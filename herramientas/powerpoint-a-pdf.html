@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir PowerPoint a PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí una presentación PowerPoint (.pptx) a PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .vista-previa-diapositivas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .vista-previa-diapositivas img {
+    width: 100%;
+    border: 1px solid var(--gris-borde);
+    border-radius: 6px;
+    background: #fff;
+  }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>PowerPoint a PDF</h1>
+  <p>Elegí un archivo .pptx. Primero se intenta reproducir las diapositivas reales; si no se puede, se genera igual un PDF con el texto.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonProcesar" disabled>Convertir a PDF</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+    <div class="vista-previa-diapositivas" id="vistaPreviaDiapositivas"></div>
+
+    <div class="resultado" id="resultado">
+      <span id="mensajeResultado">✅ Listo.</span>
+      <a id="enlaceDescarga" download="presentacion.pdf">Descargar PDF</a>
+      <span id="separadorDescargas" style="display:none;"> · </span>
+      <a id="enlaceDescargaImagenes" download="diapositivas.zip" style="display:none;">Descargar imágenes (.zip)</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes) y armar el PDF con eso — también se pueden descargar esas imágenes sueltas en un .zip.</li>
+      <li>Si el archivo no se puede renderizar bien, se genera igual un PDF con el <strong>texto de cada diapositiva</strong> en vez de fallar (se avisa cuál de los dos resultó). Si solo te interesa el texto, también está <a href="extraer-texto-powerpoint.html">Extraer texto de PowerPoint</a>.</li>
+      <li><em>Nota: como esto corre 100% en tu navegador (no en un servicio especializado en un servidor, como PowerPoint o LibreOffice reales), el resultado puede no ser 100% fiel al original — diapositivas con diseños complejos, animaciones o elementos poco comunes pueden verse distinto.</em></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<canvas id="canvasRender" style="display:none;"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script>window.__FileReaderNativo = window.FileReader;</script>
+<script src="https://cdn.jsdelivr.net/npm/pptxviewjs@1.1.9/dist/PptxViewJS.min.js"></script>
+<script>
+  // PptxViewJS pisa el FileReader nativo del navegador con uno propio (para uso
+  // interno de la librería), lo que rompe JSZip.loadAsync() apenas se carga.
+  // Lo restauramos acá.
+  window.FileReader = window.__FileReaderNativo;
+</script>
+<script src="../assets/js/pdf-texto.js"></script>
+<script src="../assets/js/pptx-visual.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonProcesar = document.getElementById('botonProcesar');
+const progreso = document.getElementById('progreso');
+const vistaPreviaDiapositivas = document.getElementById('vistaPreviaDiapositivas');
+const resultado = document.getElementById('resultado');
+const mensajeResultado = document.getElementById('mensajeResultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const enlaceDescargaImagenes = document.getElementById('enlaceDescargaImagenes');
+const separadorDescargas = document.getElementById('separadorDescargas');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonProcesar.disabled = false;
+  vistaPreviaDiapositivas.innerHTML = '';
+  separadorDescargas.style.display = 'none';
+  enlaceDescargaImagenes.style.display = 'none';
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonProcesar.addEventListener('click', async () => {
+  botonProcesar.disabled = true;
+  botonProcesar.textContent = 'Generando...';
+  progreso.style.display = 'none';
+  mensajeResultado.textContent = '✅ Listo.';
+  try {
+    let pdf;
+    try {
+      progreso.style.display = 'block';
+      progreso.textContent = 'Renderizando diapositivas...';
+      const canvasRender = document.getElementById('canvasRender');
+      const imagenes = await renderizarDiapositivasComoImagenes(archivoActual, canvasRender);
+      pdf = await construirPdfDesdeImagenes(imagenes);
+
+      imagenes.forEach(({ dataUrl }) => {
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        vistaPreviaDiapositivas.appendChild(img);
+      });
+
+      progreso.textContent = 'Generando .zip de imágenes...';
+      const blobZip = await construirZipDesdeImagenes(imagenes);
+      enlaceDescargaImagenes.href = URL.createObjectURL(blobZip);
+      enlaceDescargaImagenes.style.display = 'inline';
+      separadorDescargas.style.display = 'inline';
+      mensajeResultado.textContent = '✅ Listo — se generó el PDF con las diapositivas reales.';
+    } catch (errorVisual) {
+      console.warn('No se pudo renderizar el PowerPoint visualmente, se usa solo texto:', errorVisual);
+      progreso.textContent = 'No se pudo renderizar visualmente. Generando PDF de solo texto...';
+      const texto = await extraerTextoPowerPoint(archivoActual);
+      pdf = await generarPdfDeTexto(texto);
+      mensajeResultado.textContent = '⚠️ No se pudo renderizar el diseño visual de las diapositivas — el PDF generado tiene solo el texto.';
+    }
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = archivoActual.name.replace(/\.pptx$/i, '') + '.pdf';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el PDF: ' + error.message);
+  } finally {
+    botonProcesar.disabled = false;
+    botonProcesar.textContent = 'Convertir a PDF';
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

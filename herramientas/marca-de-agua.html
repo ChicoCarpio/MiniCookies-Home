@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marca de agua para PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Marca de agua para PDF</h1>
+  <p>Agregá un texto (ej. "CONFIDENCIAL", "BORRADOR") como marca de agua diagonal en todas las páginas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo" style="flex:1; min-width:200px;">
+        Texto de la marca de agua
+        <input type="text" id="textoMarca" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Opacidad
+        <input type="range" id="opacidad" min="5" max="50" value="15">
+      </label>
+      <button class="boton" id="botonAplicar" disabled>Aplicar marca de agua</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-marcado.pdf">Descargar PDF con marca de agua</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonAplicar = document.getElementById('botonAplicar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  if (archivo) {
+    try {
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    } catch (error) {
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+    }
+  }
+  botonAplicar.disabled = !archivo;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonAplicar.addEventListener('click', async () => {
+  botonAplicar.disabled = true;
+  botonAplicar.textContent = 'Aplicando...';
+  try {
+    const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const fuente = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const texto = document.getElementById('textoMarca').value || 'MARCA DE AGUA';
+    const opacidad = parseInt(document.getElementById('opacidad').value, 10) / 100;
+    const tamanoFuente = 60;
+    const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
+
+    pdf.getPages().forEach((pagina) => {
+      const { width, height } = pagina.getSize();
+      pagina.drawText(texto, {
+        x: width / 2 - anchoTexto / 2,
+        y: height / 2,
+        size: tamanoFuente,
+        font: fuente,
+        color: rgb(0.5, 0.5, 0.5),
+        opacity: opacidad,
+        rotate: degrees(45),
+      });
+    });
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo aplicar la marca de agua: ' + error.message);
+  } finally {
+    botonAplicar.disabled = false;
+    botonAplicar.textContent = 'Aplicar marca de agua';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

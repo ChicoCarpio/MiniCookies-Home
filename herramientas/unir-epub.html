@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unir varios EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Combiná varios libros EPUB en uno solo, gratis y sin subir tus archivos a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Unir varios EPUB</h1>
+  <p>Elegí dos o más libros .epub. Se combinan en un solo EPUB, en el orden de la lista — cada libro original empieza con su propio título como capítulo separador.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📚 Arrastrá tus archivos .epub acá o hacé clic para elegirlos
+      <input type="file" id="entradaArchivos" accept=".epub" multiple hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivos"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        Título del libro combinado
+        <input type="text" id="tituloLibro" value="Libros combinados" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Autor (opcional)
+        <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonUnir" disabled>Unir en un EPUB</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="libros-combinados.epub">Descargar EPUB combinado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <p style="color:var(--texto-suave);">
+      No es necesario que los libros compartan formato ni estilo. No funciona con libros con DRM (candado editorial).
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const listaArchivos = document.getElementById('listaArchivos');
+const botonUnir = document.getElementById('botonUnir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivos = [];
+
+function actualizarLista() {
+  listaArchivos.innerHTML = '';
+  archivos.forEach((archivo, indice) => {
+    const item = document.createElement('li');
+    item.innerHTML = `<span>${indice + 1}. ${archivo.name}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { archivos.splice(indice, 1); actualizarLista(); };
+    item.appendChild(quitar);
+    listaArchivos.appendChild(item);
+  });
+  botonUnir.disabled = archivos.length < 2;
+  resultado.classList.remove('visible');
+}
+
+function agregarArchivos(listaFileList) {
+  for (const archivo of listaFileList) {
+    if (archivo.name.toLowerCase().endsWith('.epub')) archivos.push(archivo);
+  }
+  actualizarLista();
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivos.click());
+entradaArchivos.addEventListener('change', (e) => agregarArchivos(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  agregarArchivos(e.dataTransfer.files);
+});
+
+botonUnir.addEventListener('click', async () => {
+  botonUnir.disabled = true;
+  progreso.style.display = 'block';
+  try {
+    const capitulosFinales = [];
+
+    for (let i = 0; i < archivos.length; i++) {
+      progreso.textContent = `Leyendo "${archivos[i].name}" (${i + 1} de ${archivos.length})...`;
+      const { titulo, capitulos } = await leerEpub(archivos[i]);
+      capitulosFinales.push({ titulo, html: `<h1>${titulo}</h1>` });
+      capitulosFinales.push(...capitulos);
+    }
+
+    progreso.textContent = 'Armando el EPUB combinado...';
+    const tituloFinal = document.getElementById('tituloLibro').value.trim() || 'Libros combinados';
+    const autorFinal = document.getElementById('autorLibro').value.trim();
+    const blob = await construirEpub({ titulo: tituloFinal, autor: autorFinal, capitulos: capitulosFinales });
+
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = tituloFinal.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo unir los libros: ' + error.message);
+  } finally {
+    botonUnir.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

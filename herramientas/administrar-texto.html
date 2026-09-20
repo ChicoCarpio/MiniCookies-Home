@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reordenar párrafos de un texto gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Reordená o eliminá párrafos de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/texto.html">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Administrar / reordenar párrafos</h1>
+  <p>Elegí un archivo .txt. Se separa en párrafos por líneas en blanco — arrastralos para reordenarlos, o quitá los que no quieras, y descargá el .txt resultante.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".txt" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo el archivo...</p>
+    <ul class="lista-archivos" id="listaParrafos"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonGuardar" disabled>Descargar reordenado</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="texto-reordenado.txt">Descargar .txt</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const listaParrafos = document.getElementById('listaParrafos');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let parrafos = []; // [{ id, texto }]
+let siguienteId = 0;
+
+function etiquetaCorta(texto) {
+  const linea = texto.trim().split('\n')[0] || '(párrafo vacío)';
+  return linea.length > 60 ? linea.slice(0, 60) + '…' : linea;
+}
+
+function renderizarLista() {
+  listaParrafos.innerHTML = '';
+  parrafos.forEach((parrafo) => {
+    const item = document.createElement('li');
+    item.draggable = true;
+    item.dataset.id = parrafo.id;
+    item.innerHTML = `<span>${etiquetaCorta(parrafo.texto)}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { parrafos = parrafos.filter(p => p.id !== parrafo.id); renderizarLista(); };
+    item.appendChild(quitar);
+    listaParrafos.appendChild(item);
+  });
+  botonGuardar.disabled = parrafos.length === 0;
+  resultado.classList.remove('visible');
+}
+
+let arrastrando = null;
+listaParrafos.addEventListener('dragstart', (e) => {
+  if (e.target.tagName === 'LI') { arrastrando = e.target; e.target.classList.add('arrastrando'); }
+});
+listaParrafos.addEventListener('dragend', (e) => {
+  if (e.target.tagName === 'LI') e.target.classList.remove('arrastrando');
+});
+listaParrafos.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const objetivo = e.target.closest('li');
+  if (!objetivo || !arrastrando || objetivo === arrastrando) return;
+  const rect = objetivo.getBoundingClientRect();
+  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
+  objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
+});
+listaParrafos.addEventListener('drop', () => {
+  const idsEnOrden = [...listaParrafos.children].map(li => parseInt(li.dataset.id, 10));
+  parrafos.sort((a, b) => idsEnOrden.indexOf(a.id) - idsEnOrden.indexOf(b.id));
+});
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) cargarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarArchivo(archivo) {
+  cargando.style.display = 'block';
+  try {
+    const texto = await archivo.text();
+    const bloques = texto.split(/\n\s*\n/);
+    parrafos = bloques.map(b => ({ id: siguienteId++, texto: b }));
+    renderizarLista();
+  } catch (error) {
+    alert('No se pudo leer el archivo: ' + error.message);
+  } finally {
+    cargando.style.display = 'none';
+  }
+}
+
+botonGuardar.addEventListener('click', () => {
+  try {
+    if (parrafos.length === 0) throw new Error('No queda ningún párrafo.');
+    const textoFinal = parrafos.map(p => p.texto).join('\n\n');
+    const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el archivo: ' + error.message);
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

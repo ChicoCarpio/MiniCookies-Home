@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extraer páginas de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Extraé un rango o selección de páginas de un PDF a un archivo nuevo, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Extraer páginas</h1>
+  <p>Elegí un PDF e indicá qué páginas querés sacar a un archivo nuevo (ej. <code>1-3,5,8-9</code>).</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo" style="flex:1; min-width:220px;">
+        Páginas a extraer
+        <input type="text" id="rangoPaginas" placeholder="ej. 1-3,5,8-9" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonExtraer" disabled>Extraer páginas</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="paginas-extraidas.pdf">Descargar PDF extraído</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const rangoPaginas = document.getElementById('rangoPaginas');
+const botonExtraer = document.getElementById('botonExtraer');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+let totalPaginas = 0;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  resultado.classList.remove('visible');
+  botonExtraer.disabled = true;
+
+  try {
+    const { elemento, totalPaginas: paginas } = await generarMiniaturaPdf(archivo, 0.28);
+    totalPaginas = paginas;
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    botonExtraer.disabled = false;
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+  }
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function analizarRangoPaginas(texto, maxPagina) {
+  const indices = [];
+  const trozos = texto.split(',').map(t => t.trim()).filter(t => t !== '');
+  if (trozos.length === 0) throw new Error('Indicá al menos una página o rango.');
+
+  for (const trozo of trozos) {
+    const coincidencia = trozo.match(/^(\d+)(?:-(\d+))?$/);
+    if (!coincidencia) throw new Error(`No entendí "${trozo}". Usá números y rangos, ej. 1-3,5.`);
+    const inicio = parseInt(coincidencia[1], 10);
+    const fin = coincidencia[2] ? parseInt(coincidencia[2], 10) : inicio;
+    if (inicio < 1 || fin < 1 || inicio > maxPagina || fin > maxPagina) {
+      throw new Error(`Página fuera de rango en "${trozo}" (el PDF tiene ${maxPagina} páginas).`);
+    }
+    if (inicio <= fin) {
+      for (let p = inicio; p <= fin; p++) indices.push(p - 1);
+    } else {
+      for (let p = inicio; p >= fin; p--) indices.push(p - 1);
+    }
+  }
+  return indices;
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = 'Extrayendo...';
+  try {
+    const indices = analizarRangoPaginas(rangoPaginas.value, totalPaginas);
+
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdfOrigen = await PDFDocument.load(bytes);
+    const pdfNuevo = await PDFDocument.create();
+    const paginas = await pdfNuevo.copyPages(pdfOrigen, indices);
+    paginas.forEach((pagina) => pdfNuevo.addPage(pagina));
+
+    const bytesFinales = await pdfNuevo.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo extraer las páginas: ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = 'Extraer páginas';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

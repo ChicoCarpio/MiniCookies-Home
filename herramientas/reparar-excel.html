@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reparar Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Intentá recuperar un archivo Excel (.xlsx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Reparar Excel</h1>
+  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) que no abre bien y probamos reconstruirlo.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonReparar" disabled>Reparar</button>
+    </div>
+
+    <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="excel-reparado.xlsx">Descargar Excel reparado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonReparar = document.getElementById('botonReparar');
+const mensajeNivel = document.getElementById('mensajeNivel');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonReparar.disabled = false;
+  resultado.classList.remove('visible');
+  mensajeNivel.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonReparar.addEventListener('click', async () => {
+  botonReparar.disabled = true;
+  botonReparar.textContent = 'Reparando...';
+  mensajeNivel.style.display = 'none';
+  try {
+    const bytes = await archivoActual.arrayBuffer();
+    const libro = XLSX.read(bytes, { type: 'array', cellStyles: false, cellHTML: false });
+
+    const hojasConDatos = libro.SheetNames.filter(nombre => {
+      const hoja = libro.Sheets[nombre];
+      return hoja && hoja['!ref'];
+    });
+    if (hojasConDatos.length === 0) throw new Error('No se encontraron datos legibles en ninguna hoja.');
+
+    const libroLimpio = XLSX.utils.book_new();
+    hojasConDatos.forEach(nombre => {
+      XLSX.utils.book_append_sheet(libroLimpio, libro.Sheets[nombre], nombre);
+    });
+
+    const bytesFinales = XLSX.write(libroLimpio, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+
+    mensajeNivel.textContent = hojasConDatos.length === libro.SheetNames.length
+      ? '✅ Se pudo leer el archivo y se reconstruyó desde cero.'
+      : `⚠️ Se recuperaron ${hojasConDatos.length} de ${libro.SheetNames.length} hojas — las demás no tenían datos legibles.`;
+    mensajeNivel.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo reparar el archivo: ' + error.message);
+  } finally {
+    botonReparar.disabled = false;
+    botonReparar.textContent = 'Reparar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

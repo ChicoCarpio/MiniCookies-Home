@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir mayúsculas y minúsculas gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título u oración, gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/generales.html">Herramientas generales</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Convertir mayúsculas y minúsculas</h1>
+  <p>Escribí o pegá tu texto y elegí el formato. Todo en tu navegador.</p>
+
+  <div class="panel-herramienta">
+    <textarea id="texto" placeholder="Escribí o pegá tu texto acá..."></textarea>
+
+    <div class="controles">
+      <button class="boton" data-modo="mayusculas" type="button">MAYÚSCULAS</button>
+      <button class="boton" data-modo="minusculas" type="button">minúsculas</button>
+      <button class="boton" data-modo="titulo" type="button">Cada Palabra En Mayúscula</button>
+      <button class="boton" data-modo="oracion" type="button">Solo la primera letra</button>
+      <button class="boton" data-modo="alternado" type="button">AltErNaDo</button>
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar</button>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script>
+const texto = document.getElementById('texto');
+
+const modos = {
+  mayusculas: (t) => t.toUpperCase(),
+  minusculas: (t) => t.toLowerCase(),
+  titulo: (t) => t.toLowerCase().replace(/(^|\s)\p{L}/gu, (letra) => letra.toUpperCase()),
+  oracion: (t) => {
+    const minuscula = t.toLowerCase();
+    return minuscula.replace(/(^\s*\p{L}|[.!?¡¿]\s+\p{L})/gu, (letra) => letra.toUpperCase());
+  },
+  alternado: (t) => [...t].map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''),
+};
+
+document.querySelectorAll('[data-modo]').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    texto.value = modos[boton.dataset.modo](texto.value);
+  });
+});
+
+document.getElementById('botonCopiar').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(texto.value);
+  const boton = document.getElementById('botonCopiar');
+  const textoOriginal = boton.textContent;
+  boton.textContent = '¡Copiado!';
+  setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

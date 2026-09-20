@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formatear fórmulas anidadas de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Pegá una fórmula larga de SI/SI.CONJUNTO y la reordena en líneas legibles con sangría, verificando que la lógica quede idéntica. Gratis y sin subir nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --f-bg:#F2F5F3; --f-surface:#FFFFFF; --f-surface-2:#E8EDEA; --f-grid-line:#DCE3E0;
+    --f-border:#D3DBD8; --f-ink:#16211F; --f-ink-soft:#55655F; --f-ink-faint:#8CA099;
+    --f-accent:#0F6E5C; --f-accent-soft:#E1F1EC; --f-on-accent:#FFFFFF;
+    --f-danger:#B3261E; --f-danger-soft:#FBE9E7;
+    --f-syn-fn:#1D5FBF; --f-syn-ref:#0F6E5C; --f-syn-str:#B1460A; --f-syn-num:#7A3E9D;
+    --f-shadow: 0 1px 2px rgba(22,33,31,.06), 0 8px 24px rgba(22,33,31,.05);
+  }
+  .fmt-page{ max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:24px; font-family:'Public Sans', system-ui, sans-serif; color:var(--f-ink); }
+  .fmt-page code{ font-family:'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; background:var(--f-surface-2); border:1px solid var(--f-border); border-radius:5px; padding:0 5px; font-size:.9em; }
+  .fmt-controls{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:24px; background:var(--f-surface); border:1px solid var(--f-border); border-radius:14px; padding:18px 20px; box-shadow:var(--f-shadow); }
+  .fmt-control-group{ display:flex; flex-direction:column; gap:8px; }
+  .fmt-control-group--grow{ flex:1 1 220px; min-width:200px; }
+  .fmt-control-group--actions{ margin-left:auto; justify-content:flex-end; }
+  .fmt-control-label{ font-size:.72rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--f-ink-soft); }
+  .fmt-segmented{ display:inline-flex; border:1px solid var(--f-border); border-radius:999px; padding:3px; background:var(--f-surface-2); gap:2px; }
+  .fmt-seg-btn{ border:none; background:transparent; color:var(--f-ink-soft); font-family:inherit; font-size:.82rem; font-weight:600; padding:6px 14px; border-radius:999px; cursor:pointer; }
+  .fmt-seg-btn.activo{ background:var(--f-accent); color:var(--f-on-accent); }
+  .fmt-stepper{ display:inline-flex; align-items:center; border:1px solid var(--f-border); border-radius:10px; overflow:hidden; background:var(--f-surface-2); }
+  .fmt-stepper-btn{ width:32px; height:32px; border:none; background:transparent; color:var(--f-ink); font-size:1.05rem; line-height:1; cursor:pointer; }
+  .fmt-stepper-btn:hover{ background:var(--f-accent-soft); color:var(--f-accent); }
+  #indent-input{ width:44px; text-align:center; border:none; border-left:1px solid var(--f-border); border-right:1px solid var(--f-border); height:32px; background:var(--f-surface); color:var(--f-ink); font-family:'JetBrains Mono', monospace; font-size:.9rem; }
+  .fmt-page input[type="range"]{ width:100%; accent-color:var(--f-accent); }
+  .fmt-btn{ font-family:inherit; font-size:.85rem; font-weight:600; border-radius:999px; border:1px solid var(--f-border); padding:9px 16px; cursor:pointer; background:var(--f-surface); color:var(--f-ink); }
+  .fmt-btn-ghost:hover{ border-color:var(--f-accent); color:var(--f-accent); }
+  .fmt-btn-accent{ background:var(--f-accent); color:var(--f-on-accent); border-color:transparent; }
+  .fmt-btn-accent:hover{ filter:brightness(1.06); }
+  .fmt-btn-small{ padding:6px 14px; font-size:.78rem; }
+  .fmt-btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .fmt-stats{ display:grid; grid-template-columns: repeat(3, minmax(140px,auto)) 1fr; gap:18px; align-items:center; }
+  .fmt-stat-tile{ display:flex; flex-direction:column; gap:2px; background:var(--f-surface); border:1px solid var(--f-border); border-radius:12px; padding:12px 16px; box-shadow:var(--f-shadow); }
+  .fmt-stat-label{ font-size:.68rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--f-ink-faint); }
+  .fmt-stat-value{ font-family:'JetBrains Mono', monospace; font-size:1.35rem; font-weight:600; }
+  .fmt-stat-unit{ font-size:.72rem; color:var(--f-ink-faint); }
+  .fmt-badge{ display:inline-flex; align-items:center; gap:6px; width:fit-content; font-size:.82rem; font-weight:600; padding:4px 10px; border-radius:999px; background:var(--f-surface-2); color:var(--f-ink-soft); }
+  .fmt-badge::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .fmt-badge.ok{ background:var(--f-accent-soft); color:var(--f-accent); }
+  .fmt-badge.error{ background:var(--f-danger-soft); color:var(--f-danger); }
+  .fmt-gauge-wrap{ grid-column: span 4; background:var(--f-surface); border:1px solid var(--f-border); border-radius:12px; padding:14px 18px; box-shadow:var(--f-shadow); }
+  .fmt-gauge-header{ display:flex; justify-content:space-between; font-size:.72rem; color:var(--f-ink-faint); margin-bottom:8px; }
+  .fmt-gauge-track{ position:relative; height:10px; border-radius:999px; background:var(--f-surface-2); overflow:visible; }
+  .fmt-gauge-fill{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:var(--f-accent); }
+  .fmt-gauge-fill.over{ background:var(--f-danger); }
+  .fmt-gauge-marker{ position:absolute; top:-4px; width:2px; height:18px; background:var(--f-ink); opacity:.55; left:0%; }
+  .fmt-workbench{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:860px){ .fmt-workbench{ grid-template-columns:1fr; } .fmt-stats{ grid-template-columns:1fr 1fr; } .fmt-gauge-wrap{ grid-column: span 2; } }
+  .fmt-panel{ display:flex; flex-direction:column; background:var(--f-surface); border:1px solid var(--f-border); border-radius:14px; box-shadow:var(--f-shadow); overflow:hidden; min-height:0; }
+  .fmt-panel-header{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid var(--f-border); background:var(--f-surface-2); }
+  .fmt-panel-title{ font-weight:600; font-size:.88rem; }
+  .fmt-panel-hint{ font-size:.74rem; color:var(--f-ink-faint); }
+  .fmt-panel-textarea{ flex:1; min-height:420px; max-height:62vh; resize:vertical; border:none; padding:16px; font-family:'JetBrains Mono', ui-monospace, monospace; font-size:.84rem; line-height:1.6; background:var(--f-surface); color:var(--f-ink); }
+  .fmt-panel-textarea:focus{ outline:none; background:var(--f-accent-soft); }
+  .fmt-panel-output{ flex:1; min-height:420px; max-height:62vh; margin:0; padding:16px; overflow:auto; font-family:'JetBrains Mono', ui-monospace, monospace; font-size:.84rem; line-height:1.6; white-space:pre; color:var(--f-ink); }
+  .fmt-panel-output .tok-fn{ color:var(--f-syn-fn); font-weight:600; }
+  .fmt-panel-output .tok-ref{ color:var(--f-syn-ref); }
+  .fmt-panel-output .tok-str{ color:var(--f-syn-str); }
+  .fmt-panel-output .tok-num{ color:var(--f-syn-num); }
+  .fmt-panel-output .placeholder{ color:var(--f-ink-faint); font-style:italic; }
+  .fmt-preview-etiqueta{ color:var(--f-ink-faint); font-style:italic; font-family:'Public Sans', sans-serif; margin-bottom:10px; }
+  .fmt-preview-contenido{ opacity:.55; }
+  .fmt-error-banner{ margin:0 16px 16px; padding:10px 12px; border-radius:8px; background:var(--f-danger-soft); color:var(--f-danger); font-size:.82rem; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Formatear fórmulas anidadas de Excel</h1>
+  <p>Pegá una fórmula larga de <code>SI</code> / <code>SI.CONJUNTO</code> y la reordena en líneas legibles con sangría — verificando, token por token, que la lógica quede idéntica — y avisa si el resultado supera el límite de 8192 caracteres de una celda de Excel.</p>
+
+  <div class="fmt-page">
+
+  <section class="fmt-controls" aria-label="Opciones de formato">
+    <div class="fmt-control-group">
+      <span class="fmt-control-label" id="sep-label">Separador</span>
+      <div class="fmt-segmented" role="group" aria-labelledby="sep-label">
+        <button type="button" class="fmt-seg-btn activo" data-sep=";" aria-pressed="true">; (ES/LatAm)</button>
+        <button type="button" class="fmt-seg-btn" data-sep="," aria-pressed="false">, (EN)</button>
+      </div>
+    </div>
+    <div class="fmt-control-group">
+      <label class="fmt-control-label" for="indent-input">Sangría (espacios)</label>
+      <div class="fmt-stepper">
+        <button type="button" class="fmt-stepper-btn" data-step="-1" aria-label="Reducir sangría">−</button>
+        <input id="indent-input" type="number" min="0" max="4" value="1" inputmode="numeric">
+        <button type="button" class="fmt-stepper-btn" data-step="1" aria-label="Aumentar sangría">+</button>
+      </div>
+    </div>
+    <div class="fmt-control-group fmt-control-group--grow">
+      <label class="fmt-control-label" for="width-input">Ancho antes de partir línea — <span id="width-value">120</span> car.</label>
+      <input id="width-input" type="range" min="60" max="160" step="5" value="120">
+    </div>
+    <div class="fmt-control-group fmt-control-group--actions" style="flex-direction:row; gap:8px;">
+      <button type="button" id="btn-limpiar" class="fmt-btn fmt-btn-ghost">Limpiar</button>
+      <button type="button" id="btn-reset" class="fmt-btn fmt-btn-ghost">Restablecer ejemplo</button>
+    </div>
+  </section>
+
+  <section class="fmt-stats" aria-live="polite">
+    <div class="fmt-stat-tile">
+      <span class="fmt-stat-label">Compacta (mínimo)</span>
+      <span class="fmt-stat-value" id="stat-canonical">—</span>
+      <span class="fmt-stat-unit">caracteres</span>
+    </div>
+    <div class="fmt-stat-tile">
+      <span class="fmt-stat-label">Formateada</span>
+      <span class="fmt-stat-value" id="stat-formatted">—</span>
+      <span class="fmt-stat-unit">caracteres</span>
+    </div>
+    <div class="fmt-stat-tile">
+      <span class="fmt-stat-label">Estado</span>
+      <span class="fmt-badge" id="badge-status">Analizando…</span>
+    </div>
+    <div class="fmt-gauge-wrap">
+      <div class="fmt-gauge-header">
+        <span>0</span>
+        <span>Límite de una celda de Excel: 8192 caracteres</span>
+      </div>
+      <div class="fmt-gauge-track">
+        <div class="fmt-gauge-fill" id="gauge-fill"></div>
+        <div class="fmt-gauge-marker" id="gauge-marker" title="Versión compacta (sin sangría)"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fmt-workbench">
+    <div class="fmt-panel">
+      <div class="fmt-panel-header">
+        <span class="fmt-panel-title">Fórmula original</span>
+        <span class="fmt-panel-hint">pegá aquí tal como sale de Excel</span>
+      </div>
+      <textarea id="input-formula" class="fmt-panel-textarea" spellcheck="false" autocomplete="off"></textarea>
+    </div>
+    <div class="fmt-panel">
+      <div class="fmt-panel-header">
+        <span class="fmt-panel-title">Fórmula formateada</span>
+        <button type="button" id="btn-copy" class="fmt-btn fmt-btn-accent fmt-btn-small">Copiar</button>
+      </div>
+      <pre class="fmt-panel-output" id="output-formula" tabindex="0"></pre>
+      <div class="fmt-error-banner" id="error-banner" hidden></div>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <p style="color:var(--texto-suave);">
+      Nunca se agrega, quita ni reordena nada de tu fórmula — solo se le agregan saltos de línea y sangría
+      para que se lea mejor. Antes de mostrar cualquier resultado se verifica que la versión formateada
+      equivalga exactamente a la original; si algo no cuadra, no formatea nada y avisa del error.
+    </p>
+    <p style="color:var(--texto-suave);">
+      También reconoce fórmulas matriciales con llaves (<code>{1;2}</code>), referencias a otro libro
+      (<code>[Libro.xlsx]Hoja1!A1</code>), el operador de porcentaje sobre cualquier expresión
+      (<code>50%</code>, <code>(A1+B1)%</code>) y números decimales con coma cuando el separador de
+      argumentos es <code>;</code> (así los escribe Excel en español). Si aun así algo no se puede
+      interpretar con seguridad, avisa con un error en vez de arriesgarse a formatear mal.
+    </p>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script type="text/plain" id="ejemplo-formula">=SI.CONJUNTO([@Stock]<=0;"Sin stock";[@Stock]<[@[Stock Mínimo]];"Reponer pronto";[@Stock]>[@[Stock Máximo]];CONCATENAR("Exceso de ";[@Stock]-[@[Stock Máximo]];" unidades");BUSCARX([@Categoría];Tabla_Categorias[Nombre];Tabla_Categorias[Prioridad];0;0)>=Config!$B$2;"Revisar prioridad";VERDADERO;"Normal")</script>
+
+<script>
+(function(){
+  "use strict";
+
+  function isNameChar(ch){
+    if(ch>='0'&&ch<='9') return true;
+    if((ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z')) return true;
+    if('._@'.indexOf(ch)!==-1) return true;
+    return ch.codePointAt(0) > 127;
+  }
+
+  var CELL_RE = /^\$?[A-Za-z]{1,3}\$?[0-9]{1,7}/;
+  function matchReference(s, pos){
+    var m1 = CELL_RE.exec(s.slice(pos));
+    if(!m1) return null;
+    var end = pos + m1[0].length;
+    if(end < s.length && (isNameChar(s[end]) || s[end]==='(' || s[end]==='[')) return null;
+    var full = m1[0];
+    if(s[end] === ':'){
+      var m2 = CELL_RE.exec(s.slice(end+1));
+      if(m2){
+        var end2 = end + 1 + m2[0].length;
+        if(!(end2 < s.length && (isNameChar(s[end2]) || s[end2]==='(' || s[end2]==='['))){
+          full = full + ':' + m2[0];
+        }
+      }
+    }
+    return full;
+  }
+
+  function tokenize(s, sep){
+    var tokens = [];
+    var i = 0, n = s.length;
+    while(i < n){
+      var c = s[i];
+      if(/\s/.test(c)){ i++; continue; }
+      if(c === '"'){
+        var j = i+1;
+        while(j < n){
+          if(s[j]==='"' && (j+1>=n || s[j+1]!=='"')) break;
+          if(s[j]==='"' && j+1<n && s[j+1]==='"'){ j+=2; continue; }
+          j++;
+        }
+        j++;
+        tokens.push(['STRING', s.slice(i,j)]);
+        i = j; continue;
+      }
+      if(c === "'"){
+        var q = i+1;
+        while(q < n){
+          if(s[q]==="'" && (q+1>=n || s[q+1]!=="'")) break;
+          if(s[q]==="'" && q+1<n && s[q+1]==="'"){ q+=2; continue; }
+          q++;
+        }
+        q++;
+        if(s[q] !== '!'){
+          throw new Error('La comilla simple en la posición '+i+' no forma parte de un nombre de hoja válido (formato esperado: \'Nombre de Hoja\'!A1).');
+        }
+        var refQ = matchReference(s, q+1);
+        if(!refQ){
+          throw new Error('Se esperaba una referencia de celda después de "'+s.slice(i,q+1)+'" (ej: '+s.slice(i,q+1)+'A1).');
+        }
+        tokens.push(['REF', s.slice(i,q+1)+refQ]);
+        i = q+1+refQ.length; continue;
+      }
+      if(c === '{'){
+        var depthB = 0, kb = i;
+        while(kb < n){
+          if(s[kb]==='{') depthB++;
+          else if(s[kb]==='}'){ depthB--; if(depthB===0){ kb++; break; } }
+          kb++;
+        }
+        if(depthB !== 0) throw new Error('Falta cerrar la llave "{" abierta en la posición '+i+'.');
+        tokens.push(['BRACE', s.slice(i,kb)]);
+        i = kb; continue;
+      }
+      if(c === '['){
+        var depth = 0, k = i;
+        while(k < n){
+          if(s[k]==='[') depth++;
+          else if(s[k]===']'){ depth--; if(depth===0){ k++; break; } }
+          k++;
+        }
+        if(depth !== 0) throw new Error('Falta cerrar el corchete "[" abierto en la posición '+i+'.');
+        var bracketText = s.slice(i,k);
+        // ¿Referencia a otro libro, ej. [Libro1.xlsx]Hoja1!A1 o
+        // [Libro1.xlsx]'Hoja 1'!A1? Se intenta antes de tratarlo como una
+        // referencia estructurada de tabla simple ([@Columna]).
+        if(k < n && s[k] === "'"){
+          var q2 = k+1;
+          while(q2 < n){
+            if(s[q2]==="'" && (q2+1>=n || s[q2+1]!=="'")) break;
+            if(s[q2]==="'" && q2+1<n && s[q2+1]==="'"){ q2+=2; continue; }
+            q2++;
+          }
+          q2++;
+          if(s[q2] === '!'){
+            var refQ2 = matchReference(s, q2+1);
+            if(refQ2){
+              tokens.push(['REF', bracketText+s.slice(k,q2)+'!'+refQ2]);
+              i = q2+1+refQ2.length; continue;
+            }
+          }
+        } else if(k < n && isNameChar(s[k])){
+          var p2 = k;
+          while(p2 < n && isNameChar(s[p2])) p2++;
+          if(s[p2] === '!'){
+            var refS2 = matchReference(s, p2+1);
+            if(refS2){
+              tokens.push(['REF', bracketText+s.slice(k,p2)+'!'+refS2]);
+              i = p2+1+refS2.length; continue;
+            }
+          }
+        }
+        tokens.push(['BRACKET', bracketText]);
+        i = k; continue;
+      }
+      if(c === '('){ tokens.push(['LPAREN','(']); i++; continue; }
+      if(c === ')'){ tokens.push(['RPAREN',')']); i++; continue; }
+      if(c === sep){ tokens.push(['SEMI', sep]); i++; continue; }
+      if('+-*/^&'.indexOf(c)!==-1){ tokens.push(['OP', c]); i++; continue; }
+      if(c === '%'){ tokens.push(['PCT', '%']); i++; continue; }
+      if('=<>'.indexOf(c)!==-1){
+        var two = s.slice(i, i+2);
+        if(two==='<='||two==='>='||two==='<>'){ tokens.push(['OP', two]); i+=2; continue; }
+        tokens.push(['OP', c]); i++; continue;
+      }
+      if(c === '$'){
+        var refD = matchReference(s, i);
+        if(!refD) throw new Error('Signo "$" inesperado en la posición '+i+' — solo se usa en referencias de celda, como $A$1.');
+        tokens.push(['REF', refD]);
+        i += refD.length; continue;
+      }
+      if(isNameChar(c)){
+        var p = i;
+        while(p < n && isNameChar(s[p])) p++;
+        // Decimal con coma cuando el separador de argumentos es ";" (así es
+        // como Excel en español escribe números dentro de una fórmula) — se
+        // extiende el número si termina en dígito y sigue una coma y más
+        // dígitos, para no confundirla con el separador de argumentos.
+        if(sep===';' && s[p]===',' && p>i && s[p-1]>='0' && s[p-1]<='9' && p+1<n && s[p+1]>='0' && s[p+1]<='9'){
+          p++;
+          while(p < n && s[p]>='0' && s[p]<='9') p++;
+        }
+        var word = s.slice(i,p);
+        if(s[p] === '!'){
+          var refS = matchReference(s, p+1);
+          if(!refS) throw new Error('Se esperaba una referencia de celda después de "'+word+'!" (ej: '+word+'!A1).');
+          tokens.push(['REF', word+'!'+refS]);
+          i = p+1+refS.length; continue;
+        }
+        if(/^[A-Za-z]{1,3}[0-9]{1,7}$/.test(word) && s[p]!=='(' && s[p]!=='['){
+          var full = word;
+          if(s[p] === ':'){
+            var refR = matchReference(s, p+1);
+            if(refR) full = word+':'+refR;
+          }
+          tokens.push(['REF', full]);
+          i += full.length; continue;
+        }
+        tokens.push(['NAME', word]);
+        i = p; continue;
+      }
+      throw new Error('Carácter no reconocido "'+c+'" en la posición '+i+'.');
+    }
+    return tokens;
+  }
+
+  function Parser(tokens){ this.tokens = tokens; this.pos = 0; }
+  Parser.prototype.peek = function(){ return this.pos < this.tokens.length ? this.tokens[this.pos] : [null,null]; };
+  Parser.prototype.advance = function(){ return this.tokens[this.pos++]; };
+  Parser.prototype.expect = function(tt){
+    var t = this.peek();
+    if(t[0] !== tt) throw new Error('Se esperaba "'+tt+'" y se encontró "'+(t[1]||'fin de la fórmula')+'". Revisá que los paréntesis estén balanceados.');
+    return this.advance();
+  };
+  Parser.prototype.parseArglist = function(){
+    var args = [this.parseComparison()];
+    while(this.peek()[0]==='SEMI'){ this.advance(); args.push(this.parseComparison()); }
+    return args;
+  };
+  Parser.prototype.parseComparison = function(){
+    var node = this.parseConcat();
+    while(this.peek()[0]==='OP' && ['=','<>','<=','>=','<','>'].indexOf(this.peek()[1])!==-1){
+      var op = this.advance()[1];
+      node = {type:'BinOp', left:node, op:op, right:this.parseConcat()};
+    }
+    return node;
+  };
+  Parser.prototype.parseConcat = function(){
+    var node = this.parseAdditive();
+    while(this.peek()[0]==='OP' && this.peek()[1]==='&'){
+      var op = this.advance()[1];
+      node = {type:'BinOp', left:node, op:op, right:this.parseAdditive()};
+    }
+    return node;
+  };
+  Parser.prototype.parseAdditive = function(){
+    var node = this.parseMultiplicative();
+    while(this.peek()[0]==='OP' && ['+','-'].indexOf(this.peek()[1])!==-1){
+      var op = this.advance()[1];
+      node = {type:'BinOp', left:node, op:op, right:this.parseMultiplicative()};
+    }
+    return node;
+  };
+  Parser.prototype.parseMultiplicative = function(){
+    var node = this.parseUnary();
+    while(this.peek()[0]==='OP' && ['*','/'].indexOf(this.peek()[1])!==-1){
+      var op = this.advance()[1];
+      node = {type:'BinOp', left:node, op:op, right:this.parseUnary()};
+    }
+    return node;
+  };
+  Parser.prototype.parseUnary = function(){
+    if(this.peek()[0]==='OP' && this.peek()[1]==='-'){
+      this.advance();
+      return {type:'UnaryOp', op:'-', operand:this.parseUnary()};
+    }
+    return this.parsePower();
+  };
+  Parser.prototype.parsePercent = function(){
+    var node = this.parsePrimary();
+    while(this.peek()[0]==='PCT'){
+      this.advance();
+      node = {type:'PostfixOp', op:'%', operand:node};
+    }
+    return node;
+  };
+  Parser.prototype.parsePower = function(){
+    var base = this.parsePercent();
+    if(this.peek()[0]==='OP' && this.peek()[1]==='^'){
+      this.advance();
+      return {type:'BinOp', left:base, op:'^', right:this.parseUnary()};
+    }
+    return base;
+  };
+  Parser.prototype.parsePrimary = function(){
+    var t = this.peek();
+    if(t[0]==='STRING'){ this.advance(); return {type:'Atom', value:t[1]}; }
+    if(t[0]==='BRACKET'){ this.advance(); return {type:'Atom', value:t[1]}; }
+    if(t[0]==='BRACE'){ this.advance(); return {type:'Atom', value:t[1]}; }
+    if(t[0]==='REF'){ this.advance(); return {type:'Atom', value:t[1]}; }
+    if(t[0]==='LPAREN'){
+      this.advance();
+      var inner = this.parseArglist();
+      this.expect('RPAREN');
+      if(inner.length !== 1) throw new Error('Paréntesis de agrupación con separador inesperado dentro.');
+      return {type:'Group', item:inner[0]};
+    }
+    if(t[0]==='NAME'){
+      var name = this.advance()[1];
+      if(this.peek()[0]==='BRACKET'){
+        var brack = this.advance()[1];
+        return {type:'Atom', value:name+brack};
+      }
+      if(this.peek()[0]==='LPAREN'){
+        this.advance();
+        var args;
+        if(this.peek()[0]==='RPAREN') args = [];
+        else args = this.parseArglist();
+        this.expect('RPAREN');
+        return {type:'Call', name:name, args:args};
+      }
+      return {type:'Atom', value:name};
+    }
+    throw new Error('No se pudo interpretar la fórmula cerca del token #'+this.pos+' (¿falta un operador o un paréntesis?).');
+  };
+
+  function compactNode(node, sep){
+    switch(node.type){
+      case 'Atom': return node.value;
+      case 'Group': return '('+compactNode(node.item, sep)+')';
+      case 'UnaryOp': return node.op+compactNode(node.operand, sep);
+      case 'PostfixOp': return compactNode(node.operand, sep)+node.op;
+      case 'BinOp': return compactNode(node.left, sep)+node.op+compactNode(node.right, sep);
+      case 'Call':
+        return node.name+'('+node.args.map(function(a){ return compactNode(a, sep); }).join(sep)+')';
+    }
+  }
+
+  function prettyNode(node, indent, sep, indentUnit, maxWidth){
+    var c = compactNode(node, sep);
+    if(c.length + indent*indentUnit <= maxWidth) return c;
+    var pad = function(n){ return ' '.repeat(Math.max(0, n*indentUnit)); };
+    switch(node.type){
+      case 'Call': {
+        var parts = node.args.map(function(a){ return prettyNode(a, indent+1, sep, indentUnit, maxWidth); });
+        var body = parts.join(sep+'\n'+pad(indent+1));
+        return node.name+'(\n'+pad(indent+1)+body+'\n'+pad(indent)+')';
+      }
+      case 'Group':
+        return '('+prettyNode(node.item, indent, sep, indentUnit, maxWidth)+')';
+      case 'UnaryOp':
+        return node.op+prettyNode(node.operand, indent, sep, indentUnit, maxWidth);
+      case 'PostfixOp':
+        return prettyNode(node.operand, indent, sep, indentUnit, maxWidth)+node.op;
+      case 'BinOp':
+        return prettyNode(node.left, indent, sep, indentUnit, maxWidth)+node.op+prettyNode(node.right, indent, sep, indentUnit, maxWidth);
+      default:
+        return c;
+    }
+  }
+
+  function formatFormula(raw, opts){
+    var s = raw.trim();
+    var prefix = '';
+    if(s[0] === '='){ prefix = '='; s = s.slice(1).trim(); }
+    if(!s) throw new Error('No hay ninguna expresión después del "=".');
+    var tokens = tokenize(s, opts.sep);
+    if(tokens.length === 0) throw new Error('No hay nada que formatear.');
+    var parser = new Parser(tokens);
+    var args = parser.parseArglist();
+    if(parser.pos !== parser.tokens.length){
+      throw new Error('Sobran caracteres al final de la fórmula — revisá los paréntesis o si el separador elegido ('+opts.sep+') es el correcto.');
+    }
+    if(args.length !== 1){
+      throw new Error('Se encontraron '+args.length+' expresiones sueltas de nivel superior; una fórmula válida tiene una sola.');
+    }
+    var tree = args[0];
+    var canonicalFromTree = compactNode(tree, opts.sep);
+    var canonicalFromTokens = tokens.map(function(t){ return t[1]; }).join('');
+    if(canonicalFromTree !== canonicalFromTokens){
+      throw new Error('La verificación de integridad falló: el árbol reconstruido no coincide con la fórmula original. No se aplicó ningún formato, por seguridad.');
+    }
+    var formattedBody = prettyNode(tree, 0, opts.sep, opts.indentUnit, opts.maxWidth);
+    return {
+      canonical: prefix + canonicalFromTokens,
+      formatted: prefix + formattedBody
+    };
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  var SHEET_RE = "(?:'(?:[^']|'')*'|[A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_.]*)!";
+  var ADDR_RE = "\\$?[A-Za-z]{1,3}\\$?[0-9]{1,7}";
+  var HILITE_RE = new RegExp(
+    '("(?:[^"]|"")*")' +
+    '|(\\[(?:[^\\[\\]]|\\[[^\\]]*\\])*\\]|\\{(?:[^{}]|\\{[^}]*\\})*\\})' +
+    '|([A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_.]*)(\\()' +
+    '|(\\b\\d+(?:[.,]\\d+)?%?)' +
+    '|((?:' + SHEET_RE + ')?' + ADDR_RE + '(?::' + ADDR_RE + ')?)',
+    'g'
+  );
+  function highlight(text){
+    var esc = escapeHtml(text);
+    return esc.replace(HILITE_RE, function(m, str, bracket, fname, paren, num, cellref){
+      if(str) return '<span class="tok-str">'+str+'</span>';
+      if(bracket) return '<span class="tok-ref">'+bracket+'</span>';
+      if(fname) return '<span class="tok-fn">'+fname+'</span>(';
+      if(num) return '<span class="tok-num">'+num+'</span>';
+      if(cellref) return '<span class="tok-ref">'+cellref+'</span>';
+      return m;
+    });
+  }
+
+  var state = { sep:';', indentUnit:1, maxWidth:120 };
+  var lastFormattedText = '';
+
+  var inputEl = document.getElementById('input-formula');
+  var outputEl = document.getElementById('output-formula');
+  var errorBanner = document.getElementById('error-banner');
+  var badgeEl = document.getElementById('badge-status');
+  var statCanonical = document.getElementById('stat-canonical');
+  var statFormatted = document.getElementById('stat-formatted');
+  var gaugeFill = document.getElementById('gauge-fill');
+  var gaugeMarker = document.getElementById('gauge-marker');
+  var btnCopy = document.getElementById('btn-copy');
+  var btnReset = document.getElementById('btn-reset');
+  var indentInput = document.getElementById('indent-input');
+  var widthInput = document.getElementById('width-input');
+  var widthValue = document.getElementById('width-value');
+  var segButtons = Array.prototype.slice.call(document.querySelectorAll('.fmt-seg-btn'));
+  var EXCEL_LIMIT = 8192;
+
+  function setBadge(kind, text){
+    badgeEl.className = 'fmt-badge' + (kind ? ' '+kind : '');
+    badgeEl.textContent = text;
+  }
+
+  function mostrarVistaPreviaEjemplo(){
+    var ejemplo = document.getElementById('ejemplo-formula').textContent.trim();
+    try{
+      var resultado = formatFormula(ejemplo, state);
+      outputEl.innerHTML = '<div class="fmt-preview-etiqueta">👀 Ejemplo — escribí tu fórmula para reemplazarlo</div>'
+        + '<div class="fmt-preview-contenido">' + highlight(resultado.formatted) + '</div>';
+      setBadge('', 'Mostrando ejemplo');
+      statCanonical.textContent = resultado.canonical.length.toLocaleString('es-CR');
+      statFormatted.textContent = resultado.formatted.length.toLocaleString('es-CR');
+      var fmtPct = Math.min(100, (resultado.formatted.length/EXCEL_LIMIT)*100);
+      var canonPct = Math.min(100, (resultado.canonical.length/EXCEL_LIMIT)*100);
+      gaugeFill.style.width = fmtPct+'%';
+      gaugeFill.classList.remove('over');
+      gaugeMarker.style.left = canonPct+'%';
+    }catch(err){
+      outputEl.innerHTML = '<span class="placeholder">// pegá una fórmula arriba para empezar</span>';
+      setBadge('', 'Esperando fórmula');
+      statCanonical.textContent = '—';
+      statFormatted.textContent = '—';
+      gaugeFill.style.width = '0%';
+      gaugeFill.classList.remove('over');
+      gaugeMarker.style.left = '0%';
+    }
+    errorBanner.hidden = true;
+    lastFormattedText = '';
+    btnCopy.disabled = true;
+  }
+
+  function runFormat(){
+    var raw = inputEl.value;
+    if(!raw.trim()){
+      mostrarVistaPreviaEjemplo();
+      return;
+    }
+    try{
+      var result = formatFormula(raw, state);
+      outputEl.innerHTML = highlight(result.formatted);
+      errorBanner.hidden = true;
+      setBadge('ok', 'Estructura verificada');
+      lastFormattedText = result.formatted;
+      btnCopy.disabled = false;
+
+      var canonLen = result.canonical.length;
+      var fmtLen = result.formatted.length;
+      statCanonical.textContent = canonLen.toLocaleString('es-CR');
+      statFormatted.textContent = fmtLen.toLocaleString('es-CR');
+
+      var fmtPct = Math.min(100, (fmtLen/EXCEL_LIMIT)*100);
+      var canonPct = Math.min(100, (canonLen/EXCEL_LIMIT)*100);
+      gaugeFill.style.width = fmtPct+'%';
+      gaugeFill.classList.toggle('over', fmtLen > EXCEL_LIMIT);
+      gaugeMarker.style.left = canonPct+'%';
+
+      if(fmtLen > EXCEL_LIMIT){
+        errorBanner.hidden = false;
+        errorBanner.textContent = 'La versión formateada ('+fmtLen.toLocaleString('es-CR')+' caracteres) supera el límite de Excel. Reducí la sangría o aumentá el ancho antes de partir línea.';
+        setBadge('error', 'Supera el límite de Excel');
+      }
+    }catch(err){
+      outputEl.innerHTML = '<span class="placeholder">// no se pudo formatear</span>';
+      errorBanner.hidden = false;
+      errorBanner.textContent = err.message;
+      setBadge('error', 'Error de sintaxis');
+      statCanonical.textContent = '—';
+      statFormatted.textContent = '—';
+      gaugeFill.style.width = '0%';
+      gaugeFill.classList.remove('over');
+      gaugeMarker.style.left = '0%';
+      lastFormattedText = '';
+      btnCopy.disabled = true;
+    }
+  }
+
+  var debounceTimer = null;
+  function scheduleFormat(){
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(runFormat, 120);
+  }
+
+  inputEl.addEventListener('input', scheduleFormat);
+
+  segButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      segButtons.forEach(function(b){ b.classList.remove('activo'); b.setAttribute('aria-pressed','false'); });
+      btn.classList.add('activo');
+      btn.setAttribute('aria-pressed','true');
+      state.sep = btn.getAttribute('data-sep');
+      scheduleFormat();
+    });
+  });
+
+  document.querySelectorAll('.fmt-stepper-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var step = parseInt(btn.getAttribute('data-step'), 10);
+      var val = clamp((parseInt(indentInput.value,10)||0) + step, 0, 4);
+      indentInput.value = val;
+      state.indentUnit = val;
+      scheduleFormat();
+    });
+  });
+  indentInput.addEventListener('input', function(){
+    var val = clamp(parseInt(indentInput.value,10)||0, 0, 4);
+    state.indentUnit = val;
+    scheduleFormat();
+  });
+
+  widthInput.addEventListener('input', function(){
+    widthValue.textContent = widthInput.value;
+    state.maxWidth = parseInt(widthInput.value, 10);
+    scheduleFormat();
+  });
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  btnCopy.addEventListener('click', function(){
+    if(!lastFormattedText) return;
+    navigator.clipboard.writeText(lastFormattedText).then(function(){
+      var original = btnCopy.textContent;
+      btnCopy.textContent = '¡Copiado!';
+      setTimeout(function(){ btnCopy.textContent = original; }, 1400);
+    }).catch(function(){
+      btnCopy.textContent = 'No se pudo copiar';
+      setTimeout(function(){ btnCopy.textContent = 'Copiar'; }, 1400);
+    });
+  });
+
+  btnReset.addEventListener('click', function(){
+    inputEl.value = document.getElementById('ejemplo-formula').textContent.trim();
+    runFormat();
+  });
+
+  var btnLimpiar = document.getElementById('btn-limpiar');
+  btnLimpiar.addEventListener('click', function(){
+    inputEl.value = '';
+    runFormat();
+    inputEl.focus();
+  });
+
+  inputEl.placeholder = document.getElementById('ejemplo-formula').textContent.trim();
+  runFormat();
+})();
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

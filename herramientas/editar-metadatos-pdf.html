@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editar metadatos de un PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Editá el título, autor, asunto y palabras clave de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Editar metadatos de un PDF</h1>
+  <p>Elegí un PDF y editá su título, autor, asunto y palabras clave (los datos que se ven en "Propiedades del documento", no el contenido visible).</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles" id="controlesMetadatos" style="display:none;">
+      <label class="campo">
+        Título
+        <input type="text" id="campoTitulo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Autor
+        <input type="text" id="campoAutor" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Asunto
+        <input type="text" id="campoAsunto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Palabras clave (separadas por coma)
+        <input type="text" id="campoPalabrasClave" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonGuardar">Guardar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-con-metadatos.pdf">Descargar PDF</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const controlesMetadatos = document.getElementById('controlesMetadatos');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let pdfActual = null;
+let nombreArchivoActual = 'documento';
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) cargarPdf(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarPdf(archivo) {
+  try {
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivo.arrayBuffer();
+    pdfActual = await PDFDocument.load(bytes);
+    nombreArchivoActual = archivo.name.replace(/\.pdf$/i, '');
+
+    listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+    document.getElementById('campoTitulo').value = pdfActual.getTitle() || '';
+    document.getElementById('campoAutor').value = pdfActual.getAuthor() || '';
+    document.getElementById('campoAsunto').value = pdfActual.getSubject() || '';
+    document.getElementById('campoPalabrasClave').value = (pdfActual.getKeywords() || '');
+    controlesMetadatos.style.display = 'flex';
+    resultado.classList.remove('visible');
+  } catch (error) {
+    alert('No se pudo leer el PDF: ' + error.message);
+  }
+}
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = 'Guardando...';
+  try {
+    pdfActual.setTitle(document.getElementById('campoTitulo').value);
+    pdfActual.setAuthor(document.getElementById('campoAutor').value);
+    pdfActual.setSubject(document.getElementById('campoAsunto').value);
+    pdfActual.setKeywords(document.getElementById('campoPalabrasClave').value.split(',').map(p => p.trim()).filter(Boolean));
+
+    const bytesFinales = await pdfActual.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `${nombreArchivoActual}.pdf`;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo guardar el PDF: ' + error.message);
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = 'Guardar y descargar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

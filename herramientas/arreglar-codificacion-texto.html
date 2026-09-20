@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arreglar codificación de un texto gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Arreglá problemas de codificación en un archivo de texto (.txt): BOM, saltos de línea mixtos y caracteres inválidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/texto.html">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Arreglar codificación de un texto</h1>
+  <p>Elegí un archivo .txt con problemas de codificación (acentos rotos, saltos de línea mezclados) y lo normalizamos.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".txt" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        Saltos de línea de salida
+        <select id="finDeLinea">
+          <option value="lf" selected>Unix / Mac (LF)</option>
+          <option value="crlf">Windows (CRLF)</option>
+        </select>
+      </label>
+      <button class="boton" id="botonArreglar" disabled>Arreglar</button>
+    </div>
+
+    <p id="diagnostico" style="color:var(--texto-suave); display:none; font-size:0.9rem;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="texto-corregido.txt">Descargar .txt corregido</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Qué corrige</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Quita el BOM (marca de orden de bytes) al principio del archivo, si lo tiene.</li>
+      <li>Si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252 (la codificación más común en archivos viejos de Windows) en vez de mostrar los acentos rotos.</li>
+      <li>Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonArreglar = document.getElementById('botonArreglar');
+const diagnostico = document.getElementById('diagnostico');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonArreglar.disabled = false;
+  resultado.classList.remove('visible');
+  diagnostico.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonArreglar.addEventListener('click', async () => {
+  botonArreglar.disabled = true;
+  botonArreglar.textContent = 'Arreglando...';
+  try {
+    let bytes = new Uint8Array(await archivoActual.arrayBuffer());
+    const avisos = [];
+
+    // BOM UTF-8: EF BB BF al principio del archivo.
+    let teniaBom = false;
+    if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+      bytes = bytes.slice(3);
+      teniaBom = true;
+      avisos.push('Se encontró y quitó el BOM al principio del archivo.');
+    }
+
+    let texto;
+    let codificacionUsada = 'UTF-8';
+    try {
+      texto = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch (errorUtf8) {
+      texto = new TextDecoder('windows-1252').decode(bytes);
+      codificacionUsada = 'Windows-1252 (de respaldo, el archivo no era UTF-8 válido)';
+      avisos.push('El archivo no era UTF-8 válido — se reinterpretó como Windows-1252.');
+    }
+
+    const teniaSaltosMixtos = /\r\n/.test(texto) && /[^\r]\n/.test(texto.replace(/\r\n/g, ''));
+    const finDeLinea = document.getElementById('finDeLinea').value;
+    const textoNormalizado = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const textoFinal = finDeLinea === 'crlf' ? textoNormalizado.replace(/\n/g, '\r\n') : textoNormalizado;
+
+    if (teniaSaltosMixtos) avisos.push('Se normalizaron saltos de línea mezclados.');
+    if (avisos.length === 0) avisos.push('El archivo ya estaba bien formado — se generó igual una copia normalizada.');
+
+    diagnostico.innerHTML = `<strong>Codificación detectada:</strong> ${codificacionUsada}${teniaBom ? ' (con BOM)' : ''}<br>` + avisos.map(a => `• ${a}`).join('<br>');
+    diagnostico.style.display = 'block';
+
+    const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo procesar el archivo: ' + error.message);
+  } finally {
+    botonArreglar.disabled = false;
+    botonArreglar.textContent = 'Arreglar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

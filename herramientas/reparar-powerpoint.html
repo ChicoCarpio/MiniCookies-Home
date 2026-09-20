@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reparar PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Intentá recuperar una presentación PowerPoint (.pptx) dañada, descartando solo las diapositivas rotas, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Reparar PowerPoint</h1>
+  <p>Elegí un archivo .pptx que no abre bien. Si alguna diapositiva individual está corrupta, se descarta esa sola — el resto de la presentación se conserva.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonReparar" disabled>Reparar</button>
+    </div>
+
+    <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="presentacion-reparada.pptx">Descargar PowerPoint reparado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Se quitan las diapositivas dañadas que no se pueden interpretar; el resto del archivo queda intacto.</li>
+      <li>Si el archivo en sí está dañado (no solo una diapositiva puntual), no hay forma de repararlo con esta técnica — se avisa en vez de intentar algo que no va a funcionar.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonReparar = document.getElementById('botonReparar');
+const mensajeNivel = document.getElementById('mensajeNivel');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonReparar.disabled = false;
+  resultado.classList.remove('visible');
+  mensajeNivel.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function xmlTieneError(doc) {
+  return doc.getElementsByTagName('parsererror').length > 0;
+}
+
+botonReparar.addEventListener('click', async () => {
+  botonReparar.disabled = true;
+  botonReparar.textContent = 'Reparando...';
+  mensajeNivel.style.display = 'none';
+  try {
+    const zip = await JSZip.loadAsync(archivoActual);
+    const parser = new DOMParser();
+
+    const archivoPresentacion = zip.file('ppt/presentation.xml');
+    const archivoRels = zip.file('ppt/_rels/presentation.xml.rels');
+    if (!archivoPresentacion || !archivoRels) {
+      throw new Error('El archivo no tiene la estructura mínima de un .pptx — no se puede reparar.');
+    }
+
+    const relsDoc = parser.parseFromString(await archivoRels.async('string'), 'application/xml');
+    const mapaRels = {};
+    [...relsDoc.getElementsByTagName('Relationship')].forEach((rel) => {
+      mapaRels[rel.getAttribute('Id')] = rel.getAttribute('Target');
+    });
+
+    const presentacionXmlTexto = await archivoPresentacion.async('string');
+    const presentacionDoc = parser.parseFromString(presentacionXmlTexto, 'application/xml');
+    if (xmlTieneError(presentacionDoc)) {
+      throw new Error('presentation.xml está dañado — no se puede reparar sin reconstruir toda la estructura.');
+    }
+
+    const listaDiapositivas = presentacionDoc.getElementsByTagName('p:sldIdLst')[0];
+    if (!listaDiapositivas) throw new Error('No se encontró la lista de diapositivas.');
+
+    const nodosSldId = [...listaDiapositivas.getElementsByTagName('p:sldId')];
+    let totalOriginal = nodosSldId.length;
+    let descartadas = 0;
+
+    for (const nodo of nodosSldId) {
+      const rId = nodo.getAttribute('r:id');
+      const destino = mapaRels[rId];
+      const rutaSlide = destino ? `ppt/${destino.replace(/^\.?\//, '')}` : null;
+      const archivoSlide = rutaSlide ? zip.file(rutaSlide) : null;
+
+      let valida = false;
+      if (archivoSlide) {
+        try {
+          const slideXml = await archivoSlide.async('string');
+          const slideDoc = parser.parseFromString(slideXml, 'application/xml');
+          valida = !xmlTieneError(slideDoc);
+        } catch (error) {
+          valida = false;
+        }
+      }
+
+      if (!valida) {
+        listaDiapositivas.removeChild(nodo);
+        descartadas++;
+      }
+    }
+
+    if (descartadas === totalOriginal) {
+      throw new Error('Ninguna diapositiva se pudo leer — el archivo está demasiado dañado.');
+    }
+
+    const nuevoXml = new XMLSerializer().serializeToString(presentacionDoc);
+    zip.file('ppt/presentation.xml', nuevoXml);
+
+    const blobFinal = await zip.generateAsync({ type: 'blob' });
+    enlaceDescarga.href = URL.createObjectURL(blobFinal);
+    resultado.classList.add('visible');
+
+    mensajeNivel.textContent = descartadas === 0
+      ? '✅ Se pudo leer la presentación completa, no se descartó ninguna diapositiva.'
+      : `⚠️ Se descartaron ${descartadas} de ${totalOriginal} diapositivas por estar dañadas — el resto se conservó.`;
+    mensajeNivel.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo reparar la presentación: ' + error.message);
+  } finally {
+    botonReparar.disabled = false;
+    botonReparar.textContent = 'Reparar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

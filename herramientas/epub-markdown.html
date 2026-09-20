@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir EPUB y Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí un libro EPUB a Markdown, o Markdown a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+  textarea#markdownResultado { min-height: 320px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>EPUB ↔ Markdown</h1>
+  <p>Convertí un libro EPUB a Markdown, o Markdown a EPUB, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="epub-a-md" checked> EPUB → Markdown</label>
+      <label><input type="radio" name="direccion" value="md-a-epub"> Markdown → EPUB</label>
+    </div>
+
+    <!-- EPUB → Markdown -->
+    <div id="panelEpubAMd">
+      <div class="zona-arrastre" id="zonaArrastreEpub">
+        📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+        <input type="file" id="entradaEpub" accept=".epub" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaEpub"></ul>
+      <div class="controles">
+        <button class="boton" id="botonAMd" disabled>Convertir a Markdown</button>
+      </div>
+      <div id="bloqueResultadoMd" style="display:none; margin-top:20px;">
+        <textarea id="markdownResultado" readonly></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiarMd" type="button">Copiar Markdown</button>
+          <a class="boton" id="enlaceDescargaMd" download="libro.md" style="text-decoration:none; display:inline-block;">Descargar .md</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Markdown → EPUB -->
+    <div id="panelMdAEpub" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastreMd">
+        📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo
+        <input type="file" id="entradaMd" accept=".md,.markdown" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaMd"></ul>
+      <div class="controles">
+        <label class="campo">
+          Título del libro
+          <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <label class="campo">
+          Autor (opcional)
+          <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAEpub" disabled>Convertir a EPUB</button>
+      </div>
+      <div class="resultado" id="resultadoEpub">
+        ✅ Listo. <a id="enlaceDescargaEpub" download="libro.epub">Descargar EPUB</a>
+      </div>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
+      <li>EPUB → Markdown separa cada capítulo con una línea horizontal (<code>---</code>). Markdown → EPUB empieza un capítulo nuevo en cada <code>#</code> de primer nivel.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const panelEpubAMd = document.getElementById('panelEpubAMd');
+const panelMdAEpub = document.getElementById('panelMdAEpub');
+const progreso = document.getElementById('progreso');
+
+const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esEpubAMd = document.querySelector('input[name="direccion"]:checked').value === 'epub-a-md';
+    panelEpubAMd.style.display = esEpubAMd ? '' : 'none';
+    panelMdAEpub.style.display = esEpubAMd ? 'none' : '';
+  });
+});
+
+// --- EPUB → Markdown ---
+const zonaArrastreEpub = document.getElementById('zonaArrastreEpub');
+const entradaEpub = document.getElementById('entradaEpub');
+const listaEpub = document.getElementById('listaEpub');
+const botonAMd = document.getElementById('botonAMd');
+const bloqueResultadoMd = document.getElementById('bloqueResultadoMd');
+const markdownResultado = document.getElementById('markdownResultado');
+const botonCopiarMd = document.getElementById('botonCopiarMd');
+const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
+
+let archivoEpubActual = null;
+
+function mostrarArchivoEpub(archivo) {
+  archivoEpubActual = archivo;
+  listaEpub.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAMd.disabled = false;
+  bloqueResultadoMd.style.display = 'none';
+}
+
+function elegirArchivoEpub(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivoEpub(archivo);
+}
+
+zonaArrastreEpub.addEventListener('click', () => entradaEpub.click());
+entradaEpub.addEventListener('change', (e) => elegirArchivoEpub(e.target.files));
+zonaArrastreEpub.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreEpub.classList.add('activa'); });
+zonaArrastreEpub.addEventListener('dragleave', () => zonaArrastreEpub.classList.remove('activa'));
+zonaArrastreEpub.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreEpub.classList.remove('activa');
+  elegirArchivoEpub(e.dataTransfer.files);
+});
+
+botonAMd.addEventListener('click', async () => {
+  botonAMd.disabled = true;
+  botonAMd.textContent = 'Convirtiendo...';
+  try {
+    const { capitulos } = await leerEpub(archivoEpubActual);
+    const markdown = capitulos.map(capitulo => turndownService.turndown(capitulo.html)).join('\n\n---\n\n');
+    markdownResultado.value = markdown;
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+    enlaceDescargaMd.href = URL.createObjectURL(blob);
+    bloqueResultadoMd.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo convertir el EPUB: ' + error.message);
+  } finally {
+    botonAMd.disabled = false;
+    botonAMd.textContent = 'Convertir a Markdown';
+  }
+});
+
+botonCopiarMd.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(markdownResultado.value);
+  botonCopiarMd.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiarMd.textContent = 'Copiar Markdown'; }, 1500);
+});
+
+// --- Markdown → EPUB ---
+const zonaArrastreMd = document.getElementById('zonaArrastreMd');
+const entradaMd = document.getElementById('entradaMd');
+const listaMd = document.getElementById('listaMd');
+const tituloLibro = document.getElementById('tituloLibro');
+const botonAEpub = document.getElementById('botonAEpub');
+const resultadoEpub = document.getElementById('resultadoEpub');
+const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
+
+let archivoMdActual = null;
+
+function mostrarArchivoMd(archivo) {
+  archivoMdActual = archivo;
+  listaMd.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAEpub.disabled = false;
+  resultadoEpub.classList.remove('visible');
+  if (!tituloLibro.value.trim()) {
+    tituloLibro.value = archivo.name.replace(/\.(md|markdown)$/i, '');
+  }
+}
+
+function elegirArchivoMd(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(md|markdown)$/i.test(f.name));
+  if (archivo) mostrarArchivoMd(archivo);
+}
+
+zonaArrastreMd.addEventListener('click', () => entradaMd.click());
+entradaMd.addEventListener('change', (e) => elegirArchivoMd(e.target.files));
+zonaArrastreMd.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreMd.classList.add('activa'); });
+zonaArrastreMd.addEventListener('dragleave', () => zonaArrastreMd.classList.remove('activa'));
+zonaArrastreMd.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreMd.classList.remove('activa');
+  elegirArchivoMd(e.dataTransfer.files);
+});
+
+botonAEpub.addEventListener('click', async () => {
+  botonAEpub.disabled = true;
+  progreso.style.display = 'block';
+  try {
+    const titulo = tituloLibro.value.trim() || 'Documento';
+    const autor = document.getElementById('autorLibro').value.trim();
+
+    progreso.textContent = 'Leyendo el Markdown...';
+    const texto = await archivoMdActual.text();
+    const capitulos = dividirHtmlEnCapitulosEpub(marked.parse(texto), titulo);
+
+    progreso.textContent = 'Armando el EPUB...';
+    const blob = await construirEpub({ titulo, autor, capitulos });
+
+    enlaceDescargaEpub.href = URL.createObjectURL(blob);
+    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    resultadoEpub.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el EPUB: ' + error.message);
+  } finally {
+    botonAEpub.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

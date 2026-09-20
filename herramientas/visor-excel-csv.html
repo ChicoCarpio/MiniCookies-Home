@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ver Excel o CSV sin abrir Excel — Herramientas Ofimáticas</title>
+<meta name="description" content="Mirá el contenido de un archivo Excel o CSV como una tabla, sin necesidad de tener Excel instalado. Gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .pestanas { display: flex; gap: 4px; flex-wrap: wrap; margin: 16px 0 0; }
+  .pestanas button {
+    background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde);
+    border-bottom: none;
+    padding: 8px 14px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+  }
+  .pestanas button.activa { background: #fff; color: var(--texto); font-weight: 600; }
+  .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 0 8px 8px 8px; max-height: 500px; }
+  table.tabla-datos { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  table.tabla-datos th, table.tabla-datos td {
+    border: 1px solid var(--gris-borde);
+    padding: 6px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.tabla-datos th { background: var(--gris-fondo); position: sticky; top: 0; }
+  table.tabla-datos tr.fila-par { background: #fafafa; }
+  table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Ver Excel o CSV</h1>
+  <p>Elegí un archivo .xlsx, .xlsm, .xlsb, .xls, .ods o .csv y mirá su contenido como tabla, sin necesidad de tener Excel instalado.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="pestanas" id="pestanas"></div>
+    <div class="contenedor-tabla" id="contenedorTabla"></div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const pestanas = document.getElementById('pestanas');
+const contenedorTabla = document.getElementById('contenedorTabla');
+
+let libroActual = null;
+
+function esArchivoValido(archivo) {
+  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+}
+
+function escaparHtml(valor) {
+  const texto = valor === null || valor === undefined ? '' : String(valor);
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// --- Virtualización de filas ---
+// Con tablas medianamente grandes, montar TODAS las filas como <tr> reales
+// hace que el scroll se sienta trabado (el navegador tiene que pintar/componer
+// miles de nodos aunque casi ninguno esté visible). Por debajo de este umbral
+// se sigue renderizando la tabla entera de una — es más simple y ya es fluido
+// para el caso común de un archivo chico.
+const UMBRAL_VIRTUALIZACION = 200;
+const SOBRESCANEO = 10; // filas extra renderizadas arriba/abajo de lo visible, para que no se vean huecos en blanco al scrollear rápido
+const ALTURA_FILA_ESTIMADA = 32; // se corrige apenas se puede medir una fila real
+
+let columnasActuales = [];
+let filasDatosActuales = [];
+let alturaFilaMedida = ALTURA_FILA_ESTIMADA;
+let ventanaRenderizada = { inicio: -1, fin: -1 };
+let renderizadoPendiente = false;
+
+function filaHtml(indiceGlobal, valoresFila) {
+  const clase = indiceGlobal % 2 === 0 ? '' : ' class="fila-par"';
+  let html = `<tr${clase}>`;
+  columnasActuales.forEach((_, indice) => html += `<td>${escaparHtml(valoresFila[indice])}</td>`);
+  return html + '</tr>';
+}
+
+function filaEspaciadoraHtml(alturaPx) {
+  return `<tr class="fila-espaciadora" aria-hidden="true" style="height:${alturaPx}px;"><td colspan="${columnasActuales.length}"></td></tr>`;
+}
+
+function renderizarVentana(inicio, fin) {
+  ventanaRenderizada = { inicio, fin };
+  const total = filasDatosActuales.length;
+  const alturaAntes = inicio * alturaFilaMedida;
+  const alturaDespues = (total - fin) * alturaFilaMedida;
+
+  let html = filaEspaciadoraHtml(alturaAntes);
+  for (let i = inicio; i < fin; i++) html += filaHtml(i, filasDatosActuales[i]);
+  html += filaEspaciadoraHtml(alturaDespues);
+
+  const tbody = contenedorTabla.querySelector('tbody');
+  tbody.innerHTML = html;
+}
+
+function calcularVentanaVisible() {
+  const scrollTop = contenedorTabla.scrollTop;
+  const alturaVisible = contenedorTabla.clientHeight;
+  const inicio = Math.max(0, Math.floor(scrollTop / alturaFilaMedida) - SOBRESCANEO);
+  const cantidad = Math.ceil(alturaVisible / alturaFilaMedida) + SOBRESCANEO * 2;
+  const fin = Math.min(filasDatosActuales.length, inicio + cantidad);
+  return { inicio, fin };
+}
+
+function actualizarVentanaSiHaceFalta() {
+  const { inicio, fin } = calcularVentanaVisible();
+  if (inicio === ventanaRenderizada.inicio && fin === ventanaRenderizada.fin) return;
+  renderizarVentana(inicio, fin);
+}
+
+function alManejarScroll() {
+  if (renderizadoPendiente) return;
+  renderizadoPendiente = true;
+  requestAnimationFrame(() => {
+    renderizadoPendiente = false;
+    actualizarVentanaSiHaceFalta();
+  });
+}
+
+contenedorTabla.addEventListener('scroll', () => {
+  if (filasDatosActuales.length > UMBRAL_VIRTUALIZACION) alManejarScroll();
+});
+
+function mostrarHoja(nombreHoja) {
+  [...pestanas.children].forEach(boton => boton.classList.toggle('activa', boton.textContent === nombreHoja));
+  const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombreHoja], { header: 1, raw: false, defval: '' });
+
+  if (filas.length === 0) {
+    contenedorTabla.innerHTML = '<p style="padding:16px; color:var(--texto-suave);">Esta hoja está vacía.</p>';
+    columnasActuales = [];
+    filasDatosActuales = [];
+    return;
+  }
+
+  columnasActuales = filas[0];
+  filasDatosActuales = filas.slice(1);
+  ventanaRenderizada = { inicio: -1, fin: -1 };
+
+  let htmlEncabezado = '<thead><tr>';
+  columnasActuales.forEach(celda => htmlEncabezado += `<th>${escaparHtml(celda)}</th>`);
+  htmlEncabezado += '</tr></thead>';
+
+  if (filasDatosActuales.length <= UMBRAL_VIRTUALIZACION) {
+    // Tabla chica: se renderiza entera de una, sin virtualizar — más simple
+    // y ya es fluido para este tamaño.
+    let htmlFilas = '<tbody>';
+    filasDatosActuales.forEach((fila, indice) => htmlFilas += filaHtml(indice, fila));
+    htmlFilas += '</tbody>';
+    contenedorTabla.innerHTML = `<table class="tabla-datos">${htmlEncabezado}${htmlFilas}</table>`;
+    return;
+  }
+
+  contenedorTabla.scrollTop = 0;
+  contenedorTabla.innerHTML = `<table class="tabla-datos">${htmlEncabezado}<tbody></tbody></table>`;
+  const { inicio, fin } = calcularVentanaVisible();
+  renderizarVentana(inicio, fin);
+
+  // La altura de fila estimada puede no coincidir exactamente con la real
+  // (depende de la fuente/renderizado del navegador) — se mide la primera
+  // fila real ya pintada y, si difiere, se vuelve a calcular la ventana con
+  // el valor correcto para que el alto total de la tabla sea preciso.
+  requestAnimationFrame(() => {
+    const filaMedida = contenedorTabla.querySelector('tbody tr:not(.fila-espaciadora)');
+    if (!filaMedida) return;
+    const alturaReal = filaMedida.getBoundingClientRect().height;
+    if (alturaReal > 0 && Math.abs(alturaReal - alturaFilaMedida) > 0.5) {
+      alturaFilaMedida = alturaReal;
+      ventanaRenderizada = { inicio: -1, fin: -1 };
+      actualizarVentanaSiHaceFalta();
+    }
+  });
+}
+
+async function mostrarArchivo(archivo) {
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  const bytes = await archivo.arrayBuffer();
+  libroActual = XLSX.read(bytes, { type: 'array' });
+
+  pestanas.innerHTML = '';
+  libroActual.SheetNames.forEach((nombre) => {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.textContent = nombre;
+    boton.addEventListener('click', () => mostrarHoja(nombre));
+    pestanas.appendChild(boton);
+  });
+
+  mostrarHoja(libroActual.SheetNames[0]);
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(esArchivoValido);
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

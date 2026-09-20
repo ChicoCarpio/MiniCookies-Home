@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dividir Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Separá un documento Word (.docx) en varios archivos, uno por cada Título 1, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Dividir Word</h1>
+  <p>Elegí un documento .docx. Se separa en un .docx por cada Título 1, empaquetados en un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled>Dividir</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="secciones-word.zip">Descargar .zip con los documentos</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <p style="color:var(--texto-suave);">
+      Si el documento no tiene ningún Título 1, no hay nada por lo que dividirlo — se avisa en vez de generar
+      un .zip con un solo archivo idéntico al original.
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonDividir = document.getElementById('botonDividir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonDividir.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = 'Dividiendo...';
+  progreso.style.display = 'block';
+  try {
+    const arrayBuffer = await archivoActual.arrayBuffer();
+    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, 'Documento');
+
+    if (capitulos.length < 2) {
+      throw new Error('El documento no tiene más de un Título 1 — no hay nada que dividir.');
+    }
+
+    const zip = new JSZip();
+    const cantidadDigitos = String(capitulos.length).length;
+
+    for (let i = 0; i < capitulos.length; i++) {
+      progreso.textContent = `Generando documento ${i + 1} de ${capitulos.length}...`;
+      const contenedor = document.createElement('div');
+      contenedor.innerHTML = capitulos[i].html;
+      const parrafos = await contenidoAParrafos(contenedor);
+
+      const documento = new docx.Document({
+        numbering: NUMERACION_DOCX_CONFIG,
+        sections: [{ children: parrafos }],
+      });
+      const blob = await docx.Packer.toBlob(documento);
+
+      const numero = String(i + 1).padStart(cantidadDigitos, '0');
+      const nombreLimpio = capitulos[i].titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || 'seccion';
+      zip.file(`${numero}-${nombreLimpio}.docx`, blob);
+    }
+
+    progreso.textContent = 'Generando .zip...';
+    const blobZip = await zip.generateAsync({ type: 'blob' });
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo dividir el documento: ' + error.message);
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = 'Dividir';
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

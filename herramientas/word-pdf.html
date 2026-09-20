@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir Word y PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí un Word (.docx) a PDF conservando el formato, o un PDF a Word, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .vista-previa-documento {
+    background: #fff;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 40px;
+    margin-top: 16px;
+    max-height: 600px;
+    overflow: auto;
+    line-height: 1.6;
+  }
+  .vista-previa-documento img { max-width: 100%; }
+  .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
+  .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
+  @media print {
+    body > *:not(#areaImprimir) { display: none !important; }
+    #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
+  }
+  #areaImprimir { display: none; }
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Word ↔ PDF</h1>
+  <p>Convertí un Word a PDF conservando el formato, o un PDF a Word, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="word-a-pdf" checked> Word → PDF</label>
+      <label><input type="radio" name="direccion" value="pdf-a-word"> PDF → Word</label>
+    </div>
+
+    <!-- Word → PDF -->
+    <div id="panelWordAPdf">
+      <p style="color:var(--texto-suave); font-size:0.9rem;">
+        Vas a ver una vista previa con el formato (títulos, negritas, listas, tablas) — desde ahí usás
+        "Guardar como PDF" del diálogo de impresión del navegador, así se conserva el formato real.
+      </p>
+      <div class="zona-arrastre" id="zonaArrastreWord">
+        📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+        <input type="file" id="entradaWord" accept=".docx" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaWord"></ul>
+      <div class="controles">
+        <button class="boton" id="botonAPdf" disabled>Generar vista previa</button>
+      </div>
+      <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
+      <div class="controles" id="controlesImprimir" style="display:none;">
+        <button class="boton" id="botonImprimir" type="button">🖨️ Guardar como PDF / Imprimir</button>
+      </div>
+      <div class="vista-previa-documento" id="vistaPrevia" style="display:none;"></div>
+    </div>
+
+    <!-- PDF → Word -->
+    <div id="panelPdfAWord" style="display:none;">
+      <p style="color:var(--texto-suave); font-size:0.9rem;">
+        ⚠️ Solo se extrae el texto del PDF (sin columnas, imágenes ni tablas) — un Word real armado desde
+        cero a partir del texto, con párrafos separados por página.
+      </p>
+      <div class="zona-arrastre" id="zonaArrastrePdf">
+        📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+      </div>
+      <div class="grid-miniaturas" id="listaPdf"></div>
+      <div class="controles">
+        <label class="campo">
+          Nombre del archivo
+          <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAWord" disabled>Convertir a Word</button>
+      </div>
+      <div class="resultado" id="resultadoWord">
+        ✅ Listo. <a id="enlaceDescargaWord" download="documento.docx">Descargar Word</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<div id="areaImprimir"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const panelWordAPdf = document.getElementById('panelWordAPdf');
+const panelPdfAWord = document.getElementById('panelPdfAWord');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esWordAPdf = document.querySelector('input[name="direccion"]:checked').value === 'word-a-pdf';
+    panelWordAPdf.style.display = esWordAPdf ? '' : 'none';
+    panelPdfAWord.style.display = esWordAPdf ? 'none' : '';
+  });
+});
+
+// --- Word → PDF ---
+const zonaArrastreWord = document.getElementById('zonaArrastreWord');
+const entradaWord = document.getElementById('entradaWord');
+const listaWord = document.getElementById('listaWord');
+const botonAPdf = document.getElementById('botonAPdf');
+const advertencias = document.getElementById('advertencias');
+const controlesImprimir = document.getElementById('controlesImprimir');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const botonImprimir = document.getElementById('botonImprimir');
+const areaImprimir = document.getElementById('areaImprimir');
+
+let archivoWordActual = null;
+
+function mostrarArchivoWord(archivo) {
+  archivoWordActual = archivo;
+  listaWord.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAPdf.disabled = false;
+  vistaPrevia.style.display = 'none';
+  controlesImprimir.style.display = 'none';
+  advertencias.style.display = 'none';
+}
+
+function elegirArchivoWord(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivoWord(archivo);
+}
+
+zonaArrastreWord.addEventListener('click', () => entradaWord.click());
+entradaWord.addEventListener('change', (e) => elegirArchivoWord(e.target.files));
+zonaArrastreWord.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreWord.classList.add('activa'); });
+zonaArrastreWord.addEventListener('dragleave', () => zonaArrastreWord.classList.remove('activa'));
+zonaArrastreWord.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreWord.classList.remove('activa');
+  elegirArchivoWord(e.dataTransfer.files);
+});
+
+botonAPdf.addEventListener('click', async () => {
+  botonAPdf.disabled = true;
+  botonAPdf.textContent = 'Generando...';
+  try {
+    const arrayBuffer = await archivoWordActual.arrayBuffer();
+    const resultado = await mammoth.convertToHtml({ arrayBuffer });
+
+    vistaPrevia.innerHTML = resultado.value;
+    vistaPrevia.style.display = 'block';
+    areaImprimir.innerHTML = resultado.value;
+    controlesImprimir.style.display = 'flex';
+
+    if (resultado.messages.length > 0) {
+      advertencias.textContent = `⚠️ ${resultado.messages.length} advertencia(s) — algunos elementos pueden no verse exactamente igual que en Word.`;
+      advertencias.style.display = 'block';
+    }
+  } catch (error) {
+    alert('No se pudo generar la vista previa: ' + error.message);
+  } finally {
+    botonAPdf.disabled = false;
+    botonAPdf.textContent = 'Generar vista previa';
+  }
+});
+
+botonImprimir.addEventListener('click', () => window.print());
+
+// --- PDF → Word ---
+const zonaArrastrePdf = document.getElementById('zonaArrastrePdf');
+const entradaPdf = document.getElementById('entradaPdf');
+const listaPdf = document.getElementById('listaPdf');
+const nombreArchivoInput = document.getElementById('nombreArchivo');
+const botonAWord = document.getElementById('botonAWord');
+const resultadoWord = document.getElementById('resultadoWord');
+const enlaceDescargaWord = document.getElementById('enlaceDescargaWord');
+
+let archivoPdfActual = null;
+
+async function mostrarArchivoPdf(archivo) {
+  archivoPdfActual = archivo;
+  listaPdf.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+  } catch (error) {
+    listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+  }
+  botonAWord.disabled = false;
+  resultadoWord.classList.remove('visible');
+  if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === 'documento') {
+    nombreArchivoInput.value = archivo.name.replace(/\.pdf$/i, '');
+  }
+}
+
+function elegirArchivoPdf(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivoPdf(archivo);
+}
+
+zonaArrastrePdf.addEventListener('click', () => entradaPdf.click());
+entradaPdf.addEventListener('change', (e) => elegirArchivoPdf(e.target.files));
+zonaArrastrePdf.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastrePdf.classList.add('activa'); });
+zonaArrastrePdf.addEventListener('dragleave', () => zonaArrastrePdf.classList.remove('activa'));
+zonaArrastrePdf.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastrePdf.classList.remove('activa');
+  elegirArchivoPdf(e.dataTransfer.files);
+});
+
+function textoAHtml(texto) {
+  return texto.split(/\n\s*\n/).map(parrafo => {
+    const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+async function extraerTextoPdf(archivo) {
+  const bytes = await archivo.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const paginas = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const pagina = await pdf.getPage(i);
+    const contenido = await pagina.getTextContent();
+    paginas.push(contenido.items.map(item => item.str).join(' '));
+  }
+  return paginas.join('\n\n');
+}
+
+botonAWord.addEventListener('click', async () => {
+  botonAWord.disabled = true;
+  botonAWord.textContent = 'Convirtiendo...';
+  try {
+    const texto = await extraerTextoPdf(archivoPdfActual);
+    if (!texto.trim()) throw new Error('No se encontró texto en el PDF (¿es un escaneo?).');
+
+    const contenedor = document.createElement('div');
+    contenedor.innerHTML = textoAHtml(texto);
+    const parrafos = await contenidoAParrafos(contenedor);
+
+    const documento = new docx.Document({
+      numbering: NUMERACION_DOCX_CONFIG,
+      sections: [{ children: parrafos }],
+    });
+    const blob = await docx.Packer.toBlob(documento);
+    const nombreArchivo = (nombreArchivoInput.value || 'documento').trim();
+    enlaceDescargaWord.href = URL.createObjectURL(blob);
+    enlaceDescargaWord.download = `${nombreArchivo}.docx`;
+    resultadoWord.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el documento: ' + error.message);
+  } finally {
+    botonAWord.disabled = false;
+    botonAWord.textContent = 'Convertir a Word';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

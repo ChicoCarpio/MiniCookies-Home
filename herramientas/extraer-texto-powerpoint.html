@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extraer texto de PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Extraé todo el texto de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Extraer texto de PowerPoint</h1>
+  <p>Elegí una presentación .pptx y sacá todo su texto a texto plano, organizado por diapositiva.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📽️ Arrastrá tu presentación .pptx acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonExtraer" disabled>Extraer texto</button>
+    </div>
+
+    <div id="bloqueResultado" style="display:none; margin-top:20px;">
+      <textarea id="textoExtraido" readonly style="min-height:320px;"></textarea>
+      <div class="controles">
+        <button class="boton" id="botonCopiar" type="button">Copiar texto</button>
+        <a class="boton" id="enlaceDescarga" download="texto-presentacion.txt" style="text-decoration:none; display:inline-block;">Descargar .txt</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonExtraer = document.getElementById('botonExtraer');
+const bloqueResultado = document.getElementById('bloqueResultado');
+const textoExtraido = document.getElementById('textoExtraido');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonExtraer.disabled = false;
+  bloqueResultado.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function extraerTextoDeXmlDiapositiva(xmlTexto) {
+  const doc = new DOMParser().parseFromString(xmlTexto, 'application/xml');
+  // Cada <a:p> es un párrafo; dentro, cada <a:t> es un fragmento de texto.
+  const parrafos = [...doc.getElementsByTagName('a:p')];
+  const lineas = parrafos.map((parrafo) => {
+    const fragmentos = [...parrafo.getElementsByTagName('a:t')];
+    return fragmentos.map(f => f.textContent).join('');
+  });
+  return lineas.filter(linea => linea.trim() !== '');
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = 'Extrayendo...';
+  try {
+    const zip = await JSZip.loadAsync(archivoActual);
+
+    const nombresDiapositivas = Object.keys(zip.files)
+      .filter(nombre => /^ppt\/slides\/slide\d+\.xml$/.test(nombre))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/slide(\d+)\.xml$/)[1], 10);
+        const numB = parseInt(b.match(/slide(\d+)\.xml$/)[1], 10);
+        return numA - numB;
+      });
+
+    if (nombresDiapositivas.length === 0) throw new Error('No se encontraron diapositivas legibles en este archivo.');
+
+    const bloquesDeTexto = [];
+    for (let i = 0; i < nombresDiapositivas.length; i++) {
+      const xmlTexto = await zip.files[nombresDiapositivas[i]].async('string');
+      const lineas = extraerTextoDeXmlDiapositiva(xmlTexto);
+      bloquesDeTexto.push(`--- Diapositiva ${i + 1} ---\n` + (lineas.length > 0 ? lineas.join('\n') : '(sin texto)'));
+    }
+
+    const textoCompleto = bloquesDeTexto.join('\n\n');
+    textoExtraido.value = textoCompleto;
+    const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    bloqueResultado.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo extraer el texto: ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = 'Extraer texto';
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(textoExtraido.value);
+  botonCopiar.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiar.textContent = 'Copiar texto'; }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agregar texto a cada capítulo de un EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Agregá una línea de texto (marca de agua, aviso o pie) al principio o final de cada capítulo de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Agregar texto a cada capítulo (EPUB)</h1>
+  <p>Elegí un libro .epub y una línea de texto se agrega al principio o al final de cada capítulo — útil para un aviso de copyright, "muestra gratuita", etc.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".epub" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        Texto a agregar
+        <input type="text" id="textoAgregar" placeholder="ej. © 2026 Mi nombre — muestra gratuita" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Posición
+        <select id="posicion">
+          <option value="inicio">Al principio de cada capítulo</option>
+          <option value="fin">Al final de cada capítulo</option>
+        </select>
+      </label>
+      <button class="boton" id="botonAplicar" disabled>Aplicar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="libro-con-texto.epub">Descargar EPUB</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonAplicar = document.getElementById('botonAplicar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAplicar.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function escaparHtml(texto) {
+  return texto.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+}
+
+botonAplicar.addEventListener('click', async () => {
+  botonAplicar.disabled = true;
+  botonAplicar.textContent = 'Generando...';
+  try {
+    const texto = document.getElementById('textoAgregar').value.trim();
+    if (!texto) throw new Error('Escribí el texto que querés agregar.');
+    const posicion = document.getElementById('posicion').value;
+
+    const { titulo, autor, capitulos } = await leerEpub(archivoActual);
+    const lineaHtml = `<p style="color:#666; font-size:0.85em;"><em>${escaparHtml(texto)}</em></p>`;
+    const capitulosNuevos = capitulos.map(cap => ({
+      titulo: cap.titulo,
+      html: posicion === 'inicio' ? (lineaHtml + cap.html) : (cap.html + lineaHtml),
+    }));
+
+    const blob = await construirEpub({ titulo, autor, capitulos: capitulosNuevos });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el EPUB: ' + error.message);
+  } finally {
+    botonAplicar.disabled = false;
+    botonAplicar.textContent = 'Aplicar y descargar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

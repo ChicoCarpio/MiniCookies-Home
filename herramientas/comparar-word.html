@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparar dos documentos Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Compará el texto de dos versiones de un documento Word (.docx) y mirá exactamente qué cambió, gratis y sin subir tus archivos a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
+  .resultado-diff {
+    background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 16px;
+    margin-top: 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .resultado-diff ins { background: #dcfce7; color: #166534; text-decoration: none; }
+  .resultado-diff del { background: #fee2e2; color: #991b1b; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Comparar dos documentos Word</h1>
+  <p>Elegí la versión original y la nueva. Te mostramos qué texto se agregó (en verde) y qué se quitó (en rojo).</p>
+  <p style="color:var(--texto-suave); font-size:0.9rem;">
+    ⚠️ Compara el <strong>texto</strong> de ambos documentos, no el formato ni el diseño — un cambio de
+    negrita o de tipografía sin cambiar palabras no se va a marcar como diferencia.
+  </p>
+
+  <div class="panel-herramienta">
+    <div class="columnas">
+      <label class="campo">
+        Documento original
+        <div class="zona-arrastre" id="zonaArrastreA" style="min-height:80px;">
+          📝 Arrastrá el .docx original o hacé clic
+          <input type="file" id="entradaA" accept=".docx" hidden>
+        </div>
+        <span id="nombreA" style="color:var(--texto-suave); font-size:0.85rem;"></span>
+      </label>
+      <label class="campo">
+        Documento nuevo
+        <div class="zona-arrastre" id="zonaArrastreB" style="min-height:80px;">
+          📝 Arrastrá el .docx nuevo o hacé clic
+          <input type="file" id="entradaB" accept=".docx" hidden>
+        </div>
+        <span id="nombreB" style="color:var(--texto-suave); font-size:0.85rem;"></span>
+      </label>
+    </div>
+
+    <div class="controles">
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="porPalabra" checked> Comparar por palabra (si no, por línea)
+      </label>
+      <button class="boton" id="botonComparar" disabled>Comparar</button>
+    </div>
+
+    <div class="resultado-diff" id="resultadoDiff" style="display:none;"></div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/9.0.0/diff.min.js"></script>
+<script>
+const zonaArrastreA = document.getElementById('zonaArrastreA');
+const zonaArrastreB = document.getElementById('zonaArrastreB');
+const entradaA = document.getElementById('entradaA');
+const entradaB = document.getElementById('entradaB');
+const nombreA = document.getElementById('nombreA');
+const nombreB = document.getElementById('nombreB');
+const botonComparar = document.getElementById('botonComparar');
+const resultadoDiff = document.getElementById('resultadoDiff');
+
+let archivoA = null;
+let archivoB = null;
+
+function actualizarBoton() {
+  botonComparar.disabled = !(archivoA && archivoB);
+}
+
+function configurarZona(zona, entrada, alElegir) {
+  zona.addEventListener('click', () => entrada.click());
+  zona.addEventListener('dragover', (e) => { e.preventDefault(); zona.classList.add('activa'); });
+  zona.addEventListener('dragleave', () => zona.classList.remove('activa'));
+  zona.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zona.classList.remove('activa');
+    const archivo = [...e.dataTransfer.files].find(f => f.name.toLowerCase().endsWith('.docx'));
+    if (archivo) alElegir(archivo);
+  });
+  entrada.addEventListener('change', (e) => {
+    const archivo = [...e.target.files].find(f => f.name.toLowerCase().endsWith('.docx'));
+    if (archivo) alElegir(archivo);
+  });
+}
+
+configurarZona(zonaArrastreA, entradaA, (archivo) => { archivoA = archivo; nombreA.textContent = archivo.name; actualizarBoton(); });
+configurarZona(zonaArrastreB, entradaB, (archivo) => { archivoB = archivo; nombreB.textContent = archivo.name; actualizarBoton(); });
+
+botonComparar.addEventListener('click', async () => {
+  botonComparar.disabled = true;
+  botonComparar.textContent = 'Comparando...';
+  try {
+    const [resultadoA, resultadoB] = await Promise.all([
+      mammoth.extractRawText({ arrayBuffer: await archivoA.arrayBuffer() }),
+      mammoth.extractRawText({ arrayBuffer: await archivoB.arrayBuffer() }),
+    ]);
+
+    const porPalabra = document.getElementById('porPalabra').checked;
+    const cambios = porPalabra
+      ? Diff.diffWords(resultadoA.value, resultadoB.value)
+      : Diff.diffLines(resultadoA.value, resultadoB.value);
+
+    resultadoDiff.innerHTML = '';
+    cambios.forEach((parte) => {
+      const elemento = document.createElement(parte.added ? 'ins' : parte.removed ? 'del' : 'span');
+      elemento.textContent = parte.value;
+      resultadoDiff.appendChild(elemento);
+    });
+    resultadoDiff.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo comparar los documentos: ' + error.message);
+  } finally {
+    botonComparar.disabled = false;
+    botonComparar.textContent = 'Comparar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

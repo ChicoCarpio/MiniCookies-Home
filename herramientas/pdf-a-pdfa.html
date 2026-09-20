@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir PDF a PDF/A gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí un PDF normal a PDF/A (formato de archivo para preservación a largo plazo) o quitá la marca PDF/A de uno existente, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .opcion-direccion {
+    flex: 1;
+    min-width: 220px;
+    border: 2px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 14px 16px;
+    cursor: pointer;
+    background: #fff;
+  }
+  .opcion-direccion.activa { border-color: var(--azul); background: var(--activo-fondo); }
+  .opcion-direccion h4 { margin: 0 0 4px; }
+  .opcion-direccion p { margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
+  .aviso-limites {
+    background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+  }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>PDF ↔ PDF/A</h1>
+  <p>Convertí un PDF normal a PDF/A (el formato pensado para archivar documentos a largo plazo) o quitá la marca PDF/A de un archivo para que vuelva a ser un PDF normal.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <div class="opcion-direccion activa" id="opcionAPdfa" data-direccion="a-pdfa">
+        <h4>📥 PDF → PDF/A</h4>
+        <p>Agrega perfil de color y metadatos de conformidad PDF/A a un PDF normal.</p>
+      </div>
+      <div class="opcion-direccion" id="opcionAPdf" data-direccion="a-pdf">
+        <h4>📤 PDF/A → PDF normal</h4>
+        <p>Quita la marca de conformidad PDF/A (el archivo sigue siendo un PDF válido).</p>
+      </div>
+    </div>
+
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+    <div class="aviso-limites" id="avisoDeteccion" style="display:none;"></div>
+
+    <div class="controles" id="controlesParte">
+      <label class="campo">
+        Parte del estándar
+        <select id="selectorParte">
+          <option value="1">PDF/A-1 (la más estricta, PDF 1.4)</option>
+          <option value="2" selected>PDF/A-2 (recomendada, permite PDF 1.7)</option>
+          <option value="3">PDF/A-3 (como PDF/A-2, permite adjuntar archivos)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonConvertir" disabled>Convertir</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento.pdf">Descargar PDF</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Importante: esto es "mejor esfuerzo", no una certificación PDF/A</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Esta herramienta agrega lo que un PDF/A necesita que se pueda agregar desde afuera: un perfil de color embebido (OutputIntent) y los metadatos XMP que identifican al archivo como PDF/A.</li>
+      <li><strong>No puede garantizar el resto del estándar ISO 19005</strong> sobre un PDF que ya viene armado de otro programa: no puede forzar que todas las fuentes usadas ya estén embebidas, ni quitar transparencias o JavaScript si el PDF original los trae. Si necesitás una conformidad PDF/A certificada (por ejemplo para un trámite legal), validá el resultado con una herramienta especializada como <em>veraPDF</em> antes de confiar en él.</li>
+      <li>Solo se ofrece el nivel "B" (Basic) de conformidad — el nivel "A" (Accesible) exige contenido etiquetado que esta herramienta no puede garantizar.</li>
+      <li>Si el PDF tiene contraseña, primero quitala con <a href="desbloquear-pdf.html">Desbloquear PDF</a>.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/pdfa.js"></script>
+<script>
+const opcionAPdfa = document.getElementById('opcionAPdfa');
+const opcionAPdf = document.getElementById('opcionAPdf');
+const controlesParte = document.getElementById('controlesParte');
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const avisoDeteccion = document.getElementById('avisoDeteccion');
+const botonConvertir = document.getElementById('botonConvertir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const selectorParte = document.getElementById('selectorParte');
+
+let archivoActual = null;
+let direccion = 'a-pdfa';
+
+function elegirDireccion(nueva) {
+  direccion = nueva;
+  opcionAPdfa.classList.toggle('activa', nueva === 'a-pdfa');
+  opcionAPdf.classList.toggle('activa', nueva === 'a-pdf');
+  controlesParte.style.display = nueva === 'a-pdfa' ? 'flex' : 'none';
+  botonConvertir.textContent = nueva === 'a-pdfa' ? 'Convertir a PDF/A' : 'Quitar marca PDF/A';
+}
+
+opcionAPdfa.addEventListener('click', () => elegirDireccion('a-pdfa'));
+opcionAPdf.addEventListener('click', () => elegirDireccion('a-pdf'));
+elegirDireccion('a-pdfa');
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonConvertir.disabled = false;
+  resultado.classList.remove('visible');
+  avisoDeteccion.style.display = 'none';
+
+  try {
+    const bytes = await archivo.arrayBuffer();
+    const pdf = await PDFLib.PDFDocument.load(bytes, { updateMetadata: false });
+    const conformidad = await detectarConformidadPdfA(pdf);
+    if (conformidad) {
+      avisoDeteccion.textContent = `ℹ️ Este archivo ya tiene marca PDF/A-${conformidad.parte}${conformidad.nivel}.`;
+      avisoDeteccion.style.display = 'block';
+    }
+  } catch (error) {
+    // No es crítico si no se puede detectar de antemano — el botón de convertir igual va a avisar si el PDF no es válido.
+  }
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  progreso.style.display = 'block';
+  progreso.textContent = 'Procesando...';
+  try {
+    const bytesOriginales = await archivoActual.arrayBuffer();
+    const pdf = await PDFLib.PDFDocument.load(bytesOriginales, { updateMetadata: false });
+
+    let sufijo;
+    if (direccion === 'a-pdfa') {
+      await agregarConformidadPdfA(pdf, { parte: selectorParte.value, nivel: 'B' });
+      sufijo = `-PDFA${selectorParte.value}B`;
+    } else {
+      quitarConformidadPdfA(pdf);
+      sufijo = '-normal';
+    }
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = archivoActual.name.replace(/\.pdf$/i, '') + sufijo + '.pdf';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo procesar el PDF: ' + error.message);
+  } finally {
+    botonConvertir.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

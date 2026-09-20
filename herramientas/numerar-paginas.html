@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numerar páginas de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Agregá numeración de páginas a un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Numerar páginas de PDF</h1>
+  <p>Agregá numeración a todas las páginas de un PDF.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo">
+        Empezar en
+        <input type="number" id="numeroInicial" value="1" min="0" style="width:80px;">
+      </label>
+      <label class="campo">
+        Posición
+        <select id="posicion">
+          <option value="bottom-right">Abajo a la derecha</option>
+          <option value="bottom-center">Abajo al centro</option>
+          <option value="bottom-left">Abajo a la izquierda</option>
+        </select>
+      </label>
+      <button class="boton" id="botonNumerar" disabled>Numerar páginas</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-numerado.pdf">Descargar PDF numerado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonNumerar = document.getElementById('botonNumerar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  if (archivo) {
+    try {
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    } catch (error) {
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+    }
+  }
+  botonNumerar.disabled = !archivo;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function calcularPosicion(posicion, width, anchoTexto, margen) {
+  if (posicion === 'bottom-left') return margen;
+  if (posicion === 'bottom-center') return width / 2 - anchoTexto / 2;
+  return width - anchoTexto - margen;
+}
+
+botonNumerar.addEventListener('click', async () => {
+  botonNumerar.disabled = true;
+  botonNumerar.textContent = 'Numerando...';
+  try {
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const fuente = await pdf.embedFont(StandardFonts.Helvetica);
+    const numeroInicial = parseInt(document.getElementById('numeroInicial').value, 10) || 1;
+    const posicion = document.getElementById('posicion').value;
+    const tamanoFuente = 12;
+    const margen = 30;
+
+    pdf.getPages().forEach((pagina, indice) => {
+      const { width } = pagina.getSize();
+      const texto = String(numeroInicial + indice);
+      const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
+      pagina.drawText(texto, {
+        x: calcularPosicion(posicion, width, anchoTexto, margen),
+        y: 20,
+        size: tamanoFuente,
+        font: fuente,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+    });
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo numerar el PDF: ' + error.message);
+  } finally {
+    botonNumerar.disabled = false;
+    botonNumerar.textContent = 'Numerar páginas';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reparar EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Intentá recuperar un libro EPUB dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Reparar EPUB</h1>
+  <p>Elegí un libro .epub que no abre bien y probamos reconstruirlo.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".epub" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonReparar" disabled>Reparar</button>
+    </div>
+
+    <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="libro-reparado.epub">Descargar EPUB reparado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Si el archivo está muy dañado, se puede perder la tabla de contenidos o el orden exacto de algún capítulo al reconstruirlo.</li>
+      <li>No funciona con libros con DRM (candado editorial).</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonReparar = document.getElementById('botonReparar');
+const mensajeNivel = document.getElementById('mensajeNivel');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonReparar.disabled = false;
+  resultado.classList.remove('visible');
+  mensajeNivel.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// Rescate de nivel 2: ignora el manifest/spine y busca directamente archivos
+// de contenido dentro del .zip, resolviendo imágenes relativas por nombre de
+// archivo (no por ruta exacta, ya que sin OPF no sabemos la carpeta base real).
+async function rescatarCapitulosSinPaquete(archivo) {
+  const zip = await JSZip.loadAsync(archivo);
+  const rutasHtml = Object.keys(zip.files)
+    .filter(ruta => !zip.files[ruta].dir && /\.(xhtml|html|htm)$/i.test(ruta))
+    .sort();
+
+  if (rutasHtml.length === 0) throw new Error('No se encontró ningún capítulo legible dentro de este archivo.');
+
+  const parser = new DOMParser();
+  const capitulos = [];
+
+  for (const ruta of rutasHtml) {
+    const xhtml = await zip.files[ruta].async('string');
+    const doc = parser.parseFromString(xhtml, 'text/html');
+    const cuerpo = doc.body;
+    if (!cuerpo || !cuerpo.textContent.trim()) continue;
+
+    for (const img of [...cuerpo.querySelectorAll('img')]) {
+      const src = img.getAttribute('src') || '';
+      if (!src || /^(https?:|data:)/i.test(src)) continue;
+      const nombreBase = src.split('/').pop();
+      const rutaImagen = Object.keys(zip.files).find(r => r.endsWith('/' + nombreBase) || r === nombreBase);
+      if (!rutaImagen) continue;
+      const base64 = await zip.files[rutaImagen].async('base64');
+      const extension = (nombreBase.split('.').pop() || '').toLowerCase();
+      const tipoMime = extension === 'svg' ? 'image/svg+xml' : `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+      img.setAttribute('src', `data:${tipoMime};base64,${base64}`);
+    }
+
+    const encabezado = cuerpo.querySelector('h1, h2, title');
+    const titulo = (encabezado && encabezado.textContent.trim()) || ruta.split('/').pop().replace(/\.(xhtml|html|htm)$/i, '');
+    capitulos.push({ titulo, html: cuerpo.innerHTML });
+  }
+
+  if (capitulos.length === 0) throw new Error('Los archivos encontrados no tenían contenido de texto.');
+  return capitulos;
+}
+
+botonReparar.addEventListener('click', async () => {
+  botonReparar.disabled = true;
+  botonReparar.textContent = 'Reparando...';
+  mensajeNivel.style.display = 'none';
+  try {
+    const nombreLibro = archivoActual.name.replace(/\.epub$/i, '');
+
+    try {
+      // Nivel 1: leerEpub ya tolera bastante (imágenes rotas, etc.) mientras
+      // exista container.xml + OPF válidos.
+      const { titulo, autor, capitulos } = await leerEpub(archivoActual);
+      const blob = await construirEpub({ titulo: titulo || nombreLibro, autor, capitulos });
+
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      resultado.classList.add('visible');
+      mensajeNivel.textContent = '✅ Se pudo leer el EPUB normalmente y se reconstruyó desde cero.';
+      mensajeNivel.style.color = '#166534';
+      mensajeNivel.style.display = 'block';
+    } catch (errorNivel1) {
+      // Nivel 2: ignorar el paquete (container.xml/OPF) y rescatar capítulos
+      // buscando archivos de contenido directo dentro del .zip.
+      const capitulos = await rescatarCapitulosSinPaquete(archivoActual);
+      const blob = await construirEpub({ titulo: nombreLibro, autor: '', capitulos });
+
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      resultado.classList.add('visible');
+      mensajeNivel.textContent = `⚠️ El paquete EPUB estaba dañado (${errorNivel1.message}) — se reconstruyó a partir de ${capitulos.length} archivo(s) de contenido encontrados directamente, sin depender de la tabla de contenidos original.`;
+      mensajeNivel.style.display = 'block';
+    }
+  } catch (error) {
+    alert('No se pudo reparar el EPUB: ' + error.message);
+  } finally {
+    botonReparar.disabled = false;
+    botonReparar.textContent = 'Reparar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

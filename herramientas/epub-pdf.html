@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir EPUB y PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí un libro EPUB a PDF, o un PDF a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .vista-previa-documento {
+    background: #fff;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 40px;
+    margin-top: 16px;
+    max-height: 600px;
+    overflow: auto;
+    line-height: 1.6;
+  }
+  .vista-previa-documento img { max-width: 100%; }
+  .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
+  .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
+  .vista-previa-documento h1 { page-break-before: always; }
+  .vista-previa-documento > h1:first-child { page-break-before: auto; }
+  @media print {
+    body > *:not(#areaImprimir) { display: none !important; }
+    #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
+  }
+  #areaImprimir { display: none; }
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>EPUB ↔ PDF</h1>
+  <p>Convertí un libro EPUB a PDF, o un PDF a EPUB, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="epub-a-pdf" checked> EPUB → PDF</label>
+      <label><input type="radio" name="direccion" value="pdf-a-epub"> PDF → EPUB</label>
+    </div>
+
+    <!-- EPUB → PDF -->
+    <div id="panelEpubAPdf">
+      <div class="zona-arrastre" id="zonaArrastreEpub">
+        📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+        <input type="file" id="entradaEpub" accept=".epub" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaEpub"></ul>
+      <div class="controles">
+        <button class="boton" id="botonAPdf" disabled>Generar vista previa</button>
+      </div>
+      <div class="controles" id="controlesImprimir" style="display:none;">
+        <button class="boton" id="botonImprimir" type="button">🖨️ Guardar como PDF / Imprimir</button>
+      </div>
+      <div class="vista-previa-documento" id="vistaPrevia" style="display:none;"></div>
+    </div>
+
+    <!-- PDF → EPUB -->
+    <div id="panelPdfAEpub" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastrePdf">
+        📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaPdf"></ul>
+      <div class="controles">
+        <label class="campo">
+          Título del libro
+          <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <label class="campo">
+          Autor (opcional)
+          <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAEpub" disabled>Convertir a EPUB</button>
+      </div>
+      <p style="color:var(--texto-suave); font-size:0.9rem;">
+        ⚠️ Solo se extrae el texto del PDF (sin imágenes ni diseño). Si el PDF es un escaneo (imágenes de páginas sin texto real), no va a poder extraer nada.
+      </p>
+      <div class="resultado" id="resultadoEpub">
+        ✅ Listo. <a id="enlaceDescargaEpub" download="libro.epub">Descargar EPUB</a>
+      </div>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
+      <li>EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; PDF → EPUB solo conserva el texto.</li>
+      <li>Cada capítulo empieza en una página nueva.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<div id="areaImprimir"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const panelEpubAPdf = document.getElementById('panelEpubAPdf');
+const panelPdfAEpub = document.getElementById('panelPdfAEpub');
+const progreso = document.getElementById('progreso');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esEpubAPdf = document.querySelector('input[name="direccion"]:checked').value === 'epub-a-pdf';
+    panelEpubAPdf.style.display = esEpubAPdf ? '' : 'none';
+    panelPdfAEpub.style.display = esEpubAPdf ? 'none' : '';
+  });
+});
+
+// --- EPUB → PDF ---
+const zonaArrastreEpub = document.getElementById('zonaArrastreEpub');
+const entradaEpub = document.getElementById('entradaEpub');
+const listaEpub = document.getElementById('listaEpub');
+const botonAPdf = document.getElementById('botonAPdf');
+const controlesImprimir = document.getElementById('controlesImprimir');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const botonImprimir = document.getElementById('botonImprimir');
+const areaImprimir = document.getElementById('areaImprimir');
+
+let archivoEpubActual = null;
+
+function mostrarArchivoEpub(archivo) {
+  archivoEpubActual = archivo;
+  listaEpub.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAPdf.disabled = false;
+  vistaPrevia.style.display = 'none';
+  controlesImprimir.style.display = 'none';
+}
+
+function elegirArchivoEpub(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivoEpub(archivo);
+}
+
+zonaArrastreEpub.addEventListener('click', () => entradaEpub.click());
+entradaEpub.addEventListener('change', (e) => elegirArchivoEpub(e.target.files));
+zonaArrastreEpub.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreEpub.classList.add('activa'); });
+zonaArrastreEpub.addEventListener('dragleave', () => zonaArrastreEpub.classList.remove('activa'));
+zonaArrastreEpub.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreEpub.classList.remove('activa');
+  elegirArchivoEpub(e.dataTransfer.files);
+});
+
+botonAPdf.addEventListener('click', async () => {
+  botonAPdf.disabled = true;
+  botonAPdf.textContent = 'Generando...';
+  try {
+    const { titulo, capitulos } = await leerEpub(archivoEpubActual);
+    const htmlCompleto = `<h1 style="page-break-before:auto;">${titulo}</h1>` + capitulos.map(cap => cap.html).join('');
+    vistaPrevia.innerHTML = htmlCompleto;
+    vistaPrevia.style.display = 'block';
+    areaImprimir.innerHTML = htmlCompleto;
+    controlesImprimir.style.display = 'flex';
+  } catch (error) {
+    alert('No se pudo generar la vista previa: ' + error.message);
+  } finally {
+    botonAPdf.disabled = false;
+    botonAPdf.textContent = 'Generar vista previa';
+  }
+});
+
+botonImprimir.addEventListener('click', () => window.print());
+
+// --- PDF → EPUB ---
+const zonaArrastrePdf = document.getElementById('zonaArrastrePdf');
+const entradaPdf = document.getElementById('entradaPdf');
+const listaPdf = document.getElementById('listaPdf');
+const tituloLibro = document.getElementById('tituloLibro');
+const botonAEpub = document.getElementById('botonAEpub');
+const resultadoEpub = document.getElementById('resultadoEpub');
+const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
+
+let archivoPdfActual = null;
+
+function mostrarArchivoPdf(archivo) {
+  archivoPdfActual = archivo;
+  listaPdf.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAEpub.disabled = false;
+  resultadoEpub.classList.remove('visible');
+  if (!tituloLibro.value.trim()) {
+    tituloLibro.value = archivo.name.replace(/\.pdf$/i, '');
+  }
+}
+
+function elegirArchivoPdf(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivoPdf(archivo);
+}
+
+zonaArrastrePdf.addEventListener('click', () => entradaPdf.click());
+entradaPdf.addEventListener('change', (e) => elegirArchivoPdf(e.target.files));
+zonaArrastrePdf.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastrePdf.classList.add('activa'); });
+zonaArrastrePdf.addEventListener('dragleave', () => zonaArrastrePdf.classList.remove('activa'));
+zonaArrastrePdf.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastrePdf.classList.remove('activa');
+  elegirArchivoPdf(e.dataTransfer.files);
+});
+
+function textoAHtml(texto) {
+  return texto.split(/\n\s*\n/).map(parrafo => {
+    const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+async function extraerTextoPdf(archivo) {
+  const bytes = await archivo.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const paginas = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const pagina = await pdf.getPage(i);
+    const contenido = await pagina.getTextContent();
+    paginas.push(contenido.items.map(item => item.str).join(' '));
+  }
+  return paginas.join('\n\n');
+}
+
+botonAEpub.addEventListener('click', async () => {
+  botonAEpub.disabled = true;
+  botonAEpub.textContent = 'Convirtiendo...';
+  progreso.style.display = 'block';
+  try {
+    const titulo = tituloLibro.value.trim() || 'Documento';
+    const autor = document.getElementById('autorLibro').value.trim();
+
+    progreso.textContent = 'Extrayendo texto del PDF...';
+    const texto = await extraerTextoPdf(archivoPdfActual);
+    if (!texto.trim()) throw new Error('No se encontró texto en el PDF (¿es un escaneo?).');
+
+    progreso.textContent = 'Armando el EPUB...';
+    const capitulos = [{ titulo, html: textoAHtml(texto) }];
+    const blob = await construirEpub({ titulo, autor, capitulos });
+
+    enlaceDescargaEpub.href = URL.createObjectURL(blob);
+    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    resultadoEpub.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el EPUB: ' + error.message);
+  } finally {
+    botonAEpub.disabled = false;
+    botonAEpub.textContent = 'Convertir a EPUB';
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

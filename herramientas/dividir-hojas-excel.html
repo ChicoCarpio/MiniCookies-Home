@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dividir hojas de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Dividir hojas de Excel</h1>
+  <p>Elegí un Excel con varias hojas y descargá cada una como un archivo individual, dentro de un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo Excel acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+    <p id="infoHojas" style="color:var(--texto-suave); font-size:0.9rem;"></p>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled>Dividir en archivos separados</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="hojas-separadas.zip">Descargar .zip con las hojas</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const infoHojas = document.getElementById('infoHojas');
+const botonDividir = document.getElementById('botonDividir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let libroActual = null;
+
+async function mostrarArchivo(archivo) {
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  resultado.classList.remove('visible');
+
+  const bytes = await archivo.arrayBuffer();
+  libroActual = XLSX.read(bytes, { type: 'array' });
+  infoHojas.textContent = `Este Excel tiene ${libroActual.SheetNames.length} hoja(s): ${libroActual.SheetNames.join(', ')}.`;
+  botonDividir.disabled = libroActual.SheetNames.length < 2;
+  if (libroActual.SheetNames.length < 2) {
+    infoHojas.textContent += ' Necesita al menos 2 hojas para poder dividir.';
+  }
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = 'Dividiendo...';
+  try {
+    const zip = new JSZip();
+
+    libroActual.SheetNames.forEach((nombreHoja) => {
+      const libroNuevo = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libroNuevo, libroActual.Sheets[nombreHoja], nombreHoja);
+      const bytes = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
+      const nombreArchivo = nombreHoja.replace(/[\/\\?*\[\]]/g, '-');
+      zip.file(`${nombreArchivo}.xlsx`, bytes);
+    });
+
+    const blobZip = await zip.generateAsync({ type: 'blob' });
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo dividir el Excel: ' + error.message);
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = 'Dividir en archivos separados';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

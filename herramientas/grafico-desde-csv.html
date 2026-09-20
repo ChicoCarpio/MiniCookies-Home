@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generar gráfico desde Excel o CSV gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Generá un gráfico de barras, líneas o torta a partir de un Excel o CSV, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Gráfico desde Excel / CSV</h1>
+  <p>Elegí un archivo, indicá qué columna usar como etiqueta y cuál como valores, y generá un gráfico.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles" id="controles" style="display:none;">
+      <label class="campo">
+        Columna de etiquetas (eje X)
+        <select id="columnaEtiquetas"></select>
+      </label>
+      <label class="campo">
+        Columna de valores
+        <select id="columnaValores"></select>
+      </label>
+      <label class="campo">
+        Tipo de gráfico
+        <select id="tipoGrafico">
+          <option value="bar">Barras</option>
+          <option value="line">Líneas</option>
+          <option value="pie">Torta</option>
+        </select>
+      </label>
+      <button class="boton" id="botonGraficar" type="button">Generar gráfico</button>
+    </div>
+
+    <div style="margin-top:20px; background:#fff; padding:16px; border-radius:8px; display:none;" id="contenedorGrafico">
+      <canvas id="canvasGrafico"></canvas>
+    </div>
+
+    <div class="controles" id="controlesDescarga" style="display:none;">
+      <button class="boton" id="botonDescargarPng" type="button" style="background:#64748b;">Descargar como PNG</button>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const controles = document.getElementById('controles');
+const columnaEtiquetas = document.getElementById('columnaEtiquetas');
+const columnaValores = document.getElementById('columnaValores');
+const botonGraficar = document.getElementById('botonGraficar');
+const contenedorGrafico = document.getElementById('contenedorGrafico');
+const controlesDescarga = document.getElementById('controlesDescarga');
+
+let filasDatos = [];
+let graficoActual = null;
+
+async function mostrarArchivo(archivo) {
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  contenedorGrafico.style.display = 'none';
+  controlesDescarga.style.display = 'none';
+
+  const bytes = await archivo.arrayBuffer();
+  const libro = XLSX.read(bytes, { type: 'array' });
+  const primeraHoja = libro.Sheets[libro.SheetNames[0]];
+  filasDatos = XLSX.utils.sheet_to_json(primeraHoja, { defval: '' });
+
+  if (filasDatos.length === 0) {
+    alert('No se encontraron filas de datos en este archivo.');
+    return;
+  }
+
+  const columnas = Object.keys(filasDatos[0]);
+  columnaEtiquetas.innerHTML = columnas.map(c => `<option value="${c}">${c}</option>`).join('');
+  columnaValores.innerHTML = columnas.map(c => `<option value="${c}">${c}</option>`).join('');
+  if (columnas.length > 1) columnaValores.value = columnas[1];
+
+  controles.style.display = 'flex';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+const COLORES = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
+
+botonGraficar.addEventListener('click', () => {
+  const claveEtiqueta = columnaEtiquetas.value;
+  const claveValor = columnaValores.value;
+  const tipo = document.getElementById('tipoGrafico').value;
+
+  const etiquetas = filasDatos.map(fila => String(fila[claveEtiqueta]));
+  const valores = filasDatos.map(fila => parseFloat(fila[claveValor]) || 0);
+
+  if (graficoActual) graficoActual.destroy();
+  contenedorGrafico.style.display = 'block';
+  controlesDescarga.style.display = 'flex';
+
+  const ctx = document.getElementById('canvasGrafico').getContext('2d');
+  graficoActual = new Chart(ctx, {
+    type: tipo,
+    data: {
+      labels: etiquetas,
+      datasets: [{
+        label: claveValor,
+        data: valores,
+        backgroundColor: tipo === 'pie' ? COLORES : COLORES[0],
+        borderColor: COLORES[0],
+        borderWidth: tipo === 'line' ? 2 : 1,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: tipo === 'pie' } },
+    },
+  });
+});
+
+document.getElementById('botonDescargarPng').addEventListener('click', () => {
+  if (!graficoActual) return;
+  const enlace = document.createElement('a');
+  enlace.download = 'grafico.png';
+  enlace.href = graficoActual.toBase64Image();
+  enlace.click();
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

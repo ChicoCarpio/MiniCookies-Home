@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir Excel o CSV a PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Exportá una hoja de Excel o un CSV como tabla PDF lista para imprimir, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; max-height: 500px; margin-top: 16px; }
+  table.tabla-datos { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  table.tabla-datos th, table.tabla-datos td {
+    border: 1px solid var(--gris-borde);
+    padding: 6px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.tabla-datos th { background: var(--gris-fondo); position: sticky; top: 0; }
+  table.tabla-datos tr.fila-par { background: #fafafa; }
+  table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Excel / CSV a PDF</h1>
+  <p>Elegí un archivo y lo convertimos en una tabla PDF, lista para imprimir o compartir. Las columnas y filas completamente vacías se omiten, y se conserva negrita, cursiva, subrayado y color de texto de las celdas cuando el archivo los tiene (no se replican fuentes personalizadas, bordes ni tamaños de letra por celda). Si el archivo tiene gráficos, se agregan como páginas extra después de la tabla, reconstruidos a partir de sus datos — el estilo puede no ser idéntico al del original. No se incluyen imágenes embebidas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles" id="controles" style="display:none;">
+      <label class="campo" id="campoHoja" style="display:none;">
+        Hoja
+        <select id="selectorHoja"></select>
+      </label>
+      <label class="campo">
+        Orientación
+        <select id="orientacion">
+          <option value="vertical">Vertical</option>
+          <option value="horizontal">Horizontal (más columnas)</option>
+        </select>
+      </label>
+      <label class="campo">
+        Tamaño de página
+        <select id="tamanoPagina">
+          <option value="a4" selected>A4</option>
+          <option value="carta">Carta (Letter)</option>
+          <option value="legal">Legal</option>
+          <option value="oficio">Oficio</option>
+        </select>
+      </label>
+      <label class="campo">
+        Tamaño de letra
+        <select id="tamanoFuente">
+          <option value="7">Chico</option>
+          <option value="9" selected>Mediano</option>
+          <option value="11">Grande</option>
+        </select>
+      </label>
+      <button class="boton" id="botonConvertir" type="button">Generar PDF</button>
+    </div>
+
+    <div id="bloqueVistaPrevia" style="display:none;">
+      <h2 style="font-size:1.05rem; margin:20px 0 0;">Vista previa</h2>
+      <p style="color:var(--texto-suave); margin:4px 0 0;">Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).</p>
+      <p id="avisoObjetosHoja" style="color:var(--texto-suave); margin:4px 0 0; display:none;"></p>
+      <div class="contenedor-tabla" id="contenedorVistaPrevia"></div>
+    </div>
+
+    <p id="advertencia" style="color:#b45309; display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="tabla.pdf">Descargar PDF</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const controles = document.getElementById('controles');
+const campoHoja = document.getElementById('campoHoja');
+const selectorHoja = document.getElementById('selectorHoja');
+const botonConvertir = document.getElementById('botonConvertir');
+const advertencia = document.getElementById('advertencia');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
+const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
+const avisoObjetosHoja = document.getElementById('avisoObjetosHoja');
+
+let libroActual = null;
+let nombreArchivoActual = '';
+let bytesArchivoActual = null;
+let esXlsxActual = false;
+
+function escaparHtml(valor) {
+  const texto = valor === null || valor === undefined ? '' : String(valor);
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function estiloCeldaHtml(celdaInfo) {
+  const partes = [];
+  if (celdaInfo.negrita) partes.push('font-weight:700');
+  if (celdaInfo.cursiva) partes.push('font-style:italic');
+  if (celdaInfo.subrayado) partes.push('text-decoration:underline');
+  if (celdaInfo.color) partes.push(`color:rgb(${Math.round(celdaInfo.color.r * 255)},${Math.round(celdaInfo.color.g * 255)},${Math.round(celdaInfo.color.b * 255)})`);
+  if (celdaInfo.relleno) partes.push(`background:rgb(${Math.round(celdaInfo.relleno.r * 255)},${Math.round(celdaInfo.relleno.g * 255)},${Math.round(celdaInfo.relleno.b * 255)})`);
+  return partes.length ? ` style="${partes.join(';')}"` : '';
+}
+
+// Misma virtualización que ya usa visor-excel-csv.html: por debajo del umbral
+// se renderiza la tabla entera de una, y por encima solo las filas visibles
+// (+ sobrescaneo) para que el scroll no se sienta trabado con archivos grandes.
+const UMBRAL_VIRTUALIZACION = 200;
+const SOBRESCANEO = 10;
+const ALTURA_FILA_ESTIMADA = 32;
+
+let columnasVistaPrevia = [];
+let filasVistaPrevia = [];
+let alturaFilaMedida = ALTURA_FILA_ESTIMADA;
+let ventanaRenderizada = { inicio: -1, fin: -1 };
+let renderizadoPendiente = false;
+
+function filaVistaPreviaHtml(indiceGlobal, celdasFila) {
+  const clase = indiceGlobal % 2 === 0 ? '' : ' class="fila-par"';
+  let html = `<tr${clase}>`;
+  celdasFila.forEach((celdaInfo) => html += `<td${estiloCeldaHtml(celdaInfo)}>${escaparHtml(celdaInfo.texto)}</td>`);
+  return html + '</tr>';
+}
+
+function filaEspaciadoraHtml(alturaPx) {
+  return `<tr class="fila-espaciadora" aria-hidden="true" style="height:${alturaPx}px;"><td colspan="${columnasVistaPrevia.length}"></td></tr>`;
+}
+
+function renderizarVentana(inicio, fin) {
+  ventanaRenderizada = { inicio, fin };
+  const total = filasVistaPrevia.length;
+  const alturaAntes = inicio * alturaFilaMedida;
+  const alturaDespues = (total - fin) * alturaFilaMedida;
+
+  let html = filaEspaciadoraHtml(alturaAntes);
+  for (let i = inicio; i < fin; i++) html += filaVistaPreviaHtml(i, filasVistaPrevia[i]);
+  html += filaEspaciadoraHtml(alturaDespues);
+
+  const tbody = contenedorVistaPrevia.querySelector('tbody');
+  tbody.innerHTML = html;
+}
+
+function calcularVentanaVisible() {
+  const scrollTop = contenedorVistaPrevia.scrollTop;
+  const alturaVisible = contenedorVistaPrevia.clientHeight;
+  const inicio = Math.max(0, Math.floor(scrollTop / alturaFilaMedida) - SOBRESCANEO);
+  const cantidad = Math.ceil(alturaVisible / alturaFilaMedida) + SOBRESCANEO * 2;
+  const fin = Math.min(filasVistaPrevia.length, inicio + cantidad);
+  return { inicio, fin };
+}
+
+function actualizarVentanaSiHaceFalta() {
+  const { inicio, fin } = calcularVentanaVisible();
+  if (inicio === ventanaRenderizada.inicio && fin === ventanaRenderizada.fin) return;
+  renderizarVentana(inicio, fin);
+}
+
+contenedorVistaPrevia.addEventListener('scroll', () => {
+  if (filasVistaPrevia.length <= UMBRAL_VIRTUALIZACION) return;
+  if (renderizadoPendiente) return;
+  renderizadoPendiente = true;
+  requestAnimationFrame(() => {
+    renderizadoPendiente = false;
+    actualizarVentanaSiHaceFalta();
+  });
+});
+
+function mostrarVistaPrevia(matriz) {
+  bloqueVistaPrevia.style.display = 'block';
+
+  if (matriz.length === 0) {
+    columnasVistaPrevia = [];
+    filasVistaPrevia = [];
+    contenedorVistaPrevia.innerHTML = '<p style="padding:16px; color:var(--texto-suave);">No hay datos para mostrar (la hoja está vacía o todas sus filas/columnas están vacías).</p>';
+    return;
+  }
+
+  columnasVistaPrevia = matriz[0];
+  filasVistaPrevia = matriz.slice(1);
+  ventanaRenderizada = { inicio: -1, fin: -1 };
+  alturaFilaMedida = ALTURA_FILA_ESTIMADA;
+
+  let htmlEncabezado = '<thead><tr>';
+  columnasVistaPrevia.forEach((celdaInfo) => htmlEncabezado += `<th${estiloCeldaHtml(celdaInfo)}>${escaparHtml(celdaInfo.texto)}</th>`);
+  htmlEncabezado += '</tr></thead>';
+
+  if (filasVistaPrevia.length <= UMBRAL_VIRTUALIZACION) {
+    let htmlFilas = '<tbody>';
+    filasVistaPrevia.forEach((fila, indice) => htmlFilas += filaVistaPreviaHtml(indice, fila));
+    htmlFilas += '</tbody>';
+    contenedorVistaPrevia.innerHTML = `<table class="tabla-datos">${htmlEncabezado}${htmlFilas}</table>`;
+    return;
+  }
+
+  contenedorVistaPrevia.scrollTop = 0;
+  contenedorVistaPrevia.innerHTML = `<table class="tabla-datos">${htmlEncabezado}<tbody></tbody></table>`;
+  const { inicio, fin } = calcularVentanaVisible();
+  renderizarVentana(inicio, fin);
+
+  requestAnimationFrame(() => {
+    const filaMedida = contenedorVistaPrevia.querySelector('tbody tr:not(.fila-espaciadora)');
+    if (!filaMedida) return;
+    const alturaReal = filaMedida.getBoundingClientRect().height;
+    if (alturaReal > 0 && Math.abs(alturaReal - alturaFilaMedida) > 0.5) {
+      alturaFilaMedida = alturaReal;
+      ventanaRenderizada = { inicio: -1, fin: -1 };
+      actualizarVentanaSiHaceFalta();
+    }
+  });
+}
+
+function actualizarVistaPrevia() {
+  if (!libroActual) return;
+  const nombreHoja = campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
+  mostrarVistaPrevia(leerHojaConEstilos(libroActual.Sheets[nombreHoja]));
+  actualizarAvisoObjetosHoja(nombreHoja);
+}
+
+// Muestra cuántas imágenes/gráficos tiene la hoja antes de generar el PDF,
+// para que no sea sorpresa recién al descargar. Usa las mismas funciones que
+// el generador de PDF (ver más abajo) — si algo falla acá, simplemente no se
+// muestra el aviso, no bloquea la vista previa de la tabla.
+async function actualizarAvisoObjetosHoja(nombreHoja) {
+  avisoObjetosHoja.style.display = 'none';
+  if (!esXlsxActual) return;
+  try {
+    const zip = await JSZip.loadAsync(bytesArchivoActual);
+    const mapaHojas = await mapaHojaARutaXml(zip);
+    const rutaHojaXml = mapaHojas.get(nombreHoja);
+    if (!rutaHojaXml) return;
+    const { graficos } = await objetosDeHoja(zip, rutaHojaXml);
+    if (graficos.length === 0) return;
+    avisoObjetosHoja.textContent = `📊 Esta hoja tiene ${graficos.length} gráfico${graficos.length === 1 ? '' : 's'} — se van a agregar como páginas extra después de la tabla.`;
+    avisoObjetosHoja.style.display = 'block';
+  } catch (error) {
+    console.warn('No se pudo revisar si la hoja tiene gráficos:', error);
+  }
+}
+
+async function mostrarArchivo(archivo) {
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  nombreArchivoActual = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+  resultado.classList.remove('visible');
+
+  const bytes = await archivo.arrayBuffer();
+  bytesArchivoActual = bytes;
+  esXlsxActual = /\.(xlsx|xlsm)$/i.test(archivo.name);
+  libroActual = XLSX.read(bytes, { type: 'array', cellStyles: true });
+
+  if (libroActual.SheetNames.length > 1) {
+    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    campoHoja.style.display = 'flex';
+  } else {
+    campoHoja.style.display = 'none';
+  }
+
+  controles.style.display = 'flex';
+  actualizarVistaPrevia();
+}
+
+selectorHoja.addEventListener('change', actualizarVistaPrevia);
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function truncarTexto(fuente, texto, tamano, anchoMaximo) {
+  texto = String(texto ?? '');
+  if (fuente.widthOfTextAtSize(texto, tamano) <= anchoMaximo) return texto;
+  let recortado = texto;
+  while (recortado.length > 1 && fuente.widthOfTextAtSize(recortado + '…', tamano) > anchoMaximo) {
+    recortado = recortado.slice(0, -1);
+  }
+  return recortado + '…';
+}
+
+function celdaVacia(texto) {
+  return String(texto ?? '').trim() === '';
+}
+
+function colorDesdeHex(hex) {
+  if (!hex || typeof hex !== 'string') return null;
+  const limpio = hex.length === 8 ? hex.slice(2) : hex; // quita el canal alfa si viene ARGB
+  if (limpio.length !== 6) return null;
+  const r = parseInt(limpio.slice(0, 2), 16) / 255;
+  const g = parseInt(limpio.slice(2, 4), 16) / 255;
+  const b = parseInt(limpio.slice(4, 6), 16) / 255;
+  if ([r, g, b].some(Number.isNaN)) return null;
+  return { r, g, b };
+}
+
+// SheetJS (versión gratuita) solo expone el color de fuente/relleno cuando
+// viene como RGB explícito en el archivo — los "colores de tema" (ej. blanco
+// de tema sobre un relleno de tema oscuro, muy común en encabezados) no se
+// pueden leer así, y quedan como color null aunque el relleno sí se detecte.
+// Para no terminar con texto oscuro invisible sobre un relleno oscuro
+// detectado, si hay relleno pero no se pudo leer el color de fuente real, se
+// elige automáticamente blanco o negro según qué tan clara es esa celda.
+function colorTextoLegible(fondo) {
+  const luminancia = 0.299 * fondo.r + 0.587 * fondo.g + 0.114 * fondo.b;
+  return luminancia > 0.6 ? { r: 0, g: 0, b: 0 } : { r: 1, g: 1, b: 1 };
+}
+
+// Lee la hoja celda por celda (en vez de sheet_to_json) para poder acceder a
+// cell.s (estilo), que sheet_to_json descarta. Devuelve una matriz de
+// {texto, negrita, cursiva, subrayado, color, relleno} ya sin columnas ni
+// filas completamente vacías.
+function leerHojaConEstilos(hoja) {
+  if (!hoja['!ref']) return [];
+  const rango = XLSX.utils.decode_range(hoja['!ref']);
+  const matriz = [];
+  for (let r = rango.s.r; r <= rango.e.r; r++) {
+    const fila = [];
+    for (let c = rango.s.c; c <= rango.e.c; c++) {
+      const celda = hoja[XLSX.utils.encode_cell({ r, c })];
+      const texto = celda ? XLSX.utils.format_cell(celda) : '';
+      const estilo = (celda && celda.s) || {};
+      const relleno = estilo.patternType === 'solid' ? colorDesdeHex(estilo.fgColor && estilo.fgColor.rgb) : null;
+      const colorFuente = colorDesdeHex(estilo.color && estilo.color.rgb);
+      fila.push({
+        texto,
+        negrita: !!estilo.bold,
+        cursiva: !!estilo.italic,
+        subrayado: !!estilo.underline,
+        color: colorFuente || (relleno ? colorTextoLegible(relleno) : null),
+        relleno,
+      });
+    }
+    matriz.push(fila);
+  }
+
+  const cantidadColumnasOriginal = matriz[0]?.length || 0;
+  const columnaConTexto = Array(cantidadColumnasOriginal).fill(false);
+  matriz.forEach(fila => fila.forEach((celda, i) => { if (!celdaVacia(celda.texto)) columnaConTexto[i] = true; }));
+  const columnasAConservar = columnaConTexto.map((tiene, i) => tiene ? i : -1).filter(i => i !== -1);
+
+  return matriz
+    .map(fila => columnasAConservar.map(i => fila[i]))
+    .filter(fila => fila.some(celda => !celdaVacia(celda.texto)));
+}
+
+// --- Gráficos embebidos (solo .xlsx) ---
+// SheetJS no expone la definición de gráficos, así que se vuelve a abrir el
+// mismo archivo con JSZip y se parsean a mano el OPF de relaciones y el XML
+// de dibujo — mismo patrón ya usado en este proyecto para PowerPoint/Word/
+// EPUB (ver administrar-diapositivas.html, epub.js). No se incluyen imágenes
+// embebidas, únicamente celdas (tabla) y gráficos. No se intenta ubicar cada
+// gráfico exactamente sobre su celda de origen: la tabla ya filtra filas/
+// columnas vacías y usa columnas de ancho uniforme, así que esas posiciones
+// no coinciden con las del Excel original. En cambio, se agregan como
+// páginas propias después de la tabla, con una leyenda que indica en qué
+// celda estaban ancladas.
+
+function carpetaDe(ruta) {
+  const partes = ruta.split('/');
+  partes.pop();
+  return partes.length ? partes.join('/') + '/' : '';
+}
+
+function resolverRutaRelativa(carpetaBase, relativa) {
+  const partes = (carpetaBase + relativa).split('/');
+  const resultado = [];
+  partes.forEach((parte) => {
+    if (parte === '..') resultado.pop();
+    else if (parte !== '.' && parte !== '') resultado.push(parte);
+  });
+  return resultado.join('/');
+}
+
+function rutaRelsDe(rutaXml) {
+  const partes = rutaXml.split('/');
+  const archivo = partes.pop();
+  return [...partes, '_rels', archivo + '.rels'].join('/');
+}
+
+async function leerXmlDeZip(zip, ruta) {
+  const entrada = zip.file(ruta);
+  if (!entrada) return null;
+  const texto = await entrada.async('text');
+  return new DOMParser().parseFromString(texto, 'application/xml');
+}
+
+async function leerRelaciones(zip, rutaRels) {
+  const doc = await leerXmlDeZip(zip, rutaRels);
+  const mapa = new Map();
+  if (!doc) return mapa;
+  [...doc.getElementsByTagName('Relationship')].forEach((rel) => {
+    mapa.set(rel.getAttribute('Id'), rel.getAttribute('Target'));
+  });
+  return mapa;
+}
+
+// nombre de hoja -> ruta del sheetN.xml dentro del zip
+async function mapaHojaARutaXml(zip) {
+  const workbookDoc = await leerXmlDeZip(zip, 'xl/workbook.xml');
+  const mapa = new Map();
+  if (!workbookDoc) return mapa;
+  const relaciones = await leerRelaciones(zip, 'xl/_rels/workbook.xml.rels');
+  [...workbookDoc.getElementsByTagName('sheet')].forEach((hoja) => {
+    const nombre = hoja.getAttribute('name');
+    const rId = hoja.getAttribute('r:id');
+    const target = rId && relaciones.get(rId);
+    if (nombre && target) mapa.set(nombre, resolverRutaRelativa('xl/', target));
+  });
+  return mapa;
+}
+
+function primerHijoDirecto(nodo, tag) {
+  if (!nodo) return null;
+  return [...nodo.children].find((n) => n.tagName === tag) || null;
+}
+
+function celdaDesdeAncla(ancla) {
+  const from = ancla.getElementsByTagName('xdr:from')[0];
+  if (!from) return null;
+  const col = parseInt(from.getElementsByTagName('xdr:col')[0]?.textContent || '0', 10);
+  const row = parseInt(from.getElementsByTagName('xdr:row')[0]?.textContent || '0', 10);
+  return XLSX.utils.encode_cell({ r: row, c: col });
+}
+
+async function objetosDeHoja(zip, rutaSheetXml) {
+  const vacio = { graficos: [] };
+  const hojaDoc = await leerXmlDeZip(zip, rutaSheetXml);
+  if (!hojaDoc) return vacio;
+  const nodoDrawing = hojaDoc.getElementsByTagName('drawing')[0];
+  if (!nodoDrawing) return vacio;
+
+  const relacionesHoja = await leerRelaciones(zip, rutaRelsDe(rutaSheetXml));
+  const targetDrawing = relacionesHoja.get(nodoDrawing.getAttribute('r:id'));
+  if (!targetDrawing) return vacio;
+
+  const rutaDrawing = resolverRutaRelativa(carpetaDe(rutaSheetXml), targetDrawing);
+  const drawingDoc = await leerXmlDeZip(zip, rutaDrawing);
+  if (!drawingDoc) return vacio;
+
+  const relacionesDrawing = await leerRelaciones(zip, rutaRelsDe(rutaDrawing));
+  const carpetaDrawing = carpetaDe(rutaDrawing);
+
+  const graficos = [];
+  const anclas = [...drawingDoc.getElementsByTagName('xdr:twoCellAnchor'), ...drawingDoc.getElementsByTagName('xdr:oneCellAnchor')];
+
+  for (const ancla of anclas) {
+    const graphicFrame = ancla.getElementsByTagName('xdr:graphicFrame')[0];
+    if (!graphicFrame) continue;
+    const chartNodo = graphicFrame.getElementsByTagName('c:chart')[0];
+    const rIdGrafico = chartNodo && chartNodo.getAttribute('r:id');
+    const targetGrafico = rIdGrafico && relacionesDrawing.get(rIdGrafico);
+    if (!targetGrafico) continue;
+    const rutaGrafico = resolverRutaRelativa(carpetaDrawing, targetGrafico);
+    const graficoDoc = await leerXmlDeZip(zip, rutaGrafico);
+    if (graficoDoc) graficos.push({ doc: graficoDoc, celda: celdaDesdeAncla(ancla) });
+  }
+
+  return { graficos };
+}
+
+const PALETA_GRAFICOS = ['#4f7cff', '#22c55e', '#f97316', '#ef4444', '#a855f7', '#14b8a6', '#eab308', '#64748b'];
+
+function valoresDeCache(nodo) {
+  if (!nodo) return [];
+  const pts = [...nodo.getElementsByTagName('c:pt')];
+  const maxIdx = pts.reduce((m, p) => Math.max(m, parseInt(p.getAttribute('idx') || '0', 10)), -1);
+  const arr = new Array(maxIdx + 1).fill('');
+  pts.forEach((p) => {
+    const idx = parseInt(p.getAttribute('idx') || '0', 10);
+    const v = p.getElementsByTagName('c:v')[0];
+    arr[idx] = v ? v.textContent : '';
+  });
+  return arr;
+}
+
+function nombreSerie(ser, indice) {
+  const tx = primerHijoDirecto(ser, 'c:tx');
+  const vDirecto = tx && primerHijoDirecto(tx, 'c:v');
+  if (vDirecto) return vDirecto.textContent;
+  const strRef = tx && primerHijoDirecto(tx, 'c:strRef');
+  const cache = strRef && primerHijoDirecto(strRef, 'c:strCache');
+  const valores = cache ? valoresDeCache(cache) : [];
+  return valores[0] || `Serie ${indice + 1}`;
+}
+
+function categoriasDe(ser) {
+  const cat = primerHijoDirecto(ser, 'c:cat');
+  if (!cat) return [];
+  const ref = primerHijoDirecto(cat, 'c:strRef') || primerHijoDirecto(cat, 'c:numRef');
+  if (ref) {
+    const cache = primerHijoDirecto(ref, 'c:strCache') || primerHijoDirecto(ref, 'c:numCache');
+    return cache ? valoresDeCache(cache) : [];
+  }
+  // Categorías de varios niveles (ej. una tabla de Excel con dos columnas
+  // como categoría, "lugar" + "casa") vienen en c:multiLvlStrRef en vez de
+  // c:strRef — sin este caso las categorías quedaban vacías y el gráfico de
+  // barras no dibujaba nada (0 categorías = barras de ancho 0 en Chart.js).
+  const multiRef = primerHijoDirecto(cat, 'c:multiLvlStrRef');
+  const multiCache = multiRef && primerHijoDirecto(multiRef, 'c:multiLvlStrCache');
+  if (!multiCache) return [];
+  const niveles = [...multiCache.children].filter((n) => n.tagName === 'c:lvl').map((nivel) => valoresDeCache(nivel));
+  const cantidad = niveles.reduce((max, nivel) => Math.max(max, nivel.length), 0);
+  return Array.from({ length: cantidad }, (_, i) => niveles.map((nivel) => nivel[i]).filter(Boolean).join(' / '));
+}
+
+function valoresDe(ser) {
+  const val = primerHijoDirecto(ser, 'c:val');
+  const ref = val && primerHijoDirecto(val, 'c:numRef');
+  const cache = ref && primerHijoDirecto(ref, 'c:numCache');
+  const bruto = cache ? valoresDeCache(cache) : [];
+  return bruto.map((v) => parseFloat(v) || 0);
+}
+
+function colorDeSerie(ser, indice) {
+  const spPr = primerHijoDirecto(ser, 'c:spPr');
+  const solidFill = spPr && primerHijoDirecto(spPr, 'a:solidFill');
+  const srgb = solidFill && primerHijoDirecto(solidFill, 'a:srgbClr');
+  return srgb ? '#' + srgb.getAttribute('val') : PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length];
+}
+
+function extraerTituloGrafico(doc) {
+  const chartNodo = doc.getElementsByTagName('c:chart')[0];
+  const titleNodo = chartNodo && primerHijoDirecto(chartNodo, 'c:title');
+  if (!titleNodo) return '';
+  return [...titleNodo.getElementsByTagName('a:t')].map((r) => r.textContent).join('').trim();
+}
+
+const TIPOS_GRAFICO_SOPORTADOS = [
+  ['c:barChart', 'bar'], ['c:bar3DChart', 'bar'],
+  ['c:lineChart', 'line'], ['c:line3DChart', 'line'],
+  ['c:areaChart', 'line'], ['c:area3DChart', 'line'],
+  ['c:pieChart', 'pie'], ['c:pie3DChart', 'pie'],
+  ['c:doughnutChart', 'doughnut'],
+  ['c:radarChart', 'radar'],
+  ['c:scatterChart', 'line'],
+];
+
+function parsearGrafico(doc) {
+  let elementoChart = null, tipo = 'bar', soportado = true;
+  for (const [tag, t] of TIPOS_GRAFICO_SOPORTADOS) {
+    const nodo = doc.getElementsByTagName(tag)[0];
+    if (nodo) { elementoChart = nodo; tipo = t; break; }
+  }
+  if (!elementoChart) {
+    const plotArea = doc.getElementsByTagName('c:plotArea')[0];
+    const cualquiera = plotArea && [...plotArea.children].find((n) => /Chart$/.test(n.tagName));
+    if (!cualquiera) return null;
+    elementoChart = cualquiera;
+    soportado = false;
+  }
+
+  const seriesNodos = [...elementoChart.getElementsByTagName('c:ser')];
+  if (seriesNodos.length === 0) return null;
+
+  let categorias = [];
+  const series = seriesNodos.map((ser, indice) => {
+    const cats = categoriasDe(ser);
+    if (cats.length > categorias.length) categorias = cats;
+    return { nombre: nombreSerie(ser, indice), valores: valoresDe(ser), color: colorDeSerie(ser, indice) };
+  });
+
+  // Si el gráfico no tiene un título explícito, Excel muestra automáticamente
+  // el nombre de la única serie como título cuando hay solo una — se imita
+  // ese comportamiento en vez de dejar el título vacío.
+  const titulo = extraerTituloGrafico(doc) || (series.length === 1 ? series[0].nombre : '');
+
+  return { tipo, soportado, titulo, categorias, series };
+}
+
+async function renderizarGraficoComoPng(datosGrafico) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 900;
+  canvas.height = 550;
+  // Chart.js necesita el canvas dentro del documento para medir/dibujar bien
+  // (con uno desconectado del DOM, en algunos navegadores el gráfico sale en
+  // blanco) — se agrega fuera de pantalla y se saca apenas se captura la imagen.
+  canvas.style.position = 'fixed';
+  canvas.style.left = '-99999px';
+  canvas.style.top = '0';
+  document.body.appendChild(canvas);
+
+  const esCircular = datosGrafico.tipo === 'pie' || datosGrafico.tipo === 'doughnut';
+  const datasets = esCircular
+    ? [{ data: datosGrafico.series[0]?.valores || [], backgroundColor: datosGrafico.categorias.map((_, i) => PALETA_GRAFICOS[i % PALETA_GRAFICOS.length]) }]
+    : datosGrafico.series.map((serie) => ({
+        label: serie.nombre,
+        data: serie.valores,
+        backgroundColor: serie.color,
+        borderColor: serie.color,
+        fill: false,
+      }));
+
+  const chart = new Chart(canvas.getContext('2d'), {
+    type: datosGrafico.tipo,
+    data: { labels: datosGrafico.categorias, datasets },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: {
+        title: { display: !!datosGrafico.titulo, text: datosGrafico.titulo, font: { size: 18 } },
+        legend: { display: datasets.length > 1 || esCircular },
+      },
+    },
+  });
+
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  chart.destroy();
+  canvas.remove();
+  return blob.arrayBuffer();
+}
+
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  botonConvertir.textContent = 'Generando...';
+  advertencia.style.display = 'none';
+  try {
+    const nombreHoja = campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
+    const matriz = leerHojaConEstilos(libroActual.Sheets[nombreHoja]);
+    if (matriz.length === 0) throw new Error('La hoja no tiene datos.');
+
+    const encabezado = matriz[0];
+    const cuerpoFilas = matriz.slice(1);
+    const cantidadColumnas = encabezado.length;
+
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    const pdf = await PDFDocument.create();
+    const fuente = await pdf.embedFont(StandardFonts.Helvetica);
+    const fuenteNegrita = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const fuenteCursiva = await pdf.embedFont(StandardFonts.HelveticaOblique);
+    const fuenteNegritaCursiva = await pdf.embedFont(StandardFonts.HelveticaBoldOblique);
+
+    function elegirFuente(negrita, cursiva) {
+      if (negrita && cursiva) return fuenteNegritaCursiva;
+      if (negrita) return fuenteNegrita;
+      if (cursiva) return fuenteCursiva;
+      return fuente;
+    }
+
+    const TAMANOS_PAGINA = {
+      a4: [595, 842],
+      carta: [612, 792],
+      legal: [612, 1008],
+      oficio: [612, 935],
+    };
+
+    const horizontal = document.getElementById('orientacion').value === 'horizontal';
+    const tamanoFuente = parseInt(document.getElementById('tamanoFuente').value, 10);
+    const margen = 30;
+    const [anchoVertical, altoVertical] = TAMANOS_PAGINA[document.getElementById('tamanoPagina').value];
+    const [anchoPagina, altoPagina] = horizontal ? [altoVertical, anchoVertical] : [anchoVertical, altoVertical];
+    const anchoUtil = anchoPagina - margen * 2;
+    const anchoColumna = anchoUtil / cantidadColumnas;
+    const alturaFila = tamanoFuente * 2;
+
+    if (anchoColumna < 25) {
+      advertencia.textContent = `⚠️ Tenés ${cantidadColumnas} columnas — el texto puede quedar muy recortado. Probá "Horizontal" o letra "Chica".`;
+      advertencia.style.display = 'block';
+    }
+
+    function dibujarCelda(pagina, celdaInfo, x, y, ancho, colorPorDefecto, forzarNegrita) {
+      const negrita = celdaInfo.negrita || forzarNegrita;
+      const fuenteElegida = elegirFuente(negrita, celdaInfo.cursiva);
+      const color = celdaInfo.color ? rgb(celdaInfo.color.r, celdaInfo.color.g, celdaInfo.color.b) : colorPorDefecto;
+      const yTexto = y - alturaFila + (alturaFila - tamanoFuente) / 2;
+      if (celdaInfo.relleno) {
+        pagina.drawRectangle({ x, y: y - alturaFila, width: ancho, height: alturaFila, color: rgb(celdaInfo.relleno.r, celdaInfo.relleno.g, celdaInfo.relleno.b) });
+      }
+      const textoRecortado = truncarTexto(fuenteElegida, celdaInfo.texto, tamanoFuente, ancho - 6);
+      pagina.drawText(textoRecortado, { x: x + 3, y: yTexto, size: tamanoFuente, font: fuenteElegida, color });
+      if (celdaInfo.subrayado) {
+        const anchoTexto = fuenteElegida.widthOfTextAtSize(textoRecortado, tamanoFuente);
+        pagina.drawLine({ start: { x: x + 3, y: yTexto - 1 }, end: { x: x + 3 + anchoTexto, y: yTexto - 1 }, thickness: 0.6, color });
+      }
+    }
+
+    function dibujarEncabezado(pagina, y) {
+      let x = margen;
+      pagina.drawRectangle({ x: margen, y: y - alturaFila, width: anchoUtil, height: alturaFila, color: rgb(0.9, 0.93, 0.98) });
+      encabezado.forEach((celdaInfo) => {
+        dibujarCelda(pagina, celdaInfo, x, y, anchoColumna, rgb(0.1, 0.1, 0.2), true);
+        x += anchoColumna;
+      });
+    }
+
+    function dibujarLineasColumnas(pagina, yTope, yFondo) {
+      for (let i = 0; i <= cantidadColumnas; i++) {
+        const x = margen + i * anchoColumna;
+        pagina.drawLine({ start: { x, y: yTope }, end: { x, y: yFondo }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+      }
+    }
+
+    let pagina = pdf.addPage([anchoPagina, altoPagina]);
+    let y = altoPagina - margen;
+    dibujarEncabezado(pagina, y);
+    y -= alturaFila;
+    const yInicioTabla = y + alturaFila;
+
+    let yFilasInicio = y;
+
+    cuerpoFilas.forEach((fila) => {
+      if (y - alturaFila < margen) {
+        dibujarLineasColumnas(pagina, yFilasInicio + alturaFila, y);
+        pagina.drawLine({ start: { x: margen, y: yFilasInicio + alturaFila }, end: { x: margen + anchoUtil, y: yFilasInicio + alturaFila }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+
+        pagina = pdf.addPage([anchoPagina, altoPagina]);
+        y = altoPagina - margen;
+        dibujarEncabezado(pagina, y);
+        y -= alturaFila;
+        yFilasInicio = y;
+      }
+
+      let x = margen;
+      fila.forEach((celdaInfo, indice) => {
+        if (indice >= cantidadColumnas) return;
+        dibujarCelda(pagina, celdaInfo, x, y, anchoColumna, rgb(0.15, 0.15, 0.15), false);
+        x += anchoColumna;
+      });
+      pagina.drawLine({ start: { x: margen, y }, end: { x: margen + anchoUtil, y }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+      y -= alturaFila;
+    });
+
+    dibujarLineasColumnas(pagina, yFilasInicio + alturaFila, y + alturaFila);
+    pagina.drawLine({ start: { x: margen, y: y + alturaFila }, end: { x: margen + anchoUtil, y: y + alturaFila }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+
+    // Gráficos embebidos en la hoja (solo aplica a .xlsx — .xls y .csv no
+    // tienen esta estructura). Si algo falla acá no se pierde la tabla ya
+    // generada: se avisa y se sigue con lo que sí se pudo procesar.
+    if (esXlsxActual) {
+      try {
+        const zip = await JSZip.loadAsync(bytesArchivoActual);
+        const mapaHojas = await mapaHojaARutaXml(zip);
+        const rutaHojaXml = mapaHojas.get(nombreHoja);
+        const { graficos } = rutaHojaXml ? await objetosDeHoja(zip, rutaHojaXml) : { graficos: [] };
+
+        function agregarPaginaConImagen(imagenPdf, leyenda) {
+          const p = pdf.addPage([anchoPagina, altoPagina]);
+          const anchoDisponible = anchoPagina - margen * 2;
+          const altoDisponible = altoPagina - margen * 2 - 20;
+          const escala = Math.min(anchoDisponible / imagenPdf.width, altoDisponible / imagenPdf.height, 1);
+          const anchoFinal = imagenPdf.width * escala;
+          const altoFinal = imagenPdf.height * escala;
+          p.drawImage(imagenPdf, {
+            x: margen + (anchoDisponible - anchoFinal) / 2,
+            y: margen + (altoDisponible - altoFinal) / 2 + 20,
+            width: anchoFinal,
+            height: altoFinal,
+          });
+          p.drawText(truncarTexto(fuente, leyenda, 9, anchoDisponible), { x: margen, y: margen, size: 9, font: fuente, color: rgb(0.4, 0.4, 0.4) });
+        }
+
+        for (const grafico of graficos) {
+          try {
+            const datos = parsearGrafico(grafico.doc);
+            if (!datos) continue;
+            const bytesGrafico = await renderizarGraficoComoPng(datos);
+            const imagenPdf = await pdf.embedPng(bytesGrafico);
+            const leyendaTipo = datos.soportado ? '' : ' (tipo de gráfico no soportado — mostrado como barras)';
+            const leyenda = `Gráfico${datos.titulo ? `: ${datos.titulo}` : ''}, celda ${grafico.celda || '?'} de "${nombreHoja}"${leyendaTipo} — reconstruido a partir de los datos, el estilo puede no ser idéntico al original`;
+            agregarPaginaConImagen(imagenPdf, leyenda);
+          } catch (errorGrafico) {
+            console.warn('No se pudo reconstruir un gráfico de la hoja:', errorGrafico);
+          }
+        }
+      } catch (errorObjetos) {
+        console.warn('No se pudieron leer los gráficos del archivo:', errorObjetos);
+      }
+    }
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `${nombreArchivoActual}.pdf`;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el PDF: ' + error.message);
+  } finally {
+    botonConvertir.disabled = false;
+    botonConvertir.textContent = 'Generar PDF';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

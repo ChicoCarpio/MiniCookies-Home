@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extraer notas del orador de PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Sacá las notas del orador de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Extraer notas del orador</h1>
+  <p>Elegí un archivo .pptx y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonExtraer" disabled>Extraer notas</button>
+    </div>
+
+    <div id="bloqueResultado" style="display:none; margin-top:20px;">
+      <textarea id="textoExtraido" readonly></textarea>
+      <div class="controles">
+        <button class="boton" id="botonCopiar" type="button">Copiar texto</button>
+        <a class="boton" id="enlaceDescarga" download="notas-orador.txt" style="text-decoration:none; display:inline-block;">Descargar .txt</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonExtraer = document.getElementById('botonExtraer');
+const bloqueResultado = document.getElementById('bloqueResultado');
+const textoExtraido = document.getElementById('textoExtraido');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonExtraer.disabled = false;
+  bloqueResultado.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = 'Extrayendo...';
+  try {
+    const zip = await JSZip.loadAsync(archivoActual);
+    const nombresNotas = Object.keys(zip.files)
+      .filter(nombre => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(nombre))
+      .sort((a, b) => parseInt(a.match(/notesSlide(\d+)/)[1], 10) - parseInt(b.match(/notesSlide(\d+)/)[1], 10));
+
+    if (nombresNotas.length === 0) throw new Error('Esta presentación no tiene notas del orador.');
+
+    const bloques = [];
+    for (let i = 0; i < nombresNotas.length; i++) {
+      const xmlTexto = await zip.files[nombresNotas[i]].async('string');
+      const doc = new DOMParser().parseFromString(xmlTexto, 'application/xml');
+      const parrafos = [...doc.getElementsByTagName('a:p')];
+      const lineas = parrafos
+        .map(p => [...p.getElementsByTagName('a:t')].map(t => t.textContent).join(''))
+        .filter(l => l.trim() !== '');
+      const numeroDiapositiva = nombresNotas[i].match(/notesSlide(\d+)/)[1];
+      bloques.push(`--- Notas diapositiva ${numeroDiapositiva} ---\n` + (lineas.length > 0 ? lineas.join('\n') : '(sin notas)'));
+    }
+
+    const textoCompleto = bloques.join('\n\n');
+    textoExtraido.value = textoCompleto;
+    const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    bloqueResultado.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo extraer las notas: ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = 'Extraer notas';
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(textoExtraido.value);
+  botonCopiar.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiar.textContent = 'Copiar texto'; }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

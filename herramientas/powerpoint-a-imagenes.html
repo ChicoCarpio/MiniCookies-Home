@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir PowerPoint a imágenes gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Exportá cada diapositiva de una presentación PowerPoint (.pptx) como imagen PNG, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .vista-previa-diapositivas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .vista-previa-diapositivas img {
+    width: 100%;
+    border: 1px solid var(--gris-borde);
+    border-radius: 6px;
+    background: #fff;
+  }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>PowerPoint a imágenes</h1>
+  <p>Elegí un archivo .pptx y descargá cada diapositiva como imagen PNG, dentro de un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonConvertir" disabled>Convertir a imágenes</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+    <div class="vista-previa-diapositivas" id="vistaPreviaDiapositivas"></div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="diapositivas.zip">Descargar .zip con las imágenes</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <p style="color:var(--texto-suave);">
+      Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al
+      original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse
+      distinto. Si no se puede renderizar el diseño visual, se avisa el error en vez de generar imágenes en
+      blanco — para el texto de todas formas está <a href="extraer-texto-powerpoint.html">Extraer texto de PowerPoint</a>.
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<canvas id="canvasRender" style="display:none;"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script>window.__FileReaderNativo = window.FileReader;</script>
+<script src="https://cdn.jsdelivr.net/npm/pptxviewjs@1.1.9/dist/PptxViewJS.min.js"></script>
+<script>
+  // PptxViewJS pisa el FileReader nativo del navegador con uno propio (para uso
+  // interno de la librería), lo que rompe JSZip.loadAsync() apenas se carga.
+  // Lo restauramos acá.
+  window.FileReader = window.__FileReaderNativo;
+</script>
+<script src="../assets/js/pptx-visual.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonConvertir = document.getElementById('botonConvertir');
+const progreso = document.getElementById('progreso');
+const vistaPreviaDiapositivas = document.getElementById('vistaPreviaDiapositivas');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonConvertir.disabled = false;
+  vistaPreviaDiapositivas.innerHTML = '';
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  botonConvertir.textContent = 'Convirtiendo...';
+  progreso.style.display = 'block';
+  progreso.textContent = 'Renderizando diapositivas...';
+  try {
+    const canvasRender = document.getElementById('canvasRender');
+    const imagenes = await renderizarDiapositivasComoImagenes(archivoActual, canvasRender);
+
+    imagenes.forEach(({ dataUrl }) => {
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      vistaPreviaDiapositivas.appendChild(img);
+    });
+
+    progreso.textContent = 'Generando .zip...';
+    const blobZip = await construirZipDesdeImagenes(imagenes);
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo renderizar las diapositivas: ' + error.message);
+  } finally {
+    botonConvertir.disabled = false;
+    botonConvertir.textContent = 'Convertir a imágenes';
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

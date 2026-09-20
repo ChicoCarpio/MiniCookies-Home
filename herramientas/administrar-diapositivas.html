@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reordenar diapositivas de PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Reordená o eliminá diapositivas de una presentación PowerPoint (.pptx), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Administrar / reordenar diapositivas</h1>
+  <p>Elegí un archivo .pptx. Arrastrá las diapositivas para reordenarlas, o quitá las que no quieras, y descargá la presentación resultante.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo la presentación...</p>
+    <ul class="lista-archivos" id="listaDiapositivas"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonGuardar" disabled>Descargar reordenada</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="presentacion-reordenada.pptx">Descargar PowerPoint</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const listaDiapositivas = document.getElementById('listaDiapositivas');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let zipActual = null;
+let diapositivas = []; // [{ rId, etiqueta }]
+let parser = new DOMParser();
+
+function renderizarLista() {
+  listaDiapositivas.innerHTML = '';
+  diapositivas.forEach((diapo) => {
+    const item = document.createElement('li');
+    item.draggable = true;
+    item.dataset.rid = diapo.rId;
+    item.innerHTML = `<span>${diapo.etiqueta}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { diapositivas = diapositivas.filter(d => d.rId !== diapo.rId); renderizarLista(); };
+    item.appendChild(quitar);
+    listaDiapositivas.appendChild(item);
+  });
+  botonGuardar.disabled = diapositivas.length === 0;
+  resultado.classList.remove('visible');
+}
+
+let arrastrando = null;
+listaDiapositivas.addEventListener('dragstart', (e) => {
+  if (e.target.tagName === 'LI') { arrastrando = e.target; e.target.classList.add('arrastrando'); }
+});
+listaDiapositivas.addEventListener('dragend', (e) => {
+  if (e.target.tagName === 'LI') e.target.classList.remove('arrastrando');
+});
+listaDiapositivas.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const objetivo = e.target.closest('li');
+  if (!objetivo || !arrastrando || objetivo === arrastrando) return;
+  const rect = objetivo.getBoundingClientRect();
+  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
+  objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
+});
+listaDiapositivas.addEventListener('drop', () => {
+  const ordenRids = [...listaDiapositivas.children].map(li => li.dataset.rid);
+  diapositivas.sort((a, b) => ordenRids.indexOf(a.rId) - ordenRids.indexOf(b.rId));
+});
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) cargarPresentacion(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarPresentacion(archivo) {
+  cargando.style.display = 'block';
+  try {
+    zipActual = await JSZip.loadAsync(archivo);
+    const archivoRels = zipActual.file('ppt/_rels/presentation.xml.rels');
+    const archivoPresentacion = zipActual.file('ppt/presentation.xml');
+    if (!archivoRels || !archivoPresentacion) throw new Error('El archivo no tiene la estructura de un .pptx válido.');
+
+    const relsDoc = parser.parseFromString(await archivoRels.async('string'), 'application/xml');
+    const mapaRels = {};
+    [...relsDoc.getElementsByTagName('Relationship')].forEach((rel) => {
+      mapaRels[rel.getAttribute('Id')] = rel.getAttribute('Target');
+    });
+
+    const presentacionXmlTexto = await archivoPresentacion.async('string');
+    const presentacionDoc = parser.parseFromString(presentacionXmlTexto, 'application/xml');
+    const nodosSldId = [...presentacionDoc.getElementsByTagName('p:sldId')];
+    if (nodosSldId.length === 0) throw new Error('No se encontraron diapositivas.');
+
+    diapositivas = [];
+    for (let i = 0; i < nodosSldId.length; i++) {
+      const rId = nodosSldId[i].getAttribute('r:id');
+      const destino = mapaRels[rId];
+      const rutaSlide = destino ? `ppt/${destino.replace(/^\.?\//, '')}` : null;
+      let etiqueta = `Diapositiva ${i + 1}`;
+      if (rutaSlide && zipActual.file(rutaSlide)) {
+        const slideXml = await zipActual.file(rutaSlide).async('string');
+        const primerTexto = slideXml.match(/<a:t>([^<]+)<\/a:t>/);
+        if (primerTexto && primerTexto[1].trim()) {
+          etiqueta = `Diapositiva ${i + 1} — ${primerTexto[1].trim().slice(0, 40)}`;
+        }
+      }
+      diapositivas.push({ rId, etiqueta });
+    }
+
+    renderizarLista();
+  } catch (error) {
+    alert('No se pudo leer la presentación: ' + error.message);
+  } finally {
+    cargando.style.display = 'none';
+  }
+}
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = 'Generando...';
+  try {
+    if (diapositivas.length === 0) throw new Error('No queda ninguna diapositiva.');
+
+    const archivoPresentacion = zipActual.file('ppt/presentation.xml');
+    const presentacionDoc = parser.parseFromString(await archivoPresentacion.async('string'), 'application/xml');
+    const listaSld = presentacionDoc.getElementsByTagName('p:sldIdLst')[0];
+    const nodosOriginales = [...listaSld.getElementsByTagName('p:sldId')];
+    const nodoPorRid = new Map(nodosOriginales.map(nodo => [nodo.getAttribute('r:id'), nodo]));
+
+    // Vaciar y volver a insertar en el orden final (y sin las eliminadas).
+    nodosOriginales.forEach(nodo => listaSld.removeChild(nodo));
+    diapositivas.forEach(({ rId }) => {
+      const nodo = nodoPorRid.get(rId);
+      if (nodo) listaSld.appendChild(nodo);
+    });
+
+    const nuevoXml = new XMLSerializer().serializeToString(presentacionDoc);
+    zipActual.file('ppt/presentation.xml', nuevoXml);
+
+    const blobFinal = await zipActual.generateAsync({ type: 'blob' });
+    enlaceDescarga.href = URL.createObjectURL(blobFinal);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar la presentación: ' + error.message);
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = 'Descargar reordenada';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

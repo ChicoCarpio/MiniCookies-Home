@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comprimir y optimizar PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Reducí el peso de un PDF recomprimiendo las fotos que tiene adentro, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Comprimir / optimizar PDF</h1>
+  <p>Elegí un PDF y recomprimimos las fotos que tiene adentro para bajar el peso total del archivo.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo">
+        Calidad de las fotos: <span id="etiquetaCalidad">65</span>%
+        <input type="range" id="calidad" min="20" max="90" value="65">
+      </label>
+      <button class="boton" id="botonComprimir" disabled>Comprimir PDF</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="estadisticas" id="estadisticas" style="display:none;">
+      <div class="estadistica"><div class="numero" id="pesoOriginal">—</div><div class="etiqueta">Peso original</div></div>
+      <div class="estadistica"><div class="numero" id="pesoFinal">—</div><div class="etiqueta">Peso final</div></div>
+      <div class="estadistica"><div class="numero" id="porcentajeAhorro">—</div><div class="etiqueta">Reducción</div></div>
+      <div class="estadistica"><div class="numero" id="imagenesProcesadas">—</div><div class="etiqueta">Fotos optimizadas</div></div>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-comprimido.pdf">Descargar PDF comprimido</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Solo recomprime fotos que ya están en formato JPEG y en color (el caso más común de PDFs pesados: escaneos o fotos de alta resolución). Imágenes en blanco y negro, indexadas o ya muy comprimidas se dejan sin tocar para no arriesgar la calidad.</li>
+      <li>Si un PDF no tiene fotos así (por ejemplo, es solo texto), esta herramienta no va a reducir mucho su peso — un PDF de puro texto ya es liviano de por sí.</li>
+      <li>Cada foto solo se reemplaza si la nueva versión pesa menos que la original.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonComprimir = document.getElementById('botonComprimir');
+const progreso = document.getElementById('progreso');
+const estadisticas = document.getElementById('estadisticas');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const elCalidad = document.getElementById('calidad');
+const etiquetaCalidad = document.getElementById('etiquetaCalidad');
+
+elCalidad.addEventListener('input', () => etiquetaCalidad.textContent = elCalidad.value);
+
+let archivoActual = null;
+
+function formatearPeso(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${formatearPeso(archivo.size)}, ${totalPaginas} pág.)` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (${formatearPeso(archivo.size)})` }));
+  }
+  botonComprimir.disabled = false;
+  resultado.classList.remove('visible');
+  estadisticas.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function decodificarImagenJpeg(bytes) {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([bytes], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('JPEG inválido')); };
+    img.src = url;
+  });
+}
+
+botonComprimir.addEventListener('click', async () => {
+  botonComprimir.disabled = true;
+  progreso.style.display = 'block';
+  progreso.textContent = 'Analizando el PDF...';
+  try {
+    const { PDFDocument, PDFName, PDFRawStream } = PDFLib;
+    const bytesOriginales = await archivoActual.arrayBuffer();
+    const pesoOriginal = bytesOriginales.byteLength;
+
+    const pdf = await PDFDocument.load(bytesOriginales, { updateMetadata: false });
+    const calidad = parseInt(elCalidad.value, 10) / 100;
+    const objetos = pdf.context.enumerateIndirectObjects();
+    let contadorProcesadas = 0;
+
+    for (let i = 0; i < objetos.length; i++) {
+      const [ref, objeto] = objetos[i];
+      if (!(objeto instanceof PDFRawStream)) continue;
+
+      const dict = objeto.dict;
+      const subtipo = dict.get(PDFName.of('Subtype'));
+      if (!subtipo || subtipo.toString() !== '/Image') continue;
+
+      const filtro = dict.get(PDFName.of('Filter'));
+      const esSoloJpeg = filtro && filtro.toString() === '/DCTDecode';
+      if (!esSoloJpeg) continue;
+
+      const espacioColor = dict.get(PDFName.of('ColorSpace'));
+      if (!espacioColor || espacioColor.toString() !== '/DeviceRGB') continue;
+
+      try {
+        progreso.textContent = `Optimizando foto ${contadorProcesadas + 1}...`;
+        const bytesOriginalesImagen = objeto.getContents();
+        const img = await decodificarImagenJpeg(bytesOriginalesImagen);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+
+        const blobNuevo = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', calidad));
+        const bytesNuevos = new Uint8Array(await blobNuevo.arrayBuffer());
+
+        if (bytesNuevos.length < bytesOriginalesImagen.length) {
+          pdf.context.assign(ref, PDFRawStream.of(dict, bytesNuevos));
+          contadorProcesadas++;
+        }
+      } catch (errorImagen) {
+        console.warn('Se omitió una imagen que no se pudo optimizar:', errorImagen);
+      }
+    }
+
+    progreso.textContent = 'Guardando PDF...';
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+
+    document.getElementById('pesoOriginal').textContent = formatearPeso(pesoOriginal);
+    document.getElementById('pesoFinal').textContent = formatearPeso(bytesFinales.length);
+    const ahorro = Math.max(0, Math.round((1 - bytesFinales.length / pesoOriginal) * 100));
+    document.getElementById('porcentajeAhorro').textContent = `${ahorro}%`;
+    document.getElementById('imagenesProcesadas').textContent = contadorProcesadas;
+    estadisticas.style.display = 'grid';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo comprimir el PDF: ' + error.message);
+  } finally {
+    botonComprimir.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

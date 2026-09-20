@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unir varios Excel o CSV en un archivo gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Combiná varios archivos Excel o CSV en un solo libro, cada uno en su propia hoja, gratis y sin subir tus archivos a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Unir Excel / CSV</h1>
+  <p>Elegí varios archivos de planilla (.xlsx, .xlsm, .xlsb, .xls, .ods) o .csv. Cada hoja de cada archivo se agrega como una hoja separada dentro de un mismo Excel (si un archivo tiene varias hojas, se conservan todas). Se conservan los datos, fórmulas, anchos de columna y celdas combinadas — <strong>no</strong> se conservan estilos de celda (colores, negrita), imágenes ni gráficos incrustados.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tus archivos acá o hacé clic para elegirlos
+      <input type="file" id="entradaArchivos" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" multiple hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivos"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonUnir" disabled>Unir en un Excel</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="archivos-unidos.xlsx">Descargar Excel combinado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const listaArchivos = document.getElementById('listaArchivos');
+const botonUnir = document.getElementById('botonUnir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivos = [];
+
+function esArchivoValido(archivo) {
+  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+}
+
+function actualizarLista() {
+  listaArchivos.innerHTML = '';
+  archivos.forEach((archivo, indice) => {
+    const item = document.createElement('li');
+    item.innerHTML = `<span>${indice + 1}. ${archivo.name}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { archivos.splice(indice, 1); actualizarLista(); };
+    item.appendChild(quitar);
+    listaArchivos.appendChild(item);
+  });
+  botonUnir.disabled = archivos.length < 2;
+  resultado.classList.remove('visible');
+}
+
+function agregarArchivos(listaFileList) {
+  for (const archivo of listaFileList) {
+    if (esArchivoValido(archivo)) archivos.push(archivo);
+  }
+  actualizarLista();
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivos.click());
+entradaArchivos.addEventListener('change', (e) => agregarArchivos(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  agregarArchivos(e.dataTransfer.files);
+});
+
+function nombreDeHojaUnico(nombreDeseado, nombresUsados) {
+  // Excel limita el nombre de hoja a 31 caracteres y no permite / \ ? * [ ]
+  let base = nombreDeseado.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '').replace(/[\/\\?*\[\]]/g, '-').slice(0, 31);
+  if (base.trim() === '') base = 'Hoja';
+  let nombreFinal = base;
+  let sufijo = 2;
+  while (nombresUsados.has(nombreFinal)) {
+    nombreFinal = `${base.slice(0, 28)}_${sufijo}`;
+    sufijo++;
+  }
+  nombresUsados.add(nombreFinal);
+  return nombreFinal;
+}
+
+botonUnir.addEventListener('click', async () => {
+  botonUnir.disabled = true;
+  botonUnir.textContent = 'Uniendo...';
+  try {
+    const libroFinal = XLSX.utils.book_new();
+    const nombresUsados = new Set();
+
+    for (const archivo of archivos) {
+      const bytes = await archivo.arrayBuffer();
+      const libroOrigen = XLSX.read(bytes, { type: 'array', cellStyles: true });
+      const nombreBase = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+      const tieneVariasHojas = libroOrigen.SheetNames.length > 1;
+
+      // Antes solo se tomaba la primera hoja de cada archivo — si un Excel de
+      // origen tenía varias, el resto se perdía en silencio. Ahora se agregan
+      // todas, y si el archivo tiene más de una se usa "archivo - Hoja" para
+      // distinguirlas (si solo tiene una, se usa directamente el nombre del
+      // archivo, como antes).
+      for (const nombreHojaOrigen of libroOrigen.SheetNames) {
+        const hoja = libroOrigen.Sheets[nombreHojaOrigen];
+        const etiquetaDeseada = tieneVariasHojas ? `${nombreBase} - ${nombreHojaOrigen}` : nombreBase;
+        const nombreHoja = nombreDeHojaUnico(etiquetaDeseada, nombresUsados);
+        XLSX.utils.book_append_sheet(libroFinal, hoja, nombreHoja);
+      }
+    }
+
+    const bytesFinales = XLSX.write(libroFinal, { bookType: 'xlsx', type: 'array', cellStyles: true });
+    const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo unir los archivos: ' + error.message);
+  } finally {
+    botonUnir.disabled = false;
+    botonUnir.textContent = 'Unir en un Excel';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

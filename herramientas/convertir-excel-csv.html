@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir Excel a CSV y CSV a Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí un archivo Excel (.xlsx) a CSV o un CSV a Excel, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Convertir Excel ↔ CSV</h1>
+  <p>Elegí un archivo de planilla (.xlsx, .xlsm, .xlsb, .xls u .ods) para convertirlo a CSV, o un .csv para convertirlo a Excel. Detectamos el sentido según el archivo.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles" id="controlesHoja" style="display:none;">
+      <label class="campo">
+        Hoja a convertir
+        <select id="selectorHoja"></select>
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonConvertir" disabled>Convertir</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga">Descargar resultado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const controlesHoja = document.getElementById('controlesHoja');
+const selectorHoja = document.getElementById('selectorHoja');
+const botonConvertir = document.getElementById('botonConvertir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+let esCsv = false;
+let libro = null;
+
+function esArchivoValido(archivo) {
+  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  esCsv = /\.csv$/i.test(archivo.name);
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  resultado.classList.remove('visible');
+  controlesHoja.style.display = 'none';
+  botonConvertir.disabled = true;
+
+  const bytes = await archivo.arrayBuffer();
+  libro = XLSX.read(bytes, { type: 'array' });
+
+  if (!esCsv && libro.SheetNames.length > 1) {
+    selectorHoja.innerHTML = libro.SheetNames.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+    controlesHoja.style.display = 'flex';
+  }
+
+  botonConvertir.textContent = esCsv ? 'Convertir a Excel (.xlsx)' : 'Convertir a CSV';
+  botonConvertir.disabled = false;
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(esArchivoValido);
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonConvertir.addEventListener('click', () => {
+  const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+
+  if (esCsv) {
+    const libroNuevo = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libroNuevo, libro.Sheets[libro.SheetNames[0]], 'Hoja1');
+    const bytesXlsx = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([bytesXlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `${nombreBase}.xlsx`;
+  } else {
+    const nombreHoja = controlesHoja.style.display !== 'none' ? selectorHoja.value : libro.SheetNames[0];
+    const csv = XLSX.utils.sheet_to_csv(libro.Sheets[nombreHoja]);
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `${nombreBase}.csv`;
+  }
+
+  resultado.classList.add('visible');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

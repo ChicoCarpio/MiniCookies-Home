@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reparar Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Intentá recuperar un documento Word (.docx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Reparar Word</h1>
+  <p>Elegí un documento .docx que no abre bien y probamos reconstruirlo.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonReparar" disabled>Reparar</button>
+    </div>
+
+    <p id="mensajeNivel" style="color:#b45309; display:none; font-size:0.85rem;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-reparado.docx">Descargar Word reparado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>Si el archivo está muy dañado, a veces solo se puede rescatar el texto sin formato (se pierde negrita, tablas, imágenes, etc., pero se recupera el contenido).</li>
+      <li>Si ni así se puede leer, el archivo está demasiado dañado para esta herramienta.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonReparar = document.getElementById('botonReparar');
+const mensajeNivel = document.getElementById('mensajeNivel');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonReparar.disabled = false;
+  resultado.classList.remove('visible');
+  mensajeNivel.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function textoAHtml(texto) {
+  return texto.split(/\n\s*\n/).map(parrafo => {
+    const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+async function guardarComoDocx(parrafos) {
+  const documento = new docx.Document({
+    numbering: NUMERACION_DOCX_CONFIG,
+    sections: [{ children: parrafos }],
+  });
+  const blob = await docx.Packer.toBlob(documento);
+  enlaceDescarga.href = URL.createObjectURL(blob);
+  resultado.classList.add('visible');
+}
+
+botonReparar.addEventListener('click', async () => {
+  botonReparar.disabled = true;
+  botonReparar.textContent = 'Reparando...';
+  mensajeNivel.style.display = 'none';
+  try {
+    const arrayBuffer = await archivoActual.arrayBuffer();
+
+    try {
+      // Nivel 1: mammoth suele tolerar bastantes problemas menores.
+      const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+      const contenedor = document.createElement('div');
+      contenedor.innerHTML = resultadoMammoth.value;
+      const parrafos = await contenidoAParrafos(contenedor);
+      if (parrafos.length === 0) throw new Error('mammoth no encontró contenido.');
+
+      await guardarComoDocx(parrafos);
+      mensajeNivel.textContent = '✅ Se pudo leer el documento normalmente y se reconstruyó desde cero.';
+      mensajeNivel.style.color = '#166534';
+      mensajeNivel.style.display = 'block';
+    } catch (errorNivel1) {
+      // Nivel 2: rescatar texto crudo de word/document.xml sin depender de un XML válido.
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const documentoXml = zip.file('word/document.xml');
+      if (!documentoXml) throw new Error('El archivo no tiene la estructura mínima de un .docx — no se puede reparar.');
+
+      const xmlTexto = await documentoXml.async('string');
+      const coincidencias = [...xmlTexto.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)];
+      const texto = coincidencias.map(m => m[1]).join(' ').trim();
+      if (!texto) throw new Error('No se pudo rescatar texto legible de este archivo.');
+
+      const contenedor = document.createElement('div');
+      contenedor.innerHTML = textoAHtml(texto);
+      const parrafos = await contenidoAParrafos(contenedor);
+
+      await guardarComoDocx(parrafos);
+      mensajeNivel.textContent = '⚠️ El documento estaba dañado — se recuperó solo el texto plano, sin el formato original.';
+      mensajeNivel.style.display = 'block';
+    }
+  } catch (error) {
+    alert('No se pudo reparar el documento: ' + error.message);
+  } finally {
+    botonReparar.disabled = false;
+    botonReparar.textContent = 'Reparar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

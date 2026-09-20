@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extraer imágenes de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Extraé las imágenes embebidas dentro de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Extraer imágenes de PDF</h1>
+  <p>Elegí un PDF y sacamos las imágenes que tiene embebidas adentro (fotos, logos, etc — no genera una imagen de la página completa, para eso usá "PDF a imágenes").</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <button class="boton" id="botonExtraer" disabled>Extraer imágenes</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+    <p id="sinImagenes" style="color:var(--texto-suave); display:none;">No se encontraron imágenes embebidas en este PDF (puede que el contenido sea todo texto/vectores, o que use un formato de imagen que esta herramienta no puede leer).</p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo, se encontraron <span id="cantidadImagenes"></span> imagen(es). <a id="enlaceDescarga" download="imagenes-extraidas.zip">Descargar .zip</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonExtraer = document.getElementById('botonExtraer');
+const progreso = document.getElementById('progreso');
+const sinImagenes = document.getElementById('sinImagenes');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const cantidadImagenes = document.getElementById('cantidadImagenes');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+  }
+  botonExtraer.disabled = false;
+  resultado.classList.remove('visible');
+  sinImagenes.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function imagenPdfACanvas(imagenPdf) {
+  const { width, height, data, kind } = imagenPdf;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const contexto = canvas.getContext('2d');
+  const imageData = contexto.createImageData(width, height);
+  const salida = imageData.data;
+
+  if (kind === pdfjsLib.ImageKind.RGBA_32BPP) {
+    salida.set(data);
+  } else if (kind === pdfjsLib.ImageKind.RGB_24BPP) {
+    for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
+      salida[j] = data[i];
+      salida[j + 1] = data[i + 1];
+      salida[j + 2] = data[i + 2];
+      salida[j + 3] = 255;
+    }
+  } else if (kind === pdfjsLib.ImageKind.GRAYSCALE_1BPP) {
+    const bytesPorFila = Math.ceil(width / 8);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const byte = data[y * bytesPorFila + (x >> 3)];
+        const bit = (byte >> (7 - (x % 8))) & 1;
+        const valor = bit ? 255 : 0;
+        const j = (y * width + x) * 4;
+        salida[j] = salida[j + 1] = salida[j + 2] = valor;
+        salida[j + 3] = 255;
+      }
+    }
+  } else {
+    return null;
+  }
+
+  contexto.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  progreso.style.display = 'block';
+  sinImagenes.style.display = 'none';
+  resultado.classList.remove('visible');
+  try {
+    const bytes = await archivoActual.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    const zip = new JSZip();
+    let contadorImagenes = 0;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      progreso.textContent = `Revisando página ${i} de ${pdf.numPages}...`;
+      const pagina = await pdf.getPage(i);
+      const listaOperadores = await pagina.getOperatorList();
+      const nombresImagenes = new Set();
+
+      listaOperadores.fnArray.forEach((funcion, indice) => {
+        if (funcion === pdfjsLib.OPS.paintImageXObject || funcion === pdfjsLib.OPS.paintJpegXObject) {
+          const nombre = listaOperadores.argsArray[indice][0];
+          nombresImagenes.add(nombre);
+        }
+      });
+
+      for (const nombre of nombresImagenes) {
+        try {
+          const imagenPdf = await new Promise((resolve, reject) => {
+            pagina.objs.get(nombre, resolve);
+            setTimeout(() => reject(new Error('tiempo agotado')), 5000);
+          });
+          if (!imagenPdf || !imagenPdf.data) continue;
+
+          const canvas = imagenPdfACanvas(imagenPdf);
+          if (!canvas) continue;
+
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+          contadorImagenes++;
+          zip.file(`pagina-${i}-imagen-${contadorImagenes}.png`, blob);
+        } catch (errorImagen) {
+          // Se ignora una imagen puntual que no se pudo leer y se sigue con las demás.
+          console.warn('No se pudo extraer una imagen:', errorImagen);
+        }
+      }
+    }
+
+    if (contadorImagenes === 0) {
+      sinImagenes.style.display = 'block';
+    } else {
+      const blobZip = await zip.generateAsync({ type: 'blob' });
+      enlaceDescarga.href = URL.createObjectURL(blobZip);
+      cantidadImagenes.textContent = contadorImagenes;
+      resultado.classList.add('visible');
+    }
+  } catch (error) {
+    alert('No se pudo extraer las imágenes: ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

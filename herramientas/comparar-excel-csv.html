@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparar Excel o CSV gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Compará dos versiones de una planilla Excel o CSV y mirá qué filas se agregaron, se quitaron o cambiaron. Gratis y sin subir tus archivos a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; max-height: 600px; margin-top: 16px; }
+  table.tabla-comparacion { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  table.tabla-comparacion th, table.tabla-comparacion td {
+    border: 1px solid var(--gris-borde);
+    padding: 6px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.tabla-comparacion th { background: var(--gris-fondo); position: sticky; top: 0; }
+  tr.fila-agregada { background: #f0fdf4; }
+  tr.fila-eliminada { background: #fef2f2; }
+  tr.fila-modificada { background: #fffbeb; }
+  td.celda-cambiada { background: #fde68a; font-weight: 600; }
+  .badge-estado { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; font-weight: 700; }
+  .badge-estado.agregada { background: #dcfce7; color: #166534; }
+  .badge-estado.eliminada { background: #fee2e2; color: #991b1b; }
+  .badge-estado.modificada { background: #fef3c7; color: #92400e; }
+  .badge-estado.igual { background: #e2e8f0; color: #475569; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Comparar Excel / CSV</h1>
+  <p>Elegí dos versiones de una planilla (original y nueva) y una columna que identifique cada fila (ej. un ID o código). Te mostramos qué filas se agregaron, se quitaron o cambiaron.</p>
+
+  <div class="panel-herramienta">
+    <label class="campo" style="margin-bottom:16px;">
+      Versión original
+      <div class="zona-arrastre" id="zonaA" style="padding:20px;">
+        📊 Arrastrá el archivo original acá o hacé clic para elegirlo
+        <input type="file" id="entradaA" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaA"></ul>
+    </label>
+
+    <label class="campo">
+      Versión nueva
+      <div class="zona-arrastre" id="zonaB" style="padding:20px;">
+        📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo
+        <input type="file" id="entradaB" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaB"></ul>
+    </label>
+
+    <div class="controles" id="controles" style="display:none;">
+      <label class="campo">
+        Columna clave (identifica cada fila)
+        <select id="columnaClave"></select>
+      </label>
+      <button class="boton" id="botonComparar" type="button">Comparar</button>
+    </div>
+
+    <div class="estadisticas" id="estadisticas" style="display:none;">
+      <div class="estadistica"><div class="numero" id="numAgregadas">0</div><div class="etiqueta">Agregadas</div></div>
+      <div class="estadistica"><div class="numero" id="numEliminadas">0</div><div class="etiqueta">Eliminadas</div></div>
+      <div class="estadistica"><div class="numero" id="numModificadas">0</div><div class="etiqueta">Modificadas</div></div>
+      <div class="estadistica"><div class="numero" id="numIguales">0</div><div class="etiqueta">Sin cambios</div></div>
+    </div>
+
+    <div class="contenedor-tabla" id="contenedorTabla"></div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let filasA = null;
+let filasB = null;
+let columnas = [];
+
+function esArchivoValido(archivo) {
+  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+}
+
+async function leerFilas(archivo) {
+  const bytes = await archivo.arrayBuffer();
+  const libro = XLSX.read(bytes, { type: 'array' });
+  return XLSX.utils.sheet_to_json(libro.Sheets[libro.SheetNames[0]], { defval: '', raw: false });
+}
+
+function configurarZona(idZona, idEntrada, idLista, onElegido) {
+  const zona = document.getElementById(idZona);
+  const entrada = document.getElementById(idEntrada);
+  const lista = document.getElementById(idLista);
+
+  async function elegir(listaFileList) {
+    const archivo = [...listaFileList].find(esArchivoValido);
+    if (!archivo) return;
+    lista.innerHTML = `<li><span>${archivo.name}</span></li>`;
+    onElegido(await leerFilas(archivo));
+  }
+
+  zona.addEventListener('click', () => entrada.click());
+  entrada.addEventListener('change', (e) => elegir(e.target.files));
+  zona.addEventListener('dragover', (e) => { e.preventDefault(); zona.classList.add('activa'); });
+  zona.addEventListener('dragleave', () => zona.classList.remove('activa'));
+  zona.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zona.classList.remove('activa');
+    elegir(e.dataTransfer.files);
+  });
+}
+
+function actualizarControles() {
+  if (!filasA || !filasB || filasA.length === 0 || filasB.length === 0) return;
+  const columnasA = Object.keys(filasA[0]);
+  const columnasB = Object.keys(filasB[0]);
+  columnas = [...new Set([...columnasA, ...columnasB])].filter(c => !/^__EMPTY/.test(c));
+
+  const selector = document.getElementById('columnaClave');
+  selector.innerHTML = columnas.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('controles').style.display = 'flex';
+}
+
+configurarZona('zonaA', 'entradaA', 'listaA', (filas) => { filasA = filas; actualizarControles(); });
+configurarZona('zonaB', 'entradaB', 'listaB', (filas) => { filasB = filas; actualizarControles(); });
+
+document.getElementById('botonComparar').addEventListener('click', () => {
+  const clave = document.getElementById('columnaClave').value;
+
+  const mapaA = new Map(filasA.map(fila => [String(fila[clave]), fila]));
+  const mapaB = new Map(filasB.map(fila => [String(fila[clave]), fila]));
+  const clavesUnicas = [...new Set([...mapaA.keys(), ...mapaB.keys()])];
+
+  let agregadas = 0, eliminadas = 0, modificadas = 0, iguales = 0;
+  const filasResultado = [];
+
+  const filaVacia = (fila) => columnas.every(col => String(fila[col] ?? '').trim() === '');
+
+  clavesUnicas.forEach((claveFila) => {
+    const filaA = mapaA.get(claveFila);
+    const filaB = mapaB.get(claveFila);
+
+    if (!filaA) {
+      if (filaVacia(filaB)) return;
+      agregadas++;
+      filasResultado.push({ estado: 'agregada', fila: filaB, camposCambiados: new Set() });
+    } else if (!filaB) {
+      if (filaVacia(filaA)) return;
+      eliminadas++;
+      filasResultado.push({ estado: 'eliminada', fila: filaA, camposCambiados: new Set() });
+    } else {
+      if (filaVacia(filaA) && filaVacia(filaB)) return;
+      const camposCambiados = new Set();
+      columnas.forEach((col) => {
+        if (String(filaA[col] ?? '') !== String(filaB[col] ?? '')) camposCambiados.add(col);
+      });
+      if (camposCambiados.size > 0) {
+        modificadas++;
+        filasResultado.push({ estado: 'modificada', fila: filaB, camposCambiados });
+      } else {
+        iguales++;
+        filasResultado.push({ estado: 'igual', fila: filaB, camposCambiados: new Set() });
+      }
+    }
+  });
+
+  document.getElementById('numAgregadas').textContent = agregadas;
+  document.getElementById('numEliminadas').textContent = eliminadas;
+  document.getElementById('numModificadas').textContent = modificadas;
+  document.getElementById('numIguales').textContent = iguales;
+  document.getElementById('estadisticas').style.display = 'grid';
+
+  const nombresEstado = { agregada: 'Agregada', eliminada: 'Eliminada', modificada: 'Modificada', igual: 'Sin cambios' };
+
+  let html = '<table class="tabla-comparacion"><thead><tr><th>Estado</th>';
+  columnas.forEach(col => html += `<th>${col}</th>`);
+  html += '</tr></thead><tbody>';
+
+  filasResultado.forEach(({ estado, fila, camposCambiados }) => {
+    html += `<tr class="fila-${estado}"><td><span class="badge-estado ${estado}">${nombresEstado[estado]}</span></td>`;
+    columnas.forEach((col) => {
+      const claseCambio = camposCambiados.has(col) ? ' class="celda-cambiada"' : '';
+      html += `<td${claseCambio}>${fila[col] ?? ''}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('contenedorTabla').innerHTML = html;
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

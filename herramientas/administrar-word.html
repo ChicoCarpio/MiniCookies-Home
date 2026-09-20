@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reordenar secciones de Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Reordená o eliminá secciones de un documento Word (.docx), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Administrar / reordenar secciones de Word</h1>
+  <p>Elegí un documento .docx. Se separa en secciones por cada Título 1 — arrastralas para reordenarlas, o quitá las que no quieras, y descargá el documento reordenado.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo el documento...</p>
+    <ul class="lista-archivos" id="listaSecciones"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonGuardar" disabled>Descargar reordenado</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-reordenado.docx">Descargar Word</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Limitaciones</h3>
+    <p style="color:var(--texto-suave);">
+      Si el documento no tiene ningún Título 1, se trata como una sola sección (no hay nada para reordenar).
+      Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada sección.
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const listaSecciones = document.getElementById('listaSecciones');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let secciones = []; // [{ id, titulo, html }]
+let siguienteId = 0;
+
+function renderizarLista() {
+  listaSecciones.innerHTML = '';
+  secciones.forEach((seccion) => {
+    const item = document.createElement('li');
+    item.draggable = true;
+    item.dataset.id = seccion.id;
+    item.innerHTML = `<span>${seccion.titulo}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { secciones = secciones.filter(s => s.id !== seccion.id); renderizarLista(); };
+    item.appendChild(quitar);
+    listaSecciones.appendChild(item);
+  });
+  botonGuardar.disabled = secciones.length === 0;
+  resultado.classList.remove('visible');
+}
+
+let arrastrando = null;
+listaSecciones.addEventListener('dragstart', (e) => {
+  if (e.target.tagName === 'LI') { arrastrando = e.target; e.target.classList.add('arrastrando'); }
+});
+listaSecciones.addEventListener('dragend', (e) => {
+  if (e.target.tagName === 'LI') e.target.classList.remove('arrastrando');
+});
+listaSecciones.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const objetivo = e.target.closest('li');
+  if (!objetivo || !arrastrando || objetivo === arrastrando) return;
+  const rect = objetivo.getBoundingClientRect();
+  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
+  objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
+});
+listaSecciones.addEventListener('drop', () => {
+  const idsEnOrden = [...listaSecciones.children].map(li => parseInt(li.dataset.id, 10));
+  secciones.sort((a, b) => idsEnOrden.indexOf(a.id) - idsEnOrden.indexOf(b.id));
+});
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) cargarDocumento(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarDocumento(archivo) {
+  cargando.style.display = 'block';
+  listaSecciones.innerHTML = '';
+  try {
+    const arrayBuffer = await archivo.arrayBuffer();
+    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, 'Documento');
+    secciones = capitulos.map(cap => ({ id: siguienteId++, titulo: cap.titulo, html: cap.html }));
+    renderizarLista();
+  } catch (error) {
+    alert('No se pudo leer el documento: ' + error.message);
+  } finally {
+    cargando.style.display = 'none';
+  }
+}
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = 'Generando...';
+  try {
+    if (secciones.length === 0) throw new Error('No queda ninguna sección.');
+
+    const bloquesFinales = [];
+    for (let i = 0; i < secciones.length; i++) {
+      const contenedor = document.createElement('div');
+      contenedor.innerHTML = secciones[i].html;
+      if (i > 0) bloquesFinales.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
+      bloquesFinales.push(...await contenidoAParrafos(contenedor));
+    }
+
+    const documento = new docx.Document({
+      numbering: NUMERACION_DOCX_CONFIG,
+      sections: [{ children: bloquesFinales }],
+    });
+    const blob = await docx.Packer.toBlob(documento);
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el documento: ' + error.message);
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = 'Descargar reordenado';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

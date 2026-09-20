@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unir PDF e imágenes gratis y seguro — Herramientas Ofimáticas</title>
+<meta name="description" content="Uní varios archivos PDF e imágenes (JPG, PNG, WebP y más) en un solo PDF, gratis y sin subir tus archivos a ningún servidor. Todo el proceso ocurre en tu navegador.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio">
+    <a href="../menus/pdf.html">Herramientas de PDF</a>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Unir PDF e imágenes</h1>
+  <p>Elegí dos o más archivos — PDF y/o imágenes (JPG, PNG, WebP, GIF, BMP) —, en cualquier combinación. Vas a ver una miniatura real de cada uno (la primera página, si es un PDF) — arrastralas para ordenarlas y descargá un único PDF combinado, cada imagen como una página nueva.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄🖼️ Arrastrá tus PDFs e imágenes acá o hacé clic para elegirlos
+      <input type="file" id="entradaArchivos" accept="application/pdf,image/*" multiple hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);">Generando miniaturas...</p>
+
+    <div id="envoltorioSelectorVista"></div>
+    <div class="contenedor-miniaturas" id="gridArchivos"></div>
+
+    <div class="controles">
+      <button class="boton" id="botonUnir" disabled>Unir en un PDF</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="documento-unido.pdf">Descargar PDF combinado</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const cargando = document.getElementById('cargando');
+const gridArchivos = document.getElementById('gridArchivos');
+const botonUnir = document.getElementById('botonUnir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+document.getElementById('envoltorioSelectorVista').appendChild(
+  crearSelectorVista(gridArchivos, 'vista-unir-pdf')
+);
+
+let siguienteId = 0;
+const archivosPorId = new Map(); // id -> File
+
+function actualizarBoton() {
+  botonUnir.disabled = archivosPorId.size < 2;
+  resultado.classList.remove('visible');
+}
+
+habilitarArrastreReordenable(gridArchivos, actualizarBoton);
+
+async function agregarArchivos(listaFileList) {
+  const nuevos = [...listaFileList].filter(f => f.type === 'application/pdf' || f.type.startsWith('image/'));
+  if (nuevos.length === 0) return;
+
+  cargando.style.display = 'block';
+  for (const archivo of nuevos) {
+    const id = siguienteId++;
+    archivosPorId.set(id, archivo);
+    const esPdf = archivo.type === 'application/pdf';
+    let tarjeta;
+    try {
+      const { elemento, totalPaginas } = esPdf
+        ? await generarMiniaturaPdf(archivo, 0.28)
+        : await generarMiniaturaImagen(archivo);
+      tarjeta = crearTarjetaMiniatura({
+        elementoVisual: elemento,
+        etiqueta: esPdf ? `${archivo.name} (${totalPaginas} pág.)` : archivo.name,
+        conQuitar: true,
+        alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
+        arrastrable: true,
+        indiceOrden: id,
+      });
+    } catch (error) {
+      tarjeta = crearTarjetaMiniatura({
+        etiqueta: `${archivo.name} (no se pudo previsualizar)`,
+        conQuitar: true,
+        alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
+        arrastrable: true,
+        indiceOrden: id,
+      });
+    }
+    gridArchivos.appendChild(tarjeta);
+  }
+  cargando.style.display = 'none';
+  actualizarBoton();
+}
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+// pdf-lib solo sabe incrustar JPEG y PNG directamente. Para cualquier otro
+// formato de imagen (WebP, GIF, BMP, etc.) la redibujamos en un <canvas> y la
+// reconvertimos a PNG, que sí puede incrustar.
+async function incrustarImagenEnPdf(pdf, archivo) {
+  if (archivo.type === 'image/jpeg') {
+    return pdf.embedJpg(await archivo.arrayBuffer());
+  }
+  if (archivo.type === 'image/png') {
+    return pdf.embedPng(await archivo.arrayBuffer());
+  }
+  const img = await cargarImagen(archivo);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  canvas.getContext('2d').drawImage(img, 0, 0);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  return pdf.embedPng(await blob.arrayBuffer());
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivos.click());
+entradaArchivos.addEventListener('change', (e) => agregarArchivos(e.target.files));
+
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  agregarArchivos(e.dataTransfer.files);
+});
+
+botonUnir.addEventListener('click', async () => {
+  botonUnir.disabled = true;
+  botonUnir.textContent = 'Uniendo...';
+  try {
+    const { PDFDocument } = PDFLib;
+    const pdfFinal = await PDFDocument.create();
+
+    const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
+    for (const id of ordenIds) {
+      const archivo = archivosPorId.get(id);
+      if (archivo.type === 'application/pdf') {
+        const bytes = await archivo.arrayBuffer();
+        const pdfOrigen = await PDFDocument.load(bytes);
+        const paginas = await pdfFinal.copyPages(pdfOrigen, pdfOrigen.getPageIndices());
+        paginas.forEach((pagina) => pdfFinal.addPage(pagina));
+      } else {
+        const imagenEmbebida = await incrustarImagenEnPdf(pdfFinal, archivo);
+        const { width, height } = imagenEmbebida.size();
+        const pagina = pdfFinal.addPage([width, height]);
+        pagina.drawImage(imagenEmbebida, { x: 0, y: 0, width, height });
+      }
+    }
+
+    const bytesFinales = await pdfFinal.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo unir los archivos: ' + error.message);
+  } finally {
+    botonUnir.disabled = false;
+    botonUnir.textContent = 'Unir en un PDF';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

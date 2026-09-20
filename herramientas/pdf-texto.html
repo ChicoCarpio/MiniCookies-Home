@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir PDF y texto plano gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Extraé el texto de un PDF a .txt, o convertí un .txt a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>PDF ↔ Texto</h1>
+  <p>Extraé el texto de un PDF a .txt, o convertí un archivo de texto plano a PDF, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="pdf-a-texto" checked> PDF → Texto</label>
+      <label><input type="radio" name="direccion" value="texto-a-pdf"> Texto → PDF</label>
+    </div>
+
+    <!-- PDF → Texto -->
+    <div id="panelPdfATexto">
+      <div class="zona-arrastre" id="zonaArrastrePdf">
+        📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+      </div>
+      <div class="grid-miniaturas" id="listaPdf"></div>
+      <div class="controles">
+        <button class="boton" id="botonExtraer" disabled>Extraer texto</button>
+      </div>
+      <div id="bloqueResultadoTexto" style="display:none; margin-top:20px;">
+        <textarea id="textoExtraido" readonly></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiar" type="button">Copiar texto</button>
+          <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" style="text-decoration:none; display:inline-block;">Descargar .txt</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Texto → PDF -->
+    <div id="panelTextoAPdf" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastreTxt">
+        📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
+        <input type="file" id="entradaTxt" accept=".txt" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaTxt"></ul>
+      <div class="controles">
+        <button class="boton" id="botonAPdf" disabled>Convertir a PDF</button>
+      </div>
+      <div class="resultado" id="resultadoPdf">
+        ✅ Listo. <a id="enlaceDescargaPdf" download="documento.pdf">Descargar PDF</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-texto.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const panelPdfATexto = document.getElementById('panelPdfATexto');
+const panelTextoAPdf = document.getElementById('panelTextoAPdf');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esPdfATexto = document.querySelector('input[name="direccion"]:checked').value === 'pdf-a-texto';
+    panelPdfATexto.style.display = esPdfATexto ? '' : 'none';
+    panelTextoAPdf.style.display = esPdfATexto ? 'none' : '';
+  });
+});
+
+// --- PDF → Texto ---
+const zonaArrastrePdf = document.getElementById('zonaArrastrePdf');
+const entradaPdf = document.getElementById('entradaPdf');
+const listaPdf = document.getElementById('listaPdf');
+const botonExtraer = document.getElementById('botonExtraer');
+const bloqueResultadoTexto = document.getElementById('bloqueResultadoTexto');
+const textoExtraido = document.getElementById('textoExtraido');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescargaTxt = document.getElementById('enlaceDescargaTxt');
+
+let archivoPdfActual = null;
+
+async function mostrarArchivoPdf(archivo) {
+  archivoPdfActual = archivo;
+  listaPdf.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+  } catch (error) {
+    listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+  }
+  botonExtraer.disabled = false;
+  bloqueResultadoTexto.style.display = 'none';
+}
+
+function elegirArchivoPdf(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  if (archivo) mostrarArchivoPdf(archivo);
+}
+
+zonaArrastrePdf.addEventListener('click', () => entradaPdf.click());
+entradaPdf.addEventListener('change', (e) => elegirArchivoPdf(e.target.files));
+zonaArrastrePdf.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastrePdf.classList.add('activa'); });
+zonaArrastrePdf.addEventListener('dragleave', () => zonaArrastrePdf.classList.remove('activa'));
+zonaArrastrePdf.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastrePdf.classList.remove('activa');
+  elegirArchivoPdf(e.dataTransfer.files);
+});
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = 'Extrayendo...';
+  try {
+    const bytes = await archivoPdfActual.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    const paginasDeTexto = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pagina = await pdf.getPage(i);
+      const contenido = await pagina.getTextContent();
+      const textoPagina = contenido.items.map(item => item.str).join(' ');
+      paginasDeTexto.push(textoPagina);
+    }
+
+    const textoCompleto = paginasDeTexto.join('\n\n--- Página siguiente ---\n\n');
+    textoExtraido.value = textoCompleto;
+    const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+    enlaceDescargaTxt.href = URL.createObjectURL(blob);
+    bloqueResultadoTexto.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo extraer el texto: ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = 'Extraer texto';
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(textoExtraido.value);
+  botonCopiar.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiar.textContent = 'Copiar texto'; }, 1500);
+});
+
+// --- Texto → PDF ---
+const zonaArrastreTxt = document.getElementById('zonaArrastreTxt');
+const entradaTxt = document.getElementById('entradaTxt');
+const listaTxt = document.getElementById('listaTxt');
+const botonAPdf = document.getElementById('botonAPdf');
+const resultadoPdf = document.getElementById('resultadoPdf');
+const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
+
+let archivoTxtActual = null;
+
+function mostrarArchivoTxt(archivo) {
+  archivoTxtActual = archivo;
+  listaTxt.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAPdf.disabled = false;
+  resultadoPdf.classList.remove('visible');
+}
+
+function elegirArchivoTxt(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivoTxt(archivo);
+}
+
+zonaArrastreTxt.addEventListener('click', () => entradaTxt.click());
+entradaTxt.addEventListener('change', (e) => elegirArchivoTxt(e.target.files));
+zonaArrastreTxt.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreTxt.classList.add('activa'); });
+zonaArrastreTxt.addEventListener('dragleave', () => zonaArrastreTxt.classList.remove('activa'));
+zonaArrastreTxt.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreTxt.classList.remove('activa');
+  elegirArchivoTxt(e.dataTransfer.files);
+});
+
+botonAPdf.addEventListener('click', async () => {
+  botonAPdf.disabled = true;
+  botonAPdf.textContent = 'Convirtiendo...';
+  try {
+    const texto = await archivoTxtActual.text();
+    const pdf = await generarPdfDeTexto(texto);
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescargaPdf.href = URL.createObjectURL(blob);
+    enlaceDescargaPdf.download = archivoTxtActual.name.replace(/\.txt$/i, '') + '.pdf';
+    resultadoPdf.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el PDF: ' + error.message);
+  } finally {
+    botonAPdf.disabled = false;
+    botonAPdf.textContent = 'Convertir a PDF';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

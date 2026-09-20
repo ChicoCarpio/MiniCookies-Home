@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generar tabla de contenidos de Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Generá automáticamente una tabla de contenidos a partir de los encabezados de un Markdown, gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  textarea { min-height: 320px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/markdown.html">Herramientas de Markdown</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Tabla de contenidos de Markdown</h1>
+  <p>Pegá o subí tu Markdown y generamos una tabla de contenidos con links a cada encabezado, lista para pegar al principio del documento.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📄 Arrastrá tu archivo .md acá, o escribí/pegá el Markdown directamente abajo
+      <input type="file" id="entradaArchivo" accept=".md,.markdown" hidden>
+    </div>
+
+    <label class="campo">
+      Markdown
+      <textarea id="entrada" placeholder="# Título&#10;&#10;## Sección uno&#10;## Sección dos"></textarea>
+    </label>
+
+    <div class="controles">
+      <button class="boton" id="botonGenerar" type="button">Generar tabla de contenidos</button>
+    </div>
+
+    <div id="bloqueResultado" style="display:none; margin-top:20px;">
+      <label class="campo">
+        Markdown con tabla de contenidos agregada
+        <textarea id="salida" readonly></textarea>
+      </label>
+      <div class="controles">
+        <button class="boton" id="botonCopiar" type="button">Copiar resultado</button>
+        <a class="boton" id="enlaceDescarga" download="documento-con-indice.md" style="text-decoration:none; display:inline-block;">Descargar .md</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <p style="color:var(--texto-suave);">
+      Los links usan el mismo formato de "ancla" que GitHub/GitLab (minúsculas, espacios reemplazados por
+      guiones, sin puntuación) — funcionan al publicar el Markdown en esas plataformas o en cualquier
+      visor que siga esa misma convención.
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const entrada = document.getElementById('entrada');
+const botonGenerar = document.getElementById('botonGenerar');
+const bloqueResultado = document.getElementById('bloqueResultado');
+const salida = document.getElementById('salida');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(md|markdown)$/i.test(f.name));
+  if (archivo) archivo.text().then(texto => { entrada.value = texto; });
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function generarAncla(texto) {
+  return texto.trim().toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-');
+}
+
+botonGenerar.addEventListener('click', () => {
+  const texto = entrada.value;
+  if (!texto.trim()) { alert('Escribí o subí un Markdown primero.'); return; }
+
+  const lineas = texto.split('\n');
+  const encabezados = [];
+  lineas.forEach((linea) => {
+    const coincidencia = linea.match(/^(#{1,6})\s+(.+)$/);
+    if (coincidencia) {
+      encabezados.push({ nivel: coincidencia[1].length, texto: coincidencia[2].trim() });
+    }
+  });
+
+  if (encabezados.length === 0) { alert('No se encontró ningún encabezado (#) en el texto.'); return; }
+
+  const nivelMinimo = Math.min(...encabezados.map(e => e.nivel));
+  const lineasIndice = encabezados.map((e) => {
+    const sangria = '  '.repeat(e.nivel - nivelMinimo);
+    const ancla = generarAncla(e.texto);
+    return `${sangria}- [${e.texto}](#${ancla})`;
+  });
+
+  const indiceMarkdown = '## Tabla de contenidos\n\n' + lineasIndice.join('\n') + '\n';
+  salida.value = indiceMarkdown + '\n' + texto;
+  const blob = new Blob([salida.value], { type: 'text/markdown;charset=utf-8' });
+  enlaceDescarga.href = URL.createObjectURL(blob);
+  bloqueResultado.style.display = 'block';
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(salida.value);
+  botonCopiar.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiar.textContent = 'Copiar resultado'; }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

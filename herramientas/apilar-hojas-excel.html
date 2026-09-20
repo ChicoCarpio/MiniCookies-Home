@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combinar hojas de Excel en una tabla gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .lista-archivos li { flex-wrap: wrap; align-items: flex-start; }
+  .mini-vista-previa { flex-basis: 100%; margin-top: 6px; overflow-x: auto; }
+  table.mini-tabla { border-collapse: collapse; font-size: 0.75rem; color: var(--texto-suave); }
+  table.mini-tabla td {
+    border: 1px solid var(--gris-borde);
+    padding: 2px 6px;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-vista-vacia { font-size: 0.75rem; color: var(--texto-suave); margin-top: 4px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Combinar hojas en una tabla</h1>
+  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.</p>
+  <p style="color:var(--texto-suave); font-size:0.9rem;">
+    Distinto de "Unir Excel / CSV": esa herramienta junta <em>archivos</em> separados, uno por hoja. Esta
+    combina hojas que <em>ya están dentro de un mismo archivo</em> en una única tabla.
+  </p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaHojas"></ul>
+
+    <div class="controles">
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="tieneEncabezado" checked>
+        Cada hoja tiene fila de encabezado (se usa la del primer archivo, se descarta el resto)
+      </label>
+      <button class="boton" id="botonCombinar" disabled>Combinar en una tabla</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="tabla-combinada.xlsx">Descargar Excel</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaHojas = document.getElementById('listaHojas');
+const botonCombinar = document.getElementById('botonCombinar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let libroActual = null;
+let hojasSeleccionadas = new Set();
+
+function escaparHtml(valor) {
+  const texto = valor === null || valor === undefined ? '' : String(valor);
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Mini tabla con las primeras celdas de cada hoja — para identificarlas de
+// un vistazo, sin depender únicamente del nombre.
+const FILAS_VISTA_PREVIA = 4;
+const COLUMNAS_VISTA_PREVIA = 4;
+
+function miniVistaPreviaHtml(nombre) {
+  const hoja = libroActual.Sheets[nombre];
+  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false, defval: '' }).slice(0, FILAS_VISTA_PREVIA);
+  if (filas.length === 0) return '<div class="mini-vista-vacia">(hoja vacía)</div>';
+
+  let html = '<div class="mini-vista-previa"><table class="mini-tabla">';
+  filas.forEach((fila) => {
+    html += '<tr>';
+    for (let i = 0; i < COLUMNAS_VISTA_PREVIA; i++) {
+      const texto = String(fila[i] ?? '');
+      const recortado = texto.length > 14 ? texto.slice(0, 14) + '…' : texto;
+      html += `<td>${escaparHtml(recortado)}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</table></div>';
+  return html;
+}
+
+function renderizarLista() {
+  listaHojas.innerHTML = '';
+  libroActual.SheetNames.forEach((nombre) => {
+    const item = document.createElement('li');
+    const label = document.createElement('label');
+    label.style.display = 'flex';
+    label.style.alignItems = 'center';
+    label.style.gap = '8px';
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.checked = hojasSeleccionadas.has(nombre);
+    check.addEventListener('change', () => {
+      if (check.checked) hojasSeleccionadas.add(nombre); else hojasSeleccionadas.delete(nombre);
+      botonCombinar.disabled = hojasSeleccionadas.size < 2;
+    });
+    label.appendChild(check);
+    label.appendChild(document.createTextNode(nombre));
+    item.appendChild(label);
+    item.insertAdjacentHTML('beforeend', miniVistaPreviaHtml(nombre));
+    listaHojas.appendChild(item);
+  });
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  if (archivo) cargarLibro(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarLibro(archivo) {
+  const bytes = await archivo.arrayBuffer();
+  libroActual = XLSX.read(bytes, { type: 'array' });
+  hojasSeleccionadas = new Set(libroActual.SheetNames);
+  renderizarLista();
+  botonCombinar.disabled = hojasSeleccionadas.size < 2;
+  resultado.classList.remove('visible');
+}
+
+botonCombinar.addEventListener('click', () => {
+  try {
+    const nombresElegidos = libroActual.SheetNames.filter(n => hojasSeleccionadas.has(n));
+    if (nombresElegidos.length < 2) throw new Error('Elegí al menos dos hojas.');
+
+    const tieneEncabezado = document.getElementById('tieneEncabezado').checked;
+    let filasFinales = [];
+
+    nombresElegidos.forEach((nombre, indice) => {
+      const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombre], { header: 1, raw: false, defval: '' });
+      if (tieneEncabezado) {
+        if (indice === 0) filasFinales.push(...filas);
+        else filasFinales.push(...filas.slice(1));
+      } else {
+        filasFinales.push(...filas);
+      }
+    });
+
+    const hojaNueva = XLSX.utils.aoa_to_sheet(filasFinales);
+    const libroNuevo = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libroNuevo, hojaNueva, 'Combinado');
+
+    const bytesFinales = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo combinar las hojas: ' + error.message);
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

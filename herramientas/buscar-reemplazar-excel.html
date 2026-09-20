@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscar y reemplazar en Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Buscá y reemplazá texto en las celdas de un Excel (.xlsx), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; max-height: 480px; margin-top: 10px; }
+  table.tabla-datos { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  table.tabla-datos th, table.tabla-datos td {
+    border: 1px solid var(--gris-borde);
+    padding: 6px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.tabla-datos th { background: var(--gris-fondo); position: sticky; top: 0; vertical-align: top; }
+  table.tabla-datos th label { display: flex; align-items: center; gap: 6px; font-weight: 700; cursor: pointer; }
+  table.tabla-datos th .letra-columna { font-weight: 400; color: var(--texto-suave); font-size: 0.75rem; }
+  table.tabla-datos td.coincidencia { background: #fde68a; font-weight: 600; }
+  table.tabla-datos td.columna-excluida { color: var(--texto-suave); opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Buscar y reemplazar en Excel</h1>
+  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) y reemplazá un texto por otro — en toda la hoja o solo en las columnas que elijas. Incluye texto, fechas y números (comparando contra cómo se ven), pero nunca toca fórmulas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo" id="campoHoja" style="display:none;">
+        Hoja
+        <select id="selectorHoja"></select>
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="todasLasHojas">
+        Aplicar a todas las hojas
+      </label>
+    </div>
+
+    <div class="controles">
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="radio" name="ambito" id="ambitoToda" value="toda" checked>
+        Toda la hoja
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="radio" name="ambito" id="ambitoColumnas" value="columnas">
+        Solo columnas elegidas (tildá cuáles en la vista previa, abajo)
+      </label>
+    </div>
+
+    <div class="controles">
+      <label class="campo">
+        Buscar
+        <input type="text" id="textoBuscar" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        Reemplazar por
+        <input type="text" id="textoReemplazo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="coincidirMayusculas">
+        Coincidir mayúsculas/minúsculas
+      </label>
+      <button class="boton" id="botonProcesar" disabled>Reemplazar</button>
+    </div>
+
+    <div id="bloqueVistaPrevia" style="display:none;">
+      <p style="color:var(--texto-suave); margin:10px 0 0; font-size:0.9rem;">
+        Vista previa de "<strong id="nombreHojaVista"></strong>"<span id="avisoTodasHojas"></span> — en amarillo, las celdas que van a cambiar (las fórmulas nunca se tocan, aunque su resultado coincida):
+      </p>
+      <div class="contenedor-tabla" id="contenedorVistaPrevia"></div>
+    </div>
+
+    <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="excel-reemplazado.xlsx">Descargar Excel</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <p style="color:var(--texto-suave);">
+      Las fórmulas nunca se tocan (para no romper cálculos). Si el texto que reemplazás está dentro de una
+      fecha, número o moneda formateada, esa celda pasa a ser texto plano con el resultado — deja de ser
+      una fecha/número real (por ejemplo, ya no se podría usar en una cuenta).
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const campoHoja = document.getElementById('campoHoja');
+const selectorHoja = document.getElementById('selectorHoja');
+const botonProcesar = document.getElementById('botonProcesar');
+const mensaje = document.getElementById('mensaje');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
+const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
+const nombreHojaVista = document.getElementById('nombreHojaVista');
+const avisoTodasHojas = document.getElementById('avisoTodasHojas');
+
+let libroActual = null;
+let columnasSeleccionadas = new Set(); // índices de columna, solo se usa si el ámbito es "columnas"
+
+function escaparHtml(valor) {
+  const texto = valor === null || valor === undefined ? '' : String(valor);
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function hojaActualSeleccionada() {
+  return campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
+}
+
+function ambitoActual() {
+  return document.querySelector('input[name="ambito"]:checked').value;
+}
+
+const FILAS_VISTA_PREVIA = 200;
+
+function mostrarVistaPrevia() {
+  const todasLasHojas = document.getElementById('todasLasHojas').checked;
+  const nombreHoja = hojaActualSeleccionada();
+  const ambito = ambitoActual();
+  avisoTodasHojas.textContent = todasLasHojas ? ' (se muestra solo esta hoja, pero el reemplazo va a aplicar a todas)' : '';
+  nombreHojaVista.textContent = nombreHoja;
+  bloqueVistaPrevia.style.display = 'block';
+
+  const buscar = document.getElementById('textoBuscar').value;
+  const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
+  const regex = buscar ? new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi') : null;
+
+  const hoja = libroActual.Sheets[nombreHoja];
+  if (!hoja['!ref']) {
+    contenedorVistaPrevia.innerHTML = '<p style="padding:10px; color:var(--texto-suave);">Esta hoja está vacía.</p>';
+    return;
+  }
+
+  // Se leen las celdas crudas (no con sheet_to_json) para saber si cada una
+  // es una fórmula — esas nunca se tocan, para no romper cálculos. El resto
+  // (texto, fechas, números) se compara contra el texto tal como se ve, que
+  // es lo mismo que compara el reemplazo real.
+  const rango = XLSX.utils.decode_range(hoja['!ref']);
+  const filaLimite = Math.min(rango.e.r, rango.s.r + FILAS_VISTA_PREVIA - 1);
+
+  let html = '<table class="tabla-datos"><thead><tr>';
+  for (let c = rango.s.c; c <= rango.e.c; c++) {
+    const letra = XLSX.utils.encode_col(c);
+    if (ambito === 'columnas') {
+      html += `<th><label><input type="checkbox" class="chk-columna" data-columna="${c}"${columnasSeleccionadas.has(c) ? ' checked' : ''}>${letra}</label></th>`;
+    } else {
+      html += `<th><div class="letra-columna">${letra}</div></th>`;
+    }
+  }
+  html += '</tr></thead><tbody>';
+  for (let r = rango.s.r; r <= filaLimite; r++) {
+    html += '<tr>';
+    for (let c = rango.s.c; c <= rango.e.c; c++) {
+      const celda = hoja[XLSX.utils.encode_cell({ r, c })];
+      const texto = celda ? XLSX.utils.format_cell(celda) : '';
+      const columnaHabilitada = ambito === 'toda' || columnasSeleccionadas.has(c);
+      const coincide = regex && celda && !celda.f && texto !== '' && columnaHabilitada && regex.test(texto);
+      if (regex) regex.lastIndex = 0; // regex con flag "g" guarda posición entre usos, hay que resetear
+      const clase = coincide ? ' class="coincidencia"' : (ambito === 'columnas' && !columnaHabilitada ? ' class="columna-excluida"' : '');
+      html += `<td${clase}>${escaparHtml(texto)}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  if (rango.e.r - rango.s.r + 1 > FILAS_VISTA_PREVIA) {
+    html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">Mostrando las primeras ${FILAS_VISTA_PREVIA} filas — el reemplazo sí procesa todas.</p>`;
+  }
+  contenedorVistaPrevia.innerHTML = html;
+
+  contenedorVistaPrevia.querySelectorAll('.chk-columna').forEach((chk) => {
+    chk.addEventListener('change', () => {
+      const indice = parseInt(chk.dataset.columna, 10);
+      if (chk.checked) columnasSeleccionadas.add(indice);
+      else columnasSeleccionadas.delete(indice);
+      mostrarVistaPrevia();
+    });
+  });
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  if (archivo) cargarLibro(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarLibro(archivo) {
+  const bytes = await archivo.arrayBuffer();
+  libroActual = XLSX.read(bytes, { type: 'array' });
+  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonProcesar.disabled = false;
+  resultado.classList.remove('visible');
+  mensaje.style.display = 'none';
+  if (libroActual.SheetNames.length > 1) {
+    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    campoHoja.style.display = 'flex';
+  } else {
+    campoHoja.style.display = 'none';
+  }
+  columnasSeleccionadas = new Set();
+  mostrarVistaPrevia();
+}
+
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+selectorHoja.addEventListener('change', () => { columnasSeleccionadas = new Set(); mostrarVistaPrevia(); });
+document.getElementById('todasLasHojas').addEventListener('change', mostrarVistaPrevia);
+document.getElementById('textoBuscar').addEventListener('input', mostrarVistaPrevia);
+document.getElementById('coincidirMayusculas').addEventListener('change', mostrarVistaPrevia);
+document.getElementById('ambitoToda').addEventListener('change', mostrarVistaPrevia);
+document.getElementById('ambitoColumnas').addEventListener('change', mostrarVistaPrevia);
+
+botonProcesar.addEventListener('click', () => {
+  try {
+    const buscar = document.getElementById('textoBuscar').value;
+    if (!buscar) throw new Error('Escribí el texto a buscar.');
+    const reemplazo = document.getElementById('textoReemplazo').value;
+    const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
+    const todasLasHojas = document.getElementById('todasLasHojas').checked;
+    const ambito = ambitoActual();
+    if (ambito === 'columnas' && columnasSeleccionadas.size === 0) {
+      throw new Error('Tildá al menos una columna, o elegí "Toda la hoja".');
+    }
+
+    const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
+    const hojasAProcesar = todasLasHojas
+      ? libroActual.SheetNames
+      : [campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0]];
+
+    let totalReemplazos = 0;
+    hojasAProcesar.forEach((nombreHoja) => {
+      const hoja = libroActual.Sheets[nombreHoja];
+      Object.keys(hoja).forEach((direccionCelda) => {
+        if (direccionCelda.startsWith('!')) return;
+        const celda = hoja[direccionCelda];
+        if (celda.f) return; // no se tocan fórmulas, para no romper cálculos
+        if (ambito === 'columnas' && !columnasSeleccionadas.has(XLSX.utils.decode_cell(direccionCelda).c)) return;
+
+        if (celda.t === 's' && typeof celda.v === 'string') {
+          const coincidencias = celda.v.match(regex);
+          if (coincidencias) {
+            totalReemplazos += coincidencias.length;
+            celda.v = celda.v.replace(regex, reemplazo);
+            if (celda.w !== undefined) celda.w = celda.v;
+          }
+          return;
+        }
+
+        // Celdas con formato (fechas, números, moneda, etc.): se compara
+        // contra el texto tal como se ve, y si coincide la celda pasa a ser
+        // texto plano con el resultado — deja de ser una fecha/número real.
+        const textoMostrado = XLSX.utils.format_cell(celda);
+        if (!textoMostrado) return;
+        const coincidencias = textoMostrado.match(regex);
+        if (coincidencias) {
+          totalReemplazos += coincidencias.length;
+          celda.t = 's';
+          celda.v = textoMostrado.replace(regex, reemplazo);
+          celda.w = celda.v;
+          delete celda.z; // formato numérico/fecha — ya no aplica a una celda de texto
+        }
+      });
+    });
+
+    if (totalReemplazos === 0) throw new Error('No se encontró ninguna coincidencia.');
+
+    const bytesFinales = XLSX.write(libroActual, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+
+    mensaje.textContent = `Se hicieron ${totalReemplazos} reemplazo(s).`;
+    mensaje.style.display = 'block';
+    mostrarVistaPrevia();
+  } catch (error) {
+    alert('No se pudo procesar el archivo: ' + error.message);
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

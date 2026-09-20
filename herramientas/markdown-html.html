@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir Markdown y HTML gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Convertí Markdown a HTML o HTML a Markdown, en los dos sentidos, con vista previa en vivo — gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
+  .vista-previa {
+    background: #fff;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 16px;
+    min-height: 300px;
+    overflow: auto;
+  }
+  .vista-previa img { max-width: 100%; }
+  .vista-previa pre { background: var(--gris-fondo); padding: 10px; border-radius: 6px; overflow-x: auto; }
+  textarea#salidaMarkdown { min-height: 320px; font-family: monospace; }
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/markdown.html">Herramientas de Markdown</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Markdown ↔ HTML</h1>
+  <p>Convertí Markdown a HTML o HTML a Markdown, en el sentido que necesites. Todo en tu navegador.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="md-a-html" checked> Markdown → HTML</label>
+      <label><input type="radio" name="direccion" value="html-a-md"> HTML → Markdown</label>
+    </div>
+
+    <div class="columnas">
+      <label class="campo">
+        <span id="etiquetaEntrada">Markdown</span>
+        <textarea id="entrada" style="min-height:320px;"></textarea>
+      </label>
+      <label class="campo" id="bloqueVistaPrevia">
+        Vista previa
+        <div class="vista-previa" id="vistaPrevia"></div>
+      </label>
+      <label class="campo" id="bloqueMarkdown" style="display:none;">
+        Markdown
+        <textarea id="salidaMarkdown" readonly></textarea>
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonVerHtml" type="button" style="background:#64748b;">Ver / copiar código HTML</button>
+      <button class="boton" id="botonCopiarMarkdown" type="button" style="display:none;">Copiar Markdown</button>
+    </div>
+
+    <textarea id="salidaHtml" readonly style="display:none; margin-top:12px;"></textarea>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
+<script>
+const entrada = document.getElementById('entrada');
+const etiquetaEntrada = document.getElementById('etiquetaEntrada');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
+const bloqueMarkdown = document.getElementById('bloqueMarkdown');
+const salidaMarkdown = document.getElementById('salidaMarkdown');
+const salidaHtml = document.getElementById('salidaHtml');
+const botonVerHtml = document.getElementById('botonVerHtml');
+const botonCopiarMarkdown = document.getElementById('botonCopiarMarkdown');
+
+const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+
+const EJEMPLO_MARKDOWN = `## Hola mundo
+
+Este es un ejemplo de **Markdown** con:
+
+- Una lista
+- *Texto en cursiva*
+- [Un link](https://ejemplo.com)
+
+\`\`\`
+Un bloque de código
+\`\`\``;
+
+const EJEMPLO_HTML = `<h2>Hola mundo</h2>
+<p>Un párrafo con <strong>negrita</strong> y <em>cursiva</em>.</p>
+<ul>
+  <li>Un ítem</li>
+  <li>Otro ítem</li>
+</ul>
+<p>Un <a href="https://ejemplo.com">link</a>.</p>`;
+
+function direccionActual() {
+  return document.querySelector('input[name="direccion"]:checked').value;
+}
+
+function actualizar() {
+  if (direccionActual() === 'md-a-html') {
+    const html = marked.parse(entrada.value);
+    vistaPrevia.innerHTML = html;
+    salidaHtml.value = html;
+  } else {
+    try {
+      salidaMarkdown.value = turndownService.turndown(entrada.value);
+    } catch (error) {
+      salidaMarkdown.value = 'No se pudo convertir: ' + error.message;
+    }
+  }
+}
+
+function actualizarDireccion() {
+  const esMdAHtml = direccionActual() === 'md-a-html';
+  etiquetaEntrada.textContent = esMdAHtml ? 'Markdown' : 'HTML';
+  entrada.value = esMdAHtml ? EJEMPLO_MARKDOWN : EJEMPLO_HTML;
+  bloqueVistaPrevia.style.display = esMdAHtml ? '' : 'none';
+  bloqueMarkdown.style.display = esMdAHtml ? 'none' : '';
+  botonVerHtml.style.display = esMdAHtml ? '' : 'none';
+  botonCopiarMarkdown.style.display = esMdAHtml ? 'none' : '';
+  salidaHtml.style.display = 'none';
+  botonVerHtml.textContent = 'Ver / copiar código HTML';
+  actualizar();
+}
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', actualizarDireccion);
+});
+
+entrada.addEventListener('input', actualizar);
+
+botonVerHtml.addEventListener('click', async () => {
+  if (salidaHtml.style.display === 'none') {
+    salidaHtml.style.display = 'block';
+    botonVerHtml.textContent = 'Ocultar código HTML';
+  } else {
+    await navigator.clipboard.writeText(salidaHtml.value);
+    botonVerHtml.textContent = '¡Copiado!';
+    setTimeout(() => { botonVerHtml.textContent = 'Ocultar código HTML'; }, 1500);
+  }
+});
+
+botonCopiarMarkdown.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(salidaMarkdown.value);
+  botonCopiarMarkdown.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiarMarkdown.textContent = 'Copiar Markdown'; }, 1500);
+});
+
+actualizarDireccion();
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

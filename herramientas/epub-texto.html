@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir EPUB y texto plano gratis — Herramientas Ofimáticas</title>
+<meta name="description" content="Extraé el texto de un libro EPUB a .txt, o convertí un .txt a un libro EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../menus/index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>EPUB ↔ Texto</h1>
+  <p>Extraé el texto de un libro EPUB a .txt, o convertí un archivo de texto plano a un libro EPUB, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="epub-a-texto" checked> EPUB → Texto</label>
+      <label><input type="radio" name="direccion" value="texto-a-epub"> Texto → EPUB</label>
+    </div>
+
+    <!-- EPUB → Texto -->
+    <div id="panelEpubATexto">
+      <div class="zona-arrastre" id="zonaArrastreEpub">
+        📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+        <input type="file" id="entradaEpub" accept=".epub" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaEpub"></ul>
+      <div class="controles">
+        <button class="boton" id="botonExtraer" disabled>Extraer texto</button>
+      </div>
+      <div id="bloqueResultadoTexto" style="display:none; margin-top:20px;">
+        <textarea id="textoExtraido" readonly></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiar" type="button">Copiar texto</button>
+          <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" style="text-decoration:none; display:inline-block;">Descargar .txt</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Texto → EPUB -->
+    <div id="panelTextoAEpub" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastreTxt">
+        📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
+        <input type="file" id="entradaTxt" accept=".txt" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaTxt"></ul>
+      <div class="controles">
+        <label class="campo">
+          Título del libro
+          <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <label class="campo">
+          Autor (opcional)
+          <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAEpub" disabled>Convertir a EPUB</button>
+      </div>
+      <div class="resultado" id="resultadoEpub">
+        ✅ Listo. <a id="enlaceDescargaEpub" download="libro.epub">Descargar EPUB</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <ul style="color:var(--texto-suave);">
+      <li>No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
+      <li>EPUB → Texto separa cada capítulo con una línea en blanco, sin formato (sin negrita, listas ni imágenes). Texto → EPUB arma un único capítulo, separando párrafos por líneas en blanco.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const panelEpubATexto = document.getElementById('panelEpubATexto');
+const panelTextoAEpub = document.getElementById('panelTextoAEpub');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esEpubATexto = document.querySelector('input[name="direccion"]:checked').value === 'epub-a-texto';
+    panelEpubATexto.style.display = esEpubATexto ? '' : 'none';
+    panelTextoAEpub.style.display = esEpubATexto ? 'none' : '';
+  });
+});
+
+// --- EPUB → Texto ---
+const zonaArrastreEpub = document.getElementById('zonaArrastreEpub');
+const entradaEpub = document.getElementById('entradaEpub');
+const listaEpub = document.getElementById('listaEpub');
+const botonExtraer = document.getElementById('botonExtraer');
+const bloqueResultadoTexto = document.getElementById('bloqueResultadoTexto');
+const textoExtraido = document.getElementById('textoExtraido');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescargaTxt = document.getElementById('enlaceDescargaTxt');
+
+let archivoEpubActual = null;
+
+function mostrarArchivoEpub(archivo) {
+  archivoEpubActual = archivo;
+  listaEpub.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonExtraer.disabled = false;
+  bloqueResultadoTexto.style.display = 'none';
+}
+
+function elegirArchivoEpub(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivoEpub(archivo);
+}
+
+zonaArrastreEpub.addEventListener('click', () => entradaEpub.click());
+entradaEpub.addEventListener('change', (e) => elegirArchivoEpub(e.target.files));
+zonaArrastreEpub.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreEpub.classList.add('activa'); });
+zonaArrastreEpub.addEventListener('dragleave', () => zonaArrastreEpub.classList.remove('activa'));
+zonaArrastreEpub.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreEpub.classList.remove('activa');
+  elegirArchivoEpub(e.dataTransfer.files);
+});
+
+// Saca el texto plano de un HTML de capítulo, usando el propio parser del navegador.
+function htmlATextoPlano(html) {
+  const contenedor = document.createElement('div');
+  contenedor.innerHTML = html;
+  return contenedor.textContent.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = 'Extrayendo...';
+  try {
+    const { capitulos } = await leerEpub(archivoEpubActual);
+    const textoCompleto = capitulos.map(capitulo => htmlATextoPlano(capitulo.html)).join('\n\n\n');
+
+    textoExtraido.value = textoCompleto;
+    const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+    enlaceDescargaTxt.href = URL.createObjectURL(blob);
+    bloqueResultadoTexto.style.display = 'block';
+  } catch (error) {
+    alert('No se pudo extraer el texto: ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = 'Extraer texto';
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(textoExtraido.value);
+  botonCopiar.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiar.textContent = 'Copiar texto'; }, 1500);
+});
+
+// --- Texto → EPUB ---
+const zonaArrastreTxt = document.getElementById('zonaArrastreTxt');
+const entradaTxt = document.getElementById('entradaTxt');
+const listaTxt = document.getElementById('listaTxt');
+const tituloLibro = document.getElementById('tituloLibro');
+const botonAEpub = document.getElementById('botonAEpub');
+const resultadoEpub = document.getElementById('resultadoEpub');
+const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
+
+let archivoTxtActual = null;
+
+function mostrarArchivoTxt(archivo) {
+  archivoTxtActual = archivo;
+  listaTxt.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  botonAEpub.disabled = false;
+  resultadoEpub.classList.remove('visible');
+  if (!tituloLibro.value.trim()) {
+    tituloLibro.value = archivo.name.replace(/\.txt$/i, '');
+  }
+}
+
+function elegirArchivoTxt(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivoTxt(archivo);
+}
+
+zonaArrastreTxt.addEventListener('click', () => entradaTxt.click());
+entradaTxt.addEventListener('change', (e) => elegirArchivoTxt(e.target.files));
+zonaArrastreTxt.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreTxt.classList.add('activa'); });
+zonaArrastreTxt.addEventListener('dragleave', () => zonaArrastreTxt.classList.remove('activa'));
+zonaArrastreTxt.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreTxt.classList.remove('activa');
+  elegirArchivoTxt(e.dataTransfer.files);
+});
+
+function textoAHtml(texto) {
+  return texto.split(/\n\s*\n/).map(parrafo => {
+    const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+botonAEpub.addEventListener('click', async () => {
+  botonAEpub.disabled = true;
+  botonAEpub.textContent = 'Convirtiendo...';
+  try {
+    const titulo = tituloLibro.value.trim() || 'Documento';
+    const autor = document.getElementById('autorLibro').value.trim();
+    const texto = await archivoTxtActual.text();
+    const capitulos = [{ titulo, html: textoAHtml(texto) }];
+    const blob = await construirEpub({ titulo, autor, capitulos });
+
+    enlaceDescargaEpub.href = URL.createObjectURL(blob);
+    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    resultadoEpub.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el EPUB: ' + error.message);
+  } finally {
+    botonAEpub.disabled = false;
+    botonAEpub.textContent = 'Convertir a EPUB';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>
