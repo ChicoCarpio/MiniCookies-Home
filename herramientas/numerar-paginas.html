@@ -40,6 +40,9 @@
           <option value="bottom-right">Abajo a la derecha</option>
           <option value="bottom-center">Abajo al centro</option>
           <option value="bottom-left">Abajo a la izquierda</option>
+          <option value="top-right">Arriba a la derecha</option>
+          <option value="top-center">Arriba al centro</option>
+          <option value="top-left">Arriba a la izquierda</option>
         </select>
       </label>
       <button class="boton" id="botonNumerar" disabled>Numerar páginas</button>
@@ -103,10 +106,14 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
-function calcularPosicion(posicion, width, anchoTexto, margen) {
-  if (posicion === 'bottom-left') return margen;
-  if (posicion === 'bottom-center') return width / 2 - anchoTexto / 2;
+function calcularX(posicion, width, anchoTexto, margen) {
+  if (posicion.endsWith('-left')) return margen;
+  if (posicion.endsWith('-center')) return width / 2 - anchoTexto / 2;
   return width - anchoTexto - margen;
+}
+
+function calcularY(posicion, height, margenInferior, margenSuperior) {
+  return posicion.startsWith('top-') ? height - margenSuperior : margenInferior;
 }
 
 botonNumerar.addEventListener('click', async () => {
@@ -123,12 +130,12 @@ botonNumerar.addEventListener('click', async () => {
     const margen = 30;
 
     pdf.getPages().forEach((pagina, indice) => {
-      const { width } = pagina.getSize();
+      const { width, height } = pagina.getSize();
       const texto = String(numeroInicial + indice);
       const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
       pagina.drawText(texto, {
-        x: calcularPosicion(posicion, width, anchoTexto, margen),
-        y: 20,
+        x: calcularX(posicion, width, anchoTexto, margen),
+        y: calcularY(posicion, height, 20, margen),
         size: tamanoFuente,
         font: fuente,
         color: rgb(0.2, 0.2, 0.2),

@@ -2,12 +2,15 @@
 // nombre del archivo, en una grilla de tarjetas (mismo estilo visual que "Administrar
 // páginas"). Requiere que la página ya haya cargado pdf.js (pdfjsLib) para PDFs.
 
-async function generarMiniaturaPdf(archivo, escala) {
+// gradosExtra: rotación adicional a sumarle a la que ya trae la página (para
+// previsualizar herramientas como "Rotar PDF" antes de aplicar el cambio de verdad).
+async function generarMiniaturaPdf(archivo, escala, gradosExtra) {
   escala = escala || 0.28;
   const bytes = await archivo.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
   const pagina = await pdf.getPage(1);
-  const viewport = pagina.getViewport({ scale: escala });
+  const rotacionTotal = (pagina.rotate + (gradosExtra || 0)) % 360;
+  const viewport = pagina.getViewport({ scale: escala, rotation: rotacionTotal });
   const canvas = document.createElement('canvas');
   canvas.width = viewport.width;
   canvas.height = viewport.height;

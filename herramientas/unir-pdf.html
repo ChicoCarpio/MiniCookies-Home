@@ -35,6 +35,14 @@
     <div class="contenedor-miniaturas" id="gridArchivos"></div>
 
     <div class="controles">
+      <label class="campo">
+        Tamaño de página para las imágenes
+        <select id="tamanoPaginaImagenes">
+          <option value="a4" selected>A4 (recomendado, más consistente con los PDF)</option>
+          <option value="carta">Carta (Letter)</option>
+          <option value="original">Tamaño original de cada imagen (sin recorte, puede quedar inconsistente)</option>
+        </select>
+      </label>
       <button class="boton" id="botonUnir" disabled>Unir en un PDF</button>
     </div>
 
@@ -155,12 +163,17 @@ zonaArrastre.addEventListener('drop', (e) => {
   agregarArchivos(e.dataTransfer.files);
 });
 
+const TAMANOS_PAGINA = {
+  a4: [595, 842],
+  carta: [612, 792],
+};
 botonUnir.addEventListener('click', async () => {
   botonUnir.disabled = true;
   botonUnir.textContent = 'Uniendo...';
   try {
     const { PDFDocument } = PDFLib;
     const pdfFinal = await PDFDocument.create();
+    const tamanoElegido = document.getElementById('tamanoPaginaImagenes').value;
 
     const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
     for (const id of ordenIds) {
@@ -173,8 +186,33 @@ botonUnir.addEventListener('click', async () => {
       } else {
         const imagenEmbebida = await incrustarImagenEnPdf(pdfFinal, archivo);
         const { width, height } = imagenEmbebida.size();
-        const pagina = pdfFinal.addPage([width, height]);
-        pagina.drawImage(imagenEmbebida, { x: 0, y: 0, width, height });
+
+        if (tamanoElegido === 'original') {
+          const pagina = pdfFinal.addPage([width, height]);
+          pagina.drawImage(imagenEmbebida, { x: 0, y: 0, width, height });
+        } else {
+          // Página de tamaño estándar (A4/Carta), en la orientación que mejor
+          // se ajuste a la imagen, con la imagen centrada y escalada para
+          // llenar la página completa (recortando el sobrante si la
+          // proporción no coincide exacto) — sin bordes blancos, y todas las
+          // páginas de imagen quedan del mismo tamaño entre sí y consistentes
+          // con los PDF. El recorte queda fuera del área de la página, así
+          // que un lector de PDF nunca lo muestra.
+          const esApaisada = width > height;
+          const [anchoBase, altoBase] = TAMANOS_PAGINA[tamanoElegido];
+          const [anchoPagina, altoPagina] = esApaisada ? [altoBase, anchoBase] : [anchoBase, altoBase];
+          const escala = Math.max(anchoPagina / width, altoPagina / height);
+          const anchoFinal = width * escala;
+          const altoFinal = height * escala;
+
+          const pagina = pdfFinal.addPage([anchoPagina, altoPagina]);
+          pagina.drawImage(imagenEmbebida, {
+            x: (anchoPagina - anchoFinal) / 2,
+            y: (altoPagina - altoFinal) / 2,
+            width: anchoFinal,
+            height: altoFinal,
+          });
+        }
       }
     }
 

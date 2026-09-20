@@ -68,21 +68,28 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let archivoActual = null;
+const elGrados = document.getElementById('grados');
+
+async function actualizarVistaPrevia() {
+  listaArchivo.innerHTML = '';
+  if (!archivoActual) return;
+  try {
+    const grados = parseInt(elGrados.value, 10);
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivoActual, 0.28, grados);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivoActual.name} (${totalPaginas} pág.) — así quedaría` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivoActual.name} (no se pudo previsualizar)` }));
+  }
+}
 
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = '';
-  if (archivo) {
-    try {
-      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
-    } catch (error) {
-      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
-    }
-  }
+  await actualizarVistaPrevia();
   botonRotar.disabled = !archivo;
   resultado.classList.remove('visible');
 }
+
+elGrados.addEventListener('change', actualizarVistaPrevia);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type === 'application/pdf');

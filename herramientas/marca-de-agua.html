@@ -7,6 +7,13 @@
 <meta name="description" content="Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
+<style>
+  .controles { flex-direction: column; align-items: stretch; }
+  .controles .campo { flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; }
+  .controles .campo > span:first-child { min-width: 190px; }
+  .controles .campo input[type="range"] { width: 240px; max-width: 50vw; }
+  .controles .boton { align-self: flex-start; }
+</style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body>
@@ -30,13 +37,21 @@
     <div class="grid-miniaturas" id="listaArchivo"></div>
 
     <div class="controles">
-      <label class="campo" style="flex:1; min-width:200px;">
-        Texto de la marca de agua
-        <input type="text" id="textoMarca" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      <label class="campo">
+        <span>Texto de la marca de agua</span>
+        <input type="text" id="textoMarca" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
       </label>
       <label class="campo">
-        Opacidad
+        <span>Tamaño de letra: <span id="etiquetaTamano">60</span></span>
+        <input type="range" id="tamanoLetra" min="20" max="150" value="60">
+      </label>
+      <label class="campo">
+        <span>Opacidad: <span id="etiquetaOpacidad">15</span>%</span>
         <input type="range" id="opacidad" min="5" max="50" value="15">
+      </label>
+      <label class="campo">
+        <span>Repetir el mensaje: <span id="etiquetaRepeticiones">1</span></span>
+        <input type="range" id="repeticiones" min="1" max="20" value="1">
       </label>
       <button class="boton" id="botonAplicar" disabled>Aplicar marca de agua</button>
     </div>
@@ -67,15 +82,99 @@ const botonAplicar = document.getElementById('botonAplicar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
+const ESCALA_MINIATURA = 0.28;
+const elTexto = document.getElementById('textoMarca');
+const elTamano = document.getElementById('tamanoLetra');
+const etiquetaTamano = document.getElementById('etiquetaTamano');
+const elOpacidad = document.getElementById('opacidad');
+const etiquetaOpacidad = document.getElementById('etiquetaOpacidad');
+const elRepeticiones = document.getElementById('repeticiones');
+const etiquetaRepeticiones = document.getElementById('etiquetaRepeticiones');
+
 let archivoActual = null;
+let canvasBase = null; // miniatura de la página 1 sin marca de agua, para redibujar rápido
+let totalPaginasActual = 0;
+
+elTamano.addEventListener('input', () => etiquetaTamano.textContent = elTamano.value);
+elOpacidad.addEventListener('input', () => etiquetaOpacidad.textContent = elOpacidad.value);
+elRepeticiones.addEventListener('input', () => etiquetaRepeticiones.textContent = elRepeticiones.value);
+
+// Reparte "cantidad" copias en una cuadrícula lo más cuadrada posible
+// (ej. 4 -> 2x2, 6 -> 3x2, 1 -> 1x1) para distribuirlas parejo por la página.
+function calcularFilasColumnas(cantidad) {
+  const columnas = Math.ceil(Math.sqrt(cantidad));
+  const filas = Math.ceil(cantidad / columnas);
+  return { filas, columnas };
+}
+
+// Mismo criterio que calcularTamanoAjustado (para el PDF real) pero usando el
+// contexto 2D del canvas de la miniatura, para que la vista previa coincida.
+function calcularTamanoAjustadoCanvas(contexto, texto, anchoDisponible, altoDisponible, tamanoMaximo) {
+  const margen = 0.9;
+  let tamano = tamanoMaximo;
+  while (tamano > 3) {
+    contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+    const anchoTexto = contexto.measureText(texto).width;
+    const anchoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    const altoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    if (anchoRotado <= anchoDisponible * margen && altoRotado <= altoDisponible * margen) return tamano;
+    tamano -= 1;
+  }
+  return tamano;
+}
+
+function actualizarVistaPreviaMarca() {
+  if (!canvasBase) return;
+  const texto = elTexto.value || 'MARCA DE AGUA';
+  const opacidad = parseInt(elOpacidad.value, 10) / 100;
+  const tamanoMaximoPx = parseInt(elTamano.value, 10) * ESCALA_MINIATURA;
+  const cantidad = parseInt(elRepeticiones.value, 10);
+  const { filas, columnas } = calcularFilasColumnas(cantidad);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasBase.width;
+  canvas.height = canvasBase.height;
+  const contexto = canvas.getContext('2d');
+  contexto.drawImage(canvasBase, 0, 0);
+
+  const anchoCelda = canvas.width / columnas;
+  const altoCelda = canvas.height / filas;
+  const tamano = calcularTamanoAjustadoCanvas(contexto, texto, anchoCelda, altoCelda, tamanoMaximoPx);
+  contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+  const anchoTexto = contexto.measureText(texto).width;
+
+  contexto.save();
+  contexto.globalAlpha = opacidad;
+  contexto.fillStyle = 'rgb(128,128,128)';
+  let contador = 0;
+  for (let f = 0; f < filas && contador < cantidad; f++) {
+    for (let c = 0; c < columnas && contador < cantidad; c++) {
+      const centroX = anchoCelda * c + anchoCelda / 2;
+      const centroY = altoCelda * f + altoCelda / 2;
+      contexto.save();
+      contexto.translate(centroX - anchoTexto / 2, centroY);
+      contexto.rotate(-45 * Math.PI / 180);
+      contexto.fillText(texto, 0, 0);
+      contexto.restore();
+      contador++;
+    }
+  }
+  contexto.restore();
+
+  listaArchivo.innerHTML = '';
+  listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `${archivoActual.name} (${totalPaginasActual} pág.) — así quedaría` }));
+}
 
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
+  canvasBase = null;
   listaArchivo.innerHTML = '';
   if (archivo) {
     try {
-      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, ESCALA_MINIATURA);
+      canvasBase = elemento;
+      totalPaginasActual = totalPaginas;
+      actualizarVistaPreviaMarca();
     } catch (error) {
       listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
     }
@@ -83,6 +182,11 @@ async function mostrarArchivo(archivo) {
   botonAplicar.disabled = !archivo;
   resultado.classList.remove('visible');
 }
+
+elTexto.addEventListener('input', actualizarVistaPreviaMarca);
+elTamano.addEventListener('input', actualizarVistaPreviaMarca);
+elOpacidad.addEventListener('input', actualizarVistaPreviaMarca);
+elRepeticiones.addEventListener('input', actualizarVistaPreviaMarca);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
@@ -99,6 +203,22 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
+// Encuentra el tamaño de letra más grande (hasta tamanoMaximo) tal que el
+// texto, ya rotado 45°, quepa dentro de la página — para que un mensaje largo
+// se achique en vez de salirse de los bordes.
+function calcularTamanoAjustado(fuente, texto, anchoPagina, altoPagina, tamanoMaximo) {
+  const margen = 0.9; // deja un 10% de aire
+  let tamano = tamanoMaximo;
+  while (tamano > 6) {
+    const anchoTexto = fuente.widthOfTextAtSize(texto, tamano);
+    const anchoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    const altoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    if (anchoRotado <= anchoPagina * margen && altoRotado <= altoPagina * margen) return tamano;
+    tamano -= 2;
+  }
+  return tamano;
+}
+
 botonAplicar.addEventListener('click', async () => {
   botonAplicar.disabled = true;
   botonAplicar.textContent = 'Aplicando...';
@@ -107,22 +227,36 @@ botonAplicar.addEventListener('click', async () => {
     const bytes = await archivoActual.arrayBuffer();
     const pdf = await PDFDocument.load(bytes);
     const fuente = await pdf.embedFont(StandardFonts.HelveticaBold);
-    const texto = document.getElementById('textoMarca').value || 'MARCA DE AGUA';
-    const opacidad = parseInt(document.getElementById('opacidad').value, 10) / 100;
-    const tamanoFuente = 60;
-    const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
+    const texto = elTexto.value || 'MARCA DE AGUA';
+    const opacidad = parseInt(elOpacidad.value, 10) / 100;
+    const tamanoMaximo = parseInt(elTamano.value, 10);
+    const cantidad = parseInt(elRepeticiones.value, 10);
+    const { filas, columnas } = calcularFilasColumnas(cantidad);
 
     pdf.getPages().forEach((pagina) => {
       const { width, height } = pagina.getSize();
-      pagina.drawText(texto, {
-        x: width / 2 - anchoTexto / 2,
-        y: height / 2,
-        size: tamanoFuente,
-        font: fuente,
-        color: rgb(0.5, 0.5, 0.5),
-        opacity: opacidad,
-        rotate: degrees(45),
-      });
+      const anchoCelda = width / columnas;
+      const altoCelda = height / filas;
+      const tamanoFuente = calcularTamanoAjustado(fuente, texto, anchoCelda, altoCelda, tamanoMaximo);
+      const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
+
+      let contador = 0;
+      for (let f = 0; f < filas && contador < cantidad; f++) {
+        for (let c = 0; c < columnas && contador < cantidad; c++) {
+          const centroX = anchoCelda * c + anchoCelda / 2;
+          const centroY = altoCelda * f + altoCelda / 2;
+          pagina.drawText(texto, {
+            x: centroX - anchoTexto / 2,
+            y: centroY,
+            size: tamanoFuente,
+            font: fuente,
+            color: rgb(0.5, 0.5, 0.5),
+            opacity: opacidad,
+            rotate: degrees(45),
+          });
+          contador++;
+        }
+      }
     });
 
     const bytesFinales = await pdf.save();
