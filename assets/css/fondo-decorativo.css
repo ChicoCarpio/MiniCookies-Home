@@ -1,0 +1,19 @@
+/* Fondo decorativo del sitio: unos pocos íconos sueltos (galleta, hoja,
+   engranaje, bombilla, lupa, checks, carta, base de datos, code, folder),
+   ubicados al azar por fondo-decorativo.js, como marca de agua muy tenue
+   detrás del contenido — nunca como imagen protagonista. */
+#fondoDecorativo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+#fondoDecorativo img {
+  position: absolute;
+  opacity: 0.08;
+}
+@media (prefers-color-scheme: dark) {
+  #fondoDecorativo img { opacity: 0.1; }
+}
+:root[data-theme="dark"] #fondoDecorativo img { opacity: 0.1; }
