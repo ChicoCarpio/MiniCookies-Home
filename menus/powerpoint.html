@@ -3,103 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Herramientas de PowerPoint Gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Extraer texto y generar presentaciones PowerPoint — gratis y sin subir tus archivos a ningún servidor.">
+<title data-i18n="titulo-pagina">Herramientas de PowerPoint Gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraer texto y generar presentaciones PowerPoint — gratis y sin subir tus archivos a ningún servidor.">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  "es": {
+    "titulo-pagina": "Herramientas de PowerPoint Gratis — Herramientas Ofimáticas",
+    "meta-descripcion": "Extraer texto y generar presentaciones PowerPoint — gratis y sin subir tus archivos a ningún servidor.",
+    "hero-titulo": "📽️ Herramientas de PowerPoint",
+    "hero-subtitulo": "Herramientas para presentaciones .pptx.",
+    "tool-extraer-texto-powerpoint-titulo": "Extraer texto de PowerPoint",
+    "tool-extraer-texto-powerpoint-desc": "Sacar todo el texto de una .pptx a texto plano, por diapositiva.",
+    "tool-generar-powerpoint-titulo": "Crear presentación PowerPoint",
+    "tool-generar-powerpoint-desc": "Armá diapositivas con título, texto y formato con botones — sin símbolos.",
+    "tool-powerpoint-a-pdf-titulo": "PowerPoint a PDF",
+    "tool-powerpoint-a-pdf-desc": "Diapositivas reales cuando se puede; si no, un PDF con el texto. (Herramienta compartida con la categoría PDF.)",
+    "tool-dividir-powerpoint-titulo": "Dividir PowerPoint",
+    "tool-dividir-powerpoint-desc": "Separá una presentación en una mini-presentación por diapositiva.",
+    "tool-administrar-diapositivas-titulo": "Administrar / reordenar diapositivas",
+    "tool-administrar-diapositivas-desc": "Reordená o eliminá diapositivas sin re-renderizar nada.",
+    "tool-reparar-powerpoint-titulo": "Reparar PowerPoint",
+    "tool-reparar-powerpoint-desc": "Descartar solo las diapositivas dañadas, conservando el resto.",
+    "tool-extraer-imagenes-powerpoint-titulo": "Extraer imágenes de PowerPoint",
+    "tool-extraer-imagenes-powerpoint-desc": "Sacar las imágenes embebidas dentro de una .pptx.",
+    "tool-extraer-notas-powerpoint-titulo": "Extraer notas del orador",
+    "tool-extraer-notas-powerpoint-desc": "Sacá el texto de las notas de cada diapositiva.",
+    "tool-powerpoint-a-imagenes-titulo": "PowerPoint a imágenes",
+    "tool-powerpoint-a-imagenes-desc": "Exportá cada diapositiva como imagen PNG."
+  },
+  "en": {
+    "titulo-pagina": "Free PowerPoint Tools — Office Tools",
+    "meta-descripcion": "Extract text and generate PowerPoint presentations — free and without uploading your files to any server.",
+    "hero-titulo": "📽️ PowerPoint tools",
+    "hero-subtitulo": "Tools for .pptx presentations.",
+    "tool-extraer-texto-powerpoint-titulo": "Extract text from PowerPoint",
+    "tool-extraer-texto-powerpoint-desc": "Pull all the text out of a .pptx into plain text, slide by slide.",
+    "tool-generar-powerpoint-titulo": "Create PowerPoint presentation",
+    "tool-generar-powerpoint-desc": "Build slides with title, text and formatting using buttons — no symbols.",
+    "tool-powerpoint-a-pdf-titulo": "PowerPoint to PDF",
+    "tool-powerpoint-a-pdf-desc": "Real slides when possible; otherwise, a PDF with the text. (Tool shared with the PDF category.)",
+    "tool-dividir-powerpoint-titulo": "Split PowerPoint",
+    "tool-dividir-powerpoint-desc": "Split a presentation into one mini-presentation per slide.",
+    "tool-administrar-diapositivas-titulo": "Manage / reorder slides",
+    "tool-administrar-diapositivas-desc": "Reorder or delete slides without re-rendering anything.",
+    "tool-reparar-powerpoint-titulo": "Repair PowerPoint",
+    "tool-reparar-powerpoint-desc": "Discard only the damaged slides, keeping the rest.",
+    "tool-extraer-imagenes-powerpoint-titulo": "Extract images from PowerPoint",
+    "tool-extraer-imagenes-powerpoint-desc": "Pull out the images embedded inside a .pptx file.",
+    "tool-extraer-notas-powerpoint-titulo": "Extract speaker notes",
+    "tool-extraer-notas-powerpoint-desc": "Pull out the notes text from each slide.",
+    "tool-powerpoint-a-imagenes-titulo": "PowerPoint to images",
+    "tool-powerpoint-a-imagenes-desc": "Export every slide as a PNG image."
+  }
+};
+</script>
 </head>
 <body>
 
 <header class="sitio">
   <div class="marca"><a href="index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
   <nav class="sitio">
-    <a href="index.html">Todas las categorías</a>
-    <a href="privacidad.html">Privacidad</a>
-    <a href="terminos.html">Términos de uso</a>
+    <a href="index.html" data-i18n="nav-todas-cat">Todas las categorías</a>
+    <a href="privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
     <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
   <section class="hero">
-    <h1>📽️ Herramientas de PowerPoint</h1>
-    <p>Herramientas para presentaciones .pptx.</p>
-    <div class="aviso-privacidad">
+    <h1 data-i18n="hero-titulo">📽️ Herramientas de PowerPoint</h1>
+    <p data-i18n="hero-subtitulo">Herramientas para presentaciones .pptx.</p>
+    <div class="aviso-privacidad" data-i18n="aviso-privacidad">
       🔒 Tus archivos nunca se suben a ningún servidor: todo el procesamiento ocurre en tu propia computadora.
     </div>
   </section>
 
-  <div class="anuncio" id="anuncio-superior">Espacio publicitario</div>
+  <div class="anuncio" id="anuncio-superior" data-i18n="anuncio">Espacio publicitario</div>
 
   <section id="herramientas">
     <div class="grid-herramientas">
 
       <a class="tarjeta-herramienta" href="../herramientas/extraer-texto-powerpoint.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">📝</div>
-        <h3>Extraer texto de PowerPoint</h3>
-        <p>Sacar todo el texto de una .pptx a texto plano, por diapositiva.</p>
+        <h3 data-i18n="tool-extraer-texto-powerpoint-titulo">Extraer texto de PowerPoint</h3>
+        <p data-i18n="tool-extraer-texto-powerpoint-desc">Sacar todo el texto de una .pptx a texto plano, por diapositiva.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/generar-powerpoint.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">✍️</div>
-        <h3>Crear presentación PowerPoint</h3>
-        <p>Armá diapositivas con título, texto y formato con botones — sin símbolos.</p>
+        <h3 data-i18n="tool-generar-powerpoint-titulo">Crear presentación PowerPoint</h3>
+        <p data-i18n="tool-generar-powerpoint-desc">Armá diapositivas con título, texto y formato con botones — sin símbolos.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/powerpoint-a-pdf.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">📄</div>
-        <h3>PowerPoint a PDF</h3>
-        <p>Diapositivas reales cuando se puede; si no, un PDF con el texto. (Herramienta compartida con la categoría PDF.)</p>
+        <h3 data-i18n="tool-powerpoint-a-pdf-titulo">PowerPoint a PDF</h3>
+        <p data-i18n="tool-powerpoint-a-pdf-desc">Diapositivas reales cuando se puede; si no, un PDF con el texto. (Herramienta compartida con la categoría PDF.)</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/dividir-powerpoint.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">✂️</div>
-        <h3>Dividir PowerPoint</h3>
-        <p>Separá una presentación en una mini-presentación por diapositiva.</p>
+        <h3 data-i18n="tool-dividir-powerpoint-titulo">Dividir PowerPoint</h3>
+        <p data-i18n="tool-dividir-powerpoint-desc">Separá una presentación en una mini-presentación por diapositiva.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/administrar-diapositivas.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">🔀</div>
-        <h3>Administrar / reordenar diapositivas</h3>
-        <p>Reordená o eliminá diapositivas sin re-renderizar nada.</p>
+        <h3 data-i18n="tool-administrar-diapositivas-titulo">Administrar / reordenar diapositivas</h3>
+        <p data-i18n="tool-administrar-diapositivas-desc">Reordená o eliminá diapositivas sin re-renderizar nada.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/reparar-powerpoint.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">🩹</div>
-        <h3>Reparar PowerPoint</h3>
-        <p>Descartar solo las diapositivas dañadas, conservando el resto.</p>
+        <h3 data-i18n="tool-reparar-powerpoint-titulo">Reparar PowerPoint</h3>
+        <p data-i18n="tool-reparar-powerpoint-desc">Descartar solo las diapositivas dañadas, conservando el resto.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/extraer-imagenes-powerpoint.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">🖼️</div>
-        <h3>Extraer imágenes de PowerPoint</h3>
-        <p>Sacar las imágenes embebidas dentro de una .pptx.</p>
+        <h3 data-i18n="tool-extraer-imagenes-powerpoint-titulo">Extraer imágenes de PowerPoint</h3>
+        <p data-i18n="tool-extraer-imagenes-powerpoint-desc">Sacar las imágenes embebidas dentro de una .pptx.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/extraer-notas-powerpoint.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">🗒️</div>
-        <h3>Extraer notas del orador</h3>
-        <p>Sacá el texto de las notas de cada diapositiva.</p>
+        <h3 data-i18n="tool-extraer-notas-powerpoint-titulo">Extraer notas del orador</h3>
+        <p data-i18n="tool-extraer-notas-powerpoint-desc">Sacá el texto de las notas de cada diapositiva.</p>
       </a>
       <a class="tarjeta-herramienta" href="../herramientas/powerpoint-a-imagenes.html">
-        <span class="badge listo">Listo</span>
+        <span class="badge listo" data-i18n="badge-listo">Listo</span>
         <div class="icono">📤</div>
-        <h3>PowerPoint a imágenes</h3>
-        <p>Exportá cada diapositiva como imagen PNG.</p>
+        <h3 data-i18n="tool-powerpoint-a-imagenes-titulo">PowerPoint a imágenes</h3>
+        <p data-i18n="tool-powerpoint-a-imagenes-desc">Exportá cada diapositiva como imagen PNG.</p>
       </a>
 
     </div>
   </section>
 
-  <div class="anuncio" id="anuncio-inferior">Espacio publicitario</div>
+  <div class="anuncio" id="anuncio-inferior" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="privacidad.html">Política de privacidad</a> · <a href="terminos.html">Términos de uso</a> · <a href="creditos.html">Créditos</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="privacidad.html">Política de privacidad</a> · <a href="terminos.html" data-i18n="nav-terminos">Términos de uso</a> · <a href="creditos.html">Créditos</a> · <a href="contacto.html">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/tema.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -414,12 +414,19 @@ footer.sitio {
 
 label.campo { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--texto-suave); }
 
-input[type="range"], input[type="number"], select {
+input[type="range"], input[type="number"], input[type="text"], input[type="email"], select {
   padding: 6px 8px;
   border: 1px solid var(--gris-borde);
   border-radius: 6px;
   background: var(--superficie);
   color: var(--texto);
+}
+
+input[type="text"], input[type="email"] {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 1rem;
 }
 
 textarea {
