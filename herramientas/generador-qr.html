@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de códigos QR gratis — Mini Cookies</title>
+<meta name="description" content="Generá un código QR a partir de un link o texto, gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Generador de códigos QR</h1>
+  <p>Escribí un link o texto y generá un código QR al instante. Se genera en tu navegador, no se envía a ningún servidor.</p>
+
+  <div class="panel-herramienta">
+    <label class="campo">
+      Texto o URL
+      <input type="text" id="entradaTexto" placeholder="https://ejemplo.com" style="padding:10px; border:1px solid var(--gris-borde); border-radius:6px; font-size:1rem;">
+    </label>
+
+    <div class="controles">
+      <label class="campo">
+        Tamaño
+        <select id="tamano">
+          <option value="200">Pequeño (200px)</option>
+          <option value="300" selected>Mediano (300px)</option>
+          <option value="500">Grande (500px)</option>
+        </select>
+      </label>
+      <button class="boton" id="botonGenerar">Generar QR</button>
+    </div>
+
+    <div id="contenedorQR" style="margin-top:20px; display:flex; justify-content:center;"></div>
+
+    <div class="resultado" id="resultado" style="text-align:center;">
+      ✅ Listo. <a id="enlaceDescarga" download="codigo-qr.png">Descargar QR como imagen</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const entradaTexto = document.getElementById('entradaTexto');
+const botonGenerar = document.getElementById('botonGenerar');
+const contenedorQR = document.getElementById('contenedorQR');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+function generarQR() {
+  const texto = entradaTexto.value.trim();
+  contenedorQR.innerHTML = '';
+  resultado.classList.remove('visible');
+  if (!texto) return;
+
+  const tamano = parseInt(document.getElementById('tamano').value, 10);
+  new QRCode(contenedorQR, {
+    text: texto,
+    width: tamano,
+    height: tamano,
+    correctLevel: QRCode.CorrectLevel.M,
+  });
+
+  setTimeout(() => {
+    const canvas = contenedorQR.querySelector('canvas');
+    if (canvas) {
+      enlaceDescarga.href = canvas.toDataURL('image/png');
+      resultado.classList.add('visible');
+    }
+  }, 100);
+}
+
+botonGenerar.addEventListener('click', generarQR);
+entradaTexto.addEventListener('keydown', (e) => { if (e.key === 'Enter') generarQR(); });
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

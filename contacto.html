@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto — Mini Cookies</title>
+<link rel="stylesheet" href="assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Contacto</h1>
+
+  <div class="panel-herramienta">
+    <p>¿Encontraste un error, te falta una herramienta o tenés alguna duda? Escribinos acá abajo — leemos todos los mensajes.</p>
+
+    <form id="formularioContacto" action="https://api.web3forms.com/submit" method="POST" style="display:flex; flex-direction:column; gap:16px; max-width:520px; margin-top:16px;">
+      <input type="hidden" name="access_key" value="199ab81f-6404-4c14-bfb3-db02fd1fc2f3">
+      <input type="hidden" name="subject" value="Nuevo mensaje desde Mini Cookies">
+      <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+
+      <label class="campo">
+        Nombre
+        <input type="text" name="name" required>
+      </label>
+
+      <label class="campo">
+        Email
+        <input type="email" name="email" required>
+      </label>
+
+      <label class="campo">
+        Mensaje
+        <textarea name="message" style="min-height:140px;" required></textarea>
+      </label>
+
+      <button class="boton" type="submit" id="botonEnviar">Enviar mensaje</button>
+
+      <p id="mensajeEstado" style="display:none;"></p>
+    </form>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="privacidad.html">Política de privacidad</a> · <a href="terminos.html">Términos de uso</a> · <a href="creditos.html">Créditos</a> · <a href="contacto.html">Contacto</a></p>
+</footer>
+
+<script src="assets/js/tema.js"></script>
+<script>
+const formulario = document.getElementById('formularioContacto');
+const botonEnviar = document.getElementById('botonEnviar');
+const mensajeEstado = document.getElementById('mensajeEstado');
+
+formulario.addEventListener('submit', async function(evento) {
+  evento.preventDefault();
+  botonEnviar.disabled = true;
+  botonEnviar.textContent = 'Enviando…';
+  mensajeEstado.style.display = 'none';
+
+  try {
+    const datos = new FormData(formulario);
+    const respuesta = await fetch(formulario.action, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: datos
+    });
+    const resultado = await respuesta.json();
+
+    if (resultado.success) {
+      formulario.reset();
+      mensajeEstado.textContent = '¡Mensaje enviado! Gracias por escribirnos.';
+      mensajeEstado.style.color = 'var(--verde, #16a34a)';
+    } else {
+      throw new Error(resultado.message || 'Error desconocido');
+    }
+  } catch (error) {
+    mensajeEstado.textContent = 'No se pudo enviar el mensaje. Probá de nuevo en un momento.';
+    mensajeEstado.style.color = '#dc2626';
+  }
+
+  mensajeEstado.style.display = 'block';
+  botonEnviar.disabled = false;
+  botonEnviar.textContent = 'Enviar mensaje';
+});
+</script>
+</body>
+</html>

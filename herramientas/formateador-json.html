@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formatear y validar JSON gratis — Mini Cookies</title>
+<meta name="description" content="Formateá, validá y minificá JSON al instante, gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Formatear y validar JSON</h1>
+  <p>Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error. Todo en tu navegador.</p>
+
+  <div class="panel-herramienta">
+    <textarea id="entrada" placeholder='{"ejemplo": true, "numero": 42}'></textarea>
+
+    <div class="controles">
+      <button class="boton" id="botonFormatear" type="button">Formatear (indentado)</button>
+      <button class="boton" id="botonMinificar" type="button" style="background:#64748b;">Minificar</button>
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar resultado</button>
+    </div>
+
+    <p id="mensajeError" style="color:#dc2626; display:none;"></p>
+    <p id="mensajeOk" style="color:var(--verde); display:none;">✅ JSON válido.</p>
+
+    <textarea id="salida" readonly style="margin-top:12px;"></textarea>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const entrada = document.getElementById('entrada');
+const salida = document.getElementById('salida');
+const mensajeError = document.getElementById('mensajeError');
+const mensajeOk = document.getElementById('mensajeOk');
+
+function procesar(indentacion) {
+  mensajeError.style.display = 'none';
+  mensajeOk.style.display = 'none';
+  try {
+    const objeto = JSON.parse(entrada.value);
+    salida.value = indentacion === null ? JSON.stringify(objeto) : JSON.stringify(objeto, null, indentacion);
+    mensajeOk.style.display = 'block';
+  } catch (error) {
+    salida.value = '';
+    mensajeError.textContent = '❌ ' + error.message;
+    mensajeError.style.display = 'block';
+  }
+}
+
+document.getElementById('botonFormatear').addEventListener('click', () => procesar(2));
+document.getElementById('botonMinificar').addEventListener('click', () => procesar(null));
+
+document.getElementById('botonCopiar').addEventListener('click', async () => {
+  if (!salida.value) return;
+  await navigator.clipboard.writeText(salida.value);
+  const boton = document.getElementById('botonCopiar');
+  const textoOriginal = boton.textContent;
+  boton.textContent = '¡Copiado!';
+  setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

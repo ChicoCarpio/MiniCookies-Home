@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Lorem Ipsum gratis — Mini Cookies</title>
+<meta name="description" content="Generá texto de relleno Lorem Ipsum por párrafos, oraciones o palabras, gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Generador de Lorem Ipsum</h1>
+  <p>Generá texto de relleno para maquetas y pruebas. Todo en tu navegador.</p>
+
+  <div class="panel-herramienta">
+    <div class="controles">
+      <label class="campo">
+        Cantidad
+        <input type="number" id="cantidad" value="3" min="1" max="1000" style="width:80px;">
+      </label>
+      <label class="campo">
+        Unidad
+        <select id="unidad">
+          <option value="parrafos">Párrafos</option>
+          <option value="oraciones">Oraciones</option>
+          <option value="palabras">Palabras</option>
+        </select>
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="empezarClasico" checked> Empezar con "Lorem ipsum dolor sit amet..."
+      </label>
+      <button class="boton" id="botonGenerar" type="button">Generar</button>
+    </div>
+
+    <textarea id="resultado" readonly style="margin-top:16px;"></textarea>
+    <div class="controles">
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar</button>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const PALABRAS = ('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor ' +
+  'incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ' +
+  'ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit ' +
+  'voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non ' +
+  'proident sunt culpa qui officia deserunt mollit anim id est laborum').split(' ');
+
+function palabraAleatoria() {
+  return PALABRAS[Math.floor(Math.random() * PALABRAS.length)];
+}
+
+function generarOracion(cantidadPalabras) {
+  const palabras = [];
+  for (let i = 0; i < cantidadPalabras; i++) palabras.push(palabraAleatoria());
+  const oracion = palabras.join(' ');
+  return oracion.charAt(0).toUpperCase() + oracion.slice(1) + '.';
+}
+
+function generarParrafo(cantidadOraciones) {
+  const oraciones = [];
+  for (let i = 0; i < cantidadOraciones; i++) {
+    oraciones.push(generarOracion(6 + Math.floor(Math.random() * 10)));
+  }
+  return oraciones.join(' ');
+}
+
+document.getElementById('botonGenerar').addEventListener('click', () => {
+  // El atributo "max" del input es solo una sugerencia visual del navegador
+  // (le pone el borde rojo), no impide leer un valor más grande — sin este
+  // límite acá, pedir varios millones de párrafos podía colgar o tirar abajo
+  // la pestaña por consumo de memoria/CPU.
+  const campoCantidad = document.getElementById('cantidad');
+  const limiteMaximo = Number(campoCantidad.max) || 50;
+  const cantidadPedida = parseInt(campoCantidad.value, 10) || 1;
+  const cantidad = Math.min(limiteMaximo, Math.max(1, cantidadPedida));
+  if (cantidadPedida > limiteMaximo) campoCantidad.value = cantidad;
+  const unidad = document.getElementById('unidad').value;
+  const empezarClasico = document.getElementById('empezarClasico').checked;
+
+  let partes = [];
+  if (unidad === 'palabras') {
+    const palabras = [];
+    for (let i = 0; i < cantidad; i++) palabras.push(palabraAleatoria());
+    partes = [palabras.join(' ')];
+  } else if (unidad === 'oraciones') {
+    for (let i = 0; i < cantidad; i++) partes.push(generarOracion(6 + Math.floor(Math.random() * 10)));
+  } else {
+    for (let i = 0; i < cantidad; i++) partes.push(generarParrafo(4 + Math.floor(Math.random() * 3)));
+  }
+
+  let resultado = unidad === 'palabras' ? partes[0] : partes.join(unidad === 'oraciones' ? ' ' : '\n\n');
+
+  if (empezarClasico) {
+    const inicioClasico = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    if (unidad === 'palabras') {
+      resultado = 'lorem ipsum dolor sit amet consectetur adipiscing elit ' + resultado;
+    } else {
+      const resto = resultado.split(unidad === 'oraciones' ? ' ' : '\n\n').slice(1);
+      resultado = [inicioClasico, ...resto].join(unidad === 'oraciones' ? ' ' : '\n\n');
+    }
+  }
+
+  document.getElementById('resultado').value = resultado;
+});
+
+document.getElementById('botonCopiar').addEventListener('click', async () => {
+  const resultado = document.getElementById('resultado');
+  if (!resultado.value) return;
+  await navigator.clipboard.writeText(resultado.value);
+  const boton = document.getElementById('botonCopiar');
+  const textoOriginal = boton.textContent;
+  boton.textContent = '¡Copiado!';
+  setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+});
+
+document.getElementById('botonGenerar').click();
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>

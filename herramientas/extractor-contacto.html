@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extraer emails, teléfonos y links de un texto — Mini Cookies</title>
+<meta name="description" content="Extraé todos los emails, teléfonos y links de un texto pegado, gratis y sin enviar nada a ningún servidor.">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Extraer emails, teléfonos y links</h1>
+  <p>Pegá cualquier texto (un correo, una página, tus notas) y sacamos todos los emails, teléfonos y links que contenga. Todo en tu navegador.</p>
+
+  <div class="panel-herramienta">
+    <textarea id="entrada" placeholder="Pegá acá el texto donde buscar..."></textarea>
+
+    <div class="controles">
+      <button class="boton" id="botonExtraer" type="button">Extraer</button>
+    </div>
+
+    <div class="estadisticas" id="estadisticas" style="display:none;">
+      <div class="estadistica"><div class="numero" id="numEmails">0</div><div class="etiqueta">Emails</div></div>
+      <div class="estadistica"><div class="numero" id="numTelefonos">0</div><div class="etiqueta">Teléfonos</div></div>
+      <div class="estadistica"><div class="numero" id="numLinks">0</div><div class="etiqueta">Links</div></div>
+    </div>
+
+    <div id="bloqueResultados" style="display:none; margin-top:16px;">
+      <label class="campo">
+        Emails
+        <textarea id="resultadoEmails" readonly style="min-height:100px;"></textarea>
+      </label>
+      <label class="campo">
+        Teléfonos
+        <textarea id="resultadoTelefonos" readonly style="min-height:100px;"></textarea>
+      </label>
+      <label class="campo">
+        Links
+        <textarea id="resultadoLinks" readonly style="min-height:100px;"></textarea>
+      </label>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const RE_EMAIL = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+const RE_TELEFONO = /(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g;
+const RE_LINK = /(https?:\/\/[^\s<>"')]+)/g;
+
+function extraerUnico(texto, regex) {
+  const coincidencias = texto.match(regex) || [];
+  return [...new Set(coincidencias.map(c => c.trim()))];
+}
+
+document.getElementById('botonExtraer').addEventListener('click', () => {
+  const texto = document.getElementById('entrada').value;
+
+  const emails = extraerUnico(texto, RE_EMAIL);
+  const links = extraerUnico(texto, RE_LINK);
+  // Se excluyen del resultado de teléfonos los números que ya forman parte de un link o email,
+  // para no listar dos veces la misma coincidencia bajo categorías distintas.
+  const textoSinLinksNiEmails = texto.replace(RE_LINK, ' ').replace(RE_EMAIL, ' ');
+  const telefonos = extraerUnico(textoSinLinksNiEmails, RE_TELEFONO).filter(t => t.replace(/\D/g, '').length >= 7);
+
+  document.getElementById('numEmails').textContent = emails.length;
+  document.getElementById('numTelefonos').textContent = telefonos.length;
+  document.getElementById('numLinks').textContent = links.length;
+
+  document.getElementById('resultadoEmails').value = emails.join('\n');
+  document.getElementById('resultadoTelefonos').value = telefonos.join('\n');
+  document.getElementById('resultadoLinks').value = links.join('\n');
+
+  document.getElementById('estadisticas').style.display = 'grid';
+  document.getElementById('bloqueResultados').style.display = 'block';
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+</body>
+</html>
