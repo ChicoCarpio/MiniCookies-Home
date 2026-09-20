@@ -15,8 +15,7 @@ window.i18nComun = {
     'footer-privacidad': 'Política de privacidad',
     'footer-terminos': 'Términos de uso',
     'footer-creditos': 'Créditos',
-    'footer-contacto': 'Contacto',
-    'badge-listo': 'Listo'
+    'footer-contacto': 'Contacto'
   },
   en: {
     'nav-todas': 'All tools',
@@ -29,8 +28,7 @@ window.i18nComun = {
     'footer-privacidad': 'Privacy policy',
     'footer-terminos': 'Terms of use',
     'footer-creditos': 'Credits',
-    'footer-contacto': 'Contact',
-    'badge-listo': 'Ready'
+    'footer-contacto': 'Contact'
   }
 };
 
