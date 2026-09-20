@@ -7,6 +7,10 @@
 <meta name="description" content="Formateá, validá y minificá JSON al instante, gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
+<style>
+  #entrada.json-invalido { border: 2px solid #dc2626; }
+  #entrada.json-valido { border: 2px solid var(--verde); }
+</style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body>
@@ -50,22 +54,61 @@ const salida = document.getElementById('salida');
 const mensajeError = document.getElementById('mensajeError');
 const mensajeOk = document.getElementById('mensajeOk');
 
+function posicionALineaColumna(texto, posicion) {
+  const antes = texto.slice(0, posicion);
+  const lineas = antes.split('\n');
+  return { linea: lineas.length, columna: lineas[lineas.length - 1].length + 1 };
+}
+
+function lineaColumnaAPosicion(texto, linea, columna) {
+  const lineas = texto.split('\n');
+  let posicion = 0;
+  for (let i = 0; i < linea - 1; i++) posicion += lineas[i].length + 1;
+  return posicion + columna - 1;
+}
+
 function procesar(indentacion) {
   mensajeError.style.display = 'none';
   mensajeOk.style.display = 'none';
+  entrada.classList.remove('json-invalido', 'json-valido');
   try {
     const objeto = JSON.parse(entrada.value);
     salida.value = indentacion === null ? JSON.stringify(objeto) : JSON.stringify(objeto, null, indentacion);
     mensajeOk.style.display = 'block';
+    entrada.classList.add('json-valido');
   } catch (error) {
     salida.value = '';
-    mensajeError.textContent = '❌ ' + error.message;
+    entrada.classList.add('json-invalido');
+
+    let posicion = null;
+    const porPosicion = error.message.match(/position (\d+)/);
+    const porLineaColumna = error.message.match(/line (\d+) column (\d+)/);
+    if (porPosicion) {
+      posicion = parseInt(porPosicion[1], 10);
+    } else if (porLineaColumna) {
+      posicion = lineaColumnaAPosicion(entrada.value, parseInt(porLineaColumna[1], 10), parseInt(porLineaColumna[2], 10));
+    }
+
+    let mensaje = '❌ ' + error.message;
+    if (posicion !== null && posicion >= 0 && posicion <= entrada.value.length) {
+      const { linea, columna } = posicionALineaColumna(entrada.value, posicion);
+      mensaje += ` — mirá la línea ${linea}, columna ${columna} (marcada abajo)`;
+      entrada.focus();
+      entrada.setSelectionRange(posicion, Math.min(entrada.value.length, posicion + 1));
+    }
+    mensajeError.textContent = mensaje;
     mensajeError.style.display = 'block';
   }
 }
 
 document.getElementById('botonFormatear').addEventListener('click', () => procesar(2));
 document.getElementById('botonMinificar').addEventListener('click', () => procesar(null));
+
+entrada.addEventListener('input', () => {
+  entrada.classList.remove('json-invalido', 'json-valido');
+  mensajeError.style.display = 'none';
+  mensajeOk.style.display = 'none';
+});
 
 document.getElementById('botonCopiar').addEventListener('click', async () => {
   if (!salida.value) return;

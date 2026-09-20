@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Comprimir imagen gratis — Mini Cookies</title>
-<meta name="description" content="Comprimí imágenes JPG, PNG o WebP sin perder demasiada calidad, gratis y sin subirlas a ningún servidor.">
+<meta name="description" content="Comprimí imágenes a JPG o WebP sin perder demasiada calidad, gratis y sin subirlas a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
@@ -19,7 +19,7 @@
 
 <main>
   <h1>Comprimir imagen</h1>
-  <p>Elegí una imagen (JPG, PNG o WebP) y reducí su peso.</p>
+  <p>Elegí una imagen (JPG, PNG o WebP) y convertila a JPG o WebP con menos peso.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -39,7 +39,6 @@
         <select id="formato">
           <option value="image/jpeg">JPG</option>
           <option value="image/webp">WebP</option>
-          <option value="image/png">PNG</option>
         </select>
       </label>
       <button class="boton" id="botonComprimir" disabled>Comprimir imagen</button>
@@ -74,7 +73,6 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 const elCalidad = document.getElementById('calidad');
 const etiquetaCalidad = document.getElementById('etiquetaCalidad');
 const estadisticas = document.getElementById('estadisticas');
-
 let archivoActual = null;
 
 elCalidad.addEventListener('input', () => etiquetaCalidad.textContent = elCalidad.value);
@@ -133,14 +131,19 @@ botonComprimir.addEventListener('click', async () => {
 
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, calidad));
 
-    const extension = formato === 'image/jpeg' ? 'jpg' : formato === 'image/webp' ? 'webp' : 'png';
+    const extension = formato === 'image/jpeg' ? 'jpg' : 'webp';
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `imagen-comprimida.${extension}`;
 
     document.getElementById('pesoOriginal').textContent = formatearPeso(archivoActual.size);
     document.getElementById('pesoFinal').textContent = formatearPeso(blob.size);
-    const ahorro = Math.max(0, Math.round((1 - blob.size / archivoActual.size) * 100));
-    document.getElementById('porcentajeAhorro').textContent = `${ahorro}%`;
+    const diferencia = 1 - blob.size / archivoActual.size;
+    const porcentajeAhorro = document.getElementById('porcentajeAhorro');
+    if (diferencia < 0) {
+      porcentajeAhorro.textContent = `+${Math.round(-diferencia * 100)}% más pesado`;
+    } else {
+      porcentajeAhorro.textContent = `${Math.round(diferencia * 100)}%`;
+    }
     estadisticas.style.display = 'grid';
 
     resultado.classList.add('visible');
