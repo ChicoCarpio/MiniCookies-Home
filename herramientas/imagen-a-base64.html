@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir imagen a Base64 gratis — Mini Cookies</title>
+<meta name="description" content="Convertí una imagen a texto Base64 (data URI) para pegar directo en HTML o CSS, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 200px; max-height: 200px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Convertir imagen a Base64</h1>
+  <p>Elegí una imagen y obtené su texto Base64 (data URI), listo para pegar en HTML o CSS.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <img id="vistaPrevia" alt="Vista previa">
+
+    <div class="controles">
+      <button class="boton" id="botonCopiar" type="button" disabled>Copiar Base64</button>
+    </div>
+
+    <textarea id="salida" readonly style="margin-top:12px; min-height:160px;" placeholder="El texto Base64 aparece acá..."></textarea>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const botonCopiar = document.getElementById('botonCopiar');
+const salida = document.getElementById('salida');
+
+function mostrarArchivo(archivo) {
+  if (!archivo) return;
+  const lector = new FileReader();
+  lector.onload = () => {
+    salida.value = lector.result;
+    vistaPrevia.src = lector.result;
+    vistaPrevia.style.display = 'block';
+    botonCopiar.disabled = false;
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonCopiar.addEventListener('click', async () => {
+  if (!salida.value) return;
+  await navigator.clipboard.writeText(salida.value);
+  const textoOriginal = botonCopiar.textContent;
+  botonCopiar.textContent = '¡Copiado!';
+  setTimeout(() => { botonCopiar.textContent = textoOriginal; }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

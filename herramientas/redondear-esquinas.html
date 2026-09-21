@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redondear esquinas de imagen gratis — Mini Cookies</title>
+<meta name="description" content="Redondeá las esquinas de una imagen, hasta convertirla en un óvalo o círculo, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia {
+    max-width: 100%; max-height: 400px; display: none; margin: 16px 0;
+    background-image: repeating-conic-gradient(#8883 0% 25%, transparent 0% 50%);
+    background-size: 16px 16px;
+  }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Redondear esquinas</h1>
+  <p>Elegí una imagen y redondeá sus esquinas — llevá el control al máximo para un óvalo o círculo. El fondo (cuadriculado abajo) queda transparente.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <canvas id="vistaPrevia"></canvas>
+
+    <div class="controles">
+      <label class="campo">
+        Radio de esquina: <span id="etiquetaRadio">0</span>%
+        <input type="range" id="radio" min="0" max="100" value="0">
+      </label>
+      <button class="boton" id="botonDescargar" disabled>Descargar imagen (PNG)</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="imagen-redondeada.png">Descargar imagen</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contexto = vistaPrevia.getContext('2d');
+const elRadio = document.getElementById('radio');
+const etiquetaRadio = document.getElementById('etiquetaRadio');
+const botonDescargar = document.getElementById('botonDescargar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+let imagenActual = null;
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+function trazarRectanguloRedondeado(ctx, x, y, ancho, alto, radio) {
+  ctx.beginPath();
+  ctx.moveTo(x + radio, y);
+  ctx.arcTo(x + ancho, y, x + ancho, y + alto, radio);
+  ctx.arcTo(x + ancho, y + alto, x, y + alto, radio);
+  ctx.arcTo(x, y + alto, x, y, radio);
+  ctx.arcTo(x, y, x + ancho, y, radio);
+  ctx.closePath();
+}
+
+function actualizarVistaPrevia() {
+  if (!imagenActual) return;
+  const ancho = imagenActual.naturalWidth;
+  const alto = imagenActual.naturalHeight;
+  vistaPrevia.width = ancho;
+  vistaPrevia.height = alto;
+  contexto.clearRect(0, 0, ancho, alto);
+
+  const porcentaje = parseInt(elRadio.value, 10) / 100;
+  const radio = porcentaje * Math.min(ancho, alto) / 2;
+
+  contexto.save();
+  trazarRectanguloRedondeado(contexto, 0, 0, ancho, alto, radio);
+  contexto.clip();
+  contexto.drawImage(imagenActual, 0, 0);
+  contexto.restore();
+  resultado.classList.remove('visible');
+}
+
+elRadio.addEventListener('input', () => {
+  etiquetaRadio.textContent = elRadio.value;
+  actualizarVistaPrevia();
+});
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  if (!archivo) {
+    vistaPrevia.style.display = 'none';
+    botonDescargar.disabled = true;
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+  vistaPrevia.style.display = 'block';
+  actualizarVistaPrevia();
+  botonDescargar.disabled = false;
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDescargar.addEventListener('click', async () => {
+  const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, 'image/png'));
+  enlaceDescarga.href = URL.createObjectURL(blob);
+  resultado.classList.add('visible');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotar y voltear imagen gratis — Mini Cookies</title>
+<meta name="description" content="Rotá 90/180/270° o volteá una imagen horizontal o verticalmente, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Rotar y voltear imagen</h1>
+  <p>Elegí una imagen y rotala o volteala las veces que quieras antes de descargar.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <canvas id="vistaPrevia"></canvas>
+
+    <div class="controles">
+      <button class="boton" id="botonIzquierda" type="button" disabled style="background:#64748b;">↺ Rotar 90° izquierda</button>
+      <button class="boton" id="botonDerecha" type="button" disabled style="background:#64748b;">↻ Rotar 90° derecha</button>
+      <button class="boton" id="botonVolteoH" type="button" disabled style="background:#64748b;">⇋ Voltear horizontal</button>
+      <button class="boton" id="botonVolteoV" type="button" disabled style="background:#64748b;">⇵ Voltear vertical</button>
+      <button class="boton" id="botonDescargar" disabled>Descargar imagen</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="imagen-editada">Descargar imagen</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contexto = vistaPrevia.getContext('2d');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const botones = ['botonIzquierda', 'botonDerecha', 'botonVolteoH', 'botonVolteoV', 'botonDescargar'].map(id => document.getElementById(id));
+
+let archivoActual = null;
+let imagenActual = null;
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+function dibujar(imagen) {
+  vistaPrevia.width = imagen.naturalWidth ?? imagen.width;
+  vistaPrevia.height = imagen.naturalHeight ?? imagen.height;
+  contexto.drawImage(imagen, 0, 0);
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  if (!archivo) {
+    vistaPrevia.style.display = 'none';
+    botones.forEach(b => b.disabled = true);
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+  dibujar(imagenActual);
+  vistaPrevia.style.display = 'block';
+  botones.forEach(b => b.disabled = false);
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function rotar(grados) {
+  const anchoOriginal = vistaPrevia.width;
+  const altoOriginal = vistaPrevia.height;
+  const temporal = document.createElement('canvas');
+  temporal.width = anchoOriginal;
+  temporal.height = altoOriginal;
+  temporal.getContext('2d').drawImage(vistaPrevia, 0, 0);
+
+  vistaPrevia.width = altoOriginal;
+  vistaPrevia.height = anchoOriginal;
+  contexto.save();
+  contexto.translate(vistaPrevia.width / 2, vistaPrevia.height / 2);
+  contexto.rotate(grados * Math.PI / 180);
+  contexto.drawImage(temporal, -anchoOriginal / 2, -altoOriginal / 2);
+  contexto.restore();
+  resultado.classList.remove('visible');
+}
+
+function voltear(horizontal) {
+  const ancho = vistaPrevia.width;
+  const alto = vistaPrevia.height;
+  const temporal = document.createElement('canvas');
+  temporal.width = ancho;
+  temporal.height = alto;
+  temporal.getContext('2d').drawImage(vistaPrevia, 0, 0);
+
+  contexto.save();
+  contexto.clearRect(0, 0, ancho, alto);
+  if (horizontal) {
+    contexto.translate(ancho, 0);
+    contexto.scale(-1, 1);
+  } else {
+    contexto.translate(0, alto);
+    contexto.scale(1, -1);
+  }
+  contexto.drawImage(temporal, 0, 0);
+  contexto.restore();
+  resultado.classList.remove('visible');
+}
+
+document.getElementById('botonIzquierda').addEventListener('click', () => rotar(-90));
+document.getElementById('botonDerecha').addEventListener('click', () => rotar(90));
+document.getElementById('botonVolteoH').addEventListener('click', () => voltear(true));
+document.getElementById('botonVolteoV').addEventListener('click', () => voltear(false));
+
+document.getElementById('botonDescargar').addEventListener('click', async () => {
+  const esPng = archivoActual.type === 'image/png';
+  const formato = esPng ? 'image/png' : 'image/jpeg';
+  const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.92));
+  enlaceDescarga.href = URL.createObjectURL(blob);
+  enlaceDescarga.download = `imagen-editada.${esPng ? 'png' : 'jpg'}`;
+  resultado.classList.add('visible');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

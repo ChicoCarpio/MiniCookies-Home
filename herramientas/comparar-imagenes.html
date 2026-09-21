@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparar dos imágenes (diff visual) gratis — Mini Cookies</title>
+<meta name="description" content="Compará dos imágenes y resaltá visualmente las diferencias entre ellas, gratis y sin subirlas a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  .zonas-comparar { display: flex; gap: 16px; flex-wrap: wrap; }
+  .zonas-comparar .zona-arrastre { flex: 1 1 220px; padding: 24px 16px; font-size: 0.9rem; }
+  .zonas-comparar .miniatura { max-width: 100%; max-height: 120px; display: block; margin: 8px auto 0; border-radius: 6px; }
+  #vistaResultado { max-width: 100%; max-height: 450px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+  .aviso-tamano { color: var(--texto-suave); font-size: 0.85rem; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Comparar dos imágenes</h1>
+  <p>Elegí dos imágenes (por ejemplo, dos versiones de un diseño o dos capturas de pantalla) y resaltá las diferencias entre ellas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zonas-comparar">
+      <div class="zona-arrastre" id="zonaArrastreA">
+        🅰️ Arrastrá la imagen A acá o hacé clic para elegirla
+        <input type="file" id="entradaArchivoA" accept="image/*" hidden>
+        <img class="miniatura" id="miniaturaA" style="display:none;" alt="Vista previa de la imagen A">
+      </div>
+      <div class="zona-arrastre" id="zonaArrastreB">
+        🅱️ Arrastrá la imagen B acá o hacé clic para elegirla
+        <input type="file" id="entradaArchivoB" accept="image/*" hidden>
+        <img class="miniatura" id="miniaturaB" style="display:none;" alt="Vista previa de la imagen B">
+      </div>
+    </div>
+
+    <p class="aviso-tamano" id="avisoTamano" style="display:none;"></p>
+
+    <div class="controles">
+      <label class="campo">
+        Sensibilidad: <span id="etiquetaSensibilidad">30</span>
+        <input type="range" id="sensibilidad" min="5" max="120" value="30">
+      </label>
+      <button class="boton" id="botonComparar" disabled>Comparar</button>
+    </div>
+
+    <canvas id="vistaResultado"></canvas>
+
+    <div class="estadisticas" id="estadisticas" style="display:none;">
+      <div class="estadistica"><div class="numero" id="porcentajeDiferencia">—</div><div class="etiqueta">Píxeles distintos</div></div>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="comparacion">Descargar imagen de diferencias</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+function crearZona(idZona, idInput, idMiniatura) {
+  const zona = document.getElementById(idZona);
+  const input = document.getElementById(idInput);
+  const miniatura = document.getElementById(idMiniatura);
+  let imagen = null;
+
+  function cargarImagen(archivo) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = URL.createObjectURL(archivo);
+    });
+  }
+
+  async function elegir(archivo) {
+    if (!archivo || !archivo.type.startsWith('image/')) return;
+    imagen = await cargarImagen(archivo);
+    miniatura.src = imagen.src;
+    miniatura.style.display = 'block';
+    zona.dispatchEvent(new CustomEvent('imagen-lista'));
+  }
+
+  zona.addEventListener('click', (e) => { if (e.target !== miniatura) input.click(); });
+  input.addEventListener('change', (e) => elegir(e.target.files[0]));
+  zona.addEventListener('dragover', (e) => { e.preventDefault(); zona.classList.add('activa'); });
+  zona.addEventListener('dragleave', () => zona.classList.remove('activa'));
+  zona.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zona.classList.remove('activa');
+    elegir(e.dataTransfer.files[0]);
+  });
+
+  return { zona, obtenerImagen: () => imagen };
+}
+
+const zonaA = crearZona('zonaArrastreA', 'entradaArchivoA', 'miniaturaA');
+const zonaB = crearZona('zonaArrastreB', 'entradaArchivoB', 'miniaturaB');
+
+const avisoTamano = document.getElementById('avisoTamano');
+const elSensibilidad = document.getElementById('sensibilidad');
+const etiquetaSensibilidad = document.getElementById('etiquetaSensibilidad');
+const botonComparar = document.getElementById('botonComparar');
+const vistaResultado = document.getElementById('vistaResultado');
+const contextoResultado = vistaResultado.getContext('2d');
+const estadisticas = document.getElementById('estadisticas');
+const porcentajeDiferencia = document.getElementById('porcentajeDiferencia');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+elSensibilidad.addEventListener('input', () => etiquetaSensibilidad.textContent = elSensibilidad.value);
+
+function actualizarEstadoBoton() {
+  const imgA = zonaA.obtenerImagen();
+  const imgB = zonaB.obtenerImagen();
+  botonComparar.disabled = !imgA || !imgB;
+  if (imgA && imgB && (imgA.naturalWidth !== imgB.naturalWidth || imgA.naturalHeight !== imgB.naturalHeight)) {
+    avisoTamano.style.display = 'block';
+    avisoTamano.textContent = `Las imágenes tienen tamaños distintos (${imgA.naturalWidth}×${imgA.naturalHeight}px vs. ${imgB.naturalWidth}×${imgB.naturalHeight}px) — la B se va a estirar para que coincida con la A antes de comparar.`;
+  } else {
+    avisoTamano.style.display = 'none';
+  }
+  resultado.classList.remove('visible');
+  estadisticas.style.display = 'none';
+}
+
+zonaA.zona.addEventListener('imagen-lista', actualizarEstadoBoton);
+zonaB.zona.addEventListener('imagen-lista', actualizarEstadoBoton);
+
+botonComparar.addEventListener('click', () => {
+  const imgA = zonaA.obtenerImagen();
+  const imgB = zonaB.obtenerImagen();
+  const ancho = imgA.naturalWidth, alto = imgA.naturalHeight;
+  const umbral = parseInt(elSensibilidad.value, 10);
+
+  const canvasA = document.createElement('canvas');
+  canvasA.width = ancho; canvasA.height = alto;
+  canvasA.getContext('2d').drawImage(imgA, 0, 0, ancho, alto);
+  const datosA = canvasA.getContext('2d').getImageData(0, 0, ancho, alto).data;
+
+  const canvasB = document.createElement('canvas');
+  canvasB.width = ancho; canvasB.height = alto;
+  canvasB.getContext('2d').drawImage(imgB, 0, 0, ancho, alto); // se estira B al tamaño de A
+  const datosB = canvasB.getContext('2d').getImageData(0, 0, ancho, alto).data;
+
+  vistaResultado.width = ancho;
+  vistaResultado.height = alto;
+  const imageDataResultado = contextoResultado.createImageData(ancho, alto);
+  const datosResultado = imageDataResultado.data;
+
+  let pixelesDistintos = 0;
+  const totalPixeles = ancho * alto;
+
+  for (let i = 0; i < datosA.length; i += 4) {
+    const diferencia = Math.abs(datosA[i] - datosB[i]) + Math.abs(datosA[i + 1] - datosB[i + 1]) + Math.abs(datosA[i + 2] - datosB[i + 2]);
+    if (diferencia > umbral) {
+      // Zona distinta: se resalta en rojo bien visible
+      datosResultado[i] = 255; datosResultado[i + 1] = 0; datosResultado[i + 2] = 64; datosResultado[i + 3] = 255;
+      pixelesDistintos++;
+    } else {
+      // Zona igual: se muestra atenuada en gris, de fondo de referencia
+      const gris = (datosA[i] * 0.299 + datosA[i + 1] * 0.587 + datosA[i + 2] * 0.114) * 0.5 + 90;
+      datosResultado[i] = gris; datosResultado[i + 1] = gris; datosResultado[i + 2] = gris; datosResultado[i + 3] = 255;
+    }
+  }
+
+  contextoResultado.putImageData(imageDataResultado, 0, 0);
+  vistaResultado.style.display = 'block';
+
+  porcentajeDiferencia.textContent = `${((pixelesDistintos / totalPixeles) * 100).toFixed(2)}%`;
+  estadisticas.style.display = 'grid';
+
+  vistaResultado.toBlob((blob) => {
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = 'comparacion.png';
+    resultado.classList.add('visible');
+  }, 'image/png');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

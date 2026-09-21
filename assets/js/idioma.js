@@ -5,6 +5,7 @@
 window.i18nComun = {
   es: {
     'nav-todas': 'Todas las herramientas',
+    'nav-todas-cat': 'Todas las categorías',
     'nav-privacidad': 'Privacidad',
     'nav-terminos': 'Términos de uso',
     'aviso-privacidad': '🔒 Tus archivos nunca se suben a ningún servidor: todo el procesamiento ocurre en tu propia computadora.',
@@ -16,6 +17,7 @@ window.i18nComun = {
   },
   en: {
     'nav-todas': 'All tools',
+    'nav-todas-cat': 'All categories',
     'nav-privacidad': 'Privacy',
     'nav-terminos': 'Terms of use',
     'aviso-privacidad': '🔒 Your files never get uploaded anywhere: everything runs on your own computer.',

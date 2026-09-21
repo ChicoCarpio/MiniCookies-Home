@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extraer paleta de colores de una imagen gratis — Mini Cookies</title>
+<meta name="description" content="Sacá los colores dominantes de una imagen con su código hexadecimal, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 100%; max-height: 350px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+  .paleta { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin: 16px 0; }
+  .color-swatch {
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--superficie);
+    text-align: center;
+  }
+  .color-swatch .muestra { height: 70px; }
+  .color-swatch .codigo { padding: 6px 4px; font-size: 0.85rem; font-family: monospace; }
+  .color-swatch .porcentaje { font-size: 0.75rem; color: var(--texto-suave); padding-bottom: 6px; }
+  .color-swatch.copiado .codigo::after { content: ' ✅'; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Extraer paleta de colores</h1>
+  <p>Elegí una imagen y obtené sus colores dominantes con el código hexadecimal, listo para copiar.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <canvas id="vistaPrevia"></canvas>
+
+    <label class="campo" style="max-width: 260px;">
+      Cantidad de colores: <span id="etiquetaCantidad">8</span>
+      <input type="range" id="cantidad" min="4" max="16" value="8">
+    </label>
+
+    <div class="paleta" id="paleta"></div>
+
+    <p id="ayudaCopiar" style="display:none; color: var(--texto-suave); font-size: 0.9rem;">Tocá un color para copiar su código.</p>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contexto = vistaPrevia.getContext('2d');
+const paleta = document.getElementById('paleta');
+const ayudaCopiar = document.getElementById('ayudaCopiar');
+const elCantidad = document.getElementById('cantidad');
+const etiquetaCantidad = document.getElementById('etiquetaCantidad');
+
+let imagenActual = null;
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+function componenteHex(v) { return v.toString(16).padStart(2, '0'); }
+
+// Agrupa colores parecidos en "cubetas" (redondeando cada canal) para no
+// separar tonos casi idénticos en dos colores distintos — el color final de
+// cada cubeta es el promedio real de los píxeles que cayeron en ella, no el
+// centro de la cubeta.
+function extraerColoresDominantes(imageData, cantidad) {
+  const datos = imageData.data;
+  const TAMANO_CUBETA = 24;
+  const cubetas = new Map();
+
+  for (let i = 0; i < datos.length; i += 4) {
+    const alpha = datos[i + 3];
+    if (alpha < 128) continue;
+    const r = datos[i], g = datos[i + 1], b = datos[i + 2];
+    const clave = `${Math.round(r / TAMANO_CUBETA)}_${Math.round(g / TAMANO_CUBETA)}_${Math.round(b / TAMANO_CUBETA)}`;
+    const cubeta = cubetas.get(clave) || { r: 0, g: 0, b: 0, n: 0 };
+    cubeta.r += r; cubeta.g += g; cubeta.b += b; cubeta.n += 1;
+    cubetas.set(clave, cubeta);
+  }
+
+  const totalPixeles = [...cubetas.values()].reduce((suma, c) => suma + c.n, 0) || 1;
+  return [...cubetas.values()]
+    .sort((a, b) => b.n - a.n)
+    .slice(0, cantidad)
+    .map((c) => ({
+      r: Math.round(c.r / c.n),
+      g: Math.round(c.g / c.n),
+      b: Math.round(c.b / c.n),
+      porcentaje: (c.n / totalPixeles) * 100,
+    }));
+}
+
+function mostrarPaleta(colores) {
+  paleta.innerHTML = colores.map((c) => {
+    const hex = `#${componenteHex(c.r)}${componenteHex(c.g)}${componenteHex(c.b)}`;
+    return `
+      <div class="color-swatch" data-hex="${hex}">
+        <div class="muestra" style="background:${hex};"></div>
+        <div class="codigo">${hex}</div>
+        <div class="porcentaje">${c.porcentaje.toFixed(1)}%</div>
+      </div>
+    `;
+  }).join('');
+
+  paleta.querySelectorAll('.color-swatch').forEach((elemento) => {
+    elemento.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(elemento.dataset.hex);
+        elemento.classList.add('copiado');
+        setTimeout(() => elemento.classList.remove('copiado'), 1200);
+      } catch (error) {
+        alert(`Código: ${elemento.dataset.hex}`);
+      }
+    });
+  });
+
+  ayudaCopiar.style.display = colores.length ? 'block' : 'none';
+}
+
+function analizarImagenActual() {
+  if (!imagenActual) return;
+  // Se analiza sobre una copia chica (más rápido) — el color promedio de
+  // cada zona no cambia por reducir la resolución.
+  const LADO_ANALISIS = 150;
+  const escala = LADO_ANALISIS / Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight);
+  const anchoChico = Math.max(1, Math.round(imagenActual.naturalWidth * escala));
+  const altoChico = Math.max(1, Math.round(imagenActual.naturalHeight * escala));
+  const canvasChico = document.createElement('canvas');
+  canvasChico.width = anchoChico;
+  canvasChico.height = altoChico;
+  const ctxChico = canvasChico.getContext('2d');
+  ctxChico.drawImage(imagenActual, 0, 0, anchoChico, altoChico);
+  const imageData = ctxChico.getImageData(0, 0, anchoChico, altoChico);
+
+  const colores = extraerColoresDominantes(imageData, parseInt(elCantidad.value, 10));
+  mostrarPaleta(colores);
+}
+
+elCantidad.addEventListener('input', () => {
+  etiquetaCantidad.textContent = elCantidad.value;
+  analizarImagenActual();
+});
+
+async function mostrarArchivo(archivo) {
+  if (!archivo) {
+    vistaPrevia.style.display = 'none';
+    paleta.innerHTML = '';
+    ayudaCopiar.style.display = 'none';
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+  vistaPrevia.width = imagenActual.naturalWidth;
+  vistaPrevia.height = imagenActual.naturalHeight;
+  contexto.drawImage(imagenActual, 0, 0);
+  vistaPrevia.style.display = 'block';
+  analizarImagenActual();
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

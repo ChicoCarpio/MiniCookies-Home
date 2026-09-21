@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertir formato de imagen gratis — Mini Cookies</title>
+<meta name="description" content="Convertí una imagen entre PNG, JPG y WebP, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+  .formatos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .formatos button {
+    padding: 8px 16px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 999px;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .formatos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .aviso-transparencia { font-size: 0.85rem; color: var(--texto-suave); margin-top: 4px; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Convertir formato de imagen</h1>
+  <p>Elegí una imagen y convertila entre PNG, JPG y WebP.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/png,image/jpeg,image/webp" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+    <canvas id="vistaPrevia"></canvas>
+
+    <div class="controles">
+      <label class="campo">
+        Formato de salida
+        <div class="formatos" id="formatos">
+          <button type="button" class="activo" data-formato="image/png">PNG</button>
+          <button type="button" data-formato="image/jpeg">JPG</button>
+          <button type="button" data-formato="image/webp">WebP</button>
+        </div>
+      </label>
+      <label class="campo" id="campoCalidad" style="display:none;">
+        Calidad: <span id="etiquetaCalidad">85</span>%
+        <input type="range" id="calidad" min="10" max="100" value="85">
+      </label>
+      <button class="boton" id="botonConvertir" disabled>Convertir imagen</button>
+    </div>
+    <p class="aviso-transparencia" id="avisoTransparencia" style="display:none;">
+      ⚠️ JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco.
+    </p>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="imagen-convertida">Descargar imagen</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contexto = vistaPrevia.getContext('2d');
+const botonConvertir = document.getElementById('botonConvertir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const botonesFormato = [...document.querySelectorAll('#formatos button')];
+const campoCalidad = document.getElementById('campoCalidad');
+const elCalidad = document.getElementById('calidad');
+const etiquetaCalidad = document.getElementById('etiquetaCalidad');
+const avisoTransparencia = document.getElementById('avisoTransparencia');
+
+let archivoActual = null;
+let imagenActual = null;
+let formatoElegido = 'image/png';
+
+const EXTENSIONES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+
+function actualizarControlesFormato() {
+  campoCalidad.style.display = formatoElegido === 'image/png' ? 'none' : 'flex';
+  avisoTransparencia.style.display = formatoElegido === 'image/jpeg' ? 'block' : 'none';
+}
+
+botonesFormato.forEach((boton) => {
+  boton.addEventListener('click', () => {
+    botonesFormato.forEach((b) => b.classList.remove('activo'));
+    boton.classList.add('activo');
+    formatoElegido = boton.dataset.formato;
+    actualizarControlesFormato();
+    resultado.classList.remove('visible');
+  });
+});
+
+elCalidad.addEventListener('input', () => etiquetaCalidad.textContent = elCalidad.value);
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = archivo ? `<li><span>${archivo.name}</span></li>` : '';
+  if (!archivo) {
+    vistaPrevia.style.display = 'none';
+    botonConvertir.disabled = true;
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+  vistaPrevia.width = imagenActual.naturalWidth;
+  vistaPrevia.height = imagenActual.naturalHeight;
+  contexto.drawImage(imagenActual, 0, 0);
+  vistaPrevia.style.display = 'block';
+  botonConvertir.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  botonConvertir.textContent = 'Convirtiendo...';
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = imagenActual.naturalWidth;
+    canvas.height = imagenActual.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    // JPG no tiene canal alfa — sin este relleno, el navegador pinta la
+    // transparencia de negro en vez de dejarla blanca.
+    if (formatoElegido === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(imagenActual, 0, 0);
+
+    const calidad = formatoElegido === 'image/png' ? undefined : parseInt(elCalidad.value, 10) / 100;
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, formatoElegido, calidad));
+    if (!blob) throw new Error('El navegador no pudo generar ese formato.');
+
+    const extension = EXTENSIONES[formatoElegido];
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `imagen-convertida.${extension}`;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo convertir la imagen: ' + error.message);
+  } finally {
+    botonConvertir.disabled = false;
+    botonConvertir.textContent = 'Convertir imagen';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

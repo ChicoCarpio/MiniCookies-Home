@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redimensionar imagen gratis — Mini Cookies</title>
+<meta name="description" content="Cambiá el ancho y alto de una imagen, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  .comparacion { display: none; gap: 24px; align-items: flex-end; margin: 16px 0; flex-wrap: wrap; }
+  .comparacion figure { margin: 0; text-align: center; }
+  .comparacion .marco {
+    display: flex; align-items: center; justify-content: center;
+    background-image: repeating-conic-gradient(#8883 0% 25%, transparent 0% 50%);
+    background-size: 16px 16px;
+    border: 1px solid var(--gris-borde); border-radius: 8px; overflow: hidden;
+  }
+  .comparacion canvas { display: block; }
+  .comparacion figcaption { margin-top: 6px; font-size: 0.85rem; color: var(--texto-suave); }
+  .campo-numero { position: relative; display: inline-flex; }
+  .campo-numero input[type="number"]::-webkit-inner-spin-button,
+  .campo-numero input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .campo-numero input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+    padding-right: 28px !important;
+  }
+  .campo-numero .stepper {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    bottom: 1px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--gris-borde);
+    border-radius: 0 5px 5px 0;
+    overflow: hidden;
+  }
+  .campo-numero .stepper button {
+    flex: 1;
+    width: 22px;
+    border: none;
+    background: var(--gris-fondo);
+    color: var(--texto-suave);
+    cursor: pointer;
+    font-size: 0.6rem;
+    line-height: 1;
+    padding: 0;
+  }
+  .campo-numero .stepper button:first-child { border-bottom: 1px solid var(--gris-borde); }
+  .campo-numero .stepper button:hover { background: var(--azul); color: #fff; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Redimensionar imagen</h1>
+  <p>Elegí una imagen y cambiá su ancho y alto.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="comparacion" id="comparacion">
+      <figure>
+        <div class="marco" id="marcoOriginal"><canvas id="canvasOriginal"></canvas></div>
+        <figcaption>Original — <span id="textoOriginal"></span></figcaption>
+      </figure>
+      <div style="font-size:1.5rem; color:var(--texto-suave); padding-bottom:24px;">→</div>
+      <figure>
+        <div class="marco" id="marcoNuevo"><canvas id="canvasNuevo"></canvas></div>
+        <figcaption>Nuevo tamaño — <span id="textoNuevo"></span></figcaption>
+      </figure>
+    </div>
+
+    <div class="controles">
+      <label class="campo">
+        Ancho (px)
+        <span class="campo-numero">
+          <input type="number" id="ancho" min="1" style="width:100px;">
+          <span class="stepper">
+            <button type="button" data-objetivo="ancho" data-paso="1" aria-label="Aumentar ancho">▲</button>
+            <button type="button" data-objetivo="ancho" data-paso="-1" aria-label="Disminuir ancho">▼</button>
+          </span>
+        </span>
+      </label>
+      <label class="campo">
+        Alto (px)
+        <span class="campo-numero">
+          <input type="number" id="alto" min="1" style="width:100px;">
+          <span class="stepper">
+            <button type="button" data-objetivo="alto" data-paso="1" aria-label="Aumentar alto">▲</button>
+            <button type="button" data-objetivo="alto" data-paso="-1" aria-label="Disminuir alto">▼</button>
+          </span>
+        </span>
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:6px;">
+        <input type="checkbox" id="mantenerProporcion" checked style="width:auto;">
+        Mantener proporción
+      </label>
+      <label class="campo">
+        Calidad de reescalado
+        <select id="calidad">
+          <option value="suave" selected>Suave (recomendado)</option>
+          <option value="nitido">Nítido (pixel art)</option>
+        </select>
+      </label>
+      <button class="boton" id="botonRedimensionar" disabled>Redimensionar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="imagen-redimensionada">Descargar imagen redimensionada</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonRedimensionar = document.getElementById('botonRedimensionar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const elAncho = document.getElementById('ancho');
+const elAlto = document.getElementById('alto');
+const elMantenerProporcion = document.getElementById('mantenerProporcion');
+const elCalidad = document.getElementById('calidad');
+const comparacion = document.getElementById('comparacion');
+const canvasOriginal = document.getElementById('canvasOriginal');
+const marcoOriginal = document.getElementById('marcoOriginal');
+const textoOriginal = document.getElementById('textoOriginal');
+const canvasNuevo = document.getElementById('canvasNuevo');
+const marcoNuevo = document.getElementById('marcoNuevo');
+const textoNuevo = document.getElementById('textoNuevo');
+
+const TAMANO_MAX_PREVIA = 220; // px, el lado más largo de la miniatura más grande
+
+// Límites conservadores para no romper el canvas del navegador (varía según
+// navegador/dispositivo — Safari en iPhone es el más chico de todos).
+const LIMITE_DIMENSION_PX = 8000;
+const LIMITE_MEGAPIXELES = 40;
+
+let archivoActual = null;
+let imagenActual = null;
+let relacionAspecto = 1;
+let actualizandoPorCodigo = false;
+
+// Dibuja ambas miniaturas con el mismo factor de escala (calculado sobre la
+// dimensión más grande entre el tamaño original y el nuevo) para que la
+// diferencia de tamaño se note visualmente, no solo en los números.
+function dibujarMiniatura(canvas, marco, anchoReal, altoReal, escala) {
+  const anchoMostrado = Math.max(1, Math.round(anchoReal * escala));
+  const altoMostrado = Math.max(1, Math.round(altoReal * escala));
+  canvas.width = anchoMostrado;
+  canvas.height = altoMostrado;
+  marco.style.width = `${anchoMostrado}px`;
+  marco.style.height = `${altoMostrado}px`;
+  canvas.getContext('2d').drawImage(imagenActual, 0, 0, anchoMostrado, altoMostrado);
+}
+
+function actualizarComparacion() {
+  if (!imagenActual) { comparacion.style.display = 'none'; return; }
+  const anchoNuevo = parseInt(elAncho.value, 10) || imagenActual.naturalWidth;
+  const altoNuevo = parseInt(elAlto.value, 10) || imagenActual.naturalHeight;
+
+  const dimensionMaxima = Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight, anchoNuevo, altoNuevo);
+  const escala = TAMANO_MAX_PREVIA / dimensionMaxima;
+
+  dibujarMiniatura(canvasOriginal, marcoOriginal, imagenActual.naturalWidth, imagenActual.naturalHeight, escala);
+  dibujarMiniatura(canvasNuevo, marcoNuevo, anchoNuevo, altoNuevo, escala);
+  textoOriginal.textContent = `${imagenActual.naturalWidth}×${imagenActual.naturalHeight}px`;
+  textoNuevo.textContent = `${anchoNuevo}×${altoNuevo}px`;
+  comparacion.style.display = 'flex';
+}
+
+// "nitido": vecino más cercano (sin suavizado) — bloques duros, ideal pixel art.
+// "suave": si se achica mucho (más de 2x), reescala en pasos a la mitad antes
+// del final en vez de un solo salto — evita el aliasing feo de una reducción
+// grande de una sola vez, con suavizado de alta calidad en cada paso.
+function crearCanvasEscalado(fuente, anchoFuente, altoFuente, anchoDestino, altoDestino, modo) {
+  if (modo === 'nitido') {
+    const canvas = document.createElement('canvas');
+    canvas.width = anchoDestino;
+    canvas.height = altoDestino;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(fuente, 0, 0, anchoFuente, altoFuente, 0, 0, anchoDestino, altoDestino);
+    return canvas;
+  }
+
+  let fuenteActual = fuente;
+  let anchoActual = anchoFuente;
+  let altoActual = altoFuente;
+
+  while (anchoActual > anchoDestino * 2 && altoActual > altoDestino * 2) {
+    const anchoSiguiente = Math.max(anchoDestino, Math.floor(anchoActual / 2));
+    const altoSiguiente = Math.max(altoDestino, Math.floor(altoActual / 2));
+    const canvasPaso = document.createElement('canvas');
+    canvasPaso.width = anchoSiguiente;
+    canvasPaso.height = altoSiguiente;
+    const ctxPaso = canvasPaso.getContext('2d');
+    ctxPaso.imageSmoothingEnabled = true;
+    ctxPaso.imageSmoothingQuality = 'high';
+    ctxPaso.drawImage(fuenteActual, 0, 0, anchoActual, altoActual, 0, 0, anchoSiguiente, altoSiguiente);
+    fuenteActual = canvasPaso;
+    anchoActual = anchoSiguiente;
+    altoActual = altoSiguiente;
+  }
+
+  const canvasFinal = document.createElement('canvas');
+  canvasFinal.width = anchoDestino;
+  canvasFinal.height = altoDestino;
+  const ctxFinal = canvasFinal.getContext('2d');
+  ctxFinal.imageSmoothingEnabled = true;
+  ctxFinal.imageSmoothingQuality = 'high';
+  ctxFinal.drawImage(fuenteActual, 0, 0, anchoActual, altoActual, 0, 0, anchoDestino, altoDestino);
+  return canvasFinal;
+}
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  imagenActual = archivo ? await cargarImagen(archivo) : null;
+  listaArchivo.innerHTML = archivo ? `<li><span>${archivo.name} (${imagenActual.naturalWidth}×${imagenActual.naturalHeight}px)</span></li>` : '';
+  if (imagenActual) {
+    relacionAspecto = imagenActual.naturalWidth / imagenActual.naturalHeight;
+    actualizandoPorCodigo = true;
+    elAncho.value = imagenActual.naturalWidth;
+    elAlto.value = imagenActual.naturalHeight;
+    actualizandoPorCodigo = false;
+  }
+  botonRedimensionar.disabled = !archivo;
+  resultado.classList.remove('visible');
+  actualizarComparacion();
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// Mantener presionado el botón repite el paso (delay inicial más largo,
+// después rápido), no solo un click a la vez.
+function aplicarPaso(boton) {
+  const input = document.getElementById(boton.dataset.objetivo);
+  const paso = parseInt(boton.dataset.paso, 10);
+  input[paso > 0 ? 'stepUp' : 'stepDown']();
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+document.querySelectorAll('.stepper button').forEach((boton) => {
+  let intervalo = null;
+  let timeoutInicial = null;
+
+  function detener() {
+    clearTimeout(timeoutInicial);
+    clearInterval(intervalo);
+    timeoutInicial = null;
+    intervalo = null;
+  }
+
+  boton.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    aplicarPaso(boton);
+    timeoutInicial = setTimeout(() => {
+      intervalo = setInterval(() => aplicarPaso(boton), 60);
+    }, 400);
+  });
+
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((evento) => {
+    boton.addEventListener(evento, detener);
+  });
+});
+
+elAncho.addEventListener('input', () => {
+  if (!actualizandoPorCodigo && elMantenerProporcion.checked) {
+    actualizandoPorCodigo = true;
+    elAlto.value = Math.round(parseInt(elAncho.value, 10) / relacionAspecto) || '';
+    actualizandoPorCodigo = false;
+  }
+  actualizarComparacion();
+});
+elAlto.addEventListener('input', () => {
+  if (!actualizandoPorCodigo && elMantenerProporcion.checked) {
+    actualizandoPorCodigo = true;
+    elAncho.value = Math.round(parseInt(elAlto.value, 10) * relacionAspecto) || '';
+    actualizandoPorCodigo = false;
+  }
+  actualizarComparacion();
+});
+
+botonRedimensionar.addEventListener('click', async () => {
+  botonRedimensionar.disabled = true;
+  botonRedimensionar.textContent = 'Redimensionando...';
+  try {
+    const ancho = parseInt(elAncho.value, 10);
+    const alto = parseInt(elAlto.value, 10);
+    if (!ancho || !alto) throw new Error('Indicá un ancho y alto válidos.');
+    if (ancho > LIMITE_DIMENSION_PX || alto > LIMITE_DIMENSION_PX) {
+      throw new Error(`El ancho y el alto no pueden superar los ${LIMITE_DIMENSION_PX.toLocaleString('es')}px cada uno — es el límite que soportan los navegadores.`);
+    }
+    if (ancho * alto > LIMITE_MEGAPIXELES * 1_000_000) {
+      throw new Error(`Esa combinación pesaría ${(ancho * alto / 1_000_000).toFixed(0)} megapíxeles — los navegadores no soportan más de ${LIMITE_MEGAPIXELES}. Probá con un tamaño menor.`);
+    }
+
+    const canvas = crearCanvasEscalado(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight, ancho, alto, elCalidad.value);
+
+    const esPng = archivoActual.type === 'image/png';
+    const formato = esPng ? 'image/png' : 'image/jpeg';
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
+
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `imagen-redimensionada.${esPng ? 'png' : 'jpg'}`;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo redimensionar la imagen: ' + error.message);
+  } finally {
+    botonRedimensionar.disabled = false;
+    botonRedimensionar.textContent = 'Redimensionar';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixelar o difuminar una zona de una imagen gratis — Mini Cookies</title>
+<meta name="description" content="Tapá una parte de una imagen con pixelado o desenfoque (censura, datos sensibles), por área o pintando a mano libre, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  .zona-recorte-contenedor {
+    display: none;
+    max-height: 550px;
+    overflow: auto;
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  .zona-recorte {
+    position: relative;
+    touch-action: none;
+  }
+  .zona-recorte img {
+    display: block;
+    max-width: 100%;
+    max-height: 500px;
+    user-select: none;
+    -webkit-user-drag: none;
+    /* La imagen sigue en el DOM solo como referencia de tamaño responsive
+       (mismo max-width/max-height de siempre) — lo que se ve de verdad es
+       el <canvas> de arriba, que se repinta con el efecto en vivo. */
+    visibility: hidden;
+  }
+  #canvasVivo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+  }
+  .zona-recorte.modo-libre #canvasVivo { cursor: none; }
+  .zona-recorte.modo-libre .caja-seleccion { display: none; }
+  #cursorPincel {
+    position: absolute;
+    border: 2px solid var(--azul);
+    background: rgba(231, 164, 89, 0.2);
+    border-radius: 50%;
+    box-sizing: border-box;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+  #cursorPincel.visible { display: block; }
+  .caja-seleccion {
+    position: absolute;
+    border: 2px dashed var(--azul);
+    background: rgba(231, 164, 89, 0.18);
+    box-sizing: border-box;
+    cursor: move;
+  }
+  .manija-recorte {
+    position: absolute;
+    right: -7px;
+    bottom: -7px;
+    width: 16px;
+    height: 16px;
+    background: var(--azul);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    cursor: nwse-resize;
+  }
+  .modos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .modos button {
+    padding: 6px 12px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 999px;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .modos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+  #vistaResultado { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Pixelar o difuminar una zona</h1>
+  <p>Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado o desenfoque.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <div class="zona-recorte-contenedor" id="zonaRecorteContenedor">
+      <div class="zona-recorte" id="zonaRecorte">
+        <img id="imgRecorte" alt="Imagen a censurar">
+        <canvas id="canvasVivo"></canvas>
+        <div id="cursorPincel"></div>
+        <div class="caja-seleccion" id="cajaSeleccion">
+          <div class="manija-recorte" id="manijaRecorte"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controles">
+      <label class="campo">
+        Selección
+        <div class="modos" id="modosSeleccion">
+          <button type="button" class="activo" data-seleccion="area">Área</button>
+          <button type="button" data-seleccion="libre">Libre (pincel)</button>
+        </div>
+      </label>
+      <label class="campo" id="campoPincel" style="display:none;">
+        Tamaño de pincel: <span id="etiquetaPincel">30</span>px
+        <input type="range" id="tamanoPincel" min="6" max="120" value="30">
+      </label>
+      <label class="campo" id="campoZoom" style="display:none;">
+        Zoom: <span id="etiquetaZoom">100</span>%
+        <input type="range" id="zoom" min="100" max="400" value="100">
+      </label>
+      <button type="button" id="botonBorrarSeleccion" style="display:none; border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;">Borrar lo pintado</button>
+    </div>
+
+    <div class="controles">
+      <label class="campo">
+        Efecto
+        <div class="modos" id="modos">
+          <button type="button" class="activo" data-modo="pixelar">Pixelar</button>
+          <button type="button" data-modo="difuminar">Difuminar</button>
+        </div>
+      </label>
+      <label class="campo">
+        Intensidad: <span id="etiquetaIntensidad">18</span>
+        <input type="range" id="intensidad" min="4" max="40" value="18">
+      </label>
+      <button class="boton" id="botonAplicar" disabled>Aplicar</button>
+    </div>
+
+    <canvas id="vistaResultado"></canvas>
+
+    <div class="controles" id="controlesDescarga" style="display:none;">
+      <button type="button" id="botonOtraZona" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;">Tapar otra zona</button>
+      <button class="boton" id="botonDescargar">Descargar imagen</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="imagen-censurada">Descargar imagen</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const zonaRecorteContenedor = document.getElementById('zonaRecorteContenedor');
+const zonaRecorte = document.getElementById('zonaRecorte');
+const imgRecorte = document.getElementById('imgRecorte');
+const canvasVivo = document.getElementById('canvasVivo');
+const ctxVivo = canvasVivo.getContext('2d');
+const cajaSeleccion = document.getElementById('cajaSeleccion');
+const manijaRecorte = document.getElementById('manijaRecorte');
+const cursorPincel = document.getElementById('cursorPincel');
+const campoPincel = document.getElementById('campoPincel');
+const elTamanoPincel = document.getElementById('tamanoPincel');
+const etiquetaPincel = document.getElementById('etiquetaPincel');
+const campoZoom = document.getElementById('campoZoom');
+const elZoom = document.getElementById('zoom');
+const etiquetaZoom = document.getElementById('etiquetaZoom');
+const botonBorrarSeleccion = document.getElementById('botonBorrarSeleccion');
+const botonAplicar = document.getElementById('botonAplicar');
+const vistaResultado = document.getElementById('vistaResultado');
+const contextoResultado = vistaResultado.getContext('2d');
+const controlesDescarga = document.getElementById('controlesDescarga');
+const botonDescargar = document.getElementById('botonDescargar');
+const botonOtraZona = document.getElementById('botonOtraZona');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const elIntensidad = document.getElementById('intensidad');
+const etiquetaIntensidad = document.getElementById('etiquetaIntensidad');
+
+let archivoActual = null;
+let imagenActual = null;
+let modoElegido = 'pixelar'; // pixelar | difuminar
+let modoSeleccionElegido = 'area'; // area | libre
+let caja = { x: 0, y: 0, w: 100, h: 100 };
+let fotogramaPendiente = null;
+
+// Tamaño "sin zoom" del canvas visible — el zoom (solo disponible en modo
+// Libre) agranda canvasVivo por encima de esto, pero la máscara pintada a
+// mano se guarda siempre a ESTE tamaño de referencia, para no perder el
+// trazo cada vez que se cambia el zoom.
+let baseAncho = 0, baseAlto = 0;
+let zoomActual = 1;
+
+// Máscara del pincel (modo Libre): blanco = "acá va el efecto", transparente
+// = "acá se ve la imagen original". Vive fuera del DOM, a resolución base.
+const canvasMascara = document.createElement('canvas');
+const ctxMascara = canvasMascara.getContext('2d');
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+function pixelarRegion(ctx, sx, sy, sw, sh, bloque) {
+  const datos = ctx.getImageData(sx, sy, sw, sh);
+  const d = datos.data;
+  for (let by = 0; by < sh; by += bloque) {
+    for (let bx = 0; bx < sw; bx += bloque) {
+      const anchoBloque = Math.min(bloque, sw - bx);
+      const altoBloque = Math.min(bloque, sh - by);
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let y = 0; y < altoBloque; y++) {
+        for (let x = 0; x < anchoBloque; x++) {
+          const i = ((by + y) * sw + (bx + x)) * 4;
+          r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+        }
+      }
+      r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
+      for (let y = 0; y < altoBloque; y++) {
+        for (let x = 0; x < anchoBloque; x++) {
+          const i = ((by + y) * sw + (bx + x)) * 4;
+          d[i] = r; d[i + 1] = g; d[i + 2] = b;
+        }
+      }
+    }
+  }
+  ctx.putImageData(datos, sx, sy);
+}
+
+// "fuente" es de donde se toman los píxeles a desenfocar — la imagen
+// original a tamaño real para el resultado final, o el propio canvas visible
+// (ya redibujado limpio antes de llamar a esta función) para la vista previa
+// en vivo. Ambos casos comparten el mismo sistema de coordenadas que sx/sy.
+function difuminarRegion(ctxDestino, fuente, sx, sy, sw, sh, radio) {
+  // Se recorta con un margen extra antes de desenfocar y se vuelve a
+  // recortar al tamaño real al pegar — así el desenfoque no aclara los
+  // bordes de la zona tapada trayendo "aire" de afuera del recorte.
+  const margen = Math.max(1, Math.round(radio)) * 2;
+  const canvasChico = document.createElement('canvas');
+  canvasChico.width = sw + margen * 2;
+  canvasChico.height = sh + margen * 2;
+  const ctxChico = canvasChico.getContext('2d');
+  ctxChico.drawImage(fuente, sx - margen, sy - margen, sw + margen * 2, sh + margen * 2, 0, 0, sw + margen * 2, sh + margen * 2);
+
+  const canvasBorroso = document.createElement('canvas');
+  canvasBorroso.width = canvasChico.width;
+  canvasBorroso.height = canvasChico.height;
+  const ctxBorroso = canvasBorroso.getContext('2d');
+  ctxBorroso.filter = `blur(${radio}px)`;
+  ctxBorroso.drawImage(canvasChico, 0, 0);
+
+  ctxDestino.drawImage(canvasBorroso, margen, margen, sw, sh, sx, sy, sw, sh);
+}
+
+// Aplica pixelado/desenfoque a un canvas ENTERO (usado en modo Libre, donde
+// la zona a tapar no es un rectángulo sino lo que diga la máscara del
+// pincel) — el desenfoque acá no necesita el margen de la función de arriba
+// porque no hay "afuera del recorte", es toda la imagen.
+function aplicarEfectoCompleto(ctxDestino, fuenteLimpia, ancho, alto, intensidadPx) {
+  if (modoElegido === 'pixelar') {
+    ctxDestino.drawImage(fuenteLimpia, 0, 0, ancho, alto);
+    pixelarRegion(ctxDestino, 0, 0, ancho, alto, Math.max(2, Math.round(intensidadPx)));
+  } else {
+    ctxDestino.filter = `blur(${intensidadPx}px)`;
+    ctxDestino.drawImage(fuenteLimpia, 0, 0, ancho, alto);
+    ctxDestino.filter = 'none';
+  }
+}
+
+// Vuelve a pintar el canvas visible con la imagen limpia + el efecto
+// (pixelado o desenfoque) — en modo Área, solo dentro del rectángulo de
+// selección; en modo Libre, en toda la imagen pero recortado por la máscara
+// pintada a mano (con bordes suaves, gracias al alfa del pincel). Se llama
+// en cada cambio para que se vea en vivo, no solo al apretar "Aplicar".
+function renderizarVivo() {
+  if (!imagenActual) return;
+  ctxVivo.clearRect(0, 0, canvasVivo.width, canvasVivo.height);
+  ctxVivo.drawImage(imagenActual, 0, 0, canvasVivo.width, canvasVivo.height);
+
+  // La intensidad del deslizador está pensada en píxeles de la imagen a
+  // tamaño real (así funciona "Aplicar" más abajo); acá se escala hacia
+  // abajo para que, en la vista previa, el bloque/desenfoque se vea
+  // proporcionalmente igual de fuerte que en el resultado final.
+  const escala = imagenActual.naturalWidth / canvasVivo.width;
+  const intensidadVivo = Math.max(1, parseInt(elIntensidad.value, 10) / escala);
+
+  if (modoSeleccionElegido === 'area') {
+    const cajaEntera = { x: Math.round(caja.x), y: Math.round(caja.y), w: Math.round(caja.w), h: Math.round(caja.h) };
+    if (modoElegido === 'pixelar') {
+      pixelarRegion(ctxVivo, cajaEntera.x, cajaEntera.y, cajaEntera.w, cajaEntera.h, Math.max(2, Math.round(intensidadVivo)));
+    } else {
+      difuminarRegion(ctxVivo, canvasVivo, cajaEntera.x, cajaEntera.y, cajaEntera.w, cajaEntera.h, intensidadVivo);
+    }
+  } else {
+    const canvasEfecto = document.createElement('canvas');
+    canvasEfecto.width = canvasVivo.width;
+    canvasEfecto.height = canvasVivo.height;
+    aplicarEfectoCompleto(canvasEfecto.getContext('2d'), imagenActual, canvasEfecto.width, canvasEfecto.height, intensidadVivo);
+
+    const ctxEfecto = canvasEfecto.getContext('2d');
+    ctxEfecto.globalCompositeOperation = 'destination-in';
+    ctxEfecto.drawImage(canvasMascara, 0, 0, canvasEfecto.width, canvasEfecto.height);
+    ctxEfecto.globalCompositeOperation = 'source-over';
+
+    ctxVivo.drawImage(canvasEfecto, 0, 0);
+  }
+}
+
+function programarRenderizado() {
+  if (fotogramaPendiente) return;
+  fotogramaPendiente = requestAnimationFrame(() => {
+    fotogramaPendiente = null;
+    renderizarVivo();
+  });
+}
+
+elIntensidad.addEventListener('input', () => {
+  etiquetaIntensidad.textContent = elIntensidad.value;
+  programarRenderizado();
+});
+
+document.querySelectorAll('#modos button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    document.querySelectorAll('#modos button').forEach((b) => b.classList.remove('activo'));
+    boton.classList.add('activo');
+    modoElegido = boton.dataset.modo;
+    programarRenderizado();
+  });
+});
+
+// --- Selección por Área (rectángulo arrastrable, comportamiento previo) ---
+
+function dibujarCaja() {
+  cajaSeleccion.style.left = `${caja.x}px`;
+  cajaSeleccion.style.top = `${caja.y}px`;
+  cajaSeleccion.style.width = `${caja.w}px`;
+  cajaSeleccion.style.height = `${caja.h}px`;
+}
+
+function limitarCaja() {
+  caja.w = Math.max(16, Math.min(caja.w, canvasVivo.width));
+  caja.h = Math.max(16, Math.min(caja.h, canvasVivo.height));
+  caja.x = Math.max(0, Math.min(caja.x, canvasVivo.width - caja.w));
+  caja.y = Math.max(0, Math.min(caja.y, canvasVivo.height - caja.h));
+}
+
+function inicializarCaja() {
+  caja = { x: canvasVivo.width * 0.3, y: canvasVivo.height * 0.3, w: canvasVivo.width * 0.4, h: canvasVivo.height * 0.4 };
+  limitarCaja();
+  dibujarCaja();
+}
+
+let arrastrando = null;
+cajaSeleccion.addEventListener('pointerdown', (e) => {
+  if (e.target === manijaRecorte) return;
+  arrastrando = { x: e.clientX, y: e.clientY, cajaX: caja.x, cajaY: caja.y };
+  cajaSeleccion.setPointerCapture(e.pointerId);
+});
+cajaSeleccion.addEventListener('pointermove', (e) => {
+  if (!arrastrando) return;
+  caja.x = arrastrando.cajaX + (e.clientX - arrastrando.x);
+  caja.y = arrastrando.cajaY + (e.clientY - arrastrando.y);
+  limitarCaja();
+  dibujarCaja();
+  programarRenderizado();
+});
+cajaSeleccion.addEventListener('pointerup', () => { arrastrando = null; });
+
+let redimensionando = null;
+manijaRecorte.addEventListener('pointerdown', (e) => {
+  e.stopPropagation();
+  redimensionando = { x: e.clientX, y: e.clientY, w: caja.w, h: caja.h };
+  manijaRecorte.setPointerCapture(e.pointerId);
+});
+manijaRecorte.addEventListener('pointermove', (e) => {
+  if (!redimensionando) return;
+  caja.w = Math.max(16, redimensionando.w + (e.clientX - redimensionando.x));
+  caja.h = Math.max(16, redimensionando.h + (e.clientY - redimensionando.y));
+  limitarCaja();
+  dibujarCaja();
+  programarRenderizado();
+});
+manijaRecorte.addEventListener('pointerup', () => { redimensionando = null; });
+
+// --- Selección Libre (pincel circular sobre una máscara) ---
+
+function radioPincelEnMascara() {
+  // El pincel se ve del mismo tamaño en pantalla sea cual sea el zoom —
+  // por eso su radio en la máscara (que no cambia con el zoom) se calcula a
+  // partir del tamaño actual de canvasVivo, no de baseAncho fijo.
+  const factor = canvasMascara.width / canvasVivo.width;
+  return (parseInt(elTamanoPincel.value, 10) / 2) * factor;
+}
+
+function coordenadasEnMascara(e) {
+  const rect = canvasVivo.getBoundingClientRect();
+  const factor = canvasMascara.width / canvasVivo.width;
+  return {
+    x: (e.clientX - rect.left) * factor,
+    y: (e.clientY - rect.top) * factor,
+  };
+}
+
+function pintarPunto(p, radio) {
+  ctxMascara.fillStyle = '#fff';
+  ctxMascara.beginPath();
+  ctxMascara.arc(p.x, p.y, radio, 0, Math.PI * 2);
+  ctxMascara.fill();
+}
+
+function pintarTrazo(a, b, radio) {
+  ctxMascara.strokeStyle = '#fff';
+  ctxMascara.lineWidth = radio * 2;
+  ctxMascara.lineCap = 'round';
+  ctxMascara.lineJoin = 'round';
+  ctxMascara.beginPath();
+  ctxMascara.moveTo(a.x, a.y);
+  ctxMascara.lineTo(b.x, b.y);
+  ctxMascara.stroke();
+}
+
+let pintando = false;
+let ultimoPuntoPincel = null;
+
+// Círculo que sigue al puntero mostrando el tamaño real del pincel — así se
+// ve de entrada qué tan grande queda la brocha, sin tener que pintar primero
+// para averiguarlo.
+function actualizarTamanoCursorPincel() {
+  const diametro = parseInt(elTamanoPincel.value, 10);
+  cursorPincel.style.width = `${diametro}px`;
+  cursorPincel.style.height = `${diametro}px`;
+}
+
+function moverCursorPincel(e) {
+  const rect = canvasVivo.getBoundingClientRect();
+  cursorPincel.style.left = `${e.clientX - rect.left}px`;
+  cursorPincel.style.top = `${e.clientY - rect.top}px`;
+}
+
+canvasVivo.addEventListener('pointerenter', (e) => {
+  if (modoSeleccionElegido !== 'libre') return;
+  actualizarTamanoCursorPincel();
+  moverCursorPincel(e);
+  cursorPincel.classList.add('visible');
+});
+canvasVivo.addEventListener('pointerleave', () => {
+  cursorPincel.classList.remove('visible');
+});
+
+canvasVivo.addEventListener('pointerdown', (e) => {
+  if (modoSeleccionElegido !== 'libre') return;
+  pintando = true;
+  canvasVivo.setPointerCapture(e.pointerId);
+  ultimoPuntoPincel = coordenadasEnMascara(e);
+  pintarPunto(ultimoPuntoPincel, radioPincelEnMascara());
+  programarRenderizado();
+});
+canvasVivo.addEventListener('pointermove', (e) => {
+  if (modoSeleccionElegido === 'libre') moverCursorPincel(e);
+  if (!pintando) return;
+  const punto = coordenadasEnMascara(e);
+  pintarTrazo(ultimoPuntoPincel, punto, radioPincelEnMascara());
+  ultimoPuntoPincel = punto;
+  programarRenderizado();
+});
+canvasVivo.addEventListener('pointerup', () => { pintando = false; ultimoPuntoPincel = null; });
+canvasVivo.addEventListener('pointercancel', () => { pintando = false; ultimoPuntoPincel = null; });
+
+elTamanoPincel.addEventListener('input', () => {
+  etiquetaPincel.textContent = elTamanoPincel.value;
+  actualizarTamanoCursorPincel();
+});
+
+botonBorrarSeleccion.addEventListener('click', () => {
+  ctxMascara.clearRect(0, 0, canvasMascara.width, canvasMascara.height);
+  programarRenderizado();
+});
+
+// --- Zoom (solo tiene sentido en modo Libre, para pintar con precisión) ---
+
+function aplicarTamanoCanvasVivo() {
+  const anchoZoom = Math.max(1, Math.round(baseAncho * zoomActual));
+  const altoZoom = Math.max(1, Math.round(baseAlto * zoomActual));
+  canvasVivo.width = anchoZoom;
+  canvasVivo.height = altoZoom;
+  canvasVivo.style.width = `${anchoZoom}px`;
+  canvasVivo.style.height = `${altoZoom}px`;
+  zonaRecorte.style.width = `${anchoZoom}px`;
+  zonaRecorte.style.height = `${altoZoom}px`;
+}
+
+elZoom.addEventListener('input', () => {
+  etiquetaZoom.textContent = elZoom.value;
+  zoomActual = parseInt(elZoom.value, 10) / 100;
+  aplicarTamanoCanvasVivo();
+  if (modoSeleccionElegido === 'area') { limitarCaja(); dibujarCaja(); }
+  renderizarVivo();
+});
+
+// --- Cambiar entre selección por Área y Libre ---
+
+document.querySelectorAll('#modosSeleccion button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    document.querySelectorAll('#modosSeleccion button').forEach((b) => b.classList.remove('activo'));
+    boton.classList.add('activo');
+    modoSeleccionElegido = boton.dataset.seleccion;
+    zonaRecorte.classList.toggle('modo-libre', modoSeleccionElegido === 'libre');
+    campoPincel.style.display = modoSeleccionElegido === 'libre' ? 'flex' : 'none';
+    campoZoom.style.display = modoSeleccionElegido === 'libre' ? 'flex' : 'none';
+    botonBorrarSeleccion.style.display = modoSeleccionElegido === 'libre' ? 'inline-block' : 'none';
+    if (modoSeleccionElegido !== 'libre') cursorPincel.classList.remove('visible');
+
+    // El zoom solo existe en modo Libre — al cambiar de modo se reinicia,
+    // para no dejar el rectángulo de Área desalineado con un canvas que
+    // quedó agrandado por un zoom anterior.
+    zoomActual = 1;
+    elZoom.value = 100;
+    etiquetaZoom.textContent = '100';
+    if (imagenActual) {
+      aplicarTamanoCanvasVivo();
+      if (modoSeleccionElegido === 'area') { limitarCaja(); dibujarCaja(); }
+      renderizarVivo();
+    }
+  });
+});
+
+// --- Carga de archivo y tamaño base ---
+
+function establecerTamanoBase() {
+  baseAncho = imgRecorte.offsetWidth;
+  baseAlto = imgRecorte.offsetHeight;
+  canvasMascara.width = baseAncho;
+  canvasMascara.height = baseAlto;
+  aplicarTamanoCanvasVivo();
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  if (!archivo) {
+    zonaRecorteContenedor.style.display = 'none';
+    botonAplicar.disabled = true;
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+  imgRecorte.src = imagenActual.src;
+  zonaRecorteContenedor.style.display = 'block';
+  botonAplicar.disabled = false;
+  vistaResultado.style.display = 'none';
+  controlesDescarga.style.display = 'none';
+  resultado.classList.remove('visible');
+  // Esperar a que el <img> termine de acomodarse en el layout antes de
+  // medir su tamaño ya escalado.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    establecerTamanoBase();
+    inicializarCaja();
+    renderizarVivo();
+  }));
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+window.addEventListener('resize', () => {
+  if (!imagenActual || zonaRecorteContenedor.style.display === 'none') return;
+  // La medida "sin zoom" del <img> puede cambiar con el ancho de pantalla;
+  // se vuelve a tomar y se reaplica el zoom actual sobre la nueva base
+  // (esto reinicia lo pintado en modo Libre, un caso raro y aceptable).
+  establecerTamanoBase();
+  if (modoSeleccionElegido === 'area') { limitarCaja(); dibujarCaja(); }
+  renderizarVivo();
+});
+
+botonAplicar.addEventListener('click', () => {
+  botonAplicar.disabled = true;
+  botonAplicar.textContent = 'Generando...';
+  try {
+    const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
+    vistaResultado.width = ancho;
+    vistaResultado.height = alto;
+
+    if (modoSeleccionElegido === 'area') {
+      contextoResultado.drawImage(imagenActual, 0, 0);
+      const escala = ancho / canvasVivo.width;
+      const sx = Math.round(caja.x * escala);
+      const sy = Math.round(caja.y * escala);
+      const sw = Math.round(caja.w * escala);
+      const sh = Math.round(caja.h * escala);
+      const intensidad = parseInt(elIntensidad.value, 10);
+      if (modoElegido === 'pixelar') {
+        pixelarRegion(contextoResultado, sx, sy, sw, sh, intensidad);
+      } else {
+        difuminarRegion(contextoResultado, imagenActual, sx, sy, sw, sh, intensidad);
+      }
+    } else {
+      contextoResultado.drawImage(imagenActual, 0, 0);
+      const canvasEfecto = document.createElement('canvas');
+      canvasEfecto.width = ancho;
+      canvasEfecto.height = alto;
+      const intensidad = parseInt(elIntensidad.value, 10);
+      aplicarEfectoCompleto(canvasEfecto.getContext('2d'), imagenActual, ancho, alto, intensidad);
+
+      const mascaraNatural = document.createElement('canvas');
+      mascaraNatural.width = ancho;
+      mascaraNatural.height = alto;
+      mascaraNatural.getContext('2d').drawImage(canvasMascara, 0, 0, ancho, alto);
+
+      const ctxEfecto = canvasEfecto.getContext('2d');
+      ctxEfecto.globalCompositeOperation = 'destination-in';
+      ctxEfecto.drawImage(mascaraNatural, 0, 0);
+      ctxEfecto.globalCompositeOperation = 'source-over';
+
+      contextoResultado.drawImage(canvasEfecto, 0, 0);
+    }
+
+    vistaResultado.style.display = 'block';
+    controlesDescarga.style.display = 'flex';
+    resultado.classList.remove('visible');
+  } finally {
+    botonAplicar.disabled = false;
+    botonAplicar.textContent = 'Aplicar';
+  }
+});
+
+botonOtraZona.addEventListener('click', () => {
+  vistaResultado.style.display = 'none';
+  controlesDescarga.style.display = 'none';
+  resultado.classList.remove('visible');
+});
+
+botonDescargar.addEventListener('click', async () => {
+  const esPng = archivoActual.type === 'image/png';
+  const formato = esPng ? 'image/png' : 'image/jpeg';
+  const blob = await new Promise((resolve) => vistaResultado.toBlob(resolve, formato, 0.92));
+  enlaceDescarga.href = URL.createObjectURL(blob);
+  enlaceDescarga.download = `imagen-censurada.${esPng ? 'png' : 'jpg'}`;
+  resultado.classList.add('visible');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

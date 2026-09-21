@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear collage de imágenes gratis — Mini Cookies</title>
+<meta name="description" content="Combiná varias imágenes en una sola grilla (collage), gratis y sin subirlas a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 100%; max-height: 450px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+  .campo-numero-chico { width: 70px; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Crear collage de imágenes</h1>
+  <p>Elegí varias imágenes y combinalas en una sola grilla.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (podés elegir varias)
+      <input type="file" id="entradaArchivo" accept="image/*" multiple hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <canvas id="vistaPrevia"></canvas>
+
+    <div class="controles">
+      <label class="campo">
+        Columnas
+        <input type="number" id="columnas" class="campo-numero-chico" min="1" max="4" value="2">
+      </label>
+      <label class="campo">
+        Filas
+        <input type="number" id="filas" class="campo-numero-chico" min="1" max="4" value="2">
+      </label>
+      <label class="campo">
+        Tamaño de celda: <span id="etiquetaCelda">300</span>px
+        <input type="range" id="tamanoCelda" min="100" max="600" value="300">
+      </label>
+      <label class="campo">
+        Espacio entre fotos: <span id="etiquetaEspacio">8</span>px
+        <input type="range" id="espacio" min="0" max="40" value="8">
+      </label>
+      <label class="campo">
+        <span>Color de fondo</span>
+        <input type="color" id="colorFondo" value="#ffffff">
+      </label>
+      <button class="boton" id="botonGenerar" disabled>Generar collage</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="collage">Descargar collage</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contexto = vistaPrevia.getContext('2d');
+const botonGenerar = document.getElementById('botonGenerar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const elColumnas = document.getElementById('columnas');
+const elFilas = document.getElementById('filas');
+const elTamanoCelda = document.getElementById('tamanoCelda');
+const etiquetaCelda = document.getElementById('etiquetaCelda');
+const elEspacio = document.getElementById('espacio');
+const etiquetaEspacio = document.getElementById('etiquetaEspacio');
+const elColorFondo = document.getElementById('colorFondo');
+
+let archivos = [];
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+function actualizarLista() {
+  listaArchivo.innerHTML = archivos.map((archivo, indice) => `
+    <li>
+      <span>${archivo.name}</span>
+      <button type="button" class="quitar" data-indice="${indice}" aria-label="Quitar">✕</button>
+    </li>
+  `).join('');
+  listaArchivo.querySelectorAll('button.quitar').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      archivos.splice(parseInt(boton.dataset.indice, 10), 1);
+      actualizarLista();
+      actualizarBoton();
+    });
+  });
+}
+
+function actualizarBoton() {
+  botonGenerar.disabled = archivos.length === 0;
+}
+
+function agregarArchivos(listaFileList) {
+  const nuevos = [...listaFileList].filter(f => f.type.startsWith('image/'));
+  archivos = archivos.concat(nuevos);
+  actualizarLista();
+  actualizarBoton();
+  resultado.classList.remove('visible');
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => { agregarArchivos(e.target.files); entradaArchivo.value = ''; });
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  agregarArchivos(e.dataTransfer.files);
+});
+
+elTamanoCelda.addEventListener('input', () => etiquetaCelda.textContent = elTamanoCelda.value);
+elEspacio.addEventListener('input', () => etiquetaEspacio.textContent = elEspacio.value);
+
+// Encaja la imagen en la celda tipo "cover": la recorta centrada en vez de
+// deformarla, igual que el object-fit:cover de CSS pero dibujado a mano.
+function dibujarCover(ctx, img, celdaX, celdaY, celdaAncho, celdaAlto) {
+  const escala = Math.max(celdaAncho / img.naturalWidth, celdaAlto / img.naturalHeight);
+  const anchoDestino = img.naturalWidth * escala;
+  const altoDestino = img.naturalHeight * escala;
+  const offsetX = celdaX + (celdaAncho - anchoDestino) / 2;
+  const offsetY = celdaY + (celdaAlto - altoDestino) / 2;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(celdaX, celdaY, celdaAncho, celdaAlto);
+  ctx.clip();
+  ctx.drawImage(img, offsetX, offsetY, anchoDestino, altoDestino);
+  ctx.restore();
+}
+
+botonGenerar.addEventListener('click', async () => {
+  botonGenerar.disabled = true;
+  botonGenerar.textContent = 'Generando...';
+  try {
+    const columnas = Math.max(1, parseInt(elColumnas.value, 10) || 1);
+    const filas = Math.max(1, parseInt(elFilas.value, 10) || 1);
+    const celda = parseInt(elTamanoCelda.value, 10);
+    const espacio = parseInt(elEspacio.value, 10);
+    const maxCeldas = columnas * filas;
+
+    const imagenes = await Promise.all(archivos.slice(0, maxCeldas).map(cargarImagen));
+
+    vistaPrevia.width = columnas * celda + (columnas + 1) * espacio;
+    vistaPrevia.height = filas * celda + (filas + 1) * espacio;
+    contexto.fillStyle = elColorFondo.value;
+    contexto.fillRect(0, 0, vistaPrevia.width, vistaPrevia.height);
+
+    imagenes.forEach((img, indice) => {
+      const col = indice % columnas;
+      const fila = Math.floor(indice / columnas);
+      const x = espacio + col * (celda + espacio);
+      const y = espacio + fila * (celda + espacio);
+      dibujarCover(contexto, img, x, y, celda, celda);
+    });
+
+    vistaPrevia.style.display = 'block';
+
+    const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, 'image/png'));
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = 'collage.png';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert('No se pudo generar el collage: ' + error.message);
+  } finally {
+    botonGenerar.disabled = false;
+    botonGenerar.textContent = 'Generar collage';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

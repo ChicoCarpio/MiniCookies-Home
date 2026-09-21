@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quitar metadatos EXIF de una foto gratis — Mini Cookies</title>
+<meta name="description" content="Sacá los metadatos EXIF (cámara, fecha, ubicación GPS) de una foto antes de compartirla, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+  .metadatos { margin: 16px 0; }
+  .metadatos table { border-collapse: collapse; width: 100%; max-width: 500px; }
+  .metadatos td { padding: 6px 10px; border-bottom: 1px solid var(--gris-borde); font-size: 0.9rem; }
+  .metadatos td:first-child { color: var(--texto-suave); white-space: nowrap; }
+  .sin-metadatos { color: var(--texto-suave); font-size: 0.9rem; }
+  .aviso-gps { color: #dc2626; font-weight: 600; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Quitar metadatos EXIF de una foto</h1>
+  <p>Elegí una foto, mirá qué metadatos tiene (cámara, fecha, ubicación GPS) y descargala sin ellos antes de compartirla.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <canvas id="vistaPrevia"></canvas>
+
+    <div class="metadatos" id="metadatos"></div>
+
+    <div class="controles">
+      <button class="boton" id="botonDescargar" disabled>Descargar sin metadatos</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      ✅ Listo. <a id="enlaceDescarga" download="imagen-sin-metadatos">Descargar imagen</a>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contexto = vistaPrevia.getContext('2d');
+const metadatosDiv = document.getElementById('metadatos');
+const botonDescargar = document.getElementById('botonDescargar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+let imagenActual = null;
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+// Lector manual de EXIF (solo lectura, para mostrar qué tiene la foto antes
+// de sacarlo — la eliminación en sí no depende de este parseo: pasar la
+// imagen por un <canvas> y reexportarla ya la deja sin ningún metadato).
+function leerIfd(vista, inicioIfd, inicioTiff, esLittleEndian) {
+  const entradas = {};
+  const cantidad = vista.getUint16(inicioIfd, esLittleEndian);
+  for (let i = 0; i < cantidad; i++) {
+    const offset = inicioIfd + 2 + i * 12;
+    const tag = vista.getUint16(offset, esLittleEndian);
+    const tipo = vista.getUint16(offset + 2, esLittleEndian);
+    const conteo = vista.getUint32(offset + 4, esLittleEndian);
+    const tamanosPorTipo = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8 };
+    const tamanoTotal = (tamanosPorTipo[tipo] || 1) * conteo;
+    const posicionValor = tamanoTotal <= 4 ? offset + 8 : inicioTiff + vista.getUint32(offset + 8, esLittleEndian);
+
+    if (tipo === 2) { // ASCII
+      let texto = '';
+      for (let j = 0; j < conteo - 1; j++) texto += String.fromCharCode(vista.getUint8(posicionValor + j));
+      entradas[tag] = texto;
+    } else if (tipo === 3) { // SHORT
+      entradas[tag] = vista.getUint16(posicionValor, esLittleEndian);
+    } else if (tipo === 4) { // LONG
+      entradas[tag] = vista.getUint32(posicionValor, esLittleEndian);
+    } else if (tipo === 5 && conteo === 1) { // RATIONAL
+      entradas[tag] = vista.getUint32(posicionValor, esLittleEndian) / vista.getUint32(posicionValor + 4, esLittleEndian);
+    } else if (tipo === 5 && conteo === 3) { // 3 RATIONAL (coordenadas GPS)
+      entradas[tag] = [0, 1, 2].map((j) =>
+        vista.getUint32(posicionValor + j * 8, esLittleEndian) / vista.getUint32(posicionValor + j * 8 + 4, esLittleEndian)
+      );
+    }
+  }
+  return entradas;
+}
+
+function gradosDesdeGps(valores, referencia) {
+  const [grados, minutos, segundos] = valores;
+  let decimal = grados + minutos / 60 + segundos / 3600;
+  if (referencia === 'S' || referencia === 'W') decimal *= -1;
+  return decimal;
+}
+
+async function leerExif(archivo) {
+  if (archivo.type !== 'image/jpeg') return null; // EXIF solo existe en JPEG
+  const buffer = await archivo.arrayBuffer();
+  const vista = new DataView(buffer);
+  if (vista.getUint16(0) !== 0xFFD8) return null; // no es un JPEG válido
+
+  let offset = 2;
+  while (offset < vista.byteLength - 4) {
+    const marcador = vista.getUint16(offset);
+    if (marcador === 0xFFE1) {
+      const inicioApp1 = offset + 4;
+      const esExif = vista.getUint32(inicioApp1) === 0x45786966; // "Exif"
+      if (!esExif) return null;
+      const inicioTiff = inicioApp1 + 6;
+      const esLittleEndian = vista.getUint16(inicioTiff) === 0x4949;
+      const inicioIfd0 = inicioTiff + vista.getUint32(inicioTiff + 4, esLittleEndian);
+      const ifd0 = leerIfd(vista, inicioIfd0, inicioTiff, esLittleEndian);
+
+      let ifdExif = {};
+      if (ifd0[0x8769]) {
+        ifdExif = leerIfd(vista, inicioTiff + ifd0[0x8769], inicioTiff, esLittleEndian);
+      }
+      let gps = null;
+      if (ifd0[0x8825]) {
+        const ifdGps = leerIfd(vista, inicioTiff + ifd0[0x8825], inicioTiff, esLittleEndian);
+        if (ifdGps[2] && ifdGps[4]) {
+          gps = {
+            lat: gradosDesdeGps(ifdGps[2], ifdGps[1]),
+            lon: gradosDesdeGps(ifdGps[4], ifdGps[3]),
+          };
+        }
+      }
+
+      return {
+        marca: ifd0[0x010F] || null,
+        modelo: ifd0[0x0110] || null,
+        fecha: ifdExif[0x9003] || ifd0[0x0132] || null,
+        orientacion: ifd0[0x0112] || null,
+        gps,
+      };
+    }
+    if ((marcador & 0xFF00) !== 0xFF00) break; // ya no es un marcador válido
+    if (marcador === 0xFFDA) break; // arrancó el contenido de la imagen, no hay más APPn
+    offset += 2 + vista.getUint16(offset + 2);
+  }
+  return null;
+}
+
+function mostrarMetadatos(datos) {
+  if (!datos || (!datos.marca && !datos.modelo && !datos.fecha && !datos.gps)) {
+    metadatosDiv.innerHTML = '<p class="sin-metadatos">No se encontraron metadatos EXIF en esta imagen (o ya venía sin ellos).</p>';
+    return;
+  }
+  const filas = [];
+  if (datos.marca || datos.modelo) filas.push(['Cámara', [datos.marca, datos.modelo].filter(Boolean).join(' ')]);
+  if (datos.fecha) filas.push(['Fecha', datos.fecha]);
+  if (datos.gps) filas.push(['Ubicación GPS', `<span class="aviso-gps">${datos.gps.lat.toFixed(5)}, ${datos.gps.lon.toFixed(5)}</span>`]);
+  metadatosDiv.innerHTML = `
+    <table>${filas.map(([etiqueta, valor]) => `<tr><td>${etiqueta}</td><td>${valor}</td></tr>`).join('')}</table>
+  `;
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  if (!archivo) {
+    vistaPrevia.style.display = 'none';
+    metadatosDiv.innerHTML = '';
+    botonDescargar.disabled = true;
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+  vistaPrevia.width = imagenActual.naturalWidth;
+  vistaPrevia.height = imagenActual.naturalHeight;
+  contexto.drawImage(imagenActual, 0, 0);
+  vistaPrevia.style.display = 'block';
+  botonDescargar.disabled = false;
+  resultado.classList.remove('visible');
+
+  metadatosDiv.innerHTML = '<p class="sin-metadatos">Leyendo metadatos...</p>';
+  try {
+    const datos = await leerExif(archivo);
+    mostrarMetadatos(datos);
+  } catch (error) {
+    metadatosDiv.innerHTML = '<p class="sin-metadatos">No se pudieron leer los metadatos, pero igual se pueden quitar al descargar.</p>';
+  }
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDescargar.addEventListener('click', async () => {
+  // Volver a dibujar la imagen en un canvas y exportarla de nuevo alcanza:
+  // el archivo resultante es una imagen completamente nueva, sin ningún
+  // bloque EXIF/XMP/IPTC del original.
+  const esPng = archivoActual.type === 'image/png';
+  const formato = esPng ? 'image/png' : 'image/jpeg';
+  const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.95));
+  enlaceDescarga.href = URL.createObjectURL(blob);
+  enlaceDescarga.download = `imagen-sin-metadatos.${esPng ? 'png' : 'jpg'}`;
+  resultado.classList.add('visible');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de color de imagen gratis — Mini Cookies</title>
+<meta name="description" content="Editá exposición, contraste, sombras, reflejos, saturación, intensidad de color, blanco y negro, claridad y grano de una imagen, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
+  /* Tira de miniaturas de filtros: se desplaza horizontalmente (igual que
+     .lista-ajustes pero en el otro eje) en vez de armar una grilla, así entra
+     una lista larga de filtros sin empujar el resto del panel hacia abajo. */
+  .presets {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Padding de más arriba y a los costados: la miniatura activa se
+       agranda con transform (no reserva espacio propio en el flujo), así
+       que sin este margen de aire se superpone o se corta contra lo que
+       esté arriba (la imagen/zona de arrastre) o contra el borde del
+       carrusel cuando es la primera o la última. */
+    padding: 10px 8px 8px;
+    margin-bottom: 6px;
+  }
+  .preset-miniatura {
+    flex: 0 0 auto;
+    width: 76px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  .preset-miniatura canvas {
+    display: block;
+    width: 76px;
+    height: 76px;
+    border-radius: 8px;
+    border: 2px solid var(--gris-borde);
+    background: var(--gris-fondo);
+    transition: transform .15s, border-color .15s;
+  }
+  .preset-miniatura:hover canvas { border-color: var(--azul); }
+  .preset-miniatura span {
+    font-size: 0.72rem;
+    line-height: 1.2;
+    color: var(--texto-suave);
+    text-align: center;
+    white-space: nowrap;
+    transition: color .15s;
+  }
+  /* La miniatura seleccionada se agranda un poco y se resalta, para que
+     quede claro cuál filtro está aplicado ahora mismo. */
+  .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.12); }
+  .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
+  .intensidad-filtro { margin: 4px 0 14px; }
+  .intensidad-filtro .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 2px; }
+  .intensidad-filtro .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
+  .intensidad-filtro input[type="range"] { width: 100%; margin: 0; }
+  .lista-ajustes {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+  .grupo-ajustes {
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+    padding: 12px 16px 16px;
+    margin: 14px 0;
+  }
+  /* Sin esto, el primer grupo queda 14px más abajo que la zona de arrastre
+     de al lado (por el margin-top de arriba) y las dos columnas no arrancan
+     alineadas. */
+  .lista-ajustes .grupo-ajustes:first-child { margin-top: 0; }
+  .grupo-ajustes > .titulo-grupo {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 0 0 10px;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .deslizadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 20px; }
+  .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
+  .campo-deslizador.deshabilitado { opacity: 0.5; }
+  .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
+  .campo-deslizador .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
+  .campo-deslizador input[type="range"] { width: 100%; margin: 0; }
+  .campo-check { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; margin-bottom: 10px; }
+  .campo-check input { width: auto; }
+  .editor-layout { display: flex; align-items: flex-start; gap: 24px; }
+  .editor-imagen { flex: 1 1 0; min-width: 0; }
+  .editor-controles { width: 360px; flex-shrink: 0; }
+  .editor-controles .deslizadores { grid-template-columns: 1fr; }
+  @media (max-width: 900px) {
+    .editor-layout { flex-direction: column; }
+    .editor-controles { width: 100%; }
+  }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Editor de color de imagen</h1>
+  <p>Elegí una imagen y ajustá luz, color, blanco y negro y efectos como en un editor de fotos.</p>
+
+  <div class="panel-herramienta">
+    <div class="editor-layout">
+      <div class="editor-imagen">
+        <div class="zona-arrastre" id="zonaArrastre">
+          🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+          <input type="file" id="entradaArchivo" accept="image/*" hidden>
+        </div>
+
+        <canvas id="vistaPrevia"></canvas>
+
+        <div class="presets" id="presets">
+          <button type="button" class="preset-miniatura activo" data-preset="ninguno"><canvas></canvas><span>Sin filtro</span></button>
+
+          <!-- Blanco y negro -->
+          <button type="button" class="preset-miniatura" data-preset="grises"><canvas></canvas><span>Blanco y negro</span></button>
+          <button type="button" class="preset-miniatura" data-preset="bnClasico"><canvas></canvas><span>B/N clásico</span></button>
+          <button type="button" class="preset-miniatura" data-preset="bnCine"><canvas></canvas><span>B/N cine</span></button>
+          <button type="button" class="preset-miniatura" data-preset="bnAltaClave"><canvas></canvas><span>B/N alta clave</span></button>
+          <button type="button" class="preset-miniatura" data-preset="bnBajaClave"><canvas></canvas><span>B/N baja clave</span></button>
+          <button type="button" class="preset-miniatura" data-preset="bnAltoContraste"><canvas></canvas><span>B/N contraste</span></button>
+          <button type="button" class="preset-miniatura" data-preset="bnSuave"><canvas></canvas><span>B/N suave</span></button>
+          <button type="button" class="preset-miniatura" data-preset="rayosX"><canvas></canvas><span>Rayos X</span></button>
+
+          <!-- Sepia y película -->
+          <button type="button" class="preset-miniatura" data-preset="sepia"><canvas></canvas><span>Sepia</span></button>
+          <button type="button" class="preset-miniatura" data-preset="sepiaSuave"><canvas></canvas><span>Sepia suave</span></button>
+          <button type="button" class="preset-miniatura" data-preset="sepiaIntenso"><canvas></canvas><span>Sepia intenso</span></button>
+          <button type="button" class="preset-miniatura" data-preset="vintage"><canvas></canvas><span>Vintage</span></button>
+          <button type="button" class="preset-miniatura" data-preset="retro70"><canvas></canvas><span>Retro 70s</span></button>
+          <button type="button" class="preset-miniatura" data-preset="retro80"><canvas></canvas><span>Retro 80s</span></button>
+          <button type="button" class="preset-miniatura" data-preset="polaroid"><canvas></canvas><span>Polaroid</span></button>
+          <button type="button" class="preset-miniatura" data-preset="lomografia"><canvas></canvas><span>Lomografía</span></button>
+          <button type="button" class="preset-miniatura" data-preset="peliculaAntigua"><canvas></canvas><span>Película antigua</span></button>
+
+          <!-- Tonos de color / clima -->
+          <button type="button" class="preset-miniatura" data-preset="frio"><canvas></canvas><span>Frío</span></button>
+          <button type="button" class="preset-miniatura" data-preset="calido"><canvas></canvas><span>Cálido</span></button>
+          <button type="button" class="preset-miniatura" data-preset="veranoDorado"><canvas></canvas><span>Verano dorado</span></button>
+          <button type="button" class="preset-miniatura" data-preset="oceano"><canvas></canvas><span>Océano</span></button>
+          <button type="button" class="preset-miniatura" data-preset="atardecer"><canvas></canvas><span>Atardecer</span></button>
+          <button type="button" class="preset-miniatura" data-preset="amanecer"><canvas></canvas><span>Amanecer</span></button>
+          <button type="button" class="preset-miniatura" data-preset="lluvioso"><canvas></canvas><span>Lluvioso</span></button>
+          <button type="button" class="preset-miniatura" data-preset="artico"><canvas></canvas><span>Ártico</span></button>
+          <button type="button" class="preset-miniatura" data-preset="plateado"><canvas></canvas><span>Plateado</span></button>
+
+          <!-- Retrato y edición dramática -->
+          <button type="button" class="preset-miniatura" data-preset="technicolor"><canvas></canvas><span>Technicolor</span></button>
+          <button type="button" class="preset-miniatura" data-preset="dramatico"><canvas></canvas><span>Dramático</span></button>
+          <button type="button" class="preset-miniatura" data-preset="retrato"><canvas></canvas><span>Retrato</span></button>
+          <button type="button" class="preset-miniatura" data-preset="cine"><canvas></canvas><span>Cine</span></button>
+          <button type="button" class="preset-miniatura" data-preset="altaModa"><canvas></canvas><span>Alta moda</span></button>
+          <button type="button" class="preset-miniatura" data-preset="comic"><canvas></canvas><span>Cómic</span></button>
+          <button type="button" class="preset-miniatura" data-preset="pastel"><canvas></canvas><span>Pastel</span></button>
+          <button type="button" class="preset-miniatura" data-preset="desvanecido"><canvas></canvas><span>Desvanecido</span></button>
+          <button type="button" class="preset-miniatura" data-preset="altoBrillo"><canvas></canvas><span>Alto brillo</span></button>
+          <button type="button" class="preset-miniatura" data-preset="sombrasProfundas"><canvas></canvas><span>Sombras</span></button>
+
+          <!-- Luz, neón y creativos -->
+          <button type="button" class="preset-miniatura" data-preset="resplandor"><canvas></canvas><span>Resplandor</span></button>
+          <button type="button" class="preset-miniatura" data-preset="neonRosa"><canvas></canvas><span>Neón rosa</span></button>
+          <button type="button" class="preset-miniatura" data-preset="neonAzul"><canvas></canvas><span>Neón azul</span></button>
+          <button type="button" class="preset-miniatura" data-preset="cyberpunk"><canvas></canvas><span>Cyberpunk</span></button>
+          <button type="button" class="preset-miniatura" data-preset="glitch"><canvas></canvas><span>Glitch</span></button>
+          <button type="button" class="preset-miniatura" data-preset="glamour"><canvas></canvas><span>Glamour</span></button>
+          <button type="button" class="preset-miniatura" data-preset="sueno"><canvas></canvas><span>Sueño</span></button>
+          <button type="button" class="preset-miniatura" data-preset="fantasma"><canvas></canvas><span>Fantasma</span></button>
+          <button type="button" class="preset-miniatura" data-preset="terror"><canvas></canvas><span>Terror</span></button>
+          <button type="button" class="preset-miniatura" data-preset="nocturno"><canvas></canvas><span>Nocturno</span></button>
+
+          <!-- Artístico y otros -->
+          <button type="button" class="preset-miniatura" data-preset="acuarela"><canvas></canvas><span>Acuarela</span></button>
+          <button type="button" class="preset-miniatura" data-preset="oleo"><canvas></canvas><span>Óleo</span></button>
+          <button type="button" class="preset-miniatura" data-preset="invertir"><canvas></canvas><span>Invertir</span></button>
+          <button type="button" class="preset-miniatura" data-preset="neon"><canvas></canvas><span>Neón</span></button>
+        </div>
+
+        <div class="intensidad-filtro">
+          <span class="etiqueta-deslizador"><span>Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
+          <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
+        </div>
+
+        <div class="controles">
+          <button type="button" id="botonRestablecer" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;">Restablecer</button>
+          <button class="boton" id="botonDescargar" disabled>Descargar imagen</button>
+        </div>
+
+        <div class="resultado" id="resultado">
+          ✅ Listo. <a id="enlaceDescarga" download="imagen-editada">Descargar imagen</a>
+        </div>
+      </div>
+
+      <div class="editor-controles">
+        <div class="lista-ajustes">
+          <fieldset class="grupo-ajustes">
+            <p class="titulo-grupo">Luz</p>
+            <div class="deslizadores">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Exposición</span><span id="valorExposicion">0</span></span>
+                <input type="range" id="exposicion" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Contraste</span><span id="valorContraste">0</span></span>
+                <input type="range" id="contraste" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Sombras</span><span id="valorSombras">0</span></span>
+                <input type="range" id="sombras" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Reflejos</span><span id="valorReflejos">0</span></span>
+                <input type="range" id="reflejos" min="-100" max="100" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="grupo-ajustes">
+            <p class="titulo-grupo">Color</p>
+            <div class="deslizadores">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Saturación</span><span id="valorSaturacion">0</span></span>
+                <input type="range" id="saturacion" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Intensidad de color</span><span id="valorIntensidad">0</span></span>
+                <input type="range" id="intensidad" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Girar tono</span><span id="valorTono">0°</span></span>
+                <input type="range" id="tono" min="-180" max="180" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Canal rojo</span><span id="valorColorRojo">0</span></span>
+                <input type="range" id="colorRojo" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Canal verde</span><span id="valorColorVerde">0</span></span>
+                <input type="range" id="colorVerde" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Canal azul</span><span id="valorColorAzul">0</span></span>
+                <input type="range" id="colorAzul" min="-100" max="100" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="grupo-ajustes">
+            <p class="titulo-grupo">Blanco y negro</p>
+            <label class="campo-check">
+              <input type="checkbox" id="activarBN">
+              Convertir a blanco y negro
+            </label>
+            <div class="deslizadores">
+              <label class="campo-deslizador deshabilitado" data-canal>
+                <span class="etiqueta-deslizador"><span>Rojos</span><span id="valorCanalRojo">100%</span></span>
+                <input type="range" id="canalRojo" min="0" max="200" value="100" disabled>
+              </label>
+              <label class="campo-deslizador deshabilitado" data-canal>
+                <span class="etiqueta-deslizador"><span>Verdes</span><span id="valorCanalVerde">100%</span></span>
+                <input type="range" id="canalVerde" min="0" max="200" value="100" disabled>
+              </label>
+              <label class="campo-deslizador deshabilitado" data-canal>
+                <span class="etiqueta-deslizador"><span>Azules</span><span id="valorCanalAzul">100%</span></span>
+                <input type="range" id="canalAzul" min="0" max="200" value="100" disabled>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="grupo-ajustes">
+            <p class="titulo-grupo">Efectos</p>
+            <div class="deslizadores">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Claridad</span><span id="valorClaridad">0</span></span>
+                <input type="range" id="claridad" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Grano</span><span id="valorGrano">0%</span></span>
+                <input type="range" id="grano" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Sepia</span><span id="valorSepia">0%</span></span>
+                <input type="range" id="sepia" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Invertir colores</span><span id="valorInvertir">0%</span></span>
+                <input type="range" id="invertir" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Desenfoque</span><span id="valorDesenfoque">0px</span></span>
+                <input type="range" id="desenfoque" min="0" max="20" step="0.5" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="grupo-ajustes">
+            <p class="titulo-grupo">Resplandor</p>
+            <div class="deslizadores">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Intensidad</span><span id="valorDispersionIntensidad">0%</span></span>
+                <input type="range" id="dispersionIntensidad" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Matiz</span><span id="valorDispersionMatiz">0°</span></span>
+                <input type="range" id="dispersionMatiz" min="-180" max="180" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Tamaño</span><span id="valorDispersionTamano">50%</span></span>
+                <input type="range" id="dispersionTamano" min="0" max="100" value="50">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="grupo-ajustes">
+            <p class="titulo-grupo">Dispersión de luz</p>
+            <div class="deslizadores">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Intensidad</span><span id="valorAberracionIntensidad">0%</span></span>
+                <input type="range" id="aberracionIntensidad" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Ángulo</span><span id="valorAberracionAngulo">0°</span></span>
+                <input type="range" id="aberracionAngulo" min="0" max="360" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Matiz</span><span id="valorAberracionMatiz">0°</span></span>
+                <input type="range" id="aberracionMatiz" min="-180" max="180" value="0">
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const vistaPrevia = document.getElementById('vistaPrevia');
+const contextoPrevia = vistaPrevia.getContext('2d');
+const botonDescargar = document.getElementById('botonDescargar');
+const botonRestablecer = document.getElementById('botonRestablecer');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const activarBN = document.getElementById('activarBN');
+
+// La vista previa se calcula sobre una copia reducida de la imagen (lado
+// más largo acotado a esto) para que mover un deslizador no se sienta lento
+// en fotos grandes; al descargar, el mismo procesamiento corre una sola vez
+// sobre la imagen a resolución completa.
+const LADO_MAXIMO_PREVIA = 1000;
+
+// brillo/contraste/saturación/etc. se muestran como desviación desde 0
+// (neutro), así el deslizador arranca en el medio de la barra en vez de en
+// un extremo.
+const deslizadores = {
+  exposicion: { input: document.getElementById('exposicion'), valor: document.getElementById('valorExposicion'), unidad: '', porDefecto: 0, conSigno: true },
+  contraste: { input: document.getElementById('contraste'), valor: document.getElementById('valorContraste'), unidad: '', porDefecto: 0, conSigno: true },
+  sombras: { input: document.getElementById('sombras'), valor: document.getElementById('valorSombras'), unidad: '', porDefecto: 0, conSigno: true },
+  reflejos: { input: document.getElementById('reflejos'), valor: document.getElementById('valorReflejos'), unidad: '', porDefecto: 0, conSigno: true },
+  saturacion: { input: document.getElementById('saturacion'), valor: document.getElementById('valorSaturacion'), unidad: '', porDefecto: 0, conSigno: true },
+  intensidad: { input: document.getElementById('intensidad'), valor: document.getElementById('valorIntensidad'), unidad: '', porDefecto: 0, conSigno: true },
+  tono: { input: document.getElementById('tono'), valor: document.getElementById('valorTono'), unidad: '°', porDefecto: 0, conSigno: true },
+  colorRojo: { input: document.getElementById('colorRojo'), valor: document.getElementById('valorColorRojo'), unidad: '', porDefecto: 0, conSigno: true },
+  colorVerde: { input: document.getElementById('colorVerde'), valor: document.getElementById('valorColorVerde'), unidad: '', porDefecto: 0, conSigno: true },
+  colorAzul: { input: document.getElementById('colorAzul'), valor: document.getElementById('valorColorAzul'), unidad: '', porDefecto: 0, conSigno: true },
+  canalRojo: { input: document.getElementById('canalRojo'), valor: document.getElementById('valorCanalRojo'), unidad: '%', porDefecto: 100 },
+  canalVerde: { input: document.getElementById('canalVerde'), valor: document.getElementById('valorCanalVerde'), unidad: '%', porDefecto: 100 },
+  canalAzul: { input: document.getElementById('canalAzul'), valor: document.getElementById('valorCanalAzul'), unidad: '%', porDefecto: 100 },
+  claridad: { input: document.getElementById('claridad'), valor: document.getElementById('valorClaridad'), unidad: '', porDefecto: 0, conSigno: true },
+  grano: { input: document.getElementById('grano'), valor: document.getElementById('valorGrano'), unidad: '%', porDefecto: 0 },
+  sepia: { input: document.getElementById('sepia'), valor: document.getElementById('valorSepia'), unidad: '%', porDefecto: 0 },
+  invertir: { input: document.getElementById('invertir'), valor: document.getElementById('valorInvertir'), unidad: '%', porDefecto: 0 },
+  desenfoque: { input: document.getElementById('desenfoque'), valor: document.getElementById('valorDesenfoque'), unidad: 'px', porDefecto: 0 },
+  dispersionIntensidad: { input: document.getElementById('dispersionIntensidad'), valor: document.getElementById('valorDispersionIntensidad'), unidad: '%', porDefecto: 0 },
+  dispersionMatiz: { input: document.getElementById('dispersionMatiz'), valor: document.getElementById('valorDispersionMatiz'), unidad: '°', porDefecto: 0, conSigno: true },
+  dispersionTamano: { input: document.getElementById('dispersionTamano'), valor: document.getElementById('valorDispersionTamano'), unidad: '%', porDefecto: 50 },
+  aberracionIntensidad: { input: document.getElementById('aberracionIntensidad'), valor: document.getElementById('valorAberracionIntensidad'), unidad: '%', porDefecto: 0 },
+  aberracionAngulo: { input: document.getElementById('aberracionAngulo'), valor: document.getElementById('valorAberracionAngulo'), unidad: '°', porDefecto: 0 },
+  aberracionMatiz: { input: document.getElementById('aberracionMatiz'), valor: document.getElementById('valorAberracionMatiz'), unidad: '°', porDefecto: 0, conSigno: true },
+  intensidadFiltro: { input: document.getElementById('intensidadFiltro'), valor: document.getElementById('valorIntensidadFiltro'), unidad: '%', porDefecto: 100 },
+};
+
+// Valores neutros de cada ajuste — cada preset parte de esta base y sólo
+// declara en qué se diferencia, en vez de repetir los ~19 campos enteros
+// cada vez (ahora que hay muchos presets, mantenerlos así sería un lío).
+const AJUSTES_NEUTROS = {
+  bn: false, exposicion: 0, contraste: 0, sombras: 0, reflejos: 0, saturacion: 0, intensidad: 0, tono: 0,
+  colorRojo: 0, colorVerde: 0, colorAzul: 0,
+  canalRojo: 100, canalVerde: 100, canalAzul: 100, claridad: 0, grano: 0, sepia: 0, invertir: 0, desenfoque: 0,
+  dispersionIntensidad: 0, dispersionMatiz: 0, dispersionTamano: 50,
+  aberracionIntensidad: 0, aberracionAngulo: 0, aberracionMatiz: 0, intensidadFiltro: 100,
+};
+function crearPreset(cambios) { return { ...AJUSTES_NEUTROS, ...cambios }; }
+
+const PRESETS = {
+  ninguno: crearPreset({}),
+  grises: crearPreset({ bn: true, contraste: 10 }),
+  bnAltoContraste: crearPreset({ bn: true, contraste: 40, claridad: 20 }),
+  bnSuave: crearPreset({ bn: true, contraste: -10, exposicion: 5 }),
+  sepia: crearPreset({ sepia: 100 }),
+  invertir: crearPreset({ invertir: 100 }),
+  vintage: crearPreset({ exposicion: 5, contraste: -10, sombras: 10, reflejos: -10, saturacion: -20, grano: 15, sepia: 35 }),
+  dramatico: crearPreset({ exposicion: -5, contraste: 40, sombras: -15, reflejos: -15, saturacion: 10, intensidad: 20, claridad: 30 }),
+  retrato: crearPreset({ exposicion: 5, contraste: 5, sombras: 15, reflejos: -10, saturacion: -5, intensidad: 15, claridad: -15 }),
+  resplandor: crearPreset({ exposicion: 5, reflejos: -10, saturacion: 5, intensidad: 10, dispersionIntensidad: 55, dispersionMatiz: 15, dispersionTamano: 65 }),
+  frio: crearPreset({ tono: -15, saturacion: -10, contraste: 10 }),
+  calido: crearPreset({ tono: 12, saturacion: 10, exposicion: 5 }),
+  cine: crearPreset({ tono: 8, saturacion: 15, contraste: 20, sombras: -10, claridad: 15 }),
+  pastel: crearPreset({ saturacion: -30, exposicion: 10, contraste: -15, claridad: -10 }),
+  nocturno: crearPreset({ exposicion: -15, contraste: 20, saturacion: -10, tono: -10 }),
+  polaroid: crearPreset({ sepia: 20, contraste: -10, saturacion: -15, grano: 20, exposicion: 5 }),
+  neon: crearPreset({ saturacion: 60, intensidad: 40, contraste: 20, dispersionIntensidad: 30, dispersionMatiz: 40, dispersionTamano: 60 }),
+  peliculaAntigua: crearPreset({ sepia: 30, grano: 35, contraste: -5, exposicion: -5 }),
+  altoBrillo: crearPreset({ exposicion: 20, sombras: 20, reflejos: -5, contraste: -10, saturacion: 5 }),
+  sombrasProfundas: crearPreset({ sombras: -30, reflejos: 10, contraste: 25, claridad: 20 }),
+  bnClasico: crearPreset({ bn: true, contraste: 15, claridad: 10, grano: 10 }),
+  bnCine: crearPreset({ bn: true, contraste: 25, sombras: 10, reflejos: -10, claridad: 15 }),
+  bnAltaClave: crearPreset({ bn: true, exposicion: 20, contraste: -10 }),
+  bnBajaClave: crearPreset({ bn: true, exposicion: -20, contraste: 35, claridad: 15 }),
+  sepiaSuave: crearPreset({ sepia: 50, contraste: -5 }),
+  sepiaIntenso: crearPreset({ sepia: 100, contraste: 15, grano: 15 }),
+  technicolor: crearPreset({ saturacion: 40, contraste: 20, tono: 5 }),
+  veranoDorado: crearPreset({ tono: 15, saturacion: 20, exposicion: 10 }),
+  oceano: crearPreset({ tono: -30, saturacion: 15, contraste: 10, claridad: 10 }),
+  atardecer: crearPreset({ tono: 20, saturacion: 25, exposicion: 5, reflejos: -10 }),
+  amanecer: crearPreset({ exposicion: 10, saturacion: -10, tono: 8, claridad: -5 }),
+  lluvioso: crearPreset({ saturacion: -25, tono: -10, contraste: 5, exposicion: -5 }),
+  artico: crearPreset({ saturacion: -20, tono: -25, exposicion: 10, contraste: 10 }),
+  neonRosa: crearPreset({ tono: -60, saturacion: 50, dispersionIntensidad: 40, dispersionMatiz: -30, dispersionTamano: 55 }),
+  neonAzul: crearPreset({ tono: 60, saturacion: 50, dispersionIntensidad: 35, dispersionMatiz: 60, dispersionTamano: 60 }),
+  cyberpunk: crearPreset({ contraste: 30, saturacion: 40, tono: -20, dispersionIntensidad: 45, dispersionMatiz: -40, dispersionTamano: 70, claridad: 15, aberracionIntensidad: 20, aberracionAngulo: 0 }),
+  glitch: crearPreset({ contraste: 25, saturacion: 35, grano: 20, aberracionIntensidad: 75, aberracionAngulo: 0 }),
+  glamour: crearPreset({ exposicion: 5, claridad: -20, saturacion: -5, dispersionIntensidad: 25, dispersionTamano: 70 }),
+  sueno: crearPreset({ exposicion: 10, contraste: -15, saturacion: -10, dispersionIntensidad: 35, dispersionTamano: 80, claridad: -15 }),
+  lomografia: crearPreset({ contraste: 25, saturacion: 20, grano: 25, sombras: -15 }),
+  retro80: crearPreset({ saturacion: 30, tono: -10, contraste: 15, dispersionIntensidad: 20, dispersionMatiz: -20, dispersionTamano: 50 }),
+  retro70: crearPreset({ sepia: 25, saturacion: -15, contraste: -10, grano: 20, exposicion: 5 }),
+  desvanecido: crearPreset({ exposicion: 15, contraste: -25, saturacion: -20 }),
+  altaModa: crearPreset({ contraste: 35, claridad: 25, saturacion: -10 }),
+  comic: crearPreset({ saturacion: 60, contraste: 40, claridad: 30 }),
+  acuarela: crearPreset({ saturacion: -15, contraste: -10, claridad: -20, desenfoque: 1, exposicion: 5 }),
+  oleo: crearPreset({ contraste: 10, claridad: -25, saturacion: 10 }),
+  rayosX: crearPreset({ bn: true, invertir: 100, contraste: 20 }),
+  terror: crearPreset({ tono: -90, saturacion: -20, exposicion: -15, contraste: 25, sombras: -10 }),
+  fantasma: crearPreset({ exposicion: 25, saturacion: -40, contraste: -10, dispersionIntensidad: 20, dispersionTamano: 75 }),
+  plateado: crearPreset({ saturacion: -30, tono: -15, contraste: 10 }),
+};
+
+let archivoActual = null;
+let imagenActual = null;
+let canvasPrevia = null; // copia reducida de la imagen, se redibuja "limpia" antes de cada procesado
+let fotogramaPendiente = null;
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+function leerAjustes() {
+  const a = {};
+  Object.entries(deslizadores).forEach(([clave, d]) => { a[clave] = Number(d.input.value); });
+  a.bn = activarBN.checked;
+  return a;
+}
+
+// Matriz de rotación de tono, misma fórmula que usan los navegadores para
+// el filtro CSS hue-rotate (feColorMatrix "hueRotate" de SVG/CSS Filter
+// Effects), para poder combinarla en un único paso por píxel junto al resto.
+function matrizTono(gradosGrados) {
+  const a = gradosGrados * Math.PI / 180;
+  const c = Math.cos(a), s = Math.sin(a);
+  return [
+    0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928,
+    0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
+    0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072,
+  ];
+}
+
+// Truco barato de desenfoque: reescalar la imagen a un tamaño muy chico y
+// volver a agrandarla usando el suavizado nativo del canvas — sirve como
+// aproximación de un desenfoque gaussiano fuerte, sin implementar
+// convolución a mano. Se usa como referencia de "detalle local" para la
+// claridad (unsharp mask) y como base del resplandor de la dispersión de luz
+// (cuanto más chico el lado de referencia, más grande y difuso el desenfoque).
+function generarVersionBorrosa(canvasFuente, ladoChico = 40) {
+  const ancho = canvasFuente.width, alto = canvasFuente.height;
+  const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
+  const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
+
+  const canvasChico = document.createElement('canvas');
+  canvasChico.width = anchoChico;
+  canvasChico.height = altoChico;
+  const ctxChico = canvasChico.getContext('2d');
+  ctxChico.imageSmoothingEnabled = true;
+  ctxChico.imageSmoothingQuality = 'high';
+  ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
+
+  const canvasBorroso = document.createElement('canvas');
+  canvasBorroso.width = ancho;
+  canvasBorroso.height = alto;
+  const ctxBorroso = canvasBorroso.getContext('2d');
+  ctxBorroso.imageSmoothingEnabled = true;
+  ctxBorroso.imageSmoothingQuality = 'high';
+  ctxBorroso.drawImage(canvasChico, 0, 0, anchoChico, altoChico, 0, 0, ancho, alto);
+  return ctxBorroso.getImageData(0, 0, ancho, alto).data;
+}
+
+// Aplica todo el pipeline de ajustes sobre el canvas recibido (que ya debe
+// contener la imagen original sin procesar) y lo deja mutado con el
+// resultado. Se usa tanto para la vista previa (canvas chico) como para la
+// descarga final (canvas a resolución completa) con el mismo código.
+function procesarCanvas(canvasFuente, ajustes) {
+  const ctx = canvasFuente.getContext('2d');
+  const ancho = canvasFuente.width, alto = canvasFuente.height;
+  const imageData = ctx.getImageData(0, 0, ancho, alto);
+  const datos = imageData.data;
+
+  // Dispersión de luz (separación de canales / aberración cromática): a
+  // diferencia del resto de ajustes, que son por-píxel, este es geométrico
+  // — desplaza el canal rojo hacia un lado y el azul hacia el opuesto,
+  // dejando el verde en su lugar, igual que la dispersión óptica de un
+  // prisma. Por eso corre antes que todo lo demás, sobre una copia del
+  // original: el resto del pipeline sigue trabajando normal, ahora sobre
+  // la imagen ya "separada".
+  const ampAberracion = ajustes.aberracionIntensidad / 100;
+  if (ampAberracion > 0) {
+    const anguloRad = (ajustes.aberracionAngulo / 180) * Math.PI;
+    const desplazamiento = ampAberracion * Math.max(2, Math.round(Math.min(ancho, alto) * 0.02));
+    const dx = Math.round(Math.cos(anguloRad) * desplazamiento);
+    const dy = Math.round(Math.sin(anguloRad) * desplazamiento);
+    const original = new Uint8ClampedArray(datos);
+    // Matiz: en vez de separar siempre en rojo/azul puro, gira esos dos
+    // colores por la rueda de tono (misma matriz que "Girar tono") — a 0°
+    // sigue siendo la dispersión clásica tipo prisma, y al mover el
+    // deslizador la separación pasa a naranja/cian, magenta/verde, etc.
+    const mTonoAberracion = ajustes.aberracionMatiz !== 0 ? matrizTono(ajustes.aberracionMatiz) : null;
+    for (let y = 0; y < alto; y++) {
+      const yr = y + dy < 0 ? 0 : y + dy >= alto ? alto - 1 : y + dy;
+      const yb = y - dy < 0 ? 0 : y - dy >= alto ? alto - 1 : y - dy;
+      for (let x = 0; x < ancho; x++) {
+        const xr = x + dx < 0 ? 0 : x + dx >= ancho ? ancho - 1 : x + dx;
+        const xb = x - dx < 0 ? 0 : x - dx >= ancho ? ancho - 1 : x - dx;
+        const iDestino = (y * ancho + x) * 4;
+        const iR = (yr * ancho + xr) * 4;
+        const iB = (yb * ancho + xb) * 4;
+        if (mTonoAberracion) {
+          const rr = original[iR], rg = original[iR + 1], rb = original[iR + 2];
+          const br = original[iB], bg = original[iB + 1], bb = original[iB + 2];
+          datos[iDestino] = mTonoAberracion[0] * rr + mTonoAberracion[1] * rg + mTonoAberracion[2] * rb;
+          datos[iDestino + 2] = mTonoAberracion[6] * br + mTonoAberracion[7] * bg + mTonoAberracion[8] * bb;
+        } else {
+          datos[iDestino] = original[iR];
+          datos[iDestino + 2] = original[iB + 2];
+        }
+      }
+    }
+  }
+
+  const factorExposicion = Math.pow(2, (ajustes.exposicion / 100) * 2);
+  const c = ajustes.contraste;
+  const factorContraste = (259 * (c + 255)) / (255 * (259 - c));
+  const amplitudSombras = (ajustes.sombras / 100) * 70;
+  const amplitudReflejos = (ajustes.reflejos / 100) * 70;
+  const factorSaturacion = 1 + ajustes.saturacion / 100;
+  const nIntensidad = ajustes.intensidad / 100;
+  const necesitaTono = ajustes.tono !== 0;
+  const mTono = necesitaTono ? matrizTono(ajustes.tono) : null;
+  // Balance de color: suma/resta directo sobre cada canal de la imagen A
+  // COLOR (distinto de los deslizadores "Rojos/Verdes/Azules" de más abajo,
+  // que solo pesan la mezcla a blanco y negro).
+  const deltaColorRojo = ajustes.colorRojo;
+  const deltaColorVerde = ajustes.colorVerde;
+  const deltaColorAzul = ajustes.colorAzul;
+  const bn = ajustes.bn;
+  const wr = ajustes.canalRojo / 100, wg = ajustes.canalVerde / 100, wb = ajustes.canalAzul / 100;
+  const sumaCanales = (wr + wg + wb) || 1;
+  const ampSepia = ajustes.sepia / 100;
+  const ampInvertir = ajustes.invertir / 100;
+  const ampClaridad = (ajustes.claridad / 100) * 1.3;
+  const necesitaClaridad = ampClaridad !== 0;
+  const borrosos = necesitaClaridad ? generarVersionBorrosa(canvasFuente) : null;
+  const ampGrano = (ajustes.grano / 100) * 45;
+  const factorIntensidadFiltro = ajustes.intensidadFiltro / 100;
+
+  // Dispersión de luz (bloom): se extraen del original las zonas más
+  // brillantes (con un umbral suave), se desenfocan mucho — el tamaño del
+  // desenfoque lo controla el deslizador "Tamaño" — y después se mezclan de
+  // vuelta con la imagen en modo "screen", opcionalmente con un giro de tono
+  // propio para que el resplandor tenga un matiz distinto al de la imagen.
+  const ampDispersion = (ajustes.dispersionIntensidad / 100) * 1.6;
+  let capaDispersion = null;
+  let mMatizDispersion = null;
+  if (ampDispersion > 0) {
+    const brillante = new Uint8ClampedArray(datos.length);
+    for (let i = 0; i < datos.length; i += 4) {
+      const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
+      const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
+      brillante[i] = datos[i] * factor;
+      brillante[i + 1] = datos[i + 1] * factor;
+      brillante[i + 2] = datos[i + 2] * factor;
+      brillante[i + 3] = 255;
+    }
+    const canvasBrillante = document.createElement('canvas');
+    canvasBrillante.width = ancho;
+    canvasBrillante.height = alto;
+    canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+    const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
+    capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion);
+    if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
+  }
+
+  for (let i = 0; i < datos.length; i += 4) {
+    let r = datos[i], g = datos[i + 1], b = datos[i + 2];
+    const rOriginal = r, gOriginal = g, bOriginal = b;
+
+    // Exposición
+    r *= factorExposicion; g *= factorExposicion; b *= factorExposicion;
+    if (r < 0) r = 0; else if (r > 255) r = 255;
+    if (g < 0) g = 0; else if (g > 255) g = 255;
+    if (b < 0) b = 0; else if (b > 255) b = 255;
+
+    // Contraste
+    r = factorContraste * (r - 128) + 128;
+    g = factorContraste * (g - 128) + 128;
+    b = factorContraste * (b - 128) + 128;
+    // Sin este clamp, el contraste alto empuja canales por encima de 255 o
+    // por debajo de 0; ese desborde llega sin avisar al giro de tono y a la
+    // saturación de más abajo (pensados para 0-255) y produce manchas de
+    // colores que no tienen nada que ver con la imagen, sobre todo en zonas
+    // de mucho brillo/sombra combinadas con contraste o claridad altos.
+    if (r < 0) r = 0; else if (r > 255) r = 255;
+    if (g < 0) g = 0; else if (g > 255) g = 255;
+    if (b < 0) b = 0; else if (b > 255) b = 255;
+
+    // Sombras y reflejos, según la luminancia del píxel
+    if (amplitudSombras !== 0 || amplitudReflejos !== 0) {
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const mascaraSombra = Math.max(0, Math.min(1, 1 - lum / 128));
+      const mascaraReflejo = Math.max(0, Math.min(1, (lum - 128) / 127));
+      const delta = amplitudSombras * mascaraSombra + amplitudReflejos * mascaraReflejo;
+      r += delta; g += delta; b += delta;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    // Girar tono (matriz precalculada una sola vez por render)
+    if (mTono) {
+      const nr = mTono[0] * r + mTono[1] * g + mTono[2] * b;
+      const ng = mTono[3] * r + mTono[4] * g + mTono[5] * b;
+      const nb = mTono[6] * r + mTono[7] * g + mTono[8] * b;
+      r = nr; g = ng; b = nb;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    // Saturación + intensidad de color (vibrance: satura más lo que está
+    // menos saturado, protegiendo tonos ya intensos)
+    if (factorSaturacion !== 1 || nIntensidad !== 0) {
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
+      const saturacionActual = maxC > 0 ? (maxC - minC) / maxC : 0;
+      const factorVibrance = 1 + nIntensidad * (1 - saturacionActual) * 1.5;
+      const factorTotal = factorSaturacion * factorVibrance;
+      r = lum + (r - lum) * factorTotal;
+      g = lum + (g - lum) * factorTotal;
+      b = lum + (b - lum) * factorTotal;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    // Balance de color: ajusta rojo/verde/azul de la imagen a color por
+    // separado, antes de decidir si además se convierte a blanco y negro
+    if (deltaColorRojo !== 0) { r += deltaColorRojo; if (r < 0) r = 0; else if (r > 255) r = 255; }
+    if (deltaColorVerde !== 0) { g += deltaColorVerde; if (g < 0) g = 0; else if (g > 255) g = 255; }
+    if (deltaColorAzul !== 0) { b += deltaColorAzul; if (b < 0) b = 0; else if (b > 255) b = 255; }
+
+    // Blanco y negro con mezcla de canales ajustable
+    if (bn) {
+      const gris = (r * wr + g * wg + b * wb) / sumaCanales;
+      r = gris; g = gris; b = gris;
+    }
+
+    // Sepia (la matriz de tono sepia puede pasarse de 255 con canales muy
+    // brillantes, así que se recorta antes de seguir)
+    if (ampSepia !== 0) {
+      const tr = 0.393 * r + 0.769 * g + 0.189 * b;
+      const tg = 0.349 * r + 0.686 * g + 0.168 * b;
+      const tb = 0.272 * r + 0.534 * g + 0.131 * b;
+      r += (tr - r) * ampSepia; g += (tg - g) * ampSepia; b += (tb - b) * ampSepia;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    // Invertir colores
+    if (ampInvertir !== 0) {
+      r += (255 - r - r) * ampInvertir;
+      g += (255 - g - g) * ampInvertir;
+      b += (255 - b - b) * ampInvertir;
+    }
+
+    // Dispersión de luz: mezcla tipo "screen" con la capa de resplandor
+    // precalculada a partir de las zonas brillantes del original
+    if (capaDispersion) {
+      let br = capaDispersion[i], bg = capaDispersion[i + 1], bb = capaDispersion[i + 2];
+      if (mMatizDispersion) {
+        const nr = mMatizDispersion[0] * br + mMatizDispersion[1] * bg + mMatizDispersion[2] * bb;
+        const ng = mMatizDispersion[3] * br + mMatizDispersion[4] * bg + mMatizDispersion[5] * bb;
+        const nb = mMatizDispersion[6] * br + mMatizDispersion[7] * bg + mMatizDispersion[8] * bb;
+        br = nr < 0 ? 0 : nr > 255 ? 255 : nr;
+        bg = ng < 0 ? 0 : ng > 255 ? 255 : ng;
+        bb = nb < 0 ? 0 : nb > 255 ? 255 : nb;
+      }
+      const pantallaR = 255 - (255 - r) * (255 - br) / 255;
+      const pantallaG = 255 - (255 - g) * (255 - bg) / 255;
+      const pantallaB = 255 - (255 - b) * (255 - bb) / 255;
+      r += (pantallaR - r) * ampDispersion;
+      g += (pantallaG - g) * ampDispersion;
+      b += (pantallaB - b) * ampDispersion;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    // Claridad: contraste local (diferencia contra una versión muy borrosa
+    // de la imagen ORIGINAL, sumada al final del pipeline)
+    if (borrosos) {
+      const lumOriginal = 0.299 * rOriginal + 0.587 * gOriginal + 0.114 * bOriginal;
+      const lumBorrosa = 0.299 * borrosos[i] + 0.587 * borrosos[i + 1] + 0.114 * borrosos[i + 2];
+      const delta = (lumOriginal - lumBorrosa) * ampClaridad;
+      r += delta; g += delta; b += delta;
+    }
+
+    // Grano
+    if (ampGrano !== 0) {
+      const ruido = (Math.random() - 0.5) * ampGrano;
+      r += ruido; g += ruido; b += ruido;
+    }
+
+    // Intensidad del filtro: mezcla el resultado completo de arriba con el
+    // píxel ORIGINAL sin tocar, así el deslizador funciona como un control
+    // de "cuánto" del filtro/preset elegido se aplica, en vez de todo o nada.
+    if (factorIntensidadFiltro !== 1) {
+      r = rOriginal + (r - rOriginal) * factorIntensidadFiltro;
+      g = gOriginal + (g - gOriginal) * factorIntensidadFiltro;
+      b = bOriginal + (b - bOriginal) * factorIntensidadFiltro;
+    }
+
+    datos[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+    datos[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    datos[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return canvasFuente;
+}
+
+function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
+  const canvas = document.createElement('canvas');
+  canvas.width = anchoDestino;
+  canvas.height = altoDestino;
+  canvas.getContext('2d').drawImage(imagen, 0, 0, anchoDestino, altoDestino);
+  return canvas;
+}
+
+const TAMANO_MINIATURA_PRESET = 76;
+
+// Recorte cuadrado del centro de la imagen, del tamaño justo de la
+// miniatura — así procesar cada preset sobre él es instantáneo aunque la
+// foto original sea enorme.
+function crearBaseMiniatura(imagen) {
+  const lado = Math.min(imagen.naturalWidth, imagen.naturalHeight);
+  const origenX = (imagen.naturalWidth - lado) / 2;
+  const origenY = (imagen.naturalHeight - lado) / 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = TAMANO_MINIATURA_PRESET;
+  canvas.height = TAMANO_MINIATURA_PRESET;
+  canvas.getContext('2d').drawImage(imagen, origenX, origenY, lado, lado, 0, 0, TAMANO_MINIATURA_PRESET, TAMANO_MINIATURA_PRESET);
+  return canvas;
+}
+
+// Dibuja, sobre el <canvas> de cada botón de preset, cómo quedaría ese mismo
+// recorte con ese preset aplicado — se recalcula una sola vez por imagen
+// elegida (los presets no cambian con los deslizadores).
+function actualizarMiniaturasPresets() {
+  if (!imagenActual) return;
+  document.querySelectorAll('.preset-miniatura').forEach((boton) => {
+    const preset = PRESETS[boton.dataset.preset];
+    if (!preset) return;
+    const base = crearBaseMiniatura(imagenActual);
+    procesarCanvas(base, preset);
+    const canvasDestino = boton.querySelector('canvas');
+    canvasDestino.width = TAMANO_MINIATURA_PRESET;
+    canvasDestino.height = TAMANO_MINIATURA_PRESET;
+    canvasDestino.getContext('2d').drawImage(base, 0, 0);
+  });
+}
+
+function renderizarVistaPrevia() {
+  if (!imagenActual || !canvasPrevia) return;
+  const ajustes = leerAjustes();
+  const anchoPrevia = canvasPrevia.width, altoPrevia = canvasPrevia.height;
+  const copiaTrabajo = crearCanvasConImagen(imagenActual, anchoPrevia, altoPrevia);
+  procesarCanvas(copiaTrabajo, ajustes);
+
+  vistaPrevia.width = anchoPrevia;
+  vistaPrevia.height = altoPrevia;
+  contextoPrevia.filter = ajustes.desenfoque > 0 ? `blur(${ajustes.desenfoque * (anchoPrevia / imagenActual.naturalWidth)}px)` : 'none';
+  contextoPrevia.drawImage(copiaTrabajo, 0, 0);
+  contextoPrevia.filter = 'none';
+  resultado.classList.remove('visible');
+}
+
+function actualizarEtiquetas() {
+  Object.values(deslizadores).forEach((d) => {
+    const n = Number(d.input.value);
+    const signo = d.conSigno && n > 0 ? '+' : '';
+    d.valor.textContent = `${signo}${n}${d.unidad}`;
+  });
+}
+
+function programarRenderizado() {
+  actualizarEtiquetas();
+  if (fotogramaPendiente) return;
+  fotogramaPendiente = requestAnimationFrame(() => {
+    fotogramaPendiente = null;
+    renderizarVistaPrevia();
+  });
+}
+
+Object.values(deslizadores).forEach((d) => d.input.addEventListener('input', programarRenderizado));
+
+activarBN.addEventListener('change', () => {
+  document.querySelectorAll('[data-canal]').forEach((campo) => {
+    campo.classList.toggle('deshabilitado', !activarBN.checked);
+    campo.querySelector('input').disabled = !activarBN.checked;
+  });
+  programarRenderizado();
+});
+
+document.querySelectorAll('.presets button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const preset = PRESETS[boton.dataset.preset];
+    Object.entries(preset).forEach(([clave, valor]) => {
+      if (clave === 'bn') { activarBN.checked = valor; return; }
+      if (deslizadores[clave]) deslizadores[clave].input.value = valor;
+    });
+    document.querySelectorAll('[data-canal]').forEach((campo) => {
+      campo.classList.toggle('deshabilitado', !activarBN.checked);
+      campo.querySelector('input').disabled = !activarBN.checked;
+    });
+    // Resalta y agranda la miniatura elegida, para que quede claro cuál
+    // filtro está aplicado ahora mismo.
+    document.querySelectorAll('.preset-miniatura.activo').forEach((otro) => otro.classList.remove('activo'));
+    boton.classList.add('activo');
+    programarRenderizado();
+  });
+});
+
+botonRestablecer.addEventListener('click', () => {
+  Object.values(deslizadores).forEach((d) => { d.input.value = d.porDefecto; });
+  activarBN.checked = false;
+  document.querySelectorAll('[data-canal]').forEach((campo) => {
+    campo.classList.add('deshabilitado');
+    campo.querySelector('input').disabled = true;
+  });
+  document.querySelectorAll('.preset-miniatura.activo').forEach((otro) => otro.classList.remove('activo'));
+  document.querySelector('.preset-miniatura[data-preset="ninguno"]')?.classList.add('activo');
+  programarRenderizado();
+});
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  if (!archivo) {
+    vistaPrevia.style.display = 'none';
+    botonDescargar.disabled = true;
+    canvasPrevia = null;
+    return;
+  }
+  imagenActual = await cargarImagen(archivo);
+
+  const escala = Math.min(1, LADO_MAXIMO_PREVIA / Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight));
+  canvasPrevia = document.createElement('canvas');
+  canvasPrevia.width = Math.max(1, Math.round(imagenActual.naturalWidth * escala));
+  canvasPrevia.height = Math.max(1, Math.round(imagenActual.naturalHeight * escala));
+
+  vistaPrevia.style.display = 'block';
+  renderizarVistaPrevia();
+  actualizarMiniaturasPresets();
+  botonDescargar.disabled = false;
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDescargar.addEventListener('click', async () => {
+  botonDescargar.disabled = true;
+  botonDescargar.textContent = 'Procesando...';
+  try {
+    const ajustes = leerAjustes();
+    const canvasCompleto = crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight);
+    procesarCanvas(canvasCompleto, ajustes);
+
+    let canvasFinal = canvasCompleto;
+    if (ajustes.desenfoque > 0) {
+      canvasFinal = document.createElement('canvas');
+      canvasFinal.width = canvasCompleto.width;
+      canvasFinal.height = canvasCompleto.height;
+      const ctxFinal = canvasFinal.getContext('2d');
+      ctxFinal.filter = `blur(${ajustes.desenfoque}px)`;
+      ctxFinal.drawImage(canvasCompleto, 0, 0);
+      ctxFinal.filter = 'none';
+    }
+
+    const esPng = archivoActual.type === 'image/png';
+    const formato = esPng ? 'image/png' : 'image/jpeg';
+    const blob = await new Promise((resolve) => canvasFinal.toBlob(resolve, formato, 0.92));
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `imagen-editada.${esPng ? 'png' : 'jpg'}`;
+    resultado.classList.add('visible');
+  } finally {
+    botonDescargar.disabled = false;
+    botonDescargar.textContent = 'Descargar imagen';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>
