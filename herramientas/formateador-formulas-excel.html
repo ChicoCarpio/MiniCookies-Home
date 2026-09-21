@@ -19,6 +19,27 @@
     --f-syn-fn:#1D5FBF; --f-syn-ref:#0F6E5C; --f-syn-str:#B1460A; --f-syn-num:#7A3E9D;
     --f-shadow: 0 1px 2px rgba(22,33,31,.06), 0 8px 24px rgba(22,33,31,.05);
   }
+  /* Esta paleta --f-* es propia de esta página y no las variables del resto
+     del sitio (--gris-fondo/--texto/etc, que sí cambian solas) — sin esto,
+     los paneles quedaban blancos con texto oscuro sea cual sea el tema. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --f-bg:#17181b; --f-surface:#1f2125; --f-surface-2:#24272c; --f-grid-line:#34383f;
+      --f-border:#34383f; --f-ink:#f0f1f2; --f-ink-soft:#9aa0aa; --f-ink-faint:#6b7280;
+      --f-accent:#f0b968; --f-accent-soft:#3a2f18; --f-on-accent:#17181b;
+      --f-danger:#f87171; --f-danger-soft:#3f1d1a;
+      --f-syn-fn:#7aa2f7; --f-syn-ref:#f0b968; --f-syn-str:#f2a65a; --f-syn-num:#c78fe0;
+      --f-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --f-bg:#17181b; --f-surface:#1f2125; --f-surface-2:#24272c; --f-grid-line:#34383f;
+    --f-border:#34383f; --f-ink:#f0f1f2; --f-ink-soft:#9aa0aa; --f-ink-faint:#6b7280;
+    --f-accent:#f0b968; --f-accent-soft:#3a2f18; --f-on-accent:#17181b;
+    --f-danger:#f87171; --f-danger-soft:#3f1d1a;
+    --f-syn-fn:#7aa2f7; --f-syn-ref:#f0b968; --f-syn-str:#f2a65a; --f-syn-num:#c78fe0;
+    --f-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
   .fmt-page{ max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:24px; font-family:'Public Sans', system-ui, sans-serif; color:var(--f-ink); }
   .fmt-page code{ font-family:'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; background:var(--f-surface-2); border:1px solid var(--f-border); border-radius:5px; padding:0 5px; font-size:.9em; }
   .fmt-controls{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:24px; background:var(--f-surface); border:1px solid var(--f-border); border-radius:14px; padding:18px 20px; box-shadow:var(--f-shadow); }
