@@ -10,9 +10,9 @@
   const baseIconos = new URL('../img/fondo/', scriptActual.src).href;
 
   const nombresIconos = [
-    'galletas.png', 'icon-perro-transparente.png', 'hombre-de-gengibre.png', 'base-de-datos.png', 'bombilla.png',
-    'carta.png', 'checks.png', 'code.png', 'engranaje.png', 'folder.png',
-    'hoja.png', 'lupa.png', 'minicookies-logo.png',
+    'icon-perro-transparente.png', 'icon-otono-transparente.png', 'galletas.png', 'hombre-de-gengibre.png', 'base-de-datos.png',
+    'bombilla.png', 'carta.png', 'checks.png', 'code.png', 'engranaje.png',
+    'folder.png', 'hoja.png', 'lupa.png', 'minicookies-logo.png',
   ];
   const iconos = nombresIconos.map((nombre) => baseIconos + nombre);
 
