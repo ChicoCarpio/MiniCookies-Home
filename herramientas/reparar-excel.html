@@ -3,12 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reparar Excel gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Intentá recuperar un archivo Excel (.xlsx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reparar Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un archivo Excel (.xlsx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reparar Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Intentá recuperar un archivo Excel (.xlsx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Reparar Excel',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) que no abre bien y probamos reconstruirlo.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
+    'boton-reparar': 'Reparar',
+    'boton-reparar-procesando': 'Reparando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Excel reparado',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-item': 'No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.',
+    'error-sin-datos': 'No se encontraron datos legibles en ninguna hoja.',
+    'mensaje-todo-ok': '✅ Se pudo leer el archivo y se reconstruyó desde cero.',
+    'mensaje-parcial': '⚠️ Se recuperaron {n} de {total} hojas — las demás no tenían datos legibles.',
+    'error-reparar': 'No se pudo reparar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Repair Excel Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Try to recover a damaged Excel file (.xlsx) that won’t open properly, free and without uploading your file anywhere.',
+    'h1': 'Repair Excel',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) that doesn’t open properly and we’ll try to rebuild it.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it',
+    'boton-reparar': 'Repair',
+    'boton-reparar-procesando': 'Repairing...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download repaired Excel',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-item': 'There’s no "text-only rescue" like there is for Word/PDF: if no row in the file can be read, there’s no reliable way to rescue unstructured tabular data — it reports that it couldn’t be repaired instead of making up a result.',
+    'error-sin-datos': 'No readable data was found on any sheet.',
+    'mensaje-todo-ok': '✅ The file could be read and was rebuilt from scratch.',
+    'mensaje-parcial': '⚠️ {n} of {total} sheets were recovered — the rest had no readable data.',
+    'error-reparar': 'Couldn’t repair the file'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,46 +54,47 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Reparar Excel</h1>
-  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) que no abre bien y probamos reconstruirlo.</p>
+  <h1 data-i18n="h1">Reparar Excel</h1>
+  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) que no abre bien y probamos reconstruirlo.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonReparar" disabled>Reparar</button>
+      <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Reparar</button>
     </div>
 
     <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="excel-reparado.xlsx">Descargar Excel reparado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="excel-reparado.xlsx" data-i18n="resultado-enlace">Descargar Excel reparado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li>No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.</li>
+      <li data-i18n="limitaciones-item">No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -95,7 +134,7 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonReparar.addEventListener('click', async () => {
   botonReparar.disabled = true;
-  botonReparar.textContent = 'Reparando...';
+  botonReparar.textContent = t('boton-reparar-procesando');
   mensajeNivel.style.display = 'none';
   try {
     const bytes = await archivoActual.arrayBuffer();
@@ -105,7 +144,7 @@ botonReparar.addEventListener('click', async () => {
       const hoja = libro.Sheets[nombre];
       return hoja && hoja['!ref'];
     });
-    if (hojasConDatos.length === 0) throw new Error('No se encontraron datos legibles en ninguna hoja.');
+    if (hojasConDatos.length === 0) throw new Error(t('error-sin-datos'));
 
     const libroLimpio = XLSX.utils.book_new();
     hojasConDatos.forEach(nombre => {
@@ -118,18 +157,19 @@ botonReparar.addEventListener('click', async () => {
     resultado.classList.add('visible');
 
     mensajeNivel.textContent = hojasConDatos.length === libro.SheetNames.length
-      ? '✅ Se pudo leer el archivo y se reconstruyó desde cero.'
-      : `⚠️ Se recuperaron ${hojasConDatos.length} de ${libro.SheetNames.length} hojas — las demás no tenían datos legibles.`;
+      ? t('mensaje-todo-ok')
+      : t('mensaje-parcial').replace('{n}', hojasConDatos.length).replace('{total}', libro.SheetNames.length);
     mensajeNivel.style.display = 'block';
   } catch (error) {
-    alert('No se pudo reparar el archivo: ' + error.message);
+    alert(t('error-reparar') + ': ' + error.message);
   } finally {
     botonReparar.disabled = false;
-    botonReparar.textContent = 'Reparar';
+    botonReparar.textContent = t('boton-reparar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

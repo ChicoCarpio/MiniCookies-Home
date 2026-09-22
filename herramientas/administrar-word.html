@@ -3,12 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reordenar secciones de Word gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Reordená o eliminá secciones de un documento Word (.docx), gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reordenar secciones de Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená o eliminá secciones de un documento Word (.docx), gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar secciones de Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená o eliminá secciones de un documento Word (.docx), gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Administrar / reordenar secciones de Word',
+    'intro': 'Elegí un documento .docx. Se separa en secciones por cada Título 1 — arrastralas para reordenarlas, o quitá las que no quieras, y descargá el documento reordenado.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'cargando': 'Leyendo el documento...',
+    'boton-guardar': 'Descargar reordenado',
+    'boton-guardar-procesando': 'Generando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Word',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-texto': 'Si el documento no tiene ningún Título 1, se trata como una sola sección (no hay nada para reordenar). Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada sección.',
+    'titulo-defecto': 'Documento',
+    'error-leer': 'No se pudo leer el documento',
+    'error-sin-secciones': 'No queda ninguna sección.',
+    'error-generar': 'No se pudo generar el documento'
+  },
+  en: {
+    'titulo-pagina': 'Reorder Word Sections Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder or delete sections of a Word document (.docx), free and without uploading your file anywhere.',
+    'h1': 'Manage / reorder Word sections',
+    'intro': 'Pick a .docx document. It’s split into sections by each Heading 1 — drag them to reorder, or remove the ones you don’t want, and download the reordered document.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'cargando': 'Reading the document...',
+    'boton-guardar': 'Download reordered',
+    'boton-guardar-procesando': 'Generating...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Word',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-texto': 'If the document has no Heading 1 at all, it’s treated as a single section (there’s nothing to reorder). Headings, bold, italics, lists, tables and images are kept for each section.',
+    'titulo-defecto': 'Document',
+    'error-leer': 'Couldn’t read the document',
+    'error-sin-secciones': 'There are no sections left.',
+    'error-generar': 'Couldn’t generate the document'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,37 +56,38 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Administrar / reordenar secciones de Word</h1>
-  <p>Elegí un documento .docx. Se separa en secciones por cada Título 1 — arrastralas para reordenarlas, o quitá las que no quieras, y descargá el documento reordenado.</p>
+  <h1 data-i18n="h1">Administrar / reordenar secciones de Word</h1>
+  <p data-i18n="intro">Elegí un documento .docx. Se separa en secciones por cada Título 1 — arrastralas para reordenarlas, o quitá las que no quieras, y descargá el documento reordenado.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".docx" hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo el documento...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo el documento...</p>
     <ul class="lista-archivos" id="listaSecciones"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonGuardar" disabled>Descargar reordenado</button>
+      <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenado</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-reordenado.docx">Descargar Word</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reordenado.docx" data-i18n="resultado-enlace">Descargar Word</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
-    <p style="color:var(--texto-suave);">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">
       Si el documento no tiene ningún Título 1, se trata como una sola sección (no hay nada para reordenar).
       Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada sección.
     </p>
@@ -54,8 +95,8 @@
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
@@ -133,11 +174,11 @@ async function cargarDocumento(archivo) {
   try {
     const arrayBuffer = await archivo.arrayBuffer();
     const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
-    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, 'Documento');
+    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, t('titulo-defecto'));
     secciones = capitulos.map(cap => ({ id: siguienteId++, titulo: cap.titulo, html: cap.html }));
     renderizarLista();
   } catch (error) {
-    alert('No se pudo leer el documento: ' + error.message);
+    alert(t('error-leer') + ': ' + error.message);
   } finally {
     cargando.style.display = 'none';
   }
@@ -145,9 +186,9 @@ async function cargarDocumento(archivo) {
 
 botonGuardar.addEventListener('click', async () => {
   botonGuardar.disabled = true;
-  botonGuardar.textContent = 'Generando...';
+  botonGuardar.textContent = t('boton-guardar-procesando');
   try {
-    if (secciones.length === 0) throw new Error('No queda ninguna sección.');
+    if (secciones.length === 0) throw new Error(t('error-sin-secciones'));
 
     const bloquesFinales = [];
     for (let i = 0; i < secciones.length; i++) {
@@ -165,14 +206,15 @@ botonGuardar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el documento: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonGuardar.disabled = false;
-    botonGuardar.textContent = 'Descargar reordenado';
+    botonGuardar.textContent = t('boton-guardar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

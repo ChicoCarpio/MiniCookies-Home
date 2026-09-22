@@ -3,12 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dividir hojas de Excel gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Dividir hojas de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir hojas de Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Dividir hojas de Excel',
+    'intro': 'Elegí un Excel con varias hojas y descargá cada una como un archivo individual, dentro de un .zip.',
+    'zona-arrastre': '📊 Arrastrá tu archivo Excel acá o hacé clic para elegirlo',
+    'boton-dividir': 'Dividir en archivos separados',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar .zip con las hojas',
+    'info-hojas': 'Este Excel tiene {n} hoja(s): {lista}.',
+    'info-necesita-dos': ' Necesita al menos 2 hojas para poder dividir.',
+    'error-dividir': 'No se pudo dividir el Excel'
+  },
+  en: {
+    'titulo-pagina': 'Split Excel Sheets Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split each sheet of an Excel file into its own file, free and without uploading your file anywhere.',
+    'h1': 'Split Excel sheets',
+    'intro': 'Pick an Excel file with several sheets and download each one as an individual file, inside a .zip.',
+    'zona-arrastre': '📊 Drag your Excel file here or click to choose it',
+    'boton-dividir': 'Split into separate files',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download .zip with the sheets',
+    'info-hojas': 'This Excel file has {n} sheet(s): {lista}.',
+    'info-necesita-dos': ' It needs at least 2 sheets to be split.',
+    'error-dividir': 'Couldn’t split the Excel file'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +48,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Dividir hojas de Excel</h1>
-  <p>Elegí un Excel con varias hojas y descargá cada una como un archivo individual, dentro de un .zip.</p>
+  <h1 data-i18n="h1">Dividir hojas de Excel</h1>
+  <p data-i18n="intro">Elegí un Excel con varias hojas y descargá cada una como un archivo individual, dentro de un .zip.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo Excel acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo Excel acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
     </div>
 
@@ -34,20 +67,20 @@
     <p id="infoHojas" style="color:var(--texto-suave); font-size:0.9rem;"></p>
 
     <div class="controles">
-      <button class="boton" id="botonDividir" disabled>Dividir en archivos separados</button>
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir en archivos separados</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="hojas-separadas.zip">Descargar .zip con las hojas</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="hojas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las hojas</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -69,10 +102,10 @@ async function mostrarArchivo(archivo) {
 
   const bytes = await archivo.arrayBuffer();
   libroActual = XLSX.read(bytes, { type: 'array' });
-  infoHojas.textContent = `Este Excel tiene ${libroActual.SheetNames.length} hoja(s): ${libroActual.SheetNames.join(', ')}.`;
+  infoHojas.textContent = t('info-hojas').replace('{n}', libroActual.SheetNames.length).replace('{lista}', libroActual.SheetNames.join(', '));
   botonDividir.disabled = libroActual.SheetNames.length < 2;
   if (libroActual.SheetNames.length < 2) {
-    infoHojas.textContent += ' Necesita al menos 2 hojas para poder dividir.';
+    infoHojas.textContent += t('info-necesita-dos');
   }
 }
 
@@ -93,7 +126,7 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonDividir.addEventListener('click', async () => {
   botonDividir.disabled = true;
-  botonDividir.textContent = 'Dividiendo...';
+  botonDividir.textContent = t('boton-dividir-procesando');
   try {
     const zip = new JSZip();
 
@@ -109,14 +142,15 @@ botonDividir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo dividir el Excel: ' + error.message);
+    alert(t('error-dividir') + ': ' + error.message);
   } finally {
     botonDividir.disabled = false;
-    botonDividir.textContent = 'Dividir en archivos separados';
+    botonDividir.textContent = t('boton-dividir');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

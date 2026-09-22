@@ -3,12 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reordenar y administrar páginas de PDF — Herramientas Ofimáticas</title>
-<meta name="description" content="Reordená, eliminá o restaurá páginas de un PDF arrastrando sus miniaturas, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reordenar y administrar páginas de PDF — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená, eliminá o restaurá páginas de un PDF arrastrando sus miniaturas, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar y administrar páginas de PDF — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená, eliminá o restaurá páginas de un PDF arrastrando sus miniaturas, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Administrar páginas de PDF',
+    'intro': 'Elegí un PDF, arrastrá las miniaturas para reordenar y usá la ✕ para eliminar páginas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-restaurar': 'Restaurar orden original',
+    'boton-guardar': 'Guardar PDF modificado',
+    'boton-guardar-procesando': 'Guardando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF modificado',
+    'etiqueta-original': 'Original: página {n}',
+    'quitar-pagina-title': 'Eliminar esta página',
+    'error-vacio': 'No quedan páginas para guardar.',
+    'error-guardar': 'No se pudo guardar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Reorder and Manage PDF Pages — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder, delete or restore pages of a PDF by dragging their thumbnails, free and without uploading your file anywhere.',
+    'h1': 'Manage PDF pages',
+    'intro': 'Pick a PDF, drag the thumbnails to reorder them, and use the ✕ to delete pages.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'boton-restaurar': 'Restore original order',
+    'boton-guardar': 'Save modified PDF',
+    'boton-guardar-procesando': 'Saving...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download modified PDF',
+    'etiqueta-original': 'Original: page {n}',
+    'quitar-pagina-title': 'Delete this page',
+    'error-vacio': 'No pages left to save.',
+    'error-guardar': 'Couldn’t save the PDF'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,41 +52,42 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Administrar páginas de PDF</h1>
-  <p>Elegí un PDF, arrastrá las miniaturas para reordenar y usá la ✕ para eliminar páginas.</p>
+  <h1 data-i18n="h1">Administrar páginas de PDF</h1>
+  <p data-i18n="intro">Elegí un PDF, arrastrá las miniaturas para reordenar y usá la ✕ para eliminar páginas.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Generando miniaturas...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
 
     <div id="envoltorioSelectorVista"></div>
     <div class="contenedor-miniaturas" id="gridMiniaturas"></div>
 
     <div class="controles" id="controles" style="display:none;">
-      <button class="boton" id="botonRestaurar" type="button" style="background:#64748b;">Restaurar orden original</button>
-      <button class="boton" id="botonGuardar" type="button">Guardar PDF modificado</button>
+      <button class="boton" id="botonRestaurar" type="button" style="background:#64748b;" data-i18n="boton-restaurar">Restaurar orden original</button>
+      <button class="boton" id="botonGuardar" type="button" data-i18n="boton-guardar">Guardar PDF modificado</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-modificado.pdf">Descargar PDF modificado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-modificado.pdf" data-i18n="resultado-enlace">Descargar PDF modificado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -126,13 +163,13 @@ function agregarMiniatura(canvas, indiceOriginal) {
 
   const etiqueta = document.createElement('div');
   etiqueta.className = 'numero-pagina';
-  etiqueta.textContent = `Original: página ${indiceOriginal + 1}`;
+  etiqueta.textContent = t('etiqueta-original').replace('{n}', indiceOriginal + 1);
   tarjeta.appendChild(etiqueta);
 
   const botonQuitar = document.createElement('button');
   botonQuitar.className = 'quitar-pagina';
   botonQuitar.textContent = '✕';
-  botonQuitar.title = 'Eliminar esta página';
+  botonQuitar.title = t('quitar-pagina-title');
   botonQuitar.addEventListener('click', () => {
     const indice = ordenPaginas.indexOf(indiceOriginal);
     if (indice !== -1) ordenPaginas.splice(indice, 1);
@@ -166,9 +203,9 @@ botonRestaurar.addEventListener('click', async () => {
 
 botonGuardar.addEventListener('click', async () => {
   botonGuardar.disabled = true;
-  botonGuardar.textContent = 'Guardando...';
+  botonGuardar.textContent = t('boton-guardar-procesando');
   try {
-    if (ordenPaginas.length === 0) throw new Error('No quedan páginas para guardar.');
+    if (ordenPaginas.length === 0) throw new Error(t('error-vacio'));
     const { PDFDocument } = PDFLib;
     const pdfOrigen = await PDFDocument.load(bytesOriginales);
     const pdfNuevo = await PDFDocument.create();
@@ -180,14 +217,15 @@ botonGuardar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo guardar el PDF: ' + error.message);
+    alert(t('error-guardar') + ': ' + error.message);
   } finally {
     botonGuardar.disabled = false;
-    botonGuardar.textContent = 'Guardar PDF modificado';
+    botonGuardar.textContent = t('boton-guardar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -3,12 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reparar PDF dañado gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Intentá recuperar un PDF dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reparar PDF dañado gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un PDF dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reparar PDF dañado gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Intentá recuperar un PDF dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Reparar PDF',
+    'intro': 'Elegí un PDF dañado o que no abre bien. Probamos dos niveles de reparación, del menos al más invasivo.',
+    'zona-arrastre': '📄 Arrastrá tu PDF dañado acá o hacé clic para elegirlo',
+    'boton-reparar': 'Intentar reparar',
+    'resultado-enlace': 'Descargar PDF reparado',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-antes': 'Si el archivo está muy dañado, a veces solo se puede recuperar el contenido visual de cada página como imagen — en ese caso ',
+    'limitaciones-enfasis': 'se pierde el texto seleccionable/copiable',
+    'limitaciones-final': '. Si ni así se puede recuperar, el archivo está dañado más allá de lo que se puede arreglar desde el navegador.',
+    'etiqueta-danado': '⚠️ {nombre} (no se pudo previsualizar — puede estar dañado, probemos reparar igual)',
+    'progreso-nivel1': 'Probando nivel 1 (reescritura limpia)...',
+    'progreso-nivel1-fallo': 'Nivel 1 falló. Probando nivel 2 (reconstrucción visual)...',
+    'progreso-nivel2-pagina': 'Reconstruyendo página {actual} de {total}...',
+    'mensaje-nivel1-ok': '✅ Reparado con el nivel 1 (se mantiene el texto y la calidad original).',
+    'mensaje-nivel2-ok': '⚠️ Se pudo reparar solo con el nivel 2: el resultado son imágenes de cada página (se perdió el texto seleccionable).',
+    'error-sin-paginas': 'El PDF no tiene páginas legibles.',
+    'error-sin-nada': 'No se pudo leer ninguna página, ni siquiera para reconstruir visualmente.',
+    'error-reparar': 'No se pudo reparar el PDF con ninguno de los dos niveles'
+  },
+  en: {
+    'titulo-pagina': 'Repair a Damaged PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Try to recover a damaged PDF or one that won’t open properly, free and without uploading your file anywhere.',
+    'h1': 'Repair PDF',
+    'intro': 'Pick a damaged PDF or one that doesn’t open properly. We try two repair levels, from least to most invasive.',
+    'zona-arrastre': '📄 Drag your damaged PDF here or click to choose it',
+    'boton-reparar': 'Try to repair',
+    'resultado-enlace': 'Download repaired PDF',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-antes': 'If the file is badly damaged, sometimes only the visual content of each page can be recovered as an image — in that case ',
+    'limitaciones-enfasis': 'the selectable/copyable text is lost',
+    'limitaciones-final': '. If it still can’t be recovered, the file is damaged beyond what can be fixed from the browser.',
+    'etiqueta-danado': '⚠️ {nombre} (preview unavailable — it may be damaged, let’s try repairing it anyway)',
+    'progreso-nivel1': 'Trying level 1 (clean rewrite)...',
+    'progreso-nivel1-fallo': 'Level 1 failed. Trying level 2 (visual reconstruction)...',
+    'progreso-nivel2-pagina': 'Rebuilding page {actual} of {total}...',
+    'mensaje-nivel1-ok': '✅ Repaired with level 1 (original text and quality kept).',
+    'mensaje-nivel2-ok': '⚠️ Could only be repaired with level 2: the result is an image of each page (selectable text was lost).',
+    'error-sin-paginas': 'The PDF has no readable pages.',
+    'error-sin-nada': 'Couldn’t read any page, not even to rebuild it visually.',
+    'error-reparar': 'Couldn’t repair the PDF with either level'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,45 +64,46 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Reparar PDF</h1>
-  <p>Elegí un PDF dañado o que no abre bien. Probamos dos niveles de reparación, del menos al más invasivo.</p>
+  <h1 data-i18n="h1">Reparar PDF</h1>
+  <p data-i18n="intro">Elegí un PDF dañado o que no abre bien. Probamos dos niveles de reparación, del menos al más invasivo.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF dañado acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF dañado acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
     <div class="grid-miniaturas" id="listaArchivo"></div>
 
     <div class="controles">
-      <button class="boton" id="botonReparar" disabled>Intentar reparar</button>
+      <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Intentar reparar</button>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
       <p id="mensajeResultado" style="margin-top:0;"></p>
-      <a id="enlaceDescarga" download="documento-reparado.pdf">Descargar PDF reparado</a>
+      <a id="enlaceDescarga" download="documento-reparado.pdf" data-i18n="resultado-enlace">Descargar PDF reparado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
-    <p style="color:var(--texto-suave);">Si el archivo está muy dañado, a veces solo se puede recuperar el contenido visual de cada página como imagen — en ese caso <strong>se pierde el texto seleccionable/copiable</strong>. Si ni así se puede recuperar, el archivo está dañado más allá de lo que se puede arreglar desde el navegador.</p>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);"><span data-i18n="limitaciones-antes">Si el archivo está muy dañado, a veces solo se puede recuperar el contenido visual de cada página como imagen — en ese caso </span><strong data-i18n="limitaciones-enfasis">se pierde el texto seleccionable/copiable</strong><span data-i18n="limitaciones-final">. Si ni así se puede recuperar, el archivo está dañado más allá de lo que se puede arreglar desde el navegador.</span></p>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -79,9 +128,9 @@ async function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = '';
   try {
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
   } catch (error) {
-    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `⚠️ ${archivo.name} (no se pudo previsualizar — puede estar dañado, probemos reparar igual)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: t('etiqueta-danado').replace('{nombre}', archivo.name) }));
   }
   botonReparar.disabled = false;
   resultado.classList.remove('visible');
@@ -109,19 +158,19 @@ async function intentarNivel1(bytes) {
     throwOnInvalidObject: false,
     updateMetadata: false,
   });
-  if (pdf.getPageCount() === 0) throw new Error('El PDF no tiene páginas legibles.');
+  if (pdf.getPageCount() === 0) throw new Error(t('error-sin-paginas'));
   return await pdf.save();
 }
 
 async function intentarNivel2(bytes) {
   const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, stopAtErrors: false }).promise;
-  if (pdfjsDoc.numPages === 0) throw new Error('No se pudo leer ninguna página, ni siquiera para reconstruir visualmente.');
+  if (pdfjsDoc.numPages === 0) throw new Error(t('error-sin-nada'));
 
   const { PDFDocument } = PDFLib;
   const pdfNuevo = await PDFDocument.create();
 
   for (let i = 1; i <= pdfjsDoc.numPages; i++) {
-    progreso.textContent = `Reconstruyendo página ${i} de ${pdfjsDoc.numPages}...`;
+    progreso.textContent = t('progreso-nivel2-pagina').replace('{actual}', i).replace('{total}', pdfjsDoc.numPages);
     const pagina = await pdfjsDoc.getPage(i);
     const viewport = pagina.getViewport({ scale: 2 });
     const canvas = document.createElement('canvas');
@@ -142,7 +191,7 @@ async function intentarNivel2(bytes) {
 botonReparar.addEventListener('click', async () => {
   botonReparar.disabled = true;
   progreso.style.display = 'block';
-  progreso.textContent = 'Probando nivel 1 (reescritura limpia)...';
+  progreso.textContent = t('progreso-nivel1');
   resultado.classList.remove('visible');
   try {
     const bytesOriginales = await archivoActual.arrayBuffer();
@@ -151,12 +200,12 @@ botonReparar.addEventListener('click', async () => {
 
     try {
       bytesFinales = await intentarNivel1(bytesOriginales.slice(0));
-      mensaje = '✅ Reparado con el nivel 1 (se mantiene el texto y la calidad original).';
+      mensaje = t('mensaje-nivel1-ok');
     } catch (errorNivel1) {
       console.warn('Nivel 1 falló, probando nivel 2:', errorNivel1);
-      progreso.textContent = 'Nivel 1 falló. Probando nivel 2 (reconstrucción visual)...';
+      progreso.textContent = t('progreso-nivel1-fallo');
       bytesFinales = await intentarNivel2(bytesOriginales.slice(0));
-      mensaje = '⚠️ Se pudo reparar solo con el nivel 2: el resultado son imágenes de cada página (se perdió el texto seleccionable).';
+      mensaje = t('mensaje-nivel2-ok');
     }
 
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
@@ -164,7 +213,7 @@ botonReparar.addEventListener('click', async () => {
     mensajeResultado.textContent = mensaje;
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo reparar el PDF con ninguno de los dos niveles: ' + error.message);
+    alert(t('error-reparar') + ': ' + error.message);
   } finally {
     botonReparar.disabled = false;
     progreso.style.display = 'none';
@@ -173,5 +222,6 @@ botonReparar.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

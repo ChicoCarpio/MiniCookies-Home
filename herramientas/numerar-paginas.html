@@ -3,12 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Numerar páginas de PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Agregá numeración de páginas a un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Numerar páginas de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá numeración de páginas a un PDF, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Numerar páginas de PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Agregá numeración de páginas a un PDF, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Numerar páginas de PDF',
+    'intro': 'Agregá numeración a todas las páginas de un PDF.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-empezar': 'Empezar en',
+    'campo-posicion': 'Posición',
+    'opcion-abajo-derecha': 'Abajo a la derecha',
+    'opcion-abajo-centro': 'Abajo al centro',
+    'opcion-abajo-izquierda': 'Abajo a la izquierda',
+    'opcion-arriba-derecha': 'Arriba a la derecha',
+    'opcion-arriba-centro': 'Arriba al centro',
+    'opcion-arriba-izquierda': 'Arriba a la izquierda',
+    'boton-numerar': 'Numerar páginas',
+    'boton-numerar-procesando': 'Numerando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF numerado',
+    'error-numerar': 'No se pudo numerar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Number PDF Pages Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add page numbers to a PDF, free and without uploading your file anywhere.',
+    'h1': 'Number PDF pages',
+    'intro': 'Add page numbers to every page of a PDF.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-empezar': 'Start at',
+    'campo-posicion': 'Position',
+    'opcion-abajo-derecha': 'Bottom right',
+    'opcion-abajo-centro': 'Bottom center',
+    'opcion-abajo-izquierda': 'Bottom left',
+    'opcion-arriba-derecha': 'Top right',
+    'opcion-arriba-centro': 'Top center',
+    'opcion-arriba-izquierda': 'Top left',
+    'boton-numerar': 'Number pages',
+    'boton-numerar-procesando': 'Numbering...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download numbered PDF',
+    'error-numerar': 'Couldn’t number the PDF'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +60,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Numerar páginas de PDF</h1>
-  <p>Agregá numeración a todas las páginas de un PDF.</p>
+  <h1 data-i18n="h1">Numerar páginas de PDF</h1>
+  <p data-i18n="intro">Agregá numeración a todas las páginas de un PDF.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
@@ -34,34 +79,34 @@
 
     <div class="controles">
       <label class="campo">
-        Empezar en
+        <span data-i18n="campo-empezar">Empezar en</span>
         <input type="number" id="numeroInicial" value="1" min="0" style="width:80px;">
       </label>
       <label class="campo">
-        Posición
+        <span data-i18n="campo-posicion">Posición</span>
         <select id="posicion">
-          <option value="bottom-right">Abajo a la derecha</option>
-          <option value="bottom-center">Abajo al centro</option>
-          <option value="bottom-left">Abajo a la izquierda</option>
-          <option value="top-right">Arriba a la derecha</option>
-          <option value="top-center">Arriba al centro</option>
-          <option value="top-left">Arriba a la izquierda</option>
+          <option value="bottom-right" data-i18n="opcion-abajo-derecha">Abajo a la derecha</option>
+          <option value="bottom-center" data-i18n="opcion-abajo-centro">Abajo al centro</option>
+          <option value="bottom-left" data-i18n="opcion-abajo-izquierda">Abajo a la izquierda</option>
+          <option value="top-right" data-i18n="opcion-arriba-derecha">Arriba a la derecha</option>
+          <option value="top-center" data-i18n="opcion-arriba-centro">Arriba al centro</option>
+          <option value="top-left" data-i18n="opcion-arriba-izquierda">Arriba a la izquierda</option>
         </select>
       </label>
-      <button class="boton" id="botonNumerar" disabled>Numerar páginas</button>
+      <button class="boton" id="botonNumerar" disabled data-i18n="boton-numerar">Numerar páginas</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-numerado.pdf">Descargar PDF numerado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-numerado.pdf" data-i18n="resultado-enlace">Descargar PDF numerado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -85,9 +130,9 @@ async function mostrarArchivo(archivo) {
   if (archivo) {
     try {
       const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
     } catch (error) {
-      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
     }
   }
   botonNumerar.disabled = !archivo;
@@ -121,7 +166,7 @@ function calcularY(posicion, height, margenInferior, margenSuperior) {
 
 botonNumerar.addEventListener('click', async () => {
   botonNumerar.disabled = true;
-  botonNumerar.textContent = 'Numerando...';
+  botonNumerar.textContent = t('boton-numerar-procesando');
   try {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const bytes = await archivoActual.arrayBuffer();
@@ -150,14 +195,15 @@ botonNumerar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo numerar el PDF: ' + error.message);
+    alert(t('error-numerar') + ': ' + error.message);
   } finally {
     botonNumerar.disabled = false;
-    botonNumerar.textContent = 'Numerar páginas';
+    botonNumerar.textContent = t('boton-numerar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

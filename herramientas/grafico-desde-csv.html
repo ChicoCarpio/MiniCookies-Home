@@ -3,12 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generar gráfico desde Excel o CSV gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Generá un gráfico de barras, líneas o torta a partir de un Excel o CSV, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Generar gráfico desde Excel o CSV gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Generá un gráfico de barras, líneas o torta a partir de un Excel o CSV, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Generar gráfico desde Excel o CSV gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Generá un gráfico de barras, líneas o torta a partir de un Excel o CSV, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Gráfico desde Excel / CSV',
+    'intro': 'Elegí un archivo, indicá qué columna usar como etiqueta y cuál como valores, y generá un gráfico.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)',
+    'campo-etiquetas': 'Columna de etiquetas (eje X)',
+    'campo-valores': 'Columna de valores',
+    'campo-tipo': 'Tipo de gráfico',
+    'opcion-barras': 'Barras',
+    'opcion-lineas': 'Líneas',
+    'opcion-torta': 'Torta',
+    'boton-graficar': 'Generar gráfico',
+    'boton-descargar-png': 'Descargar como PNG',
+    'error-sin-filas': 'No se encontraron filas de datos en este archivo.'
+  },
+  en: {
+    'titulo-pagina': 'Generate a Chart from Excel or CSV Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Generate a bar, line or pie chart from an Excel or CSV file, free and without uploading your file anywhere.',
+    'h1': 'Chart from Excel / CSV',
+    'intro': 'Pick a file, choose which column to use as labels and which as values, and generate a chart.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv)',
+    'campo-etiquetas': 'Labels column (X axis)',
+    'campo-valores': 'Values column',
+    'campo-tipo': 'Chart type',
+    'opcion-barras': 'Bar',
+    'opcion-lineas': 'Line',
+    'opcion-torta': 'Pie',
+    'boton-graficar': 'Generate chart',
+    'boton-descargar-png': 'Download as PNG',
+    'error-sin-filas': 'No data rows were found in this file.'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +52,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Gráfico desde Excel / CSV</h1>
-  <p>Elegí un archivo, indicá qué columna usar como etiqueta y cuál como valores, y generá un gráfico.</p>
+  <h1 data-i18n="h1">Gráfico desde Excel / CSV</h1>
+  <p data-i18n="intro">Elegí un archivo, indicá qué columna usar como etiqueta y cuál como valores, y generá un gráfico.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
     </div>
 
@@ -34,22 +71,22 @@
 
     <div class="controles" id="controles" style="display:none;">
       <label class="campo">
-        Columna de etiquetas (eje X)
+        <span data-i18n="campo-etiquetas">Columna de etiquetas (eje X)</span>
         <select id="columnaEtiquetas"></select>
       </label>
       <label class="campo">
-        Columna de valores
+        <span data-i18n="campo-valores">Columna de valores</span>
         <select id="columnaValores"></select>
       </label>
       <label class="campo">
-        Tipo de gráfico
+        <span data-i18n="campo-tipo">Tipo de gráfico</span>
         <select id="tipoGrafico">
-          <option value="bar">Barras</option>
-          <option value="line">Líneas</option>
-          <option value="pie">Torta</option>
+          <option value="bar" data-i18n="opcion-barras">Barras</option>
+          <option value="line" data-i18n="opcion-lineas">Líneas</option>
+          <option value="pie" data-i18n="opcion-torta">Torta</option>
         </select>
       </label>
-      <button class="boton" id="botonGraficar" type="button">Generar gráfico</button>
+      <button class="boton" id="botonGraficar" type="button" data-i18n="boton-graficar">Generar gráfico</button>
     </div>
 
     <div style="margin-top:20px; background:#fff; padding:16px; border-radius:8px; display:none;" id="contenedorGrafico">
@@ -57,16 +94,16 @@
     </div>
 
     <div class="controles" id="controlesDescarga" style="display:none;">
-      <button class="boton" id="botonDescargarPng" type="button" style="background:#64748b;">Descargar como PNG</button>
+      <button class="boton" id="botonDescargarPng" type="button" style="background:#64748b;" data-i18n="boton-descargar-png">Descargar como PNG</button>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -96,7 +133,7 @@ async function mostrarArchivo(archivo) {
   filasDatos = XLSX.utils.sheet_to_json(primeraHoja, { defval: '' });
 
   if (filasDatos.length === 0) {
-    alert('No se encontraron filas de datos en este archivo.');
+    alert(t('error-sin-filas'));
     return;
   }
 
@@ -167,5 +204,6 @@ document.getElementById('botonDescargarPng').addEventListener('click', () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

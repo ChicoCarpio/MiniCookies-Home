@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Combinar hojas de Excel en una tabla gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Combinar hojas de Excel en una tabla gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -23,6 +23,50 @@
   }
   .mini-vista-vacia { font-size: 0.75rem; color: var(--texto-suave); margin-top: 4px; font-style: italic; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Combinar hojas de Excel en una tabla gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Combinar hojas en una tabla',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.',
+    'nota-diferencia-antes': 'Distinto de "Unir Excel / CSV": esa herramienta junta ',
+    'nota-diferencia-enfasis1': 'archivos',
+    'nota-diferencia-medio': ' separados, uno por hoja. Esta combina hojas que ',
+    'nota-diferencia-enfasis2': 'ya están dentro de un mismo archivo',
+    'nota-diferencia-final': ' en una única tabla.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
+    'campo-encabezado': 'Cada hoja tiene fila de encabezado (se usa la del primer archivo, se descarta el resto)',
+    'boton-combinar': 'Combinar en una tabla',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Excel',
+    'hoja-vacia': '(hoja vacía)',
+    'error-min-hojas': 'Elegí al menos dos hojas.',
+    'nombre-hoja-combinado': 'Combinado',
+    'error-combinar': 'No se pudo combinar las hojas'
+  },
+  en: {
+    'titulo-pagina': 'Combine Excel Sheets into One Table Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combine several sheets from the same Excel file (.xlsx) into one table, stacking their rows, free and without uploading your file anywhere.',
+    'h1': 'Combine sheets into one table',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) with several sheets that share the same columns (e.g. January, February, March sales) and we’ll stack them into one table.',
+    'nota-diferencia-antes': 'Different from "Merge Excel / CSV": that tool combines separate ',
+    'nota-diferencia-enfasis1': 'files',
+    'nota-diferencia-medio': ', one per sheet. This one combines sheets that are ',
+    'nota-diferencia-enfasis2': 'already inside the same file',
+    'nota-diferencia-final': ' into a single table.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it',
+    'campo-encabezado': 'Each sheet has a header row (the first file’s is used, the rest are discarded)',
+    'boton-combinar': 'Combine into one table',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Excel',
+    'hoja-vacia': '(empty sheet)',
+    'error-min-hojas': 'Pick at least two sheets.',
+    'nombre-hoja-combinado': 'Combined',
+    'error-combinar': 'Couldn’t combine the sheets'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -30,21 +74,21 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Combinar hojas en una tabla</h1>
-  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.</p>
+  <h1 data-i18n="h1">Combinar hojas en una tabla</h1>
+  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.</p>
   <p style="color:var(--texto-suave); font-size:0.9rem;">
-    Distinto de "Unir Excel / CSV": esa herramienta junta <em>archivos</em> separados, uno por hoja. Esta
-    combina hojas que <em>ya están dentro de un mismo archivo</em> en una única tabla.
+    <span data-i18n="nota-diferencia-antes">Distinto de "Unir Excel / CSV": esa herramienta junta </span><em data-i18n="nota-diferencia-enfasis1">archivos</em><span data-i18n="nota-diferencia-medio"> separados, uno por hoja. Esta combina hojas que </span><em data-i18n="nota-diferencia-enfasis2">ya están dentro de un mismo archivo</em><span data-i18n="nota-diferencia-final"> en una única tabla.</span>
   </p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
     </div>
 
@@ -53,22 +97,22 @@
     <div class="controles">
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="tieneEncabezado" checked>
-        Cada hoja tiene fila de encabezado (se usa la del primer archivo, se descarta el resto)
+        <span data-i18n="campo-encabezado">Cada hoja tiene fila de encabezado (se usa la del primer archivo, se descarta el resto)</span>
       </label>
-      <button class="boton" id="botonCombinar" disabled>Combinar en una tabla</button>
+      <button class="boton" id="botonCombinar" disabled data-i18n="boton-combinar">Combinar en una tabla</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="tabla-combinada.xlsx">Descargar Excel</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="tabla-combinada.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -96,7 +140,7 @@ const COLUMNAS_VISTA_PREVIA = 4;
 function miniVistaPreviaHtml(nombre) {
   const hoja = libroActual.Sheets[nombre];
   const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false, defval: '' }).slice(0, FILAS_VISTA_PREVIA);
-  if (filas.length === 0) return '<div class="mini-vista-vacia">(hoja vacía)</div>';
+  if (filas.length === 0) return `<div class="mini-vista-vacia">${t('hoja-vacia')}</div>`;
 
   let html = '<div class="mini-vista-previa"><table class="mini-tabla">';
   filas.forEach((fila) => {
@@ -162,7 +206,7 @@ async function cargarLibro(archivo) {
 botonCombinar.addEventListener('click', () => {
   try {
     const nombresElegidos = libroActual.SheetNames.filter(n => hojasSeleccionadas.has(n));
-    if (nombresElegidos.length < 2) throw new Error('Elegí al menos dos hojas.');
+    if (nombresElegidos.length < 2) throw new Error(t('error-min-hojas'));
 
     const tieneEncabezado = document.getElementById('tieneEncabezado').checked;
     let filasFinales = [];
@@ -179,18 +223,19 @@ botonCombinar.addEventListener('click', () => {
 
     const hojaNueva = XLSX.utils.aoa_to_sheet(filasFinales);
     const libroNuevo = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libroNuevo, hojaNueva, 'Combinado');
+    XLSX.utils.book_append_sheet(libroNuevo, hojaNueva, t('nombre-hoja-combinado'));
 
     const bytesFinales = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo combinar las hojas: ' + error.message);
+    alert(t('error-combinar') + ': ' + error.message);
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

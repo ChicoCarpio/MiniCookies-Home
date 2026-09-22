@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quitar encabezados duplicados de Excel gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Quitá encabezados u otras filas duplicadas de una hoja de Excel, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Quitar encabezados duplicados de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Quitá encabezados u otras filas duplicadas de una hoja de Excel, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -24,6 +24,56 @@
   table.tabla-datos tr.fila-preambulo td { color: var(--texto-suave); font-style: italic; background: var(--gris-fondo); }
   input[type="number"].campo-numero { padding: 8px; border: 1px solid var(--gris-borde); border-radius: 6px; width: 70px; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Quitar encabezados duplicados de Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Quitá encabezados u otras filas duplicadas de una hoja de Excel, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Quitar encabezados duplicados',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods), indicá dónde empieza la tabla (por si hay un título o filas sueltas arriba) y con qué columnas identificar una fila como duplicada. Pensada sobre todo para encabezados de columna que se repiten en medio de los datos (común en reportes armados pegando varias tablas), pero también sirve para cualquier otra fila duplicada. Se conserva la primera aparición de cada una; todo lo de arriba de la tabla queda intacto.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
+    'campo-hoja': 'Hoja a limpiar',
+    'campo-fila-inicio': 'La tabla empieza en la fila',
+    'campo-tiene-encabezado': 'Esa fila es el encabezado de columnas (no es un dato)',
+    'boton-procesar': 'Quitar duplicados',
+    'vista-previa-antes': 'Vista previa de "',
+    'vista-previa-despues': '" — las filas en gris/cursiva de arriba (si hay) no se tocan. Tildá en el encabezado las columnas que querés usar como criterio para detectar duplicados:',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Excel',
+    'hoja-vacia': 'Esta hoja está vacía.',
+    'columna-defecto': 'Columna {letra}',
+    'mostrando-primeras': 'Mostrando las primeras {n} filas de datos — el procesamiento sí usa todas.',
+    'error-sin-datos': 'La hoja no tiene datos.',
+    'error-sin-columna': 'Tildá al menos una columna como criterio para detectar duplicados.',
+    'mensaje-sin-duplicados': 'No se encontró ninguna fila duplicada en "{hoja}".',
+    'mensaje-con-duplicados': 'Se encontraron y quitaron {n} fila(s) duplicada(s) en "{hoja}".',
+    'error-procesar': 'No se pudo procesar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Remove Duplicate Excel Headers Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Remove duplicate headers or other repeated rows from an Excel sheet, free and without uploading your file anywhere.',
+    'h1': 'Remove duplicate headers',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods), say where the table starts (in case there’s a title or loose rows above it) and which columns to use to identify a row as a duplicate. Mainly meant for column headers that repeat in the middle of the data (common in reports built by pasting several tables together), but it also works for any other duplicate row. The first occurrence of each is kept; everything above the table is left untouched.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it',
+    'campo-hoja': 'Sheet to clean',
+    'campo-fila-inicio': 'The table starts at row',
+    'campo-tiene-encabezado': 'That row is the column header (not data)',
+    'boton-procesar': 'Remove duplicates',
+    'vista-previa-antes': 'Preview of "',
+    'vista-previa-despues': '" — the gray/italic rows above (if any) aren’t touched. Check the columns in the header you want to use as the criteria to detect duplicates:',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Excel',
+    'hoja-vacia': 'This sheet is empty.',
+    'columna-defecto': 'Column {letra}',
+    'mostrando-primeras': 'Showing the first {n} data rows — processing does use all of them.',
+    'error-sin-datos': 'The sheet has no data.',
+    'error-sin-columna': 'Check at least one column to use as the criteria to detect duplicates.',
+    'mensaje-sin-duplicados': 'No duplicate rows were found in "{hoja}".',
+    'mensaje-con-duplicados': '{n} duplicate row(s) were found and removed in "{hoja}".',
+    'error-procesar': 'Couldn’t process the file'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -31,17 +81,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Quitar encabezados duplicados</h1>
-  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods), indicá dónde empieza la tabla (por si hay un título o filas sueltas arriba) y con qué columnas identificar una fila como duplicada. Pensada sobre todo para encabezados de columna que se repiten en medio de los datos (común en reportes armados pegando varias tablas), pero también sirve para cualquier otra fila duplicada. Se conserva la primera aparición de cada una; todo lo de arriba de la tabla queda intacto.</p>
+  <h1 data-i18n="h1">Quitar encabezados duplicados</h1>
+  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods), indicá dónde empieza la tabla (por si hay un título o filas sueltas arriba) y con qué columnas identificar una fila como duplicada. Pensada sobre todo para encabezados de columna que se repiten en medio de los datos (común en reportes armados pegando varias tablas), pero también sirve para cualquier otra fila duplicada. Se conserva la primera aparición de cada una; todo lo de arriba de la tabla queda intacto.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
     </div>
 
@@ -49,25 +100,23 @@
 
     <div class="controles">
       <label class="campo" id="campoHoja" style="display:none;">
-        Hoja a limpiar
+        <span data-i18n="campo-hoja">Hoja a limpiar</span>
         <select id="selectorHoja"></select>
       </label>
       <label class="campo">
-        La tabla empieza en la fila
+        <span data-i18n="campo-fila-inicio">La tabla empieza en la fila</span>
         <input type="number" id="filaInicioTabla" class="campo-numero" min="1" value="1">
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="tieneEncabezado" checked>
-        Esa fila es el encabezado de columnas (no es un dato)
+        <span data-i18n="campo-tiene-encabezado">Esa fila es el encabezado de columnas (no es un dato)</span>
       </label>
-      <button class="boton" id="botonProcesar" disabled>Quitar duplicados</button>
+      <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Quitar duplicados</button>
     </div>
 
     <div id="bloqueVistaPrevia" style="display:none;">
       <p style="color:var(--texto-suave); margin:10px 0 0; font-size:0.9rem;">
-        Vista previa de "<strong id="nombreHojaVista"></strong>" — las filas en gris/cursiva de arriba
-        (si hay) no se tocan. Tildá en el encabezado las columnas que querés usar como criterio para
-        detectar duplicados:
+        <span data-i18n="vista-previa-antes">Vista previa de "</span><strong id="nombreHojaVista"></strong><span data-i18n="vista-previa-despues">" — las filas en gris/cursiva de arriba (si hay) no se tocan. Tildá en el encabezado las columnas que querés usar como criterio para detectar duplicados:</span>
       </p>
       <div class="contenedor-tabla" id="contenedorVistaPrevia"></div>
     </div>
@@ -75,16 +124,16 @@
     <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="sin-duplicados.xlsx">Descargar Excel</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="sin-duplicados.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -132,7 +181,7 @@ function mostrarVistaPrevia(nombreHoja) {
   bloqueVistaPrevia.style.display = 'block';
 
   if (filas.length === 0) {
-    contenedorVistaPrevia.innerHTML = '<p style="padding:10px; color:var(--texto-suave);">Esta hoja está vacía.</p>';
+    contenedorVistaPrevia.innerHTML = `<p style="padding:10px; color:var(--texto-suave);">${t('hoja-vacia')}</p>`;
     columnasSeleccionadas = new Set();
     return;
   }
@@ -161,7 +210,7 @@ function mostrarVistaPrevia(nombreHoja) {
   html += '<thead><tr>';
   for (let i = 0; i < cantidadColumnas; i++) {
     const letra = XLSX.utils.encode_col(i);
-    const nombreColumna = encabezado && encabezado[i] ? String(encabezado[i]) : `Columna ${letra}`;
+    const nombreColumna = encabezado && encabezado[i] ? String(encabezado[i]) : t('columna-defecto').replace('{letra}', letra);
     html += `<th><label><input type="checkbox" class="chk-columna" data-columna="${i}">${escaparHtml(nombreColumna)}</label>`;
     if (encabezado && encabezado[i]) html += `<div class="letra-columna">${letra}</div>`;
     html += '</th>';
@@ -174,7 +223,7 @@ function mostrarVistaPrevia(nombreHoja) {
   });
   html += '</tbody></table>';
   if (datos.length > FILAS_VISTA_PREVIA) {
-    html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">Mostrando las primeras ${FILAS_VISTA_PREVIA} filas de datos — el procesamiento sí usa todas.</p>`;
+    html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">${t('mostrando-primeras').replace('{n}', FILAS_VISTA_PREVIA)}</p>`;
   }
   contenedorVistaPrevia.innerHTML = html;
 
@@ -239,9 +288,9 @@ botonProcesar.addEventListener('click', () => {
   try {
     const nombreHoja = hojaActualSeleccionada();
     const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombreHoja], { header: 1, raw: false, defval: '' });
-    if (filas.length === 0) throw new Error('La hoja no tiene datos.');
+    if (filas.length === 0) throw new Error(t('error-sin-datos'));
 
-    if (columnasSeleccionadas.size === 0) throw new Error('Tildá al menos una columna como criterio para detectar duplicados.');
+    if (columnasSeleccionadas.size === 0) throw new Error(t('error-sin-columna'));
 
     const { preambulo, encabezado, datos } = separarHoja(filas);
     const indicesClave = [...columnasSeleccionadas].sort((a, b) => a - b);
@@ -276,15 +325,16 @@ botonProcesar.addEventListener('click', () => {
     resultado.classList.add('visible');
 
     mensaje.textContent = duplicadas === 0
-      ? `No se encontró ninguna fila duplicada en "${nombreHoja}".`
-      : `Se encontraron y quitaron ${duplicadas} fila(s) duplicada(s) en "${nombreHoja}".`;
+      ? t('mensaje-sin-duplicados').replace('{hoja}', nombreHoja)
+      : t('mensaje-con-duplicados').replace('{n}', duplicadas).replace('{hoja}', nombreHoja);
     mensaje.style.display = 'block';
   } catch (error) {
-    alert('No se pudo procesar el archivo: ' + error.message);
+    alert(t('error-procesar') + ': ' + error.message);
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

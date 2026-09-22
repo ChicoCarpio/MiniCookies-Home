@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OCR de PDF e imágenes escaneadas gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí un PDF escaneado o fotos/imágenes escaneadas en un PDF con texto buscable/seleccionable, o extraé el texto a .txt — gratis, con OCR que corre en tu navegador.">
+<title data-i18n="titulo-pagina">OCR de PDF e imágenes escaneadas gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí un PDF escaneado o fotos/imágenes escaneadas en un PDF con texto buscable/seleccionable, o extraé el texto a .txt — gratis, con OCR que corre en tu navegador.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -15,6 +15,82 @@
   .barra-progreso-ocr { width: 100%; height: 10px; border-radius: 5px; background: var(--fondo-suave, #eee); overflow: hidden; margin: 10px 0; display: none; }
   .barra-progreso-ocr div { height: 100%; width: 0%; background: var(--color-primario, #4a6cf7); transition: width 0.2s; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'OCR de PDF e imágenes escaneadas gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí un PDF escaneado o fotos/imágenes escaneadas en un PDF con texto buscable/seleccionable, o extraé el texto a .txt — gratis, con OCR que corre en tu navegador.',
+    'h1': 'OCR de PDF e imágenes escaneadas',
+    'intro': 'Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR — todo corre en tu navegador, tus archivos nunca se suben a ningún servidor. Podés combinar PDF e imágenes, en cualquier orden.',
+    'idiomas-titulo': 'Idiomas a reconocer',
+    'idioma-spa': 'Español',
+    'idioma-eng': 'Inglés',
+    'idioma-por': 'Portugués',
+    'idioma-fra': 'Francés',
+    'idioma-deu': 'Alemán',
+    'idioma-ita': 'Italiano',
+    'idioma-chi': 'Chino simplificado',
+    'idioma-jpn': 'Japonés',
+    'idiomas-nota': 'Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.',
+    'corregir-inclinacion': 'Enderezar automáticamente páginas/fotos torcidas (recomendado)',
+    'preproceso-titulo': 'Preprocesamiento antes del OCR',
+    'preproceso-ninguno': 'Ninguno (usar la imagen tal cual)',
+    'preproceso-contraste': 'Contraste automático (recomendado)',
+    'preproceso-otsu': 'Blanco y negro puro (Otsu)',
+    'preproceso-nota': '"Blanco y negro puro" calcula automáticamente el punto exacto de corte entre tinta y papel (método de Otsu) — puede rendir mejor que el contraste automático en escaneos muy limpios de un solo color, pero puede perder detalle en fotos con sombras irregulares o texto muy fino.',
+    'zona-arrastre': '📄🖼️ Arrastrá tus PDFs y/o imágenes escaneadas acá o hacé clic para elegirlos',
+    'boton-ocr': 'Reconocer texto (OCR)',
+    'resultado-enlace-pdf': 'Descargar PDF con texto buscable',
+    'resultado-enlace-txt': 'Descargar .txt',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-texto': 'El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla. Sobre el preprocesamiento: "Contraste automático" funciona bien en la mayoría de los casos; "Blanco y negro puro (Otsu)" puede dar mejores resultados en escaneos muy limpios y parejos, pero en fotos con sombras irregulares o texto con resaltador de color puede perder información — si tu escaneo ya es nítido y a color, probá "Ninguno".',
+    'error-sin-idioma': 'Elegí al menos un idioma.',
+    'progreso-cargando-motor': 'Cargando el motor de OCR (puede tardar la primera vez)...',
+    'progreso-preparando': 'Preparando páginas (enderezando si hace falta)...',
+    'error-sin-paginas': 'No hay páginas ni imágenes para procesar.',
+    'progreso-reconociendo': 'Reconociendo texto de la página {actual} de {total}...',
+    'separador-pagina': '\n\n--- Página siguiente ---\n\n',
+    'resultado-mensaje': '✅ Listo. Se reconoció el texto de {n} página{s}.',
+    'error-ocr': 'No se pudo hacer OCR'
+  },
+  en: {
+    'titulo-pagina': 'OCR for Scanned PDFs and Images Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert a scanned PDF or scanned photos/images into a PDF with searchable/selectable text, or extract the text to .txt — free, with OCR that runs in your browser.',
+    'h1': 'OCR for scanned PDFs and images',
+    'intro': 'For PDFs that are actually scanned images, or for loose photos/images of a document (with no selectable text). We recognize the text with OCR — everything runs in your browser, your files never get uploaded anywhere. You can combine PDFs and images, in any order.',
+    'idiomas-titulo': 'Languages to recognize',
+    'idioma-spa': 'Spanish',
+    'idioma-eng': 'English',
+    'idioma-por': 'Portuguese',
+    'idioma-fra': 'French',
+    'idioma-deu': 'German',
+    'idioma-ita': 'Italian',
+    'idioma-chi': 'Simplified Chinese',
+    'idioma-jpn': 'Japanese',
+    'idiomas-nota': 'Only pick the languages that appear in your document — each one adds a several-MB download the first time it’s used.',
+    'corregir-inclinacion': 'Automatically straighten tilted pages/photos (recommended)',
+    'preproceso-titulo': 'Preprocessing before OCR',
+    'preproceso-ninguno': 'None (use the image as is)',
+    'preproceso-contraste': 'Automatic contrast (recommended)',
+    'preproceso-otsu': 'Pure black and white (Otsu)',
+    'preproceso-nota': '"Pure black and white" automatically calculates the exact cutoff point between ink and paper (Otsu’s method) — it can perform better than automatic contrast on very clean, single-color scans, but may lose detail on photos with uneven shadows or very fine text.',
+    'zona-arrastre': '📄🖼️ Drag your PDFs and/or scanned images here or click to choose them',
+    'boton-ocr': 'Recognize text (OCR)',
+    'resultado-enlace-pdf': 'Download PDF with searchable text',
+    'resultado-enlace-txt': 'Download .txt',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-texto': 'The result looks the same as the original (unless you correct the tilt), but the text becomes selectable and searchable — you can also download just the recognized text as .txt. OCR gets slower the more pages/images and languages you pick, and it works best with sharp, straight scans — blurry or handwritten text, or a photo with strong shadows, may be recognized poorly or not at all. Automatic straightening fixes small tilts (up to about 9°); if your document is already straight or you want to keep it exactly as is, you can uncheck that box. About preprocessing: "Automatic contrast" works well in most cases; "Pure black and white (Otsu)" can give better results on very clean, even scans, but on photos with uneven shadows or highlighter-marked text it can lose information — if your scan is already sharp and in color, try "None".',
+    'error-sin-idioma': 'Pick at least one language.',
+    'progreso-cargando-motor': 'Loading the OCR engine (may take a while the first time)...',
+    'progreso-preparando': 'Preparing pages (straightening if needed)...',
+    'error-sin-paginas': 'There are no pages or images to process.',
+    'progreso-reconociendo': 'Recognizing text on page {actual} of {total}...',
+    'separador-pagina': '\n\n--- Next page ---\n\n',
+    'resultado-mensaje': '✅ Done. Text was recognized on {n} page{s}.',
+    'error-ocr': 'Couldn’t run OCR'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -22,53 +98,54 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>OCR de PDF e imágenes escaneadas</h1>
-  <p>Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR — todo corre en tu navegador, tus archivos nunca se suben a ningún servidor. Podés combinar PDF e imágenes, en cualquier orden.</p>
+  <h1 data-i18n="h1">OCR de PDF e imágenes escaneadas</h1>
+  <p data-i18n="intro">Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR — todo corre en tu navegador, tus archivos nunca se suben a ningún servidor. Podés combinar PDF e imágenes, en cualquier orden.</p>
 
   <div class="panel-herramienta">
-    <p style="margin-top:0; font-weight:600;">Idiomas a reconocer</p>
+    <p style="margin-top:0; font-weight:600;" data-i18n="idiomas-titulo">Idiomas a reconocer</p>
     <div class="lista-idiomas" id="listaIdiomas">
-      <label><input type="checkbox" value="spa" checked> Español</label>
-      <label><input type="checkbox" value="eng" checked> Inglés</label>
-      <label><input type="checkbox" value="por"> Portugués</label>
-      <label><input type="checkbox" value="fra"> Francés</label>
-      <label><input type="checkbox" value="deu"> Alemán</label>
-      <label><input type="checkbox" value="ita"> Italiano</label>
-      <label><input type="checkbox" value="chi_sim"> Chino simplificado</label>
-      <label><input type="checkbox" value="jpn"> Japonés</label>
+      <label><input type="checkbox" value="spa" checked> <span data-i18n="idioma-spa">Español</span></label>
+      <label><input type="checkbox" value="eng" checked> <span data-i18n="idioma-eng">Inglés</span></label>
+      <label><input type="checkbox" value="por"> <span data-i18n="idioma-por">Portugués</span></label>
+      <label><input type="checkbox" value="fra"> <span data-i18n="idioma-fra">Francés</span></label>
+      <label><input type="checkbox" value="deu"> <span data-i18n="idioma-deu">Alemán</span></label>
+      <label><input type="checkbox" value="ita"> <span data-i18n="idioma-ita">Italiano</span></label>
+      <label><input type="checkbox" value="chi_sim"> <span data-i18n="idioma-chi">Chino simplificado</span></label>
+      <label><input type="checkbox" value="jpn"> <span data-i18n="idioma-jpn">Japonés</span></label>
     </div>
-    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:-10px;">Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.</p>
+    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:-10px;" data-i18n="idiomas-nota">Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.</p>
 
     <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-bottom:14px;">
       <input type="checkbox" id="corregirInclinacion" checked>
-      Enderezar automáticamente páginas/fotos torcidas (recomendado)
+      <span data-i18n="corregir-inclinacion">Enderezar automáticamente páginas/fotos torcidas (recomendado)</span>
     </label>
 
-    <p style="margin:0 0 6px; font-weight:600;">Preprocesamiento antes del OCR</p>
+    <p style="margin:0 0 6px; font-weight:600;" data-i18n="preproceso-titulo">Preprocesamiento antes del OCR</p>
     <div class="lista-idiomas" id="listaPreproceso" style="margin-top:0; margin-bottom:6px;">
-      <label><input type="radio" name="preprocesoOcr" value="ninguno"> Ninguno (usar la imagen tal cual)</label>
-      <label><input type="radio" name="preprocesoOcr" value="contraste" checked> Contraste automático (recomendado)</label>
-      <label><input type="radio" name="preprocesoOcr" value="otsu"> Blanco y negro puro (Otsu)</label>
+      <label><input type="radio" name="preprocesoOcr" value="ninguno"> <span data-i18n="preproceso-ninguno">Ninguno (usar la imagen tal cual)</span></label>
+      <label><input type="radio" name="preprocesoOcr" value="contraste" checked> <span data-i18n="preproceso-contraste">Contraste automático (recomendado)</span></label>
+      <label><input type="radio" name="preprocesoOcr" value="otsu"> <span data-i18n="preproceso-otsu">Blanco y negro puro (Otsu)</span></label>
     </div>
-    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:20px;">"Blanco y negro puro" calcula automáticamente el punto exacto de corte entre tinta y papel (método de Otsu) — puede rendir mejor que el contraste automático en escaneos muy limpios de un solo color, pero puede perder detalle en fotos con sombras irregulares o texto muy fino.</p>
+    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:20px;" data-i18n="preproceso-nota">"Blanco y negro puro" calcula automáticamente el punto exacto de corte entre tinta y papel (método de Otsu) — puede rendir mejor que el contraste automático en escaneos muy limpios de un solo color, pero puede perder detalle en fotos con sombras irregulares o texto muy fino.</p>
 
     <div class="zona-arrastre" id="zonaArrastre">
-      📄🖼️ Arrastrá tus PDFs y/o imágenes escaneadas acá o hacé clic para elegirlos
+      <span data-i18n="zona-arrastre">📄🖼️ Arrastrá tus PDFs y/o imágenes escaneadas acá o hacé clic para elegirlos</span>
       <input type="file" id="entradaArchivos" accept="application/pdf,image/*" multiple hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Generando miniaturas...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
 
     <div id="envoltorioSelectorVista"></div>
     <div class="contenedor-miniaturas" id="gridArchivos"></div>
 
     <div class="controles">
-      <button class="boton" id="botonOcr" disabled>Reconocer texto (OCR)</button>
+      <button class="boton" id="botonOcr" disabled data-i18n="boton-ocr">Reconocer texto (OCR)</button>
     </div>
 
     <div class="barra-progreso-ocr" id="barraProgreso"><div id="barraProgresoRelleno"></div></div>
@@ -77,23 +154,23 @@
     <div class="resultado" id="resultado">
       <p id="mensajeResultado" style="margin-top:0;"></p>
       <div class="controles">
-        <a class="boton" id="enlaceDescargaPdf" download="documento-ocr.pdf" style="text-decoration:none; display:inline-block;">Descargar PDF con texto buscable</a>
-        <a class="boton" id="enlaceDescargaTxt" download="texto-ocr.txt" style="text-decoration:none; display:inline-block;">Descargar .txt</a>
+        <a class="boton" id="enlaceDescargaPdf" download="documento-ocr.pdf" style="text-decoration:none; display:inline-block;" data-i18n="resultado-enlace-pdf">Descargar PDF con texto buscable</a>
+        <a class="boton" id="enlaceDescargaTxt" download="texto-ocr.txt" style="text-decoration:none; display:inline-block;" data-i18n="resultado-enlace-txt">Descargar .txt</a>
       </div>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
-    <p style="color:var(--texto-suave);">El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla. Sobre el preprocesamiento: "Contraste automático" funciona bien en la mayoría de los casos; "Blanco y negro puro (Otsu)" puede dar mejores resultados en escaneos muy limpios y parejos, pero en fotos con sombras irregulares o texto con resaltador de color puede perder información — si tu escaneo ya es nítido y a color, probá "Ninguno".</p>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla. Sobre el preprocesamiento: "Contraste automático" funciona bien en la mayoría de los casos; "Blanco y negro puro (Otsu)" puede dar mejores resultados en escaneos muy limpios y parejos, pero en fotos con sombras irregulares o texto con resaltador de color puede perder información — si tu escaneo ya es nítido y a color, probá "Ninguno".</p>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -159,7 +236,7 @@ async function agregarArchivos(listaFileList) {
         : await generarMiniaturaImagen(archivo);
       tarjeta = crearTarjetaMiniatura({
         elementoVisual: elemento,
-        etiqueta: esPdf ? `${archivo.name} (${totalPaginas} pág.)` : archivo.name,
+        etiqueta: esPdf ? `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` : archivo.name,
         conQuitar: true,
         alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
         arrastrable: true,
@@ -167,7 +244,7 @@ async function agregarArchivos(listaFileList) {
       });
     } catch (error) {
       tarjeta = crearTarjetaMiniatura({
-        etiqueta: `${archivo.name} (no se pudo previsualizar)`,
+        etiqueta: `${archivo.name} ${t('previsualizar-fallo')}`,
         conQuitar: true,
         alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
         arrastrable: true,
@@ -469,7 +546,7 @@ function binarizarOtsu(canvasOriginal) {
 botonOcr.addEventListener('click', async () => {
   const idiomas = idiomasElegidos();
   if (idiomas.length === 0) {
-    alert('Elegí al menos un idioma.');
+    alert(t('error-sin-idioma'));
     return;
   }
 
@@ -480,7 +557,7 @@ botonOcr.addEventListener('click', async () => {
 
   let worker = null;
   try {
-    progreso.textContent = 'Cargando el motor de OCR (puede tardar la primera vez)...';
+    progreso.textContent = t('progreso-cargando-motor');
     worker = await Tesseract.createWorker(idiomas, 1, {
       logger: (m) => {
         if (m.progress != null) barraProgresoRelleno.style.width = `${Math.round(m.progress * 100)}%`;
@@ -491,11 +568,11 @@ botonOcr.addEventListener('click', async () => {
     const corregirInclinacion = document.getElementById('corregirInclinacion').checked;
     const modoPreproceso = document.querySelector('input[name="preprocesoOcr"]:checked').value;
 
-    progreso.textContent = 'Preparando páginas (enderezando si hace falta)...';
+    progreso.textContent = t('progreso-preparando');
     const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
     const paginas = await prepararPaginas(ordenIds, corregirInclinacion);
     const totalPaginas = paginas.length;
-    if (totalPaginas === 0) throw new Error('No hay páginas ni imágenes para procesar.');
+    if (totalPaginas === 0) throw new Error(t('error-sin-paginas'));
 
     const { PDFDocument, rgb } = PDFLib;
     const pdfNuevo = await PDFDocument.create();
@@ -503,7 +580,7 @@ botonOcr.addEventListener('click', async () => {
 
     for (let i = 0; i < totalPaginas; i++) {
       const { canvas, escala } = paginas[i];
-      progreso.textContent = `Reconociendo texto de la página ${i + 1} de ${totalPaginas}...`;
+      progreso.textContent = t('progreso-reconociendo').replace('{actual}', i + 1).replace('{total}', totalPaginas);
       let canvasParaOcr = canvas;
       if (modoPreproceso === 'contraste') canvasParaOcr = prepararParaOcr(canvas);
       else if (modoPreproceso === 'otsu') canvasParaOcr = binarizarOtsu(canvas);
@@ -550,15 +627,15 @@ botonOcr.addEventListener('click', async () => {
     enlaceDescargaPdf.href = URL.createObjectURL(blobPdf);
     enlaceDescargaPdf.download = 'documento-ocr.pdf';
 
-    const textoCompleto = textosPorPagina.join('\n\n--- Página siguiente ---\n\n');
+    const textoCompleto = textosPorPagina.join(t('separador-pagina'));
     const blobTxt = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
     enlaceDescargaTxt.href = URL.createObjectURL(blobTxt);
     enlaceDescargaTxt.download = 'texto-ocr.txt';
 
-    mensajeResultado.textContent = `✅ Listo. Se reconoció el texto de ${totalPaginas} página(s).`;
+    mensajeResultado.textContent = t('resultado-mensaje').replace('{n}', totalPaginas).replace('{s}', totalPaginas === 1 ? '' : 's');
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo hacer OCR: ' + error.message);
+    alert(t('error-ocr') + ': ' + error.message);
   } finally {
     if (worker) await worker.terminate();
     botonOcr.disabled = false;
@@ -570,5 +647,6 @@ botonOcr.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

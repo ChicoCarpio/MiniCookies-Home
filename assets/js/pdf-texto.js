@@ -53,7 +53,9 @@ async function extraerTextoPowerPoint(archivo) {
     .filter(nombre => /^ppt\/slides\/slide\d+\.xml$/.test(nombre))
     .sort((a, b) => parseInt(a.match(/slide(\d+)/)[1], 10) - parseInt(b.match(/slide(\d+)/)[1], 10));
 
-  if (nombresDiapositivas.length === 0) throw new Error('No se encontraron diapositivas legibles en este archivo.');
+  if (nombresDiapositivas.length === 0) {
+    throw new Error(window.t ? t('ppt-sin-diapositivas') : 'No se encontraron diapositivas legibles en este archivo.');
+  }
 
   const bloques = [];
   for (let i = 0; i < nombresDiapositivas.length; i++) {
@@ -63,7 +65,9 @@ async function extraerTextoPowerPoint(archivo) {
     const lineas = parrafos
       .map(p => [...p.getElementsByTagName('a:t')].map(t => t.textContent).join(''))
       .filter(l => l.trim() !== '');
-    bloques.push(`--- Diapositiva ${i + 1} ---\n` + (lineas.length > 0 ? lineas.join('\n') : '(sin texto)'));
+    const tituloDiapositiva = (window.t ? t('ppt-diapositiva-titulo') : '--- Diapositiva {n} ---').replace('{n}', i + 1);
+    const sinTexto = window.t ? t('ppt-sin-texto') : '(sin texto)';
+    bloques.push(`${tituloDiapositiva}\n` + (lineas.length > 0 ? lineas.join('\n') : sinTexto));
   }
   return bloques.join('\n\n');
 }

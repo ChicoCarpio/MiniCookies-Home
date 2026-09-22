@@ -3,12 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unir varios Word en uno gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Combiná varios documentos Word (.docx) en uno solo, cada uno empezando en una página nueva, gratis y sin subir tus archivos a ningún servidor.">
+<title data-i18n="titulo-pagina">Unir varios Word en uno gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Combiná varios documentos Word (.docx) en uno solo, cada uno empezando en una página nueva, gratis y sin subir tus archivos a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Unir varios Word en uno gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combiná varios documentos Word (.docx) en uno solo, cada uno empezando en una página nueva, gratis y sin subir tus archivos a ningún servidor.',
+    'h1': 'Unir varios Word',
+    'intro': 'Elegí dos o más documentos .docx. Se combinan en un solo archivo, en el orden de la lista, cada uno empezando en una página nueva.',
+    'zona-arrastre': '📝 Arrastrá tus documentos .docx acá o hacé clic para elegirlos',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-unir': 'Unir en un Word',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Word combinado',
+    'limitaciones-titulo': 'Limitaciones',
+    'limite1': 'Se conservan títulos, negrita, cursiva, subrayado, listas, tablas e imágenes, pero no es una copia exacta del original — algún detalle de formato muy específico (fuentes, colores, saltos de sección) puede no mantenerse igual.',
+    'limite2': 'Las imágenes se reinsertan, pero se ajustan a un ancho máximo para que entren bien en la página.',
+    'progreso-procesando': 'Procesando "{nombre}" ({actual} de {total})...',
+    'error-sin-contenido': 'No se encontró contenido en los documentos.',
+    'nombre-defecto': 'documentos-unidos',
+    'advertencias-texto': '⚠️ {n} advertencia(s) al leer los documentos originales (puede haber elementos que no se transfirieron perfectamente).',
+    'error-unir': 'No se pudo unir los documentos'
+  },
+  en: {
+    'titulo-pagina': 'Merge Several Word Documents Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combine several Word documents (.docx) into one, each starting on a new page, free and without uploading your files anywhere.',
+    'h1': 'Merge several Word documents',
+    'intro': 'Pick two or more .docx documents. They’re combined into a single file, in list order, each one starting on a new page.',
+    'zona-arrastre': '📝 Drag your .docx documents here or click to choose them',
+    'campo-nombre': 'File name',
+    'boton-unir': 'Merge into a Word document',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download combined Word document',
+    'limitaciones-titulo': 'Limitations',
+    'limite1': 'Headings, bold, italics, underline, lists, tables and images are kept, but it’s not an exact copy of the original — some very specific formatting details (fonts, colors, section breaks) may not carry over exactly.',
+    'limite2': 'Images are reinserted, but scaled down to a maximum width so they fit well on the page.',
+    'progreso-procesando': 'Processing "{nombre}" ({actual} of {total})...',
+    'error-sin-contenido': 'No content was found in the documents.',
+    'nombre-defecto': 'merged-documents',
+    'advertencias-texto': '⚠️ {n} warning(s) while reading the original documents (some elements may not have transferred perfectly).',
+    'error-unir': 'Couldn’t merge the documents'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +58,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Unir varios Word</h1>
-  <p>Elegí dos o más documentos .docx. Se combinan en un solo archivo, en el orden de la lista, cada uno empezando en una página nueva.</p>
+  <h1 data-i18n="h1">Unir varios Word</h1>
+  <p data-i18n="intro">Elegí dos o más documentos .docx. Se combinan en un solo archivo, en el orden de la lista, cada uno empezando en una página nueva.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📝 Arrastrá tus documentos .docx acá o hacé clic para elegirlos
+      <span data-i18n="zona-arrastre">📝 Arrastrá tus documentos .docx acá o hacé clic para elegirlos</span>
       <input type="file" id="entradaArchivos" accept=".docx" multiple hidden>
     </div>
 
@@ -34,34 +77,34 @@
 
     <div class="controles">
       <label class="campo">
-        Nombre del archivo
+        <span data-i18n="campo-nombre">Nombre del archivo</span>
         <input type="text" id="nombreArchivo" value="documentos-unidos" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
-      <button class="boton" id="botonUnir" disabled>Unir en un Word</button>
+      <button class="boton" id="botonUnir" disabled data-i18n="boton-unir">Unir en un Word</button>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
     <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documentos-unidos.docx">Descargar Word combinado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documentos-unidos.docx" data-i18n="resultado-enlace">Descargar Word combinado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Se conservan títulos, negrita, cursiva, subrayado, listas, tablas e imágenes, pero no es una copia exacta del original — algún detalle de formato muy específico (fuentes, colores, saltos de sección) puede no mantenerse igual.</li>
-      <li>Las imágenes se reinsertan, pero se ajustan a un ancho máximo para que entren bien en la página.</li>
+      <li data-i18n="limite1">Se conservan títulos, negrita, cursiva, subrayado, listas, tablas e imágenes, pero no es una copia exacta del original — algún detalle de formato muy específico (fuentes, colores, saltos de sección) puede no mantenerse igual.</li>
+      <li data-i18n="limite2">Las imágenes se reinsertan, pero se ajustan a un ancho máximo para que entren bien en la página.</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
@@ -121,7 +164,7 @@ botonUnir.addEventListener('click', async () => {
     let totalAdvertencias = 0;
 
     for (let i = 0; i < archivos.length; i++) {
-      progreso.textContent = `Procesando "${archivos[i].name}" (${i + 1} de ${archivos.length})...`;
+      progreso.textContent = t('progreso-procesando').replace('{nombre}', archivos[i].name).replace('{actual}', i + 1).replace('{total}', archivos.length);
 
       const arrayBuffer = await archivos[i].arrayBuffer();
       const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
@@ -136,7 +179,7 @@ botonUnir.addEventListener('click', async () => {
       bloquesFinales.push(...await contenidoAParrafos(contenedor));
     }
 
-    if (bloquesFinales.length === 0) throw new Error('No se encontró contenido en los documentos.');
+    if (bloquesFinales.length === 0) throw new Error(t('error-sin-contenido'));
 
     const documento = new docx.Document({
       numbering: NUMERACION_DOCX_CONFIG,
@@ -144,17 +187,17 @@ botonUnir.addEventListener('click', async () => {
     });
 
     const blob = await docx.Packer.toBlob(documento);
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || 'documentos-unidos').trim();
+    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `${nombreArchivo}.docx`;
     resultado.classList.add('visible');
 
     if (totalAdvertencias > 0) {
-      advertencias.textContent = `⚠️ ${totalAdvertencias} advertencia(s) al leer los documentos originales (puede haber elementos que no se transfirieron perfectamente).`;
+      advertencias.textContent = t('advertencias-texto').replace('{n}', totalAdvertencias);
       advertencias.style.display = 'block';
     }
   } catch (error) {
-    alert('No se pudo unir los documentos: ' + error.message);
+    alert(t('error-unir') + ': ' + error.message);
   } finally {
     botonUnir.disabled = false;
     progreso.style.display = 'none';
@@ -163,5 +206,6 @@ botonUnir.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

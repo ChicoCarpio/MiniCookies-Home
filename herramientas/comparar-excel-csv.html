@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comparar Excel o CSV gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Compará dos versiones de una planilla Excel o CSV y mirá qué filas se agregaron, se quitaron o cambiaron. Gratis y sin subir tus archivos a ningún servidor.">
+<title data-i18n="titulo-pagina">Comparar Excel o CSV gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Compará dos versiones de una planilla Excel o CSV y mirá qué filas se agregaron, se quitaron o cambiaron. Gratis y sin subir tus archivos a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -29,6 +29,52 @@
   .badge-estado.modificada { background: #fef3c7; color: #92400e; }
   .badge-estado.igual { background: #e2e8f0; color: #475569; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Comparar Excel o CSV gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Compará dos versiones de una planilla Excel o CSV y mirá qué filas se agregaron, se quitaron o cambiaron. Gratis y sin subir tus archivos a ningún servidor.',
+    'h1': 'Comparar Excel / CSV',
+    'intro': 'Elegí dos versiones de una planilla (original y nueva) y una columna que identifique cada fila (ej. un ID o código). Te mostramos qué filas se agregaron, se quitaron o cambiaron.',
+    'campo-original': 'Versión original',
+    'zona-a': '📊 Arrastrá el archivo original acá o hacé clic para elegirlo',
+    'campo-nueva': 'Versión nueva',
+    'zona-b': '📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo',
+    'campo-clave': 'Columna clave (identifica cada fila)',
+    'boton-comparar': 'Comparar',
+    'stat-agregadas': 'Agregadas',
+    'stat-eliminadas': 'Eliminadas',
+    'stat-modificadas': 'Modificadas',
+    'stat-iguales': 'Sin cambios',
+    'estado-agregada': 'Agregada',
+    'estado-eliminada': 'Eliminada',
+    'estado-modificada': 'Modificada',
+    'estado-igual': 'Sin cambios',
+    'columna-estado': 'Estado'
+  },
+  en: {
+    'titulo-pagina': 'Compare Excel or CSV Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Compare two versions of an Excel or CSV spreadsheet and see which rows were added, removed or changed. Free and without uploading your files anywhere.',
+    'h1': 'Compare Excel / CSV',
+    'intro': 'Pick two versions of a spreadsheet (original and new) and a column that identifies each row (e.g. an ID or code). We’ll show you which rows were added, removed or changed.',
+    'campo-original': 'Original version',
+    'zona-a': '📊 Drag the original file here or click to choose it',
+    'campo-nueva': 'New version',
+    'zona-b': '📊 Drag the new file here or click to choose it',
+    'campo-clave': 'Key column (identifies each row)',
+    'boton-comparar': 'Compare',
+    'stat-agregadas': 'Added',
+    'stat-eliminadas': 'Removed',
+    'stat-modificadas': 'Changed',
+    'stat-iguales': 'Unchanged',
+    'estado-agregada': 'Added',
+    'estado-eliminada': 'Removed',
+    'estado-modificada': 'Changed',
+    'estado-igual': 'Unchanged',
+    'columna-estado': 'Status'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -36,28 +82,29 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Comparar Excel / CSV</h1>
-  <p>Elegí dos versiones de una planilla (original y nueva) y una columna que identifique cada fila (ej. un ID o código). Te mostramos qué filas se agregaron, se quitaron o cambiaron.</p>
+  <h1 data-i18n="h1">Comparar Excel / CSV</h1>
+  <p data-i18n="intro">Elegí dos versiones de una planilla (original y nueva) y una columna que identifique cada fila (ej. un ID o código). Te mostramos qué filas se agregaron, se quitaron o cambiaron.</p>
 
   <div class="panel-herramienta">
     <label class="campo" style="margin-bottom:16px;">
-      Versión original
+      <span data-i18n="campo-original">Versión original</span>
       <div class="zona-arrastre" id="zonaA" style="padding:20px;">
-        📊 Arrastrá el archivo original acá o hacé clic para elegirlo
+        <span data-i18n="zona-a">📊 Arrastrá el archivo original acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaA" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
       </div>
       <ul class="lista-archivos" id="listaA"></ul>
     </label>
 
     <label class="campo">
-      Versión nueva
+      <span data-i18n="campo-nueva">Versión nueva</span>
       <div class="zona-arrastre" id="zonaB" style="padding:20px;">
-        📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo
+        <span data-i18n="zona-b">📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaB" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
       </div>
       <ul class="lista-archivos" id="listaB"></ul>
@@ -65,28 +112,28 @@
 
     <div class="controles" id="controles" style="display:none;">
       <label class="campo">
-        Columna clave (identifica cada fila)
+        <span data-i18n="campo-clave">Columna clave (identifica cada fila)</span>
         <select id="columnaClave"></select>
       </label>
-      <button class="boton" id="botonComparar" type="button">Comparar</button>
+      <button class="boton" id="botonComparar" type="button" data-i18n="boton-comparar">Comparar</button>
     </div>
 
     <div class="estadisticas" id="estadisticas" style="display:none;">
-      <div class="estadistica"><div class="numero" id="numAgregadas">0</div><div class="etiqueta">Agregadas</div></div>
-      <div class="estadistica"><div class="numero" id="numEliminadas">0</div><div class="etiqueta">Eliminadas</div></div>
-      <div class="estadistica"><div class="numero" id="numModificadas">0</div><div class="etiqueta">Modificadas</div></div>
-      <div class="estadistica"><div class="numero" id="numIguales">0</div><div class="etiqueta">Sin cambios</div></div>
+      <div class="estadistica"><div class="numero" id="numAgregadas">0</div><div class="etiqueta" data-i18n="stat-agregadas">Agregadas</div></div>
+      <div class="estadistica"><div class="numero" id="numEliminadas">0</div><div class="etiqueta" data-i18n="stat-eliminadas">Eliminadas</div></div>
+      <div class="estadistica"><div class="numero" id="numModificadas">0</div><div class="etiqueta" data-i18n="stat-modificadas">Modificadas</div></div>
+      <div class="estadistica"><div class="numero" id="numIguales">0</div><div class="etiqueta" data-i18n="stat-iguales">Sin cambios</div></div>
     </div>
 
     <div class="contenedor-tabla" id="contenedorTabla"></div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -188,9 +235,9 @@ document.getElementById('botonComparar').addEventListener('click', () => {
   document.getElementById('numIguales').textContent = iguales;
   document.getElementById('estadisticas').style.display = 'grid';
 
-  const nombresEstado = { agregada: 'Agregada', eliminada: 'Eliminada', modificada: 'Modificada', igual: 'Sin cambios' };
+  const nombresEstado = { agregada: t('estado-agregada'), eliminada: t('estado-eliminada'), modificada: t('estado-modificada'), igual: t('estado-igual') };
 
-  let html = '<table class="tabla-comparacion"><thead><tr><th>Estado</th>';
+  let html = `<table class="tabla-comparacion"><thead><tr><th>${t('columna-estado')}</th>`;
   columnas.forEach(col => html += `<th>${col}</th>`);
   html += '</tr></thead><tbody>';
 
@@ -209,5 +256,6 @@ document.getElementById('botonComparar').addEventListener('click', () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

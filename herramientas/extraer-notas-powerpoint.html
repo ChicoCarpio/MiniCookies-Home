@@ -3,12 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Extraer notas del orador de PowerPoint gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Sacá las notas del orador de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Extraer notas del orador de PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Sacá las notas del orador de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Extraer notas del orador de PowerPoint gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Sacá las notas del orador de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Extraer notas del orador',
+    'intro': 'Elegí un archivo .pptx y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").',
+    'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
+    'boton-extraer': 'Extraer notas',
+    'boton-extraer-procesando': 'Extrayendo...',
+    'boton-copiar': 'Copiar texto',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar': 'Descargar .txt',
+    'error-sin-notas': 'Esta presentación no tiene notas del orador.',
+    'titulo-notas-diapositiva': '--- Notas diapositiva {n} ---',
+    'sin-notas': '(sin notas)',
+    'error-extraer': 'No se pudo extraer las notas'
+  },
+  en: {
+    'titulo-pagina': 'Extract PowerPoint Speaker Notes Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Get the speaker notes from a PowerPoint presentation (.pptx) as plain text, free and without uploading your file anywhere.',
+    'h1': 'Extract speaker notes',
+    'intro': 'Pick a .pptx file and get the speaker notes text from each slide (not the visible slide content — for that use "Extract text from PowerPoint").',
+    'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
+    'boton-extraer': 'Extract notes',
+    'boton-extraer-procesando': 'Extracting...',
+    'boton-copiar': 'Copy text',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar': 'Download .txt',
+    'error-sin-notas': 'This presentation has no speaker notes.',
+    'titulo-notas-diapositiva': '--- Notes for slide {n} ---',
+    'sin-notas': '(no notes)',
+    'error-extraer': 'Couldn’t extract the notes'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,41 +52,42 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Extraer notas del orador</h1>
-  <p>Elegí un archivo .pptx y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").</p>
+  <h1 data-i18n="h1">Extraer notas del orador</h1>
+  <p data-i18n="intro">Elegí un archivo .pptx y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".pptx" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonExtraer" disabled>Extraer notas</button>
+      <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer notas</button>
     </div>
 
     <div id="bloqueResultado" style="display:none; margin-top:20px;">
       <textarea id="textoExtraido" readonly></textarea>
       <div class="controles">
-        <button class="boton" id="botonCopiar" type="button">Copiar texto</button>
-        <a class="boton" id="enlaceDescarga" download="notas-orador.txt" style="text-decoration:none; display:inline-block;">Descargar .txt</a>
+        <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
+        <a class="boton" id="enlaceDescarga" download="notas-orador.txt" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar">Descargar .txt</a>
       </div>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -90,14 +127,14 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
-  botonExtraer.textContent = 'Extrayendo...';
+  botonExtraer.textContent = t('boton-extraer-procesando');
   try {
     const zip = await JSZip.loadAsync(archivoActual);
     const nombresNotas = Object.keys(zip.files)
       .filter(nombre => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(nombre))
       .sort((a, b) => parseInt(a.match(/notesSlide(\d+)/)[1], 10) - parseInt(b.match(/notesSlide(\d+)/)[1], 10));
 
-    if (nombresNotas.length === 0) throw new Error('Esta presentación no tiene notas del orador.');
+    if (nombresNotas.length === 0) throw new Error(t('error-sin-notas'));
 
     const bloques = [];
     for (let i = 0; i < nombresNotas.length; i++) {
@@ -108,7 +145,7 @@ botonExtraer.addEventListener('click', async () => {
         .map(p => [...p.getElementsByTagName('a:t')].map(t => t.textContent).join(''))
         .filter(l => l.trim() !== '');
       const numeroDiapositiva = nombresNotas[i].match(/notesSlide(\d+)/)[1];
-      bloques.push(`--- Notas diapositiva ${numeroDiapositiva} ---\n` + (lineas.length > 0 ? lineas.join('\n') : '(sin notas)'));
+      bloques.push(t('titulo-notas-diapositiva').replace('{n}', numeroDiapositiva) + '\n' + (lineas.length > 0 ? lineas.join('\n') : t('sin-notas')));
     }
 
     const textoCompleto = bloques.join('\n\n');
@@ -117,20 +154,21 @@ botonExtraer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     bloqueResultado.style.display = 'block';
   } catch (error) {
-    alert('No se pudo extraer las notas: ' + error.message);
+    alert(t('error-extraer') + ': ' + error.message);
   } finally {
     botonExtraer.disabled = false;
-    botonExtraer.textContent = 'Extraer notas';
+    botonExtraer.textContent = t('boton-extraer');
   }
 });
 
 botonCopiar.addEventListener('click', async () => {
   await navigator.clipboard.writeText(textoExtraido.value);
-  botonCopiar.textContent = '¡Copiado!';
-  setTimeout(() => { botonCopiar.textContent = 'Copiar texto'; }, 1500);
+  botonCopiar.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiar.textContent = t('boton-copiar'); }, 1500);
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

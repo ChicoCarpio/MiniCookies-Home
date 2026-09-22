@@ -3,12 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Extraer imágenes de PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Extraé las imágenes embebidas dentro de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Extraer imágenes de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraé las imágenes embebidas dentro de un PDF, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Extraer imágenes de PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extraé las imágenes embebidas dentro de un PDF, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Extraer imágenes de PDF',
+    'intro': 'Elegí un PDF y sacamos las imágenes que tiene embebidas adentro (fotos, logos, etc — no genera una imagen de la página completa, para eso usá "PDF a imágenes").',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-extraer': 'Extraer imágenes',
+    'sin-imagenes': 'No se encontraron imágenes embebidas en este PDF (puede que el contenido sea todo texto/vectores, o que use un formato de imagen que esta herramienta no puede leer).',
+    'resultado-antes': '✅ Listo, se encontraron ',
+    'resultado-medio': ' imagen(es). ',
+    'resultado-enlace': 'Descargar .zip',
+    'progreso-pagina': 'Revisando página {actual} de {total}...',
+    'error-extraer': 'No se pudo extraer las imágenes'
+  },
+  en: {
+    'titulo-pagina': 'Extract Images from PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extract the images embedded inside a PDF, free and without uploading your file anywhere.',
+    'h1': 'Extract images from PDF',
+    'intro': 'Pick a PDF and we’ll pull out the images embedded inside it (photos, logos, etc — this doesn’t generate an image of the whole page; for that use "PDF to images").',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'boton-extraer': 'Extract images',
+    'sin-imagenes': 'No embedded images were found in this PDF (the content may be all text/vectors, or use an image format this tool can’t read).',
+    'resultado-antes': '✅ Done, we found ',
+    'resultado-medio': ' image(s). ',
+    'resultado-enlace': 'Download .zip',
+    'progreso-pagina': 'Checking page {actual} of {total}...',
+    'error-extraer': 'Couldn’t extract the images'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,40 +48,41 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Extraer imágenes de PDF</h1>
-  <p>Elegí un PDF y sacamos las imágenes que tiene embebidas adentro (fotos, logos, etc — no genera una imagen de la página completa, para eso usá "PDF a imágenes").</p>
+  <h1 data-i18n="h1">Extraer imágenes de PDF</h1>
+  <p data-i18n="intro">Elegí un PDF y sacamos las imágenes que tiene embebidas adentro (fotos, logos, etc — no genera una imagen de la página completa, para eso usá "PDF a imágenes").</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
     <div class="grid-miniaturas" id="listaArchivo"></div>
 
     <div class="controles">
-      <button class="boton" id="botonExtraer" disabled>Extraer imágenes</button>
+      <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer imágenes</button>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
-    <p id="sinImagenes" style="color:var(--texto-suave); display:none;">No se encontraron imágenes embebidas en este PDF (puede que el contenido sea todo texto/vectores, o que use un formato de imagen que esta herramienta no puede leer).</p>
+    <p id="sinImagenes" style="color:var(--texto-suave); display:none;" data-i18n="sin-imagenes">No se encontraron imágenes embebidas en este PDF (puede que el contenido sea todo texto/vectores, o que use un formato de imagen que esta herramienta no puede leer).</p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo, se encontraron <span id="cantidadImagenes"></span> imagen(es). <a id="enlaceDescarga" download="imagenes-extraidas.zip">Descargar .zip</a>
+      <span data-i18n="resultado-antes">✅ Listo, se encontraron </span><span id="cantidadImagenes"></span><span data-i18n="resultado-medio"> imagen(es). </span><a id="enlaceDescarga" download="imagenes-extraidas.zip" data-i18n="resultado-enlace">Descargar .zip</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -75,9 +108,9 @@ async function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = '';
   try {
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
   } catch (error) {
-    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
   }
   botonExtraer.disabled = false;
   resultado.classList.remove('visible');
@@ -149,7 +182,7 @@ botonExtraer.addEventListener('click', async () => {
     let contadorImagenes = 0;
 
     for (let i = 1; i <= pdf.numPages; i++) {
-      progreso.textContent = `Revisando página ${i} de ${pdf.numPages}...`;
+      progreso.textContent = t('progreso-pagina').replace('{actual}', i).replace('{total}', pdf.numPages);
       const pagina = await pdf.getPage(i);
       const listaOperadores = await pagina.getOperatorList();
       const nombresImagenes = new Set();
@@ -191,7 +224,7 @@ botonExtraer.addEventListener('click', async () => {
       resultado.classList.add('visible');
     }
   } catch (error) {
-    alert('No se pudo extraer las imágenes: ' + error.message);
+    alert(t('error-extraer') + ': ' + error.message);
   } finally {
     botonExtraer.disabled = false;
     progreso.style.display = 'none';
@@ -200,5 +233,6 @@ botonExtraer.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

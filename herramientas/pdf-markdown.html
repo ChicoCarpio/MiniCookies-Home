@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir PDF y Markdown gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí PDF a Markdown o Markdown a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir PDF y Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí PDF a Markdown o Markdown a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -33,6 +33,54 @@
   .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
   .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PDF y Markdown gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí PDF a Markdown o Markdown a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'PDF ↔ Markdown',
+    'intro': 'Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.',
+    'dir-pdf-a-md': 'PDF → Markdown',
+    'dir-md-a-pdf': 'Markdown → PDF',
+    'aviso-solo-texto-antes': '⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (',
+    'aviso-solo-texto-final': ').',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-extraer': 'Convertir a Markdown',
+    'boton-extraer-procesando': 'Convirtiendo...',
+    'boton-copiar-md': 'Copiar Markdown',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-md': 'Descargar .md',
+    'campo-markdown': 'Markdown',
+    'campo-vista-previa': 'Vista previa',
+    'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
+    'markdown-ejemplo': '## Hola mundo\n\nEste es un ejemplo de **Markdown** con:\n\n- Una lista\n- *Texto en cursiva*\n- [Un link](https://ejemplo.com)',
+    'error-sin-texto': 'No se encontró texto en el PDF (¿es un escaneo?).',
+    'error-convertir': 'No se pudo convertir el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Convert PDF and Markdown Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert PDF to Markdown or Markdown to PDF, in either direction — free and without uploading your file anywhere.',
+    'h1': 'PDF ↔ Markdown',
+    'intro': 'Convert a PDF to Markdown, or Markdown to PDF, whichever you need.',
+    'dir-pdf-a-md': 'PDF → Markdown',
+    'dir-md-a-pdf': 'Markdown → PDF',
+    'aviso-solo-texto-antes': '⚠️ Only the text is extracted — it doesn’t detect headings, bold text or tables from the original PDF. Each page is separated with a horizontal rule (',
+    'aviso-solo-texto-final': ').',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'boton-extraer': 'Convert to Markdown',
+    'boton-extraer-procesando': 'Converting...',
+    'boton-copiar-md': 'Copy Markdown',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-md': 'Download .md',
+    'campo-markdown': 'Markdown',
+    'campo-vista-previa': 'Preview',
+    'boton-imprimir': '🖨️ Save as PDF / Print',
+    'markdown-ejemplo': '## Hello world\n\nThis is an example of **Markdown** with:\n\n- A list\n- *Italic text*\n- [A link](https://example.com)',
+    'error-sin-texto': 'No text was found in the PDF (is it a scan?).',
+    'error-convertir': 'Couldn’t convert the PDF'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -40,39 +88,39 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>PDF ↔ Markdown</h1>
-  <p>Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.</p>
+  <h1 data-i18n="h1">PDF ↔ Markdown</h1>
+  <p data-i18n="intro">Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.</p>
 
   <div class="panel-herramienta">
     <div class="selector-direccion">
-      <label><input type="radio" name="direccion" value="pdf-a-md" checked> PDF → Markdown</label>
-      <label><input type="radio" name="direccion" value="md-a-pdf"> Markdown → PDF</label>
+      <label><input type="radio" name="direccion" value="pdf-a-md" checked> <span data-i18n="dir-pdf-a-md">PDF → Markdown</span></label>
+      <label><input type="radio" name="direccion" value="md-a-pdf"> <span data-i18n="dir-md-a-pdf">Markdown → PDF</span></label>
     </div>
 
     <!-- PDF → Markdown -->
     <div id="panelPdfAMd">
       <p style="color:var(--texto-suave); font-size:0.9rem;">
-        ⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original.
-        Cada página se separa con una línea horizontal (<code>---</code>).
+        <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
       </p>
       <div class="zona-arrastre" id="zonaArrastre">
-        📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaArchivo"></div>
       <div class="controles">
-        <button class="boton" id="botonExtraer" disabled>Convertir a Markdown</button>
+        <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Convertir a Markdown</button>
       </div>
       <div id="bloqueResultadoPdfAMd" style="display:none; margin-top:20px;">
         <textarea id="markdownExtraido" style="min-height:320px; font-family:monospace;"></textarea>
         <div class="controles">
-          <button class="boton" id="botonCopiarMd" type="button">Copiar Markdown</button>
-          <a class="boton" id="enlaceDescargaMd" download="documento.md" style="text-decoration:none; display:inline-block;">Descargar .md</a>
+          <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
+          <a class="boton" id="enlaceDescargaMd" download="documento.md" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
     </div>
@@ -81,7 +129,7 @@
     <div id="panelMdAPdf" style="display:none;">
       <div class="columnas">
         <label class="campo">
-          Markdown
+          <span data-i18n="campo-markdown">Markdown</span>
           <textarea id="entradaMarkdown" style="min-height:320px;">## Hola mundo
 
 Este es un ejemplo de **Markdown** con:
@@ -91,22 +139,22 @@ Este es un ejemplo de **Markdown** con:
 - [Un link](https://ejemplo.com)</textarea>
         </label>
         <label class="campo">
-          Vista previa
+          <span data-i18n="campo-vista-previa">Vista previa</span>
           <div class="vista-previa-documento" id="vistaPreviaMd"></div>
         </label>
       </div>
       <div class="controles">
-        <button class="boton" id="botonImprimir" type="button">🖨️ Guardar como PDF / Imprimir</button>
+        <button class="boton" id="botonImprimir" type="button" data-i18n="boton-imprimir">🖨️ Guardar como PDF / Imprimir</button>
       </div>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <div id="areaImprimir"></div>
@@ -149,9 +197,9 @@ async function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = '';
   try {
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
   } catch (error) {
-    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
   }
   botonExtraer.disabled = false;
   bloqueResultadoPdfAMd.style.display = 'none';
@@ -178,7 +226,7 @@ function escaparMarkdown(texto) {
 
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
-  botonExtraer.textContent = 'Convirtiendo...';
+  botonExtraer.textContent = t('boton-extraer-procesando');
   try {
     const bytes = await archivoActual.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
@@ -193,7 +241,7 @@ botonExtraer.addEventListener('click', async () => {
     }
 
     if (!paginasMarkdown.some(p => p.trim())) {
-      throw new Error('No se encontró texto en el PDF (¿es un escaneo?).');
+      throw new Error(t('error-sin-texto'));
     }
 
     const markdownCompleto = paginasMarkdown.join('\n\n---\n\n');
@@ -202,17 +250,17 @@ botonExtraer.addEventListener('click', async () => {
     enlaceDescargaMd.href = URL.createObjectURL(blob);
     bloqueResultadoPdfAMd.style.display = 'block';
   } catch (error) {
-    alert('No se pudo convertir el PDF: ' + error.message);
+    alert(t('error-convertir') + ': ' + error.message);
   } finally {
     botonExtraer.disabled = false;
-    botonExtraer.textContent = 'Convertir a Markdown';
+    botonExtraer.textContent = t('boton-extraer');
   }
 });
 
 botonCopiarMd.addEventListener('click', async () => {
   await navigator.clipboard.writeText(markdownExtraido.value);
-  botonCopiarMd.textContent = '¡Copiado!';
-  setTimeout(() => { botonCopiarMd.textContent = 'Copiar Markdown'; }, 1500);
+  botonCopiarMd.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiarMd.textContent = t('boton-copiar-md'); }, 1500);
 });
 
 // --- Markdown → PDF ---
@@ -229,9 +277,20 @@ function actualizarVistaPreviaMd() {
 entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
 document.getElementById('botonImprimir').addEventListener('click', () => window.print());
 
+document.addEventListener('cambioIdioma', () => {
+  // El ejemplo de Markdown solo se re-traduce si el usuario no lo tocó todavía.
+  const esEjemploEs = entradaMarkdown.value.trim() === i18nPagina.es['markdown-ejemplo'].trim();
+  const esEjemploEn = entradaMarkdown.value.trim() === i18nPagina.en['markdown-ejemplo'].trim();
+  if (esEjemploEs || esEjemploEn) {
+    entradaMarkdown.value = t('markdown-ejemplo');
+    actualizarVistaPreviaMd();
+  }
+});
+
 actualizarVistaPreviaMd();
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marca de agua para PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Marca de agua para PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -16,6 +16,48 @@
   .controles .boton { align-self: flex-start; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Marca de agua para PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Marca de agua para PDF',
+    'intro': 'Agregá un texto (ej. "CONFIDENCIAL", "BORRADOR") como marca de agua diagonal en todas las páginas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-texto': 'Texto de la marca de agua',
+    'campo-tamano': 'Tamaño de letra: ',
+    'campo-opacidad': 'Opacidad: ',
+    'simbolo-porcentaje': '%',
+    'campo-repeticiones': 'Repetir el mensaje: ',
+    'boton-aplicar': 'Aplicar marca de agua',
+    'boton-aplicar-procesando': 'Aplicando...',
+    'texto-defecto': 'MARCA DE AGUA',
+    'asi-quedaria': ' — así quedaría',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF con marca de agua',
+    'error-aplicar': 'No se pudo aplicar la marca de agua'
+  },
+  en: {
+    'titulo-pagina': 'Free PDF Watermark — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add a text watermark to every page of a PDF, free and without uploading your file anywhere.',
+    'h1': 'PDF watermark',
+    'intro': 'Add text (e.g. "CONFIDENTIAL", "DRAFT") as a diagonal watermark on every page.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-texto': 'Watermark text',
+    'campo-tamano': 'Font size: ',
+    'campo-opacidad': 'Opacity: ',
+    'simbolo-porcentaje': '%',
+    'campo-repeticiones': 'Repeat the message: ',
+    'boton-aplicar': 'Apply watermark',
+    'boton-aplicar-procesando': 'Applying...',
+    'texto-defecto': 'WATERMARK',
+    'asi-quedaria': ' — preview',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download watermarked PDF',
+    'error-aplicar': 'Couldn’t apply the watermark'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -23,17 +65,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Marca de agua para PDF</h1>
-  <p>Agregá un texto (ej. "CONFIDENCIAL", "BORRADOR") como marca de agua diagonal en todas las páginas.</p>
+  <h1 data-i18n="h1">Marca de agua para PDF</h1>
+  <p data-i18n="intro">Agregá un texto (ej. "CONFIDENCIAL", "BORRADOR") como marca de agua diagonal en todas las páginas.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
@@ -41,35 +84,35 @@
 
     <div class="controles">
       <label class="campo">
-        <span>Texto de la marca de agua</span>
+        <span data-i18n="campo-texto">Texto de la marca de agua</span>
         <input type="text" id="textoMarca" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
       </label>
       <label class="campo">
-        <span>Tamaño de letra: <span id="etiquetaTamano">60</span></span>
+        <span><span data-i18n="campo-tamano">Tamaño de letra: </span><span id="etiquetaTamano">60</span></span>
         <input type="range" id="tamanoLetra" min="20" max="150" value="60">
       </label>
       <label class="campo">
-        <span>Opacidad: <span id="etiquetaOpacidad">15</span>%</span>
+        <span><span data-i18n="campo-opacidad">Opacidad: </span><span id="etiquetaOpacidad">15</span><span data-i18n="simbolo-porcentaje">%</span></span>
         <input type="range" id="opacidad" min="5" max="50" value="15">
       </label>
       <label class="campo">
-        <span>Repetir el mensaje: <span id="etiquetaRepeticiones">1</span></span>
+        <span><span data-i18n="campo-repeticiones">Repetir el mensaje: </span><span id="etiquetaRepeticiones">1</span></span>
         <input type="range" id="repeticiones" min="1" max="20" value="1">
       </label>
-      <button class="boton" id="botonAplicar" disabled>Aplicar marca de agua</button>
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar marca de agua</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-marcado.pdf">Descargar PDF con marca de agua</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-marcado.pdf" data-i18n="resultado-enlace">Descargar PDF con marca de agua</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -128,7 +171,7 @@ function calcularTamanoAjustadoCanvas(contexto, texto, anchoDisponible, altoDisp
 
 function actualizarVistaPreviaMarca() {
   if (!canvasBase) return;
-  const texto = elTexto.value || 'MARCA DE AGUA';
+  const texto = elTexto.value || t('texto-defecto');
   const opacidad = parseInt(elOpacidad.value, 10) / 100;
   const tamanoMaximoPx = parseInt(elTamano.value, 10) * ESCALA_MINIATURA;
   const cantidad = parseInt(elRepeticiones.value, 10);
@@ -165,7 +208,7 @@ function actualizarVistaPreviaMarca() {
   contexto.restore();
 
   listaArchivo.innerHTML = '';
-  listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `${archivoActual.name} (${totalPaginasActual} pág.) — así quedaría` }));
+  listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `${archivoActual.name} (${totalPaginasActual} ${t('sufijo-pag')})${t('asi-quedaria')}` }));
 }
 
 async function mostrarArchivo(archivo) {
@@ -179,7 +222,7 @@ async function mostrarArchivo(archivo) {
       totalPaginasActual = totalPaginas;
       actualizarVistaPreviaMarca();
     } catch (error) {
-      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
     }
   }
   botonAplicar.disabled = !archivo;
@@ -224,13 +267,13 @@ function calcularTamanoAjustado(fuente, texto, anchoPagina, altoPagina, tamanoMa
 
 botonAplicar.addEventListener('click', async () => {
   botonAplicar.disabled = true;
-  botonAplicar.textContent = 'Aplicando...';
+  botonAplicar.textContent = t('boton-aplicar-procesando');
   try {
     const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
     const bytes = await archivoActual.arrayBuffer();
     const pdf = await PDFDocument.load(bytes);
     const fuente = await pdf.embedFont(StandardFonts.HelveticaBold);
-    const texto = elTexto.value || 'MARCA DE AGUA';
+    const texto = elTexto.value || t('texto-defecto');
     const opacidad = parseInt(elOpacidad.value, 10) / 100;
     const tamanoMaximo = parseInt(elTamano.value, 10);
     const cantidad = parseInt(elRepeticiones.value, 10);
@@ -267,14 +310,15 @@ botonAplicar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo aplicar la marca de agua: ' + error.message);
+    alert(t('error-aplicar') + ': ' + error.message);
   } finally {
     botonAplicar.disabled = false;
-    botonAplicar.textContent = 'Aplicar marca de agua';
+    botonAplicar.textContent = t('boton-aplicar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

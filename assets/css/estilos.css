@@ -53,6 +53,29 @@ body {
   line-height: 1.5;
 }
 
+/* Barras de desplazamiento con los colores del tema: por defecto el
+   navegador las dibuja siempre claras, y en modo oscuro quedan blancas y no
+   contrastan con el fondo. Al usar las variables de tema, cambian solas
+   junto con el resto del sitio (igual que en MiniCookies-Home). */
+html {
+  scrollbar-color: var(--gris-borde) var(--gris-fondo);
+  scrollbar-width: thin;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--gris-fondo);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--gris-borde);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--texto-suave);
+}
+
 a { color: var(--azul); text-decoration: none; }
 a:hover { text-decoration: underline; }
 

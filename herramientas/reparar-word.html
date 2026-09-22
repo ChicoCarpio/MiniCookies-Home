@@ -3,12 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reparar Word gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Intentá recuperar un documento Word (.docx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reparar Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un documento Word (.docx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reparar Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Intentá recuperar un documento Word (.docx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Reparar Word',
+    'intro': 'Elegí un documento .docx que no abre bien y probamos reconstruirlo.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'boton-reparar': 'Reparar',
+    'boton-reparar-procesando': 'Reparando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Word reparado',
+    'limitaciones-titulo': 'Limitaciones',
+    'limite1': 'Si el archivo está muy dañado, a veces solo se puede rescatar el texto sin formato (se pierde negrita, tablas, imágenes, etc., pero se recupera el contenido).',
+    'limite2': 'Si ni así se puede leer, el archivo está demasiado dañado para esta herramienta.',
+    'error-mammoth-vacio': 'mammoth no encontró contenido.',
+    'mensaje-nivel1-ok': '✅ Se pudo leer el documento normalmente y se reconstruyó desde cero.',
+    'error-sin-estructura': 'El archivo no tiene la estructura mínima de un .docx — no se puede reparar.',
+    'error-sin-texto': 'No se pudo rescatar texto legible de este archivo.',
+    'mensaje-nivel2-ok': '⚠️ El documento estaba dañado — se recuperó solo el texto plano, sin el formato original.',
+    'error-reparar': 'No se pudo reparar el documento'
+  },
+  en: {
+    'titulo-pagina': 'Repair Word Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Try to recover a damaged Word document (.docx) that won’t open properly, free and without uploading your file anywhere.',
+    'h1': 'Repair Word',
+    'intro': 'Pick a .docx document that doesn’t open properly and we’ll try to rebuild it.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'boton-reparar': 'Repair',
+    'boton-reparar-procesando': 'Repairing...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download repaired Word',
+    'limitaciones-titulo': 'Limitations',
+    'limite1': 'If the file is badly damaged, sometimes only the plain text can be rescued (bold, tables, images, etc. are lost, but the content is recovered).',
+    'limite2': 'If it still can’t be read, the file is too damaged for this tool.',
+    'error-mammoth-vacio': 'mammoth found no content.',
+    'mensaje-nivel1-ok': '✅ The document could be read normally and was rebuilt from scratch.',
+    'error-sin-estructura': 'The file doesn’t have the minimum structure of a .docx — it can’t be repaired.',
+    'error-sin-texto': 'No readable text could be rescued from this file.',
+    'mensaje-nivel2-ok': '⚠️ The document was damaged — only the plain text was recovered, without the original formatting.',
+    'error-reparar': 'Couldn’t repair the document'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,47 +60,48 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Reparar Word</h1>
-  <p>Elegí un documento .docx que no abre bien y probamos reconstruirlo.</p>
+  <h1 data-i18n="h1">Reparar Word</h1>
+  <p data-i18n="intro">Elegí un documento .docx que no abre bien y probamos reconstruirlo.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".docx" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonReparar" disabled>Reparar</button>
+      <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Reparar</button>
     </div>
 
     <p id="mensajeNivel" style="color:#b45309; display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-reparado.docx">Descargar Word reparado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reparado.docx" data-i18n="resultado-enlace">Descargar Word reparado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Si el archivo está muy dañado, a veces solo se puede rescatar el texto sin formato (se pierde negrita, tablas, imágenes, etc., pero se recupera el contenido).</li>
-      <li>Si ni así se puede leer, el archivo está demasiado dañado para esta herramienta.</li>
+      <li data-i18n="limite1">Si el archivo está muy dañado, a veces solo se puede rescatar el texto sin formato (se pierde negrita, tablas, imágenes, etc., pero se recupera el contenido).</li>
+      <li data-i18n="limite2">Si ni así se puede leer, el archivo está demasiado dañado para esta herramienta.</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
@@ -116,7 +161,7 @@ async function guardarComoDocx(parrafos) {
 
 botonReparar.addEventListener('click', async () => {
   botonReparar.disabled = true;
-  botonReparar.textContent = 'Reparando...';
+  botonReparar.textContent = t('boton-reparar-procesando');
   mensajeNivel.style.display = 'none';
   try {
     const arrayBuffer = await archivoActual.arrayBuffer();
@@ -127,40 +172,41 @@ botonReparar.addEventListener('click', async () => {
       const contenedor = document.createElement('div');
       contenedor.innerHTML = resultadoMammoth.value;
       const parrafos = await contenidoAParrafos(contenedor);
-      if (parrafos.length === 0) throw new Error('mammoth no encontró contenido.');
+      if (parrafos.length === 0) throw new Error(t('error-mammoth-vacio'));
 
       await guardarComoDocx(parrafos);
-      mensajeNivel.textContent = '✅ Se pudo leer el documento normalmente y se reconstruyó desde cero.';
+      mensajeNivel.textContent = t('mensaje-nivel1-ok');
       mensajeNivel.style.color = '#166534';
       mensajeNivel.style.display = 'block';
     } catch (errorNivel1) {
       // Nivel 2: rescatar texto crudo de word/document.xml sin depender de un XML válido.
       const zip = await JSZip.loadAsync(arrayBuffer);
       const documentoXml = zip.file('word/document.xml');
-      if (!documentoXml) throw new Error('El archivo no tiene la estructura mínima de un .docx — no se puede reparar.');
+      if (!documentoXml) throw new Error(t('error-sin-estructura'));
 
       const xmlTexto = await documentoXml.async('string');
       const coincidencias = [...xmlTexto.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)];
       const texto = coincidencias.map(m => m[1]).join(' ').trim();
-      if (!texto) throw new Error('No se pudo rescatar texto legible de este archivo.');
+      if (!texto) throw new Error(t('error-sin-texto'));
 
       const contenedor = document.createElement('div');
       contenedor.innerHTML = textoAHtml(texto);
       const parrafos = await contenidoAParrafos(contenedor);
 
       await guardarComoDocx(parrafos);
-      mensajeNivel.textContent = '⚠️ El documento estaba dañado — se recuperó solo el texto plano, sin el formato original.';
+      mensajeNivel.textContent = t('mensaje-nivel2-ok');
       mensajeNivel.style.display = 'block';
     }
   } catch (error) {
-    alert('No se pudo reparar el documento: ' + error.message);
+    alert(t('error-reparar') + ': ' + error.message);
   } finally {
     botonReparar.disabled = false;
-    botonReparar.textContent = 'Reparar';
+    botonReparar.textContent = t('boton-reparar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

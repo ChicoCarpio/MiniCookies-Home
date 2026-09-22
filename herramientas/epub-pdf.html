@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir EPUB y PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí un libro EPUB a PDF, o un PDF a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir EPUB y PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí un libro EPUB a PDF, o un PDF a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -34,6 +34,70 @@
   .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
   .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir EPUB y PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí un libro EPUB a PDF, o un PDF a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'EPUB ↔ PDF',
+    'intro': 'Convertí un libro EPUB a PDF, o un PDF a EPUB, según lo que necesites.',
+    'dir-epub-a-pdf': 'EPUB → PDF',
+    'dir-pdf-a-epub': 'PDF → EPUB',
+    'zona-arrastre-epub': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'boton-a-pdf': 'Generar vista previa',
+    'boton-a-pdf-generando': 'Generando...',
+    'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
+    'zona-arrastre-pdf': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-titulo': 'Título del libro',
+    'campo-autor': 'Autor (opcional)',
+    'boton-a-epub': 'Convertir a EPUB',
+    'boton-a-epub-procesando': 'Convirtiendo...',
+    'aviso-solo-texto': '⚠️ Solo se extrae el texto del PDF (sin imágenes ni diseño). Si el PDF es un escaneo (imágenes de páginas sin texto real), no va a poder extraer nada.',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar EPUB',
+    'limites-titulo': 'Límites conocidos',
+    'limite1': 'No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.',
+    'limite2': 'EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; PDF → EPUB solo conserva el texto.',
+    'limite3': 'Cada capítulo empieza en una página nueva.',
+    'error-vista-previa': 'No se pudo generar la vista previa',
+    'progreso-extrayendo': 'Extrayendo texto del PDF...',
+    'progreso-armando': 'Armando el EPUB...',
+    'error-sin-texto': 'No se encontró texto en el PDF (¿es un escaneo?).',
+    'titulo-defecto': 'Documento',
+    'error-generar-epub': 'No se pudo generar el EPUB'
+  },
+  en: {
+    'titulo-pagina': 'Convert EPUB and PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert an EPUB book to PDF, or a PDF to EPUB, in either direction — free and without uploading your file anywhere.',
+    'h1': 'EPUB ↔ PDF',
+    'intro': 'Convert an EPUB book to PDF, or a PDF to EPUB, whichever you need.',
+    'dir-epub-a-pdf': 'EPUB → PDF',
+    'dir-pdf-a-epub': 'PDF → EPUB',
+    'zona-arrastre-epub': '📚 Drag your .epub file here or click to choose it',
+    'boton-a-pdf': 'Generate preview',
+    'boton-a-pdf-generando': 'Generating...',
+    'boton-imprimir': '🖨️ Save as PDF / Print',
+    'zona-arrastre-pdf': '📄 Drag your PDF here or click to choose it',
+    'campo-titulo': 'Book title',
+    'campo-autor': 'Author (optional)',
+    'boton-a-epub': 'Convert to EPUB',
+    'boton-a-epub-procesando': 'Converting...',
+    'aviso-solo-texto': '⚠️ Only the PDF’s text is extracted (no images or layout). If the PDF is a scan (images of pages with no real text), nothing will be extracted.',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download EPUB',
+    'limites-titulo': 'Known limits',
+    'limite1': 'Doesn’t work with DRM-protected EPUB books (publisher lock) — only with unprotected EPUB.',
+    'limite2': 'EPUB → PDF keeps headings, bold, italics, lists, tables and images from each chapter; PDF → EPUB keeps only the text.',
+    'limite3': 'Each chapter starts on a new page.',
+    'error-vista-previa': 'Couldn’t generate the preview',
+    'progreso-extrayendo': 'Extracting text from the PDF...',
+    'progreso-armando': 'Building the EPUB...',
+    'error-sin-texto': 'No text was found in the PDF (is it a scan?).',
+    'titulo-defecto': 'Document',
+    'error-generar-epub': 'Couldn’t generate the EPUB'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -41,32 +105,33 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>EPUB ↔ PDF</h1>
-  <p>Convertí un libro EPUB a PDF, o un PDF a EPUB, según lo que necesites.</p>
+  <h1 data-i18n="h1">EPUB ↔ PDF</h1>
+  <p data-i18n="intro">Convertí un libro EPUB a PDF, o un PDF a EPUB, según lo que necesites.</p>
 
   <div class="panel-herramienta">
     <div class="selector-direccion">
-      <label><input type="radio" name="direccion" value="epub-a-pdf" checked> EPUB → PDF</label>
-      <label><input type="radio" name="direccion" value="pdf-a-epub"> PDF → EPUB</label>
+      <label><input type="radio" name="direccion" value="epub-a-pdf" checked> <span data-i18n="dir-epub-a-pdf">EPUB → PDF</span></label>
+      <label><input type="radio" name="direccion" value="pdf-a-epub"> <span data-i18n="dir-pdf-a-epub">PDF → EPUB</span></label>
     </div>
 
     <!-- EPUB → PDF -->
     <div id="panelEpubAPdf">
       <div class="zona-arrastre" id="zonaArrastreEpub">
-        📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaEpub" accept=".epub" hidden>
       </div>
       <ul class="lista-archivos" id="listaEpub"></ul>
       <div class="controles">
-        <button class="boton" id="botonAPdf" disabled>Generar vista previa</button>
+        <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Generar vista previa</button>
       </div>
       <div class="controles" id="controlesImprimir" style="display:none;">
-        <button class="boton" id="botonImprimir" type="button">🖨️ Guardar como PDF / Imprimir</button>
+        <button class="boton" id="botonImprimir" type="button" data-i18n="boton-imprimir">🖨️ Guardar como PDF / Imprimir</button>
       </div>
       <div class="vista-previa-documento" id="vistaPrevia" style="display:none;"></div>
     </div>
@@ -74,47 +139,47 @@
     <!-- PDF → EPUB -->
     <div id="panelPdfAEpub" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastrePdf">
-        📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaPdf" accept="application/pdf" hidden>
       </div>
       <ul class="lista-archivos" id="listaPdf"></ul>
       <div class="controles">
         <label class="campo">
-          Título del libro
+          <span data-i18n="campo-titulo">Título del libro</span>
           <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
         <label class="campo">
-          Autor (opcional)
+          <span data-i18n="campo-autor">Autor (opcional)</span>
           <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
-        <button class="boton" id="botonAEpub" disabled>Convertir a EPUB</button>
+        <button class="boton" id="botonAEpub" disabled data-i18n="boton-a-epub">Convertir a EPUB</button>
       </div>
-      <p style="color:var(--texto-suave); font-size:0.9rem;">
+      <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-solo-texto">
         ⚠️ Solo se extrae el texto del PDF (sin imágenes ni diseño). Si el PDF es un escaneo (imágenes de páginas sin texto real), no va a poder extraer nada.
       </p>
       <div class="resultado" id="resultadoEpub">
-        ✅ Listo. <a id="enlaceDescargaEpub" download="libro.epub">Descargar EPUB</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
       </div>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <h3 style="margin-top:0;" data-i18n="limites-titulo">Límites conocidos</h3>
     <ul style="color:var(--texto-suave);">
-      <li>No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
-      <li>EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; PDF → EPUB solo conserva el texto.</li>
-      <li>Cada capítulo empieza en una página nueva.</li>
+      <li data-i18n="limite1">No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
+      <li data-i18n="limite2">EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; PDF → EPUB solo conserva el texto.</li>
+      <li data-i18n="limite3">Cada capítulo empieza en una página nueva.</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <div id="areaImprimir"></div>
@@ -174,7 +239,7 @@ zonaArrastreEpub.addEventListener('drop', (e) => {
 
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
-  botonAPdf.textContent = 'Generando...';
+  botonAPdf.textContent = t('boton-a-pdf-generando');
   try {
     const { titulo, capitulos } = await leerEpub(archivoEpubActual);
     const htmlCompleto = `<h1 style="page-break-before:auto;">${titulo}</h1>` + capitulos.map(cap => cap.html).join('');
@@ -183,10 +248,10 @@ botonAPdf.addEventListener('click', async () => {
     areaImprimir.innerHTML = htmlCompleto;
     controlesImprimir.style.display = 'flex';
   } catch (error) {
-    alert('No se pudo generar la vista previa: ' + error.message);
+    alert(t('error-vista-previa') + ': ' + error.message);
   } finally {
     botonAPdf.disabled = false;
-    botonAPdf.textContent = 'Generar vista previa';
+    botonAPdf.textContent = t('boton-a-pdf');
   }
 });
 
@@ -249,17 +314,17 @@ async function extraerTextoPdf(archivo) {
 
 botonAEpub.addEventListener('click', async () => {
   botonAEpub.disabled = true;
-  botonAEpub.textContent = 'Convirtiendo...';
+  botonAEpub.textContent = t('boton-a-epub-procesando');
   progreso.style.display = 'block';
   try {
-    const titulo = tituloLibro.value.trim() || 'Documento';
+    const titulo = tituloLibro.value.trim() || t('titulo-defecto');
     const autor = document.getElementById('autorLibro').value.trim();
 
-    progreso.textContent = 'Extrayendo texto del PDF...';
+    progreso.textContent = t('progreso-extrayendo');
     const texto = await extraerTextoPdf(archivoPdfActual);
-    if (!texto.trim()) throw new Error('No se encontró texto en el PDF (¿es un escaneo?).');
+    if (!texto.trim()) throw new Error(t('error-sin-texto'));
 
-    progreso.textContent = 'Armando el EPUB...';
+    progreso.textContent = t('progreso-armando');
     const capitulos = [{ titulo, html: textoAHtml(texto) }];
     const blob = await construirEpub({ titulo, autor, capitulos });
 
@@ -267,15 +332,16 @@ botonAEpub.addEventListener('click', async () => {
     enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
     resultadoEpub.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el EPUB: ' + error.message);
+    alert(t('error-generar-epub') + ': ' + error.message);
   } finally {
     botonAEpub.disabled = false;
-    botonAEpub.textContent = 'Convertir a EPUB';
+    botonAEpub.textContent = t('boton-a-epub');
     progreso.style.display = 'none';
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

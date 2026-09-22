@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crear presentación PowerPoint gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Armá una presentación PowerPoint diapositiva por diapositiva, con títulos, negrita, cursiva y viñetas, sin escribir ningún símbolo. Gratis y sin subir nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Crear presentación PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Armá una presentación PowerPoint diapositiva por diapositiva, con títulos, negrita, cursiva y viñetas, sin escribir ningún símbolo. Gratis y sin subir nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -82,6 +82,54 @@
   }
   .cuerpo-diapositiva ul { margin: 0; padding-left: 22px; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Crear presentación PowerPoint gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Armá una presentación PowerPoint diapositiva por diapositiva, con títulos, negrita, cursiva y viñetas, sin escribir ningún símbolo. Gratis y sin subir nada a ningún servidor.',
+    'h1': 'Crear presentación PowerPoint',
+    'intro': 'Armá tu presentación diapositiva por diapositiva: escribí el título, el contenido, y dale formato seleccionando texto y usando los botones — igual que en PowerPoint.',
+    'boton-agregar': '+ Agregar diapositiva',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-generar': 'Descargar .pptx',
+    'boton-generar-procesando': 'Generando...',
+    'etiqueta-diapositiva': 'Diapositiva {n}',
+    'mover-arriba': 'Mover arriba',
+    'mover-abajo': 'Mover abajo',
+    'eliminar': 'Eliminar',
+    'placeholder-titulo': 'Título de la diapositiva',
+    'boton-negrita': 'Negrita',
+    'boton-cursiva': 'Cursiva',
+    'boton-lista': 'Lista con viñetas',
+    'placeholder-cuerpo': 'Contenido de la diapositiva...',
+    'error-sin-diapositivas': 'Agregá al menos una diapositiva.',
+    'nombre-defecto': 'presentacion',
+    'error-generar': 'No se pudo generar la presentación'
+  },
+  en: {
+    'titulo-pagina': 'Create a PowerPoint Presentation Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Build a PowerPoint presentation slide by slide, with headings, bold, italics and bullet points, without typing a single symbol. Free and without uploading anything anywhere.',
+    'h1': 'Create a PowerPoint presentation',
+    'intro': 'Build your presentation slide by slide: write the title, the content, and format it by selecting text and using the buttons — just like in PowerPoint.',
+    'boton-agregar': '+ Add slide',
+    'campo-nombre': 'File name',
+    'boton-generar': 'Download .pptx',
+    'boton-generar-procesando': 'Generating...',
+    'etiqueta-diapositiva': 'Slide {n}',
+    'mover-arriba': 'Move up',
+    'mover-abajo': 'Move down',
+    'eliminar': 'Delete',
+    'placeholder-titulo': 'Slide title',
+    'boton-negrita': 'Bold',
+    'boton-cursiva': 'Italic',
+    'boton-lista': 'Bulleted list',
+    'placeholder-cuerpo': 'Slide content...',
+    'error-sin-diapositivas': 'Add at least one slide.',
+    'nombre-defecto': 'presentation',
+    'error-generar': 'Couldn’t generate the presentation'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -89,39 +137,41 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Crear presentación PowerPoint</h1>
-  <p>Armá tu presentación diapositiva por diapositiva: escribí el título, el contenido, y dale formato seleccionando texto y usando los botones — igual que en PowerPoint.</p>
+  <h1 data-i18n="h1">Crear presentación PowerPoint</h1>
+  <p data-i18n="intro">Armá tu presentación diapositiva por diapositiva: escribí el título, el contenido, y dale formato seleccionando texto y usando los botones — igual que en PowerPoint.</p>
 
   <div class="panel-herramienta">
     <div id="listaDiapositivas"></div>
 
     <div class="controles">
-      <button class="boton" id="botonAgregarDiapositiva" type="button" style="background:#64748b;">+ Agregar diapositiva</button>
+      <button class="boton" id="botonAgregarDiapositiva" type="button" style="background:#64748b;" data-i18n="boton-agregar">+ Agregar diapositiva</button>
     </div>
 
     <div class="controles">
       <label class="campo">
-        Nombre del archivo
+        <span data-i18n="campo-nombre">Nombre del archivo</span>
         <input type="text" id="nombreArchivo" value="presentacion" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
-      <button class="boton" id="botonGenerar" type="button">Descargar .pptx</button>
+      <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Descargar .pptx</button>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+<script src="../assets/js/idioma.js"></script>
 <script>
 const listaDiapositivas = document.getElementById('listaDiapositivas');
 let siguienteId = 1;
@@ -135,18 +185,18 @@ function crearTarjetaDiapositiva() {
     <div class="cabecera-diapositiva">
       <span class="etiqueta-numero">Diapositiva</span>
       <div class="botones-cabecera">
-        <button type="button" class="subir-diapositiva" title="Mover arriba">▲</button>
-        <button type="button" class="bajar-diapositiva" title="Mover abajo">▼</button>
-        <button type="button" class="quitar-diapositiva" title="Eliminar">✕</button>
+        <button type="button" class="subir-diapositiva" title="${t('mover-arriba')}">▲</button>
+        <button type="button" class="bajar-diapositiva" title="${t('mover-abajo')}">▼</button>
+        <button type="button" class="quitar-diapositiva" title="${t('eliminar')}">✕</button>
       </div>
     </div>
-    <input type="text" class="titulo-diapositiva" placeholder="Título de la diapositiva">
+    <input type="text" class="titulo-diapositiva" placeholder="${t('placeholder-titulo')}">
     <div class="barra-mini">
-      <button type="button" data-comando="bold" title="Negrita"><strong>N</strong></button>
-      <button type="button" data-comando="italic" title="Cursiva"><em>C</em></button>
-      <button type="button" data-comando="insertUnorderedList" title="Lista con viñetas">•≡</button>
+      <button type="button" data-comando="bold" title="${t('boton-negrita')}"><strong>N</strong></button>
+      <button type="button" data-comando="italic" title="${t('boton-cursiva')}"><em>C</em></button>
+      <button type="button" data-comando="insertUnorderedList" title="${t('boton-lista')}">•≡</button>
     </div>
-    <div class="cuerpo-diapositiva" contenteditable="true" data-placeholder="Contenido de la diapositiva..."></div>
+    <div class="cuerpo-diapositiva" contenteditable="true" data-placeholder="${t('placeholder-cuerpo')}"></div>
   `;
 
   const cuerpo = tarjeta.querySelector('.cuerpo-diapositiva');
@@ -178,7 +228,7 @@ function crearTarjetaDiapositiva() {
 
 function renumerarDiapositivas() {
   [...listaDiapositivas.children].forEach((tarjeta, indice) => {
-    tarjeta.querySelector('.etiqueta-numero').textContent = `Diapositiva ${indice + 1}`;
+    tarjeta.querySelector('.etiqueta-numero').textContent = t('etiqueta-diapositiva').replace('{n}', indice + 1);
   });
 }
 
@@ -192,6 +242,21 @@ document.getElementById('botonAgregarDiapositiva').addEventListener('click', agr
 // Empezar con 2 diapositivas en blanco, como cualquier presentación nueva.
 agregarDiapositiva();
 agregarDiapositiva();
+
+// Al cambiar de idioma, los títulos/placeholders de las tarjetas ya creadas
+// (dibujados una vez al armarlas) se vuelven a traducir; el texto que el
+// usuario ya escribió en título/cuerpo no se toca.
+document.addEventListener('cambioIdioma', () => {
+  document.querySelectorAll('.subir-diapositiva').forEach(b => b.title = t('mover-arriba'));
+  document.querySelectorAll('.bajar-diapositiva').forEach(b => b.title = t('mover-abajo'));
+  document.querySelectorAll('.quitar-diapositiva').forEach(b => b.title = t('eliminar'));
+  document.querySelectorAll('.titulo-diapositiva').forEach(el => el.placeholder = t('placeholder-titulo'));
+  document.querySelectorAll('.barra-mini button[data-comando="bold"]').forEach(b => b.title = t('boton-negrita'));
+  document.querySelectorAll('.barra-mini button[data-comando="italic"]').forEach(b => b.title = t('boton-cursiva'));
+  document.querySelectorAll('.barra-mini button[data-comando="insertUnorderedList"]').forEach(b => b.title = t('boton-lista'));
+  document.querySelectorAll('.cuerpo-diapositiva').forEach(el => el.dataset.placeholder = t('placeholder-cuerpo'));
+  renumerarDiapositivas();
+});
 
 // --- Convertir el cuerpo (HTML del contenteditable) a los "runs" que espera PptxGenJS ---
 
@@ -252,10 +317,10 @@ function cuerpoAPptxRuns(contenedor) {
 document.getElementById('botonGenerar').addEventListener('click', () => {
   const boton = document.getElementById('botonGenerar');
   boton.disabled = true;
-  boton.textContent = 'Generando...';
+  boton.textContent = t('boton-generar-procesando');
   try {
     const tarjetas = [...listaDiapositivas.children];
-    if (tarjetas.length === 0) throw new Error('Agregá al menos una diapositiva.');
+    if (tarjetas.length === 0) throw new Error(t('error-sin-diapositivas'));
 
     const pptx = new PptxGenJS();
 
@@ -275,13 +340,13 @@ document.getElementById('botonGenerar').addEventListener('click', () => {
       }
     });
 
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || 'presentacion').trim();
+    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
     pptx.writeFile({ fileName: `${nombreArchivo}.pptx` });
   } catch (error) {
-    alert('No se pudo generar la presentación: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     boton.disabled = false;
-    boton.textContent = 'Descargar .pptx';
+    boton.textContent = t('boton-generar');
   }
 });
 </script>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formatear fórmulas anidadas de Excel gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Pegá una fórmula larga de SI/SI.CONJUNTO y la reordena en líneas legibles con sangría, verificando que la lógica quede idéntica. Gratis y sin subir nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Formatear fórmulas anidadas de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Pegá una fórmula larga de SI/SI.CONJUNTO y la reordena en líneas legibles con sangría, verificando que la lógica quede idéntica. Gratis y sin subir nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -94,6 +94,140 @@
   .fmt-preview-contenido{ opacity:.55; }
   .fmt-error-banner{ margin:0 16px 16px; padding:10px 12px; border-radius:8px; background:var(--f-danger-soft); color:var(--f-danger); font-size:.82rem; line-height:1.5; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Formatear fórmulas anidadas de Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Pegá una fórmula larga de SI/SI.CONJUNTO y la reordena en líneas legibles con sangría, verificando que la lógica quede idéntica. Gratis y sin subir nada a ningún servidor.',
+    'h1': 'Formatear fórmulas anidadas de Excel',
+    'intro-antes': 'Pegá una fórmula larga de ',
+    'intro-medio': ' / ',
+    'intro-final': ' y la reordena en líneas legibles con sangría — verificando, token por token, que la lógica quede idéntica — y avisa si el resultado supera el límite de 8192 caracteres de una celda de Excel.',
+    'sep-label': 'Separador',
+    'sep-es': '; (ES/LatAm)',
+    'sep-en': ', (EN)',
+    'sangria-label': 'Sangría (espacios)',
+    'reducir-sangria': 'Reducir sangría',
+    'aumentar-sangria': 'Aumentar sangría',
+    'ancho-label-antes': 'Ancho antes de partir línea — ',
+    'ancho-label-despues': ' car.',
+    'boton-limpiar': 'Limpiar',
+    'boton-reset': 'Restablecer ejemplo',
+    'stat-compacta': 'Compacta (mínimo)',
+    'stat-caracteres': 'caracteres',
+    'stat-formateada': 'Formateada',
+    'stat-estado': 'Estado',
+    'badge-analizando': 'Analizando…',
+    'gauge-limite': 'Límite de una celda de Excel: 8192 caracteres',
+    'gauge-marker-title': 'Versión compacta (sin sangría)',
+    'panel-original-titulo': 'Fórmula original',
+    'panel-original-hint': 'pegá aquí tal como sale de Excel',
+    'panel-formateada-titulo': 'Fórmula formateada',
+    'boton-copiar': 'Copiar',
+    'boton-copiado': '¡Copiado!',
+    'boton-no-copiado': 'No se pudo copiar',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-p1': 'Nunca se agrega, quita ni reordena nada de tu fórmula — solo se le agregan saltos de línea y sangría para que se lea mejor. Antes de mostrar cualquier resultado se verifica que la versión formateada equivalga exactamente a la original; si algo no cuadra, no formatea nada y avisa del error.',
+    'limitaciones-p2-antes': 'También reconoce fórmulas matriciales con llaves (',
+    'limitaciones-p2-medio1': '), referencias a otro libro (',
+    'limitaciones-p2-medio2': '), el operador de porcentaje sobre cualquier expresión (',
+    'limitaciones-p2-medio3': ', ',
+    'limitaciones-p2-final': ') y números decimales con coma cuando el separador de argumentos es ',
+    'limitaciones-p2-final2': ' (así los escribe Excel en español). Si aun así algo no se puede interpretar con seguridad, avisa con un error en vez de arriesgarse a formatear mal.',
+    'badge-mostrando-ejemplo': 'Mostrando ejemplo',
+    'badge-esperando': 'Esperando fórmula',
+    'placeholder-ejemplo': '👀 Ejemplo — escribí tu fórmula para reemplazarlo',
+    'placeholder-vacio': '// pegá una fórmula arriba para empezar',
+    'placeholder-no-formateado': '// no se pudo formatear',
+    'badge-verificada': 'Estructura verificada',
+    'badge-supera-limite': 'Supera el límite de Excel',
+    'badge-error-sintaxis': 'Error de sintaxis',
+    'aviso-supera-limite': 'La versión formateada ({n} caracteres) supera el límite de Excel. Reducí la sangría o aumentá el ancho antes de partir línea.',
+    'locale-numero': 'es-CR',
+    'err-comilla': 'La comilla simple en la posición {pos} no forma parte de un nombre de hoja válido (formato esperado: \'Nombre de Hoja\'!A1).',
+    'err-ref-esperada': 'Se esperaba una referencia de celda después de "{ref}" (ej: {ref}A1).',
+    'err-ref-esperada2': 'Se esperaba una referencia de celda después de "{word}!" (ej: {word}!A1).',
+    'err-llave': 'Falta cerrar la llave "{" abierta en la posición {pos}.',
+    'err-corchete': 'Falta cerrar el corchete "[" abierto en la posición {pos}.',
+    'err-signo-pesos': 'Signo "$" inesperado en la posición {pos} — solo se usa en referencias de celda, como $A$1.',
+    'err-caracter': 'Carácter no reconocido "{c}" en la posición {pos}.',
+    'err-esperaba-token': 'Se esperaba "{tt}" y se encontró "{encontrado}". Revisá que los paréntesis estén balanceados.',
+    'fin-formula': 'fin de la fórmula',
+    'err-parentesis-agrupacion': 'Paréntesis de agrupación con separador inesperado dentro.',
+    'err-no-interpretar': 'No se pudo interpretar la fórmula cerca del token #{n} (¿falta un operador o un paréntesis?).',
+    'err-sin-expresion': 'No hay ninguna expresión después del "=".',
+    'err-nada-formatear': 'No hay nada que formatear.',
+    'err-sobran-caracteres': 'Sobran caracteres al final de la fórmula — revisá los paréntesis o si el separador elegido ({sep}) es el correcto.',
+    'err-varias-expresiones': 'Se encontraron {n} expresiones sueltas de nivel superior; una fórmula válida tiene una sola.',
+    'err-integridad': 'La verificación de integridad falló: el árbol reconstruido no coincide con la fórmula original. No se aplicó ningún formato, por seguridad.'
+  },
+  en: {
+    'titulo-pagina': 'Format Nested Excel Formulas Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Paste a long IF/IFS formula and it reorders it into readable, indented lines, verifying the logic stays identical. Free and without uploading anything anywhere.',
+    'h1': 'Format nested Excel formulas',
+    'intro-antes': 'Paste a long ',
+    'intro-medio': ' / ',
+    'intro-final': ' formula and it reorders it into readable, indented lines — verifying, token by token, that the logic stays identical — and warns you if the result goes over Excel’s 8192-character cell limit.',
+    'sep-label': 'Separator',
+    'sep-es': '; (ES/LatAm)',
+    'sep-en': ', (EN)',
+    'sangria-label': 'Indent (spaces)',
+    'reducir-sangria': 'Decrease indent',
+    'aumentar-sangria': 'Increase indent',
+    'ancho-label-antes': 'Width before wrapping a line — ',
+    'ancho-label-despues': ' chars.',
+    'boton-limpiar': 'Clear',
+    'boton-reset': 'Reset to example',
+    'stat-compacta': 'Compact (minimum)',
+    'stat-caracteres': 'characters',
+    'stat-formateada': 'Formatted',
+    'stat-estado': 'Status',
+    'badge-analizando': 'Analyzing…',
+    'gauge-limite': 'Excel cell limit: 8192 characters',
+    'gauge-marker-title': 'Compact version (no indent)',
+    'panel-original-titulo': 'Original formula',
+    'panel-original-hint': 'paste it here exactly as it comes from Excel',
+    'panel-formateada-titulo': 'Formatted formula',
+    'boton-copiar': 'Copy',
+    'boton-copiado': 'Copied!',
+    'boton-no-copiado': 'Couldn’t copy',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-p1': 'Nothing is ever added, removed or reordered in your formula — only line breaks and indentation are added so it reads better. Before showing any result, it verifies the formatted version is exactly equivalent to the original; if anything doesn’t match, it formats nothing and reports the error.',
+    'limitaciones-p2-antes': 'It also recognizes array formulas with braces (',
+    'limitaciones-p2-medio1': '), references to another workbook (',
+    'limitaciones-p2-medio2': '), the percent operator over any expression (',
+    'limitaciones-p2-medio3': ', ',
+    'limitaciones-p2-final': ') and decimal numbers with a comma when the argument separator is ',
+    'limitaciones-p2-final2': ' (that’s how Excel in Spanish writes numbers). If something still can’t be interpreted safely, it reports an error instead of risking a bad format.',
+    'badge-mostrando-ejemplo': 'Showing example',
+    'badge-esperando': 'Waiting for a formula',
+    'placeholder-ejemplo': '👀 Example — type your formula to replace it',
+    'placeholder-vacio': '// paste a formula above to get started',
+    'placeholder-no-formateado': '// couldn’t format it',
+    'badge-verificada': 'Structure verified',
+    'badge-supera-limite': 'Exceeds Excel’s limit',
+    'badge-error-sintaxis': 'Syntax error',
+    'aviso-supera-limite': 'The formatted version ({n} characters) exceeds Excel’s limit. Reduce the indent or increase the width before wrapping a line.',
+    'locale-numero': 'en-US',
+    'err-comilla': 'The single quote at position {pos} isn’t part of a valid sheet name (expected format: \'Sheet Name\'!A1).',
+    'err-ref-esperada': 'Expected a cell reference after "{ref}" (e.g.: {ref}A1).',
+    'err-ref-esperada2': 'Expected a cell reference after "{word}!" (e.g.: {word}!A1).',
+    'err-llave': 'Missing closing brace "}" for the one opened at position {pos}.',
+    'err-corchete': 'Missing closing bracket "]" for the one opened at position {pos}.',
+    'err-signo-pesos': 'Unexpected "$" at position {pos} — it’s only used in cell references, like $A$1.',
+    'err-caracter': 'Unrecognized character "{c}" at position {pos}.',
+    'err-esperaba-token': 'Expected "{tt}" and found "{encontrado}". Check that the parentheses are balanced.',
+    'fin-formula': 'end of the formula',
+    'err-parentesis-agrupacion': 'Grouping parentheses with an unexpected separator inside.',
+    'err-no-interpretar': 'Couldn’t interpret the formula near token #{n} (missing an operator or a parenthesis?).',
+    'err-sin-expresion': 'There’s no expression after the "=".',
+    'err-nada-formatear': 'There’s nothing to format.',
+    'err-sobran-caracteres': 'There are extra characters at the end of the formula — check the parentheses or whether the chosen separator ({sep}) is the right one.',
+    'err-varias-expresiones': '{n} loose top-level expressions were found; a valid formula has only one.',
+    'err-integridad': 'The integrity check failed: the rebuilt tree doesn’t match the original formula. No formatting was applied, for safety.'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -101,65 +235,66 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Formatear fórmulas anidadas de Excel</h1>
-  <p>Pegá una fórmula larga de <code>SI</code> / <code>SI.CONJUNTO</code> y la reordena en líneas legibles con sangría — verificando, token por token, que la lógica quede idéntica — y avisa si el resultado supera el límite de 8192 caracteres de una celda de Excel.</p>
+  <h1 data-i18n="h1">Formatear fórmulas anidadas de Excel</h1>
+  <p><span data-i18n="intro-antes">Pegá una fórmula larga de </span><code>SI</code><span data-i18n="intro-medio"> / </span><code>SI.CONJUNTO</code><span data-i18n="intro-final"> y la reordena en líneas legibles con sangría — verificando, token por token, que la lógica quede idéntica — y avisa si el resultado supera el límite de 8192 caracteres de una celda de Excel.</span></p>
 
   <div class="fmt-page">
 
   <section class="fmt-controls" aria-label="Opciones de formato">
     <div class="fmt-control-group">
-      <span class="fmt-control-label" id="sep-label">Separador</span>
+      <span class="fmt-control-label" id="sep-label" data-i18n="sep-label">Separador</span>
       <div class="fmt-segmented" role="group" aria-labelledby="sep-label">
-        <button type="button" class="fmt-seg-btn activo" data-sep=";" aria-pressed="true">; (ES/LatAm)</button>
-        <button type="button" class="fmt-seg-btn" data-sep="," aria-pressed="false">, (EN)</button>
+        <button type="button" class="fmt-seg-btn activo" data-sep=";" aria-pressed="true" data-i18n="sep-es">; (ES/LatAm)</button>
+        <button type="button" class="fmt-seg-btn" data-sep="," aria-pressed="false" data-i18n="sep-en">, (EN)</button>
       </div>
     </div>
     <div class="fmt-control-group">
-      <label class="fmt-control-label" for="indent-input">Sangría (espacios)</label>
+      <label class="fmt-control-label" for="indent-input" data-i18n="sangria-label">Sangría (espacios)</label>
       <div class="fmt-stepper">
-        <button type="button" class="fmt-stepper-btn" data-step="-1" aria-label="Reducir sangría">−</button>
+        <button type="button" class="fmt-stepper-btn" data-step="-1" aria-label="Reducir sangría" data-i18n-attr="aria-label:reducir-sangria">−</button>
         <input id="indent-input" type="number" min="0" max="4" value="1" inputmode="numeric">
-        <button type="button" class="fmt-stepper-btn" data-step="1" aria-label="Aumentar sangría">+</button>
+        <button type="button" class="fmt-stepper-btn" data-step="1" aria-label="Aumentar sangría" data-i18n-attr="aria-label:aumentar-sangria">+</button>
       </div>
     </div>
     <div class="fmt-control-group fmt-control-group--grow">
-      <label class="fmt-control-label" for="width-input">Ancho antes de partir línea — <span id="width-value">120</span> car.</label>
+      <label class="fmt-control-label" for="width-input"><span data-i18n="ancho-label-antes">Ancho antes de partir línea — </span><span id="width-value">120</span><span data-i18n="ancho-label-despues"> car.</span></label>
       <input id="width-input" type="range" min="60" max="160" step="5" value="120">
     </div>
     <div class="fmt-control-group fmt-control-group--actions" style="flex-direction:row; gap:8px;">
-      <button type="button" id="btn-limpiar" class="fmt-btn fmt-btn-ghost">Limpiar</button>
-      <button type="button" id="btn-reset" class="fmt-btn fmt-btn-ghost">Restablecer ejemplo</button>
+      <button type="button" id="btn-limpiar" class="fmt-btn fmt-btn-ghost" data-i18n="boton-limpiar">Limpiar</button>
+      <button type="button" id="btn-reset" class="fmt-btn fmt-btn-ghost" data-i18n="boton-reset">Restablecer ejemplo</button>
     </div>
   </section>
 
   <section class="fmt-stats" aria-live="polite">
     <div class="fmt-stat-tile">
-      <span class="fmt-stat-label">Compacta (mínimo)</span>
+      <span class="fmt-stat-label" data-i18n="stat-compacta">Compacta (mínimo)</span>
       <span class="fmt-stat-value" id="stat-canonical">—</span>
-      <span class="fmt-stat-unit">caracteres</span>
+      <span class="fmt-stat-unit" data-i18n="stat-caracteres">caracteres</span>
     </div>
     <div class="fmt-stat-tile">
-      <span class="fmt-stat-label">Formateada</span>
+      <span class="fmt-stat-label" data-i18n="stat-formateada">Formateada</span>
       <span class="fmt-stat-value" id="stat-formatted">—</span>
-      <span class="fmt-stat-unit">caracteres</span>
+      <span class="fmt-stat-unit" data-i18n="stat-caracteres">caracteres</span>
     </div>
     <div class="fmt-stat-tile">
-      <span class="fmt-stat-label">Estado</span>
-      <span class="fmt-badge" id="badge-status">Analizando…</span>
+      <span class="fmt-stat-label" data-i18n="stat-estado">Estado</span>
+      <span class="fmt-badge" id="badge-status" data-i18n="badge-analizando">Analizando…</span>
     </div>
     <div class="fmt-gauge-wrap">
       <div class="fmt-gauge-header">
         <span>0</span>
-        <span>Límite de una celda de Excel: 8192 caracteres</span>
+        <span data-i18n="gauge-limite">Límite de una celda de Excel: 8192 caracteres</span>
       </div>
       <div class="fmt-gauge-track">
         <div class="fmt-gauge-fill" id="gauge-fill"></div>
-        <div class="fmt-gauge-marker" id="gauge-marker" title="Versión compacta (sin sangría)"></div>
+        <div class="fmt-gauge-marker" id="gauge-marker" title="Versión compacta (sin sangría)" data-i18n-attr="title:gauge-marker-title"></div>
       </div>
     </div>
   </section>
@@ -167,15 +302,15 @@
   <section class="fmt-workbench">
     <div class="fmt-panel">
       <div class="fmt-panel-header">
-        <span class="fmt-panel-title">Fórmula original</span>
-        <span class="fmt-panel-hint">pegá aquí tal como sale de Excel</span>
+        <span class="fmt-panel-title" data-i18n="panel-original-titulo">Fórmula original</span>
+        <span class="fmt-panel-hint" data-i18n="panel-original-hint">pegá aquí tal como sale de Excel</span>
       </div>
       <textarea id="input-formula" class="fmt-panel-textarea" spellcheck="false" autocomplete="off"></textarea>
     </div>
     <div class="fmt-panel">
       <div class="fmt-panel-header">
-        <span class="fmt-panel-title">Fórmula formateada</span>
-        <button type="button" id="btn-copy" class="fmt-btn fmt-btn-accent fmt-btn-small">Copiar</button>
+        <span class="fmt-panel-title" data-i18n="panel-formateada-titulo">Fórmula formateada</span>
+        <button type="button" id="btn-copy" class="fmt-btn fmt-btn-accent fmt-btn-small" data-i18n="boton-copiar">Copiar</button>
       </div>
       <pre class="fmt-panel-output" id="output-formula" tabindex="0"></pre>
       <div class="fmt-error-banner" id="error-banner" hidden></div>
@@ -185,31 +320,28 @@
   </div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
-    <p style="color:var(--texto-suave);">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones-p1">
       Nunca se agrega, quita ni reordena nada de tu fórmula — solo se le agregan saltos de línea y sangría
       para que se lea mejor. Antes de mostrar cualquier resultado se verifica que la versión formateada
       equivalga exactamente a la original; si algo no cuadra, no formatea nada y avisa del error.
     </p>
     <p style="color:var(--texto-suave);">
-      También reconoce fórmulas matriciales con llaves (<code>{1;2}</code>), referencias a otro libro
-      (<code>[Libro.xlsx]Hoja1!A1</code>), el operador de porcentaje sobre cualquier expresión
-      (<code>50%</code>, <code>(A1+B1)%</code>) y números decimales con coma cuando el separador de
-      argumentos es <code>;</code> (así los escribe Excel en español). Si aun así algo no se puede
-      interpretar con seguridad, avisa con un error en vez de arriesgarse a formatear mal.
+      <span data-i18n="limitaciones-p2-antes">También reconoce fórmulas matriciales con llaves (</span><code>{1;2}</code><span data-i18n="limitaciones-p2-medio1">), referencias a otro libro (</span><code>[Libro.xlsx]Hoja1!A1</code><span data-i18n="limitaciones-p2-medio2">), el operador de porcentaje sobre cualquier expresión (</span><code>50%</code><span data-i18n="limitaciones-p2-medio3">, </span><code>(A1+B1)%</code><span data-i18n="limitaciones-p2-final">) y números decimales con coma cuando el separador de argumentos es </span><code>;</code><span data-i18n="limitaciones-p2-final2"> (así los escribe Excel en español). Si aun así algo no se puede interpretar con seguridad, avisa con un error en vez de arriesgarse a formatear mal.</span>
     </p>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script type="text/plain" id="ejemplo-formula">=SI.CONJUNTO([@Stock]<=0;"Sin stock";[@Stock]<[@[Stock Mínimo]];"Reponer pronto";[@Stock]>[@[Stock Máximo]];CONCATENAR("Exceso de ";[@Stock]-[@[Stock Máximo]];" unidades");BUSCARX([@Categoría];Tabla_Categorias[Nombre];Tabla_Categorias[Prioridad];0;0)>=Config!$B$2;"Revisar prioridad";VERDADERO;"Normal")</script>
 
+<script src="../assets/js/idioma.js"></script>
 <script>
 (function(){
   "use strict";
@@ -266,11 +398,12 @@
         }
         q++;
         if(s[q] !== '!'){
-          throw new Error('La comilla simple en la posición '+i+' no forma parte de un nombre de hoja válido (formato esperado: \'Nombre de Hoja\'!A1).');
+          throw new Error(t('err-comilla').replace('{pos}', i));
         }
         var refQ = matchReference(s, q+1);
         if(!refQ){
-          throw new Error('Se esperaba una referencia de celda después de "'+s.slice(i,q+1)+'" (ej: '+s.slice(i,q+1)+'A1).');
+          var refTxt = s.slice(i,q+1);
+          throw new Error(t('err-ref-esperada').split('{ref}').join(refTxt));
         }
         tokens.push(['REF', s.slice(i,q+1)+refQ]);
         i = q+1+refQ.length; continue;
@@ -282,7 +415,7 @@
           else if(s[kb]==='}'){ depthB--; if(depthB===0){ kb++; break; } }
           kb++;
         }
-        if(depthB !== 0) throw new Error('Falta cerrar la llave "{" abierta en la posición '+i+'.');
+        if(depthB !== 0) throw new Error(t('err-llave').replace('{pos}', i));
         tokens.push(['BRACE', s.slice(i,kb)]);
         i = kb; continue;
       }
@@ -293,7 +426,7 @@
           else if(s[k]===']'){ depth--; if(depth===0){ k++; break; } }
           k++;
         }
-        if(depth !== 0) throw new Error('Falta cerrar el corchete "[" abierto en la posición '+i+'.');
+        if(depth !== 0) throw new Error(t('err-corchete').replace('{pos}', i));
         var bracketText = s.slice(i,k);
         // ¿Referencia a otro libro, ej. [Libro1.xlsx]Hoja1!A1 o
         // [Libro1.xlsx]'Hoja 1'!A1? Se intenta antes de tratarlo como una
@@ -339,7 +472,7 @@
       }
       if(c === '$'){
         var refD = matchReference(s, i);
-        if(!refD) throw new Error('Signo "$" inesperado en la posición '+i+' — solo se usa en referencias de celda, como $A$1.');
+        if(!refD) throw new Error(t('err-signo-pesos').replace('{pos}', i));
         tokens.push(['REF', refD]);
         i += refD.length; continue;
       }
@@ -357,7 +490,7 @@
         var word = s.slice(i,p);
         if(s[p] === '!'){
           var refS = matchReference(s, p+1);
-          if(!refS) throw new Error('Se esperaba una referencia de celda después de "'+word+'!" (ej: '+word+'!A1).');
+          if(!refS) throw new Error(t('err-ref-esperada2').split('{word}').join(word));
           tokens.push(['REF', word+'!'+refS]);
           i = p+1+refS.length; continue;
         }
@@ -373,7 +506,7 @@
         tokens.push(['NAME', word]);
         i = p; continue;
       }
-      throw new Error('Carácter no reconocido "'+c+'" en la posición '+i+'.');
+      throw new Error(t('err-caracter').split('{c}').join(c).replace('{pos}', i));
     }
     return tokens;
   }
@@ -382,8 +515,8 @@
   Parser.prototype.peek = function(){ return this.pos < this.tokens.length ? this.tokens[this.pos] : [null,null]; };
   Parser.prototype.advance = function(){ return this.tokens[this.pos++]; };
   Parser.prototype.expect = function(tt){
-    var t = this.peek();
-    if(t[0] !== tt) throw new Error('Se esperaba "'+tt+'" y se encontró "'+(t[1]||'fin de la fórmula')+'". Revisá que los paréntesis estén balanceados.');
+    var tok = this.peek();
+    if(tok[0] !== tt) throw new Error(t('err-esperaba-token').replace('{tt}', tt).replace('{encontrado}', tok[1]||t('fin-formula')));
     return this.advance();
   };
   Parser.prototype.parseArglist = function(){
@@ -456,7 +589,7 @@
       this.advance();
       var inner = this.parseArglist();
       this.expect('RPAREN');
-      if(inner.length !== 1) throw new Error('Paréntesis de agrupación con separador inesperado dentro.');
+      if(inner.length !== 1) throw new Error(window.t('err-parentesis-agrupacion'));
       return {type:'Group', item:inner[0]};
     }
     if(t[0]==='NAME'){
@@ -475,7 +608,7 @@
       }
       return {type:'Atom', value:name};
     }
-    throw new Error('No se pudo interpretar la fórmula cerca del token #'+this.pos+' (¿falta un operador o un paréntesis?).');
+    throw new Error(window.t('err-no-interpretar').replace('{n}', this.pos));
   };
 
   function compactNode(node, sep){
@@ -517,22 +650,22 @@
     var s = raw.trim();
     var prefix = '';
     if(s[0] === '='){ prefix = '='; s = s.slice(1).trim(); }
-    if(!s) throw new Error('No hay ninguna expresión después del "=".');
+    if(!s) throw new Error(window.t('err-sin-expresion'));
     var tokens = tokenize(s, opts.sep);
-    if(tokens.length === 0) throw new Error('No hay nada que formatear.');
+    if(tokens.length === 0) throw new Error(window.t('err-nada-formatear'));
     var parser = new Parser(tokens);
     var args = parser.parseArglist();
     if(parser.pos !== parser.tokens.length){
-      throw new Error('Sobran caracteres al final de la fórmula — revisá los paréntesis o si el separador elegido ('+opts.sep+') es el correcto.');
+      throw new Error(window.t('err-sobran-caracteres').replace('{sep}', opts.sep));
     }
     if(args.length !== 1){
-      throw new Error('Se encontraron '+args.length+' expresiones sueltas de nivel superior; una fórmula válida tiene una sola.');
+      throw new Error(window.t('err-varias-expresiones').replace('{n}', args.length));
     }
     var tree = args[0];
     var canonicalFromTree = compactNode(tree, opts.sep);
     var canonicalFromTokens = tokens.map(function(t){ return t[1]; }).join('');
     if(canonicalFromTree !== canonicalFromTokens){
-      throw new Error('La verificación de integridad falló: el árbol reconstruido no coincide con la fórmula original. No se aplicó ningún formato, por seguridad.');
+      throw new Error(window.t('err-integridad'));
     }
     var formattedBody = prettyNode(tree, 0, opts.sep, opts.indentUnit, opts.maxWidth);
     return {
@@ -585,6 +718,10 @@
   var segButtons = Array.prototype.slice.call(document.querySelectorAll('.fmt-seg-btn'));
   var EXCEL_LIMIT = 8192;
 
+  function numeroLocalizado(n){
+    return n.toLocaleString(window.t('locale-numero'));
+  }
+
   function setBadge(kind, text){
     badgeEl.className = 'fmt-badge' + (kind ? ' '+kind : '');
     badgeEl.textContent = text;
@@ -594,19 +731,19 @@
     var ejemplo = document.getElementById('ejemplo-formula').textContent.trim();
     try{
       var resultado = formatFormula(ejemplo, state);
-      outputEl.innerHTML = '<div class="fmt-preview-etiqueta">👀 Ejemplo — escribí tu fórmula para reemplazarlo</div>'
+      outputEl.innerHTML = '<div class="fmt-preview-etiqueta">' + window.t('placeholder-ejemplo') + '</div>'
         + '<div class="fmt-preview-contenido">' + highlight(resultado.formatted) + '</div>';
-      setBadge('', 'Mostrando ejemplo');
-      statCanonical.textContent = resultado.canonical.length.toLocaleString('es-CR');
-      statFormatted.textContent = resultado.formatted.length.toLocaleString('es-CR');
+      setBadge('', window.t('badge-mostrando-ejemplo'));
+      statCanonical.textContent = numeroLocalizado(resultado.canonical.length);
+      statFormatted.textContent = numeroLocalizado(resultado.formatted.length);
       var fmtPct = Math.min(100, (resultado.formatted.length/EXCEL_LIMIT)*100);
       var canonPct = Math.min(100, (resultado.canonical.length/EXCEL_LIMIT)*100);
       gaugeFill.style.width = fmtPct+'%';
       gaugeFill.classList.remove('over');
       gaugeMarker.style.left = canonPct+'%';
     }catch(err){
-      outputEl.innerHTML = '<span class="placeholder">// pegá una fórmula arriba para empezar</span>';
-      setBadge('', 'Esperando fórmula');
+      outputEl.innerHTML = '<span class="placeholder">' + window.t('placeholder-vacio') + '</span>';
+      setBadge('', window.t('badge-esperando'));
       statCanonical.textContent = '—';
       statFormatted.textContent = '—';
       gaugeFill.style.width = '0%';
@@ -628,14 +765,14 @@
       var result = formatFormula(raw, state);
       outputEl.innerHTML = highlight(result.formatted);
       errorBanner.hidden = true;
-      setBadge('ok', 'Estructura verificada');
+      setBadge('ok', window.t('badge-verificada'));
       lastFormattedText = result.formatted;
       btnCopy.disabled = false;
 
       var canonLen = result.canonical.length;
       var fmtLen = result.formatted.length;
-      statCanonical.textContent = canonLen.toLocaleString('es-CR');
-      statFormatted.textContent = fmtLen.toLocaleString('es-CR');
+      statCanonical.textContent = numeroLocalizado(canonLen);
+      statFormatted.textContent = numeroLocalizado(fmtLen);
 
       var fmtPct = Math.min(100, (fmtLen/EXCEL_LIMIT)*100);
       var canonPct = Math.min(100, (canonLen/EXCEL_LIMIT)*100);
@@ -645,14 +782,14 @@
 
       if(fmtLen > EXCEL_LIMIT){
         errorBanner.hidden = false;
-        errorBanner.textContent = 'La versión formateada ('+fmtLen.toLocaleString('es-CR')+' caracteres) supera el límite de Excel. Reducí la sangría o aumentá el ancho antes de partir línea.';
-        setBadge('error', 'Supera el límite de Excel');
+        errorBanner.textContent = window.t('aviso-supera-limite').replace('{n}', numeroLocalizado(fmtLen));
+        setBadge('error', window.t('badge-supera-limite'));
       }
     }catch(err){
-      outputEl.innerHTML = '<span class="placeholder">// no se pudo formatear</span>';
+      outputEl.innerHTML = '<span class="placeholder">' + window.t('placeholder-no-formateado') + '</span>';
       errorBanner.hidden = false;
       errorBanner.textContent = err.message;
-      setBadge('error', 'Error de sintaxis');
+      setBadge('error', window.t('badge-error-sintaxis'));
       statCanonical.textContent = '—';
       statFormatted.textContent = '—';
       gaugeFill.style.width = '0%';
@@ -708,11 +845,11 @@
     if(!lastFormattedText) return;
     navigator.clipboard.writeText(lastFormattedText).then(function(){
       var original = btnCopy.textContent;
-      btnCopy.textContent = '¡Copiado!';
+      btnCopy.textContent = window.t('boton-copiado');
       setTimeout(function(){ btnCopy.textContent = original; }, 1400);
     }).catch(function(){
-      btnCopy.textContent = 'No se pudo copiar';
-      setTimeout(function(){ btnCopy.textContent = 'Copiar'; }, 1400);
+      btnCopy.textContent = window.t('boton-no-copiado');
+      setTimeout(function(){ btnCopy.textContent = window.t('boton-copiar'); }, 1400);
     });
   });
 
@@ -730,6 +867,10 @@
 
   inputEl.placeholder = document.getElementById('ejemplo-formula').textContent.trim();
   runFormat();
+
+  document.addEventListener('cambioIdioma', function () {
+    if (!inputEl.value.trim()) runFormat();
+  });
 })();
 </script>
 <script src="../assets/js/tema.js"></script>

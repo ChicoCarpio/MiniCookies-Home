@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir PowerPoint a imágenes gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Exportá cada diapositiva de una presentación PowerPoint (.pptx) como imagen PNG, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir PowerPoint a imágenes gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Exportá cada diapositiva de una presentación PowerPoint (.pptx) como imagen PNG, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -23,6 +23,46 @@
     background: #fff;
   }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PowerPoint a imágenes gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Exportá cada diapositiva de una presentación PowerPoint (.pptx) como imagen PNG, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'PowerPoint a imágenes',
+    'intro': 'Elegí un archivo .pptx y descargá cada diapositiva como imagen PNG, dentro de un .zip.',
+    'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
+    'boton-convertir': 'Convertir a imágenes',
+    'boton-convertir-procesando': 'Convirtiendo...',
+    'progreso-renderizando': 'Renderizando diapositivas...',
+    'progreso-zip': 'Generando .zip...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar .zip con las imágenes',
+    'limites-titulo': 'Límites conocidos',
+    'limites-antes': 'Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse distinto. Si no se puede renderizar el diseño visual, se avisa el error en vez de generar imágenes en blanco — para el texto de todas formas está ',
+    'limites-enlace': 'Extraer texto de PowerPoint',
+    'limites-final': '.',
+    'error-renderizar': 'No se pudo renderizar las diapositivas'
+  },
+  en: {
+    'titulo-pagina': 'Convert PowerPoint to Images Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Export each slide of a PowerPoint presentation (.pptx) as a PNG image, free and without uploading your file anywhere.',
+    'h1': 'PowerPoint to images',
+    'intro': 'Pick a .pptx file and download each slide as a PNG image, inside a .zip.',
+    'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
+    'boton-convertir': 'Convert to images',
+    'boton-convertir-procesando': 'Converting...',
+    'progreso-renderizando': 'Rendering slides...',
+    'progreso-zip': 'Generating .zip...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download .zip with the images',
+    'limites-titulo': 'Known limits',
+    'limites-antes': 'Since this runs 100% in your browser (not in real PowerPoint), the result may not be 100% faithful to the original — slides with very complex designs, animations or unusual elements may look different. If the visual design can’t be rendered, the error is reported instead of generating blank images — for the text there’s also ',
+    'limites-enlace': 'Extract text from PowerPoint',
+    'limites-final': '.',
+    'error-renderizar': 'Couldn’t render the slides'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -30,50 +70,51 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>PowerPoint a imágenes</h1>
-  <p>Elegí un archivo .pptx y descargá cada diapositiva como imagen PNG, dentro de un .zip.</p>
+  <h1 data-i18n="h1">PowerPoint a imágenes</h1>
+  <p data-i18n="intro">Elegí un archivo .pptx y descargá cada diapositiva como imagen PNG, dentro de un .zip.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".pptx" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonConvertir" disabled>Convertir a imágenes</button>
+      <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir a imágenes</button>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
     <div class="vista-previa-diapositivas" id="vistaPreviaDiapositivas"></div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="diapositivas.zip">Descargar .zip con las imágenes</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="diapositivas.zip" data-i18n="resultado-enlace">Descargar .zip con las imágenes</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <h3 style="margin-top:0;" data-i18n="limites-titulo">Límites conocidos</h3>
     <p style="color:var(--texto-suave);">
-      Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al
+      <span data-i18n="limites-antes">Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al
       original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse
       distinto. Si no se puede renderizar el diseño visual, se avisa el error en vez de generar imágenes en
-      blanco — para el texto de todas formas está <a href="extraer-texto-powerpoint.html">Extraer texto de PowerPoint</a>.
+      blanco — para el texto de todas formas está </span><a href="extraer-texto-powerpoint.html" data-i18n="limites-enlace">Extraer texto de PowerPoint</a><span data-i18n="limites-final">.</span>
     </p>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <canvas id="canvasRender" style="display:none;"></canvas>
@@ -126,9 +167,9 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
-  botonConvertir.textContent = 'Convirtiendo...';
+  botonConvertir.textContent = t('boton-convertir-procesando');
   progreso.style.display = 'block';
-  progreso.textContent = 'Renderizando diapositivas...';
+  progreso.textContent = t('progreso-renderizando');
   try {
     const canvasRender = document.getElementById('canvasRender');
     const imagenes = await renderizarDiapositivasComoImagenes(archivoActual, canvasRender);
@@ -139,20 +180,21 @@ botonConvertir.addEventListener('click', async () => {
       vistaPreviaDiapositivas.appendChild(img);
     });
 
-    progreso.textContent = 'Generando .zip...';
+    progreso.textContent = t('progreso-zip');
     const blobZip = await construirZipDesdeImagenes(imagenes);
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo renderizar las diapositivas: ' + error.message);
+    alert(t('error-renderizar') + ': ' + error.message);
   } finally {
     botonConvertir.disabled = false;
-    botonConvertir.textContent = 'Convertir a imágenes';
+    botonConvertir.textContent = t('boton-convertir');
     progreso.style.display = 'none';
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

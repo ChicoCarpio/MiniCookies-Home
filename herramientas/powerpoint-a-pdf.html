@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir PowerPoint a PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí una presentación PowerPoint (.pptx) a PDF, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir PowerPoint a PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí una presentación PowerPoint (.pptx) a PDF, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -23,6 +23,62 @@
     background: #fff;
   }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PowerPoint a PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí una presentación PowerPoint (.pptx) a PDF, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'PowerPoint a PDF',
+    'intro': 'Elegí un archivo .pptx. Primero se intenta reproducir las diapositivas reales; si no se puede, se genera igual un PDF con el texto.',
+    'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
+    'boton-procesar': 'Convertir a PDF',
+    'boton-procesar-generando': 'Generando...',
+    'mensaje-listo': '✅ Listo.',
+    'resultado-enlace': 'Descargar PDF',
+    'resultado-enlace-imagenes': 'Descargar imágenes (.zip)',
+    'limitaciones-titulo': 'Limitaciones',
+    'item1': 'Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes) y armar el PDF con eso — también se pueden descargar esas imágenes sueltas en un .zip.',
+    'item2-antes': 'Si el archivo no se puede renderizar bien, se genera igual un PDF con el ',
+    'item2-enfasis': 'texto de cada diapositiva',
+    'item2-medio': ' en vez de fallar (se avisa cuál de los dos resultó). Si solo te interesa el texto, también está ',
+    'item2-enlace': 'Extraer texto de PowerPoint',
+    'item2-final': '.',
+    'item3': 'Nota: como esto corre 100% en tu navegador (no en un servicio especializado en un servidor, como PowerPoint o LibreOffice reales), el resultado puede no ser 100% fiel al original — diapositivas con diseños complejos, animaciones o elementos poco comunes pueden verse distinto.',
+    'progreso-renderizando': 'Renderizando diapositivas...',
+    'progreso-zip': 'Generando .zip de imágenes...',
+    'mensaje-visual-ok': '✅ Listo — se generó el PDF con las diapositivas reales.',
+    'progreso-solo-texto': 'No se pudo renderizar visualmente. Generando PDF de solo texto...',
+    'mensaje-solo-texto': '⚠️ No se pudo renderizar el diseño visual de las diapositivas — el PDF generado tiene solo el texto.',
+    'error-generar': 'No se pudo generar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Convert PowerPoint to PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert a PowerPoint presentation (.pptx) to PDF, free and without uploading your file anywhere.',
+    'h1': 'PowerPoint to PDF',
+    'intro': 'Pick a .pptx file. We first try to reproduce the real slides; if that fails, a text-only PDF is generated anyway.',
+    'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
+    'boton-procesar': 'Convert to PDF',
+    'boton-procesar-generando': 'Generating...',
+    'mensaje-listo': '✅ Done.',
+    'resultado-enlace': 'Download PDF',
+    'resultado-enlace-imagenes': 'Download images (.zip)',
+    'limitaciones-titulo': 'Limitations',
+    'item1': 'We first try to render the real slides (text, shapes, images) and build the PDF from that — those images can also be downloaded separately as a .zip.',
+    'item2-antes': 'If the file can’t be rendered well, a PDF is generated anyway with the ',
+    'item2-enfasis': 'text of each slide',
+    'item2-medio': ' instead of failing (you’ll be told which of the two happened). If you’re only after the text, there’s also ',
+    'item2-enlace': 'Extract text from PowerPoint',
+    'item2-final': '.',
+    'item3': 'Note: since this runs 100% in your browser (not on a specialized server service, like real PowerPoint or LibreOffice), the result may not be 100% faithful to the original — slides with complex designs, animations or unusual elements may look different.',
+    'progreso-renderizando': 'Rendering slides...',
+    'progreso-zip': 'Generating image .zip...',
+    'mensaje-visual-ok': '✅ Done — the PDF was generated with the real slides.',
+    'progreso-solo-texto': 'Couldn’t render it visually. Generating text-only PDF...',
+    'mensaje-solo-texto': '⚠️ Couldn’t render the slides’ visual design — the generated PDF has only the text.',
+    'error-generar': 'Couldn’t generate the PDF'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -30,52 +86,53 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>PowerPoint a PDF</h1>
-  <p>Elegí un archivo .pptx. Primero se intenta reproducir las diapositivas reales; si no se puede, se genera igual un PDF con el texto.</p>
+  <h1 data-i18n="h1">PowerPoint a PDF</h1>
+  <p data-i18n="intro">Elegí un archivo .pptx. Primero se intenta reproducir las diapositivas reales; si no se puede, se genera igual un PDF con el texto.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".pptx" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonProcesar" disabled>Convertir a PDF</button>
+      <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Convertir a PDF</button>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
     <div class="vista-previa-diapositivas" id="vistaPreviaDiapositivas"></div>
 
     <div class="resultado" id="resultado">
-      <span id="mensajeResultado">✅ Listo.</span>
-      <a id="enlaceDescarga" download="presentacion.pdf">Descargar PDF</a>
+      <span id="mensajeResultado" data-i18n="mensaje-listo">✅ Listo.</span>
+      <a id="enlaceDescarga" download="presentacion.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
       <span id="separadorDescargas" style="display:none;"> · </span>
-      <a id="enlaceDescargaImagenes" download="diapositivas.zip" style="display:none;">Descargar imágenes (.zip)</a>
+      <a id="enlaceDescargaImagenes" download="diapositivas.zip" style="display:none;" data-i18n="resultado-enlace-imagenes">Descargar imágenes (.zip)</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes) y armar el PDF con eso — también se pueden descargar esas imágenes sueltas en un .zip.</li>
-      <li>Si el archivo no se puede renderizar bien, se genera igual un PDF con el <strong>texto de cada diapositiva</strong> en vez de fallar (se avisa cuál de los dos resultó). Si solo te interesa el texto, también está <a href="extraer-texto-powerpoint.html">Extraer texto de PowerPoint</a>.</li>
-      <li><em>Nota: como esto corre 100% en tu navegador (no en un servicio especializado en un servidor, como PowerPoint o LibreOffice reales), el resultado puede no ser 100% fiel al original — diapositivas con diseños complejos, animaciones o elementos poco comunes pueden verse distinto.</em></li>
+      <li data-i18n="item1">Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes) y armar el PDF con eso — también se pueden descargar esas imágenes sueltas en un .zip.</li>
+      <li><span data-i18n="item2-antes">Si el archivo no se puede renderizar bien, se genera igual un PDF con el </span><strong data-i18n="item2-enfasis">texto de cada diapositiva</strong><span data-i18n="item2-medio"> en vez de fallar (se avisa cuál de los dos resultó). Si solo te interesa el texto, también está </span><a href="extraer-texto-powerpoint.html" data-i18n="item2-enlace">Extraer texto de PowerPoint</a><span data-i18n="item2-final">.</span></li>
+      <li><em data-i18n="item3">Nota: como esto corre 100% en tu navegador (no en un servicio especializado en un servidor, como PowerPoint o LibreOffice reales), el resultado puede no ser 100% fiel al original — diapositivas con diseños complejos, animaciones o elementos poco comunes pueden verse distinto.</em></li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <canvas id="canvasRender" style="display:none;"></canvas>
@@ -135,14 +192,14 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonProcesar.addEventListener('click', async () => {
   botonProcesar.disabled = true;
-  botonProcesar.textContent = 'Generando...';
+  botonProcesar.textContent = t('boton-procesar-generando');
   progreso.style.display = 'none';
-  mensajeResultado.textContent = '✅ Listo.';
+  mensajeResultado.textContent = t('mensaje-listo');
   try {
     let pdf;
     try {
       progreso.style.display = 'block';
-      progreso.textContent = 'Renderizando diapositivas...';
+      progreso.textContent = t('progreso-renderizando');
       const canvasRender = document.getElementById('canvasRender');
       const imagenes = await renderizarDiapositivasComoImagenes(archivoActual, canvasRender);
       pdf = await construirPdfDesdeImagenes(imagenes);
@@ -153,18 +210,18 @@ botonProcesar.addEventListener('click', async () => {
         vistaPreviaDiapositivas.appendChild(img);
       });
 
-      progreso.textContent = 'Generando .zip de imágenes...';
+      progreso.textContent = t('progreso-zip');
       const blobZip = await construirZipDesdeImagenes(imagenes);
       enlaceDescargaImagenes.href = URL.createObjectURL(blobZip);
       enlaceDescargaImagenes.style.display = 'inline';
       separadorDescargas.style.display = 'inline';
-      mensajeResultado.textContent = '✅ Listo — se generó el PDF con las diapositivas reales.';
+      mensajeResultado.textContent = t('mensaje-visual-ok');
     } catch (errorVisual) {
       console.warn('No se pudo renderizar el PowerPoint visualmente, se usa solo texto:', errorVisual);
-      progreso.textContent = 'No se pudo renderizar visualmente. Generando PDF de solo texto...';
+      progreso.textContent = t('progreso-solo-texto');
       const texto = await extraerTextoPowerPoint(archivoActual);
       pdf = await generarPdfDeTexto(texto);
-      mensajeResultado.textContent = '⚠️ No se pudo renderizar el diseño visual de las diapositivas — el PDF generado tiene solo el texto.';
+      mensajeResultado.textContent = t('mensaje-solo-texto');
     }
 
     const bytesFinales = await pdf.save();
@@ -173,15 +230,16 @@ botonProcesar.addEventListener('click', async () => {
     enlaceDescarga.download = archivoActual.name.replace(/\.pptx$/i, '') + '.pdf';
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el PDF: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonProcesar.disabled = false;
-    botonProcesar.textContent = 'Convertir a PDF';
+    botonProcesar.textContent = t('boton-procesar');
     progreso.style.display = 'none';
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

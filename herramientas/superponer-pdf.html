@@ -3,12 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Superponer PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Superponé un PDF sobre otro (por ejemplo una plantilla o membrete) página por página, gratis y sin subir tus archivos a ningún servidor.">
+<title data-i18n="titulo-pagina">Superponer PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Superponé un PDF sobre otro (por ejemplo una plantilla o membrete) página por página, gratis y sin subir tus archivos a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Superponer PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Superponé un PDF sobre otro (por ejemplo una plantilla o membrete) página por página, gratis y sin subir tus archivos a ningún servidor.',
+    'h1': 'Superponer PDF',
+    'intro': 'Elegí un PDF base y un PDF de superposición (ej. una plantilla o membrete). Cada página del PDF base recibe encima la página correspondiente del PDF de superposición. Si el de superposición tiene menos páginas, se repite la última.',
+    'campo-base': 'PDF base (el contenido)',
+    'zona-base': '📄 Arrastrá el PDF base acá o hacé clic para elegirlo',
+    'campo-overlay': 'PDF de superposición (la plantilla/membrete)',
+    'zona-overlay': '📄 Arrastrá el PDF de superposición acá o hacé clic para elegirlo',
+    'boton-superponer': 'Superponer PDFs',
+    'boton-superponer-procesando': 'Superponiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF resultante',
+    'error-superponer': 'No se pudo superponer los PDFs'
+  },
+  en: {
+    'titulo-pagina': 'Overlay PDFs Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Overlay one PDF on top of another (e.g. a template or letterhead) page by page, free and without uploading your files anywhere.',
+    'h1': 'Overlay PDF',
+    'intro': 'Pick a base PDF and an overlay PDF (e.g. a template or letterhead). Each page of the base PDF gets the matching page of the overlay PDF drawn on top of it. If the overlay has fewer pages, its last page repeats.',
+    'campo-base': 'Base PDF (the content)',
+    'zona-base': '📄 Drag the base PDF here or click to choose it',
+    'campo-overlay': 'Overlay PDF (the template/letterhead)',
+    'zona-overlay': '📄 Drag the overlay PDF here or click to choose it',
+    'boton-superponer': 'Overlay PDFs',
+    'boton-superponer-procesando': 'Overlaying...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download resulting PDF',
+    'error-superponer': 'Couldn’t overlay the PDFs'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,48 +50,49 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Superponer PDF</h1>
-  <p>Elegí un PDF base y un PDF de superposición (ej. una plantilla o membrete). Cada página del PDF base recibe encima la página correspondiente del PDF de superposición. Si el de superposición tiene menos páginas, se repite la última.</p>
+  <h1 data-i18n="h1">Superponer PDF</h1>
+  <p data-i18n="intro">Elegí un PDF base y un PDF de superposición (ej. una plantilla o membrete). Cada página del PDF base recibe encima la página correspondiente del PDF de superposición. Si el de superposición tiene menos páginas, se repite la última.</p>
 
   <div class="panel-herramienta">
     <label class="campo" style="margin-bottom:16px;">
-      PDF base (el contenido)
+      <span data-i18n="campo-base">PDF base (el contenido)</span>
       <div class="zona-arrastre" id="zonaBase" style="padding:20px;">
-        📄 Arrastrá el PDF base acá o hacé clic para elegirlo
+        <span data-i18n="zona-base">📄 Arrastrá el PDF base acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaBase" accept="application/pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaBase"></div>
     </label>
 
     <label class="campo">
-      PDF de superposición (la plantilla/membrete)
+      <span data-i18n="campo-overlay">PDF de superposición (la plantilla/membrete)</span>
       <div class="zona-arrastre" id="zonaOverlay" style="padding:20px;">
-        📄 Arrastrá el PDF de superposición acá o hacé clic para elegirlo
+        <span data-i18n="zona-overlay">📄 Arrastrá el PDF de superposición acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaOverlay" accept="application/pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaOverlay"></div>
     </label>
 
     <div class="controles">
-      <button class="boton" id="botonSuperponer" disabled>Superponer PDFs</button>
+      <button class="boton" id="botonSuperponer" disabled data-i18n="boton-superponer">Superponer PDFs</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-superpuesto.pdf">Descargar PDF resultante</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-superpuesto.pdf" data-i18n="resultado-enlace">Descargar PDF resultante</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -80,9 +115,9 @@ function configurarZona(idZona, idEntrada, idLista, onElegido) {
     lista.innerHTML = '';
     try {
       const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-      lista.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+      lista.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
     } catch (error) {
-      lista.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+      lista.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
     }
     onElegido(archivo);
   }
@@ -112,7 +147,7 @@ configurarZona('zonaOverlay', 'entradaOverlay', 'listaOverlay', (archivo) => { a
 
 botonSuperponer.addEventListener('click', async () => {
   botonSuperponer.disabled = true;
-  botonSuperponer.textContent = 'Superponiendo...';
+  botonSuperponer.textContent = t('boton-superponer-procesando');
   try {
     const { PDFDocument } = PDFLib;
     const bytesBase = await archivoBase.arrayBuffer();
@@ -135,14 +170,15 @@ botonSuperponer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo superponer los PDFs: ' + error.message);
+    alert(t('error-superponer') + ': ' + error.message);
   } finally {
     botonSuperponer.disabled = false;
-    botonSuperponer.textContent = 'Superponer PDFs';
+    botonSuperponer.textContent = t('boton-superponer');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

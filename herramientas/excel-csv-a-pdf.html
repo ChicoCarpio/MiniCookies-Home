@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir Excel o CSV a PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Exportá una hoja de Excel o un CSV como tabla PDF lista para imprimir, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir Excel o CSV a PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Exportá una hoja de Excel o un CSV como tabla PDF lista para imprimir, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -22,6 +22,78 @@
   table.tabla-datos tr.fila-par { background: var(--superficie-alt); }
   table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir Excel o CSV a PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Exportá una hoja de Excel o un CSV como tabla PDF lista para imprimir, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Excel / CSV a PDF',
+    'intro': 'Elegí un archivo y lo convertimos en una tabla PDF, lista para imprimir o compartir. Las columnas y filas completamente vacías se omiten, y se conserva negrita, cursiva, subrayado y color de texto de las celdas cuando el archivo los tiene (no se replican fuentes personalizadas, bordes ni tamaños de letra por celda). Si el archivo tiene gráficos, se agregan como páginas extra después de la tabla, reconstruidos a partir de sus datos — el estilo puede no ser idéntico al del original. No se incluyen imágenes embebidas.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)',
+    'campo-hoja': 'Hoja',
+    'campo-orientacion': 'Orientación',
+    'opcion-vertical': 'Vertical',
+    'opcion-horizontal': 'Horizontal (más columnas)',
+    'campo-tamano': 'Tamaño de página',
+    'opcion-a4': 'A4',
+    'opcion-carta': 'Carta (Letter)',
+    'opcion-legal': 'Legal',
+    'opcion-oficio': 'Oficio',
+    'campo-fuente': 'Tamaño de letra',
+    'opcion-chico': 'Chico',
+    'opcion-mediano': 'Mediano',
+    'opcion-grande': 'Grande',
+    'boton-convertir': 'Generar PDF',
+    'boton-convertir-generando': 'Generando...',
+    'vista-previa-titulo': 'Vista previa',
+    'vista-previa-desc': 'Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF',
+    'sin-datos': 'No hay datos para mostrar (la hoja está vacía o todas sus filas/columnas están vacías).',
+    'aviso-graficos': '📊 Esta hoja tiene {n} gráfico{s} — se van a agregar como páginas extra después de la tabla.',
+    'aviso-columnas': '⚠️ Tenés {n} columnas — el texto puede quedar muy recortado. Probá "Horizontal" o letra "Chica".',
+    'error-sin-datos': 'La hoja no tiene datos.',
+    'error-generar': 'No se pudo generar el PDF',
+    'serie-defecto': 'Serie {n}',
+    'leyenda-tipo-no-soportado': ' (tipo de gráfico no soportado — mostrado como barras)',
+    'leyenda-grafico': 'Gráfico{titulo}, celda {celda} de "{hoja}"{tipo} — reconstruido a partir de los datos, el estilo puede no ser idéntico al original'
+  },
+  en: {
+    'titulo-pagina': 'Convert Excel or CSV to PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Export an Excel sheet or a CSV as a print-ready PDF table, free and without uploading your file anywhere.',
+    'h1': 'Excel / CSV to PDF',
+    'intro': 'Pick a file and we’ll convert it into a PDF table, ready to print or share. Completely empty columns and rows are skipped, and bold, italics, underline and text color are kept when the file has them (custom fonts, borders and per-cell font sizes aren’t replicated). If the file has charts, they’re added as extra pages after the table, rebuilt from their data — the style may not be identical to the original. Embedded images aren’t included.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv)',
+    'campo-hoja': 'Sheet',
+    'campo-orientacion': 'Orientation',
+    'opcion-vertical': 'Portrait',
+    'opcion-horizontal': 'Landscape (more columns)',
+    'campo-tamano': 'Page size',
+    'opcion-a4': 'A4',
+    'opcion-carta': 'Letter',
+    'opcion-legal': 'Legal',
+    'opcion-oficio': 'Oficio',
+    'campo-fuente': 'Font size',
+    'opcion-chico': 'Small',
+    'opcion-mediano': 'Medium',
+    'opcion-grande': 'Large',
+    'boton-convertir': 'Generate PDF',
+    'boton-convertir-generando': 'Generating...',
+    'vista-previa-titulo': 'Preview',
+    'vista-previa-desc': 'This is what will be converted to PDF (already without empty rows/columns, with bold/italics/underline/color when the file has them).',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download PDF',
+    'sin-datos': 'No data to show (the sheet is empty or all its rows/columns are empty).',
+    'aviso-graficos': '📊 This sheet has {n} chart{s} — they’ll be added as extra pages after the table.',
+    'aviso-columnas': '⚠️ You have {n} columns — the text may end up very cropped. Try "Landscape" or "Small" font size.',
+    'error-sin-datos': 'The sheet has no data.',
+    'error-generar': 'Couldn’t generate the PDF',
+    'serie-defecto': 'Series {n}',
+    'leyenda-tipo-no-soportado': ' (chart type not supported — shown as bars)',
+    'leyenda-grafico': 'Chart{titulo}, cell {celda} of "{hoja}"{tipo} — rebuilt from the data, the style may not be identical to the original'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -29,17 +101,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Excel / CSV a PDF</h1>
-  <p>Elegí un archivo y lo convertimos en una tabla PDF, lista para imprimir o compartir. Las columnas y filas completamente vacías se omiten, y se conserva negrita, cursiva, subrayado y color de texto de las celdas cuando el archivo los tiene (no se replican fuentes personalizadas, bordes ni tamaños de letra por celda). Si el archivo tiene gráficos, se agregan como páginas extra después de la tabla, reconstruidos a partir de sus datos — el estilo puede no ser idéntico al del original. No se incluyen imágenes embebidas.</p>
+  <h1 data-i18n="h1">Excel / CSV a PDF</h1>
+  <p data-i18n="intro">Elegí un archivo y lo convertimos en una tabla PDF, lista para imprimir o compartir. Las columnas y filas completamente vacías se omiten, y se conserva negrita, cursiva, subrayado y color de texto de las celdas cuando el archivo los tiene (no se replican fuentes personalizadas, bordes ni tamaños de letra por celda). Si el archivo tiene gráficos, se agregan como páginas extra después de la tabla, reconstruidos a partir de sus datos — el estilo puede no ser idéntico al del original. No se incluyen imágenes embebidas.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
     </div>
 
@@ -47,39 +120,39 @@
 
     <div class="controles" id="controles" style="display:none;">
       <label class="campo" id="campoHoja" style="display:none;">
-        Hoja
+        <span data-i18n="campo-hoja">Hoja</span>
         <select id="selectorHoja"></select>
       </label>
       <label class="campo">
-        Orientación
+        <span data-i18n="campo-orientacion">Orientación</span>
         <select id="orientacion">
-          <option value="vertical">Vertical</option>
-          <option value="horizontal">Horizontal (más columnas)</option>
+          <option value="vertical" data-i18n="opcion-vertical">Vertical</option>
+          <option value="horizontal" data-i18n="opcion-horizontal">Horizontal (más columnas)</option>
         </select>
       </label>
       <label class="campo">
-        Tamaño de página
+        <span data-i18n="campo-tamano">Tamaño de página</span>
         <select id="tamanoPagina">
-          <option value="a4" selected>A4</option>
-          <option value="carta">Carta (Letter)</option>
-          <option value="legal">Legal</option>
-          <option value="oficio">Oficio</option>
+          <option value="a4" selected data-i18n="opcion-a4">A4</option>
+          <option value="carta" data-i18n="opcion-carta">Carta (Letter)</option>
+          <option value="legal" data-i18n="opcion-legal">Legal</option>
+          <option value="oficio" data-i18n="opcion-oficio">Oficio</option>
         </select>
       </label>
       <label class="campo">
-        Tamaño de letra
+        <span data-i18n="campo-fuente">Tamaño de letra</span>
         <select id="tamanoFuente">
-          <option value="7">Chico</option>
-          <option value="9" selected>Mediano</option>
-          <option value="11">Grande</option>
+          <option value="7" data-i18n="opcion-chico">Chico</option>
+          <option value="9" selected data-i18n="opcion-mediano">Mediano</option>
+          <option value="11" data-i18n="opcion-grande">Grande</option>
         </select>
       </label>
-      <button class="boton" id="botonConvertir" type="button">Generar PDF</button>
+      <button class="boton" id="botonConvertir" type="button" data-i18n="boton-convertir">Generar PDF</button>
     </div>
 
     <div id="bloqueVistaPrevia" style="display:none;">
-      <h2 style="font-size:1.05rem; margin:20px 0 0;">Vista previa</h2>
-      <p style="color:var(--texto-suave); margin:4px 0 0;">Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).</p>
+      <h2 style="font-size:1.05rem; margin:20px 0 0;" data-i18n="vista-previa-titulo">Vista previa</h2>
+      <p style="color:var(--texto-suave); margin:4px 0 0;" data-i18n="vista-previa-desc">Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).</p>
       <p id="avisoObjetosHoja" style="color:var(--texto-suave); margin:4px 0 0; display:none;"></p>
       <div class="contenedor-tabla" id="contenedorVistaPrevia"></div>
     </div>
@@ -87,16 +160,16 @@
     <p id="advertencia" style="color:#b45309; display:none;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="tabla.pdf">Descargar PDF</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="tabla.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -207,7 +280,7 @@ function mostrarVistaPrevia(matriz) {
   if (matriz.length === 0) {
     columnasVistaPrevia = [];
     filasVistaPrevia = [];
-    contenedorVistaPrevia.innerHTML = '<p style="padding:16px; color:var(--texto-suave);">No hay datos para mostrar (la hoja está vacía o todas sus filas/columnas están vacías).</p>';
+    contenedorVistaPrevia.innerHTML = `<p style="padding:16px; color:var(--texto-suave);">${t('sin-datos')}</p>`;
     return;
   }
 
@@ -266,7 +339,7 @@ async function actualizarAvisoObjetosHoja(nombreHoja) {
     if (!rutaHojaXml) return;
     const { graficos } = await objetosDeHoja(zip, rutaHojaXml);
     if (graficos.length === 0) return;
-    avisoObjetosHoja.textContent = `📊 Esta hoja tiene ${graficos.length} gráfico${graficos.length === 1 ? '' : 's'} — se van a agregar como páginas extra después de la tabla.`;
+    avisoObjetosHoja.textContent = t('aviso-graficos').replace('{n}', graficos.length).replace('{s}', graficos.length === 1 ? '' : 's');
     avisoObjetosHoja.style.display = 'block';
   } catch (error) {
     console.warn('No se pudo revisar si la hoja tiene gráficos:', error);
@@ -523,7 +596,7 @@ function nombreSerie(ser, indice) {
   const strRef = tx && primerHijoDirecto(tx, 'c:strRef');
   const cache = strRef && primerHijoDirecto(strRef, 'c:strCache');
   const valores = cache ? valoresDeCache(cache) : [];
-  return valores[0] || `Serie ${indice + 1}`;
+  return valores[0] || t('serie-defecto').replace('{n}', indice + 1);
 }
 
 function categoriasDe(ser) {
@@ -655,12 +728,12 @@ async function renderizarGraficoComoPng(datosGrafico) {
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
-  botonConvertir.textContent = 'Generando...';
+  botonConvertir.textContent = t('boton-convertir-generando');
   advertencia.style.display = 'none';
   try {
     const nombreHoja = campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
     const matriz = leerHojaConEstilos(libroActual.Sheets[nombreHoja]);
-    if (matriz.length === 0) throw new Error('La hoja no tiene datos.');
+    if (matriz.length === 0) throw new Error(t('error-sin-datos'));
 
     const encabezado = matriz[0];
     const cuerpoFilas = matriz.slice(1);
@@ -697,7 +770,7 @@ botonConvertir.addEventListener('click', async () => {
     const alturaFila = tamanoFuente * 2;
 
     if (anchoColumna < 25) {
-      advertencia.textContent = `⚠️ Tenés ${cantidadColumnas} columnas — el texto puede quedar muy recortado. Probá "Horizontal" o letra "Chica".`;
+      advertencia.textContent = t('aviso-columnas').replace('{n}', cantidadColumnas);
       advertencia.style.display = 'block';
     }
 
@@ -798,8 +871,12 @@ botonConvertir.addEventListener('click', async () => {
             if (!datos) continue;
             const bytesGrafico = await renderizarGraficoComoPng(datos);
             const imagenPdf = await pdf.embedPng(bytesGrafico);
-            const leyendaTipo = datos.soportado ? '' : ' (tipo de gráfico no soportado — mostrado como barras)';
-            const leyenda = `Gráfico${datos.titulo ? `: ${datos.titulo}` : ''}, celda ${grafico.celda || '?'} de "${nombreHoja}"${leyendaTipo} — reconstruido a partir de los datos, el estilo puede no ser idéntico al original`;
+            const leyendaTipo = datos.soportado ? '' : t('leyenda-tipo-no-soportado');
+            const leyenda = t('leyenda-grafico')
+              .replace('{titulo}', datos.titulo ? `: ${datos.titulo}` : '')
+              .replace('{celda}', grafico.celda || '?')
+              .replace('{hoja}', nombreHoja)
+              .replace('{tipo}', leyendaTipo);
             agregarPaginaConImagen(imagenPdf, leyenda);
           } catch (errorGrafico) {
             console.warn('No se pudo reconstruir un gráfico de la hoja:', errorGrafico);
@@ -816,14 +893,15 @@ botonConvertir.addEventListener('click', async () => {
     enlaceDescarga.download = `${nombreArchivoActual}.pdf`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el PDF: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonConvertir.disabled = false;
-    botonConvertir.textContent = 'Generar PDF';
+    botonConvertir.textContent = t('boton-convertir');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

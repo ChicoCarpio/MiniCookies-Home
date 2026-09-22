@@ -56,7 +56,7 @@ function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, 
     botonQuitar.className = 'quitar-pagina';
     botonQuitar.type = 'button';
     botonQuitar.textContent = '✕';
-    botonQuitar.title = 'Quitar';
+    botonQuitar.title = window.t ? t('quitar') : 'Quitar';
     botonQuitar.addEventListener('click', () => alQuitar && alQuitar());
     tarjeta.appendChild(botonQuitar);
   }
@@ -73,11 +73,16 @@ function crearSelectorVista(contenedor, claveAlmacenamiento) {
 
   const botonGrid = document.createElement('button');
   botonGrid.type = 'button';
-  botonGrid.textContent = '▦ Cuadrícula';
+  botonGrid.textContent = window.t ? t('vista-cuadricula') : '▦ Cuadrícula';
 
   const botonLista = document.createElement('button');
   botonLista.type = 'button';
-  botonLista.textContent = '☰ Lista';
+  botonLista.textContent = window.t ? t('vista-lista') : '☰ Lista';
+
+  document.addEventListener('cambioIdioma', function () {
+    botonGrid.textContent = t('vista-cuadricula');
+    botonLista.textContent = t('vista-lista');
+  });
 
   function aplicarVista(vista) {
     contenedor.classList.remove('vista-grid', 'vista-lista');

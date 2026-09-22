@@ -25,10 +25,10 @@ async function obtenerTamanoDiapositivaEmu(archivo) {
   const xmlTexto = await archivoPresentacion.async('string');
   const doc = new DOMParser().parseFromString(xmlTexto, 'application/xml');
   const sldSz = doc.getElementsByTagName('p:sldSz')[0];
-  if (!sldSz) throw new Error('No se pudo determinar el tamaño de las diapositivas.');
+  if (!sldSz) throw new Error(window.t ? t('ppt-sin-tamano') : 'No se pudo determinar el tamaño de las diapositivas.');
   const cx = parseInt(sldSz.getAttribute('cx'), 10);
   const cy = parseInt(sldSz.getAttribute('cy'), 10);
-  if (!cx || !cy) throw new Error('Tamaño de diapositiva inválido.');
+  if (!cx || !cy) throw new Error(window.t ? t('ppt-tamano-invalido') : 'Tamaño de diapositiva inválido.');
   return { cx, cy };
 }
 
@@ -92,7 +92,7 @@ async function renderizarDiapositivasComoImagenes(archivo, canvas) {
     // frenar acá y caer al respaldo de solo texto que arriesgar un PDF con
     // páginas ilegibles.
     if (canvas.width < anchoPxObjetivo * 0.5 || canvas.height < altoPxObjetivo * 0.5) {
-      throw new Error('El renderizado devolvió un tamaño de diapositiva inconsistente.');
+      throw new Error(window.t ? t('ppt-render-inconsistente') : 'El renderizado devolvió un tamaño de diapositiva inconsistente.');
     }
 
     if (canvasPareceVacio(canvas)) {

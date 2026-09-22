@@ -3,11 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Política de privacidad — Herramientas Ofimáticas</title>
+<title data-i18n="titulo-pagina">Política de privacidad — Herramientas Ofimáticas</title>
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Política de privacidad — Herramientas Ofimáticas',
+    'h1': 'Política de privacidad',
+    'sec1-titulo': 'Tus archivos nunca salen de tu computadora',
+    'sec1-antes': 'Todas las herramientas de este sitio procesan tus archivos y textos ',
+    'sec1-enfasis': 'directamente en tu navegador',
+    'sec1-despues': ', usando JavaScript. Ningún archivo, texto o contraseña que ingreses en una herramienta se sube, se envía ni se guarda en ningún servidor nuestro ni de terceros.',
+    'sec2-titulo': 'Qué datos sí se recopilan',
+    'sec2-p1': 'Este sitio puede mostrar publicidad de Google AdSense. Google, como todo proveedor de anuncios, puede usar cookies para mostrar anuncios relevantes según tu actividad de navegación. Podés controlar la personalización de anuncios desde',
+    'sec2-p1-enlace': 'la configuración de anuncios de Google',
+    'sec2-p2-antes': 'La única excepción a "nada sale de tu navegador" es la ',
+    'sec2-p2-enlace1': 'página de contacto',
+    'sec2-p2-medio': ': si completás y enviás ese formulario, el nombre, email y mensaje que escribas se envían al servicio externo ',
+    'sec2-p2-enlace2': 'Web3Forms',
+    'sec2-p2-final': ', que nos los reenvía por correo. Esto pasa únicamente si vos decidís enviar ese formulario — nunca al usar cualquiera de las herramientas.',
+    'sec2-p3': 'No usamos cuentas de usuario, no pedimos registro ni recolectamos datos personales para el funcionamiento de las herramientas.',
+    'sec3-titulo': 'Contacto',
+    'sec3-antes': 'Ante cualquier duda sobre esta política, podés escribirnos desde la ',
+    'sec3-enlace': 'página de contacto',
+    'sec3-final': '.',
+    'actualizado': 'Última actualización: 2026-09-13.'
+  },
+  en: {
+    'titulo-pagina': 'Privacy Policy — Herramientas Ofimáticas',
+    'h1': 'Privacy policy',
+    'sec1-titulo': 'Your files never leave your computer',
+    'sec1-antes': 'Every tool on this site processes your files and text ',
+    'sec1-enfasis': 'directly in your browser',
+    'sec1-despues': ', using JavaScript. No file, text or password you enter into a tool is uploaded, sent, or stored on any server of ours or anyone else’s.',
+    'sec2-titulo': 'What data we do collect',
+    'sec2-p1': 'This site may show ads from Google AdSense. Google, like any ad provider, may use cookies to show relevant ads based on your browsing activity. You can control ad personalization from',
+    'sec2-p1-enlace': 'Google’s ad settings',
+    'sec2-p2-antes': 'The one exception to "nothing leaves your browser" is the ',
+    'sec2-p2-enlace1': 'contact page',
+    'sec2-p2-medio': ': if you fill out and submit that form, the name, email and message you write are sent to the external service ',
+    'sec2-p2-enlace2': 'Web3Forms',
+    'sec2-p2-final': ', which forwards them to us by email. This only happens if you choose to submit that form — never while using any of the tools.',
+    'sec2-p3': 'We don’t use user accounts, we don’t require sign-up, and we don’t collect personal data for the tools to work.',
+    'sec3-titulo': 'Contact',
+    'sec3-antes': 'If you have any questions about this policy, you can reach us from the ',
+    'sec3-enlace': 'contact page',
+    'sec3-final': '.',
+    'actualizado': 'Last updated: 2026-09-13.'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -15,37 +63,39 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="index.html" data-i18n="nav-todas">Todas las herramientas</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Política de privacidad</h1>
+  <h1 data-i18n="h1">Política de privacidad</h1>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Tus archivos nunca salen de tu computadora</h3>
-    <p>Todas las herramientas de este sitio procesan tus archivos y textos <strong>directamente en tu navegador</strong>, usando JavaScript. Ningún archivo, texto o contraseña que ingreses en una herramienta se sube, se envía ni se guarda en ningún servidor nuestro ni de terceros.</p>
+    <h3 style="margin-top:0;" data-i18n="sec1-titulo">Tus archivos nunca salen de tu computadora</h3>
+    <p><span data-i18n="sec1-antes">Todas las herramientas de este sitio procesan tus archivos y textos </span><strong data-i18n="sec1-enfasis">directamente en tu navegador</strong><span data-i18n="sec1-despues">, usando JavaScript. Ningún archivo, texto o contraseña que ingreses en una herramienta se sube, se envía ni se guarda en ningún servidor nuestro ni de terceros.</span></p>
 
-    <h3>Qué datos sí se recopilan</h3>
-    <p>Este sitio puede mostrar publicidad de Google AdSense. Google, como todo proveedor de anuncios, puede usar cookies para mostrar anuncios relevantes según tu actividad de navegación. Podés controlar la personalización de anuncios desde
-      <a href="https://adssettings.google.com" target="_blank" rel="noopener">la configuración de anuncios de Google</a>.
+    <h3 data-i18n="sec2-titulo">Qué datos sí se recopilan</h3>
+    <p><span data-i18n="sec2-p1">Este sitio puede mostrar publicidad de Google AdSense. Google, como todo proveedor de anuncios, puede usar cookies para mostrar anuncios relevantes según tu actividad de navegación. Podés controlar la personalización de anuncios desde</span>
+      <a href="https://adssettings.google.com" target="_blank" rel="noopener" data-i18n="sec2-p1-enlace">la configuración de anuncios de Google</a>.
     </p>
-    <p>La única excepción a "nada sale de tu navegador" es la <a href="contacto.html">página de contacto</a>: si completás y enviás ese formulario, el nombre, email y mensaje que escribas se envían al servicio externo <a href="https://web3forms.com" target="_blank" rel="noopener">Web3Forms</a>, que nos los reenvía por correo. Esto pasa únicamente si vos decidís enviar ese formulario — nunca al usar cualquiera de las herramientas.</p>
-    <p>No usamos cuentas de usuario, no pedimos registro ni recolectamos datos personales para el funcionamiento de las herramientas.</p>
+    <p><span data-i18n="sec2-p2-antes">La única excepción a "nada sale de tu navegador" es la </span><a href="contacto.html" data-i18n="sec2-p2-enlace1">página de contacto</a><span data-i18n="sec2-p2-medio">: si completás y enviás ese formulario, el nombre, email y mensaje que escribas se envían al servicio externo </span><a href="https://web3forms.com" target="_blank" rel="noopener" data-i18n="sec2-p2-enlace2">Web3Forms</a><span data-i18n="sec2-p2-final">, que nos los reenvía por correo. Esto pasa únicamente si vos decidís enviar ese formulario — nunca al usar cualquiera de las herramientas.</span></p>
+    <p data-i18n="sec2-p3">No usamos cuentas de usuario, no pedimos registro ni recolectamos datos personales para el funcionamiento de las herramientas.</p>
 
-    <h3>Contacto</h3>
-    <p>Ante cualquier duda sobre esta política, podés escribirnos desde la <a href="contacto.html">página de contacto</a>.</p>
+    <h3 data-i18n="sec3-titulo">Contacto</h3>
+    <p><span data-i18n="sec3-antes">Ante cualquier duda sobre esta política, podés escribirnos desde la </span><a href="contacto.html" data-i18n="sec3-enlace">página de contacto</a><span data-i18n="sec3-final">.</span></p>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem;">Última actualización: 2026-09-13.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="actualizado">Última actualización: 2026-09-13.</p>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="privacidad.html">Política de privacidad</a> · <a href="terminos.html">Términos de uso</a> · <a href="creditos.html">Créditos</a> · <a href="contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscar y reemplazar en Excel gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Buscá y reemplazá texto en las celdas de un Excel (.xlsx), gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Buscar y reemplazar en Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Buscá y reemplazá texto en las celdas de un Excel (.xlsx), gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -24,6 +24,68 @@
   table.tabla-datos td.coincidencia { background: #fde68a; color: #78350f; font-weight: 600; }
   table.tabla-datos td.columna-excluida { color: var(--texto-suave); opacity: 0.5; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Buscar y reemplazar en Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Buscá y reemplazá texto en las celdas de un Excel (.xlsx), gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Buscar y reemplazar en Excel',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) y reemplazá un texto por otro — en toda la hoja o solo en las columnas que elijas. Incluye texto, fechas y números (comparando contra cómo se ven), pero nunca toca fórmulas.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
+    'campo-hoja': 'Hoja',
+    'campo-todas-hojas': 'Aplicar a todas las hojas',
+    'ambito-toda': 'Toda la hoja',
+    'ambito-columnas': 'Solo columnas elegidas (tildá cuáles en la vista previa, abajo)',
+    'campo-buscar': 'Buscar',
+    'campo-reemplazar': 'Reemplazar por',
+    'campo-mayusculas': 'Coincidir mayúsculas/minúsculas',
+    'boton-procesar': 'Reemplazar',
+    'vista-previa-antes': 'Vista previa de "',
+    'vista-previa-medio': '"',
+    'vista-previa-despues': ' — en amarillo, las celdas que van a cambiar (las fórmulas nunca se tocan, aunque su resultado coincida):',
+    'aviso-todas-hojas': ' (se muestra solo esta hoja, pero el reemplazo va a aplicar a todas)',
+    'hoja-vacia': 'Esta hoja está vacía.',
+    'mostrando-primeras': 'Mostrando las primeras {n} filas — el reemplazo sí procesa todas.',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Excel',
+    'nota-formulas': 'Las fórmulas nunca se tocan (para no romper cálculos). Si el texto que reemplazás está dentro de una fecha, número o moneda formateada, esa celda pasa a ser texto plano con el resultado — deja de ser una fecha/número real (por ejemplo, ya no se podría usar en una cuenta).',
+    'error-sin-buscar': 'Escribí el texto a buscar.',
+    'error-sin-columna': 'Tildá al menos una columna, o elegí "Toda la hoja".',
+    'error-sin-coincidencias': 'No se encontró ninguna coincidencia.',
+    'mensaje-reemplazos': 'Se hicieron {n} reemplazo(s).',
+    'error-procesar': 'No se pudo procesar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Find and Replace in Excel Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Find and replace text in the cells of an Excel file (.xlsx), free and without uploading your file anywhere.',
+    'h1': 'Find and replace in Excel',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) and replace one piece of text with another — across the whole sheet or only in the columns you choose. Covers text, dates and numbers (comparing against how they look), but never touches formulas.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it',
+    'campo-hoja': 'Sheet',
+    'campo-todas-hojas': 'Apply to all sheets',
+    'ambito-toda': 'The whole sheet',
+    'ambito-columnas': 'Only chosen columns (check which ones in the preview below)',
+    'campo-buscar': 'Find',
+    'campo-reemplazar': 'Replace with',
+    'campo-mayusculas': 'Match case',
+    'boton-procesar': 'Replace',
+    'vista-previa-antes': 'Preview of "',
+    'vista-previa-medio': '"',
+    'vista-previa-despues': ' — in yellow, the cells that are going to change (formulas are never touched, even if their result matches):',
+    'aviso-todas-hojas': ' (only this sheet is shown, but the replacement will apply to all of them)',
+    'hoja-vacia': 'This sheet is empty.',
+    'mostrando-primeras': 'Showing the first {n} rows — the replacement does process all of them.',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Excel',
+    'nota-formulas': 'Formulas are never touched (so calculations don’t break). If the text you’re replacing is inside a formatted date, number or currency, that cell becomes plain text with the result — it stops being a real date/number (for example, it could no longer be used in a calculation).',
+    'error-sin-buscar': 'Type the text to search for.',
+    'error-sin-columna': 'Check at least one column, or choose "The whole sheet".',
+    'error-sin-coincidencias': 'No matches were found.',
+    'mensaje-reemplazos': '{n} replacement(s) were made.',
+    'error-procesar': 'Couldn’t process the file'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -31,17 +93,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/excel-csv.html">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Buscar y reemplazar en Excel</h1>
-  <p>Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) y reemplazá un texto por otro — en toda la hoja o solo en las columnas que elijas. Incluye texto, fechas y números (comparando contra cómo se ven), pero nunca toca fórmulas.</p>
+  <h1 data-i18n="h1">Buscar y reemplazar en Excel</h1>
+  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) y reemplazá un texto por otro — en toda la hoja o solo en las columnas que elijas. Incluye texto, fechas y números (comparando contra cómo se ven), pero nunca toca fórmulas.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📊 Arrastrá tu archivo acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
     </div>
 
@@ -49,45 +112,45 @@
 
     <div class="controles">
       <label class="campo" id="campoHoja" style="display:none;">
-        Hoja
+        <span data-i18n="campo-hoja">Hoja</span>
         <select id="selectorHoja"></select>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="todasLasHojas">
-        Aplicar a todas las hojas
+        <span data-i18n="campo-todas-hojas">Aplicar a todas las hojas</span>
       </label>
     </div>
 
     <div class="controles">
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="radio" name="ambito" id="ambitoToda" value="toda" checked>
-        Toda la hoja
+        <span data-i18n="ambito-toda">Toda la hoja</span>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="radio" name="ambito" id="ambitoColumnas" value="columnas">
-        Solo columnas elegidas (tildá cuáles en la vista previa, abajo)
+        <span data-i18n="ambito-columnas">Solo columnas elegidas (tildá cuáles en la vista previa, abajo)</span>
       </label>
     </div>
 
     <div class="controles">
       <label class="campo">
-        Buscar
+        <span data-i18n="campo-buscar">Buscar</span>
         <input type="text" id="textoBuscar" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
       <label class="campo">
-        Reemplazar por
+        <span data-i18n="campo-reemplazar">Reemplazar por</span>
         <input type="text" id="textoReemplazo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="coincidirMayusculas">
-        Coincidir mayúsculas/minúsculas
+        <span data-i18n="campo-mayusculas">Coincidir mayúsculas/minúsculas</span>
       </label>
-      <button class="boton" id="botonProcesar" disabled>Reemplazar</button>
+      <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Reemplazar</button>
     </div>
 
     <div id="bloqueVistaPrevia" style="display:none;">
       <p style="color:var(--texto-suave); margin:10px 0 0; font-size:0.9rem;">
-        Vista previa de "<strong id="nombreHojaVista"></strong>"<span id="avisoTodasHojas"></span> — en amarillo, las celdas que van a cambiar (las fórmulas nunca se tocan, aunque su resultado coincida):
+        <span data-i18n="vista-previa-antes">Vista previa de "</span><strong id="nombreHojaVista"></strong><span data-i18n="vista-previa-medio">"</span><span id="avisoTodasHojas"></span><span data-i18n="vista-previa-despues"> — en amarillo, las celdas que van a cambiar (las fórmulas nunca se tocan, aunque su resultado coincida):</span>
       </p>
       <div class="contenedor-tabla" id="contenedorVistaPrevia"></div>
     </div>
@@ -95,14 +158,14 @@
     <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="excel-reemplazado.xlsx">Descargar Excel</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="excel-reemplazado.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <p style="color:var(--texto-suave);">
+    <p style="color:var(--texto-suave);" data-i18n="nota-formulas">
       Las fórmulas nunca se tocan (para no romper cálculos). Si el texto que reemplazás está dentro de una
       fecha, número o moneda formateada, esa celda pasa a ser texto plano con el resultado — deja de ser
       una fecha/número real (por ejemplo, ya no se podría usar en una cuenta).
@@ -111,8 +174,8 @@
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -153,7 +216,7 @@ function mostrarVistaPrevia() {
   const todasLasHojas = document.getElementById('todasLasHojas').checked;
   const nombreHoja = hojaActualSeleccionada();
   const ambito = ambitoActual();
-  avisoTodasHojas.textContent = todasLasHojas ? ' (se muestra solo esta hoja, pero el reemplazo va a aplicar a todas)' : '';
+  avisoTodasHojas.textContent = todasLasHojas ? t('aviso-todas-hojas') : '';
   nombreHojaVista.textContent = nombreHoja;
   bloqueVistaPrevia.style.display = 'block';
 
@@ -163,7 +226,7 @@ function mostrarVistaPrevia() {
 
   const hoja = libroActual.Sheets[nombreHoja];
   if (!hoja['!ref']) {
-    contenedorVistaPrevia.innerHTML = '<p style="padding:10px; color:var(--texto-suave);">Esta hoja está vacía.</p>';
+    contenedorVistaPrevia.innerHTML = `<p style="padding:10px; color:var(--texto-suave);">${t('hoja-vacia')}</p>`;
     return;
   }
 
@@ -199,7 +262,7 @@ function mostrarVistaPrevia() {
   }
   html += '</tbody></table>';
   if (rango.e.r - rango.s.r + 1 > FILAS_VISTA_PREVIA) {
-    html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">Mostrando las primeras ${FILAS_VISTA_PREVIA} filas — el reemplazo sí procesa todas.</p>`;
+    html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">${t('mostrando-primeras').replace('{n}', FILAS_VISTA_PREVIA)}</p>`;
   }
   contenedorVistaPrevia.innerHTML = html;
 
@@ -259,13 +322,13 @@ document.getElementById('ambitoColumnas').addEventListener('change', mostrarVist
 botonProcesar.addEventListener('click', () => {
   try {
     const buscar = document.getElementById('textoBuscar').value;
-    if (!buscar) throw new Error('Escribí el texto a buscar.');
+    if (!buscar) throw new Error(t('error-sin-buscar'));
     const reemplazo = document.getElementById('textoReemplazo').value;
     const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
     const todasLasHojas = document.getElementById('todasLasHojas').checked;
     const ambito = ambitoActual();
     if (ambito === 'columnas' && columnasSeleccionadas.size === 0) {
-      throw new Error('Tildá al menos una columna, o elegí "Toda la hoja".');
+      throw new Error(t('error-sin-columna'));
     }
 
     const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
@@ -308,22 +371,23 @@ botonProcesar.addEventListener('click', () => {
       });
     });
 
-    if (totalReemplazos === 0) throw new Error('No se encontró ninguna coincidencia.');
+    if (totalReemplazos === 0) throw new Error(t('error-sin-coincidencias'));
 
     const bytesFinales = XLSX.write(libroActual, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
 
-    mensaje.textContent = `Se hicieron ${totalReemplazos} reemplazo(s).`;
+    mensaje.textContent = t('mensaje-reemplazos').replace('{n}', totalReemplazos);
     mensaje.style.display = 'block';
     mostrarVistaPrevia();
   } catch (error) {
-    alert('No se pudo procesar el archivo: ' + error.message);
+    alert(t('error-procesar') + ': ' + error.message);
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

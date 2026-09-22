@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crear documento Word gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Escribí y dale formato a tu documento como en Word (negrita, títulos, listas) y descargalo como .docx. Gratis y sin subir nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Crear documento Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Escribí y dale formato a tu documento como en Word (negrita, títulos, listas) y descargalo como .docx. Gratis y sin subir nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -65,6 +65,56 @@
   #areaEditable p { margin: 0 0 0.8em; }
   #areaEditable ul, #areaEditable ol { margin: 0 0 0.8em; padding-left: 24px; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Crear documento Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Escribí y dale formato a tu documento como en Word (negrita, títulos, listas) y descargalo como .docx. Gratis y sin subir nada a ningún servidor.',
+    'h1': 'Crear documento Word',
+    'intro': 'Escribí tu texto y dale formato seleccionándolo y usando los botones de arriba — igual que en Word. Después descargalo como .docx.',
+    'estilo-title': 'Tipo de texto',
+    'opcion-normal': 'Texto normal',
+    'opcion-h1': 'Título 1',
+    'opcion-h2': 'Título 2',
+    'opcion-h3': 'Título 3',
+    'boton-negrita': 'Negrita',
+    'boton-cursiva': 'Cursiva',
+    'boton-subrayado': 'Subrayado',
+    'boton-lista-vinetas': 'Lista con viñetas',
+    'boton-lista-numerada': 'Lista numerada',
+    'placeholder-editor': 'Empezá a escribir acá...',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-generar': 'Descargar .docx',
+    'boton-generar-procesando': 'Generando...',
+    'error-sin-texto': 'Escribí algo de texto primero.',
+    'nombre-defecto': 'documento',
+    'error-generar': 'No se pudo generar el documento'
+  },
+  en: {
+    'titulo-pagina': 'Create a Word Document Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Write and format your document like in Word (bold, headings, lists) and download it as .docx. Free and without uploading anything anywhere.',
+    'h1': 'Create a Word document',
+    'intro': 'Write your text and format it by selecting it and using the buttons above — just like in Word. Then download it as .docx.',
+    'estilo-title': 'Text type',
+    'opcion-normal': 'Normal text',
+    'opcion-h1': 'Heading 1',
+    'opcion-h2': 'Heading 2',
+    'opcion-h3': 'Heading 3',
+    'boton-negrita': 'Bold',
+    'boton-cursiva': 'Italic',
+    'boton-subrayado': 'Underline',
+    'boton-lista-vinetas': 'Bulleted list',
+    'boton-lista-numerada': 'Numbered list',
+    'placeholder-editor': 'Start typing here...',
+    'campo-nombre': 'File name',
+    'boton-generar': 'Download .docx',
+    'boton-generar-procesando': 'Generating...',
+    'error-sin-texto': 'Write some text first.',
+    'nombre-defecto': 'document',
+    'error-generar': 'Couldn’t generate the document'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -72,48 +122,49 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Crear documento Word</h1>
-  <p>Escribí tu texto y dale formato seleccionándolo y usando los botones de arriba — igual que en Word. Después descargalo como .docx.</p>
+  <h1 data-i18n="h1">Crear documento Word</h1>
+  <p data-i18n="intro">Escribí tu texto y dale formato seleccionándolo y usando los botones de arriba — igual que en Word. Después descargalo como .docx.</p>
 
   <div class="panel-herramienta">
     <div class="barra-herramientas">
-      <select id="selectorEstilo" title="Tipo de texto">
-        <option value="P">Texto normal</option>
-        <option value="H1">Título 1</option>
-        <option value="H2">Título 2</option>
-        <option value="H3">Título 3</option>
+      <select id="selectorEstilo" title="Tipo de texto" data-i18n-attr="title:estilo-title">
+        <option value="P" data-i18n="opcion-normal">Texto normal</option>
+        <option value="H1" data-i18n="opcion-h1">Título 1</option>
+        <option value="H2" data-i18n="opcion-h2">Título 2</option>
+        <option value="H3" data-i18n="opcion-h3">Título 3</option>
       </select>
       <div class="separador-barra"></div>
-      <button type="button" data-comando="bold" title="Negrita"><strong>N</strong></button>
-      <button type="button" data-comando="italic" title="Cursiva"><em>C</em></button>
-      <button type="button" data-comando="underline" title="Subrayado"><u>S</u></button>
+      <button type="button" data-comando="bold" title="Negrita" data-i18n-attr="title:boton-negrita"><strong>N</strong></button>
+      <button type="button" data-comando="italic" title="Cursiva" data-i18n-attr="title:boton-cursiva"><em>C</em></button>
+      <button type="button" data-comando="underline" title="Subrayado" data-i18n-attr="title:boton-subrayado"><u>S</u></button>
       <div class="separador-barra"></div>
-      <button type="button" data-comando="insertUnorderedList" title="Lista con viñetas">•≡</button>
-      <button type="button" data-comando="insertOrderedList" title="Lista numerada">1≡</button>
+      <button type="button" data-comando="insertUnorderedList" title="Lista con viñetas" data-i18n-attr="title:boton-lista-vinetas">•≡</button>
+      <button type="button" data-comando="insertOrderedList" title="Lista numerada" data-i18n-attr="title:boton-lista-numerada">1≡</button>
     </div>
 
-    <div id="areaEditable" contenteditable="true" data-placeholder="Empezá a escribir acá..."></div>
+    <div id="areaEditable" contenteditable="true" data-placeholder="Empezá a escribir acá..." data-i18n-attr="data-placeholder:placeholder-editor"></div>
 
     <div class="controles">
       <label class="campo">
-        Nombre del archivo
+        <span data-i18n="campo-nombre">Nombre del archivo</span>
         <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
-      <button class="boton" id="botonGenerar" type="button">Descargar .docx</button>
+      <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Descargar .docx</button>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
@@ -164,10 +215,10 @@ document.addEventListener('selectionchange', () => {
 document.getElementById('botonGenerar').addEventListener('click', async () => {
   const boton = document.getElementById('botonGenerar');
   boton.disabled = true;
-  boton.textContent = 'Generando...';
+  boton.textContent = t('boton-generar-procesando');
   try {
     const parrafos = await contenidoAParrafos(areaEditable);
-    if (parrafos.length === 0) throw new Error('Escribí algo de texto primero.');
+    if (parrafos.length === 0) throw new Error(t('error-sin-texto'));
 
     const documento = new docx.Document({
       numbering: NUMERACION_DOCX_CONFIG,
@@ -175,21 +226,22 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
     });
 
     const blob = await docx.Packer.toBlob(documento);
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || 'documento').trim();
+    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
 
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);
     enlace.download = `${nombreArchivo}.docx`;
     enlace.click();
   } catch (error) {
-    alert('No se pudo generar el documento: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     boton.disabled = false;
-    boton.textContent = 'Descargar .docx';
+    boton.textContent = t('boton-generar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

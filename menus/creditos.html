@@ -3,11 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Créditos y licencias — Herramientas Ofimáticas</title>
+<title data-i18n="titulo-pagina">Créditos y licencias — Herramientas Ofimáticas</title>
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Créditos y licencias — Herramientas Ofimáticas',
+    'h1': 'Créditos y licencias',
+    'sec1-titulo': 'Librerías de terceros',
+    'sec1-texto': 'Este sitio no tiene backend propio: cada herramienta procesa tus archivos en tu navegador usando alguna de estas librerías de código abierto, cargadas desde un CDN. Ninguna fue modificada — se usan tal cual las publica cada autor.',
+    'th-libreria': 'Librería',
+    'th-version': 'Versión usada',
+    'th-licencia': 'Licencia',
+    'th-autor': 'Autor / repositorio',
+    'jszip-nota': ' (también disponible bajo GPLv3, a elección de quien la use — este sitio la usa bajo MIT)',
+    'fork-nota': ' (fork mantenido de pdf-lib, con cifrado)',
+    'cdn-nota': 'Todas se cargan directamente desde su CDN público (cdnjs o jsdelivr) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.',
+    'sec2-titulo': 'Servicios de terceros',
+    'sec2-antes': 'A diferencia de las librerías de arriba, esto no es código que corre en tu navegador sino un servicio externo que recibe datos: la ',
+    'sec2-enlace1': 'página de contacto',
+    'sec2-medio': ' usa ',
+    'sec2-enlace2': 'Web3Forms',
+    'sec2-medio2': ' para reenviarnos por correo lo que escribas ahí (nombre, email, mensaje). Es el único punto del sitio donde se envía algo a un servidor — ver ',
+    'sec2-enlace3': 'política de privacidad',
+    'sec2-final': '.',
+    'sec3-titulo': 'Nombres y marcas mencionados',
+    'sec3-antes': 'Word, Excel, PowerPoint, PDF, EPUB y otros nombres de formato que aparecen en las herramientas son marcas o formatos de sus respectivos titulares, usados solo para indicar compatibilidad — ver el detalle en ',
+    'sec3-enlace': 'términos de uso',
+    'sec3-final': '.',
+    'actualizado': 'Última actualización: 2026-09-20.'
+  },
+  en: {
+    'titulo-pagina': 'Credits and Licenses — Herramientas Ofimáticas',
+    'h1': 'Credits and licenses',
+    'sec1-titulo': 'Third-party libraries',
+    'sec1-texto': 'This site has no backend of its own: each tool processes your files in your browser using one of these open-source libraries, loaded from a CDN. None of them were modified — they’re used exactly as published by their author.',
+    'th-libreria': 'Library',
+    'th-version': 'Version used',
+    'th-licencia': 'License',
+    'th-autor': 'Author / repository',
+    'jszip-nota': ' (also available under GPLv3, at the user’s choice — this site uses it under MIT)',
+    'fork-nota': ' (maintained fork of pdf-lib, with encryption)',
+    'cdn-nota': 'All of them load directly from their public CDN (cdnjs or jsdelivr) — no copy of any of them is bundled or redistributed. Each one’s full license text is in its repository linked above.',
+    'sec2-titulo': 'Third-party services',
+    'sec2-antes': 'Unlike the libraries above, this isn’t code that runs in your browser but an external service that receives data: the ',
+    'sec2-enlace1': 'contact page',
+    'sec2-medio': ' uses ',
+    'sec2-enlace2': 'Web3Forms',
+    'sec2-medio2': ' to forward whatever you write there (name, email, message) to us by email. This is the only point in the site where anything is sent to a server — see the ',
+    'sec2-enlace3': 'privacy policy',
+    'sec2-final': '.',
+    'sec3-titulo': 'Names and trademarks mentioned',
+    'sec3-antes': 'Word, Excel, PowerPoint, PDF, EPUB and other format names that appear in the tools are trademarks or formats of their respective owners, used only to indicate compatibility — see the details in the ',
+    'sec3-enlace': 'terms of use',
+    'sec3-final': '.',
+    'actualizado': 'Last updated: 2026-09-20.'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -15,31 +71,32 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="index.html" data-i18n="nav-todas">Todas las herramientas</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Créditos y licencias</h1>
+  <h1 data-i18n="h1">Créditos y licencias</h1>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Librerías de terceros</h3>
-    <p>Este sitio no tiene backend propio: cada herramienta procesa tus archivos en tu navegador usando alguna de estas librerías de código abierto, cargadas desde un CDN. Ninguna fue modificada — se usan tal cual las publica cada autor.</p>
+    <h3 style="margin-top:0;" data-i18n="sec1-titulo">Librerías de terceros</h3>
+    <p data-i18n="sec1-texto">Este sitio no tiene backend propio: cada herramienta procesa tus archivos en tu navegador usando alguna de estas librerías de código abierto, cargadas desde un CDN. Ninguna fue modificada — se usan tal cual las publica cada autor.</p>
 
     <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
       <thead>
         <tr style="text-align:left; border-bottom:1px solid var(--gris-borde);">
-          <th style="padding:0.5rem 0.5rem 0.5rem 0;">Librería</th>
-          <th style="padding:0.5rem;">Versión usada</th>
-          <th style="padding:0.5rem;">Licencia</th>
-          <th style="padding:0.5rem;">Autor / repositorio</th>
+          <th style="padding:0.5rem 0.5rem 0.5rem 0;" data-i18n="th-libreria">Librería</th>
+          <th style="padding:0.5rem;" data-i18n="th-version">Versión usada</th>
+          <th style="padding:0.5rem;" data-i18n="th-licencia">Licencia</th>
+          <th style="padding:0.5rem;" data-i18n="th-autor">Autor / repositorio</th>
         </tr>
       </thead>
       <tbody>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">pdf-lib</td><td style="padding:0.5rem;">1.17.1</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">Hopding/pdf-lib</a></td></tr>
-        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@cantoo/pdf-lib</td><td style="padding:0.5rem;">2.11.0</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/cantoo-scribe/pdf-lib" target="_blank" rel="noopener">cantoo-scribe/pdf-lib</a> (fork mantenido de pdf-lib, con cifrado)</td></tr>
+        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@cantoo/pdf-lib</td><td style="padding:0.5rem;">2.11.0</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/cantoo-scribe/pdf-lib" target="_blank" rel="noopener">cantoo-scribe/pdf-lib</a><span data-i18n="fork-nota"> (fork mantenido de pdf-lib, con cifrado)</span></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">PDF.js</td><td style="padding:0.5rem;">3.11.174</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/mozilla/pdf.js" target="_blank" rel="noopener">mozilla/pdf.js</a></td></tr>
-        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">JSZip</td><td style="padding:0.5rem;">3.10.1</td><td style="padding:0.5rem;">MIT<span style="color:var(--texto-suave);"> (también disponible bajo GPLv3, a elección de quien la use — este sitio la usa bajo MIT)</span></td><td style="padding:0.5rem;"><a href="https://github.com/Stuk/jszip" target="_blank" rel="noopener">Stuk/jszip</a></td></tr>
+        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">JSZip</td><td style="padding:0.5rem;">3.10.1</td><td style="padding:0.5rem;">MIT<span style="color:var(--texto-suave);" data-i18n="jszip-nota"> (también disponible bajo GPLv3, a elección de quien la use — este sitio la usa bajo MIT)</span></td><td style="padding:0.5rem;"><a href="https://github.com/Stuk/jszip" target="_blank" rel="noopener">Stuk/jszip</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">mammoth.js</td><td style="padding:0.5rem;">1.12.2</td><td style="padding:0.5rem;">BSD-2-Clause</td><td style="padding:0.5rem;"><a href="https://github.com/mwilliamson/mammoth.js" target="_blank" rel="noopener">mwilliamson/mammoth.js</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">docx</td><td style="padding:0.5rem;">8.5.0</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/dolanmiu/docx" target="_blank" rel="noopener">dolanmiu/docx</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">SheetJS (xlsx)</td><td style="padding:0.5rem;">0.18.5</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/SheetJS/sheetjs" target="_blank" rel="noopener">SheetJS/sheetjs</a></td></tr>
@@ -53,24 +110,25 @@
       </tbody>
     </table>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;">Todas se cargan directamente desde su CDN público (cdnjs o jsdelivr) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;" data-i18n="cdn-nota">Todas se cargan directamente desde su CDN público (cdnjs o jsdelivr) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.</p>
 
-    <h3>Servicios de terceros</h3>
-    <p>A diferencia de las librerías de arriba, esto no es código que corre en tu navegador sino un servicio externo que recibe datos: la <a href="contacto.html">página de contacto</a> usa <a href="https://web3forms.com" target="_blank" rel="noopener">Web3Forms</a> para reenviarnos por correo lo que escribas ahí (nombre, email, mensaje). Es el único punto del sitio donde se envía algo a un servidor — ver <a href="privacidad.html">política de privacidad</a>.</p>
+    <h3 data-i18n="sec2-titulo">Servicios de terceros</h3>
+    <p><span data-i18n="sec2-antes">A diferencia de las librerías de arriba, esto no es código que corre en tu navegador sino un servicio externo que recibe datos: la </span><a href="contacto.html" data-i18n="sec2-enlace1">página de contacto</a><span data-i18n="sec2-medio"> usa </span><a href="https://web3forms.com" target="_blank" rel="noopener" data-i18n="sec2-enlace2">Web3Forms</a><span data-i18n="sec2-medio2"> para reenviarnos por correo lo que escribas ahí (nombre, email, mensaje). Es el único punto del sitio donde se envía algo a un servidor — ver </span><a href="privacidad.html" data-i18n="sec2-enlace3">política de privacidad</a><span data-i18n="sec2-final">.</span></p>
 
-    <h3>Nombres y marcas mencionados</h3>
-    <p>Word, Excel, PowerPoint, PDF, EPUB y otros nombres de formato que aparecen en las herramientas son marcas o formatos de sus respectivos titulares, usados solo para indicar compatibilidad — ver el detalle en <a href="terminos.html">términos de uso</a>.</p>
+    <h3 data-i18n="sec3-titulo">Nombres y marcas mencionados</h3>
+    <p><span data-i18n="sec3-antes">Word, Excel, PowerPoint, PDF, EPUB y otros nombres de formato que aparecen en las herramientas son marcas o formatos de sus respectivos titulares, usados solo para indicar compatibilidad — ver el detalle en </span><a href="terminos.html" data-i18n="sec3-enlace">términos de uso</a><span data-i18n="sec3-final">.</span></p>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem;">Última actualización: 2026-09-20.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="actualizado">Última actualización: 2026-09-20.</p>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="privacidad.html">Política de privacidad</a> · <a href="terminos.html">Términos de uso</a> · <a href="creditos.html">Créditos</a> · <a href="contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

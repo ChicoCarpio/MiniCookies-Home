@@ -3,12 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reordenar diapositivas de PowerPoint gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Reordená o eliminá diapositivas de una presentación PowerPoint (.pptx), gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reordenar diapositivas de PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená o eliminá diapositivas de una presentación PowerPoint (.pptx), gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar diapositivas de PowerPoint gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená o eliminá diapositivas de una presentación PowerPoint (.pptx), gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Administrar / reordenar diapositivas',
+    'intro': 'Elegí un archivo .pptx. Arrastrá las diapositivas para reordenarlas, o quitá las que no quieras, y descargá la presentación resultante.',
+    'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
+    'cargando': 'Leyendo la presentación...',
+    'boton-guardar': 'Descargar reordenada',
+    'boton-guardar-procesando': 'Generando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PowerPoint',
+    'error-estructura': 'El archivo no tiene la estructura de un .pptx válido.',
+    'error-sin-diapositivas': 'No se encontraron diapositivas.',
+    'etiqueta-diapositiva': 'Diapositiva {n}',
+    'etiqueta-diapositiva-con-texto': 'Diapositiva {n} — {texto}',
+    'error-leer': 'No se pudo leer la presentación',
+    'error-sin-ninguna': 'No queda ninguna diapositiva.',
+    'error-generar': 'No se pudo generar la presentación'
+  },
+  en: {
+    'titulo-pagina': 'Reorder PowerPoint Slides Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder or delete slides of a PowerPoint presentation (.pptx), free and without uploading your file anywhere.',
+    'h1': 'Manage / reorder slides',
+    'intro': 'Pick a .pptx file. Drag the slides to reorder them, or remove the ones you don’t want, and download the resulting presentation.',
+    'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
+    'cargando': 'Reading the presentation...',
+    'boton-guardar': 'Download reordered',
+    'boton-guardar-procesando': 'Generating...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download PowerPoint',
+    'error-estructura': 'The file doesn’t have the structure of a valid .pptx.',
+    'error-sin-diapositivas': 'No slides were found.',
+    'etiqueta-diapositiva': 'Slide {n}',
+    'etiqueta-diapositiva-con-texto': 'Slide {n} — {texto}',
+    'error-leer': 'Couldn’t read the presentation',
+    'error-sin-ninguna': 'There are no slides left.',
+    'error-generar': 'Couldn’t generate the presentation'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,38 +58,39 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/powerpoint.html">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Administrar / reordenar diapositivas</h1>
-  <p>Elegí un archivo .pptx. Arrastrá las diapositivas para reordenarlas, o quitá las que no quieras, y descargá la presentación resultante.</p>
+  <h1 data-i18n="h1">Administrar / reordenar diapositivas</h1>
+  <p data-i18n="intro">Elegí un archivo .pptx. Arrastrá las diapositivas para reordenarlas, o quitá las que no quieras, y descargá la presentación resultante.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".pptx" hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo la presentación...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo la presentación...</p>
     <ul class="lista-archivos" id="listaDiapositivas"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonGuardar" disabled>Descargar reordenada</button>
+      <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenada</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="presentacion-reordenada.pptx">Descargar PowerPoint</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="presentacion-reordenada.pptx" data-i18n="resultado-enlace">Descargar PowerPoint</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -123,7 +166,7 @@ async function cargarPresentacion(archivo) {
     zipActual = await JSZip.loadAsync(archivo);
     const archivoRels = zipActual.file('ppt/_rels/presentation.xml.rels');
     const archivoPresentacion = zipActual.file('ppt/presentation.xml');
-    if (!archivoRels || !archivoPresentacion) throw new Error('El archivo no tiene la estructura de un .pptx válido.');
+    if (!archivoRels || !archivoPresentacion) throw new Error(t('error-estructura'));
 
     const relsDoc = parser.parseFromString(await archivoRels.async('string'), 'application/xml');
     const mapaRels = {};
@@ -134,19 +177,19 @@ async function cargarPresentacion(archivo) {
     const presentacionXmlTexto = await archivoPresentacion.async('string');
     const presentacionDoc = parser.parseFromString(presentacionXmlTexto, 'application/xml');
     const nodosSldId = [...presentacionDoc.getElementsByTagName('p:sldId')];
-    if (nodosSldId.length === 0) throw new Error('No se encontraron diapositivas.');
+    if (nodosSldId.length === 0) throw new Error(t('error-sin-diapositivas'));
 
     diapositivas = [];
     for (let i = 0; i < nodosSldId.length; i++) {
       const rId = nodosSldId[i].getAttribute('r:id');
       const destino = mapaRels[rId];
       const rutaSlide = destino ? `ppt/${destino.replace(/^\.?\//, '')}` : null;
-      let etiqueta = `Diapositiva ${i + 1}`;
+      let etiqueta = t('etiqueta-diapositiva').replace('{n}', i + 1);
       if (rutaSlide && zipActual.file(rutaSlide)) {
         const slideXml = await zipActual.file(rutaSlide).async('string');
         const primerTexto = slideXml.match(/<a:t>([^<]+)<\/a:t>/);
         if (primerTexto && primerTexto[1].trim()) {
-          etiqueta = `Diapositiva ${i + 1} — ${primerTexto[1].trim().slice(0, 40)}`;
+          etiqueta = t('etiqueta-diapositiva-con-texto').replace('{n}', i + 1).replace('{texto}', primerTexto[1].trim().slice(0, 40));
         }
       }
       diapositivas.push({ rId, etiqueta });
@@ -154,7 +197,7 @@ async function cargarPresentacion(archivo) {
 
     renderizarLista();
   } catch (error) {
-    alert('No se pudo leer la presentación: ' + error.message);
+    alert(t('error-leer') + ': ' + error.message);
   } finally {
     cargando.style.display = 'none';
   }
@@ -162,9 +205,9 @@ async function cargarPresentacion(archivo) {
 
 botonGuardar.addEventListener('click', async () => {
   botonGuardar.disabled = true;
-  botonGuardar.textContent = 'Generando...';
+  botonGuardar.textContent = t('boton-guardar-procesando');
   try {
-    if (diapositivas.length === 0) throw new Error('No queda ninguna diapositiva.');
+    if (diapositivas.length === 0) throw new Error(t('error-sin-ninguna'));
 
     const archivoPresentacion = zipActual.file('ppt/presentation.xml');
     const presentacionDoc = parser.parseFromString(await archivoPresentacion.async('string'), 'application/xml');
@@ -186,14 +229,15 @@ botonGuardar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar la presentación: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonGuardar.disabled = false;
-    botonGuardar.textContent = 'Descargar reordenada';
+    botonGuardar.textContent = t('boton-guardar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

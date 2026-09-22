@@ -3,12 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comprimir y optimizar PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Reducí el peso de un PDF recomprimiendo las fotos que tiene adentro, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Comprimir y optimizar PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reducí el peso de un PDF recomprimiendo las fotos que tiene adentro, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Comprimir y optimizar PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reducí el peso de un PDF recomprimiendo las fotos que tiene adentro, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Comprimir / optimizar PDF',
+    'intro': 'Elegí un PDF y recomprimimos las fotos que tiene adentro para bajar el peso total del archivo.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-calidad': 'Calidad de las fotos: ',
+    'simbolo-porcentaje': '%',
+    'boton-comprimir': 'Comprimir PDF',
+    'stat-peso-original': 'Peso original',
+    'stat-peso-final': 'Peso final',
+    'stat-reduccion': 'Reducción',
+    'stat-fotos': 'Fotos optimizadas',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF comprimido',
+    'limitaciones-titulo': 'Limitaciones',
+    'item1': 'Solo recomprime fotos que ya están en formato JPEG y en color (el caso más común de PDFs pesados: escaneos o fotos de alta resolución). Imágenes en blanco y negro, indexadas o ya muy comprimidas se dejan sin tocar para no arriesgar la calidad.',
+    'item2': 'Si un PDF no tiene fotos así (por ejemplo, es solo texto), esta herramienta no va a reducir mucho su peso — un PDF de puro texto ya es liviano de por sí.',
+    'item3': 'Cada foto solo se reemplaza si la nueva versión pesa menos que la original.',
+    'progreso-analizando': 'Analizando el PDF...',
+    'progreso-optimizando': 'Optimizando foto {n}...',
+    'progreso-guardando': 'Guardando PDF...',
+    'error-comprimir': 'No se pudo comprimir el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Compress and Optimize PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reduce a PDF’s size by recompressing the photos inside it, free and without uploading your file anywhere.',
+    'h1': 'Compress / optimize PDF',
+    'intro': 'Pick a PDF and we’ll recompress the photos inside it to bring down the file’s total size.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-calidad': 'Photo quality: ',
+    'simbolo-porcentaje': '%',
+    'boton-comprimir': 'Compress PDF',
+    'stat-peso-original': 'Original size',
+    'stat-peso-final': 'Final size',
+    'stat-reduccion': 'Reduction',
+    'stat-fotos': 'Photos optimized',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download compressed PDF',
+    'limitaciones-titulo': 'Limitations',
+    'item1': 'Only recompresses photos that are already JPEG and in color (the most common case for heavy PDFs: scans or high-resolution photos). Black-and-white or indexed images, or ones already heavily compressed, are left untouched to avoid risking quality.',
+    'item2': 'If a PDF doesn’t have photos like that (for example, it’s all text), this tool won’t shrink it by much — a plain-text PDF is already lightweight to begin with.',
+    'item3': 'Each photo is only replaced if the new version is smaller than the original.',
+    'progreso-analizando': 'Analyzing the PDF...',
+    'progreso-optimizando': 'Optimizing photo {n}...',
+    'progreso-guardando': 'Saving PDF...',
+    'error-comprimir': 'Couldn’t compress the PDF'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +68,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Comprimir / optimizar PDF</h1>
-  <p>Elegí un PDF y recomprimimos las fotos que tiene adentro para bajar el peso total del archivo.</p>
+  <h1 data-i18n="h1">Comprimir / optimizar PDF</h1>
+  <p data-i18n="intro">Elegí un PDF y recomprimimos las fotos que tiene adentro para bajar el peso total del archivo.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
@@ -34,41 +87,41 @@
 
     <div class="controles">
       <label class="campo">
-        Calidad de las fotos: <span id="etiquetaCalidad">65</span>%
+        <span data-i18n="campo-calidad">Calidad de las fotos: </span><span id="etiquetaCalidad">65</span><span data-i18n="simbolo-porcentaje">%</span>
         <input type="range" id="calidad" min="20" max="90" value="65">
       </label>
-      <button class="boton" id="botonComprimir" disabled>Comprimir PDF</button>
+      <button class="boton" id="botonComprimir" disabled data-i18n="boton-comprimir">Comprimir PDF</button>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="estadisticas" id="estadisticas" style="display:none;">
-      <div class="estadistica"><div class="numero" id="pesoOriginal">—</div><div class="etiqueta">Peso original</div></div>
-      <div class="estadistica"><div class="numero" id="pesoFinal">—</div><div class="etiqueta">Peso final</div></div>
-      <div class="estadistica"><div class="numero" id="porcentajeAhorro">—</div><div class="etiqueta">Reducción</div></div>
-      <div class="estadistica"><div class="numero" id="imagenesProcesadas">—</div><div class="etiqueta">Fotos optimizadas</div></div>
+      <div class="estadistica"><div class="numero" id="pesoOriginal">—</div><div class="etiqueta" data-i18n="stat-peso-original">Peso original</div></div>
+      <div class="estadistica"><div class="numero" id="pesoFinal">—</div><div class="etiqueta" data-i18n="stat-peso-final">Peso final</div></div>
+      <div class="estadistica"><div class="numero" id="porcentajeAhorro">—</div><div class="etiqueta" data-i18n="stat-reduccion">Reducción</div></div>
+      <div class="estadistica"><div class="numero" id="imagenesProcesadas">—</div><div class="etiqueta" data-i18n="stat-fotos">Fotos optimizadas</div></div>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="documento-comprimido.pdf">Descargar PDF comprimido</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-comprimido.pdf" data-i18n="resultado-enlace">Descargar PDF comprimido</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Solo recomprime fotos que ya están en formato JPEG y en color (el caso más común de PDFs pesados: escaneos o fotos de alta resolución). Imágenes en blanco y negro, indexadas o ya muy comprimidas se dejan sin tocar para no arriesgar la calidad.</li>
-      <li>Si un PDF no tiene fotos así (por ejemplo, es solo texto), esta herramienta no va a reducir mucho su peso — un PDF de puro texto ya es liviano de por sí.</li>
-      <li>Cada foto solo se reemplaza si la nueva versión pesa menos que la original.</li>
+      <li data-i18n="item1">Solo recomprime fotos que ya están en formato JPEG y en color (el caso más común de PDFs pesados: escaneos o fotos de alta resolución). Imágenes en blanco y negro, indexadas o ya muy comprimidas se dejan sin tocar para no arriesgar la calidad.</li>
+      <li data-i18n="item2">Si un PDF no tiene fotos así (por ejemplo, es solo texto), esta herramienta no va a reducir mucho su peso — un PDF de puro texto ya es liviano de por sí.</li>
+      <li data-i18n="item3">Cada foto solo se reemplaza si la nueva versión pesa menos que la original.</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -103,7 +156,7 @@ async function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = '';
   try {
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${formatearPeso(archivo.size)}, ${totalPaginas} pág.)` }));
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${formatearPeso(archivo.size)}, ${totalPaginas} ${t('sufijo-pag')})` }));
   } catch (error) {
     listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (${formatearPeso(archivo.size)})` }));
   }
@@ -141,7 +194,7 @@ function decodificarImagenJpeg(bytes) {
 botonComprimir.addEventListener('click', async () => {
   botonComprimir.disabled = true;
   progreso.style.display = 'block';
-  progreso.textContent = 'Analizando el PDF...';
+  progreso.textContent = t('progreso-analizando');
   try {
     const { PDFDocument, PDFName, PDFRawStream } = PDFLib;
     const bytesOriginales = await archivoActual.arrayBuffer();
@@ -168,7 +221,7 @@ botonComprimir.addEventListener('click', async () => {
       if (!espacioColor || espacioColor.toString() !== '/DeviceRGB') continue;
 
       try {
-        progreso.textContent = `Optimizando foto ${contadorProcesadas + 1}...`;
+        progreso.textContent = t('progreso-optimizando').replace('{n}', contadorProcesadas + 1);
         const bytesOriginalesImagen = objeto.getContents();
         const img = await decodificarImagenJpeg(bytesOriginalesImagen);
 
@@ -189,7 +242,7 @@ botonComprimir.addEventListener('click', async () => {
       }
     }
 
-    progreso.textContent = 'Guardando PDF...';
+    progreso.textContent = t('progreso-guardando');
     const bytesFinales = await pdf.save();
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
     enlaceDescarga.href = URL.createObjectURL(blob);
@@ -202,7 +255,7 @@ botonComprimir.addEventListener('click', async () => {
     estadisticas.style.display = 'grid';
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo comprimir el PDF: ' + error.message);
+    alert(t('error-comprimir') + ': ' + error.message);
   } finally {
     botonComprimir.disabled = false;
     progreso.style.display = 'none';
@@ -211,5 +264,6 @@ botonComprimir.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

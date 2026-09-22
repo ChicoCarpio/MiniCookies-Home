@@ -15,7 +15,40 @@ window.i18nComun = {
     'footer-privacidad': 'Política de privacidad',
     'footer-terminos': 'Términos de uso',
     'footer-creditos': 'Créditos',
-    'footer-contacto': 'Contacto'
+    'footer-contacto': 'Contacto',
+    // Compartidas por las 76 páginas de herramientas (header/nav y helpers JS).
+    'nav-cat-pdf': 'Herramientas de PDF',
+    'nav-cat-excel': 'Herramientas de Excel / CSV',
+    'nav-cat-word': 'Herramientas de Word',
+    'nav-cat-powerpoint': 'Herramientas de PowerPoint',
+    'nav-cat-epub': 'Herramientas de EPUB',
+    'nav-cat-markdown': 'Herramientas de Markdown',
+    'nav-cat-texto': 'Herramientas de Texto plano',
+    'nav-cat-generales': 'Herramientas generales',
+    'tema-aria': 'Cambiar a modo oscuro',
+    'tema-title': 'Cambiar tema',
+    'previsualizar-fallo': '(no se pudo previsualizar)',
+    'generando-miniaturas': 'Generando miniaturas...',
+    'sufijo-pag': 'pág.',
+    'quitar': 'Quitar',
+    'vista-cuadricula': '▦ Cuadrícula',
+    'vista-lista': '☰ Lista',
+    // Usadas por assets/js/pdf-texto.js (extraerTextoPowerPoint), compartida
+    // entre powerpoint-a-pdf.html y extraer-texto-powerpoint.html.
+    'ppt-sin-diapositivas': 'No se encontraron diapositivas legibles en este archivo.',
+    'ppt-diapositiva-titulo': '--- Diapositiva {n} ---',
+    'ppt-sin-texto': '(sin texto)',
+    // Usadas por assets/js/epub.js (leerEpub/construirEpub), compartidas por
+    // todas las herramientas de EPUB.
+    'epub-drm': 'Este EPUB está protegido con DRM (cifrado) — no se puede leer su contenido en el navegador.',
+    'epub-sin-container': 'El EPUB no tiene un container.xml válido.',
+    'epub-sin-titulo': 'Sin título',
+    'epub-sin-contenido': 'No se encontró contenido legible dentro del EPUB.',
+    // Usadas por assets/js/pptx-visual.js, compartidas por powerpoint-a-pdf.html
+    // y powerpoint-a-imagenes.html.
+    'ppt-sin-tamano': 'No se pudo determinar el tamaño de las diapositivas.',
+    'ppt-tamano-invalido': 'Tamaño de diapositiva inválido.',
+    'ppt-render-inconsistente': 'El renderizado devolvió un tamaño de diapositiva inconsistente.'
   },
   en: {
     'nav-todas': 'All tools',
@@ -28,7 +61,33 @@ window.i18nComun = {
     'footer-privacidad': 'Privacy policy',
     'footer-terminos': 'Terms of use',
     'footer-creditos': 'Credits',
-    'footer-contacto': 'Contact'
+    'footer-contacto': 'Contact',
+    'nav-cat-pdf': 'PDF tools',
+    'nav-cat-excel': 'Excel / CSV tools',
+    'nav-cat-word': 'Word tools',
+    'nav-cat-powerpoint': 'PowerPoint tools',
+    'nav-cat-epub': 'EPUB tools',
+    'nav-cat-markdown': 'Markdown tools',
+    'nav-cat-texto': 'Plain text tools',
+    'nav-cat-generales': 'General tools',
+    'tema-aria': 'Switch to dark mode',
+    'tema-title': 'Toggle theme',
+    'previsualizar-fallo': '(preview unavailable)',
+    'generando-miniaturas': 'Generating thumbnails...',
+    'sufijo-pag': 'p.',
+    'quitar': 'Remove',
+    'vista-cuadricula': '▦ Grid',
+    'vista-lista': '☰ List',
+    'ppt-sin-diapositivas': 'No readable slides were found in this file.',
+    'ppt-diapositiva-titulo': '--- Slide {n} ---',
+    'ppt-sin-texto': '(no text)',
+    'epub-drm': 'This EPUB is DRM-protected (encrypted) — its content can’t be read in the browser.',
+    'epub-sin-container': 'The EPUB doesn’t have a valid container.xml.',
+    'epub-sin-titulo': 'Untitled',
+    'epub-sin-contenido': 'No readable content was found inside the EPUB.',
+    'ppt-sin-tamano': 'Couldn’t determine the size of the slides.',
+    'ppt-tamano-invalido': 'Invalid slide size.',
+    'ppt-render-inconsistente': 'Rendering returned an inconsistent slide size.'
   }
 };
 
@@ -42,6 +101,18 @@ window.i18nComun = {
     var comun = window.i18nComun[idioma] || window.i18nComun.es;
     return Object.assign({}, comun, pagina);
   }
+
+  // Traducción para texto generado por JavaScript (mensajes de botones en
+  // proceso, alertas de error, etiquetas de miniaturas, etc.), que data-i18n
+  // no puede cubrir porque no existe en el HTML hasta que el script corre.
+  // Cada página inline y los helpers compartidos (miniaturas.js, etc.) llaman
+  // a t('clave') en vez de escribir el texto fijo en español. Si la clave no
+  // está en ningún diccionario, devuelve la clave misma como último recurso.
+  window.t = function (clave) {
+    var dic = diccionario(idiomaActual());
+    return dic[clave] !== undefined ? dic[clave] : clave;
+  };
+  window.idiomaActual = idiomaActual;
 
   function aplicarIdioma(idioma) {
     var dic = diccionario(idioma);
@@ -66,6 +137,11 @@ window.i18nComun = {
       boton.textContent = idioma === 'es' ? 'EN' : 'ES';
       boton.setAttribute('title', idioma === 'es' ? 'Switch to English' : 'Cambiar a español');
     }
+
+    // Avisa a la página (código inline de cada herramienta) que el idioma
+    // cambió, para que pueda re-renderizar texto generado dinámicamente que
+    // ya estaba dibujado en pantalla (miniaturas, mensajes de resultado, etc.).
+    document.dispatchEvent(new CustomEvent('cambioIdioma', { detail: { idioma: idioma } }));
   }
 
   document.addEventListener('DOMContentLoaded', function () {

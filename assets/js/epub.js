@@ -174,20 +174,20 @@ async function leerEpub(archivo) {
   const zip = await JSZip.loadAsync(archivo);
 
   if (zip.file('META-INF/encryption.xml')) {
-    throw new Error('Este EPUB está protegido con DRM (cifrado) — no se puede leer su contenido en el navegador.');
+    throw new Error(window.t ? t('epub-drm') : 'Este EPUB está protegido con DRM (cifrado) — no se puede leer su contenido en el navegador.');
   }
 
   const parser = new DOMParser();
   const containerXml = await zip.file('META-INF/container.xml').async('string');
   const containerDoc = parser.parseFromString(containerXml, 'application/xml');
   const rutaOpf = containerDoc.getElementsByTagName('rootfile')[0]?.getAttribute('full-path');
-  if (!rutaOpf) throw new Error('El EPUB no tiene un container.xml válido.');
+  if (!rutaOpf) throw new Error(window.t ? t('epub-sin-container') : 'El EPUB no tiene un container.xml válido.');
   const carpetaOpf = rutaOpf.includes('/') ? rutaOpf.slice(0, rutaOpf.lastIndexOf('/') + 1) : '';
 
   const opfXml = await zip.file(rutaOpf).async('string');
   const opfDoc = parser.parseFromString(opfXml, 'application/xml');
 
-  const titulo = opfDoc.getElementsByTagName('dc:title')[0]?.textContent?.trim() || 'Sin título';
+  const titulo = opfDoc.getElementsByTagName('dc:title')[0]?.textContent?.trim() || (window.t ? t('epub-sin-titulo') : 'Sin título');
   const autor = opfDoc.getElementsByTagName('dc:creator')[0]?.textContent?.trim() || '';
 
   const manifest = {};
@@ -235,7 +235,7 @@ async function leerEpub(archivo) {
     capitulos.push({ titulo: tituloCapitulo, html: cuerpo.innerHTML });
   }
 
-  if (capitulos.length === 0) throw new Error('No se encontró contenido legible dentro del EPUB.');
+  if (capitulos.length === 0) throw new Error(window.t ? t('epub-sin-contenido') : 'No se encontró contenido legible dentro del EPUB.');
 
   return { titulo, autor, capitulos };
 }

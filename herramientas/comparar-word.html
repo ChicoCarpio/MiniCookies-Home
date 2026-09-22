@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comparar dos documentos Word gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Compará el texto de dos versiones de un documento Word (.docx) y mirá exactamente qué cambió, gratis y sin subir tus archivos a ningún servidor.">
+<title data-i18n="titulo-pagina">Comparar dos documentos Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Compará el texto de dos versiones de un documento Word (.docx) y mirá exactamente qué cambió, gratis y sin subir tus archivos a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -27,6 +27,44 @@
   .resultado-diff ins { background: #dcfce7; color: #166534; text-decoration: none; }
   .resultado-diff del { background: #fee2e2; color: #991b1b; text-decoration: none; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Comparar dos documentos Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Compará el texto de dos versiones de un documento Word (.docx) y mirá exactamente qué cambió, gratis y sin subir tus archivos a ningún servidor.',
+    'h1': 'Comparar dos documentos Word',
+    'intro': 'Elegí la versión original y la nueva. Te mostramos qué texto se agregó (en verde) y qué se quitó (en rojo).',
+    'aviso-antes': '⚠️ Compara el ',
+    'aviso-enfasis': 'texto',
+    'aviso-final': ' de ambos documentos, no el formato ni el diseño — un cambio de negrita o de tipografía sin cambiar palabras no se va a marcar como diferencia.',
+    'campo-original': 'Documento original',
+    'zona-a': '📝 Arrastrá el .docx original o hacé clic',
+    'campo-nuevo': 'Documento nuevo',
+    'zona-b': '📝 Arrastrá el .docx nuevo o hacé clic',
+    'campo-por-palabra': 'Comparar por palabra (si no, por línea)',
+    'boton-comparar': 'Comparar',
+    'boton-comparar-procesando': 'Comparando...',
+    'error-comparar': 'No se pudo comparar los documentos'
+  },
+  en: {
+    'titulo-pagina': 'Compare Two Word Documents Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Compare the text of two versions of a Word document (.docx) and see exactly what changed, free and without uploading your files anywhere.',
+    'h1': 'Compare two Word documents',
+    'intro': 'Pick the original version and the new one. We’ll show you what text was added (in green) and what was removed (in red).',
+    'aviso-antes': '⚠️ Compares the ',
+    'aviso-enfasis': 'text',
+    'aviso-final': ' of both documents, not the formatting or layout — a change in bold or typeface without changing words won’t be flagged as a difference.',
+    'campo-original': 'Original document',
+    'zona-a': '📝 Drag the original .docx or click',
+    'campo-nuevo': 'New document',
+    'zona-b': '📝 Drag the new .docx or click',
+    'campo-por-palabra': 'Compare by word (otherwise, by line)',
+    'boton-comparar': 'Compare',
+    'boton-comparar-procesando': 'Comparing...',
+    'error-comparar': 'Couldn’t compare the documents'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -34,32 +72,33 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/word.html">Herramientas de Word</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Comparar dos documentos Word</h1>
-  <p>Elegí la versión original y la nueva. Te mostramos qué texto se agregó (en verde) y qué se quitó (en rojo).</p>
+  <h1 data-i18n="h1">Comparar dos documentos Word</h1>
+  <p data-i18n="intro">Elegí la versión original y la nueva. Te mostramos qué texto se agregó (en verde) y qué se quitó (en rojo).</p>
   <p style="color:var(--texto-suave); font-size:0.9rem;">
-    ⚠️ Compara el <strong>texto</strong> de ambos documentos, no el formato ni el diseño — un cambio de
-    negrita o de tipografía sin cambiar palabras no se va a marcar como diferencia.
+    <span data-i18n="aviso-antes">⚠️ Compara el </span><strong data-i18n="aviso-enfasis">texto</strong><span data-i18n="aviso-final"> de ambos documentos, no el formato ni el diseño — un cambio de
+    negrita o de tipografía sin cambiar palabras no se va a marcar como diferencia.</span>
   </p>
 
   <div class="panel-herramienta">
     <div class="columnas">
       <label class="campo">
-        Documento original
+        <span data-i18n="campo-original">Documento original</span>
         <div class="zona-arrastre" id="zonaArrastreA" style="min-height:80px;">
-          📝 Arrastrá el .docx original o hacé clic
+          <span data-i18n="zona-a">📝 Arrastrá el .docx original o hacé clic</span>
           <input type="file" id="entradaA" accept=".docx" hidden>
         </div>
         <span id="nombreA" style="color:var(--texto-suave); font-size:0.85rem;"></span>
       </label>
       <label class="campo">
-        Documento nuevo
+        <span data-i18n="campo-nuevo">Documento nuevo</span>
         <div class="zona-arrastre" id="zonaArrastreB" style="min-height:80px;">
-          📝 Arrastrá el .docx nuevo o hacé clic
+          <span data-i18n="zona-b">📝 Arrastrá el .docx nuevo o hacé clic</span>
           <input type="file" id="entradaB" accept=".docx" hidden>
         </div>
         <span id="nombreB" style="color:var(--texto-suave); font-size:0.85rem;"></span>
@@ -68,20 +107,20 @@
 
     <div class="controles">
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="porPalabra" checked> Comparar por palabra (si no, por línea)
+        <input type="checkbox" id="porPalabra" checked> <span data-i18n="campo-por-palabra">Comparar por palabra (si no, por línea)</span>
       </label>
-      <button class="boton" id="botonComparar" disabled>Comparar</button>
+      <button class="boton" id="botonComparar" disabled data-i18n="boton-comparar">Comparar</button>
     </div>
 
     <div class="resultado-diff" id="resultadoDiff" style="display:none;"></div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
@@ -124,7 +163,7 @@ configurarZona(zonaArrastreB, entradaB, (archivo) => { archivoB = archivo; nombr
 
 botonComparar.addEventListener('click', async () => {
   botonComparar.disabled = true;
-  botonComparar.textContent = 'Comparando...';
+  botonComparar.textContent = t('boton-comparar-procesando');
   try {
     const [resultadoA, resultadoB] = await Promise.all([
       mammoth.extractRawText({ arrayBuffer: await archivoA.arrayBuffer() }),
@@ -144,14 +183,15 @@ botonComparar.addEventListener('click', async () => {
     });
     resultadoDiff.style.display = 'block';
   } catch (error) {
-    alert('No se pudo comparar los documentos: ' + error.message);
+    alert(t('error-comparar') + ': ' + error.message);
   } finally {
     botonComparar.disabled = false;
-    botonComparar.textContent = 'Comparar';
+    botonComparar.textContent = t('boton-comparar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

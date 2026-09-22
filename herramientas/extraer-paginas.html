@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Extraer páginas de PDF gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Extraé un rango o selección de páginas de un PDF a un archivo nuevo, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Extraer páginas de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraé un rango o selección de páginas de un PDF a un archivo nuevo, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -34,6 +34,52 @@
   }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Extraer páginas de PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extraé un rango o selección de páginas de un PDF a un archivo nuevo, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Extraer páginas',
+    'intro-antes': 'Elegí un PDF y elegí qué páginas sacar a un archivo nuevo — hacé clic en las miniaturas para seleccionarlas, o escribí un rango a mano (ej. ',
+    'intro-despues': '); se sincronizan solas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-paginas': 'Páginas a extraer',
+    'placeholder-rango': 'ej. 1-3,5,8-9',
+    'boton-extraer': 'Extraer páginas',
+    'boton-extraer-procesando': 'Extrayendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF extraído',
+    'modal-cerrar': 'Cerrar',
+    'zoom-title': 'Ver esta página más grande',
+    'prefijo-pag': 'Pág. ',
+    'error-vacio': 'Indicá al menos una página o rango.',
+    'error-formato': 'No entendí "{trozo}". Usá números y rangos, ej. 1-3,5.',
+    'error-rango': 'Página fuera de rango en "{trozo}" (el PDF tiene {max} páginas).',
+    'error-extraer': 'No se pudo extraer las páginas'
+  },
+  en: {
+    'titulo-pagina': 'Extract PDF Pages Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extract a range or selection of pages from a PDF into a new file, free and without uploading your file anywhere.',
+    'h1': 'Extract pages',
+    'intro-antes': 'Pick a PDF and choose which pages to pull into a new file — click the thumbnails to select them, or type a range by hand (e.g. ',
+    'intro-despues': '); they stay in sync automatically.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-paginas': 'Pages to extract',
+    'placeholder-rango': 'e.g. 1-3,5,8-9',
+    'boton-extraer': 'Extract pages',
+    'boton-extraer-procesando': 'Extracting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download extracted PDF',
+    'modal-cerrar': 'Close',
+    'zoom-title': 'View this page larger',
+    'prefijo-pag': 'Page ',
+    'error-vacio': 'Enter at least one page or range.',
+    'error-formato': 'Couldn’t understand "{trozo}". Use numbers and ranges, e.g. 1-3,5.',
+    'error-rango': 'Page out of range in "{trozo}" (the PDF has {max} pages).',
+    'error-extraer': 'Couldn’t extract the pages'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -41,50 +87,51 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Extraer páginas</h1>
-  <p>Elegí un PDF y elegí qué páginas sacar a un archivo nuevo — hacé clic en las miniaturas para seleccionarlas, o escribí un rango a mano (ej. <code>1-3,5,8-9</code>); se sincronizan solas.</p>
+  <h1 data-i18n="h1">Extraer páginas</h1>
+  <p><span data-i18n="intro-antes">Elegí un PDF y elegí qué páginas sacar a un archivo nuevo — hacé clic en las miniaturas para seleccionarlas, o escribí un rango a mano (ej. </span><code>1-3,5,8-9</code><span data-i18n="intro-despues">); se sincronizan solas.</span></p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Generando miniaturas...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
 
     <div class="contenedor-miniaturas vista-grid" id="gridMiniaturas"></div>
 
     <div class="controles">
       <label class="campo" style="flex:1; min-width:220px;">
-        Páginas a extraer
-        <input type="text" id="rangoPaginas" placeholder="ej. 1-3,5,8-9" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        <span data-i18n="campo-paginas">Páginas a extraer</span>
+        <input type="text" id="rangoPaginas" placeholder="ej. 1-3,5,8-9" data-i18n-attr="placeholder:placeholder-rango" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
-      <button class="boton" id="botonExtraer" disabled>Extraer páginas</button>
+      <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer páginas</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="paginas-extraidas.pdf">Descargar PDF extraído</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="paginas-extraidas.pdf" data-i18n="resultado-enlace">Descargar PDF extraído</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <div class="modal-vista-previa" id="modalVistaPrevia">
   <div class="modal-contenido">
-    <button type="button" class="modal-cerrar" id="cerrarModal" title="Cerrar">✕</button>
+    <button type="button" class="modal-cerrar" id="cerrarModal" title="Cerrar" data-i18n-attr="title:modal-cerrar">✕</button>
     <canvas id="canvasModal"></canvas>
   </div>
 </div>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -192,7 +239,7 @@ async function mostrarArchivo(archivo) {
       await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
 
       const indice = i - 1;
-      const tarjeta = crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `Pág. ${i}`, indiceOrden: indice });
+      const tarjeta = crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `${t('prefijo-pag')}${i}`, indiceOrden: indice });
       tarjeta.classList.add('seleccionable');
       tarjeta.addEventListener('click', () => alternarSeleccion(indice));
 
@@ -200,7 +247,7 @@ async function mostrarArchivo(archivo) {
       botonZoom.type = 'button';
       botonZoom.className = 'boton-zoom';
       botonZoom.textContent = '🔍';
-      botonZoom.title = 'Ver esta página más grande';
+      botonZoom.title = t('zoom-title');
       botonZoom.addEventListener('click', (e) => { e.stopPropagation(); abrirVistaAmpliada(i); });
       tarjeta.appendChild(botonZoom);
 
@@ -208,7 +255,7 @@ async function mostrarArchivo(archivo) {
     }
   } catch (error) {
     gridMiniaturas.innerHTML = '';
-    gridMiniaturas.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+    gridMiniaturas.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
   }
   cargando.style.display = 'none';
 }
@@ -231,15 +278,15 @@ zonaArrastre.addEventListener('drop', (e) => {
 function analizarRangoPaginas(texto, maxPagina) {
   const indices = [];
   const trozos = texto.split(',').map(t => t.trim()).filter(t => t !== '');
-  if (trozos.length === 0) throw new Error('Indicá al menos una página o rango.');
+  if (trozos.length === 0) throw new Error(t('error-vacio'));
 
   for (const trozo of trozos) {
     const coincidencia = trozo.match(/^(\d+)(?:-(\d+))?$/);
-    if (!coincidencia) throw new Error(`No entendí "${trozo}". Usá números y rangos, ej. 1-3,5.`);
+    if (!coincidencia) throw new Error(t('error-formato').replace('{trozo}', trozo));
     const inicio = parseInt(coincidencia[1], 10);
     const fin = coincidencia[2] ? parseInt(coincidencia[2], 10) : inicio;
     if (inicio < 1 || fin < 1 || inicio > maxPagina || fin > maxPagina) {
-      throw new Error(`Página fuera de rango en "${trozo}" (el PDF tiene ${maxPagina} páginas).`);
+      throw new Error(t('error-rango').replace('{trozo}', trozo).replace('{max}', maxPagina));
     }
     if (inicio <= fin) {
       for (let p = inicio; p <= fin; p++) indices.push(p - 1);
@@ -252,7 +299,7 @@ function analizarRangoPaginas(texto, maxPagina) {
 
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
-  botonExtraer.textContent = 'Extrayendo...';
+  botonExtraer.textContent = t('boton-extraer-procesando');
   try {
     const indices = analizarRangoPaginas(rangoPaginas.value, totalPaginas);
 
@@ -268,14 +315,15 @@ botonExtraer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo extraer las páginas: ' + error.message);
+    alert(t('error-extraer') + ': ' + error.message);
   } finally {
     botonExtraer.disabled = false;
-    botonExtraer.textContent = 'Extraer páginas';
+    botonExtraer.textContent = t('boton-extraer');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

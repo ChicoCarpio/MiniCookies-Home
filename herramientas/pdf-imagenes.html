@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir PDF e imágenes gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí imágenes a PDF o un PDF a imágenes, en los dos sentidos — gratis y sin subir tus archivos a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir PDF e imágenes gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí imágenes a PDF o un PDF a imágenes, en los dos sentidos — gratis y sin subir tus archivos a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,6 +13,64 @@
   .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
   .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PDF e imágenes gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí imágenes a PDF o un PDF a imágenes, en los dos sentidos — gratis y sin subir tus archivos a ningún servidor.',
+    'h1': 'PDF ↔ Imágenes',
+    'intro': 'Convertí imágenes a PDF, o un PDF a imágenes, según lo que necesites.',
+    'dir-img-a-pdf': 'Imágenes → PDF',
+    'dir-pdf-a-img': 'PDF → Imágenes',
+    'img-intro': 'Elegí una o varias imágenes (JPG o PNG). Cada una se convierte en una página — arrastralas para ordenarlas.',
+    'zona-arrastre-img': '🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas',
+    'boton-a-pdf': 'Convertir a PDF',
+    'boton-a-pdf-procesando': 'Convirtiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace-pdf': 'Descargar PDF',
+    'pdf-intro': 'Elegí un PDF y descargá cada página como imagen, dentro de un .zip.',
+    'zona-arrastre-pdf': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-formato': 'Formato',
+    'campo-calidad': 'Calidad de render',
+    'opcion-normal': 'Normal',
+    'opcion-alta': 'Alta',
+    'opcion-muy-alta': 'Muy alta',
+    'boton-a-imagenes': 'Convertir a imágenes',
+    'resultado-enlace-zip': 'Descargar .zip con las imágenes',
+    'progreso-pagina': 'Procesando página {actual} de {total}...',
+    'progreso-zip': 'Generando .zip...',
+    'error-a-pdf': 'No se pudo convertir a PDF',
+    'error-a-imagenes': 'No se pudo convertir el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Convert PDF and Images Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert images to PDF or a PDF to images, in either direction — free and without uploading your files anywhere.',
+    'h1': 'PDF ↔ Images',
+    'intro': 'Convert images to PDF, or a PDF to images, whichever you need.',
+    'dir-img-a-pdf': 'Images → PDF',
+    'dir-pdf-a-img': 'PDF → Images',
+    'img-intro': 'Pick one or more images (JPG or PNG). Each one becomes a page — drag them to reorder.',
+    'zona-arrastre-img': '🖼️ Drag your images here or click to choose them',
+    'boton-a-pdf': 'Convert to PDF',
+    'boton-a-pdf-procesando': 'Converting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace-pdf': 'Download PDF',
+    'pdf-intro': 'Pick a PDF and download each page as an image, inside a .zip.',
+    'zona-arrastre-pdf': '📄 Drag your PDF here or click to choose it',
+    'campo-formato': 'Format',
+    'campo-calidad': 'Render quality',
+    'opcion-normal': 'Normal',
+    'opcion-alta': 'High',
+    'opcion-muy-alta': 'Very high',
+    'boton-a-imagenes': 'Convert to images',
+    'resultado-enlace-zip': 'Download .zip with the images',
+    'progreso-pagina': 'Processing page {actual} of {total}...',
+    'progreso-zip': 'Generating .zip...',
+    'error-a-pdf': 'Couldn’t convert to PDF',
+    'error-a-imagenes': 'Couldn’t convert the PDF'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -20,76 +78,77 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/pdf.html">Herramientas de PDF</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>PDF ↔ Imágenes</h1>
-  <p>Convertí imágenes a PDF, o un PDF a imágenes, según lo que necesites.</p>
+  <h1 data-i18n="h1">PDF ↔ Imágenes</h1>
+  <p data-i18n="intro">Convertí imágenes a PDF, o un PDF a imágenes, según lo que necesites.</p>
 
   <div class="panel-herramienta">
     <div class="selector-direccion">
-      <label><input type="radio" name="direccion" value="img-a-pdf" checked> Imágenes → PDF</label>
-      <label><input type="radio" name="direccion" value="pdf-a-img"> PDF → Imágenes</label>
+      <label><input type="radio" name="direccion" value="img-a-pdf" checked> <span data-i18n="dir-img-a-pdf">Imágenes → PDF</span></label>
+      <label><input type="radio" name="direccion" value="pdf-a-img"> <span data-i18n="dir-pdf-a-img">PDF → Imágenes</span></label>
     </div>
 
     <!-- Imágenes → PDF -->
     <div id="panelImgAPdf">
-      <p>Elegí una o varias imágenes (JPG o PNG). Cada una se convierte en una página — arrastralas para ordenarlas.</p>
+      <p data-i18n="img-intro">Elegí una o varias imágenes (JPG o PNG). Cada una se convierte en una página — arrastralas para ordenarlas.</p>
       <div class="zona-arrastre" id="zonaArrastreImg">
-        🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas
+        <span data-i18n="zona-arrastre-img">🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas</span>
         <input type="file" id="entradaImagenes" accept="image/png,image/jpeg" multiple hidden>
       </div>
       <div id="envoltorioSelectorVista"></div>
       <div class="contenedor-miniaturas" id="gridArchivos"></div>
       <div class="controles">
-        <button class="boton" id="botonAPdf" disabled>Convertir a PDF</button>
+        <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
       </div>
       <div class="resultado" id="resultadoAPdf">
-        ✅ Listo. <a id="enlaceDescargaPdf" download="imagenes.pdf">Descargar PDF</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="imagenes.pdf" data-i18n="resultado-enlace-pdf">Descargar PDF</a>
       </div>
     </div>
 
     <!-- PDF → Imágenes -->
     <div id="panelPdfAImg" style="display:none;">
-      <p>Elegí un PDF y descargá cada página como imagen, dentro de un .zip.</p>
+      <p data-i18n="pdf-intro">Elegí un PDF y descargá cada página como imagen, dentro de un .zip.</p>
       <div class="zona-arrastre" id="zonaArrastrePdf">
-        📄 Arrastrá tu PDF acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaPdf" accept="application/pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaPdf"></div>
       <div class="controles">
         <label class="campo">
-          Formato
+          <span data-i18n="campo-formato">Formato</span>
           <select id="formato">
             <option value="image/png">PNG</option>
             <option value="image/jpeg">JPG</option>
           </select>
         </label>
         <label class="campo">
-          Calidad de render
+          <span data-i18n="campo-calidad">Calidad de render</span>
           <select id="escala">
-            <option value="1.5">Normal</option>
-            <option value="2" selected>Alta</option>
-            <option value="3">Muy alta</option>
+            <option value="1.5" data-i18n="opcion-normal">Normal</option>
+            <option value="2" selected data-i18n="opcion-alta">Alta</option>
+            <option value="3" data-i18n="opcion-muy-alta">Muy alta</option>
           </select>
         </label>
-        <button class="boton" id="botonAImagenes" disabled>Convertir a imágenes</button>
+        <button class="boton" id="botonAImagenes" disabled data-i18n="boton-a-imagenes">Convertir a imágenes</button>
       </div>
       <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
       <div class="resultado" id="resultadoAImagenes">
-        ✅ Listo. <a id="enlaceDescargaZip" download="paginas-pdf.zip">Descargar .zip con las imágenes</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaZip" download="paginas-pdf.zip" data-i18n="resultado-enlace-zip">Descargar .zip con las imágenes</a>
       </div>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -150,7 +209,7 @@ async function agregarArchivos(listaFileList) {
       });
     } catch (error) {
       tarjeta = crearTarjetaMiniatura({
-        etiqueta: `${archivo.name} (no se pudo previsualizar)`,
+        etiqueta: `${archivo.name} ${t('previsualizar-fallo')}`,
         conQuitar: true,
         alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
         arrastrable: true,
@@ -174,7 +233,7 @@ zonaArrastreImg.addEventListener('drop', (e) => {
 
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
-  botonAPdf.textContent = 'Convirtiendo...';
+  botonAPdf.textContent = t('boton-a-pdf-procesando');
   try {
     const { PDFDocument } = PDFLib;
     const pdf = await PDFDocument.create();
@@ -196,10 +255,10 @@ botonAPdf.addEventListener('click', async () => {
     enlaceDescargaPdf.href = URL.createObjectURL(blob);
     resultadoAPdf.classList.add('visible');
   } catch (error) {
-    alert('No se pudo convertir a PDF: ' + error.message);
+    alert(t('error-a-pdf') + ': ' + error.message);
   } finally {
     botonAPdf.disabled = false;
-    botonAPdf.textContent = 'Convertir a PDF';
+    botonAPdf.textContent = t('boton-a-pdf');
   }
 });
 
@@ -219,9 +278,9 @@ async function mostrarArchivoPdf(archivo) {
   listaPdf.innerHTML = '';
   try {
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} pág.)` }));
+    listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
   } catch (error) {
-    listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} (no se pudo previsualizar)` }));
+    listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
   }
   botonAImagenes.disabled = false;
   resultadoAImagenes.classList.remove('visible');
@@ -255,7 +314,7 @@ botonAImagenes.addEventListener('click', async () => {
     const cantidadDigitos = String(pdf.numPages).length;
 
     for (let i = 1; i <= pdf.numPages; i++) {
-      progreso.textContent = `Procesando página ${i} de ${pdf.numPages}...`;
+      progreso.textContent = t('progreso-pagina').replace('{actual}', i).replace('{total}', pdf.numPages);
       const pagina = await pdf.getPage(i);
       const viewport = pagina.getViewport({ scale: escala });
       const canvas = document.createElement('canvas');
@@ -268,12 +327,12 @@ botonAImagenes.addEventListener('click', async () => {
       zip.file(`pagina-${numero}.${extension}`, blob);
     }
 
-    progreso.textContent = 'Generando .zip...';
+    progreso.textContent = t('progreso-zip');
     const blobZip = await zip.generateAsync({ type: 'blob' });
     enlaceDescargaZip.href = URL.createObjectURL(blobZip);
     resultadoAImagenes.classList.add('visible');
   } catch (error) {
-    alert('No se pudo convertir el PDF: ' + error.message);
+    alert(t('error-a-imagenes') + ': ' + error.message);
   } finally {
     botonAImagenes.disabled = false;
     progreso.style.display = 'none';
@@ -282,5 +341,6 @@ botonAImagenes.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>
