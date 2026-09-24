@@ -187,8 +187,6 @@ function actualizarVistaPreviaMarca() {
   const altoCelda = canvas.height / filas;
   const tamano = calcularTamanoAjustadoCanvas(contexto, texto, anchoCelda, altoCelda, tamanoMaximoPx);
   contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
-  const anchoTexto = contexto.measureText(texto).width;
-
   contexto.save();
   contexto.globalAlpha = opacidad;
   contexto.fillStyle = 'rgb(128,128,128)';
@@ -198,8 +196,10 @@ function actualizarVistaPreviaMarca() {
       const centroX = anchoCelda * c + anchoCelda / 2;
       const centroY = altoCelda * f + altoCelda / 2;
       contexto.save();
-      contexto.translate(centroX - anchoTexto / 2, centroY);
+      contexto.translate(centroX, centroY);
       contexto.rotate(-45 * Math.PI / 180);
+      contexto.textAlign = 'center';
+      contexto.textBaseline = 'middle';
       contexto.fillText(texto, 0, 0);
       contexto.restore();
       contador++;
@@ -235,7 +235,7 @@ elOpacidad.addEventListener('input', actualizarVistaPreviaMarca);
 elRepeticiones.addEventListener('input', actualizarVistaPreviaMarca);
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -279,8 +279,13 @@ botonAplicar.addEventListener('click', async () => {
     const cantidad = parseInt(elRepeticiones.value, 10);
     const { filas, columnas } = calcularFilasColumnas(cantidad);
 
+    const angulo = 45 * Math.PI / 180;
     pdf.getPages().forEach((pagina) => {
-      const { width, height } = pagina.getSize();
+      // Se trabaja sobre la página tal como se ve (con /Rotate): si no, en
+      // un PDF escaneado o rotado la marca quedaba girada y descentrada.
+      const marco = marcoVisualPagina(pagina);
+      const width = marco.ancho;
+      const height = marco.alto;
       const anchoCelda = width / columnas;
       const altoCelda = height / filas;
       const tamanoFuente = calcularTamanoAjustado(fuente, texto, anchoCelda, altoCelda, tamanoMaximo);
@@ -291,14 +296,22 @@ botonAplicar.addEventListener('click', async () => {
         for (let c = 0; c < columnas && contador < cantidad; c++) {
           const centroX = anchoCelda * c + anchoCelda / 2;
           const centroY = altoCelda * f + altoCelda / 2;
+          // drawText gira desde el inicio de la línea de base: se retrocede
+          // medio ancho a lo largo del texto y media altura de mayúscula
+          // perpendicular a él, para que el texto quede centrado en la celda.
+          const altoLetra = fuente.heightAtSize(tamanoFuente, { descender: false }) * 0.7;
+          const origen = marco.aPagina(
+            centroX - (anchoTexto / 2) * Math.cos(angulo) + (altoLetra / 2) * Math.sin(angulo),
+            centroY - (anchoTexto / 2) * Math.sin(angulo) - (altoLetra / 2) * Math.cos(angulo)
+          );
           pagina.drawText(texto, {
-            x: centroX - anchoTexto / 2,
-            y: centroY,
+            x: origen.x,
+            y: origen.y,
             size: tamanoFuente,
             font: fuente,
             color: rgb(0.5, 0.5, 0.5),
             opacity: opacidad,
-            rotate: degrees(45),
+            rotate: degrees(45 + marco.rotacion),
           });
           contador++;
         }
@@ -310,7 +323,7 @@ botonAplicar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-aplicar') + ': ' + error.message);
+    alert(t('error-aplicar') + ': ' + detalleError(error));
   } finally {
     botonAplicar.disabled = false;
     botonAplicar.textContent = t('boton-aplicar');

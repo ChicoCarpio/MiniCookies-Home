@@ -3,12 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dividir Markdown gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Separá un archivo Markdown (.md) en varios archivos, uno por cada encabezado de primer nivel, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Dividir Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá un archivo Markdown (.md) en varios archivos, uno por cada encabezado de primer nivel, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir Markdown gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Separá un archivo Markdown (.md) en varios archivos, uno por cada encabezado de primer nivel, gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Dividir Markdown',
+    'intro-antes': 'Elegí un archivo .md. Se separa en un .md por cada encabezado de primer nivel (',
+    'intro-despues': '), empaquetados en un .zip.',
+    'boton-dividir': 'Dividir',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-enlace': 'Descargar .zip con las secciones',
+    'error-pocas-secciones': 'El archivo tiene menos de dos encabezados de primer nivel — no hay nada que dividir.',
+    'error-dividir': 'No se pudo dividir el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Split Markdown Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split a Markdown file (.md) into several files, one per top-level heading, free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .md file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Split Markdown',
+    'intro-antes': 'Pick a .md file. It’s split into one .md per top-level heading (',
+    'intro-despues': '), packed into a .zip.',
+    'boton-dividir': 'Split',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-enlace': 'Download .zip with the sections',
+    'error-pocas-secciones': 'The file has fewer than two top-level headings — there’s nothing to split.',
+    'error-dividir': 'Couldn’t split the file'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,40 +48,42 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/markdown.html">Herramientas de Markdown</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/markdown.html" data-i18n="nav-cat-markdown">Herramientas de Markdown</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Dividir Markdown</h1>
-  <p>Elegí un archivo .md. Se separa en un .md por cada encabezado de primer nivel (<code>#</code>), empaquetados en un .zip.</p>
+  <h1 data-i18n="h1">Dividir Markdown</h1>
+  <p><span data-i18n="intro-antes">Elegí un archivo .md. Se separa en un .md por cada encabezado de primer nivel (</span><code>#</code><span data-i18n="intro-despues">), empaquetados en un .zip.</span></p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".md,.markdown" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonDividir" disabled>Dividir</button>
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="secciones-markdown.zip">Descargar .zip con las secciones</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="secciones-markdown.zip" data-i18n="resultado-enlace">Descargar .zip con las secciones</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -66,7 +100,7 @@ function dividirMarkdownEnSecciones(texto) {
   let actual = null;
   lineas.forEach((linea) => {
     if (/^#\s+/.test(linea)) {
-      actual = { titulo: linea.replace(/^#\s+/, '').trim() || 'Sin título', lineas: [linea] };
+      actual = { titulo: linea.replace(/^#\s+/, '').trim() || t('epub-sin-titulo'), lineas: [linea] };
       bloques.push(actual);
     } else if (actual) {
       actual.lineas.push(linea);
@@ -80,7 +114,7 @@ function dividirMarkdownEnSecciones(texto) {
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonDividir.disabled = false;
   resultado.classList.remove('visible');
 }
@@ -102,11 +136,11 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonDividir.addEventListener('click', async () => {
   botonDividir.disabled = true;
-  botonDividir.textContent = 'Dividiendo...';
+  botonDividir.textContent = t('boton-dividir-procesando');
   try {
     const texto = await archivoActual.text();
     const secciones = dividirMarkdownEnSecciones(texto);
-    if (secciones.length < 2) throw new Error('El archivo tiene menos de dos encabezados de primer nivel — no hay nada que dividir.');
+    if (secciones.length < 2) throw new Error(t('error-pocas-secciones'));
 
     const zip = new JSZip();
     const cantidadDigitos = String(secciones.length).length;
@@ -116,18 +150,19 @@ botonDividir.addEventListener('click', async () => {
       zip.file(`${numero}-${nombreLimpio}.md`, seccion.texto);
     });
 
-    const blobZip = await zip.generateAsync({ type: 'blob' });
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo dividir el archivo: ' + error.message);
+    alert(t('error-dividir') + ': ' + error.message);
   } finally {
     botonDividir.disabled = false;
-    botonDividir.textContent = 'Dividir';
+    botonDividir.textContent = t('boton-dividir');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

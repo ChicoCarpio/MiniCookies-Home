@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir Markdown y Word gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí Markdown a Word (.docx) o Word a Markdown, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir Markdown y Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí Markdown a Word (.docx) o Word a Markdown, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -28,6 +28,52 @@
   .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
   .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir Markdown y Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí Markdown a Word (.docx) o Word a Markdown, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Markdown ↔ Word',
+    'intro': 'Convertí Markdown a un documento Word editable, o un Word a Markdown, según lo que necesites.',
+    'vista-previa': 'Vista previa',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-generar': 'Descargar .docx',
+    'boton-generar-procesando': 'Generando...',
+    'nota-md-word': 'Se conservan títulos, negrita, cursiva, listas, tablas, links (como texto) e imágenes. Bloques de código se conservan como texto plano.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'boton-convertir': 'Convertir a Markdown',
+    'boton-convertir-procesando': 'Convirtiendo...',
+    'boton-copiar-md': 'Copiar Markdown',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-md': 'Descargar .md',
+    'error-md-vacio': 'Escribí algo de Markdown primero.',
+    'error-generar': 'No se pudo generar el documento',
+    'advertencias': '⚠️ {n} advertencia(s) al leer el documento (puede haber elementos que no se transfirieron perfectamente).',
+    'error-convertir': 'No se pudo convertir el documento'
+  },
+  en: {
+    'titulo-pagina': 'Convert Markdown and Word Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert Markdown to an editable Word document or Word to Markdown, free and without uploading your file anywhere.',
+    'h1': 'Markdown ↔ Word',
+    'intro': 'Convert Markdown to an editable Word document, or Word to Markdown, whichever you need.',
+    'vista-previa': 'Preview',
+    'campo-nombre': 'File name',
+    'boton-generar': 'Download .docx',
+    'boton-generar-procesando': 'Generating...',
+    'nota-md-word': 'Headings, bold, italics, lists, tables, links (as text) and images are kept. Code blocks are kept as plain text.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'boton-convertir': 'Convert to Markdown',
+    'boton-convertir-procesando': 'Converting...',
+    'boton-copiar-md': 'Copy Markdown',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-md': 'Download .md',
+    'error-md-vacio': 'Type some Markdown first.',
+    'error-generar': 'Couldn’t generate the document',
+    'advertencias': '⚠️ {n} warning(s) while reading the document (some elements may not have transferred perfectly).',
+    'error-convertir': 'Couldn’t convert the document'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -35,13 +81,14 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/markdown.html">Herramientas de Markdown</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/markdown.html" data-i18n="nav-cat-markdown">Herramientas de Markdown</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Markdown ↔ Word</h1>
-  <p>Convertí Markdown a un documento Word editable, o un Word a Markdown, según lo que necesites.</p>
+  <h1 data-i18n="h1">Markdown ↔ Word</h1>
+  <p data-i18n="intro">Convertí Markdown a un documento Word editable, o un Word a Markdown, según lo que necesites.</p>
 
   <div class="panel-herramienta">
     <div class="selector-direccion">
@@ -63,50 +110,47 @@ Este es un ejemplo de **Markdown** con:
 - [Un link](https://ejemplo.com)</textarea>
         </label>
         <label class="campo">
-          Vista previa
+          <span data-i18n="vista-previa">Vista previa</span>
           <div class="vista-previa-documento" id="vistaPreviaMd"></div>
         </label>
       </div>
       <div class="controles">
         <label class="campo">
-          Nombre del archivo
+          <span data-i18n="campo-nombre">Nombre del archivo</span>
           <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
-        <button class="boton" id="botonGenerar" type="button">Descargar .docx</button>
+        <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Descargar .docx</button>
       </div>
-      <p style="color:var(--texto-suave); font-size:0.9rem; margin-top:12px;">
-        Se conservan títulos, negrita, cursiva, listas, tablas, links (como texto) e imágenes.
-        Bloques de código se conservan como texto plano.
-      </p>
+      <p style="color:var(--texto-suave); font-size:0.9rem; margin-top:12px;" data-i18n="nota-md-word">Se conservan títulos, negrita, cursiva, listas, tablas, links (como texto) e imágenes. Bloques de código se conservan como texto plano.</p>
     </div>
 
     <!-- Word → Markdown -->
     <div id="panelWordAMd" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastre">
-        📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaArchivo" accept=".docx" hidden>
       </div>
       <ul class="lista-archivos" id="listaArchivo"></ul>
       <div class="controles">
-        <button class="boton" id="botonConvertir" disabled>Convertir a Markdown</button>
+        <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir a Markdown</button>
       </div>
       <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
       <div id="bloqueResultado" style="display:none; margin-top:20px;">
         <textarea id="markdownResultado" style="min-height:320px; font-family:monospace;"></textarea>
         <div class="controles">
-          <button class="boton" id="botonCopiarMd" type="button">Copiar Markdown</button>
-          <a class="boton" id="enlaceDescargaMd" download="documento.md" style="text-decoration:none; display:inline-block;">Descargar .md</a>
+          <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
+          <a class="boton" id="enlaceDescargaMd" download="documento.md" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
@@ -114,6 +158,7 @@ Este es un ejemplo de **Markdown** con:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const panelMdAWord = document.getElementById('panelMdAWord');
 const panelWordAMd = document.getElementById('panelWordAMd');
@@ -131,7 +176,7 @@ const entradaMarkdown = document.getElementById('entradaMarkdown');
 const vistaPreviaMd = document.getElementById('vistaPreviaMd');
 
 function actualizarVistaPreviaMd() {
-  vistaPreviaMd.innerHTML = marked.parse(entradaMarkdown.value);
+  vistaPreviaMd.innerHTML = sanitizarHtml(marked.parse(entradaMarkdown.value));
 }
 entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
 actualizarVistaPreviaMd();
@@ -139,13 +184,13 @@ actualizarVistaPreviaMd();
 document.getElementById('botonGenerar').addEventListener('click', async () => {
   const boton = document.getElementById('botonGenerar');
   boton.disabled = true;
-  boton.textContent = 'Generando...';
+  boton.textContent = t('boton-generar-procesando');
   try {
     const contenedor = document.createElement('div');
-    contenedor.innerHTML = marked.parse(entradaMarkdown.value);
+    contenedor.innerHTML = sanitizarHtml(marked.parse(entradaMarkdown.value));
 
     const parrafos = await contenidoAParrafos(contenedor);
-    if (parrafos.length === 0) throw new Error('Escribí algo de Markdown primero.');
+    if (parrafos.length === 0) throw new Error(t('error-md-vacio'));
 
     const documento = new docx.Document({
       numbering: NUMERACION_DOCX_CONFIG,
@@ -160,10 +205,10 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
     enlace.download = `${nombreArchivo}.docx`;
     enlace.click();
   } catch (error) {
-    alert('No se pudo generar el documento: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     boton.disabled = false;
-    boton.textContent = 'Descargar .docx';
+    boton.textContent = t('boton-generar');
   }
 });
 
@@ -184,7 +229,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonConvertir.disabled = false;
   bloqueResultado.style.display = 'none';
   advertencias.style.display = 'none';
@@ -207,7 +252,7 @@ zonaArrastre.addEventListener('drop', (e) => {
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
-  botonConvertir.textContent = 'Convirtiendo...';
+  botonConvertir.textContent = t('boton-convertir-procesando');
   try {
     const arrayBuffer = await archivoActual.arrayBuffer();
     const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
@@ -219,24 +264,25 @@ botonConvertir.addEventListener('click', async () => {
     bloqueResultado.style.display = 'block';
 
     if (resultadoMammoth.messages.length > 0) {
-      advertencias.textContent = `⚠️ ${resultadoMammoth.messages.length} advertencia(s) al leer el documento (puede haber elementos que no se transfirieron perfectamente).`;
+      advertencias.textContent = t('advertencias').replace('{n}', resultadoMammoth.messages.length);
       advertencias.style.display = 'block';
     }
   } catch (error) {
-    alert('No se pudo convertir el documento: ' + error.message);
+    alert(t('error-convertir') + ': ' + error.message);
   } finally {
     botonConvertir.disabled = false;
-    botonConvertir.textContent = 'Convertir a Markdown';
+    botonConvertir.textContent = t('boton-convertir');
   }
 });
 
 botonCopiarMd.addEventListener('click', async () => {
   await navigator.clipboard.writeText(markdownResultado.value);
-  botonCopiarMd.textContent = '¡Copiado!';
-  setTimeout(() => { botonCopiarMd.textContent = 'Copiar Markdown'; }, 1500);
+  botonCopiarMd.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiarMd.textContent = t('boton-copiar-md'); }, 1500);
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -25,7 +25,8 @@ window.i18nPagina = {
     'etiqueta-original': 'Original: página {n}',
     'quitar-pagina-title': 'Eliminar esta página',
     'error-vacio': 'No quedan páginas para guardar.',
-    'error-guardar': 'No se pudo guardar el PDF'
+    'error-guardar': 'No se pudo guardar el PDF',
+    'error-abrir': 'No se pudo abrir el PDF'
   },
   en: {
     'titulo-pagina': 'Reorder and Manage PDF Pages — Herramientas Ofimáticas',
@@ -41,7 +42,8 @@ window.i18nPagina = {
     'etiqueta-original': 'Original: page {n}',
     'quitar-pagina-title': 'Delete this page',
     'error-vacio': 'No pages left to save.',
-    'error-guardar': 'Couldn’t save the PDF'
+    'error-guardar': 'Couldn’t save the PDF',
+    'error-abrir': 'Couldn’t open the PDF'
   }
 };
 </script>
@@ -93,6 +95,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -113,6 +116,8 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let bytesOriginales = null;
 let ordenPaginas = []; // índices 0-based en el orden actual (lo que sobrevive tras eliminar/reordenar)
 let ordenOriginal = [];
+let archivoActual = null; // para "Restaurar" (entradaArchivo.files está vacío si el PDF se arrastró)
+let cargaActual = 0;      // si se elige otro PDF mientras se generan miniaturas, la carga vieja se descarta
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
 entradaArchivo.addEventListener('change', (e) => { if (e.target.files[0]) cargarPdf(e.target.files[0]); });
@@ -121,36 +126,46 @@ zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('
 zonaArrastre.addEventListener('drop', (e) => {
   e.preventDefault();
   zonaArrastre.classList.remove('activa');
-  const archivo = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+  const archivo = [...e.dataTransfer.files].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) cargarPdf(archivo);
 });
 
 async function cargarPdf(archivo) {
+  const estaCarga = ++cargaActual;
+  archivoActual = archivo;
   resultado.classList.remove('visible');
   controles.style.display = 'none';
   gridMiniaturas.innerHTML = '';
   cargando.style.display = 'block';
 
-  bytesOriginales = await archivo.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: bytesOriginales.slice(0) }).promise;
+  try {
+    bytesOriginales = await archivo.arrayBuffer();
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytesOriginales.slice(0), isEvalSupported: false }).promise;
 
-  ordenPaginas = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const pagina = await pdf.getPage(i);
-    const viewport = pagina.getViewport({ scale: 0.3 });
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    ordenPaginas = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pagina = await pdf.getPage(i);
+      const viewport = pagina.getViewport({ scale: 0.3 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      if (estaCarga !== cargaActual) return;
 
-    const indice = i - 1;
-    ordenPaginas.push(indice);
-    agregarMiniatura(canvas, indice);
+      const indice = i - 1;
+      ordenPaginas.push(indice);
+      agregarMiniatura(canvas, indice);
+    }
+
+    ordenOriginal = [...ordenPaginas];
+    controles.style.display = 'flex';
+  } catch (error) {
+    if (estaCarga === cargaActual) alert(t('error-abrir') + ': ' + detalleError(error));
+  } finally {
+    if (estaCarga === cargaActual) cargando.style.display = 'none';
   }
-
-  ordenOriginal = [...ordenPaginas];
-  cargando.style.display = 'none';
-  controles.style.display = 'flex';
 }
 
 function agregarMiniatura(canvas, indiceOriginal) {
@@ -183,10 +198,7 @@ function agregarMiniatura(canvas, indiceOriginal) {
     e.preventDefault();
     const arrastrando = gridMiniaturas.querySelector('.arrastrando');
     if (!arrastrando || arrastrando === tarjeta) return;
-    const rectangulo = tarjeta.getBoundingClientRect();
-    const despuesDelMedio = e.clientX > rectangulo.left + rectangulo.width / 2;
-    tarjeta.parentNode.insertBefore(arrastrando, despuesDelMedio ? tarjeta.nextSibling : tarjeta);
-    sincronizarOrdenDesdeDOM();
+    if (insertarSegunPosicion(arrastrando, tarjeta, e.clientX, e.clientY)) sincronizarOrdenDesdeDOM();
   });
 
   gridMiniaturas.appendChild(tarjeta);
@@ -196,9 +208,10 @@ function sincronizarOrdenDesdeDOM() {
   ordenPaginas = [...gridMiniaturas.children].map(el => parseInt(el.dataset.indiceOriginal, 10));
 }
 
+habilitarReordenTactil(gridMiniaturas, '.miniatura-pagina', sincronizarOrdenDesdeDOM);
+
 botonRestaurar.addEventListener('click', async () => {
-  const archivo = entradaArchivo.files[0];
-  if (archivo) cargarPdf(archivo);
+  if (archivoActual) cargarPdf(archivoActual);
 });
 
 botonGuardar.addEventListener('click', async () => {
@@ -217,7 +230,7 @@ botonGuardar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-guardar') + ': ' + error.message);
+    alert(t('error-guardar') + ': ' + detalleError(error));
   } finally {
     botonGuardar.disabled = false;
     botonGuardar.textContent = t('boton-guardar');

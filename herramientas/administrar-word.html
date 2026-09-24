@@ -102,7 +102,9 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -121,7 +123,7 @@ function renderizarLista() {
     const item = document.createElement('li');
     item.draggable = true;
     item.dataset.id = seccion.id;
-    item.innerHTML = `<span>${seccion.titulo}</span>`;
+    item.innerHTML = `<span>${escaparHtml(seccion.titulo)}</span>`;
     const quitar = document.createElement('button');
     quitar.className = 'quitar';
     quitar.textContent = '✕';
@@ -148,10 +150,13 @@ listaSecciones.addEventListener('dragover', (e) => {
   const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
   objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
 });
-listaSecciones.addEventListener('drop', () => {
+function sincronizarOrdenLista() {
   const idsEnOrden = [...listaSecciones.children].map(li => parseInt(li.dataset.id, 10));
   secciones.sort((a, b) => idsEnOrden.indexOf(a.id) - idsEnOrden.indexOf(b.id));
-});
+}
+listaSecciones.addEventListener('drop', sincronizarOrdenLista);
+listaSecciones.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaSecciones, 'li', sincronizarOrdenLista);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));

@@ -150,7 +150,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -190,7 +190,7 @@ botonProteger.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-proteger') + ': ' + error.message);
+    alert(t('error-proteger') + ': ' + detalleError(error));
   } finally {
     botonProteger.disabled = false;
     botonProteger.textContent = t('boton-proteger');

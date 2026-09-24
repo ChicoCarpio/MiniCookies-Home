@@ -105,6 +105,8 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -113,17 +115,17 @@ const listaHojas = document.getElementById('listaHojas');
 const botonGuardar = document.getElementById('botonGuardar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
-const parser = new DOMParser();
 
 let libroActual = null; // SheetJS — solo para la vista previa de celdas
 let zipActual = null;   // JSZip — para reordenar/eliminar sin perder formato
+let bytesActuales = null;
 let nombresHojas = [];
 let extensionActual = 'xlsx';
 let nombreBaseActual = 'excel-reordenado';
 
 function escaparHtml(valor) {
   const texto = valor === null || valor === undefined ? '' : String(valor);
-  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // Mini tabla con las primeras celdas de la hoja (sin el estilo/formato
@@ -185,9 +187,12 @@ listaHojas.addEventListener('dragover', (e) => {
   const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
   objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
 });
-listaHojas.addEventListener('drop', () => {
+function sincronizarOrdenLista() {
   nombresHojas = [...listaHojas.children].map(li => li.dataset.nombre);
-});
+}
+listaHojas.addEventListener('drop', sincronizarOrdenLista);
+listaHojas.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaHojas, 'li', sincronizarOrdenLista);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm)$/i.test(f.name));
@@ -210,6 +215,7 @@ async function cargarLibro(archivo) {
     const bytes = await archivo.arrayBuffer();
     libroActual = XLSX.read(bytes, { type: 'array' });
     zipActual = await JSZip.loadAsync(bytes);
+    bytesActuales = bytes;
     nombresHojas = [...libroActual.SheetNames];
     // El nombre de descarga tiene que conservar la extensión original — un
     // .xlsm renombrado a .xlsx no abre bien en Excel (el formato interno
@@ -224,60 +230,20 @@ async function cargarLibro(archivo) {
   }
 }
 
-// Quita del XML la referencia a "PartName" (Content_Types) o a un Target que
-// termine en "objetivo" (Relationship) — usado para calcChain.xml más abajo.
-function quitarNodo(lista, predicado) {
-  [...lista].forEach((nodo) => { if (predicado(nodo)) nodo.parentNode.removeChild(nodo); });
-}
-
 botonGuardar.addEventListener('click', async () => {
   botonGuardar.disabled = true;
   botonGuardar.textContent = t('boton-guardar-procesando');
   try {
     if (nombresHojas.length === 0) throw new Error(t('error-sin-hojas'));
+    if (!zipActual.file('xl/workbook.xml')) throw new Error(t('error-estructura'));
+    // Se parte siempre del archivo original (no del resultado de un guardado
+    // anterior). reordenarHojasExcel (assets/js/ooxml-paquete.js) reordena
+    // la lista de hojas y, si se quitó alguna, borra también su contenido
+    // del paquete y corrige nombres definidos, pestaña activa, etc.
+    const zip = await JSZip.loadAsync(bytesActuales);
+    await reordenarHojasExcel(zip, nombresHojas);
 
-    const archivoWorkbook = zipActual.file('xl/workbook.xml');
-    if (!archivoWorkbook) throw new Error(t('error-estructura'));
-
-    const workbookDoc = parser.parseFromString(await archivoWorkbook.async('string'), 'application/xml');
-    const listaSheets = workbookDoc.getElementsByTagName('sheets')[0];
-    if (!listaSheets) throw new Error(t('error-estructura'));
-
-    const nodosOriginales = [...listaSheets.getElementsByTagName('sheet')];
-    const nodoPorNombre = new Map(nodosOriginales.map((nodo) => [nodo.getAttribute('name'), nodo]));
-
-    // Vaciar y volver a insertar en el orden final (y sin las eliminadas) —
-    // no se toca el XML de cada hoja, solo esta lista de referencias.
-    nodosOriginales.forEach((nodo) => listaSheets.removeChild(nodo));
-    nombresHojas.forEach((nombre) => {
-      const nodo = nodoPorNombre.get(nombre);
-      if (nodo) listaSheets.appendChild(nodo);
-    });
-
-    zipActual.file('xl/workbook.xml', new XMLSerializer().serializeToString(workbookDoc));
-
-    // calcChain.xml (el orden de recálculo de fórmulas) puede quedar
-    // inconsistente si se eliminó una hoja — se quita del todo, Excel lo
-    // regenera solo al abrir el archivo, así que es seguro sacarlo.
-    if (zipActual.file('xl/calcChain.xml')) {
-      zipActual.remove('xl/calcChain.xml');
-
-      const archivoTipos = zipActual.file('[Content_Types].xml');
-      if (archivoTipos) {
-        const tiposDoc = parser.parseFromString(await archivoTipos.async('string'), 'application/xml');
-        quitarNodo(tiposDoc.getElementsByTagName('Override'), (n) => n.getAttribute('PartName') === '/xl/calcChain.xml');
-        zipActual.file('[Content_Types].xml', new XMLSerializer().serializeToString(tiposDoc));
-      }
-
-      const archivoRels = zipActual.file('xl/_rels/workbook.xml.rels');
-      if (archivoRels) {
-        const relsDoc = parser.parseFromString(await archivoRels.async('string'), 'application/xml');
-        quitarNodo(relsDoc.getElementsByTagName('Relationship'), (n) => (n.getAttribute('Target') || '').endsWith('calcChain.xml'));
-        zipActual.file('xl/_rels/workbook.xml.rels', new XMLSerializer().serializeToString(relsDoc));
-      }
-    }
-
-    const blobFinal = await zipActual.generateAsync({ type: 'blob' });
+    const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     enlaceDescarga.download = `${nombreBaseActual}-reordenado.${extensionActual}`;
     resultado.classList.add('visible');

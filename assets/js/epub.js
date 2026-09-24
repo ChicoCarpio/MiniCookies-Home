@@ -122,7 +122,7 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
   <spine toc="ncx">${spineItems.join('')}</spine>
 </package>`);
 
-  return zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip' });
+  return zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
 }
 
 // Corta un HTML (de mammoth o marked) en capítulos, uno por cada <h1> que
@@ -232,6 +232,10 @@ async function leerEpub(archivo) {
 
     const primerEncabezado = cuerpo.querySelector('h1, h2');
     const tituloCapitulo = primerEncabezado ? primerEncabezado.textContent.trim() : `Capítulo ${capitulos.length + 1}`;
+    // El XHTML del libro viene de un archivo externo: se limpia acá (sobre el
+    // documento inerte de DOMParser) antes de que cualquier herramienta lo
+    // meta con innerHTML — ver assets/js/seguridad-html.js.
+    sanitizarArbolHtml(cuerpo);
     capitulos.push({ titulo: tituloCapitulo, html: cuerpo.innerHTML });
   }
 

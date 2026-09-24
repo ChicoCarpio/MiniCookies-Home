@@ -3,12 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reordenar capítulos de EPUB gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Reordená o eliminá capítulos de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reordenar capítulos de EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená o eliminá capítulos de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar capítulos de EPUB gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená o eliminá capítulos de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Administrar / reordenar capítulos',
+    'intro': 'Elegí un libro .epub. Arrastrá los capítulos para reordenarlos, o quitá los que no quieras, y descargá el EPUB resultante.',
+    'cargando': 'Leyendo el libro...',
+    'boton-guardar': 'Descargar reordenado',
+    'boton-guardar-procesando': 'Generando...',
+    'resultado-enlace': 'Descargar EPUB',
+    'error-leer-epub': 'No se pudo leer el EPUB',
+    'error-sin-capitulos': 'No queda ningún capítulo.',
+    'error-generar': 'No se pudo generar el EPUB'
+  },
+  en: {
+    'titulo-pagina': 'Reorder EPUB Chapters Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder or remove the chapters of an EPUB book, free and without uploading your file anywhere.',
+    'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Manage / reorder chapters',
+    'intro': 'Pick a .epub book. Drag the chapters to reorder them, remove the ones you don’t want, and download the resulting EPUB.',
+    'cargando': 'Reading the book...',
+    'boton-guardar': 'Download reordered',
+    'boton-guardar-procesando': 'Generating...',
+    'resultado-enlace': 'Download EPUB',
+    'error-leer-epub': 'Couldn’t read the EPUB',
+    'error-sin-capitulos': 'There are no chapters left.',
+    'error-generar': 'Couldn’t generate the EPUB'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,42 +50,45 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Administrar / reordenar capítulos</h1>
-  <p>Elegí un libro .epub. Arrastrá los capítulos para reordenarlos, o quitá los que no quieras, y descargá el EPUB resultante.</p>
+  <h1 data-i18n="h1">Administrar / reordenar capítulos</h1>
+  <p data-i18n="intro">Elegí un libro .epub. Arrastrá los capítulos para reordenarlos, o quitá los que no quieras, y descargá el EPUB resultante.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".epub" hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo el libro...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo el libro...</p>
     <ul class="lista-archivos" id="listaCapitulos"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonGuardar" disabled>Descargar reordenado</button>
+      <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenado</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="libro-reordenado.epub">Descargar EPUB</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libro-reordenado.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -72,7 +109,7 @@ function renderizarLista() {
     const item = document.createElement('li');
     item.draggable = true;
     item.dataset.id = capitulo.id;
-    item.innerHTML = `<span>${capitulo.titulo}</span>`;
+    item.innerHTML = `<span>${escaparHtml(capitulo.titulo)}</span>`;
     const quitar = document.createElement('button');
     quitar.className = 'quitar';
     quitar.textContent = '✕';
@@ -99,10 +136,13 @@ listaCapitulos.addEventListener('dragover', (e) => {
   const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
   objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
 });
-listaCapitulos.addEventListener('drop', () => {
+function sincronizarOrdenLista() {
   const idsEnOrden = [...listaCapitulos.children].map(li => parseInt(li.dataset.id, 10));
   capitulos.sort((a, b) => idsEnOrden.indexOf(a.id) - idsEnOrden.indexOf(b.id));
-});
+}
+listaCapitulos.addEventListener('drop', sincronizarOrdenLista);
+listaCapitulos.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaCapitulos, 'li', sincronizarOrdenLista);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
@@ -128,7 +168,7 @@ async function cargarLibro(archivo) {
     capitulos = capitulosLeidos.map(cap => ({ id: siguienteId++, titulo: cap.titulo, html: cap.html }));
     renderizarLista();
   } catch (error) {
-    alert('No se pudo leer el EPUB: ' + error.message);
+    alert(t('error-leer-epub') + ': ' + error.message);
   } finally {
     cargando.style.display = 'none';
   }
@@ -136,9 +176,9 @@ async function cargarLibro(archivo) {
 
 botonGuardar.addEventListener('click', async () => {
   botonGuardar.disabled = true;
-  botonGuardar.textContent = 'Generando...';
+  botonGuardar.textContent = t('boton-guardar-procesando');
   try {
-    if (capitulos.length === 0) throw new Error('No queda ningún capítulo.');
+    if (capitulos.length === 0) throw new Error(t('error-sin-capitulos'));
 
     const blob = await construirEpub({
       titulo: tituloLibro,
@@ -148,14 +188,15 @@ botonGuardar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el EPUB: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonGuardar.disabled = false;
-    botonGuardar.textContent = 'Descargar reordenado';
+    botonGuardar.textContent = t('boton-guardar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

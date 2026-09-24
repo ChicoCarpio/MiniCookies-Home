@@ -3,12 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reordenar párrafos de un texto gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Reordená o eliminá párrafos de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reordenar párrafos de un texto gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená o eliminá párrafos de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar párrafos de un texto gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená o eliminá párrafos de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Administrar / reordenar párrafos',
+    'intro': 'Elegí un archivo .txt. Se separa en párrafos por líneas en blanco — arrastralos para reordenarlos, o quitá los que no quieras, y descargá el .txt resultante.',
+    'cargando': 'Leyendo el archivo...',
+    'boton-guardar': 'Descargar reordenado',
+    'resultado-enlace': 'Descargar .txt',
+    'error-leer-archivo': 'No se pudo leer el archivo',
+    'error-sin-parrafos': 'No queda ningún párrafo.',
+    'error-generar': 'No se pudo generar el archivo',
+    'parrafo-vacio': '(párrafo vacío)'
+  },
+  en: {
+    'titulo-pagina': 'Reorder Text Paragraphs Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder or remove the paragraphs of a plain text file (.txt), free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Manage / reorder paragraphs',
+    'intro': 'Pick a .txt file. It’s split into paragraphs at blank lines — drag them to reorder, remove the ones you don’t want, and download the resulting .txt.',
+    'cargando': 'Reading the file...',
+    'boton-guardar': 'Download reordered',
+    'resultado-enlace': 'Download .txt',
+    'error-leer-archivo': 'Couldn’t read the file',
+    'error-sin-parrafos': 'There are no paragraphs left.',
+    'error-generar': 'Couldn’t generate the file',
+    'parrafo-vacio': '(empty paragraph)'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,40 +50,43 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/texto.html">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/texto.html" data-i18n="nav-cat-texto">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Administrar / reordenar párrafos</h1>
-  <p>Elegí un archivo .txt. Se separa en párrafos por líneas en blanco — arrastralos para reordenarlos, o quitá los que no quieras, y descargá el .txt resultante.</p>
+  <h1 data-i18n="h1">Administrar / reordenar párrafos</h1>
+  <p data-i18n="intro">Elegí un archivo .txt. Se separa en párrafos por líneas en blanco — arrastralos para reordenarlos, o quitá los que no quieras, y descargá el .txt resultante.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".txt" hidden>
     </div>
 
-    <p id="cargando" style="display:none; color:var(--texto-suave);">Leyendo el archivo...</p>
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo el archivo...</p>
     <ul class="lista-archivos" id="listaParrafos"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonGuardar" disabled>Descargar reordenado</button>
+      <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenado</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="texto-reordenado.txt">Descargar .txt</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-reordenado.txt" data-i18n="resultado-enlace">Descargar .txt</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -63,7 +100,7 @@ let parrafos = []; // [{ id, texto }]
 let siguienteId = 0;
 
 function etiquetaCorta(texto) {
-  const linea = texto.trim().split('\n')[0] || '(párrafo vacío)';
+  const linea = texto.trim().split('\n')[0] || t('parrafo-vacio');
   return linea.length > 60 ? linea.slice(0, 60) + '…' : linea;
 }
 
@@ -73,7 +110,7 @@ function renderizarLista() {
     const item = document.createElement('li');
     item.draggable = true;
     item.dataset.id = parrafo.id;
-    item.innerHTML = `<span>${etiquetaCorta(parrafo.texto)}</span>`;
+    item.innerHTML = `<span>${escaparHtml(etiquetaCorta(parrafo.texto))}</span>`;
     const quitar = document.createElement('button');
     quitar.className = 'quitar';
     quitar.textContent = '✕';
@@ -100,10 +137,13 @@ listaParrafos.addEventListener('dragover', (e) => {
   const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
   objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
 });
-listaParrafos.addEventListener('drop', () => {
+function sincronizarOrdenLista() {
   const idsEnOrden = [...listaParrafos.children].map(li => parseInt(li.dataset.id, 10));
   parrafos.sort((a, b) => idsEnOrden.indexOf(a.id) - idsEnOrden.indexOf(b.id));
-});
+}
+listaParrafos.addEventListener('drop', sincronizarOrdenLista);
+listaParrafos.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaParrafos, 'li', sincronizarOrdenLista);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
@@ -128,7 +168,7 @@ async function cargarArchivo(archivo) {
     parrafos = bloques.map(b => ({ id: siguienteId++, texto: b }));
     renderizarLista();
   } catch (error) {
-    alert('No se pudo leer el archivo: ' + error.message);
+    alert(t('error-leer-archivo') + ': ' + error.message);
   } finally {
     cargando.style.display = 'none';
   }
@@ -136,17 +176,18 @@ async function cargarArchivo(archivo) {
 
 botonGuardar.addEventListener('click', () => {
   try {
-    if (parrafos.length === 0) throw new Error('No queda ningún párrafo.');
+    if (parrafos.length === 0) throw new Error(t('error-sin-parrafos'));
     const textoFinal = parrafos.map(p => p.texto).join('\n\n');
     const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el archivo: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

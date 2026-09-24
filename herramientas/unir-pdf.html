@@ -107,6 +107,7 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -134,14 +135,14 @@ function actualizarBoton() {
 habilitarArrastreReordenable(gridArchivos, actualizarBoton);
 
 async function agregarArchivos(listaFileList) {
-  const nuevos = [...listaFileList].filter(f => f.type === 'application/pdf' || f.type.startsWith('image/'));
+  const nuevos = [...listaFileList].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name) || f.type.startsWith('image/'));
   if (nuevos.length === 0) return;
 
   cargando.style.display = 'block';
   for (const archivo of nuevos) {
     const id = siguienteId++;
     archivosPorId.set(id, archivo);
-    const esPdf = archivo.type === 'application/pdf';
+    const esPdf = archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name);
     let tarjeta;
     try {
       const { elemento, totalPaginas } = esPdf
@@ -170,36 +171,8 @@ async function agregarArchivos(listaFileList) {
   actualizarBoton();
 }
 
-function cargarImagen(archivo) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = URL.createObjectURL(archivo);
-  });
-}
-
-// pdf-lib solo sabe incrustar JPEG y PNG directamente. Para cualquier otro
-// formato de imagen (WebP, GIF, BMP, etc.) la redibujamos en un <canvas> y la
-// reconvertimos a PNG, que sí puede incrustar.
-async function incrustarImagenEnPdf(pdf, archivo) {
-  if (archivo.type === 'image/jpeg') {
-    return pdf.embedJpg(await archivo.arrayBuffer());
-  }
-  if (archivo.type === 'image/png') {
-    return pdf.embedPng(await archivo.arrayBuffer());
-  }
-  const img = await cargarImagen(archivo);
-  const canvas = document.createElement('canvas');
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  canvas.getContext('2d').drawImage(img, 0, 0);
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-  return pdf.embedPng(await blob.arrayBuffer());
-}
-
 zonaArrastre.addEventListener('click', () => entradaArchivos.click());
-entradaArchivos.addEventListener('change', (e) => agregarArchivos(e.target.files));
+entradaArchivos.addEventListener('change', (e) => { agregarArchivos(e.target.files); entradaArchivos.value = ''; });
 
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
@@ -209,11 +182,8 @@ zonaArrastre.addEventListener('drop', (e) => {
   agregarArchivos(e.dataTransfer.files);
 });
 
-// Medidas exactas en puntos: A4 = 210x297 mm, Carta = 8.5x11 pulgadas.
-const TAMANOS_PAGINA = {
-  a4: [595.276, 841.89],
-  carta: [612, 792],
-};
+// incrustarImagenEnPdf, agregarPaginaConImagen y los tamaños de página
+// están en assets/js/miniaturas.js (compartidos con "Imágenes → PDF").
 botonUnir.addEventListener('click', async () => {
   botonUnir.disabled = true;
   botonUnir.textContent = t('boton-unir-procesando');
@@ -225,56 +195,14 @@ botonUnir.addEventListener('click', async () => {
     const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
     for (const id of ordenIds) {
       const archivo = archivosPorId.get(id);
-      if (archivo.type === 'application/pdf') {
+      if (archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name)) {
         const bytes = await archivo.arrayBuffer();
         const pdfOrigen = await PDFDocument.load(bytes);
         const paginas = await pdfFinal.copyPages(pdfOrigen, pdfOrigen.getPageIndices());
         paginas.forEach((pagina) => pdfFinal.addPage(pagina));
       } else {
         const imagenEmbebida = await incrustarImagenEnPdf(pdfFinal, archivo);
-        const { width, height } = imagenEmbebida.size();
-
-        if (tamanoElegido === 'original') {
-          const pagina = pdfFinal.addPage([width, height]);
-          pagina.drawImage(imagenEmbebida, { x: 0, y: 0, width, height });
-        } else if (tamanoElegido.startsWith('ajustar-')) {
-          // Página con el ancho estándar (A4/Carta) y el alto calculado según
-          // la proporción de la imagen: es la única forma de no recortar nada
-          // y a la vez no dejar márgenes blancos, porque la página termina
-          // teniendo exactamente la proporción de la imagen. El ancho sigue
-          // coincidiendo con el de los PDF, así que el resultado se lee
-          // parejo aunque el alto varíe de una imagen a otra.
-          // El ancho es siempre el del lado corto (vertical), también para
-          // fotos apaisadas: así todas las páginas quedan del mismo ancho y el
-          // documento se lee parejo al desplazarse. Es lo mismo que hace PDF24.
-          const [anchoPagina] = TAMANOS_PAGINA[tamanoElegido.slice('ajustar-'.length)];
-          const altoPagina = anchoPagina * (height / width);
-          const pagina = pdfFinal.addPage([anchoPagina, altoPagina]);
-          pagina.drawImage(imagenEmbebida, { x: 0, y: 0, width: anchoPagina, height: altoPagina });
-        } else {
-          // Página de tamaño estándar (A4/Carta), en la orientación que mejor
-          // se ajuste a la imagen, con la imagen centrada y escalada para
-          // entrar COMPLETA dentro de la página (Math.min, no Math.max: con
-          // Math.max la imagen llenaba la página y se recortaba todo lo que
-          // sobresalía cuando la proporción no coincidía exacto). Puede quedar
-          // un margen blanco arriba/abajo o a los costados, pero nunca se
-          // pierde parte de la imagen original, y todas las páginas de imagen
-          // quedan del mismo tamaño entre sí y consistentes con los PDF.
-          const esApaisada = width > height;
-          const [anchoBase, altoBase] = TAMANOS_PAGINA[tamanoElegido];
-          const [anchoPagina, altoPagina] = esApaisada ? [altoBase, anchoBase] : [anchoBase, altoBase];
-          const escala = Math.min(anchoPagina / width, altoPagina / height);
-          const anchoFinal = width * escala;
-          const altoFinal = height * escala;
-
-          const pagina = pdfFinal.addPage([anchoPagina, altoPagina]);
-          pagina.drawImage(imagenEmbebida, {
-            x: (anchoPagina - anchoFinal) / 2,
-            y: (altoPagina - altoFinal) / 2,
-            width: anchoFinal,
-            height: altoFinal,
-          });
-        }
+        agregarPaginaConImagen(pdfFinal, imagenEmbebida, tamanoElegido);
       }
     }
 
@@ -283,7 +211,7 @@ botonUnir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-unir') + ': ' + error.message);
+    alert(t('error-unir') + ': ' + detalleError(error));
   } finally {
     botonUnir.disabled = false;
     botonUnir.textContent = t('boton-unir');

@@ -137,7 +137,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -163,7 +163,9 @@ async function intentarNivel1(bytes) {
 }
 
 async function intentarNivel2(bytes) {
-  const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, stopAtErrors: false }).promise;
+  // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+  // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+  const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false, stopAtErrors: false }).promise;
   if (pdfjsDoc.numPages === 0) throw new Error(t('error-sin-nada'));
 
   const { PDFDocument } = PDFLib;
@@ -198,6 +200,15 @@ botonReparar.addEventListener('click', async () => {
     let bytesFinales = null;
     let mensaje = '';
 
+    // Un PDF protegido no está dañado: el nivel 1 (ignoreEncryption) lo
+    // "reparaba" guardando el contenido todavía cifrado, y el resultado no
+    // abría. Se avisa que hay que desbloquearlo primero.
+    try {
+      await PDFLib.PDFDocument.load(bytesOriginales.slice(0), { throwOnInvalidObject: false, updateMetadata: false });
+    } catch (errorCarga) {
+      if (/encrypted/i.test(errorCarga.message)) throw errorCarga;
+    }
+
     try {
       bytesFinales = await intentarNivel1(bytesOriginales.slice(0));
       mensaje = t('mensaje-nivel1-ok');
@@ -213,7 +224,7 @@ botonReparar.addEventListener('click', async () => {
     mensajeResultado.textContent = mensaje;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-reparar') + ': ' + error.message);
+    alert(t('error-reparar') + ': ' + detalleError(error));
   } finally {
     botonReparar.disabled = false;
     progreso.style.display = 'none';

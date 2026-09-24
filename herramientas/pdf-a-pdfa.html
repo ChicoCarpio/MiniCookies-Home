@@ -180,6 +180,7 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfa.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const opcionAPdfa = document.getElementById('opcionAPdfa');
 const opcionAPdf = document.getElementById('opcionAPdf');
@@ -207,11 +208,16 @@ function elegirDireccion(nueva) {
 
 opcionAPdfa.addEventListener('click', () => elegirDireccion('a-pdfa'));
 opcionAPdf.addEventListener('click', () => elegirDireccion('a-pdf'));
-elegirDireccion('a-pdfa');
+// idioma.js (que define t) se carga al final de la página: la dirección
+// inicial se aplica cuando ya está disponible. Antes se llamaba acá mismo,
+// t() no existía todavía y el resto del script no llegaba a ejecutarse
+// (la herramienta no respondía).
+document.addEventListener('DOMContentLoaded', () => elegirDireccion(direccion));
+document.addEventListener('cambioIdioma', () => elegirDireccion(direccion));
 
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonConvertir.disabled = false;
   resultado.classList.remove('visible');
   avisoDeteccion.style.display = 'none';
@@ -230,7 +236,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -267,7 +273,7 @@ botonConvertir.addEventListener('click', async () => {
     enlaceDescarga.download = archivoActual.name.replace(/\.pdf$/i, '') + sufijo + '.pdf';
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-procesar') + ': ' + error.message);
+    alert(t('error-procesar') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
     progreso.style.display = 'none';

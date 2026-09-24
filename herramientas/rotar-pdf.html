@@ -134,7 +134,7 @@ async function mostrarArchivo(archivo) {
 elGrados.addEventListener('change', actualizarVistaPrevia);
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -167,7 +167,7 @@ botonRotar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-rotar') + ': ' + error.message);
+    alert(t('error-rotar') + ': ' + detalleError(error));
   } finally {
     botonRotar.disabled = false;
     botonRotar.textContent = t('boton-rotar');

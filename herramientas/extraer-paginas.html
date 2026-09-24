@@ -226,7 +226,9 @@ async function mostrarArchivo(archivo) {
 
   try {
     const bytes = await archivo.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
     pdfDocumentActual = pdf;
     totalPaginas = pdf.numPages;
 
@@ -261,7 +263,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -315,7 +317,7 @@ botonExtraer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-extraer') + ': ' + error.message);
+    alert(t('error-extraer') + ': ' + detalleError(error));
   } finally {
     botonExtraer.disabled = false;
     botonExtraer.textContent = t('boton-extraer');

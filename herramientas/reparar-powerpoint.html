@@ -107,6 +107,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -120,7 +122,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonReparar.disabled = false;
   resultado.classList.remove('visible');
   mensajeNivel.style.display = 'none';
@@ -205,10 +207,15 @@ botonReparar.addEventListener('click', async () => {
       throw new Error(t('error-todas-danadas'));
     }
 
-    const nuevoXml = new XMLSerializer().serializeToString(presentacionDoc);
-    zip.file('ppt/presentation.xml', nuevoXml);
+    // Con la lista ya depurada, conservarDiapositivas (assets/js/ooxml-paquete.js)
+    // saca las descartadas de secciones y presentaciones personalizadas (si
+    // no, PowerPoint vuelve a pedir "reparar") y borra su contenido.
+    if (descartadas > 0) {
+      const validas = [...listaDiapositivas.getElementsByTagName('p:sldId')].map((nodo) => nodo.getAttribute('r:id'));
+      await conservarDiapositivas(zip, validas);
+    }
 
-    const blobFinal = await zip.generateAsync({ type: 'blob' });
+    const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
 

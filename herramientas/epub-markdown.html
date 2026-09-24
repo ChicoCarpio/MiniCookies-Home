@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir EPUB y Markdown gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí un libro EPUB a Markdown, o Markdown a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir EPUB y Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí un libro EPUB a Markdown, o Markdown a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -14,6 +14,66 @@
   .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
   textarea#markdownResultado { min-height: 320px; font-family: monospace; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir EPUB y Markdown gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí un libro EPUB a Markdown, o Markdown a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'EPUB ↔ Markdown',
+    'intro': 'Convertí un libro EPUB a Markdown, o Markdown a EPUB, según lo que necesites.',
+    'zona-arrastre-epub': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'boton-a-md': 'Convertir a Markdown',
+    'boton-a-md-procesando': 'Convirtiendo...',
+    'boton-copiar-md': 'Copiar Markdown',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-md': 'Descargar .md',
+    'zona-arrastre-md': '📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo',
+    'campo-titulo': 'Título del libro',
+    'campo-autor': 'Autor (opcional)',
+    'boton-a-epub': 'Convertir a EPUB',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace-epub': 'Descargar EPUB',
+    'limites-titulo': 'Límites conocidos',
+    'item1': 'No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.',
+    'item2-a': 'EPUB → Markdown separa cada capítulo con una línea horizontal (',
+    'item2-b': '). Markdown → EPUB empieza un capítulo nuevo en cada ',
+    'item2-c': ' de primer nivel.',
+    'error-convertir': 'No se pudo convertir el EPUB',
+    'titulo-defecto': 'Documento',
+    'progreso-leyendo': 'Leyendo el Markdown...',
+    'progreso-armando': 'Armando el EPUB...',
+    'error-generar': 'No se pudo generar el EPUB'
+  },
+  en: {
+    'titulo-pagina': 'Convert EPUB and Markdown Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert an EPUB book to Markdown or Markdown to EPUB, free and without uploading your file anywhere.',
+    'h1': 'EPUB ↔ Markdown',
+    'intro': 'Convert an EPUB book to Markdown, or Markdown to EPUB, whichever you need.',
+    'zona-arrastre-epub': '📚 Drag your .epub file here or click to choose it',
+    'boton-a-md': 'Convert to Markdown',
+    'boton-a-md-procesando': 'Converting...',
+    'boton-copiar-md': 'Copy Markdown',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-md': 'Download .md',
+    'zona-arrastre-md': '📄 Drag your .md file here or click to choose it',
+    'campo-titulo': 'Book title',
+    'campo-autor': 'Author (optional)',
+    'boton-a-epub': 'Convert to EPUB',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace-epub': 'Download EPUB',
+    'limites-titulo': 'Known limits',
+    'item1': 'It doesn’t work with DRM-protected EPUB books (publisher lock) — only with unprotected EPUBs.',
+    'item2-a': 'EPUB → Markdown separates each chapter with a horizontal rule (',
+    'item2-b': '). Markdown → EPUB starts a new chapter at each top-level ',
+    'item2-c': ' heading.',
+    'error-convertir': 'Couldn’t convert the EPUB',
+    'titulo-defecto': 'Document',
+    'progreso-leyendo': 'Reading the Markdown...',
+    'progreso-armando': 'Building the EPUB...',
+    'error-generar': 'Couldn’t generate the EPUB'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -21,13 +81,14 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>EPUB ↔ Markdown</h1>
-  <p>Convertí un libro EPUB a Markdown, o Markdown a EPUB, según lo que necesites.</p>
+  <h1 data-i18n="h1">EPUB ↔ Markdown</h1>
+  <p data-i18n="intro">Convertí un libro EPUB a Markdown, o Markdown a EPUB, según lo que necesites.</p>
 
   <div class="panel-herramienta">
     <div class="selector-direccion">
@@ -38,18 +99,18 @@
     <!-- EPUB → Markdown -->
     <div id="panelEpubAMd">
       <div class="zona-arrastre" id="zonaArrastreEpub">
-        📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaEpub" accept=".epub" hidden>
       </div>
       <ul class="lista-archivos" id="listaEpub"></ul>
       <div class="controles">
-        <button class="boton" id="botonAMd" disabled>Convertir a Markdown</button>
+        <button class="boton" id="botonAMd" disabled data-i18n="boton-a-md">Convertir a Markdown</button>
       </div>
       <div id="bloqueResultadoMd" style="display:none; margin-top:20px;">
         <textarea id="markdownResultado" readonly></textarea>
         <div class="controles">
-          <button class="boton" id="botonCopiarMd" type="button">Copiar Markdown</button>
-          <a class="boton" id="enlaceDescargaMd" download="libro.md" style="text-decoration:none; display:inline-block;">Descargar .md</a>
+          <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
+          <a class="boton" id="enlaceDescargaMd" download="libro.md" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
     </div>
@@ -57,48 +118,49 @@
     <!-- Markdown → EPUB -->
     <div id="panelMdAEpub" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastreMd">
-        📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre-md">📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaMd" accept=".md,.markdown" hidden>
       </div>
       <ul class="lista-archivos" id="listaMd"></ul>
       <div class="controles">
         <label class="campo">
-          Título del libro
+          <span data-i18n="campo-titulo">Título del libro</span>
           <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
         <label class="campo">
-          Autor (opcional)
+          <span data-i18n="campo-autor">Autor (opcional)</span>
           <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
-        <button class="boton" id="botonAEpub" disabled>Convertir a EPUB</button>
+        <button class="boton" id="botonAEpub" disabled data-i18n="boton-a-epub">Convertir a EPUB</button>
       </div>
       <div class="resultado" id="resultadoEpub">
-        ✅ Listo. <a id="enlaceDescargaEpub" download="libro.epub">Descargar EPUB</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace-epub">Descargar EPUB</a>
       </div>
     </div>
 
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Límites conocidos</h3>
+    <h3 style="margin-top:0;" data-i18n="limites-titulo">Límites conocidos</h3>
     <ul style="color:var(--texto-suave);">
-      <li>No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
-      <li>EPUB → Markdown separa cada capítulo con una línea horizontal (<code>---</code>). Markdown → EPUB empieza un capítulo nuevo en cada <code>#</code> de primer nivel.</li>
+      <li data-i18n="item1">No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
+      <li><span data-i18n="item2-a">EPUB → Markdown separa cada capítulo con una línea horizontal (</span><code>---</code><span data-i18n="item2-b">). Markdown → EPUB empieza un capítulo nuevo en cada </span><code>#</code><span data-i18n="item2-c"> de primer nivel.</span></li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script>
 const panelEpubAMd = document.getElementById('panelEpubAMd');
@@ -129,7 +191,7 @@ let archivoEpubActual = null;
 
 function mostrarArchivoEpub(archivo) {
   archivoEpubActual = archivo;
-  listaEpub.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaEpub.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonAMd.disabled = false;
   bloqueResultadoMd.style.display = 'none';
 }
@@ -151,7 +213,7 @@ zonaArrastreEpub.addEventListener('drop', (e) => {
 
 botonAMd.addEventListener('click', async () => {
   botonAMd.disabled = true;
-  botonAMd.textContent = 'Convirtiendo...';
+  botonAMd.textContent = t('boton-a-md-procesando');
   try {
     const { capitulos } = await leerEpub(archivoEpubActual);
     const markdown = capitulos.map(capitulo => turndownService.turndown(capitulo.html)).join('\n\n---\n\n');
@@ -160,17 +222,17 @@ botonAMd.addEventListener('click', async () => {
     enlaceDescargaMd.href = URL.createObjectURL(blob);
     bloqueResultadoMd.style.display = 'block';
   } catch (error) {
-    alert('No se pudo convertir el EPUB: ' + error.message);
+    alert(t('error-convertir') + ': ' + error.message);
   } finally {
     botonAMd.disabled = false;
-    botonAMd.textContent = 'Convertir a Markdown';
+    botonAMd.textContent = t('boton-a-md');
   }
 });
 
 botonCopiarMd.addEventListener('click', async () => {
   await navigator.clipboard.writeText(markdownResultado.value);
-  botonCopiarMd.textContent = '¡Copiado!';
-  setTimeout(() => { botonCopiarMd.textContent = 'Copiar Markdown'; }, 1500);
+  botonCopiarMd.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiarMd.textContent = t('boton-copiar-md'); }, 1500);
 });
 
 // --- Markdown → EPUB ---
@@ -186,7 +248,7 @@ let archivoMdActual = null;
 
 function mostrarArchivoMd(archivo) {
   archivoMdActual = archivo;
-  listaMd.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaMd.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonAEpub.disabled = false;
   resultadoEpub.classList.remove('visible');
   if (!tituloLibro.value.trim()) {
@@ -213,21 +275,21 @@ botonAEpub.addEventListener('click', async () => {
   botonAEpub.disabled = true;
   progreso.style.display = 'block';
   try {
-    const titulo = tituloLibro.value.trim() || 'Documento';
+    const titulo = tituloLibro.value.trim() || t('titulo-defecto');
     const autor = document.getElementById('autorLibro').value.trim();
 
-    progreso.textContent = 'Leyendo el Markdown...';
+    progreso.textContent = t('progreso-leyendo');
     const texto = await archivoMdActual.text();
-    const capitulos = dividirHtmlEnCapitulosEpub(marked.parse(texto), titulo);
+    const capitulos = dividirHtmlEnCapitulosEpub(sanitizarHtml(marked.parse(texto)), titulo);
 
-    progreso.textContent = 'Armando el EPUB...';
+    progreso.textContent = t('progreso-armando');
     const blob = await construirEpub({ titulo, autor, capitulos });
 
     enlaceDescargaEpub.href = URL.createObjectURL(blob);
     enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
     resultadoEpub.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el EPUB: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonAEpub.disabled = false;
     progreso.style.display = 'none';
@@ -236,5 +298,6 @@ botonAEpub.addEventListener('click', async () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

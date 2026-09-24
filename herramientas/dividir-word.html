@@ -106,6 +106,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -120,7 +121,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonDividir.disabled = false;
   resultado.classList.remove('visible');
 }
@@ -174,7 +175,8 @@ botonDividir.addEventListener('click', async () => {
     }
 
     progreso.textContent = t('progreso-zip');
-    const blobZip = await zip.generateAsync({ type: 'blob' });
+    // Los archivos de adentro ya van comprimidos: se guardan sin recomprimir.
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {

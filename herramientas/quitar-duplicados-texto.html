@@ -3,12 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quitar líneas duplicadas o vacías gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Quitá líneas duplicadas o vacías de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Quitar líneas duplicadas o vacías gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Quitá líneas duplicadas o vacías de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Quitar líneas duplicadas o vacías gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Quitá líneas duplicadas o vacías de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Quitar líneas duplicadas o vacías',
+    'intro': 'Elegí un archivo .txt y limpiá líneas repetidas y/o vacías.',
+    'campo-vacias': 'Quitar líneas vacías',
+    'campo-duplicadas': 'Quitar líneas duplicadas (se conserva la primera aparición)',
+    'boton-procesar': 'Procesar y descargar',
+    'resultado-enlace': 'Descargar .txt',
+    'error-sin-opcion': 'Marcá al menos una opción.',
+    'mensaje-resultado': 'De {total} líneas originales, quedaron {quedan}',
+    'mensaje-duplicadas': ' (se quitaron {n} duplicada(s))',
+    'error-procesar': 'No se pudo procesar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Remove Duplicate or Empty Lines Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Remove duplicate and/or empty lines from a plain text file (.txt), free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Remove duplicate or empty lines',
+    'intro': 'Pick a .txt file and clean up repeated and/or empty lines.',
+    'campo-vacias': 'Remove empty lines',
+    'campo-duplicadas': 'Remove duplicate lines (the first occurrence is kept)',
+    'boton-procesar': 'Process and download',
+    'resultado-enlace': 'Download .txt',
+    'error-sin-opcion': 'Check at least one option.',
+    'mensaje-resultado': 'Of {total} original lines, {quedan} remain',
+    'mensaje-duplicadas': ' ({n} duplicate(s) removed)',
+    'error-procesar': 'Couldn’t process the file'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +52,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/texto.html">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/texto.html" data-i18n="nav-cat-texto">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Quitar líneas duplicadas o vacías</h1>
-  <p>Elegí un archivo .txt y limpiá líneas repetidas y/o vacías.</p>
+  <h1 data-i18n="h1">Quitar líneas duplicadas o vacías</h1>
+  <p data-i18n="intro">Elegí un archivo .txt y limpiá líneas repetidas y/o vacías.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".txt" hidden>
     </div>
 
@@ -35,30 +72,31 @@
     <div class="controles">
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="quitarVacias" checked>
-        Quitar líneas vacías
+        <span data-i18n="campo-vacias">Quitar líneas vacías</span>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="quitarDuplicadas" checked>
-        Quitar líneas duplicadas (se conserva la primera aparición)
+        <span data-i18n="campo-duplicadas">Quitar líneas duplicadas (se conserva la primera aparición)</span>
       </label>
-      <button class="boton" id="botonProcesar" disabled>Procesar y descargar</button>
+      <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Procesar y descargar</button>
     </div>
 
     <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="texto-limpio.txt">Descargar .txt</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-limpio.txt" data-i18n="resultado-enlace">Descargar .txt</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -72,7 +110,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonProcesar.disabled = false;
   resultado.classList.remove('visible');
   mensaje.style.display = 'none';
@@ -97,7 +135,7 @@ botonProcesar.addEventListener('click', async () => {
   try {
     const quitarVacias = document.getElementById('quitarVacias').checked;
     const quitarDuplicadas = document.getElementById('quitarDuplicadas').checked;
-    if (!quitarVacias && !quitarDuplicadas) throw new Error('Marcá al menos una opción.');
+    if (!quitarVacias && !quitarDuplicadas) throw new Error(t('error-sin-opcion'));
 
     const texto = await archivoActual.text();
     let lineas = texto.split(/\r\n|\r|\n/);
@@ -119,15 +157,16 @@ botonProcesar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
 
-    mensaje.textContent = `De ${totalOriginal} líneas originales, quedaron ${lineas.length}` +
-      (quitarDuplicadas ? ` (se quitaron ${duplicadasQuitadas} duplicada(s))` : '') + '.';
+    mensaje.textContent = t('mensaje-resultado').replace('{total}', totalOriginal).replace('{quedan}', lineas.length) +
+      (quitarDuplicadas ? t('mensaje-duplicadas').replace('{n}', duplicadasQuitadas) : '') + '.';
     mensaje.style.display = 'block';
   } catch (error) {
-    alert('No se pudo procesar el archivo: ' + error.message);
+    alert(t('error-procesar') + ': ' + error.message);
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

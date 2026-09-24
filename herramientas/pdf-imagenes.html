@@ -22,8 +22,14 @@ window.i18nPagina = {
     'intro': 'Convertí imágenes a PDF, o un PDF a imágenes, según lo que necesites.',
     'dir-img-a-pdf': 'Imágenes → PDF',
     'dir-pdf-a-img': 'PDF → Imágenes',
-    'img-intro': 'Elegí una o varias imágenes (JPG o PNG). Cada una se convierte en una página — arrastralas para ordenarlas.',
+    'img-intro': 'Elegí una o varias imágenes (JPG, PNG, WebP, GIF o BMP). Cada una se convierte en una página — arrastralas para ordenarlas.',
     'zona-arrastre-img': '🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas',
+    'campo-tamano': 'Tamaño de página',
+    'opcion-ajustar-a4': 'Ancho A4, alto según la imagen (recomendado, sin recorte ni márgenes)',
+    'opcion-ajustar-carta': 'Ancho Carta, alto según la imagen (sin recorte ni márgenes)',
+    'opcion-a4': 'A4 exacto (imagen completa, con márgenes blancos)',
+    'opcion-carta': 'Carta exacto (imagen completa, con márgenes blancos)',
+    'opcion-original': 'Tamaño original de cada imagen (sin márgenes, puede quedar inconsistente)',
     'boton-a-pdf': 'Convertir a PDF',
     'boton-a-pdf-procesando': 'Convirtiendo...',
     'resultado-listo': '✅ Listo. ',
@@ -49,8 +55,14 @@ window.i18nPagina = {
     'intro': 'Convert images to PDF, or a PDF to images, whichever you need.',
     'dir-img-a-pdf': 'Images → PDF',
     'dir-pdf-a-img': 'PDF → Images',
-    'img-intro': 'Pick one or more images (JPG or PNG). Each one becomes a page — drag them to reorder.',
+    'img-intro': 'Pick one or more images (JPG, PNG, WebP, GIF or BMP). Each one becomes a page — drag them to reorder.',
     'zona-arrastre-img': '🖼️ Drag your images here or click to choose them',
+    'campo-tamano': 'Page size',
+    'opcion-ajustar-a4': 'A4 width, height matched to the image (recommended, no cropping or margins)',
+    'opcion-ajustar-carta': 'Letter width, height matched to the image (no cropping or margins)',
+    'opcion-a4': 'Exact A4 (full image, with white margins)',
+    'opcion-carta': 'Exact Letter (full image, with white margins)',
+    'opcion-original': 'Each image’s original size (no margins, pages may look inconsistent)',
     'boton-a-pdf': 'Convert to PDF',
     'boton-a-pdf-procesando': 'Converting...',
     'resultado-listo': '✅ Done. ',
@@ -95,14 +107,24 @@ window.i18nPagina = {
 
     <!-- Imágenes → PDF -->
     <div id="panelImgAPdf">
-      <p data-i18n="img-intro">Elegí una o varias imágenes (JPG o PNG). Cada una se convierte en una página — arrastralas para ordenarlas.</p>
+      <p data-i18n="img-intro">Elegí una o varias imágenes (JPG, PNG, WebP, GIF o BMP). Cada una se convierte en una página — arrastralas para ordenarlas.</p>
       <div class="zona-arrastre" id="zonaArrastreImg">
         <span data-i18n="zona-arrastre-img">🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas</span>
-        <input type="file" id="entradaImagenes" accept="image/png,image/jpeg" multiple hidden>
+        <input type="file" id="entradaImagenes" accept="image/*" multiple hidden>
       </div>
       <div id="envoltorioSelectorVista"></div>
       <div class="contenedor-miniaturas" id="gridArchivos"></div>
       <div class="controles">
+        <label class="campo">
+          <span data-i18n="campo-tamano">Tamaño de página</span>
+          <select id="tamanoPaginaImagenes">
+            <option value="ajustar-a4" selected data-i18n="opcion-ajustar-a4">Ancho A4, alto según la imagen (recomendado, sin recorte ni márgenes)</option>
+            <option value="ajustar-carta" data-i18n="opcion-ajustar-carta">Ancho Carta, alto según la imagen (sin recorte ni márgenes)</option>
+            <option value="a4" data-i18n="opcion-a4">A4 exacto (imagen completa, con márgenes blancos)</option>
+            <option value="carta" data-i18n="opcion-carta">Carta exacto (imagen completa, con márgenes blancos)</option>
+            <option value="original" data-i18n="opcion-original">Tamaño original de cada imagen (sin márgenes, puede quedar inconsistente)</option>
+          </select>
+        </label>
         <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
       </div>
       <div class="resultado" id="resultadoAPdf">
@@ -115,7 +137,7 @@ window.i18nPagina = {
       <p data-i18n="pdf-intro">Elegí un PDF y descargá cada página como imagen, dentro de un .zip.</p>
       <div class="zona-arrastre" id="zonaArrastrePdf">
         <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+        <input type="file" id="entradaPdf" accept="application/pdf,.pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaPdf"></div>
       <div class="controles">
@@ -154,6 +176,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -192,7 +215,7 @@ function actualizarBoton() {
 habilitarArrastreReordenable(gridArchivos, actualizarBoton);
 
 async function agregarArchivos(listaFileList) {
-  const nuevos = [...listaFileList].filter(f => f.type === 'image/jpeg' || f.type === 'image/png');
+  const nuevos = [...listaFileList].filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name));
   for (const archivo of nuevos) {
     const id = siguienteId++;
     archivosPorId.set(id, archivo);
@@ -237,17 +260,15 @@ botonAPdf.addEventListener('click', async () => {
   try {
     const { PDFDocument } = PDFLib;
     const pdf = await PDFDocument.create();
+    const tamanoElegido = document.getElementById('tamanoPaginaImagenes').value;
 
     const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
     for (const id of ordenIds) {
       const archivo = archivosPorId.get(id);
-      const bytes = await archivo.arrayBuffer();
-      const imagenEmbebida = archivo.type === 'image/png'
-        ? await pdf.embedPng(bytes)
-        : await pdf.embedJpg(bytes);
-      const { width, height } = imagenEmbebida.size();
-      const pagina = pdf.addPage([width, height]);
-      pagina.drawImage(imagenEmbebida, { x: 0, y: 0, width, height });
+      // incrustarImagenEnPdf corrige la orientación EXIF (fotos de celular) y
+      // convierte WebP/GIF/BMP; ambas funciones están en assets/js/miniaturas.js.
+      const imagenEmbebida = await incrustarImagenEnPdf(pdf, archivo);
+      agregarPaginaConImagen(pdf, imagenEmbebida, tamanoElegido);
     }
 
     const bytesFinales = await pdf.save();
@@ -255,7 +276,7 @@ botonAPdf.addEventListener('click', async () => {
     enlaceDescargaPdf.href = URL.createObjectURL(blob);
     resultadoAPdf.classList.add('visible');
   } catch (error) {
-    alert(t('error-a-pdf') + ': ' + error.message);
+    alert(t('error-a-pdf') + ': ' + detalleError(error));
   } finally {
     botonAPdf.disabled = false;
     botonAPdf.textContent = t('boton-a-pdf');
@@ -287,7 +308,7 @@ async function mostrarArchivoPdf(archivo) {
 }
 
 function elegirArchivoPdf(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivoPdf(archivo);
 }
 
@@ -306,7 +327,9 @@ botonAImagenes.addEventListener('click', async () => {
   progreso.style.display = 'block';
   try {
     const bytes = await archivoPdfActual.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
     const formato = document.getElementById('formato').value;
     const extension = formato === 'image/png' ? 'png' : 'jpg';
     const escala = parseFloat(document.getElementById('escala').value);
@@ -328,11 +351,11 @@ botonAImagenes.addEventListener('click', async () => {
     }
 
     progreso.textContent = t('progreso-zip');
-    const blobZip = await zip.generateAsync({ type: 'blob' });
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescargaZip.href = URL.createObjectURL(blobZip);
     resultadoAImagenes.classList.add('visible');
   } catch (error) {
-    alert(t('error-a-imagenes') + ': ' + error.message);
+    alert(t('error-a-imagenes') + ': ' + detalleError(error));
   } finally {
     botonAImagenes.disabled = false;
     progreso.style.display = 'none';

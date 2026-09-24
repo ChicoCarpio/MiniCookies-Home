@@ -59,7 +59,10 @@ async function crearImageRunDesdeImg(imgEl) {
   });
 }
 
-async function extraerRuns(elementoBloque) {
+// omitirListas: en un <li>, las sublistas (<ul>/<ol> anidadas) se
+// convierten aparte, como párrafos de nivel siguiente; si no se omiten, su
+// texto quedaba pegado al del ítem padre.
+async function extraerRuns(elementoBloque, omitirListas) {
   const runs = [];
   async function recorrer(nodo) {
     if (nodo.nodeType === Node.TEXT_NODE) {
@@ -78,6 +81,7 @@ async function extraerRuns(elementoBloque) {
         if (imageRun) runs.push(imageRun);
         return;
       }
+      if (omitirListas && (nodo.tagName === 'UL' || nodo.tagName === 'OL')) return;
       for (const hijo of nodo.childNodes) {
         await recorrer(hijo);
       }
@@ -95,15 +99,28 @@ const NIVELES_TITULO_DOCX = {
   H4: 'HEADING_4', H5: 'HEADING_5', H6: 'HEADING_6',
 };
 
-async function convertirListaAParrafos(listaEl, numerada) {
+// Cada <ol> es una "instancia" distinta de la numeración: sin esto, todas
+// las listas numeradas del documento compartían el contador y la segunda
+// lista seguía en 4, 5, 6... en vez de empezar en 1.
+let instanciaListaDocx = 0;
+
+async function convertirListaAParrafos(listaEl, numerada, nivel) {
+  nivel = nivel || 0;
+  const instancia = ++instanciaListaDocx;
+  const nivelDocx = Math.min(nivel, 8); // Word admite hasta 9 niveles (0-8)
   const parrafos = [];
   for (const item of [...listaEl.children]) {
     if (item.tagName !== 'LI') continue;
     parrafos.push(new docx.Paragraph({
-      children: await extraerRuns(item),
-      numbering: numerada ? { reference: 'lista-numerada', level: 0 } : undefined,
-      bullet: numerada ? undefined : { level: 0 },
+      children: await extraerRuns(item, true),
+      numbering: numerada ? { reference: 'lista-numerada', level: nivelDocx, instance: instancia } : undefined,
+      bullet: numerada ? undefined : { level: nivelDocx },
     }));
+    for (const sublista of [...item.children]) {
+      if (sublista.tagName === 'UL' || sublista.tagName === 'OL') {
+        parrafos.push(...await convertirListaAParrafos(sublista, sublista.tagName === 'OL', nivel + 1));
+      }
+    }
   }
   return parrafos;
 }
@@ -152,9 +169,17 @@ async function contenidoAParrafos(contenedor) {
 
 // Config de numeración que hay que pasarle a `new docx.Document({ numbering: ... })`
 // para que las listas numeradas (bullet: false) se vean como "1. 2. 3." reales.
+// Los niveles 1+ son las sublistas (a., i., 1., ...), con sangría creciente.
+const FORMATOS_NIVEL_DOCX = ['decimal', 'lowerLetter', 'lowerRoman'];
 const NUMERACION_DOCX_CONFIG = {
   config: [{
     reference: 'lista-numerada',
-    levels: [{ level: 0, format: 'decimal', text: '%1.', alignment: docx.AlignmentType.START }],
+    levels: Array.from({ length: 9 }, (_, nivel) => ({
+      level: nivel,
+      format: FORMATOS_NIVEL_DOCX[nivel % 3],
+      text: `%${nivel + 1}.`,
+      alignment: docx.AlignmentType.START,
+      style: { paragraph: { indent: { left: 720 * (nivel + 1), hanging: 360 } } },
+    })),
   }],
 };

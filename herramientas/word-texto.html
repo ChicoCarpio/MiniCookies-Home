@@ -140,6 +140,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const panelWordATexto = document.getElementById('panelWordATexto');
 const panelTextoAWord = document.getElementById('panelTextoAWord');
@@ -167,7 +168,7 @@ let archivoWordActual = null;
 
 function mostrarArchivoWord(archivo) {
   archivoWordActual = archivo;
-  listaWord.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonExtraer.disabled = false;
   bloqueResultadoTexto.style.display = 'none';
   advertencias.style.display = 'none';
@@ -231,7 +232,7 @@ let archivoTxtActual = null;
 
 function mostrarArchivoTxt(archivo) {
   archivoTxtActual = archivo;
-  listaTxt.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaTxt.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonAWord.disabled = false;
   resultadoWord.classList.remove('visible');
   if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === t('nombre-defecto')) {

@@ -23,7 +23,8 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar .zip con las hojas',
     'info-hojas': 'Este Excel tiene {n} hoja(s): {lista}.',
     'info-necesita-dos': ' Necesita al menos 2 hojas para poder dividir.',
-    'error-dividir': 'No se pudo dividir el Excel'
+    'error-dividir': 'No se pudo dividir el Excel',
+    'aviso-formato': 'Con archivos .xls, .xlsb u .ods cada hoja se copia solo con sus datos: se pierden los colores, bordes, anchos de columna y el formato de las celdas. Con .xlsx o .xlsm el formato se conserva completo.'
   },
   en: {
     'titulo-pagina': 'Split Excel Sheets Free — Herramientas Ofimáticas',
@@ -37,7 +38,8 @@ window.i18nPagina = {
     'resultado-enlace': 'Download .zip with the sheets',
     'info-hojas': 'This Excel file has {n} sheet(s): {lista}.',
     'info-necesita-dos': ' It needs at least 2 sheets to be split.',
-    'error-dividir': 'Couldn’t split the Excel file'
+    'error-dividir': 'Couldn’t split the Excel file',
+    'aviso-formato': 'With .xls, .xlsb or .ods files each sheet is copied with its data only: colors, borders, column widths and cell formatting are lost. With .xlsx or .xlsm the formatting is fully kept.'
   }
 };
 </script>
@@ -65,6 +67,7 @@ window.i18nPagina = {
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
     <p id="infoHojas" style="color:var(--texto-suave); font-size:0.9rem;"></p>
+    <p id="avisoFormato" style="display:none; color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-formato">Con archivos .xls, .xlsb u .ods cada hoja se copia solo con sus datos: se pierden los colores, bordes, anchos de columna y el formato de las celdas. Con .xlsx o .xlsm el formato se conserva completo.</p>
 
     <div class="controles">
       <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir en archivos separados</button>
@@ -85,6 +88,8 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -93,15 +98,28 @@ const infoHojas = document.getElementById('infoHojas');
 const botonDividir = document.getElementById('botonDividir');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
+const avisoFormato = document.getElementById('avisoFormato');
 
 let libroActual = null;
+let archivoActual = null;
+
+function esOoxml(archivo) {
+  return /\.(xlsx|xlsm)$/i.test(archivo.name);
+}
 
 async function mostrarArchivo(archivo) {
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   resultado.classList.remove('visible');
 
-  const bytes = await archivo.arrayBuffer();
-  libroActual = XLSX.read(bytes, { type: 'array' });
+  archivoActual = archivo;
+  try {
+    libroActual = XLSX.read(await archivo.arrayBuffer(), { type: 'array', cellNF: true, cellStyles: true });
+  } catch (error) {
+    botonDividir.disabled = true;
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
+  avisoFormato.style.display = esOoxml(archivo) ? 'none' : 'block';
   infoHojas.textContent = t('info-hojas').replace('{n}', libroActual.SheetNames.length).replace('{lista}', libroActual.SheetNames.join(', '));
   botonDividir.disabled = libroActual.SheetNames.length < 2;
   if (libroActual.SheetNames.length < 2) {
@@ -129,16 +147,38 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.textContent = t('boton-dividir-procesando');
   try {
     const zip = new JSZip();
+    const usados = new Set();
+    const nombreUnico = (nombreHoja) => {
+      const base = nombreHoja.replace(/[\/\\?*\[\]:"<>|]/g, '-').trim() || 'hoja';
+      let nombre = base;
+      for (let n = 2; usados.has(nombre.toLowerCase()); n++) nombre = `${base} (${n})`;
+      usados.add(nombre.toLowerCase());
+      return nombre;
+    };
 
-    libroActual.SheetNames.forEach((nombreHoja) => {
-      const libroNuevo = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(libroNuevo, libroActual.Sheets[nombreHoja], nombreHoja);
-      const bytes = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
-      const nombreArchivo = nombreHoja.replace(/[\/\\?*\[\]]/g, '-');
-      zip.file(`${nombreArchivo}.xlsx`, bytes);
-    });
+    if (esOoxml(archivoActual)) {
+      // .xlsx/.xlsm: cada archivo sale del original con solo su hoja
+      // (reordenarHojasExcel en assets/js/ooxml-paquete.js), así se conserva
+      // todo el formato, las imágenes y los gráficos de esa hoja.
+      const bytesOriginales = await archivoActual.arrayBuffer();
+      const extension = /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
+      for (const nombreHoja of libroActual.SheetNames) {
+        const libroZip = await JSZip.loadAsync(bytesOriginales);
+        await reordenarHojasExcel(libroZip, [nombreHoja]);
+        const bytes = await libroZip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+        zip.file(`${nombreUnico(nombreHoja)}.${extension}`, bytes);
+      }
+    } else {
+      libroActual.SheetNames.forEach((nombreHoja) => {
+        const libroNuevo = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libroNuevo, libroActual.Sheets[nombreHoja], nombreHoja);
+        const bytes = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
+        zip.file(`${nombreUnico(nombreHoja)}.xlsx`, bytes);
+      });
+    }
 
-    const blobZip = await zip.generateAsync({ type: 'blob' });
+    // Los .xlsx ya van comprimidos: guardarlos sin recomprimir es más rápido.
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {

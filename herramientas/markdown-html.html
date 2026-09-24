@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir Markdown y HTML gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Convertí Markdown a HTML o HTML a Markdown, en los dos sentidos, con vista previa en vivo — gratis y sin enviar nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir Markdown y HTML gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí Markdown a HTML o HTML a Markdown, en los dos sentidos, con vista previa en vivo — gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -27,6 +27,34 @@
   .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
   .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir Markdown y HTML gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí Markdown a HTML o HTML a Markdown, en los dos sentidos, con vista previa en vivo — gratis y sin enviar nada a ningún servidor.',
+    'h1': 'Markdown ↔ HTML',
+    'intro': 'Convertí Markdown a HTML o HTML a Markdown, en el sentido que necesites.',
+    'vista-previa': 'Vista previa',
+    'boton-ver-html': 'Ver / copiar código HTML',
+    'boton-ocultar-html': 'Ocultar código HTML',
+    'boton-copiar-md': 'Copiar Markdown',
+    'boton-copiado': '¡Copiado!',
+    'error-convertir': 'No se pudo convertir'
+  },
+  en: {
+    'titulo-pagina': 'Convert Markdown and HTML Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert Markdown to HTML or HTML to Markdown, in either direction — free and without uploading anything anywhere.',
+    'h1': 'Markdown ↔ HTML',
+    'intro': 'Convert Markdown to HTML or HTML to Markdown, whichever you need.',
+    'vista-previa': 'Preview',
+    'boton-ver-html': 'View / copy HTML code',
+    'boton-ocultar-html': 'Hide HTML code',
+    'boton-copiar-md': 'Copy Markdown',
+    'boton-copiado': 'Copied!',
+    'error-convertir': 'Couldn’t convert'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -34,13 +62,14 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/markdown.html">Herramientas de Markdown</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/markdown.html" data-i18n="nav-cat-markdown">Herramientas de Markdown</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Markdown ↔ HTML</h1>
-  <p>Convertí Markdown a HTML o HTML a Markdown, en el sentido que necesites. Todo en tu navegador.</p>
+  <h1 data-i18n="h1">Markdown ↔ HTML</h1>
+  <p data-i18n="intro">Convertí Markdown a HTML o HTML a Markdown, en el sentido que necesites.</p>
 
   <div class="panel-herramienta">
     <div class="selector-direccion">
@@ -54,7 +83,7 @@
         <textarea id="entrada" style="min-height:320px;"></textarea>
       </label>
       <label class="campo" id="bloqueVistaPrevia">
-        Vista previa
+        <span data-i18n="vista-previa">Vista previa</span>
         <div class="vista-previa" id="vistaPrevia"></div>
       </label>
       <label class="campo" id="bloqueMarkdown" style="display:none;">
@@ -64,23 +93,24 @@
     </div>
 
     <div class="controles">
-      <button class="boton" id="botonVerHtml" type="button" style="background:#64748b;">Ver / copiar código HTML</button>
-      <button class="boton" id="botonCopiarMarkdown" type="button" style="display:none;">Copiar Markdown</button>
+      <button class="boton" id="botonVerHtml" type="button" style="background:#64748b;" data-i18n="boton-ver-html">Ver / copiar código HTML</button>
+      <button class="boton" id="botonCopiarMarkdown" type="button" style="display:none;" data-i18n="boton-copiar-md">Copiar Markdown</button>
     </div>
 
     <textarea id="salidaHtml" readonly style="display:none; margin-top:12px;"></textarea>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const entrada = document.getElementById('entrada');
 const etiquetaEntrada = document.getElementById('etiquetaEntrada');
@@ -121,13 +151,15 @@ function direccionActual() {
 function actualizar() {
   if (direccionActual() === 'md-a-html') {
     const html = marked.parse(entrada.value);
-    vistaPrevia.innerHTML = html;
+    // La vista previa se limpia (un .md puede traer HTML crudo con código
+    // malicioso); el código que se copia queda tal cual lo generó marked.
+    vistaPrevia.innerHTML = sanitizarHtml(html);
     salidaHtml.value = html;
   } else {
     try {
       salidaMarkdown.value = turndownService.turndown(entrada.value);
     } catch (error) {
-      salidaMarkdown.value = 'No se pudo convertir: ' + error.message;
+      salidaMarkdown.value = t('error-convertir') + ': ' + error.message;
     }
   }
 }
@@ -141,7 +173,7 @@ function actualizarDireccion() {
   botonVerHtml.style.display = esMdAHtml ? '' : 'none';
   botonCopiarMarkdown.style.display = esMdAHtml ? 'none' : '';
   salidaHtml.style.display = 'none';
-  botonVerHtml.textContent = 'Ver / copiar código HTML';
+  botonVerHtml.textContent = t('boton-ver-html');
   actualizar();
 }
 
@@ -154,23 +186,30 @@ entrada.addEventListener('input', actualizar);
 botonVerHtml.addEventListener('click', async () => {
   if (salidaHtml.style.display === 'none') {
     salidaHtml.style.display = 'block';
-    botonVerHtml.textContent = 'Ocultar código HTML';
+    botonVerHtml.textContent = t('boton-ocultar-html');
   } else {
     await navigator.clipboard.writeText(salidaHtml.value);
-    botonVerHtml.textContent = '¡Copiado!';
-    setTimeout(() => { botonVerHtml.textContent = 'Ocultar código HTML'; }, 1500);
+    botonVerHtml.textContent = t('boton-copiado');
+    setTimeout(() => { botonVerHtml.textContent = t('boton-ocultar-html'); }, 1500);
   }
 });
 
 botonCopiarMarkdown.addEventListener('click', async () => {
   await navigator.clipboard.writeText(salidaMarkdown.value);
-  botonCopiarMarkdown.textContent = '¡Copiado!';
-  setTimeout(() => { botonCopiarMarkdown.textContent = 'Copiar Markdown'; }, 1500);
+  botonCopiarMarkdown.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiarMarkdown.textContent = t('boton-copiar-md'); }, 1500);
 });
 
-actualizarDireccion();
+// idioma.js (que define t) se carga al final de la página: la dirección
+// inicial se aplica cuando ya está disponible.
+document.addEventListener('DOMContentLoaded', actualizarDireccion);
+// Al cambiar de idioma solo se re-traducen las etiquetas (sin pisar lo escrito).
+document.addEventListener('cambioIdioma', () => {
+  if (direccionActual() === 'md-a-html') botonVerHtml.textContent = t(salidaHtml.style.display === 'none' ? 'boton-ver-html' : 'boton-ocultar-html');
+});
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

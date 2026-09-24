@@ -137,6 +137,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 let filasA = null;
 let filasB = null;
@@ -147,8 +149,7 @@ function esArchivoValido(archivo) {
 }
 
 async function leerFilas(archivo) {
-  const bytes = await archivo.arrayBuffer();
-  const libro = XLSX.read(bytes, { type: 'array' });
+  const libro = await leerLibroDesdeArchivo(archivo);
   return XLSX.utils.sheet_to_json(libro.Sheets[libro.SheetNames[0]], { defval: '', raw: false });
 }
 
@@ -160,8 +161,12 @@ function configurarZona(idZona, idEntrada, idLista, onElegido) {
   async function elegir(listaFileList) {
     const archivo = [...listaFileList].find(esArchivoValido);
     if (!archivo) return;
-    lista.innerHTML = `<li><span>${archivo.name}</span></li>`;
-    onElegido(await leerFilas(archivo));
+    lista.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+    try {
+      onElegido(await leerFilas(archivo));
+    } catch (error) {
+      alert(t('error-leer') + ': ' + error.message);
+    }
   }
 
   zona.addEventListener('click', () => entrada.click());
@@ -182,7 +187,7 @@ function actualizarControles() {
   columnas = [...new Set([...columnasA, ...columnasB])].filter(c => !/^__EMPTY/.test(c));
 
   const selector = document.getElementById('columnaClave');
-  selector.innerHTML = columnas.map(c => `<option value="${c}">${c}</option>`).join('');
+  selector.innerHTML = columnas.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
   document.getElementById('controles').style.display = 'flex';
 }
 
@@ -238,14 +243,14 @@ document.getElementById('botonComparar').addEventListener('click', () => {
   const nombresEstado = { agregada: t('estado-agregada'), eliminada: t('estado-eliminada'), modificada: t('estado-modificada'), igual: t('estado-igual') };
 
   let html = `<table class="tabla-comparacion"><thead><tr><th>${t('columna-estado')}</th>`;
-  columnas.forEach(col => html += `<th>${col}</th>`);
+  columnas.forEach(col => html += `<th>${escaparHtml(col)}</th>`);
   html += '</tr></thead><tbody>';
 
   filasResultado.forEach(({ estado, fila, camposCambiados }) => {
     html += `<tr class="fila-${estado}"><td><span class="badge-estado ${estado}">${nombresEstado[estado]}</span></td>`;
     columnas.forEach((col) => {
       const claseCambio = camposCambiados.has(col) ? ' class="celda-cambiada"' : '';
-      html += `<td${claseCambio}>${fila[col] ?? ''}</td>`;
+      html += `<td${claseCambio}>${escaparHtml(fila[col] ?? '')}</td>`;
     });
     html += '</tr>';
   });

@@ -3,12 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reparar EPUB gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Intentá recuperar un libro EPUB dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Reparar EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un libro EPUB dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reparar EPUB gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Intentá recuperar un libro EPUB dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Reparar EPUB',
+    'intro': 'Elegí un libro .epub que no abre bien y probamos reconstruirlo.',
+    'boton-reparar': 'Reparar',
+    'boton-reparar-procesando': 'Reparando...',
+    'resultado-enlace': 'Descargar EPUB reparado',
+    'limitaciones-titulo': 'Limitaciones',
+    'item1': 'Si el archivo está muy dañado, se puede perder la tabla de contenidos o el orden exacto de algún capítulo al reconstruirlo.',
+    'item2': 'No funciona con libros con DRM (candado editorial).',
+    'error-sin-capitulos': 'No se encontró ningún capítulo legible dentro de este archivo.',
+    'error-sin-texto': 'Los archivos encontrados no tenían contenido de texto.',
+    'mensaje-nivel1': '✅ Se pudo leer el EPUB normalmente y se reconstruyó desde cero.',
+    'mensaje-nivel2': '⚠️ El paquete EPUB estaba dañado ({detalle}) — se reconstruyó a partir de {n} archivo(s) de contenido encontrados directamente, sin depender de la tabla de contenidos original.',
+    'error-reparar': 'No se pudo reparar el EPUB'
+  },
+  en: {
+    'titulo-pagina': 'Repair EPUB Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Try to rebuild a damaged EPUB book that won’t open, free and without uploading your file anywhere.',
+    'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Repair EPUB',
+    'intro': 'Pick a .epub book that doesn’t open properly and we’ll try to rebuild it.',
+    'boton-reparar': 'Repair',
+    'boton-reparar-procesando': 'Repairing...',
+    'resultado-enlace': 'Download repaired EPUB',
+    'limitaciones-titulo': 'Limitations',
+    'item1': 'If the file is badly damaged, the table of contents or the exact order of some chapter may be lost when rebuilding it.',
+    'item2': 'It doesn’t work with DRM-protected books (publisher lock).',
+    'error-sin-capitulos': 'No readable chapter was found inside this file.',
+    'error-sin-texto': 'The files found had no text content.',
+    'mensaje-nivel1': '✅ The EPUB could be read normally and was rebuilt from scratch.',
+    'mensaje-nivel2': '⚠️ The EPUB package was damaged ({detalle}) — it was rebuilt from {n} content file(s) found directly, without relying on the original table of contents.',
+    'error-reparar': 'Couldn’t repair the EPUB'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,50 +58,52 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Reparar EPUB</h1>
-  <p>Elegí un libro .epub que no abre bien y probamos reconstruirlo.</p>
+  <h1 data-i18n="h1">Reparar EPUB</h1>
+  <p data-i18n="intro">Elegí un libro .epub que no abre bien y probamos reconstruirlo.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".epub" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
-      <button class="boton" id="botonReparar" disabled>Reparar</button>
+      <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Reparar</button>
     </div>
 
     <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="libro-reparado.epub">Descargar EPUB reparado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libro-reparado.epub" data-i18n="resultado-enlace">Descargar EPUB reparado</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Limitaciones</h3>
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Si el archivo está muy dañado, se puede perder la tabla de contenidos o el orden exacto de algún capítulo al reconstruirlo.</li>
-      <li>No funciona con libros con DRM (candado editorial).</li>
+      <li data-i18n="item1">Si el archivo está muy dañado, se puede perder la tabla de contenidos o el orden exacto de algún capítulo al reconstruirlo.</li>
+      <li data-i18n="item2">No funciona con libros con DRM (candado editorial).</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -74,7 +118,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonReparar.disabled = false;
   resultado.classList.remove('visible');
   mensajeNivel.style.display = 'none';
@@ -104,7 +148,7 @@ async function rescatarCapitulosSinPaquete(archivo) {
     .filter(ruta => !zip.files[ruta].dir && /\.(xhtml|html|htm)$/i.test(ruta))
     .sort();
 
-  if (rutasHtml.length === 0) throw new Error('No se encontró ningún capítulo legible dentro de este archivo.');
+  if (rutasHtml.length === 0) throw new Error(t('error-sin-capitulos'));
 
   const parser = new DOMParser();
   const capitulos = [];
@@ -129,16 +173,17 @@ async function rescatarCapitulosSinPaquete(archivo) {
 
     const encabezado = cuerpo.querySelector('h1, h2, title');
     const titulo = (encabezado && encabezado.textContent.trim()) || ruta.split('/').pop().replace(/\.(xhtml|html|htm)$/i, '');
+    sanitizarArbolHtml(cuerpo); // mismo criterio que leerEpub (assets/js/seguridad-html.js)
     capitulos.push({ titulo, html: cuerpo.innerHTML });
   }
 
-  if (capitulos.length === 0) throw new Error('Los archivos encontrados no tenían contenido de texto.');
+  if (capitulos.length === 0) throw new Error(t('error-sin-texto'));
   return capitulos;
 }
 
 botonReparar.addEventListener('click', async () => {
   botonReparar.disabled = true;
-  botonReparar.textContent = 'Reparando...';
+  botonReparar.textContent = t('boton-reparar-procesando');
   mensajeNivel.style.display = 'none';
   try {
     const nombreLibro = archivoActual.name.replace(/\.epub$/i, '');
@@ -151,7 +196,7 @@ botonReparar.addEventListener('click', async () => {
 
       enlaceDescarga.href = URL.createObjectURL(blob);
       resultado.classList.add('visible');
-      mensajeNivel.textContent = '✅ Se pudo leer el EPUB normalmente y se reconstruyó desde cero.';
+      mensajeNivel.textContent = t('mensaje-nivel1');
       mensajeNivel.style.color = '#166534';
       mensajeNivel.style.display = 'block';
     } catch (errorNivel1) {
@@ -162,18 +207,19 @@ botonReparar.addEventListener('click', async () => {
 
       enlaceDescarga.href = URL.createObjectURL(blob);
       resultado.classList.add('visible');
-      mensajeNivel.textContent = `⚠️ El paquete EPUB estaba dañado (${errorNivel1.message}) — se reconstruyó a partir de ${capitulos.length} archivo(s) de contenido encontrados directamente, sin depender de la tabla de contenidos original.`;
+      mensajeNivel.textContent = t('mensaje-nivel2').replace('{detalle}', errorNivel1.message).replace('{n}', capitulos.length);
       mensajeNivel.style.display = 'block';
     }
   } catch (error) {
-    alert('No se pudo reparar el EPUB: ' + error.message);
+    alert(t('error-reparar') + ': ' + error.message);
   } finally {
     botonReparar.disabled = false;
-    botonReparar.textContent = 'Reparar';
+    botonReparar.textContent = t('boton-reparar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -85,6 +85,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivos = document.getElementById('entradaArchivos');
@@ -103,7 +105,7 @@ function actualizarLista() {
   listaArchivos.innerHTML = '';
   archivos.forEach((archivo, indice) => {
     const item = document.createElement('li');
-    item.innerHTML = `<span>${indice + 1}. ${archivo.name}</span>`;
+    item.innerHTML = `<span>${indice + 1}. ${escaparHtml(archivo.name)}</span>`;
     const quitar = document.createElement('button');
     quitar.className = 'quitar';
     quitar.textContent = '✕';
@@ -154,8 +156,7 @@ botonUnir.addEventListener('click', async () => {
     const nombresUsados = new Set();
 
     for (const archivo of archivos) {
-      const bytes = await archivo.arrayBuffer();
-      const libroOrigen = XLSX.read(bytes, { type: 'array', cellStyles: true });
+      const libroOrigen = await leerLibroDesdeArchivo(archivo, { cellStyles: true, cellNF: true });
       const nombreBase = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
       const tieneVariasHojas = libroOrigen.SheetNames.length > 1;
 

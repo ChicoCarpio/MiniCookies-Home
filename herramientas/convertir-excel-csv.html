@@ -23,7 +23,11 @@ window.i18nPagina = {
     'boton-a-csv': 'Convertir a CSV',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar resultado',
-    'nombre-hoja-defecto': 'Hoja1'
+    'nombre-hoja-defecto': 'Hoja1',
+    'campo-separador': 'Separador del CSV',
+    'opcion-sep-punto-coma': 'Punto y coma (;) — Excel en español, con coma decimal',
+    'opcion-sep-coma': 'Coma (,) — Excel en inglés, Google Sheets y otros programas',
+    'error-leer': 'No se pudo leer el archivo. Puede estar dañado o no ser una planilla válida'
   },
   en: {
     'titulo-pagina': 'Convert Excel to CSV and CSV to Excel Free — Herramientas Ofimáticas',
@@ -37,7 +41,11 @@ window.i18nPagina = {
     'boton-a-csv': 'Convert to CSV',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download result',
-    'nombre-hoja-defecto': 'Sheet1'
+    'nombre-hoja-defecto': 'Sheet1',
+    'campo-separador': 'CSV separator',
+    'opcion-sep-punto-coma': 'Semicolon (;) — Excel in Spanish and other languages that use a decimal comma',
+    'opcion-sep-coma': 'Comma (,) — Excel in English, Google Sheets and most other programs',
+    'error-leer': 'Couldn’t read the file. It may be damaged or not a valid spreadsheet'
   }
 };
 </script>
@@ -72,6 +80,16 @@ window.i18nPagina = {
       </label>
     </div>
 
+    <div class="controles" id="controlesSeparador" style="display:none;">
+      <label class="campo">
+        <span data-i18n="campo-separador">Separador del CSV</span>
+        <select id="selectorSeparador">
+          <option value=";" data-i18n="opcion-sep-punto-coma">Punto y coma (;) — Excel en español, con coma decimal</option>
+          <option value="," data-i18n="opcion-sep-coma">Coma (,) — Excel en inglés, Google Sheets y otros programas</option>
+        </select>
+      </label>
+    </div>
+
     <div class="controles">
       <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir</button>
     </div>
@@ -90,6 +108,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -97,6 +117,12 @@ const listaArchivo = document.getElementById('listaArchivo');
 const controlesHoja = document.getElementById('controlesHoja');
 const selectorHoja = document.getElementById('selectorHoja');
 const botonConvertir = document.getElementById('botonConvertir');
+const controlesSeparador = document.getElementById('controlesSeparador');
+const selectorSeparador = document.getElementById('selectorSeparador');
+
+// Por defecto, el separador que espera el Excel de esta computadora: si la
+// configuración regional usa coma decimal, Excel espera ";" en los CSV.
+selectorSeparador.value = (1.5).toLocaleString().includes(',') ? ';' : ',';
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
@@ -111,18 +137,25 @@ function esArchivoValido(archivo) {
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
   esCsv = /\.csv$/i.test(archivo.name);
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   resultado.classList.remove('visible');
   controlesHoja.style.display = 'none';
+  controlesSeparador.style.display = 'none';
   botonConvertir.disabled = true;
 
-  const bytes = await archivo.arrayBuffer();
-  libro = XLSX.read(bytes, { type: 'array' });
+  try {
+    libro = await leerLibroDesdeArchivo(archivo);
+  } catch (error) {
+    libro = null;
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
 
   if (!esCsv && libro.SheetNames.length > 1) {
-    selectorHoja.innerHTML = libro.SheetNames.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+    selectorHoja.innerHTML = libro.SheetNames.map(nombre => `<option value="${escaparHtml(nombre)}">${escaparHtml(nombre)}</option>`).join('');
     controlesHoja.style.display = 'flex';
   }
+  if (!esCsv) controlesSeparador.style.display = 'flex';
 
   botonConvertir.textContent = esCsv ? t('boton-a-excel') : t('boton-a-csv');
   botonConvertir.disabled = false;
@@ -143,6 +176,24 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
+// Con ";" los números se escriben con coma decimal y punto de miles (como
+// los muestra Excel en español): se intercambian "," y "." en el texto ya
+// formateado de cada celda numérica, sobre una copia de la hoja.
+function hojaParaCsv(hoja, separador) {
+  if (separador !== ';') return hoja;
+  const copia = {};
+  Object.keys(hoja).forEach((direccion) => {
+    const celda = hoja[direccion];
+    if (direccion[0] !== '!' && celda && celda.t === 'n') {
+      const texto = celda.w !== undefined ? celda.w : String(celda.v);
+      copia[direccion] = Object.assign({}, celda, { w: texto.replace(/[.,]/g, (c) => (c === '.' ? ',' : '.')) });
+    } else {
+      copia[direccion] = celda;
+    }
+  });
+  return copia;
+}
+
 botonConvertir.addEventListener('click', () => {
   const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
 
@@ -155,7 +206,8 @@ botonConvertir.addEventListener('click', () => {
     enlaceDescarga.download = `${nombreBase}.xlsx`;
   } else {
     const nombreHoja = controlesHoja.style.display !== 'none' ? selectorHoja.value : libro.SheetNames[0];
-    const csv = XLSX.utils.sheet_to_csv(libro.Sheets[nombreHoja]);
+    const separador = selectorSeparador.value;
+    const csv = XLSX.utils.sheet_to_csv(hojaParaCsv(libro.Sheets[nombreHoja], separador), { FS: separador });
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `${nombreBase}.csv`;

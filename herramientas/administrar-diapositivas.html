@@ -94,6 +94,9 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -104,6 +107,7 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let zipActual = null;
+let archivoOriginal = null;
 let diapositivas = []; // [{ rId, etiqueta }]
 let parser = new DOMParser();
 
@@ -113,7 +117,7 @@ function renderizarLista() {
     const item = document.createElement('li');
     item.draggable = true;
     item.dataset.rid = diapo.rId;
-    item.innerHTML = `<span>${diapo.etiqueta}</span>`;
+    item.innerHTML = `<span>${escaparHtml(diapo.etiqueta)}</span>`;
     const quitar = document.createElement('button');
     quitar.className = 'quitar';
     quitar.textContent = '✕';
@@ -140,10 +144,13 @@ listaDiapositivas.addEventListener('dragover', (e) => {
   const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
   objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
 });
-listaDiapositivas.addEventListener('drop', () => {
+function sincronizarOrdenLista() {
   const ordenRids = [...listaDiapositivas.children].map(li => li.dataset.rid);
   diapositivas.sort((a, b) => ordenRids.indexOf(a.rId) - ordenRids.indexOf(b.rId));
-});
+}
+listaDiapositivas.addEventListener('drop', sincronizarOrdenLista);
+listaDiapositivas.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaDiapositivas, 'li', sincronizarOrdenLista);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
@@ -164,6 +171,7 @@ async function cargarPresentacion(archivo) {
   cargando.style.display = 'block';
   try {
     zipActual = await JSZip.loadAsync(archivo);
+    archivoOriginal = archivo;
     const archivoRels = zipActual.file('ppt/_rels/presentation.xml.rels');
     const archivoPresentacion = zipActual.file('ppt/presentation.xml');
     if (!archivoRels || !archivoPresentacion) throw new Error(t('error-estructura'));
@@ -209,23 +217,14 @@ botonGuardar.addEventListener('click', async () => {
   try {
     if (diapositivas.length === 0) throw new Error(t('error-sin-ninguna'));
 
-    const archivoPresentacion = zipActual.file('ppt/presentation.xml');
-    const presentacionDoc = parser.parseFromString(await archivoPresentacion.async('string'), 'application/xml');
-    const listaSld = presentacionDoc.getElementsByTagName('p:sldIdLst')[0];
-    const nodosOriginales = [...listaSld.getElementsByTagName('p:sldId')];
-    const nodoPorRid = new Map(nodosOriginales.map(nodo => [nodo.getAttribute('r:id'), nodo]));
+    // Se parte siempre del archivo original. conservarDiapositivas
+    // (assets/js/ooxml-paquete.js) reordena la lista y, si se quitó alguna
+    // diapositiva, borra también su contenido (XML, imágenes, notas) del
+    // paquete y la saca de secciones y presentaciones personalizadas.
+    const zip = await JSZip.loadAsync(archivoOriginal);
+    await conservarDiapositivas(zip, diapositivas.map(({ rId }) => rId));
 
-    // Vaciar y volver a insertar en el orden final (y sin las eliminadas).
-    nodosOriginales.forEach(nodo => listaSld.removeChild(nodo));
-    diapositivas.forEach(({ rId }) => {
-      const nodo = nodoPorRid.get(rId);
-      if (nodo) listaSld.appendChild(nodo);
-    });
-
-    const nuevoXml = new XMLSerializer().serializeToString(presentacionDoc);
-    zipActual.file('ppt/presentation.xml', nuevoXml);
-
-    const blobFinal = await zipActual.generateAsync({ type: 'blob' });
+    const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
   } catch (error) {

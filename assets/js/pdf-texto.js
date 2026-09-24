@@ -1,11 +1,31 @@
-// Helpers compartidos de "texto plano -> PDF" y "extraer texto de un .pptx".
+// Helpers compartidos de "texto plano -> PDF", "texto de un PDF con sus
+// renglones y párrafos" y "extraer texto de un .pptx".
 // Requiere que la página ya haya cargado pdf-lib (global PDFLib) y, para
 // extraerTextoPowerPoint, JSZip (global JSZip).
+
+// Las fuentes estándar de PDF (Helvetica) solo traen los caracteres de
+// Windows-1252: un solo emoji, una flecha "→" o un ideograma hacían fallar
+// toda la conversión ("WinAnsi cannot encode..."). Se reemplazan los más
+// comunes por un equivalente y el resto por "?", en vez de fallar.
+const EQUIVALENTES_WINANSI = {
+  '→': '->', '←': '<-', '↑': '^', '↓': 'v', '⇒': '=>', '≤': '<=', '≥': '>=', '≠': '!=',
+  '✓': 'v', '✔': 'v', '✗': 'x', '✘': 'x', '●': '•', '◦': '•', '▪': '•', '■': '•', '\t': '    ',
+};
+function adaptarTextoAFuente(texto, fuente) {
+  const permitidos = new Set(fuente.getCharacterSet());
+  return [...texto.normalize('NFC')].map((c) => {
+    if (permitidos.has(c.codePointAt(0))) return c;
+    if (EQUIVALENTES_WINANSI[c] !== undefined) return EQUIVALENTES_WINANSI[c];
+    if (/[\u200B-\u200D\uFE0F\u20E3]/.test(c)) return ''; // caracteres invisibles de unión/emoji
+    return '?';
+  }).join('');
+}
 
 async function generarPdfDeTexto(texto) {
   const { PDFDocument, StandardFonts, rgb } = PDFLib;
   const pdf = await PDFDocument.create();
   const fuente = await pdf.embedFont(StandardFonts.Helvetica);
+  texto = adaptarTextoAFuente(texto.replace(/\r\n?/g, '\n'), fuente);
   const tamanoFuente = 11;
   const margen = 50;
   const anchoPagina = 595, altoPagina = 842; // A4
@@ -45,6 +65,75 @@ async function generarPdfDeTexto(texto) {
   });
 
   return pdf;
+}
+
+// --- Texto de un PDF con sus renglones y párrafos ---
+//
+// getTextContent() de pdf.js devuelve fragmentos sueltos con su posición en la
+// página. Unirlos todos con un espacio (como se hacía antes) dejaba cada
+// página como un único renglón gigante: se perdían todos los saltos de línea
+// y de párrafo. Acá se reconstruyen a partir de las coordenadas: cambio de
+// altura de la línea base = renglón nuevo; un salto vertical bastante mayor al
+// interlineado habitual de la página = párrafo nuevo.
+// Devuelve el texto con los renglones separados por "\n" y los párrafos por
+// una línea en blanco ("\n\n").
+async function extraerTextoPaginaPdf(pagina) {
+  const contenido = await pagina.getTextContent();
+  const lineas = [];
+  let linea = null;
+  let finAnterior = null;
+  let saltoPendiente = false;
+  for (const item of contenido.items) {
+    if (typeof item.str !== 'string') continue; // marcas de contenido, sin texto
+    const x = item.transform[4];
+    const y = item.transform[5];
+    const alto = Math.abs(item.height || item.transform[3]) || 10;
+    const renglonNuevo = !linea || saltoPendiente || Math.abs(y - linea.y) > alto * 0.5;
+    if (renglonNuevo) {
+      if (item.str.trim() === '' && !item.hasEOL) { saltoPendiente = false; continue; }
+      linea = { texto: '', y, alto };
+      lineas.push(linea);
+      finAnterior = null;
+    } else if (finAnterior !== null && x - finAnterior > alto * 0.15 && !/\s$/.test(linea.texto) && !/^\s/.test(item.str)) {
+      // Dos fragmentos del mismo renglón separados por un hueco: va un espacio.
+      linea.texto += ' ';
+    }
+    linea.texto += item.str;
+    finAnterior = x + (item.width || 0);
+    saltoPendiente = !!item.hasEOL;
+  }
+
+  const renglones = lineas.map((l) => ({ ...l, texto: l.texto.replace(/\s+$/, '') })).filter((l) => l.texto !== '');
+  if (renglones.length === 0) return '';
+
+  // Interlineado habitual = mediana de la distancia entre renglones seguidos.
+  const saltos = [];
+  for (let i = 1; i < renglones.length; i++) {
+    const salto = renglones[i - 1].y - renglones[i].y;
+    if (salto > 0) saltos.push(salto);
+  }
+  saltos.sort((a, b) => a - b);
+  const interlineado = saltos.length ? saltos[Math.floor(saltos.length / 2)] : renglones[0].alto * 1.2;
+
+  let texto = renglones[0].texto;
+  for (let i = 1; i < renglones.length; i++) {
+    const salto = renglones[i - 1].y - renglones[i].y;
+    // Un salto mucho mayor que el habitual, o hacia arriba (otra columna), separa párrafos.
+    const parrafoNuevo = salto > interlineado * 1.45 || salto < 0;
+    texto += (parrafoNuevo ? '\n\n' : '\n') + renglones[i].texto;
+  }
+  return texto;
+}
+
+// Une los renglones de un párrafo en una sola línea de texto corrido (para
+// Word, EPUB o Markdown, donde el ancho lo decide quien lo muestra), juntando
+// además las palabras cortadas con guion al final de un renglón ("docu-\nmento").
+function unirRenglonesDeParrafo(parrafo) {
+  return parrafo.split('\n').reduce((acumulado, renglon) => {
+    if (!acumulado) return renglon.trim();
+    if (/\p{L}-$/u.test(acumulado) && /^\p{Ll}/u.test(renglon.trim())) return acumulado.slice(0, -1) + renglon.trim();
+    return acumulado + ' ' + renglon.trim();
+  }, '');
 }
 
 async function extraerTextoPowerPoint(archivo) {

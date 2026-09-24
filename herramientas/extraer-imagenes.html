@@ -118,7 +118,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -133,11 +133,18 @@ zonaArrastre.addEventListener('drop', (e) => {
 });
 
 function imagenPdfACanvas(imagenPdf) {
-  const { width, height, data, kind } = imagenPdf;
+  const { width, height, data, kind, bitmap } = imagenPdf;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const contexto = canvas.getContext('2d');
+  // PDF.js 3.x entrega casi todas las imágenes ya decodificadas como
+  // ImageBitmap (sin "data"): alcanza con dibujarlas.
+  if (bitmap) {
+    contexto.drawImage(bitmap, 0, 0);
+    return canvas;
+  }
+  if (!data) return null;
   const imageData = contexto.createImageData(width, height);
   const salida = imageData.data;
 
@@ -177,9 +184,13 @@ botonExtraer.addEventListener('click', async () => {
   resultado.classList.remove('visible');
   try {
     const bytes = await archivoActual.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
     const zip = new JSZip();
     let contadorImagenes = 0;
+    const imagenesComunesVistas = new Set();
+    const huellasVistas = new Set();
 
     for (let i = 1; i <= pdf.numPages; i++) {
       progreso.textContent = t('progreso-pagina').replace('{actual}', i).replace('{total}', pdf.numPages);
@@ -195,17 +206,31 @@ botonExtraer.addEventListener('click', async () => {
       });
 
       for (const nombre of nombresImagenes) {
+        // Las imágenes que se repiten en varias páginas (un logo, un fondo)
+        // PDF.js las guarda una sola vez en commonObjs con nombre "g_...":
+        // se extraen una sola vez.
+        const esComun = nombre.startsWith('g_');
+        if (esComun && imagenesComunesVistas.has(nombre)) continue;
         try {
           const imagenPdf = await new Promise((resolve, reject) => {
-            pagina.objs.get(nombre, resolve);
-            setTimeout(() => reject(new Error('tiempo agotado')), 5000);
+            const temporizador = setTimeout(() => reject(new Error('tiempo agotado')), 5000);
+            (esComun ? pagina.commonObjs : pagina.objs).get(nombre, (objeto) => {
+              clearTimeout(temporizador);
+              resolve(objeto);
+            });
           });
-          if (!imagenPdf || !imagenPdf.data) continue;
+          if (esComun) imagenesComunesVistas.add(nombre);
+          if (!imagenPdf || (!imagenPdf.data && !imagenPdf.bitmap)) continue;
 
           const canvas = imagenPdfACanvas(imagenPdf);
           if (!canvas) continue;
 
           const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+          // La misma imagen usada en otra página (antes de que PDF.js la pase
+          // a commonObjs) llega con otro nombre: se descarta por contenido.
+          const huella = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))).join(',');
+          if (huellasVistas.has(huella)) continue;
+          huellasVistas.add(huella);
           contadorImagenes++;
           zip.file(`pagina-${i}-imagen-${contadorImagenes}.png`, blob);
         } catch (errorImagen) {
@@ -218,13 +243,13 @@ botonExtraer.addEventListener('click', async () => {
     if (contadorImagenes === 0) {
       sinImagenes.style.display = 'block';
     } else {
-      const blobZip = await zip.generateAsync({ type: 'blob' });
+      const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
       enlaceDescarga.href = URL.createObjectURL(blobZip);
       cantidadImagenes.textContent = contadorImagenes;
       resultado.classList.add('visible');
     }
   } catch (error) {
-    alert(t('error-extraer') + ': ' + error.message);
+    alert(t('error-extraer') + ': ' + detalleError(error));
   } finally {
     botonExtraer.disabled = false;
     progreso.style.display = 'none';

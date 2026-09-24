@@ -60,23 +60,25 @@ window.i18nPagina = {
   <p data-i18n="intro">Elegí un PDF base y un PDF de superposición (ej. una plantilla o membrete). Cada página del PDF base recibe encima la página correspondiente del PDF de superposición. Si el de superposición tiene menos páginas, se repite la última.</p>
 
   <div class="panel-herramienta">
-    <label class="campo" style="margin-bottom:16px;">
+    <!-- div (no label): un label alrededor de la zona de arrastre abría el
+         selector de archivos dos veces (clic de la zona + clic del label). -->
+    <div class="campo" style="display:flex; flex-direction:column; gap:4px; font-size:0.9rem; color:var(--texto-suave); margin-bottom:16px;">
       <span data-i18n="campo-base">PDF base (el contenido)</span>
       <div class="zona-arrastre" id="zonaBase" style="padding:20px;">
         <span data-i18n="zona-base">📄 Arrastrá el PDF base acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaBase" accept="application/pdf" hidden>
+        <input type="file" id="entradaBase" accept="application/pdf,.pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaBase"></div>
-    </label>
+    </div>
 
-    <label class="campo">
+    <div class="campo" style="display:flex; flex-direction:column; gap:4px; font-size:0.9rem; color:var(--texto-suave);">
       <span data-i18n="campo-overlay">PDF de superposición (la plantilla/membrete)</span>
       <div class="zona-arrastre" id="zonaOverlay" style="padding:20px;">
         <span data-i18n="zona-overlay">📄 Arrastrá el PDF de superposición acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaOverlay" accept="application/pdf" hidden>
+        <input type="file" id="entradaOverlay" accept="application/pdf,.pdf" hidden>
       </div>
       <div class="grid-miniaturas" id="listaOverlay"></div>
-    </label>
+    </div>
 
     <div class="controles">
       <button class="boton" id="botonSuperponer" disabled data-i18n="boton-superponer">Superponer PDFs</button>
@@ -110,7 +112,7 @@ function configurarZona(idZona, idEntrada, idLista, onElegido) {
   const lista = document.getElementById(idLista);
 
   async function elegir(listaFileList) {
-    const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+    const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
     if (!archivo) return;
     lista.innerHTML = '';
     try {
@@ -170,7 +172,7 @@ botonSuperponer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-superponer') + ': ' + error.message);
+    alert(t('error-superponer') + ': ' + detalleError(error));
   } finally {
     botonSuperponer.disabled = false;
     botonSuperponer.textContent = t('boton-superponer');

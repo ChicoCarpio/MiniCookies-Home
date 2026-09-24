@@ -110,7 +110,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -144,11 +144,11 @@ botonDividir.addEventListener('click', async () => {
       zip.file(`pagina-${numero}.pdf`, bytesPagina);
     }
 
-    const blobZip = await zip.generateAsync({ type: 'blob' });
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-dividir') + ': ' + error.message);
+    alert(t('error-dividir') + ': ' + detalleError(error));
   } finally {
     botonDividir.disabled = false;
     botonDividir.textContent = t('boton-dividir');

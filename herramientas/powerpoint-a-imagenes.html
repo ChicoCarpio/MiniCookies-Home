@@ -130,6 +130,7 @@ window.i18nPagina = {
   window.FileReader = window.__FileReaderNativo;
 </script>
 <script src="../assets/js/pptx-visual.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -144,7 +145,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonConvertir.disabled = false;
   vistaPreviaDiapositivas.innerHTML = '';
   resultado.classList.remove('visible');

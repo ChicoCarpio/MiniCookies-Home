@@ -168,6 +168,8 @@ window.i18nPagina = {
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/pdf-texto.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -197,7 +199,7 @@ let archivoWordActual = null;
 
 function mostrarArchivoWord(archivo) {
   archivoWordActual = archivo;
-  listaWord.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonAPdf.disabled = false;
   vistaPrevia.style.display = 'none';
   controlesImprimir.style.display = 'none';
@@ -226,9 +228,12 @@ botonAPdf.addEventListener('click', async () => {
     const arrayBuffer = await archivoWordActual.arrayBuffer();
     const resultado = await mammoth.convertToHtml({ arrayBuffer });
 
-    vistaPrevia.innerHTML = resultado.value;
+    // mammoth copia tal cual los enlaces del .docx (incluso "javascript:..."):
+    // se limpia antes de mostrarlo.
+    const htmlLimpio = sanitizarHtml(resultado.value);
+    vistaPrevia.innerHTML = htmlLimpio;
     vistaPrevia.style.display = 'block';
-    areaImprimir.innerHTML = resultado.value;
+    areaImprimir.innerHTML = htmlLimpio;
     controlesImprimir.style.display = 'flex';
 
     if (resultado.messages.length > 0) {
@@ -273,7 +278,7 @@ async function mostrarArchivoPdf(archivo) {
 }
 
 function elegirArchivoPdf(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivoPdf(archivo);
 }
 
@@ -287,21 +292,23 @@ zonaArrastrePdf.addEventListener('drop', (e) => {
   elegirArchivoPdf(e.dataTransfer.files);
 });
 
+// Cada párrafo del PDF pasa a ser un párrafo de texto corrido (sin los
+// cortes de renglón del PDF, que en Word los decide el ancho de página).
 function textoAHtml(texto) {
-  return texto.split(/\n\s*\n/).map(parrafo => {
-    const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-    return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
+  return texto.split(/\n\s*\n/).filter(p => p.trim()).map(parrafo => {
+    const escapado = unirRenglonesDeParrafo(parrafo).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    return `<p>${escapado}</p>`;
   }).join('');
 }
 
 async function extraerTextoPdf(archivo) {
   const bytes = await archivo.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+  // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+  // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+  const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
   const paginas = [];
   for (let i = 1; i <= pdf.numPages; i++) {
-    const pagina = await pdf.getPage(i);
-    const contenido = await pagina.getTextContent();
-    paginas.push(contenido.items.map(item => item.str).join(' '));
+    paginas.push(await extraerTextoPaginaPdf(await pdf.getPage(i)));
   }
   return paginas.join('\n\n');
 }

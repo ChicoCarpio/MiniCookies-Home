@@ -105,6 +105,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -118,7 +119,7 @@ let pdfActual = null;
 let nombreArchivoActual = 'documento';
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) cargarPdf(archivo);
 }
 
@@ -136,10 +137,12 @@ async function cargarPdf(archivo) {
   try {
     const { PDFDocument } = PDFLib;
     const bytes = await archivo.arrayBuffer();
-    pdfActual = await PDFDocument.load(bytes);
+    // updateMetadata: false — si no, pdf-lib reemplaza "Creador" y
+    // "Productor" (con qué programa se hizo el PDF) por "pdf-lib".
+    pdfActual = await PDFDocument.load(bytes, { updateMetadata: false });
     nombreArchivoActual = archivo.name.replace(/\.pdf$/i, '');
 
-    listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+    listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
     document.getElementById('campoTitulo').value = pdfActual.getTitle() || '';
     document.getElementById('campoAutor').value = pdfActual.getAuthor() || '';
     document.getElementById('campoAsunto').value = pdfActual.getSubject() || '';
@@ -147,7 +150,7 @@ async function cargarPdf(archivo) {
     controlesMetadatos.style.display = 'flex';
     resultado.classList.remove('visible');
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
   }
 }
 
@@ -160,13 +163,14 @@ botonGuardar.addEventListener('click', async () => {
     pdfActual.setSubject(document.getElementById('campoAsunto').value);
     pdfActual.setKeywords(document.getElementById('campoPalabrasClave').value.split(',').map(p => p.trim()).filter(Boolean));
 
+    pdfActual.setModificationDate(new Date());
     const bytesFinales = await pdfActual.save();
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `${nombreArchivoActual}.pdf`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-guardar') + ': ' + error.message);
+    alert(t('error-guardar') + ': ' + detalleError(error));
   } finally {
     botonGuardar.disabled = false;
     botonGuardar.textContent = t('boton-guardar');

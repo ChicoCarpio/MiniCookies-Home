@@ -340,6 +340,10 @@ main {
 }
 
 .miniatura-pagina.arrastrando { opacity: 0.4; }
+.arrastrando { opacity: 0.4; }
+/* Reordenar con el dedo (assets/js/reordenar-tactil.js): mantener apretado no
+   selecciona texto ni abre el menú del sistema. */
+[draggable="true"] { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .miniatura-pagina.zona-destino { border-color: var(--azul); }
 
 .miniatura-pagina canvas, .miniatura-pagina img {

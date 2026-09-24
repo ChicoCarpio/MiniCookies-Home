@@ -137,6 +137,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -158,7 +159,7 @@ let columnasSeleccionadas = new Set(); // índices de columna a usar como criter
 
 function escaparHtml(valor) {
   const texto = valor === null || valor === undefined ? '' : String(valor);
-  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 const FILAS_VISTA_PREVIA = 200; // más que suficiente para revisar visualmente sin trabar el navegador
@@ -187,6 +188,8 @@ function mostrarVistaPrevia(nombreHoja) {
   }
 
   const { preambulo, encabezado, datos } = separarHoja(filas);
+  const hoja = libroActual.Sheets[nombreHoja];
+  const columnaInicial = hoja['!ref'] ? XLSX.utils.decode_range(hoja['!ref']).s.c : 0;
   const datosVisibles = datos.slice(0, FILAS_VISTA_PREVIA);
   const cantidadColumnas = filas.reduce((max, fila) => Math.max(max, fila.length), 0);
 
@@ -209,7 +212,7 @@ function mostrarVistaPrevia(nombreHoja) {
 
   html += '<thead><tr>';
   for (let i = 0; i < cantidadColumnas; i++) {
-    const letra = XLSX.utils.encode_col(i);
+    const letra = XLSX.utils.encode_col(columnaInicial + i);
     const nombreColumna = encabezado && encabezado[i] ? String(encabezado[i]) : t('columna-defecto').replace('{letra}', letra);
     html += `<th><label><input type="checkbox" class="chk-columna" data-columna="${i}">${escaparHtml(nombreColumna)}</label>`;
     if (encabezado && encabezado[i]) html += `<div class="letra-columna">${letra}</div>`;
@@ -245,7 +248,7 @@ function actualizarVistaPreviaSiHayArchivo() {
 }
 
 function mostrarArchivo(archivo) {
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonProcesar.disabled = false;
   resultado.classList.remove('visible');
   mensaje.style.display = 'none';
@@ -267,11 +270,16 @@ zonaArrastre.addEventListener('drop', (e) => {
 });
 
 async function cargarLibro(archivo) {
-  const bytes = await archivo.arrayBuffer();
-  libroActual = XLSX.read(bytes, { type: 'array' });
+  try {
+    // cellNF: conserva el formato de número de cada celda (fechas, monedas).
+    libroActual = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });
+  } catch (error) {
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
   mostrarArchivo(archivo);
   if (libroActual.SheetNames.length > 1) {
-    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
     campoHoja.style.display = 'flex';
   } else {
     campoHoja.style.display = 'none';
@@ -294,22 +302,39 @@ botonProcesar.addEventListener('click', () => {
 
     const { preambulo, encabezado, datos } = separarHoja(filas);
     const indicesClave = [...columnasSeleccionadas].sort((a, b) => a - b);
+    const primerDato = preambulo.length + (encabezado ? 1 : 0);
 
+    // Las filas se comparan por su texto formateado (lo que se ve en Excel),
+    // pero se copian las celdas originales, con su tipo y formato de número:
+    // antes números y fechas quedaban como texto en el resultado.
+    const claveDe = (fila) => JSON.stringify(indicesClave.map((c) => fila[c] ?? ''));
     const vistas = new Set();
-    const filasUnicas = [];
-    let duplicadas = 0;
-    datos.forEach((fila) => {
-      const clave = JSON.stringify(indicesClave.map((i) => fila[i] ?? ''));
-      if (vistas.has(clave)) {
-        duplicadas++;
-      } else {
-        vistas.add(clave);
-        filasUnicas.push(fila);
-      }
+    // El encabezado cuenta como primera aparición: así se quitan sus
+    // repeticiones en medio de los datos (el caso principal de esta herramienta).
+    if (encabezado) vistas.add(claveDe(encabezado));
+    const repetidas = new Set();
+    datos.forEach((fila, i) => {
+      const clave = claveDe(fila);
+      if (vistas.has(clave)) repetidas.add(primerDato + i);
+      else vistas.add(clave);
     });
+    const duplicadas = repetidas.size;
 
-    const filasFinales = [...preambulo, ...(encabezado ? [encabezado] : []), ...filasUnicas];
-    const hojaNueva = XLSX.utils.aoa_to_sheet(filasFinales);
+    const hojaOriginal = libroActual.Sheets[nombreHoja];
+    const rango = XLSX.utils.decode_range(hojaOriginal['!ref']);
+    const hojaNueva = {};
+    let filaSalida = rango.s.r;
+    filas.forEach((fila, i) => {
+      if (repetidas.has(i)) return;
+      copiarFilaDeHoja(hojaOriginal, rango.s.r + i, hojaNueva, filaSalida, rango.s.c, rango.e.c);
+      filaSalida++;
+    });
+    hojaNueva['!ref'] = XLSX.utils.encode_range({ s: rango.s, e: { r: Math.max(filaSalida - 1, rango.s.r), c: rango.e.c } });
+    if (hojaOriginal['!cols']) hojaNueva['!cols'] = hojaOriginal['!cols'];
+    // Celdas combinadas: se conservan las que están antes de la primera
+    // fila quitada (título, encabezado), que no cambian de lugar.
+    const primeraQuitada = duplicadas > 0 ? rango.s.r + Math.min(...repetidas) : Infinity;
+    if (hojaOriginal['!merges']) hojaNueva['!merges'] = hojaOriginal['!merges'].filter((m) => m.e.r < primeraQuitada);
 
     // Solo se limpia la hoja elegida — las demás hojas del archivo se
     // conservan tal cual, en el mismo orden (antes se perdían: el archivo

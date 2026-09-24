@@ -107,7 +107,9 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -121,14 +123,32 @@ const controlesDescarga = document.getElementById('controlesDescarga');
 
 let filasDatos = [];
 let graficoActual = null;
+let comaDecimalArchivo = false;
+
+// Los números ya vienen convertidos desde lector-planillas.js; esto cubre
+// celdas de texto con números ("1.234,56" escrito a mano en un .xlsx), que
+// parseFloat leía como 1.234.
+function valorNumerico(valor) {
+  if (typeof valor === 'number') return valor;
+  const numero = interpretarNumeroTexto(valor, comaDecimalArchivo);
+  if (numero !== null) return numero;
+  const alternativo = interpretarNumeroTexto(valor, !comaDecimalArchivo);
+  return alternativo !== null ? alternativo : 0;
+}
 
 async function mostrarArchivo(archivo) {
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   contenedorGrafico.style.display = 'none';
   controlesDescarga.style.display = 'none';
 
-  const bytes = await archivo.arrayBuffer();
-  const libro = XLSX.read(bytes, { type: 'array' });
+  let libro;
+  try {
+    libro = await leerLibroDesdeArchivo(archivo);
+  } catch (error) {
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
+  comaDecimalArchivo = libro.comaDecimalCsv !== undefined ? libro.comaDecimalCsv : (1.5).toLocaleString().includes(',');
   const primeraHoja = libro.Sheets[libro.SheetNames[0]];
   filasDatos = XLSX.utils.sheet_to_json(primeraHoja, { defval: '' });
 
@@ -138,8 +158,8 @@ async function mostrarArchivo(archivo) {
   }
 
   const columnas = Object.keys(filasDatos[0]);
-  columnaEtiquetas.innerHTML = columnas.map(c => `<option value="${c}">${c}</option>`).join('');
-  columnaValores.innerHTML = columnas.map(c => `<option value="${c}">${c}</option>`).join('');
+  columnaEtiquetas.innerHTML = columnas.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
+  columnaValores.innerHTML = columnas.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
   if (columnas.length > 1) columnaValores.value = columnas[1];
 
   controles.style.display = 'flex';
@@ -168,7 +188,7 @@ botonGraficar.addEventListener('click', () => {
   const tipo = document.getElementById('tipoGrafico').value;
 
   const etiquetas = filasDatos.map(fila => String(fila[claveEtiqueta]));
-  const valores = filasDatos.map(fila => parseFloat(fila[claveValor]) || 0);
+  const valores = filasDatos.map(fila => valorNumerico(fila[claveValor]));
 
   if (graficoActual) graficoActual.destroy();
   contenedorGrafico.style.display = 'block';
@@ -196,9 +216,19 @@ botonGraficar.addEventListener('click', () => {
 
 document.getElementById('botonDescargarPng').addEventListener('click', () => {
   if (!graficoActual) return;
+  // El canvas de Chart.js es transparente: se copia sobre fondo blanco para
+  // que el PNG no se vea negro en visores con fondo oscuro.
+  const origen = graficoActual.canvas;
+  const lienzo = document.createElement('canvas');
+  lienzo.width = origen.width;
+  lienzo.height = origen.height;
+  const contexto = lienzo.getContext('2d');
+  contexto.fillStyle = '#ffffff';
+  contexto.fillRect(0, 0, lienzo.width, lienzo.height);
+  contexto.drawImage(origen, 0, 0);
   const enlace = document.createElement('a');
   enlace.download = 'grafico.png';
-  enlace.href = graficoActual.toBase64Image();
+  enlace.href = lienzo.toDataURL('image/png');
   enlace.click();
 });
 </script>

@@ -3,12 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arreglar codificación de un texto gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Arreglá problemas de codificación en un archivo de texto (.txt): BOM, saltos de línea mixtos y caracteres inválidos — gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Arreglar codificación de un texto gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Arreglá problemas de codificación en un archivo de texto (.txt): BOM, saltos de línea mixtos y caracteres inválidos — gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Arreglar codificación de un texto gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Arreglá problemas de codificación en un archivo de texto (.txt): BOM, saltos de línea mixtos y caracteres inválidos — gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo de texto acá o hacé clic para elegirlo (.txt, .csv, .tsv, .srt, .vtt, .md, .log)',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Arreglar codificación de un texto',
+    'intro': 'Elegí un archivo de texto (.txt, .csv, .srt, .md y similares) con problemas de codificación (acentos rotos, saltos de línea mezclados) y lo normalizamos.',
+    'campo-saltos': 'Saltos de línea de salida',
+    'campo-bom': 'Guardar con BOM (ayuda a que Excel muestre bien los acentos de un .csv)',
+    'boton-arreglar': 'Arreglar',
+    'boton-arreglar-procesando': 'Arreglando...',
+    'resultado-enlace': 'Descargar archivo corregido',
+    'que-corrige': 'Qué corrige',
+    'diag-codificacion': 'Codificación detectada:',
+    'diag-con-bom': ' (con BOM)',
+    'diag-sin-bom': 'sin BOM',
+    'diag-1252': 'Windows-1252 (de respaldo, el archivo no era UTF-8 válido)',
+    'aviso-utf16-bom': 'El archivo estaba en {cod} ("Unicode" del Bloc de notas) — se convirtió a UTF-8.',
+    'aviso-bom': 'Se encontró y quitó el BOM al principio del archivo.',
+    'aviso-utf16': 'El archivo estaba en {cod} — se convirtió a UTF-8.',
+    'aviso-1252': 'El archivo no era UTF-8 válido — se reinterpretó como Windows-1252.',
+    'aviso-mojibake': 'Se corrigieron {n} caracteres rotos del tipo "Ã©" o "â€™" (texto que ya se había guardado con la codificación equivocada).',
+    'aviso-saltos': 'Se normalizaron saltos de línea mezclados.',
+    'aviso-ok': 'El archivo ya estaba bien formado — se generó igual una copia normalizada.',
+    'error-procesar': 'No se pudo procesar el archivo',
+    'item1': 'Quita el BOM (marca de orden de bytes) al principio del archivo, si lo tiene.',
+    'item2': 'Convierte a UTF-8 los archivos en UTF-16 (lo que el Bloc de notas llama "Unicode").',
+    'item3': 'Corrige el texto que ya se guardó con la codificación equivocada, donde "canción" aparece como "canciÃ³n" o las comillas como "â€™".',
+    'item4': 'Si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252 (la codificación más común en archivos viejos de Windows) en vez de mostrar los acentos rotos.',
+    'item5': 'Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.'
+  },
+  en: {
+    'titulo-pagina': 'Fix Text File Encoding Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Fix broken accents and mixed line breaks in a text file (.txt, .csv, .srt...), free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your text file here or click to choose it (.txt, .csv, .tsv, .srt, .vtt, .md, .log)',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Fix a text file’s encoding',
+    'intro': 'Pick a text file (.txt, .csv, .srt, .md and similar) with encoding problems (broken accents, mixed line breaks) and we’ll normalize it.',
+    'campo-saltos': 'Output line breaks',
+    'campo-bom': 'Save with BOM (helps Excel show a .csv’s accents correctly)',
+    'boton-arreglar': 'Fix',
+    'boton-arreglar-procesando': 'Fixing...',
+    'resultado-enlace': 'Download fixed file',
+    'que-corrige': 'What it fixes',
+    'diag-codificacion': 'Detected encoding:',
+    'diag-con-bom': ' (with BOM)',
+    'diag-sin-bom': 'no BOM',
+    'diag-1252': 'Windows-1252 (fallback, the file wasn’t valid UTF-8)',
+    'aviso-utf16-bom': 'The file was in {cod} (Notepad’s "Unicode") — it was converted to UTF-8.',
+    'aviso-bom': 'A BOM was found and removed at the start of the file.',
+    'aviso-utf16': 'The file was in {cod} — it was converted to UTF-8.',
+    'aviso-1252': 'The file wasn’t valid UTF-8 — it was read as Windows-1252.',
+    'aviso-mojibake': '{n} broken characters like "Ã©" or "â€™" were fixed (text that had already been saved with the wrong encoding).',
+    'aviso-saltos': 'Mixed line breaks were normalized.',
+    'aviso-ok': 'The file was already well formed — a normalized copy was generated anyway.',
+    'error-procesar': 'Couldn’t process the file',
+    'item1': 'Removes the BOM (byte order mark) at the start of the file, if it has one.',
+    'item2': 'Converts UTF-16 files (what Notepad calls "Unicode") to UTF-8.',
+    'item3': 'Fixes text that was already saved with the wrong encoding, where "café" shows up as "cafÃ©" or quotes as "â€™".',
+    'item4': 'If the file isn’t valid UTF-8, it’s read as Windows-1252 (the most common encoding in older Windows files) instead of showing broken accents.',
+    'item5': 'Normalizes line breaks (a mix of Windows/Unix/Mac styles) to the format you choose.'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,57 +82,65 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/texto.html">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/texto.html" data-i18n="nav-cat-texto">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Arreglar codificación de un texto</h1>
-  <p>Elegí un archivo .txt con problemas de codificación (acentos rotos, saltos de línea mezclados) y lo normalizamos.</p>
+  <h1 data-i18n="h1">Arreglar codificación de un texto</h1>
+  <p data-i18n="intro">Elegí un archivo de texto (.txt, .csv, .srt, .md y similares) con problemas de codificación (acentos rotos, saltos de línea mezclados) y lo normalizamos.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo
-      <input type="file" id="entradaArchivo" accept=".txt" hidden>
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo de texto acá o hacé clic para elegirlo (.txt, .csv, .tsv, .srt, .vtt, .md, .log)</span>
+      <input type="file" id="entradaArchivo" accept=".txt,.csv,.tsv,.srt,.vtt,.md,.markdown,.log,text/*" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
     <div class="controles">
       <label class="campo">
-        Saltos de línea de salida
+        <span data-i18n="campo-saltos">Saltos de línea de salida</span>
         <select id="finDeLinea">
           <option value="lf" selected>Unix / Mac (LF)</option>
           <option value="crlf">Windows (CRLF)</option>
         </select>
       </label>
-      <button class="boton" id="botonArreglar" disabled>Arreglar</button>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="agregarBom">
+        <span data-i18n="campo-bom">Guardar con BOM (ayuda a que Excel muestre bien los acentos de un .csv)</span>
+      </label>
+      <button class="boton" id="botonArreglar" disabled data-i18n="boton-arreglar">Arreglar</button>
     </div>
 
     <p id="diagnostico" style="color:var(--texto-suave); display:none; font-size:0.9rem;"></p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="texto-corregido.txt">Descargar .txt corregido</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-corregido.txt" data-i18n="resultado-enlace">Descargar archivo corregido</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">Qué corrige</h3>
+    <h3 style="margin-top:0;" data-i18n="que-corrige">Qué corrige</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Quita el BOM (marca de orden de bytes) al principio del archivo, si lo tiene.</li>
-      <li>Si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252 (la codificación más común en archivos viejos de Windows) en vez de mostrar los acentos rotos.</li>
-      <li>Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.</li>
+      <li data-i18n="item1">Quita el BOM (marca de orden de bytes) al principio del archivo, si lo tiene.</li>
+      <li data-i18n="item2">Convierte a UTF-8 los archivos en UTF-16 (lo que el Bloc de notas llama "Unicode").</li>
+      <li data-i18n="item3">Corrige el texto que ya se guardó con la codificación equivocada, donde "canción" aparece como "canciÃ³n" o las comillas como "â€™".</li>
+      <li data-i18n="item4">Si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252 (la codificación más común en archivos viejos de Windows) en vez de mostrar los acentos rotos.</li>
+      <li data-i18n="item5">Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.</li>
     </ul>
   </div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -80,14 +154,15 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonArreglar.disabled = false;
   resultado.classList.remove('visible');
   diagnostico.style.display = 'none';
+  document.getElementById('agregarBom').checked = /\.(csv|tsv)$/i.test(archivo.name);
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  const archivo = [...listaFileList].find(f => /\.(txt|csv|tsv|srt|vtt|md|markdown|log)$/i.test(f.name) || f.type.startsWith('text/'));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -101,54 +176,141 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
+// Tabla inversa de Windows-1252 (carácter -> byte), para deshacer el
+// "mojibake": texto UTF-8 que en algún momento se leyó como Windows-1252 y
+// se volvió a guardar ("canción" convertido en "canciÃ³n", "’" en "â€™").
+const BYTE_WINDOWS_1252 = (() => {
+  const mapa = new Map();
+  const texto = new TextDecoder('windows-1252').decode(Uint8Array.from({ length: 256 }, (_, i) => i));
+  [...texto].forEach((caracter, i) => mapa.set(caracter, i));
+  return mapa;
+})();
+// Un carácter UTF-8 de 2 o 3 bytes leído como Windows-1252 se ve como una
+// letra "inicial" (Ã, Â, â...) seguida de 1 o 2 caracteres "de continuación"
+// (los que corresponden a los bytes 0x80-0xBF: ©, ³, €, ™, ƒ...).
+const PATRON_MOJIBAKE = (() => {
+  const continuacion = new TextDecoder('windows-1252').decode(Uint8Array.from({ length: 64 }, (_, i) => 0x80 + i))
+    .replace(/[\]\\^-]/g, '\\$&');
+  return new RegExp(`[\\u00C2-\\u00DF][${continuacion}]|[\\u00E0-\\u00EF][${continuacion}]{2}`, 'g');
+})();
+
+function contarMojibake(texto) {
+  return (texto.match(PATRON_MOJIBAKE) || []).length;
+}
+
+// Intenta deshacer el mojibake (hasta 2 veces, por si se dañó dos veces).
+// Devuelve null si no hay nada que corregir o si la corrección no es segura.
+function corregirMojibake(texto) {
+  let actual = texto;
+  let corregido = false;
+  for (let vuelta = 0; vuelta < 2 && contarMojibake(actual) > 0; vuelta++) {
+    const bytes = [];
+    for (const caracter of actual) {
+      if (!BYTE_WINDOWS_1252.has(caracter)) return corregido ? actual : null;
+      bytes.push(BYTE_WINDOWS_1252.get(caracter));
+    }
+    let candidato;
+    try {
+      candidato = new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(bytes));
+    } catch (e) {
+      return corregido ? actual : null;
+    }
+    if (contarMojibake(candidato) >= contarMojibake(actual)) break;
+    actual = candidato;
+    corregido = true;
+  }
+  return corregido ? actual : null;
+}
+
+// UTF-16 sin BOM: texto en alfabeto latino tiene un byte 0 cada dos.
+function pareceUtf16(bytes) {
+  const muestra = Math.min(bytes.length, 4000);
+  if (muestra < 4) return null;
+  let cerosPares = 0;
+  let cerosImpares = 0;
+  for (let i = 0; i < muestra; i++) {
+    if (bytes[i] === 0) { if (i % 2 === 0) cerosPares++; else cerosImpares++; }
+  }
+  if (cerosImpares > muestra * 0.3 && cerosPares < muestra * 0.05) return 'utf-16le';
+  if (cerosPares > muestra * 0.3 && cerosImpares < muestra * 0.05) return 'utf-16be';
+  return null;
+}
+
 botonArreglar.addEventListener('click', async () => {
   botonArreglar.disabled = true;
-  botonArreglar.textContent = 'Arreglando...';
+  botonArreglar.textContent = t('boton-arreglar-procesando');
   try {
     let bytes = new Uint8Array(await archivoActual.arrayBuffer());
     const avisos = [];
 
-    // BOM UTF-8: EF BB BF al principio del archivo.
-    let teniaBom = false;
-    if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
-      bytes = bytes.slice(3);
-      teniaBom = true;
-      avisos.push('Se encontró y quitó el BOM al principio del archivo.');
-    }
-
     let texto;
     let codificacionUsada = 'UTF-8';
-    try {
-      texto = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-    } catch (errorUtf8) {
-      texto = new TextDecoder('windows-1252').decode(bytes);
-      codificacionUsada = 'Windows-1252 (de respaldo, el archivo no era UTF-8 válido)';
-      avisos.push('El archivo no era UTF-8 válido — se reinterpretó como Windows-1252.');
+    let teniaBom = false;
+    if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+      // BOM UTF-8: EF BB BF al principio del archivo.
+      teniaBom = true;
+      bytes = bytes.slice(3);
+    } else if (bytes.length >= 2 && ((bytes[0] === 0xFF && bytes[1] === 0xFE) || (bytes[0] === 0xFE && bytes[1] === 0xFF))) {
+      // UTF-16 con BOM: lo que el Bloc de notas llama "Unicode".
+      teniaBom = true;
+      codificacionUsada = bytes[0] === 0xFF ? 'UTF-16 LE' : 'UTF-16 BE';
+      texto = new TextDecoder(bytes[0] === 0xFF ? 'utf-16le' : 'utf-16be').decode(bytes.slice(2));
+      avisos.push(t('aviso-utf16-bom').replace('{cod}', codificacionUsada));
+    }
+    if (teniaBom) avisos.push(t('aviso-bom'));
+
+    if (texto === undefined) {
+      const utf16 = pareceUtf16(bytes);
+      if (utf16) {
+        codificacionUsada = (utf16 === 'utf-16le' ? 'UTF-16 LE' : 'UTF-16 BE') + ` (${t('diag-sin-bom')})`;
+        texto = new TextDecoder(utf16).decode(bytes);
+        avisos.push(t('aviso-utf16').replace('{cod}', codificacionUsada));
+      } else {
+        try {
+          texto = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        } catch (errorUtf8) {
+          texto = new TextDecoder('windows-1252').decode(bytes);
+          codificacionUsada = t('diag-1252');
+          avisos.push(t('aviso-1252'));
+        }
+      }
     }
 
-    const teniaSaltosMixtos = /\r\n/.test(texto) && /[^\r]\n/.test(texto.replace(/\r\n/g, ''));
+    const sinMojibake = corregirMojibake(texto);
+    if (sinMojibake !== null) {
+      avisos.push(t('aviso-mojibake').replace('{n}', contarMojibake(texto)));
+      texto = sinMojibake;
+    }
+
+    const teniaSaltosMixtos = /\r\n/.test(texto) && /[^\r]\n|\r(?!\n)/.test(texto.replace(/\r\n/g, ''));
     const finDeLinea = document.getElementById('finDeLinea').value;
     const textoNormalizado = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const textoFinal = finDeLinea === 'crlf' ? textoNormalizado.replace(/\n/g, '\r\n') : textoNormalizado;
+    if (teniaSaltosMixtos) avisos.push(t('aviso-saltos'));
+    if (avisos.length === 0) avisos.push(t('aviso-ok'));
 
-    if (teniaSaltosMixtos) avisos.push('Se normalizaron saltos de línea mezclados.');
-    if (avisos.length === 0) avisos.push('El archivo ya estaba bien formado — se generó igual una copia normalizada.');
-
-    diagnostico.innerHTML = `<strong>Codificación detectada:</strong> ${codificacionUsada}${teniaBom ? ' (con BOM)' : ''}<br>` + avisos.map(a => `• ${a}`).join('<br>');
+    diagnostico.innerHTML = `<strong>${escaparHtml(t('diag-codificacion'))}</strong> ${escaparHtml(codificacionUsada)}${teniaBom ? escaparHtml(t('diag-con-bom')) : ''}<br>` + avisos.map(a => `• ${escaparHtml(a)}`).join('<br>');
     diagnostico.style.display = 'block';
 
-    const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
+    // Con BOM, Excel reconoce el .csv como UTF-8 y muestra bien los acentos.
+    const conBom = document.getElementById('agregarBom').checked;
+    const blob = new Blob([conBom ? '\uFEFF' + textoFinal : textoFinal], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
+    const punto = archivoActual.name.lastIndexOf('.');
+    enlaceDescarga.download = punto > 0
+      ? `${archivoActual.name.slice(0, punto)}-corregido${archivoActual.name.slice(punto)}`
+      : `${archivoActual.name}-corregido.txt`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo procesar el archivo: ' + error.message);
+    alert(t('error-procesar') + ': ' + error.message);
   } finally {
     botonArreglar.disabled = false;
-    botonArreglar.textContent = 'Arreglar';
+    botonArreglar.textContent = t('boton-arreglar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

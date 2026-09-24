@@ -140,7 +140,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -168,7 +168,7 @@ botonNumerar.addEventListener('click', async () => {
   botonNumerar.disabled = true;
   botonNumerar.textContent = t('boton-numerar-procesando');
   try {
-    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+    const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
     const bytes = await archivoActual.arrayBuffer();
     const pdf = await PDFDocument.load(bytes);
     const fuente = await pdf.embedFont(StandardFonts.Helvetica);
@@ -178,12 +178,18 @@ botonNumerar.addEventListener('click', async () => {
     const margen = 30;
 
     pdf.getPages().forEach((pagina, indice) => {
-      const { width, height } = pagina.getSize();
+      // Posición calculada sobre la página tal como se ve (con /Rotate).
+      const marco = marcoVisualPagina(pagina);
       const texto = String(numeroInicial + indice);
       const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
+      const { x, y } = marco.aPagina(
+        calcularX(posicion, marco.ancho, anchoTexto, margen),
+        calcularY(posicion, marco.alto, 20, margen)
+      );
       pagina.drawText(texto, {
-        x: calcularX(posicion, width, anchoTexto, margen),
-        y: calcularY(posicion, height, 20, margen),
+        x,
+        y,
+        rotate: degrees(marco.rotacion),
         size: tamanoFuente,
         font: fuente,
         color: rgb(0.2, 0.2, 0.2),
@@ -195,7 +201,7 @@ botonNumerar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-numerar') + ': ' + error.message);
+    alert(t('error-numerar') + ': ' + detalleError(error));
   } finally {
     botonNumerar.disabled = false;
     botonNumerar.textContent = t('boton-numerar');

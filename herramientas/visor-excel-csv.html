@@ -91,6 +91,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -106,7 +107,7 @@ function esArchivoValido(archivo) {
 
 function escaparHtml(valor) {
   const texto = valor === null || valor === undefined ? '' : String(valor);
-  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // --- Virtualización de filas ---
@@ -229,9 +230,13 @@ function mostrarHoja(nombreHoja) {
 }
 
 async function mostrarArchivo(archivo) {
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
-  const bytes = await archivo.arrayBuffer();
-  libroActual = XLSX.read(bytes, { type: 'array' });
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  try {
+    libroActual = await leerLibroDesdeArchivo(archivo);
+  } catch (error) {
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
 
   pestanas.innerHTML = '';
   libroActual.SheetNames.forEach((nombre) => {

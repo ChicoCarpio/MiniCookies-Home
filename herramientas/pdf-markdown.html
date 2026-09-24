@@ -162,6 +162,8 @@ Este es un ejemplo de **Markdown** con:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/pdf-texto.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -206,7 +208,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -220,8 +222,14 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
+// Escapa solo lo que Markdown interpretaría como formato. Antes se escapaban
+// también puntos, paréntesis, signos de exclamación, etc. en cualquier lugar,
+// y el resultado quedaba lleno de barras ("Hola\. \(nota\)").
 function escaparMarkdown(texto) {
-  return texto.replace(/([\\`*_{}\[\]()#+.!|>~])/g, '\\$1');
+  return texto
+    .replace(/([\\`*\[\]<>|~])/g, '\\$1')
+    .replace(/(^|\s)_|_(?=\s|$)/g, (m) => m.replace('_', '\\_'))
+    .replace(/^(\s*)([#>+-]|\d+[.)])(\s)/, '$1\\$2$3');
 }
 
 botonExtraer.addEventListener('click', async () => {
@@ -229,14 +237,14 @@ botonExtraer.addEventListener('click', async () => {
   botonExtraer.textContent = t('boton-extraer-procesando');
   try {
     const bytes = await archivoActual.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
     const paginasMarkdown = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {
-      const pagina = await pdf.getPage(i);
-      const contenido = await pagina.getTextContent();
-      const textoPagina = contenido.items.map(item => item.str).join(' ');
-      const parrafos = textoPagina.split(/\s{2,}|\n/).map(p => p.trim()).filter(Boolean);
+      const textoPagina = await extraerTextoPaginaPdf(await pdf.getPage(i));
+      const parrafos = textoPagina.split(/\n\s*\n/).map(unirRenglonesDeParrafo).filter(Boolean);
       paginasMarkdown.push(parrafos.map(escaparMarkdown).join('\n\n'));
     }
 
@@ -269,7 +277,7 @@ const vistaPreviaMd = document.getElementById('vistaPreviaMd');
 const areaImprimir = document.getElementById('areaImprimir');
 
 function actualizarVistaPreviaMd() {
-  const html = marked.parse(entradaMarkdown.value);
+  const html = sanitizarHtml(marked.parse(entradaMarkdown.value));
   vistaPreviaMd.innerHTML = html;
   areaImprimir.innerHTML = html;
 }

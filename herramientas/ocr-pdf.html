@@ -21,7 +21,7 @@ window.i18nPagina = {
     'titulo-pagina': 'OCR de PDF e imágenes escaneadas gratis — Herramientas Ofimáticas',
     'meta-descripcion': 'Convertí un PDF escaneado o fotos/imágenes escaneadas en un PDF con texto buscable/seleccionable, o extraé el texto a .txt — gratis, con OCR que corre en tu navegador.',
     'h1': 'OCR de PDF e imágenes escaneadas',
-    'intro': 'Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR — todo corre en tu navegador, tus archivos nunca se suben a ningún servidor. Podés combinar PDF e imágenes, en cualquier orden.',
+    'intro': 'Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR. Podés combinar PDF e imágenes, en cualquier orden.',
     'idiomas-titulo': 'Idiomas a reconocer',
     'idioma-spa': 'Español',
     'idioma-eng': 'Inglés',
@@ -57,7 +57,7 @@ window.i18nPagina = {
     'titulo-pagina': 'OCR for Scanned PDFs and Images Free — Herramientas Ofimáticas',
     'meta-descripcion': 'Convert a scanned PDF or scanned photos/images into a PDF with searchable/selectable text, or extract the text to .txt — free, with OCR that runs in your browser.',
     'h1': 'OCR for scanned PDFs and images',
-    'intro': 'For PDFs that are actually scanned images, or for loose photos/images of a document (with no selectable text). We recognize the text with OCR — everything runs in your browser, your files never get uploaded anywhere. You can combine PDFs and images, in any order.',
+    'intro': 'For PDFs that are actually scanned images, or for loose photos/images of a document (with no selectable text). We recognize the text with OCR. You can combine PDFs and images, in any order.',
     'idiomas-titulo': 'Languages to recognize',
     'idioma-spa': 'Spanish',
     'idioma-eng': 'English',
@@ -105,7 +105,7 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="h1">OCR de PDF e imágenes escaneadas</h1>
-  <p data-i18n="intro">Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR — todo corre en tu navegador, tus archivos nunca se suben a ningún servidor. Podés combinar PDF e imágenes, en cualquier orden.</p>
+  <p data-i18n="intro">Para PDFs que son en realidad imágenes escaneadas, o para fotos/imágenes sueltas de un documento (sin texto seleccionable). Reconocemos el texto con OCR. Podés combinar PDF e imágenes, en cualquier orden.</p>
 
   <div class="panel-herramienta">
     <p style="margin-top:0; font-weight:600;" data-i18n="idiomas-titulo">Idiomas a reconocer</p>
@@ -176,6 +176,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/tesseract.min.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -221,14 +222,14 @@ function actualizarBoton() {
 habilitarArrastreReordenable(gridArchivos, actualizarBoton);
 
 async function agregarArchivos(listaFileList) {
-  const nuevos = [...listaFileList].filter(f => f.type === 'application/pdf' || f.type.startsWith('image/'));
+  const nuevos = [...listaFileList].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name) || f.type.startsWith('image/'));
   if (nuevos.length === 0) return;
 
   cargando.style.display = 'block';
   for (const archivo of nuevos) {
     const id = siguienteId++;
     archivosPorId.set(id, archivo);
-    const esPdf = archivo.type === 'application/pdf';
+    const esPdf = archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name);
     let tarjeta;
     try {
       const { elemento, totalPaginas } = esPdf
@@ -421,9 +422,11 @@ async function prepararPaginas(ordenIds, corregirInclinacion) {
   const paginas = [];
   for (const id of ordenIds) {
     const archivo = archivosPorId.get(id);
-    if (archivo.type === 'application/pdf') {
+    if (archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name)) {
       const bytes = await archivo.arrayBuffer();
-      const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
+      // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+      // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+      const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
       for (let i = 1; i <= pdfjsDoc.numPages; i++) {
         const pagina = await pdfjsDoc.getPage(i);
         const viewport = pagina.getViewport({ scale: ESCALA_RENDERIZADO_PDF });

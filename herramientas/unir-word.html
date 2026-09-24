@@ -110,6 +110,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivos = document.getElementById('entradaArchivos');
@@ -126,7 +127,7 @@ function actualizarLista() {
   listaArchivos.innerHTML = '';
   archivos.forEach((archivo, indice) => {
     const item = document.createElement('li');
-    item.innerHTML = `<span>${indice + 1}. ${archivo.name}</span>`;
+    item.innerHTML = `<span>${indice + 1}. ${escaparHtml(archivo.name)}</span>`;
     const quitar = document.createElement('button');
     quitar.className = 'quitar';
     quitar.textContent = '✕';

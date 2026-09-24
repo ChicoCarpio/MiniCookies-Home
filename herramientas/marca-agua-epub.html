@@ -3,12 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agregar texto a cada capítulo de un EPUB gratis — Herramientas Ofimáticas</title>
-<meta name="description" content="Agregá una línea de texto (marca de agua, aviso o pie) al principio o final de cada capítulo de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.">
+<title data-i18n="titulo-pagina">Agregar texto a cada capítulo de un EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá una línea de texto (marca de agua, aviso o pie) al principio o final de cada capítulo de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Agregar texto a cada capítulo de un EPUB gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Agregá una línea de texto (marca de agua, aviso o pie) al principio o final de cada capítulo de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Agregar texto a cada capítulo (EPUB)',
+    'intro': 'Elegí un libro .epub y una línea de texto se agrega al principio o al final de cada capítulo — útil para un aviso de copyright, "muestra gratuita", etc.',
+    'campo-texto': 'Texto a agregar',
+    'placeholder-texto': 'ej. © 2026 Mi nombre — muestra gratuita',
+    'campo-posicion': 'Posición',
+    'opcion-inicio': 'Al principio de cada capítulo',
+    'opcion-fin': 'Al final de cada capítulo',
+    'boton-aplicar': 'Aplicar y descargar',
+    'boton-aplicar-procesando': 'Generando...',
+    'resultado-enlace': 'Descargar EPUB',
+    'error-sin-texto': 'Escribí el texto que querés agregar.',
+    'error-generar': 'No se pudo generar el EPUB'
+  },
+  en: {
+    'titulo-pagina': 'Add Text to Every EPUB Chapter Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add a line of text (copyright, "free sample"...) at the start or end of every chapter of an EPUB, free and without uploading your file anywhere.',
+    'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Add text to every chapter (EPUB)',
+    'intro': 'Pick a .epub book and a line of text is added at the start or end of every chapter — handy for a copyright notice, "free sample", etc.',
+    'campo-texto': 'Text to add',
+    'placeholder-texto': 'e.g. © 2026 My name — free sample',
+    'campo-posicion': 'Position',
+    'opcion-inicio': 'At the start of each chapter',
+    'opcion-fin': 'At the end of each chapter',
+    'boton-aplicar': 'Apply and download',
+    'boton-aplicar-procesando': 'Generating...',
+    'resultado-enlace': 'Download EPUB',
+    'error-sin-texto': 'Type the text you want to add.',
+    'error-generar': 'Couldn’t generate the EPUB'
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,17 +56,18 @@
 
 <header class="sitio">
   <div class="marca"><a href="https://www.minicookies.net" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../menus/index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
-  <nav class="sitio"><a href="../menus/epub.html">Herramientas de EPUB</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio"><a href="../menus/epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Agregar texto a cada capítulo (EPUB)</h1>
-  <p>Elegí un libro .epub y una línea de texto se agrega al principio o al final de cada capítulo — útil para un aviso de copyright, "muestra gratuita", etc.</p>
+  <h1 data-i18n="h1">Agregar texto a cada capítulo (EPUB)</h1>
+  <p data-i18n="intro">Elegí un libro .epub y una línea de texto se agrega al principio o al final de cada capítulo — útil para un aviso de copyright, "muestra gratuita", etc.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo
+      <span data-i18n="zona-arrastre">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
       <input type="file" id="entradaArchivo" accept=".epub" hidden>
     </div>
 
@@ -34,33 +75,34 @@
 
     <div class="controles">
       <label class="campo">
-        Texto a agregar
-        <input type="text" id="textoAgregar" placeholder="ej. © 2026 Mi nombre — muestra gratuita" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        <span data-i18n="campo-texto">Texto a agregar</span>
+        <input type="text" id="textoAgregar" placeholder="ej. © 2026 Mi nombre — muestra gratuita" data-i18n-attr="placeholder:placeholder-texto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
       <label class="campo">
-        Posición
+        <span data-i18n="campo-posicion">Posición</span>
         <select id="posicion">
-          <option value="inicio">Al principio de cada capítulo</option>
-          <option value="fin">Al final de cada capítulo</option>
+          <option value="inicio" data-i18n="opcion-inicio">Al principio de cada capítulo</option>
+          <option value="fin" data-i18n="opcion-fin">Al final de cada capítulo</option>
         </select>
       </label>
-      <button class="boton" id="botonAplicar" disabled>Aplicar y descargar</button>
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar y descargar</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="libro-con-texto.epub">Descargar EPUB</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libro-con-texto.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../menus/privacidad.html">Política de privacidad</a> · <a href="../menus/terminos.html">Términos de uso</a> · <a href="../menus/creditos.html">Créditos</a> · <a href="../menus/contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -74,7 +116,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonAplicar.disabled = false;
   resultado.classList.remove('visible');
 }
@@ -100,10 +142,10 @@ function escaparHtml(texto) {
 
 botonAplicar.addEventListener('click', async () => {
   botonAplicar.disabled = true;
-  botonAplicar.textContent = 'Generando...';
+  botonAplicar.textContent = t('boton-aplicar-procesando');
   try {
     const texto = document.getElementById('textoAgregar').value.trim();
-    if (!texto) throw new Error('Escribí el texto que querés agregar.');
+    if (!texto) throw new Error(t('error-sin-texto'));
     const posicion = document.getElementById('posicion').value;
 
     const { titulo, autor, capitulos } = await leerEpub(archivoActual);
@@ -117,14 +159,15 @@ botonAplicar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo generar el EPUB: ' + error.message);
+    alert(t('error-generar') + ': ' + error.message);
   } finally {
     botonAplicar.disabled = false;
-    botonAplicar.textContent = 'Aplicar y descargar';
+    botonAplicar.textContent = t('boton-aplicar');
   }
 });
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

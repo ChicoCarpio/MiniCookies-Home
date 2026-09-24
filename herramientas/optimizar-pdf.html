@@ -33,7 +33,13 @@ window.i18nPagina = {
     'progreso-analizando': 'Analizando el PDF...',
     'progreso-optimizando': 'Optimizando foto {n}...',
     'progreso-guardando': 'Guardando PDF...',
-    'error-comprimir': 'No se pudo comprimir el PDF'
+    'error-comprimir': 'No se pudo comprimir el PDF',
+    'campo-resolucion': 'Tamaño máximo de las fotos',
+    'opcion-sin-reducir': 'Sin reducir (solo recomprimir)',
+    'opcion-2500': 'Hasta 2500 px (calidad de impresión)',
+    'opcion-1600': 'Hasta 1600 px (recomendado para pantalla)',
+    'opcion-1000': 'Hasta 1000 px (el más liviano)',
+    'aviso-sin-mejora': 'Este PDF ya estaba optimizado: la versión comprimida no pesaba menos, así que se ofrece el original sin cambios. Probá con una calidad más baja o reduciendo el tamaño de las fotos.',
   },
   en: {
     'titulo-pagina': 'Compress and Optimize PDF Free — Herramientas Ofimáticas',
@@ -57,7 +63,13 @@ window.i18nPagina = {
     'progreso-analizando': 'Analyzing the PDF...',
     'progreso-optimizando': 'Optimizing photo {n}...',
     'progreso-guardando': 'Saving PDF...',
-    'error-comprimir': 'Couldn’t compress the PDF'
+    'error-comprimir': 'Couldn’t compress the PDF',
+    'campo-resolucion': 'Maximum photo size',
+    'opcion-sin-reducir': 'Don’t shrink (recompress only)',
+    'opcion-2500': 'Up to 2500 px (print quality)',
+    'opcion-1600': 'Up to 1600 px (recommended for screen)',
+    'opcion-1000': 'Up to 1000 px (smallest file)',
+    'aviso-sin-mejora': 'This PDF was already optimized: the compressed version wasn’t any smaller, so the original is offered unchanged. Try a lower quality or shrinking the photos.',
   }
 };
 </script>
@@ -90,6 +102,15 @@ window.i18nPagina = {
         <span data-i18n="campo-calidad">Calidad de las fotos: </span><span id="etiquetaCalidad">65</span><span data-i18n="simbolo-porcentaje">%</span>
         <input type="range" id="calidad" min="20" max="90" value="65">
       </label>
+      <label class="campo">
+        <span data-i18n="campo-resolucion">Tamaño máximo de las fotos</span>
+        <select id="resolucionMaxima">
+          <option value="0" data-i18n="opcion-sin-reducir">Sin reducir (solo recomprimir)</option>
+          <option value="2500" data-i18n="opcion-2500">Hasta 2500 px (calidad de impresión)</option>
+          <option value="1600" selected data-i18n="opcion-1600">Hasta 1600 px (recomendado para pantalla)</option>
+          <option value="1000" data-i18n="opcion-1000">Hasta 1000 px (el más liviano)</option>
+        </select>
+      </label>
       <button class="boton" id="botonComprimir" disabled data-i18n="boton-comprimir">Comprimir PDF</button>
     </div>
 
@@ -101,6 +122,8 @@ window.i18nPagina = {
       <div class="estadistica"><div class="numero" id="porcentajeAhorro">—</div><div class="etiqueta" data-i18n="stat-reduccion">Reducción</div></div>
       <div class="estadistica"><div class="numero" id="imagenesProcesadas">—</div><div class="etiqueta" data-i18n="stat-fotos">Fotos optimizadas</div></div>
     </div>
+
+    <p id="avisoSinMejora" style="display:none; color:var(--texto-suave);" data-i18n="aviso-sin-mejora">Este PDF ya estaba optimizado: la versión comprimida no pesaba menos, así que se ofrece el original sin cambios. Probá con una calidad más baja o reduciendo el tamaño de las fotos.</p>
 
     <div class="resultado" id="resultado">
       <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-comprimido.pdf" data-i18n="resultado-enlace">Descargar PDF comprimido</a>
@@ -166,7 +189,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf');
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -179,6 +202,19 @@ zonaArrastre.addEventListener('drop', (e) => {
   zonaArrastre.classList.remove('activa');
   elegirArchivo(e.dataTransfer.files);
 });
+
+function esEspacioRgb(pdf, espacioColor) {
+  const { PDFName, PDFArray } = PDFLib;
+  if (!espacioColor) return false;
+  const valor = pdf.context.lookup(espacioColor);
+  if (valor && valor.toString() === '/DeviceRGB') return true;
+  if (valor instanceof PDFArray && valor.size() === 2 && valor.get(0).toString() === '/ICCBased') {
+    const perfil = pdf.context.lookup(valor.get(1));
+    const canales = perfil && perfil.dict ? perfil.dict.get(PDFName.of('N')) : null;
+    return Boolean(canales) && canales.toString() === '3';
+  }
+  return false;
+}
 
 function decodificarImagenJpeg(bytes) {
   return new Promise((resolve, reject) => {
@@ -196,7 +232,8 @@ botonComprimir.addEventListener('click', async () => {
   progreso.style.display = 'block';
   progreso.textContent = t('progreso-analizando');
   try {
-    const { PDFDocument, PDFName, PDFRawStream } = PDFLib;
+    const { PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFArray } = PDFLib;
+    const ladoMaximo = parseInt(document.getElementById('resolucionMaxima').value, 10) || 0;
     const bytesOriginales = await archivoActual.arrayBuffer();
     const pesoOriginal = bytesOriginales.byteLength;
 
@@ -217,23 +254,32 @@ botonComprimir.addEventListener('click', async () => {
       const esSoloJpeg = filtro && filtro.toString() === '/DCTDecode';
       if (!esSoloJpeg) continue;
 
-      const espacioColor = dict.get(PDFName.of('ColorSpace'));
-      if (!espacioColor || espacioColor.toString() !== '/DeviceRGB') continue;
+      // Color RGB: /DeviceRGB o un perfil ICC de 3 canales (muy común en
+      // fotos de cámaras y escáneres). Gris, CMYK e indexadas se dejan igual:
+      // el canvas siempre devuelve RGB y cambiarían de color.
+      if (!esEspacioRgb(pdf, dict.get(PDFName.of('ColorSpace')))) continue;
+      // Un /Decode no estándar invierte o reescala los colores al dibujar.
+      if (dict.get(PDFName.of('Decode'))) continue;
 
       try {
         progreso.textContent = t('progreso-optimizando').replace('{n}', contadorProcesadas + 1);
         const bytesOriginalesImagen = objeto.getContents();
         const img = await decodificarImagenJpeg(bytesOriginalesImagen);
 
+        // Reducción opcional: el lado más largo queda en "ladoMaximo" px.
+        // La foto ocupa el mismo lugar en la página (el tamaño en la página
+        // lo define el contenido, no los píxeles), solo con menos detalle.
+        const escala = ladoMaximo > 0 ? Math.min(1, ladoMaximo / Math.max(img.naturalWidth, img.naturalHeight)) : 1;
         const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * escala));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * escala));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         const blobNuevo = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', calidad));
         const bytesNuevos = new Uint8Array(await blobNuevo.arrayBuffer());
-
         if (bytesNuevos.length < bytesOriginalesImagen.length) {
+          dict.set(PDFName.of('Width'), PDFNumber.of(canvas.width));
+          dict.set(PDFName.of('Height'), PDFNumber.of(canvas.height));
+          dict.set(PDFName.of('BitsPerComponent'), PDFNumber.of(8));
           pdf.context.assign(ref, PDFRawStream.of(dict, bytesNuevos));
           contadorProcesadas++;
         }
@@ -243,7 +289,12 @@ botonComprimir.addEventListener('click', async () => {
     }
 
     progreso.textContent = t('progreso-guardando');
-    const bytesFinales = await pdf.save();
+    let bytesFinales = await pdf.save();
+    // Si no se ganó nada (PDF ya optimizado, o sin fotos para recomprimir),
+    // se ofrece el original: guardar con pdf-lib a veces pesa un poco más.
+    const sinMejora = bytesFinales.length >= pesoOriginal;
+    if (sinMejora) bytesFinales = new Uint8Array(bytesOriginales);
+    document.getElementById('avisoSinMejora').style.display = sinMejora ? 'block' : 'none';
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
     enlaceDescarga.href = URL.createObjectURL(blob);
 
@@ -255,7 +306,7 @@ botonComprimir.addEventListener('click', async () => {
     estadisticas.style.display = 'grid';
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-comprimir') + ': ' + error.message);
+    alert(t('error-comprimir') + ': ' + detalleError(error));
   } finally {
     botonComprimir.disabled = false;
     progreso.style.display = 'none';

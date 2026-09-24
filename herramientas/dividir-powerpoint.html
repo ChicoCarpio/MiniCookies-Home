@@ -101,6 +101,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -114,7 +116,7 @@ let archivoActual = null;
 
 function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${archivo.name}</span></li>`;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonDividir.disabled = false;
   resultado.classList.remove('visible');
 }
@@ -146,41 +148,27 @@ botonDividir.addEventListener('click', async () => {
     const nodosSldId = [...parser.parseFromString(presentacionXmlTexto, 'application/xml').getElementsByTagName('p:sldId')];
     if (nodosSldId.length < 2) throw new Error(t('error-una-diapositiva'));
 
-    // Leemos todo el contenido del .zip original una sola vez en memoria, para
-    // no tener que releer cada parte del paquete por cada diapositiva.
-    progreso.textContent = t('progreso-leyendo');
-    const rutas = Object.keys(zipOriginal.files).filter(r => !zipOriginal.files[r].dir);
-    const contenidoPorRuta = new Map();
-    for (const ruta of rutas) {
-      contenidoPorRuta.set(ruta, await zipOriginal.files[ruta].async('uint8array'));
-    }
-
+    // Cada archivo sale del original con solo su diapositiva: el resto
+    // (XML, imágenes, notas) se borra del paquete con conservarDiapositivas
+    // (assets/js/ooxml-paquete.js). Antes cada archivo era una copia completa
+    // de la presentación con la lista recortada: pesaba lo mismo que el
+    // original y cualquiera podía recuperar las demás diapositivas.
+    const bytesOriginales = await archivoActual.arrayBuffer();
     const zipSalida = new JSZip();
     const cantidadDigitos = String(nodosSldId.length).length;
 
     for (let i = 0; i < nodosSldId.length; i++) {
       progreso.textContent = t('progreso-generando').replace('{actual}', i + 1).replace('{total}', nodosSldId.length);
-      const rIdConservar = nodosSldId[i].getAttribute('r:id');
-
-      const presentacionDoc = parser.parseFromString(presentacionXmlTexto, 'application/xml');
-      const listaSld = presentacionDoc.getElementsByTagName('p:sldIdLst')[0];
-      [...listaSld.getElementsByTagName('p:sldId')].forEach((nodo) => {
-        if (nodo.getAttribute('r:id') !== rIdConservar) listaSld.removeChild(nodo);
-      });
-      const xmlModificado = new XMLSerializer().serializeToString(presentacionDoc);
-
-      const miniZip = new JSZip();
-      for (const [ruta, datos] of contenidoPorRuta) {
-        miniZip.file(ruta, ruta === 'ppt/presentation.xml' ? xmlModificado : datos);
-      }
-
+      const miniZip = await JSZip.loadAsync(bytesOriginales);
+      await conservarDiapositivas(miniZip, [nodosSldId[i].getAttribute('r:id')]);
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
-      const blobMini = await miniZip.generateAsync({ type: 'blob' });
+      const blobMini = await miniZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
       zipSalida.file(`diapositiva-${numero}.pptx`, blobMini);
     }
 
     progreso.textContent = t('progreso-zip');
-    const blobFinal = await zipSalida.generateAsync({ type: 'blob' });
+    // Los .pptx ya van comprimidos: guardarlos sin recomprimir es más rápido.
+    const blobFinal = await zipSalida.generateAsync({ type: 'blob', compression: 'STORE' });
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
   } catch (error) {

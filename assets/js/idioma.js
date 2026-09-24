@@ -48,7 +48,12 @@ window.i18nComun = {
     // y powerpoint-a-imagenes.html.
     'ppt-sin-tamano': 'No se pudo determinar el tamaño de las diapositivas.',
     'ppt-tamano-invalido': 'Tamaño de diapositiva inválido.',
-    'ppt-render-inconsistente': 'El renderizado devolvió un tamaño de diapositiva inconsistente.'
+    'ppt-render-inconsistente': 'El renderizado devolvió un tamaño de diapositiva inconsistente.',
+    // Usada por detalleError() (abajo) en todas las herramientas de PDF.
+    'pdf-protegido': 'el PDF está protegido (tiene contraseña o restricciones de edición). Quitale la protección primero con la herramienta "Desbloquear PDF" y volvé a intentarlo.',
+    // Mensaje genérico de lectura fallida (las páginas pueden definir uno propio).
+    'error-leer': 'No se pudo leer el archivo. Puede estar dañado o no tener un formato válido',
+    'xml-invalido': 'XML inválido'
   },
   en: {
     'nav-todas': 'All tools',
@@ -87,7 +92,10 @@ window.i18nComun = {
     'epub-sin-contenido': 'No readable content was found inside the EPUB.',
     'ppt-sin-tamano': 'Couldn’t determine the size of the slides.',
     'ppt-tamano-invalido': 'Invalid slide size.',
-    'ppt-render-inconsistente': 'Rendering returned an inconsistent slide size.'
+    'ppt-render-inconsistente': 'Rendering returned an inconsistent slide size.',
+    'pdf-protegido': 'the PDF is protected (it has a password or editing restrictions). Remove the protection first with the "Unlock PDF" tool and try again.',
+    'error-leer': 'Couldn’t read the file. It may be damaged or not in a valid format',
+    'xml-invalido': 'Invalid XML'
   }
 };
 
@@ -113,6 +121,16 @@ window.i18nComun = {
     return dic[clave] !== undefined ? dic[clave] : clave;
   };
   window.idiomaActual = idiomaActual;
+
+  // Texto para mostrarle al usuario cuando algo falla. Los errores de las
+  // librerías vienen en inglés técnico; el caso más común que tiene una
+  // explicación clara (PDF protegido: pdf-lib tira "...is encrypted...") se
+  // reemplaza por un mensaje traducido que dice qué hacer.
+  window.detalleError = function (error) {
+    var mensaje = (error && error.message) || String(error);
+    if (/encrypted/i.test(mensaje)) return t('pdf-protegido');
+    return mensaje;
+  };
 
   function aplicarIdioma(idioma) {
     var dic = diccionario(idioma);
