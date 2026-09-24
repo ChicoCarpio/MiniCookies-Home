@@ -96,7 +96,7 @@
 
 <main>
   <h1>Pixelar o difuminar una zona</h1>
-  <p>Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado o desenfoque.</p>
+  <p>Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado, puntos, ruido, o distintos tipos de desenfoque.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -138,8 +138,12 @@
       <label class="campo">
         Efecto
         <div class="modos" id="modos">
-          <button type="button" class="activo" data-modo="pixelar">Pixelar</button>
-          <button type="button" data-modo="difuminar">Difuminar</button>
+          <button type="button" class="activo" data-modo="pixelar">Pixelado</button>
+          <button type="button" data-modo="pixelar-circulos">Puntos</button>
+          <button type="button" data-modo="ruido">Ruido</button>
+          <button type="button" data-modo="difuminar">Difuminado</button>
+          <button type="button" data-modo="direccional">Movimiento</button>
+          <button type="button" data-modo="esmerilado">Esmerilado</button>
         </div>
       </label>
       <label class="campo">
@@ -169,6 +173,8 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/efectos-textura.js"></script>
+<script src="../assets/js/zoom-anclado.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -200,7 +206,12 @@ const etiquetaIntensidad = document.getElementById('etiquetaIntensidad');
 
 let archivoActual = null;
 let imagenActual = null;
-let modoElegido = 'pixelar'; // pixelar | difuminar
+// Imagen sobre la que se trabaja, a resolución completa: arranca como una
+// copia del original y, con "Tapar otra zona", pasa a ser el resultado ya
+// censurado — así cada zona nueva se suma a las anteriores en vez de volver
+// a partir del original (antes la zona anterior se perdía sin avisar).
+let fuenteTrabajo = null;
+let modoElegido = 'pixelar'; // pixelar | pixelar-circulos | ruido | difuminar | direccional | esmerilado
 let modoSeleccionElegido = 'area'; // area | libre
 let caja = { x: 0, y: 0, w: 100, h: 100 };
 let fotogramaPendiente = null;
@@ -217,6 +228,17 @@ let zoomActual = 1;
 const canvasMascara = document.createElement('canvas');
 const ctxMascara = canvasMascara.getContext('2d');
 
+// Formato de la imagen descargada: se respetan PNG y WebP (guardan
+// transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
+// sale como PNG: antes todo lo que no era PNG salía como JPG, y la
+// transparencia de un WebP/GIF quedaba pintada de negro.
+const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+function formatoDeSalida(archivo) {
+  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+}
+
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
+
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -226,70 +248,14 @@ function cargarImagen(archivo) {
   });
 }
 
-function pixelarRegion(ctx, sx, sy, sw, sh, bloque) {
-  const datos = ctx.getImageData(sx, sy, sw, sh);
-  const d = datos.data;
-  for (let by = 0; by < sh; by += bloque) {
-    for (let bx = 0; bx < sw; bx += bloque) {
-      const anchoBloque = Math.min(bloque, sw - bx);
-      const altoBloque = Math.min(bloque, sh - by);
-      let r = 0, g = 0, b = 0, n = 0;
-      for (let y = 0; y < altoBloque; y++) {
-        for (let x = 0; x < anchoBloque; x++) {
-          const i = ((by + y) * sw + (bx + x)) * 4;
-          r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
-        }
-      }
-      r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
-      for (let y = 0; y < altoBloque; y++) {
-        for (let x = 0; x < anchoBloque; x++) {
-          const i = ((by + y) * sw + (bx + x)) * 4;
-          d[i] = r; d[i + 1] = g; d[i + 2] = b;
-        }
-      }
-    }
-  }
-  ctx.putImageData(datos, sx, sy);
-}
+// Las funciones de cada efecto (pixelado, puntos, ruido, difuminado,
+// movimiento, esmerilado) viven en el helper compartido, reusado también por
+// Editor-de-color-de-imagen.html — ver assets/js/efectos-textura.js.
 
-// "fuente" es de donde se toman los píxeles a desenfocar — la imagen
-// original a tamaño real para el resultado final, o el propio canvas visible
-// (ya redibujado limpio antes de llamar a esta función) para la vista previa
-// en vivo. Ambos casos comparten el mismo sistema de coordenadas que sx/sy.
-function difuminarRegion(ctxDestino, fuente, sx, sy, sw, sh, radio) {
-  // Se recorta con un margen extra antes de desenfocar y se vuelve a
-  // recortar al tamaño real al pegar — así el desenfoque no aclara los
-  // bordes de la zona tapada trayendo "aire" de afuera del recorte.
-  const margen = Math.max(1, Math.round(radio)) * 2;
-  const canvasChico = document.createElement('canvas');
-  canvasChico.width = sw + margen * 2;
-  canvasChico.height = sh + margen * 2;
-  const ctxChico = canvasChico.getContext('2d');
-  ctxChico.drawImage(fuente, sx - margen, sy - margen, sw + margen * 2, sh + margen * 2, 0, 0, sw + margen * 2, sh + margen * 2);
-
-  const canvasBorroso = document.createElement('canvas');
-  canvasBorroso.width = canvasChico.width;
-  canvasBorroso.height = canvasChico.height;
-  const ctxBorroso = canvasBorroso.getContext('2d');
-  ctxBorroso.filter = `blur(${radio}px)`;
-  ctxBorroso.drawImage(canvasChico, 0, 0);
-
-  ctxDestino.drawImage(canvasBorroso, margen, margen, sw, sh, sx, sy, sw, sh);
-}
-
-// Aplica pixelado/desenfoque a un canvas ENTERO (usado en modo Libre, donde
-// la zona a tapar no es un rectángulo sino lo que diga la máscara del
-// pincel) — el desenfoque acá no necesita el margen de la función de arriba
-// porque no hay "afuera del recorte", es toda la imagen.
+// Aplica el efecto elegido a un canvas ENTERO (usado en modo Libre, donde la
+// zona a tapar no es un rectángulo sino lo que diga la máscara del pincel).
 function aplicarEfectoCompleto(ctxDestino, fuenteLimpia, ancho, alto, intensidadPx) {
-  if (modoElegido === 'pixelar') {
-    ctxDestino.drawImage(fuenteLimpia, 0, 0, ancho, alto);
-    pixelarRegion(ctxDestino, 0, 0, ancho, alto, Math.max(2, Math.round(intensidadPx)));
-  } else {
-    ctxDestino.filter = `blur(${intensidadPx}px)`;
-    ctxDestino.drawImage(fuenteLimpia, 0, 0, ancho, alto);
-    ctxDestino.filter = 'none';
-  }
+  EfectosTextura.aplicarCompleto(modoElegido, ctxDestino, fuenteLimpia, ancho, alto, intensidadPx);
 }
 
 // Vuelve a pintar el canvas visible con la imagen limpia + el efecto
@@ -300,7 +266,7 @@ function aplicarEfectoCompleto(ctxDestino, fuenteLimpia, ancho, alto, intensidad
 function renderizarVivo() {
   if (!imagenActual) return;
   ctxVivo.clearRect(0, 0, canvasVivo.width, canvasVivo.height);
-  ctxVivo.drawImage(imagenActual, 0, 0, canvasVivo.width, canvasVivo.height);
+  ctxVivo.drawImage(fuenteTrabajo, 0, 0, canvasVivo.width, canvasVivo.height);
 
   // La intensidad del deslizador está pensada en píxeles de la imagen a
   // tamaño real (así funciona "Aplicar" más abajo); acá se escala hacia
@@ -311,16 +277,12 @@ function renderizarVivo() {
 
   if (modoSeleccionElegido === 'area') {
     const cajaEntera = { x: Math.round(caja.x), y: Math.round(caja.y), w: Math.round(caja.w), h: Math.round(caja.h) };
-    if (modoElegido === 'pixelar') {
-      pixelarRegion(ctxVivo, cajaEntera.x, cajaEntera.y, cajaEntera.w, cajaEntera.h, Math.max(2, Math.round(intensidadVivo)));
-    } else {
-      difuminarRegion(ctxVivo, canvasVivo, cajaEntera.x, cajaEntera.y, cajaEntera.w, cajaEntera.h, intensidadVivo);
-    }
+    EfectosTextura.aplicarRegion(modoElegido, ctxVivo, canvasVivo, cajaEntera.x, cajaEntera.y, cajaEntera.w, cajaEntera.h, intensidadVivo);
   } else {
     const canvasEfecto = document.createElement('canvas');
     canvasEfecto.width = canvasVivo.width;
     canvasEfecto.height = canvasVivo.height;
-    aplicarEfectoCompleto(canvasEfecto.getContext('2d'), imagenActual, canvasEfecto.width, canvasEfecto.height, intensidadVivo);
+    aplicarEfectoCompleto(canvasEfecto.getContext('2d'), fuenteTrabajo, canvasEfecto.width, canvasEfecto.height, intensidadVivo);
 
     const ctxEfecto = canvasEfecto.getContext('2d');
     ctxEfecto.globalCompositeOperation = 'destination-in';
@@ -517,7 +479,9 @@ function aplicarTamanoCanvasVivo() {
 elZoom.addEventListener('input', () => {
   etiquetaZoom.textContent = elZoom.value;
   zoomActual = parseInt(elZoom.value, 10) / 100;
-  aplicarTamanoCanvasVivo();
+  // Se mantiene fijo el centro de lo que se ve (antes el zoom siempre
+  // quedaba anclado a la esquina superior izquierda de la imagen).
+  zoomAnclado(document.getElementById('zonaRecorteContenedor'), zonaRecorte, aplicarTamanoCanvasVivo);
   if (modoSeleccionElegido === 'area') { limitarCaja(); dibujarCaja(); }
   renderizarVivo();
 });
@@ -567,6 +531,8 @@ async function mostrarArchivo(archivo) {
     return;
   }
   imagenActual = await cargarImagen(archivo);
+  fuenteTrabajo = copiarEnCanvas(imagenActual);
+  ctxMascara.clearRect(0, 0, canvasMascara.width, canvasMascara.height);
   imgRecorte.src = imagenActual.src;
   zonaRecorteContenedor.style.display = 'block';
   botonAplicar.disabled = false;
@@ -584,11 +550,11 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
@@ -616,25 +582,21 @@ botonAplicar.addEventListener('click', () => {
     vistaResultado.height = alto;
 
     if (modoSeleccionElegido === 'area') {
-      contextoResultado.drawImage(imagenActual, 0, 0);
+      contextoResultado.drawImage(fuenteTrabajo, 0, 0);
       const escala = ancho / canvasVivo.width;
       const sx = Math.round(caja.x * escala);
       const sy = Math.round(caja.y * escala);
       const sw = Math.round(caja.w * escala);
       const sh = Math.round(caja.h * escala);
       const intensidad = parseInt(elIntensidad.value, 10);
-      if (modoElegido === 'pixelar') {
-        pixelarRegion(contextoResultado, sx, sy, sw, sh, intensidad);
-      } else {
-        difuminarRegion(contextoResultado, imagenActual, sx, sy, sw, sh, intensidad);
-      }
+      EfectosTextura.aplicarRegion(modoElegido, contextoResultado, fuenteTrabajo, sx, sy, sw, sh, intensidad);
     } else {
-      contextoResultado.drawImage(imagenActual, 0, 0);
+      contextoResultado.drawImage(fuenteTrabajo, 0, 0);
       const canvasEfecto = document.createElement('canvas');
       canvasEfecto.width = ancho;
       canvasEfecto.height = alto;
       const intensidad = parseInt(elIntensidad.value, 10);
-      aplicarEfectoCompleto(canvasEfecto.getContext('2d'), imagenActual, ancho, alto, intensidad);
+      aplicarEfectoCompleto(canvasEfecto.getContext('2d'), fuenteTrabajo, ancho, alto, intensidad);
 
       const mascaraNatural = document.createElement('canvas');
       mascaraNatural.width = ancho;
@@ -658,18 +620,29 @@ botonAplicar.addEventListener('click', () => {
   }
 });
 
+function copiarEnCanvas(fuente) {
+  const canvas = document.createElement('canvas');
+  canvas.width = fuente.naturalWidth || fuente.width;
+  canvas.height = fuente.naturalHeight || fuente.height;
+  canvas.getContext('2d').drawImage(fuente, 0, 0);
+  return canvas;
+}
+
 botonOtraZona.addEventListener('click', () => {
+  // Lo ya tapado queda fijo y se sigue marcando encima de eso.
+  fuenteTrabajo = copiarEnCanvas(vistaResultado);
+  ctxMascara.clearRect(0, 0, canvasMascara.width, canvasMascara.height);
+  programarRenderizado();
   vistaResultado.style.display = 'none';
   controlesDescarga.style.display = 'none';
   resultado.classList.remove('visible');
 });
 
 botonDescargar.addEventListener('click', async () => {
-  const esPng = archivoActual.type === 'image/png';
-  const formato = esPng ? 'image/png' : 'image/jpeg';
+  const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaResultado.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-censurada.${esPng ? 'png' : 'jpg'}`;
+  enlaceDescarga.download = `imagen-censurada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

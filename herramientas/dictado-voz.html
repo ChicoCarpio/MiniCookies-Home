@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictado por voz gratis — Mini Cookies</title>
+<meta name="description" content="Grabá tu voz y convertila a texto 100% en tu navegador, sin enviar el audio a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .barra-progreso-dictado { width: 100%; height: 10px; border-radius: 5px; background: var(--gris-fondo); overflow: hidden; margin: 10px 0; }
+  .barra-progreso-dictado div { height: 100%; width: 0%; background: var(--azul); transition: width .2s; }
+  .estado-grabacion { display: none; align-items: center; gap: 8px; margin-top: 12px; color: #dc2626; font-weight: 600; }
+  .punto-grabando { width: 10px; height: 10px; border-radius: 50%; background: #dc2626; animation: parpadeo 1s infinite; }
+  @keyframes parpadeo { 50% { opacity: .2; } }
+</style>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Dictado por voz</h1>
+  <p>Grabá tu voz con el micrófono y convertila a texto usando inteligencia artificial (Whisper).</p>
+
+  <div class="panel-herramienta">
+    <div class="controles" style="margin-bottom:16px;">
+      <label class="campo">
+        Modelo
+        <select id="selectorModelo">
+          <option value="Xenova/whisper-tiny" selected>Rápido — ideal para notas cortas (~41 MB)</option>
+          <option value="Xenova/whisper-base">Preciso — mejor con ruido o acento marcado (~77 MB)</option>
+          <option value="Xenova/whisper-small">Muy preciso — la mejor calidad (~249 MB)</option>
+        </select>
+      </label>
+      <label class="campo">
+        Idioma
+        <select id="selectorIdioma">
+          <option value="spanish" selected>Español</option>
+          <option value="auto">Detectar automáticamente</option>
+          <option value="english">Inglés</option>
+        </select>
+      </label>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="boton" id="botonGrabar" type="button">🎙️ Empezar a grabar</button>
+      <div class="estado-grabacion" id="estadoGrabacion" style="justify-content:center;">
+        <span class="punto-grabando"></span> Grabando... <span id="tiempoGrabando">00:00</span>
+      </div>
+    </div>
+
+    <div id="panelProgreso" style="display:none; margin-top:16px;">
+      <p id="textoProgreso" style="color:var(--texto-suave); margin-bottom:4px;"></p>
+      <div class="barra-progreso-dictado"><div id="barraProgresoRelleno"></div></div>
+    </div>
+
+    <p id="mensajeError" style="color:#dc2626; display:none; margin-top:16px;"></p>
+
+    <div class="resultado" id="resultado">
+      <label class="campo">
+        Texto transcripto (editable)
+        <textarea id="areaTexto" style="min-height:150px;"></textarea>
+      </label>
+      <div class="controles" style="margin-top:10px;">
+        <button class="boton" id="botonCopiar" type="button">Copiar</button>
+        <button class="boton" id="botonDescargar" type="button">Descargar .txt</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script type="module">
+  import { iniciarDictado } from '../assets/js/dictado-voz.js';
+  iniciarDictado();
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

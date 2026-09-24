@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor avanzado gratis — Mini Cookies</title>
+<meta name="description" content="Editá una imagen por capas, cada una con su propia selección (toda la imagen, a mano libre o por color) y sus propios ajustes de luz, color y textura, gratis y sin subirla a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
+     del sitio, pensado como columna angosta de lectura). */
+  main { max-width: 1700px; }
+
+  /* --- Layout de 3 columnas, altura fija: el área de trabajo no scrollea,
+     la página sigue pudiendo bajar para mostrar el anuncio y el pie. --- */
+  .editor-avanzado-layout {
+    display: grid;
+    grid-template-columns: var(--col-izq, 260px) 1fr var(--col-der, 320px);
+    transition: grid-template-columns .2s ease;
+    gap: 16px;
+    height: calc(100vh - 190px);
+    min-height: 480px;
+  }
+  .panel-capas, .panel-lienzo, .panel-ajustes {
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 12px;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .panel-lienzo { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; }
+  .seccion-lateral { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
+  .titulo-seccion-lateral { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); margin-bottom: 8px; }
+  .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
+  .seccion-lateral .modos button { flex: 1 1 auto; }
+  .nota-lateral { font-size: 0.72rem; color: var(--texto-suave); }
+
+  /* Grilla de filtros (los mismos del Editor de color, assets/js/filtros-color.js) */
+  .filtros-capa > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 6px; margin-bottom: 0; }
+  .filtros-capa > summary::-webkit-details-marker { display: none; }
+  .filtros-capa > summary::after { content: '▾'; }
+  .filtros-capa[open] > summary::after { content: '▴'; }
+  .filtros-capa[open] > summary { margin-bottom: 8px; }
+  #nombreFiltroCapa { color: var(--azul); text-transform: none; letter-spacing: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 6px; padding: 6px 4px; }
+  .titulo-grupo-presets {
+    grid-column: 1 / -1; margin-top: 6px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave);
+  }
+  .preset-miniatura { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; cursor: pointer; min-width: 0; }
+  .preset-miniatura canvas {
+    display: block; width: 100%; aspect-ratio: 1; height: auto;
+    border-radius: 8px; border: 2px solid var(--gris-borde); background: var(--gris-fondo);
+    transition: transform .15s, border-color .15s;
+  }
+  .preset-miniatura:hover canvas { border-color: var(--azul); }
+  .preset-miniatura span {
+    font-size: 0.68rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
+  .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
+  #botonVerOriginal { margin-top: 8px; padding: 5px 12px; font-size: 0.78rem; user-select: none; -webkit-user-select: none; touch-action: none; }
+
+  /* --- Paneles laterales plegables ---
+     Computadora: el panel plegado queda como una franja angosta con su
+     nombre en vertical; al hacerle clic se vuelve a abrir.
+     Celular: los dos paneles son cajones que salen desde el borde de la
+     pantalla, así la imagen usa todo el ancho. */
+  .boton-plegar {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); color: var(--texto);
+    cursor: pointer; padding: 6px 10px; margin-bottom: 10px;
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .boton-plegar:hover { border-color: var(--azul); }
+  .abrir-panel-movil, .fondo-panel-movil { display: none; }
+
+  @media (min-width: 901px) {
+    .editor-avanzado-layout.izq-plegado { --col-izq: 42px; }
+    .editor-avanzado-layout.der-plegado { --col-der: 42px; }
+    .izq-plegado .panel-capas, .der-plegado .panel-ajustes { padding: 6px 4px; overflow: hidden; }
+    .izq-plegado .panel-capas > :not(.boton-plegar),
+    .der-plegado .panel-ajustes > :not(.boton-plegar) { display: none !important; }
+    .izq-plegado .panel-capas .boton-plegar,
+    .der-plegado .panel-ajustes .boton-plegar {
+      height: 100%; margin: 0; padding: 10px 0; justify-content: flex-start;
+      writing-mode: vertical-rl;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .editor-avanzado-layout { display: block; height: auto; min-height: 0; }
+    .panel-lienzo { height: 72vh; min-height: 320px; }
+    .panel-capas, .panel-ajustes {
+      position: fixed; top: 0; bottom: 0; z-index: 1000;
+      width: min(86vw, 340px); border-radius: 0;
+      background: var(--superficie); box-shadow: 0 0 24px rgba(0,0,0,.35);
+      transition: transform .25s ease, visibility .25s;
+    }
+    .panel-capas { left: 0; }
+    .panel-ajustes { right: 0; }
+    .izq-plegado .panel-capas { transform: translateX(-105%); visibility: hidden; }
+    .der-plegado .panel-ajustes { transform: translateX(105%); visibility: hidden; }
+
+    .abrir-panel-movil {
+      display: block; position: fixed; top: 50%; z-index: 900;
+      border: 1px solid var(--gris-borde); background: var(--azul); color: #fff;
+      font-size: 0.75rem; font-weight: 700; padding: 12px 6px; cursor: pointer;
+      writing-mode: vertical-rl; transform: translateY(-50%);
+      box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    }
+    .abrir-panel-movil.izq { left: 0; border-radius: 0 10px 10px 0; }
+    .abrir-panel-movil.der { right: 0; border-radius: 10px 0 0 10px; }
+    .fondo-panel-movil { position: fixed; inset: 0; z-index: 990; background: rgba(0,0,0,.45); }
+    .editor-avanzado-layout:not(.izq-plegado) .fondo-panel-movil,
+    .editor-avanzado-layout:not(.der-plegado) .fondo-panel-movil { display: block; }
+  }
+
+  /* --- Panel de capas --- */
+  .contenedor-capa { margin-bottom: 8px; }
+  .contenedor-capa.arrastrando { opacity: 0.4; }
+  .fila-capa {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px 8px 0 0;
+    cursor: grab;
+    border-bottom: none;
+    background: var(--gris-fondo);
+  }
+  .fila-capa.activa { border-color: var(--azul); background: color-mix(in srgb, var(--azul) 12%, var(--gris-fondo)); }
+  .fila-capa canvas.miniatura-capa { width: 32px; height: 32px; border-radius: 4px; border: 1px solid var(--gris-borde); flex-shrink: 0; background: #fff; }
+  .fila-capa input.nombre-capa {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: none;
+    color: var(--texto);
+    font-size: 0.82rem;
+    padding: 2px;
+  }
+  .fila-capa button.icono-capa {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+    padding: 2px 4px;
+    flex-shrink: 0;
+  }
+  .fila-capa button.icono-capa.apagado { opacity: 0.35; }
+  .fila-opacidad {
+    display: flex; align-items: center; gap: 4px; padding: 4px 6px 6px;
+    border: 1px solid var(--gris-borde); border-top: none; border-radius: 0 0 8px 8px;
+    background: var(--gris-fondo);
+  }
+  .fila-opacidad input[type="range"] { flex: 1; margin: 0; }
+  .fila-opacidad span { font-size: 0.72rem; color: var(--texto-suave); width: 30px; text-align: right; }
+
+  /* --- Panel de lienzo: selección de capa activa --- */
+  .zona-lienzo-contenedor { max-width: 100%; max-height: 100%; overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; }
+  .zona-lienzo { position: relative; touch-action: none; }
+  #canvasTrabajo { display: block; cursor: grab; }
+  .zona-lienzo.modo-pincel #canvasTrabajo { cursor: none; }
+  #cursorPincelAvanzado {
+    position: absolute; border: 2px solid var(--azul); background: rgba(231,164,89,0.2);
+    border-radius: 50%; box-sizing: border-box; pointer-events: none; transform: translate(-50%,-50%); display: none;
+  }
+  #cursorPincelAvanzado.visible { display: block; }
+  .zona-lienzo.modo-color #canvasTrabajo { cursor: crosshair; }
+  .zona-lienzo.paneando #canvasTrabajo { cursor: grabbing; }
+
+  /* --- Acordeón de ajustes --- */
+  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  .acordeon-titulo {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; background: var(--gris-fondo); border: none; cursor: pointer;
+    font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .acordeon-contenido { display: none; padding: 10px; }
+  .acordeon-grupo.abierto .acordeon-contenido { display: block; }
+  .acordeon-titulo .flecha { transition: transform .15s; }
+  .acordeon-grupo.abierto .acordeon-titulo .flecha { transform: rotate(180deg); }
+  .campo-deslizador { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+  .campo-deslizador.deshabilitado { opacity: 0.5; }
+  .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.82rem; }
+  .campo-deslizador .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
+  .campo-deslizador input[type="range"] { width: 100%; margin: 0; }
+  .campo-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; margin-bottom: 8px; }
+  .campo-check input { width: auto; }
+  .subtitulo-bn { font-size: 0.8rem; font-weight: 600; margin: 14px 0 6px; padding-top: 10px; border-top: 1px solid var(--gris-borde); }
+  .subtitulo-bn:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
+  .muestra-color { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .modos { display: flex; gap: 6px; flex-wrap: wrap; }
+  .modos button {
+    padding: 5px 10px; border: 1px solid var(--gris-borde); border-radius: 999px;
+    background: var(--gris-fondo); color: var(--texto); cursor: pointer; font-size: 0.78rem;
+  }
+  .modos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .muestra-color-objetivo { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--gris-borde); display: inline-block; vertical-align: middle; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Editor avanzado</h1>
+  <p>Editá por capas: cada una tiene su propia selección (toda la imagen, a mano libre, o solo un color puntual) y sus propios ajustes de luz, color y textura. ¿Buscás algo más simple? Probá el <a href="Editor-de-color-de-imagen.html">editor de un solo paso</a>.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <div id="editorCompleto" style="display:none; margin-top:16px;">
+      <div class="editor-avanzado-layout" id="layoutEditor">
+        <button type="button" class="abrir-panel-movil izq" data-panel="izq">☰ Capas y herramientas</button>
+        <button type="button" class="abrir-panel-movil der" data-panel="der">⚙ Ajustes</button>
+        <div class="fondo-panel-movil" id="fondoPanelMovil"></div>
+
+        <div class="panel-capas">
+          <button type="button" class="boton-plegar" data-panel="izq" title="Contraer/expandir panel"><span>Capas y herramientas</span><span class="flecha-plegar">«</span></button>
+          <div class="controles" style="margin-bottom:8px; gap:6px;">
+            <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;">+ Capa</button>
+          </div>
+          <div id="listaCapas"></div>
+          <div class="controles" style="margin-top:12px; flex-direction:column; gap:6px; align-items:stretch;">
+            <button type="button" id="botonGuardarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 10px; font-size:0.78rem;">💾 Guardar proyecto</button>
+            <button type="button" id="botonCargarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 10px; font-size:0.78rem;">📂 Cargar proyecto</button>
+            <input type="file" id="entradaProyecto" accept="application/json" hidden>
+          </div>
+
+          <div class="seccion-lateral">
+            <div class="titulo-seccion-lateral">Aplicar la capa a</div>
+            <div class="modos" id="modosSeleccionCapa">
+              <button type="button" class="activo" data-seleccion="toda">Toda la imagen</button>
+              <button type="button" data-seleccion="pincel">Pincel</button>
+              <button type="button" data-seleccion="color">Color</button>
+            </div>
+
+            <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Tamaño de pincel</span><span id="valorPincelAvanzado">30px</span></span>
+                <input type="range" id="tamanoPincelAvanzado" min="6" max="120" value="30">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Dureza (bordes)</span><span id="valorDurezaPincel">70%</span></span>
+                <input type="range" id="durezaPincel" min="10" max="100" value="70">
+              </label>
+              <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;">Borrar lo pintado</button>
+            </div>
+
+            <div id="controlesColorAvanzado" class="controles controles-apilados" style="display:none;">
+              <span style="font-size:0.8rem;">Hacé clic en la imagen para elegir el color <span class="muestra-color-objetivo" id="muestraColorObjetivo"></span></span>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Tolerancia</span><span id="valorToleranciaColor">30</span></span>
+                <input type="range" id="toleranciaColor" min="0" max="100" value="30">
+              </label>
+            </div>
+          </div>
+
+          <div class="seccion-lateral">
+            <details class="filtros-capa" id="filtrosCapa">
+              <summary class="titulo-seccion-lateral"><span>Filtro de la capa</span><span id="nombreFiltroCapa">Sin filtro</span></summary>
+              <p class="nota-lateral" style="margin:0 0 6px;">Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.</p>
+              <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
+              <div class="presets" id="presets"></div>
+            </details>
+          </div>
+
+          <div class="seccion-lateral">
+            <div class="titulo-seccion-lateral">Vista</div>
+            <div class="controles controles-apilados">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Zoom</span><span id="valorZoomAvanzado">100%</span></span>
+                <input type="range" id="zoomAvanzado" min="10" max="400" value="100">
+              </label>
+              <span class="nota-lateral">También con la rueda del mouse o pellizcando con dos dedos</span>
+              <label for="resolucionVistaPrevia" style="font-size:0.8rem;">Resolución de la vista previa</label>
+              <select id="resolucionVistaPrevia" style="padding:4px 8px; font-size:0.8rem;">
+                <option value="rapida">Rápida (hasta 1000 px)</option>
+                <option value="original" id="opcionResolucionOriginal">Resolución original</option>
+              </select>
+              <span id="avisoResolucionOriginal" class="nota-lateral"></span>
+            </div>
+          </div>
+
+          <div class="seccion-lateral">
+            <div class="controles controles-apilados">
+              <button class="boton" id="botonDescargarAvanzado">Descargar imagen</button>
+              <button type="button" id="botonRestablecerAvanzado" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;">Reiniciar todo</button>
+              <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;">🖼️ Cambiar imagen</button>
+            </div>
+            <div class="resultado" id="resultado">
+              ✅ Listo. <a id="enlaceDescarga" download="imagen-editada">Descargar imagen</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-lienzo">
+          <div class="zona-lienzo-contenedor" id="zonaLienzoContenedor">
+            <div class="zona-lienzo" id="zonaLienzo">
+              <canvas id="canvasTrabajo"></canvas>
+              <div id="cursorPincelAvanzado"></div>
+            </div>
+          </div>
+          <!-- Botón aparte (no sobre la imagen): en el lienzo, presionar ya sirve para pintar, mover o elegir color -->
+          <button type="button" id="botonVerOriginal" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;">👁 Mantené presionado para ver el original</button>
+        </div>
+
+        <div class="panel-ajustes">
+          <button type="button" class="boton-plegar" data-panel="der" title="Contraer/expandir panel"><span class="flecha-plegar">»</span><span>Ajustes</span></button>
+          <fieldset class="acordeon-grupo abierto" data-grupo="luz">
+            <button type="button" class="acordeon-titulo">Luz <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Exposición</span><span id="valorExposicion">0</span></span>
+                <input type="range" id="exposicion" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Contraste</span><span id="valorContraste">0</span></span>
+                <input type="range" id="contraste" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Sombras</span><span id="valorSombras">0</span></span>
+                <input type="range" id="sombras" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Reflejos</span><span id="valorReflejos">0</span></span>
+                <input type="range" id="reflejos" min="-100" max="100" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="color">
+            <button type="button" class="acordeon-titulo">Color <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Saturación</span><span id="valorSaturacion">0</span></span>
+                <input type="range" id="saturacion" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Intensidad de color</span><span id="valorIntensidad">0</span></span>
+                <input type="range" id="intensidad" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Girar tono</span><span id="valorTono">0°</span></span>
+                <input type="range" id="tono" min="-180" max="180" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Canal rojo</span><span id="valorColorRojo">0</span></span>
+                <input type="range" id="colorRojo" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Canal verde</span><span id="valorColorVerde">0</span></span>
+                <input type="range" id="colorVerde" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Canal azul</span><span id="valorColorAzul">0</span></span>
+                <input type="range" id="colorAzul" min="-100" max="100" value="0">
+              </label>
+              <div id="panelAjustePorColor"></div>
+            </div>
+          </fieldset>
+          <fieldset class="acordeon-grupo">
+            <button type="button" class="acordeon-titulo">Luz por color <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <!-- Un deslizador por rango de "Ajustar por color" (se generan en el script) -->
+              <div class="deslizadores" id="mezclaBN"></div>
+              <p class="nota-lateral" style="margin:6px 0 0;">Aclara u oscurece solo ese color, como la exposición pero por color (sin cambiarle el tono). Por ejemplo, Azules en −60 oscurece el cielo; Naranjas en +30 aclara la piel. En blanco y negro decide qué tan claro queda cada color en gris.</p>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="bn">
+            <button type="button" class="acordeon-titulo">Blanco y negro <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-check">
+                <input type="checkbox" id="activarBN">
+                Convertir a blanco y negro
+              </label>
+              <div class="subtitulo-bn">Filtro de lente (canales)</div>
+              <label class="campo-deslizador deshabilitado" data-canal>
+                <span class="etiqueta-deslizador"><span>Rojo</span><span id="valorCanalRojo">100%</span></span>
+                <input type="range" id="canalRojo" min="0" max="200" value="100" disabled>
+              </label>
+              <label class="campo-deslizador deshabilitado" data-canal>
+                <span class="etiqueta-deslizador"><span>Verde</span><span id="valorCanalVerde">100%</span></span>
+                <input type="range" id="canalVerde" min="0" max="200" value="100" disabled>
+              </label>
+              <label class="campo-deslizador deshabilitado" data-canal>
+                <span class="etiqueta-deslizador"><span>Azul</span><span id="valorCanalAzul">100%</span></span>
+                <input type="range" id="canalAzul" min="0" max="200" value="100" disabled>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="efectos">
+            <button type="button" class="acordeon-titulo">Efectos <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Claridad</span><span id="valorClaridad">0</span></span>
+                <input type="range" id="claridad" min="-100" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Grano</span><span id="valorGrano">0%</span></span>
+                <input type="range" id="grano" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Sepia</span><span id="valorSepia">0%</span></span>
+                <input type="range" id="sepia" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Invertir colores</span><span id="valorInvertir">0%</span></span>
+                <input type="range" id="invertir" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Desenfoque</span><span id="valorDesenfoque">0px</span></span>
+                <input type="range" id="desenfoque" min="0" max="20" step="0.5" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="resplandor">
+            <button type="button" class="acordeon-titulo">Resplandor <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Intensidad</span><span id="valorDispersionIntensidad">0%</span></span>
+                <input type="range" id="dispersionIntensidad" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Matiz</span><span id="valorDispersionMatiz">0°</span></span>
+                <input type="range" id="dispersionMatiz" min="-180" max="180" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Tamaño</span><span id="valorDispersionTamano">50%</span></span>
+                <input type="range" id="dispersionTamano" min="0" max="100" value="50">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="dispersion">
+            <button type="button" class="acordeon-titulo">Dispersión de luz <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Intensidad</span><span id="valorAberracionIntensidad">0%</span></span>
+                <input type="range" id="aberracionIntensidad" min="0" max="100" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Ángulo</span><span id="valorAberracionAngulo">0°</span></span>
+                <input type="range" id="aberracionAngulo" min="0" max="360" value="0">
+              </label>
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span>Matiz</span><span id="valorAberracionMatiz">0°</span></span>
+                <input type="range" id="aberracionMatiz" min="-180" max="180" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="textura">
+            <button type="button" class="acordeon-titulo">Textura <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="modos" id="modosTextura" style="margin-bottom:10px;">
+                <button type="button" class="activo" data-textura="ninguno">Ninguno</button>
+                <button type="button" data-textura="pixelar">Pixelado</button>
+                <button type="button" data-textura="pixelar-circulos">Puntos</button>
+                <button type="button" data-textura="ruido">Ruido</button>
+                <button type="button" data-textura="difuminar">Difuminado</button>
+                <button type="button" data-textura="direccional">Movimiento</button>
+                <button type="button" data-textura="esmerilado">Esmerilado</button>
+              </div>
+              <div id="controlesTextura" style="display:none;">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span>Intensidad de la textura</span><span id="valorTexturaIntensidad">18</span></span>
+                  <input type="range" id="texturaIntensidad" min="2" max="50" value="18">
+                </label>
+                <div class="modos" id="modosOrdenTextura">
+                  <button type="button" class="activo" data-orden="debajo">Debajo de los filtros</button>
+                  <button type="button" data-orden="encima">Encima de los filtros</button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/efectos-textura.js"></script>
+<script src="../assets/js/ajuste-por-color.js"></script>
+<script src="../assets/js/filtros-color.js"></script>
+<script src="../assets/js/zoom-anclado.js"></script>
+<script>
+// ===== Elementos =====
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const editorCompleto = document.getElementById('editorCompleto');
+const listaCapas = document.getElementById('listaCapas');
+const botonNuevaCapa = document.getElementById('botonNuevaCapa');
+const botonGuardarProyecto = document.getElementById('botonGuardarProyecto');
+const botonCargarProyecto = document.getElementById('botonCargarProyecto');
+const entradaProyecto = document.getElementById('entradaProyecto');
+const modosSeleccionCapa = document.getElementById('modosSeleccionCapa');
+const controlesPincelAvanzado = document.getElementById('controlesPincelAvanzado');
+const controlesColorAvanzado = document.getElementById('controlesColorAvanzado');
+const elTamanoPincelAvanzado = document.getElementById('tamanoPincelAvanzado');
+const elDurezaPincel = document.getElementById('durezaPincel');
+const valorDurezaPincel = document.getElementById('valorDurezaPincel');
+const valorPincelAvanzado = document.getElementById('valorPincelAvanzado');
+const elZoomAvanzado = document.getElementById('zoomAvanzado');
+const valorZoomAvanzado = document.getElementById('valorZoomAvanzado');
+const botonBorrarMascaraCapa = document.getElementById('botonBorrarMascaraCapa');
+const muestraColorObjetivo = document.getElementById('muestraColorObjetivo');
+const elToleranciaColor = document.getElementById('toleranciaColor');
+const valorToleranciaColor = document.getElementById('valorToleranciaColor');
+const zonaLienzoContenedor = document.getElementById('zonaLienzoContenedor');
+const zonaLienzo = document.getElementById('zonaLienzo');
+const canvasTrabajo = document.getElementById('canvasTrabajo');
+const ctxTrabajo = canvasTrabajo.getContext('2d');
+const cursorPincelAvanzado = document.getElementById('cursorPincelAvanzado');
+const botonRestablecerAvanzado = document.getElementById('botonRestablecerAvanzado');
+const botonDescargarAvanzado = document.getElementById('botonDescargarAvanzado');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const activarBN = document.getElementById('activarBN');
+const elTexturaIntensidad = document.getElementById('texturaIntensidad');
+const valorTexturaIntensidad = document.getElementById('valorTexturaIntensidad');
+const controlesTextura = document.getElementById('controlesTextura');
+
+const LADO_MAXIMO_TRABAJO = 1000;
+const elResolucionVistaPrevia = document.getElementById('resolucionVistaPrevia');
+const opcionResolucionOriginal = document.getElementById('opcionResolucionOriginal');
+const avisoResolucionOriginal = document.getElementById('avisoResolucionOriginal');
+
+// Luz por color: un deslizador por rango (mezclaRojos, mezclaVerdes...),
+// mismos rangos y colores que "Ajustar por color". A color aclara/oscurece
+// ese color; en B/N es la mezcla B/N. Igual que en el Editor de color.
+const CLAVES_MEZCLA_BN = AjustePorColor.RANGOS.map((r) => 'mezcla' + r.clave[0].toUpperCase() + r.clave.slice(1));
+AjustePorColor.RANGOS.forEach((rango, n) => {
+  const clave = CLAVES_MEZCLA_BN[n];
+  document.getElementById('mezclaBN').insertAdjacentHTML('beforeend', `
+    <label class="campo-deslizador">
+      <span class="etiqueta-deslizador"><span><span class="muestra-color" style="background:${rango.muestra}"></span>${rango.nombre}</span><span id="valor-${clave}">0</span></span>
+      <input type="range" id="${clave}" min="-100" max="100" value="0">
+    </label>`);
+});
+
+const deslizadores = {
+  exposicion: { input: document.getElementById('exposicion'), valor: document.getElementById('valorExposicion'), unidad: '', porDefecto: 0, conSigno: true },
+  contraste: { input: document.getElementById('contraste'), valor: document.getElementById('valorContraste'), unidad: '', porDefecto: 0, conSigno: true },
+  sombras: { input: document.getElementById('sombras'), valor: document.getElementById('valorSombras'), unidad: '', porDefecto: 0, conSigno: true },
+  reflejos: { input: document.getElementById('reflejos'), valor: document.getElementById('valorReflejos'), unidad: '', porDefecto: 0, conSigno: true },
+  saturacion: { input: document.getElementById('saturacion'), valor: document.getElementById('valorSaturacion'), unidad: '', porDefecto: 0, conSigno: true },
+  intensidad: { input: document.getElementById('intensidad'), valor: document.getElementById('valorIntensidad'), unidad: '', porDefecto: 0, conSigno: true },
+  tono: { input: document.getElementById('tono'), valor: document.getElementById('valorTono'), unidad: '°', porDefecto: 0, conSigno: true },
+  colorRojo: { input: document.getElementById('colorRojo'), valor: document.getElementById('valorColorRojo'), unidad: '', porDefecto: 0, conSigno: true },
+  colorVerde: { input: document.getElementById('colorVerde'), valor: document.getElementById('valorColorVerde'), unidad: '', porDefecto: 0, conSigno: true },
+  colorAzul: { input: document.getElementById('colorAzul'), valor: document.getElementById('valorColorAzul'), unidad: '', porDefecto: 0, conSigno: true },
+  canalRojo: { input: document.getElementById('canalRojo'), valor: document.getElementById('valorCanalRojo'), unidad: '%', porDefecto: 100 },
+  canalVerde: { input: document.getElementById('canalVerde'), valor: document.getElementById('valorCanalVerde'), unidad: '%', porDefecto: 100 },
+  canalAzul: { input: document.getElementById('canalAzul'), valor: document.getElementById('valorCanalAzul'), unidad: '%', porDefecto: 100 },
+  claridad: { input: document.getElementById('claridad'), valor: document.getElementById('valorClaridad'), unidad: '', porDefecto: 0, conSigno: true },
+  grano: { input: document.getElementById('grano'), valor: document.getElementById('valorGrano'), unidad: '%', porDefecto: 0 },
+  sepia: { input: document.getElementById('sepia'), valor: document.getElementById('valorSepia'), unidad: '%', porDefecto: 0 },
+  invertir: { input: document.getElementById('invertir'), valor: document.getElementById('valorInvertir'), unidad: '%', porDefecto: 0 },
+  desenfoque: { input: document.getElementById('desenfoque'), valor: document.getElementById('valorDesenfoque'), unidad: 'px', porDefecto: 0 },
+  dispersionIntensidad: { input: document.getElementById('dispersionIntensidad'), valor: document.getElementById('valorDispersionIntensidad'), unidad: '%', porDefecto: 0 },
+  dispersionMatiz: { input: document.getElementById('dispersionMatiz'), valor: document.getElementById('valorDispersionMatiz'), unidad: '°', porDefecto: 0, conSigno: true },
+  dispersionTamano: { input: document.getElementById('dispersionTamano'), valor: document.getElementById('valorDispersionTamano'), unidad: '%', porDefecto: 50 },
+  aberracionIntensidad: { input: document.getElementById('aberracionIntensidad'), valor: document.getElementById('valorAberracionIntensidad'), unidad: '%', porDefecto: 0 },
+  aberracionAngulo: { input: document.getElementById('aberracionAngulo'), valor: document.getElementById('valorAberracionAngulo'), unidad: '°', porDefecto: 0 },
+  aberracionMatiz: { input: document.getElementById('aberracionMatiz'), valor: document.getElementById('valorAberracionMatiz'), unidad: '°', porDefecto: 0, conSigno: true },
+};
+CLAVES_MEZCLA_BN.forEach((clave) => {
+  deslizadores[clave] = { input: document.getElementById(clave), valor: document.getElementById('valor-' + clave), unidad: '', porDefecto: 0, conSigno: true };
+});
+
+const AJUSTES_NEUTROS = {
+  bn: false, exposicion: 0, contraste: 0, sombras: 0, reflejos: 0, saturacion: 0, intensidad: 0, tono: 0,
+  colorRojo: 0, colorVerde: 0, colorAzul: 0,
+  canalRojo: 100, canalVerde: 100, canalAzul: 100, claridad: 0, grano: 0, sepia: 0, invertir: 0, desenfoque: 0,
+  dispersionIntensidad: 0, dispersionMatiz: 0, dispersionTamano: 50,
+  aberracionIntensidad: 0, aberracionAngulo: 0, aberracionMatiz: 0,
+  textura: 'ninguno', texturaIntensidad: 18, texturaOrden: 'debajo',
+  hsl: null, // Ajustar por color (null = sin cambios), ver assets/js/ajuste-por-color.js
+  filtro: 'ninguno', // filtro elegido para la capa (clave de FiltrosColor.FILTROS)
+};
+// Los proyectos guardados antes de la mezcla B/N se completan con estos 0
+// al abrirse ({ ...AJUSTES_NEUTROS, ...c.ajustes }).
+CLAVES_MEZCLA_BN.forEach((clave) => { AJUSTES_NEUTROS[clave] = 0; });
+
+// ===== Estado =====
+let archivoActual = null;
+let imagenActual = null;
+let canvasOrigenTrabajo = null; // imagen original a tamaño de trabajo, para el gotero de color
+let anchoTrabajo = 0, altoTrabajo = 0;
+let capas = [];
+let capaActivaId = null;
+let contadorCapas = 0;
+let fotogramaPendiente = null;
+let zoomActual = 1;
+let panelAjustePorColor = null; // se crea más abajo, junto al resto del panel de ajustes
+
+function nuevoId() { contadorCapas += 1; return 'capa-' + contadorCapas; }
+
+function crearCapa(nombre) {
+  // nuevoId() ya incrementó contadorCapas, así que el nombre por defecto usa
+  // ese mismo número (sin sumarle otro, que era de dónde salía el salto de
+  // "Capa 1" a "Capa 3").
+  const id = nuevoId();
+  return {
+    id,
+    nombre: nombre || `Capa ${contadorCapas}`,
+    visible: true,
+    opacidad: 100,
+    seleccion: 'toda', // toda | pincel | color
+    mascaraPincel: null, // canvas propio, tamaño anchoTrabajo x altoTrabajo
+    colorObjetivo: null, // {r,g,b}
+    tolerancia: 30,
+    ajustes: { ...AJUSTES_NEUTROS },
+  };
+}
+
+function capaActiva() { return capas.find((c) => c.id === capaActivaId) || null; }
+
+// Formato de la imagen descargada: se respetan PNG y WebP (guardan
+// transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
+// sale como PNG: antes todo lo que no era PNG salía como JPG, y la
+// transparencia de un WebP/GIF quedaba pintada de negro.
+const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+function formatoDeSalida(archivo) {
+  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+}
+
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
+
+function cargarImagen(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+
+// ===== Pipeline de ajustes (idéntico al editor simple, por canvas) =====
+function matrizTono(grados) {
+  const a = grados * Math.PI / 180;
+  const c = Math.cos(a), s = Math.sin(a);
+  return [
+    0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928,
+    0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
+    0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072,
+  ];
+}
+
+function generarVersionBorrosa(canvasFuente, ladoChico) {
+  ladoChico = ladoChico || 40;
+  const ancho = canvasFuente.width, alto = canvasFuente.height;
+  const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
+  const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
+  const canvasChico = document.createElement('canvas');
+  canvasChico.width = anchoChico; canvasChico.height = altoChico;
+  const ctxChico = canvasChico.getContext('2d');
+  ctxChico.imageSmoothingEnabled = true; ctxChico.imageSmoothingQuality = 'high';
+  ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
+  const canvasBorroso = document.createElement('canvas');
+  canvasBorroso.width = ancho; canvasBorroso.height = alto;
+  const ctxBorroso = canvasBorroso.getContext('2d');
+  ctxBorroso.imageSmoothingEnabled = true; ctxBorroso.imageSmoothingQuality = 'high';
+  ctxBorroso.drawImage(canvasChico, 0, 0, anchoChico, altoChico, 0, 0, ancho, alto);
+  return ctxBorroso.getImageData(0, 0, ancho, alto).data;
+}
+
+function procesarCanvas(canvasFuente, ajustes) {
+  const ctx = canvasFuente.getContext('2d');
+  const ancho = canvasFuente.width, alto = canvasFuente.height;
+  const imageData = ctx.getImageData(0, 0, ancho, alto);
+  const datos = imageData.data;
+
+  const ampAberracion = ajustes.aberracionIntensidad / 100;
+  if (ampAberracion > 0) {
+    const anguloRad = (ajustes.aberracionAngulo / 180) * Math.PI;
+    const desplazamiento = ampAberracion * Math.max(2, Math.round(Math.min(ancho, alto) * 0.02));
+    const dx = Math.round(Math.cos(anguloRad) * desplazamiento);
+    const dy = Math.round(Math.sin(anguloRad) * desplazamiento);
+    const original = new Uint8ClampedArray(datos);
+    const mTonoAberracion = ajustes.aberracionMatiz !== 0 ? matrizTono(ajustes.aberracionMatiz) : null;
+    for (let y = 0; y < alto; y++) {
+      const yr = y + dy < 0 ? 0 : y + dy >= alto ? alto - 1 : y + dy;
+      const yb = y - dy < 0 ? 0 : y - dy >= alto ? alto - 1 : y - dy;
+      for (let x = 0; x < ancho; x++) {
+        const xr = x + dx < 0 ? 0 : x + dx >= ancho ? ancho - 1 : x + dx;
+        const xb = x - dx < 0 ? 0 : x - dx >= ancho ? ancho - 1 : x - dx;
+        const iDestino = (y * ancho + x) * 4;
+        const iR = (yr * ancho + xr) * 4;
+        const iB = (yb * ancho + xb) * 4;
+        if (mTonoAberracion) {
+          const rr = original[iR], rg = original[iR + 1], rb = original[iR + 2];
+          const br = original[iB], bg = original[iB + 1], bb = original[iB + 2];
+          datos[iDestino] = mTonoAberracion[0] * rr + mTonoAberracion[1] * rg + mTonoAberracion[2] * rb;
+          datos[iDestino + 2] = mTonoAberracion[6] * br + mTonoAberracion[7] * bg + mTonoAberracion[8] * bb;
+        } else {
+          datos[iDestino] = original[iR];
+          datos[iDestino + 2] = original[iB + 2];
+        }
+      }
+    }
+  }
+
+  const factorExposicion = Math.pow(2, (ajustes.exposicion / 100) * 2);
+  const c = ajustes.contraste;
+  const factorContraste = (259 * (c + 255)) / (255 * (259 - c));
+  const amplitudSombras = (ajustes.sombras / 100) * 70;
+  const amplitudReflejos = (ajustes.reflejos / 100) * 70;
+  const factorSaturacion = 1 + ajustes.saturacion / 100;
+  const nIntensidad = ajustes.intensidad / 100;
+  const necesitaTono = ajustes.tono !== 0;
+  const mTono = necesitaTono ? matrizTono(ajustes.tono) : null;
+  const deltaColorRojo = ajustes.colorRojo;
+  const deltaColorVerde = ajustes.colorVerde;
+  const deltaColorAzul = ajustes.colorAzul;
+  const bn = ajustes.bn;
+  const wr = ajustes.canalRojo / 100, wg = ajustes.canalVerde / 100, wb = ajustes.canalAzul / 100;
+  const sumaCanales = (wr + wg + wb) || 1;
+  // Luz por color: funciona a color y en blanco y negro (ver más abajo).
+  const mezclaGris = AjustePorColor.prepararMezclaGris(CLAVES_MEZCLA_BN.map((clave) => ajustes[clave] || 0));
+  const ampSepia = ajustes.sepia / 100;
+  const ampInvertir = ajustes.invertir / 100;
+  const ampClaridad = (ajustes.claridad / 100) * 1.3;
+  const necesitaClaridad = ampClaridad !== 0;
+  const borrosos = necesitaClaridad ? generarVersionBorrosa(canvasFuente) : null;
+  const ampGrano = (ajustes.grano / 100) * 45;
+  const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
+  // Referencia de color apenas desenfocada (ver referenciaColor en
+  // ajuste-por-color.js): evita bloques en la piel por el ruido del JPEG.
+  const refColor = (ajustePorColor || mezclaGris) ? AjustePorColor.referenciaColor(canvasFuente) : null;
+
+  const ampDispersion = (ajustes.dispersionIntensidad / 100) * 1.6;
+  let capaDispersion = null;
+  let mMatizDispersion = null;
+  if (ampDispersion > 0) {
+    const brillante = new Uint8ClampedArray(datos.length);
+    for (let i = 0; i < datos.length; i += 4) {
+      const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
+      const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
+      brillante[i] = datos[i] * factor;
+      brillante[i + 1] = datos[i + 1] * factor;
+      brillante[i + 2] = datos[i + 2] * factor;
+      brillante[i + 3] = 255;
+    }
+    const canvasBrillante = document.createElement('canvas');
+    canvasBrillante.width = ancho; canvasBrillante.height = alto;
+    canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+    const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
+    capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion);
+    if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
+  }
+
+  for (let i = 0; i < datos.length; i += 4) {
+    let r = datos[i], g = datos[i + 1], b = datos[i + 2];
+    const rOriginal = r, gOriginal = g, bOriginal = b;
+
+    r *= factorExposicion; g *= factorExposicion; b *= factorExposicion;
+    if (r < 0) r = 0; else if (r > 255) r = 255;
+    if (g < 0) g = 0; else if (g > 255) g = 255;
+    if (b < 0) b = 0; else if (b > 255) b = 255;
+
+    r = factorContraste * (r - 128) + 128;
+    g = factorContraste * (g - 128) + 128;
+    b = factorContraste * (b - 128) + 128;
+    if (r < 0) r = 0; else if (r > 255) r = 255;
+    if (g < 0) g = 0; else if (g > 255) g = 255;
+    if (b < 0) b = 0; else if (b > 255) b = 255;
+
+    if (amplitudSombras !== 0 || amplitudReflejos !== 0) {
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const mascaraSombra = Math.max(0, Math.min(1, 1 - lum / 128));
+      const mascaraReflejo = Math.max(0, Math.min(1, (lum - 128) / 127));
+      const delta = amplitudSombras * mascaraSombra + amplitudReflejos * mascaraReflejo;
+      r += delta; g += delta; b += delta;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    if (mTono) {
+      const nr = mTono[0] * r + mTono[1] * g + mTono[2] * b;
+      const ng = mTono[3] * r + mTono[4] * g + mTono[5] * b;
+      const nb = mTono[6] * r + mTono[7] * g + mTono[8] * b;
+      r = nr; g = ng; b = nb;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    if (factorSaturacion !== 1 || nIntensidad !== 0) {
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
+      const saturacionActual = maxC > 0 ? (maxC - minC) / maxC : 0;
+      const factorVibrance = 1 + nIntensidad * (1 - saturacionActual) * 1.5;
+      const factorTotal = factorSaturacion * factorVibrance;
+      r = lum + (r - lum) * factorTotal;
+      g = lum + (g - lum) * factorTotal;
+      b = lum + (b - lum) * factorTotal;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    // Ajustar por color (assets/js/ajuste-por-color.js): tono, saturación y
+    // luminancia solo de los píxeles de cada rango de color.
+    if (ajustePorColor) [r, g, b] = AjustePorColor.aplicar(r, g, b, ajustePorColor, refColor[i], refColor[i + 1], refColor[i + 2]);
+
+    if (deltaColorRojo !== 0) { r += deltaColorRojo; if (r < 0) r = 0; else if (r > 255) r = 255; }
+    if (deltaColorVerde !== 0) { g += deltaColorVerde; if (g < 0) g = 0; else if (g > 255) g = 255; }
+    if (deltaColorAzul !== 0) { b += deltaColorAzul; if (b < 0) b = 0; else if (b > 255) b = 255; }
+
+    if (bn) {
+      let gris = (r * wr + g * wg + b * wb) / sumaCanales;
+      // Luz por color en B/N: aclara/oscurece el gris según el color del píxel
+      if (mezclaGris) gris = AjustePorColor.mezclarGris(r, g, b, gris, mezclaGris, refColor[i], refColor[i + 1], refColor[i + 2]);
+      r = gris; g = gris; b = gris;
+    } else if (mezclaGris) {
+      // Luz por color a color: la misma cuenta sobre la luminancia, aplicada
+      // como factor a los tres canales (aclara/oscurece sin cambiar el tono).
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (lum > 0) {
+        const factor = AjustePorColor.mezclarGris(r, g, b, lum, mezclaGris, refColor[i], refColor[i + 1], refColor[i + 2]) / lum;
+        r *= factor; g *= factor; b *= factor;
+        if (r > 255) r = 255;
+        if (g > 255) g = 255;
+        if (b > 255) b = 255;
+      }
+    }
+
+    if (ampSepia !== 0) {
+      const tr = 0.393 * r + 0.769 * g + 0.189 * b;
+      const tg = 0.349 * r + 0.686 * g + 0.168 * b;
+      const tb = 0.272 * r + 0.534 * g + 0.131 * b;
+      r += (tr - r) * ampSepia; g += (tg - g) * ampSepia; b += (tb - b) * ampSepia;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    if (ampInvertir !== 0) {
+      r += (255 - r - r) * ampInvertir;
+      g += (255 - g - g) * ampInvertir;
+      b += (255 - b - b) * ampInvertir;
+    }
+
+    if (capaDispersion) {
+      let br = capaDispersion[i], bg = capaDispersion[i + 1], bb = capaDispersion[i + 2];
+      if (mMatizDispersion) {
+        const nr = mMatizDispersion[0] * br + mMatizDispersion[1] * bg + mMatizDispersion[2] * bb;
+        const ng = mMatizDispersion[3] * br + mMatizDispersion[4] * bg + mMatizDispersion[5] * bb;
+        const nb = mMatizDispersion[6] * br + mMatizDispersion[7] * bg + mMatizDispersion[8] * bb;
+        br = nr < 0 ? 0 : nr > 255 ? 255 : nr;
+        bg = ng < 0 ? 0 : ng > 255 ? 255 : ng;
+        bb = nb < 0 ? 0 : nb > 255 ? 255 : nb;
+      }
+      const pantallaR = 255 - (255 - r) * (255 - br) / 255;
+      const pantallaG = 255 - (255 - g) * (255 - bg) / 255;
+      const pantallaB = 255 - (255 - b) * (255 - bb) / 255;
+      r += (pantallaR - r) * ampDispersion;
+      g += (pantallaG - g) * ampDispersion;
+      b += (pantallaB - b) * ampDispersion;
+      if (r < 0) r = 0; else if (r > 255) r = 255;
+      if (g < 0) g = 0; else if (g > 255) g = 255;
+      if (b < 0) b = 0; else if (b > 255) b = 255;
+    }
+
+    if (borrosos) {
+      const lumOriginal = 0.299 * rOriginal + 0.587 * gOriginal + 0.114 * bOriginal;
+      const lumBorrosa = 0.299 * borrosos[i] + 0.587 * borrosos[i + 1] + 0.114 * borrosos[i + 2];
+      const delta = (lumOriginal - lumBorrosa) * ampClaridad;
+      r += delta; g += delta; b += delta;
+    }
+
+    if (ampGrano !== 0) {
+      const ruido = (Math.random() - 0.5) * ampGrano;
+      r += ruido; g += ruido; b += ruido;
+    }
+
+    datos[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+    datos[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    datos[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return canvasFuente;
+}
+
+function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
+  const canvas = document.createElement('canvas');
+  canvas.width = anchoDestino; canvas.height = altoDestino;
+  canvas.getContext('2d').drawImage(imagen, 0, 0, anchoDestino, altoDestino);
+  return canvas;
+}
+
+// Aplica el pipeline completo de UNA capa (color + textura en el orden que
+// eligió + el desenfoque final) sobre un canvas que ya tiene los píxeles de
+// entrada dibujados. "escala" es para que la intensidad de textura/desenfoque
+// se vea proporcional en preview vs. exportación a resolución completa.
+function procesarCapaEnCanvas(canvas, capa, escala) {
+  const ajustes = capa.ajustes;
+  const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * escala);
+
+  if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'debajo') {
+    EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura);
+  }
+
+  // Capas extra del filtro (viñeta, sombras, luces, un tono): sus máscaras se
+  // calculan sobre lo que entra a esta capa, antes de sus ajustes.
+  const capasFiltro = (FiltrosColor.FILTROS[ajustes.filtro] || {}).capas || [];
+  let base = null;
+  if (capasFiltro.length) {
+    base = document.createElement('canvas');
+    base.width = canvas.width; base.height = canvas.height;
+    base.getContext('2d').drawImage(canvas, 0, 0);
+  }
+
+  procesarCanvas(canvas, ajustes);
+
+  if (base) FiltrosColor.aplicarCapasExtra(canvas, base, capasFiltro, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
+
+  if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'encima') {
+    EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura);
+  }
+
+  if (ajustes.desenfoque > 0) {
+    const temp = document.createElement('canvas');
+    temp.width = canvas.width; temp.height = canvas.height;
+    const ctxTemp = temp.getContext('2d');
+    ctxTemp.filter = `blur(${ajustes.desenfoque * escala}px)`;
+    ctxTemp.drawImage(canvas, 0, 0);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(temp, 0, 0);
+  }
+}
+
+// ===== Selección por color (HSL) =====
+function rgbAHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0; const l = (max + min) / 2;
+  const d = max - min;
+  if (d !== 0) {
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return { h, s, l };
+}
+
+function generarMascaraColor(canvasOrigen, colorObjetivo, tolerancia, ancho, alto) {
+  const base = document.createElement('canvas');
+  base.width = ancho; base.height = alto;
+  const ctxBase = base.getContext('2d');
+  ctxBase.drawImage(canvasOrigen, 0, 0, ancho, alto);
+  const datos = ctxBase.getImageData(0, 0, ancho, alto);
+  const d = datos.data;
+  const objetivo = rgbAHsl(colorObjetivo.r, colorObjetivo.g, colorObjetivo.b);
+  const radioTono = 8 + (tolerancia / 100) * 90;
+  const radioSL = 0.15 + (tolerancia / 100) * 0.6;
+  const suavizado = Math.max(4, radioTono * 0.25);
+  for (let i = 0; i < d.length; i += 4) {
+    const hsl = rgbAHsl(d[i], d[i + 1], d[i + 2]);
+    let difTono = Math.abs(hsl.h - objetivo.h);
+    if (difTono > 180) difTono = 360 - difTono;
+    const difS = Math.abs(hsl.s - objetivo.s);
+    const difL = Math.abs(hsl.l - objetivo.l);
+    let alpha;
+    if (difTono <= radioTono - suavizado) alpha = 1;
+    else if (difTono >= radioTono) alpha = 0;
+    else alpha = 1 - (difTono - (radioTono - suavizado)) / suavizado;
+    if (difS > radioSL || difL > radioSL) alpha = 0;
+    d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
+    d[i + 3] = Math.round(alpha * 255);
+  }
+  ctxBase.putImageData(datos, 0, 0);
+  return base;
+}
+
+function generarMascaraCapa(capa, ancho, alto) {
+  if (capa.seleccion === 'toda') return null;
+  if (capa.seleccion === 'pincel') {
+    if (!capa.mascaraPincel) return null;
+    const c = document.createElement('canvas');
+    c.width = ancho; c.height = alto;
+    c.getContext('2d').drawImage(capa.mascaraPincel, 0, 0, ancho, alto);
+    return c;
+  }
+  if (capa.seleccion === 'color') {
+    if (!capa.colorObjetivo || !canvasOrigenTrabajo) return null;
+    return generarMascaraColor(canvasOrigenTrabajo, capa.colorObjetivo, capa.tolerancia, ancho, alto);
+  }
+  return null;
+}
+
+// ===== Composición de todas las capas =====
+function renderizarComposicion() {
+  if (!imagenActual || !canvasOrigenTrabajo) return;
+  const ancho = anchoTrabajo, alto = altoTrabajo;
+  const escala = ancho / imagenActual.naturalWidth;
+
+  const acumulado = document.createElement('canvas');
+  acumulado.width = ancho; acumulado.height = alto;
+  acumulado.getContext('2d').drawImage(canvasOrigenTrabajo, 0, 0);
+
+  // La máscara de la capa activa se guarda para reusarla en el tinte de
+  // abajo, en vez de recalcularla (la de color recorre píxel por píxel).
+  let mascaraDeActiva = null;
+
+  for (const capa of capas) {
+    if (!capa.visible) continue;
+    const procesado = document.createElement('canvas');
+    procesado.width = ancho; procesado.height = alto;
+    procesado.getContext('2d').drawImage(acumulado, 0, 0);
+    procesarCapaEnCanvas(procesado, capa, escala);
+
+    const mascara = generarMascaraCapa(capa, ancho, alto);
+    if (capa.id === capaActivaId) mascaraDeActiva = mascara;
+    if (mascara) {
+      const ctxProcesado = procesado.getContext('2d');
+      ctxProcesado.globalCompositeOperation = 'destination-in';
+      ctxProcesado.drawImage(mascara, 0, 0);
+      ctxProcesado.globalCompositeOperation = 'source-over';
+    }
+
+    const ctxAcumulado = acumulado.getContext('2d');
+    ctxAcumulado.globalAlpha = capa.opacidad / 100;
+    ctxAcumulado.drawImage(procesado, 0, 0);
+    ctxAcumulado.globalAlpha = 1;
+  }
+
+  canvasTrabajo.width = ancho; canvasTrabajo.height = alto;
+  ctxTrabajo.clearRect(0, 0, ancho, alto);
+  ctxTrabajo.drawImage(acumulado, 0, 0);
+
+  dibujarTinteSeleccion(ancho, alto, mascaraDeActiva);
+}
+
+// Ayuda visual SOLO en la vista previa (nunca en la imagen exportada): pinta
+// un tinte sobre la zona seleccionada de la capa activa, para ver dónde se
+// está pintando con el pincel o qué agarró la selección por color, aunque
+// los ajustes de esa capa todavía estén en neutro y no se note ningún cambio.
+function dibujarTinteSeleccion(ancho, alto, mascaraYaCalculada) {
+  const capa = capaActiva();
+  if (!capa || (capa.seleccion !== 'pincel' && capa.seleccion !== 'color')) return;
+  const mascara = mascaraYaCalculada || generarMascaraCapa(capa, ancho, alto);
+  if (!mascara) return;
+
+  const tinte = document.createElement('canvas');
+  tinte.width = ancho; tinte.height = alto;
+  const ctxTinte = tinte.getContext('2d');
+  ctxTinte.drawImage(mascara, 0, 0);
+  ctxTinte.globalCompositeOperation = 'source-in';
+  ctxTinte.fillStyle = '#e7a459';
+  ctxTinte.fillRect(0, 0, ancho, alto);
+
+  ctxTrabajo.globalAlpha = 0.35;
+  ctxTrabajo.drawImage(tinte, 0, 0);
+  ctxTrabajo.globalAlpha = 1;
+}
+
+function programarRenderizado() {
+  if (fotogramaPendiente) return;
+  fotogramaPendiente = requestAnimationFrame(() => {
+    fotogramaPendiente = null;
+    renderizarComposicion();
+  });
+}
+
+// ===== Filtros (los mismos del Editor de color) =====
+FiltrosColor.crearGrilla(document.getElementById('presets'));
+
+// Ajustes completos de una capa con ese filtro (reemplazan los que tenía).
+function ajustesDeFiltro(clave) {
+  const f = FiltrosColor.FILTROS[clave] || FiltrosColor.FILTROS.ninguno;
+  const ajustes = { ...AJUSTES_NEUTROS, ...JSON.parse(JSON.stringify(f.cambios)), filtro: clave };
+  if (f.textura) {
+    ajustes.textura = f.textura.tipo;
+    ajustes.texturaIntensidad = f.textura.intensidad;
+    ajustes.texturaOrden = f.textura.orden;
+  }
+  return ajustes;
+}
+
+function marcarFiltroActivo(clave) {
+  document.querySelectorAll('.preset-miniatura').forEach((b) => b.classList.toggle('activo', b.dataset.preset === (clave || 'ninguno')));
+  document.getElementById('nombreFiltroCapa').textContent = FiltrosColor.nombre(clave || 'ninguno');
+}
+
+// Miniatura de cada filtro sobre un recorte cuadrado del centro de la
+// imagen (una vez por imagen: no dependen de las capas ni de los deslizadores).
+const TAMANO_MINIATURA_FILTRO = 64;
+function actualizarMiniaturasFiltros() {
+  if (!canvasOrigenTrabajo) return;
+  const lado = Math.min(canvasOrigenTrabajo.width, canvasOrigenTrabajo.height);
+  const ox = (canvasOrigenTrabajo.width - lado) / 2, oy = (canvasOrigenTrabajo.height - lado) / 2;
+  const escala = (TAMANO_MINIATURA_FILTRO / lado) * (canvasOrigenTrabajo.width / imagenActual.naturalWidth);
+  document.querySelectorAll('.preset-miniatura').forEach((boton) => {
+    const base = document.createElement('canvas');
+    base.width = TAMANO_MINIATURA_FILTRO; base.height = TAMANO_MINIATURA_FILTRO;
+    base.getContext('2d').drawImage(canvasOrigenTrabajo, ox, oy, lado, lado, 0, 0, TAMANO_MINIATURA_FILTRO, TAMANO_MINIATURA_FILTRO);
+    procesarCapaEnCanvas(base, { ajustes: ajustesDeFiltro(boton.dataset.preset) }, escala);
+    const destino = boton.querySelector('canvas');
+    destino.width = TAMANO_MINIATURA_FILTRO; destino.height = TAMANO_MINIATURA_FILTRO;
+    destino.getContext('2d').drawImage(base, 0, 0);
+  });
+}
+
+document.querySelectorAll('.preset-miniatura').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.ajustes = ajustesDeFiltro(boton.dataset.preset);
+    escribirAjustesEnUI(capa.ajustes);
+    actualizarMiniaturaCapa(capa);
+    programarRenderizado();
+  });
+});
+
+// ===== Panel de ajustes: leer/escribir según la capa activa =====
+function actualizarEtiquetas() {
+  Object.values(deslizadores).forEach((d) => {
+    const n = Number(d.input.value);
+    const signo = d.conSigno && n > 0 ? '+' : '';
+    d.valor.textContent = `${signo}${n}${d.unidad}`;
+  });
+}
+
+function escribirAjustesEnUI(ajustes) {
+  Object.entries(deslizadores).forEach(([clave, d]) => { d.input.value = ajustes[clave]; });
+  activarBN.checked = ajustes.bn;
+  document.querySelectorAll('[data-canal]').forEach((campo) => {
+    campo.classList.toggle('deshabilitado', !ajustes.bn);
+    campo.querySelector('input').disabled = !ajustes.bn;
+  });
+  document.querySelectorAll('#modosTextura button').forEach((b) => b.classList.toggle('activo', b.dataset.textura === ajustes.textura));
+  controlesTextura.style.display = ajustes.textura === 'ninguno' ? 'none' : 'block';
+  elTexturaIntensidad.value = ajustes.texturaIntensidad;
+  valorTexturaIntensidad.textContent = ajustes.texturaIntensidad;
+  document.querySelectorAll('#modosOrdenTextura button').forEach((b) => b.classList.toggle('activo', b.dataset.orden === ajustes.texturaOrden));
+  if (panelAjustePorColor) panelAjustePorColor.refrescar();
+  marcarFiltroActivo(ajustes.filtro);
+  actualizarEtiquetas();
+}
+
+function actualizarControlesSeleccion() {
+  const capa = capaActiva();
+  if (!capa) return;
+  document.querySelectorAll('#modosSeleccionCapa button').forEach((b) => b.classList.toggle('activo', b.dataset.seleccion === capa.seleccion));
+  controlesPincelAvanzado.style.display = capa.seleccion === 'pincel' ? 'flex' : 'none';
+  controlesColorAvanzado.style.display = capa.seleccion === 'color' ? 'flex' : 'none';
+  zonaLienzo.classList.toggle('modo-pincel', capa.seleccion === 'pincel');
+  zonaLienzo.classList.toggle('modo-color', capa.seleccion === 'color');
+  muestraColorObjetivo.style.background = capa.colorObjetivo ? `rgb(${capa.colorObjetivo.r},${capa.colorObjetivo.g},${capa.colorObjetivo.b})` : 'transparent';
+  elToleranciaColor.value = capa.tolerancia;
+  valorToleranciaColor.textContent = capa.tolerancia;
+}
+
+Object.entries(deslizadores).forEach(([clave, d]) => {
+  d.input.addEventListener('input', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.ajustes[clave] = Number(d.input.value);
+    actualizarEtiquetas();
+    actualizarMiniaturaCapa(capa);
+    programarRenderizado();
+  });
+});
+
+// Ajustar por color: cada capa guarda el suyo en capa.ajustes.hsl.
+panelAjustePorColor = AjustePorColor.crearPanel(document.getElementById('panelAjustePorColor'), {
+  leer: () => (capaActiva() ? capaActiva().ajustes.hsl : null),
+  escribir: (ajustes) => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.ajustes.hsl = ajustes;
+    actualizarMiniaturaCapa(capa);
+    programarRenderizado();
+  },
+});
+
+activarBN.addEventListener('change', () => {
+  const capa = capaActiva();
+  if (!capa) return;
+  capa.ajustes.bn = activarBN.checked;
+  document.querySelectorAll('[data-canal]').forEach((campo) => {
+    campo.classList.toggle('deshabilitado', !activarBN.checked);
+    campo.querySelector('input').disabled = !activarBN.checked;
+  });
+  actualizarMiniaturaCapa(capa);
+  programarRenderizado();
+});
+
+elTexturaIntensidad.addEventListener('input', () => {
+  const capa = capaActiva();
+  if (!capa) return;
+  capa.ajustes.texturaIntensidad = Number(elTexturaIntensidad.value);
+  valorTexturaIntensidad.textContent = elTexturaIntensidad.value;
+  actualizarMiniaturaCapa(capa);
+  programarRenderizado();
+});
+
+document.querySelectorAll('#modosTextura button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.ajustes.textura = boton.dataset.textura;
+    document.querySelectorAll('#modosTextura button').forEach((b) => b.classList.remove('activo'));
+    boton.classList.add('activo');
+    controlesTextura.style.display = capa.ajustes.textura === 'ninguno' ? 'none' : 'block';
+    actualizarMiniaturaCapa(capa);
+    programarRenderizado();
+  });
+});
+
+document.querySelectorAll('#modosOrdenTextura button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.ajustes.texturaOrden = boton.dataset.orden;
+    document.querySelectorAll('#modosOrdenTextura button').forEach((b) => b.classList.remove('activo'));
+    boton.classList.add('activo');
+    actualizarMiniaturaCapa(capa);
+    programarRenderizado();
+  });
+});
+
+// --- Acordeón (uno abierto a la vez, para no necesitar scroll) ---
+document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
+  titulo.addEventListener('click', () => {
+    const grupo = titulo.closest('.acordeon-grupo');
+    const yaAbierto = grupo.classList.contains('abierto');
+    document.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
+    if (!yaAbierto) grupo.classList.add('abierto');
+  });
+});
+
+// ===== Selección de la capa activa: Toda / Pincel / Color =====
+document.querySelectorAll('#modosSeleccionCapa button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.seleccion = boton.dataset.seleccion;
+    actualizarControlesSeleccion();
+    programarRenderizado();
+  });
+});
+
+elToleranciaColor.addEventListener('input', () => {
+  const capa = capaActiva();
+  if (!capa) return;
+  capa.tolerancia = Number(elToleranciaColor.value);
+  valorToleranciaColor.textContent = elToleranciaColor.value;
+  programarRenderizado();
+});
+
+canvasTrabajo.addEventListener('click', (e) => {
+  const capa = capaActiva();
+  if (!capa || capa.seleccion !== 'color' || !canvasOrigenTrabajo) return;
+  if (huboPan) return; // fue un arrastre para mover la imagen, no un clic de gotero
+  const rect = canvasTrabajo.getBoundingClientRect();
+  const factor = canvasTrabajo.width / rect.width;
+  const x = Math.round((e.clientX - rect.left) * factor);
+  const y = Math.round((e.clientY - rect.top) * factor);
+  const ctxOrigen = canvasOrigenTrabajo.getContext('2d');
+  const px = ctxOrigen.getImageData(Math.min(x, canvasOrigenTrabajo.width - 1), Math.min(y, canvasOrigenTrabajo.height - 1), 1, 1).data;
+  capa.colorObjetivo = { r: px[0], g: px[1], b: px[2] };
+  actualizarControlesSeleccion();
+  programarRenderizado();
+});
+
+// --- Pincel: pinta en la máscara PROPIA de la capa activa ---
+let pintando = false;
+let ultimoPuntoPincel = null;
+
+// --- Arrastrar para mover la imagen (cuando el pincel NO está activo) ---
+let paneando = false;
+let panInicio = null;
+let huboPan = false;
+
+function mascaraDeCapaActiva() {
+  const capa = capaActiva();
+  if (!capa) return null;
+  if (!capa.mascaraPincel) {
+    const c = document.createElement('canvas');
+    c.width = anchoTrabajo; c.height = altoTrabajo;
+    capa.mascaraPincel = c;
+  }
+  return capa.mascaraPincel;
+}
+
+function coordenadasEnCanvasTrabajo(e) {
+  const rect = canvasTrabajo.getBoundingClientRect();
+  const factor = canvasTrabajo.width / rect.width;
+  return { x: (e.clientX - rect.left) * factor, y: (e.clientY - rect.top) * factor };
+}
+
+function radioPincelEnMascara() {
+  const rect = canvasTrabajo.getBoundingClientRect();
+  const factor = canvasTrabajo.width / rect.width;
+  return (parseInt(elTamanoPincelAvanzado.value, 10) / 2) * factor;
+}
+
+function durezaPincelActual() { return parseInt(elDurezaPincel.value, 10); }
+
+// dureza 100 = borde duro (círculo sólido, más rápido). Menos que eso = un
+// degradado radial que se desvanece hacia el borde, para un pincel suave.
+function pintarPunto(ctx, p, radio, dureza) {
+  if (dureza >= 100) {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radio, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+  const radioInterior = Math.max(0, radio * (dureza / 100));
+  const gradiente = ctx.createRadialGradient(p.x, p.y, radioInterior, p.x, p.y, radio);
+  gradiente.addColorStop(0, 'rgba(255,255,255,1)');
+  gradiente.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gradiente;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, radio, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Con borde duro se puede usar un trazo grueso normal (rápido y sin costuras).
+// Con borde suave, un solo trazo con gradiente perpendicular no es posible en
+// canvas 2D, así que se "estampan" puntos suaves seguidos a lo largo del
+// segmento — el solape entre estampas da una franja pareja.
+function pintarTrazo(ctx, a, b, radio, dureza) {
+  if (dureza >= 100) {
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = radio * 2;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    return;
+  }
+  const distancia = Math.hypot(b.x - a.x, b.y - a.y);
+  const paso = Math.max(1, radio * 0.2);
+  const pasos = Math.max(1, Math.ceil(distancia / paso));
+  for (let i = 0; i <= pasos; i++) {
+    const t = i / pasos;
+    pintarPunto(ctx, { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, radio, dureza);
+  }
+}
+
+function actualizarTamanoCursorPincel() {
+  const diametro = parseInt(elTamanoPincelAvanzado.value, 10);
+  cursorPincelAvanzado.style.width = `${diametro}px`;
+  cursorPincelAvanzado.style.height = `${diametro}px`;
+}
+function moverCursorPincel(e) {
+  const rect = canvasTrabajo.getBoundingClientRect();
+  cursorPincelAvanzado.style.left = `${e.clientX - rect.left}px`;
+  cursorPincelAvanzado.style.top = `${e.clientY - rect.top}px`;
+}
+
+canvasTrabajo.addEventListener('pointerenter', (e) => {
+  const capa = capaActiva();
+  if (!capa || capa.seleccion !== 'pincel') return;
+  actualizarTamanoCursorPincel();
+  moverCursorPincel(e);
+  cursorPincelAvanzado.classList.add('visible');
+});
+canvasTrabajo.addEventListener('pointerleave', () => cursorPincelAvanzado.classList.remove('visible'));
+
+canvasTrabajo.addEventListener('pointerdown', (e) => {
+  const capa = capaActiva();
+  if (!capa) return;
+
+  // Sin pincel activo, arrastrar mueve la imagen dentro del recuadro (útil
+  // cuando está ampliada y no entra entera).
+  if (capa.seleccion !== 'pincel') {
+    if (e.pointerType === 'touch' && punterosActivos.size >= 1) return; // dejale el gesto al pellizco
+    paneando = true;
+    huboPan = false;
+    panInicio = {
+      x: e.clientX, y: e.clientY,
+      scrollX: zonaLienzoContenedor.scrollLeft,
+      scrollY: zonaLienzoContenedor.scrollTop,
+    };
+    canvasTrabajo.setPointerCapture(e.pointerId);
+    zonaLienzo.classList.add('paneando');
+    return;
+  }
+
+  const mascara = mascaraDeCapaActiva();
+  if (!mascara) return;
+  pintando = true;
+  canvasTrabajo.setPointerCapture(e.pointerId);
+  ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
+  pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual());
+  actualizarMiniaturaCapa(capa);
+  programarRenderizado();
+});
+canvasTrabajo.addEventListener('pointermove', (e) => {
+  const capa = capaActiva();
+  if (capa && capa.seleccion === 'pincel') moverCursorPincel(e);
+
+  if (paneando && panInicio) {
+    const dx = e.clientX - panInicio.x;
+    const dy = e.clientY - panInicio.y;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) huboPan = true;
+    zonaLienzoContenedor.scrollLeft = panInicio.scrollX - dx;
+    zonaLienzoContenedor.scrollTop = panInicio.scrollY - dy;
+    return;
+  }
+
+  if (!pintando) return;
+  const mascara = mascaraDeCapaActiva();
+  if (!mascara) return;
+  const punto = coordenadasEnCanvasTrabajo(e);
+  pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual());
+  ultimoPuntoPincel = punto;
+  programarRenderizado();
+});
+function terminarGestoLienzo() {
+  pintando = false;
+  ultimoPuntoPincel = null;
+  paneando = false;
+  panInicio = null;
+  zonaLienzo.classList.remove('paneando');
+}
+canvasTrabajo.addEventListener('pointerup', terminarGestoLienzo);
+canvasTrabajo.addEventListener('pointercancel', terminarGestoLienzo);
+
+elTamanoPincelAvanzado.addEventListener('input', () => {
+  valorPincelAvanzado.textContent = `${elTamanoPincelAvanzado.value}px`;
+  actualizarTamanoCursorPincel();
+});
+
+elDurezaPincel.addEventListener('input', () => {
+  valorDurezaPincel.textContent = `${elDurezaPincel.value}%`;
+});
+
+botonBorrarMascaraCapa.addEventListener('click', () => {
+  const capa = capaActiva();
+  if (!capa || !capa.mascaraPincel) return;
+  capa.mascaraPincel.getContext('2d').clearRect(0, 0, capa.mascaraPincel.width, capa.mascaraPincel.height);
+  actualizarMiniaturaCapa(capa);
+  programarRenderizado();
+});
+
+// Zoom: solo escala visualmente el <canvas> por CSS (el contenedor scrollea),
+// las coordenadas del pincel/gotero se recalculan solas porque usan
+// getBoundingClientRect(). Tres formas de controlarlo: el slider, la rueda
+// del mouse, y pellizco con dos dedos en pantallas táctiles.
+// clientX/clientY: punto de la pantalla que queda fijo al hacer zoom (el
+// puntero del mouse o el centro del pellizco). Sin ellos, el centro de lo que
+// se ve (deslizador). Ver assets/js/zoom-anclado.js.
+function aplicarZoom(nuevoZoom, clientX, clientY) {
+  zoomActual = Math.max(0.1, Math.min(4, nuevoZoom));
+  const porcentaje = Math.round(zoomActual * 100);
+  elZoomAvanzado.value = porcentaje;
+  valorZoomAvanzado.textContent = porcentaje + '%';
+  zoomAnclado(zonaLienzoContenedor, canvasTrabajo, () => {
+    canvasTrabajo.style.width = zoomActual === 1 ? '' : `${anchoTrabajo * zoomActual}px`;
+    canvasTrabajo.style.height = zoomActual === 1 ? '' : `${altoTrabajo * zoomActual}px`;
+  }, clientX, clientY);
+}
+
+elZoomAvanzado.addEventListener('input', () => {
+  aplicarZoom(parseInt(elZoomAvanzado.value, 10) / 100);
+});
+
+// La rueda del mouse siempre hace zoom (sin necesitar Ctrl). Se acumulan los
+// eventos y se aplican en el próximo frame (en vez de uno por evento) para
+// que el zoom se sienta parejo incluso con mouses/trackpads que mandan
+// muchos eventos chiquitos seguidos.
+let deltaZoomAcumulado = 0;
+let zoomFotogramaPendiente = null;
+let puntoZoomRueda = null;
+zonaLienzoContenedor.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  deltaZoomAcumulado += e.deltaY;
+  puntoZoomRueda = { x: e.clientX, y: e.clientY };
+  if (zoomFotogramaPendiente) return;
+  zoomFotogramaPendiente = requestAnimationFrame(() => {
+    aplicarZoom(zoomActual * (1 - deltaZoomAcumulado * 0.0035), puntoZoomRueda.x, puntoZoomRueda.y);
+    deltaZoomAcumulado = 0;
+    zoomFotogramaPendiente = null;
+  });
+}, { passive: false });
+
+// Pellizco con dos dedos (touch): se sigue la distancia entre los dos puntos
+// de contacto y se escala el zoom según cuánto cambia esa distancia.
+const punterosActivos = new Map();
+let distanciaPinchInicial = null;
+let zoomAlIniciarPinch = 1;
+
+function distanciaEntrePunteros() {
+  const puntos = [...punterosActivos.values()];
+  if (puntos.length < 2) return null;
+  const dx = puntos[0].x - puntos[1].x;
+  const dy = puntos[0].y - puntos[1].y;
+  return Math.hypot(dx, dy);
+}
+
+zonaLienzoContenedor.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'touch') return;
+  punterosActivos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (punterosActivos.size === 2) {
+    distanciaPinchInicial = distanciaEntrePunteros();
+    zoomAlIniciarPinch = zoomActual;
+  }
+});
+zonaLienzoContenedor.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'touch' || !punterosActivos.has(e.pointerId)) return;
+  punterosActivos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (punterosActivos.size === 2 && distanciaPinchInicial) {
+    e.preventDefault();
+    const distanciaActual = distanciaEntrePunteros();
+    const [a, b] = [...punterosActivos.values()];
+    aplicarZoom(zoomAlIniciarPinch * (distanciaActual / distanciaPinchInicial), (a.x + b.x) / 2, (a.y + b.y) / 2);
+  }
+}, { passive: false });
+function soltarPuntero(e) {
+  punterosActivos.delete(e.pointerId);
+  if (punterosActivos.size < 2) distanciaPinchInicial = null;
+}
+zonaLienzoContenedor.addEventListener('pointerup', soltarPuntero);
+zonaLienzoContenedor.addEventListener('pointercancel', soltarPuntero);
+
+// ===== Lista de capas =====
+function pintarListaCapas() {
+  listaCapas.innerHTML = '';
+  // Se muestran de arriba (última, la que se ve "encima") hacia abajo, pero
+  // "capas" guarda el orden real de renderizado (índice 0 = fondo) — se
+  // invierte solo para pintar la lista.
+  [...capas].reverse().forEach((capa) => {
+    const contenedor = document.createElement('div');
+    contenedor.className = 'contenedor-capa';
+    contenedor.dataset.id = capa.id;
+
+    // El "arrastrable" va solo en la fila de arriba (miniatura+nombre+ojo+
+    // eliminar), no en el contenedor entero — si no, interactuar con la
+    // barra de opacidad de abajo se interpretaba como arrastrar la capa.
+    const fila = document.createElement('div');
+    fila.className = 'fila-capa' + (capa.id === capaActivaId ? ' activa' : '');
+    fila.draggable = true;
+
+    const miniatura = document.createElement('canvas');
+    miniatura.className = 'miniatura-capa';
+    fila.appendChild(miniatura);
+
+    const nombre = document.createElement('input');
+    nombre.className = 'nombre-capa';
+    nombre.value = capa.nombre;
+    nombre.addEventListener('click', (e) => e.stopPropagation());
+    nombre.addEventListener('input', () => { capa.nombre = nombre.value; });
+    fila.appendChild(nombre);
+
+    const botonOjo = document.createElement('button');
+    botonOjo.type = 'button';
+    botonOjo.className = 'icono-capa' + (capa.visible ? '' : ' apagado');
+    botonOjo.textContent = capa.visible ? '👁️' : '🚫';
+    botonOjo.title = 'Mostrar/ocultar capa';
+    botonOjo.addEventListener('click', (e) => {
+      e.stopPropagation();
+      capa.visible = !capa.visible;
+      pintarListaCapas();
+      programarRenderizado();
+    });
+    fila.appendChild(botonOjo);
+
+    const botonEliminar = document.createElement('button');
+    botonEliminar.type = 'button';
+    botonEliminar.className = 'icono-capa';
+    botonEliminar.textContent = '✕';
+    botonEliminar.title = 'Eliminar capa';
+    botonEliminar.style.display = capas.length > 1 ? 'inline' : 'none';
+    botonEliminar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      eliminarCapa(capa.id);
+    });
+    fila.appendChild(botonEliminar);
+
+    fila.addEventListener('click', () => {
+      capaActivaId = capa.id;
+      pintarListaCapas();
+      escribirAjustesEnUI(capa.ajustes);
+      actualizarControlesSeleccion();
+    });
+
+    contenedor.appendChild(fila);
+
+    const filaOpacidad = document.createElement('div');
+    filaOpacidad.className = 'fila-opacidad';
+    const sliderOpacidad = document.createElement('input');
+    sliderOpacidad.type = 'range'; sliderOpacidad.min = 0; sliderOpacidad.max = 100; sliderOpacidad.value = capa.opacidad;
+    sliderOpacidad.addEventListener('click', (e) => e.stopPropagation());
+    sliderOpacidad.addEventListener('input', () => {
+      capa.opacidad = Number(sliderOpacidad.value);
+      etiquetaOpacidad.textContent = capa.opacidad + '%';
+      programarRenderizado();
+    });
+    const etiquetaOpacidad = document.createElement('span');
+    etiquetaOpacidad.textContent = capa.opacidad + '%';
+    filaOpacidad.appendChild(sliderOpacidad);
+    filaOpacidad.appendChild(etiquetaOpacidad);
+    contenedor.appendChild(filaOpacidad);
+
+    listaCapas.appendChild(contenedor);
+    actualizarMiniaturaCapa(capa, miniatura);
+  });
+
+  habilitarArrastreCapas();
+}
+
+function actualizarMiniaturaCapa(capa, elementoMiniatura) {
+  if (!canvasOrigenTrabajo) return;
+  const canvasMini = elementoMiniatura || listaCapas.querySelector(`.contenedor-capa[data-id="${capa.id}"] .miniatura-capa`);
+  if (!canvasMini) return;
+  const lado = 32;
+  canvasMini.width = lado; canvasMini.height = lado;
+  const ladoOrigen = Math.min(canvasOrigenTrabajo.width, canvasOrigenTrabajo.height);
+  const ox = (canvasOrigenTrabajo.width - ladoOrigen) / 2;
+  const oy = (canvasOrigenTrabajo.height - ladoOrigen) / 2;
+  const base = document.createElement('canvas');
+  base.width = lado; base.height = lado;
+  base.getContext('2d').drawImage(canvasOrigenTrabajo, ox, oy, ladoOrigen, ladoOrigen, 0, 0, lado, lado);
+  procesarCapaEnCanvas(base, capa, lado / canvasOrigenTrabajo.width);
+  canvasMini.getContext('2d').drawImage(base, 0, 0);
+}
+
+// Arrastrar y soltar para reordenar (adaptado del patrón de
+// habilitarArrastreReordenable en HerramientasOfimaticas/assets/js/miniaturas.js,
+// acá con un solo contenedor por capa en vez de una grilla de tarjetas sueltas).
+function habilitarArrastreCapas() {
+  listaCapas.querySelectorAll('.fila-capa').forEach((fila) => {
+    const contenedor = fila.closest('.contenedor-capa');
+    fila.addEventListener('dragstart', () => contenedor.classList.add('arrastrando'));
+    fila.addEventListener('dragend', () => {
+      contenedor.classList.remove('arrastrando');
+      const nuevoOrdenIds = [...listaCapas.querySelectorAll('.contenedor-capa')].map((c) => c.dataset.id).reverse();
+      capas.sort((a, b) => nuevoOrdenIds.indexOf(a.id) - nuevoOrdenIds.indexOf(b.id));
+      programarRenderizado();
+    });
+  });
+}
+
+// El dragover va una sola vez sobre el contenedor de la lista (no dentro de
+// habilitarArrastreCapas, que corre en cada repintado — si no se acumulaba
+// un listener nuevo por cada vez que se redibujaban las capas).
+listaCapas.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const contenedor = e.target.closest('.contenedor-capa');
+  const arrastrando = listaCapas.querySelector('.arrastrando');
+  if (!contenedor || !arrastrando || arrastrando === contenedor) return;
+  const rect = contenedor.getBoundingClientRect();
+  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
+  listaCapas.insertBefore(arrastrando, despuesDelMedio ? contenedor.nextSibling : contenedor);
+});
+
+// ===== Agregar / eliminar capas =====
+botonNuevaCapa.addEventListener('click', () => {
+  const capa = crearCapa();
+  capas.push(capa);
+  capaActivaId = capa.id;
+  pintarListaCapas();
+  escribirAjustesEnUI(capa.ajustes);
+  actualizarControlesSeleccion();
+  programarRenderizado();
+});
+
+function eliminarCapa(id) {
+  if (capas.length <= 1) return;
+  capas = capas.filter((c) => c.id !== id);
+  if (capaActivaId === id) capaActivaId = capas[capas.length - 1].id;
+  pintarListaCapas();
+  escribirAjustesEnUI(capaActiva().ajustes);
+  actualizarControlesSeleccion();
+  programarRenderizado();
+}
+
+// ===== Resolución de la vista previa =====
+// "Rápida" trabaja sobre una copia de hasta LADO_MAXIMO_TRABAJO px (fluido
+// incluso con fotos grandes); "Original" trabaja a la resolución real de la
+// imagen, para ver el detalle exacto y pintar con el pincel con precisión de
+// píxel, a costa de que cada ajuste tarde más en imágenes grandes. La
+// descarga siempre sale a resolución original, elija lo que elija.
+function tamanoTrabajoSegunModo() {
+  const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
+  const escala = elResolucionVistaPrevia.value === 'original'
+    ? 1
+    : Math.min(1, LADO_MAXIMO_TRABAJO / Math.max(ancho, alto));
+  return { ancho: Math.max(1, Math.round(ancho * escala)), alto: Math.max(1, Math.round(alto * escala)) };
+}
+
+function actualizarSelectorResolucion() {
+  const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
+  const esChica = Math.max(ancho, alto) <= LADO_MAXIMO_TRABAJO;
+  opcionResolucionOriginal.textContent = `Resolución original (${ancho} × ${alto} px)`;
+  // Si la imagen ya entra en el tamaño rápido, las dos opciones son lo mismo.
+  elResolucionVistaPrevia.disabled = esChica;
+  if (esChica) elResolucionVistaPrevia.value = 'original';
+  avisoResolucionOriginal.textContent = esChica
+    ? 'La imagen ya se ve a su tamaño real.'
+    : (elResolucionVistaPrevia.value === 'original' ? 'Más lento con imágenes grandes.' : '');
+}
+
+function prepararResolucionTrabajo() {
+  const { ancho, alto } = tamanoTrabajoSegunModo();
+  anchoTrabajo = ancho; altoTrabajo = alto;
+  canvasOrigenTrabajo = crearCanvasConImagen(imagenActual, anchoTrabajo, altoTrabajo);
+  actualizarSelectorResolucion();
+}
+
+elResolucionVistaPrevia.addEventListener('change', () => {
+  if (!imagenActual) return;
+  const anchoAnterior = anchoTrabajo;
+  prepararResolucionTrabajo();
+  // Lo ya pintado con el pincel se reescala al nuevo tamaño de trabajo.
+  for (const capa of capas) {
+    if (!capa.mascaraPincel) continue;
+    const cm = document.createElement('canvas');
+    cm.width = anchoTrabajo; cm.height = altoTrabajo;
+    cm.getContext('2d').drawImage(capa.mascaraPincel, 0, 0, anchoTrabajo, altoTrabajo);
+    capa.mascaraPincel = cm;
+  }
+  // Mantiene el tamaño en pantalla: si el lienzo ahora tiene 4 veces más
+  // píxeles, el zoom baja a la cuarta parte para que no salte de golpe.
+  aplicarZoom(zoomActual * anchoAnterior / anchoTrabajo);
+  pintarListaCapas();
+  programarRenderizado();
+});
+
+// ===== Carga de imagen =====
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  imagenActual = await cargarImagen(archivo);
+
+  prepararResolucionTrabajo();
+  aplicarZoom(1);
+
+  contadorCapas = 0;
+  capas = [crearCapa('Capa 1')];
+  capaActivaId = capas[0].id;
+
+  editorCompleto.style.display = 'block';
+  zonaArrastre.style.display = 'none';
+  escribirAjustesEnUI(capas[0].ajustes);
+  actualizarControlesSeleccion();
+  pintarListaCapas();
+  programarRenderizado();
+  actualizarMiniaturasFiltros();
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find((f) => f.type.startsWith('image/'));
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// ===== Reiniciar / Descargar =====
+botonRestablecerAvanzado.addEventListener('click', () => {
+  if (!imagenActual) return;
+  contadorCapas = 0;
+  capas = [crearCapa('Capa 1')];
+  capaActivaId = capas[0].id;
+  escribirAjustesEnUI(capas[0].ajustes);
+  actualizarControlesSeleccion();
+  pintarListaCapas();
+  programarRenderizado();
+});
+
+// Cambiar la imagen empieza de nuevo (las zonas pintadas son de esta foto):
+// se confirma solo si ya hay algo editado.
+function hayCambios() {
+  const neutro = JSON.stringify(AJUSTES_NEUTROS);
+  return capas.length > 1 || capas.some((c) => c.seleccion !== 'toda' || c.opacidad !== 100 || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
+}
+document.getElementById('botonCambiarImagen').addEventListener('click', () => {
+  if (hayCambios() && !confirm('Al cambiar la imagen se empieza de nuevo y se pierden las capas actuales. ¿Seguir?')) return;
+  entradaArchivo.click();
+});
+
+// Mantener presionado el botón muestra la imagen original sin ninguna capa.
+const botonVerOriginal = document.getElementById('botonVerOriginal');
+let mostrandoOriginal = false;
+function verOriginal(e) {
+  e.preventDefault();
+  if (!canvasOrigenTrabajo || mostrandoOriginal) return;
+  mostrandoOriginal = true;
+  ctxTrabajo.clearRect(0, 0, canvasTrabajo.width, canvasTrabajo.height);
+  ctxTrabajo.drawImage(canvasOrigenTrabajo, 0, 0, canvasTrabajo.width, canvasTrabajo.height);
+}
+function dejarDeVerOriginal() {
+  if (!mostrandoOriginal) return;
+  mostrandoOriginal = false;
+  renderizarComposicion();
+}
+botonVerOriginal.addEventListener('pointerdown', verOriginal);
+['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => botonVerOriginal.addEventListener(ev, dejarDeVerOriginal));
+botonVerOriginal.addEventListener('contextmenu', (e) => e.preventDefault());
+
+botonDescargarAvanzado.addEventListener('click', async () => {
+  if (!imagenActual) return;
+  botonDescargarAvanzado.disabled = true;
+  botonDescargarAvanzado.textContent = 'Procesando...';
+  // Se guardan acá afuera para poder restaurarlos en el finally aunque algo
+  // falle a mitad de camino (si no, el editor quedaba apuntando al canvas a
+  // resolución completa y la vista previa se rompía).
+  const origenTrabajoAnterior = canvasOrigenTrabajo;
+  const anchoAnterior = anchoTrabajo, altoAnterior = altoTrabajo;
+  try {
+    const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
+    const canvasOrigenCompleto = crearCanvasConImagen(imagenActual, ancho, alto);
+    // Renderiza la composición a resolución completa reusando la misma
+    // lógica que la vista previa, apuntando temporalmente el "origen" al
+    // tamaño real de la imagen.
+    canvasOrigenTrabajo = canvasOrigenCompleto;
+    anchoTrabajo = ancho; altoTrabajo = alto;
+
+    const acumulado = document.createElement('canvas');
+    acumulado.width = ancho; acumulado.height = alto;
+    acumulado.getContext('2d').drawImage(canvasOrigenCompleto, 0, 0);
+
+    for (const capa of capas) {
+      if (!capa.visible) continue;
+      const procesado = document.createElement('canvas');
+      procesado.width = ancho; procesado.height = alto;
+      procesado.getContext('2d').drawImage(acumulado, 0, 0);
+      procesarCapaEnCanvas(procesado, capa, 1);
+
+      const mascara = generarMascaraCapa(capa, ancho, alto);
+      if (mascara) {
+        const ctxProcesado = procesado.getContext('2d');
+        ctxProcesado.globalCompositeOperation = 'destination-in';
+        ctxProcesado.drawImage(mascara, 0, 0);
+        ctxProcesado.globalCompositeOperation = 'source-over';
+      }
+      const ctxAcumulado = acumulado.getContext('2d');
+      ctxAcumulado.globalAlpha = capa.opacidad / 100;
+      ctxAcumulado.drawImage(procesado, 0, 0);
+      ctxAcumulado.globalAlpha = 1;
+    }
+
+    const formato = formatoDeSalida(archivoActual);
+    const blob = await new Promise((resolve) => acumulado.toBlob(resolve, formato, 0.92));
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+    resultado.classList.add('visible');
+  } finally {
+    canvasOrigenTrabajo = origenTrabajoAnterior;
+    anchoTrabajo = anchoAnterior; altoTrabajo = altoAnterior;
+    botonDescargarAvanzado.disabled = false;
+    botonDescargarAvanzado.textContent = 'Descargar imagen';
+  }
+});
+
+// ===== Guardar / cargar proyecto =====
+function canvasADataUrl(canvas) { return canvas ? canvas.toDataURL('image/png') : null; }
+
+botonGuardarProyecto.addEventListener('click', () => {
+  if (!imagenActual) return;
+  const proyecto = {
+    version: 1,
+    imagen: crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight).toDataURL(archivoActual.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.95),
+    nombreArchivo: archivoActual.name,
+    capaActivaId,
+    capas: capas.map((c) => ({
+      id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad,
+      seleccion: c.seleccion, colorObjetivo: c.colorObjetivo, tolerancia: c.tolerancia,
+      ajustes: c.ajustes,
+      mascaraPincel: canvasADataUrl(c.mascaraPincel),
+    })),
+  };
+  const blob = new Blob([JSON.stringify(proyecto)], { type: 'application/json' });
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = 'proyecto-editor-avanzado.json';
+  enlace.click();
+});
+
+function cargarDataUrlComoImagen(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+botonCargarProyecto.addEventListener('click', () => entradaProyecto.click());
+entradaProyecto.addEventListener('change', async (e) => {
+  const archivo = e.target.files[0];
+  if (!archivo) return;
+  const texto = await archivo.text();
+  let proyecto;
+  try { proyecto = JSON.parse(texto); } catch (error) {
+    alert('No se pudo leer ese archivo de proyecto: ' + error.message);
+    return;
+  }
+
+  imagenActual = await cargarDataUrlComoImagen(proyecto.imagen);
+  archivoActual = new File([await (await fetch(proyecto.imagen)).blob()], proyecto.nombreArchivo || 'imagen.png', { type: proyecto.imagen.startsWith('data:image/png') ? 'image/png' : 'image/jpeg' });
+
+  prepararResolucionTrabajo();
+  aplicarZoom(1);
+
+  const capasCargadas = [];
+  for (const c of proyecto.capas) {
+    const nueva = {
+      id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad,
+      seleccion: c.seleccion, colorObjetivo: c.colorObjetivo, tolerancia: c.tolerancia,
+      ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes },
+      mascaraPincel: null,
+    };
+    if (c.mascaraPincel) {
+      const imgMascara = await cargarDataUrlComoImagen(c.mascaraPincel);
+      const cm = document.createElement('canvas');
+      cm.width = anchoTrabajo; cm.height = altoTrabajo;
+      cm.getContext('2d').drawImage(imgMascara, 0, 0, anchoTrabajo, altoTrabajo);
+      nueva.mascaraPincel = cm;
+    }
+    capasCargadas.push(nueva);
+  }
+  capas = capasCargadas.length ? capasCargadas : [crearCapa('Capa 1')];
+  capaActivaId = proyecto.capaActivaId && capas.some((c) => c.id === proyecto.capaActivaId) ? proyecto.capaActivaId : capas[capas.length - 1].id;
+
+  // El contador arranca después del id más alto del proyecto cargado, para
+  // que una capa nueva no reuse un id que ya existe.
+  contadorCapas = capas.reduce((maximo, c) => {
+    const numero = parseInt(String(c.id).replace('capa-', ''), 10);
+    return Number.isFinite(numero) ? Math.max(maximo, numero) : maximo;
+  }, 0);
+
+  editorCompleto.style.display = 'block';
+  zonaArrastre.style.display = 'none';
+  escribirAjustesEnUI(capaActiva().ajustes);
+  actualizarControlesSeleccion();
+  pintarListaCapas();
+  programarRenderizado();
+  actualizarMiniaturasFiltros();
+  entradaProyecto.value = '';
+});
+
+// ===== Paneles laterales plegables =====
+// En celular arrancan cerrados (son cajones sobre la imagen) y abrir uno
+// cierra el otro; en computadora arrancan abiertos y son independientes.
+const layoutEditor = document.getElementById('layoutEditor');
+const consultaMovil = window.matchMedia('(max-width: 900px)');
+
+function actualizarFlechasPlegar() {
+  const izqPlegado = layoutEditor.classList.contains('izq-plegado');
+  const derPlegado = layoutEditor.classList.contains('der-plegado');
+  document.querySelectorAll('.boton-plegar').forEach((b) => {
+    const plegado = b.dataset.panel === 'izq' ? izqPlegado : derPlegado;
+    const haciaIzquierda = (b.dataset.panel === 'izq') !== plegado;
+    b.querySelector('.flecha-plegar').textContent = haciaIzquierda ? '«' : '»';
+    b.setAttribute('aria-expanded', String(!plegado));
+  });
+}
+
+function alternarPanel(lado) {
+  const clase = lado === 'izq' ? 'izq-plegado' : 'der-plegado';
+  const abrir = layoutEditor.classList.contains(clase);
+  layoutEditor.classList.toggle(clase, !abrir);
+  if (abrir && consultaMovil.matches) {
+    layoutEditor.classList.add(lado === 'izq' ? 'der-plegado' : 'izq-plegado');
+  }
+  actualizarFlechasPlegar();
+}
+
+function estadoInicialPaneles() {
+  layoutEditor.classList.toggle('izq-plegado', consultaMovil.matches);
+  layoutEditor.classList.toggle('der-plegado', consultaMovil.matches);
+  actualizarFlechasPlegar();
+}
+
+document.querySelectorAll('.boton-plegar, .abrir-panel-movil').forEach((b) => {
+  b.addEventListener('click', () => alternarPanel(b.dataset.panel));
+});
+document.getElementById('fondoPanelMovil').addEventListener('click', () => {
+  layoutEditor.classList.add('izq-plegado', 'der-plegado');
+  actualizarFlechasPlegar();
+});
+consultaMovil.addEventListener('change', estadoInicialPaneles);
+estadoInicialPaneles();
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

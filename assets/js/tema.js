@@ -1,3 +1,4 @@
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 (function () {
   function iconoPara(tema) {
     return tema === 'dark' ? '☀️' : '🌙';

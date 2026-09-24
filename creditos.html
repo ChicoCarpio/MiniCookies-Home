@@ -39,10 +39,15 @@
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">jsdiff</td><td style="padding:0.5rem;">9.0.0</td><td style="padding:0.5rem;">BSD-3-Clause</td><td style="padding:0.5rem;"><a href="https://github.com/kpdecker/jsdiff" target="_blank" rel="noopener">kpdecker/jsdiff</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">JsBarcode</td><td style="padding:0.5rem;">3.12.3</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/lindell/JsBarcode" target="_blank" rel="noopener">lindell/JsBarcode</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">qrcode.js</td><td style="padding:0.5rem;">1.0.0</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/davidshimjs/qrcodejs" target="_blank" rel="noopener">davidshimjs/qrcodejs</a></td></tr>
+        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@zxing/library</td><td style="padding:0.5rem;">0.23.0</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/zxing-js/library" target="_blank" rel="noopener">zxing-js/library</a></td></tr>
+        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@huggingface/transformers</td><td style="padding:0.5rem;">4.3.0</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/huggingface/transformers.js" target="_blank" rel="noopener">huggingface/transformers.js</a></td></tr>
       </tbody>
     </table>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;">Todas se cargan directamente desde su CDN público (cdnjs) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;">Todas se cargan directamente desde su CDN público (cdnjs, salvo @zxing/library y @huggingface/transformers que se cargan desde jsdelivr por no estar publicadas en cdnjs) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.</p>
+
+    <h3>Modelo de inteligencia artificial (Dictado por voz)</h3>
+    <p>La herramienta <a href="herramientas/dictado-voz.html">Dictado por voz</a> usa <strong>Whisper</strong> de OpenAI (modelos <code>Xenova/whisper-tiny</code>, <code>Xenova/whisper-base</code> y <code>Xenova/whisper-small</code>, publicados por la comunidad en Hugging Face, licencia <strong>Apache-2.0</strong>) ejecutado enteramente en tu navegador con <code>@huggingface/transformers</code> (con aceleración por WebGPU cuando el navegador la soporta). El modelo se descarga una sola vez desde el CDN de Hugging Face y queda cacheado en tu navegador — tu grabación de voz nunca se envía a ningún servidor.</p>
 
     <h3>Servicios de terceros</h3>
     <p>A diferencia de las librerías de arriba, esto no es código que corre en tu navegador sino un servicio externo que recibe datos: la <a href="contacto.html">página de contacto</a> usa <a href="https://web3forms.com" target="_blank" rel="noopener">Web3Forms</a> para reenviarnos por correo lo que escribas ahí (nombre, email, mensaje). Es el único punto del sitio donde se envía algo a un servidor — ver <a href="privacidad.html">política de privacidad</a>.</p>

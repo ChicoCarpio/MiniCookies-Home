@@ -72,6 +72,18 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let archivoActual = null;
 let imagenActual = null;
+let orientacionActual = 1;
+
+// Formato de la imagen descargada: se respetan PNG y WebP (guardan
+// transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
+// sale como PNG: antes todo lo que no era PNG salía como JPG, y la
+// transparencia de un WebP/GIF quedaba pintada de negro.
+const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+function formatoDeSalida(archivo) {
+  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+}
+
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -171,14 +183,79 @@ async function leerExif(archivo) {
   return null;
 }
 
+function escaparHtml(texto) {
+  return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Quita los metadatos de un JPEG SIN recomprimirlo: recorre los segmentos del
+// archivo y descarta APP1 (EXIF/XMP), APP13 (IPTC/Photoshop), el resto de
+// APPn de fabricantes y los comentarios (COM). Se conservan APP0 (JFIF) y el
+// perfil de color ICC (APP2 "ICC_PROFILE"), que no identifica a nadie pero
+// cambia cómo se ven los colores. También se descarta todo lo que venga
+// después del final de la imagen principal: los celulares guardan ahí
+// imágenes extra (miniaturas, mapas de profundidad) con su propio EXIF.
+// La imagen comprimida en sí queda idéntica byte a byte.
+// Devuelve null si el archivo no tiene la estructura esperada.
+function quitarMetadatosJpegSinPerdida(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const vista = new DataView(buffer);
+  const largoTotal = bytes.length;
+  if (largoTotal < 4 || vista.getUint16(0) !== 0xFFD8) return null;
+  const partes = [bytes.subarray(0, 2)];
+  let offset = 2;
+  // 1) Cabecera: segmentos con largo hasta el primer SOS
+  while (true) {
+    if (offset + 4 > largoTotal) return null;
+    const marcador = vista.getUint16(offset);
+    if ((marcador & 0xFF00) !== 0xFF00) return null;
+    if (marcador === 0xFFDA) break;
+    const largo = vista.getUint16(offset + 2);
+    if (largo < 2 || offset + 2 + largo > largoTotal) return null;
+    const esAppN = marcador >= 0xFFE0 && marcador <= 0xFFEF;
+    const esIcc = marcador === 0xFFE2 && String.fromCharCode(...bytes.subarray(offset + 4, offset + 15)) === 'ICC_PROFILE';
+    const seQueda = !(esAppN || marcador === 0xFFFE) || marcador === 0xFFE0 || esIcc;
+    if (seQueda) partes.push(bytes.subarray(offset, offset + 2 + largo));
+    offset += 2 + largo;
+  }
+  // 2) Imagen: desde el primer SOS hasta su EOI (FFD9). Los datos comprimidos
+  // no tienen largo, así que se recorren hasta el siguiente marcador real
+  // (FF00 es un FF "escapado" y FFD0–FFD7 son marcas de reinicio). Las JPEG
+  // progresivas tienen varios SOS con tablas en el medio: se siguen igual.
+  const inicioImagen = offset;
+  let fin = -1;
+  while (offset + 2 <= largoTotal) {
+    const marcador = vista.getUint16(offset);
+    if (marcador === 0xFFD9) { fin = offset + 2; break; }
+    if ((marcador & 0xFF00) !== 0xFF00 || offset + 4 > largoTotal) return null;
+    const largo = vista.getUint16(offset + 2);
+    offset += 2 + largo;
+    if (marcador !== 0xFFDA) continue;
+    while (offset + 1 < largoTotal) {
+      if (bytes[offset] !== 0xFF) { offset++; continue; }
+      const siguiente = bytes[offset + 1];
+      if (siguiente === 0x00 || (siguiente >= 0xD0 && siguiente <= 0xD7)) { offset += 2; continue; }
+      if (siguiente === 0xFF) { offset++; continue; } // bytes de relleno antes de un marcador
+      break;
+    }
+  }
+  if (fin < 0) return null;
+  partes.push(bytes.subarray(inicioImagen, fin));
+  const salida = new Uint8Array(partes.reduce((suma, p) => suma + p.length, 0));
+  let posicion = 0;
+  for (const parte of partes) { salida.set(parte, posicion); posicion += parte.length; }
+  return salida;
+}
+
 function mostrarMetadatos(datos) {
   if (!datos || (!datos.marca && !datos.modelo && !datos.fecha && !datos.gps)) {
     metadatosDiv.innerHTML = '<p class="sin-metadatos">No se encontraron metadatos EXIF en esta imagen (o ya venía sin ellos).</p>';
     return;
   }
   const filas = [];
-  if (datos.marca || datos.modelo) filas.push(['Cámara', [datos.marca, datos.modelo].filter(Boolean).join(' ')]);
-  if (datos.fecha) filas.push(['Fecha', datos.fecha]);
+  // Marca, modelo y fecha son texto libre que viene dentro del archivo: se
+  // escapan para que una foto armada a propósito no pueda meter HTML/scripts.
+  if (datos.marca || datos.modelo) filas.push(['Cámara', escaparHtml([datos.marca, datos.modelo].filter(Boolean).join(' '))]);
+  if (datos.fecha) filas.push(['Fecha', escaparHtml(datos.fecha)]);
   if (datos.gps) filas.push(['Ubicación GPS', `<span class="aviso-gps">${datos.gps.lat.toFixed(5)}, ${datos.gps.lon.toFixed(5)}</span>`]);
   metadatosDiv.innerHTML = `
     <table>${filas.map(([etiqueta, valor]) => `<tr><td>${etiqueta}</td><td>${valor}</td></tr>`).join('')}</table>
@@ -202,8 +279,11 @@ async function mostrarArchivo(archivo) {
   resultado.classList.remove('visible');
 
   metadatosDiv.innerHTML = '<p class="sin-metadatos">Leyendo metadatos...</p>';
+  // Si no se llega a leer la orientación, la descarga va por el camino seguro (canvas).
+  orientacionActual = null;
   try {
     const datos = await leerExif(archivo);
+    orientacionActual = datos && datos.orientacion ? datos.orientacion : 1;
     mostrarMetadatos(datos);
   } catch (error) {
     metadatosDiv.innerHTML = '<p class="sin-metadatos">No se pudieron leer los metadatos, pero igual se pueden quitar al descargar.</p>';
@@ -212,11 +292,11 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
@@ -226,14 +306,25 @@ zonaArrastre.addEventListener('drop', (e) => {
 });
 
 botonDescargar.addEventListener('click', async () => {
-  // Volver a dibujar la imagen en un canvas y exportarla de nuevo alcanza:
-  // el archivo resultante es una imagen completamente nueva, sin ningún
-  // bloque EXIF/XMP/IPTC del original.
-  const esPng = archivoActual.type === 'image/png';
-  const formato = esPng ? 'image/png' : 'image/jpeg';
-  const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.95));
+  // JPEG con orientación normal: se sacan los metadatos sin tocar la imagen
+  // (sin pérdida de calidad). Si la foto depende de la etiqueta de
+  // orientación del EXIF para verse derecha (típico de celulares), borrarla
+  // la dejaría girada: en ese caso, igual que con PNG/WebP, se redibuja en
+  // un canvas (que ya la aplica) y se exporta de nuevo.
+  let blob = null;
+  if (archivoActual.type === 'image/jpeg' && orientacionActual === 1) {
+    const limpio = quitarMetadatosJpegSinPerdida(await archivoActual.arrayBuffer());
+    if (limpio) blob = new Blob([limpio], { type: 'image/jpeg' });
+  }
+  if (!blob) {
+    // Volver a dibujar la imagen en un canvas y exportarla de nuevo alcanza:
+    // el archivo resultante es una imagen completamente nueva, sin ningún
+    // bloque EXIF/XMP/IPTC del original.
+    const formato = formatoDeSalida(archivoActual);
+    blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.95));
+  }
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-sin-metadatos.${esPng ? 'png' : 'jpg'}`;
+  enlaceDescarga.download = `imagen-sin-metadatos.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

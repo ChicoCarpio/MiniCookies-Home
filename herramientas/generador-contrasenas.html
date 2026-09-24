@@ -22,7 +22,7 @@
 
 <main>
   <h1>Generador de contraseñas</h1>
-  <p>Contraseñas aleatorias generadas con <code>crypto.getRandomValues</code> (criptográficamente seguro), directo en tu navegador. Nunca viajan por internet.</p>
+  <p>Contraseñas aleatorias generadas con <code>crypto.getRandomValues</code> (criptográficamente seguro).</p>
 
   <div class="panel-herramienta">
     <div class="resultado visible" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
@@ -62,7 +62,6 @@
     <ul style="color:var(--texto-suave);">
       <li>Usa <code>crypto.getRandomValues</code>, el generador aleatorio criptográfico del navegador (no <code>Math.random</code>).</li>
       <li>Rechaza y vuelve a generar si detecta secuencias (<code>abc</code>, <code>321</code>), caracteres repetidos (<code>aaa</code>) o fragmentos de contraseñas comunes (<code>password</code>, <code>admin</code>, <code>qwerty</code>...).</li>
-      <li>Nunca se guarda ni se envía a ningún servidor — existe solo en tu pantalla.</li>
     </ul>
   </div>
 </main>
@@ -79,17 +78,24 @@ const DENYLIST = [
 ];
 const MAX_INTENTOS = 200;
 
+// Entero aleatorio uniforme en [0, maximo). Con un simple "% maximo" los
+// primeros valores salen apenas más seguido que el resto (sesgo de módulo):
+// se descartan los números del tramo final que no alcanza para una vuelta
+// completa y se vuelve a sortear.
+function enteroAleatorio(maximo) {
+  const limite = Math.floor(0x100000000 / maximo) * maximo;
+  const valor = new Uint32Array(1);
+  do { crypto.getRandomValues(valor); } while (valor[0] >= limite);
+  return valor[0] % maximo;
+}
+
 function eleccionAleatoria(conjunto) {
-  const indices = new Uint32Array(1);
-  crypto.getRandomValues(indices);
-  return conjunto[indices[0] % conjunto.length];
+  return conjunto[enteroAleatorio(conjunto.length)];
 }
 
 function barajar(arreglo) {
   for (let i = arreglo.length - 1; i > 0; i--) {
-    const aleatorio = new Uint32Array(1);
-    crypto.getRandomValues(aleatorio);
-    const j = aleatorio[0] % (i + 1);
+    const j = enteroAleatorio(i + 1);
     [arreglo[i], arreglo[j]] = [arreglo[j], arreglo[i]];
   }
   return arreglo;
@@ -149,8 +155,11 @@ const elResultado = document.getElementById('contrasenaGenerada');
 const elBotonGenerar = document.getElementById('botonGenerar');
 const elBotonCopiar = document.getElementById('botonCopiar');
 
+let contrasenaValida = false;
+
 function actualizarYGenerar() {
   elEtiquetaLongitud.textContent = elLongitud.value;
+  contrasenaValida = false;
   try {
     elResultado.textContent = generarContrasena(
       parseInt(elLongitud.value, 10),
@@ -159,6 +168,7 @@ function actualizarYGenerar() {
       document.getElementById('usarNumeros').checked,
       document.getElementById('usarSimbolos').checked,
     );
+    contrasenaValida = true;
   } catch (error) {
     elResultado.textContent = error.message;
   }
@@ -171,6 +181,7 @@ elBotonGenerar.addEventListener('click', actualizarYGenerar);
 });
 
 elBotonCopiar.addEventListener('click', async () => {
+  if (!contrasenaValida) return; // no copiar el mensaje de error
   await navigator.clipboard.writeText(elResultado.textContent);
   elBotonCopiar.textContent = '¡Copiado!';
   setTimeout(() => { elBotonCopiar.textContent = 'Copiar'; }, 1500);

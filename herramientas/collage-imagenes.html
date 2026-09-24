@@ -4,13 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Crear collage de imágenes gratis — Mini Cookies</title>
-<meta name="description" content="Combiná varias imágenes en una sola grilla (collage), gratis y sin subirlas a ningún servidor.">
+<meta name="description" content="Combiná varias imágenes en un collage con diseños como los de Instagram, elegí qué parte de cada foto se ve, gratis y sin subirlas a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <style>
-  #vistaPrevia { max-width: 100%; max-height: 450px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
-  .campo-numero-chico { width: 70px; }
+  .editor-collage { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; margin-top: 16px; }
+  @media (max-width: 760px) { .editor-collage { grid-template-columns: 1fr; } }
+
+  .lienzo-contenedor { display: flex; justify-content: center; background: repeating-conic-gradient(var(--gris-borde) 0 25%, transparent 0 50%) 0 0 / 20px 20px; border-radius: 10px; padding: 12px; }
+  #lienzo { max-width: 100%; max-height: 70vh; touch-action: none; cursor: grab; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+  #lienzo.moviendo { cursor: grabbing; }
+  .ayuda-gestos { color: var(--texto-suave); font-size: 0.85rem; margin: 8px 0 0; text-align: center; }
+
+  .bloque-opciones h3 { font-size: 0.95rem; margin: 0 0 8px; }
+  .bloque-opciones + .bloque-opciones { margin-top: 18px; }
+  .bloque-opciones .campo { margin-bottom: 10px; }
+
+  .lista-disenos { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 8px; }
+  .boton-diseno { position: relative; aspect-ratio: 1; border: 2px solid var(--gris-borde); border-radius: 8px; background: none; padding: 4px; cursor: pointer; }
+  .boton-diseno.activo { border-color: var(--azul); box-shadow: 0 0 0 2px var(--azul); }
+  .boton-diseno .casilla { position: absolute; background: var(--texto-suave); opacity: 0.55; border-radius: 2px; }
+  .boton-diseno.activo .casilla { background: var(--azul); opacity: 0.9; }
+
+  .botones-formato { display: flex; flex-wrap: wrap; gap: 6px; }
+  .botones-formato button { border: 1px solid var(--gris-borde); background: none; color: inherit; border-radius: 16px; padding: 4px 10px; cursor: pointer; font-size: 0.85rem; }
+  .botones-formato button.activo { background: var(--azul); border-color: var(--azul); color: #fff; }
+
+  .barra-foto { display: none; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; padding: 10px; border: 1px solid var(--azul); border-radius: 8px; }
+  .barra-foto.visible { display: flex; }
+  .barra-foto .titulo-barra { font-weight: 600; font-size: 0.9rem; margin-right: auto; }
+  .barra-foto button { border: 1px solid var(--gris-borde); background: none; color: inherit; border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+  .barra-foto label { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+
+  .tira-orden { display: flex; gap: 8px; overflow-x: auto; padding: 6px 2px 10px; margin-top: 12px; }
+  .miniatura-orden { position: relative; flex: 0 0 72px; height: 72px; border: 2px solid var(--gris-borde); border-radius: 8px; overflow: hidden; cursor: pointer; background: none; padding: 0; }
+  .miniatura-orden.activo { border-color: var(--azul); }
+  .miniatura-orden.arrastrando { opacity: 0.4; }
+  .miniatura-orden img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .miniatura-orden .numero { position: absolute; top: 3px; left: 3px; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.75rem; border-radius: 10px; padding: 0 6px; }
+  .miniatura-orden .quitar-foto { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border: none; border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.7rem; cursor: pointer; line-height: 20px; padding: 0; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
@@ -26,44 +59,87 @@
 
 <main>
   <h1>Crear collage de imágenes</h1>
-  <p>Elegí varias imágenes y combinalas en una sola grilla.</p>
+  <p>Elegí tus fotos, un diseño y el formato. Tocá una foto del collage para acomodar qué parte se ve, y mantenela apretada para cambiarla de lugar.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (podés elegir varias)
+      🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (de 1 a 12)
       <input type="file" id="entradaArchivo" accept="image/*" multiple hidden>
     </div>
 
-    <ul class="lista-archivos" id="listaArchivo"></ul>
+    <p id="aviso" style="display:none; color:var(--texto-suave); font-size:0.9rem;"></p>
 
-    <canvas id="vistaPrevia"></canvas>
+    <div class="editor-collage" id="editor" style="display:none;">
+      <div>
+        <div class="lienzo-contenedor">
+          <canvas id="lienzo" aria-label="Vista previa del collage"></canvas>
+        </div>
+        <p class="ayuda-gestos">Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla</p>
 
-    <div class="controles">
-      <label class="campo">
-        Columnas
-        <input type="number" id="columnas" class="campo-numero-chico" min="1" max="4" value="2">
-      </label>
-      <label class="campo">
-        Filas
-        <input type="number" id="filas" class="campo-numero-chico" min="1" max="4" value="2">
-      </label>
-      <label class="campo">
-        Tamaño de celda: <span id="etiquetaCelda">300</span>px
-        <input type="range" id="tamanoCelda" min="100" max="600" value="300">
-      </label>
-      <label class="campo">
-        Espacio entre fotos: <span id="etiquetaEspacio">8</span>px
-        <input type="range" id="espacio" min="0" max="40" value="8">
-      </label>
-      <label class="campo">
-        <span>Color de fondo</span>
-        <input type="color" id="colorFondo" value="#ffffff">
-      </label>
-      <button class="boton" id="botonGenerar" disabled>Generar collage</button>
-    </div>
+        <div class="barra-foto" id="barraFoto">
+          <span class="titulo-barra" id="tituloBarra">Foto 1</span>
+          <label>🔍 <input type="range" id="zoomFoto" min="100" max="400" value="100"></label>
+          <button type="button" id="botonCentrar" title="Volver a centrar la foto">Centrar</button>
+          <button type="button" id="botonAntes" title="Mover al lugar anterior">◀</button>
+          <button type="button" id="botonDespues" title="Mover al lugar siguiente">▶</button>
+          <button type="button" id="botonListo" title="Terminar de editar esta foto">Listo</button>
+        </div>
 
-    <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="collage">Descargar collage</a>
+        <div class="tira-orden" id="tiraOrden" aria-label="Orden de las fotos en el collage"></div>
+      </div>
+
+      <div>
+        <div class="bloque-opciones">
+          <h3>Diseño</h3>
+          <div class="lista-disenos" id="listaDisenos"></div>
+        </div>
+
+        <div class="bloque-opciones">
+          <h3>Formato</h3>
+          <div class="botones-formato" id="botonesFormato">
+            <button type="button" data-proporcion="1:1" class="activo">1:1 Cuadrado</button>
+            <button type="button" data-proporcion="4:5">4:5 Publicación</button>
+            <button type="button" data-proporcion="9:16">9:16 Historia</button>
+            <button type="button" data-proporcion="3:4">3:4</button>
+            <button type="button" data-proporcion="16:9">16:9 Horizontal</button>
+          </div>
+        </div>
+
+        <div class="bloque-opciones">
+          <h3>Estilo</h3>
+          <label class="campo">
+            <span>Borde entre fotos: <span id="etiquetaEspacio">12</span></span>
+            <input type="range" id="espacio" min="0" max="60" value="12">
+          </label>
+          <label class="campo">
+            <span>Esquinas redondeadas: <span id="etiquetaRedondeo">0</span></span>
+            <input type="range" id="redondeo" min="0" max="80" value="0">
+          </label>
+          <label class="campo">
+            <span>Color del borde / fondo</span>
+            <input type="color" id="colorFondo" value="#ffffff">
+          </label>
+        </div>
+
+        <div class="bloque-opciones">
+          <h3>Descargar</h3>
+          <label class="campo">
+            <span>Tamaño</span>
+            <select id="tamanoSalida">
+              <option value="1080" selected>1080 px de ancho (redes sociales)</option>
+              <option value="2160">2160 px de ancho (alta calidad / impresión)</option>
+            </select>
+          </label>
+          <label class="campo">
+            <span>Formato de archivo</span>
+            <select id="formatoSalida">
+              <option value="image/jpeg" selected>JPG (más liviano)</option>
+              <option value="image/png">PNG (sin pérdida)</option>
+            </select>
+          </label>
+          <button class="boton" id="botonDescargar" type="button">Descargar collage</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -76,60 +152,528 @@
 </footer>
 
 <script>
+const MAX_FOTOS = 12;
+const LADO_MAX_VISTA = 1600; // las fotos se reducen a esto para que la vista previa responda rápido
+
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
-const listaArchivo = document.getElementById('listaArchivo');
-const vistaPrevia = document.getElementById('vistaPrevia');
-const contexto = vistaPrevia.getContext('2d');
-const botonGenerar = document.getElementById('botonGenerar');
-const resultado = document.getElementById('resultado');
-const enlaceDescarga = document.getElementById('enlaceDescarga');
-const elColumnas = document.getElementById('columnas');
-const elFilas = document.getElementById('filas');
-const elTamanoCelda = document.getElementById('tamanoCelda');
-const etiquetaCelda = document.getElementById('etiquetaCelda');
+const aviso = document.getElementById('aviso');
+const editor = document.getElementById('editor');
+const lienzo = document.getElementById('lienzo');
+const ctx = lienzo.getContext('2d');
+const listaDisenos = document.getElementById('listaDisenos');
+const tiraOrden = document.getElementById('tiraOrden');
+const barraFoto = document.getElementById('barraFoto');
+const tituloBarra = document.getElementById('tituloBarra');
+const zoomFoto = document.getElementById('zoomFoto');
 const elEspacio = document.getElementById('espacio');
-const etiquetaEspacio = document.getElementById('etiquetaEspacio');
+const elRedondeo = document.getElementById('redondeo');
 const elColorFondo = document.getElementById('colorFondo');
 
-let archivos = [];
+// fotos: { nombre, original (HTMLImageElement), vista (canvas reducido),
+//          zoom (1 = encaja justo), cx, cy (centro de lo visible, 0..1 de la foto) }
+// El orden del arreglo es el orden en el collage: la foto i va en la casilla i.
+let fotos = [];
+let diseno = null;
+let proporcion = [1, 1];
+let seleccionada = -1;
 
+// --- Diseños -----------------------------------------------------------------
+// Cada diseño es una lista de casillas [x, y, ancho, alto] en fracciones del
+// lienzo (0 a 1), en el orden en que se llenan con las fotos.
+function cuadricula(columnas, filas, total) {
+  const casillas = [];
+  for (let f = 0; f < filas; f++) {
+    // La última fila, si queda incompleta, se estira para no dejar huecos.
+    const enFila = Math.min(columnas, total - f * columnas);
+    for (let c = 0; c < enFila; c++) casillas.push([c / enFila, f / filas, 1 / enFila, 1 / filas]);
+  }
+  return casillas;
+}
+
+const DISENOS = {
+  1: [[[0, 0, 1, 1]]],
+  2: [
+    [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]],
+    [[0, 0, 1, 0.5], [0, 0.5, 1, 0.5]],
+    [[0, 0, 2 / 3, 1], [2 / 3, 0, 1 / 3, 1]],
+    [[0, 0, 1, 2 / 3], [0, 2 / 3, 1, 1 / 3]],
+  ],
+  3: [
+    [[0, 0, 0.5, 1], [0.5, 0, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]],
+    [[0, 0, 1, 0.5], [0, 0.5, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]],
+    [[0, 0, 1 / 3, 1], [1 / 3, 0, 1 / 3, 1], [2 / 3, 0, 1 / 3, 1]],
+    [[0, 0, 1, 1 / 3], [0, 1 / 3, 1, 1 / 3], [0, 2 / 3, 1, 1 / 3]],
+    [[0, 0, 0.5, 0.5], [0.5, 0, 0.5, 0.5], [0, 0.5, 1, 0.5]],
+  ],
+  4: [
+    cuadricula(2, 2, 4),
+    [[0, 0, 2 / 3, 1], [2 / 3, 0, 1 / 3, 1 / 3], [2 / 3, 1 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 1 / 3, 1 / 3]],
+    [[0, 0, 1, 2 / 3], [0, 2 / 3, 1 / 3, 1 / 3], [1 / 3, 2 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 1 / 3, 1 / 3]],
+    [[0, 0, 0.25, 1], [0.25, 0, 0.25, 1], [0.5, 0, 0.25, 1], [0.75, 0, 0.25, 1]],
+    [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1 / 3], [0.5, 1 / 3, 0.5, 1 / 3], [0.5, 2 / 3, 0.5, 1 / 3]],
+  ],
+  5: [
+    [[0, 0, 0.5, 0.5], [0.5, 0, 0.5, 0.5], [0, 0.5, 1 / 3, 0.5], [1 / 3, 0.5, 1 / 3, 0.5], [2 / 3, 0.5, 1 / 3, 0.5]],
+    [[0, 0, 0.5, 1], [0.5, 0, 0.25, 0.5], [0.75, 0, 0.25, 0.5], [0.5, 0.5, 0.25, 0.5], [0.75, 0.5, 0.25, 0.5]],
+    [[0, 0, 1, 0.5], [0, 0.5, 0.25, 0.5], [0.25, 0.5, 0.25, 0.5], [0.5, 0.5, 0.25, 0.5], [0.75, 0.5, 0.25, 0.5]],
+  ],
+  6: [
+    cuadricula(3, 2, 6),
+    cuadricula(2, 3, 6),
+    [[0, 0, 2 / 3, 2 / 3], [2 / 3, 0, 1 / 3, 1 / 3], [2 / 3, 1 / 3, 1 / 3, 1 / 3], [0, 2 / 3, 1 / 3, 1 / 3], [1 / 3, 2 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 1 / 3, 1 / 3]],
+  ],
+};
+
+function disenosPara(cantidad) {
+  const lista = (DISENOS[cantidad] || []).slice();
+  // Siempre hay al menos una cuadrícula que acepta esa cantidad de fotos.
+  const columnas = Math.ceil(Math.sqrt(cantidad));
+  const filas = Math.ceil(cantidad / columnas);
+  const generica = cuadricula(columnas, filas, cantidad);
+  if (!lista.some((d) => JSON.stringify(d) === JSON.stringify(generica))) lista.push(generica);
+  if (cantidad >= 7) lista.push(cuadricula(filas, columnas, cantidad));
+  return lista;
+}
+
+function dibujarBotonesDiseno() {
+  listaDisenos.innerHTML = '';
+  disenosPara(fotos.length).forEach((opcion) => {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'boton-diseno' + (JSON.stringify(opcion) === JSON.stringify(diseno) ? ' activo' : '');
+    boton.title = 'Usar este diseño';
+    opcion.forEach(([x, y, w, h]) => {
+      const casilla = document.createElement('span');
+      casilla.className = 'casilla';
+      casilla.style.left = `calc(4px + ${x} * (100% - 8px) + 1px)`;
+      casilla.style.top = `calc(4px + ${y} * (100% - 8px) + 1px)`;
+      casilla.style.width = `calc(${w} * (100% - 8px) - 2px)`;
+      casilla.style.height = `calc(${h} * (100% - 8px) - 2px)`;
+      boton.appendChild(casilla);
+    });
+    boton.addEventListener('click', () => { diseno = opcion; dibujarBotonesDiseno(); dibujar(); });
+    listaDisenos.appendChild(boton);
+  });
+}
+
+// --- Geometría ---------------------------------------------------------------
+function tamanoLienzo(ancho) {
+  return { ancho, alto: Math.round(ancho * proporcion[1] / proporcion[0]) };
+}
+
+// Rectángulo en píxeles de cada casilla: el borde exterior mide "espacio" y
+// el que queda entre dos fotos también (medio de cada lado).
+function rectangulosCasillas(ancho, alto, espacio) {
+  const cerca = (a, b) => Math.abs(a - b) < 1e-6;
+  return diseno.map(([x, y, w, h]) => {
+    const izq = x * ancho + (cerca(x, 0) ? espacio : espacio / 2);
+    const der = (x + w) * ancho - (cerca(x + w, 1) ? espacio : espacio / 2);
+    const arr = y * alto + (cerca(y, 0) ? espacio : espacio / 2);
+    const aba = (y + h) * alto - (cerca(y + h, 1) ? espacio : espacio / 2);
+    return { x: izq, y: arr, w: Math.max(1, der - izq), h: Math.max(1, aba - arr) };
+  });
+}
+
+// Qué parte de la foto se ve en una casilla (como "cover": llena la casilla
+// sin deformar), según el zoom y el centro elegidos por el usuario.
+function recorteFoto(foto, anchoFoto, altoFoto, casilla) {
+  const escala = Math.max(casilla.w / anchoFoto, casilla.h / altoFoto) * foto.zoom;
+  const visibleAncho = casilla.w / escala;
+  const visibleAlto = casilla.h / escala;
+  foto.cx = Math.min(1 - visibleAncho / anchoFoto / 2, Math.max(visibleAncho / anchoFoto / 2, foto.cx));
+  foto.cy = Math.min(1 - visibleAlto / altoFoto / 2, Math.max(visibleAlto / altoFoto / 2, foto.cy));
+  return { sx: foto.cx * anchoFoto - visibleAncho / 2, sy: foto.cy * altoFoto - visibleAlto / 2, sw: visibleAncho, sh: visibleAlto, escala };
+}
+
+function trazarRedondeado(c, r, radio) {
+  const rad = Math.min(radio, r.w / 2, r.h / 2);
+  c.beginPath();
+  c.moveTo(r.x + rad, r.y);
+  c.arcTo(r.x + r.w, r.y, r.x + r.w, r.y + r.h, rad);
+  c.arcTo(r.x + r.w, r.y + r.h, r.x, r.y + r.h, rad);
+  c.arcTo(r.x, r.y + r.h, r.x, r.y, rad);
+  c.arcTo(r.x, r.y, r.x + r.w, r.y, rad);
+  c.closePath();
+}
+
+// Dibuja el collage en cualquier canvas. "alta" usa las fotos originales
+// (para descargar); si no, las reducidas (vista previa).
+function dibujarEn(canvas, ancho, alta) {
+  const { alto } = tamanoLienzo(ancho);
+  canvas.width = ancho;
+  canvas.height = alto;
+  const c = canvas.getContext('2d');
+  const factor = ancho / 1080; // borde y redondeo se piensan sobre 1080 px
+  const espacio = parseInt(elEspacio.value, 10) * factor;
+  const radio = parseInt(elRedondeo.value, 10) * factor;
+  c.fillStyle = elColorFondo.value;
+  c.fillRect(0, 0, ancho, alto);
+  c.imageSmoothingQuality = 'high';
+  const casillas = rectangulosCasillas(ancho, alto, espacio);
+  casillas.forEach((casilla, i) => {
+    const foto = fotos[i];
+    if (!foto) return;
+    const fuente = alta ? foto.original : foto.vista;
+    const anchoFuente = alta ? foto.original.naturalWidth : foto.vista.width;
+    const altoFuente = alta ? foto.original.naturalHeight : foto.vista.height;
+    const r = recorteFoto(foto, anchoFuente, altoFuente, casilla);
+    c.save();
+    trazarRedondeado(c, casilla, radio);
+    c.clip();
+    c.drawImage(fuente, r.sx, r.sy, r.sw, r.sh, casilla.x, casilla.y, casilla.w, casilla.h);
+    c.restore();
+  });
+  return casillas;
+}
+
+let casillasVista = [];
+let intercambioDesde = -1;
+let intercambioSobre = -1;
+
+function dibujar() {
+  if (!diseno) return;
+  casillasVista = dibujarEn(lienzo, 1080, false);
+  const grosor = Math.max(4, lienzo.width / 200);
+  const resaltar = (i, color, punteado) => {
+    const r = casillasVista[i];
+    if (!r) return;
+    ctx.save();
+    ctx.lineWidth = grosor;
+    ctx.strokeStyle = color;
+    if (punteado) ctx.setLineDash([grosor * 3, grosor * 2]);
+    trazarRedondeado(ctx, { x: r.x + grosor / 2, y: r.y + grosor / 2, w: r.w - grosor, h: r.h - grosor }, parseInt(elRedondeo.value, 10));
+    ctx.stroke();
+    ctx.restore();
+  };
+  if (intercambioDesde >= 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = '#000';
+    const r = casillasVista[intercambioDesde];
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.restore();
+    if (intercambioSobre >= 0 && intercambioSobre !== intercambioDesde) resaltar(intercambioSobre, '#e7a459', true);
+  } else if (seleccionada >= 0) {
+    resaltar(seleccionada, '#e7a459', false);
+  }
+}
+
+// --- Fotos, orden y selección -----------------------------------------------
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = () => reject(new Error(`no se pudo abrir "${archivo.name}"`));
     img.src = URL.createObjectURL(archivo);
   });
 }
 
-function actualizarLista() {
-  listaArchivo.innerHTML = archivos.map((archivo, indice) => `
-    <li>
-      <span>${archivo.name}</span>
-      <button type="button" class="quitar" data-indice="${indice}" aria-label="Quitar">✕</button>
-    </li>
-  `).join('');
-  listaArchivo.querySelectorAll('button.quitar').forEach((boton) => {
-    boton.addEventListener('click', () => {
-      archivos.splice(parseInt(boton.dataset.indice, 10), 1);
-      actualizarLista();
-      actualizarBoton();
+function versionReducida(img) {
+  const escala = Math.min(1, LADO_MAX_VISTA / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * escala));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * escala));
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+function mostrarAviso(texto) {
+  aviso.textContent = texto;
+  aviso.style.display = texto ? 'block' : 'none';
+}
+
+async function agregarArchivos(listaFileList) {
+  const imagenes = [...listaFileList].filter((f) => f.type.startsWith('image/'));
+  const lugar = MAX_FOTOS - fotos.length;
+  const aAgregar = imagenes.slice(0, Math.max(0, lugar));
+  const errores = [];
+  for (const archivo of aAgregar) {
+    try {
+      const original = await cargarImagen(archivo);
+      fotos.push({ nombre: archivo.name, original, vista: versionReducida(original), miniatura: original.src, zoom: 1, cx: 0.5, cy: 0.5 });
+    } catch (error) {
+      errores.push(error.message);
+    }
+  }
+  const avisos = [];
+  if (imagenes.length > aAgregar.length) avisos.push(`El collage admite hasta ${MAX_FOTOS} fotos: ${imagenes.length - aAgregar.length} no se agregaron.`);
+  if (errores.length) avisos.push('No se pudieron abrir algunas imágenes: ' + errores.join(', ') + '.');
+  mostrarAviso(avisos.join(' '));
+  cambioDeCantidad();
+}
+
+// Al cambiar cuántas fotos hay, se elige el primer diseño para esa cantidad
+// (como Instagram, que muestra los diseños según las fotos elegidas).
+function cambioDeCantidad() {
+  editor.style.display = fotos.length ? '' : 'none';
+  if (seleccionada >= fotos.length) seleccionar(-1);
+  if (fotos.length) {
+    const opciones = disenosPara(fotos.length);
+    if (!diseno || diseno.length !== fotos.length) diseno = opciones[0];
+    dibujarBotonesDiseno();
+  } else {
+    diseno = null;
+  }
+  dibujarTira();
+  dibujar();
+}
+
+function seleccionar(indice) {
+  seleccionada = indice;
+  barraFoto.classList.toggle('visible', indice >= 0);
+  if (indice >= 0) {
+    tituloBarra.textContent = `Foto ${indice + 1} de ${fotos.length}`;
+    zoomFoto.value = Math.round(fotos[indice].zoom * 100);
+    document.getElementById('botonAntes').disabled = indice === 0;
+    document.getElementById('botonDespues').disabled = indice === fotos.length - 1;
+  }
+  tiraOrden.querySelectorAll('.miniatura-orden').forEach((el, i) => el.classList.toggle('activo', i === indice));
+  dibujar();
+}
+
+function moverFoto(desde, hasta) {
+  if (hasta < 0 || hasta >= fotos.length || desde === hasta) return;
+  const [foto] = fotos.splice(desde, 1);
+  fotos.splice(hasta, 0, foto);
+  dibujarTira();
+  seleccionar(hasta);
+}
+
+function intercambiarFotos(a, b) {
+  [fotos[a], fotos[b]] = [fotos[b], fotos[a]];
+  // Cada foto vuelve a encuadrarse centrada en su casilla nueva.
+  fotos[a].cx = fotos[a].cy = fotos[b].cx = fotos[b].cy = 0.5;
+  dibujarTira();
+  seleccionar(b);
+}
+
+// Tira con el orden: el número es la casilla del collage donde va cada foto.
+let arrastreTira = -1;
+function dibujarTira() {
+  tiraOrden.innerHTML = '';
+  fotos.forEach((foto, i) => {
+    const item = document.createElement('div');
+    item.className = 'miniatura-orden' + (i === seleccionada ? ' activo' : '');
+    item.draggable = true;
+    item.title = foto.nombre;
+    const img = document.createElement('img');
+    img.src = foto.miniatura;
+    img.alt = foto.nombre;
+    const numero = document.createElement('span');
+    numero.className = 'numero';
+    numero.textContent = i + 1;
+    const quitar = document.createElement('button');
+    quitar.type = 'button';
+    quitar.className = 'quitar-foto';
+    quitar.textContent = '✕';
+    quitar.title = 'Quitar esta foto';
+    quitar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fotos.splice(i, 1);
+      seleccionada = -1;
+      barraFoto.classList.remove('visible');
+      mostrarAviso('');
+      cambioDeCantidad();
     });
+    item.append(img, numero, quitar);
+    item.addEventListener('click', () => seleccionar(i));
+    item.addEventListener('dragstart', () => { arrastreTira = i; item.classList.add('arrastrando'); });
+    item.addEventListener('dragend', () => item.classList.remove('arrastrando'));
+    item.addEventListener('dragover', (e) => e.preventDefault());
+    item.addEventListener('drop', (e) => { e.preventDefault(); if (arrastreTira >= 0) moverFoto(arrastreTira, i); arrastreTira = -1; });
+    tiraOrden.appendChild(item);
   });
 }
 
-function actualizarBoton() {
-  botonGenerar.disabled = archivos.length === 0;
+// --- Gestos sobre el lienzo ---------------------------------------------------
+// Un dedo / mouse: arrastrar mueve el encuadre de la foto tocada.
+// Mantener apretado ~0,4 s sin moverse: modo intercambio (soltar sobre otra foto).
+// Dos dedos: pellizcar para acercar o alejar.
+const punteros = new Map();
+let gesto = null; // { tipo: 'mover'|'espera'|'intercambio'|'zoom', indice, ... }
+let temporizadorIntercambio = null;
+
+function puntoEnLienzo(e) {
+  const rect = lienzo.getBoundingClientRect();
+  return { x: (e.clientX - rect.left) * lienzo.width / rect.width, y: (e.clientY - rect.top) * lienzo.height / rect.height };
 }
 
-function agregarArchivos(listaFileList) {
-  const nuevos = [...listaFileList].filter(f => f.type.startsWith('image/'));
-  archivos = archivos.concat(nuevos);
-  actualizarLista();
-  actualizarBoton();
-  resultado.classList.remove('visible');
+function casillaEn(p) {
+  return casillasVista.findIndex((r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h);
 }
+
+function moverEncuadre(indice, dx, dy) {
+  const foto = fotos[indice];
+  const casilla = casillasVista[indice];
+  const r = recorteFoto(foto, foto.vista.width, foto.vista.height, casilla);
+  foto.cx -= dx / r.escala / foto.vista.width;
+  foto.cy -= dy / r.escala / foto.vista.height;
+}
+
+// punto (opcional, en coordenadas del lienzo): lo que está debajo queda en
+// el mismo lugar al acercar o alejar (el puntero del mouse o el centro del
+// pellizco). Sin punto, el zoom se hace sobre el centro de la casilla.
+function fijarZoom(indice, zoom, punto) {
+  const foto = fotos[indice];
+  const casilla = casillasVista[indice];
+  const anchoFoto = foto.vista.width;
+  const altoFoto = foto.vista.height;
+  const antes = recorteFoto(foto, anchoFoto, altoFoto, casilla);
+  const px = punto ? punto.x - casilla.x : casilla.w / 2;
+  const py = punto ? punto.y - casilla.y : casilla.h / 2;
+  // Punto de la foto (en píxeles de la foto) que está bajo el puntero.
+  const fotoX = antes.sx + px / antes.escala;
+  const fotoY = antes.sy + py / antes.escala;
+  foto.zoom = Math.min(4, Math.max(1, zoom));
+  const escala = Math.max(casilla.w / anchoFoto, casilla.h / altoFoto) * foto.zoom;
+  foto.cx = (fotoX - px / escala + casilla.w / escala / 2) / anchoFoto;
+  foto.cy = (fotoY - py / escala + casilla.h / escala / 2) / altoFoto;
+  if (indice === seleccionada) zoomFoto.value = Math.round(foto.zoom * 100);
+}
+
+lienzo.addEventListener('pointerdown', (e) => {
+  try { lienzo.setPointerCapture(e.pointerId); } catch (error) { /* puntero ya liberado */ }
+  const p = puntoEnLienzo(e);
+  punteros.set(e.pointerId, p);
+  clearTimeout(temporizadorIntercambio);
+
+  if (punteros.size === 2 && gesto && gesto.indice >= 0) {
+    const [a, b] = [...punteros.values()];
+    gesto = { tipo: 'zoom', indice: gesto.indice, distancia: Math.hypot(a.x - b.x, a.y - b.y), zoomInicial: fotos[gesto.indice].zoom };
+    return;
+  }
+  const indice = casillaEn(p);
+  if (indice < 0 || !fotos[indice]) { gesto = null; return; }
+  if (indice !== seleccionada) seleccionar(indice);
+  gesto = { tipo: 'espera', indice, inicio: p, ultimo: p };
+  lienzo.classList.add('moviendo');
+  temporizadorIntercambio = setTimeout(() => {
+    if (!gesto || gesto.tipo !== 'espera') return;
+    gesto.tipo = 'intercambio';
+    intercambioDesde = indice;
+    intercambioSobre = indice;
+    if (navigator.vibrate) navigator.vibrate(20);
+    dibujar();
+  }, 400);
+});
+
+lienzo.addEventListener('pointermove', (e) => {
+  if (!punteros.has(e.pointerId) || !gesto) return;
+  const p = puntoEnLienzo(e);
+  punteros.set(e.pointerId, p);
+
+  if (gesto.tipo === 'zoom' && punteros.size === 2) {
+    const [a, b] = [...punteros.values()];
+    fijarZoom(gesto.indice, gesto.zoomInicial * Math.hypot(a.x - b.x, a.y - b.y) / gesto.distancia, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+    dibujar();
+    return;
+  }
+  if (gesto.tipo === 'espera' && Math.hypot(p.x - gesto.inicio.x, p.y - gesto.inicio.y) > 8 * lienzo.width / lienzo.getBoundingClientRect().width) {
+    clearTimeout(temporizadorIntercambio);
+    gesto.tipo = 'mover';
+  }
+  if (gesto.tipo === 'mover') {
+    moverEncuadre(gesto.indice, p.x - gesto.ultimo.x, p.y - gesto.ultimo.y);
+    gesto.ultimo = p;
+    dibujar();
+  } else if (gesto.tipo === 'intercambio') {
+    const sobre = casillaEn(p);
+    if (sobre !== intercambioSobre) { intercambioSobre = sobre; dibujar(); }
+  }
+});
+
+function terminarGesto(e) {
+  punteros.delete(e.pointerId);
+  clearTimeout(temporizadorIntercambio);
+  if (!gesto) return;
+  if (gesto.tipo === 'zoom') {
+    // Al levantar un dedo del pellizco, el otro sigue moviendo el encuadre.
+    if (punteros.size === 1) gesto = { tipo: 'mover', indice: gesto.indice, ultimo: [...punteros.values()][0] };
+    return;
+  }
+  if (punteros.size > 0) return;
+  if (gesto.tipo === 'intercambio') {
+    const destino = intercambioSobre;
+    intercambioDesde = intercambioSobre = -1;
+    if (destino >= 0 && destino !== gesto.indice && fotos[destino]) intercambiarFotos(gesto.indice, destino);
+    else dibujar();
+  }
+  gesto = null;
+  lienzo.classList.remove('moviendo');
+}
+lienzo.addEventListener('pointerup', terminarGesto);
+lienzo.addEventListener('pointercancel', terminarGesto);
+lienzo.addEventListener('contextmenu', (e) => e.preventDefault());
+
+lienzo.addEventListener('wheel', (e) => {
+  const punto = puntoEnLienzo(e);
+  const indice = casillaEn(punto);
+  if (indice < 0 || !fotos[indice]) return;
+  e.preventDefault();
+  if (indice !== seleccionada) seleccionar(indice);
+  fijarZoom(indice, fotos[indice].zoom * Math.exp(-e.deltaY * 0.0015), punto);
+  dibujar();
+}, { passive: false });
+
+lienzo.addEventListener('dblclick', (e) => {
+  const indice = casillaEn(puntoEnLienzo(e));
+  if (indice < 0 || !fotos[indice]) return;
+  Object.assign(fotos[indice], { zoom: 1, cx: 0.5, cy: 0.5 });
+  seleccionar(indice);
+});
+
+// --- Controles ----------------------------------------------------------------
+zoomFoto.addEventListener('input', () => {
+  if (seleccionada < 0) return;
+  fijarZoom(seleccionada, parseInt(zoomFoto.value, 10) / 100);
+  dibujar();
+});
+document.getElementById('botonCentrar').addEventListener('click', () => {
+  if (seleccionada < 0) return;
+  Object.assign(fotos[seleccionada], { zoom: 1, cx: 0.5, cy: 0.5 });
+  seleccionar(seleccionada);
+});
+document.getElementById('botonAntes').addEventListener('click', () => moverFoto(seleccionada, seleccionada - 1));
+document.getElementById('botonDespues').addEventListener('click', () => moverFoto(seleccionada, seleccionada + 1));
+document.getElementById('botonListo').addEventListener('click', () => seleccionar(-1));
+
+document.querySelectorAll('#botonesFormato button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    document.querySelectorAll('#botonesFormato button').forEach((b) => b.classList.toggle('activo', b === boton));
+    proporcion = boton.dataset.proporcion.split(':').map(Number);
+    dibujar();
+  });
+});
+
+elEspacio.addEventListener('input', () => { document.getElementById('etiquetaEspacio').textContent = elEspacio.value; dibujar(); });
+elRedondeo.addEventListener('input', () => { document.getElementById('etiquetaRedondeo').textContent = elRedondeo.value; dibujar(); });
+elColorFondo.addEventListener('input', dibujar);
+
+document.getElementById('botonDescargar').addEventListener('click', async () => {
+  const boton = document.getElementById('botonDescargar');
+  boton.disabled = true;
+  boton.textContent = 'Generando...';
+  try {
+    const formato = document.getElementById('formatoSalida').value;
+    const canvas = document.createElement('canvas');
+    dibujarEn(canvas, parseInt(document.getElementById('tamanoSalida').value, 10), true);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
+    if (!blob) throw new Error('el navegador no pudo generar la imagen (probá con un tamaño menor)');
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = formato === 'image/png' ? 'collage.png' : 'collage.jpg';
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
+  } catch (error) {
+    alert('No se pudo generar el collage: ' + error.message);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Descargar collage';
+  }
+});
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
 entradaArchivo.addEventListener('change', (e) => { agregarArchivos(e.target.files); entradaArchivo.value = ''; });
@@ -139,64 +683,6 @@ zonaArrastre.addEventListener('drop', (e) => {
   e.preventDefault();
   zonaArrastre.classList.remove('activa');
   agregarArchivos(e.dataTransfer.files);
-});
-
-elTamanoCelda.addEventListener('input', () => etiquetaCelda.textContent = elTamanoCelda.value);
-elEspacio.addEventListener('input', () => etiquetaEspacio.textContent = elEspacio.value);
-
-// Encaja la imagen en la celda tipo "cover": la recorta centrada en vez de
-// deformarla, igual que el object-fit:cover de CSS pero dibujado a mano.
-function dibujarCover(ctx, img, celdaX, celdaY, celdaAncho, celdaAlto) {
-  const escala = Math.max(celdaAncho / img.naturalWidth, celdaAlto / img.naturalHeight);
-  const anchoDestino = img.naturalWidth * escala;
-  const altoDestino = img.naturalHeight * escala;
-  const offsetX = celdaX + (celdaAncho - anchoDestino) / 2;
-  const offsetY = celdaY + (celdaAlto - altoDestino) / 2;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(celdaX, celdaY, celdaAncho, celdaAlto);
-  ctx.clip();
-  ctx.drawImage(img, offsetX, offsetY, anchoDestino, altoDestino);
-  ctx.restore();
-}
-
-botonGenerar.addEventListener('click', async () => {
-  botonGenerar.disabled = true;
-  botonGenerar.textContent = 'Generando...';
-  try {
-    const columnas = Math.max(1, parseInt(elColumnas.value, 10) || 1);
-    const filas = Math.max(1, parseInt(elFilas.value, 10) || 1);
-    const celda = parseInt(elTamanoCelda.value, 10);
-    const espacio = parseInt(elEspacio.value, 10);
-    const maxCeldas = columnas * filas;
-
-    const imagenes = await Promise.all(archivos.slice(0, maxCeldas).map(cargarImagen));
-
-    vistaPrevia.width = columnas * celda + (columnas + 1) * espacio;
-    vistaPrevia.height = filas * celda + (filas + 1) * espacio;
-    contexto.fillStyle = elColorFondo.value;
-    contexto.fillRect(0, 0, vistaPrevia.width, vistaPrevia.height);
-
-    imagenes.forEach((img, indice) => {
-      const col = indice % columnas;
-      const fila = Math.floor(indice / columnas);
-      const x = espacio + col * (celda + espacio);
-      const y = espacio + fila * (celda + espacio);
-      dibujarCover(contexto, img, x, y, celda, celda);
-    });
-
-    vistaPrevia.style.display = 'block';
-
-    const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, 'image/png'));
-    enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = 'collage.png';
-    resultado.classList.add('visible');
-  } catch (error) {
-    alert('No se pudo generar el collage: ' + error.message);
-  } finally {
-    botonGenerar.disabled = false;
-    botonGenerar.textContent = 'Generar collage';
-  }
 });
 </script>
 <script src="../assets/js/tema.js"></script>

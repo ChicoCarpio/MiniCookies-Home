@@ -68,6 +68,17 @@ const botones = ['botonIzquierda', 'botonDerecha', 'botonVolteoH', 'botonVolteoV
 let archivoActual = null;
 let imagenActual = null;
 
+// Formato de la imagen descargada: se respetan PNG y WebP (guardan
+// transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
+// sale como PNG: antes todo lo que no era PNG salía como JPG, y la
+// transparencia de un WebP/GIF quedaba pintada de negro.
+const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+function formatoDeSalida(archivo) {
+  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+}
+
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
+
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -99,11 +110,11 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
@@ -158,11 +169,10 @@ document.getElementById('botonVolteoH').addEventListener('click', () => voltear(
 document.getElementById('botonVolteoV').addEventListener('click', () => voltear(false));
 
 document.getElementById('botonDescargar').addEventListener('click', async () => {
-  const esPng = archivoActual.type === 'image/png';
-  const formato = esPng ? 'image/png' : 'image/jpeg';
+  const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-editada.${esPng ? 'png' : 'jpg'}`;
+  enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

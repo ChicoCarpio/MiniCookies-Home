@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lector de códigos QR y de barras gratis — Mini Cookies</title>
+<meta name="description" content="Leé un código QR o de barras desde una imagen o con la cámara, gratis y sin enviar nada a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Lector de códigos QR y de barras</h1>
+  <p>Subí una imagen o usá la cámara para leer un código QR o de barras (EAN-13, CODE128, CODE39 y más).</p>
+
+  <div class="panel-herramienta">
+    <div class="controles" style="margin-bottom:20px;">
+      <button class="boton" id="botonModoImagen" type="button">📁 Subir imagen</button>
+      <button class="boton" id="botonModoCamara" type="button" style="background:#94a3b8;">📷 Usar cámara</button>
+    </div>
+
+    <div id="seccionImagen">
+      <div class="zona-arrastre" id="zonaArrastre">
+        🖼️ Arrastrá una imagen acá o hacé clic para elegirla
+        <input type="file" id="entradaArchivo" accept="image/*" hidden>
+      </div>
+    </div>
+
+    <div id="seccionCamara" style="display:none;">
+      <div class="controles" id="controlesCamara" style="display:none; margin-bottom:12px;">
+        <label class="campo">
+          Cámara
+          <select id="selectorCamara"></select>
+        </label>
+      </div>
+      <div style="display:flex; justify-content:center; background:#000; border-radius:var(--radio); overflow:hidden;">
+        <video id="video" style="max-width:100%; max-height:400px;" muted playsinline></video>
+      </div>
+      <div class="controles" style="margin-top:12px;">
+        <button class="boton" id="botonDetenerCamara" type="button">Detener cámara</button>
+      </div>
+    </div>
+
+    <p id="mensajeError" style="color:#dc2626; display:none; margin-top:16px;"></p>
+
+    <div class="resultado" id="resultado">
+      ✅ <strong id="formatoResultado"></strong>
+      <p id="textoResultado" style="word-break:break-all; margin:10px 0;"></p>
+      <div class="controles">
+        <button class="boton" id="botonCopiar" type="button">Copiar</button>
+        <a class="boton" id="enlaceAbrir" href="#" target="_blank" rel="noopener" style="display:none; text-decoration:none;">Abrir enlace</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.23.0/umd/index.min.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const seccionImagen = document.getElementById('seccionImagen');
+const seccionCamara = document.getElementById('seccionCamara');
+const botonModoImagen = document.getElementById('botonModoImagen');
+const botonModoCamara = document.getElementById('botonModoCamara');
+const controlesCamara = document.getElementById('controlesCamara');
+const selectorCamara = document.getElementById('selectorCamara');
+const video = document.getElementById('video');
+const botonDetenerCamara = document.getElementById('botonDetenerCamara');
+const mensajeError = document.getElementById('mensajeError');
+const resultado = document.getElementById('resultado');
+const formatoResultado = document.getElementById('formatoResultado');
+const textoResultado = document.getElementById('textoResultado');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceAbrir = document.getElementById('enlaceAbrir');
+
+const lector = new ZXing.BrowserMultiFormatReader();
+let camaraActiva = false;
+let deviceIdActivo = null;
+
+function mostrarError(texto) {
+  mensajeError.textContent = '❌ ' + texto;
+  mensajeError.style.display = 'block';
+}
+
+function ocultarError() {
+  mensajeError.style.display = 'none';
+}
+
+function mostrarResultado(resultadoZXing) {
+  ocultarError();
+  const texto = resultadoZXing.getText();
+  const formato = resultadoZXing.getBarcodeFormat();
+  formatoResultado.textContent = 'Código detectado (' + formato + ')';
+  textoResultado.textContent = texto;
+
+  const esUrl = /^https?:\/\//i.test(texto.trim());
+  if (esUrl) {
+    enlaceAbrir.href = texto.trim();
+    enlaceAbrir.style.display = 'inline-block';
+  } else {
+    enlaceAbrir.style.display = 'none';
+  }
+
+  resultado.classList.add('visible');
+}
+
+botonCopiar.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(textoResultado.textContent);
+    botonCopiar.textContent = '✅ Copiado';
+    setTimeout(() => botonCopiar.textContent = 'Copiar', 1500);
+  } catch (error) {
+    mostrarError('No se pudo copiar: ' + error.message);
+  }
+});
+
+// --- Modo imagen ---
+
+function leerImagen(archivo) {
+  ocultarError();
+  resultado.classList.remove('visible');
+  const url = URL.createObjectURL(archivo);
+  lector.decodeFromImageUrl(url)
+    .then(mostrarResultado)
+    .catch(() => mostrarError('No se encontró ningún código QR o de barras en esa imagen.'))
+    .finally(() => URL.revokeObjectURL(url));
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => {
+  if (e.target.files[0]) leerImagen(e.target.files[0]);
+});
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  const archivo = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+  if (archivo) leerImagen(archivo);
+});
+
+// --- Modo cámara ---
+
+function detenerCamara() {
+  lector.reset();
+  camaraActiva = false;
+  seccionCamara.style.display = 'none';
+}
+
+async function iniciarCamara(deviceId, esReintento) {
+  ocultarError();
+  resultado.classList.remove('visible');
+  seccionCamara.style.display = 'block';
+  try {
+    lector.reset();
+    await lector.decodeFromVideoDevice(deviceId || null, video, (resultadoZXing, error) => {
+      if (resultadoZXing) mostrarResultado(resultadoZXing);
+    });
+    camaraActiva = true;
+    deviceIdActivo = deviceId || deviceIdActivo;
+
+    if (!selectorCamara.options.length) {
+      const dispositivos = await navigator.mediaDevices.enumerateDevices();
+      const camaras = dispositivos.filter(d => d.kind === 'videoinput');
+      if (camaras.length > 1) {
+        selectorCamara.replaceChildren(...camaras.map((c, i) => new Option(c.label || 'Cámara ' + (i + 1), c.deviceId)));
+        if (deviceIdActivo) selectorCamara.value = deviceIdActivo;
+        controlesCamara.style.display = 'block';
+      }
+    } else if (deviceIdActivo) {
+      selectorCamara.value = deviceIdActivo;
+    }
+  } catch (error) {
+    camaraActiva = false;
+    mostrarError('No se pudo acceder a esa cámara (¿está apagada o sin señal?): ' + error.message);
+    if (selectorCamara.options.length) selectorCamara.value = deviceIdActivo || '';
+    if (deviceIdActivo && !esReintento) {
+      iniciarCamara(deviceIdActivo, true);
+    } else if (!deviceIdActivo) {
+      seccionCamara.style.display = 'none';
+    }
+  }
+}
+
+function activarModo(modo) {
+  if (camaraActiva) detenerCamara();
+  ocultarError();
+  resultado.classList.remove('visible');
+  if (modo === 'imagen') {
+    seccionImagen.style.display = 'block';
+    seccionCamara.style.display = 'none';
+    botonModoImagen.style.background = '';
+    botonModoCamara.style.background = '#94a3b8';
+  } else {
+    seccionImagen.style.display = 'none';
+    botonModoCamara.style.background = '';
+    botonModoImagen.style.background = '#94a3b8';
+    iniciarCamara();
+  }
+}
+
+botonModoImagen.addEventListener('click', () => activarModo('imagen'));
+botonModoCamara.addEventListener('click', () => activarModo('camara'));
+botonDetenerCamara.addEventListener('click', () => activarModo('imagen'));
+selectorCamara.addEventListener('change', () => {
+  iniciarCamara(selectorCamara.value);
+});
+
+window.addEventListener('beforeunload', () => { if (camaraActiva) lector.reset(); });
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

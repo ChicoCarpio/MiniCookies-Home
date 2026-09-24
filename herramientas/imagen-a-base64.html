@@ -37,6 +37,7 @@
 
     <div class="controles">
       <button class="boton" id="botonCopiar" type="button" disabled>Copiar Base64</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" disabled>Descargar .txt</button>
     </div>
 
     <textarea id="salida" readonly style="margin-top:12px; min-height:160px;" placeholder="El texto Base64 aparece acá..."></textarea>
@@ -50,21 +51,26 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/descargar.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const vistaPrevia = document.getElementById('vistaPrevia');
 const botonCopiar = document.getElementById('botonCopiar');
 const salida = document.getElementById('salida');
+const botonDescargar = document.getElementById('botonDescargar');
+let nombreImagen = 'imagen';
 
 function mostrarArchivo(archivo) {
   if (!archivo) return;
+  nombreImagen = archivo.name.replace(/\.[^.]+$/, '') || 'imagen';
   const lector = new FileReader();
   lector.onload = () => {
     salida.value = lector.result;
     vistaPrevia.src = lector.result;
     vistaPrevia.style.display = 'block';
     botonCopiar.disabled = false;
+    botonDescargar.disabled = false;
   };
   lector.readAsDataURL(archivo);
 }
@@ -75,7 +81,7 @@ function elegirArchivo(listaFileList) {
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
@@ -90,6 +96,11 @@ botonCopiar.addEventListener('click', async () => {
   const textoOriginal = botonCopiar.textContent;
   botonCopiar.textContent = '¡Copiado!';
   setTimeout(() => { botonCopiar.textContent = textoOriginal; }, 1500);
+});
+
+// El data URI completo ("data:image/...;base64,..."), igual que lo que se copia.
+botonDescargar.addEventListener('click', () => {
+  if (salida.value) descargarTexto(salida.value, `${nombreImagen}-base64.txt`);
 });
 </script>
 <script src="../assets/js/tema.js"></script>

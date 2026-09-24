@@ -118,6 +118,14 @@ botonesFormato.forEach((boton) => {
 
 elCalidad.addEventListener('input', () => etiquetaCalidad.textContent = elCalidad.value);
 
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
+
+// Los nombres de archivo van dentro de innerHTML: se escapan para que un
+// nombre con "<" o "&" se muestre tal cual en vez de interpretarse como HTML.
+function escaparHtml(texto) {
+  return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -129,7 +137,7 @@ function cargarImagen(archivo) {
 
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
-  listaArchivo.innerHTML = archivo ? `<li><span>${archivo.name}</span></li>` : '';
+  listaArchivo.innerHTML = archivo ? `<li><span>${escaparHtml(archivo.name)}</span></li>` : '';
   if (!archivo) {
     vistaPrevia.style.display = 'none';
     botonConvertir.disabled = true;
@@ -146,11 +154,11 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {

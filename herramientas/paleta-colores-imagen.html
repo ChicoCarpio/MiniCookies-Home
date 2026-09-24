@@ -56,6 +56,10 @@
     <div class="paleta" id="paleta"></div>
 
     <p id="ayudaCopiar" style="display:none; color: var(--texto-suave); font-size: 0.9rem;">Tocá un color para copiar su código.</p>
+    <div class="controles" id="controlesDescarga" style="display:none;">
+      <button class="boton" id="botonDescargarPng" type="button">Descargar paleta (.png)</button>
+      <button class="boton" id="botonDescargarTxt" type="button" style="background:#64748b;">Descargar códigos (.txt)</button>
+    </div>
   </div>
 
   <div class="anuncio">Espacio publicitario</div>
@@ -66,6 +70,7 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/descargar.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -77,6 +82,8 @@ const elCantidad = document.getElementById('cantidad');
 const etiquetaCantidad = document.getElementById('etiquetaCantidad');
 
 let imagenActual = null;
+
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -120,7 +127,14 @@ function extraerColoresDominantes(imageData, cantidad) {
     }));
 }
 
+let coloresActuales = [];
+let nombreImagen = 'imagen';
+
+function hexDe(c) { return `#${componenteHex(c.r)}${componenteHex(c.g)}${componenteHex(c.b)}`; }
+
 function mostrarPaleta(colores) {
+  coloresActuales = colores;
+  document.getElementById('controlesDescarga').style.display = colores.length ? 'flex' : 'none';
   paleta.innerHTML = colores.map((c) => {
     const hex = `#${componenteHex(c.r)}${componenteHex(c.g)}${componenteHex(c.b)}`;
     return `
@@ -179,6 +193,7 @@ async function mostrarArchivo(archivo) {
     return;
   }
   imagenActual = await cargarImagen(archivo);
+  nombreImagen = archivo.name.replace(/\.[^.]+$/, '') || 'imagen';
   vistaPrevia.width = imagenActual.naturalWidth;
   vistaPrevia.height = imagenActual.naturalHeight;
   contexto.drawImage(imagenActual, 0, 0);
@@ -188,17 +203,54 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
   e.preventDefault();
   zonaArrastre.classList.remove('activa');
   elegirArchivo(e.dataTransfer.files);
+});
+
+// ===== Descargar =====
+// PNG: una tarjeta por color (muestra + código + porcentaje), de a 8 por fila.
+document.getElementById('botonDescargarPng').addEventListener('click', () => {
+  if (!coloresActuales.length) return;
+  const ANCHO = 160, ALTO_MUESTRA = 140, ALTO_TEXTO = 56, POR_FILA = 8, MARGEN = 12;
+  const columnas = Math.min(POR_FILA, coloresActuales.length);
+  const filas = Math.ceil(coloresActuales.length / POR_FILA);
+  const canvas = document.createElement('canvas');
+  canvas.width = columnas * ANCHO + (columnas + 1) * MARGEN;
+  canvas.height = filas * (ALTO_MUESTRA + ALTO_TEXTO) + (filas + 1) * MARGEN;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  coloresActuales.forEach((c, i) => {
+    const x = MARGEN + (i % POR_FILA) * (ANCHO + MARGEN);
+    const y = MARGEN + Math.floor(i / POR_FILA) * (ALTO_MUESTRA + ALTO_TEXTO + MARGEN);
+    ctx.fillStyle = hexDe(c);
+    ctx.fillRect(x, y, ANCHO, ALTO_MUESTRA);
+    ctx.strokeStyle = '#d4d4d8';
+    ctx.strokeRect(x + 0.5, y + 0.5, ANCHO - 1, ALTO_MUESTRA + ALTO_TEXTO - 1);
+    ctx.fillStyle = '#18181b';
+    ctx.font = 'bold 18px system-ui, sans-serif';
+    ctx.fillText(hexDe(c).toUpperCase(), x + 10, y + ALTO_MUESTRA + 26);
+    ctx.fillStyle = '#71717a';
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillText(`${c.porcentaje.toFixed(1)}%`, x + 10, y + ALTO_MUESTRA + 46);
+  });
+  canvas.toBlob((blob) => descargarBlob(blob, `${nombreImagen}-paleta.png`), 'image/png');
+});
+
+// TXT: un color por línea (código HEX, RGB y porcentaje).
+document.getElementById('botonDescargarTxt').addEventListener('click', () => {
+  if (!coloresActuales.length) return;
+  const lineas = coloresActuales.map((c) => `${hexDe(c).toUpperCase()}\trgb(${c.r}, ${c.g}, ${c.b})\t${c.porcentaje.toFixed(1)}%`);
+  descargarTexto(`Paleta de ${nombreImagen}\n\n${lineas.join('\n')}\n`, `${nombreImagen}-paleta.txt`);
 });
 </script>
 <script src="../assets/js/tema.js"></script>

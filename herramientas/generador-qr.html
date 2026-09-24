@@ -22,7 +22,7 @@
 
 <main>
   <h1>Generador de códigos QR</h1>
-  <p>Escribí un link o texto y generá un código QR al instante. Se genera en tu navegador, no se envía a ningún servidor.</p>
+  <p>Escribí un link o texto y generá un código QR al instante.</p>
 
   <div class="panel-herramienta">
     <label class="campo">
@@ -42,7 +42,11 @@
       <button class="boton" id="botonGenerar">Generar QR</button>
     </div>
 
-    <div id="contenedorQR" style="margin-top:20px; display:flex; justify-content:center;"></div>
+    <p id="mensajeError" style="color:#dc2626; display:none;"></p>
+    <div style="margin-top:20px; display:flex; justify-content:center;">
+      <canvas id="vistaQR" style="display:none; max-width:100%; height:auto; border-radius:8px;"></canvas>
+    </div>
+    <div id="contenedorQR" hidden></div>
 
     <div class="resultado" id="resultado" style="text-align:center;">
       ✅ Listo. <a id="enlaceDescarga" download="codigo-qr.png">Descargar QR como imagen</a>
@@ -65,27 +69,51 @@ const contenedorQR = document.getElementById('contenedorQR');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
+const vistaQR = document.getElementById('vistaQR');
+const mensajeError = document.getElementById('mensajeError');
+
+// La librería dibuja el QR pegado a los bordes, sin el margen blanco ("zona
+// de silencio") que los lectores necesitan para encontrarlo: sin él, el QR
+// puesto sobre un fondo oscuro (o en el modo oscuro del sitio) muchas veces
+// no se lee. Se arma un canvas final con 4 módulos de margen blanco, que es
+// el que se ve y el que se descarga.
 function generarQR() {
   const texto = entradaTexto.value.trim();
   contenedorQR.innerHTML = '';
   resultado.classList.remove('visible');
+  mensajeError.style.display = 'none';
+  vistaQR.style.display = 'none';
   if (!texto) return;
 
   const tamano = parseInt(document.getElementById('tamano').value, 10);
-  new QRCode(contenedorQR, {
-    text: texto,
-    width: tamano,
-    height: tamano,
-    correctLevel: QRCode.CorrectLevel.M,
-  });
+  let qr;
+  try {
+    qr = new QRCode(contenedorQR, {
+      text: texto,
+      width: tamano,
+      height: tamano,
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+  } catch (error) {
+    mensajeError.textContent = '❌ El texto es demasiado largo para un código QR. Probá acortarlo (por ejemplo, con un acortador de links).';
+    mensajeError.style.display = 'block';
+    return;
+  }
+  const canvasQR = contenedorQR.querySelector('canvas');
+  if (!canvasQR) return;
 
-  setTimeout(() => {
-    const canvas = contenedorQR.querySelector('canvas');
-    if (canvas) {
-      enlaceDescarga.href = canvas.toDataURL('image/png');
-      resultado.classList.add('visible');
-    }
-  }, 100);
+  const modulos = (qr._oQRCode && qr._oQRCode.getModuleCount && qr._oQRCode.getModuleCount()) || 33;
+  const margen = Math.ceil(4 * tamano / modulos);
+  vistaQR.width = tamano + margen * 2;
+  vistaQR.height = tamano + margen * 2;
+  const ctx = vistaQR.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, vistaQR.width, vistaQR.height);
+  ctx.drawImage(canvasQR, margen, margen);
+  vistaQR.style.display = 'block';
+
+  enlaceDescarga.href = vistaQR.toDataURL('image/png');
+  resultado.classList.add('visible');
 }
 
 botonGenerar.addEventListener('click', generarQR);

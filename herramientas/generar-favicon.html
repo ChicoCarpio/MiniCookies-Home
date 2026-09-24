@@ -82,6 +82,8 @@ const TAMANOS = [
   { lado: 512, nombre: 'icon-512.png' },
 ];
 
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
+
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -141,15 +143,66 @@ async function mostrarArchivo(archivo) {
 
     favicones.appendChild(item);
   });
+
+  // favicon.ico: el archivo clásico que los navegadores piden solos en
+  // /favicon.ico, con los tres tamaños chicos adentro.
+  const itemIco = document.createElement('div');
+  itemIco.className = 'favicon-item';
+  itemIco.innerHTML = '<p><strong>favicon.ico</strong><br>16, 32 y 48 px en un solo archivo</p>';
+  const enlaceIco = document.createElement('a');
+  enlaceIco.textContent = 'Descargar';
+  enlaceIco.download = 'favicon.ico';
+  const parrafoIco = document.createElement('p');
+  parrafoIco.appendChild(enlaceIco);
+  itemIco.appendChild(parrafoIco);
+  favicones.prepend(itemIco);
+  generarIco([16, 32, 48]).then((blob) => { enlaceIco.href = URL.createObjectURL(blob); });
+}
+
+// Arma un .ico con PNGs adentro (formato que aceptan todos los navegadores
+// actuales y Windows Vista en adelante): cabecera de 6 bytes, una entrada de
+// 16 bytes por tamaño, y a continuación cada PNG tal cual.
+async function generarIco(lados) {
+  const pngs = await Promise.all(lados.map((lado) => new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = lado;
+    canvas.height = lado;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(vistaPrevia, 0, 0, lado, lado);
+    canvas.toBlob(async (blob) => resolve(new Uint8Array(await blob.arrayBuffer())), 'image/png');
+  })));
+  const largoCabecera = 6 + 16 * pngs.length;
+  const buffer = new ArrayBuffer(largoCabecera + pngs.reduce((suma, png) => suma + png.length, 0));
+  const vista = new DataView(buffer);
+  const bytes = new Uint8Array(buffer);
+  vista.setUint16(0, 0, true); // reservado
+  vista.setUint16(2, 1, true); // tipo 1 = ícono
+  vista.setUint16(4, pngs.length, true);
+  let offset = largoCabecera;
+  pngs.forEach((png, i) => {
+    const entrada = 6 + 16 * i;
+    const lado = lados[i] >= 256 ? 0 : lados[i]; // 0 significa 256
+    vista.setUint8(entrada, lado);
+    vista.setUint8(entrada + 1, lado);
+    vista.setUint16(entrada + 4, 1, true); // planos de color
+    vista.setUint16(entrada + 6, 32, true); // bits por píxel
+    vista.setUint32(entrada + 8, png.length, true);
+    vista.setUint32(entrada + 12, offset, true);
+    bytes.set(png, offset);
+    offset += png.length;
+  });
+  return new Blob([buffer], { type: 'image/x-icon' });
 }
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {

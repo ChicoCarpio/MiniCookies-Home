@@ -26,7 +26,7 @@
 
 <main>
   <h1>Formatear y validar JSON</h1>
-  <p>Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error. Todo en tu navegador.</p>
+  <p>Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error.</p>
 
   <div class="panel-herramienta">
     <textarea id="entrada" placeholder='{"ejemplo": true, "numero": 42}'></textarea>
@@ -35,6 +35,7 @@
       <button class="boton" id="botonFormatear" type="button">Formatear (indentado)</button>
       <button class="boton" id="botonMinificar" type="button" style="background:#64748b;">Minificar</button>
       <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar resultado</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar .json</button>
     </div>
 
     <p id="mensajeError" style="color:#dc2626; display:none;"></p>
@@ -51,6 +52,7 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/descargar.js"></script>
 <script>
 const entrada = document.getElementById('entrada');
 const salida = document.getElementById('salida');
@@ -120,6 +122,14 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
   const textoOriginal = boton.textContent;
   boton.textContent = '¡Copiado!';
   setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+});
+
+// Descarga lo que haya en el resultado; si todavía no se formateó, formatea
+// primero (así el botón sirve también como "formatear y descargar").
+document.getElementById('botonDescargar').addEventListener('click', () => {
+  if (!salida.value && entrada.value.trim()) procesar(2);
+  if (!salida.value) return;
+  descargarTexto(salida.value, nombreConFecha('json-formateado', 'json'), 'application/json');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

@@ -22,7 +22,7 @@
 
 <main>
   <h1>Contador de palabras</h1>
-  <p>Escribí o pegá tu texto abajo. Se cuenta en tiempo real, directo en tu navegador.</p>
+  <p>Escribí o pegá tu texto abajo. Se cuenta en tiempo real.</p>
 
   <div class="panel-herramienta">
     <textarea id="texto" placeholder="Pegá o escribí tu texto acá..."></textarea>
@@ -57,7 +57,12 @@ function contar() {
   const caracteres = texto.length;
   const caracteresSinEspacios = texto.replace(/\s/g, '').length;
   const parrafos = textoRecortado === '' ? 0 : textoRecortado.split(/\n+/).filter(p => p.trim() !== '').length;
-  const oraciones = textoRecortado === '' ? 0 : (textoRecortado.match(/[.!?¡¿]+/g) || []).length;
+  // Solo cuentan los signos que CIERRAN una oración (antes "¿Hola?" contaba
+  // 2 porque también sumaba el "¿" de apertura), y si el texto termina sin
+  // punto final, esa última oración también cuenta.
+  const cierres = (textoRecortado.match(/[.!?…]+/g) || []).length;
+  const terminaSinCierre = textoRecortado !== '' && !/[.!?…]["'»”)\]]*$/.test(textoRecortado);
+  const oraciones = cierres + (terminaSinCierre ? 1 : 0);
   const minutos = Math.max(1, Math.ceil(palabras / PALABRAS_POR_MINUTO));
 
   document.getElementById('numPalabras').textContent = palabras;

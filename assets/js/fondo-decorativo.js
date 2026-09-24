@@ -1,3 +1,4 @@
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Genera el fondo decorativo del sitio: unos pocos íconos sueltos, cada uno
 // en una celda de una grilla floja con una posición/tamaño/rotación al azar
 // dentro de esa celda (no una grilla pareja), salteando celdas al azar para

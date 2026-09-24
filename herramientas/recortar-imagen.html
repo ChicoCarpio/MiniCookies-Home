@@ -118,6 +118,7 @@
         </div>
       </label>
       <button class="boton" id="botonRecortar" disabled>Recortar</button>
+      <span id="tamanoRecorte" style="color:var(--texto-suave); font-size:0.85rem;"></span>
     </div>
 
     <canvas id="vistaResultado"></canvas>
@@ -157,9 +158,22 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let archivoActual = null;
 let imagenActual = null;
 let ratioObjetivo = 0; // 0 = libre
+let anchoMostradoPrevio = 0;
+const tamanoRecorte = document.getElementById('tamanoRecorte');
 // Caja de selección en píxeles DENTRO del elemento <img> ya escalado (no en
 // píxeles reales de la imagen — esa conversión se hace recién al recortar).
 let caja = { x: 0, y: 0, w: 100, h: 100 };
+
+// Formato de la imagen descargada: se respetan PNG y WebP (guardan
+// transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
+// sale como PNG: antes todo lo que no era PNG salía como JPG, y la
+// transparencia de un WebP/GIF quedaba pintada de negro.
+const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+function formatoDeSalida(archivo) {
+  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+}
+
+const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -175,12 +189,28 @@ function dibujarCaja() {
   cajaSeleccion.style.top = `${caja.y}px`;
   cajaSeleccion.style.width = `${caja.w}px`;
   cajaSeleccion.style.height = `${caja.h}px`;
+  // Tamaño real (en píxeles de la imagen) que va a tener el recorte.
+  if (imagenActual && imgRecorte.offsetWidth) {
+    const escala = imagenActual.naturalWidth / imgRecorte.offsetWidth;
+    tamanoRecorte.textContent = `Recorte: ${Math.round(caja.w * escala)} × ${Math.round(caja.h * escala)} px`;
+  }
+  anchoMostradoPrevio = imgRecorte.offsetWidth;
 }
 
 function limitarCaja() {
   const anchoImg = imgRecorte.offsetWidth, altoImg = imgRecorte.offsetHeight;
-  caja.w = Math.max(20, Math.min(caja.w, anchoImg));
-  caja.h = Math.max(20, Math.min(caja.h, altoImg));
+  if (ratioObjetivo > 0) {
+    // Con relación fija, al chocar con un borde se achican los DOS lados
+    // (antes se recortaba solo el que chocaba y el resultado salía con otra
+    // proporción).
+    let w = Math.min(Math.max(20, caja.w), anchoImg);
+    let h = w / ratioObjetivo;
+    if (h > altoImg) { h = altoImg; w = h * ratioObjetivo; }
+    caja.w = w; caja.h = h;
+  } else {
+    caja.w = Math.max(20, Math.min(caja.w, anchoImg));
+    caja.h = Math.max(20, Math.min(caja.h, altoImg));
+  }
   caja.x = Math.max(0, Math.min(caja.x, anchoImg - caja.w));
   caja.y = Math.max(0, Math.min(caja.y, altoImg - caja.h));
 }
@@ -292,11 +322,11 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) mostrarArchivo(archivo);
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
@@ -305,7 +335,15 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
-window.addEventListener('resize', () => { if (imagenActual) { limitarCaja(); dibujarCaja(); } });
+// Si cambia el tamaño de la ventana, la imagen se muestra más grande o más
+// chica: la selección se escala con ella para seguir marcando la misma zona.
+window.addEventListener('resize', () => {
+  if (!imagenActual || !anchoMostradoPrevio || !imgRecorte.offsetWidth) return;
+  const factor = imgRecorte.offsetWidth / anchoMostradoPrevio;
+  caja = { x: caja.x * factor, y: caja.y * factor, w: caja.w * factor, h: caja.h * factor };
+  limitarCaja();
+  dibujarCaja();
+});
 
 botonRecortar.addEventListener('click', () => {
   const escala = imagenActual.naturalWidth / imgRecorte.offsetWidth;
@@ -323,11 +361,10 @@ botonRecortar.addEventListener('click', () => {
 });
 
 botonDescargar.addEventListener('click', async () => {
-  const esPng = archivoActual.type === 'image/png';
-  const formato = esPng ? 'image/png' : 'image/jpeg';
+  const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaResultado.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-recortada.${esPng ? 'png' : 'jpg'}`;
+  enlaceDescarga.download = `imagen-recortada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

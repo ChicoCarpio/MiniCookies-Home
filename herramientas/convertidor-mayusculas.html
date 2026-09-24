@@ -22,7 +22,7 @@
 
 <main>
   <h1>Convertir mayúsculas y minúsculas</h1>
-  <p>Escribí o pegá tu texto y elegí el formato. Todo en tu navegador.</p>
+  <p>Escribí o pegá tu texto y elegí el formato.</p>
 
   <div class="panel-herramienta">
     <textarea id="texto" placeholder="Escribí o pegá tu texto acá..."></textarea>
@@ -34,6 +34,7 @@
       <button class="boton" data-modo="oracion" type="button">Solo la primera letra</button>
       <button class="boton" data-modo="alternado" type="button">AltErNaDo</button>
       <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar .txt</button>
     </div>
   </div>
 
@@ -45,6 +46,7 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/descargar.js"></script>
 <script>
 const texto = document.getElementById('texto');
 
@@ -54,7 +56,10 @@ const modos = {
   titulo: (t) => t.toLowerCase().replace(/(^|\s)\p{L}/gu, (letra) => letra.toUpperCase()),
   oracion: (t) => {
     const minuscula = t.toLowerCase();
-    return minuscula.replace(/(^\s*\p{L}|[.!?¡¿]\s+\p{L})/gu, (letra) => letra.toUpperCase());
+    // Mayúscula en la primera letra de cada oración, también cuando la
+    // oración arranca con "¿", "¡", comillas o paréntesis (antes "¿hola?"
+    // quedaba sin mayúscula).
+    return minuscula.replace(/(^|[.!?…]\s+|\n\s*)([¿¡"'«“(\[]*)(\p{L})/gu, (_, antes, signos, letra) => antes + signos + letra.toUpperCase());
   },
   alternado: (t) => [...t].map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''),
 };
@@ -71,6 +76,10 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
   const textoOriginal = boton.textContent;
   boton.textContent = '¡Copiado!';
   setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+});
+
+document.getElementById('botonDescargar').addEventListener('click', () => {
+  if (texto.value) descargarTexto(texto.value, nombreConFecha('texto', 'txt'));
 });
 </script>
 <script src="../assets/js/tema.js"></script>

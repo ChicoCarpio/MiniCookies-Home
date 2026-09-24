@@ -40,7 +40,7 @@
 
 <main>
   <h1>Comparar dos textos</h1>
-  <p>Pegá la versión original y la nueva. Te mostramos qué se agregó (en verde) y qué se quitó (en rojo). Todo en tu navegador.</p>
+  <p>Pegá la versión original y la nueva. Te mostramos qué se agregó (en verde) y qué se quitó (en rojo).</p>
 
   <div class="panel-herramienta">
     <div class="columnas">
@@ -62,6 +62,9 @@
     </div>
 
     <div class="resultado-diff" id="resultadoDiff"></div>
+    <div class="controles" id="controlesDescarga" style="display:none;">
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar informe (.html)</button>
+    </div>
   </div>
 
   <div class="anuncio">Espacio publicitario</div>
@@ -73,6 +76,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/9.0.0/diff.min.js"></script>
+<script src="../assets/js/descargar.js"></script>
 <script>
 document.getElementById('botonComparar').addEventListener('click', () => {
   const textoA = document.getElementById('textoA').value;
@@ -88,6 +92,33 @@ document.getElementById('botonComparar').addEventListener('click', () => {
     elemento.textContent = parte.value;
     contenedor.appendChild(elemento);
   });
+  document.getElementById('controlesDescarga').style.display = 'flex';
+});
+
+// Informe: página HTML independiente (se abre en cualquier navegador y se
+// puede imprimir o guardar como PDF), con lo agregado en verde y lo quitado
+// en rojo tachado. El contenido ya está escapado (se armó con textContent).
+document.getElementById('botonDescargar').addEventListener('click', () => {
+  const contenedor = document.getElementById('resultadoDiff');
+  if (!contenedor.childNodes.length) return;
+  const agregados = contenedor.querySelectorAll('ins').length;
+  const quitados = contenedor.querySelectorAll('del').length;
+  const fecha = new Date().toLocaleString('es');
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Comparación de textos</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; color: #18181b; }
+  .texto { white-space: pre-wrap; line-height: 1.6; border: 1px solid #d4d4d8; border-radius: 8px; padding: 16px; }
+  ins { background: #dcfce7; color: #166534; text-decoration: none; }
+  del { background: #fee2e2; color: #991b1b; }
+  .nota { color: #71717a; font-size: 0.9rem; }
+</style></head><body>
+<h1>Comparación de textos</h1>
+<p class="nota">${fecha} · ${agregados} cambio(s) agregado(s) <ins>en verde</ins> · ${quitados} quitado(s) <del>en rojo</del> · Comparado ${document.getElementById('porPalabra').checked ? 'por palabra' : 'por línea'}.</p>
+<div class="texto">${contenedor.innerHTML}</div>
+<p class="nota">Generado con Mini Cookies — minicookies.net</p>
+</body></html>`;
+  descargarTexto(html, nombreConFecha('comparacion-textos', 'html'), 'text/html');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

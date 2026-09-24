@@ -22,7 +22,7 @@
 
 <main>
   <h1>Generador de Lorem Ipsum</h1>
-  <p>Generá texto de relleno para maquetas y pruebas. Todo en tu navegador.</p>
+  <p>Generá texto de relleno para maquetas y pruebas.</p>
 
   <div class="panel-herramienta">
     <div class="controles">
@@ -47,6 +47,7 @@
     <textarea id="resultado" readonly style="margin-top:16px;"></textarea>
     <div class="controles">
       <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar .txt</button>
     </div>
   </div>
 
@@ -58,6 +59,7 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/descargar.js"></script>
 <script>
 const PALABRAS = ('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor ' +
   'incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ' +
@@ -108,17 +110,24 @@ document.getElementById('botonGenerar').addEventListener('click', () => {
     for (let i = 0; i < cantidad; i++) partes.push(generarParrafo(4 + Math.floor(Math.random() * 3)));
   }
 
-  let resultado = unidad === 'palabras' ? partes[0] : partes.join(unidad === 'oraciones' ? ' ' : '\n\n');
-
+  // El inicio clásico REEMPLAZA el comienzo (no se suma), así la cantidad
+  // pedida se respeta. Antes, en "Oraciones" se partía el texto por espacios
+  // y solo se descartaba la primera palabra (la oración quedaba cortada), y
+  // en "Palabras" se agregaban 8 palabras de más.
   if (empezarClasico) {
     const inicioClasico = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
     if (unidad === 'palabras') {
-      resultado = 'lorem ipsum dolor sit amet consectetur adipiscing elit ' + resultado;
+      const clasicas = ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit'];
+      const palabras = partes[0].split(' ');
+      partes = [[...clasicas.slice(0, cantidad), ...palabras.slice(clasicas.length)].slice(0, cantidad).join(' ')];
+    } else if (unidad === 'oraciones') {
+      partes[0] = inicioClasico;
     } else {
-      const resto = resultado.split(unidad === 'oraciones' ? ' ' : '\n\n').slice(1);
-      resultado = [inicioClasico, ...resto].join(unidad === 'oraciones' ? ' ' : '\n\n');
+      // Párrafos: la primera oración del primer párrafo pasa a ser la clásica.
+      partes[0] = partes[0].replace(/^[^.]*\./, inicioClasico);
     }
   }
+  const resultado = unidad === 'palabras' ? partes[0] : partes.join(unidad === 'oraciones' ? ' ' : '\n\n');
 
   document.getElementById('resultado').value = resultado;
 });
@@ -131,6 +140,11 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
   const textoOriginal = boton.textContent;
   boton.textContent = '¡Copiado!';
   setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+});
+
+document.getElementById('botonDescargar').addEventListener('click', () => {
+  const texto = document.getElementById('resultado').value;
+  if (texto) descargarTexto(texto, nombreConFecha('lorem-ipsum', 'txt'));
 });
 
 document.getElementById('botonGenerar').click();

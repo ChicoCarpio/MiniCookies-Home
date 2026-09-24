@@ -22,7 +22,7 @@
 
 <main>
   <h1>Extraer emails, teléfonos y links</h1>
-  <p>Pegá cualquier texto (un correo, una página, tus notas) y sacamos todos los emails, teléfonos y links que contenga. Todo en tu navegador.</p>
+  <p>Pegá cualquier texto (un correo, una página, tus notas) y sacamos todos los emails, teléfonos y links que contenga.</p>
 
   <div class="panel-herramienta">
     <textarea id="entrada" placeholder="Pegá acá el texto donde buscar..."></textarea>
@@ -50,6 +50,10 @@
         Links
         <textarea id="resultadoLinks" readonly style="min-height:100px;"></textarea>
       </label>
+      <div class="controles">
+        <button class="boton" id="botonDescargarCsv" type="button">Descargar todo (.csv para Excel)</button>
+        <button class="boton" id="botonDescargarTxt" type="button" style="background:#64748b;">Descargar .txt</button>
+      </div>
     </div>
   </div>
 
@@ -61,6 +65,7 @@
   <p><a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/descargar.js"></script>
 <script>
 const RE_EMAIL = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 const RE_TELEFONO = /(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g;
@@ -75,7 +80,9 @@ document.getElementById('botonExtraer').addEventListener('click', () => {
   const texto = document.getElementById('entrada').value;
 
   const emails = extraerUnico(texto, RE_EMAIL);
-  const links = extraerUnico(texto, RE_LINK);
+  // Un link al final de una oración ("visitá https://ejemplo.com.") venía con
+  // el punto/coma pegado y quedaba roto: se le sacan los signos finales.
+  const links = [...new Set(extraerUnico(texto, RE_LINK).map((l) => l.replace(/[.,;:!?»”'"\]]+$/, '')))];
   // Se excluyen del resultado de teléfonos los números que ya forman parte de un link o email,
   // para no listar dos veces la misma coincidencia bajo categorías distintas.
   const textoSinLinksNiEmails = texto.replace(RE_LINK, ' ').replace(RE_EMAIL, ' ');
@@ -91,6 +98,31 @@ document.getElementById('botonExtraer').addEventListener('click', () => {
 
   document.getElementById('estadisticas').style.display = 'grid';
   document.getElementById('bloqueResultados').style.display = 'block';
+  ultimoResultado = { emails, telefonos, links };
+});
+
+// ===== Descargar =====
+let ultimoResultado = null;
+
+// CSV con una fila por dato: Tipo, Valor (con BOM para que Excel lea bien los acentos).
+document.getElementById('botonDescargarCsv').addEventListener('click', () => {
+  if (!ultimoResultado) return;
+  const celda = (v) => `"${String(v).replace(/"/g, '""')}"`;
+  const filas = [['Tipo', 'Valor']];
+  ultimoResultado.emails.forEach((v) => filas.push(['Email', v]));
+  ultimoResultado.telefonos.forEach((v) => filas.push(['Teléfono', v]));
+  ultimoResultado.links.forEach((v) => filas.push(['Link', v]));
+  descargarTexto(filas.map((f) => f.map(celda).join(',')).join('\r\n'), nombreConFecha('contactos', 'csv'), 'text/csv', true);
+});
+
+document.getElementById('botonDescargarTxt').addEventListener('click', () => {
+  if (!ultimoResultado) return;
+  const seccion = (titulo, lista) => `${titulo} (${lista.length})\n${lista.join('\n') || '—'}`;
+  descargarTexto([
+    seccion('Emails', ultimoResultado.emails),
+    seccion('Teléfonos', ultimoResultado.telefonos),
+    seccion('Links', ultimoResultado.links),
+  ].join('\n\n') + '\n', nombreConFecha('contactos', 'txt'));
 });
 </script>
 <script src="../assets/js/tema.js"></script>
