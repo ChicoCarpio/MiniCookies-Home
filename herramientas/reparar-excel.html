@@ -15,7 +15,7 @@ window.i18nPagina = {
     'titulo-pagina': 'Reparar Excel gratis — Herramientas Ofimáticas',
     'meta-descripcion': 'Intentá recuperar un archivo Excel (.xlsx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Reparar Excel',
-    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) que no abre bien y probamos reconstruirlo.',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) que no abre bien. Probamos dos niveles de reparación, del menos al más invasivo.',
     'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
     'boton-reparar': 'Reparar',
     'boton-reparar-procesando': 'Reparando...',
@@ -24,16 +24,19 @@ window.i18nPagina = {
     'limitaciones-titulo': 'Limitaciones',
     'limitaciones-item': 'No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.',
     'error-sin-datos': 'No se encontraron datos legibles en ninguna hoja.',
-    'mensaje-todo-ok': '✅ Se pudo leer el archivo y se reconstruyó desde cero.',
-    'mensaje-parcial': '⚠️ Se recuperaron {n} de {total} hojas — las demás no tenían datos legibles.',
+    'mensaje-todo-ok': '⚠️ Reparado con el nivel 2: el libro se volvió a armar con los datos (valores, fórmulas y formatos de número). Se perdieron colores, bordes, fuentes, imágenes y gráficos.',
+    'mensaje-parcial': '⚠️ Reparado con el nivel 2: se recuperaron {n} de {total} hojas, solo con los datos (se perdieron colores, bordes, fuentes, imágenes y gráficos).',
+    'mensaje-sano': '✅ El archivo no tiene partes dañadas: no hace falta repararlo (el archivo de abajo es igual al original). Si Excel igual no lo abre, podés reconstruirlo solo con los datos.',
+    'mensaje-nivel1': '✅ Reparado con el nivel 1: se quitaron las hojas dañadas ({hojas}) y el resto del libro quedó intacto, con su formato, gráficos e imágenes.',
+    'boton-forzar': 'Reconstruir solo con los datos (nivel 2)',
     'error-reparar': 'No se pudo reparar el archivo',
-    'nota-formato': 'El archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.'
+    'nota-formato': 'Nivel 1: se revisa cada parte del archivo y se quitan solo las hojas dañadas; el resto queda intacto (formato, gráficos, imágenes, tablas). Nivel 2, si el 1 no alcanza: el libro se vuelve a armar con los datos (valores, fórmulas y formatos de número) y se pierden colores, bordes, fuentes, imágenes y gráficos.'
   },
   en: {
     'titulo-pagina': 'Repair Excel Free — Herramientas Ofimáticas',
     'meta-descripcion': 'Try to recover a damaged Excel file (.xlsx) that won’t open properly, free and without uploading your file anywhere.',
     'h1': 'Repair Excel',
-    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) that doesn’t open properly and we’ll try to rebuild it.',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) that doesn’t open properly. We try two repair levels, from least to most invasive.',
     'zona-arrastre': '📊 Drag your file here or click to choose it',
     'boton-reparar': 'Repair',
     'boton-reparar-procesando': 'Repairing...',
@@ -42,10 +45,13 @@ window.i18nPagina = {
     'limitaciones-titulo': 'Limitations',
     'limitaciones-item': 'There’s no "text-only rescue" like there is for Word/PDF: if no row in the file can be read, there’s no reliable way to rescue unstructured tabular data — it reports that it couldn’t be repaired instead of making up a result.',
     'error-sin-datos': 'No readable data was found on any sheet.',
-    'mensaje-todo-ok': '✅ The file could be read and was rebuilt from scratch.',
-    'mensaje-parcial': '⚠️ {n} of {total} sheets were recovered — the rest had no readable data.',
+    'mensaje-todo-ok': '⚠️ Repaired with level 2: the workbook was rebuilt from its data (values, formulas and number formats). Colors, borders, fonts, images and charts were lost.',
+    'mensaje-parcial': '⚠️ Repaired with level 2: {n} of {total} sheets were recovered, data only (colors, borders, fonts, images and charts were lost).',
+    'mensaje-sano': '✅ The file has no damaged parts: it doesn’t need repairing (the file below is the same as the original). If Excel still won’t open it, you can rebuild it from its data only.',
+    'mensaje-nivel1': '✅ Repaired with level 1: the damaged sheets were removed ({hojas}) and the rest of the workbook was kept intact, with its formatting, charts and images.',
+    'boton-forzar': 'Rebuild from data only (level 2)',
     'error-reparar': 'Couldn’t repair the file',
-    'nota-formato': 'The file is rebuilt from its data: values, formulas and number formats (dates, currencies) are kept, but colors, borders, fonts, images and charts are lost.'
+    'nota-formato': 'Level 1: each part of the file is checked and only the damaged sheets are removed; the rest stays intact (formatting, charts, images, tables). Level 2, if level 1 isn’t enough: the workbook is rebuilt from its data (values, formulas and number formats) and colors, borders, fonts, images and charts are lost.'
   }
 };
 </script>
@@ -78,7 +84,10 @@ window.i18nPagina = {
     </div>
 
     <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
-    <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
+    <p id="mensajeNivel" style="display:none; font-size:0.9rem;"></p>
+    <div class="controles" id="controlesForzar" style="display:none;">
+      <button class="boton" id="botonForzar" type="button" style="background:#64748b;" data-i18n="boton-forzar">Reconstruir solo con los datos (nivel 2)</button>
+    </div>
 
     <div class="resultado" id="resultado">
       <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="excel-reparado.xlsx" data-i18n="resultado-enlace">Descargar Excel reparado</a>
@@ -101,7 +110,9 @@ window.i18nPagina = {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -136,41 +147,105 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
-botonReparar.addEventListener('click', async () => {
+const controlesForzar = document.getElementById('controlesForzar');
+
+// Nivel 1 (solo .xlsx/.xlsm, que son un .zip con partes XML): revisa el
+// libro, sus relaciones y cada hoja; si hay hojas con XML inválido o que
+// faltan, las quita con reordenarHojasExcel (ooxml-paquete.js), que además
+// limpia sus relaciones, nombres definidos y referencias — el resto del libro
+// no se toca (formato, gráficos, imágenes, tablas). Antes la herramienta
+// siempre rearmaba el libro desde cero con SheetJS y un archivo sano o con
+// una sola hoja rota perdía todo el formato. Devuelve { bytes, quitadas }
+// ({ quitadas: [] } si no hay nada dañado) o tira un error si hace falta el
+// nivel 2.
+async function repararConservandoFormato(bytes) {
+  const zip = await JSZip.loadAsync(bytes);
+  // Partes generales: si alguna está rota, el nivel 1 no alcanza.
+  for (const ruta of ['[Content_Types].xml', 'xl/_rels/workbook.xml.rels', 'xl/styles.xml', 'xl/sharedStrings.xml']) {
+    if (zip.file(ruta)) await leerXmlDeZip(zip, ruta);
+  }
+  const libro = await leerXmlDeZip(zip, 'xl/workbook.xml');
+  if (!libro) throw new Error('xl/workbook.xml');
+  const relaciones = await relacionesDeParte(zip, 'xl/workbook.xml');
+  const hojas = [...libro.getElementsByTagName('sheet')];
+  const sanas = [], quitadas = [];
+  for (const hoja of hojas) {
+    const idRel = hoja.getAttributeNS(NS_RELACIONES_OOXML, 'id') || hoja.getAttribute('r:id');
+    const rel = relaciones.find((r) => r.id === idRel);
+    let sana = false;
+    if (rel && zip.file(rel.destino)) {
+      const doc = new DOMParser().parseFromString(await zip.file(rel.destino).async('string'), 'application/xml');
+      sana = doc.getElementsByTagName('parsererror').length === 0;
+    }
+    (sana ? sanas : quitadas).push(hoja.getAttribute('name'));
+  }
+  if (sanas.length === 0) throw new Error(t('error-sin-datos'));
+  if (quitadas.length === 0) return { bytes, quitadas };
+  await reordenarHojasExcel(zip, sanas);
+  const tipo = /\.xlsm$/i.test(archivoActual.name) ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  return { bytes: await zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE', mimeType: tipo }), quitadas };
+}
+
+// Nivel 2: vuelve a armar el libro con los datos que SheetJS pueda leer.
+function repararSoloDatos(bytes) {
+  const libro = XLSX.read(bytes, { type: 'array', cellNF: true, cellStyles: false, cellHTML: false });
+  const hojasConDatos = libro.SheetNames.filter((nombre) => libro.Sheets[nombre] && libro.Sheets[nombre]['!ref']);
+  if (hojasConDatos.length === 0) throw new Error(t('error-sin-datos'));
+  const libroLimpio = XLSX.utils.book_new();
+  hojasConDatos.forEach((nombre) => XLSX.utils.book_append_sheet(libroLimpio, libro.Sheets[nombre], nombre));
+  const mensaje = hojasConDatos.length === libro.SheetNames.length
+    ? t('mensaje-todo-ok')
+    : t('mensaje-parcial').replace('{n}', hojasConDatos.length).replace('{total}', libro.SheetNames.length);
+  return { bytes: XLSX.write(libroLimpio, { bookType: 'xlsx', type: 'array' }), mensaje };
+}
+
+function mostrarResultado(bytes, nombre, mensaje, aviso, ofrecerNivel2) {
+  enlaceDescarga.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
+  enlaceDescarga.download = nombre;
+  resultado.classList.add('visible');
+  mensajeNivel.textContent = mensaje;
+  mensajeNivel.style.color = aviso ? '#b45309' : '#166534';
+  mensajeNivel.style.display = 'block';
+  controlesForzar.style.display = ofrecerNivel2 ? 'flex' : 'none';
+}
+
+const nombreBase = () => archivoActual.name.replace(/\.[^.]+$/, '');
+
+async function reparar(forzarNivel2) {
   botonReparar.disabled = true;
   botonReparar.textContent = t('boton-reparar-procesando');
   mensajeNivel.style.display = 'none';
+  controlesForzar.style.display = 'none';
+  resultado.classList.remove('visible');
   try {
     const bytes = await archivoActual.arrayBuffer();
-    const libro = XLSX.read(bytes, { type: 'array', cellNF: true, cellStyles: false, cellHTML: false });
-
-    const hojasConDatos = libro.SheetNames.filter(nombre => {
-      const hoja = libro.Sheets[nombre];
-      return hoja && hoja['!ref'];
-    });
-    if (hojasConDatos.length === 0) throw new Error(t('error-sin-datos'));
-
-    const libroLimpio = XLSX.utils.book_new();
-    hojasConDatos.forEach(nombre => {
-      XLSX.utils.book_append_sheet(libroLimpio, libro.Sheets[nombre], nombre);
-    });
-
-    const bytesFinales = XLSX.write(libroLimpio, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
-    enlaceDescarga.href = URL.createObjectURL(blob);
-    resultado.classList.add('visible');
-
-    mensajeNivel.textContent = hojasConDatos.length === libro.SheetNames.length
-      ? t('mensaje-todo-ok')
-      : t('mensaje-parcial').replace('{n}', hojasConDatos.length).replace('{total}', libro.SheetNames.length);
-    mensajeNivel.style.display = 'block';
+    const esOoxml = /\.(xlsx|xlsm)$/i.test(archivoActual.name);
+    if (esOoxml && !forzarNivel2) {
+      try {
+        const { bytes: reparados, quitadas } = await repararConservandoFormato(bytes.slice(0));
+        const extension = archivoActual.name.split('.').pop().toLowerCase();
+        if (quitadas.length === 0) {
+          mostrarResultado(reparados, archivoActual.name, t('mensaje-sano'), false, true);
+        } else {
+          mostrarResultado(reparados, `${nombreBase()}-reparado.${extension}`, t('mensaje-nivel1').replace('{hojas}', quitadas.join(', ')), false, true);
+        }
+        return;
+      } catch (errorNivel1) {
+        console.warn('Nivel 1 no alcanzó, probando nivel 2:', errorNivel1);
+      }
+    }
+    const { bytes: reparados, mensaje } = repararSoloDatos(bytes);
+    mostrarResultado(reparados, `${nombreBase()}-reparado.xlsx`, mensaje, true, false);
   } catch (error) {
     alert(t('error-reparar') + ': ' + error.message);
   } finally {
     botonReparar.disabled = false;
     botonReparar.textContent = t('boton-reparar');
   }
-});
+}
+
+botonReparar.addEventListener('click', () => reparar(false));
+document.getElementById('botonForzar').addEventListener('click', () => reparar(true));
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>

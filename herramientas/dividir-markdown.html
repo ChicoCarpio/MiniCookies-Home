@@ -84,6 +84,7 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -98,8 +99,16 @@ function dividirMarkdownEnSecciones(texto) {
   const lineas = texto.split('\n');
   const bloques = [];
   let actual = null;
+  // Dentro de un bloque de código (``` o ~~~) un "#" no es un título (es un
+  // comentario de Python/Bash, por ejemplo): antes cortaba el documento ahí.
+  let valla = null;
   lineas.forEach((linea) => {
-    if (/^#\s+/.test(linea)) {
+    const marca = linea.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (marca) {
+      if (!valla) valla = marca[1];
+      else if (marca[1][0] === valla[0] && marca[1].length >= valla.length) valla = null;
+    }
+    if (!valla && !marca && /^#\s+/.test(linea)) {
       actual = { titulo: linea.replace(/^#\s+/, '').trim() || t('epub-sin-titulo'), lineas: [linea] };
       bloques.push(actual);
     } else if (actual) {
@@ -138,7 +147,7 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.disabled = true;
   botonDividir.textContent = t('boton-dividir-procesando');
   try {
-    const texto = await archivoActual.text();
+    const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
     const secciones = dividirMarkdownEnSecciones(texto);
     if (secciones.length < 2) throw new Error(t('error-pocas-secciones'));
 
@@ -147,7 +156,7 @@ botonDividir.addEventListener('click', async () => {
     secciones.forEach((seccion, i) => {
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
       const nombreLimpio = seccion.titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || 'seccion';
-      zip.file(`${numero}-${nombreLimpio}.md`, seccion.texto);
+      zip.file(`${numero}-${nombreLimpio}.md`, conFinDeLinea(seccion.texto, finDeLinea));
     });
 
     const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });

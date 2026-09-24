@@ -159,12 +159,18 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
+// Identificador (ISBN/uuid) e idioma del libro: se conservan al guardar.
+let idiomaLibro = '';
+let identificadorLibro = '';
+
 async function cargarLibro(archivo) {
   cargando.style.display = 'block';
   try {
-    const { titulo, autor, capitulos: capitulosLeidos } = await leerEpub(archivo);
+    const { titulo, autor, idioma, identificador, capitulos: capitulosLeidos } = await leerEpub(archivo);
     tituloLibro = titulo;
     autorLibro = autor;
+    idiomaLibro = idioma;
+    identificadorLibro = identificador;
     capitulos = capitulosLeidos.map(cap => ({ id: siguienteId++, titulo: cap.titulo, html: cap.html }));
     renderizarLista();
   } catch (error) {
@@ -183,6 +189,8 @@ botonGuardar.addEventListener('click', async () => {
     const blob = await construirEpub({
       titulo: tituloLibro,
       autor: autorLibro,
+      idioma: idiomaLibro || undefined,
+      identificador: identificadorLibro || undefined,
       capitulos: capitulos.map(c => ({ titulo: c.titulo, html: c.html })),
     });
     enlaceDescarga.href = URL.createObjectURL(blob);

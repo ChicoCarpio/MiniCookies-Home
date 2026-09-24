@@ -240,13 +240,28 @@ botonExtraer.addEventListener('click', async () => {
     // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
     // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
     const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
-    const paginasMarkdown = [];
+    const paginas = [];
+    for (let i = 1; i <= pdf.numPages; i++) paginas.push(await extraerParrafosPaginaPdf(await pdf.getPage(i)));
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const textoPagina = await extraerTextoPaginaPdf(await pdf.getPage(i));
-      const parrafos = textoPagina.split(/\n\s*\n/).map(unirRenglonesDeParrafo).filter(Boolean);
-      paginasMarkdown.push(parrafos.map(escaparMarkdown).join('\n\n'));
-    }
+    // Títulos por tamaño de letra: el tamaño del texto normal es el que más
+    // caracteres tiene en todo el documento; un párrafo corto bastante más
+    // grande que eso es un título (#, ## o ### según cuánto más grande).
+    // Antes no se detectaba ningún título: todo salía como párrafos.
+    const caracteresPorTamano = new Map();
+    paginas.flat().forEach((p) => {
+      const tamano = Math.round(p.alto * 2) / 2;
+      caracteresPorTamano.set(tamano, (caracteresPorTamano.get(tamano) || 0) + p.texto.length);
+    });
+    const tamanoNormal = [...caracteresPorTamano.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 10;
+    const aMarkdown = (p) => {
+      const proporcion = p.alto / tamanoNormal;
+      const esCorto = p.texto.length <= 150 && !/[.:;,]$/.test(p.texto);
+      if (esCorto && proporcion >= 1.6) return '# ' + escaparMarkdown(p.texto);
+      if (esCorto && proporcion >= 1.3) return '## ' + escaparMarkdown(p.texto);
+      if (esCorto && proporcion >= 1.15) return '### ' + escaparMarkdown(p.texto);
+      return escaparMarkdown(p.texto);
+    };
+    const paginasMarkdown = paginas.map((parrafos) => parrafos.map(aMarkdown).join('\n\n'));
 
     if (!paginasMarkdown.some(p => p.trim())) {
       throw new Error(t('error-sin-texto'));

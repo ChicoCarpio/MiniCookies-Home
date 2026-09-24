@@ -86,6 +86,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -97,6 +98,8 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let parrafos = []; // [{ id, texto }]
+let finDeLineaArchivo = '\n';
+let terminaEnSalto = false;
 let siguienteId = 0;
 
 function etiquetaCorta(texto) {
@@ -163,8 +166,12 @@ zonaArrastre.addEventListener('drop', (e) => {
 async function cargarArchivo(archivo) {
   cargando.style.display = 'block';
   try {
-    const texto = await archivo.text();
-    const bloques = texto.split(/\n\s*\n/);
+    const { texto, finDeLinea } = await leerTextoArchivo(archivo);
+    finDeLineaArchivo = finDeLinea;
+    // El salto de línea final del archivo no es parte del último párrafo (si
+    // no, al moverlo quedaba una línea en blanco de más); se agrega al guardar.
+    terminaEnSalto = texto.endsWith('\n');
+    const bloques = texto.replace(/\n+$/, '').split(/\n\s*\n/);
     parrafos = bloques.map(b => ({ id: siguienteId++, texto: b }));
     renderizarLista();
   } catch (error) {
@@ -177,8 +184,8 @@ async function cargarArchivo(archivo) {
 botonGuardar.addEventListener('click', () => {
   try {
     if (parrafos.length === 0) throw new Error(t('error-sin-parrafos'));
-    const textoFinal = parrafos.map(p => p.texto).join('\n\n');
-    const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
+    const textoFinal = parrafos.map(p => p.texto).join('\n\n') + (terminaEnSalto ? '\n' : '');
+    const blob = new Blob([conFinDeLinea(textoFinal, finDeLineaArchivo)], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

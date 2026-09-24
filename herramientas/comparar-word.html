@@ -43,6 +43,12 @@ window.i18nPagina = {
     'zona-b': '📝 Arrastrá el .docx nuevo o hacé clic',
     'campo-por-palabra': 'Comparar por palabra (si no, por línea)',
     'boton-comparar': 'Comparar',
+    'boton-descargar-informe': 'Descargar informe (.html)',
+    'informe-titulo': 'Comparación de documentos Word',
+    'informe-original': 'Original',
+    'informe-nuevo': 'Nuevo',
+    'informe-agregados': 'agregado(s) en verde',
+    'informe-quitados': 'quitado(s) en rojo',
     'boton-comparar-procesando': 'Comparando...',
     'error-comparar': 'No se pudo comparar los documentos'
   },
@@ -60,6 +66,12 @@ window.i18nPagina = {
     'zona-b': '📝 Drag the new .docx or click',
     'campo-por-palabra': 'Compare by word (otherwise, by line)',
     'boton-comparar': 'Compare',
+    'boton-descargar-informe': 'Download report (.html)',
+    'informe-titulo': 'Word documents comparison',
+    'informe-original': 'Original',
+    'informe-nuevo': 'New',
+    'informe-agregados': 'added, in green',
+    'informe-quitados': 'removed, in red',
     'boton-comparar-procesando': 'Comparing...',
     'error-comparar': 'Couldn’t compare the documents'
   }
@@ -113,6 +125,9 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado-diff" id="resultadoDiff" style="display:none;"></div>
+    <div class="controles" id="controlesDescarga" style="display:none;">
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" data-i18n="boton-descargar-informe">Descargar informe (.html)</button>
+    </div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -125,6 +140,8 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/9.0.0/diff.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/descargar.js"></script>
 <script>
 const zonaArrastreA = document.getElementById('zonaArrastreA');
 const zonaArrastreB = document.getElementById('zonaArrastreB');
@@ -182,12 +199,38 @@ botonComparar.addEventListener('click', async () => {
       resultadoDiff.appendChild(elemento);
     });
     resultadoDiff.style.display = 'block';
+    document.getElementById('controlesDescarga').style.display = 'flex';
   } catch (error) {
     alert(t('error-comparar') + ': ' + error.message);
   } finally {
     botonComparar.disabled = false;
     botonComparar.textContent = t('boton-comparar');
   }
+});
+
+// Informe: página HTML independiente (se abre en cualquier navegador y se
+// puede imprimir o guardar como PDF). El contenido ya está escapado (se armó
+// con textContent); los nombres de archivo se escapan acá.
+document.getElementById('botonDescargar').addEventListener('click', () => {
+  if (!resultadoDiff.childNodes.length) return;
+  const agregados = resultadoDiff.querySelectorAll('ins').length;
+  const quitados = resultadoDiff.querySelectorAll('del').length;
+  const html = `<!DOCTYPE html>
+<html lang="${idiomaActual()}"><head><meta charset="UTF-8"><title>${t('informe-titulo')}</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; color: #18181b; }
+  .texto { white-space: pre-wrap; line-height: 1.6; border: 1px solid #d4d4d8; border-radius: 8px; padding: 16px; }
+  ins { background: #dcfce7; color: #166534; text-decoration: none; }
+  del { background: #fee2e2; color: #991b1b; }
+  .nota { color: #71717a; font-size: 0.9rem; }
+</style></head><body>
+<h1>${t('informe-titulo')}</h1>
+<p class="nota">${t('informe-original')}: <strong>${escaparHtml(archivoA.name)}</strong> · ${t('informe-nuevo')}: <strong>${escaparHtml(archivoB.name)}</strong><br>
+${new Date().toLocaleString(idiomaActual())} · ${agregados} <ins>${t('informe-agregados')}</ins> · ${quitados} <del>${t('informe-quitados')}</del></p>
+<div class="texto">${resultadoDiff.innerHTML}</div>
+<p class="nota">Herramientas Ofimáticas — herramientasofimaticas.minicookies.net</p>
+</body></html>`;
+  descargarTexto(html, nombreConFecha('comparacion-word', 'html'), 'text/html');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

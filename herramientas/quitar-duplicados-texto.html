@@ -97,6 +97,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -137,8 +138,10 @@ botonProcesar.addEventListener('click', async () => {
     const quitarDuplicadas = document.getElementById('quitarDuplicadas').checked;
     if (!quitarVacias && !quitarDuplicadas) throw new Error(t('error-sin-opcion'));
 
-    const texto = await archivoActual.text();
-    let lineas = texto.split(/\r\n|\r|\n/);
+    const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
+    // El salto de línea final del archivo no es una línea más (se conserva al guardar).
+    const terminaEnSalto = texto.endsWith('\n');
+    let lineas = (terminaEnSalto ? texto.slice(0, -1) : texto).split('\n');
     const totalOriginal = lineas.length;
 
     if (quitarVacias) lineas = lineas.filter(l => l.trim() !== '');
@@ -153,7 +156,7 @@ botonProcesar.addEventListener('click', async () => {
       });
     }
 
-    const blob = new Blob([lineas.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([conFinDeLinea(lineas.join('\n') + (terminaEnSalto ? '\n' : ''), finDeLinea)], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
 

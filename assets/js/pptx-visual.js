@@ -1,3 +1,4 @@
+/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
 // Helper compartido para renderizar diapositivas de un .pptx a imágenes reales
 // (no solo texto) usando PptxViewJS, y empaquetarlas como PDF o .zip.
 // Requiere que la página ya haya cargado JSZip, Chart.js, PptxViewJS y pdf-lib,
@@ -71,7 +72,12 @@ async function renderizarDiapositivasComoImagenes(archivo, canvas) {
   canvas.width = anchoPxObjetivo;
   canvas.height = altoPxObjetivo;
 
-  const viewer = new PptxViewJS.PPTXViewer({ canvas, slideSizeMode: 'custom' });
+  // autoChartRerenderDelayMs: 0 — por defecto la librería vuelve a dibujar
+  // la diapositiva 1 sobre el mismo canvas 200 ms después (para completar los
+  // gráficos). Con el bucle de abajo eso podía mezclar la diapositiva 1 en la
+  // captura de otra, y si caía después de destroy() tiraba "No PPTX loaded".
+  // El segundo dibujado para los gráficos se hace a mano en cada diapositiva.
+  const viewer = new PptxViewJS.PPTXViewer({ canvas, slideSizeMode: 'custom', autoChartRerenderDelayMs: 0 });
   await viewer.loadFile(archivo);
   const totalDiapositivas = viewer.getSlideCount();
   if (!totalDiapositivas || totalDiapositivas === 0) throw new Error('No se detectaron diapositivas.');
@@ -85,6 +91,12 @@ async function renderizarDiapositivasComoImagenes(archivo, canvas) {
     canvas.width = anchoPxObjetivo;
     canvas.height = altoPxObjetivo;
 
+    await viewer.renderSlide(i, canvas, { scale: ESCALA_RENDERIZADO, quality: 'high' });
+    // Segundo dibujado (lo que hacía la librería sola): los gráficos se
+    // terminan de armar después del primero.
+    await new Promise((listo) => setTimeout(listo, 200));
+    canvas.width = anchoPxObjetivo;
+    canvas.height = altoPxObjetivo;
     await viewer.renderSlide(i, canvas, { scale: ESCALA_RENDERIZADO, quality: 'high' });
 
     // Si después de renderizar el canvas quedó mucho más chico de lo pedido,

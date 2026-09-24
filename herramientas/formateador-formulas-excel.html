@@ -125,6 +125,7 @@ window.i18nPagina = {
     'panel-formateada-titulo': 'Fórmula formateada',
     'boton-copiar': 'Copiar',
     'boton-copiado': '¡Copiado!',
+    'boton-descargar': 'Descargar .txt',
     'boton-no-copiado': 'No se pudo copiar',
     'limitaciones-titulo': 'Limitaciones',
     'limitaciones-p1': 'Nunca se agrega, quita ni reordena nada de tu fórmula — solo se le agregan saltos de línea y sangría para que se lea mejor. Antes de mostrar cualquier resultado se verifica que la versión formateada equivalga exactamente a la original; si algo no cuadra, no formatea nada y avisa del error.',
@@ -190,6 +191,7 @@ window.i18nPagina = {
     'panel-formateada-titulo': 'Formatted formula',
     'boton-copiar': 'Copy',
     'boton-copiado': 'Copied!',
+    'boton-descargar': 'Download .txt',
     'boton-no-copiado': 'Couldn’t copy',
     'limitaciones-titulo': 'Limitations',
     'limitaciones-p1': 'Nothing is ever added, removed or reordered in your formula — only line breaks and indentation are added so it reads better. Before showing any result, it verifies the formatted version is exactly equivalent to the original; if anything doesn’t match, it formats nothing and reports the error.',
@@ -310,7 +312,10 @@ window.i18nPagina = {
     <div class="fmt-panel">
       <div class="fmt-panel-header">
         <span class="fmt-panel-title" data-i18n="panel-formateada-titulo">Fórmula formateada</span>
-        <button type="button" id="btn-copy" class="fmt-btn fmt-btn-accent fmt-btn-small" data-i18n="boton-copiar">Copiar</button>
+        <span>
+          <button type="button" id="btn-download" class="fmt-btn fmt-btn-ghost fmt-btn-small" data-i18n="boton-descargar">Descargar .txt</button>
+          <button type="button" id="btn-copy" class="fmt-btn fmt-btn-accent fmt-btn-small" data-i18n="boton-copiar">Copiar</button>
+        </span>
       </div>
       <pre class="fmt-panel-output" id="output-formula" tabindex="0"></pre>
       <div class="fmt-error-banner" id="error-banner" hidden></div>
@@ -342,6 +347,7 @@ window.i18nPagina = {
 <script type="text/plain" id="ejemplo-formula">=SI.CONJUNTO([@Stock]<=0;"Sin stock";[@Stock]<[@[Stock Mínimo]];"Reponer pronto";[@Stock]>[@[Stock Máximo]];CONCATENAR("Exceso de ";[@Stock]-[@[Stock Máximo]];" unidades");BUSCARX([@Categoría];Tabla_Categorias[Nombre];Tabla_Categorias[Prioridad];0;0)>=Config!$B$2;"Revisar prioridad";VERDADERO;"Normal")</script>
 
 <script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/descargar.js"></script>
 <script>
 (function(){
   "use strict";
@@ -851,6 +857,10 @@ window.i18nPagina = {
       btnCopy.textContent = window.t('boton-no-copiado');
       setTimeout(function(){ btnCopy.textContent = window.t('boton-copiar'); }, 1400);
     });
+  });
+
+  document.getElementById('btn-download').addEventListener('click', function(){
+    if(lastFormattedText) descargarTexto(lastFormattedText + '\n', nombreConFecha('formula-formateada', 'txt'));
   });
 
   btnReset.addEventListener('click', function(){

@@ -148,14 +148,14 @@ botonAplicar.addEventListener('click', async () => {
     if (!texto) throw new Error(t('error-sin-texto'));
     const posicion = document.getElementById('posicion').value;
 
-    const { titulo, autor, capitulos } = await leerEpub(archivoActual);
+    const { titulo, autor, idioma, identificador, capitulos } = await leerEpub(archivoActual);
     const lineaHtml = `<p style="color:#666; font-size:0.85em;"><em>${escaparHtml(texto)}</em></p>`;
     const capitulosNuevos = capitulos.map(cap => ({
       titulo: cap.titulo,
       html: posicion === 'inicio' ? (lineaHtml + cap.html) : (cap.html + lineaHtml),
     }));
 
-    const blob = await construirEpub({ titulo, autor, capitulos: capitulosNuevos });
+    const blob = await construirEpub({ titulo, autor, idioma: idioma || undefined, identificador: identificador || undefined, capitulos: capitulosNuevos });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

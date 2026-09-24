@@ -141,6 +141,7 @@ window.i18nPagina = {
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 const panelWordATexto = document.getElementById('panelWordATexto');
 const panelTextoAWord = document.getElementById('panelTextoAWord');
@@ -267,7 +268,7 @@ botonAWord.addEventListener('click', async () => {
   botonAWord.disabled = true;
   botonAWord.textContent = t('boton-a-word-procesando');
   try {
-    const texto = await archivoTxtActual.text();
+    const { texto } = await leerTextoArchivo(archivoTxtActual);
     const contenedor = document.createElement('div');
     contenedor.innerHTML = textoAHtml(texto);
     const parrafos = await contenidoAParrafos(contenedor);

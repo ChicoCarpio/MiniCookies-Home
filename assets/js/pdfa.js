@@ -1,3 +1,4 @@
+/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
 // Helper para agregar/quitar los marcadores de conformidad PDF/A de un PDF ya
 // cargado con pdf-lib. Requiere que la página ya haya cargado pdf-lib.
 //

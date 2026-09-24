@@ -1,3 +1,4 @@
+/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
 // Helpers compartidos de "texto plano -> PDF", "texto de un PDF con sus
 // renglones y párrafos" y "extraer texto de un .pptx".
 // Requiere que la página ya haya cargado pdf-lib (global PDFLib) y, para
@@ -75,9 +76,12 @@ async function generarPdfDeTexto(texto) {
 // y de párrafo. Acá se reconstruyen a partir de las coordenadas: cambio de
 // altura de la línea base = renglón nuevo; un salto vertical bastante mayor al
 // interlineado habitual de la página = párrafo nuevo.
-// Devuelve el texto con los renglones separados por "\n" y los párrafos por
-// una línea en blanco ("\n\n").
-async function extraerTextoPaginaPdf(pagina) {
+// También corta el párrafo cuando cambia claramente el tamaño de letra (un
+// título seguido de texto normal quedaba pegado en un solo párrafo).
+// extraerRenglonesPaginaPdf devuelve [{ texto, y, alto, parrafoNuevo }] (alto =
+// tamaño de letra aproximado); extraerTextoPaginaPdf, el texto con los
+// renglones separados por "\n" y los párrafos por una línea en blanco ("\n\n").
+async function extraerRenglonesPaginaPdf(pagina) {
   const contenido = await pagina.getTextContent();
   const lineas = [];
   let linea = null;
@@ -104,7 +108,7 @@ async function extraerTextoPaginaPdf(pagina) {
   }
 
   const renglones = lineas.map((l) => ({ ...l, texto: l.texto.replace(/\s+$/, '') })).filter((l) => l.texto !== '');
-  if (renglones.length === 0) return '';
+  if (renglones.length === 0) return [];
 
   // Interlineado habitual = mediana de la distancia entre renglones seguidos.
   const saltos = [];
@@ -115,14 +119,33 @@ async function extraerTextoPaginaPdf(pagina) {
   saltos.sort((a, b) => a - b);
   const interlineado = saltos.length ? saltos[Math.floor(saltos.length / 2)] : renglones[0].alto * 1.2;
 
-  let texto = renglones[0].texto;
+  renglones[0].parrafoNuevo = true;
   for (let i = 1; i < renglones.length; i++) {
     const salto = renglones[i - 1].y - renglones[i].y;
-    // Un salto mucho mayor que el habitual, o hacia arriba (otra columna), separa párrafos.
-    const parrafoNuevo = salto > interlineado * 1.45 || salto < 0;
-    texto += (parrafoNuevo ? '\n\n' : '\n') + renglones[i].texto;
+    const anterior = renglones[i - 1].alto, actual = renglones[i].alto;
+    // Un salto mucho mayor que el habitual, hacia arriba (otra columna), o un
+    // cambio claro de tamaño de letra (título ↔ texto) separa párrafos.
+    renglones[i].parrafoNuevo = salto > interlineado * 1.45 || salto < 0 || Math.max(anterior, actual) / Math.min(anterior, actual) > 1.25;
   }
-  return texto;
+  return renglones;
+}
+
+async function extraerTextoPaginaPdf(pagina) {
+  const renglones = await extraerRenglonesPaginaPdf(pagina);
+  return renglones.map((r, i) => (i === 0 ? '' : r.parrafoNuevo ? '\n\n' : '\n') + r.texto).join('');
+}
+
+// Párrafos de una página con su tamaño de letra (el mayor de sus renglones):
+// [{ texto, alto }], con el texto de cada párrafo en una sola línea.
+async function extraerParrafosPaginaPdf(pagina) {
+  const parrafos = [];
+  for (const r of await extraerRenglonesPaginaPdf(pagina)) {
+    if (r.parrafoNuevo || !parrafos.length) parrafos.push({ renglones: [], alto: 0 });
+    const actual = parrafos[parrafos.length - 1];
+    actual.renglones.push(r.texto);
+    actual.alto = Math.max(actual.alto, r.alto);
+  }
+  return parrafos.map((p) => ({ texto: unirRenglonesDeParrafo(p.renglones.join('\n')), alto: p.alto })).filter((p) => p.texto);
 }
 
 // Une los renglones de un párrafo en una sola línea de texto corrido (para

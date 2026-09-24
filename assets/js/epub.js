@@ -1,3 +1,4 @@
+/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
 // Helpers compartidos para leer y construir archivos EPUB. Un .epub es un .zip
 // con estructura fija (mimetype sin comprimir, META-INF/container.xml, un OPF
 // con manifest/spine, capítulos en XHTML) — no hace falta una librería de EPUB
@@ -40,13 +41,27 @@ function extraerImagenesDataUriEpub(html, prefijo) {
   return { html: htmlNuevo, imagenes };
 }
 
-// contenidoAParrafos-style: recibe { titulo, autor, idioma, capitulos: [{titulo, html}] }
-// y devuelve un Blob del .epub listo para descargar.
-async function construirEpub({ titulo, autor, idioma = 'es', capitulos }) {
+// Un EPUB exige XHTML estricto: el HTML que sale de innerHTML, marked o
+// mammoth trae <br>, <img>, <hr> sin cerrar y entidades como &nbsp;, que un
+// lector estricto (Apple Books, epubcheck) rechaza o muestra roto. Se
+// reserializa con XMLSerializer, que cierra todo y convierte las entidades.
+function htmlAXhtmlEpub(html) {
+  const doc = new DOMParser().parseFromString(`<!DOCTYPE html><html><body>${html}</body></html>`, 'text/html');
+  const serializador = new XMLSerializer();
+  return [...doc.body.childNodes].map((nodo) => serializador.serializeToString(nodo)).join('')
+    // El espacio de nombres ya lo declara el <html> del capítulo.
+    .replace(/ xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"/g, '');
+}
+
+// contenidoAParrafos-style: recibe { titulo, autor, idioma, identificador, capitulos: [{titulo, html}] }
+// y devuelve un Blob del .epub listo para descargar. "identificador": el del
+// libro original cuando se lo modifica (ISBN, uuid...), para que un lector o
+// una tienda lo siga reconociendo como el mismo libro; si falta, se genera uno.
+async function construirEpub({ titulo, autor, idioma = 'es', identificador, capitulos }) {
   if (!capitulos || capitulos.length === 0) throw new Error('No hay contenido para armar el EPUB.');
 
   const zip = new JSZip();
-  const uuid = generarUuidEpub();
+  const uuid = identificador || generarUuidEpub();
   const fecha = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
@@ -83,9 +98,9 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
     });
 
     zip.file(`OEBPS/${nombreArchivo}`, `<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="${ESPACIO_NOMBRES_XHTML}" lang="${idioma}">
+<html xmlns="${ESPACIO_NOMBRES_XHTML}" lang="${escaparXmlEpub(idioma || 'es')}">
 <head><title>${escaparXmlEpub(tituloCapitulo)}</title><link rel="stylesheet" type="text/css" href="styles.css"/></head>
-<body>${htmlSinImagenes || `<h1>${escaparXmlEpub(tituloCapitulo)}</h1>`}</body>
+<body>${htmlSinImagenes ? htmlAXhtmlEpub(htmlSinImagenes) : `<h1>${escaparXmlEpub(tituloCapitulo)}</h1>`}</body>
 </html>`);
 
     manifestItems.push(`<item id="${idCapitulo}" href="${nombreArchivo}" media-type="application/xhtml+xml"/>`);
@@ -103,7 +118,7 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
 
   zip.file('OEBPS/toc.ncx', `<?xml version="1.0" encoding="UTF-8"?>
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
-  <head><meta name="dtb:uid" content="${uuid}"/></head>
+  <head><meta name="dtb:uid" content="${escaparXmlEpub(uuid)}"/></head>
   <docTitle><text>${escaparXmlEpub(titulo)}</text></docTitle>
   <navMap>${navPoints.join('')}</navMap>
 </ncx>`);
@@ -112,9 +127,9 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
   zip.file('OEBPS/content.opf', `<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:identifier id="uid">${uuid}</dc:identifier>
+    <dc:identifier id="uid">${escaparXmlEpub(uuid)}</dc:identifier>
     <dc:title>${escaparXmlEpub(titulo || 'Documento')}</dc:title>
-    <dc:language>${idioma}</dc:language>
+    <dc:language>${escaparXmlEpub(idioma || 'es')}</dc:language>
     <dc:creator>${escaparXmlEpub(autor || 'Herramientas Ofimáticas')}</dc:creator>
     <meta property="dcterms:modified">${fecha}</meta>
   </metadata>
@@ -128,7 +143,9 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
 // Corta un HTML (de mammoth o marked) en capítulos, uno por cada <h1> que
 // encuentra — si no hay ningún <h1>, todo el contenido queda como un único
 // capítulo. El contenido antes del primer <h1> (si lo hay) se agrega como un
-// capítulo inicial sin título propio.
+// capítulo inicial sin título propio. El <h1> queda también al principio del
+// capítulo (antes solo se usaba como nombre en el índice y el lector mostraba
+// el capítulo sin su título).
 function dividirHtmlEnCapitulosEpub(html, tituloPorDefecto) {
   const contenedor = document.createElement('div');
   contenedor.innerHTML = html;
@@ -142,7 +159,7 @@ function dividirHtmlEnCapitulosEpub(html, tituloPorDefecto) {
   let actual = null;
   [...contenedor.childNodes].forEach((nodo) => {
     if (nodo.nodeType === Node.ELEMENT_NODE && nodo.tagName === 'H1') {
-      actual = { titulo: nodo.textContent.trim() || `Capítulo ${capitulos.length + 1}`, nodos: [] };
+      actual = { titulo: nodo.textContent.trim() || `Capítulo ${capitulos.length + 1}`, nodos: [nodo] };
       capitulos.push(actual);
     } else if (actual) {
       actual.nodos.push(nodo);
@@ -189,6 +206,11 @@ async function leerEpub(archivo) {
 
   const titulo = opfDoc.getElementsByTagName('dc:title')[0]?.textContent?.trim() || (window.t ? t('epub-sin-titulo') : 'Sin título');
   const autor = opfDoc.getElementsByTagName('dc:creator')[0]?.textContent?.trim() || '';
+  const idioma = opfDoc.getElementsByTagName('dc:language')[0]?.textContent?.trim() || '';
+  // El identificador principal es el que nombra "unique-identifier" en <package>.
+  const idUnico = opfDoc.documentElement.getAttribute('unique-identifier');
+  const identificadores = [...opfDoc.getElementsByTagName('dc:identifier')];
+  const identificador = ((idUnico && identificadores.find((e) => e.getAttribute('id') === idUnico)) || identificadores[0])?.textContent?.trim() || '';
 
   const manifest = {};
   [...opfDoc.getElementsByTagName('item')].forEach((item) => {
@@ -241,5 +263,5 @@ async function leerEpub(archivo) {
 
   if (capitulos.length === 0) throw new Error(window.t ? t('epub-sin-contenido') : 'No se encontró contenido legible dentro del EPUB.');
 
-  return { titulo, autor, capitulos };
+  return { titulo, autor, idioma, identificador, capitulos };
 }

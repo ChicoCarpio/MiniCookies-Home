@@ -136,6 +136,7 @@ window.i18nPagina = {
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -262,7 +263,7 @@ botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
   botonAPdf.textContent = t('boton-a-pdf-procesando');
   try {
-    const texto = await archivoTxtActual.text();
+    const { texto } = await leerTextoArchivo(archivoTxtActual);
     const pdf = await generarPdfDeTexto(texto);
     const bytesFinales = await pdf.save();
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });

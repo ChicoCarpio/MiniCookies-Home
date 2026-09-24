@@ -105,6 +105,7 @@ window.i18nPagina = {
   <p><a href="../menus/privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../menus/terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../menus/creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../menus/contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -117,7 +118,7 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => /\.(md|markdown)$/i.test(f.name));
-  if (archivo) archivo.text().then(texto => { entrada.value = texto; });
+  if (archivo) leerTextoArchivo(archivo).then(({ texto }) => { entrada.value = texto; });
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());

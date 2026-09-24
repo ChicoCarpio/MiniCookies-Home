@@ -39,7 +39,11 @@ window.i18nPagina = {
     'boton-ocultar-html': 'Ocultar código HTML',
     'boton-copiar-md': 'Copiar Markdown',
     'boton-copiado': '¡Copiado!',
-    'error-convertir': 'No se pudo convertir'
+    'error-convertir': 'No se pudo convertir',
+    'boton-abrir': '📂 Abrir archivo',
+    'boton-descargar-html': 'Descargar .html',
+    'boton-descargar-md': 'Descargar .md',
+    'titulo-documento': 'Documento'
   },
   en: {
     'titulo-pagina': 'Convert Markdown and HTML Free — Herramientas Ofimáticas',
@@ -51,7 +55,11 @@ window.i18nPagina = {
     'boton-ocultar-html': 'Hide HTML code',
     'boton-copiar-md': 'Copy Markdown',
     'boton-copiado': 'Copied!',
-    'error-convertir': 'Couldn’t convert'
+    'error-convertir': 'Couldn’t convert',
+    'boton-abrir': '📂 Open file',
+    'boton-descargar-html': 'Download .html',
+    'boton-descargar-md': 'Download .md',
+    'titulo-documento': 'Document'
   }
 };
 </script>
@@ -93,8 +101,12 @@ window.i18nPagina = {
     </div>
 
     <div class="controles">
+      <button class="boton" id="botonAbrir" type="button" style="background:#64748b;" data-i18n="boton-abrir">📂 Abrir archivo</button>
+      <input type="file" id="entradaArchivo" accept=".md,.markdown,.txt,.html,.htm,text/markdown,text/html,text/plain" hidden>
+      <button class="boton" id="botonDescargarHtml" type="button" data-i18n="boton-descargar-html">Descargar .html</button>
       <button class="boton" id="botonVerHtml" type="button" style="background:#64748b;" data-i18n="boton-ver-html">Ver / copiar código HTML</button>
-      <button class="boton" id="botonCopiarMarkdown" type="button" style="display:none;" data-i18n="boton-copiar-md">Copiar Markdown</button>
+      <button class="boton" id="botonDescargarMarkdown" type="button" style="display:none;" data-i18n="boton-descargar-md">Descargar .md</button>
+      <button class="boton" id="botonCopiarMarkdown" type="button" style="display:none; background:#64748b;" data-i18n="boton-copiar-md">Copiar Markdown</button>
     </div>
 
     <textarea id="salidaHtml" readonly style="display:none; margin-top:12px;"></textarea>
@@ -111,6 +123,8 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/descargar.js"></script>
 <script>
 const entrada = document.getElementById('entrada');
 const etiquetaEntrada = document.getElementById('etiquetaEntrada');
@@ -121,10 +135,20 @@ const salidaMarkdown = document.getElementById('salidaMarkdown');
 const salidaHtml = document.getElementById('salidaHtml');
 const botonVerHtml = document.getElementById('botonVerHtml');
 const botonCopiarMarkdown = document.getElementById('botonCopiarMarkdown');
+const botonDescargarHtml = document.getElementById('botonDescargarHtml');
+const botonDescargarMarkdown = document.getElementById('botonDescargarMarkdown');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const botonAbrir = document.getElementById('botonAbrir');
+// Nombre base de los archivos descargados: el del archivo abierto, si se abrió uno.
+let nombreBase = null;
 
 const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
 
-const EJEMPLO_MARKDOWN = `## Hola mundo
+// Textos de ejemplo en cada idioma. Si el usuario no los tocó, cambian
+// al cambiar el idioma de la página.
+const EJEMPLOS = {
+  es: {
+    md: `## Hola mundo
 
 Este es un ejemplo de **Markdown** con:
 
@@ -134,15 +158,38 @@ Este es un ejemplo de **Markdown** con:
 
 \`\`\`
 Un bloque de código
-\`\`\``;
-
-const EJEMPLO_HTML = `<h2>Hola mundo</h2>
+\`\`\``,
+    html: `<h2>Hola mundo</h2>
 <p>Un párrafo con <strong>negrita</strong> y <em>cursiva</em>.</p>
 <ul>
   <li>Un ítem</li>
   <li>Otro ítem</li>
 </ul>
-<p>Un <a href="https://ejemplo.com">link</a>.</p>`;
+<p>Un <a href="https://ejemplo.com">link</a>.</p>`,
+  },
+  en: {
+    md: `## Hello world
+
+This is an example of **Markdown** with:
+
+- A list
+- *Italic text*
+- [A link](https://example.com)
+
+\`\`\`
+A code block
+\`\`\``,
+    html: `<h2>Hello world</h2>
+<p>A paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
+<ul>
+  <li>An item</li>
+  <li>Another item</li>
+</ul>
+<p>A <a href="https://example.com">link</a>.</p>`,
+  },
+};
+function ejemplo(tipo) { return (EJEMPLOS[idiomaActual()] || EJEMPLOS.es)[tipo]; }
+function esEjemplo(texto) { return Object.values(EJEMPLOS).some((e) => e.md === texto || e.html === texto); }
 
 function direccionActual() {
   return document.querySelector('input[name="direccion"]:checked').value;
@@ -167,11 +214,14 @@ function actualizar() {
 function actualizarDireccion() {
   const esMdAHtml = direccionActual() === 'md-a-html';
   etiquetaEntrada.textContent = esMdAHtml ? 'Markdown' : 'HTML';
-  entrada.value = esMdAHtml ? EJEMPLO_MARKDOWN : EJEMPLO_HTML;
+  entrada.value = ejemplo(esMdAHtml ? 'md' : 'html');
+  nombreBase = null;
   bloqueVistaPrevia.style.display = esMdAHtml ? '' : 'none';
   bloqueMarkdown.style.display = esMdAHtml ? 'none' : '';
   botonVerHtml.style.display = esMdAHtml ? '' : 'none';
   botonCopiarMarkdown.style.display = esMdAHtml ? 'none' : '';
+  botonDescargarHtml.style.display = esMdAHtml ? '' : 'none';
+  botonDescargarMarkdown.style.display = esMdAHtml ? 'none' : '';
   salidaHtml.style.display = 'none';
   botonVerHtml.textContent = t('boton-ver-html');
   actualizar();
@@ -206,6 +256,59 @@ document.addEventListener('DOMContentLoaded', actualizarDireccion);
 // Al cambiar de idioma solo se re-traducen las etiquetas (sin pisar lo escrito).
 document.addEventListener('cambioIdioma', () => {
   if (direccionActual() === 'md-a-html') botonVerHtml.textContent = t(salidaHtml.style.display === 'none' ? 'boton-ver-html' : 'boton-ocultar-html');
+  if (esEjemplo(entrada.value)) {
+    entrada.value = ejemplo(direccionActual() === 'md-a-html' ? 'md' : 'html');
+    actualizar();
+  }
+});
+
+// ===== Abrir un archivo .md / .html =====
+// Si la extensión corresponde a la otra dirección, se cambia sola.
+botonAbrir.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', async () => {
+  const archivo = entradaArchivo.files[0];
+  entradaArchivo.value = '';
+  if (!archivo) return;
+  const esHtml = /\.html?$/i.test(archivo.name) || archivo.type === 'text/html';
+  const direccion = esHtml ? 'html-a-md' : 'md-a-html';
+  if (direccionActual() !== direccion) {
+    document.querySelector(`input[name="direccion"][value="${direccion}"]`).checked = true;
+    actualizarDireccion();
+  }
+  entrada.value = (await leerTextoArchivo(archivo)).texto;
+  nombreBase = archivo.name.replace(/\.[^.]+$/, '');
+  actualizar();
+});
+
+// ===== Descargar =====
+function tituloDelDocumento() {
+  const h = vistaPrevia.querySelector('h1, h2, h3');
+  return (h && h.textContent.trim()) || nombreBase || t('titulo-documento');
+}
+
+// Página HTML completa (se abre directo en el navegador), con el HTML tal
+// cual lo generó marked, igual que el código que se copia.
+botonDescargarHtml.addEventListener('click', () => {
+  actualizar();
+  const titulo = escaparHtml(tituloDelDocumento());
+  const documento = `<!DOCTYPE html>
+<html lang="${idiomaActual()}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${titulo}</title>
+</head>
+<body>
+${salidaHtml.value.trim()}
+</body>
+</html>
+`;
+  descargarTexto(documento, `${nombreBase || 'documento'}.html`, 'text/html');
+});
+
+botonDescargarMarkdown.addEventListener('click', () => {
+  actualizar();
+  if (salidaMarkdown.value) descargarTexto(salidaMarkdown.value + '\n', `${nombreBase || 'documento'}.md`, 'text/markdown');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

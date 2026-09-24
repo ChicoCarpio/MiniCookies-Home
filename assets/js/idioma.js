@@ -1,3 +1,4 @@
+/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
 // Selector de idioma es/en para el hub y las páginas de categoría.
 // Cada página define window.i18nPagina = {es:{...}, en:{...}} con sus textos propios
 // (títulos de sección, tarjetas de herramientas). Este archivo aporta los textos

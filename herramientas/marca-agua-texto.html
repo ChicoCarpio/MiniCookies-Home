@@ -97,6 +97,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -137,14 +138,14 @@ botonAplicar.addEventListener('click', async () => {
     const textoPie = document.getElementById('textoPie').value.trim();
     if (!textoEncabezado && !textoPie) throw new Error(t('error-sin-texto'));
 
-    const contenidoOriginal = await archivoActual.text();
+    const { texto: contenidoOriginal, finDeLinea } = await leerTextoArchivo(archivoActual);
     const partes = [];
     if (textoEncabezado) partes.push(textoEncabezado);
     partes.push(contenidoOriginal);
     if (textoPie) partes.push(textoPie);
 
     const textoFinal = partes.join('\n\n');
-    const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([conFinDeLinea(textoFinal, finDeLinea)], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

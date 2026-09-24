@@ -151,6 +151,35 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
+// Un PDF cortado (descarga o copia interrumpida) pierde el final: la tabla
+// xref y el "trailer", que es lo que indica dónde empieza el documento. Sin
+// eso ni pdf-lib ni PDF.js lo abren, aunque las páginas sigan todas ahí. Si
+// falta, se descarta el último objeto incompleto y se agrega un trailer que
+// apunta al catálogo (/Type /Catalog); después los dos niveles trabajan sobre
+// eso. Devuelve null si el archivo no parece cortado o no tiene catálogo.
+function completarFinalFaltante(buffer) {
+  const bytes = new Uint8Array(buffer);
+  // Texto byte a byte (sin decodificar), para buscar marcadores y cortar en
+  // la misma posición de los bytes originales.
+  let texto = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) texto += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  if (/startxref\s+\d+\s*%%EOF\s*$/.test(texto.slice(-2048))) return null;
+
+  let catalogo = null, mayorNumero = 0;
+  for (const m of texto.matchAll(/(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g)) {
+    mayorNumero = Math.max(mayorNumero, parseInt(m[1], 10));
+    if (/\/Type\s*\/Catalog\b/.test(m[3])) catalogo = `${m[1]} ${m[2]} R`;
+  }
+  const finUltimoObjeto = texto.lastIndexOf('endobj');
+  if (!catalogo || finUltimoObjeto < 0) return null;
+
+  const cola = `\ntrailer\n<< /Size ${mayorNumero + 1} /Root ${catalogo} >>\nstartxref\n0\n%%EOF\n`;
+  const resultado = new Uint8Array(finUltimoObjeto + 6 + cola.length);
+  resultado.set(bytes.subarray(0, finUltimoObjeto + 6));
+  for (let i = 0; i < cola.length; i++) resultado[finUltimoObjeto + 6 + i] = cola.charCodeAt(i);
+  return resultado.buffer;
+}
+
 async function intentarNivel1(bytes) {
   const { PDFDocument } = PDFLib;
   const pdf = await PDFDocument.load(bytes, {
@@ -196,7 +225,9 @@ botonReparar.addEventListener('click', async () => {
   progreso.textContent = t('progreso-nivel1');
   resultado.classList.remove('visible');
   try {
-    const bytesOriginales = await archivoActual.arrayBuffer();
+    const bytesLeidos = await archivoActual.arrayBuffer();
+    // Si el archivo está cortado, se le reconstruye el final antes de todo.
+    const bytesOriginales = completarFinalFaltante(bytesLeidos) || bytesLeidos;
     let bytesFinales = null;
     let mensaje = '';
 

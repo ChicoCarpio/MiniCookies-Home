@@ -88,6 +88,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -99,14 +100,23 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let secciones = []; // [{ id, titulo, texto }]
+let finDeLineaArchivo = '\n';
 let siguienteId = 0;
 
 function dividirMarkdownEnSecciones(texto) {
   const lineas = texto.split('\n');
   const bloques = [];
   let actual = null;
+  // Dentro de un bloque de código (``` o ~~~) un "#" no es un título (es un
+  // comentario de Python/Bash, por ejemplo): antes cortaba el documento ahí.
+  let valla = null;
   lineas.forEach((linea) => {
-    if (/^#\s+/.test(linea)) {
+    const marca = linea.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (marca) {
+      if (!valla) valla = marca[1];
+      else if (marca[1][0] === valla[0] && marca[1].length >= valla.length) valla = null;
+    }
+    if (!valla && !marca && /^#\s+/.test(linea)) {
       actual = { titulo: linea.replace(/^#\s+/, '').trim() || t('epub-sin-titulo'), lineas: [linea] };
       bloques.push(actual);
     } else if (actual) {
@@ -178,7 +188,8 @@ zonaArrastre.addEventListener('drop', (e) => {
 async function cargarArchivo(archivo) {
   cargando.style.display = 'block';
   try {
-    const texto = await archivo.text();
+    const { texto, finDeLinea } = await leerTextoArchivo(archivo);
+    finDeLineaArchivo = finDeLinea;
     const bloques = dividirMarkdownEnSecciones(texto);
     secciones = bloques.map(b => ({ id: siguienteId++, titulo: b.titulo, texto: b.texto }));
     renderizarLista();
@@ -193,7 +204,7 @@ botonGuardar.addEventListener('click', () => {
   try {
     if (secciones.length === 0) throw new Error(t('error-sin-secciones'));
     const textoFinal = secciones.map(s => s.texto).join('\n');
-    const blob = new Blob([textoFinal], { type: 'text/markdown;charset=utf-8' });
+    const blob = new Blob([conFinDeLinea(textoFinal, finDeLineaArchivo)], { type: 'text/markdown;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

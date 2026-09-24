@@ -82,6 +82,7 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -118,7 +119,7 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.disabled = true;
   botonDividir.textContent = t('boton-dividir-procesando');
   try {
-    const texto = await archivoActual.text();
+    const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
     const parrafos = texto.split(/\n\s*\n/).filter(p => p.trim() !== '');
     if (parrafos.length < 2) throw new Error(t('error-un-parrafo'));
 
@@ -126,7 +127,7 @@ botonDividir.addEventListener('click', async () => {
     const cantidadDigitos = String(parrafos.length).length;
     parrafos.forEach((parrafo, i) => {
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
-      zip.file(`parrafo-${numero}.txt`, parrafo);
+      zip.file(`parrafo-${numero}.txt`, conFinDeLinea(parrafo, finDeLinea));
     });
 
     const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });

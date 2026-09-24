@@ -191,8 +191,8 @@ botonReparar.addEventListener('click', async () => {
     try {
       // Nivel 1: leerEpub ya tolera bastante (imágenes rotas, etc.) mientras
       // exista container.xml + OPF válidos.
-      const { titulo, autor, capitulos } = await leerEpub(archivoActual);
-      const blob = await construirEpub({ titulo: titulo || nombreLibro, autor, capitulos });
+      const { titulo, autor, idioma, identificador, capitulos } = await leerEpub(archivoActual);
+      const blob = await construirEpub({ titulo: titulo || nombreLibro, autor, idioma: idioma || undefined, identificador: identificador || undefined, capitulos });
 
       enlaceDescarga.href = URL.createObjectURL(blob);
       resultado.classList.add('visible');

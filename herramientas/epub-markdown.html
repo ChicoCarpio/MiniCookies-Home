@@ -161,6 +161,7 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script>
 const panelEpubAMd = document.getElementById('panelEpubAMd');
@@ -279,7 +280,7 @@ botonAEpub.addEventListener('click', async () => {
     const autor = document.getElementById('autorLibro').value.trim();
 
     progreso.textContent = t('progreso-leyendo');
-    const texto = await archivoMdActual.text();
+    const { texto } = await leerTextoArchivo(archivoMdActual);
     const capitulos = dividirHtmlEnCapitulosEpub(sanitizarHtml(marked.parse(texto)), titulo);
 
     progreso.textContent = t('progreso-armando');

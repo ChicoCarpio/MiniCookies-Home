@@ -66,7 +66,7 @@ window.i18nPagina = {
     'item4-antes': 'Si el PDF tiene contraseña, primero quitala con ',
     'item4-enlace': 'Desbloquear PDF',
     'item4-final': '.',
-    'aviso-deteccion': 'ℹ️ Este archivo ya tiene marca PDF/A-{parte}{nivel}.',
+    'aviso-deteccion': 'ℹ️ Este archivo ya tiene marca PDF/A-{parte}{nivel}: se eligió «Quitar marca PDF/A» (podés cambiarlo arriba).',
     'progreso-procesando': 'Procesando...',
     'error-procesar': 'No se pudo procesar el PDF'
   },
@@ -96,7 +96,7 @@ window.i18nPagina = {
     'item4-antes': 'If the PDF has a password, remove it first with ',
     'item4-enlace': 'Unlock PDF',
     'item4-final': '.',
-    'aviso-deteccion': 'ℹ️ This file already has a PDF/A-{parte}{nivel} mark.',
+    'aviso-deteccion': 'ℹ️ This file already has a PDF/A-{parte}{nivel} mark: «Remove PDF/A mark» was selected (you can change it above).',
     'progreso-procesando': 'Processing...',
     'error-procesar': 'Couldn’t process the PDF'
   }
@@ -229,6 +229,8 @@ async function mostrarArchivo(archivo) {
     if (conformidad) {
       avisoDeteccion.textContent = t('aviso-deteccion').replace('{parte}', conformidad.parte).replace('{nivel}', conformidad.nivel);
       avisoDeteccion.style.display = 'block';
+      // Volver a convertirlo a PDF/A no tiene sentido: se elige quitar la marca.
+      elegirDireccion('a-pdf');
     }
   } catch (error) {
     // No es crítico si no se puede detectar de antemano — el botón de convertir igual va a avisar si el PDF no es válido.

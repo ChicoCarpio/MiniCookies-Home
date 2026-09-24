@@ -154,6 +154,7 @@ window.i18nPagina = {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script>
 const panelEpubATexto = document.getElementById('panelEpubATexto');
@@ -270,7 +271,7 @@ zonaArrastreTxt.addEventListener('drop', (e) => {
 });
 
 function textoAHtml(texto) {
-  return texto.split(/\n\s*\n/).map(parrafo => {
+  return texto.trim().split(/\n\s*\n/).map(parrafo => {
     const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
     return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
   }).join('');
@@ -282,7 +283,7 @@ botonAEpub.addEventListener('click', async () => {
   try {
     const titulo = tituloLibro.value.trim() || t('titulo-defecto');
     const autor = document.getElementById('autorLibro').value.trim();
-    const texto = await archivoTxtActual.text();
+    const { texto } = await leerTextoArchivo(archivoTxtActual);
     const capitulos = [{ titulo, html: textoAHtml(texto) }];
     const blob = await construirEpub({ titulo, autor, capitulos });
 

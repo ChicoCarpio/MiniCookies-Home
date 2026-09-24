@@ -42,6 +42,9 @@ window.i18nPagina = {
     'zona-b': '📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo',
     'campo-clave': 'Columna clave (identifica cada fila)',
     'boton-comparar': 'Comparar',
+    'boton-descargar-xlsx': 'Descargar resultado (.xlsx)',
+    'columna-cambios': 'Qué cambió',
+    'hoja-resultado': 'Comparación',
     'stat-agregadas': 'Agregadas',
     'stat-eliminadas': 'Eliminadas',
     'stat-modificadas': 'Modificadas',
@@ -63,6 +66,9 @@ window.i18nPagina = {
     'zona-b': '📊 Drag the new file here or click to choose it',
     'campo-clave': 'Key column (identifies each row)',
     'boton-comparar': 'Compare',
+    'boton-descargar-xlsx': 'Download result (.xlsx)',
+    'columna-cambios': 'What changed',
+    'hoja-resultado': 'Comparison',
     'stat-agregadas': 'Added',
     'stat-eliminadas': 'Removed',
     'stat-modificadas': 'Changed',
@@ -126,6 +132,9 @@ window.i18nPagina = {
     </div>
 
     <div class="contenedor-tabla" id="contenedorTabla"></div>
+    <div class="controles" id="controlesDescarga" style="display:none;">
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" data-i18n="boton-descargar-xlsx">Descargar resultado (.xlsx)</button>
+    </div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -139,10 +148,12 @@ window.i18nPagina = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/descargar.js"></script>
 <script>
 let filasA = null;
 let filasB = null;
 let columnas = [];
+let ultimaComparacion = null; // { filasResultado, mapaA, clave } para descargar
 
 function esArchivoValido(archivo) {
   return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
@@ -257,6 +268,30 @@ document.getElementById('botonComparar').addEventListener('click', () => {
 
   html += '</tbody></table>';
   document.getElementById('contenedorTabla').innerHTML = html;
+  ultimaComparacion = { filasResultado, mapaA, clave };
+  document.getElementById('controlesDescarga').style.display = 'flex';
+});
+
+// Descarga la comparación como Excel: estado, las columnas (valores de la
+// versión nueva; de la vieja en las eliminadas) y "Qué cambió" con el valor
+// anterior → nuevo de cada columna modificada.
+document.getElementById('botonDescargar').addEventListener('click', () => {
+  if (!ultimaComparacion) return;
+  const { filasResultado, mapaA, clave } = ultimaComparacion;
+  const nombresEstado = { agregada: t('estado-agregada'), eliminada: t('estado-eliminada'), modificada: t('estado-modificada'), igual: t('estado-igual') };
+  const filas = [[t('columna-estado'), ...columnas, t('columna-cambios')]];
+  filasResultado.forEach(({ estado, fila, camposCambiados }) => {
+    const anterior = estado === 'modificada' ? mapaA.get(String(fila[clave])) : null;
+    const cambios = [...camposCambiados].map((col) => `${col}: ${anterior[col] ?? ''} → ${fila[col] ?? ''}`).join('; ');
+    filas.push([nombresEstado[estado], ...columnas.map((col) => fila[col] ?? ''), cambios]);
+  });
+  const hoja = XLSX.utils.aoa_to_sheet(filas);
+  hoja['!cols'] = filas[0].map((_, i) => ({ wch: Math.min(50, Math.max(10, ...filas.map((f) => String(f[i] ?? '').length))) }));
+  hoja['!autofilter'] = { ref: hoja['!ref'] };
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, t('hoja-resultado'));
+  const datos = XLSX.write(libro, { bookType: 'xlsx', type: 'array', compression: true });
+  descargarBlob(new Blob([datos], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nombreConFecha('comparacion', 'xlsx'));
 });
 </script>
 <script src="../assets/js/tema.js"></script>
