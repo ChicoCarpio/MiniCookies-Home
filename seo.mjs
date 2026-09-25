@@ -41,11 +41,19 @@ const desescapar = (s) => String(s)
   .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'")
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
-/** Ruta relativa dentro del sitio -> URL absoluta y canónica. */
+/**
+ * Ruta de un archivo dentro del sitio -> la URL con la que se sirve.
+ *
+ * Cloudflare Pages entrega las páginas SIN la extensión y manda un 308 de
+ * `/pdf.html` a `/pdf`. Así que la dirección buena —la que va en el canonical,
+ * en hreflang, en Open Graph y en el sitemap— es la corta: declarar la otra
+ * sería darle a Google como canónica una URL que redirige a otra.
+ */
 export function urlDe(rel) {
-  const limpio = rel.replace(/\\/g, '/');
-  if (limpio === 'index.html') return SITIO + '/';
-  return SITIO + '/' + limpio;
+  const limpio = rel.replace(/\\/g, '/').replace(/\.html$/i, '');
+  if (limpio === 'index') return SITIO + '/';
+  // Una carpeta se sirve por su índice: /en/index -> /en/
+  return SITIO + '/' + limpio.replace(/\/index$/, '/');
 }
 
 /**

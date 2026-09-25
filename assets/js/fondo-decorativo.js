@@ -11,13 +11,12 @@
   const baseIconos = new URL('../img/fondo/', scriptActual.src).href;
 
   const nombresIconos = [
-    'auto-combo-1790056103-qwen-transparente.png', 'auto-combo-1790298268-qwen-transparente.png', 'auto-combo-1790330979-qwen-transparente.png', 'icon-otono-transparente.png', 'hombre-de-gengibre.png',
-    'test-combo-qwen-transparente.png', 'auto-combo-1790328230-qwen-transparente.png', 'auto-combo-1790325611-qwen-transparente.png', 'auto-combo-1790329390-qwen-transparente.png', 'auto-combo-1790334361-qwen-transparente.png',
-    'auto-combo-1790328032-qwen-transparente.png', 'auto-combo-1790327638-qwen-transparente.png', 'auto-combo-1790331586-qwen-transparente.png', 'auto-combo-1790333166-qwen-transparente.png', 'icon-perro-transparente.png',
-    'auto-combo-1790331986-qwen-transparente.png', 'auto-combo-1790327439-qwen-transparente.png', 'auto-combo-1790328779-qwen-transparente.png', 'auto-combo-1790299148-qwen-transparente.png', 'galletas.png',
-    'auto-combo-1790333562-qwen-transparente.png', 'auto-combo-1790327033-qwen-transparente.png', 'auto-combo-1790325816-qwen-transparente.png', 'base-de-datos.png', 'bombilla.png',
-    'carta.png', 'checks.png', 'code.png', 'engranaje.png', 'folder.png',
-    'hoja.png', 'lupa.png', 'minicookies-logo.png',
+    'auto-combo-1790331586-qwen-transparente.png', 'auto-combo-1790327033-qwen-transparente.png', 'test-combo-qwen-transparente.png', 'auto-combo-1790325816-qwen-transparente.png', 'auto-combo-1790327439-qwen-transparente.png',
+    'icon-perro-transparente.png', 'auto-combo-1790328230-qwen-transparente.png', 'auto-combo-1790330979-qwen-transparente.png', 'galletas.png', 'icon-otono-transparente.png',
+    'auto-combo-1790325611-qwen-transparente.png', 'auto-combo-1790056103-qwen-transparente.png', 'hombre-de-gengibre.png', 'auto-combo-1790333562-qwen-transparente.png', 'auto-combo-1790328779-qwen-transparente.png',
+    'auto-combo-1790327638-qwen-transparente.png', 'auto-combo-1790334361-qwen-transparente.png', 'auto-combo-1790298268-qwen-transparente.png', 'auto-combo-1790328032-qwen-transparente.png', 'auto-combo-1790331986-qwen-transparente.png',
+    'base-de-datos.png', 'bombilla.png', 'carta.png', 'checks.png', 'code.png',
+    'engranaje.png', 'folder.png', 'hoja.png', 'lupa.png', 'minicookies-logo.png',
   ];
   const iconos = nombresIconos.map((nombre) => baseIconos + nombre);
 
