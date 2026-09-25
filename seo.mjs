@@ -77,11 +77,11 @@ const titulos = (html) => ({
  * Agrega a una página sus etiquetas de SEO justo antes de </head>.
  * Si la página ya trae alguna escrita a mano, se respeta y no se duplica.
  */
-export function inyectarSeo(html, rel, indice) {
+export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
   if (/<link[^>]+rel="canonical"/i.test(html)) return html;
 
   const ruta = rel.replace(/\\/g, '/');
-  const url = urlDe(ruta);
+  const url = urlDe(esIngles ? 'en/' + ruta : ruta);
   const { titulo, desc } = titulos(html);
   if (!titulo) return html;
 
@@ -112,7 +112,7 @@ export function inyectarSeo(html, rel, indice) {
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'Cualquiera con navegador web',
       browserRequirements: 'Requiere JavaScript',
-      inLanguage: 'es',
+      inLanguage: esIngles ? 'en' : 'es',
       isAccessibleForFree: true,
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
       publisher: { '@type': 'Organization', name: 'Mini Cookies', url: SITIO + '/' },
@@ -124,7 +124,7 @@ export function inyectarSeo(html, rel, indice) {
       name: 'Mini Cookies',
       url: SITIO + '/',
       description: desc,
-      inLanguage: 'es',
+      inLanguage: esIngles ? 'en' : 'es',
       publisher: { '@type': 'Organization', name: 'Mini Cookies', url: SITIO + '/', logo: IMAGEN_SOCIAL },
     });
   } else if (esCategoria) {
@@ -134,7 +134,7 @@ export function inyectarSeo(html, rel, indice) {
       name: titulo.split('—')[0].split('|')[0].trim(),
       description: desc,
       url,
-      inLanguage: 'es',
+      inLanguage: esIngles ? 'en' : 'es',
       isPartOf: { '@type': 'WebSite', name: 'Mini Cookies', url: SITIO + '/' },
     });
   }
@@ -149,11 +149,20 @@ export function inyectarSeo(html, rel, indice) {
     });
   }
 
+  // hreflang solo si la página existe de verdad en los dos idiomas. Declarar
+  // una alternativa que no está traducida es peor que no declarar ninguna.
+  const alternativas = (conIngles && conIngles.has(ruta)) ? [
+    `<link rel="alternate" hreflang="es" href="${escXml(urlDe(ruta))}">`,
+    `<link rel="alternate" hreflang="en" href="${escXml(urlDe('en/' + ruta))}">`,
+    `<link rel="alternate" hreflang="x-default" href="${escXml(urlDe(ruta))}">`,
+  ] : [];
+
   const etiquetas = [
     `<link rel="canonical" href="${escXml(url)}">`,
+    ...alternativas,
     `<meta property="og:type" content="website">`,
     `<meta property="og:site_name" content="Mini Cookies">`,
-    `<meta property="og:locale" content="es_ES">`,
+    `<meta property="og:locale" content="${esIngles ? 'en_US' : 'es_ES'}">`,
     `<meta property="og:url" content="${escXml(url)}">`,
     `<meta property="og:title" content="${escXml(titulo)}">`,
     `<meta property="og:description" content="${escXml(desc)}">`,

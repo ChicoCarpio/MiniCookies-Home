@@ -103,7 +103,22 @@ window.i18nComun = {
 };
 
 (function () {
+  // Las páginas traducidas se publican dos veces, una por idioma y con URL
+  // propia (/pdf.html y /en/pdf.html), para que un buscador pueda indexar
+  // las dos. El build deja en cada una un <link rel="alternate"> apuntando a
+  // su gemela, y de ahí sale a dónde lleva el botón de idioma.
+  function alternativa(idioma) {
+    var l = document.querySelector('link[rel="alternate"][hreflang="' + idioma + '"]');
+    return l ? l.href : null;
+  }
+
   function idiomaActual() {
+    // Si la página tiene gemela, manda la URL: el HTML ya viene en ese idioma
+    // desde el servidor y reescribirlo según localStorage lo contradiría.
+    if (alternativa('en')) {
+      return document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'es';
+    }
+    // Páginas sin versión en inglés todavía: se traduce lo que haya en el acto.
     try { return localStorage.getItem('idioma') || 'es'; } catch (e) { return 'es'; }
   }
 
@@ -173,6 +188,15 @@ window.i18nComun = {
     boton.addEventListener('click', function () {
       var nuevo = idiomaActual() === 'es' ? 'en' : 'es';
       try { localStorage.setItem('idioma', nuevo); } catch (e) {}
+
+      // Si esta página existe en el otro idioma, se va a esa URL en vez de
+      // reescribir el texto acá: así la dirección que queda en la barra (y la
+      // que alguien copia y comparte) es la del idioma que se está viendo.
+      var destino = alternativa(nuevo);
+      if (destino && destino !== location.href.split('#')[0]) {
+        location.href = destino;
+        return;
+      }
       aplicarIdioma(nuevo);
     });
   });

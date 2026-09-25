@@ -16,6 +16,7 @@
 import { transformSync } from 'esbuild';
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
 import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias } from './seo.mjs';
+import { traducir, diccionarioComun, paginasConIngles } from './ingles.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 
 const RAIZ = process.cwd();
@@ -24,7 +25,7 @@ const SALIDA = join(RAIZ, 'dist');
 // Lo que no se publica: herramientas del build, notas internas (.md) y
 // archivos del repo.
 const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist',
-  'build.mjs', 'seo.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
+  'build.mjs', 'seo.mjs', 'ingles.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUIR_EXTENSIONES = new Set(['.md', '.log']);
 
 // Aviso de copyright de cada sitio: campo "config.aviso" de su package.json.
@@ -86,8 +87,20 @@ function recorrer(carpeta) {
     if (ext === '.js' || ext === '.mjs') writeFileSync(destino, minificarJs(readFileSync(origen, 'utf8'), rel) + '\n');
     else if (ext === '.css') writeFileSync(destino, minificarCss(readFileSync(origen, 'utf8'), rel) + '\n');
     else if (ext === '.html') {
+      const rutaWeb = rel.replace(/\\/g, '/');
+      const crudo = readFileSync(origen, 'utf8');
       paginas.push(rel);
-      writeFileSync(destino, inyectarSeo(procesarHtml(readFileSync(origen, 'utf8'), rel), rel, indiceCategorias));
+      writeFileSync(destino, inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles));
+
+      // Gemela en inglés bajo /en/, con su propia URL para que Google la vea.
+      if (conIngles.has(rutaWeb)) {
+        const en = traducir(crudo, RAIZ, comun, rutaWeb, conIngles);
+        if (!en) throw new Error('No se pudo traducir ' + rutaWeb);
+        const destinoEn = join(SALIDA, 'en', rel);
+        mkdirSync(dirname(destinoEn), { recursive: true });
+        writeFileSync(destinoEn, inyectarSeo(procesarHtml(en, 'en/' + rel), rel, indiceCategorias, conIngles, true));
+        paginasEn.push('en/' + rutaWeb);
+      }
     }
     else copyFileSync(origen, destino);
   }
@@ -95,10 +108,13 @@ function recorrer(carpeta) {
 
 // Rutas de todas las páginas publicadas, para armar el sitemap al final.
 const paginas = [];
+const paginasEn = [];
 const indiceCategorias = indiceDeCategorias(RAIZ);
+const comun = diccionarioComun(RAIZ);
+const conIngles = paginasConIngles(RAIZ, EXCLUIR_NOMBRES);
 
 rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);
 recorrer(RAIZ);
-generarRobotsYSitemap(SALIDA, paginas);
-console.log(`Build listo en dist/ — ${paginas.length} páginas, sitemap.xml y robots.txt generados`);
+generarRobotsYSitemap(SALIDA, paginas.concat(paginasEn));
+console.log(`Build listo en dist/ — ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados`);
