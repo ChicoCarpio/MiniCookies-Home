@@ -122,6 +122,29 @@
       chips.appendChild(boton);
     });
 
+    // Las categorías no entran todas a lo ancho de un celular. Se corren con
+    // el dedo, pero eso solo no alcanza: con la barra de desplazamiento
+    // oculta no se ve que haya más, y con mouse (ventana angosta en una
+    // computadora) no había ninguna forma de moverlas.
+    function marcarBordes() {
+      var resto = chips.scrollWidth - chips.clientWidth;
+      chips.classList.toggle('hay-mas-izquierda', chips.scrollLeft > 4);
+      chips.classList.toggle('hay-mas-derecha', resto > 4 && chips.scrollLeft < resto - 4);
+    }
+
+    chips.addEventListener('scroll', marcarBordes);
+
+    // La rueda del mouse mueve de costado: una rueda común solo da deltaY, y
+    // sin esto la tira quedaba inmóvil en una ventana angosta de computadora.
+    chips.addEventListener('wheel', function (e) {
+      var resto = chips.scrollWidth - chips.clientWidth;
+      if (resto <= 0) return;
+      var paso = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (!paso) return;
+      e.preventDefault();
+      chips.scrollLeft += paso;
+    }, { passive: false });
+
     function cerrarHoja() {
       if (abierta < 0) return;
       var cat = categorias[abierta];
@@ -137,11 +160,20 @@
       var cat = categorias[i];
       hoja.appendChild(cat.elemento);
       cat.chip.classList.add('activo');
+      // Si la categoría estaba cortada contra el borde, se la trae a la vista.
+      if (cat.chip.scrollIntoView) cat.chip.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       abierta = i;
       // Si el grupo venía plegado en la versión de computadora, acá tiene que
       // verse igual: la hoja ya muestra el contenido, pero la clase mantiene
       // coherente el estado por si se vuelve a pantalla ancha.
       cat.elemento.classList.add('abierto');
+      // Un bloque marcado con data-em-categoria puede ser un <details>
+      // plegado (el filtro de capa del editor avanzado): elegir la categoría
+      // y que no se vea nada no tendría sentido.
+      if (cat.elemento.tagName === 'DETAILS') cat.elemento.open = true;
+      // El panel arranca desde arriba aunque la categoría anterior estuviera
+      // desplazada.
+      hoja.scrollTop = 0;
     }
 
     // --- Acciones siempre visibles ---
@@ -183,6 +215,7 @@
       shell.appendChild(hoja);
       shell.appendChild(chips);
       shell.appendChild(acciones);
+      marcarBordes();
       avisarCambioDeTamano();
     }
 
@@ -204,6 +237,10 @@
     function avisarCambioDeTamano() {
       window.dispatchEvent(new Event('resize'));
     }
+
+    window.addEventListener('resize', function () {
+      if (cuerpo.classList.contains('em-activo')) marcarBordes();
+    });
 
     function revisar() {
       // Solo tiene sentido cuando hay una imagen cargada: el editor está

@@ -109,6 +109,29 @@
 
   body.em-activo .em-hoja:empty { display: none; }
 
+  /* Los paneles que en este archivo se mueven enteros al panel de abajo
+     (Filtros, Capas) siguen arrastrando el CSS de los cajones laterales del
+     editor: position:fixed, ancho propio y un translateX que los saca de la
+     pantalla cuando están plegados. Movidos acá eso los dejaba invisibles y
+     fuera de alcance — el botón "+ Capa" quedaba en x = -344. Se les devuelve
+     el comportamiento de un bloque normal. */
+  body.em-activo .em-hoja > .panel-filtros,
+  body.em-activo .em-hoja > .panel-capas,
+  body.em-activo .em-hoja > .panel-ajustes {
+    position: static;
+    inset: auto;
+    width: auto;
+    max-height: none;
+    transform: none;
+    visibility: visible;
+    overflow: visible;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
   /* Dentro del panel, el acordeón ya no hace falta: la categoría la eligió
      la tira de abajo, así que el título propio del grupo sobra. */
   body.em-activo .em-hoja .acordeon-grupo {
@@ -136,15 +159,29 @@
     gap: 4px;
     overflow-x: auto;
     overflow-y: hidden;
-    /* Sin barra de desplazamiento visible: se entiende que corre porque se
-       ve media categoría cortada en el borde. */
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Las categorías no entran todas a lo ancho de un celular y hay que
+       correrlas. Con la barra de desplazamiento oculta no se notaba que
+       hubiera más: estas clases (las pone editor-movil.js según la posición)
+       desvanecen el borde por el lado que queda contenido sin ver. */
+    -webkit-mask-image: var(--em-degradado, none);
+            mask-image: var(--em-degradado, none);
     padding: 6px 8px;
     border-top: 1px solid var(--gris-borde);
     background: var(--superficie);
   }
   body.em-activo .em-chips::-webkit-scrollbar { display: none; }
+  body.em-activo .em-chips.hay-mas-derecha {
+    --em-degradado: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+  body.em-activo .em-chips.hay-mas-izquierda {
+    --em-degradado: linear-gradient(to right, transparent 0, #000 28px);
+  }
+  body.em-activo .em-chips.hay-mas-izquierda.hay-mas-derecha {
+    --em-degradado: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  }
 
   body.em-activo .em-chip {
     flex: 0 0 auto;
