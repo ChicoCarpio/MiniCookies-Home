@@ -562,3 +562,99 @@ textarea {
 .tarjeta-producto .icono { font-size: 2.4rem; margin-bottom: 10px; }
 .tarjeta-producto h2 { margin: 0 0 6px; color: var(--texto); font-size: 1.15rem; }
 .tarjeta-producto p { margin: 0; color: var(--texto-suave); font-size: 0.9rem; }
+
+/* --- Portada: eslogan rotativo, buscador y bloques temáticos --- */
+
+.eslogan {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--azul);
+  margin: 4px 0 14px;
+  /* Reserva el alto de dos líneas: el eslogan se sortea al cargar y sin esto
+     el resto de la portada saltaría al cambiarlo. */
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buscador {
+  position: relative;
+  max-width: 520px;
+  margin: 22px auto 0;
+}
+
+.buscador input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px 13px 42px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio);
+}
+
+.buscador input:focus {
+  outline: 2px solid var(--azul);
+  outline-offset: -1px;
+}
+
+.buscador .lupa {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .55;
+  pointer-events: none;
+}
+
+.bloque-categorias { margin-top: 38px; }
+
+.bloque-categorias > h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--texto-suave);
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+/* Resultados del buscador y mensaje de "sin resultados" */
+#resultadosBusqueda { margin-top: 24px; }
+.sin-resultados { color: var(--texto-suave); text-align: center; padding: 30px 0; }
+
+/* Catálogo completo (todas.html) */
+.grupo-catalogo { margin-top: 40px; }
+
+.grupo-catalogo > h2 {
+  font-size: 1.2rem;
+  margin: 0 0 4px;
+  color: var(--texto);
+}
+
+.grupo-catalogo > .resumen {
+  margin: 0 0 16px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.indice-catalogo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.indice-catalogo a {
+  background: var(--superficie);
+  border: 1px solid var(--gris-borde);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.indice-catalogo a:hover { border-color: var(--azul); text-decoration: none; }

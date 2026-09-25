@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title data-i18n="titulo-pagina">Mini Cookies — herramientas simples y gratuitas</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Mini Cookies: herramientas digitales pequeñas, simples y gratuitas para el día a día — QR, contraseñas, JSON, Lorem Ipsum y más. Sin registro, sin instalar nada.">
+<title data-i18n="titulo-pagina">Mini Cookies — 104 herramientas gratis para PDF, Word, Excel e imágenes</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Herramientas gratis. Cero archivos subidos. 104 utilidades para PDF, Word, Excel, PowerPoint, EPUB, Markdown, texto e imágenes, sin registro y sin instalar nada.">
 <link rel="icon" type="image/png" href="marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="assets/css/estilos.css">
 <link rel="stylesheet" href="assets/css/fondo-decorativo.css">
@@ -12,63 +12,112 @@
 <script>
 window.i18nPagina = {
   es: {
-    'titulo-pagina': 'Mini Cookies — herramientas simples y gratuitas',
-    'meta-descripcion': 'Mini Cookies: herramientas digitales pequeñas, simples y gratuitas para el día a día — QR, contraseñas, JSON, Lorem Ipsum y más. Sin registro, sin instalar nada.',
-    'hero-titulo': 'Mini Cookies',
-    'hero-subtitulo': 'Herramientas digitales pequeñas para tareas puntuales',
-    'producto-ho-titulo': 'Herramientas Ofimáticas',
-    'producto-ho-desc': 'PDF, Word, Excel, PowerPoint, EPUB, Markdown y más — todo funciona en tu navegador, tus archivos nunca se suben a ningún servidor.',
-    'producto-img-titulo': 'Imágenes',
-    'producto-img-desc': 'Herramientas para fotos e imágenes sueltas — comprimir y más.',
-    'seccion-generales-titulo': 'Herramientas generales',
-    'seccion-generales-desc': 'Utilidades de texto y oficina que no dependen de ningún formato de archivo en particular.',
-    'tool-contador-palabras-titulo': 'Contador de palabras', 'tool-contador-palabras-desc': 'Contá palabras, caracteres, párrafos y tiempo de lectura al instante.',
-    'tool-formateador-json-titulo': 'Formatear / validar JSON', 'tool-formateador-json-desc': 'Indentá, minificá y validá JSON al instante.',
-    'tool-comparador-texto-titulo': 'Comparar dos textos', 'tool-comparador-texto-desc': 'Mirá exactamente qué cambió entre dos versiones de un texto.',
-    'tool-convertidor-mayusculas-titulo': 'Mayúsculas / minúsculas', 'tool-convertidor-mayusculas-desc': 'Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título y más.',
-    'tool-generador-lorem-ipsum-titulo': 'Generador de Lorem Ipsum', 'tool-generador-lorem-ipsum-desc': 'Texto de relleno para maquetas y pruebas, por párrafos, oraciones o palabras.',
-    'tool-extractor-contacto-titulo': 'Extraer emails, teléfonos y links', 'tool-extractor-contacto-desc': 'Sacá todos los contactos y links de un texto pegado.',
-    'tool-generador-codigo-barras-titulo': 'Generador de código de barras', 'tool-generador-codigo-barras-desc': 'CODE128, EAN-13, UPC y más, descargable como SVG.',
-    'tool-generador-qr-titulo': 'Generador de QR', 'tool-generador-qr-desc': 'Creá códigos QR para links, texto o wifi y descargalos como imagen.',
-    'tool-lector-codigos-titulo': 'Lector de códigos QR y de barras', 'tool-lector-codigos-desc': 'Leé un código desde una imagen o con la cámara, al instante.',
-    'tool-dictado-voz-titulo': 'Dictado por voz', 'tool-dictado-voz-desc': 'Grabá tu voz y convertila a texto, 100% en tu navegador — elegí entre modelo rápido o preciso.',
-    'tool-generador-contrasenas-titulo': 'Generador de contraseñas', 'tool-generador-contrasenas-desc': 'Contraseñas aleatorias seguras, criptográficamente robustas.'
+    'titulo-pagina': 'Mini Cookies — 104 herramientas gratis para PDF, Word, Excel e imágenes',
+    'meta-descripcion': 'Herramientas gratis. Cero archivos subidos. 104 utilidades para PDF, Word, Excel, PowerPoint, EPUB, Markdown, texto e imágenes, sin registro y sin instalar nada.',
+    'hero-subtitulo': '104 herramientas gratis para PDF, Word, Excel, imágenes y más. Sin registro, sin instalar nada, sin que tus archivos salgan de tu equipo.',
+    'buscador-etiqueta': 'Buscar herramienta',
+    'buscador-placeholder': 'Buscar entre las herramientas…',
+    'sin-resultados': 'Ninguna herramienta coincide con esa búsqueda.',
+    'resultados-titulo': 'Resultados',
+    'ver-todas': 'Ver las 104 herramientas en una sola página →',
+    'eslogan-0': 'Las únicas cookies que no te rastrean.',
+    'eslogan-1': 'Muchas herramientas. Mini cookies.',
+    'eslogan-2': 'Menos cookies. Más privacidad.',
+    'eslogan-3': 'Acá las cookies son de galleta.',
+    'eslogan-4': 'Tus archivos nunca salen de tu computadora.',
+    'eslogan-5': 'Herramientas gratis. Cero archivos subidos.',
+    'eslogan-6': 'Herramientas útiles. Tus datos siguen siendo tuyos.',
+    'bloque-doc': 'Documentos de oficina',
+    'bloque-txt': 'Texto y publicación',
+    'bloque-otr': 'Imágenes y utilidades',
+    'cat-pdf-titulo': 'PDF',
+    'cat-pdf-desc': 'Unir, dividir, rotar, proteger, comprimir y más.',
+    'cat-pdf-conteo': '23 herramientas',
+    'cat-word-titulo': 'Word',
+    'cat-word-desc': 'Documentos .docx: unir, dividir, generar, reparar y convertir.',
+    'cat-word-conteo': '13 herramientas',
+    'cat-excel-csv-titulo': 'Excel / CSV',
+    'cat-excel-csv-desc': 'Convertir, ver, unir, dividir y graficar planillas.',
+    'cat-excel-csv-conteo': '14 herramientas',
+    'cat-powerpoint-titulo': 'PowerPoint',
+    'cat-powerpoint-desc': 'Presentaciones .pptx: dividir, reparar, exportar y extraer.',
+    'cat-powerpoint-conteo': '9 herramientas',
+    'cat-texto-titulo': 'Texto plano',
+    'cat-texto-desc': 'Sacá el texto de un PDF, Word o EPUB, o convertí un .txt.',
+    'cat-texto-conteo': '10 herramientas',
+    'cat-markdown-titulo': 'Markdown',
+    'cat-markdown-desc': 'Markdown a HTML, PDF, Word o EPUB, y viceversa.',
+    'cat-markdown-conteo': '8 herramientas',
+    'cat-epub-titulo': 'EPUB',
+    'cat-epub-desc': 'Convertir, dividir, reparar y editar libros electrónicos.',
+    'cat-epub-conteo': '11 herramientas',
+    'cat-imagenes-titulo': 'Imágenes',
+    'cat-imagenes-desc': 'Comprimir, recortar, redimensionar, editar color y más.',
+    'cat-imagenes-conteo': '17 herramientas',
+    'cat-generales-titulo': 'Generales',
+    'cat-generales-desc': 'QR, contraseñas, JSON, códigos de barras, dictado y más.',
+    'cat-generales-conteo': '11 herramientas'
   },
   en: {
-    'titulo-pagina': 'Mini Cookies — simple, free tools',
-    'meta-descripcion': 'Mini Cookies: small, simple, free digital tools for everyday tasks — QR codes, passwords, JSON, Lorem Ipsum and more. No sign-up, nothing to install.',
-    'hero-titulo': 'Mini Cookies',
-    'hero-subtitulo': 'Small digital tools for one-off tasks — simple, secure and free. Each one does a single thing well, no sign-up or installs.',
-    'producto-ho-titulo': 'Office Tools',
-    'producto-ho-desc': 'PDF, Word, Excel, PowerPoint, EPUB, Markdown and more — everything runs in your browser, your files never get uploaded anywhere.',
-    'producto-img-titulo': 'Images',
-    'producto-img-desc': 'Tools for standalone photos and images — compress and more.',
-    'seccion-generales-titulo': 'General tools',
-    'seccion-generales-desc': "Text and office utilities that don't depend on any particular file format.",
-    'tool-contador-palabras-titulo': 'Word counter', 'tool-contador-palabras-desc': 'Count words, characters, paragraphs and reading time instantly.',
-    'tool-formateador-json-titulo': 'Format / validate JSON', 'tool-formateador-json-desc': 'Indent, minify and validate JSON instantly.',
-    'tool-comparador-texto-titulo': 'Compare two texts', 'tool-comparador-texto-desc': 'See exactly what changed between two versions of a text.',
-    'tool-convertidor-mayusculas-titulo': 'Uppercase / lowercase', 'tool-convertidor-mayusculas-desc': 'Convert text to UPPERCASE, lowercase, Title Case and more.',
-    'tool-generador-lorem-ipsum-titulo': 'Lorem Ipsum generator', 'tool-generador-lorem-ipsum-desc': 'Placeholder text for mockups and tests, by paragraphs, sentences or words.',
-    'tool-extractor-contacto-titulo': 'Extract emails, phone numbers and links', 'tool-extractor-contacto-desc': 'Pull out every contact and link from a pasted text.',
-    'tool-generador-codigo-barras-titulo': 'Barcode generator', 'tool-generador-codigo-barras-desc': 'CODE128, EAN-13, UPC and more, downloadable as SVG.',
-    'tool-generador-qr-titulo': 'QR code generator', 'tool-generador-qr-desc': 'Create QR codes for links, text or wifi and download them as an image.',
-    'tool-lector-codigos-titulo': 'QR and barcode reader', 'tool-lector-codigos-desc': 'Read a code from an image or with your camera, instantly.',
-    'tool-dictado-voz-titulo': 'Voice dictation', 'tool-dictado-voz-desc': 'Record your voice and turn it into text, 100% in your browser — choose a fast or an accurate model.',
-    'tool-generador-contrasenas-titulo': 'Password generator', 'tool-generador-contrasenas-desc': 'Secure, cryptographically strong random passwords.'
+    'titulo-pagina': 'Mini Cookies — 104 free tools for PDF, Word, Excel and images',
+    'meta-descripcion': 'Free tools. Zero uploads. 104 utilities for PDF, Word, Excel, PowerPoint, EPUB, Markdown, text and images — no sign-up, nothing to install.',
+    'hero-subtitulo': '104 free tools for PDF, Word, Excel, images and more. No sign-up, nothing to install, and your files never leave your device.',
+    'buscador-etiqueta': 'Search tools',
+    'buscador-placeholder': 'Search the tools…',
+    'sin-resultados': 'No tool matches that search.',
+    'resultados-titulo': 'Results',
+    'ver-todas': 'See all 104 tools on one page →',
+    'eslogan-0': 'The only cookies that don\'t track you.',
+    'eslogan-1': 'Plenty of tools. Mini cookies.',
+    'eslogan-2': 'Fewer cookies. More privacy.',
+    'eslogan-3': 'Around here, cookies are the edible kind.',
+    'eslogan-4': 'Your files never leave your computer.',
+    'eslogan-5': 'Free tools. Zero uploads.',
+    'eslogan-6': 'Useful tools. Your data stays yours.',
+    'bloque-doc': 'Office documents',
+    'bloque-txt': 'Text and publishing',
+    'bloque-otr': 'Images and utilities',
+    'cat-pdf-titulo': 'PDF',
+    'cat-pdf-desc': 'Merge, split, rotate, protect, compress and more.',
+    'cat-pdf-conteo': '23 tools',
+    'cat-word-titulo': 'Word',
+    'cat-word-desc': '.docx documents: merge, split, create, repair and convert.',
+    'cat-word-conteo': '13 tools',
+    'cat-excel-csv-titulo': 'Excel / CSV',
+    'cat-excel-csv-desc': 'Convert, view, merge, split and chart spreadsheets.',
+    'cat-excel-csv-conteo': '14 tools',
+    'cat-powerpoint-titulo': 'PowerPoint',
+    'cat-powerpoint-desc': '.pptx presentations: split, repair, export and extract.',
+    'cat-powerpoint-conteo': '9 tools',
+    'cat-texto-titulo': 'Plain text',
+    'cat-texto-desc': 'Pull text out of a PDF, Word or EPUB file, or convert a .txt.',
+    'cat-texto-conteo': '10 tools',
+    'cat-markdown-titulo': 'Markdown',
+    'cat-markdown-desc': 'Markdown to HTML, PDF, Word or EPUB, and back.',
+    'cat-markdown-conteo': '8 tools',
+    'cat-epub-titulo': 'EPUB',
+    'cat-epub-desc': 'Convert, split, repair and edit e-books.',
+    'cat-epub-conteo': '11 tools',
+    'cat-imagenes-titulo': 'Images',
+    'cat-imagenes-desc': 'Compress, crop, resize, colour-correct and more.',
+    'cat-imagenes-conteo': '17 tools',
+    'cat-generales-titulo': 'General',
+    'cat-generales-desc': 'QR codes, passwords, JSON, barcodes, dictation and more.',
+    'cat-generales-conteo': '11 tools'
   }
 };
 </script>
+<!-- TODO: reemplazar por tu ID real de Google AdSense cuando la cuenta esté aprobada -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 </head>
 <body>
 
 <div id="fondoDecorativo"></div>
 
 <header class="sitio">
-  <div class="marca">
-    <img src="marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca">
-  </div>
+  <div class="marca"><a href="index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
   <nav class="sitio">
+    <a href="todas.html" data-i18n="nav-todas">Todas las herramientas</a>
     <a href="privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
     <a href="terminos.html" data-i18n="nav-terminos">Términos de uso</a>
     <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
@@ -78,95 +127,194 @@ window.i18nPagina = {
 
 <main>
   <div class="hero">
-    <h1 data-i18n="hero-titulo">Mini Cookies</h1>
-    <p data-i18n="hero-subtitulo">Herramientas digitales pequeñas para tareas puntuales</p>
+    <img src="marca-logo/minicookies_expandido.png" alt="Mini Cookies" class="logo-hero">
+    <p class="eslogan" id="eslogan" data-i18n="eslogan-0">Las únicas cookies que no te rastrean.</p>
+    <script>
+    /* El eslogan se sortea al cargar. Se cambia el data-i18n en vez del texto
+       para que idioma.js lo traduzca solo al cambiar de idioma. El HTML trae
+       uno escrito de verdad, así que si el JS no corre igual se ve algo. */
+    (function () {
+      var n = 7;
+      var el = document.getElementById('eslogan');
+      var i = Math.floor(Math.random() * n);
+      el.setAttribute('data-i18n', 'eslogan-' + i);
+      var dic = window.i18nPagina.es;
+      try { dic = window.i18nPagina[localStorage.getItem('idioma') || 'es'] || dic; } catch (e) {}
+      el.textContent = dic['eslogan-' + i];
+    })();
+    </script>
+    <p data-i18n="hero-subtitulo">104 herramientas gratis para PDF, Word, Excel, imágenes y más. Sin registro, sin instalar nada, sin que tus archivos salgan de tu equipo.</p>
+
+    <div class="buscador">
+      <span class="lupa" aria-hidden="true">🔍</span>
+      <input type="search" id="buscador" autocomplete="off"
+             aria-label="Buscar herramienta" data-i18n-attr="aria-label:buscador-etiqueta;placeholder:buscador-placeholder"
+             placeholder="Buscar entre las herramientas…">
+    </div>
+
     <div class="aviso-privacidad" data-i18n="aviso-privacidad">
       🔒 Tus archivos nunca se suben a ningún servidor: todo el procesamiento ocurre en tu propia computadora.
     </div>
   </div>
 
-  <div class="grid-productos">
-    <a class="tarjeta-producto" href="https://www.herramientasofimaticas.minicookies.net">
-      <div class="icono">🛠️</div>
-      <h2 data-i18n="producto-ho-titulo">Herramientas Ofimáticas</h2>
-      <p data-i18n="producto-ho-desc">PDF, Word, Excel, PowerPoint, EPUB, Markdown y más — todo funciona en tu navegador, tus archivos nunca se suben a ningún servidor.</p>
-    </a>
-    <a class="tarjeta-producto" href="imagenes.html">
-      <div class="icono">🖼️</div>
-      <h2 data-i18n="producto-img-titulo">Imágenes</h2>
-      <p data-i18n="producto-img-desc">Herramientas para fotos e imágenes sueltas — comprimir y más.</p>
-    </a>
-  </div>
+  <section id="resultadosBusqueda" hidden aria-live="polite">
+    <div class="grid-herramientas" id="gridResultados"></div>
+    <p class="sin-resultados" id="sinResultados" hidden data-i18n="sin-resultados">Ninguna herramienta coincide con esa búsqueda.</p>
+  </section>
 
-  <section id="herramientas">
-    <h2 class="titulo-seccion" data-i18n="seccion-generales-titulo">Herramientas generales</h2>
-    <p data-i18n="seccion-generales-desc">Utilidades de texto y oficina que no dependen de ningún formato de archivo en particular.</p>
+  <div id="categorias">
 
-    <div class="grid-herramientas">
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
-      <a class="tarjeta-herramienta" href="herramientas/contador-palabras.html">
+  <section class="bloque-categorias">
+    <h2 data-i18n="bloque-doc">Documentos de oficina</h2>
+    <div class="grid-categorias">
+
+      <a class="tarjeta-categoria" href="pdf.html">
+        <div class="icono">📄</div>
+        <h2 data-i18n="cat-pdf-titulo">PDF</h2>
+        <p data-i18n="cat-pdf-desc">Unir, dividir, rotar, proteger, comprimir y más.</p>
+        <div class="conteo" data-i18n="cat-pdf-conteo">23 herramientas</div>
+      </a>
+      <a class="tarjeta-categoria" href="word.html">
         <div class="icono">📝</div>
-        <h3 data-i18n="tool-contador-palabras-titulo">Contador de palabras</h3>
-        <p data-i18n="tool-contador-palabras-desc">Contá palabras, caracteres, párrafos y tiempo de lectura al instante.</p>
+        <h2 data-i18n="cat-word-titulo">Word</h2>
+        <p data-i18n="cat-word-desc">Documentos .docx: unir, dividir, generar, reparar y convertir.</p>
+        <div class="conteo" data-i18n="cat-word-conteo">13 herramientas</div>
       </a>
-      <a class="tarjeta-herramienta" href="herramientas/formateador-json.html">
-        <div class="icono">🧾</div>
-        <h3 data-i18n="tool-formateador-json-titulo">Formatear / validar JSON</h3>
-        <p data-i18n="tool-formateador-json-desc">Indentá, minificá y validá JSON al instante.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/comparador-texto.html">
-        <div class="icono">🔍</div>
-        <h3 data-i18n="tool-comparador-texto-titulo">Comparar dos textos</h3>
-        <p data-i18n="tool-comparador-texto-desc">Mirá exactamente qué cambió entre dos versiones de un texto.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/convertidor-mayusculas.html">
-        <div class="icono">🔠</div>
-        <h3 data-i18n="tool-convertidor-mayusculas-titulo">Mayúsculas / minúsculas</h3>
-        <p data-i18n="tool-convertidor-mayusculas-desc">Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título y más.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/generador-lorem-ipsum.html">
-        <div class="icono">📰</div>
-        <h3 data-i18n="tool-generador-lorem-ipsum-titulo">Generador de Lorem Ipsum</h3>
-        <p data-i18n="tool-generador-lorem-ipsum-desc">Texto de relleno para maquetas y pruebas, por párrafos, oraciones o palabras.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/extractor-contacto.html">
-        <div class="icono">📇</div>
-        <h3 data-i18n="tool-extractor-contacto-titulo">Extraer emails, teléfonos y links</h3>
-        <p data-i18n="tool-extractor-contacto-desc">Sacá todos los contactos y links de un texto pegado.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/generador-codigo-barras.html">
+      <a class="tarjeta-categoria" href="excel-csv.html">
         <div class="icono">📊</div>
-        <h3 data-i18n="tool-generador-codigo-barras-titulo">Generador de código de barras</h3>
-        <p data-i18n="tool-generador-codigo-barras-desc">CODE128, EAN-13, UPC y más, descargable como SVG.</p>
+        <h2 data-i18n="cat-excel-csv-titulo">Excel / CSV</h2>
+        <p data-i18n="cat-excel-csv-desc">Convertir, ver, unir, dividir y graficar planillas.</p>
+        <div class="conteo" data-i18n="cat-excel-csv-conteo">14 herramientas</div>
       </a>
-      <a class="tarjeta-herramienta" href="herramientas/generador-qr.html">
-        <div class="icono">🔳</div>
-        <h3 data-i18n="tool-generador-qr-titulo">Generador de QR</h3>
-        <p data-i18n="tool-generador-qr-desc">Creá códigos QR para links, texto o wifi y descargalos como imagen.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/lector-codigos.html">
-        <div class="icono">📷</div>
-        <h3 data-i18n="tool-lector-codigos-titulo">Lector de códigos QR y de barras</h3>
-        <p data-i18n="tool-lector-codigos-desc">Leé un código desde una imagen o con la cámara, al instante.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/dictado-voz.html">
-        <div class="icono">🎙️</div>
-        <h3 data-i18n="tool-dictado-voz-titulo">Dictado por voz</h3>
-        <p data-i18n="tool-dictado-voz-desc">Grabá tu voz y convertila a texto, 100% en tu navegador — elegí entre modelo rápido o preciso.</p>
-      </a>
-      <a class="tarjeta-herramienta" href="herramientas/generador-contrasenas.html">
-        <div class="icono">🔑</div>
-        <h3 data-i18n="tool-generador-contrasenas-titulo">Generador de contraseñas</h3>
-        <p data-i18n="tool-generador-contrasenas-desc">Contraseñas aleatorias seguras, criptográficamente robustas.</p>
+      <a class="tarjeta-categoria" href="powerpoint.html">
+        <div class="icono">📽️</div>
+        <h2 data-i18n="cat-powerpoint-titulo">PowerPoint</h2>
+        <p data-i18n="cat-powerpoint-desc">Presentaciones .pptx: dividir, reparar, exportar y extraer.</p>
+        <div class="conteo" data-i18n="cat-powerpoint-conteo">9 herramientas</div>
       </a>
 
     </div>
   </section>
+
+  <section class="bloque-categorias">
+    <h2 data-i18n="bloque-txt">Texto y publicación</h2>
+    <div class="grid-categorias">
+
+      <a class="tarjeta-categoria" href="texto.html">
+        <div class="icono">🔤</div>
+        <h2 data-i18n="cat-texto-titulo">Texto plano</h2>
+        <p data-i18n="cat-texto-desc">Sacá el texto de un PDF, Word o EPUB, o convertí un .txt.</p>
+        <div class="conteo" data-i18n="cat-texto-conteo">10 herramientas</div>
+      </a>
+      <a class="tarjeta-categoria" href="markdown.html">
+        <div class="icono">Ⓜ️</div>
+        <h2 data-i18n="cat-markdown-titulo">Markdown</h2>
+        <p data-i18n="cat-markdown-desc">Markdown a HTML, PDF, Word o EPUB, y viceversa.</p>
+        <div class="conteo" data-i18n="cat-markdown-conteo">8 herramientas</div>
+      </a>
+      <a class="tarjeta-categoria" href="epub.html">
+        <div class="icono">📚</div>
+        <h2 data-i18n="cat-epub-titulo">EPUB</h2>
+        <p data-i18n="cat-epub-desc">Convertir, dividir, reparar y editar libros electrónicos.</p>
+        <div class="conteo" data-i18n="cat-epub-conteo">11 herramientas</div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="bloque-categorias">
+    <h2 data-i18n="bloque-otr">Imágenes y utilidades</h2>
+    <div class="grid-categorias">
+
+      <a class="tarjeta-categoria" href="imagenes.html">
+        <div class="icono">🖼️</div>
+        <h2 data-i18n="cat-imagenes-titulo">Imágenes</h2>
+        <p data-i18n="cat-imagenes-desc">Comprimir, recortar, redimensionar, editar color y más.</p>
+        <div class="conteo" data-i18n="cat-imagenes-conteo">17 herramientas</div>
+      </a>
+      <a class="tarjeta-categoria" href="generales.html">
+        <div class="icono">🧰</div>
+        <h2 data-i18n="cat-generales-titulo">Generales</h2>
+        <p data-i18n="cat-generales-desc">QR, contraseñas, JSON, códigos de barras, dictado y más.</p>
+        <div class="conteo" data-i18n="cat-generales-conteo">11 herramientas</div>
+      </a>
+
+    </div>
+  </section>
+
+  <p style="text-align:center;margin-top:34px;">
+    <a href="todas.html" data-i18n="ver-todas">Ver las 104 herramientas en una sola página →</a>
+  </p>
+
+  </div>
 </main>
+
+<script>
+/* Buscador de herramientas: filtra en el navegador sobre la lista de abajo.
+   Sin acentos y sin distinguir mayúsculas, para que "grafico" encuentre
+   "gráfico". Mientras hay texto se ocultan los bloques de categorías. */
+(function () {
+  var HERRAMIENTAS = [{"h":"unir-pdf.html","i":"📎","es":["Unir PDF e imágenes","Combiná varios PDFs e imágenes en un solo archivo, en el orden que quieras."],"en":["Merge PDFs and images","Combine several PDFs and images into one file, in whatever order you want."]},{"h":"dividir-pdf.html","i":"✂️","es":["Dividir PDF","Separá un PDF en archivos individuales por página."],"en":["Split PDF","Split a PDF into individual files, one per page."]},{"h":"rotar-pdf.html","i":"🔄","es":["Rotar PDF","Girá todas las páginas de un PDF 90°, 180° o 270°."],"en":["Rotate PDF","Rotate every page of a PDF by 90°, 180° or 270°."]},{"h":"marca-de-agua.html","i":"💧","es":["Marca de agua","Agregá un texto de marca de agua a todas las páginas."],"en":["Watermark","Add a watermark text to every page."]},{"h":"numerar-paginas.html","i":"🔢","es":["Numerar páginas","Agregá numeración de páginas a un PDF."],"en":["Number pages","Add page numbering to a PDF."]},{"h":"administrar-paginas.html","i":"🔀","es":["Administrar / reordenar páginas","Reordenar, eliminar o mover páginas de un PDF de forma visual."],"en":["Manage / reorder pages","Visually reorder, delete or move pages in a PDF."]},{"h":"extraer-paginas.html","i":"📑","es":["Extraer páginas","Sacar un rango o selección de páginas a un PDF nuevo."],"en":["Extract pages","Pull a range or selection of pages into a new PDF."]},{"h":"proteger-pdf.html","i":"🔒","es":["Proteger PDF","Poner contraseña a un PDF para que no cualquiera lo abra."],"en":["Protect PDF","Password-protect a PDF so not just anyone can open it."]},{"h":"desbloquear-pdf.html","i":"🔓","es":["Desbloquear PDF","Quitar la contraseña de un PDF protegido (si la conocés)."],"en":["Unlock PDF","Remove the password from a protected PDF (if you know it)."]},{"h":"optimizar-pdf.html","i":"🗜️","es":["Comprimir / optimizar PDF","Reducir el peso de un PDF (distinto de comprimir imágenes sueltas)."],"en":["Compress / optimize PDF","Reduce a PDF's file size (different from compressing standalone images)."]},{"h":"reparar-pdf.html","i":"🩹","es":["Reparar PDF","Intentar recuperar un PDF dañado o que no abre bien."],"en":["Repair PDF","Try to recover a damaged PDF that won't open properly."]},{"h":"pdf-imagenes.html","i":"🖼️","es":["PDF ↔ Imágenes","Convertir imágenes a PDF, o un PDF a imágenes (PNG/JPG)."],"en":["PDF ↔ Images","Convert images to PDF, or a PDF to images (PNG/JPG)."]},{"h":"powerpoint-a-pdf.html","i":"📽️","es":["PowerPoint a PDF","Diapositivas reales cuando se puede; si no, un PDF con el texto."],"en":["PowerPoint to PDF","Real slides when possible; otherwise, a PDF with the text."]},{"h":"pdf-texto.html","i":"📝","es":["PDF ↔ Texto","Extraé el texto de un PDF a .txt, o convertí un .txt a PDF."],"en":["PDF ↔ Text","Extract the text from a PDF to .txt, or convert a .txt to PDF."]},{"h":"extraer-imagenes.html","i":"🖼️","es":["Extraer imágenes de PDF","Sacar las imágenes embebidas dentro de un PDF."],"en":["Extract images from PDF","Pull out the images embedded inside a PDF."]},{"h":"superponer-pdf.html","i":"🪞","es":["Superponer PDF","Combinar dos PDFs superponiendo sus páginas (ej. plantilla + contenido)."],"en":["Overlay PDF","Combine two PDFs by overlaying their pages (e.g. template + content)."]},{"h":"epub-pdf.html","i":"📚","es":["EPUB ↔ PDF","Convertí un libro EPUB a PDF conservando texto e imágenes, o un PDF a EPUB."],"en":["EPUB ↔ PDF","Convert an EPUB book to PDF keeping text and images, or a PDF to EPUB."]},{"h":"pdf-a-pdfa.html","i":"🗄️","es":["PDF ↔ PDF/A","Convertir a PDF/A para archivo a largo plazo, o quitar la marca PDF/A."],"en":["PDF ↔ PDF/A","Convert to PDF/A for long-term archiving, or remove the PDF/A marking."]},{"h":"pdf-markdown.html","i":"Ⓜ️","es":["PDF ↔ Markdown","Extraé el texto de un PDF como Markdown, o convertí Markdown a PDF."],"en":["PDF ↔ Markdown","Extract the text from a PDF as Markdown, or convert Markdown to PDF."]},{"h":"word-pdf.html","i":"📄","es":["Word ↔ PDF","Vista previa con formato real + \"Guardar como PDF\" del navegador, o un PDF a Word."],"en":["Word ↔ PDF","Real-formatting preview + your browser's \"Save as PDF\", or a PDF to Word."]},{"h":"excel-csv-a-pdf.html","i":"📄","es":["Excel / CSV → PDF","Exportar una hoja como tabla PDF, lista para imprimir."],"en":["Excel / CSV → PDF","Export a sheet as a print-ready PDF table."]},{"h":"editar-metadatos-pdf.html","i":"🏷️","es":["Editar metadatos de un PDF","Título, autor, asunto y palabras clave."],"en":["Edit PDF metadata","Title, author, subject and keywords."]},{"h":"ocr-pdf.html","i":"🔍","es":["OCR de PDF e imágenes escaneadas","Convertí un PDF o imágenes escaneadas en un PDF con texto buscable/seleccionable, o extraelo a .txt."],"en":["OCR for scanned PDFs and images","Turn a scanned PDF or images into a PDF with searchable/selectable text, or extract it to .txt."]},{"h":"comprimir-imagen.html","i":"🖼️","es":["Comprimir imagen","Reducí el peso de JPG/PNG/WebP sin perder demasiada calidad."],"en":["Compress image","Shrink JPG/PNG/WebP files without losing too much quality."]},{"h":"redimensionar-imagen.html","i":"📐","es":["Redimensionar imagen","Cambiá el ancho y alto de una imagen."],"en":["Resize image","Change an image's width and height."]},{"h":"rotar-imagen.html","i":"🔄","es":["Rotar y voltear imagen","Girá 90/180/270° o volteá horizontal o verticalmente."],"en":["Rotate and flip image","Rotate 90/180/270° or flip horizontally or vertically."]},{"h":"marca-agua-imagen.html","i":"💧","es":["Marca de agua para imagen","Agregá un texto de marca de agua diagonal sobre una imagen."],"en":["Watermark for image","Add a diagonal watermark text over an image."]},{"h":"Editor-de-color-de-imagen.html","i":"🎨","es":["Editor de color","Exposición, contraste, sombras, reflejos, saturación, blanco y negro, claridad y grano."],"en":["Color editor","Exposure, contrast, shadows, highlights, saturation, black & white, clarity and grain."]},{"h":"editor-avanzado-imagen.html","i":"🗂️","es":["Editor avanzado","Editá por capas, cada una con su propia selección (zona o color) y sus propios ajustes."],"en":["Advanced editor","Edit by layers, each with its own selection (area or color) and its own adjustments."]},{"h":"imagen-a-base64.html","i":"🔤","es":["Convertir imagen a Base64","Obtené el texto Base64 (data URI) de una imagen, listo para pegar en HTML o CSS."],"en":["Convert image to Base64","Get an image as Base64 (data URI) text, ready to paste into HTML or CSS."]},{"h":"redondear-esquinas.html","i":"⭕","es":["Redondear esquinas","Redondeá las esquinas de una imagen, hasta convertirla en óvalo o círculo."],"en":["Round corners","Round an image's corners, all the way to an oval or circle."]},{"h":"agregar-borde.html","i":"🖼️","es":["Agregar borde","Agregá un borde de color alrededor de una imagen."],"en":["Add border","Add a colored border around an image."]},{"h":"convertir-formato-imagen.html","i":"🔁","es":["Convertir formato de imagen","Convertí una imagen entre PNG, JPG y WebP."],"en":["Convert image format","Convert an image between PNG, JPG and WebP."]},{"h":"recortar-imagen.html","i":"✂️","es":["Recortar imagen","Recortá una imagen arrastrando la selección, libre o con relación de aspecto fija."],"en":["Crop image","Crop an image by dragging the selection, freely or with a fixed aspect ratio."]},{"h":"censurar-imagen.html","i":"🔲","es":["Pixelar o difuminar una zona","Tapá una parte de una imagen con pixelado o desenfoque."],"en":["Pixelate or blur an area","Cover part of an image with pixelation or blur."]},{"h":"collage-imagenes.html","i":"🧩","es":["Crear collage de imágenes","Combiná tus fotos en diseños tipo Instagram y elegí qué parte de cada una se ve."],"en":["Create an image collage","Combine your photos in Instagram-style layouts and choose which part of each one shows."]},{"h":"paleta-colores-imagen.html","i":"🎨","es":["Extraer paleta de colores","Sacá los colores dominantes de una imagen con su código hexadecimal."],"en":["Extract color palette","Get an image's dominant colors with their hex code."]},{"h":"quitar-metadatos-imagen.html","i":"🔒","es":["Quitar metadatos EXIF","Sacá cámara, fecha y ubicación GPS de una foto antes de compartirla."],"en":["Remove EXIF metadata","Strip camera, date and GPS location from a photo before sharing it."]},{"h":"generar-favicon.html","i":"⭐","es":["Generar favicon","Generá tu favicon en todos los tamaños estándar (16 a 512px)."],"en":["Generate favicon","Generate your favicon in every standard size (16 to 512px)."]},{"h":"comparar-imagenes.html","i":"🔍","es":["Comparar dos imágenes","Resaltá visualmente las diferencias entre dos imágenes."],"en":["Compare two images","Visually highlight the differences between two images."]},{"h":"convertir-excel-csv.html","i":"🔁","es":["Convertir Excel ↔ CSV","De .xlsx a .csv o de .csv a .xlsx, detectando el sentido automáticamente."],"en":["Convert Excel ↔ CSV","From .xlsx to .csv or from .csv to .xlsx, detecting the direction automatically."]},{"h":"visor-excel-csv.html","i":"👁️","es":["Ver Excel o CSV","Mirá el contenido como tabla, sin necesidad de tener Excel instalado."],"en":["View Excel or CSV","See the content as a table, no need to have Excel installed."]},{"h":"unir-excel.html","i":"📎","es":["Unir Excel / CSV","Combiná varios archivos en un mismo Excel, cada uno en su propia hoja."],"en":["Merge Excel / CSV","Combine several files into one Excel workbook, each on its own sheet."]},{"h":"dividir-hojas-excel.html","i":"✂️","es":["Dividir hojas de Excel","Separá cada hoja de un Excel en su propio archivo."],"en":["Split Excel sheets","Split each sheet of an Excel file into its own file."]},{"h":"grafico-desde-csv.html","i":"📈","es":["Gráfico desde Excel / CSV","Generá un gráfico de barras, líneas o torta a partir de tus datos."],"en":["Chart from Excel / CSV","Generate a bar, line or pie chart from your data."]},{"h":"comparar-excel-csv.html","i":"🔍","es":["Comparar Excel / CSV","Ver qué filas cambiaron entre dos versiones de una planilla."],"en":["Compare Excel / CSV","See which rows changed between two versions of a spreadsheet."]},{"h":"formateador-formulas-excel.html","i":"🧮","es":["Formatear fórmulas de Excel","Reordená fórmulas SI/SI.CONJUNTO largas en líneas legibles, sin cambiar la lógica."],"en":["Format Excel formulas","Reformat long IF/IFS formulas into readable lines, without changing the logic."]},{"h":"administrar-hojas-excel.html","i":"🔀","es":["Administrar / reordenar hojas","Reordená o eliminá hojas de un Excel."],"en":["Manage / reorder sheets","Reorder or delete sheets in an Excel file."]},{"h":"reparar-excel.html","i":"🩹","es":["Reparar Excel","Intentar recuperar un archivo dañado o que no abre bien."],"en":["Repair Excel","Try to recover a damaged file that won't open properly."]},{"h":"extraer-imagenes-excel.html","i":"🖼️","es":["Extraer imágenes de Excel","Sacar las imágenes embebidas dentro de un .xlsx."],"en":["Extract images from Excel","Pull out the images embedded inside an .xlsx file."]},{"h":"quitar-encabezados-duplicados-excel.html","i":"🧹","es":["Quitar encabezados duplicados","Conservá solo la primera aparición de cada fila repetida (útil para encabezados que se repiten en medio de los datos)."],"en":["Remove duplicate headers","Keep only the first occurrence of each repeated row (useful for headers repeated in the middle of the data)."]},{"h":"buscar-reemplazar-excel.html","i":"🔍","es":["Buscar y reemplazar","Reemplazá texto en las celdas de una o todas las hojas."],"en":["Find and replace","Replace text in the cells of one or all sheets."]},{"h":"apilar-hojas-excel.html","i":"📎","es":["Combinar hojas en una tabla","Apilá las filas de varias hojas del mismo archivo."],"en":["Stack sheets into one table","Stack the rows from several sheets of the same file."]},{"h":"word-texto.html","i":"📝","es":["Word ↔ Texto","Extraé el texto de un Word a .txt, o convertí un .txt a Word."],"en":["Word ↔ Text","Extract the text from a Word file to .txt, or convert a .txt to Word."]},{"h":"unir-word.html","i":"📎","es":["Unir varios Word","Combinar varios .docx en un solo documento, cada uno en página nueva."],"en":["Merge Word documents","Combine several .docx files into one, each starting on a new page."]},{"h":"generar-word.html","i":"✍️","es":["Crear documento Word","Escribí y dale formato con botones (como en Word) — sin símbolos que aprender."],"en":["Create Word document","Write and format it with buttons (just like Word) — no symbols to learn."]},{"h":"markdown-word.html","i":"📘","es":["Markdown ↔ Word","Convertí Markdown a un .docx editable, o un Word a Markdown."],"en":["Markdown ↔ Word","Convert Markdown to an editable .docx, or Word to Markdown."]},{"h":"epub-word.html","i":"📚","es":["EPUB ↔ Word","Convertí un libro EPUB a un documento Word editable, o un Word a EPUB."],"en":["EPUB ↔ Word","Convert an EPUB book to an editable Word document, or Word to EPUB."]},{"h":"dividir-word.html","i":"✂️","es":["Dividir Word","Separá un documento en un .docx por cada Título 1."],"en":["Split Word document","Split a document into one .docx per Heading 1."]},{"h":"administrar-word.html","i":"🔀","es":["Administrar / reordenar secciones","Reordená o eliminá secciones de un documento por Título 1."],"en":["Manage / reorder sections","Reorder or delete sections of a document by Heading 1."]},{"h":"reparar-word.html","i":"🩹","es":["Reparar Word","Intentar recuperar un documento dañado o que no abre bien."],"en":["Repair Word","Try to recover a damaged document that won't open properly."]},{"h":"extraer-imagenes-word.html","i":"🖼️","es":["Extraer imágenes de Word","Sacar las imágenes embebidas dentro de un documento."],"en":["Extract images from Word","Pull out the images embedded inside a document."]},{"h":"marca-agua-word.html","i":"💧","es":["Encabezado / pie de página","Agregar texto de encabezado, pie de página o numeración."],"en":["Header / footer","Add header text, footer text or page numbering."]},{"h":"buscar-reemplazar-word.html","i":"🔍","es":["Buscar y reemplazar","Reemplazá texto en todo el documento, conservando el formato."],"en":["Find and replace","Replace text throughout the document, keeping the formatting."]},{"h":"comparar-word.html","i":"🔎","es":["Comparar dos documentos","Mirá exactamente qué texto cambió entre dos versiones."],"en":["Compare two documents","See exactly what text changed between two versions."]},{"h":"epub-markdown.html","i":"Ⓜ️","es":["EPUB ↔ Markdown","Convertí un libro EPUB a Markdown, o Markdown a EPUB."],"en":["EPUB ↔ Markdown","Convert an EPUB book to Markdown, or Markdown to EPUB."]},{"h":"epub-texto.html","i":"📄","es":["EPUB ↔ Texto","Extraé el texto de un libro EPUB a .txt, o convertí un .txt a EPUB."],"en":["EPUB ↔ Text","Extract the text from an EPUB book to .txt, or convert a .txt to EPUB."]},{"h":"unir-epub.html","i":"📎","es":["Unir varios EPUB","Combiná varios libros en uno solo, en el orden que quieras."],"en":["Merge EPUB books","Combine several books into one, in whatever order you want."]},{"h":"dividir-epub.html","i":"✂️","es":["Dividir EPUB","Separá un libro en un mini-EPUB por capítulo."],"en":["Split EPUB","Split a book into one mini-EPUB per chapter."]},{"h":"administrar-epub.html","i":"🔀","es":["Administrar / reordenar capítulos","Reordená o eliminá capítulos de un libro."],"en":["Manage / reorder chapters","Reorder or delete chapters in a book."]},{"h":"reparar-epub.html","i":"🩹","es":["Reparar EPUB","Intentar recuperar un libro dañado o que no abre bien."],"en":["Repair EPUB","Try to recover a damaged book that won't open properly."]},{"h":"extraer-imagenes-epub.html","i":"🖼️","es":["Extraer imágenes de EPUB","Sacar las imágenes embebidas dentro de un libro."],"en":["Extract images from EPUB","Pull out the images embedded inside a book."]},{"h":"marca-agua-epub.html","i":"💧","es":["Agregar texto a cada capítulo","Aviso, copyright o \"muestra gratuita\" al principio o final de cada capítulo."],"en":["Add text to every chapter","A notice, copyright line or \"free sample\" at the start or end of every chapter."]},{"h":"editar-metadatos-epub.html","i":"🏷️","es":["Editar metadatos de un EPUB","Título, autor e idioma, sin tocar el contenido."],"en":["Edit EPUB metadata","Title, author and language, without touching the content."]},{"h":"extraer-texto-powerpoint.html","i":"📽️","es":["Extraer texto de PowerPoint","Sacar todo el texto de una .pptx a texto plano, por diapositiva."],"en":["Extract text from PowerPoint","Pull all the text out of a .pptx into plain text, slide by slide."]},{"h":"dividir-texto.html","i":"✂️","es":["Dividir texto","Separá un .txt en un archivo por cada párrafo."],"en":["Split text","Split a .txt file into one file per paragraph."]},{"h":"administrar-texto.html","i":"🔀","es":["Administrar / reordenar párrafos","Reordená o eliminá párrafos de un texto."],"en":["Manage / reorder paragraphs","Reorder or delete paragraphs in a text."]},{"h":"marca-agua-texto.html","i":"💧","es":["Encabezado / pie de texto","Agregar una línea al principio o al final de un .txt."],"en":["Header / footer line","Add a line at the start or end of a .txt file."]},{"h":"arreglar-codificacion-texto.html","i":"🩹","es":["Arreglar codificación","Quitar BOM, corregir acentos rotos y normalizar saltos de línea."],"en":["Fix encoding","Remove BOM, fix broken accents and normalize line breaks."]},{"h":"quitar-duplicados-texto.html","i":"🧹","es":["Quitar líneas duplicadas o vacías","Limpiá líneas repetidas y/o vacías de un .txt."],"en":["Remove duplicate or blank lines","Clean up repeated and/or blank lines in a .txt file."]},{"h":"ordenar-lineas-texto.html","i":"🔤","es":["Ordenar líneas","Orden alfabético o numérico de las líneas de un .txt."],"en":["Sort lines","Sort the lines of a .txt file alphabetically or numerically."]},{"h":"generar-powerpoint.html","i":"✍️","es":["Crear presentación PowerPoint","Armá diapositivas con título, texto y formato con botones — sin símbolos."],"en":["Create PowerPoint presentation","Build slides with title, text and formatting using buttons — no symbols."]},{"h":"dividir-powerpoint.html","i":"✂️","es":["Dividir PowerPoint","Separá una presentación en una mini-presentación por diapositiva."],"en":["Split PowerPoint","Split a presentation into one mini-presentation per slide."]},{"h":"administrar-diapositivas.html","i":"🔀","es":["Administrar / reordenar diapositivas","Reordená o eliminá diapositivas sin re-renderizar nada."],"en":["Manage / reorder slides","Reorder or delete slides without re-rendering anything."]},{"h":"reparar-powerpoint.html","i":"🩹","es":["Reparar PowerPoint","Descartar solo las diapositivas dañadas, conservando el resto."],"en":["Repair PowerPoint","Discard only the damaged slides, keeping the rest."]},{"h":"extraer-imagenes-powerpoint.html","i":"🖼️","es":["Extraer imágenes de PowerPoint","Sacar las imágenes embebidas dentro de una .pptx."],"en":["Extract images from PowerPoint","Pull out the images embedded inside a .pptx file."]},{"h":"extraer-notas-powerpoint.html","i":"🗒️","es":["Extraer notas del orador","Sacá el texto de las notas de cada diapositiva."],"en":["Extract speaker notes","Pull out the notes text from each slide."]},{"h":"powerpoint-a-imagenes.html","i":"📤","es":["PowerPoint a imágenes","Exportá cada diapositiva como imagen PNG."],"en":["PowerPoint to images","Export every slide as a PNG image."]},{"h":"markdown-html.html","i":"📄","es":["Markdown ↔ HTML","Convertí Markdown a HTML o HTML a Markdown, con vista previa en vivo."],"en":["Markdown ↔ HTML","Convert Markdown to HTML or HTML to Markdown, with a live preview."]},{"h":"dividir-markdown.html","i":"✂️","es":["Dividir Markdown","Separá un .md en un archivo por cada encabezado de primer nivel."],"en":["Split Markdown","Split a .md file into one file per top-level heading."]},{"h":"administrar-markdown.html","i":"🔀","es":["Administrar / reordenar secciones","Reordená o eliminá secciones de un .md por encabezado."],"en":["Manage / reorder sections","Reorder or delete sections of a .md file by heading."]},{"h":"tabla-contenidos-markdown.html","i":"📑","es":["Tabla de contenidos","Generá un índice con links a partir de los encabezados."],"en":["Table of contents","Generate a linked index from the headings."]},{"h":"markdown-tabla-csv.html","i":"📊","es":["Tabla Markdown ↔ CSV","Convertí una tabla Markdown a CSV, o un CSV a tabla Markdown."],"en":["Markdown table ↔ CSV","Convert a Markdown table to CSV, or a CSV to a Markdown table."]},{"h":"contador-palabras.html","i":"📝","es":["Contador de palabras","Contá palabras, caracteres, párrafos y tiempo de lectura al instante."],"en":["Word counter","Count words, characters, paragraphs and reading time instantly."]},{"h":"formateador-json.html","i":"🧾","es":["Formatear / validar JSON","Indentá, minificá y validá JSON al instante."],"en":["Format / validate JSON","Indent, minify and validate JSON instantly."]},{"h":"comparador-texto.html","i":"🔍","es":["Comparar dos textos","Mirá exactamente qué cambió entre dos versiones de un texto."],"en":["Compare two texts","See exactly what changed between two versions of a text."]},{"h":"convertidor-mayusculas.html","i":"🔠","es":["Mayúsculas / minúsculas","Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título y más."],"en":["Uppercase / lowercase","Convert text to UPPERCASE, lowercase, Title Case and more."]},{"h":"generador-lorem-ipsum.html","i":"📰","es":["Generador de Lorem Ipsum","Texto de relleno para maquetas y pruebas, por párrafos, oraciones o palabras."],"en":["Lorem Ipsum generator","Placeholder text for mockups and tests, by paragraphs, sentences or words."]},{"h":"extractor-contacto.html","i":"📇","es":["Extraer emails, teléfonos y links","Sacá todos los contactos y links de un texto pegado."],"en":["Extract emails, phone numbers and links","Pull out every contact and link from a pasted text."]},{"h":"generador-codigo-barras.html","i":"📊","es":["Generador de código de barras","CODE128, EAN-13, UPC y más, descargable como SVG."],"en":["Barcode generator","CODE128, EAN-13, UPC and more, downloadable as SVG."]},{"h":"generador-qr.html","i":"🔳","es":["Generador de QR","Creá códigos QR para links, texto o wifi y descargalos como imagen."],"en":["QR code generator","Create QR codes for links, text or wifi and download them as an image."]},{"h":"lector-codigos.html","i":"📷","es":["Lector de códigos QR y de barras","Leé un código desde una imagen o con la cámara, al instante."],"en":["QR and barcode reader","Read a code from an image or with your camera, instantly."]},{"h":"dictado-voz.html","i":"🎙️","es":["Dictado por voz","Grabá tu voz y convertila a texto, 100% en tu navegador — elegí entre modelo rápido o preciso."],"en":["Voice dictation","Record your voice and turn it into text, 100% in your browser — choose a fast or an accurate model."]},{"h":"generador-contrasenas.html","i":"🔑","es":["Generador de contraseñas","Contraseñas aleatorias seguras, criptográficamente robustas."],"en":["Password generator","Secure, cryptographically strong random passwords."]}];
+  var entrada = document.getElementById('buscador');
+  var seccion = document.getElementById('resultadosBusqueda');
+  var grid = document.getElementById('gridResultados');
+  var vacio = document.getElementById('sinResultados');
+  var categorias = document.getElementById('categorias');
+
+  function normalizar(s) {
+    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function idioma() {
+    try { return localStorage.getItem('idioma') || 'es'; } catch (e) { return 'es'; }
+  }
+
+  function pintar() {
+    var texto = normalizar(entrada.value.trim());
+    if (!texto) {
+      seccion.hidden = true;
+      categorias.hidden = false;
+      return;
+    }
+    var lang = idioma();
+    var partes = texto.split(/\s+/);
+    var hallados = HERRAMIENTAS.filter(function (t) {
+      var campo = normalizar((t[lang] || t.es).join(' '));
+      return partes.every(function (p) { return campo.indexOf(p) !== -1; });
+    });
+    grid.innerHTML = '';
+    hallados.forEach(function (t) {
+      var textos = t[lang] || t.es;
+      var a = document.createElement('a');
+      a.className = 'tarjeta-herramienta';
+      a.href = 'herramientas/' + t.h;
+      var ic = document.createElement('div');
+      ic.className = 'icono';
+      ic.textContent = t.i;
+      var h3 = document.createElement('h3');
+      h3.textContent = textos[0];
+      var p = document.createElement('p');
+      p.textContent = textos[1];
+      a.appendChild(ic); a.appendChild(h3); a.appendChild(p);
+      grid.appendChild(a);
+    });
+    vacio.hidden = hallados.length > 0;
+    seccion.hidden = false;
+    categorias.hidden = true;
+  }
+
+  entrada.addEventListener('input', pintar);
+  // Al cambiar de idioma hay que redibujar: las tarjetas ya pintadas tienen
+  // el texto del idioma anterior y no las alcanza data-i18n.
+  document.addEventListener('cambioIdioma', pintar);
+})();
+</script>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="assets/js/tema.js"></script>
