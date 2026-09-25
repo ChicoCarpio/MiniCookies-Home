@@ -11,9 +11,10 @@
   const baseIconos = new URL('../img/fondo/', scriptActual.src).href;
 
   const nombresIconos = [
-    'icon-perro-transparente.png', 'icon-otono-transparente.png', 'galletas.png', 'hombre-de-gengibre.png', 'base-de-datos.png',
-    'bombilla.png', 'carta.png', 'checks.png', 'code.png', 'engranaje.png',
-    'folder.png', 'hoja.png', 'lupa.png', 'minicookies-logo.png',
+    'hombre-de-gengibre.png', 'auto-combo-1790299148-qwen-transparente.png', 'icon-perro-transparente.png', 'test-combo-qwen-transparente.png', 'galletas.png',
+    'auto-combo-1790056103-qwen-transparente.png', 'auto-combo-1790298268-qwen-transparente.png', 'auto-1790052743-1-dolphin-013-qwen-transparente.png', 'auto-combo-1790315435-qwen-transparente.png', 'auto-combo-1790316328-qwen-transparente.png',
+    'base-de-datos.png', 'bombilla.png', 'carta.png', 'checks.png', 'code.png',
+    'engranaje.png', 'folder.png', 'hoja.png', 'lupa.png', 'minicookies-logo.png',
   ];
   const iconos = nombresIconos.map((nombre) => baseIconos + nombre);
 

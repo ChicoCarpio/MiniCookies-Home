@@ -1,0 +1,223 @@
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/* Distribución de los editores de imagen en celular.
+   Lo maneja assets/js/editor-movil.js — ver ese archivo para el porqué.
+
+   En computadora los editores son tres columnas (filtros | imagen | ajustes).
+   En celular eso no entra, y la solución anterior —cajones laterales que
+   ocupaban el 86% del ancho— tapaba justo la imagen que se estaba ajustando.
+   Acá la imagen manda: ocupa todo el alto libre y nunca queda tapada; los
+   controles viven abajo, en una tira de categorías con desplazamiento
+   horizontal que abre un panel bajo y angosto.
+
+        ┌──────────────┐
+        │  publicidad  │  tira fina arriba (reemplaza al encabezado)
+        ├──────────────┤
+        │              │
+        │    IMAGEN    │  todo el alto que sobre
+        │              │
+        ├──────────────┤
+        │ ajustes      │  panel del grupo abierto (solo si hay uno)
+        ├──────────────┤
+        │ ☀ 🎨 ◐ ✨ →  │  categorías, se desplazan de costado
+        ├──────────────┤
+        │ 🖼 ↺      ⤓  │  acciones siempre a mano
+        └──────────────┘
+
+   Nada de esto aplica arriba de 900px: ahí sigue el diseño de tres columnas
+   tal cual estaba. */
+
+@media (max-width: 900px) {
+
+  /* El editor pasa a ser una capa fija sobre la página. Así no hay que
+     esconder el encabezado, la intro ni el pie uno por uno: quedan debajo. */
+  body.em-activo { overflow: hidden; }
+
+  body.em-activo .em-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: var(--fondo, var(--gris-fondo));
+    /* Respeta la barra de gestos y el notch. */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* --- Tira de publicidad, arriba --- */
+  body.em-activo .em-anuncio {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Chica a propósito: es el alto de un banner de celular y nada más.
+       Lo que sobra es para la imagen. */
+    height: 52px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--gris-borde);
+    background: var(--superficie);
+  }
+
+  body.em-activo .em-anuncio .anuncio {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+  }
+
+  /* --- La imagen: se queda con todo lo que sobra --- */
+  body.em-activo .panel-lienzo {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    padding: 6px;
+    border: none;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  body.em-activo .panel-lienzo .zona-lienzo-contenedor {
+    max-height: 100%;
+    border: none;
+  }
+
+  /* --- Panel del grupo abierto --- */
+  body.em-activo .em-hoja {
+    flex: 0 0 auto;
+    /* Un tercio de la pantalla como mucho: lo que importa es ver la
+       imagen mientras se la ajusta. Si hay más controles, se desplazan. */
+    max-height: 34vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px 12px;
+    border-top: 1px solid var(--gris-borde);
+    background: var(--superficie);
+  }
+
+  body.em-activo .em-hoja:empty { display: none; }
+
+  /* Dentro del panel, el acordeón ya no hace falta: la categoría la eligió
+     la tira de abajo, así que el título propio del grupo sobra. */
+  body.em-activo .em-hoja .acordeon-grupo {
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    overflow: visible;
+  }
+  body.em-activo .em-hoja .acordeon-titulo,
+  body.em-activo .em-hoja .boton-plegar { display: none; }
+  body.em-activo .em-hoja .acordeon-contenido { display: block; padding: 0; }
+
+  /* Deslizadores más altos: con el dedo, 16px de alto no se agarran bien. */
+  body.em-activo .em-hoja input[type="range"] {
+    height: 34px;
+    margin: 0;
+  }
+  body.em-activo .em-hoja .campo-deslizador { margin-bottom: 4px; }
+  body.em-activo .em-hoja .etiqueta-deslizador { font-size: 0.85rem; }
+
+  /* --- Tira de categorías --- */
+  body.em-activo .em-chips {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Sin barra de desplazamiento visible: se entiende que corre porque se
+       ve media categoría cortada en el borde. */
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px 8px;
+    border-top: 1px solid var(--gris-borde);
+    background: var(--superficie);
+  }
+  body.em-activo .em-chips::-webkit-scrollbar { display: none; }
+
+  body.em-activo .em-chip {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 62px;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    color: var(--texto-suave);
+    font-family: inherit;
+    font-size: 0.68rem;
+    line-height: 1.1;
+    cursor: pointer;
+    text-align: center;
+  }
+  body.em-activo .em-chip .em-icono { font-size: 1.25rem; line-height: 1; }
+  body.em-activo .em-chip.activo { background: var(--gris-fondo); color: var(--azul); font-weight: 600; }
+  /* Un puntito debajo de la categoría que tiene algún ajuste tocado. */
+  body.em-activo .em-chip.tocado .em-icono::after {
+    content: '';
+    display: block;
+    width: 4px; height: 4px;
+    margin: 2px auto -6px;
+    border-radius: 50%;
+    background: var(--azul);
+  }
+
+  /* --- Acciones --- */
+  body.em-activo .em-acciones {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--gris-borde);
+    background: var(--superficie);
+  }
+  body.em-activo .em-acciones .em-secundario {
+    flex: 0 0 auto;
+    border: 1px solid var(--gris-borde);
+    border-radius: 999px;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  body.em-activo .em-acciones .em-principal {
+    flex: 1 1 auto;
+    border: none;
+    border-radius: 999px;
+    background: var(--azul);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  body.em-activo .em-acciones .em-principal[disabled] { opacity: .45; cursor: default; }
+
+  /* Los cajones laterales y sus pestañas ya no se usan en este modo. */
+  body.em-activo .abrir-panel-movil,
+  body.em-activo .fondo-panel-movil { display: none !important; }
+
+  /* Los paneles que no son la hoja abierta no se ven. Se mantienen en el DOM
+     (no se destruyen) para no perder los escuchadores ya enganchados. */
+  body.em-activo .em-shell > .panel-filtros,
+  body.em-activo .em-shell > .panel-ajustes,
+  body.em-activo .em-shell > .panel-capas { display: none; }
+}

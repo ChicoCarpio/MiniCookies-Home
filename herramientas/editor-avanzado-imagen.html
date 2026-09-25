@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/editor-movil.css">
 <style>
   /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
      del sitio, pensado como columna angosta de lectura). */
@@ -274,7 +275,7 @@
           </div>
 
           <div class="seccion-lateral">
-            <details class="filtros-capa" id="filtrosCapa">
+            <details class="filtros-capa" id="filtrosCapa" data-em-categoria="Filtros">
               <summary class="titulo-seccion-lateral"><span>Filtro de la capa</span><span id="nombreFiltroCapa">Sin filtro</span></summary>
               <p class="nota-lateral" style="margin:0 0 6px;">Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.</p>
               <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
@@ -1303,6 +1304,7 @@ canvasTrabajo.addEventListener('click', (e) => {
 // --- Pincel: pinta en la máscara PROPIA de la capa activa ---
 let pintando = false;
 let ultimoPuntoPincel = null;
+let mascaraAntesDelTrazo = null;
 
 // --- Arrastrar para mover la imagen (cuando el pincel NO está activo) ---
 let paneando = false;
@@ -1415,9 +1417,18 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
     return;
   }
 
+  // Con dos dedos en la pantalla el gesto es un pellizco, no un trazo.
+  if (e.pointerType === 'touch' && punterosActivos.size >= 1) return;
+
   const mascara = mascaraDeCapaActiva();
   if (!mascara) return;
   pintando = true;
+  // Copia de la máscara antes de empezar: si el trazo resulta ser el primer
+  // dedo de un pellizco, se restaura y no queda una mancha no pedida.
+  mascaraAntesDelTrazo = document.createElement('canvas');
+  mascaraAntesDelTrazo.width = mascara.width;
+  mascaraAntesDelTrazo.height = mascara.height;
+  mascaraAntesDelTrazo.getContext('2d').drawImage(mascara, 0, 0);
   canvasTrabajo.setPointerCapture(e.pointerId);
   ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
   pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual());
@@ -1448,9 +1459,27 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
 function terminarGestoLienzo() {
   pintando = false;
   ultimoPuntoPincel = null;
+  mascaraAntesDelTrazo = null;
   paneando = false;
   panInicio = null;
   zonaLienzo.classList.remove('paneando');
+}
+
+// Se llama cuando aparece el segundo dedo: lo que venía haciendo el primero
+// no era lo que el usuario quería, era el comienzo de un pellizco.
+function cancelarGestoDeUnDedo() {
+  if (pintando && mascaraAntesDelTrazo) {
+    const mascara = mascaraDeCapaActiva();
+    if (mascara) {
+      const ctx = mascara.getContext('2d');
+      ctx.clearRect(0, 0, mascara.width, mascara.height);
+      ctx.drawImage(mascaraAntesDelTrazo, 0, 0);
+      const capa = capaActiva();
+      if (capa) actualizarMiniaturaCapa(capa);
+      programarRenderizado();
+    }
+  }
+  terminarGestoLienzo();
 }
 canvasTrabajo.addEventListener('pointerup', terminarGestoLienzo);
 canvasTrabajo.addEventListener('pointercancel', terminarGestoLienzo);
@@ -1490,7 +1519,47 @@ function aplicarZoom(nuevoZoom, clientX, clientY) {
   }, clientX, clientY);
 }
 
+// Zoom con el que la imagen entra entera en el recuadro. Sin esto arrancaba
+// siempre al 100%: una foto de celular (varios miles de píxeles) mostraba solo
+// una esquina, y en pantalla chica ni se entendía qué se estaba viendo.
+// "zoomAutomatico" recuerda si el zoom actual lo puso el programa o el
+// usuario: si lo puso el usuario, cambiar el tamaño de la ventana no se lo
+// pisa.
+let zoomAutomatico = true;
+
+// Cuánto espacio hay realmente para la imagen. Se mide el panel, NO el
+// recuadro del lienzo: ese recuadro se achica según su contenido, así que
+// medirlo para decidir el tamaño del contenido es circular — cada reajuste
+// encogía un poco más la imagen.
+function espacioParaElLienzo() {
+  const panel = zonaLienzoContenedor.parentElement;
+  const caja = panel.getBoundingClientRect();
+  const estilo = getComputedStyle(panel);
+  let ancho = caja.width - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight);
+  let alto = caja.height - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom);
+  // Lo que acompaña al lienzo dentro del panel (el botón de ver el original)
+  // también ocupa alto.
+  for (const hijo of panel.children) {
+    if (hijo !== zonaLienzoContenedor) alto -= hijo.getBoundingClientRect().height;
+  }
+  return { ancho, alto };
+}
+
+function encajarEnLaVista() {
+  const { ancho, alto } = espacioParaElLienzo();
+  if (!anchoTrabajo || !altoTrabajo || ancho < 8 || alto < 8) return;
+  // Unos píxeles de margen para no provocar barras de desplazamiento.
+  const factor = Math.min(1, (ancho - 6) / anchoTrabajo, (alto - 6) / altoTrabajo);
+  aplicarZoom(factor);
+  zoomAutomatico = true;
+}
+
+window.addEventListener('resize', () => {
+  if (imagenActual && zoomAutomatico) encajarEnLaVista();
+});
+
 elZoomAvanzado.addEventListener('input', () => {
+  zoomAutomatico = false;
   aplicarZoom(parseInt(elZoomAvanzado.value, 10) / 100);
 });
 
@@ -1533,6 +1602,12 @@ zonaLienzoContenedor.addEventListener('pointerdown', (e) => {
   if (punterosActivos.size === 2) {
     distanciaPinchInicial = distanciaEntrePunteros();
     zoomAlIniciarPinch = zoomActual;
+    zoomAutomatico = false;
+    // Al apoyar el segundo dedo hay que soltar lo que haya empezado el
+    // primero. Si no, arrastrar y pellizcar corren a la vez y los dos
+    // escriben el desplazamiento del recuadro: se pelean y el zoom se siente
+    // trabado. Y con el pincel activo, además, quedaban trazos sueltos.
+    cancelarGestoDeUnDedo();
   }
 });
 zonaLienzoContenedor.addEventListener('pointermove', (e) => {
@@ -1762,7 +1837,6 @@ async function mostrarArchivo(archivo) {
   imagenActual = await cargarImagen(archivo);
 
   prepararResolucionTrabajo();
-  aplicarZoom(1);
 
   contadorCapas = 0;
   capas = [crearCapa('Capa 1')];
@@ -1770,6 +1844,9 @@ async function mostrarArchivo(archivo) {
 
   editorCompleto.style.display = 'block';
   zonaArrastre.style.display = 'none';
+  // Con el editor ya visible el recuadro tiene tamaño real: recién ahora se
+  // puede calcular el zoom con el que la imagen entra entera.
+  requestAnimationFrame(encajarEnLaVista);
   escribirAjustesEnUI(capas[0].ajustes);
   actualizarControlesSeleccion();
   pintarListaCapas();
@@ -1937,7 +2014,6 @@ entradaProyecto.addEventListener('change', async (e) => {
   archivoActual = new File([await (await fetch(proyecto.imagen)).blob()], proyecto.nombreArchivo || 'imagen.png', { type: proyecto.imagen.startsWith('data:image/png') ? 'image/png' : 'image/jpeg' });
 
   prepararResolucionTrabajo();
-  aplicarZoom(1);
 
   const capasCargadas = [];
   for (const c of proyecto.capas) {
@@ -1968,6 +2044,9 @@ entradaProyecto.addEventListener('change', async (e) => {
 
   editorCompleto.style.display = 'block';
   zonaArrastre.style.display = 'none';
+  // Con el editor ya visible el recuadro tiene tamaño real: recién ahora se
+  // puede calcular el zoom con el que la imagen entra entera.
+  requestAnimationFrame(encajarEnLaVista);
   escribirAjustesEnUI(capaActiva().ajustes);
   actualizarControlesSeleccion();
   pintarListaCapas();
@@ -2021,5 +2100,6 @@ estadoInicialPaneles();
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/editor-movil.js"></script>
 </body>
 </html>
