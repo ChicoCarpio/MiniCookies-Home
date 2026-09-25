@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lector de códigos QR y de barras gratis — Mini Cookies</title>
-<meta name="description" content="Leé un código QR o de barras desde una imagen o con la cámara, gratis y sin enviar nada a ningún servidor.">
+<title>Leer códigos QR y de barras desde imagen o PDF, gratis — Mini Cookies</title>
+<meta name="description" content="Leé códigos QR y de barras desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB, o con la cámara. Gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -22,18 +22,18 @@
 
 <main>
   <h1>Lector de códigos QR y de barras</h1>
-  <p>Subí una imagen o usá la cámara para leer un código QR o de barras (EAN-13, CODE128, CODE39 y más).</p>
+  <p>Leé códigos QR y de barras (EAN-13, CODE128, CODE39 y más) desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o con la cámara. Si el archivo tiene varios códigos, se listan todos.</p>
 
   <div class="panel-herramienta">
     <div class="controles" style="margin-bottom:20px;">
-      <button class="boton" id="botonModoImagen" type="button">📁 Subir imagen</button>
+      <button class="boton" id="botonModoImagen" type="button">📁 Subir archivo</button>
       <button class="boton" id="botonModoCamara" type="button" style="background:#94a3b8;">📷 Usar cámara</button>
     </div>
 
     <div id="seccionImagen">
       <div class="zona-arrastre" id="zonaArrastre">
-        🖼️ Arrastrá una imagen acá o hacé clic para elegirla
-        <input type="file" id="entradaArchivo" accept="image/*" hidden>
+        🖼️ Arrastrá acá una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o hacé clic para elegirlo
+        <input type="file" id="entradaArchivo" accept="image/*,.pdf,.docx,.xlsx,.pptx,.epub" hidden>
       </div>
     </div>
 
@@ -54,13 +54,11 @@
 
     <p id="mensajeError" style="color:#dc2626; display:none; margin-top:16px;"></p>
 
+    <p id="progreso" style="display:none; margin-top:16px; color:var(--texto-suave);"></p>
+
     <div class="resultado" id="resultado">
-      ✅ <strong id="formatoResultado"></strong>
-      <p id="textoResultado" style="word-break:break-all; margin:10px 0;"></p>
-      <div class="controles">
-        <button class="boton" id="botonCopiar" type="button">Copiar</button>
-        <a class="boton" id="enlaceAbrir" href="#" target="_blank" rel="noopener" style="display:none; text-decoration:none;">Abrir enlace</a>
-      </div>
+      <strong id="tituloResultado"></strong>
+      <div id="listaCodigos"></div>
     </div>
   </div>
 
@@ -73,6 +71,9 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.23.0/umd/index.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/extraer-medios-zip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -86,10 +87,9 @@ const video = document.getElementById('video');
 const botonDetenerCamara = document.getElementById('botonDetenerCamara');
 const mensajeError = document.getElementById('mensajeError');
 const resultado = document.getElementById('resultado');
-const formatoResultado = document.getElementById('formatoResultado');
-const textoResultado = document.getElementById('textoResultado');
-const botonCopiar = document.getElementById('botonCopiar');
-const enlaceAbrir = document.getElementById('enlaceAbrir');
+const tituloResultado = document.getElementById('tituloResultado');
+const listaCodigos = document.getElementById('listaCodigos');
+const progreso = document.getElementById('progreso');
 
 const lector = new ZXing.BrowserMultiFormatReader();
 let camaraActiva = false;
@@ -104,57 +104,242 @@ function ocultarError() {
   mensajeError.style.display = 'none';
 }
 
-function mostrarResultado(resultadoZXing) {
-  ocultarError();
-  const texto = resultadoZXing.getText();
-  const formato = resultadoZXing.getBarcodeFormat();
-  formatoResultado.textContent = 'Código detectado (' + formato + ')';
-  textoResultado.textContent = texto;
+function escaparHtml(t) {
+  return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
-  const esUrl = /^https?:\/\//i.test(texto.trim());
-  if (esUrl) {
-    enlaceAbrir.href = texto.trim();
-    enlaceAbrir.style.display = 'inline-block';
-  } else {
-    enlaceAbrir.style.display = 'none';
+// Pinta la lista de códigos encontrados. Un PDF o un documento pueden traer
+// varios, así que cada uno va con su origen (de qué página o imagen salió) y
+// sus propios botones.
+function mostrarCodigos(codigos, resumenOrigen) {
+  ocultarError();
+  listaCodigos.replaceChildren();
+
+  if (!codigos.length) {
+    resultado.classList.remove('visible');
+    mostrarError('No se encontró ningún código QR o de barras en ' + resumenOrigen + '.');
+    return;
   }
+
+  tituloResultado.textContent = codigos.length === 1
+    ? '✅ Se encontró 1 código'
+    : '✅ Se encontraron ' + codigos.length + ' códigos';
+
+  codigos.forEach((c) => {
+    const fila = document.createElement('div');
+    fila.style.cssText = 'border-top:1px solid var(--gris-borde); margin-top:12px; padding-top:12px;';
+
+    const donde = document.createElement('div');
+    donde.style.cssText = 'font-size:0.78rem; color:var(--texto-suave);';
+    donde.textContent = c.formato + (c.origen ? ' · ' + c.origen : '');
+
+    const texto = document.createElement('p');
+    texto.style.cssText = 'word-break:break-all; margin:6px 0 10px;';
+    texto.textContent = c.texto;
+
+    const controles = document.createElement('div');
+    controles.className = 'controles';
+
+    const copiar = document.createElement('button');
+    copiar.type = 'button';
+    copiar.className = 'boton';
+    copiar.textContent = 'Copiar';
+    copiar.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(c.texto);
+        copiar.textContent = '✅ Copiado';
+        setTimeout(() => { copiar.textContent = 'Copiar'; }, 1500);
+      } catch (error) {
+        mostrarError('No se pudo copiar: ' + error.message);
+      }
+    });
+    controles.appendChild(copiar);
+
+    if (/^https?:\/\//i.test(c.texto.trim())) {
+      const abrir = document.createElement('a');
+      abrir.className = 'boton';
+      abrir.href = c.texto.trim();
+      abrir.target = '_blank';
+      abrir.rel = 'noopener';
+      abrir.style.textDecoration = 'none';
+      abrir.textContent = 'Abrir enlace';
+      controles.appendChild(abrir);
+    }
+
+    fila.appendChild(donde);
+    fila.appendChild(texto);
+    fila.appendChild(controles);
+    listaCodigos.appendChild(fila);
+  });
 
   resultado.classList.add('visible');
 }
 
-botonCopiar.addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(textoResultado.textContent);
-    botonCopiar.textContent = '✅ Copiado';
-    setTimeout(() => botonCopiar.textContent = 'Copiar', 1500);
-  } catch (error) {
-    mostrarError('No se pudo copiar: ' + error.message);
-  }
-});
+// La cámara entrega un código por vez: se muestra como una lista de uno solo.
+function mostrarResultado(resultadoZXing) {
+  mostrarCodigos([{
+    texto: resultadoZXing.getText(),
+    formato: nombreFormato(resultadoZXing.getBarcodeFormat()),
+    origen: '',
+  }], 'la cámara');
+}
 
 // --- Modo imagen ---
 
-function leerImagen(archivo) {
+// isEvalSupported: false mitiga CVE-2024-4367 de PDF.js (un PDF armado a
+// propósito podía ejecutar código). Igual que en las demás herramientas de PDF.
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Formatos que son un .zip por dentro: el código puede estar en una imagen
+// incrustada (un QR pegado en una diapositiva, un código de barras en una
+// etiqueta de Word...). Se sacan esas imágenes y se leen una por una.
+const MEDIOS_POR_EXTENSION = {
+  docx: 'word/media/', xlsx: 'xl/media/', pptx: 'ppt/media/', epub: '',
+};
+
+function extensionDe(nombre) {
+  const m = /\.([a-z0-9]+)$/i.exec(nombre || '');
+  return m ? m[1].toLowerCase() : '';
+}
+
+function avisar(texto) {
+  progreso.textContent = texto;
+  progreso.style.display = texto ? 'block' : 'none';
+}
+
+// Un intento de lectura sobre un lienzo. Devuelve el código o null.
+// ZXing no sabe leer un <canvas> directamente (esta versión no trae
+// decodeFromCanvas), así que se le pasa el lienzo como imagen.
+async function leerLienzo(lienzo) {
+  const blob = await new Promise((resolve) => lienzo.toBlob(resolve, 'image/png'));
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  try {
+    return await lector.decodeFromImageUrl(url);
+  } catch (error) {
+    return null; // en ese lienzo no había ningún código
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+// getBarcodeFormat() devuelve el número del enum; sin traducirlo, la página
+// mostraba "11" en vez de "QR CODE".
+function nombreFormato(valor) {
+  const nombre = ZXing.BarcodeFormat[valor];
+  return nombre ? String(nombre).replace(/_/g, ' ') : String(valor);
+}
+
+// Los códigos chicos (un QR de 2 cm en una página A4) no se reconocen al
+// tamaño natural de la página: se prueba con más resolución antes de darla
+// por perdida. Se empieza por la escala barata.
+const ESCALAS_PDF = [2, 3.5];
+
+async function codigosDePdf(archivo) {
+  const bytes = new Uint8Array(await archivo.arrayBuffer());
+  const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+  const encontrados = [];
+
+  for (let n = 1; n <= pdf.numPages; n++) {
+    avisar('Leyendo página ' + n + ' de ' + pdf.numPages + '…');
+    const pagina = await pdf.getPage(n);
+    for (const escala of ESCALAS_PDF) {
+      const viewport = pagina.getViewport({ scale: escala });
+      const lienzo = document.createElement('canvas');
+      lienzo.width = viewport.width;
+      lienzo.height = viewport.height;
+      await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport }).promise;
+      const hallado = await leerLienzo(lienzo);
+      if (hallado) {
+        encontrados.push({
+          texto: hallado.getText(),
+          formato: nombreFormato(hallado.getBarcodeFormat()),
+          origen: 'página ' + n,
+        });
+        break; // ya está: no hace falta probar más resolución en esta página
+      }
+    }
+  }
+  return encontrados;
+}
+
+async function codigosDeImagen(archivo, origen) {
+  const url = URL.createObjectURL(archivo);
+  try {
+    const hallado = await lector.decodeFromImageUrl(url);
+    return [{ texto: hallado.getText(), formato: nombreFormato(hallado.getBarcodeFormat()), origen: origen || '' }];
+  } catch (error) {
+    return [];
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function codigosDeDocumento(archivo, carpeta) {
+  const imagenes = await extraerArchivosDeZip(archivo, (ruta) => {
+    if (!/\.(png|jpe?g|gif|bmp|webp)$/i.test(ruta)) return false;
+    return carpeta ? ruta.startsWith(carpeta) : true;
+  });
+  if (!imagenes.length) return [];
+
+  const encontrados = [];
+  for (let i = 0; i < imagenes.length; i++) {
+    avisar('Leyendo imagen ' + (i + 1) + ' de ' + imagenes.length + '…');
+    const nombre = imagenes[i].nombre.split('/').pop();
+    const hallados = await codigosDeImagen(new File([imagenes[i].blob], nombre), 'imagen «' + nombre + '»');
+    encontrados.push(...hallados);
+  }
+  return encontrados;
+}
+
+async function leerArchivo(archivo) {
   ocultarError();
   resultado.classList.remove('visible');
-  const url = URL.createObjectURL(archivo);
-  lector.decodeFromImageUrl(url)
-    .then(mostrarResultado)
-    .catch(() => mostrarError('No se encontró ningún código QR o de barras en esa imagen.'))
-    .finally(() => URL.revokeObjectURL(url));
+  listaCodigos.replaceChildren();
+
+  const extension = extensionDe(archivo.name);
+  const esImagen = archivo.type.startsWith('image/');
+  let codigos = [];
+  let queEra = 'ese archivo';
+
+  try {
+    if (extension === 'pdf' || archivo.type === 'application/pdf') {
+      queEra = 'ese PDF';
+      avisar('Abriendo el PDF…');
+      codigos = await codigosDePdf(archivo);
+    } else if (Object.prototype.hasOwnProperty.call(MEDIOS_POR_EXTENSION, extension)) {
+      queEra = 'ese documento';
+      avisar('Buscando imágenes dentro del archivo…');
+      codigos = await codigosDeDocumento(archivo, MEDIOS_POR_EXTENSION[extension]);
+    } else if (esImagen) {
+      queEra = 'esa imagen';
+      codigos = await codigosDeImagen(archivo, '');
+    } else {
+      avisar('');
+      mostrarError('No se puede leer ese tipo de archivo. Probá con una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB.');
+      return;
+    }
+  } catch (error) {
+    avisar('');
+    mostrarError('No se pudo leer el archivo: ' + ((error && error.message) || error));
+    return;
+  }
+
+  avisar('');
+  mostrarCodigos(codigos, queEra);
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
 entradaArchivo.addEventListener('change', (e) => {
-  if (e.target.files[0]) leerImagen(e.target.files[0]);
+  if (e.target.files[0]) leerArchivo(e.target.files[0]);
 });
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
   e.preventDefault();
   zonaArrastre.classList.remove('activa');
-  const archivo = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
-  if (archivo) leerImagen(archivo);
+  const archivo = e.dataTransfer.files[0];
+  if (archivo) leerArchivo(archivo);
 });
 
 // --- Modo cámara ---
