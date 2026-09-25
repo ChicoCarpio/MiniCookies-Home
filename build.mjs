@@ -17,6 +17,7 @@ import { transformSync } from 'esbuild';
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
 import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias } from './seo.mjs';
 import { traducir, diccionarioComun, paginasConIngles } from './ingles.mjs';
+import { contarHerramientas, aplicarConteos } from './conteo.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 
 const RAIZ = process.cwd();
@@ -25,7 +26,7 @@ const SALIDA = join(RAIZ, 'dist');
 // Lo que no se publica: herramientas del build, notas internas (.md) y
 // archivos del repo.
 const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist',
-  'build.mjs', 'seo.mjs', 'ingles.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
+  'build.mjs', 'seo.mjs', 'ingles.mjs', 'conteo.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUIR_EXTENSIONES = new Set(['.md', '.log']);
 
 // Aviso de copyright de cada sitio: campo "config.aviso" de su package.json.
@@ -88,7 +89,7 @@ function recorrer(carpeta) {
     else if (ext === '.css') writeFileSync(destino, minificarCss(readFileSync(origen, 'utf8'), rel) + '\n');
     else if (ext === '.html') {
       const rutaWeb = rel.replace(/\\/g, '/');
-      const crudo = readFileSync(origen, 'utf8');
+      const crudo = aplicarConteos(readFileSync(origen, 'utf8'), conteo, rutaWeb);
       paginas.push(rel);
       writeFileSync(destino, inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles));
 
@@ -112,9 +113,10 @@ const paginasEn = [];
 const indiceCategorias = indiceDeCategorias(RAIZ);
 const comun = diccionarioComun(RAIZ);
 const conIngles = paginasConIngles(RAIZ, EXCLUIR_NOMBRES);
+const conteo = contarHerramientas(RAIZ);
 
 rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);
 recorrer(RAIZ);
 generarRobotsYSitemap(SALIDA, paginas.concat(paginasEn));
-console.log(`Build listo en dist/ — ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados`);
+console.log(`Build listo en dist/ — ${conteo.total} herramientas, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados`);
