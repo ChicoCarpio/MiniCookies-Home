@@ -402,8 +402,17 @@ function activarModo(modo) {
   }
 }
 
-botonModoImagen.addEventListener('click', () => activarModo('imagen'));
+// "Subir archivo" abre el selector, además de volver a ese modo. Antes solo
+// cambiaba de modo, y como el modo archivo es el que está activo al entrar,
+// apretarlo no hacía nada visible y parecía roto — mientras que su botón
+// hermano, "Usar cámara", sí enciende la cámara al instante.
+botonModoImagen.addEventListener('click', () => {
+  activarModo('imagen');
+  entradaArchivo.click();
+});
 botonModoCamara.addEventListener('click', () => activarModo('camara'));
+// Al detener la cámara se vuelve al modo archivo, pero sin abrir el selector:
+// el usuario pidió salir de la cámara, no elegir un archivo.
 botonDetenerCamara.addEventListener('click', () => activarModo('imagen'));
 selectorCamara.addEventListener('change', () => {
   iniciarCamara(selectorCamara.value);
