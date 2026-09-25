@@ -183,7 +183,13 @@ export function iniciarDictado() {
   async function iniciarGrabacion() {
     ocultarError();
     yaSeUsoElDictado = true;
-    precargarModeloElegido();
+    // Ojo con el orden: la descarga del modelo se dispara DESPUÉS de que la
+    // grabación ya arrancó. Aunque no se la espere, pipeline() de
+    // transformers.js trabaja en el hilo principal, y lanzarla antes dejaba
+    // el pedido del micrófono haciendo cola detrás de ella: el usuario
+    // apretaba "grabar" y tenía que esperar a que bajara el modelo (41 a 249
+    // MB) para que empezara a grabarse su voz. Primero el micrófono; el
+    // modelo se baja mientras habla.
     try {
       // echoCancellation apagado y bitrate alto: evitan que el navegador
       // comprima/distorsione la voz antes de que la escuche el modelo.
@@ -209,6 +215,12 @@ export function iniciarDictado() {
       intervaloTiempo = setInterval(() => {
         tiempoGrabando.textContent = formatearTiempo(Date.now() - inicioGrabacion);
       }, 200);
+
+      // Ya se está grabando: ahora sí, a bajar el modelo. Lo más probable es
+      // que para cuando el usuario termine de hablar ya esté listo, y la
+      // transcripción salga sin espera. El audio no depende de esto: lo
+      // captura MediaRecorder por su cuenta, no el hilo principal.
+      precargarModeloElegido();
     } catch (error) {
       mostrarError('No se pudo acceder al micrófono: ' + error.message);
     }
