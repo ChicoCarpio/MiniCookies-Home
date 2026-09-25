@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Dividir hojas de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir hojas de Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Dividir hojas de Excel',
+    'intro': 'Elegí un Excel con varias hojas y descargá cada una como un archivo individual, dentro de un .zip.',
+    'zona-arrastre': '📊 Arrastrá tu archivo Excel acá o hacé clic para elegirlo',
+    'boton-dividir': 'Dividir en archivos separados',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar .zip con las hojas',
+    'info-hojas': 'Este Excel tiene {n} hoja(s): {lista}.',
+    'info-necesita-dos': ' Necesita al menos 2 hojas para poder dividir.',
+    'error-dividir': 'No se pudo dividir el Excel',
+    'aviso-formato': 'Con archivos .xls, .xlsb u .ods cada hoja se copia solo con sus datos: se pierden los colores, bordes, anchos de columna y el formato de las celdas. Con .xlsx o .xlsm el formato se conserva completo.'
+  },
+  en: {
+    'titulo-pagina': 'Split Excel Sheets Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split each sheet of an Excel file into its own file, free and without uploading your file anywhere.',
+    'h1': 'Split Excel sheets',
+    'intro': 'Pick an Excel file with several sheets and download each one as an individual file, inside a .zip.',
+    'zona-arrastre': '📊 Drag your Excel file here or click to choose it',
+    'boton-dividir': 'Split into separate files',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download .zip with the sheets',
+    'info-hojas': 'This Excel file has {n} sheet(s): {lista}.',
+    'info-necesita-dos': ' It needs at least 2 sheets to be split.',
+    'error-dividir': 'Couldn’t split the Excel file',
+    'aviso-formato': 'With .xls, .xlsb or .ods files each sheet is copied with its data only: colors, borders, column widths and cell formatting are lost. With .xlsx or .xlsm the formatting is fully kept.'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Dividir hojas de Excel</h1>
+  <p data-i18n="intro">Elegí un Excel con varias hojas y descargá cada una como un archivo individual, dentro de un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo Excel acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+    <p id="infoHojas" style="color:var(--texto-suave); font-size:0.9rem;"></p>
+    <p id="avisoFormato" style="display:none; color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-formato">Con archivos .xls, .xlsb u .ods cada hoja se copia solo con sus datos: se pierden los colores, bordes, anchos de columna y el formato de las celdas. Con .xlsx o .xlsm el formato se conserva completo.</p>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir en archivos separados</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="hojas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las hojas</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const infoHojas = document.getElementById('infoHojas');
+const botonDividir = document.getElementById('botonDividir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const avisoFormato = document.getElementById('avisoFormato');
+
+let libroActual = null;
+let archivoActual = null;
+
+function esOoxml(archivo) {
+  return /\.(xlsx|xlsm)$/i.test(archivo.name);
+}
+
+async function mostrarArchivo(archivo) {
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  resultado.classList.remove('visible');
+
+  archivoActual = archivo;
+  try {
+    libroActual = XLSX.read(await archivo.arrayBuffer(), { type: 'array', cellNF: true, cellStyles: true });
+  } catch (error) {
+    botonDividir.disabled = true;
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
+  avisoFormato.style.display = esOoxml(archivo) ? 'none' : 'block';
+  infoHojas.textContent = t('info-hojas').replace('{n}', libroActual.SheetNames.length).replace('{lista}', libroActual.SheetNames.join(', '));
+  botonDividir.disabled = libroActual.SheetNames.length < 2;
+  if (libroActual.SheetNames.length < 2) {
+    infoHojas.textContent += t('info-necesita-dos');
+  }
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = t('boton-dividir-procesando');
+  try {
+    const zip = new JSZip();
+    const usados = new Set();
+    const nombreUnico = (nombreHoja) => {
+      const base = nombreHoja.replace(/[\/\\?*\[\]:"<>|]/g, '-').trim() || 'hoja';
+      let nombre = base;
+      for (let n = 2; usados.has(nombre.toLowerCase()); n++) nombre = `${base} (${n})`;
+      usados.add(nombre.toLowerCase());
+      return nombre;
+    };
+
+    if (esOoxml(archivoActual)) {
+      // .xlsx/.xlsm: cada archivo sale del original con solo su hoja
+      // (reordenarHojasExcel en assets/js/ooxml-paquete.js), así se conserva
+      // todo el formato, las imágenes y los gráficos de esa hoja.
+      const bytesOriginales = await archivoActual.arrayBuffer();
+      const extension = /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
+      for (const nombreHoja of libroActual.SheetNames) {
+        const libroZip = await JSZip.loadAsync(bytesOriginales);
+        await reordenarHojasExcel(libroZip, [nombreHoja]);
+        const bytes = await libroZip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+        zip.file(`${nombreUnico(nombreHoja)}.${extension}`, bytes);
+      }
+    } else {
+      libroActual.SheetNames.forEach((nombreHoja) => {
+        const libroNuevo = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libroNuevo, libroActual.Sheets[nombreHoja], nombreHoja);
+        const bytes = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
+        zip.file(`${nombreUnico(nombreHoja)}.xlsx`, bytes);
+      });
+    }
+
+    // Los .xlsx ya van comprimidos: guardarlos sin recomprimir es más rápido.
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-dividir') + ': ' + error.message);
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = t('boton-dividir');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

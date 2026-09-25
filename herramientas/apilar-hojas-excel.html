@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Combinar hojas de Excel en una tabla gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .lista-archivos li { flex-wrap: wrap; align-items: flex-start; }
+  .mini-vista-previa { flex-basis: 100%; margin-top: 6px; overflow-x: auto; }
+  table.mini-tabla { border-collapse: collapse; font-size: 0.75rem; color: var(--texto-suave); }
+  table.mini-tabla td {
+    border: 1px solid var(--gris-borde);
+    padding: 2px 6px;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-vista-vacia { font-size: 0.75rem; color: var(--texto-suave); margin-top: 4px; font-style: italic; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Combinar hojas de Excel en una tabla gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Combinar hojas en una tabla',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.',
+    'nota-diferencia-antes': 'Distinto de "Unir Excel / CSV": esa herramienta junta ',
+    'nota-diferencia-enfasis1': 'archivos',
+    'nota-diferencia-medio': ' separados, uno por hoja. Esta combina hojas que ',
+    'nota-diferencia-enfasis2': 'ya están dentro de un mismo archivo',
+    'nota-diferencia-final': ' en una única tabla.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
+    'campo-encabezado': 'Cada hoja tiene fila de encabezado (se usa la del primer archivo, se descarta el resto)',
+    'boton-combinar': 'Combinar en una tabla',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Excel',
+    'hoja-vacia': '(hoja vacía)',
+    'error-min-hojas': 'Elegí al menos dos hojas.',
+    'nombre-hoja-combinado': 'Combinado',
+    'error-combinar': 'No se pudo combinar las hojas'
+  },
+  en: {
+    'titulo-pagina': 'Combine Excel Sheets into One Table Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combine several sheets from the same Excel file (.xlsx) into one table, stacking their rows, free and without uploading your file anywhere.',
+    'h1': 'Combine sheets into one table',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) with several sheets that share the same columns (e.g. January, February, March sales) and we’ll stack them into one table.',
+    'nota-diferencia-antes': 'Different from "Merge Excel / CSV": that tool combines separate ',
+    'nota-diferencia-enfasis1': 'files',
+    'nota-diferencia-medio': ', one per sheet. This one combines sheets that are ',
+    'nota-diferencia-enfasis2': 'already inside the same file',
+    'nota-diferencia-final': ' into a single table.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it',
+    'campo-encabezado': 'Each sheet has a header row (the first file’s is used, the rest are discarded)',
+    'boton-combinar': 'Combine into one table',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Excel',
+    'hoja-vacia': '(empty sheet)',
+    'error-min-hojas': 'Pick at least two sheets.',
+    'nombre-hoja-combinado': 'Combined',
+    'error-combinar': 'Couldn’t combine the sheets'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Combinar hojas en una tabla</h1>
+  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.</p>
+  <p style="color:var(--texto-suave); font-size:0.9rem;">
+    <span data-i18n="nota-diferencia-antes">Distinto de "Unir Excel / CSV": esa herramienta junta </span><em data-i18n="nota-diferencia-enfasis1">archivos</em><span data-i18n="nota-diferencia-medio"> separados, uno por hoja. Esta combina hojas que </span><em data-i18n="nota-diferencia-enfasis2">ya están dentro de un mismo archivo</em><span data-i18n="nota-diferencia-final"> en una única tabla.</span>
+  </p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaHojas"></ul>
+
+    <div class="controles">
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="tieneEncabezado" checked>
+        <span data-i18n="campo-encabezado">Cada hoja tiene fila de encabezado (se usa la del primer archivo, se descarta el resto)</span>
+      </label>
+      <button class="boton" id="botonCombinar" disabled data-i18n="boton-combinar">Combinar en una tabla</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="tabla-combinada.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaHojas = document.getElementById('listaHojas');
+const botonCombinar = document.getElementById('botonCombinar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let libroActual = null;
+let hojasSeleccionadas = new Set();
+
+function escaparHtml(valor) {
+  const texto = valor === null || valor === undefined ? '' : String(valor);
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Mini tabla con las primeras celdas de cada hoja — para identificarlas de
+// un vistazo, sin depender únicamente del nombre.
+const FILAS_VISTA_PREVIA = 4;
+const COLUMNAS_VISTA_PREVIA = 4;
+
+function miniVistaPreviaHtml(nombre) {
+  const hoja = libroActual.Sheets[nombre];
+  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false, defval: '' }).slice(0, FILAS_VISTA_PREVIA);
+  if (filas.length === 0) return `<div class="mini-vista-vacia">${t('hoja-vacia')}</div>`;
+
+  let html = '<div class="mini-vista-previa"><table class="mini-tabla">';
+  filas.forEach((fila) => {
+    html += '<tr>';
+    for (let i = 0; i < COLUMNAS_VISTA_PREVIA; i++) {
+      const texto = String(fila[i] ?? '');
+      const recortado = texto.length > 14 ? texto.slice(0, 14) + '…' : texto;
+      html += `<td>${escaparHtml(recortado)}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</table></div>';
+  return html;
+}
+
+function renderizarLista() {
+  listaHojas.innerHTML = '';
+  libroActual.SheetNames.forEach((nombre) => {
+    const item = document.createElement('li');
+    const label = document.createElement('label');
+    label.style.display = 'flex';
+    label.style.alignItems = 'center';
+    label.style.gap = '8px';
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.checked = hojasSeleccionadas.has(nombre);
+    check.addEventListener('change', () => {
+      if (check.checked) hojasSeleccionadas.add(nombre); else hojasSeleccionadas.delete(nombre);
+      botonCombinar.disabled = hojasSeleccionadas.size < 2;
+    });
+    label.appendChild(check);
+    label.appendChild(document.createTextNode(nombre));
+    item.appendChild(label);
+    item.insertAdjacentHTML('beforeend', miniVistaPreviaHtml(nombre));
+    listaHojas.appendChild(item);
+  });
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  if (archivo) cargarLibro(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarLibro(archivo) {
+  try {
+    // cellNF: conserva el formato de número de cada celda (fechas, monedas).
+    libroActual = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });
+  } catch (error) {
+    alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
+  hojasSeleccionadas = new Set(libroActual.SheetNames);
+  renderizarLista();
+  botonCombinar.disabled = hojasSeleccionadas.size < 2;
+  resultado.classList.remove('visible');
+}
+
+botonCombinar.addEventListener('click', () => {
+  try {
+    const nombresElegidos = libroActual.SheetNames.filter(n => hojasSeleccionadas.has(n));
+    if (nombresElegidos.length < 2) throw new Error(t('error-min-hojas'));
+
+    const tieneEncabezado = document.getElementById('tieneEncabezado').checked;
+    // Se copian las celdas (con su tipo y formato de número), no el texto
+    // formateado: antes números y fechas quedaban como texto en el resultado.
+    const hojaNueva = {};
+    let filaSalida = 0;
+    let ultimaColumna = 0;
+    let encabezadoPuesto = false;
+
+    nombresElegidos.forEach((nombre) => {
+      const hoja = libroActual.Sheets[nombre];
+      if (!hoja['!ref']) return;
+      const rango = XLSX.utils.decode_range(hoja['!ref']);
+      let inicio = rango.s.r;
+      if (tieneEncabezado) {
+        if (encabezadoPuesto) inicio++;
+        encabezadoPuesto = true;
+      }
+      for (let r = inicio; r <= rango.e.r; r++) {
+        copiarFilaDeHoja(hoja, r, hojaNueva, filaSalida, rango.s.c, rango.e.c, 0);
+        filaSalida++;
+      }
+      ultimaColumna = Math.max(ultimaColumna, rango.e.c - rango.s.c);
+      if (!hojaNueva['!cols'] && hoja['!cols'] && rango.s.c === 0) hojaNueva['!cols'] = hoja['!cols'];
+    });
+    hojaNueva['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(filaSalida - 1, 0), c: ultimaColumna } });
+    const libroNuevo = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libroNuevo, hojaNueva, t('nombre-hoja-combinado'));
+
+    const bytesFinales = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-combinar') + ': ' + error.message);
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir PDF y texto plano gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraé el texto de un PDF a .txt, o convertí un .txt a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PDF y texto plano gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extraé el texto de un PDF a .txt, o convertí un .txt a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'PDF ↔ Texto',
+    'intro': 'Extraé el texto de un PDF a .txt, o convertí un archivo de texto plano a PDF, según lo que necesites.',
+    'dir-pdf-a-texto': 'PDF → Texto',
+    'dir-texto-a-pdf': 'Texto → PDF',
+    'zona-arrastre-pdf': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-extraer': 'Extraer texto',
+    'boton-extraer-procesando': 'Extrayendo...',
+    'boton-copiar': 'Copiar texto',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-txt': 'Descargar .txt',
+    'zona-arrastre-txt': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'boton-a-pdf': 'Convertir a PDF',
+    'boton-a-pdf-procesando': 'Convirtiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF',
+    'aviso-sin-texto': '⚠️ No se encontró texto en este PDF. Si es un documento escaneado (una foto de cada página), el texto no está guardado como texto: usá la herramienta de OCR para reconocerlo.',
+    'aviso-sin-texto-enlace': 'Ir a OCR de PDF escaneado',
+    'separador-pagina': '\n\n--- Página siguiente ---\n\n',
+    'error-extraer': 'No se pudo extraer el texto',
+    'error-generar': 'No se pudo generar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Convert PDF and Plain Text Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extract text from a PDF to .txt, or convert a .txt to PDF, in either direction — free and without uploading your file anywhere.',
+    'h1': 'PDF ↔ Text',
+    'intro': 'Extract the text from a PDF to .txt, or convert a plain text file to PDF, whichever you need.',
+    'dir-pdf-a-texto': 'PDF → Text',
+    'dir-texto-a-pdf': 'Text → PDF',
+    'zona-arrastre-pdf': '📄 Drag your PDF here or click to choose it',
+    'boton-extraer': 'Extract text',
+    'boton-extraer-procesando': 'Extracting...',
+    'boton-copiar': 'Copy text',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-txt': 'Download .txt',
+    'zona-arrastre-txt': '📄 Drag your .txt file here or click to choose it',
+    'boton-a-pdf': 'Convert to PDF',
+    'boton-a-pdf-procesando': 'Converting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download PDF',
+    'aviso-sin-texto': '⚠️ No text was found in this PDF. If it’s a scanned document (a picture of each page), the text isn’t stored as text: use the OCR tool to recognize it.',
+    'aviso-sin-texto-enlace': 'Go to OCR for scanned PDFs',
+    'separador-pagina': '\n\n--- Next page ---\n\n',
+    'error-extraer': 'Couldn’t extract the text',
+    'error-generar': 'Couldn’t generate the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">PDF ↔ Texto</h1>
+  <p data-i18n="intro">Extraé el texto de un PDF a .txt, o convertí un archivo de texto plano a PDF, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="pdf-a-texto" checked> <span data-i18n="dir-pdf-a-texto">PDF → Texto</span></label>
+      <label><input type="radio" name="direccion" value="texto-a-pdf"> <span data-i18n="dir-texto-a-pdf">Texto → PDF</span></label>
+    </div>
+
+    <!-- PDF → Texto -->
+    <div id="panelPdfATexto">
+      <div class="zona-arrastre" id="zonaArrastrePdf">
+        <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+      </div>
+      <div class="grid-miniaturas" id="listaPdf"></div>
+      <div class="controles">
+        <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer texto</button>
+      </div>
+      <p id="avisoSinTexto" style="display:none; margin-top:16px;"><span data-i18n="aviso-sin-texto">⚠️ No se encontró texto en este PDF. Si es un documento escaneado (una foto de cada página), el texto no está guardado como texto: usá la herramienta de OCR para reconocerlo.</span> <a href="ocr-pdf.html" data-i18n="aviso-sin-texto-enlace">Ir a OCR de PDF escaneado</a></p>
+      <div id="bloqueResultadoTexto" style="display:none; margin-top:20px;">
+        <textarea id="textoExtraido" readonly></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
+          <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-txt">Descargar .txt</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Texto → PDF -->
+    <div id="panelTextoAPdf" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastreTxt">
+        <span data-i18n="zona-arrastre-txt">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaTxt" accept=".txt" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaTxt"></ul>
+      <div class="controles">
+        <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
+      </div>
+      <div class="resultado" id="resultadoPdf">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="documento.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-texto.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const panelPdfATexto = document.getElementById('panelPdfATexto');
+const panelTextoAPdf = document.getElementById('panelTextoAPdf');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esPdfATexto = document.querySelector('input[name="direccion"]:checked').value === 'pdf-a-texto';
+    panelPdfATexto.style.display = esPdfATexto ? '' : 'none';
+    panelTextoAPdf.style.display = esPdfATexto ? 'none' : '';
+  });
+});
+
+// --- PDF → Texto ---
+const zonaArrastrePdf = document.getElementById('zonaArrastrePdf');
+const entradaPdf = document.getElementById('entradaPdf');
+const listaPdf = document.getElementById('listaPdf');
+const botonExtraer = document.getElementById('botonExtraer');
+const bloqueResultadoTexto = document.getElementById('bloqueResultadoTexto');
+const textoExtraido = document.getElementById('textoExtraido');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescargaTxt = document.getElementById('enlaceDescargaTxt');
+
+let archivoPdfActual = null;
+
+async function mostrarArchivoPdf(archivo) {
+  archivoPdfActual = archivo;
+  listaPdf.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+  } catch (error) {
+    listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+  }
+  botonExtraer.disabled = false;
+  bloqueResultadoTexto.style.display = 'none';
+}
+
+function elegirArchivoPdf(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivoPdf(archivo);
+}
+
+zonaArrastrePdf.addEventListener('click', () => entradaPdf.click());
+entradaPdf.addEventListener('change', (e) => elegirArchivoPdf(e.target.files));
+zonaArrastrePdf.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastrePdf.classList.add('activa'); });
+zonaArrastrePdf.addEventListener('dragleave', () => zonaArrastrePdf.classList.remove('activa'));
+zonaArrastrePdf.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastrePdf.classList.remove('activa');
+  elegirArchivoPdf(e.dataTransfer.files);
+});
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = t('boton-extraer-procesando');
+  try {
+    const bytes = await archivoPdfActual.arrayBuffer();
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+    const paginasDeTexto = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pagina = await pdf.getPage(i);
+      paginasDeTexto.push(await extraerTextoPaginaPdf(pagina));
+    }
+
+    const avisoSinTexto = document.getElementById('avisoSinTexto');
+    avisoSinTexto.style.display = paginasDeTexto.every((texto) => !texto.trim()) ? 'block' : 'none';
+    const textoCompleto = paginasDeTexto.join(t('separador-pagina'));
+    textoExtraido.value = textoCompleto;
+    const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+    enlaceDescargaTxt.href = URL.createObjectURL(blob);
+    bloqueResultadoTexto.style.display = 'block';
+  } catch (error) {
+    alert(t('error-extraer') + ': ' + detalleError(error));
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = t('boton-extraer');
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(textoExtraido.value);
+  botonCopiar.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiar.textContent = t('boton-copiar'); }, 1500);
+});
+
+// --- Texto → PDF ---
+const zonaArrastreTxt = document.getElementById('zonaArrastreTxt');
+const entradaTxt = document.getElementById('entradaTxt');
+const listaTxt = document.getElementById('listaTxt');
+const botonAPdf = document.getElementById('botonAPdf');
+const resultadoPdf = document.getElementById('resultadoPdf');
+const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
+
+let archivoTxtActual = null;
+
+function mostrarArchivoTxt(archivo) {
+  archivoTxtActual = archivo;
+  listaTxt.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonAPdf.disabled = false;
+  resultadoPdf.classList.remove('visible');
+}
+
+function elegirArchivoTxt(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivoTxt(archivo);
+}
+
+zonaArrastreTxt.addEventListener('click', () => entradaTxt.click());
+entradaTxt.addEventListener('change', (e) => elegirArchivoTxt(e.target.files));
+zonaArrastreTxt.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreTxt.classList.add('activa'); });
+zonaArrastreTxt.addEventListener('dragleave', () => zonaArrastreTxt.classList.remove('activa'));
+zonaArrastreTxt.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreTxt.classList.remove('activa');
+  elegirArchivoTxt(e.dataTransfer.files);
+});
+
+botonAPdf.addEventListener('click', async () => {
+  botonAPdf.disabled = true;
+  botonAPdf.textContent = t('boton-a-pdf-procesando');
+  try {
+    const { texto } = await leerTextoArchivo(archivoTxtActual);
+    const pdf = await generarPdfDeTexto(texto);
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescargaPdf.href = URL.createObjectURL(blob);
+    enlaceDescargaPdf.download = archivoTxtActual.name.replace(/\.txt$/i, '') + '.pdf';
+    resultadoPdf.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    botonAPdf.disabled = false;
+    botonAPdf.textContent = t('boton-a-pdf');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

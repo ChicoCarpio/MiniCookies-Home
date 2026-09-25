@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Unir varios EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Combiná varios libros EPUB en uno solo, gratis y sin subir tus archivos a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Unir varios EPUB gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combiná varios libros EPUB en uno solo, gratis y sin subir tus archivos a ningún servidor.',
+    'zona-arrastre': '📚 Arrastrá tus archivos .epub acá o hacé clic para elegirlos',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Unir varios EPUB',
+    'intro': 'Elegí dos o más libros .epub. Se combinan en un solo EPUB, en el orden de la lista — cada libro original empieza con su propio título como capítulo separador.',
+    'campo-titulo': 'Título del libro combinado',
+    'valor-titulo': 'Libros combinados',
+    'campo-autor': 'Autor (opcional)',
+    'boton-unir': 'Unir en un EPUB',
+    'resultado-enlace': 'Descargar EPUB combinado',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones': 'No es necesario que los libros compartan formato ni estilo. No funciona con libros con DRM (candado editorial).',
+    'progreso-leyendo': 'Leyendo "{nombre}" ({actual} de {total})...',
+    'progreso-armando': 'Armando el EPUB combinado...',
+    'error-unir': 'No se pudo unir los libros'
+  },
+  en: {
+    'titulo-pagina': 'Merge EPUB Books Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Combine several EPUB books into one, free and without uploading your files anywhere.',
+    'zona-arrastre': '📚 Drag your .epub files here or click to choose them',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Merge EPUB books',
+    'intro': 'Pick two or more .epub books. They’re combined into a single EPUB, in list order — each original book starts with its own title as a divider chapter.',
+    'campo-titulo': 'Title of the combined book',
+    'valor-titulo': 'Combined books',
+    'campo-autor': 'Author (optional)',
+    'boton-unir': 'Merge into one EPUB',
+    'resultado-enlace': 'Download combined EPUB',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones': 'The books don’t need to share format or style. It doesn’t work with DRM-protected books (publisher lock).',
+    'progreso-leyendo': 'Reading "{nombre}" ({actual} of {total})...',
+    'progreso-armando': 'Building the combined EPUB...',
+    'error-unir': 'Couldn’t merge the books'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Unir varios EPUB</h1>
+  <p data-i18n="intro">Elegí dos o más libros .epub. Se combinan en un solo EPUB, en el orden de la lista — cada libro original empieza con su propio título como capítulo separador.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📚 Arrastrá tus archivos .epub acá o hacé clic para elegirlos</span>
+      <input type="file" id="entradaArchivos" accept=".epub" multiple hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivos"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-titulo">Título del libro combinado</span>
+        <input type="text" id="tituloLibro" value="Libros combinados" data-i18n-attr="value:valor-titulo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-autor">Autor (opcional)</span>
+        <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonUnir" disabled data-i18n="boton-unir">Unir en un EPUB</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libros-combinados.epub" data-i18n="resultado-enlace">Descargar EPUB combinado</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones">No es necesario que los libros compartan formato ni estilo. No funciona con libros con DRM (candado editorial).</p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const listaArchivos = document.getElementById('listaArchivos');
+const botonUnir = document.getElementById('botonUnir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivos = [];
+
+function actualizarLista() {
+  listaArchivos.innerHTML = '';
+  archivos.forEach((archivo, indice) => {
+    const item = document.createElement('li');
+    item.innerHTML = `<span>${indice + 1}. ${escaparHtml(archivo.name)}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { archivos.splice(indice, 1); actualizarLista(); };
+    item.appendChild(quitar);
+    listaArchivos.appendChild(item);
+  });
+  botonUnir.disabled = archivos.length < 2;
+  resultado.classList.remove('visible');
+}
+
+function agregarArchivos(listaFileList) {
+  for (const archivo of listaFileList) {
+    if (archivo.name.toLowerCase().endsWith('.epub')) archivos.push(archivo);
+  }
+  actualizarLista();
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivos.click());
+entradaArchivos.addEventListener('change', (e) => agregarArchivos(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  agregarArchivos(e.dataTransfer.files);
+});
+
+botonUnir.addEventListener('click', async () => {
+  botonUnir.disabled = true;
+  progreso.style.display = 'block';
+  try {
+    const capitulosFinales = [];
+
+    for (let i = 0; i < archivos.length; i++) {
+      progreso.textContent = t('progreso-leyendo').replace('{nombre}', archivos[i].name).replace('{actual}', i + 1).replace('{total}', archivos.length);
+      const { titulo, capitulos } = await leerEpub(archivos[i]);
+      capitulosFinales.push({ titulo, html: `<h1>${escaparHtml(titulo)}</h1>` });
+      capitulosFinales.push(...capitulos);
+    }
+
+    progreso.textContent = t('progreso-armando');
+    const tituloFinal = document.getElementById('tituloLibro').value.trim() || 'Libros combinados';
+    const autorFinal = document.getElementById('autorLibro').value.trim();
+    const blob = await construirEpub({ titulo: tituloFinal, autor: autorFinal, capitulos: capitulosFinales });
+
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = tituloFinal.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-unir') + ': ' + error.message);
+  } finally {
+    botonUnir.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

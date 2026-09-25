@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Rotar PDF gratis y seguro — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Rotá todas las páginas de un PDF 90, 180 o 270 grados, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Rotar PDF gratis y seguro — Herramientas Ofimáticas',
+    'meta-descripcion': 'Rotá todas las páginas de un PDF 90, 180 o 270 grados, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Rotar PDF',
+    'intro': 'Elegí un PDF y rotá todas sus páginas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-girar': 'Girar',
+    'opcion-90': '90° (sentido horario)',
+    'opcion-180': '180°',
+    'opcion-270': '270° (sentido horario) / 90° antihorario',
+    'boton-rotar': 'Rotar PDF',
+    'boton-rotar-procesando': 'Rotando...',
+    'asi-quedaria': ' — así quedaría',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF rotado',
+    'error-rotar': 'No se pudo rotar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Rotate PDF Free and Securely — Herramientas Ofimáticas',
+    'meta-descripcion': 'Rotate every page of a PDF 90, 180 or 270 degrees, free and without uploading your file anywhere.',
+    'h1': 'Rotate PDF',
+    'intro': 'Pick a PDF and rotate all of its pages.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-girar': 'Rotate',
+    'opcion-90': '90° (clockwise)',
+    'opcion-180': '180°',
+    'opcion-270': '270° (clockwise) / 90° counter-clockwise',
+    'boton-rotar': 'Rotate PDF',
+    'boton-rotar-procesando': 'Rotating...',
+    'asi-quedaria': ' — preview',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download rotated PDF',
+    'error-rotar': 'Couldn’t rotate the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Rotar PDF</h1>
+  <p data-i18n="intro">Elegí un PDF y rotá todas sus páginas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-girar">Girar</span>
+        <select id="grados">
+          <option value="90" data-i18n="opcion-90">90° (sentido horario)</option>
+          <option value="180" data-i18n="opcion-180">180°</option>
+          <option value="270" data-i18n="opcion-270">270° (sentido horario) / 90° antihorario</option>
+        </select>
+      </label>
+      <button class="boton" id="botonRotar" disabled data-i18n="boton-rotar">Rotar PDF</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-rotado.pdf" data-i18n="resultado-enlace">Descargar PDF rotado</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonRotar = document.getElementById('botonRotar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+const elGrados = document.getElementById('grados');
+
+async function actualizarVistaPrevia() {
+  listaArchivo.innerHTML = '';
+  if (!archivoActual) return;
+  try {
+    const grados = parseInt(elGrados.value, 10);
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivoActual, 0.28, grados);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivoActual.name} (${totalPaginas} ${t('sufijo-pag')})${t('asi-quedaria')}` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivoActual.name} ${t('previsualizar-fallo')}` }));
+  }
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  await actualizarVistaPrevia();
+  botonRotar.disabled = !archivo;
+  resultado.classList.remove('visible');
+}
+
+elGrados.addEventListener('change', actualizarVistaPrevia);
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonRotar.addEventListener('click', async () => {
+  botonRotar.disabled = true;
+  botonRotar.textContent = t('boton-rotar-procesando');
+  try {
+    const { PDFDocument, degrees } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const grados = parseInt(document.getElementById('grados').value, 10);
+
+    pdf.getPages().forEach((pagina) => {
+      const rotacionActual = pagina.getRotation().angle;
+      pagina.setRotation(degrees(rotacionActual + grados));
+    });
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-rotar') + ': ' + detalleError(error));
+  } finally {
+    botonRotar.disabled = false;
+    botonRotar.textContent = t('boton-rotar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

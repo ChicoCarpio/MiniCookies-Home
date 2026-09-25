@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir PDF a PDF/A gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí un PDF normal a PDF/A (formato de archivo para preservación a largo plazo) o quitá la marca PDF/A de uno existente, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .opcion-direccion {
+    flex: 1;
+    min-width: 220px;
+    border: 2px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 14px 16px;
+    cursor: pointer;
+    background: var(--superficie);
+  }
+  .opcion-direccion.activa { border-color: var(--azul); background: var(--activo-fondo); }
+  .opcion-direccion h4 { margin: 0 0 4px; }
+  .opcion-direccion p { margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
+  .aviso-limites {
+    background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+  }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PDF a PDF/A gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí un PDF normal a PDF/A (formato de archivo para preservación a largo plazo) o quitá la marca PDF/A de uno existente, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'PDF ↔ PDF/A',
+    'intro': 'Convertí un PDF normal a PDF/A (el formato pensado para archivar documentos a largo plazo) o quitá la marca PDF/A de un archivo para que vuelva a ser un PDF normal.',
+    'opcion-a-pdfa-titulo': '📥 PDF → PDF/A',
+    'opcion-a-pdfa-desc': 'Agrega perfil de color y metadatos de conformidad PDF/A a un PDF normal.',
+    'opcion-a-pdf-titulo': '📤 PDF/A → PDF normal',
+    'opcion-a-pdf-desc': 'Quita la marca de conformidad PDF/A (el archivo sigue siendo un PDF válido).',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-parte': 'Parte del estándar',
+    'opcion-parte1': 'PDF/A-1 (la más estricta, PDF 1.4)',
+    'opcion-parte2': 'PDF/A-2 (recomendada, permite PDF 1.7)',
+    'opcion-parte3': 'PDF/A-3 (como PDF/A-2, permite adjuntar archivos)',
+    'boton-convertir-a-pdfa': 'Convertir a PDF/A',
+    'boton-convertir-a-pdf': 'Quitar marca PDF/A',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF',
+    'importante-titulo': 'Importante: esto es "mejor esfuerzo", no una certificación PDF/A',
+    'item1': 'Esta herramienta agrega lo que un PDF/A necesita que se pueda agregar desde afuera: un perfil de color embebido (OutputIntent) y los metadatos XMP que identifican al archivo como PDF/A.',
+    'item2-antes': 'No puede garantizar el resto del estándar ISO 19005',
+    'item2-final': ' sobre un PDF que ya viene armado de otro programa: no puede forzar que todas las fuentes usadas ya estén embebidas, ni quitar transparencias o JavaScript si el PDF original los trae. Si necesitás una conformidad PDF/A certificada (por ejemplo para un trámite legal), validá el resultado con una herramienta especializada como veraPDF antes de confiar en él.',
+    'item3': 'Solo se ofrece el nivel "B" (Basic) de conformidad — el nivel "A" (Accesible) exige contenido etiquetado que esta herramienta no puede garantizar.',
+    'item4-antes': 'Si el PDF tiene contraseña, primero quitala con ',
+    'item4-enlace': 'Desbloquear PDF',
+    'item4-final': '.',
+    'aviso-deteccion': 'ℹ️ Este archivo ya tiene marca PDF/A-{parte}{nivel}: se eligió «Quitar marca PDF/A» (podés cambiarlo arriba).',
+    'progreso-procesando': 'Procesando...',
+    'error-procesar': 'No se pudo procesar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Convert PDF to PDF/A Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert a regular PDF to PDF/A (a file format for long-term preservation) or remove the PDF/A mark from an existing one, free and without uploading your file anywhere.',
+    'h1': 'PDF ↔ PDF/A',
+    'intro': 'Convert a regular PDF to PDF/A (the format meant for archiving documents long-term) or remove the PDF/A mark from a file so it goes back to being a regular PDF.',
+    'opcion-a-pdfa-titulo': '📥 PDF → PDF/A',
+    'opcion-a-pdfa-desc': 'Adds a color profile and PDF/A conformance metadata to a regular PDF.',
+    'opcion-a-pdf-titulo': '📤 PDF/A → regular PDF',
+    'opcion-a-pdf-desc': 'Removes the PDF/A conformance mark (the file stays a valid PDF).',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-parte': 'Standard part',
+    'opcion-parte1': 'PDF/A-1 (the strictest, PDF 1.4)',
+    'opcion-parte2': 'PDF/A-2 (recommended, allows PDF 1.7)',
+    'opcion-parte3': 'PDF/A-3 (like PDF/A-2, allows attaching files)',
+    'boton-convertir-a-pdfa': 'Convert to PDF/A',
+    'boton-convertir-a-pdf': 'Remove PDF/A mark',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download PDF',
+    'importante-titulo': 'Important: this is "best effort", not a PDF/A certification',
+    'item1': 'This tool adds what a PDF/A needs that can be added from the outside: an embedded color profile (OutputIntent) and the XMP metadata that identifies the file as PDF/A.',
+    'item2-antes': 'It can’t guarantee the rest of the ISO 19005 standard',
+    'item2-final': ' over a PDF that was already built by another program: it can’t force every font used to already be embedded, nor remove transparencies or JavaScript if the original PDF has them. If you need certified PDF/A conformance (for example for a legal procedure), validate the result with a specialized tool like veraPDF before relying on it.',
+    'item3': 'Only "B" (Basic) conformance level is offered — level "A" (Accessible) requires tagged content this tool can’t guarantee.',
+    'item4-antes': 'If the PDF has a password, remove it first with ',
+    'item4-enlace': 'Unlock PDF',
+    'item4-final': '.',
+    'aviso-deteccion': 'ℹ️ This file already has a PDF/A-{parte}{nivel} mark: «Remove PDF/A mark» was selected (you can change it above).',
+    'progreso-procesando': 'Processing...',
+    'error-procesar': 'Couldn’t process the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">PDF ↔ PDF/A</h1>
+  <p data-i18n="intro">Convertí un PDF normal a PDF/A (el formato pensado para archivar documentos a largo plazo) o quitá la marca PDF/A de un archivo para que vuelva a ser un PDF normal.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <div class="opcion-direccion activa" id="opcionAPdfa" data-direccion="a-pdfa">
+        <h4 data-i18n="opcion-a-pdfa-titulo">📥 PDF → PDF/A</h4>
+        <p data-i18n="opcion-a-pdfa-desc">Agrega perfil de color y metadatos de conformidad PDF/A a un PDF normal.</p>
+      </div>
+      <div class="opcion-direccion" id="opcionAPdf" data-direccion="a-pdf">
+        <h4 data-i18n="opcion-a-pdf-titulo">📤 PDF/A → PDF normal</h4>
+        <p data-i18n="opcion-a-pdf-desc">Quita la marca de conformidad PDF/A (el archivo sigue siendo un PDF válido).</p>
+      </div>
+    </div>
+
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+    <div class="aviso-limites" id="avisoDeteccion" style="display:none;"></div>
+
+    <div class="controles" id="controlesParte">
+      <label class="campo">
+        <span data-i18n="campo-parte">Parte del estándar</span>
+        <select id="selectorParte">
+          <option value="1" data-i18n="opcion-parte1">PDF/A-1 (la más estricta, PDF 1.4)</option>
+          <option value="2" selected data-i18n="opcion-parte2">PDF/A-2 (recomendada, permite PDF 1.7)</option>
+          <option value="3" data-i18n="opcion-parte3">PDF/A-3 (como PDF/A-2, permite adjuntar archivos)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir-a-pdfa">Convertir</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="importante-titulo">Importante: esto es "mejor esfuerzo", no una certificación PDF/A</h3>
+    <ul style="color:var(--texto-suave);">
+      <li data-i18n="item1">Esta herramienta agrega lo que un PDF/A necesita que se pueda agregar desde afuera: un perfil de color embebido (OutputIntent) y los metadatos XMP que identifican al archivo como PDF/A.</li>
+      <li><strong data-i18n="item2-antes">No puede garantizar el resto del estándar ISO 19005</strong><span data-i18n="item2-final"> sobre un PDF que ya viene armado de otro programa: no puede forzar que todas las fuentes usadas ya estén embebidas, ni quitar transparencias o JavaScript si el PDF original los trae. Si necesitás una conformidad PDF/A certificada (por ejemplo para un trámite legal), validá el resultado con una herramienta especializada como <em>veraPDF</em> antes de confiar en él.</span></li>
+      <li data-i18n="item3">Solo se ofrece el nivel "B" (Basic) de conformidad — el nivel "A" (Accesible) exige contenido etiquetado que esta herramienta no puede garantizar.</li>
+      <li><span data-i18n="item4-antes">Si el PDF tiene contraseña, primero quitala con </span><a href="desbloquear-pdf.html" data-i18n="item4-enlace">Desbloquear PDF</a><span data-i18n="item4-final">.</span></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/pdfa.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const opcionAPdfa = document.getElementById('opcionAPdfa');
+const opcionAPdf = document.getElementById('opcionAPdf');
+const controlesParte = document.getElementById('controlesParte');
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const avisoDeteccion = document.getElementById('avisoDeteccion');
+const botonConvertir = document.getElementById('botonConvertir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const selectorParte = document.getElementById('selectorParte');
+
+let archivoActual = null;
+let direccion = 'a-pdfa';
+
+function elegirDireccion(nueva) {
+  direccion = nueva;
+  opcionAPdfa.classList.toggle('activa', nueva === 'a-pdfa');
+  opcionAPdf.classList.toggle('activa', nueva === 'a-pdf');
+  controlesParte.style.display = nueva === 'a-pdfa' ? 'flex' : 'none';
+  botonConvertir.textContent = nueva === 'a-pdfa' ? t('boton-convertir-a-pdfa') : t('boton-convertir-a-pdf');
+}
+
+opcionAPdfa.addEventListener('click', () => elegirDireccion('a-pdfa'));
+opcionAPdf.addEventListener('click', () => elegirDireccion('a-pdf'));
+// idioma.js (que define t) se carga al final de la página: la dirección
+// inicial se aplica cuando ya está disponible. Antes se llamaba acá mismo,
+// t() no existía todavía y el resto del script no llegaba a ejecutarse
+// (la herramienta no respondía).
+document.addEventListener('DOMContentLoaded', () => elegirDireccion(direccion));
+document.addEventListener('cambioIdioma', () => elegirDireccion(direccion));
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonConvertir.disabled = false;
+  resultado.classList.remove('visible');
+  avisoDeteccion.style.display = 'none';
+
+  try {
+    const bytes = await archivo.arrayBuffer();
+    const pdf = await PDFLib.PDFDocument.load(bytes, { updateMetadata: false });
+    const conformidad = await detectarConformidadPdfA(pdf);
+    if (conformidad) {
+      avisoDeteccion.textContent = t('aviso-deteccion').replace('{parte}', conformidad.parte).replace('{nivel}', conformidad.nivel);
+      avisoDeteccion.style.display = 'block';
+      // Volver a convertirlo a PDF/A no tiene sentido: se elige quitar la marca.
+      elegirDireccion('a-pdf');
+    }
+  } catch (error) {
+    // No es crítico si no se puede detectar de antemano — el botón de convertir igual va a avisar si el PDF no es válido.
+  }
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  progreso.style.display = 'block';
+  progreso.textContent = t('progreso-procesando');
+  try {
+    const bytesOriginales = await archivoActual.arrayBuffer();
+    const pdf = await PDFLib.PDFDocument.load(bytesOriginales, { updateMetadata: false });
+
+    let sufijo;
+    if (direccion === 'a-pdfa') {
+      await agregarConformidadPdfA(pdf, { parte: selectorParte.value, nivel: 'B' });
+      sufijo = `-PDFA${selectorParte.value}B`;
+    } else {
+      quitarConformidadPdfA(pdf);
+      sufijo = '-normal';
+    }
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = archivoActual.name.replace(/\.pdf$/i, '') + sufijo + '.pdf';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-procesar') + ': ' + detalleError(error));
+  } finally {
+    botonConvertir.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

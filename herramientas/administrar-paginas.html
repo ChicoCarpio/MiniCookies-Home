@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Reordenar y administrar páginas de PDF — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená, eliminá o restaurá páginas de un PDF arrastrando sus miniaturas, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar y administrar páginas de PDF — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená, eliminá o restaurá páginas de un PDF arrastrando sus miniaturas, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Administrar páginas de PDF',
+    'intro': 'Elegí un PDF, arrastrá las miniaturas para reordenar y usá la ✕ para eliminar páginas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-restaurar': 'Restaurar orden original',
+    'boton-guardar': 'Guardar PDF modificado',
+    'boton-guardar-procesando': 'Guardando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF modificado',
+    'etiqueta-original': 'Original: página {n}',
+    'quitar-pagina-title': 'Eliminar esta página',
+    'error-vacio': 'No quedan páginas para guardar.',
+    'error-guardar': 'No se pudo guardar el PDF',
+    'error-abrir': 'No se pudo abrir el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Reorder and Manage PDF Pages — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder, delete or restore pages of a PDF by dragging their thumbnails, free and without uploading your file anywhere.',
+    'h1': 'Manage PDF pages',
+    'intro': 'Pick a PDF, drag the thumbnails to reorder them, and use the ✕ to delete pages.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'boton-restaurar': 'Restore original order',
+    'boton-guardar': 'Save modified PDF',
+    'boton-guardar-procesando': 'Saving...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download modified PDF',
+    'etiqueta-original': 'Original: page {n}',
+    'quitar-pagina-title': 'Delete this page',
+    'error-vacio': 'No pages left to save.',
+    'error-guardar': 'Couldn’t save the PDF',
+    'error-abrir': 'Couldn’t open the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Administrar páginas de PDF</h1>
+  <p data-i18n="intro">Elegí un PDF, arrastrá las miniaturas para reordenar y usá la ✕ para eliminar páginas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
+
+    <div id="envoltorioSelectorVista"></div>
+    <div class="contenedor-miniaturas" id="gridMiniaturas"></div>
+
+    <div class="controles" id="controles" style="display:none;">
+      <button class="boton" id="botonRestaurar" type="button" style="background:#64748b;" data-i18n="boton-restaurar">Restaurar orden original</button>
+      <button class="boton" id="botonGuardar" type="button" data-i18n="boton-guardar">Guardar PDF modificado</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-modificado.pdf" data-i18n="resultado-enlace">Descargar PDF modificado</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+document.getElementById('envoltorioSelectorVista').appendChild(
+  crearSelectorVista(document.getElementById('gridMiniaturas'), 'vista-administrar-paginas')
+);
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const gridMiniaturas = document.getElementById('gridMiniaturas');
+const controles = document.getElementById('controles');
+const botonRestaurar = document.getElementById('botonRestaurar');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let bytesOriginales = null;
+let ordenPaginas = []; // índices 0-based en el orden actual (lo que sobrevive tras eliminar/reordenar)
+let ordenOriginal = [];
+let archivoActual = null; // para "Restaurar" (entradaArchivo.files está vacío si el PDF se arrastró)
+let cargaActual = 0;      // si se elige otro PDF mientras se generan miniaturas, la carga vieja se descarta
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => { if (e.target.files[0]) cargarPdf(e.target.files[0]); });
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  const archivo = [...e.dataTransfer.files].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) cargarPdf(archivo);
+});
+
+async function cargarPdf(archivo) {
+  const estaCarga = ++cargaActual;
+  archivoActual = archivo;
+  resultado.classList.remove('visible');
+  controles.style.display = 'none';
+  gridMiniaturas.innerHTML = '';
+  cargando.style.display = 'block';
+
+  try {
+    bytesOriginales = await archivo.arrayBuffer();
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytesOriginales.slice(0), isEvalSupported: false }).promise;
+
+    ordenPaginas = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pagina = await pdf.getPage(i);
+      const viewport = pagina.getViewport({ scale: 0.3 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      if (estaCarga !== cargaActual) return;
+
+      const indice = i - 1;
+      ordenPaginas.push(indice);
+      agregarMiniatura(canvas, indice);
+    }
+
+    ordenOriginal = [...ordenPaginas];
+    controles.style.display = 'flex';
+  } catch (error) {
+    if (estaCarga === cargaActual) alert(t('error-abrir') + ': ' + detalleError(error));
+  } finally {
+    if (estaCarga === cargaActual) cargando.style.display = 'none';
+  }
+}
+
+function agregarMiniatura(canvas, indiceOriginal) {
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'miniatura-pagina';
+  tarjeta.draggable = true;
+  tarjeta.dataset.indiceOriginal = indiceOriginal;
+
+  tarjeta.appendChild(canvas);
+
+  const etiqueta = document.createElement('div');
+  etiqueta.className = 'numero-pagina';
+  etiqueta.textContent = t('etiqueta-original').replace('{n}', indiceOriginal + 1);
+  tarjeta.appendChild(etiqueta);
+
+  const botonQuitar = document.createElement('button');
+  botonQuitar.className = 'quitar-pagina';
+  botonQuitar.textContent = '✕';
+  botonQuitar.title = t('quitar-pagina-title');
+  botonQuitar.addEventListener('click', () => {
+    const indice = ordenPaginas.indexOf(indiceOriginal);
+    if (indice !== -1) ordenPaginas.splice(indice, 1);
+    tarjeta.remove();
+  });
+  tarjeta.appendChild(botonQuitar);
+
+  tarjeta.addEventListener('dragstart', () => tarjeta.classList.add('arrastrando'));
+  tarjeta.addEventListener('dragend', () => tarjeta.classList.remove('arrastrando'));
+  tarjeta.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const arrastrando = gridMiniaturas.querySelector('.arrastrando');
+    if (!arrastrando || arrastrando === tarjeta) return;
+    if (insertarSegunPosicion(arrastrando, tarjeta, e.clientX, e.clientY)) sincronizarOrdenDesdeDOM();
+  });
+
+  gridMiniaturas.appendChild(tarjeta);
+}
+
+function sincronizarOrdenDesdeDOM() {
+  ordenPaginas = [...gridMiniaturas.children].map(el => parseInt(el.dataset.indiceOriginal, 10));
+}
+
+habilitarReordenTactil(gridMiniaturas, '.miniatura-pagina', sincronizarOrdenDesdeDOM);
+
+botonRestaurar.addEventListener('click', async () => {
+  if (archivoActual) cargarPdf(archivoActual);
+});
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = t('boton-guardar-procesando');
+  try {
+    if (ordenPaginas.length === 0) throw new Error(t('error-vacio'));
+    const { PDFDocument } = PDFLib;
+    const pdfOrigen = await PDFDocument.load(bytesOriginales);
+    const pdfNuevo = await PDFDocument.create();
+    const paginas = await pdfNuevo.copyPages(pdfOrigen, ordenPaginas);
+    paginas.forEach((pagina) => pdfNuevo.addPage(pagina));
+
+    const bytesFinales = await pdfNuevo.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-guardar') + ': ' + detalleError(error));
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = t('boton-guardar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

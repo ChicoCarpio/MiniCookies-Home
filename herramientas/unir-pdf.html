@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Unir PDF e imágenes gratis y seguro — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Uní varios archivos PDF e imágenes (JPG, PNG, WebP y más) en un solo PDF, gratis y sin subir tus archivos a ningún servidor. Todo el proceso ocurre en tu navegador.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Unir PDF e imágenes gratis y seguro — Herramientas Ofimáticas',
+    'meta-descripcion': 'Uní varios archivos PDF e imágenes (JPG, PNG, WebP y más) en un solo PDF, gratis y sin subir tus archivos a ningún servidor. Todo el proceso ocurre en tu navegador.',
+    'h1': 'Unir PDF e imágenes',
+    'intro': 'Elegí dos o más archivos — PDF y/o imágenes (JPG, PNG, WebP, GIF, BMP) —, en cualquier combinación. Vas a ver una miniatura real de cada uno (la primera página, si es un PDF) — arrastralas para ordenarlas y descargá un único PDF combinado, cada imagen como una página nueva.',
+    'zona-arrastre': '📄🖼️ Arrastrá tus PDFs e imágenes acá o hacé clic para elegirlos',
+    'campo-tamano': 'Tamaño de página para las imágenes',
+    'opcion-ajustar-a4': 'Ancho A4, alto según la imagen (recomendado, sin recorte ni márgenes)',
+    'opcion-ajustar-carta': 'Ancho Carta, alto según la imagen (sin recorte ni márgenes)',
+    'opcion-a4': 'A4 exacto (imagen completa, con márgenes blancos)',
+    'opcion-carta': 'Carta exacto (imagen completa, con márgenes blancos)',
+    'opcion-original': 'Tamaño original de cada imagen (sin márgenes, puede quedar inconsistente)',
+    'boton-unir': 'Unir en un PDF',
+    'boton-unir-procesando': 'Uniendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF combinado',
+    'error-unir': 'No se pudo unir los archivos'
+  },
+  en: {
+    'titulo-pagina': 'Merge PDFs and Images Free and Securely — Herramientas Ofimáticas',
+    'meta-descripcion': 'Merge several PDF files and images (JPG, PNG, WebP and more) into one PDF, free and without uploading your files anywhere. Everything happens in your browser.',
+    'h1': 'Merge PDF and images',
+    'intro': 'Pick two or more files — PDF and/or images (JPG, PNG, WebP, GIF, BMP) — in any combination. You’ll see a real thumbnail of each one (the first page, if it’s a PDF) — drag them to reorder, then download a single combined PDF, with each image as a new page.',
+    'zona-arrastre': '📄🖼️ Drag your PDFs and images here or click to choose them',
+    'campo-tamano': 'Page size for the images',
+    'opcion-ajustar-a4': 'A4 width, height matched to the image (recommended, no cropping or margins)',
+    'opcion-ajustar-carta': 'Letter width, height matched to the image (no cropping or margins)',
+    'opcion-a4': 'Exact A4 (full image, with white margins)',
+    'opcion-carta': 'Exact Letter (full image, with white margins)',
+    'opcion-original': 'Each image’s original size (no margins, pages may look inconsistent)',
+    'boton-unir': 'Merge into a PDF',
+    'boton-unir-procesando': 'Merging...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download combined PDF',
+    'error-unir': 'Couldn’t merge the files'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio">
+    <a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Unir PDF e imágenes</h1>
+  <p data-i18n="intro">Elegí dos o más archivos — PDF y/o imágenes (JPG, PNG, WebP, GIF, BMP) —, en cualquier combinación. Vas a ver una miniatura real de cada uno (la primera página, si es un PDF) — arrastralas para ordenarlas y descargá un único PDF combinado, cada imagen como una página nueva.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄🖼️ Arrastrá tus PDFs e imágenes acá o hacé clic para elegirlos</span>
+      <input type="file" id="entradaArchivos" accept="application/pdf,image/*" multiple hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
+
+    <div id="envoltorioSelectorVista"></div>
+    <div class="contenedor-miniaturas" id="gridArchivos"></div>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-tamano">Tamaño de página para las imágenes</span>
+        <select id="tamanoPaginaImagenes">
+          <option value="ajustar-a4" selected data-i18n="opcion-ajustar-a4">Ancho A4, alto según la imagen (recomendado, sin recorte ni márgenes)</option>
+          <option value="ajustar-carta" data-i18n="opcion-ajustar-carta">Ancho Carta, alto según la imagen (sin recorte ni márgenes)</option>
+          <option value="a4" data-i18n="opcion-a4">A4 exacto (imagen completa, con márgenes blancos)</option>
+          <option value="carta" data-i18n="opcion-carta">Carta exacto (imagen completa, con márgenes blancos)</option>
+          <option value="original" data-i18n="opcion-original">Tamaño original de cada imagen (sin márgenes, puede quedar inconsistente)</option>
+        </select>
+      </label>
+      <button class="boton" id="botonUnir" disabled data-i18n="boton-unir">Unir en un PDF</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-unido.pdf" data-i18n="resultado-enlace">Descargar PDF combinado</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const cargando = document.getElementById('cargando');
+const gridArchivos = document.getElementById('gridArchivos');
+const botonUnir = document.getElementById('botonUnir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+document.getElementById('envoltorioSelectorVista').appendChild(
+  crearSelectorVista(gridArchivos, 'vista-unir-pdf')
+);
+
+let siguienteId = 0;
+const archivosPorId = new Map(); // id -> File
+
+function actualizarBoton() {
+  botonUnir.disabled = archivosPorId.size < 2;
+  resultado.classList.remove('visible');
+}
+
+habilitarArrastreReordenable(gridArchivos, actualizarBoton);
+
+async function agregarArchivos(listaFileList) {
+  const nuevos = [...listaFileList].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name) || f.type.startsWith('image/'));
+  if (nuevos.length === 0) return;
+
+  cargando.style.display = 'block';
+  for (const archivo of nuevos) {
+    const id = siguienteId++;
+    archivosPorId.set(id, archivo);
+    const esPdf = archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name);
+    let tarjeta;
+    try {
+      const { elemento, totalPaginas } = esPdf
+        ? await generarMiniaturaPdf(archivo, 0.28)
+        : await generarMiniaturaImagen(archivo);
+      tarjeta = crearTarjetaMiniatura({
+        elementoVisual: elemento,
+        etiqueta: esPdf ? `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` : archivo.name,
+        conQuitar: true,
+        alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
+        arrastrable: true,
+        indiceOrden: id,
+      });
+    } catch (error) {
+      tarjeta = crearTarjetaMiniatura({
+        etiqueta: `${archivo.name} ${t('previsualizar-fallo')}`,
+        conQuitar: true,
+        alQuitar: () => { archivosPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
+        arrastrable: true,
+        indiceOrden: id,
+      });
+    }
+    gridArchivos.appendChild(tarjeta);
+  }
+  cargando.style.display = 'none';
+  actualizarBoton();
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivos.click());
+entradaArchivos.addEventListener('change', (e) => { agregarArchivos(e.target.files); entradaArchivos.value = ''; });
+
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  agregarArchivos(e.dataTransfer.files);
+});
+
+// incrustarImagenEnPdf, agregarPaginaConImagen y los tamaños de página
+// están en assets/js/miniaturas.js (compartidos con "Imágenes → PDF").
+botonUnir.addEventListener('click', async () => {
+  botonUnir.disabled = true;
+  botonUnir.textContent = t('boton-unir-procesando');
+  try {
+    const { PDFDocument } = PDFLib;
+    const pdfFinal = await PDFDocument.create();
+    const tamanoElegido = document.getElementById('tamanoPaginaImagenes').value;
+
+    const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
+    for (const id of ordenIds) {
+      const archivo = archivosPorId.get(id);
+      if (archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name)) {
+        const bytes = await archivo.arrayBuffer();
+        const pdfOrigen = await PDFDocument.load(bytes);
+        const paginas = await pdfFinal.copyPages(pdfOrigen, pdfOrigen.getPageIndices());
+        paginas.forEach((pagina) => pdfFinal.addPage(pagina));
+      } else {
+        const imagenEmbebida = await incrustarImagenEnPdf(pdfFinal, archivo);
+        agregarPaginaConImagen(pdfFinal, imagenEmbebida, tamanoElegido);
+      }
+    }
+
+    const bytesFinales = await pdfFinal.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-unir') + ': ' + detalleError(error));
+  } finally {
+    botonUnir.disabled = false;
+    botonUnir.textContent = t('boton-unir');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

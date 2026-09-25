@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir EPUB y Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí un libro EPUB a Word, o un Word a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir EPUB y Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí un libro EPUB a Word, o un Word a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre-epub': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'campo-titulo': 'Título del libro',
+    'campo-autor': 'Autor (opcional)',
+    'boton-a-epub': 'Convertir a EPUB',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace-epub': 'Descargar EPUB',
+    'limites-titulo': 'Límites conocidos',
+    'item1': 'No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.',
+    'titulo-defecto': 'Documento',
+    'error-generar': 'No se pudo generar el EPUB',
+    'h1': 'EPUB ↔ Word',
+    'intro': 'Convertí un libro EPUB a un documento Word editable, o un Word a EPUB, según lo que necesites.',
+    'campo-nombre': 'Nombre del archivo',
+    'valor-nombre': 'libro',
+    'boton-a-word': 'Convertir a Word',
+    'resultado-enlace-word': 'Descargar Word',
+    'zona-arrastre-word': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'item2': 'Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; estilos visuales muy particulares del original (maquetación fija tipo cómic) pueden no verse igual.',
+    'item3': 'Word → EPUB: cada título principal (Heading 1) empieza un capítulo nuevo. EPUB → Word: cada capítulo empieza en una página nueva.',
+    'progreso-leyendo-epub': 'Leyendo el EPUB...',
+    'progreso-capitulo': 'Convirtiendo capítulo {actual} de {total}...',
+    'error-sin-contenido': 'No se encontró contenido en el EPUB.',
+    'error-convertir': 'No se pudo convertir el EPUB',
+    'progreso-leyendo-word': 'Leyendo el Word...',
+    'progreso-armando': 'Armando el EPUB...'
+  },
+  en: {
+    'titulo-pagina': 'Convert EPUB and Word Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert an EPUB book to an editable Word document or Word to EPUB, free and without uploading your file anywhere.',
+    'zona-arrastre-epub': '📚 Drag your .epub file here or click to choose it',
+    'campo-titulo': 'Book title',
+    'campo-autor': 'Author (optional)',
+    'boton-a-epub': 'Convert to EPUB',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace-epub': 'Download EPUB',
+    'limites-titulo': 'Known limits',
+    'item1': 'It doesn’t work with DRM-protected EPUB books (publisher lock) — only with unprotected EPUBs.',
+    'titulo-defecto': 'Document',
+    'error-generar': 'Couldn’t generate the EPUB',
+    'h1': 'EPUB ↔ Word',
+    'intro': 'Convert an EPUB book to an editable Word document, or Word to EPUB, whichever you need.',
+    'campo-nombre': 'File name',
+    'valor-nombre': 'book',
+    'boton-a-word': 'Convert to Word',
+    'resultado-enlace-word': 'Download Word',
+    'zona-arrastre-word': '📝 Drag your .docx document here or click to choose it',
+    'item2': 'Headings, bold, italics, lists, tables and images of each chapter are kept; very particular visual styles from the original (fixed layouts like comics) may not look the same.',
+    'item3': 'Word → EPUB: each main heading (Heading 1) starts a new chapter. EPUB → Word: each chapter starts on a new page.',
+    'progreso-leyendo-epub': 'Reading the EPUB...',
+    'progreso-capitulo': 'Converting chapter {actual} of {total}...',
+    'error-sin-contenido': 'No content was found in the EPUB.',
+    'error-convertir': 'Couldn’t convert the EPUB',
+    'progreso-leyendo-word': 'Reading the Word document...',
+    'progreso-armando': 'Building the EPUB...'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">EPUB ↔ Word</h1>
+  <p data-i18n="intro">Convertí un libro EPUB a un documento Word editable, o un Word a EPUB, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="epub-a-word" checked> EPUB → Word</label>
+      <label><input type="radio" name="direccion" value="word-a-epub"> Word → EPUB</label>
+    </div>
+
+    <!-- EPUB → Word -->
+    <div id="panelEpubAWord">
+      <div class="zona-arrastre" id="zonaArrastreEpub">
+        <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaEpub" accept=".epub" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaEpub"></ul>
+      <div class="controles">
+        <label class="campo">
+          <span data-i18n="campo-nombre">Nombre del archivo</span>
+          <input type="text" id="nombreArchivo" value="libro" data-i18n-attr="value:valor-nombre" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAWord" disabled data-i18n="boton-a-word">Convertir a Word</button>
+      </div>
+      <div class="resultado" id="resultadoWord">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="libro.docx" data-i18n="resultado-enlace-word">Descargar Word</a>
+      </div>
+    </div>
+
+    <!-- Word → EPUB -->
+    <div id="panelWordAEpub" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastreWord">
+        <span data-i18n="zona-arrastre-word">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaWord" accept=".docx" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaWord"></ul>
+      <div class="controles">
+        <label class="campo">
+          <span data-i18n="campo-titulo">Título del libro</span>
+          <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <label class="campo">
+          <span data-i18n="campo-autor">Autor (opcional)</span>
+          <input type="text" id="autorLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAEpub" disabled data-i18n="boton-a-epub">Convertir a EPUB</button>
+      </div>
+      <div class="resultado" id="resultadoEpub">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace-epub">Descargar EPUB</a>
+      </div>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limites-titulo">Límites conocidos</h3>
+    <ul style="color:var(--texto-suave);">
+      <li data-i18n="item1">No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.</li>
+      <li data-i18n="item2">Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; estilos visuales muy particulares del original (maquetación fija tipo cómic) pueden no verse igual.</li>
+      <li data-i18n="item3">Word → EPUB: cada título principal (Heading 1) empieza un capítulo nuevo. EPUB → Word: cada capítulo empieza en una página nueva.</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script>
+const panelEpubAWord = document.getElementById('panelEpubAWord');
+const panelWordAEpub = document.getElementById('panelWordAEpub');
+const progreso = document.getElementById('progreso');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esEpubAWord = document.querySelector('input[name="direccion"]:checked').value === 'epub-a-word';
+    panelEpubAWord.style.display = esEpubAWord ? '' : 'none';
+    panelWordAEpub.style.display = esEpubAWord ? 'none' : '';
+  });
+});
+
+// --- EPUB → Word ---
+const zonaArrastreEpub = document.getElementById('zonaArrastreEpub');
+const entradaEpub = document.getElementById('entradaEpub');
+const listaEpub = document.getElementById('listaEpub');
+const nombreArchivoInput = document.getElementById('nombreArchivo');
+const botonAWord = document.getElementById('botonAWord');
+const resultadoWord = document.getElementById('resultadoWord');
+const enlaceDescargaWord = document.getElementById('enlaceDescargaWord');
+
+let archivoEpubActual = null;
+
+function mostrarArchivoEpub(archivo) {
+  archivoEpubActual = archivo;
+  listaEpub.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonAWord.disabled = false;
+  resultadoWord.classList.remove('visible');
+  if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === 'libro') {
+    nombreArchivoInput.value = archivo.name.replace(/\.epub$/i, '');
+  }
+}
+
+function elegirArchivoEpub(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) mostrarArchivoEpub(archivo);
+}
+
+zonaArrastreEpub.addEventListener('click', () => entradaEpub.click());
+entradaEpub.addEventListener('change', (e) => elegirArchivoEpub(e.target.files));
+zonaArrastreEpub.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreEpub.classList.add('activa'); });
+zonaArrastreEpub.addEventListener('dragleave', () => zonaArrastreEpub.classList.remove('activa'));
+zonaArrastreEpub.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreEpub.classList.remove('activa');
+  elegirArchivoEpub(e.dataTransfer.files);
+});
+
+botonAWord.addEventListener('click', async () => {
+  botonAWord.disabled = true;
+  progreso.style.display = 'block';
+  try {
+    progreso.textContent = t('progreso-leyendo-epub');
+    const { capitulos } = await leerEpub(archivoEpubActual);
+
+    const bloquesFinales = [];
+    for (let i = 0; i < capitulos.length; i++) {
+      progreso.textContent = t('progreso-capitulo').replace('{actual}', i + 1).replace('{total}', capitulos.length);
+      const contenedor = document.createElement('div');
+      contenedor.innerHTML = capitulos[i].html;
+      if (i > 0) bloquesFinales.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
+      bloquesFinales.push(...await contenidoAParrafos(contenedor));
+    }
+    if (bloquesFinales.length === 0) throw new Error(t('error-sin-contenido'));
+
+    const documento = new docx.Document({
+      numbering: NUMERACION_DOCX_CONFIG,
+      sections: [{ children: bloquesFinales }],
+    });
+    const blob = await docx.Packer.toBlob(documento);
+    const nombreArchivo = (nombreArchivoInput.value || 'libro').trim();
+    enlaceDescargaWord.href = URL.createObjectURL(blob);
+    enlaceDescargaWord.download = `${nombreArchivo}.docx`;
+    resultadoWord.classList.add('visible');
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  } finally {
+    botonAWord.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+
+// --- Word → EPUB ---
+const zonaArrastreWord = document.getElementById('zonaArrastreWord');
+const entradaWord = document.getElementById('entradaWord');
+const listaWord = document.getElementById('listaWord');
+const tituloLibro = document.getElementById('tituloLibro');
+const botonAEpub = document.getElementById('botonAEpub');
+const resultadoEpub = document.getElementById('resultadoEpub');
+const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
+
+let archivoWordActual = null;
+
+function mostrarArchivoWord(archivo) {
+  archivoWordActual = archivo;
+  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonAEpub.disabled = false;
+  resultadoEpub.classList.remove('visible');
+  if (!tituloLibro.value.trim()) {
+    tituloLibro.value = archivo.name.replace(/\.docx$/i, '');
+  }
+}
+
+function elegirArchivoWord(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivoWord(archivo);
+}
+
+zonaArrastreWord.addEventListener('click', () => entradaWord.click());
+entradaWord.addEventListener('change', (e) => elegirArchivoWord(e.target.files));
+zonaArrastreWord.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreWord.classList.add('activa'); });
+zonaArrastreWord.addEventListener('dragleave', () => zonaArrastreWord.classList.remove('activa'));
+zonaArrastreWord.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreWord.classList.remove('activa');
+  elegirArchivoWord(e.dataTransfer.files);
+});
+
+botonAEpub.addEventListener('click', async () => {
+  botonAEpub.disabled = true;
+  progreso.style.display = 'block';
+  try {
+    const titulo = tituloLibro.value.trim() || t('titulo-defecto');
+    const autor = document.getElementById('autorLibro').value.trim();
+
+    progreso.textContent = t('progreso-leyendo-word');
+    const arrayBuffer = await archivoWordActual.arrayBuffer();
+    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
+
+    progreso.textContent = t('progreso-armando');
+    const blob = await construirEpub({ titulo, autor, capitulos });
+
+    enlaceDescargaEpub.href = URL.createObjectURL(blob);
+    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    resultadoEpub.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    botonAEpub.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

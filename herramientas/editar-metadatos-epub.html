@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Editar metadatos de un EPUB gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Editá el título, autor e idioma de un libro EPUB sin tocar el contenido, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Editar metadatos de un EPUB gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Editá el título, autor e idioma de un libro EPUB sin tocar el contenido, gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Editar metadatos de un EPUB',
+    'intro': 'Elegí un libro .epub y editá su título, autor e idioma, sin tocar el contenido de los capítulos.',
+    'campo-titulo': 'Título',
+    'campo-autor': 'Autor',
+    'campo-idioma': 'Idioma (código, ej. "es", "en")',
+    'boton-guardar': 'Guardar y descargar',
+    'boton-guardar-procesando': 'Guardando...',
+    'resultado-enlace': 'Descargar EPUB',
+    'nota': 'Solo se cambian el título, el autor y el idioma dentro del archivo del libro: los capítulos, la portada, las imágenes, los estilos, el índice y el resto de los datos (como el ISBN) quedan exactamente igual.',
+    'error-xml': 'XML inválido',
+    'error-sin-container': 'falta META-INF/container.xml',
+    'error-sin-opf': 'no se encontró el archivo .opf',
+    'error-sin-metadata': 'el .opf no tiene <metadata>',
+    'error-leer-epub': 'No se pudo leer el EPUB',
+    'error-guardar': 'No se pudo guardar el EPUB',
+    'titulo-defecto': 'Documento'
+  },
+  en: {
+    'titulo-pagina': 'Edit EPUB Metadata Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Edit the title, author and language of an EPUB book without touching its content, free and without uploading your file anywhere.',
+    'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Edit EPUB metadata',
+    'intro': 'Pick a .epub book and edit its title, author and language, without touching the chapters’ content.',
+    'campo-titulo': 'Title',
+    'campo-autor': 'Author',
+    'campo-idioma': 'Language (code, e.g. "en", "es")',
+    'boton-guardar': 'Save and download',
+    'boton-guardar-procesando': 'Saving...',
+    'resultado-enlace': 'Download EPUB',
+    'nota': 'Only the title, author and language inside the book file are changed: the chapters, cover, images, styles, table of contents and the rest of the data (like the ISBN) stay exactly the same.',
+    'error-xml': 'invalid XML',
+    'error-sin-container': 'META-INF/container.xml is missing',
+    'error-sin-opf': 'the .opf file wasn’t found',
+    'error-sin-metadata': 'the .opf has no <metadata>',
+    'error-leer-epub': 'Couldn’t read the EPUB',
+    'error-guardar': 'Couldn’t save the EPUB',
+    'titulo-defecto': 'Document'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../epub.html" data-i18n="nav-cat-epub">Herramientas de EPUB</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Editar metadatos de un EPUB</h1>
+  <p data-i18n="intro">Elegí un libro .epub y editá su título, autor e idioma, sin tocar el contenido de los capítulos.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".epub" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles" id="controlesMetadatos" style="display:none;">
+      <label class="campo">
+        <span data-i18n="campo-titulo">Título</span>
+        <input type="text" id="campoTitulo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-autor">Autor</span>
+        <input type="text" id="campoAutor" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-idioma">Idioma (código, ej. "es", "en")</span>
+        <input type="text" id="campoIdioma" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; max-width:120px;">
+      </label>
+      <button class="boton" id="botonGuardar" data-i18n="boton-guardar">Guardar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libro-editado.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <p style="color:var(--texto-suave);" data-i18n="nota">Solo se cambian el título, el autor y el idioma dentro del archivo del libro: los capítulos, la portada, las imágenes, los estilos, el índice y el resto de los datos (como el ISBN) quedan exactamente igual.</p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const controlesMetadatos = document.getElementById('controlesMetadatos');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+// Se editan solo los metadatos dentro del archivo .opf del libro (y el
+// título del índice toc.ncx), sin tocar nada más: antes se reconstruía el
+// EPUB entero con construirEpub() y se perdían la hoja de estilos, las
+// fuentes, la portada, el índice y datos como el ISBN.
+const NS_DC = 'http://purl.org/dc/elements/1.1/';
+const NS_OPF = 'http://www.idpf.org/2007/opf';
+
+let zipActual = null;
+let rutaOpf = null;
+let nombreArchivoActual = 'libro';
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivo) cargarLibro(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function parsearXml(texto) {
+  const doc = new DOMParser().parseFromString(texto, 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length > 0) throw new Error(t('error-xml'));
+  return doc;
+}
+
+async function leerOpf(zip) {
+  const contenedor = zip.file('META-INF/container.xml');
+  if (!contenedor) throw new Error(t('error-sin-container'));
+  const raiz = parsearXml(await contenedor.async('string')).getElementsByTagName('rootfile')[0];
+  const ruta = raiz && raiz.getAttribute('full-path');
+  if (!ruta || !zip.file(ruta)) throw new Error(t('error-sin-opf'));
+  return { ruta, doc: parsearXml(await zip.file(ruta).async('string')) };
+}
+
+function primerDc(doc, nombre) {
+  return doc.getElementsByTagNameNS(NS_DC, nombre)[0] || null;
+}
+
+async function cargarLibro(archivo) {
+  try {
+    const zip = await JSZip.loadAsync(archivo);
+    const { ruta, doc } = await leerOpf(zip);
+    zipActual = zip;
+    rutaOpf = ruta;
+    nombreArchivoActual = archivo.name.replace(/\.epub$/i, '');
+
+    listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+    const texto = (nombre) => (primerDc(doc, nombre) ? primerDc(doc, nombre).textContent.trim() : '');
+    document.getElementById('campoTitulo').value = texto('title');
+    document.getElementById('campoAutor').value = texto('creator');
+    document.getElementById('campoIdioma').value = texto('language');
+    controlesMetadatos.style.display = 'flex';
+    resultado.classList.remove('visible');
+  } catch (error) {
+    alert(t('error-leer-epub') + ': ' + error.message);
+  }
+}
+
+// Fija el texto del primer <dc:nombre> (lo crea si no existe; si el valor
+// queda vacío y no es obligatorio, lo quita). Si el elemento tiene id, se
+// actualiza también su "file-as" de EPUB 3 (nombre para ordenar).
+function fijarDc(doc, metadata, nombre, valor, obligatorio) {
+  let nodo = primerDc(doc, nombre);
+  if (!valor && !obligatorio) {
+    [...doc.getElementsByTagNameNS(NS_DC, nombre)].forEach((n) => n.parentNode.removeChild(n));
+    return;
+  }
+  if (!nodo) {
+    nodo = doc.createElementNS(NS_DC, 'dc:' + nombre);
+    metadata.appendChild(nodo);
+  }
+  nodo.textContent = valor;
+  const id = nodo.getAttribute('id');
+  if (!id) return;
+  [...metadata.getElementsByTagNameNS(NS_OPF, 'meta')].forEach((meta) => {
+    if (meta.getAttribute('refines') === '#' + id && meta.getAttribute('property') === 'file-as') meta.textContent = valor;
+  });
+}
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = t('boton-guardar-procesando');
+  try {
+    const titulo = document.getElementById('campoTitulo').value.trim() || t('titulo-defecto');
+    const autor = document.getElementById('campoAutor').value.trim();
+    const idioma = document.getElementById('campoIdioma').value.trim() || 'es';
+
+    const zip = zipActual;
+    const { doc } = await leerOpf(zip);
+    const metadata = doc.getElementsByTagNameNS(NS_OPF, 'metadata')[0] || doc.getElementsByTagName('metadata')[0];
+    if (!metadata) throw new Error(t('error-sin-metadata'));
+    fijarDc(doc, metadata, 'title', titulo, true);
+    fijarDc(doc, metadata, 'creator', autor, false);
+    fijarDc(doc, metadata, 'language', idioma, true);
+
+    // EPUB 3 exige la fecha de última modificación.
+    const modificado = [...metadata.getElementsByTagNameNS(NS_OPF, 'meta')].find((m) => m.getAttribute('property') === 'dcterms:modified');
+    if (modificado) modificado.textContent = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+
+    zip.file(rutaOpf, new XMLSerializer().serializeToString(doc));
+
+    // Título del índice de EPUB 2 (toc.ncx), que algunos lectores muestran.
+    const itemNcx = [...doc.getElementsByTagNameNS(NS_OPF, 'item')].find((it) => it.getAttribute('media-type') === 'application/x-dtbncx+xml');
+    if (itemNcx) {
+      const rutaNcx = rutaOpf.slice(0, rutaOpf.lastIndexOf('/') + 1) + decodeURI(itemNcx.getAttribute('href'));
+      if (zip.file(rutaNcx)) {
+        try {
+          const ncx = parsearXml(await zip.file(rutaNcx).async('string'));
+          const tituloNcx = ncx.getElementsByTagName('docTitle')[0];
+          const nodoTexto = tituloNcx && tituloNcx.getElementsByTagName('text')[0];
+          if (nodoTexto) {
+            nodoTexto.textContent = titulo;
+            zip.file(rutaNcx, new XMLSerializer().serializeToString(ncx));
+          }
+        } catch (errorNcx) {
+          console.warn('No se actualizó el título de toc.ncx:', errorNcx);
+        }
+      }
+    }
+
+    // El EPUB exige que "mimetype" sea el primer archivo del .zip y vaya sin comprimir.
+    const salida = new JSZip();
+    salida.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+    for (const ruta of Object.keys(zip.files)) {
+      const entrada = zip.files[ruta];
+      if (entrada.dir || ruta === 'mimetype') continue;
+      salida.file(ruta, await entrada.async('uint8array'));
+    }
+    const blob = await salida.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = (titulo.replace(/[\\/:*?"<>|]/g, '').trim() || nombreArchivoActual) + '.epub';
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-guardar') + ': ' + error.message);
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = t('boton-guardar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

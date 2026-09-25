@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir Markdown y Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí Markdown a Word (.docx) o Word a Markdown, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
+  .vista-previa-documento {
+    background: #fff;
+    color: #1a1a1a;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 16px;
+    min-height: 320px;
+    overflow: auto;
+    line-height: 1.6;
+  }
+  .vista-previa-documento img { max-width: 100%; }
+  .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
+  .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir Markdown y Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí Markdown a Word (.docx) o Word a Markdown, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Markdown ↔ Word',
+    'intro': 'Convertí Markdown a un documento Word editable, o un Word a Markdown, según lo que necesites.',
+    'vista-previa': 'Vista previa',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-generar': 'Descargar .docx',
+    'boton-generar-procesando': 'Generando...',
+    'nota-md-word': 'Se conservan títulos, negrita, cursiva, listas, tablas, links (como texto) e imágenes. Bloques de código se conservan como texto plano.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'boton-convertir': 'Convertir a Markdown',
+    'boton-convertir-procesando': 'Convirtiendo...',
+    'boton-copiar-md': 'Copiar Markdown',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-md': 'Descargar .md',
+    'error-md-vacio': 'Escribí algo de Markdown primero.',
+    'error-generar': 'No se pudo generar el documento',
+    'advertencias': '⚠️ {n} advertencia(s) al leer el documento (puede haber elementos que no se transfirieron perfectamente).',
+    'error-convertir': 'No se pudo convertir el documento'
+  },
+  en: {
+    'titulo-pagina': 'Convert Markdown and Word Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert Markdown to an editable Word document or Word to Markdown, free and without uploading your file anywhere.',
+    'h1': 'Markdown ↔ Word',
+    'intro': 'Convert Markdown to an editable Word document, or Word to Markdown, whichever you need.',
+    'vista-previa': 'Preview',
+    'campo-nombre': 'File name',
+    'boton-generar': 'Download .docx',
+    'boton-generar-procesando': 'Generating...',
+    'nota-md-word': 'Headings, bold, italics, lists, tables, links (as text) and images are kept. Code blocks are kept as plain text.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'boton-convertir': 'Convert to Markdown',
+    'boton-convertir-procesando': 'Converting...',
+    'boton-copiar-md': 'Copy Markdown',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-md': 'Download .md',
+    'error-md-vacio': 'Type some Markdown first.',
+    'error-generar': 'Couldn’t generate the document',
+    'advertencias': '⚠️ {n} warning(s) while reading the document (some elements may not have transferred perfectly).',
+    'error-convertir': 'Couldn’t convert the document'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../markdown.html" data-i18n="nav-cat-markdown">Herramientas de Markdown</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Markdown ↔ Word</h1>
+  <p data-i18n="intro">Convertí Markdown a un documento Word editable, o un Word a Markdown, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="md-a-word" checked> Markdown → Word</label>
+      <label><input type="radio" name="direccion" value="word-a-md"> Word → Markdown</label>
+    </div>
+
+    <!-- Markdown → Word -->
+    <div id="panelMdAWord">
+      <div class="columnas">
+        <label class="campo">
+          Markdown
+          <textarea id="entradaMarkdown" style="min-height:320px;">## Hola mundo
+
+Este es un ejemplo de **Markdown** con:
+
+- Una lista
+- *Texto en cursiva*
+- [Un link](https://ejemplo.com)</textarea>
+        </label>
+        <label class="campo">
+          <span data-i18n="vista-previa">Vista previa</span>
+          <div class="vista-previa-documento" id="vistaPreviaMd"></div>
+        </label>
+      </div>
+      <div class="controles">
+        <label class="campo">
+          <span data-i18n="campo-nombre">Nombre del archivo</span>
+          <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Descargar .docx</button>
+      </div>
+      <p style="color:var(--texto-suave); font-size:0.9rem; margin-top:12px;" data-i18n="nota-md-word">Se conservan títulos, negrita, cursiva, listas, tablas, links (como texto) e imágenes. Bloques de código se conservan como texto plano.</p>
+    </div>
+
+    <!-- Word → Markdown -->
+    <div id="panelWordAMd" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastre">
+        <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaArchivo" accept=".docx" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaArchivo"></ul>
+      <div class="controles">
+        <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir a Markdown</button>
+      </div>
+      <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
+      <div id="bloqueResultado" style="display:none; margin-top:20px;">
+        <textarea id="markdownResultado" style="min-height:320px; font-family:monospace;"></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
+          <a class="boton" id="enlaceDescargaMd" download="documento.md" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-md">Descargar .md</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.2.0/turndown.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const panelMdAWord = document.getElementById('panelMdAWord');
+const panelWordAMd = document.getElementById('panelWordAMd');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esMdAWord = document.querySelector('input[name="direccion"]:checked').value === 'md-a-word';
+    panelMdAWord.style.display = esMdAWord ? '' : 'none';
+    panelWordAMd.style.display = esMdAWord ? 'none' : '';
+  });
+});
+
+// --- Markdown → Word ---
+const entradaMarkdown = document.getElementById('entradaMarkdown');
+const vistaPreviaMd = document.getElementById('vistaPreviaMd');
+
+function actualizarVistaPreviaMd() {
+  vistaPreviaMd.innerHTML = sanitizarHtml(marked.parse(entradaMarkdown.value));
+}
+entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
+actualizarVistaPreviaMd();
+
+document.getElementById('botonGenerar').addEventListener('click', async () => {
+  const boton = document.getElementById('botonGenerar');
+  boton.disabled = true;
+  boton.textContent = t('boton-generar-procesando');
+  try {
+    const contenedor = document.createElement('div');
+    contenedor.innerHTML = sanitizarHtml(marked.parse(entradaMarkdown.value));
+
+    const parrafos = await contenidoAParrafos(contenedor);
+    if (parrafos.length === 0) throw new Error(t('error-md-vacio'));
+
+    const documento = new docx.Document({
+      numbering: NUMERACION_DOCX_CONFIG,
+      sections: [{ children: parrafos }],
+    });
+
+    const blob = await docx.Packer.toBlob(documento);
+    const nombreArchivo = (document.getElementById('nombreArchivo').value || 'documento').trim();
+
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = `${nombreArchivo}.docx`;
+    enlace.click();
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = t('boton-generar');
+  }
+});
+
+// --- Word → Markdown ---
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonConvertir = document.getElementById('botonConvertir');
+const advertencias = document.getElementById('advertencias');
+const bloqueResultado = document.getElementById('bloqueResultado');
+const markdownResultado = document.getElementById('markdownResultado');
+const botonCopiarMd = document.getElementById('botonCopiarMd');
+const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
+
+const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonConvertir.disabled = false;
+  bloqueResultado.style.display = 'none';
+  advertencias.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  botonConvertir.textContent = t('boton-convertir-procesando');
+  try {
+    const arrayBuffer = await archivoActual.arrayBuffer();
+    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+    const markdown = turndownService.turndown(resultadoMammoth.value);
+
+    markdownResultado.value = markdown;
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+    enlaceDescargaMd.href = URL.createObjectURL(blob);
+    bloqueResultado.style.display = 'block';
+
+    if (resultadoMammoth.messages.length > 0) {
+      advertencias.textContent = t('advertencias').replace('{n}', resultadoMammoth.messages.length);
+      advertencias.style.display = 'block';
+    }
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  } finally {
+    botonConvertir.disabled = false;
+    botonConvertir.textContent = t('boton-convertir');
+  }
+});
+
+botonCopiarMd.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(markdownResultado.value);
+  botonCopiarMd.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiarMd.textContent = t('boton-copiar-md'); }, 1500);
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

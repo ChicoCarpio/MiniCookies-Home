@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir tabla Markdown y CSV gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí una tabla Markdown a CSV, o un CSV a tabla Markdown, en los dos sentidos — gratis y sin enviar nada a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
+  textarea { min-height: 260px; font-family: monospace; }
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir tabla Markdown y CSV gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí una tabla Markdown a CSV, o un CSV a tabla Markdown, en los dos sentidos — gratis y sin enviar nada a ningún servidor.',
+    'h1': 'Tabla Markdown ↔ CSV',
+    'intro': 'Convertí una tabla en formato Markdown a CSV, o un CSV a tabla Markdown.',
+    'etiqueta-tabla-md': 'Tabla Markdown',
+    'placeholder-md': '| Nombre | Edad |\n| --- | --- |\n| Ana | 30 |\n| Luis | 25 |',
+    'boton-convertir': 'Convertir',
+    'boton-copiar': 'Copiar resultado',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar': 'Descargar',
+    'error-tabla-invalida': 'No se encontró una tabla Markdown válida (necesita encabezado + línea separadora).',
+    'error-csv-vacio': 'El CSV está vacío.',
+    'error-convertir': 'No se pudo convertir'
+  },
+  en: {
+    'titulo-pagina': 'Convert Markdown Tables and CSV Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert a Markdown table to CSV or a CSV to a Markdown table, free and without uploading anything anywhere.',
+    'h1': 'Markdown table ↔ CSV',
+    'intro': 'Convert a Markdown table to CSV, or a CSV to a Markdown table.',
+    'etiqueta-tabla-md': 'Markdown table',
+    'placeholder-md': '| Name | Age |\n| --- | --- |\n| Ana | 30 |\n| Luis | 25 |',
+    'boton-convertir': 'Convert',
+    'boton-copiar': 'Copy result',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar': 'Download',
+    'error-tabla-invalida': 'No valid Markdown table was found (it needs a header row + separator line).',
+    'error-csv-vacio': 'The CSV is empty.',
+    'error-convertir': 'Couldn’t convert'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../markdown.html" data-i18n="nav-cat-markdown">Herramientas de Markdown</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Tabla Markdown ↔ CSV</h1>
+  <p data-i18n="intro">Convertí una tabla en formato Markdown a CSV, o un CSV a tabla Markdown.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="md-a-csv" checked> Markdown → CSV</label>
+      <label><input type="radio" name="direccion" value="csv-a-md"> CSV → Markdown</label>
+    </div>
+
+    <div class="columnas">
+      <label class="campo">
+        <span id="etiquetaEntrada" data-i18n="etiqueta-tabla-md">Tabla Markdown</span>
+        <textarea id="entrada" placeholder="| Nombre | Edad |&#10;| --- | --- |&#10;| Ana | 30 |&#10;| Luis | 25 |" data-i18n-attr="placeholder:placeholder-md"></textarea>
+      </label>
+      <label class="campo">
+        <span id="etiquetaSalida">CSV</span>
+        <textarea id="salida" readonly></textarea>
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonConvertir" type="button" data-i18n="boton-convertir">Convertir</button>
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;" data-i18n="boton-copiar">Copiar resultado</button>
+      <a class="boton" id="enlaceDescarga" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar">Descargar</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script>
+const entrada = document.getElementById('entrada');
+const salida = document.getElementById('salida');
+const etiquetaEntrada = document.getElementById('etiquetaEntrada');
+const etiquetaSalida = document.getElementById('etiquetaSalida');
+const botonConvertir = document.getElementById('botonConvertir');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+const EJEMPLO_MD = `| Nombre | Edad |
+| --- | --- |
+| Ana | 30 |
+| Luis | 25 |`;
+
+const EJEMPLO_CSV = `Nombre,Edad
+Ana,30
+Luis,25`;
+
+function direccionActual() {
+  return document.querySelector('input[name="direccion"]:checked').value;
+}
+
+function parsearTablaMarkdown(texto) {
+  const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.startsWith('|'));
+  if (lineas.length < 2) throw new Error(t('error-tabla-invalida'));
+
+  const partirFila = (linea) => linea.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+  const filas = lineas
+    .filter((linea, indice) => !(indice === 1 && /^[\s|:-]+$/.test(linea))) // salta la línea "| --- | --- |"
+    .map(partirFila);
+
+  return filas;
+}
+
+function celdaCsv(valor) {
+  if (/[",\n]/.test(valor)) return '"' + valor.replace(/"/g, '""') + '"';
+  return valor;
+}
+
+function filasACsv(filas) {
+  return filas.map(fila => fila.map(celdaCsv).join(',')).join('\n');
+}
+
+function parsearCsv(texto) {
+  const filas = [];
+  let fila = [];
+  let celda = '';
+  let dentroDeComillas = false;
+
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (dentroDeComillas) {
+      if (c === '"' && texto[i + 1] === '"') { celda += '"'; i++; }
+      else if (c === '"') { dentroDeComillas = false; }
+      else { celda += c; }
+    } else if (c === '"') {
+      dentroDeComillas = true;
+    } else if (c === ',') {
+      fila.push(celda); celda = '';
+    } else if (c === '\n' || c === '\r') {
+      if (c === '\r' && texto[i + 1] === '\n') i++;
+      fila.push(celda); celda = '';
+      filas.push(fila); fila = [];
+    } else {
+      celda += c;
+    }
+  }
+  if (celda !== '' || fila.length > 0) { fila.push(celda); filas.push(fila); }
+  return filas.filter(f => f.length > 1 || f[0] !== '');
+}
+
+function filasATablaMarkdown(filas) {
+  if (filas.length === 0) throw new Error(t('error-csv-vacio'));
+  const encabezado = filas[0];
+  const separador = encabezado.map(() => '---');
+  const cuerpo = filas.slice(1);
+
+  const formatearFila = (fila) => '| ' + fila.map(c => c.replace(/\|/g, '\\|')).join(' | ') + ' |';
+  return [formatearFila(encabezado), formatearFila(separador), ...cuerpo.map(formatearFila)].join('\n');
+}
+
+function actualizarDireccion() {
+  const esMdACsv = direccionActual() === 'md-a-csv';
+  etiquetaEntrada.textContent = esMdACsv ? t('etiqueta-tabla-md') : 'CSV';
+  etiquetaSalida.textContent = esMdACsv ? 'CSV' : t('etiqueta-tabla-md');
+  entrada.value = esMdACsv ? EJEMPLO_MD : EJEMPLO_CSV;
+  salida.value = '';
+  enlaceDescarga.style.display = 'none';
+}
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', actualizarDireccion);
+});
+
+botonConvertir.addEventListener('click', () => {
+  try {
+    if (direccionActual() === 'md-a-csv') {
+      const filas = parsearTablaMarkdown(entrada.value);
+      salida.value = filasACsv(filas);
+      const blob = new Blob([salida.value], { type: 'text/csv;charset=utf-8' });
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      enlaceDescarga.download = 'tabla.csv';
+    } else {
+      const filas = parsearCsv(entrada.value);
+      salida.value = filasATablaMarkdown(filas);
+      const blob = new Blob([salida.value], { type: 'text/markdown;charset=utf-8' });
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      enlaceDescarga.download = 'tabla.md';
+    }
+    enlaceDescarga.style.display = 'inline-block';
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(salida.value);
+  botonCopiar.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiar.textContent = t('boton-copiar'); }, 1500);
+});
+
+// idioma.js (que define t) se carga al final de la página: la dirección
+// inicial se aplica cuando ya está disponible.
+document.addEventListener('DOMContentLoaded', actualizarDireccion);
+// Al cambiar de idioma solo se re-traducen las etiquetas (sin pisar lo escrito).
+document.addEventListener('cambioIdioma', () => {
+  const esMdACsv = direccionActual() === 'md-a-csv';
+  etiquetaEntrada.textContent = esMdACsv ? t('etiqueta-tabla-md') : 'CSV';
+  etiquetaSalida.textContent = esMdACsv ? 'CSV' : t('etiqueta-tabla-md');
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

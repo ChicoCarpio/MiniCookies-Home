@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Encabezado, pie de página y numeración para Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá texto de encabezado, pie de página o numeración a un documento Word (.docx), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Encabezado, pie de página y numeración para Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Agregá texto de encabezado, pie de página o numeración a un documento Word (.docx), gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Encabezado / pie de página para Word',
+    'intro': 'Elegí un documento .docx y agregale un texto de encabezado, de pie de página, y/o numeración de páginas.',
+    'aviso': '⚠️ Esto agrega texto en el encabezado/pie (visible en todas las páginas) — no es una marca de agua diagonal semitransparente sobre el contenido, que no se puede generar con esta herramienta.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'campo-encabezado': 'Texto de encabezado (opcional)',
+    'placeholder-encabezado': 'ej. CONFIDENCIAL',
+    'campo-pie': 'Texto de pie de página (opcional)',
+    'placeholder-pie': 'ej. © Mi empresa 2026',
+    'campo-numeracion': 'Incluir "Página X de Y" en el pie',
+    'boton-aplicar': 'Aplicar y descargar',
+    'boton-aplicar-procesando': 'Generando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Word',
+    'error-sin-nada': 'Escribí al menos un texto, o marcá la numeración de páginas.',
+    'texto-pagina': 'Página ',
+    'texto-de': ' de ',
+    'error-generar': 'No se pudo generar el documento'
+  },
+  en: {
+    'titulo-pagina': 'Word Header, Footer and Page Numbers Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add header, footer text or page numbers to a Word document (.docx), free and without uploading your file anywhere.',
+    'h1': 'Header / footer for Word',
+    'intro': 'Pick a .docx document and add header text, footer text, and/or page numbers to it.',
+    'aviso': '⚠️ This adds text in the header/footer (visible on every page) — it’s not a diagonal, semi-transparent watermark over the content, which this tool can’t generate.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'campo-encabezado': 'Header text (optional)',
+    'placeholder-encabezado': 'e.g. CONFIDENTIAL',
+    'campo-pie': 'Footer text (optional)',
+    'placeholder-pie': 'e.g. © My company 2026',
+    'campo-numeracion': 'Include "Page X of Y" in the footer',
+    'boton-aplicar': 'Apply and download',
+    'boton-aplicar-procesando': 'Generating...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Word',
+    'error-sin-nada': 'Write at least one text, or check the page numbering.',
+    'texto-pagina': 'Page ',
+    'texto-de': ' of ',
+    'error-generar': 'Couldn’t generate the document'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Encabezado / pie de página para Word</h1>
+  <p data-i18n="intro">Elegí un documento .docx y agregale un texto de encabezado, de pie de página, y/o numeración de páginas.</p>
+  <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso">
+    ⚠️ Esto agrega texto en el encabezado/pie (visible en todas las páginas) — no es una marca de agua
+    diagonal semitransparente sobre el contenido, que no se puede generar con esta herramienta.
+  </p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-encabezado">Texto de encabezado (opcional)</span>
+        <input type="text" id="textoEncabezado" placeholder="ej. CONFIDENCIAL" data-i18n-attr="placeholder:placeholder-encabezado" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-pie">Texto de pie de página (opcional)</span>
+        <input type="text" id="textoPie" placeholder="ej. © Mi empresa 2026" data-i18n-attr="placeholder:placeholder-pie" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="incluirNumeracion">
+        <span data-i18n="campo-numeracion">Incluir "Página X de Y" en el pie</span>
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-con-pie.docx" data-i18n="resultado-enlace">Descargar Word</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonAplicar = document.getElementById('botonAplicar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonAplicar.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonAplicar.addEventListener('click', async () => {
+  botonAplicar.disabled = true;
+  botonAplicar.textContent = t('boton-aplicar-procesando');
+  try {
+    const textoEncabezado = document.getElementById('textoEncabezado').value.trim();
+    const textoPie = document.getElementById('textoPie').value.trim();
+    const incluirNumeracion = document.getElementById('incluirNumeracion').checked;
+
+    if (!textoEncabezado && !textoPie && !incluirNumeracion) {
+      throw new Error(t('error-sin-nada'));
+    }
+
+    const arrayBuffer = await archivoActual.arrayBuffer();
+    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+    const contenedor = document.createElement('div');
+    contenedor.innerHTML = resultadoMammoth.value;
+    const parrafos = await contenidoAParrafos(contenedor);
+
+    const opciones = { numbering: NUMERACION_DOCX_CONFIG, sections: [{ children: parrafos }] };
+
+    if (textoEncabezado) {
+      opciones.sections[0].headers = {
+        default: new docx.Header({
+          children: [new docx.Paragraph({ alignment: docx.AlignmentType.CENTER, children: [new docx.TextRun(textoEncabezado)] })],
+        }),
+      };
+    }
+
+    if (textoPie || incluirNumeracion) {
+      const runsPie = [];
+      if (textoPie) runsPie.push(new docx.TextRun(textoPie + (incluirNumeracion ? ' — ' : '')));
+      if (incluirNumeracion) {
+        runsPie.push(new docx.TextRun({ children: [t('texto-pagina'), docx.PageNumber.CURRENT, t('texto-de'), docx.PageNumber.TOTAL_PAGES] }));
+      }
+      opciones.sections[0].footers = {
+        default: new docx.Footer({
+          children: [new docx.Paragraph({ alignment: docx.AlignmentType.CENTER, children: runsPie })],
+        }),
+      };
+    }
+
+    const documento = new docx.Document(opciones);
+    const blob = await docx.Packer.toBlob(documento);
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    botonAplicar.disabled = false;
+    botonAplicar.textContent = t('boton-aplicar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir PDF y Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí PDF a Markdown o Markdown a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
+  .vista-previa-documento {
+    background: #fff;
+    color: #1a1a1a;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 16px;
+    min-height: 320px;
+    overflow: auto;
+    line-height: 1.6;
+  }
+  .vista-previa-documento img { max-width: 100%; }
+  .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
+  .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
+  @media print {
+    body > *:not(#areaImprimir) { display: none !important; }
+    #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
+  }
+  #areaImprimir { display: none; }
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir PDF y Markdown gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convertí PDF a Markdown o Markdown a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'PDF ↔ Markdown',
+    'intro': 'Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.',
+    'dir-pdf-a-md': 'PDF → Markdown',
+    'dir-md-a-pdf': 'Markdown → PDF',
+    'aviso-solo-texto-antes': '⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (',
+    'aviso-solo-texto-final': ').',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-extraer': 'Convertir a Markdown',
+    'boton-extraer-procesando': 'Convirtiendo...',
+    'boton-copiar-md': 'Copiar Markdown',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-md': 'Descargar .md',
+    'campo-markdown': 'Markdown',
+    'campo-vista-previa': 'Vista previa',
+    'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
+    'markdown-ejemplo': '## Hola mundo\n\nEste es un ejemplo de **Markdown** con:\n\n- Una lista\n- *Texto en cursiva*\n- [Un link](https://ejemplo.com)',
+    'error-sin-texto': 'No se encontró texto en el PDF (¿es un escaneo?).',
+    'error-convertir': 'No se pudo convertir el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Convert PDF and Markdown Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Convert PDF to Markdown or Markdown to PDF, in either direction — free and without uploading your file anywhere.',
+    'h1': 'PDF ↔ Markdown',
+    'intro': 'Convert a PDF to Markdown, or Markdown to PDF, whichever you need.',
+    'dir-pdf-a-md': 'PDF → Markdown',
+    'dir-md-a-pdf': 'Markdown → PDF',
+    'aviso-solo-texto-antes': '⚠️ Only the text is extracted — it doesn’t detect headings, bold text or tables from the original PDF. Each page is separated with a horizontal rule (',
+    'aviso-solo-texto-final': ').',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'boton-extraer': 'Convert to Markdown',
+    'boton-extraer-procesando': 'Converting...',
+    'boton-copiar-md': 'Copy Markdown',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-md': 'Download .md',
+    'campo-markdown': 'Markdown',
+    'campo-vista-previa': 'Preview',
+    'boton-imprimir': '🖨️ Save as PDF / Print',
+    'markdown-ejemplo': '## Hello world\n\nThis is an example of **Markdown** with:\n\n- A list\n- *Italic text*\n- [A link](https://example.com)',
+    'error-sin-texto': 'No text was found in the PDF (is it a scan?).',
+    'error-convertir': 'Couldn’t convert the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">PDF ↔ Markdown</h1>
+  <p data-i18n="intro">Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="pdf-a-md" checked> <span data-i18n="dir-pdf-a-md">PDF → Markdown</span></label>
+      <label><input type="radio" name="direccion" value="md-a-pdf"> <span data-i18n="dir-md-a-pdf">Markdown → PDF</span></label>
+    </div>
+
+    <!-- PDF → Markdown -->
+    <div id="panelPdfAMd">
+      <p style="color:var(--texto-suave); font-size:0.9rem;">
+        <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
+      </p>
+      <div class="zona-arrastre" id="zonaArrastre">
+        <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+      </div>
+      <div class="grid-miniaturas" id="listaArchivo"></div>
+      <div class="controles">
+        <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Convertir a Markdown</button>
+      </div>
+      <div id="bloqueResultadoPdfAMd" style="display:none; margin-top:20px;">
+        <textarea id="markdownExtraido" style="min-height:320px; font-family:monospace;"></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
+          <a class="boton" id="enlaceDescargaMd" download="documento.md" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-md">Descargar .md</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Markdown → PDF -->
+    <div id="panelMdAPdf" style="display:none;">
+      <div class="columnas">
+        <label class="campo">
+          <span data-i18n="campo-markdown">Markdown</span>
+          <textarea id="entradaMarkdown" style="min-height:320px;">## Hola mundo
+
+Este es un ejemplo de **Markdown** con:
+
+- Una lista
+- *Texto en cursiva*
+- [Un link](https://ejemplo.com)</textarea>
+        </label>
+        <label class="campo">
+          <span data-i18n="campo-vista-previa">Vista previa</span>
+          <div class="vista-previa-documento" id="vistaPreviaMd"></div>
+        </label>
+      </div>
+      <div class="controles">
+        <button class="boton" id="botonImprimir" type="button" data-i18n="boton-imprimir">🖨️ Guardar como PDF / Imprimir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<div id="areaImprimir"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/pdf-texto.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const panelPdfAMd = document.getElementById('panelPdfAMd');
+const panelMdAPdf = document.getElementById('panelMdAPdf');
+
+function direccionActual() {
+  return document.querySelector('input[name="direccion"]:checked').value;
+}
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esPdfAMd = direccionActual() === 'pdf-a-md';
+    panelPdfAMd.style.display = esPdfAMd ? '' : 'none';
+    panelMdAPdf.style.display = esPdfAMd ? 'none' : '';
+  });
+});
+
+// --- PDF → Markdown ---
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonExtraer = document.getElementById('botonExtraer');
+const bloqueResultadoPdfAMd = document.getElementById('bloqueResultadoPdfAMd');
+const markdownExtraido = document.getElementById('markdownExtraido');
+const botonCopiarMd = document.getElementById('botonCopiarMd');
+const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+  }
+  botonExtraer.disabled = false;
+  bloqueResultadoPdfAMd.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// Escapa solo lo que Markdown interpretaría como formato. Antes se escapaban
+// también puntos, paréntesis, signos de exclamación, etc. en cualquier lugar,
+// y el resultado quedaba lleno de barras ("Hola\. \(nota\)").
+function escaparMarkdown(texto) {
+  return texto
+    .replace(/([\\`*\[\]<>|~])/g, '\\$1')
+    .replace(/(^|\s)_|_(?=\s|$)/g, (m) => m.replace('_', '\\_'))
+    .replace(/^(\s*)([#>+-]|\d+[.)])(\s)/, '$1\\$2$3');
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = t('boton-extraer-procesando');
+  try {
+    const bytes = await archivoActual.arrayBuffer();
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+    const paginas = [];
+    for (let i = 1; i <= pdf.numPages; i++) paginas.push(await extraerParrafosPaginaPdf(await pdf.getPage(i)));
+
+    // Títulos por tamaño de letra: el tamaño del texto normal es el que más
+    // caracteres tiene en todo el documento; un párrafo corto bastante más
+    // grande que eso es un título (#, ## o ### según cuánto más grande).
+    // Antes no se detectaba ningún título: todo salía como párrafos.
+    const caracteresPorTamano = new Map();
+    paginas.flat().forEach((p) => {
+      const tamano = Math.round(p.alto * 2) / 2;
+      caracteresPorTamano.set(tamano, (caracteresPorTamano.get(tamano) || 0) + p.texto.length);
+    });
+    const tamanoNormal = [...caracteresPorTamano.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 10;
+    const aMarkdown = (p) => {
+      const proporcion = p.alto / tamanoNormal;
+      const esCorto = p.texto.length <= 150 && !/[.:;,]$/.test(p.texto);
+      if (esCorto && proporcion >= 1.6) return '# ' + escaparMarkdown(p.texto);
+      if (esCorto && proporcion >= 1.3) return '## ' + escaparMarkdown(p.texto);
+      if (esCorto && proporcion >= 1.15) return '### ' + escaparMarkdown(p.texto);
+      return escaparMarkdown(p.texto);
+    };
+    const paginasMarkdown = paginas.map((parrafos) => parrafos.map(aMarkdown).join('\n\n'));
+
+    if (!paginasMarkdown.some(p => p.trim())) {
+      throw new Error(t('error-sin-texto'));
+    }
+
+    const markdownCompleto = paginasMarkdown.join('\n\n---\n\n');
+    markdownExtraido.value = markdownCompleto;
+    const blob = new Blob([markdownCompleto], { type: 'text/markdown;charset=utf-8' });
+    enlaceDescargaMd.href = URL.createObjectURL(blob);
+    bloqueResultadoPdfAMd.style.display = 'block';
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = t('boton-extraer');
+  }
+});
+
+botonCopiarMd.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(markdownExtraido.value);
+  botonCopiarMd.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiarMd.textContent = t('boton-copiar-md'); }, 1500);
+});
+
+// --- Markdown → PDF ---
+const entradaMarkdown = document.getElementById('entradaMarkdown');
+const vistaPreviaMd = document.getElementById('vistaPreviaMd');
+const areaImprimir = document.getElementById('areaImprimir');
+
+function actualizarVistaPreviaMd() {
+  const html = sanitizarHtml(marked.parse(entradaMarkdown.value));
+  vistaPreviaMd.innerHTML = html;
+  areaImprimir.innerHTML = html;
+}
+
+entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
+document.getElementById('botonImprimir').addEventListener('click', () => window.print());
+
+document.addEventListener('cambioIdioma', () => {
+  // El ejemplo de Markdown solo se re-traduce si el usuario no lo tocó todavía.
+  const esEjemploEs = entradaMarkdown.value.trim() === i18nPagina.es['markdown-ejemplo'].trim();
+  const esEjemploEn = entradaMarkdown.value.trim() === i18nPagina.en['markdown-ejemplo'].trim();
+  if (esEjemploEs || esEjemploEn) {
+    entradaMarkdown.value = t('markdown-ejemplo');
+    actualizarVistaPreviaMd();
+  }
+});
+
+actualizarVistaPreviaMd();
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

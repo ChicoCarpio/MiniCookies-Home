@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Reordenar hojas de Excel gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená o eliminá hojas de un archivo Excel (.xlsx o .xlsm), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .lista-archivos li { flex-wrap: wrap; align-items: flex-start; }
+  .mini-vista-previa { flex-basis: 100%; margin-top: 6px; overflow-x: auto; }
+  table.mini-tabla { border-collapse: collapse; font-size: 0.75rem; color: var(--texto-suave); }
+  table.mini-tabla td {
+    border: 1px solid var(--gris-borde);
+    padding: 2px 6px;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-vista-vacia { font-size: 0.75rem; color: var(--texto-suave); margin-top: 4px; font-style: italic; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar hojas de Excel gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená o eliminá hojas de un archivo Excel (.xlsx o .xlsm), gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Administrar / reordenar hojas de Excel',
+    'intro': 'Elegí un archivo .xlsx o .xlsm (Excel con macros). Arrastrá las hojas para reordenarlas, o quitá las que no quieras, y descargá el Excel resultante — las macros se conservan. Cada hoja muestra una vista previa de sus primeras celdas, para no depender solo del nombre.',
+    'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx o .xlsm)',
+    'cargando': 'Leyendo el archivo...',
+    'hoja-vacia': '(hoja vacía)',
+    'boton-guardar': 'Descargar reordenado',
+    'boton-guardar-procesando': 'Generando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Excel',
+    'error-leer': 'No se pudo leer el archivo',
+    'error-sin-hojas': 'No queda ninguna hoja.',
+    'error-estructura': 'El archivo no tiene la estructura de un .xlsx válido.',
+    'error-generar': 'No se pudo generar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Reorder Excel Sheets Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder or delete sheets of an Excel file (.xlsx or .xlsm), free and without uploading your file anywhere.',
+    'h1': 'Manage / reorder Excel sheets',
+    'intro': 'Pick an .xlsx or .xlsm (macro-enabled Excel) file. Drag the sheets to reorder them, or remove the ones you don’t want, and download the resulting Excel file — macros are kept. Each sheet shows a preview of its first cells, so you don’t have to rely only on its name.',
+    'zona-arrastre': '📊 Drag your file here or click to choose it (.xlsx or .xlsm)',
+    'cargando': 'Reading the file...',
+    'hoja-vacia': '(empty sheet)',
+    'boton-guardar': 'Download reordered',
+    'boton-guardar-procesando': 'Generating...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Excel',
+    'error-leer': 'Couldn’t read the file',
+    'error-sin-hojas': 'There are no sheets left.',
+    'error-estructura': 'The file doesn’t have the structure of a valid .xlsx.',
+    'error-generar': 'Couldn’t generate the file'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Administrar / reordenar hojas de Excel</h1>
+  <p data-i18n="intro">Elegí un archivo .xlsx o .xlsm (Excel con macros). Arrastrá las hojas para reordenarlas, o quitá las que no quieras, y descargá el Excel resultante — las macros se conservan. Cada hoja muestra una vista previa de sus primeras celdas, para no depender solo del nombre.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx o .xlsm)</span>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo el archivo...</p>
+    <ul class="lista-archivos" id="listaHojas"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenado</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="excel-reordenado.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const listaHojas = document.getElementById('listaHojas');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let libroActual = null; // SheetJS — solo para la vista previa de celdas
+let zipActual = null;   // JSZip — para reordenar/eliminar sin perder formato
+let bytesActuales = null;
+let nombresHojas = [];
+let extensionActual = 'xlsx';
+let nombreBaseActual = 'excel-reordenado';
+
+function escaparHtml(valor) {
+  const texto = valor === null || valor === undefined ? '' : String(valor);
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Mini tabla con las primeras celdas de la hoja (sin el estilo/formato
+// completo, solo para identificarla de un vistazo) — pedido explícito del
+// usuario para no depender únicamente del nombre de la hoja.
+const FILAS_VISTA_PREVIA = 4;
+const COLUMNAS_VISTA_PREVIA = 4;
+
+function miniVistaPreviaHtml(nombre) {
+  const hoja = libroActual.Sheets[nombre];
+  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false, defval: '' }).slice(0, FILAS_VISTA_PREVIA);
+  if (filas.length === 0) return `<div class="mini-vista-vacia">${t('hoja-vacia')}</div>`;
+
+  let html = '<div class="mini-vista-previa"><table class="mini-tabla">';
+  filas.forEach((fila) => {
+    html += '<tr>';
+    for (let i = 0; i < COLUMNAS_VISTA_PREVIA; i++) {
+      const texto = String(fila[i] ?? '');
+      const recortado = texto.length > 14 ? texto.slice(0, 14) + '…' : texto;
+      html += `<td>${escaparHtml(recortado)}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</table></div>';
+  return html;
+}
+
+function renderizarLista() {
+  listaHojas.innerHTML = '';
+  nombresHojas.forEach((nombre) => {
+    const item = document.createElement('li');
+    item.draggable = true;
+    item.dataset.nombre = nombre;
+    item.innerHTML = `<span>${escaparHtml(nombre)}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { nombresHojas = nombresHojas.filter(n => n !== nombre); renderizarLista(); };
+    item.appendChild(quitar);
+    item.insertAdjacentHTML('beforeend', miniVistaPreviaHtml(nombre));
+    listaHojas.appendChild(item);
+  });
+  botonGuardar.disabled = nombresHojas.length === 0;
+  resultado.classList.remove('visible');
+}
+
+let arrastrando = null;
+listaHojas.addEventListener('dragstart', (e) => {
+  if (e.target.tagName === 'LI') { arrastrando = e.target; e.target.classList.add('arrastrando'); }
+});
+listaHojas.addEventListener('dragend', (e) => {
+  if (e.target.tagName === 'LI') e.target.classList.remove('arrastrando');
+});
+listaHojas.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const objetivo = e.target.closest('li');
+  if (!objetivo || !arrastrando || objetivo === arrastrando) return;
+  const rect = objetivo.getBoundingClientRect();
+  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
+  objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
+});
+function sincronizarOrdenLista() {
+  nombresHojas = [...listaHojas.children].map(li => li.dataset.nombre);
+}
+listaHojas.addEventListener('drop', sincronizarOrdenLista);
+listaHojas.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaHojas, 'li', sincronizarOrdenLista);
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm)$/i.test(f.name));
+  if (archivo) cargarLibro(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarLibro(archivo) {
+  cargando.style.display = 'block';
+  try {
+    const bytes = await archivo.arrayBuffer();
+    libroActual = XLSX.read(bytes, { type: 'array' });
+    zipActual = await JSZip.loadAsync(bytes);
+    bytesActuales = bytes;
+    nombresHojas = [...libroActual.SheetNames];
+    // El nombre de descarga tiene que conservar la extensión original — un
+    // .xlsm renombrado a .xlsx no abre bien en Excel (el formato interno
+    // sigue siendo macro-habilitado, pero la extensión ya no coincide).
+    extensionActual = /\.xlsm$/i.test(archivo.name) ? 'xlsm' : 'xlsx';
+    nombreBaseActual = archivo.name.replace(/\.(xlsx|xlsm)$/i, '');
+    renderizarLista();
+  } catch (error) {
+    alert(t('error-leer') + ': ' + error.message);
+  } finally {
+    cargando.style.display = 'none';
+  }
+}
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = t('boton-guardar-procesando');
+  try {
+    if (nombresHojas.length === 0) throw new Error(t('error-sin-hojas'));
+    if (!zipActual.file('xl/workbook.xml')) throw new Error(t('error-estructura'));
+    // Se parte siempre del archivo original (no del resultado de un guardado
+    // anterior). reordenarHojasExcel (assets/js/ooxml-paquete.js) reordena
+    // la lista de hojas y, si se quitó alguna, borra también su contenido
+    // del paquete y corrige nombres definidos, pestaña activa, etc.
+    const zip = await JSZip.loadAsync(bytesActuales);
+    await reordenarHojasExcel(zip, nombresHojas);
+
+    const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    enlaceDescarga.href = URL.createObjectURL(blobFinal);
+    enlaceDescarga.download = `${nombreBaseActual}-reordenado.${extensionActual}`;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = t('boton-guardar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

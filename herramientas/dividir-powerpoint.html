@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Dividir PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá una presentación PowerPoint (.pptx) en un archivo por diapositiva, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir PowerPoint gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Separá una presentación PowerPoint (.pptx) en un archivo por diapositiva, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Dividir PowerPoint',
+    'intro': 'Elegí un archivo .pptx. Se genera una mini-presentación .pptx por cada diapositiva, empaquetadas en un .zip.',
+    'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
+    'boton-dividir': 'Dividir',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar .zip con las diapositivas',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-texto': 'Cada archivo generado pesa parecido al original, no una fracción — es lo que garantiza que abra bien en PowerPoint/LibreOffice sin errores.',
+    'error-una-diapositiva': 'La presentación tiene una sola diapositiva — no hay nada que dividir.',
+    'progreso-leyendo': 'Leyendo el paquete original...',
+    'progreso-generando': 'Generando diapositiva {actual} de {total}...',
+    'progreso-zip': 'Generando .zip final...',
+    'error-dividir': 'No se pudo dividir la presentación'
+  },
+  en: {
+    'titulo-pagina': 'Split PowerPoint Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split a PowerPoint presentation (.pptx) into one file per slide, free and without uploading your file anywhere.',
+    'h1': 'Split PowerPoint',
+    'intro': 'Pick a .pptx file. A mini-presentation .pptx is generated for each slide, packaged in a .zip.',
+    'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
+    'boton-dividir': 'Split',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download .zip with the slides',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-texto': 'Each generated file weighs about the same as the original, not a fraction of it — that’s what guarantees it opens correctly in PowerPoint/LibreOffice without errors.',
+    'error-una-diapositiva': 'The presentation has only one slide — there’s nothing to split.',
+    'progreso-leyendo': 'Reading the original package...',
+    'progreso-generando': 'Generating slide {actual} of {total}...',
+    'progreso-zip': 'Generating final .zip...',
+    'error-dividir': 'Couldn’t split the presentation'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Dividir PowerPoint</h1>
+  <p data-i18n="intro">Elegí un archivo .pptx. Se genera una mini-presentación .pptx por cada diapositiva, empaquetadas en un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="diapositivas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las diapositivas</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">
+      Cada archivo generado pesa parecido al original, no una fracción — es lo que garantiza que abra bien
+      en PowerPoint/LibreOffice sin errores.
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonDividir = document.getElementById('botonDividir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonDividir.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = t('boton-dividir-procesando');
+  progreso.style.display = 'block';
+  try {
+    const zipOriginal = await JSZip.loadAsync(archivoActual);
+    const parser = new DOMParser();
+
+    const presentacionXmlTexto = await zipOriginal.file('ppt/presentation.xml').async('string');
+    const nodosSldId = [...parser.parseFromString(presentacionXmlTexto, 'application/xml').getElementsByTagName('p:sldId')];
+    if (nodosSldId.length < 2) throw new Error(t('error-una-diapositiva'));
+
+    // Cada archivo sale del original con solo su diapositiva: el resto
+    // (XML, imágenes, notas) se borra del paquete con conservarDiapositivas
+    // (assets/js/ooxml-paquete.js). Antes cada archivo era una copia completa
+    // de la presentación con la lista recortada: pesaba lo mismo que el
+    // original y cualquiera podía recuperar las demás diapositivas.
+    const bytesOriginales = await archivoActual.arrayBuffer();
+    const zipSalida = new JSZip();
+    const cantidadDigitos = String(nodosSldId.length).length;
+
+    for (let i = 0; i < nodosSldId.length; i++) {
+      progreso.textContent = t('progreso-generando').replace('{actual}', i + 1).replace('{total}', nodosSldId.length);
+      const miniZip = await JSZip.loadAsync(bytesOriginales);
+      await conservarDiapositivas(miniZip, [nodosSldId[i].getAttribute('r:id')]);
+      const numero = String(i + 1).padStart(cantidadDigitos, '0');
+      const blobMini = await miniZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      zipSalida.file(`diapositiva-${numero}.pptx`, blobMini);
+    }
+
+    progreso.textContent = t('progreso-zip');
+    // Los .pptx ya van comprimidos: guardarlos sin recomprimir es más rápido.
+    const blobFinal = await zipSalida.generateAsync({ type: 'blob', compression: 'STORE' });
+    enlaceDescarga.href = URL.createObjectURL(blobFinal);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-dividir') + ': ' + error.message);
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = t('boton-dividir');
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

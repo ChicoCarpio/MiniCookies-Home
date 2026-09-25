@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Buscar y reemplazar en Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Buscá y reemplazá texto en un documento Word (.docx) conservando el formato, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Buscar y reemplazar en Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Buscá y reemplazá texto en un documento Word (.docx) conservando el formato, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Buscar y reemplazar en Word',
+    'intro': 'Elegí un documento .docx y reemplazá un texto por otro en todo el documento, conservando el formato.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'campo-buscar': 'Buscar',
+    'campo-reemplazar': 'Reemplazar por',
+    'campo-mayusculas': 'Coincidir mayúsculas/minúsculas',
+    'boton-procesar': 'Reemplazar y descargar',
+    'boton-procesar-procesando': 'Procesando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Word',
+    'nota': 'El reemplazo se hace directamente dentro del documento, así que todo lo demás queda igual: fuentes, colores, tablas, imágenes, encabezados y pies de página (donde también se busca). Encuentra la frase aunque tenga partes con distinto formato (por ejemplo, una palabra en negrita en el medio); en ese caso el texto nuevo toma el formato del comienzo de la frase encontrada.',
+    'error-no-docx': 'El archivo no parece un documento .docx válido',
+    'error-sin-buscar': 'Escribí el texto a buscar.',
+    'error-sin-coincidencias': 'No se encontró ninguna coincidencia.',
+    'mensaje-reemplazos': 'Se hicieron {n} reemplazo(s).',
+    'error-procesar': 'No se pudo procesar el documento'
+  },
+  en: {
+    'titulo-pagina': 'Find and Replace in Word Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Find and replace text in a Word document (.docx) while keeping the formatting, free and without uploading your file anywhere.',
+    'h1': 'Find and replace in Word',
+    'intro': 'Pick a .docx document and replace one piece of text with another throughout the document, keeping the formatting.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'campo-buscar': 'Find',
+    'campo-reemplazar': 'Replace with',
+    'campo-mayusculas': 'Match case',
+    'boton-procesar': 'Replace and download',
+    'boton-procesar-procesando': 'Processing...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Word',
+    'nota': 'The replacement happens right inside the document, so everything else stays the same: fonts, colors, tables, images, headers and footers (which are searched too). It finds the phrase even if parts of it have different formatting (for example, a bold word in the middle); in that case the new text takes the formatting of the start of the matched phrase.',
+    'error-no-docx': 'The file doesn’t look like a valid .docx document',
+    'error-sin-buscar': 'Type the text to search for.',
+    'error-sin-coincidencias': 'No matches were found.',
+    'mensaje-reemplazos': '{n} replacement(s) were made.',
+    'error-procesar': 'Couldn’t process the document'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Buscar y reemplazar en Word</h1>
+  <p data-i18n="intro">Elegí un documento .docx y reemplazá un texto por otro en todo el documento, conservando el formato.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-buscar">Buscar</span>
+        <input type="text" id="textoBuscar" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-reemplazar">Reemplazar por</span>
+        <input type="text" id="textoReemplazo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="coincidirMayusculas">
+        <span data-i18n="campo-mayusculas">Coincidir mayúsculas/minúsculas</span>
+      </label>
+      <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Reemplazar y descargar</button>
+    </div>
+
+    <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reemplazado.docx" data-i18n="resultado-enlace">Descargar Word</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <p style="color:var(--texto-suave);" data-i18n="nota">El reemplazo se hace directamente dentro del documento, así que todo lo demás queda igual: fuentes, colores, tablas, imágenes, encabezados y pies de página (donde también se busca). Encuentra la frase aunque tenga partes con distinto formato (por ejemplo, una palabra en negrita en el medio); en ese caso el texto nuevo toma el formato del comienzo de la frase encontrada.</p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonProcesar = document.getElementById('botonProcesar');
+const mensaje = document.getElementById('mensaje');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonProcesar.disabled = false;
+  resultado.classList.remove('visible');
+  mensaje.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// El reemplazo se hace directamente sobre el XML del .docx (antes se
+// convertía a HTML con mammoth y se reconstruía con docx.js, y se perdían
+// fuentes, colores, encabezados, pies de página y más). En Word el texto de
+// un párrafo está repartido en fragmentos <w:t>, uno por cada cambio de
+// formato: se une el texto del párrafo, se buscan las coincidencias y cada
+// una se escribe en el primer fragmento que toca (con su formato), vaciando
+// lo que ocupaba en los siguientes. Así se encuentran también frases que
+// atraviesan partes con distinto formato.
+const NS_WORD = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const PARTES_CON_TEXTO = /^word\/(document|header\d*|footer\d*|footnotes|endnotes|comments)\.xml$/;
+// Un tabulador o salto de línea corta la búsqueda (no hay coincidencias que lo atraviesen).
+const CORTE = '\u0000';
+
+function parrafoDe(nodo) {
+  let actual = nodo.parentNode;
+  while (actual && !(actual.namespaceURI === NS_WORD && actual.localName === 'p')) actual = actual.parentNode;
+  return actual;
+}
+
+function reemplazarEnParrafo(parrafo, regex, reemplazo) {
+  let texto = '';
+  const fragmentos = [];
+  for (const el of parrafo.getElementsByTagNameNS(NS_WORD, '*')) {
+    if (parrafoDe(el) !== parrafo) continue; // párrafos anidados (cuadros de texto) van aparte
+    if (el.localName === 't') {
+      fragmentos.push({ nodo: el, inicio: texto.length });
+      texto += el.textContent;
+    } else if (el.localName === 'tab' || el.localName === 'br' || el.localName === 'cr') {
+      texto += CORTE;
+    }
+  }
+  if (fragmentos.length === 0) return 0;
+  const coincidencias = [...texto.matchAll(regex)].filter((m) => m[0].length > 0);
+  // De la última a la primera: así las posiciones de las anteriores no cambian.
+  for (const coincidencia of coincidencias.reverse()) {
+    const inicio = coincidencia.index;
+    const fin = inicio + coincidencia[0].length;
+    let primero = true;
+    for (const fragmento of fragmentos) {
+      const largo = fragmento.nodo.textContent.length;
+      const desde = Math.max(inicio, fragmento.inicio) - fragmento.inicio;
+      const hasta = Math.min(fin, fragmento.inicio + largo) - fragmento.inicio;
+      if (desde >= hasta) continue;
+      const actual = fragmento.nodo.textContent;
+      fragmento.nodo.textContent = actual.slice(0, desde) + (primero ? reemplazo : '') + actual.slice(hasta);
+      fragmento.nodo.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+      primero = false;
+    }
+  }
+  return coincidencias.length;
+}
+
+botonProcesar.addEventListener('click', async () => {
+  botonProcesar.disabled = true;
+  botonProcesar.textContent = t('boton-procesar-procesando');
+  try {
+    const buscar = document.getElementById('textoBuscar').value;
+    if (!buscar) throw new Error(t('error-sin-buscar'));
+    const reemplazo = document.getElementById('textoReemplazo').value;
+    const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
+    const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
+
+    const zip = await JSZip.loadAsync(await archivoActual.arrayBuffer());
+    if (!zip.file('word/document.xml')) throw new Error(t('error-no-docx'));
+    let total = 0;
+    for (const ruta of Object.keys(zip.files).filter((r) => PARTES_CON_TEXTO.test(r))) {
+      const doc = new DOMParser().parseFromString(await zip.file(ruta).async('string'), 'application/xml');
+      if (doc.getElementsByTagName('parsererror').length > 0) continue;
+      let enParte = 0;
+      for (const parrafo of [...doc.getElementsByTagNameNS(NS_WORD, 'p')]) {
+        enParte += reemplazarEnParrafo(parrafo, regex, reemplazo);
+      }
+      if (enParte > 0) {
+        zip.file(ruta, new XMLSerializer().serializeToString(doc));
+        total += enParte;
+      }
+    }
+    if (total === 0) throw new Error(t('error-sin-coincidencias'));
+
+    const blob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+
+    mensaje.textContent = t('mensaje-reemplazos').replace('{n}', total);
+    mensaje.style.display = 'block';
+  } catch (error) {
+    alert(t('error-procesar') + ': ' + error.message);
+  } finally {
+    botonProcesar.disabled = false;
+    botonProcesar.textContent = t('boton-procesar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Convertir Word y texto plano gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraé el texto de un Word (.docx) a .txt, o convertí un .txt a un documento Word, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Convertir Word y texto plano gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extraé el texto de un Word (.docx) a .txt, o convertí un .txt a un documento Word, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Word ↔ Texto',
+    'intro': 'Extraé el texto de un Word a .txt, o convertí un archivo de texto plano a un documento Word, según lo que necesites.',
+    'dir-word-a-texto': 'Word → Texto',
+    'dir-texto-a-word': 'Texto → Word',
+    'zona-arrastre-word': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'boton-extraer': 'Extraer texto',
+    'boton-extraer-procesando': 'Extrayendo...',
+    'boton-copiar': 'Copiar texto',
+    'boton-copiado': '¡Copiado!',
+    'enlace-descargar-txt': 'Descargar .txt',
+    'zona-arrastre-txt': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-a-word': 'Convertir a Word',
+    'boton-a-word-procesando': 'Generando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar Word',
+    'advertencias-texto': '⚠️ {n} advertencia(s) al leer el documento (puede haber elementos que no se extrajeron perfectamente).',
+    'error-extraer': 'No se pudo extraer el texto',
+    'error-sin-contenido': 'El archivo está vacío.',
+    'nombre-defecto': 'documento',
+    'error-generar': 'No se pudo generar el documento'
+  },
+  en: {
+    'titulo-pagina': 'Convert Word and Plain Text Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extract the text from a Word document (.docx) to .txt, or convert a .txt to a Word document, in either direction — free and without uploading your file anywhere.',
+    'h1': 'Word ↔ Text',
+    'intro': 'Extract the text from a Word document to .txt, or convert a plain text file to a Word document, whichever you need.',
+    'dir-word-a-texto': 'Word → Text',
+    'dir-texto-a-word': 'Text → Word',
+    'zona-arrastre-word': '📝 Drag your .docx document here or click to choose it',
+    'boton-extraer': 'Extract text',
+    'boton-extraer-procesando': 'Extracting...',
+    'boton-copiar': 'Copy text',
+    'boton-copiado': 'Copied!',
+    'enlace-descargar-txt': 'Download .txt',
+    'zona-arrastre-txt': '📄 Drag your .txt file here or click to choose it',
+    'campo-nombre': 'File name',
+    'boton-a-word': 'Convert to Word',
+    'boton-a-word-procesando': 'Generating...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download Word',
+    'advertencias-texto': '⚠️ {n} warning(s) while reading the document (some elements may not have been extracted perfectly).',
+    'error-extraer': 'Couldn’t extract the text',
+    'error-sin-contenido': 'The file is empty.',
+    'nombre-defecto': 'document',
+    'error-generar': 'Couldn’t generate the document'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Word ↔ Texto</h1>
+  <p data-i18n="intro">Extraé el texto de un Word a .txt, o convertí un archivo de texto plano a un documento Word, según lo que necesites.</p>
+
+  <div class="panel-herramienta">
+    <div class="selector-direccion">
+      <label><input type="radio" name="direccion" value="word-a-texto" checked> <span data-i18n="dir-word-a-texto">Word → Texto</span></label>
+      <label><input type="radio" name="direccion" value="texto-a-word"> <span data-i18n="dir-texto-a-word">Texto → Word</span></label>
+    </div>
+
+    <!-- Word → Texto -->
+    <div id="panelWordATexto">
+      <div class="zona-arrastre" id="zonaArrastreWord">
+        <span data-i18n="zona-arrastre-word">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaWord" accept=".docx" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaWord"></ul>
+      <div class="controles">
+        <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer texto</button>
+      </div>
+      <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
+      <div id="bloqueResultadoTexto" style="display:none; margin-top:20px;">
+        <textarea id="textoExtraido" readonly></textarea>
+        <div class="controles">
+          <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
+          <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" style="text-decoration:none; display:inline-block;" data-i18n="enlace-descargar-txt">Descargar .txt</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Texto → Word -->
+    <div id="panelTextoAWord" style="display:none;">
+      <div class="zona-arrastre" id="zonaArrastreTxt">
+        <span data-i18n="zona-arrastre-txt">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
+        <input type="file" id="entradaTxt" accept=".txt" hidden>
+      </div>
+      <ul class="lista-archivos" id="listaTxt"></ul>
+      <div class="controles">
+        <label class="campo">
+          <span data-i18n="campo-nombre">Nombre del archivo</span>
+          <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        </label>
+        <button class="boton" id="botonAWord" disabled data-i18n="boton-a-word">Convertir a Word</button>
+      </div>
+      <div class="resultado" id="resultadoWord">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="documento.docx" data-i18n="resultado-enlace">Descargar Word</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script>
+const panelWordATexto = document.getElementById('panelWordATexto');
+const panelTextoAWord = document.getElementById('panelTextoAWord');
+
+document.querySelectorAll('input[name="direccion"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esWordATexto = document.querySelector('input[name="direccion"]:checked').value === 'word-a-texto';
+    panelWordATexto.style.display = esWordATexto ? '' : 'none';
+    panelTextoAWord.style.display = esWordATexto ? 'none' : '';
+  });
+});
+
+// --- Word → Texto ---
+const zonaArrastreWord = document.getElementById('zonaArrastreWord');
+const entradaWord = document.getElementById('entradaWord');
+const listaWord = document.getElementById('listaWord');
+const botonExtraer = document.getElementById('botonExtraer');
+const advertencias = document.getElementById('advertencias');
+const bloqueResultadoTexto = document.getElementById('bloqueResultadoTexto');
+const textoExtraido = document.getElementById('textoExtraido');
+const botonCopiar = document.getElementById('botonCopiar');
+const enlaceDescargaTxt = document.getElementById('enlaceDescargaTxt');
+
+let archivoWordActual = null;
+
+function mostrarArchivoWord(archivo) {
+  archivoWordActual = archivo;
+  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonExtraer.disabled = false;
+  bloqueResultadoTexto.style.display = 'none';
+  advertencias.style.display = 'none';
+}
+
+function elegirArchivoWord(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivoWord(archivo);
+}
+
+zonaArrastreWord.addEventListener('click', () => entradaWord.click());
+entradaWord.addEventListener('change', (e) => elegirArchivoWord(e.target.files));
+zonaArrastreWord.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreWord.classList.add('activa'); });
+zonaArrastreWord.addEventListener('dragleave', () => zonaArrastreWord.classList.remove('activa'));
+zonaArrastreWord.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreWord.classList.remove('activa');
+  elegirArchivoWord(e.dataTransfer.files);
+});
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = t('boton-extraer-procesando');
+  try {
+    const arrayBuffer = await archivoWordActual.arrayBuffer();
+    const resultado = await mammoth.extractRawText({ arrayBuffer });
+
+    textoExtraido.value = resultado.value;
+    const blob = new Blob([resultado.value], { type: 'text/plain;charset=utf-8' });
+    enlaceDescargaTxt.href = URL.createObjectURL(blob);
+    bloqueResultadoTexto.style.display = 'block';
+
+    if (resultado.messages.length > 0) {
+      advertencias.textContent = t('advertencias-texto').replace('{n}', resultado.messages.length);
+      advertencias.style.display = 'block';
+    }
+  } catch (error) {
+    alert(t('error-extraer') + ': ' + error.message);
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = t('boton-extraer');
+  }
+});
+
+botonCopiar.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(textoExtraido.value);
+  botonCopiar.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiar.textContent = t('boton-copiar'); }, 1500);
+});
+
+// --- Texto → Word ---
+const zonaArrastreTxt = document.getElementById('zonaArrastreTxt');
+const entradaTxt = document.getElementById('entradaTxt');
+const listaTxt = document.getElementById('listaTxt');
+const nombreArchivoInput = document.getElementById('nombreArchivo');
+const botonAWord = document.getElementById('botonAWord');
+const resultadoWord = document.getElementById('resultadoWord');
+const enlaceDescargaWord = document.getElementById('enlaceDescargaWord');
+
+let archivoTxtActual = null;
+
+function mostrarArchivoTxt(archivo) {
+  archivoTxtActual = archivo;
+  listaTxt.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonAWord.disabled = false;
+  resultadoWord.classList.remove('visible');
+  if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === t('nombre-defecto')) {
+    nombreArchivoInput.value = archivo.name.replace(/\.txt$/i, '');
+  }
+}
+
+function elegirArchivoTxt(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivoTxt(archivo);
+}
+
+zonaArrastreTxt.addEventListener('click', () => entradaTxt.click());
+entradaTxt.addEventListener('change', (e) => elegirArchivoTxt(e.target.files));
+zonaArrastreTxt.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreTxt.classList.add('activa'); });
+zonaArrastreTxt.addEventListener('dragleave', () => zonaArrastreTxt.classList.remove('activa'));
+zonaArrastreTxt.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastreTxt.classList.remove('activa');
+  elegirArchivoTxt(e.dataTransfer.files);
+});
+
+// Envuelve texto plano en párrafos <p>, separando por líneas en blanco.
+function textoAHtml(texto) {
+  return texto.split(/\n\s*\n/).map(parrafo => {
+    const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+botonAWord.addEventListener('click', async () => {
+  botonAWord.disabled = true;
+  botonAWord.textContent = t('boton-a-word-procesando');
+  try {
+    const { texto } = await leerTextoArchivo(archivoTxtActual);
+    const contenedor = document.createElement('div');
+    contenedor.innerHTML = textoAHtml(texto);
+    const parrafos = await contenidoAParrafos(contenedor);
+    if (parrafos.length === 0) throw new Error(t('error-sin-contenido'));
+
+    const documento = new docx.Document({
+      numbering: NUMERACION_DOCX_CONFIG,
+      sections: [{ children: parrafos }],
+    });
+    const blob = await docx.Packer.toBlob(documento);
+    const nombreArchivo = (nombreArchivoInput.value || t('nombre-defecto')).trim();
+    enlaceDescargaWord.href = URL.createObjectURL(blob);
+    enlaceDescargaWord.download = `${nombreArchivo}.docx`;
+    resultadoWord.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    botonAWord.disabled = false;
+    botonAWord.textContent = t('boton-a-word');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

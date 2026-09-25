@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Ordenar líneas de un texto gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Ordená alfabética o numéricamente las líneas de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Ordenar líneas de un texto gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Ordená alfabética o numéricamente las líneas de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Ordenar líneas',
+    'intro': 'Elegí un archivo .txt y ordená sus líneas alfabética o numéricamente.',
+    'campo-orden': 'Orden',
+    'opcion-alfa-asc': 'Alfabético (A→Z)',
+    'opcion-alfa-desc': 'Alfabético (Z→A)',
+    'opcion-num-asc': 'Numérico (menor a mayor)',
+    'opcion-num-desc': 'Numérico (mayor a menor)',
+    'campo-mayusculas': 'Ignorar mayúsculas/minúsculas (orden alfabético)',
+    'boton-ordenar': 'Ordenar y descargar',
+    'resultado-enlace': 'Descargar .txt',
+    'nota': 'El orden numérico toma el primer número que encuentra al principio de cada línea — las líneas que no empiezan con un número quedan al final, en el orden en que aparecían.',
+    'error-ordenar': 'No se pudo ordenar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Sort Text Lines Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Sort the lines of a plain text file (.txt) alphabetically or numerically, free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Sort lines',
+    'intro': 'Pick a .txt file and sort its lines alphabetically or numerically.',
+    'campo-orden': 'Order',
+    'opcion-alfa-asc': 'Alphabetical (A→Z)',
+    'opcion-alfa-desc': 'Alphabetical (Z→A)',
+    'opcion-num-asc': 'Numeric (smallest to largest)',
+    'opcion-num-desc': 'Numeric (largest to smallest)',
+    'campo-mayusculas': 'Ignore upper/lower case (alphabetical order)',
+    'boton-ordenar': 'Sort and download',
+    'resultado-enlace': 'Download .txt',
+    'nota': 'Numeric order uses the first number found at the start of each line — lines that don’t start with a number go at the end, in the order they appeared.',
+    'error-ordenar': 'Couldn’t sort the file'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../texto.html" data-i18n="nav-cat-texto">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Ordenar líneas</h1>
+  <p data-i18n="intro">Elegí un archivo .txt y ordená sus líneas alfabética o numéricamente.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".txt" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-orden">Orden</span>
+        <select id="tipoOrden">
+          <option value="alfabetico-asc" data-i18n="opcion-alfa-asc">Alfabético (A→Z)</option>
+          <option value="alfabetico-desc" data-i18n="opcion-alfa-desc">Alfabético (Z→A)</option>
+          <option value="numerico-asc" data-i18n="opcion-num-asc">Numérico (menor a mayor)</option>
+          <option value="numerico-desc" data-i18n="opcion-num-desc">Numérico (mayor a menor)</option>
+        </select>
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="ignorarMayusculas" checked>
+        <span data-i18n="campo-mayusculas">Ignorar mayúsculas/minúsculas (orden alfabético)</span>
+      </label>
+      <button class="boton" id="botonOrdenar" disabled data-i18n="boton-ordenar">Ordenar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-ordenado.txt" data-i18n="resultado-enlace">Descargar .txt</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <p style="color:var(--texto-suave);" data-i18n="nota">El orden numérico toma el primer número que encuentra al principio de cada línea — las líneas que no empiezan con un número quedan al final, en el orden en que aparecían.</p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonOrdenar = document.getElementById('botonOrdenar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonOrdenar.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// Primer número de la línea, con coma o punto decimal y separador de miles:
+// "3,5" → 3.5, "1.234,50" → 1234.5, "1,234.50" → 1234.5, "1.000.000" → 1000000.
+// Antes solo se entendía el punto decimal ("3,5" se ordenaba como 3).
+function numeroDeLinea(linea) {
+  const m = linea.match(/-?\d[\d.,]*/);
+  if (!m) return null;
+  let s = m[0].replace(/[.,]+$/, '');
+  const punto = s.lastIndexOf('.'), coma = s.lastIndexOf(',');
+  if (punto >= 0 && coma >= 0) {
+    // Hay de los dos: el último es el decimal.
+    s = punto > coma ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.');
+  } else if (coma >= 0) {
+    // Solo comas: una sola y sin 3 cifras detrás es decimal ("3,5"); si no, son miles ("1,234").
+    const partes = s.split(',');
+    s = partes.length === 2 && partes[1].length !== 3 ? partes.join('.') : partes.join('');
+  } else if (punto >= 0 && s.split('.').length > 2) {
+    s = s.replace(/\./g, ''); // varios puntos: separador de miles
+  }
+  const numero = parseFloat(s);
+  return Number.isFinite(numero) ? numero : null;
+}
+
+botonOrdenar.addEventListener('click', async () => {
+  try {
+    const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
+    // El salto de línea final no es una línea más: antes aparecía una línea
+    // vacía al principio del resultado.
+    const terminaEnSalto = texto.endsWith('\n');
+    const lineas = (terminaEnSalto ? texto.slice(0, -1) : texto).split('\n');
+    const tipoOrden = document.getElementById('tipoOrden').value;
+    const ignorarMayusculas = document.getElementById('ignorarMayusculas').checked;
+
+    let lineasOrdenadas;
+    if (tipoOrden.startsWith('alfabetico')) {
+      // Orden de diccionario del idioma de la página: acentos y ñ en su
+      // lugar ("árbol" junto a "arco", "ñandú" después de "nube"; antes iban
+      // al final) y números como números ("tema 2" antes que "tema 10").
+      const colador = new Intl.Collator(idiomaActual(), { numeric: true, sensitivity: ignorarMayusculas ? 'accent' : 'variant', caseFirst: 'upper' });
+      lineasOrdenadas = [...lineas].sort(colador.compare);
+      if (tipoOrden.endsWith('desc')) lineasOrdenadas.reverse();
+    } else {
+      const conNumero = [];
+      const sinNumero = [];
+      lineas.forEach((linea) => {
+        const numero = numeroDeLinea(linea);
+        if (numero !== null) conNumero.push({ linea, numero });
+        else sinNumero.push(linea);
+      });
+      conNumero.sort((a, b) => a.numero - b.numero);
+      if (tipoOrden.endsWith('desc')) conNumero.reverse();
+      lineasOrdenadas = [...conNumero.map(x => x.linea), ...sinNumero];
+    }
+
+    const blob = new Blob([conFinDeLinea(lineasOrdenadas.join('\n') + (terminaEnSalto ? '\n' : ''), finDeLinea)], { type: 'text/plain;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-ordenar') + ': ' + error.message);
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

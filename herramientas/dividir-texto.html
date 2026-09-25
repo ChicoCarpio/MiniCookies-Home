@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Dividir texto plano gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá un archivo de texto plano (.txt) en varios archivos por párrafo, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir texto plano gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Separá un archivo de texto plano (.txt) en varios archivos por párrafo, gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Dividir texto plano',
+    'intro': 'Elegí un archivo .txt. Se separa en un .txt por cada párrafo (separados por líneas en blanco), empaquetados en un .zip.',
+    'boton-dividir': 'Dividir',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-enlace': 'Descargar .zip con los párrafos',
+    'error-un-parrafo': 'El archivo tiene un solo párrafo — no hay nada que dividir.',
+    'error-dividir': 'No se pudo dividir el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Split Plain Text Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split a plain text file (.txt) into several files, one per paragraph, free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Split plain text',
+    'intro': 'Pick a .txt file. It’s split into one .txt per paragraph (paragraphs are separated by blank lines), packed into a .zip.',
+    'boton-dividir': 'Split',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-enlace': 'Download .zip with the paragraphs',
+    'error-un-parrafo': 'The file has only one paragraph — there’s nothing to split.',
+    'error-dividir': 'Couldn’t split the file'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../texto.html" data-i18n="nav-cat-texto">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Dividir texto plano</h1>
+  <p data-i18n="intro">Elegí un archivo .txt. Se separa en un .txt por cada párrafo (separados por líneas en blanco), empaquetados en un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".txt" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="parrafos-texto.zip" data-i18n="resultado-enlace">Descargar .zip con los párrafos</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonDividir = document.getElementById('botonDividir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonDividir.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = t('boton-dividir-procesando');
+  try {
+    const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
+    const parrafos = texto.split(/\n\s*\n/).filter(p => p.trim() !== '');
+    if (parrafos.length < 2) throw new Error(t('error-un-parrafo'));
+
+    const zip = new JSZip();
+    const cantidadDigitos = String(parrafos.length).length;
+    parrafos.forEach((parrafo, i) => {
+      const numero = String(i + 1).padStart(cantidadDigitos, '0');
+      zip.file(`parrafo-${numero}.txt`, conFinDeLinea(parrafo, finDeLinea));
+    });
+
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-dividir') + ': ' + error.message);
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = t('boton-dividir');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

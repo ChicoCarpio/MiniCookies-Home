@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Proteger PDF con contraseña gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Ponele una contraseña a un PDF para que no cualquiera lo abra, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Proteger PDF con contraseña gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Ponele una contraseña a un PDF para que no cualquiera lo abra, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Proteger PDF con contraseña',
+    'intro': 'Elegí un PDF y ponele una contraseña (cifrado AES-256) para que no cualquiera lo abra.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-usuario': 'Contraseña para abrir el PDF',
+    'placeholder-usuario': 'Requerida para abrir el archivo',
+    'campo-propietario': 'Contraseña de propietario (opcional)',
+    'placeholder-propietario': 'Si la dejás vacía, se usa la misma de arriba',
+    'boton-proteger': 'Proteger PDF',
+    'boton-proteger-procesando': 'Protegiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF protegido',
+    'importante-titulo': 'Importante',
+    'item1-antes': 'Si perdés la contraseña, ',
+    'item1-enfasis': 'no hay forma de recuperar el archivo',
+    'item1-medio': ' — guardala en un lugar seguro (podés usar el ',
+    'item1-enlace': 'generador de contraseñas de Mini Cookies',
+    'item1-final': ').',
+    'item2': 'Se usa cifrado AES-256, el estándar actual de protección de PDF (compatible con Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos).',
+    'error-vacio': 'Ingresá una contraseña para abrir el PDF.',
+    'error-proteger': 'No se pudo proteger el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Password-Protect a PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add a password to a PDF so not just anyone can open it, free and without uploading your file anywhere.',
+    'h1': 'Password-protect a PDF',
+    'intro': 'Pick a PDF and add a password to it (AES-256 encryption) so not just anyone can open it.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-usuario': 'Password to open the PDF',
+    'placeholder-usuario': 'Required to open the file',
+    'campo-propietario': 'Owner password (optional)',
+    'placeholder-propietario': 'If left empty, the one above is used',
+    'boton-proteger': 'Protect PDF',
+    'boton-proteger-procesando': 'Protecting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download protected PDF',
+    'importante-titulo': 'Important',
+    'item1-antes': 'If you lose the password, ',
+    'item1-enfasis': 'there’s no way to recover the file',
+    'item1-medio': ' — keep it somewhere safe (you can use the ',
+    'item1-enlace': 'Mini Cookies password generator',
+    'item1-final': ').',
+    'item2': 'AES-256 encryption is used, the current standard for protecting PDFs (compatible with Adobe Reader, Chrome, Edge, Firefox and most modern readers).',
+    'error-vacio': 'Enter a password to open the PDF.',
+    'error-proteger': 'Couldn’t protect the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Proteger PDF con contraseña</h1>
+  <p data-i18n="intro">Elegí un PDF y ponele una contraseña (cifrado AES-256) para que no cualquiera lo abra.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles" style="flex-direction:column; align-items:stretch;">
+      <label class="campo">
+        <span data-i18n="campo-usuario">Contraseña para abrir el PDF</span>
+        <input type="password" id="contrasenaUsuario" placeholder="Requerida para abrir el archivo" data-i18n-attr="placeholder:placeholder-usuario" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-propietario">Contraseña de propietario (opcional)</span>
+        <input type="password" id="contrasenaPropietario" placeholder="Si la dejás vacía, se usa la misma de arriba" data-i18n-attr="placeholder:placeholder-propietario" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonProteger" disabled data-i18n="boton-proteger">Proteger PDF</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-protegido.pdf" data-i18n="resultado-enlace">Descargar PDF protegido</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="importante-titulo">Importante</h3>
+    <ul style="color:var(--texto-suave);">
+      <li><span data-i18n="item1-antes">Si perdés la contraseña, </span><strong data-i18n="item1-enfasis">no hay forma de recuperar el archivo</strong><span data-i18n="item1-medio"> — guardala en un lugar seguro (podés usar el </span><a href="generador-contrasenas.html" data-i18n="item1-enlace">generador de contraseñas de Mini Cookies</a><span data-i18n="item1-final">).</span></li>
+      <li data-i18n="item2">Se usa cifrado AES-256, el estándar actual de protección de PDF (compatible con Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos).</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.11.0/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonProteger = document.getElementById('botonProteger');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+  }
+  botonProteger.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonProteger.addEventListener('click', async () => {
+  const contrasenaUsuario = document.getElementById('contrasenaUsuario').value;
+  const contrasenaPropietario = document.getElementById('contrasenaPropietario').value;
+
+  if (!contrasenaUsuario) {
+    alert(t('error-vacio'));
+    return;
+  }
+
+  botonProteger.disabled = true;
+  botonProteger.textContent = t('boton-proteger-procesando');
+  try {
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+
+    await pdf.encrypt({
+      userPassword: contrasenaUsuario,
+      ownerPassword: contrasenaPropietario || contrasenaUsuario,
+    });
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-proteger') + ': ' + detalleError(error));
+  } finally {
+    botonProteger.disabled = false;
+    botonProteger.textContent = t('boton-proteger');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

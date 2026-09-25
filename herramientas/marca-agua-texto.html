@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Agregar encabezado o pie a un texto plano gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá una línea de texto al principio o al final de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Agregar encabezado o pie a un texto plano gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Agregá una línea de texto al principio o al final de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Agregar encabezado o pie a un texto',
+    'intro': 'Elegí un archivo .txt y agregale una línea de texto al principio, al final, o ambas.',
+    'campo-encabezado': 'Texto de encabezado (opcional)',
+    'placeholder-encabezado': 'ej. --- Documento confidencial ---',
+    'campo-pie': 'Texto de pie (opcional)',
+    'placeholder-pie': 'ej. © 2026 Mi nombre',
+    'boton-aplicar': 'Aplicar y descargar',
+    'boton-aplicar-procesando': 'Generando...',
+    'resultado-enlace': 'Descargar .txt',
+    'error-sin-texto': 'Escribí al menos un texto.',
+    'error-generar': 'No se pudo generar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Add a Header or Footer to a Text File Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add a line of text at the start and/or end of a plain text file (.txt), free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Add a header or footer to a text file',
+    'intro': 'Pick a .txt file and add a line of text at the beginning, at the end, or both.',
+    'campo-encabezado': 'Header text (optional)',
+    'placeholder-encabezado': 'e.g. --- Confidential document ---',
+    'campo-pie': 'Footer text (optional)',
+    'placeholder-pie': 'e.g. © 2026 My name',
+    'boton-aplicar': 'Apply and download',
+    'boton-aplicar-procesando': 'Generating...',
+    'resultado-enlace': 'Download .txt',
+    'error-sin-texto': 'Type at least one text.',
+    'error-generar': 'Couldn’t generate the file'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../texto.html" data-i18n="nav-cat-texto">Herramientas de Texto plano</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Agregar encabezado o pie a un texto</h1>
+  <p data-i18n="intro">Elegí un archivo .txt y agregale una línea de texto al principio, al final, o ambas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".txt" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-encabezado">Texto de encabezado (opcional)</span>
+        <input type="text" id="textoEncabezado" placeholder="ej. --- Documento confidencial ---" data-i18n-attr="placeholder:placeholder-encabezado" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-pie">Texto de pie (opcional)</span>
+        <input type="text" id="textoPie" placeholder="ej. © 2026 Mi nombre" data-i18n-attr="placeholder:placeholder-pie" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-con-pie.txt" data-i18n="resultado-enlace">Descargar .txt</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonAplicar = document.getElementById('botonAplicar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonAplicar.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonAplicar.addEventListener('click', async () => {
+  botonAplicar.disabled = true;
+  botonAplicar.textContent = t('boton-aplicar-procesando');
+  try {
+    const textoEncabezado = document.getElementById('textoEncabezado').value.trim();
+    const textoPie = document.getElementById('textoPie').value.trim();
+    if (!textoEncabezado && !textoPie) throw new Error(t('error-sin-texto'));
+
+    const { texto: contenidoOriginal, finDeLinea } = await leerTextoArchivo(archivoActual);
+    const partes = [];
+    if (textoEncabezado) partes.push(textoEncabezado);
+    partes.push(contenidoOriginal);
+    if (textoPie) partes.push(textoPie);
+
+    const textoFinal = partes.join('\n\n');
+    const blob = new Blob([conFinDeLinea(textoFinal, finDeLinea)], { type: 'text/plain;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    botonAplicar.disabled = false;
+    botonAplicar.textContent = t('boton-aplicar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

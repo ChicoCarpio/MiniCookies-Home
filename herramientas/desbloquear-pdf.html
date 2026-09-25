@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Desbloquear PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Quitá la contraseña de un PDF protegido (si la conocés), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Desbloquear PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Quitá la contraseña de un PDF protegido (si la conocés), gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Desbloquear PDF',
+    'intro': 'Elegí un PDF protegido e ingresá su contraseña para generar una copia sin protección. Necesitás conocer la contraseña — esto no la "rompe" ni la adivina. Si el PDF se abre sin contraseña pero no deja imprimir, copiar o editar, dejá el campo vacío.',
+    'zona-arrastre': '📄 Arrastrá tu PDF protegido acá o hacé clic para elegirlo',
+    'campo-contrasena': 'Contraseña del PDF (vacía si solo tiene restricciones)',
+    'boton-desbloquear': 'Desbloquear PDF',
+    'boton-desbloquear-procesando': 'Desbloqueando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF sin contraseña',
+    'etiqueta-protegido': '🔒 {nombre} (protegido, ingresá la contraseña abajo)',
+    'etiqueta-restricciones': '🔒 {nombre} (se abre sin contraseña pero tiene restricciones: podés dejar el campo vacío)',
+    'etiqueta-sin-proteccion': '{nombre} — este PDF no tiene contraseña ni restricciones',
+    'error-necesita-contrasena': 'Este PDF pide una contraseña para abrirse: ingresala para desbloquearlo.',
+    'error-contrasena-incorrecta': 'La contraseña no es correcta. Revisá mayúsculas, minúsculas y espacios.',
+    'error-desbloquear': 'No se pudo desbloquear el PDF.\n\nDetalle: '
+  },
+  en: {
+    'titulo-pagina': 'Unlock PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Remove the password from a protected PDF (if you know it), free and without uploading your file anywhere.',
+    'h1': 'Unlock PDF',
+    'intro': 'Pick a protected PDF and enter its password to generate an unprotected copy. You need to know the password — this doesn’t "crack" it or guess it. If the PDF opens without a password but won’t let you print, copy or edit, leave the field empty.',
+    'zona-arrastre': '📄 Drag your protected PDF here or click to choose it',
+    'campo-contrasena': 'PDF password (empty if it only has restrictions)',
+    'boton-desbloquear': 'Unlock PDF',
+    'boton-desbloquear-procesando': 'Unlocking...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download PDF without password',
+    'etiqueta-protegido': '🔒 {nombre} (protected, enter the password below)',
+    'etiqueta-restricciones': '🔒 {nombre} (opens without a password but has restrictions: you can leave the field empty)',
+    'etiqueta-sin-proteccion': '{nombre} — this PDF has no password or restrictions',
+    'error-necesita-contrasena': 'This PDF asks for a password to open: enter it to unlock it.',
+    'error-contrasena-incorrecta': 'The password is not correct. Check upper/lower case and spaces.',
+    'error-desbloquear': 'Couldn’t unlock the PDF.\n\nDetail: '
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Desbloquear PDF</h1>
+  <p data-i18n="intro">Elegí un PDF protegido con contraseña e ingresá esa contraseña para generar una copia sin protección. Necesitás conocer la contraseña — esto no la "rompe" ni la adivina.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF protegido acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf,.pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo" style="flex:1; min-width:220px;">
+        <span data-i18n="campo-contrasena">Contraseña del PDF</span>
+        <input type="password" id="contrasena" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonDesbloquear" disabled data-i18n="boton-desbloquear">Desbloquear PDF</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-desbloqueado.pdf" data-i18n="resultado-enlace">Descargar PDF sin contraseña</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.11.0/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonDesbloquear = document.getElementById('botonDesbloquear');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  // El PDF está cifrado: pdf.js no puede generar miniatura sin la contraseña,
+  // así que mostramos un marcador de "protegido" en vez de intentar renderizar.
+  try {
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    await pdfjsLib.getDocument({ data: await archivo.arrayBuffer(), isEvalSupported: false }).promise;
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    // Se abre sin contraseña: o no está protegido, o solo tiene restricciones
+    // (imprimir, copiar, editar), que es lo que pdf-lib detecta como cifrado.
+    let etiqueta = `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})`;
+    try {
+      await PDFLib.PDFDocument.load(await archivo.arrayBuffer());
+      etiqueta = t('etiqueta-sin-proteccion').replace('{nombre}', etiqueta);
+    } catch (errorCifrado) {
+      etiqueta = t('etiqueta-restricciones').replace('{nombre}', etiqueta);
+    }
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: t('etiqueta-protegido').replace('{nombre}', archivo.name) }));
+  }
+  botonDesbloquear.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDesbloquear.addEventListener('click', async () => {
+  const contrasena = document.getElementById('contrasena').value;
+
+  botonDesbloquear.disabled = true;
+  botonDesbloquear.textContent = t('boton-desbloquear-procesando');
+  try {
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    // Contraseña vacía = PDF con solo restricciones (sin contraseña de
+    // apertura). Si se escribió una que no es la de apertura, se prueba
+    // también vacía: puede que el PDF solo tenga restricciones.
+    let pdf;
+    try {
+      pdf = await PDFDocument.load(bytes, { password: contrasena });
+    } catch (errorPrimero) {
+      if (!contrasena || !/incorrect/i.test(errorPrimero.message)) throw errorPrimero;
+      try {
+        pdf = await PDFDocument.load(bytes, { password: '' });
+      } catch (errorVacia) {
+        throw errorPrimero;
+      }
+    }
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    if (/needs password/i.test(error.message)) alert(t('error-necesita-contrasena'));
+    else if (/password incorrect/i.test(error.message)) alert(t('error-contrasena-incorrecta'));
+    else alert(t('error-desbloquear') + error.message);
+  } finally {
+    botonDesbloquear.disabled = false;
+    botonDesbloquear.textContent = t('boton-desbloquear');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Extraer páginas de PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraé un rango o selección de páginas de un PDF a un archivo nuevo, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  #gridMiniaturas.contenedor-miniaturas { grid-template-columns: repeat(auto-fill, minmax(120px, 130px)); gap: 10px; }
+  .miniatura-pagina.seleccionable { cursor: pointer; padding: 6px; }
+  .miniatura-pagina.seleccionada { border-color: var(--azul); border-width: 3px; }
+  .miniatura-pagina.seleccionada .numero-pagina { color: var(--azul); font-weight: 600; }
+  .miniatura-pagina .boton-zoom {
+    position: absolute; top: 4px; right: 4px;
+    background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: 50%;
+    width: 20px; height: 20px; font-size: 0.7rem; line-height: 1; cursor: pointer;
+  }
+  .modal-vista-previa {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+  }
+  .modal-vista-previa.visible { display: flex; }
+  .modal-vista-previa .modal-contenido {
+    background: var(--superficie); border-radius: 8px; padding: 16px;
+    max-width: 90vw; max-height: 90vh; overflow: auto; position: relative;
+  }
+  .modal-vista-previa canvas { display: block; max-width: 80vw; max-height: 80vh; }
+  .modal-vista-previa .modal-cerrar {
+    position: absolute; top: 8px; right: 8px; background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde); border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
+  }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Extraer páginas de PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extraé un rango o selección de páginas de un PDF a un archivo nuevo, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Extraer páginas',
+    'intro-antes': 'Elegí un PDF y elegí qué páginas sacar a un archivo nuevo — hacé clic en las miniaturas para seleccionarlas, o escribí un rango a mano (ej. ',
+    'intro-despues': '); se sincronizan solas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-paginas': 'Páginas a extraer',
+    'placeholder-rango': 'ej. 1-3,5,8-9',
+    'boton-extraer': 'Extraer páginas',
+    'boton-extraer-procesando': 'Extrayendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF extraído',
+    'modal-cerrar': 'Cerrar',
+    'zoom-title': 'Ver esta página más grande',
+    'prefijo-pag': 'Pág. ',
+    'error-vacio': 'Indicá al menos una página o rango.',
+    'error-formato': 'No entendí "{trozo}". Usá números y rangos, ej. 1-3,5.',
+    'error-rango': 'Página fuera de rango en "{trozo}" (el PDF tiene {max} páginas).',
+    'error-extraer': 'No se pudo extraer las páginas'
+  },
+  en: {
+    'titulo-pagina': 'Extract PDF Pages Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Extract a range or selection of pages from a PDF into a new file, free and without uploading your file anywhere.',
+    'h1': 'Extract pages',
+    'intro-antes': 'Pick a PDF and choose which pages to pull into a new file — click the thumbnails to select them, or type a range by hand (e.g. ',
+    'intro-despues': '); they stay in sync automatically.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-paginas': 'Pages to extract',
+    'placeholder-rango': 'e.g. 1-3,5,8-9',
+    'boton-extraer': 'Extract pages',
+    'boton-extraer-procesando': 'Extracting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download extracted PDF',
+    'modal-cerrar': 'Close',
+    'zoom-title': 'View this page larger',
+    'prefijo-pag': 'Page ',
+    'error-vacio': 'Enter at least one page or range.',
+    'error-formato': 'Couldn’t understand "{trozo}". Use numbers and ranges, e.g. 1-3,5.',
+    'error-rango': 'Page out of range in "{trozo}" (the PDF has {max} pages).',
+    'error-extraer': 'Couldn’t extract the pages'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Extraer páginas</h1>
+  <p><span data-i18n="intro-antes">Elegí un PDF y elegí qué páginas sacar a un archivo nuevo — hacé clic en las miniaturas para seleccionarlas, o escribí un rango a mano (ej. </span><code>1-3,5,8-9</code><span data-i18n="intro-despues">); se sincronizan solas.</span></p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
+
+    <div class="contenedor-miniaturas vista-grid" id="gridMiniaturas"></div>
+
+    <div class="controles">
+      <label class="campo" style="flex:1; min-width:220px;">
+        <span data-i18n="campo-paginas">Páginas a extraer</span>
+        <input type="text" id="rangoPaginas" placeholder="ej. 1-3,5,8-9" data-i18n-attr="placeholder:placeholder-rango" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer páginas</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="paginas-extraidas.pdf" data-i18n="resultado-enlace">Descargar PDF extraído</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<div class="modal-vista-previa" id="modalVistaPrevia">
+  <div class="modal-contenido">
+    <button type="button" class="modal-cerrar" id="cerrarModal" title="Cerrar" data-i18n-attr="title:modal-cerrar">✕</button>
+    <canvas id="canvasModal"></canvas>
+  </div>
+</div>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const gridMiniaturas = document.getElementById('gridMiniaturas');
+const rangoPaginas = document.getElementById('rangoPaginas');
+const botonExtraer = document.getElementById('botonExtraer');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const modalVistaPrevia = document.getElementById('modalVistaPrevia');
+const canvasModal = document.getElementById('canvasModal');
+const cerrarModal = document.getElementById('cerrarModal');
+
+let archivoActual = null;
+let totalPaginas = 0;
+let pdfDocumentActual = null;
+const paginasSeleccionadas = new Set(); // índices 0-based
+
+async function abrirVistaAmpliada(numeroPagina) {
+  if (!pdfDocumentActual) return;
+  const pagina = await pdfDocumentActual.getPage(numeroPagina);
+  const base = pagina.getViewport({ scale: 1 });
+  const escala = Math.min((window.innerWidth * 0.8) / base.width, (window.innerHeight * 0.8) / base.height, 3);
+  const viewport = pagina.getViewport({ scale: escala });
+  canvasModal.width = viewport.width;
+  canvasModal.height = viewport.height;
+  await pagina.render({ canvasContext: canvasModal.getContext('2d'), viewport }).promise;
+  modalVistaPrevia.classList.add('visible');
+}
+
+cerrarModal.addEventListener('click', () => modalVistaPrevia.classList.remove('visible'));
+modalVistaPrevia.addEventListener('click', (e) => { if (e.target === modalVistaPrevia) modalVistaPrevia.classList.remove('visible'); });
+
+// Convierte un conjunto de índices 0-based en el texto compacto "1-3,5,8-9".
+function compactarRango(indices) {
+  const paginas = [...indices].sort((a, b) => a - b).map(i => i + 1);
+  if (paginas.length === 0) return '';
+  const partes = [];
+  let inicio = paginas[0];
+  let anterior = paginas[0];
+  for (let i = 1; i < paginas.length; i++) {
+    if (paginas[i] === anterior + 1) { anterior = paginas[i]; continue; }
+    partes.push(inicio === anterior ? `${inicio}` : `${inicio}-${anterior}`);
+    inicio = anterior = paginas[i];
+  }
+  partes.push(inicio === anterior ? `${inicio}` : `${inicio}-${anterior}`);
+  return partes.join(',');
+}
+
+function actualizarClasesSeleccion() {
+  gridMiniaturas.querySelectorAll('.miniatura-pagina').forEach((tarjeta) => {
+    const indice = parseInt(tarjeta.dataset.indiceOrden, 10);
+    tarjeta.classList.toggle('seleccionada', paginasSeleccionadas.has(indice));
+  });
+}
+
+function alternarSeleccion(indice) {
+  if (paginasSeleccionadas.has(indice)) paginasSeleccionadas.delete(indice);
+  else paginasSeleccionadas.add(indice);
+  rangoPaginas.value = compactarRango(paginasSeleccionadas);
+  actualizarClasesSeleccion();
+  botonExtraer.disabled = paginasSeleccionadas.size === 0;
+}
+
+// Escribir a mano en el campo de texto también actualiza qué miniaturas se ven marcadas.
+rangoPaginas.addEventListener('input', () => {
+  paginasSeleccionadas.clear();
+  try {
+    if (totalPaginas > 0) {
+      analizarRangoPaginas(rangoPaginas.value, totalPaginas).forEach(i => paginasSeleccionadas.add(i));
+    }
+  } catch (error) { /* mientras el usuario todavía está escribiendo, un rango incompleto es normal */ }
+  actualizarClasesSeleccion();
+  botonExtraer.disabled = !archivoActual || rangoPaginas.value.trim() === '';
+});
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  paginasSeleccionadas.clear();
+  rangoPaginas.value = '';
+  gridMiniaturas.innerHTML = '';
+  resultado.classList.remove('visible');
+  botonExtraer.disabled = true;
+  cargando.style.display = 'block';
+
+  try {
+    const bytes = await archivo.arrayBuffer();
+    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+    pdfDocumentActual = pdf;
+    totalPaginas = pdf.numPages;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pagina = await pdf.getPage(i);
+      const viewport = pagina.getViewport({ scale: 0.22 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+      const indice = i - 1;
+      const tarjeta = crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `${t('prefijo-pag')}${i}`, indiceOrden: indice });
+      tarjeta.classList.add('seleccionable');
+      tarjeta.addEventListener('click', () => alternarSeleccion(indice));
+
+      const botonZoom = document.createElement('button');
+      botonZoom.type = 'button';
+      botonZoom.className = 'boton-zoom';
+      botonZoom.textContent = '🔍';
+      botonZoom.title = t('zoom-title');
+      botonZoom.addEventListener('click', (e) => { e.stopPropagation(); abrirVistaAmpliada(i); });
+      tarjeta.appendChild(botonZoom);
+
+      gridMiniaturas.appendChild(tarjeta);
+    }
+  } catch (error) {
+    gridMiniaturas.innerHTML = '';
+    gridMiniaturas.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+  }
+  cargando.style.display = 'none';
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+function analizarRangoPaginas(texto, maxPagina) {
+  const indices = [];
+  const trozos = texto.split(',').map(t => t.trim()).filter(t => t !== '');
+  if (trozos.length === 0) throw new Error(t('error-vacio'));
+
+  for (const trozo of trozos) {
+    const coincidencia = trozo.match(/^(\d+)(?:-(\d+))?$/);
+    if (!coincidencia) throw new Error(t('error-formato').replace('{trozo}', trozo));
+    const inicio = parseInt(coincidencia[1], 10);
+    const fin = coincidencia[2] ? parseInt(coincidencia[2], 10) : inicio;
+    if (inicio < 1 || fin < 1 || inicio > maxPagina || fin > maxPagina) {
+      throw new Error(t('error-rango').replace('{trozo}', trozo).replace('{max}', maxPagina));
+    }
+    if (inicio <= fin) {
+      for (let p = inicio; p <= fin; p++) indices.push(p - 1);
+    } else {
+      for (let p = inicio; p >= fin; p--) indices.push(p - 1);
+    }
+  }
+  return indices;
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  botonExtraer.textContent = t('boton-extraer-procesando');
+  try {
+    const indices = analizarRangoPaginas(rangoPaginas.value, totalPaginas);
+
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdfOrigen = await PDFDocument.load(bytes);
+    const pdfNuevo = await PDFDocument.create();
+    const paginas = await pdfNuevo.copyPages(pdfOrigen, indices);
+    paginas.forEach((pagina) => pdfNuevo.addPage(pagina));
+
+    const bytesFinales = await pdfNuevo.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-extraer') + ': ' + detalleError(error));
+  } finally {
+    botonExtraer.disabled = false;
+    botonExtraer.textContent = t('boton-extraer');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

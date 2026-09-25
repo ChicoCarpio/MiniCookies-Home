@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Reordenar secciones de Markdown gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Reordená o eliminá secciones de un archivo Markdown (.md), gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reordenar secciones de Markdown gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reordená o eliminá secciones de un archivo Markdown (.md), gratis y sin subir tu archivo a ningún servidor.',
+    'zona-arrastre': '📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo',
+    'resultado-listo': '✅ Listo. ',
+    'h1': 'Administrar / reordenar secciones de Markdown',
+    'intro-antes': 'Elegí un archivo .md. Se separa en secciones por cada encabezado de primer nivel (',
+    'intro-despues': ') — arrastralas para reordenarlas, o quitá las que no quieras, y descargá el .md resultante.',
+    'cargando': 'Leyendo el archivo...',
+    'boton-guardar': 'Descargar reordenado',
+    'resultado-enlace': 'Descargar .md',
+    'seccion-intro': 'Introducción (antes del primer encabezado)',
+    'error-leer-archivo': 'No se pudo leer el archivo',
+    'error-sin-secciones': 'No queda ninguna sección.',
+    'error-generar': 'No se pudo generar el archivo'
+  },
+  en: {
+    'titulo-pagina': 'Reorder Markdown Sections Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Reorder or remove the sections of a Markdown file (.md), free and without uploading your file anywhere.',
+    'zona-arrastre': '📄 Drag your .md file here or click to choose it',
+    'resultado-listo': '✅ Done. ',
+    'h1': 'Manage / reorder Markdown sections',
+    'intro-antes': 'Pick a .md file. It’s split into sections at each top-level heading (',
+    'intro-despues': ') — drag them to reorder, remove the ones you don’t want, and download the resulting .md.',
+    'cargando': 'Reading the file...',
+    'boton-guardar': 'Download reordered',
+    'resultado-enlace': 'Download .md',
+    'seccion-intro': 'Introduction (before the first heading)',
+    'error-leer-archivo': 'Couldn’t read the file',
+    'error-sin-secciones': 'There are no sections left.',
+    'error-generar': 'Couldn’t generate the file'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../markdown.html" data-i18n="nav-cat-markdown">Herramientas de Markdown</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Administrar / reordenar secciones de Markdown</h1>
+  <p><span data-i18n="intro-antes">Elegí un archivo .md. Se separa en secciones por cada encabezado de primer nivel (</span><code>#</code><span data-i18n="intro-despues">) — arrastralas para reordenarlas, o quitá las que no quieras, y descargá el .md resultante.</span></p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".md,.markdown" hidden>
+    </div>
+
+    <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo el archivo...</p>
+    <ul class="lista-archivos" id="listaSecciones"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenado</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reordenado.md" data-i18n="resultado-enlace">Descargar .md</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const cargando = document.getElementById('cargando');
+const listaSecciones = document.getElementById('listaSecciones');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let secciones = []; // [{ id, titulo, texto }]
+let finDeLineaArchivo = '\n';
+let siguienteId = 0;
+
+function dividirMarkdownEnSecciones(texto) {
+  const lineas = texto.split('\n');
+  const bloques = [];
+  let actual = null;
+  // Dentro de un bloque de código (``` o ~~~) un "#" no es un título (es un
+  // comentario de Python/Bash, por ejemplo): antes cortaba el documento ahí.
+  let valla = null;
+  lineas.forEach((linea) => {
+    const marca = linea.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (marca) {
+      if (!valla) valla = marca[1];
+      else if (marca[1][0] === valla[0] && marca[1].length >= valla.length) valla = null;
+    }
+    if (!valla && !marca && /^#\s+/.test(linea)) {
+      actual = { titulo: linea.replace(/^#\s+/, '').trim() || t('epub-sin-titulo'), lineas: [linea] };
+      bloques.push(actual);
+    } else if (actual) {
+      actual.lineas.push(linea);
+    } else {
+      actual = { titulo: t('seccion-intro'), lineas: [linea] };
+      bloques.push(actual);
+    }
+  });
+  return bloques.map(b => ({ titulo: b.titulo, texto: b.lineas.join('\n') }));
+}
+
+function renderizarLista() {
+  listaSecciones.innerHTML = '';
+  secciones.forEach((seccion) => {
+    const item = document.createElement('li');
+    item.draggable = true;
+    item.dataset.id = seccion.id;
+    item.innerHTML = `<span>${escaparHtml(seccion.titulo)}</span>`;
+    const quitar = document.createElement('button');
+    quitar.className = 'quitar';
+    quitar.textContent = '✕';
+    quitar.onclick = () => { secciones = secciones.filter(s => s.id !== seccion.id); renderizarLista(); };
+    item.appendChild(quitar);
+    listaSecciones.appendChild(item);
+  });
+  botonGuardar.disabled = secciones.length === 0;
+  resultado.classList.remove('visible');
+}
+
+let arrastrando = null;
+listaSecciones.addEventListener('dragstart', (e) => {
+  if (e.target.tagName === 'LI') { arrastrando = e.target; e.target.classList.add('arrastrando'); }
+});
+listaSecciones.addEventListener('dragend', (e) => {
+  if (e.target.tagName === 'LI') e.target.classList.remove('arrastrando');
+});
+listaSecciones.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const objetivo = e.target.closest('li');
+  if (!objetivo || !arrastrando || objetivo === arrastrando) return;
+  const rect = objetivo.getBoundingClientRect();
+  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
+  objetivo.parentNode.insertBefore(arrastrando, despuesDelMedio ? objetivo.nextSibling : objetivo);
+});
+function sincronizarOrdenLista() {
+  const idsEnOrden = [...listaSecciones.children].map(li => parseInt(li.dataset.id, 10));
+  secciones.sort((a, b) => idsEnOrden.indexOf(a.id) - idsEnOrden.indexOf(b.id));
+}
+listaSecciones.addEventListener('drop', sincronizarOrdenLista);
+listaSecciones.addEventListener('dragend', sincronizarOrdenLista);
+habilitarReordenTactil(listaSecciones, 'li', sincronizarOrdenLista);
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => /\.(md|markdown)$/i.test(f.name));
+  if (archivo) cargarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarArchivo(archivo) {
+  cargando.style.display = 'block';
+  try {
+    const { texto, finDeLinea } = await leerTextoArchivo(archivo);
+    finDeLineaArchivo = finDeLinea;
+    const bloques = dividirMarkdownEnSecciones(texto);
+    secciones = bloques.map(b => ({ id: siguienteId++, titulo: b.titulo, texto: b.texto }));
+    renderizarLista();
+  } catch (error) {
+    alert(t('error-leer-archivo') + ': ' + error.message);
+  } finally {
+    cargando.style.display = 'none';
+  }
+}
+
+botonGuardar.addEventListener('click', () => {
+  try {
+    if (secciones.length === 0) throw new Error(t('error-sin-secciones'));
+    const textoFinal = secciones.map(s => s.texto).join('\n');
+    const blob = new Blob([conFinDeLinea(textoFinal, finDeLineaArchivo)], { type: 'text/markdown;charset=utf-8' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

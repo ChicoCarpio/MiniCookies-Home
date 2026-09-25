@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Dividir Word gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá un documento Word (.docx) en varios archivos, uno por cada Título 1, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir Word gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Separá un documento Word (.docx) en varios archivos, uno por cada Título 1, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Dividir Word',
+    'intro': 'Elegí un documento .docx. Se separa en un .docx por cada Título 1, empaquetados en un .zip.',
+    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'boton-dividir': 'Dividir',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar .zip con los documentos',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-texto': 'Si el documento no tiene ningún Título 1, no hay nada por lo que dividirlo — se avisa en vez de generar un .zip con un solo archivo idéntico al original.',
+    'titulo-defecto': 'Documento',
+    'error-sin-titulos': 'El documento no tiene más de un Título 1 — no hay nada que dividir.',
+    'progreso-generando': 'Generando documento {actual} de {total}...',
+    'nombre-seccion-defecto': 'seccion',
+    'progreso-zip': 'Generando .zip...',
+    'error-dividir': 'No se pudo dividir el documento'
+  },
+  en: {
+    'titulo-pagina': 'Split a Word Document Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split a Word document (.docx) into several files, one per Heading 1, free and without uploading your file anywhere.',
+    'h1': 'Split Word',
+    'intro': 'Pick a .docx document. It’s split into one .docx per Heading 1, packaged in a .zip.',
+    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'boton-dividir': 'Split',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download .zip with the documents',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-texto': 'If the document has no Heading 1 at all, there’s nothing to split it by — it reports that instead of generating a .zip with a single file identical to the original.',
+    'titulo-defecto': 'Document',
+    'error-sin-titulos': 'The document has no more than one Heading 1 — there’s nothing to split.',
+    'progreso-generando': 'Generating document {actual} of {total}...',
+    'nombre-seccion-defecto': 'section',
+    'progreso-zip': 'Generating .zip...',
+    'error-dividir': 'Couldn’t split the document'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Dividir Word</h1>
+  <p data-i18n="intro">Elegí un documento .docx. Se separa en un .docx por cada Título 1, empaquetados en un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="secciones-word.zip" data-i18n="resultado-enlace">Descargar .zip con los documentos</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">
+      Si el documento no tiene ningún Título 1, no hay nada por lo que dividirlo — se avisa en vez de generar
+      un .zip con un solo archivo idéntico al original.
+    </p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/epub.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonDividir = document.getElementById('botonDividir');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonDividir.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = t('boton-dividir-procesando');
+  progreso.style.display = 'block';
+  try {
+    const arrayBuffer = await archivoActual.arrayBuffer();
+    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, t('titulo-defecto'));
+
+    if (capitulos.length < 2) {
+      throw new Error(t('error-sin-titulos'));
+    }
+
+    const zip = new JSZip();
+    const cantidadDigitos = String(capitulos.length).length;
+
+    for (let i = 0; i < capitulos.length; i++) {
+      progreso.textContent = t('progreso-generando').replace('{actual}', i + 1).replace('{total}', capitulos.length);
+      const contenedor = document.createElement('div');
+      contenedor.innerHTML = capitulos[i].html;
+      const parrafos = await contenidoAParrafos(contenedor);
+
+      const documento = new docx.Document({
+        numbering: NUMERACION_DOCX_CONFIG,
+        sections: [{ children: parrafos }],
+      });
+      const blob = await docx.Packer.toBlob(documento);
+
+      const numero = String(i + 1).padStart(cantidadDigitos, '0');
+      const nombreLimpio = capitulos[i].titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || t('nombre-seccion-defecto');
+      zip.file(`${numero}-${nombreLimpio}.docx`, blob);
+    }
+
+    progreso.textContent = t('progreso-zip');
+    // Los archivos de adentro ya van comprimidos: se guardan sin recomprimir.
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-dividir') + ': ' + error.message);
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = t('boton-dividir');
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

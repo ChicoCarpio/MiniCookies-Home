@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Editar metadatos de un PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Editá el título, autor, asunto y palabras clave de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Editar metadatos de un PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Editá el título, autor, asunto y palabras clave de un PDF, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Editar metadatos de un PDF',
+    'intro': 'Elegí un PDF y editá su título, autor, asunto y palabras clave (los datos que se ven en "Propiedades del documento", no el contenido visible).',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-titulo': 'Título',
+    'campo-autor': 'Autor',
+    'campo-asunto': 'Asunto',
+    'campo-palabras-clave': 'Palabras clave (separadas por coma)',
+    'boton-guardar': 'Guardar y descargar',
+    'boton-guardar-procesando': 'Guardando...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF',
+    'error-leer': 'No se pudo leer el PDF',
+    'error-guardar': 'No se pudo guardar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Edit PDF Metadata Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Edit the title, author, subject and keywords of a PDF, free and without uploading your file anywhere.',
+    'h1': 'Edit PDF metadata',
+    'intro': 'Pick a PDF and edit its title, author, subject and keywords (the data shown in "Document properties", not the visible content).',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-titulo': 'Title',
+    'campo-autor': 'Author',
+    'campo-asunto': 'Subject',
+    'campo-palabras-clave': 'Keywords (comma-separated)',
+    'boton-guardar': 'Save and download',
+    'boton-guardar-procesando': 'Saving...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download PDF',
+    'error-leer': 'Couldn’t read the PDF',
+    'error-guardar': 'Couldn’t save the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Editar metadatos de un PDF</h1>
+  <p data-i18n="intro">Elegí un PDF y editá su título, autor, asunto y palabras clave (los datos que se ven en "Propiedades del documento", no el contenido visible).</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div class="controles" id="controlesMetadatos" style="display:none;">
+      <label class="campo">
+        <span data-i18n="campo-titulo">Título</span>
+        <input type="text" id="campoTitulo" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-autor">Autor</span>
+        <input type="text" id="campoAutor" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-asunto">Asunto</span>
+        <input type="text" id="campoAsunto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-palabras-clave">Palabras clave (separadas por coma)</span>
+        <input type="text" id="campoPalabrasClave" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonGuardar" data-i18n="boton-guardar">Guardar y descargar</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-con-metadatos.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const controlesMetadatos = document.getElementById('controlesMetadatos');
+const botonGuardar = document.getElementById('botonGuardar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let pdfActual = null;
+let nombreArchivoActual = 'documento';
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) cargarPdf(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+async function cargarPdf(archivo) {
+  try {
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivo.arrayBuffer();
+    // updateMetadata: false — si no, pdf-lib reemplaza "Creador" y
+    // "Productor" (con qué programa se hizo el PDF) por "pdf-lib".
+    pdfActual = await PDFDocument.load(bytes, { updateMetadata: false });
+    nombreArchivoActual = archivo.name.replace(/\.pdf$/i, '');
+
+    listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+    document.getElementById('campoTitulo').value = pdfActual.getTitle() || '';
+    document.getElementById('campoAutor').value = pdfActual.getAuthor() || '';
+    document.getElementById('campoAsunto').value = pdfActual.getSubject() || '';
+    document.getElementById('campoPalabrasClave').value = (pdfActual.getKeywords() || '');
+    controlesMetadatos.style.display = 'flex';
+    resultado.classList.remove('visible');
+  } catch (error) {
+    alert(t('error-leer') + ': ' + detalleError(error));
+  }
+}
+
+botonGuardar.addEventListener('click', async () => {
+  botonGuardar.disabled = true;
+  botonGuardar.textContent = t('boton-guardar-procesando');
+  try {
+    pdfActual.setTitle(document.getElementById('campoTitulo').value);
+    pdfActual.setAuthor(document.getElementById('campoAutor').value);
+    pdfActual.setSubject(document.getElementById('campoAsunto').value);
+    pdfActual.setKeywords(document.getElementById('campoPalabrasClave').value.split(',').map(p => p.trim()).filter(Boolean));
+
+    pdfActual.setModificationDate(new Date());
+    const bytesFinales = await pdfActual.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `${nombreArchivoActual}.pdf`;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-guardar') + ': ' + detalleError(error));
+  } finally {
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = t('boton-guardar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

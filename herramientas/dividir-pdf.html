@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Dividir PDF gratis y seguro — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Dividí un PDF en archivos individuales por página, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Dividir PDF gratis y seguro — Herramientas Ofimáticas',
+    'meta-descripcion': 'Dividí un PDF en archivos individuales por página, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Dividir PDF',
+    'intro': 'Elegí un PDF y descargá cada página como un archivo individual, dentro de un .zip.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'boton-dividir': 'Dividir PDF',
+    'boton-dividir-procesando': 'Dividiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar .zip con las páginas',
+    'error-dividir': 'No se pudo dividir el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Split PDF Free and Securely — Herramientas Ofimáticas',
+    'meta-descripcion': 'Split a PDF into individual files by page, free and without uploading your file anywhere.',
+    'h1': 'Split PDF',
+    'intro': 'Pick a PDF and download each page as an individual file, inside a .zip.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'boton-dividir': 'Split PDF',
+    'boton-dividir-procesando': 'Splitting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download .zip with the pages',
+    'error-dividir': 'Couldn’t split the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Dividir PDF</h1>
+  <p data-i18n="intro">Elegí un PDF y descargá cada página como un archivo individual, dentro de un .zip.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <button class="boton" id="botonDividir" disabled data-i18n="boton-dividir">Dividir PDF</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="paginas-divididas.zip" data-i18n="resultado-enlace">Descargar .zip con las páginas</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonDividir = document.getElementById('botonDividir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  if (archivo) {
+    try {
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+    } catch (error) {
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+    }
+  }
+  botonDividir.disabled = !archivo;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+botonDividir.addEventListener('click', async () => {
+  botonDividir.disabled = true;
+  botonDividir.textContent = t('boton-dividir-procesando');
+  try {
+    const { PDFDocument } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdfOrigen = await PDFDocument.load(bytes);
+    const totalPaginas = pdfOrigen.getPageCount();
+    const zip = new JSZip();
+    const cantidadDigitos = String(totalPaginas).length;
+
+    for (let i = 0; i < totalPaginas; i++) {
+      const pdfPagina = await PDFDocument.create();
+      const [pagina] = await pdfPagina.copyPages(pdfOrigen, [i]);
+      pdfPagina.addPage(pagina);
+      const bytesPagina = await pdfPagina.save();
+      const numero = String(i + 1).padStart(cantidadDigitos, '0');
+      zip.file(`pagina-${numero}.pdf`, bytesPagina);
+    }
+
+    const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    enlaceDescarga.href = URL.createObjectURL(blobZip);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-dividir') + ': ' + detalleError(error));
+  } finally {
+    botonDividir.disabled = false;
+    botonDividir.textContent = t('boton-dividir');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

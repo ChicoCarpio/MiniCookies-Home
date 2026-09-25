@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Marca de agua para PDF gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<style>
+  .controles { flex-direction: column; align-items: stretch; }
+  .controles .campo { flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; }
+  .controles .campo > span:first-child { min-width: 190px; }
+  .controles .campo input[type="range"] { width: 240px; max-width: 50vw; }
+  .controles .boton { align-self: flex-start; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Marca de agua para PDF gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Marca de agua para PDF',
+    'intro': 'Agregá un texto (ej. "CONFIDENCIAL", "BORRADOR") como marca de agua diagonal en todas las páginas.',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-texto': 'Texto de la marca de agua',
+    'campo-tamano': 'Tamaño de letra: ',
+    'campo-opacidad': 'Opacidad: ',
+    'simbolo-porcentaje': '%',
+    'campo-repeticiones': 'Repetir el mensaje: ',
+    'boton-aplicar': 'Aplicar marca de agua',
+    'boton-aplicar-procesando': 'Aplicando...',
+    'texto-defecto': 'MARCA DE AGUA',
+    'asi-quedaria': ' — así quedaría',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar PDF con marca de agua',
+    'error-aplicar': 'No se pudo aplicar la marca de agua'
+  },
+  en: {
+    'titulo-pagina': 'Free PDF Watermark — Herramientas Ofimáticas',
+    'meta-descripcion': 'Add a text watermark to every page of a PDF, free and without uploading your file anywhere.',
+    'h1': 'PDF watermark',
+    'intro': 'Add text (e.g. "CONFIDENTIAL", "DRAFT") as a diagonal watermark on every page.',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-texto': 'Watermark text',
+    'campo-tamano': 'Font size: ',
+    'campo-opacidad': 'Opacity: ',
+    'simbolo-porcentaje': '%',
+    'campo-repeticiones': 'Repeat the message: ',
+    'boton-aplicar': 'Apply watermark',
+    'boton-aplicar-procesando': 'Applying...',
+    'texto-defecto': 'WATERMARK',
+    'asi-quedaria': ' — preview',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download watermarked PDF',
+    'error-aplicar': 'Couldn’t apply the watermark'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Marca de agua para PDF</h1>
+  <p data-i18n="intro">Agregá un texto (ej. "CONFIDENCIAL", "BORRADOR") como marca de agua diagonal en todas las páginas.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-texto">Texto de la marca de agua</span>
+        <input type="text" id="textoMarca" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
+      </label>
+      <label class="campo">
+        <span><span data-i18n="campo-tamano">Tamaño de letra: </span><span id="etiquetaTamano">60</span></span>
+        <input type="range" id="tamanoLetra" min="20" max="150" value="60">
+      </label>
+      <label class="campo">
+        <span><span data-i18n="campo-opacidad">Opacidad: </span><span id="etiquetaOpacidad">15</span><span data-i18n="simbolo-porcentaje">%</span></span>
+        <input type="range" id="opacidad" min="5" max="50" value="15">
+      </label>
+      <label class="campo">
+        <span><span data-i18n="campo-repeticiones">Repetir el mensaje: </span><span id="etiquetaRepeticiones">1</span></span>
+        <input type="range" id="repeticiones" min="1" max="20" value="1">
+      </label>
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar marca de agua</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-marcado.pdf" data-i18n="resultado-enlace">Descargar PDF con marca de agua</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonAplicar = document.getElementById('botonAplicar');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+const ESCALA_MINIATURA = 0.28;
+const elTexto = document.getElementById('textoMarca');
+const elTamano = document.getElementById('tamanoLetra');
+const etiquetaTamano = document.getElementById('etiquetaTamano');
+const elOpacidad = document.getElementById('opacidad');
+const etiquetaOpacidad = document.getElementById('etiquetaOpacidad');
+const elRepeticiones = document.getElementById('repeticiones');
+const etiquetaRepeticiones = document.getElementById('etiquetaRepeticiones');
+
+let archivoActual = null;
+let canvasBase = null; // miniatura de la página 1 sin marca de agua, para redibujar rápido
+let totalPaginasActual = 0;
+
+elTamano.addEventListener('input', () => etiquetaTamano.textContent = elTamano.value);
+elOpacidad.addEventListener('input', () => etiquetaOpacidad.textContent = elOpacidad.value);
+elRepeticiones.addEventListener('input', () => etiquetaRepeticiones.textContent = elRepeticiones.value);
+
+// Reparte "cantidad" copias en una cuadrícula lo más cuadrada posible
+// (ej. 4 -> 2x2, 6 -> 3x2, 1 -> 1x1) para distribuirlas parejo por la página.
+function calcularFilasColumnas(cantidad) {
+  const columnas = Math.ceil(Math.sqrt(cantidad));
+  const filas = Math.ceil(cantidad / columnas);
+  return { filas, columnas };
+}
+
+// Mismo criterio que calcularTamanoAjustado (para el PDF real) pero usando el
+// contexto 2D del canvas de la miniatura, para que la vista previa coincida.
+function calcularTamanoAjustadoCanvas(contexto, texto, anchoDisponible, altoDisponible, tamanoMaximo) {
+  const margen = 0.9;
+  let tamano = tamanoMaximo;
+  while (tamano > 3) {
+    contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+    const anchoTexto = contexto.measureText(texto).width;
+    const anchoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    const altoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    if (anchoRotado <= anchoDisponible * margen && altoRotado <= altoDisponible * margen) return tamano;
+    tamano -= 1;
+  }
+  return tamano;
+}
+
+function actualizarVistaPreviaMarca() {
+  if (!canvasBase) return;
+  const texto = elTexto.value || t('texto-defecto');
+  const opacidad = parseInt(elOpacidad.value, 10) / 100;
+  const tamanoMaximoPx = parseInt(elTamano.value, 10) * ESCALA_MINIATURA;
+  const cantidad = parseInt(elRepeticiones.value, 10);
+  const { filas, columnas } = calcularFilasColumnas(cantidad);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasBase.width;
+  canvas.height = canvasBase.height;
+  const contexto = canvas.getContext('2d');
+  contexto.drawImage(canvasBase, 0, 0);
+
+  const anchoCelda = canvas.width / columnas;
+  const altoCelda = canvas.height / filas;
+  const tamano = calcularTamanoAjustadoCanvas(contexto, texto, anchoCelda, altoCelda, tamanoMaximoPx);
+  contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+  contexto.save();
+  contexto.globalAlpha = opacidad;
+  contexto.fillStyle = 'rgb(128,128,128)';
+  let contador = 0;
+  for (let f = 0; f < filas && contador < cantidad; f++) {
+    for (let c = 0; c < columnas && contador < cantidad; c++) {
+      const centroX = anchoCelda * c + anchoCelda / 2;
+      const centroY = altoCelda * f + altoCelda / 2;
+      contexto.save();
+      contexto.translate(centroX, centroY);
+      contexto.rotate(-45 * Math.PI / 180);
+      contexto.textAlign = 'center';
+      contexto.textBaseline = 'middle';
+      contexto.fillText(texto, 0, 0);
+      contexto.restore();
+      contador++;
+    }
+  }
+  contexto.restore();
+
+  listaArchivo.innerHTML = '';
+  listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: canvas, etiqueta: `${archivoActual.name} (${totalPaginasActual} ${t('sufijo-pag')})${t('asi-quedaria')}` }));
+}
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  canvasBase = null;
+  listaArchivo.innerHTML = '';
+  if (archivo) {
+    try {
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, ESCALA_MINIATURA);
+      canvasBase = elemento;
+      totalPaginasActual = totalPaginas;
+      actualizarVistaPreviaMarca();
+    } catch (error) {
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+    }
+  }
+  botonAplicar.disabled = !archivo;
+  resultado.classList.remove('visible');
+}
+
+elTexto.addEventListener('input', actualizarVistaPreviaMarca);
+elTamano.addEventListener('input', actualizarVistaPreviaMarca);
+elOpacidad.addEventListener('input', actualizarVistaPreviaMarca);
+elRepeticiones.addEventListener('input', actualizarVistaPreviaMarca);
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// Encuentra el tamaño de letra más grande (hasta tamanoMaximo) tal que el
+// texto, ya rotado 45°, quepa dentro de la página — para que un mensaje largo
+// se achique en vez de salirse de los bordes.
+function calcularTamanoAjustado(fuente, texto, anchoPagina, altoPagina, tamanoMaximo) {
+  const margen = 0.9; // deja un 10% de aire
+  let tamano = tamanoMaximo;
+  while (tamano > 6) {
+    const anchoTexto = fuente.widthOfTextAtSize(texto, tamano);
+    const anchoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    const altoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
+    if (anchoRotado <= anchoPagina * margen && altoRotado <= altoPagina * margen) return tamano;
+    tamano -= 2;
+  }
+  return tamano;
+}
+
+botonAplicar.addEventListener('click', async () => {
+  botonAplicar.disabled = true;
+  botonAplicar.textContent = t('boton-aplicar-procesando');
+  try {
+    const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+    const bytes = await archivoActual.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const fuente = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const texto = elTexto.value || t('texto-defecto');
+    const opacidad = parseInt(elOpacidad.value, 10) / 100;
+    const tamanoMaximo = parseInt(elTamano.value, 10);
+    const cantidad = parseInt(elRepeticiones.value, 10);
+    const { filas, columnas } = calcularFilasColumnas(cantidad);
+
+    const angulo = 45 * Math.PI / 180;
+    pdf.getPages().forEach((pagina) => {
+      // Se trabaja sobre la página tal como se ve (con /Rotate): si no, en
+      // un PDF escaneado o rotado la marca quedaba girada y descentrada.
+      const marco = marcoVisualPagina(pagina);
+      const width = marco.ancho;
+      const height = marco.alto;
+      const anchoCelda = width / columnas;
+      const altoCelda = height / filas;
+      const tamanoFuente = calcularTamanoAjustado(fuente, texto, anchoCelda, altoCelda, tamanoMaximo);
+      const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
+
+      let contador = 0;
+      for (let f = 0; f < filas && contador < cantidad; f++) {
+        for (let c = 0; c < columnas && contador < cantidad; c++) {
+          const centroX = anchoCelda * c + anchoCelda / 2;
+          const centroY = altoCelda * f + altoCelda / 2;
+          // drawText gira desde el inicio de la línea de base: se retrocede
+          // medio ancho a lo largo del texto y media altura de mayúscula
+          // perpendicular a él, para que el texto quede centrado en la celda.
+          const altoLetra = fuente.heightAtSize(tamanoFuente, { descender: false }) * 0.7;
+          const origen = marco.aPagina(
+            centroX - (anchoTexto / 2) * Math.cos(angulo) + (altoLetra / 2) * Math.sin(angulo),
+            centroY - (anchoTexto / 2) * Math.sin(angulo) - (altoLetra / 2) * Math.cos(angulo)
+          );
+          pagina.drawText(texto, {
+            x: origen.x,
+            y: origen.y,
+            size: tamanoFuente,
+            font: fuente,
+            color: rgb(0.5, 0.5, 0.5),
+            opacity: opacidad,
+            rotate: degrees(45 + marco.rotacion),
+          });
+          contador++;
+        }
+      }
+    });
+
+    const bytesFinales = await pdf.save();
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-aplicar') + ': ' + detalleError(error));
+  } finally {
+    botonAplicar.disabled = false;
+    botonAplicar.textContent = t('boton-aplicar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

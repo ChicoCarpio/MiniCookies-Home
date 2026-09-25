@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Crear presentación PowerPoint gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Armá una presentación PowerPoint diapositiva por diapositiva, con títulos, negrita, cursiva y viñetas, sin escribir ningún símbolo. Gratis y sin subir nada a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .tarjeta-diapositiva {
+    background: #fff;
+    color: #1a1a1a;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .cabecera-diapositiva {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--gris-fondo);
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    font-weight: 600;
+  }
+  .cabecera-diapositiva .botones-cabecera { display: flex; gap: 4px; }
+  .cabecera-diapositiva button {
+    background: #fff;
+    border: 1px solid var(--gris-borde);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+  }
+  .cabecera-diapositiva button:hover { background: var(--gris-fondo); }
+  .cabecera-diapositiva button.quitar-diapositiva { color: #dc2626; }
+
+  .titulo-diapositiva {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--gris-borde);
+    padding: 14px 18px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    outline: none;
+  }
+  .titulo-diapositiva::placeholder { color: var(--texto-suave); font-weight: 400; }
+
+  .barra-mini {
+    display: flex;
+    gap: 4px;
+    padding: 6px 10px;
+    background: var(--gris-fondo);
+    border-bottom: 1px solid var(--gris-borde);
+  }
+  .barra-mini button {
+    background: #fff;
+    border: 1px solid var(--gris-borde);
+    border-radius: 5px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .barra-mini button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+
+  .cuerpo-diapositiva {
+    padding: 14px 18px;
+    min-height: 100px;
+    outline: none;
+    line-height: 1.5;
+  }
+  .cuerpo-diapositiva:empty:before {
+    content: attr(data-placeholder);
+    color: var(--texto-suave);
+    pointer-events: none;
+  }
+  .cuerpo-diapositiva ul { margin: 0; padding-left: 22px; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Crear presentación PowerPoint gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Armá una presentación PowerPoint diapositiva por diapositiva, con títulos, negrita, cursiva y viñetas, sin escribir ningún símbolo. Gratis y sin subir nada a ningún servidor.',
+    'h1': 'Crear presentación PowerPoint',
+    'intro': 'Armá tu presentación diapositiva por diapositiva: escribí el título, el contenido, y dale formato seleccionando texto y usando los botones — igual que en PowerPoint.',
+    'boton-agregar': '+ Agregar diapositiva',
+    'campo-nombre': 'Nombre del archivo',
+    'boton-generar': 'Descargar .pptx',
+    'boton-generar-procesando': 'Generando...',
+    'etiqueta-diapositiva': 'Diapositiva {n}',
+    'mover-arriba': 'Mover arriba',
+    'mover-abajo': 'Mover abajo',
+    'eliminar': 'Eliminar',
+    'placeholder-titulo': 'Título de la diapositiva',
+    'boton-negrita': 'Negrita',
+    'boton-cursiva': 'Cursiva',
+    'boton-lista': 'Lista con viñetas',
+    'placeholder-cuerpo': 'Contenido de la diapositiva...',
+    'error-sin-diapositivas': 'Agregá al menos una diapositiva.',
+    'nombre-defecto': 'presentacion',
+    'error-generar': 'No se pudo generar la presentación'
+  },
+  en: {
+    'titulo-pagina': 'Create a PowerPoint Presentation Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Build a PowerPoint presentation slide by slide, with headings, bold, italics and bullet points, without typing a single symbol. Free and without uploading anything anywhere.',
+    'h1': 'Create a PowerPoint presentation',
+    'intro': 'Build your presentation slide by slide: write the title, the content, and format it by selecting text and using the buttons — just like in PowerPoint.',
+    'boton-agregar': '+ Add slide',
+    'campo-nombre': 'File name',
+    'boton-generar': 'Download .pptx',
+    'boton-generar-procesando': 'Generating...',
+    'etiqueta-diapositiva': 'Slide {n}',
+    'mover-arriba': 'Move up',
+    'mover-abajo': 'Move down',
+    'eliminar': 'Delete',
+    'placeholder-titulo': 'Slide title',
+    'boton-negrita': 'Bold',
+    'boton-cursiva': 'Italic',
+    'boton-lista': 'Bulleted list',
+    'placeholder-cuerpo': 'Slide content...',
+    'error-sin-diapositivas': 'Add at least one slide.',
+    'nombre-defecto': 'presentation',
+    'error-generar': 'Couldn’t generate the presentation'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Crear presentación PowerPoint</h1>
+  <p data-i18n="intro">Armá tu presentación diapositiva por diapositiva: escribí el título, el contenido, y dale formato seleccionando texto y usando los botones — igual que en PowerPoint.</p>
+
+  <div class="panel-herramienta">
+    <div id="listaDiapositivas"></div>
+
+    <div class="controles">
+      <button class="boton" id="botonAgregarDiapositiva" type="button" style="background:#64748b;" data-i18n="boton-agregar">+ Agregar diapositiva</button>
+    </div>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-nombre">Nombre del archivo</span>
+        <input type="text" id="nombreArchivo" value="presentacion" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+      </label>
+      <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Descargar .pptx</button>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<!-- pptxgen.min.js necesita JSZip cargado antes (la versión "bundle" lo trae incluido). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+<script src="../assets/js/idioma.js"></script>
+<script>
+const listaDiapositivas = document.getElementById('listaDiapositivas');
+let siguienteId = 1;
+
+function crearTarjetaDiapositiva() {
+  const id = siguienteId++;
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'tarjeta-diapositiva';
+  tarjeta.dataset.id = id;
+  tarjeta.innerHTML = `
+    <div class="cabecera-diapositiva">
+      <span class="etiqueta-numero">Diapositiva</span>
+      <div class="botones-cabecera">
+        <button type="button" class="subir-diapositiva" title="${t('mover-arriba')}">▲</button>
+        <button type="button" class="bajar-diapositiva" title="${t('mover-abajo')}">▼</button>
+        <button type="button" class="quitar-diapositiva" title="${t('eliminar')}">✕</button>
+      </div>
+    </div>
+    <input type="text" class="titulo-diapositiva" placeholder="${t('placeholder-titulo')}">
+    <div class="barra-mini">
+      <button type="button" data-comando="bold" title="${t('boton-negrita')}"><strong>N</strong></button>
+      <button type="button" data-comando="italic" title="${t('boton-cursiva')}"><em>C</em></button>
+      <button type="button" data-comando="insertUnorderedList" title="${t('boton-lista')}">•≡</button>
+    </div>
+    <div class="cuerpo-diapositiva" contenteditable="true" data-placeholder="${t('placeholder-cuerpo')}"></div>
+  `;
+
+  const cuerpo = tarjeta.querySelector('.cuerpo-diapositiva');
+  tarjeta.querySelectorAll('.barra-mini button[data-comando]').forEach((boton) => {
+    boton.addEventListener('mousedown', (e) => e.preventDefault());
+    boton.addEventListener('click', () => {
+      cuerpo.focus();
+      document.execCommand(boton.dataset.comando, false, null);
+    });
+  });
+
+  tarjeta.querySelector('.quitar-diapositiva').addEventListener('click', () => {
+    tarjeta.remove();
+    renumerarDiapositivas();
+  });
+  tarjeta.querySelector('.subir-diapositiva').addEventListener('click', () => {
+    const anterior = tarjeta.previousElementSibling;
+    if (anterior) listaDiapositivas.insertBefore(tarjeta, anterior);
+    renumerarDiapositivas();
+  });
+  tarjeta.querySelector('.bajar-diapositiva').addEventListener('click', () => {
+    const siguiente = tarjeta.nextElementSibling;
+    if (siguiente) listaDiapositivas.insertBefore(siguiente, tarjeta);
+    renumerarDiapositivas();
+  });
+
+  return tarjeta;
+}
+
+function renumerarDiapositivas() {
+  [...listaDiapositivas.children].forEach((tarjeta, indice) => {
+    tarjeta.querySelector('.etiqueta-numero').textContent = t('etiqueta-diapositiva').replace('{n}', indice + 1);
+  });
+}
+
+function agregarDiapositiva() {
+  listaDiapositivas.appendChild(crearTarjetaDiapositiva());
+  renumerarDiapositivas();
+}
+
+document.getElementById('botonAgregarDiapositiva').addEventListener('click', agregarDiapositiva);
+
+// Empezar con 2 diapositivas en blanco, como cualquier presentación nueva.
+agregarDiapositiva();
+agregarDiapositiva();
+
+// Al cambiar de idioma, los títulos/placeholders de las tarjetas ya creadas
+// (dibujados una vez al armarlas) se vuelven a traducir; el texto que el
+// usuario ya escribió en título/cuerpo no se toca.
+document.addEventListener('cambioIdioma', () => {
+  document.querySelectorAll('.subir-diapositiva').forEach(b => b.title = t('mover-arriba'));
+  document.querySelectorAll('.bajar-diapositiva').forEach(b => b.title = t('mover-abajo'));
+  document.querySelectorAll('.quitar-diapositiva').forEach(b => b.title = t('eliminar'));
+  document.querySelectorAll('.titulo-diapositiva').forEach(el => el.placeholder = t('placeholder-titulo'));
+  document.querySelectorAll('.barra-mini button[data-comando="bold"]').forEach(b => b.title = t('boton-negrita'));
+  document.querySelectorAll('.barra-mini button[data-comando="italic"]').forEach(b => b.title = t('boton-cursiva'));
+  document.querySelectorAll('.barra-mini button[data-comando="insertUnorderedList"]').forEach(b => b.title = t('boton-lista'));
+  document.querySelectorAll('.cuerpo-diapositiva').forEach(el => el.dataset.placeholder = t('placeholder-cuerpo'));
+  renumerarDiapositivas();
+});
+
+// --- Convertir el cuerpo (HTML del contenteditable) a los "runs" que espera PptxGenJS ---
+
+function leerFormatoDeAncestros(nodo, raiz) {
+  const formato = { bold: false, italic: false };
+  let actual = nodo.parentElement;
+  while (actual && actual !== raiz) {
+    const etiqueta = actual.tagName;
+    if (etiqueta === 'B' || etiqueta === 'STRONG') formato.bold = true;
+    if (etiqueta === 'I' || etiqueta === 'EM') formato.italic = true;
+    actual = actual.parentElement;
+  }
+  return formato;
+}
+
+function extraerRunsDeLinea(elementoLinea) {
+  const runs = [];
+  function recorrer(nodo) {
+    if (nodo.nodeType === Node.TEXT_NODE) {
+      if (nodo.textContent === '') return;
+      runs.push({ text: nodo.textContent, ...leerFormatoDeAncestros(nodo, elementoLinea) });
+      return;
+    }
+    if (nodo.nodeType === Node.ELEMENT_NODE && nodo.tagName !== 'BR') {
+      nodo.childNodes.forEach(recorrer);
+    }
+  }
+  elementoLinea.childNodes.forEach(recorrer);
+  if (runs.length === 0) runs.push({ text: elementoLinea.textContent || '' });
+  return runs;
+}
+
+function cuerpoAPptxRuns(contenedor) {
+  const resultado = [];
+  const bloques = contenedor.children.length > 0 ? [...contenedor.children] : [contenedor];
+
+  bloques.forEach((bloque) => {
+    let lineas = [bloque];
+    let esVineta = false;
+    if (bloque.tagName === 'UL' || bloque.tagName === 'OL') {
+      lineas = [...bloque.children].filter(li => li.tagName === 'LI');
+      esVineta = true;
+    }
+    lineas.forEach((linea) => {
+      const runs = extraerRunsDeLinea(linea);
+      runs.forEach((run, indice) => {
+        resultado.push({
+          text: run.text,
+          options: { bold: !!run.bold, italic: !!run.italic, bullet: esVineta, breakLine: indice === runs.length - 1 },
+        });
+      });
+    });
+  });
+
+  return resultado;
+}
+
+document.getElementById('botonGenerar').addEventListener('click', () => {
+  const boton = document.getElementById('botonGenerar');
+  boton.disabled = true;
+  boton.textContent = t('boton-generar-procesando');
+  try {
+    const tarjetas = [...listaDiapositivas.children];
+    if (tarjetas.length === 0) throw new Error(t('error-sin-diapositivas'));
+
+    const pptx = new PptxGenJS();
+
+    tarjetas.forEach((tarjeta) => {
+      const slide = pptx.addSlide();
+      const titulo = tarjeta.querySelector('.titulo-diapositiva').value.trim();
+      const cuerpo = tarjeta.querySelector('.cuerpo-diapositiva');
+
+      if (titulo) {
+        slide.addText(titulo, { x: 0.5, y: 0.3, w: 9, h: 1, fontSize: 28, bold: true, color: '1E293B' });
+      }
+
+      const runs = cuerpoAPptxRuns(cuerpo);
+      const tieneContenido = runs.some(r => r.text.trim() !== '');
+      if (tieneContenido) {
+        slide.addText(runs, { x: 0.5, y: 1.5, w: 9, h: 4.8, fontSize: 18, color: '1E293B', valign: 'top' });
+      }
+    });
+
+    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
+    pptx.writeFile({ fileName: `${nombreArchivo}.pptx` });
+  } catch (error) {
+    alert(t('error-generar') + ': ' + error.message);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = t('boton-generar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+</body>
+</html>

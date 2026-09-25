@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Reparar PDF dañado gratis — Herramientas Ofimáticas</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un PDF dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Reparar PDF dañado gratis — Herramientas Ofimáticas',
+    'meta-descripcion': 'Intentá recuperar un PDF dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Reparar PDF',
+    'intro': 'Elegí un PDF dañado o que no abre bien. Probamos dos niveles de reparación, del menos al más invasivo.',
+    'zona-arrastre': '📄 Arrastrá tu PDF dañado acá o hacé clic para elegirlo',
+    'boton-reparar': 'Intentar reparar',
+    'resultado-enlace': 'Descargar PDF reparado',
+    'limitaciones-titulo': 'Limitaciones',
+    'limitaciones-antes': 'Si el archivo está muy dañado, a veces solo se puede recuperar el contenido visual de cada página como imagen — en ese caso ',
+    'limitaciones-enfasis': 'se pierde el texto seleccionable/copiable',
+    'limitaciones-final': '. Si ni así se puede recuperar, el archivo está dañado más allá de lo que se puede arreglar desde el navegador.',
+    'etiqueta-danado': '⚠️ {nombre} (no se pudo previsualizar — puede estar dañado, probemos reparar igual)',
+    'progreso-nivel1': 'Probando nivel 1 (reescritura limpia)...',
+    'progreso-nivel1-fallo': 'Nivel 1 falló. Probando nivel 2 (reconstrucción visual)...',
+    'progreso-nivel2-pagina': 'Reconstruyendo página {actual} de {total}...',
+    'mensaje-nivel1-ok': '✅ Reparado con el nivel 1 (se mantiene el texto y la calidad original).',
+    'mensaje-nivel2-ok': '⚠️ Se pudo reparar solo con el nivel 2: el resultado son imágenes de cada página (se perdió el texto seleccionable).',
+    'error-sin-paginas': 'El PDF no tiene páginas legibles.',
+    'error-sin-nada': 'No se pudo leer ninguna página, ni siquiera para reconstruir visualmente.',
+    'error-reparar': 'No se pudo reparar el PDF con ninguno de los dos niveles'
+  },
+  en: {
+    'titulo-pagina': 'Repair a Damaged PDF Free — Herramientas Ofimáticas',
+    'meta-descripcion': 'Try to recover a damaged PDF or one that won’t open properly, free and without uploading your file anywhere.',
+    'h1': 'Repair PDF',
+    'intro': 'Pick a damaged PDF or one that doesn’t open properly. We try two repair levels, from least to most invasive.',
+    'zona-arrastre': '📄 Drag your damaged PDF here or click to choose it',
+    'boton-reparar': 'Try to repair',
+    'resultado-enlace': 'Download repaired PDF',
+    'limitaciones-titulo': 'Limitations',
+    'limitaciones-antes': 'If the file is badly damaged, sometimes only the visual content of each page can be recovered as an image — in that case ',
+    'limitaciones-enfasis': 'the selectable/copyable text is lost',
+    'limitaciones-final': '. If it still can’t be recovered, the file is damaged beyond what can be fixed from the browser.',
+    'etiqueta-danado': '⚠️ {nombre} (preview unavailable — it may be damaged, let’s try repairing it anyway)',
+    'progreso-nivel1': 'Trying level 1 (clean rewrite)...',
+    'progreso-nivel1-fallo': 'Level 1 failed. Trying level 2 (visual reconstruction)...',
+    'progreso-nivel2-pagina': 'Rebuilding page {actual} of {total}...',
+    'mensaje-nivel1-ok': '✅ Repaired with level 1 (original text and quality kept).',
+    'mensaje-nivel2-ok': '⚠️ Could only be repaired with level 2: the result is an image of each page (selectable text was lost).',
+    'error-sin-paginas': 'The PDF has no readable pages.',
+    'error-sin-nada': 'Couldn’t read any page, not even to rebuild it visually.',
+    'error-reparar': 'Couldn’t repair the PDF with either level'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Herramientas<span>Ofimáticas</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Reparar PDF</h1>
+  <p data-i18n="intro">Elegí un PDF dañado o que no abre bien. Probamos dos niveles de reparación, del menos al más invasivo.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF dañado acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <div class="grid-miniaturas" id="listaArchivo"></div>
+
+    <div class="controles">
+      <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Intentar reparar</button>
+    </div>
+
+    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
+
+    <div class="resultado" id="resultado">
+      <p id="mensajeResultado" style="margin-top:0;"></p>
+      <a id="enlaceDescarga" download="documento-reparado.pdf" data-i18n="resultado-enlace">Descargar PDF reparado</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
+    <p style="color:var(--texto-suave);"><span data-i18n="limitaciones-antes">Si el archivo está muy dañado, a veces solo se puede recuperar el contenido visual de cada página como imagen — en ese caso </span><strong data-i18n="limitaciones-enfasis">se pierde el texto seleccionable/copiable</strong><span data-i18n="limitaciones-final">. Si ni así se puede recuperar, el archivo está dañado más allá de lo que se puede arreglar desde el navegador.</span></p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Herramientas Ofimáticas — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const botonReparar = document.getElementById('botonReparar');
+const progreso = document.getElementById('progreso');
+const resultado = document.getElementById('resultado');
+const mensajeResultado = document.getElementById('mensajeResultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+let archivoActual = null;
+
+async function mostrarArchivo(archivo) {
+  archivoActual = archivo;
+  listaArchivo.innerHTML = '';
+  try {
+    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+  } catch (error) {
+    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: t('etiqueta-danado').replace('{nombre}', archivo.name) }));
+  }
+  botonReparar.disabled = false;
+  resultado.classList.remove('visible');
+}
+
+function elegirArchivo(listaFileList) {
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) mostrarArchivo(archivo);
+}
+
+zonaArrastre.addEventListener('click', () => entradaArchivo.click());
+entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
+zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
+zonaArrastre.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonaArrastre.classList.remove('activa');
+  elegirArchivo(e.dataTransfer.files);
+});
+
+// Un PDF cortado (descarga o copia interrumpida) pierde el final: la tabla
+// xref y el "trailer", que es lo que indica dónde empieza el documento. Sin
+// eso ni pdf-lib ni PDF.js lo abren, aunque las páginas sigan todas ahí. Si
+// falta, se descarta el último objeto incompleto y se agrega un trailer que
+// apunta al catálogo (/Type /Catalog); después los dos niveles trabajan sobre
+// eso. Devuelve null si el archivo no parece cortado o no tiene catálogo.
+function completarFinalFaltante(buffer) {
+  const bytes = new Uint8Array(buffer);
+  // Texto byte a byte (sin decodificar), para buscar marcadores y cortar en
+  // la misma posición de los bytes originales.
+  let texto = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) texto += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  if (/startxref\s+\d+\s*%%EOF\s*$/.test(texto.slice(-2048))) return null;
+
+  let catalogo = null, mayorNumero = 0;
+  for (const m of texto.matchAll(/(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g)) {
+    mayorNumero = Math.max(mayorNumero, parseInt(m[1], 10));
+    if (/\/Type\s*\/Catalog\b/.test(m[3])) catalogo = `${m[1]} ${m[2]} R`;
+  }
+  const finUltimoObjeto = texto.lastIndexOf('endobj');
+  if (!catalogo || finUltimoObjeto < 0) return null;
+
+  const cola = `\ntrailer\n<< /Size ${mayorNumero + 1} /Root ${catalogo} >>\nstartxref\n0\n%%EOF\n`;
+  const resultado = new Uint8Array(finUltimoObjeto + 6 + cola.length);
+  resultado.set(bytes.subarray(0, finUltimoObjeto + 6));
+  for (let i = 0; i < cola.length; i++) resultado[finUltimoObjeto + 6 + i] = cola.charCodeAt(i);
+  return resultado.buffer;
+}
+
+async function intentarNivel1(bytes) {
+  const { PDFDocument } = PDFLib;
+  const pdf = await PDFDocument.load(bytes, {
+    ignoreEncryption: true,
+    throwOnInvalidObject: false,
+    updateMetadata: false,
+  });
+  if (pdf.getPageCount() === 0) throw new Error(t('error-sin-paginas'));
+  return await pdf.save();
+}
+
+async function intentarNivel2(bytes) {
+  // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
+  // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
+  const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false, stopAtErrors: false }).promise;
+  if (pdfjsDoc.numPages === 0) throw new Error(t('error-sin-nada'));
+
+  const { PDFDocument } = PDFLib;
+  const pdfNuevo = await PDFDocument.create();
+
+  for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+    progreso.textContent = t('progreso-nivel2-pagina').replace('{actual}', i).replace('{total}', pdfjsDoc.numPages);
+    const pagina = await pdfjsDoc.getPage(i);
+    const viewport = pagina.getViewport({ scale: 2 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+    const bytesImagen = new Uint8Array(await blob.arrayBuffer());
+    const imagenEmbebida = await pdfNuevo.embedJpg(bytesImagen);
+    const paginaNueva = pdfNuevo.addPage([viewport.width, viewport.height]);
+    paginaNueva.drawImage(imagenEmbebida, { x: 0, y: 0, width: viewport.width, height: viewport.height });
+  }
+
+  return await pdfNuevo.save();
+}
+
+botonReparar.addEventListener('click', async () => {
+  botonReparar.disabled = true;
+  progreso.style.display = 'block';
+  progreso.textContent = t('progreso-nivel1');
+  resultado.classList.remove('visible');
+  try {
+    const bytesLeidos = await archivoActual.arrayBuffer();
+    // Si el archivo está cortado, se le reconstruye el final antes de todo.
+    const bytesOriginales = completarFinalFaltante(bytesLeidos) || bytesLeidos;
+    let bytesFinales = null;
+    let mensaje = '';
+
+    // Un PDF protegido no está dañado: el nivel 1 (ignoreEncryption) lo
+    // "reparaba" guardando el contenido todavía cifrado, y el resultado no
+    // abría. Se avisa que hay que desbloquearlo primero.
+    try {
+      await PDFLib.PDFDocument.load(bytesOriginales.slice(0), { throwOnInvalidObject: false, updateMetadata: false });
+    } catch (errorCarga) {
+      if (/encrypted/i.test(errorCarga.message)) throw errorCarga;
+    }
+
+    try {
+      bytesFinales = await intentarNivel1(bytesOriginales.slice(0));
+      mensaje = t('mensaje-nivel1-ok');
+    } catch (errorNivel1) {
+      console.warn('Nivel 1 falló, probando nivel 2:', errorNivel1);
+      progreso.textContent = t('progreso-nivel1-fallo');
+      bytesFinales = await intentarNivel2(bytesOriginales.slice(0));
+      mensaje = t('mensaje-nivel2-ok');
+    }
+
+    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    enlaceDescarga.href = URL.createObjectURL(blob);
+    mensajeResultado.textContent = mensaje;
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-reparar') + ': ' + detalleError(error));
+  } finally {
+    botonReparar.disabled = false;
+    progreso.style.display = 'none';
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
