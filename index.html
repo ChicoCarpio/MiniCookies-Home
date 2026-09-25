@@ -20,13 +20,6 @@ window.i18nPagina = {
     'sin-resultados': 'Ninguna herramienta coincide con esa búsqueda.',
     'resultados-titulo': 'Resultados',
     'ver-todas': 'Ver las {{HERRAMIENTAS}} herramientas en una sola página →',
-    'eslogan-0': 'Las únicas cookies que no te rastrean.',
-    'eslogan-1': 'Muchas herramientas. Mini cookies.',
-    'eslogan-2': 'Menos cookies. Más privacidad.',
-    'eslogan-3': 'Acá las cookies son de galleta.',
-    'eslogan-4': 'Tus archivos nunca salen de tu computadora.',
-    'eslogan-5': 'Herramientas gratis. Cero archivos subidos.',
-    'eslogan-6': 'Herramientas útiles. Tus datos siguen siendo tuyos.',
     'bloque-doc': 'Documentos de oficina',
     'bloque-txt': 'Texto y publicación',
     'bloque-otr': 'Imágenes y utilidades',
@@ -67,13 +60,6 @@ window.i18nPagina = {
     'sin-resultados': 'No tool matches that search.',
     'resultados-titulo': 'Results',
     'ver-todas': 'See all {{HERRAMIENTAS}} tools on one page →',
-    'eslogan-0': 'The only cookies that don\'t track you.',
-    'eslogan-1': 'Plenty of tools. Mini cookies.',
-    'eslogan-2': 'Fewer cookies. More privacy.',
-    'eslogan-3': 'Around here, cookies are the edible kind.',
-    'eslogan-4': 'Your files never leave your computer.',
-    'eslogan-5': 'Free tools. Zero uploads.',
-    'eslogan-6': 'Useful tools. Your data stays yours.',
     'bloque-doc': 'Office documents',
     'bloque-txt': 'Text and publishing',
     'bloque-otr': 'Images and utilities',
@@ -129,20 +115,6 @@ window.i18nPagina = {
   <div class="hero">
     <img src="marca-logo/minicookies_logo_sticker.png" alt="Mini Cookies" class="logo-hero" width="1466" height="451">
     <p class="eslogan" id="eslogan" data-i18n="eslogan-0">Las únicas cookies que no te rastrean.</p>
-    <script>
-    /* El eslogan se sortea al cargar. Se cambia el data-i18n en vez del texto
-       para que idioma.js lo traduzca solo al cambiar de idioma. El HTML trae
-       uno escrito de verdad, así que si el JS no corre igual se ve algo. */
-    (function () {
-      var n = 7;
-      var el = document.getElementById('eslogan');
-      var i = Math.floor(Math.random() * n);
-      el.setAttribute('data-i18n', 'eslogan-' + i);
-      var dic = window.i18nPagina.es;
-      try { dic = window.i18nPagina[localStorage.getItem('idioma') || 'es'] || dic; } catch (e) {}
-      el.textContent = dic['eslogan-' + i];
-    })();
-    </script>
     <p data-i18n="hero-subtitulo">{{HERRAMIENTAS}} herramientas gratis para PDF, Word, Excel, imágenes y más. Sin registro, sin instalar nada, sin que tus archivos salgan de tu equipo.</p>
 
     <div class="buscador">
@@ -320,5 +292,6 @@ window.i18nPagina = {
 <script src="assets/js/tema.js"></script>
 <script src="assets/js/fondo-decorativo.js"></script>
 <script src="assets/js/idioma.js"></script>
+<script src="assets/js/eslogan.js"></script>
 </body>
 </html>
