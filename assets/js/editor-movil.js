@@ -134,6 +134,62 @@
 
     chips.addEventListener('scroll', marcarBordes);
 
+    // Arrastrar la tira, agarrándola. No se deja en manos del desplazamiento
+    // nativo del navegador porque con mouse (ventana angosta en una
+    // computadora, o el emulador de celular) no se arrastra, y ahí las
+    // últimas categorías quedaban fuera de alcance. Hecho con eventos de
+    // puntero, el mismo gesto sirve para el dedo y para el mouse.
+    var arrastre = null;
+    var huboArrastre = false;
+    var MINIMO_PARA_ARRASTRE = 6; // px: menos que esto es un toque, no un arrastre
+
+    chips.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      huboArrastre = false;
+      // Ojo: acá NO se captura el puntero. Capturarlo desde el principio
+      // desvía el click al contenedor y entonces tocar una categoría deja de
+      // abrirla. Se captura recién cuando el gesto resulta ser un arrastre.
+      arrastre = { id: e.pointerId, x: e.clientX, desde: chips.scrollLeft, maximo: 0, capturado: false };
+    });
+
+    chips.addEventListener('pointermove', function (e) {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      var dx = e.clientX - arrastre.x;
+      if (Math.abs(dx) > arrastre.maximo) arrastre.maximo = Math.abs(dx);
+      if (arrastre.maximo > MINIMO_PARA_ARRASTRE) {
+        huboArrastre = true;
+        chips.classList.add('arrastrando-tira');
+        if (!arrastre.capturado) {
+          // Ya es un arrastre: ahora sí conviene capturar, para que siga
+          // funcionando aunque el dedo se salga de la tira.
+          arrastre.capturado = true;
+          try { chips.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+      }
+      if (!huboArrastre) return;
+      chips.scrollLeft = arrastre.desde - dx;
+      marcarBordes();
+    });
+
+    function soltarTira(e) {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      if (arrastre.capturado) {
+        try { chips.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
+      arrastre = null;
+      chips.classList.remove('arrastrando-tira');
+    }
+    chips.addEventListener('pointerup', soltarTira);
+    chips.addEventListener('pointercancel', soltarTira);
+
+    // Si el dedo se movió, el gesto fue correr la tira: no hay que abrir la
+    // categoría que quedó debajo al soltar.
+    chips.addEventListener('click', function (e) {
+      if (!huboArrastre) return;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+
     // La rueda del mouse mueve de costado: una rueda común solo da deltaY, y
     // sin esto la tira quedaba inmóvil en una ventana angosta de computadora.
     chips.addEventListener('wheel', function (e) {
@@ -161,7 +217,7 @@
       hoja.appendChild(cat.elemento);
       cat.chip.classList.add('activo');
       // Si la categoría estaba cortada contra el borde, se la trae a la vista.
-      if (cat.chip.scrollIntoView) cat.chip.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      if (cat.chip.scrollIntoView) cat.chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       abierta = i;
       // Si el grupo venía plegado en la versión de computadora, acá tiene que
       // verse igual: la hoja ya muestra el contenido, pero la clase mantiene

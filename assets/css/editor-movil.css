@@ -161,7 +161,12 @@
     overflow-y: hidden;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    /* El arrastre lo maneja editor-movil.js con eventos de puntero, para que
+       funcione igual con el dedo y con el mouse. Si además quedara el
+       desplazamiento táctil del navegador, el dedo movería la tira al doble
+       de velocidad, así que acá se lo desactiva a propósito. */
+    touch-action: none;
+    cursor: grab;
     /* Las categorías no entran todas a lo ancho de un celular y hay que
        correrlas. Con la barra de desplazamiento oculta no se notaba que
        hubiera más: estas clases (las pone editor-movil.js según la posición)
@@ -173,6 +178,7 @@
     background: var(--superficie);
   }
   body.em-activo .em-chips::-webkit-scrollbar { display: none; }
+  body.em-activo .em-chips.arrastrando-tira { cursor: grabbing; }
   body.em-activo .em-chips.hay-mas-derecha {
     --em-degradado: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
   }
