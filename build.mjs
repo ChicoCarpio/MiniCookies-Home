@@ -15,6 +15,7 @@
 // HerramientasOfimaticas): si se cambia, copiarlo al otro.
 import { transformSync } from 'esbuild';
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
+import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias } from './seo.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 
 const RAIZ = process.cwd();
@@ -23,7 +24,7 @@ const SALIDA = join(RAIZ, 'dist');
 // Lo que no se publica: herramientas del build, notas internas (.md) y
 // archivos del repo.
 const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist',
-  'build.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
+  'build.mjs', 'seo.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUIR_EXTENSIONES = new Set(['.md', '.log']);
 
 // Aviso de copyright de cada sitio: campo "config.aviso" de su package.json.
@@ -84,12 +85,20 @@ function recorrer(carpeta) {
     mkdirSync(dirname(destino), { recursive: true });
     if (ext === '.js' || ext === '.mjs') writeFileSync(destino, minificarJs(readFileSync(origen, 'utf8'), rel) + '\n');
     else if (ext === '.css') writeFileSync(destino, minificarCss(readFileSync(origen, 'utf8'), rel) + '\n');
-    else if (ext === '.html') writeFileSync(destino, procesarHtml(readFileSync(origen, 'utf8'), rel));
+    else if (ext === '.html') {
+      paginas.push(rel);
+      writeFileSync(destino, inyectarSeo(procesarHtml(readFileSync(origen, 'utf8'), rel), rel, indiceCategorias));
+    }
     else copyFileSync(origen, destino);
   }
 }
 
+// Rutas de todas las páginas publicadas, para armar el sitemap al final.
+const paginas = [];
+const indiceCategorias = indiceDeCategorias(RAIZ);
+
 rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);
 recorrer(RAIZ);
-console.log('Build listo en dist/');
+generarRobotsYSitemap(SALIDA, paginas);
+console.log(`Build listo en dist/ — ${paginas.length} páginas, sitemap.xml y robots.txt generados`);
