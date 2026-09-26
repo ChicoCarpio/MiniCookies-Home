@@ -19,10 +19,22 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Redondear esquinas',
+    'intro': 'Elegí una imagen y redondeá sus esquinas — llevá el control al máximo para un óvalo o círculo. El fondo (cuadriculado abajo) queda transparente.',
+    'campo-radio-a': 'Radio de esquina: ',
+    'boton-descargar': 'Descargar imagen (PNG)',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Redondear esquinas de imagen gratis — Mini Cookies',
     'meta-descripcion': 'Redondeá las esquinas de una imagen, hasta convertirla en un óvalo o círculo, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Round the corners',
+    'intro': 'Pick an image and round its corners — push the slider all the way for an oval or a circle. The background (the checkerboard below) stays transparent.',
+    'campo-radio-a': 'Corner radius: ',
+    'boton-descargar': 'Download image (PNG)',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download image',
     'titulo-pagina': 'Round the corners of an image, free — Mini Cookies',
     'meta-descripcion': 'Round the corners of an image, all the way to an oval or a circle — free, and nothing is uploaded to a server.',
   }
@@ -43,12 +55,12 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Redondear esquinas</h1>
-  <p>Elegí una imagen y redondeá sus esquinas — llevá el control al máximo para un óvalo o círculo. El fondo (cuadriculado abajo) queda transparente.</p>
+  <h1 data-i18n="hero-titulo">Redondear esquinas</h1>
+  <p data-i18n="intro">Elegí una imagen y redondeá sus esquinas — llevá el control al máximo para un óvalo o círculo. El fondo (cuadriculado abajo) queda transparente.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <span data-i18n="zona-arrastre-imagen">🖼️ Arrastrá tu imagen acá o hacé clic para elegirla</span>
       <input type="file" id="entradaArchivo" accept="image/*" hidden>
     </div>
 
@@ -56,14 +68,14 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        Radio de esquina: <span id="etiquetaRadio">0</span>%
+        <span data-i18n="campo-radio-a">Radio de esquina: </span><span id="etiquetaRadio">0</span>%
         <input type="range" id="radio" min="0" max="100" value="0">
       </label>
-      <button class="boton" id="botonDescargar" disabled>Descargar imagen (PNG)</button>
+      <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen (PNG)</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-redondeada.png">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-redondeada.png" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -89,7 +101,6 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let archivoActual = null;
 let imagenActual = null;
 
-const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -149,7 +160,7 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(t('imagen-invalida')));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());

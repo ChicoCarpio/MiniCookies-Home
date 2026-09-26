@@ -12,10 +12,52 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Generador de contraseñas',
+    'intro-a': 'Contraseñas aleatorias generadas con ',
+    'intro-b': ' (criptográficamente seguro).',
+    'boton-copiar': 'Copiar',
+    'boton-copiado': '¡Copiado!',
+    'longitud-a': 'Longitud: ',
+    'longitud-b': ' caracteres',
+    'op-mayusculas': ' Mayúsculas (A-Z)',
+    'op-minusculas': ' Minúsculas (a-z)',
+    'op-numeros': ' Números (0-9)',
+    'op-simbolos': ' Símbolos (!@#$%...)',
+    'boton-generar': 'Generar nueva contraseña',
+    'h-seguridad': '¿Por qué es segura?',
+    'seg-li1-a': 'Usa ',
+    'seg-li1-b': ', el generador aleatorio criptográfico del navegador (no ',
+    'seg-li1-c': ').',
+    'seg-li2-a': 'Rechaza y vuelve a generar si detecta secuencias (',
+    'seg-li2-b': '), caracteres repetidos (',
+    'seg-li2-c': ') o fragmentos de contraseñas comunes (',
+    'seg-li2-d': '...).',
+    'error-longitud': 'La longitud mínima para lo elegido es {n}.',
     'titulo-pagina': 'Generador de contraseñas seguras — Mini Cookies',
     'meta-descripcion': 'Generá contraseñas seguras y aleatorias, gratis y sin salir de tu navegador. Nunca se envían a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Password generator',
+    'intro-a': 'Random passwords generated with ',
+    'intro-b': ' (cryptographically secure).',
+    'boton-copiar': 'Copy',
+    'boton-copiado': 'Copied!',
+    'longitud-a': 'Length: ',
+    'longitud-b': ' characters',
+    'op-mayusculas': ' Uppercase (A-Z)',
+    'op-minusculas': ' Lowercase (a-z)',
+    'op-numeros': ' Numbers (0-9)',
+    'op-simbolos': ' Symbols (!@#$%...)',
+    'boton-generar': 'Generate a new password',
+    'h-seguridad': 'Why is it secure?',
+    'seg-li1-a': 'It uses ',
+    'seg-li1-b': ', the browser’s cryptographic random generator (not ',
+    'seg-li1-c': ').',
+    'seg-li2-a': 'It rejects and regenerates if it spots sequences (',
+    'seg-li2-b': '), repeated characters (',
+    'seg-li2-c': ') or chunks of common passwords (',
+    'seg-li2-d': '...).',
+    'error-longitud': 'The minimum length for the options you picked is {n}.',
     'titulo-pagina': 'Strong password generator — Mini Cookies',
     'meta-descripcion': 'Generate strong random passwords without leaving your browser. They are never sent to a server.',
   }
@@ -36,47 +78,47 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Generador de contraseñas</h1>
-  <p>Contraseñas aleatorias generadas con <code>crypto.getRandomValues</code> (criptográficamente seguro).</p>
+  <h1 data-i18n="hero-titulo">Generador de contraseñas</h1>
+  <p><span data-i18n="intro-a">Contraseñas aleatorias generadas con </span><code>crypto.getRandomValues</code><span data-i18n="intro-b"> (criptográficamente seguro).</span></p>
 
   <div class="panel-herramienta">
     <div class="resultado visible" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
       <span id="contrasenaGenerada" style="font-family: 'Consolas', monospace; font-size: 1.3rem; word-break: break-all;">—</span>
-      <button class="boton" id="botonCopiar" type="button">Copiar</button>
+      <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar</button>
     </div>
 
     <div class="controles" style="margin-top:24px; flex-direction:column; align-items:stretch;">
       <label class="campo">
-        Longitud: <span id="etiquetaLongitud">16</span> caracteres
+        <span data-i18n="longitud-a">Longitud: </span><span id="etiquetaLongitud">16</span><span data-i18n="longitud-b"> caracteres</span>
         <input type="range" id="longitud" min="8" max="64" value="16">
       </label>
 
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="usarMayusculas" checked> Mayúsculas (A-Z)
+        <input type="checkbox" id="usarMayusculas" checked><span data-i18n="op-mayusculas"> Mayúsculas (A-Z)</span>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="usarMinusculas" checked> Minúsculas (a-z)
+        <input type="checkbox" id="usarMinusculas" checked><span data-i18n="op-minusculas"> Minúsculas (a-z)</span>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="usarNumeros" checked> Números (0-9)
+        <input type="checkbox" id="usarNumeros" checked><span data-i18n="op-numeros"> Números (0-9)</span>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="usarSimbolos" checked> Símbolos (!@#$%...)
+        <input type="checkbox" id="usarSimbolos" checked><span data-i18n="op-simbolos"> Símbolos (!@#$%...)</span>
       </label>
     </div>
 
     <div class="controles">
-      <button class="boton" id="botonGenerar" type="button">Generar nueva contraseña</button>
+      <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Generar nueva contraseña</button>
     </div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <h3 style="margin-top:0;">¿Por qué es segura?</h3>
+    <h3 style="margin-top:0;" data-i18n="h-seguridad">¿Por qué es segura?</h3>
     <ul style="color:var(--texto-suave);">
-      <li>Usa <code>crypto.getRandomValues</code>, el generador aleatorio criptográfico del navegador (no <code>Math.random</code>).</li>
-      <li>Rechaza y vuelve a generar si detecta secuencias (<code>abc</code>, <code>321</code>), caracteres repetidos (<code>aaa</code>) o fragmentos de contraseñas comunes (<code>password</code>, <code>admin</code>, <code>qwerty</code>...).</li>
+      <li><span data-i18n="seg-li1-a">Usa </span><code>crypto.getRandomValues</code><span data-i18n="seg-li1-b">, el generador aleatorio criptográfico del navegador (no </span><code>Math.random</code><span data-i18n="seg-li1-c">).</span></li>
+      <li><span data-i18n="seg-li2-a">Rechaza y vuelve a generar si detecta secuencias (</span><code>abc</code>, <code>321</code><span data-i18n="seg-li2-b">), caracteres repetidos (</span><code>aaa</code><span data-i18n="seg-li2-c">) o fragmentos de contraseñas comunes (</span><code>password</code>, <code>admin</code>, <code>qwerty</code><span data-i18n="seg-li2-d">...).</span></li>
     </ul>
   </div>
 </main>
@@ -150,7 +192,7 @@ function generarContrasena(longitud, usarMayus, usarMinus, usarNumeros, usarSimb
   if (usarNumeros) pools.push("0123456789");
   if (usarSimbolos) pools.push("!@#$%^&*()-_=+[]{}?");
   if (pools.length === 0) throw new Error("Elegí al menos un tipo de carácter.");
-  if (longitud < pools.length) throw new Error(`La longitud mínima para lo elegido es ${pools.length}.`);
+  if (longitud < pools.length) throw new Error(t('error-longitud').replace('{n}', pools.length));
 
   const todosLosCaracteres = pools.join("");
 
@@ -198,7 +240,7 @@ elBotonGenerar.addEventListener('click', actualizarYGenerar);
 elBotonCopiar.addEventListener('click', async () => {
   if (!contrasenaValida) return; // no copiar el mensaje de error
   await navigator.clipboard.writeText(elResultado.textContent);
-  elBotonCopiar.textContent = '¡Copiado!';
+  elBotonCopiar.textContent = t('boton-copiado');
   setTimeout(() => { elBotonCopiar.textContent = 'Copiar'; }, 1500);
 });
 

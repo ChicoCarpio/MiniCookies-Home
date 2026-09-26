@@ -19,10 +19,24 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Agregar borde a imagen',
+    'intro': 'Elegí una imagen y agregale un borde de color alrededor.',
+    'campo-color': 'Color del borde',
+    'campo-grosor-a': 'Grosor: ',
+    'boton-descargar': 'Descargar imagen',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Agregar borde a imagen gratis — Mini Cookies',
     'meta-descripcion': 'Agregá un borde de color alrededor de una imagen, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Add a border to an image',
+    'intro': 'Pick an image and add a colored border around it.',
+    'campo-color': 'Border color',
+    'campo-grosor-a': 'Thickness: ',
+    'boton-descargar': 'Download image',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download image',
     'titulo-pagina': 'Add a border to an image, free — Mini Cookies',
     'meta-descripcion': 'Add a colored border around an image — free, and nothing is uploaded to a server.',
   }
@@ -43,12 +57,12 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Agregar borde a imagen</h1>
-  <p>Elegí una imagen y agregale un borde de color alrededor.</p>
+  <h1 data-i18n="hero-titulo">Agregar borde a imagen</h1>
+  <p data-i18n="intro">Elegí una imagen y agregale un borde de color alrededor.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <span data-i18n="zona-arrastre-imagen">🖼️ Arrastrá tu imagen acá o hacé clic para elegirla</span>
       <input type="file" id="entradaArchivo" accept="image/*" hidden>
     </div>
 
@@ -56,18 +70,18 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        <span>Color del borde</span>
+        <span data-i18n="campo-color">Color del borde</span>
         <input type="color" id="colorBorde" value="#ffffff">
       </label>
       <label class="campo">
-        <span>Grosor: <span id="etiquetaGrosor">20</span>px</span>
+        <span><span data-i18n="campo-grosor-a">Grosor: </span><span id="etiquetaGrosor">20</span>px</span>
         <input type="range" id="grosor" min="1" max="200" value="20">
       </label>
-      <button class="boton" id="botonDescargar" disabled>Descargar imagen</button>
+      <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-con-borde">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-con-borde" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -103,7 +117,6 @@ function formatoDeSalida(archivo) {
   return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
 }
 
-const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -149,7 +162,7 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(t('imagen-invalida')));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());

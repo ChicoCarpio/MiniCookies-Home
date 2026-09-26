@@ -12,10 +12,30 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Generador de códigos de barras',
+    'intro': 'Escribí un texto o número y generá un código de barras al instante.',
+    'campo-texto': 'Texto o número',
+    'campo-formato': 'Formato',
+    'fmt-code128': 'CODE128 (texto y números, el más flexible)',
+    'fmt-ean13': 'EAN-13 (13 dígitos, productos)',
+    'fmt-upc': 'UPC (12 dígitos, productos EE.UU.)',
+    'boton-generar': 'Generar',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar como SVG',
     'titulo-pagina': 'Generador de códigos de barras gratis — Mini Cookies',
     'meta-descripcion': 'Generá un código de barras (CODE128, EAN13 y más) a partir de un texto o número, gratis y sin enviar nada a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Barcode generator',
+    'intro': 'Type a number or some text and get a barcode instantly.',
+    'campo-texto': 'Text or number',
+    'campo-formato': 'Format',
+    'fmt-code128': 'CODE128 (text and numbers, the most flexible)',
+    'fmt-ean13': 'EAN-13 (13 digits, retail products)',
+    'fmt-upc': 'UPC (12 digits, US products)',
+    'boton-generar': 'Generate',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download as SVG',
     'titulo-pagina': 'Free barcode generator — Mini Cookies',
     'meta-descripcion': 'Generate a barcode (CODE128, EAN13 and more) from a number or a piece of text — free, and nothing is sent to a server.',
   }
@@ -36,26 +56,26 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Generador de códigos de barras</h1>
-  <p>Escribí un texto o número y generá un código de barras al instante.</p>
+  <h1 data-i18n="hero-titulo">Generador de códigos de barras</h1>
+  <p data-i18n="intro">Escribí un texto o número y generá un código de barras al instante.</p>
 
   <div class="panel-herramienta">
     <label class="campo">
-      Texto o número
+      <span data-i18n="campo-texto">Texto o número</span>
       <input type="text" id="entradaTexto" value="123456789012" style="padding:10px; border:1px solid var(--gris-borde); border-radius:6px; font-size:1rem;">
     </label>
 
     <div class="controles">
       <label class="campo">
-        Formato
+        <span data-i18n="campo-formato">Formato</span>
         <select id="formato">
-          <option value="CODE128">CODE128 (texto y números, el más flexible)</option>
-          <option value="EAN13">EAN-13 (13 dígitos, productos)</option>
-          <option value="UPC">UPC (12 dígitos, productos EE.UU.)</option>
+          <option value="CODE128" data-i18n="fmt-code128">CODE128 (texto y números, el más flexible)</option>
+          <option value="EAN13" data-i18n="fmt-ean13">EAN-13 (13 dígitos, productos)</option>
+          <option value="UPC" data-i18n="fmt-upc">UPC (12 dígitos, productos EE.UU.)</option>
           <option value="CODE39">CODE39</option>
         </select>
       </label>
-      <button class="boton" id="botonGenerar" type="button">Generar</button>
+      <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Generar</button>
     </div>
 
     <p id="mensajeError" style="color:#dc2626; display:none;"></p>
@@ -65,7 +85,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado" style="text-align:center;">
-      ✅ Listo. <a id="enlaceDescarga" download="codigo-de-barras.svg">Descargar como SVG</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-de-barras.svg" data-i18n="resultado-enlace">Descargar como SVG</a>
     </div>
   </div>
 

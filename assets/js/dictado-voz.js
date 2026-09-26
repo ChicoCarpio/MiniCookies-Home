@@ -7,6 +7,10 @@
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/dist/transformers.min.js';
 
+// Textos de usuario: los toma del diccionario de la pagina (idioma.js).
+// El respaldo en espanol cubre el caso de que idioma.js no llegue a cargar.
+const tt = (clave, porDefecto) => (window.t ? window.t(clave) : porDefecto);
+
 env.allowLocalModels = false;
 
 export function iniciarDictado() {
@@ -55,7 +59,7 @@ export function iniciarDictado() {
 
     modeloIdEnCarga = modeloId;
     panelProgreso.style.display = 'block';
-    textoProgreso.textContent = 'Preparando el modelo elegido...';
+    textoProgreso.textContent = tt('estado-preparando', 'Preparando el modelo elegido...');
     barraProgreso.style.width = '0%';
 
     const archivos = {};
@@ -67,7 +71,8 @@ export function iniciarDictado() {
         const total = valores.reduce((a, f) => a + (f.total || 0), 0);
         const porcentaje = total ? Math.round((cargado / total) * 100) : 0;
         barraProgreso.style.width = porcentaje + '%';
-        textoProgreso.textContent = `Descargando modelo... ${porcentaje}% (solo esta vez, después queda guardado)`;
+        textoProgreso.textContent = tt('estado-descargando',
+          'Descargando modelo... {p}% (solo esta vez, después queda guardado)').replace('{p}', porcentaje);
       }
     };
 
@@ -107,7 +112,7 @@ export function iniciarDictado() {
   function precargarModeloElegido() {
     ocultarError();
     cargarModelo(selectorModelo.value).catch((error) => {
-      mostrarError('No se pudo cargar el modelo: ' + error.message);
+      mostrarError(tt('error-cargar-modelo', 'No se pudo cargar el modelo: ') + error.message);
     });
   }
 
@@ -154,7 +159,7 @@ export function iniciarDictado() {
       const modelo = await cargarModelo(selectorModelo.value);
       panelProgreso.style.display = 'block';
       barraProgreso.style.width = '100%';
-      textoProgreso.textContent = 'Transcribiendo...';
+      textoProgreso.textContent = tt('estado-transcribiendo', 'Transcribiendo...');
 
       const audio = await resamplearA16kHz(blob);
       const idioma = selectorIdioma.value;
@@ -173,8 +178,8 @@ export function iniciarDictado() {
     } catch (error) {
       const sinMemoria = /bad_alloc|memory|out of memory|OrtRun/i.test(error.message);
       mostrarError(sinMemoria
-        ? 'Tu navegador se quedó sin memoria para correr este modelo. Probá con uno más liviano.'
-        : 'No se pudo transcribir: ' + error.message);
+        ? tt('error-sin-memoria', 'Tu navegador se quedó sin memoria para correr este modelo. Probá con uno más liviano.')
+        : tt('error-transcribir', 'No se pudo transcribir: ') + error.message);
     } finally {
       panelProgreso.style.display = 'none';
     }
@@ -207,7 +212,7 @@ export function iniciarDictado() {
       mediaRecorder.start();
       grabando = true;
       inicioGrabacion = Date.now();
-      botonGrabar.textContent = '⏹️ Detener grabación';
+      botonGrabar.textContent = tt('boton-detener', '⏹️ Detener grabación');
       botonGrabar.style.background = '#dc2626';
       selectorModelo.disabled = true;
       estadoGrabacion.style.display = 'flex';
@@ -222,7 +227,7 @@ export function iniciarDictado() {
       // captura MediaRecorder por su cuenta, no el hilo principal.
       precargarModeloElegido();
     } catch (error) {
-      mostrarError('No se pudo acceder al micrófono: ' + error.message);
+      mostrarError(tt('error-microfono', 'No se pudo acceder al micrófono: ') + error.message);
     }
   }
 
@@ -230,7 +235,7 @@ export function iniciarDictado() {
     if (mediaRecorder && grabando) mediaRecorder.stop();
     grabando = false;
     clearInterval(intervaloTiempo);
-    botonGrabar.textContent = '🎙️ Empezar a grabar';
+    botonGrabar.textContent = tt('boton-grabar', '🎙️ Empezar a grabar');
     botonGrabar.style.background = '';
     selectorModelo.disabled = false;
     estadoGrabacion.style.display = 'none';
@@ -246,10 +251,10 @@ export function iniciarDictado() {
   botonCopiar.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(areaTexto.value);
-      botonCopiar.textContent = '✅ Copiado';
-      setTimeout(() => (botonCopiar.textContent = 'Copiar'), 1500);
+      botonCopiar.textContent = tt('boton-copiado', '✅ Copiado');
+      setTimeout(() => (botonCopiar.textContent = tt('boton-copiar', 'Copiar')), 1500);
     } catch (error) {
-      mostrarError('No se pudo copiar: ' + error.message);
+      mostrarError(tt('error-copiar', 'No se pudo copiar: ') + error.message);
     }
   });
 

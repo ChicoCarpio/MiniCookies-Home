@@ -59,10 +59,50 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Redimensionar imagen',
+    'intro': 'Elegí una imagen y cambiá su ancho y alto.',
+    'cap-original': 'Original — ',
+    'cap-nuevo': 'Nuevo tamaño — ',
+    'campo-ancho': 'Ancho (px)',
+    'campo-alto': 'Alto (px)',
+    'aria-mas-ancho': 'Aumentar ancho',
+    'aria-menos-ancho': 'Disminuir ancho',
+    'aria-mas-alto': 'Aumentar alto',
+    'aria-menos-alto': 'Disminuir alto',
+    'op-proporcion': ' Mantener proporción',
+    'campo-calidad': 'Calidad de reescalado',
+    'calidad-suave': 'Suave (recomendado)',
+    'calidad-nitido': 'Nítido (pixel art)',
+    'boton-redimensionar': 'Redimensionar',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen redimensionada',
+    'error-medidas': 'Indicá un ancho y alto válidos.',
+    'error-limite': 'El ancho y el alto no pueden superar los {n}px cada uno — es el límite que soportan los navegadores.',
+    'error-megapixeles': 'Esa combinación pesaría {mp} megapíxeles — los navegadores no soportan más de {max}. Probá con un tamaño menor.',
     'titulo-pagina': 'Redimensionar imagen gratis — Mini Cookies',
     'meta-descripcion': 'Cambiá el ancho y alto de una imagen, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Resize an image',
+    'intro': 'Pick an image and change its width and height.',
+    'cap-original': 'Original — ',
+    'cap-nuevo': 'New size — ',
+    'campo-ancho': 'Width (px)',
+    'campo-alto': 'Height (px)',
+    'aria-mas-ancho': 'Increase width',
+    'aria-menos-ancho': 'Decrease width',
+    'aria-mas-alto': 'Increase height',
+    'aria-menos-alto': 'Decrease height',
+    'op-proporcion': ' Keep aspect ratio',
+    'campo-calidad': 'Rescaling quality',
+    'calidad-suave': 'Smooth (recommended)',
+    'calidad-nitido': 'Sharp (pixel art)',
+    'boton-redimensionar': 'Resize',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download the resized image',
+    'error-medidas': 'Enter a valid width and height.',
+    'error-limite': 'Width and height cannot go over {n}px each — that is the limit browsers support.',
+    'error-megapixeles': 'That combination would come to {mp} megapixels — browsers do not support more than {max}. Try a smaller size.',
     'titulo-pagina': 'Resize an image, free — Mini Cookies',
     'meta-descripcion': 'Change the width and height of an image — free, and nothing is uploaded to a server.',
   }
@@ -83,12 +123,12 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Redimensionar imagen</h1>
-  <p>Elegí una imagen y cambiá su ancho y alto.</p>
+  <h1 data-i18n="hero-titulo">Redimensionar imagen</h1>
+  <p data-i18n="intro">Elegí una imagen y cambiá su ancho y alto.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <span data-i18n="zona-arrastre-imagen">🖼️ Arrastrá tu imagen acá o hacé clic para elegirla</span>
       <input type="file" id="entradaArchivo" accept="image/*" hidden>
     </div>
 
@@ -97,52 +137,51 @@ window.i18nPagina = {
     <div class="comparacion" id="comparacion">
       <figure>
         <div class="marco" id="marcoOriginal"><canvas id="canvasOriginal"></canvas></div>
-        <figcaption>Original — <span id="textoOriginal"></span></figcaption>
+        <figcaption><span data-i18n="cap-original">Original — </span><span id="textoOriginal"></span></figcaption>
       </figure>
       <div style="font-size:1.5rem; color:var(--texto-suave); padding-bottom:24px;">→</div>
       <figure>
         <div class="marco" id="marcoNuevo"><canvas id="canvasNuevo"></canvas></div>
-        <figcaption>Nuevo tamaño — <span id="textoNuevo"></span></figcaption>
+        <figcaption><span data-i18n="cap-nuevo">Nuevo tamaño — </span><span id="textoNuevo"></span></figcaption>
       </figure>
     </div>
 
     <div class="controles">
       <label class="campo">
-        Ancho (px)
+        <span data-i18n="campo-ancho">Ancho (px)</span>
         <span class="campo-numero">
           <input type="number" id="ancho" min="1" style="width:100px;">
           <span class="stepper">
-            <button type="button" data-objetivo="ancho" data-paso="1" aria-label="Aumentar ancho">▲</button>
-            <button type="button" data-objetivo="ancho" data-paso="-1" aria-label="Disminuir ancho">▼</button>
+            <button type="button" data-objetivo="ancho" data-paso="1" data-i18n-attr="aria-label:aria-mas-ancho" aria-label="Aumentar ancho">▲</button>
+            <button type="button" data-objetivo="ancho" data-paso="-1" data-i18n-attr="aria-label:aria-menos-ancho" aria-label="Disminuir ancho">▼</button>
           </span>
         </span>
       </label>
       <label class="campo">
-        Alto (px)
+        <span data-i18n="campo-alto">Alto (px)</span>
         <span class="campo-numero">
           <input type="number" id="alto" min="1" style="width:100px;">
           <span class="stepper">
-            <button type="button" data-objetivo="alto" data-paso="1" aria-label="Aumentar alto">▲</button>
-            <button type="button" data-objetivo="alto" data-paso="-1" aria-label="Disminuir alto">▼</button>
+            <button type="button" data-objetivo="alto" data-paso="1" data-i18n-attr="aria-label:aria-mas-alto" aria-label="Aumentar alto">▲</button>
+            <button type="button" data-objetivo="alto" data-paso="-1" data-i18n-attr="aria-label:aria-menos-alto" aria-label="Disminuir alto">▼</button>
           </span>
         </span>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:6px;">
-        <input type="checkbox" id="mantenerProporcion" checked style="width:auto;">
-        Mantener proporción
+        <input type="checkbox" id="mantenerProporcion" checked style="width:auto;"><span data-i18n="op-proporcion"> Mantener proporción</span>
       </label>
       <label class="campo">
-        Calidad de reescalado
+        <span data-i18n="campo-calidad">Calidad de reescalado</span>
         <select id="calidad">
-          <option value="suave" selected>Suave (recomendado)</option>
-          <option value="nitido">Nítido (pixel art)</option>
+          <option value="suave" selected data-i18n="calidad-suave">Suave (recomendado)</option>
+          <option value="nitido" data-i18n="calidad-nitido">Nítido (pixel art)</option>
         </select>
       </label>
-      <button class="boton" id="botonRedimensionar" disabled>Redimensionar</button>
+      <button class="boton" id="botonRedimensionar" disabled data-i18n="boton-redimensionar">Redimensionar</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-redimensionada">Descargar imagen redimensionada</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-redimensionada" data-i18n="resultado-enlace">Descargar imagen redimensionada</a>
     </div>
   </div>
 
@@ -266,7 +305,6 @@ function formatoDeSalida(archivo) {
   return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
 }
 
-const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 // Los nombres de archivo van dentro de innerHTML: se escapan para que un
 // nombre con "<" o "&" se muestre tal cual en vez de interpretarse como HTML.
@@ -301,7 +339,7 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(t('imagen-invalida')));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
@@ -370,12 +408,14 @@ botonRedimensionar.addEventListener('click', async () => {
   try {
     const ancho = parseInt(elAncho.value, 10);
     const alto = parseInt(elAlto.value, 10);
-    if (!ancho || !alto) throw new Error('Indicá un ancho y alto válidos.');
+    if (!ancho || !alto) throw new Error(t('error-medidas'));
     if (ancho > LIMITE_DIMENSION_PX || alto > LIMITE_DIMENSION_PX) {
-      throw new Error(`El ancho y el alto no pueden superar los ${LIMITE_DIMENSION_PX.toLocaleString('es')}px cada uno — es el límite que soportan los navegadores.`);
+      throw new Error(t('error-limite').replace('{n}', LIMITE_DIMENSION_PX.toLocaleString(idiomaActual())));
     }
     if (ancho * alto > LIMITE_MEGAPIXELES * 1_000_000) {
-      throw new Error(`Esa combinación pesaría ${(ancho * alto / 1_000_000).toFixed(0)} megapíxeles — los navegadores no soportan más de ${LIMITE_MEGAPIXELES}. Probá con un tamaño menor.`);
+      throw new Error(t('error-megapixeles')
+        .replace('{mp}', (ancho * alto / 1_000_000).toFixed(0))
+        .replace('{max}', LIMITE_MEGAPIXELES));
     }
 
     const canvas = crearCanvasEscalado(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight, ancho, alto, elCalidad.value);

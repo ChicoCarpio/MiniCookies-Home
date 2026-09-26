@@ -15,10 +15,28 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Rotar y voltear imagen',
+    'intro': 'Elegí una imagen y rotala o volteala las veces que quieras antes de descargar.',
+    'boton-izquierda': '↺ Rotar 90° izquierda',
+    'boton-derecha': '↻ Rotar 90° derecha',
+    'boton-volteo-h': '⇋ Voltear horizontal',
+    'boton-volteo-v': '⇵ Voltear vertical',
+    'boton-descargar': 'Descargar imagen',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Rotar y voltear imagen gratis — Mini Cookies',
     'meta-descripcion': 'Rotá 90/180/270° o volteá una imagen horizontal o verticalmente, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Rotate and flip an image',
+    'intro': 'Pick an image and rotate or flip it as many times as you like before downloading.',
+    'boton-izquierda': '↺ Rotate 90° left',
+    'boton-derecha': '↻ Rotate 90° right',
+    'boton-volteo-h': '⇋ Flip horizontally',
+    'boton-volteo-v': '⇵ Flip vertically',
+    'boton-descargar': 'Download image',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download image',
     'titulo-pagina': 'Rotate and flip an image, free — Mini Cookies',
     'meta-descripcion': 'Rotate 90/180/270° or flip an image horizontally or vertically — free, and nothing is uploaded to a server.',
   }
@@ -39,27 +57,27 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Rotar y voltear imagen</h1>
-  <p>Elegí una imagen y rotala o volteala las veces que quieras antes de descargar.</p>
+  <h1 data-i18n="hero-titulo">Rotar y voltear imagen</h1>
+  <p data-i18n="intro">Elegí una imagen y rotala o volteala las veces que quieras antes de descargar.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <span data-i18n="zona-arrastre-imagen">🖼️ Arrastrá tu imagen acá o hacé clic para elegirla</span>
       <input type="file" id="entradaArchivo" accept="image/*" hidden>
     </div>
 
     <canvas id="vistaPrevia"></canvas>
 
     <div class="controles">
-      <button class="boton" id="botonIzquierda" type="button" disabled style="background:#64748b;">↺ Rotar 90° izquierda</button>
-      <button class="boton" id="botonDerecha" type="button" disabled style="background:#64748b;">↻ Rotar 90° derecha</button>
-      <button class="boton" id="botonVolteoH" type="button" disabled style="background:#64748b;">⇋ Voltear horizontal</button>
-      <button class="boton" id="botonVolteoV" type="button" disabled style="background:#64748b;">⇵ Voltear vertical</button>
-      <button class="boton" id="botonDescargar" disabled>Descargar imagen</button>
+      <button class="boton" id="botonIzquierda" type="button" disabled style="background:#64748b;" data-i18n="boton-izquierda">↺ Rotar 90° izquierda</button>
+      <button class="boton" id="botonDerecha" type="button" disabled style="background:#64748b;" data-i18n="boton-derecha">↻ Rotar 90° derecha</button>
+      <button class="boton" id="botonVolteoH" type="button" disabled style="background:#64748b;" data-i18n="boton-volteo-h">⇋ Voltear horizontal</button>
+      <button class="boton" id="botonVolteoV" type="button" disabled style="background:#64748b;" data-i18n="boton-volteo-v">⇵ Voltear vertical</button>
+      <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-editada">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -92,7 +110,6 @@ function formatoDeSalida(archivo) {
   return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
 }
 
-const MENSAJE_IMAGEN_INVALIDA = 'No se pudo abrir esa imagen. Probá con un JPG, PNG, WebP o GIF (las fotos HEIC de iPhone no se abren en la mayoría de los navegadores).';
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -125,7 +142,7 @@ async function mostrarArchivo(archivo) {
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));
-  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(MENSAJE_IMAGEN_INVALIDA));
+  if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(t('imagen-invalida')));
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());

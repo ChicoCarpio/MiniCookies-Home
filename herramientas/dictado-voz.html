@@ -12,10 +12,60 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Dictado por voz',
+    'intro': 'Grabá tu voz con el micrófono y convertila a texto usando inteligencia artificial (Whisper).',
+    'campo-modelo': 'Modelo',
+    'modelo-tiny': 'Rápido — ideal para notas cortas (~41 MB)',
+    'modelo-base': 'Preciso — mejor con ruido o acento marcado (~77 MB)',
+    'modelo-small': 'Muy preciso — la mejor calidad (~249 MB)',
+    'campo-idioma': 'Idioma',
+    'idioma-espanol': 'Español',
+    'idioma-auto': 'Detectar automáticamente',
+    'idioma-ingles': 'Inglés',
+    'boton-grabar': '🎙️ Empezar a grabar',
+    'boton-detener': '⏹️ Detener grabación',
+    'grabando': ' Grabando... ',
+    'campo-transcripcion': 'Texto transcripto (editable)',
+    'boton-copiar': 'Copiar',
+    'boton-copiado': '✅ Copiado',
+    'boton-descargar': 'Descargar .txt',
+    'estado-preparando': 'Preparando el modelo elegido...',
+    'estado-descargando': 'Descargando modelo... {p}% (solo esta vez, después queda guardado)',
+    'estado-transcribiendo': 'Transcribiendo...',
+    'error-cargar-modelo': 'No se pudo cargar el modelo: ',
+    'error-sin-memoria': 'Tu navegador se quedó sin memoria para correr este modelo. Probá con uno más liviano.',
+    'error-transcribir': 'No se pudo transcribir: ',
+    'error-microfono': 'No se pudo acceder al micrófono: ',
+    'error-copiar': 'No se pudo copiar: ',
     'titulo-pagina': 'Dictado por voz gratis — Mini Cookies',
     'meta-descripcion': 'Grabá tu voz y convertila a texto 100% en tu navegador, sin enviar el audio a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Voice dictation',
+    'intro': 'Record your voice with the microphone and turn it into text using AI (Whisper).',
+    'campo-modelo': 'Model',
+    'modelo-tiny': 'Fast — best for short notes (~41 MB)',
+    'modelo-base': 'Accurate — better with background noise or a strong accent (~77 MB)',
+    'modelo-small': 'Very accurate — the best quality (~249 MB)',
+    'campo-idioma': 'Language',
+    'idioma-espanol': 'Spanish',
+    'idioma-auto': 'Detect automatically',
+    'idioma-ingles': 'English',
+    'boton-grabar': '🎙️ Start recording',
+    'boton-detener': '⏹️ Stop recording',
+    'grabando': ' Recording... ',
+    'campo-transcripcion': 'Transcribed text (editable)',
+    'boton-copiar': 'Copy',
+    'boton-copiado': '✅ Copied',
+    'boton-descargar': 'Download .txt',
+    'estado-preparando': 'Getting the chosen model ready...',
+    'estado-descargando': 'Downloading the model... {p}% (just this once — after that it stays cached)',
+    'estado-transcribiendo': 'Transcribing...',
+    'error-cargar-modelo': 'The model could not be loaded: ',
+    'error-sin-memoria': 'Your browser ran out of memory running this model. Try a lighter one.',
+    'error-transcribir': 'The audio could not be transcribed: ',
+    'error-microfono': 'The microphone could not be accessed: ',
+    'error-copiar': 'Could not copy: ',
     'titulo-pagina': 'Free voice dictation — Mini Cookies',
     'meta-descripcion': 'Record your voice and turn it into text entirely in your browser, without sending the audio to any server.',
   }
@@ -43,33 +93,33 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Dictado por voz</h1>
-  <p>Grabá tu voz con el micrófono y convertila a texto usando inteligencia artificial (Whisper).</p>
+  <h1 data-i18n="hero-titulo">Dictado por voz</h1>
+  <p data-i18n="intro">Grabá tu voz con el micrófono y convertila a texto usando inteligencia artificial (Whisper).</p>
 
   <div class="panel-herramienta">
     <div class="controles" style="margin-bottom:16px;">
       <label class="campo">
-        Modelo
+        <span data-i18n="campo-modelo">Modelo</span>
         <select id="selectorModelo">
-          <option value="Xenova/whisper-tiny" selected>Rápido — ideal para notas cortas (~41 MB)</option>
-          <option value="Xenova/whisper-base">Preciso — mejor con ruido o acento marcado (~77 MB)</option>
-          <option value="Xenova/whisper-small">Muy preciso — la mejor calidad (~249 MB)</option>
+          <option value="Xenova/whisper-tiny" selected data-i18n="modelo-tiny">Rápido — ideal para notas cortas (~41 MB)</option>
+          <option value="Xenova/whisper-base" data-i18n="modelo-base">Preciso — mejor con ruido o acento marcado (~77 MB)</option>
+          <option value="Xenova/whisper-small" data-i18n="modelo-small">Muy preciso — la mejor calidad (~249 MB)</option>
         </select>
       </label>
       <label class="campo">
-        Idioma
+        <span data-i18n="campo-idioma">Idioma</span>
         <select id="selectorIdioma">
-          <option value="spanish" selected>Español</option>
-          <option value="auto">Detectar automáticamente</option>
-          <option value="english">Inglés</option>
+          <option value="spanish" selected data-i18n="idioma-espanol">Español</option>
+          <option value="auto" data-i18n="idioma-auto">Detectar automáticamente</option>
+          <option value="english" data-i18n="idioma-ingles">Inglés</option>
         </select>
       </label>
     </div>
 
     <div style="text-align:center;">
-      <button class="boton" id="botonGrabar" type="button">🎙️ Empezar a grabar</button>
+      <button class="boton" id="botonGrabar" type="button" data-i18n="boton-grabar">🎙️ Empezar a grabar</button>
       <div class="estado-grabacion" id="estadoGrabacion" style="justify-content:center;">
-        <span class="punto-grabando"></span> Grabando... <span id="tiempoGrabando">00:00</span>
+        <span class="punto-grabando"></span><span data-i18n="grabando"> Grabando... </span><span id="tiempoGrabando">00:00</span>
       </div>
     </div>
 
@@ -82,12 +132,12 @@ window.i18nPagina = {
 
     <div class="resultado" id="resultado">
       <label class="campo">
-        Texto transcripto (editable)
+        <span data-i18n="campo-transcripcion">Texto transcripto (editable)</span>
         <textarea id="areaTexto" style="min-height:150px;"></textarea>
       </label>
       <div class="controles" style="margin-top:10px;">
-        <button class="boton" id="botonCopiar" type="button">Copiar</button>
-        <button class="boton" id="botonDescargar" type="button">Descargar .txt</button>
+        <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar</button>
+        <button class="boton" id="botonDescargar" type="button" data-i18n="boton-descargar">Descargar .txt</button>
       </div>
     </div>
   </div>
