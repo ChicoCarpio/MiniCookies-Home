@@ -35,6 +35,16 @@ const AVISO = `/*! ${JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8')
 // copyright (los chiquitos, como el del tema, no lo necesitan).
 const MINIMO_PARA_AVISO = 1500;
 
+// Etiqueta de Google AdSense. Va en TODAS las paginas, no solo en la portada:
+// ademas de servir los anuncios, es la que verifica la propiedad del sitio y
+// la que muestra el mensaje de consentimiento de cookies a los visitantes de
+// la UE (Privacy & messaging usa esta misma etiqueta, no un script aparte).
+// El ID sale de package.json para no repetirlo en 119 archivos.
+const ADSENSE = JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8')).config.adsense;
+const ETIQUETA_ADSENSE = ADSENSE
+  ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE}" crossorigin="anonymous"></script>`
+  : '';
+
 function esModulo(codigo) {
   return /^\s*(import|export)\s/m.test(codigo);
 }
@@ -72,6 +82,10 @@ function procesarHtml(html, archivo) {
   });
   html = html.replace(/<style(\s[^>]*)?>([\s\S]*?)<\/style>/gi, (completo, atributos = '', codigo) =>
     (codigo.trim() ? `<style${atributos}>${minificarCss(codigo, `${archivo} <style>`)}</style>` : completo));
+  if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js')) {
+    if (!/<\/head>/i.test(html)) throw new Error('Sin </head>, no se puede poner AdSense: ' + archivo);
+    html = html.replace(/<\/head>/i, ETIQUETA_ADSENSE + '\n</head>');
+  }
   return html;
 }
 
