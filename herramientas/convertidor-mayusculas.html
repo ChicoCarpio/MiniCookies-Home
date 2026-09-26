@@ -3,12 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir mayúsculas y minúsculas gratis — Mini Cookies</title>
-<meta name="description" content="Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título u oración, gratis y sin enviar nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir mayúsculas y minúsculas gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título u oración, gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'hero-titulo': 'Convertir mayúsculas y minúsculas',
+    'intro': 'Escribí o pegá tu texto y elegí el formato.',
+    'placeholder-texto': 'Escribí o pegá tu texto acá...',
+    'modo-mayusculas': 'MAYÚSCULAS',
+    'modo-minusculas': 'minúsculas',
+    'modo-titulo': 'Cada Palabra En Mayúscula',
+    'modo-oracion': 'Solo la primera letra',
+    'modo-alternado': 'AltErNaDo',
+    'boton-copiar': 'Copiar',
+    'boton-copiado': '¡Copiado!',
+    'boton-descargar': 'Descargar .txt',
+    'titulo-pagina': 'Convertir mayúsculas y minúsculas gratis — Mini Cookies',
+    'meta-descripcion': 'Convertí un texto a MAYÚSCULAS, minúsculas, Tipo Título u oración, gratis y sin enviar nada a ningún servidor.',
+  },
+  en: {
+    'hero-titulo': 'Change text case',
+    'intro': 'Type or paste your text and pick a format.',
+    'placeholder-texto': 'Type or paste your text here...',
+    'modo-mayusculas': 'UPPERCASE',
+    'modo-minusculas': 'lowercase',
+    'modo-titulo': 'Capitalize Each Word',
+    'modo-oracion': 'Sentence case',
+    'modo-alternado': 'AlTeRnAtInG',
+    'boton-copiar': 'Copy',
+    'boton-copiado': 'Copied!',
+    'boton-descargar': 'Download .txt',
+    'titulo-pagina': 'Change text case, free — Mini Cookies',
+    'meta-descripcion': 'Convert text to UPPERCASE, lowercase, Title Case or sentence case — free, and nothing is sent to a server.',
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,34 +50,37 @@
 
 <header class="sitio">
   <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
-  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Convertir mayúsculas y minúsculas</h1>
-  <p>Escribí o pegá tu texto y elegí el formato.</p>
+  <h1 data-i18n="hero-titulo">Convertir mayúsculas y minúsculas</h1>
+  <p data-i18n="intro">Escribí o pegá tu texto y elegí el formato.</p>
 
   <div class="panel-herramienta">
-    <textarea id="texto" placeholder="Escribí o pegá tu texto acá..."></textarea>
+    <textarea id="texto" data-i18n-attr="placeholder:placeholder-texto" placeholder="Escribí o pegá tu texto acá..."></textarea>
 
     <div class="controles">
-      <button class="boton" data-modo="mayusculas" type="button">MAYÚSCULAS</button>
-      <button class="boton" data-modo="minusculas" type="button">minúsculas</button>
-      <button class="boton" data-modo="titulo" type="button">Cada Palabra En Mayúscula</button>
-      <button class="boton" data-modo="oracion" type="button">Solo la primera letra</button>
-      <button class="boton" data-modo="alternado" type="button">AltErNaDo</button>
-      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar</button>
-      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar .txt</button>
+      <button class="boton" data-modo="mayusculas" type="button" data-i18n="modo-mayusculas">MAYÚSCULAS</button>
+      <button class="boton" data-modo="minusculas" type="button" data-i18n="modo-minusculas">minúsculas</button>
+      <button class="boton" data-modo="titulo" type="button" data-i18n="modo-titulo">Cada Palabra En Mayúscula</button>
+      <button class="boton" data-modo="oracion" type="button" data-i18n="modo-oracion">Solo la primera letra</button>
+      <button class="boton" data-modo="alternado" type="button" data-i18n="modo-alternado">AltErNaDo</button>
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;" data-i18n="boton-copiar">Copiar</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" data-i18n="boton-descargar">Descargar .txt</button>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/descargar.js"></script>
@@ -73,9 +110,8 @@ document.querySelectorAll('[data-modo]').forEach((boton) => {
 document.getElementById('botonCopiar').addEventListener('click', async () => {
   await navigator.clipboard.writeText(texto.value);
   const boton = document.getElementById('botonCopiar');
-  const textoOriginal = boton.textContent;
-  boton.textContent = '¡Copiado!';
-  setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+  boton.textContent = t('boton-copiado');
+  setTimeout(() => { boton.textContent = t('boton-copiar'); }, 1500);
 });
 
 document.getElementById('botonDescargar').addEventListener('click', () => {
@@ -84,5 +120,6 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

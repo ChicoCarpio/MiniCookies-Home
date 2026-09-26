@@ -3,12 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Lorem Ipsum gratis — Mini Cookies</title>
-<meta name="description" content="Generá texto de relleno Lorem Ipsum por párrafos, oraciones o palabras, gratis y sin enviar nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Generador de Lorem Ipsum gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Generá texto de relleno Lorem Ipsum por párrafos, oraciones o palabras, gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'hero-titulo': 'Generador de Lorem Ipsum',
+    'intro': 'Generá texto de relleno para maquetas y pruebas.',
+    'campo-cantidad': 'Cantidad',
+    'campo-unidad': 'Unidad',
+    'unidad-parrafos': 'Párrafos',
+    'unidad-oraciones': 'Oraciones',
+    'unidad-palabras': 'Palabras',
+    'empezar-clasico': ' Empezar con "Lorem ipsum dolor sit amet..."',
+    'boton-generar': 'Generar',
+    'boton-copiar': 'Copiar',
+    'boton-copiado': '¡Copiado!',
+    'boton-descargar': 'Descargar .txt',
+    'titulo-pagina': 'Generador de Lorem Ipsum gratis — Mini Cookies',
+    'meta-descripcion': 'Generá texto de relleno Lorem Ipsum por párrafos, oraciones o palabras, gratis y sin enviar nada a ningún servidor.',
+  },
+  en: {
+    'hero-titulo': 'Lorem Ipsum generator',
+    'intro': 'Generate placeholder text for mockups and testing.',
+    'campo-cantidad': 'How many',
+    'campo-unidad': 'Unit',
+    'unidad-parrafos': 'Paragraphs',
+    'unidad-oraciones': 'Sentences',
+    'unidad-palabras': 'Words',
+    'empezar-clasico': ' Start with "Lorem ipsum dolor sit amet..."',
+    'boton-generar': 'Generate',
+    'boton-copiar': 'Copy',
+    'boton-copiado': 'Copied!',
+    'boton-descargar': 'Download .txt',
+    'titulo-pagina': 'Free Lorem Ipsum generator — Mini Cookies',
+    'meta-descripcion': 'Generate Lorem Ipsum placeholder text by paragraphs, sentences or words — free, and nothing is sent to a server.',
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,47 +52,50 @@
 
 <header class="sitio">
   <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
-  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Generador de Lorem Ipsum</h1>
-  <p>Generá texto de relleno para maquetas y pruebas.</p>
+  <h1 data-i18n="hero-titulo">Generador de Lorem Ipsum</h1>
+  <p data-i18n="intro">Generá texto de relleno para maquetas y pruebas.</p>
 
   <div class="panel-herramienta">
     <div class="controles">
       <label class="campo">
-        Cantidad
+        <span data-i18n="campo-cantidad">Cantidad</span>
         <input type="number" id="cantidad" value="3" min="1" max="1000" style="width:80px;">
       </label>
       <label class="campo">
-        Unidad
+        <span data-i18n="campo-unidad">Unidad</span>
         <select id="unidad">
-          <option value="parrafos">Párrafos</option>
-          <option value="oraciones">Oraciones</option>
-          <option value="palabras">Palabras</option>
+          <option value="parrafos" data-i18n="unidad-parrafos">Párrafos</option>
+          <option value="oraciones" data-i18n="unidad-oraciones">Oraciones</option>
+          <option value="palabras" data-i18n="unidad-palabras">Palabras</option>
         </select>
       </label>
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="empezarClasico" checked> Empezar con "Lorem ipsum dolor sit amet..."
+        <input type="checkbox" id="empezarClasico" checked><span data-i18n="empezar-clasico"> Empezar con "Lorem ipsum dolor sit amet..."</span>
       </label>
-      <button class="boton" id="botonGenerar" type="button">Generar</button>
+      <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Generar</button>
     </div>
 
     <textarea id="resultado" readonly style="margin-top:16px;"></textarea>
     <div class="controles">
-      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar</button>
-      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar .txt</button>
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;" data-i18n="boton-copiar">Copiar</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" data-i18n="boton-descargar">Descargar .txt</button>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/descargar.js"></script>
@@ -137,9 +176,8 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
   if (!resultado.value) return;
   await navigator.clipboard.writeText(resultado.value);
   const boton = document.getElementById('botonCopiar');
-  const textoOriginal = boton.textContent;
-  boton.textContent = '¡Copiado!';
-  setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+  boton.textContent = t('boton-copiado');
+  setTimeout(() => { boton.textContent = t('boton-copiar'); }, 1500);
 });
 
 document.getElementById('botonDescargar').addEventListener('click', () => {
@@ -151,5 +189,6 @@ document.getElementById('botonGenerar').click();
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

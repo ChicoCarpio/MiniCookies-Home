@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formatear y validar JSON gratis — Mini Cookies</title>
-<meta name="description" content="Formateá, validá y minificá JSON al instante, gratis y sin enviar nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Formatear y validar JSON gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Formateá, validá y minificá JSON al instante, gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,6 +13,36 @@
   #entrada.json-valido { border: 2px solid var(--verde); }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'hero-titulo': 'Formatear y validar JSON',
+    'intro': 'Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error.',
+    'boton-formatear': 'Formatear (indentado)',
+    'boton-minificar': 'Minificar',
+    'boton-copiar': 'Copiar resultado',
+    'boton-copiado': '¡Copiado!',
+    'boton-descargar': 'Descargar .json',
+    'json-valido': '✅ JSON válido.',
+    'error-ubicacion': ' — mirá la línea {linea}, columna {columna} (marcada abajo)',
+    'titulo-pagina': 'Formatear y validar JSON gratis — Mini Cookies',
+    'meta-descripcion': 'Formateá, validá y minificá JSON al instante, gratis y sin enviar nada a ningún servidor.',
+  },
+  en: {
+    'hero-titulo': 'Format and validate JSON',
+    'intro': 'Paste your JSON, format it with readable indentation or minify it, and we will tell you if anything is broken.',
+    'boton-formatear': 'Format (indented)',
+    'boton-minificar': 'Minify',
+    'boton-copiar': 'Copy result',
+    'boton-copiado': 'Copied!',
+    'boton-descargar': 'Download .json',
+    'json-valido': '✅ Valid JSON.',
+    'error-ubicacion': ' — look at line {linea}, column {columna} (highlighted below)',
+    'titulo-pagina': 'Format and validate JSON, free — Mini Cookies',
+    'meta-descripcion': 'Format, validate and minify JSON instantly — free, and nothing is sent to a server.',
+  }
+};
+</script>
 </head>
 <body>
 
@@ -20,36 +50,39 @@
 
 <header class="sitio">
   <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
-  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Formatear y validar JSON</h1>
-  <p>Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error.</p>
+  <h1 data-i18n="hero-titulo">Formatear y validar JSON</h1>
+  <p data-i18n="intro">Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error.</p>
 
   <div class="panel-herramienta">
     <textarea id="entrada" placeholder='{"ejemplo": true, "numero": 42}'></textarea>
 
     <div class="controles">
-      <button class="boton" id="botonFormatear" type="button">Formatear (indentado)</button>
-      <button class="boton" id="botonMinificar" type="button" style="background:#64748b;">Minificar</button>
-      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;">Copiar resultado</button>
-      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;">Descargar .json</button>
+      <button class="boton" id="botonFormatear" type="button" data-i18n="boton-formatear">Formatear (indentado)</button>
+      <button class="boton" id="botonMinificar" type="button" style="background:#64748b;" data-i18n="boton-minificar">Minificar</button>
+      <button class="boton" id="botonCopiar" type="button" style="background:#64748b;" data-i18n="boton-copiar">Copiar resultado</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" data-i18n="boton-descargar">Descargar .json</button>
     </div>
 
     <p id="mensajeError" style="color:#dc2626; display:none;"></p>
-    <p id="mensajeOk" style="color:var(--verde); display:none;">✅ JSON válido.</p>
+    <p id="mensajeOk" style="color:var(--verde); display:none;" data-i18n="json-valido">✅ JSON válido.</p>
 
     <textarea id="salida" readonly style="margin-top:12px;"></textarea>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/descargar.js"></script>
@@ -97,7 +130,7 @@ function procesar(indentacion) {
     let mensaje = '❌ ' + error.message;
     if (posicion !== null && posicion >= 0 && posicion <= entrada.value.length) {
       const { linea, columna } = posicionALineaColumna(entrada.value, posicion);
-      mensaje += ` — mirá la línea ${linea}, columna ${columna} (marcada abajo)`;
+      mensaje += t('error-ubicacion').replace('{linea}', linea).replace('{columna}', columna);
       entrada.focus();
       entrada.setSelectionRange(posicion, Math.min(entrada.value.length, posicion + 1));
     }
@@ -119,9 +152,8 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
   if (!salida.value) return;
   await navigator.clipboard.writeText(salida.value);
   const boton = document.getElementById('botonCopiar');
-  const textoOriginal = boton.textContent;
-  boton.textContent = '¡Copiado!';
-  setTimeout(() => { boton.textContent = textoOriginal; }, 1500);
+  boton.textContent = t('boton-copiado');
+  setTimeout(() => { boton.textContent = t('boton-copiar'); }, 1500);
 });
 
 // Descarga lo que haya en el resultado; si todavía no se formateó, formatea
@@ -134,5 +166,6 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

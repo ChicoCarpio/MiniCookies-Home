@@ -3,12 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de contraseñas seguras — Mini Cookies</title>
-<meta name="description" content="Generá contraseñas seguras y aleatorias, gratis y sin salir de tu navegador. Nunca se envían a ningún servidor.">
+<title data-i18n="titulo-pagina">Generador de contraseñas seguras — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Generá contraseñas seguras y aleatorias, gratis y sin salir de tu navegador. Nunca se envían a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Generador de contraseñas seguras — Mini Cookies',
+    'meta-descripcion': 'Generá contraseñas seguras y aleatorias, gratis y sin salir de tu navegador. Nunca se envían a ningún servidor.',
+  },
+  en: {
+    'titulo-pagina': 'Strong password generator — Mini Cookies',
+    'meta-descripcion': 'Generate strong random passwords without leaving your browser. They are never sent to a server.',
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,7 +28,10 @@
 
 <header class="sitio">
   <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
-  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
@@ -55,7 +70,7 @@
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
     <h3 style="margin-top:0;">¿Por qué es segura?</h3>
@@ -67,8 +82,8 @@
 </main>
 
 <footer class="sitio">
-  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script>
@@ -191,5 +206,6 @@ actualizarYGenerar();
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

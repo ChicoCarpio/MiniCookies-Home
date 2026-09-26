@@ -3,12 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contador de palabras y caracteres — Mini Cookies</title>
-<meta name="description" content="Contá palabras, caracteres, párrafos y tiempo de lectura de un texto al instante, gratis y sin enviar nada a ningún servidor.">
+<title data-i18n="titulo-pagina">Contador de palabras y caracteres — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Contá palabras, caracteres, párrafos y tiempo de lectura de un texto al instante, gratis y sin enviar nada a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Contador de palabras y caracteres — Mini Cookies',
+    'meta-descripcion': 'Contá palabras, caracteres, párrafos y tiempo de lectura de un texto al instante, gratis y sin enviar nada a ningún servidor.',
+    'hero-titulo': 'Contador de palabras',
+    'intro': 'Escribí o pegá tu texto abajo. Se cuenta en tiempo real.',
+    'placeholder-texto': 'Pegá o escribí tu texto acá...',
+    'et-palabras': 'Palabras',
+    'et-caracteres': 'Caracteres',
+    'et-sin-espacios': 'Sin espacios',
+    'et-parrafos': 'Párrafos',
+    'et-oraciones': 'Oraciones',
+    'et-lectura': 'Lectura',
+  },
+  en: {
+    'titulo-pagina': 'Word and character counter — Mini Cookies',
+    'meta-descripcion': 'Count the words, characters, paragraphs and reading time of any text instantly — free, and nothing is sent to a server.',
+    'hero-titulo': 'Word counter',
+    'intro': 'Type or paste your text below. It counts as you go.',
+    'placeholder-texto': 'Paste or type your text here...',
+    'et-palabras': 'Words',
+    'et-caracteres': 'Characters',
+    'et-sin-espacios': 'No spaces',
+    'et-parrafos': 'Paragraphs',
+    'et-oraciones': 'Sentences',
+    'et-lectura': 'Reading time',
+  }
+};
+</script>
 </head>
 <body>
 
@@ -16,33 +46,36 @@
 
 <header class="sitio">
   <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
-  <nav class="sitio"><a href="../index.html">Todas las herramientas</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Contador de palabras</h1>
-  <p>Escribí o pegá tu texto abajo. Se cuenta en tiempo real.</p>
+  <h1 data-i18n="hero-titulo">Contador de palabras</h1>
+  <p data-i18n="intro">Escribí o pegá tu texto abajo. Se cuenta en tiempo real.</p>
 
   <div class="panel-herramienta">
-    <textarea id="texto" placeholder="Pegá o escribí tu texto acá..."></textarea>
+    <textarea id="texto" data-i18n-attr="placeholder:placeholder-texto" placeholder="Pegá o escribí tu texto acá..."></textarea>
 
     <div class="estadisticas">
-      <div class="estadistica"><div class="numero" id="numPalabras">0</div><div class="etiqueta">Palabras</div></div>
-      <div class="estadistica"><div class="numero" id="numCaracteres">0</div><div class="etiqueta">Caracteres</div></div>
-      <div class="estadistica"><div class="numero" id="numCaracteresSinEspacios">0</div><div class="etiqueta">Sin espacios</div></div>
-      <div class="estadistica"><div class="numero" id="numParrafos">0</div><div class="etiqueta">Párrafos</div></div>
-      <div class="estadistica"><div class="numero" id="numOraciones">0</div><div class="etiqueta">Oraciones</div></div>
-      <div class="estadistica"><div class="numero" id="tiempoLectura">0 min</div><div class="etiqueta">Lectura</div></div>
+      <div class="estadistica"><div class="numero" id="numPalabras">0</div><div class="etiqueta" data-i18n="et-palabras">Palabras</div></div>
+      <div class="estadistica"><div class="numero" id="numCaracteres">0</div><div class="etiqueta" data-i18n="et-caracteres">Caracteres</div></div>
+      <div class="estadistica"><div class="numero" id="numCaracteresSinEspacios">0</div><div class="etiqueta" data-i18n="et-sin-espacios">Sin espacios</div></div>
+      <div class="estadistica"><div class="numero" id="numParrafos">0</div><div class="etiqueta" data-i18n="et-parrafos">Párrafos</div></div>
+      <div class="estadistica"><div class="numero" id="numOraciones">0</div><div class="etiqueta" data-i18n="et-oraciones">Oraciones</div></div>
+      <div class="estadistica"><div class="numero" id="tiempoLectura">0 min</div><div class="etiqueta" data-i18n="et-lectura">Lectura</div></div>
     </div>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script>
@@ -78,5 +111,6 @@ contar();
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>

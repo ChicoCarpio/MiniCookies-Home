@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convertir imagen a Base64 gratis — Mini Cookies</title>
-<meta name="description" content="Convertí una imagen a texto Base64 (data URI) para pegar directo en HTML o CSS, gratis y sin subirla a ningún servidor.">
+<title data-i18n="titulo-pagina">Convertir imagen a Base64 gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí una imagen a texto Base64 (data URI) para pegar directo en HTML o CSS, gratis y sin subirla a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -12,6 +12,34 @@
   #vistaPrevia { max-width: 200px; max-height: 200px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'hero-titulo': 'Convertir imagen a Base64',
+    'intro': 'Elegí una imagen y obtené su texto Base64 (data URI), listo para pegar en HTML o CSS.',
+    'zona-arrastre': '🖼️ Arrastrá tu imagen acá o hacé clic para elegirla',
+    'alt-vista-previa': 'Vista previa',
+    'boton-copiar': 'Copiar Base64',
+    'boton-copiado': '¡Copiado!',
+    'boton-descargar': 'Descargar .txt',
+    'placeholder-salida': 'El texto Base64 aparece acá...',
+    'titulo-pagina': 'Convertir imagen a Base64 gratis — Mini Cookies',
+    'meta-descripcion': 'Convertí una imagen a texto Base64 (data URI) para pegar directo en HTML o CSS, gratis y sin subirla a ningún servidor.',
+  },
+  en: {
+    'hero-titulo': 'Convert an image to Base64',
+    'intro': 'Pick an image and get its Base64 text (data URI), ready to paste into HTML or CSS.',
+    'zona-arrastre': '🖼️ Drop your image here, or click to pick one',
+    'alt-vista-previa': 'Preview',
+    'boton-copiar': 'Copy Base64',
+    'boton-copiado': 'Copied!',
+    'boton-descargar': 'Download .txt',
+    'placeholder-salida': 'The Base64 text shows up here...',
+    'titulo-pagina': 'Convert an image to Base64, free — Mini Cookies',
+    'meta-descripcion': 'Turn an image into Base64 text (data URI) you can paste straight into HTML or CSS — free, and nothing is uploaded to a server.',
+  }
+};
+</script>
 </head>
 <body>
 
@@ -19,36 +47,39 @@
 
 <header class="sitio">
   <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
-  <nav class="sitio"><a href="../imagenes.html">Imágenes</a>  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  <nav class="sitio">
+    <a href="../imagenes.html" data-i18n="nav-cat-imagenes">Herramientas de Imágenes</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
 </header>
 
 <main>
-  <h1>Convertir imagen a Base64</h1>
-  <p>Elegí una imagen y obtené su texto Base64 (data URI), listo para pegar en HTML o CSS.</p>
+  <h1 data-i18n="hero-titulo">Convertir imagen a Base64</h1>
+  <p data-i18n="intro">Elegí una imagen y obtené su texto Base64 (data URI), listo para pegar en HTML o CSS.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tu imagen acá o hacé clic para elegirla
+      <span data-i18n="zona-arrastre">🖼️ Arrastrá tu imagen acá o hacé clic para elegirla</span>
       <input type="file" id="entradaArchivo" accept="image/*" hidden>
     </div>
 
-    <img id="vistaPrevia" alt="Vista previa">
+    <img id="vistaPrevia" data-i18n-attr="alt:alt-vista-previa" alt="Vista previa">
 
     <div class="controles">
-      <button class="boton" id="botonCopiar" type="button" disabled>Copiar Base64</button>
-      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" disabled>Descargar .txt</button>
+      <button class="boton" id="botonCopiar" type="button" disabled data-i18n="boton-copiar">Copiar Base64</button>
+      <button class="boton" id="botonDescargar" type="button" style="background:#64748b;" disabled data-i18n="boton-descargar">Descargar .txt</button>
     </div>
 
-    <textarea id="salida" readonly style="margin-top:12px; min-height:160px;" placeholder="El texto Base64 aparece acá..."></textarea>
+    <textarea id="salida" readonly style="margin-top:12px; min-height:160px;" data-i18n-attr="placeholder:placeholder-salida" placeholder="El texto Base64 aparece acá..."></textarea>
   </div>
 
-  <div class="anuncio">Espacio publicitario</div>
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 </main>
 
 <footer class="sitio">
-  <p>Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html">Política de privacidad</a> · <a href="../terminos.html">Términos de uso</a> · <a href="../creditos.html">Créditos</a> · <a href="../contacto.html">Contacto</a></p>
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/descargar.js"></script>
@@ -93,9 +124,8 @@ zonaArrastre.addEventListener('drop', (e) => {
 botonCopiar.addEventListener('click', async () => {
   if (!salida.value) return;
   await navigator.clipboard.writeText(salida.value);
-  const textoOriginal = botonCopiar.textContent;
-  botonCopiar.textContent = '¡Copiado!';
-  setTimeout(() => { botonCopiar.textContent = textoOriginal; }, 1500);
+  botonCopiar.textContent = t('boton-copiado');
+  setTimeout(() => { botonCopiar.textContent = t('boton-copiar'); }, 1500);
 });
 
 // El data URI completo ("data:image/...;base64,..."), igual que lo que se copia.
@@ -105,5 +135,6 @@ botonDescargar.addEventListener('click', () => {
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
 </body>
 </html>
