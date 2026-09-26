@@ -19,10 +19,36 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Comparar dos imágenes',
+    'intro': 'Elegí dos imágenes (por ejemplo, dos versiones de un diseño o dos capturas de pantalla) y resaltá las diferencias entre ellas.',
+    'zona-a': '🅰️ Arrastrá la imagen A acá o hacé clic para elegirla',
+    'zona-b': '🅱️ Arrastrá la imagen B acá o hacé clic para elegirla',
+    'alt-a': 'Vista previa de la imagen A',
+    'alt-b': 'Vista previa de la imagen B',
+    'campo-tolerancia-a': 'Tolerancia: ',
+    'campo-tolerancia-b': '(más alta = ignora diferencias chicas)',
+    'boton-comparar': 'Comparar',
+    'et-diferencia': 'Píxeles distintos',
+    'aviso-tamano': 'Las imágenes tienen tamaños distintos ({a} vs. {b}) — la B se va a estirar para que coincida con la A antes de comparar.',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen de diferencias',
     'titulo-pagina': 'Comparar dos imágenes (diff visual) gratis — Mini Cookies',
     'meta-descripcion': 'Compará dos imágenes y resaltá visualmente las diferencias entre ellas, gratis y sin subirlas a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Compare two images',
+    'intro': 'Pick two images (two versions of a design, say, or two screenshots) and highlight the differences between them.',
+    'zona-a': '🅰️ Drop image A here, or click to pick it',
+    'zona-b': '🅱️ Drop image B here, or click to pick it',
+    'alt-a': 'Preview of image A',
+    'alt-b': 'Preview of image B',
+    'campo-tolerancia-a': 'Tolerance: ',
+    'campo-tolerancia-b': '(higher = ignores small differences)',
+    'boton-comparar': 'Compare',
+    'et-diferencia': 'Pixels that differ',
+    'aviso-tamano': 'The images are different sizes ({a} vs. {b}) — B will be stretched to match A before comparing.',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download the difference image',
     'titulo-pagina': 'Compare two images (visual diff), free — Mini Cookies',
     'meta-descripcion': 'Compare two images and highlight the differences between them — free, and nothing is uploaded to a server.',
   }
@@ -43,20 +69,20 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Comparar dos imágenes</h1>
-  <p>Elegí dos imágenes (por ejemplo, dos versiones de un diseño o dos capturas de pantalla) y resaltá las diferencias entre ellas.</p>
+  <h1 data-i18n="hero-titulo">Comparar dos imágenes</h1>
+  <p data-i18n="intro">Elegí dos imágenes (por ejemplo, dos versiones de un diseño o dos capturas de pantalla) y resaltá las diferencias entre ellas.</p>
 
   <div class="panel-herramienta">
     <div class="zonas-comparar">
       <div class="zona-arrastre" id="zonaArrastreA">
-        🅰️ Arrastrá la imagen A acá o hacé clic para elegirla
+        <span data-i18n="zona-a">🅰️ Arrastrá la imagen A acá o hacé clic para elegirla</span>
         <input type="file" id="entradaArchivoA" accept="image/*" hidden>
-        <img class="miniatura" id="miniaturaA" style="display:none;" alt="Vista previa de la imagen A">
+        <img class="miniatura" id="miniaturaA" style="display:none;" data-i18n-attr="alt:alt-a" alt="Vista previa de la imagen A">
       </div>
       <div class="zona-arrastre" id="zonaArrastreB">
-        🅱️ Arrastrá la imagen B acá o hacé clic para elegirla
+        <span data-i18n="zona-b">🅱️ Arrastrá la imagen B acá o hacé clic para elegirla</span>
         <input type="file" id="entradaArchivoB" accept="image/*" hidden>
-        <img class="miniatura" id="miniaturaB" style="display:none;" alt="Vista previa de la imagen B">
+        <img class="miniatura" id="miniaturaB" style="display:none;" data-i18n-attr="alt:alt-b" alt="Vista previa de la imagen B">
       </div>
     </div>
 
@@ -64,20 +90,20 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        Tolerancia: <span id="etiquetaSensibilidad">30</span> <span style="color:var(--texto-suave); font-size:0.8rem;">(más alta = ignora diferencias chicas)</span>
+        <span data-i18n="campo-tolerancia-a">Tolerancia: </span><span id="etiquetaSensibilidad">30</span> <span style="color:var(--texto-suave); font-size:0.8rem;" data-i18n="campo-tolerancia-b">(más alta = ignora diferencias chicas)</span>
         <input type="range" id="sensibilidad" min="5" max="120" value="30">
       </label>
-      <button class="boton" id="botonComparar" disabled>Comparar</button>
+      <button class="boton" id="botonComparar" disabled data-i18n="boton-comparar">Comparar</button>
     </div>
 
     <canvas id="vistaResultado"></canvas>
 
     <div class="estadisticas" id="estadisticas" style="display:none;">
-      <div class="estadistica"><div class="numero" id="porcentajeDiferencia">—</div><div class="etiqueta">Píxeles distintos</div></div>
+      <div class="estadistica"><div class="numero" id="porcentajeDiferencia">—</div><div class="etiqueta" data-i18n="et-diferencia">Píxeles distintos</div></div>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="comparacion">Descargar imagen de diferencias</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="comparacion" data-i18n="resultado-enlace">Descargar imagen de diferencias</a>
     </div>
   </div>
 
@@ -148,7 +174,9 @@ function actualizarEstadoBoton() {
   botonComparar.disabled = !imgA || !imgB;
   if (imgA && imgB && (imgA.naturalWidth !== imgB.naturalWidth || imgA.naturalHeight !== imgB.naturalHeight)) {
     avisoTamano.style.display = 'block';
-    avisoTamano.textContent = `Las imágenes tienen tamaños distintos (${imgA.naturalWidth}×${imgA.naturalHeight}px vs. ${imgB.naturalWidth}×${imgB.naturalHeight}px) — la B se va a estirar para que coincida con la A antes de comparar.`;
+    avisoTamano.textContent = t('aviso-tamano')
+      .replace('{a}', `${imgA.naturalWidth}×${imgA.naturalHeight}px`)
+      .replace('{b}', `${imgB.naturalWidth}×${imgB.naturalHeight}px`);
   } else {
     avisoTamano.style.display = 'none';
   }

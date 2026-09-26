@@ -73,10 +73,30 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Recortar imagen',
+    'intro': 'Elegí una imagen, arrastrá la selección y recortala con relación de aspecto libre o fija.',
+    'alt-recorte': 'Imagen a recortar',
+    'campo-relacion': 'Relación de aspecto',
+    'ratio-libre': 'Libre',
+    'boton-recortar': 'Recortar',
+    'tamano-recorte': 'Recorte: {w} × {h} px',
+    'boton-descargar': 'Descargar imagen recortada',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen recortada',
     'titulo-pagina': 'Recortar imagen gratis — Mini Cookies',
     'meta-descripcion': 'Recortá una imagen arrastrando la selección, con relación de aspecto libre o fija, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Crop an image',
+    'intro': 'Pick an image, drag the selection and crop it with a free or fixed aspect ratio.',
+    'alt-recorte': 'Image to crop',
+    'campo-relacion': 'Aspect ratio',
+    'ratio-libre': 'Free',
+    'boton-recortar': 'Crop',
+    'tamano-recorte': 'Crop: {w} × {h} px',
+    'boton-descargar': 'Download the cropped image',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download the cropped image',
     'titulo-pagina': 'Crop an image, free — Mini Cookies',
     'meta-descripcion': 'Crop an image by dragging the selection, with a free or fixed aspect ratio — free, and nothing is uploaded to a server.',
   }
@@ -97,8 +117,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Recortar imagen</h1>
-  <p>Elegí una imagen, arrastrá la selección y recortala con relación de aspecto libre o fija.</p>
+  <h1 data-i18n="hero-titulo">Recortar imagen</h1>
+  <p data-i18n="intro">Elegí una imagen, arrastrá la selección y recortala con relación de aspecto libre o fija.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -107,7 +127,7 @@ window.i18nPagina = {
     </div>
 
     <div class="zona-recorte" id="zonaRecorte">
-      <img id="imgRecorte" alt="Imagen a recortar">
+      <img id="imgRecorte" data-i18n-attr="alt:alt-recorte" alt="Imagen a recortar">
       <div class="caja-seleccion" id="cajaSeleccion">
         <div class="manija-recorte" data-direccion="nw"></div>
         <div class="manija-recorte" data-direccion="n"></div>
@@ -122,9 +142,9 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        Relación de aspecto
+        <span data-i18n="campo-relacion">Relación de aspecto</span>
         <div class="proporciones" id="proporciones">
-          <button type="button" class="activo" data-ratio="0">Libre</button>
+          <button type="button" class="activo" data-ratio="0" data-i18n="ratio-libre">Libre</button>
           <button type="button" data-ratio="1">1:1</button>
           <button type="button" data-ratio="1.3333">4:3</button>
           <button type="button" data-ratio="0.75">3:4</button>
@@ -132,18 +152,18 @@ window.i18nPagina = {
           <button type="button" data-ratio="0.5625">9:16</button>
         </div>
       </label>
-      <button class="boton" id="botonRecortar" disabled>Recortar</button>
+      <button class="boton" id="botonRecortar" disabled data-i18n="boton-recortar">Recortar</button>
       <span id="tamanoRecorte" style="color:var(--texto-suave); font-size:0.85rem;"></span>
     </div>
 
     <canvas id="vistaResultado"></canvas>
 
     <div class="controles" id="controlesDescarga" style="display:none;">
-      <button class="boton" id="botonDescargar">Descargar imagen recortada</button>
+      <button class="boton" id="botonDescargar" data-i18n="boton-descargar">Descargar imagen recortada</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-recortada">Descargar imagen recortada</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-recortada" data-i18n="resultado-enlace">Descargar imagen recortada</a>
     </div>
   </div>
 
@@ -206,7 +226,9 @@ function dibujarCaja() {
   // Tamaño real (en píxeles de la imagen) que va a tener el recorte.
   if (imagenActual && imgRecorte.offsetWidth) {
     const escala = imagenActual.naturalWidth / imgRecorte.offsetWidth;
-    tamanoRecorte.textContent = `Recorte: ${Math.round(caja.w * escala)} × ${Math.round(caja.h * escala)} px`;
+    tamanoRecorte.textContent = t('tamano-recorte')
+      .replace('{w}', Math.round(caja.w * escala))
+      .replace('{h}', Math.round(caja.h * escala));
   }
   anchoMostradoPrevio = imgRecorte.offsetWidth;
 }

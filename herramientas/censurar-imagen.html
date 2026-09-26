@@ -86,10 +86,54 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Pixelar o difuminar una zona',
+    'intro': 'Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado, puntos, ruido, o distintos tipos de desenfoque.',
+    'alt-censurar': 'Imagen a censurar',
+    'campo-seleccion': 'Selección',
+    'sel-area': 'Área',
+    'sel-libre': 'Libre (pincel)',
+    'campo-pincel-a': 'Tamaño de pincel: ',
+    'campo-zoom-a': 'Zoom: ',
+    'boton-borrar-seleccion': 'Borrar lo pintado',
+    'campo-efecto': 'Efecto',
+    'efecto-pixelar': 'Pixelado',
+    'efecto-puntos': 'Puntos',
+    'efecto-ruido': 'Ruido',
+    'efecto-difuminar': 'Difuminado',
+    'efecto-movimiento': 'Movimiento',
+    'efecto-esmerilado': 'Esmerilado',
+    'campo-intensidad-a': 'Intensidad: ',
+    'boton-aplicar': 'Aplicar',
+    'boton-otra-zona': 'Tapar otra zona',
+    'boton-descargar': 'Descargar imagen',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Pixelar o difuminar una zona de una imagen gratis — Mini Cookies',
     'meta-descripcion': 'Tapá una parte de una imagen con pixelado o desenfoque (censura, datos sensibles), por área o pintando a mano libre, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Pixelate or blur an area',
+    'intro': 'Pick an image, mark the area to cover (a face, a license plate, a sensitive detail) either as a rectangle or by painting it freehand, and apply pixelation, dots, noise, or one of several blurs.',
+    'alt-censurar': 'Image to redact',
+    'campo-seleccion': 'Selection',
+    'sel-area': 'Area',
+    'sel-libre': 'Freehand (brush)',
+    'campo-pincel-a': 'Brush size: ',
+    'campo-zoom-a': 'Zoom: ',
+    'boton-borrar-seleccion': 'Clear what you painted',
+    'campo-efecto': 'Effect',
+    'efecto-pixelar': 'Pixelate',
+    'efecto-puntos': 'Dots',
+    'efecto-ruido': 'Noise',
+    'efecto-difuminar': 'Blur',
+    'efecto-movimiento': 'Motion',
+    'efecto-esmerilado': 'Frosted',
+    'campo-intensidad-a': 'Strength: ',
+    'boton-aplicar': 'Apply',
+    'boton-otra-zona': 'Cover another area',
+    'boton-descargar': 'Download image',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download image',
     'titulo-pagina': 'Pixelate or blur part of an image, free — Mini Cookies',
     'meta-descripcion': 'Cover part of an image with pixelation or blur (redaction, sensitive data), by area or by painting freehand — free, and nothing is uploaded to a server.',
   }
@@ -110,8 +154,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Pixelar o difuminar una zona</h1>
-  <p>Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado, puntos, ruido, o distintos tipos de desenfoque.</p>
+  <h1 data-i18n="hero-titulo">Pixelar o difuminar una zona</h1>
+  <p data-i18n="intro">Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado, puntos, ruido, o distintos tipos de desenfoque.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -121,7 +165,7 @@ window.i18nPagina = {
 
     <div class="zona-recorte-contenedor" id="zonaRecorteContenedor">
       <div class="zona-recorte" id="zonaRecorte">
-        <img id="imgRecorte" alt="Imagen a censurar">
+        <img id="imgRecorte" data-i18n-attr="alt:alt-censurar" alt="Imagen a censurar">
         <canvas id="canvasVivo"></canvas>
         <div id="cursorPincel"></div>
         <div class="caja-seleccion" id="cajaSeleccion">
@@ -132,51 +176,51 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        Selección
+        <span data-i18n="campo-seleccion">Selección</span>
         <div class="modos" id="modosSeleccion">
-          <button type="button" class="activo" data-seleccion="area">Área</button>
-          <button type="button" data-seleccion="libre">Libre (pincel)</button>
+          <button type="button" class="activo" data-seleccion="area" data-i18n="sel-area">Área</button>
+          <button type="button" data-seleccion="libre" data-i18n="sel-libre">Libre (pincel)</button>
         </div>
       </label>
       <label class="campo" id="campoPincel" style="display:none;">
-        Tamaño de pincel: <span id="etiquetaPincel">30</span>px
+        <span data-i18n="campo-pincel-a">Tamaño de pincel: </span><span id="etiquetaPincel">30</span>px
         <input type="range" id="tamanoPincel" min="6" max="120" value="30">
       </label>
       <label class="campo" id="campoZoom" style="display:none;">
-        Zoom: <span id="etiquetaZoom">100</span>%
+        <span data-i18n="campo-zoom-a">Zoom: </span><span id="etiquetaZoom">100</span>%
         <input type="range" id="zoom" min="100" max="400" value="100">
       </label>
-      <button type="button" id="botonBorrarSeleccion" style="display:none; border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;">Borrar lo pintado</button>
+      <button type="button" id="botonBorrarSeleccion" style="display:none; border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;" data-i18n="boton-borrar-seleccion">Borrar lo pintado</button>
     </div>
 
     <div class="controles">
       <label class="campo">
-        Efecto
+        <span data-i18n="campo-efecto">Efecto</span>
         <div class="modos" id="modos">
-          <button type="button" class="activo" data-modo="pixelar">Pixelado</button>
-          <button type="button" data-modo="pixelar-circulos">Puntos</button>
-          <button type="button" data-modo="ruido">Ruido</button>
-          <button type="button" data-modo="difuminar">Difuminado</button>
-          <button type="button" data-modo="direccional">Movimiento</button>
-          <button type="button" data-modo="esmerilado">Esmerilado</button>
+          <button type="button" class="activo" data-modo="pixelar" data-i18n="efecto-pixelar">Pixelado</button>
+          <button type="button" data-modo="pixelar-circulos" data-i18n="efecto-puntos">Puntos</button>
+          <button type="button" data-modo="ruido" data-i18n="efecto-ruido">Ruido</button>
+          <button type="button" data-modo="difuminar" data-i18n="efecto-difuminar">Difuminado</button>
+          <button type="button" data-modo="direccional" data-i18n="efecto-movimiento">Movimiento</button>
+          <button type="button" data-modo="esmerilado" data-i18n="efecto-esmerilado">Esmerilado</button>
         </div>
       </label>
       <label class="campo">
-        Intensidad: <span id="etiquetaIntensidad">18</span>
+        <span data-i18n="campo-intensidad-a">Intensidad: </span><span id="etiquetaIntensidad">18</span>
         <input type="range" id="intensidad" min="4" max="40" value="18">
       </label>
-      <button class="boton" id="botonAplicar" disabled>Aplicar</button>
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar</button>
     </div>
 
     <canvas id="vistaResultado"></canvas>
 
     <div class="controles" id="controlesDescarga" style="display:none;">
-      <button type="button" id="botonOtraZona" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;">Tapar otra zona</button>
-      <button class="boton" id="botonDescargar">Descargar imagen</button>
+      <button type="button" id="botonOtraZona" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.85rem;" data-i18n="boton-otra-zona">Tapar otra zona</button>
+      <button class="boton" id="botonDescargar" data-i18n="boton-descargar">Descargar imagen</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-censurada">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-censurada" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
