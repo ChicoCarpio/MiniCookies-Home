@@ -33,10 +33,20 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Generar favicon',
+    'intro': 'Elegí una imagen (idealmente cuadrada) y descargala lista en todos los tamaños de favicon que se usan en la web.',
+    'aviso-recorte': 'La imagen no era cuadrada — se recortó al centro a {lado}×{lado}px antes de generar los tamaños.',
+    'boton-descargar': 'Descargar',
+    'ico-descripcion': '16, 32 y 48 px en un solo archivo',
     'titulo-pagina': 'Generar favicon en varios tamaños gratis — Mini Cookies',
     'meta-descripcion': 'Generá tu favicon en todos los tamaños estándar (16, 32, 48, 180, 192, 512px) a partir de una imagen, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Generate a favicon',
+    'intro': 'Pick an image (ideally square) and download it ready in every favicon size the web uses.',
+    'aviso-recorte': 'The image was not square — it was cropped from the center to {lado}×{lado}px before generating the sizes.',
+    'boton-descargar': 'Download',
+    'ico-descripcion': '16, 32 and 48 px in a single file',
     'titulo-pagina': 'Generate a favicon in every size, free — Mini Cookies',
     'meta-descripcion': 'Generate your favicon in all the standard sizes (16, 32, 48, 180, 192, 512px) from a single image — free, and nothing is uploaded to a server.',
   }
@@ -57,8 +67,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Generar favicon</h1>
-  <p>Elegí una imagen (idealmente cuadrada) y descargala lista en todos los tamaños de favicon que se usan en la web.</p>
+  <h1 data-i18n="hero-titulo">Generar favicon</h1>
+  <p data-i18n="intro">Elegí una imagen (idealmente cuadrada) y descargala lista en todos los tamaños de favicon que se usan en la web.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -128,7 +138,7 @@ async function mostrarArchivo(archivo) {
   vistaPrevia.style.display = 'block';
 
   avisoRecorte.style.display = imagen.naturalWidth !== imagen.naturalHeight ? 'block' : 'none';
-  avisoRecorte.textContent = `La imagen no era cuadrada — se recortó al centro a ${lado}×${lado}px antes de generar los tamaños.`;
+  avisoRecorte.textContent = t('aviso-recorte').replace(/\{lado\}/g, lado);
 
   favicones.innerHTML = '';
   TAMANOS.forEach(({ lado: ladoDestino, nombre }) => {
@@ -148,7 +158,7 @@ async function mostrarArchivo(archivo) {
     item.appendChild(canvas);
 
     const enlace = document.createElement('a');
-    enlace.textContent = 'Descargar';
+    enlace.textContent = t('boton-descargar');
     enlace.download = nombre;
     canvas.toBlob((blob) => { enlace.href = URL.createObjectURL(blob); }, 'image/png');
     const parrafoEnlace = document.createElement('p');
@@ -162,9 +172,9 @@ async function mostrarArchivo(archivo) {
   // /favicon.ico, con los tres tamaños chicos adentro.
   const itemIco = document.createElement('div');
   itemIco.className = 'favicon-item';
-  itemIco.innerHTML = '<p><strong>favicon.ico</strong><br>16, 32 y 48 px en un solo archivo</p>';
+  itemIco.innerHTML = '<p><strong>favicon.ico</strong><br>' + t('ico-descripcion') + '</p>';
   const enlaceIco = document.createElement('a');
-  enlaceIco.textContent = 'Descargar';
+  enlaceIco.textContent = t('boton-descargar');
   enlaceIco.download = 'favicon.ico';
   const parrafoIco = document.createElement('p');
   parrafoIco.appendChild(enlaceIco);

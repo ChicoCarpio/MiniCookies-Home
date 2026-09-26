@@ -28,10 +28,24 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Extraer paleta de colores',
+    'intro': 'Elegí una imagen y obtené sus colores dominantes con el código hexadecimal, listo para copiar.',
+    'campo-cantidad-a': 'Cantidad de colores: ',
+    'ayuda-copiar': 'Tocá un color para copiar su código.',
+    'boton-png': 'Descargar paleta (.png)',
+    'boton-txt': 'Descargar códigos (.txt)',
+    'aviso-codigo': 'Código: ',
     'titulo-pagina': 'Extraer paleta de colores de una imagen gratis — Mini Cookies',
     'meta-descripcion': 'Sacá los colores dominantes de una imagen con su código hexadecimal, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Extract a color palette',
+    'intro': 'Pick an image and get its dominant colors with their hex codes, ready to copy.',
+    'campo-cantidad-a': 'Number of colors: ',
+    'ayuda-copiar': 'Tap a color to copy its code.',
+    'boton-png': 'Download palette (.png)',
+    'boton-txt': 'Download codes (.txt)',
+    'aviso-codigo': 'Code: ',
     'titulo-pagina': 'Extract a color palette from an image, free — Mini Cookies',
     'meta-descripcion': 'Pull the dominant colors out of an image with their hex codes — free, and nothing is uploaded to a server.',
   }
@@ -52,8 +66,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Extraer paleta de colores</h1>
-  <p>Elegí una imagen y obtené sus colores dominantes con el código hexadecimal, listo para copiar.</p>
+  <h1 data-i18n="hero-titulo">Extraer paleta de colores</h1>
+  <p data-i18n="intro">Elegí una imagen y obtené sus colores dominantes con el código hexadecimal, listo para copiar.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -64,16 +78,16 @@ window.i18nPagina = {
     <canvas id="vistaPrevia"></canvas>
 
     <label class="campo" style="max-width: 260px;">
-      Cantidad de colores: <span id="etiquetaCantidad">8</span>
+      <span data-i18n="campo-cantidad-a">Cantidad de colores: </span><span id="etiquetaCantidad">8</span>
       <input type="range" id="cantidad" min="4" max="16" value="8">
     </label>
 
     <div class="paleta" id="paleta"></div>
 
-    <p id="ayudaCopiar" style="display:none; color: var(--texto-suave); font-size: 0.9rem;">Tocá un color para copiar su código.</p>
+    <p id="ayudaCopiar" style="display:none; color: var(--texto-suave); font-size: 0.9rem;" data-i18n="ayuda-copiar">Tocá un color para copiar su código.</p>
     <div class="controles" id="controlesDescarga" style="display:none;">
-      <button class="boton" id="botonDescargarPng" type="button">Descargar paleta (.png)</button>
-      <button class="boton" id="botonDescargarTxt" type="button" style="background:#64748b;">Descargar códigos (.txt)</button>
+      <button class="boton" id="botonDescargarPng" type="button" data-i18n="boton-png">Descargar paleta (.png)</button>
+      <button class="boton" id="botonDescargarTxt" type="button" style="background:#64748b;" data-i18n="boton-txt">Descargar códigos (.txt)</button>
     </div>
   </div>
 
@@ -167,7 +181,7 @@ function mostrarPaleta(colores) {
         elemento.classList.add('copiado');
         setTimeout(() => elemento.classList.remove('copiado'), 1200);
       } catch (error) {
-        alert(`Código: ${elemento.dataset.hex}`);
+        alert(t('aviso-codigo') + elemento.dataset.hex);
       }
     });
   });
