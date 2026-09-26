@@ -28,6 +28,20 @@
     return TEXTOS[lang][clave];
   };
 
+  // Por clave data-i18n del titulo del grupo: no cambia con el idioma.
+  // (El mapa por texto de abajo queda como respaldo para un grupo que
+  // todavia no tenga data-i18n.)
+  var ICONOS_POR_CLAVE = {
+    'grupo-luz': '☀️',
+    'grupo-color': '🎨',
+    'grupo-luz-color': '🌈',
+    'grupo-bn': '◐',
+    'grupo-efectos': '✨',
+    'grupo-resplandor': '💫',
+    'grupo-dispersion': '🔦',
+    'grupo-textura': '🧱',
+  };
+
   var ICONOS = {
     'luz': '☀️',
     'color': '🎨',
@@ -101,7 +115,11 @@
     // dentro de otro panel pero que en celular merecen su propio botón (los
     // filtros de capa del editor avanzado, por ejemplo).
     shell.querySelectorAll('[data-em-categoria]').forEach(function (el) {
-      agregarCategoria(el.getAttribute('data-em-categoria'), el);
+      var clave = el.getAttribute('data-em-categoria');
+      // 'Filtros' y 'Capas' los sabe traducir el modulo; cualquier otro
+      // nombre se muestra tal cual lo escribio la pagina.
+      var conocido = { Filtros: 'filtros', Capas: 'capas' }[clave];
+      agregarCategoria(conocido ? txt(conocido) : clave, el, undefined, clave);
     });
 
     if (panelAjustes) {
@@ -109,7 +127,9 @@
         var titulo = grupo.querySelector('.acordeon-titulo');
         if (!titulo) return;
         var texto = titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
-        agregarCategoria(texto, grupo, undefined, texto, titulo);
+        var conClave = titulo.querySelector('[data-i18n]');
+        var clave = conClave ? conClave.getAttribute('data-i18n') : null;
+        agregarCategoria(texto, grupo, undefined, clave || texto, titulo);
       });
     }
     if (panelCapas) agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
@@ -123,7 +143,8 @@
       boton.className = 'em-chip';
       var icono = document.createElement('span');
       icono.className = 'em-icono';
-      icono.textContent = ICONOS[sinAcentos(cat.claveIcono)] || '🎚️';
+      icono.textContent = ICONOS_POR_CLAVE[cat.claveIcono]
+        || ICONOS[sinAcentos(cat.claveIcono)] || '🎚️';
       var nombre = document.createElement('span');
       nombre.textContent = cat.etiqueta;
       cat.nombreChip = nombre;
@@ -141,10 +162,8 @@
       categorias.forEach(function (cat) {
         if (cat.titulo) {
           cat.etiqueta = cat.titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
-        } else if (cat.claveIcono === 'Filtros') {
-          cat.etiqueta = txt('filtros');
-        } else if (cat.claveIcono === 'Capas') {
-          cat.etiqueta = txt('capas');
+        } else if (cat.claveIcono === 'Filtros' || cat.claveIcono === 'Capas') {
+          cat.etiqueta = txt(cat.claveIcono === 'Filtros' ? 'filtros' : 'capas');
         }
         if (cat.nombreChip) cat.nombreChip.textContent = cat.etiqueta;
       });
