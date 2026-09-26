@@ -49,10 +49,86 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Crear collage de imágenes',
+    'intro': 'Elegí tus fotos, un diseño y el formato. Tocá una foto del collage para acomodar qué parte se ve, y mantenela apretada para cambiarla de lugar.',
+    'zona-arrastre': '🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (de 1 a 12)',
+    'aria-lienzo': 'Vista previa del collage',
+    'ayuda-gestos': 'Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla',
+    'titulo-foto-inicial': 'Foto 1',
+    'titulo-foto': 'Foto {n} de {total}',
+    'boton-centrar': 'Centrar',
+    'title-centrar': 'Volver a centrar la foto',
+    'title-antes': 'Mover al lugar anterior',
+    'title-despues': 'Mover al lugar siguiente',
+    'boton-listo': 'Listo',
+    'title-listo': 'Terminar de editar esta foto',
+    'aria-tira': 'Orden de las fotos en el collage',
+    'h-diseno': 'Diseño',
+    'title-diseno': 'Usar este diseño',
+    'h-formato': 'Formato',
+    'fmt-1-1': '1:1 Cuadrado',
+    'fmt-4-5': '4:5 Publicación',
+    'fmt-9-16': '9:16 Historia',
+    'fmt-16-9': '16:9 Horizontal',
+    'h-estilo': 'Estilo',
+    'campo-espacio-a': 'Borde entre fotos: ',
+    'campo-redondeo-a': 'Esquinas redondeadas: ',
+    'campo-color': 'Color del borde / fondo',
+    'h-descargar': 'Descargar',
+    'campo-tamano': 'Tamaño',
+    'tamano-1080': '1080 px de ancho (redes sociales)',
+    'tamano-2160': '2160 px de ancho (alta calidad / impresión)',
+    'campo-formato-archivo': 'Formato de archivo',
+    'archivo-jpg': 'JPG (más liviano)',
+    'archivo-png': 'PNG (sin pérdida)',
+    'boton-descargar': 'Descargar collage',
+    'boton-generando': 'Generando...',
+    'aviso-maximo': 'El collage admite hasta {max} fotos: {n} no se agregaron.',
+    'aviso-ilegibles': 'No se pudieron abrir algunas imágenes: ',
+    'error-generar-blob': 'el navegador no pudo generar la imagen (probá con un tamaño menor)',
+    'error-collage': 'No se pudo generar el collage: ',
     'titulo-pagina': 'Crear collage de imágenes gratis — Mini Cookies',
     'meta-descripcion': 'Combiná varias imágenes en un collage con diseños como los de Instagram, elegí qué parte de cada foto se ve, gratis y sin subirlas a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Make a photo collage',
+    'intro': 'Pick your photos, a layout and a format. Tap a photo in the collage to set which part shows, and press and hold it to move it somewhere else.',
+    'zona-arrastre': '🖼️ Drop your images here, or click to pick them (1 to 12)',
+    'aria-lienzo': 'Collage preview',
+    'ayuda-gestos': 'Tap a photo to edit it · drag to move the framing · pinch or use the mouse wheel to zoom · press and hold, then drop it on another to swap them · double-click to center it',
+    'titulo-foto-inicial': 'Photo 1',
+    'titulo-foto': 'Photo {n} of {total}',
+    'boton-centrar': 'Center',
+    'title-centrar': 'Re-center the photo',
+    'title-antes': 'Move to the previous slot',
+    'title-despues': 'Move to the next slot',
+    'boton-listo': 'Done',
+    'title-listo': 'Finish editing this photo',
+    'aria-tira': 'Order of the photos in the collage',
+    'h-diseno': 'Layout',
+    'title-diseno': 'Use this layout',
+    'h-formato': 'Format',
+    'fmt-1-1': '1:1 Square',
+    'fmt-4-5': '4:5 Post',
+    'fmt-9-16': '9:16 Story',
+    'fmt-16-9': '16:9 Landscape',
+    'h-estilo': 'Style',
+    'campo-espacio-a': 'Gap between photos: ',
+    'campo-redondeo-a': 'Rounded corners: ',
+    'campo-color': 'Border / background color',
+    'h-descargar': 'Download',
+    'campo-tamano': 'Size',
+    'tamano-1080': '1080 px wide (social media)',
+    'tamano-2160': '2160 px wide (high quality / print)',
+    'campo-formato-archivo': 'File format',
+    'archivo-jpg': 'JPG (lighter)',
+    'archivo-png': 'PNG (lossless)',
+    'boton-descargar': 'Download collage',
+    'boton-generando': 'Generating...',
+    'aviso-maximo': 'The collage takes up to {max} photos: {n} were left out.',
+    'aviso-ilegibles': 'Some images could not be opened: ',
+    'error-generar-blob': 'the browser could not generate the image (try a smaller size)',
+    'error-collage': 'The collage could not be generated: ',
     'titulo-pagina': 'Make a photo collage, free — Mini Cookies',
     'meta-descripcion': 'Combine several images into a collage with Instagram-style layouts, choosing which part of each photo shows — free, and nothing is uploaded to a server.',
   }
@@ -73,12 +149,12 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Crear collage de imágenes</h1>
-  <p>Elegí tus fotos, un diseño y el formato. Tocá una foto del collage para acomodar qué parte se ve, y mantenela apretada para cambiarla de lugar.</p>
+  <h1 data-i18n="hero-titulo">Crear collage de imágenes</h1>
+  <p data-i18n="intro">Elegí tus fotos, un diseño y el formato. Tocá una foto del collage para acomodar qué parte se ve, y mantenela apretada para cambiarla de lugar.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (de 1 a 12)
+      <span data-i18n="zona-arrastre">🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (de 1 a 12)</span>
       <input type="file" id="entradaArchivo" accept="image/*" multiple hidden>
     </div>
 
@@ -87,72 +163,72 @@ window.i18nPagina = {
     <div class="editor-collage" id="editor" style="display:none;">
       <div>
         <div class="lienzo-contenedor">
-          <canvas id="lienzo" aria-label="Vista previa del collage"></canvas>
+          <canvas id="lienzo" data-i18n-attr="aria-label:aria-lienzo" aria-label="Vista previa del collage"></canvas>
         </div>
-        <p class="ayuda-gestos">Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla</p>
+        <p class="ayuda-gestos" data-i18n="ayuda-gestos">Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla</p>
 
         <div class="barra-foto" id="barraFoto">
-          <span class="titulo-barra" id="tituloBarra">Foto 1</span>
+          <span class="titulo-barra" id="tituloBarra" data-i18n="titulo-foto-inicial">Foto 1</span>
           <label>🔍 <input type="range" id="zoomFoto" min="100" max="400" value="100"></label>
-          <button type="button" id="botonCentrar" title="Volver a centrar la foto">Centrar</button>
-          <button type="button" id="botonAntes" title="Mover al lugar anterior">◀</button>
-          <button type="button" id="botonDespues" title="Mover al lugar siguiente">▶</button>
-          <button type="button" id="botonListo" title="Terminar de editar esta foto">Listo</button>
+          <button type="button" id="botonCentrar" data-i18n-attr="title:title-centrar" title="Volver a centrar la foto" data-i18n="boton-centrar">Centrar</button>
+          <button type="button" id="botonAntes" data-i18n-attr="title:title-antes" title="Mover al lugar anterior">◀</button>
+          <button type="button" id="botonDespues" data-i18n-attr="title:title-despues" title="Mover al lugar siguiente">▶</button>
+          <button type="button" id="botonListo" data-i18n-attr="title:title-listo" title="Terminar de editar esta foto" data-i18n="boton-listo">Listo</button>
         </div>
 
-        <div class="tira-orden" id="tiraOrden" aria-label="Orden de las fotos en el collage"></div>
+        <div class="tira-orden" id="tiraOrden" data-i18n-attr="aria-label:aria-tira" aria-label="Orden de las fotos en el collage"></div>
       </div>
 
       <div>
         <div class="bloque-opciones">
-          <h3>Diseño</h3>
+          <h3 data-i18n="h-diseno">Diseño</h3>
           <div class="lista-disenos" id="listaDisenos"></div>
         </div>
 
         <div class="bloque-opciones">
-          <h3>Formato</h3>
+          <h3 data-i18n="h-formato">Formato</h3>
           <div class="botones-formato" id="botonesFormato">
-            <button type="button" data-proporcion="1:1" class="activo">1:1 Cuadrado</button>
-            <button type="button" data-proporcion="4:5">4:5 Publicación</button>
-            <button type="button" data-proporcion="9:16">9:16 Historia</button>
+            <button type="button" data-proporcion="1:1" class="activo" data-i18n="fmt-1-1">1:1 Cuadrado</button>
+            <button type="button" data-proporcion="4:5" data-i18n="fmt-4-5">4:5 Publicación</button>
+            <button type="button" data-proporcion="9:16" data-i18n="fmt-9-16">9:16 Historia</button>
             <button type="button" data-proporcion="3:4">3:4</button>
-            <button type="button" data-proporcion="16:9">16:9 Horizontal</button>
+            <button type="button" data-proporcion="16:9" data-i18n="fmt-16-9">16:9 Horizontal</button>
           </div>
         </div>
 
         <div class="bloque-opciones">
-          <h3>Estilo</h3>
+          <h3 data-i18n="h-estilo">Estilo</h3>
           <label class="campo">
-            <span>Borde entre fotos: <span id="etiquetaEspacio">12</span></span>
+            <span><span data-i18n="campo-espacio-a">Borde entre fotos: </span><span id="etiquetaEspacio">12</span></span>
             <input type="range" id="espacio" min="0" max="60" value="12">
           </label>
           <label class="campo">
-            <span>Esquinas redondeadas: <span id="etiquetaRedondeo">0</span></span>
+            <span><span data-i18n="campo-redondeo-a">Esquinas redondeadas: </span><span id="etiquetaRedondeo">0</span></span>
             <input type="range" id="redondeo" min="0" max="80" value="0">
           </label>
           <label class="campo">
-            <span>Color del borde / fondo</span>
+            <span data-i18n="campo-color">Color del borde / fondo</span>
             <input type="color" id="colorFondo" value="#ffffff">
           </label>
         </div>
 
         <div class="bloque-opciones">
-          <h3>Descargar</h3>
+          <h3 data-i18n="h-descargar">Descargar</h3>
           <label class="campo">
-            <span>Tamaño</span>
+            <span data-i18n="campo-tamano">Tamaño</span>
             <select id="tamanoSalida">
-              <option value="1080" selected>1080 px de ancho (redes sociales)</option>
-              <option value="2160">2160 px de ancho (alta calidad / impresión)</option>
+              <option value="1080" selected data-i18n="tamano-1080">1080 px de ancho (redes sociales)</option>
+              <option value="2160" data-i18n="tamano-2160">2160 px de ancho (alta calidad / impresión)</option>
             </select>
           </label>
           <label class="campo">
-            <span>Formato de archivo</span>
+            <span data-i18n="campo-formato-archivo">Formato de archivo</span>
             <select id="formatoSalida">
-              <option value="image/jpeg" selected>JPG (más liviano)</option>
-              <option value="image/png">PNG (sin pérdida)</option>
+              <option value="image/jpeg" selected data-i18n="archivo-jpg">JPG (más liviano)</option>
+              <option value="image/png" data-i18n="archivo-png">PNG (sin pérdida)</option>
             </select>
           </label>
-          <button class="boton" id="botonDescargar" type="button">Descargar collage</button>
+          <button class="boton" id="botonDescargar" type="button" data-i18n="boton-descargar">Descargar collage</button>
         </div>
       </div>
     </div>
@@ -257,7 +333,7 @@ function dibujarBotonesDiseno() {
     const boton = document.createElement('button');
     boton.type = 'button';
     boton.className = 'boton-diseno' + (JSON.stringify(opcion) === JSON.stringify(diseno) ? ' activo' : '');
-    boton.title = 'Usar este diseño';
+    boton.title = t('title-diseno');
     opcion.forEach(([x, y, w, h]) => {
       const casilla = document.createElement('span');
       casilla.className = 'casilla';
@@ -412,8 +488,9 @@ async function agregarArchivos(listaFileList) {
     }
   }
   const avisos = [];
-  if (imagenes.length > aAgregar.length) avisos.push(`El collage admite hasta ${MAX_FOTOS} fotos: ${imagenes.length - aAgregar.length} no se agregaron.`);
-  if (errores.length) avisos.push('No se pudieron abrir algunas imágenes: ' + errores.join(', ') + '.');
+  if (imagenes.length > aAgregar.length) avisos.push(t('aviso-maximo')
+    .replace('{max}', MAX_FOTOS).replace('{n}', imagenes.length - aAgregar.length));
+  if (errores.length) avisos.push(t('aviso-ilegibles') + errores.join(', ') + '.');
   mostrarAviso(avisos.join(' '));
   cambioDeCantidad();
 }
@@ -438,7 +515,8 @@ function seleccionar(indice) {
   seleccionada = indice;
   barraFoto.classList.toggle('visible', indice >= 0);
   if (indice >= 0) {
-    tituloBarra.textContent = `Foto ${indice + 1} de ${fotos.length}`;
+    tituloBarra.textContent = t('titulo-foto')
+      .replace('{n}', indice + 1).replace('{total}', fotos.length);
     zoomFoto.value = Math.round(fotos[indice].zoom * 100);
     document.getElementById('botonAntes').disabled = indice === 0;
     document.getElementById('botonDespues').disabled = indice === fotos.length - 1;
@@ -668,13 +746,13 @@ elColorFondo.addEventListener('input', dibujar);
 document.getElementById('botonDescargar').addEventListener('click', async () => {
   const boton = document.getElementById('botonDescargar');
   boton.disabled = true;
-  boton.textContent = 'Generando...';
+  boton.textContent = t('boton-generando');
   try {
     const formato = document.getElementById('formatoSalida').value;
     const canvas = document.createElement('canvas');
     dibujarEn(canvas, parseInt(document.getElementById('tamanoSalida').value, 10), true);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
-    if (!blob) throw new Error('el navegador no pudo generar la imagen (probá con un tamaño menor)');
+    if (!blob) throw new Error(t('error-generar-blob'));
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);
     enlace.download = formato === 'image/png' ? 'collage.png' : 'collage.jpg';
@@ -683,10 +761,10 @@ document.getElementById('botonDescargar').addEventListener('click', async () => 
     enlace.remove();
     setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
   } catch (error) {
-    alert('No se pudo generar el collage: ' + error.message);
+    alert(t('error-collage') + error.message);
   } finally {
     boton.disabled = false;
-    boton.textContent = 'Descargar collage';
+    boton.textContent = t('boton-descargar');
   }
 });
 

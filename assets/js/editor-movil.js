@@ -19,6 +19,15 @@
   // Ícono por categoría. La clave es el texto del título en español, en
   // minúsculas y sin acentos; si una categoría no está acá, se usa el
   // comodín (no se rompe nada, solo sale un ícono genérico).
+  var TEXTOS = {
+    es: { filtros: 'Filtros', capas: 'Capas', categorias: 'Categorías de ajuste' },
+    en: { filtros: 'Filters', capas: 'Layers', categorias: 'Adjustment categories' },
+  };
+  var txt = function (clave) {
+    var lang = (window.idiomaActual && idiomaActual() === 'en') ? 'en' : 'es';
+    return TEXTOS[lang][clave];
+  };
+
   var ICONOS = {
     'luz': '☀️',
     'color': '🎨',
@@ -57,7 +66,7 @@
 
     var chips = document.createElement('nav');
     chips.className = 'em-chips';
-    chips.setAttribute('aria-label', 'Categorías de ajuste');
+    chips.setAttribute('aria-label', txt('categorias'));
 
     var acciones = document.createElement('div');
     acciones.className = 'em-acciones';
@@ -73,17 +82,19 @@
     // es su contenedor original para poder devolverlo.
     var categorias = [];
 
-    function agregarCategoria(etiqueta, elemento, contenedorOriginal) {
+    function agregarCategoria(etiqueta, elemento, contenedorOriginal, claveIcono, titulo) {
       if (!elemento) return;
       categorias.push({
         etiqueta: etiqueta,
+        claveIcono: claveIcono || etiqueta,
+        titulo: titulo || null,
         elemento: elemento,
         padre: contenedorOriginal || elemento.parentNode,
         siguiente: elemento.nextSibling,
       });
     }
 
-    if (panelFiltros) agregarCategoria('Filtros', panelFiltros);
+    if (panelFiltros) agregarCategoria(txt('filtros'), panelFiltros, undefined, 'Filtros');
 
     // Una página puede marcar un bloque suelto como categoría propia con
     // data-em-categoria="Nombre". Se usa para cosas que en computadora viven
@@ -98,10 +109,10 @@
         var titulo = grupo.querySelector('.acordeon-titulo');
         if (!titulo) return;
         var texto = titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
-        agregarCategoria(texto, grupo);
+        agregarCategoria(texto, grupo, undefined, texto, titulo);
       });
     }
-    if (panelCapas) agregarCategoria('Capas', panelCapas);
+    if (panelCapas) agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
     if (!categorias.length) return;
 
     var abierta = -1;
@@ -112,14 +123,31 @@
       boton.className = 'em-chip';
       var icono = document.createElement('span');
       icono.className = 'em-icono';
-      icono.textContent = ICONOS[sinAcentos(cat.etiqueta)] || '🎚️';
+      icono.textContent = ICONOS[sinAcentos(cat.claveIcono)] || '🎚️';
       var nombre = document.createElement('span');
       nombre.textContent = cat.etiqueta;
+      cat.nombreChip = nombre;
       boton.appendChild(icono);
       boton.appendChild(nombre);
       boton.addEventListener('click', function () { alternar(i); });
       cat.chip = boton;
       chips.appendChild(boton);
+    });
+
+    // El texto de cada categoria vuelve a salir de su titulo del acordeon
+    // (que la pagina ya tradujo); el icono no, porque su clave es fija.
+    document.addEventListener('cambioIdioma', function () {
+      chips.setAttribute('aria-label', txt('categorias'));
+      categorias.forEach(function (cat) {
+        if (cat.titulo) {
+          cat.etiqueta = cat.titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
+        } else if (cat.claveIcono === 'Filtros') {
+          cat.etiqueta = txt('filtros');
+        } else if (cat.claveIcono === 'Capas') {
+          cat.etiqueta = txt('capas');
+        }
+        if (cat.nombreChip) cat.nombreChip.textContent = cat.etiqueta;
+      });
     });
 
     // Las categorías no entran todas a lo ancho de un celular. Se corren con

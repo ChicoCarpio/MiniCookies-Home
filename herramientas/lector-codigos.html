@@ -12,10 +12,66 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Lector de códigos QR y de barras',
+    'intro': 'Leé códigos QR y de barras (EAN-13, CODE128, CODE39 y más) desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o con la cámara. Si el archivo tiene varios códigos, se listan todos.',
+    'boton-modo-archivo': '📁 Subir archivo',
+    'boton-modo-camara': '📷 Usar cámara',
+    'zona-arrastre': '🖼️ Arrastrá acá una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o hacé clic para elegirlo',
+    'campo-camara': 'Cámara',
+    'boton-detener-camara': 'Detener cámara',
+    'boton-copiar': 'Copiar',
+    'boton-copiado': '✅ Copiado',
+    'sin-codigos': 'No se encontró ningún código QR o de barras en {donde}.',
+    'encontrado-uno': '✅ Se encontró 1 código',
+    'encontrados-varios': '✅ Se encontraron {n} códigos',
+    'origen-camara': 'la cámara',
+    'origen-archivo': 'ese archivo',
+    'origen-pdf': 'ese PDF',
+    'origen-documento': 'ese documento',
+    'origen-imagen': 'esa imagen',
+    'origen-pagina': 'página {n}',
+    'origen-imagen-nombre': 'imagen «{nombre}»',
+    'progreso-pagina': 'Leyendo página {n} de {total}…',
+    'progreso-imagen': 'Leyendo imagen {n} de {total}…',
+    'progreso-pdf': 'Abriendo el PDF…',
+    'progreso-medios': 'Buscando imágenes dentro del archivo…',
+    'error-tipo': 'No se puede leer ese tipo de archivo. Probá con una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB.',
+    'error-leer-archivo': 'No se pudo leer el archivo: ',
+    'error-copiar': 'No se pudo copiar: ',
+    'error-camara': 'No se pudo acceder a esa cámara (¿está apagada o sin señal?): ',
+    'camara-numerada': 'Cámara {n}',
     'titulo-pagina': 'Leer códigos QR y de barras desde imagen o PDF, gratis — Mini Cookies',
     'meta-descripcion': 'Leé códigos QR y de barras desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB, o con la cámara. Gratis y sin enviar nada a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'QR and barcode reader',
+    'intro': 'Read QR codes and barcodes (EAN-13, CODE128, CODE39 and more) from an image, a PDF, a Word, Excel or PowerPoint file, an EPUB — or straight from your camera. If the file holds several codes, all of them are listed.',
+    'boton-modo-archivo': '📁 Upload a file',
+    'boton-modo-camara': '📷 Use the camera',
+    'zona-arrastre': '🖼️ Drop an image, a PDF, a Word, Excel or PowerPoint file, or an EPUB here — or click to pick one',
+    'campo-camara': 'Camera',
+    'boton-detener-camara': 'Stop the camera',
+    'boton-copiar': 'Copy',
+    'boton-copiado': '✅ Copied',
+    'sin-codigos': 'No QR code or barcode was found in {donde}.',
+    'encontrado-uno': '✅ Found 1 code',
+    'encontrados-varios': '✅ Found {n} codes',
+    'origen-camara': 'the camera',
+    'origen-archivo': 'that file',
+    'origen-pdf': 'that PDF',
+    'origen-documento': 'that document',
+    'origen-imagen': 'that image',
+    'origen-pagina': 'page {n}',
+    'origen-imagen-nombre': 'image “{nombre}”',
+    'progreso-pagina': 'Reading page {n} of {total}…',
+    'progreso-imagen': 'Reading image {n} of {total}…',
+    'progreso-pdf': 'Opening the PDF…',
+    'progreso-medios': 'Looking for images inside the file…',
+    'error-tipo': 'That file type cannot be read. Try an image, a PDF, a Word, Excel or PowerPoint file, or an EPUB.',
+    'error-leer-archivo': 'The file could not be read: ',
+    'error-copiar': 'Could not copy: ',
+    'error-camara': 'That camera could not be accessed (is it off, or not sending a signal?): ',
+    'camara-numerada': 'Camera {n}',
     'titulo-pagina': 'Read QR and barcodes from an image or PDF, free — Mini Cookies',
     'meta-descripcion': 'Read QR codes and barcodes from an image, a PDF, a Word, Excel or PowerPoint file, an EPUB, or straight from your camera. Free, and nothing is sent to a server.',
   }
@@ -36,18 +92,18 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Lector de códigos QR y de barras</h1>
-  <p>Leé códigos QR y de barras (EAN-13, CODE128, CODE39 y más) desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o con la cámara. Si el archivo tiene varios códigos, se listan todos.</p>
+  <h1 data-i18n="hero-titulo">Lector de códigos QR y de barras</h1>
+  <p data-i18n="intro">Leé códigos QR y de barras (EAN-13, CODE128, CODE39 y más) desde una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o con la cámara. Si el archivo tiene varios códigos, se listan todos.</p>
 
   <div class="panel-herramienta">
     <div class="controles" style="margin-bottom:20px;">
-      <button class="boton" id="botonModoImagen" type="button">📁 Subir archivo</button>
-      <button class="boton" id="botonModoCamara" type="button" style="background:#94a3b8;">📷 Usar cámara</button>
+      <button class="boton" id="botonModoImagen" type="button" data-i18n="boton-modo-archivo">📁 Subir archivo</button>
+      <button class="boton" id="botonModoCamara" type="button" style="background:#94a3b8;" data-i18n="boton-modo-camara">📷 Usar cámara</button>
     </div>
 
     <div id="seccionImagen">
       <div class="zona-arrastre" id="zonaArrastre">
-        🖼️ Arrastrá acá una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o hacé clic para elegirlo
+        <span data-i18n="zona-arrastre">🖼️ Arrastrá acá una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB — o hacé clic para elegirlo</span>
         <input type="file" id="entradaArchivo" accept="image/*,.pdf,.docx,.xlsx,.pptx,.epub" hidden>
       </div>
     </div>
@@ -55,7 +111,7 @@ window.i18nPagina = {
     <div id="seccionCamara" style="display:none;">
       <div class="controles" id="controlesCamara" style="display:none; margin-bottom:12px;">
         <label class="campo">
-          Cámara
+          <span data-i18n="campo-camara">Cámara</span>
           <select id="selectorCamara"></select>
         </label>
       </div>
@@ -63,7 +119,7 @@ window.i18nPagina = {
         <video id="video" style="max-width:100%; max-height:400px;" muted playsinline></video>
       </div>
       <div class="controles" style="margin-top:12px;">
-        <button class="boton" id="botonDetenerCamara" type="button">Detener cámara</button>
+        <button class="boton" id="botonDetenerCamara" type="button" data-i18n="boton-detener-camara">Detener cámara</button>
       </div>
     </div>
 
@@ -132,13 +188,13 @@ function mostrarCodigos(codigos, resumenOrigen) {
 
   if (!codigos.length) {
     resultado.classList.remove('visible');
-    mostrarError('No se encontró ningún código QR o de barras en ' + resumenOrigen + '.');
+    mostrarError(t('sin-codigos').replace('{donde}', resumenOrigen));
     return;
   }
 
   tituloResultado.textContent = codigos.length === 1
-    ? '✅ Se encontró 1 código'
-    : '✅ Se encontraron ' + codigos.length + ' códigos';
+    ? t('encontrado-uno')
+    : t('encontrados-varios').replace('{n}', codigos.length);
 
   codigos.forEach((c) => {
     const fila = document.createElement('div');
@@ -158,14 +214,14 @@ function mostrarCodigos(codigos, resumenOrigen) {
     const copiar = document.createElement('button');
     copiar.type = 'button';
     copiar.className = 'boton';
-    copiar.textContent = 'Copiar';
+    copiar.textContent = t('boton-copiar');
     copiar.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(c.texto);
-        copiar.textContent = '✅ Copiado';
-        setTimeout(() => { copiar.textContent = 'Copiar'; }, 1500);
+        copiar.textContent = t('boton-copiado');
+        setTimeout(() => { copiar.textContent = t('boton-copiar'); }, 1500);
       } catch (error) {
-        mostrarError('No se pudo copiar: ' + error.message);
+        mostrarError(t('error-copiar') + error.message);
       }
     });
     controles.appendChild(copiar);
@@ -196,7 +252,7 @@ function mostrarResultado(resultadoZXing) {
     texto: resultadoZXing.getText(),
     formato: nombreFormato(resultadoZXing.getBarcodeFormat()),
     origen: '',
-  }], 'la cámara');
+  }], t('origen-camara'));
 }
 
 // --- Modo imagen ---
@@ -256,7 +312,7 @@ async function codigosDePdf(archivo) {
   const encontrados = [];
 
   for (let n = 1; n <= pdf.numPages; n++) {
-    avisar('Leyendo página ' + n + ' de ' + pdf.numPages + '…');
+    avisar(t('progreso-pagina').replace('{n}', n).replace('{total}', pdf.numPages));
     const pagina = await pdf.getPage(n);
     for (const escala of ESCALAS_PDF) {
       const viewport = pagina.getViewport({ scale: escala });
@@ -269,7 +325,7 @@ async function codigosDePdf(archivo) {
         encontrados.push({
           texto: hallado.getText(),
           formato: nombreFormato(hallado.getBarcodeFormat()),
-          origen: 'página ' + n,
+          origen: t('origen-pagina').replace('{n}', n),
         });
         break; // ya está: no hace falta probar más resolución en esta página
       }
@@ -299,9 +355,10 @@ async function codigosDeDocumento(archivo, carpeta) {
 
   const encontrados = [];
   for (let i = 0; i < imagenes.length; i++) {
-    avisar('Leyendo imagen ' + (i + 1) + ' de ' + imagenes.length + '…');
+    avisar(t('progreso-imagen').replace('{n}', i + 1).replace('{total}', imagenes.length));
     const nombre = imagenes[i].nombre.split('/').pop();
-    const hallados = await codigosDeImagen(new File([imagenes[i].blob], nombre), 'imagen «' + nombre + '»');
+    const hallados = await codigosDeImagen(new File([imagenes[i].blob], nombre),
+      t('origen-imagen-nombre').replace('{nombre}', nombre));
     encontrados.push(...hallados);
   }
   return encontrados;
@@ -315,28 +372,28 @@ async function leerArchivo(archivo) {
   const extension = extensionDe(archivo.name);
   const esImagen = archivo.type.startsWith('image/');
   let codigos = [];
-  let queEra = 'ese archivo';
+  let queEra = t('origen-archivo');
 
   try {
     if (extension === 'pdf' || archivo.type === 'application/pdf') {
-      queEra = 'ese PDF';
-      avisar('Abriendo el PDF…');
+      queEra = t('origen-pdf');
+      avisar(t('progreso-pdf'));
       codigos = await codigosDePdf(archivo);
     } else if (Object.prototype.hasOwnProperty.call(MEDIOS_POR_EXTENSION, extension)) {
-      queEra = 'ese documento';
-      avisar('Buscando imágenes dentro del archivo…');
+      queEra = t('origen-documento');
+      avisar(t('progreso-medios'));
       codigos = await codigosDeDocumento(archivo, MEDIOS_POR_EXTENSION[extension]);
     } else if (esImagen) {
-      queEra = 'esa imagen';
+      queEra = t('origen-imagen');
       codigos = await codigosDeImagen(archivo, '');
     } else {
       avisar('');
-      mostrarError('No se puede leer ese tipo de archivo. Probá con una imagen, un PDF, un Word, un Excel, un PowerPoint o un EPUB.');
+      mostrarError(t('error-tipo'));
       return;
     }
   } catch (error) {
     avisar('');
-    mostrarError('No se pudo leer el archivo: ' + ((error && error.message) || error));
+    mostrarError(t('error-leer-archivo') + ((error && error.message) || error));
     return;
   }
 
@@ -381,7 +438,8 @@ async function iniciarCamara(deviceId, esReintento) {
       const dispositivos = await navigator.mediaDevices.enumerateDevices();
       const camaras = dispositivos.filter(d => d.kind === 'videoinput');
       if (camaras.length > 1) {
-        selectorCamara.replaceChildren(...camaras.map((c, i) => new Option(c.label || 'Cámara ' + (i + 1), c.deviceId)));
+        selectorCamara.replaceChildren(...camaras.map((c, i) =>
+          new Option(c.label || t('camara-numerada').replace('{n}', i + 1), c.deviceId)));
         if (deviceIdActivo) selectorCamara.value = deviceIdActivo;
         controlesCamara.style.display = 'block';
       }
@@ -390,7 +448,7 @@ async function iniciarCamara(deviceId, esReintento) {
     }
   } catch (error) {
     camaraActiva = false;
-    mostrarError('No se pudo acceder a esa cámara (¿está apagada o sin señal?): ' + error.message);
+    mostrarError(t('error-camara') + error.message);
     if (selectorCamara.options.length) selectorCamara.value = deviceIdActivo || '';
     if (deviceIdActivo && !esReintento) {
       iniciarCamara(deviceIdActivo, true);

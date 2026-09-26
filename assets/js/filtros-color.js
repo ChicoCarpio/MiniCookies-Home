@@ -231,6 +231,101 @@ const FiltrosColor = (() => {
     neon: filtro({ saturacion: 60, intensidad: 40, contraste: 20, dispersionIntensidad: 30, dispersionMatiz: 40, dispersionTamano: 60 }),
   };
 
+  // --- Version en ingles de los nombres de la grilla ---------------------
+  // Viven aca y no en i18nComun porque solo los usan los dos editores, y
+  // idioma.js se carga en las 119 paginas del sitio.
+  const NOMBRES_EN = {
+    ninguno: "No filter",
+    grises: "Black and white",
+    bnClasico: "B&W classic",
+    bnCine: "B&W cinematic",
+    bnAltaClave: "B&W high key",
+    bnBajaClave: "B&W low key",
+    bnAltoContraste: "B&W contrast",
+    bnSuave: "B&W soft",
+    bnFiltroVerde: "B&W green filter",
+    bnRetrato: "B&W portrait",
+    bnCieloDramatico: "B&W dramatic sky",
+    infrarrojo: "Infrared",
+    selenio: "Selenium",
+    cianotipia: "Cyanotype",
+    rayosX: "X-ray",
+    sepia: "Sepia",
+    sepiaSuave: "Soft sepia",
+    sepiaIntenso: "Deep sepia",
+    vintage: "Vintage",
+    retro70: "Retro 70s",
+    retro80: "Retro 80s",
+    polaroid: "Polaroid",
+    lomografia: "Lomography",
+    peliculaAntigua: "Old film",
+    diapositiva: "Slide film",
+    peliculaFria: "Cool film",
+    procesoCruzado: "Cross process",
+    frio: "Cool",
+    calido: "Warm",
+    veranoDorado: "Golden summer",
+    oceano: "Ocean",
+    atardecer: "Sunset",
+    amanecer: "Sunrise",
+    lluvioso: "Rainy",
+    artico: "Arctic",
+    plateado: "Silver",
+    otono: "Autumn",
+    primavera: "Spring",
+    niebla: "Fog",
+    cieloIntenso: "Deep sky",
+    marCaribe: "Caribbean sea",
+    verdesEsmeralda: "Emerald greens",
+    bosqueSombrio: "Dark forest",
+    floresVivas: "Vivid flowers",
+    tonosTierra: "Earth tones",
+    desierto: "Desert",
+    soloRojos: "Reds only",
+    soloNaranjas: "Oranges and browns only",
+    soloAmarillos: "Yellows only",
+    soloVerdes: "Greens only",
+    soloCian: "Cyan / teal only",
+    soloAzules: "Blues only",
+    soloMorados: "Purples only",
+    soloRosas: "Pinks / magentas only",
+    acentoRojo: "Red accent",
+    acentoAzul: "Blue accent",
+    acentoCalido: "Warm accent",
+    technicolor: "Technicolor",
+    dramatico: "Dramatic",
+    retrato: "Portrait",
+    pielLuminosa: "Glowing skin",
+    cine: "Cinematic",
+    altaModa: "High fashion",
+    comic: "Comic",
+    pastel: "Pastel",
+    desvanecido: "Faded",
+    altoBrillo: "High key",
+    sombrasProfundas: "Shadows",
+    blanqueado: "Bleached",
+    mate: "Matte",
+    resplandor: "Glow",
+    neonRosa: "Pink neon",
+    neonAzul: "Blue neon",
+    cyberpunk: "Cyberpunk",
+    glitch: "Glitch",
+    glamour: "Glamour",
+    sueno: "Dream",
+    fantasma: "Ghost",
+    terror: "Horror",
+    nocturno: "Night",
+    vaporwave: "Vaporwave",
+    popArt: "Pop art",
+    pixelArt: "Pixel art",
+    acuarela: "Watercolor",
+    oleo: "Oil paint",
+    invertir: "Invert",
+    neon: "Neon",
+  };
+  const GRUPOS_EN = ["Black and white", "Sepia and film", "Color tones / weather", "Landscape and nature", "Selective color", "Portrait and dramatic looks", "Light, neon and creative", "Artistic and others"];
+  const enIngles = () => (window.idiomaActual ? idiomaActual() === 'en' : false);
+
   // Grupos y nombres de la grilla de miniaturas ("Sin filtro" va primero, fuera de los grupos).
   const GRUPOS = [
     { titulo: "Blanco y negro", filtros: [
@@ -439,13 +534,28 @@ const FiltrosColor = (() => {
   // Llena "contenedor" con un botón por filtro (clase preset-miniatura, con
   // un <canvas> para la miniatura y data-preset = clave), agrupados.
   function crearGrilla(contenedor) {
-    const boton = (clave, nombre) => `<button type="button" class="preset-miniatura" data-preset="${clave}" title="${nombre}"><canvas></canvas><span>${nombre}</span></button>`;
-    contenedor.innerHTML = boton('ninguno', 'Sin filtro') + GRUPOS.map((g) =>
-      `<div class="titulo-grupo-presets">${g.titulo}</div>` + g.filtros.map(([clave, nombre]) => boton(clave, nombre)).join('')).join('');
+    const boton = (clave) => `<button type="button" class="preset-miniatura" data-preset="${clave}" title="${nombre(clave)}"><canvas></canvas><span>${nombre(clave)}</span></button>`;
+    contenedor.innerHTML = boton('ninguno') + GRUPOS.map((g, i) =>
+      `<div class="titulo-grupo-presets">${tituloGrupo(i)}</div>` + g.filtros.map(([clave]) => boton(clave)).join('')).join('');
     contenedor.querySelector('[data-preset="ninguno"]').classList.add('activo');
+    // Se reescriben los textos en vez de rehacer la grilla: rehacerla borraria
+    // las miniaturas ya dibujadas en cada <canvas> y cual esta seleccionado.
+    document.addEventListener('cambioIdioma', () => {
+      contenedor.querySelectorAll('.preset-miniatura').forEach((b) => {
+        const texto = nombre(b.dataset.preset);
+        b.title = texto;
+        b.querySelector('span').textContent = texto;
+      });
+      contenedor.querySelectorAll('.titulo-grupo-presets').forEach((d, i) => { d.textContent = tituloGrupo(i); });
+    });
+  }
+
+  function tituloGrupo(indice) {
+    return enIngles() ? GRUPOS_EN[indice] : GRUPOS[indice].titulo;
   }
 
   function nombre(clave) {
+    if (enIngles() && NOMBRES_EN[clave]) return NOMBRES_EN[clave];
     if (clave === 'ninguno') return 'Sin filtro';
     for (const g of GRUPOS) for (const [k, n] of g.filtros) if (k === clave) return n;
     return clave;

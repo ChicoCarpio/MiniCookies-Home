@@ -22,6 +22,33 @@ const AjustePorColor = (() => {
   ];
   const INDICE_VERDES = RANGOS.findIndex((r) => r.clave === 'verdes');
 
+  // --- Version en ingles (ver la nota en filtros-color.js sobre por que
+  // estos textos viven en el modulo y no en i18nComun) ---------------------
+  const NOMBRES_EN = {
+    rojos: 'Reds', naranjas: 'Oranges and browns', amarillos: 'Yellows', verdes: 'Greens',
+    cian: 'Cyan / teal', azules: 'Blues', morados: 'Purples', rosas: 'Pinks / magentas',
+  };
+  const TEXTOS = {
+    es: {
+      subtitulo: 'Ajustar por color', aria: 'Color a ajustar', restablecer: 'Restablecer este color',
+      tono: 'Tono', saturacion: 'Saturación', luminancia: 'Luminancia',
+      nota: 'Cambia solo los tonos de ese color. Por ejemplo, Saturación en −100 en todos los colores menos uno deja solo ese color.',
+    },
+    en: {
+      subtitulo: 'Adjust by color', aria: 'Color to adjust', restablecer: 'Reset this color',
+      tono: 'Hue', saturacion: 'Saturation', luminancia: 'Luminance',
+      nota: 'Changes only the tones of that color. For example, Saturation at −100 on every color but one leaves just that color.',
+    },
+  };
+  const enIngles = () => (window.idiomaActual ? idiomaActual() === 'en' : false);
+  const txt = (clave) => TEXTOS[enIngles() ? 'en' : 'es'][clave];
+  function nombreRango(clave) {
+    if (enIngles() && NOMBRES_EN[clave]) return NOMBRES_EN[clave];
+    const r = RANGOS.find((x) => x.clave === clave);
+    return r ? r.nombre : clave;
+  }
+
+
   function neutro() {
     const ajustes = {};
     RANGOS.forEach((r) => { ajustes[r.clave] = { tono: 0, saturacion: 0, luminancia: 0 }; });
@@ -285,15 +312,15 @@ const AjustePorColor = (() => {
       document.head.appendChild(estilo);
     }
     contenedor.innerHTML = `
-      <div class="ajuste-color-subtitulo">Ajustar por color</div>
-      <div class="ajuste-color-chips" role="group" aria-label="Color a ajustar"></div>
-      <div class="ajuste-color-nombre"><span class="ajuste-color-rango"></span><button type="button">Restablecer este color</button></div>
+      <div class="ajuste-color-subtitulo">${txt('subtitulo')}</div>
+      <div class="ajuste-color-chips" role="group" aria-label="${txt('aria')}"></div>
+      <div class="ajuste-color-nombre"><span class="ajuste-color-rango"></span><button type="button">${txt('restablecer')}</button></div>
       <div class="ajuste-color-deslizadores">
-        <label class="campo-deslizador"><span class="etiqueta-deslizador"><span>Tono</span><span data-valor="tono">0</span></span><input type="range" data-ajuste="tono" min="-100" max="100" value="0"></label>
-        <label class="campo-deslizador"><span class="etiqueta-deslizador"><span>Saturación</span><span data-valor="saturacion">0</span></span><input type="range" data-ajuste="saturacion" min="-100" max="100" value="0"></label>
-        <label class="campo-deslizador"><span class="etiqueta-deslizador"><span>Luminancia</span><span data-valor="luminancia">0</span></span><input type="range" data-ajuste="luminancia" min="-100" max="100" value="0"></label>
+        <label class="campo-deslizador"><span class="etiqueta-deslizador"><span>${txt('tono')}</span><span data-valor="tono">0</span></span><input type="range" data-ajuste="tono" min="-100" max="100" value="0"></label>
+        <label class="campo-deslizador"><span class="etiqueta-deslizador"><span>${txt('saturacion')}</span><span data-valor="saturacion">0</span></span><input type="range" data-ajuste="saturacion" min="-100" max="100" value="0"></label>
+        <label class="campo-deslizador"><span class="etiqueta-deslizador"><span>${txt('luminancia')}</span><span data-valor="luminancia">0</span></span><input type="range" data-ajuste="luminancia" min="-100" max="100" value="0"></label>
       </div>
-      <p class="ajuste-color-nota">Cambia solo los tonos de ese color. Por ejemplo, Saturación en −100 en todos los colores menos uno deja solo ese color.</p>`;
+      <p class="ajuste-color-nota">${txt('nota')}</p>`;
     const chips = contenedor.querySelector('.ajuste-color-chips');
     let elegido = RANGOS[0].clave;
 
@@ -301,7 +328,7 @@ const AjustePorColor = (() => {
 
     function refrescar() {
       const ajustes = actuales();
-      contenedor.querySelector('.ajuste-color-rango').textContent = RANGOS.find((r) => r.clave === elegido).nombre;
+      contenedor.querySelector('.ajuste-color-rango').textContent = nombreRango(elegido);
       contenedor.querySelectorAll('input[data-ajuste]').forEach((input) => {
         const n = ajustes[elegido][input.dataset.ajuste];
         input.value = n;
@@ -319,8 +346,8 @@ const AjustePorColor = (() => {
       chip.type = 'button';
       chip.className = 'ajuste-color-chip';
       chip.dataset.rango = rango.clave;
-      chip.title = rango.nombre;
-      chip.setAttribute('aria-label', rango.nombre);
+      chip.title = nombreRango(rango.clave);
+      chip.setAttribute('aria-label', nombreRango(rango.clave));
       chip.style.background = rango.muestra;
       chip.addEventListener('click', () => { elegido = rango.clave; refrescar(); });
       chips.appendChild(chip);
@@ -331,7 +358,23 @@ const AjustePorColor = (() => {
         const ajustes = JSON.parse(JSON.stringify(actuales()));
         ajustes[elegido][input.dataset.ajuste] = Number(input.value);
         opciones.escribir(ajustes);
-        refrescar();
+        document.addEventListener('cambioIdioma', () => {
+      contenedor.querySelector('.ajuste-color-subtitulo').textContent = txt('subtitulo');
+      contenedor.querySelector('.ajuste-color-chips').setAttribute('aria-label', txt('aria'));
+      contenedor.querySelector('.ajuste-color-nombre button').textContent = txt('restablecer');
+      contenedor.querySelector('.ajuste-color-nota').textContent = txt('nota');
+      contenedor.querySelectorAll('.campo-deslizador').forEach((campo) => {
+        const clave = campo.querySelector('input[data-ajuste]').dataset.ajuste;
+        campo.querySelector('.etiqueta-deslizador span').textContent = txt(clave);
+      });
+      contenedor.querySelectorAll('.ajuste-color-chip').forEach((chip) => {
+        chip.title = nombreRango(chip.dataset.rango);
+        chip.setAttribute('aria-label', nombreRango(chip.dataset.rango));
+      });
+      refrescar();
+    });
+
+    refrescar();
       });
     });
 
@@ -346,5 +389,5 @@ const AjustePorColor = (() => {
     return { refrescar };
   }
 
-  return { RANGOS, neutro, enUso, preparar, referenciaColor, aplicar, prepararMezclaGris, mezclarGris, crearPanel };
+  return { nombreRango, RANGOS, neutro, enUso, preparar, referenciaColor, aplicar, prepararMezclaGris, mezclarGris, crearPanel };
 })();
