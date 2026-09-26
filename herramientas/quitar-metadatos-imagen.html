@@ -21,10 +21,32 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Quitar metadatos EXIF de una foto',
+    'intro': 'Elegí una foto, mirá qué metadatos tiene (cámara, fecha, ubicación GPS) y descargala sin ellos antes de compartirla.',
+    'boton-descargar': 'Descargar sin metadatos',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen',
+    'meta-leyendo': 'Leyendo metadatos...',
+    'meta-ninguno': 'No se encontraron metadatos EXIF en esta imagen (o ya venía sin ellos).',
+    'meta-ilegible': 'No se pudieron leer los metadatos, pero igual se pueden quitar al descargar.',
+    'meta-camara': 'Cámara',
+    'meta-fecha': 'Fecha',
+    'meta-gps': 'Ubicación GPS',
     'titulo-pagina': 'Quitar metadatos EXIF de una foto gratis — Mini Cookies',
     'meta-descripcion': 'Sacá los metadatos EXIF (cámara, fecha, ubicación GPS) de una foto antes de compartirla, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Remove EXIF metadata from a photo',
+    'intro': 'Pick a photo, see what metadata it carries (camera, date, GPS location) and download it without any of that before you share it.',
+    'boton-descargar': 'Download without metadata',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download image',
+    'meta-leyendo': 'Reading metadata...',
+    'meta-ninguno': 'No EXIF metadata was found in this image (or it never had any).',
+    'meta-ilegible': 'The metadata could not be read, but it will still be stripped on download.',
+    'meta-camara': 'Camera',
+    'meta-fecha': 'Date',
+    'meta-gps': 'GPS location',
     'titulo-pagina': 'Remove EXIF metadata from a photo, free — Mini Cookies',
     'meta-descripcion': 'Strip the EXIF metadata (camera, date, GPS location) from a photo before you share it — free, and nothing is uploaded to a server.',
   }
@@ -45,8 +67,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Quitar metadatos EXIF de una foto</h1>
-  <p>Elegí una foto, mirá qué metadatos tiene (cámara, fecha, ubicación GPS) y descargala sin ellos antes de compartirla.</p>
+  <h1 data-i18n="hero-titulo">Quitar metadatos EXIF de una foto</h1>
+  <p data-i18n="intro">Elegí una foto, mirá qué metadatos tiene (cámara, fecha, ubicación GPS) y descargala sin ellos antes de compartirla.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -59,11 +81,11 @@ window.i18nPagina = {
     <div class="metadatos" id="metadatos"></div>
 
     <div class="controles">
-      <button class="boton" id="botonDescargar" disabled>Descargar sin metadatos</button>
+      <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar sin metadatos</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-sin-metadatos">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-sin-metadatos" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -262,15 +284,15 @@ function quitarMetadatosJpegSinPerdida(buffer) {
 
 function mostrarMetadatos(datos) {
   if (!datos || (!datos.marca && !datos.modelo && !datos.fecha && !datos.gps)) {
-    metadatosDiv.innerHTML = '<p class="sin-metadatos">No se encontraron metadatos EXIF en esta imagen (o ya venía sin ellos).</p>';
+    metadatosDiv.innerHTML = '<p class="sin-metadatos">' + escaparHtml(t('meta-ninguno')) + '</p>';
     return;
   }
   const filas = [];
   // Marca, modelo y fecha son texto libre que viene dentro del archivo: se
   // escapan para que una foto armada a propósito no pueda meter HTML/scripts.
-  if (datos.marca || datos.modelo) filas.push(['Cámara', escaparHtml([datos.marca, datos.modelo].filter(Boolean).join(' '))]);
-  if (datos.fecha) filas.push(['Fecha', escaparHtml(datos.fecha)]);
-  if (datos.gps) filas.push(['Ubicación GPS', `<span class="aviso-gps">${datos.gps.lat.toFixed(5)}, ${datos.gps.lon.toFixed(5)}</span>`]);
+  if (datos.marca || datos.modelo) filas.push([escaparHtml(t('meta-camara')), escaparHtml([datos.marca, datos.modelo].filter(Boolean).join(' '))]);
+  if (datos.fecha) filas.push([escaparHtml(t('meta-fecha')), escaparHtml(datos.fecha)]);
+  if (datos.gps) filas.push([escaparHtml(t('meta-gps')), `<span class="aviso-gps">${datos.gps.lat.toFixed(5)}, ${datos.gps.lon.toFixed(5)}</span>`]);
   metadatosDiv.innerHTML = `
     <table>${filas.map(([etiqueta, valor]) => `<tr><td>${etiqueta}</td><td>${valor}</td></tr>`).join('')}</table>
   `;
@@ -292,7 +314,7 @@ async function mostrarArchivo(archivo) {
   botonDescargar.disabled = false;
   resultado.classList.remove('visible');
 
-  metadatosDiv.innerHTML = '<p class="sin-metadatos">Leyendo metadatos...</p>';
+  metadatosDiv.innerHTML = '<p class="sin-metadatos">' + escaparHtml(t('meta-leyendo')) + '</p>';
   // Si no se llega a leer la orientación, la descarga va por el camino seguro (canvas).
   orientacionActual = null;
   try {
@@ -300,7 +322,7 @@ async function mostrarArchivo(archivo) {
     orientacionActual = datos && datos.orientacion ? datos.orientacion : 1;
     mostrarMetadatos(datos);
   } catch (error) {
-    metadatosDiv.innerHTML = '<p class="sin-metadatos">No se pudieron leer los metadatos, pero igual se pueden quitar al descargar.</p>';
+    metadatosDiv.innerHTML = '<p class="sin-metadatos">' + escaparHtml(t('meta-ilegible')) + '</p>';
   }
 }
 

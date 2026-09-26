@@ -20,10 +20,30 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Marca de agua para imagen',
+    'intro': 'Agregá un texto (ej. "CONFIDENCIAL", tu nombre) como marca de agua diagonal sobre una imagen.',
+    'campo-texto': 'Texto de la marca de agua',
+    'valor-texto': 'CONFIDENCIAL',
+    'campo-tamano-a': 'Tamaño de letra: ',
+    'campo-opacidad-a': 'Opacidad: ',
+    'campo-repetir-a': 'Repetir el mensaje: ',
+    'boton-aplicar': 'Aplicar marca de agua',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen con marca de agua',
     'titulo-pagina': 'Marca de agua para imagen gratis — Mini Cookies',
     'meta-descripcion': 'Agregá una marca de agua de texto diagonal a una imagen, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Image watermark',
+    'intro': 'Add a piece of text (say "CONFIDENTIAL", or your name) as a diagonal watermark over an image.',
+    'campo-texto': 'Watermark text',
+    'valor-texto': 'CONFIDENTIAL',
+    'campo-tamano-a': 'Font size: ',
+    'campo-opacidad-a': 'Opacity: ',
+    'campo-repetir-a': 'Repeat the message: ',
+    'boton-aplicar': 'Apply watermark',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download the watermarked image',
     'titulo-pagina': 'Add a watermark to an image, free — Mini Cookies',
     'meta-descripcion': 'Add a diagonal text watermark to an image — free, and nothing is uploaded to a server.',
   }
@@ -44,8 +64,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Marca de agua para imagen</h1>
-  <p>Agregá un texto (ej. "CONFIDENCIAL", tu nombre) como marca de agua diagonal sobre una imagen.</p>
+  <h1 data-i18n="hero-titulo">Marca de agua para imagen</h1>
+  <p data-i18n="intro">Agregá un texto (ej. "CONFIDENCIAL", tu nombre) como marca de agua diagonal sobre una imagen.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -57,26 +77,26 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        <span>Texto de la marca de agua</span>
-        <input type="text" id="textoMarca" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
+        <span data-i18n="campo-texto">Texto de la marca de agua</span>
+        <input type="text" id="textoMarca" data-i18n-attr="value:valor-texto" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
       </label>
       <label class="campo">
-        <span>Tamaño de letra: <span id="etiquetaTamano">60</span></span>
+        <span><span data-i18n="campo-tamano-a">Tamaño de letra: </span><span id="etiquetaTamano">60</span></span>
         <input type="range" id="tamanoLetra" min="20" max="150" value="60">
       </label>
       <label class="campo">
-        <span>Opacidad: <span id="etiquetaOpacidad">30</span>%</span>
+        <span><span data-i18n="campo-opacidad-a">Opacidad: </span><span id="etiquetaOpacidad">30</span>%</span>
         <input type="range" id="opacidad" min="5" max="80" value="30">
       </label>
       <label class="campo">
-        <span>Repetir el mensaje: <span id="etiquetaRepeticiones">1</span></span>
+        <span><span data-i18n="campo-repetir-a">Repetir el mensaje: </span><span id="etiquetaRepeticiones">1</span></span>
         <input type="range" id="repeticiones" min="1" max="20" value="1">
       </label>
-      <button class="boton" id="botonAplicar" disabled>Aplicar marca de agua</button>
+      <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar marca de agua</button>
     </div>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-marcada">Descargar imagen con marca de agua</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-marcada" data-i18n="resultado-enlace">Descargar imagen con marca de agua</a>
     </div>
   </div>
 

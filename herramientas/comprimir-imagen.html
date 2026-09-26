@@ -12,10 +12,34 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Comprimir imagen',
+    'intro': 'Elegí una imagen (JPG, PNG o WebP) y convertila a JPG o WebP con menos peso.',
+    'campo-calidad-a': 'Calidad: ',
+    'campo-formato': 'Formato de salida',
+    'boton-comprimir': 'Comprimir imagen',
+    'et-peso-original': 'Peso original',
+    'et-peso-final': 'Peso comprimido',
+    'et-reduccion': 'Reducción',
+    'aviso-mas-pesado': '⚠️ Con esta configuración la imagen pesa más que la original (ya venía bien comprimida). Probá bajar la calidad o elegir WebP; si no, te conviene quedarte con el archivo original.',
+    'mas-pesado': '+{n}% más pesado',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen comprimida',
     'titulo-pagina': 'Comprimir imagen gratis — Mini Cookies',
     'meta-descripcion': 'Comprimí imágenes a JPG o WebP sin perder demasiada calidad, gratis y sin subirlas a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Compress an image',
+    'intro': 'Pick an image (JPG, PNG or WebP) and turn it into a lighter JPG or WebP.',
+    'campo-calidad-a': 'Quality: ',
+    'campo-formato': 'Output format',
+    'boton-comprimir': 'Compress image',
+    'et-peso-original': 'Original size',
+    'et-peso-final': 'Compressed size',
+    'et-reduccion': 'Saved',
+    'aviso-mas-pesado': '⚠️ With these settings the image comes out heavier than the original (it was already well compressed). Try lowering the quality or choosing WebP — otherwise you are better off keeping the original file.',
+    'mas-pesado': '+{n}% heavier',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download the compressed image',
     'titulo-pagina': 'Compress an image, free — Mini Cookies',
     'meta-descripcion': 'Compress images to JPG or WebP without losing too much quality — free, and nothing is uploaded to a server.',
   }
@@ -36,8 +60,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Comprimir imagen</h1>
-  <p>Elegí una imagen (JPG, PNG o WebP) y convertila a JPG o WebP con menos peso.</p>
+  <h1 data-i18n="hero-titulo">Comprimir imagen</h1>
+  <p data-i18n="intro">Elegí una imagen (JPG, PNG o WebP) y convertila a JPG o WebP con menos peso.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -49,30 +73,28 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        Calidad: <span id="etiquetaCalidad">70</span>%
+        <span data-i18n="campo-calidad-a">Calidad: </span><span id="etiquetaCalidad">70</span>%
         <input type="range" id="calidad" min="10" max="95" value="70">
       </label>
       <label class="campo">
-        Formato de salida
+        <span data-i18n="campo-formato">Formato de salida</span>
         <select id="formato">
           <option value="image/jpeg">JPG</option>
           <option value="image/webp">WebP</option>
         </select>
       </label>
-      <button class="boton" id="botonComprimir" disabled>Comprimir imagen</button>
+      <button class="boton" id="botonComprimir" disabled data-i18n="boton-comprimir">Comprimir imagen</button>
     </div>
 
     <div class="estadisticas" id="estadisticas" style="display:none;">
-      <div class="estadistica"><div class="numero" id="pesoOriginal">—</div><div class="etiqueta">Peso original</div></div>
-      <div class="estadistica"><div class="numero" id="pesoFinal">—</div><div class="etiqueta">Peso comprimido</div></div>
-      <div class="estadistica"><div class="numero" id="porcentajeAhorro">—</div><div class="etiqueta">Reducción</div></div>
+      <div class="estadistica"><div class="numero" id="pesoOriginal">—</div><div class="etiqueta" data-i18n="et-peso-original">Peso original</div></div>
+      <div class="estadistica"><div class="numero" id="pesoFinal">—</div><div class="etiqueta" data-i18n="et-peso-final">Peso comprimido</div></div>
+      <div class="estadistica"><div class="numero" id="porcentajeAhorro">—</div><div class="etiqueta" data-i18n="et-reduccion">Reducción</div></div>
     </div>
-    <p id="avisoMasPesado" style="display:none; color:var(--texto-suave); font-size:0.9rem;">
-      ⚠️ Con esta configuración la imagen pesa más que la original (ya venía bien comprimida). Probá bajar la calidad o elegir WebP; si no, te conviene quedarte con el archivo original.
-    </p>
+    <p id="avisoMasPesado" style="display:none; color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-mas-pesado">⚠️ Con esta configuración la imagen pesa más que la original (ya venía bien comprimida). Probá bajar la calidad o elegir WebP; si no, te conviene quedarte con el archivo original.</p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-comprimida">Descargar imagen comprimida</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-comprimida" data-i18n="resultado-enlace">Descargar imagen comprimida</a>
     </div>
   </div>
 
@@ -179,7 +201,7 @@ botonComprimir.addEventListener('click', async () => {
     const diferencia = 1 - blob.size / archivoActual.size;
     const porcentajeAhorro = document.getElementById('porcentajeAhorro');
     if (diferencia < 0) {
-      porcentajeAhorro.textContent = `+${Math.round(-diferencia * 100)}% más pesado`;
+      porcentajeAhorro.textContent = t('mas-pesado').replace('{n}', Math.round(-diferencia * 100));
     } else {
       porcentajeAhorro.textContent = `${Math.round(diferencia * 100)}%`;
     }

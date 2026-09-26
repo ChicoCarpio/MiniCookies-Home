@@ -27,10 +27,26 @@
 <script>
 window.i18nPagina = {
   es: {
+    'hero-titulo': 'Convertir formato de imagen',
+    'intro': 'Elegí una imagen y convertila entre PNG, JPG y WebP.',
+    'campo-formato': 'Formato de salida',
+    'campo-calidad-a': 'Calidad: ',
+    'boton-convertir': 'Convertir imagen',
+    'aviso-transparencia': '⚠️ JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco.',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Convertir formato de imagen gratis — Mini Cookies',
     'meta-descripcion': 'Convertí una imagen entre PNG, JPG y WebP, gratis y sin subirla a ningún servidor.',
   },
   en: {
+    'hero-titulo': 'Convert image format',
+    'intro': 'Pick an image and convert it between PNG, JPG and WebP.',
+    'campo-formato': 'Output format',
+    'campo-calidad-a': 'Quality: ',
+    'boton-convertir': 'Convert image',
+    'aviso-transparencia': '⚠️ JPG has no transparency — a transparent background will be filled with white.',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download image',
     'titulo-pagina': 'Convert image format, free — Mini Cookies',
     'meta-descripcion': 'Convert an image between PNG, JPG and WebP — free, and nothing is uploaded to a server.',
   }
@@ -51,8 +67,8 @@ window.i18nPagina = {
 </header>
 
 <main>
-  <h1>Convertir formato de imagen</h1>
-  <p>Elegí una imagen y convertila entre PNG, JPG y WebP.</p>
+  <h1 data-i18n="hero-titulo">Convertir formato de imagen</h1>
+  <p data-i18n="intro">Elegí una imagen y convertila entre PNG, JPG y WebP.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -65,7 +81,7 @@ window.i18nPagina = {
 
     <div class="controles">
       <label class="campo">
-        Formato de salida
+        <span data-i18n="campo-formato">Formato de salida</span>
         <div class="formatos" id="formatos">
           <button type="button" class="activo" data-formato="image/png">PNG</button>
           <button type="button" data-formato="image/jpeg">JPG</button>
@@ -73,17 +89,15 @@ window.i18nPagina = {
         </div>
       </label>
       <label class="campo" id="campoCalidad" style="display:none;">
-        Calidad: <span id="etiquetaCalidad">85</span>%
+        <span data-i18n="campo-calidad-a">Calidad: </span><span id="etiquetaCalidad">85</span>%
         <input type="range" id="calidad" min="10" max="100" value="85">
       </label>
-      <button class="boton" id="botonConvertir" disabled>Convertir imagen</button>
+      <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir imagen</button>
     </div>
-    <p class="aviso-transparencia" id="avisoTransparencia" style="display:none;">
-      ⚠️ JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco.
-    </p>
+    <p class="aviso-transparencia" id="avisoTransparencia" style="display:none;" data-i18n="aviso-transparencia">⚠️ JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco.</p>
 
     <div class="resultado" id="resultado">
-      ✅ Listo. <a id="enlaceDescarga" download="imagen-convertida">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-convertida" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
