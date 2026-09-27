@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Generador de stickers gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí una foto en un sticker con fondo transparente y borde de color, usando inteligencia artificial que corre 100% en tu navegador.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/editor-movil.css">
+<style>
+  /* Mismo esqueleto de columnas que Editor-de-color-de-imagen.html: filtros
+     a la izquierda, imagen al centro — pero acá el panel de filtros no se
+     puede plegar (siempre visible, solo ordenado de arriba a abajo con
+     scroll), y el grosor/color de borde + descargar van debajo de la imagen,
+     no adentro del panel de filtros. */
+  main { max-width: 1300px; }
+
+  .editor-color-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    height: calc(100vh - 320px);
+    min-height: 480px;
+    margin-top: 16px;
+  }
+  /* A diferencia de los otros editores, acá "Filtros", "Color del borde" y
+     "Acciones" son tres herramientas distintas con su propio espacio (cada
+     una es su propia categoría en celular, ver data-em-categoria) — por eso
+     este contenedor solo las apila, sin envolverlas en un panel con borde
+     propio (cada .acordeon-grupo ya trae el suyo). */
+  .panel-stickers { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; }
+  /* La grilla de filtros vive dentro de su propio acordeón: con un alto
+     máximo y scroll propio, abrirla no empuja a "Acciones" fuera de la
+     vista. */
+  .presets-scroll { max-height: 45vh; overflow-y: auto; }
+  .panel-lienzo {
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 12px;
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .area-canvas { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; }
+  .area-controles { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
+  .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
+  .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
+  .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
+  .campo-deslizador .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
+  .campo-deslizador input[type="range"] { width: 100%; margin: 0; }
+
+  /* --- Acordeón del panel de filtros: mismo patrón que Editor-de-color-de-imagen.html --- */
+  /* Sin margin propio: el espacio entre cajas lo da el gap de .panel-stickers. */
+  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin: 0; padding: 0; overflow: hidden; min-width: 0; flex: 0 0 auto; }
+  .acordeon-titulo {
+    width: 100%; display: flex; flex-wrap: nowrap; align-items: center; gap: 8px;
+    padding: 8px 10px; background: var(--gris-fondo); border: none; cursor: pointer;
+    font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
+  .acordeon-titulo > span:first-child { flex: 1 1 auto; min-width: 0; }
+  .acordeon-contenido { display: none; padding: 10px; }
+  .acordeon-grupo.abierto .acordeon-contenido { display: block; }
+  .acordeon-titulo .flecha { flex: 0 0 auto; margin-left: auto; transition: transform .15s; }
+  .acordeon-grupo.abierto .acordeon-titulo .flecha { transform: rotate(180deg); }
+  .campo-color-borde { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; }
+
+  /* Grilla de miniaturas de filtros — igual que en Editor-de-color-de-imagen.html. */
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px 8px; padding: 6px 4px; }
+  .titulo-grupo-presets { grid-column: 1 / -1; margin-top: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
+  .preset-miniatura { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; cursor: pointer; min-width: 0; }
+  .preset-miniatura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border-radius: 8px; border: 2px solid var(--gris-borde); background: var(--gris-fondo); transition: transform .15s, border-color .15s; }
+  .preset-miniatura:hover canvas { border-color: var(--azul); }
+  .preset-miniatura span { font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .15s; }
+  .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
+  .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
+
+  .barra-progreso-stickers { width: 100%; height: 10px; border-radius: 5px; background: var(--gris-fondo); overflow: hidden; margin: 10px 0; }
+  .barra-progreso-stickers div { height: 100%; width: 0%; background: var(--azul); transition: width .2s; }
+  #vistaResultado { max-width: 100%; max-height: 100%; display: none; background-image: linear-gradient(45deg, #8883 25%, transparent 25%), linear-gradient(-45deg, #8883 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #8883 75%), linear-gradient(-45deg, transparent 75%, #8883 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; border-radius: 8px; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'hero-titulo': 'Generador de stickers',
+    'intro': 'Subí una foto y recortá el sujeto automáticamente con inteligencia artificial para armar un sticker con borde de color, listo para descargar como PNG con fondo transparente.',
+    'nota-modelo': 'La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador.',
+    'grupo-filtros': 'Filtros',
+    'grupo-acciones': 'Acciones',
+    'lbl-intensidad-filtro': 'Intensidad del filtro',
+    'lbl-tamano-textura': 'Tamaño',
+    'campo-grosor': 'Grosor del borde: ',
+    'campo-color-borde': 'Color del borde',
+    'boton-descargar': 'Descargar sticker (PNG)',
+    'boton-cambiar': '🖼️ Cambiar imagen',
+    'estado-preparando': 'Preparando el modelo...',
+    'estado-descargando': 'Descargando el modelo... {p}% (solo esta vez, después queda guardado)',
+    'estado-recortando': 'Recortando el fondo...',
+    'error-sin-memoria': 'Tu navegador se quedó sin memoria para correr este modelo.',
+    'error-recortar': 'No se pudo recortar la imagen: ',
+    'titulo-pagina': 'Generador de stickers gratis — Mini Cookies',
+    'meta-descripcion': 'Convertí una foto en un sticker con fondo transparente y borde de color, usando inteligencia artificial que corre 100% en tu navegador.',
+  },
+  en: {
+    'hero-titulo': 'Sticker generator',
+    'intro': 'Upload a photo and automatically cut out the subject with AI to build a sticker with a colored border, ready to download as a transparent PNG.',
+    'nota-modelo': 'The first time, it downloads a segmentation model (~42 MB) that then stays cached in your browser.',
+    'grupo-filtros': 'Filters',
+    'grupo-acciones': 'Actions',
+    'lbl-intensidad-filtro': 'Filter intensity',
+    'lbl-tamano-textura': 'Size',
+    'campo-grosor': 'Border thickness: ',
+    'campo-color-borde': 'Border color',
+    'boton-descargar': 'Download sticker (PNG)',
+    'boton-cambiar': '🖼️ Change image',
+    'estado-preparando': 'Getting the model ready...',
+    'estado-descargando': 'Downloading the model... {p}% (just this once — after that it stays cached)',
+    'estado-recortando': 'Cutting out the background...',
+    'error-sin-memoria': 'Your browser ran out of memory running this model.',
+    'error-recortar': 'The image could not be cut out: ',
+    'titulo-pagina': 'Free sticker generator — Mini Cookies',
+    'meta-descripcion': 'Turn a photo into a sticker with a transparent background and a colored border, using AI that runs entirely in your browser.',
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px;"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../imagenes.html" data-i18n="nav-cat-imagenes">Herramientas de Imágenes</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">Generador de stickers</h1>
+  <p data-i18n="intro">Subí una foto y recortá el sujeto automáticamente con inteligencia artificial para armar un sticker con borde de color, listo para descargar como PNG con fondo transparente.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre-imagen">🖼️ Arrastrá tu imagen acá o hacé clic para elegirla</span>
+      <input type="file" id="entradaArchivo" accept="image/*" hidden>
+    </div>
+
+    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="nota-modelo">La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador.</p>
+
+    <div id="panelProgreso" style="display:none; margin-top:16px;">
+      <p id="textoProgreso" style="color:var(--texto-suave); margin-bottom:4px;"></p>
+      <div class="barra-progreso-stickers"><div id="barraProgresoRelleno"></div></div>
+    </div>
+
+    <p id="mensajeError" style="color:#dc2626; display:none; margin-top:16px;"></p>
+
+    <div id="editorCompleto" style="display:none;">
+      <div class="editor-color-layout" data-em-sin-descarga-flotante>
+        <div class="panel-stickers">
+          <fieldset class="acordeon-grupo abierto" data-em-categoria="Filtros">
+            <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="grupo-filtros">Filtros</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-filtro">Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
+                <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
+              </label>
+
+              <div id="controlesTextura" style="display:none;">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="lbl-tamano-textura">Tamaño</span><span id="valorTexturaIntensidad">14</span></span>
+                  <input type="range" id="texturaIntensidad" min="2" max="50" value="14">
+                </label>
+              </div>
+
+              <div class="presets-scroll">
+                <div class="presets" id="presets"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-em-categoria="ColorBorde">
+            <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="campo-color-borde">Color del borde</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-color-borde">
+                <span data-i18n="campo-color-borde">Color del borde</span>
+                <input type="color" id="entradaColorBorde" value="#ffffff">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-em-categoria="Acciones">
+            <button type="button" class="acordeon-titulo" data-icono="⤓"><span data-i18n="grupo-acciones">Acciones</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="controles controles-apilados">
+                <button class="boton" id="botonDescargar" data-i18n="boton-descargar">Descargar sticker (PNG)</button>
+                <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="panel-lienzo">
+          <div class="area-canvas">
+            <canvas id="vistaResultado"></canvas>
+          </div>
+          <div class="area-controles">
+            <label class="campo-deslizador">
+              <span class="etiqueta-deslizador"><span data-i18n="campo-grosor">Grosor del borde: </span><span id="etiquetaGrosor">14</span>px</span>
+              <input type="range" id="entradaGrosor" min="0" max="40" value="14">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/ajuste-por-color.js"></script>
+<script src="../assets/js/efectos-textura.js"></script>
+<script src="../assets/js/filtros-color.js"></script>
+<script src="../assets/js/procesar-filtros.js"></script>
+<script type="module">
+  import { iniciarGeneradorStickers } from '../assets/js/generador-stickers.js';
+  iniciarGeneradorStickers();
+</script>
+<script>
+// --- Acordeón del panel de filtros (uno abierto a la vez) ---
+document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
+  titulo.addEventListener('click', () => {
+    const grupo = titulo.closest('.acordeon-grupo');
+    const panelPadre = titulo.closest('.panel-stickers') || document;
+    const yaAbierto = grupo.classList.contains('abierto');
+    panelPadre.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
+    if (!yaAbierto) grupo.classList.add('abierto');
+  });
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/editor-movil.js"></script>
+</body>
+</html>

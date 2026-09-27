@@ -18,7 +18,7 @@
      la página sigue pudiendo bajar para mostrar el anuncio y el pie. --- */
   .editor-avanzado-layout {
     display: grid;
-    grid-template-columns: var(--col-izq, 260px) 1fr var(--col-der, 320px);
+    grid-template-columns: var(--col-izq, 280px) 1fr var(--col-der, 320px);
     transition: grid-template-columns .2s ease;
     gap: 16px;
     height: calc(100vh - 190px);
@@ -33,18 +33,19 @@
   }
   .panel-lienzo { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; }
   .seccion-lateral { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
+  /* La grilla de filtros vive dentro de su propio acordeón: si se deja crecer
+     libre, al abrirlo empuja "Vista" y los botones de descarga bien abajo y
+     hay que scrollear todo el panel de capas para llegar a ellos. Con un
+     alto máximo y scroll propio, el resto del panel queda alcanzable. */
+  .presets-scroll { max-height: 340px; overflow-y: auto; }
   .titulo-seccion-lateral { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); margin-bottom: 8px; }
   .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
   .seccion-lateral .modos button { flex: 1 1 auto; }
   .nota-lateral { font-size: 0.72rem; color: var(--texto-suave); }
 
-  /* Grilla de filtros (los mismos del Editor de color, assets/js/filtros-color.js) */
-  .filtros-capa > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 6px; margin-bottom: 0; }
-  .filtros-capa > summary::-webkit-details-marker { display: none; }
-  .filtros-capa > summary::after { content: '▾'; }
-  .filtros-capa[open] > summary::after { content: '▴'; }
-  .filtros-capa[open] > summary { margin-bottom: 8px; }
-  #nombreFiltroCapa { color: var(--azul); text-transform: none; letter-spacing: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Grilla de filtros (los mismos del Editor de color, assets/js/filtros-color.js),
+     dentro de un .acordeon-grupo más como los demás bloques del panel. */
+  #nombreFiltroCapa { color: var(--azul); text-transform: none; letter-spacing: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
   .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 6px; padding: 6px 4px; }
   .titulo-grupo-presets {
     grid-column: 1 / -1; margin-top: 6px;
@@ -177,23 +178,34 @@
   .zona-lienzo.paneando #canvasTrabajo { cursor: grabbing; }
 
   /* --- Acordeón de ajustes --- */
-  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  /* min-width:0 en el fieldset: sin esto, el <fieldset> nativo del navegador
+     no se achica por debajo del ancho de su contenido y termina empujando/
+     desalineando el título cuando el texto es largo ("Aplicar la capa a"). */
+  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin-bottom: 8px; padding: 0; overflow: hidden; min-width: 0; }
   .acordeon-titulo {
-    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    width: 100%; display: flex; flex-wrap: nowrap; align-items: center; gap: 8px;
     padding: 8px 10px; background: var(--gris-fondo); border: none; cursor: pointer;
     font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em;
   }
+  /* El texto del título puede ocupar dos líneas en un panel angosto; que
+     encoja él y no el resto es lo que mantiene la flechita siempre pegada
+     a la derecha en vez de saltar a su propia línea. */
+  .acordeon-titulo > span:first-child { flex: 1 1 auto; min-width: 0; }
   .acordeon-contenido { display: none; padding: 10px; }
   .acordeon-grupo.abierto .acordeon-contenido { display: block; }
-  .acordeon-titulo .flecha { transition: transform .15s; }
+  .acordeon-titulo .flecha { flex: 0 0 auto; margin-left: auto; transition: transform .15s; }
   .acordeon-grupo.abierto .acordeon-titulo .flecha { transform: rotate(180deg); }
-  .campo-deslizador { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+  /* El ícono se agrega por CSS (::before), no como texto del título: así el
+     nombre que lee editor-movil.js para el chip de celular no cambia — esta
+     vista solo la ve la versión de escritorio. */
+  .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
+  .deslizadores { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
   .campo-deslizador.deshabilitado { opacity: 0.5; }
-  .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.82rem; }
+  .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
   .campo-deslizador .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
   .campo-deslizador input[type="range"] { width: 100%; margin: 0; }
-  .campo-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; margin-bottom: 8px; }
-  .campo-check input { width: auto; }
+  .campo-check { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; margin-bottom: 10px; }
   .subtitulo-bn { font-size: 0.8rem; font-weight: 600; margin: 14px 0 6px; padding-top: 10px; border-top: 1px solid var(--gris-borde); }
   .subtitulo-bn:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
   .muestra-color { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
@@ -230,9 +242,11 @@ window.i18nPagina = {
     'boton-borrar-mascara': 'Borrar lo pintado',
     'ayuda-color': 'Hacé clic en la imagen para elegir el color ',
     'sl-tolerancia': 'Tolerancia',
-    'resumen-filtro': 'Filtro de la capa',
+    'resumen-filtro': 'Filtro',
+    'lbl-filtro-actual': 'Filtro actual: ',
     'nota-filtro-capa': 'Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.',
     'titulo-vista': 'Vista',
+    'grupo-acciones': 'Acciones',
     'sl-zoom': 'Zoom',
     'nota-zoom': 'También con la rueda del mouse o pellizcando con dos dedos',
     'lbl-resolucion': 'Resolución de la vista previa',
@@ -291,7 +305,7 @@ window.i18nPagina = {
     'textura-difuminar': 'Difuminado',
     'textura-movimiento': 'Movimiento',
     'textura-esmerilado': 'Esmerilado',
-    'lbl-intensidad-textura': 'Intensidad de la textura',
+    'lbl-intensidad-textura': 'Intensidad de textura',
     'orden-debajo': 'Debajo de los filtros',
     'orden-encima': 'Encima de los filtros',
     'titulo-pagina': 'Editor avanzado gratis — Mini Cookies',
@@ -319,9 +333,11 @@ window.i18nPagina = {
     'boton-borrar-mascara': 'Clear what you painted',
     'ayuda-color': 'Click the image to pick the color ',
     'sl-tolerancia': 'Tolerance',
-    'resumen-filtro': 'Layer filter',
+    'resumen-filtro': 'Filter',
+    'lbl-filtro-actual': 'Current filter: ',
     'nota-filtro-capa': 'It applies to the active layer (and only to its area, if you limited it with the brush or a color) and replaces its adjustments. To soften it, lower the layer opacity.',
     'titulo-vista': 'View',
+    'grupo-acciones': 'Actions',
     'sl-zoom': 'Zoom',
     'nota-zoom': 'Also with the mouse wheel, or by pinching with two fingers',
     'lbl-resolucion': 'Preview resolution',
@@ -424,77 +440,75 @@ window.i18nPagina = {
             <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
           </div>
           <div id="listaCapas"></div>
-          <div class="controles" style="margin-top:12px; flex-direction:column; gap:6px; align-items:stretch;">
-            <button type="button" id="botonGuardarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 10px; font-size:0.78rem;" data-i18n="boton-guardar-proyecto">💾 Guardar proyecto</button>
-            <button type="button" id="botonCargarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 10px; font-size:0.78rem;" data-i18n="boton-cargar-proyecto">📂 Cargar proyecto</button>
-            <input type="file" id="entradaProyecto" accept="application/json" hidden>
-          </div>
+          <input type="file" id="entradaProyecto" accept="application/json" hidden>
 
-          <div class="seccion-lateral">
-            <div class="titulo-seccion-lateral" data-i18n="titulo-aplicar">Aplicar la capa a</div>
-            <div class="modos" id="modosSeleccionCapa">
-              <button type="button" class="activo" data-seleccion="toda" data-i18n="sel-toda">Toda la imagen</button>
-              <button type="button" data-seleccion="pincel" data-i18n="sel-pincel">Pincel</button>
-              <button type="button" data-seleccion="color" data-i18n="sel-color">Color</button>
-            </div>
+          <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
+               así ninguno empuja a los demás fuera de la vista. -->
+          <fieldset class="acordeon-grupo">
+            <button type="button" class="acordeon-titulo" data-icono="🎯"><span data-i18n="titulo-aplicar">Aplicar la capa a</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="modos" id="modosSeleccionCapa">
+                <button type="button" class="activo" data-seleccion="toda" data-i18n="sel-toda">Toda la imagen</button>
+                <button type="button" data-seleccion="pincel" data-i18n="sel-pincel">Pincel</button>
+                <button type="button" data-seleccion="color" data-i18n="sel-color">Color</button>
+              </div>
 
-            <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-pincel">Tamaño de pincel</span><span id="valorPincelAvanzado">30px</span></span>
-                <input type="range" id="tamanoPincelAvanzado" min="6" max="120" value="30">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-dureza">Dureza (bordes)</span><span id="valorDurezaPincel">70%</span></span>
-                <input type="range" id="durezaPincel" min="10" max="100" value="70">
-              </label>
-              <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar lo pintado</button>
-            </div>
+              <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-pincel">Tamaño de pincel</span><span id="valorPincelAvanzado">30px</span></span>
+                  <input type="range" id="tamanoPincelAvanzado" min="6" max="120" value="30">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-dureza">Dureza (bordes)</span><span id="valorDurezaPincel">70%</span></span>
+                  <input type="range" id="durezaPincel" min="10" max="100" value="70">
+                </label>
+                <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar lo pintado</button>
+              </div>
 
-            <div id="controlesColorAvanzado" class="controles controles-apilados" style="display:none;">
-              <span style="font-size:0.8rem;"><span data-i18n="ayuda-color">Hacé clic en la imagen para elegir el color </span><span class="muestra-color-objetivo" id="muestraColorObjetivo"></span></span>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-tolerancia">Tolerancia</span><span id="valorToleranciaColor">30</span></span>
-                <input type="range" id="toleranciaColor" min="0" max="100" value="30">
-              </label>
+              <div id="controlesColorAvanzado" class="controles controles-apilados" style="display:none;">
+                <span style="font-size:0.8rem;"><span data-i18n="ayuda-color">Hacé clic en la imagen para elegir el color </span><span class="muestra-color-objetivo" id="muestraColorObjetivo"></span></span>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-tolerancia">Tolerancia</span><span id="valorToleranciaColor">30</span></span>
+                  <input type="range" id="toleranciaColor" min="0" max="100" value="30">
+                </label>
+              </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div class="seccion-lateral">
-            <details class="filtros-capa" id="filtrosCapa" data-em-categoria="Filtros">
-              <summary class="titulo-seccion-lateral"><span data-i18n="resumen-filtro">Filtro de la capa</span><span id="nombreFiltroCapa">Sin filtro</span></summary>
-              <p class="nota-lateral" style="margin:0 0 6px;" data-i18n="nota-filtro-capa">Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.</p>
-              <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
-              <div class="presets" id="presets"></div>
-            </details>
-          </div>
+          <fieldset class="acordeon-grupo">
+            <button type="button" class="acordeon-titulo" data-icono="🔍"><span data-i18n="titulo-vista">Vista</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="controles controles-apilados">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-zoom">Zoom</span><span id="valorZoomAvanzado">100%</span></span>
+                  <input type="range" id="zoomAvanzado" min="10" max="400" value="100">
+                </label>
+                <span class="nota-lateral" data-i18n="nota-zoom">También con la rueda del mouse o pellizcando con dos dedos</span>
+                <label for="resolucionVistaPrevia" style="font-size:0.8rem;" data-i18n="lbl-resolucion">Resolución de la vista previa</label>
+                <select id="resolucionVistaPrevia" style="padding:4px 8px; font-size:0.8rem;">
+                  <option value="rapida" data-i18n="res-rapida">Rápida (hasta 1000 px)</option>
+                  <option value="original" id="opcionResolucionOriginal" data-i18n="res-original">Resolución original</option>
+                </select>
+                <span id="avisoResolucionOriginal" class="nota-lateral"></span>
+              </div>
+            </div>
+          </fieldset>
 
-          <div class="seccion-lateral">
-            <div class="titulo-seccion-lateral" data-i18n="titulo-vista">Vista</div>
-            <div class="controles controles-apilados">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-zoom">Zoom</span><span id="valorZoomAvanzado">100%</span></span>
-                <input type="range" id="zoomAvanzado" min="10" max="400" value="100">
-              </label>
-              <span class="nota-lateral" data-i18n="nota-zoom">También con la rueda del mouse o pellizcando con dos dedos</span>
-              <label for="resolucionVistaPrevia" style="font-size:0.8rem;" data-i18n="lbl-resolucion">Resolución de la vista previa</label>
-              <select id="resolucionVistaPrevia" style="padding:4px 8px; font-size:0.8rem;">
-                <option value="rapida" data-i18n="res-rapida">Rápida (hasta 1000 px)</option>
-                <option value="original" id="opcionResolucionOriginal" data-i18n="res-original">Resolución original</option>
-              </select>
-              <span id="avisoResolucionOriginal" class="nota-lateral"></span>
+          <fieldset class="acordeon-grupo">
+            <button type="button" class="acordeon-titulo" data-icono="⤓"><span data-i18n="grupo-acciones">Acciones</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="controles controles-apilados">
+                <button class="boton" id="botonDescargarAvanzado" data-i18n="boton-descargar">Descargar imagen</button>
+                <button type="button" id="botonRestablecerAvanzado" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-reiniciar">Reiniciar todo</button>
+                <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
+                <button type="button" id="botonGuardarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-guardar-proyecto">💾 Guardar proyecto</button>
+                <button type="button" id="botonCargarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cargar-proyecto">📂 Cargar proyecto</button>
+              </div>
+              <div class="resultado" id="resultado">
+                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+              </div>
             </div>
-          </div>
-
-          <div class="seccion-lateral">
-            <div class="controles controles-apilados">
-              <button class="boton" id="botonDescargarAvanzado" data-i18n="boton-descargar">Descargar imagen</button>
-              <button type="button" id="botonRestablecerAvanzado" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-reiniciar">Reiniciar todo</button>
-              <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
-            </div>
-            <div class="resultado" id="resultado">
-              <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
-            </div>
-          </div>
+          </fieldset>
         </div>
 
         <div class="panel-lienzo">
@@ -511,59 +525,63 @@ window.i18nPagina = {
         <div class="panel-ajustes">
           <button type="button" class="boton-plegar" data-panel="der" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span class="flecha-plegar">»</span><span data-i18n="panel-ajustes">Ajustes</span></button>
           <fieldset class="acordeon-grupo abierto" data-grupo="luz">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-luz">Luz</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="☀️"><span data-i18n="grupo-luz">Luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-exposicion">Exposición</span><span id="valorExposicion">0</span></span>
-                <input type="range" id="exposicion" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-contraste">Contraste</span><span id="valorContraste">0</span></span>
-                <input type="range" id="contraste" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-sombras">Sombras</span><span id="valorSombras">0</span></span>
-                <input type="range" id="sombras" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-reflejos">Reflejos</span><span id="valorReflejos">0</span></span>
-                <input type="range" id="reflejos" min="-100" max="100" value="0">
-              </label>
+              <div class="deslizadores">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-exposicion">Exposición</span><span id="valorExposicion">0</span></span>
+                  <input type="range" id="exposicion" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-contraste">Contraste</span><span id="valorContraste">0</span></span>
+                  <input type="range" id="contraste" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-sombras">Sombras</span><span id="valorSombras">0</span></span>
+                  <input type="range" id="sombras" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-reflejos">Reflejos</span><span id="valorReflejos">0</span></span>
+                  <input type="range" id="reflejos" min="-100" max="100" value="0">
+                </label>
+              </div>
             </div>
           </fieldset>
 
           <fieldset class="acordeon-grupo" data-grupo="color">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-saturacion">Saturación</span><span id="valorSaturacion">0</span></span>
-                <input type="range" id="saturacion" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-intensidad-color">Intensidad de color</span><span id="valorIntensidad">0</span></span>
-                <input type="range" id="intensidad" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-tono">Girar tono</span><span id="valorTono">0°</span></span>
-                <input type="range" id="tono" min="-180" max="180" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-canal-rojo">Canal rojo</span><span id="valorColorRojo">0</span></span>
-                <input type="range" id="colorRojo" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-canal-verde">Canal verde</span><span id="valorColorVerde">0</span></span>
-                <input type="range" id="colorVerde" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-canal-azul">Canal azul</span><span id="valorColorAzul">0</span></span>
-                <input type="range" id="colorAzul" min="-100" max="100" value="0">
-              </label>
+              <div class="deslizadores">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-saturacion">Saturación</span><span id="valorSaturacion">0</span></span>
+                  <input type="range" id="saturacion" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-intensidad-color">Intensidad de color</span><span id="valorIntensidad">0</span></span>
+                  <input type="range" id="intensidad" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-tono">Girar tono</span><span id="valorTono">0°</span></span>
+                  <input type="range" id="tono" min="-180" max="180" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-canal-rojo">Canal rojo</span><span id="valorColorRojo">0</span></span>
+                  <input type="range" id="colorRojo" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-canal-verde">Canal verde</span><span id="valorColorVerde">0</span></span>
+                  <input type="range" id="colorVerde" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-canal-azul">Canal azul</span><span id="valorColorAzul">0</span></span>
+                  <input type="range" id="colorAzul" min="-100" max="100" value="0">
+                </label>
+              </div>
               <div id="panelAjustePorColor"></div>
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-luz-color">Luz por color</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🌈"><span data-i18n="grupo-luz-color">Luz por color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <!-- Un deslizador por rango de "Ajustar por color" (se generan en el script) -->
               <div class="deslizadores" id="mezclaBN"></div>
@@ -572,92 +590,112 @@ window.i18nPagina = {
           </fieldset>
 
           <fieldset class="acordeon-grupo" data-grupo="bn">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-bn">Blanco y negro</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="◐"><span data-i18n="grupo-bn">Blanco y negro</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-check">
                 <input type="checkbox" id="activarBN">
                 Convertir a blanco y negro
               </label>
               <div class="subtitulo-bn" data-i18n="subtitulo-bn">Filtro de lente (canales)</div>
-              <label class="campo-deslizador deshabilitado" data-canal>
-                <span class="etiqueta-deslizador"><span data-i18n="sl-rojo">Rojo</span><span id="valorCanalRojo">100%</span></span>
-                <input type="range" id="canalRojo" min="0" max="200" value="100" disabled>
-              </label>
-              <label class="campo-deslizador deshabilitado" data-canal>
-                <span class="etiqueta-deslizador"><span data-i18n="sl-verde">Verde</span><span id="valorCanalVerde">100%</span></span>
-                <input type="range" id="canalVerde" min="0" max="200" value="100" disabled>
-              </label>
-              <label class="campo-deslizador deshabilitado" data-canal>
-                <span class="etiqueta-deslizador"><span data-i18n="sl-azul">Azul</span><span id="valorCanalAzul">100%</span></span>
-                <input type="range" id="canalAzul" min="0" max="200" value="100" disabled>
-              </label>
+              <div class="deslizadores">
+                <label class="campo-deslizador deshabilitado" data-canal>
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-rojo">Rojo</span><span id="valorCanalRojo">100%</span></span>
+                  <input type="range" id="canalRojo" min="0" max="200" value="100" disabled>
+                </label>
+                <label class="campo-deslizador deshabilitado" data-canal>
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-verde">Verde</span><span id="valorCanalVerde">100%</span></span>
+                  <input type="range" id="canalVerde" min="0" max="200" value="100" disabled>
+                </label>
+                <label class="campo-deslizador deshabilitado" data-canal>
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-azul">Azul</span><span id="valorCanalAzul">100%</span></span>
+                  <input type="range" id="canalAzul" min="0" max="200" value="100" disabled>
+                </label>
+              </div>
             </div>
           </fieldset>
 
           <fieldset class="acordeon-grupo" data-grupo="efectos">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-efectos">Efectos</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="✨"><span data-i18n="grupo-efectos">Efectos</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-claridad">Claridad</span><span id="valorClaridad">0</span></span>
-                <input type="range" id="claridad" min="-100" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-grano">Grano</span><span id="valorGrano">0%</span></span>
-                <input type="range" id="grano" min="0" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-sepia">Sepia</span><span id="valorSepia">0%</span></span>
-                <input type="range" id="sepia" min="0" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-invertir">Invertir colores</span><span id="valorInvertir">0%</span></span>
-                <input type="range" id="invertir" min="0" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-desenfoque">Desenfoque</span><span id="valorDesenfoque">0px</span></span>
-                <input type="range" id="desenfoque" min="0" max="20" step="0.5" value="0">
-              </label>
+              <div class="deslizadores">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-claridad">Claridad</span><span id="valorClaridad">0</span></span>
+                  <input type="range" id="claridad" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-grano">Grano</span><span id="valorGrano">0%</span></span>
+                  <input type="range" id="grano" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-sepia">Sepia</span><span id="valorSepia">0%</span></span>
+                  <input type="range" id="sepia" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-invertir">Invertir colores</span><span id="valorInvertir">0%</span></span>
+                  <input type="range" id="invertir" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-desenfoque">Desenfoque</span><span id="valorDesenfoque">0px</span></span>
+                  <input type="range" id="desenfoque" min="0" max="20" step="0.5" value="0">
+                </label>
+              </div>
             </div>
           </fieldset>
 
           <fieldset class="acordeon-grupo" data-grupo="resplandor">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-resplandor">Resplandor</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="💫"><span data-i18n="grupo-resplandor">Resplandor</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-intensidad">Intensidad</span><span id="valorDispersionIntensidad">0%</span></span>
-                <input type="range" id="dispersionIntensidad" min="0" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-matiz">Matiz</span><span id="valorDispersionMatiz">0°</span></span>
-                <input type="range" id="dispersionMatiz" min="-180" max="180" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-tamano">Tamaño</span><span id="valorDispersionTamano">50%</span></span>
-                <input type="range" id="dispersionTamano" min="0" max="100" value="50">
-              </label>
+              <div class="deslizadores">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-intensidad">Intensidad</span><span id="valorDispersionIntensidad">0%</span></span>
+                  <input type="range" id="dispersionIntensidad" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-matiz">Matiz</span><span id="valorDispersionMatiz">0°</span></span>
+                  <input type="range" id="dispersionMatiz" min="-180" max="180" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-tamano">Tamaño</span><span id="valorDispersionTamano">50%</span></span>
+                  <input type="range" id="dispersionTamano" min="0" max="100" value="50">
+                </label>
+              </div>
             </div>
           </fieldset>
 
           <fieldset class="acordeon-grupo" data-grupo="dispersion">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-dispersion">Dispersión de luz</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🔦"><span data-i18n="grupo-dispersion">Dispersión de luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-intensidad">Intensidad</span><span id="valorAberracionIntensidad">0%</span></span>
-                <input type="range" id="aberracionIntensidad" min="0" max="100" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-angulo">Ángulo</span><span id="valorAberracionAngulo">0°</span></span>
-                <input type="range" id="aberracionAngulo" min="0" max="360" value="0">
-              </label>
-              <label class="campo-deslizador">
-                <span class="etiqueta-deslizador"><span data-i18n="sl-matiz">Matiz</span><span id="valorAberracionMatiz">0°</span></span>
-                <input type="range" id="aberracionMatiz" min="-180" max="180" value="0">
-              </label>
+              <div class="deslizadores">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-intensidad">Intensidad</span><span id="valorAberracionIntensidad">0%</span></span>
+                  <input type="range" id="aberracionIntensidad" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-angulo">Ángulo</span><span id="valorAberracionAngulo">0°</span></span>
+                  <input type="range" id="aberracionAngulo" min="0" max="360" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-matiz">Matiz</span><span id="valorAberracionMatiz">0°</span></span>
+                  <input type="range" id="aberracionMatiz" min="-180" max="180" value="0">
+                </label>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" id="filtrosCapa">
+            <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="resumen-filtro">Filtro</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <p class="nota-lateral" style="margin:0 0 6px;"><span data-i18n="lbl-filtro-actual">Filtro actual: </span><span id="nombreFiltroCapa">Sin filtro</span></p>
+              <p class="nota-lateral" style="margin:0 0 6px;" data-i18n="nota-filtro-capa">Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.</p>
+              <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
+              <div class="presets-scroll">
+                <div class="presets" id="presets"></div>
+              </div>
             </div>
           </fieldset>
 
           <fieldset class="acordeon-grupo" data-grupo="textura">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="modos" id="modosTextura" style="margin-bottom:10px;">
                 <button type="button" class="activo" data-textura="ninguno" data-i18n="textura-ninguno">Ninguno</button>
@@ -670,7 +708,7 @@ window.i18nPagina = {
               </div>
               <div id="controlesTextura" style="display:none;">
                 <label class="campo-deslizador">
-                  <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-textura">Intensidad de la textura</span><span id="valorTexturaIntensidad">18</span></span>
+                  <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-textura">Intensidad de textura</span><span id="valorTexturaIntensidad">18</span></span>
                   <input type="range" id="texturaIntensidad" min="2" max="50" value="18">
                 </label>
                 <div class="modos" id="modosOrdenTextura">
@@ -1219,10 +1257,6 @@ function renderizarComposicion() {
   acumulado.width = ancho; acumulado.height = alto;
   acumulado.getContext('2d').drawImage(canvasOrigenTrabajo, 0, 0);
 
-  // La máscara de la capa activa se guarda para reusarla en el tinte de
-  // abajo, en vez de recalcularla (la de color recorre píxel por píxel).
-  let mascaraDeActiva = null;
-
   for (const capa of capas) {
     if (!capa.visible) continue;
     const procesado = document.createElement('canvas');
@@ -1231,7 +1265,6 @@ function renderizarComposicion() {
     procesarCapaEnCanvas(procesado, capa, escala);
 
     const mascara = generarMascaraCapa(capa, ancho, alto);
-    if (capa.id === capaActivaId) mascaraDeActiva = mascara;
     if (mascara) {
       const ctxProcesado = procesado.getContext('2d');
       ctxProcesado.globalCompositeOperation = 'destination-in';
@@ -1248,31 +1281,6 @@ function renderizarComposicion() {
   canvasTrabajo.width = ancho; canvasTrabajo.height = alto;
   ctxTrabajo.clearRect(0, 0, ancho, alto);
   ctxTrabajo.drawImage(acumulado, 0, 0);
-
-  dibujarTinteSeleccion(ancho, alto, mascaraDeActiva);
-}
-
-// Ayuda visual SOLO en la vista previa (nunca en la imagen exportada): pinta
-// un tinte sobre la zona seleccionada de la capa activa, para ver dónde se
-// está pintando con el pincel o qué agarró la selección por color, aunque
-// los ajustes de esa capa todavía estén en neutro y no se note ningún cambio.
-function dibujarTinteSeleccion(ancho, alto, mascaraYaCalculada) {
-  const capa = capaActiva();
-  if (!capa || (capa.seleccion !== 'pincel' && capa.seleccion !== 'color')) return;
-  const mascara = mascaraYaCalculada || generarMascaraCapa(capa, ancho, alto);
-  if (!mascara) return;
-
-  const tinte = document.createElement('canvas');
-  tinte.width = ancho; tinte.height = alto;
-  const ctxTinte = tinte.getContext('2d');
-  ctxTinte.drawImage(mascara, 0, 0);
-  ctxTinte.globalCompositeOperation = 'source-in';
-  ctxTinte.fillStyle = '#e7a459';
-  ctxTinte.fillRect(0, 0, ancho, alto);
-
-  ctxTrabajo.globalAlpha = 0.35;
-  ctxTrabajo.drawImage(tinte, 0, 0);
-  ctxTrabajo.globalAlpha = 1;
 }
 
 function programarRenderizado() {
@@ -1305,19 +1313,26 @@ function marcarFiltroActivo(clave) {
 
 // Miniatura de cada filtro sobre un recorte cuadrado del centro de la
 // imagen (una vez por imagen: no dependen de las capas ni de los deslizadores).
-const TAMANO_MINIATURA_FILTRO = 64;
+// La grilla usa columnas "minmax(72px, 1fr)": en un panel angosto con pocas
+// miniaturas por fila, cada columna crece bastante más allá de esos 72px
+// mínimos. Dibujar la miniatura a 64px y dejar que el CSS la estire para
+// llenar la columna la hacía ver borrosa/pixelada — se dibuja a un tamaño
+// base más grande (160px) que cubre el ancho real de columna más común,
+// multiplicado además por devicePixelRatio para pantallas de alta densidad.
+const TAMANO_MINIATURA_FILTRO = 160;
+const LADO_MINIATURA_FILTRO_FISICO = Math.round(TAMANO_MINIATURA_FILTRO * (window.devicePixelRatio || 1));
 function actualizarMiniaturasFiltros() {
   if (!canvasOrigenTrabajo) return;
   const lado = Math.min(canvasOrigenTrabajo.width, canvasOrigenTrabajo.height);
   const ox = (canvasOrigenTrabajo.width - lado) / 2, oy = (canvasOrigenTrabajo.height - lado) / 2;
-  const escala = (TAMANO_MINIATURA_FILTRO / lado) * (canvasOrigenTrabajo.width / imagenActual.naturalWidth);
+  const escala = (LADO_MINIATURA_FILTRO_FISICO / lado) * (canvasOrigenTrabajo.width / imagenActual.naturalWidth);
   document.querySelectorAll('.preset-miniatura').forEach((boton) => {
     const base = document.createElement('canvas');
-    base.width = TAMANO_MINIATURA_FILTRO; base.height = TAMANO_MINIATURA_FILTRO;
-    base.getContext('2d').drawImage(canvasOrigenTrabajo, ox, oy, lado, lado, 0, 0, TAMANO_MINIATURA_FILTRO, TAMANO_MINIATURA_FILTRO);
+    base.width = LADO_MINIATURA_FILTRO_FISICO; base.height = LADO_MINIATURA_FILTRO_FISICO;
+    base.getContext('2d').drawImage(canvasOrigenTrabajo, ox, oy, lado, lado, 0, 0, LADO_MINIATURA_FILTRO_FISICO, LADO_MINIATURA_FILTRO_FISICO);
     procesarCapaEnCanvas(base, { ajustes: ajustesDeFiltro(boton.dataset.preset) }, escala);
     const destino = boton.querySelector('canvas');
-    destino.width = TAMANO_MINIATURA_FILTRO; destino.height = TAMANO_MINIATURA_FILTRO;
+    destino.width = LADO_MINIATURA_FILTRO_FISICO; destino.height = LADO_MINIATURA_FILTRO_FISICO;
     destino.getContext('2d').drawImage(base, 0, 0);
   });
 }
@@ -1441,12 +1456,16 @@ document.querySelectorAll('#modosOrdenTextura button').forEach((boton) => {
   });
 });
 
-// --- Acordeón (uno abierto a la vez, para no necesitar scroll) ---
+// --- Acordeón (uno abierto a la vez POR PANEL, para no necesitar scroll) ---
+// Hay acordeones tanto en el panel de capas (Aplicar la capa a/Vista/
+// Acciones) como en el de ajustes: cerrar "los de todo el documento" haría
+// que abrir uno de la izquierda cierre el que está abierto a la derecha.
 document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
   titulo.addEventListener('click', () => {
     const grupo = titulo.closest('.acordeon-grupo');
+    const panelPadre = titulo.closest('.panel-capas, .panel-ajustes') || document;
     const yaAbierto = grupo.classList.contains('abierto');
-    document.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
+    panelPadre.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
     if (!yaAbierto) grupo.classList.add('abierto');
   });
 });

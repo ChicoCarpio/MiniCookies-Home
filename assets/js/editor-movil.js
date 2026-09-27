@@ -40,6 +40,10 @@
     'grupo-resplandor': '💫',
     'grupo-dispersion': '🔦',
     'grupo-textura': '🧱',
+    'resumen-filtro': '🖼️',
+    'grupo-filtros': '🖼️',
+    'grupo-acciones': '⤓',
+    'campo-color-borde': '🎨',
   };
 
   var ICONOS = {
@@ -111,15 +115,24 @@
     if (panelFiltros) agregarCategoria(txt('filtros'), panelFiltros, undefined, 'Filtros');
 
     // Una página puede marcar un bloque suelto como categoría propia con
-    // data-em-categoria="Nombre". Se usa para cosas que en computadora viven
-    // dentro de otro panel pero que en celular merecen su propio botón (los
-    // filtros de capa del editor avanzado, por ejemplo).
+    // data-em-categoria="Nombre". Se usa para herramientas que en computadora
+    // viven en la misma columna que otra cosa pero son un bloque aparte y en
+    // celular merecen su propio botón (el color del borde y el descargar del
+    // generador de stickers, separados de "Filtros"; antes también los
+    // filtros de capa del editor avanzado).
     shell.querySelectorAll('[data-em-categoria]').forEach(function (el) {
       var clave = el.getAttribute('data-em-categoria');
-      // 'Filtros' y 'Capas' los sabe traducir el modulo; cualquier otro
-      // nombre se muestra tal cual lo escribio la pagina.
+      // 'Filtros' y 'Capas' los sabe traducir el modulo. Cualquier otro
+      // nombre no tiene traducción propia acá: se lee del título del propio
+      // acordeón (que idioma.js ya tradujo), igual que hace el panel de
+      // ajustes más abajo — así una categoría nueva no necesita agregarse a
+      // mano en este archivo.
       var conocido = { Filtros: 'filtros', Capas: 'capas' }[clave];
-      agregarCategoria(conocido ? txt(conocido) : clave, el, undefined, clave);
+      var titulo = el.querySelector('.acordeon-titulo');
+      var conClave = titulo ? titulo.querySelector('[data-i18n]') : null;
+      var claveIcono = conClave ? conClave.getAttribute('data-i18n') : clave;
+      var etiqueta = conocido ? txt(conocido) : (titulo ? titulo.textContent.replace(/[▾▴▲▼]/g, '').trim() : clave);
+      agregarCategoria(etiqueta, el, undefined, claveIcono, titulo || undefined);
     });
 
     if (panelAjustes) {
@@ -270,10 +283,6 @@
       // verse igual: la hoja ya muestra el contenido, pero la clase mantiene
       // coherente el estado por si se vuelve a pantalla ancha.
       cat.elemento.classList.add('abierto');
-      // Un bloque marcado con data-em-categoria puede ser un <details>
-      // plegado (el filtro de capa del editor avanzado): elegir la categoría
-      // y que no se vea nada no tendría sentido.
-      if (cat.elemento.tagName === 'DETAILS') cat.elemento.open = true;
       // El panel arranca desde arriba aunque la categoría anterior estuviera
       // desplazada.
       hoja.scrollTop = 0;
@@ -307,17 +316,39 @@
 
     accion('🖼️', ['botonCambiarImagen'], 'em-secundario');
     accion('↺', ['botonRestablecer', 'botonRestablecerAvanzado'], 'em-secundario');
-    accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'em-principal');
+    // El botón de descargar flotante es un atajo para cuando "Descargar" está
+    // escondido dentro de un panel grande (Filtros/Capas/Ajustes) con muchos
+    // otros controles. Una página que ya le da su propia categoría de nivel
+    // superior (como "Acciones" en el generador de stickers) no lo necesita
+    // — sería un segundo botón repitiendo el mismo texto — y lo marca con
+    // data-em-sin-descarga-flotante en su shell.
+    if (!shell.hasAttribute('data-em-sin-descarga-flotante')) {
+      accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'em-principal');
+    }
+
+    // Hoja + categorías + acciones van juntas en un solo bloque flotante,
+    // superpuesto ABAJO de la imagen (no empujándola hacia arriba): así la
+    // imagen ocupa siempre el mismo alto fijo, se abra o no un panel, y lo
+    // que tapa el bloque flotante se alcanza paneando/haciendo zoom en la
+    // imagen en vez de que esta se achique cada vez. Ver "encajarEnLaVista"
+    // en los editores: al no cambiar más el alto de .panel-lienzo, tampoco
+    // hace falta re-ajustar el zoom al abrir/cerrar un panel.
+    var controles = document.createElement('div');
+    controles.className = 'em-controles';
+    controles.appendChild(hoja);
+    controles.appendChild(chips);
+    // Sin botones (una página sin cambiar-imagen/reiniciar ni el atajo de
+    // descarga), la tira quedaría vacía: mejor no mostrar la franja.
+    if (acciones.children.length) controles.appendChild(acciones);
 
     // --- Encender / apagar según el ancho ---
     function encender() {
       if (cuerpo.classList.contains('em-activo')) return;
       cuerpo.classList.add('em-activo');
+      document.documentElement.classList.add('em-activo');
       if (anuncio) tiraAnuncio.appendChild(anuncio);
       shell.insertBefore(tiraAnuncio, shell.firstChild);
-      shell.appendChild(hoja);
-      shell.appendChild(chips);
-      shell.appendChild(acciones);
+      shell.appendChild(controles);
       marcarBordes();
       avisarCambioDeTamano();
     }
@@ -326,9 +357,10 @@
       if (!cuerpo.classList.contains('em-activo')) return;
       cerrarHoja();
       cuerpo.classList.remove('em-activo');
+      document.documentElement.classList.remove('em-activo');
       // Todo vuelve a donde estaba: la página queda igual que antes.
       if (anuncio && anuncioPadre) anuncioPadre.insertBefore(anuncio, anuncioSiguiente);
-      [tiraAnuncio, hoja, chips, acciones].forEach(function (el) {
+      [tiraAnuncio, controles].forEach(function (el) {
         if (el.parentNode) el.parentNode.removeChild(el);
       });
       avisarCambioDeTamano();

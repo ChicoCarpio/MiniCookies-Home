@@ -36,6 +36,17 @@ window.i18nPagina = {
     'ia-e': ') ejecutado enteramente en tu navegador con ',
     'ia-f': ' (con aceleración por WebGPU cuando el navegador la soporta). El modelo se descarga una sola vez desde el CDN de Hugging Face y queda cacheado en tu navegador — tu grabación de voz nunca se envía a ningún servidor.',
 
+    'h-ia2': 'Modelo de inteligencia artificial (Generador de stickers)',
+    'ia2-a': 'La herramienta ',
+    'ia2-link': 'Generador de stickers',
+    'ia2-b': ' usa ',
+    'ia2-c': ' (una red de segmentación de imágenes de uso general, publicada por ',
+    'ia2-d': ', licencia ',
+    'ia2-e': '), en su variante cuantizada ',
+    'ia2-f': ', también licencia ',
+    'ia2-g': ', ejecutada enteramente en tu navegador con ',
+    'ia2-h': ' (con aceleración por WebGPU cuando el navegador la soporta). El modelo (~42 MB) se descarga una sola vez desde el CDN de Hugging Face y queda cacheado en tu navegador — tu foto nunca se envía a ningún servidor.',
+
     'h-servicios': 'Servicios de terceros',
     'serv-a': 'A diferencia de las librerías de arriba, esto no es código que corre en tu navegador sino un servicio externo que recibe datos: la ',
     'serv-link-contacto': 'página de contacto',
@@ -44,7 +55,7 @@ window.i18nPagina = {
     'serv-link-privacidad': 'política de privacidad',
     'serv-d': '.',
 
-    'actualizacion': 'Última actualización: 2026-09-20.'
+    'actualizacion': 'Última actualización: 2026-09-26.'
   },
   en: {
     'titulo-pagina': 'Credits and licenses — Mini Cookies',
@@ -71,6 +82,17 @@ window.i18nPagina = {
     'ia-e': ') running entirely in your browser through ',
     'ia-f': ' (with WebGPU acceleration where the browser supports it). The model is downloaded once from the Hugging Face CDN and cached in your browser — your recording never reaches any server.',
 
+    'h-ia2': 'AI model (Sticker generator)',
+    'ia2-a': 'The ',
+    'ia2-link': 'Sticker generator',
+    'ia2-b': ' tool uses ',
+    'ia2-c': ' (a general-purpose image segmentation network, published by ',
+    'ia2-d': ', licensed ',
+    'ia2-e': '), in its quantized variant ',
+    'ia2-f': ', also licensed ',
+    'ia2-g': ', running entirely in your browser through ',
+    'ia2-h': ' (with WebGPU acceleration where the browser supports it). The model (~42 MB) is downloaded once from the Hugging Face CDN and cached in your browser — your photo never reaches any server.',
+
     'h-servicios': 'Third-party services',
     'serv-a': 'Unlike the libraries above, this is not code running in your browser but an external service that receives data: the ',
     'serv-link-contacto': 'contact page',
@@ -79,7 +101,7 @@ window.i18nPagina = {
     'serv-link-privacidad': 'privacy policy',
     'serv-d': '.',
 
-    'actualizacion': 'Last updated: 2026-09-20.'
+    'actualizacion': 'Last updated: 2026-09-26.'
   }
 };
 </script>
@@ -143,10 +165,13 @@ window.i18nPagina = {
     <h3 data-i18n="h-ia">Modelo de inteligencia artificial (Dictado por voz)</h3>
     <p><span data-i18n="ia-a">La herramienta </span><a href="herramientas/dictado-voz.html" data-i18n="ia-link">Dictado por voz</a><span data-i18n="ia-b"> usa </span><strong>Whisper</strong><span data-i18n="ia-c"> de OpenAI (modelos </span><code>Xenova/whisper-tiny</code><span data-i18n="ia-coma">, </span><code>Xenova/whisper-base</code><span data-i18n="ia-y"> y </span><code>Xenova/whisper-small</code><span data-i18n="ia-d">, publicados por la comunidad en Hugging Face, licencia </span><strong>Apache-2.0</strong><span data-i18n="ia-e">) ejecutado enteramente en tu navegador con </span><code>@huggingface/transformers</code><span data-i18n="ia-f"> (con aceleración por WebGPU cuando el navegador la soporta). El modelo se descarga una sola vez desde el CDN de Hugging Face y queda cacheado en tu navegador — tu grabación de voz nunca se envía a ningún servidor.</span></p>
 
+    <h3 data-i18n="h-ia2">Modelo de inteligencia artificial (Generador de stickers)</h3>
+    <p><span data-i18n="ia2-a">La herramienta </span><a href="herramientas/generador-stickers.html" data-i18n="ia2-link">Generador de stickers</a><span data-i18n="ia2-b"> usa </span><strong>ISNet</strong><span data-i18n="ia2-c"> (una red de segmentación de imágenes de uso general, publicada por </span><a href="https://huggingface.co/imgly/isnet-general-onnx" target="_blank" rel="noopener">imgly/isnet-general-onnx</a><span data-i18n="ia2-d"> licencia </span><strong>MIT</strong><span data-i18n="ia2-e">), en su variante cuantizada </span><a href="https://huggingface.co/xrds/isnet-general-onnx-int8" target="_blank" rel="noopener">xrds/isnet-general-onnx-int8</a><span data-i18n="ia2-f"> también licencia </span><strong>MIT</strong><span data-i18n="ia2-g"> ejecutada enteramente en tu navegador con </span><code>@huggingface/transformers</code><span data-i18n="ia2-h"> (con aceleración por WebGPU cuando el navegador la soporta). El modelo (~42 MB) se descarga una sola vez desde el CDN de Hugging Face y queda cacheado en tu navegador — tu foto nunca se envía a ningún servidor.</span></p>
+
     <h3 data-i18n="h-servicios">Servicios de terceros</h3>
     <p><span data-i18n="serv-a">A diferencia de las librerías de arriba, esto no es código que corre en tu navegador sino un servicio externo que recibe datos: la </span><a href="contacto.html" data-i18n="serv-link-contacto">página de contacto</a><span data-i18n="serv-b"> usa </span><a href="https://web3forms.com" target="_blank" rel="noopener">Web3Forms</a><span data-i18n="serv-c"> para reenviarnos por correo lo que escribas ahí (nombre, email, mensaje). Es el único punto del sitio donde se envía algo a un servidor — ver </span><a href="privacidad.html" data-i18n="serv-link-privacidad">política de privacidad</a><span data-i18n="serv-d">.</span></p>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="actualizacion">Última actualización: 2026-09-20.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="actualizacion">Última actualización: 2026-09-26.</p>
   </div>
 </main>
 

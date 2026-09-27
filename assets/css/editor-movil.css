@@ -5,23 +5,29 @@
    En computadora los editores son tres columnas (filtros | imagen | ajustes).
    En celular eso no entra, y la solución anterior —cajones laterales que
    ocupaban el 86% del ancho— tapaba justo la imagen que se estaba ajustando.
-   Acá la imagen manda: ocupa todo el alto libre y nunca queda tapada; los
-   controles viven abajo, en una tira de categorías con desplazamiento
-   horizontal que abre un panel bajo y angosto.
+
+   La imagen ocupa SIEMPRE el alto completo de la pantalla (de la publicidad
+   para abajo), se abra o no un panel — antes cada panel abierto le restaba
+   ese alto, y con una imagen alargada terminaba viéndose minúscula. Ahora
+   hoja + categorías + acciones son un solo bloque flotante (.em-controles)
+   que se SUPERPONE abajo, sobre la imagen, en vez de empujarla hacia arriba.
+   Lo que ese bloque tapa se alcanza paneando/haciendo zoom en la imagen
+   (zoom nativo del navegador; el editor avanzado además tiene su propio
+   deslizador de zoom).
 
         ┌──────────────┐
         │  publicidad  │  tira fina arriba (reemplaza al encabezado)
         ├──────────────┤
         │              │
-        │    IMAGEN    │  todo el alto que sobre
         │              │
-        ├──────────────┤
-        │ ajustes      │  panel del grupo abierto (solo si hay uno)
-        ├──────────────┤
-        │ ☀ 🎨 ◐ ✨ →  │  categorías, se desplazan de costado
-        ├──────────────┤
-        │ 🖼 ↺      ⤓  │  acciones siempre a mano
-        └──────────────┘
+        │    IMAGEN    │  todo el alto de la pantalla, de punta a punta
+        │  ┌──────────┐│
+        │  │ ajustes  ││  ↑ bloque flotante superpuesto (.em-controles):
+        │  ├──────────┤│    panel del grupo abierto (si hay uno) +
+        │  │☀🎨◐✨→  ││    categorías, se desplazan de costado +
+        │  ├──────────┤│    acciones, siempre a mano
+        │  │🖼️↺    ⤓ ││
+        └──┴──────────┴┘
 
    Nada de esto aplica arriba de 900px: ahí sigue el diseño de tres columnas
    tal cual estaba. */
@@ -29,8 +35,11 @@
 @media (max-width: 900px) {
 
   /* El editor pasa a ser una capa fija sobre la página. Así no hay que
-     esconder el encabezado, la intro ni el pie uno por uno: quedan debajo. */
-  body.em-activo { overflow: hidden; }
+     esconder el encabezado, la intro ni el pie uno por uno: quedan debajo.
+     html Y body: con solo body, algunos navegadores igual dejan la barra de
+     desplazamiento de la página completa (una tercera barra, de más, detrás
+     del editor). editor-movil.js le pone "em-activo" a los dos. */
+  html.em-activo, body.em-activo { overflow: hidden; }
 
   body.em-activo .em-shell {
     position: fixed;
@@ -78,20 +87,68 @@
     font-size: 0.72rem;
   }
 
-  /* --- La imagen: se queda con todo lo que sobra --- */
+  /* --- La imagen: ocupa TODO el alto, de la publicidad para abajo --- */
+  /* .em-controles (más abajo) se le superpone con position:absolute, así que
+     queda afuera del flujo flex: este panel es el único que se reparte el
+     flex:1 1 auto restante y por eso su alto no cambia al abrir un panel. */
   body.em-activo .panel-lienzo {
+    /* En computadora es flex (para centrar la imagen); flex ENCOGE a sus
+       hijos para que entren en el contenedor sin importar max-height, así
+       que la imagen se seguía achicando aunque se le sacara el límite de
+       alto. En bloque, el contenido no se encoge: si es más grande que el
+       panel, se desborda y el overflow:auto de abajo lo hace desplazable. */
+    display: block;
     flex: 1 1 auto;
     min-height: 0;
     height: auto;
     padding: 6px;
     border: none;
     border-radius: 0;
-    overflow: hidden;
+    overflow: auto;
+    /* Zoom nativo del navegador (pellizcar con dos dedos) sobre la imagen:
+       "auto" no le saca al usuario el gesto de desplazar con un dedo. */
+    touch-action: pan-x pan-y pinch-zoom;
+    /* Se arrastra la imagen (mouse o dedo, ver el JS de cada editor) en vez
+       de tirar de una barra — mostrarla igual quedaba rara al lado de la del
+       panel de abajo (dos barras verticales, una arriba de la otra). */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  body.em-activo .panel-lienzo::-webkit-scrollbar { display: none; }
 
+  /* El editor avanzado ya trae su propio zoom/paneo (deslizador + arrastrar +
+     pellizcar, ver editor-avanzado-imagen.html): esto solo lo mantiene capado
+     al panel, como en computadora — .panel-lienzo ya no lo encoge de más
+     porque dejó de ser flex, así que no hace falta tocarle el límite. */
   body.em-activo .panel-lienzo .zona-lienzo-contenedor {
     max-height: 100%;
     border: none;
+  }
+
+  /* Sin el límite de alto del panel, la imagen ya no necesita achicarse para
+     entrar: al ancho de la pantalla le sobra alto de sobra en casi todos los
+     casos, y si una imagen queda más alta que la pantalla, .panel-lienzo de
+     arriba la deja desplazar en vez de apretarla. */
+  body.em-activo .panel-lienzo #vistaPrevia {
+    max-height: none !important;
+  }
+  /* Con zoom aplicado (ver aplicarZoomSimple en Editor-de-color-de-imagen.html),
+     también hace falta soltarle el ancho: si no, max-width:100% recortaba el
+     zoom horizontal a la fuerza y la imagen quedaba estirada verticalmente
+     nada más (solo el alto podía crecer, el ancho seguía atado al panel). */
+  body.em-activo .panel-lienzo #vistaPrevia.con-zoom {
+    max-width: none;
+  }
+
+  /* Bloque flotante: hoja + categorías + acciones, superpuesto abajo sobre
+     la imagen en vez de restarle alto. Sacarlo del flujo con position:
+     absolute es lo que le devuelve todo ese alto a .panel-lienzo de arriba. */
+  body.em-activo .em-controles {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
   }
 
   /* --- Panel del grupo abierto --- */
@@ -102,7 +159,7 @@
     max-height: 34vh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 10px 12px;
+    padding: 8px 12px;
     border-top: 1px solid var(--gris-borde);
     background: var(--superficie);
   }
@@ -144,13 +201,17 @@
   body.em-activo .em-hoja .boton-plegar { display: none; }
   body.em-activo .em-hoja .acordeon-contenido { display: block; padding: 0; }
 
-  /* Deslizadores más altos: con el dedo, 16px de alto no se agarran bien. */
+  /* Deslizadores más altos que en computadora: con el dedo, uno muy fino no
+     se agarra bien. Más bajos que antes (eran 34px): con varios seguidos
+     (algunos grupos tienen 6+) la lista se hacía larga de sobra, sobre todo
+     compitiendo por alto con una imagen alargada. */
   body.em-activo .em-hoja input[type="range"] {
-    height: 34px;
+    height: 26px;
     margin: 0;
   }
-  body.em-activo .em-hoja .campo-deslizador { margin-bottom: 4px; }
-  body.em-activo .em-hoja .etiqueta-deslizador { font-size: 0.85rem; }
+  body.em-activo .em-hoja .deslizadores { gap: 2px; }
+  body.em-activo .em-hoja .campo-deslizador { gap: 0; margin-bottom: 2px; }
+  body.em-activo .em-hoja .etiqueta-deslizador { font-size: 0.8rem; line-height: 1.3; }
 
   /* --- Tira de categorías --- */
   body.em-activo .em-chips {
@@ -262,5 +323,6 @@
      (no se destruyen) para no perder los escuchadores ya enganchados. */
   body.em-activo .em-shell > .panel-filtros,
   body.em-activo .em-shell > .panel-ajustes,
-  body.em-activo .em-shell > .panel-capas { display: none; }
+  body.em-activo .em-shell > .panel-capas,
+  body.em-activo .em-shell > .panel-stickers { display: none; }
 }

@@ -28,16 +28,18 @@
     border: 1px solid var(--gris-borde);
     border-radius: var(--radio);
     padding: 12px;
-    overflow-y: auto;
     min-height: 0;
   }
+  .panel-filtros, .panel-ajustes { overflow-y: auto; }
   .panel-lienzo { display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+  /* La grilla de filtros vive dentro de su propio acordeón: con un alto
+     máximo y scroll propio, abrirla no empuja a "Textura extra"/"Acciones"
+     fuera de la vista. */
+  .presets-scroll { max-height: 45vh; overflow-y: auto; }
   #vistaPrevia {
     display: block; max-width: 100%; max-height: calc(100% - 28px); min-height: 0;
     border-radius: 6px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
   }
-  .seccion-lateral { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
-  .titulo-seccion-lateral { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); margin-bottom: 8px; }
   .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
   .nota-lateral { font-size: 0.72rem; color: var(--texto-suave); }
 
@@ -80,15 +82,27 @@
   .modos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
 
   /* --- Panel de ajustes: acordeón, uno abierto a la vez --- */
-  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin: 0 0 8px; padding: 0; overflow: hidden; }
+  /* min-width:0 en el fieldset: sin esto, el <fieldset> nativo del navegador
+     no se achica por debajo del ancho de su contenido y desalinea el título
+     cuando el texto es largo ("Luz por color", "Dispersión de luz"). */
+  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin: 0 0 8px; padding: 0; overflow: hidden; min-width: 0; }
   .acordeon-titulo {
-    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    width: 100%; display: flex; flex-wrap: nowrap; align-items: center; gap: 8px;
     padding: 8px 10px; background: var(--gris-fondo); border: none; cursor: pointer;
     font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em;
   }
+  /* El ícono se agrega por CSS (::before), no como texto del botón: así el
+     título que lee editor-movil.js para el nombre del chip en celular
+     (titulo.textContent) no cambia — esta vista solo la ve la versión de
+     escritorio. */
+  .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
+  /* El texto del título puede ocupar dos líneas en un panel angosto; que
+     encoja él y no el resto mantiene la flechita siempre pegada a la
+     derecha en vez de saltar a su propia línea. */
+  .acordeon-titulo > span:first-child { flex: 1 1 auto; min-width: 0; }
   .acordeon-contenido { display: none; padding: 10px; }
   .acordeon-grupo.abierto .acordeon-contenido { display: block; }
-  .acordeon-titulo .flecha { transition: transform .15s; }
+  .acordeon-titulo .flecha { flex: 0 0 auto; margin-left: auto; transition: transform .15s; }
   .acordeon-grupo.abierto .acordeon-titulo .flecha { transform: rotate(180deg); }
 
   .deslizadores { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -168,6 +182,8 @@ window.i18nPagina = {
     'panel-filtros': 'Filtros',
     'panel-ajustes': 'Ajustes',
     'title-plegar': 'Contraer/expandir panel',
+    'grupo-filtros': 'Filtros',
+    'grupo-acciones': 'Acciones',
     'lbl-intensidad-filtro': 'Intensidad del filtro',
     'titulo-textura': 'Textura extra',
     'textura-ninguno': 'Ninguno',
@@ -177,7 +193,7 @@ window.i18nPagina = {
     'textura-difuminar': 'Difuminado',
     'textura-movimiento': 'Movimiento',
     'textura-esmerilado': 'Esmerilado',
-    'lbl-intensidad-textura': 'Intensidad de la textura',
+    'lbl-intensidad-textura': 'Intensidad de textura',
     'orden-debajo': 'Debajo de los filtros',
     'orden-encima': 'Encima de los filtros',
     'boton-descargar': 'Descargar imagen',
@@ -232,6 +248,8 @@ window.i18nPagina = {
     'panel-filtros': 'Filters',
     'panel-ajustes': 'Adjustments',
     'title-plegar': 'Collapse/expand panel',
+    'grupo-filtros': 'Filters',
+    'grupo-acciones': 'Actions',
     'lbl-intensidad-filtro': 'Filter strength',
     'titulo-textura': 'Extra texture',
     'textura-ninguno': 'None',
@@ -323,59 +341,73 @@ window.i18nPagina = {
         <div class="panel-filtros">
           <button type="button" class="boton-plegar" data-panel="izq" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span data-i18n="panel-filtros">Filtros</span><span class="flecha-plegar">«</span></button>
 
-          <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
-          <div class="presets" id="presets"></div>
-
-          <div class="seccion-lateral">
-            <label class="campo-deslizador">
-              <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-filtro">Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
-              <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
-            </label>
-          </div>
-
-          <div class="seccion-lateral">
-            <div class="titulo-seccion-lateral" data-i18n="titulo-textura">Textura extra</div>
-            <div class="modos" id="modosTextura" style="margin: 6px 0 10px;">
-              <button type="button" class="activo" data-textura="ninguno" data-i18n="textura-ninguno">Ninguno</button>
-              <button type="button" data-textura="pixelar" data-i18n="textura-pixelar">Pixelado</button>
-              <button type="button" data-textura="pixelar-circulos" data-i18n="textura-puntos">Puntos</button>
-              <button type="button" data-textura="ruido" data-i18n="textura-ruido">Ruido</button>
-              <button type="button" data-textura="difuminar" data-i18n="textura-difuminar">Difuminado</button>
-              <button type="button" data-textura="direccional" data-i18n="textura-movimiento">Movimiento</button>
-              <button type="button" data-textura="esmerilado" data-i18n="textura-esmerilado">Esmerilado</button>
-            </div>
-            <div id="controlesTextura" style="display:none;">
-              <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-textura">Intensidad de la textura</span><span id="valorTexturaIntensidad">18</span></span>
-              <input type="range" id="texturaIntensidad" min="2" max="50" value="18">
-              <div class="modos" id="modosOrdenTextura" style="margin-top: 8px;">
-                <button type="button" class="activo" data-orden="debajo" data-i18n="orden-debajo">Debajo de los filtros</button>
-                <button type="button" data-orden="encima" data-i18n="orden-encima">Encima de los filtros</button>
+          <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
+               así ninguno empuja a los demás fuera de la vista, y no hay que
+               scrollear 90 miniaturas para llegar a "Acciones". -->
+          <fieldset class="acordeon-grupo abierto">
+            <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="grupo-filtros">Filtros</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <label class="campo-deslizador">
+                <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-filtro">Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
+                <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
+              </label>
+              <div class="presets-scroll">
+                <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
+                <div class="presets" id="presets"></div>
               </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div class="seccion-lateral">
-            <div class="controles controles-apilados">
-              <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
-              <button type="button" id="botonRestablecer" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-restablecer">Restablecer</button>
-              <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
+          <fieldset class="acordeon-grupo">
+            <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="titulo-textura">Textura extra</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="modos" id="modosTextura" style="margin-bottom: 10px;">
+                <button type="button" class="activo" data-textura="ninguno" data-i18n="textura-ninguno">Ninguno</button>
+                <button type="button" data-textura="pixelar" data-i18n="textura-pixelar">Pixelado</button>
+                <button type="button" data-textura="pixelar-circulos" data-i18n="textura-puntos">Puntos</button>
+                <button type="button" data-textura="ruido" data-i18n="textura-ruido">Ruido</button>
+                <button type="button" data-textura="difuminar" data-i18n="textura-difuminar">Difuminado</button>
+                <button type="button" data-textura="direccional" data-i18n="textura-movimiento">Movimiento</button>
+                <button type="button" data-textura="esmerilado" data-i18n="textura-esmerilado">Esmerilado</button>
+              </div>
+              <div id="controlesTextura" style="display:none;">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-textura">Intensidad de textura</span><span id="valorTexturaIntensidad">18</span></span>
+                  <input type="range" id="texturaIntensidad" min="2" max="50" value="18">
+                </label>
+                <div class="modos" id="modosOrdenTextura" style="margin-top: 8px;">
+                  <button type="button" class="activo" data-orden="debajo" data-i18n="orden-debajo">Debajo de los filtros</button>
+                  <button type="button" data-orden="encima" data-i18n="orden-encima">Encima de los filtros</button>
+                </div>
+              </div>
             </div>
-            <div class="resultado" id="resultado">
-              <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo">
+            <button type="button" class="acordeon-titulo" data-icono="⤓"><span data-i18n="grupo-acciones">Acciones</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="controles controles-apilados">
+                <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
+                <button type="button" id="botonRestablecer" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-restablecer">Restablecer</button>
+                <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
+              </div>
+              <div class="resultado" id="resultado">
+                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+              </div>
             </div>
-            <p class="nota-lateral" style="margin:12px 0 0;"><span data-i18n="nota-avanzado-a">¿Necesitás editar solo una parte de la imagen, por zona o por color, con varias capas? Probá el </span><a href="editor-avanzado-imagen.html" data-i18n="nota-avanzado-link">Editor avanzado →</a></p>
-          </div>
+          </fieldset>
         </div>
 
         <div class="panel-lienzo">
           <canvas id="vistaPrevia" data-i18n-attr="title:title-original" title="Mantené presionado para ver la imagen original"></canvas>
           <p class="nota-lateral" style="margin:8px 0 0;" data-i18n="nota-original">Mantené presionada la imagen para ver el original</p>
+          <p class="nota-lateral" style="margin:8px 0 0;"><span data-i18n="nota-avanzado-a">¿Necesitás editar solo una parte de la imagen, por zona o por color, con varias capas? Probá el </span><a href="editor-avanzado-imagen.html" data-i18n="nota-avanzado-link">Editor avanzado →</a></p>
         </div>
 
         <div class="panel-ajustes">
           <button type="button" class="boton-plegar" data-panel="der" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span class="flecha-plegar">»</span><span data-i18n="panel-ajustes">Ajustes</span></button>
           <fieldset class="acordeon-grupo abierto">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-luz">Luz</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="☀️"><span data-i18n="grupo-luz">Luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
                 <label class="campo-deslizador">
@@ -398,7 +430,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
                 <label class="campo-deslizador">
@@ -431,7 +463,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-luz-color">Luz por color</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🌈"><span data-i18n="grupo-luz-color">Luz por color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <!-- Un deslizador por rango de "Ajustar por color" (se generan en el script) -->
               <div class="deslizadores" id="mezclaBN"></div>
@@ -439,7 +471,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-bn">Blanco y negro</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="◐"><span data-i18n="grupo-bn">Blanco y negro</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-check">
                 <input type="checkbox" id="activarBN"><span data-i18n="chk-bn"> Convertir a blanco y negro</span>
@@ -462,7 +494,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-efectos">Efectos</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="✨"><span data-i18n="grupo-efectos">Efectos</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
                 <label class="campo-deslizador">
@@ -489,7 +521,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-resplandor">Resplandor</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="💫"><span data-i18n="grupo-resplandor">Resplandor</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
                 <label class="campo-deslizador">
@@ -508,7 +540,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
           <fieldset class="acordeon-grupo">
-            <button type="button" class="acordeon-titulo"><span data-i18n="grupo-dispersion">Dispersión de luz</span> <span class="flecha">▾</span></button>
+            <button type="button" class="acordeon-titulo" data-icono="🔦"><span data-i18n="grupo-dispersion">Dispersión de luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
                 <label class="campo-deslizador">
@@ -542,12 +574,14 @@ window.i18nPagina = {
 <script src="../assets/js/efectos-textura.js"></script>
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
+<script src="../assets/js/zoom-anclado.js"></script>
 <script>
 FiltrosColor.crearGrilla(document.getElementById('presets'));
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const vistaPrevia = document.getElementById('vistaPrevia');
 const contextoPrevia = vistaPrevia.getContext('2d');
+const panelLienzo = document.querySelector('.panel-lienzo');
 const botonDescargar = document.getElementById('botonDescargar');
 const botonRestablecer = document.getElementById('botonRestablecer');
 const resultado = document.getElementById('resultado');
@@ -1082,7 +1116,15 @@ function ponerTextura(textura) {
   document.querySelectorAll('#modosOrdenTextura button').forEach((b) => b.classList.toggle('activo', b.dataset.orden === texturaOrden));
 }
 
-const TAMANO_MINIATURA_PRESET = 76;
+// La grilla usa columnas "minmax(72px, 1fr)": en un panel angosto con pocas
+// miniaturas por fila, cada columna crece bastante más allá de esos 72px
+// mínimos (hasta 150-160px real en el panel lateral del editor). Dibujar la
+// miniatura a esos 76px de antes y dejar que el CSS la estire para llenar la
+// columna la hacía ver borrosa/pixelada — se dibuja a un tamaño base más
+// grande (160px) que cubre el ancho real de columna más común, multiplicado
+// además por devicePixelRatio para pantallas de alta densidad (retina).
+const TAMANO_MINIATURA_PRESET = 160;
+const LADO_MINIATURA_PRESET_FISICO = Math.round(TAMANO_MINIATURA_PRESET * (window.devicePixelRatio || 1));
 
 // Recorte cuadrado del centro de la imagen, del tamaño justo de la
 // miniatura — así procesar cada preset sobre él es instantáneo aunque la
@@ -1092,9 +1134,9 @@ function crearBaseMiniatura(imagen) {
   const origenX = (imagen.naturalWidth - lado) / 2;
   const origenY = (imagen.naturalHeight - lado) / 2;
   const canvas = document.createElement('canvas');
-  canvas.width = TAMANO_MINIATURA_PRESET;
-  canvas.height = TAMANO_MINIATURA_PRESET;
-  canvas.getContext('2d').drawImage(imagen, origenX, origenY, lado, lado, 0, 0, TAMANO_MINIATURA_PRESET, TAMANO_MINIATURA_PRESET);
+  canvas.width = LADO_MINIATURA_PRESET_FISICO;
+  canvas.height = LADO_MINIATURA_PRESET_FISICO;
+  canvas.getContext('2d').drawImage(imagen, origenX, origenY, lado, lado, 0, 0, LADO_MINIATURA_PRESET_FISICO, LADO_MINIATURA_PRESET_FISICO);
   return canvas;
 }
 
@@ -1108,10 +1150,10 @@ function actualizarMiniaturasPresets() {
     if (!preset) return;
     const base = crearBaseMiniatura(imagenActual);
     const lado = Math.min(imagenActual.naturalWidth, imagenActual.naturalHeight);
-    renderizarFiltro(base, preset, preset.capasExtra, preset.textura || SIN_TEXTURA, TAMANO_MINIATURA_PRESET / lado);
+    renderizarFiltro(base, preset, preset.capasExtra, preset.textura || SIN_TEXTURA, LADO_MINIATURA_PRESET_FISICO / lado);
     const canvasDestino = boton.querySelector('canvas');
-    canvasDestino.width = TAMANO_MINIATURA_PRESET;
-    canvasDestino.height = TAMANO_MINIATURA_PRESET;
+    canvasDestino.width = LADO_MINIATURA_PRESET_FISICO;
+    canvasDestino.height = LADO_MINIATURA_PRESET_FISICO;
     canvasDestino.getContext('2d').drawImage(base, 0, 0);
   });
 }
@@ -1256,6 +1298,7 @@ async function mostrarArchivo(archivo) {
   renderizarVistaPrevia();
   actualizarMiniaturasPresets();
   botonDescargar.disabled = false;
+  requestAnimationFrame(encajarVistaPreviaEnPanel);
 }
 
 function elegirArchivo(listaFileList) {
@@ -1307,16 +1350,161 @@ function dejarDeComparar() {
   comparando = false;
   renderizarVistaPrevia();
 }
-vistaPrevia.addEventListener('pointerdown', (e) => { e.preventDefault(); mostrarOriginal(); });
-['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => vistaPrevia.addEventListener(ev, dejarDeComparar));
+
+// ===== Arrastrar para desplazar la imagen (celular, con el panel ampliado) =====
+// Si la imagen no entra entera en el panel (una imagen alargada, o con zoom
+// del navegador), hace falta poder correrla arrastrando en vez de solo con
+// la barra de desplazamiento. El mismo puntero que dispara "ver original" de
+// arriba: si se queda quieto es "mantené presionado para comparar"; si se
+// mueve más que el umbral, pasa a ser arrastrar (y se cancela la comparación,
+// igual que ya distingue el editor avanzado entre pincel y paneo).
+let panInicioSimple = null;
+let huboPanSimple = false;
+const UMBRAL_PAN_SIMPLE = 6; // px: menos que esto es el gesto de "mantené presionado", no un arrastre
+
+vistaPrevia.addEventListener('pointerdown', (e) => {
+  // Con dos dedos en la pantalla el gesto es un pellizco (más abajo), no
+  // arrastrar ni "mantené presionado": punterosSimple ya trae el primer dedo
+  // para cuando llega el pointerdown del segundo (ver el pellizco, abajo).
+  if (e.pointerType === 'touch' && punterosSimple.size >= 1) return;
+  e.preventDefault();
+  panInicioSimple = {
+    x: e.clientX, y: e.clientY,
+    scrollX: panelLienzo.scrollLeft, scrollY: panelLienzo.scrollTop,
+  };
+  huboPanSimple = false;
+  vistaPrevia.setPointerCapture(e.pointerId);
+  mostrarOriginal();
+});
+vistaPrevia.addEventListener('pointermove', (e) => {
+  if (!panInicioSimple) return;
+  // En computadora la imagen entra entera y no hay nada para desplazar: se
+  // deja el gesto tal como estaba (mantené presionado para comparar), sin
+  // que un tembleque del mouse lo cancele a mitad de camino.
+  const sePuedeArrastrar = panelLienzo.scrollWidth > panelLienzo.clientWidth || panelLienzo.scrollHeight > panelLienzo.clientHeight;
+  if (!sePuedeArrastrar) return;
+  const dx = e.clientX - panInicioSimple.x;
+  const dy = e.clientY - panInicioSimple.y;
+  if (!huboPanSimple && (Math.abs(dx) > UMBRAL_PAN_SIMPLE || Math.abs(dy) > UMBRAL_PAN_SIMPLE)) {
+    huboPanSimple = true;
+    dejarDeComparar();
+  }
+  if (huboPanSimple) {
+    panelLienzo.scrollLeft = panInicioSimple.scrollX - dx;
+    panelLienzo.scrollTop = panInicioSimple.scrollY - dy;
+  }
+});
+function terminarGestoVistaPrevia() {
+  dejarDeComparar();
+  panInicioSimple = null;
+  huboPanSimple = false;
+}
+['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => vistaPrevia.addEventListener(ev, terminarGestoVistaPrevia));
 vistaPrevia.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// --- Acordeón (uno abierto a la vez, para no necesitar scroll) ---
+// ===== Zoom (celular): con la rueda del mouse o pellizcando con dos dedos =====
+// En computadora la imagen ya entra entera en el panel (el CSS de siempre,
+// max-width/max-height) y no hace falta nada de esto. Mismo mecanismo que
+// editor-avanzado-imagen.html — ver assets/js/zoom-anclado.js.
+let zoomSimple = 1;
+let zoomAutomaticoSimple = true;
+
+function enCelular() { return document.body.classList.contains('em-activo'); }
+
+function aplicarZoomSimple(nuevoZoom, clientX, clientY) {
+  zoomSimple = Math.max(1, Math.min(4, nuevoZoom));
+  const conZoom = zoomSimple !== 1;
+  zoomAnclado(panelLienzo, vistaPrevia, () => {
+    // La clase "con-zoom" le suelta el max-width en editor-movil.css: sin
+    // eso, ese límite (el que hace que la imagen entre al ancho del panel
+    // cuando zoomSimple es 1) recortaba el ancho a la fuerza y solo el alto
+    // podía crecer con el zoom, estirando la imagen.
+    vistaPrevia.classList.toggle('con-zoom', conZoom);
+    vistaPrevia.style.width = conZoom ? `${vistaPrevia.width * zoomSimple}px` : '';
+    vistaPrevia.style.height = conZoom ? `${vistaPrevia.height * zoomSimple}px` : '';
+  }, clientX, clientY);
+}
+
+// Sin esto, el zoom arrancaría en la esquina superior izquierda de golpe en
+// vez de con la imagen entera a la vista (el CSS normal ya la ajusta al
+// panel; esto solo la deja lista para acercar desde ahí).
+function encajarVistaPreviaEnPanel() {
+  if (!enCelular() || !imagenActual) return;
+  vistaPrevia.classList.remove('con-zoom');
+  vistaPrevia.style.width = '';
+  vistaPrevia.style.height = '';
+  zoomSimple = 1;
+  zoomAutomaticoSimple = true;
+}
+
+window.addEventListener('resize', () => {
+  if (imagenActual && zoomAutomaticoSimple) encajarVistaPreviaEnPanel();
+});
+
+let deltaZoomSimpleAcumulado = 0;
+let zoomSimpleFotogramaPendiente = null;
+let puntoZoomSimpleRueda = null;
+panelLienzo.addEventListener('wheel', (e) => {
+  if (!enCelular()) return; // en computadora la imagen ya entra sola, no hay nada que acercar
+  e.preventDefault();
+  zoomAutomaticoSimple = false;
+  deltaZoomSimpleAcumulado += e.deltaY;
+  puntoZoomSimpleRueda = { x: e.clientX, y: e.clientY };
+  if (zoomSimpleFotogramaPendiente) return;
+  zoomSimpleFotogramaPendiente = requestAnimationFrame(() => {
+    aplicarZoomSimple(zoomSimple * (1 - deltaZoomSimpleAcumulado * 0.0035), puntoZoomSimpleRueda.x, puntoZoomSimpleRueda.y);
+    deltaZoomSimpleAcumulado = 0;
+    zoomSimpleFotogramaPendiente = null;
+  });
+}, { passive: false });
+
+// Pellizco con dos dedos (touch).
+const punterosSimple = new Map();
+let distanciaPinchSimpleInicial = null;
+let zoomSimpleAlIniciarPinch = 1;
+function distanciaEntrePunterosSimple() {
+  const puntos = [...punterosSimple.values()];
+  if (puntos.length < 2) return null;
+  return Math.hypot(puntos[0].x - puntos[1].x, puntos[0].y - puntos[1].y);
+}
+panelLienzo.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'touch') return;
+  punterosSimple.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (punterosSimple.size === 2) {
+    distanciaPinchSimpleInicial = distanciaEntrePunterosSimple();
+    zoomSimpleAlIniciarPinch = zoomSimple;
+    zoomAutomaticoSimple = false;
+    // Dos dedos: lo que haya empezado el primero (arrastre o "ver original")
+    // no vale, era el comienzo de un pellizco.
+    terminarGestoVistaPrevia();
+  }
+});
+panelLienzo.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'touch' || !punterosSimple.has(e.pointerId)) return;
+  punterosSimple.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (punterosSimple.size === 2 && distanciaPinchSimpleInicial) {
+    e.preventDefault();
+    const distanciaActual = distanciaEntrePunterosSimple();
+    const [a, b] = [...punterosSimple.values()];
+    aplicarZoomSimple(zoomSimpleAlIniciarPinch * (distanciaActual / distanciaPinchSimpleInicial), (a.x + b.x) / 2, (a.y + b.y) / 2);
+  }
+}, { passive: false });
+function soltarPunteroSimple(e) {
+  punterosSimple.delete(e.pointerId);
+  if (punterosSimple.size < 2) distanciaPinchSimpleInicial = null;
+}
+['pointerup', 'pointercancel'].forEach((ev) => panelLienzo.addEventListener(ev, soltarPunteroSimple));
+
+// --- Acordeón (uno abierto a la vez POR PANEL, para no necesitar scroll) ---
+// Ahora hay acordeones tanto en el panel de filtros (Filtros/Textura extra/
+// Acciones) como en el de ajustes: cerrar "los de todo el documento" haría
+// que abrir uno de la izquierda cierre el que está abierto a la derecha.
 document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
   titulo.addEventListener('click', () => {
     const grupo = titulo.closest('.acordeon-grupo');
+    const panelPadre = titulo.closest('.panel-filtros, .panel-ajustes') || document;
     const yaAbierto = grupo.classList.contains('abierto');
-    document.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
+    panelPadre.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
     if (!yaAbierto) grupo.classList.add('abierto');
   });
 });
