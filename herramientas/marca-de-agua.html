@@ -14,6 +14,14 @@
   .controles .campo > span:first-child { min-width: 190px; }
   .controles .campo input[type="range"] { width: 240px; max-width: 50vw; }
   .controles .boton { align-self: flex-start; }
+  /* En fila, la etiqueta fija (190px) más el deslizador (240px, capado a la
+     mitad de la pantalla) piden 400px mínimos: en un teléfono de 390px la
+     página entera terminaba con desplazamiento lateral. Apilados entran. */
+  @media (max-width: 600px) {
+    .controles .campo { flex-direction: column; align-items: stretch; gap: 4px; }
+    .controles .campo > span:first-child { min-width: 0; }
+    .controles .campo input[type="range"] { width: 100%; max-width: none; }
+  }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>

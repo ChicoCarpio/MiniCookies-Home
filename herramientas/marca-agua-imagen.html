@@ -14,6 +14,14 @@
   .controles .campo > span:first-child { min-width: 170px; }
   .controles .campo input[type="range"] { width: 220px; max-width: 50vw; }
   .controles .boton { align-self: flex-start; }
+  /* En fila, la etiqueta fija (170px) más el deslizador (220px, capado a la
+     mitad de la pantalla) no entran en un teléfono y empujaban la página
+     entera a lo ancho. Apilados entran. */
+  @media (max-width: 600px) {
+    .controles .campo { flex-direction: column; align-items: stretch; gap: 4px; }
+    .controles .campo > span:first-child { min-width: 0; }
+    .controles .campo input[type="range"] { width: 100%; max-width: none; }
+  }
   #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>

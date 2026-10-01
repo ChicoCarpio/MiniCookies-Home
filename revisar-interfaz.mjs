@@ -77,6 +77,40 @@ function paginasDe(dir, acumulado = []) {
 // --- Lo que se comprueba, ejecutado dentro del navegador -------------------
 // Se manda como texto porque corre en el contexto de la página, no acá.
 const COMPROBACIONES = `
+// Decir "la página desborda" no alcanza para arreglarla: hay que decir quién.
+// Se buscan los elementos que se salen y se reportan los MÁS PROFUNDOS (los
+// que no tienen adentro otro que también se salga), porque ese es el que
+// realmente es ancho — sus padres solo lo arrastran.
+function culpablesDeDesborde(doc, ancho) {
+  // Salirse de la pantalla no siempre ensancha la página: lo que está dentro
+  // de algo con overflow distinto de visible queda recortado, y lo que cuelga
+  // de un position:fixed no participa del tamaño del documento. El fondo
+  // decorativo cumple las dos cosas, así que sin este filtro se lleva la culpa
+  // en todas las páginas y el verdadero causante queda tapado.
+  const inocente = (el) => {
+    for (let p = el; p && p !== doc.body; p = p.parentElement) {
+      const e = getComputedStyle(p);
+      if (p !== el && e.overflowX !== 'visible') return true;
+      if (e.position === 'fixed') return true;
+    }
+    return false;
+  };
+  const seSalen = [];
+  for (const el of doc.querySelectorAll('body *')) {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0 && Math.round(r.right) > ancho + 1 && !inocente(el)) seSalen.push(el);
+  }
+  const hojas = seSalen.filter((el) => !seSalen.some((otro) => otro !== el && el.contains(otro)));
+  const nombre = (el) => {
+    let n = el.tagName.toLowerCase();
+    if (el.id) n += '#' + el.id;
+    else if (el.className && typeof el.className === 'string') n += '.' + el.className.trim().split(/\\s+/).join('.');
+    return n + ' (' + Math.round(el.getBoundingClientRect().right) + 'px)';
+  };
+  const lista = (hojas.length ? hojas : seSalen).slice(0, 3).map(nombre);
+  return lista.length ? lista.join(', ') : 'no se pudo identificar';
+}
+
 function medir(doc, win) {
   const fallas = [];
   const anchoVista = doc.documentElement.clientWidth;
@@ -115,7 +149,8 @@ function medir(doc, win) {
   // 3. Nada se sale de la pantalla a lo ancho.
   const de = doc.documentElement;
   if (de.scrollWidth > de.clientWidth + 1) {
-    fallas.push('desborde horizontal: ' + de.scrollWidth + 'px en una pantalla de ' + de.clientWidth + 'px');
+    fallas.push('desborde horizontal: ' + de.scrollWidth + 'px en una pantalla de ' + de.clientWidth
+      + 'px — lo causa ' + culpablesDeDesborde(doc, de.clientWidth));
   }
 
   // 4. Toda página tiene un título visible.
@@ -303,9 +338,11 @@ if (!conFallas.length) {
 const porFalla = new Map();
 for (const r of conFallas) {
   for (const f of r.fallas) {
-    const clave = f.replace(/\d+px/g, 'N px').replace(/: .*$/, '');
+    const corte = f.indexOf(': ');
+    const clave = corte > 0 ? f.slice(0, corte) : f;
+    const detalle = corte > 0 ? f.slice(corte + 2) : '';
     if (!porFalla.has(clave)) porFalla.set(clave, []);
-    porFalla.get(clave).push(`${r.ruta} (${r.estado})`);
+    porFalla.get(clave).push(`${r.ruta} (${r.estado})` + (detalle ? `\n          ${detalle}` : ''));
   }
 }
 

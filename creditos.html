@@ -23,7 +23,7 @@ window.i18nPagina = {
     'th-autor': 'Autor / repositorio',
     'fork-nota': ' (fork mantenido de pdf-lib, con cifrado)',
     'jszip-nota': ' (también disponible bajo GPLv3, a elección de quien la use — este sitio la usa bajo MIT)',
-    'cdn-nota': 'Todas se cargan directamente desde su CDN público (cdnjs, salvo @zxing/library y @huggingface/transformers que se cargan desde jsdelivr por no estar publicadas en cdnjs) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.',
+    'cdn-nota': 'Las bibliotecas se cargan desde su CDN público (cdnjs, salvo @zxing/library y @huggingface/transformers, que usan jsdelivr). Noto Sans se descarga desde Google Fonts solo cuando hace falta. No se distribuye copia propia de estos recursos; la licencia completa está en el repositorio enlazado.',
 
     'h-ia': 'Modelo de inteligencia artificial (Dictado por voz)',
     'ia-a': 'La herramienta ',
@@ -55,7 +55,7 @@ window.i18nPagina = {
     'serv-link-privacidad': 'política de privacidad',
     'serv-d': '.',
 
-    'actualizacion': 'Última actualización: 2026-09-26.'
+    'actualizacion': 'Última actualización: 2026-09-28.'
   },
   en: {
     'titulo-pagina': 'Credits and licenses — Mini Cookies',
@@ -69,7 +69,7 @@ window.i18nPagina = {
     'th-autor': 'Author / repository',
     'fork-nota': ' (maintained fork of pdf-lib, with encryption)',
     'jszip-nota': ' (also available under GPLv3, whichever the user prefers — this site uses it under MIT)',
-    'cdn-nota': 'All of them are loaded straight from their public CDN (cdnjs, except @zxing/library and @huggingface/transformers, which come from jsdelivr because they are not published on cdnjs) — we do not ship a copy of any of them. The full license of each one is in its linked repository above.',
+    'cdn-nota': 'Libraries are loaded from their public CDN (cdnjs, except @zxing/library and @huggingface/transformers, which use jsdelivr). Noto Sans is fetched from Google Fonts only when needed. We do not ship copies of these resources; their full licenses are in the linked repositories.',
 
     'h-ia': 'AI model (Voice dictation)',
     'ia-a': 'The ',
@@ -101,7 +101,7 @@ window.i18nPagina = {
     'serv-link-privacidad': 'privacy policy',
     'serv-d': '.',
 
-    'actualizacion': 'Last updated: 2026-09-26.'
+    'actualizacion': 'Last updated: 2026-09-28.'
   }
 };
 </script>
@@ -128,6 +128,7 @@ window.i18nPagina = {
     <h3 style="margin-top:0;" data-i18n="h-librerias">Librerías de terceros</h3>
     <p data-i18n="librerias-intro">Este sitio no tiene backend propio: algunas herramientas procesan tus archivos en tu navegador usando alguna de estas librerías de código abierto, cargadas desde un CDN. Ninguna fue modificada — se usan tal cual las publica cada autor.</p>
 
+    <div class="tabla-ancha">
     <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
       <thead>
         <tr style="text-align:left; border-bottom:1px solid var(--gris-borde);">
@@ -145,6 +146,8 @@ window.i18nPagina = {
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@huggingface/transformers</td><td style="padding:0.5rem;">4.3.0</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/huggingface/transformers.js" target="_blank" rel="noopener">huggingface/transformers.js</a></td></tr>
       
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">pdf-lib</td><td style="padding:0.5rem;">1.17.1</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">Hopding/pdf-lib</a></td></tr>
+        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@pdf-lib/fontkit</td><td style="padding:0.5rem;">1.1.1</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/Hopding/fontkit" target="_blank" rel="noopener">Hopding/fontkit</a></td></tr>
+        <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">Noto Sans</td><td style="padding:0.5rem;">2.015</td><td style="padding:0.5rem;">SIL Open Font License 1.1</td><td style="padding:0.5rem;"><a href="https://github.com/google/fonts/tree/main/ofl/notosans" target="_blank" rel="noopener">google/fonts — notosans</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">@cantoo/pdf-lib</td><td style="padding:0.5rem;">2.11.0</td><td style="padding:0.5rem;">MIT</td><td style="padding:0.5rem;"><a href="https://github.com/cantoo-scribe/pdf-lib" target="_blank" rel="noopener">cantoo-scribe/pdf-lib</a><span data-i18n="fork-nota"> (fork mantenido de pdf-lib, con cifrado)</span></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">PDF.js</td><td style="padding:0.5rem;">3.11.174</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/mozilla/pdf.js" target="_blank" rel="noopener">mozilla/pdf.js</a></td></tr>
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">JSZip</td><td style="padding:0.5rem;">3.10.1</td><td style="padding:0.5rem;">MIT<span style="color:var(--texto-suave);" data-i18n="jszip-nota"> (también disponible bajo GPLv3, a elección de quien la use — este sitio la usa bajo MIT)</span></td><td style="padding:0.5rem;"><a href="https://github.com/Stuk/jszip" target="_blank" rel="noopener">Stuk/jszip</a></td></tr>
@@ -159,6 +162,7 @@ window.i18nPagina = {
         <tr><td style="padding:0.5rem 0.5rem 0.5rem 0;">Tesseract.js</td><td style="padding:0.5rem;">7.0.0</td><td style="padding:0.5rem;">Apache-2.0</td><td style="padding:0.5rem;"><a href="https://github.com/naptha/tesseract.js" target="_blank" rel="noopener">naptha/tesseract.js</a></td></tr>
       </tbody>
     </table>
+    </div>
 
     <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;" data-i18n="cdn-nota">Todas se cargan directamente desde su CDN público (cdnjs, salvo @zxing/library y @huggingface/transformers que se cargan desde jsdelivr por no estar publicadas en cdnjs) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.</p>
 

@@ -449,6 +449,22 @@ footer.sitio {
 
 label.campo { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--texto-suave); }
 
+/* Ningún control se sale de la pantalla.
+   Un <select> toma el ancho de su opción más larga, y "Ancho A4, alto según la
+   imagen (recomendado, sin recorte ni márgenes)" mide 544px. Como un hijo de
+   un contenedor flex no se achica por debajo de su contenido (min-width: auto
+   es el valor inicial), ese selector ensanchaba la página entera en celular:
+   la herramienta se veía corrida y con desplazamiento lateral. Pasa en
+   cualquier herramienta con opciones descriptivas, así que se resuelve acá y
+   no página por página. */
+.controles > *, label.campo { min-width: 0; }
+.controles select, label.campo select, .controles input, label.campo input { max-width: 100%; }
+
+/* Una tabla con muchas columnas no entra en un teléfono y no se puede
+   reflujar sin romperla: se envuelve en esto y se desplaza sola, sin arrastrar
+   la página. */
+.tabla-ancha { max-width: 100%; overflow-x: auto; }
+
 input[type="range"], input[type="number"], input[type="text"], input[type="email"], select {
   padding: 6px 8px;
   border: 1px solid var(--gris-borde);
@@ -528,6 +544,12 @@ textarea {
   --resultado-fondo: #16332699;
   --resultado-borde: #22c55e66;
 }
+
+/* En la portada el logo ES el título de la página, así que va dentro del <h1>
+   (antes la portada no tenía ninguno y empezaba directo en <h2>). El alt del
+   logo hace de texto del encabezado; esto solo evita que envolverlo mueva algo
+   de lugar. */
+.hero h1.titulo-logo { margin: 0; line-height: 0; }
 
 .hero .logo-hero {
   /* El logo de la portada es apaisado (unas 3 veces más ancho que alto), así
