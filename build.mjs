@@ -89,6 +89,41 @@ function procesarHtml(html, archivo) {
   return html;
 }
 
+/**
+ * Enlaces internos sin ".html".
+ *
+ * El código fuente enlaza "pagina.html" para que las páginas se puedan abrir
+ * directo del disco al desarrollar. Pero Cloudflare Pages sirve la URL sin
+ * extensión y responde 308 cuando se la pide con ella, así que cada enlace del
+ * sitio costaba dos peticiones y, peor, la URL enlazada no era la misma que la
+ * página declara como canónica ni la que está en el sitemap. Un rastreador veía
+ * esa incoherencia en las 120 páginas.
+ *
+ * "index" es la raíz de su carpeta: ../index.html -> ../ (pedir /index también
+ * redirige).
+ *
+ * Solo se tocan los atributos del marcado: el contenido de <script> se aparta
+ * antes, para no reescribir cadenas dentro del JavaScript.
+ */
+function enlacesLimpios(html) {
+  const guardados = [];
+  const sinScripts = html.replace(/<script[\s\S]*?<\/script>/gi, (bloque) => {
+    guardados.push(bloque);
+    return `\u0000S${guardados.length - 1}\u0000`;
+  });
+
+  const limpio = sinScripts.replace(/(\s(?:href|action)\s*=\s*")([^"]+)(")/gi, (todo, antes, url, despues) => {
+    // Absolutas, protocolo relativo, anclas y mailto: no se tocan.
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('//') || url.startsWith('#')) return todo;
+    if (!/\.html$/i.test(url)) return todo;
+    let destino = url.slice(0, -'.html'.length).replace(/(^|\/)index$/i, '$1');
+    if (destino === '') destino = './';
+    return antes + destino + despues;
+  });
+
+  return limpio.replace(/\u0000S(\d+)\u0000/g, (_, i) => guardados[i]);
+}
+
 function recorrer(carpeta) {
   for (const nombre of readdirSync(carpeta)) {
     if (EXCLUIR_NOMBRES.has(nombre)) continue;
@@ -105,7 +140,7 @@ function recorrer(carpeta) {
       const rutaWeb = rel.replace(/\\/g, '/');
       const crudo = aplicarConteos(readFileSync(origen, 'utf8'), conteo, rutaWeb);
       paginas.push(rel);
-      writeFileSync(destino, inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles));
+      writeFileSync(destino, enlacesLimpios(inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles)));
 
       // Gemela en inglés bajo /en/, con su propia URL para que Google la vea.
       if (conIngles.has(rutaWeb)) {
@@ -113,7 +148,7 @@ function recorrer(carpeta) {
         if (!en) throw new Error('No se pudo traducir ' + rutaWeb);
         const destinoEn = join(SALIDA, 'en', rel);
         mkdirSync(dirname(destinoEn), { recursive: true });
-        writeFileSync(destinoEn, inyectarSeo(procesarHtml(en, 'en/' + rel), rel, indiceCategorias, conIngles, true));
+        writeFileSync(destinoEn, enlacesLimpios(inyectarSeo(procesarHtml(en, 'en/' + rel), rel, indiceCategorias, conIngles, true)));
         paginasEn.push('en/' + rutaWeb);
       }
     }
