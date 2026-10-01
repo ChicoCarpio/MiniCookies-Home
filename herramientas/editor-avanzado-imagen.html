@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
-<link rel="stylesheet" href="../assets/css/editor-movil.css">
+<link rel="stylesheet" href="../assets/css/app-movil.css">
 <link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
@@ -211,7 +211,7 @@
   .acordeon-titulo .flecha { flex: 0 0 auto; margin-left: auto; transition: transform .15s; }
   .acordeon-grupo.abierto .acordeon-titulo .flecha { transform: rotate(180deg); }
   /* El ícono se agrega por CSS (::before), no como texto del título: así el
-     nombre que lee editor-movil.js para el chip de celular no cambia — esta
+     nombre que lee app-movil.js para el chip de celular no cambia — esta
      vista solo la ve la versión de escritorio. */
   .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
   .deslizadores { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -452,20 +452,20 @@ window.i18nPagina = {
     </div>
 
     <div id="editorCompleto" style="display:none; margin-top:16px;">
-      <div class="editor-avanzado-layout" id="layoutEditor" data-em-sin-descarga-flotante>
+      <div class="editor-avanzado-layout" id="layoutEditor" data-app-sin-descarga-flotante>
         <button type="button" class="abrir-panel-movil izq" data-panel="izq" data-i18n="movil-capas">☰ Capas y herramientas</button>
         <button type="button" class="abrir-panel-movil der" data-panel="der" data-i18n="movil-ajustes">⚙ Ajustes</button>
         <div class="fondo-panel-movil" id="fondoPanelMovil"></div>
 
-        <div class="panel-capas" data-em-categorias-individuales>
+        <div class="panel-capas" data-app-categorias-individuales>
           <!-- Hermano directo de .panel-capas, no adentro de ningún
-               data-em-categoria: el CSS que lo mantiene visible al contraer
+               data-app-categoria: el CSS que lo mantiene visible al contraer
                (".izq-plegado .panel-capas > :not(.boton-plegar)") apunta a
                hijos directos — metido un nivel más adentro quedaba oculto
                junto con el resto y no había forma de volver a desplegar el
                panel (bug encontrado 2026-09-30, viene de antes de hoy). -->
           <button type="button" class="boton-plegar" data-panel="izq" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span data-i18n="panel-capas">Capas y herramientas</span><span class="flecha-plegar">«</span></button>
-          <div data-em-categoria="Capas">
+          <div data-app-categoria="Capas">
             <div class="controles" style="margin-bottom:8px; gap:6px;">
               <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
             </div>
@@ -475,7 +475,7 @@ window.i18nPagina = {
 
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
                así ninguno empuja a los demás fuera de la vista. -->
-          <fieldset class="acordeon-grupo" data-em-categoria="Aplicar">
+          <fieldset class="acordeon-grupo" data-app-categoria="Aplicar">
             <button type="button" class="acordeon-titulo" data-icono="🎯"><span data-i18n="titulo-aplicar">Aplicar la capa a</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="modos" id="modosSeleccionCapa">
@@ -506,7 +506,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-em-categoria="Vista">
+          <fieldset class="acordeon-grupo" data-app-categoria="Vista">
             <button type="button" class="acordeon-titulo" data-icono="🔍"><span data-i18n="titulo-vista">Vista</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
@@ -525,7 +525,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-em-categoria="Acciones">
+          <fieldset class="acordeon-grupo" data-app-categoria="Acciones">
             <button type="button" class="acordeon-titulo" data-icono="⤓"><span data-i18n="grupo-acciones">Acciones</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
@@ -541,7 +541,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" id="filtrosCapa" data-em-categoria="Filtro">
+          <fieldset class="acordeon-grupo" id="filtrosCapa" data-app-categoria="Filtro">
             <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="resumen-filtro">Filtro</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <p class="nota-lateral" style="margin:0 0 6px; display:flex; align-items:center; gap:6px;">
@@ -564,7 +564,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="textura" data-em-categoria="Textura">
+          <fieldset class="acordeon-grupo" data-grupo="textura" data-app-categoria="Textura">
             <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="texturas-scroll">
@@ -592,7 +592,7 @@ window.i18nPagina = {
           </fieldset>
         </div>
 
-        <div class="panel-lienzo">
+        <div class="panel-lienzo" data-app-escenario="desplazable">
           <div class="zona-lienzo-contenedor" id="zonaLienzoContenedor">
             <div class="zona-lienzo" id="zonaLienzo">
               <canvas id="canvasTrabajo"></canvas>
@@ -600,7 +600,7 @@ window.i18nPagina = {
             </div>
           </div>
           <!-- Botón aparte (no sobre la imagen): en el lienzo, presionar ya sirve para pintar, mover o elegir color -->
-          <button type="button" id="botonVerOriginal" data-em-categoria="Original" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
+          <button type="button" id="botonVerOriginal" data-app-categoria="Original" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
         </div>
 
         <div class="panel-ajustes">
@@ -2693,10 +2693,10 @@ entradaProyecto.addEventListener('change', async (e) => {
 // cierra el otro; en computadora arrancan abiertos y son independientes.
 const layoutEditor = document.getElementById('layoutEditor');
 const consultaMovil = window.matchMedia('(max-width: 900px)');
-document.addEventListener('editorMovilCategoriaAbierta', (e) => {
+document.addEventListener('appMovilCategoriaAbierta', (e) => {
   const clave = e.detail && e.detail.claveIcono;
   if (clave === 'Filtros' || clave === 'resumen-filtro' || clave === 'grupo-filtros') solicitarMiniaturasFiltros();
-  // En celular, editor-movil.js abre la categoría moviendo el <fieldset> al
+  // En celular, app-movil.js abre la categoría moviendo el <fieldset> al
   // panel de abajo sin simular un click sobre .acordeon-titulo — así que sin
   // esto las miniaturas de textura nunca se generaban al abrir "Textura"
   // desde la tira de categorías (sí funcionaba en computadora, al hacer click
@@ -2757,7 +2757,7 @@ estadoInicialPaneles();
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
-<script src="../assets/js/editor-movil.js"></script>
+<script src="../assets/js/app-movil.js"></script>
 <script src="../assets/js/ayuda-tip.js"></script>
 </body>
 </html>

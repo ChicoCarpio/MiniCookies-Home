@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
 // Arma la distribución de celular de los editores de imagen (ver el dibujo en
-// assets/css/editor-movil.css).
+// assets/css/app-movil.css).
 //
 // Idea central: NO se duplican los controles. Los paneles que en computadora
 // son columnas se mueven —el mismo elemento, no una copia— al panel de abajo
@@ -48,6 +48,11 @@
     'grupo-filtros': '🖼️',
     'grupo-acciones': '⤓',
     'campo-color-borde': '🎨',
+    // Collage
+    'h-diseno': '▦',
+    'h-formato': '🖼️',
+    'h-estilo': '🎨',
+    'h-descargar': '⤓',
   };
 
   var ICONOS = {
@@ -74,24 +79,33 @@
     var panelAjustes = shell.querySelector('.panel-ajustes');
     var panelFiltros = shell.querySelector('.panel-filtros');
     var panelCapas = shell.querySelector('.panel-capas');
-    var lienzo = shell.querySelector('.panel-lienzo');
-    if (!lienzo) return;
 
-    shell.classList.add('em-shell');
+    // El escenario es lo que se está editando y tiene que quedar siempre a la
+    // vista. Una página lo marca con data-app-escenario; las que vienen de
+    // antes usan .panel-lienzo. Si lleva el valor "desplazable", además se
+    // comporta como lienzo con zoom propio (ver app-movil.css).
+    var escenario = shell.querySelector('[data-app-escenario]') || shell.querySelector('.panel-lienzo');
+    if (!escenario) return;
+    escenario.classList.add('app-escenario');
+    if (escenario.getAttribute('data-app-escenario') === 'desplazable') {
+      escenario.classList.add('app-desplazable');
+    }
+
+    shell.classList.add('app-shell');
 
     // --- Piezas nuevas: tira de publicidad, hoja, categorías y acciones ---
     var tiraAnuncio = document.createElement('div');
-    tiraAnuncio.className = 'em-anuncio';
+    tiraAnuncio.className = 'app-anuncio';
 
     var hoja = document.createElement('div');
-    hoja.className = 'em-hoja';
+    hoja.className = 'app-hoja';
 
     var chips = document.createElement('nav');
-    chips.className = 'em-chips';
+    chips.className = 'app-chips';
     chips.setAttribute('aria-label', txt('categorias'));
 
     var acciones = document.createElement('div');
-    acciones.className = 'em-acciones';
+    acciones.className = 'app-acciones';
 
     // El anuncio de la página se sube a la tira de arriba mientras dure el
     // modo celular; se recuerda de dónde salió para devolverlo después.
@@ -139,33 +153,39 @@
       // de .panel-ajustes): si el shell pide categorías individuales, cada
       // acordeón de .panel-filtros se trata igual que los de panelAjustes, en
       // vez de moverse los dos juntos como un solo bloque "Filtros".
-      if (panelFiltros.hasAttribute('data-em-categorias-individuales')) agregarAcordeonesDe(panelFiltros);
+      if (panelFiltros.hasAttribute('data-app-categorias-individuales')) agregarAcordeonesDe(panelFiltros);
       else agregarCategoria(txt('filtros'), panelFiltros, undefined, 'Filtros');
     }
 
     // Una página puede marcar un bloque suelto como categoría propia con
-    // data-em-categoria="Nombre". Se usa para herramientas que en computadora
+    // data-app-categoria="Nombre". Se usa para herramientas que en computadora
     // viven en la misma columna que otra cosa pero son un bloque aparte y en
     // celular merecen su propio botón (el color del borde y el descargar del
     // generador de stickers, separados de "Filtros"; antes también los
     // filtros de capa del editor avanzado).
-    shell.querySelectorAll('[data-em-categoria]').forEach(function (el) {
-      var clave = el.getAttribute('data-em-categoria');
+    shell.querySelectorAll('[data-app-categoria]').forEach(function (el) {
+      var clave = el.getAttribute('data-app-categoria');
       // 'Filtros' y 'Capas' los sabe traducir el modulo. Cualquier otro
       // nombre no tiene traducción propia acá: se lee del título del propio
       // acordeón (que idioma.js ya tradujo), igual que hace el panel de
       // ajustes más abajo — así una categoría nueva no necesita agregarse a
       // mano en este archivo.
       var conocido = { Filtros: 'filtros', Capas: 'capas' }[clave];
-      var titulo = el.querySelector('.acordeon-titulo');
-      var conClave = titulo ? titulo.querySelector('[data-i18n]') : null;
+      // El título da el nombre y el icono de la categoría. En los editores es
+      // el botón del acordeón; en una herramienta que solo agrupa opciones bajo
+      // un encabezado (el collage) es ese encabezado.
+      var titulo = el.querySelector('.acordeon-titulo') || el.querySelector('h3');
+      // La clave de traducción puede estar en un hijo del título (un <span>
+      // dentro del botón del acordeón) o en el título mismo (un <h3>).
+      var conClave = !titulo ? null
+        : (titulo.hasAttribute('data-i18n') ? titulo : titulo.querySelector('[data-i18n]'));
       var claveIcono = conClave ? conClave.getAttribute('data-i18n') : clave;
       var etiqueta = conocido ? txt(conocido) : (titulo ? titulo.textContent.replace(/[▾▴▲▼]/g, '').trim() : clave);
       agregarCategoria(etiqueta, el, undefined, claveIcono, titulo || undefined);
     });
 
     agregarAcordeonesDe(panelAjustes);
-    if (panelCapas && !panelCapas.hasAttribute('data-em-categorias-individuales')) {
+    if (panelCapas && !panelCapas.hasAttribute('data-app-categorias-individuales')) {
       agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
     }
     if (!categorias.length) return;
@@ -175,9 +195,9 @@
     categorias.forEach(function (cat, i) {
       var boton = document.createElement('button');
       boton.type = 'button';
-      boton.className = 'em-chip';
+      boton.className = 'app-chip';
       var icono = document.createElement('span');
-      icono.className = 'em-icono';
+      icono.className = 'app-icono';
       icono.textContent = ICONOS_POR_CLAVE[cat.claveIcono]
         || ICONOS[sinAcentos(cat.claveIcono)] || '🎚️';
       var nombre = document.createElement('span');
@@ -305,7 +325,7 @@
       // Si la categoría estaba cortada contra el borde, se la trae a la vista.
       if (cat.chip.scrollIntoView) cat.chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       abierta = i;
-      document.dispatchEvent(new CustomEvent('editorMovilCategoriaAbierta', {
+      document.dispatchEvent(new CustomEvent('appMovilCategoriaAbierta', {
         detail: { claveIcono: cat.claveIcono },
       }));
       // Si el grupo venía plegado en la versión de computadora, acá tiene que
@@ -344,16 +364,16 @@
       return b;
     }
 
-    accion('🖼️', ['botonCambiarImagen'], 'em-secundario');
-    accion('↺', ['botonRestablecer', 'botonRestablecerAvanzado'], 'em-secundario');
+    accion('🖼️', ['botonCambiarImagen'], 'app-secundario');
+    accion('↺', ['botonRestablecer', 'botonRestablecerAvanzado'], 'app-secundario');
     // El botón de descargar flotante es un atajo para cuando "Descargar" está
     // escondido dentro de un panel grande (Filtros/Capas/Ajustes) con muchos
     // otros controles. Una página que ya le da su propia categoría de nivel
     // superior (como "Acciones" en el generador de stickers) no lo necesita
     // — sería un segundo botón repitiendo el mismo texto — y lo marca con
-    // data-em-sin-descarga-flotante en su shell.
-    if (!shell.hasAttribute('data-em-sin-descarga-flotante')) {
-      accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'em-principal');
+    // data-app-sin-descarga-flotante en su shell.
+    if (!shell.hasAttribute('data-app-sin-descarga-flotante')) {
+      accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'app-principal');
     }
 
     // Hoja + categorías + acciones van juntas en un solo bloque flotante,
@@ -364,7 +384,7 @@
     // en los editores: al no cambiar más el alto de .panel-lienzo, tampoco
     // hace falta re-ajustar el zoom al abrir/cerrar un panel.
     var controles = document.createElement('div');
-    controles.className = 'em-controles';
+    controles.className = 'app-controles';
     controles.appendChild(hoja);
     controles.appendChild(chips);
     // Sin botones (una página sin cambiar-imagen/reiniciar ni el atajo de
@@ -374,21 +394,21 @@
     // --- El encabezado del sitio queda a la vista, arriba de la capa ---
     // La capa del editor es "position: fixed", así que no la empuja nada:
     // hay que decirle desde dónde empieza. Se mide el encabezado DESPUÉS de
-    // agregar "em-activo" (que es lo que lo compacta), porque si no se mide
+    // agregar "app-activo" (que es lo que lo compacta), porque si no se mide
     // el alto grande de escritorio y queda una franja vacía.
     var encabezado = document.querySelector('header.sitio');
 
     function medirEncabezado() {
-      if (!encabezado || !cuerpo.classList.contains('em-activo')) return;
+      if (!encabezado || !cuerpo.classList.contains('app-activo')) return;
       var alto = Math.round(encabezado.getBoundingClientRect().height);
-      document.documentElement.style.setProperty('--em-alto-encabezado', alto + 'px');
+      document.documentElement.style.setProperty('--app-alto-encabezado', alto + 'px');
     }
 
     // --- Encender / apagar según el ancho ---
     function encender() {
-      if (cuerpo.classList.contains('em-activo')) return;
-      cuerpo.classList.add('em-activo');
-      document.documentElement.classList.add('em-activo');
+      if (cuerpo.classList.contains('app-activo')) return;
+      cuerpo.classList.add('app-activo');
+      document.documentElement.classList.add('app-activo');
       medirEncabezado();
       if (anuncio) tiraAnuncio.appendChild(anuncio);
       shell.insertBefore(tiraAnuncio, shell.firstChild);
@@ -398,11 +418,11 @@
     }
 
     function apagar() {
-      if (!cuerpo.classList.contains('em-activo')) return;
+      if (!cuerpo.classList.contains('app-activo')) return;
       cerrarHoja();
-      cuerpo.classList.remove('em-activo');
-      document.documentElement.classList.remove('em-activo');
-      document.documentElement.style.removeProperty('--em-alto-encabezado');
+      cuerpo.classList.remove('app-activo');
+      document.documentElement.classList.remove('app-activo');
+      document.documentElement.style.removeProperty('--app-alto-encabezado');
       // Todo vuelve a donde estaba: la página queda igual que antes.
       if (anuncio && anuncioPadre) anuncioPadre.insertBefore(anuncio, anuncioSiguiente);
       [tiraAnuncio, controles].forEach(function (el) {
@@ -419,7 +439,7 @@
     }
 
     window.addEventListener('resize', function () {
-      if (!cuerpo.classList.contains('em-activo')) return;
+      if (!cuerpo.classList.contains('app-activo')) return;
       marcarBordes();
       // Girar el teléfono puede cambiar cuántas líneas ocupa el enlace de
       // categoría, y con eso el alto del encabezado.
@@ -445,7 +465,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    var shell = document.querySelector('.editor-color-layout, .editor-avanzado-layout');
+    // data-app-movil es la forma de marcar el contenedor en una página nueva;
+    // las dos clases son las herramientas que ya existían cuando esto se
+    // escribió para ellas.
+    var shell = document.querySelector('[data-app-movil], .editor-color-layout, .editor-avanzado-layout');
     if (shell) iniciar(shell);
   });
 })();

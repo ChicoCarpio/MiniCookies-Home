@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
-<link rel="stylesheet" href="../assets/css/editor-movil.css">
+<link rel="stylesheet" href="../assets/css/app-movil.css">
 <style>
   /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
      del sitio, pensado como columna angosta de lectura). Mismo esqueleto que
@@ -101,7 +101,7 @@
     font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em;
   }
   /* El ícono se agrega por CSS (::before), no como texto del botón: así el
-     título que lee editor-movil.js para el nombre del chip en celular
+     título que lee app-movil.js para el nombre del chip en celular
      (titulo.textContent) no cambia — esta vista solo la ve la versión de
      escritorio. */
   .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
@@ -347,7 +347,7 @@ window.i18nPagina = {
         <button type="button" class="abrir-panel-movil der" data-panel="der" data-i18n="movil-ajustes">⚙ Ajustes</button>
         <div class="fondo-panel-movil" id="fondoPanelMovil"></div>
 
-        <div class="panel-filtros" data-em-categorias-individuales>
+        <div class="panel-filtros" data-app-categorias-individuales>
           <button type="button" class="boton-plegar" data-panel="izq" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span data-i18n="panel-filtros">Filtros</span><span class="flecha-plegar">«</span></button>
 
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
@@ -407,7 +407,7 @@ window.i18nPagina = {
           </fieldset>
         </div>
 
-        <div class="panel-lienzo">
+        <div class="panel-lienzo" data-app-escenario="desplazable">
           <canvas id="vistaPrevia" data-i18n-attr="title:title-original" title="Mantené presionado para ver la imagen original"></canvas>
           <p class="nota-lateral" style="margin:8px 0 0;" data-i18n="nota-original">Mantené presionada la imagen para ver el original</p>
           <p class="nota-lateral" style="margin:8px 0 0;"><span data-i18n="nota-avanzado-a">¿Necesitás editar solo una parte de la imagen, por zona o por color, con varias capas? Probá el </span><a href="editor-avanzado-imagen.html" data-i18n="nota-avanzado-link">Editor avanzado →</a></p>
@@ -1561,13 +1561,13 @@ vistaPrevia.addEventListener('contextmenu', (e) => e.preventDefault());
 let zoomSimple = 1;
 let zoomAutomaticoSimple = true;
 
-function enCelular() { return document.body.classList.contains('em-activo'); }
+function enCelular() { return document.body.classList.contains('app-activo'); }
 
 function aplicarZoomSimple(nuevoZoom, clientX, clientY) {
   zoomSimple = Math.max(1, Math.min(4, nuevoZoom));
   const conZoom = zoomSimple !== 1;
   zoomAnclado(panelLienzo, vistaPrevia, () => {
-    // La clase "con-zoom" le suelta el max-width en editor-movil.css: sin
+    // La clase "con-zoom" le suelta el max-width en app-movil.css: sin
     // eso, ese límite (el que hace que la imagen entre al ancho del panel
     // cuando zoomSimple es 1) recortaba el ancho a la fuerza y solo el alto
     // podía crecer con el zoom, estirando la imagen.
@@ -1707,6 +1707,6 @@ estadoInicialPaneles();
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
-<script src="../assets/js/editor-movil.js"></script>
+<script src="../assets/js/app-movil.js"></script>
 </body>
 </html>

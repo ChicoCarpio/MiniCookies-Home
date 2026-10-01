@@ -204,8 +204,7 @@ function barraSuperpuesta(doc) {
 // revisar. Forzar el editor en una página cualquiera que use ese mismo id
 // dispara su código a destiempo y el error es del método, no de la página.
 function esPantallaCompleta(doc, win) {
-  return !!doc.querySelector('.editor-color-layout, .editor-avanzado-layout')
-    || !!doc.getElementById('tiraAnuncioMovil');
+  return !!doc.querySelector('[data-app-movil], .editor-color-layout, .editor-avanzado-layout');
 }
 
 // Una foto de verdad para las herramientas que no muestran su editor hasta

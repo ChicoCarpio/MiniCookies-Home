@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
-<link rel="stylesheet" href="../assets/css/editor-movil.css">
+<link rel="stylesheet" href="../assets/css/app-movil.css">
 <style>
   /* Mismo esqueleto de columnas que Editor-de-color-de-imagen.html: filtros
      a la izquierda, imagen al centro — pero acá el panel de filtros no se
@@ -27,7 +27,7 @@
   }
   /* A diferencia de los otros editores, acá "Filtros", "Color del borde" y
      "Acciones" son tres herramientas distintas con su propio espacio (cada
-     una es su propia categoría en celular, ver data-em-categoria) — por eso
+     una es su propia categoría en celular, ver data-app-categoria) — por eso
      este contenedor solo las apila, sin envolverlas en un panel con borde
      propio (cada .acordeon-grupo ya trae el suyo). */
   .panel-stickers { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; }
@@ -43,16 +43,6 @@
   }
   .area-canvas { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; }
   .area-controles { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
-  /* editor-movil.css pone .panel-lienzo en "display:block" para los otros dos
-     editores (ahí solo envuelve la imagen). Acá .panel-lienzo también reparte
-     el alto entre .area-canvas y .area-controles (el grosor del borde): si se
-     vuelve bloque, "flex:1" de .area-canvas deja de hacer nada, el lienzo se
-     encoge a su tamaño natural y queda un hueco vacío enorme antes de llegar
-     a la bandeja de categorías. Se restaura el flex en celular para esta
-     página en particular. */
-  @media (max-width: 900px) {
-    body.em-activo .panel-lienzo { display: flex; flex-direction: column; min-height: 0; height: auto; overflow: hidden; }
-  }
   .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
   .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
   .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
@@ -168,9 +158,9 @@ window.i18nPagina = {
     <p id="mensajeError" style="color:#dc2626; display:none; margin-top:16px;"></p>
 
     <div id="editorCompleto" style="display:none;">
-      <div class="editor-color-layout" data-em-sin-descarga-flotante>
+      <div class="editor-color-layout" data-app-sin-descarga-flotante>
         <div class="panel-stickers">
-          <fieldset class="acordeon-grupo abierto" data-em-categoria="Filtros">
+          <fieldset class="acordeon-grupo abierto" data-app-categoria="Filtros">
             <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="grupo-filtros">Filtros</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-deslizador">
@@ -191,7 +181,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-em-categoria="ColorBorde">
+          <fieldset class="acordeon-grupo" data-app-categoria="ColorBorde">
             <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="campo-color-borde">Color del borde</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-color-borde">
@@ -201,7 +191,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-em-categoria="Acciones">
+          <fieldset class="acordeon-grupo" data-app-categoria="Acciones">
             <button type="button" class="acordeon-titulo" data-icono="⤓"><span data-i18n="grupo-acciones">Acciones</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
@@ -212,7 +202,7 @@ window.i18nPagina = {
           </fieldset>
         </div>
 
-        <div class="panel-lienzo">
+        <div class="panel-lienzo" data-app-escenario>
           <div class="area-canvas">
             <canvas id="vistaResultado"></canvas>
           </div>
@@ -258,6 +248,6 @@ document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
-<script src="../assets/js/editor-movil.js"></script>
+<script src="../assets/js/app-movil.js"></script>
 </body>
 </html>

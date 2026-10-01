@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
 /* Distribución de los editores de imagen en celular.
-   Lo maneja assets/js/editor-movil.js — ver ese archivo para el porqué.
+   Lo maneja assets/js/app-movil.js — ver ese archivo para el porqué.
 
    En computadora los editores son tres columnas (filtros | imagen | ajustes).
    En celular eso no entra, y la solución anterior —cajones laterales que
@@ -33,28 +33,28 @@
      esconder la intro ni el pie uno por uno: quedan debajo.
      html Y body: con solo body, algunos navegadores igual dejan la barra de
      desplazamiento de la página completa (una tercera barra, de más, detrás
-     del editor). editor-movil.js le pone "em-activo" a los dos. */
-  html.em-activo, body.em-activo { overflow: hidden; }
+     del editor). app-movil.js le pone "app-activo" a los dos. */
+  html.app-activo, body.app-activo { overflow: hidden; }
 
   /* --- El encabezado del sitio NO se tapa --- */
   /* Antes la capa era "inset: 0" y cubría la pantalla entera, encabezado
      incluido: al abrir el editor en celular, donde debía estar el logo y el
      enlace a la categoría aparecía la tira de publicidad. Es decir, la
      publicidad ocupaba el lugar del encabezado — justo lo que la guía
-     prohíbe. Ahora la capa arranca DEBAJO del encabezado: editor-movil.js
-     mide su alto ya compactado y lo publica en --em-alto-encabezado. */
-  body.em-activo > header.sitio {
+     prohíbe. Ahora la capa arranca DEBAJO del encabezado: app-movil.js
+     mide su alto ya compactado y lo publica en --app-alto-encabezado. */
+  body.app-activo > header.sitio {
     flex-wrap: nowrap;
     min-height: 46px;
     padding: 6px 12px;
     padding-top: calc(6px + env(safe-area-inset-top, 0px));
     gap: 2px;
   }
-  body.em-activo > header.sitio .marca { font-size: 0.95rem; }
-  body.em-activo > header.sitio .texto-marca { display: none; }
-  body.em-activo > header.sitio .logo-marca { height: 27px; }
-  body.em-activo > header.sitio nav.sitio { width: auto; flex-wrap: nowrap; gap: 6px; }
-  body.em-activo > header.sitio nav.sitio a {
+  body.app-activo > header.sitio .marca { font-size: 0.95rem; }
+  body.app-activo > header.sitio .texto-marca { display: none; }
+  body.app-activo > header.sitio .logo-marca { height: 27px; }
+  body.app-activo > header.sitio nav.sitio { width: auto; flex-wrap: nowrap; gap: 6px; }
+  body.app-activo > header.sitio nav.sitio a {
     display: block;
     max-width: 84px;
     margin: 0;
@@ -63,15 +63,20 @@
     text-align: center;
   }
 
-  body.em-activo .em-shell {
+  body.app-activo .app-shell {
     position: fixed;
-    top: var(--em-alto-encabezado, 0px);
+    top: var(--app-alto-encabezado, 0px);
     right: 0;
     bottom: 0;
     left: 0;
     z-index: 1200;
     display: flex;
     flex-direction: column;
+    /* El contenedor trae la distribución de escritorio, que puede alinear sus
+       hijos de otra forma (el collage usa align-items:start en su grilla). Sin
+       volver a "stretch", cada franja toma el ancho de su contenido y la tira
+       de publicidad queda como una cajita suelta en la esquina. */
+    align-items: stretch;
     gap: 0;
     height: auto;
     min-height: 0;
@@ -85,7 +90,7 @@
   }
 
   /* --- Tira de publicidad, arriba --- */
-  body.em-activo .em-anuncio {
+  body.app-activo .app-anuncio {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -98,7 +103,7 @@
     background: var(--superficie);
   }
 
-  body.em-activo .em-anuncio .anuncio {
+  body.app-activo .app-anuncio .anuncio {
     margin: 0;
     padding: 0;
     border: none;
@@ -112,20 +117,34 @@
     font-size: 0.72rem;
   }
 
-  /* --- Escenario exclusivo de imagen --- */
-  body.em-activo .panel-lienzo {
-    /* En computadora es flex (para centrar la imagen); flex ENCOGE a sus
-       hijos para que entren en el contenedor sin importar max-height, así
-       que la imagen se seguía achicando aunque se le sacara el límite de
-       alto. En bloque, el contenido no se encoge: si es más grande que el
-       panel, se desborda y el overflow:auto de abajo lo hace desplazable. */
-    display: block;
+  /* --- Escenario exclusivo --- */
+  /* El escenario es lo que la herramienta está editando: una imagen, un
+     collage, un documento. La clase se la pone el JS al elemento que la página
+     marque con data-app-escenario (o, en las que vienen de antes, a su
+     .panel-lienzo), así que acá no hay que saber cómo se llama en cada una.
+     Solo se le da el espacio que sobra: NO se le toca el display, porque hay
+     escenarios que reparten ese alto entre varias partes (el generador de
+     stickers pone el grosor del borde debajo del lienzo, el collage pone el
+     contador arriba y la tira de fotos abajo) y volverlos bloque les rompe el
+     reparto. */
+  body.app-activo .app-escenario {
     flex: 1 1 auto;
     min-height: 0;
     height: auto;
     padding: 6px;
     border: none;
     border-radius: 0;
+    overflow: hidden;
+  }
+
+  /* Variante para una imagen con zoom propio (los dos editores de imagen).
+     En computadora el panel es flex para centrar la imagen, y flex ENCOGE a
+     sus hijos para que entren sin importar max-height, así que la imagen se
+     seguía achicando aunque se le sacara el límite de alto. En bloque el
+     contenido no se encoge: si es más grande que el panel se desborda, y el
+     overflow de acá lo vuelve desplazable. */
+  body.app-activo .app-escenario.app-desplazable {
+    display: block;
     overflow: auto;
     /* Zoom nativo del navegador (pellizcar con dos dedos) sobre la imagen:
        "auto" no le saca al usuario el gesto de desplazar con un dedo. */
@@ -136,13 +155,13 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  body.em-activo .panel-lienzo::-webkit-scrollbar { display: none; }
+  body.app-activo .app-escenario.app-desplazable::-webkit-scrollbar { display: none; }
 
   /* El editor avanzado ya trae su propio zoom/paneo (deslizador + arrastrar +
      pellizcar, ver editor-avanzado-imagen.html): esto solo lo mantiene capado
      al panel, como en computadora — .panel-lienzo ya no lo encoge de más
      porque dejó de ser flex, así que no hace falta tocarle el límite. */
-  body.em-activo .panel-lienzo .zona-lienzo-contenedor {
+  body.app-activo .app-escenario .zona-lienzo-contenedor {
     max-height: 100%;
     border: none;
   }
@@ -151,19 +170,19 @@
      entrar: al ancho de la pantalla le sobra alto de sobra en casi todos los
      casos, y si una imagen queda más alta que la pantalla, .panel-lienzo de
      arriba la deja desplazar en vez de apretarla. */
-  body.em-activo .panel-lienzo #vistaPrevia {
+  body.app-activo .app-escenario #vistaPrevia {
     max-height: none !important;
   }
   /* Con zoom aplicado (ver aplicarZoomSimple en Editor-de-color-de-imagen.html),
      también hace falta soltarle el ancho: si no, max-width:100% recortaba el
      zoom horizontal a la fuerza y la imagen quedaba estirada verticalmente
      nada más (solo el alto podía crecer, el ancho seguía atado al panel). */
-  body.em-activo .panel-lienzo #vistaPrevia.con-zoom {
+  body.app-activo .app-escenario #vistaPrevia.con-zoom {
     max-width: none;
   }
 
   /* Bandeja de controles en una fila propia; nunca se superpone al lienzo. */
-  body.em-activo .em-controles {
+  body.app-activo .app-controles {
     position: relative;
     flex: 0 0 auto;
     display: flex;
@@ -175,7 +194,7 @@
   }
 
   /* --- Panel del grupo abierto --- */
-  body.em-activo .em-hoja {
+  body.app-activo .app-hoja {
     flex: 1 1 auto;
     min-height: 0;
     max-height: none;
@@ -186,7 +205,7 @@
     background: var(--superficie);
   }
 
-  body.em-activo .em-hoja:empty { display: none; }
+  body.app-activo .app-hoja:empty { display: none; }
 
   /* Los filtros son una tira horizontal, no una lista que empuje la imagen.
      Sin ligar esto a ningún id de página en particular: se aplica a la
@@ -195,7 +214,7 @@
      tiene id="filtrosCapa" — el Editor de color y el generador de stickers
      se quedaban con la lista vertical de escritorio, en contra de la guía de
      interfaz móvil). */
-  body.em-activo .em-hoja .presets-scroll {
+  body.app-activo .app-hoja .presets-scroll {
     width: 100%;
     max-height: none;
     overflow-x: auto;
@@ -209,10 +228,10 @@
     user-select: none;
     -webkit-user-select: none;
   }
-  body.em-activo .em-hoja .presets-scroll::-webkit-scrollbar { display: none; }
-  body.em-activo .em-hoja .presets-scroll.arrastrando-puntero,
-  body.em-activo .em-hoja .presets-scroll.arrastrando-puntero .preset-miniatura { cursor: grabbing; }
-  body.em-activo .em-hoja .presets {
+  body.app-activo .app-hoja .presets-scroll::-webkit-scrollbar { display: none; }
+  body.app-activo .app-hoja .presets-scroll.arrastrando-puntero,
+  body.app-activo .app-hoja .presets-scroll.arrastrando-puntero .preset-miniatura { cursor: grabbing; }
+  body.app-activo .app-hoja .presets {
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
@@ -220,7 +239,7 @@
     min-width: 100%;
     gap: 8px;
   }
-  body.em-activo .em-hoja .titulo-grupo-presets {
+  body.app-activo .app-hoja .titulo-grupo-presets {
     display: flex;
     flex: 0 0 76px;
     align-items: center;
@@ -236,15 +255,15 @@
     text-transform: none;
     white-space: normal;
   }
-  body.em-activo .em-hoja .preset-miniatura {
+  body.app-activo .app-hoja .preset-miniatura {
     flex: 0 0 68px;
     width: 68px;
   }
-  body.em-activo .em-hoja .preset-miniatura canvas {
+  body.app-activo .app-hoja .preset-miniatura canvas {
     width: 64px;
     height: 64px;
   }
-  body.em-activo .em-hoja .preset-miniatura span {
+  body.app-activo .app-hoja .preset-miniatura span {
     display: -webkit-box;
     overflow: hidden;
     white-space: normal;
@@ -252,7 +271,7 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  body.em-activo .em-hoja .texturas-scroll {
+  body.app-activo .app-hoja .texturas-scroll {
     max-height: none;
     overflow-x: auto;
     overflow-y: hidden;
@@ -265,10 +284,10 @@
     user-select: none;
     -webkit-user-select: none;
   }
-  body.em-activo .em-hoja .texturas-scroll::-webkit-scrollbar { display: none; }
-  body.em-activo .em-hoja .texturas-scroll.arrastrando-puntero,
-  body.em-activo .em-hoja .texturas-scroll.arrastrando-puntero .miniatura-textura { cursor: grabbing; }
-  body.em-activo .em-hoja .texturas-galeria {
+  body.app-activo .app-hoja .texturas-scroll::-webkit-scrollbar { display: none; }
+  body.app-activo .app-hoja .texturas-scroll.arrastrando-puntero,
+  body.app-activo .app-hoja .texturas-scroll.arrastrando-puntero .miniatura-textura { cursor: grabbing; }
+  body.app-activo .app-hoja .texturas-galeria {
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
@@ -277,15 +296,15 @@
     gap: 8px;
     padding: 6px 4px;
   }
-  body.em-activo .em-hoja .miniatura-textura {
+  body.app-activo .app-hoja .miniatura-textura {
     flex: 0 0 68px;
     width: 68px;
   }
-  body.em-activo .em-hoja .miniatura-textura canvas {
+  body.app-activo .app-hoja .miniatura-textura canvas {
     width: 64px;
     height: 64px;
   }
-  body.em-activo .em-hoja .miniatura-textura span {
+  body.app-activo .app-hoja .miniatura-textura span {
     display: -webkit-box;
     overflow: hidden;
     white-space: normal;
@@ -300,9 +319,9 @@
      pantalla cuando están plegados. Movidos acá eso los dejaba invisibles y
      fuera de alcance — el botón "+ Capa" quedaba en x = -344. Se les devuelve
      el comportamiento de un bloque normal. */
-  body.em-activo .em-hoja > .panel-filtros,
-  body.em-activo .em-hoja > .panel-capas,
-  body.em-activo .em-hoja > .panel-ajustes {
+  body.app-activo .app-hoja > .panel-filtros,
+  body.app-activo .app-hoja > .panel-capas,
+  body.app-activo .app-hoja > .panel-ajustes {
     position: static;
     inset: auto;
     width: auto;
@@ -319,30 +338,30 @@
 
   /* Dentro del panel, el acordeón ya no hace falta: la categoría la eligió
      la tira de abajo, así que el título propio del grupo sobra. */
-  body.em-activo .em-hoja .acordeon-grupo {
+  body.app-activo .app-hoja .acordeon-grupo {
     border: none;
     border-radius: 0;
     margin: 0;
     overflow: visible;
   }
-  body.em-activo .em-hoja .acordeon-titulo,
-  body.em-activo .em-hoja .boton-plegar { display: none; }
-  body.em-activo .em-hoja .acordeon-contenido { display: block; padding: 0; }
+  body.app-activo .app-hoja .acordeon-titulo,
+  body.app-activo .app-hoja .boton-plegar { display: none; }
+  body.app-activo .app-hoja .acordeon-contenido { display: block; padding: 0; }
 
   /* Deslizadores más altos que en computadora: con el dedo, uno muy fino no
      se agarra bien. Más bajos que antes (eran 34px): con varios seguidos
      (algunos grupos tienen 6+) la lista se hacía larga de sobra, sobre todo
      compitiendo por alto con una imagen alargada. */
-  body.em-activo .em-hoja input[type="range"] {
+  body.app-activo .app-hoja input[type="range"] {
     height: 26px;
     margin: 0;
   }
-  body.em-activo .em-hoja .deslizadores { gap: 2px; }
-  body.em-activo .em-hoja .campo-deslizador { gap: 0; margin-bottom: 2px; }
-  body.em-activo .em-hoja .etiqueta-deslizador { font-size: 0.8rem; line-height: 1.3; }
+  body.app-activo .app-hoja .deslizadores { gap: 2px; }
+  body.app-activo .app-hoja .campo-deslizador { gap: 0; margin-bottom: 2px; }
+  body.app-activo .app-hoja .etiqueta-deslizador { font-size: 0.8rem; line-height: 1.3; }
 
   /* --- Tira de categorías --- */
-  body.em-activo .em-chips {
+  body.app-activo .app-chips {
     flex: 0 0 auto;
     display: flex;
     gap: 4px;
@@ -350,7 +369,7 @@
     overflow-y: hidden;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    /* El arrastre lo maneja editor-movil.js con eventos de puntero, para que
+    /* El arrastre lo maneja app-movil.js con eventos de puntero, para que
        funcione igual con el dedo y con el mouse. Si además quedara el
        desplazamiento táctil del navegador, el dedo movería la tira al doble
        de velocidad, así que acá se lo desactiva a propósito. */
@@ -358,27 +377,27 @@
     cursor: grab;
     /* Las categorías no entran todas a lo ancho de un celular y hay que
        correrlas. Con la barra de desplazamiento oculta no se notaba que
-       hubiera más: estas clases (las pone editor-movil.js según la posición)
+       hubiera más: estas clases (las pone app-movil.js según la posición)
        desvanecen el borde por el lado que queda contenido sin ver. */
-    -webkit-mask-image: var(--em-degradado, none);
-            mask-image: var(--em-degradado, none);
+    -webkit-mask-image: var(--app-degradado, none);
+            mask-image: var(--app-degradado, none);
     padding: 6px 8px;
     border-top: 1px solid var(--gris-borde);
     background: var(--superficie);
   }
-  body.em-activo .em-chips::-webkit-scrollbar { display: none; }
-  body.em-activo .em-chips.arrastrando-tira { cursor: grabbing; }
-  body.em-activo .em-chips.hay-mas-derecha {
-    --em-degradado: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  body.app-activo .app-chips::-webkit-scrollbar { display: none; }
+  body.app-activo .app-chips.arrastrando-tira { cursor: grabbing; }
+  body.app-activo .app-chips.hay-mas-derecha {
+    --app-degradado: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
   }
-  body.em-activo .em-chips.hay-mas-izquierda {
-    --em-degradado: linear-gradient(to right, transparent 0, #000 28px);
+  body.app-activo .app-chips.hay-mas-izquierda {
+    --app-degradado: linear-gradient(to right, transparent 0, #000 28px);
   }
-  body.em-activo .em-chips.hay-mas-izquierda.hay-mas-derecha {
-    --em-degradado: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  body.app-activo .app-chips.hay-mas-izquierda.hay-mas-derecha {
+    --app-degradado: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   }
 
-  body.em-activo .em-chip {
+  body.app-activo .app-chip {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
@@ -396,10 +415,10 @@
     cursor: pointer;
     text-align: center;
   }
-  body.em-activo .em-chip .em-icono { font-size: 1.25rem; line-height: 1; }
-  body.em-activo .em-chip.activo { background: var(--gris-fondo); color: var(--azul); font-weight: 600; }
+  body.app-activo .app-chip .app-icono { font-size: 1.25rem; line-height: 1; }
+  body.app-activo .app-chip.activo { background: var(--gris-fondo); color: var(--azul); font-weight: 600; }
   /* Un puntito debajo de la categoría que tiene algún ajuste tocado. */
-  body.em-activo .em-chip.tocado .em-icono::after {
+  body.app-activo .app-chip.tocado .app-icono::after {
     content: '';
     display: block;
     width: 4px; height: 4px;
@@ -409,7 +428,7 @@
   }
 
   /* --- Acciones --- */
-  body.em-activo .em-acciones {
+  body.app-activo .app-acciones {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -418,7 +437,7 @@
     border-top: 1px solid var(--gris-borde);
     background: var(--superficie);
   }
-  body.em-activo .em-acciones .em-secundario {
+  body.app-activo .app-acciones .app-secundario {
     flex: 0 0 auto;
     border: 1px solid var(--gris-borde);
     border-radius: 999px;
@@ -429,7 +448,7 @@
     padding: 8px 12px;
     cursor: pointer;
   }
-  body.em-activo .em-acciones .em-principal {
+  body.app-activo .app-acciones .app-principal {
     flex: 1 1 auto;
     border: none;
     border-radius: 999px;
@@ -441,16 +460,18 @@
     padding: 10px 14px;
     cursor: pointer;
   }
-  body.em-activo .em-acciones .em-principal[disabled] { opacity: .45; cursor: default; }
+  body.app-activo .app-acciones .app-principal[disabled] { opacity: .45; cursor: default; }
 
   /* Los cajones laterales y sus pestañas ya no se usan en este modo. */
-  body.em-activo .abrir-panel-movil,
-  body.em-activo .fondo-panel-movil { display: none !important; }
+  body.app-activo .abrir-panel-movil,
+  body.app-activo .fondo-panel-movil { display: none !important; }
 
   /* Los paneles que no son la hoja abierta no se ven. Se mantienen en el DOM
-     (no se destruyen) para no perder los escuchadores ya enganchados. */
-  body.em-activo .em-shell > .panel-filtros,
-  body.em-activo .em-shell > .panel-ajustes,
-  body.em-activo .em-shell > .panel-capas,
-  body.em-activo .em-shell > .panel-stickers { display: none; }
+     (no se destruyen) para no perder los escuchadores ya enganchados.
+     Se oculta por descarte y no con una lista de clases: en esta pantalla solo
+     tienen lugar la publicidad, el escenario y la bandeja, así que cualquier
+     otra columna sobra. Con una lista, cada herramienta nueva tenía que
+     acordarse de agregar la suya, y la que se olvidaba quedaba con la columna
+     de escritorio encajada en el celular. */
+  body.app-activo .app-shell > *:not(.app-anuncio):not(.app-controles):not(.app-escenario) { display: none; }
 }

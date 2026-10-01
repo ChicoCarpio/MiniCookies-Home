@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/app-movil.css">
 <style>
   .editor-collage { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; margin-top: 16px; }
   .editor-collage > div { min-width: 0; }
@@ -46,87 +47,52 @@
   .miniatura-orden .numero { position: absolute; top: 3px; left: 3px; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.75rem; border-radius: 10px; padding: 0 6px; }
   .miniatura-orden .quitar-foto { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border: none; border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.7rem; cursor: pointer; line-height: 20px; padding: 0; }
 
-  .estado-editor-movil, .pestanas-editor-movil, .tira-anuncio-movil { display: none; }
+  /* El contador de fotos y el botón de agregar son de la pantalla de celular:
+     en computadora esas acciones están en la zona de arrastre y en el panel. */
+  .estado-app-movil { display: none; }
 
-  @media (max-width: 760px) {
-    body.collage-app { display: flex; flex-direction: column; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
-    body.collage-app > #fondoDecorativo { display: none; }
-    body.collage-app > header.sitio { flex: 0 0 auto; flex-wrap: nowrap; min-height: 46px; padding: 6px 12px; gap: 2px; }
-    body.collage-app > header.sitio .marca { font-size: 0.95rem; }
-    body.collage-app > header.sitio .texto-marca { display: none; }
-    body.collage-app > header.sitio .logo-marca { height: 27px; }
-    body.collage-app > header.sitio nav.sitio { width: auto; flex-wrap: nowrap; gap: 6px; }
-    body.collage-app > header.sitio nav.sitio a { display: block; max-width: 84px; margin: 0; font-size: 0.68rem; line-height: 1.15; text-align: center; }
-    body.collage-app > main { display: flex; flex: 1 1 auto; flex-direction: column; width: 100%; min-height: 0; max-width: none; margin: 0; padding: 4px 8px 6px; overflow: hidden; }
-    body.collage-app > main > h1,
-    body.collage-app > main > p[data-i18n="intro"],
-    body.collage-app > footer.sitio { display: none; }
-    body.collage-app .tira-anuncio-movil {
-      display: flex;
-      flex: 0 0 auto;
-      align-items: center;
-      justify-content: center;
-      /* Chica a propósito: el alto de un banner de celular. Lo que sobra es
-         para el escenario del collage (ver GUIA-INTERFAZ-MOVIL.md). */
-      height: 52px;
-      overflow: hidden;
-      border-bottom: 1px solid var(--gris-borde);
-      background: var(--superficie);
-    }
-    body.collage-app .tira-anuncio-movil .anuncio {
-      margin: 0;
-      padding: 0;
-      border: none;
-      background: none;
-      min-height: 0;
-      height: 100%;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.72rem;
-    }
-    body.collage-app .panel-herramienta { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: 0; background: transparent; }
-    body.collage-app #zonaArrastre { display: none; }
-    body.collage-app #editor { display: flex !important; flex: 1 1 auto; flex-direction: column; align-items: stretch; min-width: 0; min-height: 0; gap: 0; margin: 0; }
-    body.collage-app #editor > div:first-child { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
-    body.collage-app #editor > div:last-child { display: flex; flex: 0 0 auto; flex-direction: column; min-width: 0; padding-bottom: env(safe-area-inset-bottom); }
-    .estado-editor-movil { display: flex; flex: 0 0 36px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px; color: var(--texto-suave); font-size: 0.82rem; }
-    .estado-editor-movil button { min-height: 30px; padding: 3px 10px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font: inherit; cursor: pointer; }
-    .lienzo-contenedor { flex: 1 1 auto; min-height: 0; align-items: center; overflow: hidden; padding: 4px; border-radius: 6px; }
-    #lienzo { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; }
-    .ayuda-gestos { display: none; }
-    .barra-foto { flex: 0 0 auto; flex-wrap: nowrap; min-height: 42px; gap: 5px; margin: 2px 0 0; padding: 3px 4px; border: 0; }
-    .barra-foto .titulo-barra { display: none; }
-    .barra-foto label { flex: 1 1 auto; min-width: 70px; }
-    .barra-foto label input { width: 100%; min-width: 48px; }
-    .barra-foto button { min-width: 34px; min-height: 32px; padding: 3px 7px; }
-    .tira-orden { flex: 0 0 auto; min-width: 0; margin: 2px 0 4px; padding: 4px 2px; }
-    .miniatura-orden { flex-basis: 52px; height: 52px; }
-    body.collage-app #editor > div:last-child .bloque-opciones { display: none; }
-    body.collage-app #editor > div:last-child .bloque-opciones.activo { display: block; min-height: 104px; max-height: 190px; margin: 0; padding: 5px 8px 8px; overflow: auto; }
-    body.collage-app .bloque-opciones h3 { display: none; }
-    body.collage-app .bloque-opciones .campo { margin: 3px 0; font-size: 0.82rem; }
-    body.collage-app .bloque-opciones .campo:has(input[type="range"]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; }
-    body.collage-app .bloque-opciones .campo input[type="range"] { grid-column: 1 / -1; width: 100%; margin: 0; }
-    body.collage-app .bloque-opciones .campo:has(select) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); align-items: center; gap: 8px; }
-    body.collage-app .bloque-opciones select { width: 100%; min-width: 0; }
-    body.collage-app .lista-disenos { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
-    body.collage-app .boton-diseno { flex: 0 0 46px; min-height: 46px; }
-    body.collage-app .botones-formato { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
-    body.collage-app .botones-formato button { min-height: 32px; padding: 4px 3px; border-radius: 6px; font-size: 0.74rem; }
-    body.collage-app #botonDescargar { width: 100%; min-height: 36px; margin-top: 3px; padding: 6px 10px; font-size: 0.88rem; }
-    .pestanas-editor-movil { display: flex; flex: 0 0 48px; align-items: stretch; justify-content: space-around; gap: 2px; border-top: 1px solid var(--gris-borde); }
-    .pestanas-editor-movil button { flex: 1 1 0; min-width: 0; padding: 4px 2px 6px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--texto-suave); font: inherit; font-size: 0.72rem; cursor: pointer; }
-    .pestanas-editor-movil button[aria-selected="true"] { border-bottom-color: var(--azul); color: var(--texto); font-weight: 600; }
+  /* La pantalla completa de celular (encabezado compacto, tira de publicidad,
+     escenario y bandeja de categorías) la arma assets/js/app-movil.js, igual
+     que en los editores de imagen. Acá solo queda lo propio del collage: cómo
+     reparte su escenario, y cómo se ven sus bloques de opciones una vez que el
+     módulo los mueve a la hoja de abajo. */
+  @media (max-width: 900px) {
+    /* El módulo le da el espacio al escenario; el reparto interno es de acá:
+       contador arriba, collage en el medio, tira de fotos abajo. */
+    body.app-activo [data-app-escenario] { display: flex; flex-direction: column; }
+    body.app-activo .estado-app-movil { display: flex; flex: 0 0 36px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px; color: var(--texto-suave); font-size: 0.82rem; }
+    body.app-activo .estado-app-movil button { min-height: 30px; padding: 3px 10px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font: inherit; cursor: pointer; }
+    body.app-activo .lienzo-contenedor { flex: 1 1 auto; min-height: 0; align-items: center; overflow: hidden; padding: 4px; border-radius: 6px; }
+    body.app-activo #lienzo { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; }
+    body.app-activo .ayuda-gestos { display: none; }
+    body.app-activo .barra-foto { flex: 0 0 auto; flex-wrap: nowrap; min-height: 42px; gap: 5px; margin: 2px 0 0; padding: 3px 4px; border: 0; }
+    body.app-activo .barra-foto .titulo-barra { display: none; }
+    body.app-activo .barra-foto label { flex: 1 1 auto; min-width: 70px; }
+    body.app-activo .barra-foto label input { width: 100%; min-width: 48px; }
+    body.app-activo .barra-foto button { min-width: 34px; min-height: 32px; padding: 3px 7px; }
+    body.app-activo .tira-orden { flex: 0 0 auto; min-width: 0; margin: 2px 0 4px; padding: 4px 2px; }
+    body.app-activo .miniatura-orden { flex-basis: 52px; height: 52px; }
+
+    /* Ya dentro de la hoja del módulo: el título lo repite el botón de la
+       categoría, así que sobra, y los controles se achican para entrar. */
+    body.app-activo .app-hoja .bloque-opciones { margin: 0; }
+    body.app-activo .app-hoja .bloque-opciones h3 { display: none; }
+    body.app-activo .app-hoja .campo { margin: 3px 0; font-size: 0.82rem; }
+    body.app-activo .app-hoja .campo:has(input[type="range"]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; }
+    body.app-activo .app-hoja .campo input[type="range"] { grid-column: 1 / -1; width: 100%; margin: 0; }
+    body.app-activo .app-hoja .campo:has(select) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); align-items: center; gap: 8px; }
+    body.app-activo .app-hoja select { width: 100%; min-width: 0; }
+    body.app-activo .app-hoja .lista-disenos { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    body.app-activo .app-hoja .boton-diseno { flex: 0 0 46px; min-height: 46px; }
+    body.app-activo .app-hoja .botones-formato { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+    body.app-activo .app-hoja .botones-formato button { min-height: 32px; padding: 4px 3px; border-radius: 6px; font-size: 0.74rem; }
+    body.app-activo .app-hoja #botonDescargar { width: 100%; min-height: 36px; margin-top: 3px; padding: 6px 10px; font-size: 0.88rem; }
   }
 
-  @media (max-width: 760px) and (max-height: 560px) {
-    .estado-editor-movil { flex-basis: 30px; }
-    .barra-foto { min-height: 36px; }
-    .miniatura-orden { flex-basis: 42px; height: 42px; }
-    body.collage-app #editor > div:last-child .bloque-opciones.activo { min-height: 80px; max-height: 128px; }
-    .pestanas-editor-movil { flex-basis: 42px; }
+  @media (max-width: 900px) and (max-height: 560px) {
+    body.app-activo .estado-app-movil { flex-basis: 30px; }
+    body.app-activo .barra-foto { min-height: 36px; }
+    body.app-activo .miniatura-orden { flex-basis: 42px; height: 42px; }
   }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
@@ -139,11 +105,6 @@ window.i18nPagina = {
     'movil-agregar': 'Agregar fotos',
     'movil-fotos': '{n} fotos',
     'movil-foto-unica': '1 foto',
-    'movil-controles-aria': 'Controles del collage',
-    'movil-panel-diseno': 'Diseño',
-    'movil-panel-formato': 'Formato',
-    'movil-panel-estilo': 'Estilo',
-    'movil-panel-exportar': 'Exportar',
     'aria-lienzo': 'Vista previa del collage',
     'ayuda-gestos': 'Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla',
     'titulo-foto-inicial': 'Foto 1',
@@ -190,11 +151,6 @@ window.i18nPagina = {
     'movil-agregar': 'Add photos',
     'movil-fotos': '{n} photos',
     'movil-foto-unica': '1 photo',
-    'movil-controles-aria': 'Collage controls',
-    'movil-panel-diseno': 'Layout',
-    'movil-panel-formato': 'Format',
-    'movil-panel-estilo': 'Style',
-    'movil-panel-exportar': 'Export',
     'aria-lienzo': 'Collage preview',
     'ayuda-gestos': 'Tap a photo to edit it · drag to move the framing · pinch or use the mouse wheel to zoom · press and hold, then drop it on another to swap them · double-click to center it',
     'titulo-foto-inicial': 'Photo 1',
@@ -262,10 +218,9 @@ window.i18nPagina = {
 
     <p id="aviso" style="display:none; color:var(--texto-suave); font-size:0.9rem;"></p>
 
-    <div class="editor-collage" id="editor" style="display:none;">
-      <div>
-        <div class="tira-anuncio-movil" id="tiraAnuncioMovil"></div>
-        <div class="estado-editor-movil">
+    <div class="editor-collage" id="editor" style="display:none;" data-app-movil data-app-sin-descarga-flotante>
+      <div data-app-escenario>
+        <div class="estado-app-movil">
           <span id="contadorFotosMovil"></span>
           <button type="button" id="botonAgregarFotos" data-i18n="movil-agregar">Agregar fotos</button>
         </div>
@@ -287,12 +242,12 @@ window.i18nPagina = {
       </div>
 
       <div>
-        <div class="bloque-opciones activo" data-panel-movil="diseno">
+        <div class="bloque-opciones" data-app-categoria="diseno">
           <h3 data-i18n="h-diseno">Diseño</h3>
           <div class="lista-disenos" id="listaDisenos"></div>
         </div>
 
-        <div class="bloque-opciones" data-panel-movil="formato">
+        <div class="bloque-opciones" data-app-categoria="formato">
           <h3 data-i18n="h-formato">Formato</h3>
           <div class="botones-formato" id="botonesFormato">
             <button type="button" data-proporcion="1:1" class="activo" data-i18n="fmt-1-1">1:1 Cuadrado</button>
@@ -303,7 +258,7 @@ window.i18nPagina = {
           </div>
         </div>
 
-        <div class="bloque-opciones" data-panel-movil="estilo">
+        <div class="bloque-opciones" data-app-categoria="estilo">
           <h3 data-i18n="h-estilo">Estilo</h3>
           <label class="campo">
             <span><span data-i18n="campo-espacio-a">Borde entre fotos: </span><span id="etiquetaEspacio">12</span></span>
@@ -319,7 +274,7 @@ window.i18nPagina = {
           </label>
         </div>
 
-        <div class="bloque-opciones" data-panel-movil="exportar">
+        <div class="bloque-opciones" data-app-categoria="exportar">
           <h3 data-i18n="h-descargar">Descargar</h3>
           <label class="campo">
             <span data-i18n="campo-tamano">Tamaño</span>
@@ -337,12 +292,6 @@ window.i18nPagina = {
           </label>
           <button class="boton" id="botonDescargar" type="button" data-i18n="boton-descargar">Descargar collage</button>
         </div>
-        <nav class="pestanas-editor-movil" id="pestanasEditorMovil" role="tablist" aria-label="Controles del collage" data-i18n-attr="aria-label:movil-controles-aria">
-          <button type="button" role="tab" data-panel="diseno" aria-selected="true" data-i18n="movil-panel-diseno">Diseño</button>
-          <button type="button" role="tab" data-panel="formato" aria-selected="false" data-i18n="movil-panel-formato">Formato</button>
-          <button type="button" role="tab" data-panel="estilo" aria-selected="false" data-i18n="movil-panel-estilo">Estilo</button>
-          <button type="button" role="tab" data-panel="exportar" aria-selected="false" data-i18n="movil-panel-exportar">Exportar</button>
-        </nav>
       </div>
     </div>
   </div>
@@ -365,7 +314,6 @@ const entradaArchivo = document.getElementById('entradaArchivo');
 const aviso = document.getElementById('aviso');
 const editor = document.getElementById('editor');
 const contadorFotosMovil = document.getElementById('contadorFotosMovil');
-const pestanasEditorMovil = document.getElementById('pestanasEditorMovil');
 const lienzo = document.getElementById('lienzo');
 const ctx = lienzo.getContext('2d');
 const listaDisenos = document.getElementById('listaDisenos');
@@ -643,15 +591,6 @@ function actualizarEstadoMovil() {
   contadorFotosMovil.textContent = t(clave).replace('{n}', fotos.length);
 }
 
-function seleccionarPanelMovil(clave) {
-  pestanasEditorMovil.querySelectorAll('[role="tab"]').forEach((tab) => {
-    tab.setAttribute('aria-selected', String(tab.dataset.panel === clave));
-  });
-  editor.querySelectorAll('[data-panel-movil]').forEach((panel) => {
-    panel.classList.toggle('activo', panel.dataset.panelMovil === clave);
-  });
-}
-
 async function agregarArchivos(listaFileList) {
   const imagenes = [...listaFileList].filter((f) => f.type.startsWith('image/'));
   const lugar = MAX_FOTOS - fotos.length;
@@ -679,33 +618,12 @@ async function agregarArchivos(listaFileList) {
   cambioDeCantidad();
 }
 
-// El anuncio de la página se mueve a la tira fina de arriba mientras dura el
-// modo de edición móvil, y vuelve a su lugar original al salir — igual que
-// hace editor-movil.js con los editores de imagen (ver GUIA-INTERFAZ-MOVIL.md,
-// sección "Publicidad": nunca se esconde el anuncio para ganar espacio).
-const tiraAnuncioMovil = document.getElementById('tiraAnuncioMovil');
-const anuncio = document.querySelector('.anuncio');
-const anuncioPadre = anuncio ? anuncio.parentNode : null;
-const anuncioSiguiente = anuncio ? anuncio.nextSibling : null;
-const consultaAnchoCelular = window.matchMedia('(max-width: 760px)');
-
-function actualizarAnuncioMovil() {
-  if (!anuncio) return;
-  const moverloArriba = consultaAnchoCelular.matches && fotos.length > 0;
-  if (moverloArriba && anuncio.parentNode !== tiraAnuncioMovil) {
-    tiraAnuncioMovil.appendChild(anuncio);
-  } else if (!moverloArriba && anuncio.parentNode !== anuncioPadre) {
-    anuncioPadre.insertBefore(anuncio, anuncioSiguiente);
-  }
-}
-consultaAnchoCelular.addEventListener('change', actualizarAnuncioMovil);
-
 // Al cambiar cuántas fotos hay, se elige el primer diseño para esa cantidad
 // (como Instagram, que muestra los diseños según las fotos elegidas).
+// Mostrar u ocultar #editor es además lo que enciende y apaga la pantalla
+// completa de celular: app-movil.js vigila ese cambio por su cuenta.
 function cambioDeCantidad() {
   editor.style.display = fotos.length ? '' : 'none';
-  document.body.classList.toggle('collage-app', fotos.length > 0);
-  actualizarAnuncioMovil();
   actualizarEstadoMovil();
   if (seleccionada >= fotos.length) seleccionar(-1);
   if (fotos.length) {
@@ -803,11 +721,6 @@ document.addEventListener('cambioIdioma', () => {
   if (fotos.length) dibujarBotonesDiseno();
   dibujarTira();
   if (seleccionada >= 0) seleccionar(seleccionada);
-});
-
-pestanasEditorMovil.addEventListener('click', (e) => {
-  const tab = e.target.closest('[role="tab"]');
-  if (tab) seleccionarPanelMovil(tab.dataset.panel);
 });
 document.getElementById('botonAgregarFotos').addEventListener('click', () => entradaArchivo.click());
 
@@ -1020,5 +933,6 @@ zonaArrastre.addEventListener('drop', (e) => {
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/app-movil.js"></script>
 </body>
 </html>

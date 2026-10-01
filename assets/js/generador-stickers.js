@@ -13,7 +13,7 @@
 // izquierdo queda siempre visible), pero con tres acordeones independientes
 // ("Filtros", "Color del borde", "Acciones") en vez de un panel único: son
 // herramientas distintas, y así cada una tiene su propia categoría en la
-// barra inferior de celular (assets/js/editor-movil.js), en vez de quedar
+// barra inferior de celular (assets/js/app-movil.js), en vez de quedar
 // escondidas dentro de "Filtros". El grosor del borde sigue debajo del
 // canvas, en el panel del lienzo, porque se ajusta mirando el resultado.
 
