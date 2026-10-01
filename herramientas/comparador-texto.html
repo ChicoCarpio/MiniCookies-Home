@@ -27,7 +27,6 @@ window.i18nPagina = {
     'informe-comparado': ' · Comparado ',
     'informe-por-palabra': 'por palabra',
     'informe-por-linea': 'por línea',
-    'informe-pie': 'Generado con Mini Cookies — minicookies.net',
     'titulo-pagina': 'Comparar dos textos gratis — Mini Cookies',
     'meta-descripcion': 'Compará dos versiones de un texto y mirá exactamente qué cambió, gratis y sin enviar nada a ningún servidor.',
   },
@@ -47,7 +46,6 @@ window.i18nPagina = {
     'informe-comparado': ' · Compared ',
     'informe-por-palabra': 'word by word',
     'informe-por-linea': 'line by line',
-    'informe-pie': 'Generated with Mini Cookies — minicookies.net',
     'titulo-pagina': 'Compare two texts, free — Mini Cookies',
     'meta-descripcion': 'Compare two versions of a text and see exactly what changed — free, and nothing is sent to a server.',
   }
@@ -153,6 +151,7 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
   const fecha = new Date().toLocaleString(idiomaActual());
   const html = `<!DOCTYPE html>
 <html lang="${idiomaActual()}"><head><meta charset="UTF-8"><title>${t('informe-titulo')}</title>
+<meta name="generator" content="Mini Cookies — minicookies.net">
 <style>
   body { font-family: system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; color: #18181b; }
   .texto { white-space: pre-wrap; line-height: 1.6; border: 1px solid #d4d4d8; border-radius: 8px; padding: 16px; }
@@ -163,7 +162,6 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
 <h1>${t('informe-titulo')}</h1>
 <p class="nota">${fecha} · ${agregados}${t('informe-agregados')}<ins>${t('informe-en-verde')}</ins> · ${quitados}${t('informe-quitados')}<del>${t('informe-en-rojo')}</del>${t('informe-comparado')}${document.getElementById('porPalabra').checked ? t('informe-por-palabra') : t('informe-por-linea')}.</p>
 <div class="texto">${contenedor.innerHTML}</div>
-<p class="nota">${t('informe-pie')}</p>
 </body></html>`;
   descargarTexto(html, nombreConFecha('comparacion-textos', 'html'), 'text/html');
 });

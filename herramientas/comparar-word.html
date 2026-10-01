@@ -217,6 +217,7 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
   const quitados = resultadoDiff.querySelectorAll('del').length;
   const html = `<!DOCTYPE html>
 <html lang="${idiomaActual()}"><head><meta charset="UTF-8"><title>${t('informe-titulo')}</title>
+<meta name="generator" content="Mini Cookies — minicookies.net">
 <style>
   body { font-family: system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; color: #18181b; }
   .texto { white-space: pre-wrap; line-height: 1.6; border: 1px solid #d4d4d8; border-radius: 8px; padding: 16px; }
@@ -228,7 +229,6 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
 <p class="nota">${t('informe-original')}: <strong>${escaparHtml(archivoA.name)}</strong> · ${t('informe-nuevo')}: <strong>${escaparHtml(archivoB.name)}</strong><br>
 ${new Date().toLocaleString(idiomaActual())} · ${agregados} <ins>${t('informe-agregados')}</ins> · ${quitados} <del>${t('informe-quitados')}</del></p>
 <div class="texto">${resultadoDiff.innerHTML}</div>
-<p class="nota">Mini Cookies — minicookies.net</p>
 </body></html>`;
   descargarTexto(html, nombreConFecha('comparacion-word', 'html'), 'text/html');
 });
