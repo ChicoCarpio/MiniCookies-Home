@@ -42,25 +42,13 @@
      enlace a la categoría aparecía la tira de publicidad. Es decir, la
      publicidad ocupaba el lugar del encabezado — justo lo que la guía
      prohíbe. Ahora la capa arranca DEBAJO del encabezado: app-movil.js
-     mide su alto ya compactado y lo publica en --app-alto-encabezado. */
+     mide su alto ya compactado y lo publica en --app-alto-encabezado.
+     El encabezado angosto en sí NO se define acá: es el mismo de todo el
+     sitio (ver "Encabezado en pantalla angosta" en estilos.css), que arranca
+     en este mismo ancho. Tenerlo dos veces fue lo que dejó que el encabezado
+     de los menús y el de las herramientas se vieran distintos. */
   body.app-activo > header.sitio {
-    flex-wrap: nowrap;
-    min-height: 46px;
-    padding: 6px 12px;
     padding-top: calc(6px + env(safe-area-inset-top, 0px));
-    gap: 2px;
-  }
-  body.app-activo > header.sitio .marca { font-size: 0.95rem; }
-  body.app-activo > header.sitio .texto-marca { display: none; }
-  body.app-activo > header.sitio .logo-marca { height: 27px; }
-  body.app-activo > header.sitio nav.sitio { width: auto; flex-wrap: nowrap; gap: 6px; }
-  body.app-activo > header.sitio nav.sitio a {
-    display: block;
-    max-width: 84px;
-    margin: 0;
-    font-size: 0.68rem;
-    line-height: 1.15;
-    text-align: center;
   }
 
   body.app-activo .app-shell {

@@ -112,27 +112,85 @@ nav.sitio a {
   font-weight: 500;
 }
 
-@media (max-width: 640px) {
+/* --- Encabezado en pantalla angosta: una sola fila --- */
+/* Antes el encabezado se dejaba partir: la marca ocupaba una fila y la
+   navegación se iba a la de abajo con "width: 100%", y con tres enlaces
+   terminaba en tres renglones desparejos alineados a la derecha. Se veía
+   desordenado, y además distinto en cada tipo de página según cuántos enlaces
+   tuviera.
+   Ahora es siempre lo mismo: el logo sin la palabra "MiniCookies" a la
+   izquierda, los enlaces chicos y centrados a la derecha —cada uno parte su
+   propio texto en dos líneas si hace falta, en vez de empujar al de al lado a
+   otra fila— y los botones de idioma y tema al final. Un enlace (una
+   herramienta) o tres (los menús) se ven igual de ordenados.
+   Esta es la ÚNICA definición del encabezado angosto: el modo de pantalla
+   completa de app-movil.css no trae la suya, usa esta. */
+@media (max-width: 900px) {
   header.sitio {
-    flex-wrap: wrap;
-    row-gap: 10px;
-    padding: 12px 16px;
+    flex-wrap: nowrap;
+    gap: 6px;
+    min-height: 46px;
+    padding: 6px 10px;
   }
 
-  header.sitio .marca { font-size: 1.05rem; }
+  header.sitio .marca {
+    flex: 0 0 auto;
+    font-size: 0.95rem;
+    gap: 8px;
+  }
+  /* El logo ya dice la marca; la palabra al lado es la que no deja espacio
+     para los enlaces. */
+  header.sitio .marca .texto-marca { display: none; }
+  header.sitio .marca .logo-marca { height: 22px; }
 
   nav.sitio {
     display: flex;
+    flex: 1 1 auto;
+    /* Si de verdad no entran, los enlaces pasan a un segundo renglón enteros.
+       Es preferible a partirlos: una palabra cortada al medio se lee peor que
+       dos renglones ordenados. */
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 14px;
-    width: 100%;
     justify-content: flex-end;
+    width: auto;
+    min-width: 0;
+    gap: 4px 5px;
   }
 
-  nav.sitio a { margin-left: 0; }
+  /* Todos los enlaces miden lo mismo y centran su texto: así tres enlaces de
+     largo muy distinto ("Privacidad" contra "Todas las herramientas") forman
+     una fila pareja en vez de un amontonamiento desalineado. */
+  /* En bloque, no como contenedor flex: dentro de un flex el texto forma un
+     ítem anónimo que no se encoge por debajo de su palabra más larga, así que
+     "herramientas" se salía de la celda por más que se pidiera partirla. */
+  /* En bloque, no como contenedor flex: dentro de un flex el texto forma un
+     ítem anónimo que no se encoge por debajo de su palabra más larga, así que
+     "herramientas" se salía de la celda y se montaba sobre el enlace de al
+     lado — eso era lo que hacía ver el encabezado desprolijo.
+     El ancho lo da el propio texto, con un tope para que el enlace más largo
+     se parta en dos renglones en vez de empujar a los demás. */
+  nav.sitio a {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 78px;
+    margin: 0;
+    font-size: 0.6rem;
+    line-height: 1.2;
+    text-align: center;
+  }
 
-  .boton-tema { margin-left: 0; }
+  /* "header.sitio" y no ".boton-tema" a secas: la regla base del botón está
+     más abajo en este mismo archivo, y con la misma especificidad ganaba ella
+     — los botones seguían midiendo 34px y por esos 16px el encabezado se
+     partía en dos renglones. */
+  header.sitio .boton-tema {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    margin-left: 0;
+    font-size: 0.75rem;
+  }
 }
 
 main {
