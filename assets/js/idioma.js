@@ -45,6 +45,8 @@ window.i18nComun = {
     'generando-miniaturas': 'Generando miniaturas...',
     'sufijo-pag': 'pág.',
     'quitar': 'Quitar',
+    // Botón "?" de assets/js/ayuda-tip.js (ver también assets/css/ayuda-tip.css).
+    'ayuda-etiqueta': 'Ayuda',
     'vista-cuadricula': '▦ Cuadrícula',
     'vista-lista': '☰ Lista',
     // Usadas por assets/js/pdf-texto.js (extraerTextoPowerPoint), compartida
@@ -106,6 +108,7 @@ window.i18nComun = {
     'generando-miniaturas': 'Generating thumbnails...',
     'sufijo-pag': 'p.',
     'quitar': 'Remove',
+    'ayuda-etiqueta': 'Help',
     'vista-cuadricula': '▦ Grid',
     'vista-lista': '☰ List',
     'ppt-sin-diapositivas': 'No readable slides were found in this file.',

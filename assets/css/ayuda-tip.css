@@ -1,0 +1,47 @@
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/* Icono "?" con burbuja de ayuda (ver assets/js/ayuda-tip.js). Markup:
+   <span class="ayuda-tip">
+     <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+     <span class="ayuda-burbuja" data-i18n="clave-del-texto">Texto de ayuda...</span>
+   </span>
+   Comentarios/observaciones secundarias de una herramienta (una aclaración,
+   un detalle técnico, por qué algo se comporta de cierta forma) van acá en
+   vez de texto fijo en la página — así no le quitan espacio a los controles
+   reales. No usarlo para lo esencial: una etiqueta, un estado o una acción
+   siempre tienen que verse sin tocar nada.
+
+   La burbuja se abre con position:fixed y assets/js/ayuda-tip.js la saca de
+   su lugar y la cuelga directo de <body> con la posición ya calculada
+   (ver "visible" más abajo): así se superpone a todo sin que la corte ningún
+   panel con scroll propio o "overflow: hidden" (antes, con position:absolute
+   dentro de .ayuda-tip, cualquier acordeón o columna angosta la recortaba). */
+.ayuda-tip { position: relative; display: inline-flex; align-items: center; vertical-align: middle; }
+.ayuda-boton {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; flex: 0 0 18px; border-radius: 50%;
+  border: 1px solid var(--gris-borde); background: var(--gris-fondo); color: var(--texto-suave);
+  font-size: 0.72rem; font-weight: 700; line-height: 1; cursor: pointer; padding: 0;
+  font-family: inherit;
+}
+.ayuda-boton:hover, .ayuda-boton:focus-visible { border-color: var(--azul); color: var(--azul); }
+.ayuda-burbuja {
+  display: none;
+  position: fixed; z-index: 500; transform: translateX(-50%);
+  width: max-content; max-width: min(260px, 80vw);
+  background: var(--superficie); color: var(--texto); border: 1px solid var(--gris-borde);
+  border-radius: var(--radio, 10px); box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  padding: 8px 10px; font-size: 0.78rem; line-height: 1.35; text-align: left; font-weight: 400;
+}
+.ayuda-burbuja.visible { display: block; }
+.ayuda-burbuja::before,
+.ayuda-burbuja::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  border: 7px solid transparent;
+}
+/* Por defecto la burbuja va arriba del botón, con la flecha apuntando abajo;
+   .abajo es el caso contrario, cuando no entraba arriba (botón pegado al
+   borde superior de la pantalla) — ver colocarBurbuja() en ayuda-tip.js. */
+.ayuda-burbuja::before { top: 100%; border-top-color: var(--gris-borde); margin-top: 1px; }
+.ayuda-burbuja::after { top: 100%; border-top-color: var(--superficie); }
+.ayuda-burbuja.abajo::before { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 1px; border-top-color: transparent; border-bottom-color: var(--gris-borde); }
+.ayuda-burbuja.abajo::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--superficie); }

@@ -40,6 +40,10 @@
     'grupo-resplandor': '💫',
     'grupo-dispersion': '🔦',
     'grupo-textura': '🧱',
+    'titulo-aplicar': '🎯',
+    'titulo-vista': '🔍',
+    'titulo-textura': '🧱',
+    'Original': '👁️',
     'resumen-filtro': '🖼️',
     'grupo-filtros': '🖼️',
     'grupo-acciones': '⤓',
@@ -112,7 +116,32 @@
       });
     }
 
-    if (panelFiltros) agregarCategoria(txt('filtros'), panelFiltros, undefined, 'Filtros');
+    // Agrupa cada <fieldset class="acordeon-grupo"> de "panel" como su propia
+    // categoría (texto e icono salen de su propio título) — lo usa tanto
+    // panelAjustes como un panelFiltros que pida categorías individuales en
+    // vez de viajar entero como un solo bloque "Filtros".
+    function agregarAcordeonesDe(panel) {
+      if (!panel) return;
+      panel.querySelectorAll('.acordeon-grupo').forEach(function (grupo) {
+        var titulo = grupo.querySelector('.acordeon-titulo');
+        if (!titulo) return;
+        var texto = titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
+        var conClave = titulo.querySelector('[data-i18n]');
+        var clave = conClave ? conClave.getAttribute('data-i18n') : null;
+        agregarCategoria(texto, grupo, undefined, clave || texto, titulo);
+      });
+    }
+
+    if (panelFiltros) {
+      // El Editor de color tiene "Filtros" y "Textura extra" como dos
+      // acordeones separados dentro de .panel-filtros (a diferencia del
+      // editor avanzado, donde "Filtro" y "Textura" ya son fieldsets sueltos
+      // de .panel-ajustes): si el shell pide categorías individuales, cada
+      // acordeón de .panel-filtros se trata igual que los de panelAjustes, en
+      // vez de moverse los dos juntos como un solo bloque "Filtros".
+      if (panelFiltros.hasAttribute('data-em-categorias-individuales')) agregarAcordeonesDe(panelFiltros);
+      else agregarCategoria(txt('filtros'), panelFiltros, undefined, 'Filtros');
+    }
 
     // Una página puede marcar un bloque suelto como categoría propia con
     // data-em-categoria="Nombre". Se usa para herramientas que en computadora
@@ -135,17 +164,10 @@
       agregarCategoria(etiqueta, el, undefined, claveIcono, titulo || undefined);
     });
 
-    if (panelAjustes) {
-      panelAjustes.querySelectorAll('.acordeon-grupo').forEach(function (grupo) {
-        var titulo = grupo.querySelector('.acordeon-titulo');
-        if (!titulo) return;
-        var texto = titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
-        var conClave = titulo.querySelector('[data-i18n]');
-        var clave = conClave ? conClave.getAttribute('data-i18n') : null;
-        agregarCategoria(texto, grupo, undefined, clave || texto, titulo);
-      });
+    agregarAcordeonesDe(panelAjustes);
+    if (panelCapas && !panelCapas.hasAttribute('data-em-categorias-individuales')) {
+      agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
     }
-    if (panelCapas) agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
     if (!categorias.length) return;
 
     var abierta = -1;
@@ -180,6 +202,9 @@
         }
         if (cat.nombreChip) cat.nombreChip.textContent = cat.etiqueta;
       });
+      // "Herramientas de Imágenes" y "Image Tools" no ocupan lo mismo: el
+      // enlace de categoría puede pasar de dos líneas a una.
+      medirEncabezado();
     });
 
     // Las categorías no entran todas a lo ancho de un celular. Se corren con
@@ -261,24 +286,28 @@
       chips.scrollLeft += paso;
     }, { passive: false });
 
-    function cerrarHoja() {
+    function cerrarHoja(notificarTamano) {
       if (abierta < 0) return;
       var cat = categorias[abierta];
       // De vuelta a su lugar exacto en el panel de origen.
       if (cat.padre) cat.padre.insertBefore(cat.elemento, cat.siguiente);
       cat.chip.classList.remove('activo');
       abierta = -1;
+      if (notificarTamano !== false) avisarCambioDeTamano();
     }
 
     function alternar(i) {
       if (abierta === i) { cerrarHoja(); return; }
-      cerrarHoja();
+      cerrarHoja(false);
       var cat = categorias[i];
       hoja.appendChild(cat.elemento);
       cat.chip.classList.add('activo');
       // Si la categoría estaba cortada contra el borde, se la trae a la vista.
       if (cat.chip.scrollIntoView) cat.chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       abierta = i;
+      document.dispatchEvent(new CustomEvent('editorMovilCategoriaAbierta', {
+        detail: { claveIcono: cat.claveIcono },
+      }));
       // Si el grupo venía plegado en la versión de computadora, acá tiene que
       // verse igual: la hoja ya muestra el contenido, pero la clase mantiene
       // coherente el estado por si se vuelve a pantalla ancha.
@@ -286,6 +315,7 @@
       // El panel arranca desde arriba aunque la categoría anterior estuviera
       // desplazada.
       hoja.scrollTop = 0;
+      avisarCambioDeTamano();
     }
 
     // --- Acciones siempre visibles ---
@@ -341,11 +371,25 @@
     // descarga), la tira quedaría vacía: mejor no mostrar la franja.
     if (acciones.children.length) controles.appendChild(acciones);
 
+    // --- El encabezado del sitio queda a la vista, arriba de la capa ---
+    // La capa del editor es "position: fixed", así que no la empuja nada:
+    // hay que decirle desde dónde empieza. Se mide el encabezado DESPUÉS de
+    // agregar "em-activo" (que es lo que lo compacta), porque si no se mide
+    // el alto grande de escritorio y queda una franja vacía.
+    var encabezado = document.querySelector('header.sitio');
+
+    function medirEncabezado() {
+      if (!encabezado || !cuerpo.classList.contains('em-activo')) return;
+      var alto = Math.round(encabezado.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--em-alto-encabezado', alto + 'px');
+    }
+
     // --- Encender / apagar según el ancho ---
     function encender() {
       if (cuerpo.classList.contains('em-activo')) return;
       cuerpo.classList.add('em-activo');
       document.documentElement.classList.add('em-activo');
+      medirEncabezado();
       if (anuncio) tiraAnuncio.appendChild(anuncio);
       shell.insertBefore(tiraAnuncio, shell.firstChild);
       shell.appendChild(controles);
@@ -358,6 +402,7 @@
       cerrarHoja();
       cuerpo.classList.remove('em-activo');
       document.documentElement.classList.remove('em-activo');
+      document.documentElement.style.removeProperty('--em-alto-encabezado');
       // Todo vuelve a donde estaba: la página queda igual que antes.
       if (anuncio && anuncioPadre) anuncioPadre.insertBefore(anuncio, anuncioSiguiente);
       [tiraAnuncio, controles].forEach(function (el) {
@@ -374,7 +419,11 @@
     }
 
     window.addEventListener('resize', function () {
-      if (cuerpo.classList.contains('em-activo')) marcarBordes();
+      if (!cuerpo.classList.contains('em-activo')) return;
+      marcarBordes();
+      // Girar el teléfono puede cambiar cuántas líneas ocupa el enlace de
+      // categoría, y con eso el alto del encabezado.
+      medirEncabezado();
     });
 
     function revisar() {

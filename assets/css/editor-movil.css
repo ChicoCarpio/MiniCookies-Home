@@ -6,28 +6,23 @@
    En celular eso no entra, y la solución anterior —cajones laterales que
    ocupaban el 86% del ancho— tapaba justo la imagen que se estaba ajustando.
 
-   La imagen ocupa SIEMPRE el alto completo de la pantalla (de la publicidad
-   para abajo), se abra o no un panel — antes cada panel abierto le restaba
-   ese alto, y con una imagen alargada terminaba viéndose minúscula. Ahora
-   hoja + categorías + acciones son un solo bloque flotante (.em-controles)
-   que se SUPERPONE abajo, sobre la imagen, en vez de empujarla hacia arriba.
-   Lo que ese bloque tapa se alcanza paneando/haciendo zoom en la imagen
-   (zoom nativo del navegador; el editor avanzado además tiene su propio
-   deslizador de zoom).
+  La imagen y los controles tienen áreas exclusivas: el lienzo ocupa el
+  espacio flexible superior y la hoja + categorías + acciones forman una
+  bandeja inferior en el flujo de la pantalla. Abrir controles reduce el
+  área del lienzo, pero nunca la tapa; el editor reajusta el zoom automático.
 
         ┌──────────────┐
-        │  publicidad  │  tira fina arriba (reemplaza al encabezado)
+        │ mini🍪  cat  │  encabezado del sitio, compacto pero COMPLETO
+        ├──────────────┤
+        │  publicidad  │  tira fina, debajo del encabezado
         ├──────────────┤
         │              │
+        │    IMAGEN    │  zona exclusiva, sin controles encima
         │              │
-        │    IMAGEN    │  todo el alto de la pantalla, de punta a punta
-        │  ┌──────────┐│
-        │  │ ajustes  ││  ↑ bloque flotante superpuesto (.em-controles):
-        │  ├──────────┤│    panel del grupo abierto (si hay uno) +
-        │  │☀🎨◐✨→  ││    categorías, se desplazan de costado +
-        │  ├──────────┤│    acciones, siempre a mano
-        │  │🖼️↺    ⤓ ││
-        └──┴──────────┴┘
+        ├──────────────┤
+        │   ajustes    │  panel activo con scroll propio si hace falta
+        │☀🎨◐✨→ 🖼️↺ │  categorías y acciones en una bandeja inferior
+        └──────────────┘
 
    Nada de esto aplica arriba de 900px: ahí sigue el diseño de tres columnas
    tal cual estaba. */
@@ -35,15 +30,45 @@
 @media (max-width: 900px) {
 
   /* El editor pasa a ser una capa fija sobre la página. Así no hay que
-     esconder el encabezado, la intro ni el pie uno por uno: quedan debajo.
+     esconder la intro ni el pie uno por uno: quedan debajo.
      html Y body: con solo body, algunos navegadores igual dejan la barra de
      desplazamiento de la página completa (una tercera barra, de más, detrás
      del editor). editor-movil.js le pone "em-activo" a los dos. */
   html.em-activo, body.em-activo { overflow: hidden; }
 
+  /* --- El encabezado del sitio NO se tapa --- */
+  /* Antes la capa era "inset: 0" y cubría la pantalla entera, encabezado
+     incluido: al abrir el editor en celular, donde debía estar el logo y el
+     enlace a la categoría aparecía la tira de publicidad. Es decir, la
+     publicidad ocupaba el lugar del encabezado — justo lo que la guía
+     prohíbe. Ahora la capa arranca DEBAJO del encabezado: editor-movil.js
+     mide su alto ya compactado y lo publica en --em-alto-encabezado. */
+  body.em-activo > header.sitio {
+    flex-wrap: nowrap;
+    min-height: 46px;
+    padding: 6px 12px;
+    padding-top: calc(6px + env(safe-area-inset-top, 0px));
+    gap: 2px;
+  }
+  body.em-activo > header.sitio .marca { font-size: 0.95rem; }
+  body.em-activo > header.sitio .texto-marca { display: none; }
+  body.em-activo > header.sitio .logo-marca { height: 27px; }
+  body.em-activo > header.sitio nav.sitio { width: auto; flex-wrap: nowrap; gap: 6px; }
+  body.em-activo > header.sitio nav.sitio a {
+    display: block;
+    max-width: 84px;
+    margin: 0;
+    font-size: 0.68rem;
+    line-height: 1.15;
+    text-align: center;
+  }
+
   body.em-activo .em-shell {
     position: fixed;
-    inset: 0;
+    top: var(--em-alto-encabezado, 0px);
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 1200;
     display: flex;
     flex-direction: column;
@@ -54,9 +79,9 @@
     border: none;
     border-radius: 0;
     background: var(--fondo, var(--gris-fondo));
-    /* Respeta la barra de gestos y el notch. */
+    /* Respeta la barra de gestos. El notch lo absorbe el encabezado, que
+       ahora queda arriba de la capa. */
     padding-bottom: env(safe-area-inset-bottom, 0);
-    padding-top: env(safe-area-inset-top, 0);
   }
 
   /* --- Tira de publicidad, arriba --- */
@@ -87,10 +112,7 @@
     font-size: 0.72rem;
   }
 
-  /* --- La imagen: ocupa TODO el alto, de la publicidad para abajo --- */
-  /* .em-controles (más abajo) se le superpone con position:absolute, así que
-     queda afuera del flujo flex: este panel es el único que se reparte el
-     flex:1 1 auto restante y por eso su alto no cambia al abrir un panel. */
+  /* --- Escenario exclusivo de imagen --- */
   body.em-activo .panel-lienzo {
     /* En computadora es flex (para centrar la imagen); flex ENCOGE a sus
        hijos para que entren en el contenedor sin importar max-height, así
@@ -140,23 +162,23 @@
     max-width: none;
   }
 
-  /* Bloque flotante: hoja + categorías + acciones, superpuesto abajo sobre
-     la imagen en vez de restarle alto. Sacarlo del flujo con position:
-     absolute es lo que le devuelve todo ese alto a .panel-lienzo de arriba. */
+  /* Bandeja de controles en una fila propia; nunca se superpone al lienzo. */
   body.em-activo .em-controles {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    z-index: 5;
+    position: relative;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
+    max-height: min(48vh, 380px);
+    max-height: min(48dvh, 380px);
+    min-height: 0;
+    overflow: hidden;
   }
 
   /* --- Panel del grupo abierto --- */
   body.em-activo .em-hoja {
-    flex: 0 0 auto;
-    /* Un tercio de la pantalla como mucho: lo que importa es ver la
-       imagen mientras se la ajusta. Si hay más controles, se desplazan. */
-    max-height: 34vh;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 8px 12px;
@@ -165,6 +187,112 @@
   }
 
   body.em-activo .em-hoja:empty { display: none; }
+
+  /* Los filtros son una tira horizontal, no una lista que empuje la imagen.
+     Sin ligar esto a ningún id de página en particular: se aplica a la
+     grilla de presets de cualquier herramienta que la use (antes solo
+     funcionaba en editor-avanzado-imagen.html porque su fieldset de Filtro
+     tiene id="filtrosCapa" — el Editor de color y el generador de stickers
+     se quedaban con la lista vertical de escritorio, en contra de la guía de
+     interfaz móvil). */
+  body.em-activo .em-hoja .presets-scroll {
+    width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body.em-activo .em-hoja .presets-scroll::-webkit-scrollbar { display: none; }
+  body.em-activo .em-hoja .presets-scroll.arrastrando-puntero,
+  body.em-activo .em-hoja .presets-scroll.arrastrando-puntero .preset-miniatura { cursor: grabbing; }
+  body.em-activo .em-hoja .presets {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: max-content;
+    min-width: 100%;
+    gap: 8px;
+  }
+  body.em-activo .em-hoja .titulo-grupo-presets {
+    display: flex;
+    flex: 0 0 76px;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    margin: 0 2px;
+    padding: 3px;
+    border-right: 1px solid var(--gris-borde);
+    font-size: 0.64rem;
+    line-height: 1.15;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: none;
+    white-space: normal;
+  }
+  body.em-activo .em-hoja .preset-miniatura {
+    flex: 0 0 68px;
+    width: 68px;
+  }
+  body.em-activo .em-hoja .preset-miniatura canvas {
+    width: 64px;
+    height: 64px;
+  }
+  body.em-activo .em-hoja .preset-miniatura span {
+    display: -webkit-box;
+    overflow: hidden;
+    white-space: normal;
+    text-overflow: clip;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  body.em-activo .em-hoja .texturas-scroll {
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body.em-activo .em-hoja .texturas-scroll::-webkit-scrollbar { display: none; }
+  body.em-activo .em-hoja .texturas-scroll.arrastrando-puntero,
+  body.em-activo .em-hoja .texturas-scroll.arrastrando-puntero .miniatura-textura { cursor: grabbing; }
+  body.em-activo .em-hoja .texturas-galeria {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: max-content;
+    min-width: 100%;
+    gap: 8px;
+    padding: 6px 4px;
+  }
+  body.em-activo .em-hoja .miniatura-textura {
+    flex: 0 0 68px;
+    width: 68px;
+  }
+  body.em-activo .em-hoja .miniatura-textura canvas {
+    width: 64px;
+    height: 64px;
+  }
+  body.em-activo .em-hoja .miniatura-textura span {
+    display: -webkit-box;
+    overflow: hidden;
+    white-space: normal;
+    text-overflow: clip;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 
   /* Los paneles que en este archivo se mueven enteros al panel de abajo
      (Filtros, Capas) siguen arrastrando el CSS de los cajones laterales del

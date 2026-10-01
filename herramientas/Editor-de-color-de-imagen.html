@@ -68,11 +68,20 @@
   }
   .preset-miniatura:hover canvas { border-color: var(--azul); }
   .preset-miniatura span {
-    font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
+    min-width: 0; font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .15s;
   }
   .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
   .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
+
+  /* Igual que .preset-miniatura: miniatura con canvas arriba y nombre debajo,
+     en vez de la fila de botones de solo texto que tenía antes esta sección. */
+  .texturas-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+  .miniatura-textura { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; color: var(--texto); cursor: pointer; font: inherit; }
+  .miniatura-textura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border: 2px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); }
+  .miniatura-textura span { min-width: 0; max-width: 100%; overflow: hidden; color: var(--texto-suave); font-size: 0.68rem; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+  .miniatura-textura.activo canvas { border-color: var(--azul); }
+  .miniatura-textura.activo span { color: var(--azul); font-weight: 600; }
 
   .modos { display: flex; gap: 6px; flex-wrap: wrap; }
   .modos button {
@@ -338,7 +347,7 @@ window.i18nPagina = {
         <button type="button" class="abrir-panel-movil der" data-panel="der" data-i18n="movil-ajustes">⚙ Ajustes</button>
         <div class="fondo-panel-movil" id="fondoPanelMovil"></div>
 
-        <div class="panel-filtros">
+        <div class="panel-filtros" data-em-categorias-individuales>
           <button type="button" class="boton-plegar" data-panel="izq" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span data-i18n="panel-filtros">Filtros</span><span class="flecha-plegar">«</span></button>
 
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
@@ -361,14 +370,14 @@ window.i18nPagina = {
           <fieldset class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="titulo-textura">Textura extra</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <div class="modos" id="modosTextura" style="margin-bottom: 10px;">
-                <button type="button" class="activo" data-textura="ninguno" data-i18n="textura-ninguno">Ninguno</button>
-                <button type="button" data-textura="pixelar" data-i18n="textura-pixelar">Pixelado</button>
-                <button type="button" data-textura="pixelar-circulos" data-i18n="textura-puntos">Puntos</button>
-                <button type="button" data-textura="ruido" data-i18n="textura-ruido">Ruido</button>
-                <button type="button" data-textura="difuminar" data-i18n="textura-difuminar">Difuminado</button>
-                <button type="button" data-textura="direccional" data-i18n="textura-movimiento">Movimiento</button>
-                <button type="button" data-textura="esmerilado" data-i18n="textura-esmerilado">Esmerilado</button>
+              <div class="texturas-galeria" id="modosTextura" style="margin-bottom: 10px;">
+                <button type="button" class="miniatura-textura activo" data-textura="ninguno"><canvas></canvas><span data-i18n="textura-ninguno">Ninguno</span></button>
+                <button type="button" class="miniatura-textura" data-textura="pixelar"><canvas></canvas><span data-i18n="textura-pixelar">Pixelado</span></button>
+                <button type="button" class="miniatura-textura" data-textura="pixelar-circulos"><canvas></canvas><span data-i18n="textura-puntos">Puntos</span></button>
+                <button type="button" class="miniatura-textura" data-textura="ruido"><canvas></canvas><span data-i18n="textura-ruido">Ruido</span></button>
+                <button type="button" class="miniatura-textura" data-textura="difuminar"><canvas></canvas><span data-i18n="textura-difuminar">Difuminado</span></button>
+                <button type="button" class="miniatura-textura" data-textura="direccional"><canvas></canvas><span data-i18n="textura-movimiento">Movimiento</span></button>
+                <button type="button" class="miniatura-textura" data-textura="esmerilado"><canvas></canvas><span data-i18n="textura-esmerilado">Esmerilado</span></button>
               </div>
               <div id="controlesTextura" style="display:none;">
                 <label class="campo-deslizador">
@@ -1142,20 +1151,162 @@ function crearBaseMiniatura(imagen) {
 
 // Dibuja, sobre el <canvas> de cada botón de preset, cómo quedaría ese mismo
 // recorte con ese preset aplicado — se recalcula una sola vez por imagen
-// elegida (los presets no cambian con los deslizadores).
+// elegida (los presets no cambian con los deslizadores). Son ~50 presets:
+// procesarlos todos de un tirón congela la pantalla justo después de elegir
+// la foto, así que se hacen de a lotes en el tiempo libre del navegador
+// (mismo mecanismo que editor-avanzado-imagen.html y generador-stickers.js).
+let generacionMiniaturasPresets = 0;
+let origenMiniaturasPresetsSolicitado = null;
+
 function actualizarMiniaturasPresets() {
-  if (!imagenActual) return;
-  document.querySelectorAll('.preset-miniatura').forEach((boton) => {
-    const preset = PRESETS[boton.dataset.preset];
-    if (!preset) return;
-    const base = crearBaseMiniatura(imagenActual);
-    const lado = Math.min(imagenActual.naturalWidth, imagenActual.naturalHeight);
-    renderizarFiltro(base, preset, preset.capasExtra, preset.textura || SIN_TEXTURA, LADO_MINIATURA_PRESET_FISICO / lado);
-    const canvasDestino = boton.querySelector('canvas');
-    canvasDestino.width = LADO_MINIATURA_PRESET_FISICO;
-    canvasDestino.height = LADO_MINIATURA_PRESET_FISICO;
-    canvasDestino.getContext('2d').drawImage(base, 0, 0);
+  if (!imagenActual || origenMiniaturasPresetsSolicitado === imagenActual) return;
+  origenMiniaturasPresetsSolicitado = imagenActual;
+  const generacion = ++generacionMiniaturasPresets;
+  const origen = imagenActual;
+  const botones = [...document.querySelectorAll('.preset-miniatura')];
+  const lado = Math.min(origen.naturalWidth, origen.naturalHeight);
+  let indice = 0;
+
+  function procesarLote(plazo) {
+    if (generacion !== generacionMiniaturasPresets || origen !== imagenActual) return;
+    const inicio = performance.now();
+    let procesadas = 0;
+    while (indice < botones.length && (!procesadas || performance.now() - inicio < 8)) {
+      if (plazo && !plazo.didTimeout && procesadas && plazo.timeRemaining() < 2) break;
+      const boton = botones[indice++];
+      const preset = PRESETS[boton.dataset.preset];
+      procesadas++;
+      if (!preset) continue;
+      const base = crearBaseMiniatura(origen);
+      renderizarFiltro(base, preset, preset.capasExtra, preset.textura || SIN_TEXTURA, LADO_MINIATURA_PRESET_FISICO / lado);
+      const canvasDestino = boton.querySelector('canvas');
+      canvasDestino.width = LADO_MINIATURA_PRESET_FISICO;
+      canvasDestino.height = LADO_MINIATURA_PRESET_FISICO;
+      canvasDestino.getContext('2d').drawImage(base, 0, 0);
+    }
+
+    if (indice >= botones.length) return;
+    if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+    else window.requestAnimationFrame(() => procesarLote(null));
+  }
+
+  if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+  else window.requestAnimationFrame(() => procesarLote(null));
+}
+
+// Muestra genérica (cielo, nubes, montañas, pasto, casa, árboles) para las
+// miniaturas de textura: a diferencia de los filtros, que tiene sentido
+// previsualizar sobre la foto real, una textura (pixelado, desenfoque,
+// esmerilado...) se entiende mejor sobre una escena neutra siempre igual, con
+// bordes y detalle de sobra para notar el efecto — igual que en
+// editor-avanzado-imagen.html.
+function dibujarMuestraTextura(contexto, lado) {
+  const cielo = contexto.createLinearGradient(0, 0, 0, lado * 0.68);
+  cielo.addColorStop(0, '#4a86c5');
+  cielo.addColorStop(1, '#cfe2f3');
+  contexto.fillStyle = cielo;
+  contexto.fillRect(0, 0, lado, lado);
+
+  contexto.fillStyle = '#fff2cc';
+  contexto.beginPath();
+  contexto.arc(lado * 0.78, lado * 0.2, lado * 0.11, 0, Math.PI * 2);
+  contexto.fill();
+
+  contexto.fillStyle = '#ffffff';
+  [[lado * 0.22, lado * 0.18, lado * 0.09], [lado * 0.34, lado * 0.14, lado * 0.06]].forEach(([cx, cy, r]) => {
+    contexto.beginPath();
+    contexto.arc(cx, cy, r, 0, Math.PI * 2);
+    contexto.fill();
   });
+
+  contexto.fillStyle = '#7d9aad';
+  contexto.beginPath();
+  contexto.moveTo(0, lado * 0.56);
+  contexto.lineTo(lado * 0.3, lado * 0.3);
+  contexto.lineTo(lado * 0.55, lado * 0.56);
+  contexto.closePath();
+  contexto.fill();
+  contexto.fillStyle = '#5e7c8f';
+  contexto.beginPath();
+  contexto.moveTo(lado * 0.4, lado * 0.56);
+  contexto.lineTo(lado * 0.68, lado * 0.34);
+  contexto.lineTo(lado, lado * 0.56);
+  contexto.closePath();
+  contexto.fill();
+
+  const franjas = 6;
+  for (let i = 0; i < franjas; i++) {
+    contexto.fillStyle = i % 2 === 0 ? '#6aa84f' : '#5b9644';
+    contexto.fillRect(0, lado * (0.56 + i * (0.44 / franjas)), lado, lado * (0.44 / franjas) + 1);
+  }
+
+  const cx = lado * 0.28, basePiso = lado * 0.92, anchoCasa = lado * 0.22, altoCasa = lado * 0.18;
+  contexto.fillStyle = '#b35a3b';
+  contexto.fillRect(cx - anchoCasa / 2, basePiso - altoCasa, anchoCasa, altoCasa);
+  contexto.fillStyle = '#7a2f1d';
+  contexto.beginPath();
+  contexto.moveTo(cx - anchoCasa / 2 - lado * 0.02, basePiso - altoCasa);
+  contexto.lineTo(cx, basePiso - altoCasa - lado * 0.1);
+  contexto.lineTo(cx + anchoCasa / 2 + lado * 0.02, basePiso - altoCasa);
+  contexto.closePath();
+  contexto.fill();
+  contexto.fillStyle = '#fff2cc';
+  contexto.fillRect(cx - lado * 0.03, basePiso - altoCasa * 0.6, lado * 0.06, lado * 0.06);
+
+  [lado * 0.62, lado * 0.86].forEach((px, i) => {
+    const alturaCopa = lado * (0.1 + i * 0.015);
+    contexto.fillStyle = '#6b4423';
+    contexto.fillRect(px - lado * 0.015, basePiso - alturaCopa * 0.6, lado * 0.03, alturaCopa * 0.6);
+    contexto.fillStyle = '#4c7a2f';
+    contexto.beginPath();
+    contexto.arc(px, basePiso - alturaCopa * 0.6, alturaCopa * 0.55, 0, Math.PI * 2);
+    contexto.fill();
+  });
+}
+
+const TAMANO_MINIATURA_TEXTURA = TAMANO_MINIATURA_PRESET;
+let generacionMiniaturasTextura = 0;
+let origenMiniaturasTexturaSolicitado = null;
+
+function solicitarMiniaturasTextura() {
+  if (!imagenActual || origenMiniaturasTexturaSolicitado === imagenActual) return;
+  origenMiniaturasTexturaSolicitado = imagenActual;
+  const generacion = ++generacionMiniaturasTextura;
+  const origen = imagenActual;
+  const botones = [...document.querySelectorAll('#modosTextura .miniatura-textura')];
+  const ladoFisico = Math.round(TAMANO_MINIATURA_TEXTURA * Math.min(window.devicePixelRatio || 1, 2));
+  // La intensidad se calibra contra el tamaño real de la foto (para que se
+  // vea proporcional a como quedará al aplicarla de verdad) y se usa el
+  // máximo del slider (no el valor con el que arranca) para que la miniatura
+  // muestre el efecto bien marcado.
+  const escala = ladoFisico / origen.naturalWidth;
+  const intensidad = Math.max(1, Number(elTexturaIntensidad.max) * escala);
+  let indice = 0;
+
+  function procesarLote(plazo) {
+    if (generacion !== generacionMiniaturasTextura || origen !== imagenActual) return;
+    const inicio = performance.now();
+    let procesadas = 0;
+    while (indice < botones.length && (!procesadas || performance.now() - inicio < 8)) {
+      if (plazo && !plazo.didTimeout && procesadas && plazo.timeRemaining() < 2) break;
+      const boton = botones[indice++];
+      const miniatura = boton.querySelector('canvas');
+      miniatura.width = ladoFisico; miniatura.height = ladoFisico;
+      const contexto = miniatura.getContext('2d');
+      dibujarMuestraTextura(contexto, ladoFisico);
+      if (boton.dataset.textura !== 'ninguno') {
+        EfectosTextura.aplicarCompleto(boton.dataset.textura, contexto, undefined, ladoFisico, ladoFisico, intensidad);
+      }
+      procesadas++;
+    }
+
+    if (indice >= botones.length) return;
+    if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+    else window.requestAnimationFrame(() => procesarLote(null));
+  }
+
+  if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+  else window.requestAnimationFrame(() => procesarLote(null));
 }
 
 function renderizarVistaPrevia() {
@@ -1297,6 +1448,7 @@ async function mostrarArchivo(archivo) {
   editorCompleto.style.display = 'block';
   renderizarVistaPrevia();
   actualizarMiniaturasPresets();
+  solicitarMiniaturasTextura();
   botonDescargar.disabled = false;
   requestAnimationFrame(encajarVistaPreviaEnPanel);
 }

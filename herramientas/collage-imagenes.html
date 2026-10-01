@@ -10,7 +10,8 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <style>
   .editor-collage { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; margin-top: 16px; }
-  @media (max-width: 760px) { .editor-collage { grid-template-columns: 1fr; } }
+  .editor-collage > div { min-width: 0; }
+  @media (max-width: 760px) { .editor-collage { grid-template-columns: minmax(0, 1fr); } }
 
   .lienzo-contenedor { display: flex; justify-content: center; background: repeating-conic-gradient(var(--gris-borde) 0 25%, transparent 0 50%) 0 0 / 20px 20px; border-radius: 10px; padding: 12px; }
   #lienzo { max-width: 100%; max-height: 70vh; touch-action: none; cursor: grab; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
@@ -44,6 +45,89 @@
   .miniatura-orden img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
   .miniatura-orden .numero { position: absolute; top: 3px; left: 3px; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.75rem; border-radius: 10px; padding: 0 6px; }
   .miniatura-orden .quitar-foto { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border: none; border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.7rem; cursor: pointer; line-height: 20px; padding: 0; }
+
+  .estado-editor-movil, .pestanas-editor-movil, .tira-anuncio-movil { display: none; }
+
+  @media (max-width: 760px) {
+    body.collage-app { display: flex; flex-direction: column; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
+    body.collage-app > #fondoDecorativo { display: none; }
+    body.collage-app > header.sitio { flex: 0 0 auto; flex-wrap: nowrap; min-height: 46px; padding: 6px 12px; gap: 2px; }
+    body.collage-app > header.sitio .marca { font-size: 0.95rem; }
+    body.collage-app > header.sitio .texto-marca { display: none; }
+    body.collage-app > header.sitio .logo-marca { height: 27px; }
+    body.collage-app > header.sitio nav.sitio { width: auto; flex-wrap: nowrap; gap: 6px; }
+    body.collage-app > header.sitio nav.sitio a { display: block; max-width: 84px; margin: 0; font-size: 0.68rem; line-height: 1.15; text-align: center; }
+    body.collage-app > main { display: flex; flex: 1 1 auto; flex-direction: column; width: 100%; min-height: 0; max-width: none; margin: 0; padding: 4px 8px 6px; overflow: hidden; }
+    body.collage-app > main > h1,
+    body.collage-app > main > p[data-i18n="intro"],
+    body.collage-app > footer.sitio { display: none; }
+    body.collage-app .tira-anuncio-movil {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      /* Chica a propósito: el alto de un banner de celular. Lo que sobra es
+         para el escenario del collage (ver GUIA-INTERFAZ-MOVIL.md). */
+      height: 52px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--gris-borde);
+      background: var(--superficie);
+    }
+    body.collage-app .tira-anuncio-movil .anuncio {
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: none;
+      min-height: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+    }
+    body.collage-app .panel-herramienta { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: 0; background: transparent; }
+    body.collage-app #zonaArrastre { display: none; }
+    body.collage-app #editor { display: flex !important; flex: 1 1 auto; flex-direction: column; align-items: stretch; min-width: 0; min-height: 0; gap: 0; margin: 0; }
+    body.collage-app #editor > div:first-child { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+    body.collage-app #editor > div:last-child { display: flex; flex: 0 0 auto; flex-direction: column; min-width: 0; padding-bottom: env(safe-area-inset-bottom); }
+    .estado-editor-movil { display: flex; flex: 0 0 36px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px; color: var(--texto-suave); font-size: 0.82rem; }
+    .estado-editor-movil button { min-height: 30px; padding: 3px 10px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font: inherit; cursor: pointer; }
+    .lienzo-contenedor { flex: 1 1 auto; min-height: 0; align-items: center; overflow: hidden; padding: 4px; border-radius: 6px; }
+    #lienzo { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; }
+    .ayuda-gestos { display: none; }
+    .barra-foto { flex: 0 0 auto; flex-wrap: nowrap; min-height: 42px; gap: 5px; margin: 2px 0 0; padding: 3px 4px; border: 0; }
+    .barra-foto .titulo-barra { display: none; }
+    .barra-foto label { flex: 1 1 auto; min-width: 70px; }
+    .barra-foto label input { width: 100%; min-width: 48px; }
+    .barra-foto button { min-width: 34px; min-height: 32px; padding: 3px 7px; }
+    .tira-orden { flex: 0 0 auto; min-width: 0; margin: 2px 0 4px; padding: 4px 2px; }
+    .miniatura-orden { flex-basis: 52px; height: 52px; }
+    body.collage-app #editor > div:last-child .bloque-opciones { display: none; }
+    body.collage-app #editor > div:last-child .bloque-opciones.activo { display: block; min-height: 104px; max-height: 190px; margin: 0; padding: 5px 8px 8px; overflow: auto; }
+    body.collage-app .bloque-opciones h3 { display: none; }
+    body.collage-app .bloque-opciones .campo { margin: 3px 0; font-size: 0.82rem; }
+    body.collage-app .bloque-opciones .campo:has(input[type="range"]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; }
+    body.collage-app .bloque-opciones .campo input[type="range"] { grid-column: 1 / -1; width: 100%; margin: 0; }
+    body.collage-app .bloque-opciones .campo:has(select) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); align-items: center; gap: 8px; }
+    body.collage-app .bloque-opciones select { width: 100%; min-width: 0; }
+    body.collage-app .lista-disenos { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    body.collage-app .boton-diseno { flex: 0 0 46px; min-height: 46px; }
+    body.collage-app .botones-formato { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+    body.collage-app .botones-formato button { min-height: 32px; padding: 4px 3px; border-radius: 6px; font-size: 0.74rem; }
+    body.collage-app #botonDescargar { width: 100%; min-height: 36px; margin-top: 3px; padding: 6px 10px; font-size: 0.88rem; }
+    .pestanas-editor-movil { display: flex; flex: 0 0 48px; align-items: stretch; justify-content: space-around; gap: 2px; border-top: 1px solid var(--gris-borde); }
+    .pestanas-editor-movil button { flex: 1 1 0; min-width: 0; padding: 4px 2px 6px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--texto-suave); font: inherit; font-size: 0.72rem; cursor: pointer; }
+    .pestanas-editor-movil button[aria-selected="true"] { border-bottom-color: var(--azul); color: var(--texto); font-weight: 600; }
+  }
+
+  @media (max-width: 760px) and (max-height: 560px) {
+    .estado-editor-movil { flex-basis: 30px; }
+    .barra-foto { min-height: 36px; }
+    .miniatura-orden { flex-basis: 42px; height: 42px; }
+    body.collage-app #editor > div:last-child .bloque-opciones.activo { min-height: 80px; max-height: 128px; }
+    .pestanas-editor-movil { flex-basis: 42px; }
+  }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
@@ -52,6 +136,14 @@ window.i18nPagina = {
     'hero-titulo': 'Crear collage de imágenes',
     'intro': 'Elegí tus fotos, un diseño y el formato. Tocá una foto del collage para acomodar qué parte se ve, y mantenela apretada para cambiarla de lugar.',
     'zona-arrastre': '🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas (de 1 a 12)',
+    'movil-agregar': 'Agregar fotos',
+    'movil-fotos': '{n} fotos',
+    'movil-foto-unica': '1 foto',
+    'movil-controles-aria': 'Controles del collage',
+    'movil-panel-diseno': 'Diseño',
+    'movil-panel-formato': 'Formato',
+    'movil-panel-estilo': 'Estilo',
+    'movil-panel-exportar': 'Exportar',
     'aria-lienzo': 'Vista previa del collage',
     'ayuda-gestos': 'Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla',
     'titulo-foto-inicial': 'Foto 1',
@@ -60,6 +152,7 @@ window.i18nPagina = {
     'title-centrar': 'Volver a centrar la foto',
     'title-antes': 'Mover al lugar anterior',
     'title-despues': 'Mover al lugar siguiente',
+    'title-quitar': 'Quitar esta foto',
     'boton-listo': 'Listo',
     'title-listo': 'Terminar de editar esta foto',
     'aria-tira': 'Orden de las fotos en el collage',
@@ -94,6 +187,14 @@ window.i18nPagina = {
     'hero-titulo': 'Make a photo collage',
     'intro': 'Pick your photos, a layout and a format. Tap a photo in the collage to set which part shows, and press and hold it to move it somewhere else.',
     'zona-arrastre': '🖼️ Drop your images here, or click to pick them (1 to 12)',
+    'movil-agregar': 'Add photos',
+    'movil-fotos': '{n} photos',
+    'movil-foto-unica': '1 photo',
+    'movil-controles-aria': 'Collage controls',
+    'movil-panel-diseno': 'Layout',
+    'movil-panel-formato': 'Format',
+    'movil-panel-estilo': 'Style',
+    'movil-panel-exportar': 'Export',
     'aria-lienzo': 'Collage preview',
     'ayuda-gestos': 'Tap a photo to edit it · drag to move the framing · pinch or use the mouse wheel to zoom · press and hold, then drop it on another to swap them · double-click to center it',
     'titulo-foto-inicial': 'Photo 1',
@@ -102,6 +203,7 @@ window.i18nPagina = {
     'title-centrar': 'Re-center the photo',
     'title-antes': 'Move to the previous slot',
     'title-despues': 'Move to the next slot',
+    'title-quitar': 'Remove this photo',
     'boton-listo': 'Done',
     'title-listo': 'Finish editing this photo',
     'aria-tira': 'Order of the photos in the collage',
@@ -162,6 +264,11 @@ window.i18nPagina = {
 
     <div class="editor-collage" id="editor" style="display:none;">
       <div>
+        <div class="tira-anuncio-movil" id="tiraAnuncioMovil"></div>
+        <div class="estado-editor-movil">
+          <span id="contadorFotosMovil"></span>
+          <button type="button" id="botonAgregarFotos" data-i18n="movil-agregar">Agregar fotos</button>
+        </div>
         <div class="lienzo-contenedor">
           <canvas id="lienzo" data-i18n-attr="aria-label:aria-lienzo" aria-label="Vista previa del collage"></canvas>
         </div>
@@ -180,12 +287,12 @@ window.i18nPagina = {
       </div>
 
       <div>
-        <div class="bloque-opciones">
+        <div class="bloque-opciones activo" data-panel-movil="diseno">
           <h3 data-i18n="h-diseno">Diseño</h3>
           <div class="lista-disenos" id="listaDisenos"></div>
         </div>
 
-        <div class="bloque-opciones">
+        <div class="bloque-opciones" data-panel-movil="formato">
           <h3 data-i18n="h-formato">Formato</h3>
           <div class="botones-formato" id="botonesFormato">
             <button type="button" data-proporcion="1:1" class="activo" data-i18n="fmt-1-1">1:1 Cuadrado</button>
@@ -196,7 +303,7 @@ window.i18nPagina = {
           </div>
         </div>
 
-        <div class="bloque-opciones">
+        <div class="bloque-opciones" data-panel-movil="estilo">
           <h3 data-i18n="h-estilo">Estilo</h3>
           <label class="campo">
             <span><span data-i18n="campo-espacio-a">Borde entre fotos: </span><span id="etiquetaEspacio">12</span></span>
@@ -212,7 +319,7 @@ window.i18nPagina = {
           </label>
         </div>
 
-        <div class="bloque-opciones">
+        <div class="bloque-opciones" data-panel-movil="exportar">
           <h3 data-i18n="h-descargar">Descargar</h3>
           <label class="campo">
             <span data-i18n="campo-tamano">Tamaño</span>
@@ -230,6 +337,12 @@ window.i18nPagina = {
           </label>
           <button class="boton" id="botonDescargar" type="button" data-i18n="boton-descargar">Descargar collage</button>
         </div>
+        <nav class="pestanas-editor-movil" id="pestanasEditorMovil" role="tablist" aria-label="Controles del collage" data-i18n-attr="aria-label:movil-controles-aria">
+          <button type="button" role="tab" data-panel="diseno" aria-selected="true" data-i18n="movil-panel-diseno">Diseño</button>
+          <button type="button" role="tab" data-panel="formato" aria-selected="false" data-i18n="movil-panel-formato">Formato</button>
+          <button type="button" role="tab" data-panel="estilo" aria-selected="false" data-i18n="movil-panel-estilo">Estilo</button>
+          <button type="button" role="tab" data-panel="exportar" aria-selected="false" data-i18n="movil-panel-exportar">Exportar</button>
+        </nav>
       </div>
     </div>
   </div>
@@ -242,6 +355,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script>
 const MAX_FOTOS = 12;
 const LADO_MAX_VISTA = 1600; // las fotos se reducen a esto para que la vista previa responda rápido
@@ -250,6 +364,8 @@ const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const aviso = document.getElementById('aviso');
 const editor = document.getElementById('editor');
+const contadorFotosMovil = document.getElementById('contadorFotosMovil');
+const pestanasEditorMovil = document.getElementById('pestanasEditorMovil');
 const lienzo = document.getElementById('lienzo');
 const ctx = lienzo.getContext('2d');
 const listaDisenos = document.getElementById('listaDisenos');
@@ -261,7 +377,7 @@ const elEspacio = document.getElementById('espacio');
 const elRedondeo = document.getElementById('redondeo');
 const elColorFondo = document.getElementById('colorFondo');
 
-// fotos: { nombre, original (HTMLImageElement), vista (canvas reducido),
+// fotos: { nombre, archivo (File original), vista (canvas reducido),
 //          zoom (1 = encaja justo), cx, cy (centro de lo visible, 0..1 de la foto) }
 // El orden del arreglo es el orden en el collage: la foto i va en la casilla i.
 let fotos = [];
@@ -388,12 +504,10 @@ function trazarRedondeado(c, r, radio) {
   c.closePath();
 }
 
-// Dibuja el collage en cualquier canvas. "alta" usa las fotos originales
-// (para descargar); si no, las reducidas (vista previa).
-function dibujarEn(canvas, ancho, alta) {
+function dibujarEn(canvas, ancho) {
   const { alto } = tamanoLienzo(ancho);
-  canvas.width = ancho;
-  canvas.height = alto;
+  if (canvas.width !== ancho) canvas.width = ancho;
+  if (canvas.height !== alto) canvas.height = alto;
   const c = canvas.getContext('2d');
   const factor = ancho / 1080; // borde y redondeo se piensan sobre 1080 px
   const espacio = parseInt(elEspacio.value, 10) * factor;
@@ -405,17 +519,41 @@ function dibujarEn(canvas, ancho, alta) {
   casillas.forEach((casilla, i) => {
     const foto = fotos[i];
     if (!foto) return;
-    const fuente = alta ? foto.original : foto.vista;
-    const anchoFuente = alta ? foto.original.naturalWidth : foto.vista.width;
-    const altoFuente = alta ? foto.original.naturalHeight : foto.vista.height;
-    const r = recorteFoto(foto, anchoFuente, altoFuente, casilla);
+    const r = recorteFoto(foto, foto.vista.width, foto.vista.height, casilla);
     c.save();
     trazarRedondeado(c, casilla, radio);
     c.clip();
-    c.drawImage(fuente, r.sx, r.sy, r.sw, r.sh, casilla.x, casilla.y, casilla.w, casilla.h);
+    c.drawImage(foto.vista, r.sx, r.sy, r.sw, r.sh, casilla.x, casilla.y, casilla.w, casilla.h);
     c.restore();
   });
   return casillas;
+}
+
+async function dibujarEnAlta(canvas, ancho) {
+  dibujarEn(canvas, ancho);
+  const c = canvas.getContext('2d');
+  const { alto } = tamanoLienzo(ancho);
+  const factor = ancho / 1080;
+  const espacio = parseInt(elEspacio.value, 10) * factor;
+  const radio = parseInt(elRedondeo.value, 10) * factor;
+  const casillas = rectangulosCasillas(ancho, alto, espacio);
+
+  for (let i = 0; i < fotos.length; i++) {
+    const foto = fotos[i];
+    const original = await cargarImagen(foto.archivo);
+    try {
+      const casilla = casillas[i];
+      const r = recorteFoto(foto, original.naturalWidth, original.naturalHeight, casilla);
+      c.save();
+      trazarRedondeado(c, casilla, radio);
+      c.clip();
+      c.drawImage(original, r.sx, r.sy, r.sw, r.sh, casilla.x, casilla.y, casilla.w, casilla.h);
+      c.restore();
+    } finally {
+      original.removeAttribute('src');
+    }
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
 }
 
 let casillasVista = [];
@@ -442,6 +580,8 @@ function dibujar() {
     ctx.globalAlpha = 0.45;
     ctx.fillStyle = '#000';
     const r = casillasVista[intercambioDesde];
+    trazarRedondeado(ctx, r, parseInt(elRedondeo.value, 10));
+    ctx.clip();
     ctx.fillRect(r.x, r.y, r.w, r.h);
     ctx.restore();
     if (intercambioSobre >= 0 && intercambioSobre !== intercambioDesde) resaltar(intercambioSobre, '#e7a459', true);
@@ -450,13 +590,23 @@ function dibujar() {
   }
 }
 
+let fotogramaPendiente = 0;
+function programarDibujo() {
+  if (fotogramaPendiente) return;
+  fotogramaPendiente = requestAnimationFrame(() => {
+    fotogramaPendiente = 0;
+    dibujar();
+  });
+}
+
 // --- Fotos, orden y selección -----------------------------------------------
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`no se pudo abrir "${archivo.name}"`));
-    img.src = URL.createObjectURL(archivo);
+    const url = URL.createObjectURL(archivo);
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`no se pudo abrir "${archivo.name}"`)); };
+    img.src = url;
   });
 }
 
@@ -465,13 +615,41 @@ function versionReducida(img) {
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.round(img.naturalWidth * escala));
   canvas.height = Math.max(1, Math.round(img.naturalHeight * escala));
-  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  const contexto = canvas.getContext('2d');
+  contexto.imageSmoothingQuality = 'high';
+  contexto.drawImage(img, 0, 0, canvas.width, canvas.height);
   return canvas;
+}
+
+function crearMiniatura(canvas) {
+  const maximo = 144;
+  const escala = Math.min(1, maximo / Math.max(canvas.width, canvas.height));
+  const miniatura = document.createElement('canvas');
+  miniatura.width = Math.max(1, Math.round(canvas.width * escala));
+  miniatura.height = Math.max(1, Math.round(canvas.height * escala));
+  const contexto = miniatura.getContext('2d');
+  contexto.imageSmoothingQuality = 'high';
+  contexto.drawImage(canvas, 0, 0, miniatura.width, miniatura.height);
+  return miniatura.toDataURL('image/jpeg', 0.82);
 }
 
 function mostrarAviso(texto) {
   aviso.textContent = texto;
   aviso.style.display = texto ? 'block' : 'none';
+}
+
+function actualizarEstadoMovil() {
+  const clave = fotos.length === 1 ? 'movil-foto-unica' : 'movil-fotos';
+  contadorFotosMovil.textContent = t(clave).replace('{n}', fotos.length);
+}
+
+function seleccionarPanelMovil(clave) {
+  pestanasEditorMovil.querySelectorAll('[role="tab"]').forEach((tab) => {
+    tab.setAttribute('aria-selected', String(tab.dataset.panel === clave));
+  });
+  editor.querySelectorAll('[data-panel-movil]').forEach((panel) => {
+    panel.classList.toggle('activo', panel.dataset.panelMovil === clave);
+  });
 }
 
 async function agregarArchivos(listaFileList) {
@@ -482,7 +660,13 @@ async function agregarArchivos(listaFileList) {
   for (const archivo of aAgregar) {
     try {
       const original = await cargarImagen(archivo);
-      fotos.push({ nombre: archivo.name, original, vista: versionReducida(original), miniatura: original.src, zoom: 1, cx: 0.5, cy: 0.5 });
+      let vista;
+      try {
+        vista = versionReducida(original);
+      } finally {
+        original.removeAttribute('src');
+      }
+      fotos.push({ nombre: archivo.name, archivo, vista, miniatura: crearMiniatura(vista), zoom: 1, cx: 0.5, cy: 0.5 });
     } catch (error) {
       errores.push(error.message);
     }
@@ -495,10 +679,34 @@ async function agregarArchivos(listaFileList) {
   cambioDeCantidad();
 }
 
+// El anuncio de la página se mueve a la tira fina de arriba mientras dura el
+// modo de edición móvil, y vuelve a su lugar original al salir — igual que
+// hace editor-movil.js con los editores de imagen (ver GUIA-INTERFAZ-MOVIL.md,
+// sección "Publicidad": nunca se esconde el anuncio para ganar espacio).
+const tiraAnuncioMovil = document.getElementById('tiraAnuncioMovil');
+const anuncio = document.querySelector('.anuncio');
+const anuncioPadre = anuncio ? anuncio.parentNode : null;
+const anuncioSiguiente = anuncio ? anuncio.nextSibling : null;
+const consultaAnchoCelular = window.matchMedia('(max-width: 760px)');
+
+function actualizarAnuncioMovil() {
+  if (!anuncio) return;
+  const moverloArriba = consultaAnchoCelular.matches && fotos.length > 0;
+  if (moverloArriba && anuncio.parentNode !== tiraAnuncioMovil) {
+    tiraAnuncioMovil.appendChild(anuncio);
+  } else if (!moverloArriba && anuncio.parentNode !== anuncioPadre) {
+    anuncioPadre.insertBefore(anuncio, anuncioSiguiente);
+  }
+}
+consultaAnchoCelular.addEventListener('change', actualizarAnuncioMovil);
+
 // Al cambiar cuántas fotos hay, se elige el primer diseño para esa cantidad
 // (como Instagram, que muestra los diseños según las fotos elegidas).
 function cambioDeCantidad() {
   editor.style.display = fotos.length ? '' : 'none';
+  document.body.classList.toggle('collage-app', fotos.length > 0);
+  actualizarAnuncioMovil();
+  actualizarEstadoMovil();
   if (seleccionada >= fotos.length) seleccionar(-1);
   if (fotos.length) {
     const opciones = disenosPara(fotos.length);
@@ -548,6 +756,7 @@ function dibujarTira() {
   fotos.forEach((foto, i) => {
     const item = document.createElement('div');
     item.className = 'miniatura-orden' + (i === seleccionada ? ' activo' : '');
+    item.dataset.indice = i;
     item.draggable = true;
     item.title = foto.nombre;
     const img = document.createElement('img');
@@ -560,7 +769,7 @@ function dibujarTira() {
     quitar.type = 'button';
     quitar.className = 'quitar-foto';
     quitar.textContent = '✕';
-    quitar.title = 'Quitar esta foto';
+    quitar.title = t('title-quitar');
     quitar.addEventListener('click', (e) => {
       e.stopPropagation();
       fotos.splice(i, 1);
@@ -578,6 +787,29 @@ function dibujarTira() {
     tiraOrden.appendChild(item);
   });
 }
+
+habilitarReordenTactil(tiraOrden, '.miniatura-orden', () => {
+  const fotoSeleccionada = fotos[seleccionada];
+  const orden = [...tiraOrden.children].map((item) => Number(item.dataset.indice));
+  fotos = orden.map((indice) => fotos[indice]);
+  seleccionada = fotoSeleccionada ? fotos.indexOf(fotoSeleccionada) : -1;
+  dibujarTira();
+  if (seleccionada >= 0) seleccionar(seleccionada);
+  else dibujar();
+});
+
+document.addEventListener('cambioIdioma', () => {
+  actualizarEstadoMovil();
+  if (fotos.length) dibujarBotonesDiseno();
+  dibujarTira();
+  if (seleccionada >= 0) seleccionar(seleccionada);
+});
+
+pestanasEditorMovil.addEventListener('click', (e) => {
+  const tab = e.target.closest('[role="tab"]');
+  if (tab) seleccionarPanelMovil(tab.dataset.panel);
+});
+document.getElementById('botonAgregarFotos').addEventListener('click', () => entradaArchivo.click());
 
 // --- Gestos sobre el lienzo ---------------------------------------------------
 // Un dedo / mouse: arrastrar mueve el encuadre de la foto tocada.
@@ -633,7 +865,10 @@ lienzo.addEventListener('pointerdown', (e) => {
 
   if (punteros.size === 2 && gesto && gesto.indice >= 0) {
     const [a, b] = [...punteros.values()];
-    gesto = { tipo: 'zoom', indice: gesto.indice, distancia: Math.hypot(a.x - b.x, a.y - b.y), zoomInicial: fotos[gesto.indice].zoom };
+    const centro = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    const indice = casillaEn(centro);
+    const indiceZoom = indice >= 0 && fotos[indice] ? indice : gesto.indice;
+    gesto = { tipo: 'zoom', indice: indiceZoom, distancia: Math.hypot(a.x - b.x, a.y - b.y), zoomInicial: fotos[indiceZoom].zoom };
     return;
   }
   const indice = casillaEn(p);
@@ -659,7 +894,7 @@ lienzo.addEventListener('pointermove', (e) => {
   if (gesto.tipo === 'zoom' && punteros.size === 2) {
     const [a, b] = [...punteros.values()];
     fijarZoom(gesto.indice, gesto.zoomInicial * Math.hypot(a.x - b.x, a.y - b.y) / gesto.distancia, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
-    dibujar();
+    programarDibujo();
     return;
   }
   if (gesto.tipo === 'espera' && Math.hypot(p.x - gesto.inicio.x, p.y - gesto.inicio.y) > 8 * lienzo.width / lienzo.getBoundingClientRect().width) {
@@ -669,10 +904,10 @@ lienzo.addEventListener('pointermove', (e) => {
   if (gesto.tipo === 'mover') {
     moverEncuadre(gesto.indice, p.x - gesto.ultimo.x, p.y - gesto.ultimo.y);
     gesto.ultimo = p;
-    dibujar();
+    programarDibujo();
   } else if (gesto.tipo === 'intercambio') {
     const sobre = casillaEn(p);
-    if (sobre !== intercambioSobre) { intercambioSobre = sobre; dibujar(); }
+    if (sobre !== intercambioSobre) { intercambioSobre = sobre; programarDibujo(); }
   }
 });
 
@@ -706,7 +941,7 @@ lienzo.addEventListener('wheel', (e) => {
   e.preventDefault();
   if (indice !== seleccionada) seleccionar(indice);
   fijarZoom(indice, fotos[indice].zoom * Math.exp(-e.deltaY * 0.0015), punto);
-  dibujar();
+  programarDibujo();
 }, { passive: false });
 
 lienzo.addEventListener('dblclick', (e) => {
@@ -720,7 +955,7 @@ lienzo.addEventListener('dblclick', (e) => {
 zoomFoto.addEventListener('input', () => {
   if (seleccionada < 0) return;
   fijarZoom(seleccionada, parseInt(zoomFoto.value, 10) / 100);
-  dibujar();
+  programarDibujo();
 });
 document.getElementById('botonCentrar').addEventListener('click', () => {
   if (seleccionada < 0) return;
@@ -739,18 +974,20 @@ document.querySelectorAll('#botonesFormato button').forEach((boton) => {
   });
 });
 
-elEspacio.addEventListener('input', () => { document.getElementById('etiquetaEspacio').textContent = elEspacio.value; dibujar(); });
-elRedondeo.addEventListener('input', () => { document.getElementById('etiquetaRedondeo').textContent = elRedondeo.value; dibujar(); });
-elColorFondo.addEventListener('input', dibujar);
+elEspacio.addEventListener('input', () => { document.getElementById('etiquetaEspacio').textContent = elEspacio.value; programarDibujo(); });
+elRedondeo.addEventListener('input', () => { document.getElementById('etiquetaRedondeo').textContent = elRedondeo.value; programarDibujo(); });
+elColorFondo.addEventListener('input', programarDibujo);
 
 document.getElementById('botonDescargar').addEventListener('click', async () => {
   const boton = document.getElementById('botonDescargar');
   boton.disabled = true;
+  editor.inert = true;
+  zonaArrastre.inert = true;
   boton.textContent = t('boton-generando');
   try {
     const formato = document.getElementById('formatoSalida').value;
     const canvas = document.createElement('canvas');
-    dibujarEn(canvas, parseInt(document.getElementById('tamanoSalida').value, 10), true);
+    await dibujarEnAlta(canvas, parseInt(document.getElementById('tamanoSalida').value, 10));
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
     if (!blob) throw new Error(t('error-generar-blob'));
     const enlace = document.createElement('a');
@@ -763,6 +1000,8 @@ document.getElementById('botonDescargar').addEventListener('click', async () => 
   } catch (error) {
     alert(t('error-collage') + error.message);
   } finally {
+    editor.inert = false;
+    zonaArrastre.inert = false;
     boton.disabled = false;
     boton.textContent = t('boton-descargar');
   }

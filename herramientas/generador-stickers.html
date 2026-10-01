@@ -43,6 +43,16 @@
   }
   .area-canvas { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; }
   .area-controles { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
+  /* editor-movil.css pone .panel-lienzo en "display:block" para los otros dos
+     editores (ahí solo envuelve la imagen). Acá .panel-lienzo también reparte
+     el alto entre .area-canvas y .area-controles (el grosor del borde): si se
+     vuelve bloque, "flex:1" de .area-canvas deja de hacer nada, el lienzo se
+     encoge a su tamaño natural y queda un hueco vacío enorme antes de llegar
+     a la bandeja de categorías. Se restaura el flex en celular para esta
+     página en particular. */
+  @media (max-width: 900px) {
+    body.em-activo .panel-lienzo { display: flex; flex-direction: column; min-height: 0; height: auto; overflow: hidden; }
+  }
   .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
   .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
   .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
@@ -71,7 +81,7 @@
   .preset-miniatura { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; cursor: pointer; min-width: 0; }
   .preset-miniatura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border-radius: 8px; border: 2px solid var(--gris-borde); background: var(--gris-fondo); transition: transform .15s, border-color .15s; }
   .preset-miniatura:hover canvas { border-color: var(--azul); }
-  .preset-miniatura span { font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .15s; }
+  .preset-miniatura span { min-width: 0; font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .15s; }
   .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
   .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
 

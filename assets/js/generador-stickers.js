@@ -220,22 +220,47 @@ export function iniciarGeneradorStickers() {
 
   // Dibuja, sobre el <canvas> de cada botón de la grilla, cómo quedaría el
   // sticker con ese filtro — se calcula una sola vez por recorte nuevo (los
-  // presets no cambian).
+  // presets no cambian). Son ~50 filtros: procesarlos todos de un tirón
+  // congela la pantalla justo después de "Recortando el fondo...", así que
+  // se hacen de a lotes en el tiempo libre del navegador (mismo mecanismo que
+  // editor-avanzado-imagen.html usa para su propia grilla de filtros).
+  let generacionMiniaturasPresets = 0;
+
   function actualizarMiniaturasPresets() {
     if (!canvasBase) return;
-    contenedorPresets.querySelectorAll('.preset-miniatura').forEach((boton) => {
-      const preset = ProcesarFiltros.PRESETS[boton.dataset.preset];
-      if (!preset) return;
-      const miniatura = crearMiniaturaSticker(canvasBase, TAMANO_MINIATURA_FISICO);
-      const alfaOriginal = miniatura.getContext('2d').getImageData(0, 0, miniatura.width, miniatura.height);
-      const escala = TAMANO_MINIATURA_FISICO / Math.max(canvasBase.width, canvasBase.height);
-      ProcesarFiltros.renderizarFiltro(miniatura, preset, preset.capasExtra, preset.textura || ProcesarFiltros.SIN_TEXTURA, escala);
-      restaurarAlfa(miniatura, alfaOriginal);
-      const canvasDestino = boton.querySelector('canvas');
-      canvasDestino.width = TAMANO_MINIATURA_FISICO;
-      canvasDestino.height = TAMANO_MINIATURA_FISICO;
-      canvasDestino.getContext('2d').drawImage(miniatura, 0, 0);
-    });
+    const generacion = ++generacionMiniaturasPresets;
+    const origen = canvasBase;
+    const botones = [...contenedorPresets.querySelectorAll('.preset-miniatura')];
+    const escala = TAMANO_MINIATURA_FISICO / Math.max(origen.width, origen.height);
+    let indice = 0;
+
+    function procesarLote(plazo) {
+      if (generacion !== generacionMiniaturasPresets || origen !== canvasBase) return;
+      const inicio = performance.now();
+      let procesadas = 0;
+      while (indice < botones.length && (!procesadas || performance.now() - inicio < 8)) {
+        if (plazo && !plazo.didTimeout && procesadas && plazo.timeRemaining() < 2) break;
+        const boton = botones[indice++];
+        const preset = ProcesarFiltros.PRESETS[boton.dataset.preset];
+        procesadas++;
+        if (!preset) continue;
+        const miniatura = crearMiniaturaSticker(origen, TAMANO_MINIATURA_FISICO);
+        const alfaOriginal = miniatura.getContext('2d').getImageData(0, 0, miniatura.width, miniatura.height);
+        ProcesarFiltros.renderizarFiltro(miniatura, preset, preset.capasExtra, preset.textura || ProcesarFiltros.SIN_TEXTURA, escala);
+        restaurarAlfa(miniatura, alfaOriginal);
+        const canvasDestino = boton.querySelector('canvas');
+        canvasDestino.width = TAMANO_MINIATURA_FISICO;
+        canvasDestino.height = TAMANO_MINIATURA_FISICO;
+        canvasDestino.getContext('2d').drawImage(miniatura, 0, 0);
+      }
+
+      if (indice >= botones.length) return;
+      if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+      else window.requestAnimationFrame(() => procesarLote(null));
+    }
+
+    if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+    else window.requestAnimationFrame(() => procesarLote(null));
   }
 
   // Aplica el filtro elegido (assets/js/filtros-color.js, vía

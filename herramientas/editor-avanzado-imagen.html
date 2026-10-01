@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <link rel="stylesheet" href="../assets/css/editor-movil.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
      del sitio, pensado como columna angosta de lectura). */
@@ -59,11 +60,25 @@
   }
   .preset-miniatura:hover canvas { border-color: var(--azul); }
   .preset-miniatura span {
-    font-size: 0.68rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
+    min-width: 0; font-size: 0.68rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
   .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
+  .texturas-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+  .miniatura-textura { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; color: var(--texto); cursor: pointer; font: inherit; }
+  .miniatura-textura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border: 2px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); }
+  .miniatura-textura span {
+    /* min-width: 0 es necesario porque es un hijo flex (columna) dentro de
+       .miniatura-textura: sin esto, un nombre largo ("Esmerilado",
+       "Difuminado") no se achica más allá de su ancho natural y el texto
+       termina pisando a la miniatura de al lado en vez de recortarse con
+       "…" como ya hace .preset-miniatura con nombres de filtro. */
+    min-width: 0; max-width: 100%; overflow: hidden; color: var(--texto-suave); font-size: 0.68rem; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .miniatura-textura.activo canvas { border-color: var(--azul); }
+  .miniatura-textura.activo span { color: var(--azul); font-weight: 600; }
+  .texturas-scroll { max-height: 220px; overflow: auto; }
   #botonVerOriginal { margin-top: 8px; padding: 5px 12px; font-size: 0.78rem; user-select: none; -webkit-user-select: none; touch-action: none; }
 
   /* --- Paneles laterales plegables ---
@@ -244,7 +259,9 @@ window.i18nPagina = {
     'sl-tolerancia': 'Tolerancia',
     'resumen-filtro': 'Filtro',
     'lbl-filtro-actual': 'Filtro actual: ',
-    'nota-filtro-capa': 'Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.',
+    'lbl-intensidad-filtro': 'Intensidad del filtro',
+    'lbl-intensidad-filtro': 'Intensidad del filtro',
+    'nota-filtro-capa': 'Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. La opacidad de la capa es independiente.',
     'titulo-vista': 'Vista',
     'grupo-acciones': 'Acciones',
     'sl-zoom': 'Zoom',
@@ -255,7 +272,9 @@ window.i18nPagina = {
     'res-original-medidas': 'Resolución original ({ancho} × {alto} px)',
     'aviso-ya-real': 'La imagen ya se ve a su tamaño real.',
     'aviso-mas-lento': 'Más lento con imágenes grandes.',
+    'aviso-original-movil': 'En móvil se usa la vista rápida; la descarga conserva la resolución completa.',
     'boton-descargar': 'Descargar imagen',
+    'boton-procesando': 'Procesando...',
     'boton-reiniciar': 'Reiniciar todo',
     'boton-cambiar': '🖼️ Cambiar imagen',
     'resultado-listo': '✅ Listo. ',
@@ -335,7 +354,9 @@ window.i18nPagina = {
     'sl-tolerancia': 'Tolerance',
     'resumen-filtro': 'Filter',
     'lbl-filtro-actual': 'Current filter: ',
-    'nota-filtro-capa': 'It applies to the active layer (and only to its area, if you limited it with the brush or a color) and replaces its adjustments. To soften it, lower the layer opacity.',
+    'lbl-intensidad-filtro': 'Filter strength',
+    'lbl-intensidad-filtro': 'Filter strength',
+    'nota-filtro-capa': 'It applies to the active layer (and only to its area, if you limited it with the brush or a color) and replaces its adjustments. Layer opacity remains independent.',
     'titulo-vista': 'View',
     'grupo-acciones': 'Actions',
     'sl-zoom': 'Zoom',
@@ -346,7 +367,9 @@ window.i18nPagina = {
     'res-original-medidas': 'Original resolution ({ancho} × {alto} px)',
     'aviso-ya-real': 'The image is already shown at its real size.',
     'aviso-mas-lento': 'Slower with large images.',
+    'aviso-original-movil': 'Mobile uses the fast preview; downloads keep the full resolution.',
     'boton-descargar': 'Download image',
+    'boton-procesando': 'Processing...',
     'boton-reiniciar': 'Reset everything',
     'boton-cambiar': '🖼️ Change image',
     'resultado-listo': '✅ Done. ',
@@ -429,22 +452,30 @@ window.i18nPagina = {
     </div>
 
     <div id="editorCompleto" style="display:none; margin-top:16px;">
-      <div class="editor-avanzado-layout" id="layoutEditor">
+      <div class="editor-avanzado-layout" id="layoutEditor" data-em-sin-descarga-flotante>
         <button type="button" class="abrir-panel-movil izq" data-panel="izq" data-i18n="movil-capas">☰ Capas y herramientas</button>
         <button type="button" class="abrir-panel-movil der" data-panel="der" data-i18n="movil-ajustes">⚙ Ajustes</button>
         <div class="fondo-panel-movil" id="fondoPanelMovil"></div>
 
-        <div class="panel-capas">
+        <div class="panel-capas" data-em-categorias-individuales>
+          <!-- Hermano directo de .panel-capas, no adentro de ningún
+               data-em-categoria: el CSS que lo mantiene visible al contraer
+               (".izq-plegado .panel-capas > :not(.boton-plegar)") apunta a
+               hijos directos — metido un nivel más adentro quedaba oculto
+               junto con el resto y no había forma de volver a desplegar el
+               panel (bug encontrado 2026-09-30, viene de antes de hoy). -->
           <button type="button" class="boton-plegar" data-panel="izq" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span data-i18n="panel-capas">Capas y herramientas</span><span class="flecha-plegar">«</span></button>
-          <div class="controles" style="margin-bottom:8px; gap:6px;">
-            <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
+          <div data-em-categoria="Capas">
+            <div class="controles" style="margin-bottom:8px; gap:6px;">
+              <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
+            </div>
+            <div id="listaCapas"></div>
+            <input type="file" id="entradaProyecto" accept="application/json" hidden>
           </div>
-          <div id="listaCapas"></div>
-          <input type="file" id="entradaProyecto" accept="application/json" hidden>
 
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
                así ninguno empuja a los demás fuera de la vista. -->
-          <fieldset class="acordeon-grupo">
+          <fieldset class="acordeon-grupo" data-em-categoria="Aplicar">
             <button type="button" class="acordeon-titulo" data-icono="🎯"><span data-i18n="titulo-aplicar">Aplicar la capa a</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="modos" id="modosSeleccionCapa">
@@ -475,7 +506,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo">
+          <fieldset class="acordeon-grupo" data-em-categoria="Vista">
             <button type="button" class="acordeon-titulo" data-icono="🔍"><span data-i18n="titulo-vista">Vista</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
@@ -494,7 +525,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo">
+          <fieldset class="acordeon-grupo" data-em-categoria="Acciones">
             <button type="button" class="acordeon-titulo" data-icono="⤓"><span data-i18n="grupo-acciones">Acciones</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
@@ -509,6 +540,56 @@ window.i18nPagina = {
               </div>
             </div>
           </fieldset>
+
+          <fieldset class="acordeon-grupo" id="filtrosCapa" data-em-categoria="Filtro">
+            <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="resumen-filtro">Filtro</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <p class="nota-lateral" style="margin:0 0 6px; display:flex; align-items:center; gap:6px;">
+                <span data-i18n="lbl-filtro-actual">Filtro actual: </span><span id="nombreFiltroCapa">Sin filtro</span>
+                <span class="ayuda-tip">
+                  <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                  <span class="ayuda-burbuja" data-i18n="nota-filtro-capa">Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. La opacidad de la capa es independiente.</span>
+                </span>
+              </p>
+              <div id="controlesIntensidadFiltro" style="display:none;">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-filtro">Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
+                  <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
+                </label>
+              </div>
+              <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
+              <div class="presets-scroll">
+                <div class="presets" id="presets"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="acordeon-grupo" data-grupo="textura" data-em-categoria="Textura">
+            <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="texturas-scroll">
+                <div class="texturas-galeria" id="modosTextura">
+                  <button type="button" class="miniatura-textura activo" data-textura="ninguno"><canvas></canvas><span data-i18n="textura-ninguno">Ninguno</span></button>
+                  <button type="button" class="miniatura-textura" data-textura="pixelar"><canvas></canvas><span data-i18n="textura-pixelar">Pixelado</span></button>
+                  <button type="button" class="miniatura-textura" data-textura="pixelar-circulos"><canvas></canvas><span data-i18n="textura-puntos">Puntos</span></button>
+                  <button type="button" class="miniatura-textura" data-textura="ruido"><canvas></canvas><span data-i18n="textura-ruido">Ruido</span></button>
+                  <button type="button" class="miniatura-textura" data-textura="difuminar"><canvas></canvas><span data-i18n="textura-difuminar">Difuminado</span></button>
+                  <button type="button" class="miniatura-textura" data-textura="direccional"><canvas></canvas><span data-i18n="textura-movimiento">Movimiento</span></button>
+                  <button type="button" class="miniatura-textura" data-textura="esmerilado"><canvas></canvas><span data-i18n="textura-esmerilado">Esmerilado</span></button>
+                </div>
+              </div>
+              <div id="controlesTextura" style="display:none;">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-textura">Intensidad de textura</span><span id="valorTexturaIntensidad">18</span></span>
+                  <input type="range" id="texturaIntensidad" min="2" max="50" value="18">
+                </label>
+                <div class="modos" id="modosOrdenTextura">
+                  <button type="button" class="activo" data-orden="debajo" data-i18n="orden-debajo">Debajo de los filtros</button>
+                  <button type="button" data-orden="encima" data-i18n="orden-encima">Encima de los filtros</button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
         </div>
 
         <div class="panel-lienzo">
@@ -519,7 +600,7 @@ window.i18nPagina = {
             </div>
           </div>
           <!-- Botón aparte (no sobre la imagen): en el lienzo, presionar ya sirve para pintar, mover o elegir color -->
-          <button type="button" id="botonVerOriginal" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
+          <button type="button" id="botonVerOriginal" data-em-categoria="Original" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
         </div>
 
         <div class="panel-ajustes">
@@ -682,42 +763,6 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" id="filtrosCapa">
-            <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="resumen-filtro">Filtro</span> <span class="flecha">▾</span></button>
-            <div class="acordeon-contenido">
-              <p class="nota-lateral" style="margin:0 0 6px;"><span data-i18n="lbl-filtro-actual">Filtro actual: </span><span id="nombreFiltroCapa">Sin filtro</span></p>
-              <p class="nota-lateral" style="margin:0 0 6px;" data-i18n="nota-filtro-capa">Se aplica a la capa activa (y solo a su zona, si la limitaste con pincel o color) y reemplaza sus ajustes. Para suavizarlo, bajá la opacidad de la capa.</p>
-              <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
-              <div class="presets-scroll">
-                <div class="presets" id="presets"></div>
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset class="acordeon-grupo" data-grupo="textura">
-            <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
-            <div class="acordeon-contenido">
-              <div class="modos" id="modosTextura" style="margin-bottom:10px;">
-                <button type="button" class="activo" data-textura="ninguno" data-i18n="textura-ninguno">Ninguno</button>
-                <button type="button" data-textura="pixelar" data-i18n="textura-pixelar">Pixelado</button>
-                <button type="button" data-textura="pixelar-circulos" data-i18n="textura-puntos">Puntos</button>
-                <button type="button" data-textura="ruido" data-i18n="textura-ruido">Ruido</button>
-                <button type="button" data-textura="difuminar" data-i18n="textura-difuminar">Difuminado</button>
-                <button type="button" data-textura="direccional" data-i18n="textura-movimiento">Movimiento</button>
-                <button type="button" data-textura="esmerilado" data-i18n="textura-esmerilado">Esmerilado</button>
-              </div>
-              <div id="controlesTextura" style="display:none;">
-                <label class="campo-deslizador">
-                  <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-textura">Intensidad de textura</span><span id="valorTexturaIntensidad">18</span></span>
-                  <input type="range" id="texturaIntensidad" min="2" max="50" value="18">
-                </label>
-                <div class="modos" id="modosOrdenTextura">
-                  <button type="button" class="activo" data-orden="debajo" data-i18n="orden-debajo">Debajo de los filtros</button>
-                  <button type="button" data-orden="encima" data-i18n="orden-encima">Encima de los filtros</button>
-                </div>
-              </div>
-            </div>
-          </fieldset>
         </div>
 
       </div>
@@ -772,6 +817,9 @@ const activarBN = document.getElementById('activarBN');
 const elTexturaIntensidad = document.getElementById('texturaIntensidad');
 const valorTexturaIntensidad = document.getElementById('valorTexturaIntensidad');
 const controlesTextura = document.getElementById('controlesTextura');
+const elIntensidadFiltro = document.getElementById('intensidadFiltro');
+const valorIntensidadFiltro = document.getElementById('valorIntensidadFiltro');
+const controlesIntensidadFiltro = document.getElementById('controlesIntensidadFiltro');
 
 const LADO_MAXIMO_TRABAJO = 1000;
 const elResolucionVistaPrevia = document.getElementById('resolucionVistaPrevia');
@@ -830,6 +878,7 @@ const AJUSTES_NEUTROS = {
   textura: 'ninguno', texturaIntensidad: 18, texturaOrden: 'debajo',
   hsl: null, // Ajustar por color (null = sin cambios), ver assets/js/ajuste-por-color.js
   filtro: 'ninguno', // filtro elegido para la capa (clave de FiltrosColor.FILTROS)
+  intensidadFiltro: 100,
 };
 // Los proyectos guardados antes de la mezcla B/N se completan con estos 0
 // al abrirse ({ ...AJUSTES_NEUTROS, ...c.ajustes }).
@@ -844,6 +893,15 @@ let capas = [];
 let capaActivaId = null;
 let contadorCapas = 0;
 let fotogramaPendiente = null;
+// Caché de renderizarComposicion(): cacheCapas[i] guarda, para la capa que en
+// el último render ocupaba el índice i, su "firma" (estado que afecta su
+// resultado) y el canvas acumulado resultante de componer las capas 0..i. Al
+// mover un deslizador de UNA capa, las de abajo no cambiaron: se parte del
+// acumulado cacheado justo antes de la primera capa cuya firma ya no coincide,
+// en vez de reprocesar todo desde cero (ver "revisado Kimi.md", 2.1).
+let cacheCapas = [];
+let cacheOrigenCapas = null;
+let cacheAnchoCapas = 0, cacheAltoCapas = 0;
 let zoomActual = 1;
 let panelAjustePorColor = null; // se crea más abajo, junto al resto del panel de ajustes
 
@@ -861,10 +919,22 @@ function crearCapa(nombre) {
     opacidad: 100,
     seleccion: 'toda', // toda | pincel | color
     mascaraPincel: null, // canvas propio, tamaño anchoTrabajo x altoTrabajo
+    _versionMascara: 0, // se incrementa al pintar/borrar la máscara (ver cacheCapas)
     colorObjetivo: null, // {r,g,b}
     tolerancia: 30,
     ajustes: { ...AJUSTES_NEUTROS },
   };
+}
+
+// Las sliders/toggles de una capa cambian sus propiedades directamente
+// (capa.ajustes.x = ...) y luego llaman a programarRenderizado(): el render
+// detecta esos cambios solo, comparando JSON.stringify(capa.ajustes) etc.
+// Pero el contenido de mascaraPincel es un canvas que se pinta a mano
+// (pintarPunto/pintarTrazo) — comparar sus píxeles sería tan caro como
+// volver a procesar la capa, así que en vez de eso se marca "sucia" acá,
+// en los pocos lugares que realmente dibujan o borran la máscara.
+function marcarMascaraSucia(capa) {
+  if (capa) capa._versionMascara = (capa._versionMascara || 0) + 1;
 }
 
 function capaActiva() { return capas.find((c) => c.id === capaActivaId) || null; }
@@ -882,9 +952,10 @@ function formatoDeSalida(archivo) {
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = URL.createObjectURL(archivo);
+    const url = URL.createObjectURL(archivo);
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = (error) => { URL.revokeObjectURL(url); reject(error); };
+    img.src = url;
   });
 }
 
@@ -1150,6 +1221,7 @@ function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
 // se vea proporcional en preview vs. exportación a resolución completa.
 function procesarCapaEnCanvas(canvas, capa, escala) {
   const ajustes = capa.ajustes;
+  const intensidadFiltro = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100))) / 100;
   const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * escala);
 
   if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'debajo') {
@@ -1160,7 +1232,7 @@ function procesarCapaEnCanvas(canvas, capa, escala) {
   // calculan sobre lo que entra a esta capa, antes de sus ajustes.
   const capasFiltro = (FiltrosColor.FILTROS[ajustes.filtro] || {}).capas || [];
   let base = null;
-  if (capasFiltro.length) {
+  if (capasFiltro.length || intensidadFiltro < 1) {
     base = document.createElement('canvas');
     base.width = canvas.width; base.height = canvas.height;
     base.getContext('2d').drawImage(canvas, 0, 0);
@@ -1169,6 +1241,20 @@ function procesarCapaEnCanvas(canvas, capa, escala) {
   procesarCanvas(canvas, ajustes);
 
   if (base) FiltrosColor.aplicarCapasExtra(canvas, base, capasFiltro, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
+
+  if (base && intensidadFiltro < 1) {
+    const ctx = canvas.getContext('2d');
+    const original = base.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    const resultado = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const datos = resultado.data;
+    for (let i = 0; i < datos.length; i += 4) {
+      datos[i] = original[i] + (datos[i] - original[i]) * intensidadFiltro;
+      datos[i + 1] = original[i + 1] + (datos[i + 1] - original[i + 1]) * intensidadFiltro;
+      datos[i + 2] = original[i + 2] + (datos[i + 2] - original[i + 2]) * intensidadFiltro;
+      datos[i + 3] = original[i + 3] + (datos[i + 3] - original[i + 3]) * intensidadFiltro;
+    }
+    ctx.putImageData(resultado, 0, 0);
+  }
 
   if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'encima') {
     EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura);
@@ -1248,34 +1334,87 @@ function generarMascaraCapa(capa, ancho, alto) {
 }
 
 // ===== Composición de todas las capas =====
+// Firma del estado de una capa que afecta su resultado visual. No incluye
+// los píxeles de mascaraPincel (comparar un canvas entero costaría lo mismo
+// que reprocesarlo) — para eso está _versionMascara, incrementado a mano en
+// marcarMascaraSucia() cada vez que algo pinta o borra la máscara.
+function firmaDeCapa(capa) {
+  return JSON.stringify([
+    capa.visible, capa.opacidad, capa.seleccion,
+    capa.ajustes, capa.colorObjetivo, capa.tolerancia,
+    capa._versionMascara || 0,
+  ]);
+}
+
 function renderizarComposicion() {
   if (!imagenActual || !canvasOrigenTrabajo) return;
   const ancho = anchoTrabajo, alto = altoTrabajo;
   const escala = ancho / imagenActual.naturalWidth;
+  const ajustesNeutros = JSON.stringify(AJUSTES_NEUTROS);
 
-  const acumulado = document.createElement('canvas');
-  acumulado.width = ancho; acumulado.height = alto;
-  acumulado.getContext('2d').drawImage(canvasOrigenTrabajo, 0, 0);
+  // Si cambió la imagen de origen o el tamaño de trabajo (p. ej. al alternar
+  // "Resolución original"), ningún canvas cacheado sirve: hay que invalidar
+  // todo en vez de comparar capa por capa.
+  if (cacheOrigenCapas !== canvasOrigenTrabajo || cacheAnchoCapas !== ancho || cacheAltoCapas !== alto) {
+    cacheCapas = [];
+    cacheOrigenCapas = canvasOrigenTrabajo;
+    cacheAnchoCapas = ancho; cacheAltoCapas = alto;
+  }
 
-  for (const capa of capas) {
-    if (!capa.visible) continue;
-    const procesado = document.createElement('canvas');
-    procesado.width = ancho; procesado.height = alto;
-    procesado.getContext('2d').drawImage(acumulado, 0, 0);
-    procesarCapaEnCanvas(procesado, capa, escala);
+  // Busca desde qué capa hay que recalcular: mientras la capa en el índice i
+  // sea la misma (mismo id) y su firma no haya cambiado desde el último
+  // render, lo acumulado hasta ahí sigue sirviendo tal cual quedó cacheado.
+  let indiceDesde = 0;
+  while (
+    indiceDesde < capas.length
+    && cacheCapas[indiceDesde]
+    && cacheCapas[indiceDesde].id === capas[indiceDesde].id
+    && cacheCapas[indiceDesde].firma === firmaDeCapa(capas[indiceDesde])
+  ) {
+    indiceDesde += 1;
+  }
+  cacheCapas.length = indiceDesde; // descarta cache de capas borradas/reordenadas desde acá
 
-    const mascara = generarMascaraCapa(capa, ancho, alto);
-    if (mascara) {
-      const ctxProcesado = procesado.getContext('2d');
-      ctxProcesado.globalCompositeOperation = 'destination-in';
-      ctxProcesado.drawImage(mascara, 0, 0);
-      ctxProcesado.globalCompositeOperation = 'source-over';
+  let acumulado;
+  if (indiceDesde > 0) {
+    acumulado = cacheCapas[indiceDesde - 1].canvasAcumulado;
+  } else {
+    acumulado = document.createElement('canvas');
+    acumulado.width = ancho; acumulado.height = alto;
+    acumulado.getContext('2d').drawImage(canvasOrigenTrabajo, 0, 0);
+  }
+
+  for (let i = indiceDesde; i < capas.length; i++) {
+    const capa = capas[i];
+    const esNeutra = !capa.visible || capa.opacidad <= 0
+      || (capa.opacidad === 100 && capa.seleccion === 'toda' && JSON.stringify(capa.ajustes) === ajustesNeutros);
+    if (!esNeutra) {
+      const procesado = document.createElement('canvas');
+      procesado.width = ancho; procesado.height = alto;
+      procesado.getContext('2d').drawImage(acumulado, 0, 0);
+      procesarCapaEnCanvas(procesado, capa, escala);
+
+      const mascara = generarMascaraCapa(capa, ancho, alto);
+      if (mascara) {
+        const ctxProcesado = procesado.getContext('2d');
+        ctxProcesado.globalCompositeOperation = 'destination-in';
+        ctxProcesado.drawImage(mascara, 0, 0);
+        ctxProcesado.globalCompositeOperation = 'source-over';
+      }
+
+      // Nunca se pisa el canvas que ya quedó cacheado para esta capa: se
+      // compone en uno nuevo, así una capa de más arriba puede seguir
+      // reusando el acumulado de esta sin que lo cambien renders futuros.
+      const nuevoAcumulado = document.createElement('canvas');
+      nuevoAcumulado.width = ancho; nuevoAcumulado.height = alto;
+      const ctxNuevo = nuevoAcumulado.getContext('2d');
+      ctxNuevo.drawImage(acumulado, 0, 0);
+      ctxNuevo.globalAlpha = capa.opacidad / 100;
+      ctxNuevo.drawImage(procesado, 0, 0);
+      ctxNuevo.globalAlpha = 1;
+      acumulado = nuevoAcumulado;
     }
-
-    const ctxAcumulado = acumulado.getContext('2d');
-    ctxAcumulado.globalAlpha = capa.opacidad / 100;
-    ctxAcumulado.drawImage(procesado, 0, 0);
-    ctxAcumulado.globalAlpha = 1;
+    cacheCapas[i] = { id: capa.id, firma: firmaDeCapa(capa), canvasAcumulado: acumulado };
   }
 
   canvasTrabajo.width = ancho; canvasTrabajo.height = alto;
@@ -1320,22 +1459,182 @@ function marcarFiltroActivo(clave) {
 // base más grande (160px) que cubre el ancho real de columna más común,
 // multiplicado además por devicePixelRatio para pantallas de alta densidad.
 const TAMANO_MINIATURA_FILTRO = 160;
-const LADO_MINIATURA_FILTRO_FISICO = Math.round(TAMANO_MINIATURA_FILTRO * (window.devicePixelRatio || 1));
+let generacionMiniaturasFiltros = 0;
+let origenMiniaturasFiltrosSolicitado = null;
+
+function solicitarMiniaturasFiltros() {
+  if (!canvasOrigenTrabajo || origenMiniaturasFiltrosSolicitado === canvasOrigenTrabajo) return;
+  origenMiniaturasFiltrosSolicitado = canvasOrigenTrabajo;
+  actualizarMiniaturasFiltros();
+}
+
 function actualizarMiniaturasFiltros() {
   if (!canvasOrigenTrabajo) return;
-  const lado = Math.min(canvasOrigenTrabajo.width, canvasOrigenTrabajo.height);
-  const ox = (canvasOrigenTrabajo.width - lado) / 2, oy = (canvasOrigenTrabajo.height - lado) / 2;
-  const escala = (LADO_MINIATURA_FILTRO_FISICO / lado) * (canvasOrigenTrabajo.width / imagenActual.naturalWidth);
-  document.querySelectorAll('.preset-miniatura').forEach((boton) => {
-    const base = document.createElement('canvas');
-    base.width = LADO_MINIATURA_FILTRO_FISICO; base.height = LADO_MINIATURA_FILTRO_FISICO;
-    base.getContext('2d').drawImage(canvasOrigenTrabajo, ox, oy, lado, lado, 0, 0, LADO_MINIATURA_FILTRO_FISICO, LADO_MINIATURA_FILTRO_FISICO);
-    procesarCapaEnCanvas(base, { ajustes: ajustesDeFiltro(boton.dataset.preset) }, escala);
-    const destino = boton.querySelector('canvas');
-    destino.width = LADO_MINIATURA_FILTRO_FISICO; destino.height = LADO_MINIATURA_FILTRO_FISICO;
-    destino.getContext('2d').drawImage(base, 0, 0);
+  const generacion = ++generacionMiniaturasFiltros;
+  const origen = canvasOrigenTrabajo;
+  const botones = [...document.querySelectorAll('.preset-miniatura')];
+  const lado = Math.min(origen.width, origen.height);
+  const ox = (origen.width - lado) / 2, oy = (origen.height - lado) / 2;
+  const ladoFisico = Math.round(TAMANO_MINIATURA_FILTRO * Math.min(window.devicePixelRatio || 1, 2));
+  const escala = (ladoFisico / lado) * (origen.width / imagenActual.naturalWidth);
+  let indice = 0;
+
+  function procesarLote(plazo) {
+    if (generacion !== generacionMiniaturasFiltros || origen !== canvasOrigenTrabajo) return;
+    const inicio = performance.now();
+    let procesadas = 0;
+    while (indice < botones.length && (!procesadas || performance.now() - inicio < 8)) {
+      if (plazo && !plazo.didTimeout && procesadas && plazo.timeRemaining() < 2) break;
+      const boton = botones[indice++];
+      const base = document.createElement('canvas');
+      base.width = ladoFisico; base.height = ladoFisico;
+      base.getContext('2d').drawImage(origen, ox, oy, lado, lado, 0, 0, ladoFisico, ladoFisico);
+      procesarCapaEnCanvas(base, { ajustes: ajustesDeFiltro(boton.dataset.preset) }, escala);
+      const destino = boton.querySelector('canvas');
+      destino.width = ladoFisico; destino.height = ladoFisico;
+      destino.getContext('2d').drawImage(base, 0, 0);
+      procesadas++;
+    }
+
+    if (indice >= botones.length) return;
+    if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+    else window.requestAnimationFrame(() => procesarLote(null));
+  }
+
+  if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+  else window.requestAnimationFrame(() => procesarLote(null));
+}
+
+const TAMANO_MINIATURA_TEXTURA = TAMANO_MINIATURA_FILTRO;
+let origenMiniaturasTexturaSolicitado = null;
+let generacionMiniaturasTextura = 0;
+
+// Muestra genérica (cielo + sol + franjas) para las miniaturas de textura:
+// a diferencia de los filtros de color, que tiene sentido previsualizar sobre
+// la foto real del usuario, una textura (pixelado, desenfoque, esmerilado...)
+// se entiende mejor sobre una escena neutra siempre igual — así la miniatura
+// comunica "así se ve esta textura" y no "así queda mi foto", y de paso con
+// bordes definidos (el horizonte, el círculo) que muestran el efecto mejor
+// que una foto cualquiera.
+function dibujarMuestraTextura(contexto, lado) {
+  // Escena con bastantes elementos y bordes marcados a propósito (nubes,
+  // montañas, casa, árboles, pasto a rayas): cuantos más detalles y
+  // contrastes tenga, mejor se nota cada textura (el desenfoque necesita
+  // bordes para mostrar que los suaviza, el pixelado necesita detalle para
+  // mostrar que lo bloquea, el ruido se nota más sobre áreas lisas, etc.).
+  const cielo = contexto.createLinearGradient(0, 0, 0, lado * 0.68);
+  cielo.addColorStop(0, '#4a86c5');
+  cielo.addColorStop(1, '#cfe2f3');
+  contexto.fillStyle = cielo;
+  contexto.fillRect(0, 0, lado, lado);
+
+  contexto.fillStyle = '#fff2cc';
+  contexto.beginPath();
+  contexto.arc(lado * 0.78, lado * 0.2, lado * 0.11, 0, Math.PI * 2);
+  contexto.fill();
+
+  contexto.fillStyle = '#ffffff';
+  [[lado * 0.22, lado * 0.18, lado * 0.09], [lado * 0.34, lado * 0.14, lado * 0.06]].forEach(([cx, cy, r]) => {
+    contexto.beginPath();
+    contexto.arc(cx, cy, r, 0, Math.PI * 2);
+    contexto.fill();
+  });
+
+  // Montañas: un polígono grande atrás y uno más chico adelante, para tener
+  // bordes diagonales además de los horizontales del resto de la escena.
+  contexto.fillStyle = '#7d9aad';
+  contexto.beginPath();
+  contexto.moveTo(0, lado * 0.56);
+  contexto.lineTo(lado * 0.3, lado * 0.3);
+  contexto.lineTo(lado * 0.55, lado * 0.56);
+  contexto.closePath();
+  contexto.fill();
+  contexto.fillStyle = '#5e7c8f';
+  contexto.beginPath();
+  contexto.moveTo(lado * 0.4, lado * 0.56);
+  contexto.lineTo(lado * 0.68, lado * 0.34);
+  contexto.lineTo(lado, lado * 0.56);
+  contexto.closePath();
+  contexto.fill();
+
+  // Pasto a rayas (en vez de un bloque liso): da detalle de alta frecuencia,
+  // útil para notar pixelado/puntos/esmerilado.
+  const franjas = 6;
+  for (let i = 0; i < franjas; i++) {
+    contexto.fillStyle = i % 2 === 0 ? '#6aa84f' : '#5b9644';
+    contexto.fillRect(0, lado * (0.56 + i * (0.44 / franjas)), lado, lado * (0.44 / franjas) + 1);
+  }
+
+  // Casa: formas geométricas con bordes rectos y uno triangular (el techo).
+  const cx = lado * 0.28, basePiso = lado * 0.92, anchoCasa = lado * 0.22, altoCasa = lado * 0.18;
+  contexto.fillStyle = '#b35a3b';
+  contexto.fillRect(cx - anchoCasa / 2, basePiso - altoCasa, anchoCasa, altoCasa);
+  contexto.fillStyle = '#7a2f1d';
+  contexto.beginPath();
+  contexto.moveTo(cx - anchoCasa / 2 - lado * 0.02, basePiso - altoCasa);
+  contexto.lineTo(cx, basePiso - altoCasa - lado * 0.1);
+  contexto.lineTo(cx + anchoCasa / 2 + lado * 0.02, basePiso - altoCasa);
+  contexto.closePath();
+  contexto.fill();
+  contexto.fillStyle = '#fff2cc';
+  contexto.fillRect(cx - lado * 0.03, basePiso - altoCasa * 0.6, lado * 0.06, lado * 0.06);
+
+  // Dos árboles (tronco + copa circular) para más bordes curvos.
+  [lado * 0.62, lado * 0.86].forEach((px, i) => {
+    const alturaCopa = lado * (0.1 + i * 0.015);
+    contexto.fillStyle = '#6b4423';
+    contexto.fillRect(px - lado * 0.015, basePiso - alturaCopa * 0.6, lado * 0.03, alturaCopa * 0.6);
+    contexto.fillStyle = '#4c7a2f';
+    contexto.beginPath();
+    contexto.arc(px, basePiso - alturaCopa * 0.6, alturaCopa * 0.55, 0, Math.PI * 2);
+    contexto.fill();
   });
 }
+
+function solicitarMiniaturasTextura() {
+  if (!canvasOrigenTrabajo || origenMiniaturasTexturaSolicitado === canvasOrigenTrabajo) return;
+  origenMiniaturasTexturaSolicitado = canvasOrigenTrabajo;
+  const generacion = ++generacionMiniaturasTextura;
+  const origen = canvasOrigenTrabajo;
+  const botones = [...document.querySelectorAll('#modosTextura .miniatura-textura')];
+  const ladoFisico = Math.round(TAMANO_MINIATURA_TEXTURA * Math.min(window.devicePixelRatio || 1, 2));
+  // La intensidad se sigue calibrando contra el tamaño real de la foto (para
+  // que se vea proporcional a como quedará al aplicarla de verdad), aunque la
+  // miniatura ya no dibuje la foto en sí. Se usa el máximo del slider (no el
+  // valor neutro con el que arranca una capa nueva) para que la miniatura
+  // muestre el efecto bien marcado y sea fácil distinguir una textura de otra
+  // de un vistazo — a intensidad baja, varias se ven casi iguales.
+  const escala = (ladoFisico / Math.min(origen.width, origen.height)) * (origen.width / imagenActual.naturalWidth);
+  const intensidad = Math.max(1, Number(elTexturaIntensidad.max) * escala);
+  let indice = 0;
+
+  function procesarLote(plazo) {
+    if (generacion !== generacionMiniaturasTextura || origen !== canvasOrigenTrabajo) return;
+    const inicio = performance.now();
+    let procesadas = 0;
+    while (indice < botones.length && (!procesadas || performance.now() - inicio < 8)) {
+      if (plazo && !plazo.didTimeout && procesadas && plazo.timeRemaining() < 2) break;
+      const boton = botones[indice++];
+      const miniatura = boton.querySelector('canvas');
+      miniatura.width = ladoFisico; miniatura.height = ladoFisico;
+      const contexto = miniatura.getContext('2d');
+      dibujarMuestraTextura(contexto, ladoFisico);
+      if (boton.dataset.textura !== 'ninguno') {
+        EfectosTextura.aplicarCompleto(boton.dataset.textura, contexto, undefined, ladoFisico, ladoFisico, intensidad);
+      }
+      procesadas++;
+    }
+
+    if (indice >= botones.length) return;
+    if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+    else window.requestAnimationFrame(() => procesarLote(null));
+  }
+
+  if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
+  else window.requestAnimationFrame(() => procesarLote(null));
+}
+
+document.querySelector('[data-grupo="textura"] .acordeon-titulo').addEventListener('click', solicitarMiniaturasTextura);
 
 document.querySelectorAll('.preset-miniatura').forEach((boton) => {
   boton.addEventListener('click', () => {
@@ -1348,6 +1647,86 @@ document.querySelectorAll('.preset-miniatura').forEach((boton) => {
   });
 });
 
+const tiraFiltros = document.querySelector('#filtrosCapa .presets-scroll');
+let arrastreTiraFiltros = null;
+let suprimirClickTiraFiltros = false;
+
+const tiraTexturas = document.querySelector('.texturas-scroll');
+let arrastreTiraTexturas = null;
+let suprimirClickTiraTexturas = false;
+
+tiraFiltros.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch' || e.button !== 0) return;
+  arrastreTiraFiltros = { id: e.pointerId, x: e.clientX, scroll: tiraFiltros.scrollLeft, activo: false };
+});
+tiraFiltros.addEventListener('pointermove', (e) => {
+  if (!arrastreTiraFiltros || e.pointerId !== arrastreTiraFiltros.id) return;
+  const desplazamiento = e.clientX - arrastreTiraFiltros.x;
+  if (!arrastreTiraFiltros.activo && Math.abs(desplazamiento) > 6) {
+    arrastreTiraFiltros.activo = true;
+    tiraFiltros.classList.add('arrastrando-puntero');
+    try { tiraFiltros.setPointerCapture(e.pointerId); } catch (error) {}
+  }
+  if (!arrastreTiraFiltros.activo) return;
+  e.preventDefault();
+  tiraFiltros.scrollLeft = arrastreTiraFiltros.scroll - desplazamiento;
+});
+function terminarArrastreTiraFiltros(e) {
+  if (!arrastreTiraFiltros || e.pointerId !== arrastreTiraFiltros.id) return;
+  const huboArrastre = arrastreTiraFiltros.activo;
+  arrastreTiraFiltros = null;
+  tiraFiltros.classList.remove('arrastrando-puntero');
+  if (!huboArrastre) return;
+  suprimirClickTiraFiltros = true;
+  setTimeout(() => { suprimirClickTiraFiltros = false; }, 0);
+  try { tiraFiltros.releasePointerCapture(e.pointerId); } catch (error) {}
+}
+tiraFiltros.addEventListener('pointerup', terminarArrastreTiraFiltros);
+tiraFiltros.addEventListener('pointercancel', terminarArrastreTiraFiltros);
+tiraFiltros.addEventListener('click', (e) => {
+  if (!suprimirClickTiraFiltros) return;
+  e.preventDefault();
+  e.stopPropagation();
+  suprimirClickTiraFiltros = false;
+}, true);
+
+if (tiraTexturas) {
+  tiraTexturas.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' || e.button !== 0) return;
+    arrastreTiraTexturas = { id: e.pointerId, x: e.clientX, scroll: tiraTexturas.scrollLeft, activo: false };
+  });
+  tiraTexturas.addEventListener('pointermove', (e) => {
+    if (!arrastreTiraTexturas || e.pointerId !== arrastreTiraTexturas.id) return;
+    const desplazamiento = e.clientX - arrastreTiraTexturas.x;
+    if (!arrastreTiraTexturas.activo && Math.abs(desplazamiento) > 6) {
+      arrastreTiraTexturas.activo = true;
+      tiraTexturas.classList.add('arrastrando-puntero');
+      try { tiraTexturas.setPointerCapture(e.pointerId); } catch (error) {}
+    }
+    if (!arrastreTiraTexturas.activo) return;
+    e.preventDefault();
+    tiraTexturas.scrollLeft = arrastreTiraTexturas.scroll - desplazamiento;
+  });
+  function terminarArrastreTiraTexturas(e) {
+    if (!arrastreTiraTexturas || e.pointerId !== arrastreTiraTexturas.id) return;
+    const huboArrastre = arrastreTiraTexturas.activo;
+    arrastreTiraTexturas = null;
+    tiraTexturas.classList.remove('arrastrando-puntero');
+    if (!huboArrastre) return;
+    suprimirClickTiraTexturas = true;
+    setTimeout(() => { suprimirClickTiraTexturas = false; }, 0);
+    try { tiraTexturas.releasePointerCapture(e.pointerId); } catch (error) {}
+  }
+  tiraTexturas.addEventListener('pointerup', terminarArrastreTiraTexturas);
+  tiraTexturas.addEventListener('pointercancel', terminarArrastreTiraTexturas);
+  tiraTexturas.addEventListener('click', (e) => {
+    if (!suprimirClickTiraTexturas) return;
+    e.preventDefault();
+    e.stopPropagation();
+    suprimirClickTiraTexturas = false;
+  }, true);
+}
+
 // ===== Panel de ajustes: leer/escribir según la capa activa =====
 function actualizarEtiquetas() {
   Object.values(deslizadores).forEach((d) => {
@@ -1359,6 +1738,7 @@ function actualizarEtiquetas() {
 
 function escribirAjustesEnUI(ajustes) {
   Object.entries(deslizadores).forEach(([clave, d]) => { d.input.value = ajustes[clave]; });
+  escribirIntensidadFiltroEnUI(ajustes);
   activarBN.checked = ajustes.bn;
   document.querySelectorAll('[data-canal]').forEach((campo) => {
     campo.classList.toggle('deshabilitado', !ajustes.bn);
@@ -1372,6 +1752,13 @@ function escribirAjustesEnUI(ajustes) {
   if (panelAjustePorColor) panelAjustePorColor.refrescar();
   marcarFiltroActivo(ajustes.filtro);
   actualizarEtiquetas();
+}
+
+function escribirIntensidadFiltroEnUI(ajustes) {
+  const intensidad = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100)));
+  elIntensidadFiltro.value = intensidad;
+  valorIntensidadFiltro.textContent = intensidad + '%';
+  controlesIntensidadFiltro.style.display = ajustes.filtro && ajustes.filtro !== 'ninguno' ? 'block' : 'none';
 }
 
 function actualizarControlesSeleccion() {
@@ -1396,6 +1783,15 @@ Object.entries(deslizadores).forEach(([clave, d]) => {
     actualizarMiniaturaCapa(capa);
     programarRenderizado();
   });
+});
+
+elIntensidadFiltro.addEventListener('input', () => {
+  const capa = capaActiva();
+  if (!capa) return;
+  capa.ajustes.intensidadFiltro = Number(elIntensidadFiltro.value);
+  valorIntensidadFiltro.textContent = elIntensidadFiltro.value + '%';
+  actualizarMiniaturaCapa(capa);
+  programarRenderizado();
 });
 
 // Ajustar por color: cada capa guarda el suyo en capa.ajustes.hsl.
@@ -1599,6 +1995,11 @@ canvasTrabajo.addEventListener('pointerenter', (e) => {
   cursorPincelAvanzado.classList.add('visible');
 });
 canvasTrabajo.addEventListener('pointerleave', () => cursorPincelAvanzado.classList.remove('visible'));
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach((tipo) => {
+  canvasTrabajo.addEventListener(tipo, (e) => {
+    if (e.pointerType === 'touch') cursorPincelAvanzado.classList.remove('visible');
+  });
+});
 
 canvasTrabajo.addEventListener('pointerdown', (e) => {
   const capa = capaActiva();
@@ -1635,6 +2036,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   canvasTrabajo.setPointerCapture(e.pointerId);
   ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
   pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual());
+  marcarMascaraSucia(capa);
   actualizarMiniaturaCapa(capa);
   programarRenderizado();
 });
@@ -1657,6 +2059,7 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
   const punto = coordenadasEnCanvasTrabajo(e);
   pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual());
   ultimoPuntoPincel = punto;
+  marcarMascaraSucia(capaActiva());
   programarRenderizado();
 });
 function terminarGestoLienzo() {
@@ -1678,7 +2081,7 @@ function cancelarGestoDeUnDedo() {
       ctx.clearRect(0, 0, mascara.width, mascara.height);
       ctx.drawImage(mascaraAntesDelTrazo, 0, 0);
       const capa = capaActiva();
-      if (capa) actualizarMiniaturaCapa(capa);
+      if (capa) { marcarMascaraSucia(capa); actualizarMiniaturaCapa(capa); }
       programarRenderizado();
     }
   }
@@ -1700,6 +2103,7 @@ botonBorrarMascaraCapa.addEventListener('click', () => {
   const capa = capaActiva();
   if (!capa || !capa.mascaraPincel) return;
   capa.mascaraPincel.getContext('2d').clearRect(0, 0, capa.mascaraPincel.width, capa.mascaraPincel.height);
+  marcarMascaraSucia(capa);
   actualizarMiniaturaCapa(capa);
   programarRenderizado();
 });
@@ -1999,17 +2403,25 @@ function tamanoTrabajoSegunModo() {
 function actualizarSelectorResolucion() {
   const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
   const esChica = Math.max(ancho, alto) <= LADO_MAXIMO_TRABAJO;
+  const esMovil = window.matchMedia('(max-width: 900px)').matches;
   opcionResolucionOriginal.textContent = t('res-original-medidas')
     .replace('{ancho}', ancho).replace('{alto}', alto);
+  opcionResolucionOriginal.disabled = esChica || esMovil;
   // Si la imagen ya entra en el tamaño rápido, las dos opciones son lo mismo.
   elResolucionVistaPrevia.disabled = esChica;
   if (esChica) elResolucionVistaPrevia.value = 'original';
+  else if (esMovil && elResolucionVistaPrevia.value === 'original') elResolucionVistaPrevia.value = 'rapida';
   avisoResolucionOriginal.textContent = esChica
     ? t('aviso-ya-real')
-    : (elResolucionVistaPrevia.value === 'original' ? t('aviso-mas-lento') : '');
+    : (esMovil ? t('aviso-original-movil') : (elResolucionVistaPrevia.value === 'original' ? t('aviso-mas-lento') : ''));
 }
 
 function prepararResolucionTrabajo() {
+  if (window.matchMedia('(max-width: 900px)').matches
+    && elResolucionVistaPrevia.value === 'original'
+    && Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight) > LADO_MAXIMO_TRABAJO) {
+    elResolucionVistaPrevia.value = 'rapida';
+  }
   const { ancho, alto } = tamanoTrabajoSegunModo();
   anchoTrabajo = ancho; altoTrabajo = alto;
   canvasOrigenTrabajo = crearCanvasConImagen(imagenActual, anchoTrabajo, altoTrabajo);
@@ -2055,7 +2467,7 @@ async function mostrarArchivo(archivo) {
   actualizarControlesSeleccion();
   pintarListaCapas();
   programarRenderizado();
-  actualizarMiniaturasFiltros();
+  if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
 }
 
 function elegirArchivo(listaFileList) {
@@ -2115,10 +2527,11 @@ botonVerOriginal.addEventListener('pointerdown', verOriginal);
 ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => botonVerOriginal.addEventListener(ev, dejarDeVerOriginal));
 botonVerOriginal.addEventListener('contextmenu', (e) => e.preventDefault());
 
+let urlDescargaAvanzada = null;
 botonDescargarAvanzado.addEventListener('click', async () => {
   if (!imagenActual) return;
   botonDescargarAvanzado.disabled = true;
-  botonDescargarAvanzado.textContent = 'Procesando...';
+  botonDescargarAvanzado.textContent = t('boton-procesando');
   // Se guardan acá afuera para poder restaurarlos en el finally aunque algo
   // falle a mitad de camino (si no, el editor quedaba apuntando al canvas a
   // resolución completa y la vista previa se rompía).
@@ -2159,14 +2572,16 @@ botonDescargarAvanzado.addEventListener('click', async () => {
 
     const formato = formatoDeSalida(archivoActual);
     const blob = await new Promise((resolve) => acumulado.toBlob(resolve, formato, 0.92));
-    enlaceDescarga.href = URL.createObjectURL(blob);
+    if (urlDescargaAvanzada) URL.revokeObjectURL(urlDescargaAvanzada);
+    urlDescargaAvanzada = URL.createObjectURL(blob);
+    enlaceDescarga.href = urlDescargaAvanzada;
     enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } finally {
     canvasOrigenTrabajo = origenTrabajoAnterior;
     anchoTrabajo = anchoAnterior; altoTrabajo = altoAnterior;
     botonDescargarAvanzado.disabled = false;
-    botonDescargarAvanzado.textContent = 'Descargar imagen';
+    botonDescargarAvanzado.textContent = t('boton-descargar');
   }
 });
 
@@ -2201,9 +2616,11 @@ botonGuardarProyecto.addEventListener('click', () => {
   };
   const blob = new Blob([JSON.stringify(proyecto)], { type: 'application/json' });
   const enlace = document.createElement('a');
-  enlace.href = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  enlace.href = url;
   enlace.download = 'proyecto-editor-avanzado.json';
   enlace.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 });
 
 function cargarDataUrlComoImagen(dataUrl) {
@@ -2267,7 +2684,7 @@ entradaProyecto.addEventListener('change', async (e) => {
   actualizarControlesSeleccion();
   pintarListaCapas();
   programarRenderizado();
-  actualizarMiniaturasFiltros();
+  if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
   entradaProyecto.value = '';
 });
 
@@ -2276,6 +2693,19 @@ entradaProyecto.addEventListener('change', async (e) => {
 // cierra el otro; en computadora arrancan abiertos y son independientes.
 const layoutEditor = document.getElementById('layoutEditor');
 const consultaMovil = window.matchMedia('(max-width: 900px)');
+document.addEventListener('editorMovilCategoriaAbierta', (e) => {
+  const clave = e.detail && e.detail.claveIcono;
+  if (clave === 'Filtros' || clave === 'resumen-filtro' || clave === 'grupo-filtros') solicitarMiniaturasFiltros();
+  // En celular, editor-movil.js abre la categoría moviendo el <fieldset> al
+  // panel de abajo sin simular un click sobre .acordeon-titulo — así que sin
+  // esto las miniaturas de textura nunca se generaban al abrir "Textura"
+  // desde la tira de categorías (sí funcionaba en computadora, al hacer click
+  // en el acordeón de verdad).
+  if (clave === 'grupo-textura') solicitarMiniaturasTextura();
+});
+consultaMovil.addEventListener('change', () => {
+  if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
+});
 
 function actualizarFlechasPlegar() {
   const izqPlegado = layoutEditor.classList.contains('izq-plegado');
@@ -2311,12 +2741,23 @@ document.getElementById('fondoPanelMovil').addEventListener('click', () => {
   layoutEditor.classList.add('izq-plegado', 'der-plegado');
   actualizarFlechasPlegar();
 });
-consultaMovil.addEventListener('change', estadoInicialPaneles);
+consultaMovil.addEventListener('change', () => {
+  estadoInicialPaneles();
+  if (!imagenActual) return;
+  if (consultaMovil.matches && elResolucionVistaPrevia.value === 'original'
+    && Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight) > LADO_MAXIMO_TRABAJO) {
+    elResolucionVistaPrevia.value = 'rapida';
+    elResolucionVistaPrevia.dispatchEvent(new Event('change'));
+  } else {
+    actualizarSelectorResolucion();
+  }
+});
 estadoInicialPaneles();
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
 <script src="../assets/js/editor-movil.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 </body>
 </html>

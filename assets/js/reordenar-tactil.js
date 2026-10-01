@@ -18,7 +18,9 @@ function insertarSegunPosicion(arrastrando, objetivo, x, y) {
     const r = vecino.getBoundingClientRect();
     return Math.abs(r.top - rect.top) < rect.height / 2;
   };
-  const enCuadricula = mismaFila(objetivo.previousElementSibling) || mismaFila(objetivo.nextElementSibling);
+  const estilo = getComputedStyle(objetivo.parentNode);
+  const filaFlex = estilo.display.includes('flex') && estilo.flexDirection.startsWith('row');
+  const enCuadricula = filaFlex || mismaFila(objetivo.previousElementSibling) || mismaFila(objetivo.nextElementSibling);
   const despues = enCuadricula ? x > rect.left + rect.width / 2 : y > rect.top + rect.height / 2;
   const referencia = despues ? objetivo.nextSibling : objetivo;
   if (referencia !== arrastrando && arrastrando.nextSibling !== referencia) {
