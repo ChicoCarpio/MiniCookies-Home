@@ -18,7 +18,7 @@ a reimplementar.
 
 ## 1. Por dónde empezar
 
-Antes de escribir una línea, decidí **qué arquetipo** es la página. Son cuatro y
+Antes de escribir una línea, decidí **qué arquetipo** es la página. Son cinco y
 cubren las 120 páginas del sitio. Cada uno tiene su esqueleto en la sección 4.
 
 | Si la página… | Es el arquetipo |
@@ -27,6 +27,7 @@ cubren las 120 páginas del sitio. Cada uno tiene su esqueleto en la sección 4.
 | recibe una entrada, hace algo y devuelve un resultado | **B — Herramienta simple** |
 | deja manipular un contenido con varios grupos de ajustes | **C — Edición a pantalla completa** |
 | muestra páginas/hojas/diapositivas para seleccionar | **D — Vista previa de documento** |
+| es solo texto para leer | **E — Página de texto** |
 
 La gran mayoría (unas 100) son **B**. Solo cuatro son **C**:
 `herramientas/collage-imagenes.html`, `herramientas/Editor-de-color-de-imagen.html`,
@@ -233,6 +234,16 @@ Ver sección 6: el esqueleto es el de B, más los marcadores del módulo.
 
 Como B, con `.grid-miniaturas` / `.contenedor-miniaturas` dentro de
 `.panel-herramienta`. Las miniaturas se generan con `assets/js/miniaturas.js`.
+
+### E — Página de texto
+
+`privacidad.html`, `terminos.html`, `creditos.html` y `contacto.html`: el marco
+común y prosa dentro de un `.panel-herramienta`, sin controles. No llevan
+`.aviso-privacidad` (eso es de los menús) pero sí su `.anuncio`.
+
+Dos detalles propios: `creditos.html` envuelve su tabla en `.tabla-ancha`, que es
+lo que evita que se lleve la página entera a lo ancho en un teléfono, y
+`contacto.html` tiene un formulario.
 
 ---
 
@@ -466,8 +477,9 @@ en ventana angosta son donde aparecen los problemas de este patrón.
 - **El verificador solo mira celular.** Faltan las comprobaciones de escritorio.
 - **No hay catálogo visual de piezas.** Una página que las muestre todas en los
   dos temas y los dos anchos haría esta guía comprobable en vez de aspiracional.
-- **Los arquetipos A, B y D no están migrados a piezas**: hoy son convención, no
-  código compartido. El arquetipo C sí lo está.
+- **Los arquetipos A, B, D y E no están migrados a piezas**: hoy son convención,
+  no código compartido. Solo el C lo está. Es la tarea de prioridad 1 nº 3 en
+  `../PENDIENTES.md`.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar
   cuando todos los grupos tengan clave.
