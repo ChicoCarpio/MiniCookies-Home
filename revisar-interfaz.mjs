@@ -24,6 +24,10 @@
 //    bloquearlas la revisión depende de la red.
 //
 // Uso: npm run revisar      (y falla con código 1 si algo no cumple)
+//
+// NO conectar esto a "npm run build": ese es el comando que corre Cloudflare
+// Pages, en Linux y sin Edge instalado, así que la revisión fallaría siempre y
+// no se podría publicar nada. Es una comprobación local, antes de subir.
 
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
