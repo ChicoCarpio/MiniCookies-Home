@@ -229,13 +229,6 @@ window.i18nPagina = {
     'sl-matiz': 'Matiz',
     'sl-tamano': 'Tamaño',
     'sl-angulo': 'Ángulo',
-    'textura-ninguno': 'Ninguno',
-    'textura-pixelar': 'Pixelado',
-    'textura-puntos': 'Puntos',
-    'textura-ruido': 'Ruido',
-    'textura-difuminar': 'Difuminado',
-    'textura-movimiento': 'Movimiento',
-    'textura-esmerilado': 'Esmerilado',
     'lbl-intensidad-textura': 'Intensidad de textura',
     'orden-debajo': 'Debajo de los filtros',
     'orden-encima': 'Encima de los filtros',
@@ -324,13 +317,6 @@ window.i18nPagina = {
     'sl-matiz': 'Hue',
     'sl-tamano': 'Size',
     'sl-angulo': 'Angle',
-    'textura-ninguno': 'None',
-    'textura-pixelar': 'Pixelate',
-    'textura-puntos': 'Dots',
-    'textura-ruido': 'Noise',
-    'textura-difuminar': 'Blur',
-    'textura-movimiento': 'Motion',
-    'textura-esmerilado': 'Frosted',
     'lbl-intensidad-textura': 'Texture strength',
     'orden-debajo': 'Under the filters',
     'orden-encima': 'Over the filters',
@@ -480,15 +466,7 @@ window.i18nPagina = {
             <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="texturas-scroll">
-                <div class="texturas-galeria" id="modosTextura">
-                  <button type="button" class="miniatura-textura activo" data-textura="ninguno"><canvas></canvas><span data-i18n="textura-ninguno">Ninguno</span></button>
-                  <button type="button" class="miniatura-textura" data-textura="pixelar"><canvas></canvas><span data-i18n="textura-pixelar">Pixelado</span></button>
-                  <button type="button" class="miniatura-textura" data-textura="pixelar-circulos"><canvas></canvas><span data-i18n="textura-puntos">Puntos</span></button>
-                  <button type="button" class="miniatura-textura" data-textura="ruido"><canvas></canvas><span data-i18n="textura-ruido">Ruido</span></button>
-                  <button type="button" class="miniatura-textura" data-textura="difuminar"><canvas></canvas><span data-i18n="textura-difuminar">Difuminado</span></button>
-                  <button type="button" class="miniatura-textura" data-textura="direccional"><canvas></canvas><span data-i18n="textura-movimiento">Movimiento</span></button>
-                  <button type="button" class="miniatura-textura" data-textura="esmerilado"><canvas></canvas><span data-i18n="textura-esmerilado">Esmerilado</span></button>
-                </div>
+                <div class="texturas-galeria" id="modosTextura"></div>
               </div>
               <div id="controlesTextura" style="display:none;">
                 <label class="campo-deslizador">
@@ -733,10 +711,12 @@ const activarBN = document.getElementById('activarBN');
 const elTexturaIntensidad = document.getElementById('texturaIntensidad');
 const valorTexturaIntensidad = document.getElementById('valorTexturaIntensidad');
 const controlesTextura = document.getElementById('controlesTextura');
-// Mosaicos y cómic (assets/js/efectos-mosaico.js): sus miniaturas van antes
-// de conectar los clics de la galería; sus opciones se guardan en la capa.
-EfectosMosaico.agregarMiniaturas(document.getElementById('modosTextura'));
+// Galería de texturas (assets/js/efectos-textura.js), antes de conectar sus
+// clics, y el panel de los mosaicos y el cómic (assets/js/efectos-mosaico.js),
+// cuyas opciones se guardan en la capa.
+EfectosTextura.crearGaleria(document.getElementById('modosTextura'));
 const panelMosaico = EfectosMosaico.crearPanel(controlesTextura, {
+  campoIntensidad: elTexturaIntensidad.closest('label'),
   alCambiar: () => {
     const capa = capaActiva();
     if (!capa) return;

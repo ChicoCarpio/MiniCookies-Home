@@ -16,9 +16,9 @@
 // (ver OPCIONES), medido respecto de la imagen y no en píxeles, así la vista
 // previa y la descarga a tamaño completo se ven iguales.
 //
-// Además arma la parte de interfaz que comparten los dos editores: las
-// miniaturas de estos estilos en la galería de texturas y el panel con sus
-// controles.
+// Además arma el panel con sus controles, que comparten los dos editores y
+// el generador de stickers. Los botones de la galería los arma
+// EfectosTextura.crearGaleria (con los nombres de TEXTOS de acá).
 //
 // Necesita, cargados antes: paleta-color.js y, para el cómic,
 // vendor/imagetracerjs/1.2.6/imagetracer_v1.2.6.js.
@@ -557,37 +557,16 @@ window.EfectosMosaico = (function () {
   })();
   const texto = (clave) => (window.t ? window.t(clave) : TEXTOS.es[clave]);
 
-  // Agrega a la galería de texturas un botón por estilo, con el mismo
-  // marcado que los demás. Hay que llamarla ANTES de que la página conecte
-  // los clics de '#modosTextura button'.
-  function agregarMiniaturas(galeria) {
-    for (const tipo of Object.keys(TIPOS)) {
-      const boton = document.createElement('button');
-      boton.type = 'button';
-      boton.className = 'miniatura-textura';
-      boton.dataset.textura = tipo;
-      boton.title = texto('textura-' + tipo);
-      boton.setAttribute('data-i18n-attr', 'title:textura-' + tipo);
-      const nombre = document.createElement('span');
-      nombre.dataset.i18n = 'textura-' + tipo;
-      nombre.textContent = texto('textura-' + tipo);
-      boton.append(document.createElement('canvas'), nombre);
-      galeria.append(boton);
-    }
-  }
-
   // Panel con los controles de estos estilos, al final de "contenedor" (los
   // controles de textura de la página). Solo se ve con un tipo de este
-  // módulo, y entonces oculta el deslizador de intensidad de la página
-  // (#texturaIntensidad), que estos estilos no usan. alCambiar() se llama
+  // módulo, y entonces oculta "campoIntensidad" (el deslizador de intensidad
+  // de las demás texturas), que estos estilos no usan. alCambiar() se llama
   // cuando la persona toca algo; leer() devuelve las opciones del tipo
   // visible y poner(opciones, tipo) las muestra (null = las de fábrica).
-  function crearPanel(contenedor, { alCambiar }) {
+  function crearPanel(contenedor, { alCambiar, campoIntensidad }) {
     const panel = document.createElement('div');
     panel.className = 'opciones-mosaico';
     contenedor.append(panel);
-    const intensidadPagina = contenedor.querySelector('#texturaIntensidad');
-    const campoIntensidad = intensidadPagina && intensidadPagina.closest('label');
 
     // Controles con las piezas de los editores (.campo-deslizador,
     // .campo-check, .modos). data-grupo: 'mosaico', 'comic' o 'ambos'.
@@ -718,7 +697,6 @@ window.EfectosMosaico = (function () {
   return {
     TIPOS: Object.keys(TIPOS),
     aplicar,
-    agregarMiniaturas,
     crearPanel,
   };
 })();

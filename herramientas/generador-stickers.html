@@ -62,7 +62,6 @@ window.i18nPagina = {
     'grupo-filtros': 'Filtros',
     'grupo-acciones': 'Acciones',
     'titulo-textura': 'Texturas',
-    'textura-ninguno': 'Ninguna',
     'lbl-intensidad-filtro': 'Intensidad del filtro',
     'lbl-tamano-textura': 'Tamaño',
     'campo-grosor': 'Grosor del borde: ',
@@ -84,7 +83,6 @@ window.i18nPagina = {
     'grupo-filtros': 'Filters',
     'grupo-acciones': 'Actions',
     'titulo-textura': 'Textures',
-    'textura-ninguno': 'None',
     'lbl-intensidad-filtro': 'Filter intensity',
     'lbl-tamano-textura': 'Size',
     'campo-grosor': 'Border thickness: ',
@@ -162,11 +160,14 @@ window.i18nPagina = {
             <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="titulo-textura">Texturas</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="texturas-scroll">
-                <div class="texturas-galeria" id="modosTextura">
-                  <button type="button" class="miniatura-textura activo" data-textura="ninguno"><canvas></canvas><span data-i18n="textura-ninguno">Ninguna</span></button>
-                </div>
+                <div class="texturas-galeria" id="modosTextura"></div>
               </div>
-              <div id="controlesMosaico"></div>
+              <div id="controlesTexturaSticker" hidden>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="lbl-tamano-textura">Tamaño</span><span id="valorTamanoTextura">14</span></span>
+                  <input type="range" id="tamanoTextura" min="2" max="50" value="14">
+                </label>
+              </div>
             </div>
           </fieldset>
 

@@ -224,9 +224,56 @@ window.EfectosTextura = (function () {
     aplicarRegion(nombre, ctxDestino, fuente, 0, 0, ancho, alto, intensidad, opciones);
   }
 
+  // --- Galería de texturas -------------------------------------------------
+  // La arman igual los dos editores y el generador de stickers: antes los
+  // botones y sus nombres estaban escritos a mano en cada página. Los nombres
+  // viven acá (se suman a los textos de la página, que mandan); los de
+  // efectos-mosaico.js los trae ese módulo con la clave 'textura-' + tipo.
+  const CLAVES_NOMBRE = {
+    ninguno: 'textura-ninguno', pixelar: 'textura-pixelar', 'pixelar-circulos': 'textura-puntos',
+    ruido: 'textura-ruido', difuminar: 'textura-difuminar', direccional: 'textura-movimiento', esmerilado: 'textura-esmerilado',
+  };
+  const TEXTOS = {
+    es: {
+      'textura-ninguno': 'Ninguna', 'textura-pixelar': 'Pixelado', 'textura-puntos': 'Puntos', 'textura-ruido': 'Ruido',
+      'textura-difuminar': 'Difuminado', 'textura-movimiento': 'Movimiento', 'textura-esmerilado': 'Esmerilado',
+    },
+    en: {
+      'textura-ninguno': 'None', 'textura-pixelar': 'Pixelate', 'textura-puntos': 'Dots', 'textura-ruido': 'Noise',
+      'textura-difuminar': 'Blur', 'textura-movimiento': 'Motion', 'textura-esmerilado': 'Frosted',
+    },
+  };
+  if (window.i18nPagina) {
+    for (const idioma of Object.keys(TEXTOS)) window.i18nPagina[idioma] = Object.assign({}, TEXTOS[idioma], window.i18nPagina[idioma]);
+  }
+
+  // Llena "galeria" con un botón por textura (clase miniatura-textura, con
+  // un <canvas> para la miniatura y data-textura = tipo): "Ninguna" (activo),
+  // las de este archivo y, si la página cargó efectos-mosaico.js, las suyas.
+  // Hay que llamarla ANTES de conectar los clics de la galería.
+  function crearGaleria(galeria) {
+    const texto = (clave) => (window.t ? window.t(clave) : TEXTOS.es[clave] || clave);
+    const tipos = Object.entries(CLAVES_NOMBRE);
+    if (window.EfectosMosaico) for (const tipo of EfectosMosaico.TIPOS) tipos.push([tipo, 'textura-' + tipo]);
+    galeria.textContent = '';
+    for (const [tipo, clave] of tipos) {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.className = 'miniatura-textura' + (tipo === 'ninguno' ? ' activo' : '');
+      boton.dataset.textura = tipo;
+      boton.title = texto(clave);
+      boton.setAttribute('data-i18n-attr', 'title:' + clave);
+      const nombre = document.createElement('span');
+      nombre.dataset.i18n = clave;
+      nombre.textContent = texto(clave);
+      boton.append(document.createElement('canvas'), nombre);
+      galeria.append(boton);
+    }
+  }
+
   return {
     pixelar, pixelarCirculos, ruido, difuminar, direccional, esmerilado,
-    aplicarRegion, aplicarCompleto, esMosaico,
+    aplicarRegion, aplicarCompleto, esMosaico, crearGaleria,
     NOMBRES: ['pixelar', 'pixelar-circulos', 'ruido', 'difuminar', 'direccional', 'esmerilado'],
   };
 })();
