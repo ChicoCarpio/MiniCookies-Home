@@ -94,7 +94,12 @@ export function traducir(html, raiz, comun, rutaWeb, conIngles) {
 
   // /en/x.html y /en/herramientas/x.html no tienen assets/ propios al lado:
   // se apuntan a los de la raíz del sitio.
-  html = html.replace(/(href|src)="(?:\.\.\/)?(assets|marca-logo)\//g, '$1="/$2/');
+  html = html.replace(/(href|src)="(?:\.\.\/)?(assets|marca-logo|vendor)\//g, '$1="/$2/');
+  // Lo mismo para los import de los módulos en línea. Sin esto, dictado por
+  // voz y el generador de stickers en inglés importaban /en/assets/js/…, que
+  // no existe: Cloudflare devolvía la portada como HTML, el navegador lo
+  // rechazaba como módulo y la herramienta no arrancaba.
+  html = html.replace(/(\b(?:from|import)\s*\(?\s*['"])(?:\.\.\/)?(assets|vendor)\//g, '$1/$2/');
 
   // No todas las páginas tienen versión en inglés (la política de privacidad,
   // el contacto y las herramientas que todavía no se tradujeron). Un enlace

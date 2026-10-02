@@ -1,0 +1,6 @@
+# Las librerías de /vendor/ llevan la versión en la ruta (vendor/pdf-lib/1.17.1/…):
+# un archivo de ahí nunca cambia, y si se actualiza la librería cambia la ruta.
+# Así el navegador las guarda un año sin volver a preguntar, en vez de
+# revalidarlas en cada página.
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable

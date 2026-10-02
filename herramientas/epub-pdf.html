@@ -184,13 +184,14 @@ window.i18nPagina = {
 
 <div id="areaImprimir"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/vendor.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
 const panelEpubAPdf = document.getElementById('panelEpubAPdf');
 const panelPdfAEpub = document.getElementById('panelPdfAEpub');

@@ -124,11 +124,28 @@ function enlacesLimpios(html) {
   return limpio.replace(/\u0000S(\d+)\u0000/g, (_, i) => guardados[i]);
 }
 
+// Copias de librerías de terceros: se publican byte por byte y completas.
+// Minificarlas les agregaría nuestro aviso de copyright y podría quitarles el
+// suyo; sus licencias (algunas .md, o un package.json cuando el paquete no trae
+// otra) tienen que publicarse junto a cada una; y las exclusiones del sitio no
+// aplican: muchas guardan sus archivos en una carpeta "dist", que para el
+// sitio es la salida del build y se saltea.
+function copiarVendor(carpeta) {
+  for (const nombre of readdirSync(carpeta)) {
+    const origen = join(carpeta, nombre);
+    if (statSync(origen).isDirectory()) { copiarVendor(origen); continue; }
+    const destino = join(SALIDA, relative(RAIZ, origen));
+    mkdirSync(dirname(destino), { recursive: true });
+    copyFileSync(origen, destino);
+  }
+}
+
 function recorrer(carpeta) {
   for (const nombre of readdirSync(carpeta)) {
-    if (EXCLUIR_NOMBRES.has(nombre)) continue;
     const origen = join(carpeta, nombre);
     const rel = relative(RAIZ, origen);
+    if (rel === 'vendor') { copiarVendor(origen); continue; }
+    if (EXCLUIR_NOMBRES.has(nombre)) continue;
     if (statSync(origen).isDirectory()) { recorrer(origen); continue; }
     const ext = extname(nombre).toLowerCase();
     if (EXCLUIR_EXTENSIONES.has(ext)) continue;

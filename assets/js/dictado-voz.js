@@ -5,7 +5,7 @@
 // que deja elegir entre modelo rápido (whisper-tiny), preciso (whisper-base) o muy
 // preciso (whisper-small).
 
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/dist/transformers.min.js';
+import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js';
 
 // Textos de usuario: los toma del diccionario de la pagina (idioma.js).
 // El respaldo en espanol cubre el caso de que idioma.js no llegue a cargar.

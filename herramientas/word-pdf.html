@@ -163,15 +163,16 @@ window.i18nPagina = {
 
 <div id="areaImprimir"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.12.2/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/vendor.js"></script>
+<script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
 const panelWordAPdf = document.getElementById('panelWordAPdf');
 const panelPdfAWord = document.getElementById('panelPdfAWord');

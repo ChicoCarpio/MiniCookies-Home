@@ -4,12 +4,14 @@
 // mientras funcionan (motor y diccionarios del OCR, WebAssembly de la IA), los
 // modelos de IA y las fuentes de Google Fonts. Con la licencia de cada una.
 //
-// Por qué existe: el sitio no tiene copia propia de nada de eso. Si una CDN
-// se cae, borra una versión o cambia de dirección, las herramientas que la
-// usan dejan de funcionar y no habría de dónde sacar ESA versión exacta. Con
-// este respaldo alcanza con publicar los archivos en el propio dominio y
-// cambiar la dirección (la carpeta "cdn/" replica las rutas originales justo
-// para que ese cambio sea mecánico).
+// Por qué existe: si una CDN se cae, borra una versión o cambia de dirección,
+// las herramientas que la usan dejan de funcionar y no habría de dónde sacar
+// ESA versión exacta. Desde el 2026-10-01 las librerías se sirven desde el
+// propio sitio (carpeta vendor/, versionada en git), así que lo que este
+// respaldo sigue cubriendo de verdad es lo que todavía viene de afuera: el
+// motor de IA (onnxruntime-web, en jsDelivr) y los modelos (Hugging Face),
+// que pasan los 25 MB por archivo de Cloudflare Pages. Cualquier dirección de
+// CDN que vuelva a aparecer en el código también se respalda sola.
 //
 // Uso:  node respaldar-librerias.mjs [--sin-modelos] [carpeta-destino]
 //       (por defecto ../librerias-respaldo, fuera del repo: con los modelos
@@ -58,6 +60,7 @@ const LICENCIA_DIRECTA = {
   'Noto Sans': 'https://cdn.jsdelivr.net/gh/google/fonts@2984c575fdce412ee02b2baaba67672b9a9434d8/ofl/notosans/OFL.txt',
   'Public Sans': 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/publicsans/OFL.txt',
   'JetBrains Mono': 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/jetbrainsmono/OFL.txt',
+  tessdata_best: 'https://cdn.jsdelivr.net/gh/tesseract-ocr/tessdata_best@main/LICENSE',
 };
 
 // --- Utilidades -------------------------------------------------------------

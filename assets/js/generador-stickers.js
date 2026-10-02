@@ -17,7 +17,7 @@
 // escondidas dentro de "Filtros". El grosor del borde sigue debajo del
 // canvas, en el panel del lienzo, porque se ajusta mirando el resultado.
 
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/dist/transformers.min.js';
+import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js';
 
 const tt = (clave, porDefecto) => (window.t ? window.t(clave) : porDefecto);
 

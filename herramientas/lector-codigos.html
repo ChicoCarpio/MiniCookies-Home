@@ -141,9 +141,10 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.23.0/umd/index.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/vendor.js"></script>
+<script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
+<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/extraer-medios-zip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -259,7 +260,7 @@ function mostrarResultado(resultadoZXing) {
 
 // isEvalSupported: false mitiga CVE-2024-4367 de PDF.js (un PDF armado a
 // propósito podía ejecutar código). Igual que en las demás herramientas de PDF.
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
 // Formatos que son un .zip por dentro: el código puede estar en una imagen
 // incrustada (un QR pegado en una diapositiva, un código de barras en una

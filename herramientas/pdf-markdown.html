@@ -159,13 +159,14 @@ Este es un ejemplo de **Markdown** con:
 
 <div id="areaImprimir"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="../assets/js/vendor.js"></script>
+<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
 const panelPdfAMd = document.getElementById('panelPdfAMd');
 const panelMdAPdf = document.getElementById('panelMdAPdf');
