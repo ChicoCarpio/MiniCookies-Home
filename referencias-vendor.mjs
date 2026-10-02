@@ -55,7 +55,8 @@ export function revisarReferenciasVendor(salida, raiz) {
     const texto = readFileSync(archivo, 'utf8');
     for (const patron of PATRONES) {
       for (const m of texto.matchAll(patron)) {
-        const ruta = m[1].replace(/[.\/]+$/, (f) => (f.endsWith('/') ? '/' : ''));
+        // Sin el ?v=… de las rutas que tuvieron que cambiar de URL (ver _headers).
+        const ruta = m[1].replace(/\?.*$/, '').replace(/[.\/]+$/, (f) => (f.endsWith('/') ? '/' : ''));
         if (!referencias.has(ruta)) referencias.set(ruta, rel);
       }
     }

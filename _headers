@@ -2,5 +2,13 @@
 # un archivo de ahí nunca cambia, y si se actualiza la librería cambia la ruta.
 # Así el navegador las guarda un año sin volver a preguntar, en vez de
 # revalidarlas en cada página.
+#
+# Ojo: la regla vale para cualquier respuesta bajo /vendor/, también la de un
+# archivo que falta. Siete librerías no se publicaron (2026-10-01/02) y la
+# respuesta de error quedó guardada un año, en Cloudflare y en el navegador de
+# quien abrió esas herramientas. Por eso sus referencias llevan "?v=2": es
+# otra URL, que nadie tiene guardada. No quitarlo. Desde entonces el build
+# falla si una página pide un archivo de vendor/ que no se publicaría
+# (referencias-vendor.mjs).
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable

@@ -5,7 +5,7 @@
 // que deja elegir entre modelo rápido (whisper-tiny), preciso (whisper-base) o muy
 // preciso (whisper-small).
 
-import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js';
+import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js?v=2';
 import { cargarModeloIA } from './ia-dispositivo.js';
 
 // Textos de usuario: los toma del diccionario de la pagina (idioma.js).
