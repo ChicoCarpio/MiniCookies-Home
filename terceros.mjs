@@ -16,7 +16,8 @@
 // direcciones que se visiten.
 //
 // Lo que una librería de vendor/ pide por dentro no se puede ver leyendo el
-// código del sitio: va declarado a mano abajo con `interno: true`.
+// código del sitio: va declarado a mano abajo con `interno: true`. Tampoco lo
+// que agrega Cloudflare al servir la página: va con `inyectado`.
 
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, extname, relative } from 'node:path';
@@ -29,6 +30,9 @@ export const TERCEROS = {
   'api.web3forms.com': { menciona: 'Web3Forms', motivo: 'envío del formulario de contacto' },
   'huggingface.co': { menciona: 'huggingface.co', motivo: 'modelos de IA que baja transformers.js (dictado, stickers)', interno: 'vendor/@huggingface/transformers' },
   'cdn.jsdelivr.net': { menciona: 'cdn.jsdelivr.net', motivo: 'onnxruntime-web, que baja transformers.js', interno: 'vendor/@huggingface/transformers' },
+  // No está en el código: Cloudflare inyecta el script de Web Analytics al
+  // servir cada página (decisión del usuario, 2026-10-02: se conserva).
+  'static.cloudflareinsights.com': { menciona: 'static.cloudflareinsights.com', motivo: 'Cloudflare Web Analytics, que inyecta Cloudflare en cada página', inyectado: 'Cloudflare' },
 };
 
 const host = (url) => {
@@ -93,12 +97,12 @@ export function revisarTerceros(dist, raiz) {
   }
 
   const politica = ['privacidad.html', 'en/privacidad.html'].map((p) => [p, existsSync(join(dist, p)) ? readFileSync(join(dist, p), 'utf8') : '']);
-  for (const [h, { menciona, interno }] of Object.entries(TERCEROS)) {
+  for (const [h, { menciona, interno, inyectado }] of Object.entries(TERCEROS)) {
     for (const [p, texto] of politica) {
       if (!texto.includes(menciona)) errores.push(`${p} no menciona "${menciona}" (por ${h})`);
     }
     if (interno && !existsSync(join(raiz, interno))) avisos.push(`${h} figura como carga de ${interno}, que ya no existe: ¿sigue haciendo falta declararlo?`);
-    if (!interno && !vistos.has(h)) avisos.push(`${h} está declarado pero ninguna página lo carga: ¿la política habla de algo que ya no se usa?`);
+    if (!interno && !inyectado && !vistos.has(h)) avisos.push(`${h} está declarado pero ninguna página lo carga: ¿la política habla de algo que ya no se usa?`);
   }
 
   for (const a of avisos) console.warn('Aviso (terceros): ' + a);
