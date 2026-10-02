@@ -1352,6 +1352,11 @@ async function mostrarArchivo(archivo) {
     return;
   }
   if (idCarga !== secuenciaCargaArchivo) return;
+  if (/\.(xlsx|xlsm)$/i.test(archivo.name)) {
+    // Si falla, la tabla sale igual, solo sin negrita, cursiva ni color de letra.
+    try { await leerFuentesDeCeldas(libro, bytes); } catch (error) { console.warn('No se pudieron leer los estilos de letra:', error); }
+    if (idCarga !== secuenciaCargaArchivo) return;
+  }
 
   libroActual = libro;
   nombreArchivoActual = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
@@ -1553,29 +1558,28 @@ function colorDesdeHex(hex) {
   return { r, g, b };
 }
 
-// SheetJS (versión gratuita) solo expone el color de fuente/relleno cuando
-// viene como RGB explícito en el archivo — los "colores de tema" (ej. blanco
-// de tema sobre un relleno de tema oscuro, muy común en encabezados) no se
-// pueden leer así, y quedan como color null aunque el relleno sí se detecte.
-// Para no terminar con texto oscuro invisible sobre un relleno oscuro
-// detectado, si hay relleno pero no se pudo leer el color de fuente real, se
-// elige automáticamente blanco o negro según qué tan clara es esa celda.
+// El color real de la letra solo se conoce en .xlsx/.xlsm (ver
+// leerFuentesDeCeldas). En los demás formatos, si la celda tiene relleno, se
+// elige blanco o negro según qué tan clara es, para no terminar con texto
+// oscuro invisible sobre un relleno oscuro (muy común en encabezados).
 function colorTextoLegible(fondo) {
   const luminancia = 0.299 * fondo.r + 0.587 * fondo.g + 0.114 * fondo.b;
   return luminancia > 0.6 ? { r: 0, g: 0, b: 0 } : { r: 1, g: 1, b: 1 };
 }
 
 function leerCeldaConEstilo(hoja, fila, columna) {
-  const celda = hoja[XLSX.utils.encode_cell({ r: fila, c: columna })];
+  const referencia = XLSX.utils.encode_cell({ r: fila, c: columna });
+  const celda = hoja[referencia];
   const estilo = (celda && celda.s) || {};
+  // Letra: la lee leerFuentesDeCeldas() del XML (solo .xlsx/.xlsm).
+  const fuente = (hoja['!fuentes'] && hoja['!fuentes'].get(referencia)) || {};
   const relleno = estilo.patternType === 'solid' ? colorDesdeHex(estilo.fgColor && estilo.fgColor.rgb) : null;
-  const colorFuente = colorDesdeHex(estilo.color && estilo.color.rgb);
   return {
     texto: celda ? XLSX.utils.format_cell(celda) : '',
-    negrita: !!estilo.bold,
-    cursiva: !!estilo.italic,
-    subrayado: !!estilo.underline,
-    color: colorFuente || (relleno ? colorTextoLegible(relleno) : null),
+    negrita: !!fuente.negrita,
+    cursiva: !!fuente.cursiva,
+    subrayado: !!fuente.subrayado,
+    color: fuente.color || (relleno ? colorTextoLegible(relleno) : null),
     relleno,
   };
 }
@@ -1694,6 +1698,54 @@ async function mapaHojaARutaXml(zip) {
     if (nombre && target) mapa.set(nombre, resolverRutaRelativa('xl/', target));
   });
   return mapa;
+}
+
+// --- Negrita, cursiva, subrayado y color de la letra (solo .xlsx/.xlsm) ---
+// SheetJS (versión gratuita) lee de styles.xml la lista de formatos y de
+// fuentes (libro.Styles), y hasta resuelve los colores de tema, pero en cada
+// celda deja solo el relleno: no dice qué formato usa. Ese dato está en el XML
+// de la hoja (<c r="B2" s="5">), así que se lee el atributo y se cruza con la
+// lista. Se guarda solo lo que cambia el dibujo, en hoja['!fuentes'] (las
+// claves con "!" no son celdas: nadie más las recorre).
+function estiloFuenteDeFormato(estilos, indice) {
+  const formato = estilos.CellXf[indice];
+  const fuente = formato && estilos.Fonts[formato.fontId || 0];
+  if (!fuente) return null;
+  const color = fuente.color && !fuente.color.auto ? colorDesdeHex(fuente.color.rgb) : null;
+  const relleno = estilos.Fills && estilos.Fills[formato.fillId || 0];
+  const negro = color && color.r === 0 && color.g === 0 && color.b === 0;
+  // Letra negra común: no hace falta guardarla, salvo sobre un relleno (si no,
+  // colorTextoLegible() la cambiaría por blanca sobre un fondo oscuro).
+  const colorQueImporta = color && (!negro || (relleno && relleno.patternType === 'solid'));
+  if (!fuente.bold && !fuente.italic && !fuente.underline && !colorQueImporta) return null;
+  return { negrita: !!fuente.bold, cursiva: !!fuente.italic, subrayado: !!fuente.underline, color: colorQueImporta ? color : null };
+}
+
+async function leerFuentesDeCeldas(libro, bytes) {
+  const estilos = libro.Styles;
+  if (!estilos || !estilos.CellXf || !estilos.Fonts) return;
+  const zip = await JSZip.loadAsync(bytes);
+  const rutas = await mapaHojaARutaXml(zip);
+  const porFormato = new Map(); // índice de formato -> estilo o null, calculado una vez
+  for (const nombre of libro.SheetNames) {
+    const hoja = libro.Sheets[nombre];
+    const entrada = rutas.has(nombre) && zip.file(rutas.get(nombre));
+    if (!hoja || !entrada) continue;
+    const xml = await entrada.async('text');
+    const fuentes = new Map();
+    // Expresiones regulares y no DOMParser: una hoja de 60.000 filas pesa
+    // decenas de MB como XML, y armar su árbol duplicaba la memoria.
+    for (const [, atributos] of xml.matchAll(/<c\b([^>]*)>/g)) {
+      const s = /\ss="(\d+)"/.exec(atributos);
+      if (!s) continue;
+      if (!porFormato.has(s[1])) porFormato.set(s[1], estiloFuenteDeFormato(estilos, +s[1]));
+      const estilo = porFormato.get(s[1]);
+      if (!estilo) continue;
+      const referencia = /\sr="([A-Z]+\d+)"/.exec(atributos);
+      if (referencia) fuentes.set(referencia[1], estilo);
+    }
+    hoja['!fuentes'] = fuentes;
+  }
 }
 
 function primerHijoDirecto(nodo, tag) {

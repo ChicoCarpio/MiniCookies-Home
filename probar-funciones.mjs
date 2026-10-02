@@ -225,6 +225,55 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     });
   }
 
+  // Negrita, cursiva, subrayado y color de letra: SheetJS gratuito no los
+  // escribe ni los entrega por celda, así que el Excel de prueba se arma
+  // reemplazando styles.xml y marcando cada celda con su formato (s="N").
+  function armarExcelConEstilos() {
+    return (async () => {
+      const l = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(l, XLSX.utils.aoa_to_sheet([['A', 'B', 'C', 'D', 'E'], ['Normal', 'Negrita', 'Cursiva', 'Subrayado', 'Blanco']]), 'Hoja1');
+      const zip = await JSZip.loadAsync(XLSX.write(l, { type: 'array', bookType: 'xlsx' }));
+      const fuente = (extra) => '<font>' + extra + '<sz val="11"/><name val="Calibri"/></font>';
+      zip.file('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        + '<fonts count="5">' + fuente('<color rgb="FF000000"/>') + fuente('<b/>') + fuente('<i/>') + fuente('<u/>') + fuente('<color rgb="FFFFFFFF"/>') + '</fonts>'
+        + '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F3864"/><bgColor indexed="64"/></patternFill></fill></fills>'
+        + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+        + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+        + '<cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="4" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs>'
+        + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>');
+      let hoja = await zip.file('xl/worksheets/sheet1.xml').async('text');
+      // Segunda fila: la primera es el encabezado, que siempre va en negrita.
+      ['B', 'C', 'D', 'E'].forEach((col, i) => { hoja = hoja.replace(new RegExp('<c r="' + col + '2"( s="\\d+")?'), '<c r="' + col + '2" s="' + (i + 1) + '"'); });
+      zip.file('xl/worksheets/sheet1.xml', hoja);
+      return zip.generateAsync({ type: 'uint8array' });
+    })();
+  }
+
+  await prueba('Excel → PDF: negrita, cursiva, subrayado y color de letra', async () => {
+    await abrir('/herramientas/excel-csv-a-pdf.html'); await esperar(300);
+    const bytes = new Uint8Array(await W().eval('(' + armarExcelConEstilos + ')')());
+    await W().mostrarArchivo(new (W().File)([bytes], 'estilos.xlsx'));
+    const leidas = W().eval('[0,1,2,3,4].map(c => leerCeldaConEstilo(libroActual.Sheets.Hoja1, 1, c))');
+    const marca = (c) => (c.negrita ? 'N' : '') + (c.cursiva ? 'C' : '') + (c.subrayado ? 'S' : '') + (c.color ? '#' + [c.color.r, c.color.g, c.color.b].map((v) => Math.round(v * 255)).join(',') : '');
+    const obtenido = leidas.map(marca).join(' | ');
+    afirmar(obtenido === ' | N | C | S | #255,255,255', 'leído: "' + obtenido + '"');
+    // Y que el PDF use de verdad la fuente de cada estilo.
+    D().getElementById('botonConvertir').click();
+    const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href, 60000);
+    afirmar(enlace, 'no generó el PDF');
+    const pdf = new Uint8Array(await (await W().fetch(enlace)).arrayBuffer());
+    await abrir('/herramientas/rotar-pdf.html'); await esperar(300);
+    const doc = await W().abrirPdf(new (W().Uint8Array)(pdf));
+    const pagina = await doc.getPage(1);
+    await pagina.getOperatorList();
+    const items = (await pagina.getTextContent()).items.filter((i) => i.str.trim());
+    const fuenteDe = (texto) => { const it = items.find((i) => i.str === texto); return it ? pagina.commonObjs.get(it.fontName).name : 'no está'; };
+    const esperado = { Normal: /^Helvetica$/, Negrita: /Helvetica-Bold$/, Cursiva: /Helvetica-Oblique$/, Subrayado: /^Helvetica$/ };
+    const fuentes = Object.keys(esperado).map((t) => t + '=' + fuenteDe(t));
+    afirmar(Object.entries(esperado).every(([t, re]) => re.test(fuenteDe(t))), 'fuentes en el PDF: ' + fuentes.join(', '));
+    return obtenido + ' · ' + fuentes.join(', ');
+  });
+
   // SheetJS < 0.20.2 tiene dos CVE al leer archivos maliciosos
   // (CVE-2023-30533, CVE-2024-22363): ninguna herramienta puede cargar una así.
   await prueba('SheetJS sin versiones vulnerables (herramientas de Excel)', async () => {
