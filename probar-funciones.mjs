@@ -289,14 +289,114 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return JSON.stringify(csv);
   });
 
+  // Si el worker no arranca (ruta o tipo MIME mal), PDF.js no falla: corre
+  // todo en la página ("fake worker") y las demás pruebas pasarían igual.
+  // Por eso se espía el constructor de Worker antes del primer documento.
   for (const ruta of ['/herramientas/rotar-pdf.html', '/en/herramientas/rotar-pdf.html']) {
     await prueba('PDF.js con su worker (' + (ruta.startsWith('/en/') ? 'en' : 'es') + ')', async () => {
       await abrir(ruta); await esperar(300);
-      const doc = await W().pdfjsLib.getDocument({ data: await (await pdfDePrueba(3)).arrayBuffer() }).promise;
+      const creados = [];
+      const Original = W().Worker;
+      W().Worker = class extends Original { constructor(url, op) { creados.push(String(url)); super(url, op); } };
+      const doc = await W().abrirPdf(await (await pdfDePrueba(3)).arrayBuffer());
       afirmar(doc.numPages === 3, 'leyó ' + doc.numPages + ' páginas');
-      return '3 páginas leídas';
+      afirmar(creados.some((u) => /pdf\.worker\.min\.mjs$/.test(u)), 'sin worker propio (¿fake worker?): ' + JSON.stringify(creados));
+      return '3 páginas leídas, worker ' + creados[0].replace(/^.*\/vendor\//, 'vendor/');
     });
   }
+
+  // Cada herramienta que carga PDF.js lo hace con assets/js/pdfjs.js: que en
+  // todas abra un PDF (orden de scripts, ruta del worker) y, si tiene
+  // miniaturas, la dibuje.
+  await prueba('PDF.js en todas las herramientas que lo usan', async () => {
+    await abrir('/herramientas/rotar-pdf.html'); await esperar(300); // tiene pdf-lib
+    const bytes = new Uint8Array(await (await pdfDePrueba(2)).arrayBuffer());
+    let paginas = 0;
+    for (const p of PAGINAS.filter((x) => x.startsWith('/herramientas/'))) {
+      await abrir(p); await esperar(60);
+      if (typeof W().abrirPdf !== 'function') continue;
+      paginas++;
+      const archivo = new (W().File)([bytes], 'prueba.pdf', { type: 'application/pdf' });
+      const doc = await W().abrirPdf(await archivo.arrayBuffer());
+      afirmar(doc.numPages === 2, p + ': leyó ' + doc.numPages + ' páginas');
+      if (typeof W().generarMiniaturaPdf === 'function') {
+        const { elemento } = await W().generarMiniaturaPdf(archivo, 0.2);
+        afirmar(elemento.width > 0, p + ': miniatura vacía');
+      }
+    }
+    afirmar(paginas >= 20, 'solo ' + paginas + ' herramientas con PDF.js');
+    return paginas + ' herramientas';
+  });
+
+  // Texto (fuente estándar no incrustada), dibujo de página y una imagen
+  // JPEG 2000: desde la 5.x esta última la decodifica el WebAssembly de
+  // vendor/pdf.js/<versión>/wasm/, que antes venía dentro de la librería.
+  // JPX de 16×16 px, rojo (200, 30, 30), generado con Pillow/OpenJPEG.
+  const JPX_ROJO = '/0//UQAvAAAAAAAQAAAAEAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAADBwEBBwEBBwEB/1IADAAAAAEABAQEAAH/XAAQQEBISFBISFBISFBISFD/ZAAlAAFDcmVhdGVkIGJ5IE9wZW5KUEVHIHZlcnNpb24gMi41LjT/kAAKAAAAAAApAAH/k8+0CARPz7QICJ/PtAgIn4CAgICAgICAgICAgP/Z';
+  // Se arma DENTRO del marco (pdf-lib reconoce arreglos y objetos por
+  // instanceof, y los de esta ventana son de otro "realm"). Necesita una
+  // página con pdf-lib cargado; devuelve los bytes copiados a esta ventana.
+  function armarPdfConTextoEImagenes(jpxBase64) {
+    return (async () => {
+      const P = PDFLib;
+      const doc = await P.PDFDocument.create();
+      const helvetica = await doc.embedFont(P.StandardFonts.Helvetica);
+      doc.addPage([300, 100]).drawText('HOLA MUNDO', { x: 20, y: 40, size: 30, font: helvetica });
+      // Página 2: el JPX ocupando toda la página.
+      const jpx = Uint8Array.from(atob(jpxBase64), (c) => c.charCodeAt(0));
+      const ref = doc.context.register(doc.context.stream(jpx, { Type: 'XObject', Subtype: 'Image', Width: 16, Height: 16, Filter: 'JPXDecode' }));
+      const p2 = doc.addPage([100, 100]);
+      p2.node.setXObject(P.PDFName.of('Jpx'), ref);
+      p2.pushOperators(P.pushGraphicsState(), P.concatTransformationMatrix(100, 0, 0, 100, 0, 0), P.drawObject('Jpx'), P.popGraphicsState());
+      // Página 3: un PNG azul.
+      const c = document.createElement('canvas'); c.width = c.height = 20;
+      const cx = c.getContext('2d'); cx.fillStyle = 'rgb(20, 40, 210)'; cx.fillRect(0, 0, 20, 20);
+      const png = await doc.embedPng(await (await new Promise((r) => c.toBlob(r, 'image/png'))).arrayBuffer());
+      doc.addPage([100, 100]).drawImage(png, { x: 0, y: 0, width: 100, height: 100 });
+      return doc.save();
+    })();
+  }
+  async function pdfConTextoEImagenes() {
+    return new Uint8Array(await W().eval('(' + armarPdfConTextoEImagenes + ')')(JPX_ROJO));
+  }
+  async function dibujarPagina(doc, n) {
+    const pagina = await doc.getPage(n);
+    const viewport = pagina.getViewport({ scale: 1 });
+    const canvas = D().createElement('canvas');
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    return canvas.getContext('2d');
+  }
+
+  await prueba('PDF.js: texto, dibujo y JPEG 2000 (WebAssembly)', async () => {
+    await abrir('/herramientas/rotar-pdf.html'); await esperar(300);
+    const doc = await W().abrirPdf(new (W().Uint8Array)(await pdfConTextoEImagenes()));
+    const texto = (await (await doc.getPage(1)).getTextContent()).items.map((i) => i.str).join('');
+    afirmar(texto.includes('HOLA MUNDO'), 'texto leído: ' + JSON.stringify(texto));
+    const pixeles = (await dibujarPagina(doc, 1)).getImageData(0, 0, 300, 100).data;
+    let oscuros = 0;
+    for (let i = 0; i < pixeles.length; i += 4) if (pixeles[i + 3] > 200 && pixeles[i] < 100) oscuros++;
+    afirmar(oscuros > 300, 'la página 1 no dibujó el texto (' + oscuros + ' píxeles oscuros)');
+    const [r, g, b] = (await dibujarPagina(doc, 2)).getImageData(50, 50, 1, 1).data;
+    afirmar(Math.abs(r - 200) < 25 && g < 60 && b < 60, 'el JPEG 2000 se dibujó rgb(' + [r, g, b] + '), se esperaba ~rgb(200,30,30)');
+    return '"' + texto + '", ' + oscuros + ' px de texto, JPX rgb(' + [r, g, b] + ')';
+  });
+
+  await prueba('extraer-imagenes: JPEG 2000 y PNG', async () => {
+    await abrir('/herramientas/rotar-pdf.html'); await esperar(300); // tiene pdf-lib
+    const bytes = await pdfConTextoEImagenes();
+    await abrir('/herramientas/extraer-imagenes.html'); await esperar(300);
+    const alertas = []; W().alert = (m) => alertas.push(m);
+    await W().mostrarArchivo(new (W().File)([bytes], 'prueba.pdf', { type: 'application/pdf' }));
+    D().getElementById('botonExtraer').click();
+    const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href);
+    afirmar(!alertas.length, 'error: ' + alertas.join(' | '));
+    afirmar(enlace, 'no terminó (¿sin imágenes?): ' + D().getElementById('sinImagenes').style.display);
+    const zip = await W().JSZip.loadAsync(await (await W().fetch(enlace)).arrayBuffer());
+    const nombres = Object.keys(zip.files);
+    afirmar(nombres.length === 2, 'imágenes: ' + nombres.join(', '));
+    return nombres.join(', ');
+  });
 
   await prueba('OCR completo (motor y diccionario propios)', async () => {
     await abrir('/herramientas/ocr-pdf.html'); await esperar(300);

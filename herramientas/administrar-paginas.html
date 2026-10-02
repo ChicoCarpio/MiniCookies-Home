@@ -94,13 +94,11 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
-
 document.getElementById('envoltorioSelectorVista').appendChild(
   crearSelectorVista(document.getElementById('gridMiniaturas'), 'vista-administrar-paginas')
 );
@@ -136,9 +134,7 @@ async function cargarPdf(archivo) {
 
   try {
     bytesOriginales = await archivo.arrayBuffer();
-    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
-    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
-    const pdf = await pdfjsLib.getDocument({ data: bytesOriginales.slice(0), isEvalSupported: false }).promise;
+    const pdf = await abrirPdf(bytesOriginales.slice(0));
 
     ordenPaginas = [];
     for (let i = 1; i <= pdf.numPages; i++) {

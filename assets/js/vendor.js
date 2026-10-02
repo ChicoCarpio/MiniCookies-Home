@@ -9,7 +9,7 @@
 // relativa que sirva para las tres. Esta sí: se calcula desde la ubicación de
 // este archivo, que siempre está en assets/js/.
 //
-// Uso:  rutaVendor('pdf.js/3.11.174/pdf.worker.min.js')
+// Uso:  rutaVendor('pdf.js/6.3.289/pdf.worker.min.mjs')
 // Tiene que cargarse antes del script que la usa.
 (function () {
   const base = new URL('../../vendor/', document.currentScript.src).href;

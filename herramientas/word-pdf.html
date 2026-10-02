@@ -163,7 +163,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
-<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/docx-html.js"></script>
@@ -171,8 +171,6 @@ window.i18nPagina = {
 <script src="../assets/js/pdf-texto.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
-
 const panelWordAPdf = document.getElementById('panelWordAPdf');
 const panelPdfAWord = document.getElementById('panelPdfAWord');
 
@@ -280,9 +278,7 @@ function textoAHtml(texto) {
 
 async function extraerTextoPdf(archivo) {
   const bytes = await archivo.arrayBuffer();
-  // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
-  // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
-  const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+  const pdf = await abrirPdf(bytes);
   const paginas = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     paginas.push(await extraerTextoPaginaPdf(await pdf.getPage(i)));

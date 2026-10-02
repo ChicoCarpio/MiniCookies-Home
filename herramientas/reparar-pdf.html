@@ -108,12 +108,10 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
-
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const listaArchivo = document.getElementById('listaArchivo');
@@ -186,9 +184,7 @@ async function intentarNivel1(bytes) {
 }
 
 async function intentarNivel2(bytes) {
-  // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
-  // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
-  const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false, stopAtErrors: false }).promise;
+  const pdfjsDoc = await abrirPdf(bytes, { stopAtErrors: false });
   if (pdfjsDoc.numPages === 0) throw new Error(t('error-sin-nada'));
 
   const { PDFDocument } = PDFLib;

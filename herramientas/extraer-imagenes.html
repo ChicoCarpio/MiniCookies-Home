@@ -86,13 +86,11 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
-<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
-
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const listaArchivo = document.getElementById('listaArchivo');
@@ -132,7 +130,7 @@ function imagenPdfACanvas(imagenPdf) {
   canvas.width = width;
   canvas.height = height;
   const contexto = canvas.getContext('2d');
-  // PDF.js 3.x entrega casi todas las imágenes ya decodificadas como
+  // PDF.js entrega casi todas las imágenes ya decodificadas como
   // ImageBitmap (sin "data"): alcanza con dibujarlas.
   if (bitmap) {
     contexto.drawImage(bitmap, 0, 0);
@@ -178,9 +176,7 @@ botonExtraer.addEventListener('click', async () => {
   resultado.classList.remove('visible');
   try {
     const bytes = await archivoActual.arrayBuffer();
-    // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
-    // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
-    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+    const pdf = await abrirPdf(bytes);
     const zip = new JSZip();
     let contadorImagenes = 0;
     const imagenesComunesVistas = new Set();
@@ -193,7 +189,9 @@ botonExtraer.addEventListener('click', async () => {
       const nombresImagenes = new Set();
 
       listaOperadores.fnArray.forEach((funcion, indice) => {
-        if (funcion === pdfjsLib.OPS.paintImageXObject || funcion === pdfjsLib.OPS.paintJpegXObject) {
+        // Una imagen repetida en mosaico llega como paintImageXObjectRepeat,
+        // también con el nombre del objeto como primer argumento.
+        if (funcion === pdfjsLib.OPS.paintImageXObject || funcion === pdfjsLib.OPS.paintImageXObjectRepeat) {
           const nombre = listaOperadores.argsArray[indice][0];
           nombresImagenes.add(nombre);
         }

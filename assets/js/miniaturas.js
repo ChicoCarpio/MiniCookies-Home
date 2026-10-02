@@ -1,16 +1,14 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Helper compartido para mostrar miniaturas reales de PDFs/imágenes en vez de solo el
 // nombre del archivo, en una grilla de tarjetas (mismo estilo visual que "Administrar
-// páginas"). Requiere que la página ya haya cargado pdf.js (pdfjsLib) para PDFs.
+// páginas"). Para PDFs requiere assets/js/pdfjs.js (abrirPdf).
 
 // gradosExtra: rotación adicional a sumarle a la que ya trae la página (para
 // previsualizar herramientas como "Rotar PDF" antes de aplicar el cambio de verdad).
 async function generarMiniaturaPdf(archivo, escala, gradosExtra) {
   escala = escala || 0.28;
   const bytes = await archivo.arrayBuffer();
-  // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
-  // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
-  const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+  const pdf = await abrirPdf(bytes);
   const pagina = await pdf.getPage(1);
   const rotacionTotal = (pagina.rotate + (gradosExtra || 0)) % 360;
   const viewport = pagina.getViewport({ scale: escala, rotation: rotacionTotal });

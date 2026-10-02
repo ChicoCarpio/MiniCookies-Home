@@ -174,15 +174,13 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
-<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../vendor/tesseract.js/7.0.0/dist/tesseract.min.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
-
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivos = document.getElementById('entradaArchivos');
 const cargando = document.getElementById('cargando');
@@ -418,9 +416,7 @@ async function prepararPaginas(ordenIds, corregirInclinacion) {
     const archivo = archivosPorId.get(id);
     if (archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name)) {
       const bytes = await archivo.arrayBuffer();
-      // isEvalSupported: false mitiga CVE-2024-4367 (un PDF armado a propósito podía
-      // ejecutar JavaScript al abrirse) mientras se use PDF.js 3.x.
-      const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+      const pdfjsDoc = await abrirPdf(bytes);
       for (let i = 1; i <= pdfjsDoc.numPages; i++) {
         const pagina = await pdfjsDoc.getPage(i);
         const viewport = pagina.getViewport({ scale: ESCALA_RENDERIZADO_PDF });

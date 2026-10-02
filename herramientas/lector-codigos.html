@@ -145,7 +145,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
-<script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/extraer-medios-zip.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -258,10 +258,6 @@ function mostrarResultado(resultadoZXing) {
 
 // --- Modo imagen ---
 
-// isEvalSupported: false mitiga CVE-2024-4367 de PDF.js (un PDF armado a
-// propósito podía ejecutar código). Igual que en las demás herramientas de PDF.
-pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
-
 // Formatos que son un .zip por dentro: el código puede estar en una imagen
 // incrustada (un QR pegado en una diapositiva, un código de barras en una
 // etiqueta de Word...). Se sacan esas imágenes y se leen una por una.
@@ -309,7 +305,7 @@ const ESCALAS_PDF = [2, 3.5];
 
 async function codigosDePdf(archivo) {
   const bytes = new Uint8Array(await archivo.arrayBuffer());
-  const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+  const pdf = await abrirPdf(bytes);
   const encontrados = [];
 
   for (let n = 1; n <= pdf.numPages; n++) {
