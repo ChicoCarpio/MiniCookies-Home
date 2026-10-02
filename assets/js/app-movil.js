@@ -340,7 +340,12 @@
 
     // --- Acciones siempre visibles ---
     // Se reutilizan los botones que ya existen en la página (mismo id, mismos
-    // escuchadores): estos solo los "pulsan".
+    // escuchadores): estos solo los "pulsan". Son un atajo para lo que NO está
+    // en ninguna categoría: si el botón ya vive en una (como "Acciones" en los
+    // editores y el generador de stickers, o "Exportar" en el collage), no se
+    // repite abajo. Antes se repetía y cada página lo tapaba a medias con una
+    // marca que solo cubría "Descargar": en el editor de color salían los tres
+    // botones dos veces.
     // Los dos editores nombran distinto los mismos botones (el avanzado les
     // agrega "Avanzado"), así que se prueban los nombres posibles y se usa el
     // primero que exista.
@@ -348,6 +353,7 @@
       var destino = null;
       for (var i = 0; i < ids.length && !destino; i++) destino = document.getElementById(ids[i]);
       if (!destino) return null;
+      if (categorias.some(function (cat) { return cat.elemento.contains(destino); })) return null;
       var b = document.createElement('button');
       b.type = 'button';
       b.className = clase;
@@ -366,15 +372,7 @@
 
     accion('🖼️', ['botonCambiarImagen'], 'app-secundario');
     accion('↺', ['botonRestablecer', 'botonRestablecerAvanzado'], 'app-secundario');
-    // El botón de descargar flotante es un atajo para cuando "Descargar" está
-    // escondido dentro de un panel grande (Filtros/Capas/Ajustes) con muchos
-    // otros controles. Una página que ya le da su propia categoría de nivel
-    // superior (como "Acciones" en el generador de stickers) no lo necesita
-    // — sería un segundo botón repitiendo el mismo texto — y lo marca con
-    // data-app-sin-descarga-flotante en su shell.
-    if (!shell.hasAttribute('data-app-sin-descarga-flotante')) {
-      accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'app-principal');
-    }
+    accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'app-principal');
 
     // Hoja + categorías + acciones van juntas en un solo bloque flotante,
     // superpuesto ABAJO de la imagen (no empujándola hacia arriba): así la

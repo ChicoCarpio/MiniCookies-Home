@@ -437,11 +437,16 @@ Qué garantiza el módulo:
   lista de clases. Una herramienta nueva no tiene que registrar la suya.
 - **El encabezado no se tapa:** la capa arranca en `--app-alto-encabezado`.
 - **La publicidad va en su tira**, no en el lugar del encabezado.
+- **Ningún botón sale dos veces.** La barra fija de abajo (🖼️ cambiar imagen,
+  ↺ restablecer, ⤓ descargar) es un atajo solo para los botones que **no**
+  están dentro de ninguna categoría; si la herramienta los tiene en una
+  ("Acciones", "Exportar"), no se copian, y sin botones la barra no aparece.
+  Hasta el 2026-10-02 se copiaban siempre y una marca por página
+  (`data-app-sin-descarga-flotante`) tapaba solo "Descargar": en el editor de
+  color salían los tres repetidos.
 
-Opcionales: `data-app-sin-descarga-flotante` en el contenedor si tu herramienta
-ya tiene su propia categoría de descarga (evita dos botones que dicen lo mismo),
-y `data-app-categorias-individuales` en un panel para que cada acordeón de
-adentro sea su propia categoría en vez de viajar todo junto.
+Opcional: `data-app-categorias-individuales` en un panel para que cada acordeón
+de adentro sea su propia categoría en vez de viajar todo junto.
 
 ### Lo que sigue siendo tuyo
 
