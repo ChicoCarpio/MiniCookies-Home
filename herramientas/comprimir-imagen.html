@@ -107,6 +107,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -147,9 +148,6 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 // Los nombres de archivo van dentro de innerHTML: se escapan para que un
 // nombre con "<" o "&" se muestre tal cual en vez de interpretarse como HTML.
-function escaparHtml(texto) {
-  return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {

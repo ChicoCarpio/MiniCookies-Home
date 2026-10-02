@@ -22,17 +22,8 @@
     color: var(--texto-suave);
   }
   .pestanas button.activa { background: var(--superficie); color: var(--texto); font-weight: 600; }
-  .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 0 8px 8px 8px; max-height: 500px; }
-  table.tabla-datos { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-  table.tabla-datos th, table.tabla-datos td {
-    border: 1px solid var(--gris-borde);
-    padding: 6px 10px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  table.tabla-datos th { background: var(--gris-fondo); position: sticky; top: 0; }
-  table.tabla-datos tr.fila-par { background: var(--superficie-alt); }
-  table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
+  /* Pegada a las pestañas de hoja: sin esquina arriba a la izquierda. */
+  .contenedor-tabla { border-radius: 0 8px 8px 8px; max-height: 500px; margin-top: 0; }
 </style>
 <script>
 window.i18nPagina = {
@@ -93,6 +84,7 @@ window.i18nPagina = {
 <script src="../vendor/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -106,10 +98,6 @@ function esArchivoValido(archivo) {
   return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
 }
 
-function escaparHtml(valor) {
-  const texto = valor === null || valor === undefined ? '' : String(valor);
-  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 
 // --- Virtualización de filas ---
 // Con tablas medianamente grandes, montar TODAS las filas como <tr> reales

@@ -147,6 +147,7 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | `.contenedor-miniaturas`, `.selector-vista` | lista o grilla conmutable |
 | `.lista-archivos` | lista de archivos cargados |
 | `.tabla-ancha` | envoltorio para una tabla que no entra: se desplaza sola sin arrastrar la página |
+| `.contenedor-tabla` + `table.tabla-datos` | tabla de datos de una planilla, con encabezado fijo y desplazamiento propio; `tr.fila-par` y `tr.fila-espaciadora` para filas alternadas y virtualización. La página solo ajusta lo suyo (altura, resaltados) |
 
 ### Menús
 
@@ -166,6 +167,9 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | Fondo decorativo | `assets/js/fondo-decorativo.js` | marca de agua |
 | Descargas | `assets/js/descargar.js` | `descargarTexto`, `nombreConFecha` |
 | Reordenar al tacto | `assets/js/reordenar-tactil.js` | arrastrar para reordenar |
+| Escapar y limpiar HTML | `assets/js/seguridad-html.js` | `escaparHtml` (única definición del sitio) y la limpieza de HTML de archivos del usuario |
+| Zona de arrastre | `assets/js/zona-arrastre.js` | `conectarZonaArrastre` y acceso con teclado (sección 3, Entrada) |
+| Selector de dirección | `assets/js/selector-direccion.js` | panel según la dirección elegida (`data-panel-direccion`) |
 
 Los dos primeros necesitan que incluyas **su CSS y su JS**. Olvidarse de uno es
 un error silencioso: la página se ve, pero sin el comportamiento.

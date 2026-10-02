@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // La zona de "arrastrá tu archivo acá", una sola vez para todo el sitio.
 //
 // Por qué existe: el mismo cableado (clic, elegir, arrastrar, soltar) estaba

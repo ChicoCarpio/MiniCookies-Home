@@ -1,4 +1,4 @@
-/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Limpieza de HTML que viene de un archivo del usuario (capítulos de un EPUB,
 // Markdown convertido con marked, HTML de mammoth) antes de meterlo en la
 // página con innerHTML. Sin esto, un archivo armado a propósito podía ejecutar

@@ -118,6 +118,7 @@ window.i18nPagina = {
 <script src="../vendor/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -129,10 +130,6 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let libroActual = null;
 let hojasSeleccionadas = new Set();
 
-function escaparHtml(valor) {
-  const texto = valor === null || valor === undefined ? '' : String(valor);
-  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 
 // Mini tabla con las primeras celdas de cada hoja — para identificarlas de
 // un vistazo, sin depender únicamente del nombre.

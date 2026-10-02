@@ -680,9 +680,6 @@ window.i18nPagina = {
     };
   }
 
-  function escapeHtml(s){
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
   var SHEET_RE = "(?:'(?:[^']|'')*'|[A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_.]*)!";
   var ADDR_RE = "\\$?[A-Za-z]{1,3}\\$?[0-9]{1,7}";
   var HILITE_RE = new RegExp(
@@ -693,8 +690,17 @@ window.i18nPagina = {
     '|((?:' + SHEET_RE + ')?' + ADDR_RE + '(?::' + ADDR_RE + ')?)',
     'g'
   );
+  // Solo & < >, a propósito: el resaltador de abajo busca las comillas de la
+  // fórmula ("texto", 'Hoja'!) DESPUÉS de escapar. Con el escaparHtml completo
+  // de seguridad-html.js quedarían como &quot; / &#39;, el resaltado de textos
+  // se perdería y el "39" de &#39; se marcaría como número, rompiendo el HTML.
+  // Es seguro: el resultado va como contenido de un elemento, nunca dentro de
+  // un atributo.
+  function escaparSinComillas(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
   function highlight(text){
-    var esc = escapeHtml(text);
+    var esc = escaparSinComillas(text);
     return esc.replace(HILITE_RE, function(m, str, bracket, fname, paren, num, cellref){
       if(str) return '<span class="tok-str">'+str+'</span>';
       if(bracket) return '<span class="tok-ref">'+bracket+'</span>';

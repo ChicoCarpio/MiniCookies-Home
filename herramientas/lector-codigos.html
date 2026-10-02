@@ -21,6 +21,7 @@ window.i18nPagina = {
     'boton-detener-camara': 'Detener cámara',
     'boton-copiar': 'Copiar',
     'boton-copiado': '✅ Copiado',
+    'boton-abrir-enlace': 'Abrir enlace',
     'sin-codigos': 'No se encontró ningún código QR o de barras en {donde}.',
     'encontrado-uno': '✅ Se encontró 1 código',
     'encontrados-varios': '✅ Se encontraron {n} códigos',
@@ -53,6 +54,7 @@ window.i18nPagina = {
     'boton-detener-camara': 'Stop the camera',
     'boton-copiar': 'Copy',
     'boton-copiado': '✅ Copied',
+    'boton-abrir-enlace': 'Open link',
     'sin-codigos': 'No QR code or barcode was found in {donde}.',
     'encontrado-uno': '✅ Found 1 code',
     'encontrados-varios': '✅ Found {n} codes',
@@ -177,9 +179,6 @@ function ocultarError() {
   mensajeError.style.display = 'none';
 }
 
-function escaparHtml(t) {
-  return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
 
 // Pinta la lista de códigos encontrados. Un PDF o un documento pueden traer
 // varios, así que cada uno va con su origen (de qué página o imagen salió) y
@@ -235,7 +234,7 @@ function mostrarCodigos(codigos, resumenOrigen) {
       abrir.target = '_blank';
       abrir.rel = 'noopener';
       abrir.style.textDecoration = 'none';
-      abrir.textContent = 'Abrir enlace';
+      abrir.textContent = t('boton-abrir-enlace');
       controles.appendChild(abrir);
     }
 
@@ -486,6 +485,7 @@ window.addEventListener('beforeunload', () => { if (camaraActiva) lector.reset()
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/idioma.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Ruta a una librería de terceros copiada en /vendor/.
 //
 // Las etiquetas <script src="../vendor/..."> se resuelven solas, pero algunas

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Selector de dirección de las herramientas bidireccionales (PDF → Texto /
 // Texto → PDF, etc.): muestra el panel de la dirección elegida y oculta los
 // demás.

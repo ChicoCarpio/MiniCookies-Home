@@ -1,4 +1,4 @@
-/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Reordenar elementos arrastrándolos, compartido por las herramientas que
 // tienen listas o cuadrículas reordenables (páginas, hojas, capítulos...).
 //

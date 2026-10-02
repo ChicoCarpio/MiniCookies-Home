@@ -1,4 +1,4 @@
-/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Helpers compartidos para leer y construir archivos EPUB. Un .epub es un .zip
 // con estructura fija (mimetype sin comprimir, META-INF/container.xml, un OPF
 // con manifest/spine, capítulos en XHTML) — no hace falta una librería de EPUB

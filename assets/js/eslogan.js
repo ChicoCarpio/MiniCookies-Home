@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Sortea uno de los eslóganes de la marca al cargar la página.
 //
 // Lo usa cualquier página que tenga un elemento con id="eslogan"; hoy la

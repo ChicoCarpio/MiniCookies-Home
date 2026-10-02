@@ -1,4 +1,4 @@
-/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Helper compartido para renderizar diapositivas de un .pptx a imágenes reales
 // (no solo texto) usando PptxViewJS, y empaquetarlas como PDF o .zip.
 // Requiere que la página ya haya cargado JSZip, Chart.js, PptxViewJS y pdf-lib,

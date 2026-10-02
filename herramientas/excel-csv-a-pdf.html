@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
-  .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; max-height: 500px; margin-top: 16px; }
+  .contenedor-tabla { max-height: 500px; margin-top: 16px; }
   table.tabla-datos {
     --tamano-fuente-vista: 0.85rem;
     --relleno-y-vista: 6px;
@@ -27,9 +27,6 @@
     overflow-wrap: anywhere;
     vertical-align: top;
   }
-  table.tabla-datos th { background: var(--gris-fondo); position: sticky; top: 0; }
-  table.tabla-datos tr.fila-par { background: var(--superficie-alt); }
-  table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
   .controles-seleccion { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
   label.campo-opcion { flex-direction: row; align-items: center; gap: 8px; }
   .controles-seleccion input { min-width: 150px; }
@@ -365,6 +362,7 @@ window.i18nPagina = {
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../vendor/Chart.js/4.5.1/chart.umd.min.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -497,10 +495,6 @@ window.addEventListener('pagehide', () => {
   liberarUrlVistaPrevia();
 });
 
-function escaparHtml(valor) {
-  const texto = valor === null || valor === undefined ? '' : String(valor);
-  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 
 async function cargarDatosFuenteUnicode() {
   if (datosFuenteUnicodeCache) return datosFuenteUnicodeCache;

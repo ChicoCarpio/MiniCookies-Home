@@ -1,4 +1,4 @@
-/*! © 2026 Herramientas Ofimáticas (Mini Cookies). Código propio, todos los derechos reservados. Uso sujeto a los términos: https://www.herramientasofimaticas.minicookies.net/menus/terminos.html */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Helper compartido para extraer archivos embebidos (imágenes) de formatos que
 // son en el fondo un .zip con estructura interna (.docx, .xlsx, .pptx, .epub).
 // Requiere que la página ya haya cargado JSZip.

@@ -98,6 +98,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -220,9 +221,6 @@ async function leerExif(archivo) {
   return null;
 }
 
-function escaparHtml(texto) {
-  return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
 
 // Quita los metadatos de un JPEG SIN recomprimirlo: recorre los segmentos del
 // archivo y descarta APP1 (EXIF/XMP), APP13 (IPTC/Photoshop), el resto de

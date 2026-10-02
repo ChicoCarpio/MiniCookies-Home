@@ -254,6 +254,22 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'Public Sans y JetBrains Mono';
   });
 
+  // El formateador escapa solo & < > a propósito (busca comillas después de
+  // escapar); con el escaparHtml completo se rompía el resaltado de textos.
+  await prueba('formateador de fórmulas: resalta textos y hojas entre comillas', async () => {
+    await abrir('/herramientas/formateador-formulas-excel.html'); await esperar(200);
+    const entrada = D().getElementById('input-formula'), salida = D().getElementById('output-formula');
+    entrada.value = '=SI(A1>0;"sí";\'Hoja 1\'!B2)';
+    entrada.dispatchEvent(new (W().Event)('input', { bubbles: true }));
+    // Mientras no hay entrada se ve una fórmula de ejemplo: esperar la propia.
+    afirmar(await hasta(() => salida.textContent.includes('Hoja 1'), 8000), 'no formateó la fórmula: ' + salida.textContent.slice(0, 80));
+    const strs = [...salida.querySelectorAll('.tok-str')].map((x) => x.textContent);
+    afirmar(strs.includes('"sí"'), 'texto entre comillas no resaltado; resaltados: ' + JSON.stringify(strs));
+    afirmar(!/&amp;#39;|&amp;quot;/.test(salida.innerHTML) && !salida.textContent.includes('&#'), 'entidades rotas en: ' + salida.textContent.slice(0, 80));
+    afirmar(salida.textContent.includes("'Hoja 1'!B2"), 'la referencia a hoja se alteró: ' + salida.textContent.slice(0, 80));
+    return 'resaltado "sí" y \'Hoja 1\'!B2 intacta';
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

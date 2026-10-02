@@ -129,9 +129,6 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-function escaparHtml(texto) {
-  return texto.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-}
 
 botonAplicar.addEventListener('click', async () => {
   botonAplicar.disabled = true;
