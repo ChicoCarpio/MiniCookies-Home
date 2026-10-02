@@ -11,16 +11,55 @@
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
   .contenedor-tabla { overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; max-height: 500px; margin-top: 16px; }
-  table.tabla-datos { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  table.tabla-datos {
+    --tamano-fuente-vista: 0.85rem;
+    --relleno-y-vista: 6px;
+    --relleno-x-vista: 10px;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: var(--tamano-fuente-vista);
+  }
   table.tabla-datos th, table.tabla-datos td {
     border: 1px solid var(--gris-borde);
-    padding: 6px 10px;
+    padding: var(--relleno-y-vista) var(--relleno-x-vista);
     text-align: left;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
   }
   table.tabla-datos th { background: var(--gris-fondo); position: sticky; top: 0; }
   table.tabla-datos tr.fila-par { background: var(--superficie-alt); }
   table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
+  .controles-seleccion { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  label.campo-opcion { flex-direction: row; align-items: center; gap: 8px; }
+  .controles-seleccion input { min-width: 150px; }
+  .lista-rangos { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; }
+  .lista-rangos li { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; }
+  .lista-rangos button { border: 0; background: transparent; color: var(--texto); cursor: pointer; font-size: 1.1rem; }
+  .contenedor-seleccion { max-height: 520px; user-select: none; touch-action: pan-x pan-y; }
+  .visor-pdf { display: block; width: 100%; height: min(78vh, 900px); min-height: 520px; margin-top: 12px; border: 1px solid var(--gris-borde); border-radius: 6px; background: #e8e8e8; }
+  .campos-pagina-personalizada { display: none; gap: 10px; align-items: end; }
+  .campos-pagina-personalizada.visible { display: flex; }
+  .campos-pagina-personalizada input { width: 110px; }
+  table.tabla-seleccion { width: max-content; min-width: 100%; }
+  table.tabla-seleccion th { z-index: 2; text-align: center; }
+  table.tabla-seleccion th.indice-fila { position: sticky; left: 0; z-index: 3; min-width: var(--ancho-indice-vista, 48px); }
+  table.tabla-seleccion tbody th.indice-fila { top: auto; }
+  table.tabla-seleccion td { min-width: var(--ancho-celda-vista, 72px); cursor: cell; }
+  table.tabla-seleccion td.celda-marcada { outline: 2px solid #1976d2; outline-offset: -2px; background: rgba(25, 118, 210, 0.16) !important; }
+  table.tabla-seleccion td.celda-en-curso { outline-style: dashed; }
+  .campo-zoom input { width: 120px; }
+  .campo-zoom output { font-size: 0.85em; font-variant-numeric: tabular-nums; }
+  @media (max-width: 600px) {
+    label.campo-zoom { display: none; }
+    .contenedor-tabla { touch-action: none; }
+    table.tabla-datos { --tamano-fuente-vista: 0.7rem; --relleno-y-vista: 2px; --relleno-x-vista: 4px; }
+    table.tabla-seleccion th, table.tabla-seleccion td {
+      padding: var(--relleno-seleccion-y, 1px) var(--relleno-seleccion-x, 3px);
+      line-height: var(--alto-linea-vista, 14px);
+    }
+    table.tabla-seleccion { --ancho-indice-vista: 18px; --ancho-celda-vista: 32px; }
+  }
 </style>
 <script>
 window.i18nPagina = {
@@ -31,26 +70,69 @@ window.i18nPagina = {
     'intro': 'Elegí un archivo y lo convertimos en una tabla PDF, lista para imprimir o compartir. Las columnas y filas completamente vacías se omiten, y se conserva negrita, cursiva, subrayado y color de texto de las celdas cuando el archivo los tiene (no se replican fuentes personalizadas, bordes ni tamaños de letra por celda). Si el archivo tiene gráficos, se agregan como páginas extra después de la tabla, reconstruidos a partir de sus datos — el estilo puede no ser idéntico al del original. No se incluyen imágenes embebidas.',
     'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)',
     'campo-hoja': 'Hoja',
+    'campo-que-imprimir': 'Qué imprimir',
+    'campo-columnas-ocultas': 'Mostrar columnas ocultas',
+    'opcion-todo': 'Todo',
+    'opcion-celdas': 'Solo celdas seleccionadas',
+    'aria-cuadricula': 'Cuadrícula de celdas',
+    'ayuda-seleccion': 'Arrastrá sobre la cuadrícula para marcar un rectángulo o escribí una dirección (por ejemplo, A1:D8). Usá Ctrl o Shift para seleccionar varios rangos.',
+    'campo-rango-celdas': 'Rango de celdas',
+    'boton-agregar-rango': 'Agregar rango',
+    'rangos-a-imprimir': 'Rangos que se imprimirán',
+    'quitar-rango': 'Quitar rango',
+    'error-rango-invalido': 'El rango no es válido o queda fuera del área usada de la hoja.',
+    'error-sin-rangos': 'Agregá al menos un rango de celdas para generar el PDF.',
+    'error-rangos-ocultos': 'Los rangos seleccionados solo contienen columnas ocultas. Activá “Mostrar columnas ocultas” o elegí otras celdas.',
     'campo-orientacion': 'Orientación',
     'opcion-vertical': 'Vertical',
     'opcion-horizontal': 'Horizontal (más columnas)',
     'campo-tamano': 'Tamaño de página',
-    'opcion-a4': 'A4',
-    'opcion-carta': 'Carta (Letter)',
-    'opcion-legal': 'Legal',
-    'opcion-oficio': 'Oficio',
+    'opcion-a4': 'A4 (210 x 297 mm)',
+    'opcion-carta': 'Carta / Letter (216 x 279 mm)',
+    'opcion-legal': 'Legal (216 x 356 mm)',
+    'opcion-oficio': 'Oficio (216 x 330 mm)',
+    'opcion-a0': 'A0 (841 x 1189 mm)',
+    'opcion-4a0': '4A0 (1682 x 2378 mm)',
+    'opcion-2a0': '2A0 (1189 x 1682 mm)',
+    'opcion-arch-e': 'Architectural E (914 x 1219 mm)',
+    'opcion-ansi-e': 'ANSI E (864 x 1118 mm)',
+    'opcion-a1': 'A1 (594 x 841 mm)',
+    'opcion-a2': 'A2 (420 x 594 mm)',
+    'opcion-a3': 'A3 (297 x 420 mm)',
+    'opcion-a5': 'A5 (148 x 210 mm)',
+    'opcion-a6': 'A6 (105 x 148 mm)',
+    'opcion-b4': 'B4 JIS (257 x 364 mm)',
+    'opcion-b5': 'B5 JIS (182 x 257 mm)',
+    'opcion-tabloide': 'Tabloide (279 x 432 mm)',
+    'opcion-ejecutivo': 'Ejecutivo (184 x 267 mm)',
+    'opcion-media-carta': 'Media carta (140 x 216 mm)',
+    'opcion-folio': 'Folio (216 x 330 mm)',
+    'opcion-personalizado': 'Personalizado',
+    'campo-ancho-personalizado': 'Ancho (mm)',
+    'campo-alto-personalizado': 'Alto (mm)',
+    'vista-pdf-titulo': 'Vista previa del PDF',
+    'vista-pdf-cargando': 'Preparando vista previa del PDF…',
+    'error-tamano-personalizado': 'El tamaño personalizado debe tener medidas válidas mayores a 25 mm.',
     'campo-fuente': 'Tamaño de letra',
+    'campo-limite-lineas': 'Líneas por celda',
+    'opcion-sin-limite-lineas': 'Sin límite',
+    'opcion-ocho-lineas': 'Máximo 8 líneas',
+    'campo-zoom': 'Zoom de vista',
     'opcion-chico': 'Chico',
     'opcion-mediano': 'Mediano',
     'opcion-grande': 'Grande',
     'boton-convertir': 'Generar PDF',
     'boton-convertir-generando': 'Generando...',
+    'boton-convertir-progreso': 'Generando PDF: {n} de {total} filas...',
+    'boton-convertir-finalizando': 'Finalizando PDF...',
+    'aviso-caracteres': 'La fuente de respaldo no representa todos los caracteres del archivo ({n} sustituidos); los signos monetarios disponibles se conservaron.',
     'vista-previa-titulo': 'Vista previa',
     'vista-previa-desc': 'Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar PDF',
     'sin-datos': 'No hay datos para mostrar (la hoja está vacía o todas sus filas/columnas están vacías).',
     'aviso-graficos': '📊 Esta hoja tiene {n} gráfico{s} — se van a agregar como páginas extra después de la tabla.',
+    'aviso-vista-parcial': 'La vista previa muestra las primeras {n} filas de {total}. El PDF que descargues incluye todas.',
     'aviso-columnas': '⚠️ Tenés {n} columnas — el texto puede quedar muy recortado. Probá "Horizontal" o letra "Chica".',
     'error-sin-datos': 'La hoja no tiene datos.',
     'error-generar': 'No se pudo generar el PDF',
@@ -65,26 +147,69 @@ window.i18nPagina = {
     'intro': 'Pick a file and we’ll convert it into a PDF table, ready to print or share. Completely empty columns and rows are skipped, and bold, italics, underline and text color are kept when the file has them (custom fonts, borders and per-cell font sizes aren’t replicated). If the file has charts, they’re added as extra pages after the table, rebuilt from their data — the style may not be identical to the original. Embedded images aren’t included.',
     'zona-arrastre': '📊 Drag your file here or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv)',
     'campo-hoja': 'Sheet',
+    'campo-que-imprimir': 'What to print',
+    'campo-columnas-ocultas': 'Show hidden columns',
+    'opcion-todo': 'Everything',
+    'opcion-celdas': 'Selected cells only',
+    'aria-cuadricula': 'Cell selection grid',
+    'ayuda-seleccion': 'Drag across the grid to mark a rectangle or enter a range (for example, A1:D8). Use Ctrl or Shift to select multiple ranges.',
+    'campo-rango-celdas': 'Cell range',
+    'boton-agregar-rango': 'Add range',
+    'rangos-a-imprimir': 'Ranges to print',
+    'quitar-rango': 'Remove range',
+    'error-rango-invalido': 'The range is invalid or outside the used area of the sheet.',
+    'error-sin-rangos': 'Add at least one cell range to generate the PDF.',
+    'error-rangos-ocultos': 'The selected ranges only contain hidden columns. Turn on “Show hidden columns” or choose different cells.',
     'campo-orientacion': 'Orientation',
     'opcion-vertical': 'Portrait',
     'opcion-horizontal': 'Landscape (more columns)',
     'campo-tamano': 'Page size',
-    'opcion-a4': 'A4',
-    'opcion-carta': 'Letter',
-    'opcion-legal': 'Legal',
-    'opcion-oficio': 'Oficio',
+    'opcion-a4': 'A4 (210 x 297 mm)',
+    'opcion-carta': 'Letter (216 x 279 mm)',
+    'opcion-legal': 'Legal (216 x 356 mm)',
+    'opcion-oficio': 'Oficio (216 x 330 mm)',
+    'opcion-a0': 'A0 (841 x 1189 mm)',
+    'opcion-4a0': '4A0 (1682 x 2378 mm)',
+    'opcion-2a0': '2A0 (1189 x 1682 mm)',
+    'opcion-arch-e': 'Architectural E (914 x 1219 mm)',
+    'opcion-ansi-e': 'ANSI E (864 x 1118 mm)',
+    'opcion-a1': 'A1 (594 x 841 mm)',
+    'opcion-a2': 'A2 (420 x 594 mm)',
+    'opcion-a3': 'A3 (297 x 420 mm)',
+    'opcion-a5': 'A5 (148 x 210 mm)',
+    'opcion-a6': 'A6 (105 x 148 mm)',
+    'opcion-b4': 'B4 JIS (257 x 364 mm)',
+    'opcion-b5': 'B5 JIS (182 x 257 mm)',
+    'opcion-tabloide': 'Tabloid (279 x 432 mm)',
+    'opcion-ejecutivo': 'Executive (184 x 267 mm)',
+    'opcion-media-carta': 'Statement (140 x 216 mm)',
+    'opcion-folio': 'Folio (216 x 330 mm)',
+    'opcion-personalizado': 'Custom',
+    'campo-ancho-personalizado': 'Width (mm)',
+    'campo-alto-personalizado': 'Height (mm)',
+    'vista-pdf-titulo': 'PDF preview',
+    'vista-pdf-cargando': 'Preparing PDF preview…',
+    'error-tamano-personalizado': 'Custom page dimensions must be valid and greater than 25 mm.',
     'campo-fuente': 'Font size',
+    'campo-limite-lineas': 'Lines per cell',
+    'opcion-sin-limite-lineas': 'No limit',
+    'opcion-ocho-lineas': 'Maximum 8 lines',
+    'campo-zoom': 'View zoom',
     'opcion-chico': 'Small',
     'opcion-mediano': 'Medium',
     'opcion-grande': 'Large',
     'boton-convertir': 'Generate PDF',
     'boton-convertir-generando': 'Generating...',
+    'boton-convertir-progreso': 'Generating PDF: {n} of {total} rows...',
+    'boton-convertir-finalizando': 'Finishing PDF...',
+    'aviso-caracteres': 'The fallback font does not cover every character in the file ({n} replaced); available currency symbols were preserved.',
     'vista-previa-titulo': 'Preview',
     'vista-previa-desc': 'This is what will be converted to PDF (already without empty rows/columns, with bold/italics/underline/color when the file has them).',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download PDF',
     'sin-datos': 'No data to show (the sheet is empty or all its rows/columns are empty).',
     'aviso-graficos': '📊 This sheet has {n} chart{s} — they’ll be added as extra pages after the table.',
+    'aviso-vista-parcial': 'The preview shows the first {n} of {total} rows. The PDF you download includes all of them.',
     'aviso-columnas': '⚠️ You have {n} columns — the text may end up very cropped. Try "Landscape" or "Small" font size.',
     'error-sin-datos': 'The sheet has no data.',
     'error-generar': 'Couldn’t generate the PDF',
@@ -100,7 +225,7 @@ window.i18nPagina = {
 <div id="fondoDecorativo"></div>
 
 <header class="sitio">
-  <div class="marca"><a href="../index.html" title="Mini Cookies"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"></a><a href="../index.html" style="color:inherit;text-decoration:none;"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
   <nav class="sitio"><a href="../excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
   <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
   </nav>
@@ -124,6 +249,39 @@ window.i18nPagina = {
         <select id="selectorHoja"></select>
       </label>
       <label class="campo">
+        <span data-i18n="campo-que-imprimir">Qué imprimir</span>
+        <select id="modoImpresion">
+          <option value="todo" data-i18n="opcion-todo">Todo</option>
+          <option value="celdas" data-i18n="opcion-celdas">Solo celdas seleccionadas</option>
+        </select>
+      </label>
+      <label class="campo campo-opcion">
+        <input id="mostrarColumnasOcultas" type="checkbox" checked>
+        <span data-i18n="campo-columnas-ocultas">Mostrar columnas ocultas</span>
+      </label>
+      <label class="campo campo-zoom">
+        <span data-i18n="campo-zoom">Zoom de vista</span>
+        <input id="controlZoom" type="range" min="70" max="150" step="10" value="100">
+        <output id="valorZoom" for="controlZoom">100%</output>
+      </label>
+    </div>
+
+    <div id="bloqueSeleccion" style="display:none;">
+      <p data-i18n="ayuda-seleccion">Arrastrá sobre la cuadrícula para marcar un rectángulo o escribí una dirección (por ejemplo, A1:D8). Podés agregar varios rangos.</p>
+      <div class="controles-seleccion" id="controlesRangos" style="display:none;">
+        <label class="campo">
+          <span data-i18n="campo-rango-celdas">Rango de celdas</span>
+          <input id="entradaRangoCeldas" type="text" placeholder="A1:D8" autocomplete="off" spellcheck="false">
+        </label>
+        <button class="boton" id="botonAgregarRango" type="button" data-i18n="boton-agregar-rango">Agregar rango</button>
+      </div>
+      <p style="margin:12px 0 0;" data-i18n="rangos-a-imprimir">Rangos que se imprimirán</p>
+      <ul id="listaRangos" class="lista-rangos"></ul>
+      <div class="contenedor-tabla contenedor-seleccion" id="contenedorSeleccion" tabindex="0" aria-label="Cuadrícula de celdas" data-i18n-attr="aria-label:aria-cuadricula"></div>
+    </div>
+
+    <div class="controles" id="controlesFormatoPdf" style="display:none;">
+      <label class="campo">
         <span data-i18n="campo-orientacion">Orientación</span>
         <select id="orientacion">
           <option value="vertical" data-i18n="opcion-vertical">Vertical</option>
@@ -133,12 +291,33 @@ window.i18nPagina = {
       <label class="campo">
         <span data-i18n="campo-tamano">Tamaño de página</span>
         <select id="tamanoPagina">
-          <option value="a4" selected data-i18n="opcion-a4">A4</option>
-          <option value="carta" data-i18n="opcion-carta">Carta (Letter)</option>
-          <option value="legal" data-i18n="opcion-legal">Legal</option>
-          <option value="oficio" data-i18n="opcion-oficio">Oficio</option>
+          <option value="4a0" data-i18n="opcion-4a0">4A0 (1682 x 2378 mm)</option>
+          <option value="2a0" data-i18n="opcion-2a0">2A0 (1189 x 1682 mm)</option>
+          <option value="arch-e" data-i18n="opcion-arch-e">Architectural E (914 x 1219 mm)</option>
+          <option value="a0" data-i18n="opcion-a0">A0 (841 x 1189 mm)</option>
+          <option value="ansi-e" data-i18n="opcion-ansi-e">ANSI E (864 x 1118 mm)</option>
+          <option value="a1" data-i18n="opcion-a1">A1 (594 x 841 mm)</option>
+          <option value="a2" data-i18n="opcion-a2">A2 (420 x 594 mm)</option>
+          <option value="a3" data-i18n="opcion-a3">A3 (297 x 420 mm)</option>
+          <option value="a4" selected data-i18n="opcion-a4">A4 (210 x 297 mm)</option>
+          <option value="a5" data-i18n="opcion-a5">A5 (148 x 210 mm)</option>
+          <option value="a6" data-i18n="opcion-a6">A6 (105 x 148 mm)</option>
+          <option value="b4" data-i18n="opcion-b4">B4 JIS (257 x 364 mm)</option>
+          <option value="b5" data-i18n="opcion-b5">B5 JIS (182 x 257 mm)</option>
+          <option value="carta" data-i18n="opcion-carta">Carta / Letter (216 x 279 mm)</option>
+          <option value="legal" data-i18n="opcion-legal">Legal (216 x 356 mm)</option>
+          <option value="oficio" data-i18n="opcion-oficio">Oficio (216 x 330 mm)</option>
+          <option value="tabloide" data-i18n="opcion-tabloide">Tabloide (279 x 432 mm)</option>
+          <option value="ejecutivo" data-i18n="opcion-ejecutivo">Ejecutivo (184 x 267 mm)</option>
+          <option value="media-carta" data-i18n="opcion-media-carta">Media carta (140 x 216 mm)</option>
+          <option value="folio" data-i18n="opcion-folio">Folio (216 x 330 mm)</option>
+          <option value="personalizado" data-i18n="opcion-personalizado">Personalizado</option>
         </select>
       </label>
+      <div id="camposPaginaPersonalizada" class="campos-pagina-personalizada">
+        <label class="campo"><span data-i18n="campo-ancho-personalizado">Ancho (mm)</span><input id="anchoPaginaPersonalizada" type="number" min="25" max="2000" step="1" value="210"></label>
+        <label class="campo"><span data-i18n="campo-alto-personalizado">Alto (mm)</span><input id="altoPaginaPersonalizada" type="number" min="25" max="2000" step="1" value="297"></label>
+      </div>
       <label class="campo">
         <span data-i18n="campo-fuente">Tamaño de letra</span>
         <select id="tamanoFuente">
@@ -147,14 +326,21 @@ window.i18nPagina = {
           <option value="11" data-i18n="opcion-grande">Grande</option>
         </select>
       </label>
+      <label class="campo">
+        <span data-i18n="campo-limite-lineas">Líneas por celda</span>
+        <select id="limiteLineasCelda">
+          <option value="sin-limite" selected data-i18n="opcion-sin-limite-lineas">Sin límite</option>
+          <option value="8" data-i18n="opcion-ocho-lineas">Máximo 8 líneas</option>
+        </select>
+      </label>
       <button class="boton" id="botonConvertir" type="button" data-i18n="boton-convertir">Generar PDF</button>
     </div>
 
     <div id="bloqueVistaPrevia" style="display:none;">
-      <h2 style="font-size:1.05rem; margin:20px 0 0;" data-i18n="vista-previa-titulo">Vista previa</h2>
-      <p style="color:var(--texto-suave); margin:4px 0 0;" data-i18n="vista-previa-desc">Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).</p>
+      <h2 style="font-size:1.05rem; margin:20px 0 0;" data-i18n="vista-pdf-titulo">Vista previa del PDF</h2>
       <p id="avisoObjetosHoja" style="color:var(--texto-suave); margin:4px 0 0; display:none;"></p>
-      <div class="contenedor-tabla" id="contenedorVistaPrevia"></div>
+      <iframe id="visorPdf" class="visor-pdf" title="Vista previa del PDF" data-i18n-attr="title:vista-pdf-titulo"></iframe>
+      <div class="contenedor-tabla" id="contenedorVistaPrevia" style="display:none;"></div>
     </div>
 
     <p id="advertencia" style="color:#b45309; display:none;"></p>
@@ -182,24 +368,153 @@ const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const listaArchivo = document.getElementById('listaArchivo');
 const controles = document.getElementById('controles');
+const controlesFormatoPdf = document.getElementById('controlesFormatoPdf');
 const campoHoja = document.getElementById('campoHoja');
 const selectorHoja = document.getElementById('selectorHoja');
+const modoImpresion = document.getElementById('modoImpresion');
+const mostrarColumnasOcultas = document.getElementById('mostrarColumnasOcultas');
+const controlZoom = document.getElementById('controlZoom');
+const valorZoom = document.getElementById('valorZoom');
 const botonConvertir = document.getElementById('botonConvertir');
 const advertencia = document.getElementById('advertencia');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
 const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
+const visorPdf = document.getElementById('visorPdf');
 const avisoObjetosHoja = document.getElementById('avisoObjetosHoja');
+const bloqueSeleccion = document.getElementById('bloqueSeleccion');
+const controlesRangos = document.getElementById('controlesRangos');
+const entradaRangoCeldas = document.getElementById('entradaRangoCeldas');
+const botonAgregarRango = document.getElementById('botonAgregarRango');
+const listaRangos = document.getElementById('listaRangos');
+const contenedorSeleccion = document.getElementById('contenedorSeleccion');
+const tamanoPagina = document.getElementById('tamanoPagina');
+const camposPaginaPersonalizada = document.getElementById('camposPaginaPersonalizada');
+const anchoPaginaPersonalizada = document.getElementById('anchoPaginaPersonalizada');
+const altoPaginaPersonalizada = document.getElementById('altoPaginaPersonalizada');
+const limiteLineasCelda = document.getElementById('limiteLineasCelda');
 
 let libroActual = null;
 let nombreArchivoActual = '';
 let bytesArchivoActual = null;
 let esXlsxActual = false;
+let secuenciaCargaArchivo = 0;
+let urlDescargaActual = null;
+let caracteresPdfAdaptados = 0;
+let datosFuenteUnicodeCache = null;
+let rangosPorHoja = new Map();
+let rangoHojaActual = null;
+let inicioArrastreSeleccion = null;
+let rangoEnCurso = null;
+let celdaActivaRangoEnCurso = null;
+let arrastrandoSeleccion = false;
+let renderSeleccionPendiente = false;
+let puntoPunteroSeleccion = null;
+let frameAutoScrollSeleccion = 0;
+let indiceRangoEnEdicion = null;
+let rangoSeMovio = false;
+let seleccionConControl = false;
+let zoomVistaTabla = 100;
+let punterosVista = new Map();
+let gestoPinza = null;
+let gestoPaneoVista = null;
+let indicesColumnasVistaPrevia = [];
+let anchosColumnasVistaPrevia = [];
+let indicesColumnasSeleccion = [];
+let anchosColumnasSeleccion = [];
+let cacheAnchosColumnas = new Map();
+let frameZoomGesto = 0;
+let urlVistaPreviaActual = null;
+let temporizadorVistaPreviaPdf = 0;
+let secuenciaVistaPreviaPdf = 0;
+let colaGeneracionPdf = Promise.resolve();
+
+const TAMANOS_PAGINA_PTS = {
+  '4a0': [1682, 2378].map(milimetros => milimetros * 72 / 25.4),
+  '2a0': [1189, 1682].map(milimetros => milimetros * 72 / 25.4),
+  'arch-e': [914.4, 1219.2].map(milimetros => milimetros * 72 / 25.4),
+  a0: [2384, 3370], a1: [1684, 2384], a2: [1191, 1684], a3: [842, 1191],
+  'ansi-e': [863.6, 1117.6].map(milimetros => milimetros * 72 / 25.4),
+  a4: [595, 842], a5: [420, 595], a6: [298, 420],
+  b4: [729, 1032], b5: [516, 729], carta: [612, 792], legal: [612, 1008],
+  oficio: [612, 936], tabloide: [792, 1224], ejecutivo: [522, 756],
+  'media-carta': [396, 612], folio: [612, 936],
+};
+
+const URL_FONTKIT = 'https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js';
+const URL_FUENTE_ALTERNATIVA = 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf';
+
+function liberarUrlDescarga() {
+  if (!urlDescargaActual) return;
+  URL.revokeObjectURL(urlDescargaActual);
+  urlDescargaActual = null;
+}
+
+function liberarUrlVistaPrevia() {
+  if (!urlVistaPreviaActual) return;
+  URL.revokeObjectURL(urlVistaPreviaActual);
+  urlVistaPreviaActual = null;
+}
+
+function mostrarPdfEnVistaPrevia(blob) {
+  liberarUrlVistaPrevia();
+  urlVistaPreviaActual = URL.createObjectURL(blob);
+  visorPdf.removeAttribute('srcdoc');
+  visorPdf.src = urlVistaPreviaActual;
+}
+
+function mostrarMensajeVistaPrevia(mensaje) {
+  visorPdf.removeAttribute('src');
+  visorPdf.srcdoc = `<p style="font:16px sans-serif;color:#444;padding:24px">${escaparHtml(mensaje)}</p>`;
+}
+
+function programarVistaPreviaPdf() {
+  if (!libroActual) return;
+  const secuencia = ++secuenciaVistaPreviaPdf;
+  clearTimeout(temporizadorVistaPreviaPdf);
+  temporizadorVistaPreviaPdf = setTimeout(() => {
+    if (modoImpresion.value === 'celdas' && rangosActuales().length === 0) {
+      mostrarMensajeVistaPrevia(t('error-sin-rangos'));
+      return;
+    }
+    mostrarMensajeVistaPrevia(t('vista-pdf-cargando'));
+    generarPdf(true, secuencia);
+  }, 350);
+}
+
+function actualizarCamposPaginaPersonalizada() {
+  camposPaginaPersonalizada.classList.toggle('visible', tamanoPagina.value === 'personalizado');
+}
+
+window.addEventListener('pagehide', () => {
+  liberarUrlDescarga();
+  liberarUrlVistaPrevia();
+});
 
 function escaparHtml(valor) {
   const texto = valor === null || valor === undefined ? '' : String(valor);
   return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+async function cargarDatosFuenteUnicode() {
+  if (datosFuenteUnicodeCache) return datosFuenteUnicodeCache;
+
+  if (!window.fontkit) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = URL_FONTKIT;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('No se pudo cargar fontkit.'));
+      document.head.appendChild(script);
+    });
+  }
+
+  const respuesta = await fetch(URL_FUENTE_ALTERNATIVA);
+  if (!respuesta.ok) throw new Error('No se pudo descargar Noto Sans.');
+  const bytes = new Uint8Array(await respuesta.arrayBuffer());
+  datosFuenteUnicodeCache = { bytes, fuente: window.fontkit.create(bytes) };
+  return datosFuenteUnicodeCache;
 }
 
 function estiloCeldaHtml(celdaInfo) {
@@ -212,6 +527,123 @@ function estiloCeldaHtml(celdaInfo) {
   return partes.length ? ` style="${partes.join(';')}"` : '';
 }
 
+function columnasVisiblesDeHoja(hoja, inicio, fin) {
+  const columnas = [];
+  const metadatos = hoja['!cols'] || [];
+  for (let columna = inicio; columna <= fin; columna++) {
+    if (mostrarColumnasOcultas.checked || !metadatos[columna]?.hidden) columnas.push(columna);
+  }
+  return columnas;
+}
+
+function anchoBaseColumna(hoja, columna) {
+  const movil = window.matchMedia('(max-width: 600px)').matches;
+  const cacheKey = `${nombreHojaActual()}|${mostrarColumnasOcultas.checked}|${columna}|${movil}`;
+  if (cacheAnchosColumnas.has(cacheKey)) return cacheAnchosColumnas.get(cacheKey);
+
+  const metadato = hoja['!cols']?.[columna] || {};
+  let ancho;
+  if (metadato.hidden && mostrarColumnasOcultas.checked && hoja['!ref']) {
+    const contexto = document.createElement('canvas').getContext('2d');
+    contexto.font = `${movil ? 11 : 14}px Arial`;
+    const rango = XLSX.utils.decode_range(hoja['!ref']);
+    let anchoTexto = 0;
+    for (let fila = rango.s.r; fila <= rango.e.r; fila++) {
+      const celda = hoja[XLSX.utils.encode_cell({ r: fila, c: columna })];
+      if (celda) anchoTexto = Math.max(anchoTexto, contexto.measureText(XLSX.utils.format_cell(celda)).width);
+    }
+    ancho = Math.max(movil ? 48 : 72, Math.ceil(anchoTexto + (movil ? 12 : 20)));
+  } else if (Number(metadato.wpx) > 0) {
+    ancho = Number(metadato.wpx);
+  } else if (Number(metadato.wch) > 0) {
+    ancho = Math.ceil(Number(metadato.wch) * 7 + 5);
+  } else {
+    ancho = movil ? 84 : 140;
+  }
+
+  cacheAnchosColumnas.set(cacheKey, ancho);
+  return ancho;
+}
+
+function aplicarZoomATabla(tabla, anchosBase, incluyeIndice = false) {
+  if (!tabla) return;
+  const escala = zoomVistaTabla / 100;
+  const movil = window.matchMedia('(max-width: 600px)').matches;
+  const raizPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const anchos = anchosBase || (tabla.classList.contains('tabla-seleccion') ? anchosColumnasSeleccion : anchosColumnasVistaPrevia);
+  const scroller = tabla.closest('.contenedor-tabla');
+  const anchoIndice = (movil ? 18 : 48) * escala;
+  tabla.style.setProperty('--tamano-fuente-vista', `${raizPx * (movil ? 0.7 : 0.85) * escala}px`);
+  tabla.style.setProperty('--relleno-y-vista', `${(movil ? 2 : 6) * escala}px`);
+  tabla.style.setProperty('--relleno-x-vista', `${(movil ? 4 : 10) * escala}px`);
+  tabla.style.setProperty('--ancho-indice-vista', `${anchoIndice}px`);
+  tabla.style.setProperty('--ancho-celda-vista', `${(movil ? 32 : 72) * escala}px`);
+  tabla.style.setProperty('--relleno-seleccion-y', `${escala}px`);
+  tabla.style.setProperty('--relleno-seleccion-x', `${3 * escala}px`);
+  tabla.style.setProperty('--alto-linea-vista', `${14 * escala}px`);
+
+  const grupoColumnas = document.createElement('colgroup');
+  if (incluyeIndice) {
+    const columnaIndice = document.createElement('col');
+    columnaIndice.style.width = `${anchoIndice}px`;
+    grupoColumnas.appendChild(columnaIndice);
+  }
+  let anchoTotal = incluyeIndice ? anchoIndice : 0;
+  anchos.forEach(anchoBase => {
+    const ancho = anchoBase * escala;
+    const columna = document.createElement('col');
+    columna.style.width = `${ancho}px`;
+    grupoColumnas.appendChild(columna);
+    anchoTotal += ancho;
+  });
+  tabla.querySelector('colgroup')?.remove();
+  tabla.prepend(grupoColumnas);
+  tabla.style.tableLayout = 'fixed';
+  tabla.style.width = `${Math.max(anchoTotal, scroller?.clientWidth || 0)}px`;
+  if (tabla.classList.contains('tabla-seleccion')) {
+    tabla.style.setProperty('--relleno-seleccion-y', `${escala}px`);
+    tabla.style.setProperty('--relleno-seleccion-x', `${3 * escala}px`);
+    tabla.style.setProperty('--alto-linea-vista', `${14 * escala}px`);
+  }
+}
+
+function aplicarZoomConAncla(nuevoZoom, scroller, puntoCliente, anclaContenido = null, zoomReferencia = zoomVistaTabla) {
+  const rect = scroller.getBoundingClientRect();
+  const puntoLocal = { x: puntoCliente.x - rect.left, y: puntoCliente.y - rect.top };
+  const ancla = anclaContenido || {
+    x: scroller.scrollLeft + puntoLocal.x,
+    y: scroller.scrollTop + puntoLocal.y,
+  };
+  const factor = nuevoZoom / zoomReferencia;
+  zoomVistaTabla = nuevoZoom;
+  controlZoom.value = String(nuevoZoom);
+  valorZoom.textContent = `${nuevoZoom}%`;
+
+  const tabla = scroller.querySelector('table');
+  aplicarZoomATabla(tabla);
+  if (scroller === contenedorSeleccion) {
+    renderizarCuadriculaSeleccion();
+  } else if (filasVistaPrevia.length > UMBRAL_VIRTUALIZACION) {
+    const fila = scroller.querySelector('tbody tr:not(.fila-espaciadora)');
+    const altura = fila?.getBoundingClientRect().height || 0;
+    if (altura > 0) alturaFilaMedida = altura;
+    ventanaRenderizada = { inicio: -1, fin: -1 };
+    actualizarVentanaSiHaceFalta();
+  }
+
+  scroller.scrollLeft = ancla.x * factor - puntoLocal.x;
+  scroller.scrollTop = ancla.y * factor - puntoLocal.y;
+}
+
+function actualizarZoomDesdeControl() {
+  const scroller = contenedorSeleccion;
+  const rect = scroller.getBoundingClientRect();
+  const puntoCliente = { x: rect.left + scroller.clientWidth / 2, y: rect.top + scroller.clientHeight / 2 };
+  aplicarZoomConAncla(Number(controlZoom.value), scroller, puntoCliente);
+}
+
+controlZoom.addEventListener('input', actualizarZoomDesdeControl);
+
 // Misma virtualización que ya usa visor-excel-csv.html: por debajo del umbral
 // se renderiza la tabla entera de una, y por encima solo las filas visibles
 // (+ sobrescaneo) para que el scroll no se sienta trabado con archivos grandes.
@@ -222,13 +654,32 @@ const ALTURA_FILA_ESTIMADA = 32;
 let columnasVistaPrevia = [];
 let filasVistaPrevia = [];
 let alturaFilaMedida = ALTURA_FILA_ESTIMADA;
+let alturasFilasVistaPrevia = [];
+let prefijosAlturasVistaPrevia = [0];
 let ventanaRenderizada = { inicio: -1, fin: -1 };
 let renderizadoPendiente = false;
 
+function crearPrefijosAltura(alturas) {
+  const prefijos = new Array(alturas.length + 1).fill(0);
+  for (let indice = 0; indice < alturas.length; indice++) prefijos[indice + 1] = prefijos[indice] + alturas[indice];
+  return prefijos;
+}
+
+function indiceEnPrefijosAltura(prefijos, posicion) {
+  let izquierda = 0;
+  let derecha = prefijos.length - 1;
+  while (izquierda < derecha) {
+    const medio = Math.ceil((izquierda + derecha) / 2);
+    if (prefijos[medio] <= posicion) izquierda = medio;
+    else derecha = medio - 1;
+  }
+  return Math.max(0, Math.min(prefijos.length - 2, izquierda));
+}
+
 function filaVistaPreviaHtml(indiceGlobal, celdasFila) {
   const clase = indiceGlobal % 2 === 0 ? '' : ' class="fila-par"';
-  let html = `<tr${clase}>`;
-  celdasFila.forEach((celdaInfo) => html += `<td${estiloCeldaHtml(celdaInfo)}>${escaparHtml(celdaInfo.texto)}</td>`);
+  let html = `<tr${clase} data-indice="${indiceGlobal}">`;
+  celdasFila.forEach((celdaInfo) => html += `<td${estiloCeldaHtml(celdaInfo)} title="${escaparHtml(celdaInfo.texto)}">${escaparHtml(celdaInfo.texto)}</td>`);
   return html + '</tr>';
 }
 
@@ -239,8 +690,8 @@ function filaEspaciadoraHtml(alturaPx) {
 function renderizarVentana(inicio, fin) {
   ventanaRenderizada = { inicio, fin };
   const total = filasVistaPrevia.length;
-  const alturaAntes = inicio * alturaFilaMedida;
-  const alturaDespues = (total - fin) * alturaFilaMedida;
+  const alturaAntes = prefijosAlturasVistaPrevia[inicio] || 0;
+  const alturaDespues = (prefijosAlturasVistaPrevia[total] || 0) - (prefijosAlturasVistaPrevia[fin] || 0);
 
   let html = filaEspaciadoraHtml(alturaAntes);
   for (let i = inicio; i < fin; i++) html += filaVistaPreviaHtml(i, filasVistaPrevia[i]);
@@ -248,15 +699,43 @@ function renderizarVentana(inicio, fin) {
 
   const tbody = contenedorVistaPrevia.querySelector('tbody');
   tbody.innerHTML = html;
+  medirVentanaVistaPrevia();
 }
 
 function calcularVentanaVisible() {
-  const scrollTop = contenedorVistaPrevia.scrollTop;
+  const alturaEncabezado = contenedorVistaPrevia.querySelector('thead')?.getBoundingClientRect().height || 0;
+  const scrollTop = Math.max(0, contenedorVistaPrevia.scrollTop - alturaEncabezado);
   const alturaVisible = contenedorVistaPrevia.clientHeight;
-  const inicio = Math.max(0, Math.floor(scrollTop / alturaFilaMedida) - SOBRESCANEO);
-  const cantidad = Math.ceil(alturaVisible / alturaFilaMedida) + SOBRESCANEO * 2;
-  const fin = Math.min(filasVistaPrevia.length, inicio + cantidad);
+  const primeroVisible = indiceEnPrefijosAltura(prefijosAlturasVistaPrevia, scrollTop);
+  const ultimoVisible = indiceEnPrefijosAltura(prefijosAlturasVistaPrevia, scrollTop + alturaVisible);
+  const inicio = Math.max(0, primeroVisible - SOBRESCANEO);
+  const fin = Math.min(filasVistaPrevia.length, ultimoVisible + SOBRESCANEO + 1);
   return { inicio, fin };
+}
+
+function medirVentanaVistaPrevia() {
+  requestAnimationFrame(() => {
+    const filas = [...contenedorVistaPrevia.querySelectorAll('tbody tr[data-indice]')];
+    if (filas.length === 0) return;
+    const alturaEncabezado = contenedorVistaPrevia.querySelector('thead')?.getBoundingClientRect().height || 0;
+    const scrollCuerpo = Math.max(0, contenedorVistaPrevia.scrollTop - alturaEncabezado);
+    const filaAncla = indiceEnPrefijosAltura(prefijosAlturasVistaPrevia, scrollCuerpo);
+    const desplazamientoAncla = scrollCuerpo - prefijosAlturasVistaPrevia[filaAncla];
+    let cambio = false;
+    filas.forEach(fila => {
+      const indice = Number(fila.dataset.indice);
+      const altura = fila.getBoundingClientRect().height;
+      if (altura > 0 && Math.abs(altura - alturasFilasVistaPrevia[indice]) > 0.5) {
+        alturasFilasVistaPrevia[indice] = altura;
+        cambio = true;
+      }
+    });
+    if (!cambio) return;
+    prefijosAlturasVistaPrevia = crearPrefijosAltura(alturasFilasVistaPrevia);
+    contenedorVistaPrevia.scrollTop = alturaEncabezado + prefijosAlturasVistaPrevia[filaAncla] + desplazamientoAncla;
+    ventanaRenderizada = { inicio: -1, fin: -1 };
+    actualizarVentanaSiHaceFalta();
+  });
 }
 
 function actualizarVentanaSiHaceFalta() {
@@ -287,11 +766,15 @@ function mostrarVistaPrevia(matriz) {
 
   columnasVistaPrevia = matriz[0];
   filasVistaPrevia = matriz.slice(1);
+  indicesColumnasVistaPrevia = matriz.indicesColumnas || columnasVistaPrevia.map((_, i) => i);
+  anchosColumnasVistaPrevia = indicesColumnasVistaPrevia.map(columna => anchoBaseColumna(libroActual.Sheets[nombreHojaActual()], columna));
   ventanaRenderizada = { inicio: -1, fin: -1 };
-  alturaFilaMedida = ALTURA_FILA_ESTIMADA;
+  alturaFilaMedida = ALTURA_FILA_ESTIMADA * zoomVistaTabla / 100;
+  alturasFilasVistaPrevia = Array(filasVistaPrevia.length).fill(alturaFilaMedida);
+  prefijosAlturasVistaPrevia = crearPrefijosAltura(alturasFilasVistaPrevia);
 
   let htmlEncabezado = '<thead><tr>';
-  columnasVistaPrevia.forEach((celdaInfo) => htmlEncabezado += `<th${estiloCeldaHtml(celdaInfo)}>${escaparHtml(celdaInfo.texto)}</th>`);
+  columnasVistaPrevia.forEach((celdaInfo) => htmlEncabezado += `<th${estiloCeldaHtml(celdaInfo)} title="${escaparHtml(celdaInfo.texto)}">${escaparHtml(celdaInfo.texto)}</th>`);
   htmlEncabezado += '</tr></thead>';
 
   if (filasVistaPrevia.length <= UMBRAL_VIRTUALIZACION) {
@@ -299,32 +782,519 @@ function mostrarVistaPrevia(matriz) {
     filasVistaPrevia.forEach((fila, indice) => htmlFilas += filaVistaPreviaHtml(indice, fila));
     htmlFilas += '</tbody>';
     contenedorVistaPrevia.innerHTML = `<table class="tabla-datos">${htmlEncabezado}${htmlFilas}</table>`;
+    aplicarZoomATabla(contenedorVistaPrevia.querySelector('table'), anchosColumnasVistaPrevia);
     return;
   }
 
   contenedorVistaPrevia.scrollTop = 0;
   contenedorVistaPrevia.innerHTML = `<table class="tabla-datos">${htmlEncabezado}<tbody></tbody></table>`;
+  aplicarZoomATabla(contenedorVistaPrevia.querySelector('table'), anchosColumnasVistaPrevia);
   const { inicio, fin } = calcularVentanaVisible();
   renderizarVentana(inicio, fin);
 
-  requestAnimationFrame(() => {
-    const filaMedida = contenedorVistaPrevia.querySelector('tbody tr:not(.fila-espaciadora)');
-    if (!filaMedida) return;
-    const alturaReal = filaMedida.getBoundingClientRect().height;
-    if (alturaReal > 0 && Math.abs(alturaReal - alturaFilaMedida) > 0.5) {
-      alturaFilaMedida = alturaReal;
-      ventanaRenderizada = { inicio: -1, fin: -1 };
-      actualizarVentanaSiHaceFalta();
-    }
+}
+
+let alturaFilaSeleccion = 34;
+let alturasFilasSeleccion = [];
+let prefijosAlturasSeleccion = [0];
+let claveAlturasSeleccion = '';
+const SOBRESCANEO_SELECCION = 8;
+
+function nombreHojaActual() {
+  return campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual?.SheetNames[0];
+}
+
+function rangosActuales() {
+  const nombreHoja = nombreHojaActual();
+  if (!rangosPorHoja.has(nombreHoja)) rangosPorHoja.set(nombreHoja, []);
+  return rangosPorHoja.get(nombreHoja);
+}
+
+function referenciaRango(rango) {
+  const inicio = XLSX.utils.encode_cell(rango.s);
+  const fin = XLSX.utils.encode_cell(rango.e);
+  return inicio === fin ? inicio : `${inicio}:${fin}`;
+}
+
+function normalizarRango(rango) {
+  return {
+    s: { r: Math.min(rango.s.r, rango.e.r), c: Math.min(rango.s.c, rango.e.c) },
+    e: { r: Math.max(rango.s.r, rango.e.r), c: Math.max(rango.s.c, rango.e.c) },
+  };
+}
+
+function rangoDesdeTexto(texto) {
+  const hoja = libroActual?.Sheets[nombreHojaActual()];
+  if (!hoja?.['!ref']) return null;
+  try {
+    const rango = normalizarRango(XLSX.utils.decode_range(texto.trim().toUpperCase()));
+    const limites = XLSX.utils.decode_range(hoja['!ref']);
+    if (rango.s.r < limites.s.r || rango.s.c < limites.s.c || rango.e.r > limites.e.r || rango.e.c > limites.e.c) return null;
+    return rango;
+  } catch {
+    return null;
+  }
+}
+
+function celdaDentroDeRango(fila, columna, rango) {
+  return rango && fila >= rango.s.r && fila <= rango.e.r && columna >= rango.s.c && columna <= rango.e.c;
+}
+
+function renderizarListaRangos() {
+  listaRangos.replaceChildren();
+  rangosActuales().forEach((rango, indice) => {
+    const elemento = document.createElement('li');
+    const texto = document.createElement('span');
+    texto.textContent = rango.referencia;
+    const quitar = document.createElement('button');
+    quitar.type = 'button';
+    quitar.textContent = '×';
+    quitar.title = t('quitar-rango');
+    quitar.setAttribute('aria-label', `${t('quitar-rango')} ${rango.referencia}`);
+    quitar.dataset.indice = indice;
+    elemento.append(texto, quitar);
+    listaRangos.appendChild(elemento);
   });
 }
 
+function actualizarMarcasSeleccion() {
+  const rangos = rangosActuales();
+  contenedorSeleccion.querySelectorAll('td[data-fila][data-columna]').forEach(celda => {
+    const fila = Number(celda.dataset.fila);
+    const columna = Number(celda.dataset.columna);
+    const agregada = rangos.some(rango => celdaDentroDeRango(fila, columna, rango));
+    const enCurso = celdaDentroDeRango(fila, columna, rangoEnCurso);
+    celda.classList.toggle('celda-marcada', agregada || enCurso);
+    celda.classList.toggle('celda-en-curso', enCurso && !agregada);
+  });
+}
+
+function renderizarCuadriculaSeleccion() {
+  const hoja = libroActual?.Sheets[nombreHojaActual()];
+  if (!hoja?.['!ref']) {
+    contenedorSeleccion.innerHTML = `<p>${t('sin-datos')}</p>`;
+    rangoHojaActual = null;
+    return;
+  }
+
+  rangoHojaActual = XLSX.utils.decode_range(hoja['!ref']);
+  indicesColumnasSeleccion = columnasVisiblesDeHoja(hoja, rangoHojaActual.s.c, rangoHojaActual.e.c);
+  anchosColumnasSeleccion = indicesColumnasSeleccion.map(columna => anchoBaseColumna(hoja, columna));
+  const columnas = indicesColumnasSeleccion.length;
+  const totalFilas = rangoHojaActual.e.r - rangoHojaActual.s.r + 1;
+  const claveActual = `${nombreHojaActual()}|${hoja['!ref']}|${zoomVistaTabla}|${mostrarColumnasOcultas.checked}|${window.matchMedia('(max-width: 600px)').matches}`;
+  if (claveActual !== claveAlturasSeleccion || alturasFilasSeleccion.length !== totalFilas) {
+    claveAlturasSeleccion = claveActual;
+    alturaFilaSeleccion = (window.matchMedia('(max-width: 600px)').matches ? 17 : 34) * zoomVistaTabla / 100;
+    alturasFilasSeleccion = Array(totalFilas).fill(alturaFilaSeleccion);
+    prefijosAlturasSeleccion = crearPrefijosAltura(alturasFilasSeleccion);
+  }
+  const alturaEncabezado = contenedorSeleccion.querySelector('thead')?.getBoundingClientRect().height || alturaFilaSeleccion;
+  const scrollCuerpo = Math.max(0, contenedorSeleccion.scrollTop - alturaEncabezado);
+  const primeroVisible = indiceEnPrefijosAltura(prefijosAlturasSeleccion, scrollCuerpo);
+  const ultimoVisible = indiceEnPrefijosAltura(prefijosAlturasSeleccion, scrollCuerpo + contenedorSeleccion.clientHeight);
+  const inicio = Math.max(0, primeroVisible - SOBRESCANEO_SELECCION);
+  const fin = Math.min(totalFilas, ultimoVisible + SOBRESCANEO_SELECCION + 1);
+  let html = '<table class="tabla-datos tabla-seleccion"><thead><tr><th class="indice-fila"></th>';
+  for (const columna of indicesColumnasSeleccion) html += `<th>${XLSX.utils.encode_col(columna)}</th>`;
+  html += '</tr></thead><tbody>';
+  if (inicio > 0) html += `<tr class="fila-espaciadora" aria-hidden="true" style="height:${prefijosAlturasSeleccion[inicio]}px"><td colspan="${columnas + 1}"></td></tr>`;
+  for (let indice = inicio; indice < fin; indice++) {
+    const fila = rangoHojaActual.s.r + indice;
+    html += `<tr data-indice="${indice}"><th class="indice-fila">${fila + 1}</th>`;
+    for (const columna of indicesColumnasSeleccion) {
+      const celda = leerCeldaConEstilo(hoja, fila, columna);
+      const referencia = XLSX.utils.encode_cell({ r: fila, c: columna });
+      html += `<td data-fila="${fila}" data-columna="${columna}"${estiloCeldaHtml(celda)} title="${escaparHtml(celda.texto)}" aria-label="${referencia}: ${escaparHtml(celda.texto)}">${escaparHtml(celda.texto)}</td>`;
+    }
+    html += '</tr>';
+  }
+  if (fin < totalFilas) html += `<tr class="fila-espaciadora" aria-hidden="true" style="height:${prefijosAlturasSeleccion[totalFilas] - prefijosAlturasSeleccion[fin]}px"><td colspan="${columnas + 1}"></td></tr>`;
+  html += '</tbody></table>';
+  contenedorSeleccion.innerHTML = html;
+  aplicarZoomATabla(contenedorSeleccion.querySelector('table'), anchosColumnasSeleccion, true);
+  medirVentanaSeleccion(alturaEncabezado);
+  actualizarMarcasSeleccion();
+}
+
+function medirVentanaSeleccion(alturaEncabezado) {
+  requestAnimationFrame(() => {
+    const filas = [...contenedorSeleccion.querySelectorAll('tbody tr[data-indice]')];
+    if (filas.length === 0) return;
+    const scrollCuerpo = Math.max(0, contenedorSeleccion.scrollTop - alturaEncabezado);
+    const filaAncla = indiceEnPrefijosAltura(prefijosAlturasSeleccion, scrollCuerpo);
+    const desplazamientoAncla = scrollCuerpo - prefijosAlturasSeleccion[filaAncla];
+    let cambio = false;
+    filas.forEach(fila => {
+      const indice = Number(fila.dataset.indice);
+      const altura = fila.getBoundingClientRect().height;
+      if (altura > 0 && Math.abs(altura - alturasFilasSeleccion[indice]) > 0.5) {
+        alturasFilasSeleccion[indice] = altura;
+        cambio = true;
+      }
+    });
+    if (!cambio) return;
+    prefijosAlturasSeleccion = crearPrefijosAltura(alturasFilasSeleccion);
+    contenedorSeleccion.scrollTop = alturaEncabezado + prefijosAlturasSeleccion[filaAncla] + desplazamientoAncla;
+    renderizarCuadriculaSeleccion();
+  });
+}
+
+function programarRenderCuadriculaSeleccion() {
+  if (renderSeleccionPendiente) return;
+  renderSeleccionPendiente = true;
+  requestAnimationFrame(() => {
+    renderSeleccionPendiente = false;
+    renderizarCuadriculaSeleccion();
+  });
+}
+
+function actualizarRangoEnCurso(fila, columna) {
+  if (!inicioArrastreSeleccion) return;
+  if (celdaActivaRangoEnCurso && (celdaActivaRangoEnCurso.r !== fila || celdaActivaRangoEnCurso.c !== columna)) rangoSeMovio = true;
+  celdaActivaRangoEnCurso = { r: fila, c: columna };
+  rangoEnCurso = normalizarRango({ s: inicioArrastreSeleccion, e: { r: fila, c: columna } });
+  entradaRangoCeldas.value = referenciaRango(rangoEnCurso);
+  actualizarMarcasSeleccion();
+}
+
+function agregarRangoSeleccionado() {
+  const rango = entradaRangoCeldas.value.trim() ? rangoDesdeTexto(entradaRangoCeldas.value) : rangoEnCurso;
+  if (!rango) {
+    advertencia.textContent = t('error-rango-invalido');
+    advertencia.style.display = 'block';
+    return;
+  }
+  rango.referencia = referenciaRango(rango);
+  rango.ancla = inicioArrastreSeleccion || rango.s;
+  rango.activo = celdaActivaRangoEnCurso || rango.e;
+  if (indiceRangoEnEdicion === null) rangosActuales().push(rango);
+  else rangosActuales()[indiceRangoEnEdicion] = rango;
+  entradaRangoCeldas.value = '';
+  rangoEnCurso = null;
+  inicioArrastreSeleccion = null;
+  celdaActivaRangoEnCurso = null;
+  indiceRangoEnEdicion = null;
+  advertencia.style.display = 'none';
+  renderizarListaRangos();
+  actualizarMarcasSeleccion();
+}
+
+function actualizarModoImpresion() {
+  if (!libroActual) return;
+  actualizarVistaPrevia();
+}
+
+function medirPunterosPinza() {
+  const puntos = [...punterosVista.values()].slice(0, 2);
+  if (puntos.length < 2) return null;
+  return {
+    x: (puntos[0].x + puntos[1].x) / 2,
+    y: (puntos[0].y + puntos[1].y) / 2,
+    distancia: Math.hypot(puntos[1].x - puntos[0].x, puntos[1].y - puntos[0].y),
+  };
+}
+
+function iniciarGestoPinza(scroller) {
+  const medida = medirPunterosPinza();
+  if (!medida || medida.distancia < 8) return;
+  const rect = scroller.getBoundingClientRect();
+  gestoPinza = {
+    scroller,
+    zoom: zoomVistaTabla,
+    distancia: medida.distancia,
+    ancla: {
+      x: scroller.scrollLeft + medida.x - rect.left,
+      y: scroller.scrollTop + medida.y - rect.top,
+    },
+  };
+  gestoPaneoVista = null;
+}
+
+function programarZoomPinza() {
+  if (frameZoomGesto) return;
+  frameZoomGesto = requestAnimationFrame(() => {
+    frameZoomGesto = 0;
+    if (!gestoPinza) return;
+    const medida = medirPunterosPinza();
+    if (!medida || medida.distancia < 8) return;
+    const escala = medida.distancia / gestoPinza.distancia;
+    const zoom = Math.max(70, Math.min(150, Math.round(gestoPinza.zoom * escala * 10) / 10));
+    aplicarZoomConAncla(zoom, gestoPinza.scroller, medida, gestoPinza.ancla, gestoPinza.zoom);
+  });
+}
+
+function registrarPunteroTactil(evento, scroller) {
+  if (evento.pointerType !== 'touch') return false;
+  evento.preventDefault();
+  punterosVista.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+  try { scroller.setPointerCapture(evento.pointerId); } catch {}
+  return true;
+}
+
+function soltarPunteroTactil(evento, scroller) {
+  if (evento.pointerType !== 'touch') return;
+  punterosVista.delete(evento.pointerId);
+  if (gestoPinza?.scroller === scroller) {
+    gestoPinza = null;
+    gestoPaneoVista = null;
+  }
+  if (gestoPaneoVista?.scroller === scroller && gestoPaneoVista.id === evento.pointerId) gestoPaneoVista = null;
+}
+
+contenedorVistaPrevia.addEventListener('pointerdown', evento => {
+  if (!registrarPunteroTactil(evento, contenedorVistaPrevia)) return;
+  if (punterosVista.size >= 2) iniciarGestoPinza(contenedorVistaPrevia);
+  else gestoPaneoVista = {
+    id: evento.pointerId,
+    scroller: contenedorVistaPrevia,
+    x: evento.clientX,
+    y: evento.clientY,
+    left: contenedorVistaPrevia.scrollLeft,
+    top: contenedorVistaPrevia.scrollTop,
+  };
+});
+contenedorVistaPrevia.addEventListener('pointermove', evento => {
+  if (evento.pointerType !== 'touch' || !punterosVista.has(evento.pointerId)) return;
+  punterosVista.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+  if (gestoPinza?.scroller === contenedorVistaPrevia) {
+    programarZoomPinza();
+  } else if (gestoPaneoVista?.id === evento.pointerId) {
+    contenedorVistaPrevia.scrollLeft = gestoPaneoVista.left - (evento.clientX - gestoPaneoVista.x);
+    contenedorVistaPrevia.scrollTop = gestoPaneoVista.top - (evento.clientY - gestoPaneoVista.y);
+  }
+});
+contenedorVistaPrevia.addEventListener('pointerup', evento => soltarPunteroTactil(evento, contenedorVistaPrevia));
+contenedorVistaPrevia.addEventListener('pointercancel', evento => {
+  if (evento.pointerType !== 'touch') return;
+  punterosVista.clear();
+  gestoPinza = null;
+  gestoPaneoVista = null;
+});
+
+function velocidadAutoScroll(posicion, inicio, fin, zona) {
+  if (posicion < inicio + zona) return -Math.min(18, Math.ceil((inicio + zona - posicion) / 4));
+  if (posicion > fin - zona) return Math.min(18, Math.ceil((posicion - (fin - zona)) / 4));
+  return 0;
+}
+
+function celdaSeleccionEnPunto(x, y) {
+  const directa = document.elementFromPoint(x, y)?.closest('td[data-fila][data-columna]');
+  if (directa && contenedorSeleccion.contains(directa)) return directa;
+
+  let filaCercana = null;
+  let distanciaVerticalMinima = Infinity;
+  contenedorSeleccion.querySelectorAll('tbody tr:not(.fila-espaciadora)').forEach(fila => {
+    const rect = fila.getBoundingClientRect();
+    const distancia = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0;
+    if (distancia < distanciaVerticalMinima) {
+      distanciaVerticalMinima = distancia;
+      filaCercana = fila;
+    }
+  });
+  if (!filaCercana || distanciaVerticalMinima > 48) return null;
+
+  let celdaCercana = null;
+  let distanciaHorizontalMinima = Infinity;
+  filaCercana.querySelectorAll('td[data-fila][data-columna]').forEach(celda => {
+    const rect = celda.getBoundingClientRect();
+    const distancia = x < rect.left ? rect.left - x : x > rect.right ? x - rect.right : 0;
+    if (distancia < distanciaHorizontalMinima) {
+      distanciaHorizontalMinima = distancia;
+      celdaCercana = celda;
+    }
+  });
+  return distanciaHorizontalMinima <= 48 ? celdaCercana : null;
+}
+
+function actualizarRangoBajoPuntero() {
+  if (!puntoPunteroSeleccion) return;
+  const rect = contenedorSeleccion.getBoundingClientRect();
+  const x = Math.max(rect.left + 2, Math.min(rect.right - 2, puntoPunteroSeleccion.x));
+  const y = Math.max(rect.top + 2, Math.min(rect.bottom - 2, puntoPunteroSeleccion.y));
+  const celda = celdaSeleccionEnPunto(x, y);
+  if (celda) actualizarRangoEnCurso(Number(celda.dataset.fila), Number(celda.dataset.columna));
+}
+
+function detenerAutoScrollSeleccion() {
+  if (frameAutoScrollSeleccion) cancelAnimationFrame(frameAutoScrollSeleccion);
+  frameAutoScrollSeleccion = 0;
+}
+
+function avanzarAutoScrollSeleccion() {
+  frameAutoScrollSeleccion = 0;
+  if (!arrastrandoSeleccion || !puntoPunteroSeleccion) return;
+  const rect = contenedorSeleccion.getBoundingClientRect();
+  const dx = velocidadAutoScroll(puntoPunteroSeleccion.x, rect.left, rect.right, 44);
+  const dy = velocidadAutoScroll(puntoPunteroSeleccion.y, rect.top, rect.bottom, 44);
+  const anteriorX = contenedorSeleccion.scrollLeft;
+  const anteriorY = contenedorSeleccion.scrollTop;
+  contenedorSeleccion.scrollLeft += dx;
+  contenedorSeleccion.scrollTop += dy;
+  if (anteriorX === contenedorSeleccion.scrollLeft && anteriorY === contenedorSeleccion.scrollTop) return;
+  actualizarRangoBajoPuntero();
+  frameAutoScrollSeleccion = requestAnimationFrame(avanzarAutoScrollSeleccion);
+}
+
+function programarAutoScrollSeleccion(x, y) {
+  puntoPunteroSeleccion = { x, y };
+  const rect = contenedorSeleccion.getBoundingClientRect();
+  const cercaDelBorde = Math.abs(velocidadAutoScroll(x, rect.left, rect.right, 44)) > 0
+    || Math.abs(velocidadAutoScroll(y, rect.top, rect.bottom, 44)) > 0;
+  if (cercaDelBorde && !frameAutoScrollSeleccion) {
+    frameAutoScrollSeleccion = requestAnimationFrame(avanzarAutoScrollSeleccion);
+  } else if (!cercaDelBorde) {
+    detenerAutoScrollSeleccion();
+  }
+}
+
+function alternarCeldaConControl() {
+  if (!inicioArrastreSeleccion) return;
+  const rango = normalizarRango({ s: inicioArrastreSeleccion, e: inicioArrastreSeleccion });
+  const rangos = rangosActuales();
+  const indice = rangos.findIndex(actual => actual.s.r === rango.s.r && actual.s.c === rango.s.c && actual.e.r === rango.e.r && actual.e.c === rango.e.c);
+  if (indice >= 0) rangos.splice(indice, 1);
+  else rangos.push({ ...rango, referencia: referenciaRango(rango), ancla: inicioArrastreSeleccion, activo: inicioArrastreSeleccion });
+  entradaRangoCeldas.value = '';
+  rangoEnCurso = null;
+  inicioArrastreSeleccion = null;
+  celdaActivaRangoEnCurso = null;
+  indiceRangoEnEdicion = null;
+  advertencia.style.display = 'none';
+  renderizarListaRangos();
+  actualizarMarcasSeleccion();
+}
+
+function finalizarArrastreSeleccion(evento) {
+  const eraPinza = gestoPinza?.scroller === contenedorSeleccion;
+  soltarPunteroTactil(evento, contenedorSeleccion);
+  if (eraPinza) return;
+  if (!arrastrandoSeleccion) return;
+  arrastrandoSeleccion = false;
+  detenerAutoScrollSeleccion();
+  if (seleccionConControl && indiceRangoEnEdicion === null && !rangoSeMovio) alternarCeldaConControl();
+  seleccionConControl = false;
+  rangoSeMovio = false;
+  puntoPunteroSeleccion = null;
+}
+
+function cancelarArrastreSeleccion(evento) {
+  if (evento?.pointerType === 'touch') {
+    punterosVista.clear();
+    gestoPinza = null;
+    gestoPaneoVista = null;
+  }
+  if (!arrastrandoSeleccion) return;
+  arrastrandoSeleccion = false;
+  detenerAutoScrollSeleccion();
+  entradaRangoCeldas.value = '';
+  inicioArrastreSeleccion = null;
+  celdaActivaRangoEnCurso = null;
+  rangoEnCurso = null;
+  indiceRangoEnEdicion = null;
+  seleccionConControl = false;
+  rangoSeMovio = false;
+  puntoPunteroSeleccion = null;
+  actualizarMarcasSeleccion();
+}
+
+contenedorSeleccion.addEventListener('scroll', programarRenderCuadriculaSeleccion);
+contenedorSeleccion.addEventListener('pointerdown', evento => {
+  if (registrarPunteroTactil(evento, contenedorSeleccion)) {
+    if (punterosVista.size >= 2) {
+      cancelarArrastreSeleccion();
+      iniciarGestoPinza(contenedorSeleccion);
+      return;
+    }
+  }
+  const celda = evento.target.closest('td[data-fila][data-columna]');
+  if (!celda) return;
+  evento.preventDefault();
+  arrastrandoSeleccion = true;
+  rangoSeMovio = false;
+  seleccionConControl = evento.ctrlKey || evento.metaKey;
+  const rangos = rangosActuales();
+  indiceRangoEnEdicion = evento.shiftKey && rangos.length ? rangos.length - 1 : null;
+  const ancla = indiceRangoEnEdicion === null
+    ? { r: Number(celda.dataset.fila), c: Number(celda.dataset.columna) }
+    : rangos[indiceRangoEnEdicion].ancla || rangos[indiceRangoEnEdicion].s;
+  inicioArrastreSeleccion = { r: ancla.r, c: ancla.c };
+  celdaActivaRangoEnCurso = null;
+  actualizarRangoEnCurso(Number(celda.dataset.fila), Number(celda.dataset.columna));
+  programarAutoScrollSeleccion(evento.clientX, evento.clientY);
+  try { contenedorSeleccion.setPointerCapture(evento.pointerId); } catch {}
+});
+contenedorSeleccion.addEventListener('pointermove', evento => {
+  if (evento.pointerType === 'touch' && punterosVista.has(evento.pointerId)) {
+    punterosVista.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+    if (gestoPinza?.scroller === contenedorSeleccion) {
+      programarZoomPinza();
+      return;
+    }
+  }
+  if (!arrastrandoSeleccion) return;
+  programarAutoScrollSeleccion(evento.clientX, evento.clientY);
+  const celda = celdaSeleccionEnPunto(evento.clientX, evento.clientY);
+  if (celda) {
+    const fila = Number(celda.dataset.fila);
+    const columna = Number(celda.dataset.columna);
+    if (fila !== inicioArrastreSeleccion.r || columna !== inicioArrastreSeleccion.c) rangoSeMovio = true;
+    actualizarRangoEnCurso(fila, columna);
+  }
+});
+contenedorSeleccion.addEventListener('pointerup', finalizarArrastreSeleccion);
+contenedorSeleccion.addEventListener('pointercancel', cancelarArrastreSeleccion);
+botonAgregarRango.addEventListener('click', agregarRangoSeleccionado);
+entradaRangoCeldas.addEventListener('keydown', evento => {
+  if (evento.key === 'Enter') {
+    evento.preventDefault();
+    agregarRangoSeleccionado();
+  }
+});
+entradaRangoCeldas.addEventListener('input', () => {
+  indiceRangoEnEdicion = null;
+  inicioArrastreSeleccion = null;
+  celdaActivaRangoEnCurso = null;
+  rangoEnCurso = null;
+  actualizarMarcasSeleccion();
+});
+listaRangos.addEventListener('click', evento => {
+  const boton = evento.target.closest('button[data-indice]');
+  if (!boton) return;
+  rangosActuales().splice(Number(boton.dataset.indice), 1);
+  renderizarListaRangos();
+  actualizarMarcasSeleccion();
+});
+modoImpresion.addEventListener('change', actualizarModoImpresion);
+mostrarColumnasOcultas.addEventListener('change', () => {
+  cacheAnchosColumnas.clear();
+  actualizarVistaPrevia();
+});
+
 function actualizarVistaPrevia() {
   if (!libroActual) return;
-  const nombreHoja = campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
-  mostrarVistaPrevia(leerHojaConEstilos(libroActual.Sheets[nombreHoja]));
+  const nombreHoja = nombreHojaActual();
+  bloqueVistaPrevia.style.display = 'block';
+  bloqueSeleccion.style.display = 'block';
+  controlesRangos.style.display = modoImpresion.value === 'celdas' ? 'flex' : 'none';
+  renderizarListaRangos();
+  renderizarCuadriculaSeleccion();
+  actualizarCamposPaginaPersonalizada();
+  programarVistaPreviaPdf();
   actualizarAvisoObjetosHoja(nombreHoja);
 }
+
+tamanoPagina.addEventListener('change', () => {
+  actualizarCamposPaginaPersonalizada();
+  programarVistaPreviaPdf();
+});
+document.getElementById('orientacion').addEventListener('change', programarVistaPreviaPdf);
+document.getElementById('tamanoFuente').addEventListener('change', programarVistaPreviaPdf);
+limiteLineasCelda.addEventListener('change', programarVistaPreviaPdf);
+[anchoPaginaPersonalizada, altoPaginaPersonalizada].forEach(input => input.addEventListener('input', programarVistaPreviaPdf));
+modoImpresion.addEventListener('change', programarVistaPreviaPdf);
+listaRangos.addEventListener('click', () => programarVistaPreviaPdf());
+botonAgregarRango.addEventListener('click', () => programarVistaPreviaPdf());
 
 // Muestra cuántas imágenes/gráficos tiene la hoja antes de generar el PDF,
 // para que no sea sorpresa recién al descargar. Usa las mismas funciones que
@@ -348,19 +1318,46 @@ async function actualizarAvisoObjetosHoja(nombreHoja) {
 }
 
 async function mostrarArchivo(archivo) {
+  const idCarga = ++secuenciaCargaArchivo;
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  nombreArchivoActual = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
   resultado.classList.remove('visible');
+  libroActual = null;
+  nombreArchivoActual = '';
+  bytesArchivoActual = null;
+  esXlsxActual = false;
+  rangosPorHoja.clear();
+  cacheAnchosColumnas.clear();
+  rangoEnCurso = null;
+  inicioArrastreSeleccion = null;
+  entradaRangoCeldas.value = '';
+  listaRangos.replaceChildren();
+  controles.style.display = 'none';
+  controlesFormatoPdf.style.display = 'none';
+  campoHoja.style.display = 'none';
+  bloqueVistaPrevia.style.display = 'none';
+  bloqueSeleccion.style.display = 'none';
+  avisoObjetosHoja.style.display = 'none';
+  contenedorVistaPrevia.innerHTML = '';
+  mostrarMensajeVistaPrevia(t('vista-pdf-cargando'));
+  liberarUrlVistaPrevia();
+  liberarUrlDescarga();
 
-  const bytes = await archivo.arrayBuffer();
-  bytesArchivoActual = bytes;
-  esXlsxActual = /\.(xlsx|xlsm)$/i.test(archivo.name);
+  let bytes;
+  let libro;
   try {
-    libroActual = await leerLibroDesdeArchivo(archivo, { cellStyles: true });
+    bytes = await archivo.arrayBuffer();
+    libro = await leerLibroDesdeArchivo(archivo, { cellStyles: true });
   } catch (error) {
+    if (idCarga !== secuenciaCargaArchivo) return;
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
+  if (idCarga !== secuenciaCargaArchivo) return;
+
+  libroActual = libro;
+  nombreArchivoActual = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+  bytesArchivoActual = bytes;
+  esXlsxActual = /\.(xlsx|xlsm)$/i.test(archivo.name);
 
   if (libroActual.SheetNames.length > 1) {
     selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
@@ -370,18 +1367,23 @@ async function mostrarArchivo(archivo) {
   }
 
   controles.style.display = 'flex';
+  controlesFormatoPdf.style.display = 'flex';
   actualizarVistaPrevia();
 }
 
 selectorHoja.addEventListener('change', actualizarVistaPrevia);
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(f.name));
+  const archivo = Array.from(listaFileList).find(f => /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
 zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
+entradaArchivo.addEventListener('change', (e) => {
+  const archivos = Array.from(e.target.files);
+  e.target.value = '';
+  elegirArchivo(archivos);
+});
 zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
 zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
 zonaArrastre.addEventListener('drop', (e) => {
@@ -390,14 +1392,163 @@ zonaArrastre.addEventListener('drop', (e) => {
   elegirArchivo(e.dataTransfer.files);
 });
 
-function truncarTexto(fuente, texto, tamano, anchoMaximo) {
-  texto = String(texto ?? '');
-  if (fuente.widthOfTextAtSize(texto, tamano) <= anchoMaximo) return texto;
-  let recortado = texto;
-  while (recortado.length > 1 && fuente.widthOfTextAtSize(recortado + '…', tamano) > anchoMaximo) {
-    recortado = recortado.slice(0, -1);
+const CODIGOS_MONEDA = new Map([
+  ['؋', 'AFN'], ['৳', 'BDT'], ['₿', 'BTC'], ['₵', 'GHS'], ['₡', 'CRC'],
+  ['₫', 'VND'], ['₭', 'LAK'], ['₦', 'NGN'], ['₱', 'PHP'], ['₲', 'PYG'],
+  ['₴', 'UAH'], ['₪', 'ILS'], ['₸', 'KZT'], ['₺', 'TRY'], ['₮', 'MNT'],
+  ['₩', 'KRW'], ['₹', 'INR'], ['₽', 'RUB'], ['﷼', 'SAR'],
+]);
+
+function necesitaFuenteUnicode(fuente, matriz) {
+  return matriz.some(fila => fila.some(celda => {
+    try {
+      fuente.encodeText(String(celda.texto ?? '').normalize('NFC'));
+      return false;
+    } catch {
+      return true;
+    }
+  }));
+}
+
+// Qué fuente dibuja cada carácter y cuánto mide, calculado UNA vez por
+// carácter y por fuente. Antes se volvía a preguntar a la fuente por cada
+// letra cada vez que se medía un texto, y partir una celda en líneas medía
+// de nuevo la línea entera por cada palabra agregada: con 20.000 filas el PDF
+// completo tardaba más de 4 minutos. El caché vive mientras viva la fuente,
+// que se crea de nuevo en cada PDF, así que nunca mezcla dos documentos.
+const cacheCaracteresPdf = new WeakMap();
+
+function infoCaracterPdf(fuente, caracter, fuenteUnicode, metadatosUnicode) {
+  let porCaracter = cacheCaracteresPdf.get(fuente);
+  if (!porCaracter) {
+    porCaracter = new Map();
+    cacheCaracteresPdf.set(fuente, porCaracter);
   }
-  return recortado + '…';
+  let info = porCaracter.get(caracter);
+  if (info) return info;
+
+  let fuenteCaracter = fuente;
+  let texto = caracter;
+  let adaptado = false;
+  try {
+    fuente.encodeText(caracter);
+  } catch {
+    if (fuenteUnicode && metadatosUnicode && metadatosUnicode.hasGlyphForCodePoint(caracter.codePointAt(0))) {
+      fuenteCaracter = fuenteUnicode;
+    } else {
+      texto = CODIGOS_MONEDA.get(caracter) || '?';
+      adaptado = true;
+    }
+  }
+  // El ancho se suma letra por letra, sin el ajuste entre pares (kerning)
+  // que incluye widthOfTextAtSize: drawText tampoco lo aplica al dibujar, así
+  // que esto coincide mejor con lo que realmente ocupa el texto en el PDF.
+  info = { texto, fuente: fuenteCaracter, ancho: fuenteCaracter.widthOfTextAtSize(texto, 1), adaptado };
+  porCaracter.set(caracter, info);
+  return info;
+}
+
+function prepararTextoPdf(fuente, texto, fuenteUnicode, metadatosUnicode) {
+  const caracteres = [];
+  const textoNormalizado = String(texto ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, ' ');
+  for (const caracter of textoNormalizado.normalize('NFC')) {
+    caracteres.push(infoCaracterPdf(fuente, caracter, fuenteUnicode, metadatosUnicode));
+  }
+  return caracteres;
+}
+
+function agruparCaracteresPdf(caracteres) {
+  const grupos = [];
+  caracteres.forEach(({ texto, fuente, ancho }) => {
+    const ultimo = grupos[grupos.length - 1];
+    if (ultimo && ultimo.fuente === fuente) {
+      ultimo.texto += texto;
+      ultimo.ancho += ancho;
+    } else {
+      grupos.push({ texto, fuente, ancho });
+    }
+  });
+  return grupos;
+}
+
+function medirTextoPdf(caracteres, tamano) {
+  let ancho = 0;
+  for (const caracter of caracteres) ancho += caracter.ancho;
+  return ancho * tamano;
+}
+
+function truncarTexto(fuente, texto, tamano, anchoMaximo, fuenteUnicode, metadatosUnicode) {
+  const caracteres = prepararTextoPdf(fuente, texto, fuenteUnicode, metadatosUnicode);
+  if (medirTextoPdf(caracteres, tamano) <= anchoMaximo) return caracteres;
+
+  const elipsis = infoCaracterPdf(fuente, '…', fuenteUnicode, metadatosUnicode);
+  let ancho = elipsis.ancho * tamano;
+  let cantidad = 0;
+  while (cantidad < caracteres.length && ancho + caracteres[cantidad].ancho * tamano <= anchoMaximo) {
+    ancho += caracteres[cantidad].ancho * tamano;
+    cantidad++;
+  }
+  return caracteres.slice(0, cantidad).concat(elipsis);
+}
+
+// --- Dibujo directo sobre el contenido de la página ---
+// pdf-lib guarda cada drawText/drawLine/drawRectangle como varios objetos en
+// memoria hasta el save(): con 20.000 filas eso pasaba de 1,5 GB y con más la
+// pestaña moría. Acá se escriben los mismos operadores PDF que generaría
+// pdf-lib, pero como texto, y al cerrar cada página se comprimen en un único
+// flujo. Lo que queda en memoria por página es ese flujo, no miles de objetos.
+// Las fuentes siguen siendo de pdf-lib (encodeText marca los glifos usados, así
+// que el subconjunto de Noto Sans se arma igual al guardar).
+function crearLienzoPdf(pdf, pagina) {
+  return { pdf, pagina, partes: [], fuentes: new Map() };
+}
+
+function numeroPdf(n) {
+  return Number.isInteger(n) ? String(n) : n.toFixed(3).replace(/\.?0+$/, '');
+}
+
+function colorPdf(color) {
+  return `${numeroPdf(color.red)} ${numeroPdf(color.green)} ${numeroPdf(color.blue)}`;
+}
+
+function nombreFuenteEnLienzo(lienzo, fuente) {
+  let nombre = lienzo.fuentes.get(fuente);
+  if (!nombre) {
+    nombre = lienzo.pagina.node.newFontDictionary(fuente.name, fuente.ref).toString();
+    lienzo.fuentes.set(fuente, nombre);
+  }
+  return nombre;
+}
+
+function textoEnLienzo(lienzo, texto, fuente, tamano, x, y, color) {
+  lienzo.partes.push(`BT ${nombreFuenteEnLienzo(lienzo, fuente)} ${numeroPdf(tamano)} Tf ${colorPdf(color)} rg ${numeroPdf(x)} ${numeroPdf(y)} Td ${fuente.encodeText(texto).toString()} Tj ET`);
+}
+
+function lineaEnLienzo(lienzo, x1, y1, x2, y2, grosor, color) {
+  lienzo.partes.push(`${colorPdf(color)} RG ${numeroPdf(grosor)} w ${numeroPdf(x1)} ${numeroPdf(y1)} m ${numeroPdf(x2)} ${numeroPdf(y2)} l S`);
+}
+
+function rectanguloEnLienzo(lienzo, x, y, ancho, alto, color) {
+  lienzo.partes.push(`${colorPdf(color)} rg ${numeroPdf(x)} ${numeroPdf(y)} ${numeroPdf(ancho)} ${numeroPdf(alto)} re f`);
+}
+
+function cerrarLienzoPdf(lienzo) {
+  if (!lienzo.partes.length) return;
+  const flujo = lienzo.pdf.context.flateStream(`q\n${lienzo.partes.join('\n')}\nQ\n`);
+  lienzo.pagina.node.addContentStream(lienzo.pdf.context.register(flujo));
+  lienzo.partes = [];
+}
+
+function dibujarTextoPdf(lienzo, caracteres, opciones) {
+  // Se cuentan al dibujar, no al medir: un mismo texto se mide varias veces
+  // y el aviso inflaba la cantidad de caracteres sustituidos.
+  for (const caracter of caracteres) if (caracter.adaptado) caracteresPdfAdaptados++;
+  let x = opciones.x;
+  agruparCaracteresPdf(caracteres).forEach(grupo => {
+    textoEnLienzo(lienzo, grupo.texto, grupo.fuente, opciones.size, x, opciones.y, opciones.color);
+    x += grupo.ancho * opciones.size;
+  });
+  return x - opciones.x;
 }
 
 function celdaVacia(texto) {
@@ -427,42 +1578,69 @@ function colorTextoLegible(fondo) {
   return luminancia > 0.6 ? { r: 0, g: 0, b: 0 } : { r: 1, g: 1, b: 1 };
 }
 
-// Lee la hoja celda por celda (en vez de sheet_to_json) para poder acceder a
-// cell.s (estilo), que sheet_to_json descarta. Devuelve una matriz de
-// {texto, negrita, cursiva, subrayado, color, relleno} ya sin columnas ni
-// filas completamente vacías.
-function leerHojaConEstilos(hoja) {
+function leerCeldaConEstilo(hoja, fila, columna) {
+  const celda = hoja[XLSX.utils.encode_cell({ r: fila, c: columna })];
+  const estilo = (celda && celda.s) || {};
+  const relleno = estilo.patternType === 'solid' ? colorDesdeHex(estilo.fgColor && estilo.fgColor.rgb) : null;
+  const colorFuente = colorDesdeHex(estilo.color && estilo.color.rgb);
+  return {
+    texto: celda ? XLSX.utils.format_cell(celda) : '',
+    negrita: !!estilo.bold,
+    cursiva: !!estilo.italic,
+    subrayado: !!estilo.underline,
+    color: colorFuente || (relleno ? colorTextoLegible(relleno) : null),
+    relleno,
+  };
+}
+
+function elegirFuente(negrita, cursiva) {
+  if (negrita && cursiva) return window.fuenteNegritaCursivaPdf || window.fuenteNegritaCursivaPdf;
+  if (negrita) return window.fuenteNegritaPdf || window.fuenteNegritaPdf;
+  if (cursiva) return window.fuenteCursivaPdf || window.fuenteCursivaPdf;
+  return window.fuenteBasePdf || window.fuenteBasePdf;
+}
+
+// Lee estilos celda por celda porque sheet_to_json los descarta.
+//
+// Recorre solo las celdas que EXISTEN en la hoja, no el rectángulo de '!ref'.
+// Antes armaba un objeto por cada posición del rango, vacía o no, y después lo
+// filtraba: con un archivo grande —o con un '!ref' inflado porque alguien le
+// dio formato a columnas enteras— la pestaña se quedaba sin memoria antes de
+// llegar a dibujar nada. Ahora primero se decide qué filas y columnas tienen
+// texto y recién después se leen esas, hasta 'maxFilas' (la vista previa no
+// necesita la hoja entera).
+const CELDA_SIN_DATOS = Object.freeze({ texto: '', negrita: false, cursiva: false, subrayado: false, color: null, relleno: null });
+
+function leerHojaConEstilos(hoja, maxFilas = Infinity) {
   if (!hoja['!ref']) return [];
   const rango = XLSX.utils.decode_range(hoja['!ref']);
-  const matriz = [];
-  for (let r = rango.s.r; r <= rango.e.r; r++) {
-    const fila = [];
-    for (let c = rango.s.c; c <= rango.e.c; c++) {
-      const celda = hoja[XLSX.utils.encode_cell({ r, c })];
-      const texto = celda ? XLSX.utils.format_cell(celda) : '';
-      const estilo = (celda && celda.s) || {};
-      const relleno = estilo.patternType === 'solid' ? colorDesdeHex(estilo.fgColor && estilo.fgColor.rgb) : null;
-      const colorFuente = colorDesdeHex(estilo.color && estilo.color.rgb);
-      fila.push({
-        texto,
-        negrita: !!estilo.bold,
-        cursiva: !!estilo.italic,
-        subrayado: !!estilo.underline,
-        color: colorFuente || (relleno ? colorTextoLegible(relleno) : null),
-        relleno,
-      });
-    }
-    matriz.push(fila);
+  const conTexto = [];
+  const columnasConTexto = new Set();
+  for (const referencia in hoja) {
+    if (referencia[0] === '!') continue;
+    const { r, c } = XLSX.utils.decode_cell(referencia);
+    if (r < rango.s.r || r > rango.e.r || c < rango.s.c || c > rango.e.c) continue;
+    if (celdaVacia(XLSX.utils.format_cell(hoja[referencia]))) continue;
+    conTexto.push(r, c);
+    columnasConTexto.add(c);
   }
 
-  const cantidadColumnasOriginal = matriz[0]?.length || 0;
-  const columnaConTexto = Array(cantidadColumnasOriginal).fill(false);
-  matriz.forEach(fila => fila.forEach((celda, i) => { if (!celdaVacia(celda.texto)) columnaConTexto[i] = true; }));
-  const columnasAConservar = columnaConTexto.map((tiene, i) => tiene ? i : -1).filter(i => i !== -1);
+  const columnasAConservar = [...columnasConTexto]
+    .filter(c => mostrarColumnasOcultas.checked || !hoja['!cols']?.[c]?.hidden)
+    .sort((x, y) => x - y);
+  const conservar = new Set(columnasAConservar);
+  const filasConTexto = new Set();
+  for (let i = 0; i < conTexto.length; i += 2) {
+    if (conservar.has(conTexto[i + 1])) filasConTexto.add(conTexto[i]);
+  }
+  const filas = [...filasConTexto].sort((x, y) => x - y);
 
-  return matriz
-    .map(fila => columnasAConservar.map(i => fila[i]))
-    .filter(fila => fila.some(celda => !celdaVacia(celda.texto)));
+  const resultado = filas.slice(0, maxFilas).map(r => columnasAConservar.map(c => (
+    hoja[XLSX.utils.encode_cell({ r, c })] ? leerCeldaConEstilo(hoja, r, c) : CELDA_SIN_DATOS
+  )));
+  resultado.indicesColumnas = columnasAConservar;
+  resultado.totalFilas = filas.length;
+  return resultado;
 }
 
 // --- Gráficos embebidos (solo .xlsx) ---
@@ -732,18 +1910,156 @@ async function renderizarGraficoComoPng(datosGrafico) {
   return blob.arrayBuffer();
 }
 
-botonConvertir.addEventListener('click', async () => {
-  botonConvertir.disabled = true;
-  botonConvertir.textContent = t('boton-convertir-generando');
+function anchoColumnaDesdeHoja(hoja, indiceColumna, fallback = 120) {
+  const metadato = hoja['!cols']?.[indiceColumna] || {};
+  if (Number(metadato.wpx) > 0) return Number(metadato.wpx);
+  if (Number(metadato.wch) > 0) return Math.max(50, Math.ceil(Number(metadato.wch) * 7 + 10));
+  return fallback;
+}
+
+function dividirTextoEnLineas(fuente, texto, anchoMaximo, tamano, fuenteUnicode, metadatosUnicode) {
+  const textoBase = String(texto ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (!textoBase) return [''];
+
+  const bloques = textoBase.split('\n');
+  const lineas = [];
+
+  for (const bloque of bloques) {
+    if (!bloque) {
+      lineas.push('');
+      continue;
+    }
+
+    const tokens = bloque.split(/(\s+)/g).filter((token) => token.length > 0);
+    let lineaActual = '';
+    let anchoLinea = 0;
+
+    // El ancho de la línea se va sumando palabra por palabra, en vez de volver
+    // a medir la línea entera cada vez que se le agrega una.
+    for (const token of tokens) {
+      const anchoToken = medirTextoPdf(prepararTextoPdf(fuente, token, fuenteUnicode, metadatosUnicode), tamano);
+      if (anchoLinea + anchoToken <= anchoMaximo || lineaActual === '') {
+        lineaActual += token;
+        anchoLinea += anchoToken;
+        continue;
+      }
+
+      if (lineaActual) {
+        lineas.push(lineaActual.trimEnd());
+      }
+      lineaActual = token;
+      anchoLinea = anchoToken;
+    }
+
+    if (lineaActual) lineas.push(lineaActual.trimEnd());
+  }
+
+  return lineas.length ? lineas : [''];
+}
+
+function prepararLineasFilaPDF(fila, anchosColumnas, tamanoFuente, fuenteUnicode, metadatosUnicode, forzarNegrita = false, limitarAOcho = false) {
+  return fila.map((celdaInfo, indice) => {
+    const ancho = Math.max(12, (anchosColumnas[indice] || 80) - 8);
+    const fuenteCelda = elegirFuente(celdaInfo.negrita || forzarNegrita, celdaInfo.cursiva);
+    const lineas = dividirTextoEnLineas(fuenteCelda, celdaInfo.texto, ancho, tamanoFuente, fuenteUnicode, metadatosUnicode);
+    return limitarAOcho ? lineas.slice(0, 8) : lineas;
+  });
+}
+
+function calcularAlturaFilaPDF(lineasFila, tamanoFuente) {
+  const mayorNumeroLineas = Math.max(1, ...lineasFila.map(lineas => lineas.length));
+  return Math.max(tamanoFuente * 1.5 + 8, mayorNumeroLineas * tamanoFuente * 1.35 + 8);
+}
+
+function dibujarCeldaPdf(pagina, celdaInfo, x, y, ancho, altoFila, tamanoFuente, colorPorDefecto, fuente, fuenteUnicode, metadatosUnicode, forzarNegrita, rgbFn, lineasPreparadas = null, inicioLinea = 0, cantidadLineas = Infinity) {
+  const negrita = celdaInfo.negrita || forzarNegrita;
+  const fuenteElegida = elegirFuente(negrita, celdaInfo.cursiva);
+  const color = celdaInfo.color ? rgbFn(celdaInfo.color.r, celdaInfo.color.g, celdaInfo.color.b) : colorPorDefecto;
+  if (celdaInfo.relleno) {
+    rectanguloEnLienzo(pagina, x, y - altoFila, ancho, altoFila, rgbFn(celdaInfo.relleno.r, celdaInfo.relleno.g, celdaInfo.relleno.b));
+  }
+
+  const anchoUtilCelda = Math.max(12, ancho - 8);
+  const lineas = lineasPreparadas || dividirTextoEnLineas(fuenteElegida, celdaInfo.texto, anchoUtilCelda, tamanoFuente, fuenteUnicode, metadatosUnicode);
+  const interlineado = tamanoFuente * 1.35;
+  const inicioY = y - 4;
+  const lineasVisibles = lineas.slice(inicioLinea, inicioLinea + cantidadLineas);
+  lineasVisibles.forEach((linea, indice) => {
+    const yLinea = inicioY - (indice * interlineado);
+    const textoRecortado = truncarTexto(fuenteElegida, linea, tamanoFuente, anchoUtilCelda, fuenteUnicode, metadatosUnicode);
+    dibujarTextoPdf(pagina, textoRecortado, { x: x + 4, y: yLinea - tamanoFuente + 2, size: tamanoFuente, color });
+  });
+
+  if (celdaInfo.subrayado && inicioLinea + lineasVisibles.length >= lineas.length) {
+    const ultimaLinea = lineasVisibles[lineasVisibles.length - 1] || '';
+    const textoUltimaLinea = truncarTexto(fuenteElegida, ultimaLinea, tamanoFuente, anchoUtilCelda, fuenteUnicode, metadatosUnicode);
+    const anchoTexto = medirTextoPdf(textoUltimaLinea, tamanoFuente);
+    const yLinea = inicioY - ((lineasVisibles.length - 1) * interlineado) - 1;
+    lineaEnLienzo(pagina, x + 4, yLinea, x + 4 + anchoTexto, yLinea, 0.6, color);
+  }
+}
+
+// La vista previa automática arma un PDF de verdad, y lo hace sola apenas se
+// carga el archivo. Con la hoja entera, un Excel de 20.000 filas llevaba la
+// pestaña a 1,7 GB y uno más grande la mataba ("Render process gone: oom")
+// antes de que el usuario tocara nada. Para ver cómo queda alcanza con unas
+// páginas; el PDF que se descarga sí lleva todas las filas.
+const FILAS_VISTA_PREVIA = 200;
+
+async function construirPdf(esPrevisualizacion = false, secuencia = 0) {
+  if (esPrevisualizacion && secuencia !== secuenciaVistaPreviaPdf) return;
+  if (!esPrevisualizacion) {
+    botonConvertir.disabled = true;
+    botonConvertir.textContent = t('boton-convertir-generando');
+  }
   advertencia.style.display = 'none';
+  caracteresPdfAdaptados = 0;
+  liberarUrlDescarga();
+  const mensajesAdvertencia = [];
   try {
     const nombreHoja = campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
-    const matriz = leerHojaConEstilos(libroActual.Sheets[nombreHoja]);
-    if (matriz.length === 0) throw new Error(t('error-sin-datos'));
-
-    const encabezado = matriz[0];
-    const cuerpoFilas = matriz.slice(1);
-    const cantidadColumnas = encabezado.length;
+    const soloCeldas = modoImpresion.value === 'celdas';
+    const hoja = libroActual.Sheets[nombreHoja];
+    let matriz;
+    let encabezado;
+    let cuerpoFilas;
+    let cantidadColumnas;
+    let totalFilasCuerpo;
+    const limiteFilas = esPrevisualizacion ? FILAS_VISTA_PREVIA : Infinity;
+    if (soloCeldas) {
+      const rangos = rangosActuales();
+      if (rangos.length === 0) throw new Error(t('error-sin-rangos'));
+      const rangosConCeldas = rangos.map(rango => {
+        const columnas = columnasVisiblesDeHoja(hoja, rango.s.c, rango.e.c);
+        return { rango, columnas, ancho: columnas.length };
+      }).filter(item => item.ancho > 0);
+      if (rangosConCeldas.length === 0) throw new Error(t('error-rangos-ocultos'));
+      cantidadColumnas = Math.max(...rangosConCeldas.map(item => item.ancho));
+      const celdaVacia = { texto: '', negrita: false, cursiva: false, subrayado: false, color: null, relleno: null };
+      cuerpoFilas = [];
+      totalFilasCuerpo = rangosConCeldas.reduce((suma, { rango }, indice) => suma + (indice > 0 ? 1 : 0) + rango.e.r - rango.s.r + 1, 0);
+      rangosConCeldas.forEach(({ rango, columnas, ancho }, indiceRango) => {
+        if (indiceRango > 0 && cuerpoFilas.length < limiteFilas) cuerpoFilas.push(Array(cantidadColumnas).fill(celdaVacia));
+        for (let fila = rango.s.r; fila <= rango.e.r && cuerpoFilas.length < limiteFilas; fila++) {
+          const celdas = [];
+          for (const columna of columnas) celdas.push(leerCeldaConEstilo(hoja, fila, columna));
+          while (celdas.length < cantidadColumnas) celdas.push(celdaVacia);
+          cuerpoFilas.push(celdas);
+        }
+      });
+      matriz = cuerpoFilas;
+      encabezado = [];
+    } else {
+      matriz = leerHojaConEstilos(hoja, limiteFilas + 1);
+      if (matriz.length === 0) throw new Error(t('error-sin-datos'));
+      encabezado = matriz[0];
+      cuerpoFilas = matriz.slice(1);
+      cantidadColumnas = encabezado.length;
+      totalFilasCuerpo = matriz.totalFilas - 1;
+    }
+    if (cuerpoFilas.length < totalFilasCuerpo) {
+      mensajesAdvertencia.push(t('aviso-vista-parcial').replace('{n}', cuerpoFilas.length).replace('{total}', totalFilasCuerpo));
+    }
 
     const { PDFDocument, StandardFonts, rgb } = PDFLib;
     const pdf = await PDFDocument.create();
@@ -751,104 +2067,153 @@ botonConvertir.addEventListener('click', async () => {
     const fuenteNegrita = await pdf.embedFont(StandardFonts.HelveticaBold);
     const fuenteCursiva = await pdf.embedFont(StandardFonts.HelveticaOblique);
     const fuenteNegritaCursiva = await pdf.embedFont(StandardFonts.HelveticaBoldOblique);
-
-    function elegirFuente(negrita, cursiva) {
-      if (negrita && cursiva) return fuenteNegritaCursiva;
-      if (negrita) return fuenteNegrita;
-      if (cursiva) return fuenteCursiva;
-      return fuente;
+    window.fuenteBasePdf = fuente;
+    window.fuenteNegritaPdf = fuenteNegrita;
+    window.fuenteCursivaPdf = fuenteCursiva;
+    window.fuenteNegritaCursivaPdf = fuenteNegritaCursiva;
+    let fuenteUnicode = null;
+    let metadatosFuenteUnicode = null;
+    if (necesitaFuenteUnicode(fuente, matriz)) {
+      try {
+        const datos = await cargarDatosFuenteUnicode();
+        pdf.registerFontkit(window.fontkit);
+        fuenteUnicode = await pdf.embedFont(datos.bytes, { subset: true });
+        metadatosFuenteUnicode = datos.fuente;
+      } catch (errorFuente) {
+        console.warn('No se pudo cargar la fuente de símbolos; se usarán sustituciones:', errorFuente);
+      }
     }
-
-    const TAMANOS_PAGINA = {
-      a4: [595, 842],
-      carta: [612, 792],
-      legal: [612, 1008],
-      oficio: [612, 935],
-    };
 
     const horizontal = document.getElementById('orientacion').value === 'horizontal';
     const tamanoFuente = parseInt(document.getElementById('tamanoFuente').value, 10);
     const margen = 30;
-    const [anchoVertical, altoVertical] = TAMANOS_PAGINA[document.getElementById('tamanoPagina').value];
+    let [anchoVertical, altoVertical] = tamanoPagina.value === 'personalizado'
+      ? [Number(anchoPaginaPersonalizada.value) * 72 / 25.4, Number(altoPaginaPersonalizada.value) * 72 / 25.4]
+      : TAMANOS_PAGINA_PTS[tamanoPagina.value];
+    if (!Number.isFinite(anchoVertical) || !Number.isFinite(altoVertical) || anchoVertical < 70 || altoVertical < 70) {
+      throw new Error(t('error-tamano-personalizado'));
+    }
     const [anchoPagina, altoPagina] = horizontal ? [altoVertical, anchoVertical] : [anchoVertical, altoVertical];
     const anchoUtil = anchoPagina - margen * 2;
-    const anchoColumna = anchoUtil / cantidadColumnas;
-    const alturaFila = tamanoFuente * 2;
 
-    if (anchoColumna < 25) {
-      advertencia.textContent = t('aviso-columnas').replace('{n}', cantidadColumnas);
-      advertencia.style.display = 'block';
+    const anchosColumnas = soloCeldas
+      ? Array.from({ length: cantidadColumnas }, (_, indice) => Math.max(70, anchoUtil / Math.max(1, cantidadColumnas)))
+      : Array.from({ length: cantidadColumnas }, (_, indice) => anchoColumnaDesdeHoja(hoja, matriz.indicesColumnas?.[indice] ?? indice, 120));
+
+    const totalAnchoColumnas = anchosColumnas.reduce((suma, ancho) => suma + ancho, 0);
+    const escalaColumnas = totalAnchoColumnas > anchoUtil ? anchoUtil / totalAnchoColumnas : 1;
+    const anchosAUsar = anchosColumnas.map((ancho) => ancho * escalaColumnas);
+
+    if (anchosAUsar.some((ancho) => ancho < 25)) {
+      mensajesAdvertencia.push(t('aviso-columnas').replace('{n}', cantidadColumnas));
     }
 
-    function dibujarCelda(pagina, celdaInfo, x, y, ancho, colorPorDefecto, forzarNegrita) {
-      const negrita = celdaInfo.negrita || forzarNegrita;
-      const fuenteElegida = elegirFuente(negrita, celdaInfo.cursiva);
-      const color = celdaInfo.color ? rgb(celdaInfo.color.r, celdaInfo.color.g, celdaInfo.color.b) : colorPorDefecto;
-      const yTexto = y - alturaFila + (alturaFila - tamanoFuente) / 2;
-      if (celdaInfo.relleno) {
-        pagina.drawRectangle({ x, y: y - alturaFila, width: ancho, height: alturaFila, color: rgb(celdaInfo.relleno.r, celdaInfo.relleno.g, celdaInfo.relleno.b) });
-      }
-      const textoRecortado = truncarTexto(fuenteElegida, celdaInfo.texto, tamanoFuente, ancho - 6);
-      pagina.drawText(textoRecortado, { x: x + 3, y: yTexto, size: tamanoFuente, font: fuenteElegida, color });
-      if (celdaInfo.subrayado) {
-        const anchoTexto = fuenteElegida.widthOfTextAtSize(textoRecortado, tamanoFuente);
-        pagina.drawLine({ start: { x: x + 3, y: yTexto - 1 }, end: { x: x + 3 + anchoTexto, y: yTexto - 1 }, thickness: 0.6, color });
-      }
-    }
-
-    function dibujarEncabezado(pagina, y) {
+    function dibujarEncabezado(pagina, y, altura) {
       let x = margen;
-      pagina.drawRectangle({ x: margen, y: y - alturaFila, width: anchoUtil, height: alturaFila, color: rgb(0.9, 0.93, 0.98) });
-      encabezado.forEach((celdaInfo) => {
-        dibujarCelda(pagina, celdaInfo, x, y, anchoColumna, rgb(0.1, 0.1, 0.2), true);
-        x += anchoColumna;
+      if (!soloCeldas) rectanguloEnLienzo(pagina, margen, y - altura, anchoUtil, altura, rgb(0.9, 0.93, 0.98));
+      encabezado.forEach((celdaInfo, indice) => {
+        const ancho = anchosAUsar[indice] || 80;
+        dibujarCeldaPdf(pagina, celdaInfo, x, y, ancho, altura, tamanoFuente, rgb(0.1, 0.1, 0.2), fuente, fuenteUnicode, metadatosFuenteUnicode, true, rgb, lineasEncabezado[indice]);
+        x += ancho;
       });
     }
 
     function dibujarLineasColumnas(pagina, yTope, yFondo) {
-      for (let i = 0; i <= cantidadColumnas; i++) {
-        const x = margen + i * anchoColumna;
-        pagina.drawLine({ start: { x, y: yTope }, end: { x, y: yFondo }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+      let x = margen;
+      for (let i = 0; i < anchosAUsar.length; i++) {
+        x += anchosAUsar[i];
+        lineaEnLienzo(pagina, x, yTope, x, yFondo, 0.5, rgb(0.85, 0.85, 0.85));
       }
     }
 
-    let pagina = pdf.addPage([anchoPagina, altoPagina]);
-    let y = altoPagina - margen;
-    dibujarEncabezado(pagina, y);
-    y -= alturaFila;
-    const yInicioTabla = y + alturaFila;
+    const limitarAOchoLineas = limiteLineasCelda.value === '8';
+    const lineasEncabezado = prepararLineasFilaPDF(encabezado || [], anchosAUsar, tamanoFuente, fuenteUnicode, metadatosFuenteUnicode, true, limitarAOchoLineas);
+    const alturaEncabezado = Math.max(26, calcularAlturaFilaPDF(lineasEncabezado, tamanoFuente));
+    const interlineadoFila = tamanoFuente * 1.35;
+    let pagina;
+    let y;
+    let yFilasInicio;
+    let hayFilasEnPagina = false;
 
-    let yFilasInicio = y;
+    function abrirPaginaTabla() {
+      pagina = crearLienzoPdf(pdf, pdf.addPage([anchoPagina, altoPagina]));
+      y = altoPagina - margen;
+      if (!soloCeldas) {
+        dibujarEncabezado(pagina, y, alturaEncabezado);
+        y -= alturaEncabezado;
+      }
+      yFilasInicio = y;
+      hayFilasEnPagina = false;
+    }
 
-    cuerpoFilas.forEach((fila) => {
-      if (y - alturaFila < margen) {
-        dibujarLineasColumnas(pagina, yFilasInicio + alturaFila, y);
-        pagina.drawLine({ start: { x: margen, y: yFilasInicio + alturaFila }, end: { x: margen + anchoUtil, y: yFilasInicio + alturaFila }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+    function cerrarPaginaTabla() {
+      const yTopeTabla = yFilasInicio + (soloCeldas ? 0 : alturaEncabezado);
+      dibujarLineasColumnas(pagina, yTopeTabla, y);
+      lineaEnLienzo(pagina, margen, y, margen + anchoUtil, y, 0.5, rgb(0.85, 0.85, 0.85));
+      cerrarLienzoPdf(pagina);
+    }
 
-        pagina = pdf.addPage([anchoPagina, altoPagina]);
-        y = altoPagina - margen;
-        dibujarEncabezado(pagina, y);
-        y -= alturaFila;
-        yFilasInicio = y;
+    abrirPaginaTabla();
+
+    for (let indiceFila = 0; indiceFila < cuerpoFilas.length; indiceFila++) {
+      const fila = cuerpoFilas[indiceFila];
+      // Se calculan fila por fila: tenerlas todas armadas de antemano era otra
+      // copia entera de la hoja en memoria.
+      const lineasFila = prepararLineasFilaPDF(fila, anchosAUsar, tamanoFuente, fuenteUnicode, metadatosFuenteUnicode, false, limitarAOchoLineas);
+      const totalLineas = Math.max(1, ...lineasFila.map(lineas => lineas.length));
+      let inicioLinea = 0;
+
+      while (inicioLinea < totalLineas) {
+        const espacioDisponible = y - margen;
+        let maxLineasSegmento = Math.floor((espacioDisponible - 8) / interlineadoFila);
+        if (maxLineasSegmento < 1 && hayFilasEnPagina) {
+          cerrarPaginaTabla();
+          abrirPaginaTabla();
+          continue;
+        }
+        maxLineasSegmento = Math.max(1, maxLineasSegmento);
+        const cantidadLineas = Math.min(totalLineas - inicioLinea, maxLineasSegmento);
+        const alturaSegmento = cantidadLineas * interlineadoFila + 8;
+
+        let x = margen;
+        fila.forEach((celdaInfo, indice) => {
+          if (indice >= anchosAUsar.length) return;
+          const ancho = anchosAUsar[indice] || 80;
+          dibujarCeldaPdf(
+            pagina, celdaInfo, x, y, ancho, alturaSegmento, tamanoFuente,
+            rgb(0.15, 0.15, 0.15), fuente, fuenteUnicode, metadatosFuenteUnicode,
+            false, rgb, lineasFila[indice], inicioLinea, cantidadLineas
+          );
+          x += ancho;
+        });
+        y -= alturaSegmento;
+        lineaEnLienzo(pagina, margen, y, margen + anchoUtil, y, 0.5, rgb(0.85, 0.85, 0.85));
+        hayFilasEnPagina = true;
+        inicioLinea += cantidadLineas;
+
+        if (inicioLinea < totalLineas) {
+          cerrarPaginaTabla();
+          abrirPaginaTabla();
+        }
       }
 
-      let x = margen;
-      fila.forEach((celdaInfo, indice) => {
-        if (indice >= cantidadColumnas) return;
-        dibujarCelda(pagina, celdaInfo, x, y, anchoColumna, rgb(0.15, 0.15, 0.15), false);
-        x += anchoColumna;
-      });
-      pagina.drawLine({ start: { x: margen, y }, end: { x: margen + anchoUtil, y }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
-      y -= alturaFila;
-    });
-
-    dibujarLineasColumnas(pagina, yFilasInicio + alturaFila, y + alturaFila);
-    pagina.drawLine({ start: { x: margen, y: y + alturaFila }, end: { x: margen + anchoUtil, y: y + alturaFila }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+      if ((indiceFila + 1) % 100 === 0 || indiceFila + 1 === cuerpoFilas.length) {
+        if (!esPrevisualizacion) {
+          botonConvertir.textContent = t('boton-convertir-progreso')
+            .replace('{n}', indiceFila + 1)
+            .replace('{total}', cuerpoFilas.length);
+        }
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    }
+    // Siempre: es lo que dibuja las líneas de columna de la última página y
+    // vuelca su contenido al PDF.
+    cerrarPaginaTabla();
 
     // Gráficos embebidos en la hoja (solo aplica a .xlsx — .xls y .csv no
     // tienen esta estructura). Si algo falla acá no se pierde la tabla ya
     // generada: se avisa y se sigue con lo que sí se pudo procesar.
-    if (esXlsxActual) {
+    if (esXlsxActual && !soloCeldas) {
       try {
         const zip = await JSZip.loadAsync(bytesArchivoActual);
         const mapaHojas = await mapaHojaARutaXml(zip);
@@ -868,7 +2233,10 @@ botonConvertir.addEventListener('click', async () => {
             width: anchoFinal,
             height: altoFinal,
           });
-          p.drawText(truncarTexto(fuente, leyenda, 9, anchoDisponible), { x: margen, y: margen, size: 9, font: fuente, color: rgb(0.4, 0.4, 0.4) });
+          const textoLeyenda = truncarTexto(fuente, leyenda, 9, anchoDisponible, fuenteUnicode, metadatosFuenteUnicode);
+          const lienzoLeyenda = crearLienzoPdf(pdf, p);
+          dibujarTextoPdf(lienzoLeyenda, textoLeyenda, { x: margen, y: margen, size: 9, color: rgb(0.4, 0.4, 0.4) });
+          cerrarLienzoPdf(lienzoLeyenda);
         }
 
         for (const grafico of graficos) {
@@ -893,18 +2261,42 @@ botonConvertir.addEventListener('click', async () => {
       }
     }
 
+    if (caracteresPdfAdaptados > 0) {
+      mensajesAdvertencia.push(t('aviso-caracteres').replace('{n}', caracteresPdfAdaptados));
+    }
+    advertencia.textContent = mensajesAdvertencia.join(' ');
+    advertencia.style.display = mensajesAdvertencia.length ? 'block' : 'none';
+    if (!esPrevisualizacion) botonConvertir.textContent = t('boton-convertir-finalizando');
     const bytesFinales = await pdf.save();
+    if (esPrevisualizacion && secuencia !== secuenciaVistaPreviaPdf) return;
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
-    enlaceDescarga.href = URL.createObjectURL(blob);
+    mostrarPdfEnVistaPrevia(blob);
+    liberarUrlDescarga();
+    urlDescargaActual = URL.createObjectURL(blob);
+    enlaceDescarga.href = urlDescargaActual;
     enlaceDescarga.download = `${nombreArchivoActual}.pdf`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    if (esPrevisualizacion) {
+      if (secuencia === secuenciaVistaPreviaPdf) mostrarMensajeVistaPrevia(`${t('error-generar')}: ${error.message}`);
+    } else {
+      alert(t('error-generar') + ': ' + error.message);
+    }
   } finally {
-    botonConvertir.disabled = false;
-    botonConvertir.textContent = t('boton-convertir');
+    if (!esPrevisualizacion) {
+      botonConvertir.disabled = false;
+      botonConvertir.textContent = t('boton-convertir');
+    }
   }
-});
+}
+
+function generarPdf(esPrevisualizacion = false, secuencia = 0) {
+  const tarea = colaGeneracionPdf.then(() => construirPdf(esPrevisualizacion, secuencia));
+  colaGeneracionPdf = tarea.catch(() => {});
+  return tarea;
+}
+
+botonConvertir.addEventListener('click', () => generarPdf());
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
