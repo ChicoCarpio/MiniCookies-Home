@@ -13,11 +13,13 @@
 // real sin poder validarla (no hay un validador tipo veraPDF disponible para
 // correr 100% en el navegador).
 
-const RUTA_PERFIL_ICC_SRGB = '../assets/icc/sRGB-v2-nano.icc';
-
+// Perfil sRGB de "Compact ICC Profiles" (CC0, ver creditos.html). Con
+// rutaVendor, no con una ruta relativa: '../assets/icc/…' desde
+// /en/herramientas/ apuntaba a /en/assets/, que no existe, y la versión en
+// inglés no podía convertir (encontrado el 2026-10-02).
 async function cargarPerfilIccSrgb() {
-  const respuesta = await fetch(RUTA_PERFIL_ICC_SRGB);
-  if (!respuesta.ok) throw new Error('No se pudo cargar el perfil de color sRGB incluido en el sitio.');
+  const respuesta = await fetch(rutaVendor('compact-icc-profiles/8e22c54/sRGB-v2-nano.icc'));
+  if (!respuesta.ok) throw new Error(t('error-perfil-icc'));
   return new Uint8Array(await respuesta.arrayBuffer());
 }
 

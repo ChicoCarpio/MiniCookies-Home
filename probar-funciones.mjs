@@ -305,6 +305,27 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     });
   }
 
+  // PDF → PDF/A incrusta un perfil de color de vendor/. Con una ruta relativa
+  // la versión en inglés lo buscaba en /en/assets/ y no convertía (2026-10-02).
+  for (const ruta of ['/herramientas/pdf-a-pdfa.html', '/en/herramientas/pdf-a-pdfa.html']) {
+    await prueba('PDF → PDF/A con su perfil de color (' + (ruta.startsWith('/en/') ? 'en' : 'es') + ')', async () => {
+      await abrir(ruta); await esperar(300);
+      const alertas = []; W().alert = (m) => alertas.push(m);
+      await W().mostrarArchivo(await pdfDePrueba(1));
+      D().getElementById('botonConvertir').click();
+      const enlace = await hasta(() => alertas.length || (D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href));
+      afirmar(!alertas.length, 'error: ' + alertas.join(' | '));
+      // pdf-lib comprime los objetos: se lee el catálogo, no el texto crudo.
+      const P = W().PDFLib;
+      const doc = await P.PDFDocument.load(await (await W().fetch(enlace)).arrayBuffer());
+      const intents = doc.catalog.lookup(P.PDFName.of('OutputIntents'));
+      afirmar(intents && intents.size() > 0, 'el PDF no trae OutputIntents');
+      const perfil = intents.lookup(0).lookup(P.PDFName.of('DestOutputProfile'));
+      afirmar(perfil && perfil.getContents().length > 100, 'OutputIntent sin perfil ICC');
+      return 'OutputIntent con perfil ICC de ' + perfil.getContents().length + ' bytes';
+    });
+  }
+
   // Cada herramienta que carga PDF.js lo hace con assets/js/pdfjs.js: que en
   // todas abra un PDF (orden de scripts, ruta del worker) y, si tiene
   // miniaturas, la dibuje.
