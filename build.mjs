@@ -20,6 +20,7 @@ import { traducir, diccionarioComun, paginasConIngles } from './ingles.mjs';
 import { contarHerramientas, aplicarConteos } from './conteo.mjs';
 import { leerCatalogo, aplicarCatalogo } from './catalogo.mjs';
 import { revisarTerceros } from './terceros.mjs';
+import { revisarReferenciasVendor } from './referencias-vendor.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 
 const RAIZ = process.cwd();
@@ -28,7 +29,7 @@ const SALIDA = join(RAIZ, 'dist');
 // Lo que no se publica: herramientas del build, notas internas (.md) y
 // archivos del repo.
 const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist',
-  'build.mjs', 'seo.mjs', 'ingles.mjs', 'conteo.mjs', 'catalogo.mjs', 'catalogo.json', 'terceros.mjs', 'revisar-interfaz.mjs', 'probar-funciones.mjs', 'respaldar-librerias.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
+  'build.mjs', 'seo.mjs', 'ingles.mjs', 'conteo.mjs', 'catalogo.mjs', 'catalogo.json', 'terceros.mjs', 'referencias-vendor.mjs', 'revisar-interfaz.mjs', 'probar-funciones.mjs', 'respaldar-librerias.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUIR_EXTENSIONES = new Set(['.md', '.log']);
 
 // Aviso de copyright de cada sitio: campo "config.aviso" de su package.json.
@@ -193,4 +194,7 @@ generarRobotsYSitemap(SALIDA, paginas.concat(paginasEn));
 // Todo servidor ajeno que el sitio carga tiene que estar en la política de
 // privacidad. Si no, el build falla y Cloudflare deja la versión anterior.
 const terceros = revisarTerceros(SALIDA, RAIZ);
-console.log(`Build listo en dist/ — ${conteo.total} herramientas, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados; servidores externos declarados: ${[...terceros.keys()].sort().join(', ')}`);
+// Todo archivo de vendor/ que las páginas piden tiene que publicarse (y estar
+// en git, que es de donde compila Cloudflare).
+const rutasVendor = revisarReferenciasVendor(SALIDA, RAIZ);
+console.log(`Build listo en dist/ — ${conteo.total} herramientas, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados; servidores externos declarados: ${[...terceros.keys()].sort().join(', ')}; ${rutasVendor} rutas de vendor/ comprobadas`);
