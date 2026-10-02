@@ -270,6 +270,24 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'resaltado "sí" y \'Hoja 1\'!B2 intacta';
   });
 
+  await prueba('ejemplos de Markdown en el idioma de la página', async () => {
+    const casos = [];
+    for (const [idioma, titulo, tabla, csv] of [['es', '## Hola mundo', '| Nombre | Edad |', 'Nombre,Edad'], ['en', '## Hello world', '| Name | Age |', 'Name,Age']]) {
+      const pre = idioma === 'en' ? '/en' : '';
+      await abrir(pre + '/herramientas/markdown-word.html'); await esperar(200);
+      const md = D().getElementById('entradaMarkdown').value;
+      afirmar(md.startsWith(titulo), idioma + ' markdown-word: ' + JSON.stringify(md.slice(0, 30)));
+      await abrir(pre + '/herramientas/markdown-tabla-csv.html'); await esperar(200);
+      const entrada = D().getElementById('entrada');
+      afirmar(entrada.value.startsWith(tabla), idioma + ' tabla: ' + JSON.stringify(entrada.value.slice(0, 30)));
+      const otra = [...D().querySelectorAll('input[name="direccion"]')].find((r) => !r.checked);
+      otra.checked = true; otra.dispatchEvent(new (W().Event)('change', { bubbles: true }));
+      afirmar(entrada.value.startsWith(csv), idioma + ' CSV: ' + JSON.stringify(entrada.value.slice(0, 30)));
+      casos.push(idioma);
+    }
+    return 'es y en, las dos direcciones';
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

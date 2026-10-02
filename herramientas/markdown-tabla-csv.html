@@ -103,14 +103,30 @@ const botonConvertir = document.getElementById('botonConvertir');
 const botonCopiar = document.getElementById('botonCopiar');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
-const EJEMPLO_MD = `| Nombre | Edad |
+// Ejemplos en cada idioma (mismo patrón que markdown-html): si el usuario no
+// los tocó, cambian con el idioma de la página.
+const EJEMPLOS = {
+  es: {
+    md: `| Nombre | Edad |
 | --- | --- |
 | Ana | 30 |
-| Luis | 25 |`;
-
-const EJEMPLO_CSV = `Nombre,Edad
+| Luis | 25 |`,
+    csv: `Nombre,Edad
 Ana,30
-Luis,25`;
+Luis,25`,
+  },
+  en: {
+    md: `| Name | Age |
+| --- | --- |
+| Ana | 30 |
+| Luis | 25 |`,
+    csv: `Name,Age
+Ana,30
+Luis,25`,
+  },
+};
+function ejemplo(tipo) { return (EJEMPLOS[idiomaActual()] || EJEMPLOS.es)[tipo]; }
+function esEjemplo(texto) { return Object.values(EJEMPLOS).some((e) => e.md === texto || e.csv === texto); }
 
 function direccionActual() {
   return document.querySelector('input[name="direccion"]:checked').value;
@@ -179,7 +195,7 @@ function actualizarDireccion() {
   const esMdACsv = direccionActual() === 'md-a-csv';
   etiquetaEntrada.textContent = esMdACsv ? t('etiqueta-tabla-md') : 'CSV';
   etiquetaSalida.textContent = esMdACsv ? 'CSV' : t('etiqueta-tabla-md');
-  entrada.value = esMdACsv ? EJEMPLO_MD : EJEMPLO_CSV;
+  entrada.value = ejemplo(esMdACsv ? 'md' : 'csv');
   salida.value = '';
   enlaceDescarga.style.display = 'none';
 }
@@ -223,6 +239,7 @@ document.addEventListener('cambioIdioma', () => {
   const esMdACsv = direccionActual() === 'md-a-csv';
   etiquetaEntrada.textContent = esMdACsv ? t('etiqueta-tabla-md') : 'CSV';
   etiquetaSalida.textContent = esMdACsv ? 'CSV' : t('etiqueta-tabla-md');
+  if (esEjemplo(entrada.value)) entrada.value = ejemplo(esMdACsv ? 'md' : 'csv');
 });
 </script>
 <script src="../assets/js/tema.js"></script>
