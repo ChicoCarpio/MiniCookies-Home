@@ -274,6 +274,159 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return obtenido + ' · ' + fuentes.join(', ');
   });
 
+  // EPUB: las herramientas que modifican un libro lo editan en su lugar
+  // (assets/js/epub.js) y conservan estilos, fuentes, portada y metadatos.
+  // Antes lo rearmaban con un estilo genérico. El libro de prueba trae todo
+  // eso; cada herramienta se usa desde su interfaz.
+  function armarEpubDePrueba(fuenteOfuscada) {
+    return (async () => {
+      const uuid = 'urn:uuid:1b4e28ba-2fa1-41d2-883f-0016d3cca427';
+      const zip = new JSZip();
+      zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+      zip.file('META-INF/container.xml', '<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
+      const fuente = new Uint8Array(await (await fetch('/vendor/google-fonts/d2761cb6ca3b.woff2')).arrayBuffer());
+      if (fuenteOfuscada) {
+        const clave = new Uint8Array(await crypto.subtle.digest('SHA-1', new TextEncoder().encode(uuid)));
+        for (let i = 0; i < 1040 && i < fuente.length; i++) fuente[i] ^= clave[i % 20];
+        zip.file('META-INF/encryption.xml', '<?xml version="1.0"?><encryption xmlns="urn:oasis:names:tc:opendocument:xmlns:container" xmlns:enc="http://www.w3.org/2001/04/xmlenc#"><enc:EncryptedData><enc:EncryptionMethod Algorithm="http://www.idpf.org/2008/embedding"/><enc:CipherData><enc:CipherReference URI="OEBPS/Fonts/fuente.woff2"/></enc:CipherData></enc:EncryptedData></encryption>');
+      }
+      zip.file('OEBPS/Fonts/fuente.woff2', fuente);
+      zip.file('OEBPS/Styles/estilo.css', '@font-face { font-family: "Prueba"; src: url(../Fonts/fuente.woff2); } .destacado { color: #c0392b; }');
+      const c = document.createElement('canvas'); c.width = c.height = 20;
+      const png = new Uint8Array(await (await new Promise((r) => c.toBlob(r, 'image/png'))).arrayBuffer());
+      const pagina = (cuerpo) => '<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>x</title><link rel="stylesheet" type="text/css" href="../Styles/estilo.css"/></head><body>' + cuerpo + '</body></html>';
+      zip.file('OEBPS/Images/portada.png', png);
+      let items = ''; let refs = ''; let nav = ''; let ncx = '';
+      for (let i = 1; i <= 3; i++) {
+        zip.file('OEBPS/Images/img' + i + '.png', png);
+        zip.file('OEBPS/Text/cap' + i + '.xhtml', pagina('<h1 class="destacado">Capítulo ' + i + '</h1><p><img src="../Images/img' + i + '.png" alt=""/></p>'));
+        items += '<item id="cap' + i + '" href="Text/cap' + i + '.xhtml" media-type="application/xhtml+xml"/><item id="img' + i + '" href="Images/img' + i + '.png" media-type="image/png"/>';
+        refs += '<itemref idref="cap' + i + '"/>';
+        nav += '<li><a href="cap' + i + '.xhtml">Capítulo ' + i + '</a></li>';
+        ncx += '<navPoint id="np' + i + '" playOrder="' + i + '"><navLabel><text>Capítulo ' + i + '</text></navLabel><content src="Text/cap' + i + '.xhtml"/></navPoint>';
+      }
+      zip.file('OEBPS/Text/nav.xhtml', '<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Índice</title></head><body><nav epub:type="toc"><ol>' + nav + '</ol></nav></body></html>');
+      zip.file('OEBPS/toc.ncx', '<?xml version="1.0"?><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="' + uuid + '"/></head><docTitle><text>Libro</text></docTitle><navMap>' + ncx + '</navMap></ncx>');
+      zip.file('OEBPS/content.opf', '<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">' + uuid + '</dc:identifier><dc:title>Libro</dc:title><dc:creator>Autora</dc:creator><dc:language>es</dc:language><dc:publisher>Editorial Prueba</dc:publisher><meta property="dcterms:modified">2024-05-01T00:00:00Z</meta></metadata><manifest><item id="nav" href="Text/nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="css" href="Styles/estilo.css" media-type="text/css"/><item id="fuente" href="Fonts/fuente.woff2" media-type="font/woff2"/><item id="portada" href="Images/portada.png" media-type="image/png" properties="cover-image"/>' + items + '</manifest><spine toc="ncx">' + refs + '</spine></package>');
+      return zip.generateAsync({ type: 'uint8array' });
+    })();
+  }
+  // Lo que tiene que sobrevivir, y el orden de lectura resultante.
+  async function revisarEpub(bytes) {
+    const zip = await W().JSZip.loadAsync(new (W().Uint8Array)(bytes));
+    const opf = await zip.file('OEBPS/content.opf').async('string');
+    const faltan = ['OEBPS/Styles/estilo.css', 'OEBPS/Fonts/fuente.woff2', 'OEBPS/Images/portada.png'].filter((r) => !zip.file(r));
+    if (!/Editorial Prueba/.test(opf)) faltan.push('editorial');
+    if (!/properties="cover-image"/.test(opf)) faltan.push('portada marcada');
+    if (Object.keys(zip.files)[0] !== 'mimetype') faltan.push('mimetype primero');
+    const spine = [...opf.matchAll(/<itemref idref="([^"]+)"/g)].map((m) => m[1]).join(',');
+    return { faltan, spine, zip };
+  }
+  async function epubDePrueba(ofuscada) {
+    await abrir('/herramientas/administrar-epub.html'); await esperar(300);
+    return new Uint8Array(await W().eval('(' + armarEpubDePrueba + ')')(!!ofuscada));
+  }
+  const descargarResultado = async (ms = 30000) => {
+    const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href, ms);
+    afirmar(enlace, 'no terminó');
+    return new Uint8Array(await (await W().fetch(enlace)).arrayBuffer());
+  };
+
+  await prueba('EPUB: administrar conserva diseño y reordena', async () => {
+    const libro = await epubDePrueba();
+    const alertas = []; W().alert = (m) => alertas.push(m);
+    await W().cargarLibro(new (W().File)([libro], 'libro.epub'));
+    const lista = D().getElementById('listaCapitulos');
+    lista.querySelectorAll('li')[1].querySelector('.quitar').click(); // fuera el capítulo 2
+    lista.insertBefore(lista.querySelectorAll('li')[1], lista.querySelectorAll('li')[0]); // el 3 primero
+    lista.dispatchEvent(new (W().Event)('drop'));
+    D().getElementById('botonGuardar').click();
+    const r = await revisarEpub(await descargarResultado());
+    afirmar(!alertas.length, 'error: ' + alertas.join(' | '));
+    afirmar(!r.faltan.length, 'se perdió: ' + r.faltan.join(', '));
+    afirmar(r.spine === 'cap3,cap1', 'spine: ' + r.spine);
+    afirmar(!r.zip.file('OEBPS/Images/img2.png'), 'quedó la imagen del capítulo quitado');
+    const nav = await r.zip.file('OEBPS/Text/nav.xhtml').async('string');
+    afirmar(/cap3\.xhtml[\s\S]*cap1\.xhtml/.test(nav) && !/cap2\.xhtml/.test(nav), 'índice: ' + nav.replace(/^[\s\S]*<ol>/, '<ol>').slice(0, 200));
+    return 'spine ' + r.spine + ', estilo, fuente, portada y editorial intactos';
+  });
+
+  await prueba('EPUB: agregar texto, dividir, unir y reparar conservan el diseño', async () => {
+    const libro = await epubDePrueba();
+    const detalles = [];
+    // Agregar texto a cada capítulo.
+    await abrir('/herramientas/marca-agua-epub.html'); await esperar(300);
+    let alertas = []; W().alert = (m) => alertas.push(m);
+    W().mostrarArchivo(new (W().File)([libro], 'libro.epub'));
+    D().getElementById('textoAgregar').value = 'Copia de prueba & más';
+    D().getElementById('botonAplicar').click();
+    let r = await revisarEpub(await descargarResultado());
+    afirmar(!alertas.length && !r.faltan.length, 'agregar texto: ' + alertas.join(' | ') + r.faltan.join(', '));
+    const cap = await r.zip.file('OEBPS/Text/cap2.xhtml').async('string');
+    afirmar(/Copia de prueba &amp; más/.test(cap) && /class="destacado"/.test(cap), 'capítulo: ' + cap.slice(0, 300));
+    detalles.push('texto');
+    // Dividir: una parte por capítulo, cada una con su imagen y nada más.
+    await abrir('/herramientas/dividir-epub.html'); await esperar(300);
+    alertas = []; W().alert = (m) => alertas.push(m);
+    W().mostrarArchivo(new (W().File)([libro], 'libro.epub'));
+    D().getElementById('botonDividir').click();
+    const zipPartes = await W().JSZip.loadAsync(new (W().Uint8Array)(await descargarResultado()));
+    const partes = Object.keys(zipPartes.files).sort();
+    afirmar(!alertas.length && partes.length === 3, 'dividir: ' + alertas.join(' | ') + partes.join(', '));
+    const parte2 = await revisarEpub(await zipPartes.file(partes[1]).async('uint8array'));
+    afirmar(!parte2.faltan.length && parte2.spine === 'cap2', 'parte 2: ' + parte2.faltan.join(', ') + ' spine ' + parte2.spine);
+    afirmar(parte2.zip.file('OEBPS/Images/img2.png') && !parte2.zip.file('OEBPS/Images/img1.png'), 'parte 2 con imágenes ajenas');
+    detalles.push('dividir en ' + partes.length);
+    // Unir dos copias: el segundo libro entra entero en su carpeta.
+    await abrir('/herramientas/unir-epub.html'); await esperar(300);
+    alertas = []; W().alert = (m) => alertas.push(m);
+    W().agregarArchivos([new (W().File)([libro], 'a.epub'), new (W().File)([libro], 'b.epub')]);
+    D().getElementById('botonUnir').click();
+    r = await revisarEpub(await descargarResultado());
+    afirmar(!alertas.length && !r.faltan.length, 'unir: ' + alertas.join(' | ') + r.faltan.join(', '));
+    afirmar(r.spine.split(',').length === 6 && r.zip.file('OEBPS/libro2/OEBPS/Styles/estilo.css'), 'unir: spine ' + r.spine);
+    detalles.push('unir (' + r.spine.split(',').length + ' capítulos)');
+    // Reparar un libro sano: nivel 1, sin rearmar.
+    await abrir('/herramientas/reparar-epub.html'); await esperar(300);
+    alertas = []; W().alert = (m) => alertas.push(m);
+    W().mostrarArchivo(new (W().File)([libro], 'libro.epub'));
+    D().getElementById('botonReparar').click();
+    r = await revisarEpub(await descargarResultado());
+    afirmar(!alertas.length && !r.faltan.length, 'reparar: ' + alertas.join(' | ') + r.faltan.join(', '));
+    afirmar(D().getElementById('mensajeNivel').textContent.includes('✅'), 'reparar: ' + D().getElementById('mensajeNivel').textContent);
+    detalles.push('reparar');
+    return detalles.join(', ');
+  });
+
+  await prueba('EPUB: editar metadatos (guardado compartido)', async () => {
+    const libro = await epubDePrueba();
+    await abrir('/herramientas/editar-metadatos-epub.html'); await esperar(300);
+    const alertas = []; W().alert = (m) => alertas.push(m);
+    await W().cargarLibro(new (W().File)([libro], 'libro.epub'));
+    D().getElementById('campoTitulo').value = 'Título nuevo';
+    D().getElementById('botonGuardar').click();
+    const r = await revisarEpub(await descargarResultado());
+    afirmar(!alertas.length && !r.faltan.length, 'editar: ' + alertas.join(' | ') + r.faltan.join(', '));
+    const opf = await r.zip.file('OEBPS/content.opf').async('string');
+    afirmar(/<dc:title[^>]*>Título nuevo</.test(opf), 'título: ' + (opf.match(/<dc:title[^>]*>[^<]*/) || [''])[0]);
+    return 'título cambiado, el resto intacto';
+  });
+
+  await prueba('EPUB con fuentes ofuscadas: se abre y al dividir quedan legibles', async () => {
+    const libro = await epubDePrueba(true);
+    const original = new Uint8Array(await (await W().fetch('/vendor/google-fonts/d2761cb6ca3b.woff2')).arrayBuffer());
+    await abrir('/herramientas/dividir-epub.html'); await esperar(300);
+    const alertas = []; W().alert = (m) => alertas.push(m);
+    W().mostrarArchivo(new (W().File)([libro], 'libro.epub'));
+    D().getElementById('botonDividir').click();
+    const zipPartes = await W().JSZip.loadAsync(new (W().Uint8Array)(await descargarResultado()));
+    afirmar(!alertas.length, 'error: ' + alertas.join(' | '));
+    const parte = await W().JSZip.loadAsync(await zipPartes.file(Object.keys(zipPartes.files)[0]).async('uint8array'));
+    const fuente = await parte.file('OEBPS/Fonts/fuente.woff2').async('uint8array');
+    afirmar(!parte.file('META-INF/encryption.xml') && fuente.length === original.length && fuente.every((b, i) => b === original[i]), 'la fuente de la parte no es la original');
+    return 'fuente desofuscada, idéntica a la original';
+  });
+
   // SheetJS < 0.20.2 tiene dos CVE al leer archivos maliciosos
   // (CVE-2023-30533, CVE-2024-22363): ninguna herramienta puede cargar una así.
   await prueba('SheetJS sin versiones vulnerables (herramientas de Excel)', async () => {

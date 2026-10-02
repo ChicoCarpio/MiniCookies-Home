@@ -99,9 +99,11 @@ const botonGuardar = document.getElementById('botonGuardar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
-let tituloLibro = '';
-let autorLibro = '';
-let capitulos = []; // [{ id, titulo, html }]
+// Se trabaja sobre el libro original (assets/js/epub.js, "Editar un .epub en
+// su lugar"): al guardar solo cambian el orden de lectura y el índice, y
+// conserva estilos, fuentes, portada y metadatos.
+let archivoLibro = null;
+let capitulos = []; // [{ id, idref, titulo }]
 let siguienteId = 0;
 
 function renderizarLista() {
@@ -152,19 +154,12 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Identificador (ISBN/uuid) e idioma del libro: se conservan al guardar.
-let idiomaLibro = '';
-let identificadorLibro = '';
-
 async function cargarLibro(archivo) {
   cargando.style.display = 'block';
   try {
-    const { titulo, autor, idioma, identificador, capitulos: capitulosLeidos } = await leerEpub(archivo);
-    tituloLibro = titulo;
-    autorLibro = autor;
-    idiomaLibro = idioma;
-    identificadorLibro = identificador;
-    capitulos = capitulosLeidos.map(cap => ({ id: siguienteId++, titulo: cap.titulo, html: cap.html }));
+    const capitulosLeidos = await capitulosDePaqueteEpub(await abrirPaqueteEpub(archivo));
+    archivoLibro = archivo;
+    capitulos = capitulosLeidos.map(cap => ({ id: siguienteId++, idref: cap.idref, titulo: cap.titulo }));
     renderizarLista();
   } catch (error) {
     alert(t('error-leer-epub') + ': ' + error.message);
@@ -179,13 +174,12 @@ botonGuardar.addEventListener('click', async () => {
   try {
     if (capitulos.length === 0) throw new Error(t('error-sin-capitulos'));
 
-    const blob = await construirEpub({
-      titulo: tituloLibro,
-      autor: autorLibro,
-      idioma: idiomaLibro || undefined,
-      identificador: identificadorLibro || undefined,
-      capitulos: capitulos.map(c => ({ titulo: c.titulo, html: c.html })),
-    });
+    const paquete = await abrirPaqueteEpub(archivoLibro);
+    const antes = (await capitulosDePaqueteEpub(paquete)).length;
+    await fijarCapitulosEpub(paquete, capitulos.map(c => c.idref));
+    // Si se quitaron capítulos, también sus imágenes que ya nadie usa.
+    if (capitulos.length < antes) await podarRecursosEpub(paquete);
+    const blob = await guardarPaqueteEpub(paquete);
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

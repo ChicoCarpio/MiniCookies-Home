@@ -116,6 +116,7 @@ window.i18nPagina = {
 
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -245,15 +246,8 @@ botonGuardar.addEventListener('click', async () => {
       }
     }
 
-    // El EPUB exige que "mimetype" sea el primer archivo del .zip y vaya sin comprimir.
-    const salida = new JSZip();
-    salida.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
-    for (const ruta of Object.keys(zip.files)) {
-      const entrada = zip.files[ruta];
-      if (entrada.dir || ruta === 'mimetype') continue;
-      salida.file(ruta, await entrada.async('uint8array'));
-    }
-    const blob = await salida.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
+    // mimetype primero y sin comprimir: generarBlobEpub (assets/js/epub.js).
+    const blob = await generarBlobEpub(zip);
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = (titulo.replace(/[\\/:*?"<>|]/g, '').trim() || nombreArchivoActual) + '.epub';
     resultado.classList.add('visible');

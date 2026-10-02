@@ -22,12 +22,18 @@ window.i18nPagina = {
     'boton-reparar-procesando': 'Reparando...',
     'resultado-enlace': 'Descargar EPUB reparado',
     'limitaciones-titulo': 'Limitaciones',
-    'item1': 'Si el archivo está muy dañado, se puede perder la tabla de contenidos o el orden exacto de algún capítulo al reconstruirlo.',
+    'item1': 'Si el archivo está muy dañado y hay que reconstruirlo, se pierden su diseño (estilos, fuentes, portada) y puede perderse la tabla de contenidos o el orden exacto de algún capítulo.',
     'item2': 'No funciona con libros con DRM (candado editorial).',
     'error-sin-capitulos': 'No se encontró ningún capítulo legible dentro de este archivo.',
     'error-sin-texto': 'Los archivos encontrados no tenían contenido de texto.',
-    'mensaje-nivel1': '✅ Se pudo leer el EPUB normalmente y se reconstruyó desde cero.',
-    'mensaje-nivel2': '⚠️ El paquete EPUB estaba dañado ({detalle}) — se reconstruyó a partir de {n} archivo(s) de contenido encontrados directamente, sin depender de la tabla de contenidos original.',
+    'mensaje-nivel1-sano': '✅ La estructura del libro estaba bien. Se volvió a guardar con el formato correcto, sin cambiar su contenido ni su diseño.',
+    'mensaje-nivel1': '✅ Se reparó la estructura del libro ({arreglos}) sin rearmarlo: conserva su diseño, sus fuentes y su portada.',
+    'arreglo-container': 'la ruta al índice del paquete',
+    'arreglo-manifest': 'archivos listados que no existían',
+    'arreglo-spine': 'capítulos del orden de lectura que no existían',
+    'arreglo-indice': 'un índice que no se podía leer',
+    'mensaje-nivel2': '⚠️ La estructura del libro estaba dañada ({detalle}): se rearmó a partir de su contenido. Se conservan el texto y las imágenes, pero no su diseño original.',
+    'mensaje-nivel3': '⚠️ El paquete EPUB estaba dañado ({detalle}) — se reconstruyó a partir de {n} archivo(s) de contenido encontrados directamente, sin depender de la tabla de contenidos original.',
     'error-reparar': 'No se pudo reparar el EPUB'
   },
   en: {
@@ -41,12 +47,18 @@ window.i18nPagina = {
     'boton-reparar-procesando': 'Repairing...',
     'resultado-enlace': 'Download repaired EPUB',
     'limitaciones-titulo': 'Limitations',
-    'item1': 'If the file is badly damaged, the table of contents or the exact order of some chapter may be lost when rebuilding it.',
+    'item1': 'If the file is badly damaged and has to be rebuilt, its design (styles, fonts, cover) is lost, and so may be the table of contents or the exact order of some chapter.',
     'item2': 'It doesn’t work with DRM-protected books (publisher lock).',
     'error-sin-capitulos': 'No readable chapter was found inside this file.',
     'error-sin-texto': 'The files found had no text content.',
-    'mensaje-nivel1': '✅ The EPUB could be read normally and was rebuilt from scratch.',
-    'mensaje-nivel2': '⚠️ The EPUB package was damaged ({detalle}) — it was rebuilt from {n} content file(s) found directly, without relying on the original table of contents.',
+    'mensaje-nivel1-sano': '✅ The book’s structure was fine. It was saved again in the correct format, without changing its content or design.',
+    'mensaje-nivel1': '✅ The book’s structure was repaired ({arreglos}) without rebuilding it: it keeps its design, fonts and cover.',
+    'arreglo-container': 'the path to the package index',
+    'arreglo-manifest': 'listed files that did not exist',
+    'arreglo-spine': 'reading-order chapters that did not exist',
+    'arreglo-indice': 'a table of contents that could not be read',
+    'mensaje-nivel2': '⚠️ The book’s structure was damaged ({detalle}): it was rebuilt from its content. Text and images are kept, but not its original design.',
+    'mensaje-nivel3': '⚠️ The EPUB package was damaged ({detalle}) — it was rebuilt from {n} content file(s) found directly, without relying on the original table of contents.',
     'error-reparar': 'Couldn’t repair the EPUB'
   }
 };
@@ -181,27 +193,35 @@ botonReparar.addEventListener('click', async () => {
   try {
     const nombreLibro = archivoActual.name.replace(/\.epub$/i, '');
 
+    const mostrar = (blob, mensaje, color) => {
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      resultado.classList.add('visible');
+      mensajeNivel.textContent = mensaje;
+      mensajeNivel.style.color = color || '';
+      mensajeNivel.style.display = 'block';
+    };
     try {
-      // Nivel 1: leerEpub ya tolera bastante (imágenes rotas, etc.) mientras
-      // exista container.xml + OPF válidos.
-      const { titulo, autor, idioma, identificador, capitulos } = await leerEpub(archivoActual);
-      const blob = await construirEpub({ titulo: titulo || nombreLibro, autor, idioma: idioma || undefined, identificador: identificador || undefined, capitulos });
-
-      enlaceDescarga.href = URL.createObjectURL(blob);
-      resultado.classList.add('visible');
-      mensajeNivel.textContent = t('mensaje-nivel1');
-      mensajeNivel.style.color = '#166534';
-      mensajeNivel.style.display = 'block';
+      // Nivel 1: arreglar el paquete sin rearmarlo (conserva el diseño): ver
+      // repararPaqueteEpub en assets/js/epub.js.
+      const { paquete, arreglos } = await repararPaqueteEpub(archivoActual);
+      const blob = await guardarPaqueteEpub(paquete);
+      mostrar(blob, arreglos.length
+        ? t('mensaje-nivel1').replace('{arreglos}', arreglos.map((a) => t('arreglo-' + a)).join(', '))
+        : t('mensaje-nivel1-sano'), '#166534');
     } catch (errorNivel1) {
-      // Nivel 2: ignorar el paquete (container.xml/OPF) y rescatar capítulos
-      // buscando archivos de contenido directo dentro del .zip.
-      const capitulos = await rescatarCapitulosSinPaquete(archivoActual);
-      const blob = await construirEpub({ titulo: nombreLibro, autor: '', capitulos });
-
-      enlaceDescarga.href = URL.createObjectURL(blob);
-      resultado.classList.add('visible');
-      mensajeNivel.textContent = t('mensaje-nivel2').replace('{detalle}', errorNivel1.message).replace('{n}', capitulos.length);
-      mensajeNivel.style.display = 'block';
+      try {
+        // Nivel 2: el OPF no se puede usar, pero leerEpub todavía saca el
+        // contenido: se rearma un libro nuevo con él.
+        const { titulo, autor, idioma, identificador, capitulos } = await leerEpub(archivoActual);
+        const blob = await construirEpub({ titulo: titulo || nombreLibro, autor, idioma: idioma || undefined, identificador: identificador || undefined, capitulos });
+        mostrar(blob, t('mensaje-nivel2').replace('{detalle}', errorNivel1.message));
+      } catch (errorNivel2) {
+        // Nivel 3: ignorar el paquete (container.xml/OPF) y rescatar capítulos
+        // buscando archivos de contenido directo dentro del .zip.
+        const capitulos = await rescatarCapitulosSinPaquete(archivoActual);
+        const blob = await construirEpub({ titulo: nombreLibro, autor: '', capitulos });
+        mostrar(blob, t('mensaje-nivel3').replace('{detalle}', errorNivel2.message).replace('{n}', capitulos.length));
+      }
     }
   } catch (error) {
     alert(t('error-reparar') + ': ' + error.message);

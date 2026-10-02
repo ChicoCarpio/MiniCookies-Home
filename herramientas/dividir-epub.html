@@ -120,7 +120,13 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.textContent = t('boton-dividir-procesando');
   progreso.style.display = 'block';
   try {
-    const { titulo, autor, capitulos } = await leerEpub(archivoActual);
+    // Cada parte es una copia del libro original con un solo capítulo: conserva
+    // estilos, fuentes y metadatos, y lleva solo las imágenes que ese capítulo
+    // usa. Tiene su propio identificador, para que no se confunda con el libro.
+    const bytes = await archivoActual.arrayBuffer();
+    const original = await abrirPaqueteEpub(bytes);
+    const titulo = metadatoDcEpub(original, 'title') || archivoActual.name.replace(/\.epub$/i, '');
+    const capitulos = await capitulosDePaqueteEpub(original);
     if (capitulos.length < 2) throw new Error(t('error-un-capitulo'));
 
     const zip = new JSZip();
@@ -128,11 +134,12 @@ botonDividir.addEventListener('click', async () => {
 
     for (let i = 0; i < capitulos.length; i++) {
       progreso.textContent = t('progreso-capitulo').replace('{actual}', i + 1).replace('{total}', capitulos.length);
-      const blob = await construirEpub({
-        titulo: `${titulo} — ${capitulos[i].titulo}`,
-        autor,
-        capitulos: [capitulos[i]],
-      });
+      const parte = await abrirPaqueteEpub(bytes);
+      await fijarCapitulosEpub(parte, [capitulos[i].idref]);
+      await fijarTituloEpub(parte, `${titulo} — ${capitulos[i].titulo}`);
+      await nuevoIdentificadorEpub(parte);
+      await podarRecursosEpub(parte);
+      const blob = await guardarPaqueteEpub(parte);
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
       const nombreLimpio = capitulos[i].titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || 'capitulo';
       zip.file(`${numero}-${nombreLimpio}.epub`, blob);

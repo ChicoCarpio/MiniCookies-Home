@@ -60,6 +60,7 @@ window.i18nComun = {
     'epub-sin-container': 'El EPUB no tiene un container.xml válido.',
     'epub-sin-titulo': 'Sin título',
     'epub-sin-contenido': 'No se encontró contenido legible dentro del EPUB.',
+    'epub-xml-invalido': 'Un archivo interno del EPUB no es XML válido',
     // Usadas por assets/js/pptx-visual.js, compartidas por powerpoint-a-pdf.html
     // y powerpoint-a-imagenes.html.
     'ppt-sin-tamano': 'No se pudo determinar el tamaño de las diapositivas.',
@@ -118,6 +119,7 @@ window.i18nComun = {
     'epub-sin-container': 'The EPUB doesn’t have a valid container.xml.',
     'epub-sin-titulo': 'Untitled',
     'epub-sin-contenido': 'No readable content was found inside the EPUB.',
+    'epub-xml-invalido': 'An internal file of the EPUB is not valid XML',
     'ppt-sin-tamano': 'Couldn’t determine the size of the slides.',
     'ppt-tamano-invalido': 'Invalid slide size.',
     'ppt-render-inconsistente': 'Rendering returned an inconsistent slide size.',

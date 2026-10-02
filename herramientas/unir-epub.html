@@ -149,19 +149,19 @@ botonUnir.addEventListener('click', async () => {
   botonUnir.disabled = true;
   progreso.style.display = 'block';
   try {
-    const capitulosFinales = [];
-
+    // Cada libro entra entero, con sus estilos, fuentes e imágenes; el primero
+    // pone la portada y los metadatos, y el índice queda con un grupo por libro
+    // (ver unirPaquetesEpub en assets/js/epub.js).
+    const paquetes = [];
     for (let i = 0; i < archivos.length; i++) {
       progreso.textContent = t('progreso-leyendo').replace('{nombre}', archivos[i].name).replace('{actual}', i + 1).replace('{total}', archivos.length);
-      const { titulo, capitulos } = await leerEpub(archivos[i]);
-      capitulosFinales.push({ titulo, html: `<h1>${escaparHtml(titulo)}</h1>` });
-      capitulosFinales.push(...capitulos);
+      paquetes.push(await abrirPaqueteEpub(archivos[i]));
     }
 
     progreso.textContent = t('progreso-armando');
-    const tituloFinal = document.getElementById('tituloLibro').value.trim() || 'Libros combinados';
+    const tituloFinal = document.getElementById('tituloLibro').value.trim() || t('valor-titulo');
     const autorFinal = document.getElementById('autorLibro').value.trim();
-    const blob = await construirEpub({ titulo: tituloFinal, autor: autorFinal, capitulos: capitulosFinales });
+    const blob = await guardarPaqueteEpub(await unirPaquetesEpub(paquetes, { titulo: tituloFinal, autor: autorFinal }));
 
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = tituloFinal.replace(/[\\/:*?"<>|]/g, '') + '.epub';
