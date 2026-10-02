@@ -296,6 +296,10 @@ Dos detalles propios: `creditos.html` envuelve su tabla en `.tabla-ancha`, que e
 lo que evita que se lleve la página entera a lo ancho en un teléfono, y
 `contacto.html` tiene un formulario.
 
+Piezas: `table.tabla-creditos` (una fila nueva de créditos es `<tr><td>…`
+sin estilos: antes cada celda llevaba su `style="padding…"`) y
+`.texto-actualizacion` para la línea "Última actualización".
+
 ---
 
 ## 5. Reglas transversales
@@ -543,7 +547,7 @@ en ventana angosta son donde aparecen los problemas de este patrón.
   (`app-movil.*` + `editor-imagen.css`) y D (`miniaturas.js`,
   `.vista-previa-diapositivas`) ya comparten su código. Queda CSS propio en
   varias herramientas, pero ya no hay bloques copiados entre páginas: lo que
-  queda es de cada una. El E (páginas de texto) no se revisó todavía.
+  queda es de cada una. El E también: `.tabla-creditos` y `.texto-actualizacion`.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar
   cuando todos los grupos tengan clave.

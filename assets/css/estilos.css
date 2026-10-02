@@ -390,6 +390,15 @@ main {
 .vista-previa-diapositivas { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
 .vista-previa-diapositivas img { width: 100%; border: 1px solid var(--gris-borde); border-radius: 6px; background: #fff; }
 
+/* --- Páginas de texto (arquetipo E: privacidad, términos, créditos) --- */
+.texto-actualizacion { color: var(--texto-suave); font-size: 0.85rem; }
+/* La tabla de créditos tenía el relleno escrito celda por celda (104 estilos
+   en línea): una fila nueva se copiaba con todos ellos o quedaba distinta. */
+table.tabla-creditos { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.tabla-creditos thead tr { text-align: left; border-bottom: 1px solid var(--gris-borde); }
+table.tabla-creditos th, table.tabla-creditos td { padding: 0.5rem; }
+table.tabla-creditos th:first-child, table.tabla-creditos td:first-child { padding-left: 0; }
+
 /* Tabla de datos de una planilla (visor, buscar y reemplazar, Excel → PDF…):
    se desplaza dentro de su contenedor sin arrastrar la página, con el
    encabezado fijo. Estaba copiada en el <style> de 5 herramientas; cada una
