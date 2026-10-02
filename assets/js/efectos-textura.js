@@ -12,6 +12,11 @@
 //   (pasando undefined, o el propio canvas, como fuente).
 // - aplicarCompleto(nombre, ctxDestino, fuente, ancho, alto, intensidad):
 //   atajo para aplicar sobre el canvas entero (0,0,ancho,alto).
+//
+// Los mosaicos (pixel art, punto de cruz, cuentas, pop art…) y el cómic viven
+// en assets/js/efectos-mosaico.js y entran por acá mismo: solo están en las
+// páginas que cargan ese módulo, ignoran la intensidad y reciben un último
+// argumento "opciones" (ver ese archivo).
 window.EfectosTextura = (function () {
   function pixelar(ctx, sx, sy, sw, sh, bloque) {
     const datos = ctx.getImageData(sx, sy, sw, sh);
@@ -190,7 +195,19 @@ window.EfectosTextura = (function () {
   const EN_LUGAR = { pixelar: pixelar, 'pixelar-circulos': pixelarCirculos, ruido: ruido };
   const CON_FUENTE = { direccional: direccional, esmerilado: esmerilado };
 
-  function aplicarRegion(nombre, ctxDestino, fuente, sx, sy, sw, sh, intensidad) {
+  // ¿Es un estilo de efectos-mosaico.js? (deja transparente lo que no es figura)
+  function esMosaico(nombre) {
+    return !!(window.EfectosMosaico && EfectosMosaico.TIPOS.includes(nombre));
+  }
+
+  function aplicarRegion(nombre, ctxDestino, fuente, sx, sy, sw, sh, intensidad, opciones) {
+    if (esMosaico(nombre)) {
+      if (fuente && fuente !== ctxDestino.canvas) {
+        ctxDestino.drawImage(fuente, sx, sy, sw, sh, sx, sy, sw, sh);
+      }
+      EfectosMosaico.aplicar(nombre, ctxDestino, sx, sy, sw, sh, opciones);
+      return;
+    }
     const bloque = Math.max(2, Math.round(intensidad));
     if (EN_LUGAR[nombre]) {
       if (fuente && fuente !== ctxDestino.canvas) {
@@ -203,13 +220,13 @@ window.EfectosTextura = (function () {
     (CON_FUENTE[nombre] || difuminar)(ctxDestino, fuenteReal, sx, sy, sw, sh, intensidad);
   }
 
-  function aplicarCompleto(nombre, ctxDestino, fuente, ancho, alto, intensidad) {
-    aplicarRegion(nombre, ctxDestino, fuente, 0, 0, ancho, alto, intensidad);
+  function aplicarCompleto(nombre, ctxDestino, fuente, ancho, alto, intensidad, opciones) {
+    aplicarRegion(nombre, ctxDestino, fuente, 0, 0, ancho, alto, intensidad, opciones);
   }
 
   return {
     pixelar, pixelarCirculos, ruido, difuminar, direccional, esmerilado,
-    aplicarRegion, aplicarCompleto,
+    aplicarRegion, aplicarCompleto, esMosaico,
     NOMBRES: ['pixelar', 'pixelar-circulos', 'ruido', 'difuminar', 'direccional', 'esmerilado'],
   };
 })();

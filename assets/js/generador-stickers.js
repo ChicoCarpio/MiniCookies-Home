@@ -7,11 +7,12 @@
 // sale del navegador: solo el modelo de recorte (un archivo estático, ~42 MB)
 // se descarga una vez desde la CDN de Hugging Face y queda cacheado.
 // Requiere, cargados antes como <script>: ajuste-por-color.js, filtros-color.js,
-// efectos-textura.js, procesar-filtros.js. El panel lateral usa el mismo
+// efectos-textura.js, paleta-color.js, vendor/imagetracerjs, efectos-mosaico.js,
+// procesar-filtros.js. El panel lateral usa el mismo
 // esqueleto de 2 columnas que Editor-de-color-de-imagen.html (clase
 // .editor-color-layout, sin el panel plegable de ese editor: acá el panel
-// izquierdo queda siempre visible), pero con tres acordeones independientes
-// ("Filtros", "Color del borde", "Acciones") en vez de un panel único: son
+// izquierdo queda siempre visible), pero con cuatro acordeones independientes
+// ("Filtros", "Texturas", "Color del borde", "Acciones") en vez de un panel único: son
 // herramientas distintas, y así cada una tiene su propia categoría en la
 // barra inferior de celular (assets/js/app-movil.js), en vez de quedar
 // escondidas dentro de "Filtros". El grosor del borde sigue debajo del
@@ -57,6 +58,16 @@ export function iniciarGeneradorStickers() {
   const TAMANO_MINIATURA = 160;
   const TAMANO_MINIATURA_FISICO = Math.round(TAMANO_MINIATURA * (window.devicePixelRatio || 1));
   FiltrosColor.crearGrilla(contenedorPresets);
+
+  // Texturas (assets/js/efectos-mosaico.js): pixel art, punto de cruz,
+  // cuentas, pop art, cómic… Se aplican después del filtro, con sus propios
+  // controles, y sus miniaturas se dibujan sobre el propio sticker. Las
+  // texturas de los editores pensadas para fotos o para tapar una zona
+  // (pixelado, ruido, difuminado…) no se ofrecen acá.
+  const galeriaTexturas = document.getElementById('modosTextura');
+  EfectosMosaico.agregarMiniaturas(galeriaTexturas);
+  const panelTextura = EfectosMosaico.crearPanel(document.getElementById('controlesMosaico'), { alCambiar: () => actualizarFiltro() });
+  let texturaActual = 'ninguno';
 
   let segmentador = null;
   let cargaPromesa = null;
@@ -203,7 +214,7 @@ export function iniciarGeneradorStickers() {
     return destino;
   }
 
-  // Algunas texturas (ej. los puntos de "Pop art", pixelar-circulos en
+  // Algunas texturas (ej. los puntos, pixelar-circulos en
   // efectos-textura.js) dibujan círculos con ctx.fill() sin fijarse en la
   // transparencia de lo que pisan — ahí aparecían puntos sobre el fondo
   // vacío del sticker. Volver a poner el canal alfa ORIGINAL después de
@@ -216,36 +227,32 @@ export function iniciarGeneradorStickers() {
     ctx.putImageData(datos, 0, 0);
   }
 
-  // Dibuja, sobre el <canvas> de cada botón de la grilla, cómo quedaría el
-  // sticker con ese filtro — se calcula una sola vez por recorte nuevo (los
-  // presets no cambian). Son ~50 filtros: procesarlos todos de un tirón
+  // Dibuja, sobre el <canvas> de cada botón de una grilla (filtros o
+  // texturas), cómo quedaría el sticker con esa opción — se calcula una sola
+  // vez por recorte nuevo. Son ~80 filtros: procesarlos todos de un tirón
   // congela la pantalla justo después de "Recortando el fondo...", así que
   // se hacen de a lotes en el tiempo libre del navegador (mismo mecanismo que
   // editor-avanzado-imagen.html usa para su propia grilla de filtros).
-  let generacionMiniaturasPresets = 0;
+  // dibujar(miniatura, boton) aplica la opción sobre la miniatura; devuelve
+  // false si ese botón no tiene nada que dibujar.
+  const generacionMiniaturas = { presets: 0, texturas: 0 };
 
-  function actualizarMiniaturasPresets() {
+  function dibujarMiniaturasEnLotes(grilla, botones, dibujar) {
     if (!canvasBase) return;
-    const generacion = ++generacionMiniaturasPresets;
+    const generacion = ++generacionMiniaturas[grilla];
     const origen = canvasBase;
-    const botones = [...contenedorPresets.querySelectorAll('.preset-miniatura')];
-    const escala = TAMANO_MINIATURA_FISICO / Math.max(origen.width, origen.height);
     let indice = 0;
 
     function procesarLote(plazo) {
-      if (generacion !== generacionMiniaturasPresets || origen !== canvasBase) return;
+      if (generacion !== generacionMiniaturas[grilla] || origen !== canvasBase) return;
       const inicio = performance.now();
       let procesadas = 0;
       while (indice < botones.length && (!procesadas || performance.now() - inicio < 8)) {
         if (plazo && !plazo.didTimeout && procesadas && plazo.timeRemaining() < 2) break;
         const boton = botones[indice++];
-        const preset = ProcesarFiltros.PRESETS[boton.dataset.preset];
         procesadas++;
-        if (!preset) continue;
         const miniatura = crearMiniaturaSticker(origen, TAMANO_MINIATURA_FISICO);
-        const alfaOriginal = miniatura.getContext('2d').getImageData(0, 0, miniatura.width, miniatura.height);
-        ProcesarFiltros.renderizarFiltro(miniatura, preset, preset.capasExtra, preset.textura || ProcesarFiltros.SIN_TEXTURA, escala);
-        restaurarAlfa(miniatura, alfaOriginal);
+        if (dibujar(miniatura, boton) === false) continue;
         const canvasDestino = boton.querySelector('canvas');
         canvasDestino.width = TAMANO_MINIATURA_FISICO;
         canvasDestino.height = TAMANO_MINIATURA_FISICO;
@@ -259,6 +266,26 @@ export function iniciarGeneradorStickers() {
 
     if (window.requestIdleCallback) window.requestIdleCallback(procesarLote, { timeout: 150 });
     else window.requestAnimationFrame(() => procesarLote(null));
+  }
+
+  function actualizarMiniaturasPresets() {
+    if (!canvasBase) return;
+    const escala = TAMANO_MINIATURA_FISICO / Math.max(canvasBase.width, canvasBase.height);
+    dibujarMiniaturasEnLotes('presets', [...contenedorPresets.querySelectorAll('.preset-miniatura')], (miniatura, boton) => {
+      const preset = ProcesarFiltros.PRESETS[boton.dataset.preset];
+      if (!preset) return false;
+      const alfaOriginal = miniatura.getContext('2d').getImageData(0, 0, miniatura.width, miniatura.height);
+      ProcesarFiltros.renderizarFiltro(miniatura, preset, preset.capasExtra, preset.textura || ProcesarFiltros.SIN_TEXTURA, escala);
+      restaurarAlfa(miniatura, alfaOriginal);
+    });
+  }
+
+  // Cada textura con sus opciones de fábrica, sobre el sticker sin filtro
+  function actualizarMiniaturasTexturas() {
+    dibujarMiniaturasEnLotes('texturas', [...galeriaTexturas.querySelectorAll('.miniatura-textura')], (miniatura, boton) => {
+      const tipo = boton.dataset.textura;
+      if (tipo !== 'ninguno') EfectosTextura.aplicarCompleto(tipo, miniatura.getContext('2d'), undefined, miniatura.width, miniatura.height, 0);
+    });
   }
 
   // Aplica el filtro elegido (assets/js/filtros-color.js, vía
@@ -287,6 +314,12 @@ export function iniciarGeneradorStickers() {
       ProcesarFiltros.renderizarFiltro(copia, ajustes, preset.capasExtra, textura, 1);
       restaurarAlfa(copia, alfaOriginal);
       canvasFiltrado = copia;
+    }
+    // La textura va después: deja transparente lo que no es figura por su
+    // cuenta, así que no lleva restaurarAlfa (recortaría sus celdas del borde)
+    if (texturaActual !== 'ninguno') {
+      if (canvasFiltrado === canvasBase) canvasFiltrado = ProcesarFiltros.copiarCanvas(canvasBase);
+      EfectosTextura.aplicarCompleto(texturaActual, canvasFiltrado.getContext('2d'), undefined, canvasFiltrado.width, canvasFiltrado.height, 0, panelTextura.leer());
     }
     dibujarSticker();
   }
@@ -362,7 +395,9 @@ export function iniciarGeneradorStickers() {
       controlesTextura.style.display = 'none';
       contenedorPresets.querySelectorAll('.preset-miniatura.activo').forEach((b) => b.classList.remove('activo'));
       contenedorPresets.querySelector('[data-preset="ninguno"]')?.classList.add('activo');
+      elegirTextura(galeriaTexturas.querySelector('[data-textura="ninguno"]'));
       actualizarMiniaturasPresets();
+      actualizarMiniaturasTexturas();
       actualizarFiltro();
     } catch (error) {
       const sinMemoria = /bad_alloc|memory|out of memory|OrtRun/i.test(error.message);
@@ -404,6 +439,19 @@ export function iniciarGeneradorStickers() {
 
   entradaTextura.addEventListener('input', () => {
     valorTextura.textContent = entradaTextura.value;
+    actualizarFiltro();
+  });
+
+  function elegirTextura(boton) {
+    galeriaTexturas.querySelectorAll('.miniatura-textura').forEach((b) => b.classList.toggle('activo', b === boton));
+    texturaActual = boton.dataset.textura;
+    panelTextura.mostrar(texturaActual);
+  }
+
+  galeriaTexturas.addEventListener('click', (e) => {
+    const boton = e.target.closest('.miniatura-textura');
+    if (!boton) return;
+    elegirTextura(boton);
     actualizarFiltro();
   });
 

@@ -171,6 +171,7 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | Escapar y limpiar HTML | `assets/js/seguridad-html.js` | `escaparHtml` (única definición del sitio) y la limpieza de HTML de archivos del usuario |
 | Zona de arrastre | `assets/js/zona-arrastre.js` | `conectarZonaArrastre` y acceso con teclado (sección 3, Entrada) |
 | Selector de dirección | `assets/js/selector-direccion.js` | panel según la dirección elegida (`data-panel-direccion`) |
+| Mosaicos y cómic | `assets/js/paleta-color.js` + `assets/js/efectos-mosaico.js` (+ `vendor/imagetracerjs` para el cómic) | texturas de los editores de imagen y del generador de stickers (sección Texturas) (pixel art, cuadrícula, punto de cruz, cuentas, diamantes, abalorios, pop art, cómic). Son **texturas, no filtros**: no hay filtros predefinidos que las usen, y cada una se ajusta con sus propios controles. `EfectosMosaico.agregarMiniaturas(galeria)` suma sus miniaturas a `#modosTextura` (llamarla **antes** de conectar los clics de la galería) y `EfectosMosaico.crearPanel(contenedor, { alCambiar })` arma los controles (celdas, colores, tramado, separación o línea, grosor…) con `leer()`, `poner(opciones, tipo)` y `mostrar(tipo)`; con uno de estos tipos oculta el `#texturaIntensidad` de la página, que no usan. Trae sus propias traducciones. Se aplican por `EfectosTextura.aplicarCompleto(…, opciones)` como cualquier textura; `EfectosTextura.esMosaico(tipo)` dice si deja transparente lo que no es figura |
 
 Los dos primeros necesitan que incluyas **su CSS y su JS**. Olvidarse de uno es
 un error silencioso: la página se ve, pero sin el comportamiento.
@@ -555,6 +556,13 @@ en ventana angosta son donde aparecen los problemas de este patrón.
   `.vista-previa-diapositivas`) ya comparten su código. Queda CSS propio en
   varias herramientas, pero ya no hay bloques copiados entre páginas: lo que
   queda es de cada una. El E también: `.tabla-creditos` y `.texto-actualizacion`.
+- **El motor de filtros está tres veces.** `procesarCanvas` y `renderizarFiltro`
+  existen en `assets/js/procesar-filtros.js` (lo usa el generador de stickers) y
+  copiados dentro de cada editor de imagen. Las texturas sí son una sola pieza
+  (`efectos-textura.js` y `efectos-mosaico.js`), pero pasarles un dato nuevo
+  obliga a tocar cada copia (las `opciones` de los mosaicos se pasaron a mano en
+  cada editor; el generador de stickers aplica su textura aparte, después del
+  filtro). Unirlas es el paso pendiente.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar
   cuando todos los grupos tengan clave.

@@ -18,9 +18,22 @@
 .miniatura-textura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border: 2px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); }
 .miniatura-textura.activo canvas { border-color: var(--azul); }
 .miniatura-textura.activo span { color: var(--azul); font-weight: 600; }
+.texturas-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+/* min-width: 0 porque es hijo flex (columna) de .miniatura-textura: sin esto un
+   nombre largo ("Esmerilado", "Punto de cruz") no se achica y pisa a la
+   miniatura de al lado en vez de recortarse con "…". */
+.miniatura-textura span { min-width: 0; max-width: 100%; overflow: hidden; color: var(--texto-suave); font-size: 0.68rem; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 .modos { display: flex; gap: 6px; flex-wrap: wrap; }
 .modos button { padding: 5px 10px; border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); color: var(--texto); cursor: pointer; font-size: 0.78rem; }
 .modos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+/* Controles de los mosaicos y el cómic (los arma assets/js/efectos-mosaico.js).
+   El [hidden] va explícito porque los display:flex de las clases lo anularían. */
+.opciones-mosaico { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.opciones-mosaico[hidden], .opciones-mosaico [hidden] { display: none; }
+.opciones-mosaico .etiqueta-modos { display: block; margin-bottom: 4px; font-size: 0.85rem; }
+.opciones-mosaico .modos { align-items: center; }
+.opciones-mosaico input[type="color"] { width: 36px; height: 28px; padding: 1px 3px; border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); cursor: pointer; }
+.opciones-mosaico input[type="color"].activo { border-color: var(--azul); box-shadow: 0 0 0 2px var(--azul); }
 .acordeon-titulo { width: 100%; display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; padding: 8px 10px; background: var(--gris-fondo); border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em; }
 .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
 .acordeon-titulo > span:first-child { flex: 1 1 auto; min-width: 0; }
@@ -31,6 +44,7 @@
 .deslizadores { display: grid; grid-template-columns: 1fr; gap: 8px; }
 .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
 .campo-deslizador.deshabilitado { opacity: 0.5; }
+.campo-deslizador[hidden] { display: none; }
 .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
 .campo-deslizador .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
 .campo-deslizador input[type="range"] { width: 100%; margin: 0; }

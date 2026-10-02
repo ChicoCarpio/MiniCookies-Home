@@ -192,7 +192,6 @@ const FiltrosColor = (() => {
       capas: [enSombras({ colorRojo: -18, colorVerde: 8, colorAzul: 28 }), enLuces({ colorRojo: 22, colorVerde: 6, colorAzul: -20 }), vineta(20)],
     }),
     altaModa: filtro({ contraste: 35, claridad: 25, saturacion: -15, reflejos: 10 }, { capas: [enSombras({ colorAzul: 6 })] }),
-    comic: filtro({ saturacion: 60, contraste: 45, claridad: 40 }),
     pastel: filtro({ saturacion: -30, exposicion: 12, contraste: -20, sombras: 20, claridad: -10, colorRojo: 5, colorAzul: 5 }),
     desvanecido: filtro({ exposicion: 10, contraste: -25, sombras: 25, saturacion: -20 }),
     altoBrillo: filtro({ exposicion: 20, sombras: 20, reflejos: -5, contraste: -10, saturacion: 5 }),
@@ -221,8 +220,6 @@ const FiltrosColor = (() => {
     vaporwave: filtro({ saturacion: 30, contraste: 10, dispersionIntensidad: 25, dispersionTamano: 65 }, {
       capas: [enSombras({ colorRojo: 10, colorAzul: 30 }), enLuces({ colorRojo: 25, colorVerde: -10, colorAzul: 20 })],
     }),
-    popArt: filtro({ saturacion: 60, contraste: 30 }, { textura: { tipo: 'pixelar-circulos', intensidad: 14, orden: 'encima' } }),
-    pixelArt: filtro({ saturacion: 20, contraste: 10 }, { textura: { tipo: 'pixelar', intensidad: 24, orden: 'debajo' } }),
 
     // --- Artístico y otros ---
     acuarela: filtro({ saturacion: -15, contraste: -10, claridad: -20, desenfoque: 1, exposicion: 5 }),
@@ -298,7 +295,6 @@ const FiltrosColor = (() => {
     pielLuminosa: "Glowing skin",
     cine: "Cinematic",
     altaModa: "High fashion",
-    comic: "Comic",
     pastel: "Pastel",
     desvanecido: "Faded",
     altoBrillo: "High key",
@@ -316,8 +312,6 @@ const FiltrosColor = (() => {
     terror: "Horror",
     nocturno: "Night",
     vaporwave: "Vaporwave",
-    popArt: "Pop art",
-    pixelArt: "Pixel art",
     acuarela: "Watercolor",
     oleo: "Oil paint",
     invertir: "Invert",
@@ -401,7 +395,6 @@ const FiltrosColor = (() => {
       ["pielLuminosa", "Piel luminosa"],
       ["cine", "Cine"],
       ["altaModa", "Alta moda"],
-      ["comic", "Cómic"],
       ["pastel", "Pastel"],
       ["desvanecido", "Desvanecido"],
       ["altoBrillo", "Alto brillo"],
@@ -421,8 +414,6 @@ const FiltrosColor = (() => {
       ["terror", "Terror"],
       ["nocturno", "Nocturno"],
       ["vaporwave", "Vaporwave"],
-      ["popArt", "Pop art"],
-      ["pixelArt", "Pixel art"],
     ] },
     { titulo: "Artístico y otros", filtros: [
       ["acuarela", "Acuarela"],

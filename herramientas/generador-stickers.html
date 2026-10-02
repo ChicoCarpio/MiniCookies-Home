@@ -61,6 +61,8 @@ window.i18nPagina = {
     'nota-modelo': 'La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador.',
     'grupo-filtros': 'Filtros',
     'grupo-acciones': 'Acciones',
+    'titulo-textura': 'Texturas',
+    'textura-ninguno': 'Ninguna',
     'lbl-intensidad-filtro': 'Intensidad del filtro',
     'lbl-tamano-textura': 'Tamaño',
     'campo-grosor': 'Grosor del borde: ',
@@ -81,6 +83,8 @@ window.i18nPagina = {
     'nota-modelo': 'The first time, it downloads a segmentation model (~42 MB) that then stays cached in your browser.',
     'grupo-filtros': 'Filters',
     'grupo-acciones': 'Actions',
+    'titulo-textura': 'Textures',
+    'textura-ninguno': 'None',
     'lbl-intensidad-filtro': 'Filter intensity',
     'lbl-tamano-textura': 'Size',
     'campo-grosor': 'Border thickness: ',
@@ -154,6 +158,18 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
+          <fieldset class="acordeon-grupo" data-app-categoria="Texturas">
+            <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="titulo-textura">Texturas</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="texturas-scroll">
+                <div class="texturas-galeria" id="modosTextura">
+                  <button type="button" class="miniatura-textura activo" data-textura="ninguno"><canvas></canvas><span data-i18n="textura-ninguno">Ninguna</span></button>
+                </div>
+              </div>
+              <div id="controlesMosaico"></div>
+            </div>
+          </fieldset>
+
           <fieldset class="acordeon-grupo" data-app-categoria="ColorBorde">
             <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="campo-color-borde">Color del borde</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
@@ -200,6 +216,9 @@ window.i18nPagina = {
 
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/efectos-textura.js"></script>
+<script src="../assets/js/paleta-color.js"></script>
+<script src="../vendor/imagetracerjs/1.2.6/imagetracer_v1.2.6.js"></script>
+<script src="../assets/js/efectos-mosaico.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
 <script type="module">

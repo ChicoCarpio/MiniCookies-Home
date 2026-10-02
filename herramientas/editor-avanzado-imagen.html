@@ -47,14 +47,7 @@
   .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 6px; padding: 6px 4px; }  .preset-miniatura span {
     min-width: 0; font-size: 0.68rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }  .texturas-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }  .miniatura-textura span {
-    /* min-width: 0 es necesario porque es un hijo flex (columna) dentro de
-       .miniatura-textura: sin esto, un nombre largo ("Esmerilado",
-       "Difuminado") no se achica más allá de su ancho natural y el texto
-       termina pisando a la miniatura de al lado en vez de recortarse con
-       "…" como ya hace .preset-miniatura con nombres de filtro. */
-    min-width: 0; max-width: 100%; overflow: hidden; color: var(--texto-suave); font-size: 0.68rem; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap;
-  }  .texturas-scroll { max-height: 220px; overflow: auto; }
+  }  .texturas-galeria { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }  .texturas-scroll { max-height: 220px; overflow: auto; }
   #botonVerOriginal { margin-top: 8px; padding: 5px 12px; font-size: 0.78rem; user-select: none; -webkit-user-select: none; touch-action: none; }
 
   /* --- Paneles laterales plegables ---
@@ -697,6 +690,9 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/efectos-textura.js"></script>
+<script src="../assets/js/paleta-color.js"></script>
+<script src="../vendor/imagetracerjs/1.2.6/imagetracer_v1.2.6.js"></script>
+<script src="../assets/js/efectos-mosaico.js"></script>
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
@@ -737,6 +733,18 @@ const activarBN = document.getElementById('activarBN');
 const elTexturaIntensidad = document.getElementById('texturaIntensidad');
 const valorTexturaIntensidad = document.getElementById('valorTexturaIntensidad');
 const controlesTextura = document.getElementById('controlesTextura');
+// Mosaicos y cómic (assets/js/efectos-mosaico.js): sus miniaturas van antes
+// de conectar los clics de la galería; sus opciones se guardan en la capa.
+EfectosMosaico.agregarMiniaturas(document.getElementById('modosTextura'));
+const panelMosaico = EfectosMosaico.crearPanel(controlesTextura, {
+  alCambiar: () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.ajustes.texturaOpciones = panelMosaico.leer();
+    actualizarMiniaturaCapa(capa);
+    programarRenderizado();
+  },
+});
 const elIntensidadFiltro = document.getElementById('intensidadFiltro');
 const valorIntensidadFiltro = document.getElementById('valorIntensidadFiltro');
 const controlesIntensidadFiltro = document.getElementById('controlesIntensidadFiltro');
@@ -796,6 +804,7 @@ const AJUSTES_NEUTROS = {
   dispersionIntensidad: 0, dispersionMatiz: 0, dispersionTamano: 50,
   aberracionIntensidad: 0, aberracionAngulo: 0, aberracionMatiz: 0,
   textura: 'ninguno', texturaIntensidad: 18, texturaOrden: 'debajo',
+  texturaOpciones: null, // controles de los mosaicos y el cómic, ver efectos-mosaico.js (null = los de fábrica)
   hsl: null, // Ajustar por color (null = sin cambios), ver assets/js/ajuste-por-color.js
   filtro: 'ninguno', // filtro elegido para la capa (clave de FiltrosColor.FILTROS)
   intensidadFiltro: 100,
@@ -1145,7 +1154,7 @@ function procesarCapaEnCanvas(canvas, capa, escala) {
   const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * escala);
 
   if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'debajo') {
-    EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura);
+    EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura, ajustes.texturaOpciones);
   }
 
   // Capas extra del filtro (viñeta, sombras, luces, un tono): sus máscaras se
@@ -1177,7 +1186,7 @@ function procesarCapaEnCanvas(canvas, capa, escala) {
   }
 
   if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'encima') {
-    EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura);
+    EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura, ajustes.texturaOpciones);
   }
 
   if (ajustes.desenfoque > 0) {
@@ -1361,6 +1370,7 @@ function ajustesDeFiltro(clave) {
     ajustes.textura = f.textura.tipo;
     ajustes.texturaIntensidad = f.textura.intensidad;
     ajustes.texturaOrden = f.textura.orden;
+    ajustes.texturaOpciones = f.textura.opciones || null;
   }
   return ajustes;
 }
@@ -1666,6 +1676,7 @@ function escribirAjustesEnUI(ajustes) {
   });
   document.querySelectorAll('#modosTextura button').forEach((b) => b.classList.toggle('activo', b.dataset.textura === ajustes.textura));
   controlesTextura.style.display = ajustes.textura === 'ninguno' ? 'none' : 'block';
+  panelMosaico.poner(ajustes.texturaOpciones, ajustes.textura);
   elTexturaIntensidad.value = ajustes.texturaIntensidad;
   valorTexturaIntensidad.textContent = ajustes.texturaIntensidad;
   document.querySelectorAll('#modosOrdenTextura button').forEach((b) => b.classList.toggle('activo', b.dataset.orden === ajustes.texturaOrden));
@@ -1755,6 +1766,8 @@ document.querySelectorAll('#modosTextura button').forEach((boton) => {
     document.querySelectorAll('#modosTextura button').forEach((b) => b.classList.remove('activo'));
     boton.classList.add('activo');
     controlesTextura.style.display = capa.ajustes.textura === 'ninguno' ? 'none' : 'block';
+    panelMosaico.mostrar(capa.ajustes.textura);
+    capa.ajustes.texturaOpciones = panelMosaico.leer();
     actualizarMiniaturaCapa(capa);
     programarRenderizado();
   });
