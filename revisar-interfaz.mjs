@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
 // Revisión automática de la interfaz: abre TODAS las páginas publicadas a
-// ancho de teléfono y comprueba un puñado de invariantes que no se pueden
-// romper nunca.
+// ancho de teléfono y de escritorio y comprueba un puñado de invariantes que
+// no se pueden romper nunca.
 //
 // Por qué existe: la guía de interfaz ya decía "la publicidad no tapa el
 // encabezado" y aun así las tres herramientas de pantalla completa lo hacían
@@ -13,7 +13,8 @@
 // Cómo funciona, y por qué así:
 //  - Se revisa dist/, no el código fuente: es lo que realmente se publica, así
 //    que también atrapa lo que rompa el propio build.
-//  - Cada página se mide DENTRO de un <iframe> de 390px. Es la única forma de
+//  - Cada página se mide DENTRO de un <iframe> del ancho de cada vista (390px
+//    y 1366px, ver VISTAS). Es la única forma de
 //    fijar el viewport: "--window-size" de Edge no lo controla (deja el layout
 //    en 492px y solo recorta la captura, así que todo parece cortado a la
 //    derecha cuando en realidad entra bien).
@@ -37,8 +38,15 @@ import { join, extname, relative, sep } from 'node:path';
 const RAIZ = new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const DIST = join(RAIZ, 'dist');
 const PUERTO = 8788;
-const ANCHO = 390;
-const ALTO = 844;
+// Una pasada completa por cada vista. Al principio solo existía la de
+// celular, y la mitad del sitio —todo lo que se ve en una computadora— quedaba
+// sin red: un cambio de escritorio podía romper el encabezado sin que nada lo
+// avisara. 1366x768 es la pantalla de laptop más común y la más baja de las
+// habituales, así que es la que primero muestra si algo tapa el encabezado.
+const VISTAS = [
+  { nombre: 'celular', ancho: 390, alto: 844 },
+  { nombre: 'escritorio', ancho: 1366, alto: 768 },
+];
 
 // Edge en Windows. Se puede forzar otro con EDGE=<ruta>.
 const CANDIDATOS_EDGE = [
@@ -167,12 +175,13 @@ function medir(doc, win) {
 function paginaDeControl(paginas) {
   return `<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8"><title>revision</title>
-<style>html,body{margin:0}iframe{width:${ANCHO}px;height:${ALTO}px;border:0;display:block}</style>
+<style>html,body{margin:0}iframe{border:0;display:block}</style>
 </head><body>
 <iframe id="marco"></iframe>
 <pre id="salida"></pre>
 <script>
 const PAGINAS = ${JSON.stringify(paginas)};
+const VISTAS = ${JSON.stringify(VISTAS)};
 ${COMPROBACIONES}
 
 const marco = document.getElementById('marco');
@@ -220,16 +229,20 @@ function archivoDePrueba(win) {
 }
 
 (async () => {
+  for (const vista of VISTAS) {
+  marco.style.width = vista.ancho + 'px';
+  marco.style.height = vista.alto + 'px';
   for (const ruta of PAGINAS) {
+    const v = vista.nombre;
     await cargar(ruta);
     await esperar(60);
     let doc, win;
     try { doc = marco.contentDocument; win = marco.contentWindow; } catch (e) {}
-    if (!doc) { resultados.push({ ruta, estado: 'inicial', fallas: ['no se pudo abrir la página'] }); continue; }
+    if (!doc) { resultados.push({ ruta, vista: v, estado: 'inicial', fallas: ['no se pudo abrir la página'] }); continue; }
 
     barraSuperpuesta(doc);
     await esperar(30);
-    resultados.push({ ruta, estado: 'inicial', fallas: medir(doc, win) });
+    resultados.push({ ruta, vista: v, estado: 'inicial', fallas: medir(doc, win) });
 
     // Las herramientas de pantalla completa solo arman su distribución cuando
     // hay contenido. Ahí es justamente donde estaba el bug, así que se las
@@ -240,19 +253,20 @@ function archivoDePrueba(win) {
         if (editor) {
           editor.style.display = 'block';
           await esperar(150);
-          resultados.push({ ruta, estado: 'editor abierto', fallas: medir(doc, win) });
+          resultados.push({ ruta, vista: v, estado: 'editor abierto', fallas: medir(doc, win) });
         } else if (typeof win.agregarArchivos === 'function') {
           const archivo = await archivoDePrueba(win);
           const dt = new win.DataTransfer();
           dt.items.add(archivo);
           await win.agregarArchivos(dt.files);
           await esperar(150);
-          resultados.push({ ruta, estado: 'con contenido', fallas: medir(doc, win) });
+          resultados.push({ ruta, vista: v, estado: 'con contenido', fallas: medir(doc, win) });
         }
       } catch (e) {
-        resultados.push({ ruta, estado: 'editor abierto', fallas: ['no se pudo abrir el editor: ' + e.message] });
+        resultados.push({ ruta, vista: v, estado: 'editor abierto', fallas: ['no se pudo abrir el editor: ' + e.message] });
       }
     }
+  }
   }
   document.getElementById('salida').textContent = JSON.stringify(resultados);
 })();
@@ -284,6 +298,8 @@ function correrEdge(url) {
       '--headless',
       '--disable-gpu',
       '--no-sandbox',
+      // La ventana tiene que poder contener el iframe de escritorio.
+      '--window-size=1400,900',
       // Sin esto la revisión depende de que respondan los CDN.
       '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
       '--virtual-time-budget=600000',
@@ -308,7 +324,7 @@ const archivoControl = join(DIST, '__revision.html');
 writeFileSync(archivoControl, paginaDeControl(paginas), 'utf8');
 
 const servidor = await servir(DIST);
-console.log(`Revisando ${paginas.length} páginas a ${ANCHO}px...`);
+console.log(`Revisando ${paginas.length} páginas a ${VISTAS.map((v) => v.ancho + 'px').join(' y ')}...`);
 
 let salida;
 try {
@@ -345,7 +361,7 @@ for (const r of conFallas) {
     const clave = corte > 0 ? f.slice(0, corte) : f;
     const detalle = corte > 0 ? f.slice(corte + 2) : '';
     if (!porFalla.has(clave)) porFalla.set(clave, []);
-    porFalla.get(clave).push(`${r.ruta} (${r.estado})` + (detalle ? `\n          ${detalle}` : ''));
+    porFalla.get(clave).push(`${r.ruta} (${r.vista}, ${r.estado})` + (detalle ? `\n          ${detalle}` : ''));
   }
 }
 

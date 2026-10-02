@@ -426,7 +426,8 @@ que aplastó el lienzo del generador de stickers.
 npm run revisar
 ```
 
-Compila el sitio y abre **las 120 páginas** en un iframe de 390px, comprobando
+Compila el sitio y abre **las 120 páginas** dos veces —en un iframe de 390px
+(celular) y en uno de 1366px (escritorio)—, comprobando en cada una
 que el encabezado esté visible y sin tapar, que la publicidad no ocupe el borde
 superior, que nada desborde a lo ancho y que haya un `<h1>`. Las herramientas de
 arquetipo C se revisan dos veces: también con su editor abierto, que es el estado
@@ -442,7 +443,6 @@ memoria `verificar-vistas-headless`.
 
 Esto sigue siendo a ojo:
 
-- [ ] Escritorio: solo se revisa 390px.
 - [ ] Que el escenario no se cruce con la bandeja de controles en ninguna
       categoría ni proporción.
 - [ ] Que cada categoría entre sin desplazamiento interno.
