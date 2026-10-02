@@ -138,6 +138,7 @@ window.i18nPagina = {
 <script src="../assets/js/pdf-texto.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
@@ -182,15 +183,7 @@ function elegirArchivoPdf(listaFileList) {
   if (archivo) mostrarArchivoPdf(archivo);
 }
 
-zonaArrastrePdf.addEventListener('click', () => entradaPdf.click());
-entradaPdf.addEventListener('change', (e) => elegirArchivoPdf(e.target.files));
-zonaArrastrePdf.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastrePdf.classList.add('activa'); });
-zonaArrastrePdf.addEventListener('dragleave', () => zonaArrastrePdf.classList.remove('activa'));
-zonaArrastrePdf.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastrePdf.classList.remove('activa');
-  elegirArchivoPdf(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivoPdf);
 
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
@@ -250,15 +243,7 @@ function elegirArchivoTxt(listaFileList) {
   if (archivo) mostrarArchivoTxt(archivo);
 }
 
-zonaArrastreTxt.addEventListener('click', () => entradaTxt.click());
-entradaTxt.addEventListener('change', (e) => elegirArchivoTxt(e.target.files));
-zonaArrastreTxt.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreTxt.classList.add('activa'); });
-zonaArrastreTxt.addEventListener('dragleave', () => zonaArrastreTxt.classList.remove('activa'));
-zonaArrastreTxt.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastreTxt.classList.remove('activa');
-  elegirArchivoTxt(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastreTxt, entradaTxt, elegirArchivoTxt);
 
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;

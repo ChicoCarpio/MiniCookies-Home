@@ -781,6 +781,7 @@ window.i18nPagina = {
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -2475,15 +2476,7 @@ function elegirArchivo(listaFileList) {
   if (archivo) Promise.resolve(mostrarArchivo(archivo)).catch(() => alert(t('imagen-invalida')));
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => { elegirArchivo(e.target.files); entradaArchivo.value = ''; });
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  elegirArchivo(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 // ===== Reiniciar / Descargar =====
 botonRestablecerAvanzado.addEventListener('click', () => {

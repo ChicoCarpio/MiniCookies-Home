@@ -165,6 +165,7 @@ Este es un ejemplo de **Markdown** con:
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
@@ -213,15 +214,7 @@ function elegirArchivo(listaFileList) {
   if (archivo) mostrarArchivo(archivo);
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  elegirArchivo(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 // Escapa solo lo que Markdown interpretaría como formato. Antes se escapaban
 // también puntos, paréntesis, signos de exclamación, etc. en cualquier lugar,

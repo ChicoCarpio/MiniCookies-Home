@@ -364,6 +364,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../vendor/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -1382,19 +1383,7 @@ function elegirArchivo(listaFileList) {
   if (archivo) mostrarArchivo(archivo);
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => {
-  const archivos = Array.from(e.target.files);
-  e.target.value = '';
-  elegirArchivo(archivos);
-});
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  elegirArchivo(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 const CODIGOS_MONEDA = new Map([
   ['؋', 'AFN'], ['৳', 'BDT'], ['₿', 'BTC'], ['₵', 'GHS'], ['₡', 'CRC'],

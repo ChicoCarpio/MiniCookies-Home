@@ -171,6 +171,7 @@ window.i18nPagina = {
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
@@ -212,15 +213,7 @@ function elegirArchivoWord(listaFileList) {
   if (archivo) mostrarArchivoWord(archivo);
 }
 
-zonaArrastreWord.addEventListener('click', () => entradaWord.click());
-entradaWord.addEventListener('change', (e) => elegirArchivoWord(e.target.files));
-zonaArrastreWord.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreWord.classList.add('activa'); });
-zonaArrastreWord.addEventListener('dragleave', () => zonaArrastreWord.classList.remove('activa'));
-zonaArrastreWord.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastreWord.classList.remove('activa');
-  elegirArchivoWord(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivoWord);
 
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
@@ -283,15 +276,7 @@ function elegirArchivoPdf(listaFileList) {
   if (archivo) mostrarArchivoPdf(archivo);
 }
 
-zonaArrastrePdf.addEventListener('click', () => entradaPdf.click());
-entradaPdf.addEventListener('change', (e) => elegirArchivoPdf(e.target.files));
-zonaArrastrePdf.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastrePdf.classList.add('activa'); });
-zonaArrastrePdf.addEventListener('dragleave', () => zonaArrastrePdf.classList.remove('activa'));
-zonaArrastrePdf.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastrePdf.classList.remove('activa');
-  elegirArchivoPdf(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivoPdf);
 
 // Cada párrafo del PDF pasa a ser un párrafo de texto corrido (sin los
 // cortes de renglón del PDF, que en Word los decide el ancho de página).

@@ -146,6 +146,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/extraer-medios-zip.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -402,18 +403,7 @@ async function leerArchivo(archivo) {
   mostrarCodigos(codigos, queEra);
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => {
-  if (e.target.files[0]) leerArchivo(e.target.files[0]);
-});
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  const archivo = e.dataTransfer.files[0];
-  if (archivo) leerArchivo(archivo);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, (archivos) => leerArchivo(archivos[0]));
 
 // --- Modo cámara ---
 

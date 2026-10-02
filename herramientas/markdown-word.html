@@ -159,6 +159,7 @@ Este es un ejemplo de **Markdown** con:
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelMdAWord = document.getElementById('panelMdAWord');
 const panelWordAMd = document.getElementById('panelWordAMd');
@@ -240,15 +241,7 @@ function elegirArchivo(listaFileList) {
   if (archivo) mostrarArchivo(archivo);
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  elegirArchivo(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;

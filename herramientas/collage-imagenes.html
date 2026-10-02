@@ -305,6 +305,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const MAX_FOTOS = 12;
 const LADO_MAX_VISTA = 1600; // las fotos se reducen a esto para que la vista previa responda rápido
@@ -920,15 +921,7 @@ document.getElementById('botonDescargar').addEventListener('click', async () => 
   }
 });
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => { agregarArchivos(e.target.files); entradaArchivo.value = ''; });
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  agregarArchivos(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, agregarArchivos);
 </script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>

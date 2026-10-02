@@ -108,12 +108,27 @@ No agregues reglas de encabezado en la página. Si algo no entra, se arregla en
 
 | Pieza | Qué es |
 |---|---|
-| `.zona-arrastre` | caja de "arrastrá tu archivo acá"; lleva un `<input type="file" hidden>` |
+| `.zona-arrastre` | caja de "arrastrá tu archivo acá"; lleva un `<input type="file" hidden>`. Se conecta con `assets/js/zona-arrastre.js` (ver abajo) |
 | `.controles` | fila de controles; es flex y envuelve |
 | `label.campo` | etiqueta + control, apilados |
 | `.campo-deslizador` | variante con el valor a la derecha de la etiqueta |
 | `.boton` | acción principal |
 | `.boton-tema` | botón circular de icono (idioma, tema) |
+
+**Zona de arrastre: nunca se cablea a mano.** Se incluye
+`assets/js/zona-arrastre.js` antes del script de la página y se llama:
+
+```js
+conectarZonaArrastre(zonaArrastre, entradaArchivo, (archivos) => { … });
+```
+
+`archivos` es siempre un `Array` de `File`, venga del selector o de lo soltado.
+El módulo limpia el selector después de cada elección (si no, volver a elegir
+el mismo archivo no hace nada) y hace **toda** `.zona-arrastre` de la página
+usable con teclado: foco con Tab, Enter/Espacio para elegir, contorno visible.
+Estaba copiado en 77 herramientas: 53 no limpiaban el selector y ninguna
+funcionaba con teclado. Si una herramienta acepta un solo tipo o un solo
+archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 
 > **Trampa documentada.** Un `<select>` toma el ancho de su opción más larga, y
 > un hijo de un contenedor flex no se achica por debajo de su contenido. Por eso
@@ -457,6 +472,20 @@ donde aparecieron los bugs. Cuando algo falla, dice **qué elemento** lo causa.
 
 **No lo conectes a `npm run build`**: ese comando lo corre Cloudflare Pages, en
 Linux y sin Edge, así que fallaría siempre y no se podría publicar.
+
+```
+npm run probar
+```
+
+Complementa a `revisar`: en vez de mirar cómo se ve, **usa** las herramientas,
+sin internet y en tiempo real (`probar-funciones.mjs`). Comprueba que toda zona
+de arrastre de las 240 páginas responde al teclado, que elegir dos veces el mismo
+archivo y soltar funcionan, que las librerías de `vendor/` cargan de verdad
+(Excel → PDF sin caracteres sustituidos, PDF.js con su worker, OCR completo,
+fuentes propias), el buscador en los dos idiomas, y que ninguna página pide un
+archivo que no existe. Cada prueba verifica una señal concreta, no solo que no
+hubo error: varias herramientas tienen respaldos silenciosos que esconden fallas.
+Tampoco va conectado al build.
 
 Detalles de la técnica —por qué hace falta el iframe, cómo medir el DOM— en la
 memoria `verificar-vistas-headless`.

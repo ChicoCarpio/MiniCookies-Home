@@ -142,6 +142,7 @@ window.i18nPagina = {
 <script src="../vendor/jsdiff/9.0.0/diff.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastreA = document.getElementById('zonaArrastreA');
 const zonaArrastreB = document.getElementById('zonaArrastreB');
@@ -160,17 +161,8 @@ function actualizarBoton() {
 }
 
 function configurarZona(zona, entrada, alElegir) {
-  zona.addEventListener('click', () => entrada.click());
-  zona.addEventListener('dragover', (e) => { e.preventDefault(); zona.classList.add('activa'); });
-  zona.addEventListener('dragleave', () => zona.classList.remove('activa'));
-  zona.addEventListener('drop', (e) => {
-    e.preventDefault();
-    zona.classList.remove('activa');
-    const archivo = [...e.dataTransfer.files].find(f => f.name.toLowerCase().endsWith('.docx'));
-    if (archivo) alElegir(archivo);
-  });
-  entrada.addEventListener('change', (e) => {
-    const archivo = [...e.target.files].find(f => f.name.toLowerCase().endsWith('.docx'));
+  conectarZonaArrastre(zona, entrada, (archivos) => {
+    const archivo = archivos.find(f => f.name.toLowerCase().endsWith('.docx'));
     if (archivo) alElegir(archivo);
   });
 }

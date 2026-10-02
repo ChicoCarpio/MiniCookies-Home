@@ -163,6 +163,7 @@ window.i18nPagina = {
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/epub.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelEpubAMd = document.getElementById('panelEpubAMd');
 const panelMdAEpub = document.getElementById('panelMdAEpub');
@@ -202,15 +203,7 @@ function elegirArchivoEpub(listaFileList) {
   if (archivo) mostrarArchivoEpub(archivo);
 }
 
-zonaArrastreEpub.addEventListener('click', () => entradaEpub.click());
-entradaEpub.addEventListener('change', (e) => elegirArchivoEpub(e.target.files));
-zonaArrastreEpub.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreEpub.classList.add('activa'); });
-zonaArrastreEpub.addEventListener('dragleave', () => zonaArrastreEpub.classList.remove('activa'));
-zonaArrastreEpub.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastreEpub.classList.remove('activa');
-  elegirArchivoEpub(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivoEpub);
 
 botonAMd.addEventListener('click', async () => {
   botonAMd.disabled = true;
@@ -262,15 +255,7 @@ function elegirArchivoMd(listaFileList) {
   if (archivo) mostrarArchivoMd(archivo);
 }
 
-zonaArrastreMd.addEventListener('click', () => entradaMd.click());
-entradaMd.addEventListener('change', (e) => elegirArchivoMd(e.target.files));
-zonaArrastreMd.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastreMd.classList.add('activa'); });
-zonaArrastreMd.addEventListener('dragleave', () => zonaArrastreMd.classList.remove('activa'));
-zonaArrastreMd.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastreMd.classList.remove('activa');
-  elegirArchivoMd(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastreMd, entradaMd, elegirArchivoMd);
 
 botonAEpub.addEventListener('click', async () => {
   botonAEpub.disabled = true;

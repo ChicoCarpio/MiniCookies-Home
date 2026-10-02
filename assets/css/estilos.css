@@ -326,7 +326,17 @@ main {
 
 .zona-arrastre.activa {
   border-color: var(--azul);
-  background: #fdf1d9;
+  /* Token y no el color literal: con #fdf1d9 fijo, en modo oscuro quedaba
+     un recuadro crema con el texto claro encima, casi ilegible. */
+  background: var(--activo-fondo);
+}
+
+/* La zona se puede usar con teclado (zona-arrastre.js le da foco y Enter):
+   tiene que verse dónde está el foco. */
+.zona-arrastre:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 3px;
+  border-color: var(--azul);
 }
 
 .boton {

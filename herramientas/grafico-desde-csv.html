@@ -110,6 +110,7 @@ window.i18nPagina = {
 <script src="../assets/js/lector-planillas.js"></script>
 <script src="../vendor/Chart.js/4.5.1/chart.umd.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -170,15 +171,7 @@ function elegirArchivo(listaFileList) {
   if (archivo) mostrarArchivo(archivo);
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  elegirArchivo(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 const COLORES = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
 

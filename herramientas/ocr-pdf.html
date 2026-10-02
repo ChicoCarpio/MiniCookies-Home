@@ -179,6 +179,7 @@ window.i18nPagina = {
 <script src="../vendor/tesseract.js/7.0.0/dist/tesseract.min.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
@@ -259,15 +260,7 @@ async function agregarArchivos(listaFileList) {
   actualizarBoton();
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivos.click());
-entradaArchivos.addEventListener('change', (e) => agregarArchivos(e.target.files));
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  agregarArchivos(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivos, agregarArchivos);
 
 function idiomasElegidos() {
   return [...document.querySelectorAll('#listaIdiomas input:checked')].map(c => c.value);

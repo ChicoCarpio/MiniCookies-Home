@@ -101,6 +101,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../vendor/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.min.js');
 
@@ -125,15 +126,7 @@ function configurarZona(idZona, idEntrada, idLista, onElegido) {
     onElegido(archivo);
   }
 
-  zona.addEventListener('click', () => entrada.click());
-  entrada.addEventListener('change', (e) => elegir(e.target.files));
-  zona.addEventListener('dragover', (e) => { e.preventDefault(); zona.classList.add('activa'); });
-  zona.addEventListener('dragleave', () => zona.classList.remove('activa'));
-  zona.addEventListener('drop', (e) => {
-    e.preventDefault();
-    zona.classList.remove('activa');
-    elegir(e.dataTransfer.files);
-  });
+  conectarZonaArrastre(zona, entrada, elegir);
 }
 
 const botonSuperponer = document.getElementById('botonSuperponer');

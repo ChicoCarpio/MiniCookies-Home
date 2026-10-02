@@ -181,6 +181,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfa.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const opcionAPdfa = document.getElementById('opcionAPdfa');
 const opcionAPdf = document.getElementById('opcionAPdf');
@@ -242,15 +243,7 @@ function elegirArchivo(listaFileList) {
   if (archivo) mostrarArchivo(archivo);
 }
 
-zonaArrastre.addEventListener('click', () => entradaArchivo.click());
-entradaArchivo.addEventListener('change', (e) => elegirArchivo(e.target.files));
-zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('activa'); });
-zonaArrastre.addEventListener('dragleave', () => zonaArrastre.classList.remove('activa'));
-zonaArrastre.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zonaArrastre.classList.remove('activa');
-  elegirArchivo(e.dataTransfer.files);
-});
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
