@@ -10,8 +10,6 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
-  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
   .vista-previa-documento {
     background: #fff;
     color: #1a1a1a;
@@ -30,8 +28,6 @@
     #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
   }
   #areaImprimir { display: none; }
-  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
 <script>
 window.i18nPagina = {
@@ -104,7 +100,7 @@ window.i18nPagina = {
     </div>
 
     <!-- PDF → Markdown -->
-    <div id="panelPdfAMd">
+    <div id="panelPdfAMd" data-panel-direccion="pdf-a-md">
       <p style="color:var(--texto-suave); font-size:0.9rem;">
         <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
       </p>
@@ -126,7 +122,7 @@ window.i18nPagina = {
     </div>
 
     <!-- Markdown → PDF -->
-    <div id="panelMdAPdf" style="display:none;">
+    <div id="panelMdAPdf" data-panel-direccion="md-a-pdf" style="display:none;">
       <div class="columnas">
         <label class="campo">
           <span data-i18n="campo-markdown">Markdown</span>
@@ -176,13 +172,6 @@ function direccionActual() {
   return document.querySelector('input[name="direccion"]:checked').value;
 }
 
-document.querySelectorAll('input[name="direccion"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    const esPdfAMd = direccionActual() === 'pdf-a-md';
-    panelPdfAMd.style.display = esPdfAMd ? '' : 'none';
-    panelMdAPdf.style.display = esPdfAMd ? 'none' : '';
-  });
-});
 
 // --- PDF → Markdown ---
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -306,6 +295,7 @@ document.addEventListener('cambioIdioma', () => {
 
 actualizarVistaPreviaMd();
 </script>
+<script src="../assets/js/selector-direccion.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>

@@ -10,8 +10,6 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
-  .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 700px) { .columnas { grid-template-columns: 1fr; } }
   .vista-previa-documento {
     background: #fff;
     color: #1a1a1a;
@@ -25,8 +23,6 @@
   .vista-previa-documento img { max-width: 100%; }
   .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
   .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
-  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
 <script>
 window.i18nPagina = {
@@ -97,7 +93,7 @@ window.i18nPagina = {
     </div>
 
     <!-- Markdown → Word -->
-    <div id="panelMdAWord">
+    <div id="panelMdAWord" data-panel-direccion="md-a-word">
       <div class="columnas">
         <label class="campo">
           Markdown
@@ -125,7 +121,7 @@ Este es un ejemplo de **Markdown** con:
     </div>
 
     <!-- Word → Markdown -->
-    <div id="panelWordAMd" style="display:none;">
+    <div id="panelWordAMd" data-panel-direccion="word-a-md" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastre">
         <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
         <input type="file" id="entradaArchivo" accept=".docx" hidden>
@@ -164,13 +160,6 @@ Este es un ejemplo de **Markdown** con:
 const panelMdAWord = document.getElementById('panelMdAWord');
 const panelWordAMd = document.getElementById('panelWordAMd');
 
-document.querySelectorAll('input[name="direccion"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    const esMdAWord = document.querySelector('input[name="direccion"]:checked').value === 'md-a-word';
-    panelMdAWord.style.display = esMdAWord ? '' : 'none';
-    panelWordAMd.style.display = esMdAWord ? 'none' : '';
-  });
-});
 
 // --- Markdown → Word ---
 const entradaMarkdown = document.getElementById('entradaMarkdown');
@@ -274,6 +263,7 @@ botonCopiarMd.addEventListener('click', async () => {
   setTimeout(() => { botonCopiarMd.textContent = t('boton-copiar-md'); }, 1500);
 });
 </script>
+<script src="../assets/js/selector-direccion.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>

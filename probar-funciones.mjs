@@ -176,6 +176,33 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'rechaza .txt, acepta .docx';
   });
 
+  await prueba('selector de dirección: un panel por opción (herramientas bidireccionales)', async () => {
+    let paginasConSelector = 0;
+    for (const p of PAGINAS.filter((x) => x.startsWith('/herramientas/'))) {
+      await abrir(p); await esperar(80);
+      const paneles = [...D().querySelectorAll('[data-panel-direccion]')];
+      if (!paneles.length) continue;
+      paginasConSelector++;
+      for (const radio of D().querySelectorAll('.selector-direccion input[type="radio"]')) {
+        radio.checked = true;
+        radio.dispatchEvent(new (W().Event)('change', { bubbles: true }));
+        const visibles = paneles.filter((x) => W().getComputedStyle(x).display !== 'none');
+        afirmar(visibles.length === 1 && visibles[0].dataset.panelDireccion === radio.value,
+          p + ': con "' + radio.value + '" se ven ' + visibles.map((x) => x.dataset.panelDireccion).join(', '));
+      }
+    }
+    afirmar(paginasConSelector >= 10, 'solo ' + paginasConSelector + ' herramientas con selector');
+    return paginasConSelector + ' herramientas, todas las direcciones';
+  });
+
+  await prueba('.columnas: dos columnas desde estilos.css', async () => {
+    await abrir('/herramientas/comparador-texto.html'); await esperar(150);
+    const c = D().querySelector('.columnas');
+    const e = W().getComputedStyle(c);
+    afirmar(e.display === 'grid' && e.gridTemplateColumns.split(' ').length === 2, 'display ' + e.display + ', columnas ' + e.gridTemplateColumns);
+    return e.gridTemplateColumns;
+  });
+
   // 3. Librerías de vendor/ cargadas de verdad (sin internet).
   for (const ruta of ['/herramientas/excel-csv-a-pdf.html', '/en/herramientas/excel-csv-a-pdf.html']) {
     await prueba('Excel → PDF con fuente Noto (' + (ruta.startsWith('/en/') ? 'en' : 'es') + ')', async () => {

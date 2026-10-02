@@ -29,8 +29,6 @@
     #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
   }
   #areaImprimir { display: none; }
-  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 </style>
 <script>
 window.i18nPagina = {
@@ -109,7 +107,7 @@ window.i18nPagina = {
     </div>
 
     <!-- Word → PDF -->
-    <div id="panelWordAPdf">
+    <div id="panelWordAPdf" data-panel-direccion="word-a-pdf">
       <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-vista-previa">
         Vas a ver una vista previa con el formato (títulos, negritas, listas, tablas) — desde ahí usás
         "Guardar como PDF" del diálogo de impresión del navegador, así se conserva el formato real.
@@ -130,7 +128,7 @@ window.i18nPagina = {
     </div>
 
     <!-- PDF → Word -->
-    <div id="panelPdfAWord" style="display:none;">
+    <div id="panelPdfAWord" data-panel-direccion="pdf-a-word" style="display:none;">
       <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-solo-texto">
         ⚠️ Solo se extrae el texto del PDF (sin columnas, imágenes ni tablas) — un Word real armado desde
         cero a partir del texto, con párrafos separados por página.
@@ -178,13 +176,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.
 const panelWordAPdf = document.getElementById('panelWordAPdf');
 const panelPdfAWord = document.getElementById('panelPdfAWord');
 
-document.querySelectorAll('input[name="direccion"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    const esWordAPdf = document.querySelector('input[name="direccion"]:checked').value === 'word-a-pdf';
-    panelWordAPdf.style.display = esWordAPdf ? '' : 'none';
-    panelPdfAWord.style.display = esWordAPdf ? 'none' : '';
-  });
-});
 
 // --- Word → PDF ---
 const zonaArrastreWord = document.getElementById('zonaArrastreWord');
@@ -335,6 +326,7 @@ document.addEventListener('cambioIdioma', () => {
   }
 });
 </script>
+<script src="../assets/js/selector-direccion.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>

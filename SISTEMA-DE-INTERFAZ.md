@@ -114,6 +114,8 @@ No agregues reglas de encabezado en la página. Si algo no entra, se arregla en
 | `.campo-deslizador` | variante con el valor a la derecha de la etiqueta |
 | `.boton` | acción principal |
 | `.boton-tema` | botón circular de icono (idioma, tema) |
+| `.selector-direccion` | opciones "A → B / B → A" de una herramienta bidireccional; con `assets/js/selector-direccion.js` y un `data-panel-direccion="valor"` en cada panel, muestra solo el de la opción elegida, sin código propio |
+| `.columnas` | dos columnas (entrada \| resultado) que se apilan abajo de 700px |
 
 **Zona de arrastre: nunca se cablea a mano.** Se incluye
 `assets/js/zona-arrastre.js` antes del script de la página y se llama:

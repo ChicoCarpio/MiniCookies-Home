@@ -9,10 +9,6 @@
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<style>
-  .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-  .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
-</style>
 <script>
 window.i18nPagina = {
   es: {
@@ -106,7 +102,7 @@ window.i18nPagina = {
     </div>
 
     <!-- Imágenes → PDF -->
-    <div id="panelImgAPdf">
+    <div id="panelImgAPdf" data-panel-direccion="img-a-pdf">
       <p data-i18n="img-intro">Elegí una o varias imágenes (JPG, PNG, WebP, GIF o BMP). Cada una se convierte en una página — arrastralas para ordenarlas.</p>
       <div class="zona-arrastre" id="zonaArrastreImg">
         <span data-i18n="zona-arrastre-img">🖼️ Arrastrá tus imágenes acá o hacé clic para elegirlas</span>
@@ -133,7 +129,7 @@ window.i18nPagina = {
     </div>
 
     <!-- PDF → Imágenes -->
-    <div id="panelPdfAImg" style="display:none;">
+    <div id="panelPdfAImg" data-panel-direccion="pdf-a-img" style="display:none;">
       <p data-i18n="pdf-intro">Elegí un PDF y descargá cada página como imagen, dentro de un .zip.</p>
       <div class="zona-arrastre" id="zonaArrastrePdf">
         <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
@@ -186,13 +182,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = rutaVendor('pdf.js/3.11.174/pdf.worker.
 const panelImgAPdf = document.getElementById('panelImgAPdf');
 const panelPdfAImg = document.getElementById('panelPdfAImg');
 
-document.querySelectorAll('input[name="direccion"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    const esImgAPdf = document.querySelector('input[name="direccion"]:checked').value === 'img-a-pdf';
-    panelImgAPdf.style.display = esImgAPdf ? '' : 'none';
-    panelPdfAImg.style.display = esImgAPdf ? 'none' : '';
-  });
-});
 
 // --- Imágenes → PDF ---
 const zonaArrastreImg = document.getElementById('zonaArrastreImg');
@@ -348,6 +337,7 @@ botonAImagenes.addEventListener('click', async () => {
   }
 });
 </script>
+<script src="../assets/js/selector-direccion.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
