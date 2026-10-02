@@ -20,6 +20,7 @@
 
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { categoriaPrincipal } from './catalogo.mjs';
 
 export const SITIO = 'https://www.minicookies.net';
 const IMAGEN_SOCIAL = SITIO + '/marca-logo/minicookies_expandido.png';
@@ -57,23 +58,13 @@ export function urlDe(rel) {
 }
 
 /**
- * Recorre las páginas de categoría y devuelve, para cada herramienta, a qué
- * categorías pertenece. Varias herramientas son bidireccionales y tienen
- * tarjeta en dos categorías (ej. Word ↔ PDF): para las migas de pan se usa
- * la primera, que alcanza para ubicarla.
+ * Para cada herramienta, la categoría de sus migas de pan, sacada de
+ * catalogo.json. Varias herramientas son bidireccionales y están en dos
+ * categorías (ej. Word ↔ PDF): se usa la primera según el orden de CATEGORIAS,
+ * que alcanza para ubicarla.
  */
-export function indiceDeCategorias(raiz) {
-  const indice = new Map();
-  for (const clave of Object.keys(CATEGORIAS)) {
-    let html;
-    try { html = readFileSync(join(raiz, clave + '.html'), 'utf8'); } catch { continue; }
-    const re = /<a class="tarjeta-herramienta" href="(?:\.\.\/)?herramientas\/([^"]+)"/g;
-    let m;
-    while ((m = re.exec(html))) {
-      if (!indice.has(m[1])) indice.set(m[1], clave);
-    }
-  }
-  return indice;
+export function indiceDeCategorias(catalogo) {
+  return categoriaPrincipal(catalogo, Object.keys(CATEGORIAS));
 }
 
 const titulos = (html) => ({

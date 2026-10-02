@@ -150,7 +150,10 @@ window.i18nComun = {
   function diccionario(idioma) {
     var pagina = (window.i18nPagina && window.i18nPagina[idioma]) || {};
     var comun = window.i18nComun[idioma] || window.i18nComun.es;
-    return Object.assign({}, comun, pagina);
+    // Textos de las tarjetas de herramientas, que el build genera desde
+    // catalogo.json (ver catalogo.mjs).
+    var catalogo = (window.i18nCatalogo && window.i18nCatalogo[idioma]) || {};
+    return Object.assign({}, comun, catalogo, pagina);
   }
 
   // Traducción para texto generado por JavaScript (mensajes de botones en

@@ -8,32 +8,24 @@
 //
 // Así que en el HTML se escribe un marcador y acá se cuenta de verdad:
 //   {{HERRAMIENTAS}}       -> total de archivos en herramientas/
-//   {{HERRAMIENTAS:pdf}}   -> tarjetas de herramienta en pdf.html
+//   {{HERRAMIENTAS:pdf}}   -> herramientas de la categoría pdf en catalogo.json
 //
 // Si queda un marcador sin resolver, el build falla: es preferible eso a
 // publicar "{{HERRAMIENTAS}} herramientas gratis" en la portada.
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { conteoPorCategoria } from './catalogo.mjs';
 
-/** Cuenta las herramientas del sitio: total y por categoría. */
-export function contarHerramientas(raiz) {
+/**
+ * Cuenta las herramientas del sitio: total y por categoría. Los conteos por
+ * categoría salen de catalogo.json, la misma fuente que genera las tarjetas,
+ * así que no pueden diferir de lo que la página muestra.
+ */
+export function contarHerramientas(raiz, catalogo) {
   const total = readdirSync(join(raiz, 'herramientas'))
     .filter((n) => n.toLowerCase().endsWith('.html')).length;
-
-  const porCategoria = {};
-  for (const nombre of readdirSync(raiz)) {
-    if (!nombre.toLowerCase().endsWith('.html')) continue;
-    const clave = nombre.replace(/\.html$/i, '');
-    const html = readFileSync(join(raiz, nombre), 'utf8');
-    // Una herramienta puede tener tarjeta en dos categorías (las
-    // bidireccionales), así que se cuentan destinos distintos, no tarjetas.
-    const vistas = new Set();
-    const re = /<a class="tarjeta-herramienta" href="(?:\.\.\/)?herramientas\/([^"]+)"/g;
-    let m;
-    while ((m = re.exec(html))) vistas.add(m[1]);
-    if (vistas.size) porCategoria[clave] = vistas.size;
-  }
+  const porCategoria = conteoPorCategoria(catalogo);
   return { total, porCategoria };
 }
 

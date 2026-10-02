@@ -199,11 +199,22 @@ del final, la página parpadearía en claro antes de pasar a oscuro.
     <div class="aviso-privacidad" data-i18n="aviso-privacidad">🔒 …</div>
   </div>
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
-  <div class="grid-herramientas">
-    <a class="tarjeta-herramienta" href="herramientas/unir-pdf.html">…</a>
-  </div>
+  <div class="grid-herramientas" data-catalogo="pdf"></div>
 </main>
 ```
+
+**Las tarjetas no se escriben en la página.** Salen de `catalogo.json`, la única
+lista de herramientas del sitio: qué herramientas lleva cada categoría, en qué
+orden y con qué icono, más el título y la descripción de cada una en español e
+inglés, escritos una sola vez. El build (`catalogo.mjs`) llena cada
+`data-catalogo`, la lista del buscador de la portada (`{{CATALOGO_BUSCADOR}}`)
+y los conteos, y falla si una herramienta de `herramientas/` falta en el
+catálogo o no está en ninguna categoría. Por eso, abiertas directo del disco,
+las páginas de menú se ven sin tarjetas: para verlas, `npm run preview`.
+
+Antes eran tres copias a mano (categoría, `todas.html`, buscador) y se habían
+separado: el buscador no encontraba el generador de stickers y `todas.html`
+tenía otro orden y otros iconos.
 
 El aviso de privacidad **es exclusivo de los menús** (ver sección 5).
 
@@ -484,8 +495,9 @@ en ventana angosta son donde aparecen los problemas de este patrón.
 
 - **No hay catálogo visual de piezas.** Una página que las muestre todas en los
   dos temas y los dos anchos haría esta guía comprobable en vez de aspiracional.
-- **Los arquetipos A, B, D y E no están migrados a piezas**: hoy son convención,
-  no código compartido. Solo el C lo está. Es la tarea de prioridad 1 nº 1 en
+- **Los arquetipos B, D y E no están migrados a piezas**: hoy son convención,
+  no código compartido. El C lo está (`app-movil.*`) y el A también desde el
+  2026-10-01 (`catalogo.json`). Es la tarea de prioridad 1 nº 1 en
   `../PENDIENTES.md`.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar

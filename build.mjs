@@ -18,6 +18,7 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSy
 import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias } from './seo.mjs';
 import { traducir, diccionarioComun, paginasConIngles } from './ingles.mjs';
 import { contarHerramientas, aplicarConteos } from './conteo.mjs';
+import { leerCatalogo, aplicarCatalogo } from './catalogo.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 
 const RAIZ = process.cwd();
@@ -26,7 +27,7 @@ const SALIDA = join(RAIZ, 'dist');
 // Lo que no se publica: herramientas del build, notas internas (.md) y
 // archivos del repo.
 const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist',
-  'build.mjs', 'seo.mjs', 'ingles.mjs', 'conteo.mjs', 'revisar-interfaz.mjs', 'respaldar-librerias.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
+  'build.mjs', 'seo.mjs', 'ingles.mjs', 'conteo.mjs', 'catalogo.mjs', 'catalogo.json', 'revisar-interfaz.mjs', 'respaldar-librerias.mjs', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUIR_EXTENSIONES = new Set(['.md', '.log']);
 
 // Aviso de copyright de cada sitio: campo "config.aviso" de su package.json.
@@ -155,7 +156,8 @@ function recorrer(carpeta) {
     else if (ext === '.css') writeFileSync(destino, minificarCss(readFileSync(origen, 'utf8'), rel) + '\n');
     else if (ext === '.html') {
       const rutaWeb = rel.replace(/\\/g, '/');
-      const crudo = aplicarConteos(readFileSync(origen, 'utf8'), conteo, rutaWeb);
+      // Primero el catálogo (genera las tarjetas), después los conteos.
+      const crudo = aplicarConteos(aplicarCatalogo(readFileSync(origen, 'utf8'), catalogo, rutaWeb), conteo, rutaWeb);
       paginas.push(rel);
       writeFileSync(destino, enlacesLimpios(inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles)));
 
@@ -176,10 +178,12 @@ function recorrer(carpeta) {
 // Rutas de todas las páginas publicadas, para armar el sitemap al final.
 const paginas = [];
 const paginasEn = [];
-const indiceCategorias = indiceDeCategorias(RAIZ);
+// Si catalogo.json no coincide con herramientas/, esto corta el build acá.
+const catalogo = leerCatalogo(RAIZ);
+const indiceCategorias = indiceDeCategorias(catalogo);
 const comun = diccionarioComun(RAIZ);
 const conIngles = paginasConIngles(RAIZ, EXCLUIR_NOMBRES);
-const conteo = contarHerramientas(RAIZ);
+const conteo = contarHerramientas(RAIZ, catalogo);
 
 rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);

@@ -68,7 +68,9 @@ export function paginasConIngles(raiz, excluir) {
 export function traducir(html, raiz, comun, rutaWeb, conIngles) {
   const pagina = leerObjeto(html, 'i18nPagina');
   if (!pagina || !pagina.en) return null;
-  const dic = Object.assign({}, comun.en, pagina.en);
+  // Las tarjetas generadas desde catalogo.json traen sus textos en i18nCatalogo.
+  const catalogo = leerObjeto(html, 'i18nCatalogo');
+  const dic = Object.assign({}, comun.en, catalogo ? catalogo.en : {}, pagina.en);
 
   // Texto de los elementos con data-i18n. idioma.js usa textContent, así que
   // el contenido siempre es texto plano y se puede reemplazar entero.
