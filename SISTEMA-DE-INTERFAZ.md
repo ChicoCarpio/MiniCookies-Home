@@ -143,6 +143,7 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | Pieza | Qué es |
 |---|---|
 | `.resultado` | caja de resultado; oculta hasta que se le agrega `.visible` |
+| `a.boton` | un enlace con aspecto de botón (una descarga, los de la 404): `<a class="boton">`, sin estilos en línea |
 | `.grid-miniaturas`, `.miniatura-pagina` | grilla de páginas/hojas seleccionables |
 | `.contenedor-miniaturas`, `.selector-vista` | lista o grilla conmutable |
 | `.lista-archivos` | lista de archivos cargados |
@@ -288,13 +289,19 @@ PowerPoint van en `.vista-previa-diapositivas`.
 
 ### E — Página de texto
 
-`privacidad.html`, `terminos.html`, `creditos.html` y `contacto.html`: el marco
+`privacidad.html`, `terminos.html`, `creditos.html`, `contacto.html` y `404.html`: el marco
 común y prosa dentro de un `.panel-herramienta`, sin controles. No llevan
 `.aviso-privacidad` (eso es de los menús) pero sí su `.anuncio`.
 
 Dos detalles propios: `creditos.html` envuelve su tabla en `.tabla-ancha`, que es
 lo que evita que se lleve la página entera a lo ancho en un teléfono, y
 `contacto.html` tiene un formulario.
+
+`404.html` es la excepción a las rutas relativas: Cloudflare la sirve en
+cualquier dirección que no existe (por ejemplo `/herramientas/algo/otra`), así
+que lleva `<base href="/">` y el build la pasa a `/en/` en su versión en inglés.
+Tiene `noindex`, y por eso el build no le agrega SEO, no la pone en el sitemap
+y no le inyecta AdSense (Google no admite anuncios en páginas de error).
 
 Piezas: `table.tabla-creditos` (una fila nueva de créditos es `<tr><td>…`
 sin estilos: antes cada celda llevaba su `style="padding…"`) y

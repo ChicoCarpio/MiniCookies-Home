@@ -93,6 +93,10 @@ export function traducir(html, raiz, comun, rutaWeb, conIngles) {
 
   // El idioma declarado del documento.
   html = html.replace(/<html lang="es"/i, '<html lang="en"');
+  // Una página que resuelve sus enlaces desde la raíz (la 404, que se sirve en
+  // cualquier dirección) los resuelve desde /en/ en su versión en inglés.
+  // Los assets ya quedan absolutos más abajo.
+  html = html.replace(/<base href="\/">/i, '<base href="/en/">');
 
   // /en/x.html y /en/herramientas/x.html no tienen assets/ propios al lado:
   // se apuntan a los de la raíz del sitio.

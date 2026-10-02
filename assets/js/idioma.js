@@ -143,8 +143,11 @@ window.i18nComun = {
     if (alternativa('en')) {
       return document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'es';
     }
-    // Páginas sin versión en inglés todavía: se traduce lo que haya en el acto.
-    try { return localStorage.getItem('idioma') || 'es'; } catch (e) { return 'es'; }
+    // Páginas sin gemela: se traduce lo que haya en el acto, según la
+    // preferencia guardada o, si no hay, el idioma en que llegó la página
+    // (la 404 en inglés, /en/404.html, no tiene gemela y llega en inglés).
+    var deLaPagina = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'es';
+    try { return localStorage.getItem('idioma') || deLaPagina; } catch (e) { return deLaPagina; }
   }
 
   function diccionario(idioma) {

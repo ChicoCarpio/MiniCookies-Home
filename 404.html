@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Cloudflare Pages sirve esta página, con código 404, en cualquier dirección
+     que no existe (la de inglés, /en/404.html, para las que empiezan con /en/).
+     Como puede aparecer en /herramientas/algo/otra, las rutas relativas no
+     sirven: <base> las resuelve todas desde la raíz (el build lo cambia a /en/
+     en la versión en inglés). Abierta del disco se ve sin estilos.
+     Sin esta página, Pages devolvía la portada con código 200: Google la toma
+     como "soft 404" y, bajo /vendor/, quedaba guardada un año (ver _headers). -->
+<base href="/">
+<meta name="robots" content="noindex">
+<title data-i18n="titulo-pagina">Página no encontrada — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="La dirección que abriste no corresponde a ninguna página de Mini Cookies.">
+<link rel="icon" type="image/png" href="marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="assets/css/estilos.css">
+<link rel="stylesheet" href="assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Página no encontrada — Mini Cookies',
+    'meta-descripcion': 'La dirección que abriste no corresponde a ninguna página de Mini Cookies.',
+    'hero-titulo': 'Esta página no existe',
+    'texto': 'La dirección que abriste no corresponde a ninguna página de Mini Cookies. Puede tener un error de tipeo, o la página puede haber cambiado de lugar.',
+    'ir-inicio': 'Ir al inicio',
+    'ver-todas': 'Ver todas las herramientas'
+  },
+  en: {
+    'titulo-pagina': 'Page not found — Mini Cookies',
+    'meta-descripcion': 'The address you opened does not match any page on Mini Cookies.',
+    'hero-titulo': 'This page does not exist',
+    'texto': 'The address you opened does not match any page on Mini Cookies. It may have a typo, or the page may have moved.',
+    'ir-inicio': 'Go to the home page',
+    'ver-todas': 'See all tools'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="index.html"><img src="marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">Esta página no existe</h1>
+
+  <div class="panel-herramienta">
+    <p data-i18n="texto">La dirección que abriste no corresponde a ninguna página de Mini Cookies. Puede tener un error de tipeo, o la página puede haber cambiado de lugar.</p>
+    <p><a class="boton" href="index.html" data-i18n="ir-inicio">Ir al inicio</a> <a class="boton" href="todas.html" data-i18n="ver-todas">Ver todas las herramientas</a></p>
+  </div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="assets/js/tema.js"></script>
+<script src="assets/js/fondo-decorativo.js"></script>
+<script src="assets/js/idioma.js"></script>
+</body>
+</html>

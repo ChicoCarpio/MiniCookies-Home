@@ -72,12 +72,17 @@ const titulos = (html) => ({
   desc: desescapar((html.match(/<meta\s+name="description"[^>]*\scontent="([^"]*)"/i) || [, ''])[1].trim()),
 });
 
+/** La página pide no ser indexada: <meta name="robots" content="noindex">. */
+export const esNoIndex = (html) => /<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html);
+
 /**
  * Agrega a una página sus etiquetas de SEO justo antes de </head>.
  * Si la página ya trae alguna escrita a mano, se respeta y no se duplica.
  */
 export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
   if (/<link[^>]+rel="canonical"/i.test(html)) return html;
+  // Una página que no se indexa (la 404) no tiene URL propia que declarar.
+  if (esNoIndex(html)) return html;
 
   const ruta = rel.replace(/\\/g, '/');
   const url = urlDe(esIngles ? 'en/' + ruta : ruta);

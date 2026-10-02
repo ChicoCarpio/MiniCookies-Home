@@ -15,7 +15,7 @@
 // HerramientasOfimaticas): si se cambia, copiarlo al otro.
 import { transformSync } from 'esbuild';
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
-import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias } from './seo.mjs';
+import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias, esNoIndex } from './seo.mjs';
 import { traducir, diccionarioComun, paginasConIngles } from './ingles.mjs';
 import { contarHerramientas, aplicarConteos } from './conteo.mjs';
 import { leerCatalogo, aplicarCatalogo } from './catalogo.mjs';
@@ -85,7 +85,9 @@ function procesarHtml(html, archivo) {
   });
   html = html.replace(/<style(\s[^>]*)?>([\s\S]*?)<\/style>/gi, (completo, atributos = '', codigo) =>
     (codigo.trim() ? `<style${atributos}>${minificarCss(codigo, `${archivo} <style>`)}</style>` : completo));
-  if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js')) {
+  // Sin AdSense en las páginas que no se indexan (la 404): Google no admite
+  // anuncios en páginas de error o sin contenido.
+  if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js') && !esNoIndex(html)) {
     if (!/<\/head>/i.test(html)) throw new Error('Sin </head>, no se puede poner AdSense: ' + archivo);
     html = html.replace(/<\/head>/i, ETIQUETA_ADSENSE + '\n</head>');
   }
@@ -160,7 +162,8 @@ function recorrer(carpeta) {
       const rutaWeb = rel.replace(/\\/g, '/');
       // Primero el catálogo (genera las tarjetas), después los conteos.
       const crudo = aplicarConteos(aplicarCatalogo(readFileSync(origen, 'utf8'), catalogo, rutaWeb), conteo, rutaWeb);
-      paginas.push(rel);
+      // Al sitemap solo van las páginas que se indexan (no la 404).
+      if (!esNoIndex(crudo)) paginas.push(rel);
       writeFileSync(destino, enlacesLimpios(inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles)));
 
       // Gemela en inglés bajo /en/, con su propia URL para que Google la vea.
@@ -170,7 +173,7 @@ function recorrer(carpeta) {
         const destinoEn = join(SALIDA, 'en', rel);
         mkdirSync(dirname(destinoEn), { recursive: true });
         writeFileSync(destinoEn, enlacesLimpios(inyectarSeo(procesarHtml(en, 'en/' + rel), rel, indiceCategorias, conIngles, true)));
-        paginasEn.push('en/' + rutaWeb);
+        if (!esNoIndex(crudo)) paginasEn.push('en/' + rutaWeb);
       }
     }
     else copyFileSync(origen, destino);
