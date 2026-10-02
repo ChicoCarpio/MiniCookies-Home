@@ -6,6 +6,7 @@
 // preciso (whisper-small).
 
 import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js';
+import { cargarModeloIA } from './ia-dispositivo.js';
 
 // Textos de usuario: los toma del diccionario de la pagina (idioma.js).
 // El respaldo en espanol cubre el caso de que idioma.js no llegue a cargar.
@@ -76,18 +77,14 @@ export function iniciarDictado() {
       }
     };
 
-    // Si el navegador tiene WebGPU, la memoria del modelo la maneja la placa
-    // de video en vez del límite de WebAssembly — más margen y más rápido.
-    // Si falla (sin GPU dedicada, drivers, etc.), se reintenta por WASM (CPU).
-    const intentarCargar = (device) => pipeline('automatic-speech-recognition', modeloId, {
+    // Con placa de video, la memoria del modelo la maneja la GPU en vez del
+    // límite de WebAssembly (más margen y más rápido); sin ella, CPU. La
+    // elección y el respaldo están en ia-dispositivo.js.
+    const promesaPipeline = cargarModeloIA((device) => pipeline('automatic-speech-recognition', modeloId, {
       dtype: 'q8',
-      ...(device ? { device } : {}),
+      device,
       progress_callback: progressCallback,
-    });
-
-    const promesaPipeline = (typeof navigator !== 'undefined' && navigator.gpu)
-      ? intentarCargar('webgpu').catch(() => intentarCargar())
-      : intentarCargar();
+    }));
 
     cargaPromesa = promesaPipeline.then((nuevoTranscriptor) => {
       transcriptor = nuevoTranscriptor;

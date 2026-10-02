@@ -18,6 +18,7 @@
 // canvas, en el panel del lienzo, porque se ajusta mirando el resultado.
 
 import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js';
+import { cargarModeloIA } from './ia-dispositivo.js';
 
 const tt = (clave, porDefecto) => (window.t ? window.t(clave) : porDefecto);
 
@@ -96,15 +97,12 @@ export function iniciarGeneradorStickers() {
       }
     };
 
-    const intentarCargar = (device) => pipeline('background-removal', MODELO_ID, {
+    // Placa de video si hay una de verdad, si no CPU (ver ia-dispositivo.js).
+    const promesa = cargarModeloIA((device) => pipeline('background-removal', MODELO_ID, {
       dtype: 'q8',
-      ...(device ? { device } : {}),
+      device,
       progress_callback,
-    });
-
-    const promesa = (typeof navigator !== 'undefined' && navigator.gpu)
-      ? intentarCargar('webgpu').catch(() => intentarCargar())
-      : intentarCargar();
+    }));
 
     cargaPromesa = promesa.then((nuevo) => {
       segmentador = nuevo;
