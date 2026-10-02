@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <link rel="stylesheet" href="../assets/css/app-movil.css">
 <link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<link rel="stylesheet" href="../assets/css/editor-imagen.css">
 <style>
   /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
      del sitio, pensado como columna angosta de lectura). */
@@ -39,63 +40,28 @@
      hay que scrollear todo el panel de capas para llegar a ellos. Con un
      alto máximo y scroll propio, el resto del panel queda alcanzable. */
   .presets-scroll { max-height: 340px; overflow-y: auto; }
-  .titulo-seccion-lateral { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); margin-bottom: 8px; }
-  .controles-apilados { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
-  .seccion-lateral .modos button { flex: 1 1 auto; }
-  .nota-lateral { font-size: 0.72rem; color: var(--texto-suave); }
-
+  .titulo-seccion-lateral { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); margin-bottom: 8px; }  .seccion-lateral .modos button { flex: 1 1 auto; }
   /* Grilla de filtros (los mismos del Editor de color, assets/js/filtros-color.js),
      dentro de un .acordeon-grupo más como los demás bloques del panel. */
   #nombreFiltroCapa { color: var(--azul); text-transform: none; letter-spacing: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
-  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 6px; padding: 6px 4px; }
-  .titulo-grupo-presets {
-    grid-column: 1 / -1; margin-top: 6px;
-    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave);
-  }
-  .preset-miniatura { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; cursor: pointer; min-width: 0; }
-  .preset-miniatura canvas {
-    display: block; width: 100%; aspect-ratio: 1; height: auto;
-    border-radius: 8px; border: 2px solid var(--gris-borde); background: var(--gris-fondo);
-    transition: transform .15s, border-color .15s;
-  }
-  .preset-miniatura:hover canvas { border-color: var(--azul); }
-  .preset-miniatura span {
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 6px; padding: 6px 4px; }  .preset-miniatura span {
     min-width: 0; font-size: 0.68rem; line-height: 1.2; color: var(--texto-suave); text-align: center;
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
-  .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
-  .texturas-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
-  .miniatura-textura { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; color: var(--texto); cursor: pointer; font: inherit; }
-  .miniatura-textura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border: 2px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); }
-  .miniatura-textura span {
+  }  .texturas-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }  .miniatura-textura span {
     /* min-width: 0 es necesario porque es un hijo flex (columna) dentro de
        .miniatura-textura: sin esto, un nombre largo ("Esmerilado",
        "Difuminado") no se achica más allá de su ancho natural y el texto
        termina pisando a la miniatura de al lado en vez de recortarse con
        "…" como ya hace .preset-miniatura con nombres de filtro. */
     min-width: 0; max-width: 100%; overflow: hidden; color: var(--texto-suave); font-size: 0.68rem; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .miniatura-textura.activo canvas { border-color: var(--azul); }
-  .miniatura-textura.activo span { color: var(--azul); font-weight: 600; }
-  .texturas-scroll { max-height: 220px; overflow: auto; }
+  }  .texturas-scroll { max-height: 220px; overflow: auto; }
   #botonVerOriginal { margin-top: 8px; padding: 5px 12px; font-size: 0.78rem; user-select: none; -webkit-user-select: none; touch-action: none; }
 
   /* --- Paneles laterales plegables ---
      Computadora: el panel plegado queda como una franja angosta con su
      nombre en vertical; al hacerle clic se vuelve a abrir.
      Celular: los dos paneles son cajones que salen desde el borde de la
-     pantalla, así la imagen usa todo el ancho. */
-  .boton-plegar {
-    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px;
-    border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); color: var(--texto);
-    cursor: pointer; padding: 6px 10px; margin-bottom: 10px;
-    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-  }
-  .boton-plegar:hover { border-color: var(--azul); }
-  .abrir-panel-movil, .fondo-panel-movil { display: none; }
-
-  @media (min-width: 901px) {
+     pantalla, así la imagen usa todo el ancho. */  @media (min-width: 901px) {
     .editor-avanzado-layout.izq-plegado { --col-izq: 42px; }
     .editor-avanzado-layout.der-plegado { --col-der: 42px; }
     .izq-plegado .panel-capas, .der-plegado .panel-ajustes { padding: 6px 4px; overflow: hidden; }
@@ -109,30 +75,13 @@
   }
 
   @media (max-width: 900px) {
-    .editor-avanzado-layout { display: block; height: auto; min-height: 0; }
-    .panel-lienzo { height: 72vh; min-height: 320px; }
-    .panel-capas, .panel-ajustes {
+    .editor-avanzado-layout { display: block; height: auto; min-height: 0; }    .panel-capas, .panel-ajustes {
       position: fixed; top: 0; bottom: 0; z-index: 1000;
       width: min(86vw, 340px); border-radius: 0;
       background: var(--superficie); box-shadow: 0 0 24px rgba(0,0,0,.35);
       transition: transform .25s ease, visibility .25s;
     }
-    .panel-capas { left: 0; }
-    .panel-ajustes { right: 0; }
-    .izq-plegado .panel-capas { transform: translateX(-105%); visibility: hidden; }
-    .der-plegado .panel-ajustes { transform: translateX(105%); visibility: hidden; }
-
-    .abrir-panel-movil {
-      display: block; position: fixed; top: 50%; z-index: 900;
-      border: 1px solid var(--gris-borde); background: var(--azul); color: #fff;
-      font-size: 0.75rem; font-weight: 700; padding: 12px 6px; cursor: pointer;
-      writing-mode: vertical-rl; transform: translateY(-50%);
-      box-shadow: 0 2px 10px rgba(0,0,0,.25);
-    }
-    .abrir-panel-movil.izq { left: 0; border-radius: 0 10px 10px 0; }
-    .abrir-panel-movil.der { right: 0; border-radius: 10px 0 0 10px; }
-    .fondo-panel-movil { position: fixed; inset: 0; z-index: 990; background: rgba(0,0,0,.45); }
-    .editor-avanzado-layout:not(.izq-plegado) .fondo-panel-movil,
+    .panel-capas { left: 0; }    .izq-plegado .panel-capas { transform: translateX(-105%); visibility: hidden; }    .editor-avanzado-layout:not(.izq-plegado) .fondo-panel-movil,
     .editor-avanzado-layout:not(.der-plegado) .fondo-panel-movil { display: block; }
   }
 
@@ -196,41 +145,11 @@
   /* min-width:0 en el fieldset: sin esto, el <fieldset> nativo del navegador
      no se achica por debajo del ancho de su contenido y termina empujando/
      desalineando el título cuando el texto es largo ("Aplicar la capa a"). */
-  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin-bottom: 8px; padding: 0; overflow: hidden; min-width: 0; }
-  .acordeon-titulo {
-    width: 100%; display: flex; flex-wrap: nowrap; align-items: center; gap: 8px;
-    padding: 8px 10px; background: var(--gris-fondo); border: none; cursor: pointer;
-    font-weight: 600; font-size: 0.85rem; color: var(--texto); text-transform: uppercase; letter-spacing: 0.02em;
-  }
-  /* El texto del título puede ocupar dos líneas en un panel angosto; que
+  .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin-bottom: 8px; padding: 0; overflow: hidden; min-width: 0; }  /* El texto del título puede ocupar dos líneas en un panel angosto; que
      encoja él y no el resto es lo que mantiene la flechita siempre pegada
-     a la derecha en vez de saltar a su propia línea. */
-  .acordeon-titulo > span:first-child { flex: 1 1 auto; min-width: 0; }
-  .acordeon-contenido { display: none; padding: 10px; }
-  .acordeon-grupo.abierto .acordeon-contenido { display: block; }
-  .acordeon-titulo .flecha { flex: 0 0 auto; margin-left: auto; transition: transform .15s; }
-  .acordeon-grupo.abierto .acordeon-titulo .flecha { transform: rotate(180deg); }
-  /* El ícono se agrega por CSS (::before), no como texto del título: así el
+     a la derecha en vez de saltar a su propia línea. */  /* El ícono se agrega por CSS (::before), no como texto del título: así el
      nombre que lee app-movil.js para el chip de celular no cambia — esta
-     vista solo la ve la versión de escritorio. */
-  .acordeon-titulo[data-icono]::before { content: attr(data-icono); }
-  .deslizadores { display: grid; grid-template-columns: 1fr; gap: 8px; }
-  .campo-deslizador { display: flex; flex-direction: column; gap: 2px; }
-  .campo-deslizador.deshabilitado { opacity: 0.5; }
-  .campo-deslizador .etiqueta-deslizador { display: flex; justify-content: space-between; font-size: 0.85rem; }
-  .campo-deslizador .etiqueta-deslizador span:last-child { color: var(--texto-suave); }
-  .campo-deslizador input[type="range"] { width: 100%; margin: 0; }
-  .campo-check { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; margin-bottom: 10px; }
-  .subtitulo-bn { font-size: 0.8rem; font-weight: 600; margin: 14px 0 6px; padding-top: 10px; border-top: 1px solid var(--gris-borde); }
-  .subtitulo-bn:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
-  .muestra-color { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
-  .modos { display: flex; gap: 6px; flex-wrap: wrap; }
-  .modos button {
-    padding: 5px 10px; border: 1px solid var(--gris-borde); border-radius: 999px;
-    background: var(--gris-fondo); color: var(--texto); cursor: pointer; font-size: 0.78rem;
-  }
-  .modos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
-  .muestra-color-objetivo { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--gris-borde); display: inline-block; vertical-align: middle; }
+     vista solo la ve la versión de escritorio. */  .muestra-color-objetivo { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--gris-borde); display: inline-block; vertical-align: middle; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>

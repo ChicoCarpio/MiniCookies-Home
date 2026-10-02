@@ -384,6 +384,12 @@ main {
 .selector-direccion { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
 .selector-direccion label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
 
+/* Grilla de diapositivas renderizadas (PowerPoint → PDF / → imágenes). El
+   fondo blanco es a propósito, también en modo oscuro: es el de la
+   diapositiva, no el de la página. Estaba copiada en las dos herramientas. */
+.vista-previa-diapositivas { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+.vista-previa-diapositivas img { width: 100%; border: 1px solid var(--gris-borde); border-radius: 6px; background: #fff; }
+
 /* Tabla de datos de una planilla (visor, buscar y reemplazar, Excel → PDF…):
    se desplaza dentro de su contenedor sin arrastrar la página, con el
    encabezado fijo. Estaba copiada en el <style> de 5 herramientas; cada una

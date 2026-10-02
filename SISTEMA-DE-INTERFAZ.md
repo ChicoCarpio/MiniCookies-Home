@@ -273,10 +273,18 @@ Desplazamiento normal de página. **No** la conviertas en pantalla completa.
 
 Ver sección 6: el esqueleto es el de B, más los marcadores del módulo.
 
+Los **editores de imagen** comparten además `assets/css/editor-imagen.css`:
+acordeón de ajustes, deslizadores, miniaturas de ajustes predefinidos y de
+texturas, botones de modo y el panel lateral en pantalla angosta. Antes eran
+43 reglas idénticas copiadas en cada `<style>`. En la página queda solo lo
+propio (ancho, distribución, tamaño de miniaturas).
+
 ### D — Vista previa de documento
 
 Como B, con `.grid-miniaturas` / `.contenedor-miniaturas` dentro de
-`.panel-herramienta`. Las miniaturas se generan con `assets/js/miniaturas.js`.
+`.panel-herramienta`. Las miniaturas se generan con `assets/js/miniaturas.js`
+(las 19 herramientas de PDF ya lo usan). Las diapositivas renderizadas de
+PowerPoint van en `.vista-previa-diapositivas`.
 
 ### E — Página de texto
 
@@ -530,10 +538,12 @@ en ventana angosta son donde aparecen los problemas de este patrón.
 
 - **No hay catálogo visual de piezas.** Una página que las muestre todas en los
   dos temas y los dos anchos haría esta guía comprobable en vez de aspiracional.
-- **Los arquetipos B, D y E no están migrados a piezas**: hoy son convención,
-  no código compartido. El C lo está (`app-movil.*`) y el A también desde el
-  2026-10-01 (`catalogo.json`). Es la tarea de prioridad 1 nº 1 en
-  `../PENDIENTES.md`.
+- **Migración a piezas (2026-10-01/02):** A (`catalogo.json`), B (zona de
+  arrastre, selector de dirección, columnas, tablas, `escaparHtml`), C
+  (`app-movil.*` + `editor-imagen.css`) y D (`miniaturas.js`,
+  `.vista-previa-diapositivas`) ya comparten su código. Queda CSS propio en
+  varias herramientas, pero ya no hay bloques copiados entre páginas: lo que
+  queda es de cada una. El E (páginas de texto) no se revisó todavía.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar
   cuando todos los grupos tengan clave.
