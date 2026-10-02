@@ -225,6 +225,70 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     });
   }
 
+  // SheetJS < 0.20.2 tiene dos CVE al leer archivos maliciosos
+  // (CVE-2023-30533, CVE-2024-22363): ninguna herramienta puede cargar una así.
+  await prueba('SheetJS sin versiones vulnerables (herramientas de Excel)', async () => {
+    const versiones = new Set();
+    let paginas = 0;
+    for (const p of PAGINAS.filter((x) => x.startsWith('/herramientas/'))) {
+      await abrir(p); await esperar(60);
+      const X = W().XLSX;
+      if (!X || !X.utils) continue;
+      paginas++;
+      versiones.add(X.version);
+      const [a, b, c] = X.version.split('.').map(Number);
+      afirmar(a > 0 || b > 20 || (b === 20 && c >= 2), p + ' carga SheetJS ' + X.version);
+    }
+    afirmar(paginas >= 12, 'solo ' + paginas + ' páginas con SheetJS');
+    return paginas + ' páginas, versión ' + [...versiones].join(', ');
+  });
+
+  // Unir arma los nombres de hoja con el nombre de cada archivo. SheetJS
+  // rechaza los que Excel no admite (apóstrofo al borde, ":", "History") y
+  // Excel trata "Datos" y "datos" como la misma hoja.
+  await prueba('unir-excel: nombres de hoja válidos para Excel', async () => {
+    await abrir('/herramientas/unir-excel.html'); await esperar(300);
+    const X = W().XLSX;
+    const alertas = []; W().alert = (m) => alertas.push(m);
+    const libro = (texto) => {
+      const l = X.utils.book_new();
+      X.utils.book_append_sheet(l, X.utils.aoa_to_sheet([[texto]]), 'Hoja1');
+      return X.write(l, { type: 'array', bookType: 'xlsx' });
+    };
+    const nombres = ["'notas'.xlsx", 'Datos.xlsx', 'datos.xlsx', 'a:b.xlsx', 'History.xlsx'];
+    W().agregarArchivos(nombres.map((n) => new (W().File)([libro(n)], n)));
+    D().getElementById('botonUnir').click();
+    const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href);
+    afirmar(!alertas.length, 'error al unir: ' + alertas.join(' | '));
+    afirmar(enlace, 'no terminó de unir');
+    const unido = X.read(new Uint8Array(await (await fetch(enlace)).arrayBuffer()), { type: 'array' });
+    const hojas = unido.SheetNames;
+    afirmar(hojas.length === 5, 'hojas: ' + hojas.join(', '));
+    afirmar(new Set(hojas.map((h) => h.toLowerCase())).size === 5, 'nombres repetidos para Excel: ' + hojas.join(', '));
+    afirmar(hojas.every((h) => !/[:\\/?*\[\]]|^'|'$/.test(h) && h.toLowerCase() !== 'history'), 'nombre inválido: ' + hojas.join(', '));
+    return hojas.join(' · ');
+  });
+
+  // Las herramientas trabajan con fechas como número de serie + formato de
+  // Excel (sin cellDates): el texto tiene que salir igual que en Excel.
+  await prueba('convertir-excel-csv: fecha con su formato', async () => {
+    await abrir('/herramientas/convertir-excel-csv.html'); await esperar(300);
+    const X = W().XLSX;
+    const hoja = X.utils.aoa_to_sheet([['Fecha', 'Monto']]);
+    hoja.A2 = { t: 'n', v: 46297, z: 'dd/mm/yyyy' }; // 2 de octubre de 2026
+    hoja.B2 = { t: 'n', v: 1234.5, z: '#,##0.00' };
+    hoja['!ref'] = 'A1:B2';
+    const l = X.utils.book_new(); X.utils.book_append_sheet(l, hoja, 'Hoja1');
+    await W().mostrarArchivo(new (W().File)([X.write(l, { type: 'array', bookType: 'xlsx' })], 'fechas.xlsx'));
+    D().getElementById('selectorSeparador').value = ',';
+    D().getElementById('botonConvertir').click();
+    const enlace = await hasta(() => D().getElementById('enlaceDescarga').href.startsWith('blob:') && D().getElementById('enlaceDescarga').href);
+    const csv = (await (await fetch(enlace)).text()).replace(/^﻿/, '');
+    afirmar(csv.includes('02/10/2026'), 'la fecha salió así: ' + JSON.stringify(csv));
+    afirmar(csv.includes('"1,234.50"'), 'el monto salió así: ' + JSON.stringify(csv));
+    return JSON.stringify(csv);
+  });
+
   for (const ruta of ['/herramientas/rotar-pdf.html', '/en/herramientas/rotar-pdf.html']) {
     await prueba('PDF.js con su worker (' + (ruta.startsWith('/en/') ? 'en' : 'es') + ')', async () => {
       await abrir(ruta); await esperar(300);
