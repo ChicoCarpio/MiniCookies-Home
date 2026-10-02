@@ -23,7 +23,7 @@ window.i18nPagina = {
     'th-autor': 'Autor / repositorio',
     'fork-nota': ' (fork mantenido de pdf-lib, con cifrado)',
     'jszip-nota': ' (también disponible bajo GPLv3, a elección de quien la use — este sitio la usa bajo MIT)',
-    'cdn-nota': 'Las bibliotecas se cargan desde su CDN público (cdnjs, salvo @zxing/library y @huggingface/transformers, que usan jsdelivr). Noto Sans se descarga desde Google Fonts solo cuando hace falta. No se distribuye copia propia de estos recursos; la licencia completa está en el repositorio enlazado.',
+    'cdn-nota': 'Las bibliotecas se cargan desde su CDN público (cdnjs, salvo @zxing/library, @huggingface/transformers y @pdf-lib/fontkit, que usan jsdelivr). Noto Sans se descarga desde jsdelivr, en una versión fija, solo cuando hace falta. No se distribuye copia propia de estos recursos; la licencia completa está en el repositorio enlazado.',
 
     'h-ia': 'Modelo de inteligencia artificial (Dictado por voz)',
     'ia-a': 'La herramienta ',
@@ -69,7 +69,7 @@ window.i18nPagina = {
     'th-autor': 'Author / repository',
     'fork-nota': ' (maintained fork of pdf-lib, with encryption)',
     'jszip-nota': ' (also available under GPLv3, whichever the user prefers — this site uses it under MIT)',
-    'cdn-nota': 'Libraries are loaded from their public CDN (cdnjs, except @zxing/library and @huggingface/transformers, which use jsdelivr). Noto Sans is fetched from Google Fonts only when needed. We do not ship copies of these resources; their full licenses are in the linked repositories.',
+    'cdn-nota': 'Libraries are loaded from their public CDN (cdnjs, except @zxing/library, @huggingface/transformers and @pdf-lib/fontkit, which use jsdelivr). Noto Sans is fetched from jsdelivr, at a pinned version, only when needed. We do not ship copies of these resources; their full licenses are in the linked repositories.',
 
     'h-ia': 'AI model (Voice dictation)',
     'ia-a': 'The ',
@@ -164,7 +164,7 @@ window.i18nPagina = {
     </table>
     </div>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;" data-i18n="cdn-nota">Todas se cargan directamente desde su CDN público (cdnjs, salvo @zxing/library y @huggingface/transformers que se cargan desde jsdelivr por no estar publicadas en cdnjs) — no se distribuye copia propia de ninguna. La licencia completa de cada una está en su repositorio enlazado arriba.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem; margin-top:1rem;" data-i18n="cdn-nota">Las bibliotecas se cargan desde su CDN público (cdnjs, salvo @zxing/library, @huggingface/transformers y @pdf-lib/fontkit, que usan jsdelivr). Noto Sans se descarga desde jsdelivr, en una versión fija, solo cuando hace falta. No se distribuye copia propia de estos recursos; la licencia completa está en el repositorio enlazado.</p>
 
     <h3 data-i18n="h-ia">Modelo de inteligencia artificial (Dictado por voz)</h3>
     <p><span data-i18n="ia-a">La herramienta </span><a href="herramientas/dictado-voz.html" data-i18n="ia-link">Dictado por voz</a><span data-i18n="ia-b"> usa </span><strong>Whisper</strong><span data-i18n="ia-c"> de OpenAI (modelos </span><code>Xenova/whisper-tiny</code><span data-i18n="ia-coma">, </span><code>Xenova/whisper-base</code><span data-i18n="ia-y"> y </span><code>Xenova/whisper-small</code><span data-i18n="ia-d">, publicados por la comunidad en Hugging Face, licencia </span><strong>Apache-2.0</strong><span data-i18n="ia-e">) ejecutado enteramente en tu navegador con </span><code>@huggingface/transformers</code><span data-i18n="ia-f"> (con aceleración por WebGPU cuando el navegador la soporta). El modelo se descarga una sola vez desde el CDN de Hugging Face y queda cacheado en tu navegador — tu grabación de voz nunca se envía a ningún servidor.</span></p>
