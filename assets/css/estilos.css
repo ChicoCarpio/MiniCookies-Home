@@ -97,6 +97,19 @@ header.sitio .marca {
   gap: 12px;
 }
 
+/* Logo y palabra son UN solo enlace: un tabulador y un nombre ("Mini
+   Cookies", del alt del logo; la palabra va con aria-hidden porque repite lo
+   mismo y en pantalla angosta ni se ve). Antes la mayoría de las páginas tenía
+   dos enlaces seguidos al mismo lugar y el resto uno, con estilos en línea
+   distintos que solo coincidían de casualidad. */
+header.sitio .marca a {
+  display: flex;
+  align-items: center;
+  gap: inherit;
+  color: inherit;
+  text-decoration: none;
+}
+
 header.sitio .marca .logo-marca {
   height: 33px;
   width: auto;

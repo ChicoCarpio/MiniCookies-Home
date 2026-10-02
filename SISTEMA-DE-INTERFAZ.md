@@ -79,6 +79,17 @@ tamaños y las correcciones futuras.
 
 ### Encabezado
 
+La marca es **un solo enlace** con el logo y la palabra adentro, igual en las
+120 páginas (solo cambia el `../` según la carpeta):
+
+```html
+<div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+```
+
+El nombre accesible sale del `alt` del logo; la palabra lleva `aria-hidden`
+porque repite lo mismo (y en pantalla angosta ni se ve). Nada de estilos en
+línea: el enlace se arma en `estilos.css`.
+
 Hay **una** definición. En pantalla angosta (≤900px) se compacta solo: se oculta
 la palabra "MiniCookies", el logo baja a 22px, los enlaces se achican y centran,
 y los botones de idioma y tema quedan al final. Entra en una fila de 46px tanto
@@ -471,14 +482,10 @@ en ventana angosta son donde aparecen los problemas de este patrón.
 
 ## 9. Deudas conocidas
 
-- **El encabezado tiene dos marcados distintos**: 76 herramientas usan dos `<a>`
-  separados (logo y palabra) y 29 usan uno solo que envuelve ambos. Se ven igual
-  porque el CSS los iguala, pero conviene unificarlos.
-- **El verificador solo mira celular.** Faltan las comprobaciones de escritorio.
 - **No hay catálogo visual de piezas.** Una página que las muestre todas en los
   dos temas y los dos anchos haría esta guía comprobable en vez de aspiracional.
 - **Los arquetipos A, B, D y E no están migrados a piezas**: hoy son convención,
-  no código compartido. Solo el C lo está. Es la tarea de prioridad 1 nº 3 en
+  no código compartido. Solo el C lo está. Es la tarea de prioridad 1 nº 1 en
   `../PENDIENTES.md`.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar
