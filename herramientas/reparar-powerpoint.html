@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -18,6 +19,7 @@ window.i18nPagina = {
     'intro': 'Elegí un archivo .pptx que no abre bien. Si alguna diapositiva individual está corrupta, se descarta esa sola — el resto de la presentación se conserva.',
     'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
     'boton-reparar': 'Reparar',
+    'ayuda-reparar-ppt': 'Solo se descartan las diapositivas cuyo XML está dañado; el resto se copia tal cual, así que las animaciones y transiciones de las diapositivas que quedan se conservan. Si una diapositiva que queda enlazaba a una descartada, el enlace se borra y el texto queda.',
     'boton-reparar-procesando': 'Reparando...',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar PowerPoint reparado',
@@ -39,6 +41,7 @@ window.i18nPagina = {
     'intro': 'Pick a .pptx file that doesn’t open properly. If an individual slide is corrupted, only that one is discarded — the rest of the presentation is kept.',
     'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
     'boton-reparar': 'Repair',
+    'ayuda-reparar-ppt': 'Only slides whose XML is damaged are dropped; the rest is copied as it is, so the animations and transitions of the slides that stay are kept. If a slide that stays linked to a dropped one, the link is removed and the text stays.',
     'boton-reparar-procesando': 'Repairing...',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download repaired PowerPoint',
@@ -81,6 +84,10 @@ window.i18nPagina = {
 
     <div class="controles">
       <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Reparar</button>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-reparar-ppt">Solo se descartan las diapositivas cuyo XML está dañado; el resto se copia tal cual, así que las animaciones y transiciones de las diapositivas que quedan se conservan. Si una diapositiva que queda enlazaba a una descartada, el enlace se borra y el texto queda.</span>
+      </span>
     </div>
 
     <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
@@ -110,6 +117,7 @@ window.i18nPagina = {
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
