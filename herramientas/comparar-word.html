@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
   .resultado-diff {
@@ -40,6 +41,7 @@ window.i18nPagina = {
     'campo-nuevo': 'Documento nuevo',
     'zona-b': '📝 Arrastrá el .docx nuevo o hacé clic',
     'campo-por-palabra': 'Comparar por palabra (si no, por línea)',
+    'ayuda-comparar': 'Por palabra marca cada palabra cambiada; por línea marca renglones enteros, así que un cambio mínimo puede mostrar el renglón completo. Compara el texto de los documentos, no el formato ni el diseño.',
     'boton-comparar': 'Comparar',
     'boton-descargar-informe': 'Descargar informe (.html)',
     'informe-titulo': 'Comparación de documentos Word',
@@ -63,6 +65,7 @@ window.i18nPagina = {
     'campo-nuevo': 'New document',
     'zona-b': '📝 Drag the new .docx or click',
     'campo-por-palabra': 'Compare by word (otherwise, by line)',
+    'ayuda-comparar': 'By word marks each changed word; by line marks whole lines, so a small change can show the whole line. It compares the text of both documents, not the formatting or layout.',
     'boton-comparar': 'Compare',
     'boton-descargar-informe': 'Download report (.html)',
     'informe-titulo': 'Word documents comparison',
@@ -119,6 +122,10 @@ window.i18nPagina = {
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="porPalabra" checked> <span data-i18n="campo-por-palabra">Comparar por palabra (si no, por línea)</span>
       </label>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-comparar">Por palabra marca cada palabra cambiada; por línea marca renglones enteros, así que un cambio mínimo puede mostrar el renglón completo. Compara el texto de los documentos, no el formato ni el diseño.</span>
+      </span>
       <button class="boton" id="botonComparar" disabled data-i18n="boton-comparar">Comparar</button>
     </div>
 
@@ -141,6 +148,7 @@ window.i18nPagina = {
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/descargar.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastreA = document.getElementById('zonaArrastreA');
 const zonaArrastreB = document.getElementById('zonaArrastreB');
