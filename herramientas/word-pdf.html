@@ -135,7 +135,7 @@ window.i18nPagina = {
       </p>
       <div class="zona-arrastre" id="zonaArrastrePdf">
         <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+        <input type="file" id="entradaPdf" accept="application/pdf" multiple hidden>
       </div>
       <div class="grid-miniaturas" id="listaPdf"></div>
       <div class="controles">
@@ -148,6 +148,7 @@ window.i18nPagina = {
       <div class="resultado" id="resultadoWord">
         <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="documento.docx" data-i18n="resultado-enlace">Descargar Word</a>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
   </div>
 
@@ -169,6 +170,8 @@ window.i18nPagina = {
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelWordAPdf = document.getElementById('panelWordAPdf');
@@ -242,30 +245,45 @@ const botonAWord = document.getElementById('botonAWord');
 const resultadoWord = document.getElementById('resultadoWord');
 const enlaceDescargaWord = document.getElementById('enlaceDescargaWord');
 
-let archivoPdfActual = null;
+let pdfsActuales = [];
+const resumenLotePdf = document.getElementById('resumenLote');
 
-async function mostrarArchivoPdf(archivo) {
-  archivoPdfActual = archivo;
+async function mostrarArchivosPdf(archivos) {
+  pdfsActuales = archivos;
   listaPdf.innerHTML = '';
-  try {
-    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
-  } catch (error) {
-    listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
-  }
-  botonAWord.disabled = false;
+  botonAWord.disabled = archivos.length === 0;
   resultadoWord.classList.remove('visible');
-  if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === t('nombre-defecto')) {
-    nombreArchivoInput.value = archivo.name.replace(/\.pdf$/i, '');
+  resumenLotePdf.style.display = 'none';
+  if (archivos.length === 1) {
+    const archivo = archivos[0];
+    try {
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+      listaPdf.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+    } catch (error) {
+      listaPdf.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+    }
+    if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === t('nombre-defecto')) {
+      nombreArchivoInput.value = archivo.name.replace(/\.pdf$/i, '');
+    }
+    return;
   }
+  // Varios PDF: lista de nombres; cada uno da su propio .docx.
+  const ul = document.createElement('ul');
+  ul.className = 'lista-archivos';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    ul.appendChild(li);
+  });
+  listaPdf.appendChild(ul);
 }
 
-function elegirArchivoPdf(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
-  if (archivo) mostrarArchivoPdf(archivo);
+function elegirArchivosPdf(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivos.length) mostrarArchivosPdf(archivos);
 }
 
-conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivoPdf);
+conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivosPdf);
 
 // Cada párrafo del PDF pasa a ser un párrafo de texto corrido (sin los
 // cortes de renglón del PDF, que en Word los decide el ancho de página).
@@ -286,26 +304,46 @@ async function extraerTextoPdf(archivo) {
   return paginas.join('\n\n');
 }
 
+// Un PDF da un .docx con su texto.
+async function convertirPdfAWord(archivo) {
+  const texto = await extraerTextoPdf(archivo);
+  if (!texto.trim()) throw new Error(t('error-sin-texto'));
+  const contenedor = document.createElement('div');
+  contenedor.innerHTML = textoAHtml(texto);
+  const parrafos = await contenidoAParrafos(contenedor);
+  const documento = new docx.Document({
+    numbering: NUMERACION_DOCX_CONFIG,
+    sections: [{ children: parrafos }],
+  });
+  return docx.Packer.toBlob(documento);
+}
+
 botonAWord.addEventListener('click', async () => {
   botonAWord.disabled = true;
   botonAWord.textContent = t('boton-a-word-procesando');
+  resumenLotePdf.style.display = 'none';
   try {
-    const texto = await extraerTextoPdf(archivoPdfActual);
-    if (!texto.trim()) throw new Error(t('error-sin-texto'));
-
-    const contenedor = document.createElement('div');
-    contenedor.innerHTML = textoAHtml(texto);
-    const parrafos = await contenidoAParrafos(contenedor);
-
-    const documento = new docx.Document({
-      numbering: NUMERACION_DOCX_CONFIG,
-      sections: [{ children: parrafos }],
-    });
-    const blob = await docx.Packer.toBlob(documento);
-    const nombreArchivo = (nombreArchivoInput.value || t('nombre-defecto')).trim();
-    enlaceDescargaWord.href = URL.createObjectURL(blob);
-    enlaceDescargaWord.download = `${nombreArchivo}.docx`;
-    resultadoWord.classList.add('visible');
+    if (pdfsActuales.length === 1) {
+      const blob = await convertirPdfAWord(pdfsActuales[0]);
+      const nombreArchivo = (nombreArchivoInput.value || t('nombre-defecto')).trim();
+      enlaceDescargaWord.href = URL.createObjectURL(blob);
+      enlaceDescargaWord.download = `${nombreArchivo}.docx`;
+      enlaceDescargaWord.textContent = t('resultado-enlace');
+      resultadoWord.classList.add('visible');
+    } else {
+      const resultados = await LoteArchivos.convertirLote(pdfsActuales, async (archivo) => ({
+        nombre: archivo.name.replace(/\.pdf$/i, '') + '.docx',
+        blob: await convertirPdfAWord(archivo),
+      }), (i, total) => {
+        botonAWord.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaWord.href = URL.createObjectURL(zip);
+      enlaceDescargaWord.download = 'word-desde-pdf.zip';
+      enlaceDescargaWord.textContent = t('lote-enlace-zip');
+      resultadoWord.classList.add('visible');
+      LoteArchivos.pintarResumen(resumenLotePdf, resultados, t);
+    }
   } catch (error) {
     alert(t('error-generar-doc') + ': ' + error.message);
   } finally {

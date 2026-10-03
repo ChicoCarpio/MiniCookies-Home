@@ -126,7 +126,7 @@ Este es un ejemplo de **Markdown** con:
     <div id="panelWordAMd" data-panel-direccion="word-a-md" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastre">
         <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaArchivo" accept=".docx" hidden>
+        <input type="file" id="entradaArchivo" accept=".docx" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaArchivo"></ul>
       <div class="controles">
@@ -140,6 +140,7 @@ Este es un ejemplo de **Markdown** con:
           <a class="boton" id="enlaceDescargaMd" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
   </div>
 
@@ -157,6 +158,8 @@ Este es un ejemplo de **Markdown** con:
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelMdAWord = document.getElementById('panelMdAWord');
@@ -217,39 +220,69 @@ const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
 
 const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
 
-let archivoActual = null;
+let docxsActuales = [];
+const resumenLote = document.getElementById('resumenLote');
 
-function mostrarArchivo(archivo) {
-  archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonConvertir.disabled = false;
+function mostrarArchivos(archivos) {
+  docxsActuales = archivos;
+  listaArchivo.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaArchivo.appendChild(li);
+  });
+  botonConvertir.disabled = archivos.length === 0;
   bloqueResultado.style.display = 'none';
   advertencias.style.display = 'none';
+  resumenLote.style.display = 'none';
 }
 
-function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
-  if (archivo) mostrarArchivo(archivo);
+function elegirArchivos(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivos.length) mostrarArchivos(archivos);
 }
 
-conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivos);
+
+async function convertirWordAMarkdown(archivo) {
+  const arrayBuffer = await archivo.arrayBuffer();
+  const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+  return { markdown: turndownService.turndown(resultadoMammoth.value), mensajes: resultadoMammoth.messages.length };
+}
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
   botonConvertir.textContent = t('boton-convertir-procesando');
+  resumenLote.style.display = 'none';
   try {
-    const arrayBuffer = await archivoActual.arrayBuffer();
-    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
-    const markdown = turndownService.turndown(resultadoMammoth.value);
+    if (docxsActuales.length === 1) {
+      const { markdown, mensajes } = await convertirWordAMarkdown(docxsActuales[0]);
+      markdownResultado.value = markdown;
+      markdownResultado.style.display = '';
+      botonCopiarMd.style.display = '';
+      enlaceDescargaMd.href = URL.createObjectURL(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }));
+      enlaceDescargaMd.download = docxsActuales[0].name.replace(/\.docx$/i, '') + '.md';
+      bloqueResultado.style.display = 'block';
 
-    markdownResultado.value = markdown;
-    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
-    enlaceDescargaMd.href = URL.createObjectURL(blob);
-    bloqueResultado.style.display = 'block';
-
-    if (resultadoMammoth.messages.length > 0) {
-      advertencias.textContent = t('advertencias').replace('{n}', resultadoMammoth.messages.length);
-      advertencias.style.display = 'block';
+      if (mensajes > 0) {
+        advertencias.textContent = t('advertencias').replace('{n}', mensajes);
+        advertencias.style.display = 'block';
+      }
+    } else {
+      const resultados = await LoteArchivos.convertirLote(docxsActuales, async (archivo) => {
+        const { markdown } = await convertirWordAMarkdown(archivo);
+        return { nombre: archivo.name.replace(/\.docx$/i, '') + '.md', blob: new Blob([markdown], { type: 'text/markdown;charset=utf-8' }) };
+      }, (i, total) => {
+        botonConvertir.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      markdownResultado.style.display = 'none';
+      botonCopiarMd.style.display = 'none';
+      enlaceDescargaMd.href = URL.createObjectURL(zip);
+      enlaceDescargaMd.download = 'markdown-desde-word.zip';
+      enlaceDescargaMd.textContent = t('lote-enlace-zip');
+      bloqueResultado.style.display = 'block';
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
   } catch (error) {
     alert(t('error-convertir') + ': ' + error.message);

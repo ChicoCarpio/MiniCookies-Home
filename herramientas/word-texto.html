@@ -89,7 +89,7 @@ window.i18nPagina = {
     <div id="panelWordATexto" data-panel-direccion="word-a-texto">
       <div class="zona-arrastre" id="zonaArrastreWord">
         <span data-i18n="zona-arrastre-word">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaWord" accept=".docx" hidden>
+        <input type="file" id="entradaWord" accept=".docx" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaWord"></ul>
       <div class="controles">
@@ -103,6 +103,7 @@ window.i18nPagina = {
           <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" data-i18n="enlace-descargar-txt">Descargar .txt</a>
         </div>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
     <!-- Texto → Word -->
@@ -138,6 +139,8 @@ window.i18nPagina = {
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelWordATexto = document.getElementById('panelWordATexto');
@@ -157,36 +160,74 @@ const enlaceDescargaTxt = document.getElementById('enlaceDescargaTxt');
 
 let archivoWordActual = null;
 
-function mostrarArchivoWord(archivo) {
-  archivoWordActual = archivo;
-  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonExtraer.disabled = false;
+let wordsActuales = [];
+const resumenLote = document.getElementById('resumenLote');
+
+function mostrarArchivosWord(archivos) {
+  wordsActuales = archivos;
+  listaWord.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaWord.appendChild(li);
+  });
+  botonExtraer.disabled = archivos.length === 0;
   bloqueResultadoTexto.style.display = 'none';
   advertencias.style.display = 'none';
+  resumenLote.style.display = 'none';
 }
 
-function elegirArchivoWord(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
-  if (archivo) mostrarArchivoWord(archivo);
+function elegirArchivosWord(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivos.length) mostrarArchivosWord(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivoWord);
+conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
+
+async function convertirWordATexto(archivo) {
+  const arrayBuffer = await archivo.arrayBuffer();
+  const resultado = await mammoth.extractRawText({ arrayBuffer });
+  return resultado;
+}
 
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   botonExtraer.textContent = t('boton-extraer-procesando');
+  resumenLote.style.display = 'none';
   try {
-    const arrayBuffer = await archivoWordActual.arrayBuffer();
-    const resultado = await mammoth.extractRawText({ arrayBuffer });
+    if (wordsActuales.length === 1) {
+      const resultado = await convertirWordATexto(wordsActuales[0]);
+      textoExtraido.value = resultado.value;
+      textoExtraido.style.display = '';
+      botonCopiar.style.display = '';
+      const blob = new Blob([resultado.value], { type: 'text/plain;charset=utf-8' });
+      enlaceDescargaTxt.href = URL.createObjectURL(blob);
+      enlaceDescargaTxt.download = 'texto-extraido.txt';
+      enlaceDescargaTxt.textContent = t('enlace-descargar-txt');
+      bloqueResultadoTexto.style.display = 'block';
 
-    textoExtraido.value = resultado.value;
-    const blob = new Blob([resultado.value], { type: 'text/plain;charset=utf-8' });
-    enlaceDescargaTxt.href = URL.createObjectURL(blob);
-    bloqueResultadoTexto.style.display = 'block';
-
-    if (resultado.messages.length > 0) {
-      advertencias.textContent = t('advertencias-texto').replace('{n}', resultado.messages.length);
-      advertencias.style.display = 'block';
+      if (resultado.messages.length > 0) {
+        advertencias.textContent = t('advertencias-texto').replace('{n}', resultado.messages.length);
+        advertencias.style.display = 'block';
+      }
+    } else {
+      const resultados = await LoteArchivos.convertirLote(wordsActuales, async (archivo) => {
+        const resultado = await convertirWordATexto(archivo);
+        return {
+          nombre: archivo.name.replace(/\.docx$/i, '') + '.txt',
+          blob: new Blob([resultado.value], { type: 'text/plain;charset=utf-8' }),
+        };
+      }, (i, total) => {
+        botonExtraer.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      textoExtraido.style.display = 'none';
+      botonCopiar.style.display = 'none';
+      enlaceDescargaTxt.href = URL.createObjectURL(zip);
+      enlaceDescargaTxt.download = 'texto-desde-word.zip';
+      enlaceDescargaTxt.textContent = t('lote-enlace-zip');
+      bloqueResultadoTexto.style.display = 'block';
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
   } catch (error) {
     alert(t('error-extraer') + ': ' + error.message);

@@ -98,7 +98,7 @@ window.i18nPagina = {
     <div id="panelEpubAMd" data-panel-direccion="epub-a-md">
       <div class="zona-arrastre" id="zonaArrastreEpub">
         <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaEpub" accept=".epub" hidden>
+        <input type="file" id="entradaEpub" accept=".epub" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaEpub"></ul>
       <div class="controles">
@@ -111,6 +111,7 @@ window.i18nPagina = {
           <a class="boton" id="enlaceDescargaMd" download="libro.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
     <!-- Markdown → EPUB -->
@@ -160,6 +161,7 @@ window.i18nPagina = {
 <script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -180,32 +182,66 @@ const markdownResultado = document.getElementById('markdownResultado');
 const botonCopiarMd = document.getElementById('botonCopiarMd');
 const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
 
-let archivoEpubActual = null;
+let epubsActuales = [];
+const resumenLote = document.getElementById('resumenLote');
 
-function mostrarArchivoEpub(archivo) {
-  archivoEpubActual = archivo;
-  listaEpub.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAMd.disabled = false;
+function mostrarArchivosEpub(archivos) {
+  epubsActuales = archivos;
+  listaEpub.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaEpub.appendChild(li);
+  });
+  botonAMd.disabled = archivos.length === 0;
   bloqueResultadoMd.style.display = 'none';
+  resumenLote.style.display = 'none';
 }
 
-function elegirArchivoEpub(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
-  if (archivo) mostrarArchivoEpub(archivo);
+function elegirArchivosEpub(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivos.length) mostrarArchivosEpub(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivoEpub);
+conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
+
+// Un EPUB da un Markdown: sus capítulos separados por una línea horizontal.
+async function convertirEpubAMarkdown(archivo) {
+  const { capitulos } = await leerEpub(archivo);
+  return capitulos.map(capitulo => turndownService.turndown(capitulo.html)).join('\n\n---\n\n');
+}
 
 botonAMd.addEventListener('click', async () => {
   botonAMd.disabled = true;
   botonAMd.textContent = t('boton-a-md-procesando');
+  resumenLote.style.display = 'none';
   try {
-    const { capitulos } = await leerEpub(archivoEpubActual);
-    const markdown = capitulos.map(capitulo => turndownService.turndown(capitulo.html)).join('\n\n---\n\n');
-    markdownResultado.value = markdown;
-    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
-    enlaceDescargaMd.href = URL.createObjectURL(blob);
-    bloqueResultadoMd.style.display = 'block';
+    if (epubsActuales.length === 1) {
+      const markdown = await convertirEpubAMarkdown(epubsActuales[0]);
+      markdownResultado.value = markdown;
+      markdownResultado.style.display = '';
+      botonCopiarMd.style.display = '';
+      const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+      enlaceDescargaMd.href = URL.createObjectURL(blob);
+      enlaceDescargaMd.download = 'libro.md';
+      enlaceDescargaMd.textContent = t('enlace-descargar-md');
+      bloqueResultadoMd.style.display = 'block';
+    } else {
+      const resultados = await LoteArchivos.convertirLote(epubsActuales, async (archivo) => ({
+        nombre: archivo.name.replace(/\.epub$/i, '') + '.md',
+        blob: new Blob([await convertirEpubAMarkdown(archivo)], { type: 'text/markdown;charset=utf-8' }),
+      }), (i, total) => {
+        botonAMd.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      markdownResultado.style.display = 'none';
+      botonCopiarMd.style.display = 'none';
+      enlaceDescargaMd.href = URL.createObjectURL(zip);
+      enlaceDescargaMd.download = 'markdown-desde-epub.zip';
+      enlaceDescargaMd.textContent = t('lote-enlace-zip');
+      bloqueResultadoMd.style.display = 'block';
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
+    }
   } catch (error) {
     alert(t('error-convertir') + ': ' + error.message);
   } finally {
