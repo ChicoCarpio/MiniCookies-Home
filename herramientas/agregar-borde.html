@@ -23,6 +23,11 @@ window.i18nPagina = {
     'intro': 'Elegí una imagen y agregale un borde de color alrededor.',
     'campo-color': 'Color del borde',
     'campo-grosor-a': 'Grosor: ',
+    'borde-por-lado': 'Grosores distintos por lado',
+    'lado-arriba': 'Arriba',
+    'lado-derecha': 'Derecha',
+    'lado-abajo': 'Abajo',
+    'lado-izquierda': 'Izquierda',
     'boton-descargar': 'Descargar imagen',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen',
@@ -34,6 +39,11 @@ window.i18nPagina = {
     'intro': 'Pick an image and add a colored border around it.',
     'campo-color': 'Border color',
     'campo-grosor-a': 'Thickness: ',
+    'borde-por-lado': 'Different thickness per side',
+    'lado-arriba': 'Top',
+    'lado-derecha': 'Right',
+    'lado-abajo': 'Bottom',
+    'lado-izquierda': 'Left',
     'boton-descargar': 'Download image',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download image',
@@ -77,6 +87,15 @@ window.i18nPagina = {
         <span><span data-i18n="campo-grosor-a">Grosor: </span><span id="etiquetaGrosor">20</span>px</span>
         <input type="range" id="grosor" min="1" max="200" value="20">
       </label>
+      <label class="campo">
+        <span><input type="checkbox" id="porLado"> <span data-i18n="borde-por-lado">Grosores distintos por lado</span></span>
+      </label>
+      <div id="gruesosLados" style="display:none; flex-wrap:wrap; gap:12px;">
+        <label class="campo"><span data-i18n="lado-arriba">Arriba</span> <input type="range" class="lado" data-lado="arriba" min="0" max="200" value="20"></label>
+        <label class="campo"><span data-i18n="lado-derecha">Derecha</span> <input type="range" class="lado" data-lado="derecha" min="0" max="200" value="20"></label>
+        <label class="campo"><span data-i18n="lado-abajo">Abajo</span> <input type="range" class="lado" data-lado="abajo" min="0" max="200" value="20"></label>
+        <label class="campo"><span data-i18n="lado-izquierda">Izquierda</span> <input type="range" class="lado" data-lado="izquierda" min="0" max="200" value="20"></label>
+      </div>
       <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
     </div>
 
@@ -128,17 +147,28 @@ function cargarImagen(archivo) {
   });
 }
 
+// Grosores por lado. Con la casilla apagada, los cuatro son el mismo grosor.
+const elPorLado = document.getElementById('porLado');
+const gruesosLados = document.getElementById('gruesosLados');
+const camposLados = [...document.querySelectorAll('.lado')];
+function gruesos() {
+  const g = parseInt(elGrosor.value, 10);
+  if (!elPorLado.checked) return { arriba: g, derecha: g, abajo: g, izquierda: g };
+  const v = (lado) => parseInt(camposLados.find((c) => c.dataset.lado === lado).value, 10);
+  return { arriba: v('arriba'), derecha: v('derecha'), abajo: v('abajo'), izquierda: v('izquierda') };
+}
+
 function actualizarVistaPrevia() {
   if (!imagenActual) return;
-  const grosor = parseInt(elGrosor.value, 10);
+  const g = gruesos();
   const ancho = imagenActual.naturalWidth;
   const alto = imagenActual.naturalHeight;
-  vistaPrevia.width = ancho + grosor * 2;
-  vistaPrevia.height = alto + grosor * 2;
+  vistaPrevia.width = ancho + g.izquierda + g.derecha;
+  vistaPrevia.height = alto + g.arriba + g.abajo;
 
   contexto.fillStyle = elColor.value;
   contexto.fillRect(0, 0, vistaPrevia.width, vistaPrevia.height);
-  contexto.drawImage(imagenActual, grosor, grosor);
+  contexto.drawImage(imagenActual, g.izquierda, g.arriba);
   resultado.classList.remove('visible');
 }
 
@@ -147,6 +177,11 @@ elGrosor.addEventListener('input', () => {
   etiquetaGrosor.textContent = elGrosor.value;
   actualizarVistaPrevia();
 });
+elPorLado.addEventListener('change', () => {
+  gruesosLados.style.display = elPorLado.checked ? 'flex' : 'none';
+  actualizarVistaPrevia();
+});
+camposLados.forEach((c) => c.addEventListener('input', actualizarVistaPrevia));
 
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
