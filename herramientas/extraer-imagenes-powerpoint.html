@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -18,6 +19,7 @@ window.i18nPagina = {
     'intro': 'Elegí un archivo .pptx y descargá todas sus imágenes embebidas en un .zip.',
     'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
     'boton-extraer': 'Extraer imágenes',
+    'ayuda-imagenes': 'Se saca todo lo que hay en la carpeta de medios del .pptx: imágenes insertadas en diapositivas, y también las que solo están en plantillas o diseños, o que ya no se usan. Salen tal cual están guardadas, sin recortes. No incluye gráficos de Excel ni las formas dibujadas.',
     'boton-extraer-procesando': 'Extrayendo...',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar .zip con las imágenes',
@@ -31,6 +33,7 @@ window.i18nPagina = {
     'intro': 'Pick a .pptx file and download all its embedded images in a .zip.',
     'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
     'boton-extraer': 'Extract images',
+    'ayuda-imagenes': 'Everything in the presentation’s media folder is taken: images inserted in slides, and also those that only live in templates or layouts, or are no longer used. They come out as stored, without crops. Excel charts and drawn shapes are not included.',
     'boton-extraer-procesando': 'Extracting...',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download .zip with the images',
@@ -65,6 +68,10 @@ window.i18nPagina = {
 
     <div class="controles">
       <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer imágenes</button>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-imagenes">Se saca todo lo que hay en la carpeta de medios del .pptx: imágenes insertadas en diapositivas, y también las que solo están en plantillas o diseños, o que ya no se usan. Salen tal cual están guardadas, sin recortes. No incluye gráficos de Excel ni las formas dibujadas.</span>
+      </span>
     </div>
 
     <div class="resultado" id="resultado">
@@ -84,6 +91,7 @@ window.i18nPagina = {
 <script src="../assets/js/extraer-medios-zip.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
