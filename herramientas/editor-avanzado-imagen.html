@@ -164,9 +164,11 @@ window.i18nPagina = {
     'sel-toda': 'Toda la imagen',
     'sel-pincel': 'Pincel',
     'sel-color': 'Color',
+    'modo-pincel-pintar': 'Pintar',
+    'modo-pincel-borrar': 'Borrar',
     'sl-pincel': 'Tamaño de pincel',
     'sl-dureza': 'Dureza (bordes)',
-    'boton-borrar-mascara': 'Borrar lo pintado',
+    'boton-borrar-mascara': 'Borrar todo lo pintado',
     'ayuda-color': 'Hacé clic en la imagen para elegir el color ',
     'sl-tolerancia': 'Tolerancia',
     'resumen-filtro': 'Filtro',
@@ -252,9 +254,11 @@ window.i18nPagina = {
     'sel-toda': 'The whole image',
     'sel-pincel': 'Brush',
     'sel-color': 'Color',
+    'modo-pincel-pintar': 'Paint',
+    'modo-pincel-borrar': 'Erase',
     'sl-pincel': 'Brush size',
     'sl-dureza': 'Hardness (edges)',
-    'boton-borrar-mascara': 'Clear what you painted',
+    'boton-borrar-mascara': 'Clear everything painted',
     'ayuda-color': 'Click the image to pick the color ',
     'sl-tolerancia': 'Tolerance',
     'resumen-filtro': 'Filter',
@@ -383,6 +387,10 @@ window.i18nPagina = {
               </div>
 
               <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
+                <div class="modos" id="modosPincelAvanzado">
+                  <button type="button" class="activo" data-modo-pincel="pintar" data-i18n="modo-pincel-pintar">Pintar</button>
+                  <button type="button" data-modo-pincel="borrar" data-i18n="modo-pincel-borrar">Borrar</button>
+                </div>
                 <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="sl-pincel">Tamaño de pincel</span><span id="valorPincelAvanzado">30px</span></span>
                   <input type="range" id="tamanoPincelAvanzado" min="6" max="120" value="30">
@@ -391,7 +399,7 @@ window.i18nPagina = {
                   <span class="etiqueta-deslizador"><span data-i18n="sl-dureza">Dureza (bordes)</span><span id="valorDurezaPincel">70%</span></span>
                   <input type="range" id="durezaPincel" min="10" max="100" value="70">
                 </label>
-                <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar lo pintado</button>
+                <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar todo lo pintado</button>
               </div>
 
               <div id="controlesColorAvanzado" class="controles controles-apilados" style="display:none;">
@@ -811,6 +819,16 @@ let fotogramaPendiente = null;
 let cacheCapas = [];
 let cacheOrigenCapas = null;
 let cacheAnchoCapas = 0, cacheAltoCapas = 0;
+// Caché del resultado "de color" de cada capa (exposición/contraste/textura/
+// filtro — todo el pipeline de procesarCapaEnCanvas), ANTES de aplicarle su
+// máscara. Pintar o borrar con el pincel solo cambia la máscara: nunca el
+// resultado de color, que sigue siendo válido mientras no cambien ni los
+// ajustes de la capa ni lo que viene de las capas de abajo (por eso, a
+// diferencia de cacheCapas, esta caché es por id de capa — no por posición —
+// y no se descarta al invalidar la cadena por un cambio de máscara). Sin
+// esto, cada trazo de pincel volvía a correr el pipeline entero (incluido el
+// desenfoque de Claridad y la dispersión de luz) sobre la imagen completa.
+const cacheColorPorCapa = new Map(); // id -> { firma, origen, ancho, alto, canvas }
 let zoomActual = 1;
 let panelAjustePorColor = null; // se crea más abajo, junto al resto del panel de ajustes
 
@@ -879,17 +897,17 @@ function matrizTono(grados) {
   ];
 }
 
-function generarVersionBorrosa(canvasFuente, ladoChico) {
+function generarVersionBorrosa(canvasFuente, ladoChico, scratch = null) {
   ladoChico = ladoChico || 40;
   const ancho = canvasFuente.width, alto = canvasFuente.height;
   const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
   const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
-  const canvasChico = document.createElement('canvas');
+  const canvasChico = scratch ? scratch.chico : document.createElement('canvas');
   canvasChico.width = anchoChico; canvasChico.height = altoChico;
   const ctxChico = canvasChico.getContext('2d');
   ctxChico.imageSmoothingEnabled = true; ctxChico.imageSmoothingQuality = 'high';
   ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
-  const canvasBorroso = document.createElement('canvas');
+  const canvasBorroso = scratch ? scratch.borroso : document.createElement('canvas');
   canvasBorroso.width = ancho; canvasBorroso.height = alto;
   const ctxBorroso = canvasBorroso.getContext('2d');
   ctxBorroso.imageSmoothingEnabled = true; ctxBorroso.imageSmoothingQuality = 'high';
@@ -897,7 +915,23 @@ function generarVersionBorrosa(canvasFuente, ladoChico) {
   return ctxBorroso.getImageData(0, 0, ancho, alto).data;
 }
 
-function procesarCanvas(canvasFuente, ajustes) {
+// Canvases de repuesto compartidos para la vista previa en vivo (nunca para
+// las capas extra de un filtro ni para exportar): evita crear canvases
+// nuevos por cada trazo de pincel o deslizador — ver cachePreviaEnVivo del
+// Editor de color, mismo motivo. cacheBorrososPorCapa guarda, por id de capa,
+// el desenfoque de "Claridad"/"Dispersión" ya calculado para el contenido que
+// entra a esa capa (ver su uso en renderizarComposicion): ninguno de los dos
+// depende de otro deslizador de la misma capa (salvo "Tamaño" de la
+// dispersión), así que no hace falta recalcularlos por mover, p. ej.,
+// "Exposición" en una capa que además tiene Claridad activa.
+const scratchProcesarCanvas = {
+  canvasBrillante: document.createElement('canvas'),
+  scratchBorrosoClaridad: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+  scratchBorrosoDispersion: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+};
+const cacheBorrososPorCapa = new Map(); // id de capa -> { origen, ancho, alto, claridad, dispersionBrillante, dispersionBlur }
+
+function procesarCanvas(canvasFuente, ajustes, cachePrevia = null) {
   const ctx = canvasFuente.getContext('2d');
   const ancho = canvasFuente.width, alto = canvasFuente.height;
   const imageData = ctx.getImageData(0, 0, ancho, alto);
@@ -954,7 +988,16 @@ function procesarCanvas(canvasFuente, ajustes) {
   const ampInvertir = ajustes.invertir / 100;
   const ampClaridad = (ajustes.claridad / 100) * 1.3;
   const necesitaClaridad = ampClaridad !== 0;
-  const borrosos = necesitaClaridad ? generarVersionBorrosa(canvasFuente) : null;
+  const borrososCache = cachePrevia && cachePrevia.borrosos;
+  let borrosos = null;
+  if (necesitaClaridad) {
+    if (borrososCache && borrososCache.claridad) {
+      borrosos = borrososCache.claridad;
+    } else {
+      borrosos = generarVersionBorrosa(canvasFuente, 40, cachePrevia ? cachePrevia.scratch.scratchBorrosoClaridad : null);
+      if (borrososCache) borrososCache.claridad = borrosos;
+    }
+  }
   const ampGrano = (ajustes.grano / 100) * 45;
   const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
   // Referencia de color apenas desenfocada (ver referenciaColor en
@@ -965,20 +1008,32 @@ function procesarCanvas(canvasFuente, ajustes) {
   let capaDispersion = null;
   let mMatizDispersion = null;
   if (ampDispersion > 0) {
-    const brillante = new Uint8ClampedArray(datos.length);
-    for (let i = 0; i < datos.length; i += 4) {
-      const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
-      const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
-      brillante[i] = datos[i] * factor;
-      brillante[i + 1] = datos[i + 1] * factor;
-      brillante[i + 2] = datos[i + 2] * factor;
-      brillante[i + 3] = 255;
+    let brillante;
+    if (borrososCache && borrososCache.dispersionBrillante) {
+      brillante = borrososCache.dispersionBrillante;
+    } else {
+      brillante = new Uint8ClampedArray(datos.length);
+      for (let i = 0; i < datos.length; i += 4) {
+        const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
+        const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
+        brillante[i] = datos[i] * factor;
+        brillante[i + 1] = datos[i + 1] * factor;
+        brillante[i + 2] = datos[i + 2] * factor;
+        brillante[i + 3] = 255;
+      }
+      if (borrososCache) borrososCache.dispersionBrillante = brillante;
     }
-    const canvasBrillante = document.createElement('canvas');
-    canvasBrillante.width = ancho; canvasBrillante.height = alto;
-    canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+
     const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
-    capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion);
+    if (borrososCache && borrososCache.dispersionBlur && borrososCache.dispersionBlur.tamano === ladoChicoDispersion) {
+      capaDispersion = borrososCache.dispersionBlur.datos;
+    } else {
+      const canvasBrillante = cachePrevia ? cachePrevia.scratch.canvasBrillante : document.createElement('canvas');
+      canvasBrillante.width = ancho; canvasBrillante.height = alto;
+      canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, cachePrevia ? cachePrevia.scratch.scratchBorrosoDispersion : null);
+      if (borrososCache) borrososCache.dispersionBlur = { tamano: ladoChicoDispersion, datos: capaDispersion };
+    }
     if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
   }
 
@@ -1128,10 +1183,12 @@ function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
 // eligió + el desenfoque final) sobre un canvas que ya tiene los píxeles de
 // entrada dibujados. "escala" es para que la intensidad de textura/desenfoque
 // se vea proporcional en preview vs. exportación a resolución completa.
-function procesarCapaEnCanvas(canvas, capa, escala) {
+function procesarCapaEnCanvas(canvas, capa, escala, cachePrevia = null) {
   const ajustes = capa.ajustes;
   const intensidadFiltro = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100))) / 100;
-  const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * escala);
+  // Porcentaje del ancho de este canvas, no píxeles fijos — mismo motivo que
+  // en el Editor de color: "escala" sigue sirviendo solo para el desenfoque.
+  const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
 
   if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'debajo') {
     EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura, ajustes.texturaOpciones);
@@ -1147,7 +1204,7 @@ function procesarCapaEnCanvas(canvas, capa, escala) {
     base.getContext('2d').drawImage(canvas, 0, 0);
   }
 
-  procesarCanvas(canvas, ajustes);
+  procesarCanvas(canvas, ajustes, cachePrevia);
 
   if (base) FiltrosColor.aplicarCapasExtra(canvas, base, capasFiltro, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
 
@@ -1230,6 +1287,13 @@ function generarMascaraCapa(capa, ancho, alto) {
   if (capa.seleccion === 'toda') return null;
   if (capa.seleccion === 'pincel') {
     if (!capa.mascaraPincel) return null;
+    // mascaraPincel ya está al tamaño de trabajo (ver redimensionarTrabajo):
+    // en la vista previa en vivo, que es el caso que se repite en cada trazo
+    // de pincel, coincide con "ancho"/"alto" y se puede devolver tal cual, sin
+    // copiarla — solo la exportación a resolución completa (otro "ancho"
+    // distinto) necesita la copia escalada. mascaraPincel solo se lee acá
+    // (nunca se le dibuja encima), así que devolverla por referencia es seguro.
+    if (capa.mascaraPincel.width === ancho && capa.mascaraPincel.height === alto) return capa.mascaraPincel;
     const c = document.createElement('canvas');
     c.width = ancho; c.height = alto;
     c.getContext('2d').drawImage(capa.mascaraPincel, 0, 0, ancho, alto);
@@ -1253,6 +1317,13 @@ function firmaDeCapa(capa) {
     capa.ajustes, capa.colorObjetivo, capa.tolerancia,
     capa._versionMascara || 0,
   ]);
+}
+
+// Firma de solo la parte "de color" de una capa (lo que entra a
+// procesarCapaEnCanvas): no incluye selección/máscara/opacidad, que no
+// afectan ese resultado — ver cacheColorPorCapa.
+function firmaColorDeCapa(capa) {
+  return JSON.stringify(capa.ajustes);
 }
 
 function renderizarComposicion() {
@@ -1298,17 +1369,45 @@ function renderizarComposicion() {
     const esNeutra = !capa.visible || capa.opacidad <= 0
       || (capa.opacidad === 100 && capa.seleccion === 'toda' && JSON.stringify(capa.ajustes) === ajustesNeutros);
     if (!esNeutra) {
-      const procesado = document.createElement('canvas');
-      procesado.width = ancho; procesado.height = alto;
-      procesado.getContext('2d').drawImage(acumulado, 0, 0);
-      procesarCapaEnCanvas(procesado, capa, escala);
+      // El resultado de color de esta capa solo depende de sus propios
+      // ajustes y de lo que entra desde las capas de abajo (acumulado): si
+      // ninguno de los dos cambió desde el último render (p. ej. porque lo
+      // único que cambió fue la máscara, pintando con el pincel), se reusa
+      // tal cual y no se vuelve a correr procesarCapaEnCanvas.
+      const origenCapa = acumulado;
+      const firmaColor = firmaColorDeCapa(capa);
+      const cacheadoColor = cacheColorPorCapa.get(capa.id);
+      let procesado;
+      if (cacheadoColor && cacheadoColor.firma === firmaColor && cacheadoColor.origen === origenCapa
+        && cacheadoColor.ancho === ancho && cacheadoColor.alto === alto) {
+        procesado = cacheadoColor.canvas;
+      } else {
+        procesado = document.createElement('canvas');
+        procesado.width = ancho; procesado.height = alto;
+        procesado.getContext('2d').drawImage(origenCapa, 0, 0);
+
+        let cacheBorrosos = cacheBorrososPorCapa.get(capa.id);
+        if (!cacheBorrosos || cacheBorrosos.origen !== origenCapa || cacheBorrosos.ancho !== ancho || cacheBorrosos.alto !== alto) {
+          cacheBorrosos = { origen: origenCapa, ancho, alto, claridad: null, dispersionBrillante: null, dispersionBlur: null };
+          cacheBorrososPorCapa.set(capa.id, cacheBorrosos);
+        }
+        procesarCapaEnCanvas(procesado, capa, escala, { scratch: scratchProcesarCanvas, borrosos: cacheBorrosos });
+        cacheColorPorCapa.set(capa.id, { firma: firmaColor, origen: origenCapa, ancho, alto, canvas: procesado });
+      }
 
       const mascara = generarMascaraCapa(capa, ancho, alto);
+      // "procesado" puede venir de la caché: no se le aplica la máscara
+      // encima (lo dejaría recortado para el próximo render que lo reuse sin
+      // máscara, o con otra) — se compone en una copia aparte.
+      let capaFinal = procesado;
       if (mascara) {
-        const ctxProcesado = procesado.getContext('2d');
-        ctxProcesado.globalCompositeOperation = 'destination-in';
-        ctxProcesado.drawImage(mascara, 0, 0);
-        ctxProcesado.globalCompositeOperation = 'source-over';
+        capaFinal = document.createElement('canvas');
+        capaFinal.width = ancho; capaFinal.height = alto;
+        const ctxFinal = capaFinal.getContext('2d');
+        ctxFinal.drawImage(procesado, 0, 0);
+        ctxFinal.globalCompositeOperation = 'destination-in';
+        ctxFinal.drawImage(mascara, 0, 0);
+        ctxFinal.globalCompositeOperation = 'source-over';
       }
 
       // Nunca se pisa el canvas que ya quedó cacheado para esta capa: se
@@ -1319,7 +1418,7 @@ function renderizarComposicion() {
       const ctxNuevo = nuevoAcumulado.getContext('2d');
       ctxNuevo.drawImage(acumulado, 0, 0);
       ctxNuevo.globalAlpha = capa.opacidad / 100;
-      ctxNuevo.drawImage(procesado, 0, 0);
+      ctxNuevo.drawImage(capaFinal, 0, 0);
       ctxNuevo.globalAlpha = 1;
       acumulado = nuevoAcumulado;
     }
@@ -1784,7 +1883,12 @@ document.querySelectorAll('#modosSeleccionCapa button').forEach((boton) => {
   boton.addEventListener('click', () => {
     const capa = capaActiva();
     if (!capa) return;
-    capa.seleccion = boton.dataset.seleccion;
+    const modo = boton.dataset.seleccion;
+    // Un segundo clic sobre "Pincel"/"Color" ya activos los apaga (vuelve a
+    // "Toda la imagen"): sin esto, Pincel se quedaba siempre escuchando el
+    // puntero y un gesto de pellizco/paneo para hacer zoom terminaba
+    // pintando un trazo en vez de acercar la imagen.
+    capa.seleccion = (capa.seleccion === modo && modo !== 'toda') ? 'toda' : modo;
     actualizarControlesSeleccion();
     programarRenderizado();
   });
@@ -1817,6 +1921,14 @@ canvasTrabajo.addEventListener('click', (e) => {
 let pintando = false;
 let ultimoPuntoPincel = null;
 let mascaraAntesDelTrazo = null;
+let modoPincelAvanzado = 'pintar'; // pintar | borrar — mismo tamaño/dureza para los dos
+
+document.querySelectorAll('#modosPincelAvanzado button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    modoPincelAvanzado = boton.dataset.modoPincel;
+    document.querySelectorAll('#modosPincelAvanzado button').forEach((b) => b.classList.toggle('activo', b === boton));
+  });
+});
 
 // --- Arrastrar para mover la imagen (cuando el pincel NO está activo) ---
 let paneando = false;
@@ -1850,12 +1962,17 @@ function durezaPincelActual() { return parseInt(elDurezaPincel.value, 10); }
 
 // dureza 100 = borde duro (círculo sólido, más rápido). Menos que eso = un
 // degradado radial que se desvanece hacia el borde, para un pincel suave.
-function pintarPunto(ctx, p, radio, dureza) {
+// modo "borrar": mismo dibujo, pero restando del alfa de la máscara en vez de
+// sumarle (destination-out) — así el borrador respeta el mismo tamaño/dureza
+// que pintar, incluido el degradado suave del borde.
+function pintarPunto(ctx, p, radio, dureza, modo = 'pintar') {
+  ctx.globalCompositeOperation = modo === 'borrar' ? 'destination-out' : 'source-over';
   if (dureza >= 100) {
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(p.x, p.y, radio, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
     return;
   }
   const radioInterior = Math.max(0, radio * (dureza / 100));
@@ -1866,18 +1983,21 @@ function pintarPunto(ctx, p, radio, dureza) {
   ctx.beginPath();
   ctx.arc(p.x, p.y, radio, 0, Math.PI * 2);
   ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 // Con borde duro se puede usar un trazo grueso normal (rápido y sin costuras).
 // Con borde suave, un solo trazo con gradiente perpendicular no es posible en
 // canvas 2D, así que se "estampan" puntos suaves seguidos a lo largo del
 // segmento — el solape entre estampas da una franja pareja.
-function pintarTrazo(ctx, a, b, radio, dureza) {
+function pintarTrazo(ctx, a, b, radio, dureza, modo = 'pintar') {
   if (dureza >= 100) {
+    ctx.globalCompositeOperation = modo === 'borrar' ? 'destination-out' : 'source-over';
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = radio * 2;
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.globalCompositeOperation = 'source-over';
     return;
   }
   const distancia = Math.hypot(b.x - a.x, b.y - a.y);
@@ -1885,7 +2005,7 @@ function pintarTrazo(ctx, a, b, radio, dureza) {
   const pasos = Math.max(1, Math.ceil(distancia / paso));
   for (let i = 0; i <= pasos; i++) {
     const t = i / pasos;
-    pintarPunto(ctx, { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, radio, dureza);
+    pintarPunto(ctx, { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, radio, dureza, modo);
   }
 }
 
@@ -1948,7 +2068,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   mascaraAntesDelTrazo.getContext('2d').drawImage(mascara, 0, 0);
   canvasTrabajo.setPointerCapture(e.pointerId);
   ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
-  pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual());
+  pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual(), modoPincelAvanzado);
   marcarMascaraSucia(capa);
   actualizarMiniaturaCapa(capa);
   programarRenderizado();
@@ -1970,7 +2090,7 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
   const mascara = mascaraDeCapaActiva();
   if (!mascara) return;
   const punto = coordenadasEnCanvasTrabajo(e);
-  pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual());
+  pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual(), modoPincelAvanzado);
   ultimoPuntoPincel = punto;
   marcarMascaraSucia(capaActiva());
   programarRenderizado();
@@ -2292,6 +2412,8 @@ botonNuevaCapa.addEventListener('click', () => {
 function eliminarCapa(id) {
   if (capas.length <= 1) return;
   capas = capas.filter((c) => c.id !== id);
+  cacheColorPorCapa.delete(id);
+  cacheBorrososPorCapa.delete(id);
   if (capaActivaId === id) capaActivaId = capas[capas.length - 1].id;
   pintarListaCapas();
   escribirAjustesEnUI(capaActiva().ajustes);

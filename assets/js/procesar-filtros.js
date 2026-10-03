@@ -48,12 +48,12 @@ window.ProcesarFiltros = (function () {
   // aproximación de un desenfoque gaussiano fuerte, sin implementar
   // convolución a mano. Se usa como referencia de "detalle local" para la
   // claridad (unsharp mask) y como base del resplandor de la dispersión de luz.
-  function generarVersionBorrosa(canvasFuente, ladoChico = 40) {
+  function generarVersionBorrosa(canvasFuente, ladoChico = 40, scratch = null) {
     const ancho = canvasFuente.width, alto = canvasFuente.height;
     const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
     const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
 
-    const canvasChico = document.createElement('canvas');
+    const canvasChico = scratch ? scratch.chico : document.createElement('canvas');
     canvasChico.width = anchoChico;
     canvasChico.height = altoChico;
     const ctxChico = canvasChico.getContext('2d');
@@ -61,7 +61,7 @@ window.ProcesarFiltros = (function () {
     ctxChico.imageSmoothingQuality = 'high';
     ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
 
-    const canvasBorroso = document.createElement('canvas');
+    const canvasBorroso = scratch ? scratch.borroso : document.createElement('canvas');
     canvasBorroso.width = ancho;
     canvasBorroso.height = alto;
     const ctxBorroso = canvasBorroso.getContext('2d');
@@ -74,7 +74,7 @@ window.ProcesarFiltros = (function () {
   // Aplica todo el pipeline de ajustes sobre el canvas recibido (que ya debe
   // contener la imagen sin procesar) y lo deja mutado con el resultado. Solo
   // toca r,g,b de cada píxel — nunca el canal alfa (datos[i+3]).
-  function procesarCanvas(canvasFuente, ajustes) {
+  function procesarCanvas(canvasFuente, ajustes, scratch = null) {
     const ctx = canvasFuente.getContext('2d');
     const ancho = canvasFuente.width, alto = canvasFuente.height;
     const imageData = ctx.getImageData(0, 0, ancho, alto);
@@ -137,7 +137,9 @@ window.ProcesarFiltros = (function () {
     const ampInvertir = ajustes.invertir / 100;
     const ampClaridad = (ajustes.claridad / 100) * 1.3;
     const necesitaClaridad = ampClaridad !== 0;
-    const borrosos = necesitaClaridad ? generarVersionBorrosa(canvasFuente) : null;
+    const borrosos = necesitaClaridad
+      ? generarVersionBorrosa(canvasFuente, 40, scratch ? scratch.scratchBorrosoClaridad : null)
+      : null;
     const ampGrano = (ajustes.grano / 100) * 45;
     const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
     const factorIntensidadFiltro = ajustes.intensidadFiltro / 100;
@@ -155,12 +157,12 @@ window.ProcesarFiltros = (function () {
         brillante[i + 2] = datos[i + 2] * factor;
         brillante[i + 3] = 255;
       }
-      const canvasBrillante = document.createElement('canvas');
+      const canvasBrillante = scratch ? scratch.canvasBrillante : document.createElement('canvas');
       canvasBrillante.width = ancho;
       canvasBrillante.height = alto;
       canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
       const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
-      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion);
+      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, scratch ? scratch.scratchBorrosoDispersion : null);
       if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
     }
 
@@ -304,8 +306,8 @@ window.ProcesarFiltros = (function () {
     return canvasFuente;
   }
 
-  function copiarCanvas(canvas) {
-    const copia = document.createElement('canvas');
+  function copiarCanvas(canvas, destino = null) {
+    const copia = destino || document.createElement('canvas');
     copia.width = canvas.width; copia.height = canvas.height;
     copia.getContext('2d').drawImage(canvas, 0, 0);
     return copia;
@@ -316,21 +318,24 @@ window.ProcesarFiltros = (function () {
   // "Intensidad del filtro" → textura "encima" → desenfoque. "escala" adapta
   // las medidas pensadas en píxeles de la imagen real (textura, desenfoque)
   // a un canvas más chico (usar 1 para tamaño completo).
-  function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala) {
+  function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, scratch = null) {
     const ctx = canvas.getContext('2d');
-    const intensidadTextura = Math.max(1, textura.intensidad * escala);
+    // Porcentaje del ancho de este canvas, no píxeles fijos — ver
+    // EfectosTextura.REFERENCIA_TEXTURA. "escala" sigue sirviendo solo para
+    // el desenfoque.
+    const intensidadTextura = Math.max(1, textura.intensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
     if (textura.tipo !== 'ninguno' && textura.orden === 'debajo') {
       EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura);
     }
-    const base = copiarCanvas(canvas);
+    const base = copiarCanvas(canvas, scratch ? scratch.base : null);
 
-    procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 });
+    procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 }, scratch);
 
     FiltrosColor.aplicarCapasExtra(canvas, base, capasExtra, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
 
     const factorIntensidad = ajustes.intensidadFiltro / 100;
     if (factorIntensidad < 1) {
-      const resultadoCompleto = copiarCanvas(canvas);
+      const resultadoCompleto = copiarCanvas(canvas, scratch ? scratch.resultadoCompleto : null);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(base, 0, 0);
       ctx.globalAlpha = factorIntensidad;
@@ -343,7 +348,7 @@ window.ProcesarFiltros = (function () {
     }
 
     if (ajustes.desenfoque > 0) {
-      const sinDesenfoque = copiarCanvas(canvas);
+      const sinDesenfoque = copiarCanvas(canvas, scratch ? scratch.sinDesenfoque : null);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.filter = `blur(${ajustes.desenfoque * escala}px)`;
       ctx.drawImage(sinDesenfoque, 0, 0);
@@ -352,5 +357,22 @@ window.ProcesarFiltros = (function () {
     return canvas;
   }
 
-  return { AJUSTES_NEUTROS, PRESETS, SIN_TEXTURA, crearPreset, procesarCanvas, copiarCanvas, renderizarFiltro };
+  // Canvases de repuesto para una vista previa en vivo: ver crearScratch().
+  // No guardan ningún valor (a diferencia de cachePreviaEnVivo de
+  // Editor-de-color-de-imagen.html), solo evitan crear canvases nuevos en
+  // cada llamada — acá cada llamada parte de una copia nueva de canvasBase
+  // (ver generador-stickers.js), así que cachear el desenfoque de Claridad
+  // por valor no serviría: el canvas de entrada es otro objeto cada vez.
+  function crearScratch() {
+    return {
+      base: document.createElement('canvas'),
+      resultadoCompleto: document.createElement('canvas'),
+      sinDesenfoque: document.createElement('canvas'),
+      canvasBrillante: document.createElement('canvas'),
+      scratchBorrosoClaridad: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+      scratchBorrosoDispersion: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+    };
+  }
+
+  return { AJUSTES_NEUTROS, PRESETS, SIN_TEXTURA, crearPreset, procesarCanvas, copiarCanvas, renderizarFiltro, crearScratch };
 })();
