@@ -114,7 +114,7 @@ window.i18nPagina = {
       </p>
       <div class="zona-arrastre" id="zonaArrastreWord">
         <span data-i18n="zona-arrastre-word">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaWord" accept=".docx" hidden>
+        <input type="file" id="entradaWord" accept=".docx" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaWord"></ul>
       <div class="controles">
@@ -189,41 +189,57 @@ const vistaPrevia = document.getElementById('vistaPrevia');
 const botonImprimir = document.getElementById('botonImprimir');
 const areaImprimir = document.getElementById('areaImprimir');
 
-let archivoWordActual = null;
+let wordsActuales = [];
 
-function mostrarArchivoWord(archivo) {
-  archivoWordActual = archivo;
-  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAPdf.disabled = false;
+function mostrarArchivosWord(archivos) {
+  wordsActuales = archivos;
+  listaWord.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaWord.appendChild(li);
+  });
+  botonAPdf.disabled = archivos.length === 0;
   vistaPrevia.style.display = 'none';
   controlesImprimir.style.display = 'none';
   advertencias.style.display = 'none';
 }
 
-function elegirArchivoWord(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
-  if (archivo) mostrarArchivoWord(archivo);
+function elegirArchivosWord(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivos.length) mostrarArchivosWord(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivoWord);
+conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
 
+// Varios documentos se imprimen en un solo PDF: cada uno empieza en una página
+// nueva, así se pueden separar después con "Dividir PDF".
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
   botonAPdf.textContent = t('boton-a-pdf-generando');
   try {
-    const arrayBuffer = await archivoWordActual.arrayBuffer();
-    const resultado = await mammoth.convertToHtml({ arrayBuffer });
+    let htmlTotal = '';
+    let advertenciasTotal = 0;
+    for (let i = 0; i < wordsActuales.length; i++) {
+      botonAPdf.textContent = wordsActuales.length > 1
+        ? t('lote-progreso').replace('{n}', i + 1).replace('{total}', wordsActuales.length)
+        : t('boton-a-pdf-generando');
+      const resultado = await mammoth.convertToHtml({ arrayBuffer: await wordsActuales[i].arrayBuffer() });
+      advertenciasTotal += resultado.messages.length;
+      const salto = i > 0 ? ' style="break-before: page;"' : '';
+      htmlTotal += `<section${salto}>${resultado.value}</section>`;
+    }
 
     // mammoth copia tal cual los enlaces del .docx (incluso "javascript:..."):
     // se limpia antes de mostrarlo.
-    const htmlLimpio = sanitizarHtml(resultado.value);
+    const htmlLimpio = sanitizarHtml(htmlTotal);
     vistaPrevia.innerHTML = htmlLimpio;
     vistaPrevia.style.display = 'block';
     areaImprimir.innerHTML = htmlLimpio;
     controlesImprimir.style.display = 'flex';
 
-    if (resultado.messages.length > 0) {
-      advertencias.textContent = t('advertencias-texto').replace('{n}', resultado.messages.length);
+    if (advertenciasTotal > 0) {
+      advertencias.textContent = t('advertencias-texto').replace('{n}', advertenciasTotal);
       advertencias.style.display = 'block';
     }
   } catch (error) {
