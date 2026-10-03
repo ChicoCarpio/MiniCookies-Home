@@ -811,6 +811,16 @@ let fotogramaPendiente = null;
 let cacheCapas = [];
 let cacheOrigenCapas = null;
 let cacheAnchoCapas = 0, cacheAltoCapas = 0;
+// Caché del resultado "de color" de cada capa (exposición/contraste/textura/
+// filtro — todo el pipeline de procesarCapaEnCanvas), ANTES de aplicarle su
+// máscara. Pintar o borrar con el pincel solo cambia la máscara: nunca el
+// resultado de color, que sigue siendo válido mientras no cambien ni los
+// ajustes de la capa ni lo que viene de las capas de abajo (por eso, a
+// diferencia de cacheCapas, esta caché es por id de capa — no por posición —
+// y no se descarta al invalidar la cadena por un cambio de máscara). Sin
+// esto, cada trazo de pincel volvía a correr el pipeline entero (incluido el
+// desenfoque de Claridad y la dispersión de luz) sobre la imagen completa.
+const cacheColorPorCapa = new Map(); // id -> { firma, origen, ancho, alto, canvas }
 let zoomActual = 1;
 let panelAjustePorColor = null; // se crea más abajo, junto al resto del panel de ajustes
 
@@ -879,17 +889,17 @@ function matrizTono(grados) {
   ];
 }
 
-function generarVersionBorrosa(canvasFuente, ladoChico) {
+function generarVersionBorrosa(canvasFuente, ladoChico, scratch = null) {
   ladoChico = ladoChico || 40;
   const ancho = canvasFuente.width, alto = canvasFuente.height;
   const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
   const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
-  const canvasChico = document.createElement('canvas');
+  const canvasChico = scratch ? scratch.chico : document.createElement('canvas');
   canvasChico.width = anchoChico; canvasChico.height = altoChico;
   const ctxChico = canvasChico.getContext('2d');
   ctxChico.imageSmoothingEnabled = true; ctxChico.imageSmoothingQuality = 'high';
   ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
-  const canvasBorroso = document.createElement('canvas');
+  const canvasBorroso = scratch ? scratch.borroso : document.createElement('canvas');
   canvasBorroso.width = ancho; canvasBorroso.height = alto;
   const ctxBorroso = canvasBorroso.getContext('2d');
   ctxBorroso.imageSmoothingEnabled = true; ctxBorroso.imageSmoothingQuality = 'high';
@@ -897,7 +907,23 @@ function generarVersionBorrosa(canvasFuente, ladoChico) {
   return ctxBorroso.getImageData(0, 0, ancho, alto).data;
 }
 
-function procesarCanvas(canvasFuente, ajustes) {
+// Canvases de repuesto compartidos para la vista previa en vivo (nunca para
+// las capas extra de un filtro ni para exportar): evita crear canvases
+// nuevos por cada trazo de pincel o deslizador — ver cachePreviaEnVivo del
+// Editor de color, mismo motivo. cacheBorrososPorCapa guarda, por id de capa,
+// el desenfoque de "Claridad"/"Dispersión" ya calculado para el contenido que
+// entra a esa capa (ver su uso en renderizarComposicion): ninguno de los dos
+// depende de otro deslizador de la misma capa (salvo "Tamaño" de la
+// dispersión), así que no hace falta recalcularlos por mover, p. ej.,
+// "Exposición" en una capa que además tiene Claridad activa.
+const scratchProcesarCanvas = {
+  canvasBrillante: document.createElement('canvas'),
+  scratchBorrosoClaridad: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+  scratchBorrosoDispersion: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+};
+const cacheBorrososPorCapa = new Map(); // id de capa -> { origen, ancho, alto, claridad, dispersionBrillante, dispersionBlur }
+
+function procesarCanvas(canvasFuente, ajustes, cachePrevia = null) {
   const ctx = canvasFuente.getContext('2d');
   const ancho = canvasFuente.width, alto = canvasFuente.height;
   const imageData = ctx.getImageData(0, 0, ancho, alto);
@@ -954,7 +980,16 @@ function procesarCanvas(canvasFuente, ajustes) {
   const ampInvertir = ajustes.invertir / 100;
   const ampClaridad = (ajustes.claridad / 100) * 1.3;
   const necesitaClaridad = ampClaridad !== 0;
-  const borrosos = necesitaClaridad ? generarVersionBorrosa(canvasFuente) : null;
+  const borrososCache = cachePrevia && cachePrevia.borrosos;
+  let borrosos = null;
+  if (necesitaClaridad) {
+    if (borrososCache && borrososCache.claridad) {
+      borrosos = borrososCache.claridad;
+    } else {
+      borrosos = generarVersionBorrosa(canvasFuente, 40, cachePrevia ? cachePrevia.scratch.scratchBorrosoClaridad : null);
+      if (borrososCache) borrososCache.claridad = borrosos;
+    }
+  }
   const ampGrano = (ajustes.grano / 100) * 45;
   const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
   // Referencia de color apenas desenfocada (ver referenciaColor en
@@ -965,20 +1000,32 @@ function procesarCanvas(canvasFuente, ajustes) {
   let capaDispersion = null;
   let mMatizDispersion = null;
   if (ampDispersion > 0) {
-    const brillante = new Uint8ClampedArray(datos.length);
-    for (let i = 0; i < datos.length; i += 4) {
-      const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
-      const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
-      brillante[i] = datos[i] * factor;
-      brillante[i + 1] = datos[i + 1] * factor;
-      brillante[i + 2] = datos[i + 2] * factor;
-      brillante[i + 3] = 255;
+    let brillante;
+    if (borrososCache && borrososCache.dispersionBrillante) {
+      brillante = borrososCache.dispersionBrillante;
+    } else {
+      brillante = new Uint8ClampedArray(datos.length);
+      for (let i = 0; i < datos.length; i += 4) {
+        const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
+        const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
+        brillante[i] = datos[i] * factor;
+        brillante[i + 1] = datos[i + 1] * factor;
+        brillante[i + 2] = datos[i + 2] * factor;
+        brillante[i + 3] = 255;
+      }
+      if (borrososCache) borrososCache.dispersionBrillante = brillante;
     }
-    const canvasBrillante = document.createElement('canvas');
-    canvasBrillante.width = ancho; canvasBrillante.height = alto;
-    canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+
     const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
-    capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion);
+    if (borrososCache && borrososCache.dispersionBlur && borrososCache.dispersionBlur.tamano === ladoChicoDispersion) {
+      capaDispersion = borrososCache.dispersionBlur.datos;
+    } else {
+      const canvasBrillante = cachePrevia ? cachePrevia.scratch.canvasBrillante : document.createElement('canvas');
+      canvasBrillante.width = ancho; canvasBrillante.height = alto;
+      canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, cachePrevia ? cachePrevia.scratch.scratchBorrosoDispersion : null);
+      if (borrososCache) borrososCache.dispersionBlur = { tamano: ladoChicoDispersion, datos: capaDispersion };
+    }
     if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
   }
 
@@ -1128,7 +1175,7 @@ function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
 // eligió + el desenfoque final) sobre un canvas que ya tiene los píxeles de
 // entrada dibujados. "escala" es para que la intensidad de textura/desenfoque
 // se vea proporcional en preview vs. exportación a resolución completa.
-function procesarCapaEnCanvas(canvas, capa, escala) {
+function procesarCapaEnCanvas(canvas, capa, escala, cachePrevia = null) {
   const ajustes = capa.ajustes;
   const intensidadFiltro = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100))) / 100;
   const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * escala);
@@ -1147,7 +1194,7 @@ function procesarCapaEnCanvas(canvas, capa, escala) {
     base.getContext('2d').drawImage(canvas, 0, 0);
   }
 
-  procesarCanvas(canvas, ajustes);
+  procesarCanvas(canvas, ajustes, cachePrevia);
 
   if (base) FiltrosColor.aplicarCapasExtra(canvas, base, capasFiltro, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
 
@@ -1230,6 +1277,13 @@ function generarMascaraCapa(capa, ancho, alto) {
   if (capa.seleccion === 'toda') return null;
   if (capa.seleccion === 'pincel') {
     if (!capa.mascaraPincel) return null;
+    // mascaraPincel ya está al tamaño de trabajo (ver redimensionarTrabajo):
+    // en la vista previa en vivo, que es el caso que se repite en cada trazo
+    // de pincel, coincide con "ancho"/"alto" y se puede devolver tal cual, sin
+    // copiarla — solo la exportación a resolución completa (otro "ancho"
+    // distinto) necesita la copia escalada. mascaraPincel solo se lee acá
+    // (nunca se le dibuja encima), así que devolverla por referencia es seguro.
+    if (capa.mascaraPincel.width === ancho && capa.mascaraPincel.height === alto) return capa.mascaraPincel;
     const c = document.createElement('canvas');
     c.width = ancho; c.height = alto;
     c.getContext('2d').drawImage(capa.mascaraPincel, 0, 0, ancho, alto);
@@ -1253,6 +1307,13 @@ function firmaDeCapa(capa) {
     capa.ajustes, capa.colorObjetivo, capa.tolerancia,
     capa._versionMascara || 0,
   ]);
+}
+
+// Firma de solo la parte "de color" de una capa (lo que entra a
+// procesarCapaEnCanvas): no incluye selección/máscara/opacidad, que no
+// afectan ese resultado — ver cacheColorPorCapa.
+function firmaColorDeCapa(capa) {
+  return JSON.stringify(capa.ajustes);
 }
 
 function renderizarComposicion() {
@@ -1298,17 +1359,45 @@ function renderizarComposicion() {
     const esNeutra = !capa.visible || capa.opacidad <= 0
       || (capa.opacidad === 100 && capa.seleccion === 'toda' && JSON.stringify(capa.ajustes) === ajustesNeutros);
     if (!esNeutra) {
-      const procesado = document.createElement('canvas');
-      procesado.width = ancho; procesado.height = alto;
-      procesado.getContext('2d').drawImage(acumulado, 0, 0);
-      procesarCapaEnCanvas(procesado, capa, escala);
+      // El resultado de color de esta capa solo depende de sus propios
+      // ajustes y de lo que entra desde las capas de abajo (acumulado): si
+      // ninguno de los dos cambió desde el último render (p. ej. porque lo
+      // único que cambió fue la máscara, pintando con el pincel), se reusa
+      // tal cual y no se vuelve a correr procesarCapaEnCanvas.
+      const origenCapa = acumulado;
+      const firmaColor = firmaColorDeCapa(capa);
+      const cacheadoColor = cacheColorPorCapa.get(capa.id);
+      let procesado;
+      if (cacheadoColor && cacheadoColor.firma === firmaColor && cacheadoColor.origen === origenCapa
+        && cacheadoColor.ancho === ancho && cacheadoColor.alto === alto) {
+        procesado = cacheadoColor.canvas;
+      } else {
+        procesado = document.createElement('canvas');
+        procesado.width = ancho; procesado.height = alto;
+        procesado.getContext('2d').drawImage(origenCapa, 0, 0);
+
+        let cacheBorrosos = cacheBorrososPorCapa.get(capa.id);
+        if (!cacheBorrosos || cacheBorrosos.origen !== origenCapa || cacheBorrosos.ancho !== ancho || cacheBorrosos.alto !== alto) {
+          cacheBorrosos = { origen: origenCapa, ancho, alto, claridad: null, dispersionBrillante: null, dispersionBlur: null };
+          cacheBorrososPorCapa.set(capa.id, cacheBorrosos);
+        }
+        procesarCapaEnCanvas(procesado, capa, escala, { scratch: scratchProcesarCanvas, borrosos: cacheBorrosos });
+        cacheColorPorCapa.set(capa.id, { firma: firmaColor, origen: origenCapa, ancho, alto, canvas: procesado });
+      }
 
       const mascara = generarMascaraCapa(capa, ancho, alto);
+      // "procesado" puede venir de la caché: no se le aplica la máscara
+      // encima (lo dejaría recortado para el próximo render que lo reuse sin
+      // máscara, o con otra) — se compone en una copia aparte.
+      let capaFinal = procesado;
       if (mascara) {
-        const ctxProcesado = procesado.getContext('2d');
-        ctxProcesado.globalCompositeOperation = 'destination-in';
-        ctxProcesado.drawImage(mascara, 0, 0);
-        ctxProcesado.globalCompositeOperation = 'source-over';
+        capaFinal = document.createElement('canvas');
+        capaFinal.width = ancho; capaFinal.height = alto;
+        const ctxFinal = capaFinal.getContext('2d');
+        ctxFinal.drawImage(procesado, 0, 0);
+        ctxFinal.globalCompositeOperation = 'destination-in';
+        ctxFinal.drawImage(mascara, 0, 0);
+        ctxFinal.globalCompositeOperation = 'source-over';
       }
 
       // Nunca se pisa el canvas que ya quedó cacheado para esta capa: se
@@ -1319,7 +1408,7 @@ function renderizarComposicion() {
       const ctxNuevo = nuevoAcumulado.getContext('2d');
       ctxNuevo.drawImage(acumulado, 0, 0);
       ctxNuevo.globalAlpha = capa.opacidad / 100;
-      ctxNuevo.drawImage(procesado, 0, 0);
+      ctxNuevo.drawImage(capaFinal, 0, 0);
       ctxNuevo.globalAlpha = 1;
       acumulado = nuevoAcumulado;
     }
@@ -2292,6 +2381,8 @@ botonNuevaCapa.addEventListener('click', () => {
 function eliminarCapa(id) {
   if (capas.length <= 1) return;
   capas = capas.filter((c) => c.id !== id);
+  cacheColorPorCapa.delete(id);
+  cacheBorrososPorCapa.delete(id);
   if (capaActivaId === id) capaActivaId = capas[capas.length - 1].id;
   pintarListaCapas();
   escribirAjustesEnUI(capaActiva().ajustes);

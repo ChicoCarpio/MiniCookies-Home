@@ -600,6 +600,25 @@ let imagenActual = null;
 let canvasPrevia = null; // copia reducida de la imagen, se redibuja "limpia" antes de cada procesado
 let fotogramaPendiente = null;
 
+// Reutilizado en cada fotograma de la vista previa en vivo (mientras se
+// arrastra un deslizador) para no crear canvases nuevos a cada rato: cada
+// `document.createElement('canvas')` de por medio es una textura GPU que el
+// navegador tiene que reservar y soltar, y eso es lo que se sentía como
+// "lag"/picos de GPU al mover un control. Los presets en miniatura y la
+// descarga final (una sola vez, no en un bucle de arrastre) siguen usando
+// canvases nuevos como antes: no hace falta ni conviene que compartan estos.
+const cachePreviaEnVivo = {
+  base: document.createElement('canvas'),
+  resultadoCompleto: document.createElement('canvas'),
+  sinDesenfoque: document.createElement('canvas'),
+  canvasBrillante: document.createElement('canvas'), // extracción de zonas brillantes para la dispersión de luz
+  scratchBorrosoClaridad: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+  scratchBorrosoDispersion: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
+  claridad: null, // { imagen, ancho, alto, datos } — el desenfoque de "Claridad" no depende de ningún deslizador, solo de la imagen
+  dispersionBrillante: null, // { imagen, ancho, alto, datos } — extracción de zonas brillantes, tampoco depende de los deslizadores
+  dispersionBlur: null, // { imagen, ancho, alto, tamano, datos } — sí depende del deslizador "Tamaño" de la dispersión
+};
+
 // Formato de la imagen descargada: se respetan PNG y WebP (guardan
 // transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
 // sale como PNG: antes todo lo que no era PNG salía como JPG, y la
@@ -647,12 +666,12 @@ function matrizTono(gradosGrados) {
 // convolución a mano. Se usa como referencia de "detalle local" para la
 // claridad (unsharp mask) y como base del resplandor de la dispersión de luz
 // (cuanto más chico el lado de referencia, más grande y difuso el desenfoque).
-function generarVersionBorrosa(canvasFuente, ladoChico = 40) {
+function generarVersionBorrosa(canvasFuente, ladoChico = 40, scratch = null) {
   const ancho = canvasFuente.width, alto = canvasFuente.height;
   const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
   const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
 
-  const canvasChico = document.createElement('canvas');
+  const canvasChico = scratch ? scratch.chico : document.createElement('canvas');
   canvasChico.width = anchoChico;
   canvasChico.height = altoChico;
   const ctxChico = canvasChico.getContext('2d');
@@ -660,7 +679,7 @@ function generarVersionBorrosa(canvasFuente, ladoChico = 40) {
   ctxChico.imageSmoothingQuality = 'high';
   ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
 
-  const canvasBorroso = document.createElement('canvas');
+  const canvasBorroso = scratch ? scratch.borroso : document.createElement('canvas');
   canvasBorroso.width = ancho;
   canvasBorroso.height = alto;
   const ctxBorroso = canvasBorroso.getContext('2d');
@@ -674,7 +693,7 @@ function generarVersionBorrosa(canvasFuente, ladoChico = 40) {
 // contener la imagen original sin procesar) y lo deja mutado con el
 // resultado. Se usa tanto para la vista previa (canvas chico) como para la
 // descarga final (canvas a resolución completa) con el mismo código.
-function procesarCanvas(canvasFuente, ajustes) {
+function procesarCanvas(canvasFuente, ajustes, cachePrevia = null) {
   const ctx = canvasFuente.getContext('2d');
   const ancho = canvasFuente.width, alto = canvasFuente.height;
   const imageData = ctx.getImageData(0, 0, ancho, alto);
@@ -750,7 +769,24 @@ function procesarCanvas(canvasFuente, ajustes) {
   const ampInvertir = ajustes.invertir / 100;
   const ampClaridad = (ajustes.claridad / 100) * 1.3;
   const necesitaClaridad = ampClaridad !== 0;
-  const borrosos = necesitaClaridad ? generarVersionBorrosa(canvasFuente) : null;
+  // El desenfoque de referencia para "Claridad" sale siempre de la imagen SIN
+  // procesar (se calcula antes del bucle de abajo) con un tamaño fijo: no
+  // depende de ningún deslizador, así que mientras no cambie la imagen es
+  // idéntico en cada fotograma. Recalcularlo en cada uno (como antes) era
+  // puro trabajo de más — dos canvases y una lectura de píxeles por fotograma
+  // — mientras se arrastraba cualquier otro control.
+  let borrosos = null;
+  if (necesitaClaridad) {
+    const cacheValido = cachePrevia && cachePrevia.claridad
+      && cachePrevia.claridad.imagen === imagenActual
+      && cachePrevia.claridad.ancho === ancho && cachePrevia.claridad.alto === alto;
+    if (cacheValido) {
+      borrosos = cachePrevia.claridad.datos;
+    } else {
+      borrosos = generarVersionBorrosa(canvasFuente, 40, cachePrevia ? cachePrevia.scratchBorrosoClaridad : null);
+      if (cachePrevia) cachePrevia.claridad = { imagen: imagenActual, ancho, alto, datos: borrosos };
+    }
+  }
   const ampGrano = (ajustes.grano / 100) * 45;
   const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
   const factorIntensidadFiltro = ajustes.intensidadFiltro / 100;
@@ -764,21 +800,46 @@ function procesarCanvas(canvasFuente, ajustes) {
   let capaDispersion = null;
   let mMatizDispersion = null;
   if (ampDispersion > 0) {
-    const brillante = new Uint8ClampedArray(datos.length);
-    for (let i = 0; i < datos.length; i += 4) {
-      const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
-      const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
-      brillante[i] = datos[i] * factor;
-      brillante[i + 1] = datos[i + 1] * factor;
-      brillante[i + 2] = datos[i + 2] * factor;
-      brillante[i + 3] = 255;
+    // La extracción de zonas brillantes también sale de la imagen sin
+    // procesar y no depende de ningún deslizador (ni siquiera de "Tamaño"):
+    // se cachea igual que el desenfoque de "Claridad".
+    const cacheBrillanteValido = cachePrevia && cachePrevia.dispersionBrillante
+      && cachePrevia.dispersionBrillante.imagen === imagenActual
+      && cachePrevia.dispersionBrillante.ancho === ancho && cachePrevia.dispersionBrillante.alto === alto;
+    let brillante;
+    if (cacheBrillanteValido) {
+      brillante = cachePrevia.dispersionBrillante.datos;
+    } else {
+      brillante = new Uint8ClampedArray(datos.length);
+      for (let i = 0; i < datos.length; i += 4) {
+        const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
+        const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
+        brillante[i] = datos[i] * factor;
+        brillante[i + 1] = datos[i + 1] * factor;
+        brillante[i + 2] = datos[i + 2] * factor;
+        brillante[i + 3] = 255;
+      }
+      if (cachePrevia) cachePrevia.dispersionBrillante = { imagen: imagenActual, ancho, alto, datos: brillante };
     }
-    const canvasBrillante = document.createElement('canvas');
-    canvasBrillante.width = ancho;
-    canvasBrillante.height = alto;
-    canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+
     const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
-    capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion);
+    // El desenfoque final sí depende del deslizador "Tamaño": se cachea por
+    // separado, y solo se recalcula si ese valor concreto cambió (moviendo
+    // cualquier otro control reutiliza el mismo resultado).
+    const cacheBlurValido = cachePrevia && cachePrevia.dispersionBlur
+      && cachePrevia.dispersionBlur.imagen === imagenActual
+      && cachePrevia.dispersionBlur.ancho === ancho && cachePrevia.dispersionBlur.alto === alto
+      && cachePrevia.dispersionBlur.tamano === ladoChicoDispersion;
+    if (cacheBlurValido) {
+      capaDispersion = cachePrevia.dispersionBlur.datos;
+    } else {
+      const canvasBrillante = cachePrevia ? cachePrevia.canvasBrillante : document.createElement('canvas');
+      canvasBrillante.width = ancho;
+      canvasBrillante.height = alto;
+      canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, cachePrevia ? cachePrevia.scratchBorrosoDispersion : null);
+      if (cachePrevia) cachePrevia.dispersionBlur = { imagen: imagenActual, ancho, alto, tamano: ladoChicoDispersion, datos: capaDispersion };
+    }
     if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
   }
 
@@ -952,16 +1013,16 @@ function procesarCanvas(canvasFuente, ajustes) {
   return canvasFuente;
 }
 
-function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
-  const canvas = document.createElement('canvas');
+function crearCanvasConImagen(imagen, anchoDestino, altoDestino, destino = null) {
+  const canvas = destino || document.createElement('canvas');
   canvas.width = anchoDestino;
   canvas.height = altoDestino;
   canvas.getContext('2d').drawImage(imagen, 0, 0, anchoDestino, altoDestino);
   return canvas;
 }
 
-function copiarCanvas(canvas) {
-  const copia = document.createElement('canvas');
+function copiarCanvas(canvas, destino = null) {
+  const copia = destino || document.createElement('canvas');
   copia.width = canvas.width; copia.height = canvas.height;
   copia.getContext('2d').drawImage(canvas, 0, 0);
   return copia;
@@ -975,22 +1036,24 @@ const SIN_TEXTURA = { tipo: 'ninguno', intensidad: 18, orden: 'debajo' };
 // "Intensidad del filtro" → textura "encima" → desenfoque. "escala" adapta
 // las medidas pensadas en píxeles de la imagen real (textura, desenfoque)
 // a un canvas más chico.
-function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala) {
+function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, cachePrevia = null) {
   const ctx = canvas.getContext('2d');
   const intensidadTextura = Math.max(1, textura.intensidad * escala);
   if (textura.tipo !== 'ninguno' && textura.orden === 'debajo') {
     EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);
   }
   // Referencia sin ajustes: para las máscaras y para la mezcla de intensidad.
-  const base = copiarCanvas(canvas);
+  // En la vista previa en vivo (cachePrevia) se reutiliza siempre el mismo
+  // canvas en vez de crear uno nuevo por fotograma.
+  const base = copiarCanvas(canvas, cachePrevia ? cachePrevia.base : null);
 
-  procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 });
+  procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 }, cachePrevia);
 
   FiltrosColor.aplicarCapasExtra(canvas, base, capasExtra, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
 
   const factorIntensidad = ajustes.intensidadFiltro / 100;
   if (factorIntensidad < 1) {
-    const resultadoCompleto = copiarCanvas(canvas);
+    const resultadoCompleto = copiarCanvas(canvas, cachePrevia ? cachePrevia.resultadoCompleto : null);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(base, 0, 0);
     ctx.globalAlpha = factorIntensidad;
@@ -1003,7 +1066,7 @@ function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala) {
   }
 
   if (ajustes.desenfoque > 0) {
-    const sinDesenfoque = copiarCanvas(canvas);
+    const sinDesenfoque = copiarCanvas(canvas, cachePrevia ? cachePrevia.sinDesenfoque : null);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.filter = `blur(${ajustes.desenfoque * escala}px)`;
     ctx.drawImage(sinDesenfoque, 0, 0);
@@ -1215,8 +1278,11 @@ function solicitarMiniaturasTextura() {
 function renderizarVistaPrevia() {
   if (!imagenActual || !canvasPrevia) return;
   const anchoPrevia = canvasPrevia.width, altoPrevia = canvasPrevia.height;
-  const copiaTrabajo = crearCanvasConImagen(imagenActual, anchoPrevia, altoPrevia);
-  renderizarFiltro(copiaTrabajo, leerAjustes(), capasFiltroActivo, texturaActual(), anchoPrevia / imagenActual.naturalWidth);
+  // canvasPrevia se reutiliza como canvas de trabajo de principio a fin (en
+  // vez de crear uno nuevo en cada fotograma): redibujarlo con la imagen
+  // original lo deja "limpio" antes de que renderizarFiltro lo mute.
+  const copiaTrabajo = crearCanvasConImagen(imagenActual, anchoPrevia, altoPrevia, canvasPrevia);
+  renderizarFiltro(copiaTrabajo, leerAjustes(), capasFiltroActivo, texturaActual(), anchoPrevia / imagenActual.naturalWidth, cachePreviaEnVivo);
   vistaPrevia.width = anchoPrevia;
   vistaPrevia.height = altoPrevia;
   contextoPrevia.drawImage(copiaTrabajo, 0, 0);
@@ -1339,9 +1405,15 @@ async function mostrarArchivo(archivo) {
     zonaArrastre.style.display = '';
     botonDescargar.disabled = true;
     canvasPrevia = null;
+    cachePreviaEnVivo.claridad = null;
+    cachePreviaEnVivo.dispersionBrillante = null;
+    cachePreviaEnVivo.dispersionBlur = null;
     return;
   }
   imagenActual = await cargarImagen(archivo);
+  cachePreviaEnVivo.claridad = null;
+  cachePreviaEnVivo.dispersionBrillante = null;
+  cachePreviaEnVivo.dispersionBlur = null;
 
   const escala = Math.min(1, LADO_MAXIMO_PREVIA / Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight));
   canvasPrevia = document.createElement('canvas');

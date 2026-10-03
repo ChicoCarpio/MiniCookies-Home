@@ -80,6 +80,40 @@ export function iniciarGeneradorStickers() {
   let canvasBase = null; // recorte limpio, sin filtro, ya escalado a LADO_MAXIMO
   let canvasFiltrado = null; // canvasBase con el filtro elegido ya aplicado
   let presetActual = 'ninguno';
+  // Canvases de repuesto reutilizados en cada actualizarFiltro() (la vista
+  // previa en vivo): evita crear canvases nuevos por cada ajuste. Las
+  // miniaturas de presets no los usan (se generan una sola vez por imagen,
+  // en lotes de fondo, no en un control que el usuario arrastra).
+  const scratchFiltro = ProcesarFiltros.crearScratch();
+
+  // A diferencia de los deslizadores de los editores de imagen,
+  // "Intensidad del filtro" y "Tamaño" de textura llamaban a actualizarFiltro()
+  // directo en cada evento 'input', sin agruparlos por fotograma: arrastrar
+  // el control podía correr el pipeline completo (varios canvases nuevos +
+  // getImageData/putImageData) muchas más veces de las que el navegador
+  // llega a pintar, sintiéndose pegado. Mismo límite de "una vez por
+  // requestAnimationFrame" que ya usan los editores.
+  let actualizarFiltroPendiente = null;
+  function programarActualizarFiltro() {
+    if (actualizarFiltroPendiente) return;
+    actualizarFiltroPendiente = requestAnimationFrame(() => {
+      actualizarFiltroPendiente = null;
+      actualizarFiltro();
+    });
+  }
+
+  // Mismo motivo que programarActualizarFiltro: el grosor/color del borde
+  // también corría dibujarSticker() (hasta 48 drawImage + 2 canvases nuevos
+  // por "estampado" del contorno, ver agrandarSilueta) en cada evento
+  // 'input' sin agrupar.
+  let dibujarStickerPendiente = null;
+  function programarDibujarSticker() {
+    if (dibujarStickerPendiente) return;
+    dibujarStickerPendiente = requestAnimationFrame(() => {
+      dibujarStickerPendiente = null;
+      dibujarSticker();
+    });
+  }
 
   function mostrarError(texto) {
     mensajeError.textContent = '❌ ' + texto;
@@ -332,7 +366,7 @@ export function iniciarGeneradorStickers() {
       const textura = preset.textura
         ? { ...preset.textura, intensidad: Number(entradaTextura.value) }
         : ProcesarFiltros.SIN_TEXTURA;
-      ProcesarFiltros.renderizarFiltro(copia, ajustes, preset.capasExtra, textura, 1);
+      ProcesarFiltros.renderizarFiltro(copia, ajustes, preset.capasExtra, textura, 1, scratchFiltro);
       restaurarAlfa(copia, alfaOriginal);
       canvasFiltrado = copia;
     }
@@ -448,18 +482,18 @@ export function iniciarGeneradorStickers() {
 
   entradaGrosor.addEventListener('input', () => {
     etiquetaGrosor.textContent = entradaGrosor.value;
-    dibujarSticker();
+    programarDibujarSticker();
   });
-  entradaColorBorde.addEventListener('input', dibujarSticker);
+  entradaColorBorde.addEventListener('input', programarDibujarSticker);
 
   entradaIntensidad.addEventListener('input', () => {
     valorIntensidad.textContent = entradaIntensidad.value + '%';
-    actualizarFiltro();
+    programarActualizarFiltro();
   });
 
   entradaTextura.addEventListener('input', () => {
     valorTextura.textContent = entradaTextura.value;
-    actualizarFiltro();
+    programarActualizarFiltro();
   });
 
   function elegirTextura(boton) {
@@ -471,7 +505,7 @@ export function iniciarGeneradorStickers() {
 
   entradaTamanoTextura.addEventListener('input', () => {
     valorTamanoTextura.textContent = entradaTamanoTextura.value;
-    actualizarFiltro();
+    programarActualizarFiltro();
   });
 
   galeriaTexturas.addEventListener('click', (e) => {
