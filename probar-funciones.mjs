@@ -675,6 +675,32 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'es y en, las dos direcciones';
   });
 
+  // Markdown → HTML: la vista previa se limpia (un .md puede traer HTML con
+  // código); el código que se copia queda tal cual lo genera marked.
+  await prueba('markdown-html: la vista previa no ejecuta scripts ni atributos onload', async () => {
+    await abrir('/herramientas/markdown-html.html'); await esperar(200);
+    const entrada = D().getElementById('entrada'), vista = D().getElementById('vistaPrevia');
+    entrada.value = '# Título de prueba\n\n<script>window.__pwn = 1</script>\n\n<svg onload="window.__pwn = 2"></svg>\n\nTexto normal.';
+    entrada.dispatchEvent(new (W().Event)('input', { bubbles: true }));
+    afirmar(await hasta(() => vista.textContent.includes('Texto normal'), 8000), 'no renderizó: ' + vista.textContent.slice(0, 80));
+    afirmar(!vista.querySelector('script') && !vista.querySelector('[onload]'), 'quedó código en la vista previa: ' + vista.innerHTML.slice(0, 120));
+    afirmar(!W().__pwn, 'el script de la vista previa se ejecutó');
+    return 'script y onload fuera; texto y título intactos';
+  });
+
+  // Ruta de imagen relativa: se copia tal cual (la ayuda de Dividir Markdown
+  // y las notas de la herramienta dependen de esto).
+  await prueba('markdown-html: imagen con ruta relativa se conserva tal cual', async () => {
+    await abrir('/herramientas/markdown-html.html'); await esperar(200);
+    const entrada = D().getElementById('entrada');
+    entrada.value = '![foto](fotos/vacaciones.png)';
+    entrada.dispatchEvent(new (W().Event)('input', { bubbles: true }));
+    await esperar(150);
+    const html = D().getElementById('vistaPrevia').innerHTML;
+    afirmar(html.includes('src="fotos/vacaciones.png"'), 'ruta alterada: ' + html.slice(0, 120));
+    return 'src="fotos/vacaciones.png" intacto';
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

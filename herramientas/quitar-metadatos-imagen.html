@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
   .metadatos { margin: 16px 0; }
@@ -32,6 +33,7 @@ window.i18nPagina = {
     'meta-camara': 'Cámara',
     'meta-fecha': 'Fecha',
     'meta-gps': 'Ubicación GPS',
+    'ayuda-metadatos': 'Se quitan todos los bloques de metadatos, no solo los que se muestran arriba: EXIF (cámara, fecha, GPS y la miniatura que guardan los celulares), XMP, IPTC, comentarios y los datos que algunos celulares agregan después de la imagen. En JPEG sin rotar, la imagen no se vuelve a comprimir: sus píxeles quedan iguales. Se conservan el perfil de color (ICC) y la orientación de píxeles. PNG y WebP se redibujan y se exportan de nuevo, así que tampoco conservan ningún metadato.',
     'titulo-pagina': 'Quitar metadatos EXIF de una foto gratis — Mini Cookies',
     'meta-descripcion': 'Sacá los metadatos EXIF (cámara, fecha, ubicación GPS) de una foto antes de compartirla, gratis y sin subirla a ningún servidor.',
   },
@@ -47,6 +49,7 @@ window.i18nPagina = {
     'meta-camara': 'Camera',
     'meta-fecha': 'Date',
     'meta-gps': 'GPS location',
+    'ayuda-metadatos': 'Every metadata block is removed, not only the ones listed above: EXIF (camera, date, GPS and the thumbnail phones store), XMP, IPTC, comments and any data some phones append after the image. For a JPEG that isn’t rotated, the image is not recompressed: its pixels stay exactly the same. The colour profile (ICC) and the pixel orientation are kept. PNG and WebP are redrawn and exported again, so they carry no metadata either.',
     'titulo-pagina': 'Remove EXIF metadata from a photo, free — Mini Cookies',
     'meta-descripcion': 'Strip the EXIF metadata (camera, date, GPS location) from a photo before you share it — free, and nothing is uploaded to a server.',
   }
@@ -82,6 +85,10 @@ window.i18nPagina = {
 
     <div class="controles">
       <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar sin metadatos</button>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-metadatos">Se quitan todos los bloques de metadatos, no solo los que se muestran arriba.</span>
+      </span>
     </div>
 
     <div class="resultado" id="resultado">
@@ -99,6 +106,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
