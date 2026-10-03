@@ -45,6 +45,11 @@ window.i18nComun = {
     'generando-miniaturas': 'Generando miniaturas...',
     'sufijo-pag': 'pág.',
     'quitar': 'Quitar',
+    // Lote: varios archivos a la vez (assets/js/lote-archivos.js).
+    'lote-progreso': 'Convirtiendo {n} de {total}...',
+    'lote-convertidos': '{ok} de {total} convertidos.',
+    'lote-fallos': 'No se pudieron convertir:',
+    'lote-enlace-zip': 'Descargar .zip con todos los archivos',
     // Botón "?" de assets/js/ayuda-tip.js (ver también assets/css/ayuda-tip.css).
     'ayuda-etiqueta': 'Ayuda',
     'vista-cuadricula': '▦ Cuadrícula',
@@ -109,6 +114,11 @@ window.i18nComun = {
     'generando-miniaturas': 'Generating thumbnails...',
     'sufijo-pag': 'p.',
     'quitar': 'Remove',
+    // Batch: several files at once (assets/js/lote-archivos.js).
+    'lote-progreso': 'Converting {n} of {total}...',
+    'lote-convertidos': '{ok} of {total} converted.',
+    'lote-fallos': 'Could not convert:',
+    'lote-enlace-zip': 'Download .zip with all the files',
     'ayuda-etiqueta': 'Help',
     'vista-cuadricula': '▦ Grid',
     'vista-lista': '☰ List',

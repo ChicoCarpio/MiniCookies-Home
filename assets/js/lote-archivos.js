@@ -42,5 +42,30 @@
     return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
   }
 
-  window.LoteArchivos = { convertirLote, zipDeResultados };
+  // Resumen dentro de un contenedor: cuántos salieron y, si hubo fallos, cuáles
+  // y por qué. Se arma con DOM y no con HTML: el motivo de un error puede traer
+  // texto del propio archivo.
+  function pintarResumen(contenedor, resultados, t) {
+    const ok = resultados.filter((r) => r.ok).length;
+    contenedor.innerHTML = '';
+    const resumen = document.createElement('p');
+    resumen.textContent = t('lote-convertidos').replace('{ok}', ok).replace('{total}', resultados.length);
+    contenedor.appendChild(resumen);
+    const fallos = resultados.filter((r) => !r.ok);
+    if (fallos.length) {
+      const titulo = document.createElement('p');
+      titulo.textContent = t('lote-fallos');
+      contenedor.appendChild(titulo);
+      const ul = document.createElement('ul');
+      fallos.forEach((r) => {
+        const li = document.createElement('li');
+        li.textContent = r.archivo.name + ': ' + r.error;
+        ul.appendChild(li);
+      });
+      contenedor.appendChild(ul);
+    }
+    contenedor.style.display = 'block';
+  }
+
+  window.LoteArchivos = { convertirLote, zipDeResultados, pintarResumen };
 })();
