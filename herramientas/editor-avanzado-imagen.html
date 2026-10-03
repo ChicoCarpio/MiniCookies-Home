@@ -1186,7 +1186,9 @@ function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
 function procesarCapaEnCanvas(canvas, capa, escala, cachePrevia = null) {
   const ajustes = capa.ajustes;
   const intensidadFiltro = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100))) / 100;
-  const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * escala);
+  // Porcentaje del ancho de este canvas, no píxeles fijos — mismo motivo que
+  // en el Editor de color: "escala" sigue sirviendo solo para el desenfoque.
+  const intensidadTextura = Math.max(1, ajustes.texturaIntensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
 
   if (ajustes.textura !== 'ninguno' && ajustes.texturaOrden === 'debajo') {
     EfectosTextura.aplicarCompleto(ajustes.textura, canvas.getContext('2d'), undefined, canvas.width, canvas.height, intensidadTextura, ajustes.texturaOpciones);

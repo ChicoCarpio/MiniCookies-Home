@@ -18,6 +18,18 @@
 // páginas que cargan ese módulo, ignoran la intensidad y reciben un último
 // argumento "opciones" (ver ese archivo).
 window.EfectosTextura = (function () {
+  // Ancho de referencia contra el que se calibra la intensidad/tamaño de
+  // toda textura con margen (difuminar, movimiento, esmerilado) o bloque
+  // (pixelar, puntos, grano/ruido): el deslizador pasa a representar un
+  // porcentaje del ancho de LA IMAGEN QUE SE ESTÉ PROCESANDO en cada momento
+  // (ancho / REFERENCIA_TEXTURA), no un número de píxeles fijo. Antes era un
+  // número de píxeles calibrado contra fotos de alrededor de este tamaño (el
+  // tope del generador de stickers): la misma posición del deslizador se
+  // veía mucho más débil en una foto grande que en un sticker, y hasta entre
+  // dos stickers de tamaño real distinto (uno recortado de una foto más
+  // chica que el tope de 512px).
+  const REFERENCIA_TEXTURA = 512;
+
   function pixelar(ctx, sx, sy, sw, sh, bloque) {
     const datos = ctx.getImageData(sx, sy, sw, sh);
     const d = datos.data;
@@ -326,5 +338,6 @@ window.EfectosTextura = (function () {
     pixelar, pixelarCirculos, ruido, grano, difuminar, direccional, esmerilado,
     aplicarRegion, aplicarCompleto, esMosaico, crearGaleria,
     NOMBRES: ['pixelar', 'pixelar-circulos', 'grano', 'difuminar', 'direccional', 'esmerilado'],
+    REFERENCIA_TEXTURA,
   };
 })();

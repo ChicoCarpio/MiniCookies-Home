@@ -1038,7 +1038,13 @@ const SIN_TEXTURA = { tipo: 'ninguno', intensidad: 18, orden: 'debajo' };
 // a un canvas más chico.
 function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, cachePrevia = null) {
   const ctx = canvas.getContext('2d');
-  const intensidadTextura = Math.max(1, textura.intensidad * escala);
+  // El deslizador "Tamaño" de la textura es un porcentaje del ancho de ESTE
+  // canvas (vista previa, descarga a resolución completa o miniatura — cada
+  // una ya tiene el ancho que le toca), no una cantidad de píxeles fija: así
+  // la misma posición del deslizador se ve igual de fuerte sin importar la
+  // resolución real de la foto. "escala" sigue siendo solo para el
+  // desenfoque, que si está pensado en píxeles de la imagen real.
+  const intensidadTextura = Math.max(1, textura.intensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
   if (textura.tipo !== 'ninguno' && textura.orden === 'debajo') {
     EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);
   }

@@ -320,7 +320,10 @@ window.ProcesarFiltros = (function () {
   // a un canvas más chico (usar 1 para tamaño completo).
   function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, scratch = null) {
     const ctx = canvas.getContext('2d');
-    const intensidadTextura = Math.max(1, textura.intensidad * escala);
+    // Porcentaje del ancho de este canvas, no píxeles fijos — ver
+    // EfectosTextura.REFERENCIA_TEXTURA. "escala" sigue sirviendo solo para
+    // el desenfoque.
+    const intensidadTextura = Math.max(1, textura.intensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
     if (textura.tipo !== 'ninguno' && textura.orden === 'debajo') {
       EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura);
     }

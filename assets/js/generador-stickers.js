@@ -325,21 +325,28 @@ export function iniciarGeneradorStickers() {
   // que se distingan entre sí.
   function actualizarMiniaturasTexturas() {
     if (!canvasBase) return;
-    const escala = TAMANO_MINIATURA_FISICO / Math.max(canvasBase.width, canvasBase.height);
-    const intensidad = Math.max(1, Number(entradaTamanoTextura.max) * escala);
     dibujarMiniaturasEnLotes('texturas', [...galeriaTexturas.querySelectorAll('.miniatura-textura')], (miniatura, boton) => {
-      aplicarTextura(miniatura, boton.dataset.textura, intensidad);
+      aplicarTextura(miniatura, boton.dataset.textura, Number(entradaTamanoTextura.max));
     });
   }
 
   // Aplica una textura sobre "canvas". Las de siempre pintan también sobre el
   // fondo vacío, así que se les devuelve la transparencia de antes; los
   // mosaicos y el cómic no la necesitan (y les recortaría las celdas del borde).
+  // "intensidad" es el valor crudo del deslizador "Tamaño" (un porcentaje del
+  // ancho de ESTE canvas, ver EfectosTextura.REFERENCIA_TEXTURA) — por eso
+  // esta función recibe siempre el canvas real a dibujar (el sticker o su
+  // miniatura, cada uno con su propio ancho) y no un número de píxeles ya
+  // calculado por el que llama: antes ese cálculo se hacía afuera contra el
+  // ancho del sticker (o de la miniatura) por separado, con su propia
+  // fórmula, y un sticker recortado más chico que el tope de 512px terminaba
+  // con la textura más débil que uno al tope, para el mismo deslizador.
   function aplicarTextura(canvas, tipo, intensidad, opciones) {
     if (tipo === 'ninguno') return;
     const ctx = canvas.getContext('2d');
+    const intensidadPx = Math.max(1, intensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
     const alfaAntes = EfectosTextura.esMosaico(tipo) ? null : ctx.getImageData(0, 0, canvas.width, canvas.height);
-    EfectosTextura.aplicarCompleto(tipo, ctx, undefined, canvas.width, canvas.height, intensidad, opciones);
+    EfectosTextura.aplicarCompleto(tipo, ctx, undefined, canvas.width, canvas.height, intensidadPx, opciones);
     if (alfaAntes) restaurarAlfa(canvas, alfaAntes);
   }
 
