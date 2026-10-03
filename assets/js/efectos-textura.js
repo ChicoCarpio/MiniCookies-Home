@@ -85,7 +85,10 @@ window.EfectosTextura = (function () {
   }
 
   // Pixela y suma ruido aleatorio por píxel — más difícil de "promediar"
-  // hacia atrás que un pixelado liso.
+  // hacia atrás que un pixelado liso. Usada SOLO por censurar-imagen.html: el
+  // pixelado ahí es la parte que realmente tapa la imagen (el ruido nomás
+  // dificulta reconstruirla), así que esta función no se toca aunque no se
+  // use como filtro decorativo en ningún otro lado — ver grano() abajo.
   function ruido(ctx, sx, sy, sw, sh, bloque) {
     pixelar(ctx, sx, sy, sw, sh, bloque);
     const datos = ctx.getImageData(sx, sy, sw, sh);
@@ -100,6 +103,48 @@ window.EfectosTextura = (function () {
     ctx.putImageData(datos, sx, sy);
   }
 
+  // Grano fino: el ruido de arriba, pero SIN pixelar antes — ruido por píxel
+  // derecho, para un efecto de grano de película en vez de mosaico con
+  // estática. Es la textura "Ruido" de los editores y el generador de
+  // stickers (ver CLAVES_NOMBRE/crearGaleria más abajo); censurar-imagen.html
+  // sigue usando ruido() tal cual, sin pasar por acá.
+  function grano(ctx, sx, sy, sw, sh, fuerza) {
+    const datos = ctx.getImageData(sx, sy, sw, sh);
+    const d = datos.data;
+    const amplitud = Math.min(90, fuerza * 2.2);
+    for (let i = 0; i < d.length; i += 4) {
+      const n = (Math.random() - 0.5) * 2 * amplitud;
+      d[i] = Math.min(255, Math.max(0, d[i] + n));
+      d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + n));
+      d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + n));
+    }
+    ctx.putImageData(datos, sx, sy);
+  }
+
+  // Cuando el margen de arriba se sale de los límites reales de "fuente"
+  // (pasa siempre que sx,sy,sw,sh es la imagen ENTERA, o cerca de su borde:
+  // ahí no hay nada más que recortar), ese excedente quedaba transparente en
+  // canvasChico/base — el desenfoque mezclaba esa "nada" con los píxeles
+  // reales cercanos y oscurecía/atenuaba una franja del ancho del margen en
+  // todo el borde de la imagen (mucho más visible en el generador de
+  // stickers, donde el margen puede llegar a ser casi la mitad del lado del
+  // sticker). Esto estira el borde real hacia ese excedente en vez de
+  // dejarlo vacío, sin tocar la parte del margen que sí cae dentro de
+  // "fuente" (ahí sigue siendo contexto real, como antes — por eso
+  // censurar-imagen.html, que sí suele tener ese contexto real alrededor de
+  // la zona a tapar, no cambia de resultado).
+  function extenderBordes(ctxChico, anchoFuente, altoFuente, sx, sy, sw, sh, margen) {
+    const c = ctxChico.canvas;
+    const faltaIzq = Math.max(0, margen - sx);
+    const faltaDer = Math.max(0, (sx + sw + margen) - anchoFuente);
+    const faltaArriba = Math.max(0, margen - sy);
+    const faltaAbajo = Math.max(0, (sy + sh + margen) - altoFuente);
+    if (faltaIzq > 0) ctxChico.drawImage(c, faltaIzq, 0, 1, c.height, 0, 0, faltaIzq, c.height);
+    if (faltaDer > 0) ctxChico.drawImage(c, c.width - faltaDer - 1, 0, 1, c.height, c.width - faltaDer, 0, faltaDer, c.height);
+    if (faltaArriba > 0) ctxChico.drawImage(c, 0, faltaArriba, c.width, 1, 0, 0, c.width, faltaArriba);
+    if (faltaAbajo > 0) ctxChico.drawImage(c, 0, c.height - faltaAbajo - 1, c.width, 1, 0, c.height - faltaAbajo, c.width, faltaAbajo);
+  }
+
   // "fuente" es de donde se toman los píxeles a desenfocar. Se recorta con
   // un margen extra antes de desenfocar y se vuelve a recortar al tamaño
   // real al pegar, así el desenfoque no aclara los bordes trayendo "aire" de
@@ -111,6 +156,7 @@ window.EfectosTextura = (function () {
     canvasChico.height = sh + margen * 2;
     const ctxChico = canvasChico.getContext('2d');
     ctxChico.drawImage(fuente, sx - margen, sy - margen, sw + margen * 2, sh + margen * 2, 0, 0, sw + margen * 2, sh + margen * 2);
+    extenderBordes(ctxChico, fuente.width, fuente.height, sx, sy, sw, sh, margen);
 
     const canvasBorroso = document.createElement('canvas');
     canvasBorroso.width = canvasChico.width;
@@ -132,6 +178,7 @@ window.EfectosTextura = (function () {
     canvasChico.height = sh + margen * 2;
     const ctxChico = canvasChico.getContext('2d');
     ctxChico.drawImage(fuente, sx - margen, sy - margen, sw + margen * 2, sh + margen * 2, 0, 0, sw + margen * 2, sh + margen * 2);
+    extenderBordes(ctxChico, fuente.width, fuente.height, sx, sy, sw, sh, margen);
 
     const canvasSmear = document.createElement('canvas');
     canvasSmear.width = canvasChico.width;
@@ -159,6 +206,7 @@ window.EfectosTextura = (function () {
     base.height = sh + margen * 2;
     const ctxBase = base.getContext('2d');
     ctxBase.drawImage(fuente, sx - margen, sy - margen, sw + margen * 2, sh + margen * 2, 0, 0, sw + margen * 2, sh + margen * 2);
+    extenderBordes(ctxBase, fuente.width, fuente.height, sx, sy, sw, sh, margen);
 
     const suave = document.createElement('canvas');
     suave.width = base.width;
@@ -192,7 +240,7 @@ window.EfectosTextura = (function () {
     ctxDestino.drawImage(resultado, sx, sy);
   }
 
-  const EN_LUGAR = { pixelar: pixelar, 'pixelar-circulos': pixelarCirculos, ruido: ruido };
+  const EN_LUGAR = { pixelar: pixelar, 'pixelar-circulos': pixelarCirculos, ruido: ruido, grano: grano };
   const CON_FUENTE = { direccional: direccional, esmerilado: esmerilado };
 
   // ¿Es un estilo de efectos-mosaico.js? (deja transparente lo que no es figura)
@@ -229,9 +277,12 @@ window.EfectosTextura = (function () {
   // botones y sus nombres estaban escritos a mano en cada página. Los nombres
   // viven acá (se suman a los textos de la página, que mandan); los de
   // efectos-mosaico.js los trae ese módulo con la clave 'textura-' + tipo.
+  // "ruido" (pixela + ruido) no se ofrece acá a propósito: es solo para
+  // censurar-imagen.html. La textura "Ruido" de la galería usa grano() (ruido
+  // de grano fino, sin pixelar) — mismo texto, mismo lugar, otra función.
   const CLAVES_NOMBRE = {
     ninguno: 'textura-ninguno', pixelar: 'textura-pixelar', 'pixelar-circulos': 'textura-puntos',
-    ruido: 'textura-ruido', difuminar: 'textura-difuminar', direccional: 'textura-movimiento', esmerilado: 'textura-esmerilado',
+    grano: 'textura-ruido', difuminar: 'textura-difuminar', direccional: 'textura-movimiento', esmerilado: 'textura-esmerilado',
   };
   const TEXTOS = {
     es: {
@@ -272,8 +323,8 @@ window.EfectosTextura = (function () {
   }
 
   return {
-    pixelar, pixelarCirculos, ruido, difuminar, direccional, esmerilado,
+    pixelar, pixelarCirculos, ruido, grano, difuminar, direccional, esmerilado,
     aplicarRegion, aplicarCompleto, esMosaico, crearGaleria,
-    NOMBRES: ['pixelar', 'pixelar-circulos', 'ruido', 'difuminar', 'direccional', 'esmerilado'],
+    NOMBRES: ['pixelar', 'pixelar-circulos', 'grano', 'difuminar', 'direccional', 'esmerilado'],
   };
 })();

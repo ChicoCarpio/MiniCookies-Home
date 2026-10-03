@@ -164,9 +164,11 @@ window.i18nPagina = {
     'sel-toda': 'Toda la imagen',
     'sel-pincel': 'Pincel',
     'sel-color': 'Color',
+    'modo-pincel-pintar': 'Pintar',
+    'modo-pincel-borrar': 'Borrar',
     'sl-pincel': 'Tamaño de pincel',
     'sl-dureza': 'Dureza (bordes)',
-    'boton-borrar-mascara': 'Borrar lo pintado',
+    'boton-borrar-mascara': 'Borrar todo lo pintado',
     'ayuda-color': 'Hacé clic en la imagen para elegir el color ',
     'sl-tolerancia': 'Tolerancia',
     'resumen-filtro': 'Filtro',
@@ -252,9 +254,11 @@ window.i18nPagina = {
     'sel-toda': 'The whole image',
     'sel-pincel': 'Brush',
     'sel-color': 'Color',
+    'modo-pincel-pintar': 'Paint',
+    'modo-pincel-borrar': 'Erase',
     'sl-pincel': 'Brush size',
     'sl-dureza': 'Hardness (edges)',
-    'boton-borrar-mascara': 'Clear what you painted',
+    'boton-borrar-mascara': 'Clear everything painted',
     'ayuda-color': 'Click the image to pick the color ',
     'sl-tolerancia': 'Tolerance',
     'resumen-filtro': 'Filter',
@@ -383,6 +387,10 @@ window.i18nPagina = {
               </div>
 
               <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
+                <div class="modos" id="modosPincelAvanzado">
+                  <button type="button" class="activo" data-modo-pincel="pintar" data-i18n="modo-pincel-pintar">Pintar</button>
+                  <button type="button" data-modo-pincel="borrar" data-i18n="modo-pincel-borrar">Borrar</button>
+                </div>
                 <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="sl-pincel">Tamaño de pincel</span><span id="valorPincelAvanzado">30px</span></span>
                   <input type="range" id="tamanoPincelAvanzado" min="6" max="120" value="30">
@@ -391,7 +399,7 @@ window.i18nPagina = {
                   <span class="etiqueta-deslizador"><span data-i18n="sl-dureza">Dureza (bordes)</span><span id="valorDurezaPincel">70%</span></span>
                   <input type="range" id="durezaPincel" min="10" max="100" value="70">
                 </label>
-                <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar lo pintado</button>
+                <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar todo lo pintado</button>
               </div>
 
               <div id="controlesColorAvanzado" class="controles controles-apilados" style="display:none;">
@@ -1873,7 +1881,12 @@ document.querySelectorAll('#modosSeleccionCapa button').forEach((boton) => {
   boton.addEventListener('click', () => {
     const capa = capaActiva();
     if (!capa) return;
-    capa.seleccion = boton.dataset.seleccion;
+    const modo = boton.dataset.seleccion;
+    // Un segundo clic sobre "Pincel"/"Color" ya activos los apaga (vuelve a
+    // "Toda la imagen"): sin esto, Pincel se quedaba siempre escuchando el
+    // puntero y un gesto de pellizco/paneo para hacer zoom terminaba
+    // pintando un trazo en vez de acercar la imagen.
+    capa.seleccion = (capa.seleccion === modo && modo !== 'toda') ? 'toda' : modo;
     actualizarControlesSeleccion();
     programarRenderizado();
   });
@@ -1906,6 +1919,14 @@ canvasTrabajo.addEventListener('click', (e) => {
 let pintando = false;
 let ultimoPuntoPincel = null;
 let mascaraAntesDelTrazo = null;
+let modoPincelAvanzado = 'pintar'; // pintar | borrar — mismo tamaño/dureza para los dos
+
+document.querySelectorAll('#modosPincelAvanzado button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    modoPincelAvanzado = boton.dataset.modoPincel;
+    document.querySelectorAll('#modosPincelAvanzado button').forEach((b) => b.classList.toggle('activo', b === boton));
+  });
+});
 
 // --- Arrastrar para mover la imagen (cuando el pincel NO está activo) ---
 let paneando = false;
@@ -1939,12 +1960,17 @@ function durezaPincelActual() { return parseInt(elDurezaPincel.value, 10); }
 
 // dureza 100 = borde duro (círculo sólido, más rápido). Menos que eso = un
 // degradado radial que se desvanece hacia el borde, para un pincel suave.
-function pintarPunto(ctx, p, radio, dureza) {
+// modo "borrar": mismo dibujo, pero restando del alfa de la máscara en vez de
+// sumarle (destination-out) — así el borrador respeta el mismo tamaño/dureza
+// que pintar, incluido el degradado suave del borde.
+function pintarPunto(ctx, p, radio, dureza, modo = 'pintar') {
+  ctx.globalCompositeOperation = modo === 'borrar' ? 'destination-out' : 'source-over';
   if (dureza >= 100) {
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(p.x, p.y, radio, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
     return;
   }
   const radioInterior = Math.max(0, radio * (dureza / 100));
@@ -1955,18 +1981,21 @@ function pintarPunto(ctx, p, radio, dureza) {
   ctx.beginPath();
   ctx.arc(p.x, p.y, radio, 0, Math.PI * 2);
   ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 // Con borde duro se puede usar un trazo grueso normal (rápido y sin costuras).
 // Con borde suave, un solo trazo con gradiente perpendicular no es posible en
 // canvas 2D, así que se "estampan" puntos suaves seguidos a lo largo del
 // segmento — el solape entre estampas da una franja pareja.
-function pintarTrazo(ctx, a, b, radio, dureza) {
+function pintarTrazo(ctx, a, b, radio, dureza, modo = 'pintar') {
   if (dureza >= 100) {
+    ctx.globalCompositeOperation = modo === 'borrar' ? 'destination-out' : 'source-over';
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = radio * 2;
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.globalCompositeOperation = 'source-over';
     return;
   }
   const distancia = Math.hypot(b.x - a.x, b.y - a.y);
@@ -1974,7 +2003,7 @@ function pintarTrazo(ctx, a, b, radio, dureza) {
   const pasos = Math.max(1, Math.ceil(distancia / paso));
   for (let i = 0; i <= pasos; i++) {
     const t = i / pasos;
-    pintarPunto(ctx, { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, radio, dureza);
+    pintarPunto(ctx, { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, radio, dureza, modo);
   }
 }
 
@@ -2037,7 +2066,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   mascaraAntesDelTrazo.getContext('2d').drawImage(mascara, 0, 0);
   canvasTrabajo.setPointerCapture(e.pointerId);
   ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
-  pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual());
+  pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual(), modoPincelAvanzado);
   marcarMascaraSucia(capa);
   actualizarMiniaturaCapa(capa);
   programarRenderizado();
@@ -2059,7 +2088,7 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
   const mascara = mascaraDeCapaActiva();
   if (!mascara) return;
   const punto = coordenadasEnCanvasTrabajo(e);
-  pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual());
+  pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual(), modoPincelAvanzado);
   ultimoPuntoPincel = punto;
   marcarMascaraSucia(capaActiva());
   programarRenderizado();
