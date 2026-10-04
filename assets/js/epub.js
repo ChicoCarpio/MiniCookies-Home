@@ -130,7 +130,7 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
     <dc:identifier id="uid">${escaparXmlEpub(uuid)}</dc:identifier>
     <dc:title>${escaparXmlEpub(titulo || 'Documento')}</dc:title>
     <dc:language>${escaparXmlEpub(idioma || 'es')}</dc:language>
-    <dc:creator>${escaparXmlEpub(autor || 'Herramientas Ofimáticas')}</dc:creator>
+    ${autor ? `<dc:creator>${escaparXmlEpub(autor)}</dc:creator>` : ''}
     <meta property="dcterms:modified">${fecha}</meta>
   </metadata>
   <manifest>${manifestItems.join('')}</manifest>
