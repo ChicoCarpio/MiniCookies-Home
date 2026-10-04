@@ -288,7 +288,10 @@ desenfoque). Lo usan el Editor de color, el Editor avanzado (una vez por capa,
 con `procesarCapaEnCanvas` como adaptador) y el generador de stickers. Hasta el
 2026-10-04 cada editor tenía su copia, y se habían separado: la mezcla de
 "Intensidad del filtro" volvía más opacas las zonas semitransparentes en el
-Editor de color y no en el avanzado. Un ajuste o filtro nuevo se agrega ahí,
+Editor de color y no en el avanzado. Tanto la intensidad como las capas
+extra (`FiltrosColor.aplicarCapasExtra`) mezclan píxel a píxel y no tocan el
+alfa: dibujar una capa encima con `source-over` suma opacidad (con "cine", un
+píxel de alfa 128 llegaba a 229). Un ajuste o filtro nuevo se agrega ahí,
 nunca en una página. Para la vista previa en vivo el motor recibe `scratch`
 (canvases de repuesto) y `memo` (lo que depende solo de la imagen); quien llama
 vacía el memo cuando cambia la imagen de entrada.
@@ -584,11 +587,6 @@ en ventana angosta son donde aparecen los problemas de este patrón.
   `.vista-previa-diapositivas`) ya comparten su código. Queda CSS propio en
   varias herramientas, pero ya no hay bloques copiados entre páginas: lo que
   queda es de cada una. El E también: `.tabla-creditos` y `.texto-actualizacion`.
-- **Las capas extra de un filtro suben la opacidad** de las zonas
-  semitransparentes (viñeta de "vintage": alfa 128 → 143), porque se dibujan
-  encima con `source-over`. Pasa igual en los dos editores; el generador de
-  stickers no lo nota porque restaura el alfa original. Se arregla en
-  `FiltrosColor.aplicarCapasExtra`.
 - `assets/js/app-movil.js` conserva en `ICONOS` un mapa por texto visible, como
   respaldo de grupos sin `data-i18n`. Es frágil por idioma; se puede quitar
   cuando todos los grupos tengan clave.

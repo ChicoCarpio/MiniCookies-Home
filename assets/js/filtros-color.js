@@ -449,11 +449,12 @@ const FiltrosColor = (() => {
     return t * t * (3 - 2 * t);
   }
 
-  function generarMascara(canvasOrigen, mascara) {
+  // Cuánto se aplica la capa en cada píxel (0-255, uno por píxel), calculado
+  // sobre la imagen sin ajustes.
+  function valoresMascara(canvasOrigen, mascara) {
     const ancho = canvasOrigen.width, alto = canvasOrigen.height;
     const d = canvasOrigen.getContext('2d').getImageData(0, 0, ancho, alto).data;
-    const salida = new ImageData(ancho, alto);
-    const o = salida.data;
+    const valores = new Uint8ClampedArray(ancho * alto);
     const cx = ancho / 2, cy = alto / 2, radioMaximo = Math.hypot(cx, cy);
     for (let y = 0; y < alto; y++) {
       for (let x = 0; x < ancho; x++) {
@@ -486,9 +487,20 @@ const FiltrosColor = (() => {
           if (mascara.luzMinima !== undefined) alfa *= transicion(mascara.luzMinima - 0.08, mascara.luzMinima + 0.08, hsl.l);
         }
         if (mascara.invertir) alfa = 1 - alfa;
-        o[i] = 255; o[i + 1] = 255; o[i + 2] = 255;
-        o[i + 3] = Math.round(alfa * 255);
+        valores[y * ancho + x] = Math.round(alfa * 255);
       }
+    }
+    return valores;
+  }
+
+  // La misma máscara como canvas blanco con transparencia.
+  function generarMascara(canvasOrigen, mascara) {
+    const ancho = canvasOrigen.width, alto = canvasOrigen.height;
+    const valores = valoresMascara(canvasOrigen, mascara);
+    const salida = new ImageData(ancho, alto);
+    const o = salida.data;
+    for (let p = 0; p < valores.length; p++) {
+      o[p * 4] = 255; o[p * 4 + 1] = 255; o[p * 4 + 2] = 255; o[p * 4 + 3] = valores[p];
     }
     const canvas = document.createElement('canvas');
     canvas.width = ancho; canvas.height = alto;
@@ -505,20 +517,32 @@ const FiltrosColor = (() => {
 
   // Aplica las capas extra de un filtro sobre "canvas" (que ya tiene los
   // ajustes principales). "base" es la imagen SIN ajustes, sobre la que se
-  // calculan las máscaras. procesar(canvas, ajustes) es el procesarCanvas de
-  // cada editor, que completa los ajustes con sus neutros.
+  // calculan las máscaras. procesar(canvas, ajustes) es el
+  // procesarCanvas del motor (procesar-filtros.js), que completa los ajustes
+  // con sus neutros.
+  //
+  // Cada capa se mezcla píxel a píxel según su máscara, sin tocar el alfa.
+  // Antes se recortaba con la máscara y se dibujaba encima (source-over), y
+  // eso suma la opacidad de las dos: una zona semitransparente de un PNG
+  // quedaba más opaca (viñeta de "vintage": alfa 128 → 143), aun sin máscara.
   function aplicarCapasExtra(canvas, base, capas, procesar) {
     const ctx = canvas.getContext('2d');
+    const ancho = canvas.width, alto = canvas.height;
     for (const capa of capas) {
       const procesado = copiarCanvas(canvas);
       procesar(procesado, capa.ajustes);
-      if (capa.mascara) {
-        const ctxProcesado = procesado.getContext('2d');
-        ctxProcesado.globalCompositeOperation = 'destination-in';
-        ctxProcesado.drawImage(generarMascara(base, capa.mascara), 0, 0);
-        ctxProcesado.globalCompositeOperation = 'source-over';
+      const nuevo = procesado.getContext('2d').getImageData(0, 0, ancho, alto).data;
+      const actual = ctx.getImageData(0, 0, ancho, alto);
+      const d = actual.data;
+      const valores = capa.mascara ? valoresMascara(base, capa.mascara) : null;
+      for (let p = 0, i = 0; p < ancho * alto; p++, i += 4) {
+        const m = valores ? valores[p] / 255 : 1;
+        if (m === 0) continue;
+        d[i] += (nuevo[i] - d[i]) * m;
+        d[i + 1] += (nuevo[i + 1] - d[i + 1]) * m;
+        d[i + 2] += (nuevo[i + 2] - d[i + 2]) * m;
       }
-      ctx.drawImage(procesado, 0, 0);
+      ctx.putImageData(actual, 0, 0);
     }
   }
 
