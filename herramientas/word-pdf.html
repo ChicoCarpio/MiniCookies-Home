@@ -24,11 +24,6 @@
   .vista-previa-documento img { max-width: 100%; }
   .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
   .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
-  @media print {
-    body > *:not(#areaImprimir) { display: none !important; }
-    #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
-  }
-  #areaImprimir { display: none; }
 </style>
 <script>
 window.i18nPagina = {
@@ -39,11 +34,15 @@ window.i18nPagina = {
     'intro': 'Convertí un Word a PDF conservando el formato, o un PDF a Word, según lo que necesites.',
     'dir-word-a-pdf': 'Word → PDF',
     'dir-pdf-a-word': 'PDF → Word',
-    'aviso-vista-previa': 'Vas a ver una vista previa con el formato (títulos, negritas, listas, tablas) — desde ahí usás "Guardar como PDF" del diálogo de impresión del navegador, así se conserva el formato real.',
+    'aviso-vista-previa': 'Vas a ver una vista previa con el formato del Word; después, "Descargar PDF" baja un PDF por documento (con varios, en un .zip).',
     'zona-arrastre-word': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
     'boton-a-pdf': 'Generar vista previa',
     'boton-a-pdf-generando': 'Generando...',
-    'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
+    'boton-descargar-pdf': '⬇️ Descargar PDF',
+    'descargar-pdf-generando': 'Generando PDF...',
+    'enlace-descargar-pdf': 'Descargar PDF',
+    'enlace-descargar-zip-pdf': 'Descargar .zip con los PDF',
+    'error-generar-pdf': 'No se pudo generar el PDF',
     'aviso-solo-texto': '⚠️ Solo se extrae el texto del PDF (sin columnas, imágenes ni tablas) — un Word real armado desde cero a partir del texto, con párrafos separados por página.',
     'zona-arrastre-pdf': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
     'campo-nombre': 'Nombre del archivo',
@@ -64,11 +63,15 @@ window.i18nPagina = {
     'intro': 'Convert a Word document to PDF keeping the formatting, or a PDF to Word, whichever you need.',
     'dir-word-a-pdf': 'Word → PDF',
     'dir-pdf-a-word': 'PDF → Word',
-    'aviso-vista-previa': 'You’ll see a preview with the formatting (headings, bold text, lists, tables) — from there use "Save as PDF" in your browser’s print dialog, so the real formatting is kept.',
+    'aviso-vista-previa': 'You’ll see a preview with the Word formatting; then "Download PDF" gives you one PDF per document (several come in a .zip).',
     'zona-arrastre-word': '📝 Drag your .docx document here or click to choose it',
     'boton-a-pdf': 'Generate preview',
     'boton-a-pdf-generando': 'Generating...',
-    'boton-imprimir': '🖨️ Save as PDF / Print',
+    'boton-descargar-pdf': '⬇️ Download PDF',
+    'descargar-pdf-generando': 'Generating PDF...',
+    'enlace-descargar-pdf': 'Download PDF',
+    'enlace-descargar-zip-pdf': 'Download .zip with the PDFs',
+    'error-generar-pdf': 'Couldn’t generate the PDF',
     'aviso-solo-texto': '⚠️ Only the PDF’s text is extracted (no columns, images or tables) — a real Word document built from scratch from the text, with paragraphs split by page.',
     'zona-arrastre-pdf': '📄 Drag your PDF here or click to choose it',
     'campo-nombre': 'File name',
@@ -109,8 +112,8 @@ window.i18nPagina = {
     <!-- Word → PDF -->
     <div id="panelWordAPdf" data-panel-direccion="word-a-pdf">
       <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-vista-previa">
-        Vas a ver una vista previa con el formato (títulos, negritas, listas, tablas) — desde ahí usás
-        "Guardar como PDF" del diálogo de impresión del navegador, así se conserva el formato real.
+        Vas a ver una vista previa con el formato del Word; después, "Descargar PDF" baja un PDF por
+        documento (con varios, en un .zip).
       </p>
       <div class="zona-arrastre" id="zonaArrastreWord">
         <span data-i18n="zona-arrastre-word">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
@@ -121,9 +124,13 @@ window.i18nPagina = {
         <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Generar vista previa</button>
       </div>
       <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
-      <div class="controles" id="controlesImprimir" style="display:none;">
-        <button class="boton" id="botonImprimir" type="button" data-i18n="boton-imprimir">🖨️ Guardar como PDF / Imprimir</button>
+      <div class="controles" id="controlesDescarga" style="display:none;">
+        <button class="boton" id="botonDescargarPdf" type="button" data-i18n="boton-descargar-pdf">⬇️ Descargar PDF</button>
       </div>
+      <div class="resultado" id="resultadoPdf">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="documento.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
+      </div>
+      <div id="resumenDescargaPdf" class="resultado" style="display:none; margin-top:20px;"></div>
       <div class="vista-previa-documento" id="vistaPrevia" style="display:none;"></div>
     </div>
 
@@ -160,7 +167,8 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<div id="areaImprimir"></div>
+<!-- Fuera de pantalla: el navegador mide acá el documento para escribir el PDF (html-a-pdf.js). -->
+<div id="lienzoPdf" style="position:fixed; left:-30000px; top:0;" aria-hidden="true"></div>
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
@@ -175,6 +183,8 @@ window.i18nPagina = {
 <script src="../vendor/docx-preview/0.4.1/docx-preview.min.js"></script>
 <script>window.docxPreview = window.docx; window.docx = window.docxLibreria;</script>
 <script src="../assets/js/lote-archivos.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/html-a-pdf.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelWordAPdf = document.getElementById('panelWordAPdf');
@@ -187,10 +197,8 @@ const entradaWord = document.getElementById('entradaWord');
 const listaWord = document.getElementById('listaWord');
 const botonAPdf = document.getElementById('botonAPdf');
 const advertencias = document.getElementById('advertencias');
-const controlesImprimir = document.getElementById('controlesImprimir');
+const controlesDescarga = document.getElementById('controlesDescarga');
 const vistaPrevia = document.getElementById('vistaPrevia');
-const botonImprimir = document.getElementById('botonImprimir');
-const areaImprimir = document.getElementById('areaImprimir');
 
 let wordsActuales = [];
 
@@ -204,7 +212,7 @@ function mostrarArchivosWord(archivos) {
   });
   botonAPdf.disabled = archivos.length === 0;
   vistaPrevia.style.display = 'none';
-  controlesImprimir.style.display = 'none';
+  controlesDescarga.style.display = 'none';
   advertencias.style.display = 'none';
 }
 
@@ -215,13 +223,14 @@ function elegirArchivosWord(listaFileList) {
 
 conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
 
-// Varios documentos se imprimen en un solo PDF: cada uno empieza en una página
-// nueva, así se pueden separar después con "Dividir PDF".
+// Un PDF por documento: ver botonDescargarPdf.
+let documentosHtml = [];
+
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
   botonAPdf.textContent = t('boton-a-pdf-generando');
   try {
-    let htmlTotal = '';
+    documentosHtml = [];
     for (let i = 0; i < wordsActuales.length; i++) {
       botonAPdf.textContent = wordsActuales.length > 1
         ? t('lote-progreso').replace('{n}', i + 1).replace('{total}', wordsActuales.length)
@@ -233,15 +242,15 @@ botonAPdf.addEventListener('click', async () => {
       const cuerpo = document.createElement('div');
       const estilos = document.createElement('div');
       await docxPreview.renderAsync(wordsActuales[i], cuerpo, estilos, { inWrapper: true, useBase64URL: true });
-      const salto = i > 0 ? ' style="break-before: page;"' : '';
-      htmlTotal += `<section${salto}>${estilos.innerHTML}${sanitizarHtml(cuerpo.innerHTML)}</section>`;
+      documentosHtml.push({
+        nombre: wordsActuales[i].name.replace(/\.docx$/i, ''),
+        html: `<section>${estilos.innerHTML}${sanitizarHtml(cuerpo.innerHTML)}</section>`,
+      });
     }
 
-    const htmlLimpio = htmlTotal;
-    vistaPrevia.innerHTML = htmlLimpio;
+    vistaPrevia.innerHTML = documentosHtml.map((d) => d.html).join('');
     vistaPrevia.style.display = 'block';
-    areaImprimir.innerHTML = htmlLimpio;
-    controlesImprimir.style.display = 'flex';
+    controlesDescarga.style.display = 'flex';
   } catch (error) {
     alert(t('error-vista-previa') + ': ' + error.message);
   } finally {
@@ -250,7 +259,69 @@ botonAPdf.addEventListener('click', async () => {
   }
 });
 
-botonImprimir.addEventListener('click', () => window.print());
+// Descargar sin imprimir: cada documento se vuelve a dibujar fuera de pantalla
+// y html-a-pdf.js escribe un PDF por documento (varios: .zip).
+const botonDescargarPdf = document.getElementById('botonDescargarPdf');
+const resultadoPdf = document.getElementById('resultadoPdf');
+const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
+const resumenDescargaPdf = document.getElementById('resumenDescargaPdf');
+const lienzoPdf = document.getElementById('lienzoPdf');
+
+async function documentoAPdf(documento) {
+  lienzoPdf.innerHTML = documento.html;
+  await Promise.all([...lienzoPdf.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
+  await document.fonts.ready;
+  // docx-preview arma un <section class="docx"> por sección del Word, con el
+  // tamaño de hoja como ancho/alto mínimo y los márgenes como relleno.
+  const paginas = [...lienzoPdf.querySelectorAll('section.docx')].map((seccion) => {
+    const e = getComputedStyle(seccion);
+    return {
+      elemento: seccion,
+      anchoPx: parseFloat(e.width),
+      altoPx: parseFloat(e.minHeight) || seccion.getBoundingClientRect().height,
+      margenArribaPx: parseFloat(e.paddingTop),
+      margenAbajoPx: parseFloat(e.paddingBottom),
+    };
+  });
+  const bytes = await HtmlAPdf.convertir(paginas, { titulo: documento.nombre });
+  lienzoPdf.innerHTML = '';
+  return new Blob([bytes], { type: 'application/pdf' });
+}
+
+botonDescargarPdf.addEventListener('click', async () => {
+  botonDescargarPdf.disabled = true;
+  botonDescargarPdf.textContent = t('descargar-pdf-generando');
+  resultadoPdf.classList.remove('visible');
+  resumenDescargaPdf.style.display = 'none';
+  try {
+    if (documentosHtml.length === 1) {
+      const blob = await documentoAPdf(documentosHtml[0]);
+      enlaceDescargaPdf.href = URL.createObjectURL(blob);
+      enlaceDescargaPdf.download = documentosHtml[0].nombre + '.pdf';
+      enlaceDescargaPdf.textContent = t('enlace-descargar-pdf');
+    } else {
+      // convertirLote solo usa el .name de cada entrada (para el resumen).
+      const entradas = documentosHtml.map((documento) => ({ name: documento.nombre + '.docx', documento }));
+      const resultados = await LoteArchivos.convertirLote(entradas, async (entrada) => ({
+        nombre: entrada.documento.nombre + '.pdf',
+        blob: await documentoAPdf(entrada.documento),
+      }), (i, total) => {
+        botonDescargarPdf.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaPdf.href = URL.createObjectURL(zip);
+      enlaceDescargaPdf.download = 'pdf-desde-word.zip';
+      enlaceDescargaPdf.textContent = t('enlace-descargar-zip-pdf');
+      LoteArchivos.pintarResumen(resumenDescargaPdf, resultados, t);
+    }
+    resultadoPdf.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar-pdf') + ': ' + error.message);
+  } finally {
+    botonDescargarPdf.disabled = false;
+    botonDescargarPdf.textContent = t('boton-descargar-pdf');
+  }
+});
 
 // --- PDF → Word ---
 const zonaArrastrePdf = document.getElementById('zonaArrastrePdf');
