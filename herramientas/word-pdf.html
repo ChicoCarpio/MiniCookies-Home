@@ -43,7 +43,7 @@ window.i18nPagina = {
     'enlace-descargar-pdf': 'Descargar PDF',
     'enlace-descargar-zip-pdf': 'Descargar .zip con los PDF',
     'error-generar-pdf': 'No se pudo generar el PDF',
-    'aviso-solo-texto': '⚠️ Solo se extrae el texto del PDF (sin columnas, imágenes ni tablas) — un Word real armado desde cero a partir del texto, con párrafos separados por página.',
+    'aviso-pdf-a-word': 'El Word conserva el formato del PDF: estilos de letra, párrafos, imágenes y saltos de página. Las tablas salen como texto con tabulaciones, y una página sin texto real (un escaneo) entra como imagen.',
     'zona-arrastre-pdf': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
     'campo-nombre': 'Nombre del archivo',
     'boton-a-word': 'Convertir a Word',
@@ -52,7 +52,6 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar Word',
     'advertencias-texto': '⚠️ {n} advertencia(s) — algunos elementos pueden no verse exactamente igual que en Word.',
     'error-vista-previa': 'No se pudo generar la vista previa',
-    'error-sin-texto': 'No se encontró texto en el PDF (¿es un escaneo?).',
     'error-generar-doc': 'No se pudo generar el documento',
     'nombre-defecto': 'documento'
   },
@@ -72,7 +71,7 @@ window.i18nPagina = {
     'enlace-descargar-pdf': 'Download PDF',
     'enlace-descargar-zip-pdf': 'Download .zip with the PDFs',
     'error-generar-pdf': 'Couldn’t generate the PDF',
-    'aviso-solo-texto': '⚠️ Only the PDF’s text is extracted (no columns, images or tables) — a real Word document built from scratch from the text, with paragraphs split by page.',
+    'aviso-pdf-a-word': 'The Word file keeps the PDF’s formatting: text styles, paragraphs, images and page breaks. Tables come out as tab-separated text, and a page with no real text (a scan) is added as an image.',
     'zona-arrastre-pdf': '📄 Drag your PDF here or click to choose it',
     'campo-nombre': 'File name',
     'boton-a-word': 'Convert to Word',
@@ -81,7 +80,6 @@ window.i18nPagina = {
     'resultado-enlace': 'Download Word',
     'advertencias-texto': '⚠️ {n} warning(s) — some elements may not look exactly like they do in Word.',
     'error-vista-previa': 'Couldn’t generate the preview',
-    'error-sin-texto': 'No text was found in the PDF (is it a scan?).',
     'error-generar-doc': 'Couldn’t generate the document',
     'nombre-defecto': 'document'
   }
@@ -136,9 +134,8 @@ window.i18nPagina = {
 
     <!-- PDF → Word -->
     <div id="panelPdfAWord" data-panel-direccion="pdf-a-word" style="display:none;">
-      <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-solo-texto">
-        ⚠️ Solo se extrae el texto del PDF (sin columnas, imágenes ni tablas) — un Word real armado desde
-        cero a partir del texto, con párrafos separados por página.
+      <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-pdf-a-word">
+        El Word conserva el formato del PDF: estilos de letra, párrafos, imágenes y saltos de página. Las tablas salen como texto con tabulaciones, y una página sin texto real (un escaneo) entra como imagen.
       </p>
       <div class="zona-arrastre" id="zonaArrastrePdf">
         <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
@@ -171,13 +168,10 @@ window.i18nPagina = {
 <div id="lienzoPdf" style="position:fixed; left:-30000px; top:0;" aria-hidden="true"></div>
 
 <script src="../assets/js/vendor.js"></script>
-<script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
-<script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
-<script src="../assets/js/pdf-texto.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script>window.docxLibreria = window.docx;</script>
 <script src="../vendor/docx-preview/0.4.1/docx-preview.min.js"></script>
@@ -185,6 +179,7 @@ window.i18nPagina = {
 <script src="../assets/js/lote-archivos.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/html-a-pdf.js"></script>
+<script src="../assets/js/pdf-a-docx.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelWordAPdf = document.getElementById('panelWordAPdf');
@@ -316,7 +311,7 @@ botonDescargarPdf.addEventListener('click', async () => {
     }
     resultadoPdf.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar-pdf') + ': ' + error.message);
+    alert(t('error-generar-pdf') + ': ' + (error && error.message || String(error)));
   } finally {
     botonDescargarPdf.disabled = false;
     botonDescargarPdf.textContent = t('boton-descargar-pdf');
@@ -372,37 +367,9 @@ function elegirArchivosPdf(listaFileList) {
 
 conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivosPdf);
 
-// Cada párrafo del PDF pasa a ser un párrafo de texto corrido (sin los
-// cortes de renglón del PDF, que en Word los decide el ancho de página).
-function textoAHtml(texto) {
-  return texto.split(/\n\s*\n/).filter(p => p.trim()).map(parrafo => {
-    const escapado = unirRenglonesDeParrafo(parrafo).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-    return `<p>${escapado}</p>`;
-  }).join('');
-}
-
-async function extraerTextoPdf(archivo) {
-  const bytes = await archivo.arrayBuffer();
-  const pdf = await abrirPdf(bytes);
-  const paginas = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    paginas.push(await extraerTextoPaginaPdf(await pdf.getPage(i)));
-  }
-  return paginas.join('\n\n');
-}
-
-// Un PDF da un .docx con su texto.
+// Un PDF da un .docx con su estructura: estilos, párrafos, imágenes (pdf-a-docx.js).
 async function convertirPdfAWord(archivo) {
-  const texto = await extraerTextoPdf(archivo);
-  if (!texto.trim()) throw new Error(t('error-sin-texto'));
-  const contenedor = document.createElement('div');
-  contenedor.innerHTML = textoAHtml(texto);
-  const parrafos = await contenidoAParrafos(contenedor);
-  const documento = new docx.Document({
-    numbering: NUMERACION_DOCX_CONFIG,
-    sections: [{ children: parrafos }],
-  });
-  return docx.Packer.toBlob(documento);
+  return PdfADocx.convertir(await archivo.arrayBuffer());
 }
 
 botonAWord.addEventListener('click', async () => {

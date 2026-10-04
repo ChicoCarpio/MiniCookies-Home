@@ -172,9 +172,13 @@
 
   async function bytesDeImagen(img) {
     const src = img.currentSrc || img.src;
-    if (/^data:image\/(png|jpe?g);/i.test(src)) {
+    if (/^data:image\//i.test(src)) {
+      // El tipo se mira en los bytes, no en el data: (un .docx puede declarar
+      // PNG para una foto JPEG: la librería docx guarda todo como .png).
       const bytes = await (await fetch(src)).arrayBuffer();
-      return { bytes, png: /^data:image\/png/i.test(src) };
+      const b = new Uint8Array(bytes, 0, 4);
+      if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return { bytes, png: true };
+      if (b[0] === 0xff && b[1] === 0xd8) return { bytes, png: false };
     }
     // GIF, WebP, SVG...: se pasan a PNG con un canvas.
     const canvas = document.createElement('canvas');
