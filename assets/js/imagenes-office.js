@@ -10,8 +10,9 @@
 //  - Otros que el navegador sí abre (BMP, WebP...) pasan a PNG.
 //  - Lo que no se puede abrir (WMF, TIFF) se devuelve tal cual.
 //
-// Requiere: emf.js.
+// Requiere: emf.js (y JSZip para docxConImagenesComunes).
 // Uso: const { bytes, extension, tipo } = await ImagenesOffice.aFormatoComun(bytes, contentType);
+//      const docxLimpio = await ImagenesOffice.docxConImagenesComunes(arrayBuffer); // requiere JSZip
 
 (function () {
   function tipoDe(bytes, contentType) {
@@ -62,5 +63,39 @@
     }
   }
 
-  window.ImagenesOffice = { aFormatoComun };
+  // Un .docx con sus imágenes en formato común: cada EMF (u otro que el
+  // navegador no muestra) de word/media/ pasa a PNG, y se actualizan las
+  // relaciones (*.rels) y [Content_Types].xml. Lo que se dibuje después
+  // (docx-preview, mammoth) ve un Word normal. Requiere JSZip.
+  async function docxConImagenesComunes(entrada) {
+    const zip = await JSZip.loadAsync(entrada);
+    const cambios = new Map(); // 'media/image1.emf' → 'media/image1.png'
+    for (const ruta of Object.keys(zip.files).filter((n) => /^word\/media\/[^/]+$/.test(n))) {
+      const extension = ruta.split('.').pop().toLowerCase();
+      if (['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(extension)) continue;
+      const original = await zip.file(ruta).async('uint8array');
+      const comun = await aFormatoComun(original, 'image/' + extension);
+      if (comun.extension === extension) continue; // no se pudo: queda como estaba
+      const nueva = ruta.replace(/\.[^.]+$/, '.' + comun.extension);
+      zip.remove(ruta);
+      zip.file(nueva, comun.bytes);
+      cambios.set(ruta.slice('word/'.length), nueva.slice('word/'.length));
+    }
+    if (!cambios.size) return entrada;
+    for (const rels of Object.keys(zip.files).filter((n) => /^word\/_rels\/.+\.rels$/.test(n))) {
+      let xml = await zip.file(rels).async('string');
+      for (const [antes, despues] of cambios) xml = xml.split(`Target="${antes}"`).join(`Target="${despues}"`);
+      zip.file(rels, xml);
+    }
+    let tipos = await zip.file('[Content_Types].xml').async('string');
+    for (const extension of new Set([...cambios.values()].map((r) => r.split('.').pop()))) {
+      if (!new RegExp(`Extension="${extension}"`, 'i').test(tipos)) {
+        tipos = tipos.replace('</Types>', `<Default Extension="${extension}" ContentType="image/${extension === 'jpg' ? 'jpeg' : extension}"/></Types>`);
+      }
+    }
+    zip.file('[Content_Types].xml', tipos);
+    return zip.generateAsync({ type: 'arraybuffer' });
+  }
+
+  window.ImagenesOffice = { aFormatoComun, docxConImagenesComunes };
 })();

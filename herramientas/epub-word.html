@@ -162,6 +162,8 @@ window.i18nPagina = {
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/emf.js"></script>
+<script src="../assets/js/imagenes-office.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -302,7 +304,8 @@ conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
 
 // Un Word da un EPUB. Con varios, cada uno sale con su propio nombre como título.
 async function convertirWordAEpub(archivo, titulo, autor) {
-  const arrayBuffer = await archivo.arrayBuffer();
+  // Las tablas pegadas de Excel (EMF) pasan antes a PNG: un lector de EPUB no las muestra.
+  const arrayBuffer = await ImagenesOffice.docxConImagenesComunes(await archivo.arrayBuffer());
   const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
   const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
   return construirEpub({ titulo, autor, capitulos });

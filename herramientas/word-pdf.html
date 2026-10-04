@@ -177,6 +177,8 @@ window.i18nPagina = {
 <script src="../vendor/docx-preview/0.4.1/docx-preview.min.js"></script>
 <script>window.docxPreview = window.docx; window.docx = window.docxLibreria;</script>
 <script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/emf.js"></script>
+<script src="../assets/js/imagenes-office.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/html-a-pdf.js"></script>
 <script src="../assets/js/pdf-estructura.js"></script>
@@ -237,7 +239,9 @@ botonAPdf.addEventListener('click', async () => {
       // sanitizador descarta (y dejaba los recuadros vacíos); como data:image pasan.
       const cuerpo = document.createElement('div');
       const estilos = document.createElement('div');
-      await docxPreview.renderAsync(wordsActuales[i], cuerpo, estilos, { inWrapper: true, useBase64URL: true });
+      // Las tablas pegadas de Excel (EMF) pasan antes a PNG: docx-preview no las dibuja.
+      const docx = await ImagenesOffice.docxConImagenesComunes(await wordsActuales[i].arrayBuffer());
+      await docxPreview.renderAsync(docx, cuerpo, estilos, { inWrapper: true, useBase64URL: true });
       documentosHtml.push({
         nombre: wordsActuales[i].name.replace(/\.docx$/i, ''),
         html: `<section>${estilos.innerHTML}${sanitizarHtml(cuerpo.innerHTML)}</section>`,
