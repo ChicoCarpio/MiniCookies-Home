@@ -118,7 +118,8 @@
     border: 1px solid var(--gris-borde); border-top: none; border-radius: 0 0 8px 8px;
     background: var(--gris-fondo);
   }
-  .fila-opacidad input[type="range"] { flex: 1; margin: 0; }
+  .fila-opacidad input[type="range"] { flex: 1; margin: 0; min-width: 0; }
+  .fila-opacidad select { flex: 0 1 auto; min-width: 0; max-width: 55%; font-size: 0.75rem; padding: 2px 4px; }
   .fila-opacidad span { font-size: 0.72rem; color: var(--texto-suave); width: 30px; text-align: right; }
 
   /* --- Panel de lienzo: selección de capa activa --- */
@@ -197,6 +198,15 @@ window.i18nPagina = {
     'capa-numerada': 'Capa {n}',
     'title-ojo': 'Mostrar/ocultar capa',
     'title-eliminar': 'Eliminar capa',
+    'title-fusion': 'Modo de fusión: cómo se mezcla la capa con las de abajo',
+    'title-opacidad': 'Opacidad de la capa',
+    'fusion-grupo-oscurecer': 'Oscurecen', 'fusion-grupo-aclarar': 'Aclaran', 'fusion-grupo-contraste': 'Contraste',
+    'fusion-grupo-comparar': 'Comparación', 'fusion-grupo-componentes': 'Componentes',
+    'fusion-normal': 'Normal', 'fusion-darken': 'Oscurecer', 'fusion-multiply': 'Multiplicar', 'fusion-color-burn': 'Subexponer color',
+    'fusion-lighten': 'Aclarar', 'fusion-screen': 'Trama', 'fusion-color-dodge': 'Sobreexponer color',
+    'fusion-overlay': 'Superponer', 'fusion-soft-light': 'Luz suave', 'fusion-hard-light': 'Luz fuerte',
+    'fusion-difference': 'Diferencia', 'fusion-exclusion': 'Exclusión',
+    'fusion-hue': 'Tono', 'fusion-saturation': 'Saturación', 'fusion-color': 'Color', 'fusion-luminosity': 'Luminosidad',
     'confirmar-cambiar': 'Al cambiar la imagen se empieza de nuevo y se pierden las capas actuales. ¿Seguir?',
     'error-proyecto': 'No se pudo leer ese archivo de proyecto: ',
     'grupo-luz': 'Luz',
@@ -287,6 +297,15 @@ window.i18nPagina = {
     'capa-numerada': 'Layer {n}',
     'title-ojo': 'Show/hide layer',
     'title-eliminar': 'Delete layer',
+    'title-fusion': 'Blend mode: how the layer mixes with the ones below',
+    'title-opacidad': 'Layer opacity',
+    'fusion-grupo-oscurecer': 'Darken', 'fusion-grupo-aclarar': 'Lighten', 'fusion-grupo-contraste': 'Contrast',
+    'fusion-grupo-comparar': 'Comparative', 'fusion-grupo-componentes': 'Component',
+    'fusion-normal': 'Normal', 'fusion-darken': 'Darken', 'fusion-multiply': 'Multiply', 'fusion-color-burn': 'Color Burn',
+    'fusion-lighten': 'Lighten', 'fusion-screen': 'Screen', 'fusion-color-dodge': 'Color Dodge',
+    'fusion-overlay': 'Overlay', 'fusion-soft-light': 'Soft Light', 'fusion-hard-light': 'Hard Light',
+    'fusion-difference': 'Difference', 'fusion-exclusion': 'Exclusion',
+    'fusion-hue': 'Hue', 'fusion-saturation': 'Saturation', 'fusion-color': 'Color', 'fusion-luminosity': 'Luminosity',
     'confirmar-cambiar': 'Changing the image starts over and loses the current layers. Continue?',
     'error-proyecto': 'That project file could not be read: ',
     'grupo-luz': 'Light',
@@ -845,6 +864,7 @@ function crearCapa(nombre) {
     nombre: nombre || t('capa-numerada').replace('{n}', contadorCapas),
     visible: true,
     opacidad: 100,
+    modoFusion: 'normal', // clave de MODOS_FUSION
     seleccion: 'toda', // toda | pincel | color
     mascaraPincel: null, // canvas propio, tamaño anchoTrabajo x altoTrabajo
     _versionMascara: 0, // se incrementa al pintar/borrar la máscara (ver cacheCapas)
@@ -990,6 +1010,35 @@ function generarMascaraCapa(capa, ancho, alto) {
   return null;
 }
 
+// ===== Modos de fusión =====
+// Los de Photoshop que el canvas trae de fábrica (globalCompositeOperation),
+// agrupados como en su menú. Las claves son el valor del canvas, salvo
+// 'normal' (= 'source-over'). Los que el canvas no tiene (Disolver, Luz
+// lineal, Luz focal, Restar, Dividir…) quedan afuera: hechos a mano serían
+// un recorrido píxel a píxel por capa en cada fotograma de la vista previa.
+const MODOS_FUSION = [
+  ['', ['normal']],
+  ['fusion-grupo-oscurecer', ['darken', 'multiply', 'color-burn']],
+  ['fusion-grupo-aclarar', ['lighten', 'screen', 'color-dodge']],
+  ['fusion-grupo-contraste', ['overlay', 'soft-light', 'hard-light']],
+  ['fusion-grupo-comparar', ['difference', 'exclusion']],
+  ['fusion-grupo-componentes', ['hue', 'saturation', 'color', 'luminosity']],
+];
+
+// Dibuja una capa ya procesada (y recortada por su máscara) sobre lo
+// acumulado, con su opacidad y su modo. Las capas son de ajuste: lo que se
+// funde es "la imagen con el ajuste" contra "la imagen sin él", así que con
+// un modo que no sea Normal hasta una capa sin ajustes cambia el resultado
+// (Multiplicar la imagen consigo misma la oscurece). La usan la vista previa
+// y la descarga.
+function fundirCapa(ctx, capa, capaFinal) {
+  ctx.globalAlpha = capa.opacidad / 100;
+  ctx.globalCompositeOperation = capa.modoFusion && capa.modoFusion !== 'normal' ? capa.modoFusion : 'source-over';
+  ctx.drawImage(capaFinal, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 // ===== Composición de todas las capas =====
 // Firma del estado de una capa que afecta su resultado visual. No incluye
 // los píxeles de mascaraPincel (comparar un canvas entero costaría lo mismo
@@ -997,7 +1046,7 @@ function generarMascaraCapa(capa, ancho, alto) {
 // marcarMascaraSucia() cada vez que algo pinta o borra la máscara.
 function firmaDeCapa(capa) {
   return JSON.stringify([
-    capa.visible, capa.opacidad, capa.seleccion,
+    capa.visible, capa.opacidad, capa.modoFusion, capa.seleccion,
     capa.ajustes, capa.colorObjetivo, capa.tolerancia,
     capa._versionMascara || 0,
   ]);
@@ -1051,7 +1100,7 @@ function renderizarComposicion() {
   for (let i = indiceDesde; i < capas.length; i++) {
     const capa = capas[i];
     const esNeutra = !capa.visible || capa.opacidad <= 0
-      || (capa.opacidad === 100 && capa.seleccion === 'toda' && JSON.stringify(capa.ajustes) === ajustesNeutros);
+      || (capa.opacidad === 100 && capa.modoFusion === 'normal' && capa.seleccion === 'toda' && JSON.stringify(capa.ajustes) === ajustesNeutros);
     if (!esNeutra) {
       // El resultado de color de esta capa solo depende de sus propios
       // ajustes y de lo que entra desde las capas de abajo (acumulado): si
@@ -1101,9 +1150,7 @@ function renderizarComposicion() {
       nuevoAcumulado.width = ancho; nuevoAcumulado.height = alto;
       const ctxNuevo = nuevoAcumulado.getContext('2d');
       ctxNuevo.drawImage(acumulado, 0, 0);
-      ctxNuevo.globalAlpha = capa.opacidad / 100;
-      ctxNuevo.drawImage(capaFinal, 0, 0);
-      ctxNuevo.globalAlpha = 1;
+      fundirCapa(ctxNuevo, capa, capaFinal);
       acumulado = nuevoAcumulado;
     }
     cacheCapas[i] = { id: capa.id, firma: firmaDeCapa(capa), canvasAcumulado: acumulado };
@@ -2016,8 +2063,26 @@ function pintarListaCapas() {
 
     const filaOpacidad = document.createElement('div');
     filaOpacidad.className = 'fila-opacidad';
+    // Modo de fusión y opacidad juntos, como en el panel de capas de Photoshop.
+    const selectorFusion = document.createElement('select');
+    selectorFusion.title = t('title-fusion');
+    selectorFusion.setAttribute('aria-label', t('title-fusion'));
+    MODOS_FUSION.forEach(([claveGrupo, modos]) => {
+      const destino = claveGrupo ? document.createElement('optgroup') : selectorFusion;
+      if (claveGrupo) { destino.label = t(claveGrupo); selectorFusion.appendChild(destino); }
+      modos.forEach((modo) => destino.appendChild(new Option(t('fusion-' + modo), modo)));
+    });
+    selectorFusion.value = capa.modoFusion;
+    selectorFusion.addEventListener('click', (e) => e.stopPropagation());
+    selectorFusion.addEventListener('change', () => {
+      capa.modoFusion = selectorFusion.value;
+      programarRenderizado();
+    });
+    filaOpacidad.appendChild(selectorFusion);
     const sliderOpacidad = document.createElement('input');
     sliderOpacidad.type = 'range'; sliderOpacidad.min = 0; sliderOpacidad.max = 100; sliderOpacidad.value = capa.opacidad;
+    sliderOpacidad.title = t('title-opacidad');
+    sliderOpacidad.setAttribute('aria-label', t('title-opacidad'));
     sliderOpacidad.addEventListener('click', (e) => e.stopPropagation());
     sliderOpacidad.addEventListener('input', () => {
       capa.opacidad = Number(sliderOpacidad.value);
@@ -2212,7 +2277,7 @@ botonRestablecerAvanzado.addEventListener('click', () => {
 // se confirma solo si ya hay algo editado.
 function hayCambios() {
   const neutro = JSON.stringify(AJUSTES_NEUTROS);
-  return capas.length > 1 || capas.some((c) => c.seleccion !== 'toda' || c.opacidad !== 100 || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
+  return capas.length > 1 || capas.some((c) => c.seleccion !== 'toda' || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
 }
 document.getElementById('botonCambiarImagen').addEventListener('click', () => {
   if (hayCambios() && !confirm(t('confirmar-cambiar'))) return;
@@ -2275,10 +2340,7 @@ botonDescargarAvanzado.addEventListener('click', async () => {
         ctxProcesado.drawImage(mascara, 0, 0);
         ctxProcesado.globalCompositeOperation = 'source-over';
       }
-      const ctxAcumulado = acumulado.getContext('2d');
-      ctxAcumulado.globalAlpha = capa.opacidad / 100;
-      ctxAcumulado.drawImage(procesado, 0, 0);
-      ctxAcumulado.globalAlpha = 1;
+      fundirCapa(acumulado.getContext('2d'), capa, procesado);
     }
 
     const formato = formatoDeSalida(archivoActual);
@@ -2306,6 +2368,8 @@ document.addEventListener('cambioIdioma', () => {
   document.querySelectorAll('#mezclaBN .nombre-rango').forEach((el) => {
     el.textContent = AjustePorColor.nombreRango(el.dataset.rango);
   });
+  // La lista de capas arma sus textos (modos de fusión, títulos) con t().
+  if (capas.length) pintarListaCapas();
 });
 
 // ===== Guardar / cargar proyecto =====
@@ -2319,7 +2383,7 @@ botonGuardarProyecto.addEventListener('click', () => {
     nombreArchivo: archivoActual.name,
     capaActivaId,
     capas: capas.map((c) => ({
-      id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad,
+      id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad, modoFusion: c.modoFusion,
       seleccion: c.seleccion, colorObjetivo: c.colorObjetivo, tolerancia: c.tolerancia,
       ajustes: c.ajustes,
       mascaraPincel: canvasADataUrl(c.mascaraPincel),
@@ -2363,6 +2427,8 @@ entradaProyecto.addEventListener('change', async (e) => {
   for (const c of proyecto.capas) {
     const nueva = {
       id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad,
+      // Los proyectos guardados antes de los modos de fusión no lo traen.
+      modoFusion: MODOS_FUSION.some(([, modos]) => modos.includes(c.modoFusion)) ? c.modoFusion : 'normal',
       seleccion: c.seleccion, colorObjetivo: c.colorObjetivo, tolerancia: c.tolerancia,
       ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes },
       mascaraPincel: null,

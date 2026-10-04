@@ -703,6 +703,46 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'src="fotos/vacaciones.png" intacto';
   });
 
+  // Modos de fusión del editor avanzado: con una capa sin ajustes, Multiplicar
+  // funde la imagen consigo misma (gris 128 -> 64) y Trama la aclara (-> 192).
+  // Se mira el píxel en la vista previa Y en la imagen descargada, que se
+  // componen por caminos distintos.
+  for (const ruta of ['/herramientas/editor-avanzado-imagen.html', '/en/herramientas/editor-avanzado-imagen.html']) {
+    await prueba('editor avanzado: modos de fusión (' + (ruta.startsWith('/en/') ? 'en' : 'es') + ')', async () => {
+      await abrir(ruta); await esperar(300);
+      const c = D().createElement('canvas'); c.width = 64; c.height = 64;
+      const cx = c.getContext('2d'); cx.fillStyle = 'rgb(128,128,128)'; cx.fillRect(0, 0, 64, 64);
+      const gris = new (W().File)([await new Promise((r) => c.toBlob(r, 'image/png'))], 'gris.png', { type: 'image/png' });
+      const entrada = D().getElementById('entradaArchivo');
+      entrada.files = archivos([gris]).files;
+      entrada.dispatchEvent(new (W().Event)('change'));
+      const selector = await hasta(() => D().querySelector('#listaCapas .fila-opacidad select'), 15000);
+      afirmar(selector, 'la capa no tiene selector de modo de fusión');
+      afirmar(selector.options.length === 16, selector.options.length + ' modos en vez de 16');
+      const nombre = [...selector.options].find((o) => o.value === 'multiply').textContent;
+      afirmar(nombre === (ruta.startsWith('/en/') ? 'Multiply' : 'Multiplicar'), 'nombre del modo: ' + nombre);
+      const lienzo = D().getElementById('canvasTrabajo');
+      const pixel = (cv) => cv.getContext('2d').getImageData(cv.width >> 1, cv.height >> 1, 1, 1).data[0];
+      const valores = {};
+      for (const modo of ['normal', 'multiply', 'screen']) {
+        selector.value = modo; selector.dispatchEvent(new (W().Event)('change'));
+        await esperar(250);
+        valores[modo] = pixel(lienzo);
+      }
+      afirmar(Math.abs(valores.normal - 128) <= 2 && Math.abs(valores.multiply - 64) <= 2 && Math.abs(valores.screen - 192) <= 2,
+        'vista previa: ' + JSON.stringify(valores));
+      selector.value = 'multiply'; selector.dispatchEvent(new (W().Event)('change'));
+      D().getElementById('botonDescargarAvanzado').click();
+      const enlace = D().getElementById('enlaceDescarga');
+      afirmar(await hasta(() => enlace.href.startsWith('blob:'), 15000), 'la descarga no se generó');
+      const img = new (W().Image)(); img.src = enlace.href; await img.decode();
+      const cd = D().createElement('canvas'); cd.width = img.width; cd.height = img.height;
+      cd.getContext('2d').drawImage(img, 0, 0);
+      afirmar(Math.abs(pixel(cd) - 64) <= 2, 'descarga en Multiplicar: ' + pixel(cd));
+      return 'vista previa ' + JSON.stringify(valores) + ', descarga ' + pixel(cd);
+    });
+  }
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);
