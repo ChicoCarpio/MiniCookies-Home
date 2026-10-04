@@ -274,43 +274,69 @@ const botonAEpub = document.getElementById('botonAEpub');
 const resultadoEpub = document.getElementById('resultadoEpub');
 const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
 
-let archivoWordActual = null;
+let wordsActuales = [];
 
-function mostrarArchivoWord(archivo) {
-  archivoWordActual = archivo;
-  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAEpub.disabled = false;
+function mostrarArchivosWord(archivos) {
+  wordsActuales = archivos;
+  listaWord.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaWord.appendChild(li);
+  });
+  botonAEpub.disabled = archivos.length === 0;
   resultadoEpub.classList.remove('visible');
-  if (!tituloLibro.value.trim()) {
-    tituloLibro.value = archivo.name.replace(/\.docx$/i, '');
+  resumenLote.style.display = 'none';
+  // Con un solo documento, el título sale de su nombre (si no se escribió otro).
+  if (archivos.length === 1 && !tituloLibro.value.trim()) {
+    tituloLibro.value = archivos[0].name.replace(/\.docx$/i, '');
   }
 }
 
-function elegirArchivoWord(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
-  if (archivo) mostrarArchivoWord(archivo);
+function elegirArchivosWord(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivos.length) mostrarArchivosWord(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivoWord);
+conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
+
+// Un Word da un EPUB. Con varios, cada uno sale con su propio nombre como título.
+async function convertirWordAEpub(archivo, titulo, autor) {
+  const arrayBuffer = await archivo.arrayBuffer();
+  const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+  const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
+  return construirEpub({ titulo, autor, capitulos });
+}
 
 botonAEpub.addEventListener('click', async () => {
   botonAEpub.disabled = true;
   progreso.style.display = 'block';
+  resumenLote.style.display = 'none';
   try {
-    const titulo = tituloLibro.value.trim() || t('titulo-defecto');
     const autor = document.getElementById('autorLibro').value.trim();
 
-    progreso.textContent = t('progreso-leyendo-word');
-    const arrayBuffer = await archivoWordActual.arrayBuffer();
-    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
-    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
-
-    progreso.textContent = t('progreso-armando');
-    const blob = await construirEpub({ titulo, autor, capitulos });
-
-    enlaceDescargaEpub.href = URL.createObjectURL(blob);
-    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
-    resultadoEpub.classList.add('visible');
+    if (wordsActuales.length === 1) {
+      const titulo = tituloLibro.value.trim() || t('titulo-defecto');
+      progreso.textContent = t('progreso-leyendo-word');
+      const blob = await convertirWordAEpub(wordsActuales[0], titulo, autor);
+      enlaceDescargaEpub.href = URL.createObjectURL(blob);
+      enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+      enlaceDescargaEpub.textContent = t('resultado-enlace-epub');
+      resultadoEpub.classList.add('visible');
+    } else {
+      const resultados = await LoteArchivos.convertirLote(wordsActuales, async (archivo) => {
+        const titulo = archivo.name.replace(/\.docx$/i, '');
+        return { nombre: titulo + '.epub', blob: await convertirWordAEpub(archivo, titulo, autor) };
+      }, (i, total) => {
+        progreso.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaEpub.href = URL.createObjectURL(zip);
+      enlaceDescargaEpub.download = 'epub-desde-word.zip';
+      enlaceDescargaEpub.textContent = t('lote-enlace-zip');
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
+      resultadoEpub.classList.add('visible');
+    }
   } catch (error) {
     alert(t('error-generar') + ': ' + error.message);
   } finally {

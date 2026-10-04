@@ -45,8 +45,6 @@ window.i18nPagina = {
     'boton-extraer-procesando': 'Convirtiendo...',
     'boton-extraer-progreso': 'Convirtiendo {n} de {total}...',
     'enlace-descargar-zip': 'Descargar .zip con los .md',
-    'lote-convertidos': '{ok} de {total} convertidos.',
-    'lote-fallos': 'No se pudieron convertir:',
     'boton-copiar-md': 'Copiar Markdown',
     'boton-copiado': '¡Copiado!',
     'enlace-descargar-md': 'Descargar .md',
@@ -78,8 +76,6 @@ window.i18nPagina = {
     'boton-extraer-procesando': 'Converting...',
     'boton-extraer-progreso': 'Converting {n} of {total}...',
     'enlace-descargar-zip': 'Download .zip with the .md files',
-    'lote-convertidos': '{ok} of {total} converted.',
-    'lote-fallos': 'Could not convert:',
     'boton-copiar-md': 'Copy Markdown',
     'boton-copiado': 'Copied!',
     'enlace-descargar-md': 'Download .md',
@@ -351,13 +347,7 @@ botonExtraer.addEventListener('click', async () => {
       enlaceDescargaMd.href = URL.createObjectURL(zip);
       enlaceDescargaMd.download = 'markdown-desde-pdf.zip';
       enlaceDescargaMd.textContent = t('enlace-descargar-zip');
-      const fallos = resultados.filter((r) => !r.ok);
-      resumenLote.innerHTML =
-        `<p>${escaparHtml(t('lote-convertidos').replace('{ok}', ok).replace('{total}', resultados.length))}</p>` +
-        (fallos.length
-          ? `<p>${escaparHtml(t('lote-fallos'))}</p><ul>${fallos.map((r) => `<li>${escaparHtml(r.archivo.name)}: ${escaparHtml(r.error)}</li>`).join('')}</ul>`
-          : '');
-      resumenLote.style.display = 'block';
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
       if (ok > 0) {
         bloqueResultadoPdfAMd.style.display = 'block';
         markdownExtraido.style.display = 'none';

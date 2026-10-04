@@ -237,6 +237,16 @@ async function leerEpub(archivo) {
 
     // Incrusta cada imagen referenciada como data:URI, resolviendo la ruta
     // relativa al archivo del capítulo (no a la del OPF).
+    // Las portadas suelen venir envueltas en SVG (<image xlink:href>), no en <img>:
+    // se pasan a <img> para que la misma incrustación las alcance.
+    for (const svgImagen of [...cuerpo.querySelectorAll('image')]) {
+      const href = svgImagen.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || svgImagen.getAttribute('href') || '';
+      if (!href) continue;
+      const img = cuerpo.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+      img.setAttribute('src', href);
+      img.setAttribute('alt', 'Portada');
+      svgImagen.replaceWith(img);
+    }
     const imagenes = [...cuerpo.querySelectorAll('img')];
     for (const img of imagenes) {
       const src = img.getAttribute('src') || '';
