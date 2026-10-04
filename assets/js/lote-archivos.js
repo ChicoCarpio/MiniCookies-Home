@@ -4,7 +4,9 @@
 // demás y el resultado sale en un solo .zip, con un archivo por entrada.
 //
 // convertir(archivo) devuelve { nombre, blob } o lanza un error con el mensaje
-// ya traducido. Se usa con JSZip, que ya está en vendor/.
+// ya traducido. Opcional: extras, archivos que acompañan al resultado dentro del
+// zip ([{ nombre: 'Doc-imagenes/imagen-1.png', datos }], datos en lo que acepte
+// JSZip). Se usa con JSZip, que ya está en vendor/.
 (function () {
   // Dos archivos con el mismo nombre (libro.pdf de dos carpetas) no pueden
   // pisarse dentro del zip: el segundo sale como libro-2.md.
@@ -28,7 +30,7 @@
       if (alAvanzar) alAvanzar(i, archivos.length, archivo);
       try {
         const salida = await convertir(archivo);
-        resultados.push({ archivo, ok: true, nombre: nombreUnico(salida.nombre, usados), blob: salida.blob });
+        resultados.push({ archivo, ok: true, nombre: nombreUnico(salida.nombre, usados), blob: salida.blob, extras: salida.extras || [] });
       } catch (error) {
         resultados.push({ archivo, ok: false, error: error.message || String(error) });
       }
@@ -38,7 +40,10 @@
 
   async function zipDeResultados(resultados) {
     const zip = new JSZip();
-    resultados.filter((r) => r.ok).forEach((r) => zip.file(r.nombre, r.blob));
+    resultados.filter((r) => r.ok).forEach((r) => {
+      zip.file(r.nombre, r.blob);
+      (r.extras || []).forEach((extra) => zip.file(extra.nombre, extra.datos));
+    });
     return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
   }
 
