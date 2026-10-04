@@ -10,27 +10,20 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
-  .vista-previa-documento {
-    background: #fff;
-    color: #1a1a1a;
-    border: 1px solid var(--gris-borde);
-    border-radius: var(--radio);
-    padding: 40px;
-    margin-top: 16px;
-    max-height: 600px;
-    overflow: auto;
-    line-height: 1.6;
+  /* Hoja A4 fuera de pantalla donde se mide el libro (html-a-pdf.js): 794 × 1123 px, márgenes de 2 cm. */
+  #lienzoPdf {
+    position: fixed; left: -30000px; top: 0;
+    width: 794px; box-sizing: border-box; padding: 76px;
+    background: #fff; color: #1a1a1a;
+    font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.5;
   }
-  .vista-previa-documento img { max-width: 100%; }
-  .vista-previa-documento table { border-collapse: collapse; margin: 12px 0; }
-  .vista-previa-documento table td, .vista-previa-documento table th { border: 1px solid #ccc; padding: 6px 10px; }
-  .vista-previa-documento h1 { page-break-before: always; }
-  .vista-previa-documento > h1:first-child { page-break-before: auto; }
-  @media print {
-    body > *:not(#areaImprimir) { display: none !important; }
-    #areaImprimir { display: block !important; position: static; margin: 0; padding: 0; border: none; max-height: none; overflow: visible; }
-  }
-  #areaImprimir { display: none; }
+  /* Una imagen entra entera en la hoja (971 px útiles) con margen para su párrafo. */
+  #lienzoPdf img { max-width: 100%; max-height: 900px; width: auto; height: auto; }
+  #lienzoPdf table { border-collapse: collapse; margin: 12px 0; }
+  #lienzoPdf td, #lienzoPdf th { border: 1px solid #ccc; padding: 6px 10px; }
+  #lienzoPdf .capitulo { break-before: page; }
+  #lienzoPdf .portada { text-align: center; padding-top: 300px; }
+  #lienzoPdf .portada h1 { font-size: 34px; }
 </style>
 <script>
 window.i18nPagina = {
@@ -42,25 +35,28 @@ window.i18nPagina = {
     'dir-epub-a-pdf': 'EPUB → PDF',
     'dir-pdf-a-epub': 'PDF → EPUB',
     'zona-arrastre-epub': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
-    'boton-a-pdf': 'Generar vista previa',
-    'boton-a-pdf-generando': 'Generando...',
-    'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
+    'boton-a-pdf': 'Convertir a PDF',
+    'boton-a-pdf-generando': 'Leyendo el libro...',
+    'progreso-pdf': 'Libro {n} de {total} · hoja {h} de {th}...',
+    'progreso-pdf-uno': 'Hoja {h} de {th}...',
+    'enlace-descargar-pdf': 'Descargar PDF',
+    'enlace-descargar-zip-pdf': 'Descargar .zip con los PDF',
+    'error-generar-pdf': 'No se pudo generar el PDF',
     'zona-arrastre-pdf': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
     'campo-titulo': 'Título del libro',
     'campo-autor': 'Autor (opcional)',
     'boton-a-epub': 'Convertir a EPUB',
     'boton-a-epub-procesando': 'Convirtiendo...',
-    'aviso-solo-texto': '⚠️ Solo se extrae el texto del PDF (sin imágenes ni diseño). Si el PDF es un escaneo (imágenes de páginas sin texto real), no va a poder extraer nada.',
+    'aviso-pdf-a-epub': 'El EPUB conserva títulos (cada título principal abre un capítulo), negritas, cursivas e imágenes; se quitan los números de página y encabezados que se repiten en cada hoja. Una página sin texto real (un escaneo) entra como imagen.',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar EPUB',
     'limites-titulo': 'Límites conocidos',
     'limite1': 'No funciona con libros EPUB con DRM (candado editorial) — solo con EPUB sin protección.',
     'limite2': 'EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo; PDF → EPUB solo conserva el texto.',
     'limite3': 'Cada capítulo empieza en una página nueva.',
-    'error-vista-previa': 'No se pudo generar la vista previa',
-    'progreso-extrayendo': 'Extrayendo texto del PDF...',
-    'progreso-armando': 'Armando el EPUB...',
-    'error-sin-texto': 'No se encontró texto en el PDF (¿es un escaneo?).',
+    'progreso-epub-uno': 'Leyendo página {h} de {th}...',
+    'progreso-epub': 'PDF {n} de {total} · página {h} de {th}...',
+    'enlace-descargar-zip-epub': 'Descargar .zip con los EPUB',
     'titulo-defecto': 'Documento',
     'error-generar-epub': 'No se pudo generar el EPUB'
   },
@@ -72,25 +68,28 @@ window.i18nPagina = {
     'dir-epub-a-pdf': 'EPUB → PDF',
     'dir-pdf-a-epub': 'PDF → EPUB',
     'zona-arrastre-epub': '📚 Drag your .epub file here or click to choose it',
-    'boton-a-pdf': 'Generate preview',
-    'boton-a-pdf-generando': 'Generating...',
-    'boton-imprimir': '🖨️ Save as PDF / Print',
+    'boton-a-pdf': 'Convert to PDF',
+    'boton-a-pdf-generando': 'Reading the book...',
+    'progreso-pdf': 'Book {n} of {total} · page {h} of {th}...',
+    'progreso-pdf-uno': 'Page {h} of {th}...',
+    'enlace-descargar-pdf': 'Download PDF',
+    'enlace-descargar-zip-pdf': 'Download .zip with the PDFs',
+    'error-generar-pdf': 'Couldn’t generate the PDF',
     'zona-arrastre-pdf': '📄 Drag your PDF here or click to choose it',
     'campo-titulo': 'Book title',
     'campo-autor': 'Author (optional)',
     'boton-a-epub': 'Convert to EPUB',
     'boton-a-epub-procesando': 'Converting...',
-    'aviso-solo-texto': '⚠️ Only the PDF’s text is extracted (no images or layout). If the PDF is a scan (images of pages with no real text), nothing will be extracted.',
+    'aviso-pdf-a-epub': 'The EPUB keeps headings (each main heading starts a chapter), bold, italics and images; page numbers and headers repeated on every page are removed. A page with no real text (a scan) is added as an image.',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download EPUB',
     'limites-titulo': 'Known limits',
     'limite1': 'Doesn’t work with DRM-protected EPUB books (publisher lock) — only with unprotected EPUB.',
     'limite2': 'EPUB → PDF keeps headings, bold, italics, lists, tables and images from each chapter; PDF → EPUB keeps only the text.',
     'limite3': 'Each chapter starts on a new page.',
-    'error-vista-previa': 'Couldn’t generate the preview',
-    'progreso-extrayendo': 'Extracting text from the PDF...',
-    'progreso-armando': 'Building the EPUB...',
-    'error-sin-texto': 'No text was found in the PDF (is it a scan?).',
+    'progreso-epub-uno': 'Reading page {h} of {th}...',
+    'progreso-epub': 'PDF {n} of {total} · page {h} of {th}...',
+    'enlace-descargar-zip-epub': 'Download .zip with the EPUBs',
     'titulo-defecto': 'Document',
     'error-generar-epub': 'Couldn’t generate the EPUB'
   }
@@ -122,27 +121,27 @@ window.i18nPagina = {
     <div id="panelEpubAPdf" data-panel-direccion="epub-a-pdf">
       <div class="zona-arrastre" id="zonaArrastreEpub">
         <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaEpub" accept=".epub" hidden>
+        <input type="file" id="entradaEpub" accept=".epub" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaEpub"></ul>
       <div class="controles">
-        <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Generar vista previa</button>
+        <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
       </div>
-      <div class="controles" id="controlesImprimir" style="display:none;">
-        <button class="boton" id="botonImprimir" type="button" data-i18n="boton-imprimir">🖨️ Guardar como PDF / Imprimir</button>
+      <div class="resultado" id="resultadoPdf">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="libro.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
       </div>
-      <div class="vista-previa-documento" id="vistaPrevia" style="display:none;"></div>
+      <div id="resumenLotePdf" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
     <!-- PDF → EPUB -->
     <div id="panelPdfAEpub" data-panel-direccion="pdf-a-epub" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastrePdf">
         <span data-i18n="zona-arrastre-pdf">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaPdf" accept="application/pdf" hidden>
+        <input type="file" id="entradaPdf" accept="application/pdf" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaPdf"></ul>
       <div class="controles">
-        <label class="campo">
+        <label class="campo" id="campoTitulo">
           <span data-i18n="campo-titulo">Título del libro</span>
           <input type="text" id="tituloLibro" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
@@ -152,15 +151,15 @@ window.i18nPagina = {
         </label>
         <button class="boton" id="botonAEpub" disabled data-i18n="boton-a-epub">Convertir a EPUB</button>
       </div>
-      <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-solo-texto">
-        ⚠️ Solo se extrae el texto del PDF (sin imágenes ni diseño). Si el PDF es un escaneo (imágenes de páginas sin texto real), no va a poder extraer nada.
+      <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-pdf-a-epub">
+        El EPUB conserva títulos (cada título principal abre un capítulo), negritas, cursivas e imágenes; se quitan los números de página y encabezados que se repiten en cada hoja. Una página sin texto real (un escaneo) entra como imagen.
       </p>
       <div class="resultado" id="resultadoEpub">
         <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
       </div>
+      <div id="resumenLoteEpub" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
-    <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -180,19 +179,22 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<div id="areaImprimir"></div>
+<div id="lienzoPdf" aria-hidden="true"></div>
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
-<script src="../assets/js/pdf-texto.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/html-a-pdf.js"></script>
+<script src="../assets/js/pdf-estructura.js"></script>
+<script src="../assets/js/pdf-a-epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelEpubAPdf = document.getElementById('panelEpubAPdf');
 const panelPdfAEpub = document.getElementById('panelPdfAEpub');
-const progreso = document.getElementById('progreso');
 
 
 // --- EPUB → PDF ---
@@ -200,47 +202,84 @@ const zonaArrastreEpub = document.getElementById('zonaArrastreEpub');
 const entradaEpub = document.getElementById('entradaEpub');
 const listaEpub = document.getElementById('listaEpub');
 const botonAPdf = document.getElementById('botonAPdf');
-const controlesImprimir = document.getElementById('controlesImprimir');
-const vistaPrevia = document.getElementById('vistaPrevia');
-const botonImprimir = document.getElementById('botonImprimir');
-const areaImprimir = document.getElementById('areaImprimir');
+const resultadoPdf = document.getElementById('resultadoPdf');
+const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
+const resumenLotePdf = document.getElementById('resumenLotePdf');
+const lienzoPdf = document.getElementById('lienzoPdf');
 
-let archivoEpubActual = null;
+let epubsActuales = [];
 
-function mostrarArchivoEpub(archivo) {
-  archivoEpubActual = archivo;
-  listaEpub.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAPdf.disabled = false;
-  vistaPrevia.style.display = 'none';
-  controlesImprimir.style.display = 'none';
+function mostrarArchivosEpub(archivos) {
+  epubsActuales = archivos;
+  listaEpub.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaEpub.appendChild(li);
+  });
+  botonAPdf.disabled = archivos.length === 0;
+  resultadoPdf.classList.remove('visible');
+  resumenLotePdf.style.display = 'none';
 }
 
-function elegirArchivoEpub(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
-  if (archivo) mostrarArchivoEpub(archivo);
+function elegirArchivosEpub(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivos.length) mostrarArchivosEpub(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivoEpub);
+conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
+
+// Un libro → un PDF, sin imprimir: se arma en una hoja A4 fuera de pantalla
+// (portada y cada capítulo en hoja nueva) y html-a-pdf.js lo escribe. Varios
+// libros → un .zip con un PDF por libro.
+async function libroAPdf(archivo, alAvanzar) {
+  const { titulo, autor, capitulos } = await leerEpub(archivo);
+  const portada = `<div class="portada"><h1>${escaparHtml(titulo)}</h1>${autor ? `<p>${escaparHtml(autor)}</p>` : ''}</div>`;
+  lienzoPdf.innerHTML = portada + capitulos.map((cap) => `<section class="capitulo">${cap.html}</section>`).join('');
+  try {
+    await Promise.all([...lienzoPdf.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
+    const bytes = await HtmlAPdf.convertir([{ elemento: lienzoPdf, anchoPx: 794, altoPx: 1123, margenArribaPx: 76, margenAbajoPx: 76 }], { titulo, alAvanzar });
+    return new Blob([bytes], { type: 'application/pdf' });
+  } finally {
+    lienzoPdf.innerHTML = '';
+  }
+}
 
 botonAPdf.addEventListener('click', async () => {
   botonAPdf.disabled = true;
   botonAPdf.textContent = t('boton-a-pdf-generando');
+  resultadoPdf.classList.remove('visible');
+  resumenLotePdf.style.display = 'none';
   try {
-    const { titulo, capitulos } = await leerEpub(archivoEpubActual);
-    const htmlCompleto = `<h1 style="page-break-before:auto;">${escaparHtml(titulo)}</h1>` + capitulos.map(cap => cap.html).join('');
-    vistaPrevia.innerHTML = htmlCompleto;
-    vistaPrevia.style.display = 'block';
-    areaImprimir.innerHTML = htmlCompleto;
-    controlesImprimir.style.display = 'flex';
+    if (epubsActuales.length === 1) {
+      const blob = await libroAPdf(epubsActuales[0], (h, th) => {
+        botonAPdf.textContent = t('progreso-pdf-uno').replace('{h}', h + 1).replace('{th}', th);
+      });
+      enlaceDescargaPdf.href = URL.createObjectURL(blob);
+      enlaceDescargaPdf.download = epubsActuales[0].name.replace(/\.epub$/i, '') + '.pdf';
+      enlaceDescargaPdf.textContent = t('enlace-descargar-pdf');
+    } else {
+      let libro = 0;
+      const resultados = await LoteArchivos.convertirLote(epubsActuales, async (archivo) => ({
+        nombre: archivo.name.replace(/\.epub$/i, '') + '.pdf',
+        blob: await libroAPdf(archivo, (h, th) => {
+          botonAPdf.textContent = t('progreso-pdf').replace('{n}', libro).replace('{total}', epubsActuales.length).replace('{h}', h + 1).replace('{th}', th);
+        }),
+      }), (i) => { libro = i + 1; });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaPdf.href = URL.createObjectURL(zip);
+      enlaceDescargaPdf.download = 'pdf-desde-epub.zip';
+      enlaceDescargaPdf.textContent = t('enlace-descargar-zip-pdf');
+      LoteArchivos.pintarResumen(resumenLotePdf, resultados, t);
+    }
+    resultadoPdf.classList.add('visible');
   } catch (error) {
-    alert(t('error-vista-previa') + ': ' + error.message);
+    alert(t('error-generar-pdf') + ': ' + (error && error.message || String(error)));
   } finally {
     botonAPdf.disabled = false;
     botonAPdf.textContent = t('boton-a-pdf');
   }
 });
-
-botonImprimir.addEventListener('click', () => window.print());
 
 // --- PDF → EPUB ---
 const zonaArrastrePdf = document.getElementById('zonaArrastrePdf');
@@ -251,69 +290,78 @@ const botonAEpub = document.getElementById('botonAEpub');
 const resultadoEpub = document.getElementById('resultadoEpub');
 const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
 
-let archivoPdfActual = null;
+const campoTitulo = document.getElementById('campoTitulo');
+const resumenLoteEpub = document.getElementById('resumenLoteEpub');
+let pdfsActuales = [];
 
-function mostrarArchivoPdf(archivo) {
-  archivoPdfActual = archivo;
-  listaPdf.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAEpub.disabled = false;
+// Con un PDF se elige título; con varios, cada EPUB lleva el nombre de su archivo.
+function mostrarArchivosPdf(archivos) {
+  pdfsActuales = archivos;
+  listaPdf.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaPdf.appendChild(li);
+  });
+  botonAEpub.disabled = archivos.length === 0;
   resultadoEpub.classList.remove('visible');
-  if (!tituloLibro.value.trim()) {
-    tituloLibro.value = archivo.name.replace(/\.pdf$/i, '');
+  resumenLoteEpub.style.display = 'none';
+  campoTitulo.style.display = archivos.length > 1 ? 'none' : '';
+  if (archivos.length === 1 && !tituloLibro.value.trim()) {
+    tituloLibro.value = archivos[0].name.replace(/\.pdf$/i, '');
   }
 }
 
-function elegirArchivoPdf(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
-  if (archivo) mostrarArchivoPdf(archivo);
+function elegirArchivosPdf(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivos.length) mostrarArchivosPdf(archivos);
 }
 
-conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivoPdf);
+conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivosPdf);
 
-// Cada párrafo del PDF pasa a ser un párrafo de texto corrido (sin los
-// cortes de renglón del PDF, que en un lector de EPUB los decide la pantalla).
-function textoAHtml(texto) {
-  return texto.split(/\n\s*\n/).filter(p => p.trim()).map(parrafo => {
-    const escapado = unirRenglonesDeParrafo(parrafo).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-    return `<p>${escapado}</p>`;
-  }).join('');
-}
-
-async function extraerTextoPdf(archivo) {
-  const bytes = await archivo.arrayBuffer();
-  const pdf = await abrirPdf(bytes);
-  const paginas = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    paginas.push(await extraerTextoPaginaPdf(await pdf.getPage(i)));
-  }
-  return paginas.join('\n\n');
-}
-
+// Un PDF → un EPUB con su estructura (pdf-a-epub.js). Varios → un .zip.
 botonAEpub.addEventListener('click', async () => {
   botonAEpub.disabled = true;
   botonAEpub.textContent = t('boton-a-epub-procesando');
-  progreso.style.display = 'block';
+  resultadoEpub.classList.remove('visible');
+  resumenLoteEpub.style.display = 'none';
+  const autor = document.getElementById('autorLibro').value.trim();
   try {
-    const titulo = tituloLibro.value.trim() || t('titulo-defecto');
-    const autor = document.getElementById('autorLibro').value.trim();
-
-    progreso.textContent = t('progreso-extrayendo');
-    const texto = await extraerTextoPdf(archivoPdfActual);
-    if (!texto.trim()) throw new Error(t('error-sin-texto'));
-
-    progreso.textContent = t('progreso-armando');
-    const capitulos = [{ titulo, html: textoAHtml(texto) }];
-    const blob = await construirEpub({ titulo, autor, capitulos });
-
-    enlaceDescargaEpub.href = URL.createObjectURL(blob);
-    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+    if (pdfsActuales.length === 1) {
+      const titulo = tituloLibro.value.trim() || t('titulo-defecto');
+      const blob = await PdfAEpub.convertir(await pdfsActuales[0].arrayBuffer(), {
+        titulo, autor,
+        alAvanzar: (h, th) => { botonAEpub.textContent = t('progreso-epub-uno').replace('{h}', h + 1).replace('{th}', th); },
+      });
+      enlaceDescargaEpub.href = URL.createObjectURL(blob);
+      enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+      enlaceDescargaEpub.textContent = t('resultado-enlace');
+    } else {
+      let numero = 0;
+      const resultados = await LoteArchivos.convertirLote(pdfsActuales, async (archivo) => {
+        const titulo = archivo.name.replace(/\.pdf$/i, '');
+        return {
+          nombre: titulo + '.epub',
+          blob: await PdfAEpub.convertir(await archivo.arrayBuffer(), {
+            titulo, autor,
+            alAvanzar: (h, th) => {
+              botonAEpub.textContent = t('progreso-epub').replace('{n}', numero).replace('{total}', pdfsActuales.length).replace('{h}', h + 1).replace('{th}', th);
+            },
+          }),
+        };
+      }, (i) => { numero = i + 1; });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaEpub.href = URL.createObjectURL(zip);
+      enlaceDescargaEpub.download = 'epub-desde-pdf.zip';
+      enlaceDescargaEpub.textContent = t('enlace-descargar-zip-epub');
+      LoteArchivos.pintarResumen(resumenLoteEpub, resultados, t);
+    }
     resultadoEpub.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar-epub') + ': ' + error.message);
+    alert(t('error-generar-epub') + ': ' + (error && error.message || String(error)));
   } finally {
     botonAEpub.disabled = false;
     botonAEpub.textContent = t('boton-a-epub');
-    progreso.style.display = 'none';
   }
 });
 </script>

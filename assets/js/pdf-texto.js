@@ -68,6 +68,87 @@ async function generarPdfDeTexto(texto) {
   return pdf;
 }
 
+// Markdown sencillo → PDF. Títulos (#, ## y ###) en negrita y más grandes,
+// listas con viñeta y párrafos. El formato en línea (negrita, cursiva, código,
+// enlaces e imágenes) se quita y queda el texto. No es un renderizado completo
+// de Markdown: las tablas y los bloques de código salen como texto plano.
+function envolverTexto(texto, fuente, tamano, ancho) {
+  const lineas = [];
+  let actual = '';
+  texto.split(' ').forEach((palabra) => {
+    const prueba = actual ? actual + ' ' + palabra : palabra;
+    if (actual && fuente.widthOfTextAtSize(prueba, tamano) > ancho) {
+      lineas.push(actual);
+      actual = palabra;
+    } else {
+      actual = prueba;
+    }
+  });
+  lineas.push(actual);
+  return lineas;
+}
+
+function quitarFormatoMarkdown(linea) {
+  return linea
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/(\*\*|__)(.+?)\1/g, '$2')
+    .replace(/(\*|_)(.+?)\1/g, '$2')
+    .replace(/`([^`]+)`/g, '$1');
+}
+
+async function generarPdfDeMarkdown(markdown) {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const pdf = await PDFDocument.create();
+  const normal = await pdf.embedFont(StandardFonts.Helvetica);
+  const negrita = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const margen = 50;
+  const anchoPagina = 595, altoPagina = 842; // A4
+  const anchoUtil = anchoPagina - margen * 2;
+  let pagina = pdf.addPage([anchoPagina, altoPagina]);
+  let y = altoPagina - margen;
+
+  function escribir(texto, { fuente = normal, tamano = 11, sangria = 0, espacioAntes = 0 } = {}) {
+    const lineas = envolverTexto(adaptarTextoAFuente(texto, fuente), fuente, tamano, anchoUtil - sangria);
+    y -= espacioAntes;
+    lineas.forEach((linea) => {
+      if (y < margen + tamano) {
+        pagina = pdf.addPage([anchoPagina, altoPagina]);
+        y = altoPagina - margen;
+      }
+      pagina.drawText(linea, { x: margen + sangria, y, size: tamano, font: fuente, color: rgb(0.15, 0.15, 0.15) });
+      y -= tamano * 1.4;
+    });
+  }
+
+  let parrafo = [];
+  const cerrarParrafo = () => {
+    if (parrafo.length) escribir(parrafo.join(' '));
+    parrafo = [];
+  };
+  markdown.replace(/\r\n?/g, '\n').split('\n').forEach((crudo) => {
+    const linea = crudo.trim();
+    const titulo = linea.match(/^(#{1,3})\s+(.*)$/);
+    const item = linea.match(/^[-*+]\s+(.*)$/);
+    if (!linea) { cerrarParrafo(); return; }
+    if (titulo) {
+      cerrarParrafo();
+      const tamano = { 1: 20, 2: 16, 3: 13 }[titulo[1].length];
+      escribir(quitarFormatoMarkdown(titulo[2]), { fuente: negrita, tamano, espacioAntes: 8 });
+      y -= 4;
+      return;
+    }
+    if (item) {
+      cerrarParrafo();
+      escribir('• ' + quitarFormatoMarkdown(item[1]), { sangria: 14 });
+      return;
+    }
+    parrafo.push(quitarFormatoMarkdown(linea));
+  });
+  cerrarParrafo();
+  return pdf;
+}
+
 // --- Texto de un PDF con sus renglones y párrafos ---
 //
 // getTextContent() de pdf.js devuelve fragmentos sueltos con su posición en la

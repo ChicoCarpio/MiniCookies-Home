@@ -93,7 +93,7 @@ window.i18nPagina = {
     <div id="panelEpubATexto" data-panel-direccion="epub-a-texto">
       <div class="zona-arrastre" id="zonaArrastreEpub">
         <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaEpub" accept=".epub" hidden>
+        <input type="file" id="entradaEpub" accept=".epub" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaEpub"></ul>
       <div class="controles">
@@ -106,6 +106,7 @@ window.i18nPagina = {
           <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" data-i18n="enlace-descargar-txt">Descargar .txt</a>
         </div>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
     <!-- Texto → EPUB -->
@@ -151,6 +152,7 @@ window.i18nPagina = {
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -168,21 +170,28 @@ const textoExtraido = document.getElementById('textoExtraido');
 const botonCopiar = document.getElementById('botonCopiar');
 const enlaceDescargaTxt = document.getElementById('enlaceDescargaTxt');
 
-let archivoEpubActual = null;
+let epubsActuales = [];
+const resumenLote = document.getElementById('resumenLote');
 
-function mostrarArchivoEpub(archivo) {
-  archivoEpubActual = archivo;
-  listaEpub.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonExtraer.disabled = false;
+function mostrarArchivosEpub(archivos) {
+  epubsActuales = archivos;
+  listaEpub.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaEpub.appendChild(li);
+  });
+  botonExtraer.disabled = archivos.length === 0;
   bloqueResultadoTexto.style.display = 'none';
+  resumenLote.style.display = 'none';
 }
 
-function elegirArchivoEpub(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
-  if (archivo) mostrarArchivoEpub(archivo);
+function elegirArchivosEpub(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivos.length) mostrarArchivosEpub(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivoEpub);
+conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
 
 // Saca el texto plano de un HTML de capítulo, usando el propio parser del navegador.
 function htmlATextoPlano(html) {
@@ -191,17 +200,44 @@ function htmlATextoPlano(html) {
   return contenedor.textContent.replace(/\n{3,}/g, '\n\n').trim();
 }
 
+// Un EPUB da un texto. Con uno solo se muestra y se baja un .txt; con varios,
+// un .zip con un .txt por libro.
+async function convertirEpubATexto(archivo) {
+  const { capitulos } = await leerEpub(archivo);
+  return capitulos.map(capitulo => htmlATextoPlano(capitulo.html)).join('\n\n\n');
+}
+
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   botonExtraer.textContent = t('boton-extraer-procesando');
+  resumenLote.style.display = 'none';
   try {
-    const { capitulos } = await leerEpub(archivoEpubActual);
-    const textoCompleto = capitulos.map(capitulo => htmlATextoPlano(capitulo.html)).join('\n\n\n');
-
-    textoExtraido.value = textoCompleto;
-    const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
-    enlaceDescargaTxt.href = URL.createObjectURL(blob);
-    bloqueResultadoTexto.style.display = 'block';
+    if (epubsActuales.length === 1) {
+      const textoCompleto = await convertirEpubATexto(epubsActuales[0]);
+      textoExtraido.value = textoCompleto;
+      textoExtraido.style.display = '';
+      botonCopiar.style.display = '';
+      enlaceDescargaTxt.download = 'texto-extraido.txt';
+      enlaceDescargaTxt.textContent = t('enlace-descargar-txt');
+      const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+      enlaceDescargaTxt.href = URL.createObjectURL(blob);
+      bloqueResultadoTexto.style.display = 'block';
+    } else {
+      const resultados = await LoteArchivos.convertirLote(epubsActuales, async (archivo) => ({
+        nombre: archivo.name.replace(/\.epub$/i, '') + '.txt',
+        blob: new Blob([await convertirEpubATexto(archivo)], { type: 'text/plain;charset=utf-8' }),
+      }), (i, total) => {
+        botonExtraer.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      textoExtraido.style.display = 'none';
+      botonCopiar.style.display = 'none';
+      enlaceDescargaTxt.href = URL.createObjectURL(zip);
+      enlaceDescargaTxt.download = 'texto-desde-epub.zip';
+      enlaceDescargaTxt.textContent = t('lote-enlace-zip');
+      bloqueResultadoTexto.style.display = 'block';
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
+    }
   } catch (error) {
     alert(t('error-extraer') + ': ' + error.message);
   } finally {

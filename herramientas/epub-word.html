@@ -97,7 +97,7 @@ window.i18nPagina = {
     <div id="panelEpubAWord" data-panel-direccion="epub-a-word">
       <div class="zona-arrastre" id="zonaArrastreEpub">
         <span data-i18n="zona-arrastre-epub">📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaEpub" accept=".epub" hidden>
+        <input type="file" id="entradaEpub" accept=".epub" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaEpub"></ul>
       <div class="controles">
@@ -110,6 +110,7 @@ window.i18nPagina = {
       <div class="resultado" id="resultadoWord">
         <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="libro.docx" data-i18n="resultado-enlace-word">Descargar Word</a>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
     <!-- Word → EPUB -->
@@ -160,6 +161,9 @@ window.i18nPagina = {
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/emf.js"></script>
+<script src="../assets/js/imagenes-office.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -177,51 +181,84 @@ const botonAWord = document.getElementById('botonAWord');
 const resultadoWord = document.getElementById('resultadoWord');
 const enlaceDescargaWord = document.getElementById('enlaceDescargaWord');
 
-let archivoEpubActual = null;
+let epubsActuales = [];
+const resumenLote = document.getElementById('resumenLote');
 
-function mostrarArchivoEpub(archivo) {
-  archivoEpubActual = archivo;
-  listaEpub.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAWord.disabled = false;
+function mostrarArchivosEpub(archivos) {
+  epubsActuales = archivos;
+  listaEpub.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaEpub.appendChild(li);
+  });
+  botonAWord.disabled = archivos.length === 0;
   resultadoWord.classList.remove('visible');
-  if (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === 'libro') {
-    nombreArchivoInput.value = archivo.name.replace(/\.epub$/i, '');
+  resumenLote.style.display = 'none';
+  // Con un solo libro, el nombre del Word sale de su archivo (si no se escribió otro).
+  if (archivos.length === 1 && (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === 'libro')) {
+    nombreArchivoInput.value = archivos[0].name.replace(/\.epub$/i, '');
   }
 }
 
-function elegirArchivoEpub(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.epub'));
-  if (archivo) mostrarArchivoEpub(archivo);
+function elegirArchivosEpub(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.epub'));
+  if (archivos.length) mostrarArchivosEpub(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivoEpub);
+conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
+
+// Un EPUB da un Word: cada capítulo empieza en una página nueva.
+async function convertirEpubAWord(archivo, alProgresar) {
+  const { capitulos } = await leerEpub(archivo);
+  const bloquesFinales = [];
+  for (let i = 0; i < capitulos.length; i++) {
+    if (alProgresar) alProgresar(i, capitulos.length);
+    const contenedor = document.createElement('div');
+    contenedor.innerHTML = capitulos[i].html;
+    if (i > 0) bloquesFinales.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
+    bloquesFinales.push(...await contenidoAParrafos(contenedor));
+  }
+  if (bloquesFinales.length === 0) throw new Error(t('error-sin-contenido'));
+  const documento = new docx.Document({
+    numbering: NUMERACION_DOCX_CONFIG,
+    sections: [{ children: bloquesFinales }],
+  });
+  return docx.Packer.toBlob(documento);
+}
 
 botonAWord.addEventListener('click', async () => {
   botonAWord.disabled = true;
   progreso.style.display = 'block';
+  resumenLote.style.display = 'none';
   try {
-    progreso.textContent = t('progreso-leyendo-epub');
-    const { capitulos } = await leerEpub(archivoEpubActual);
-
-    const bloquesFinales = [];
-    for (let i = 0; i < capitulos.length; i++) {
-      progreso.textContent = t('progreso-capitulo').replace('{actual}', i + 1).replace('{total}', capitulos.length);
-      const contenedor = document.createElement('div');
-      contenedor.innerHTML = capitulos[i].html;
-      if (i > 0) bloquesFinales.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
-      bloquesFinales.push(...await contenidoAParrafos(contenedor));
+    if (epubsActuales.length === 1) {
+      progreso.textContent = t('progreso-leyendo-epub');
+      const blob = await convertirEpubAWord(epubsActuales[0], (i, total) => {
+        progreso.textContent = t('progreso-capitulo').replace('{actual}', i + 1).replace('{total}', total);
+      });
+      const nombreArchivo = (nombreArchivoInput.value || 'libro').trim();
+      enlaceDescargaWord.href = URL.createObjectURL(blob);
+      enlaceDescargaWord.download = `${nombreArchivo}.docx`;
+      enlaceDescargaWord.textContent = t('resultado-enlace-word');
+      resultadoWord.classList.add('visible');
+    } else {
+      // Varios libros: un .docx por EPUB, con el nombre de cada archivo.
+      const resultados = await LoteArchivos.convertirLote(epubsActuales, async (archivo) => ({
+        nombre: archivo.name.replace(/\.epub$/i, '') + '.docx',
+        blob: await convertirEpubAWord(archivo, (i, total) => {
+          progreso.textContent = t('progreso-capitulo').replace('{actual}', i + 1).replace('{total}', total);
+        }),
+      }), (i, total) => {
+        progreso.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaWord.href = URL.createObjectURL(zip);
+      enlaceDescargaWord.download = 'word-desde-epub.zip';
+      enlaceDescargaWord.textContent = t('lote-enlace-zip');
+      resultadoWord.classList.add('visible');
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
-    if (bloquesFinales.length === 0) throw new Error(t('error-sin-contenido'));
-
-    const documento = new docx.Document({
-      numbering: NUMERACION_DOCX_CONFIG,
-      sections: [{ children: bloquesFinales }],
-    });
-    const blob = await docx.Packer.toBlob(documento);
-    const nombreArchivo = (nombreArchivoInput.value || 'libro').trim();
-    enlaceDescargaWord.href = URL.createObjectURL(blob);
-    enlaceDescargaWord.download = `${nombreArchivo}.docx`;
-    resultadoWord.classList.add('visible');
   } catch (error) {
     alert(t('error-convertir') + ': ' + error.message);
   } finally {
@@ -239,43 +276,70 @@ const botonAEpub = document.getElementById('botonAEpub');
 const resultadoEpub = document.getElementById('resultadoEpub');
 const enlaceDescargaEpub = document.getElementById('enlaceDescargaEpub');
 
-let archivoWordActual = null;
+let wordsActuales = [];
 
-function mostrarArchivoWord(archivo) {
-  archivoWordActual = archivo;
-  listaWord.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonAEpub.disabled = false;
+function mostrarArchivosWord(archivos) {
+  wordsActuales = archivos;
+  listaWord.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaWord.appendChild(li);
+  });
+  botonAEpub.disabled = archivos.length === 0;
   resultadoEpub.classList.remove('visible');
-  if (!tituloLibro.value.trim()) {
-    tituloLibro.value = archivo.name.replace(/\.docx$/i, '');
+  resumenLote.style.display = 'none';
+  // Con un solo documento, el título sale de su nombre (si no se escribió otro).
+  if (archivos.length === 1 && !tituloLibro.value.trim()) {
+    tituloLibro.value = archivos[0].name.replace(/\.docx$/i, '');
   }
 }
 
-function elegirArchivoWord(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
-  if (archivo) mostrarArchivoWord(archivo);
+function elegirArchivosWord(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivos.length) mostrarArchivosWord(archivos);
 }
 
-conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivoWord);
+conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
+
+// Un Word da un EPUB. Con varios, cada uno sale con su propio nombre como título.
+async function convertirWordAEpub(archivo, titulo, autor) {
+  // Las tablas pegadas de Excel (EMF) pasan antes a PNG: un lector de EPUB no las muestra.
+  const arrayBuffer = await ImagenesOffice.docxConImagenesComunes(await archivo.arrayBuffer());
+  const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+  const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
+  return construirEpub({ titulo, autor, capitulos });
+}
 
 botonAEpub.addEventListener('click', async () => {
   botonAEpub.disabled = true;
   progreso.style.display = 'block';
+  resumenLote.style.display = 'none';
   try {
-    const titulo = tituloLibro.value.trim() || t('titulo-defecto');
     const autor = document.getElementById('autorLibro').value.trim();
 
-    progreso.textContent = t('progreso-leyendo-word');
-    const arrayBuffer = await archivoWordActual.arrayBuffer();
-    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
-    const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
-
-    progreso.textContent = t('progreso-armando');
-    const blob = await construirEpub({ titulo, autor, capitulos });
-
-    enlaceDescargaEpub.href = URL.createObjectURL(blob);
-    enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
-    resultadoEpub.classList.add('visible');
+    if (wordsActuales.length === 1) {
+      const titulo = tituloLibro.value.trim() || t('titulo-defecto');
+      progreso.textContent = t('progreso-leyendo-word');
+      const blob = await convertirWordAEpub(wordsActuales[0], titulo, autor);
+      enlaceDescargaEpub.href = URL.createObjectURL(blob);
+      enlaceDescargaEpub.download = titulo.replace(/[\\/:*?"<>|]/g, '') + '.epub';
+      enlaceDescargaEpub.textContent = t('resultado-enlace-epub');
+      resultadoEpub.classList.add('visible');
+    } else {
+      const resultados = await LoteArchivos.convertirLote(wordsActuales, async (archivo) => {
+        const titulo = archivo.name.replace(/\.docx$/i, '');
+        return { nombre: titulo + '.epub', blob: await convertirWordAEpub(archivo, titulo, autor) };
+      }, (i, total) => {
+        progreso.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaEpub.href = URL.createObjectURL(zip);
+      enlaceDescargaEpub.download = 'epub-desde-word.zip';
+      enlaceDescargaEpub.textContent = t('lote-enlace-zip');
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
+      resultadoEpub.classList.add('visible');
+    }
   } catch (error) {
     alert(t('error-generar') + ': ' + error.message);
   } finally {

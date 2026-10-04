@@ -43,7 +43,15 @@ window.i18nPagina = {
     'boton-copiar-md': 'Copiar Markdown',
     'boton-copiado': '¡Copiado!',
     'enlace-descargar-md': 'Descargar .md',
+    'enlace-descargar-zip-md': 'Descargar .zip (Markdown e imágenes)',
     'error-md-vacio': 'Escribí algo de Markdown primero.',
+    'zona-arrastre-md': '📄 Arrastrá tus archivos .md acá o hacé clic para elegirlos',
+    'boton-convertir-word': 'Convertir a Word',
+    'boton-convertir-word-procesando': 'Convirtiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'enlace-descargar-docx': 'Descargar .docx',
+    'md-manual-titulo': 'O escribilo a mano',
+    'error-md-archivo-vacio': 'El archivo no tiene contenido.',
     'error-generar': 'No se pudo generar el documento',
     'advertencias': '⚠️ {n} advertencia(s) al leer el documento (puede haber elementos que no se transfirieron perfectamente).',
     'error-convertir': 'No se pudo convertir el documento'
@@ -65,7 +73,15 @@ window.i18nPagina = {
     'boton-copiar-md': 'Copy Markdown',
     'boton-copiado': 'Copied!',
     'enlace-descargar-md': 'Download .md',
+    'enlace-descargar-zip-md': 'Download .zip (Markdown and images)',
     'error-md-vacio': 'Type some Markdown first.',
+    'zona-arrastre-md': '📄 Drag your .md files here or click to choose them',
+    'boton-convertir-word': 'Convert to Word',
+    'boton-convertir-word-procesando': 'Converting...',
+    'resultado-listo': '✅ Done. ',
+    'enlace-descargar-docx': 'Download .docx',
+    'md-manual-titulo': 'Or type it in',
+    'error-md-archivo-vacio': 'The file is empty.',
     'error-generar': 'Couldn’t generate the document',
     'advertencias': '⚠️ {n} warning(s) while reading the document (some elements may not have transferred perfectly).',
     'error-convertir': 'Couldn’t convert the document'
@@ -96,6 +112,20 @@ window.i18nPagina = {
 
     <!-- Markdown → Word -->
     <div id="panelMdAWord" data-panel-direccion="md-a-word">
+      <div class="zona-arrastre" id="zonaMd">
+        <span data-i18n="zona-arrastre-md">📄 Arrastrá tus archivos .md acá o hacé clic para elegirlos</span>
+        <input type="file" id="entradaArchivoMd" accept=".md,.markdown,.txt,text/markdown,text/plain" multiple hidden>
+      </div>
+      <ul class="lista-archivos" id="listaMd"></ul>
+      <div class="controles">
+        <button class="boton" id="botonConvertirWord" disabled data-i18n="boton-convertir-word">Convertir a Word</button>
+      </div>
+      <div class="resultado" id="resultadoWord">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="documento.docx" data-i18n="enlace-descargar-docx">Descargar .docx</a>
+      </div>
+      <div id="resumenLoteWord" class="resultado" style="display:none; margin-top:20px;"></div>
+
+      <h2 data-i18n="md-manual-titulo">O escribilo a mano</h2>
       <div class="columnas">
         <label class="campo">
           Markdown
@@ -126,7 +156,7 @@ Este es un ejemplo de **Markdown** con:
     <div id="panelWordAMd" data-panel-direccion="word-a-md" style="display:none;">
       <div class="zona-arrastre" id="zonaArrastre">
         <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaArchivo" accept=".docx" hidden>
+        <input type="file" id="entradaArchivo" accept=".docx" multiple hidden>
       </div>
       <ul class="lista-archivos" id="listaArchivo"></ul>
       <div class="controles">
@@ -140,6 +170,7 @@ Este es un ejemplo de **Markdown** con:
           <a class="boton" id="enlaceDescargaMd" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
   </div>
 
@@ -157,6 +188,10 @@ Este es un ejemplo de **Markdown** con:
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/emf.js"></script>
+<script src="../assets/js/imagenes-office.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelMdAWord = document.getElementById('panelMdAWord');
@@ -173,23 +208,88 @@ function actualizarVistaPreviaMd() {
 entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
 actualizarVistaPreviaMd();
 
+// Un texto Markdown → un .docx. Lo usan el cuadro de archivos y el de escribir a mano.
+async function markdownAWord(textoMd, mensajeVacio) {
+  const contenedor = document.createElement('div');
+  contenedor.innerHTML = sanitizarHtml(marked.parse(textoMd));
+  const parrafos = await contenidoAParrafos(contenedor);
+  if (parrafos.length === 0) throw new Error(mensajeVacio);
+  const documento = new docx.Document({
+    numbering: NUMERACION_DOCX_CONFIG,
+    sections: [{ children: parrafos }],
+  });
+  return docx.Packer.toBlob(documento);
+}
+
+// Archivos .md: uno → .docx; varios → .zip con un .docx por archivo.
+const zonaMd = document.getElementById('zonaMd');
+const entradaArchivoMd = document.getElementById('entradaArchivoMd');
+const listaMd = document.getElementById('listaMd');
+const botonConvertirWord = document.getElementById('botonConvertirWord');
+const resultadoWord = document.getElementById('resultadoWord');
+const enlaceDescargaWord = document.getElementById('enlaceDescargaWord');
+const resumenLoteWord = document.getElementById('resumenLoteWord');
+let mdsActuales = [];
+
+function elegirArchivosMd(listaFileList) {
+  const archivos = [...listaFileList].filter((f) => /\.(md|markdown|txt)$/i.test(f.name));
+  if (!archivos.length) return;
+  mdsActuales = archivos;
+  listaMd.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaMd.appendChild(li);
+  });
+  botonConvertirWord.disabled = false;
+  resultadoWord.classList.remove('visible');
+  resumenLoteWord.style.display = 'none';
+}
+
+conectarZonaArrastre(zonaMd, entradaArchivoMd, elegirArchivosMd);
+
+const nombreDocx = (archivo) => archivo.name.replace(/\.(md|markdown|txt)$/i, '') + '.docx';
+
+botonConvertirWord.addEventListener('click', async () => {
+  botonConvertirWord.disabled = true;
+  botonConvertirWord.textContent = t('boton-convertir-word-procesando');
+  resultadoWord.classList.remove('visible');
+  resumenLoteWord.style.display = 'none';
+  try {
+    if (mdsActuales.length === 1) {
+      const blob = await markdownAWord(await mdsActuales[0].text(), t('error-md-archivo-vacio'));
+      enlaceDescargaWord.href = URL.createObjectURL(blob);
+      enlaceDescargaWord.download = nombreDocx(mdsActuales[0]);
+      enlaceDescargaWord.textContent = t('enlace-descargar-docx');
+    } else {
+      const resultados = await LoteArchivos.convertirLote(mdsActuales, async (archivo) => ({
+        nombre: nombreDocx(archivo),
+        blob: await markdownAWord(await archivo.text(), t('error-md-archivo-vacio')),
+      }), (i, total) => {
+        botonConvertirWord.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaWord.href = URL.createObjectURL(zip);
+      enlaceDescargaWord.download = 'word-desde-markdown.zip';
+      enlaceDescargaWord.textContent = t('lote-enlace-zip');
+      LoteArchivos.pintarResumen(resumenLoteWord, resultados, t);
+    }
+    resultadoWord.classList.add('visible');
+  } catch (error) {
+    alert(t('error-generar') + ': ' + (error && error.message || String(error)));
+  } finally {
+    botonConvertirWord.disabled = false;
+    botonConvertirWord.textContent = t('boton-convertir-word');
+  }
+});
+
+// Escrito a mano.
 document.getElementById('botonGenerar').addEventListener('click', async () => {
   const boton = document.getElementById('botonGenerar');
   boton.disabled = true;
   boton.textContent = t('boton-generar-procesando');
   try {
-    const contenedor = document.createElement('div');
-    contenedor.innerHTML = sanitizarHtml(marked.parse(entradaMarkdown.value));
-
-    const parrafos = await contenidoAParrafos(contenedor);
-    if (parrafos.length === 0) throw new Error(t('error-md-vacio'));
-
-    const documento = new docx.Document({
-      numbering: NUMERACION_DOCX_CONFIG,
-      sections: [{ children: parrafos }],
-    });
-
-    const blob = await docx.Packer.toBlob(documento);
+    const blob = await markdownAWord(entradaMarkdown.value, t('error-md-vacio'));
     const nombreArchivo = (document.getElementById('nombreArchivo').value || 'documento').trim();
 
     const enlace = document.createElement('a');
@@ -217,39 +317,98 @@ const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
 
 const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
 
-let archivoActual = null;
+let docxsActuales = [];
+const resumenLote = document.getElementById('resumenLote');
 
-function mostrarArchivo(archivo) {
-  archivoActual = archivo;
-  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonConvertir.disabled = false;
+function mostrarArchivos(archivos) {
+  docxsActuales = archivos;
+  listaArchivo.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaArchivo.appendChild(li);
+  });
+  botonConvertir.disabled = archivos.length === 0;
   bloqueResultado.style.display = 'none';
   advertencias.style.display = 'none';
+  resumenLote.style.display = 'none';
 }
 
-function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
-  if (archivo) mostrarArchivo(archivo);
+function elegirArchivos(listaFileList) {
+  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (archivos.length) mostrarArchivos(archivos);
 }
 
-conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivos);
+
+// Las imágenes del Word salen como archivos en una carpeta "<documento>-imagenes/"
+// y el Markdown solo las enlaza: antes iban en base64 dentro del texto y lo
+// volvían ilegible. Las EMF/WMF (tablas pegadas de Excel) pasan a PNG.
+async function convertirWordAMarkdown(archivo) {
+  const arrayBuffer = await archivo.arrayBuffer();
+  const base = archivo.name.replace(/\.docx$/i, '');
+  const carpeta = `${base}-imagenes`;
+  const imagenes = [];
+  const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer }, {
+    convertImage: mammoth.images.imgElement(async (imagen) => {
+      const original = Uint8Array.from(atob(await imagen.read('base64')), (c) => c.charCodeAt(0));
+      const { bytes, extension } = await ImagenesOffice.aFormatoComun(original, imagen.contentType);
+      const nombre = `${carpeta}/imagen-${imagenes.length + 1}.${extension}`;
+      imagenes.push({ nombre, datos: bytes });
+      return { src: encodeURI(nombre) };
+    }),
+  });
+  return {
+    nombre: base + '.md',
+    markdown: turndownService.turndown(resultadoMammoth.value),
+    imagenes,
+    mensajes: resultadoMammoth.messages.length,
+  };
+}
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
   botonConvertir.textContent = t('boton-convertir-procesando');
+  resumenLote.style.display = 'none';
   try {
-    const arrayBuffer = await archivoActual.arrayBuffer();
-    const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
-    const markdown = turndownService.turndown(resultadoMammoth.value);
+    if (docxsActuales.length === 1) {
+      const { nombre, markdown, imagenes, mensajes } = await convertirWordAMarkdown(docxsActuales[0]);
+      markdownResultado.value = markdown;
+      markdownResultado.style.display = '';
+      botonCopiarMd.style.display = '';
+      const blobMd = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+      if (imagenes.length) {
+        // Con imágenes: un .zip con el .md y su carpeta de imágenes.
+        const zip = await LoteArchivos.zipDeResultados([{ ok: true, nombre, blob: blobMd, extras: imagenes }]);
+        enlaceDescargaMd.href = URL.createObjectURL(zip);
+        enlaceDescargaMd.download = nombre.replace(/\.md$/, '') + '.zip';
+        enlaceDescargaMd.textContent = t('enlace-descargar-zip-md');
+      } else {
+        enlaceDescargaMd.href = URL.createObjectURL(blobMd);
+        enlaceDescargaMd.download = nombre;
+        enlaceDescargaMd.textContent = t('enlace-descargar-md');
+      }
+      bloqueResultado.style.display = 'block';
 
-    markdownResultado.value = markdown;
-    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
-    enlaceDescargaMd.href = URL.createObjectURL(blob);
-    bloqueResultado.style.display = 'block';
-
-    if (resultadoMammoth.messages.length > 0) {
-      advertencias.textContent = t('advertencias').replace('{n}', resultadoMammoth.messages.length);
-      advertencias.style.display = 'block';
+      if (mensajes > 0) {
+        advertencias.textContent = t('advertencias').replace('{n}', mensajes);
+        advertencias.style.display = 'block';
+      }
+    } else {
+      const resultados = await LoteArchivos.convertirLote(docxsActuales, async (archivo) => {
+        const { nombre, markdown, imagenes } = await convertirWordAMarkdown(archivo);
+        return { nombre, blob: new Blob([markdown], { type: 'text/markdown;charset=utf-8' }), extras: imagenes };
+      }, (i, total) => {
+        botonConvertir.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      markdownResultado.style.display = 'none';
+      botonCopiarMd.style.display = 'none';
+      enlaceDescargaMd.href = URL.createObjectURL(zip);
+      enlaceDescargaMd.download = 'markdown-desde-word.zip';
+      enlaceDescargaMd.textContent = t('lote-enlace-zip');
+      bloqueResultado.style.display = 'block';
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
   } catch (error) {
     alert(t('error-convertir') + ': ' + error.message);

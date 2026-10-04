@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -15,6 +16,7 @@ window.i18nPagina = {
     'titulo-pagina': 'Reordenar diapositivas de PowerPoint gratis — Mini Cookies',
     'meta-descripcion': 'Reordená o eliminá diapositivas de una presentación PowerPoint (.pptx), gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Administrar / reordenar diapositivas',
+    'ayuda-diapositivas': 'Si una diapositiva que queda tiene un enlace a una diapositiva que se quitó, el enlace se borra y el texto queda como texto normal. Las notas y las diapositivas ocultas se conservan.',
     'intro': 'Elegí un archivo .pptx. Arrastrá las diapositivas para reordenarlas, o quitá las que no quieras, y descargá la presentación resultante.',
     'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
     'cargando': 'Leyendo la presentación...',
@@ -34,6 +36,7 @@ window.i18nPagina = {
     'titulo-pagina': 'Reorder PowerPoint Slides Free — Mini Cookies',
     'meta-descripcion': 'Reorder or delete slides of a PowerPoint presentation (.pptx), free and without uploading your file anywhere.',
     'h1': 'Manage / reorder slides',
+    'ayuda-diapositivas': 'If a slide that stays has a link to a slide that was removed, the link is deleted and the text stays as plain text. Notes and hidden slides are kept.',
     'intro': 'Pick a .pptx file. Drag the slides to reorder them, or remove the ones you don’t want, and download the resulting presentation.',
     'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
     'cargando': 'Reading the presentation...',
@@ -78,6 +81,10 @@ window.i18nPagina = {
 
     <div class="controles">
       <button class="boton" id="botonGuardar" disabled data-i18n="boton-guardar">Descargar reordenada</button>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-diapositivas">Si una diapositiva que queda tiene un enlace a una diapositiva que se quitó, el enlace se borra y el texto queda como texto normal. Las notas y las diapositivas ocultas se conservan.</span>
+      </span>
     </div>
 
     <div class="resultado" id="resultado">
@@ -98,6 +105,7 @@ window.i18nPagina = {
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');

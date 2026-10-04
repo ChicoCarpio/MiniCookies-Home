@@ -80,6 +80,11 @@ window.i18nPagina = {
     'ratio-libre': 'Libre',
     'boton-recortar': 'Recortar',
     'tamano-recorte': 'Recorte: {w} × {h} px',
+    'recorte-medidas': 'Medidas exactas (px de la imagen original)',
+    'recorte-x': 'X',
+    'recorte-y': 'Y',
+    'recorte-ancho': 'Ancho',
+    'recorte-alto': 'Alto',
     'boton-descargar': 'Descargar imagen recortada',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen recortada',
@@ -94,6 +99,11 @@ window.i18nPagina = {
     'ratio-libre': 'Free',
     'boton-recortar': 'Crop',
     'tamano-recorte': 'Crop: {w} × {h} px',
+    'recorte-medidas': 'Exact size (px of the original image)',
+    'recorte-x': 'X',
+    'recorte-y': 'Y',
+    'recorte-ancho': 'Width',
+    'recorte-alto': 'Height',
     'boton-descargar': 'Download the cropped image',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download the cropped image',
@@ -152,6 +162,13 @@ window.i18nPagina = {
           <button type="button" data-ratio="0.5625">9:16</button>
         </div>
       </label>
+      <div class="campos-medidas" id="camposMedidas">
+        <span data-i18n="recorte-medidas">Medidas exactas (px de la imagen original)</span>
+        <label><span data-i18n="recorte-x">X</span> <input type="number" id="recorteX" min="0" step="1" disabled></label>
+        <label><span data-i18n="recorte-y">Y</span> <input type="number" id="recorteY" min="0" step="1" disabled></label>
+        <label><span data-i18n="recorte-ancho">Ancho</span> <input type="number" id="recorteAncho" min="1" step="1" disabled></label>
+        <label><span data-i18n="recorte-alto">Alto</span> <input type="number" id="recorteAlto" min="1" step="1" disabled></label>
+      </div>
       <button class="boton" id="botonRecortar" disabled data-i18n="boton-recortar">Recortar</button>
       <span id="tamanoRecorte" style="color:var(--texto-suave); font-size:0.85rem;"></span>
     </div>
@@ -232,7 +249,39 @@ function dibujarCaja() {
       .replace('{h}', Math.round(caja.h * escala));
   }
   anchoMostradoPrevio = imgRecorte.offsetWidth;
+  mostrarCamposCaja();
 }
+
+// Medidas exactas: los campos trabajan en píxeles de la imagen original; la caja
+// se dibuja en píxeles mostrados, así que se convierte con la misma escala.
+const camposCaja = {
+  x: document.getElementById('recorteX'),
+  y: document.getElementById('recorteY'),
+  w: document.getElementById('recorteAncho'),
+  h: document.getElementById('recorteAlto'),
+};
+function escalaCaja() {
+  return imagenActual && imgRecorte.offsetWidth ? imagenActual.naturalWidth / imgRecorte.offsetWidth : 1;
+}
+function mostrarCamposCaja() {
+  const e = escalaCaja();
+  camposCaja.x.value = Math.round(caja.x * e);
+  camposCaja.y.value = Math.round(caja.y * e);
+  camposCaja.w.value = Math.round(caja.w * e);
+  camposCaja.h.value = Math.round(caja.h * e);
+}
+function aplicarCamposCaja() {
+  if (!imagenActual) return;
+  const e = escalaCaja();
+  caja.x = Number(camposCaja.x.value) / e;
+  caja.y = Number(camposCaja.y.value) / e;
+  caja.w = Number(camposCaja.w.value) / e;
+  // Con relación fija, el alto sale del ancho (el campo Alto se corrige solo).
+  caja.h = ratioObjetivo > 0 ? caja.w / ratioObjetivo : Number(camposCaja.h.value) / e;
+  limitarCaja();
+  dibujarCaja();
+}
+Object.values(camposCaja).forEach((campo) => campo.addEventListener('change', aplicarCamposCaja));
 
 function limitarCaja() {
   const anchoImg = imgRecorte.offsetWidth, altoImg = imgRecorte.offsetHeight;
@@ -343,12 +392,14 @@ async function mostrarArchivo(archivo) {
   if (!archivo) {
     zonaRecorte.style.display = 'none';
     botonRecortar.disabled = true;
+    Object.values(camposCaja).forEach((c) => { c.disabled = true; });
     return;
   }
   imagenActual = await cargarImagen(archivo);
   imgRecorte.src = imagenActual.src;
   zonaRecorte.style.display = 'inline-block';
   botonRecortar.disabled = false;
+  Object.values(camposCaja).forEach((c) => { c.disabled = false; });
   vistaResultado.style.display = 'none';
   controlesDescarga.style.display = 'none';
   resultado.classList.remove('visible');

@@ -130,7 +130,7 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
     <dc:identifier id="uid">${escaparXmlEpub(uuid)}</dc:identifier>
     <dc:title>${escaparXmlEpub(titulo || 'Documento')}</dc:title>
     <dc:language>${escaparXmlEpub(idioma || 'es')}</dc:language>
-    <dc:creator>${escaparXmlEpub(autor || 'Herramientas Ofimáticas')}</dc:creator>
+    ${autor ? `<dc:creator>${escaparXmlEpub(autor)}</dc:creator>` : ''}
     <meta property="dcterms:modified">${fecha}</meta>
   </metadata>
   <manifest>${manifestItems.join('')}</manifest>
@@ -237,6 +237,20 @@ async function leerEpub(archivo) {
 
     // Incrusta cada imagen referenciada como data:URI, resolviendo la ruta
     // relativa al archivo del capítulo (no a la del OPF).
+    // Las portadas suelen venir envueltas en SVG (<image xlink:href>), no en <img>:
+    // se pasan a <img> para que la misma incrustación las alcance.
+    for (const svgImagen of [...cuerpo.querySelectorAll('image')]) {
+      const href = svgImagen.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || svgImagen.getAttribute('href') || '';
+      if (!href) continue;
+      const img = cuerpo.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+      img.setAttribute('src', href);
+      img.setAttribute('alt', 'Portada');
+      // Si el <svg> solo envuelve esta imagen, se reemplaza entero: vacío seguía
+      // ocupando su alto (una hoja en blanco antes de la portada en EPUB → PDF).
+      const svg = svgImagen.closest('svg');
+      const soloImagen = svg && [...svg.querySelectorAll('*')].every((n) => n === svgImagen || /^(title|desc|defs)$/i.test(n.localName));
+      (soloImagen ? svg : svgImagen).replaceWith(img);
+    }
     const imagenes = [...cuerpo.querySelectorAll('img')];
     for (const img of imagenes) {
       const src = img.getAttribute('src') || '';

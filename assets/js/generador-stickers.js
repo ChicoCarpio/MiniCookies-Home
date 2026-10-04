@@ -229,9 +229,14 @@ export function iniciarGeneradorStickers() {
     const etiquetasValidas = new Set();
     tamanos.forEach((tamano, etiqueta) => { if (tamano >= tamanoMaximo * UMBRAL_RELATIVO) etiquetasValidas.add(etiqueta); });
 
+    // Alfa bajo = restos del fondo que el segmentador dejó a medias (un libro
+    // oscuro detrás de la taza, por ejemplo). Si se conservan, el borde blanco
+    // los pinta como un velo translúcido. Se quitan aunque formen un bloque grande.
+    const UMBRAL_VELO = 96;
     let seModificoAlgo = false;
     for (let i = 0; i < total; i++) {
-      if (datos[i * 4 + 3] > 0 && !etiquetasValidas.has(etiquetas[i])) {
+      const alfa = datos[i * 4 + 3];
+      if (alfa > 0 && (!etiquetasValidas.has(etiquetas[i]) || alfa < UMBRAL_VELO)) {
         datos[i * 4 + 3] = 0;
         seModificoAlgo = true;
       }

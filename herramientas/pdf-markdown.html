@@ -38,16 +38,25 @@ window.i18nPagina = {
     'intro': 'Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.',
     'dir-pdf-a-md': 'PDF → Markdown',
     'dir-md-a-pdf': 'Markdown → PDF',
-    'aviso-solo-texto-antes': '⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (',
+    'aviso-solo-texto-antes': '⚠️ Solo se extrae el texto. Detecta títulos cuando la letra es más grande que el texto normal, pero no negritas, listas ni tablas del PDF original. Cada página se separa con una línea horizontal (',
     'aviso-solo-texto-final': ').',
     'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
     'boton-extraer': 'Convertir a Markdown',
     'boton-extraer-procesando': 'Convirtiendo...',
+    'boton-extraer-progreso': 'Convirtiendo {n} de {total}...',
+    'enlace-descargar-zip': 'Descargar .zip con los .md',
     'boton-copiar-md': 'Copiar Markdown',
     'boton-copiado': '¡Copiado!',
     'enlace-descargar-md': 'Descargar .md',
     'campo-markdown': 'Markdown',
     'campo-vista-previa': 'Vista previa',
+    'zona-arrastre-md': '📄 Arrastrá tus archivos .md acá o hacé clic para elegirlos',
+    'boton-convertir-pdf': 'Convertir a PDF',
+    'boton-convertir-pdf-procesando': 'Convirtiendo...',
+    'boton-convertir-pdf-progreso': 'Convirtiendo {n} de {total}...',
+    'enlace-descargar-pdf': 'Descargar PDF',
+    'enlace-descargar-pdf-zip': 'Descargar .zip con los PDF',
+    'md-manual-titulo': 'O escribilo a mano',
     'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
     'markdown-ejemplo': '## Hola mundo\n\nEste es un ejemplo de **Markdown** con:\n\n- Una lista\n- *Texto en cursiva*\n- [Un link](https://ejemplo.com)',
     'error-sin-texto': 'No se encontró texto en el PDF (¿es un escaneo?).',
@@ -60,16 +69,25 @@ window.i18nPagina = {
     'intro': 'Convert a PDF to Markdown, or Markdown to PDF, whichever you need.',
     'dir-pdf-a-md': 'PDF → Markdown',
     'dir-md-a-pdf': 'Markdown → PDF',
-    'aviso-solo-texto-antes': '⚠️ Only the text is extracted — it doesn’t detect headings, bold text or tables from the original PDF. Each page is separated with a horizontal rule (',
+    'aviso-solo-texto-antes': '⚠️ Only the text is extracted. Headings are detected when the type is larger than the body text, but not bold text, lists or tables from the original PDF. Each page is separated with a horizontal rule (',
     'aviso-solo-texto-final': ').',
     'zona-arrastre': '📄 Drag your PDF here or click to choose it',
     'boton-extraer': 'Convert to Markdown',
     'boton-extraer-procesando': 'Converting...',
+    'boton-extraer-progreso': 'Converting {n} of {total}...',
+    'enlace-descargar-zip': 'Download .zip with the .md files',
     'boton-copiar-md': 'Copy Markdown',
     'boton-copiado': 'Copied!',
     'enlace-descargar-md': 'Download .md',
     'campo-markdown': 'Markdown',
     'campo-vista-previa': 'Preview',
+    'zona-arrastre-md': '📄 Drag your .md files here or click to choose them',
+    'boton-convertir-pdf': 'Convert to PDF',
+    'boton-convertir-pdf-procesando': 'Converting...',
+    'boton-convertir-pdf-progreso': 'Converting {n} of {total}...',
+    'enlace-descargar-pdf': 'Download PDF',
+    'enlace-descargar-pdf-zip': 'Download .zip with the PDFs',
+    'md-manual-titulo': 'Or write it by hand',
     'boton-imprimir': '🖨️ Save as PDF / Print',
     'markdown-ejemplo': '## Hello world\n\nThis is an example of **Markdown** with:\n\n- A list\n- *Italic text*\n- [A link](https://example.com)',
     'error-sin-texto': 'No text was found in the PDF (is it a scan?).',
@@ -102,11 +120,11 @@ window.i18nPagina = {
     <!-- PDF → Markdown -->
     <div id="panelPdfAMd" data-panel-direccion="pdf-a-md">
       <p style="color:var(--texto-suave); font-size:0.9rem;">
-        <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto — no detecta títulos, negritas ni tablas del PDF original. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
+        <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto. Detecta títulos cuando la letra es más grande que el texto normal, pero no negritas, listas ni tablas del PDF original. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
       </p>
       <div class="zona-arrastre" id="zonaArrastre">
         <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+        <input type="file" id="entradaArchivo" accept="application/pdf" multiple hidden>
       </div>
       <div class="grid-miniaturas" id="listaArchivo"></div>
       <div class="controles">
@@ -119,10 +137,24 @@ window.i18nPagina = {
           <a class="boton" id="enlaceDescargaMd" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
+      <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
 
     <!-- Markdown → PDF -->
     <div id="panelMdAPdf" data-panel-direccion="md-a-pdf" style="display:none;">
+      <div class="zona-arrastre" id="zonaMd">
+        <span data-i18n="zona-arrastre-md">📄 Arrastrá tus archivos .md acá o hacé clic para elegirlos</span>
+        <input type="file" id="entradaArchivoMd" accept=".md,.markdown,.txt,text/markdown,text/plain" multiple hidden>
+      </div>
+      <ul class="lista-archivos" id="listaMd"></ul>
+      <div class="controles">
+        <button class="boton" id="botonConvertirPdf" disabled data-i18n="boton-convertir-pdf">Convertir a PDF</button>
+      </div>
+      <div class="resultado" id="resultadoPdf">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="documento.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
+      </div>
+
+      <h2 data-i18n="md-manual-titulo">O escribilo a mano</h2>
       <div class="columnas">
         <label class="campo">
           <span data-i18n="campo-markdown">Markdown</span>
@@ -159,8 +191,12 @@ Este es un ejemplo de **Markdown** con:
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const panelPdfAMd = document.getElementById('panelPdfAMd');
@@ -181,27 +217,45 @@ const markdownExtraido = document.getElementById('markdownExtraido');
 const botonCopiarMd = document.getElementById('botonCopiarMd');
 const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
 
-let archivoActual = null;
+let archivosActuales = [];
+const resumenLote = document.getElementById('resumenLote');
 
-async function mostrarArchivo(archivo) {
-  archivoActual = archivo;
+// Con un solo PDF se muestra su miniatura, como antes. Con varios, la lista
+// de nombres: la miniatura de cada uno pesaría demasiado en un lote grande.
+async function mostrarArchivos(archivos) {
+  archivosActuales = archivos;
   listaArchivo.innerHTML = '';
-  try {
-    const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
-    listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
-  } catch (error) {
-    listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
-  }
-  botonExtraer.disabled = false;
   bloqueResultadoPdfAMd.style.display = 'none';
+  resumenLote.style.display = 'none';
+  botonExtraer.disabled = archivos.length === 0;
+  if (archivos.length === 1) {
+    const archivo = archivos[0];
+    try {
+      const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
+      listaArchivo.appendChild(crearTarjetaMiniatura({ elementoVisual: elemento, etiqueta: `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` }));
+    } catch (error) {
+      listaArchivo.appendChild(crearTarjetaMiniatura({ etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` }));
+    }
+    return;
+  }
+  if (archivos.length > 1) {
+    const ul = document.createElement('ul');
+    ul.className = 'lista-archivos';
+    archivos.forEach((archivo) => {
+      const li = document.createElement('li');
+      li.textContent = archivo.name;
+      ul.appendChild(li);
+    });
+    listaArchivo.appendChild(ul);
+  }
 }
 
-function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
-  if (archivo) mostrarArchivo(archivo);
+function elegirArchivos(listaFileList) {
+  const pdfs = [...listaFileList].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (pdfs.length) mostrarArchivos(pdfs);
 }
 
-conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivos);
 
 // Escapa solo lo que Markdown interpretaría como formato. Antes se escapaban
 // también puntos, paréntesis, signos de exclamación, etc. en cualquier lugar,
@@ -213,11 +267,10 @@ function escaparMarkdown(texto) {
     .replace(/^(\s*)([#>+-]|\d+[.)])(\s)/, '$1\\$2$3');
 }
 
-botonExtraer.addEventListener('click', async () => {
-  botonExtraer.disabled = true;
-  botonExtraer.textContent = t('boton-extraer-procesando');
-  try {
-    const bytes = await archivoActual.arrayBuffer();
+// Convierte un PDF a un único texto Markdown. Lanza un error (ya traducido)
+// si no hay texto que extraer.
+async function convertirPdfAMarkdown(archivo) {
+    const bytes = await archivo.arrayBuffer();
     const pdf = await abrirPdf(bytes);
     const paginas = [];
     for (let i = 1; i <= pdf.numPages; i++) paginas.push(await extraerParrafosPaginaPdf(await pdf.getPage(i)));
@@ -232,12 +285,24 @@ botonExtraer.addEventListener('click', async () => {
       caracteresPorTamano.set(tamano, (caracteresPorTamano.get(tamano) || 0) + p.texto.length);
     });
     const tamanoNormal = [...caracteresPorTamano.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 10;
+    // Un texto que vuelve en muchas páginas (encabezado corrido, numeración)
+    // no es un título, aunque sea más grande: sin esto, un encabezado de 20 pt
+    // en cada página salía como # en todas. Los números se igualan, así que
+    // "Página 4" y "Página 5" cuentan como el mismo texto.
+    const claveRepetida = (texto) => texto.replace(/[0-9]+/g, '#').trim();
+    const paginasDondeAparece = new Map();
+    paginas.forEach((parrafos) => {
+      new Set(parrafos.map((p) => claveRepetida(p.texto))).forEach((clave) => {
+        paginasDondeAparece.set(clave, (paginasDondeAparece.get(clave) || 0) + 1);
+      });
+    });
     const aMarkdown = (p) => {
       const proporcion = p.alto / tamanoNormal;
       const esCorto = p.texto.length <= 150 && !/[.:;,]$/.test(p.texto);
-      if (esCorto && proporcion >= 1.6) return '# ' + escaparMarkdown(p.texto);
-      if (esCorto && proporcion >= 1.3) return '## ' + escaparMarkdown(p.texto);
-      if (esCorto && proporcion >= 1.15) return '### ' + escaparMarkdown(p.texto);
+      const repetido = (paginasDondeAparece.get(claveRepetida(p.texto)) || 0) >= 3;
+      if (esCorto && !repetido && proporcion >= 1.6) return '# ' + escaparMarkdown(p.texto);
+      if (esCorto && !repetido && proporcion >= 1.3) return '## ' + escaparMarkdown(p.texto);
+      if (esCorto && !repetido && proporcion >= 1.15) return '### ' + escaparMarkdown(p.texto);
       return escaparMarkdown(p.texto);
     };
     const paginasMarkdown = paginas.map((parrafos) => parrafos.map(aMarkdown).join('\n\n'));
@@ -245,12 +310,50 @@ botonExtraer.addEventListener('click', async () => {
     if (!paginasMarkdown.some(p => p.trim())) {
       throw new Error(t('error-sin-texto'));
     }
+    return paginasMarkdown.join('\n\n---\n\n');
+}
 
-    const markdownCompleto = paginasMarkdown.join('\n\n---\n\n');
-    markdownExtraido.value = markdownCompleto;
-    const blob = new Blob([markdownCompleto], { type: 'text/markdown;charset=utf-8' });
-    enlaceDescargaMd.href = URL.createObjectURL(blob);
-    bloqueResultadoPdfAMd.style.display = 'block';
+function nombreMarkdown(nombrePdf) {
+  return nombrePdf.replace(/\.pdf$/i, '') + '.md';
+}
+
+botonExtraer.addEventListener('click', async () => {
+  botonExtraer.disabled = true;
+  bloqueResultadoPdfAMd.style.display = 'none';
+  resumenLote.style.display = 'none';
+  try {
+    if (archivosActuales.length === 1) {
+      botonExtraer.textContent = t('boton-extraer-procesando');
+      const markdownCompleto = await convertirPdfAMarkdown(archivosActuales[0]);
+      markdownExtraido.value = markdownCompleto;
+      const blob = new Blob([markdownCompleto], { type: 'text/markdown;charset=utf-8' });
+      enlaceDescargaMd.href = URL.createObjectURL(blob);
+      enlaceDescargaMd.download = nombreMarkdown(archivosActuales[0].name);
+      enlaceDescargaMd.textContent = t('enlace-descargar-md');
+      markdownExtraido.style.display = '';
+      botonCopiarMd.style.display = '';
+      bloqueResultadoPdfAMd.style.display = 'block';
+    } else {
+      // Varios PDF: uno por uno, con el avance en el botón. Un PDF que falla
+      // no frena a los demás; el resumen dice cuáles no salieron y por qué.
+      const resultados = await LoteArchivos.convertirLote(archivosActuales, async (archivo) => ({
+        nombre: nombreMarkdown(archivo.name),
+        blob: new Blob([await convertirPdfAMarkdown(archivo)], { type: 'text/markdown;charset=utf-8' }),
+      }), (i, total) => {
+        botonExtraer.textContent = t('boton-extraer-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const ok = resultados.filter((r) => r.ok).length;
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaMd.href = URL.createObjectURL(zip);
+      enlaceDescargaMd.download = 'markdown-desde-pdf.zip';
+      enlaceDescargaMd.textContent = t('enlace-descargar-zip');
+      LoteArchivos.pintarResumen(resumenLote, resultados, t);
+      if (ok > 0) {
+        bloqueResultadoPdfAMd.style.display = 'block';
+        markdownExtraido.style.display = 'none';
+        botonCopiarMd.style.display = 'none';
+      }
+    }
   } catch (error) {
     alert(t('error-convertir') + ': ' + error.message);
   } finally {
@@ -278,6 +381,74 @@ function actualizarVistaPreviaMd() {
 
 entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
 document.getElementById('botonImprimir').addEventListener('click', () => window.print());
+
+// Arrastrar uno o varios .md: cada uno da un PDF. Con uno solo se baja el PDF;
+// con varios, un .zip con un PDF por archivo.
+const zonaMd = document.getElementById('zonaMd');
+const entradaArchivoMd = document.getElementById('entradaArchivoMd');
+const listaMd = document.getElementById('listaMd');
+const botonConvertirPdf = document.getElementById('botonConvertirPdf');
+const resultadoPdf = document.getElementById('resultadoPdf');
+const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
+let mdsActuales = [];
+
+function elegirMd(listaFileList) {
+  mdsActuales = [...listaFileList].filter(f => /\.(md|markdown|txt)$/i.test(f.name));
+  listaMd.innerHTML = '';
+  mdsActuales.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name;
+    listaMd.appendChild(li);
+  });
+  botonConvertirPdf.disabled = mdsActuales.length === 0;
+  resultadoPdf.style.display = 'none';
+}
+
+function nombrePdf(nombreMd) {
+  return nombreMd.replace(/\.(md|markdown|txt)$/i, '') + '.pdf';
+}
+
+conectarZonaArrastre(zonaMd, entradaArchivoMd, elegirMd);
+
+botonConvertirPdf.addEventListener('click', async () => {
+  botonConvertirPdf.disabled = true;
+  resultadoPdf.style.display = 'none';
+  botonConvertirPdf.textContent = t('boton-convertir-pdf-procesando');
+  try {
+    if (mdsActuales.length === 1) {
+      const archivo = mdsActuales[0];
+      const { texto } = await leerTextoArchivo(archivo);
+      const bytes = await (await generarPdfDeMarkdown(texto)).save();
+      enlaceDescargaPdf.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      enlaceDescargaPdf.download = nombrePdf(archivo.name);
+      enlaceDescargaPdf.textContent = t('enlace-descargar-pdf');
+    } else {
+      const resultados = await LoteArchivos.convertirLote(mdsActuales, async (archivo) => {
+        const { texto } = await leerTextoArchivo(archivo);
+        const bytes = await (await generarPdfDeMarkdown(texto)).save();
+        return { nombre: nombrePdf(archivo.name), blob: new Blob([bytes], { type: 'application/pdf' }) };
+      }, (i, total) => {
+        botonConvertirPdf.textContent = t('boton-convertir-pdf-progreso').replace('{n}', i + 1).replace('{total}', total);
+      });
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      enlaceDescargaPdf.href = URL.createObjectURL(zip);
+      enlaceDescargaPdf.download = 'pdf-desde-markdown.zip';
+      enlaceDescargaPdf.textContent = t('enlace-descargar-pdf-zip');
+      const ok = resultados.filter(r => r.ok).length;
+      const fallos = resultados.filter(r => !r.ok);
+      if (fallos.length) {
+        alert(fallos.map(r => `${r.archivo.name}: ${r.error}`).join('\n'));
+      }
+      if (ok === 0) throw new Error(t('error-convertir'));
+    }
+    resultadoPdf.style.display = 'block';
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  } finally {
+    botonConvertirPdf.disabled = mdsActuales.length === 0;
+    botonConvertirPdf.textContent = t('boton-convertir-pdf');
+  }
+});
 
 document.addEventListener('cambioIdioma', () => {
   // El ejemplo de Markdown solo se re-traduce si el usuario no lo tocó todavía.
