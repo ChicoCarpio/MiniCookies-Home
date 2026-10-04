@@ -476,6 +476,7 @@ window.i18nPagina = {
 <script src="../assets/js/efectos-mosaico.js"></script>
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
+<script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -505,7 +506,7 @@ const editorCompleto = document.getElementById('editorCompleto');
 const botonCambiarImagen = document.getElementById('botonCambiarImagen');
 let texturaElegida = 'ninguno'; // ninguno | pixelar | pixelar-circulos | ruido | difuminar | direccional | esmerilado
 let texturaOrden = 'debajo'; // debajo (antes de los filtros de color) | encima (después)
-// Capas extra del filtro elegido (ver crearPreset). Siguen aplicadas aunque
+// Capas extra del filtro elegido (ver crearPreset en procesar-filtros.js). Siguen aplicadas aunque
 // después se muevan los deslizadores; "Restablecer" o elegir otro filtro las cambia.
 let capasFiltroActivo = [];
 // true si la textura actual la puso un filtro (y no el usuario a mano): al
@@ -518,10 +519,14 @@ let texturaPuestaPorFiltro = false;
 // sobre la imagen a resolución completa.
 const LADO_MAXIMO_PREVIA = 1000;
 
+// El motor de filtros (ajustes, capas extra, intensidad, textura y
+// desenfoque) es assets/js/procesar-filtros.js, el mismo del Editor avanzado
+// y del generador de stickers: un cambio al pipeline se hace ahí.
+const { AJUSTES_NEUTROS, CLAVES_MEZCLA_BN, PRESETS, SIN_TEXTURA, renderizarFiltro } = ProcesarFiltros;
+
 // Luz por color: un deslizador por rango (mezclaRojos, mezclaVerdes...),
 // mismos rangos y colores que "Ajustar por color". A color aclara/oscurece
 // ese color; en B/N es la mezcla B/N (qué tan claro queda cada color en gris).
-const CLAVES_MEZCLA_BN = AjustePorColor.RANGOS.map((r) => 'mezcla' + r.clave[0].toUpperCase() + r.clave.slice(1));
 AjustePorColor.RANGOS.forEach((rango, n) => {
   const clave = CLAVES_MEZCLA_BN[n];
   document.getElementById('mezclaBN').insertAdjacentHTML('beforeend', `
@@ -572,52 +577,19 @@ CLAVES_MEZCLA_BN.forEach((clave) => {
   deslizadores[clave] = { input: document.getElementById(clave), valor: document.getElementById('valor-' + clave), unidad: '', porDefecto: 0, conSigno: true };
 });
 
-// Valores neutros de cada ajuste — cada preset parte de esta base y sólo
-// declara en qué se diferencia, en vez de repetir los ~19 campos enteros
-// cada vez (ahora que hay muchos presets, mantenerlos así sería un lío).
-const AJUSTES_NEUTROS = {
-  bn: false, exposicion: 0, contraste: 0, sombras: 0, reflejos: 0, saturacion: 0, intensidad: 0, tono: 0,
-  colorRojo: 0, colorVerde: 0, colorAzul: 0,
-  canalRojo: 100, canalVerde: 100, canalAzul: 100, claridad: 0, grano: 0, sepia: 0, invertir: 0, desenfoque: 0,
-  dispersionIntensidad: 0, dispersionMatiz: 0, dispersionTamano: 50,
-  aberracionIntensidad: 0, aberracionAngulo: 0, aberracionMatiz: 0, intensidadFiltro: 100,
-  hsl: null, // Ajustar por color (null = sin cambios), ver assets/js/ajuste-por-color.js
-};
-CLAVES_MEZCLA_BN.forEach((clave) => { AJUSTES_NEUTROS[clave] = 0; });
-// Un filtro es: los valores de los deslizadores (lo que se ve en el panel
-// de ajustes al elegirlo) + opcionalmente capas extra y una textura.
-function crearPreset(cambios, extra = {}) {
-  return { ...AJUSTES_NEUTROS, ...cambios, capasExtra: extra.capas || [], textura: extra.textura || null };
-}
-
-// Los filtros (valores, capas extra, textura y grupos) están en
-// assets/js/filtros-color.js, compartidos con el Editor avanzado.
-const PRESETS = Object.fromEntries(Object.entries(FiltrosColor.FILTROS).map(([clave, f]) =>
-  [clave, crearPreset(f.cambios, { capas: f.capas, textura: f.textura })]));
-
 let archivoActual = null;
 let imagenActual = null;
 let canvasPrevia = null; // copia reducida de la imagen, se redibuja "limpia" antes de cada procesado
 let fotogramaPendiente = null;
 
-// Reutilizado en cada fotograma de la vista previa en vivo (mientras se
-// arrastra un deslizador) para no crear canvases nuevos a cada rato: cada
-// `document.createElement('canvas')` de por medio es una textura GPU que el
-// navegador tiene que reservar y soltar, y eso es lo que se sentía como
-// "lag"/picos de GPU al mover un control. Los presets en miniatura y la
-// descarga final (una sola vez, no en un bucle de arrastre) siguen usando
-// canvases nuevos como antes: no hace falta ni conviene que compartan estos.
-const cachePreviaEnVivo = {
-  base: document.createElement('canvas'),
-  resultadoCompleto: document.createElement('canvas'),
-  sinDesenfoque: document.createElement('canvas'),
-  canvasBrillante: document.createElement('canvas'), // extracción de zonas brillantes para la dispersión de luz
-  scratchBorrosoClaridad: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
-  scratchBorrosoDispersion: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
-  claridad: null, // { imagen, ancho, alto, datos } — el desenfoque de "Claridad" no depende de ningún deslizador, solo de la imagen
-  dispersionBrillante: null, // { imagen, ancho, alto, datos } — extracción de zonas brillantes, tampoco depende de los deslizadores
-  dispersionBlur: null, // { imagen, ancho, alto, tamano, datos } — sí depende del deslizador "Tamaño" de la dispersión
-};
+// Vista previa en vivo (mientras se arrastra un deslizador): canvases de
+// repuesto, para no crear texturas de GPU nuevas en cada fotograma, y el
+// memo de lo que solo depende de la imagen (desenfoque de Claridad,
+// dispersión). El memo se vacía al cargar otra imagen. Las miniaturas y la
+// descarga (una sola vez, no en un bucle de arrastre) no los usan. Ver
+// crearScratch y memoDe en procesar-filtros.js.
+const scratchPreviaEnVivo = ProcesarFiltros.crearScratch();
+let memoPreviaEnVivo = {};
 
 // Formato de la imagen descargada: se respetan PNG y WebP (guardan
 // transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
@@ -647,437 +619,11 @@ function leerAjustes() {
 }
 
 
-// Matriz de rotación de tono, misma fórmula que usan los navegadores para
-// el filtro CSS hue-rotate (feColorMatrix "hueRotate" de SVG/CSS Filter
-// Effects), para poder combinarla en un único paso por píxel junto al resto.
-function matrizTono(gradosGrados) {
-  const a = gradosGrados * Math.PI / 180;
-  const c = Math.cos(a), s = Math.sin(a);
-  return [
-    0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928,
-    0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
-    0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072,
-  ];
-}
-
-// Truco barato de desenfoque: reescalar la imagen a un tamaño muy chico y
-// volver a agrandarla usando el suavizado nativo del canvas — sirve como
-// aproximación de un desenfoque gaussiano fuerte, sin implementar
-// convolución a mano. Se usa como referencia de "detalle local" para la
-// claridad (unsharp mask) y como base del resplandor de la dispersión de luz
-// (cuanto más chico el lado de referencia, más grande y difuso el desenfoque).
-function generarVersionBorrosa(canvasFuente, ladoChico = 40, scratch = null) {
-  const ancho = canvasFuente.width, alto = canvasFuente.height;
-  const anchoChico = Math.max(1, Math.round(ancho * ladoChico / Math.max(ancho, alto)));
-  const altoChico = Math.max(1, Math.round(alto * ladoChico / Math.max(ancho, alto)));
-
-  const canvasChico = scratch ? scratch.chico : document.createElement('canvas');
-  canvasChico.width = anchoChico;
-  canvasChico.height = altoChico;
-  const ctxChico = canvasChico.getContext('2d');
-  ctxChico.imageSmoothingEnabled = true;
-  ctxChico.imageSmoothingQuality = 'high';
-  ctxChico.drawImage(canvasFuente, 0, 0, anchoChico, altoChico);
-
-  const canvasBorroso = scratch ? scratch.borroso : document.createElement('canvas');
-  canvasBorroso.width = ancho;
-  canvasBorroso.height = alto;
-  const ctxBorroso = canvasBorroso.getContext('2d');
-  ctxBorroso.imageSmoothingEnabled = true;
-  ctxBorroso.imageSmoothingQuality = 'high';
-  ctxBorroso.drawImage(canvasChico, 0, 0, anchoChico, altoChico, 0, 0, ancho, alto);
-  return ctxBorroso.getImageData(0, 0, ancho, alto).data;
-}
-
-// Aplica todo el pipeline de ajustes sobre el canvas recibido (que ya debe
-// contener la imagen original sin procesar) y lo deja mutado con el
-// resultado. Se usa tanto para la vista previa (canvas chico) como para la
-// descarga final (canvas a resolución completa) con el mismo código.
-function procesarCanvas(canvasFuente, ajustes, cachePrevia = null) {
-  const ctx = canvasFuente.getContext('2d');
-  const ancho = canvasFuente.width, alto = canvasFuente.height;
-  const imageData = ctx.getImageData(0, 0, ancho, alto);
-  const datos = imageData.data;
-
-  // Dispersión de luz (separación de canales / aberración cromática): a
-  // diferencia del resto de ajustes, que son por-píxel, este es geométrico
-  // — desplaza el canal rojo hacia un lado y el azul hacia el opuesto,
-  // dejando el verde en su lugar, igual que la dispersión óptica de un
-  // prisma. Por eso corre antes que todo lo demás, sobre una copia del
-  // original: el resto del pipeline sigue trabajando normal, ahora sobre
-  // la imagen ya "separada".
-  const ampAberracion = ajustes.aberracionIntensidad / 100;
-  if (ampAberracion > 0) {
-    const anguloRad = (ajustes.aberracionAngulo / 180) * Math.PI;
-    const desplazamiento = ampAberracion * Math.max(2, Math.round(Math.min(ancho, alto) * 0.02));
-    const dx = Math.round(Math.cos(anguloRad) * desplazamiento);
-    const dy = Math.round(Math.sin(anguloRad) * desplazamiento);
-    const original = new Uint8ClampedArray(datos);
-    // Matiz: en vez de separar siempre en rojo/azul puro, gira esos dos
-    // colores por la rueda de tono (misma matriz que "Girar tono") — a 0°
-    // sigue siendo la dispersión clásica tipo prisma, y al mover el
-    // deslizador la separación pasa a naranja/cian, magenta/verde, etc.
-    const mTonoAberracion = ajustes.aberracionMatiz !== 0 ? matrizTono(ajustes.aberracionMatiz) : null;
-    for (let y = 0; y < alto; y++) {
-      const yr = y + dy < 0 ? 0 : y + dy >= alto ? alto - 1 : y + dy;
-      const yb = y - dy < 0 ? 0 : y - dy >= alto ? alto - 1 : y - dy;
-      for (let x = 0; x < ancho; x++) {
-        const xr = x + dx < 0 ? 0 : x + dx >= ancho ? ancho - 1 : x + dx;
-        const xb = x - dx < 0 ? 0 : x - dx >= ancho ? ancho - 1 : x - dx;
-        const iDestino = (y * ancho + x) * 4;
-        const iR = (yr * ancho + xr) * 4;
-        const iB = (yb * ancho + xb) * 4;
-        if (mTonoAberracion) {
-          const rr = original[iR], rg = original[iR + 1], rb = original[iR + 2];
-          const br = original[iB], bg = original[iB + 1], bb = original[iB + 2];
-          datos[iDestino] = mTonoAberracion[0] * rr + mTonoAberracion[1] * rg + mTonoAberracion[2] * rb;
-          datos[iDestino + 2] = mTonoAberracion[6] * br + mTonoAberracion[7] * bg + mTonoAberracion[8] * bb;
-        } else {
-          datos[iDestino] = original[iR];
-          datos[iDestino + 2] = original[iB + 2];
-        }
-      }
-    }
-  }
-
-  const factorExposicion = Math.pow(2, (ajustes.exposicion / 100) * 2);
-  const c = ajustes.contraste;
-  const factorContraste = (259 * (c + 255)) / (255 * (259 - c));
-  const amplitudSombras = (ajustes.sombras / 100) * 70;
-  const amplitudReflejos = (ajustes.reflejos / 100) * 70;
-  const factorSaturacion = 1 + ajustes.saturacion / 100;
-  const nIntensidad = ajustes.intensidad / 100;
-  const necesitaTono = ajustes.tono !== 0;
-  const mTono = necesitaTono ? matrizTono(ajustes.tono) : null;
-  // Balance de color: suma/resta directo sobre cada canal de la imagen A
-  // COLOR (distinto de los deslizadores "Rojos/Verdes/Azules" de más abajo,
-  // que solo pesan la mezcla a blanco y negro).
-  const deltaColorRojo = ajustes.colorRojo;
-  const deltaColorVerde = ajustes.colorVerde;
-  const deltaColorAzul = ajustes.colorAzul;
-  const bn = ajustes.bn;
-  const wr = ajustes.canalRojo / 100, wg = ajustes.canalVerde / 100, wb = ajustes.canalAzul / 100;
-  const sumaCanales = (wr + wg + wb) || 1;
-  // Luz por color: funciona a color y en blanco y negro (ver más abajo).
-  const mezclaGris = AjustePorColor.prepararMezclaGris(CLAVES_MEZCLA_BN.map((clave) => ajustes[clave] || 0));
-  // Referencia de color apenas desenfocada (ver referenciaColor en
-  // ajuste-por-color.js): evita bloques en la piel por el ruido del JPEG.
-  // Es la imagen antes de los ajustes: los rangos se eligen por el color
-  // original de la foto.
-  const refColor = (AjustePorColor.preparar(ajustes.hsl) || mezclaGris) ? AjustePorColor.referenciaColor(canvasFuente) : null;
-  const ampSepia = ajustes.sepia / 100;
-  const ampInvertir = ajustes.invertir / 100;
-  const ampClaridad = (ajustes.claridad / 100) * 1.3;
-  const necesitaClaridad = ampClaridad !== 0;
-  // El desenfoque de referencia para "Claridad" sale siempre de la imagen SIN
-  // procesar (se calcula antes del bucle de abajo) con un tamaño fijo: no
-  // depende de ningún deslizador, así que mientras no cambie la imagen es
-  // idéntico en cada fotograma. Recalcularlo en cada uno (como antes) era
-  // puro trabajo de más — dos canvases y una lectura de píxeles por fotograma
-  // — mientras se arrastraba cualquier otro control.
-  let borrosos = null;
-  if (necesitaClaridad) {
-    const cacheValido = cachePrevia && cachePrevia.claridad
-      && cachePrevia.claridad.imagen === imagenActual
-      && cachePrevia.claridad.ancho === ancho && cachePrevia.claridad.alto === alto;
-    if (cacheValido) {
-      borrosos = cachePrevia.claridad.datos;
-    } else {
-      borrosos = generarVersionBorrosa(canvasFuente, 40, cachePrevia ? cachePrevia.scratchBorrosoClaridad : null);
-      if (cachePrevia) cachePrevia.claridad = { imagen: imagenActual, ancho, alto, datos: borrosos };
-    }
-  }
-  const ampGrano = (ajustes.grano / 100) * 45;
-  const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
-  const factorIntensidadFiltro = ajustes.intensidadFiltro / 100;
-
-  // Dispersión de luz (bloom): se extraen del original las zonas más
-  // brillantes (con un umbral suave), se desenfocan mucho — el tamaño del
-  // desenfoque lo controla el deslizador "Tamaño" — y después se mezclan de
-  // vuelta con la imagen en modo "screen", opcionalmente con un giro de tono
-  // propio para que el resplandor tenga un matiz distinto al de la imagen.
-  const ampDispersion = (ajustes.dispersionIntensidad / 100) * 1.6;
-  let capaDispersion = null;
-  let mMatizDispersion = null;
-  if (ampDispersion > 0) {
-    // La extracción de zonas brillantes también sale de la imagen sin
-    // procesar y no depende de ningún deslizador (ni siquiera de "Tamaño"):
-    // se cachea igual que el desenfoque de "Claridad".
-    const cacheBrillanteValido = cachePrevia && cachePrevia.dispersionBrillante
-      && cachePrevia.dispersionBrillante.imagen === imagenActual
-      && cachePrevia.dispersionBrillante.ancho === ancho && cachePrevia.dispersionBrillante.alto === alto;
-    let brillante;
-    if (cacheBrillanteValido) {
-      brillante = cachePrevia.dispersionBrillante.datos;
-    } else {
-      brillante = new Uint8ClampedArray(datos.length);
-      for (let i = 0; i < datos.length; i += 4) {
-        const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
-        const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
-        brillante[i] = datos[i] * factor;
-        brillante[i + 1] = datos[i + 1] * factor;
-        brillante[i + 2] = datos[i + 2] * factor;
-        brillante[i + 3] = 255;
-      }
-      if (cachePrevia) cachePrevia.dispersionBrillante = { imagen: imagenActual, ancho, alto, datos: brillante };
-    }
-
-    const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
-    // El desenfoque final sí depende del deslizador "Tamaño": se cachea por
-    // separado, y solo se recalcula si ese valor concreto cambió (moviendo
-    // cualquier otro control reutiliza el mismo resultado).
-    const cacheBlurValido = cachePrevia && cachePrevia.dispersionBlur
-      && cachePrevia.dispersionBlur.imagen === imagenActual
-      && cachePrevia.dispersionBlur.ancho === ancho && cachePrevia.dispersionBlur.alto === alto
-      && cachePrevia.dispersionBlur.tamano === ladoChicoDispersion;
-    if (cacheBlurValido) {
-      capaDispersion = cachePrevia.dispersionBlur.datos;
-    } else {
-      const canvasBrillante = cachePrevia ? cachePrevia.canvasBrillante : document.createElement('canvas');
-      canvasBrillante.width = ancho;
-      canvasBrillante.height = alto;
-      canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
-      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, cachePrevia ? cachePrevia.scratchBorrosoDispersion : null);
-      if (cachePrevia) cachePrevia.dispersionBlur = { imagen: imagenActual, ancho, alto, tamano: ladoChicoDispersion, datos: capaDispersion };
-    }
-    if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
-  }
-
-  for (let i = 0; i < datos.length; i += 4) {
-    let r = datos[i], g = datos[i + 1], b = datos[i + 2];
-    const rOriginal = r, gOriginal = g, bOriginal = b;
-
-    // Exposición
-    r *= factorExposicion; g *= factorExposicion; b *= factorExposicion;
-    if (r < 0) r = 0; else if (r > 255) r = 255;
-    if (g < 0) g = 0; else if (g > 255) g = 255;
-    if (b < 0) b = 0; else if (b > 255) b = 255;
-
-    // Contraste
-    r = factorContraste * (r - 128) + 128;
-    g = factorContraste * (g - 128) + 128;
-    b = factorContraste * (b - 128) + 128;
-    // Sin este clamp, el contraste alto empuja canales por encima de 255 o
-    // por debajo de 0; ese desborde llega sin avisar al giro de tono y a la
-    // saturación de más abajo (pensados para 0-255) y produce manchas de
-    // colores que no tienen nada que ver con la imagen, sobre todo en zonas
-    // de mucho brillo/sombra combinadas con contraste o claridad altos.
-    if (r < 0) r = 0; else if (r > 255) r = 255;
-    if (g < 0) g = 0; else if (g > 255) g = 255;
-    if (b < 0) b = 0; else if (b > 255) b = 255;
-
-    // Sombras y reflejos, según la luminancia del píxel
-    if (amplitudSombras !== 0 || amplitudReflejos !== 0) {
-      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      const mascaraSombra = Math.max(0, Math.min(1, 1 - lum / 128));
-      const mascaraReflejo = Math.max(0, Math.min(1, (lum - 128) / 127));
-      const delta = amplitudSombras * mascaraSombra + amplitudReflejos * mascaraReflejo;
-      r += delta; g += delta; b += delta;
-      if (r < 0) r = 0; else if (r > 255) r = 255;
-      if (g < 0) g = 0; else if (g > 255) g = 255;
-      if (b < 0) b = 0; else if (b > 255) b = 255;
-    }
-
-    // Girar tono (matriz precalculada una sola vez por render)
-    if (mTono) {
-      const nr = mTono[0] * r + mTono[1] * g + mTono[2] * b;
-      const ng = mTono[3] * r + mTono[4] * g + mTono[5] * b;
-      const nb = mTono[6] * r + mTono[7] * g + mTono[8] * b;
-      r = nr; g = ng; b = nb;
-      if (r < 0) r = 0; else if (r > 255) r = 255;
-      if (g < 0) g = 0; else if (g > 255) g = 255;
-      if (b < 0) b = 0; else if (b > 255) b = 255;
-    }
-
-    // Saturación + intensidad de color (vibrance: satura más lo que está
-    // menos saturado, protegiendo tonos ya intensos)
-    if (factorSaturacion !== 1 || nIntensidad !== 0) {
-      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
-      const saturacionActual = maxC > 0 ? (maxC - minC) / maxC : 0;
-      const factorVibrance = 1 + nIntensidad * (1 - saturacionActual) * 1.5;
-      const factorTotal = factorSaturacion * factorVibrance;
-      r = lum + (r - lum) * factorTotal;
-      g = lum + (g - lum) * factorTotal;
-      b = lum + (b - lum) * factorTotal;
-      if (r < 0) r = 0; else if (r > 255) r = 255;
-      if (g < 0) g = 0; else if (g > 255) g = 255;
-      if (b < 0) b = 0; else if (b > 255) b = 255;
-    }
-
-    // Ajustar por color (assets/js/ajuste-por-color.js): tono, saturación y
-    // luminancia solo de los píxeles de cada rango de color.
-    if (ajustePorColor) {
-      [r, g, b] = refColor
-        ? AjustePorColor.aplicar(r, g, b, ajustePorColor, refColor[i], refColor[i + 1], refColor[i + 2])
-        : AjustePorColor.aplicar(r, g, b, ajustePorColor);
-    }
-
-    // Balance de color: ajusta rojo/verde/azul de la imagen a color por
-    // separado, antes de decidir si además se convierte a blanco y negro
-    if (deltaColorRojo !== 0) { r += deltaColorRojo; if (r < 0) r = 0; else if (r > 255) r = 255; }
-    if (deltaColorVerde !== 0) { g += deltaColorVerde; if (g < 0) g = 0; else if (g > 255) g = 255; }
-    if (deltaColorAzul !== 0) { b += deltaColorAzul; if (b < 0) b = 0; else if (b > 255) b = 255; }
-
-    // Blanco y negro con mezcla de canales ajustable
-    if (bn) {
-      let gris = (r * wr + g * wg + b * wb) / sumaCanales;
-      // Luz por color en B/N: aclara/oscurece el gris según el color del píxel
-      if (mezclaGris) gris = AjustePorColor.mezclarGris(r, g, b, gris, mezclaGris, refColor[i], refColor[i + 1], refColor[i + 2]);
-      r = gris; g = gris; b = gris;
-    } else if (mezclaGris) {
-      // Luz por color a color: la misma cuenta sobre la luminancia, aplicada
-      // como factor a los tres canales (aclara/oscurece sin cambiar el tono).
-      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      if (lum > 0) {
-        const factor = AjustePorColor.mezclarGris(r, g, b, lum, mezclaGris, refColor[i], refColor[i + 1], refColor[i + 2]) / lum;
-        r *= factor; g *= factor; b *= factor;
-        if (r > 255) r = 255;
-        if (g > 255) g = 255;
-        if (b > 255) b = 255;
-      }
-    }
-
-    // Sepia (la matriz de tono sepia puede pasarse de 255 con canales muy
-    // brillantes, así que se recorta antes de seguir)
-    if (ampSepia !== 0) {
-      const tr = 0.393 * r + 0.769 * g + 0.189 * b;
-      const tg = 0.349 * r + 0.686 * g + 0.168 * b;
-      const tb = 0.272 * r + 0.534 * g + 0.131 * b;
-      r += (tr - r) * ampSepia; g += (tg - g) * ampSepia; b += (tb - b) * ampSepia;
-      if (r < 0) r = 0; else if (r > 255) r = 255;
-      if (g < 0) g = 0; else if (g > 255) g = 255;
-      if (b < 0) b = 0; else if (b > 255) b = 255;
-    }
-
-    // Invertir colores
-    if (ampInvertir !== 0) {
-      r += (255 - r - r) * ampInvertir;
-      g += (255 - g - g) * ampInvertir;
-      b += (255 - b - b) * ampInvertir;
-    }
-
-    // Dispersión de luz: mezcla tipo "screen" con la capa de resplandor
-    // precalculada a partir de las zonas brillantes del original
-    if (capaDispersion) {
-      let br = capaDispersion[i], bg = capaDispersion[i + 1], bb = capaDispersion[i + 2];
-      if (mMatizDispersion) {
-        const nr = mMatizDispersion[0] * br + mMatizDispersion[1] * bg + mMatizDispersion[2] * bb;
-        const ng = mMatizDispersion[3] * br + mMatizDispersion[4] * bg + mMatizDispersion[5] * bb;
-        const nb = mMatizDispersion[6] * br + mMatizDispersion[7] * bg + mMatizDispersion[8] * bb;
-        br = nr < 0 ? 0 : nr > 255 ? 255 : nr;
-        bg = ng < 0 ? 0 : ng > 255 ? 255 : ng;
-        bb = nb < 0 ? 0 : nb > 255 ? 255 : nb;
-      }
-      const pantallaR = 255 - (255 - r) * (255 - br) / 255;
-      const pantallaG = 255 - (255 - g) * (255 - bg) / 255;
-      const pantallaB = 255 - (255 - b) * (255 - bb) / 255;
-      r += (pantallaR - r) * ampDispersion;
-      g += (pantallaG - g) * ampDispersion;
-      b += (pantallaB - b) * ampDispersion;
-      if (r < 0) r = 0; else if (r > 255) r = 255;
-      if (g < 0) g = 0; else if (g > 255) g = 255;
-      if (b < 0) b = 0; else if (b > 255) b = 255;
-    }
-
-    // Claridad: contraste local (diferencia contra una versión muy borrosa
-    // de la imagen ORIGINAL, sumada al final del pipeline)
-    if (borrosos) {
-      const lumOriginal = 0.299 * rOriginal + 0.587 * gOriginal + 0.114 * bOriginal;
-      const lumBorrosa = 0.299 * borrosos[i] + 0.587 * borrosos[i + 1] + 0.114 * borrosos[i + 2];
-      const delta = (lumOriginal - lumBorrosa) * ampClaridad;
-      r += delta; g += delta; b += delta;
-    }
-
-    // Grano
-    if (ampGrano !== 0) {
-      const ruido = (Math.random() - 0.5) * ampGrano;
-      r += ruido; g += ruido; b += ruido;
-    }
-
-    // Intensidad del filtro: mezcla el resultado completo de arriba con el
-    // píxel ORIGINAL sin tocar, así el deslizador funciona como un control
-    // de "cuánto" del filtro/preset elegido se aplica, en vez de todo o nada.
-    if (factorIntensidadFiltro !== 1) {
-      r = rOriginal + (r - rOriginal) * factorIntensidadFiltro;
-      g = gOriginal + (g - gOriginal) * factorIntensidadFiltro;
-      b = bOriginal + (b - bOriginal) * factorIntensidadFiltro;
-    }
-
-    datos[i] = r < 0 ? 0 : r > 255 ? 255 : r;
-    datos[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
-    datos[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-  return canvasFuente;
-}
-
 function crearCanvasConImagen(imagen, anchoDestino, altoDestino, destino = null) {
   const canvas = destino || document.createElement('canvas');
   canvas.width = anchoDestino;
   canvas.height = altoDestino;
   canvas.getContext('2d').drawImage(imagen, 0, 0, anchoDestino, altoDestino);
-  return canvas;
-}
-
-function copiarCanvas(canvas, destino = null) {
-  const copia = destino || document.createElement('canvas');
-  copia.width = canvas.width; copia.height = canvas.height;
-  copia.getContext('2d').drawImage(canvas, 0, 0);
-  return copia;
-}
-
-const SIN_TEXTURA = { tipo: 'ninguno', intensidad: 18, orden: 'debajo' };
-
-// Pipeline completo de un filtro sobre "canvas" (que ya tiene la imagen
-// original dibujada), el mismo para la vista previa, la descarga y las
-// miniaturas: textura "debajo" → ajustes → capas extra → mezcla con
-// "Intensidad del filtro" → textura "encima" → desenfoque. "escala" adapta
-// las medidas pensadas en píxeles de la imagen real (textura, desenfoque)
-// a un canvas más chico.
-function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, cachePrevia = null) {
-  const ctx = canvas.getContext('2d');
-  // El deslizador "Tamaño" de la textura es un porcentaje del ancho de ESTE
-  // canvas (vista previa, descarga a resolución completa o miniatura — cada
-  // una ya tiene el ancho que le toca), no una cantidad de píxeles fija: así
-  // la misma posición del deslizador se ve igual de fuerte sin importar la
-  // resolución real de la foto. "escala" sigue siendo solo para el
-  // desenfoque, que si está pensado en píxeles de la imagen real.
-  const intensidadTextura = Math.max(1, textura.intensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
-  if (textura.tipo !== 'ninguno' && textura.orden === 'debajo') {
-    EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);
-  }
-  // Referencia sin ajustes: para las máscaras y para la mezcla de intensidad.
-  // En la vista previa en vivo (cachePrevia) se reutiliza siempre el mismo
-  // canvas en vez de crear uno nuevo por fotograma.
-  const base = copiarCanvas(canvas, cachePrevia ? cachePrevia.base : null);
-
-  procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 }, cachePrevia);
-
-  FiltrosColor.aplicarCapasExtra(canvas, base, capasExtra, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
-
-  const factorIntensidad = ajustes.intensidadFiltro / 100;
-  if (factorIntensidad < 1) {
-    const resultadoCompleto = copiarCanvas(canvas, cachePrevia ? cachePrevia.resultadoCompleto : null);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(base, 0, 0);
-    ctx.globalAlpha = factorIntensidad;
-    ctx.drawImage(resultadoCompleto, 0, 0);
-    ctx.globalAlpha = 1;
-  }
-
-  if (textura.tipo !== 'ninguno' && textura.orden === 'encima') {
-    EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);
-  }
-
-  if (ajustes.desenfoque > 0) {
-    const sinDesenfoque = copiarCanvas(canvas, cachePrevia ? cachePrevia.sinDesenfoque : null);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.filter = `blur(${ajustes.desenfoque * escala}px)`;
-    ctx.drawImage(sinDesenfoque, 0, 0);
-    ctx.filter = 'none';
-  }
   return canvas;
 }
 
@@ -1288,7 +834,7 @@ function renderizarVistaPrevia() {
   // vez de crear uno nuevo en cada fotograma): redibujarlo con la imagen
   // original lo deja "limpio" antes de que renderizarFiltro lo mute.
   const copiaTrabajo = crearCanvasConImagen(imagenActual, anchoPrevia, altoPrevia, canvasPrevia);
-  renderizarFiltro(copiaTrabajo, leerAjustes(), capasFiltroActivo, texturaActual(), anchoPrevia / imagenActual.naturalWidth, cachePreviaEnVivo);
+  renderizarFiltro(copiaTrabajo, leerAjustes(), capasFiltroActivo, texturaActual(), anchoPrevia / imagenActual.naturalWidth, scratchPreviaEnVivo, memoPreviaEnVivo);
   vistaPrevia.width = anchoPrevia;
   vistaPrevia.height = altoPrevia;
   contextoPrevia.drawImage(copiaTrabajo, 0, 0);
@@ -1411,15 +957,11 @@ async function mostrarArchivo(archivo) {
     zonaArrastre.style.display = '';
     botonDescargar.disabled = true;
     canvasPrevia = null;
-    cachePreviaEnVivo.claridad = null;
-    cachePreviaEnVivo.dispersionBrillante = null;
-    cachePreviaEnVivo.dispersionBlur = null;
+    memoPreviaEnVivo = {};
     return;
   }
   imagenActual = await cargarImagen(archivo);
-  cachePreviaEnVivo.claridad = null;
-  cachePreviaEnVivo.dispersionBrillante = null;
-  cachePreviaEnVivo.dispersionBlur = null;
+  memoPreviaEnVivo = {};
 
   const escala = Math.min(1, LADO_MAXIMO_PREVIA / Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight));
   canvasPrevia = document.createElement('canvas');

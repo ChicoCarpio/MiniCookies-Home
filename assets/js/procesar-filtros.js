@@ -1,9 +1,12 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
-// Motor de filtros de color, extraído de Editor-de-color-de-imagen.html para
-// poder aplicar los mismos ~90 looks de assets/js/filtros-color.js fuera de
-// los dos editores grandes (ver herramientas/generador-stickers.html).
-// procesarCanvas/renderizarFiltro no tocan el canal alfa del canvas: un
-// recorte con fondo transparente sigue transparente después de aplicarlos.
+// Motor de filtros de color: el único. Lo usan el Editor de color, el Editor
+// avanzado (una vez por capa) y el generador de stickers. Antes cada editor
+// tenía su copia y se separaron (la caché de la vista previa estaba en uno
+// solo, la mezcla de "Intensidad del filtro" era distinta en cada uno):
+// cualquier cambio al pipeline va acá, no en las páginas.
+// procesarCanvas no toca el canal alfa; renderizarFiltro tampoco, salvo lo
+// que hagan la textura elegida o las capas extra del filtro: un recorte con
+// fondo transparente sigue transparente después de aplicarlos.
 // Necesita, cargados antes como <script>: ajuste-por-color.js,
 // efectos-textura.js, filtros-color.js.
 window.ProcesarFiltros = (function () {
@@ -71,14 +74,31 @@ window.ProcesarFiltros = (function () {
     return ctxBorroso.getImageData(0, 0, ancho, alto).data;
   }
 
+  // "memo" (opcional) guarda lo que sale de la imagen de entrada y no de los
+  // deslizadores —el desenfoque de Claridad, las zonas brillantes de la
+  // dispersión y su desenfoque, que solo depende de "Tamaño"—, para no
+  // recalcularlo en cada fotograma mientras se arrastra otro control. Quien
+  // llama garantiza que el memo es de esta misma imagen de entrada (lo vacía
+  // con {} cuando cambia); acá solo se controla el tamaño.
+  function memoDe(memo, ancho, alto) {
+    if (!memo) return null;
+    if (memo.ancho !== ancho || memo.alto !== alto) {
+      memo.ancho = ancho; memo.alto = alto;
+      memo.claridad = null; memo.dispersionBrillante = null; memo.dispersionBlur = null;
+    }
+    return memo;
+  }
+
   // Aplica todo el pipeline de ajustes sobre el canvas recibido (que ya debe
   // contener la imagen sin procesar) y lo deja mutado con el resultado. Solo
-  // toca r,g,b de cada píxel — nunca el canal alfa (datos[i+3]).
-  function procesarCanvas(canvasFuente, ajustes, scratch = null) {
+  // toca r,g,b de cada píxel — nunca el canal alfa (datos[i+3]). "scratch":
+  // canvases de repuesto (crearScratch); "memo": ver memoDe.
+  function procesarCanvas(canvasFuente, ajustes, scratch = null, memo = null) {
     const ctx = canvasFuente.getContext('2d');
     const ancho = canvasFuente.width, alto = canvasFuente.height;
     const imageData = ctx.getImageData(0, 0, ancho, alto);
     const datos = imageData.data;
+    memo = memoDe(memo, ancho, alto);
 
     // Dispersión de luz (separación de canales / aberración cromática): a
     // diferencia del resto de ajustes, que son por-píxel, este es geométrico
@@ -137,9 +157,16 @@ window.ProcesarFiltros = (function () {
     const ampInvertir = ajustes.invertir / 100;
     const ampClaridad = (ajustes.claridad / 100) * 1.3;
     const necesitaClaridad = ampClaridad !== 0;
-    const borrosos = necesitaClaridad
-      ? generarVersionBorrosa(canvasFuente, 40, scratch ? scratch.scratchBorrosoClaridad : null)
-      : null;
+    // Desenfoque de referencia de Claridad: sale de la imagen sin procesar,
+    // con tamaño fijo; no depende de ningún deslizador.
+    let borrosos = null;
+    if (necesitaClaridad) {
+      borrosos = memo && memo.claridad;
+      if (!borrosos) {
+        borrosos = generarVersionBorrosa(canvasFuente, 40, scratch ? scratch.scratchBorrosoClaridad : null);
+        if (memo) memo.claridad = borrosos;
+      }
+    }
     const ampGrano = (ajustes.grano / 100) * 45;
     const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
     const factorIntensidadFiltro = ajustes.intensidadFiltro / 100;
@@ -148,21 +175,33 @@ window.ProcesarFiltros = (function () {
     let capaDispersion = null;
     let mMatizDispersion = null;
     if (ampDispersion > 0) {
-      const brillante = new Uint8ClampedArray(datos.length);
-      for (let i = 0; i < datos.length; i += 4) {
-        const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
-        const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
-        brillante[i] = datos[i] * factor;
-        brillante[i + 1] = datos[i + 1] * factor;
-        brillante[i + 2] = datos[i + 2] * factor;
-        brillante[i + 3] = 255;
+      // Dispersión de luz (bloom): las zonas brillantes del original (no
+      // dependen de ningún deslizador), muy desenfocadas (eso sí depende de
+      // "Tamaño"), se mezclan en modo "screen" más abajo.
+      let brillante = memo && memo.dispersionBrillante;
+      if (!brillante) {
+        brillante = new Uint8ClampedArray(datos.length);
+        for (let i = 0; i < datos.length; i += 4) {
+          const lum = 0.299 * datos[i] + 0.587 * datos[i + 1] + 0.114 * datos[i + 2];
+          const factor = Math.max(0, Math.min(1, (lum - 170) / 60));
+          brillante[i] = datos[i] * factor;
+          brillante[i + 1] = datos[i + 1] * factor;
+          brillante[i + 2] = datos[i + 2] * factor;
+          brillante[i + 3] = 255;
+        }
+        if (memo) memo.dispersionBrillante = brillante;
       }
-      const canvasBrillante = scratch ? scratch.canvasBrillante : document.createElement('canvas');
-      canvasBrillante.width = ancho;
-      canvasBrillante.height = alto;
-      canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
       const ladoChicoDispersion = Math.round(140 - (ajustes.dispersionTamano / 100) * 130);
-      capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, scratch ? scratch.scratchBorrosoDispersion : null);
+      if (memo && memo.dispersionBlur && memo.dispersionBlur.tamano === ladoChicoDispersion) {
+        capaDispersion = memo.dispersionBlur.datos;
+      } else {
+        const canvasBrillante = scratch ? scratch.canvasBrillante : document.createElement('canvas');
+        canvasBrillante.width = ancho;
+        canvasBrillante.height = alto;
+        canvasBrillante.getContext('2d').putImageData(new ImageData(brillante, ancho, alto), 0, 0);
+        capaDispersion = generarVersionBorrosa(canvasBrillante, ladoChicoDispersion, scratch ? scratch.scratchBorrosoDispersion : null);
+        if (memo) memo.dispersionBlur = { tamano: ladoChicoDispersion, datos: capaDispersion };
+      }
       if (ajustes.dispersionMatiz !== 0) mMatizDispersion = matrizTono(ajustes.dispersionMatiz);
     }
 
@@ -314,37 +353,47 @@ window.ProcesarFiltros = (function () {
   }
 
   // Pipeline completo de un filtro sobre "canvas" (que ya tiene la imagen
-  // dibujada): textura "debajo" → ajustes → capas extra → mezcla con
-  // "Intensidad del filtro" → textura "encima" → desenfoque. "escala" adapta
-  // las medidas pensadas en píxeles de la imagen real (textura, desenfoque)
-  // a un canvas más chico (usar 1 para tamaño completo).
-  function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, scratch = null) {
+  // dibujada), el mismo para la vista previa, la descarga y las miniaturas:
+  // textura "debajo" → ajustes → capas extra → mezcla con "Intensidad del
+  // filtro" → textura "encima" → desenfoque. "textura" es { tipo,
+  // intensidad, orden, opciones } (opciones: las de los mosaicos, ver
+  // efectos-mosaico.js). "escala" adapta el desenfoque, pensado en píxeles de
+  // la imagen real, a un canvas más chico (1 para tamaño completo).
+  // "scratch" y "memo": solo para la vista previa en vivo (ver crearScratch y
+  // memoDe).
+  function renderizarFiltro(canvas, ajustes, capasExtra, textura, escala, scratch = null, memo = null) {
     const ctx = canvas.getContext('2d');
     // Porcentaje del ancho de este canvas, no píxeles fijos — ver
-    // EfectosTextura.REFERENCIA_TEXTURA. "escala" sigue sirviendo solo para
-    // el desenfoque.
+    // EfectosTextura.REFERENCIA_TEXTURA: la misma posición del deslizador se
+    // ve igual de fuerte en la vista previa, la miniatura y la descarga.
     const intensidadTextura = Math.max(1, textura.intensidad * (canvas.width / EfectosTextura.REFERENCIA_TEXTURA));
     if (textura.tipo !== 'ninguno' && textura.orden === 'debajo') {
-      EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura);
+      EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);
     }
-    const base = copiarCanvas(canvas, scratch ? scratch.base : null);
-
-    procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 }, scratch);
-
-    FiltrosColor.aplicarCapasExtra(canvas, base, capasExtra, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
-
+    // Referencia sin ajustes, para las máscaras de las capas extra y para la
+    // mezcla de intensidad. Sin ninguna de las dos no hace falta copiarla.
+    const hayCapas = capasExtra && capasExtra.length > 0;
     const factorIntensidad = ajustes.intensidadFiltro / 100;
+    const base = hayCapas || factorIntensidad < 1 ? copiarCanvas(canvas, scratch ? scratch.base : null) : null;
+
+    procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 }, scratch, memo);
+
+    if (hayCapas) FiltrosColor.aplicarCapasExtra(canvas, base, capasExtra, (c, aj) => procesarCanvas(c, { ...AJUSTES_NEUTROS, ...aj }));
+
+    // Mezcla píxel a píxel con el original, alfa incluido. No con globalAlpha:
+    // dibujar el resultado encima de la base suma opacidad, y las zonas
+    // semitransparentes de un PNG/WebP quedaban más opacas en el Editor de
+    // color (alfa 128 → 153 con la intensidad en 40%).
     if (factorIntensidad < 1) {
-      const resultadoCompleto = copiarCanvas(canvas, scratch ? scratch.resultadoCompleto : null);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(base, 0, 0);
-      ctx.globalAlpha = factorIntensidad;
-      ctx.drawImage(resultadoCompleto, 0, 0);
-      ctx.globalAlpha = 1;
+      const original = base.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      const resultado = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const datos = resultado.data;
+      for (let i = 0; i < datos.length; i++) datos[i] = original[i] + (datos[i] - original[i]) * factorIntensidad;
+      ctx.putImageData(resultado, 0, 0);
     }
 
     if (textura.tipo !== 'ninguno' && textura.orden === 'encima') {
-      EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura);
+      EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);
     }
 
     if (ajustes.desenfoque > 0) {
@@ -357,16 +406,14 @@ window.ProcesarFiltros = (function () {
     return canvas;
   }
 
-  // Canvases de repuesto para una vista previa en vivo: ver crearScratch().
-  // No guardan ningún valor (a diferencia de cachePreviaEnVivo de
-  // Editor-de-color-de-imagen.html), solo evitan crear canvases nuevos en
-  // cada llamada — acá cada llamada parte de una copia nueva de canvasBase
-  // (ver generador-stickers.js), así que cachear el desenfoque de Claridad
-  // por valor no serviría: el canvas de entrada es otro objeto cada vez.
+  // Canvases de repuesto para la vista previa en vivo: cada
+  // document.createElement('canvas') es una textura de GPU que el navegador
+  // reserva y suelta, y crear varias por fotograma es lo que se sentía como
+  // "lag" al arrastrar un deslizador. No guardan ningún valor entre llamadas
+  // (eso es el memo). Para la descarga o las miniaturas no hacen falta.
   function crearScratch() {
     return {
       base: document.createElement('canvas'),
-      resultadoCompleto: document.createElement('canvas'),
       sinDesenfoque: document.createElement('canvas'),
       canvasBrillante: document.createElement('canvas'),
       scratchBorrosoClaridad: { chico: document.createElement('canvas'), borroso: document.createElement('canvas') },
@@ -374,5 +421,5 @@ window.ProcesarFiltros = (function () {
     };
   }
 
-  return { AJUSTES_NEUTROS, PRESETS, SIN_TEXTURA, crearPreset, procesarCanvas, copiarCanvas, renderizarFiltro, crearScratch };
+  return { AJUSTES_NEUTROS, CLAVES_MEZCLA_BN, PRESETS, SIN_TEXTURA, crearPreset, procesarCanvas, copiarCanvas, renderizarFiltro, crearScratch };
 })();
