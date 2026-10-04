@@ -245,7 +245,11 @@ async function leerEpub(archivo) {
       const img = cuerpo.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml', 'img');
       img.setAttribute('src', href);
       img.setAttribute('alt', 'Portada');
-      svgImagen.replaceWith(img);
+      // Si el <svg> solo envuelve esta imagen, se reemplaza entero: vacío seguía
+      // ocupando su alto (una hoja en blanco antes de la portada en EPUB → PDF).
+      const svg = svgImagen.closest('svg');
+      const soloImagen = svg && [...svg.querySelectorAll('*')].every((n) => n === svgImagen || /^(title|desc|defs)$/i.test(n.localName));
+      (soloImagen ? svg : svgImagen).replaceWith(img);
     }
     const imagenes = [...cuerpo.querySelectorAll('img')];
     for (const img of imagenes) {

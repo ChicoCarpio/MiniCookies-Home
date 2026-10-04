@@ -22,7 +22,8 @@
 //    partan ninguna línea ni imagen.
 //
 // Uso: const bytes = await HtmlAPdf.convertir([{ elemento, anchoPx, altoPx,
-//        margenArribaPx, margenAbajoPx }], { titulo });
+//        margenArribaPx, margenAbajoPx }], { titulo, alAvanzar(hoja, total) });
+// Un break-before: page dentro del elemento fuerza una hoja nueva.
 // El elemento tiene que estar en el documento y visible (puede estar fuera de
 // pantalla) para que el navegador lo mida.
 
@@ -89,6 +90,7 @@
   // Piezas de una página lógica, en px relativos al borde superior izquierdo del contenido.
   function recogerPiezas(raiz, origen) {
     const piezas = [];
+    const saltos = [];
     const relativo = (r) => ({ x: r.left - origen.x, y: r.top - origen.y, ancho: r.width, alto: r.height });
 
     // Fondos y bordes.
@@ -98,6 +100,8 @@
       if (!r.width || !r.height) continue;
       const e = getComputedStyle(el);
       const caja = relativo(r);
+      // break-before: page (un capítulo nuevo) → corte de página forzado.
+      if (/^(page|always|left|right)$/.test(e.breakBefore) || e.pageBreakBefore === 'always') saltos.push(caja.y);
       const fondo = color(e.backgroundColor);
       if (fondo) piezas.push({ tipo: 'fondo', ...caja, color: fondo });
       for (const lado of ['Top', 'Right', 'Bottom', 'Left']) {
@@ -148,26 +152,58 @@
         piezas.push({ tipo: 'texto', ...relativo(r), texto: m[0], ...estilo });
       }
     }
-    return piezas;
+    return { piezas, saltos };
   }
 
   // Cortes de página en el eje vertical: cada corte cae donde ninguna pieza
-  // queda partida (si una pieza es más alta que la página, se la corta igual).
-  function calcularCortes(piezas, altoContenido, altoTotal) {
+  // queda partida (si una pieza es más alta que la página, se la corta igual),
+  // o en un salto forzado. Las piezas van ordenadas por y: un libro tiene
+  // cientos de miles de palabras y recorrerlas todas por cada corte no termina.
+  function calcularCortes(ordenadas, altoContenido, altoTotal, saltos) {
+    const altoMaximo = ordenadas.reduce((m, p) => Math.max(m, p.alto), 0);
+    const forzados = [...new Set(saltos)].sort((a, b) => a - b);
     const cortes = [0];
     let inicio = 0;
-    while (inicio + altoContenido < altoTotal) {
-      let corte = inicio + altoContenido;
-      for (let vuelta = 0; vuelta < 50; vuelta++) {
-        const partida = piezas.find((p) => p.tipo !== 'fondo' && p.y < corte && p.y + p.alto > corte && p.y > inicio);
-        if (!partida) break;
-        corte = partida.y;
+    while (inicio + altoContenido < altoTotal || forzados.some((f) => f > inicio + 1)) {
+      const limite = inicio + altoContenido;
+      const forzado = forzados.find((f) => f > inicio + 1 && f <= limite);
+      let corte = forzado ?? limite;
+      if (forzado === undefined) {
+        for (let vuelta = 0; vuelta < 50; vuelta++) {
+          // Piezas que empiezan antes del corte y terminan después: se busca la de más arriba.
+          let partida = null;
+          for (let k = indiceAntesDe(ordenadas, corte); k >= 0 && ordenadas[k].y > corte - altoMaximo; k--) {
+            const p = ordenadas[k];
+            if (p.y > inicio && p.y + p.alto > corte && (!partida || p.y < partida.y)) partida = p;
+          }
+          if (!partida) break;
+          corte = partida.y;
+        }
+        // Si respetar la pieza deja la hoja casi vacía (una imagen casi tan alta
+        // como la hoja), se corta en el lugar normal.
+        if (corte - inicio < altoContenido * 0.15) corte = limite;
       }
-      if (corte <= inicio) corte = inicio + altoContenido;
-      cortes.push(corte);
+      if (corte >= altoTotal && forzado === undefined) break;
+      // Un salto forzado sobre una hoja que todavía no tiene nada (un capítulo
+      // vacío seguido de otro) no deja una hoja en blanco: la hoja empieza ahí.
+      const ultima = indiceAntesDe(ordenadas, corte);
+      const hayContenido = ultima >= 0 && ordenadas[ultima].y >= inicio;
+      if (forzado !== undefined && !hayContenido && cortes.length > 1) cortes[cortes.length - 1] = corte;
+      else cortes.push(corte);
       inicio = corte;
     }
     return cortes;
+  }
+
+  // Último índice con y < valor (búsqueda binaria; -1 si no hay).
+  function indiceAntesDe(ordenadas, valor) {
+    let bajo = 0;
+    let alto = ordenadas.length;
+    while (bajo < alto) {
+      const medio = (bajo + alto) >> 1;
+      if (ordenadas[medio].y < valor) bajo = medio + 1; else alto = medio;
+    }
+    return bajo - 1;
   }
 
   async function bytesDeImagen(img) {
@@ -222,12 +258,25 @@
       const margenAbajo = pagina.margenAbajoPx || 0;
       const r = elemento.getBoundingClientRect();
       const origen = { x: r.left, y: r.top + margenArriba };
-      const piezas = recogerPiezas(elemento, origen);
+      const { piezas, saltos } = recogerPiezas(elemento, origen);
+      const fondos = piezas.filter((p) => p.tipo === 'fondo');
+      const ordenadas = piezas.filter((p) => p.tipo !== 'fondo').sort((a, b) => a.y - b.y);
       const altoContenido = altoPx - margenArriba - margenAbajo;
       const altoTotal = Math.max(r.height - margenArriba - margenAbajo, 1);
-      const cortes = calcularCortes(piezas, altoContenido, altoTotal);
+      const cortes = calcularCortes(ordenadas, altoContenido, altoTotal, saltos.filter((y) => y > 0));
+      // Cada pieza a su hoja una sola vez (lo de antes del primer corte, como un
+      // encabezado, va a la primera).
+      const porHoja = cortes.map(() => []);
+      let hojaActual = 0;
+      for (const p of ordenadas) {
+        while (hojaActual + 1 < cortes.length && p.y >= cortes[hojaActual + 1]) hojaActual++;
+        porHoja[hojaActual].push(p);
+      }
 
       for (let i = 0; i < cortes.length; i++) {
+        if (opciones.alAvanzar) opciones.alAvanzar(i, cortes.length);
+        // Respiro para la página cada tanto: un libro son cientos de hojas.
+        if (i % 20 === 19) await new Promise((r) => setTimeout(r, 0));
         const desde = cortes[i];
         const hasta = i + 1 < cortes.length ? cortes[i + 1] : Infinity;
         const hoja = pdf.addPage([anchoPx * PX_A_PT, altoPx * PX_A_PT]);
@@ -236,7 +285,7 @@
         const aX = (x) => x * PX_A_PT;
         const aY = (y) => altoHoja - (y - desde + margenArriba) * PX_A_PT;
 
-        for (const p of piezas) {
+        for (const p of [...fondos, ...porHoja[i]]) {
           if (p.tipo === 'fondo') {
             // Un fondo puede ocupar varias hojas: se recorta a esta. El relleno
             // de la propia hoja (margen) no se recorta: es el papel.
@@ -246,9 +295,6 @@
             hoja.drawRectangle({ x: aX(p.x), y: aY(abajo), width: p.ancho * PX_A_PT, height: (abajo - arriba) * PX_A_PT, color: p.color });
             continue;
           }
-          // El resto va entero a la hoja donde empieza (lo de antes del primer
-          // corte, como un encabezado, va a la primera).
-          if (!(p.y >= desde || i === 0) || p.y >= hasta) continue;
           if (p.tipo === 'imagen') {
             let incrustada = imagenesIncrustadas.get(p.img);
             if (!incrustada) {
