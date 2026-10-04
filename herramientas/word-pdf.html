@@ -171,6 +171,9 @@ window.i18nPagina = {
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/pdf-texto.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script>window.docxLibreria = window.docx;</script>
+<script src="../vendor/docx-preview/0.4.1/docx-preview.min.js"></script>
+<script>window.docxPreview = window.docx; window.docx = window.docxLibreria;</script>
 <script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -219,29 +222,26 @@ botonAPdf.addEventListener('click', async () => {
   botonAPdf.textContent = t('boton-a-pdf-generando');
   try {
     let htmlTotal = '';
-    let advertenciasTotal = 0;
     for (let i = 0; i < wordsActuales.length; i++) {
       botonAPdf.textContent = wordsActuales.length > 1
         ? t('lote-progreso').replace('{n}', i + 1).replace('{total}', wordsActuales.length)
         : t('boton-a-pdf-generando');
-      const resultado = await mammoth.convertToHtml({ arrayBuffer: await wordsActuales[i].arrayBuffer() });
-      advertenciasTotal += resultado.messages.length;
+      // docx-preview dibuja el documento con su diseño (páginas, tamaños, posiciones).
+      // Su CSS es de la propia librería; el contenido pasa por el mismo sanitizador.
+      // useBase64URL: por defecto las imágenes salen como blob:, que el
+      // sanitizador descarta (y dejaba los recuadros vacíos); como data:image pasan.
+      const cuerpo = document.createElement('div');
+      const estilos = document.createElement('div');
+      await docxPreview.renderAsync(wordsActuales[i], cuerpo, estilos, { inWrapper: true, useBase64URL: true });
       const salto = i > 0 ? ' style="break-before: page;"' : '';
-      htmlTotal += `<section${salto}>${resultado.value}</section>`;
+      htmlTotal += `<section${salto}>${estilos.innerHTML}${sanitizarHtml(cuerpo.innerHTML)}</section>`;
     }
 
-    // mammoth copia tal cual los enlaces del .docx (incluso "javascript:..."):
-    // se limpia antes de mostrarlo.
-    const htmlLimpio = sanitizarHtml(htmlTotal);
+    const htmlLimpio = htmlTotal;
     vistaPrevia.innerHTML = htmlLimpio;
     vistaPrevia.style.display = 'block';
     areaImprimir.innerHTML = htmlLimpio;
     controlesImprimir.style.display = 'flex';
-
-    if (advertenciasTotal > 0) {
-      advertencias.textContent = t('advertencias-texto').replace('{n}', advertenciasTotal);
-      advertencias.style.display = 'block';
-    }
   } catch (error) {
     alert(t('error-vista-previa') + ': ' + error.message);
   } finally {
