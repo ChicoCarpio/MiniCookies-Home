@@ -115,8 +115,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   //    404) y toda zona de arrastre se puede usar con teclado.
   await prueba('todas las páginas: zonas de arrastre accesibles con teclado', async () => {
     let zonas = 0; const fallas = [];
-    for (const p of PAGINAS) {
+    for (const [i, p] of PAGINAS.entries()) {
+      const t0 = Date.now();
       await abrir(p); await esperar(120);
+      fetch('/__avance', { method: 'POST', body: JSON.stringify({ i, total: PAGINAS.length, p, ms: Date.now() - t0 }) });
       const lista = [...D().querySelectorAll('.zona-arrastre')];
       for (const z of lista) {
         zonas++;
@@ -716,11 +718,15 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 })();
 `;
 
+// El código de las pruebas va dentro de un <script>: un "</script>" escrito en
+// una prueba (la de Markdown → HTML lo usa para probar la sanitización) cerraba
+// el script de la página y ninguna prueba arrancaba. Dentro de un texto de JS,
+// "<\/script" es lo mismo y el navegador ya no lo toma como cierre.
 function paginaDeControl(lista) {
   return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>pruebas</title>
 <style>html,body{margin:0}iframe{width:1366px;height:900px;border:0}</style></head><body>
 <iframe id="marco"></iframe>
-<script>const PAGINAS = ${JSON.stringify(lista)};\n${PRUEBAS}</script></body></html>`;
+<script>const PAGINAS = ${JSON.stringify(lista)};\n${PRUEBAS.replace(/<\/(script)/gi, '<\\/$1')}</script></body></html>`;
 }
 
 // --- Principal --------------------------------------------------------------
@@ -732,11 +738,21 @@ const control = join(DIST, '__pruebas.html');
 writeFileSync(control, paginaDeControl(lista), 'utf8');
 
 const faltantes = new Set();
+// Rutas que una prueba pide sabiendo que no existen: "markdown-html: imagen con
+// ruta relativa" escribe fotos/vacaciones.png para comprobar que la ruta no se
+// altera, y la vista previa intenta cargarla.
+const FALTAN_A_PROPOSITO = new Set(['/herramientas/fotos/vacaciones.png']);
 let terminar;
 const final = new Promise((r) => { terminar = r; });
 let ultimo = null;
 
 const servidor = createServer((q, r) => {
+  if (q.method === 'POST' && q.url === '/__avance') {
+    let cuerpo = '';
+    q.on('data', (d) => { cuerpo += d; });
+    q.on('end', () => { const a = JSON.parse(cuerpo); if (a.ms > 3000 || a.i % 40 === 0) console.log(`    página ${a.i + 1}/${a.total} ${a.p} (${a.ms} ms)`); r.end('ok'); });
+    return;
+  }
   if (q.method === 'POST' && q.url === '/__resultado') {
     let cuerpo = '';
     q.on('data', (d) => { cuerpo += d; });
@@ -754,7 +770,7 @@ const servidor = createServer((q, r) => {
   if (existsSync(archivo) && statSync(archivo).isDirectory()) archivo = join(archivo, 'index.html');
   if (!existsSync(archivo) && existsSync(archivo + '.html')) archivo += '.html';
   if (!archivo.startsWith(DIST) || !existsSync(archivo)) {
-    if (ruta !== '/favicon.ico') faltantes.add(ruta);
+    if (ruta !== '/favicon.ico' && !FALTAN_A_PROPOSITO.has(ruta)) faltantes.add(ruta);
     r.writeHead(404).end(); return;
   }
   r.writeHead(200, { 'Content-Type': TIPOS[extname(archivo)] || 'application/octet-stream' });
@@ -765,7 +781,10 @@ await new Promise((r) => servidor.listen(PUERTO, r));
 console.log(`Probando sin internet (${lista.length} páginas)...`);
 const perfil = mkdtempSync(join(tmpdir(), 'mc-pruebas-'));
 const edge = spawn(EDGE, [
-  '--headless', `--user-data-dir=${perfil}`, '--no-first-run',
+  // headless=new y sin frenar temporizadores: con el modo viejo, una página en
+  // segundo plano (el iframe) quedaba frenada y la primera prueba no terminaba.
+  '--headless=new', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+  '--disable-backgrounding-occluded-windows', `--user-data-dir=${perfil}`, '--no-first-run',
   '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
   `http://localhost:${PUERTO}/__pruebas.html`,
 ], { windowsHide: true, stdio: 'ignore' });
