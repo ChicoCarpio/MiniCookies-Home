@@ -440,7 +440,34 @@ table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
   color: var(--texto-suave);
   font-size: 0.85rem;
   margin: 24px 0;
+  overflow: hidden;
+  position: relative;
 }
+
+/* Unidad de AdSense que el build pone en cada .anuncio (build.mjs,
+   ponerUnidadesDeAnuncio). Alto fijo: Google elige un anuncio de ese tamaño
+   (728×90 o 970×90 en computadora; en celular, 50 px, el banner de 320×50,
+   que además entra en la tira de 52 px de los editores, app-movil.css). */
+.anuncio > ins.adsbygoogle {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 90px;
+}
+@media (max-width: 900px) {
+  .anuncio > ins.adsbygoogle { height: 50px; }
+}
+/* El texto "Espacio publicitario" queda debajo del <ins> y se ve hasta que
+   Google confirma que llenó el hueco: sin anuncio (AdSense revisando el sitio,
+   sin inventario, bloqueador, sin internet) no queda un recuadro vacío. */
+.anuncio > .anuncio-texto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.anuncio:has(> ins.adsbygoogle[data-ad-status="filled"]) > .anuncio-texto { display: none; }
 
 .grid-miniaturas, .contenedor-miniaturas.vista-grid {
   display: grid;

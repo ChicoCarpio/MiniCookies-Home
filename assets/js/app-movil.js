@@ -402,13 +402,21 @@
       document.documentElement.style.setProperty('--app-alto-encabezado', alto + 'px');
     }
 
+    // El anuncio real es un <iframe> de AdSense: con insertBefore/appendChild
+    // el navegador lo recarga y queda en blanco. moveBefore (Chrome/Edge 133+)
+    // lo mueve sin recargarlo; donde no existe, se mueve como siempre.
+    function mover(padre, elemento, referencia) {
+      if (padre.moveBefore) padre.moveBefore(elemento, referencia);
+      else padre.insertBefore(elemento, referencia);
+    }
+
     // --- Encender / apagar según el ancho ---
     function encender() {
       if (cuerpo.classList.contains('app-activo')) return;
       cuerpo.classList.add('app-activo');
       document.documentElement.classList.add('app-activo');
       medirEncabezado();
-      if (anuncio) tiraAnuncio.appendChild(anuncio);
+      if (anuncio) mover(tiraAnuncio, anuncio, null);
       shell.insertBefore(tiraAnuncio, shell.firstChild);
       shell.appendChild(controles);
       marcarBordes();
@@ -422,7 +430,7 @@
       document.documentElement.classList.remove('app-activo');
       document.documentElement.style.removeProperty('--app-alto-encabezado');
       // Todo vuelve a donde estaba: la página queda igual que antes.
-      if (anuncio && anuncioPadre) anuncioPadre.insertBefore(anuncio, anuncioSiguiente);
+      if (anuncio && anuncioPadre) mover(anuncioPadre, anuncio, anuncioSiguiente);
       [tiraAnuncio, controles].forEach(function (el) {
         if (el.parentNode) el.parentNode.removeChild(el);
       });

@@ -48,6 +48,43 @@ const ETIQUETA_ADSENSE = ADSENSE
   ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE}" crossorigin="anonymous"></script>`
   : '';
 
+// Unidad de anuncio manual (AdSense > Anuncios > Por unidad de anuncio): su
+// "data-ad-slot" va en config.adsenseSlot. Mientras esté vacío, cada .anuncio
+// queda con el texto "Espacio publicitario" y nada más.
+//
+// Cada hueco se convierte en:
+//   <div class="anuncio"><span class="anuncio-texto" data-i18n="anuncio">…</span><ins class="adsbygoogle" …></ins></div>
+// El texto pasa a un <span> porque idioma.js reemplaza el textContent de todo
+// [data-i18n]: dejado en el <div>, borraba el anuncio al cambiar de idioma. El
+// texto se ve solo si Google no llena el hueco (ver .anuncio en estilos.css).
+// Sin data-ad-format: el tamaño lo fija el CSS del <ins> (alto fijo, regla de
+// SISTEMA-DE-INTERFAZ.md) y Google elige un anuncio que entre ahí.
+const SLOT_ADSENSE = JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8')).config.adsenseSlot;
+const HUECO_ANUNCIO = /<div class="anuncio"([^>]*?) data-i18n="anuncio"([^>]*)>([^<]*)<\/div>/g;
+
+function ponerUnidadesDeAnuncio(html, archivo) {
+  let cuantos = 0;
+  html = html.replace(HUECO_ANUNCIO, (todo, antes, despues, texto) => {
+    cuantos++;
+    return `<div class="anuncio"${antes}${despues}><span class="anuncio-texto" data-i18n="anuncio">${texto}</span>`
+      + `<ins class="adsbygoogle" data-ad-client="${ADSENSE}" data-ad-slot="${SLOT_ADSENSE}"></ins></div>`;
+  });
+  // Un hueco escrito de otra forma (sin data-i18n, con otro orden) no se
+  // convertiría y quedaría sin anuncio sin que nadie lo note.
+  if (/class="anuncio"/.test(html.replace(/<div class="anuncio"[^>]*><span class="anuncio-texto"/g, '')))
+    throw new Error('Hueco .anuncio con un formato que el build no reconoce: ' + archivo);
+  if (!cuantos) return html;
+  // Un push por <ins>, al final del body: cuando corre, todos ya están en la
+  // página. Antes del ÚLTIMO </body>: hay páginas con otro dentro de una cadena
+  // de su JavaScript (el documento de la vista previa o de impresión), y
+  // ponerlo ahí les rompía el script.
+  const fin = html.toLowerCase().lastIndexOf('</body>');
+  if (fin < 0) throw new Error('Sin </body>, no se pueden pedir los anuncios: ' + archivo);
+  return html.slice(0, fin)
+    + `<script>document.querySelectorAll('ins.adsbygoogle').forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})</script>\n`
+    + html.slice(fin);
+}
+
 function esModulo(codigo) {
   return /^\s*(import|export)\s/m.test(codigo);
 }
@@ -90,6 +127,7 @@ function procesarHtml(html, archivo) {
   if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js') && !esNoIndex(html)) {
     if (!/<\/head>/i.test(html)) throw new Error('Sin </head>, no se puede poner AdSense: ' + archivo);
     html = html.replace(/<\/head>/i, ETIQUETA_ADSENSE + '\n</head>');
+    if (SLOT_ADSENSE) html = ponerUnidadesDeAnuncio(html, archivo);
   }
   return html;
 }

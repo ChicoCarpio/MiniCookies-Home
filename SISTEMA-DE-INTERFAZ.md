@@ -293,7 +293,7 @@ PowerPoint van en `.vista-previa-diapositivas`.
 
 `privacidad.html`, `terminos.html`, `creditos.html`, `contacto.html` y `404.html`: el marco
 común y prosa dentro de un `.panel-herramienta`, sin controles. No llevan
-`.aviso-privacidad` (eso es de los menús) pero sí su `.anuncio`.
+`.aviso-privacidad` (eso es de los menús) ni `.anuncio` (nunca lo tuvieron).
 
 Dos detalles propios: `creditos.html` envuelve su tabla en `.tabla-ancha`, que es
 lo que evita que se lleve la página entera a lo ancho en un teléfono, y
@@ -329,6 +329,17 @@ escritorio y en celular**.
 - **Siempre con alto fijo y `overflow: hidden`**, nunca `flex: 1` ni alto libre:
   un anuncio real de AdSense puede salir mucho más alto que el texto de prueba
   "Espacio publicitario" y empujar el resto de la pantalla.
+- **En el fuente se escribe solo el hueco**, siempre igual:
+  `<div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>` (puede
+  llevar `id`). El build (`ponerUnidadesDeAnuncio` en `build.mjs`) lo convierte
+  en la unidad de AdSense de `config.adsenseSlot` del `package.json`: el texto
+  pasa a un `<span class="anuncio-texto">` (porque `idioma.js` reemplaza el
+  texto de todo `[data-i18n]` y borraba el anuncio) y al lado va el `<ins>`. Un
+  hueco escrito de otra forma hace fallar el build. El texto se ve debajo hasta
+  que Google llena el hueco. Alto del `<ins>`: 90 px en escritorio, 50 px en
+  celular (entra en la tira de 52 px de los editores).
+- **Moverlo de lugar recarga el anuncio** (es un `<iframe>`): `app-movil.js` lo
+  mueve con `moveBefore`, que lo conserva, donde el navegador lo tiene.
 
 ### Privacidad
 
