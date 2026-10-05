@@ -33,7 +33,7 @@
     overflow-y: auto;
     min-height: 0;
   }
-  .panel-lienzo { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; }
+  .panel-lienzo { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; }
   .seccion-lateral { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }
   /* La grilla de filtros vive dentro de su propio acordeón: si se deja crecer
      libre, al abrirlo empuja "Vista" y los botones de descarga bien abajo y
@@ -211,13 +211,16 @@ window.i18nPagina = {
     'base-sujeto': 'Primer plano',
     'base-fondo': 'Fondo',
     'herr-objeto': '👆 Elegir objeto',
-    'ayuda-objeto': 'Con "Elegir objeto", tocá uno para quedarte solo con él.',
+    'ayuda-objeto': 'Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella.',
+    'fondo-listo-objeto': 'Fondo: todo menos el objeto elegido.',
+    'ia-buscando-objeto': 'Buscando el objeto que tocaste…',
+    'ia-analizando-objetos': 'Analizando la foto para encontrar objetos…',
+    'ia-descargando-objetos': 'Descargando el modelo para elegir objetos… {p}% (solo la primera vez)',
     'boton-todo-sujeto': 'Todo el primer plano',
     'sujeto-preparando': 'Buscando el primer plano…',
     'sujeto-descargando': 'Descargando el modelo de IA… {p}% (solo la primera vez, después queda guardado)',
     'sujeto-listo-todo': 'Primer plano: todo.',
     'sujeto-listo-objeto': 'Primer plano: solo el objeto elegido.',
-    'sujeto-sin-objeto': 'Ahí no hay ningún objeto del primer plano: tocá uno.',
     'sujeto-error': 'No se pudo separar el primer plano: ',
     'sel-toda': 'Toda la imagen',
     'base-nada': 'Nada',
@@ -395,13 +398,16 @@ window.i18nPagina = {
     'base-sujeto': 'Foreground',
     'base-fondo': 'Background',
     'herr-objeto': '👆 Pick object',
-    'ayuda-objeto': 'With "Pick object", tap one to keep only that one.',
+    'ayuda-objeto': 'With "Pick object", tap anything in the photo (a flower, a person) to keep only that.',
+    'fondo-listo-objeto': 'Background: everything but the picked object.',
+    'ia-buscando-objeto': 'Finding the object you tapped…',
+    'ia-analizando-objetos': 'Analyzing the photo to find objects…',
+    'ia-descargando-objetos': 'Downloading the model to pick objects… {p}% (only the first time)',
     'boton-todo-sujeto': 'Whole foreground',
     'sujeto-preparando': 'Finding the foreground…',
     'sujeto-descargando': 'Downloading the AI model… {p}% (only the first time, then it is kept)',
     'sujeto-listo-todo': 'Foreground: all of it.',
     'sujeto-listo-objeto': 'Foreground: only the picked object.',
-    'sujeto-sin-objeto': 'There is no foreground object there: tap one.',
     'sujeto-error': 'The foreground could not be separated: ',
     'sel-toda': 'The whole image',
     'base-nada': 'Nothing',
@@ -666,7 +672,7 @@ window.i18nPagina = {
 
               <div id="controlesSujeto" class="controles controles-apilados" style="display:none;">
                 <span class="nota-lateral" id="estadoSujeto" role="status" aria-live="polite"></span>
-                <span class="nota-lateral" data-i18n="ayuda-objeto">Con "Elegir objeto", tocá uno para quedarte solo con él.</span>
+                <span class="nota-lateral" data-i18n="ayuda-objeto">Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella.</span>
                 <button type="button" class="boton-capa-accion" id="botonTodoSujeto" data-i18n="boton-todo-sujeto">Todo el primer plano</button>
               </div>
 
@@ -872,6 +878,7 @@ window.i18nPagina = {
         </div>
 
         <div class="panel-lienzo" data-app-escenario="desplazable">
+          <div class="trabajando-ia" id="trabajandoIA" role="status" aria-live="polite" hidden><span class="trabajando-ia-texto"></span></div>
           <div class="zona-lienzo-contenedor" id="zonaLienzoContenedor">
             <div class="zona-lienzo" id="zonaLienzo">
               <canvas id="canvasTrabajo"></canvas>
@@ -1417,9 +1424,20 @@ function generarMascaraCapa(capa, ancho, alto, conMemo = false) {
     if (!memo) { memo = {}; memoMascaraPorCapa.set(capa.id, memo); }
   }
   const base = capa.mascara.base;
-  const sujeto = base === 'sujeto' || base === 'fondo' ? sujetoListo() : null;
-  if ((base === 'sujeto' || base === 'fondo') && !sujeto) pedirSujeto();
-  return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo, sujeto);
+  let ia = null;
+  if (base === 'sujeto' || base === 'fondo') {
+    // Un objeto elegido (SlimSAM) manda sobre el sujeto principal (ISNet):
+    // solo se pide el que hace falta.
+    const objeto = capa.mascara.objeto;
+    if (objeto) {
+      ia = { objeto: objetoListo(objeto) };
+      if (!ia.objeto) pedirObjeto(objeto);
+    } else {
+      ia = { sujeto: sujetoListo() };
+      if (!ia.sujeto) pedirSujeto();
+    }
+  }
+  return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo, ia);
 }
 
 // ===== Primer plano / fondo (IA, assets/js/recorte-sujeto.js) =====
@@ -1433,12 +1451,87 @@ function mostrarEstadoSujeto(texto) {
   document.getElementById('estadoSujeto').textContent = texto;
 }
 
-// El módulo se carga recién cuando hace falta (es un módulo ES, y trae
-// transformers.js). La ruta sale del <script> de mascaras-capa.js, que es la
-// misma carpeta, así sirve igual bajo /en/.
+// Velo animado sobre la imagen mientras la IA trabaja (.trabajando-ia, en
+// editor-imagen.css). Puede haber varios trabajos a la vez (el primer plano y
+// un objeto): cada uno tiene su texto, el velo muestra el del más reciente y
+// se va cuando no queda ninguno. empezarTrabajoIA devuelve { texto(t), terminar() }.
+const trabajosIA = [];
+function pintarVeloIA() {
+  const ultimo = trabajosIA[trabajosIA.length - 1];
+  document.getElementById('trabajandoIA').hidden = !ultimo;
+  if (ultimo) document.querySelector('#trabajandoIA .trabajando-ia-texto').textContent = ultimo.texto;
+}
+function empezarTrabajoIA(texto) {
+  const trabajo = { texto };
+  trabajosIA.push(trabajo);
+  pintarVeloIA();
+  return {
+    texto(nuevo) { trabajo.texto = nuevo; pintarVeloIA(); },
+    terminar() {
+      const i = trabajosIA.indexOf(trabajo);
+      if (i >= 0) trabajosIA.splice(i, 1);
+      pintarVeloIA();
+    },
+  };
+}
+// El avance de una descarga; al 100% lo que sigue es analizar la foto.
+function textoDeDescarga(claveDescarga, claveAnalisis, porcentaje) {
+  return porcentaje >= 100 ? t(claveAnalisis) : t(claveDescarga).replace('{p}', porcentaje);
+}
+
+// Los módulos de IA se cargan recién cuando hacen falta (son módulos ES y
+// traen transformers.js). La ruta sale del <script> de mascaras-capa.js, que
+// está en la misma carpeta, así sirve igual bajo /en/.
+function rutaModulo(nombre) {
+  return new URL(nombre, document.querySelector('script[src*="mascaras-capa.js"]').src).href;
+}
 function calcularSujeto(url, alProgresar) {
-  const ruta = new URL('recorte-sujeto.js', document.querySelector('script[src*="mascaras-capa.js"]').src).href;
-  return import(ruta).then((modulo) => modulo.recortarSujeto(url, alProgresar));
+  return import(rutaModulo('recorte-sujeto.js')).then((modulo) => modulo.recortarSujeto(url, alProgresar));
+}
+// Analiza la foto para elegir objetos: devuelve objetoEn(x, y) -> canvas.
+function analizarParaObjetos(url, alProgresar) {
+  return import(rutaModulo('objeto-por-toque.js')).then((modulo) =>
+    modulo.analizarImagen(url, alProgresar).then((analisis) => ({ objetoEn: (x, y) => modulo.objetoEn(analisis, x, y) })));
+}
+
+// ===== Elegir objeto (IA, assets/js/objeto-por-toque.js) =====
+// El análisis es uno por imagen; cada objeto tocado, uno por punto.
+let analisisObjetos = null; // { imagen, promesa }
+const objetosIA = new Map(); // "x,y" -> canvas, de la imagen actual
+let imagenDeObjetos = null;
+const objetosPedidos = new Set();
+function claveObjeto(o) { return o.x.toFixed(4) + ',' + o.y.toFixed(4); }
+function objetoListo(o) {
+  if (imagenDeObjetos !== imagenActual) { objetosIA.clear(); imagenDeObjetos = imagenActual; }
+  return objetosIA.get(claveObjeto(o)) || null;
+}
+
+function pedirObjeto(o) {
+  if (!imagenActual || !archivoActual || objetoListo(o)) return;
+  const clave = claveObjeto(o);
+  if (objetosPedidos.has(clave)) return;
+  objetosPedidos.add(clave);
+  const imagen = imagenActual;
+  const trabajo = empezarTrabajoIA(t(analisisObjetos && analisisObjetos.imagen === imagen ? 'ia-buscando-objeto' : 'ia-analizando-objetos'));
+  if (!analisisObjetos || analisisObjetos.imagen !== imagen) {
+    const url = URL.createObjectURL(archivoActual);
+    const promesa = Promise.resolve()
+      .then(() => analizarParaObjetos(url, (p) => trabajo.texto(textoDeDescarga('ia-descargando-objetos', 'ia-analizando-objetos', p))))
+      .finally(() => URL.revokeObjectURL(url));
+    analisisObjetos = { imagen, promesa };
+    promesa.catch(() => { if (analisisObjetos && analisisObjetos.promesa === promesa) analisisObjetos = null; });
+  }
+  analisisObjetos.promesa
+    .then((analisis) => { trabajo.texto(t('ia-buscando-objeto')); return analisis.objetoEn(o.x, o.y); })
+    .then((lienzo) => {
+      if (imagenActual !== imagen) return;
+      objetoListo(o);
+      objetosIA.set(clave, lienzo);
+      reiniciarComposicion();
+      actualizarControlesSeleccion();
+    })
+    .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
+    .finally(() => { objetosPedidos.delete(clave); trabajo.terminar(); });
 }
 
 function pedirSujeto() {
@@ -1447,8 +1540,13 @@ function pedirSujeto() {
   const imagen = imagenActual;
   const url = URL.createObjectURL(archivoActual);
   mostrarEstadoSujeto(t('sujeto-preparando'));
+  const trabajo = empezarTrabajoIA(t('sujeto-preparando'));
   const promesa = Promise.resolve()
-    .then(() => calcularSujeto(url, (p) => mostrarEstadoSujeto(t('sujeto-descargando').replace('{p}', p))))
+    .then(() => calcularSujeto(url, (p) => {
+      const texto = textoDeDescarga('sujeto-descargando', 'sujeto-preparando', p);
+      mostrarEstadoSujeto(texto);
+      trabajo.texto(texto);
+    }))
     .then((lienzo) => {
       if (imagenActual !== imagen) return;
       sujetoIA = { imagen, lienzo };
@@ -1458,6 +1556,7 @@ function pedirSujeto() {
     .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
     .finally(() => {
       URL.revokeObjectURL(url);
+      trabajo.terminar();
       if (sujetoPromesa === promesa) sujetoPromesa = null;
     });
   promesa.imagen = imagen;
@@ -2174,8 +2273,14 @@ function actualizarControlesSeleccion() {
   document.getElementById('controlesSujeto').style.display = conSujeto ? 'flex' : 'none';
   document.getElementById('botonTodoSujeto').disabled = !m.objeto;
   if (conSujeto) {
-    if (sujetoListo()) mostrarEstadoSujeto(t(m.objeto ? 'sujeto-listo-objeto' : 'sujeto-listo-todo'));
-    else pedirSujeto();
+    if (m.objeto) {
+      if (objetoListo(m.objeto)) mostrarEstadoSujeto(t(m.base === 'fondo' ? 'fondo-listo-objeto' : 'sujeto-listo-objeto'));
+      else pedirObjeto(m.objeto);
+    } else if (sujetoListo()) {
+      mostrarEstadoSujeto(t('sujeto-listo-todo'));
+    } else {
+      pedirSujeto();
+    }
   }
   actualizarPanelContenido();
   if (herramientaLienzo !== 'pincel') cursorPincelAvanzado.classList.remove('visible');
@@ -2350,16 +2455,14 @@ elInvertirMascara.addEventListener('change', () => {
 });
 elVerMascara.addEventListener('change', programarRenderizado);
 
-// Elegir objeto: la isla del primer plano que está bajo el dedo.
+// Elegir objeto: lo que esté bajo el dedo, sea o no el sujeto principal.
 canvasTrabajo.addEventListener('click', (e) => {
   const capa = itemActivo();
   if (!capa || herramientaLienzo !== 'objeto' || huboPan) return;
-  const sujeto = sujetoListo();
-  if (!sujeto) { pedirSujeto(); return; }
   const p = puntoRelativo(e);
-  if (!MascarasCapa.hayObjetoEn(sujeto, p.x, p.y)) { mostrarEstadoSujeto(t('sujeto-sin-objeto')); return; }
   capa.mascara.objeto = { x: p.x, y: p.y };
   actualizarControlesSeleccion();
+  programarRenderizado(); // pide el objeto a la IA (ver generarMascaraCapa)
 });
 
 document.getElementById('botonTodoSujeto').addEventListener('click', () => {

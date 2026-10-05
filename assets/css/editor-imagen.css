@@ -65,3 +65,32 @@
   .abrir-panel-movil.der { right: 0; border-radius: 10px 0 0 10px; }
   .fondo-panel-movil { position: fixed; inset: 0; z-index: 990; background: rgba(0,0,0,.45); }
 }
+
+/* "La IA está trabajando": velo animado sobre TODA la imagen mientras un
+   modelo se descarga o analiza, para que no parezca que la página se trabó.
+   Va dentro del panel del lienzo (que necesita position: relative) y no
+   tapa los toques (pointer-events: none). Sin animación si el sistema pide
+   menos movimiento. */
+.trabajando-ia {
+  position: absolute; inset: 0; z-index: 6; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; border-radius: inherit;
+  background: rgba(10, 12, 20, 0.38);
+}
+.trabajando-ia[hidden] { display: none; }
+.trabajando-ia::before {
+  content: ""; position: absolute; inset: -50% -10%;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+  animation: barrido-ia 1.6s linear infinite;
+}
+.trabajando-ia .trabajando-ia-texto {
+  position: relative; max-width: 85%; padding: 8px 14px; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72); color: #fff; font-size: 0.85rem; text-align: center;
+  animation: latido-ia 1.6s ease-in-out infinite;
+}
+.trabajando-ia .trabajando-ia-texto::before { content: "✨ "; }
+@keyframes barrido-ia { from { transform: translateX(-60%); } to { transform: translateX(60%); } }
+@keyframes latido-ia { 50% { opacity: 0.75; } }
+@media (prefers-reduced-motion: reduce) {
+  .trabajando-ia::before, .trabajando-ia .trabajando-ia-texto { animation: none; }
+}

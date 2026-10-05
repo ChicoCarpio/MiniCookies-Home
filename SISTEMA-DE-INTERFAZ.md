@@ -282,6 +282,16 @@ texturas, botones de modo y el panel lateral en pantalla angosta. Antes eran
 43 reglas idénticas copiadas en cada `<style>`. En la página queda solo lo
 propio (ancho, distribución, tamaño de miniaturas).
 
+También ahí, **`.trabajando-ia`** (2026-10-04): el velo animado sobre TODA la
+imagen mientras un modelo de IA se descarga o analiza, para que no parezca que
+la página se trabó (pedido del usuario). Va dentro del panel del lienzo, que
+necesita `position: relative`; no tapa los toques; sin animación con
+`prefers-reduced-motion`. Marcado: `<div class="trabajando-ia" role="status"
+aria-live="polite" hidden><span class="trabajando-ia-texto"></span></div>`. El
+editor avanzado le pone un texto por trabajo (descargando → analizando →
+buscando) y lo esconde cuando no queda ninguno. Una herramienta nueva que corra
+un modelo sobre una imagen usa esta pieza, no un spinner propio.
+
 Y comparten el **motor de filtros**, `assets/js/procesar-filtros.js`
 (`renderizarFiltro`: textura → ajustes → capas extra → intensidad → textura →
 desenfoque). Lo usan el Editor de color, el Editor avanzado (una vez por capa,

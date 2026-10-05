@@ -1161,10 +1161,12 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // cuadrados separados (dos "objetos") sobre una foto gris 128. La capa en
   // Multiplicar baja a 64 lo que la máscara marca. Se comprueba aparte que el
   // módulo real carga desde la página.
-  await prueba('editor avanzado: primer plano, fondo y elegir objeto', async () => {
+  await prueba('editor avanzado: primer plano, fondo y elegir cualquier objeto', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const mod = await W().eval("import(new URL('recorte-sujeto.js', document.querySelector('script[src*=mascaras-capa]').src).href)");
     afirmar(typeof mod.recortarSujeto === 'function', 'el módulo recorte-sujeto.js no cargó desde la página');
+    const modSam = await W().eval("import(new URL('objeto-por-toque.js', document.querySelector('script[src*=mascaras-capa]').src).href)");
+    afirmar(typeof modSam.analizarImagen === 'function' && typeof modSam.objetoEn === 'function', 'el módulo objeto-por-toque.js no cargó desde la página');
     const base = D().createElement('canvas'); base.width = 200; base.height = 100;
     base.getContext('2d').fillStyle = 'rgb(128,128,128)'; base.getContext('2d').fillRect(0, 0, 200, 100);
     let llamadas = 0;
@@ -1174,6 +1176,26 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       const cs = s.getContext('2d'); cs.fillStyle = '#fff';
       cs.fillRect(20, 30, 40, 40); cs.fillRect(140, 30, 40, 40);
       return s;
+    };
+    // SlimSAM falso: tocar dentro de un cuadrado da ese cuadrado; tocar en
+    // cualquier otro lado da una "flor" de 20x20 alrededor del punto. Tarda
+    // un poco a propósito, para ver el velo de "la IA está trabajando".
+    let analisis = 0;
+    W().analizarParaObjetos = async () => {
+      analisis++;
+      await esperar(400);
+      return {
+        objetoEn: async (x, y) => {
+          await esperar(200);
+          const s = D().createElement('canvas'); s.width = 200; s.height = 100;
+          const cs = s.getContext('2d'); cs.fillStyle = '#fff';
+          const px_ = x * 200;
+          if (px_ >= 20 && px_ < 60) cs.fillRect(20, 30, 40, 40);
+          else if (px_ >= 140 && px_ < 180) cs.fillRect(140, 30, 40, 40);
+          else cs.fillRect(px_ - 10, 40, 20, 20);
+          return s;
+        },
+      };
     };
     const png = await new Promise((r) => base.toBlob(r, 'image/png'));
     const entrada = D().getElementById('entradaArchivo');
@@ -1199,17 +1221,24 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(cerca(h.fondo, [128, 64, 128]), 'fondo: ' + h.fondo);
     clic('#modosBaseMascara [data-base="sujeto"]');
 
-    // Elegir objeto: tocar el cuadrado derecho.
+    // Elegir objeto: tocar algo que NO es el primer plano (la "flor" del
+    // medio) también lo encuentra; mientras tanto, el velo sobre la imagen.
     const tocar = (x) => {
       const r = lienzo.getBoundingClientRect();
       lienzo.dispatchEvent(new (W().MouseEvent)('click', { bubbles: true, clientX: r.left + (x / 200) * r.width, clientY: r.top + r.height / 2 }));
     };
+    const velo = D().getElementById('trabajandoIA');
+    tocar(100);
+    await esperar(100);
+    afirmar(!velo.hidden && velo.textContent.trim().length > 0, 'no apareció el velo de "la IA está trabajando"');
+    h.velo = velo.textContent.trim();
+    afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
+    h.flor = await leer();
+    afirmar(cerca(h.flor, [128, 64, 128]), 'un objeto que no es el primer plano: ' + h.flor);
     tocar(160);
+    afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
     h.objeto = await leer();
     afirmar(cerca(h.objeto, [128, 128, 64]), 'solo el objeto derecho: ' + h.objeto);
-    tocar(100); // en el medio no hay nada: no cambia la elección y avisa
-    h.nada = await leer();
-    afirmar(cerca(h.nada, [128, 128, 64]) && /ningún objeto/.test(D().getElementById('estadoSujeto').textContent), 'tocar donde no hay objeto: ' + h.nada + ' / ' + D().getElementById('estadoSujeto').textContent);
     clic('#modosBaseMascara [data-base="fondo"]');
     h.fondoMenosObjeto = await leer();
     afirmar(cerca(h.fondoMenosObjeto, [64, 64, 128]), 'fondo menos el objeto elegido: ' + h.fondoMenosObjeto);
@@ -1232,6 +1261,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     clic('#botonTodoSujeto');
     afirmar(llamadas === 1, 'el primer plano se calculó ' + llamadas + ' veces (tiene que ser una por imagen)');
+    afirmar(analisis === 1, 'la foto se analizó ' + analisis + ' veces para elegir objetos (tiene que ser una)');
 
     // El generador de stickers comparte las islas: tiene que cargar el módulo.
     await abrir('/herramientas/generador-stickers.html'); await esperar(300);
