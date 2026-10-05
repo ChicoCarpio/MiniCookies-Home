@@ -197,6 +197,34 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return paginasConSelector + ' herramientas, todas las direcciones';
   });
 
+  // Pantalla completa en celular (arquetipo C): con contenido cargado a 390px
+  // tiene que aparecer la barra de categorías. El 2026-10-04 un moveBefore
+  // sobre la tira de publicidad todavía suelta cortaba app-movil.js a la
+  // mitad: la página quedaba en modo celular pero sin categorías ni botones,
+  // y revisar-interfaz no lo veía porque mira las páginas sin imagen.
+  await prueba('pantalla completa en celular: barra de categorías con contenido cargado', async () => {
+    const detalle = [];
+    marco.style.width = '390px'; marco.style.height = '844px';
+    try {
+      for (const pagina of ['editor-avanzado-imagen', 'Editor-de-color-de-imagen', 'collage-imagenes']) {
+        await abrir('/herramientas/' + pagina + '.html'); await esperar(300);
+        const errores = [];
+        W().addEventListener('error', (ev) => errores.push(ev.message));
+        const entrada = D().getElementById('entradaArchivo');
+        entrada.files = archivos([await imagenDePrueba('A', 400, 300), await imagenDePrueba('B', 400, 300)]).files;
+        entrada.dispatchEvent(new (W().Event)('change'));
+        const chips = await hasta(() => D().querySelectorAll('.app-chip').length, 15000);
+        afirmar(!errores.length, pagina + ': ' + errores[0]);
+        afirmar(chips, pagina + ': sin barra de categorías (body: "' + D().body.className + '")');
+        afirmar(D().querySelector('.app-anuncio'), pagina + ': sin tira de publicidad');
+        detalle.push(pagina + ' ' + chips);
+      }
+    } finally {
+      marco.style.width = ''; marco.style.height = '';
+    }
+    return detalle.join(', ');
+  });
+
   await prueba('.columnas: dos columnas desde estilos.css', async () => {
     await abrir('/herramientas/comparador-texto.html'); await esperar(150);
     const c = D().querySelector('.columnas');

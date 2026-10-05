@@ -415,9 +415,15 @@
     // El anuncio real es un <iframe> de AdSense: con insertBefore/appendChild
     // el navegador lo recarga y queda en blanco. moveBefore (Chrome/Edge 133+)
     // lo mueve sin recargarlo; donde no existe, se mueve como siempre.
+    // moveBefore solo mueve entre nodos que ya están en la página: con la
+    // tira todavía suelta tiraba HierarchyRequestError, y como cortaba
+    // encender() a la mitad, el modo celular quedaba sin categorías ni
+    // botones (2026-10-04). Si igual falla, se mueve como siempre.
     function mover(padre, elemento, referencia) {
-      if (padre.moveBefore) padre.moveBefore(elemento, referencia);
-      else padre.insertBefore(elemento, referencia);
+      if (padre.moveBefore && padre.isConnected && elemento.isConnected) {
+        try { padre.moveBefore(elemento, referencia); return; } catch (e) { /* abajo */ }
+      }
+      padre.insertBefore(elemento, referencia);
     }
 
     // --- Encender / apagar según el ancho ---
@@ -426,8 +432,8 @@
       cuerpo.classList.add('app-activo');
       document.documentElement.classList.add('app-activo');
       medirEncabezado();
-      if (anuncio) mover(tiraAnuncio, anuncio, null);
       shell.insertBefore(tiraAnuncio, shell.firstChild);
+      if (anuncio) mover(tiraAnuncio, anuncio, null);
       shell.appendChild(controles);
       marcarBordes();
       avisarCambioDeTamano();
