@@ -118,6 +118,21 @@
     flex-shrink: 0;
   }
   .fila-capa button.icono-capa.apagado { opacity: 0.35; }
+  /* Grupos: carpeta en vez de miniatura, flecha para plegar, y lo de adentro
+     con sangría (margin-left desde el JavaScript). */
+  .contenedor-capa.es-grupo > .fila-capa { background: color-mix(in srgb, var(--texto) 6%, var(--gris-fondo)); }
+  .contenedor-capa.es-grupo.activo-grupo > .fila-capa { background: color-mix(in srgb, var(--azul) 12%, var(--gris-fondo)); }
+  .fila-capa .boton-plegar-grupo { background: none; border: none; color: var(--texto); cursor: pointer; padding: 2px; width: 18px; flex-shrink: 0; font-size: 0.8rem; }
+  .fila-capa .icono-grupo { width: 32px; text-align: center; font-size: 1.15rem; flex-shrink: 0; }
+  /* Dónde cae lo que se arrastra: arriba, abajo o adentro del grupo. */
+  .fila-capa.soltar-arriba { box-shadow: inset 0 3px 0 var(--azul); }
+  .fila-capa.soltar-abajo { box-shadow: inset 0 -3px 0 var(--azul); }
+  .fila-capa.soltar-dentro { outline: 2px dashed var(--azul); outline-offset: -2px; }
+  .boton-capa-accion { border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); color: var(--texto); cursor: pointer; padding: 5px 10px; font-size: 0.8rem; min-width: 32px; }
+  .boton-capa-accion:disabled { opacity: 0.4; cursor: default; }
+  /* Con un grupo elegido, los ajustes de cada capa quedan inactivos y avisan por qué. */
+  .acordeon-grupo.solo-capas .acordeon-contenido > * { opacity: 0.4; }
+  .acordeon-grupo.solo-capas .acordeon-contenido::before { content: attr(data-aviso); display: block; margin-bottom: 8px; font-size: 0.78rem; color: var(--texto-suave); }
   .fila-opacidad {
     display: flex; align-items: center; gap: 4px; padding: 4px 6px 6px;
     border: 1px solid var(--gris-borde); border-top: none; border-radius: 0 0 8px 8px;
@@ -229,6 +244,19 @@ window.i18nPagina = {
     'capa-numerada': 'Capa {n}',
     'title-ojo': 'Mostrar/ocultar capa',
     'title-eliminar': 'Eliminar capa',
+    'title-eliminar-grupo': 'Eliminar el grupo',
+    'title-nombre': 'Nombre',
+    'grupo-numerado': 'Grupo {n}',
+    'boton-agrupar': '⧉ Agrupar',
+    'title-agrupar': 'Meter lo elegido en un grupo nuevo',
+    'boton-desagrupar': 'Desagrupar',
+    'title-desagrupar': 'Deshacer el grupo y dejar sueltas sus capas',
+    'title-subir': 'Subir (entra en el grupo de arriba o sale del suyo)',
+    'title-bajar': 'Bajar (entra en el grupo de abajo o sale del suyo)',
+    'title-plegar-grupo': 'Mostrar u ocultar lo que tiene adentro',
+    'aviso-grupo-activo': 'Elegiste un grupo: estos ajustes son de cada capa. El grupo tiene su opacidad, su modo de fusión y su máscara.',
+    'confirmar-eliminar-grupo': '¿Eliminar el grupo y todo lo que tiene adentro?',
+    'aviso-ultima-capa': 'Tiene que quedar al menos una capa.',
     'title-fusion': 'Modo de fusión: cómo se mezcla la capa con las de abajo',
     'title-opacidad': 'Opacidad de la capa',
     'fusion-grupo-oscurecer': 'Oscurecen', 'fusion-grupo-aclarar': 'Aclaran', 'fusion-grupo-contraste': 'Contraste',
@@ -350,6 +378,19 @@ window.i18nPagina = {
     'capa-numerada': 'Layer {n}',
     'title-ojo': 'Show/hide layer',
     'title-eliminar': 'Delete layer',
+    'title-eliminar-grupo': 'Delete the group',
+    'title-nombre': 'Name',
+    'grupo-numerado': 'Group {n}',
+    'boton-agrupar': '⧉ Group',
+    'title-agrupar': 'Put the selection in a new group',
+    'boton-desagrupar': 'Ungroup',
+    'title-desagrupar': 'Remove the group and keep its layers',
+    'title-subir': 'Move up (enters the group above or leaves its own)',
+    'title-bajar': 'Move down (enters the group below or leaves its own)',
+    'title-plegar-grupo': 'Show or hide what is inside',
+    'aviso-grupo-activo': 'A group is selected: these settings belong to each layer. The group has its own opacity, blend mode and mask.',
+    'confirmar-eliminar-grupo': 'Delete the group and everything inside it?',
+    'aviso-ultima-capa': 'At least one layer has to remain.',
     'title-fusion': 'Blend mode: how the layer mixes with the ones below',
     'title-opacidad': 'Layer opacity',
     'fusion-grupo-oscurecer': 'Darken', 'fusion-grupo-aclarar': 'Lighten', 'fusion-grupo-contraste': 'Contrast',
@@ -448,6 +489,10 @@ window.i18nPagina = {
             <div class="acordeon-contenido">
               <div class="controles" style="margin-bottom:8px; gap:6px;">
                 <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
+                <button type="button" class="boton-capa-accion" id="botonAgrupar" data-i18n="boton-agrupar" data-i18n-attr="title:title-agrupar">⧉ Agrupar</button>
+                <button type="button" class="boton-capa-accion" id="botonDesagrupar" data-i18n="boton-desagrupar" data-i18n-attr="title:title-desagrupar" style="display:none;">Desagrupar</button>
+                <button type="button" class="boton-capa-accion" id="botonSubirCapa" data-i18n-attr="title:title-subir;aria-label:title-subir">↑</button>
+                <button type="button" class="boton-capa-accion" id="botonBajarCapa" data-i18n-attr="title:title-bajar;aria-label:title-bajar">↓</button>
               </div>
               <div id="listaCapas"></div>
               <input type="file" id="entradaProyecto" accept="application/json" hidden>
@@ -954,22 +999,27 @@ let anchoTrabajo = 0, altoTrabajo = 0;
 let capas = [];
 let capaActivaId = null;
 let contadorCapas = 0;
+// Números de los nombres por defecto ("Capa 3", "Grupo 2"), aparte del de los
+// ids: los grupos también consumen ids, y con un solo contador las capas
+// saltaban números. Nunca bajan, así un nombre no se repite al borrar.
+const contadorNombres = { capa: 0, grupo: 0 };
 let fotogramaPendiente = null;
-// Caché de renderizarComposicion(): cacheCapas[i] guarda, para la capa que en
-// el último render ocupaba el índice i, su "firma" (estado que afecta su
-// resultado) y el canvas acumulado resultante de componer las capas 0..i. Al
-// mover un deslizador de UNA capa, las de abajo no cambiaron: se parte del
-// acumulado cacheado justo antes de la primera capa cuya firma ya no coincide,
-// en vez de reprocesar todo desde cero (ver "revisado Kimi.md", 2.1).
-let cacheCapas = [];
-let cacheOrigenCapas = null;
-let cacheAnchoCapas = 0, cacheAltoCapas = 0;
+// Caché de renderizarComposicion(), una por lista (la raíz acá, y la de cada
+// grupo en su propio "_cache"): items[i] guarda, para el elemento que en el
+// último render ocupaba el índice i, su "firma" (estado que afecta su
+// resultado) y el canvas acumulado de componer los elementos 0..i sobre la
+// "entrada" de la lista. Al mover un deslizador de UNA capa, las de abajo no
+// cambiaron: se parte del acumulado cacheado justo antes del primer elemento
+// cuya firma ya no coincide, en vez de reprocesar todo desde cero (ver
+// "revisado Kimi.md", 2.1). Si cambia la entrada (otra imagen, otra
+// resolución, o algo cambió debajo de un grupo), la lista entera se rehace.
+const cacheRaiz = { entrada: null, items: [] };
 // Caché del resultado "de color" de cada capa (exposición/contraste/textura/
 // filtro — todo el pipeline de procesarCapaEnCanvas), ANTES de aplicarle su
 // máscara. Pintar o borrar con el pincel solo cambia la máscara: nunca el
 // resultado de color, que sigue siendo válido mientras no cambien ni los
 // ajustes de la capa ni lo que viene de las capas de abajo (por eso, a
-// diferencia de cacheCapas, esta caché es por id de capa — no por posición —
+// diferencia de cacheRaiz, esta caché es por id de capa — no por posición —
 // y no se descarta al invalidar la cadena por un cambio de máscara). Sin
 // esto, cada trazo de pincel volvía a correr el pipeline entero (incluido el
 // desenfoque de Claridad y la dispersión de luz) sobre la imagen completa.
@@ -980,13 +1030,10 @@ let panelAjustePorColor = null; // se crea más abajo, junto al resto del panel 
 function nuevoId() { contadorCapas += 1; return 'capa-' + contadorCapas; }
 
 function crearCapa(nombre) {
-  // nuevoId() ya incrementó contadorCapas, así que el nombre por defecto usa
-  // ese mismo número (sin sumarle otro, que era de dónde salía el salto de
-  // "Capa 1" a "Capa 3").
   const id = nuevoId();
   return {
     id,
-    nombre: nombre || t('capa-numerada').replace('{n}', contadorCapas),
+    nombre: nombre || t('capa-numerada').replace('{n}', contadorNombres.capa += 1),
     visible: true,
     opacidad: 100,
     modoFusion: 'normal', // clave de MODOS_FUSION
@@ -994,7 +1041,7 @@ function crearCapa(nombre) {
     mascara: MascarasCapa.neutra(),
     pincelSumar: null, // lienzos propios del pincel, tamaño anchoTrabajo x altoTrabajo;
     pincelQuitar: null, // null mientras no se pinte nada
-    _versionMascara: 0, // se incrementa al pintar/borrar con el pincel (ver cacheCapas)
+    _versionMascara: 0, // se incrementa al pintar/borrar con el pincel (ver cacheRaiz)
     ajustes: { ...AJUSTES_NEUTROS },
   };
 }
@@ -1010,7 +1057,61 @@ function marcarMascaraSucia(capa) {
   if (capa) capa._versionMascara = (capa._versionMascara || 0) + 1;
 }
 
-function capaActiva() { return capas.find((c) => c.id === capaActivaId) || null; }
+// ===== Árbol de capas =====
+// "capas" es un árbol: cada elemento es una capa o un grupo
+// ({ tipo: 'grupo', hijos: [...] }), y en cada lista el índice 0 es el de más
+// abajo. Un grupo no tiene ajustes propios: junta capas y les pone encima su
+// visibilidad, opacidad, modo de fusión y máscara, todo a la vez.
+function esGrupo(item) { return !!item && item.tipo === 'grupo'; }
+
+function crearGrupo(nombre) {
+  const id = nuevoId();
+  return {
+    id,
+    tipo: 'grupo',
+    nombre: nombre || t('grupo-numerado').replace('{n}', ++contadorNombres.grupo),
+    visible: true,
+    opacidad: 100,
+    modoFusion: 'normal',
+    mascara: MascarasCapa.neutra(),
+    pincelSumar: null,
+    pincelQuitar: null,
+    _versionMascara: 0,
+    plegado: false,
+    hijos: [],
+    _cache: { entrada: null, items: [] }, // ver cacheRaiz
+  };
+}
+
+// Recorre todo el árbol, de abajo hacia arriba y entrando en los grupos.
+function recorrerItems(fn, lista = capas, padre = null) {
+  for (const item of lista) {
+    fn(item, lista, padre);
+    if (esGrupo(item)) recorrerItems(fn, item.hijos, item);
+  }
+}
+function todosLosItems() { const todos = []; recorrerItems((item) => todos.push(item)); return todos; }
+function cantidadDeCapas() { return todosLosItems().filter((item) => !esGrupo(item)).length; }
+
+// Dónde está un elemento: su lista, su índice ahí y el grupo que la contiene.
+function ubicar(id, lista = capas, padre = null) {
+  for (let i = 0; i < lista.length; i++) {
+    const item = lista[i];
+    if (item.id === id) return { item, lista, indice: i, padre };
+    if (esGrupo(item)) {
+      const adentro = ubicar(id, item.hijos, item);
+      if (adentro) return adentro;
+    }
+  }
+  return null;
+}
+
+// El elemento elegido en la lista (capa o grupo): lo usan la máscara y el
+// pincel, que también son de los grupos.
+function itemActivo() { const u = ubicar(capaActivaId); return u ? u.item : null; }
+// La capa elegida, o null si lo elegido es un grupo: los ajustes de luz,
+// color, filtro y textura son solo de las capas.
+function capaActiva() { const item = itemActivo(); return item && !esGrupo(item) ? item : null; }
 
 // Formato de la imagen descargada: se respetan PNG y WebP (guardan
 // transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
@@ -1133,108 +1234,116 @@ function firmaColorDeCapa(capa) {
   return JSON.stringify(capa.ajustes);
 }
 
+// La de un grupo incluye la de todo lo que tiene adentro.
+function firmaDeItem(item) {
+  if (!esGrupo(item)) return firmaDeCapa(item);
+  return JSON.stringify(['grupo', item.visible, item.opacidad, item.modoFusion, item.mascara,
+    item._versionMascara || 0, item.hijos.map(firmaDeItem)]);
+}
+
+const AJUSTES_NEUTROS_JSON = JSON.stringify(AJUSTES_NEUTROS);
+
+// Recorta "resultado" con la máscara del elemento y lo funde sobre "abajo"
+// con su opacidad y su modo. Nunca pisa "abajo" ni "resultado" (pueden estar
+// en una caché): todo sale en lienzos nuevos.
+function fundirConMascara(abajo, resultado, item, ancho, alto, enVivo) {
+  const mascara = generarMascaraCapa(item, ancho, alto, enVivo);
+  let final = resultado;
+  if (mascara) {
+    final = document.createElement('canvas');
+    final.width = ancho; final.height = alto;
+    const ctxFinal = final.getContext('2d');
+    ctxFinal.drawImage(resultado, 0, 0);
+    ctxFinal.globalCompositeOperation = 'destination-in';
+    ctxFinal.drawImage(mascara, 0, 0);
+    ctxFinal.globalCompositeOperation = 'source-over';
+  }
+  const nuevo = document.createElement('canvas');
+  nuevo.width = ancho; nuevo.height = alto;
+  const ctx = nuevo.getContext('2d');
+  ctx.drawImage(abajo, 0, 0);
+  fundirCapa(ctx, item, final);
+  return nuevo;
+}
+
+// Compone una lista (la raíz o los hijos de un grupo) sobre "entrada" y
+// devuelve el resultado. "cache" solo en la vista previa en vivo; la
+// descarga a resolución completa pasa null y calcula todo de cero.
+function componerLista(lista, entrada, ancho, alto, escala, cache) {
+  let desde = 0;
+  if (cache) {
+    if (cache.entrada !== entrada) { cache.entrada = entrada; cache.items = []; }
+    while (desde < lista.length && cache.items[desde]
+      && cache.items[desde].id === lista[desde].id
+      && cache.items[desde].firma === firmaDeItem(lista[desde])) desde += 1;
+    cache.items.length = desde; // descarta lo borrado/reordenado desde acá
+  }
+  let acumulado = desde > 0 ? cache.items[desde - 1].salida : entrada;
+  for (let i = desde; i < lista.length; i++) {
+    const item = lista[i];
+    acumulado = componerItem(item, acumulado, ancho, alto, escala, !!cache);
+    if (cache) cache.items[i] = { id: item.id, firma: firmaDeItem(item), salida: acumulado };
+  }
+  return acumulado;
+}
+
+function componerItem(item, abajo, ancho, alto, escala, enVivo) {
+  if (!item.visible || item.opacidad <= 0) return abajo;
+
+  if (esGrupo(item)) {
+    // Lo de adentro se aplica sobre lo que hay debajo del grupo, y después
+    // el grupo entero se funde con su opacidad, su modo y su máscara.
+    if (!item._cache) item._cache = { entrada: null, items: [] };
+    const resultado = componerLista(item.hijos, abajo, ancho, alto, escala, enVivo ? item._cache : null);
+    if (resultado === abajo) return abajo;
+    if (item.modoFusion === 'normal' && item.opacidad === 100 && MascarasCapa.esTodaLaImagen(item.mascara, item.pincelQuitar)) return resultado;
+    return fundirConMascara(abajo, resultado, item, ancho, alto, enVivo);
+  }
+
+  // Con modo Normal y sin ajustes la capa procesada es igual a lo de abajo:
+  // no importa dónde se aplique ni con qué opacidad.
+  if (item.modoFusion === 'normal' && JSON.stringify(item.ajustes) === AJUSTES_NEUTROS_JSON) return abajo;
+
+  let procesado;
+  if (enVivo) {
+    // El resultado de color de esta capa solo depende de sus propios ajustes
+    // y de lo que entra desde abajo: si ninguno de los dos cambió desde el
+    // último render (p. ej. porque lo único que cambió fue la máscara,
+    // pintando con el pincel), se reusa tal cual.
+    const firmaColor = firmaColorDeCapa(item);
+    const cacheadoColor = cacheColorPorCapa.get(item.id);
+    if (cacheadoColor && cacheadoColor.firma === firmaColor && cacheadoColor.origen === abajo
+      && cacheadoColor.ancho === ancho && cacheadoColor.alto === alto) {
+      procesado = cacheadoColor.canvas;
+    } else {
+      procesado = document.createElement('canvas');
+      procesado.width = ancho; procesado.height = alto;
+      procesado.getContext('2d').drawImage(abajo, 0, 0);
+      let cacheBorrosos = cacheBorrososPorCapa.get(item.id);
+      if (!cacheBorrosos || cacheBorrosos.origen !== abajo || cacheBorrosos.ancho !== ancho || cacheBorrosos.alto !== alto) {
+        cacheBorrosos = { origen: abajo, ancho, alto, claridad: null, dispersionBrillante: null, dispersionBlur: null };
+        cacheBorrososPorCapa.set(item.id, cacheBorrosos);
+      }
+      procesarCapaEnCanvas(procesado, item, escala, scratchPreviaEnVivo, cacheBorrosos);
+      cacheColorPorCapa.set(item.id, { firma: firmaColor, origen: abajo, ancho, alto, canvas: procesado });
+    }
+  } else {
+    procesado = document.createElement('canvas');
+    procesado.width = ancho; procesado.height = alto;
+    procesado.getContext('2d').drawImage(abajo, 0, 0);
+    procesarCapaEnCanvas(procesado, item, escala);
+  }
+  return fundirConMascara(abajo, procesado, item, ancho, alto, enVivo);
+}
+
 function renderizarComposicion() {
   if (!imagenActual || !canvasOrigenTrabajo) return;
   const ancho = anchoTrabajo, alto = altoTrabajo;
   const escala = ancho / imagenActual.naturalWidth;
-  const ajustesNeutros = JSON.stringify(AJUSTES_NEUTROS);
-
-  // Si cambió la imagen de origen o el tamaño de trabajo (p. ej. al alternar
-  // "Resolución original"), ningún canvas cacheado sirve: hay que invalidar
-  // todo en vez de comparar capa por capa.
-  if (cacheOrigenCapas !== canvasOrigenTrabajo || cacheAnchoCapas !== ancho || cacheAltoCapas !== alto) {
-    cacheCapas = [];
-    cacheOrigenCapas = canvasOrigenTrabajo;
-    cacheAnchoCapas = ancho; cacheAltoCapas = alto;
-  }
-
-  // Busca desde qué capa hay que recalcular: mientras la capa en el índice i
-  // sea la misma (mismo id) y su firma no haya cambiado desde el último
-  // render, lo acumulado hasta ahí sigue sirviendo tal cual quedó cacheado.
-  let indiceDesde = 0;
-  while (
-    indiceDesde < capas.length
-    && cacheCapas[indiceDesde]
-    && cacheCapas[indiceDesde].id === capas[indiceDesde].id
-    && cacheCapas[indiceDesde].firma === firmaDeCapa(capas[indiceDesde])
-  ) {
-    indiceDesde += 1;
-  }
-  cacheCapas.length = indiceDesde; // descarta cache de capas borradas/reordenadas desde acá
-
-  let acumulado;
-  if (indiceDesde > 0) {
-    acumulado = cacheCapas[indiceDesde - 1].canvasAcumulado;
-  } else {
-    acumulado = document.createElement('canvas');
-    acumulado.width = ancho; acumulado.height = alto;
-    acumulado.getContext('2d').drawImage(canvasOrigenTrabajo, 0, 0);
-  }
-
-  for (let i = indiceDesde; i < capas.length; i++) {
-    const capa = capas[i];
-    const esNeutra = !capa.visible || capa.opacidad <= 0
-      // Con modo Normal y sin ajustes la capa procesada es igual a lo de
-      // abajo: no importa dónde se aplique ni con qué opacidad.
-      || (capa.modoFusion === 'normal' && JSON.stringify(capa.ajustes) === ajustesNeutros);
-    if (!esNeutra) {
-      // El resultado de color de esta capa solo depende de sus propios
-      // ajustes y de lo que entra desde las capas de abajo (acumulado): si
-      // ninguno de los dos cambió desde el último render (p. ej. porque lo
-      // único que cambió fue la máscara, pintando con el pincel), se reusa
-      // tal cual y no se vuelve a correr procesarCapaEnCanvas.
-      const origenCapa = acumulado;
-      const firmaColor = firmaColorDeCapa(capa);
-      const cacheadoColor = cacheColorPorCapa.get(capa.id);
-      let procesado;
-      if (cacheadoColor && cacheadoColor.firma === firmaColor && cacheadoColor.origen === origenCapa
-        && cacheadoColor.ancho === ancho && cacheadoColor.alto === alto) {
-        procesado = cacheadoColor.canvas;
-      } else {
-        procesado = document.createElement('canvas');
-        procesado.width = ancho; procesado.height = alto;
-        procesado.getContext('2d').drawImage(origenCapa, 0, 0);
-
-        let cacheBorrosos = cacheBorrososPorCapa.get(capa.id);
-        if (!cacheBorrosos || cacheBorrosos.origen !== origenCapa || cacheBorrosos.ancho !== ancho || cacheBorrosos.alto !== alto) {
-          cacheBorrosos = { origen: origenCapa, ancho, alto, claridad: null, dispersionBrillante: null, dispersionBlur: null };
-          cacheBorrososPorCapa.set(capa.id, cacheBorrosos);
-        }
-        procesarCapaEnCanvas(procesado, capa, escala, scratchPreviaEnVivo, cacheBorrosos);
-        cacheColorPorCapa.set(capa.id, { firma: firmaColor, origen: origenCapa, ancho, alto, canvas: procesado });
-      }
-
-      const mascara = generarMascaraCapa(capa, ancho, alto, true);
-      // "procesado" puede venir de la caché: no se le aplica la máscara
-      // encima (lo dejaría recortado para el próximo render que lo reuse sin
-      // máscara, o con otra) — se compone en una copia aparte.
-      let capaFinal = procesado;
-      if (mascara) {
-        capaFinal = document.createElement('canvas');
-        capaFinal.width = ancho; capaFinal.height = alto;
-        const ctxFinal = capaFinal.getContext('2d');
-        ctxFinal.drawImage(procesado, 0, 0);
-        ctxFinal.globalCompositeOperation = 'destination-in';
-        ctxFinal.drawImage(mascara, 0, 0);
-        ctxFinal.globalCompositeOperation = 'source-over';
-      }
-
-      // Nunca se pisa el canvas que ya quedó cacheado para esta capa: se
-      // compone en uno nuevo, así una capa de más arriba puede seguir
-      // reusando el acumulado de esta sin que lo cambien renders futuros.
-      const nuevoAcumulado = document.createElement('canvas');
-      nuevoAcumulado.width = ancho; nuevoAcumulado.height = alto;
-      const ctxNuevo = nuevoAcumulado.getContext('2d');
-      ctxNuevo.drawImage(acumulado, 0, 0);
-      fundirCapa(ctxNuevo, capa, capaFinal);
-      acumulado = nuevoAcumulado;
-    }
-    cacheCapas[i] = { id: capa.id, firma: firmaDeCapa(capa), canvasAcumulado: acumulado };
-  }
-
+  const resultado = componerLista(capas, canvasOrigenTrabajo, ancho, alto, escala, cacheRaiz);
   canvasTrabajo.width = ancho; canvasTrabajo.height = alto;
   ctxTrabajo.clearRect(0, 0, ancho, alto);
-  ctxTrabajo.drawImage(acumulado, 0, 0);
+  ctxTrabajo.drawImage(resultado, 0, 0);
   dibujarAyudasLienzo(ancho, alto);
 }
 
@@ -1243,7 +1352,7 @@ function renderizarComposicion() {
 // degradado mientras está elegida la herramienta de trazarlo.
 let lienzoAyudaMascara = null;
 function dibujarAyudasLienzo(ancho, alto) {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa) return;
   if (elVerMascara.checked) {
     if (!lienzoAyudaMascara) lienzoAyudaMascara = document.createElement('canvas');
@@ -1635,7 +1744,7 @@ function herramientaValida(capa, herramienta) {
 }
 
 function actualizarControlesSeleccion() {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa) return;
   const m = capa.mascara;
   if (!herramientaValida(capa, herramientaLienzo)) herramientaLienzo = 'mover';
@@ -1772,7 +1881,7 @@ document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
 // ===== Máscara de la capa activa =====
 document.querySelectorAll('#herramientasLienzo button').forEach((boton) => {
   boton.addEventListener('click', () => {
-    if (!capaActiva()) return;
+    if (!itemActivo()) return;
     const herramienta = boton.dataset.herramienta;
     // Un segundo clic sobre una herramienta activa vuelve a "Mover": así
     // nunca queda una escuchando el puntero sin querer (un pellizco para
@@ -1784,7 +1893,7 @@ document.querySelectorAll('#herramientasLienzo button').forEach((boton) => {
 
 document.querySelectorAll('#modosBaseMascara button').forEach((boton) => {
   boton.addEventListener('click', () => {
-    const capa = capaActiva();
+    const capa = itemActivo();
     if (!capa) return;
     const base = boton.dataset.base;
     capa.mascara.base = base;
@@ -1798,7 +1907,7 @@ document.querySelectorAll('#modosBaseMascara button').forEach((boton) => {
 
 document.querySelectorAll('#modosTipoDegradado button').forEach((boton) => {
   boton.addEventListener('click', () => {
-    const capa = capaActiva();
+    const capa = itemActivo();
     if (!capa) return;
     capa.mascara.degradado.tipo = boton.dataset.tipo;
     actualizarControlesSeleccion();
@@ -1806,7 +1915,7 @@ document.querySelectorAll('#modosTipoDegradado button').forEach((boton) => {
 });
 
 elToleranciaColor.addEventListener('input', () => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa) return;
   capa.mascara.tolerancia = Number(elToleranciaColor.value);
   valorToleranciaColor.textContent = elToleranciaColor.value;
@@ -1815,7 +1924,7 @@ elToleranciaColor.addEventListener('input', () => {
 
 [[elLuzDesde, 'desde'], [elLuzHasta, 'hasta'], [elLuzSuavidad, 'suavidad']].forEach(([el, clave]) => {
   el.addEventListener('input', () => {
-    const capa = capaActiva();
+    const capa = itemActivo();
     if (!capa) return;
     capa.mascara.luz[clave] = Number(el.value);
     actualizarControlesSeleccion();
@@ -1823,7 +1932,7 @@ elToleranciaColor.addEventListener('input', () => {
 });
 document.querySelectorAll('#rangosLuz button').forEach((boton) => {
   boton.addEventListener('click', () => {
-    const capa = capaActiva();
+    const capa = itemActivo();
     if (!capa) return;
     const [desde, hasta] = MascarasCapa.RANGOS_LUZ[boton.dataset.rango];
     Object.assign(capa.mascara.luz, { desde, hasta });
@@ -1832,7 +1941,7 @@ document.querySelectorAll('#rangosLuz button').forEach((boton) => {
 });
 
 elInvertirMascara.addEventListener('change', () => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa) return;
   capa.mascara.invertir = elInvertirMascara.checked;
   programarRenderizado();
@@ -1840,7 +1949,7 @@ elInvertirMascara.addEventListener('change', () => {
 elVerMascara.addEventListener('change', programarRenderizado);
 
 canvasTrabajo.addEventListener('click', (e) => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa || herramientaLienzo !== 'gotero' || !canvasOrigenTrabajo) return;
   if (huboPan) return; // fue un arrastre para mover la imagen, no un clic de gotero
   const { x, y } = coordenadasEnCanvasTrabajo(e);
@@ -1873,7 +1982,7 @@ let huboPan = false;
 
 // Los dos lienzos del pincel de la capa activa (se crean al primer trazo).
 function lienzosPincelActivos() {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa) return null;
   const nuevo = () => {
     const c = document.createElement('canvas');
@@ -1984,7 +2093,7 @@ function moverCursorPincel(e) {
 }
 
 canvasTrabajo.addEventListener('pointerenter', (e) => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa || herramientaLienzo !== 'pincel') return;
   actualizarTamanoCursorPincel();
   moverCursorPincel(e);
@@ -1998,7 +2107,7 @@ canvasTrabajo.addEventListener('pointerleave', () => cursorPincelAvanzado.classL
 });
 
 canvasTrabajo.addEventListener('pointerdown', (e) => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa) return;
 
   // Mover (y el gotero, que elige con un clic): arrastrar mueve la imagen
@@ -2044,7 +2153,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   programarRenderizado();
 });
 canvasTrabajo.addEventListener('pointermove', (e) => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (capa && herramientaLienzo === 'pincel') moverCursorPincel(e);
 
   if (trazandoDegradado && capa) {
@@ -2067,7 +2176,7 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
   const desde = ultimoPuntoPincel, radio = radioPincelEnMascara(), dureza = durezaPincelActual();
   estamparPincel((ctx, modo) => pintarTrazo(ctx, desde, punto, radio, dureza, modo));
   ultimoPuntoPincel = punto;
-  marcarMascaraSucia(capaActiva());
+  marcarMascaraSucia(itemActivo());
   programarRenderizado();
 });
 function terminarGestoLienzo() {
@@ -2084,7 +2193,7 @@ function terminarGestoLienzo() {
 // Se llama cuando aparece el segundo dedo: lo que venía haciendo el primero
 // no era lo que el usuario quería, era el comienzo de un pellizco.
 function cancelarGestoDeUnDedo() {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (capa && pintando && mascaraAntesDelTrazo) {
     for (const [lienzo, antes] of [[capa.pincelSumar, mascaraAntesDelTrazo.sumar], [capa.pincelQuitar, mascaraAntesDelTrazo.quitar]]) {
       const ctx = lienzo.getContext('2d');
@@ -2113,7 +2222,7 @@ elDurezaPincel.addEventListener('input', () => {
 });
 
 botonBorrarMascaraCapa.addEventListener('click', () => {
-  const capa = capaActiva();
+  const capa = itemActivo();
   if (!capa || (!capa.pincelSumar && !capa.pincelQuitar)) return;
   capa.pincelSumar = null;
   capa.pincelQuitar = null;
@@ -2248,108 +2357,299 @@ zonaLienzoContenedor.addEventListener('pointerup', soltarPuntero);
 zonaLienzoContenedor.addEventListener('pointercancel', soltarPuntero);
 
 // ===== Lista de capas =====
+// Se muestra de arriba (lo que se ve "encima") hacia abajo, al revés del
+// orden de "capas" (índice 0 = fondo). Lo de adentro de un grupo va debajo de
+// él con sangría, salvo que esté plegado.
+const cantidadCapas = document.getElementById('cantidadCapas');
+const botonAgrupar = document.getElementById('botonAgrupar');
+const botonDesagrupar = document.getElementById('botonDesagrupar');
+const botonSubirCapa = document.getElementById('botonSubirCapa');
+const botonBajarCapa = document.getElementById('botonBajarCapa');
+
 function pintarListaCapas() {
   listaCapas.innerHTML = '';
-  document.getElementById('cantidadCapas').textContent = capas.length > 1 ? '(' + capas.length + ')' : '';
-  // Se muestran de arriba (última, la que se ve "encima") hacia abajo, pero
-  // "capas" guarda el orden real de renderizado (índice 0 = fondo) — se
-  // invierte solo para pintar la lista.
-  [...capas].reverse().forEach((capa) => {
-    const contenedor = document.createElement('div');
-    contenedor.className = 'contenedor-capa';
-    contenedor.dataset.id = capa.id;
+  const total = todosLosItems().length;
+  cantidadCapas.textContent = total > 1 ? '(' + total + ')' : '';
+  pintarNivel(capas, 0);
+  actualizarBotonesCapa();
+}
 
-    // El "arrastrable" va solo en la fila de arriba (miniatura+nombre+ojo+
-    // eliminar), no en el contenedor entero — si no, interactuar con la
-    // barra de opacidad de abajo se interpretaba como arrastrar la capa.
-    const fila = document.createElement('div');
-    fila.className = 'fila-capa' + (capa.id === capaActivaId ? ' activa' : '');
-    fila.draggable = true;
+function pintarNivel(lista, nivel) {
+  [...lista].reverse().forEach((item) => {
+    listaCapas.appendChild(crearFilaItem(item, nivel));
+    if (esGrupo(item) && !item.plegado) pintarNivel(item.hijos, nivel + 1);
+  });
+}
 
-    const miniatura = document.createElement('canvas');
+function crearFilaItem(capa, nivel) {
+  const grupo = esGrupo(capa);
+  const contenedor = document.createElement('div');
+  contenedor.className = 'contenedor-capa' + (grupo ? ' es-grupo' : '');
+  contenedor.dataset.id = capa.id;
+  contenedor.style.marginLeft = (nivel * 14) + 'px';
+
+  // El "arrastrable" va solo en la fila de arriba (miniatura+nombre+ojo+
+  // eliminar), no en el contenedor entero — si no, interactuar con la
+  // barra de opacidad de abajo se interpretaba como arrastrar la capa.
+  const fila = document.createElement('div');
+  fila.className = 'fila-capa' + (capa.id === capaActivaId ? ' activa' : '');
+  fila.draggable = true;
+
+  let miniatura = null;
+  if (grupo) {
+    const plegar = document.createElement('button');
+    plegar.type = 'button';
+    plegar.className = 'boton-plegar-grupo';
+    plegar.textContent = capa.plegado ? '▸' : '▾';
+    plegar.title = t('title-plegar-grupo');
+    plegar.setAttribute('aria-label', t('title-plegar-grupo'));
+    plegar.setAttribute('aria-expanded', !capa.plegado);
+    plegar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      capa.plegado = !capa.plegado;
+      pintarListaCapas();
+    });
+    fila.appendChild(plegar);
+    const icono = document.createElement('span');
+    icono.className = 'icono-grupo';
+    icono.textContent = capa.plegado ? '📁' : '📂';
+    icono.setAttribute('aria-hidden', 'true');
+    fila.appendChild(icono);
+  } else {
+    miniatura = document.createElement('canvas');
     miniatura.className = 'miniatura-capa';
     fila.appendChild(miniatura);
+  }
 
-    const nombre = document.createElement('input');
-    nombre.className = 'nombre-capa';
-    nombre.value = capa.nombre;
-    nombre.addEventListener('click', (e) => e.stopPropagation());
-    nombre.addEventListener('input', () => { capa.nombre = nombre.value; });
-    fila.appendChild(nombre);
+  const nombre = document.createElement('input');
+  nombre.className = 'nombre-capa';
+  nombre.value = capa.nombre;
+  nombre.setAttribute('aria-label', t('title-nombre'));
+  nombre.addEventListener('click', (e) => e.stopPropagation());
+  nombre.addEventListener('input', () => { capa.nombre = nombre.value; });
+  fila.appendChild(nombre);
 
-    const botonOjo = document.createElement('button');
-    botonOjo.type = 'button';
-    botonOjo.className = 'icono-capa' + (capa.visible ? '' : ' apagado');
-    botonOjo.textContent = capa.visible ? '👁️' : '🚫';
-    botonOjo.title = t('title-ojo');
-    botonOjo.addEventListener('click', (e) => {
-      e.stopPropagation();
-      capa.visible = !capa.visible;
-      pintarListaCapas();
-      programarRenderizado();
-    });
-    fila.appendChild(botonOjo);
-
-    const botonEliminar = document.createElement('button');
-    botonEliminar.type = 'button';
-    botonEliminar.className = 'icono-capa';
-    botonEliminar.textContent = '✕';
-    botonEliminar.title = t('title-eliminar');
-    botonEliminar.style.display = capas.length > 1 ? 'inline' : 'none';
-    botonEliminar.addEventListener('click', (e) => {
-      e.stopPropagation();
-      eliminarCapa(capa.id);
-    });
-    fila.appendChild(botonEliminar);
-
-    fila.addEventListener('click', () => {
-      capaActivaId = capa.id;
-      pintarListaCapas();
-      escribirAjustesEnUI(capa.ajustes);
-      actualizarControlesSeleccion();
-    });
-
-    contenedor.appendChild(fila);
-
-    const filaOpacidad = document.createElement('div');
-    filaOpacidad.className = 'fila-opacidad';
-    // Modo de fusión y opacidad juntos, como en el panel de capas de Photoshop.
-    const selectorFusion = document.createElement('select');
-    selectorFusion.title = t('title-fusion');
-    selectorFusion.setAttribute('aria-label', t('title-fusion'));
-    MODOS_FUSION.forEach(([claveGrupo, modos]) => {
-      const destino = claveGrupo ? document.createElement('optgroup') : selectorFusion;
-      if (claveGrupo) { destino.label = t(claveGrupo); selectorFusion.appendChild(destino); }
-      modos.forEach((modo) => destino.appendChild(new Option(t('fusion-' + modo), modo)));
-    });
-    selectorFusion.value = capa.modoFusion;
-    selectorFusion.addEventListener('click', (e) => e.stopPropagation());
-    selectorFusion.addEventListener('change', () => {
-      capa.modoFusion = selectorFusion.value;
-      programarRenderizado();
-    });
-    filaOpacidad.appendChild(selectorFusion);
-    const sliderOpacidad = document.createElement('input');
-    sliderOpacidad.type = 'range'; sliderOpacidad.min = 0; sliderOpacidad.max = 100; sliderOpacidad.value = capa.opacidad;
-    sliderOpacidad.title = t('title-opacidad');
-    sliderOpacidad.setAttribute('aria-label', t('title-opacidad'));
-    sliderOpacidad.addEventListener('click', (e) => e.stopPropagation());
-    sliderOpacidad.addEventListener('input', () => {
-      capa.opacidad = Number(sliderOpacidad.value);
-      etiquetaOpacidad.textContent = capa.opacidad + '%';
-      programarRenderizado();
-    });
-    const etiquetaOpacidad = document.createElement('span');
-    etiquetaOpacidad.textContent = capa.opacidad + '%';
-    filaOpacidad.appendChild(sliderOpacidad);
-    filaOpacidad.appendChild(etiquetaOpacidad);
-    contenedor.appendChild(filaOpacidad);
-
-    listaCapas.appendChild(contenedor);
-    actualizarMiniaturaCapa(capa, miniatura);
+  const botonOjo = document.createElement('button');
+  botonOjo.type = 'button';
+  botonOjo.className = 'icono-capa' + (capa.visible ? '' : ' apagado');
+  botonOjo.textContent = capa.visible ? '👁️' : '🚫';
+  botonOjo.title = t('title-ojo');
+  botonOjo.setAttribute('aria-label', t('title-ojo'));
+  botonOjo.setAttribute('aria-pressed', !capa.visible);
+  botonOjo.addEventListener('click', (e) => {
+    e.stopPropagation();
+    capa.visible = !capa.visible;
+    pintarListaCapas();
+    programarRenderizado();
   });
+  fila.appendChild(botonOjo);
 
-  habilitarArrastreCapas();
+  const botonEliminar = document.createElement('button');
+  botonEliminar.type = 'button';
+  botonEliminar.className = 'icono-capa';
+  botonEliminar.textContent = '✕';
+  botonEliminar.title = t(grupo ? 'title-eliminar-grupo' : 'title-eliminar');
+  botonEliminar.setAttribute('aria-label', botonEliminar.title);
+  botonEliminar.style.display = grupo || cantidadDeCapas() > 1 ? 'inline' : 'none';
+  botonEliminar.addEventListener('click', (e) => {
+    e.stopPropagation();
+    eliminarCapa(capa.id);
+  });
+  fila.appendChild(botonEliminar);
+
+  fila.addEventListener('click', () => seleccionarItem(capa.id));
+  conectarArrastre(fila, contenedor, capa);
+  contenedor.appendChild(fila);
+
+  const filaOpacidad = document.createElement('div');
+  filaOpacidad.className = 'fila-opacidad';
+  // Modo de fusión y opacidad juntos, como en el panel de capas de Photoshop.
+  const selectorFusion = document.createElement('select');
+  selectorFusion.title = t('title-fusion');
+  selectorFusion.setAttribute('aria-label', t('title-fusion'));
+  MODOS_FUSION.forEach(([claveGrupo, modos]) => {
+    const destino = claveGrupo ? document.createElement('optgroup') : selectorFusion;
+    if (claveGrupo) { destino.label = t(claveGrupo); selectorFusion.appendChild(destino); }
+    modos.forEach((modo) => destino.appendChild(new Option(t('fusion-' + modo), modo)));
+  });
+  selectorFusion.value = capa.modoFusion;
+  selectorFusion.addEventListener('click', (e) => e.stopPropagation());
+  selectorFusion.addEventListener('change', () => {
+    capa.modoFusion = selectorFusion.value;
+    programarRenderizado();
+  });
+  filaOpacidad.appendChild(selectorFusion);
+  const sliderOpacidad = document.createElement('input');
+  sliderOpacidad.type = 'range'; sliderOpacidad.min = 0; sliderOpacidad.max = 100; sliderOpacidad.value = capa.opacidad;
+  sliderOpacidad.title = t('title-opacidad');
+  sliderOpacidad.setAttribute('aria-label', t('title-opacidad'));
+  sliderOpacidad.addEventListener('click', (e) => e.stopPropagation());
+  const etiquetaOpacidad = document.createElement('span');
+  etiquetaOpacidad.textContent = capa.opacidad + '%';
+  sliderOpacidad.addEventListener('input', () => {
+    capa.opacidad = Number(sliderOpacidad.value);
+    etiquetaOpacidad.textContent = capa.opacidad + '%';
+    programarRenderizado();
+  });
+  filaOpacidad.appendChild(sliderOpacidad);
+  filaOpacidad.appendChild(etiquetaOpacidad);
+  contenedor.appendChild(filaOpacidad);
+
+  if (miniatura) actualizarMiniaturaCapa(capa, miniatura);
+  return contenedor;
+}
+
+// Los ajustes de luz, color, filtro y textura son de cada capa: con un grupo
+// elegido quedan inactivos (inert: ni el mouse ni el teclado los alcanzan) y
+// dicen por qué. La máscara ("Aplicar la capa a") sí vale para los grupos.
+const BLOQUES_SOLO_CAPA = [...document.querySelectorAll('.panel-ajustes .acordeon-grupo, #filtrosCapa, [data-app-categoria="Textura"]')];
+
+function sincronizarPanelesConActivo() {
+  const capa = capaActiva();
+  BLOQUES_SOLO_CAPA.forEach((bloque) => {
+    const contenido = bloque.querySelector('.acordeon-contenido');
+    bloque.classList.toggle('solo-capas', !capa);
+    if (contenido) { contenido.inert = !capa; contenido.dataset.aviso = t('aviso-grupo-activo'); }
+  });
+  if (capa) escribirAjustesEnUI(capa.ajustes);
+  actualizarControlesSeleccion();
+}
+
+function seleccionarItem(id) {
+  capaActivaId = id;
+  pintarListaCapas();
+  sincronizarPanelesConActivo();
+}
+
+function cambioDeEstructura() {
+  pintarListaCapas();
+  sincronizarPanelesConActivo();
+  programarRenderizado();
+}
+
+// ===== Ordenar y agrupar =====
+// Subir y bajar cambian de lugar con el vecino; si el vecino es un grupo
+// abierto, entran en él, y en el borde de un grupo salen de él (como en
+// Photoshop). Son la forma de ordenar sin arrastrar, también con el dedo.
+function destinoAlMover(id, direccion) {
+  const u = ubicar(id);
+  if (!u) return null;
+  const j = u.indice + direccion;
+  if (j >= 0 && j < u.lista.length) return { u, vecino: u.lista[j] };
+  if (u.padre) return { u, salir: true };
+  return null;
+}
+
+function moverItem(id, direccion) {
+  const destino = destinoAlMover(id, direccion);
+  if (!destino) return;
+  const { u } = destino;
+  u.lista.splice(u.indice, 1);
+  if (destino.salir) {
+    const up = ubicar(u.padre.id);
+    up.lista.splice(up.indice + (direccion > 0 ? 1 : 0), 0, u.item);
+  } else if (esGrupo(destino.vecino) && !destino.vecino.plegado) {
+    if (direccion > 0) destino.vecino.hijos.unshift(u.item);
+    else destino.vecino.hijos.push(u.item);
+  } else {
+    u.lista.splice(u.indice + direccion, 0, u.item);
+  }
+  cambioDeEstructura();
+}
+
+function actualizarBotonesCapa() {
+  const item = itemActivo();
+  botonDesagrupar.style.display = esGrupo(item) ? '' : 'none';
+  botonSubirCapa.disabled = !item || !destinoAlMover(item.id, 1);
+  botonBajarCapa.disabled = !item || !destinoAlMover(item.id, -1);
+  botonAgrupar.disabled = !item;
+}
+
+botonSubirCapa.addEventListener('click', () => { if (itemActivo()) moverItem(capaActivaId, 1); });
+botonBajarCapa.addEventListener('click', () => { if (itemActivo()) moverItem(capaActivaId, -1); });
+
+botonAgrupar.addEventListener('click', () => {
+  const u = ubicar(capaActivaId);
+  if (!u) return;
+  const grupo = crearGrupo();
+  u.lista.splice(u.indice, 1, grupo);
+  grupo.hijos.push(u.item);
+  capaActivaId = grupo.id;
+  cambioDeEstructura();
+});
+
+botonDesagrupar.addEventListener('click', () => {
+  const u = ubicar(capaActivaId);
+  if (!u || !esGrupo(u.item)) return;
+  const hijos = u.item.hijos;
+  u.lista.splice(u.indice, 1, ...hijos);
+  olvidarItem(u.item);
+  capaActivaId = hijos.length ? hijos[hijos.length - 1].id : (u.lista[Math.min(u.indice, u.lista.length - 1)] || u.padre || capas[capas.length - 1]).id;
+  cambioDeEstructura();
+});
+
+// --- Arrastrar y soltar ---
+// Sobre una capa: arriba o abajo de ella. Sobre un grupo: arriba, adentro
+// (lo más alto de su contenido) o, si está plegado, abajo.
+let arrastrandoId = null;
+
+function lugarDeSoltar(e, fila, item) {
+  const r = fila.getBoundingClientRect();
+  const y = (e.clientY - r.top) / r.height;
+  if (!esGrupo(item)) return y < 0.5 ? 'arriba' : 'abajo';
+  if (y < 0.3) return 'arriba';
+  return item.plegado && y > 0.7 ? 'abajo' : 'dentro';
+}
+
+function puedeSoltar(id, destino) {
+  if (!id || id === destino.id) return false;
+  const u = ubicar(id);
+  if (!u) return false;
+  // Un grupo no puede ir adentro de sí mismo.
+  let adentro = false;
+  if (esGrupo(u.item)) recorrerItems((item) => { if (item.id === destino.id) adentro = true; }, u.item.hijos);
+  return !adentro;
+}
+
+function limpiarMarcasDeSoltar() {
+  listaCapas.querySelectorAll('.soltar-arriba, .soltar-abajo, .soltar-dentro')
+    .forEach((f) => f.classList.remove('soltar-arriba', 'soltar-abajo', 'soltar-dentro'));
+}
+
+function conectarArrastre(fila, contenedor, item) {
+  fila.addEventListener('dragstart', (e) => {
+    arrastrandoId = item.id;
+    contenedor.classList.add('arrastrando');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', item.id); } catch (error) { /* no hace falta */ }
+  });
+  fila.addEventListener('dragend', () => {
+    arrastrandoId = null;
+    contenedor.classList.remove('arrastrando');
+    limpiarMarcasDeSoltar();
+  });
+  fila.addEventListener('dragover', (e) => {
+    if (!puedeSoltar(arrastrandoId, item)) return;
+    e.preventDefault();
+    limpiarMarcasDeSoltar();
+    fila.classList.add('soltar-' + lugarDeSoltar(e, fila, item));
+  });
+  fila.addEventListener('drop', (e) => {
+    if (!puedeSoltar(arrastrandoId, item)) return;
+    e.preventDefault();
+    const lugar = lugarDeSoltar(e, fila, item);
+    const u = ubicar(arrastrandoId);
+    u.lista.splice(u.indice, 1);
+    if (lugar === 'dentro') {
+      item.plegado = false;
+      item.hijos.push(u.item);
+    } else {
+      const d = ubicar(item.id);
+      d.lista.splice(d.indice + (lugar === 'arriba' ? 1 : 0), 0, u.item);
+    }
+    arrastrandoId = null;
+    cambioDeEstructura();
+  });
 }
 
 function actualizarMiniaturaCapa(capa, elementoMiniatura) {
@@ -2368,57 +2668,48 @@ function actualizarMiniaturaCapa(capa, elementoMiniatura) {
   canvasMini.getContext('2d').drawImage(base, 0, 0);
 }
 
-// Arrastrar y soltar para reordenar (adaptado del patrón de
-// habilitarArrastreReordenable en HerramientasOfimaticas/assets/js/miniaturas.js,
-// acá con un solo contenedor por capa en vez de una grilla de tarjetas sueltas).
-function habilitarArrastreCapas() {
-  listaCapas.querySelectorAll('.fila-capa').forEach((fila) => {
-    const contenedor = fila.closest('.contenedor-capa');
-    fila.addEventListener('dragstart', () => contenedor.classList.add('arrastrando'));
-    fila.addEventListener('dragend', () => {
-      contenedor.classList.remove('arrastrando');
-      const nuevoOrdenIds = [...listaCapas.querySelectorAll('.contenedor-capa')].map((c) => c.dataset.id).reverse();
-      capas.sort((a, b) => nuevoOrdenIds.indexOf(a.id) - nuevoOrdenIds.indexOf(b.id));
-      programarRenderizado();
-    });
-  });
-}
-
-// El dragover va una sola vez sobre el contenedor de la lista (no dentro de
-// habilitarArrastreCapas, que corre en cada repintado — si no se acumulaba
-// un listener nuevo por cada vez que se redibujaban las capas).
-listaCapas.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  const contenedor = e.target.closest('.contenedor-capa');
-  const arrastrando = listaCapas.querySelector('.arrastrando');
-  if (!contenedor || !arrastrando || arrastrando === contenedor) return;
-  const rect = contenedor.getBoundingClientRect();
-  const despuesDelMedio = e.clientY > rect.top + rect.height / 2;
-  listaCapas.insertBefore(arrastrando, despuesDelMedio ? contenedor.nextSibling : contenedor);
-});
-
 // ===== Agregar / eliminar capas =====
+// La capa nueva va justo arriba de lo elegido; si lo elegido es un grupo,
+// adentro de él (arriba de todo).
 botonNuevaCapa.addEventListener('click', () => {
   const capa = crearCapa();
-  capas.push(capa);
+  const actual = itemActivo();
+  if (esGrupo(actual)) {
+    actual.plegado = false;
+    actual.hijos.push(capa);
+  } else if (actual) {
+    const u = ubicar(actual.id);
+    u.lista.splice(u.indice + 1, 0, capa);
+  } else {
+    capas.push(capa);
+  }
   capaActivaId = capa.id;
-  pintarListaCapas();
-  escribirAjustesEnUI(capa.ajustes);
-  actualizarControlesSeleccion();
-  programarRenderizado();
+  cambioDeEstructura();
 });
 
+// Suelta las cachés de un elemento (y de todo lo de adentro, si es un grupo).
+function olvidarItem(item) {
+  cacheColorPorCapa.delete(item.id);
+  cacheBorrososPorCapa.delete(item.id);
+  memoMascaraPorCapa.delete(item.id);
+}
+
 function eliminarCapa(id) {
-  if (capas.length <= 1) return;
-  capas = capas.filter((c) => c.id !== id);
-  cacheColorPorCapa.delete(id);
-  cacheBorrososPorCapa.delete(id);
-  memoMascaraPorCapa.delete(id);
-  if (capaActivaId === id) capaActivaId = capas[capas.length - 1].id;
-  pintarListaCapas();
-  escribirAjustesEnUI(capaActiva().ajustes);
-  actualizarControlesSeleccion();
-  programarRenderizado();
+  const u = ubicar(id);
+  if (!u) return;
+  const quitados = [u.item];
+  if (esGrupo(u.item)) recorrerItems((item) => quitados.push(item), u.item.hijos);
+  if (cantidadDeCapas() - quitados.filter((item) => !esGrupo(item)).length < 1) {
+    alert(t('aviso-ultima-capa'));
+    return;
+  }
+  if (esGrupo(u.item) && u.item.hijos.length && !confirm(t('confirmar-eliminar-grupo'))) return;
+  u.lista.splice(u.indice, 1);
+  quitados.forEach(olvidarItem);
+  if (!ubicar(capaActivaId)) {
+    capaActivaId = (u.lista[Math.min(u.indice, u.lista.length - 1)] || u.padre || capas[capas.length - 1]).id;
+  }
+  cambioDeEstructura();
 }
 
 // ===== Resolución de la vista previa =====
@@ -2468,7 +2759,7 @@ elResolucionVistaPrevia.addEventListener('change', () => {
   const anchoAnterior = anchoTrabajo;
   prepararResolucionTrabajo();
   // Lo ya pintado con el pincel se reescala al nuevo tamaño de trabajo.
-  for (const capa of capas) {
+  for (const capa of todosLosItems()) {
     for (const clave of ['pincelSumar', 'pincelQuitar']) {
       if (!capa[clave]) continue;
       const cm = document.createElement('canvas');
@@ -2492,7 +2783,8 @@ async function mostrarArchivo(archivo) {
   prepararResolucionTrabajo();
 
   contadorCapas = 0;
-  capas = [crearCapa('Capa 1')];
+  Object.assign(contadorNombres, { capa: 0, grupo: 0 });
+  capas = [crearCapa()];
   capaActivaId = capas[0].id;
 
   editorCompleto.style.display = 'block';
@@ -2500,8 +2792,7 @@ async function mostrarArchivo(archivo) {
   // Con el editor ya visible el recuadro tiene tamaño real: recién ahora se
   // puede calcular el zoom con el que la imagen entra entera.
   requestAnimationFrame(encajarEnLaVista);
-  escribirAjustesEnUI(capas[0].ajustes);
-  actualizarControlesSeleccion();
+  sincronizarPanelesConActivo();
   pintarListaCapas();
   programarRenderizado();
   if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
@@ -2518,10 +2809,10 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 botonRestablecerAvanzado.addEventListener('click', () => {
   if (!imagenActual) return;
   contadorCapas = 0;
-  capas = [crearCapa('Capa 1')];
+  Object.assign(contadorNombres, { capa: 0, grupo: 0 });
+  capas = [crearCapa()];
   capaActivaId = capas[0].id;
-  escribirAjustesEnUI(capas[0].ajustes);
-  actualizarControlesSeleccion();
+  sincronizarPanelesConActivo();
   pintarListaCapas();
   programarRenderizado();
 });
@@ -2530,7 +2821,8 @@ botonRestablecerAvanzado.addEventListener('click', () => {
 // se confirma solo si ya hay algo editado.
 function hayCambios() {
   const neutro = JSON.stringify(AJUSTES_NEUTROS);
-  return capas.length > 1 || capas.some((c) => !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
+  const todos = todosLosItems();
+  return todos.length > 1 || todos.some((c) => esGrupo(c) || !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
 }
 document.getElementById('botonCambiarImagen').addEventListener('click', () => {
   if (hayCambios() && !confirm(t('confirmar-cambiar'))) return;
@@ -2575,26 +2867,11 @@ botonDescargarAvanzado.addEventListener('click', async () => {
     canvasOrigenTrabajo = canvasOrigenCompleto;
     anchoTrabajo = ancho; altoTrabajo = alto;
 
+    const resultadoFinal = componerLista(capas, canvasOrigenCompleto, ancho, alto, 1, null);
+    // toBlob necesita un lienzo propio (el resultado puede ser el origen mismo).
     const acumulado = document.createElement('canvas');
     acumulado.width = ancho; acumulado.height = alto;
-    acumulado.getContext('2d').drawImage(canvasOrigenCompleto, 0, 0);
-
-    for (const capa of capas) {
-      if (!capa.visible) continue;
-      const procesado = document.createElement('canvas');
-      procesado.width = ancho; procesado.height = alto;
-      procesado.getContext('2d').drawImage(acumulado, 0, 0);
-      procesarCapaEnCanvas(procesado, capa, 1);
-
-      const mascara = generarMascaraCapa(capa, ancho, alto);
-      if (mascara) {
-        const ctxProcesado = procesado.getContext('2d');
-        ctxProcesado.globalCompositeOperation = 'destination-in';
-        ctxProcesado.drawImage(mascara, 0, 0);
-        ctxProcesado.globalCompositeOperation = 'source-over';
-      }
-      fundirCapa(acumulado.getContext('2d'), capa, procesado);
-    }
+    acumulado.getContext('2d').drawImage(resultadoFinal, 0, 0);
 
     const formato = formatoDeSalida(archivoActual);
     const blob = await new Promise((resolve) => acumulado.toBlob(resolve, formato, 0.92));
@@ -2622,26 +2899,32 @@ document.addEventListener('cambioIdioma', () => {
     el.textContent = AjustePorColor.nombreRango(el.dataset.rango);
   });
   // La lista de capas arma sus textos (modos de fusión, títulos) con t().
-  if (capas.length) pintarListaCapas();
+  if (capas.length) { pintarListaCapas(); sincronizarPanelesConActivo(); }
 });
 
 // ===== Guardar / cargar proyecto =====
 function canvasADataUrl(canvas) { return canvas ? canvas.toDataURL('image/png') : null; }
 
+// Una capa o un grupo (con todo lo de adentro) como se guarda en el proyecto.
+function itemAProyecto(c) {
+  const comun = {
+    id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad, modoFusion: c.modoFusion,
+    mascara: c.mascara,
+    pincelSumar: canvasADataUrl(c.pincelSumar),
+    pincelQuitar: canvasADataUrl(c.pincelQuitar),
+  };
+  if (esGrupo(c)) return { ...comun, tipo: 'grupo', plegado: c.plegado, hijos: c.hijos.map(itemAProyecto) };
+  return { ...comun, ajustes: c.ajustes };
+}
+
 botonGuardarProyecto.addEventListener('click', () => {
   if (!imagenActual) return;
   const proyecto = {
-    version: 2, // 2: máscara con base + pincel para sumar y quitar (2026-10-04)
+    version: 3, // 2: máscara con base + pincel para sumar y quitar; 3: grupos (2026-10-04)
     imagen: crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight).toDataURL(archivoActual.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.95),
     nombreArchivo: archivoActual.name,
     capaActivaId,
-    capas: capas.map((c) => ({
-      id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad, modoFusion: c.modoFusion,
-      mascara: c.mascara,
-      ajustes: c.ajustes,
-      pincelSumar: canvasADataUrl(c.pincelSumar),
-      pincelQuitar: canvasADataUrl(c.pincelQuitar),
-    })),
+    capas: capas.map(itemAProyecto),
   };
   const blob = new Blob([JSON.stringify(proyecto)], { type: 'application/json' });
   const enlace = document.createElement('a');
@@ -2683,6 +2966,23 @@ function mascaraDeProyecto(c) {
   return m;
 }
 
+async function itemDeProyecto(c) {
+  const comun = {
+    id: c.id, nombre: c.nombre, visible: c.visible !== false, opacidad: Number.isFinite(c.opacidad) ? c.opacidad : 100,
+    // Los proyectos guardados antes de los modos de fusión no lo traen.
+    modoFusion: MODOS_FUSION.some(([, modos]) => modos.includes(c.modoFusion)) ? c.modoFusion : 'normal',
+    mascara: mascaraDeProyecto(c),
+    // Versión 1: un solo lienzo de pincel, que solo podía sumar.
+    pincelSumar: await lienzoDeDataUrl(c.pincelSumar || c.mascaraPincel),
+    pincelQuitar: await lienzoDeDataUrl(c.pincelQuitar),
+    _versionMascara: 0,
+  };
+  if (c.tipo === 'grupo') {
+    return { ...comun, tipo: 'grupo', plegado: !!c.plegado, hijos: await Promise.all((c.hijos || []).map(itemDeProyecto)), _cache: { entrada: null, items: [] } };
+  }
+  return { ...comun, ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes } };
+}
+
 botonCargarProyecto.addEventListener('click', () => entradaProyecto.click());
 entradaProyecto.addEventListener('change', async (e) => {
   const archivo = e.target.files[0];
@@ -2699,26 +2999,15 @@ entradaProyecto.addEventListener('change', async (e) => {
 
   prepararResolucionTrabajo();
 
-  const capasCargadas = [];
-  for (const c of proyecto.capas) {
-    const nueva = {
-      id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad,
-      // Los proyectos guardados antes de los modos de fusión no lo traen.
-      modoFusion: MODOS_FUSION.some(([, modos]) => modos.includes(c.modoFusion)) ? c.modoFusion : 'normal',
-      mascara: mascaraDeProyecto(c),
-      ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes },
-      // Versión 1: un solo lienzo de pincel, que solo podía sumar.
-      pincelSumar: await lienzoDeDataUrl(c.pincelSumar || c.mascaraPincel),
-      pincelQuitar: await lienzoDeDataUrl(c.pincelQuitar),
-    };
-    capasCargadas.push(nueva);
-  }
-  capas = capasCargadas.length ? capasCargadas : [crearCapa('Capa 1')];
-  capaActivaId = proyecto.capaActivaId && capas.some((c) => c.id === proyecto.capaActivaId) ? proyecto.capaActivaId : capas[capas.length - 1].id;
+  capas = await Promise.all((proyecto.capas || []).map(itemDeProyecto));
+  if (!cantidadDeCapas()) capas.push(crearCapa());
+  capaActivaId = proyecto.capaActivaId && ubicar(proyecto.capaActivaId) ? proyecto.capaActivaId : capas[capas.length - 1].id;
 
   // El contador arranca después del id más alto del proyecto cargado, para
   // que una capa nueva no reuse un id que ya existe.
-  contadorCapas = capas.reduce((maximo, c) => {
+  contadorNombres.capa = cantidadDeCapas();
+  contadorNombres.grupo = todosLosItems().filter(esGrupo).length;
+  contadorCapas = todosLosItems().reduce((maximo, c) => {
     const numero = parseInt(String(c.id).replace('capa-', ''), 10);
     return Number.isFinite(numero) ? Math.max(maximo, numero) : maximo;
   }, 0);
@@ -2728,9 +3017,8 @@ entradaProyecto.addEventListener('change', async (e) => {
   // Con el editor ya visible el recuadro tiene tamaño real: recién ahora se
   // puede calcular el zoom con el que la imagen entra entera.
   requestAnimationFrame(encajarEnLaVista);
-  escribirAjustesEnUI(capaActiva().ajustes);
-  actualizarControlesSeleccion();
   pintarListaCapas();
+  sincronizarPanelesConActivo();
   programarRenderizado();
   if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
   entradaProyecto.value = '';

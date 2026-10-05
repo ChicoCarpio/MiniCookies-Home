@@ -860,6 +860,93 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(huellas).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
+  // Grupos del editor avanzado, con la misma imagen de dos mitades: el grupo
+  // aplica su visibilidad, opacidad, máscara y modo a todo lo de adentro, y
+  // subir/bajar cambian el orden (que importa: Multiplicar y Trama no
+  // conmutan).
+  await prueba('editor avanzado: grupos (agrupar, ocultar, opacidad, máscara, modo, orden, proyecto)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const base = D().createElement('canvas'); base.width = 100; base.height = 50;
+    const cb = base.getContext('2d');
+    cb.fillStyle = 'rgb(40,40,40)'; cb.fillRect(0, 0, 50, 50);
+    cb.fillStyle = 'rgb(220,220,220)'; cb.fillRect(50, 0, 50, 50);
+    const png = await new Promise((r) => base.toBlob(r, 'image/png'));
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([png], 'mitades.png', { type: 'image/png' })]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => D().querySelector('#listaCapas .fila-opacidad select'), 15000), 'el editor no cargó la imagen');
+    const lienzo = D().getElementById('canvasTrabajo');
+    const px = (x) => lienzo.getContext('2d').getImageData(Math.round(lienzo.width * x), lienzo.height >> 2, 1, 1).data[0];
+    const leer = async () => { await esperar(250); return [px(0.25), px(0.75)]; };
+    const cerca = (v, e) => Math.abs(v - e) <= 3;
+    const clic = (sel) => D().querySelector(sel).click();
+    // El selector de modo y la opacidad de la fila del elemento elegido.
+    const filaActiva = () => D().querySelector('#listaCapas .fila-capa.activa').parentElement;
+    const ponerModo = (modo) => { const s = filaActiva().querySelector('select'); s.value = modo; s.dispatchEvent(new (W().Event)('change')); };
+    const ponerOpacidad = (v) => { const r = filaActiva().querySelector('input[type=range]'); r.value = v; r.dispatchEvent(new (W().Event)('input')); };
+    const h = {};
+
+    ponerModo('multiply');
+    const idCapa1 = W().capaActiva().id;
+    clic('#botonAgrupar');
+    afirmar(W().esGrupo(W().itemActivo()), 'Agrupar no dejó elegido el grupo');
+    afirmar(D().querySelector('[data-app-categoria="Luz"], .panel-ajustes .acordeon-contenido').inert, 'con un grupo elegido, los ajustes de capa no quedaron inactivos');
+    h.agrupada = await leer();
+    afirmar(cerca(h.agrupada[0], 6) && cerca(h.agrupada[1], 190), 'grupo Normal: ' + h.agrupada);
+    filaActiva().querySelector('.icono-capa').click(); // ojo del grupo
+    h.oculto = await leer();
+    afirmar(cerca(h.oculto[0], 40) && cerca(h.oculto[1], 220), 'grupo oculto: ' + h.oculto);
+    filaActiva().querySelector('.icono-capa').click();
+    ponerOpacidad(50);
+    h.mitad = await leer();
+    afirmar(cerca(h.mitad[0], 23) && cerca(h.mitad[1], 205), 'grupo al 50%: ' + h.mitad);
+    ponerOpacidad(100);
+    clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
+    h.mascara = await leer();
+    afirmar(cerca(h.mascara[0], 6) && cerca(h.mascara[1], 220), 'máscara del grupo: ' + h.mascara);
+    clic('#modosBaseMascara [data-base="toda"]');
+    ponerModo('multiply'); // el grupo (6, 190) multiplicado sobre (40, 220)
+    h.modo = await leer();
+    afirmar(cerca(h.modo[0], 1) && cerca(h.modo[1], 164), 'grupo en Multiplicar: ' + h.modo);
+    ponerModo('normal');
+
+    // Proyecto: el árbol se guarda y vuelve igual.
+    const raiz = W().ubicar(W().itemActivo().id).lista;
+    const proyecto = { version: 3, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: idCapa1, capas: raiz.map(W().itemAProyecto) };
+    afirmar(proyecto.capas.length === 1 && proyecto.capas[0].tipo === 'grupo' && proyecto.capas[0].hijos.length === 1, 'el proyecto no guardó el grupo: ' + JSON.stringify(proyecto.capas).slice(0, 120));
+    const entradaProyecto = D().getElementById('entradaProyecto');
+    entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'grupo.json', { type: 'application/json' })]).files;
+    entradaProyecto.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().capaActiva() && W().capaActiva().id === idCapa1 && W().ubicar(idCapa1).padre, 10000), 'el proyecto no volvió con la capa dentro del grupo');
+    h.proyecto = await leer();
+    afirmar(cerca(h.proyecto[0], 6) && cerca(h.proyecto[1], 190), 'proyecto con grupo: ' + h.proyecto);
+
+    // Orden: una capa nueva en Trama, arriba de la de Multiplicar (dentro del
+    // grupo): 40 -> 6 -> 12. Bajarla la pone debajo: 40 -> 74 -> 21. Bajarla
+    // otra vez la saca del grupo, sin cambiar el resultado.
+    clic('#botonNuevaCapa');
+    ponerModo('screen');
+    const idTrama = W().capaActiva().id;
+    afirmar(W().ubicar(idTrama).padre, 'la capa nueva no quedó dentro del grupo');
+    h.tramaArriba = await leer();
+    afirmar(cerca(h.tramaArriba[0], 12), 'Trama sobre Multiplicar: ' + h.tramaArriba);
+    clic('#botonBajarCapa');
+    h.tramaAbajo = await leer();
+    afirmar(cerca(h.tramaAbajo[0], 21), 'Trama debajo de Multiplicar: ' + h.tramaAbajo);
+    clic('#botonBajarCapa');
+    afirmar(!W().ubicar(idTrama).padre, 'bajar desde el borde no la sacó del grupo');
+    h.fuera = await leer();
+    afirmar(cerca(h.fuera[0], 21), 'Trama fuera del grupo, debajo: ' + h.fuera);
+
+    // Desagrupar deja las capas sueltas, en el mismo orden.
+    W().seleccionarItem(W().ubicar(idCapa1).padre.id);
+    clic('#botonDesagrupar');
+    afirmar(!W().ubicar(idCapa1).padre, 'Desagrupar no soltó la capa');
+    h.desagrupado = await leer();
+    afirmar(cerca(h.desagrupado[0], 21), 'desagrupado: ' + h.desagrupado);
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);
