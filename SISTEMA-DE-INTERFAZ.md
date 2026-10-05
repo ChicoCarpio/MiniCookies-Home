@@ -511,6 +511,14 @@ que aplastó el lienzo del generador de stickers.
 - **Los botones de acción de abajo no duplican lógica**: pulsan los botones que
   ya existen en la página, buscados por id. Como el editor avanzado los nombra
   distinto (`botonDescargarAvanzado`), el módulo prueba varios nombres.
+- **`moveBefore` solo mueve entre nodos que ya están en la página.** El anuncio
+  se mueve con `moveBefore` para que AdSense no lo recargue, pero la tira de
+  arriba se agregaba a la página *después*: Edge y Chrome tiraban
+  `HierarchyRequestError`, `encender()` se cortaba a la mitad y los cuatro
+  editores quedaban en modo celular sin categorías ni botones (2026-10-04, en
+  producción unas horas). `revisar` no lo vio porque mira las páginas sin
+  contenido cargado; ahora lo cubre una prueba de `npm run probar` que carga
+  una imagen a 390px.
 
 ---
 
