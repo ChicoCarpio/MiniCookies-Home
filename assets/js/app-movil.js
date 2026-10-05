@@ -42,6 +42,7 @@
     'grupo-textura': '🧱',
     'titulo-aplicar': '🎯',
     'titulo-vista': '🔍',
+    'titulo-capas': '🗂️',
     'titulo-textura': '🧱',
     'Original': '👁️',
     'resumen-filtro': '🖼️',
@@ -67,6 +68,15 @@
     'filtros': '🖼️',
     'capas': '🗂️',
   };
+
+  // El nombre de una categoría es el texto traducido de su título (el
+  // elemento con data-i18n), no todo el título: así lo que el título agregue
+  // al lado (la cantidad de capas del editor avanzado, la flecha) no pasa al
+  // botón de la tira.
+  function textoDeTitulo(titulo) {
+    var conClave = titulo.hasAttribute('data-i18n') ? titulo : (titulo.querySelector('[data-i18n]') || titulo);
+    return conClave.textContent.replace(/[▾▴▲▼]/g, '').trim();
+  }
 
   function sinAcentos(t) {
     return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
@@ -180,7 +190,7 @@
       var conClave = !titulo ? null
         : (titulo.hasAttribute('data-i18n') ? titulo : titulo.querySelector('[data-i18n]'));
       var claveIcono = conClave ? conClave.getAttribute('data-i18n') : clave;
-      var etiqueta = conocido ? txt(conocido) : (titulo ? titulo.textContent.replace(/[▾▴▲▼]/g, '').trim() : clave);
+      var etiqueta = conocido ? txt(conocido) : (titulo ? textoDeTitulo(titulo) : clave);
       agregarCategoria(etiqueta, el, undefined, claveIcono, titulo || undefined);
     });
 
@@ -216,7 +226,7 @@
       chips.setAttribute('aria-label', txt('categorias'));
       categorias.forEach(function (cat) {
         if (cat.titulo) {
-          cat.etiqueta = cat.titulo.textContent.replace(/[▾▴▲▼]/g, '').trim();
+          cat.etiqueta = textoDeTitulo(cat.titulo);
         } else if (cat.claveIcono === 'Filtros' || cat.claveIcono === 'Capas') {
           cat.etiqueta = txt(cat.claveIcono === 'Filtros' ? 'filtros' : 'capas');
         }

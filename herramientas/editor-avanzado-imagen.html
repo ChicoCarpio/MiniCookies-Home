@@ -79,6 +79,11 @@
   }
 
   /* --- Panel de capas --- */
+  #listaCapas { max-height: 320px; overflow-y: auto; }
+  .cantidad-capas:not(:empty) { margin-left: 6px; color: var(--texto-suave); font-weight: 500; }
+  /* En el cajón del celular ya desplaza la hoja entera: un segundo
+     desplazamiento adentro sería un scroll dentro de otro. */
+  body.app-activo .app-hoja #listaCapas { max-height: none; overflow: visible; }
   .contenedor-capa { margin-bottom: 8px; }
   .contenedor-capa.arrastrando { opacity: 0.4; }
   .fila-capa {
@@ -159,6 +164,7 @@ window.i18nPagina = {
     'panel-ajustes': 'Ajustes',
     'title-plegar': 'Contraer/expandir panel',
     'boton-nueva-capa': '+ Capa',
+    'titulo-capas': 'Capas',
     'boton-guardar-proyecto': '💾 Guardar proyecto',
     'boton-cargar-proyecto': '📂 Cargar proyecto',
     'titulo-aplicar': 'Aplicar la capa a',
@@ -258,6 +264,7 @@ window.i18nPagina = {
     'panel-ajustes': 'Adjustments',
     'title-plegar': 'Collapse/expand panel',
     'boton-nueva-capa': '+ Layer',
+    'titulo-capas': 'Layers',
     'boton-guardar-proyecto': '💾 Save project',
     'boton-cargar-proyecto': '📂 Load project',
     'titulo-aplicar': 'Apply the layer to',
@@ -386,13 +393,20 @@ window.i18nPagina = {
                junto con el resto y no había forma de volver a desplegar el
                panel (bug encontrado 2026-09-30, viene de antes de hoy). -->
           <button type="button" class="boton-plegar" data-panel="izq" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span data-i18n="panel-capas">Capas y herramientas</span><span class="flecha-plegar">«</span></button>
-          <div data-app-categoria="Capas">
-            <div class="controles" style="margin-bottom:8px; gap:6px;">
-              <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
+          <!-- La lista de capas es un acordeón más, pero "libre": abrir otro
+               no lo cierra (se sigue viendo cuál es la capa activa mientras se
+               usan las herramientas) y la lista tiene alto máximo con su propio
+               desplazamiento, así muchas capas no empujan el resto hacia abajo. -->
+          <fieldset class="acordeon-grupo abierto" data-acordeon-libre data-app-categoria="Capas">
+            <button type="button" class="acordeon-titulo" data-icono="🗂️"><span><span data-i18n="titulo-capas">Capas</span><span id="cantidadCapas" class="cantidad-capas"></span></span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="controles" style="margin-bottom:8px; gap:6px;">
+                <button type="button" class="boton" id="botonNuevaCapa" style="padding:6px 10px; font-size:0.82rem;" data-i18n="boton-nueva-capa">+ Capa</button>
+              </div>
+              <div id="listaCapas"></div>
+              <input type="file" id="entradaProyecto" accept="application/json" hidden>
             </div>
-            <div id="listaCapas"></div>
-            <input type="file" id="entradaProyecto" accept="application/json" hidden>
-          </div>
+          </fieldset>
 
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
                así ninguno empuja a los demás fuera de la vista. -->
@@ -1604,8 +1618,10 @@ document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
     const grupo = titulo.closest('.acordeon-grupo');
     const panelPadre = titulo.closest('.panel-capas, .panel-ajustes') || document;
     const yaAbierto = grupo.classList.contains('abierto');
-    panelPadre.querySelectorAll('.acordeon-grupo').forEach((g) => g.classList.remove('abierto'));
-    if (!yaAbierto) grupo.classList.add('abierto');
+    if (!grupo.hasAttribute('data-acordeon-libre')) {
+      panelPadre.querySelectorAll('.acordeon-grupo:not([data-acordeon-libre])').forEach((g) => g.classList.remove('abierto'));
+    }
+    grupo.classList.toggle('abierto', !yaAbierto);
   });
 });
 
@@ -2001,6 +2017,7 @@ zonaLienzoContenedor.addEventListener('pointercancel', soltarPuntero);
 // ===== Lista de capas =====
 function pintarListaCapas() {
   listaCapas.innerHTML = '';
+  document.getElementById('cantidadCapas').textContent = capas.length > 1 ? '(' + capas.length + ')' : '';
   // Se muestran de arriba (última, la que se ve "encima") hacia abajo, pero
   // "capas" guarda el orden real de renderizado (índice 0 = fondo) — se
   // invierte solo para pintar la lista.
