@@ -137,7 +137,11 @@
     border-radius: 50%; box-sizing: border-box; pointer-events: none; transform: translate(-50%,-50%); display: none;
   }
   #cursorPincelAvanzado.visible { display: block; }
-  .zona-lienzo.modo-color #canvasTrabajo { cursor: crosshair; }
+  .zona-lienzo.modo-gotero #canvasTrabajo, .zona-lienzo.modo-degradado #canvasTrabajo { cursor: crosshair; }
+  /* Subtítulos dentro de "Aplicar la capa a" (herramienta, base). */
+  .titulo-mascara { display: flex; align-items: center; gap: 6px; margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
+  .acordeon-contenido > .titulo-mascara:first-child { margin-top: 0; }
+  #controlesPincelAvanzado, #controlesDegradado, #controlesColorAvanzado, #controlesLuz { margin-top: 8px; }
   .zona-lienzo.paneando #canvasTrabajo { cursor: grabbing; }
 
   /* --- Acordeón de ajustes --- */
@@ -168,11 +172,32 @@ window.i18nPagina = {
     'boton-guardar-proyecto': '💾 Guardar proyecto',
     'boton-cargar-proyecto': '📂 Cargar proyecto',
     'titulo-aplicar': 'Aplicar la capa a',
+    'lbl-al-tocar': 'Al tocar la imagen',
+    'herr-mover': '✋ Mover',
+    'herr-pincel': '🖌️ Pincel',
+    'herr-gotero': '💧 Elegir color',
+    'herr-degradado': '↘ Trazar degradado',
+    'lbl-base': 'Base de la máscara',
+    'nota-mascara': 'La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original.',
     'sel-toda': 'Toda la imagen',
-    'sel-pincel': 'Pincel',
+    'base-nada': 'Nada',
+    'base-degradado': 'Degradado',
     'sel-color': 'Color',
-    'modo-pincel-pintar': 'Pintar',
-    'modo-pincel-borrar': 'Borrar',
+    'base-luz': 'Luz',
+    'degradado-lineal': 'Lineal',
+    'degradado-radial': 'Radial',
+    'ayuda-degradado': 'Arrastrá sobre la imagen: donde empezás se aplica entera; donde soltás, ya no.',
+    'luz-sombras': 'Sombras',
+    'luz-medios': 'Medios',
+    'luz-luces': 'Luces',
+    'sl-luz-desde': 'Desde',
+    'sl-luz-hasta': 'Hasta',
+    'sl-luz-suavidad': 'Suavidad',
+    'lbl-invertir': 'Invertir la máscara',
+    'lbl-ver-mascara': 'Ver la máscara (en rojo, donde no se aplica)',
+    'modo-pincel-sumar': '＋ Sumar',
+    'modo-pincel-quitar': '－ Quitar',
+    'modo-pincel-borrador': 'Borrador',
     'sl-pincel': 'Tamaño de pincel',
     'sl-dureza': 'Dureza (bordes)',
     'boton-borrar-mascara': 'Borrar todo lo pintado',
@@ -268,11 +293,32 @@ window.i18nPagina = {
     'boton-guardar-proyecto': '💾 Save project',
     'boton-cargar-proyecto': '📂 Load project',
     'titulo-aplicar': 'Apply the layer to',
+    'lbl-al-tocar': 'When you touch the image',
+    'herr-mover': '✋ Move',
+    'herr-pincel': '🖌️ Brush',
+    'herr-gotero': '💧 Pick color',
+    'herr-degradado': '↘ Draw gradient',
+    'lbl-base': 'Mask base',
+    'nota-mascara': 'The base decides where the layer applies. What you paint with the brush is added to (or subtracted from) that base, and "Invert" flips the result. Color and light are measured on the original image.',
     'sel-toda': 'The whole image',
-    'sel-pincel': 'Brush',
+    'base-nada': 'Nothing',
+    'base-degradado': 'Gradient',
     'sel-color': 'Color',
-    'modo-pincel-pintar': 'Paint',
-    'modo-pincel-borrar': 'Erase',
+    'base-luz': 'Light',
+    'degradado-lineal': 'Linear',
+    'degradado-radial': 'Radial',
+    'ayuda-degradado': 'Drag across the image: where you start it applies fully; where you let go, not at all.',
+    'luz-sombras': 'Shadows',
+    'luz-medios': 'Midtones',
+    'luz-luces': 'Highlights',
+    'sl-luz-desde': 'From',
+    'sl-luz-hasta': 'To',
+    'sl-luz-suavidad': 'Softness',
+    'lbl-invertir': 'Invert the mask',
+    'lbl-ver-mascara': 'Show the mask (red where it does not apply)',
+    'modo-pincel-sumar': '＋ Add',
+    'modo-pincel-quitar': '－ Remove',
+    'modo-pincel-borrador': 'Eraser',
     'sl-pincel': 'Brush size',
     'sl-dureza': 'Hardness (edges)',
     'boton-borrar-mascara': 'Clear everything painted',
@@ -413,16 +459,21 @@ window.i18nPagina = {
           <fieldset class="acordeon-grupo" data-app-categoria="Aplicar">
             <button type="button" class="acordeon-titulo" data-icono="🎯"><span data-i18n="titulo-aplicar">Aplicar la capa a</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
-              <div class="modos" id="modosSeleccionCapa">
-                <button type="button" class="activo" data-seleccion="toda" data-i18n="sel-toda">Toda la imagen</button>
-                <button type="button" data-seleccion="pincel" data-i18n="sel-pincel">Pincel</button>
-                <button type="button" data-seleccion="color" data-i18n="sel-color">Color</button>
+              <!-- La máscara de la capa (assets/js/mascaras-capa.js): una base,
+                   el pincel encima para sumar o quitar, e invertir. -->
+              <span class="titulo-mascara" data-i18n="lbl-al-tocar">Al tocar la imagen</span>
+              <div class="modos" id="herramientasLienzo">
+                <button type="button" class="activo" data-herramienta="mover" data-i18n="herr-mover">✋ Mover</button>
+                <button type="button" data-herramienta="pincel" data-i18n="herr-pincel">🖌️ Pincel</button>
+                <button type="button" data-herramienta="gotero" data-i18n="herr-gotero">💧 Elegir color</button>
+                <button type="button" data-herramienta="degradado" data-i18n="herr-degradado">↘ Trazar degradado</button>
               </div>
 
               <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
                 <div class="modos" id="modosPincelAvanzado">
-                  <button type="button" class="activo" data-modo-pincel="pintar" data-i18n="modo-pincel-pintar">Pintar</button>
-                  <button type="button" data-modo-pincel="borrar" data-i18n="modo-pincel-borrar">Borrar</button>
+                  <button type="button" class="activo" data-modo-pincel="sumar" data-i18n="modo-pincel-sumar">＋ Sumar</button>
+                  <button type="button" data-modo-pincel="quitar" data-i18n="modo-pincel-quitar">－ Quitar</button>
+                  <button type="button" data-modo-pincel="borrador" data-i18n="modo-pincel-borrador">Borrador</button>
                 </div>
                 <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="sl-pincel">Tamaño de pincel</span><span id="valorPincelAvanzado">30px</span></span>
@@ -435,6 +486,29 @@ window.i18nPagina = {
                 <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar todo lo pintado</button>
               </div>
 
+              <span class="titulo-mascara">
+                <span data-i18n="lbl-base">Base de la máscara</span>
+                <span class="ayuda-tip">
+                  <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                  <span class="ayuda-burbuja" data-i18n="nota-mascara">La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original.</span>
+                </span>
+              </span>
+              <div class="modos" id="modosBaseMascara">
+                <button type="button" class="activo" data-base="toda" data-i18n="sel-toda">Toda la imagen</button>
+                <button type="button" data-base="nada" data-i18n="base-nada">Nada</button>
+                <button type="button" data-base="degradado" data-i18n="base-degradado">Degradado</button>
+                <button type="button" data-base="color" data-i18n="sel-color">Color</button>
+                <button type="button" data-base="luz" data-i18n="base-luz">Luz</button>
+              </div>
+
+              <div id="controlesDegradado" class="controles controles-apilados" style="display:none;">
+                <div class="modos" id="modosTipoDegradado">
+                  <button type="button" class="activo" data-tipo="lineal" data-i18n="degradado-lineal">Lineal</button>
+                  <button type="button" data-tipo="radial" data-i18n="degradado-radial">Radial</button>
+                </div>
+                <span class="nota-lateral" data-i18n="ayuda-degradado">Arrastrá sobre la imagen: donde empezás se aplica entera; donde soltás, ya no.</span>
+              </div>
+
               <div id="controlesColorAvanzado" class="controles controles-apilados" style="display:none;">
                 <span style="font-size:0.8rem;"><span data-i18n="ayuda-color">Hacé clic en la imagen para elegir el color </span><span class="muestra-color-objetivo" id="muestraColorObjetivo"></span></span>
                 <label class="campo-deslizador">
@@ -442,6 +516,35 @@ window.i18nPagina = {
                   <input type="range" id="toleranciaColor" min="0" max="100" value="30">
                 </label>
               </div>
+
+              <div id="controlesLuz" class="controles controles-apilados" style="display:none;">
+                <div class="modos" id="rangosLuz">
+                  <button type="button" data-rango="sombras" data-i18n="luz-sombras">Sombras</button>
+                  <button type="button" data-rango="medios" data-i18n="luz-medios">Medios</button>
+                  <button type="button" data-rango="luces" data-i18n="luz-luces">Luces</button>
+                </div>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-luz-desde">Desde</span><span id="valorLuzDesde">0</span></span>
+                  <input type="range" id="luzDesde" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-luz-hasta">Hasta</span><span id="valorLuzHasta">35</span></span>
+                  <input type="range" id="luzHasta" min="0" max="100" value="35">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-luz-suavidad">Suavidad</span><span id="valorLuzSuavidad">15</span></span>
+                  <input type="range" id="luzSuavidad" min="0" max="50" value="15">
+                </label>
+              </div>
+
+              <label class="campo-check">
+                <input type="checkbox" id="invertirMascara">
+                <span data-i18n="lbl-invertir">Invertir la máscara</span>
+              </label>
+              <label class="campo-check">
+                <input type="checkbox" id="verMascara">
+                <span data-i18n="lbl-ver-mascara">Ver la máscara (en rojo, donde no se aplica)</span>
+              </label>
             </div>
           </fieldset>
 
@@ -716,6 +819,7 @@ window.i18nPagina = {
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
+<script src="../assets/js/mascaras-capa.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
@@ -740,6 +844,13 @@ const botonBorrarMascaraCapa = document.getElementById('botonBorrarMascaraCapa')
 const muestraColorObjetivo = document.getElementById('muestraColorObjetivo');
 const elToleranciaColor = document.getElementById('toleranciaColor');
 const valorToleranciaColor = document.getElementById('valorToleranciaColor');
+const controlesDegradado = document.getElementById('controlesDegradado');
+const controlesLuz = document.getElementById('controlesLuz');
+const elLuzDesde = document.getElementById('luzDesde');
+const elLuzHasta = document.getElementById('luzHasta');
+const elLuzSuavidad = document.getElementById('luzSuavidad');
+const elInvertirMascara = document.getElementById('invertirMascara');
+const elVerMascara = document.getElementById('verMascara');
 const zonaLienzoContenedor = document.getElementById('zonaLienzoContenedor');
 const zonaLienzo = document.getElementById('zonaLienzo');
 const canvasTrabajo = document.getElementById('canvasTrabajo');
@@ -879,11 +990,11 @@ function crearCapa(nombre) {
     visible: true,
     opacidad: 100,
     modoFusion: 'normal', // clave de MODOS_FUSION
-    seleccion: 'toda', // toda | pincel | color
-    mascaraPincel: null, // canvas propio, tamaño anchoTrabajo x altoTrabajo
-    _versionMascara: 0, // se incrementa al pintar/borrar la máscara (ver cacheCapas)
-    colorObjetivo: null, // {r,g,b}
-    tolerancia: 30,
+    // Dónde se aplica: base + pincel + invertir (ver assets/js/mascaras-capa.js).
+    mascara: MascarasCapa.neutra(),
+    pincelSumar: null, // lienzos propios del pincel, tamaño anchoTrabajo x altoTrabajo;
+    pincelQuitar: null, // null mientras no se pinte nada
+    _versionMascara: 0, // se incrementa al pintar/borrar con el pincel (ver cacheCapas)
     ajustes: { ...AJUSTES_NEUTROS },
   };
 }
@@ -891,7 +1002,7 @@ function crearCapa(nombre) {
 // Las sliders/toggles de una capa cambian sus propiedades directamente
 // (capa.ajustes.x = ...) y luego llaman a programarRenderizado(): el render
 // detecta esos cambios solo, comparando JSON.stringify(capa.ajustes) etc.
-// Pero el contenido de mascaraPincel es un canvas que se pinta a mano
+// Pero lo pintado con el pincel (pincelSumar/pincelQuitar) son canvases que se pintan a mano
 // (pintarPunto/pintarTrazo) — comparar sus píxeles sería tan caro como
 // volver a procesar la capa, así que en vez de eso se marca "sucia" acá,
 // en los pocos lugares que realmente dibujan o borran la máscara.
@@ -956,72 +1067,21 @@ function procesarCapaEnCanvas(canvas, capa, escala, scratch = null, memo = null)
   ProcesarFiltros.renderizarFiltro(canvas, { ...ajustes, intensidadFiltro }, capasFiltro, textura, escala, scratch, memo);
 }
 
-// ===== Selección por color (HSL) =====
-function rgbAHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0; const l = (max + min) / 2;
-  const d = max - min;
-  if (d !== 0) {
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
-    else if (max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h *= 60;
-  }
-  return { h, s, l };
-}
+// ===== Máscara de cada capa =====
+// El cálculo está en assets/js/mascaras-capa.js. Acá, una caché por capa
+// ("memo") para la vista previa: guarda la base de color o de luz y los
+// lienzos que se reusan de un render al siguiente. La descarga a resolución
+// completa no la usa (memo = null).
+const memoMascaraPorCapa = new Map(); // id de capa -> memo de MascarasCapa.crear
 
-function generarMascaraColor(canvasOrigen, colorObjetivo, tolerancia, ancho, alto) {
-  const base = document.createElement('canvas');
-  base.width = ancho; base.height = alto;
-  const ctxBase = base.getContext('2d');
-  ctxBase.drawImage(canvasOrigen, 0, 0, ancho, alto);
-  const datos = ctxBase.getImageData(0, 0, ancho, alto);
-  const d = datos.data;
-  const objetivo = rgbAHsl(colorObjetivo.r, colorObjetivo.g, colorObjetivo.b);
-  const radioTono = 8 + (tolerancia / 100) * 90;
-  const radioSL = 0.15 + (tolerancia / 100) * 0.6;
-  const suavizado = Math.max(4, radioTono * 0.25);
-  for (let i = 0; i < d.length; i += 4) {
-    const hsl = rgbAHsl(d[i], d[i + 1], d[i + 2]);
-    let difTono = Math.abs(hsl.h - objetivo.h);
-    if (difTono > 180) difTono = 360 - difTono;
-    const difS = Math.abs(hsl.s - objetivo.s);
-    const difL = Math.abs(hsl.l - objetivo.l);
-    let alpha;
-    if (difTono <= radioTono - suavizado) alpha = 1;
-    else if (difTono >= radioTono) alpha = 0;
-    else alpha = 1 - (difTono - (radioTono - suavizado)) / suavizado;
-    if (difS > radioSL || difL > radioSL) alpha = 0;
-    d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
-    d[i + 3] = Math.round(alpha * 255);
+function generarMascaraCapa(capa, ancho, alto, conMemo = false) {
+  if (!canvasOrigenTrabajo) return null;
+  let memo = null;
+  if (conMemo) {
+    memo = memoMascaraPorCapa.get(capa.id);
+    if (!memo) { memo = {}; memoMascaraPorCapa.set(capa.id, memo); }
   }
-  ctxBase.putImageData(datos, 0, 0);
-  return base;
-}
-
-function generarMascaraCapa(capa, ancho, alto) {
-  if (capa.seleccion === 'toda') return null;
-  if (capa.seleccion === 'pincel') {
-    if (!capa.mascaraPincel) return null;
-    // mascaraPincel ya está al tamaño de trabajo (ver redimensionarTrabajo):
-    // en la vista previa en vivo, que es el caso que se repite en cada trazo
-    // de pincel, coincide con "ancho"/"alto" y se puede devolver tal cual, sin
-    // copiarla — solo la exportación a resolución completa (otro "ancho"
-    // distinto) necesita la copia escalada. mascaraPincel solo se lee acá
-    // (nunca se le dibuja encima), así que devolverla por referencia es seguro.
-    if (capa.mascaraPincel.width === ancho && capa.mascaraPincel.height === alto) return capa.mascaraPincel;
-    const c = document.createElement('canvas');
-    c.width = ancho; c.height = alto;
-    c.getContext('2d').drawImage(capa.mascaraPincel, 0, 0, ancho, alto);
-    return c;
-  }
-  if (capa.seleccion === 'color') {
-    if (!capa.colorObjetivo || !canvasOrigenTrabajo) return null;
-    return generarMascaraColor(canvasOrigenTrabajo, capa.colorObjetivo, capa.tolerancia, ancho, alto);
-  }
-  return null;
+  return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo);
 }
 
 // ===== Modos de fusión =====
@@ -1055,13 +1115,13 @@ function fundirCapa(ctx, capa, capaFinal) {
 
 // ===== Composición de todas las capas =====
 // Firma del estado de una capa que afecta su resultado visual. No incluye
-// los píxeles de mascaraPincel (comparar un canvas entero costaría lo mismo
+// los píxeles del pincel (comparar un canvas entero costaría lo mismo
 // que reprocesarlo) — para eso está _versionMascara, incrementado a mano en
 // marcarMascaraSucia() cada vez que algo pinta o borra la máscara.
 function firmaDeCapa(capa) {
   return JSON.stringify([
-    capa.visible, capa.opacidad, capa.modoFusion, capa.seleccion,
-    capa.ajustes, capa.colorObjetivo, capa.tolerancia,
+    capa.visible, capa.opacidad, capa.modoFusion, capa.mascara,
+    capa.ajustes,
     capa._versionMascara || 0,
   ]);
 }
@@ -1114,7 +1174,9 @@ function renderizarComposicion() {
   for (let i = indiceDesde; i < capas.length; i++) {
     const capa = capas[i];
     const esNeutra = !capa.visible || capa.opacidad <= 0
-      || (capa.opacidad === 100 && capa.modoFusion === 'normal' && capa.seleccion === 'toda' && JSON.stringify(capa.ajustes) === ajustesNeutros);
+      // Con modo Normal y sin ajustes la capa procesada es igual a lo de
+      // abajo: no importa dónde se aplique ni con qué opacidad.
+      || (capa.modoFusion === 'normal' && JSON.stringify(capa.ajustes) === ajustesNeutros);
     if (!esNeutra) {
       // El resultado de color de esta capa solo depende de sus propios
       // ajustes y de lo que entra desde las capas de abajo (acumulado): si
@@ -1142,7 +1204,7 @@ function renderizarComposicion() {
         cacheColorPorCapa.set(capa.id, { firma: firmaColor, origen: origenCapa, ancho, alto, canvas: procesado });
       }
 
-      const mascara = generarMascaraCapa(capa, ancho, alto);
+      const mascara = generarMascaraCapa(capa, ancho, alto, true);
       // "procesado" puede venir de la caché: no se le aplica la máscara
       // encima (lo dejaría recortado para el próximo render que lo reuse sin
       // máscara, o con otra) — se compone en una copia aparte.
@@ -1173,6 +1235,52 @@ function renderizarComposicion() {
   canvasTrabajo.width = ancho; canvasTrabajo.height = alto;
   ctxTrabajo.clearRect(0, 0, ancho, alto);
   ctxTrabajo.drawImage(acumulado, 0, 0);
+  dibujarAyudasLienzo(ancho, alto);
+}
+
+// Lo que se dibuja encima de la vista previa y no va a la descarga: la
+// máscara de la capa activa en rojo (donde NO se aplica) y la línea del
+// degradado mientras está elegida la herramienta de trazarlo.
+let lienzoAyudaMascara = null;
+function dibujarAyudasLienzo(ancho, alto) {
+  const capa = capaActiva();
+  if (!capa) return;
+  if (elVerMascara.checked) {
+    if (!lienzoAyudaMascara) lienzoAyudaMascara = document.createElement('canvas');
+    const c = lienzoAyudaMascara;
+    if (c.width !== ancho || c.height !== alto) { c.width = ancho; c.height = alto; }
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, ancho, alto);
+    const mascara = generarMascaraCapa(capa, ancho, alto, true);
+    if (mascara) { // sin máscara se aplica en toda la imagen: nada en rojo
+      ctx.fillStyle = 'rgba(255,0,0,0.5)';
+      ctx.fillRect(0, 0, ancho, alto);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.drawImage(mascara, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+      ctxTrabajo.drawImage(c, 0, 0);
+    }
+  }
+  const { a, b, tipo } = capa.mascara.degradado;
+  if (herramientaLienzo === 'degradado' && capa.mascara.base === 'degradado' && a && b) {
+    const ax = a.x * ancho, ay = a.y * alto, bx = b.x * ancho, by = b.y * alto;
+    const grosor = Math.max(1.5, 2 * canvasTrabajo.width / Math.max(1, canvasTrabajo.getBoundingClientRect().width));
+    ctxTrabajo.save();
+    ctxTrabajo.lineWidth = grosor;
+    ctxTrabajo.strokeStyle = '#fff';
+    ctxTrabajo.shadowColor = 'rgba(0,0,0,0.8)';
+    ctxTrabajo.shadowBlur = grosor * 2;
+    if (tipo === 'radial') {
+      ctxTrabajo.beginPath();
+      ctxTrabajo.arc(ax, ay, Math.hypot(bx - ax, by - ay), 0, Math.PI * 2);
+      ctxTrabajo.stroke();
+    }
+    ctxTrabajo.beginPath(); ctxTrabajo.moveTo(ax, ay); ctxTrabajo.lineTo(bx, by); ctxTrabajo.stroke();
+    for (const [x, y] of [[ax, ay], [bx, by]]) {
+      ctxTrabajo.beginPath(); ctxTrabajo.arc(x, y, grosor * 3, 0, Math.PI * 2); ctxTrabajo.stroke();
+    }
+    ctxTrabajo.restore();
+  }
 }
 
 function programarRenderizado() {
@@ -1516,17 +1624,53 @@ function escribirIntensidadFiltroEnUI(ajustes) {
   controlesIntensidadFiltro.style.display = ajustes.filtro && ajustes.filtro !== 'ninguno' ? 'block' : 'none';
 }
 
+// Qué hace tocar la imagen: mover, pintar la máscara, elegir el color de la
+// base o trazar el degradado. Es de la página, no de la capa; el gotero y el
+// trazo solo valen con su base.
+let herramientaLienzo = 'mover';
+function herramientaValida(capa, herramienta) {
+  if (herramienta === 'gotero') return capa.mascara.base === 'color';
+  if (herramienta === 'degradado') return capa.mascara.base === 'degradado';
+  return true;
+}
+
 function actualizarControlesSeleccion() {
   const capa = capaActiva();
   if (!capa) return;
-  document.querySelectorAll('#modosSeleccionCapa button').forEach((b) => b.classList.toggle('activo', b.dataset.seleccion === capa.seleccion));
-  controlesPincelAvanzado.style.display = capa.seleccion === 'pincel' ? 'flex' : 'none';
-  controlesColorAvanzado.style.display = capa.seleccion === 'color' ? 'flex' : 'none';
-  zonaLienzo.classList.toggle('modo-pincel', capa.seleccion === 'pincel');
-  zonaLienzo.classList.toggle('modo-color', capa.seleccion === 'color');
-  muestraColorObjetivo.style.background = capa.colorObjetivo ? `rgb(${capa.colorObjetivo.r},${capa.colorObjetivo.g},${capa.colorObjetivo.b})` : 'transparent';
-  elToleranciaColor.value = capa.tolerancia;
-  valorToleranciaColor.textContent = capa.tolerancia;
+  const m = capa.mascara;
+  if (!herramientaValida(capa, herramientaLienzo)) herramientaLienzo = 'mover';
+  document.querySelectorAll('#herramientasLienzo button').forEach((b) => {
+    const activa = b.dataset.herramienta === herramientaLienzo;
+    b.style.display = herramientaValida(capa, b.dataset.herramienta) ? '' : 'none';
+    b.classList.toggle('activo', activa);
+    b.setAttribute('aria-pressed', activa);
+  });
+  document.querySelectorAll('#modosBaseMascara button').forEach((b) => {
+    b.classList.toggle('activo', b.dataset.base === m.base);
+    b.setAttribute('aria-pressed', b.dataset.base === m.base);
+  });
+  controlesPincelAvanzado.style.display = herramientaLienzo === 'pincel' ? 'flex' : 'none';
+  controlesDegradado.style.display = m.base === 'degradado' ? 'flex' : 'none';
+  controlesColorAvanzado.style.display = m.base === 'color' ? 'flex' : 'none';
+  controlesLuz.style.display = m.base === 'luz' ? 'flex' : 'none';
+  document.querySelectorAll('#modosTipoDegradado button').forEach((b) => b.classList.toggle('activo', b.dataset.tipo === m.degradado.tipo));
+  muestraColorObjetivo.style.background = m.color ? `rgb(${m.color.r},${m.color.g},${m.color.b})` : 'transparent';
+  elToleranciaColor.value = m.tolerancia;
+  valorToleranciaColor.textContent = m.tolerancia;
+  elLuzDesde.value = m.luz.desde; document.getElementById('valorLuzDesde').textContent = m.luz.desde;
+  elLuzHasta.value = m.luz.hasta; document.getElementById('valorLuzHasta').textContent = m.luz.hasta;
+  elLuzSuavidad.value = m.luz.suavidad; document.getElementById('valorLuzSuavidad').textContent = m.luz.suavidad;
+  document.querySelectorAll('#rangosLuz button').forEach((b) => {
+    const [desde, hasta] = MascarasCapa.RANGOS_LUZ[b.dataset.rango];
+    b.classList.toggle('activo', m.luz.desde === desde && m.luz.hasta === hasta);
+  });
+  elInvertirMascara.checked = m.invertir;
+  zonaLienzo.classList.toggle('modo-pincel', herramientaLienzo === 'pincel');
+  zonaLienzo.classList.toggle('modo-gotero', herramientaLienzo === 'gotero');
+  zonaLienzo.classList.toggle('modo-degradado', herramientaLienzo === 'degradado');
+  if (herramientaLienzo !== 'pincel') cursorPincelAvanzado.classList.remove('visible');
+  // La línea del degradado aparece o desaparece con su herramienta.
+  programarRenderizado();
 }
 
 Object.entries(deslizadores).forEach(([clave, d]) => {
@@ -1625,50 +1769,95 @@ document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
   });
 });
 
-// ===== Selección de la capa activa: Toda / Pincel / Color =====
-document.querySelectorAll('#modosSeleccionCapa button').forEach((boton) => {
+// ===== Máscara de la capa activa =====
+document.querySelectorAll('#herramientasLienzo button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    if (!capaActiva()) return;
+    const herramienta = boton.dataset.herramienta;
+    // Un segundo clic sobre una herramienta activa vuelve a "Mover": así
+    // nunca queda una escuchando el puntero sin querer (un pellizco para
+    // hacer zoom terminaba pintando un trazo).
+    herramientaLienzo = herramientaLienzo === herramienta ? 'mover' : herramienta;
+    actualizarControlesSeleccion();
+  });
+});
+
+document.querySelectorAll('#modosBaseMascara button').forEach((boton) => {
   boton.addEventListener('click', () => {
     const capa = capaActiva();
     if (!capa) return;
-    const modo = boton.dataset.seleccion;
-    // Un segundo clic sobre "Pincel"/"Color" ya activos los apaga (vuelve a
-    // "Toda la imagen"): sin esto, Pincel se quedaba siempre escuchando el
-    // puntero y un gesto de pellizco/paneo para hacer zoom terminaba
-    // pintando un trazo en vez de acercar la imagen.
-    capa.seleccion = (capa.seleccion === modo && modo !== 'toda') ? 'toda' : modo;
+    const base = boton.dataset.base;
+    capa.mascara.base = base;
+    // La herramienta que hace falta a continuación queda elegida.
+    if (base === 'color') herramientaLienzo = 'gotero';
+    else if (base === 'degradado') herramientaLienzo = 'degradado';
+    else if (base === 'nada') herramientaLienzo = 'pincel';
     actualizarControlesSeleccion();
-    programarRenderizado();
+  });
+});
+
+document.querySelectorAll('#modosTipoDegradado button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.mascara.degradado.tipo = boton.dataset.tipo;
+    actualizarControlesSeleccion();
   });
 });
 
 elToleranciaColor.addEventListener('input', () => {
   const capa = capaActiva();
   if (!capa) return;
-  capa.tolerancia = Number(elToleranciaColor.value);
+  capa.mascara.tolerancia = Number(elToleranciaColor.value);
   valorToleranciaColor.textContent = elToleranciaColor.value;
   programarRenderizado();
 });
 
+[[elLuzDesde, 'desde'], [elLuzHasta, 'hasta'], [elLuzSuavidad, 'suavidad']].forEach(([el, clave]) => {
+  el.addEventListener('input', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    capa.mascara.luz[clave] = Number(el.value);
+    actualizarControlesSeleccion();
+  });
+});
+document.querySelectorAll('#rangosLuz button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = capaActiva();
+    if (!capa) return;
+    const [desde, hasta] = MascarasCapa.RANGOS_LUZ[boton.dataset.rango];
+    Object.assign(capa.mascara.luz, { desde, hasta });
+    actualizarControlesSeleccion();
+  });
+});
+
+elInvertirMascara.addEventListener('change', () => {
+  const capa = capaActiva();
+  if (!capa) return;
+  capa.mascara.invertir = elInvertirMascara.checked;
+  programarRenderizado();
+});
+elVerMascara.addEventListener('change', programarRenderizado);
+
 canvasTrabajo.addEventListener('click', (e) => {
   const capa = capaActiva();
-  if (!capa || capa.seleccion !== 'color' || !canvasOrigenTrabajo) return;
+  if (!capa || herramientaLienzo !== 'gotero' || !canvasOrigenTrabajo) return;
   if (huboPan) return; // fue un arrastre para mover la imagen, no un clic de gotero
-  const rect = canvasTrabajo.getBoundingClientRect();
-  const factor = canvasTrabajo.width / rect.width;
-  const x = Math.round((e.clientX - rect.left) * factor);
-  const y = Math.round((e.clientY - rect.top) * factor);
-  const ctxOrigen = canvasOrigenTrabajo.getContext('2d');
-  const px = ctxOrigen.getImageData(Math.min(x, canvasOrigenTrabajo.width - 1), Math.min(y, canvasOrigenTrabajo.height - 1), 1, 1).data;
-  capa.colorObjetivo = { r: px[0], g: px[1], b: px[2] };
+  const { x, y } = coordenadasEnCanvasTrabajo(e);
+  const px = canvasOrigenTrabajo.getContext('2d').getImageData(
+    Math.max(0, Math.min(Math.round(x), canvasOrigenTrabajo.width - 1)),
+    Math.max(0, Math.min(Math.round(y), canvasOrigenTrabajo.height - 1)), 1, 1).data;
+  capa.mascara.color = { r: px[0], g: px[1], b: px[2] };
   actualizarControlesSeleccion();
-  programarRenderizado();
 });
 
 // --- Pincel: pinta en la máscara PROPIA de la capa activa ---
 let pintando = false;
 let ultimoPuntoPincel = null;
-let mascaraAntesDelTrazo = null;
-let modoPincelAvanzado = 'pintar'; // pintar | borrar — mismo tamaño/dureza para los dos
+let mascaraAntesDelTrazo = null; // { sumar, quitar } antes del trazo
+let modoPincelAvanzado = 'sumar'; // sumar | quitar | borrador — mismo tamaño/dureza para los tres
+let trazandoDegradado = false;
+let degradadoAntesDelArrastre = null; // para deshacerlo si era el comienzo de un pellizco
 
 document.querySelectorAll('#modosPincelAvanzado button').forEach((boton) => {
   boton.addEventListener('click', () => {
@@ -1682,15 +1871,42 @@ let paneando = false;
 let panInicio = null;
 let huboPan = false;
 
-function mascaraDeCapaActiva() {
+// Los dos lienzos del pincel de la capa activa (se crean al primer trazo).
+function lienzosPincelActivos() {
   const capa = capaActiva();
   if (!capa) return null;
-  if (!capa.mascaraPincel) {
+  const nuevo = () => {
     const c = document.createElement('canvas');
     c.width = anchoTrabajo; c.height = altoTrabajo;
-    capa.mascaraPincel = c;
-  }
-  return capa.mascaraPincel;
+    return c;
+  };
+  if (!capa.pincelSumar) capa.pincelSumar = nuevo();
+  if (!capa.pincelQuitar) capa.pincelQuitar = nuevo();
+  return { sumar: capa.pincelSumar, quitar: capa.pincelQuitar };
+}
+
+// Sumar pinta en "sumar" y borra lo mismo de "quitar" (y al revés), así un
+// trazo nuevo siempre gana sobre uno viejo. El borrador borra de los dos:
+// vuelve a lo que diga la base.
+function estamparPincel(dibujar) {
+  const lienzos = lienzosPincelActivos();
+  if (!lienzos) return;
+  dibujar(lienzos.sumar.getContext('2d'), modoPincelAvanzado === 'sumar' ? 'pintar' : 'borrar');
+  dibujar(lienzos.quitar.getContext('2d'), modoPincelAvanzado === 'quitar' ? 'pintar' : 'borrar');
+}
+
+function copiaDeLienzo(c) {
+  const copia = document.createElement('canvas');
+  copia.width = c.width; copia.height = c.height;
+  copia.getContext('2d').drawImage(c, 0, 0);
+  return copia;
+}
+
+// Punto del lienzo en 0..1 del ancho/alto: así el degradado sirve a
+// cualquier resolución, también en la descarga.
+function puntoRelativo(e) {
+  const { x, y } = coordenadasEnCanvasTrabajo(e);
+  return { x: x / canvasTrabajo.width, y: y / canvasTrabajo.height };
 }
 
 function coordenadasEnCanvasTrabajo(e) {
@@ -1769,7 +1985,7 @@ function moverCursorPincel(e) {
 
 canvasTrabajo.addEventListener('pointerenter', (e) => {
   const capa = capaActiva();
-  if (!capa || capa.seleccion !== 'pincel') return;
+  if (!capa || herramientaLienzo !== 'pincel') return;
   actualizarTamanoCursorPincel();
   moverCursorPincel(e);
   cursorPincelAvanzado.classList.add('visible');
@@ -1785,9 +2001,9 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   const capa = capaActiva();
   if (!capa) return;
 
-  // Sin pincel activo, arrastrar mueve la imagen dentro del recuadro (útil
-  // cuando está ampliada y no entra entera).
-  if (capa.seleccion !== 'pincel') {
+  // Mover (y el gotero, que elige con un clic): arrastrar mueve la imagen
+  // dentro del recuadro (útil cuando está ampliada y no entra entera).
+  if (herramientaLienzo === 'mover' || herramientaLienzo === 'gotero') {
     if (e.pointerType === 'touch' && punterosActivos.size >= 1) return; // dejale el gesto al pellizco
     paneando = true;
     huboPan = false;
@@ -1804,25 +2020,38 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   // Con dos dedos en la pantalla el gesto es un pellizco, no un trazo.
   if (e.pointerType === 'touch' && punterosActivos.size >= 1) return;
 
-  const mascara = mascaraDeCapaActiva();
-  if (!mascara) return;
+  if (herramientaLienzo === 'degradado') {
+    degradadoAntesDelArrastre = { ...capa.mascara.degradado };
+    const punto = puntoRelativo(e);
+    capa.mascara.degradado.a = punto;
+    capa.mascara.degradado.b = punto;
+    trazandoDegradado = true;
+    canvasTrabajo.setPointerCapture(e.pointerId);
+    return;
+  }
+
+  const lienzos = lienzosPincelActivos();
+  if (!lienzos) return;
   pintando = true;
-  // Copia de la máscara antes de empezar: si el trazo resulta ser el primer
-  // dedo de un pellizco, se restaura y no queda una mancha no pedida.
-  mascaraAntesDelTrazo = document.createElement('canvas');
-  mascaraAntesDelTrazo.width = mascara.width;
-  mascaraAntesDelTrazo.height = mascara.height;
-  mascaraAntesDelTrazo.getContext('2d').drawImage(mascara, 0, 0);
+  // Copia antes de empezar: si el trazo resulta ser el primer dedo de un
+  // pellizco, se restaura y no queda una mancha no pedida.
+  mascaraAntesDelTrazo = { sumar: copiaDeLienzo(lienzos.sumar), quitar: copiaDeLienzo(lienzos.quitar) };
   canvasTrabajo.setPointerCapture(e.pointerId);
   ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
-  pintarPunto(mascara.getContext('2d'), ultimoPuntoPincel, radioPincelEnMascara(), durezaPincelActual(), modoPincelAvanzado);
+  const radio = radioPincelEnMascara(), dureza = durezaPincelActual();
+  estamparPincel((ctx, modo) => pintarPunto(ctx, ultimoPuntoPincel, radio, dureza, modo));
   marcarMascaraSucia(capa);
-  actualizarMiniaturaCapa(capa);
   programarRenderizado();
 });
 canvasTrabajo.addEventListener('pointermove', (e) => {
   const capa = capaActiva();
-  if (capa && capa.seleccion === 'pincel') moverCursorPincel(e);
+  if (capa && herramientaLienzo === 'pincel') moverCursorPincel(e);
+
+  if (trazandoDegradado && capa) {
+    capa.mascara.degradado.b = puntoRelativo(e);
+    programarRenderizado();
+    return;
+  }
 
   if (paneando && panInicio) {
     const dx = e.clientX - panInicio.x;
@@ -1834,16 +2063,17 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
   }
 
   if (!pintando) return;
-  const mascara = mascaraDeCapaActiva();
-  if (!mascara) return;
   const punto = coordenadasEnCanvasTrabajo(e);
-  pintarTrazo(mascara.getContext('2d'), ultimoPuntoPincel, punto, radioPincelEnMascara(), durezaPincelActual(), modoPincelAvanzado);
+  const desde = ultimoPuntoPincel, radio = radioPincelEnMascara(), dureza = durezaPincelActual();
+  estamparPincel((ctx, modo) => pintarTrazo(ctx, desde, punto, radio, dureza, modo));
   ultimoPuntoPincel = punto;
   marcarMascaraSucia(capaActiva());
   programarRenderizado();
 });
 function terminarGestoLienzo() {
   pintando = false;
+  trazandoDegradado = false;
+  degradadoAntesDelArrastre = null;
   ultimoPuntoPincel = null;
   mascaraAntesDelTrazo = null;
   paneando = false;
@@ -1854,16 +2084,19 @@ function terminarGestoLienzo() {
 // Se llama cuando aparece el segundo dedo: lo que venía haciendo el primero
 // no era lo que el usuario quería, era el comienzo de un pellizco.
 function cancelarGestoDeUnDedo() {
-  if (pintando && mascaraAntesDelTrazo) {
-    const mascara = mascaraDeCapaActiva();
-    if (mascara) {
-      const ctx = mascara.getContext('2d');
-      ctx.clearRect(0, 0, mascara.width, mascara.height);
-      ctx.drawImage(mascaraAntesDelTrazo, 0, 0);
-      const capa = capaActiva();
-      if (capa) { marcarMascaraSucia(capa); actualizarMiniaturaCapa(capa); }
-      programarRenderizado();
+  const capa = capaActiva();
+  if (capa && pintando && mascaraAntesDelTrazo) {
+    for (const [lienzo, antes] of [[capa.pincelSumar, mascaraAntesDelTrazo.sumar], [capa.pincelQuitar, mascaraAntesDelTrazo.quitar]]) {
+      const ctx = lienzo.getContext('2d');
+      ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+      ctx.drawImage(antes, 0, 0);
     }
+    marcarMascaraSucia(capa);
+    programarRenderizado();
+  }
+  if (capa && trazandoDegradado && degradadoAntesDelArrastre) {
+    capa.mascara.degradado = degradadoAntesDelArrastre;
+    programarRenderizado();
   }
   terminarGestoLienzo();
 }
@@ -1881,10 +2114,10 @@ elDurezaPincel.addEventListener('input', () => {
 
 botonBorrarMascaraCapa.addEventListener('click', () => {
   const capa = capaActiva();
-  if (!capa || !capa.mascaraPincel) return;
-  capa.mascaraPincel.getContext('2d').clearRect(0, 0, capa.mascaraPincel.width, capa.mascaraPincel.height);
+  if (!capa || (!capa.pincelSumar && !capa.pincelQuitar)) return;
+  capa.pincelSumar = null;
+  capa.pincelQuitar = null;
   marcarMascaraSucia(capa);
-  actualizarMiniaturaCapa(capa);
   programarRenderizado();
 });
 
@@ -2180,6 +2413,7 @@ function eliminarCapa(id) {
   capas = capas.filter((c) => c.id !== id);
   cacheColorPorCapa.delete(id);
   cacheBorrososPorCapa.delete(id);
+  memoMascaraPorCapa.delete(id);
   if (capaActivaId === id) capaActivaId = capas[capas.length - 1].id;
   pintarListaCapas();
   escribirAjustesEnUI(capaActiva().ajustes);
@@ -2235,11 +2469,13 @@ elResolucionVistaPrevia.addEventListener('change', () => {
   prepararResolucionTrabajo();
   // Lo ya pintado con el pincel se reescala al nuevo tamaño de trabajo.
   for (const capa of capas) {
-    if (!capa.mascaraPincel) continue;
-    const cm = document.createElement('canvas');
-    cm.width = anchoTrabajo; cm.height = altoTrabajo;
-    cm.getContext('2d').drawImage(capa.mascaraPincel, 0, 0, anchoTrabajo, altoTrabajo);
-    capa.mascaraPincel = cm;
+    for (const clave of ['pincelSumar', 'pincelQuitar']) {
+      if (!capa[clave]) continue;
+      const cm = document.createElement('canvas');
+      cm.width = anchoTrabajo; cm.height = altoTrabajo;
+      cm.getContext('2d').drawImage(capa[clave], 0, 0, anchoTrabajo, altoTrabajo);
+      capa[clave] = cm;
+    }
   }
   // Mantiene el tamaño en pantalla: si el lienzo ahora tiene 4 veces más
   // píxeles, el zoom baja a la cuarta parte para que no salte de golpe.
@@ -2294,7 +2530,7 @@ botonRestablecerAvanzado.addEventListener('click', () => {
 // se confirma solo si ya hay algo editado.
 function hayCambios() {
   const neutro = JSON.stringify(AJUSTES_NEUTROS);
-  return capas.length > 1 || capas.some((c) => c.seleccion !== 'toda' || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
+  return capas.length > 1 || capas.some((c) => !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
 }
 document.getElementById('botonCambiarImagen').addEventListener('click', () => {
   if (hayCambios() && !confirm(t('confirmar-cambiar'))) return;
@@ -2395,15 +2631,16 @@ function canvasADataUrl(canvas) { return canvas ? canvas.toDataURL('image/png') 
 botonGuardarProyecto.addEventListener('click', () => {
   if (!imagenActual) return;
   const proyecto = {
-    version: 1,
+    version: 2, // 2: máscara con base + pincel para sumar y quitar (2026-10-04)
     imagen: crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight).toDataURL(archivoActual.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.95),
     nombreArchivo: archivoActual.name,
     capaActivaId,
     capas: capas.map((c) => ({
       id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad, modoFusion: c.modoFusion,
-      seleccion: c.seleccion, colorObjetivo: c.colorObjetivo, tolerancia: c.tolerancia,
+      mascara: c.mascara,
       ajustes: c.ajustes,
-      mascaraPincel: canvasADataUrl(c.mascaraPincel),
+      pincelSumar: canvasADataUrl(c.pincelSumar),
+      pincelQuitar: canvasADataUrl(c.pincelQuitar),
     })),
   };
   const blob = new Blob([JSON.stringify(proyecto)], { type: 'application/json' });
@@ -2422,6 +2659,28 @@ function cargarDataUrlComoImagen(dataUrl) {
     img.onerror = reject;
     img.src = dataUrl;
   });
+}
+
+async function lienzoDeDataUrl(dataUrl) {
+  if (!dataUrl) return null;
+  const img = await cargarDataUrlComoImagen(dataUrl);
+  const c = document.createElement('canvas');
+  c.width = anchoTrabajo; c.height = altoTrabajo;
+  c.getContext('2d').drawImage(img, 0, 0, anchoTrabajo, altoTrabajo);
+  return c;
+}
+
+// La máscara de una capa guardada. Los proyectos de la versión 1 tenían
+// "seleccion": toda | pincel | color. "pincel" era solo lo pintado (base
+// "nada"), salvo que no hubiera nada pintado: entonces se aplicaba en toda la
+// imagen, y así se conserva.
+function mascaraDeProyecto(c) {
+  if (c.mascara) return MascarasCapa.normalizar(c.mascara);
+  const m = MascarasCapa.neutra();
+  if (Number.isFinite(c.tolerancia)) m.tolerancia = c.tolerancia;
+  if (c.seleccion === 'pincel' && c.mascaraPincel) m.base = 'nada';
+  if (c.seleccion === 'color') { m.base = 'color'; m.color = c.colorObjetivo || null; }
+  return m;
 }
 
 botonCargarProyecto.addEventListener('click', () => entradaProyecto.click());
@@ -2446,17 +2705,12 @@ entradaProyecto.addEventListener('change', async (e) => {
       id: c.id, nombre: c.nombre, visible: c.visible, opacidad: c.opacidad,
       // Los proyectos guardados antes de los modos de fusión no lo traen.
       modoFusion: MODOS_FUSION.some(([, modos]) => modos.includes(c.modoFusion)) ? c.modoFusion : 'normal',
-      seleccion: c.seleccion, colorObjetivo: c.colorObjetivo, tolerancia: c.tolerancia,
+      mascara: mascaraDeProyecto(c),
       ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes },
-      mascaraPincel: null,
+      // Versión 1: un solo lienzo de pincel, que solo podía sumar.
+      pincelSumar: await lienzoDeDataUrl(c.pincelSumar || c.mascaraPincel),
+      pincelQuitar: await lienzoDeDataUrl(c.pincelQuitar),
     };
-    if (c.mascaraPincel) {
-      const imgMascara = await cargarDataUrlComoImagen(c.mascaraPincel);
-      const cm = document.createElement('canvas');
-      cm.width = anchoTrabajo; cm.height = altoTrabajo;
-      cm.getContext('2d').drawImage(imgMascara, 0, 0, anchoTrabajo, altoTrabajo);
-      nueva.mascaraPincel = cm;
-    }
     capasCargadas.push(nueva);
   }
   capas = capasCargadas.length ? capasCargadas : [crearCapa('Capa 1')];

@@ -771,6 +771,95 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     });
   }
 
+  // Máscaras del editor avanzado. Imagen mitad oscura (40) y mitad clara
+  // (220); la capa en Multiplicar y sin ajustes oscurece justo donde se
+  // aplica (40 -> 6, 220 -> 190), así cada máscara deja una huella exacta.
+  await prueba('editor avanzado: máscaras (luz, invertir, pincel, degradado, descarga, proyecto viejo)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const base = D().createElement('canvas'); base.width = 100; base.height = 50;
+    const cb = base.getContext('2d');
+    cb.fillStyle = 'rgb(40,40,40)'; cb.fillRect(0, 0, 50, 50);
+    cb.fillStyle = 'rgb(220,220,220)'; cb.fillRect(50, 0, 50, 50);
+    const png = await new Promise((r) => base.toBlob(r, 'image/png'));
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([png], 'mitades.png', { type: 'image/png' })]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    const selector = await hasta(() => D().querySelector('#listaCapas .fila-opacidad select'), 15000);
+    afirmar(selector, 'el editor no cargó la imagen');
+    selector.value = 'multiply'; selector.dispatchEvent(new (W().Event)('change'));
+    const lienzo = D().getElementById('canvasTrabajo');
+    // A un cuarto del alto: la línea de ayuda del degradado pasa por la mitad.
+    const px = (cv, x) => cv.getContext('2d').getImageData(Math.round(cv.width * x), cv.height >> 2, 1, 1).data[0];
+    const leer = async () => { await esperar(250); return [px(lienzo, 0.25), px(lienzo, 0.75)]; };
+    const cerca = (v, e) => Math.abs(v - e) <= 3;
+    const clic = (sel) => D().querySelector(sel).click();
+    const huellas = {};
+
+    huellas.toda = await leer();
+    afirmar(cerca(huellas.toda[0], 6) && cerca(huellas.toda[1], 190), 'toda: ' + huellas.toda);
+    clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
+    huellas.sombras = await leer();
+    afirmar(cerca(huellas.sombras[0], 6) && cerca(huellas.sombras[1], 220), 'luz sombras: ' + huellas.sombras);
+    const invertir = D().getElementById('invertirMascara');
+    invertir.checked = true; invertir.dispatchEvent(new (W().Event)('change'));
+    huellas.invertida = await leer();
+    afirmar(cerca(huellas.invertida[0], 40) && cerca(huellas.invertida[1], 190), 'invertida: ' + huellas.invertida);
+
+    // La descarga tiene que salir igual que la vista previa.
+    D().getElementById('botonDescargarAvanzado').click();
+    const enlace = D().getElementById('enlaceDescarga');
+    afirmar(await hasta(() => enlace.href.startsWith('blob:'), 15000), 'la descarga no se generó');
+    const img = new (W().Image)(); img.src = enlace.href; await img.decode();
+    const cd = D().createElement('canvas'); cd.width = img.width; cd.height = img.height;
+    cd.getContext('2d').drawImage(img, 0, 0);
+    huellas.descarga = [px(cd, 0.25), px(cd, 0.75)];
+    afirmar(cerca(huellas.descarga[0], 40) && cerca(huellas.descarga[1], 190), 'descarga invertida: ' + huellas.descarga);
+    invertir.checked = false; invertir.dispatchEvent(new (W().Event)('change'));
+
+    // Base "Nada" + pincel Sumar sobre la mitad izquierda; después Quitar
+    // sobre la derecha con base "Toda".
+    clic('#modosBaseMascara [data-base="nada"]');
+    huellas.nada = await leer();
+    afirmar(cerca(huellas.nada[0], 40) && cerca(huellas.nada[1], 220), 'nada: ' + huellas.nada);
+    const estampar = (x) => {
+      W().estamparPincel((ctx, modo) => W().pintarPunto(ctx, { x: lienzo.width * x, y: lienzo.height / 4 }, 12, 100, modo));
+      W().marcarMascaraSucia(W().capaActiva()); W().programarRenderizado();
+    };
+    clic('#modosPincelAvanzado [data-modo-pincel="sumar"]'); estampar(0.25);
+    huellas.sumar = await leer();
+    afirmar(cerca(huellas.sumar[0], 6) && cerca(huellas.sumar[1], 220), 'nada + sumar: ' + huellas.sumar);
+    clic('#modosBaseMascara [data-base="toda"]');
+    clic('#modosPincelAvanzado [data-modo-pincel="quitar"]'); estampar(0.75);
+    huellas.quitar = await leer();
+    afirmar(cerca(huellas.quitar[0], 6) && cerca(huellas.quitar[1], 220), 'toda - quitar: ' + huellas.quitar);
+    clic('#botonBorrarMascaraCapa');
+
+    // Degradado lineal de izquierda (entera) a derecha (nada): a 1/4 se
+    // aplica 3/4, a 3/4 se aplica 1/4.
+    clic('#modosBaseMascara [data-base="degradado"]');
+    Object.assign(W().capaActiva().mascara.degradado, { tipo: 'lineal', a: { x: 0, y: 0.5 }, b: { x: 1, y: 0.5 } });
+    W().programarRenderizado();
+    huellas.degradado = await leer();
+    afirmar(cerca(huellas.degradado[0], 15) && cerca(huellas.degradado[1], 213), 'degradado: ' + huellas.degradado);
+
+    // Proyecto de la versión 1 (antes de las máscaras): "pincel" con la
+    // mitad izquierda pintada tiene que abrir como base "Nada" + lo pintado.
+    const pintado = D().createElement('canvas'); pintado.width = 100; pintado.height = 50;
+    pintado.getContext('2d').fillStyle = '#fff'; pintado.getContext('2d').fillRect(0, 0, 50, 50);
+    const proyecto = {
+      version: 1, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: 'capa-1',
+      capas: [{ id: 'capa-1', nombre: 'Capa 1', visible: true, opacidad: 100, modoFusion: 'multiply', seleccion: 'pincel',
+        colorObjetivo: null, tolerancia: 30, ajustes: {}, mascaraPincel: pintado.toDataURL('image/png') }],
+    };
+    const entradaProyecto = D().getElementById('entradaProyecto');
+    entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'viejo.json', { type: 'application/json' })]).files;
+    entradaProyecto.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().capaActiva().mascara.base === 'nada', 10000), 'el proyecto viejo no abrió con base "Nada"');
+    huellas.proyectoViejo = await leer();
+    afirmar(cerca(huellas.proyectoViejo[0], 6) && cerca(huellas.proyectoViejo[1], 220), 'proyecto v1: ' + huellas.proyectoViejo);
+    return Object.entries(huellas).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);
