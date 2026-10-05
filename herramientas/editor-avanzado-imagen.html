@@ -324,6 +324,12 @@ window.i18nPagina = {
     'sl-contraste': 'Contraste',
     'sl-sombras': 'Sombras',
     'sl-reflejos': 'Reflejos',
+    'sl-blancos': 'Blancos',
+    'sl-negros': 'Negros',
+    'sl-temperatura': 'Temperatura',
+    'sl-matiz-blancos': 'Matiz (verde ↔ magenta)',
+    'sl-nitidez': 'Nitidez',
+    'sl-vineta': 'Viñeta',
     'sl-saturacion': 'Saturación',
     'sl-intensidad-color': 'Intensidad de color',
     'sl-tono': 'Girar tono',
@@ -491,6 +497,12 @@ window.i18nPagina = {
     'sl-contraste': 'Contrast',
     'sl-sombras': 'Shadows',
     'sl-reflejos': 'Highlights',
+    'sl-blancos': 'Whites',
+    'sl-negros': 'Blacks',
+    'sl-temperatura': 'Temperature',
+    'sl-matiz-blancos': 'Tint (green ↔ magenta)',
+    'sl-nitidez': 'Sharpness',
+    'sl-vineta': 'Vignette',
     'sl-saturacion': 'Saturation',
     'sl-intensidad-color': 'Vibrance',
     'sl-tono': 'Hue shift',
@@ -858,6 +870,14 @@ window.i18nPagina = {
                   <span class="etiqueta-deslizador"><span data-i18n="sl-reflejos">Reflejos</span><span id="valorReflejos">0</span></span>
                   <input type="range" id="reflejos" min="-100" max="100" value="0">
                 </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-blancos">Blancos</span><span id="valorBlancos">0</span></span>
+                  <input type="range" id="blancos" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-negros">Negros</span><span id="valorNegros">0</span></span>
+                  <input type="range" id="negros" min="-100" max="100" value="0">
+                </label>
               </div>
             </div>
           </fieldset>
@@ -866,6 +886,14 @@ window.i18nPagina = {
             <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-temperatura">Temperatura</span><span id="valorTemperatura">0</span></span>
+                  <input type="range" id="temperatura" min="-100" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-matiz-blancos">Matiz (verde ↔ magenta)</span><span id="valorMatizBlancos">0</span></span>
+                  <input type="range" id="matizBlancos" min="-100" max="100" value="0">
+                </label>
                 <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="sl-saturacion">Saturación</span><span id="valorSaturacion">0</span></span>
                   <input type="range" id="saturacion" min="-100" max="100" value="0">
@@ -937,6 +965,10 @@ window.i18nPagina = {
                   <input type="range" id="claridad" min="-100" max="100" value="0">
                 </label>
                 <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-nitidez">Nitidez</span><span id="valorNitidez">0</span></span>
+                  <input type="range" id="nitidez" min="0" max="100" value="0">
+                </label>
+                <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="sl-grano">Grano</span><span id="valorGrano">0%</span></span>
                   <input type="range" id="grano" min="0" max="100" value="0">
                 </label>
@@ -951,6 +983,10 @@ window.i18nPagina = {
                 <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="sl-desenfoque">Desenfoque</span><span id="valorDesenfoque">0px</span></span>
                   <input type="range" id="desenfoque" min="0" max="20" step="0.5" value="0">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-vineta">Viñeta</span><span id="valorVineta">0</span></span>
+                  <input type="range" id="vineta" min="-100" max="100" value="0">
                 </label>
               </div>
             </div>
@@ -1101,6 +1137,12 @@ AjustePorColor.RANGOS.forEach((rango, n) => {
 });
 
 const deslizadores = {
+  blancos: { input: document.getElementById('blancos'), valor: document.getElementById('valorBlancos'), unidad: '', porDefecto: 0, conSigno: true },
+  negros: { input: document.getElementById('negros'), valor: document.getElementById('valorNegros'), unidad: '', porDefecto: 0, conSigno: true },
+  temperatura: { input: document.getElementById('temperatura'), valor: document.getElementById('valorTemperatura'), unidad: '', porDefecto: 0, conSigno: true },
+  matizBlancos: { input: document.getElementById('matizBlancos'), valor: document.getElementById('valorMatizBlancos'), unidad: '', porDefecto: 0, conSigno: true },
+  nitidez: { input: document.getElementById('nitidez'), valor: document.getElementById('valorNitidez'), unidad: '', porDefecto: 0 },
+  vineta: { input: document.getElementById('vineta'), valor: document.getElementById('valorVineta'), unidad: '', porDefecto: 0, conSigno: true },
   exposicion: { input: document.getElementById('exposicion'), valor: document.getElementById('valorExposicion'), unidad: '', porDefecto: 0, conSigno: true },
   contraste: { input: document.getElementById('contraste'), valor: document.getElementById('valorContraste'), unidad: '', porDefecto: 0, conSigno: true },
   sombras: { input: document.getElementById('sombras'), valor: document.getElementById('valorSombras'), unidad: '', porDefecto: 0, conSigno: true },
@@ -1130,12 +1172,11 @@ CLAVES_MEZCLA_BN.forEach((clave) => {
   deslizadores[clave] = { input: document.getElementById(clave), valor: document.getElementById('valor-' + clave), unidad: '', porDefecto: 0, conSigno: true };
 });
 
+// Los neutros del motor (todos sus ajustes, también los que se agreguen) más
+// lo que es solo de la capa. Antes era una copia escrita a mano, y cada
+// ajuste nuevo del motor había que acordarse de sumarlo acá.
 const AJUSTES_NEUTROS = {
-  bn: false, exposicion: 0, contraste: 0, sombras: 0, reflejos: 0, saturacion: 0, intensidad: 0, tono: 0,
-  colorRojo: 0, colorVerde: 0, colorAzul: 0,
-  canalRojo: 100, canalVerde: 100, canalAzul: 100, claridad: 0, grano: 0, sepia: 0, invertir: 0, desenfoque: 0,
-  dispersionIntensidad: 0, dispersionMatiz: 0, dispersionTamano: 50,
-  aberracionIntensidad: 0, aberracionAngulo: 0, aberracionMatiz: 0,
+  ...ProcesarFiltros.AJUSTES_NEUTROS,
   textura: 'ninguno', texturaIntensidad: 18, texturaOrden: 'debajo',
   texturaOpciones: null, // controles de los mosaicos y el cómic, ver efectos-mosaico.js (null = los de fábrica)
   hsl: null, // Ajustar por color (null = sin cambios), ver assets/js/ajuste-por-color.js

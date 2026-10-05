@@ -1092,6 +1092,70 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k2, v]) => k2 + ' ' + v).join(' · ');
   });
 
+  // Ajustes del motor agregados el 2026-10-04 (Temperatura, Matiz, Blancos,
+  // Negros, Nitidez, Viñeta), en los dos editores. Imagen: mitad gris 40 y
+  // mitad gris 220, así cada uno deja una huella: el balance separa los
+  // canales, Blancos mueve solo lo claro, Negros solo lo oscuro, la nitidez
+  // agranda el salto en el borde y la viñeta oscurece la esquina y no el centro.
+  for (const [pagina, idLienzo] of [['editor-avanzado-imagen', 'canvasTrabajo'], ['Editor-de-color-de-imagen', 'vistaPrevia']]) {
+    await prueba('ajustes nuevos del motor (' + pagina + ')', async () => {
+      await abrir('/herramientas/' + pagina + '.html'); await esperar(300);
+      const base = D().createElement('canvas'); base.width = 200; base.height = 100;
+      const cb = base.getContext('2d');
+      cb.fillStyle = 'rgb(40,40,40)'; cb.fillRect(0, 0, 100, 100);
+      cb.fillStyle = 'rgb(220,220,220)'; cb.fillRect(100, 0, 100, 100);
+      const png = await new Promise((r) => base.toBlob(r, 'image/png'));
+      const entrada = D().getElementById('entradaArchivo');
+      entrada.files = archivos([new (W().File)([png], 'mitades.png', { type: 'image/png' })]).files;
+      entrada.dispatchEvent(new (W().Event)('change'));
+      const lienzo = await hasta(() => { const c = D().getElementById(idLienzo); return c && c.width >= 100 && c; }, 15000);
+      afirmar(lienzo, 'la imagen no se cargó');
+      const px = (x, y = 0.5) => [...lienzo.getContext('2d').getImageData(Math.round((lienzo.width - 1) * x), Math.round((lienzo.height - 1) * y), 1, 1).data].slice(0, 3);
+      const poner = async (id, v) => { const el = D().getElementById(id); el.value = v; el.dispatchEvent(new (W().Event)('input')); await esperar(250); };
+      const h = {};
+      afirmar(await hasta(() => px(0.75)[0] > 0, 10000), 'la vista previa no se dibujó');
+      await esperar(300);
+      h.neutro = [px(0.25)[0], px(0.75)[0]];
+      afirmar(h.neutro[0] === 40 && h.neutro[1] === 220, 'sin ajustes no es la imagen: ' + h.neutro);
+
+      await poner('temperatura', 100);
+      const calido = px(0.25);
+      afirmar(calido[0] > 45 && calido[2] < 35, 'Temperatura +100 no calentó (R sube, B baja): ' + calido);
+      h.temperatura = calido.join('/');
+      await poner('temperatura', 0);
+      await poner('matizBlancos', 100);
+      const magenta = px(0.25);
+      afirmar(magenta[1] < 36 && magenta[0] > magenta[1], 'Matiz +100 no fue a magenta (G baja): ' + magenta);
+      h.matiz = magenta.join('/');
+      await poner('matizBlancos', 0);
+
+      await poner('blancos', 100);
+      h.blancos = [px(0.25)[0], px(0.75)[0]];
+      afirmar(h.blancos[0] === 40 && h.blancos[1] > 235, 'Blancos +100 (solo lo claro sube): ' + h.blancos);
+      await poner('blancos', 0);
+      await poner('negros', -100);
+      h.negros = [px(0.25)[0], px(0.75)[0]];
+      afirmar(h.negros[0] < 25 && h.negros[1] === 220, 'Negros -100 (solo lo oscuro baja): ' + h.negros);
+      await poner('negros', 0);
+
+      // Nitidez: junto al borde, lo oscuro se oscurece y lo claro se aclara.
+      const borde = 0.5 - 1.5 / lienzo.width, despues = 0.5 + 1.5 / lienzo.width;
+      const antesNitidez = [px(borde)[0], px(despues)[0]];
+      await poner('nitidez', 100);
+      h.nitidez = antesNitidez + ' -> ' + [px(borde)[0], px(despues)[0]];
+      afirmar(px(borde)[0] < antesNitidez[0] && px(despues)[0] > antesNitidez[1], 'Nitidez no agrandó el salto del borde: ' + h.nitidez);
+      await poner('nitidez', 0);
+
+      await poner('vineta', -100);
+      h.vineta = [px(0.02, 0.02)[0], px(0.25)[0]];
+      afirmar(h.vineta[0] < 15 && h.vineta[1] >= 36, 'Viñeta -100 (esquina oscura, centro de la mitad casi igual): ' + h.vineta);
+      await poner('vineta', 0);
+      h.vuelta = [px(0.25)[0], px(0.75)[0]];
+      afirmar(h.vuelta[0] === 40 && h.vuelta[1] === 220, 'con todo en cero no volvió a la imagen: ' + h.vuelta);
+      return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+    });
+  }
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

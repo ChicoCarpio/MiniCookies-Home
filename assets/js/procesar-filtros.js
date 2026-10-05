@@ -21,6 +21,8 @@ window.ProcesarFiltros = (function () {
     dispersionIntensidad: 0, dispersionMatiz: 0, dispersionTamano: 50,
     aberracionIntensidad: 0, aberracionAngulo: 0, aberracionMatiz: 0, intensidadFiltro: 100,
     hsl: null,
+    // 2026-10-04: balance de blancos, puntos blanco y negro, nitidez y viñeta.
+    temperatura: 0, matizBlancos: 0, blancos: 0, negros: 0, nitidez: 0, vineta: 0,
   };
   CLAVES_MEZCLA_BN.forEach((clave) => { AJUSTES_NEUTROS[clave] = 0; });
 
@@ -84,7 +86,7 @@ window.ProcesarFiltros = (function () {
     if (!memo) return null;
     if (memo.ancho !== ancho || memo.alto !== alto) {
       memo.ancho = ancho; memo.alto = alto;
-      memo.claridad = null; memo.dispersionBrillante = null; memo.dispersionBlur = null;
+      memo.claridad = null; memo.nitidez = null; memo.dispersionBrillante = null; memo.dispersionBlur = null;
     }
     return memo;
   }
@@ -167,6 +169,35 @@ window.ProcesarFiltros = (function () {
         if (memo) memo.claridad = borrosos;
       }
     }
+    // Ajustes del 2026-10-04. Se leen con "|| 0": un proyecto o un filtro de
+    // antes no los trae, y un undefined volvería NaN cada píxel.
+    // Balance de blancos: Temperatura (frío ↔ cálido) y Matiz (verde ↔
+    // magenta), como factores por canal antes de todo lo demás.
+    const nTemperatura = (ajustes.temperatura || 0) / 100;
+    const nMatizBlancos = (ajustes.matizBlancos || 0) / 100;
+    const necesitaBalance = nTemperatura !== 0 || nMatizBlancos !== 0;
+    const kR = 1 + 0.25 * nTemperatura + 0.08 * nMatizBlancos;
+    const kG = 1 - 0.18 * nMatizBlancos;
+    const kB = 1 - 0.25 * nTemperatura + 0.08 * nMatizBlancos;
+    // Blancos y Negros: como Sombras y Reflejos, pero solo en los extremos
+    // (mueven el punto blanco y el punto negro).
+    const ampBlancos = ((ajustes.blancos || 0) / 100) * 60;
+    const ampNegros = ((ajustes.negros || 0) / 100) * 60;
+    // Nitidez: máscara de enfoque de radio chico (Claridad es la de radio
+    // grande). El desenfoque de referencia solo depende de la imagen.
+    const ampNitidez = ((ajustes.nitidez || 0) / 100) * 2.5;
+    let finos = null;
+    if (ampNitidez !== 0) {
+      finos = memo && memo.nitidez;
+      if (!finos) {
+        finos = generarVersionBorrosa(canvasFuente, Math.max(8, Math.round(Math.max(ancho, alto) / 3)), scratch ? scratch.scratchBorrosoClaridad : null);
+        if (memo) memo.nitidez = finos;
+      }
+    }
+    // Viñeta: negativa oscurece los bordes, positiva los aclara.
+    const ampVineta = (ajustes.vineta || 0) / 100;
+    const centroX = (ancho - 1) / 2, centroY = (alto - 1) / 2;
+
     const ampGrano = (ajustes.grano / 100) * 45;
     const ajustePorColor = AjustePorColor.preparar(ajustes.hsl);
     const factorIntensidadFiltro = ajustes.intensidadFiltro / 100;
@@ -210,6 +241,7 @@ window.ProcesarFiltros = (function () {
       const rOriginal = r, gOriginal = g, bOriginal = b;
 
       r *= factorExposicion; g *= factorExposicion; b *= factorExposicion;
+      if (necesitaBalance) { r *= kR; g *= kG; b *= kB; }
       if (r < 0) r = 0; else if (r > 255) r = 255;
       if (g < 0) g = 0; else if (g > 255) g = 255;
       if (b < 0) b = 0; else if (b > 255) b = 255;
@@ -221,11 +253,13 @@ window.ProcesarFiltros = (function () {
       if (g < 0) g = 0; else if (g > 255) g = 255;
       if (b < 0) b = 0; else if (b > 255) b = 255;
 
-      if (amplitudSombras !== 0 || amplitudReflejos !== 0) {
+      if (amplitudSombras !== 0 || amplitudReflejos !== 0 || ampBlancos !== 0 || ampNegros !== 0) {
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
         const mascaraSombra = Math.max(0, Math.min(1, 1 - lum / 128));
         const mascaraReflejo = Math.max(0, Math.min(1, (lum - 128) / 127));
-        const delta = amplitudSombras * mascaraSombra + amplitudReflejos * mascaraReflejo;
+        const extremoBlanco = Math.max(0, (lum - 170) / 85), extremoNegro = Math.max(0, (85 - lum) / 85);
+        const delta = amplitudSombras * mascaraSombra + amplitudReflejos * mascaraReflejo
+          + ampBlancos * extremoBlanco * extremoBlanco + ampNegros * extremoNegro * extremoNegro;
         r += delta; g += delta; b += delta;
         if (r < 0) r = 0; else if (r > 255) r = 255;
         if (g < 0) g = 0; else if (g > 255) g = 255;
@@ -323,6 +357,28 @@ window.ProcesarFiltros = (function () {
         const lumBorrosa = 0.299 * borrosos[i] + 0.587 * borrosos[i + 1] + 0.114 * borrosos[i + 2];
         const delta = (lumOriginal - lumBorrosa) * ampClaridad;
         r += delta; g += delta; b += delta;
+      }
+
+      if (finos) {
+        const lumOriginal = 0.299 * rOriginal + 0.587 * gOriginal + 0.114 * bOriginal;
+        const lumFina = 0.299 * finos[i] + 0.587 * finos[i + 1] + 0.114 * finos[i + 2];
+        const delta = (lumOriginal - lumFina) * ampNitidez;
+        r += delta; g += delta; b += delta;
+      }
+
+      if (ampVineta !== 0) {
+        const p = i >> 2;
+        const x = p % ancho, y = (p - x) / ancho;
+        const dx = (x - centroX) / (centroX || 1), dy = (y - centroY) / (centroY || 1);
+        // 0 en el centro, 1 en las esquinas; empieza a notarse a mitad de camino.
+        let t = (Math.sqrt(dx * dx + dy * dy) / Math.SQRT2 - 0.35) / 0.65;
+        if (t > 0) {
+          if (t > 1) t = 1;
+          // Al máximo, 85%: la esquina conserva algo de detalle.
+          const m = t * t * (3 - 2 * t) * ampVineta * 0.85;
+          if (m < 0) { r *= 1 + m; g *= 1 + m; b *= 1 + m; }
+          else { r += (255 - r) * m; g += (255 - g) * m; b += (255 - b) * m; }
+        }
       }
 
       if (ampGrano !== 0) {
