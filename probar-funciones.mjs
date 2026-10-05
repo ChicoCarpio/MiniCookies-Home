@@ -947,6 +947,120 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
+  // Capas con contenido (texto, copia de la foto) del editor avanzado, con
+  // la imagen de dos mitades: la copia de la mitad oscura movida a la
+  // derecha la tapa (40 | 40); en Multiplicar la oscurece (40 | 35). Los
+  // gestos sobre la imagen se hacen con eventos de puntero de verdad.
+  await prueba('editor avanzado: texto e imágenes (copia, mover, escalar, girar, texto, descarga, proyecto)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const base = D().createElement('canvas'); base.width = 100; base.height = 50;
+    const cb = base.getContext('2d');
+    cb.fillStyle = 'rgb(40,40,40)'; cb.fillRect(0, 0, 50, 50);
+    cb.fillStyle = 'rgb(220,220,220)'; cb.fillRect(50, 0, 50, 50);
+    const png = await new Promise((r) => base.toBlob(r, 'image/png'));
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([png], 'mitades.png', { type: 'image/png' })]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => D().querySelector('#listaCapas .fila-opacidad select'), 15000), 'el editor no cargó la imagen');
+    const lienzo = D().getElementById('canvasTrabajo');
+    lienzo.setPointerCapture = () => {}; // los punteros sintéticos no se pueden capturar
+    const px = (cv, x, y = 0.25) => cv.getContext('2d').getImageData(Math.round(cv.width * x), Math.round(cv.height * y), 1, 1).data;
+    const leer = async () => { await esperar(250); return [px(lienzo, 0.25)[0], px(lienzo, 0.75)[0]]; };
+    const cerca = (v, e, tol = 3) => Math.abs(v - e) <= tol;
+    const clic = (sel) => D().querySelector(sel).click();
+    const deslizar = (id, v) => { const el = D().getElementById(id); el.value = v; el.dispatchEvent(new (W().Event)('input')); };
+    // Punto del lienzo -> punto de la pantalla, para los eventos de puntero.
+    const enPantalla = (p) => { const r = lienzo.getBoundingClientRect(); return { clientX: r.left + p.x * r.width / lienzo.width, clientY: r.top + p.y * r.height / lienzo.height }; };
+    const arrastrar = async (desde, hasta_) => {
+      const o = { bubbles: true, pointerId: 7, pointerType: 'mouse', isPrimary: true, button: 0, buttons: 1 };
+      lienzo.dispatchEvent(new (W().PointerEvent)('pointerdown', { ...o, ...enPantalla(desde) }));
+      lienzo.dispatchEvent(new (W().PointerEvent)('pointermove', { ...o, ...enPantalla(hasta_) }));
+      lienzo.dispatchEvent(new (W().PointerEvent)('pointerup', { ...o, ...enPantalla(hasta_), buttons: 0 }));
+      await esperar(200);
+    };
+    const h = {};
+
+    // Copia de la mitad oscura (máscara de la capa 1 en Sombras), en su lugar.
+    clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
+    clic('#botonCopiarFoto');
+    const copia = W().capaActiva();
+    afirmar(copia && copia.contenido && copia.contenido.tipo === 'imagen', 'Copia de la foto no creó una capa de imagen');
+    afirmar(cerca(copia.contenido.lienzo.width, 50, 1) && cerca(copia.contenido.centro.x, 0.25, 0.01), 'la copia no es la mitad izquierda: ' + copia.contenido.lienzo.width + ' en ' + copia.contenido.centro.x);
+    h.enSuLugar = await leer();
+    afirmar(cerca(h.enSuLugar[0], 40) && cerca(h.enSuLugar[1], 220), 'copia en su lugar: ' + h.enSuLugar);
+    deslizar('posX', 75);
+    h.movida = await leer();
+    afirmar(cerca(h.movida[0], 40) && cerca(h.movida[1], 40), 'copia movida a la derecha: ' + h.movida);
+    const fila = D().querySelector('#listaCapas .fila-capa.activa').parentElement;
+    const modo = fila.querySelector('select'); modo.value = 'multiply'; modo.dispatchEvent(new (W().Event)('change'));
+    h.multiplicada = await leer();
+    afirmar(cerca(h.multiplicada[0], 40) && cerca(h.multiplicada[1], 35), 'copia en Multiplicar: ' + h.multiplicada);
+
+    // Gestos: arrastrar el centro la mueve; una esquina la escala; la manija la gira.
+    const c = copia.contenido;
+    let k = W().cajaDeContenido(copia);
+    await arrastrar({ x: k.cx, y: k.cy }, { x: k.cx - 10, y: k.cy + 5 });
+    h.gestoMover = [Math.round(c.centro.x * 100), Math.round(c.centro.y * 100)];
+    afirmar(h.gestoMover[0] === 65 && h.gestoMover[1] === 60, 'mover con el puntero: ' + h.gestoMover);
+    k = W().cajaDeContenido(copia);
+    const f = W().pixelesPorPuntoDePantalla();
+    let m = W().ContenidoCapa.manijas(k, 28 * f);
+    const esquina = m.esquinas[2];
+    await arrastrar(esquina, { x: k.cx + (esquina.x - k.cx) * 1.5, y: k.cy + (esquina.y - k.cy) * 1.5 });
+    h.gestoEscalar = Math.round(c.escala * 100);
+    afirmar(cerca(h.gestoEscalar, 150, 2), 'escalar desde la esquina: ' + h.gestoEscalar);
+    k = W().cajaDeContenido(copia);
+    m = W().ContenidoCapa.manijas(k, 28 * f);
+    const r = Math.hypot(m.girar.x - k.cx, m.girar.y - k.cy);
+    await arrastrar(m.girar, { x: k.cx + r, y: k.cy }); // de arriba a la derecha: +90°
+    h.gestoGirar = Math.round(c.rotacion);
+    afirmar(cerca(h.gestoGirar, 90, 1), 'girar con la manija: ' + h.gestoGirar);
+    Object.assign(c, { centro: { x: 0.75, y: 0.5 }, escala: 1, rotacion: 0 });
+    W().programarRenderizado();
+    h.restaurada = await leer();
+    afirmar(cerca(h.restaurada[1], 35), 'copia vuelta a su lugar: ' + h.restaurada);
+
+    // Texto: aparece, cambia de color y crece con el tamaño.
+    const contar = (cond) => { const d = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (cond(d[i], d[i + 1], d[i + 2])) n++; return n; };
+    const rojos = (r, g, b) => r > 180 && g < 90 && b < 90;
+    clic('#botonNuevoTexto');
+    const capaTexto = W().capaActiva();
+    afirmar(capaTexto && capaTexto.contenido && capaTexto.contenido.tipo === 'texto', '+ Texto no creó una capa de texto');
+    const color = D().getElementById('colorTexto'); color.value = '#ff0000'; color.dispatchEvent(new (W().Event)('input'));
+    D().getElementById('textoCapa').value = 'HOLA'; D().getElementById('textoCapa').dispatchEvent(new (W().Event)('input'));
+    await esperar(250);
+    h.textoRojo = contar(rojos);
+    afirmar(h.textoRojo > 5, 'el texto rojo no aparece: ' + h.textoRojo + ' píxeles');
+    afirmar(capaTexto.nombre === 'HOLA', 'el nombre no siguió al texto: ' + capaTexto.nombre);
+    deslizar('tamanoContenido', 250);
+    await esperar(250);
+    h.textoGrande = contar(rojos);
+    afirmar(h.textoGrande > h.textoRojo * 3, 'al 250% el texto no creció: ' + h.textoRojo + ' -> ' + h.textoGrande);
+
+    // Descarga: la copia movida y en Multiplicar también está ahí.
+    D().getElementById('botonDescargarAvanzado').click();
+    const enlace = D().getElementById('enlaceDescarga');
+    afirmar(await hasta(() => enlace.href.startsWith('blob:'), 15000), 'la descarga no se generó');
+    const img = new (W().Image)(); img.src = enlace.href; await img.decode();
+    const cd = D().createElement('canvas'); cd.width = img.width; cd.height = img.height;
+    cd.getContext('2d').drawImage(img, 0, 0);
+    h.descarga = [px(cd, 0.25, 0.1)[0], px(cd, 0.75, 0.1)[0]];
+    afirmar(cerca(h.descarga[0], 40) && cerca(h.descarga[1], 35), 'descarga: ' + h.descarga);
+
+    // Proyecto: guardado y vuelto a abrir, da lo mismo.
+    const antes = [px(lienzo, 0.25, 0.1)[0], px(lienzo, 0.75, 0.1)[0], contar(rojos)];
+    const raiz = W().ubicar(capaTexto.id).lista;
+    const proyecto = { version: 4, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: capaTexto.id, capas: raiz.map(W().itemAProyecto) };
+    const entradaProyecto = D().getElementById('entradaProyecto');
+    entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'contenido.json', { type: 'application/json' })]).files;
+    entradaProyecto.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().capaActiva() && W().capaActiva() !== capaTexto && W().capaActiva().id === capaTexto.id, 10000), 'el proyecto no volvió a abrir');
+    await esperar(300);
+    h.proyecto = [px(lienzo, 0.25, 0.1)[0], px(lienzo, 0.75, 0.1)[0], contar(rojos)];
+    afirmar(cerca(h.proyecto[0], antes[0]) && cerca(h.proyecto[1], antes[1]) && cerca(h.proyecto[2], antes[2], antes[2] * 0.05 + 2), 'proyecto: ' + antes + ' -> ' + h.proyecto);
+    return Object.entries(h).map(([k2, v]) => k2 + ' ' + v).join(' · ');
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

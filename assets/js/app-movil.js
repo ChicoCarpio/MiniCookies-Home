@@ -42,6 +42,7 @@
     'grupo-textura': '🧱',
     'titulo-aplicar': '🎯',
     'titulo-vista': '🔍',
+    'titulo-contenido': '🔤',
     'titulo-capas': '🗂️',
     'titulo-textura': '🧱',
     'Original': '👁️',

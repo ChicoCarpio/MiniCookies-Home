@@ -153,6 +153,17 @@
   }
   #cursorPincelAvanzado.visible { display: block; }
   .zona-lienzo.modo-gotero #canvasTrabajo, .zona-lienzo.modo-degradado #canvasTrabajo { cursor: crosshair; }
+  .zona-lienzo.modo-transformar #canvasTrabajo { cursor: move; }
+  /* Texto e imágenes */
+  .campo-contenido { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; }
+  .campo-contenido textarea, .campo-contenido select { width: 100%; box-sizing: border-box; font: inherit; font-size: 0.85rem; }
+  /* El textarea global (estilos.css) mide 220px: pensado para las herramientas de texto, no para un rótulo. */
+  .campo-contenido textarea { min-height: 0; height: 4.2em; resize: vertical; padding: 6px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); }
+  .fila-colores { display: flex; gap: 14px; font-size: 0.8rem; align-items: center; flex-wrap: wrap; }
+  .fila-colores label { display: flex; align-items: center; gap: 6px; }
+  .fila-colores input[type="color"] { width: 36px; height: 26px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 6px; background: none; }
+  #botonMoverCapa.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .contenedor-capa .miniatura-capa.de-contenido { background: repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 50% / 8px 8px; }
   /* Subtítulos dentro de "Aplicar la capa a" (herramienta, base). */
   .titulo-mascara { display: flex; align-items: center; gap: 6px; margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
   .acordeon-contenido > .titulo-mascara:first-child { margin-top: 0; }
@@ -245,6 +256,37 @@ window.i18nPagina = {
     'title-ojo': 'Mostrar/ocultar capa',
     'title-eliminar': 'Eliminar capa',
     'title-eliminar-grupo': 'Eliminar el grupo',
+    'titulo-contenido': 'Texto e imágenes',
+    'lbl-agregar': 'Agregar una capa con',
+    'nota-contenido': 'Estas capas tienen su propio contenido, que se mueve, se agranda y se gira. Los ajustes de luz, color, filtro y textura se aplican a ese contenido, no a la foto de abajo. "Copia de la foto" copia la foto original, pero solo lo que marca la máscara de la capa o el grupo elegido: pintá un objeto con el pincel y copialo para moverlo.',
+    'boton-nuevo-texto': 'T Texto',
+    'boton-nueva-imagen': '🖼️ Imagen',
+    'boton-copiar-foto': '✂ Copia de la foto',
+    'aviso-sin-contenido': 'Elegí una capa de texto o de imagen para editarla y moverla.',
+    'lbl-texto': 'Texto',
+    'lbl-fuente': 'Fuente',
+    'lbl-color-texto': 'Color',
+    'lbl-contorno': 'Contorno',
+    'sl-grosor-contorno': 'Grosor del contorno',
+    'estilo-negrita': 'Negrita',
+    'estilo-cursiva': 'Cursiva',
+    'estilo-sombra': 'Sombra',
+    'alinear-izq': 'Alinear a la izquierda',
+    'alinear-centro': 'Centrar las líneas',
+    'alinear-der': 'Alinear a la derecha',
+    'lbl-posicion': 'Posición, tamaño y giro',
+    'herr-transformar': '✥ Mover con el mouse o el dedo',
+    'herr-transformar-corto': '✥ Mover la capa',
+    'sl-pos-x': 'Horizontal',
+    'sl-pos-y': 'Vertical',
+    'sl-tamano-contenido': 'Tamaño',
+    'sl-giro': 'Giro',
+    'voltear-h': '⇋ Espejar',
+    'voltear-v': '⇵ Dar vuelta',
+    'centrar': 'Centrar',
+    'texto-por-defecto': 'Tu texto',
+    'nombre-copia': 'Copia de la foto',
+    'aviso-copia-vacia': 'La máscara de lo elegido no marca nada: no hay qué copiar.',
     'title-nombre': 'Nombre',
     'grupo-numerado': 'Grupo {n}',
     'boton-agrupar': '⧉ Agrupar',
@@ -379,6 +421,37 @@ window.i18nPagina = {
     'title-ojo': 'Show/hide layer',
     'title-eliminar': 'Delete layer',
     'title-eliminar-grupo': 'Delete the group',
+    'titulo-contenido': 'Text and images',
+    'lbl-agregar': 'Add a layer with',
+    'nota-contenido': 'These layers have their own content, which you can move, resize and rotate. Light, color, filter and texture settings apply to that content, not to the photo below. "Copy of the photo" copies the original photo, but only what the mask of the selected layer or group marks: paint over an object with the brush and copy it to move it.',
+    'boton-nuevo-texto': 'T Text',
+    'boton-nueva-imagen': '🖼️ Image',
+    'boton-copiar-foto': '✂ Copy of the photo',
+    'aviso-sin-contenido': 'Select a text or image layer to edit and move it.',
+    'lbl-texto': 'Text',
+    'lbl-fuente': 'Font',
+    'lbl-color-texto': 'Color',
+    'lbl-contorno': 'Outline',
+    'sl-grosor-contorno': 'Outline width',
+    'estilo-negrita': 'Bold',
+    'estilo-cursiva': 'Italic',
+    'estilo-sombra': 'Shadow',
+    'alinear-izq': 'Align left',
+    'alinear-centro': 'Center the lines',
+    'alinear-der': 'Align right',
+    'lbl-posicion': 'Position, size and rotation',
+    'herr-transformar': '✥ Move with the mouse or your finger',
+    'herr-transformar-corto': '✥ Move the layer',
+    'sl-pos-x': 'Horizontal',
+    'sl-pos-y': 'Vertical',
+    'sl-tamano-contenido': 'Size',
+    'sl-giro': 'Rotation',
+    'voltear-h': '⇋ Mirror',
+    'voltear-v': '⇵ Flip',
+    'centrar': 'Center',
+    'texto-por-defecto': 'Your text',
+    'nombre-copia': 'Copy of the photo',
+    'aviso-copia-vacia': 'The mask of the selection marks nothing: there is nothing to copy.',
     'title-nombre': 'Name',
     'grupo-numerado': 'Group {n}',
     'boton-agrupar': '⧉ Group',
@@ -512,6 +585,7 @@ window.i18nPagina = {
                 <button type="button" data-herramienta="pincel" data-i18n="herr-pincel">🖌️ Pincel</button>
                 <button type="button" data-herramienta="gotero" data-i18n="herr-gotero">💧 Elegir color</button>
                 <button type="button" data-herramienta="degradado" data-i18n="herr-degradado">↘ Trazar degradado</button>
+                <button type="button" data-herramienta="transformar" data-i18n="herr-transformar-corto">✥ Mover la capa</button>
               </div>
 
               <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
@@ -590,6 +664,82 @@ window.i18nPagina = {
                 <input type="checkbox" id="verMascara">
                 <span data-i18n="lbl-ver-mascara">Ver la máscara (en rojo, donde no se aplica)</span>
               </label>
+            </div>
+          </fieldset>
+
+          <!-- Capas con contenido propio (assets/js/contenido-capa.js): texto,
+               otra imagen o un recorte de la foto, que se mueven, escalan y
+               rotan. Los ajustes del panel derecho se aplican a ese contenido. -->
+          <fieldset class="acordeon-grupo" data-app-categoria="Contenido">
+            <button type="button" class="acordeon-titulo" data-icono="🔤"><span data-i18n="titulo-contenido">Texto e imágenes</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <span class="titulo-mascara">
+                <span data-i18n="lbl-agregar">Agregar una capa con</span>
+                <span class="ayuda-tip">
+                  <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                  <span class="ayuda-burbuja" data-i18n="nota-contenido">Estas capas tienen su propio contenido, que se mueve, se agranda y se gira. Los ajustes de luz, color, filtro y textura se aplican a ese contenido, no a la foto de abajo. "Copia de la foto" copia la foto original, pero solo lo que marca la máscara de la capa o el grupo elegido: pintá un objeto con el pincel y copialo para moverlo.</span>
+                </span>
+              </span>
+              <div class="modos">
+                <button type="button" id="botonNuevoTexto" data-i18n="boton-nuevo-texto">T Texto</button>
+                <button type="button" id="botonNuevaImagen" data-i18n="boton-nueva-imagen">🖼️ Imagen</button>
+                <button type="button" id="botonCopiarFoto" data-i18n="boton-copiar-foto">✂ Copia de la foto</button>
+              </div>
+              <input type="file" id="entradaImagenCapa" accept="image/*" hidden>
+              <p class="nota-lateral" id="avisoSinContenido" data-i18n="aviso-sin-contenido">Elegí una capa de texto o de imagen para editarla y moverla.</p>
+
+              <div id="controlesContenido" class="controles controles-apilados" style="display:none;">
+                <div id="controlesTexto" class="controles controles-apilados">
+                  <label class="campo-contenido"><span data-i18n="lbl-texto">Texto</span>
+                    <textarea id="textoCapa" rows="2"></textarea>
+                  </label>
+                  <label class="campo-contenido"><span data-i18n="lbl-fuente">Fuente</span>
+                    <select id="familiaTexto"></select>
+                  </label>
+                  <div class="fila-colores">
+                    <label><span data-i18n="lbl-color-texto">Color</span> <input type="color" id="colorTexto"></label>
+                    <label><span data-i18n="lbl-contorno">Contorno</span> <input type="color" id="colorContorno"></label>
+                  </div>
+                  <label class="campo-deslizador">
+                    <span class="etiqueta-deslizador"><span data-i18n="sl-grosor-contorno">Grosor del contorno</span><span id="valorGrosorContorno">8</span></span>
+                    <input type="range" id="grosorContorno" min="0" max="25" value="8">
+                  </label>
+                  <div class="modos" id="estiloTexto">
+                    <button type="button" data-estilo="negrita" data-i18n="estilo-negrita" style="font-weight:700;">Negrita</button>
+                    <button type="button" data-estilo="cursiva" data-i18n="estilo-cursiva" style="font-style:italic;">Cursiva</button>
+                    <button type="button" data-estilo="sombra" data-i18n="estilo-sombra">Sombra</button>
+                  </div>
+                  <div class="modos" id="alineacionTexto">
+                    <button type="button" data-alineacion="left" data-i18n-attr="title:alinear-izq;aria-label:alinear-izq">⇤</button>
+                    <button type="button" data-alineacion="center" data-i18n-attr="title:alinear-centro;aria-label:alinear-centro">↔</button>
+                    <button type="button" data-alineacion="right" data-i18n-attr="title:alinear-der;aria-label:alinear-der">⇥</button>
+                  </div>
+                </div>
+
+                <span class="titulo-mascara" data-i18n="lbl-posicion">Posición, tamaño y giro</span>
+                <button type="button" class="boton-capa-accion" id="botonMoverCapa" data-i18n="herr-transformar">✥ Mover con el mouse o el dedo</button>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-pos-x">Horizontal</span><span id="valorPosX">50%</span></span>
+                  <input type="range" id="posX" min="-50" max="150" value="50">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-pos-y">Vertical</span><span id="valorPosY">50%</span></span>
+                  <input type="range" id="posY" min="-50" max="150" value="50">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-tamano-contenido">Tamaño</span><span id="valorTamanoContenido">100%</span></span>
+                  <input type="range" id="tamanoContenido" min="5" max="400" value="100">
+                </label>
+                <label class="campo-deslizador">
+                  <span class="etiqueta-deslizador"><span data-i18n="sl-giro">Giro</span><span id="valorGiro">0°</span></span>
+                  <input type="range" id="giroContenido" min="-180" max="180" value="0">
+                </label>
+                <div class="modos">
+                  <button type="button" id="botonVoltearH" data-i18n="voltear-h">⇋ Espejar</button>
+                  <button type="button" id="botonVoltearV" data-i18n="voltear-v">⇵ Dar vuelta</button>
+                  <button type="button" id="botonCentrarContenido" data-i18n="centrar">Centrar</button>
+                </div>
+              </div>
             </div>
           </fieldset>
 
@@ -865,6 +1015,7 @@ window.i18nPagina = {
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/mascaras-capa.js"></script>
+<script src="../assets/js/contenido-capa.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
@@ -1222,14 +1373,15 @@ function fundirCapa(ctx, capa, capaFinal) {
 function firmaDeCapa(capa) {
   return JSON.stringify([
     capa.visible, capa.opacidad, capa.modoFusion, capa.mascara,
-    capa.ajustes,
+    capa.ajustes, capa.contenido ? ContenidoCapa.firma(capa.contenido) : null,
     capa._versionMascara || 0,
   ]);
 }
 
 // Firma de solo la parte "de color" de una capa (lo que entra a
 // procesarCapaEnCanvas): no incluye selección/máscara/opacidad, que no
-// afectan ese resultado — ver cacheColorPorCapa.
+// afectan ese resultado — ver cacheColorPorCapa. El contenido propio entra
+// por identidad del lienzo (ver lienzoDeContenido).
 function firmaColorDeCapa(capa) {
   return JSON.stringify(capa.ajustes);
 }
@@ -1300,40 +1452,99 @@ function componerItem(item, abajo, ancho, alto, escala, enVivo) {
     return fundirConMascara(abajo, resultado, item, ancho, alto, enVivo);
   }
 
+  // Capa con contenido propio (texto o imagen): sus ajustes se aplican a
+  // ese contenido, que después se funde sobre lo de abajo.
+  if (item.contenido) {
+    const contenido = lienzoDeContenido(item, ancho, alto, escala, enVivo);
+    const procesado = JSON.stringify(item.ajustes) === AJUSTES_NEUTROS_JSON
+      ? contenido
+      : procesarConCache(item, contenido, ancho, alto, escala, enVivo, true);
+    return fundirConMascara(abajo, procesado, item, ancho, alto, enVivo);
+  }
+
   // Con modo Normal y sin ajustes la capa procesada es igual a lo de abajo:
   // no importa dónde se aplique ni con qué opacidad.
   if (item.modoFusion === 'normal' && JSON.stringify(item.ajustes) === AJUSTES_NEUTROS_JSON) return abajo;
+  return fundirConMascara(abajo, procesarConCache(item, abajo, ancho, alto, escala, enVivo, false), item, ancho, alto, enVivo);
+}
 
-  let procesado;
+// Los ajustes de una capa aplicados a "origen" (lo de abajo, o el contenido
+// propio de la capa). En vivo se reusa el resultado mientras no cambien ni
+// los ajustes ni el origen (p. ej. si lo único que cambió fue la máscara,
+// pintando con el pincel). conservarForma: al contenido propio se le
+// devuelve su transparencia, que algunas texturas y desenfoques rellenan.
+function procesarConCache(item, origen, ancho, alto, escala, enVivo, conservarForma) {
+  const firmaColor = firmaColorDeCapa(item);
   if (enVivo) {
-    // El resultado de color de esta capa solo depende de sus propios ajustes
-    // y de lo que entra desde abajo: si ninguno de los dos cambió desde el
-    // último render (p. ej. porque lo único que cambió fue la máscara,
-    // pintando con el pincel), se reusa tal cual.
-    const firmaColor = firmaColorDeCapa(item);
     const cacheadoColor = cacheColorPorCapa.get(item.id);
-    if (cacheadoColor && cacheadoColor.firma === firmaColor && cacheadoColor.origen === abajo
-      && cacheadoColor.ancho === ancho && cacheadoColor.alto === alto) {
-      procesado = cacheadoColor.canvas;
-    } else {
-      procesado = document.createElement('canvas');
-      procesado.width = ancho; procesado.height = alto;
-      procesado.getContext('2d').drawImage(abajo, 0, 0);
-      let cacheBorrosos = cacheBorrososPorCapa.get(item.id);
-      if (!cacheBorrosos || cacheBorrosos.origen !== abajo || cacheBorrosos.ancho !== ancho || cacheBorrosos.alto !== alto) {
-        cacheBorrosos = { origen: abajo, ancho, alto, claridad: null, dispersionBrillante: null, dispersionBlur: null };
-        cacheBorrososPorCapa.set(item.id, cacheBorrosos);
-      }
-      procesarCapaEnCanvas(procesado, item, escala, scratchPreviaEnVivo, cacheBorrosos);
-      cacheColorPorCapa.set(item.id, { firma: firmaColor, origen: abajo, ancho, alto, canvas: procesado });
+    if (cacheadoColor && cacheadoColor.firma === firmaColor && cacheadoColor.origen === origen
+      && cacheadoColor.ancho === ancho && cacheadoColor.alto === alto) return cacheadoColor.canvas;
+  }
+  const procesado = document.createElement('canvas');
+  procesado.width = ancho; procesado.height = alto;
+  procesado.getContext('2d').drawImage(origen, 0, 0);
+  if (enVivo) {
+    let cacheBorrosos = cacheBorrososPorCapa.get(item.id);
+    if (!cacheBorrosos || cacheBorrosos.origen !== origen || cacheBorrosos.ancho !== ancho || cacheBorrosos.alto !== alto) {
+      cacheBorrosos = { origen, ancho, alto, claridad: null, dispersionBrillante: null, dispersionBlur: null };
+      cacheBorrososPorCapa.set(item.id, cacheBorrosos);
     }
+    procesarCapaEnCanvas(procesado, item, escala, scratchPreviaEnVivo, cacheBorrosos);
   } else {
-    procesado = document.createElement('canvas');
-    procesado.width = ancho; procesado.height = alto;
-    procesado.getContext('2d').drawImage(abajo, 0, 0);
     procesarCapaEnCanvas(procesado, item, escala);
   }
-  return fundirConMascara(abajo, procesado, item, ancho, alto, enVivo);
+  if (conservarForma) {
+    const ctx = procesado.getContext('2d');
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(origen, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  if (enVivo) cacheColorPorCapa.set(item.id, { firma: firmaColor, origen, ancho, alto, canvas: procesado });
+  return procesado;
+}
+
+// ===== Capas con contenido: texto e imágenes =====
+// memo por capa: la "fuente" (las letras ya dibujadas, que solo cambian con
+// el texto o su estilo) y el contenido ya ubicado en el lienzo de trabajo.
+// Cuando cambia, el contenido sale en un lienzo NUEVO: las cachés de color
+// lo reconocen por identidad.
+const memoContenido = new Map(); // id de capa -> { firmaFuente, fuente, firma, ancho, alto, lienzo }
+
+function memoDeContenido(capa) {
+  let memo = memoContenido.get(capa.id);
+  if (!memo) { memo = {}; memoContenido.set(capa.id, memo); }
+  return memo;
+}
+
+function fuenteDeContenido(capa) {
+  const c = capa.contenido;
+  if (c.tipo === 'imagen') return c.lienzo;
+  const memo = memoDeContenido(capa);
+  const firma = ContenidoCapa.firmaFuente(c);
+  if (memo.firmaFuente !== firma) { memo.firmaFuente = firma; memo.fuente = ContenidoCapa.fuenteDeTexto(c); }
+  return memo.fuente;
+}
+
+function lienzoDeContenido(capa, ancho, alto, escalaVista, enVivo) {
+  const memo = memoDeContenido(capa);
+  const firma = ContenidoCapa.firma(capa.contenido);
+  if (enVivo && memo.lienzo && memo.firma === firma && memo.ancho === ancho && memo.alto === alto) return memo.lienzo;
+  const lienzo = document.createElement('canvas');
+  lienzo.width = ancho; lienzo.height = alto;
+  ContenidoCapa.dibujar(capa.contenido, fuenteDeContenido(capa), lienzo, escalaVista);
+  if (enVivo) Object.assign(memo, { firma, ancho, alto, lienzo });
+  return lienzo;
+}
+
+// La caja del contenido en el lienzo de trabajo (para las manijas y el gesto).
+function cajaDeContenido(capa) {
+  return ContenidoCapa.caja(capa.contenido, fuenteDeContenido(capa), canvasTrabajo.width, canvasTrabajo.height,
+    canvasTrabajo.width / imagenActual.naturalWidth);
+}
+
+// Cuántos píxeles del lienzo mide un píxel de la pantalla (cambia con el zoom).
+function pixelesPorPuntoDePantalla() {
+  return canvasTrabajo.width / Math.max(1, canvasTrabajo.getBoundingClientRect().width);
 }
 
 function renderizarComposicion() {
@@ -1369,6 +1580,29 @@ function dibujarAyudasLienzo(ancho, alto) {
       ctx.globalCompositeOperation = 'source-over';
       ctxTrabajo.drawImage(c, 0, 0);
     }
+  }
+  const conContenido = capaActiva();
+  if (herramientaLienzo === 'transformar' && conContenido && conContenido.contenido) {
+    const f = pixelesPorPuntoDePantalla();
+    const k = cajaDeContenido(conContenido);
+    const m = ContenidoCapa.manijas(k, 28 * f);
+    ctxTrabajo.save();
+    ctxTrabajo.lineWidth = 1.5 * f;
+    ctxTrabajo.strokeStyle = '#fff';
+    ctxTrabajo.shadowColor = 'rgba(0,0,0,0.8)';
+    ctxTrabajo.shadowBlur = 3 * f;
+    ctxTrabajo.setLineDash([6 * f, 4 * f]);
+    ctxTrabajo.beginPath();
+    m.esquinas.forEach((p, i) => (i ? ctxTrabajo.lineTo(p.x, p.y) : ctxTrabajo.moveTo(p.x, p.y)));
+    ctxTrabajo.closePath();
+    ctxTrabajo.moveTo(m.bordeArriba.x, m.bordeArriba.y); ctxTrabajo.lineTo(m.girar.x, m.girar.y);
+    ctxTrabajo.stroke();
+    ctxTrabajo.setLineDash([]);
+    ctxTrabajo.fillStyle = '#fff';
+    const lado = 9 * f;
+    m.esquinas.forEach((p) => { ctxTrabajo.fillRect(p.x - lado / 2, p.y - lado / 2, lado, lado); });
+    ctxTrabajo.beginPath(); ctxTrabajo.arc(m.girar.x, m.girar.y, 6 * f, 0, Math.PI * 2); ctxTrabajo.fill();
+    ctxTrabajo.restore();
   }
   const { a, b, tipo } = capa.mascara.degradado;
   if (herramientaLienzo === 'degradado' && capa.mascara.base === 'degradado' && a && b) {
@@ -1740,6 +1974,7 @@ let herramientaLienzo = 'mover';
 function herramientaValida(capa, herramienta) {
   if (herramienta === 'gotero') return capa.mascara.base === 'color';
   if (herramienta === 'degradado') return capa.mascara.base === 'degradado';
+  if (herramienta === 'transformar') return !esGrupo(capa) && !!capa.contenido;
   return true;
 }
 
@@ -1777,6 +2012,8 @@ function actualizarControlesSeleccion() {
   zonaLienzo.classList.toggle('modo-pincel', herramientaLienzo === 'pincel');
   zonaLienzo.classList.toggle('modo-gotero', herramientaLienzo === 'gotero');
   zonaLienzo.classList.toggle('modo-degradado', herramientaLienzo === 'degradado');
+  zonaLienzo.classList.toggle('modo-transformar', herramientaLienzo === 'transformar');
+  actualizarPanelContenido();
   if (herramientaLienzo !== 'pincel') cursorPincelAvanzado.classList.remove('visible');
   // La línea del degradado aparece o desaparece con su herramienta.
   programarRenderizado();
@@ -1967,6 +2204,9 @@ let mascaraAntesDelTrazo = null; // { sumar, quitar } antes del trazo
 let modoPincelAvanzado = 'sumar'; // sumar | quitar | borrador — mismo tamaño/dureza para los tres
 let trazandoDegradado = false;
 let degradadoAntesDelArrastre = null; // para deshacerlo si era el comienzo de un pellizco
+// Mover / escalar / girar una capa con contenido: qué gesto es, dónde empezó
+// y cómo estaba antes (para deshacerlo si era el comienzo de un pellizco).
+let gestoContenido = null;
 
 document.querySelectorAll('#modosPincelAvanzado button').forEach((boton) => {
   boton.addEventListener('click', () => {
@@ -2129,6 +2369,24 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   // Con dos dedos en la pantalla el gesto es un pellizco, no un trazo.
   if (e.pointerType === 'touch' && punterosActivos.size >= 1) return;
 
+  if (herramientaLienzo === 'transformar') {
+    const capa = capaActiva();
+    if (!capa || !capa.contenido) return;
+    const p = coordenadasEnCanvasTrabajo(e);
+    const k = cajaDeContenido(capa);
+    const f = pixelesPorPuntoDePantalla();
+    const m = ContenidoCapa.manijas(k, 28 * f);
+    const cerca = (q) => Math.hypot(q.x - p.x, q.y - p.y) <= 14 * f;
+    const c = capa.contenido;
+    gestoContenido = {
+      tipo: cerca(m.girar) ? 'girar' : (m.esquinas.some(cerca) ? 'escalar' : 'mover'),
+      inicio: p, k,
+      antes: { centro: { ...c.centro }, escala: c.escala, rotacion: c.rotacion },
+    };
+    canvasTrabajo.setPointerCapture(e.pointerId);
+    return;
+  }
+
   if (herramientaLienzo === 'degradado') {
     degradadoAntesDelArrastre = { ...capa.mascara.degradado };
     const punto = puntoRelativo(e);
@@ -2162,6 +2420,26 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
     return;
   }
 
+  if (gestoContenido && capa && capa.contenido) {
+    const c = capa.contenido, g = gestoContenido, k = g.k;
+    const p = coordenadasEnCanvasTrabajo(e);
+    if (g.tipo === 'mover') {
+      c.centro = { x: g.antes.centro.x + (p.x - g.inicio.x) / canvasTrabajo.width, y: g.antes.centro.y + (p.y - g.inicio.y) / canvasTrabajo.height };
+    } else if (g.tipo === 'escalar') {
+      const d0 = Math.max(1, Math.hypot(g.inicio.x - k.cx, g.inicio.y - k.cy));
+      c.escala = Math.max(0.02, g.antes.escala * Math.hypot(p.x - k.cx, p.y - k.cy) / d0);
+    } else {
+      const a0 = Math.atan2(g.inicio.y - k.cy, g.inicio.x - k.cx);
+      let giro = g.antes.rotacion + (Math.atan2(p.y - k.cy, p.x - k.cx) - a0) * 180 / Math.PI;
+      giro = ((giro + 540) % 360) - 180;
+      // Con Mayúsculas, de a 15°.
+      c.rotacion = e.shiftKey ? Math.round(giro / 15) * 15 : Math.round(giro * 10) / 10;
+    }
+    actualizarPanelContenido();
+    programarRenderizado();
+    return;
+  }
+
   if (paneando && panInicio) {
     const dx = e.clientX - panInicio.x;
     const dy = e.clientY - panInicio.y;
@@ -2181,6 +2459,7 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
 });
 function terminarGestoLienzo() {
   pintando = false;
+  gestoContenido = null;
   trazandoDegradado = false;
   degradadoAntesDelArrastre = null;
   ultimoPuntoPincel = null;
@@ -2201,6 +2480,11 @@ function cancelarGestoDeUnDedo() {
       ctx.drawImage(antes, 0, 0);
     }
     marcarMascaraSucia(capa);
+    programarRenderizado();
+  }
+  const conContenido = capaActiva();
+  if (gestoContenido && conContenido && conContenido.contenido) {
+    Object.assign(conContenido.contenido, gestoContenido.antes);
     programarRenderizado();
   }
   if (capa && trazandoDegradado && degradadoAntesDelArrastre) {
@@ -2658,6 +2942,13 @@ function actualizarMiniaturaCapa(capa, elementoMiniatura) {
   if (!canvasMini) return;
   const lado = 32;
   canvasMini.width = lado; canvasMini.height = lado;
+  if (capa.contenido) {
+    canvasMini.classList.add('de-contenido');
+    const fuente = fuenteDeContenido(capa);
+    const f = Math.min(lado / fuente.width, lado / fuente.height);
+    canvasMini.getContext('2d').drawImage(fuente, (lado - fuente.width * f) / 2, (lado - fuente.height * f) / 2, fuente.width * f, fuente.height * f);
+    return;
+  }
   const ladoOrigen = Math.min(canvasOrigenTrabajo.width, canvasOrigenTrabajo.height);
   const ox = (canvasOrigenTrabajo.width - ladoOrigen) / 2;
   const oy = (canvasOrigenTrabajo.height - ladoOrigen) / 2;
@@ -2668,27 +2959,180 @@ function actualizarMiniaturaCapa(capa, elementoMiniatura) {
   canvasMini.getContext('2d').drawImage(base, 0, 0);
 }
 
+// ===== Texto e imágenes =====
+const elTextoCapa = document.getElementById('textoCapa');
+const elFamiliaTexto = document.getElementById('familiaTexto');
+const elColorTexto = document.getElementById('colorTexto');
+const elColorContorno = document.getElementById('colorContorno');
+const elGrosorContorno = document.getElementById('grosorContorno');
+const elPosX = document.getElementById('posX');
+const elPosY = document.getElementById('posY');
+const elTamanoContenido = document.getElementById('tamanoContenido');
+const elGiroContenido = document.getElementById('giroContenido');
+const botonMoverCapa = document.getElementById('botonMoverCapa');
+const entradaImagenCapa = document.getElementById('entradaImagenCapa');
+ContenidoCapa.FAMILIAS.forEach(([familia, nombre]) => {
+  const opcion = new Option(nombre, familia);
+  opcion.style.fontFamily = familia;
+  elFamiliaTexto.appendChild(opcion);
+});
+
+// Escribe en el panel lo de la capa elegida (o el aviso, si no tiene
+// contenido). No toca el campo que se está escribiendo.
+function actualizarPanelContenido() {
+  const capa = capaActiva();
+  const c = capa && capa.contenido;
+  document.getElementById('botonCopiarFoto').disabled = !imagenActual;
+  document.getElementById('avisoSinContenido').style.display = c ? 'none' : '';
+  document.getElementById('controlesContenido').style.display = c ? 'flex' : 'none';
+  if (!c) return;
+  const poner = (el, valor) => { if (document.activeElement !== el) el.value = valor; };
+  document.getElementById('controlesTexto').style.display = c.tipo === 'texto' ? 'flex' : 'none';
+  if (c.tipo === 'texto') {
+    poner(elTextoCapa, c.texto);
+    poner(elFamiliaTexto, c.familia);
+    poner(elColorTexto, c.color);
+    poner(elColorContorno, c.contorno);
+    poner(elGrosorContorno, c.grosorContorno);
+    document.getElementById('valorGrosorContorno').textContent = c.grosorContorno;
+    document.querySelectorAll('#estiloTexto button').forEach((b) => {
+      b.classList.toggle('activo', !!c[b.dataset.estilo]);
+      b.setAttribute('aria-pressed', !!c[b.dataset.estilo]);
+    });
+    document.querySelectorAll('#alineacionTexto button').forEach((b) => b.classList.toggle('activo', b.dataset.alineacion === c.alineacion));
+  }
+  poner(elPosX, Math.round(c.centro.x * 100)); document.getElementById('valorPosX').textContent = Math.round(c.centro.x * 100) + '%';
+  poner(elPosY, Math.round(c.centro.y * 100)); document.getElementById('valorPosY').textContent = Math.round(c.centro.y * 100) + '%';
+  poner(elTamanoContenido, Math.round(c.escala * 100)); document.getElementById('valorTamanoContenido').textContent = Math.round(c.escala * 100) + '%';
+  poner(elGiroContenido, Math.round(c.rotacion)); document.getElementById('valorGiro').textContent = Math.round(c.rotacion) + '°';
+  botonMoverCapa.classList.toggle('activo', herramientaLienzo === 'transformar');
+  botonMoverCapa.setAttribute('aria-pressed', herramientaLienzo === 'transformar');
+  document.getElementById('botonVoltearH').classList.toggle('activo', c.voltearH);
+  document.getElementById('botonVoltearV').classList.toggle('activo', c.voltearV);
+}
+
+// Cambia algo del contenido de la capa elegida. "aspecto": cambia cómo se ve
+// (no solo dónde está), así que también la miniatura.
+function cambiarContenido(fn, aspecto = false) {
+  const capa = capaActiva();
+  if (!capa || !capa.contenido) return;
+  fn(capa.contenido, capa);
+  actualizarPanelContenido();
+  if (aspecto) actualizarMiniaturaCapa(capa);
+  programarRenderizado();
+}
+
+// El nombre de una capa de texto sigue al texto, salvo que lo hayan cambiado a mano.
+function resumenDeTexto(texto) {
+  const linea = String(texto).split('\n')[0].trim();
+  return linea.length > 24 ? linea.slice(0, 23) + '…' : (linea || t('lbl-texto'));
+}
+elTextoCapa.addEventListener('input', () => cambiarContenido((c, capa) => {
+  c.texto = elTextoCapa.value;
+  if (capa.nombre === capa._nombreAuto) {
+    capa.nombre = capa._nombreAuto = resumenDeTexto(c.texto);
+    const campo = listaCapas.querySelector(`.contenedor-capa[data-id="${capa.id}"] .nombre-capa`);
+    if (campo) campo.value = capa.nombre;
+  }
+}, true));
+elFamiliaTexto.addEventListener('change', () => cambiarContenido((c) => { c.familia = elFamiliaTexto.value; }, true));
+elColorTexto.addEventListener('input', () => cambiarContenido((c) => { c.color = elColorTexto.value; }, true));
+elColorContorno.addEventListener('input', () => cambiarContenido((c) => { c.contorno = elColorContorno.value; }, true));
+elGrosorContorno.addEventListener('input', () => cambiarContenido((c) => { c.grosorContorno = Number(elGrosorContorno.value); }, true));
+document.querySelectorAll('#estiloTexto button').forEach((b) => b.addEventListener('click', () => cambiarContenido((c) => { c[b.dataset.estilo] = !c[b.dataset.estilo]; }, true)));
+document.querySelectorAll('#alineacionTexto button').forEach((b) => b.addEventListener('click', () => cambiarContenido((c) => { c.alineacion = b.dataset.alineacion; }, true)));
+elPosX.addEventListener('input', () => cambiarContenido((c) => { c.centro = { ...c.centro, x: Number(elPosX.value) / 100 }; }));
+elPosY.addEventListener('input', () => cambiarContenido((c) => { c.centro = { ...c.centro, y: Number(elPosY.value) / 100 }; }));
+elTamanoContenido.addEventListener('input', () => cambiarContenido((c) => { c.escala = Number(elTamanoContenido.value) / 100; }));
+elGiroContenido.addEventListener('input', () => cambiarContenido((c) => { c.rotacion = Number(elGiroContenido.value); }));
+document.getElementById('botonVoltearH').addEventListener('click', () => cambiarContenido((c) => { c.voltearH = !c.voltearH; }));
+document.getElementById('botonVoltearV').addEventListener('click', () => cambiarContenido((c) => { c.voltearV = !c.voltearV; }));
+document.getElementById('botonCentrarContenido').addEventListener('click', () => cambiarContenido((c) => { c.centro = { x: 0.5, y: 0.5 }; }));
+botonMoverCapa.addEventListener('click', () => {
+  if (!capaActiva() || !capaActiva().contenido) return;
+  herramientaLienzo = herramientaLienzo === 'transformar' ? 'mover' : 'transformar';
+  actualizarControlesSeleccion();
+});
+
+// Una capa con contenido nueva, arriba de lo elegido, con "Mover la capa"
+// ya elegida para ubicarla.
+function agregarCapaDeContenido(contenido, nombre) {
+  const capa = crearCapa(nombre);
+  capa.contenido = contenido;
+  capa._nombreAuto = nombre;
+  insertarItemNuevo(capa);
+  herramientaLienzo = 'transformar';
+  actualizarControlesSeleccion();
+  return capa;
+}
+
+document.getElementById('botonNuevoTexto').addEventListener('click', () => {
+  if (!imagenActual) return;
+  const texto = t('texto-por-defecto');
+  agregarCapaDeContenido(ContenidoCapa.textoNuevo(texto, Math.min(imagenActual.naturalWidth, imagenActual.naturalHeight)), resumenDeTexto(texto));
+  // En computadora, se puede escribir enseguida; en el celular, abrir el
+  // teclado de golpe taparía la imagen.
+  if (!consultaMovil.matches) { elTextoCapa.focus(); elTextoCapa.select(); }
+});
+
+document.getElementById('botonNuevaImagen').addEventListener('click', () => { if (imagenActual) entradaImagenCapa.click(); });
+entradaImagenCapa.addEventListener('change', async () => {
+  const archivo = entradaImagenCapa.files[0];
+  entradaImagenCapa.value = '';
+  if (!archivo || !imagenActual) return;
+  let imagen;
+  try { imagen = await cargarImagen(archivo); } catch (error) { alert(t('imagen-invalida')); return; }
+  const lienzo = crearCanvasConImagen(imagen, imagen.naturalWidth, imagen.naturalHeight);
+  const contenido = ContenidoCapa.imagenNueva(lienzo);
+  // Que arranque entera a la vista: a lo sumo la mitad de la foto.
+  contenido.escala = Math.min(1, imagenActual.naturalWidth * 0.5 / lienzo.width, imagenActual.naturalHeight * 0.5 / lienzo.height);
+  agregarCapaDeContenido(contenido, archivo.name.replace(/\.[^.]+$/, '').slice(0, 30));
+});
+
+// Copia de la foto original, recortada por la máscara de lo elegido y puesta
+// exactamente donde estaba (después se mueve).
+document.getElementById('botonCopiarFoto').addEventListener('click', () => {
+  if (!imagenActual) return;
+  const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
+  const copia = crearCanvasConImagen(imagenActual, ancho, alto);
+  const item = itemActivo();
+  const mascara = item ? generarMascaraCapa(item, ancho, alto, false) : null;
+  if (mascara) {
+    const ctx = copia.getContext('2d');
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(mascara, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  const recorte = ContenidoCapa.recortarATransparencia(copia);
+  if (!recorte) { alert(t('aviso-copia-vacia')); return; }
+  const contenido = ContenidoCapa.imagenNueva(recorte.lienzo);
+  contenido.centro = { x: (recorte.x + recorte.lienzo.width / 2) / ancho, y: (recorte.y + recorte.lienzo.height / 2) / alto };
+  agregarCapaDeContenido(contenido, t('nombre-copia'));
+});
+
 // ===== Agregar / eliminar capas =====
 // La capa nueva va justo arriba de lo elegido; si lo elegido es un grupo,
 // adentro de él (arriba de todo).
-botonNuevaCapa.addEventListener('click', () => {
-  const capa = crearCapa();
+function insertarItemNuevo(item) {
   const actual = itemActivo();
   if (esGrupo(actual)) {
     actual.plegado = false;
-    actual.hijos.push(capa);
+    actual.hijos.push(item);
   } else if (actual) {
     const u = ubicar(actual.id);
-    u.lista.splice(u.indice + 1, 0, capa);
+    u.lista.splice(u.indice + 1, 0, item);
   } else {
-    capas.push(capa);
+    capas.push(item);
   }
-  capaActivaId = capa.id;
+  capaActivaId = item.id;
   cambioDeEstructura();
-});
+}
+
+botonNuevaCapa.addEventListener('click', () => insertarItemNuevo(crearCapa()));
 
 // Suelta las cachés de un elemento (y de todo lo de adentro, si es un grupo).
 function olvidarItem(item) {
+  memoContenido.delete(item.id);
   cacheColorPorCapa.delete(item.id);
   cacheBorrososPorCapa.delete(item.id);
   memoMascaraPorCapa.delete(item.id);
@@ -2822,7 +3266,7 @@ botonRestablecerAvanzado.addEventListener('click', () => {
 function hayCambios() {
   const neutro = JSON.stringify(AJUSTES_NEUTROS);
   const todos = todosLosItems();
-  return todos.length > 1 || todos.some((c) => esGrupo(c) || !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
+  return todos.length > 1 || todos.some((c) => esGrupo(c) || !!c.contenido || !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
 }
 document.getElementById('botonCambiarImagen').addEventListener('click', () => {
   if (hayCambios() && !confirm(t('confirmar-cambiar'))) return;
@@ -2914,13 +3358,19 @@ function itemAProyecto(c) {
     pincelQuitar: canvasADataUrl(c.pincelQuitar),
   };
   if (esGrupo(c)) return { ...comun, tipo: 'grupo', plegado: c.plegado, hijos: c.hijos.map(itemAProyecto) };
-  return { ...comun, ajustes: c.ajustes };
+  const capa = { ...comun, ajustes: c.ajustes };
+  if (c.contenido) {
+    const { lienzo, _idLienzo, ...resto } = c.contenido;
+    capa.contenido = c.contenido.tipo === 'imagen' ? { ...resto, lienzo: lienzo.toDataURL('image/png') } : resto;
+    capa.nombreAuto = c._nombreAuto || null;
+  }
+  return capa;
 }
 
 botonGuardarProyecto.addEventListener('click', () => {
   if (!imagenActual) return;
   const proyecto = {
-    version: 3, // 2: máscara con base + pincel para sumar y quitar; 3: grupos (2026-10-04)
+    version: 4, // 2: máscara con base + pincel para sumar y quitar; 3: grupos; 4: texto e imágenes (2026-10-04)
     imagen: crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight).toDataURL(archivoActual.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.95),
     nombreArchivo: archivoActual.name,
     capaActivaId,
@@ -2980,7 +3430,17 @@ async function itemDeProyecto(c) {
   if (c.tipo === 'grupo') {
     return { ...comun, tipo: 'grupo', plegado: !!c.plegado, hijos: await Promise.all((c.hijos || []).map(itemDeProyecto)), _cache: { entrada: null, items: [] } };
   }
-  return { ...comun, ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes } };
+  const capa = { ...comun, ajustes: { ...AJUSTES_NEUTROS, ...c.ajustes } };
+  if (c.contenido && c.contenido.tipo === 'imagen') {
+    // La imagen de una capa va a su tamaño natural, no al de trabajo.
+    const img = await cargarDataUrlComoImagen(c.contenido.lienzo);
+    const { lienzo, ...resto } = c.contenido;
+    capa.contenido = { ...ContenidoCapa.imagenNueva(crearCanvasConImagen(img, img.naturalWidth, img.naturalHeight)), ...resto };
+  } else if (c.contenido && c.contenido.tipo === 'texto') {
+    capa.contenido = { ...ContenidoCapa.textoNuevo('', 100), ...c.contenido };
+  }
+  if (c.nombreAuto) capa._nombreAuto = c.nombreAuto;
+  return capa;
 }
 
 botonCargarProyecto.addEventListener('click', () => entradaProyecto.click());
