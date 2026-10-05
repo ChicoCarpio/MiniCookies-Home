@@ -890,6 +890,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const idCapa1 = W().capaActiva().id;
     clic('#botonAgrupar');
     afirmar(W().esGrupo(W().itemActivo()), 'Agrupar no dejó elegido el grupo');
+    afirmar(filaActiva().querySelector('select').value === 'paso', 'un grupo de capas de ajuste no nació en "Pasar a través"');
     afirmar(D().querySelector('[data-app-categoria="Luz"], .panel-ajustes .acordeon-contenido').inert, 'con un grupo elegido, los ajustes de capa no quedaron inactivos');
     h.agrupada = await leer();
     afirmar(cerca(h.agrupada[0], 6) && cerca(h.agrupada[1], 190), 'grupo Normal: ' + h.agrupada);
@@ -905,10 +906,12 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     h.mascara = await leer();
     afirmar(cerca(h.mascara[0], 6) && cerca(h.mascara[1], 220), 'máscara del grupo: ' + h.mascara);
     clic('#modosBaseMascara [data-base="toda"]');
-    ponerModo('multiply'); // el grupo (6, 190) multiplicado sobre (40, 220)
-    h.modo = await leer();
-    afirmar(cerca(h.modo[0], 1) && cerca(h.modo[1], 164), 'grupo en Multiplicar: ' + h.modo);
-    ponerModo('normal');
+    // Cualquier modo que no sea "Pasar a través" aísla el grupo: una capa de
+    // ajuste sola adentro ya no tiene nada que ajustar.
+    ponerModo('multiply');
+    h.aislado = await leer();
+    afirmar(cerca(h.aislado[0], 40) && cerca(h.aislado[1], 220), 'grupo aislado con solo un ajuste: ' + h.aislado);
+    ponerModo('paso');
 
     // Proyecto: el árbol se guarda y vuelve igual.
     const raiz = W().ubicar(W().itemActivo().id).lista;
@@ -1019,6 +1022,34 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     W().programarRenderizado();
     h.restaurada = await leer();
     afirmar(cerca(h.restaurada[1], 35), 'copia vuelta a su lugar: ' + h.restaurada);
+
+    // Agrupar la copia la aísla: un ajuste en Trama dentro del grupo aclara
+    // solo la copia (derecha 40 -> 74), no la foto (izquierda sigue en 40).
+    // En "Pasar a través" aclara las dos.
+    const modoCopia = D().querySelector('#listaCapas .fila-capa.activa').parentElement.querySelector('select');
+    modoCopia.value = 'normal'; modoCopia.dispatchEvent(new (W().Event)('change'));
+    clic('#botonAgrupar');
+    const filaGrupo = () => D().querySelector('#listaCapas .fila-capa.activa').parentElement;
+    afirmar(filaGrupo().querySelector('select').value === 'normal', 'el grupo de una capa de imagen no nació aislado');
+    const idGrupo = W().itemActivo().id;
+    clic('#botonNuevaCapa');
+    const ajuste = D().querySelector('#listaCapas .fila-capa.activa').parentElement.querySelector('select');
+    ajuste.value = 'screen'; ajuste.dispatchEvent(new (W().Event)('change'));
+    h.grupoAislado = await leer();
+    afirmar(cerca(h.grupoAislado[0], 40) && cerca(h.grupoAislado[1], 74), 'ajuste dentro del grupo aislado: ' + h.grupoAislado);
+    W().seleccionarItem(idGrupo);
+    filaGrupo().querySelector('select').value = 'paso'; filaGrupo().querySelector('select').dispatchEvent(new (W().Event)('change'));
+    h.grupoPaso = await leer();
+    afirmar(cerca(h.grupoPaso[0], 74) && cerca(h.grupoPaso[1], 74), 'el mismo grupo en Pasar a través: ' + h.grupoPaso);
+    // Se deshace para seguir con lo de abajo: fuera el ajuste y el grupo.
+    W().seleccionarItem(idGrupo); clic('#botonDesagrupar');
+    W().eliminarCapa(W().todosLosItems().find((i) => !i.contenido && !W().esGrupo(i) && i !== W().todosLosItems()[0]).id);
+    W().seleccionarItem(copia.id);
+    modoCopia.value = 'multiply';
+    const filaCopia = D().querySelector('#listaCapas .fila-capa.activa').parentElement.querySelector('select');
+    filaCopia.value = 'multiply'; filaCopia.dispatchEvent(new (W().Event)('change'));
+    h.vuelta = await leer();
+    afirmar(cerca(h.vuelta[1], 35), 'copia otra vez sola en Multiplicar: ' + h.vuelta);
 
     // Texto: aparece, cambia de color y crece con el tamaño.
     const contar = (cond) => { const d = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (cond(d[i], d[i + 1], d[i + 2])) n++; return n; };

@@ -256,6 +256,8 @@ window.i18nPagina = {
     'title-ojo': 'Mostrar/ocultar capa',
     'title-eliminar': 'Eliminar capa',
     'title-eliminar-grupo': 'Eliminar el grupo',
+    'fusion-paso': 'Pasar a través',
+    'title-fusion-grupo': 'Pasar a través: lo de adentro ajusta también la foto de abajo. Cualquier otro modo aísla el grupo: lo de adentro se ajusta solo entre sí (por ejemplo, ajustes que tocan solo un texto).',
     'titulo-contenido': 'Texto e imágenes',
     'lbl-agregar': 'Agregar una capa con',
     'nota-contenido': 'Estas capas tienen su propio contenido, que se mueve, se agranda y se gira. Los ajustes de luz, color, filtro y textura se aplican a ese contenido, no a la foto de abajo. "Copia de la foto" copia la foto original, pero solo lo que marca la máscara de la capa o el grupo elegido: pintá un objeto con el pincel y copialo para moverlo.',
@@ -421,6 +423,8 @@ window.i18nPagina = {
     'title-ojo': 'Show/hide layer',
     'title-eliminar': 'Delete layer',
     'title-eliminar-grupo': 'Delete the group',
+    'fusion-paso': 'Pass through',
+    'title-fusion-grupo': 'Pass through: what is inside also adjusts the photo below. Any other mode isolates the group: what is inside only adjusts itself (for example, settings that only touch a text).',
     'titulo-contenido': 'Text and images',
     'lbl-agregar': 'Add a layer with',
     'nota-contenido': 'These layers have their own content, which you can move, resize and rotate. Light, color, filter and texture settings apply to that content, not to the photo below. "Copy of the photo" copies the original photo, but only what the mask of the selected layer or group marks: paint over an object with the brush and copy it to move it.',
@@ -1223,7 +1227,11 @@ function crearGrupo(nombre) {
     nombre: nombre || t('grupo-numerado').replace('{n}', ++contadorNombres.grupo),
     visible: true,
     opacidad: 100,
-    modoFusion: 'normal',
+    // Como en Photoshop: "paso" (Pasar a través) = lo de adentro ve y ajusta
+    // también lo de abajo. Cualquier otro modo, incluido Normal, AÍSLA el
+    // grupo: lo de adentro se compone sobre transparente y recién después se
+    // funde con lo de abajo (así unas capas de ajuste tocan solo un texto).
+    modoFusion: 'paso',
     mascara: MascarasCapa.neutra(),
     pincelSumar: null,
     pincelQuitar: null,
@@ -1359,7 +1367,7 @@ const MODOS_FUSION = [
 // y la descarga.
 function fundirCapa(ctx, capa, capaFinal) {
   ctx.globalAlpha = capa.opacidad / 100;
-  ctx.globalCompositeOperation = capa.modoFusion && capa.modoFusion !== 'normal' ? capa.modoFusion : 'source-over';
+  ctx.globalCompositeOperation = capa.modoFusion && capa.modoFusion !== 'normal' && capa.modoFusion !== 'paso' ? capa.modoFusion : 'source-over';
   ctx.drawImage(capaFinal, 0, 0);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
@@ -1418,6 +1426,17 @@ function fundirConMascara(abajo, resultado, item, ancho, alto, enVivo) {
   return nuevo;
 }
 
+// Lienzo transparente de donde arranca un grupo aislado. Uno solo por tamaño
+// y nunca se dibuja encima: las cachés lo reconocen por identidad.
+let lienzoVacioCompartido = null;
+function lienzoVacio(ancho, alto) {
+  if (!lienzoVacioCompartido || lienzoVacioCompartido.width !== ancho || lienzoVacioCompartido.height !== alto) {
+    lienzoVacioCompartido = document.createElement('canvas');
+    lienzoVacioCompartido.width = ancho; lienzoVacioCompartido.height = alto;
+  }
+  return lienzoVacioCompartido;
+}
+
 // Compone una lista (la raíz o los hijos de un grupo) sobre "entrada" y
 // devuelve el resultado. "cache" solo en la vista previa en vivo; la
 // descarga a resolución completa pasa null y calcula todo de cero.
@@ -1443,12 +1462,19 @@ function componerItem(item, abajo, ancho, alto, escala, enVivo) {
   if (!item.visible || item.opacidad <= 0) return abajo;
 
   if (esGrupo(item)) {
-    // Lo de adentro se aplica sobre lo que hay debajo del grupo, y después
-    // el grupo entero se funde con su opacidad, su modo y su máscara.
     if (!item._cache) item._cache = { entrada: null, items: [] };
-    const resultado = componerLista(item.hijos, abajo, ancho, alto, escala, enVivo ? item._cache : null);
-    if (resultado === abajo) return abajo;
-    if (item.modoFusion === 'normal' && item.opacidad === 100 && MascarasCapa.esTodaLaImagen(item.mascara, item.pincelQuitar)) return resultado;
+    if (item.modoFusion === 'paso') {
+      // Pasar a través: lo de adentro se aplica sobre lo que hay debajo del
+      // grupo, y después el grupo entero se funde con su opacidad y su máscara.
+      const resultado = componerLista(item.hijos, abajo, ancho, alto, escala, enVivo ? item._cache : null);
+      if (resultado === abajo) return abajo;
+      if (item.opacidad === 100 && MascarasCapa.esTodaLaImagen(item.mascara, item.pincelQuitar)) return resultado;
+      return fundirConMascara(abajo, resultado, item, ancho, alto, enVivo);
+    }
+    // Aislado: lo de adentro solo se ve entre sí.
+    const vacio = lienzoVacio(ancho, alto);
+    const resultado = componerLista(item.hijos, vacio, ancho, alto, escala, enVivo ? item._cache : null);
+    if (resultado === vacio) return abajo;
     return fundirConMascara(abajo, resultado, item, ancho, alto, enVivo);
   }
 
@@ -2756,6 +2782,10 @@ function crearFilaItem(capa, nivel) {
     if (claveGrupo) { destino.label = t(claveGrupo); selectorFusion.appendChild(destino); }
     modos.forEach((modo) => destino.appendChild(new Option(t('fusion-' + modo), modo)));
   });
+  if (grupo) {
+    selectorFusion.insertBefore(new Option(t('fusion-paso'), 'paso'), selectorFusion.firstChild);
+    selectorFusion.title = t('title-fusion-grupo');
+  }
   selectorFusion.value = capa.modoFusion;
   selectorFusion.addEventListener('click', (e) => e.stopPropagation());
   selectorFusion.addEventListener('change', () => {
@@ -2856,6 +2886,8 @@ botonAgrupar.addEventListener('click', () => {
   const u = ubicar(capaActivaId);
   if (!u) return;
   const grupo = crearGrupo();
+  // Agrupar un texto o una imagen es para ajustarlo solo a él: nace aislado.
+  if (u.item.contenido) grupo.modoFusion = 'normal';
   u.lista.splice(u.indice, 1, grupo);
   grupo.hijos.push(u.item);
   capaActivaId = grupo.id;
@@ -3370,7 +3402,7 @@ function itemAProyecto(c) {
 botonGuardarProyecto.addEventListener('click', () => {
   if (!imagenActual) return;
   const proyecto = {
-    version: 4, // 2: máscara con base + pincel para sumar y quitar; 3: grupos; 4: texto e imágenes (2026-10-04)
+    version: 5, // 2: máscara con base + pincel para sumar y quitar; 3: grupos; 4: texto e imágenes; 5: grupos aislados (2026-10-04)
     imagen: crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight).toDataURL(archivoActual.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.95),
     nombreArchivo: archivoActual.name,
     capaActivaId,
@@ -3416,11 +3448,18 @@ function mascaraDeProyecto(c) {
   return m;
 }
 
+// Los proyectos guardados antes de los modos de fusión no lo traen; y hasta
+// la versión 4 los grupos no se aislaban: su "normal" era "pasar a través".
+let versionProyectoCargando = 0;
+function modoDeProyecto(c) {
+  if (c.tipo === 'grupo' && (c.modoFusion === 'paso' || (versionProyectoCargando < 5 && (!c.modoFusion || c.modoFusion === 'normal')))) return 'paso';
+  return MODOS_FUSION.some(([, modos]) => modos.includes(c.modoFusion)) ? c.modoFusion : 'normal';
+}
+
 async function itemDeProyecto(c) {
   const comun = {
     id: c.id, nombre: c.nombre, visible: c.visible !== false, opacidad: Number.isFinite(c.opacidad) ? c.opacidad : 100,
-    // Los proyectos guardados antes de los modos de fusión no lo traen.
-    modoFusion: MODOS_FUSION.some(([, modos]) => modos.includes(c.modoFusion)) ? c.modoFusion : 'normal',
+    modoFusion: modoDeProyecto(c),
     mascara: mascaraDeProyecto(c),
     // Versión 1: un solo lienzo de pincel, que solo podía sumar.
     pincelSumar: await lienzoDeDataUrl(c.pincelSumar || c.mascaraPincel),
@@ -3459,6 +3498,7 @@ entradaProyecto.addEventListener('change', async (e) => {
 
   prepararResolucionTrabajo();
 
+  versionProyectoCargando = Number(proyecto.version) || 1;
   capas = await Promise.all((proyecto.capas || []).map(itemDeProyecto));
   if (!cantidadDeCapas()) capas.push(crearCapa());
   capaActivaId = proyecto.capaActivaId && ubicar(proyecto.capaActivaId) ? proyecto.capaActivaId : capas[capas.length - 1].id;
