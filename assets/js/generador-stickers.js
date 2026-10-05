@@ -18,14 +18,11 @@
 // escondidas dentro de "Filtros". El grosor del borde sigue debajo del
 // canvas, en el panel del lienzo, porque se ajusta mirando el resultado.
 
-import { pipeline, env } from '../../vendor/@huggingface/transformers/4.3.0/dist/transformers.min.js?v=2';
-import { cargarModeloIA } from './ia-dispositivo.js';
+// El modelo de recorte y su carga son compartidos con el Editor avanzado
+// (recorte-sujeto.js); las islas, con sus máscaras (mascaras-capa.js).
+import { cargarRecortador } from './recorte-sujeto.js';
 
 const tt = (clave, porDefecto) => (window.t ? window.t(clave) : porDefecto);
-
-env.allowLocalModels = false;
-
-const MODELO_ID = 'xrds/isnet-general-onnx-int8';
 const LADO_MAXIMO = 512; // tamaño estándar de un sticker (WhatsApp/Telegram)
 
 export function iniciarGeneradorStickers() {
@@ -123,9 +120,8 @@ export function iniciarGeneradorStickers() {
     mensajeError.style.display = 'none';
   }
 
-  // Carga (o reusa) el segmentador. Igual que en dictado-voz.js: si el
-  // navegador tiene WebGPU se intenta ahí primero (más rápido, más memoria
-  // disponible) y si falla se reintenta por WASM (CPU).
+  // Carga (o reusa) el segmentador (recorte-sujeto.js: placa de video si hay
+  // una de verdad, si no CPU), mostrando el avance de la descarga.
   function cargarSegmentador() {
     if (segmentador) return Promise.resolve(segmentador);
     if (cargaPromesa) return cargaPromesa;
@@ -134,26 +130,11 @@ export function iniciarGeneradorStickers() {
     textoProgreso.textContent = tt('estado-preparando', 'Preparando el modelo...');
     barraProgreso.style.width = '0%';
 
-    const archivos = {};
-    const progress_callback = (info) => {
-      if (info.status === 'progress' && info.file) {
-        archivos[info.file] = info;
-        const valores = Object.values(archivos);
-        const cargado = valores.reduce((a, f) => a + (f.loaded || 0), 0);
-        const total = valores.reduce((a, f) => a + (f.total || 0), 0);
-        const porcentaje = total ? Math.round((cargado / total) * 100) : 0;
-        barraProgreso.style.width = porcentaje + '%';
-        textoProgreso.textContent = tt('estado-descargando',
-          'Descargando el modelo... {p}% (solo esta vez, después queda guardado)').replace('{p}', porcentaje);
-      }
-    };
-
-    // Placa de video si hay una de verdad, si no CPU (ver ia-dispositivo.js).
-    const promesa = cargarModeloIA((device) => pipeline('background-removal', MODELO_ID, {
-      dtype: 'q8',
-      device,
-      progress_callback,
-    }));
+    const promesa = cargarRecortador((porcentaje) => {
+      barraProgreso.style.width = porcentaje + '%';
+      textoProgreso.textContent = tt('estado-descargando',
+        'Descargando el modelo... {p}% (solo esta vez, después queda guardado)').replace('{p}', porcentaje);
+    });
 
     cargaPromesa = promesa.then((nuevo) => {
       segmentador = nuevo;
@@ -196,32 +177,7 @@ export function iniciarGeneradorStickers() {
     const imageData = ctx.getImageData(0, 0, width, height);
     const datos = imageData.data;
 
-    const UMBRAL_ALFA = 20;
-    const visitado = new Uint8Array(total);
-    const etiquetas = new Int32Array(total).fill(-1);
-    const tamanos = [];
-    const pila = new Int32Array(total);
-
-    for (let inicio = 0; inicio < total; inicio++) {
-      if (visitado[inicio] || datos[inicio * 4 + 3] < UMBRAL_ALFA) { visitado[inicio] = 1; continue; }
-      const etiqueta = tamanos.length;
-      let tope = 0;
-      pila[tope++] = inicio;
-      visitado[inicio] = 1;
-      let tamano = 0;
-      while (tope > 0) {
-        const p = pila[--tope];
-        etiquetas[p] = etiqueta;
-        tamano++;
-        const x = p % width;
-        const y = (p / width) | 0;
-        if (x > 0 && !visitado[p - 1] && datos[(p - 1) * 4 + 3] >= UMBRAL_ALFA) { visitado[p - 1] = 1; pila[tope++] = p - 1; }
-        if (x < width - 1 && !visitado[p + 1] && datos[(p + 1) * 4 + 3] >= UMBRAL_ALFA) { visitado[p + 1] = 1; pila[tope++] = p + 1; }
-        if (y > 0 && !visitado[p - width] && datos[(p - width) * 4 + 3] >= UMBRAL_ALFA) { visitado[p - width] = 1; pila[tope++] = p - width; }
-        if (y < height - 1 && !visitado[p + width] && datos[(p + width) * 4 + 3] >= UMBRAL_ALFA) { visitado[p + width] = 1; pila[tope++] = p + width; }
-      }
-      tamanos.push(tamano);
-    }
+    const { etiquetas, tamanos } = MascarasCapa.islas(datos, width, height, 20);
 
     if (tamanos.length === 0) return;
     const tamanoMaximo = Math.max(...tamanos);

@@ -1156,6 +1156,91 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     });
   }
 
+  // Máscaras de primer plano / fondo. Sin internet no se puede bajar el
+  // modelo, así que el recorte de la IA se reemplaza por uno falso: dos
+  // cuadrados separados (dos "objetos") sobre una foto gris 128. La capa en
+  // Multiplicar baja a 64 lo que la máscara marca. Se comprueba aparte que el
+  // módulo real carga desde la página.
+  await prueba('editor avanzado: primer plano, fondo y elegir objeto', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const mod = await W().eval("import(new URL('recorte-sujeto.js', document.querySelector('script[src*=mascaras-capa]').src).href)");
+    afirmar(typeof mod.recortarSujeto === 'function', 'el módulo recorte-sujeto.js no cargó desde la página');
+    const base = D().createElement('canvas'); base.width = 200; base.height = 100;
+    base.getContext('2d').fillStyle = 'rgb(128,128,128)'; base.getContext('2d').fillRect(0, 0, 200, 100);
+    let llamadas = 0;
+    W().calcularSujeto = async () => {
+      llamadas++;
+      const s = D().createElement('canvas'); s.width = 200; s.height = 100;
+      const cs = s.getContext('2d'); cs.fillStyle = '#fff';
+      cs.fillRect(20, 30, 40, 40); cs.fillRect(140, 30, 40, 40);
+      return s;
+    };
+    const png = await new Promise((r) => base.toBlob(r, 'image/png'));
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([png], 'gris.png', { type: 'image/png' })]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => D().querySelector('#listaCapas .fila-opacidad select'), 15000), 'el editor no cargó la imagen');
+    const modo = D().querySelector('#listaCapas .fila-opacidad select'); modo.value = 'multiply'; modo.dispatchEvent(new (W().Event)('change'));
+    const lienzo = D().getElementById('canvasTrabajo');
+    const px = (cv, x) => cv.getContext('2d').getImageData(Math.round(x * cv.width / 200), Math.round(cv.height / 2), 1, 1).data[0];
+    // izquierda (cuadrado 1), medio (nada), derecha (cuadrado 2)
+    const leer = async () => { await esperar(300); return [px(lienzo, 40), px(lienzo, 100), px(lienzo, 160)]; };
+    const cerca = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= 2);
+    const clic = (sel) => D().querySelector(sel).click();
+    const h = {};
+
+    clic('#modosBaseMascara [data-base="sujeto"]');
+    afirmar(D().querySelector('#herramientasLienzo [data-herramienta="objeto"]').classList.contains('activo'), 'elegir Primer plano no dejó elegida la herramienta "Elegir objeto"');
+    afirmar(await hasta(() => W().sujetoListo(), 5000), 'el primer plano no se calculó');
+    h.primerPlano = await leer();
+    afirmar(cerca(h.primerPlano, [64, 128, 64]), 'primer plano: ' + h.primerPlano);
+    clic('#modosBaseMascara [data-base="fondo"]');
+    h.fondo = await leer();
+    afirmar(cerca(h.fondo, [128, 64, 128]), 'fondo: ' + h.fondo);
+    clic('#modosBaseMascara [data-base="sujeto"]');
+
+    // Elegir objeto: tocar el cuadrado derecho.
+    const tocar = (x) => {
+      const r = lienzo.getBoundingClientRect();
+      lienzo.dispatchEvent(new (W().MouseEvent)('click', { bubbles: true, clientX: r.left + (x / 200) * r.width, clientY: r.top + r.height / 2 }));
+    };
+    tocar(160);
+    h.objeto = await leer();
+    afirmar(cerca(h.objeto, [128, 128, 64]), 'solo el objeto derecho: ' + h.objeto);
+    tocar(100); // en el medio no hay nada: no cambia la elección y avisa
+    h.nada = await leer();
+    afirmar(cerca(h.nada, [128, 128, 64]) && /ningún objeto/.test(D().getElementById('estadoSujeto').textContent), 'tocar donde no hay objeto: ' + h.nada + ' / ' + D().getElementById('estadoSujeto').textContent);
+    clic('#modosBaseMascara [data-base="fondo"]');
+    h.fondoMenosObjeto = await leer();
+    afirmar(cerca(h.fondoMenosObjeto, [64, 64, 128]), 'fondo menos el objeto elegido: ' + h.fondoMenosObjeto);
+    clic('#modosBaseMascara [data-base="sujeto"]');
+
+    // La descarga también.
+    D().getElementById('botonDescargarAvanzado').click();
+    const enlace = D().getElementById('enlaceDescarga');
+    afirmar(await hasta(() => enlace.href.startsWith('blob:'), 15000), 'la descarga no se generó');
+    const img = new (W().Image)(); img.src = enlace.href; await img.decode();
+    const cd = D().createElement('canvas'); cd.width = img.width; cd.height = img.height;
+    cd.getContext('2d').drawImage(img, 0, 0);
+    h.descarga = [px(cd, 40), px(cd, 100), px(cd, 160)];
+    afirmar(cerca(h.descarga, [128, 128, 64]), 'descarga con el objeto elegido: ' + h.descarga);
+
+    // Copia de la foto con el objeto elegido: un recorte del tamaño del cuadrado.
+    clic('#botonCopiarFoto');
+    const copia = W().capaActiva();
+    afirmar(copia.contenido && copia.contenido.lienzo.width === 40 && copia.contenido.lienzo.height === 40, 'la copia del objeto no mide 40x40: ' + (copia.contenido && copia.contenido.lienzo.width));
+
+    clic('#botonTodoSujeto');
+    afirmar(llamadas === 1, 'el primer plano se calculó ' + llamadas + ' veces (tiene que ser una por imagen)');
+
+    // El generador de stickers comparte las islas: tiene que cargar el módulo.
+    await abrir('/herramientas/generador-stickers.html'); await esperar(300);
+    afirmar(W().MascarasCapa && typeof W().MascarasCapa.islas === 'function', 'el generador de stickers no cargó mascaras-capa.js');
+    const islas = W().MascarasCapa.islas(new Uint8ClampedArray([0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 255]), 3, 1, 20);
+    afirmar(islas.tamanos.length === 2 && islas.etiquetas[1] === -1, 'islas: ' + JSON.stringify(islas.tamanos));
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

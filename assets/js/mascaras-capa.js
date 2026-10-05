@@ -3,7 +3,9 @@
 //
 // Una capa tiene UNA máscara, como en Photoshop, armada en tres pasos:
 //   1. Una base: toda la imagen, nada, un degradado (lineal o radial), un
-//      color o un rango de luz (sombras, medios, luces).
+//      color, un rango de luz (sombras, medios, luces), o el primer plano o
+//      el fondo que separa la IA (recorte-sujeto.js) —todo el sujeto, o uno
+//      solo de sus objetos sueltos ("islas"), elegido tocándolo—.
 //   2. El pincel encima: lo pintado en "sumar" se agrega a la base y lo
 //      pintado en "quitar" se le resta. Son dos lienzos (alfa = cuánto), así
 //      el pincel combina con cualquier base en vez de reemplazarla.
@@ -21,7 +23,7 @@
 window.MascarasCapa = (function () {
   'use strict';
 
-  const BASES = ['toda', 'nada', 'degradado', 'color', 'luz'];
+  const BASES = ['toda', 'nada', 'degradado', 'color', 'luz', 'sujeto', 'fondo'];
   // Rangos rápidos de "Luz", en 0..100 de luminosidad.
   const RANGOS_LUZ = { sombras: [0, 35], medios: [35, 65], luces: [65, 100] };
 
@@ -33,6 +35,7 @@ window.MascarasCapa = (function () {
       color: null, // {r,g,b}
       tolerancia: 30,
       luz: { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 },
+      objeto: null, // {x,y} en 0..1: la isla del sujeto que contiene ese punto (null = todo el sujeto)
     };
   }
 
@@ -47,7 +50,82 @@ window.MascarasCapa = (function () {
       color: m.color || null,
       tolerancia: Number.isFinite(m.tolerancia) ? m.tolerancia : n.tolerancia,
       luz: { ...n.luz, ...(m.luz || {}) },
+      objeto: m.objeto && Number.isFinite(m.objeto.x) && Number.isFinite(m.objeto.y) ? { x: m.objeto.x, y: m.objeto.y } : null,
     };
+  }
+
+  // Islas: grupos de píxeles conectados (4 vecinos) con alfa >= umbral. Para
+  // cada píxel, el número de su isla (-1 si no es de ninguna), y el tamaño de
+  // cada isla. La usan la limpieza de manchas del generador de stickers y la
+  // elección de un objeto del sujeto.
+  function islas(datos, ancho, alto, umbral) {
+    const total = ancho * alto;
+    const visitado = new Uint8Array(total);
+    const etiquetas = new Int32Array(total).fill(-1);
+    const tamanos = [];
+    const pila = new Int32Array(total);
+    for (let inicio = 0; inicio < total; inicio++) {
+      if (visitado[inicio] || datos[inicio * 4 + 3] < umbral) { visitado[inicio] = 1; continue; }
+      const etiqueta = tamanos.length;
+      let tope = 0;
+      pila[tope++] = inicio;
+      visitado[inicio] = 1;
+      let tamano = 0;
+      while (tope > 0) {
+        const p = pila[--tope];
+        etiquetas[p] = etiqueta;
+        tamano++;
+        const x = p % ancho;
+        const y = (p / ancho) | 0;
+        if (x > 0 && !visitado[p - 1] && datos[(p - 1) * 4 + 3] >= umbral) { visitado[p - 1] = 1; pila[tope++] = p - 1; }
+        if (x < ancho - 1 && !visitado[p + 1] && datos[(p + 1) * 4 + 3] >= umbral) { visitado[p + 1] = 1; pila[tope++] = p + 1; }
+        if (y > 0 && !visitado[p - ancho] && datos[(p - ancho) * 4 + 3] >= umbral) { visitado[p - ancho] = 1; pila[tope++] = p - ancho; }
+        if (y < alto - 1 && !visitado[p + ancho] && datos[(p + ancho) * 4 + 3] >= umbral) { visitado[p + ancho] = 1; pila[tope++] = p + ancho; }
+      }
+      tamanos.push(tamano);
+    }
+    return { etiquetas, tamanos };
+  }
+
+  // Umbral para decidir de qué isla es un píxel: el borde suave del recorte
+  // (alfa bajo) se suma a la isla que toca, así el objeto elegido no queda
+  // con el borde cortado a tijera.
+  const UMBRAL_ISLA = 20;
+
+  // El sujeto a ancho x alto; si hay un objeto elegido, solo la isla que lo
+  // contiene (más su borde suave). null si el punto no cae en ninguna.
+  function sujetoAlTamano(sujeto, objeto, ancho, alto, destino) {
+    const ctx = destino.getContext('2d');
+    ctx.drawImage(sujeto, 0, 0, ancho, alto);
+    if (!objeto) return destino;
+    const datos = ctx.getImageData(0, 0, ancho, alto);
+    const d = datos.data;
+    const { etiquetas } = islas(d, ancho, alto, UMBRAL_ISLA);
+    const px = Math.min(ancho - 1, Math.max(0, Math.round(objeto.x * (ancho - 1))));
+    const py = Math.min(alto - 1, Math.max(0, Math.round(objeto.y * (alto - 1))));
+    const elegida = etiquetas[py * ancho + px];
+    // Fuera de cualquier isla: no queda nada (quien llama avisa).
+    for (let p = 0, i = 3; p < etiquetas.length; p++, i += 4) {
+      if (elegida < 0 || etiquetas[p] !== elegida) {
+        // El borde suave (alfa < umbral) se queda si toca la isla elegida.
+        const x = p % ancho;
+        const vecinaElegida = elegida >= 0 && d[i] > 0 && (
+          (x > 0 && etiquetas[p - 1] === elegida) || (x < ancho - 1 && etiquetas[p + 1] === elegida)
+          || (p >= ancho && etiquetas[p - ancho] === elegida) || (p + ancho < etiquetas.length && etiquetas[p + ancho] === elegida));
+        if (!vecinaElegida || etiquetas[p] >= 0) d[i] = 0;
+      }
+    }
+    ctx.putImageData(datos, 0, 0);
+    return destino;
+  }
+
+  // ¿El punto (0..1) cae sobre el sujeto? Para avisar si se tocó el fondo.
+  function hayObjetoEn(sujeto, x, y) {
+    const c = document.createElement('canvas');
+    c.width = 1; c.height = 1;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(sujeto, Math.round(x * (sujeto.width - 1)), Math.round(y * (sujeto.height - 1)), 1, 1, 0, 0, 1, 1);
+    return ctx.getImageData(0, 0, 1, 1).data[3] >= UMBRAL_ISLA;
   }
 
   function rgbAHsl(r, g, b) {
@@ -153,13 +231,39 @@ window.MascarasCapa = (function () {
     return m.base === 'toda' && !m.invertir && !quitar;
   }
 
+  // Base de primer plano o fondo, cacheada en memo (el objeto elegido
+  // recorre la imagen para separar las islas).
+  function baseDeSujeto(m, sujeto, ancho, alto, memo) {
+    const clave = JSON.stringify([m.base, m.objeto]);
+    if (memo && memo.sujeto && memo.sujetoClave === clave && memo.sujetoFuente === sujeto
+      && memo.sujeto.width === ancho && memo.sujeto.height === alto) return memo.sujeto;
+    const destino = lienzo(ancho, alto, memo ? memo.sujeto : null);
+    if (m.base === 'sujeto') {
+      sujetoAlTamano(sujeto, m.objeto, ancho, alto, destino);
+    } else {
+      // Fondo: todo menos el sujeto (o menos el objeto elegido).
+      const solo = sujetoAlTamano(sujeto, m.objeto, ancho, alto, lienzo(ancho, alto, null));
+      const ctx = destino.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, ancho, alto);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.drawImage(solo, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    if (memo) { memo.sujeto = destino; memo.sujetoClave = clave; memo.sujetoFuente = sujeto; }
+    return destino;
+  }
+
   // m: la máscara de la capa. origen: la imagen original (para color y luz).
   // sumar/quitar: lienzos del pincel, o null si no se pintó nada.
-  function crear(m, origen, sumar, quitar, ancho, alto, memo = null) {
+  // sujeto: el recorte de la IA (para primer plano y fondo), o null si
+  // todavía no está: mientras tanto esas bases no marcan nada.
+  function crear(m, origen, sumar, quitar, ancho, alto, memo = null, sujeto = null) {
     m = normalizar(m);
     if (esTodaLaImagen(m, quitar)) return null;
     // Color sin color elegido todavía: como "toda" (igual que antes).
-    const base = m.base === 'color' && !m.color ? 'toda' : m.base;
+    let base = m.base === 'color' && !m.color ? 'toda' : m.base;
+    if ((base === 'sujeto' || base === 'fondo') && !sujeto) base = 'nada';
 
     const final = lienzo(ancho, alto, memo ? memo.final : null);
     if (memo) memo.final = final;
@@ -167,6 +271,7 @@ window.MascarasCapa = (function () {
     if (base === 'toda') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ancho, alto); }
     else if (base === 'degradado') dibujarDegradado(ctx, m.degradado, ancho, alto);
     else if (base === 'color' || base === 'luz') ctx.drawImage(basePorPixel({ ...m, base }, origen, ancho, alto, memo), 0, 0);
+    else if (base === 'sujeto' || base === 'fondo') ctx.drawImage(baseDeSujeto(m, sujeto, ancho, alto, memo), 0, 0);
     // 'nada': queda vacía; solo cuenta lo pintado.
 
     if (sumar && base !== 'toda') ctx.drawImage(sumar, 0, 0, ancho, alto);
@@ -188,5 +293,5 @@ window.MascarasCapa = (function () {
     return invertida;
   }
 
-  return { BASES, RANGOS_LUZ, neutra, normalizar, crear, esTodaLaImagen };
+  return { BASES, RANGOS_LUZ, neutra, normalizar, crear, esTodaLaImagen, islas, hayObjetoEn };
 })();

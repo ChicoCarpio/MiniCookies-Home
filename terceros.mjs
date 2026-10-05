@@ -28,7 +28,7 @@ const PROPIO = /(^|\.)minicookies\.net$/;
 export const TERCEROS = {
   'pagead2.googlesyndication.com': { menciona: 'AdSense', motivo: 'etiqueta de Google AdSense (la inyecta build.mjs)' },
   'api.web3forms.com': { menciona: 'Web3Forms', motivo: 'envío del formulario de contacto' },
-  'huggingface.co': { menciona: 'huggingface.co', motivo: 'modelos de IA que baja transformers.js (dictado, stickers)', interno: 'vendor/@huggingface/transformers' },
+  'huggingface.co': { menciona: 'huggingface.co', motivo: 'modelos de IA que baja transformers.js (dictado, stickers, máscaras de primer plano/fondo del Editor avanzado)', interno: 'vendor/@huggingface/transformers' },
   'cdn.jsdelivr.net': { menciona: 'cdn.jsdelivr.net', motivo: 'onnxruntime-web, que baja transformers.js', interno: 'vendor/@huggingface/transformers' },
   // No está en el código: Cloudflare inyecta el script de Web Analytics al
   // servir cada página (decisión del usuario, 2026-10-02: se conserva).

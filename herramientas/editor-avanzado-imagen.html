@@ -154,6 +154,9 @@
   #cursorPincelAvanzado.visible { display: block; }
   .zona-lienzo.modo-gotero #canvasTrabajo, .zona-lienzo.modo-degradado #canvasTrabajo { cursor: crosshair; }
   .zona-lienzo.modo-transformar #canvasTrabajo { cursor: move; }
+  .zona-lienzo.modo-objeto #canvasTrabajo { cursor: pointer; }
+  #controlesSujeto { margin-top: 8px; }
+  #botonTodoSujeto:disabled { opacity: 0.4; cursor: default; }
   /* Texto e imágenes */
   .campo-contenido { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; }
   .campo-contenido textarea, .campo-contenido select { width: 100%; box-sizing: border-box; font: inherit; font-size: 0.85rem; }
@@ -204,7 +207,18 @@ window.i18nPagina = {
     'herr-gotero': '💧 Elegir color',
     'herr-degradado': '↘ Trazar degradado',
     'lbl-base': 'Base de la máscara',
-    'nota-mascara': 'La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original.',
+    'nota-mascara': 'La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original. Primer plano y Fondo los separa un modelo de IA que se descarga la primera vez (unos 42 MB) y después queda guardado.',
+    'base-sujeto': 'Primer plano',
+    'base-fondo': 'Fondo',
+    'herr-objeto': '👆 Elegir objeto',
+    'ayuda-objeto': 'Con "Elegir objeto", tocá uno para quedarte solo con él.',
+    'boton-todo-sujeto': 'Todo el primer plano',
+    'sujeto-preparando': 'Buscando el primer plano…',
+    'sujeto-descargando': 'Descargando el modelo de IA… {p}% (solo la primera vez, después queda guardado)',
+    'sujeto-listo-todo': 'Primer plano: todo.',
+    'sujeto-listo-objeto': 'Primer plano: solo el objeto elegido.',
+    'sujeto-sin-objeto': 'Ahí no hay ningún objeto del primer plano: tocá uno.',
+    'sujeto-error': 'No se pudo separar el primer plano: ',
     'sel-toda': 'Toda la imagen',
     'base-nada': 'Nada',
     'base-degradado': 'Degradado',
@@ -377,7 +391,18 @@ window.i18nPagina = {
     'herr-gotero': '💧 Pick color',
     'herr-degradado': '↘ Draw gradient',
     'lbl-base': 'Mask base',
-    'nota-mascara': 'The base decides where the layer applies. What you paint with the brush is added to (or subtracted from) that base, and "Invert" flips the result. Color and light are measured on the original image.',
+    'nota-mascara': 'The base decides where the layer applies. What you paint with the brush is added to (or subtracted from) that base, and "Invert" flips the result. Color and light are measured on the original image. Foreground and Background are separated by an AI model that downloads the first time (about 42 MB) and is then kept.',
+    'base-sujeto': 'Foreground',
+    'base-fondo': 'Background',
+    'herr-objeto': '👆 Pick object',
+    'ayuda-objeto': 'With "Pick object", tap one to keep only that one.',
+    'boton-todo-sujeto': 'Whole foreground',
+    'sujeto-preparando': 'Finding the foreground…',
+    'sujeto-descargando': 'Downloading the AI model… {p}% (only the first time, then it is kept)',
+    'sujeto-listo-todo': 'Foreground: all of it.',
+    'sujeto-listo-objeto': 'Foreground: only the picked object.',
+    'sujeto-sin-objeto': 'There is no foreground object there: tap one.',
+    'sujeto-error': 'The foreground could not be separated: ',
     'sel-toda': 'The whole image',
     'base-nada': 'Nothing',
     'base-degradado': 'Gradient',
@@ -602,6 +627,7 @@ window.i18nPagina = {
                 <button type="button" data-herramienta="gotero" data-i18n="herr-gotero">💧 Elegir color</button>
                 <button type="button" data-herramienta="degradado" data-i18n="herr-degradado">↘ Trazar degradado</button>
                 <button type="button" data-herramienta="transformar" data-i18n="herr-transformar-corto">✥ Mover la capa</button>
+                <button type="button" data-herramienta="objeto" data-i18n="herr-objeto">👆 Elegir objeto</button>
               </div>
 
               <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
@@ -634,6 +660,14 @@ window.i18nPagina = {
                 <button type="button" data-base="degradado" data-i18n="base-degradado">Degradado</button>
                 <button type="button" data-base="color" data-i18n="sel-color">Color</button>
                 <button type="button" data-base="luz" data-i18n="base-luz">Luz</button>
+                <button type="button" data-base="sujeto" data-i18n="base-sujeto">Primer plano</button>
+                <button type="button" data-base="fondo" data-i18n="base-fondo">Fondo</button>
+              </div>
+
+              <div id="controlesSujeto" class="controles controles-apilados" style="display:none;">
+                <span class="nota-lateral" id="estadoSujeto" role="status" aria-live="polite"></span>
+                <span class="nota-lateral" data-i18n="ayuda-objeto">Con "Elegir objeto", tocá uno para quedarte solo con él.</span>
+                <button type="button" class="boton-capa-accion" id="botonTodoSujeto" data-i18n="boton-todo-sujeto">Todo el primer plano</button>
               </div>
 
               <div id="controlesDegradado" class="controles controles-apilados" style="display:none;">
@@ -1382,7 +1416,61 @@ function generarMascaraCapa(capa, ancho, alto, conMemo = false) {
     memo = memoMascaraPorCapa.get(capa.id);
     if (!memo) { memo = {}; memoMascaraPorCapa.set(capa.id, memo); }
   }
-  return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo);
+  const base = capa.mascara.base;
+  const sujeto = base === 'sujeto' || base === 'fondo' ? sujetoListo() : null;
+  if ((base === 'sujeto' || base === 'fondo') && !sujeto) pedirSujeto();
+  return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo, sujeto);
+}
+
+// ===== Primer plano / fondo (IA, assets/js/recorte-sujeto.js) =====
+// Uno por imagen, no por capa: se calcula la primera vez que una máscara lo
+// necesita, a la resolución de la foto original.
+let sujetoIA = null; // { imagen, lienzo }
+let sujetoPromesa = null;
+function sujetoListo() { return sujetoIA && sujetoIA.imagen === imagenActual ? sujetoIA.lienzo : null; }
+
+function mostrarEstadoSujeto(texto) {
+  document.getElementById('estadoSujeto').textContent = texto;
+}
+
+// El módulo se carga recién cuando hace falta (es un módulo ES, y trae
+// transformers.js). La ruta sale del <script> de mascaras-capa.js, que es la
+// misma carpeta, así sirve igual bajo /en/.
+function calcularSujeto(url, alProgresar) {
+  const ruta = new URL('recorte-sujeto.js', document.querySelector('script[src*="mascaras-capa.js"]').src).href;
+  return import(ruta).then((modulo) => modulo.recortarSujeto(url, alProgresar));
+}
+
+function pedirSujeto() {
+  if (!imagenActual || !archivoActual || sujetoListo()) return;
+  if (sujetoPromesa && sujetoPromesa.imagen === imagenActual) return;
+  const imagen = imagenActual;
+  const url = URL.createObjectURL(archivoActual);
+  mostrarEstadoSujeto(t('sujeto-preparando'));
+  const promesa = Promise.resolve()
+    .then(() => calcularSujeto(url, (p) => mostrarEstadoSujeto(t('sujeto-descargando').replace('{p}', p))))
+    .then((lienzo) => {
+      if (imagenActual !== imagen) return;
+      sujetoIA = { imagen, lienzo };
+      reiniciarComposicion();
+      actualizarControlesSeleccion();
+    })
+    .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
+    .finally(() => {
+      URL.revokeObjectURL(url);
+      if (sujetoPromesa === promesa) sujetoPromesa = null;
+    });
+  promesa.imagen = imagen;
+  sujetoPromesa = promesa;
+}
+
+// Algo que las firmas no ven cambió (el primer plano llegó): se rehace la
+// composición entera, con sus máscaras.
+function reiniciarComposicion() {
+  cacheRaiz.entrada = null;
+  recorrerItems((item) => { if (esGrupo(item)) item._cache = { entrada: null, items: [] }; });
+  memoMascaraPorCapa.clear();
+  programarRenderizado();
 }
 
 // ===== Modos de fusión =====
@@ -2042,6 +2130,7 @@ function herramientaValida(capa, herramienta) {
   if (herramienta === 'gotero') return capa.mascara.base === 'color';
   if (herramienta === 'degradado') return capa.mascara.base === 'degradado';
   if (herramienta === 'transformar') return !esGrupo(capa) && !!capa.contenido;
+  if (herramienta === 'objeto') return capa.mascara.base === 'sujeto' || capa.mascara.base === 'fondo';
   return true;
 }
 
@@ -2080,6 +2169,14 @@ function actualizarControlesSeleccion() {
   zonaLienzo.classList.toggle('modo-gotero', herramientaLienzo === 'gotero');
   zonaLienzo.classList.toggle('modo-degradado', herramientaLienzo === 'degradado');
   zonaLienzo.classList.toggle('modo-transformar', herramientaLienzo === 'transformar');
+  zonaLienzo.classList.toggle('modo-objeto', herramientaLienzo === 'objeto');
+  const conSujeto = m.base === 'sujeto' || m.base === 'fondo';
+  document.getElementById('controlesSujeto').style.display = conSujeto ? 'flex' : 'none';
+  document.getElementById('botonTodoSujeto').disabled = !m.objeto;
+  if (conSujeto) {
+    if (sujetoListo()) mostrarEstadoSujeto(t(m.objeto ? 'sujeto-listo-objeto' : 'sujeto-listo-todo'));
+    else pedirSujeto();
+  }
   actualizarPanelContenido();
   if (herramientaLienzo !== 'pincel') cursorPincelAvanzado.classList.remove('visible');
   // La línea del degradado aparece o desaparece con su herramienta.
@@ -2205,6 +2302,7 @@ document.querySelectorAll('#modosBaseMascara button').forEach((boton) => {
     if (base === 'color') herramientaLienzo = 'gotero';
     else if (base === 'degradado') herramientaLienzo = 'degradado';
     else if (base === 'nada') herramientaLienzo = 'pincel';
+    else if (base === 'sujeto' || base === 'fondo') herramientaLienzo = 'objeto';
     actualizarControlesSeleccion();
   });
 });
@@ -2251,6 +2349,25 @@ elInvertirMascara.addEventListener('change', () => {
   programarRenderizado();
 });
 elVerMascara.addEventListener('change', programarRenderizado);
+
+// Elegir objeto: la isla del primer plano que está bajo el dedo.
+canvasTrabajo.addEventListener('click', (e) => {
+  const capa = itemActivo();
+  if (!capa || herramientaLienzo !== 'objeto' || huboPan) return;
+  const sujeto = sujetoListo();
+  if (!sujeto) { pedirSujeto(); return; }
+  const p = puntoRelativo(e);
+  if (!MascarasCapa.hayObjetoEn(sujeto, p.x, p.y)) { mostrarEstadoSujeto(t('sujeto-sin-objeto')); return; }
+  capa.mascara.objeto = { x: p.x, y: p.y };
+  actualizarControlesSeleccion();
+});
+
+document.getElementById('botonTodoSujeto').addEventListener('click', () => {
+  const capa = itemActivo();
+  if (!capa) return;
+  capa.mascara.objeto = null;
+  actualizarControlesSeleccion();
+});
 
 canvasTrabajo.addEventListener('click', (e) => {
   const capa = itemActivo();
@@ -2419,7 +2536,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
 
   // Mover (y el gotero, que elige con un clic): arrastrar mueve la imagen
   // dentro del recuadro (útil cuando está ampliada y no entra entera).
-  if (herramientaLienzo === 'mover' || herramientaLienzo === 'gotero') {
+  if (herramientaLienzo === 'mover' || herramientaLienzo === 'gotero' || herramientaLienzo === 'objeto') {
     if (e.pointerType === 'touch' && punterosActivos.size >= 1) return; // dejale el gesto al pellizco
     paneando = true;
     huboPan = false;
