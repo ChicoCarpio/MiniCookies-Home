@@ -1156,6 +1156,57 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     });
   }
 
+  // Motor de filtros por GPU (filtros-gpu.js, 2026-10-05) contra el bucle en
+  // JavaScript, que es el respaldo y la referencia: tienen que dar los mismos
+  // píxeles (±2 por redondeo). Un cambio al pipeline en uno solo de los dos
+  // lo rompe acá. Imagen opaca con todos los tonos y luces. "Por color" y la
+  // mezcla B/N deciden el color de cada píxel mirando su entorno desenfocado
+  // (lo desenfoca el navegador), y en unos pocos píxeles al borde de esa
+  // decisión pueden diferir unos niveles: ahí se mira que sean muy pocos.
+  // Además comprueba que la GPU de verdad corrió (si no, compararía JS con JS).
+  await prueba('motor de filtros: GPU igual que JavaScript', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const PF = W().ProcesarFiltros, GPU = W().FiltrosGPU;
+    afirmar(GPU && GPU.disponible(10, 10), 'sin WebGL2: la página usaría solo el motor en JavaScript');
+    const fuente = D().createElement('canvas'); fuente.width = 360; fuente.height = 120;
+    const cf = fuente.getContext('2d');
+    for (let x = 0; x < 360; x++) for (let y = 0; y < 120; y++) { cf.fillStyle = 'hsl(' + x + ',' + (20 + (y % 40) * 2) + '%,' + (4 + y * 0.77) + '%)'; cf.fillRect(x, y, 1, 1); }
+    let pasadas = 0;
+    const procesar = GPU.procesar;
+    GPU.procesar = function () { const r = procesar.apply(this, arguments); if (r) pasadas += 1; return r; };
+    const correr = (caso, porGpu) => {
+      const c = PF.copiarCanvas(fuente);
+      if (!porGpu) W().FiltrosGPU = undefined;
+      try { PF.renderizarFiltro(c, { ...PF.AJUSTES_NEUTROS, ...caso.ajustes }, caso.capas || [], PF.SIN_TEXTURA, 1); } finally { W().FiltrosGPU = GPU; }
+      return c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    };
+    const porColor = { ...W().eval('AjustePorColor').neutro(), rojos: { tono: 40, saturacion: 50, luminancia: -30 }, azules: { tono: -60, saturacion: -80, luminancia: 40 } };
+    const CASOS = [
+      ['exposición', { exposicion: 60 }], ['contraste', { contraste: -40 }], ['luces', { sombras: 60, reflejos: -50, blancos: 40, negros: -40 }],
+      ['balance', { temperatura: 60, matizBlancos: -40 }], ['saturación', { saturacion: 80, intensidad: 50 }], ['tono', { tono: 120 }],
+      ['colores', { colorRojo: 40, colorAzul: -30 }], ['b/n', { bn: true, canalRojo: 150 }], ['sepia', { sepia: 70 }], ['invertir', { invertir: 40 }],
+      ['claridad', { claridad: 60 }], ['nitidez', { nitidez: 70 }], ['viñeta', { vineta: -80 }],
+      ['dispersión', { dispersionIntensidad: 70, dispersionMatiz: 60 }], ['aberración', { aberracionIntensidad: 80, aberracionAngulo: 30, aberracionMatiz: 40 }],
+      ['intensidad del filtro', { exposicion: 40, intensidadFiltro: 40 }],
+    ].map(([nombre, ajustes]) => ({ nombre, ajustes }));
+    CASOS.push({ nombre: 'filtro vintage (capas extra)', ajustes: { ...PF.PRESETS.vintage, grano: 0 }, capas: PF.PRESETS.vintage.capasExtra });
+    CASOS.push({ nombre: 'por color', ajustes: { hsl: porColor }, sensible: true });
+    CASOS.push({ nombre: 'mezcla b/n', ajustes: { bn: true, mezclaAzules: -60, mezclaNaranjas: 50 }, sensible: true });
+    const malos = [];
+    let maxNormal = 0;
+    for (const caso of CASOS) {
+      const g = correr(caso, true), j = correr(caso, false);
+      let max = 0, fuera = 0;
+      for (let i = 0; i < g.length; i++) { const d = Math.abs(g[i] - j[i]); if (d > max) max = d; if (d > 2) fuera += 1; }
+      if (!caso.sensible) maxNormal = Math.max(maxNormal, max);
+      if (caso.sensible ? fuera > g.length * 0.001 : max > 2) malos.push(caso.nombre + ': máx ' + max + ', ' + fuera + ' valores fuera de ±2');
+    }
+    GPU.procesar = procesar;
+    afirmar(malos.length === 0, 'la GPU y JavaScript no dan lo mismo — ' + malos.join(' · '));
+    afirmar(pasadas >= CASOS.length, 'la GPU no corrió (pasadas: ' + pasadas + ')');
+    return CASOS.length + ' casos · diferencia máxima ' + maxNormal + ' · ' + pasadas + ' pasadas por GPU';
+  });
+
   // Máscaras de primer plano / fondo. Sin internet no se puede bajar el
   // modelo, así que el recorte de la IA se reemplaza por uno falso: dos
   // cuadrados separados (dos "objetos") sobre una foto gris 128. La capa en

@@ -1092,6 +1092,7 @@ window.i18nPagina = {
 <script src="../vendor/imagetracerjs/1.2.6/imagetracer_v1.2.6.js"></script>
 <script src="../assets/js/efectos-mosaico.js"></script>
 <script src="../assets/js/ajuste-por-color.js"></script>
+<script src="../assets/js/filtros-gpu.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
@@ -2477,9 +2478,16 @@ canvasTrabajo.addEventListener('click', (e) => {
   if (!capa || herramientaLienzo !== 'gotero' || !canvasOrigenTrabajo) return;
   if (huboPan) return; // fue un arrastre para mover la imagen, no un clic de gotero
   const { x, y } = coordenadasEnCanvasTrabajo(e);
-  const px = canvasOrigenTrabajo.getContext('2d').getImageData(
+  // Se lee una copia de 1×1: leer canvasOrigenTrabajo con getImageData hace
+  // que Chrome lo pase a la memoria común, y es la entrada de cada fotograma
+  // del motor por GPU (cada uno pasaba a tardar varias veces más).
+  const muestra = document.createElement('canvas');
+  muestra.width = 1; muestra.height = 1;
+  const ctxMuestra = muestra.getContext('2d', { willReadFrequently: true });
+  ctxMuestra.drawImage(canvasOrigenTrabajo,
     Math.max(0, Math.min(Math.round(x), canvasOrigenTrabajo.width - 1)),
-    Math.max(0, Math.min(Math.round(y), canvasOrigenTrabajo.height - 1)), 1, 1).data;
+    Math.max(0, Math.min(Math.round(y), canvasOrigenTrabajo.height - 1)), 1, 1, 0, 0, 1, 1);
+  const px = ctxMuestra.getImageData(0, 0, 1, 1).data;
   capa.mascara.color = { r: px[0], g: px[1], b: px[2] };
   actualizarControlesSeleccion();
 });

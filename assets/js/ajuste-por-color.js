@@ -176,9 +176,10 @@ const AjustePorColor = (() => {
   // se sigue aplicando al píxel real (no se pierde nitidez), y en los bordes
   // entre colores distintos manda el píxel (ver pesosDeDecision), así no
   // queda halo. Devuelve los datos RGBA, o null si el lienzo no tiene nada.
-  function referenciaColor(canvas) {
+  // referenciaColorCanvas devuelve la copia desenfocada sin leerla (el motor
+  // por GPU la sube como textura).
+  function referenciaColorCanvas(canvas) {
     const ancho = canvas.width, alto = canvas.height;
-    if (!ancho || !alto) return null;
     const copia = document.createElement('canvas');
     copia.width = ancho; copia.height = alto;
     const ctx = copia.getContext('2d');
@@ -186,7 +187,13 @@ const AjustePorColor = (() => {
     // que antes de este arreglo, no se rompe nada.
     ctx.filter = `blur(${Math.max(0.5, Math.min(ancho, alto) * 0.015)}px)`;
     ctx.drawImage(canvas, 0, 0);
-    return ctx.getImageData(0, 0, ancho, alto).data;
+    return copia;
+  }
+
+  function referenciaColor(canvas) {
+    const ancho = canvas.width, alto = canvas.height;
+    if (!ancho || !alto) return null;
+    return referenciaColorCanvas(canvas).getContext('2d').getImageData(0, 0, ancho, alto).data;
   }
 
   // Pesos y croma con los que se decide el rango de color de un píxel.
@@ -389,5 +396,7 @@ const AjustePorColor = (() => {
     return { refrescar };
   }
 
-  return { nombreRango, RANGOS, neutro, enUso, preparar, referenciaColor, aplicar, prepararMezclaGris, mezclarGris, crearPanel };
+  // PESOS e INDICE_VERDES: para el shader de filtros-gpu.js, que hace lo
+  // mismo que aplicar() y mezclarGris() en la placa de video.
+  return { nombreRango, RANGOS, PESOS, INDICE_VERDES, neutro, enUso, preparar, referenciaColor, referenciaColorCanvas, aplicar, prepararMezclaGris, mezclarGris, crearPanel };
 })();
