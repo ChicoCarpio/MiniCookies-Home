@@ -202,9 +202,18 @@ export function generarRobotsYSitemap(salida, rutas) {
   writeFileSync(join(salida, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
 
+  // El "no al entrenamiento de IA" va acá y no en Cloudflare: su bloqueo de
+  // "AI training" (2026-10-01) también le daba 403 a Googlebot, Bingbot y
+  // Applebot, que alimentan IA además de la búsqueda. Estos nombres son solo
+  // de entrenamiento; los buscadores y los lectores de IA siguen entrando.
+  const soloEntrenamiento = ['GPTBot', 'ClaudeBot', 'CCBot', 'Bytespider',
+    'Google-Extended', 'Applebot-Extended', 'meta-externalagent'];
   writeFileSync(join(salida, 'robots.txt'),
     `# Mini Cookies — todo el sitio es público y se puede indexar.\n` +
-    `User-agent: *\nAllow: /\n\nSitemap: ${SITIO}/sitemap.xml\n`);
+    `User-agent: *\nAllow: /\n\n` +
+    `# No a usar el contenido para entrenar modelos de IA.\n` +
+    soloEntrenamiento.map((ua) => `User-agent: ${ua}\n`).join('') +
+    `Disallow: /\n\nSitemap: ${SITIO}/sitemap.xml\n`);
 
   return rutas.length;
 }
