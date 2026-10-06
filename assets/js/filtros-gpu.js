@@ -545,5 +545,11 @@ void main() {
     }, canvas);
   }
 
-  return { disponible, procesar, brillante, mezclar };
+  // El lado más grande (en px) que acepta la placa; 0 sin WebGL2. Para que el
+  // editor explique por qué no ofrece una resolución.
+  function ladoMaximoGpu() {
+    return iniciar() ? ladoMaximo : 0;
+  }
+
+  return { disponible, ladoMaximo: ladoMaximoGpu, procesar, brillante, mezclar };
 })();

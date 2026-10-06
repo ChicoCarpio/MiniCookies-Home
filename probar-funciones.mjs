@@ -1242,7 +1242,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
   // Desde el motor por GPU, "Original" también se puede elegir en celular,
   // si el dispositivo puede (canvas de ese tamaño y la GPU lo acepta).
-  await prueba('resolución original en celular (con GPU)', async () => {
+  await prueba('resolución media y original en celular (con GPU)', async () => {
     marco.style.width = '390px'; marco.style.height = '844px';
     try {
       await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
@@ -1254,12 +1254,30 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       const opcion = D().getElementById('opcionResolucionOriginal');
       afirmar(selector.value === 'rapida', 'en celular no arrancó en Rápida: ' + selector.value);
       afirmar(!opcion.disabled, 'Original sigue desactivada en celular: ' + D().getElementById('avisoResolucionOriginal').textContent);
-      selector.value = 'original'; selector.dispatchEvent(new (W().Event)('change'));
       const lienzo = D().getElementById('canvasTrabajo');
+      afirmar(!D().getElementById('opcionResolucionMedia').disabled, 'Media desactivada en celular');
+      selector.value = 'media'; selector.dispatchEvent(new (W().Event)('change'));
+      afirmar(await hasta(() => lienzo.width === 2000, 10000), 'Media no pasó a 2000 px: ' + lienzo.width);
+      const anchoMedia = lienzo.width + '×' + lienzo.height;
+      selector.value = 'original'; selector.dispatchEvent(new (W().Event)('change'));
       afirmar(await hasta(() => lienzo.width === 3000, 10000), 'no pasó a 3000 px: ' + lienzo.width);
+      const anchoOriginal = lienzo.width + '×' + lienzo.height;
       const aviso = D().getElementById('avisoResolucionOriginal').textContent;
       afirmar(aviso === W().t('aviso-original-memoria'), 'aviso inesperado: ' + aviso);
-      return 'Rápida → Original, lienzo ' + lienzo.width + '×' + lienzo.height + ' · "' + aviso + '"';
+      // Un celular cuya placa admite menos que la foto (2500 px): con Original
+      // elegida, al abrir otra foto baja sola a Media y dice por qué.
+      const GPU = W().FiltrosGPU, ladoReal = GPU.ladoMaximo;
+      GPU.ladoMaximo = () => 2500;
+      try {
+        entrada.files = archivos([await imagenDePrueba('B', 3000, 2000)]).files;
+        entrada.dispatchEvent(new (W().Event)('change'));
+        afirmar(await hasta(() => lienzo.width === 2000, 10000), 'con placa de 2500 px no bajó a Media: ' + lienzo.width + ' (' + selector.value + ')');
+        const motivo = D().getElementById('avisoResolucionOriginal').textContent;
+        afirmar(opcion.disabled && selector.value === 'media' && motivo.includes('2500'), 'Original sin desactivar o sin motivo: ' + motivo);
+        return 'Rápida → Media ' + anchoMedia + ' → Original ' + anchoOriginal + ' · "' + aviso + '" · placa de 2500 px: baja a Media y avisa';
+      } finally {
+        GPU.ladoMaximo = ladoReal;
+      }
     } finally {
       marco.style.width = ''; marco.style.height = '';
     }
