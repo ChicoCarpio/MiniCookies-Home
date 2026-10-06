@@ -1207,6 +1207,64 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return CASOS.length + ' casos · diferencia máxima ' + maxNormal + ' · ' + pasadas + ' pasadas por GPU';
   });
 
+  // "Ajustar por color" (ajuste-por-color.js): hasta el 2026-10-05 el
+  // escuchador de cambio de idioma quedaba adentro del "input" de cada
+  // deslizador: el panel no se traducía hasta mover uno y después se sumaba
+  // un escuchador por movimiento.
+  await prueba('ajustar por color: idioma sin tocar nada y sin escuchadores de más', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([await imagenDePrueba('A', 400, 300)]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual'), 15000), 'la imagen no se cargó');
+    const panel = D().getElementById('panelAjustePorColor');
+    const subtitulo = () => panel.querySelector('.ajuste-color-subtitulo').textContent;
+    // Cambio de idioma en el lugar (el botón navega a /en/ cuando existe:
+    // acá se dispara el mismo evento que aplicarIdioma de idioma.js).
+    const idiomaReal = W().idiomaActual;
+    const cambiarA = (idioma) => { W().idiomaActual = () => idioma; D().dispatchEvent(new (W().CustomEvent)('cambioIdioma', { detail: { idioma } })); };
+    const inicial = subtitulo();
+    cambiarA('en');
+    const cambiado = subtitulo();
+    cambiarA('es');
+    W().idiomaActual = idiomaReal;
+    afirmar(cambiado === 'Adjust by color' && subtitulo() === 'Ajustar por color', 'el panel no cambió de idioma sin tocar un deslizador: ' + inicial + ' -> ' + cambiado + ' -> ' + subtitulo());
+    let nuevos = 0;
+    const agregar = D().addEventListener;
+    D().addEventListener = function (tipo) { if (tipo === 'cambioIdioma') nuevos += 1; return agregar.apply(this, arguments); };
+    const tono = panel.querySelector('input[data-ajuste="tono"]');
+    for (let i = 1; i <= 5; i++) { tono.value = i * 10; tono.dispatchEvent(new (W().Event)('input')); }
+    D().addEventListener = agregar;
+    afirmar(nuevos === 0, 'mover el deslizador sumó ' + nuevos + ' escuchadores de idioma');
+    afirmar(W().capaActiva().ajustes.hsl.rojos.tono === 50, 'el deslizador no llegó a la capa: ' + JSON.stringify(W().capaActiva().ajustes.hsl.rojos));
+    return inicial + ' ⇄ ' + cambiado + ' · 5 movimientos, 0 escuchadores nuevos';
+  });
+
+  // Desde el motor por GPU, "Original" también se puede elegir en celular,
+  // si el dispositivo puede (canvas de ese tamaño y la GPU lo acepta).
+  await prueba('resolución original en celular (con GPU)', async () => {
+    marco.style.width = '390px'; marco.style.height = '844px';
+    try {
+      await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+      const entrada = D().getElementById('entradaArchivo');
+      entrada.files = archivos([await imagenDePrueba('A', 3000, 2000)]).files;
+      entrada.dispatchEvent(new (W().Event)('change'));
+      afirmar(await hasta(() => W().eval('imagenActual'), 15000), 'la imagen no se cargó');
+      const selector = D().getElementById('resolucionVistaPrevia');
+      const opcion = D().getElementById('opcionResolucionOriginal');
+      afirmar(selector.value === 'rapida', 'en celular no arrancó en Rápida: ' + selector.value);
+      afirmar(!opcion.disabled, 'Original sigue desactivada en celular: ' + D().getElementById('avisoResolucionOriginal').textContent);
+      selector.value = 'original'; selector.dispatchEvent(new (W().Event)('change'));
+      const lienzo = D().getElementById('canvasTrabajo');
+      afirmar(await hasta(() => lienzo.width === 3000, 10000), 'no pasó a 3000 px: ' + lienzo.width);
+      const aviso = D().getElementById('avisoResolucionOriginal').textContent;
+      afirmar(aviso === W().t('aviso-original-memoria'), 'aviso inesperado: ' + aviso);
+      return 'Rápida → Original, lienzo ' + lienzo.width + '×' + lienzo.height + ' · "' + aviso + '"';
+    } finally {
+      marco.style.width = ''; marco.style.height = '';
+    }
+  });
+
   // Máscaras de primer plano / fondo. Sin internet no se puede bajar el
   // modelo, así que el recorte de la IA se reemplaza por uno falso: dos
   // cuadrados separados (dos "objetos") sobre una foto gris 128. La capa en

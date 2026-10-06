@@ -365,7 +365,14 @@ const AjustePorColor = (() => {
         const ajustes = JSON.parse(JSON.stringify(actuales()));
         ajustes[elegido][input.dataset.ajuste] = Number(input.value);
         opciones.escribir(ajustes);
-        document.addEventListener('cambioIdioma', () => {
+        refrescar();
+      });
+    });
+
+    // Un solo escuchador por panel. Hasta el 2026-10-05 quedaba, por un error
+    // de anidado, adentro del "input" de los deslizadores: se sumaba uno por
+    // cada movimiento y, antes de tocar alguno, el panel no cambiaba de idioma.
+    document.addEventListener('cambioIdioma', () => {
       contenedor.querySelector('.ajuste-color-subtitulo').textContent = txt('subtitulo');
       contenedor.querySelector('.ajuste-color-chips').setAttribute('aria-label', txt('aria'));
       contenedor.querySelector('.ajuste-color-nombre button').textContent = txt('restablecer');
@@ -379,10 +386,6 @@ const AjustePorColor = (() => {
         chip.setAttribute('aria-label', nombreRango(chip.dataset.rango));
       });
       refrescar();
-    });
-
-    refrescar();
-      });
     });
 
     contenedor.querySelector('.ajuste-color-nombre button').addEventListener('click', () => {

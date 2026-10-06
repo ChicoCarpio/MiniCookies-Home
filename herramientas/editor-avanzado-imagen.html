@@ -261,7 +261,8 @@ window.i18nPagina = {
     'res-original-medidas': 'Resolución original ({ancho} × {alto} px)',
     'aviso-ya-real': 'La imagen ya se ve a su tamaño real.',
     'aviso-mas-lento': 'Más lento con imágenes grandes.',
-    'aviso-original-movil': 'En móvil se usa la vista rápida; la descarga conserva la resolución completa.',
+    'aviso-original-no-cabe': 'Este dispositivo no puede trabajar esta imagen a resolución original; la descarga sí la conserva.',
+    'aviso-original-memoria': 'Usa más memoria: con muchas capas, el navegador podría cerrar la página.',
     'boton-descargar': 'Descargar imagen',
     'boton-procesando': 'Procesando...',
     'boton-reiniciar': 'Reiniciar todo',
@@ -448,7 +449,8 @@ window.i18nPagina = {
     'res-original-medidas': 'Original resolution ({ancho} × {alto} px)',
     'aviso-ya-real': 'The image is already shown at its real size.',
     'aviso-mas-lento': 'Slower with large images.',
-    'aviso-original-movil': 'Mobile uses the fast preview; downloads keep the full resolution.',
+    'aviso-original-no-cabe': 'This device cannot edit this image at original resolution; downloads still keep it.',
+    'aviso-original-memoria': 'Uses more memory: with many layers, the browser might close the page.',
     'boton-descargar': 'Download image',
     'boton-procesando': 'Processing...',
     'boton-reiniciar': 'Reset everything',
@@ -3461,8 +3463,9 @@ function eliminarCapa(id) {
 // "Rápida" trabaja sobre una copia de hasta LADO_MAXIMO_TRABAJO px (fluido
 // incluso con fotos grandes); "Original" trabaja a la resolución real de la
 // imagen, para ver el detalle exacto y pintar con el pincel con precisión de
-// píxel, a costa de que cada ajuste tarde más en imágenes grandes. La
-// descarga siempre sale a resolución original, elija lo que elija.
+// píxel. Desde el motor por GPU (2026-10-05) también es fluida, y se puede
+// elegir en celular. La descarga siempre sale a resolución original, elija
+// lo que elija.
 function tamanoTrabajoSegunModo() {
   const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
   const escala = elResolucionVistaPrevia.value === 'original'
@@ -3471,26 +3474,62 @@ function tamanoTrabajoSegunModo() {
   return { ancho: Math.max(1, Math.round(ancho * escala)), alto: Math.max(1, Math.round(alto * escala)) };
 }
 
+// Si este dispositivo puede trabajar la imagen a su tamaño real: un canvas
+// de ese tamaño tiene que funcionar (en iPhone el área tiene un tope, ~16,7
+// MP) y, en celular, además el motor por GPU tiene que aceptarlo (si no, se
+// usaría el de JavaScript, inusable a ese tamaño en un teléfono). Se prueba
+// una vez por imagen.
+let capacidadOriginal = { imagen: null, puede: false, gpu: false };
+function capacidadParaOriginal() {
+  if (capacidadOriginal.imagen === imagenActual) return capacidadOriginal;
+  const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
+  let lienzoOk = false;
+  try {
+    const c = document.createElement('canvas');
+    c.width = ancho; c.height = alto;
+    const ctx = c.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(ancho - 1, alto - 1, 1, 1);
+      // Se lee una copia de 1×1 (ver el gotero).
+      const m = document.createElement('canvas');
+      m.width = 1; m.height = 1;
+      const cm = m.getContext('2d', { willReadFrequently: true });
+      cm.drawImage(c, ancho - 1, alto - 1, 1, 1, 0, 0, 1, 1);
+      lienzoOk = cm.getImageData(0, 0, 1, 1).data[3] === 255;
+    }
+    c.width = 0; c.height = 0;
+  } catch (error) { lienzoOk = false; }
+  const gpu = Boolean(window.FiltrosGPU && FiltrosGPU.disponible(ancho, alto));
+  const esMovil = window.matchMedia('(max-width: 900px)').matches;
+  capacidadOriginal = { imagen: imagenActual, puede: lienzoOk && (gpu || !esMovil), gpu };
+  return capacidadOriginal;
+}
+
 function actualizarSelectorResolucion() {
   const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
   const esChica = Math.max(ancho, alto) <= LADO_MAXIMO_TRABAJO;
   const esMovil = window.matchMedia('(max-width: 900px)').matches;
+  const { puede, gpu } = esChica ? { puede: true, gpu: true } : capacidadParaOriginal();
   opcionResolucionOriginal.textContent = t('res-original-medidas')
     .replace('{ancho}', ancho).replace('{alto}', alto);
-  opcionResolucionOriginal.disabled = esChica || esMovil;
+  opcionResolucionOriginal.disabled = esChica || !puede;
   // Si la imagen ya entra en el tamaño rápido, las dos opciones son lo mismo.
   elResolucionVistaPrevia.disabled = esChica;
   if (esChica) elResolucionVistaPrevia.value = 'original';
-  else if (esMovil && elResolucionVistaPrevia.value === 'original') elResolucionVistaPrevia.value = 'rapida';
-  avisoResolucionOriginal.textContent = esChica
-    ? t('aviso-ya-real')
-    : (esMovil ? t('aviso-original-movil') : (elResolucionVistaPrevia.value === 'original' ? t('aviso-mas-lento') : ''));
+  else if (!puede && elResolucionVistaPrevia.value === 'original') elResolucionVistaPrevia.value = 'rapida';
+  const enOriginal = elResolucionVistaPrevia.value === 'original';
+  avisoResolucionOriginal.textContent = esChica ? t('aviso-ya-real')
+    : !puede ? t('aviso-original-no-cabe')
+    : !enOriginal ? ''
+    : !gpu ? t('aviso-mas-lento')
+    : esMovil ? t('aviso-original-memoria') : '';
 }
 
 function prepararResolucionTrabajo() {
-  if (window.matchMedia('(max-width: 900px)').matches
-    && elResolucionVistaPrevia.value === 'original'
-    && Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight) > LADO_MAXIMO_TRABAJO) {
+  if (elResolucionVistaPrevia.value === 'original'
+    && Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight) > LADO_MAXIMO_TRABAJO
+    && !capacidadParaOriginal().puede) {
     elResolucionVistaPrevia.value = 'rapida';
   }
   const { ancho, alto } = tamanoTrabajoSegunModo();
@@ -3849,8 +3888,11 @@ document.getElementById('fondoPanelMovil').addEventListener('click', () => {
 consultaMovil.addEventListener('change', () => {
   estadoInicialPaneles();
   if (!imagenActual) return;
+  // Al pasar a celular cambia lo que se exige para "Original" (la GPU).
+  capacidadOriginal = { imagen: null, puede: false, gpu: false };
   if (consultaMovil.matches && elResolucionVistaPrevia.value === 'original'
-    && Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight) > LADO_MAXIMO_TRABAJO) {
+    && Math.max(imagenActual.naturalWidth, imagenActual.naturalHeight) > LADO_MAXIMO_TRABAJO
+    && !capacidadParaOriginal().puede) {
     elResolucionVistaPrevia.value = 'rapida';
     elResolucionVistaPrevia.dispatchEvent(new Event('change'));
   } else {
