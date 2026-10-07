@@ -1340,7 +1340,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     clic('#modosBaseMascara [data-base="sujeto"]');
     afirmar(D().querySelector('#herramientasLienzo [data-herramienta="objeto"]').classList.contains('activo'), 'elegir Primer plano no dejó elegida la herramienta "Elegir objeto"');
-    afirmar(await hasta(() => W().sujetoListo(), 5000), 'el primer plano no se calculó');
+    afirmar(await hasta(() => W().sujetoListo(W().eval('imagenActual')), 5000), 'el primer plano no se calculó');
     h.primerPlano = await leer();
     afirmar(cerca(h.primerPlano, [64, 128, 64]), 'primer plano: ' + h.primerPlano);
     clic('#modosBaseMascara [data-base="fondo"]');
@@ -1396,6 +1396,125 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const islas = W().MascarasCapa.islas(new Uint8ClampedArray([0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 255]), 3, 1, 20);
     afirmar(islas.tamanos.length === 2 && islas.etiquetas[1] === -1, 'islas: ' + JSON.stringify(islas.tamanos));
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
+  // Una imagen agregada como capa mide su máscara sobre SÍ MISMA (no sobre la
+  // foto): primer plano, elegir objeto y color, y la máscara la sigue al
+  // moverla. Foto gris 128 de 200x100; la capa, de 100x50, roja a la
+  // izquierda y azul a la derecha, queda centrada (x 50..150). La IA es falsa:
+  // el "primer plano" es lo rojo de lo que reciba, y tocar un objeto da la
+  // mitad tocada. Anota el tamaño de lo que analiza, para ver que es la capa.
+  await prueba('editor avanzado: máscara medida sobre una capa de imagen (IA, color, la sigue al moverla)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const tamanos = [];
+    const leerUrl = async (url) => { const i = new (W().Image)(); i.src = url; await i.decode(); tamanos.push(i.width + 'x' + i.height); return i; };
+    W().calcularSujeto = async (url) => {
+      const i = await leerUrl(url);
+      const s = D().createElement('canvas'); s.width = i.width; s.height = i.height;
+      const cs = s.getContext('2d', { willReadFrequently: true }); cs.drawImage(i, 0, 0);
+      const d = cs.getImageData(0, 0, s.width, s.height);
+      for (let k = 0; k < d.data.length; k += 4) {
+        const rojo = d.data[k] > 200 && d.data[k + 2] < 50;
+        d.data[k] = d.data[k + 1] = d.data[k + 2] = 255; d.data[k + 3] = rojo ? 255 : 0;
+      }
+      cs.putImageData(d, 0, 0);
+      return s;
+    };
+    W().analizarParaObjetos = async (url) => {
+      const i = await leerUrl(url);
+      return { objetoEn: async (x) => {
+        const s = D().createElement('canvas'); s.width = i.width; s.height = i.height;
+        const cs = s.getContext('2d'); cs.fillStyle = '#fff';
+        cs.fillRect(x < 0.5 ? 0 : i.width / 2, 0, i.width / 2, i.height);
+        return s;
+      } };
+    };
+    const lienzoPng = async (ancho, alto, dibujar, nombre) => {
+      const c = D().createElement('canvas'); c.width = ancho; c.height = alto; dibujar(c.getContext('2d'));
+      const b = await new Promise((r) => c.toBlob(r, 'image/png'));
+      return new (W().File)([b], nombre, { type: 'image/png' });
+    };
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([await lienzoPng(200, 100, (cx) => { cx.fillStyle = 'rgb(128,128,128)'; cx.fillRect(0, 0, 200, 100); }, 'gris.png')]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual'), 15000), 'la imagen no se cargó');
+    const entradaCapa = D().getElementById('entradaImagenCapa');
+    entradaCapa.files = archivos([await lienzoPng(100, 50, (cx) => { cx.fillStyle = '#f00'; cx.fillRect(0, 0, 50, 50); cx.fillStyle = '#00f'; cx.fillRect(50, 0, 50, 50); }, 'rojo-azul.png')]).files;
+    entradaCapa.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().capaActiva() && W().capaActiva().contenido, 5000), 'la imagen no entró como capa');
+    const capa = W().capaActiva();
+    afirmar(capa.mascara.fuente === 'capa', 'una capa de imagen nueva no mide sobre sí misma: ' + capa.mascara.fuente);
+
+    const lienzo = D().getElementById('canvasTrabajo');
+    const color = (cv, x) => { const d = cv.getContext('2d').getImageData(Math.round(x * cv.width / 200), Math.round(cv.height / 2), 1, 1).data; return d[0] > 200 && d[2] < 60 ? 'rojo' : (d[2] > 200 && d[0] < 60 ? 'azul' : (Math.abs(d[0] - 128) <= 3 && Math.abs(d[2] - 128) <= 3 ? 'gris' : d[0] + ',' + d[1] + ',' + d[2])); };
+    const leer = async (xs) => { await esperar(300); return xs.map((x) => color(lienzo, x)).join(' '); };
+    const clic = (sel) => D().querySelector(sel).click();
+    const tocar = (x) => {
+      const r = lienzo.getBoundingClientRect();
+      lienzo.dispatchEvent(new (W().MouseEvent)('click', { bubbles: true, clientX: r.left + (x / 200) * r.width, clientY: r.top + r.height / 2 }));
+    };
+    const velo = D().getElementById('trabajandoIA');
+    const h = {};
+    h.sinMascara = await leer([75, 125]);
+    afirmar(h.sinMascara === 'rojo azul', 'la capa no se ve entera: ' + h.sinMascara);
+
+    clic('#modosBaseMascara [data-base="sujeto"]');
+    afirmar(D().getElementById('controlesFuenteMascara').style.display !== 'none', 'no aparece "Medir sobre" en una capa de imagen');
+    afirmar(await hasta(() => W().sujetoListo(W().fuenteDeContenido(capa)), 5000), 'el primer plano de la capa no se calculó');
+    h.primerPlano = await leer([75, 125]);
+    afirmar(h.primerPlano === 'rojo gris', 'primer plano de la capa: ' + h.primerPlano);
+    afirmar(tamanos[0] === '100x50', 'la IA no analizó la capa sino ' + tamanos[0]);
+
+    // Sobre la foto (gris, sin rojo): no queda nada de la capa.
+    clic('#modosFuenteMascara [data-fuente="foto"]');
+    afirmar(await hasta(() => W().sujetoListo(W().eval('imagenActual')), 5000), 'el primer plano de la foto no se calculó');
+    h.sobreLaFoto = await leer([75, 125]);
+    afirmar(h.sobreLaFoto === 'gris gris', 'primer plano de la foto: ' + h.sobreLaFoto);
+    clic('#modosFuenteMascara [data-fuente="capa"]');
+    h.deVuelta = await leer([75, 125]);
+    afirmar(h.deVuelta === 'rojo gris', 'al volver a "Esta capa": ' + h.deVuelta + ' (el primer plano de la capa tiene que quedar guardado)');
+
+    // La máscara acompaña a la capa: movida a la izquierda (x 0..100).
+    capa.contenido.centro = { x: 0.25, y: 0.5 }; W().programarRenderizado();
+    h.movida = await leer([25, 75, 125]);
+    afirmar(h.movida === 'rojo gris gris', 'la máscara no siguió a la capa: ' + h.movida);
+    // Y volteada: el rojo pasa a la derecha y la máscara con él.
+    capa.contenido.voltearH = true; W().programarRenderizado();
+    h.volteada = await leer([25, 75]);
+    afirmar(h.volteada === 'gris rojo', 'volteada: ' + h.volteada);
+    capa.contenido.voltearH = false; capa.contenido.centro = { x: 0.5, y: 0.5 }; W().programarRenderizado();
+
+    // Elegir objeto: tocar la mitad azul de la capa (x 125 de la foto = 0,75 de la capa).
+    afirmar(D().querySelector('#herramientasLienzo [data-herramienta="objeto"]').classList.contains('activo'), '"Elegir objeto" no quedó elegida');
+    tocar(125);
+    await esperar(100);
+    afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
+    h.objeto = await leer([75, 125]);
+    afirmar(h.objeto === 'gris azul', 'objeto elegido en la capa: ' + h.objeto);
+    afirmar(tamanos.filter((t) => t === '100x50').length === 2, 'elegir objeto no analizó la capa: ' + tamanos.join(', '));
+    // Un toque fuera de la capa no elige nada y lo dice.
+    tocar(10);
+    afirmar(D().getElementById('estadoSujeto').textContent === W().t('objeto-fuera-de-capa'), 'tocar fuera de la capa: ' + D().getElementById('estadoSujeto').textContent);
+
+    // Color: el gotero toma el color de la capa (rojo), no el gris de la foto.
+    clic('#modosBaseMascara [data-base="color"]'); // deja elegido el gotero
+    tocar(75);
+    afirmar(capa.mascara.color && capa.mascara.color.r > 200 && capa.mascara.color.b < 50, 'el gotero no tomó el rojo de la capa: ' + JSON.stringify(capa.mascara.color));
+    h.color = await leer([75, 125]);
+    afirmar(h.color === 'rojo gris', 'color de la capa: ' + h.color);
+
+    // La descarga a resolución completa, y el proyecto guarda "Medir sobre".
+    D().getElementById('botonDescargarAvanzado').click();
+    const enlace = D().getElementById('enlaceDescarga');
+    afirmar(await hasta(() => enlace.href.startsWith('blob:'), 15000), 'la descarga no se generó');
+    const img = new (W().Image)(); img.src = enlace.href; await img.decode();
+    const cd = D().createElement('canvas'); cd.width = img.width; cd.height = img.height;
+    cd.getContext('2d').drawImage(img, 0, 0);
+    h.descarga = [75, 125].map((x) => color(cd, x)).join(' ');
+    afirmar(h.descarga === 'rojo gris', 'descarga: ' + h.descarga);
+    afirmar(W().itemAProyecto(capa).mascara.fuente === 'capa', 'el proyecto no guarda "Medir sobre"');
+    afirmar(W().MascarasCapa.normalizar({ base: 'color' }).fuente === 'foto', 'un proyecto viejo no sigue midiendo sobre la foto');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · la IA analizó ' + tamanos.join(', ');
   });
 
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {

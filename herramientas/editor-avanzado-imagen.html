@@ -207,7 +207,7 @@ window.i18nPagina = {
     'herr-gotero': '💧 Elegir color',
     'herr-degradado': '↘ Trazar degradado',
     'lbl-base': 'Base de la máscara',
-    'nota-mascara': 'La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original. Primer plano y Fondo los separa un modelo de IA que se descarga la primera vez (unos 42 MB) y después queda guardado.',
+    'nota-mascara': 'La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original (o, en una capa de texto o imagen, sobre ella misma: ver "Medir sobre"). Primer plano y Fondo los separa un modelo de IA que se descarga la primera vez (unos 42 MB) y después queda guardado.',
     'base-sujeto': 'Primer plano',
     'base-fondo': 'Fondo',
     'herr-objeto': '👆 Elegir objeto',
@@ -222,6 +222,11 @@ window.i18nPagina = {
     'sujeto-listo-todo': 'Primer plano: todo.',
     'sujeto-listo-objeto': 'Primer plano: solo el objeto elegido.',
     'sujeto-error': 'No se pudo separar el primer plano: ',
+    'lbl-medir-sobre': 'Medir sobre',
+    'nota-medir-sobre': 'Con "Esta capa", el color, la luz y la IA miran solo el texto o la imagen de esta capa (por ejemplo, el primer plano de una foto que agregaste), y la máscara la acompaña si la movés, la agrandás o la girás. Con "La foto", miran la foto de fondo.',
+    'fuente-capa': 'Esta capa',
+    'fuente-foto': 'La foto',
+    'objeto-fuera-de-capa': 'Tocá dentro del texto o la imagen de esta capa.',
     'sel-toda': 'Toda la imagen',
     'base-nada': 'Nada',
     'base-degradado': 'Degradado',
@@ -398,7 +403,7 @@ window.i18nPagina = {
     'herr-gotero': '💧 Pick color',
     'herr-degradado': '↘ Draw gradient',
     'lbl-base': 'Mask base',
-    'nota-mascara': 'The base decides where the layer applies. What you paint with the brush is added to (or subtracted from) that base, and "Invert" flips the result. Color and light are measured on the original image. Foreground and Background are separated by an AI model that downloads the first time (about 42 MB) and is then kept.',
+    'nota-mascara': 'The base decides where the layer applies. What you paint with the brush is added to (or subtracted from) that base, and "Invert" flips the result. Color and light are measured on the original image (or, on a text or image layer, on that layer: see "Measure on"). Foreground and Background are separated by an AI model that downloads the first time (about 42 MB) and is then kept.',
     'base-sujeto': 'Foreground',
     'base-fondo': 'Background',
     'herr-objeto': '👆 Pick object',
@@ -413,6 +418,11 @@ window.i18nPagina = {
     'sujeto-listo-todo': 'Foreground: all of it.',
     'sujeto-listo-objeto': 'Foreground: only the picked object.',
     'sujeto-error': 'The foreground could not be separated: ',
+    'lbl-medir-sobre': 'Measure on',
+    'nota-medir-sobre': 'With "This layer", color, light and the AI look only at this layer\'s text or image (for example, the foreground of a photo you added), and the mask follows it when you move, resize or rotate it. With "The photo", they look at the background photo.',
+    'fuente-capa': 'This layer',
+    'fuente-foto': 'The photo',
+    'objeto-fuera-de-capa': 'Tap inside this layer\'s text or image.',
     'sel-toda': 'The whole image',
     'base-nada': 'Nothing',
     'base-degradado': 'Gradient',
@@ -665,7 +675,7 @@ window.i18nPagina = {
                 <span data-i18n="lbl-base">Base de la máscara</span>
                 <span class="ayuda-tip">
                   <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
-                  <span class="ayuda-burbuja" data-i18n="nota-mascara">La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original.</span>
+                  <span class="ayuda-burbuja" data-i18n="nota-mascara">La base decide dónde se aplica la capa. Lo que pintes con el pincel se suma (o se resta) a esa base, y "Invertir" da vuelta el resultado. Color y luz se miden sobre la imagen original (o, en una capa de texto o imagen, sobre ella misma: ver "Medir sobre").</span>
                 </span>
               </span>
               <div class="modos" id="modosBaseMascara">
@@ -676,6 +686,20 @@ window.i18nPagina = {
                 <button type="button" data-base="luz" data-i18n="base-luz">Luz</button>
                 <button type="button" data-base="sujeto" data-i18n="base-sujeto">Primer plano</button>
                 <button type="button" data-base="fondo" data-i18n="base-fondo">Fondo</button>
+              </div>
+
+              <div id="controlesFuenteMascara" class="controles controles-apilados" style="display:none;">
+                <span class="titulo-mascara">
+                  <span data-i18n="lbl-medir-sobre">Medir sobre</span>
+                  <span class="ayuda-tip">
+                    <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                    <span class="ayuda-burbuja" data-i18n="nota-medir-sobre">Con "Esta capa", el color, la luz y la IA miran solo el texto o la imagen de esta capa (por ejemplo, el primer plano de una foto que agregaste), y la máscara la acompaña si la movés, la agrandás o la girás. Con "La foto", miran la foto de fondo.</span>
+                  </span>
+                </span>
+                <div class="modos" id="modosFuenteMascara">
+                  <button type="button" data-fuente="capa" data-i18n="fuente-capa">Esta capa</button>
+                  <button type="button" data-fuente="foto" data-i18n="fuente-foto">La foto</button>
+                </div>
               </div>
 
               <div id="controlesSujeto" class="controles controles-apilados" style="display:none;">
@@ -1428,6 +1452,19 @@ function procesarCapaEnCanvas(canvas, capa, escala, scratch = null, memo = null)
 // completa no la usa (memo = null).
 const memoMascaraPorCapa = new Map(); // id de capa -> memo de MascarasCapa.crear
 
+// ¿La máscara de esta capa se mide sobre su propio contenido (texto o
+// imagen) en vez de la foto? Solo las capas con contenido pueden.
+function mideSobreLaCapa(item) {
+  return !esGrupo(item) && !!item.contenido && item.mascara.fuente === 'capa';
+}
+
+// Sobre qué miden la IA, el color y la luz de una máscara: la foto (su
+// archivo, para la IA, y canvasOrigenTrabajo para color y luz) o el lienzo
+// del contenido de la capa, a su propio tamaño.
+function fuenteDeMascara(item) {
+  return mideSobreLaCapa(item) ? fuenteDeContenido(item) : imagenActual;
+}
+
 function generarMascaraCapa(capa, ancho, alto, conMemo = false) {
   if (!canvasOrigenTrabajo) return null;
   let memo = null;
@@ -1436,28 +1473,53 @@ function generarMascaraCapa(capa, ancho, alto, conMemo = false) {
     if (!memo) { memo = {}; memoMascaraPorCapa.set(capa.id, memo); }
   }
   const base = capa.mascara.base;
+  const fuente = fuenteDeMascara(capa);
   let ia = null;
   if (base === 'sujeto' || base === 'fondo') {
     // Un objeto elegido (SlimSAM) manda sobre el sujeto principal (ISNet):
     // solo se pide el que hace falta.
     const objeto = capa.mascara.objeto;
     if (objeto) {
-      ia = { objeto: objetoListo(objeto) };
-      if (!ia.objeto) pedirObjeto(objeto);
+      ia = { objeto: objetoListo(fuente, objeto) };
+      if (!ia.objeto) pedirObjeto(fuente, objeto);
     } else {
-      ia = { sujeto: sujetoListo() };
-      if (!ia.sujeto) pedirSujeto();
+      ia = { sujeto: sujetoListo(fuente) };
+      if (!ia.sujeto) pedirSujeto(fuente);
     }
   }
-  return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo, ia);
+  if (!mideSobreLaCapa(capa)) {
+    return MascarasCapa.crear(capa.mascara, canvasOrigenTrabajo, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo, ia);
+  }
+  // Sobre la capa: la base sale a tamaño del contenido y se coloca como él.
+  const escalaVista = ancho / imagenActual.naturalWidth;
+  const colocar = (lienzo, destino) => ContenidoCapa.dibujar(capa.contenido, lienzo, destino, escalaVista);
+  return MascarasCapa.crear(capa.mascara, fuente, capa.pincelSumar, capa.pincelQuitar, ancho, alto, memo, ia, colocar);
 }
 
 // ===== Primer plano / fondo (IA, assets/js/recorte-sujeto.js) =====
-// Uno por imagen, no por capa: se calcula la primera vez que una máscara lo
-// necesita, a la resolución de la foto original.
-let sujetoIA = null; // { imagen, lienzo }
-let sujetoPromesa = null;
-function sujetoListo() { return sujetoIA && sujetoIA.imagen === imagenActual ? sujetoIA.lienzo : null; }
+// La IA trabaja sobre una "fuente": la foto (imagenActual) o el lienzo del
+// contenido de una capa (ver fuenteDeMascara). Guarda lo suyo por fuente, no
+// por capa: dos capas que miden sobre la foto comparten el primer plano. Se
+// calcula la primera vez que una máscara lo necesita, al tamaño de la fuente.
+// Cuando la fuente deja de existir (otra foto, capa borrada) se va con ella.
+const iaPorFuente = new WeakMap(); // fuente -> { sujeto, sujetoPromesa, analisis, objetos, pedidos }
+function estadoIA(fuente) {
+  let estado = iaPorFuente.get(fuente);
+  if (!estado) {
+    estado = { sujeto: null, sujetoPromesa: null, analisis: null, objetos: new Map(), pedidos: new Set() };
+    iaPorFuente.set(fuente, estado);
+  }
+  return estado;
+}
+function sujetoListo(fuente) { return (fuente && iaPorFuente.has(fuente) && iaPorFuente.get(fuente).sujeto) || null; }
+
+// La fuente como URL, que es lo que reciben los modelos. La foto, desde su
+// archivo (sin recomprimir); el contenido de una capa, pasado a PNG.
+function urlDeFuente(fuente) {
+  if (fuente === imagenActual) return Promise.resolve(URL.createObjectURL(archivoActual));
+  return new Promise((resolver, rechazar) => fuente.toBlob((blob) =>
+    (blob ? resolver(URL.createObjectURL(blob)) : rechazar(new Error('toBlob'))), 'image/png'));
+}
 
 function mostrarEstadoSujeto(texto) {
   document.getElementById('estadoSujeto').textContent = texto;
@@ -1507,72 +1569,66 @@ function analizarParaObjetos(url, alProgresar) {
 }
 
 // ===== Elegir objeto (IA, assets/js/objeto-por-toque.js) =====
-// El análisis es uno por imagen; cada objeto tocado, uno por punto.
-let analisisObjetos = null; // { imagen, promesa }
-const objetosIA = new Map(); // "x,y" -> canvas, de la imagen actual
-let imagenDeObjetos = null;
-const objetosPedidos = new Set();
+// El análisis es uno por fuente; cada objeto tocado, uno por punto.
 function claveObjeto(o) { return o.x.toFixed(4) + ',' + o.y.toFixed(4); }
-function objetoListo(o) {
-  if (imagenDeObjetos !== imagenActual) { objetosIA.clear(); imagenDeObjetos = imagenActual; }
-  return objetosIA.get(claveObjeto(o)) || null;
+function objetoListo(fuente, o) {
+  return (fuente && iaPorFuente.has(fuente) && iaPorFuente.get(fuente).objetos.get(claveObjeto(o))) || null;
 }
 
-function pedirObjeto(o) {
-  if (!imagenActual || !archivoActual || objetoListo(o)) return;
+function pedirObjeto(fuente, o) {
+  if (!fuente || !archivoActual || objetoListo(fuente, o)) return;
+  const estado = estadoIA(fuente);
   const clave = claveObjeto(o);
-  if (objetosPedidos.has(clave)) return;
-  objetosPedidos.add(clave);
-  const imagen = imagenActual;
-  const trabajo = empezarTrabajoIA(t(analisisObjetos && analisisObjetos.imagen === imagen ? 'ia-buscando-objeto' : 'ia-analizando-objetos'));
-  if (!analisisObjetos || analisisObjetos.imagen !== imagen) {
-    const url = URL.createObjectURL(archivoActual);
-    const promesa = Promise.resolve()
-      .then(() => analizarParaObjetos(url, (p) => trabajo.texto(textoDeDescarga('ia-descargando-objetos', 'ia-analizando-objetos', p))))
-      .finally(() => URL.revokeObjectURL(url));
-    analisisObjetos = { imagen, promesa };
-    promesa.catch(() => { if (analisisObjetos && analisisObjetos.promesa === promesa) analisisObjetos = null; });
+  if (estado.pedidos.has(clave)) return;
+  estado.pedidos.add(clave);
+  const trabajo = empezarTrabajoIA(t(estado.analisis ? 'ia-buscando-objeto' : 'ia-analizando-objetos'));
+  if (!estado.analisis) {
+    let url = null;
+    const promesa = urlDeFuente(fuente)
+      .then((u) => { url = u; return analizarParaObjetos(url, (p) => trabajo.texto(textoDeDescarga('ia-descargando-objetos', 'ia-analizando-objetos', p))); })
+      .finally(() => { if (url) URL.revokeObjectURL(url); });
+    estado.analisis = promesa;
+    promesa.catch(() => { if (estado.analisis === promesa) estado.analisis = null; });
   }
-  analisisObjetos.promesa
+  estado.analisis
     .then((analisis) => { trabajo.texto(t('ia-buscando-objeto')); return analisis.objetoEn(o.x, o.y); })
     .then((lienzo) => {
-      if (imagenActual !== imagen) return;
-      objetoListo(o);
-      objetosIA.set(clave, lienzo);
+      estado.objetos.set(clave, lienzo);
       reiniciarComposicion();
       actualizarControlesSeleccion();
     })
     .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
-    .finally(() => { objetosPedidos.delete(clave); trabajo.terminar(); });
+    .finally(() => { estado.pedidos.delete(clave); trabajo.terminar(); });
 }
 
-function pedirSujeto() {
-  if (!imagenActual || !archivoActual || sujetoListo()) return;
-  if (sujetoPromesa && sujetoPromesa.imagen === imagenActual) return;
-  const imagen = imagenActual;
-  const url = URL.createObjectURL(archivoActual);
+function pedirSujeto(fuente) {
+  if (!fuente || !archivoActual || sujetoListo(fuente)) return;
+  const estado = estadoIA(fuente);
+  if (estado.sujetoPromesa) return;
+  let url = null;
   mostrarEstadoSujeto(t('sujeto-preparando'));
   const trabajo = empezarTrabajoIA(t('sujeto-preparando'));
-  const promesa = Promise.resolve()
-    .then(() => calcularSujeto(url, (p) => {
-      const texto = textoDeDescarga('sujeto-descargando', 'sujeto-preparando', p);
-      mostrarEstadoSujeto(texto);
-      trabajo.texto(texto);
-    }))
+  const promesa = urlDeFuente(fuente)
+    .then((u) => {
+      url = u;
+      return calcularSujeto(url, (p) => {
+        const texto = textoDeDescarga('sujeto-descargando', 'sujeto-preparando', p);
+        mostrarEstadoSujeto(texto);
+        trabajo.texto(texto);
+      });
+    })
     .then((lienzo) => {
-      if (imagenActual !== imagen) return;
-      sujetoIA = { imagen, lienzo };
+      estado.sujeto = lienzo;
       reiniciarComposicion();
       actualizarControlesSeleccion();
     })
     .catch((error) => mostrarEstadoSujeto(t('sujeto-error') + (error && error.message ? error.message : error)))
     .finally(() => {
-      URL.revokeObjectURL(url);
+      if (url) URL.revokeObjectURL(url);
       trabajo.terminar();
-      if (sujetoPromesa === promesa) sujetoPromesa = null;
+      estado.sujetoPromesa = null;
     });
-  promesa.imagen = imagen;
-  sujetoPromesa = promesa;
+  estado.sujetoPromesa = promesa;
 }
 
 // Algo que las firmas no ven cambió (el primer plano llegó): se rehace la
@@ -2285,15 +2341,24 @@ function actualizarControlesSeleccion() {
   document.getElementById('controlesSujeto').style.display = conSujeto ? 'flex' : 'none';
   document.getElementById('botonTodoSujeto').disabled = !m.objeto;
   if (conSujeto) {
+    const fuente = fuenteDeMascara(capa);
     if (m.objeto) {
-      if (objetoListo(m.objeto)) mostrarEstadoSujeto(t(m.base === 'fondo' ? 'fondo-listo-objeto' : 'sujeto-listo-objeto'));
-      else pedirObjeto(m.objeto);
-    } else if (sujetoListo()) {
+      if (objetoListo(fuente, m.objeto)) mostrarEstadoSujeto(t(m.base === 'fondo' ? 'fondo-listo-objeto' : 'sujeto-listo-objeto'));
+      else pedirObjeto(fuente, m.objeto);
+    } else if (sujetoListo(fuente)) {
       mostrarEstadoSujeto(t('sujeto-listo-todo'));
     } else {
-      pedirSujeto();
+      pedirSujeto(fuente);
     }
   }
+  // Medir sobre la capa o la foto: solo en capas con contenido, y solo para
+  // las bases que miden algo (color, luz y la IA).
+  const conFuente = !esGrupo(capa) && !!capa.contenido && ['color', 'luz', 'sujeto', 'fondo'].includes(m.base);
+  document.getElementById('controlesFuenteMascara').style.display = conFuente ? 'flex' : 'none';
+  document.querySelectorAll('#modosFuenteMascara button').forEach((b) => {
+    b.classList.toggle('activo', b.dataset.fuente === m.fuente);
+    b.setAttribute('aria-pressed', b.dataset.fuente === m.fuente);
+  });
   actualizarPanelContenido();
   if (herramientaLienzo !== 'pincel') cursorPincelAvanzado.classList.remove('visible');
   // La línea del degradado aparece o desaparece con su herramienta.
@@ -2467,14 +2532,39 @@ elInvertirMascara.addEventListener('change', () => {
 });
 elVerMascara.addEventListener('change', programarRenderizado);
 
+// Dónde cae un toque dentro del contenido de una capa, en 0..1 de su ancho y
+// alto (sin mover, escalar, girar ni voltear), o null si cae afuera.
+function puntoEnContenido(capa, e) {
+  const { x, y } = coordenadasEnCanvasTrabajo(e);
+  const k = cajaDeContenido(capa);
+  const local = ContenidoCapa.puntoLocal(k, x, y);
+  let u = local.x / (2 * k.mx) + 0.5, v = local.y / (2 * k.my) + 0.5;
+  if (capa.contenido.voltearH) u = 1 - u;
+  if (capa.contenido.voltearV) v = 1 - v;
+  return u >= 0 && u <= 1 && v >= 0 && v <= 1 ? { x: u, y: v } : null;
+}
+
 // Elegir objeto: lo que esté bajo el dedo, sea o no el sujeto principal.
 canvasTrabajo.addEventListener('click', (e) => {
   const capa = itemActivo();
   if (!capa || herramientaLienzo !== 'objeto' || huboPan) return;
-  const p = puntoRelativo(e);
+  const p = mideSobreLaCapa(capa) ? puntoEnContenido(capa, e) : puntoRelativo(e);
+  if (!p) { mostrarEstadoSujeto(t('objeto-fuera-de-capa')); return; }
   capa.mascara.objeto = { x: p.x, y: p.y };
   actualizarControlesSeleccion();
   programarRenderizado(); // pide el objeto a la IA (ver generarMascaraCapa)
+});
+
+document.querySelectorAll('#modosFuenteMascara button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const capa = itemActivo();
+    if (!capa || capa.mascara.fuente === boton.dataset.fuente) return;
+    capa.mascara.fuente = boton.dataset.fuente;
+    // El objeto tocado y el color elegido eran de la otra fuente.
+    capa.mascara.objeto = null;
+    capa.mascara.color = null;
+    actualizarControlesSeleccion();
+  });
 });
 
 document.getElementById('botonTodoSujeto').addEventListener('click', () => {
@@ -2488,16 +2578,25 @@ canvasTrabajo.addEventListener('click', (e) => {
   const capa = itemActivo();
   if (!capa || herramientaLienzo !== 'gotero' || !canvasOrigenTrabajo) return;
   if (huboPan) return; // fue un arrastre para mover la imagen, no un clic de gotero
-  const { x, y } = coordenadasEnCanvasTrabajo(e);
+  // Sobre la capa, el color se toma de su contenido; si no, de la foto.
+  let origen = canvasOrigenTrabajo, x, y;
+  if (mideSobreLaCapa(capa)) {
+    const p = puntoEnContenido(capa, e);
+    if (!p) return;
+    origen = fuenteDeContenido(capa);
+    x = p.x * origen.width; y = p.y * origen.height;
+  } else {
+    ({ x, y } = coordenadasEnCanvasTrabajo(e));
+  }
   // Se lee una copia de 1×1: leer canvasOrigenTrabajo con getImageData hace
   // que Chrome lo pase a la memoria común, y es la entrada de cada fotograma
   // del motor por GPU (cada uno pasaba a tardar varias veces más).
   const muestra = document.createElement('canvas');
   muestra.width = 1; muestra.height = 1;
   const ctxMuestra = muestra.getContext('2d', { willReadFrequently: true });
-  ctxMuestra.drawImage(canvasOrigenTrabajo,
-    Math.max(0, Math.min(Math.round(x), canvasOrigenTrabajo.width - 1)),
-    Math.max(0, Math.min(Math.round(y), canvasOrigenTrabajo.height - 1)), 1, 1, 0, 0, 1, 1);
+  ctxMuestra.drawImage(origen,
+    Math.max(0, Math.min(Math.floor(x), origen.width - 1)),
+    Math.max(0, Math.min(Math.floor(y), origen.height - 1)), 1, 1, 0, 0, 1, 1);
   const px = ctxMuestra.getImageData(0, 0, 1, 1).data;
   capa.mascara.color = { r: px[0], g: px[1], b: px[2] };
   actualizarControlesSeleccion();
@@ -3371,6 +3470,8 @@ botonMoverCapa.addEventListener('click', () => {
 function agregarCapaDeContenido(contenido, nombre) {
   const capa = crearCapa(nombre);
   capa.contenido = contenido;
+  // Color, luz y la IA de su máscara miden sobre este contenido, no la foto.
+  capa.mascara.fuente = 'capa';
   capa._nombreAuto = nombre;
   insertarItemNuevo(capa);
   herramientaLienzo = 'transformar';

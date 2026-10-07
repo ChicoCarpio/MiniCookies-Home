@@ -14,6 +14,12 @@
 // punto (blanco opaco = entera, transparente = nada), o null si es "toda la
 // imagen" sin retoques (el caso común, sin costo).
 //
+// Una capa con contenido propio (texto o imagen) puede medir color, luz y la
+// IA sobre ESE contenido en vez de la foto ("fuente": 'capa'). Entonces la
+// base se calcula en las coordenadas del contenido y quien llama la coloca
+// con la misma transformación ("colocar"): sigue al objeto si se mueve,
+// escala o gira. Degradado y pincel quedan en las coordenadas de la foto.
+//
 // Color y luz se calculan píxel a píxel sobre la imagen original: van a una
 // caché ("memo", una por capa) y solo se rehacen si cambia su configuración o
 // la imagen. Con memo, además, se reusan los lienzos de un render al
@@ -36,6 +42,7 @@ window.MascarasCapa = (function () {
       tolerancia: 30,
       luz: { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 },
       objeto: null, // {x,y} en 0..1: el objeto que se tocó (null = el sujeto principal)
+      fuente: 'foto', // 'foto' | 'capa': sobre qué se miden color, luz y la IA
     };
   }
 
@@ -51,6 +58,7 @@ window.MascarasCapa = (function () {
       tolerancia: Number.isFinite(m.tolerancia) ? m.tolerancia : n.tolerancia,
       luz: { ...n.luz, ...(m.luz || {}) },
       objeto: m.objeto && Number.isFinite(m.objeto.x) && Number.isFinite(m.objeto.y) ? { x: m.objeto.x, y: m.objeto.y } : null,
+      fuente: m.fuente === 'capa' ? 'capa' : 'foto',
     };
   }
 
@@ -217,7 +225,10 @@ window.MascarasCapa = (function () {
   // sumar/quitar: lienzos del pincel, o null si no se pintó nada.
   // ia: { sujeto, objeto } de la IA (para primer plano y fondo); lo que
   // todavía no esté listo hace que esas bases no marquen nada mientras tanto.
-  function crear(m, origen, sumar, quitar, ancho, alto, memo = null, ia = null) {
+  // colocar(base, destino): solo si se mide sobre el contenido de la capa;
+  // "origen" y la IA son entonces de ese contenido, a su propio tamaño, y
+  // colocar dibuja la base en "destino" transformada como el contenido.
+  function crear(m, origen, sumar, quitar, ancho, alto, memo = null, ia = null, colocar = null) {
     m = normalizar(m);
     if (esTodaLaImagen(m, quitar)) return null;
     // Color sin color elegido todavía: como "toda" (igual que antes).
@@ -227,10 +238,13 @@ window.MascarasCapa = (function () {
     const final = lienzo(ancho, alto, memo ? memo.final : null);
     if (memo) memo.final = final;
     const ctx = final.getContext('2d');
+    // Color, luz y la IA: a tamaño de trabajo, o al del contenido de la capa.
+    const anchoBase = colocar ? origen.width : ancho, altoBase = colocar ? origen.height : alto;
+    const ponerBase = (c) => (colocar ? colocar(c, final) : ctx.drawImage(c, 0, 0));
     if (base === 'toda') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ancho, alto); }
     else if (base === 'degradado') dibujarDegradado(ctx, m.degradado, ancho, alto);
-    else if (base === 'color' || base === 'luz') ctx.drawImage(basePorPixel({ ...m, base }, origen, ancho, alto, memo), 0, 0);
-    else if (base === 'sujeto' || base === 'fondo') ctx.drawImage(baseDeSujeto(m, ia, ancho, alto, memo), 0, 0);
+    else if (base === 'color' || base === 'luz') ponerBase(basePorPixel({ ...m, base }, origen, anchoBase, altoBase, memo));
+    else if (base === 'sujeto' || base === 'fondo') ponerBase(baseDeSujeto(m, ia, anchoBase, altoBase, memo));
     // 'nada': queda vacía; solo cuenta lo pintado.
 
     if (sumar && base !== 'toda') ctx.drawImage(sumar, 0, 0, ancho, alto);
