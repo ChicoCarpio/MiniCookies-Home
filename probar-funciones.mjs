@@ -1517,6 +1517,108 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · la IA analizó ' + tamanos.join(', ');
   });
 
+  // Borrar a transparente: con la capa de la foto elegida borra la foto (queda
+  // transparente, también bajo una capa de ajuste); con una capa de imagen,
+  // borra esa imagen y lo borrado la acompaña al moverla. Foto JPG gris de
+  // 200x100 -> la descarga pasa a PNG. Con eventos de puntero de verdad.
+  await prueba('editor avanzado: borrar a transparente (foto, capa, mover, descarga PNG, proyecto, restaurar)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const lienzoArchivo = async (ancho, alto, dibujar, nombre, tipo) => {
+      const c = D().createElement('canvas'); c.width = ancho; c.height = alto; dibujar(c.getContext('2d'));
+      const b = await new Promise((r) => c.toBlob(r, tipo, 0.95));
+      return new (W().File)([b], nombre, { type: tipo });
+    };
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([await lienzoArchivo(200, 100, (cx) => { cx.fillStyle = 'rgb(128,128,128)'; cx.fillRect(0, 0, 200, 100); }, 'gris.jpg', 'image/jpeg')]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual'), 15000), 'la imagen no se cargó');
+    const capaFoto = W().capaActiva();
+    const lienzo = D().getElementById('canvasTrabajo');
+    const clic = (sel) => D().querySelector(sel).click();
+    const puntero = (tipo, x) => {
+      const r = lienzo.getBoundingClientRect();
+      lienzo.dispatchEvent(new (W().PointerEvent)(tipo, { bubbles: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, buttons: tipo === 'pointerup' ? 0 : 1,
+        clientX: r.left + (x / 200) * r.width, clientY: r.top + r.height / 2 }));
+    };
+    const trazo = (desde, hasta_) => { puntero('pointerdown', desde); puntero('pointermove', (desde + hasta_) / 2); puntero('pointermove', hasta_); puntero('pointerup', hasta_); };
+    // "gris", "rojo", "transparente" o los valores, en x (de 0..200) a media altura.
+    const ver = (cv, x) => {
+      const d = cv.getContext('2d').getImageData(Math.round(x * cv.width / 200), Math.round(cv.height / 2), 1, 1).data;
+      if (d[3] < 10) return 'transparente';
+      if (d[3] < 245) return 'semi' + d[3];
+      if (d[0] > 200 && d[2] < 60) return 'rojo';
+      return Math.abs(d[0] - d[2]) < 8 ? 'gris' + (d[0] > 160 ? '+' : '') : d.join(',');
+    };
+    const leer = async (xs) => { await esperar(300); return xs.map((x) => ver(lienzo, x)).join(' '); };
+    const h = {};
+    const tamano = D().getElementById('tamanoPincelAvanzado');
+    const factor = lienzo.width / lienzo.getBoundingClientRect().width;
+    tamano.value = Math.max(6, Math.round(14 / factor)); tamano.dispatchEvent(new (W().Event)('input'));
+
+    clic('#herramientasLienzo [data-herramienta="borrar"]');
+    afirmar(D().getElementById('notaBorrar').textContent === W().t('nota-borrar-foto'), 'la nota no dice que borra la foto: ' + D().getElementById('notaBorrar').textContent);
+    afirmar(D().getElementById('botonRestaurarBorrado').disabled, '"Restaurar" habilitado sin haber borrado nada');
+    trazo(20, 30);
+    h.foto = await leer([25, 100, 160]);
+    afirmar(h.foto === 'transparente gris gris', 'borrar la foto: ' + h.foto);
+    afirmar(D().getElementById('notaDescargaPng').style.display !== 'none', 'no avisa que la descarga sale en PNG');
+
+    // Una capa de ajuste encima no rellena el agujero.
+    capaFoto.ajustes.exposicion = 60; W().programarRenderizado();
+    h.conAjuste = await leer([25, 100]);
+    afirmar(h.conAjuste === 'transparente gris+', 'con exposición: ' + h.conAjuste);
+
+    // Una imagen roja de 100x50 como capa (x 50..150): borrar en x 120..130 borra la imagen.
+    const entradaCapa = D().getElementById('entradaImagenCapa');
+    entradaCapa.files = archivos([await lienzoArchivo(100, 50, (cx) => { cx.fillStyle = '#f00'; cx.fillRect(0, 0, 100, 50); }, 'rojo.png', 'image/png')]).files;
+    entradaCapa.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().capaActiva() && W().capaActiva().contenido, 5000), 'la imagen no entró como capa');
+    const capa = W().capaActiva();
+    clic('#herramientasLienzo [data-herramienta="borrar"]');
+    afirmar(D().getElementById('notaBorrar').textContent === W().t('nota-borrar-capa'), 'la nota no dice que borra la capa');
+    trazo(120, 130);
+    h.capa = await leer([25, 75, 125]);
+    afirmar(h.capa === 'transparente rojo gris+', 'borrar la capa: ' + h.capa);
+    afirmar(capa.borrado && capa.borrado.width === 100, 'lo borrado de la capa no está a su tamaño: ' + (capa.borrado && capa.borrado.width));
+    // Movida a la izquierda (x 0..100): el hueco va con ella (x 75) y tapa el de la foto.
+    capa.contenido.centro = { x: 0.25, y: 0.5 }; W().programarRenderizado();
+    h.movida = await leer([25, 75, 125]);
+    afirmar(h.movida === 'rojo gris+ gris+', 'la capa movida: ' + h.movida);
+    capa.contenido.centro = { x: 0.5, y: 0.5 }; W().programarRenderizado();
+
+    // Descarga: JPG -> PNG con el agujero.
+    D().getElementById('botonDescargarAvanzado').click();
+    const enlace = D().getElementById('enlaceDescarga');
+    afirmar(await hasta(() => enlace.href.startsWith('blob:'), 15000), 'la descarga no se generó');
+    const blob = await (await W().fetch(enlace.href)).blob();
+    afirmar(blob.type === 'image/png' && enlace.download.endsWith('.png'), 'la descarga no salió en PNG: ' + blob.type + ' ' + enlace.download);
+    const img = new (W().Image)(); img.src = enlace.href; await img.decode();
+    const cd = D().createElement('canvas'); cd.width = img.width; cd.height = img.height;
+    cd.getContext('2d').drawImage(img, 0, 0);
+    h.descarga = [25, 75, 125].map((x) => ver(cd, x)).join(' ');
+    afirmar(h.descarga === 'transparente rojo gris+', 'descarga: ' + h.descarga);
+
+    // Proyecto: guardar (lo mismo que arma el botón) y volver a abrir.
+    const proyecto = {
+      version: 6, imagen: W().crearCanvasConImagen(W().eval('imagenActual'), 200, 100).toDataURL('image/jpeg', 0.95), nombreArchivo: 'gris.jpg',
+      capaActivaId: capaFoto.id, capas: W().eval('capas').map(W().itemAProyecto), borradoFoto: W().canvasADataUrl(W().eval('borradoFoto')),
+    };
+    const entradaProyecto = D().getElementById('entradaProyecto');
+    entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'p.json', { type: 'application/json' })]).files;
+    entradaProyecto.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('capas').length === 2 && W().eval('capas')[1].borrado, 10000), 'el proyecto no abrió con lo borrado de la capa');
+    h.proyecto = await leer([25, 75, 125]);
+    afirmar(h.proyecto === 'transparente rojo gris+', 'proyecto: ' + h.proyecto);
+
+    // Restaurar lo borrado de la foto (la capa de la foto está elegida).
+    clic('#herramientasLienzo [data-herramienta="borrar"]');
+    clic('#botonRestaurarBorrado');
+    h.restaurada = await leer([25, 125]);
+    afirmar(h.restaurada === 'gris+ gris+', 'restaurar la foto: ' + h.restaurada);
+    afirmar(D().getElementById('notaDescargaPng').style.display === 'none', 'sigue avisando PNG sin nada borrado de la foto');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · ' + blob.type;
+  });
+
   for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);

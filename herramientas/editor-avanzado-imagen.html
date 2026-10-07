@@ -145,8 +145,9 @@
   /* --- Panel de lienzo: selección de capa activa --- */
   .zona-lienzo-contenedor { max-width: 100%; max-height: 100%; overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; }
   .zona-lienzo { position: relative; touch-action: none; }
-  #canvasTrabajo { display: block; cursor: grab; }
-  .zona-lienzo.modo-pincel #canvasTrabajo { cursor: none; }
+  /* El cuadriculado se ve donde la imagen quedó transparente (borrador). */
+  #canvasTrabajo { display: block; cursor: grab; background: repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 50% / 16px 16px; }
+  .zona-lienzo.modo-pincel #canvasTrabajo, .zona-lienzo.modo-borrar #canvasTrabajo { cursor: none; }
   #cursorPincelAvanzado {
     position: absolute; border: 2px solid var(--azul); background: rgba(231,164,89,0.2);
     border-radius: 50%; box-sizing: border-box; pointer-events: none; transform: translate(-50%,-50%); display: none;
@@ -211,6 +212,11 @@ window.i18nPagina = {
     'base-sujeto': 'Primer plano',
     'base-fondo': 'Fondo',
     'herr-objeto': '👆 Elegir objeto',
+    'herr-borrar': '🧽 Borrar a transparente',
+    'nota-borrar-capa': 'Borra partes de esta capa: se ve lo que hay debajo.',
+    'nota-borrar-foto': 'Borra partes de la foto: quedan transparentes.',
+    'boton-restaurar-borrado': 'Restaurar lo borrado',
+    'nota-descarga-png': 'Sale en PNG, para que lo borrado quede transparente.',
     'ayuda-objeto': 'Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella.',
     'fondo-listo-objeto': 'Fondo: todo menos el objeto elegido.',
     'ia-buscando-objeto': 'Buscando el objeto que tocaste…',
@@ -407,6 +413,11 @@ window.i18nPagina = {
     'base-sujeto': 'Foreground',
     'base-fondo': 'Background',
     'herr-objeto': '👆 Pick object',
+    'herr-borrar': '🧽 Erase to transparent',
+    'nota-borrar-capa': 'Erases parts of this layer: what is underneath shows through.',
+    'nota-borrar-foto': 'Erases parts of the photo: they become transparent.',
+    'boton-restaurar-borrado': 'Restore what was erased',
+    'nota-descarga-png': 'Saved as PNG, so the erased parts stay transparent.',
     'ayuda-objeto': 'With "Pick object", tap anything in the photo (a flower, a person) to keep only that.',
     'fondo-listo-objeto': 'Background: everything but the picked object.',
     'ia-buscando-objeto': 'Finding the object you tapped…',
@@ -652,9 +663,11 @@ window.i18nPagina = {
                 <button type="button" data-herramienta="degradado" data-i18n="herr-degradado">↘ Trazar degradado</button>
                 <button type="button" data-herramienta="transformar" data-i18n="herr-transformar-corto">✥ Mover la capa</button>
                 <button type="button" data-herramienta="objeto" data-i18n="herr-objeto">👆 Elegir objeto</button>
+                <button type="button" data-herramienta="borrar" data-i18n="herr-borrar">🧽 Borrar a transparente</button>
               </div>
 
               <div id="controlesPincelAvanzado" style="display:none;" class="controles controles-apilados">
+                <span class="nota-lateral" id="notaBorrar" role="status" aria-live="polite" style="display:none;"></span>
                 <div class="modos" id="modosPincelAvanzado">
                   <button type="button" class="activo" data-modo-pincel="sumar" data-i18n="modo-pincel-sumar">＋ Sumar</button>
                   <button type="button" data-modo-pincel="quitar" data-i18n="modo-pincel-quitar">－ Quitar</button>
@@ -669,6 +682,7 @@ window.i18nPagina = {
                   <input type="range" id="durezaPincel" min="10" max="100" value="70">
                 </label>
                 <button type="button" id="botonBorrarMascaraCapa" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:5px 10px; font-size:0.78rem;" data-i18n="boton-borrar-mascara">Borrar todo lo pintado</button>
+                <button type="button" class="boton-capa-accion" id="botonRestaurarBorrado" style="display:none;" data-i18n="boton-restaurar-borrado">Restaurar lo borrado</button>
               </div>
 
               <span class="titulo-mascara">
@@ -856,6 +870,7 @@ window.i18nPagina = {
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
                 <button class="boton" id="botonDescargarAvanzado" data-i18n="boton-descargar">Descargar imagen</button>
+                <span class="nota-lateral" id="notaDescargaPng" style="display:none;" data-i18n="nota-descarga-png">Sale en PNG, para que lo borrado quede transparente.</span>
                 <button type="button" id="botonRestablecerAvanzado" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-reiniciar">Reiniciar todo</button>
                 <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
                 <button type="button" id="botonGuardarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-guardar-proyecto">💾 Guardar proyecto</button>
@@ -1152,6 +1167,7 @@ const valorPincelAvanzado = document.getElementById('valorPincelAvanzado');
 const elZoomAvanzado = document.getElementById('zoomAvanzado');
 const valorZoomAvanzado = document.getElementById('valorZoomAvanzado');
 const botonBorrarMascaraCapa = document.getElementById('botonBorrarMascaraCapa');
+const botonRestaurarBorrado = document.getElementById('botonRestaurarBorrado');
 const muestraColorObjetivo = document.getElementById('muestraColorObjetivo');
 const elToleranciaColor = document.getElementById('toleranciaColor');
 const valorToleranciaColor = document.getElementById('valorToleranciaColor');
@@ -1297,6 +1313,11 @@ const cacheRaiz = { entrada: null, items: [] };
 // esto, cada trazo de pincel volvía a correr el pipeline entero (incluido el
 // desenfoque de Claridad y la dispersión de luz) sobre la imagen completa.
 const cacheColorPorCapa = new Map(); // id -> { firma, origen, ancho, alto, canvas }
+// Lo borrado de la foto con "Borrar a transparente" (alfa = cuánto), a tamaño
+// de trabajo, o null si no se borró nada. Lo borrado de una capa de texto o
+// imagen es de esa capa (capa.borrado, ver fuenteVisible).
+let borradoFoto = null;
+let versionBorradoFoto = 0;
 let zoomActual = 1;
 let panelAjustePorColor = null; // se crea más abajo, junto al resto del panel de ajustes
 
@@ -1678,7 +1699,7 @@ function firmaDeCapa(capa) {
   return JSON.stringify([
     capa.visible, capa.opacidad, capa.modoFusion, capa.mascara,
     capa.ajustes, capa.contenido ? ContenidoCapa.firma(capa.contenido) : null,
-    capa._versionMascara || 0,
+    capa._versionMascara || 0, capa._versionBorrado || 0,
   ]);
 }
 
@@ -1847,13 +1868,31 @@ function fuenteDeContenido(capa) {
   return memo.fuente;
 }
 
+// La fuente sin lo que se borró de ella con "Borrar a transparente". Lo
+// borrado está en las coordenadas de la fuente, así acompaña a la capa si se
+// mueve o gira; si la fuente cambia de tamaño (un texto editado), se estira.
+function fuenteVisible(capa) {
+  const fuente = fuenteDeContenido(capa);
+  if (!capa.borrado) return fuente;
+  const memo = memoDeContenido(capa);
+  if (memo.visible && memo.visibleDe === fuente && memo.visibleVersion === capa._versionBorrado) return memo.visible;
+  const c = document.createElement('canvas');
+  c.width = fuente.width; c.height = fuente.height;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(fuente, 0, 0);
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.drawImage(capa.borrado, 0, 0, c.width, c.height);
+  Object.assign(memo, { visible: c, visibleDe: fuente, visibleVersion: capa._versionBorrado });
+  return c;
+}
+
 function lienzoDeContenido(capa, ancho, alto, escalaVista, enVivo) {
   const memo = memoDeContenido(capa);
-  const firma = ContenidoCapa.firma(capa.contenido);
+  const firma = ContenidoCapa.firma(capa.contenido) + '|' + (capa._versionBorrado || 0);
   if (enVivo && memo.lienzo && memo.firma === firma && memo.ancho === ancho && memo.alto === alto) return memo.lienzo;
   const lienzo = document.createElement('canvas');
   lienzo.width = ancho; lienzo.height = alto;
-  ContenidoCapa.dibujar(capa.contenido, fuenteDeContenido(capa), lienzo, escalaVista);
+  ContenidoCapa.dibujar(capa.contenido, fuenteVisible(capa), lienzo, escalaVista);
   if (enVivo) Object.assign(memo, { firma, ancho, alto, lienzo });
   return lienzo;
 }
@@ -1869,11 +1908,29 @@ function pixelesPorPuntoDePantalla() {
   return canvasTrabajo.width / Math.max(1, canvasTrabajo.getBoundingClientRect().width);
 }
 
+// La foto sin lo que se borró con "Borrar a transparente": es lo que entra a
+// la composición. En vivo se reusa mientras no se borre nada más (las cachés
+// de la composición reconocen la entrada por identidad).
+let fotoVisibleMemo = null;
+function fotoVisible(origen, ancho, alto, enVivo) {
+  if (!borradoFoto) return origen;
+  const m = fotoVisibleMemo;
+  if (enVivo && m && m.origen === origen && m.version === versionBorradoFoto && m.ancho === ancho && m.alto === alto) return m.lienzo;
+  const lienzo = document.createElement('canvas');
+  lienzo.width = ancho; lienzo.height = alto;
+  const ctx = lienzo.getContext('2d');
+  ctx.drawImage(origen, 0, 0, ancho, alto);
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.drawImage(borradoFoto, 0, 0, ancho, alto);
+  if (enVivo) fotoVisibleMemo = { origen, version: versionBorradoFoto, ancho, alto, lienzo };
+  return lienzo;
+}
+
 function renderizarComposicion() {
   if (!imagenActual || !canvasOrigenTrabajo) return;
   const ancho = anchoTrabajo, alto = altoTrabajo;
   const escala = ancho / imagenActual.naturalWidth;
-  const resultado = componerLista(capas, canvasOrigenTrabajo, ancho, alto, escala, cacheRaiz);
+  const resultado = componerLista(capas, fotoVisible(canvasOrigenTrabajo, ancho, alto, true), ancho, alto, escala, cacheRaiz);
   canvasTrabajo.width = ancho; canvasTrabajo.height = alto;
   ctxTrabajo.clearRect(0, 0, ancho, alto);
   ctxTrabajo.drawImage(resultado, 0, 0);
@@ -2316,7 +2373,16 @@ function actualizarControlesSeleccion() {
     b.classList.toggle('activo', b.dataset.base === m.base);
     b.setAttribute('aria-pressed', b.dataset.base === m.base);
   });
-  controlesPincelAvanzado.style.display = herramientaLienzo === 'pincel' ? 'flex' : 'none';
+  // "Borrar a transparente" usa el mismo tamaño y dureza que el pincel.
+  const borrando = herramientaLienzo === 'borrar';
+  controlesPincelAvanzado.style.display = herramientaLienzo === 'pincel' || borrando ? 'flex' : 'none';
+  document.getElementById('modosPincelAvanzado').style.display = borrando ? 'none' : '';
+  botonBorrarMascaraCapa.style.display = borrando ? 'none' : '';
+  botonRestaurarBorrado.style.display = borrando ? '' : 'none';
+  botonRestaurarBorrado.disabled = !(borraLaCapa(capa) ? capa.borrado : borradoFoto);
+  const notaBorrar = document.getElementById('notaBorrar');
+  notaBorrar.style.display = borrando ? '' : 'none';
+  notaBorrar.textContent = t(borraLaCapa(capa) ? 'nota-borrar-capa' : 'nota-borrar-foto');
   controlesDegradado.style.display = m.base === 'degradado' ? 'flex' : 'none';
   controlesColorAvanzado.style.display = m.base === 'color' ? 'flex' : 'none';
   controlesLuz.style.display = m.base === 'luz' ? 'flex' : 'none';
@@ -2333,6 +2399,7 @@ function actualizarControlesSeleccion() {
   });
   elInvertirMascara.checked = m.invertir;
   zonaLienzo.classList.toggle('modo-pincel', herramientaLienzo === 'pincel');
+  zonaLienzo.classList.toggle('modo-borrar', borrando);
   zonaLienzo.classList.toggle('modo-gotero', herramientaLienzo === 'gotero');
   zonaLienzo.classList.toggle('modo-degradado', herramientaLienzo === 'degradado');
   zonaLienzo.classList.toggle('modo-transformar', herramientaLienzo === 'transformar');
@@ -2620,6 +2687,78 @@ document.querySelectorAll('#modosPincelAvanzado button').forEach((boton) => {
   });
 });
 
+// --- Borrar a transparente ---
+// Borra la capa activa: una capa de texto o imagen pierde esa parte de su
+// contenido (se ve lo de abajo); con cualquier otra, se borra la foto, que
+// queda transparente. Lo borrado de una capa va en las coordenadas de su
+// contenido (la acompaña al moverla); el de la foto, a tamaño de trabajo.
+let borradoAntesDelTrazo = null; // copia, por si el trazo era el comienzo de un pellizco
+
+function borraLaCapa(item) { return !!item && !esGrupo(item) && !!item.contenido; }
+
+// El lienzo donde borra el trazo, el punto y el radio en sus coordenadas.
+function destinoDelBorrador(e) {
+  const item = itemActivo();
+  if (!item) return null;
+  const p = coordenadasEnCanvasTrabajo(e);
+  const radio = radioPincelEnMascara();
+  if (!borraLaCapa(item)) {
+    if (!borradoFoto) {
+      borradoFoto = document.createElement('canvas');
+      borradoFoto.width = anchoTrabajo; borradoFoto.height = altoTrabajo;
+    }
+    return { lienzo: borradoFoto, punto: p, radio };
+  }
+  const fuente = fuenteDeContenido(item);
+  if (!item.borrado) {
+    item.borrado = document.createElement('canvas');
+    item.borrado.width = fuente.width; item.borrado.height = fuente.height;
+  }
+  const k = cajaDeContenido(item), c = item.contenido;
+  const local = ContenidoCapa.puntoLocal(k, p.x, p.y);
+  const enFuente = item.borrado.width / (2 * k.mx);
+  return {
+    lienzo: item.borrado,
+    punto: {
+      x: (c.voltearH ? -local.x : local.x) * enFuente + item.borrado.width / 2,
+      y: (c.voltearV ? -local.y : local.y) * (item.borrado.height / (2 * k.my)) + item.borrado.height / 2,
+    },
+    radio: radio * enFuente,
+  };
+}
+
+function borradoCambio() {
+  const item = itemActivo();
+  if (borraLaCapa(item)) item._versionBorrado = (item._versionBorrado || 0) + 1;
+  else versionBorradoFoto += 1;
+  botonRestaurarBorrado.disabled = false;
+  actualizarAvisoDescargaPng();
+  programarRenderizado();
+}
+
+// Con la foto borrada, una foto JPG se descarga como PNG (JPG no guarda
+// transparencia): se avisa al lado del botón.
+function descargaPasaAPng() {
+  return !!borradoFoto && !!archivoActual && formatoDeSalida(archivoActual) === 'image/jpeg';
+}
+function actualizarAvisoDescargaPng() {
+  document.getElementById('notaDescargaPng').style.display = descargaPasaAPng() ? '' : 'none';
+}
+
+botonRestaurarBorrado.addEventListener('click', () => {
+  const item = itemActivo();
+  if (!item) return;
+  if (borraLaCapa(item)) {
+    item.borrado = null;
+    item._versionBorrado = (item._versionBorrado || 0) + 1;
+  } else {
+    borradoFoto = null;
+    versionBorradoFoto += 1;
+  }
+  actualizarAvisoDescargaPng();
+  actualizarControlesSeleccion();
+});
+
 // --- Arrastrar para mover la imagen (cuando el pincel NO está activo) ---
 let paneando = false;
 let panInicio = null;
@@ -2739,7 +2878,7 @@ function moverCursorPincel(e) {
 
 canvasTrabajo.addEventListener('pointerenter', (e) => {
   const capa = itemActivo();
-  if (!capa || herramientaLienzo !== 'pincel') return;
+  if (!capa || (herramientaLienzo !== 'pincel' && herramientaLienzo !== 'borrar')) return;
   actualizarTamanoCursorPincel();
   moverCursorPincel(e);
   cursorPincelAvanzado.classList.add('visible');
@@ -2802,6 +2941,18 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
     return;
   }
 
+  if (herramientaLienzo === 'borrar') {
+    const destino = destinoDelBorrador(e);
+    if (!destino) return;
+    pintando = true;
+    borradoAntesDelTrazo = { lienzo: destino.lienzo, copia: copiaDeLienzo(destino.lienzo) };
+    canvasTrabajo.setPointerCapture(e.pointerId);
+    ultimoPuntoPincel = destino.punto;
+    pintarPunto(destino.lienzo.getContext('2d'), destino.punto, destino.radio, durezaPincelActual());
+    borradoCambio();
+    return;
+  }
+
   const lienzos = lienzosPincelActivos();
   if (!lienzos) return;
   pintando = true;
@@ -2817,7 +2968,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
 });
 canvasTrabajo.addEventListener('pointermove', (e) => {
   const capa = itemActivo();
-  if (capa && herramientaLienzo === 'pincel') moverCursorPincel(e);
+  if (capa && (herramientaLienzo === 'pincel' || herramientaLienzo === 'borrar')) moverCursorPincel(e);
 
   if (trazandoDegradado && capa) {
     capa.mascara.degradado.b = puntoRelativo(e);
@@ -2855,6 +3006,14 @@ canvasTrabajo.addEventListener('pointermove', (e) => {
   }
 
   if (!pintando) return;
+  if (herramientaLienzo === 'borrar') {
+    const destino = destinoDelBorrador(e);
+    if (!destino) return;
+    pintarTrazo(destino.lienzo.getContext('2d'), ultimoPuntoPincel, destino.punto, destino.radio, durezaPincelActual());
+    ultimoPuntoPincel = destino.punto;
+    borradoCambio();
+    return;
+  }
   const punto = coordenadasEnCanvasTrabajo(e);
   const desde = ultimoPuntoPincel, radio = radioPincelEnMascara(), dureza = durezaPincelActual();
   estamparPincel((ctx, modo) => pintarTrazo(ctx, desde, punto, radio, dureza, modo));
@@ -2869,6 +3028,7 @@ function terminarGestoLienzo() {
   degradadoAntesDelArrastre = null;
   ultimoPuntoPincel = null;
   mascaraAntesDelTrazo = null;
+  borradoAntesDelTrazo = null;
   paneando = false;
   panInicio = null;
   zonaLienzo.classList.remove('paneando');
@@ -2878,6 +3038,13 @@ function terminarGestoLienzo() {
 // no era lo que el usuario quería, era el comienzo de un pellizco.
 function cancelarGestoDeUnDedo() {
   const capa = itemActivo();
+  if (pintando && borradoAntesDelTrazo) {
+    const { lienzo, copia } = borradoAntesDelTrazo;
+    const ctx = lienzo.getContext('2d');
+    ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+    ctx.drawImage(copia, 0, 0);
+    borradoCambio();
+  }
   if (capa && pintando && mascaraAntesDelTrazo) {
     for (const [lienzo, antes] of [[capa.pincelSumar, mascaraAntesDelTrazo.sumar], [capa.pincelQuitar, mascaraAntesDelTrazo.quitar]]) {
       const ctx = lienzo.getContext('2d');
@@ -3690,7 +3857,15 @@ elResolucionVistaPrevia.addEventListener('change', () => {
   if (!imagenActual) return;
   const anchoAnterior = anchoTrabajo;
   prepararResolucionTrabajo();
-  // Lo ya pintado con el pincel se reescala al nuevo tamaño de trabajo.
+  // Lo ya pintado con el pincel (y lo borrado de la foto) se reescala al
+  // nuevo tamaño de trabajo.
+  if (borradoFoto) {
+    const cb = document.createElement('canvas');
+    cb.width = anchoTrabajo; cb.height = altoTrabajo;
+    cb.getContext('2d').drawImage(borradoFoto, 0, 0, anchoTrabajo, altoTrabajo);
+    borradoFoto = cb;
+    versionBorradoFoto += 1;
+  }
   for (const capa of todosLosItems()) {
     for (const clave of ['pincelSumar', 'pincelQuitar']) {
       if (!capa[clave]) continue;
@@ -3718,6 +3893,9 @@ async function mostrarArchivo(archivo) {
   Object.assign(contadorNombres, { capa: 0, grupo: 0 });
   capas = [crearCapa()];
   capaActivaId = capas[0].id;
+  borradoFoto = null;
+  versionBorradoFoto += 1;
+  actualizarAvisoDescargaPng();
 
   editorCompleto.style.display = 'block';
   zonaArrastre.style.display = 'none';
@@ -3744,6 +3922,9 @@ botonRestablecerAvanzado.addEventListener('click', () => {
   Object.assign(contadorNombres, { capa: 0, grupo: 0 });
   capas = [crearCapa()];
   capaActivaId = capas[0].id;
+  borradoFoto = null;
+  versionBorradoFoto += 1;
+  actualizarAvisoDescargaPng();
   sincronizarPanelesConActivo();
   pintarListaCapas();
   programarRenderizado();
@@ -3754,7 +3935,7 @@ botonRestablecerAvanzado.addEventListener('click', () => {
 function hayCambios() {
   const neutro = JSON.stringify(AJUSTES_NEUTROS);
   const todos = todosLosItems();
-  return todos.length > 1 || todos.some((c) => esGrupo(c) || !!c.contenido || !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
+  return todos.length > 1 || !!borradoFoto || todos.some((c) => esGrupo(c) || !!c.contenido || !MascarasCapa.esTodaLaImagen(c.mascara, c.pincelQuitar) || c.opacidad !== 100 || c.modoFusion !== 'normal' || JSON.stringify({ ...AJUSTES_NEUTROS, ...c.ajustes }) !== neutro);
 }
 document.getElementById('botonCambiarImagen').addEventListener('click', () => {
   if (hayCambios() && !confirm(t('confirmar-cambiar'))) return;
@@ -3799,13 +3980,13 @@ botonDescargarAvanzado.addEventListener('click', async () => {
     canvasOrigenTrabajo = canvasOrigenCompleto;
     anchoTrabajo = ancho; altoTrabajo = alto;
 
-    const resultadoFinal = componerLista(capas, canvasOrigenCompleto, ancho, alto, 1, null);
+    const resultadoFinal = componerLista(capas, fotoVisible(canvasOrigenCompleto, ancho, alto, false), ancho, alto, 1, null);
     // toBlob necesita un lienzo propio (el resultado puede ser el origen mismo).
     const acumulado = document.createElement('canvas');
     acumulado.width = ancho; acumulado.height = alto;
     acumulado.getContext('2d').drawImage(resultadoFinal, 0, 0);
 
-    const formato = formatoDeSalida(archivoActual);
+    const formato = descargaPasaAPng() ? 'image/png' : formatoDeSalida(archivoActual);
     const blob = await new Promise((resolve) => acumulado.toBlob(resolve, formato, 0.92));
     if (urlDescargaAvanzada) URL.revokeObjectURL(urlDescargaAvanzada);
     urlDescargaAvanzada = URL.createObjectURL(blob);
@@ -3851,6 +4032,7 @@ function itemAProyecto(c) {
     const { lienzo, _idLienzo, ...resto } = c.contenido;
     capa.contenido = c.contenido.tipo === 'imagen' ? { ...resto, lienzo: lienzo.toDataURL('image/png') } : resto;
     capa.nombreAuto = c._nombreAuto || null;
+    capa.borrado = canvasADataUrl(c.borrado);
   }
   return capa;
 }
@@ -3858,11 +4040,12 @@ function itemAProyecto(c) {
 botonGuardarProyecto.addEventListener('click', () => {
   if (!imagenActual) return;
   const proyecto = {
-    version: 5, // 2: máscara con base + pincel para sumar y quitar; 3: grupos; 4: texto e imágenes; 5: grupos aislados (2026-10-04)
+    version: 6, // 2: máscara con base + pincel para sumar y quitar; 3: grupos; 4: texto e imágenes; 5: grupos aislados (2026-10-04); 6: borrar a transparente (2026-10-06)
     imagen: crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight).toDataURL(archivoActual.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.95),
     nombreArchivo: archivoActual.name,
     capaActivaId,
     capas: capas.map(itemAProyecto),
+    borradoFoto: canvasADataUrl(borradoFoto),
   };
   const blob = new Blob([JSON.stringify(proyecto)], { type: 'application/json' });
   const enlace = document.createElement('a');
@@ -3935,6 +4118,12 @@ async function itemDeProyecto(c) {
     capa.contenido = { ...ContenidoCapa.textoNuevo('', 100), ...c.contenido };
   }
   if (c.nombreAuto) capa._nombreAuto = c.nombreAuto;
+  // Lo borrado del contenido va al tamaño de su fuente, no al de trabajo.
+  if (capa.contenido && c.borrado) {
+    const img = await cargarDataUrlComoImagen(c.borrado);
+    capa.borrado = crearCanvasConImagen(img, img.naturalWidth, img.naturalHeight);
+    capa._versionBorrado = 1;
+  }
   return capa;
 }
 
@@ -3956,6 +4145,9 @@ entradaProyecto.addEventListener('change', async (e) => {
 
   versionProyectoCargando = Number(proyecto.version) || 1;
   capas = await Promise.all((proyecto.capas || []).map(itemDeProyecto));
+  borradoFoto = await lienzoDeDataUrl(proyecto.borradoFoto);
+  versionBorradoFoto += 1;
+  actualizarAvisoDescargaPng();
   if (!cantidadDeCapas()) capas.push(crearCapa());
   capaActivaId = proyecto.capaActivaId && ubicar(proyecto.capaActivaId) ? proyecto.capaActivaId : capas[capas.length - 1].id;
 
