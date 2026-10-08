@@ -309,6 +309,74 @@ nunca en una página. Para la vista previa en vivo el motor recibe `scratch`
 (canvases de repuesto) y `memo` (lo que depende solo de la imagen); quien llama
 vacía el memo cuando cambia la imagen de entrada.
 
+### Esqueleto de PC de los editores de imagen (2026-10-08)
+
+Lo maneja `assets/js/esqueleto-editor.js` + la sección "Esqueleto de PC" de
+`assets/css/editor-imagen.css` (plan del rediseño, fase 6). Con **901 px o más
+y una foto cargada**, el editor ocupa toda la ventana debajo del encabezado del
+sitio (que queda fijo arriba) y se arma así:
+
+```
+┌ barra superior: ↶ ↷ │ 👁 Original │ − 100% + ⤢ │ vista │ ⛶ │  [Descargar] ⋯ ┐
+├──┬──────────────────┬────────────────────────────────────────────────────┤
+│🗂│ Editando: …      │                                                    │
+│☀️│ ☀️ LUZ           │                    escenario                       │
+│🎨│ (una categoría)  ├────────────────────────────────────────────────────┤
+│  │                  │      anuncio: franja propia de 90 px               │
+└──┴──────────────────┴────────────────────────────────────────────────────┘
+```
+
+Debajo de 900 px no hace nada: manda `app-movil.js` (sección 6). Los dos
+conviven porque **el esqueleto no mueve las categorías**.
+
+**El contrato:**
+
+| Marcador / opción | Dónde | Qué hace |
+|---|---|---|
+| `data-categoria="luz"` | cada bloque de controles (hijo directo de un panel del contenedor) | se ve solo con su categoría elegida; varios bloques pueden ser de la misma (Efectos = efectos + resplandor + dispersión) |
+| `orden` | `EsqueletoEditor.conectar` | categorías de la barra de íconos, con `'|'` como separador. Nombre e ícono salen del registro `CATEGORIAS` del módulo: **iguales en los tres editores** |
+| `barra` | ídem | los botones **reales** de la página (deshacer, rehacer, ⛶, descargar, el `<select>` de resolución, avisos cortos y los del menú "⋯") se **mudan** a la barra y vuelven a su lugar al pasar a celular. `original` y `zoom` pueden ser funciones: el módulo arma el botón |
+| `editando` | ídem | arma "Editando: …" arriba de la columna (solo el Editor avanzado) |
+| `alCambiarCategoria(cat)` | ídem | para lo que la página muda por su cuenta (los controles del pincel a "Borrar", la tira de fotos a "Fotos"). Con `null` el esqueleto se apagó: devolver todo |
+| `data-sin-esqueleto` | cualquier elemento | no se ve en PC (lo que la barra ya resuelve, como "Mantené presionado para ver el original") |
+
+Qué garantiza:
+
+- **Una sola categoría a la vista.** Tocar la abierta cierra la columna (la
+  imagen gana ancho). Teclas **1–9 y 0** en el orden de la barra; **Tab**
+  esconde la columna **solo en pantalla completa** (afuera sigue recorriendo
+  la página).
+- **El anuncio en su franja**, de 90 px fijos y sin nada encima; se muda con
+  `AppMovil.moverSinRecargar` y vuelve. Como ya está adentro del contenedor,
+  `pantalla-completa.js` no lo toca.
+- **Descargar desde la barra baja el archivo** (toca el enlace que arma el
+  editor), solo con un clic de verdad: las pruebas tocan el botón y leen el
+  enlace sin bajar nada.
+- El menú "⋯" y la lista de "Editando" viven dentro del editor: se ven también
+  en pantalla completa.
+
+Trampas ya pagadas:
+
+- **Al pasar de celular a PC, el esqueleto se arma en el turno siguiente**
+  (`setTimeout`): `app-movil.js` primero devuelve el anuncio a su lugar, y si
+  el esqueleto se lo llevaba antes, `app-movil` se lo sacaba de la franja. Al
+  revés (PC → celular) se apaga enseguida, y solo devuelve el anuncio si
+  todavía está en su franja.
+- **Un contenedor con `align-items: start`** (el collage) dejaba la barra de
+  íconos y la columna cortas y el collage desbordado: el esqueleto re-afirma
+  `align-items: stretch`.
+- **`.modos { display: flex }` le gana al atributo `hidden`**: un `.modos`
+  que se esconde con `hidden` necesita su `[hidden] { display: none }`.
+- **`typeof` sobre un `const` que todavía no se inicializó lanza error**: si
+  una función de la página puede correr antes de conectar el esqueleto,
+  declararlo con `let esqueleto = null` (o `var`) arriba.
+
+`npm run revisar` comprueba, con el editor abierto a 1366×768, que el
+escenario sea al menos el 50 % de la pantalla, que el anuncio mida 90 px sin
+nada encima y que se vea una sola categoría; al terminar dice en qué páginas
+lo revisó. `npm run probar` (`esqueleto de PC`) recorre los tres editores, lo
+contextual y la ida y vuelta a 390 px.
+
 ### D — Vista previa de documento
 
 Como B, con `.grid-miniaturas` / `.contenedor-miniaturas` dentro de

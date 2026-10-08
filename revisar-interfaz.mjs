@@ -168,6 +168,28 @@ function medir(doc, win) {
   // 4. Toda página tiene un título visible.
   if (!doc.querySelector('h1')) fallas.push('la página no tiene <h1>');
 
+  // 5. Editores con el esqueleto de PC (assets/js/esqueleto-editor.js; plan,
+  //    fase 6): el lugar para la imagen es al menos la mitad de la pantalla,
+  //    el anuncio tiene su franja de alto fijo sin nada encima, y se ve una
+  //    sola categoría.
+  if (doc.body.classList.contains('ed-esqueleto-activo')) {
+    const escenario = doc.querySelector('.esqueleto-pc > [data-app-escenario]');
+    const r = escenario ? escenario.getBoundingClientRect() : null;
+    const parte = r ? (r.width * r.height) / (win.innerWidth * win.innerHeight) : 0;
+    if (parte < 0.5) fallas.push('el lugar para la imagen ocupa ' + Math.round(parte * 100) + '% de la pantalla (mínimo 50%)');
+    const aviso = doc.querySelector('.ed-anuncio-fila .anuncio');
+    if (!aviso || !visible(aviso)) {
+      fallas.push('el anuncio no está en su franja debajo de la imagen');
+    } else {
+      const ra = aviso.getBoundingClientRect();
+      if (Math.round(ra.height) !== 90) fallas.push('el anuncio mide ' + Math.round(ra.height) + 'px de alto (tiene que ser 90)');
+      const encima = doc.elementFromPoint(Math.round(ra.left + ra.width / 2), Math.round(ra.top + ra.height / 2));
+      if (!encima || !(aviso === encima || aviso.contains(encima))) fallas.push('algo tapa el anuncio: ' + (encima ? encima.className || encima.tagName : 'fuera de la pantalla'));
+    }
+    const abiertas = new Set([...doc.querySelectorAll('.ed-cat-visible')].map((b) => b.getAttribute('data-categoria')));
+    if (abiertas.size !== 1) fallas.push('categorías a la vista: ' + abiertas.size + ' (tiene que ser una)');
+  }
+
   return fallas;
 }
 `;
@@ -253,14 +275,14 @@ function archivoDePrueba(win) {
         if (editor) {
           editor.style.display = 'block';
           await esperar(150);
-          resultados.push({ ruta, vista: v, estado: 'editor abierto', fallas: medir(doc, win) });
+          resultados.push({ ruta, vista: v, estado: 'editor abierto', fallas: medir(doc, win), esqueleto: doc.body.classList.contains('ed-esqueleto-activo') });
         } else if (typeof win.agregarArchivos === 'function') {
           const archivo = await archivoDePrueba(win);
           const dt = new win.DataTransfer();
           dt.items.add(archivo);
           await win.agregarArchivos(dt.files);
           await esperar(150);
-          resultados.push({ ruta, vista: v, estado: 'con contenido', fallas: medir(doc, win) });
+          resultados.push({ ruta, vista: v, estado: 'con contenido', fallas: medir(doc, win), esqueleto: doc.body.classList.contains('ed-esqueleto-activo') });
         }
       } catch (e) {
         resultados.push({ ruta, vista: v, estado: 'editor abierto', fallas: ['no se pudo abrir el editor: ' + e.message] });
@@ -348,7 +370,9 @@ const resultados = JSON.parse(bruto[1].replace(/&(amp|lt|gt|quot|#39);/g, (e) =>
 const conFallas = resultados.filter((r) => r.fallas.length);
 
 if (!conFallas.length) {
-  console.log(`Interfaz OK — ${resultados.length} comprobaciones sobre ${paginas.length} páginas.`);
+  // Que las comprobaciones del esqueleto de PC corrieron de verdad (no solo que no fallaron).
+  const conEsqueleto = resultados.filter((r) => r.esqueleto).map((r) => r.ruta);
+  console.log(`Interfaz OK — ${resultados.length} comprobaciones sobre ${paginas.length} páginas; esqueleto de PC revisado en: ${conEsqueleto.join(', ') || 'ninguna'}.`);
   process.exit(0);
 }
 

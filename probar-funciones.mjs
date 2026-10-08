@@ -1351,7 +1351,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       const anuncio = D().querySelector('.anuncio'), padre = anuncio.parentNode, siguiente = anuncio.nextSibling;
       fingir(contenedor);
       await esperar(100);
-      const franja = contenedor.querySelector('.franja-anuncio-completa');
+      // En PC el esqueleto ya tiene el anuncio adentro, en su franja.
+      const franja = contenedor.querySelector('.franja-anuncio-completa, .ed-anuncio-fila');
       afirmar(contenedor.classList.contains('pantalla-completa-activa'), nombre + ': el contenedor no pasó a pantalla completa');
       afirmar(franja && franja.contains(anuncio) && franja.parentNode === contenedor, nombre + ': el anuncio no entró a su franja');
       afirmar(boton.getAttribute('aria-pressed') === 'true' && boton.title === W().t('title-salir-pantalla-completa'), nombre + ': el botón no dice "salir": ' + boton.title);
@@ -1847,6 +1848,120 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(W().itemAProyecto(capa).mascara.piezas[0].fuente === 'capa', 'el proyecto no guarda "Medir sobre"');
     afirmar(W().MascarasCapa.desdeV7({ base: 'color' }).piezas[0].fuente === 'foto', 'un proyecto viejo no sigue midiendo sobre la foto');
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · la IA analizó ' + tamanos.join(', ');
+  });
+
+  // Esqueleto de PC (2026-10-08, plan fase 6, assets/js/esqueleto-editor.js)
+  // en los tres editores: barra de íconos, una sola categoría a la vista, los
+  // botones reales en la barra superior, el anuncio en su franja, teclas 1–9,
+  // lo contextual (agregar un texto, una herramienta, tocar una foto), y que
+  // al pasar a 390 px todo vuelve a su lugar para app-movil.js (y al volver a
+  // PC, otra vez al esqueleto).
+  await prueba('esqueleto de PC (editor de color, avanzado y collage; ida y vuelta a celular)', async () => {
+    const h = {};
+    const el = (id) => D().getElementById(id);
+    const archivo = async (n = 1) => {
+      const c = D().createElement('canvas'); c.width = 300; c.height = 200;
+      const cx = c.getContext('2d'); cx.fillStyle = 'rgb(40,40,40)'; cx.fillRect(0, 0, 150, 200); cx.fillStyle = 'rgb(220,220,220)'; cx.fillRect(150, 0, 150, 200);
+      const b = await new Promise((r) => c.toBlob(r, 'image/png'));
+      return Array.from({ length: n }, (_, i) => new (W().File)([b], 'f' + i + '.png', { type: 'image/png' }));
+    };
+    const cargar = async (n = 1) => {
+      el('entradaArchivo').files = archivos(await archivo(n)).files;
+      el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+      afirmar(await hasta(() => D().body.classList.contains('ed-esqueleto-activo'), 15000), 'el esqueleto no se armó');
+      await esperar(200);
+    };
+    const visibles = () => [...new Set([...D().querySelectorAll('.ed-cat-visible')].map((b) => b.getAttribute('data-categoria')))].join(',');
+    const rail = () => [...D().querySelectorAll('.ed-rail button')].map((b) => b.getAttribute('data-ed-categoria')).join(',');
+    const categoria = (c) => D().querySelector('.ed-rail [data-ed-categoria="' + c + '"]').click();
+    const tecla = (key) => D().body.dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true }));
+    const enBarra = (id) => !!D().querySelector('.ed-barra #' + id);
+    const comprobarPc = (nombre, ids) => {
+      const fila = D().querySelector('.ed-anuncio-fila');
+      const anuncio = D().querySelector('.anuncio');
+      afirmar(fila && fila.contains(anuncio), nombre + ': el anuncio no está en su franja');
+      const alto = Math.round(anuncio.getBoundingClientRect().height);
+      afirmar(alto === 90, nombre + ': el anuncio mide ' + alto + ' px de alto');
+      const r = anuncio.getBoundingClientRect();
+      const encima = D().elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      afirmar(encima && (anuncio === encima || anuncio.contains(encima)), nombre + ': algo tapa el anuncio: ' + (encima && encima.className));
+      for (const id of ids) afirmar(enBarra(id), nombre + ': ' + id + ' no está en la barra');
+    };
+    const aCelularYVuelta = async (nombre, ids, volvio) => {
+      marco.style.width = '390px'; marco.style.height = '844px';
+      afirmar(await hasta(() => D().body.classList.contains('app-activo') && !D().body.classList.contains('ed-esqueleto-activo'), 5000), nombre + ': no pasó a celular');
+      await esperar(100);
+      for (const id of ids) afirmar(!enBarra(id) && el(id).isConnected, nombre + ': ' + id + ' no volvió a su lugar');
+      afirmar(!D().querySelector('.ed-barra, .ed-rail') || !D().querySelector('.ed-barra').isConnected, nombre + ': quedó la barra del esqueleto en celular');
+      afirmar(D().querySelector('.app-anuncio .anuncio'), nombre + ': en celular el anuncio no está en su tira');
+      afirmar(volvio(), nombre + ': lo mudado no volvió a su lugar');
+      marco.style.width = ''; marco.style.height = '';
+      afirmar(await hasta(() => D().body.classList.contains('ed-esqueleto-activo'), 5000), nombre + ': no volvió el esqueleto');
+      await esperar(150);
+      comprobarPc(nombre + ' (de vuelta)', ids);
+    };
+
+    // --- Editor de color ---
+    await abrir('/herramientas/Editor-de-color-de-imagen.html'); await esperar(300);
+    await cargar();
+    h.colorRail = rail();
+    afirmar(h.colorRail === 'luz,color,bn,efectos,filtros,textura', 'barra de íconos del de color: ' + h.colorRail);
+    afirmar(visibles() === 'luz', 'al abrir no se ve solo Luz: ' + visibles());
+    comprobarPc('color', ['botonDeshacer', 'botonRehacer', 'botonDescargar']);
+    afirmar(D().querySelector('.ed-menu #botonCambiarImagen') && D().querySelector('.ed-menu #botonRestablecer'), 'el menú ⋯ no tiene cambiar imagen y restablecer');
+    categoria('efectos');
+    h.efectos = D().querySelectorAll('.ed-cat-visible').length;
+    afirmar(visibles() === 'efectos' && h.efectos === 3, 'Efectos: ' + visibles() + ' en ' + h.efectos + ' grupos');
+    tecla('2');
+    afirmar(visibles() === 'color', 'la tecla 2 no abrió Color: ' + visibles());
+    categoria('color');
+    afirmar(D().querySelector('.esqueleto-pc').classList.contains('ed-sin-columna'), 'tocar la categoría abierta no cerró la columna');
+    categoria('color');
+    // El escenario ocupa al menos la mitad de la pantalla (1366x900 en esta prueba).
+    const esc = D().querySelector('[data-app-escenario]').getBoundingClientRect();
+    h.escenario = Math.round(esc.width * esc.height / (W().innerWidth * W().innerHeight) * 100) + '%';
+    afirmar(esc.width * esc.height >= 0.5 * W().innerWidth * W().innerHeight, 'el escenario ocupa ' + h.escenario);
+    await aCelularYVuelta('color', ['botonDeshacer', 'botonDescargar'], () => !!D().querySelector('.botones-historial #botonDeshacer'));
+
+    // --- Editor avanzado ---
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    await cargar();
+    h.avanzadoRail = rail();
+    afirmar(h.avanzadoRail === 'capas,texto,zona,borrar,luz,color,bn,efectos,filtros,textura', 'barra de íconos del avanzado: ' + h.avanzadoRail);
+    afirmar(visibles() === 'capas', 'al abrir no se ve solo Capas: ' + visibles());
+    comprobarPc('avanzado', ['botonDeshacer', 'botonRehacer', 'botonDescargarAvanzado', 'resolucionVistaPrevia']);
+    afirmar(/Capa 1/.test(D().querySelector('.ed-editando').textContent), '"Editando" no dice la capa: ' + D().querySelector('.ed-editando').textContent);
+    categoria('zona');
+    afirmar(W().getComputedStyle(el('menuPiezas')).display === 'none', 'el menú de "Agregar pieza" se ve sin abrirlo');
+    tecla('e');
+    afirmar(visibles() === 'borrar' && W().eval('herramientaLienzo') === 'borrar' && D().querySelector('#lugarBorrar #controlesPincelAvanzado'), 'E no abrió Borrar con sus controles: ' + visibles() + ' / ' + W().eval('herramientaLienzo'));
+    categoria('luz');
+    afirmar(W().eval('herramientaLienzo') === 'mover' && !D().querySelector('#lugarBorrar #controlesPincelAvanzado'), 'salir de Borrar no soltó la herramienta');
+    el('botonNuevoTexto').click();
+    afirmar(visibles() === 'texto', 'agregar un texto no abrió Texto e imagen: ' + visibles());
+    await esperar(200); // el historial anota el paso después de la acción
+    // Los botones de la barra son los de siempre: Deshacer saca el texto.
+    D().querySelector('.ed-barra #botonDeshacer').click();
+    afirmar(!W().todosLosItems().some((i) => W().esObjeto(i)), 'Deshacer desde la barra no sacó el texto');
+    const zoomAntes = D().querySelector('.ed-zoom-texto').textContent;
+    D().querySelector('.ed-barra .ed-zoom-texto').nextElementSibling.click(); // +
+    h.zoom = zoomAntes + ' -> ' + D().querySelector('.ed-zoom-texto').textContent;
+    afirmar(D().querySelector('.ed-zoom-texto').textContent !== zoomAntes, 'el + de la barra no cambió el zoom');
+    categoria('borrar');
+    await aCelularYVuelta('avanzado', ['botonDeshacer', 'botonDescargarAvanzado', 'resolucionVistaPrevia'],
+      () => !D().querySelector('#lugarBorrar #controlesPincelAvanzado') && !!D().querySelector('[data-app-categoria="Aplicar"] #controlesPincelAvanzado'));
+
+    // --- Collage ---
+    await abrir('/herramientas/collage-imagenes.html'); await esperar(300);
+    await cargar(3);
+    h.collageRail = rail();
+    afirmar(h.collageRail === 'diseno,formato,estilo,fotos', 'barra de íconos del collage: ' + h.collageRail);
+    comprobarPc('collage', ['botonDeshacer', 'botonDescargar']);
+    afirmar(D().querySelector('#lugarFotos #tiraOrden') && D().querySelector('.ed-menu #tamanoSalida'), 'la tira no está en Fotos o el tamaño no está en el menú');
+    W().eval('seleccionar(1)');
+    afirmar(visibles() === 'fotos', 'elegir una foto no abrió Fotos: ' + visibles());
+    await aCelularYVuelta('collage', ['botonDeshacer', 'botonDescargar'], () => !D().querySelector('#lugarFotos #tiraOrden') && !D().querySelector('.ed-menu #tamanoSalida'));
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
   // Máscara por piezas (2026-10-07, fase 5 del plan): sumar, restar e

@@ -109,7 +109,128 @@
    debajo, sin nada encima: plan 4.4). En celular el anuncio ya está en la
    tira de app-movil.js. */
 .pantalla-completa-activa { background: var(--gris-fondo); color: var(--texto); overflow: hidden; }
-body:not(.app-activo) .pantalla-completa-activa { padding: 12px; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; margin: 0; }
-body:not(.app-activo) .pantalla-completa-activa > * { min-height: 0; }
+body:not(.app-activo) .pantalla-completa-activa:not(.esqueleto-pc) { padding: 12px; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; margin: 0; }
+body:not(.app-activo) .pantalla-completa-activa:not(.esqueleto-pc) > * { min-height: 0; }
 .franja-anuncio-completa { grid-column: 1 / -1; display: flex; justify-content: center; padding-top: 8px; border-top: 1px solid var(--gris-borde); }
 .franja-anuncio-completa .anuncio { width: min(728px, 100%); height: 90px; min-height: 90px; margin: 0; overflow: hidden; }
+
+/* Botón secundario de los editores (cambiar imagen, reiniciar, guardar…):
+   antes cada uno llevaba el mismo estilo en línea. */
+.boton-secundario-editor { border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); color: var(--texto); cursor: pointer; padding: 6px 12px; font-size: 0.82rem; }
+.boton-secundario-editor:hover:not(:disabled) { border-color: var(--azul); }
+.boton-secundario-editor:disabled { opacity: 0.4; cursor: default; }
+
+/* ===== Esqueleto de PC (assets/js/esqueleto-editor.js; plan, 4.2) =====
+   Barra superior, barra de íconos, UNA columna con la categoría elegida, la
+   imagen y la franja del anuncio. El módulo pone .esqueleto-pc en el
+   contenedor y .ed-esqueleto-activo en <body> solo con 901 px o más y una
+   foto cargada; debajo de eso manda app-movil.js. Las reglas llevan
+   .ed-esqueleto-activo delante para ganarle al <style> de cada página. */
+@media (min-width: 901px) {
+  body.ed-esqueleto-activo header.sitio { position: sticky; top: 0; z-index: 60; }
+  .ed-esqueleto-activo .esqueleto-pc {
+    display: grid;
+    grid-template-columns: 48px var(--ed-ancho-columna, 320px) minmax(0, 1fr);
+    grid-template-rows: 48px auto minmax(0, 1fr) 99px;
+    grid-template-areas: "barra barra barra" "rail cabecera escenario" "rail columna escenario" "rail columna anuncio";
+    gap: 0;
+    /* Cada pieza estirada a su fila (el collage trae align-items: start). */
+    align-items: stretch;
+    position: relative;
+    /* Toda la ventana debajo del encabezado, de borde a borde. */
+    height: calc(100dvh - var(--ed-alto-encabezado, 0px));
+    min-height: 420px;
+    width: calc(100vw - var(--ed-barra-desplazamiento, 0px));
+    margin-left: calc(50% - (100vw - var(--ed-barra-desplazamiento, 0px)) / 2);
+    background: var(--gris-fondo);
+    border-top: 1px solid var(--gris-borde);
+    transition: none;
+  }
+  .ed-esqueleto-activo .esqueleto-pc.ed-sin-columna { grid-template-columns: 48px 0 minmax(0, 1fr); }
+  .ed-esqueleto-activo .esqueleto-pc.ed-sin-columna > .ed-cabecera,
+  .ed-esqueleto-activo .esqueleto-pc.ed-sin-columna > .ed-panel-visible:not([data-app-escenario]) { display: none !important; }
+  .ed-esqueleto-activo .esqueleto-pc:fullscreen { height: 100vh; width: 100vw; margin: 0; padding: 0; }
+
+  /* Lo que no es del esqueleto (botones de los cajones viejos, paneles de
+     otras categorías) no se ve. */
+  .ed-esqueleto-activo .esqueleto-pc > :not(.ed-barra, .ed-rail, .ed-cabecera, .ed-anuncio-fila, .ed-menu, [data-app-escenario], .ed-panel-visible) { display: none !important; }
+  .ed-esqueleto-activo .esqueleto-pc .boton-plegar { display: none !important; }
+
+  /* Barra superior */
+  .ed-esqueleto-activo .ed-barra { grid-area: barra; display: flex; align-items: center; gap: 2px; padding: 0 10px; min-width: 0; background: var(--superficie); border-bottom: 1px solid var(--gris-borde); }
+  .ed-barra .ed-sep { flex: none; width: 1px; height: 24px; margin: 0 6px; background: var(--gris-borde); }
+  .ed-barra .ed-espacio { flex: 1 1 auto; }
+  .ed-barra [hidden] { display: none !important; }
+  .ed-barra > button:not(.boton), .ed-bi {
+    flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 34px; min-width: 34px; margin: 0; padding: 0 8px;
+    border: 1px solid transparent; border-radius: 8px; background: none; color: var(--texto);
+    font-size: 0.85rem; white-space: nowrap; cursor: pointer; user-select: none; -webkit-user-select: none;
+  }
+  .ed-barra > button:not(.boton):hover:not(:disabled) { background: var(--superficie-alt); border-color: var(--gris-borde); }
+  .ed-barra > button:not(.boton):disabled { opacity: 0.35; cursor: default; }
+  .ed-barra > button.activo { background: var(--activo-fondo); border-color: var(--azul); }
+  .ed-barra > #botonDeshacer, .ed-barra > #botonRehacer { font-size: 1.1rem; }
+  .ed-barra .ed-ico { font-size: 1.05rem; line-height: 1; }
+  .ed-barra > .boton { flex: none; height: 34px; margin: 0 4px 0 0; padding: 0 16px; font-size: 0.9rem; }
+  .ed-barra > select { flex: 0 1 auto; min-width: 0; max-width: 220px; height: 32px; margin: 0 4px; padding: 0 6px; border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--superficie); color: var(--texto); font-size: 0.82rem; }
+  .ed-barra > .nota-lateral { flex: 0 1 auto; min-width: 0; margin: 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ed-zoom-texto { flex: none; min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--texto-suave); }
+
+  /* Menú "⋯": vive dentro del editor, así se ve también en pantalla completa. */
+  .ed-menu { position: absolute; top: 46px; right: 8px; z-index: 30; display: flex; flex-direction: column; gap: 2px; min-width: 210px; padding: 6px; border: 1px solid var(--gris-borde); border-radius: 10px; background: var(--superficie); box-shadow: 0 8px 28px rgba(0,0,0,.28); }
+  .ed-menu[hidden] { display: none; }
+  .ed-menu > button { width: 100%; padding: 8px 10px; border: none; border-radius: 8px; background: none; color: var(--texto); text-align: left; font-size: 0.85rem; cursor: pointer; }
+  .ed-menu > button:hover, .ed-menu > button:focus-visible { background: var(--superficie-alt); outline: none; }
+  /* Un campo en el menú (el tamaño y el formato del collage). */
+  .ed-menu > label { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 6px 10px; font-size: 0.8rem; color: var(--texto-suave); }
+  .ed-menu > label select { width: 100%; }
+
+  /* Barra de íconos */
+  .ed-esqueleto-activo .ed-rail { grid-area: rail; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; overflow-y: auto; scrollbar-width: none; background: var(--superficie); border-right: 1px solid var(--gris-borde); }
+  .ed-rail button { position: relative; flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 8px; background: none; cursor: pointer; }
+  .ed-rail button .ed-ico { font-size: 1.2rem; line-height: 1; }
+  .ed-rail button:hover { background: var(--superficie-alt); }
+  .ed-rail button[aria-pressed="true"] { background: var(--activo-fondo); border-color: var(--azul); }
+  .ed-rail button[aria-pressed="true"]::before { content: ""; position: absolute; left: -5px; top: 8px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--azul); }
+  .ed-rail .ed-rail-sep { flex: none; width: 24px; height: 1px; margin: 4px 0; background: var(--gris-borde); }
+  .ed-rail button:focus-visible, .ed-barra button:focus-visible { outline: 2px solid var(--azul); outline-offset: 1px; }
+
+  /* Columna: "Editando: …", el nombre de la categoría y sus controles. */
+  .ed-esqueleto-activo .ed-cabecera { grid-area: cabecera; min-width: 0; background: var(--superficie); border-right: 1px solid var(--gris-borde); }
+  .ed-editando { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--gris-borde); font-size: 0.82rem; }
+  .ed-editando:empty { display: none; }
+  .ed-editando { position: relative; }
+  .ed-editando-rotulo { flex: none; color: var(--texto-suave); }
+  .ed-editando-boton { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); color: var(--texto); cursor: pointer; text-align: left; font-size: 0.82rem; }
+  .ed-editando-boton b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .ed-editando-lista { position: absolute; left: 8px; right: 8px; top: calc(100% - 4px); z-index: 30; max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 6px; border: 1px solid var(--gris-borde); border-radius: 10px; background: var(--superficie); box-shadow: 0 8px 28px rgba(0,0,0,.28); }
+  .ed-editando-lista[hidden] { display: none; }
+  .ed-editando-lista button { padding: 6px 8px; border: none; border-radius: 8px; background: none; color: var(--texto); text-align: left; font-size: 0.82rem; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ed-editando-lista button:hover { background: var(--superficie-alt); }
+  .ed-editando-lista button[aria-pressed="true"] { background: var(--activo-fondo); font-weight: 600; }
+  .ed-titulo-categoria { display: flex; align-items: center; gap: 8px; padding: 12px 14px 6px; font-size: 0.78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-suave); }
+  .ed-esqueleto-activo .esqueleto-pc > .ed-panel-visible:not([data-app-escenario]) {
+    grid-area: columna; display: block; min-height: 0; overflow-y: auto; margin: 0; padding: 4px 14px 18px;
+    border: none; border-right: 1px solid var(--gris-borde); border-radius: 0; background: var(--superficie);
+    position: static; transform: none; visibility: visible; width: auto; box-shadow: none;
+  }
+  .ed-esqueleto-activo .ed-panel-visible > :not(.ed-cat-visible) { display: none !important; }
+  /* Los grupos de la categoría, abiertos y sin marco: el primero no repite el
+     título (ya está arriba); los demás lo muestran como subtítulo. */
+  .ed-esqueleto-activo .ed-cat-visible.acordeon-grupo { margin: 0 0 14px; border: none; border-radius: 0; overflow: visible; }
+  .ed-esqueleto-activo .ed-cat-visible > .acordeon-contenido { display: block; padding: 0; }
+  .ed-esqueleto-activo .ed-cat-visible > .acordeon-titulo { padding: 10px 0 6px; background: none; pointer-events: none; font-size: 0.74rem; color: var(--texto-suave); justify-content: flex-start; text-align: left; }
+  /* Lo que en PC ya está en la barra ("Mantené presionado para ver el original"). */
+  .ed-esqueleto-activo [data-sin-esqueleto] { display: none !important; }
+  .ed-esqueleto-activo .ed-cat-visible > .acordeon-titulo .flecha { display: none; }
+  .ed-esqueleto-activo .ed-cat-primero > .acordeon-titulo, .ed-esqueleto-activo .ed-cat-primero > h3:first-child { display: none; }
+  /* Las listas con alto propio ya no lo necesitan: desplaza la columna. */
+  .ed-esqueleto-activo .ed-cat-visible .presets-scroll, .ed-esqueleto-activo .ed-cat-visible .texturas-scroll { max-height: none; overflow: visible; }
+
+  /* La imagen y la franja del anuncio (plan 4.4: propia, de alto fijo, sin
+     nada encima, separada de los controles por una línea y 8 px). */
+  .ed-esqueleto-activo .esqueleto-pc > [data-app-escenario] { grid-area: escenario; min-width: 0; min-height: 0; margin: 0; padding: 12px; border: none; border-radius: 0; }
+  .ed-esqueleto-activo .ed-anuncio-fila { grid-area: anuncio; display: flex; justify-content: center; padding-top: 8px; border-top: 1px solid var(--gris-borde); background: var(--superficie); }
+  .ed-anuncio-fila .anuncio { width: min(728px, calc(100% - 16px)); height: 90px; min-height: 90px; margin: 0; overflow: hidden; }
+}

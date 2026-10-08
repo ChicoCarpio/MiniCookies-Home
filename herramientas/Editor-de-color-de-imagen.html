@@ -261,7 +261,7 @@ window.i18nPagina = {
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
                así ninguno empuja a los demás fuera de la vista, y no hay que
                scrollear 90 miniaturas para llegar a "Acciones". -->
-          <fieldset class="acordeon-grupo abierto">
+          <fieldset data-categoria="filtros" class="acordeon-grupo abierto">
             <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="grupo-filtros">Filtros</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-deslizador">
@@ -275,7 +275,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="textura" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="titulo-textura">Textura extra</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="texturas-scroll" style="margin-bottom: 10px;">
@@ -299,8 +299,8 @@ window.i18nPagina = {
             <div class="acordeon-contenido">
               <div class="controles controles-apilados">
                 <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
-                <button type="button" id="botonRestablecer" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-restablecer">Restablecer</button>
-                <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
+                <button type="button" id="botonRestablecer" class="boton-secundario-editor" data-i18n="boton-restablecer">Restablecer</button>
+                <button type="button" id="botonCambiarImagen" class="boton-secundario-editor" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
               </div>
               <div class="resultado" id="resultado">
                 <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
@@ -316,13 +316,13 @@ window.i18nPagina = {
             <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
             <button type="button" id="botonPantallaCompleta" data-i18n-attr="title:title-pantalla-completa;aria-label:title-pantalla-completa" title="Pantalla completa (F)" aria-label="Pantalla completa (F)" aria-pressed="false" hidden>⛶</button>
           </div>
-          <p class="nota-lateral" style="margin:8px 0 0;" data-i18n="nota-original">Mantené presionada la imagen para ver el original</p>
+          <p class="nota-lateral" style="margin:8px 0 0;" data-i18n="nota-original" data-sin-esqueleto>Mantené presionada la imagen para ver el original</p>
           <p class="nota-lateral" style="margin:8px 0 0;"><span data-i18n="nota-avanzado-a">¿Necesitás editar solo una parte de la imagen, por zona o por color, con varias capas? Probá el </span><a href="editor-avanzado-imagen.html" data-i18n="nota-avanzado-link">Editor avanzado →</a></p>
         </div>
 
         <div class="panel-ajustes">
           <button type="button" class="boton-plegar" data-panel="der" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span class="flecha-plegar">»</span><span data-i18n="panel-ajustes">Ajustes</span></button>
-          <fieldset class="acordeon-grupo abierto">
+          <fieldset data-categoria="luz" class="acordeon-grupo abierto">
             <button type="button" class="acordeon-titulo" data-icono="☀️"><span data-i18n="grupo-luz">Luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -353,7 +353,7 @@ window.i18nPagina = {
               </div>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="color" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -394,7 +394,7 @@ window.i18nPagina = {
               <div id="panelAjustePorColor"></div>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="color" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="🌈"><span data-i18n="grupo-luz-color">Luz por color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <!-- Un deslizador por rango de "Ajustar por color" (se generan en el script) -->
@@ -402,7 +402,7 @@ window.i18nPagina = {
               <p class="nota-lateral" style="margin:6px 0 0;" data-i18n="nota-luz-color">Aclara u oscurece solo ese color, como la exposición pero por color (sin cambiarle el tono). Por ejemplo, Azules en −60 oscurece el cielo; Naranjas en +30 aclara la piel. En blanco y negro decide qué tan claro queda cada color en gris.</p>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="bn" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="◐"><span data-i18n="grupo-bn">Blanco y negro</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-check">
@@ -425,7 +425,7 @@ window.i18nPagina = {
               </div>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="efectos" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="✨"><span data-i18n="grupo-efectos">Efectos</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -460,7 +460,7 @@ window.i18nPagina = {
               </div>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="efectos" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="💫"><span data-i18n="grupo-resplandor">Resplandor</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -479,7 +479,7 @@ window.i18nPagina = {
               </div>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="efectos" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="🔦"><span data-i18n="grupo-dispersion">Dispersión de luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -522,6 +522,7 @@ window.i18nPagina = {
 <script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
 <script src="../assets/js/pantalla-completa.js"></script>
+<script src="../assets/js/esqueleto-editor.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -1072,6 +1073,24 @@ const historial = Historial.conectar({
 // ===== Pantalla completa y atajos de teclado (plan, fase 4) =====
 const editorAbierto = () => !!imagenActual && editorCompleto.style.display !== 'none';
 PantallaCompleta.conectar({ contenedor: document.getElementById('layoutEditor'), boton: document.getElementById('botonPantallaCompleta'), activo: editorAbierto });
+
+// ===== Esqueleto de PC (assets/js/esqueleto-editor.js; plan, fase 6) =====
+// Con 901 px o más: barra superior, barra de íconos y una sola categoría a
+// la vista. Los botones de la barra son los de siempre (se mudan y vuelven).
+const esqueleto = EsqueletoEditor.conectar({
+  contenedor: document.getElementById('layoutEditor'),
+  editor: editorCompleto,
+  orden: ['luz', 'color', 'bn', 'efectos', 'filtros', 'textura'],
+  inicio: 'luz',
+  barra: {
+    historial: [document.getElementById('botonDeshacer'), document.getElementById('botonRehacer')],
+    original: { abajo: mostrarOriginal, arriba: dejarDeComparar },
+    pantallaCompleta: document.getElementById('botonPantallaCompleta'),
+    descargar: botonDescargar,
+    enlace: enlaceDescarga,
+    menu: [botonCambiarImagen, document.getElementById('botonRestablecer')],
+  },
+});
 Atajos.conectar({
   'ctrl+0': () => { aplicarZoomSimple(1); zoomAutomaticoSimple = true; },
   '\\': { abajo: mostrarOriginal, arriba: dejarDeComparar },

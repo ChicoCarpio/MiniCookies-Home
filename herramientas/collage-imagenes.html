@@ -22,6 +22,13 @@
   body:not(.app-activo) .editor-collage.pantalla-completa-activa > div { overflow-y: auto; }
   body:not(.app-activo) .editor-collage.pantalla-completa-activa #lienzo { max-height: calc(100vh - 260px); }
   #lienzo.moviendo { cursor: grabbing; }
+  /* Esqueleto de PC (assets/js/esqueleto-editor.js): el collage tan grande
+     como deje el escenario. */
+  .ed-esqueleto-activo .editor-collage [data-app-escenario] { display: flex; flex-direction: column; }
+  .ed-esqueleto-activo .editor-collage .lienzo-contenedor { flex: 1 1 auto; min-height: 0; align-items: center; }
+  .ed-esqueleto-activo .editor-collage #lienzo { max-height: 100%; }
+  .ed-esqueleto-activo #lugarFotos .barra-foto { margin-top: 0; }
+  .ed-esqueleto-activo #lugarFotos #botonAgregarFotos { margin-bottom: 12px; }
   .ayuda-gestos { color: var(--texto-suave); font-size: 0.85rem; margin: 8px 0 0; text-align: center; }
 
   .bloque-opciones h3 { font-size: 0.95rem; margin: 0 0 8px; }
@@ -123,6 +130,7 @@ window.i18nPagina = {
     'title-listo': 'Terminar de editar esta foto',
     'aria-tira': 'Orden de las fotos en el collage',
     'h-diseno': 'Diseño',
+    'h-fotos': 'Fotos',
     'title-diseno': 'Usar este diseño',
     'h-formato': 'Formato',
     'fmt-1-1': '1:1 Cuadrado',
@@ -169,6 +177,7 @@ window.i18nPagina = {
     'title-listo': 'Finish editing this photo',
     'aria-tira': 'Order of the photos in the collage',
     'h-diseno': 'Layout',
+    'h-fotos': 'Photos',
     'title-diseno': 'Use this layout',
     'h-formato': 'Format',
     'fmt-1-1': '1:1 Square',
@@ -227,7 +236,7 @@ window.i18nPagina = {
       <div data-app-escenario>
         <div class="estado-app-movil">
           <span id="contadorFotosMovil"></span>
-          <button type="button" id="botonAgregarFotos" data-i18n="movil-agregar">Agregar fotos</button>
+          <button type="button" id="botonAgregarFotos" class="boton-secundario-editor" data-i18n="movil-agregar">Agregar fotos</button>
         </div>
         <div class="lienzo-contenedor">
           <canvas id="lienzo" data-i18n-attr="aria-label:aria-lienzo" aria-label="Vista previa del collage"></canvas>
@@ -252,12 +261,12 @@ window.i18nPagina = {
       </div>
 
       <div>
-        <div class="bloque-opciones" data-app-categoria="diseno">
+        <div class="bloque-opciones" data-app-categoria="diseno" data-categoria="diseno">
           <h3 data-i18n="h-diseno">Diseño</h3>
           <div class="lista-disenos" id="listaDisenos"></div>
         </div>
 
-        <div class="bloque-opciones" data-app-categoria="formato">
+        <div class="bloque-opciones" data-app-categoria="formato" data-categoria="formato">
           <h3 data-i18n="h-formato">Formato</h3>
           <div class="botones-formato" id="botonesFormato">
             <button type="button" data-proporcion="1:1" class="activo" data-i18n="fmt-1-1">1:1 Cuadrado</button>
@@ -268,7 +277,7 @@ window.i18nPagina = {
           </div>
         </div>
 
-        <div class="bloque-opciones" data-app-categoria="estilo">
+        <div class="bloque-opciones" data-app-categoria="estilo" data-categoria="estilo">
           <h3 data-i18n="h-estilo">Estilo</h3>
           <label class="campo">
             <span><span data-i18n="campo-espacio-a">Borde entre fotos: </span><span id="etiquetaEspacio">12</span></span>
@@ -282,6 +291,11 @@ window.i18nPagina = {
             <span data-i18n="campo-color">Color del borde / fondo</span>
             <input type="color" id="colorFondo" value="#ffffff">
           </label>
+        </div>
+
+        <div class="bloque-opciones" data-categoria="fotos">
+          <h3 data-i18n="h-fotos">Fotos</h3>
+          <div id="lugarFotos"></div>
         </div>
 
         <div class="bloque-opciones" data-app-categoria="exportar">
@@ -319,6 +333,7 @@ window.i18nPagina = {
 <script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
 <script src="../assets/js/pantalla-completa.js"></script>
+<script src="../assets/js/esqueleto-editor.js"></script>
 <script>
 const MAX_FOTOS = 12;
 const LADO_MAX_VISTA = 1600; // las fotos se reducen a esto para que la vista previa responda rápido
@@ -676,6 +691,36 @@ const historial = Historial.conectar({
 // ===== Pantalla completa (plan, fase 4) =====
 PantallaCompleta.conectar({ contenedor: editor, boton: document.getElementById('botonPantallaCompleta'), activo: () => fotos.length > 0 });
 
+// ===== Esqueleto de PC (assets/js/esqueleto-editor.js; plan, fase 6) =====
+// Con 901 px o más: barra superior, barra de íconos y una sola categoría a
+// la vista. "Fotos" junta lo que en celular va debajo del collage (la tira,
+// la foto elegida y "Agregar fotos"): se muda mientras dure y vuelve.
+const lugarFotos = document.getElementById('lugarFotos');
+const piezasDeFotos = ['botonAgregarFotos', 'barraFoto', 'tiraOrden'].map((id) => document.getElementById(id))
+  .concat(document.querySelector('.ayuda-gestos'));
+let fotosMudadas = null;
+var esqueleto = EsqueletoEditor.conectar({
+  contenedor: editor,
+  orden: ['diseno', 'formato', 'estilo', 'fotos'],
+  inicio: 'diseno',
+  barra: {
+    historial: [document.getElementById('botonDeshacer'), document.getElementById('botonRehacer')],
+    pantallaCompleta: document.getElementById('botonPantallaCompleta'),
+    descargar: document.getElementById('botonDescargar'),
+    // El tamaño y el formato del archivo, en el menú "⋯".
+    menu: [...document.querySelectorAll('[data-app-categoria="exportar"] label.campo')],
+  },
+  alCambiarCategoria(categoria) {
+    if (categoria && !fotosMudadas) {
+      fotosMudadas = piezasDeFotos.map((el) => ({ el, padre: el.parentNode, siguiente: el.nextSibling }));
+      piezasDeFotos.forEach((el) => lugarFotos.appendChild(el));
+    } else if (!categoria && fotosMudadas) {
+      for (const m of [...fotosMudadas].reverse()) m.padre.insertBefore(m.el, m.siguiente && m.siguiente.parentNode === m.padre ? m.siguiente : null);
+      fotosMudadas = null;
+    }
+  },
+});
+
 // Al cambiar cuántas fotos hay, se elige el primer diseño para esa cantidad
 // (como Instagram, que muestra los diseños según las fotos elegidas).
 // Mostrar u ocultar #editor es además lo que enciende y apaga la pantalla
@@ -698,6 +743,7 @@ function cambioDeCantidad() {
 function seleccionar(indice) {
   seleccionada = indice;
   barraFoto.classList.toggle('visible', indice >= 0);
+  if (indice >= 0 && typeof esqueleto !== 'undefined' && esqueleto && esqueleto.activo()) esqueleto.abrir('fotos');
   if (indice >= 0) {
     tituloBarra.textContent = t('titulo-foto')
       .replace('{n}', indice + 1).replace('{total}', fotos.length);

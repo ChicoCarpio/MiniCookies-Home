@@ -129,6 +129,8 @@
   .fila-pieza button.icono-capa { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--texto-suave); padding: 2px 6px; flex-shrink: 0; }
   .fila-pieza button.icono-capa.apagado { opacity: 0.35; }
   .menu-piezas { margin: 6px 0; }
+  /* .modos pone display: flex, que le gana al atributo hidden. */
+  .menu-piezas[hidden] { display: none; }
   .fila-ver-mascara { display: flex; align-items: center; gap: 8px; }
   .fila-ver-mascara input[type="color"] { width: 32px; height: 24px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 4px; background: none; flex-shrink: 0; }
   /* Grupos: carpeta en vez de miniatura, flecha para plegar, y lo de adentro
@@ -191,6 +193,9 @@
   .acordeon-contenido > .titulo-mascara:first-child { margin-top: 0; }
   #controlesPincelAvanzado, #controlesDegradado, #controlesColorAvanzado, #controlesLuz { margin-top: 8px; }
   .zona-lienzo.paneando #canvasTrabajo { cursor: grabbing; }
+  /* En PC (esqueleto) borrar y mover la capa tienen su propia categoría. */
+  .ed-esqueleto-activo #herramientasLienzo [data-herramienta="borrar"],
+  .ed-esqueleto-activo #herramientasLienzo [data-herramienta="transformar"] { display: none; }
 
   /* --- Acordeón de ajustes --- */
   /* min-width:0 en el fieldset: sin esto, el <fieldset> nativo del navegador
@@ -225,6 +230,10 @@ window.i18nPagina = {
     'herr-pincel': '🖌️ Pincel',
     'herr-gotero': '💧 Elegir color',
     'herr-degradado': '↘ Trazar degradado',
+    'titulo-borrar': 'Borrar',
+    'nota-categoria-borrar': 'Pasá el mouse o el dedo por la imagen para dejarla transparente ahí. Con un texto o una imagen agregados elegidos, se borra eso; con cualquier otra capa, la foto.',
+    'editando': 'Editando:',
+    'title-editando': 'Elegir otra capa para editar',
     'lbl-zona': 'Zona',
     'nota-sin-piezas': 'Sin piezas, la capa no se aplica en ningún lado.',
     'boton-agregar-pieza': '＋ Agregar pieza',
@@ -464,6 +473,10 @@ window.i18nPagina = {
     'herr-pincel': '🖌️ Brush',
     'herr-gotero': '💧 Pick color',
     'herr-degradado': '↘ Draw gradient',
+    'titulo-borrar': 'Erase',
+    'nota-categoria-borrar': 'Drag the mouse or your finger over the image to make it transparent there. With an added text or image picked, that is erased; with any other layer, the photo.',
+    'editando': 'Editing:',
+    'title-editando': 'Pick another layer to edit',
     'lbl-zona': 'Area',
     'nota-sin-piezas': 'With no pieces, the layer applies nowhere.',
     'boton-agregar-pieza': '＋ Add a piece',
@@ -727,7 +740,7 @@ window.i18nPagina = {
                no lo cierra (se sigue viendo cuál es la capa activa mientras se
                usan las herramientas) y la lista tiene alto máximo con su propio
                desplazamiento, así muchas capas no empujan el resto hacia abajo. -->
-          <fieldset class="acordeon-grupo abierto" data-acordeon-libre data-app-categoria="Capas">
+          <fieldset data-categoria="capas" class="acordeon-grupo abierto" data-acordeon-libre data-app-categoria="Capas">
             <button type="button" class="acordeon-titulo" data-icono="🗂️"><span><span data-i18n="titulo-capas">Capas</span><span id="cantidadCapas" class="cantidad-capas"></span></span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="controles" style="margin-bottom:8px; gap:6px;">
@@ -745,7 +758,7 @@ window.i18nPagina = {
 
           <!-- Cada bloque es un acordeón propio (como el panel de Ajustes):
                así ninguno empuja a los demás fuera de la vista. -->
-          <fieldset class="acordeon-grupo" data-app-categoria="Aplicar">
+          <fieldset data-categoria="zona" class="acordeon-grupo" data-app-categoria="Aplicar">
             <button type="button" class="acordeon-titulo" data-icono="🎯"><span data-i18n="titulo-aplicar">Aplicar la capa a</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <!-- La máscara de la capa (assets/js/mascaras-capa.js): una base,
@@ -891,10 +904,21 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
+          <!-- Borrar a transparente: en PC es una categoría propia (plan, 4.1);
+               en celular sigue siendo una herramienta de "Aplicar la capa a".
+               Sin data-app-categoria a propósito: en celular no hay botón. -->
+          <fieldset data-categoria="borrar" class="acordeon-grupo" id="grupoBorrar">
+            <button type="button" class="acordeon-titulo" data-icono="🧽"><span data-i18n="titulo-borrar">Borrar</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <p class="nota-lateral" data-i18n="nota-categoria-borrar">Pasá el mouse o el dedo por la imagen para dejarla transparente ahí. Con un texto o una imagen agregados elegidos, se borra eso; con cualquier otra capa, la foto.</p>
+              <div id="lugarBorrar"></div>
+            </div>
+          </fieldset>
+
           <!-- Capas con contenido propio (assets/js/contenido-capa.js): texto,
                otra imagen o un recorte de la foto, que se mueven, escalan y
                rotan. Los ajustes del panel derecho se aplican a ese contenido. -->
-          <fieldset class="acordeon-grupo" data-app-categoria="Contenido">
+          <fieldset data-categoria="texto" class="acordeon-grupo" data-app-categoria="Contenido">
             <button type="button" class="acordeon-titulo" data-icono="🔤"><span data-i18n="titulo-contenido">Texto e imágenes</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <span class="titulo-mascara">
@@ -993,10 +1017,10 @@ window.i18nPagina = {
               <div class="controles controles-apilados">
                 <button class="boton" id="botonDescargarAvanzado" data-i18n="boton-descargar">Descargar imagen</button>
                 <span class="nota-lateral" id="notaDescargaPng" style="display:none;" data-i18n="nota-descarga-png">Sale en PNG, para que lo borrado quede transparente.</span>
-                <button type="button" id="botonRestablecerAvanzado" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-reiniciar">Reiniciar todo</button>
-                <button type="button" id="botonCambiarImagen" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
-                <button type="button" id="botonGuardarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-guardar-proyecto">💾 Guardar proyecto</button>
-                <button type="button" id="botonCargarProyecto" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer; padding:6px 12px; font-size:0.82rem;" data-i18n="boton-cargar-proyecto">📂 Cargar proyecto</button>
+                <button type="button" id="botonRestablecerAvanzado" class="boton-secundario-editor" data-i18n="boton-reiniciar">Reiniciar todo</button>
+                <button type="button" id="botonCambiarImagen" class="boton-secundario-editor" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
+                <button type="button" id="botonGuardarProyecto" class="boton-secundario-editor" data-i18n="boton-guardar-proyecto">💾 Guardar proyecto</button>
+                <button type="button" id="botonCargarProyecto" class="boton-secundario-editor" data-i18n="boton-cargar-proyecto">📂 Cargar proyecto</button>
               </div>
               <div class="resultado" id="resultado">
                 <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
@@ -1004,7 +1028,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" id="filtrosCapa" data-app-categoria="Filtro">
+          <fieldset data-categoria="filtros" class="acordeon-grupo" id="filtrosCapa" data-app-categoria="Filtro">
             <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="resumen-filtro">Filtro</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <p class="nota-lateral" style="margin:0 0 6px; display:flex; align-items:center; gap:6px;">
@@ -1027,7 +1051,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="textura" data-app-categoria="Textura">
+          <fieldset data-categoria="textura" class="acordeon-grupo" data-grupo="textura" data-app-categoria="Textura">
             <button type="button" class="acordeon-titulo" data-icono="🧱"><span data-i18n="grupo-textura">Textura</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="texturas-scroll">
@@ -1061,12 +1085,12 @@ window.i18nPagina = {
             <button type="button" id="botonPantallaCompleta" data-i18n-attr="title:title-pantalla-completa;aria-label:title-pantalla-completa" title="Pantalla completa (F)" aria-label="Pantalla completa (F)" aria-pressed="false" hidden>⛶</button>
           </div>
           <!-- Botón aparte (no sobre la imagen): en el lienzo, presionar ya sirve para pintar, mover o elegir color -->
-          <button type="button" id="botonVerOriginal" data-app-categoria="Original" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
+          <button type="button" id="botonVerOriginal" data-app-categoria="Original" data-sin-esqueleto style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
         </div>
 
         <div class="panel-ajustes">
           <button type="button" class="boton-plegar" data-panel="der" data-i18n-attr="title:title-plegar" title="Contraer/expandir panel"><span class="flecha-plegar">»</span><span data-i18n="panel-ajustes">Ajustes</span></button>
-          <fieldset class="acordeon-grupo abierto" data-grupo="luz">
+          <fieldset data-categoria="luz" class="acordeon-grupo abierto" data-grupo="luz">
             <button type="button" class="acordeon-titulo" data-icono="☀️"><span data-i18n="grupo-luz">Luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -1098,7 +1122,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="color">
+          <fieldset data-categoria="color" class="acordeon-grupo" data-grupo="color">
             <button type="button" class="acordeon-titulo" data-icono="🎨"><span data-i18n="grupo-color">Color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -1138,7 +1162,7 @@ window.i18nPagina = {
               <div id="panelAjustePorColor"></div>
             </div>
           </fieldset>
-          <fieldset class="acordeon-grupo">
+          <fieldset data-categoria="color" class="acordeon-grupo">
             <button type="button" class="acordeon-titulo" data-icono="🌈"><span data-i18n="grupo-luz-color">Luz por color</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <!-- Un deslizador por rango de "Ajustar por color" (se generan en el script) -->
@@ -1147,7 +1171,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="bn">
+          <fieldset data-categoria="bn" class="acordeon-grupo" data-grupo="bn">
             <button type="button" class="acordeon-titulo" data-icono="◐"><span data-i18n="grupo-bn">Blanco y negro</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <label class="campo-check">
@@ -1172,7 +1196,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="efectos">
+          <fieldset data-categoria="efectos" class="acordeon-grupo" data-grupo="efectos">
             <button type="button" class="acordeon-titulo" data-icono="✨"><span data-i18n="grupo-efectos">Efectos</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -1208,7 +1232,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="resplandor">
+          <fieldset data-categoria="efectos" class="acordeon-grupo" data-grupo="resplandor">
             <button type="button" class="acordeon-titulo" data-icono="💫"><span data-i18n="grupo-resplandor">Resplandor</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -1228,7 +1252,7 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <fieldset class="acordeon-grupo" data-grupo="dispersion">
+          <fieldset data-categoria="efectos" class="acordeon-grupo" data-grupo="dispersion">
             <button type="button" class="acordeon-titulo" data-icono="🔦"><span data-i18n="grupo-dispersion">Dispersión de luz</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
               <div class="deslizadores">
@@ -1277,6 +1301,7 @@ window.i18nPagina = {
 <script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
 <script src="../assets/js/pantalla-completa.js"></script>
+<script src="../assets/js/esqueleto-editor.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
@@ -1420,6 +1445,7 @@ let canvasOrigenTrabajo = null; // imagen original a tamaño de trabajo, para el
 let anchoTrabajo = 0, altoTrabajo = 0;
 let capas = [];
 let capaActivaId = null;
+let esqueleto = null; // el esqueleto de PC (assets/js/esqueleto-editor.js), ver más abajo
 let contadorCapas = 0;
 // Números de los nombres por defecto ("Capa 3", "Grupo 2"), aparte del de los
 // ids: los grupos también consumen ids, y con un solo contador las capas
@@ -2595,6 +2621,8 @@ function escribirIntensidadFiltroEnUI(ajustes) {
 // degradado, elegir un objeto… Es de la página, no de la capa; las que son de
 // una pieza (gotero, degradado, objeto) solo valen con esa pieza elegida.
 let herramientaLienzo = 'mover';
+// La categoría de PC de cada herramienta (ver el esqueleto, más abajo).
+const CATEGORIA_DE_HERRAMIENTA = { pincel: 'zona', gotero: 'zona', degradado: 'zona', objeto: 'zona', borrar: 'borrar', transformar: 'texto' };
 function herramientaValida(capa, herramienta) {
   const pieza = piezaActiva(capa);
   const tipo = pieza ? pieza.tipo : null;
@@ -2905,6 +2933,9 @@ document.querySelectorAll('#herramientasLienzo button').forEach((boton) => {
     herramientaLienzo = herramientaLienzo === herramienta ? 'mover' : herramienta;
     if (herramientaLienzo === 'pincel') piezaDePincel(item);
     actualizarControlesSeleccion();
+    // En PC, la herramienta lleva a su categoría (con su tecla también).
+    const categoria = CATEGORIA_DE_HERRAMIENTA[herramientaLienzo];
+    if (categoria && esqueleto && esqueleto.activo() && esqueleto.categoria() !== categoria) esqueleto.abrir(categoria);
   });
 });
 
@@ -3493,6 +3524,7 @@ function aplicarZoom(nuevoZoom, clientX, clientY) {
     canvasTrabajo.style.width = zoomActual === 1 ? '' : `${anchoTrabajo * zoomActual}px`;
     canvasTrabajo.style.height = zoomActual === 1 ? '' : `${altoTrabajo * zoomActual}px`;
   }, clientX, clientY);
+  if (esqueleto) esqueleto.actualizar(); // el porcentaje de la barra
 }
 
 // Zoom con el que la imagen entra entera en el recuadro. Sin esto arrancaba
@@ -3798,6 +3830,7 @@ function sincronizarPanelesConActivo() {
   });
   if (capa) escribirAjustesEnUI(capa.ajustes);
   actualizarControlesSeleccion();
+  if (esqueleto) esqueleto.actualizar(); // "Editando: …"
 }
 
 // La base de un objeto no se elige sola: elegirla elige su objeto.
@@ -4115,6 +4148,8 @@ function agregarCapaDeContenido(contenido, nombre) {
   insertarItemNuevo(objeto);
   herramientaLienzo = 'transformar';
   actualizarControlesSeleccion();
+  // Agregar un texto o una imagen lleva a sus controles (plan, 4.1: contextual).
+  if (esqueleto && esqueleto.activo()) esqueleto.abrir('texto');
   return objeto;
 }
 
@@ -4787,6 +4822,103 @@ const historial = Historial.conectar({
 // ===== Pantalla completa y atajos de teclado (plan, fase 4) =====
 const editorAbierto = () => !!imagenActual && editorCompleto.style.display !== 'none';
 PantallaCompleta.conectar({ contenedor: document.getElementById('layoutEditor'), boton: document.getElementById('botonPantallaCompleta'), activo: editorAbierto });
+
+// ===== Esqueleto de PC (assets/js/esqueleto-editor.js; plan, fase 6) =====
+// Con 901 px o más: barra superior, barra de íconos y una sola categoría a
+// la vista. Los botones de la barra son los de siempre (se mudan y vuelven).
+//
+// "Borrar" es una categoría propia: abrirla elige la herramienta de borrar y
+// le muda los controles del pincel (tamaño, dureza, restaurar), que en
+// "Zona" son los del pincel de la zona. Salir de una categoría suelta su
+// herramienta, para que nunca quede una escuchando el puntero sin que se vean
+// sus controles.
+const controlesPincel = document.getElementById('controlesPincelAvanzado');
+const lugarPincelEnZona = { padre: controlesPincel.parentNode, siguiente: controlesPincel.nextSibling };
+esqueleto = EsqueletoEditor.conectar({
+  contenedor: document.getElementById('layoutEditor'),
+  editor: editorCompleto,
+  orden: ['capas', 'texto', 'zona', 'borrar', '|', 'luz', 'color', 'bn', 'efectos', 'filtros', 'textura'],
+  inicio: 'capas',
+  barra: {
+    historial: [document.getElementById('botonDeshacer'), document.getElementById('botonRehacer')],
+    original: { abajo: () => verOriginal({ preventDefault() {} }), arriba: dejarDeVerOriginal },
+    zoom: {
+      menos: () => { zoomAutomatico = false; aplicarZoom(zoomActual / 1.25); },
+      mas: () => { zoomAutomatico = false; aplicarZoom(zoomActual * 1.25); },
+      encajar: encajarEnLaVista,
+      texto: () => Math.round(zoomActual * 100) + '%',
+    },
+    resolucion: document.getElementById('resolucionVistaPrevia'),
+    pantallaCompleta: document.getElementById('botonPantallaCompleta'),
+    descargar: botonDescargarAvanzado,
+    enlace: enlaceDescarga,
+    notas: [document.getElementById('avisoResolucionOriginal'), document.getElementById('notaDescargaPng')],
+    menu: ['botonCambiarImagen', 'botonGuardarProyecto', 'botonCargarProyecto', 'botonRestablecerAvanzado'].map((id) => document.getElementById(id)),
+  },
+  editando: pintarEditando,
+  alCambiarCategoria(categoria) {
+    if (categoria === 'borrar') {
+      herramientaLienzo = 'borrar';
+      document.getElementById('lugarBorrar').appendChild(controlesPincel);
+    } else {
+      // null: el esqueleto se apagó (celular): todo vuelve a "Aplicar la capa a".
+      if (controlesPincel.parentNode !== lugarPincelEnZona.padre) lugarPincelEnZona.padre.insertBefore(controlesPincel, lugarPincelEnZona.siguiente);
+      const suya = CATEGORIA_DE_HERRAMIENTA[herramientaLienzo];
+      if (categoria && suya && suya !== categoria) herramientaLienzo = 'mover';
+    }
+    if (itemActivo()) actualizarControlesSeleccion();
+  },
+});
+
+// "Editando: …" arriba de la columna: lo elegido, y una lista para cambiarlo
+// sin ir a Capas (plan, 4.1).
+function iconoDeItem(item) {
+  // Un objeto se reconoce por su contenido: T para un texto.
+  if (esObjeto(item) && capaDeContenido(item)) return capaDeContenido(item).contenido.tipo === 'texto' ? 'T' : '🖼';
+  if (esGrupo(item)) return item.aisladoV6 ? '📁' : TiposGrupo.TIPOS[TiposGrupo.claseDe(item)].icono;
+  if (item.contenido) return item.contenido.tipo === 'texto' ? 'T' : '🖼';
+  return '☀';
+}
+function pintarEditando(contenedor) {
+  const item = itemActivo();
+  contenedor.textContent = '';
+  if (!item) return;
+  const rotulo = document.createElement('span');
+  rotulo.className = 'ed-editando-rotulo';
+  rotulo.textContent = t('editando');
+  const boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = 'ed-editando-boton';
+  boton.title = t('title-editando');
+  boton.setAttribute('aria-haspopup', 'true');
+  boton.setAttribute('aria-expanded', 'false');
+  const nombre = document.createElement('b');
+  nombre.textContent = item.nombre;
+  boton.append(iconoDeItem(item) + ' ', nombre, ' ▾');
+  const lista = document.createElement('div');
+  lista.className = 'ed-editando-lista';
+  lista.hidden = true;
+  // De arriba hacia abajo y con sangría, como la lista de capas.
+  (function agregar(items, nivel) {
+    for (const it of [...items].reverse()) {
+      // La base de un objeto no se elige sola: la representa su objeto.
+      if (it.contenido && nivel > 0) continue;
+      const opcion = document.createElement('button');
+      opcion.type = 'button';
+      opcion.style.paddingLeft = (8 + nivel * 14) + 'px';
+      opcion.setAttribute('aria-pressed', String(it.id === item.id));
+      opcion.textContent = iconoDeItem(it) + ' ' + it.nombre;
+      opcion.addEventListener('click', () => seleccionarItem(it.id));
+      lista.appendChild(opcion);
+      if (esGrupo(it)) agregar(it.hijos, nivel + 1);
+    }
+  })(capas, 0);
+  boton.addEventListener('click', () => {
+    lista.hidden = !lista.hidden;
+    boton.setAttribute('aria-expanded', String(!lista.hidden));
+  });
+  contenedor.append(rotulo, boton, lista);
+}
 
 // Una herramienta del lienzo con su tecla (la de Photoshop): solo si vale
 // para lo elegido, y sin el "segundo toque vuelve a Mover" del botón.
