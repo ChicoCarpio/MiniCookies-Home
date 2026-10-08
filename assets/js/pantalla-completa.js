@@ -1,5 +1,5 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
-// Pantalla completa de los editores de imagen (PLAN-REDISENO-EDITOR.md,
+// Pantalla completa de los editores de imagen (plan del rediseño, hallazgos.md,
 // fase 4): el botón ⛶ y la tecla F ponen el contenedor del editor en
 // pantalla completa con la API del navegador; Esc (o el mismo botón) sale.
 //

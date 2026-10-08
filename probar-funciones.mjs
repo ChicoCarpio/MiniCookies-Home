@@ -2107,7 +2107,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
-  // Fase 8 del rediseño (2026-10-08): CHECKLIST-EDITORES.md, de punta a punta.
+  // Fase 8 del rediseño (2026-10-08): el inventario de controles
+  // (hallazgos.md), de punta a punta.
   // Cada control de la lista tiene que existir y estar donde dice el plan: en
   // el bloque de su categoría (que la barra de íconos de PC y la de abajo del
   // celular abren) o en la barra superior / "⋯". En PC y a 390 px. Y todo
