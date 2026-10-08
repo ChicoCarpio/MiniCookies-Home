@@ -2046,6 +2046,67 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // la izquierda y un objeto rojo en el medio. El color del fondo se detecta
   // solo, la sombra también es fondo, y con "Borrar lo que está fuera de la
   // zona" queda solo el objeto.
+  // Pendientes de las fases 6 y 7 (2026-10-08, aprobados por el usuario):
+  // ordenar las piezas de la zona (↑ ↓, arrastre, deshacer) y "＋ Ajuste para
+  // «…»" con un objeto elegido, más la lista de las capas de adentro.
+  await prueba('editor avanzado: ordenar piezas y "＋ Ajuste para"', async () => {
+    const h = {};
+    const el = (id) => D().getElementById(id);
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    el('entradaArchivo').files = archivos([await imagenDePrueba('A', 300, 200)]).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => D().body.classList.contains('ed-esqueleto-activo'), 15000), 'el editor no abrió');
+    await esperar(200);
+    const tipos = () => W().itemActivo().mascara.piezas.map((x) => x.tipo).join(',');
+    W().agregarPieza('luz');
+    W().agregarPieza('pincel-restar');
+    afirmar(tipos() === 'luz,pincel', 'piezas de partida: ' + tipos());
+    afirmar(el('botonSubirPieza').disabled && !el('botonBajarPieza').disabled, 'la pieza de arriba puede subir o no puede bajar');
+    el('botonBajarPieza').click();
+    h.bajar = tipos();
+    afirmar(h.bajar === 'pincel,luz', '↓ Bajar: ' + h.bajar);
+    const filas = () => [...D().querySelectorAll('#listaPiezas .fila-pieza')];
+    afirmar(filas()[0].textContent.includes(W().t('pieza-luz')), 'la lista no muestra Luz arriba');
+    // Arrastrar: se reordenan las filas y al soltar las piezas toman ese orden.
+    await esperar(200);
+    filas()[1].parentNode.insertBefore(filas()[1], filas()[0]);
+    W().ordenarPiezasSegunLista();
+    h.arrastre = tipos();
+    afirmar(h.arrastre === 'luz,pincel', 'arrastrar: ' + h.arrastre);
+    await esperar(300);
+    el('botonDeshacer').click();
+    h.deshacer = tipos();
+    afirmar(h.deshacer === 'pincel,luz', 'deshacer el arrastre: ' + h.deshacer);
+
+    // "＋ Ajuste para «…»": con un objeto elegido, en Luz.
+    el('botonNuevoTexto').click();
+    await esperar(200);
+    const objeto = W().itemActivo();
+    afirmar(W().esObjeto(objeto), 'agregar un texto no eligió el objeto');
+    D().querySelector('.ed-rail [data-ed-categoria="luz"]').click();
+    const bloqueLuz = D().querySelector('[data-categoria="luz"]');
+    const boton = bloqueLuz.querySelector('.aviso-solo-capas .boton-ajuste-para');
+    afirmar(boton && boton.getBoundingClientRect().height > 0, 'no se ve "＋ Ajuste para" en Luz');
+    afirmar(boton.textContent.includes(objeto.nombre), 'el botón no nombra al objeto: ' + boton.textContent);
+    afirmar(bloqueLuz.querySelector('.acordeon-contenido').inert, 'con el objeto elegido los deslizadores no están inactivos');
+    boton.click();
+    const nueva = W().itemActivo();
+    afirmar(!W().esGrupo(nueva) && W().objetoQueContiene(nueva) === objeto, 'la capa nueva no quedó adentro del objeto');
+    afirmar(!bloqueLuz.querySelector('.acordeon-contenido').inert && !bloqueLuz.classList.contains('solo-capas'), 'con la capa nueva los deslizadores siguen inactivos');
+    // Con el objeto elegido otra vez, la lista ofrece la capa de adentro.
+    W().seleccionarItem(objeto.id);
+    const deAdentro = [...bloqueLuz.querySelectorAll('.aviso-solo-capas .lista-de-adentro button')];
+    afirmar(deAdentro.length === 1 && deAdentro[0].textContent.includes(nueva.nombre), 'la lista de adentro: ' + deAdentro.map((b) => b.textContent));
+    deAdentro[0].click();
+    afirmar(W().itemActivo() === nueva, 'tocar la capa de adentro no la eligió');
+    // En Efectos (tres bloques) la tarjeta sale una sola vez.
+    W().seleccionarItem(objeto.id);
+    D().querySelector('.ed-rail [data-ed-categoria="efectos"]').click();
+    h.tarjetasEfectos = [...D().querySelectorAll('.aviso-solo-capas')].filter((c) => c.getBoundingClientRect().height > 0).length;
+    afirmar(h.tarjetasEfectos === 1, 'en Efectos se ven ' + h.tarjetasEfectos + ' tarjetas');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   await prueba('editor avanzado: croma (detecta el fondo verde, sombras, quitar el fondo)', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const c = D().createElement('canvas'); c.width = 200; c.height = 100;

@@ -130,6 +130,19 @@
   .fila-pieza .signo-pieza { display: inline-block; min-width: 1.2em; font-weight: 700; color: var(--azul); }
   .fila-pieza button.icono-capa { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--texto-suave); padding: 2px 6px; flex-shrink: 0; }
   .fila-pieza button.icono-capa.apagado { opacity: 0.35; }
+  /* El asa para ordenar arrastrando (mouse o dedo: mantener apretada). */
+  .fila-pieza .asa-pieza { flex: none; align-self: stretch; display: flex; align-items: center; padding: 0 2px 0 6px; color: var(--texto-suave); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .fila-pieza.arrastrando { opacity: 0.45; }
+  /* Con algo que no es una capa elegido: qué hacer, en vez de los ajustes. */
+  .aviso-solo-capas { display: none; }
+  .solo-capas > .aviso-solo-capas { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin: 0 0 12px; }
+  .aviso-solo-capas p { margin: 0; font-size: 0.8rem; }
+  .aviso-solo-capas .lista-de-adentro { display: flex; flex-direction: column; gap: 2px; align-self: stretch; }
+  .aviso-solo-capas .lista-de-adentro button { padding: 5px 8px; border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); color: var(--texto); text-align: left; font-size: 0.8rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .aviso-solo-capas .lista-de-adentro button:hover { border-color: var(--azul); }
+  /* Una sola vez por categoría (Efectos tiene tres bloques). */
+  .ed-esqueleto-activo .ed-cat-visible:not(.ed-cat-primero) > .aviso-solo-capas,
+  .app-hoja > .acordeon-grupo + .acordeon-grupo > .aviso-solo-capas { display: none; }
   .menu-piezas { margin: 6px 0; }
   /* .modos pone display: flex, que le gana al atributo hidden. */
   .menu-piezas[hidden] { display: none; }
@@ -155,7 +168,6 @@
   .boton-capa-accion:disabled { opacity: 0.4; cursor: default; }
   /* Con un grupo elegido, los ajustes de cada capa quedan inactivos y avisan por qué. */
   .acordeon-grupo.solo-capas .acordeon-contenido > * { opacity: 0.4; }
-  .acordeon-grupo.solo-capas .acordeon-contenido::before { content: attr(data-aviso); display: block; margin-bottom: 8px; font-size: 0.78rem; color: var(--texto-suave); }
   .fila-opacidad {
     display: flex; align-items: center; gap: 4px; padding: 4px 6px 6px;
     border: 1px solid var(--gris-borde); border-top: none; border-radius: 0 0 8px 8px;
@@ -408,8 +420,14 @@ window.i18nPagina = {
     'fila-contenido-texto': 'El texto',
     'fila-contenido-imagen': 'La imagen',
     'title-contenido-fijo': 'Queda siempre abajo: los ajustes del objeto van arriba de esta fila',
-    'aviso-grupo-activo': 'Elegiste un grupo: estos ajustes son de cada capa. El grupo tiene su opacidad, su modo de fusión y su máscara.',
-    'aviso-objeto-activo': 'Elegiste un objeto: sus ajustes van en capas adentro de él. Tocá «+ Capa» para agregarle una.',
+    'aviso-objeto-elegido': 'Elegiste «{nombre}». Sus ajustes van en una capa de ajuste adentro de él.',
+    'aviso-grupo-elegido': 'Elegiste «{nombre}». Los ajustes son de cada capa: agregá una adentro o elegí una de las que tiene.',
+    'boton-ajuste-para': '＋ Ajuste para «{nombre}»',
+    'lbl-capas-de-adentro': 'Las capas de adentro:',
+    'boton-subir-pieza': '↑ Subir',
+    'boton-bajar-pieza': '↓ Bajar',
+    'title-orden-pieza': 'Mover la pieza en la lista: el orden cambia el resultado',
+    'title-asa-pieza': 'Arrastrá para ordenar (con el dedo, mantenela apretada)',
     'aviso-objeto-no-desagrupa': 'Un objeto no se desagrupa: sus ajustes le pertenecen. Para sacar uno, arrastralo afuera.',
     'motivo-contenido-fijo': 'El texto o la imagen de un objeto queda siempre abajo de sus ajustes.',
     'motivo-dentro-de-si': 'Un grupo no puede ir adentro de sí mismo.',
@@ -667,8 +685,14 @@ window.i18nPagina = {
     'fila-contenido-texto': 'The text',
     'fila-contenido-imagen': 'The image',
     'title-contenido-fijo': 'Always at the bottom: the object\'s adjustments go above this row',
-    'aviso-grupo-activo': 'A group is selected: these settings belong to each layer. The group has its own opacity, blend mode and mask.',
-    'aviso-objeto-activo': 'An object is selected: its adjustments go in layers inside it. Tap «+ Layer» to add one.',
+    'aviso-objeto-elegido': '«{nombre}» is selected. Its adjustments go in an adjustment layer inside it.',
+    'aviso-grupo-elegido': '«{nombre}» is selected. Adjustments belong to each layer: add one inside or pick one it already has.',
+    'boton-ajuste-para': '＋ Adjustment for «{nombre}»',
+    'lbl-capas-de-adentro': 'The layers inside:',
+    'boton-subir-pieza': '↑ Move up',
+    'boton-bajar-pieza': '↓ Move down',
+    'title-orden-pieza': 'Move the piece in the list: the order changes the result',
+    'title-asa-pieza': 'Drag to reorder (with a finger, press and hold it)',
     'aviso-objeto-no-desagrupa': 'An object cannot be ungrouped: its adjustments belong to it. To take one out, drag it outside.',
     'motivo-contenido-fijo': 'The text or image of an object always stays below its adjustments.',
     'motivo-dentro-de-si': 'A group cannot go inside itself.',
@@ -865,6 +889,10 @@ window.i18nPagina = {
               </div>
 
               <div id="controlesPieza" class="controles controles-apilados" style="display:none;">
+                <div class="modos" id="ordenPieza" data-i18n-attr="title:title-orden-pieza" title="Mover la pieza en la lista: el orden cambia el resultado">
+                  <button type="button" id="botonSubirPieza" data-i18n="boton-subir-pieza">↑ Subir</button>
+                  <button type="button" id="botonBajarPieza" data-i18n="boton-bajar-pieza">↓ Bajar</button>
+                </div>
                 <span class="titulo-mascara">
                   <span data-i18n="lbl-operacion">Con las piezas de abajo</span>
                   <span class="ayuda-tip">
@@ -1384,6 +1412,7 @@ window.i18nPagina = {
 <script src="../assets/js/historial.js"></script>
 <script src="../assets/js/pantalla-completa.js"></script>
 <script src="../assets/js/esqueleto-editor.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
@@ -2740,6 +2769,14 @@ function pintarListaPiezas(item) {
     const fila = document.createElement('div');
     fila.className = 'fila-pieza' + (p === activa ? ' activa' : '') + (p.visible ? '' : ' apagada');
     fila.setAttribute('role', 'listitem');
+    fila.dataset.id = p.id;
+    fila.draggable = piezas.length > 1;
+    const asa = document.createElement('span');
+    asa.className = 'asa-pieza';
+    asa.textContent = '⠿';
+    asa.title = t('title-asa-pieza');
+    asa.setAttribute('aria-hidden', 'true');
+    if (piezas.length < 2) asa.style.visibility = 'hidden';
     const elegir = document.createElement('button');
     elegir.type = 'button';
     elegir.className = 'nombre-pieza';
@@ -2779,9 +2816,70 @@ function pintarListaPiezas(item) {
       marcarMascaraSucia(item);
       actualizarControlesSeleccion();
     });
-    fila.append(elegir, ojo, borrar);
+    fila.append(asa, elegir, ojo, borrar);
     lista.appendChild(fila);
   }
+}
+
+// Ordenar las piezas: el orden importa (cada una se combina con lo que tiene
+// debajo). Arrastrando la fila (mouse) o su asa ⠿ (dedo, manteniéndola
+// apretada: assets/js/reordenar-tactil.js), o con ↑ ↓ de la pieza elegida.
+// El arrastre reordena las filas; al soltar, las piezas toman ese orden.
+function ordenarPiezasSegunLista() {
+  const item = itemActivo();
+  if (!item) return;
+  const filas = [...document.querySelectorAll('#listaPiezas .fila-pieza')];
+  const porId = new Map(item.mascara.piezas.map((p) => [String(p.id), p]));
+  const nuevas = filas.map((f) => porId.get(f.dataset.id)).filter(Boolean).reverse();
+  if (nuevas.length === item.mascara.piezas.length && nuevas.some((p, i) => p !== item.mascara.piezas[i])) {
+    item.mascara.piezas = nuevas;
+    marcarMascaraSucia(item);
+    historial.programar();
+  }
+  actualizarControlesSeleccion();
+}
+function moverPieza(direccion) {
+  const item = itemActivo();
+  const pieza = item && piezaActiva(item);
+  if (!pieza) return;
+  const piezas = item.mascara.piezas;
+  const i = piezas.indexOf(pieza);
+  const j = i + direccion;
+  if (j < 0 || j >= piezas.length) return;
+  piezas.splice(i, 1);
+  piezas.splice(j, 0, pieza);
+  marcarMascaraSucia(item);
+  actualizarControlesSeleccion();
+}
+// "Subir" es hacia arriba en la lista: se combina más tarde.
+document.getElementById('botonSubirPieza').addEventListener('click', () => moverPieza(1));
+document.getElementById('botonBajarPieza').addEventListener('click', () => moverPieza(-1));
+{
+  const listaPiezas = document.getElementById('listaPiezas');
+  let filaArrastrada = null;
+  listaPiezas.addEventListener('dragstart', (e) => {
+    filaArrastrada = e.target.closest ? e.target.closest('.fila-pieza') : null;
+    if (!filaArrastrada) return;
+    filaArrastrada.classList.add('arrastrando');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', 'pieza'); } catch (error) { /* no hace falta */ }
+  });
+  listaPiezas.addEventListener('dragover', (e) => {
+    if (!filaArrastrada) return;
+    e.preventDefault();
+    const fila = e.target.closest('.fila-pieza');
+    if (fila && fila !== filaArrastrada) insertarSegunPosicion(filaArrastrada, fila, e.clientX, e.clientY);
+  });
+  const soltar = (e) => {
+    if (!filaArrastrada) return;
+    if (e.type === 'drop') e.preventDefault();
+    filaArrastrada.classList.remove('arrastrando');
+    filaArrastrada = null;
+    ordenarPiezasSegunLista();
+  };
+  listaPiezas.addEventListener('drop', soltar);
+  listaPiezas.addEventListener('dragend', soltar);
+  habilitarReordenTactil(listaPiezas, '.fila-pieza', ordenarPiezasSegunLista);
 }
 
 // Agrega una pieza arriba de todo y la deja elegida, con la herramienta que
@@ -2861,6 +2959,12 @@ function actualizarControlesSeleccion() {
 
   // Los controles de la pieza elegida.
   document.getElementById('controlesPieza').style.display = pieza ? 'flex' : 'none';
+  if (pieza) {
+    const i = capa.mascara.piezas.indexOf(pieza);
+    document.getElementById('ordenPieza').style.display = capa.mascara.piezas.length > 1 ? '' : 'none';
+    document.getElementById('botonSubirPieza').disabled = i >= capa.mascara.piezas.length - 1;
+    document.getElementById('botonBajarPieza').disabled = i <= 0;
+  }
   document.querySelectorAll('#modosOperacion button').forEach((b) => {
     const activo = !!pieza && b.dataset.op === pieza.op;
     b.classList.toggle('activo', activo);
@@ -3992,12 +4096,61 @@ function crearFilaItem(capa, nivel) {
 // dicen por qué. La máscara ("Aplicar la capa a") sí vale para los grupos.
 const BLOQUES_SOLO_CAPA = [...document.querySelectorAll('.panel-ajustes .acordeon-grupo, #filtrosCapa, [data-app-categoria="Textura"]')];
 
+// En su lugar, con un objeto, un grupo o una carpeta elegidos: "＋ Ajuste
+// para «…»" (agrega una capa de ajuste adentro y la deja elegida, así los
+// deslizadores ya responden) y la lista de las capas de adentro para elegir
+// una sin ir a Capas (plan, sección 6, punto 4).
+function pintarAvisoSoloCapas(bloque, item) {
+  let caja = bloque.querySelector(':scope > .aviso-solo-capas');
+  if (!caja) {
+    caja = document.createElement('div');
+    caja.className = 'aviso-solo-capas';
+    bloque.insertBefore(caja, bloque.querySelector(':scope > .acordeon-contenido'));
+  }
+  caja.textContent = '';
+  if (!item) return;
+  const texto = document.createElement('p');
+  texto.className = 'nota-lateral';
+  texto.textContent = t(esObjeto(item) ? 'aviso-objeto-elegido' : 'aviso-grupo-elegido').replace('{nombre}', item.nombre);
+  const agregar = document.createElement('button');
+  agregar.type = 'button';
+  agregar.className = 'boton boton-ajuste-para';
+  agregar.textContent = t('boton-ajuste-para').replace('{nombre}', item.nombre);
+  agregar.addEventListener('click', () => insertarItemNuevo(crearCapa()));
+  caja.append(texto, agregar);
+  // Las capas de ajuste de adentro (no el texto o la imagen de un objeto),
+  // de arriba hacia abajo y con sangría, como en la lista de capas.
+  const deAdentro = [];
+  (function juntar(items, nivel) {
+    for (const it of [...items].reverse()) {
+      if (esGrupo(it)) juntar(it.hijos, nivel + 1);
+      else if (!it.contenido) deAdentro.push({ it, nivel });
+    }
+  })(item.hijos, 0);
+  if (!deAdentro.length) return;
+  const rotulo = document.createElement('p');
+  rotulo.className = 'nota-lateral';
+  rotulo.textContent = t('lbl-capas-de-adentro');
+  const lista = document.createElement('div');
+  lista.className = 'lista-de-adentro';
+  for (const { it, nivel } of deAdentro) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.style.marginLeft = (nivel * 12) + 'px';
+    b.textContent = '☀ ' + it.nombre;
+    b.addEventListener('click', () => seleccionarItem(it.id));
+    lista.appendChild(b);
+  }
+  caja.append(rotulo, lista);
+}
+
 function sincronizarPanelesConActivo() {
   const capa = capaActiva();
   BLOQUES_SOLO_CAPA.forEach((bloque) => {
     const contenido = bloque.querySelector('.acordeon-contenido');
     bloque.classList.toggle('solo-capas', !capa);
-    if (contenido) { contenido.inert = !capa; contenido.dataset.aviso = t(esObjeto(itemActivo()) ? 'aviso-objeto-activo' : 'aviso-grupo-activo'); }
+    if (contenido) contenido.inert = !capa;
+    pintarAvisoSoloCapas(bloque, capa ? null : itemActivo());
   });
   if (capa) escribirAjustesEnUI(capa.ajustes);
   actualizarControlesSeleccion();
