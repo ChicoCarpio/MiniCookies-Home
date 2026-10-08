@@ -73,6 +73,7 @@ async function hasta(cond, ms = 30000) {
   return null;
 }
 async function prueba(nombre, fn) {
+  if (SOLO && !nombre.includes(SOLO)) return;
   const t0 = Date.now();
   try {
     const detalle = await fn();
@@ -863,7 +864,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // Grupos del editor avanzado, con la misma imagen de dos mitades: el grupo
   // aplica su visibilidad, opacidad, máscara y modo a todo lo de adentro, y
   // subir/bajar cambian el orden (que importa: Multiplicar y Trama no
-  // conmutan).
+  // conmutan). Desde los tipos de grupo (2026-10-07) un grupo de ajustes
+  // nunca se aísla: su modo funde el resultado entero con lo de abajo.
   await prueba('editor avanzado: grupos (agrupar, ocultar, opacidad, máscara, modo, orden, proyecto)', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const base = D().createElement('canvas'); base.width = 100; base.height = 50;
@@ -890,7 +892,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const idCapa1 = W().capaActiva().id;
     clic('#botonAgrupar');
     afirmar(W().esGrupo(W().itemActivo()), 'Agrupar no dejó elegido el grupo');
-    afirmar(filaActiva().querySelector('select').value === 'paso', 'un grupo de capas de ajuste no nació en "Pasar a través"');
+    afirmar(W().itemActivo().clase === 'ajustes', 'agrupar una capa de ajuste no armó un grupo de ajustes: ' + W().itemActivo().clase);
+    afirmar(![...filaActiva().querySelector('select').options].some((o) => o.value === 'paso'), 'el grupo todavía ofrece "Pasar a través"');
     afirmar(D().querySelector('[data-app-categoria="Luz"], .panel-ajustes .acordeon-contenido').inert, 'con un grupo elegido, los ajustes de capa no quedaron inactivos');
     h.agrupada = await leer();
     afirmar(cerca(h.agrupada[0], 6) && cerca(h.agrupada[1], 190), 'grupo Normal: ' + h.agrupada);
@@ -906,16 +909,16 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     h.mascara = await leer();
     afirmar(cerca(h.mascara[0], 6) && cerca(h.mascara[1], 220), 'máscara del grupo: ' + h.mascara);
     clic('#modosBaseMascara [data-base="toda"]');
-    // Cualquier modo que no sea "Pasar a través" aísla el grupo: una capa de
-    // ajuste sola adentro ya no tiene nada que ajustar.
+    // Multiplicar en el grupo no lo aísla: lo de adentro (40 -> 6) se
+    // multiplica otra vez con lo de abajo (6 · 40 / 255 = 1; 190 · 220 / 255 = 164).
     ponerModo('multiply');
-    h.aislado = await leer();
-    afirmar(cerca(h.aislado[0], 40) && cerca(h.aislado[1], 220), 'grupo aislado con solo un ajuste: ' + h.aislado);
-    ponerModo('paso');
+    h.grupoMultiplica = await leer();
+    afirmar(cerca(h.grupoMultiplica[0], 1) && cerca(h.grupoMultiplica[1], 164), 'grupo de ajustes en Multiplicar: ' + h.grupoMultiplica);
+    ponerModo('normal');
 
     // Proyecto: el árbol se guarda y vuelve igual.
     const raiz = W().ubicar(W().itemActivo().id).lista;
-    const proyecto = { version: 3, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: idCapa1, capas: raiz.map(W().itemAProyecto) };
+    const proyecto = { version: 7, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: idCapa1, capas: raiz.map(W().itemAProyecto) };
     afirmar(proyecto.capas.length === 1 && proyecto.capas[0].tipo === 'grupo' && proyecto.capas[0].hijos.length === 1, 'el proyecto no guardó el grupo: ' + JSON.stringify(proyecto.capas).slice(0, 120));
     const entradaProyecto = D().getElementById('entradaProyecto');
     entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'grupo.json', { type: 'application/json' })]).files;
@@ -986,8 +989,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     // Copia de la mitad oscura (máscara de la capa 1 en Sombras), en su lugar.
     clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
     clic('#botonCopiarFoto');
-    const copia = W().capaActiva();
-    afirmar(copia && copia.contenido && copia.contenido.tipo === 'imagen', 'Copia de la foto no creó una capa de imagen');
+    const objetoCopia = W().itemActivo();
+    afirmar(objetoCopia && objetoCopia.clase === 'objeto', 'Copia de la foto no creó un objeto');
+    const copia = W().capaDeContenido(objetoCopia);
+    afirmar(copia && copia.contenido && copia.contenido.tipo === 'imagen' && objetoCopia.hijos[0] === copia, 'el objeto no tiene la imagen abajo');
     afirmar(cerca(copia.contenido.lienzo.width, 50, 1) && cerca(copia.contenido.centro.x, 0.25, 0.01), 'la copia no es la mitad izquierda: ' + copia.contenido.lienzo.width + ' en ' + copia.contenido.centro.x);
     h.enSuLugar = await leer();
     afirmar(cerca(h.enSuLugar[0], 40) && cerca(h.enSuLugar[1], 220), 'copia en su lugar: ' + h.enSuLugar);
@@ -1023,29 +1028,27 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     h.restaurada = await leer();
     afirmar(cerca(h.restaurada[1], 35), 'copia vuelta a su lugar: ' + h.restaurada);
 
-    // Agrupar la copia la aísla: un ajuste en Trama dentro del grupo aclara
-    // solo la copia (derecha 40 -> 74), no la foto (izquierda sigue en 40).
-    // En "Pasar a través" aclara las dos.
+    // Un ajuste adentro del objeto (+ Capa con el objeto elegido) en Trama
+    // aclara solo la copia (derecha 40 -> 74), no la foto (izquierda sigue en
+    // 40). Subido afuera del objeto, aclara las dos.
     const modoCopia = D().querySelector('#listaCapas .fila-capa.activa').parentElement.querySelector('select');
     modoCopia.value = 'normal'; modoCopia.dispatchEvent(new (W().Event)('change'));
-    clic('#botonAgrupar');
-    const filaGrupo = () => D().querySelector('#listaCapas .fila-capa.activa').parentElement;
-    afirmar(filaGrupo().querySelector('select').value === 'normal', 'el grupo de una capa de imagen no nació aislado');
-    const idGrupo = W().itemActivo().id;
     clic('#botonNuevaCapa');
+    const idAjuste = W().itemActivo().id;
+    afirmar(W().ubicar(idAjuste).padre === objetoCopia && W().ubicar(idAjuste).indice === 1, '+ Capa con un objeto elegido no la puso adentro, arriba de su imagen');
     const ajuste = D().querySelector('#listaCapas .fila-capa.activa').parentElement.querySelector('select');
     ajuste.value = 'screen'; ajuste.dispatchEvent(new (W().Event)('change'));
-    h.grupoAislado = await leer();
-    afirmar(cerca(h.grupoAislado[0], 40) && cerca(h.grupoAislado[1], 74), 'ajuste dentro del grupo aislado: ' + h.grupoAislado);
-    W().seleccionarItem(idGrupo);
-    filaGrupo().querySelector('select').value = 'paso'; filaGrupo().querySelector('select').dispatchEvent(new (W().Event)('change'));
-    h.grupoPaso = await leer();
-    afirmar(cerca(h.grupoPaso[0], 74) && cerca(h.grupoPaso[1], 74), 'el mismo grupo en Pasar a través: ' + h.grupoPaso);
-    // Se deshace para seguir con lo de abajo: fuera el ajuste y el grupo.
-    W().seleccionarItem(idGrupo); clic('#botonDesagrupar');
-    W().eliminarCapa(W().todosLosItems().find((i) => !i.contenido && !W().esGrupo(i) && i !== W().todosLosItems()[0]).id);
+    h.ajusteDelObjeto = await leer();
+    afirmar(cerca(h.ajusteDelObjeto[0], 40) && cerca(h.ajusteDelObjeto[1], 74), 'ajuste adentro del objeto: ' + h.ajusteDelObjeto);
+    afirmar(D().getElementById('botonBajarCapa').disabled === false, 'no se puede bajar el ajuste');
+    clic('#botonSubirCapa');
+    afirmar(!W().ubicar(idAjuste).padre, 'subir desde arriba de todo no lo sacó del objeto');
+    h.ajusteAfuera = await leer();
+    afirmar(cerca(h.ajusteAfuera[0], 74) && cerca(h.ajusteAfuera[1], 74), 'el mismo ajuste afuera del objeto: ' + h.ajusteAfuera);
+    // Se deshace para seguir con lo de abajo.
+    W().eliminarCapa(idAjuste);
     W().seleccionarItem(copia.id);
-    modoCopia.value = 'multiply';
+    afirmar(W().itemActivo() === objetoCopia, 'elegir la imagen de un objeto no eligió el objeto');
     const filaCopia = D().querySelector('#listaCapas .fila-capa.activa').parentElement.querySelector('select');
     filaCopia.value = 'multiply'; filaCopia.dispatchEvent(new (W().Event)('change'));
     h.vuelta = await leer();
@@ -1055,14 +1058,16 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const contar = (cond) => { const d = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (cond(d[i], d[i + 1], d[i + 2])) n++; return n; };
     const rojos = (r, g, b) => r > 180 && g < 90 && b < 90;
     clic('#botonNuevoTexto');
-    const capaTexto = W().capaActiva();
-    afirmar(capaTexto && capaTexto.contenido && capaTexto.contenido.tipo === 'texto', '+ Texto no creó una capa de texto');
+    const objetoTexto = W().itemActivo();
+    const capaTexto = W().capaDeContenido(objetoTexto);
+    afirmar(W().esObjeto(objetoTexto) && capaTexto && capaTexto.contenido && capaTexto.contenido.tipo === 'texto', '+ Texto no creó un objeto de texto');
+    afirmar(!W().ubicar(objetoTexto.id).padre, 'el texto quedó adentro de otro objeto');
     const color = D().getElementById('colorTexto'); color.value = '#ff0000'; color.dispatchEvent(new (W().Event)('input'));
     D().getElementById('textoCapa').value = 'HOLA'; D().getElementById('textoCapa').dispatchEvent(new (W().Event)('input'));
     await esperar(250);
     h.textoRojo = contar(rojos);
     afirmar(h.textoRojo > 5, 'el texto rojo no aparece: ' + h.textoRojo + ' píxeles');
-    afirmar(capaTexto.nombre === 'HOLA', 'el nombre no siguió al texto: ' + capaTexto.nombre);
+    afirmar(objetoTexto.nombre === 'HOLA', 'el nombre no siguió al texto: ' + objetoTexto.nombre);
     deslizar('tamanoContenido', 250);
     await esperar(250);
     h.textoGrande = contar(rojos);
@@ -1080,16 +1085,85 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     // Proyecto: guardado y vuelto a abrir, da lo mismo.
     const antes = [px(lienzo, 0.25, 0.1)[0], px(lienzo, 0.75, 0.1)[0], contar(rojos)];
-    const raiz = W().ubicar(capaTexto.id).lista;
-    const proyecto = { version: 4, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: capaTexto.id, capas: raiz.map(W().itemAProyecto) };
+    const raiz = W().eval('capas');
+    const proyecto = { version: 7, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: objetoTexto.id, capas: raiz.map(W().itemAProyecto) };
     const entradaProyecto = D().getElementById('entradaProyecto');
     entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'contenido.json', { type: 'application/json' })]).files;
     entradaProyecto.dispatchEvent(new (W().Event)('change'));
-    afirmar(await hasta(() => W().capaActiva() && W().capaActiva() !== capaTexto && W().capaActiva().id === capaTexto.id, 10000), 'el proyecto no volvió a abrir');
+    afirmar(await hasta(() => W().itemActivo() && W().itemActivo() !== objetoTexto && W().itemActivo().id === objetoTexto.id && W().capaDeContenido(W().itemActivo()).id === capaTexto.id, 10000), 'el proyecto no volvió a abrir');
     await esperar(300);
     h.proyecto = [px(lienzo, 0.25, 0.1)[0], px(lienzo, 0.75, 0.1)[0], contar(rojos)];
     afirmar(cerca(h.proyecto[0], antes[0]) && cerca(h.proyecto[1], antes[1]) && cerca(h.proyecto[2], antes[2], antes[2] * 0.05 + 2), 'proyecto: ' + antes + ' -> ' + h.proyecto);
     return Object.entries(h).map(([k2, v]) => k2 + ' ' + v).join(' · ');
+  });
+
+  // Tipos de grupo (2026-10-07): las reglas de qué va adentro de qué, el
+  // motivo al soltar donde no se puede, y los proyectos viejos convertidos.
+  // Foto de dos mitades (40 | 220) y una imagen gris 40 de 50x50 puesta sobre
+  // la mitad derecha. La equivalencia exacta con la versión vieja se comprobó
+  // aparte, píxel por píxel, contra la rama anterior (hallazgos.md).
+  await prueba('editor avanzado: tipos de grupo (reglas, soltar, proyectos viejos)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const base = D().createElement('canvas'); base.width = 100; base.height = 50;
+    const cb = base.getContext('2d');
+    cb.fillStyle = 'rgb(40,40,40)'; cb.fillRect(0, 0, 50, 50);
+    cb.fillStyle = 'rgb(220,220,220)'; cb.fillRect(50, 0, 50, 50);
+    const gris = D().createElement('canvas'); gris.width = 50; gris.height = 50;
+    gris.getContext('2d').fillStyle = 'rgb(40,40,40)'; gris.getContext('2d').fillRect(0, 0, 50, 50);
+    const lienzo = D().getElementById('canvasTrabajo');
+    const leer = async () => { await esperar(300); return [0.25, 0.75].map((x) => lienzo.getContext('2d').getImageData(Math.round(lienzo.width * x), lienzo.height >> 1, 1, 1).data[0]); };
+    const cerca = (v, e) => Math.abs(v - e) <= 3;
+    const forma = () => JSON.stringify(W().eval('capas').map(function f(c) { return W().esGrupo(c) ? c.clase + (c.aisladoV6 ? '*' : '') + '[' + c.hijos.map(f).join(',') + ']' : (c.contenido ? 'imagen' : 'ajuste'); }));
+    const abrirProyecto = async (version, capas) => {
+      const p = { version, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: capas[0].id, capas };
+      const e = D().getElementById('entradaProyecto'), antes = W().eval('capas');
+      e.files = archivos([new (W().File)([JSON.stringify(p)], 'p.json', { type: 'application/json' })]).files;
+      e.dispatchEvent(new (W().Event)('change'));
+      afirmar(await hasta(() => W().eval('capas') !== antes && W().ubicar(capas[0].id), 10000), 'el proyecto no abrió');
+    };
+    const capa = (id, extra = {}) => ({ id, nombre: id, visible: true, opacidad: 100, modoFusion: 'normal', mascara: null, ajustes: {}, ...extra });
+    const imagen = (id, extra = {}) => capa(id, { contenido: { tipo: 'imagen', lienzo: gris.toDataURL('image/png'), centro: { x: 0.75, y: 0.5 }, escala: 1, rotacion: 0, voltearH: false, voltearV: false }, ...extra });
+    const h = {};
+
+    // Una imagen con ajustes propios (invertir: 40 -> 215) pasa a ser un objeto con un ajuste adentro.
+    await abrirProyecto(6, [capa('capa-1'), imagen('capa-2', { ajustes: { invertir: 100 } })]);
+    h.formaImagen = forma();
+    afirmar(h.formaImagen === '["ajuste","objeto[imagen,ajuste]"]', 'conversión de una imagen con ajustes: ' + h.formaImagen);
+    h.imagen = await leer();
+    afirmar(cerca(h.imagen[0], 40) && cerca(h.imagen[1], 215), 'imagen convertida: ' + h.imagen);
+
+    // Un grupo aislado (v6) con la imagen y un ajuste en Trama: aclara solo la imagen (40 -> 74).
+    await abrirProyecto(6, [capa('capa-1'), { ...capa('capa-3'), tipo: 'grupo', hijos: [imagen('capa-2'), capa('capa-4', { modoFusion: 'screen' })] }]);
+    h.formaAislado = forma();
+    afirmar(h.formaAislado === '["ajuste","carpeta*[objeto[imagen],ajuste]"]', 'conversión de un grupo aislado: ' + h.formaAislado);
+    h.aislado = await leer();
+    afirmar(cerca(h.aislado[0], 40) && cerca(h.aislado[1], 74), 'grupo aislado convertido: ' + h.aislado);
+
+    // El mismo grupo en "Pasar a través" (v6): aclara las dos mitades.
+    await abrirProyecto(6, [capa('capa-1'), { ...capa('capa-3'), tipo: 'grupo', modoFusion: 'paso', hijos: [imagen('capa-2'), capa('capa-4', { modoFusion: 'screen' })] }]);
+    h.formaPaso = forma();
+    afirmar(h.formaPaso === '["ajuste","carpeta[objeto[imagen],ajuste]"]', 'conversión de un grupo "Pasar a través" con un objeto: ' + h.formaPaso);
+    h.paso = await leer();
+    afirmar(cerca(h.paso[0], 74) && cerca(h.paso[1], 74), 'grupo "Pasar a través" convertido: ' + h.paso);
+
+    // Reglas: lo que no admite cada tipo, con su motivo.
+    const T = W().TiposGrupo, carpetaV = W().ubicar('capa-3').item, objeto = carpetaV.hijos[0], ajusteV = carpetaV.hijos[1];
+    const grupoAjustes = W().crearGrupo(null, 'ajustes');
+    h.reglas = [
+      T.motivoNoPuede(objeto, grupoAjustes, 0), T.motivoNoPuede(W().crearGrupo(null, 'carpeta'), objeto, 1), T.motivoNoPuede(ajusteV, objeto, 0),
+      T.motivoNoPuede(objeto.hijos[0], null, 0), T.motivoNoPuede(ajusteV, objeto, 1), T.motivoNoPuede(objeto, carpetaV, 0),
+    ].join(',');
+    afirmar(h.reglas === 'motivo-ajustes-solo-ajustes,motivo-objeto-solo-ajustes,motivo-debajo-del-contenido,motivo-contenido-fijo,,', 'reglas: ' + h.reglas);
+    // Soltar el objeto adentro del ajuste no se puede (y se dice por qué); arriba de la imagen del objeto, sí.
+    h.soltar = [W().motivoNoSoltar(objeto.id, ajusteV, 'arriba'), W().motivoNoSoltar(ajusteV.id, objeto.hijos[0], 'arriba'), W().motivoNoSoltar(carpetaV.id, objeto, 'dentro')].join(',');
+    afirmar(h.soltar === ',,motivo-dentro-de-si' || h.soltar === ',,motivo-objeto-solo-ajustes', 'soltar: ' + h.soltar);
+    // Agrupar un objeto arma una carpeta; desagrupar un objeto no se puede.
+    W().seleccionarItem(objeto.id);
+    D().getElementById('botonDesagrupar').click();
+    afirmar(W().ubicar(objeto.id) && W().esObjeto(W().ubicar(objeto.id).item) && D().getElementById('avisoCapas').textContent === W().t('aviso-objeto-no-desagrupa'), 'desagrupar un objeto: ' + D().getElementById('avisoCapas').textContent);
+    D().getElementById('botonAgrupar').click();
+    afirmar(W().itemActivo().clase === 'carpeta' && W().itemActivo().hijos[0] === objeto, 'agrupar un objeto no armó una carpeta');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
   // Ajustes del motor agregados el 2026-10-04 (Temperatura, Matiz, Blancos,
@@ -1383,8 +1457,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     // Copia de la foto con el objeto elegido: un recorte del tamaño del cuadrado.
     clic('#botonCopiarFoto');
-    const copia = W().capaActiva();
-    afirmar(copia.contenido && copia.contenido.lienzo.width === 40 && copia.contenido.lienzo.height === 40, 'la copia del objeto no mide 40x40: ' + (copia.contenido && copia.contenido.lienzo.width));
+    const copia = W().capaDeContenido(W().itemActivo());
+    afirmar(copia && copia.contenido && copia.contenido.lienzo.width === 40 && copia.contenido.lienzo.height === 40, 'la copia del objeto no mide 40x40: ' + (copia.contenido && copia.contenido.lienzo.width));
 
     clic('#botonTodoSujeto');
     afirmar(llamadas === 1, 'el primer plano se calculó ' + llamadas + ' veces (tiene que ser una por imagen)');
@@ -1441,9 +1515,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const entradaCapa = D().getElementById('entradaImagenCapa');
     entradaCapa.files = archivos([await lienzoPng(100, 50, (cx) => { cx.fillStyle = '#f00'; cx.fillRect(0, 0, 50, 50); cx.fillStyle = '#00f'; cx.fillRect(50, 0, 50, 50); }, 'rojo-azul.png')]).files;
     entradaCapa.dispatchEvent(new (W().Event)('change'));
-    afirmar(await hasta(() => W().capaActiva() && W().capaActiva().contenido, 5000), 'la imagen no entró como capa');
-    const capa = W().capaActiva();
-    afirmar(capa.mascara.fuente === 'capa', 'una capa de imagen nueva no mide sobre sí misma: ' + capa.mascara.fuente);
+    afirmar(await hasta(() => W().esObjeto(W().itemActivo()), 5000), 'la imagen no entró como objeto');
+    const capa = W().itemActivo(); // el objeto: su zona dice qué parte de la imagen se ve
+    const cont = W().capaDeContenido(capa);
+    afirmar(capa.mascara.fuente === 'capa', 'un objeto nuevo no mide sobre su imagen: ' + capa.mascara.fuente);
 
     const lienzo = D().getElementById('canvasTrabajo');
     const color = (cv, x) => { const d = cv.getContext('2d').getImageData(Math.round(x * cv.width / 200), Math.round(cv.height / 2), 1, 1).data; return d[0] > 200 && d[2] < 60 ? 'rojo' : (d[2] > 200 && d[0] < 60 ? 'azul' : (Math.abs(d[0] - 128) <= 3 && Math.abs(d[2] - 128) <= 3 ? 'gris' : d[0] + ',' + d[1] + ',' + d[2])); };
@@ -1460,7 +1535,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     clic('#modosBaseMascara [data-base="sujeto"]');
     afirmar(D().getElementById('controlesFuenteMascara').style.display !== 'none', 'no aparece "Medir sobre" en una capa de imagen');
-    afirmar(await hasta(() => W().sujetoListo(W().fuenteDeContenido(capa)), 5000), 'el primer plano de la capa no se calculó');
+    afirmar(await hasta(() => W().sujetoListo(W().fuenteDeContenido(cont)), 5000), 'el primer plano de la capa no se calculó');
     h.primerPlano = await leer([75, 125]);
     afirmar(h.primerPlano === 'rojo gris', 'primer plano de la capa: ' + h.primerPlano);
     afirmar(tamanos[0] === '100x50', 'la IA no analizó la capa sino ' + tamanos[0]);
@@ -1475,14 +1550,14 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(h.deVuelta === 'rojo gris', 'al volver a "Esta capa": ' + h.deVuelta + ' (el primer plano de la capa tiene que quedar guardado)');
 
     // La máscara acompaña a la capa: movida a la izquierda (x 0..100).
-    capa.contenido.centro = { x: 0.25, y: 0.5 }; W().programarRenderizado();
+    cont.contenido.centro = { x: 0.25, y: 0.5 }; W().programarRenderizado();
     h.movida = await leer([25, 75, 125]);
     afirmar(h.movida === 'rojo gris gris', 'la máscara no siguió a la capa: ' + h.movida);
     // Y volteada: el rojo pasa a la derecha y la máscara con él.
-    capa.contenido.voltearH = true; W().programarRenderizado();
+    cont.contenido.voltearH = true; W().programarRenderizado();
     h.volteada = await leer([25, 75]);
     afirmar(h.volteada === 'gris rojo', 'volteada: ' + h.volteada);
-    capa.contenido.voltearH = false; capa.contenido.centro = { x: 0.5, y: 0.5 }; W().programarRenderizado();
+    cont.contenido.voltearH = false; cont.contenido.centro = { x: 0.5, y: 0.5 }; W().programarRenderizado();
 
     // Elegir objeto: tocar la mitad azul de la capa (x 125 de la foto = 0,75 de la capa).
     afirmar(D().querySelector('#herramientasLienzo [data-herramienta="objeto"]').classList.contains('activo'), '"Elegir objeto" no quedó elegida');
@@ -1572,8 +1647,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const entradaCapa = D().getElementById('entradaImagenCapa');
     entradaCapa.files = archivos([await lienzoArchivo(100, 50, (cx) => { cx.fillStyle = '#f00'; cx.fillRect(0, 0, 100, 50); }, 'rojo.png', 'image/png')]).files;
     entradaCapa.dispatchEvent(new (W().Event)('change'));
-    afirmar(await hasta(() => W().capaActiva() && W().capaActiva().contenido, 5000), 'la imagen no entró como capa');
-    const capa = W().capaActiva();
+    afirmar(await hasta(() => W().esObjeto(W().itemActivo()), 5000), 'la imagen no entró como objeto');
+    const capa = W().capaDeContenido(W().itemActivo());
     clic('#herramientasLienzo [data-herramienta="borrar"]');
     afirmar(D().getElementById('notaBorrar').textContent === W().t('nota-borrar-capa'), 'la nota no dice que borra la capa');
     trazo(120, 130);
@@ -1600,13 +1675,13 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     // Proyecto: guardar (lo mismo que arma el botón) y volver a abrir.
     const proyecto = {
-      version: 6, imagen: W().crearCanvasConImagen(W().eval('imagenActual'), 200, 100).toDataURL('image/jpeg', 0.95), nombreArchivo: 'gris.jpg',
+      version: 7, imagen: W().crearCanvasConImagen(W().eval('imagenActual'), 200, 100).toDataURL('image/jpeg', 0.95), nombreArchivo: 'gris.jpg',
       capaActivaId: capaFoto.id, capas: W().eval('capas').map(W().itemAProyecto), borradoFoto: W().canvasADataUrl(W().eval('borradoFoto')),
     };
     const entradaProyecto = D().getElementById('entradaProyecto');
     entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'p.json', { type: 'application/json' })]).files;
     entradaProyecto.dispatchEvent(new (W().Event)('change'));
-    afirmar(await hasta(() => W().eval('capas').length === 2 && W().eval('capas')[1].borrado, 10000), 'el proyecto no abrió con lo borrado de la capa');
+    afirmar(await hasta(() => W().eval('capas').length === 2 && W().eval('capas')[1].hijos[0].borrado, 10000), 'el proyecto no abrió con lo borrado de la capa');
     h.proyecto = await leer([25, 75, 125]);
     afirmar(h.proyecto === 'transparente rojo gris+', 'proyecto: ' + h.proyecto);
 
@@ -1642,7 +1717,7 @@ function paginaDeControl(lista) {
   return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>pruebas</title>
 <style>html,body{margin:0}iframe{width:1366px;height:900px;border:0}</style></head><body>
 <iframe id="marco"></iframe>
-<script>const PAGINAS = ${JSON.stringify(lista)};\n${PRUEBAS.replace(/<\/(script)/gi, '<\\/$1')}</script></body></html>`;
+<script>const PAGINAS = ${JSON.stringify(lista)};\nconst SOLO = ${JSON.stringify(process.env.PROBAR_SOLO || '')};\n${PRUEBAS.replace(/<\/(script)/gi, '<\\/$1')}</script></body></html>`;
 }
 
 // --- Principal --------------------------------------------------------------
