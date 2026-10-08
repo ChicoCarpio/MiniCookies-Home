@@ -4,7 +4,8 @@
 // Desde el 2026-10-07 (proyecto versión 8) una máscara es una LISTA ORDENADA
 // DE PIEZAS, como en Lightroom (PLAN-REDISENO-EDITOR.md, 3.2). Cada pieza
 // marca una zona (toda la imagen, lo pintado con un pincel, un degradado, un
-// color, un rango de luz, o el primer plano o un objeto que separa la IA:
+// color, un rango de luz, lo que no es el fondo de un croma —verde, azul…—,
+// o el primer plano o un objeto que separa la IA:
 // recorte-sujeto.js y objeto-por-toque.js) y dice cómo se combina con lo que
 // marcan las de abajo:
 //   - sumar: se agrega (source-over);
@@ -35,10 +36,10 @@
 window.MascarasCapa = (function () {
   'use strict';
 
-  const TIPOS = ['toda', 'pincel', 'degradado', 'color', 'luz', 'sujeto', 'objeto'];
+  const TIPOS = ['toda', 'pincel', 'degradado', 'color', 'luz', 'croma', 'sujeto', 'objeto'];
   const OPERACIONES = ['sumar', 'restar', 'intersecar'];
   // Las piezas que miden algo sobre una imagen (y por eso tienen "fuente").
-  const MIDEN = ['color', 'luz', 'sujeto', 'objeto'];
+  const MIDEN = ['color', 'luz', 'croma', 'sujeto', 'objeto'];
   // Rangos rápidos de "Luz", en 0..100 de luminosidad.
   const RANGOS_LUZ = { sombras: [0, 35], medios: [35, 65], luces: [65, 100] };
   const COMPOSICION = { sumar: 'source-over', restar: 'destination-out', intersecar: 'destination-in' };
@@ -57,6 +58,7 @@ window.MascarasCapa = (function () {
     if (tipo === 'pincel') { p.trazo = null; p._version = 0; } // trazo: lienzo a tamaño de trabajo, alfa = cuánto
     if (tipo === 'degradado') p.degradado = { tipo: 'lineal', a: null, b: null }; // a/b en 0..1 del ancho/alto
     if (tipo === 'color') { p.color = null; p.tolerancia = 30; } // color: {r,g,b}
+    if (tipo === 'croma') { p.color = null; p.tolerancia = 25; p.suavidad = 10; } // color: el del fondo, {r,g,b}
     if (tipo === 'luz') p.luz = { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 };
     if (tipo === 'objeto') p.punto = null; // {x,y} en 0..1: lo que se tocó
     if (MIDEN.includes(tipo)) p.fuente = 'foto'; // 'foto' | 'capa'
@@ -81,6 +83,11 @@ window.MascarasCapa = (function () {
     };
     if (tipo === 'pincel') { p.trazo = g.trazo || null; p._version = g._version || 0; }
     if (tipo === 'degradado') p.degradado = { ...n.degradado, ...(g.degradado || {}) };
+    if (tipo === 'croma') {
+      p.color = g.color || null;
+      p.tolerancia = Number.isFinite(g.tolerancia) ? g.tolerancia : n.tolerancia;
+      p.suavidad = Number.isFinite(g.suavidad) ? g.suavidad : n.suavidad;
+    }
     if (tipo === 'color') {
       p.color = g.color || null;
       p.tolerancia = Number.isFinite(g.tolerancia) ? g.tolerancia : n.tolerancia;
@@ -210,6 +217,67 @@ window.MascarasCapa = (function () {
     });
   }
 
+  // Croma: como en video, se compara el TONO del píxel con el del fondo, no
+  // el brillo. En el plano Cb/Cr (YCbCr) el tono es la DIRECCIÓN y la
+  // intensidad del color es el largo, que se achica con la sombra: por eso se
+  // compara el ángulo, y así las sombras y los reflejos sobre el fondo verde
+  // también son fondo. Un píxel casi sin color (gris, blanco, negro) nunca es
+  // fondo. Marca lo que NO es el fondo (la persona, el objeto), como "Primer
+  // plano": nada hasta "tolerancia" grados de diferencia, entera desde
+  // "tolerancia" + "suavidad", y un borde suave en el medio.
+  function cbcr(r, g, b) {
+    return { cb: -0.168736 * r - 0.331264 * g + 0.5 * b, cr: 0.5 * r - 0.418688 * g - 0.081312 * b };
+  }
+  function dibujarCroma(origen, p, ancho, alto, destino) {
+    const fondo = cbcr(p.color.r, p.color.g, p.color.b);
+    const largoFondo = Math.max(1, Math.hypot(fondo.cb, fondo.cr));
+    const anguloFondo = Math.atan2(fondo.cr, fondo.cb);
+    const desde = p.tolerancia * 0.8, hasta = desde + Math.max(0.5, p.suavidad * 0.8);
+    return porPixel(origen, ancho, alto, destino, (r, g, b) => {
+      const c = cbcr(r, g, b);
+      // Cuánto color tiene, comparado con el fondo: 0 por debajo del 15 %
+      // (no es fondo), 1 desde el 30 %.
+      const conColor = Math.min(1, Math.max(0, (Math.hypot(c.cb, c.cr) / largoFondo - 0.15) / 0.15));
+      if (conColor <= 0) return 1;
+      let dif = Math.abs(Math.atan2(c.cr, c.cb) - anguloFondo) * 180 / Math.PI;
+      if (dif > 180) dif = 360 - dif;
+      const lejos = dif <= desde ? 0 : (dif >= hasta ? 1 : (dif - desde) / (hasta - desde));
+      return 1 - conColor * (1 - lejos);
+    });
+  }
+
+  // El color del fondo de un croma: el más repetido en los bordes de la
+  // imagen, entre los que tienen color (un fondo verde o azul); si los bordes
+  // no tienen color, el más repetido igual. Se mira una copia chica: leer la
+  // imagen original con getImageData la pasa a la memoria común (ver el
+  // gotero del Editor avanzado).
+  function detectarCroma(origen) {
+    const escala = Math.min(1, 256 / Math.max(origen.width, origen.height));
+    const w = Math.max(2, Math.round(origen.width * escala)), h = Math.max(2, Math.round(origen.height * escala));
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(origen, 0, 0, w, h);
+    const d = ctx.getImageData(0, 0, w, h).data;
+    const grupos = new Map(); // tono redondeado -> { n, r, g, b, conColor }
+    const anotar = (x, y) => {
+      const i = (y * w + x) * 4;
+      if (d[i + 3] < 128) return;
+      const t = cbcr(d[i], d[i + 1], d[i + 2]);
+      const clave = Math.round(t.cb / 10) + ',' + Math.round(t.cr / 10);
+      const gr = grupos.get(clave) || { n: 0, r: 0, g: 0, b: 0, conColor: Math.hypot(t.cb, t.cr) > 20 };
+      gr.n += 1; gr.r += d[i]; gr.g += d[i + 1]; gr.b += d[i + 2];
+      grupos.set(clave, gr);
+    };
+    for (let x = 0; x < w; x++) { anotar(x, 0); anotar(x, h - 1); }
+    for (let y = 1; y < h - 1; y++) { anotar(0, y); anotar(w - 1, y); }
+    const todos = [...grupos.values()];
+    if (!todos.length) return null;
+    const conColor = todos.filter((g) => g.conColor);
+    const elegido = (conColor.length ? conColor : todos).sort((a, b) => b.n - a.n)[0];
+    return { r: Math.round(elegido.r / elegido.n), g: Math.round(elegido.g / elegido.n), b: Math.round(elegido.b / elegido.n) };
+  }
+
   // Por luz: entera dentro de [desde, hasta] y se desvanece afuera a lo largo
   // de "suavidad" puntos (luminosidad percibida, 0..100).
   function dibujarLuz(origen, luz, ancho, alto, destino) {
@@ -288,12 +356,14 @@ window.MascarasCapa = (function () {
   // mientras no cambie nada de lo que lo define.
   function medicion(p, origen, ia, ancho, alto, cache) {
     const clave = p.tipo === 'color' ? JSON.stringify([p.color, p.tolerancia])
+      : p.tipo === 'croma' ? 'croma' + JSON.stringify([p.color, p.tolerancia, p.suavidad])
       : (p.tipo === 'luz' ? JSON.stringify(p.luz) : p.tipo);
-    const desde = p.tipo === 'color' || p.tipo === 'luz' ? origen : ia;
+    const desde = p.tipo === 'sujeto' || p.tipo === 'objeto' ? ia : origen;
     if (cache && cache.base && cache.clave === clave && cache.desde === desde
       && cache.base.width === ancho && cache.base.height === alto) return cache.base;
     const destino = lienzo(ancho, alto, cache ? cache.base : null);
     if (p.tipo === 'color') dibujarColor(origen, p.color, p.tolerancia, ancho, alto, destino);
+    else if (p.tipo === 'croma') dibujarCroma(origen, p, ancho, alto, destino);
     else if (p.tipo === 'luz') dibujarLuz(origen, p.luz, ancho, alto, destino);
     else destino.getContext('2d').drawImage(ia, 0, 0, ancho, alto);
     if (cache) Object.assign(cache, { base: destino, clave, desde });
@@ -314,7 +384,7 @@ window.MascarasCapa = (function () {
     }
     // Degradado sin trazar y color sin elegir: toda la imagen (así elegirlos
     // no borra la capa, como antes con la base).
-    if (p.tipo === 'degradado' || (p.tipo === 'color' && !p.color)) {
+    if (p.tipo === 'degradado' || ((p.tipo === 'color' || p.tipo === 'croma') && !p.color)) {
       const c = guardar('propio', lienzo(ancho, alto, reusar('propio')));
       const ctx = c.getContext('2d');
       if (p.tipo === 'degradado') dibujarDegradado(ctx, p.degradado, ancho, alto);
@@ -324,7 +394,7 @@ window.MascarasCapa = (function () {
     // Color, luz y la IA: sobre la foto o sobre el contenido del objeto.
     const { origen = null, ia = null, colocar = null } = opciones.medir ? opciones.medir(p) : {};
     if ((p.tipo === 'sujeto' || p.tipo === 'objeto') && !ia) return null;
-    if ((p.tipo === 'color' || p.tipo === 'luz') && !origen) return null;
+    if ((p.tipo === 'color' || p.tipo === 'luz' || p.tipo === 'croma') && !origen) return null;
     const anchoBase = colocar ? origen.width : ancho, altoBase = colocar ? origen.height : alto;
     let base = medicion(p, origen, ia, anchoBase, altoBase, cache);
     // Se invierte antes de colocarla: afuera del contenido no marca nada.
@@ -380,6 +450,6 @@ window.MascarasCapa = (function () {
 
   return {
     TIPOS, OPERACIONES, MIDEN, RANGOS_LUZ,
-    pieza, neutra, normalizar, desdeV7, crear, esTodaLaImagen, esSoloTodaLaImagen, islas,
+    pieza, neutra, normalizar, desdeV7, crear, esTodaLaImagen, esSoloTodaLaImagen, islas, detectarCroma,
   };
 })();

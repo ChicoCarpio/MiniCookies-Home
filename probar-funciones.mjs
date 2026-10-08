@@ -1991,6 +1991,41 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
+  // Croma (2026-10-08): una pieza que marca lo que no es el fondo liso (verde,
+  // azul…), sin IA. Foto de 200x100: fondo verde, una sombra verde oscura a
+  // la izquierda y un objeto rojo en el medio. El color del fondo se detecta
+  // solo, la sombra también es fondo, y con "Borrar lo que está fuera de la
+  // zona" queda solo el objeto.
+  await prueba('editor avanzado: croma (detecta el fondo verde, sombras, quitar el fondo)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const c = D().createElement('canvas'); c.width = 200; c.height = 100;
+    const cx = c.getContext('2d');
+    cx.fillStyle = 'rgb(40,180,70)'; cx.fillRect(0, 0, 200, 100);
+    cx.fillStyle = 'rgb(20,95,35)'; cx.fillRect(0, 0, 50, 100); // sombra sobre el fondo
+    cx.fillStyle = 'rgb(210,40,40)'; cx.fillRect(80, 20, 40, 60); // el objeto
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([await new Promise((r) => c.toBlob(r, 'image/png'))], 'verde.png', { type: 'image/png' })]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual') && D().querySelector('#listaCapas .fila-capa'), 15000), 'el editor no cargó la imagen');
+    await esperar(300);
+    const h = {};
+    const pieza = agregarPieza('croma');
+    afirmar(pieza && pieza.tipo === 'croma' && pieza.color, 'no se agregó el croma o no detectó el fondo');
+    h.fondo = [pieza.color.r, pieza.color.g, pieza.color.b].join(',');
+    afirmar(pieza.color.g > 150 && pieza.color.r < 80 && pieza.color.b < 100, 'no detectó el verde: ' + h.fondo);
+    afirmar(D().getElementById('controlesCroma').style.display !== 'none', 'no aparecen los controles del croma');
+    D().querySelector('#herramientasLienzo [data-herramienta="borrar"]').click();
+    D().getElementById('botonBorrarFueraZona').click();
+    await esperar(300);
+    const lienzo = D().getElementById('canvasTrabajo');
+    const alfa = (x, y) => lienzo.getContext('2d').getImageData(Math.round(x * lienzo.width / 200), Math.round(y * lienzo.height / 100), 1, 1).data[3];
+    h.alfa = ['sombra ' + alfa(20, 50), 'verde ' + alfa(160, 50), 'objeto ' + alfa(100, 50)].join(' ');
+    afirmar(alfa(20, 50) < 5 && alfa(160, 50) < 5 && alfa(100, 50) > 250, 'quitar el fondo con el croma: ' + h.alfa);
+    // Y el proyecto guarda su configuración.
+    afirmar(W().MascarasCapa.TIPOS.includes('croma') && W().MascarasCapa.normalizar({ piezas: [{ tipo: 'croma', color: { r: 1, g: 2, b: 3 }, suavidad: 7 }] }).piezas[0].suavidad === 7, 'el croma no se guarda bien en el proyecto');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   // Máscara por piezas (2026-10-07, fase 5 del plan): sumar, restar e
   // intersecar, invertir una pieza, apagarla, deshacer, y la conversión de
   // los proyectos de la versión 7 (base + pincel) a piezas. Imagen de dos

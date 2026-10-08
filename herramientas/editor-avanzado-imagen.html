@@ -131,6 +131,7 @@
   .menu-piezas { margin: 6px 0; }
   /* .modos pone display: flex, que le gana al atributo hidden. */
   .menu-piezas[hidden] { display: none; }
+  .fila-croma { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .fila-ver-mascara { display: flex; align-items: center; gap: 8px; }
   .fila-ver-mascara input[type="color"] { width: 32px; height: 24px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 4px; background: none; flex-shrink: 0; }
   /* Grupos: carpeta en vez de miniatura, flecha para plegar, y lo de adentro
@@ -243,6 +244,13 @@ window.i18nPagina = {
     'menu-pieza-degradado': '↘ Degradado',
     'menu-pieza-color': '💧 Color',
     'menu-pieza-luz': '🌓 Luz',
+    'menu-pieza-croma': '🟩 Croma (fondo verde o azul)',
+    'pieza-croma': 'Croma',
+    'lbl-croma': 'Color del fondo',
+    'nota-croma': 'Para fotos con un fondo liso de un solo color (verde, azul…). Marca todo lo que NO es ese color: la persona o el objeto. No usa IA, así que es instantáneo. El color se detecta solo mirando los bordes de la imagen; si no acierta, elegilo con el gotero. Compara el tono y no el brillo, así las sombras sobre el fondo también son fondo. Para quitar el fondo: 🧽 Borrar → «Borrar lo que está fuera de la zona».',
+    'boton-detectar-croma': 'Detectar',
+    'boton-gotero-croma': '💧 Elegir con el gotero',
+    'sl-suavidad-croma': 'Suavidad del borde',
     'menu-pieza-sujeto': '👤 Primer plano',
     'menu-pieza-fondo': '👤 Fondo',
     'menu-pieza-objeto': '👆 Un objeto',
@@ -493,6 +501,13 @@ window.i18nPagina = {
     'menu-pieza-degradado': '↘ Gradient',
     'menu-pieza-color': '💧 Color',
     'menu-pieza-luz': '🌓 Light',
+    'menu-pieza-croma': '🟩 Chroma key (green or blue background)',
+    'pieza-croma': 'Chroma key',
+    'lbl-croma': 'Background color',
+    'nota-croma': 'For photos with a plain single-color background (green, blue…). It marks everything that is NOT that color: the person or the object. It uses no AI, so it is instant. The color is detected from the edges of the image; if it misses, pick it with the eyedropper. It compares hue, not brightness, so shadows on the background count as background too. To remove the background: 🧽 Erase → “Erase everything outside the area”.',
+    'boton-detectar-croma': 'Detect',
+    'boton-gotero-croma': '💧 Pick with the eyedropper',
+    'sl-suavidad-croma': 'Edge softness',
     'menu-pieza-sujeto': '👤 Foreground',
     'menu-pieza-fondo': '👤 Background',
     'menu-pieza-objeto': '👆 An object',
@@ -835,6 +850,7 @@ window.i18nPagina = {
                 <button type="button" data-pieza="degradado" data-i18n="menu-pieza-degradado">↘ Degradado</button>
                 <button type="button" data-pieza="color" data-i18n="menu-pieza-color">💧 Color</button>
                 <button type="button" data-pieza="luz" data-i18n="menu-pieza-luz">🌓 Luz</button>
+                <button type="button" data-pieza="croma" data-i18n="menu-pieza-croma">🟩 Croma (fondo verde o azul)</button>
                 <button type="button" data-pieza="sujeto" data-i18n="menu-pieza-sujeto">👤 Primer plano</button>
                 <button type="button" data-pieza="fondo" data-i18n="menu-pieza-fondo">👤 Fondo</button>
                 <button type="button" data-pieza="objeto" data-i18n="menu-pieza-objeto">👆 Un objeto</button>
@@ -891,6 +907,29 @@ window.i18nPagina = {
                   <label class="campo-deslizador">
                     <span class="etiqueta-deslizador"><span data-i18n="sl-tolerancia">Tolerancia</span><span id="valorToleranciaColor">30</span></span>
                     <input type="range" id="toleranciaColor" min="0" max="100" value="30">
+                  </label>
+                </div>
+
+                <div id="controlesCroma" class="controles controles-apilados" style="display:none;">
+                  <span class="titulo-mascara">
+                    <span data-i18n="lbl-croma">Color del fondo</span>
+                    <span class="ayuda-tip">
+                      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                      <span class="ayuda-burbuja" data-i18n="nota-croma">Para fotos con un fondo liso de un solo color (verde, azul…). Marca todo lo que NO es ese color: la persona o el objeto. No usa IA, así que es instantáneo. El color se detecta solo mirando los bordes de la imagen; si no acierta, elegilo con el gotero. Compara el tono y no el brillo, así las sombras sobre el fondo también son fondo. Para quitar el fondo: 🧽 Borrar → «Borrar lo que está fuera de la zona».</span>
+                    </span>
+                  </span>
+                  <div class="fila-croma">
+                    <span class="muestra-color-objetivo" id="muestraCroma"></span>
+                    <button type="button" class="boton-capa-accion" id="botonDetectarCroma" data-i18n="boton-detectar-croma">Detectar</button>
+                    <button type="button" class="boton-capa-accion" id="botonGoteroCroma" data-i18n="boton-gotero-croma">💧 Elegir con el gotero</button>
+                  </div>
+                  <label class="campo-deslizador">
+                    <span class="etiqueta-deslizador"><span data-i18n="sl-tolerancia">Tolerancia</span><span id="valorToleranciaCroma">25</span></span>
+                    <input type="range" id="toleranciaCroma" min="0" max="100" value="25">
+                  </label>
+                  <label class="campo-deslizador">
+                    <span class="etiqueta-deslizador"><span data-i18n="sl-suavidad-croma">Suavidad del borde</span><span id="valorSuavidadCroma">10</span></span>
+                    <input type="range" id="suavidadCroma" min="0" max="50" value="10">
                   </label>
                 </div>
 
@@ -1352,6 +1391,8 @@ const botonBorrarMascaraCapa = document.getElementById('botonBorrarMascaraCapa')
 const botonRestaurarBorrado = document.getElementById('botonRestaurarBorrado');
 const muestraColorObjetivo = document.getElementById('muestraColorObjetivo');
 const elToleranciaColor = document.getElementById('toleranciaColor');
+const elToleranciaCroma = document.getElementById('toleranciaCroma');
+const elSuavidadCroma = document.getElementById('suavidadCroma');
 const valorToleranciaColor = document.getElementById('valorToleranciaColor');
 const controlesDegradado = document.getElementById('controlesDegradado');
 const controlesLuz = document.getElementById('controlesLuz');
@@ -2652,7 +2693,7 @@ const CATEGORIA_DE_HERRAMIENTA = { pincel: 'zona', gotero: 'zona', degradado: 'z
 function herramientaValida(capa, herramienta) {
   const pieza = piezaActiva(capa);
   const tipo = pieza ? pieza.tipo : null;
-  if (herramienta === 'gotero') return tipo === 'color';
+  if (herramienta === 'gotero') return tipo === 'color' || tipo === 'croma';
   if (herramienta === 'degradado') return tipo === 'degradado';
   if (herramienta === 'transformar') return !!capaDeContenido(capa);
   if (herramienta === 'objeto') return tipo === 'sujeto' || tipo === 'objeto';
@@ -2660,7 +2701,7 @@ function herramientaValida(capa, herramienta) {
 }
 
 // ===== Las piezas de la máscara (assets/js/mascaras-capa.js) =====
-const ICONO_PIEZA = { toda: '⬜', pincel: '🖌️', degradado: '↘', color: '💧', luz: '🌓', sujeto: '👤', objeto: '👆' };
+const ICONO_PIEZA = { toda: '⬜', pincel: '🖌️', degradado: '↘', color: '💧', luz: '🌓', croma: '🟩', sujeto: '👤', objeto: '👆' };
 const SIGNO_OPERACION = { sumar: '＋', restar: '－', intersecar: '∩' };
 
 function nombreDePieza(p) {
@@ -2736,6 +2777,7 @@ function agregarPieza(clave) {
   const pieza = MascarasCapa.pieza(tipo, { op: clave === 'pincel-restar' ? 'restar' : 'sumar', invertir: clave === 'fondo' });
   // En un objeto (y lo que tiene adentro) se mide sobre su contenido.
   if (MascarasCapa.MIDEN.includes(tipo)) pieza.fuente = capaDeContenido(item) ? 'capa' : 'foto';
+  if (tipo === 'croma') pieza.color = detectarCroma(item, pieza);
   const m = item.mascara;
   if (pieza.op === 'sumar' && MascarasCapa.esSoloTodaLaImagen(m)) m.piezas = [pieza];
   else m.piezas.push(pieza);
@@ -2745,6 +2787,13 @@ function agregarPieza(clave) {
   document.getElementById('botonAgregarPieza').setAttribute('aria-expanded', 'false');
   actualizarControlesSeleccion();
   return pieza;
+}
+
+// El color del fondo de un croma, mirando los bordes de lo que mide la pieza
+// (la foto o el texto o la imagen agregados).
+function detectarCroma(item, pieza) {
+  const origen = piezaMideSobreLaCapa(item, pieza) ? fuenteDeContenido(capaDeContenido(item)) : canvasOrigenTrabajo;
+  return origen ? MascarasCapa.detectarCroma(origen) : null;
 }
 
 // El pincel pinta en la pieza de pincel elegida; si la elegida es de otro
@@ -2801,6 +2850,13 @@ function actualizarControlesSeleccion() {
   elInvertirPieza.checked = !!pieza && pieza.invertir;
   controlesDegradado.style.display = tipo === 'degradado' ? 'flex' : 'none';
   controlesColorAvanzado.style.display = tipo === 'color' ? 'flex' : 'none';
+  document.getElementById('controlesCroma').style.display = tipo === 'croma' ? 'flex' : 'none';
+  if (tipo === 'croma') {
+    document.getElementById('muestraCroma').style.background = pieza.color ? `rgb(${pieza.color.r},${pieza.color.g},${pieza.color.b})` : 'transparent';
+    elToleranciaCroma.value = pieza.tolerancia; document.getElementById('valorToleranciaCroma').textContent = pieza.tolerancia;
+    elSuavidadCroma.value = pieza.suavidad; document.getElementById('valorSuavidadCroma').textContent = pieza.suavidad;
+    document.getElementById('botonGoteroCroma').classList.toggle('activo', herramientaLienzo === 'gotero');
+  }
   controlesLuz.style.display = tipo === 'luz' ? 'flex' : 'none';
   if (tipo === 'degradado') {
     document.querySelectorAll('#modosTipoDegradado button').forEach((b) => b.classList.toggle('activo', b.dataset.tipo === pieza.degradado.tipo));
@@ -2999,6 +3055,17 @@ document.querySelectorAll('#modosTipoDegradado button').forEach((boton) => {
   boton.addEventListener('click', () => cambiarPieza((p) => { p.degradado.tipo = boton.dataset.tipo; }, ['degradado']));
 });
 
+elToleranciaCroma.addEventListener('input', () => cambiarPieza((p) => { p.tolerancia = Number(elToleranciaCroma.value); }, ['croma']));
+elSuavidadCroma.addEventListener('input', () => cambiarPieza((p) => { p.suavidad = Number(elSuavidadCroma.value); }, ['croma']));
+document.getElementById('botonDetectarCroma').addEventListener('click', () => {
+  const item = itemActivo();
+  cambiarPieza((p) => { p.color = detectarCroma(item, p) || p.color; }, ['croma']);
+});
+document.getElementById('botonGoteroCroma').addEventListener('click', () => {
+  herramientaLienzo = herramientaLienzo === 'gotero' ? 'mover' : 'gotero';
+  actualizarControlesSeleccion();
+});
+
 elToleranciaColor.addEventListener('input', () => {
   cambiarPieza((p) => { p.tolerancia = Number(elToleranciaColor.value); }, ['color']);
 });
@@ -3057,6 +3124,7 @@ document.querySelectorAll('#modosFuenteMascara button').forEach((boton) => {
       // El objeto tocado y el color elegido eran de la otra fuente.
       if (p.tipo === 'objeto') p.punto = null;
       if (p.tipo === 'color') p.color = null;
+      if (p.tipo === 'croma') p.color = detectarCroma(itemActivo(), p);
     });
   });
 });
@@ -3067,7 +3135,7 @@ document.getElementById('botonTodoSujeto').addEventListener('click', () => {
 
 canvasTrabajo.addEventListener('click', (e) => {
   const capa = itemActivo(), pieza = piezaActiva(capa);
-  if (!pieza || pieza.tipo !== 'color' || herramientaLienzo !== 'gotero' || !canvasOrigenTrabajo) return;
+  if (!pieza || (pieza.tipo !== 'color' && pieza.tipo !== 'croma') || herramientaLienzo !== 'gotero' || !canvasOrigenTrabajo) return;
   if (huboPan) return; // fue un arrastre para mover la imagen, no un clic de gotero
   // Sobre la capa, el color se toma de su contenido; si no, de la foto.
   let origen = canvasOrigenTrabajo, x, y;
