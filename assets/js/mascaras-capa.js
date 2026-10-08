@@ -1,65 +1,126 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Máscaras de capa del Editor avanzado: dónde se aplica cada capa.
 //
-// Una capa tiene UNA máscara, como en Photoshop, armada en tres pasos:
-//   1. Una base: toda la imagen, nada, un degradado (lineal o radial), un
-//      color, un rango de luz (sombras, medios, luces), o el primer plano o
-//      el fondo que separa la IA: el sujeto principal (recorte-sujeto.js) o,
-//      si se eligió uno tocándolo, cualquier objeto (objeto-por-toque.js).
-//   2. El pincel encima: lo pintado en "sumar" se agrega a la base y lo
-//      pintado en "quitar" se le resta. Son dos lienzos (alfa = cuánto), así
-//      el pincel combina con cualquier base en vez de reemplazarla.
-//   3. Invertir: da vuelta el resultado.
-// El resultado es un lienzo cuyo alfa dice cuánto se aplica la capa en cada
-// punto (blanco opaco = entera, transparente = nada), o null si es "toda la
-// imagen" sin retoques (el caso común, sin costo).
+// Desde el 2026-10-07 (proyecto versión 8) una máscara es una LISTA ORDENADA
+// DE PIEZAS, como en Lightroom (PLAN-REDISENO-EDITOR.md, 3.2). Cada pieza
+// marca una zona (toda la imagen, lo pintado con un pincel, un degradado, un
+// color, un rango de luz, o el primer plano o un objeto que separa la IA:
+// recorte-sujeto.js y objeto-por-toque.js) y dice cómo se combina con lo que
+// marcan las de abajo:
+//   - sumar: se agrega (source-over);
+//   - restar: se quita (destination-out);
+//   - intersecar: queda solo lo que también marca esta (destination-in).
+// Cada pieza se puede invertir y apagar, y la máscara entera se puede
+// invertir al final. El resultado es un lienzo cuyo alfa dice cuánto se
+// aplica la capa en cada punto (blanco opaco = entera, transparente = nada),
+// o null si queda "toda la imagen" sin retoques (el caso común, sin costo).
 //
-// Una capa con contenido propio (texto o imagen) puede medir color, luz y la
-// IA sobre ESE contenido en vez de la foto ("fuente": 'capa'). Entonces la
-// base se calcula en las coordenadas del contenido y quien llama la coloca
-// con la misma transformación ("colocar"): sigue al objeto si se mueve,
-// escala o gira. Degradado y pincel quedan en las coordenadas de la foto.
+// Antes (hasta la versión 7) era una base, el pincel para sumar y quitar, e
+// invertir. desdeV7 lo convierte en piezas con el mismo resultado:
+// (base ∪ sumado) − quitado = [base (sumar), pincel (sumar), pincel (restar)].
 //
-// Color y luz se calculan píxel a píxel sobre la imagen original: van a una
-// caché ("memo", una por capa) y solo se rehacen si cambia su configuración o
-// la imagen. Con memo, además, se reusan los lienzos de un render al
-// siguiente (crear lienzos por fotograma es lo que traba la vista previa);
-// sin memo (la descarga a resolución completa) todo sale en lienzos nuevos.
+// Color, luz y la IA de una pieza pueden medir sobre la foto o, en un objeto
+// (texto o imagen), sobre su contenido ("fuente": 'capa'). Entonces la pieza
+// se calcula en las coordenadas del contenido y quien llama la coloca con la
+// misma transformación ("colocar"): sigue al objeto si se mueve, escala o
+// gira. Toda la imagen, el pincel y el degradado van en las coordenadas de la
+// foto.
+//
+// Color, luz y la IA se calculan píxel a píxel: van a una caché por pieza
+// ("memo", una por capa) y solo se rehacen si cambia su configuración o la
+// imagen. Con memo, además, se reusan los lienzos de un render al siguiente
+// (crear lienzos por fotograma es lo que traba la vista previa); sin memo (la
+// descarga a resolución completa) todo sale en lienzos nuevos.
 
 window.MascarasCapa = (function () {
   'use strict';
 
-  const BASES = ['toda', 'nada', 'degradado', 'color', 'luz', 'sujeto', 'fondo'];
+  const TIPOS = ['toda', 'pincel', 'degradado', 'color', 'luz', 'sujeto', 'objeto'];
+  const OPERACIONES = ['sumar', 'restar', 'intersecar'];
+  // Las piezas que miden algo sobre una imagen (y por eso tienen "fuente").
+  const MIDEN = ['color', 'luz', 'sujeto', 'objeto'];
   // Rangos rápidos de "Luz", en 0..100 de luminosidad.
   const RANGOS_LUZ = { sombras: [0, 35], medios: [35, 65], luces: [65, 100] };
+  const COMPOSICION = { sumar: 'source-over', restar: 'destination-out', intersecar: 'destination-in' };
 
-  function neutra() {
-    return {
-      base: 'toda',
-      invertir: false,
-      degradado: { tipo: 'lineal', a: null, b: null }, // a/b en 0..1 del ancho/alto
-      color: null, // {r,g,b}
-      tolerancia: 30,
-      luz: { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 },
-      objeto: null, // {x,y} en 0..1: el objeto que se tocó (null = el sujeto principal)
-      fuente: 'foto', // 'foto' | 'capa': sobre qué se miden color, luz y la IA
-    };
+  // Ids únicos en toda la página: el historial copia el lienzo de cada pincel
+  // por el id de su pieza.
+  let contadorPiezas = 0;
+  function nuevoIdPieza() {
+    contadorPiezas += 1;
+    return 'pz-' + contadorPiezas.toString(36) + Math.random().toString(36).slice(2, 7);
   }
 
-  // Completa una máscara guardada con lo que le falte (proyectos viejos).
-  function normalizar(m) {
-    const n = neutra();
-    if (!m) return n;
-    return {
-      base: BASES.includes(m.base) ? m.base : n.base,
-      invertir: !!m.invertir,
-      degradado: { ...n.degradado, ...(m.degradado || {}) },
-      color: m.color || null,
-      tolerancia: Number.isFinite(m.tolerancia) ? m.tolerancia : n.tolerancia,
-      luz: { ...n.luz, ...(m.luz || {}) },
-      objeto: m.objeto && Number.isFinite(m.objeto.x) && Number.isFinite(m.objeto.y) ? { x: m.objeto.x, y: m.objeto.y } : null,
-      fuente: m.fuente === 'capa' ? 'capa' : 'foto',
+  // Una pieza nueva de un tipo, con su configuración de partida.
+  function pieza(tipo, extra = {}) {
+    const p = { id: nuevoIdPieza(), tipo, op: 'sumar', invertir: false, visible: true };
+    if (tipo === 'pincel') { p.trazo = null; p._version = 0; } // trazo: lienzo a tamaño de trabajo, alfa = cuánto
+    if (tipo === 'degradado') p.degradado = { tipo: 'lineal', a: null, b: null }; // a/b en 0..1 del ancho/alto
+    if (tipo === 'color') { p.color = null; p.tolerancia = 30; } // color: {r,g,b}
+    if (tipo === 'luz') p.luz = { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 };
+    if (tipo === 'objeto') p.punto = null; // {x,y} en 0..1: lo que se tocó
+    if (MIDEN.includes(tipo)) p.fuente = 'foto'; // 'foto' | 'capa'
+    return Object.assign(p, extra);
+  }
+
+  function neutra() {
+    return { piezas: [pieza('toda')], invertir: false };
+  }
+
+  // Completa una pieza guardada con lo que le falte. El lienzo del pincel
+  // (trazo) pasa tal cual.
+  function normalizarPieza(g) {
+    const tipo = TIPOS.includes(g && g.tipo) ? g.tipo : 'toda';
+    const n = pieza(tipo);
+    const p = {
+      ...n,
+      id: typeof g.id === 'string' && g.id ? g.id : n.id,
+      op: OPERACIONES.includes(g.op) ? g.op : 'sumar',
+      invertir: !!g.invertir,
+      visible: g.visible !== false,
     };
+    if (tipo === 'pincel') { p.trazo = g.trazo || null; p._version = g._version || 0; }
+    if (tipo === 'degradado') p.degradado = { ...n.degradado, ...(g.degradado || {}) };
+    if (tipo === 'color') {
+      p.color = g.color || null;
+      p.tolerancia = Number.isFinite(g.tolerancia) ? g.tolerancia : n.tolerancia;
+    }
+    if (tipo === 'luz') p.luz = { ...n.luz, ...(g.luz || {}) };
+    if (tipo === 'objeto') p.punto = g.punto && Number.isFinite(g.punto.x) && Number.isFinite(g.punto.y) ? { x: g.punto.x, y: g.punto.y } : null;
+    if (MIDEN.includes(tipo)) p.fuente = g.fuente === 'capa' ? 'capa' : 'foto';
+    return p;
+  }
+
+  // Una máscara de la versión 8. Una que no trae piezas (la de un elemento
+  // nuevo de un proyecto convertido, mascara: null) es la neutra.
+  function normalizar(m) {
+    if (!m || !Array.isArray(m.piezas)) return neutra();
+    return { piezas: m.piezas.map(normalizarPieza), invertir: !!m.invertir };
+  }
+
+  // La máscara de la versión 7 (base + pincel + invertir) como piezas, con
+  // el mismo resultado. sumar/quitar: los lienzos del pincel, o null.
+  function desdeV7(v, sumar, quitar) {
+    v = v || {};
+    const base = ['toda', 'nada', 'degradado', 'color', 'luz', 'sujeto', 'fondo'].includes(v.base) ? v.base : 'toda';
+    const fuente = v.fuente === 'capa' ? 'capa' : 'foto';
+    const piezas = [];
+    if (base === 'toda') piezas.push(pieza('toda'));
+    else if (base === 'degradado') piezas.push(pieza('degradado', { degradado: { tipo: 'lineal', a: null, b: null, ...(v.degradado || {}) } }));
+    else if (base === 'color') {
+      piezas.push(pieza('color', { color: v.color || null, tolerancia: Number.isFinite(v.tolerancia) ? v.tolerancia : 30, fuente }));
+    } else if (base === 'luz') {
+      piezas.push(pieza('luz', { luz: { ...pieza('luz').luz, ...(v.luz || {}) }, fuente }));
+    } else if (base === 'sujeto' || base === 'fondo') {
+      // "Fondo" era todo menos el sujeto (o el objeto): la misma pieza, invertida.
+      const objeto = v.objeto && Number.isFinite(v.objeto.x) && Number.isFinite(v.objeto.y) ? { x: v.objeto.x, y: v.objeto.y } : null;
+      piezas.push(objeto ? pieza('objeto', { punto: objeto, fuente }) : pieza('sujeto', { fuente }));
+      if (base === 'fondo') piezas[0].invertir = true;
+    }
+    // 'nada': sin pieza de base; solo cuenta lo pintado.
+    if (sumar) piezas.push(pieza('pincel', { trazo: sumar }));
+    if (quitar) piezas.push(pieza('pincel', { trazo: quitar, op: 'restar' }));
+    return { piezas, invertir: !!v.invertir };
   }
 
   // Islas: grupos de píxeles conectados (4 vecinos) con alfa >= umbral. Para
@@ -178,93 +239,147 @@ window.MascarasCapa = (function () {
     ctx.fillRect(0, 0, ancho, alto);
   }
 
-  // Base de color o de luz, cacheada en memo mientras no cambie nada de lo
-  // que la define.
-  function basePorPixel(m, origen, ancho, alto, memo) {
-    const firma = m.base === 'color' ? JSON.stringify([m.color, m.tolerancia]) : JSON.stringify(m.luz);
-    const clave = m.base + firma;
-    if (memo && memo.base && memo.baseClave === clave && memo.baseOrigen === origen
-      && memo.base.width === ancho && memo.base.height === alto) return memo.base;
-    const destino = lienzo(ancho, alto, memo ? memo.base : null);
-    if (m.base === 'color') dibujarColor(origen, m.color, m.tolerancia, ancho, alto, destino);
-    else dibujarLuz(origen, m.luz, ancho, alto, destino);
-    if (memo) { memo.base = destino; memo.baseClave = clave; memo.baseOrigen = origen; }
-    return destino;
+  // ¿Qué marca la máscara entera? Se sigue pieza por pieza: 'llena' (toda la
+  // imagen), 'vacia' o 'parcial'. Solo 'toda' sabe lo que marca sin calcular.
+  function estadoFinal(m) {
+    let estado = 'vacia';
+    for (const p of m.piezas) {
+      if (!p.visible) continue;
+      const marca = p.tipo !== 'toda' ? 'parcial' : (p.invertir ? 'nada' : 'todo');
+      if (p.op === 'sumar') {
+        if (marca === 'todo') estado = 'llena';
+        else if (marca === 'parcial' && estado !== 'llena') estado = 'parcial';
+      } else if (p.op === 'restar') {
+        if (marca === 'todo') estado = 'vacia';
+        else if (marca === 'parcial' && estado !== 'vacia') estado = 'parcial';
+      } else if (marca === 'nada') estado = 'vacia';
+      else if (marca === 'parcial' && estado !== 'vacia') estado = 'parcial';
+    }
+    return estado;
   }
 
   // ¿La máscara deja la capa en toda la imagen sin retoques? Entonces no hace
   // falta ningún lienzo.
-  function esTodaLaImagen(m, quitar) {
-    return m.base === 'toda' && !m.invertir && !quitar;
+  function esTodaLaImagen(m) {
+    m = normalizar(m);
+    return !m.invertir && estadoFinal(m) === 'llena';
   }
 
-  // Base de primer plano o fondo, cacheada en memo. "ia.sujeto": el sujeto
-  // principal (ISNet); "ia.objeto": el objeto tocado (SlimSAM), que manda si
-  // se eligió uno.
-  function baseDeSujeto(m, ia, ancho, alto, memo) {
-    const fuente = m.objeto ? ia.objeto : ia.sujeto;
-    if (memo && memo.sujeto && memo.sujetoClave === m.base && memo.sujetoFuente === fuente
-      && memo.sujeto.width === ancho && memo.sujeto.height === alto) return memo.sujeto;
-    const destino = lienzo(ancho, alto, memo ? memo.sujeto : null);
-    const ctx = destino.getContext('2d');
-    if (m.base === 'sujeto') {
-      ctx.drawImage(fuente, 0, 0, ancho, alto);
-    } else {
-      // Fondo: todo menos el sujeto (o menos el objeto elegido).
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, ancho, alto);
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.drawImage(fuente, 0, 0, ancho, alto);
-      ctx.globalCompositeOperation = 'source-over';
-    }
-    if (memo) { memo.sujeto = destino; memo.sujetoClave = m.base; memo.sujetoFuente = fuente; }
+  // ¿Es la máscara de partida (una sola pieza "Toda la imagen")? Una pieza
+  // nueva que suma la reemplaza, como antes reemplazaba a la base.
+  function esSoloTodaLaImagen(m) {
+    return !!m && !m.invertir && m.piezas.length === 1 && m.piezas[0].tipo === 'toda'
+      && m.piezas[0].op === 'sumar' && !m.piezas[0].invertir && m.piezas[0].visible;
+  }
+
+  function invertirEn(origen, ancho, alto, reusar) {
+    const c = lienzo(ancho, alto, reusar);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, ancho, alto);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.drawImage(origen, 0, 0, ancho, alto);
+    ctx.globalCompositeOperation = 'source-over';
+    return c;
+  }
+
+  // Lo que mide una pieza de color, luz o IA, a tamaño "ancho x alto" (el de
+  // trabajo, o el del contenido si se mide sobre él), cacheado en su memo
+  // mientras no cambie nada de lo que lo define.
+  function medicion(p, origen, ia, ancho, alto, cache) {
+    const clave = p.tipo === 'color' ? JSON.stringify([p.color, p.tolerancia])
+      : (p.tipo === 'luz' ? JSON.stringify(p.luz) : p.tipo);
+    const desde = p.tipo === 'color' || p.tipo === 'luz' ? origen : ia;
+    if (cache && cache.base && cache.clave === clave && cache.desde === desde
+      && cache.base.width === ancho && cache.base.height === alto) return cache.base;
+    const destino = lienzo(ancho, alto, cache ? cache.base : null);
+    if (p.tipo === 'color') dibujarColor(origen, p.color, p.tolerancia, ancho, alto, destino);
+    else if (p.tipo === 'luz') dibujarLuz(origen, p.luz, ancho, alto, destino);
+    else destino.getContext('2d').drawImage(ia, 0, 0, ancho, alto);
+    if (cache) Object.assign(cache, { base: destino, clave, desde });
     return destino;
   }
 
-  // m: la máscara de la capa. origen: la imagen original (para color y luz).
-  // sumar/quitar: lienzos del pincel, o null si no se pintó nada.
-  // ia: { sujeto, objeto } de la IA (para primer plano y fondo); lo que
-  // todavía no esté listo hace que esas bases no marquen nada mientras tanto.
-  // colocar(base, destino): solo si se mide sobre el contenido de la capa;
-  // "origen" y la IA son entonces de ese contenido, a su propio tamaño, y
-  // colocar dibuja la base en "destino" transformada como el contenido.
-  function crear(m, origen, sumar, quitar, ancho, alto, memo = null, ia = null, colocar = null) {
-    m = normalizar(m);
-    if (esTodaLaImagen(m, quitar)) return null;
-    // Color sin color elegido todavía: como "toda" (igual que antes).
-    let base = m.base === 'color' && !m.color ? 'toda' : m.base;
-    if ((base === 'sujeto' || base === 'fondo') && !(ia && (m.objeto ? ia.objeto : ia.sujeto))) base = 'nada';
+  // El lienzo de una pieza a tamaño final (ya invertida y colocada), para
+  // combinarlo con las de abajo: { lienzo, escalar } (escalar: dibujarlo
+  // estirado a ancho x alto, el del pincel), o null si no marca nada todavía
+  // (sin pintar, o la IA sin terminar).
+  function lienzoDePieza(p, ancho, alto, opciones, cache) {
+    const reusar = (nombre) => (cache ? cache[nombre] : null);
+    const guardar = (nombre, c) => { if (cache) cache[nombre] = c; return c; };
+    if (p.tipo === 'pincel') {
+      if (!p.trazo) return null;
+      if (!p.invertir) return { lienzo: p.trazo, escalar: true };
+      return { lienzo: guardar('invertida', invertirEn(p.trazo, ancho, alto, reusar('invertida'))) };
+    }
+    // Degradado sin trazar y color sin elegir: toda la imagen (así elegirlos
+    // no borra la capa, como antes con la base).
+    if (p.tipo === 'degradado' || (p.tipo === 'color' && !p.color)) {
+      const c = guardar('propio', lienzo(ancho, alto, reusar('propio')));
+      const ctx = c.getContext('2d');
+      if (p.tipo === 'degradado') dibujarDegradado(ctx, p.degradado, ancho, alto);
+      else { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ancho, alto); }
+      return { lienzo: p.invertir ? guardar('invertida', invertirEn(c, ancho, alto, reusar('invertida'))) : c };
+    }
+    // Color, luz y la IA: sobre la foto o sobre el contenido del objeto.
+    const { origen = null, ia = null, colocar = null } = opciones.medir ? opciones.medir(p) : {};
+    if ((p.tipo === 'sujeto' || p.tipo === 'objeto') && !ia) return null;
+    if ((p.tipo === 'color' || p.tipo === 'luz') && !origen) return null;
+    const anchoBase = colocar ? origen.width : ancho, altoBase = colocar ? origen.height : alto;
+    let base = medicion(p, origen, ia, anchoBase, altoBase, cache);
+    // Se invierte antes de colocarla: afuera del contenido no marca nada.
+    if (p.invertir) base = guardar('invertida', invertirEn(base, anchoBase, altoBase, reusar('invertida')));
+    if (!colocar) return { lienzo: base };
+    return { lienzo: guardar('puesta', colocar(base, lienzo(ancho, alto, reusar('puesta')))) };
+  }
 
+  // m: la máscara. opciones:
+  //   memo: caché de la capa (o null, para la descarga);
+  //   medir(pieza) -> { origen, ia, colocar }: sobre qué mide una pieza de
+  //     color, luz o IA. origen: la imagen (la foto a tamaño de trabajo, o el
+  //     contenido a su tamaño); ia: el lienzo que dio la IA para esa pieza, o
+  //     null si todavía no está; colocar(lienzo, destino): solo si se mide
+  //     sobre el contenido, lo dibuja en destino transformado como él.
+  function crear(m, ancho, alto, opciones = {}) {
+    m = normalizar(m);
+    if (esTodaLaImagen(m)) return null;
+    const memo = opciones.memo || null;
+    if (memo && !memo.piezas) memo.piezas = new Map();
     const final = lienzo(ancho, alto, memo ? memo.final : null);
     if (memo) memo.final = final;
     const ctx = final.getContext('2d');
-    // Color, luz y la IA: a tamaño de trabajo, o al del contenido de la capa.
-    const anchoBase = colocar ? origen.width : ancho, altoBase = colocar ? origen.height : alto;
-    const ponerBase = (c) => (colocar ? colocar(c, final) : ctx.drawImage(c, 0, 0));
-    if (base === 'toda') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ancho, alto); }
-    else if (base === 'degradado') dibujarDegradado(ctx, m.degradado, ancho, alto);
-    else if (base === 'color' || base === 'luz') ponerBase(basePorPixel({ ...m, base }, origen, anchoBase, altoBase, memo));
-    else if (base === 'sujeto' || base === 'fondo') ponerBase(baseDeSujeto(m, ia, anchoBase, altoBase, memo));
-    // 'nada': queda vacía; solo cuenta lo pintado.
-
-    if (sumar && base !== 'toda') ctx.drawImage(sumar, 0, 0, ancho, alto);
-    if (quitar) {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.drawImage(quitar, 0, 0, ancho, alto);
+    for (const p of m.piezas) {
+      if (!p.visible) continue;
+      if (p.tipo === 'toda') {
+        const todo = !p.invertir;
+        if (p.op === 'sumar' && todo) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ancho, alto); }
+        else if ((p.op === 'restar' && todo) || (p.op === 'intersecar' && !todo)) ctx.clearRect(0, 0, ancho, alto);
+        continue;
+      }
+      let cache = null;
+      if (memo) {
+        cache = memo.piezas.get(p.id);
+        if (!cache) { cache = {}; memo.piezas.set(p.id, cache); }
+      }
+      const resultado = lienzoDePieza(p, ancho, alto, opciones, cache);
+      if (!resultado) {
+        // Lo que todavía no marca nada: si tenía que intersecar, no queda nada.
+        if (p.op === 'intersecar') ctx.clearRect(0, 0, ancho, alto);
+        continue;
+      }
+      ctx.globalCompositeOperation = COMPOSICION[p.op];
+      if (resultado.escalar) ctx.drawImage(resultado.lienzo, 0, 0, ancho, alto);
+      else ctx.drawImage(resultado.lienzo, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
     }
     if (!m.invertir) return final;
-
-    const invertida = lienzo(ancho, alto, memo ? memo.invertida : null);
+    const invertida = invertirEn(final, ancho, alto, memo ? memo.invertida : null);
     if (memo) memo.invertida = invertida;
-    const ctxInv = invertida.getContext('2d');
-    ctxInv.fillStyle = '#fff';
-    ctxInv.fillRect(0, 0, ancho, alto);
-    ctxInv.globalCompositeOperation = 'destination-out';
-    ctxInv.drawImage(final, 0, 0);
-    ctxInv.globalCompositeOperation = 'source-over';
     return invertida;
   }
 
-  return { BASES, RANGOS_LUZ, neutra, normalizar, crear, esTodaLaImagen, islas };
+  return {
+    TIPOS, OPERACIONES, MIDEN, RANGOS_LUZ,
+    pieza, neutra, normalizar, desdeV7, crear, esTodaLaImagen, esSoloTodaLaImagen, islas,
+  };
 })();

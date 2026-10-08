@@ -98,6 +98,20 @@ function archivos(lista) {
   for (const f of lista) dt.items.add(f);
   return dt;
 }
+// La zona por piezas del Editor avanzado (assets/js/mascaras-capa.js).
+function agregarPieza(clave) {
+  D().getElementById('botonAgregarPieza').click();
+  D().querySelector('#menuPiezas [data-pieza="' + clave + '"]').click();
+  return W().piezaActiva();
+}
+function vaciarZona() {
+  for (const b of [...D().querySelectorAll('#listaPiezas .fila-pieza .icono-capa:last-child')]) b.click();
+}
+function zonaSoloToda() { vaciarZona(); agregarPieza('toda'); }
+function invertirPieza(valor) {
+  const c = D().getElementById('invertirPieza');
+  c.checked = valor; c.dispatchEvent(new (W().Event)('change'));
+}
 async function pdfDePrueba(paginas = 1) {
   const doc = await W().PDFLib.PDFDocument.create();
   for (let i = 0; i < paginas; i++) doc.addPage();
@@ -798,7 +812,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     huellas.toda = await leer();
     afirmar(cerca(huellas.toda[0], 6) && cerca(huellas.toda[1], 190), 'toda: ' + huellas.toda);
-    clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
+    agregarPieza('luz'); clic('#rangosLuz [data-rango="sombras"]');
+    afirmar(W().capaActiva().mascara.piezas.length === 1, 'la pieza de luz no reemplazó a "Toda la imagen"');
     huellas.sombras = await leer();
     afirmar(cerca(huellas.sombras[0], 6) && cerca(huellas.sombras[1], 220), 'luz sombras: ' + huellas.sombras);
     const invertir = D().getElementById('invertirMascara');
@@ -817,28 +832,36 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(cerca(huellas.descarga[0], 40) && cerca(huellas.descarga[1], 190), 'descarga invertida: ' + huellas.descarga);
     invertir.checked = false; invertir.dispatchEvent(new (W().Event)('change'));
 
-    // Base "Nada" + pincel Sumar sobre la mitad izquierda; después Quitar
-    // sobre la derecha con base "Toda".
-    clic('#modosBaseMascara [data-base="nada"]');
+    // Sin piezas (lo que antes era la base "Nada") + un pincel que suma
+    // sobre la mitad izquierda; después "Toda" y un pincel que quita la
+    // derecha.
+    vaciarZona();
     huellas.nada = await leer();
     afirmar(cerca(huellas.nada[0], 40) && cerca(huellas.nada[1], 220), 'nada: ' + huellas.nada);
     const estampar = (x) => {
       W().estamparPincel((ctx, modo) => W().pintarPunto(ctx, { x: lienzo.width * x, y: lienzo.height / 4 }, 12, 100, modo));
       W().marcarMascaraSucia(W().capaActiva()); W().programarRenderizado();
     };
-    clic('#modosPincelAvanzado [data-modo-pincel="sumar"]'); estampar(0.25);
+    clic('#herramientasLienzo [data-herramienta="pincel"]');
+    clic('#modosPincelAvanzado [data-modo-pincel="pintar"]'); estampar(0.25);
     huellas.sumar = await leer();
     afirmar(cerca(huellas.sumar[0], 6) && cerca(huellas.sumar[1], 220), 'nada + sumar: ' + huellas.sumar);
-    clic('#modosBaseMascara [data-base="toda"]');
-    clic('#modosPincelAvanzado [data-modo-pincel="quitar"]'); estampar(0.75);
+    agregarPieza('toda'); agregarPieza('pincel-restar'); estampar(0.75);
     huellas.quitar = await leer();
     afirmar(cerca(huellas.quitar[0], 6) && cerca(huellas.quitar[1], 220), 'toda - quitar: ' + huellas.quitar);
+    afirmar(W().capaActiva().mascara.piezas.map((p) => p.tipo + ':' + p.op).join(' ') === 'pincel:sumar toda:sumar pincel:restar', 'piezas: ' + W().capaActiva().mascara.piezas.map((p) => p.tipo + ':' + p.op).join(' '));
+    // El borrador quita lo pintado de la pieza elegida (el pincel que resta).
+    clic('#modosPincelAvanzado [data-modo-pincel="borrador"]'); estampar(0.75);
+    huellas.borrador = await leer();
+    afirmar(cerca(huellas.borrador[1], 190), 'borrador sobre el pincel que resta: ' + huellas.borrador);
+    clic('#modosPincelAvanzado [data-modo-pincel="pintar"]');
     clic('#botonBorrarMascaraCapa');
+    afirmar(!W().piezaActiva().trazo, '"Borrar lo pintado" no vació la pieza');
 
     // Degradado lineal de izquierda (entera) a derecha (nada): a 1/4 se
     // aplica 3/4, a 3/4 se aplica 1/4.
-    clic('#modosBaseMascara [data-base="degradado"]');
-    Object.assign(W().capaActiva().mascara.degradado, { tipo: 'lineal', a: { x: 0, y: 0.5 }, b: { x: 1, y: 0.5 } });
+    vaciarZona(); agregarPieza('degradado');
+    Object.assign(W().piezaActiva().degradado, { tipo: 'lineal', a: { x: 0, y: 0.5 }, b: { x: 1, y: 0.5 } });
     W().programarRenderizado();
     huellas.degradado = await leer();
     afirmar(cerca(huellas.degradado[0], 15) && cerca(huellas.degradado[1], 213), 'degradado: ' + huellas.degradado);
@@ -855,7 +878,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const entradaProyecto = D().getElementById('entradaProyecto');
     entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'viejo.json', { type: 'application/json' })]).files;
     entradaProyecto.dispatchEvent(new (W().Event)('change'));
-    afirmar(await hasta(() => W().capaActiva().mascara.base === 'nada', 10000), 'el proyecto viejo no abrió con base "Nada"');
+    afirmar(await hasta(() => W().capaActiva().mascara.piezas.map((p) => p.tipo).join() === 'pincel', 10000), 'el proyecto viejo no abrió con solo lo pintado');
     huellas.proyectoViejo = await leer();
     afirmar(cerca(huellas.proyectoViejo[0], 6) && cerca(huellas.proyectoViejo[1], 220), 'proyecto v1: ' + huellas.proyectoViejo);
     return Object.entries(huellas).map(([k, v]) => k + ' ' + v).join(' · ');
@@ -905,10 +928,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     h.mitad = await leer();
     afirmar(cerca(h.mitad[0], 23) && cerca(h.mitad[1], 205), 'grupo al 50%: ' + h.mitad);
     ponerOpacidad(100);
-    clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
+    agregarPieza('luz'); clic('#rangosLuz [data-rango="sombras"]');
     h.mascara = await leer();
     afirmar(cerca(h.mascara[0], 6) && cerca(h.mascara[1], 220), 'máscara del grupo: ' + h.mascara);
-    clic('#modosBaseMascara [data-base="toda"]');
+    zonaSoloToda();
     // Multiplicar en el grupo no lo aísla: lo de adentro (40 -> 6) se
     // multiplica otra vez con lo de abajo (6 · 40 / 255 = 1; 190 · 220 / 255 = 164).
     ponerModo('multiply');
@@ -987,7 +1010,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const h = {};
 
     // Copia de la mitad oscura (máscara de la capa 1 en Sombras), en su lugar.
-    clic('#modosBaseMascara [data-base="luz"]'); clic('#rangosLuz [data-rango="sombras"]');
+    agregarPieza('luz'); clic('#rangosLuz [data-rango="sombras"]');
     clic('#botonCopiarFoto');
     const objetoCopia = W().itemActivo();
     afirmar(objetoCopia && objetoCopia.clase === 'objeto', 'Copia de la foto no creó un objeto');
@@ -1216,11 +1239,12 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(h.conTexto === 1, 'Ctrl+Shift+Z no devolvió el texto');
     tecla(false);
 
-    // Pincel de la máscara: "Nada" + un trazo a la izquierda (que aclara solo ahí).
+    // Pincel de la zona: elegirlo con la zona de partida deja solo lo
+    // pintado; un trazo a la izquierda aclara solo ahí.
     W().seleccionarItem(W().eval('capas')[0].id);
-    D().querySelector('#modosBaseMascara [data-base="nada"]').click();
+    D().querySelector('#herramientasLienzo [data-herramienta="pincel"]').click();
     h.nada = await leer();
-    afirmar(cerca(h.nada[0], 40), 'con base "Nada": ' + h.nada);
+    afirmar(cerca(h.nada[0], 40), 'con solo un pincel sin pintar: ' + h.nada);
     trazo(0.1, 0.4);
     h.pintado = await leer();
     afirmar(h.pintado[0] > 60 && cerca(h.pintado[1], 220), 'trazo de pincel: ' + h.pintado);
@@ -1251,7 +1275,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(cerca(h.dosDedos[0], 40), 'el toque con dos dedos no deshizo: ' + h.dosDedos + ' · ' + [d0, d1, d2, diag()].join(' → '));
 
     // Borrar la foto y deshacerlo.
-    D().querySelector('#modosBaseMascara [data-base="toda"]').click();
+    agregarPieza('toda');
     D().querySelector('#herramientasLienzo [data-herramienta="borrar"]').click();
     trazo(0.2, 0.3);
     h.borrada = await leer();
@@ -1365,7 +1389,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     tecla(' '); h.espacio = herramienta();
     tecla(' ', 'keyup'); h.trasEspacio = herramienta();
     afirmar(h.espacio === 'mover' && h.trasEspacio === 'pincel', 'espacio mantenido: ' + h.espacio + ' -> ' + h.trasEspacio);
-    tecla('g'); afirmar(herramienta() === 'pincel', 'G eligió el degradado sin una base de degradado');
+    tecla('g'); afirmar(herramienta() === 'pincel', 'G eligió el degradado sin una pieza de degradado');
     tecla('\\'); h.original = W().eval('mostrandoOriginal');
     tecla('\\', 'keyup'); h.trasOriginal = W().eval('mostrandoOriginal');
     afirmar(h.original === true && h.trasOriginal === false, '"\\" mantenido: ' + h.original + ' -> ' + h.trasOriginal);
@@ -1643,15 +1667,15 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const clic = (sel) => D().querySelector(sel).click();
     const h = {};
 
-    clic('#modosBaseMascara [data-base="sujeto"]');
+    agregarPieza('sujeto');
     afirmar(D().querySelector('#herramientasLienzo [data-herramienta="objeto"]').classList.contains('activo'), 'elegir Primer plano no dejó elegida la herramienta "Elegir objeto"');
     afirmar(await hasta(() => W().sujetoListo(W().eval('imagenActual')), 5000), 'el primer plano no se calculó');
     h.primerPlano = await leer();
     afirmar(cerca(h.primerPlano, [64, 128, 64]), 'primer plano: ' + h.primerPlano);
-    clic('#modosBaseMascara [data-base="fondo"]');
+    invertirPieza(true);
     h.fondo = await leer();
     afirmar(cerca(h.fondo, [128, 64, 128]), 'fondo: ' + h.fondo);
-    clic('#modosBaseMascara [data-base="sujeto"]');
+    invertirPieza(false);
 
     // Elegir objeto: tocar algo que NO es el primer plano (la "flor" del
     // medio) también lo encuentra; mientras tanto, el velo sobre la imagen.
@@ -1671,10 +1695,11 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
     h.objeto = await leer();
     afirmar(cerca(h.objeto, [128, 128, 64]), 'solo el objeto derecho: ' + h.objeto);
-    clic('#modosBaseMascara [data-base="fondo"]');
+    afirmar(W().piezaActiva().tipo === 'objeto', 'tocar no pasó la pieza a "Objeto"');
+    invertirPieza(true);
     h.fondoMenosObjeto = await leer();
     afirmar(cerca(h.fondoMenosObjeto, [64, 64, 128]), 'fondo menos el objeto elegido: ' + h.fondoMenosObjeto);
-    clic('#modosBaseMascara [data-base="sujeto"]');
+    invertirPieza(false);
 
     // La descarga también.
     D().getElementById('botonDescargarAvanzado').click();
@@ -1749,7 +1774,6 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(await hasta(() => W().esObjeto(W().itemActivo()), 5000), 'la imagen no entró como objeto');
     const capa = W().itemActivo(); // el objeto: su zona dice qué parte de la imagen se ve
     const cont = W().capaDeContenido(capa);
-    afirmar(capa.mascara.fuente === 'capa', 'un objeto nuevo no mide sobre su imagen: ' + capa.mascara.fuente);
 
     const lienzo = D().getElementById('canvasTrabajo');
     const color = (cv, x) => { const d = cv.getContext('2d').getImageData(Math.round(x * cv.width / 200), Math.round(cv.height / 2), 1, 1).data; return d[0] > 200 && d[2] < 60 ? 'rojo' : (d[2] > 200 && d[0] < 60 ? 'azul' : (Math.abs(d[0] - 128) <= 3 && Math.abs(d[2] - 128) <= 3 ? 'gris' : d[0] + ',' + d[1] + ',' + d[2])); };
@@ -1764,7 +1788,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     h.sinMascara = await leer([75, 125]);
     afirmar(h.sinMascara === 'rojo azul', 'la capa no se ve entera: ' + h.sinMascara);
 
-    clic('#modosBaseMascara [data-base="sujeto"]');
+    const sujeto = agregarPieza('sujeto');
+    afirmar(sujeto.fuente === 'capa', 'una pieza nueva de un objeto no mide sobre su imagen: ' + sujeto.fuente);
     afirmar(D().getElementById('controlesFuenteMascara').style.display !== 'none', 'no aparece "Medir sobre" en una capa de imagen');
     afirmar(await hasta(() => W().sujetoListo(W().fuenteDeContenido(cont)), 5000), 'el primer plano de la capa no se calculó');
     h.primerPlano = await leer([75, 125]);
@@ -1803,9 +1828,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(D().getElementById('estadoSujeto').textContent === W().t('objeto-fuera-de-capa'), 'tocar fuera de la capa: ' + D().getElementById('estadoSujeto').textContent);
 
     // Color: el gotero toma el color de la capa (rojo), no el gris de la foto.
-    clic('#modosBaseMascara [data-base="color"]'); // deja elegido el gotero
+    vaciarZona();
+    const piezaColor = agregarPieza('color'); // deja elegido el gotero
     tocar(75);
-    afirmar(capa.mascara.color && capa.mascara.color.r > 200 && capa.mascara.color.b < 50, 'el gotero no tomó el rojo de la capa: ' + JSON.stringify(capa.mascara.color));
+    afirmar(piezaColor.color && piezaColor.color.r > 200 && piezaColor.color.b < 50, 'el gotero no tomó el rojo de la capa: ' + JSON.stringify(piezaColor.color));
     h.color = await leer([75, 125]);
     afirmar(h.color === 'rojo gris', 'color de la capa: ' + h.color);
 
@@ -1818,9 +1844,124 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     cd.getContext('2d').drawImage(img, 0, 0);
     h.descarga = [75, 125].map((x) => color(cd, x)).join(' ');
     afirmar(h.descarga === 'rojo gris', 'descarga: ' + h.descarga);
-    afirmar(W().itemAProyecto(capa).mascara.fuente === 'capa', 'el proyecto no guarda "Medir sobre"');
-    afirmar(W().MascarasCapa.normalizar({ base: 'color' }).fuente === 'foto', 'un proyecto viejo no sigue midiendo sobre la foto');
+    afirmar(W().itemAProyecto(capa).mascara.piezas[0].fuente === 'capa', 'el proyecto no guarda "Medir sobre"');
+    afirmar(W().MascarasCapa.desdeV7({ base: 'color' }).piezas[0].fuente === 'foto', 'un proyecto viejo no sigue midiendo sobre la foto');
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · la IA analizó ' + tamanos.join(', ');
+  });
+
+  // Máscara por piezas (2026-10-07, fase 5 del plan): sumar, restar e
+  // intersecar, invertir una pieza, apagarla, deshacer, y la conversión de
+  // los proyectos de la versión 7 (base + pincel) a piezas. Imagen de dos
+  // mitades (40 | 220) con la capa en Multiplicar: donde se aplica, 40 -> 6 y
+  // 220 -> 190. La comparación píxel por píxel con la rama anterior se hizo
+  // aparte (hallazgos.md).
+  await prueba('editor avanzado: máscara por piezas (sumar, restar, intersecar, invertir, ojo, proyecto v7)', async () => {
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    const base = D().createElement('canvas'); base.width = 100; base.height = 50;
+    const cb = base.getContext('2d');
+    cb.fillStyle = 'rgb(40,40,40)'; cb.fillRect(0, 0, 50, 50);
+    cb.fillStyle = 'rgb(220,220,220)'; cb.fillRect(50, 0, 50, 50);
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([await new Promise((r) => base.toBlob(r, 'image/png'))], 'mitades.png', { type: 'image/png' })]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    const selector = await hasta(() => D().querySelector('#listaCapas .fila-opacidad select'), 15000);
+    afirmar(selector, 'el editor no cargó la imagen');
+    selector.value = 'multiply'; selector.dispatchEvent(new (W().Event)('change'));
+    const lienzo = D().getElementById('canvasTrabajo');
+    const px = (x) => lienzo.getContext('2d').getImageData(Math.round(lienzo.width * x), lienzo.height >> 1, 1, 1).data[0];
+    const leer = async () => { await esperar(250); return [px(0.25), px(0.75)]; };
+    const es = (v, a, b) => Math.abs(v[0] - a) <= 3 && Math.abs(v[1] - b) <= 3;
+    const clic = (sel) => D().querySelector(sel).click();
+    const operacion = (op) => clic('#modosOperacion [data-op="' + op + '"]');
+    const filas = () => [...D().querySelectorAll('#listaPiezas .fila-pieza')];
+    const lista = () => filas().map((f) => f.querySelector('.nombre-pieza').textContent.trim()).join(' | ');
+    const h = {};
+
+    agregarPieza('luz'); clic('#rangosLuz [data-rango="sombras"]');
+    h.sombras = await leer();
+    afirmar(es(h.sombras, 6, 220), 'luz en sombras: ' + h.sombras);
+    agregarPieza('toda');
+    h.sumar = await leer();
+    afirmar(es(h.sumar, 6, 190), 'sombras + toda: ' + h.sumar);
+    afirmar(filas().length === 2 && filas()[0].classList.contains('activa'), 'la pieza nueva no quedó arriba y elegida: ' + lista());
+    operacion('intersecar');
+    h.intersecar = await leer();
+    afirmar(es(h.intersecar, 6, 220), 'sombras ∩ toda: ' + h.intersecar);
+    afirmar(filas()[0].querySelector('.signo-pieza').textContent === '∩', 'la lista no muestra la operación: ' + lista());
+    operacion('restar');
+    h.restar = await leer();
+    afirmar(es(h.restar, 40, 220), 'sombras − toda: ' + h.restar);
+    // El ojo apaga la pieza: queda solo la luz.
+    filas()[0].querySelector('.icono-capa').click();
+    h.apagada = await leer();
+    afirmar(es(h.apagada, 6, 220), 'con "toda" apagada: ' + h.apagada);
+    // Invertir solo la pieza de luz: pasa a todo menos las sombras.
+    filas()[1].querySelector('.nombre-pieza').click();
+    afirmar(W().piezaActiva().tipo === 'luz', 'tocar la fila no eligió la pieza');
+    invertirPieza(true);
+    h.luzInvertida = await leer();
+    afirmar(es(h.luzInvertida, 40, 190), 'luz invertida: ' + h.luzInvertida);
+    afirmar(/\(invertida\)/.test(lista()), 'la lista no dice que la pieza está invertida: ' + lista());
+    // Deshacer vuelve a la luz sin invertir.
+    D().getElementById('botonDeshacer').click();
+    h.deshecho = await leer();
+    afirmar(es(h.deshecho, 6, 220), 'deshacer invertir la pieza: ' + h.deshecho);
+    // Borrar las piezas: sin ninguna, la capa no se aplica y la nota lo dice.
+    vaciarZona();
+    h.sinPiezas = await leer();
+    afirmar(es(h.sinPiezas, 40, 220) && D().getElementById('notaSinPiezas').style.display !== 'none', 'sin piezas: ' + h.sinPiezas);
+
+    // Proyecto de la versión 7: base "luz" (sombras) + pincel que suma la
+    // mitad derecha + pincel que quita un cuadrado a la izquierda, sin
+    // invertir -> (izquierda ∪ derecha) − cuadrado.
+    const pintar = (x0, x1) => { const c = D().createElement('canvas'); c.width = 100; c.height = 50; const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(x0, 0, x1 - x0, 50); return c.toDataURL('image/png'); };
+    const capaV7 = (mascara, sumar, quitar) => ({ id: 'capa-1', nombre: 'Capa 1', visible: true, opacidad: 100, modoFusion: 'multiply', ajustes: {}, mascara, pincelSumar: sumar, pincelQuitar: quitar });
+    const abrirV7 = async (capa) => {
+      const proyecto = { version: 7, imagen: base.toDataURL('image/png'), nombreArchivo: 'mitades.png', capaActivaId: 'capa-1', capas: [capa] };
+      const entradaProyecto = D().getElementById('entradaProyecto');
+      const antes = W().eval('capas');
+      entradaProyecto.files = archivos([new (W().File)([JSON.stringify(proyecto)], 'v7.json', { type: 'application/json' })]).files;
+      entradaProyecto.dispatchEvent(new (W().Event)('change'));
+      afirmar(await hasta(() => W().eval('capas') !== antes, 10000), 'el proyecto v7 no abrió');
+      return W().capaActiva().mascara.piezas.map((p) => p.tipo + ':' + p.op + (p.invertir ? ':inv' : '')).join(' ');
+    };
+    const luz = { base: 'luz', invertir: false, luz: { desde: 0, hasta: 35, suavidad: 15 }, degradado: { tipo: 'lineal', a: null, b: null }, color: null, tolerancia: 30, objeto: null, fuente: 'foto' };
+    h.formaV7 = await abrirV7(capaV7(luz, pintar(50, 100), pintar(0, 25)));
+    afirmar(h.formaV7 === 'luz:sumar pincel:sumar pincel:restar', 'conversión v7: ' + h.formaV7);
+    const v7 = [px(0.1), px(0.4), px(0.75)];
+    h.v7 = v7.join(',');
+    afirmar(Math.abs(v7[0] - 40) <= 3 && Math.abs(v7[1] - 6) <= 3 && Math.abs(v7[2] - 190) <= 3, 'proyecto v7: ' + h.v7);
+    // La misma, invertida: el cuadrado quitado es lo único que queda.
+    h.formaV7Invertida = await abrirV7(capaV7({ ...luz, invertir: true }, pintar(50, 100), pintar(0, 25)));
+    await esperar(250);
+    const inv = [px(0.1), px(0.4), px(0.75)];
+    h.v7Invertida = inv.join(',');
+    afirmar(Math.abs(inv[0] - 6) <= 3 && Math.abs(inv[1] - 40) <= 3 && Math.abs(inv[2] - 220) <= 3 && W().capaActiva().mascara.invertir, 'proyecto v7 invertido: ' + h.v7Invertida);
+    // Base "Nada" sin pintar: no se aplica en ningún lado.
+    h.formaNada = await abrirV7(capaV7({ ...luz, base: 'nada' }, null, null));
+    afirmar(h.formaNada === '' && es(await leer(), 40, 220), 'base "Nada": ' + h.formaNada);
+
+    // Y la conversión de cada base, sin abrir nada.
+    const M = W().MascarasCapa;
+    const forma = (m) => m.piezas.map((p) => p.tipo + ':' + p.op + (p.invertir ? ':inv' : '') + (p.fuente ? ':' + p.fuente : '')).join(' ');
+    h.bases = [
+      forma(M.desdeV7({ base: 'fondo', fuente: 'capa' })),
+      forma(M.desdeV7({ base: 'fondo', objeto: { x: 0.5, y: 0.5 } })),
+      forma(M.desdeV7({ base: 'sujeto', objeto: { x: 0.2, y: 0.3 } })),
+      forma(M.desdeV7({ base: 'color', color: { r: 1, g: 2, b: 3 }, tolerancia: 40 })),
+      forma(M.desdeV7({ base: 'degradado', degradado: { tipo: 'radial', a: { x: 0, y: 0 }, b: { x: 1, y: 1 } } })),
+      forma(M.desdeV7(null)),
+    ].join(' / ');
+    afirmar(h.bases === 'sujeto:sumar:inv:capa / objeto:sumar:inv:foto / objeto:sumar:foto / color:sumar:foto / degradado:sumar / toda:sumar', 'bases convertidas: ' + h.bases);
+    afirmar(M.desdeV7({ base: 'sujeto', objeto: { x: 0.2, y: 0.3 } }).piezas[0].punto.x === 0.2
+      && M.desdeV7({ base: 'color', color: { r: 1, g: 2, b: 3 }, tolerancia: 40 }).piezas[0].tolerancia === 40
+      && M.desdeV7({ base: 'degradado', degradado: { tipo: 'radial', a: { x: 0, y: 0 }, b: { x: 1, y: 1 } } }).piezas[0].degradado.tipo === 'radial', 'la conversión perdió la configuración de la base');
+    afirmar(M.esTodaLaImagen(M.neutra()) && !M.esTodaLaImagen({ piezas: [], invertir: false }) && M.esTodaLaImagen({ piezas: [M.pieza('luz'), M.pieza('toda')], invertir: false }), 'esTodaLaImagen');
+
+    // El proyecto nuevo (versión 8) guarda las piezas y el lienzo del pincel.
+    const guardada = W().itemAProyecto(W().capaActiva());
+    afirmar(Array.isArray(guardada.mascara.piezas) && !('pincelSumar' in guardada), 'el proyecto no guarda la máscara como piezas');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
   // Borrar a transparente: con la capa de la foto elegida borra la foto (queda
