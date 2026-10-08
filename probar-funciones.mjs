@@ -1880,10 +1880,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // Esqueleto de PC (2026-10-08, plan fase 6, assets/js/esqueleto-editor.js)
   // en los tres editores: barra de íconos, una sola categoría a la vista, los
   // botones reales en la barra superior, el anuncio en su franja, teclas 1–9,
-  // lo contextual (agregar un texto, una herramienta, tocar una foto), y que
-  // al pasar a 390 px todo vuelve a su lugar para app-movil.js (y al volver a
-  // PC, otra vez al esqueleto).
-  await prueba('esqueleto de PC (editor de color, avanzado y collage; ida y vuelta a celular)', async () => {
+  // lo contextual (agregar un texto, una herramienta, tocar una foto), y a
+  // 390 px el de celular (fase 7, con app-movil.js): la misma barra, los
+  // mismos íconos abajo y la hoja; al volver a PC, otra vez el esqueleto.
+  await prueba('esqueleto de PC y de celular (editor de color, avanzado y collage)', async () => {
     const h = {};
     const el = (id) => D().getElementById(id);
     const archivo = async (n = 1) => {
@@ -1902,7 +1902,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const rail = () => [...D().querySelectorAll('.ed-rail button')].map((b) => b.getAttribute('data-ed-categoria')).join(',');
     const categoria = (c) => D().querySelector('.ed-rail [data-ed-categoria="' + c + '"]').click();
     const tecla = (key) => D().body.dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true }));
-    const enBarra = (id) => !!D().querySelector('.ed-barra #' + id);
+    const enBarra = (id) => !!D().querySelector('.ed-barra #' + id + ', .ed-menu #' + id);
     const comprobarPc = (nombre, ids) => {
       const fila = D().querySelector('.ed-anuncio-fila');
       const anuncio = D().querySelector('.anuncio');
@@ -1914,14 +1914,35 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       afirmar(encima && (anuncio === encima || anuncio.contains(encima)), nombre + ': algo tapa el anuncio: ' + (encima && encima.className));
       for (const id of ids) afirmar(enBarra(id), nombre + ': ' + id + ' no está en la barra');
     };
-    const aCelularYVuelta = async (nombre, ids, volvio) => {
+    // Celular (fase 7): la misma barra superior (con los botones reales, en
+    // la barra o en "⋯"), la barra de abajo con los mismos íconos y el mismo
+    // orden que la de la PC, el anuncio en su franja debajo de la imagen, y
+    // una hoja que se abre y se cierra tocando la categoría.
+    const chip = (c) => [...D().querySelectorAll('.app-chip')].find((b) => b.querySelector('.app-icono').textContent === W().EsqueletoEditor.CATEGORIAS[c].ico);
+    const enHoja = () => [...D().querySelectorAll('.app-hoja > [data-categoria]')].map((b) => b.getAttribute('data-categoria'));
+    const aCelularYVuelta = async (nombre, ids, enCelular) => {
+      const ordenPc = rail();
       marco.style.width = '390px'; marco.style.height = '844px';
-      afirmar(await hasta(() => D().body.classList.contains('app-activo') && !D().body.classList.contains('ed-esqueleto-activo'), 5000), nombre + ': no pasó a celular');
-      await esperar(100);
-      for (const id of ids) afirmar(!enBarra(id) && el(id).isConnected, nombre + ': ' + id + ' no volvió a su lugar');
-      afirmar(!D().querySelector('.ed-barra, .ed-rail') || !D().querySelector('.ed-barra').isConnected, nombre + ': quedó la barra del esqueleto en celular');
-      afirmar(D().querySelector('.app-anuncio .anuncio'), nombre + ': en celular el anuncio no está en su tira');
-      afirmar(volvio(), nombre + ': lo mudado no volvió a su lugar');
+      afirmar(await hasta(() => D().body.classList.contains('app-activo') && D().body.classList.contains('ed-esqueleto-movil') && !D().body.classList.contains('ed-esqueleto-activo'), 5000), nombre + ': no pasó a celular');
+      await esperar(150);
+      const shell = D().querySelector('.app-con-esqueleto');
+      afirmar(shell && shell.firstElementChild.classList.contains('ed-barra'), nombre + ': en celular la barra superior no está arriba');
+      for (const id of ids) afirmar(shell.querySelector('.ed-barra #' + id + ', .ed-menu #' + id), nombre + ': ' + id + ' no está en la barra de celular ni en "⋯"');
+      afirmar(!D().querySelector('.ed-rail') || !D().querySelector('.ed-rail').isConnected, nombre + ': quedó la barra de íconos de PC en celular');
+      const ordenCelular = [...D().querySelectorAll('.app-chip')].map((b) => Object.keys(W().EsqueletoEditor.CATEGORIAS).find((c) => W().EsqueletoEditor.CATEGORIAS[c].ico === b.querySelector('.app-icono').textContent)).join(',');
+      afirmar(ordenCelular === ordenPc, nombre + ': la barra de abajo (' + ordenCelular + ') no es la de la PC (' + ordenPc + ')');
+      // El anuncio: debajo de la imagen, 50 px, sin nada encima.
+      const tira = D().querySelector('.app-anuncio');
+      const escenario = D().querySelector('.app-escenario');
+      afirmar(tira && tira.contains(D().querySelector('.anuncio')), nombre + ': en celular el anuncio no está en su franja');
+      afirmar(tira.getBoundingClientRect().top >= escenario.getBoundingClientRect().bottom - 1, nombre + ': el anuncio no está debajo de la imagen');
+      const ra = D().querySelector('.anuncio').getBoundingClientRect();
+      afirmar(Math.round(ra.height) === 50, nombre + ': el anuncio mide ' + Math.round(ra.height) + ' px en celular');
+      const encima = D().elementFromPoint(ra.left + ra.width / 2, ra.top + ra.height / 2);
+      afirmar(encima && D().querySelector('.anuncio').contains(encima), nombre + ': algo tapa el anuncio en celular: ' + (encima && encima.className));
+      // La hoja arranca cerrada; tocar una categoría la abre y tocarla otra vez la cierra.
+      afirmar(!enHoja().length, nombre + ': la hoja arrancó abierta: ' + enHoja());
+      await enCelular();
       marco.style.width = ''; marco.style.height = '';
       afirmar(await hasta(() => D().body.classList.contains('ed-esqueleto-activo'), 5000), nombre + ': no volvió el esqueleto');
       await esperar(150);
@@ -1948,7 +1969,15 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const esc = D().querySelector('[data-app-escenario]').getBoundingClientRect();
     h.escenario = Math.round(esc.width * esc.height / (W().innerWidth * W().innerHeight) * 100) + '%';
     afirmar(esc.width * esc.height >= 0.5 * W().innerWidth * W().innerHeight, 'el escenario ocupa ' + h.escenario);
-    await aCelularYVuelta('color', ['botonDeshacer', 'botonDescargar'], () => !!D().querySelector('.botones-historial #botonDeshacer'));
+    await aCelularYVuelta('color', ['botonDeshacer', 'botonDescargar', 'botonCambiarImagen', 'botonRestablecer'], async () => {
+      afirmar(!D().querySelector('.app-acciones'), 'color: en celular siguen los botones de abajo (ya están en la barra)');
+      chip('efectos').click();
+      afirmar(enHoja().join() === 'efectos,efectos,efectos', 'color: la hoja de Efectos tiene ' + enHoja());
+      chip('efectos').click();
+      afirmar(!enHoja().length, 'color: tocar la categoría abierta no cerró la hoja');
+      chip('luz').click();
+      afirmar(enHoja().join() === 'luz', 'color: la hoja de Luz tiene ' + enHoja());
+    });
 
     // --- Editor avanzado ---
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
@@ -1977,8 +2006,24 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     h.zoom = zoomAntes + ' -> ' + D().querySelector('.ed-zoom-texto').textContent;
     afirmar(D().querySelector('.ed-zoom-texto').textContent !== zoomAntes, 'el + de la barra no cambió el zoom');
     categoria('borrar');
-    await aCelularYVuelta('avanzado', ['botonDeshacer', 'botonDescargarAvanzado', 'resolucionVistaPrevia'],
-      () => !D().querySelector('#lugarBorrar #controlesPincelAvanzado') && !!D().querySelector('[data-app-categoria="Aplicar"] #controlesPincelAvanzado'));
+    await aCelularYVuelta('avanzado', ['botonDeshacer', 'botonDescargarAvanzado', 'resolucionVistaPrevia', 'botonGuardarProyecto'], async () => {
+      const editando = D().querySelector('.app-con-esqueleto > .ed-editando');
+      afirmar(editando && /Capa/.test(editando.textContent), 'avanzado: en celular no está "Editando": ' + (editando && editando.textContent));
+      chip('borrar').click();
+      afirmar(enHoja().join() === 'borrar' && D().querySelector('.app-hoja #lugarBorrar #controlesPincelAvanzado') && W().eval('herramientaLienzo') === 'borrar', 'avanzado: Borrar en celular: ' + enHoja() + ' / ' + W().eval('herramientaLienzo'));
+      chip('zona').click();
+      afirmar(enHoja().join() === 'zona' && W().eval('herramientaLienzo') === 'mover' && !D().querySelector('#lugarBorrar #controlesPincelAvanzado'), 'avanzado: salir de Borrar en celular no soltó la herramienta');
+      afirmar(W().getComputedStyle(D().querySelector('#herramientasLienzo [data-herramienta="borrar"]')).display === 'none', 'avanzado: en celular "Borrar" sigue también en Zona');
+      el('botonNuevoTexto').click();
+      afirmar(enHoja().join() === 'texto', 'avanzado: agregar un texto en celular no abrió Texto e imagen: ' + enHoja());
+      // El zoom, en "⋯": − y + no cierran el menú.
+      D().querySelector('.ed-boton-menu').click();
+      const zt = D().querySelector('.ed-menu .ed-zoom-texto');
+      const antes = zt.textContent;
+      zt.nextElementSibling.click();
+      afirmar(zt.textContent !== antes && !D().querySelector('.ed-menu').hidden, 'avanzado: el + del menú en celular: ' + antes + ' -> ' + zt.textContent);
+      D().querySelector('.ed-boton-menu').click();
+    });
 
     // --- Collage ---
     await abrir('/herramientas/collage-imagenes.html'); await esperar(300);
@@ -1989,7 +2034,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(D().querySelector('#lugarFotos #tiraOrden') && D().querySelector('.ed-menu #tamanoSalida'), 'la tira no está en Fotos o el tamaño no está en el menú');
     W().eval('seleccionar(1)');
     afirmar(visibles() === 'fotos', 'elegir una foto no abrió Fotos: ' + visibles());
-    await aCelularYVuelta('collage', ['botonDeshacer', 'botonDescargar'], () => !D().querySelector('#lugarFotos #tiraOrden') && !D().querySelector('.ed-menu #tamanoSalida'));
+    await aCelularYVuelta('collage', ['botonDeshacer', 'botonDescargar', 'tamanoSalida'], async () => {
+      W().eval('seleccionar(0)');
+      afirmar(enHoja().join() === 'fotos' && D().querySelector('.app-hoja #tiraOrden') && D().querySelector('.app-hoja #barraFoto'), 'collage: tocar una foto en celular no abrió Fotos: ' + enHoja());
+    });
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 

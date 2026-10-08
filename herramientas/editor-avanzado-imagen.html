@@ -196,9 +196,11 @@
   .acordeon-contenido > .titulo-mascara:first-child { margin-top: 0; }
   #controlesPincelAvanzado, #controlesDegradado, #controlesColorAvanzado, #controlesLuz { margin-top: 8px; }
   .zona-lienzo.paneando #canvasTrabajo { cursor: grabbing; }
-  /* En PC (esqueleto) borrar y mover la capa tienen su propia categoría. */
+  /* Con el esqueleto (PC y celular) borrar y mover la capa tienen su propia categoría. */
   .ed-esqueleto-activo #herramientasLienzo [data-herramienta="borrar"],
-  .ed-esqueleto-activo #herramientasLienzo [data-herramienta="transformar"] { display: none; }
+  .ed-esqueleto-activo #herramientasLienzo [data-herramienta="transformar"],
+  .ed-esqueleto-movil #herramientasLienzo [data-herramienta="borrar"],
+  .ed-esqueleto-movil #herramientasLienzo [data-herramienta="transformar"] { display: none; }
 
   /* --- Acordeón de ajustes --- */
   /* min-width:0 en el fieldset: sin esto, el <fieldset> nativo del navegador
@@ -985,9 +987,8 @@ window.i18nPagina = {
             </div>
           </fieldset>
 
-          <!-- Borrar a transparente: en PC es una categoría propia (plan, 4.1);
-               en celular sigue siendo una herramienta de "Aplicar la capa a".
-               Sin data-app-categoria a propósito: en celular no hay botón. -->
+          <!-- Borrar a transparente: una categoría propia (plan, 4.1), en PC
+               y en celular. -->
           <fieldset data-categoria="borrar" class="acordeon-grupo" id="grupoBorrar">
             <button type="button" class="acordeon-titulo" data-icono="🧽"><span data-i18n="titulo-borrar">Borrar</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
@@ -5031,7 +5032,7 @@ esqueleto = EsqueletoEditor.conectar({
       herramientaLienzo = 'borrar';
       document.getElementById('lugarBorrar').appendChild(controlesPincel);
     } else {
-      // null: el esqueleto se apagó (celular): todo vuelve a "Aplicar la capa a".
+      // null: el esqueleto se apagó (sin foto): todo vuelve a "Aplicar la capa a".
       if (controlesPincel.parentNode !== lugarPincelEnZona.padre) lugarPincelEnZona.padre.insertBefore(controlesPincel, lugarPincelEnZona.siguiente);
       const suya = CATEGORIA_DE_HERRAMIENTA[herramientaLienzo];
       if (categoria && suya && suya !== categoria) herramientaLienzo = 'mover';
@@ -5132,7 +5133,9 @@ const layoutEditor = document.getElementById('layoutEditor');
 const consultaMovil = window.matchMedia('(max-width: 900px)');
 document.addEventListener('appMovilCategoriaAbierta', (e) => {
   const clave = e.detail && e.detail.claveIcono;
-  if (clave === 'Filtros' || clave === 'resumen-filtro' || clave === 'grupo-filtros') solicitarMiniaturasFiltros();
+  const categoria = e.detail && e.detail.categoria;
+  if (categoria === 'filtros' || clave === 'Filtros' || clave === 'resumen-filtro' || clave === 'grupo-filtros') solicitarMiniaturasFiltros();
+  if (categoria === 'textura') solicitarMiniaturasTextura();
   // En celular, app-movil.js abre la categoría moviendo el <fieldset> al
   // panel de abajo sin simular un click sobre .acordeon-titulo — así que sin
   // esto las miniaturas de textura nunca se generaban al abrir "Textura"

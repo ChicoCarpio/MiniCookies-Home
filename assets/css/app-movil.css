@@ -68,6 +68,9 @@
     gap: 0;
     height: auto;
     min-height: 0;
+    /* El margen de escritorio (el collage trae 16 px arriba) dejaba una
+       franja vacía entre el encabezado y la barra. */
+    margin: 0;
     padding: 0;
     border: none;
     border-radius: 0;
@@ -460,6 +463,7 @@
      tienen lugar la publicidad, el escenario y la bandeja, así que cualquier
      otra columna sobra. Con una lista, cada herramienta nueva tenía que
      acordarse de agregar la suya, y la que se olvidaba quedaba con la columna
-     de escritorio encajada en el celular. */
-  body.app-activo .app-shell > *:not(.app-anuncio):not(.app-controles):not(.app-escenario) { display: none; }
+     de escritorio encajada en el celular. Con esqueleto (los editores de
+     imagen) también tienen lugar su barra, su menú y "Editando: …". */
+  body.app-activo .app-shell > *:not(.app-anuncio):not(.app-controles):not(.app-escenario):not(.ed-barra):not(.ed-menu):not(.ed-editando) { display: none; }
 }

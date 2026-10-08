@@ -326,8 +326,10 @@ sitio (que queda fijo arriba) y se arma así:
 └──┴──────────────────┴────────────────────────────────────────────────────┘
 ```
 
-Debajo de 900 px no hace nada: manda `app-movil.js` (sección 6). Los dos
-conviven porque **el esqueleto no mueve las categorías**.
+Debajo de 900 px el marco es de `app-movil.js` (sección 6), pero las
+categorías, la barra y "Editando" siguen saliendo del esqueleto (ver
+"Esqueleto de celular", abajo). Los dos conviven porque **el esqueleto no
+mueve las categorías**.
 
 **El contrato:**
 
@@ -374,8 +376,53 @@ Trampas ya pagadas:
 `npm run revisar` comprueba, con el editor abierto a 1366×768, que el
 escenario sea al menos el 50 % de la pantalla, que el anuncio mida 90 px sin
 nada encima y que se vea una sola categoría; al terminar dice en qué páginas
-lo revisó. `npm run probar` (`esqueleto de PC`) recorre los tres editores, lo
-contextual y la ida y vuelta a 390 px.
+lo revisó. `npm run probar` (`esqueleto de PC y de celular`) recorre los tres
+editores, lo contextual y la ida y vuelta a 390 px.
+
+### Esqueleto de celular (2026-10-08)
+
+Plan del rediseño, fase 7: **lo mismo que en PC, en otro lugar**. Debajo de
+900 px y con una foto cargada:
+
+```
+┌ encabezado del sitio ──────────┐
+├ ↶ ↷ │ 👁 ⤢ ⛶        [⤓]  ⋯ ───┤  la barra de la PC (mismos botones reales)
+│ Editando: Capa 1 ▾             │  solo el Editor avanzado
+│            IMAGEN              │
+├ [ anuncio 50 px ] ─────────────┤  franja propia, DEBAJO de la imagen
+│ ☀️ la categoría abierta (hoja) │  la columna de la PC
+│🗂 🔤 🎯 🧽 │ ☀️ 🎨 ◐ ✨ 🎞 🧱 → │  la barra de íconos de la PC, acostada
+└────────────────────────────────┘
+```
+
+Cómo se reparten el trabajo:
+
+- `app-movil.js` ve bloques con `data-categoria` y entra en **modo
+  esqueleto**: no arma categorías de los acordeones ni de
+  `data-app-categoria` (se ignoran en estos tres editores), ni la tira de
+  acciones de abajo. Al encender pide `EsqueletoEditor.de(contenedor).movil`.
+- El esqueleto arma la barra con los botones reales (`.ed-barra-celular`):
+  quedan ↶ ↷, Original y Encajar solo con su ícono, ⛶, Descargar como botón
+  ⤓ y "⋯". Lo que no entra en 390 px va al menú: el zoom (− % +, que no
+  cierran el menú: el pellizco no puede ser la única forma), la resolución
+  con su rótulo y los avisos. Descargar baja el archivo directo, igual que
+  en PC.
+- Abrir una categoría mueve **todos sus bloques** a la hoja, en su orden; el
+  primero sin título y los demás con su nombre como subtítulo, como la
+  columna. Se avisa al esqueleto (`movil.abrio`), que la deja como elegida y
+  llama a `alCambiarCategoria`: "Borrar" se lleva los controles del pincel y
+  "Fotos" la tira del collage, igual que en PC.
+- `esqueleto.abrir(cat)` y `esqueleto.activo()` valen en las dos pantallas:
+  en celular, abrir es abrir la hoja (agregar un texto abre "Texto e imagen";
+  tocar una foto del collage abre "Fotos").
+- La hoja arranca cerrada (la imagen tiene todo el alto); tocar la categoría
+  abierta la cierra, como en PC la columna.
+- `body.ed-esqueleto-movil` marca el modo. `[data-sin-esqueleto]` y la fila
+  vacía de `.botones-historial` se esconden en las dos pantallas.
+
+Trampa ya pagada: **el contenedor fijo hereda su margen de escritorio** (el
+collage trae 16 px arriba) y dejaba una franja vacía entre el encabezado y la
+barra; `app-movil.css` lo pone en 0.
 
 ### D — Vista previa de documento
 

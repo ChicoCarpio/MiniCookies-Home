@@ -173,7 +173,14 @@
       });
     }
 
-    if (panelFiltros) {
+    // Los editores con esqueleto (bloques con data-categoria) toman sus
+    // categorías de él (ver armarDesdeEsqueleto, más abajo), no de los
+    // acordeones ni de data-app-categoria.
+    var modoEsqueleto = !!window.EsqueletoEditor && !!shell.querySelector('[data-categoria]');
+
+    if (modoEsqueleto) {
+      // nada: se arman al encender
+    } else if (panelFiltros) {
       // El Editor de color tiene "Filtros" y "Textura extra" como dos
       // acordeones separados dentro de .panel-filtros (a diferencia del
       // editor avanzado, donde "Filtro" y "Textura" ya son fieldsets sueltos
@@ -190,7 +197,7 @@
     // celular merecen su propio botón (el color del borde y el descargar del
     // generador de stickers, separados de "Filtros"; antes también los
     // filtros de capa del editor avanzado).
-    shell.querySelectorAll('[data-app-categoria]').forEach(function (el) {
+    if (!modoEsqueleto) shell.querySelectorAll('[data-app-categoria]').forEach(function (el) {
       var clave = el.getAttribute('data-app-categoria');
       // 'Filtros' y 'Capas' los sabe traducir el modulo. Cualquier otro
       // nombre no tiene traducción propia acá: se lee del título del propio
@@ -211,38 +218,68 @@
       agregarCategoria(etiqueta, el, undefined, claveIcono, titulo || undefined);
     });
 
-    agregarAcordeonesDe(panelAjustes);
-    if (panelCapas && !panelCapas.hasAttribute('data-app-categorias-individuales')) {
-      agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
+    if (!modoEsqueleto) {
+      agregarAcordeonesDe(panelAjustes);
+      if (panelCapas && !panelCapas.hasAttribute('data-app-categorias-individuales')) {
+        agregarCategoria(txt('capas'), panelCapas, undefined, 'Capas');
+      }
+      if (!categorias.length) return;
     }
-    if (!categorias.length) return;
 
     var abierta = -1;
 
-    categorias.forEach(function (cat, i) {
+    function crearChip(cat, i, icono) {
       var boton = document.createElement('button');
       boton.type = 'button';
       boton.className = 'app-chip';
-      var icono = document.createElement('span');
-      icono.className = 'app-icono';
-      icono.textContent = ICONOS_POR_CLAVE[cat.claveIcono]
-        || ICONOS[sinAcentos(cat.claveIcono)] || '🎚️';
+      var ico = document.createElement('span');
+      ico.className = 'app-icono';
+      ico.setAttribute('aria-hidden', 'true');
+      ico.textContent = icono;
       var nombre = document.createElement('span');
       nombre.textContent = cat.etiqueta;
       cat.nombreChip = nombre;
-      boton.appendChild(icono);
+      boton.appendChild(ico);
       boton.appendChild(nombre);
+      boton.setAttribute('aria-pressed', 'false');
       boton.addEventListener('click', function () { alternar(i); });
       cat.chip = boton;
       chips.appendChild(boton);
+    }
+
+    categorias.forEach(function (cat, i) {
+      crearChip(cat, i, ICONOS_POR_CLAVE[cat.claveIcono] || ICONOS[sinAcentos(cat.claveIcono)] || '🎚️');
     });
+
+    // Con esqueleto (los editores de imagen, fase 7): la barra de abajo es la
+    // barra de íconos de la PC acostada (mismos íconos, nombres y orden) y la
+    // hoja muestra lo mismo que la columna. Se arma al encender, cuando la
+    // página ya conectó su esqueleto.
+    var esqueleto = null;
+    function armarDesdeEsqueleto() {
+      if (esqueleto || !modoEsqueleto) return;
+      esqueleto = window.EsqueletoEditor.de(shell);
+      if (!esqueleto) return;
+      esqueleto.movil.categorias().forEach(function (c) {
+        if (c.separadorAntes) chips.appendChild(Object.assign(document.createElement('span'), { className: 'app-chips-sep' }));
+        var cat = { clave: c.clave, etiqueta: esqueleto.movil.nombre(c.clave) };
+        categorias.push(cat);
+        crearChip(cat, categorias.length - 1, esqueleto.movil.icono(c.clave));
+      });
+      esqueleto.movil.alAbrir(function (clave) {
+        var i = categorias.findIndex(function (cat) { return cat.clave === clave; });
+        if (i >= 0 && i !== abierta) alternar(i);
+      });
+    }
 
     // El texto de cada categoria vuelve a salir de su titulo del acordeon
     // (que la pagina ya tradujo); el icono no, porque su clave es fija.
     document.addEventListener('cambioIdioma', function () {
       chips.setAttribute('aria-label', txt('categorias'));
       categorias.forEach(function (cat) {
-        if (cat.titulo) {
+        if (cat.clave && esqueleto) {
+          cat.etiqueta = esqueleto.movil.nombre(cat.clave);
+        } else if (cat.titulo) {
           cat.etiqueta = textoDeTitulo(cat.titulo);
         } else if (cat.claveIcono === 'Filtros' || cat.claveIcono === 'Capas') {
           cat.etiqueta = txt(cat.claveIcono === 'Filtros' ? 'filtros' : 'capas');
@@ -337,8 +374,17 @@
       if (abierta < 0) return;
       var cat = categorias[abierta];
       // De vuelta a su lugar exacto en el panel de origen.
-      if (cat.padre) cat.padre.insertBefore(cat.elemento, cat.siguiente);
+      if (cat.mudados) {
+        for (var j = cat.mudados.length - 1; j >= 0; j--) {
+          var m = cat.mudados[j];
+          m.padre.insertBefore(m.el, m.siguiente && m.siguiente.parentNode === m.padre ? m.siguiente : null);
+        }
+        cat.mudados = null;
+      } else if (cat.padre) {
+        cat.padre.insertBefore(cat.elemento, cat.siguiente);
+      }
       cat.chip.classList.remove('activo');
+      cat.chip.setAttribute('aria-pressed', 'false');
       abierta = -1;
       if (notificarTamano !== false) avisarCambioDeTamano();
     }
@@ -347,18 +393,32 @@
       if (abierta === i) { cerrarHoja(); return; }
       cerrarHoja(false);
       var cat = categorias[i];
-      hoja.appendChild(cat.elemento);
+      var claveIcono = cat.claveIcono;
+      if (cat.clave) {
+        // Una categoría del esqueleto puede tener varios bloques (Efectos =
+        // efectos, resplandor y dispersión): van todos, en su orden, y el
+        // primero no repite el nombre (ya está en la barra de abajo).
+        var bloques = esqueleto.movil.bloques(cat.clave);
+        cat.mudados = bloques.map(function (b) { return { el: b, padre: b.parentNode, siguiente: b.nextSibling }; });
+        bloques.forEach(function (b) { hoja.appendChild(b); b.classList.add('abierto'); });
+        var conClave = bloques[0] && bloques[0].querySelector('.acordeon-titulo [data-i18n], h3[data-i18n]');
+        claveIcono = conClave ? conClave.getAttribute('data-i18n') : cat.clave;
+      } else {
+        hoja.appendChild(cat.elemento);
+      }
       cat.chip.classList.add('activo');
+      cat.chip.setAttribute('aria-pressed', 'true');
       // Si la categoría estaba cortada contra el borde, se la trae a la vista.
       if (cat.chip.scrollIntoView) cat.chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       abierta = i;
+      if (cat.clave) esqueleto.movil.abrio(cat.clave);
       document.dispatchEvent(new CustomEvent('appMovilCategoriaAbierta', {
-        detail: { claveIcono: cat.claveIcono },
+        detail: { claveIcono: claveIcono, categoria: cat.clave || null },
       }));
       // Si el grupo venía plegado en la versión de computadora, acá tiene que
       // verse igual: la hoja ya muestra el contenido, pero la clase mantiene
       // coherente el estado por si se vuelve a pantalla ancha.
-      cat.elemento.classList.add('abierto');
+      if (cat.elemento) cat.elemento.classList.add('abierto');
       // El panel arranca desde arriba aunque la categoría anterior estuviera
       // desplazada.
       hoja.scrollTop = 0;
@@ -397,9 +457,12 @@
       return b;
     }
 
-    accion('🖼️', ['botonCambiarImagen'], 'app-secundario');
-    accion('↺', ['botonRestablecer', 'botonRestablecerAvanzado'], 'app-secundario');
-    accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'app-principal');
+    // Con esqueleto no hacen falta: descargar y "⋯" están en su barra de arriba.
+    if (!modoEsqueleto) {
+      accion('🖼️', ['botonCambiarImagen'], 'app-secundario');
+      accion('↺', ['botonRestablecer', 'botonRestablecerAvanzado'], 'app-secundario');
+      accion('⤓ Descargar', ['botonDescargar', 'botonDescargarAvanzado'], 'app-principal');
+    }
 
     // Hoja + categorías + acciones van juntas en un solo bloque flotante,
     // superpuesto ABAJO de la imagen (no empujándola hacia arriba): así la
@@ -430,12 +493,27 @@
     }
 
     // --- Encender / apagar según el ancho ---
+    // Con esqueleto, el plan 4.3:
+    //   barra superior (la de la PC) · Editando: … · IMAGEN ·
+    //   anuncio (franja propia, debajo de la imagen) · hoja · barra de íconos
+    var piezasEsqueleto = null;
+
     function encender() {
       if (cuerpo.classList.contains('app-activo')) return;
+      armarDesdeEsqueleto();
       cuerpo.classList.add('app-activo');
       document.documentElement.classList.add('app-activo');
       medirEncabezado();
-      shell.insertBefore(tiraAnuncio, shell.firstChild);
+      if (esqueleto) {
+        shell.classList.add('app-con-esqueleto');
+        piezasEsqueleto = esqueleto.movil.encender();
+        shell.insertBefore(piezasEsqueleto.barra, shell.firstChild);
+        if (piezasEsqueleto.editando) shell.insertBefore(piezasEsqueleto.editando, escenario);
+        if (piezasEsqueleto.menu) shell.appendChild(piezasEsqueleto.menu);
+        shell.insertBefore(tiraAnuncio, escenario.nextSibling);
+      } else {
+        shell.insertBefore(tiraAnuncio, shell.firstChild);
+      }
       if (anuncio) mover(tiraAnuncio, anuncio, null);
       shell.appendChild(controles);
       marcarBordes();
@@ -445,6 +523,12 @@
     function apagar() {
       if (!cuerpo.classList.contains('app-activo')) return;
       cerrarHoja();
+      if (esqueleto && piezasEsqueleto) {
+        // La barra, el menú y "Editando" los devuelve el esqueleto.
+        esqueleto.movil.apagar();
+        piezasEsqueleto = null;
+        shell.classList.remove('app-con-esqueleto');
+      }
       cuerpo.classList.remove('app-activo');
       document.documentElement.classList.remove('app-activo');
       document.documentElement.style.removeProperty('--app-alto-encabezado');
