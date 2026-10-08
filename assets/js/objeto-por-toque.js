@@ -77,3 +77,19 @@ export async function objetoEn(analisis, x, y) {
   ctx.putImageData(imagen, 0, 0);
   return lienzo;
 }
+
+// Varios objetos a la vez (2026-10-08, idea del usuario: marcar varios
+// lugares y que el modelo busque el objeto de cada marca). Cada punto se
+// resuelve sobre el mismo análisis —la parte lenta se hace una sola vez— y
+// las máscaras se suman en una sola, del tamaño de la foto. "alAvanzar(i, n)"
+// avisa antes de cada punto.
+export async function objetosEn(analisis, puntos, alAvanzar = null) {
+  let union = null;
+  for (let i = 0; i < puntos.length; i++) {
+    if (alAvanzar) alAvanzar(i, puntos.length);
+    const mascara = await objetoEn(analisis, puntos[i].x, puntos[i].y);
+    if (!union) union = mascara;
+    else union.getContext('2d').drawImage(mascara, 0, 0);
+  }
+  return union;
+}

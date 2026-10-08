@@ -50,6 +50,7 @@
     'grupo-filtros': '🖼️',
     'grupo-acciones': '⤓',
     'campo-color-borde': '🎨',
+    'grupo-recorte': '🎯',
     // Collage
     'h-diseno': '▦',
     'h-formato': '🖼️',

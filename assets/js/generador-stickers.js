@@ -432,30 +432,279 @@ export function iniciarGeneradorStickers() {
   }
 
   function dibujarSticker() {
+    if (marcando) { dibujarMarcas(); return; }
     if (!canvasFiltrado) return;
     componerSticker(vistaResultado, canvasFiltrado, true);
     vistaResultado.style.display = 'block';
   }
 
+  // ===== Qué recortar: el primer plano o los objetos que se marcan =====
+  // (2026-10-08, idea del usuario.) Con "Los objetos que marco", la vista
+  // muestra la foto original: cada toque deja una marca numerada (tocar una
+  // marca la quita) y "Recortar los objetos marcados" le pide al modelo de
+  // objetos (SlimSAM, objeto-por-toque.js) el objeto de cada marca y los junta
+  // en un solo recorte. El análisis de la foto, lo lento, se hace una vez.
+  const radiosModo = [...document.querySelectorAll('input[name="modoRecorte"]')];
+  const ayudaMarcas = document.getElementById('ayudaMarcas');
+  const botonRecortarObjetos = document.getElementById('botonRecortarObjetos');
+  const botonBorrarMarcas = document.getElementById('botonBorrarMarcas');
+  const botonCambiarMarcas = document.getElementById('botonCambiarMarcas');
+  // El modelo de objetos trabaja a 1024 px: se le da una copia de a lo sumo
+  // este lado (una foto de 24 MP a tamaño completo eran cientos de MB por
+  // marca) y la máscara se agranda después a la foto.
+  const LADO_OBJETOS = 2048;
+  let fotoActual = null; // { url, imagen } de la foto cargada
+  let altaSujeto = null; // el recorte del primer plano ya listo, para volver a él sin recalcular
+  let analisisObjetos = null; // el análisis de SlimSAM de fotoActual
+  let marcas = []; // { x, y } en 0..1 de la foto
+  let marcando = false;
+  let trabajando = false; // SlimSAM buscando: no se cambia el modo ni las marcas
+  // Cada foto cargada es una "generación": lo que termina tarde de una foto
+  // anterior (ISNet o SlimSAM, que tardan) se descarta en vez de mezclarse.
+  let generacion = 0;
+  const modoRecorte = () => radiosModo.find((r) => r.checked).value;
+
+  function mostrarControlesModo() {
+    const objetos = modoRecorte() === 'objetos';
+    ayudaMarcas.hidden = !(objetos && marcando);
+    botonRecortarObjetos.hidden = !(objetos && marcando);
+    botonBorrarMarcas.hidden = !(objetos && marcando && marcas.length);
+    botonCambiarMarcas.hidden = !(objetos && !marcando);
+    botonRecortarObjetos.disabled = trabajando || !marcas.length;
+    botonBorrarMarcas.disabled = trabajando;
+    radiosModo.forEach((r) => { r.disabled = trabajando; });
+    // Mientras se marca, la vista es la foto: no hay sticker que descargar.
+    botonDescargar.disabled = trabajando || marcando;
+    botonRecortarObjetos.textContent = tt('boton-recortar-objetos', 'Recortar los objetos marcados ({n})').replace('{n}', marcas.length);
+  }
+
+  // Lo que mide el radio de una marca en la vista (también para quitarla).
+  const radioDeMarca = () => Math.max(10, Math.max(vistaResultado.width, vistaResultado.height) * 0.022);
+
+  // La foto (reducida a LADO_VISTA) con las marcas numeradas encima.
+  function dibujarMarcas() {
+    if (!fotoActual) return;
+    const { imagen } = fotoActual;
+    const escala = Math.min(1, LADO_VISTA / Math.max(imagen.naturalWidth, imagen.naturalHeight));
+    vistaResultado.width = Math.round(imagen.naturalWidth * escala);
+    vistaResultado.height = Math.round(imagen.naturalHeight * escala);
+    contextoResultado.drawImage(imagen, 0, 0, vistaResultado.width, vistaResultado.height);
+    const radio = radioDeMarca();
+    contextoResultado.font = `bold ${Math.round(radio * 1.1)}px system-ui, sans-serif`;
+    contextoResultado.textAlign = 'center';
+    contextoResultado.textBaseline = 'middle';
+    marcas.forEach((m, i) => {
+      const x = m.x * vistaResultado.width, y = m.y * vistaResultado.height;
+      contextoResultado.beginPath();
+      contextoResultado.arc(x, y, radio, 0, Math.PI * 2);
+      contextoResultado.fillStyle = '#ffffff';
+      contextoResultado.fill();
+      contextoResultado.lineWidth = Math.max(2, radio * 0.22);
+      contextoResultado.strokeStyle = '#e11d48';
+      contextoResultado.stroke();
+      contextoResultado.fillStyle = '#e11d48';
+      contextoResultado.fillText(String(i + 1), x, y + 1);
+    });
+    vistaResultado.style.display = 'block';
+  }
+
+  function empezarAMarcar() {
+    if (trabajando) return;
+    marcando = true;
+    vistaResultado.style.cursor = 'crosshair';
+    mostrarControlesModo();
+    dibujarMarcas();
+  }
+
+  radiosModo.forEach((r) => r.addEventListener('change', () => {
+    if (modoRecorte() === 'objetos') { empezarAMarcar(); return; }
+    marcando = false;
+    vistaResultado.style.cursor = '';
+    mostrarControlesModo();
+    if (altaSujeto) usarRecorteListo(altaSujeto);
+  }));
+  botonCambiarMarcas.addEventListener('click', empezarAMarcar);
+  // El texto de "Recortar los objetos marcados (n)" lo arma el JavaScript.
+  document.addEventListener('cambioIdioma', mostrarControlesModo);
+  botonBorrarMarcas.addEventListener('click', () => {
+    if (trabajando) return;
+    marcas = [];
+    mostrarControlesModo();
+    dibujarMarcas();
+  });
+
+  vistaResultado.addEventListener('click', (e) => {
+    if (!marcando || trabajando) return;
+    // Sin el borde del lienzo (clientLeft/clientTop), que corría el punto.
+    const caja = vistaResultado.getBoundingClientRect();
+    const x = (e.clientX - caja.left - vistaResultado.clientLeft) / vistaResultado.clientWidth;
+    const y = (e.clientY - caja.top - vistaResultado.clientTop) / vistaResultado.clientHeight;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    // Tocar sobre una marca (o casi) la quita; la distancia se mide en
+    // píxeles de la vista, con el mismo radio con que se dibuja.
+    const ancho = vistaResultado.width, alto = vistaResultado.height, radio = radioDeMarca();
+    const cerca = marcas.findIndex((m) => Math.hypot((m.x - x) * ancho, (m.y - y) * alto) < radio * 1.3);
+    if (cerca >= 0) marcas.splice(cerca, 1);
+    else marcas.push({ x, y });
+    mostrarControlesModo();
+    dibujarMarcas();
+  });
+
+  // Una copia de la foto de a lo sumo LADO_OBJETOS px, como URL, para el modelo.
+  async function urlParaObjetos(imagen) {
+    const escala = Math.min(1, LADO_OBJETOS / Math.max(imagen.naturalWidth, imagen.naturalHeight));
+    const copia = document.createElement('canvas');
+    copia.width = Math.max(1, Math.round(imagen.naturalWidth * escala));
+    copia.height = Math.max(1, Math.round(imagen.naturalHeight * escala));
+    copia.getContext('2d').drawImage(imagen, 0, 0, copia.width, copia.height);
+    const blob = await new Promise((r) => copia.toBlob(r, 'image/png'));
+    return URL.createObjectURL(blob);
+  }
+
+  // Qué parte de la máscara tiene objeto (0 a 1), mirando una grilla de puntos.
+  function proporcionCubierta(mascara) {
+    const datos = mascara.getContext('2d').getImageData(0, 0, mascara.width, mascara.height).data;
+    const paso = Math.max(1, Math.floor(Math.sqrt(mascara.width * mascara.height / 40000)));
+    let total = 0, cubiertos = 0;
+    for (let y = 0; y < mascara.height; y += paso) {
+      for (let x = 0; x < mascara.width; x += paso) {
+        total++;
+        if (datos[(y * mascara.width + x) * 4 + 3]) cubiertos++;
+      }
+    }
+    return total ? cubiertos / total : 0;
+  }
+
+  botonRecortarObjetos.addEventListener('click', async () => {
+    if (!marcas.length || !fotoActual || trabajando) return;
+    const gen = generacion;
+    const foto = fotoActual;
+    const puntos = marcas.slice(); // las marcas de este momento, aunque cambien
+    ocultarError();
+    trabajando = true;
+    mostrarControlesModo();
+    panelProgreso.style.display = 'block';
+    try {
+      const { analizarImagen, objetosEn } = await import('./objeto-por-toque.js');
+      if (!analisisObjetos) {
+        textoProgreso.textContent = tt('ia-analizando-objetos', 'Analizando la foto para encontrar objetos…');
+        barraProgreso.style.width = '0%';
+        const url = await urlParaObjetos(foto.imagen);
+        try {
+          const analisis = await analizarImagen(url, (porcentaje) => {
+            if (gen !== generacion) return;
+            barraProgreso.style.width = porcentaje + '%';
+            // Al 100 % ya bajó: lo que sigue es analizar la foto.
+            textoProgreso.textContent = porcentaje >= 100
+              ? tt('ia-analizando-objetos', 'Analizando la foto para encontrar objetos…')
+              : tt('ia-descargando-objetos', 'Descargando el modelo para elegir objetos… {p}% (solo la primera vez)').replace('{p}', porcentaje);
+          });
+          if (gen !== generacion) return;
+          analisisObjetos = analisis;
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      }
+      barraProgreso.style.width = '100%';
+      const mascara = await objetosEn(analisisObjetos, puntos, (i, n) => {
+        if (gen !== generacion) return;
+        textoProgreso.textContent = tt('ia-buscando-objetos', 'Buscando los objetos… {i} de {n}').replace('{i}', i + 1).replace('{n}', n);
+      });
+      if (gen !== generacion) return;
+      const cubierta = proporcionCubierta(mascara);
+      if (cubierta === 0) throw new Error(tt('error-sin-objetos', 'no se encontró ningún objeto en las marcas.'));
+      // La foto a tamaño completo (con tope), con la máscara agrandada como
+      // transparencia: el suavizado al agrandarla deja el contorno parejo.
+      const escala = Math.min(1, LADO_DESCARGA / Math.max(foto.imagen.naturalWidth, foto.imagen.naturalHeight));
+      const recorte = document.createElement('canvas');
+      recorte.width = Math.max(1, Math.round(foto.imagen.naturalWidth * escala));
+      recorte.height = Math.max(1, Math.round(foto.imagen.naturalHeight * escala));
+      const ctx = recorte.getContext('2d');
+      ctx.drawImage(foto.imagen, 0, 0, recorte.width, recorte.height);
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(mascara, 0, 0, recorte.width, recorte.height);
+      // Sin limpiarMascara: borra las islas chicas comparadas con la mayor, y
+      // acá un objeto chico marcado a propósito es tan válido como uno grande.
+      usarRecorteListo(ajustarAlSujeto(recorte));
+      marcando = false;
+      vistaResultado.style.cursor = '';
+      if (cubierta > 0.9) mostrarError(tt('aviso-casi-toda', 'El recorte ocupa casi toda la foto: puede que una marca haya caído sobre el fondo.'));
+    } catch (error) {
+      if (gen !== generacion) return;
+      const sinMemoria = /bad_alloc|memory|out of memory|OrtRun|allocation failed|RangeError/i.test(error.message);
+      mostrarError(sinMemoria
+        ? tt('error-sin-memoria', 'Tu navegador se quedó sin memoria para correr este modelo.')
+        : tt('error-objetos', 'No se pudieron buscar los objetos: ') + error.message);
+    } finally {
+      if (gen === generacion) {
+        trabajando = false;
+        panelProgreso.style.display = 'none';
+        mostrarControlesModo();
+        dibujarSticker();
+      }
+    }
+  });
+
+  // Prepara un recorte crudo (la foto con el fondo transparente): a tamaño
+  // completo con tope, sin manchas si "limpiar", y ajustado al sujeto.
+  function prepararRecorte(recorte, limpiar) {
+    let alta = escalarRecorte(recorte, LADO_DESCARGA);
+    if (limpiar) limpiarMascara(alta);
+    return ajustarAlSujeto(alta);
+  }
+
+  // Usa un recorte ya preparado: su copia para la pantalla, y el filtro, la
+  // textura y el borde que ya estaban elegidos.
+  function usarRecorteListo(alta) {
+    canvasAlta = alta;
+    canvasBase = escalarRecorte(canvasAlta, LADO_VISTA);
+    actualizarMiniaturasPresets();
+    actualizarMiniaturasTexturas();
+    actualizarFiltro();
+  }
+
   async function procesarArchivo(archivo) {
+    const gen = ++generacion;
     ocultarError();
     vistaResultado.style.display = 'none';
     editorCompleto.style.display = 'none';
     canvasAlta = null;
     canvasBase = null;
     canvasFiltrado = null;
+    // La foto queda guardada (y su URL viva) para poder marcar objetos en ella.
+    if (fotoActual) URL.revokeObjectURL(fotoActual.url);
+    fotoActual = null;
+    altaSujeto = null;
+    analisisObjetos = null;
+    marcas = [];
+    marcando = false;
+    trabajando = false;
+    vistaResultado.style.cursor = '';
+    radiosModo.forEach((r) => { r.checked = r.value === 'sujeto'; });
+    mostrarControlesModo();
     const url = URL.createObjectURL(archivo);
+    // Si mientras tanto se cargó otra foto, esta URL ya no le sirve a nadie.
+    const vigente = () => {
+      if (gen === generacion) return true;
+      if (!fotoActual || fotoActual.url !== url) URL.revokeObjectURL(url);
+      return false;
+    };
     try {
+      const imagen = new Image();
+      imagen.src = url;
+      await imagen.decode();
+      if (!vigente()) return;
+      fotoActual = { url, imagen };
       const modelo = await cargarSegmentador();
+      if (!vigente()) return;
       panelProgreso.style.display = 'block';
       barraProgreso.style.width = '100%';
       textoProgreso.textContent = tt('estado-recortando', 'Recortando el fondo...');
 
       const recorte = await modelo(url);
-      canvasAlta = escalarRecorte(recorte.toCanvas(), LADO_DESCARGA);
-      limpiarMascara(canvasAlta);
-      canvasAlta = ajustarAlSujeto(canvasAlta);
-      canvasBase = escalarRecorte(canvasAlta, LADO_VISTA);
+      if (!vigente()) return;
+      altaSujeto = prepararRecorte(recorte.toCanvas(), true);
       editorCompleto.style.display = 'block';
       presetActual = 'ninguno';
       entradaIntensidad.value = 100;
@@ -464,17 +713,18 @@ export function iniciarGeneradorStickers() {
       contenedorPresets.querySelectorAll('.preset-miniatura.activo').forEach((b) => b.classList.remove('activo'));
       contenedorPresets.querySelector('[data-preset="ninguno"]')?.classList.add('activo');
       elegirTextura(galeriaTexturas.querySelector('[data-textura="ninguno"]'));
-      actualizarMiniaturasPresets();
-      actualizarMiniaturasTexturas();
-      actualizarFiltro();
+      usarRecorteListo(altaSujeto);
+      mostrarControlesModo();
     } catch (error) {
+      if (!vigente()) return;
       const sinMemoria = /bad_alloc|memory|out of memory|OrtRun|allocation failed|RangeError/i.test(error.message);
       mostrarError(sinMemoria
         ? tt('error-sin-memoria', 'Tu navegador se quedó sin memoria para correr este modelo.')
         : tt('error-recortar', 'No se pudo recortar la imagen: ') + error.message);
+      // Sin recorte no hay editor: la foto no se va a usar.
+      if (fotoActual) { URL.revokeObjectURL(fotoActual.url); fotoActual = null; } else URL.revokeObjectURL(url);
     } finally {
-      URL.revokeObjectURL(url);
-      panelProgreso.style.display = 'none';
+      if (gen === generacion) panelProgreso.style.display = 'none';
     }
   }
 

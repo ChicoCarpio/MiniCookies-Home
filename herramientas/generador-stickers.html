@@ -59,7 +59,9 @@ window.i18nPagina = {
   es: {
     'hero-titulo': 'Generador de stickers',
     'intro': 'Subí una foto y recortá el sujeto automáticamente con inteligencia artificial para armar un sticker con borde de color, listo para descargar como PNG con fondo transparente.',
-    'nota-modelo': 'La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador.',
+    'nota-modelo': 'La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador; para elegir objetos, otro de ~14 MB.',
+    'error-sin-objetos': 'no se encontró ningún objeto en las marcas.',
+    'aviso-casi-toda': 'El recorte ocupa casi toda la foto: puede que una marca haya caído sobre el fondo.',
     'grupo-filtros': 'Filtros',
     'grupo-acciones': 'Acciones',
     'titulo-textura': 'Texturas',
@@ -67,6 +69,17 @@ window.i18nPagina = {
     'lbl-tamano-textura': 'Tamaño',
     'campo-grosor': 'Grosor del borde: ',
     'campo-suavidad': 'Suavidad del contorno: ',
+    'grupo-recorte': 'Qué recortar',
+    'modo-sujeto': 'El primer plano (automático)',
+    'modo-objetos': 'Los objetos que marco',
+    'ayuda-marcas': 'Tocá la foto sobre cada objeto que quieras en el sticker. Tocá una marca para quitarla.',
+    'boton-recortar-objetos': 'Recortar los objetos marcados ({n})',
+    'boton-borrar-marcas': 'Borrar las marcas',
+    'boton-cambiar-marcas': '✏️ Cambiar las marcas',
+    'ia-analizando-objetos': 'Analizando la foto para encontrar objetos…',
+    'ia-descargando-objetos': 'Descargando el modelo para elegir objetos… {p}% (solo la primera vez)',
+    'ia-buscando-objetos': 'Buscando los objetos… {i} de {n}',
+    'error-objetos': 'No se pudieron buscar los objetos: ',
     'ayuda-suavidad': 'Con la suavidad en 0 el borde sigue cada detalle del recorte (mechones, dedos). Más suavidad rellena las entradas angostas y redondea los rincones, como el contorno de un sticker impreso.',
     'boton-descargar-preparando': 'Preparando el sticker…',
     'error-descargar': 'No se pudo armar el sticker para descargar: tu navegador se quedó sin memoria.',
@@ -84,7 +97,9 @@ window.i18nPagina = {
   en: {
     'hero-titulo': 'Sticker generator',
     'intro': 'Upload a photo and automatically cut out the subject with AI to build a sticker with a colored border, ready to download as a transparent PNG.',
-    'nota-modelo': 'The first time, it downloads a segmentation model (~42 MB) that then stays cached in your browser.',
+    'nota-modelo': 'The first time, it downloads a segmentation model (~42 MB) that then stays cached in your browser; for picking objects, another one of ~14 MB.',
+    'error-sin-objetos': 'no object was found at the marks.',
+    'aviso-casi-toda': 'The cutout covers almost the whole photo: a mark may have landed on the background.',
     'grupo-filtros': 'Filters',
     'grupo-acciones': 'Actions',
     'titulo-textura': 'Textures',
@@ -92,6 +107,17 @@ window.i18nPagina = {
     'lbl-tamano-textura': 'Size',
     'campo-grosor': 'Border thickness: ',
     'campo-suavidad': 'Outline smoothness: ',
+    'grupo-recorte': 'What to cut out',
+    'modo-sujeto': 'The foreground (automatic)',
+    'modo-objetos': 'The objects I mark',
+    'ayuda-marcas': 'Tap the photo on each object you want in the sticker. Tap a mark to remove it.',
+    'boton-recortar-objetos': 'Cut out the marked objects ({n})',
+    'boton-borrar-marcas': 'Clear the marks',
+    'boton-cambiar-marcas': '✏️ Change the marks',
+    'ia-analizando-objetos': 'Analyzing the photo to find objects…',
+    'ia-descargando-objetos': 'Downloading the model for picking objects… {p}% (first time only)',
+    'ia-buscando-objetos': 'Looking for the objects… {i} of {n}',
+    'error-objetos': 'Could not find the objects: ',
     'ayuda-suavidad': 'At 0 the border follows every detail of the cutout (strands of hair, fingers). More smoothness fills narrow gaps and rounds the corners, like the outline of a printed sticker.',
     'boton-descargar-preparando': 'Preparing the sticker…',
     'error-descargar': 'The sticker could not be built for download: your browser ran out of memory.',
@@ -132,7 +158,7 @@ window.i18nPagina = {
       <input type="file" id="entradaArchivo" accept="image/*" hidden>
     </div>
 
-    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="nota-modelo">La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador.</p>
+    <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="nota-modelo">La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador; para elegir objetos, otro de ~14 MB.</p>
 
     <div id="panelProgreso" style="display:none; margin-top:16px;">
       <p id="textoProgreso" style="color:var(--texto-suave); margin-bottom:4px;"></p>
@@ -144,6 +170,20 @@ window.i18nPagina = {
     <div id="editorCompleto" style="display:none;">
       <div class="editor-color-layout">
         <div class="panel-stickers">
+          <fieldset class="acordeon-grupo" data-app-categoria="Recorte">
+            <button type="button" class="acordeon-titulo" data-icono="🎯"><span data-i18n="grupo-recorte">Qué recortar</span> <span class="flecha">▾</span></button>
+            <div class="acordeon-contenido">
+              <div class="controles controles-apilados">
+                <label><input type="radio" name="modoRecorte" value="sujeto" checked> <span data-i18n="modo-sujeto">El primer plano (automático)</span></label>
+                <label><input type="radio" name="modoRecorte" value="objetos"> <span data-i18n="modo-objetos">Los objetos que marco</span></label>
+                <span id="ayudaMarcas" data-i18n="ayuda-marcas" hidden>Tocá la foto sobre cada objeto que quieras en el sticker. Tocá una marca para quitarla.</span>
+                <button class="boton" id="botonRecortarObjetos" type="button" hidden disabled>Recortar los objetos marcados (0)</button>
+                <button type="button" class="boton" id="botonBorrarMarcas" hidden data-i18n="boton-borrar-marcas">Borrar las marcas</button>
+                <button type="button" class="boton" id="botonCambiarMarcas" hidden data-i18n="boton-cambiar-marcas">✏️ Cambiar las marcas</button>
+              </div>
+            </div>
+          </fieldset>
+
           <fieldset class="acordeon-grupo abierto" data-app-categoria="Filtros">
             <button type="button" class="acordeon-titulo" data-icono="🖼️"><span data-i18n="grupo-filtros">Filtros</span> <span class="flecha">▾</span></button>
             <div class="acordeon-contenido">
