@@ -32,8 +32,9 @@
 
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync, rmSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, existsSync, readdirSync, statSync, mkdtempSync } from 'node:fs';
 import { join, extname, relative, sep } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const RAIZ = new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const DIST = join(RAIZ, 'dist');
@@ -309,15 +310,30 @@ function servir(dir) {
   return new Promise((r) => servidor.listen(PUERTO, () => r(servidor)));
 }
 
+// Sin __COMPAT_LAYER: algunas terminales (Git Bash abierta desde VS Code)
+// traen "RunAsInvoker", y con eso Edge arranca por otro camino y --dump-dom
+// no devuelve nada: la revisión fallaba con "no devolvió resultados" aunque
+// todo estuviera bien (2026-10-08). Desde PowerShell no pasaba.
+function entornoParaEdge() {
+  const entorno = { ...process.env };
+  delete entorno.__COMPAT_LAYER;
+  return entorno;
+}
+
 function correrEdge(url) {
   const edge = CANDIDATOS_EDGE.find((r) => existsSync(r));
   if (!edge) {
     console.error('No se encontró Edge. Indicá la ruta con la variable EDGE.');
     process.exit(1);
   }
+  // Perfil propio y descartable, como probar-funciones.mjs: la revisión no
+  // depende del perfil del usuario ni de que tenga Edge abierto.
+  const perfil = mkdtempSync(join(tmpdir(), 'mc-revisar-'));
   return new Promise((resolver, rechazar) => {
     const proceso = spawn(edge, [
       '--headless',
+      `--user-data-dir=${perfil}`,
+      '--no-first-run',
       '--disable-gpu',
       '--no-sandbox',
       // La ventana tiene que poder contener el iframe de escritorio.
@@ -327,11 +343,14 @@ function correrEdge(url) {
       '--virtual-time-budget=600000',
       '--dump-dom',
       url,
-    ], { windowsHide: true });
+    ], { windowsHide: true, env: entornoParaEdge() });
     let salida = '';
     proceso.stdout.on('data', (d) => { salida += d; });
     proceso.on('error', rechazar);
-    proceso.on('close', () => resolver(salida));
+    proceso.on('close', () => {
+      try { rmSync(perfil, { recursive: true, force: true }); } catch {}
+      resolver(salida);
+    });
   });
 }
 

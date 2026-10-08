@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Marca de agua para imagen gratis — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá una marca de agua de texto diagonal a una imagen, gratis y sin subirla a ningún servidor.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá a una imagen una marca de agua de texto o con tu logo, en la posición y el ángulo que quieras, gratis y sin subirla a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   .controles { flex-direction: column; align-items: stretch; }
   .controles .campo { flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; }
@@ -29,7 +30,7 @@
 window.i18nPagina = {
   es: {
     'hero-titulo': 'Marca de agua para imagen',
-    'intro': 'Agregá un texto (ej. "CONFIDENCIAL", tu nombre) como marca de agua diagonal sobre una imagen.',
+    'intro': 'Agregá un texto (ej. "CONFIDENCIAL", tu nombre) o tu logo como marca de agua sobre una imagen, en la posición y el ángulo que quieras.',
     'campo-texto': 'Texto de la marca de agua',
     'valor-texto': 'CONFIDENCIAL',
     'campo-tamano-a': 'Tamaño de letra: ',
@@ -39,11 +40,31 @@ window.i18nPagina = {
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen con marca de agua',
     'titulo-pagina': 'Marca de agua para imagen gratis — Mini Cookies',
-    'meta-descripcion': 'Agregá una marca de agua de texto diagonal a una imagen, gratis y sin subirla a ningún servidor.',
+    'meta-descripcion': 'Agregá a una imagen una marca de agua de texto o con tu logo, en la posición y el ángulo que quieras, gratis y sin subirla a ningún servidor.',
+    'campo-tipo': 'Marca de agua de',
+    'tipo-texto': 'Texto',
+    'tipo-logo': 'Imagen o logo',
+    'zona-logo': '🏷️ Arrastrá tu logo acá o hacé clic para elegirlo',
+    'ayuda-logo': 'Queda mejor un PNG con el fondo transparente: el fondo de un JPG no tiene transparencia y se ve como un recuadro alrededor del logo.',
+    'campo-tamano-logo-a': 'Tamaño del logo: ',
+    'campo-angulo-a': 'Ángulo: ',
+    'campo-posicion': 'Posición',
+    'pos-repartida': 'Repartida por toda la imagen',
+    'pos-arriba-izquierda': 'Arriba a la izquierda',
+    'pos-arriba-centro': 'Arriba al centro',
+    'pos-arriba-derecha': 'Arriba a la derecha',
+    'pos-centro-izquierda': 'Al centro a la izquierda',
+    'pos-centro': 'En el centro',
+    'pos-centro-derecha': 'Al centro a la derecha',
+    'pos-abajo-izquierda': 'Abajo a la izquierda',
+    'pos-abajo-centro': 'Abajo al centro',
+    'pos-abajo-derecha': 'Abajo a la derecha',
+    'pos-libre': 'Donde yo la ponga (arrastrándola)',
+    'nota-libre': 'Arrastrá la marca sobre la imagen para moverla.',
   },
   en: {
     'hero-titulo': 'Image watermark',
-    'intro': 'Add a piece of text (say "CONFIDENTIAL", or your name) as a diagonal watermark over an image.',
+    'intro': 'Add a piece of text (say "CONFIDENTIAL", or your name) or your logo as a watermark over an image, at the position and angle you want.',
     'campo-texto': 'Watermark text',
     'valor-texto': 'CONFIDENTIAL',
     'campo-tamano-a': 'Font size: ',
@@ -53,7 +74,27 @@ window.i18nPagina = {
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download the watermarked image',
     'titulo-pagina': 'Add a watermark to an image, free — Mini Cookies',
-    'meta-descripcion': 'Add a diagonal text watermark to an image — free, and nothing is uploaded to a server.',
+    'meta-descripcion': 'Add a text or logo watermark to an image, at the position and angle you want — free, and nothing is uploaded to a server.',
+    'campo-tipo': 'Watermark made of',
+    'tipo-texto': 'Text',
+    'tipo-logo': 'Image or logo',
+    'zona-logo': '🏷️ Drag your logo here or click to choose it',
+    'ayuda-logo': 'A PNG with a transparent background works best: a JPG background has no transparency and shows up as a box around the logo.',
+    'campo-tamano-logo-a': 'Logo size: ',
+    'campo-angulo-a': 'Angle: ',
+    'campo-posicion': 'Position',
+    'pos-repartida': 'Spread over the whole image',
+    'pos-arriba-izquierda': 'Top left',
+    'pos-arriba-centro': 'Top center',
+    'pos-arriba-derecha': 'Top right',
+    'pos-centro-izquierda': 'Middle left',
+    'pos-centro': 'Center',
+    'pos-centro-derecha': 'Middle right',
+    'pos-abajo-izquierda': 'Bottom left',
+    'pos-abajo-centro': 'Bottom center',
+    'pos-abajo-derecha': 'Bottom right',
+    'pos-libre': 'Wherever I put it (drag it)',
+    'nota-libre': 'Drag the watermark over the image to move it.',
   }
 };
 </script>
@@ -73,7 +114,7 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="hero-titulo">Marca de agua para imagen</h1>
-  <p data-i18n="intro">Agregá un texto (ej. "CONFIDENCIAL", tu nombre) como marca de agua diagonal sobre una imagen.</p>
+  <p data-i18n="intro">Agregá un texto (ej. "CONFIDENCIAL", tu nombre) o tu logo como marca de agua sobre una imagen, en la posición y el ángulo que quieras.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -84,22 +125,69 @@ window.i18nPagina = {
     <canvas id="vistaPrevia"></canvas>
 
     <div class="controles">
-      <label class="campo">
-        <span data-i18n="campo-texto">Texto de la marca de agua</span>
-        <input type="text" id="textoMarca" data-i18n-attr="value:valor-texto" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
-      </label>
-      <label class="campo">
-        <span><span data-i18n="campo-tamano-a">Tamaño de letra: </span><span id="etiquetaTamano">60</span></span>
-        <input type="range" id="tamanoLetra" min="20" max="150" value="60">
-      </label>
+      <div class="campo">
+        <span data-i18n="campo-tipo">Marca de agua de</span>
+        <span>
+          <label><input type="radio" name="tipoMarca" value="texto" checked> <span data-i18n="tipo-texto">Texto</span></label>
+          <label><input type="radio" name="tipoMarca" value="logo"> <span data-i18n="tipo-logo">Imagen o logo</span></label>
+        </span>
+      </div>
+      <div id="bloqueTexto" class="controles">
+        <label class="campo">
+          <span data-i18n="campo-texto">Texto de la marca de agua</span>
+          <input type="text" id="textoMarca" data-i18n-attr="value:valor-texto" value="CONFIDENCIAL" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px; width:240px; max-width:50vw;">
+        </label>
+        <label class="campo">
+          <span><span data-i18n="campo-tamano-a">Tamaño de letra: </span><span id="etiquetaTamano">60</span></span>
+          <input type="range" id="tamanoLetra" min="20" max="150" value="60">
+        </label>
+      </div>
+      <div id="bloqueLogo" class="controles" style="display:none;">
+        <div class="zona-arrastre" id="zonaLogo">
+          <span data-i18n="zona-logo">🏷️ Arrastrá tu logo acá o hacé clic para elegirlo</span>
+          <input type="file" id="entradaLogo" accept="image/*" hidden>
+        </div>
+        <span>
+          <span id="nombreLogo"></span>
+          <span class="ayuda-tip">
+            <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+            <span class="ayuda-burbuja" data-i18n="ayuda-logo">Queda mejor un PNG con el fondo transparente: el fondo de un JPG no tiene transparencia y se ve como un recuadro alrededor del logo.</span>
+          </span>
+        </span>
+        <label class="campo">
+          <span><span data-i18n="campo-tamano-logo-a">Tamaño del logo: </span><span id="etiquetaTamanoLogo">25</span>%</span>
+          <input type="range" id="tamanoLogo" min="5" max="100" value="25">
+        </label>
+      </div>
       <label class="campo">
         <span><span data-i18n="campo-opacidad-a">Opacidad: </span><span id="etiquetaOpacidad">30</span>%</span>
-        <input type="range" id="opacidad" min="5" max="80" value="30">
+        <input type="range" id="opacidad" min="5" max="100" value="30">
       </label>
       <label class="campo">
+        <span><span data-i18n="campo-angulo-a">Ángulo: </span><span id="etiquetaAngulo">-45</span>°</span>
+        <input type="range" id="anguloMarca" min="-90" max="90" value="-45">
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-posicion">Posición</span>
+        <select id="posicionMarca">
+          <option value="repartida" data-i18n="pos-repartida">Repartida por toda la imagen</option>
+          <option value="arriba-izquierda" data-i18n="pos-arriba-izquierda">Arriba a la izquierda</option>
+          <option value="arriba-centro" data-i18n="pos-arriba-centro">Arriba al centro</option>
+          <option value="arriba-derecha" data-i18n="pos-arriba-derecha">Arriba a la derecha</option>
+          <option value="centro-izquierda" data-i18n="pos-centro-izquierda">Al centro a la izquierda</option>
+          <option value="centro-centro" data-i18n="pos-centro">En el centro</option>
+          <option value="centro-derecha" data-i18n="pos-centro-derecha">Al centro a la derecha</option>
+          <option value="abajo-izquierda" data-i18n="pos-abajo-izquierda">Abajo a la izquierda</option>
+          <option value="abajo-centro" data-i18n="pos-abajo-centro">Abajo al centro</option>
+          <option value="abajo-derecha" data-i18n="pos-abajo-derecha">Abajo a la derecha</option>
+          <option value="libre" data-i18n="pos-libre">Donde yo la ponga (arrastrándola)</option>
+        </select>
+      </label>
+      <label class="campo" id="campoRepeticiones">
         <span><span data-i18n="campo-repetir-a">Repetir el mensaje: </span><span id="etiquetaRepeticiones">1</span></span>
         <input type="range" id="repeticiones" min="1" max="20" value="1">
       </label>
+      <span id="notaLibre" data-i18n="nota-libre" hidden>Arrastrá la marca sobre la imagen para moverla.</span>
       <button class="boton" id="botonAplicar" disabled data-i18n="boton-aplicar">Aplicar marca de agua</button>
     </div>
 
@@ -117,6 +205,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -128,18 +217,60 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 const elTexto = document.getElementById('textoMarca');
 const elTamano = document.getElementById('tamanoLetra');
 const etiquetaTamano = document.getElementById('etiquetaTamano');
+const elTamanoLogo = document.getElementById('tamanoLogo');
+const etiquetaTamanoLogo = document.getElementById('etiquetaTamanoLogo');
 const elOpacidad = document.getElementById('opacidad');
 const etiquetaOpacidad = document.getElementById('etiquetaOpacidad');
+const elAngulo = document.getElementById('anguloMarca');
+const etiquetaAngulo = document.getElementById('etiquetaAngulo');
+const elPosicion = document.getElementById('posicionMarca');
 const elRepeticiones = document.getElementById('repeticiones');
 const etiquetaRepeticiones = document.getElementById('etiquetaRepeticiones');
+const campoRepeticiones = document.getElementById('campoRepeticiones');
+const notaLibre = document.getElementById('notaLibre');
+const bloqueTexto = document.getElementById('bloqueTexto');
+const bloqueLogo = document.getElementById('bloqueLogo');
+const nombreLogo = document.getElementById('nombreLogo');
 
 let archivoActual = null;
 let imagenActual = null;
+let logoActual = null;
+// Centro de la marca en modo "libre", como fracción del ancho y del alto.
+let posicionLibre = { x: 0.5, y: 0.5 };
 
-elTamano.addEventListener('input', () => { etiquetaTamano.textContent = elTamano.value; actualizarVistaPrevia(); });
-elOpacidad.addEventListener('input', () => { etiquetaOpacidad.textContent = elOpacidad.value; actualizarVistaPrevia(); });
+const tipoMarca = () => document.querySelector('input[name="tipoMarca"]:checked').value;
+
+function conEtiqueta(control, etiqueta) {
+  control.addEventListener('input', () => { etiqueta.textContent = control.value; actualizarVistaPrevia(); });
+}
+conEtiqueta(elTamano, etiquetaTamano);
+conEtiqueta(elTamanoLogo, etiquetaTamanoLogo);
+conEtiqueta(elOpacidad, etiquetaOpacidad);
+conEtiqueta(elAngulo, etiquetaAngulo);
+conEtiqueta(elRepeticiones, etiquetaRepeticiones);
 elTexto.addEventListener('input', actualizarVistaPrevia);
-elRepeticiones.addEventListener('input', () => { etiquetaRepeticiones.textContent = elRepeticiones.value; actualizarVistaPrevia(); });
+elPosicion.addEventListener('change', () => { mostrarSegunOpciones(); actualizarVistaPrevia(); });
+document.querySelectorAll('input[name="tipoMarca"]').forEach((r) => r.addEventListener('change', () => {
+  mostrarSegunOpciones(); actualizarVistaPrevia();
+}));
+
+function mostrarSegunOpciones() {
+  const esLogo = tipoMarca() === 'logo';
+  bloqueTexto.style.display = esLogo ? 'none' : '';
+  bloqueLogo.style.display = esLogo ? '' : 'none';
+  campoRepeticiones.style.display = elPosicion.value === 'repartida' ? '' : 'none';
+  notaLibre.hidden = elPosicion.value !== 'libre';
+  // Solo en "libre" el dedo mueve la marca; si no, tiene que poder desplazar la página.
+  vistaPrevia.style.touchAction = elPosicion.value === 'libre' ? 'none' : '';
+  vistaPrevia.style.cursor = elPosicion.value === 'libre' ? 'move' : '';
+  actualizarBotonAplicar();
+}
+
+// Con "Imagen o logo" y sin logo cargado no hay marca: no se puede aplicar
+// (antes descargaba la imagen sin marca y decía "Listo").
+function actualizarBotonAplicar() {
+  botonAplicar.disabled = !imagenActual || (tipoMarca() === 'logo' && !logoActual);
+}
 
 // Reparte "cantidad" copias en una cuadrícula lo más cuadrada posible
 // (ej. 4 -> 2x2, 6 -> 3x2, 1 -> 1x1) para distribuirlas parejo por la imagen.
@@ -158,7 +289,6 @@ function formatoDeSalida(archivo) {
   return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
 }
 
-
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -168,19 +298,64 @@ function cargarImagen(archivo) {
   });
 }
 
-// Reduce el tamaño de letra hasta que el texto, rotado 45°, quepa en la imagen.
-function calcularTamanoAjustado(anchoDisponible, altoDisponible, texto, tamanoMaximo) {
+// Lo que ocupa una marca de ancho × alto girada `radianes`.
+function cajaGirada(ancho, alto, radianes) {
+  const seno = Math.abs(Math.sin(radianes)), coseno = Math.abs(Math.cos(radianes));
+  return { ancho: ancho * coseno + alto * seno, alto: ancho * seno + alto * coseno };
+}
+
+// La marca (texto o logo) del tamaño pedido, achicada si girada no entra en
+// el espacio disponible. Devuelve su ancho y alto sin girar y cómo dibujarla.
+function medirMarca(espacioAncho, espacioAlto, radianes) {
   const margen = 0.9;
-  let tamano = tamanoMaximo;
-  while (tamano > 6) {
-    contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
-    const anchoTexto = contexto.measureText(texto).width;
-    const anchoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
-    const altoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
-    if (anchoRotado <= anchoDisponible * margen && altoRotado <= altoDisponible * margen) return tamano;
-    tamano -= 2;
+  const lado = Math.max(vistaPrevia.width, vistaPrevia.height);
+  if (tipoMarca() === 'logo') {
+    if (!logoActual) return null;
+    let ancho = vistaPrevia.width * parseInt(elTamanoLogo.value, 10) / 100;
+    // Un SVG sin ancho ni alto propios da 0: se lo toma cuadrado.
+    const proporcion = logoActual.naturalWidth && logoActual.naturalHeight ? logoActual.naturalHeight / logoActual.naturalWidth : 1;
+    let alto = ancho * proporcion;
+    const caja = cajaGirada(ancho, alto, radianes);
+    const escala = Math.min(1, espacioAncho * margen / caja.ancho, espacioAlto * margen / caja.alto);
+    ancho *= escala; alto *= escala;
+    return { ancho, alto, dibujar: () => contexto.drawImage(logoActual, -ancho / 2, -alto / 2, ancho, alto) };
   }
-  return tamano;
+  const texto = elTexto.value || t('valor-texto');
+  // El deslizador está pensado para una imagen de ~1000px de lado: se escala
+  // al tamaño real, si no en una foto de celular (4000px) hasta el máximo
+  // quedaba diminuto.
+  let tamano = Math.round(parseInt(elTamano.value, 10) * lado / 1000);
+  for (; tamano > 6; tamano -= 2) {
+    contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+    const caja = cajaGirada(contexto.measureText(texto).width, tamano, radianes);
+    if (caja.ancho <= espacioAncho * margen && caja.alto <= espacioAlto * margen) break;
+  }
+  contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+  const ancho = contexto.measureText(texto).width;
+  return {
+    ancho, alto: tamano,
+    dibujar: () => {
+      contexto.textAlign = 'center';
+      contexto.textBaseline = 'middle';
+      contexto.fillStyle = '#ffffff';
+      contexto.strokeStyle = 'rgba(0,0,0,0.6)';
+      contexto.lineWidth = Math.max(1, tamano / 25);
+      contexto.strokeText(texto, 0, 0);
+      contexto.fillText(texto, 0, 0);
+    },
+  };
+}
+
+// Centros donde va la marca, según la posición elegida.
+function centrosDeLaMarca(marca, radianes) {
+  const W = vistaPrevia.width, H = vistaPrevia.height;
+  if (elPosicion.value === 'libre') return [[posicionLibre.x * W, posicionLibre.y * H]];
+  const caja = cajaGirada(marca.ancho, marca.alto, radianes);
+  const margen = 0.03 * Math.min(W, H);
+  const [fila, columna] = elPosicion.value.split('-');
+  const x = { izquierda: margen + caja.ancho / 2, centro: W / 2, derecha: W - margen - caja.ancho / 2 }[columna];
+  const y = { arriba: margen + caja.alto / 2, centro: H / 2, abajo: H - margen - caja.alto / 2 }[fila];
+  return [[x, y]];
 }
 
 function actualizarVistaPrevia() {
@@ -190,45 +365,57 @@ function actualizarVistaPrevia() {
   vistaPrevia.height = imagenActual.naturalHeight;
   contexto.drawImage(imagenActual, 0, 0);
 
-  const texto = elTexto.value || 'MARCA DE AGUA';
-  const opacidad = parseInt(elOpacidad.value, 10) / 100;
-  // El deslizador está pensado para una imagen de ~1000px de lado: se escala
-  // al tamaño real, si no en una foto de celular (4000px) hasta el máximo
-  // quedaba diminuto.
-  const tamanoMaximo = Math.round(parseInt(elTamano.value, 10) * Math.max(vistaPrevia.width, vistaPrevia.height) / 1000);
-  const cantidad = parseInt(elRepeticiones.value, 10);
-  const { filas, columnas } = calcularFilasColumnas(cantidad);
-
-  const anchoCelda = vistaPrevia.width / columnas;
-  const altoCelda = vistaPrevia.height / filas;
-  const tamano = calcularTamanoAjustado(anchoCelda, altoCelda, texto, tamanoMaximo);
-  contexto.font = `bold ${tamano}px Helvetica, Arial, sans-serif`;
+  const radianes = parseInt(elAngulo.value, 10) * Math.PI / 180;
+  let marca, centros;
+  if (elPosicion.value === 'repartida') {
+    const cantidad = parseInt(elRepeticiones.value, 10);
+    const { filas, columnas } = calcularFilasColumnas(cantidad);
+    const anchoCelda = vistaPrevia.width / columnas, altoCelda = vistaPrevia.height / filas;
+    marca = medirMarca(anchoCelda, altoCelda, radianes);
+    centros = [];
+    for (let i = 0; i < cantidad; i++) {
+      centros.push([anchoCelda * (i % columnas) + anchoCelda / 2, altoCelda * Math.floor(i / columnas) + altoCelda / 2]);
+    }
+  } else {
+    marca = medirMarca(vistaPrevia.width, vistaPrevia.height, radianes);
+    if (marca) centros = centrosDeLaMarca(marca, radianes);
+  }
+  if (!marca) return;
 
   contexto.save();
-  // Centrado en la celda: se gira alrededor del centro del texto (antes
-  // giraba desde su punta izquierda y la marca quedaba corrida hacia arriba).
-  contexto.textAlign = 'center';
-  contexto.textBaseline = 'middle';
-  contexto.globalAlpha = opacidad;
-  contexto.fillStyle = '#ffffff';
-  contexto.strokeStyle = 'rgba(0,0,0,0.6)';
-  contexto.lineWidth = Math.max(1, tamano / 25);
-  let contador = 0;
-  for (let f = 0; f < filas && contador < cantidad; f++) {
-    for (let c = 0; c < columnas && contador < cantidad; c++) {
-      const centroX = anchoCelda * c + anchoCelda / 2;
-      const centroY = altoCelda * f + altoCelda / 2;
-      contexto.save();
-      contexto.translate(centroX, centroY);
-      contexto.rotate(-45 * Math.PI / 180);
-      contexto.strokeText(texto, 0, 0);
-      contexto.fillText(texto, 0, 0);
-      contexto.restore();
-      contador++;
-    }
+  contexto.globalAlpha = parseInt(elOpacidad.value, 10) / 100;
+  for (const [x, y] of centros) {
+    // Se gira alrededor del centro de la marca.
+    contexto.save();
+    contexto.translate(x, y);
+    contexto.rotate(radianes);
+    marca.dibujar();
+    contexto.restore();
   }
   contexto.restore();
 }
+
+// Modo "libre": arrastrar sobre la imagen mueve la marca.
+let arrastrando = false;
+let cuadroPendiente = 0;
+function moverMarcaA(evento) {
+  // Sin el borde del lienzo (clientLeft/clientTop): si no, la marca quedaba corrida.
+  const caja = vistaPrevia.getBoundingClientRect();
+  posicionLibre = {
+    x: Math.min(1, Math.max(0, (evento.clientX - caja.left - vistaPrevia.clientLeft) / vistaPrevia.clientWidth)),
+    y: Math.min(1, Math.max(0, (evento.clientY - caja.top - vistaPrevia.clientTop) / vistaPrevia.clientHeight)),
+  };
+  // Con una foto grande, redibujar en cada movimiento trababa el arrastre: una vez por cuadro.
+  if (!cuadroPendiente) cuadroPendiente = requestAnimationFrame(() => { cuadroPendiente = 0; actualizarVistaPrevia(); });
+}
+vistaPrevia.addEventListener('pointerdown', (e) => {
+  if (elPosicion.value !== 'libre' || !imagenActual) return;
+  arrastrando = true;
+  vistaPrevia.setPointerCapture(e.pointerId);
+  moverMarcaA(e);
+});
+vistaPrevia.addEventListener('pointermove', (e) => { if (arrastrando) moverMarcaA(e); });
+['pointerup', 'pointercancel'].forEach((tipo) => vistaPrevia.addEventListener(tipo, () => { arrastrando = false; }));
 
 async function mostrarArchivo(archivo) {
   archivoActual = archivo;
@@ -240,7 +427,7 @@ async function mostrarArchivo(archivo) {
   imagenActual = await cargarImagen(archivo);
   vistaPrevia.style.display = 'block';
   actualizarVistaPrevia();
-  botonAplicar.disabled = false;
+  actualizarBotonAplicar();
   resultado.classList.remove('visible');
 }
 
@@ -250,6 +437,19 @@ function elegirArchivo(listaFileList) {
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+conectarZonaArrastre(document.getElementById('zonaLogo'), document.getElementById('entradaLogo'), async (archivos) => {
+  const archivo = archivos.find(f => f.type.startsWith('image/'));
+  if (!archivo) return;
+  try {
+    logoActual = await cargarImagen(archivo);
+    nombreLogo.textContent = archivo.name;
+    actualizarBotonAplicar();
+    actualizarVistaPrevia();
+  } catch (e) {
+    alert(t('imagen-invalida'));
+  }
+});
+mostrarSegunOpciones();
 
 botonAplicar.addEventListener('click', async () => {
   const formato = formatoDeSalida(archivoActual);

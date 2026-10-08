@@ -796,6 +796,78 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'colspan, varios párrafos, barra y tabla anidada';
   });
 
+  // Mejoras de imagen del 2026-10-08: ángulo libre, marca con logo y posición,
+  // cuentagotas y esquemas de color.
+  async function imagenLisa(ancho, alto, color, tipo = 'image/png', mitad = null) {
+    const c = D().createElement('canvas'); c.width = ancho; c.height = alto;
+    const cx = c.getContext('2d'); cx.fillStyle = color; cx.fillRect(0, 0, ancho, alto);
+    if (mitad) { cx.fillStyle = mitad; cx.fillRect(ancho / 2, 0, ancho / 2, alto); }
+    const b = await new Promise((r) => c.toBlob(r, tipo, 0.95));
+    return new (W().File)([b], tipo === 'image/jpeg' ? 'foto.jpg' : 'foto.png', { type: tipo });
+  }
+  const alfaEn = (canvas, x, y) => canvas.getContext('2d').getImageData(x, y, 1, 1).data;
+
+  await prueba('rotar-imagen: ángulo libre, esquinas y recorte', async () => {
+    await abrir('/herramientas/rotar-imagen.html'); await esperar(200);
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([await imagenLisa(400, 200, '#3366cc', 'image/jpeg')]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    const lienzo = D().getElementById('vistaPrevia');
+    afirmar(await hasta(() => lienzo.width === 400, 8000), 'la imagen no se cargó');
+    const numero = D().getElementById('anguloNumero');
+    numero.value = '30'; numero.dispatchEvent(new (W().Event)('change'));
+    afirmar(lienzo.width === 446 && lienzo.height === 373, 'tamaño a 30°: ' + lienzo.width + 'x' + lienzo.height);
+    afirmar(alfaEn(lienzo, 0, 0)[3] === 0, 'la esquina no quedó transparente');
+    afirmar(!D().getElementById('notaPng').hidden, 'un JPG con esquinas transparentes no avisa que sale en PNG');
+    const recortar = D().getElementById('recortarEsquinas');
+    recortar.checked = true; recortar.dispatchEvent(new (W().Event)('input'));
+    afirmar(lienzo.width === 200 && lienzo.height === 115, 'recorte a 30°: ' + lienzo.width + 'x' + lienzo.height);
+    afirmar([[0, 0], [199, 0], [0, 114], [199, 114]].every(([x, y]) => alfaEn(lienzo, x, y)[3] === 255), 'quedó una esquina vacía después de recortar');
+    return '446×373 con esquinas transparentes, 200×115 recortada';
+  });
+
+  await prueba('marca-agua-imagen: logo, posición y botón sin logo', async () => {
+    await abrir('/herramientas/marca-agua-imagen.html'); await esperar(200);
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([await imagenLisa(800, 600, '#808080')]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    const lienzo = D().getElementById('vistaPrevia'), aplicar = D().getElementById('botonAplicar');
+    afirmar(await hasta(() => lienzo.width === 800 && !aplicar.disabled, 8000), 'la imagen no se cargó');
+    D().querySelector('input[name="tipoMarca"][value="logo"]').click();
+    afirmar(aplicar.disabled, 'con "Imagen o logo" y sin logo, Aplicar sigue habilitado');
+    for (const [id, v] of [['opacidad', '100'], ['anguloMarca', '0']]) {
+      const c = D().getElementById(id); c.value = v; c.dispatchEvent(new (W().Event)('input'));
+    }
+    const pos = D().getElementById('posicionMarca'); pos.value = 'arriba-izquierda'; pos.dispatchEvent(new (W().Event)('change'));
+    const logo = D().getElementById('entradaLogo');
+    logo.files = archivos([await imagenLisa(100, 50, '#ff0000')]).files;
+    logo.dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => !aplicar.disabled, 8000), 'el logo no se cargó');
+    const [r, g, b] = alfaEn(lienzo, 30, 30);
+    afirmar(r === 255 && g === 0 && b === 0, 'arriba a la izquierda no está el logo: ' + [r, g, b]);
+    afirmar(alfaEn(lienzo, 700, 500)[0] === 128, 'el logo se dibujó en otro lado');
+    return 'logo rojo arriba a la izquierda; Aplicar espera al logo';
+  });
+
+  await prueba('paleta-colores-imagen: cuentagotas y esquemas', async () => {
+    await abrir('/herramientas/paleta-colores-imagen.html'); await esperar(200);
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([await imagenLisa(400, 200, '#ff0000', 'image/png', '#0000ff')]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    const lienzo = D().getElementById('vistaPrevia');
+    afirmar(await hasta(() => lienzo.width === 400 && D().querySelectorAll('#paleta .color-swatch').length, 8000), 'no se armó la paleta');
+    const caja = lienzo.getBoundingClientRect();
+    lienzo.dispatchEvent(new (W().MouseEvent)('click', { clientX: caja.right - 20, clientY: caja.top + caja.height / 2, bubbles: true }));
+    const base = D().querySelector('#muestraBase .codigo').textContent;
+    afirmar(base === '#0000ff', 'el cuentagotas tomó ' + base);
+    const tipo = D().getElementById('tipoEsquema');
+    const esquema = (valor) => { tipo.value = valor; tipo.dispatchEvent(new (W().Event)('change')); return [...D().querySelectorAll('#esquema .codigo')].map((e) => e.textContent).join(','); };
+    afirmar(esquema('complementario') === '#0000ff,#ffff00', 'complementario: ' + esquema('complementario'));
+    afirmar(esquema('triadico') === '#0000ff,#ff0000,#00ff00', 'triádico: ' + esquema('triadico'));
+    afirmar(esquema('analogo') === '#0080ff,#0000ff,#8000ff', 'análogos: ' + esquema('analogo'));
+    return 'cuentagotas #0000ff; complementario, triádico y análogos exactos';
+  });
+
   // La carpeta de medios de Office guarda también audio y video.
   await prueba('extraer-imagenes-powerpoint: solo imágenes, sin audio ni video', async () => {
     await abrir('/herramientas/extraer-imagenes-powerpoint.html'); await esperar(200);
