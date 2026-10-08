@@ -43,14 +43,13 @@
     padding: 12px;
     display: flex; flex-direction: column; min-height: 0;
   }
-  .area-canvas { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; }
+  .area-canvas { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; }
   .area-controles { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gris-borde); }  /* --- Acordeón del panel de filtros: mismo patrón que Editor-de-color-de-imagen.html --- */
   /* Sin margin propio: el espacio entre cajas lo da el gap de .panel-stickers. */
   .acordeon-grupo { border: 1px solid var(--gris-borde); border-radius: 8px; margin: 0; padding: 0; overflow: hidden; min-width: 0; flex: 0 0 auto; }  .campo-color-borde { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; }
 
   /* Grilla de miniaturas de filtros — igual que en Editor-de-color-de-imagen.html. */
-  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px 8px; padding: 6px 4px; }  .preset-miniatura span { min-width: 0; font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .15s; }  .barra-progreso-stickers { width: 100%; height: 10px; border-radius: 5px; background: var(--gris-fondo); overflow: hidden; margin: 10px 0; }
-  .barra-progreso-stickers div { height: 100%; width: 0%; background: var(--azul); transition: width .2s; }
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px 8px; padding: 6px 4px; }  .preset-miniatura span { min-width: 0; font-size: 0.7rem; line-height: 1.2; color: var(--texto-suave); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .15s; }
   #vistaResultado { max-width: 100%; max-height: 100%; display: none; background-image: linear-gradient(45deg, #8883 25%, transparent 25%), linear-gradient(-45deg, #8883 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #8883 75%), linear-gradient(-45deg, transparent 75%, #8883 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; border-radius: 8px; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
@@ -160,10 +159,6 @@ window.i18nPagina = {
 
     <p style="color:var(--texto-suave); font-size:0.85rem;" data-i18n="nota-modelo">La primera vez descarga un modelo de segmentación (~42 MB) que después queda guardado en tu navegador; para elegir objetos, otro de ~14 MB.</p>
 
-    <div id="panelProgreso" style="display:none; margin-top:16px;">
-      <p id="textoProgreso" style="color:var(--texto-suave); margin-bottom:4px;"></p>
-      <div class="barra-progreso-stickers"><div id="barraProgresoRelleno"></div></div>
-    </div>
 
     <p id="mensajeError" style="color:#dc2626; display:none; margin-top:16px;"></p>
 
@@ -244,6 +239,7 @@ window.i18nPagina = {
         <div class="panel-lienzo" data-app-escenario>
           <div class="area-canvas">
             <canvas id="vistaResultado"></canvas>
+            <div class="trabajando-ia" id="trabajandoIA" role="status" aria-live="polite" hidden><span class="trabajando-ia-texto"></span></div>
           </div>
           <div class="area-controles">
             <label class="campo-deslizador">
@@ -282,6 +278,7 @@ window.i18nPagina = {
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/mascaras-capa.js"></script>
 <script src="../assets/js/borde-sticker.js"></script>
+<script src="../assets/js/trabajando-ia.js"></script>
 <script type="module">
   import { iniciarGeneradorStickers } from '../assets/js/generador-stickers.js';
   iniciarGeneradorStickers();

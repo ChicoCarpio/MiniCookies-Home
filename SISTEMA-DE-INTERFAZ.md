@@ -290,10 +290,14 @@ imagen mientras un modelo de IA se descarga o analiza, para que no parezca que
 la página se trabó (pedido del usuario). Va dentro del panel del lienzo, que
 necesita `position: relative`; no tapa los toques; sin animación con
 `prefers-reduced-motion`. Marcado: `<div class="trabajando-ia" role="status"
-aria-live="polite" hidden><span class="trabajando-ia-texto"></span></div>`. El
-editor avanzado le pone un texto por trabajo (descargando → analizando →
-buscando) y lo esconde cuando no queda ninguno. Una herramienta nueva que corra
-un modelo sobre una imagen usa esta pieza, no un spinner propio.
+aria-live="polite" hidden><span class="trabajando-ia-texto"></span></div>`.
+Desde el 2026-10-08 lo maneja **`assets/js/trabajando-ia.js`**
+(`TrabajandoIA.crear(velo)` → `empezar(texto)` → `{ texto(t), terminar() }`,
+y `TrabajandoIA.textoDeDescarga`): un texto por trabajo (descargando →
+analizando → buscando), el del más reciente, y se esconde cuando no queda
+ninguno. Lo usan el Editor avanzado y el Generador de stickers. Una herramienta
+nueva que corra un modelo sobre una imagen usa esta pieza, no un spinner propio
+ni una barra de progreso aparte.
 
 Y comparten el **motor de filtros**, `assets/js/procesar-filtros.js`
 (`renderizarFiltro`: textura → ajustes → capas extra → intensidad → textura →

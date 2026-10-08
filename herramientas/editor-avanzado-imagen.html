@@ -1406,6 +1406,7 @@ window.i18nPagina = {
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/mascaras-capa.js"></script>
+<script src="../assets/js/trabajando-ia.js"></script>
 <script src="../assets/js/contenido-capa.js"></script>
 <script src="../assets/js/tipos-grupo.js"></script>
 <script src="../assets/js/atajos.js"></script>
@@ -1867,32 +1868,13 @@ function mostrarEstadoSujeto(texto) {
   document.getElementById('estadoSujeto').textContent = texto;
 }
 
-// Velo animado sobre la imagen mientras la IA trabaja (.trabajando-ia, en
-// editor-imagen.css). Puede haber varios trabajos a la vez (el primer plano y
-// un objeto): cada uno tiene su texto, el velo muestra el del más reciente y
-// se va cuando no queda ninguno. empezarTrabajoIA devuelve { texto(t), terminar() }.
-const trabajosIA = [];
-function pintarVeloIA() {
-  const ultimo = trabajosIA[trabajosIA.length - 1];
-  document.getElementById('trabajandoIA').hidden = !ultimo;
-  if (ultimo) document.querySelector('#trabajandoIA .trabajando-ia-texto').textContent = ultimo.texto;
-}
-function empezarTrabajoIA(texto) {
-  const trabajo = { texto };
-  trabajosIA.push(trabajo);
-  pintarVeloIA();
-  return {
-    texto(nuevo) { trabajo.texto = nuevo; pintarVeloIA(); },
-    terminar() {
-      const i = trabajosIA.indexOf(trabajo);
-      if (i >= 0) trabajosIA.splice(i, 1);
-      pintarVeloIA();
-    },
-  };
-}
+// Velo animado sobre la imagen mientras la IA trabaja (pieza compartida,
+// assets/js/trabajando-ia.js). empezarTrabajoIA devuelve { texto(t), terminar() }.
+const veloIA = TrabajandoIA.crear(document.getElementById('trabajandoIA'));
+function empezarTrabajoIA(texto) { return veloIA.empezar(texto); }
 // El avance de una descarga; al 100% lo que sigue es analizar la foto.
 function textoDeDescarga(claveDescarga, claveAnalisis, porcentaje) {
-  return porcentaje >= 100 ? t(claveAnalisis) : t(claveDescarga).replace('{p}', porcentaje);
+  return TrabajandoIA.textoDeDescarga(t, claveDescarga, claveAnalisis, porcentaje);
 }
 
 // Los módulos de IA se cargan recién cuando hacen falta (son módulos ES y

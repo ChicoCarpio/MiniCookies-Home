@@ -39,9 +39,9 @@ const escalaDe = (canvas) => Math.max(canvas.width, canvas.height) / LADO_REFERE
 export function iniciarGeneradorStickers() {
   const zonaArrastre = document.getElementById('zonaArrastre');
   const entradaArchivo = document.getElementById('entradaArchivo');
-  const panelProgreso = document.getElementById('panelProgreso');
-  const barraProgreso = document.getElementById('barraProgresoRelleno');
-  const textoProgreso = document.getElementById('textoProgreso');
+  // Mientras la IA trabaja, la foto se ve con el velo animado encima
+  // (assets/js/trabajando-ia.js), con el texto del paso y el avance.
+  const veloIA = TrabajandoIA.crear(document.getElementById('trabajandoIA'));
   const mensajeError = document.getElementById('mensajeError');
   const editorCompleto = document.getElementById('editorCompleto');
   const entradaGrosor = document.getElementById('entradaGrosor');
@@ -133,24 +133,22 @@ export function iniciarGeneradorStickers() {
   }
 
   // Carga (o reusa) el segmentador (recorte-sujeto.js: placa de video si hay
-  // una de verdad, si no CPU), mostrando el avance de la descarga.
-  function cargarSegmentador() {
+  // una de verdad, si no CPU), mostrando el avance de la descarga en el velo.
+  function cargarSegmentador(trabajo) {
     if (segmentador) return Promise.resolve(segmentador);
     if (cargaPromesa) return cargaPromesa;
 
-    panelProgreso.style.display = 'block';
-    textoProgreso.textContent = tt('estado-preparando', 'Preparando el modelo...');
-    barraProgreso.style.width = '0%';
-
+    trabajo.texto(tt('estado-preparando', 'Preparando el modelo...'));
     const promesa = cargarRecortador((porcentaje) => {
-      barraProgreso.style.width = porcentaje + '%';
-      textoProgreso.textContent = tt('estado-descargando',
-        'Descargando el modelo... {p}% (solo esta vez, después queda guardado)').replace('{p}', porcentaje);
+      // El modelo son varios archivos: uno chico llega al 100 % antes que el
+      // grande, y "Recortando…" aparecía antes de la descarga de verdad.
+      trabajo.texto(porcentaje >= 100
+        ? tt('estado-preparando', 'Preparando el modelo...')
+        : tt('estado-descargando', 'Descargando el modelo... {p}% (solo esta vez, después queda guardado)').replace('{p}', porcentaje));
     });
 
     cargaPromesa = promesa.then((nuevo) => {
       segmentador = nuevo;
-      panelProgreso.style.display = 'none';
       return segmentador;
     }).catch((error) => {
       cargaPromesa = null;
@@ -583,21 +581,21 @@ export function iniciarGeneradorStickers() {
     ocultarError();
     trabajando = true;
     mostrarControlesModo();
-    panelProgreso.style.display = 'block';
+    // La primera vez en la página, lo que tarda es preparar el modelo (bajarlo
+    // o leerlo de la caché del navegador), no analizar la foto.
+    const trabajo = veloIA.empezar(analisisObjetos ? tt('ia-buscando-objetos', 'Buscando los objetos… {i} de {n}').replace('{i}', 1).replace('{n}', puntos.length)
+      : tt('estado-preparando', 'Preparando el modelo...'));
     try {
       const { analizarImagen, objetosEn } = await import('./objeto-por-toque.js');
       if (!analisisObjetos) {
-        textoProgreso.textContent = tt('ia-analizando-objetos', 'Analizando la foto para encontrar objetos…');
-        barraProgreso.style.width = '0%';
         const url = await urlParaObjetos(foto.imagen);
         try {
           const analisis = await analizarImagen(url, (porcentaje) => {
             if (gen !== generacion) return;
-            barraProgreso.style.width = porcentaje + '%';
             // Al 100 % ya bajó: lo que sigue es analizar la foto.
-            textoProgreso.textContent = porcentaje >= 100
+            trabajo.texto(porcentaje >= 100
               ? tt('ia-analizando-objetos', 'Analizando la foto para encontrar objetos…')
-              : tt('ia-descargando-objetos', 'Descargando el modelo para elegir objetos… {p}% (solo la primera vez)').replace('{p}', porcentaje);
+              : tt('ia-descargando-objetos', 'Descargando el modelo para elegir objetos… {p}% (solo la primera vez)').replace('{p}', porcentaje));
           });
           if (gen !== generacion) return;
           analisisObjetos = analisis;
@@ -605,10 +603,9 @@ export function iniciarGeneradorStickers() {
           URL.revokeObjectURL(url);
         }
       }
-      barraProgreso.style.width = '100%';
       const mascara = await objetosEn(analisisObjetos, puntos, (i, n) => {
         if (gen !== generacion) return;
-        textoProgreso.textContent = tt('ia-buscando-objetos', 'Buscando los objetos… {i} de {n}').replace('{i}', i + 1).replace('{n}', n);
+        trabajo.texto(tt('ia-buscando-objetos', 'Buscando los objetos… {i} de {n}').replace('{i}', i + 1).replace('{n}', n));
       });
       if (gen !== generacion) return;
       const cubierta = proporcionCubierta(mascara);
@@ -637,9 +634,9 @@ export function iniciarGeneradorStickers() {
         ? tt('error-sin-memoria', 'Tu navegador se quedó sin memoria para correr este modelo.')
         : tt('error-objetos', 'No se pudieron buscar los objetos: ') + error.message);
     } finally {
+      trabajo.terminar();
       if (gen === generacion) {
         trabajando = false;
-        panelProgreso.style.display = 'none';
         mostrarControlesModo();
         dibujarSticker();
       }
@@ -684,6 +681,7 @@ export function iniciarGeneradorStickers() {
     radiosModo.forEach((r) => { r.checked = r.value === 'sujeto'; });
     mostrarControlesModo();
     const url = URL.createObjectURL(archivo);
+    let trabajo = null;
     // Si mientras tanto se cargó otra foto, esta URL ya no le sirve a nadie.
     const vigente = () => {
       if (gen === generacion) return true;
@@ -696,11 +694,13 @@ export function iniciarGeneradorStickers() {
       await imagen.decode();
       if (!vigente()) return;
       fotoActual = { url, imagen };
-      const modelo = await cargarSegmentador();
+      // La foto se ve enseguida, con el velo, mientras la IA la recorta.
+      editorCompleto.style.display = 'block';
+      dibujarMarcas();
+      trabajo = veloIA.empezar(tt('estado-recortando', 'Recortando el fondo...'));
+      const modelo = await cargarSegmentador(trabajo);
       if (!vigente()) return;
-      panelProgreso.style.display = 'block';
-      barraProgreso.style.width = '100%';
-      textoProgreso.textContent = tt('estado-recortando', 'Recortando el fondo...');
+      trabajo.texto(tt('estado-recortando', 'Recortando el fondo...'));
 
       const recorte = await modelo(url);
       if (!vigente()) return;
@@ -722,9 +722,11 @@ export function iniciarGeneradorStickers() {
         ? tt('error-sin-memoria', 'Tu navegador se quedó sin memoria para correr este modelo.')
         : tt('error-recortar', 'No se pudo recortar la imagen: ') + error.message);
       // Sin recorte no hay editor: la foto no se va a usar.
+      editorCompleto.style.display = 'none';
+      vistaResultado.style.display = 'none';
       if (fotoActual) { URL.revokeObjectURL(fotoActual.url); fotoActual = null; } else URL.revokeObjectURL(url);
     } finally {
-      if (gen === generacion) panelProgreso.style.display = 'none';
+      if (trabajo) trabajo.terminar();
     }
   }
 
