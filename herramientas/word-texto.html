@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -20,6 +21,7 @@ window.i18nPagina = {
     'dir-texto-a-word': 'Texto → Word',
     'zona-arrastre-word': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
     'boton-extraer': 'Extraer texto',
+    'ayuda-word-texto': 'Sale el texto del cuerpo del documento: párrafos, listas, cuadros de texto y tablas (cada celda en su propio renglón, también las de una tabla dentro de otra). No salen los encabezados ni los pies de página, las notas al pie, los comentarios ni el texto de los SmartArt y gráficos. De un campo (número de página, fórmula) sale el último resultado que guardó Word.',
     'boton-extraer-procesando': 'Extrayendo...',
     'boton-copiar': 'Copiar texto',
     'boton-copiado': '¡Copiado!',
@@ -45,6 +47,7 @@ window.i18nPagina = {
     'dir-texto-a-word': 'Text → Word',
     'zona-arrastre-word': '📝 Drag your .docx document here or click to choose it',
     'boton-extraer': 'Extract text',
+    'ayuda-word-texto': 'You get the text of the document body: paragraphs, lists, text boxes and tables (each cell on its own line, including tables inside tables). Headers and footers, footnotes, comments and the text of SmartArt and charts are left out. For a field (page number, formula) you get the last result Word saved.',
     'boton-extraer-procesando': 'Extracting...',
     'boton-copiar': 'Copy text',
     'boton-copiado': 'Copied!',
@@ -94,6 +97,10 @@ window.i18nPagina = {
       <ul class="lista-archivos" id="listaWord"></ul>
       <div class="controles">
         <button class="boton" id="botonExtraer" disabled data-i18n="boton-extraer">Extraer texto</button>
+        <span class="ayuda-tip">
+          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+          <span class="ayuda-burbuja" data-i18n="ayuda-word-texto">Sale el texto del cuerpo del documento: párrafos, listas, cuadros de texto y tablas (cada celda en su propio renglón, también las de una tabla dentro de otra). No salen los encabezados ni los pies de página, las notas al pie, los comentarios ni el texto de los SmartArt y gráficos. De un campo (número de página, fórmula) sale el último resultado que guardó Word.</span>
+        </span>
       </div>
       <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
       <div id="bloqueResultadoTexto" style="display:none; margin-top:20px;">
@@ -309,6 +316,7 @@ botonAWord.addEventListener('click', async () => {
 <script src="../assets/js/selector-direccion.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/idioma.js"></script>
 </body>
 </html>

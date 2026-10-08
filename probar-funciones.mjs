@@ -746,6 +746,73 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'src="fotos/vacaciones.png" intacto';
   });
 
+  // Casos que fallaban hasta el 2026-10-08 (PENDIENTES.md, pruebas de Office
+  // y Markdown): metadatos YAML tomados como título, índice duplicado y un
+  // ancla que llevaba al índice en vez de a la sección.
+  await prueba('tabla-contenidos-markdown: metadatos YAML, índice anterior y anclas', async () => {
+    await abrir('/herramientas/tabla-contenidos-markdown.html'); await esperar(200);
+    const generar = (texto) => {
+      D().getElementById('entrada').value = texto;
+      D().getElementById('botonGenerar').click();
+      return D().getElementById('salida').value;
+    };
+    const yaml = generar('---\ntitle: Guia\n---\n\n# Titulo\n\n## Parte\n');
+    afirmar(yaml.startsWith('---\ntitle: Guia\n---\n'), 'el índice quedó antes de los metadatos: ' + yaml.slice(0, 60));
+    afirmar(!yaml.includes('title: Guia]'), 'tomó los metadatos como título');
+    const dos = generar(yaml);
+    afirmar(dos === yaml, 'una segunda pasada no reemplazó el índice anterior: ' + dos.slice(0, 160));
+    const igual = generar('# Guia\n\n## Tabla de contenidos\n\nUna sección que se llama así.\n');
+    afirmar(igual.includes('(#tabla-de-contenidos-1)'), 'el enlace a la sección lleva al índice: ' + igual.slice(0, 160));
+    const rep = generar('## Uso\n\n## Uso\n\n## Uso 1\n');
+    afirmar(rep.includes('(#uso-1)') && rep.includes('(#uso-1-1)'), 'anclas repetidas: ' + rep.slice(0, 160));
+    return 'metadatos primero, una sola tabla, anclas como GitHub';
+  });
+
+  await prueba('markdown-tabla-csv: punto y coma, saltos de línea, barras y columnas de más', async () => {
+    await abrir('/herramientas/markdown-tabla-csv.html'); await esperar(200);
+    const convertir = (dir, texto) => {
+      D().querySelector('input[value="' + dir + '"]').click();
+      D().getElementById('entrada').value = texto;
+      D().getElementById('botonConvertir').click();
+      return D().getElementById('salida').value;
+    };
+    const pyc = convertir('csv-a-md', 'Producto;Precio\nCafe;3,50');
+    afirmar(pyc.split('\n')[2] === '| Cafe | 3,50 |', 'CSV con ";": ' + pyc);
+    const salto = convertir('csv-a-md', 'A,B\nx,"uno\ndos"\n1,2,3');
+    afirmar(salto.split('\n').length === 4 && salto.includes('uno<br>dos') && salto.startsWith('| A | B |  |'), 'salto o columnas de más: ' + salto);
+    const vuelta = convertir('md-a-csv', '| A | B |\n| --- | --- |\n| a \\| b | uno<br>dos |\n| 1 |');
+    afirmar(vuelta === 'A,B\na | b,"uno\ndos"\n1,', 'Markdown → CSV: ' + JSON.stringify(vuelta));
+    return '";" detectado, <br> ida y vuelta, \\| y filas parejas';
+  });
+
+  // Word → Markdown dejaba cada celda de una tabla como un párrafo suelto.
+  await prueba('turndown-tablas: tablas HTML a tablas Markdown', async () => {
+    await abrir('/herramientas/markdown-word.html'); await esperar(200);
+    const servicio = W().agregarTablasMarkdown(new (W().TurndownService)());
+    const md = servicio.turndown('<table><tr><td colspan="2"><p><strong>Unida</strong></p></td><td>a|b</td></tr>'
+      + '<tr><td>1</td><td><p>dos</p><p>renglones</p></td><td>x<table><tr><td>in</td><td>ner</td></tr></table></td></tr></table>');
+    const esperado = '| **Unida** |  | a\\|b |\n| --- | --- | --- |\n| 1 | dos<br>renglones | x in / ner |';
+    afirmar(md === esperado, 'tabla: ' + JSON.stringify(md));
+    return 'colspan, varios párrafos, barra y tabla anidada';
+  });
+
+  // La carpeta de medios de Office guarda también audio y video.
+  await prueba('extraer-imagenes-powerpoint: solo imágenes, sin audio ni video', async () => {
+    await abrir('/herramientas/extraer-imagenes-powerpoint.html'); await esperar(200);
+    const zip = new (W().JSZip)();
+    for (const n of ['image1.png', 'image2.emf', 'image3.svg', 'media1.mp4', 'media2.wav']) zip.file('ppt/media/' + n, 'x');
+    const entrada = D().getElementById('entradaArchivo');
+    entrada.files = archivos([new (W().File)([await zip.generateAsync({ type: 'blob' })], 'medios.pptx')]).files;
+    entrada.dispatchEvent(new (W().Event)('change'));
+    D().getElementById('botonExtraer').click();
+    const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href, 15000);
+    afirmar(enlace, 'no terminó');
+    const salida = await W().JSZip.loadAsync(await (await W().fetch(enlace)).blob());
+    const nombres = Object.keys(salida.files).sort().join(',');
+    afirmar(nombres === 'image1.png,image2.emf,image3.svg', 'salieron: ' + nombres);
+    return nombres;
+  });
+
   // Modos de fusión del editor avanzado: con una capa sin ajustes, Multiplicar
   // funde la imagen consigo misma (gris 128 -> 64) y Trama la aclara (-> 192).
   // Se mira el píxel en la vista previa Y en la imagen descargada, que se

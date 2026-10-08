@@ -158,6 +158,7 @@ window.i18nPagina = {
 
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
 <script src="../vendor/turndown/7.2.0/turndown.min.js"></script>
+<script src="../assets/js/turndown-tablas.js"></script>
 <script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
@@ -169,7 +170,7 @@ const panelEpubAMd = document.getElementById('panelEpubAMd');
 const panelMdAEpub = document.getElementById('panelMdAEpub');
 const progreso = document.getElementById('progreso');
 
-const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+const turndownService = agregarTablasMarkdown(new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' }));
 
 
 // --- EPUB → Markdown ---

@@ -120,7 +120,7 @@ botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   botonExtraer.textContent = t('boton-extraer-procesando');
   try {
-    const imagenes = await extraerArchivosDeZip(archivoActual, (ruta) => ruta.startsWith('ppt/media/'));
+    const imagenes = await extraerArchivosDeZip(archivoActual, (ruta) => ruta.startsWith('ppt/media/') && esRutaDeImagen(ruta));
     if (imagenes.length === 0) throw new Error(t('error-sin-imagenes'));
 
     const blobZip = await construirZipDeArchivos(imagenes);

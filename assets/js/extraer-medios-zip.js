@@ -3,6 +3,14 @@
 // son en el fondo un .zip con estructura interna (.docx, .xlsx, .pptx, .epub).
 // Requiere que la página ya haya cargado JSZip.
 
+// ¿La ruta es una imagen? La carpeta de medios de Office guarda también audio
+// y video (un .mp4 de una diapositiva): sin esto salían en el .zip de
+// "imágenes". EMF, WMF y TIFF sí cuentan: son imágenes, aunque el navegador
+// no las muestre.
+function esRutaDeImagen(ruta) {
+  return /\.(png|jpe?g|jfif|gif|bmp|tiff?|svg|webp|emf|wmf|ico)$/i.test(ruta);
+}
+
 // Devuelve [{ nombre, blob }] para cada entrada del zip cuyo nombre de ruta
 // haga match con filtro(rutaCompleta).
 async function extraerArchivosDeZip(archivo, filtro) {

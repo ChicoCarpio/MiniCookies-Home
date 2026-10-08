@@ -153,9 +153,9 @@ function generarAncla(texto, usadas) {
 
 // Títulos del documento, ignorando lo que está dentro de bloques de código
 // (``` o ~~~), donde un "# comentario" no es un título. Acepta también los
-// títulos subrayados con === (nivel 1) o --- (nivel 2).
-function buscarEncabezados(texto) {
-  const lineas = texto.split(/\r?\n/);
+// títulos subrayados con === (nivel 1) o --- (nivel 2). Cada uno guarda en
+// qué renglón empieza.
+function buscarEncabezados(lineas) {
   const encabezados = [];
   let cercoAbierto = null;
   lineas.forEach((linea, i) => {
@@ -168,36 +168,78 @@ function buscarEncabezados(texto) {
     if (cercoAbierto) return;
     const atx = linea.match(/^\s{0,3}(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/);
     if (atx) {
-      encabezados.push({ nivel: atx[1].length, texto: textoPlanoTitulo(atx[2]) });
+      encabezados.push({ nivel: atx[1].length, texto: textoPlanoTitulo(atx[2]), linea: i });
       return;
     }
     const anterior = i > 0 ? lineas[i - 1] : '';
     const setext = linea.match(/^\s{0,3}(=+|-+)\s*$/);
     if (setext && anterior.trim() && !/^\s{0,3}(#|>|[-*+]\s|\d+[.)]\s|`{3}|~{3}|\|)/.test(anterior)) {
-      encabezados.push({ nivel: setext[1][0] === '=' ? 1 : 2, texto: textoPlanoTitulo(anterior) });
+      encabezados.push({ nivel: setext[1][0] === '=' ? 1 : 2, texto: textoPlanoTitulo(anterior), linea: i - 1 });
     }
   });
   return encabezados.filter((e) => e.texto);
+}
+
+// Bloque de metadatos YAML al principio ("front matter": Jekyll, Hugo,
+// Obsidian…). Se deja primero: con el índice arriba deja de ser metadato, y
+// su "---" de cierre se leía como un título subrayado.
+function separarMetadatos(texto) {
+  const m = texto.match(/^---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/);
+  return m ? [m[0], texto.slice(m[0].length)] : ['', texto];
+}
+
+// Un índice que ya está en el documento (de una pasada anterior): un título
+// que se llama así seguido solo de una lista de enlaces a anclas. Se
+// reemplaza en su lugar; si no, quedaban dos índices y el viejo aparecía
+// dentro del nuevo.
+const TITULO_DE_INDICE = /^(tabla de contenidos?|[íi]ndice|contenidos?|table of contents|contents|toc)$/i;
+function buscarIndiceAnterior(lineas, encabezados) {
+  for (const [k, e] of encabezados.entries()) {
+    if (!TITULO_DE_INDICE.test(e.texto)) continue;
+    const desde = e.linea + (/^\s{0,3}#/.test(lineas[e.linea]) ? 1 : 2);
+    const hasta = k + 1 < encabezados.length ? encabezados[k + 1].linea : lineas.length;
+    const cuerpo = lineas.slice(desde, hasta).filter((l) => l.trim());
+    if (cuerpo.length && cuerpo.every((l) => /^\s*([-*+]|\d+[.)])\s+\[.*\]\(#[^)]*\)\s*$/.test(l))) {
+      return { k, inicio: e.linea, fin: hasta };
+    }
+  }
+  return null;
 }
 
 botonGenerar.addEventListener('click', () => {
   const texto = entrada.value;
   if (!texto.trim()) { alert(t('error-vacio')); return; }
 
-  const encabezados = buscarEncabezados(texto);
+  const [metadatos, cuerpo] = separarMetadatos(texto);
+  const lineas = cuerpo.split(/\r?\n/);
+  const todos = buscarEncabezados(lineas);
+  const anterior = buscarIndiceAnterior(lineas, todos);
+  const encabezados = todos.filter((_, k) => !anterior || k !== anterior.k);
   if (encabezados.length === 0) { alert(t('error-sin-encabezados')); return; }
 
-  const nivelMinimo = Math.min(...encabezados.map(e => e.nivel));
+  // Las anclas se numeran en el orden del documento ya armado, contando el
+  // título del índice: una sección que se llame igual que el índice queda
+  // con "-1", como en GitHub (si no, su enlace llevaba al índice).
+  const lineaDelIndice = anterior ? anterior.inicio : 0;
   const anclasUsadas = new Set();
-  const lineasIndice = encabezados.map((e) => {
+  let indiceContado = false;
+  const anclas = encabezados.map((e) => {
+    if (!indiceContado && e.linea >= lineaDelIndice) { generarAncla(t('titulo-indice'), anclasUsadas); indiceContado = true; }
+    return generarAncla(e.texto, anclasUsadas);
+  });
+
+  const nivelMinimo = Math.min(...encabezados.map(e => e.nivel));
+  const lineasIndice = encabezados.map((e, i) => {
     const sangria = '  '.repeat(e.nivel - nivelMinimo);
-    const ancla = generarAncla(e.texto, anclasUsadas);
-    const textoEnlace = e.texto.replace(/([\[\]])/g, '\\$1');
-    return `${sangria}- [${textoEnlace}](#${ancla})`;
+    const textoEnlace = e.texto.replace(/([\[\]])/g, '\$1');
+    return `${sangria}- [${textoEnlace}](#${anclas[i]})`;
   });
 
   const indiceMarkdown = `## ${t('titulo-indice')}\n\n` + lineasIndice.join('\n') + '\n';
-  salida.value = indiceMarkdown + '\n' + texto;
+  const conIndice = anterior
+    ? [...lineas.slice(0, anterior.inicio), ...indiceMarkdown.split('\n'), ...lineas.slice(anterior.fin)].join('\n')
+    : indiceMarkdown + '\n' + cuerpo.replace(/^(\r?\n)+/, '');
+  salida.value = metadatos ? metadatos.replace(/\r?\n?$/, '\n') + '\n' + conIndice.replace(/^\n+/, '') : conIndice;
   const blob = new Blob([salida.value], { type: 'text/markdown;charset=utf-8' });
   enlaceDescarga.href = URL.createObjectURL(blob);
   bloqueResultado.style.display = 'block';

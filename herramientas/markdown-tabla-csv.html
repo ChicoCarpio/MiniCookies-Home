@@ -132,20 +132,31 @@ function direccionActual() {
   return document.querySelector('input[name="direccion"]:checked').value;
 }
 
+// Rellena las filas cortas con celdas vacías: todas con la misma cantidad de
+// columnas (en Markdown, una fila con celdas de más perdía las de más).
+function igualarColumnas(filas) {
+  const columnas = Math.max(...filas.map(f => f.length));
+  return filas.map(f => f.concat(Array(columnas - f.length).fill('')));
+}
+
 function parsearTablaMarkdown(texto) {
   const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.startsWith('|'));
   if (lineas.length < 2) throw new Error(t('error-tabla-invalida'));
 
-  const partirFila = (linea) => linea.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+  // "\|" es una barra dentro de la celda, no un borde; "<br>" es un salto de
+  // línea dentro de la celda.
+  const partirFila = (linea) => linea.replace(/^\|/, '').replace(/(^|[^\\])\|$/, '$1')
+    .split(/(?<!\\)\|/)
+    .map(c => c.trim().replace(/\\\|/g, '|').replace(/<br\s*\/?>/gi, '\n'));
   const filas = lineas
     .filter((linea, indice) => !(indice === 1 && /^[\s|:-]+$/.test(linea))) // salta la línea "| --- | --- |"
     .map(partirFila);
 
-  return filas;
+  return igualarColumnas(filas);
 }
 
 function celdaCsv(valor) {
-  if (/[",\n]/.test(valor)) return '"' + valor.replace(/"/g, '""') + '"';
+  if (/[",\r\n]/.test(valor)) return '"' + valor.replace(/"/g, '""') + '"';
   return valor;
 }
 
@@ -153,7 +164,22 @@ function filasACsv(filas) {
   return filas.map(fila => fila.map(celdaCsv).join(',')).join('\n');
 }
 
+// Separador del CSV: coma, punto y coma (el de Excel en español, porque la
+// coma es la de los decimales) o tabulación. Gana el que más aparece en el
+// primer renglón, fuera de comillas.
+function detectarSeparador(texto) {
+  const cuenta = { ',': 0, ';': 0, '\t': 0 };
+  let dentroDeComillas = false;
+  for (const c of texto) {
+    if (c === '"') dentroDeComillas = !dentroDeComillas;
+    else if (!dentroDeComillas && (c === '\n' || c === '\r')) break;
+    else if (!dentroDeComillas && c in cuenta) cuenta[c]++;
+  }
+  return Object.keys(cuenta).reduce((a, b) => (cuenta[b] > cuenta[a] ? b : a), ',');
+}
+
 function parsearCsv(texto) {
+  const separador = detectarSeparador(texto);
   const filas = [];
   let fila = [];
   let celda = '';
@@ -167,7 +193,7 @@ function parsearCsv(texto) {
       else { celda += c; }
     } else if (c === '"') {
       dentroDeComillas = true;
-    } else if (c === ',') {
+    } else if (c === separador) {
       fila.push(celda); celda = '';
     } else if (c === '\n' || c === '\r') {
       if (c === '\r' && texto[i + 1] === '\n') i++;
@@ -183,11 +209,13 @@ function parsearCsv(texto) {
 
 function filasATablaMarkdown(filas) {
   if (filas.length === 0) throw new Error(t('error-csv-vacio'));
+  filas = igualarColumnas(filas);
   const encabezado = filas[0];
   const separador = encabezado.map(() => '---');
   const cuerpo = filas.slice(1);
 
-  const formatearFila = (fila) => '| ' + fila.map(c => c.replace(/\|/g, '\\|')).join(' | ') + ' |';
+  // Un salto de línea dentro de una celda cortaba la fila: pasa a <br>.
+  const formatearFila = (fila) => '| ' + fila.map(c => c.replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>')).join(' | ') + ' |';
   return [formatearFila(encabezado), formatearFila(separador), ...cuerpo.map(formatearFila)].join('\n');
 }
 

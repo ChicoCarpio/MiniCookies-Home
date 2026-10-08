@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
   .vista-previa-documento {
@@ -39,6 +40,7 @@ window.i18nPagina = {
     'nota-md-word': 'Se conservan títulos, negrita, cursiva, listas, tablas, links (como texto) e imágenes. Bloques de código se conservan como texto plano.',
     'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
     'boton-convertir': 'Convertir a Markdown',
+    'ayuda-word-md': 'Se conservan títulos, negrita, cursiva, listas, enlaces, imágenes, cuadros de texto y tablas (como tablas de Markdown). Las notas al pie van al final, numeradas y con enlaces de ida y vuelta. Markdown no tiene celdas combinadas: una celda que abarcaba varias columnas deja vacías las de al lado, y una tabla dentro de otra pasa a texto. No se incluyen los encabezados ni los pies de página, los comentarios ni el texto de los SmartArt y gráficos.',
     'boton-convertir-procesando': 'Convirtiendo...',
     'boton-copiar-md': 'Copiar Markdown',
     'boton-copiado': '¡Copiado!',
@@ -69,6 +71,7 @@ window.i18nPagina = {
     'nota-md-word': 'Headings, bold, italics, lists, tables, links (as text) and images are kept. Code blocks are kept as plain text.',
     'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
     'boton-convertir': 'Convert to Markdown',
+    'ayuda-word-md': 'Headings, bold, italics, lists, links, images, text boxes and tables (as Markdown tables) are kept. Footnotes go at the end, numbered and linked both ways. Markdown has no merged cells: a cell that spanned several columns leaves the ones next to it empty, and a table inside another becomes text. Headers and footers, comments and the text of SmartArt and charts are left out.',
     'boton-convertir-procesando': 'Converting...',
     'boton-copiar-md': 'Copy Markdown',
     'boton-copiado': 'Copied!',
@@ -161,6 +164,10 @@ Este es un ejemplo de **Markdown** con:
       <ul class="lista-archivos" id="listaArchivo"></ul>
       <div class="controles">
         <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir a Markdown</button>
+        <span class="ayuda-tip">
+          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+          <span class="ayuda-burbuja" data-i18n="ayuda-word-md">Se conservan títulos, negrita, cursiva, listas, enlaces, imágenes, cuadros de texto y tablas (como tablas de Markdown). Las notas al pie van al final, numeradas y con enlaces de ida y vuelta. Markdown no tiene celdas combinadas: una celda que abarcaba varias columnas deja vacías las de al lado, y una tabla dentro de otra pasa a texto. No se incluyen los encabezados ni los pies de página, los comentarios ni el texto de los SmartArt y gráficos.</span>
+        </span>
       </div>
       <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
       <div id="bloqueResultado" style="display:none; margin-top:20px;">
@@ -185,6 +192,7 @@ Este es un ejemplo de **Markdown** con:
 <script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../vendor/turndown/7.2.0/turndown.min.js"></script>
+<script src="../assets/js/turndown-tablas.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -315,7 +323,7 @@ const markdownResultado = document.getElementById('markdownResultado');
 const botonCopiarMd = document.getElementById('botonCopiarMd');
 const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
 
-const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+const turndownService = agregarTablasMarkdown(new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' }));
 
 let docxsActuales = [];
 const resumenLote = document.getElementById('resumenLote');
@@ -427,6 +435,7 @@ botonCopiarMd.addEventListener('click', async () => {
 <script src="../assets/js/selector-direccion.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/idioma.js"></script>
 </body>
 </html>
