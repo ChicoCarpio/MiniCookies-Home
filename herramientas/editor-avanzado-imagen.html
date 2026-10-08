@@ -84,6 +84,8 @@
   /* En el cajón del celular ya desplaza la hoja entera: un segundo
      desplazamiento adentro sería un scroll dentro de otro. */
   body.app-activo .app-hoja #listaCapas { max-height: none; overflow: visible; }
+  /* En PC (esqueleto) tampoco: la columna entera es de Capas y se desplaza. */
+  .ed-esqueleto-activo #listaCapas { max-height: none; overflow: visible; }
   .contenedor-capa { margin-bottom: 8px; }
   .contenedor-capa.arrastrando { opacity: 0.4; }
   .fila-capa {
@@ -251,6 +253,8 @@ window.i18nPagina = {
     'boton-detectar-croma': 'Detectar',
     'boton-gotero-croma': '💧 Elegir con el gotero',
     'sl-suavidad-croma': 'Suavidad del borde',
+    'sl-recorte-croma': 'Recortar el borde',
+    'nota-recorte-croma': 'Achica lo marcado unos píxeles hacia adentro. El contorno de una persona sobre un fondo verde es mezcla de los dos colores y puede quedar como un hilo verde alrededor: subilo hasta que desaparezca.',
     'menu-pieza-sujeto': '👤 Primer plano',
     'menu-pieza-fondo': '👤 Fondo',
     'menu-pieza-objeto': '👆 Un objeto',
@@ -508,6 +512,8 @@ window.i18nPagina = {
     'boton-detectar-croma': 'Detect',
     'boton-gotero-croma': '💧 Pick with the eyedropper',
     'sl-suavidad-croma': 'Edge softness',
+    'sl-recorte-croma': 'Trim the edge',
+    'nota-recorte-croma': 'Shrinks what is marked a few pixels inward. The outline of a person on a green background is a mix of both colors and can stay as a thin green line around them: raise it until it is gone.',
     'menu-pieza-sujeto': '👤 Foreground',
     'menu-pieza-fondo': '👤 Background',
     'menu-pieza-objeto': '👆 An object',
@@ -930,6 +936,16 @@ window.i18nPagina = {
                   <label class="campo-deslizador">
                     <span class="etiqueta-deslizador"><span data-i18n="sl-suavidad-croma">Suavidad del borde</span><span id="valorSuavidadCroma">10</span></span>
                     <input type="range" id="suavidadCroma" min="0" max="50" value="10">
+                  </label>
+                  <label class="campo-deslizador">
+                    <span class="etiqueta-deslizador">
+                      <span><span data-i18n="sl-recorte-croma">Recortar el borde</span>
+                        <span class="ayuda-tip">
+                          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                          <span class="ayuda-burbuja" data-i18n="nota-recorte-croma">Achica lo marcado unos píxeles hacia adentro. El contorno de una persona sobre un fondo verde es mezcla de los dos colores y puede quedar como un hilo verde alrededor: subilo hasta que desaparezca.</span>
+                        </span>
+                      </span><span id="valorRecorteCroma">1</span></span>
+                    <input type="range" id="recorteCroma" min="0" max="10" step="0.5" value="1">
                   </label>
                 </div>
 
@@ -1393,6 +1409,7 @@ const muestraColorObjetivo = document.getElementById('muestraColorObjetivo');
 const elToleranciaColor = document.getElementById('toleranciaColor');
 const elToleranciaCroma = document.getElementById('toleranciaCroma');
 const elSuavidadCroma = document.getElementById('suavidadCroma');
+const elRecorteCroma = document.getElementById('recorteCroma');
 const valorToleranciaColor = document.getElementById('valorToleranciaColor');
 const controlesDegradado = document.getElementById('controlesDegradado');
 const controlesLuz = document.getElementById('controlesLuz');
@@ -1774,9 +1791,10 @@ function generarMascaraCapa(capa, ancho, alto, conMemo = false) {
     medir(pieza) {
       const sobreLaCapa = piezaMideSobreLaCapa(capa, pieza);
       const ia = pieza.tipo === 'sujeto' || pieza.tipo === 'objeto' ? iaDePieza(capa, pieza) : null;
+      // El contenido de un objeto ya está a su tamaño original; la foto, al de trabajo.
       return sobreLaCapa
         ? { origen: fuenteDeContenido(conContenido), ia, colocar }
-        : { origen: canvasOrigenTrabajo, ia };
+        : { origen: canvasOrigenTrabajo, ia, escala: ancho / imagenActual.naturalWidth };
     },
   });
 }
@@ -2855,6 +2873,7 @@ function actualizarControlesSeleccion() {
     document.getElementById('muestraCroma').style.background = pieza.color ? `rgb(${pieza.color.r},${pieza.color.g},${pieza.color.b})` : 'transparent';
     elToleranciaCroma.value = pieza.tolerancia; document.getElementById('valorToleranciaCroma').textContent = pieza.tolerancia;
     elSuavidadCroma.value = pieza.suavidad; document.getElementById('valorSuavidadCroma').textContent = pieza.suavidad;
+    elRecorteCroma.value = pieza.recorte; document.getElementById('valorRecorteCroma').textContent = pieza.recorte;
     document.getElementById('botonGoteroCroma').classList.toggle('activo', herramientaLienzo === 'gotero');
   }
   controlesLuz.style.display = tipo === 'luz' ? 'flex' : 'none';
@@ -3057,6 +3076,7 @@ document.querySelectorAll('#modosTipoDegradado button').forEach((boton) => {
 
 elToleranciaCroma.addEventListener('input', () => cambiarPieza((p) => { p.tolerancia = Number(elToleranciaCroma.value); }, ['croma']));
 elSuavidadCroma.addEventListener('input', () => cambiarPieza((p) => { p.suavidad = Number(elSuavidadCroma.value); }, ['croma']));
+elRecorteCroma.addEventListener('input', () => cambiarPieza((p) => { p.recorte = Number(elRecorteCroma.value); }, ['croma']));
 document.getElementById('botonDetectarCroma').addEventListener('click', () => {
   const item = itemActivo();
   cambiarPieza((p) => { p.color = detectarCroma(item, p) || p.color; }, ['croma']);

@@ -1957,6 +1957,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(h.avanzadoRail === 'capas,texto,zona,borrar,luz,color,bn,efectos,filtros,textura', 'barra de íconos del avanzado: ' + h.avanzadoRail);
     afirmar(visibles() === 'capas', 'al abrir no se ve solo Capas: ' + visibles());
     comprobarPc('avanzado', ['botonDeshacer', 'botonRehacer', 'botonDescargarAvanzado', 'resolucionVistaPrevia']);
+    // La lista de capas usa toda la columna (antes tenía 320 px de alto máximo).
+    afirmar(W().getComputedStyle(el('listaCapas')).maxHeight === 'none', 'la lista de capas tiene alto máximo: ' + W().getComputedStyle(el('listaCapas')).maxHeight);
     afirmar(/Capa 1/.test(D().querySelector('.ed-editando').textContent), '"Editando" no dice la capa: ' + D().querySelector('.ed-editando').textContent);
     categoria('zona');
     afirmar(W().getComputedStyle(el('menuPiezas')).display === 'none', 'el menú de "Agregar pieza" se ve sin abrirlo');
@@ -2002,6 +2004,9 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const cx = c.getContext('2d');
     cx.fillStyle = 'rgb(40,180,70)'; cx.fillRect(0, 0, 200, 100);
     cx.fillStyle = 'rgb(20,95,35)'; cx.fillRect(0, 0, 50, 100); // sombra sobre el fondo
+    // El objeto, con un contorno de 3 px de color mezclado (verde amarillento):
+    // el hilo que deja el suavizado de una foto real sobre un croma.
+    cx.fillStyle = 'rgb(130,150,55)'; cx.fillRect(77, 17, 46, 66);
     cx.fillStyle = 'rgb(210,40,40)'; cx.fillRect(80, 20, 40, 60); // el objeto
     const entrada = D().getElementById('entradaArchivo');
     entrada.files = archivos([new (W().File)([await new Promise((r) => c.toBlob(r, 'image/png'))], 'verde.png', { type: 'image/png' })]).files;
@@ -2021,6 +2026,24 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const alfa = (x, y) => lienzo.getContext('2d').getImageData(Math.round(x * lienzo.width / 200), Math.round(y * lienzo.height / 100), 1, 1).data[3];
     h.alfa = ['sombra ' + alfa(20, 50), 'verde ' + alfa(160, 50), 'objeto ' + alfa(100, 50)].join(' ');
     afirmar(alfa(20, 50) < 5 && alfa(160, 50) < 5 && alfa(100, 50) > 250, 'quitar el fondo con el croma: ' + h.alfa);
+    // Recortar el borde: sin recorte, el contorno mezclado queda como un hilo
+    // alrededor del objeto; con 3 px (de la imagen original) desaparece y el
+    // objeto sigue entero.
+    const conRecorte = async (valor) => {
+      D().getElementById('botonRestaurarBorrado').click();
+      const deslizador = D().getElementById('recorteCroma');
+      deslizador.value = valor; deslizador.dispatchEvent(new (W().Event)('input'));
+      D().getElementById('botonBorrarFueraZona').click();
+      await esperar(300);
+      return [alfa(78.5, 50), alfa(100, 50)];
+    };
+    const sinRecorte = await conRecorte(0);
+    h.hiloSinRecorte = sinRecorte.join(',');
+    afirmar(sinRecorte[0] > 250, 'sin recorte el contorno mezclado no quedó (la prueba no reproduce el hilo): ' + h.hiloSinRecorte);
+    const recortado = await conRecorte(3);
+    h.hiloRecortado = recortado.join(',');
+    afirmar(recortado[0] < 5 && recortado[1] > 250, 'recortar el borde 3 px no quitó el hilo o se comió el objeto: ' + h.hiloRecortado);
+    afirmar(W().piezaActiva().recorte === 3, 'el deslizador no cambió el recorte de la pieza');
     // Y el proyecto guarda su configuración.
     afirmar(W().MascarasCapa.TIPOS.includes('croma') && W().MascarasCapa.normalizar({ piezas: [{ tipo: 'croma', color: { r: 1, g: 2, b: 3 }, suavidad: 7 }] }).piezas[0].suavidad === 7, 'el croma no se guarda bien en el proyecto');
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');

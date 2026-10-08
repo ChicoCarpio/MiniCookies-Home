@@ -58,7 +58,9 @@ window.MascarasCapa = (function () {
     if (tipo === 'pincel') { p.trazo = null; p._version = 0; } // trazo: lienzo a tamaño de trabajo, alfa = cuánto
     if (tipo === 'degradado') p.degradado = { tipo: 'lineal', a: null, b: null }; // a/b en 0..1 del ancho/alto
     if (tipo === 'color') { p.color = null; p.tolerancia = 30; } // color: {r,g,b}
-    if (tipo === 'croma') { p.color = null; p.tolerancia = 25; p.suavidad = 10; } // color: el del fondo, {r,g,b}
+    // color: el del fondo, {r,g,b}; recorte: cuánto se achica el borde, en
+    // píxeles de la imagen original (ver recortarBorde).
+    if (tipo === 'croma') { p.color = null; p.tolerancia = 25; p.suavidad = 10; p.recorte = 1; }
     if (tipo === 'luz') p.luz = { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 };
     if (tipo === 'objeto') p.punto = null; // {x,y} en 0..1: lo que se tocó
     if (MIDEN.includes(tipo)) p.fuente = 'foto'; // 'foto' | 'capa'
@@ -87,6 +89,7 @@ window.MascarasCapa = (function () {
       p.color = g.color || null;
       p.tolerancia = Number.isFinite(g.tolerancia) ? g.tolerancia : n.tolerancia;
       p.suavidad = Number.isFinite(g.suavidad) ? g.suavidad : n.suavidad;
+      p.recorte = Number.isFinite(g.recorte) ? g.recorte : n.recorte;
     }
     if (tipo === 'color') {
       p.color = g.color || null;
@@ -246,6 +249,43 @@ window.MascarasCapa = (function () {
     });
   }
 
+  // Recortar el borde de lo marcado unos píxeles hacia adentro: el contorno de
+  // una persona sobre un croma es mezcla de los dos colores (por el
+  // suavizado y la compresión de la foto), su tono queda lejos del fondo y
+  // quedaba como un hilo verde alrededor. Se AGRANDA el fondo (lo no marcado,
+  // dibujado corrido en varias direcciones) en vez de achicar lo marcado: así
+  // lo que toca el borde de la imagen (los pies de una persona) no se
+  // recorta, porque lo que se corre fuera del lienzo no se dibuja.
+  function recortarBorde(lienzoMarcado, radio) {
+    const ancho = lienzoMarcado.width, alto = lienzoMarcado.height;
+    const fondo = document.createElement('canvas');
+    fondo.width = ancho; fondo.height = alto;
+    const cf = fondo.getContext('2d');
+    cf.fillStyle = '#fff';
+    cf.fillRect(0, 0, ancho, alto);
+    cf.globalCompositeOperation = 'destination-out';
+    cf.drawImage(lienzoMarcado, 0, 0);
+    const agrandado = document.createElement('canvas');
+    agrandado.width = ancho; agrandado.height = alto;
+    const ca = agrandado.getContext('2d');
+    ca.drawImage(fondo, 0, 0);
+    const pasos = Math.max(8, Math.ceil(radio * 4));
+    for (const r of radio > 1.5 ? [radio / 2, radio] : [radio]) {
+      for (let i = 0; i < pasos; i++) {
+        const a = (i / pasos) * Math.PI * 2;
+        ca.drawImage(fondo, Math.cos(a) * r, Math.sin(a) * r);
+      }
+    }
+    const ctx = lienzoMarcado.getContext('2d');
+    ctx.clearRect(0, 0, ancho, alto);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, ancho, alto);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.drawImage(agrandado, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    return lienzoMarcado;
+  }
+
   // El color del fondo de un croma: el más repetido en los bordes de la
   // imagen, entre los que tienen color (un fondo verde o azul); si los bordes
   // no tienen color, el más repetido igual. Se mira una copia chica: leer la
@@ -354,16 +394,24 @@ window.MascarasCapa = (function () {
   // Lo que mide una pieza de color, luz o IA, a tamaño "ancho x alto" (el de
   // trabajo, o el del contenido si se mide sobre él), cacheado en su memo
   // mientras no cambie nada de lo que lo define.
-  function medicion(p, origen, ia, ancho, alto, cache) {
+  // escala: cuántos píxeles de "ancho x alto" mide un píxel de la imagen
+  // original (el recorte del croma va en píxeles originales).
+  function medicion(p, origen, ia, ancho, alto, cache, escala = 1) {
     const clave = p.tipo === 'color' ? JSON.stringify([p.color, p.tolerancia])
-      : p.tipo === 'croma' ? 'croma' + JSON.stringify([p.color, p.tolerancia, p.suavidad])
+      : p.tipo === 'croma' ? 'croma' + JSON.stringify([p.color, p.tolerancia, p.suavidad, p.recorte])
       : (p.tipo === 'luz' ? JSON.stringify(p.luz) : p.tipo);
     const desde = p.tipo === 'sujeto' || p.tipo === 'objeto' ? ia : origen;
     if (cache && cache.base && cache.clave === clave && cache.desde === desde
       && cache.base.width === ancho && cache.base.height === alto) return cache.base;
     const destino = lienzo(ancho, alto, cache ? cache.base : null);
     if (p.tipo === 'color') dibujarColor(origen, p.color, p.tolerancia, ancho, alto, destino);
-    else if (p.tipo === 'croma') dibujarCroma(origen, p, ancho, alto, destino);
+    else if (p.tipo === 'croma') {
+      dibujarCroma(origen, p, ancho, alto, destino);
+      // En píxeles de la imagen original: igual a cualquier resolución de la
+      // vista previa y en la descarga.
+      const radio = (p.recorte || 0) * escala;
+      if (radio > 0.05) recortarBorde(destino, radio);
+    }
     else if (p.tipo === 'luz') dibujarLuz(origen, p.luz, ancho, alto, destino);
     else destino.getContext('2d').drawImage(ia, 0, 0, ancho, alto);
     if (cache) Object.assign(cache, { base: destino, clave, desde });
@@ -392,11 +440,11 @@ window.MascarasCapa = (function () {
       return { lienzo: p.invertir ? guardar('invertida', invertirEn(c, ancho, alto, reusar('invertida'))) : c };
     }
     // Color, luz y la IA: sobre la foto o sobre el contenido del objeto.
-    const { origen = null, ia = null, colocar = null } = opciones.medir ? opciones.medir(p) : {};
+    const { origen = null, ia = null, colocar = null, escala = 1 } = opciones.medir ? opciones.medir(p) : {};
     if ((p.tipo === 'sujeto' || p.tipo === 'objeto') && !ia) return null;
     if ((p.tipo === 'color' || p.tipo === 'luz' || p.tipo === 'croma') && !origen) return null;
     const anchoBase = colocar ? origen.width : ancho, altoBase = colocar ? origen.height : alto;
-    let base = medicion(p, origen, ia, anchoBase, altoBase, cache);
+    let base = medicion(p, origen, ia, anchoBase, altoBase, cache, escala);
     // Se invierte antes de colocarla: afuera del contenido no marca nada.
     if (p.invertir) base = guardar('invertida', invertirEn(base, anchoBase, altoBase, reusar('invertida')));
     if (!colocar) return { lienzo: base };
@@ -405,9 +453,10 @@ window.MascarasCapa = (function () {
 
   // m: la máscara. opciones:
   //   memo: caché de la capa (o null, para la descarga);
-  //   medir(pieza) -> { origen, ia, colocar }: sobre qué mide una pieza de
-  //     color, luz o IA. origen: la imagen (la foto a tamaño de trabajo, o el
-  //     contenido a su tamaño); ia: el lienzo que dio la IA para esa pieza, o
+  //   medir(pieza) -> { origen, ia, colocar, escala }: sobre qué mide una
+  //     pieza de color, luz, croma o IA (escala: píxeles de "origen" por
+  //     píxel de la imagen original, 1 si no se dice). origen: la imagen
+  //     (la foto a tamaño de trabajo, o el contenido a su tamaño); ia: el lienzo que dio la IA para esa pieza, o
   //     null si todavía no está; colocar(lienzo, destino): solo si se mide
   //     sobre el contenido, lo dibuja en destino transformado como él.
   function crear(m, ancho, alto, opciones = {}) {
