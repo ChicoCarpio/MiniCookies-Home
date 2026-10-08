@@ -55,7 +55,8 @@
     if (abierta && abierta.burbuja === burbuja) { colocarBurbuja(boton, burbuja); return; }
     cerrar();
     abierta = { tip: tip, boton: boton, burbuja: burbuja, padre: burbuja.parentNode, siguiente: burbuja.nextSibling };
-    document.body.appendChild(burbuja);
+    // En pantalla completa solo se ve lo que está adentro del elemento.
+    (document.fullscreenElement || document.body).appendChild(burbuja);
     colocarBurbuja(boton, burbuja);
     burbuja.classList.add('visible');
     tip.classList.add('abierto');

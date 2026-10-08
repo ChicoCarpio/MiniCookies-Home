@@ -54,6 +54,8 @@ window.i18nComun = {
     'ayuda-etiqueta': 'Ayuda',
     'title-deshacer': 'Deshacer (Ctrl+Z; en el celular, tocá la imagen con dos dedos)',
     'title-rehacer': 'Rehacer (Ctrl+Shift+Z)',
+    'title-pantalla-completa': 'Pantalla completa (F)',
+    'title-salir-pantalla-completa': 'Salir de pantalla completa (Esc o F)',
     'vista-cuadricula': '▦ Cuadrícula',
     'vista-lista': '☰ Lista',
     // Usadas por assets/js/pdf-texto.js (extraerTextoPowerPoint), compartida
@@ -124,6 +126,8 @@ window.i18nComun = {
     'ayuda-etiqueta': 'Help',
     'title-deshacer': 'Undo (Ctrl+Z; on a phone, tap the image with two fingers)',
     'title-rehacer': 'Redo (Ctrl+Shift+Z)',
+    'title-pantalla-completa': 'Full screen (F)',
+    'title-salir-pantalla-completa': 'Exit full screen (Esc or F)',
     'vista-cuadricula': '▦ Grid',
     'vista-lista': '☰ List',
     'ppt-sin-diapositivas': 'No readable slides were found in this file.',

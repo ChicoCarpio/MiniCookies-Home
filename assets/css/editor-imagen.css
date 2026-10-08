@@ -101,3 +101,15 @@
 .botones-historial button { min-width: 44px; height: 34px; padding: 0 10px; border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); color: var(--texto); font-size: 1.1rem; line-height: 1; cursor: pointer; }
 .botones-historial button:hover:not(:disabled) { border-color: var(--azul); }
 .botones-historial button:disabled { opacity: 0.35; cursor: default; }
+.botones-historial button.activo { border-color: var(--azul); background: var(--activo-fondo); }
+
+/* Pantalla completa (assets/js/pantalla-completa.js). El navegador ya le da
+   al elemento todo el alto y el ancho; acá, el fondo y el reparto: en PC una
+   fila para el editor y otra, de alto fijo, para el anuncio (franja propia
+   debajo, sin nada encima: plan 4.4). En celular el anuncio ya está en la
+   tira de app-movil.js. */
+.pantalla-completa-activa { background: var(--gris-fondo); color: var(--texto); overflow: hidden; }
+body:not(.app-activo) .pantalla-completa-activa { padding: 12px; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; margin: 0; }
+body:not(.app-activo) .pantalla-completa-activa > * { min-height: 0; }
+.franja-anuncio-completa { grid-column: 1 / -1; display: flex; justify-content: center; padding-top: 8px; border-top: 1px solid var(--gris-borde); }
+.franja-anuncio-completa .anuncio { width: min(728px, 100%); height: 90px; min-height: 90px; margin: 0; overflow: hidden; }

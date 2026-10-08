@@ -136,13 +136,11 @@ window.Historial = (function () {
   }
 
   // Ctrl+Z deshace; Ctrl+Shift+Z y Ctrl+Y rehacen. En un campo de texto no se
-  // tocan: ahí deshacen lo escrito, como siempre.
+  // tocan: ahí deshacen lo escrito, como siempre (la regla es de atajos.js).
   function conectarTeclado(historial, activo) {
     document.addEventListener('keydown', (e) => {
       if (!(e.ctrlKey || e.metaKey) || e.altKey || !activo()) return;
-      const t = e.target;
-      if (t && (t.isContentEditable || t.tagName === 'TEXTAREA'
-        || (t.tagName === 'INPUT' && !['range', 'checkbox', 'radio', 'button', 'color', 'file'].includes(t.type)))) return;
+      if (window.Atajos ? window.Atajos.enCampoDeTexto(e) : /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
       const tecla = e.key.toLowerCase();
       if (tecla === 'z' && !e.shiftKey) { e.preventDefault(); historial.deshacer(); }
       else if ((tecla === 'z' && e.shiftKey) || tecla === 'y') { e.preventDefault(); historial.rehacer(); }

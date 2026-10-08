@@ -83,6 +83,22 @@
     return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
   }
 
+  // El anuncio real es un <iframe> de AdSense: con insertBefore/appendChild
+  // el navegador lo recarga y queda en blanco. moveBefore (Chrome/Edge 133+)
+  // lo mueve sin recargarlo; donde no existe, se mueve como siempre.
+  // moveBefore solo mueve entre nodos que ya están en la página: con la
+  // tira todavía suelta tiraba HierarchyRequestError, y como cortaba
+  // encender() a la mitad, el modo celular quedaba sin categorías ni
+  // botones (2026-10-04). Si igual falla, se mueve como siempre.
+  // También la usa pantalla-completa.js (window.AppMovil.moverSinRecargar).
+  function mover(padre, elemento, referencia) {
+    if (padre.moveBefore && padre.isConnected && elemento.isConnected) {
+      try { padre.moveBefore(elemento, referencia); return; } catch (e) { /* abajo */ }
+    }
+    padre.insertBefore(elemento, referencia);
+  }
+  window.AppMovil = { moverSinRecargar: mover };
+
   function iniciar(shell) {
     var cuerpo = document.body;
     var consulta = window.matchMedia(ANCHO_CELULAR);
@@ -411,20 +427,6 @@
       if (!encabezado || !cuerpo.classList.contains('app-activo')) return;
       var alto = Math.round(encabezado.getBoundingClientRect().height);
       document.documentElement.style.setProperty('--app-alto-encabezado', alto + 'px');
-    }
-
-    // El anuncio real es un <iframe> de AdSense: con insertBefore/appendChild
-    // el navegador lo recarga y queda en blanco. moveBefore (Chrome/Edge 133+)
-    // lo mueve sin recargarlo; donde no existe, se mueve como siempre.
-    // moveBefore solo mueve entre nodos que ya están en la página: con la
-    // tira todavía suelta tiraba HierarchyRequestError, y como cortaba
-    // encender() a la mitad, el modo celular quedaba sin categorías ni
-    // botones (2026-10-04). Si igual falla, se mueve como siempre.
-    function mover(padre, elemento, referencia) {
-      if (padre.moveBefore && padre.isConnected && elemento.isConnected) {
-        try { padre.moveBefore(elemento, referencia); return; } catch (e) { /* abajo */ }
-      }
-      padre.insertBefore(elemento, referencia);
     }
 
     // --- Encender / apagar según el ancho ---

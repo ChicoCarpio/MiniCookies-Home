@@ -314,6 +314,7 @@ window.i18nPagina = {
           <div class="botones-historial">
             <button type="button" id="botonDeshacer" data-i18n-attr="title:title-deshacer;aria-label:title-deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)" disabled>↶</button>
             <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
+            <button type="button" id="botonPantallaCompleta" data-i18n-attr="title:title-pantalla-completa;aria-label:title-pantalla-completa" title="Pantalla completa (F)" aria-label="Pantalla completa (F)" aria-pressed="false" hidden>⛶</button>
           </div>
           <p class="nota-lateral" style="margin:8px 0 0;" data-i18n="nota-original">Mantené presionada la imagen para ver el original</p>
           <p class="nota-lateral" style="margin:8px 0 0;"><span data-i18n="nota-avanzado-a">¿Necesitás editar solo una parte de la imagen, por zona o por color, con varias capas? Probá el </span><a href="editor-avanzado-imagen.html" data-i18n="nota-avanzado-link">Editor avanzado →</a></p>
@@ -518,7 +519,9 @@ window.i18nPagina = {
 <script src="../assets/js/filtros-gpu.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
+<script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
+<script src="../assets/js/pantalla-completa.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -1065,6 +1068,14 @@ const historial = Historial.conectar({
   lienzo: vistaPrevia,
   activo: () => !!imagenActual && editorCompleto.style.display !== 'none',
 });
+
+// ===== Pantalla completa y atajos de teclado (plan, fase 4) =====
+const editorAbierto = () => !!imagenActual && editorCompleto.style.display !== 'none';
+PantallaCompleta.conectar({ contenedor: document.getElementById('layoutEditor'), boton: document.getElementById('botonPantallaCompleta'), activo: editorAbierto });
+Atajos.conectar({
+  'ctrl+0': () => { aplicarZoomSimple(1); zoomAutomaticoSimple = true; },
+  '\\': { abajo: mostrarOriginal, arriba: dejarDeComparar },
+}, editorAbierto);
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));

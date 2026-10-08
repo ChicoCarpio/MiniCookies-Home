@@ -972,6 +972,7 @@ window.i18nPagina = {
           <div class="botones-historial">
             <button type="button" id="botonDeshacer" data-i18n-attr="title:title-deshacer;aria-label:title-deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)" disabled>↶</button>
             <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
+            <button type="button" id="botonPantallaCompleta" data-i18n-attr="title:title-pantalla-completa;aria-label:title-pantalla-completa" title="Pantalla completa (F)" aria-label="Pantalla completa (F)" aria-pressed="false" hidden>⛶</button>
           </div>
           <!-- Botón aparte (no sobre la imagen): en el lienzo, presionar ya sirve para pintar, mover o elegir color -->
           <button type="button" id="botonVerOriginal" data-app-categoria="Original" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
@@ -1187,7 +1188,9 @@ window.i18nPagina = {
 <script src="../assets/js/mascaras-capa.js"></script>
 <script src="../assets/js/contenido-capa.js"></script>
 <script src="../assets/js/tipos-grupo.js"></script>
+<script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
+<script src="../assets/js/pantalla-completa.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
@@ -4540,6 +4543,45 @@ const historial = Historial.conectar({
   lienzo: canvasTrabajo,
   activo: () => !!imagenActual && editorCompleto.style.display !== 'none',
 });
+
+// ===== Pantalla completa y atajos de teclado (plan, fase 4) =====
+const editorAbierto = () => !!imagenActual && editorCompleto.style.display !== 'none';
+PantallaCompleta.conectar({ contenedor: document.getElementById('layoutEditor'), boton: document.getElementById('botonPantallaCompleta'), activo: editorAbierto });
+
+// Una herramienta del lienzo con su tecla (la de Photoshop): solo si vale
+// para lo elegido, y sin el "segundo toque vuelve a Mover" del botón.
+function elegirHerramientaConTecla(herramienta) {
+  const item = itemActivo();
+  const boton = document.querySelector(`#herramientasLienzo [data-herramienta="${herramienta}"]`);
+  if (!item || !boton || !herramientaValida(item, herramienta) || herramientaLienzo === herramienta) return;
+  boton.click();
+}
+// Espacio mantenido: mover la vista con cualquier herramienta, y al soltar
+// vuelve la de antes.
+let herramientaAntesDelEspacio = null;
+Atajos.conectar({
+  'ctrl+0': encajarEnLaVista,
+  v: () => elegirHerramientaConTecla('transformar'),
+  b: () => elegirHerramientaConTecla('pincel'),
+  e: () => elegirHerramientaConTecla('borrar'),
+  i: () => elegirHerramientaConTecla('gotero'),
+  g: () => elegirHerramientaConTecla('degradado'),
+  ' ': {
+    abajo: () => {
+      if (herramientaLienzo === 'mover' || pintando || gestoContenido) return;
+      herramientaAntesDelEspacio = herramientaLienzo;
+      herramientaLienzo = 'mover';
+      actualizarControlesSeleccion();
+    },
+    arriba: () => {
+      if (herramientaAntesDelEspacio === null) return;
+      herramientaLienzo = herramientaAntesDelEspacio;
+      herramientaAntesDelEspacio = null;
+      actualizarControlesSeleccion();
+    },
+  },
+  '\\': { abajo: () => verOriginal({ preventDefault() {} }), arriba: dejarDeVerOriginal },
+}, editorAbierto);
 
 // ===== Paneles laterales plegables =====
 // En celular arrancan cerrados (son cajones sobre la imagen) y abrir uno

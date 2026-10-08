@@ -1302,6 +1302,101 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
+  // Pantalla completa y atajos de teclado (2026-10-07, pantalla-completa.js y
+  // atajos.js). Sin una persona de verdad el navegador no deja entrar a
+  // pantalla completa: se simula su aviso (fullscreenchange) y se comprueba
+  // lo que hace el editor: el anuncio entra a su franja y vuelve a su lugar,
+  // la burbuja "?" se cuelga adentro y el botón cambia de estado.
+  await prueba('pantalla completa y atajos (editor avanzado, de color y collage)', async () => {
+    const h = {};
+    const el = (id) => D().getElementById(id);
+    const archivo = async (n = 1) => {
+      const c = D().createElement('canvas'); c.width = 120; c.height = 80;
+      const cx = c.getContext('2d'); cx.fillStyle = 'rgb(40,40,40)'; cx.fillRect(0, 0, 60, 80); cx.fillStyle = 'rgb(220,220,220)'; cx.fillRect(60, 0, 60, 80);
+      const b = await new Promise((r) => c.toBlob(r, 'image/png'));
+      return Array.from({ length: n }, (_, i) => new (W().File)([b], 'f' + i + '.png', { type: 'image/png' }));
+    };
+    const fingir = (elemento) => {
+      Object.defineProperty(D(), 'fullscreenElement', { configurable: true, get: () => elemento });
+      D().dispatchEvent(new (W().Event)('fullscreenchange'));
+    };
+    const tecla = (key, tipo = 'keydown', extra = {}) => (extra.en || D().body).dispatchEvent(new (W().KeyboardEvent)(tipo, { key, bubbles: true, ...extra }));
+    const revisarPantallaCompleta = async (contenedor, nombre) => {
+      const boton = el('botonPantallaCompleta');
+      afirmar(boton && !boton.hidden, nombre + ': no aparece el botón de pantalla completa');
+      const anuncio = D().querySelector('.anuncio'), padre = anuncio.parentNode, siguiente = anuncio.nextSibling;
+      fingir(contenedor);
+      await esperar(100);
+      const franja = contenedor.querySelector('.franja-anuncio-completa');
+      afirmar(contenedor.classList.contains('pantalla-completa-activa'), nombre + ': el contenedor no pasó a pantalla completa');
+      afirmar(franja && franja.contains(anuncio) && franja.parentNode === contenedor, nombre + ': el anuncio no entró a su franja');
+      afirmar(boton.getAttribute('aria-pressed') === 'true' && boton.title === W().t('title-salir-pantalla-completa'), nombre + ': el botón no dice "salir": ' + boton.title);
+      const alto = franja.querySelector('.anuncio').getBoundingClientRect().height;
+      fingir(null);
+      await esperar(100);
+      afirmar(anuncio.parentNode === padre && anuncio.nextSibling === siguiente && !contenedor.querySelector('.franja-anuncio-completa'), nombre + ': el anuncio no volvió a su lugar');
+      afirmar(!contenedor.classList.contains('pantalla-completa-activa') && boton.getAttribute('aria-pressed') === 'false', nombre + ': no salió de pantalla completa');
+      return 'anuncio ' + Math.round(alto) + ' px';
+    };
+
+    // --- Editor avanzado ---
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    el('entradaArchivo').files = archivos(await archivo()).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual'), 15000), 'el editor avanzado no cargó la imagen');
+    await esperar(300);
+    const layout = el('layoutEditor');
+    h.avanzado = await revisarPantallaCompleta(layout, 'avanzado');
+    // La burbuja "?" se cuelga del elemento en pantalla completa.
+    fingir(layout);
+    const tip = D().querySelector('.ayuda-tip'), burbuja = tip.querySelector('.ayuda-burbuja');
+    tip.querySelector('.ayuda-boton').dispatchEvent(new (W().FocusEvent)('focus'));
+    afirmar(layout.contains(burbuja), 'la burbuja "?" quedó fuera de la pantalla completa');
+    tip.querySelector('.ayuda-boton').dispatchEvent(new (W().FocusEvent)('blur'));
+    fingir(null);
+    await esperar(100);
+
+    // Atajos: herramientas, espacio mantenido, "\" mantenido, Ctrl+0.
+    const herramienta = () => W().eval('herramientaLienzo');
+    tecla('e'); h.e = herramienta();
+    afirmar(h.e === 'borrar', 'E no eligió el borrador: ' + h.e);
+    tecla('b'); h.b = herramienta();
+    afirmar(h.b === 'pincel', 'B no eligió el pincel: ' + h.b);
+    tecla(' '); h.espacio = herramienta();
+    tecla(' ', 'keyup'); h.trasEspacio = herramienta();
+    afirmar(h.espacio === 'mover' && h.trasEspacio === 'pincel', 'espacio mantenido: ' + h.espacio + ' -> ' + h.trasEspacio);
+    tecla('g'); afirmar(herramienta() === 'pincel', 'G eligió el degradado sin una base de degradado');
+    tecla('\\'); h.original = W().eval('mostrandoOriginal');
+    tecla('\\', 'keyup'); h.trasOriginal = W().eval('mostrandoOriginal');
+    afirmar(h.original === true && h.trasOriginal === false, '"\\" mantenido: ' + h.original + ' -> ' + h.trasOriginal);
+    W().aplicarZoom(2.5); W().eval('zoomAutomatico = false');
+    tecla('0', 'keydown', { ctrlKey: true });
+    afirmar(W().eval('zoomAutomatico') === true, 'Ctrl+0 no encajó la imagen');
+    // Escribiendo, las letras son del texto.
+    el('botonNuevoTexto').click();
+    tecla('e', 'keydown', { en: el('textoCapa') });
+    afirmar(herramienta() !== 'borrar', 'escribir una "e" en el texto eligió el borrador');
+
+    // --- Editor de color ---
+    await abrir('/herramientas/Editor-de-color-de-imagen.html'); await esperar(300);
+    el('entradaArchivo').files = archivos(await archivo()).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual'), 15000), 'el editor de color no cargó la imagen');
+    await esperar(300);
+    h.color = await revisarPantallaCompleta(el('layoutEditor'), 'de color');
+    tecla('\\'); const comparando = W().eval('comparando'); tecla('\\', 'keyup');
+    afirmar(comparando && !W().eval('comparando'), 'el editor de color no mostró el original con "\\"');
+
+    // --- Collage ---
+    await abrir('/herramientas/collage-imagenes.html'); await esperar(300);
+    el('entradaArchivo').files = archivos(await archivo(2)).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('fotos').length === 2, 15000), 'el collage no cargó las fotos');
+    await esperar(300);
+    h.collage = await revisarPantallaCompleta(el('editor'), 'collage');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   // Ajustes del motor agregados el 2026-10-04 (Temperatura, Matiz, Blancos,
   // Negros, Nitidez, Viñeta), en los dos editores. Imagen: mitad gris 40 y
   // mitad gris 220, así cada uno deja una huella: el balance separa los
@@ -1852,7 +1947,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 function paginaDeControl(lista) {
   return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>pruebas</title>
 <style>html,body{margin:0}iframe{width:1366px;height:900px;border:0}</style></head><body>
-<iframe id="marco"></iframe>
+<iframe id="marco" allow="fullscreen"></iframe>
 <script>const PAGINAS = ${JSON.stringify(lista)};\nconst SOLO = ${JSON.stringify(process.env.PROBAR_SOLO || '')};\n${PRUEBAS.replace(/<\/(script)/gi, '<\\/$1')}</script></body></html>`;
 }
 

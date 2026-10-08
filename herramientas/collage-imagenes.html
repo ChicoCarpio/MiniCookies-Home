@@ -17,6 +17,10 @@
 
   .lienzo-contenedor { display: flex; justify-content: center; background: repeating-conic-gradient(var(--gris-borde) 0 25%, transparent 0 50%) 0 0 / 20px 20px; border-radius: 10px; padding: 12px; }
   #lienzo { max-width: 100%; max-height: 70vh; touch-action: none; cursor: grab; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+  /* En pantalla completa (PC): cada columna con su propio desplazamiento y el
+     collage tan alto como deje la franja del anuncio. */
+  body:not(.app-activo) .editor-collage.pantalla-completa-activa > div { overflow-y: auto; }
+  body:not(.app-activo) .editor-collage.pantalla-completa-activa #lienzo { max-height: calc(100vh - 260px); }
   #lienzo.moviendo { cursor: grabbing; }
   .ayuda-gestos { color: var(--texto-suave); font-size: 0.85rem; margin: 8px 0 0; text-align: center; }
 
@@ -231,6 +235,7 @@ window.i18nPagina = {
         <div class="botones-historial">
           <button type="button" id="botonDeshacer" data-i18n-attr="title:title-deshacer;aria-label:title-deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)" disabled>↶</button>
           <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
+          <button type="button" id="botonPantallaCompleta" data-i18n-attr="title:title-pantalla-completa;aria-label:title-pantalla-completa" title="Pantalla completa (F)" aria-label="Pantalla completa (F)" aria-pressed="false" hidden>⛶</button>
         </div>
         <p class="ayuda-gestos" data-i18n="ayuda-gestos">Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla</p>
 
@@ -311,7 +316,9 @@ window.i18nPagina = {
 
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
+<script src="../assets/js/pantalla-completa.js"></script>
 <script>
 const MAX_FOTOS = 12;
 const LADO_MAX_VISTA = 1600; // las fotos se reducen a esto para que la vista previa responda rápido
@@ -665,6 +672,9 @@ const historial = Historial.conectar({
   lienzo,
   activo: () => fotos.length > 0,
 });
+
+// ===== Pantalla completa (plan, fase 4) =====
+PantallaCompleta.conectar({ contenedor: editor, boton: document.getElementById('botonPantallaCompleta'), activo: () => fotos.length > 0 });
 
 // Al cambiar cuántas fotos hay, se elige el primer diseño para esa cantidad
 // (como Instagram, que muestra los diseños según las fotos elegidas).
