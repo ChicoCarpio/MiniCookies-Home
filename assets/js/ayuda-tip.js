@@ -76,8 +76,17 @@
     boton.setAttribute('aria-describedby', burbuja.id);
     burbuja.setAttribute('role', 'tooltip');
 
-    // El foco por teclado (Tab) cuenta en cualquier dispositivo.
-    boton.addEventListener('focus', function () { mostrar(tip, boton, burbuja); });
+    // El foco por teclado (Tab) cuenta en cualquier dispositivo. El que llega
+    // por un toque o un clic, no: en pantallas táctiles el toque primero da el
+    // foco (y la abría) y enseguida el clic la alternaba, o sea, la cerraba.
+    // Pasaba en el emulador de celular de Edge y en Chrome de Android.
+    var porPuntero = false;
+    boton.addEventListener('pointerdown', function () { porPuntero = true; });
+    boton.addEventListener('focus', function () {
+      if (porPuntero) { porPuntero = false; return; }
+      mostrar(tip, boton, burbuja);
+    });
+    boton.addEventListener('click', function () { porPuntero = false; });
     boton.addEventListener('blur', cerrar);
 
     if (esMouse) {

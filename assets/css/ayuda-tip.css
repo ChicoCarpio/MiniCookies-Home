@@ -26,7 +26,8 @@
 .ayuda-boton:hover, .ayuda-boton:focus-visible { border-color: var(--azul); color: var(--azul); }
 .ayuda-burbuja {
   display: none;
-  position: fixed; z-index: 500; transform: translateX(-50%);
+  /* Por encima de la capa de pantalla completa de celular (app-movil.css, 1200). */
+  position: fixed; z-index: 1300; transform: translateX(-50%);
   width: max-content; max-width: min(260px, 80vw);
   background: var(--superficie); color: var(--texto); border: 1px solid var(--gris-borde);
   border-radius: var(--radio, 10px); box-shadow: 0 4px 14px rgba(0,0,0,.25);

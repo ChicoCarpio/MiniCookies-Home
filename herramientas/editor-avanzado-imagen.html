@@ -273,6 +273,13 @@ window.i18nPagina = {
     'nota-borrar-capa': 'Borra partes de esta capa: se ve lo que hay debajo.',
     'nota-borrar-foto': 'Borra partes de la foto: quedan transparentes.',
     'boton-restaurar-borrado': 'Restaurar lo borrado',
+    'lbl-borrar-con-zona': 'De una vez, con la zona',
+    'nota-borrar-con-zona': 'Usan la zona de lo elegido (🎯 Zona). Por ejemplo, con «Primer plano» o un objeto elegido tocándolo, «fuera de la zona» deja solo eso y el resto queda transparente: es la forma de quitar el fondo. Con un texto o una imagen agregados elegidos, se borra eso; si no, la foto. Se deshace con ↶.',
+    'boton-borrar-fuera-zona': '🧽 Borrar lo que está fuera de la zona',
+    'boton-borrar-zona': 'Borrar lo que está en la zona',
+    'aviso-zona-de': 'Usa la zona de «{nombre}».',
+    'aviso-zona-toda': 'La zona de «{nombre}» es toda la imagen: elegí una en 🎯 Zona (por ejemplo, Primer plano).',
+    'aviso-zona-esperando-ia': 'La IA todavía está separando la zona: probá de nuevo cuando termine.',
     'nota-descarga-png': 'Sale en PNG, para que lo borrado quede transparente.',
     'ayuda-objeto': 'Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella.',
     'fondo-listo-objeto': 'Fondo: todo menos el objeto elegido.',
@@ -516,6 +523,13 @@ window.i18nPagina = {
     'nota-borrar-capa': 'Erases parts of this layer: what is underneath shows through.',
     'nota-borrar-foto': 'Erases parts of the photo: they become transparent.',
     'boton-restaurar-borrado': 'Restore what was erased',
+    'lbl-borrar-con-zona': 'All at once, with the area',
+    'nota-borrar-con-zona': 'They use the area of what is picked (🎯 Area). For example, with “Foreground” or an object picked by tapping it, “outside the area” keeps only that and the rest becomes transparent: that is how you remove the background. With an added text or image picked, that is erased; otherwise, the photo. Undo with ↶.',
+    'boton-borrar-fuera-zona': '🧽 Erase everything outside the area',
+    'boton-borrar-zona': 'Erase what is in the area',
+    'aviso-zona-de': 'Uses the area of “{nombre}”.',
+    'aviso-zona-toda': 'The area of “{nombre}” is the whole image: pick one in 🎯 Area (for example, Foreground).',
+    'aviso-zona-esperando-ia': 'The AI is still separating the area: try again when it finishes.',
     'nota-descarga-png': 'Saved as PNG, so the erased parts stay transparent.',
     'ayuda-objeto': 'With "Pick object", tap anything in the photo (a flower, a person) to keep only that.',
     'fondo-listo-objeto': 'Background: everything but the picked object.',
@@ -790,6 +804,18 @@ window.i18nPagina = {
                 </label>
                 <button type="button" class="boton-capa-accion" id="botonBorrarMascaraCapa" data-i18n="boton-borrar-mascara">Borrar lo pintado en esta pieza</button>
                 <button type="button" class="boton-capa-accion" id="botonRestaurarBorrado" style="display:none;" data-i18n="boton-restaurar-borrado">Restaurar lo borrado</button>
+                <div id="borrarConZona" class="controles controles-apilados" style="display:none;">
+                  <span class="titulo-mascara">
+                    <span data-i18n="lbl-borrar-con-zona">De una vez, con la zona</span>
+                    <span class="ayuda-tip">
+                      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                      <span class="ayuda-burbuja" data-i18n="nota-borrar-con-zona">Usan la zona de lo elegido (🎯 Zona). Por ejemplo, con «Primer plano» o un objeto elegido tocándolo, «fuera de la zona» deja solo eso y el resto queda transparente: es la forma de quitar el fondo. Con un texto o una imagen agregados elegidos, se borra eso; si no, la foto. Se deshace con ↶.</span>
+                    </span>
+                  </span>
+                  <span class="nota-lateral" id="avisoBorrarZona" role="status" aria-live="polite"></span>
+                  <button type="button" class="boton-capa-accion" id="botonBorrarFueraZona" data-i18n="boton-borrar-fuera-zona">🧽 Borrar lo que está fuera de la zona</button>
+                  <button type="button" class="boton-capa-accion" id="botonBorrarZona" data-i18n="boton-borrar-zona">Borrar lo que está en la zona</button>
+                </div>
               </div>
 
               <span class="titulo-mascara">
@@ -2758,6 +2784,12 @@ function actualizarControlesSeleccion() {
   const notaBorrar = document.getElementById('notaBorrar');
   notaBorrar.style.display = borrando ? '' : 'none';
   notaBorrar.textContent = t(seBorra ? 'nota-borrar-capa' : 'nota-borrar-foto');
+  document.getElementById('borrarConZona').style.display = borrando ? '' : 'none';
+  if (borrando) {
+    const todaLaImagen = MascarasCapa.esTodaLaImagen(capa.mascara);
+    document.getElementById('botonBorrarFueraZona').disabled = todaLaImagen;
+    document.getElementById('avisoBorrarZona').textContent = t(todaLaImagen ? 'aviso-zona-toda' : 'aviso-zona-de').replace('{nombre}', capa.nombre);
+  }
 
   // Los controles de la pieza elegida.
   document.getElementById('controlesPieza').style.display = pieza ? 'flex' : 'none';
@@ -3152,6 +3184,56 @@ botonRestaurarBorrado.addEventListener('click', () => {
   actualizarAvisoDescargaPng();
   actualizarControlesSeleccion();
 });
+
+// Borrar con la zona: lo que está fuera (o dentro) de la zona de lo elegido
+// queda transparente de una vez. Es "Borrar a transparente" con la forma que
+// ya se eligió (el primer plano, un objeto tocado, un color…): la forma de
+// quitar el fondo. Se suma a lo ya borrado y se deshace como un trazo.
+function zonaEsperandoIA(item) {
+  return item.mascara.piezas.some((p) => p.visible && (p.tipo === 'sujeto' || p.tipo === 'objeto') && !iaDePieza(item, p));
+}
+function borrarConZona(fuera) {
+  const item = itemActivo();
+  if (!item || !canvasOrigenTrabajo) return;
+  // Con la IA sin terminar la zona todavía no marca nada: "fuera" borraría todo.
+  if (zonaEsperandoIA(item)) { document.getElementById('avisoBorrarZona').textContent = t('aviso-zona-esperando-ia'); return; }
+  const mascara = generarMascaraCapa(item, anchoTrabajo, altoTrabajo, false);
+  if (fuera && !mascara) return; // la zona es toda la imagen: afuera no hay nada
+  // Lo que se borra, a tamaño de trabajo (alfa = cuánto).
+  const marca = document.createElement('canvas');
+  marca.width = anchoTrabajo; marca.height = altoTrabajo;
+  const cm = marca.getContext('2d');
+  if (!fuera && mascara) cm.drawImage(mascara, 0, 0);
+  else {
+    cm.fillStyle = '#fff';
+    cm.fillRect(0, 0, anchoTrabajo, altoTrabajo);
+    if (mascara) { cm.globalCompositeOperation = 'destination-out'; cm.drawImage(mascara, 0, 0); }
+  }
+  const seBorra = capaQueSeBorra(item);
+  if (!seBorra) {
+    if (!borradoFoto) { borradoFoto = document.createElement('canvas'); borradoFoto.width = anchoTrabajo; borradoFoto.height = altoTrabajo; }
+    borradoFoto.getContext('2d').drawImage(marca, 0, 0, borradoFoto.width, borradoFoto.height);
+  } else {
+    // En un texto o una imagen agregados, lo borrado va en las coordenadas de
+    // su contenido: se pasa de la foto al contenido con la inversa de cómo se
+    // dibuja (ver destinoDelBorrador).
+    const fuente = fuenteDeContenido(seBorra);
+    if (!seBorra.borrado) { seBorra.borrado = document.createElement('canvas'); seBorra.borrado.width = fuente.width; seBorra.borrado.height = fuente.height; }
+    const b = seBorra.borrado, k = cajaDeContenido(seBorra), c = seBorra.contenido;
+    const ctx = b.getContext('2d');
+    ctx.save();
+    ctx.translate(b.width / 2, b.height / 2);
+    ctx.scale(b.width / (2 * k.mx), b.height / (2 * k.my));
+    ctx.scale(c.voltearH ? -1 : 1, c.voltearV ? -1 : 1);
+    ctx.rotate(-k.giro);
+    ctx.translate(-k.cx, -k.cy);
+    ctx.drawImage(marca, 0, 0);
+    ctx.restore();
+  }
+  borradoCambio();
+}
+document.getElementById('botonBorrarFueraZona').addEventListener('click', () => borrarConZona(true));
+document.getElementById('botonBorrarZona').addEventListener('click', () => borrarConZona(false));
 
 // --- Arrastrar para mover la imagen (cuando el pincel NO está activo) ---
 let paneando = false;

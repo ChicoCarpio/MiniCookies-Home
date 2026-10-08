@@ -1673,6 +1673,19 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(await hasta(() => W().sujetoListo(W().eval('imagenActual')), 5000), 'el primer plano no se calculó');
     h.primerPlano = await leer();
     afirmar(cerca(h.primerPlano, [64, 128, 64]), 'primer plano: ' + h.primerPlano);
+    // Quitar el fondo: con el borrador, "Borrar lo que está fuera de la zona"
+    // deja transparente todo menos el primer plano (2026-10-08).
+    clic('#herramientasLienzo [data-herramienta="borrar"]');
+    afirmar(D().getElementById('borrarConZona').style.display !== 'none', 'con el borrador no aparecen los botones de borrar con la zona');
+    clic('#botonBorrarFueraZona');
+    await esperar(300);
+    const alfa = (x) => lienzo.getContext('2d').getImageData(Math.round(x * lienzo.width / 200), Math.round(lienzo.height / 2), 1, 1).data[3];
+    h.sinFondo = [alfa(40), alfa(100), alfa(160)].join(',');
+    afirmar(alfa(40) > 250 && alfa(100) < 5 && alfa(160) > 250, 'borrar fuera del primer plano (alfa izquierda, medio, derecha): ' + h.sinFondo);
+    clic('#botonRestaurarBorrado');
+    await esperar(300);
+    afirmar(alfa(100) > 250, 'restaurar no devolvió el fondo');
+    clic('#herramientasLienzo [data-herramienta="objeto"]'); // de vuelta a Elegir objeto, como lo dejó el primer plano
     invertirPieza(true);
     h.fondo = await leer();
     afirmar(cerca(h.fondo, [128, 64, 128]), 'fondo: ' + h.fondo);
@@ -1847,6 +1860,20 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(h.descarga === 'rojo gris', 'descarga: ' + h.descarga);
     afirmar(W().itemAProyecto(capa).mascara.piezas[0].fuente === 'capa', 'el proyecto no guarda "Medir sobre"');
     afirmar(W().MascarasCapa.desdeV7({ base: 'color' }).piezas[0].fuente === 'foto', 'un proyecto viejo no sigue midiendo sobre la foto');
+    // Quitar el fondo de la imagen agregada: con su primer plano (la mitad
+    // roja) como zona, "Borrar lo que está fuera de la zona" borra la mitad
+    // azul de la imagen misma: con la zona de vuelta en "toda", sigue sin
+    // verse, y lo borrado la acompaña al moverla.
+    vaciarZona(); agregarPieza('sujeto');
+    afirmar(await hasta(() => W().sujetoListo(W().fuenteDeContenido(cont)), 5000), 'el primer plano de la capa no está');
+    clic('#herramientasLienzo [data-herramienta="borrar"]');
+    clic('#botonBorrarFueraZona');
+    zonaSoloToda();
+    h.sinFondoCapa = await leer([75, 125]);
+    afirmar(h.sinFondoCapa === 'rojo gris', 'borrar fuera de la zona en la imagen agregada: ' + h.sinFondoCapa);
+    cont.contenido.centro = { x: 0.25, y: 0.5 }; W().programarRenderizado();
+    h.sinFondoMovida = await leer([25, 75, 125]);
+    afirmar(h.sinFondoMovida === 'rojo gris gris', 'lo borrado no acompañó a la imagen: ' + h.sinFondoMovida);
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · la IA analizó ' + tamanos.join(', ');
   });
 
