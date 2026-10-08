@@ -2107,6 +2107,105 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
+  // Fase 8 del rediseño (2026-10-08): CHECKLIST-EDITORES.md, de punta a punta.
+  // Cada control de la lista tiene que existir y estar donde dice el plan: en
+  // el bloque de su categoría (que la barra de íconos de PC y la de abajo del
+  // celular abren) o en la barra superior / "⋯". En PC y a 390 px. Y todo
+  // texto marcado para traducir en las tres páginas tiene su versión en inglés.
+  await prueba('checklist del rediseño: cada control en su categoría, PC y celular, con inglés', async () => {
+    const EDITORES = {
+      'editor-avanzado-imagen': { fotos: 1, lugares: {
+        barra: ['botonDeshacer', 'botonRehacer', 'botonPantallaCompleta', 'botonDescargarAvanzado', 'resolucionVistaPrevia', 'notaDescargaPng', 'botonGuardarProyecto', 'botonCargarProyecto', 'botonCambiarImagen', 'botonRestablecerAvanzado'],
+        capas: ['listaCapas', 'botonNuevaCapa', 'botonAgrupar', 'botonDesagrupar', 'botonSubirCapa', 'botonBajarCapa'],
+        texto: ['botonNuevoTexto', 'botonNuevaImagen', 'botonCopiarFoto', 'avisoSinContenido', 'textoCapa', 'familiaTexto', 'colorTexto', 'colorContorno', 'grosorContorno', 'alineacionTexto', 'botonMoverCapa', 'posX', 'posY', 'tamanoContenido', 'giroContenido', 'botonVoltearH', 'botonVoltearV', 'botonCentrarContenido'],
+        zona: ['listaPiezas', 'botonAgregarPieza', 'menuPiezas', 'controlesPieza', 'modosOperacion', 'invertirPieza', 'botonSubirPieza', 'botonBajarPieza', 'toleranciaColor', 'luzDesde', 'luzHasta', 'luzSuavidad', 'botonTodoSujeto', 'invertirMascara', 'verMascara', 'colorVerMascara', 'controlesCroma', 'recorteCroma'],
+        'zona|borrar': ['tamanoPincelAvanzado', 'durezaPincel', 'botonBorrarMascaraCapa'],
+        borrar: ['botonBorrarFueraZona', 'botonBorrarZona', 'botonRestaurarBorrado'],
+        luz: ['exposicion', 'contraste', 'sombras', 'reflejos', 'blancos', 'negros'],
+        color: ['temperatura', 'matizBlancos', 'saturacion', 'intensidad', 'tono', 'colorRojo', 'colorVerde', 'colorAzul'],
+        bn: ['activarBN', 'canalRojo', 'canalVerde', 'canalAzul'],
+        efectos: ['claridad', 'nitidez', 'grano', 'sepia', 'invertir', 'desenfoque', 'vineta', 'dispersionIntensidad', 'dispersionMatiz', 'dispersionTamano', 'aberracionIntensidad', 'aberracionAngulo', 'aberracionMatiz'],
+        filtros: ['intensidadFiltro', 'presets'],
+        textura: ['modosTextura', 'texturaIntensidad', 'modosOrdenTextura'],
+      } },
+      'Editor-de-color-de-imagen': { fotos: 1, lugares: {
+        barra: ['botonDeshacer', 'botonRehacer', 'botonPantallaCompleta', 'botonDescargar', 'botonCambiarImagen', 'botonRestablecer'],
+        luz: ['exposicion', 'contraste', 'sombras', 'reflejos', 'blancos', 'negros'],
+        color: ['temperatura', 'matizBlancos', 'saturacion', 'intensidad', 'tono', 'colorRojo', 'colorVerde', 'colorAzul'],
+        bn: ['activarBN', 'canalRojo', 'canalVerde', 'canalAzul'],
+        efectos: ['claridad', 'nitidez', 'grano', 'sepia', 'invertir', 'desenfoque', 'vineta', 'dispersionIntensidad', 'dispersionMatiz', 'dispersionTamano', 'aberracionIntensidad', 'aberracionAngulo', 'aberracionMatiz'],
+        filtros: ['intensidadFiltro', 'presets'],
+        textura: ['modosTextura', 'texturaIntensidad', 'modosOrdenTextura'],
+      } },
+      'collage-imagenes': { fotos: 3, lugares: {
+        barra: ['botonDeshacer', 'botonRehacer', 'botonPantallaCompleta', 'botonDescargar', 'tamanoSalida', 'formatoSalida'],
+        diseno: ['listaDisenos'],
+        formato: ['botonesFormato'],
+        estilo: ['espacio', 'redondeo', 'colorFondo'],
+        fotos: ['botonAgregarFotos', 'barraFoto', 'zoomFoto', 'botonCentrar', 'botonListo', 'tiraOrden'],
+      } },
+    };
+    const detalle = [];
+    const revisarLugares = (pagina, lugares, ancho) => {
+      // Los controles de borrar viajan con los del pincel: están en Borrar
+      // cuando esa categoría está abierta (y en Zona, si no).
+      if (lugares.borrar) W().eval("esqueleto.abrir('borrar')");
+      let n = 0;
+      for (const [lugar, ids] of Object.entries(lugares)) {
+        for (const id of ids) {
+          const el = D().getElementById(id);
+          afirmar(el, pagina + ' (' + ancho + '): falta #' + id);
+          if (lugar === 'barra') {
+            afirmar(el.closest('.ed-barra, .ed-menu'), pagina + ' (' + ancho + '): #' + id + ' no está en la barra ni en "⋯"');
+          } else {
+            const bloque = el.closest('[data-categoria]');
+            const suyas = bloque ? bloque.getAttribute('data-categoria').split(/\s+/) : [];
+            afirmar(lugar.split('|').some((c) => suyas.includes(c)), pagina + ' (' + ancho + '): #' + id + ' está en "' + suyas.join(' ') + '", no en ' + lugar);
+          }
+          n += 1;
+        }
+      }
+      return n;
+    };
+    try {
+      for (const [pagina, { fotos, lugares }] of Object.entries(EDITORES)) {
+        await abrir('/herramientas/' + pagina + '.html'); await esperar(300);
+        // Textos traducibles sin inglés (el marcado; lo que arma el JS lo
+        // cubren las pruebas de cada editor).
+        const en = Object.assign({}, W().i18nComun.en, W().i18nPagina.en);
+        const claves = new Set();
+        D().querySelectorAll('[data-i18n]').forEach((e) => claves.add(e.getAttribute('data-i18n')));
+        D().querySelectorAll('[data-i18n-attr]').forEach((e) => e.getAttribute('data-i18n-attr').split(';').forEach((par) => { const k = par.split(':')[1]; if (k) claves.add(k.trim()); }));
+        const sinIngles = [...claves].filter((k) => en[k] === undefined);
+        afirmar(!sinIngles.length, pagina + ': sin inglés: ' + sinIngles.join(', '));
+        const entrada = D().getElementById('entradaArchivo');
+        const lista = [];
+        for (let i = 0; i < fotos; i++) lista.push(await imagenDePrueba(String(i), 300, 200));
+        entrada.files = archivos(lista).files;
+        entrada.dispatchEvent(new (W().Event)('change'));
+        afirmar(await hasta(() => D().body.classList.contains('ed-esqueleto-activo'), 15000), pagina + ': no se armó el esqueleto de PC');
+        await esperar(200);
+        const n = revisarLugares(pagina, lugares, 'PC');
+        marco.style.width = '390px'; marco.style.height = '844px';
+        afirmar(await hasta(() => D().body.classList.contains('ed-esqueleto-movil'), 5000), pagina + ': no pasó a celular');
+        await esperar(150);
+        revisarLugares(pagina, lugares, 'celular');
+        // Cada categoría del checklist tiene su botón abajo.
+        const iconos = [...D().querySelectorAll('.app-chip .app-icono')].map((e) => e.textContent);
+        for (const lugar of Object.keys(lugares)) {
+          if (lugar === 'barra' || lugar.includes('|')) continue;
+          afirmar(iconos.includes(W().EsqueletoEditor.CATEGORIAS[lugar].ico), pagina + ': en celular no hay botón para ' + lugar);
+        }
+        marco.style.width = ''; marco.style.height = '';
+        await hasta(() => D().body.classList.contains('ed-esqueleto-activo'), 5000);
+        detalle.push(pagina + ' ' + n + ' controles, ' + claves.size + ' textos');
+      }
+    } finally {
+      marco.style.width = ''; marco.style.height = '';
+    }
+    return detalle.join(' · ');
+  });
+
   await prueba('editor avanzado: croma (detecta el fondo verde, sombras, quitar el fondo)', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const c = D().createElement('canvas'); c.width = 200; c.height = 100;
