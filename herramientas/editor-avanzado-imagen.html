@@ -969,6 +969,10 @@ window.i18nPagina = {
               <div id="cursorPincelAvanzado"></div>
             </div>
           </div>
+          <div class="botones-historial">
+            <button type="button" id="botonDeshacer" data-i18n-attr="title:title-deshacer;aria-label:title-deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)" disabled>↶</button>
+            <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
+          </div>
           <!-- Botón aparte (no sobre la imagen): en el lienzo, presionar ya sirve para pintar, mover o elegir color -->
           <button type="button" id="botonVerOriginal" data-app-categoria="Original" style="border:1px solid var(--gris-borde); border-radius:999px; background:var(--gris-fondo); color:var(--texto); cursor:pointer;" data-i18n="boton-ver-original">👁 Mantené presionado para ver el original</button>
         </div>
@@ -1183,6 +1187,7 @@ window.i18nPagina = {
 <script src="../assets/js/mascaras-capa.js"></script>
 <script src="../assets/js/contenido-capa.js"></script>
 <script src="../assets/js/tipos-grupo.js"></script>
+<script src="../assets/js/historial.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 // ===== Elementos =====
@@ -3028,6 +3033,7 @@ canvasTrabajo.addEventListener('pointerleave', () => cursorPincelAvanzado.classL
 canvasTrabajo.addEventListener('pointerdown', (e) => {
   const capa = itemActivo();
   if (!capa) return;
+  const versionesPrevias = versionesAntesDelTrazo(); // antes de que el trazo cree lienzos
 
   // Mover (y el gotero, que elige con un clic): arrastrar mueve la imagen
   // dentro del recuadro (útil cuando está ampliada y no entra entera).
@@ -3080,7 +3086,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
     const destino = destinoDelBorrador(e);
     if (!destino) return;
     pintando = true;
-    borradoAntesDelTrazo = { lienzo: destino.lienzo, copia: copiaDeLienzo(destino.lienzo) };
+    borradoAntesDelTrazo = { lienzo: destino.lienzo, copia: copiaDeLienzo(destino.lienzo), ...versionesPrevias };
     canvasTrabajo.setPointerCapture(e.pointerId);
     ultimoPuntoPincel = destino.punto;
     pintarPunto(destino.lienzo.getContext('2d'), destino.punto, destino.radio, durezaPincelActual());
@@ -3093,7 +3099,7 @@ canvasTrabajo.addEventListener('pointerdown', (e) => {
   pintando = true;
   // Copia antes de empezar: si el trazo resulta ser el primer dedo de un
   // pellizco, se restaura y no queda una mancha no pedida.
-  mascaraAntesDelTrazo = { sumar: copiaDeLienzo(lienzos.sumar), quitar: copiaDeLienzo(lienzos.quitar) };
+  mascaraAntesDelTrazo = { sumar: copiaDeLienzo(lienzos.sumar), quitar: copiaDeLienzo(lienzos.quitar), ...versionesPrevias };
   canvasTrabajo.setPointerCapture(e.pointerId);
   ultimoPuntoPincel = coordenadasEnCanvasTrabajo(e);
   const radio = radioPincelEnMascara(), dureza = durezaPincelActual();
@@ -3169,6 +3175,27 @@ function terminarGestoLienzo() {
   zonaLienzo.classList.remove('paneando');
 }
 
+// Cómo estaban, antes de un trazo, las versiones y los lienzos que el trazo
+// puede crear o cambiar. Si el trazo era el comienzo de un pellizco, todo
+// vuelve exactamente como estaba (también las versiones y los lienzos que no
+// existían): si no, Deshacer guardaría un paso que no cambia nada.
+function versionesAntesDelTrazo() {
+  const item = itemActivo(), seBorra = capaQueSeBorra(item);
+  return {
+    item, seBorra,
+    versionMascara: item && item._versionMascara, pincelSumar: item && item.pincelSumar, pincelQuitar: item && item.pincelQuitar,
+    versionBorrado: seBorra && seBorra._versionBorrado, borrado: seBorra && seBorra.borrado,
+    versionFoto: versionBorradoFoto, foto: borradoFoto,
+  };
+}
+function volverVersionesAntesDelTrazo(a) {
+  if (a.item) Object.assign(a.item, { _versionMascara: a.versionMascara, pincelSumar: a.pincelSumar, pincelQuitar: a.pincelQuitar });
+  if (a.seBorra) Object.assign(a.seBorra, { _versionBorrado: a.versionBorrado, borrado: a.borrado });
+  else { versionBorradoFoto = a.versionFoto; borradoFoto = a.foto; }
+  actualizarAvisoDescargaPng();
+  programarRenderizado();
+}
+
 // Se llama cuando aparece el segundo dedo: lo que venía haciendo el primero
 // no era lo que el usuario quería, era el comienzo de un pellizco.
 function cancelarGestoDeUnDedo() {
@@ -3179,6 +3206,7 @@ function cancelarGestoDeUnDedo() {
     ctx.clearRect(0, 0, lienzo.width, lienzo.height);
     ctx.drawImage(copia, 0, 0);
     borradoCambio();
+    volverVersionesAntesDelTrazo(borradoAntesDelTrazo);
   }
   if (capa && pintando && mascaraAntesDelTrazo) {
     for (const [lienzo, antes] of [[capa.pincelSumar, mascaraAntesDelTrazo.sumar], [capa.pincelQuitar, mascaraAntesDelTrazo.quitar]]) {
@@ -3187,6 +3215,7 @@ function cancelarGestoDeUnDedo() {
       ctx.drawImage(antes, 0, 0);
     }
     marcarMascaraSucia(capa);
+    volverVersionesAntesDelTrazo(mascaraAntesDelTrazo);
     programarRenderizado();
   }
   const conContenido = capaDeContenido(capa);
@@ -4130,6 +4159,7 @@ async function mostrarArchivo(archivo) {
   sincronizarPanelesConActivo();
   pintarListaCapas();
   programarRenderizado();
+  historial.reiniciar();
   if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
 }
 
@@ -4425,8 +4455,90 @@ entradaProyecto.addEventListener('change', async (e) => {
   pintarListaCapas();
   sincronizarPanelesConActivo();
   programarRenderizado();
+  historial.reiniciar();
   if (!consultaMovil.matches) { solicitarMiniaturasFiltros(); solicitarMiniaturasTextura(); }
   entradaProyecto.value = '';
+});
+
+// ===== Deshacer y rehacer (assets/js/historial.js) =====
+// Un paso es el árbol de capas entero en JSON (sin las cachés y sin
+// "plegado", que no es una edición), más copias de los lienzos que cambian:
+// el pincel de cada máscara, lo borrado de cada objeto y de la foto. Las
+// imágenes de los objetos no cambian nunca: se guardan por referencia. La
+// capa elegida viaja con el paso pero no cuenta como cambio.
+const copiadorHistorial = Historial.crearCopiador();
+let versionHistorial = 1e9; // versiones de lo restaurado: nunca chocan con las de antes
+
+function capturarEstado() {
+  const lienzos = new Map();
+  const reemplazo = function (clave, valor) {
+    if (clave === '_cache' || clave === '_cacheForma' || clave === 'plegado') return undefined;
+    if (!(valor instanceof HTMLCanvasElement)) return valor;
+    if (clave === 'lienzo') { // la imagen de un objeto: no cambia
+      const token = 'img:' + this._idLienzo;
+      lienzos.set(token, valor);
+      return token;
+    }
+    const version = clave === 'borrado' ? this._versionBorrado : this._versionMascara;
+    const token = this.id + ':' + clave + ':' + version;
+    lienzos.set(token, copiadorHistorial.copia(this.id + ':' + clave, version, valor));
+    return token;
+  };
+  const arbol = JSON.stringify(capas, reemplazo);
+  let foto = null;
+  if (borradoFoto) {
+    foto = 'foto:' + versionBorradoFoto;
+    lienzos.set(foto, copiadorHistorial.copia('foto', versionBorradoFoto, borradoFoto));
+  }
+  const copias = [...lienzos].filter(([token]) => !token.startsWith('img:')).map(([, c]) => c);
+  return {
+    firma: arbol + '|' + foto, arbol, foto, lienzos: copias, todos: lienzos,
+    capaActivaId, contadorCapas, contadorNombres: { ...contadorNombres },
+  };
+}
+
+function restaurarEstado(paso) {
+  const plegados = new Map();
+  recorrerItems((item) => { if (esGrupo(item)) plegados.set(item.id, item.plegado); });
+  capas = JSON.parse(paso.arbol);
+  recorrerItems((item) => {
+    // Los lienzos del pincel, a tamaño de trabajo (la resolución pudo cambiar);
+    // lo borrado de un objeto, al de su contenido.
+    if (typeof item.pincelSumar === 'string' || typeof item.pincelQuitar === 'string') {
+      const version = ++versionHistorial;
+      for (const clave of ['pincelSumar', 'pincelQuitar']) {
+        if (typeof item[clave] === 'string') item[clave] = copiadorHistorial.restaurar(item.id + ':' + clave, version, paso.todos.get(item[clave]), anchoTrabajo, altoTrabajo);
+      }
+      item._versionMascara = version;
+    }
+    if (typeof item.borrado === 'string') {
+      const version = ++versionHistorial;
+      item.borrado = copiadorHistorial.restaurar(item.id + ':borrado', version, paso.todos.get(item.borrado));
+      item._versionBorrado = version;
+    }
+    if (item.contenido && typeof item.contenido.lienzo === 'string') item.contenido.lienzo = paso.todos.get(item.contenido.lienzo);
+    if (esGrupo(item)) {
+      item._cache = { entrada: null, items: [] };
+      item.plegado = plegados.has(item.id) ? plegados.get(item.id) : false;
+    }
+  });
+  versionBorradoFoto = ++versionHistorial;
+  borradoFoto = paso.foto ? copiadorHistorial.restaurar('foto', versionBorradoFoto, paso.todos.get(paso.foto), anchoTrabajo, altoTrabajo) : null;
+  contadorCapas = paso.contadorCapas;
+  Object.assign(contadorNombres, paso.contadorNombres);
+  capaActivaId = ubicar(paso.capaActivaId) ? paso.capaActivaId : capas[capas.length - 1].id;
+  actualizarAvisoDescargaPng();
+  reiniciarComposicion();
+  cambioDeEstructura();
+}
+
+const historial = Historial.conectar({
+  capturar: capturarEstado,
+  restaurar: restaurarEstado,
+  deshacer: document.getElementById('botonDeshacer'),
+  rehacer: document.getElementById('botonRehacer'),
+  lienzo: canvasTrabajo,
+  activo: () => !!imagenActual && editorCompleto.style.display !== 'none',
 });
 
 // ===== Paneles laterales plegables =====

@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <link rel="stylesheet" href="../assets/css/app-movil.css">
+<link rel="stylesheet" href="../assets/css/editor-imagen.css">
 <style>
   .editor-collage { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; margin-top: 16px; }
   .editor-collage > div { min-width: 0; }
@@ -227,6 +228,10 @@ window.i18nPagina = {
         <div class="lienzo-contenedor">
           <canvas id="lienzo" data-i18n-attr="aria-label:aria-lienzo" aria-label="Vista previa del collage"></canvas>
         </div>
+        <div class="botones-historial">
+          <button type="button" id="botonDeshacer" data-i18n-attr="title:title-deshacer;aria-label:title-deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)" disabled>↶</button>
+          <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
+        </div>
         <p class="ayuda-gestos" data-i18n="ayuda-gestos">Tocá una foto para editarla · arrastrala para mover el encuadre · pellizcá o usá la rueda del mouse para acercar · mantenela apretada y soltala sobre otra para intercambiarlas · doble clic para centrarla</p>
 
         <div class="barra-foto" id="barraFoto">
@@ -306,6 +311,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/historial.js"></script>
 <script>
 const MAX_FOTOS = 12;
 const LADO_MAX_VISTA = 1600; // las fotos se reducen a esto para que la vista previa responda rápido
@@ -592,7 +598,9 @@ function actualizarEstadoMovil() {
   contadorFotosMovil.textContent = t(clave).replace('{n}', fotos.length);
 }
 
+let contadorFotos = 0;
 async function agregarArchivos(listaFileList) {
+  const habiaFotos = fotos.length > 0;
   const imagenes = [...listaFileList].filter((f) => f.type.startsWith('image/'));
   const lugar = MAX_FOTOS - fotos.length;
   const aAgregar = imagenes.slice(0, Math.max(0, lugar));
@@ -606,7 +614,7 @@ async function agregarArchivos(listaFileList) {
       } finally {
         original.removeAttribute('src');
       }
-      fotos.push({ nombre: archivo.name, archivo, vista, miniatura: crearMiniatura(vista), zoom: 1, cx: 0.5, cy: 0.5 });
+      fotos.push({ id: ++contadorFotos, nombre: archivo.name, archivo, vista, miniatura: crearMiniatura(vista), zoom: 1, cx: 0.5, cy: 0.5 });
     } catch (error) {
       errores.push(error.message);
     }
@@ -617,7 +625,46 @@ async function agregarArchivos(listaFileList) {
   if (errores.length) avisos.push(t('aviso-ilegibles') + errores.join(', ') + '.');
   mostrarAviso(avisos.join(' '));
   cambioDeCantidad();
+  // Las primeras fotos son el punto de partida; las que se agregan después,
+  // un paso que se puede deshacer.
+  if (habiaFotos) historial.comprobar(); else if (fotos.length) historial.reiniciar();
 }
+
+// ===== Deshacer y rehacer (assets/js/historial.js) =====
+// Un paso: qué fotos hay y en qué orden (cada una con su encuadre), el diseño,
+// el formato y el estilo. Las fotos no cambian: se guardan por referencia.
+function capturarEstado() {
+  const paso = {
+    fotos: fotos.map((foto) => ({ foto, zoom: foto.zoom, cx: foto.cx, cy: foto.cy })),
+    diseno, proporcion: [...proporcion], espacio: elEspacio.value, redondeo: elRedondeo.value, fondo: elColorFondo.value,
+  };
+  const r = (v) => Math.round(v * 1000) / 1000;
+  paso.firma = JSON.stringify([fotos.map((f) => [f.id, r(f.zoom), r(f.cx), r(f.cy)]), diseno, proporcion, paso.espacio, paso.redondeo, paso.fondo]);
+  return paso;
+}
+
+function restaurarEstado(paso) {
+  fotos = paso.fotos.map(({ foto, zoom, cx, cy }) => Object.assign(foto, { zoom, cx, cy }));
+  diseno = paso.diseno;
+  proporcion = [...paso.proporcion];
+  elEspacio.value = paso.espacio; document.getElementById('etiquetaEspacio').textContent = paso.espacio;
+  elRedondeo.value = paso.redondeo; document.getElementById('etiquetaRedondeo').textContent = paso.redondeo;
+  elColorFondo.value = paso.fondo;
+  document.querySelectorAll('#botonesFormato button').forEach((b) => b.classList.toggle('activo', b.dataset.proporcion === proporcion.join(':')));
+  seleccionada = -1;
+  barraFoto.classList.remove('visible');
+  mostrarAviso('');
+  cambioDeCantidad();
+}
+
+const historial = Historial.conectar({
+  capturar: capturarEstado,
+  restaurar: restaurarEstado,
+  deshacer: document.getElementById('botonDeshacer'),
+  rehacer: document.getElementById('botonRehacer'),
+  lienzo,
+  activo: () => fotos.length > 0,
+});
 
 // Al cambiar cuántas fotos hay, se elige el primer diseño para esa cantidad
 // (como Instagram, que muestra los diseños según las fotos elegidas).

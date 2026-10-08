@@ -94,3 +94,10 @@
 @media (prefers-reduced-motion: reduce) {
   .trabajando-ia::before, .trabajando-ia .trabajando-ia-texto { animation: none; }
 }
+
+/* Deshacer / rehacer (assets/js/historial.js): los dos botones debajo de la
+   imagen, iguales en los tres editores. Se habilitan solos. */
+.botones-historial { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.botones-historial button { min-width: 44px; height: 34px; padding: 0 10px; border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); color: var(--texto); font-size: 1.1rem; line-height: 1; cursor: pointer; }
+.botones-historial button:hover:not(:disabled) { border-color: var(--azul); }
+.botones-historial button:disabled { opacity: 0.35; cursor: default; }

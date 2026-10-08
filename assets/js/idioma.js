@@ -52,6 +52,8 @@ window.i18nComun = {
     'lote-enlace-zip': 'Descargar .zip con todos los archivos',
     // Botón "?" de assets/js/ayuda-tip.js (ver también assets/css/ayuda-tip.css).
     'ayuda-etiqueta': 'Ayuda',
+    'title-deshacer': 'Deshacer (Ctrl+Z; en el celular, tocá la imagen con dos dedos)',
+    'title-rehacer': 'Rehacer (Ctrl+Shift+Z)',
     'vista-cuadricula': '▦ Cuadrícula',
     'vista-lista': '☰ Lista',
     // Usadas por assets/js/pdf-texto.js (extraerTextoPowerPoint), compartida
@@ -120,6 +122,8 @@ window.i18nComun = {
     'lote-fallos': 'Could not convert:',
     'lote-enlace-zip': 'Download .zip with all the files',
     'ayuda-etiqueta': 'Help',
+    'title-deshacer': 'Undo (Ctrl+Z; on a phone, tap the image with two fingers)',
+    'title-rehacer': 'Redo (Ctrl+Shift+Z)',
     'vista-cuadricula': '▦ Grid',
     'vista-lista': '☰ List',
     'ppt-sin-diapositivas': 'No readable slides were found in this file.',

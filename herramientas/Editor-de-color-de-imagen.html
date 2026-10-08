@@ -311,6 +311,10 @@ window.i18nPagina = {
 
         <div class="panel-lienzo" data-app-escenario="desplazable">
           <canvas id="vistaPrevia" data-i18n-attr="title:title-original" title="Mantené presionado para ver la imagen original"></canvas>
+          <div class="botones-historial">
+            <button type="button" id="botonDeshacer" data-i18n-attr="title:title-deshacer;aria-label:title-deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)" disabled>↶</button>
+            <button type="button" id="botonRehacer" data-i18n-attr="title:title-rehacer;aria-label:title-rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer (Ctrl+Shift+Z)" disabled>↷</button>
+          </div>
           <p class="nota-lateral" style="margin:8px 0 0;" data-i18n="nota-original">Mantené presionada la imagen para ver el original</p>
           <p class="nota-lateral" style="margin:8px 0 0;"><span data-i18n="nota-avanzado-a">¿Necesitás editar solo una parte de la imagen, por zona o por color, con varias capas? Probá el </span><a href="editor-avanzado-imagen.html" data-i18n="nota-avanzado-link">Editor avanzado →</a></p>
         </div>
@@ -514,6 +518,7 @@ window.i18nPagina = {
 <script src="../assets/js/filtros-gpu.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
+<script src="../assets/js/historial.js"></script>
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -1018,7 +1023,48 @@ async function mostrarArchivo(archivo) {
   solicitarMiniaturasTextura();
   botonDescargar.disabled = false;
   requestAnimationFrame(encajarVistaPreviaEnPanel);
+  historial.reiniciar();
 }
+
+// ===== Deshacer y rehacer (assets/js/historial.js) =====
+// El estado de este editor vive en sus controles (los deslizadores, B/N, la
+// textura) y en el filtro elegido con su ajuste por color y sus capas extra.
+function capturarEstado() {
+  const valores = {};
+  Object.entries(deslizadores).forEach(([clave, d]) => { valores[clave] = d.input.value; });
+  const activo = document.querySelector('.preset-miniatura.activo');
+  const paso = {
+    valores, bn: activarBN.checked, hsl: hslRangos ? JSON.stringify(hslRangos) : null, textura: texturaActual(),
+    capas: capasFiltroActivo, puestaPorFiltro: texturaPuestaPorFiltro, filtro: activo ? activo.dataset.preset : null,
+  };
+  paso.firma = JSON.stringify([valores, paso.bn, paso.hsl, paso.textura, paso.filtro, capasFiltroActivo.length]);
+  return paso;
+}
+
+function restaurarEstado(paso) {
+  Object.entries(paso.valores).forEach(([clave, valor]) => { deslizadores[clave].input.value = valor; });
+  activarBN.checked = paso.bn;
+  document.querySelectorAll('[data-canal]').forEach((campo) => {
+    campo.classList.toggle('deshabilitado', !paso.bn);
+    campo.querySelector('input').disabled = !paso.bn;
+  });
+  hslRangos = paso.hsl ? JSON.parse(paso.hsl) : null;
+  panelAjustePorColor.refrescar();
+  ponerTextura(paso.textura);
+  capasFiltroActivo = paso.capas;
+  texturaPuestaPorFiltro = paso.puestaPorFiltro;
+  document.querySelectorAll('.preset-miniatura').forEach((b) => b.classList.toggle('activo', b.dataset.preset === paso.filtro));
+  programarRenderizado();
+}
+
+const historial = Historial.conectar({
+  capturar: capturarEstado,
+  restaurar: restaurarEstado,
+  deshacer: document.getElementById('botonDeshacer'),
+  rehacer: document.getElementById('botonRehacer'),
+  lienzo: vistaPrevia,
+  activo: () => !!imagenActual && editorCompleto.style.display !== 'none',
+});
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.type.startsWith('image/'));

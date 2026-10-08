@@ -1166,6 +1166,142 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
   });
 
+  // Deshacer y rehacer (2026-10-07, assets/js/historial.js) en los tres
+  // editores: botones, teclado y toque con dos dedos; un deslizador es un paso
+  // al soltarlo; los lienzos del pincel y del borrador vuelven como estaban.
+  await prueba('deshacer y rehacer (editor avanzado, de color y collage)', async () => {
+    const h = {};
+    const mitades = async () => {
+      const c = D().createElement('canvas'); c.width = 100; c.height = 50;
+      const cx = c.getContext('2d'); cx.fillStyle = 'rgb(40,40,40)'; cx.fillRect(0, 0, 50, 50); cx.fillStyle = 'rgb(220,220,220)'; cx.fillRect(50, 0, 50, 50);
+      return new (W().File)([await new Promise((r) => c.toBlob(r, 'image/png'))], 'mitades.png', { type: 'image/png' });
+    };
+    const el = (id) => D().getElementById(id);
+    const deslizar = (id, v) => { const e = el(id); e.value = v; e.dispatchEvent(new (W().Event)('input', { bubbles: true })); e.dispatchEvent(new (W().Event)('change', { bubbles: true })); };
+    const tecla = (shift) => D().body.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: shift ? 'Z' : 'z', ctrlKey: true, shiftKey: !!shift, bubbles: true }));
+    const cerca = (v, e) => Math.abs(v - e) <= 3;
+
+    // --- Editor avanzado ---
+    await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
+    el('entradaArchivo').files = archivos([await mitades()]).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual') && W().eval('historial').cantidad() === 1, 15000), 'el editor no cargó la imagen o el historial no arrancó');
+    const lienzo = el('canvasTrabajo');
+    lienzo.setPointerCapture = () => {};
+    const leer = async (y = 0.5) => { await esperar(300); const d = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data; return [0.25, 0.75].map((x) => { const i = (Math.round(lienzo.height * y) * lienzo.width + Math.round(lienzo.width * x)) * 4; return d[i + 3] < 10 ? 'T' : d[i]; }); };
+    const puntero = (tipo, x, id = 1, tipoPuntero = 'mouse') => { const r = lienzo.getBoundingClientRect(); lienzo.dispatchEvent(new (W().PointerEvent)(tipo, { bubbles: true, pointerId: id, pointerType: tipoPuntero, isPrimary: id === 1, buttons: tipo === 'pointerup' ? 0 : 1, clientX: r.left + x * r.width, clientY: r.top + r.height / 2 })); };
+    const trazo = (a, b) => { puntero('pointerdown', a); puntero('pointermove', (a + b) / 2); puntero('pointermove', b); puntero('pointerup', b); };
+    afirmar(el('botonDeshacer').disabled, 'Deshacer habilitado sin haber hecho nada');
+
+    deslizar('exposicion', 60);
+    h.claro = await leer();
+    afirmar(h.claro[0] > 60 && !el('botonDeshacer').disabled, 'exposición: ' + h.claro + ', deshacer ' + (el('botonDeshacer').disabled ? 'apagado' : 'encendido'));
+    el('botonDeshacer').click();
+    h.deshecho = await leer();
+    afirmar(cerca(h.deshecho[0], 40) && cerca(h.deshecho[1], 220) && Number(el('exposicion').value) === 0, 'deshacer la exposición: ' + h.deshecho + ' (deslizador en ' + el('exposicion').value + ')');
+    el('botonRehacer').click();
+    h.rehecho = await leer();
+    afirmar(h.rehecho[0] === h.claro[0] && Number(el('exposicion').value) === 60, 'rehacer la exposición: ' + h.rehecho);
+
+    // Agregar un texto y deshacerlo con el teclado.
+    el('botonNuevoTexto').click();
+    const objetos = () => W().todosLosItems().filter((i) => W().esObjeto(i)).length;
+    afirmar(objetos() === 1, '+ Texto no agregó un objeto');
+    await esperar(150);
+    tecla(false);
+    h.sinTexto = objetos();
+    afirmar(h.sinTexto === 0, 'Ctrl+Z no sacó el texto: ' + h.sinTexto);
+    tecla(true);
+    h.conTexto = objetos();
+    afirmar(h.conTexto === 1, 'Ctrl+Shift+Z no devolvió el texto');
+    tecla(false);
+
+    // Pincel de la máscara: "Nada" + un trazo a la izquierda (que aclara solo ahí).
+    W().seleccionarItem(W().eval('capas')[0].id);
+    D().querySelector('#modosBaseMascara [data-base="nada"]').click();
+    h.nada = await leer();
+    afirmar(cerca(h.nada[0], 40), 'con base "Nada": ' + h.nada);
+    trazo(0.1, 0.4);
+    h.pintado = await leer();
+    afirmar(h.pintado[0] > 60 && cerca(h.pintado[1], 220), 'trazo de pincel: ' + h.pintado);
+    el('botonDeshacer').click();
+    h.trazoDeshecho = await leer();
+    afirmar(cerca(h.trazoDeshecho[0], 40), 'deshacer el trazo: ' + h.trazoDeshecho);
+    el('botonRehacer').click();
+    h.trazoRehecho = await leer();
+    afirmar(h.trazoRehecho[0] === h.pintado[0], 'rehacer el trazo: ' + h.trazoRehecho);
+
+    // Un pellizco que empieza como trazo no deja un paso vacío.
+    const pasos = W().eval('historial').cantidad();
+    // (en píxeles de pantalla fijos: el pellizco cambia el zoom y el tamaño del lienzo)
+    const r0 = lienzo.getBoundingClientRect(), y0 = r0.top + r0.height / 2;
+    const dedo = (tipo, x, id) => lienzo.dispatchEvent(new (W().PointerEvent)(tipo, { bubbles: true, pointerId: id, pointerType: 'touch', isPrimary: id === 1, buttons: tipo === 'pointerup' ? 0 : 1, clientX: r0.left + x, clientY: y0 }));
+    dedo('pointerdown', 120, 1); dedo('pointerdown', 160, 2);
+    dedo('pointermove', 90, 1); dedo('pointermove', 200, 2);
+    dedo('pointerup', 90, 1); dedo('pointerup', 200, 2);
+    await esperar(200);
+    h.pasosTrasPellizco = W().eval('historial').cantidad() - pasos;
+    afirmar(h.pasosTrasPellizco === 0, 'un pellizco dejó ' + h.pasosTrasPellizco + ' paso(s)');
+    // Tocar con dos dedos (sin moverlos) deshace el trazo.
+    const diag = () => [W().eval('historial').cantidad(), W().eval('historial').puedeRehacer(), W().eval('punterosActivos').size, W().eval('pintando')].join('/');
+    const d0 = diag();
+    puntero('pointerdown', 0.6, 3, 'touch'); const d1 = diag(); puntero('pointerdown', 0.7, 4, 'touch'); const d2 = diag();
+    puntero('pointerup', 0.6, 3, 'touch'); puntero('pointerup', 0.7, 4, 'touch');
+    h.dosDedos = await leer();
+    afirmar(cerca(h.dosDedos[0], 40), 'el toque con dos dedos no deshizo: ' + h.dosDedos + ' · ' + [d0, d1, d2, diag()].join(' → '));
+
+    // Borrar la foto y deshacerlo.
+    D().querySelector('#modosBaseMascara [data-base="toda"]').click();
+    D().querySelector('#herramientasLienzo [data-herramienta="borrar"]').click();
+    trazo(0.2, 0.3);
+    h.borrada = await leer();
+    afirmar(h.borrada[0] === 'T', 'el borrador no borró: ' + h.borrada);
+    el('botonDeshacer').click();
+    h.borradoDeshecho = await leer();
+    afirmar(h.borradoDeshecho[0] !== 'T', 'deshacer el borrado: ' + h.borradoDeshecho);
+
+    // --- Editor de color ---
+    await abrir('/herramientas/Editor-de-color-de-imagen.html'); await esperar(300);
+    el('entradaArchivo').files = archivos([await mitades()]).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('imagenActual') && W().eval('historial').cantidad() === 1, 15000), 'el editor de color no cargó la imagen');
+    const previa = el('vistaPrevia');
+    const leerColor = async () => { await esperar(300); return previa.getContext('2d').getImageData(Math.round(previa.width * 0.25), previa.height >> 1, 1, 1).data[0]; };
+    deslizar('exposicion', 60);
+    h.colorClaro = await leerColor();
+    D().querySelector('.presets button[data-preset]:not([data-preset="ninguno"])').click();
+    const filtro = D().querySelector('.preset-miniatura.activo').dataset.preset;
+    await esperar(150);
+    el('botonDeshacer').click();
+    afirmar(!D().querySelector('.preset-miniatura.activo') || D().querySelector('.preset-miniatura.activo').dataset.preset !== filtro, 'deshacer el filtro no lo quitó');
+    h.colorSinFiltro = await leerColor();
+    afirmar(h.colorSinFiltro === h.colorClaro && Number(el('exposicion').value) === 60, 'deshacer el filtro: ' + h.colorSinFiltro + ' (antes ' + h.colorClaro + ')');
+    el('botonDeshacer').click();
+    h.colorOriginal = await leerColor();
+    afirmar(cerca(h.colorOriginal, 40), 'deshacer la exposición del editor de color: ' + h.colorOriginal);
+
+    // --- Collage ---
+    await abrir('/herramientas/collage-imagenes.html'); await esperar(300);
+    el('entradaArchivo').files = archivos([await mitades(), await mitades()]).files;
+    el('entradaArchivo').dispatchEvent(new (W().Event)('change'));
+    afirmar(await hasta(() => W().eval('fotos').length === 2 && W().eval('historial').cantidad() === 1, 15000), 'el collage no cargó las fotos');
+    const disenoActivo = () => [...D().querySelectorAll('#listaDisenos .boton-diseno')].findIndex((b) => b.classList.contains('activo'));
+    D().querySelectorAll('#listaDisenos .boton-diseno')[1].click();
+    await esperar(150);
+    deslizar('espacio', 40);
+    await esperar(150);
+    afirmar(disenoActivo() === 1, 'no se eligió el segundo diseño');
+    el('botonDeshacer').click();
+    h.collageBorde = el('espacio').value;
+    afirmar(disenoActivo() === 1 && h.collageBorde !== '40', 'deshacer el borde del collage: ' + h.collageBorde);
+    el('botonDeshacer').click();
+    h.collageDiseno = disenoActivo();
+    afirmar(h.collageDiseno === 0, 'deshacer el diseño del collage: ' + h.collageDiseno);
+    el('botonRehacer').click();
+    afirmar(disenoActivo() === 1, 'rehacer el diseño del collage');
+    return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ');
+  });
+
   // Ajustes del motor agregados el 2026-10-04 (Temperatura, Matiz, Blancos,
   // Negros, Nitidez, Viñeta), en los dos editores. Imagen: mitad gris 40 y
   // mitad gris 220, así cada uno deja una huella: el balance separa los
