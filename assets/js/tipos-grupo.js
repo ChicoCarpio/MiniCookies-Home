@@ -1,5 +1,5 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
-// Tipos de grupo del Editor avanzado (PLAN-REDISENO-EDITOR.md, 3.3). Un grupo
+// Tipos de grupo del Editor avanzado (plan del rediseño, hallazgos.md, 3.3). Un grupo
 // no es genérico: tiene un tipo que dice qué puede ir adentro y cómo se
 // compone con lo de abajo. Cada tipo se define UNA vez en TIPOS; uno nuevo
 // (un "Marco", "Variantes"…) se agrega ahí sin tocar los otros.
