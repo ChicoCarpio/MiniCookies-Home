@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <link rel="stylesheet" href="../assets/css/app-movil.css">
 <link rel="stylesheet" href="../assets/css/editor-imagen.css">
 <style>
@@ -65,6 +66,10 @@ window.i18nPagina = {
     'lbl-intensidad-filtro': 'Intensidad del filtro',
     'lbl-tamano-textura': 'Tamaño',
     'campo-grosor': 'Grosor del borde: ',
+    'campo-suavidad': 'Suavidad del contorno: ',
+    'ayuda-suavidad': 'Con la suavidad en 0 el borde sigue cada detalle del recorte (mechones, dedos). Más suavidad rellena las entradas angostas y redondea los rincones, como el contorno de un sticker impreso.',
+    'boton-descargar-preparando': 'Preparando el sticker…',
+    'error-descargar': 'No se pudo armar el sticker para descargar: tu navegador se quedó sin memoria.',
     'campo-color-borde': 'Color del borde',
     'boton-descargar': 'Descargar sticker (PNG)',
     'boton-cambiar': '🖼️ Cambiar imagen',
@@ -86,6 +91,10 @@ window.i18nPagina = {
     'lbl-intensidad-filtro': 'Filter intensity',
     'lbl-tamano-textura': 'Size',
     'campo-grosor': 'Border thickness: ',
+    'campo-suavidad': 'Outline smoothness: ',
+    'ayuda-suavidad': 'At 0 the border follows every detail of the cutout (strands of hair, fingers). More smoothness fills narrow gaps and rounds the corners, like the outline of a printed sticker.',
+    'boton-descargar-preparando': 'Preparing the sticker…',
+    'error-descargar': 'The sticker could not be built for download: your browser ran out of memory.',
     'campo-color-borde': 'Border color',
     'boton-descargar': 'Download sticker (PNG)',
     'boton-cambiar': '🖼️ Change image',
@@ -201,6 +210,14 @@ window.i18nPagina = {
               <span class="etiqueta-deslizador"><span data-i18n="campo-grosor">Grosor del borde: </span><span id="etiquetaGrosor">14</span>px</span>
               <input type="range" id="entradaGrosor" min="0" max="40" value="14">
             </label>
+            <label class="campo-deslizador">
+              <span class="etiqueta-deslizador"><span data-i18n="campo-suavidad">Suavidad del contorno: </span><span id="etiquetaSuavidad">3</span></span>
+              <input type="range" id="entradaSuavidad" min="0" max="30" value="3">
+            </label>
+            <span class="ayuda-tip">
+              <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+              <span class="ayuda-burbuja" data-i18n="ayuda-suavidad">Con la suavidad en 0 el borde sigue cada detalle del recorte (mechones, dedos). Más suavidad rellena las entradas angostas y redondea los rincones, como el contorno de un sticker impreso.</span>
+            </span>
           </div>
         </div>
       </div>
@@ -224,6 +241,7 @@ window.i18nPagina = {
 <script src="../assets/js/filtros-color.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/mascaras-capa.js"></script>
+<script src="../assets/js/borde-sticker.js"></script>
 <script type="module">
   import { iniciarGeneradorStickers } from '../assets/js/generador-stickers.js';
   iniciarGeneradorStickers();
@@ -241,6 +259,7 @@ document.querySelectorAll('.acordeon-titulo').forEach((titulo) => {
 });
 </script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>

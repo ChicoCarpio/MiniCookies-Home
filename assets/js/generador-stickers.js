@@ -8,7 +8,7 @@
 // se descarga una vez desde la CDN de Hugging Face y queda cacheado.
 // Requiere, cargados antes como <script>: ajuste-por-color.js, filtros-color.js,
 // efectos-textura.js, paleta-color.js, vendor/imagetracerjs, efectos-mosaico.js,
-// procesar-filtros.js. El panel lateral usa el mismo
+// procesar-filtros.js, mascaras-capa.js, borde-sticker.js. El panel lateral usa el mismo
 // esqueleto de 2 columnas que Editor-de-color-de-imagen.html (clase
 // .editor-color-layout, sin el panel plegable de ese editor: acá el panel
 // izquierdo queda siempre visible), pero con cuatro acordeones independientes
@@ -23,7 +23,18 @@
 import { cargarRecortador } from './recorte-sujeto.js';
 
 const tt = (clave, porDefecto) => (window.t ? window.t(clave) : porDefecto);
-const LADO_MAXIMO = 512; // tamaño estándar de un sticker (WhatsApp/Telegram)
+// Resoluciones (2026-10-08). Antes todo se hacía a 512 px —el recorte, el
+// borde y la descarga— y una foto de 4000 px perdía casi toda su calidad.
+// Ahora el recorte se guarda a tamaño completo (con tope, por la memoria del
+// celular), la pantalla trabaja sobre una copia de LADO_VISTA y la descarga
+// rehace filtro, textura y borde a tamaño completo.
+const LADO_VISTA = 1024;
+const LADO_DESCARGA = 4096;
+// El grosor y la suavidad del borde, y el desenfoque de los filtros, están
+// pensados en píxeles de un sticker de este lado: se escalan al tamaño real
+// para que se vean igual en la vista, las miniaturas y la descarga.
+const LADO_REFERENCIA = 512;
+const escalaDe = (canvas) => Math.max(canvas.width, canvas.height) / LADO_REFERENCIA;
 
 export function iniciarGeneradorStickers() {
   const zonaArrastre = document.getElementById('zonaArrastre');
@@ -36,6 +47,8 @@ export function iniciarGeneradorStickers() {
   const entradaGrosor = document.getElementById('entradaGrosor');
   const etiquetaGrosor = document.getElementById('etiquetaGrosor');
   const entradaColorBorde = document.getElementById('entradaColorBorde');
+  const entradaSuavidad = document.getElementById('entradaSuavidad');
+  const etiquetaSuavidad = document.getElementById('etiquetaSuavidad');
   const entradaIntensidad = document.getElementById('intensidadFiltro');
   const valorIntensidad = document.getElementById('valorIntensidadFiltro');
   const controlesTextura = document.getElementById('controlesTextura');
@@ -74,7 +87,8 @@ export function iniciarGeneradorStickers() {
 
   let segmentador = null;
   let cargaPromesa = null;
-  let canvasBase = null; // recorte limpio, sin filtro, ya escalado a LADO_MAXIMO
+  let canvasAlta = null; // recorte limpio, sin filtro, a tamaño completo (≤ LADO_DESCARGA)
+  let canvasBase = null; // el mismo, reducido a LADO_VISTA para la pantalla
   let canvasFiltrado = null; // canvasBase con el filtro elegido ya aplicado
   let presetActual = 'ninguno';
   // Canvases de repuesto reutilizados en cada actualizarFiltro() (la vista
@@ -99,10 +113,8 @@ export function iniciarGeneradorStickers() {
     });
   }
 
-  // Mismo motivo que programarActualizarFiltro: el grosor/color del borde
-  // también corría dibujarSticker() (hasta 48 drawImage + 2 canvases nuevos
-  // por "estampado" del contorno, ver agrandarSilueta) en cada evento
-  // 'input' sin agrupar.
+  // Mismo motivo que programarActualizarFiltro: el grosor, la suavidad y el
+  // color del borde redibujan el sticker una vez por fotograma.
   let dibujarStickerPendiente = null;
   function programarDibujarSticker() {
     if (dibujarStickerPendiente) return;
@@ -148,11 +160,9 @@ export function iniciarGeneradorStickers() {
     return cargaPromesa;
   }
 
-  // Reduce el recorte a un máximo de LADO_MAXIMO px de lado (tamaño típico
-  // de sticker) para que el grosor de borde elegido se vea proporcionado —
-  // una foto de 4000px con un borde de 12px se vería como si no tuviera nada.
-  function escalarRecorte(canvasOrigen) {
-    const factor = Math.min(1, LADO_MAXIMO / Math.max(canvasOrigen.width, canvasOrigen.height));
+  // Reduce el recorte a un máximo de "lado" px (nunca lo agranda).
+  function escalarRecorte(canvasOrigen, lado) {
+    const factor = Math.min(1, lado / Math.max(canvasOrigen.width, canvasOrigen.height));
     const ancho = Math.max(1, Math.round(canvasOrigen.width * factor));
     const alto = Math.max(1, Math.round(canvasOrigen.height * factor));
     const destino = document.createElement('canvas');
@@ -180,7 +190,10 @@ export function iniciarGeneradorStickers() {
     const { etiquetas, tamanos } = MascarasCapa.islas(datos, width, height, 20);
 
     if (tamanos.length === 0) return;
-    const tamanoMaximo = Math.max(...tamanos);
+    // Con un bucle: a 4096 px puede haber tantas islas que Math.max(...tamanos)
+    // supera el límite de argumentos de una función.
+    let tamanoMaximo = 0;
+    for (const tamano of tamanos) if (tamano > tamanoMaximo) tamanoMaximo = tamano;
     const UMBRAL_RELATIVO = 0.08;
     const etiquetasValidas = new Set();
     tamanos.forEach((tamano, etiqueta) => { if (tamano >= tamanoMaximo * UMBRAL_RELATIVO) etiquetasValidas.add(etiqueta); });
@@ -198,6 +211,30 @@ export function iniciarGeneradorStickers() {
       }
     }
     if (seModificoAlgo) ctx.putImageData(imageData, 0, 0);
+  }
+
+  // Recorta el lienzo al rectángulo del sujeto: la IA devuelve la foto entera
+  // con el fondo transparente, y un sujeto chico en una foto grande quedaba
+  // en una esquina de un PNG enorme y casi vacío.
+  function ajustarAlSujeto(canvas) {
+    const { width: w, height: h } = canvas;
+    const datos = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (datos[(y * w + x) * 4 + 3] === 0) continue;
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        y1 = y;
+      }
+    }
+    if (x1 < 0 || (x0 === 0 && y0 === 0 && x1 === w - 1 && y1 === h - 1)) return canvas;
+    const recorte = document.createElement('canvas');
+    recorte.width = x1 - x0 + 1;
+    recorte.height = y1 - y0 + 1;
+    recorte.getContext('2d').drawImage(canvas, -x0, -y0);
+    return recorte;
   }
 
   // Encaja canvasBase dentro de un cuadrado de "lado" px sin recortarlo (a
@@ -271,12 +308,11 @@ export function iniciarGeneradorStickers() {
 
   function actualizarMiniaturasPresets() {
     if (!canvasBase) return;
-    const escala = TAMANO_MINIATURA_FISICO / Math.max(canvasBase.width, canvasBase.height);
     dibujarMiniaturasEnLotes('presets', [...contenedorPresets.querySelectorAll('.preset-miniatura')], (miniatura, boton) => {
       const preset = ProcesarFiltros.PRESETS[boton.dataset.preset];
       if (!preset) return false;
       const alfaOriginal = miniatura.getContext('2d').getImageData(0, 0, miniatura.width, miniatura.height);
-      ProcesarFiltros.renderizarFiltro(miniatura, preset, preset.capasExtra, preset.textura || ProcesarFiltros.SIN_TEXTURA, escala);
+      ProcesarFiltros.renderizarFiltro(miniatura, preset, preset.capasExtra, preset.textura || ProcesarFiltros.SIN_TEXTURA, escalaDe(miniatura));
       restaurarAlfa(miniatura, alfaOriginal);
     });
   }
@@ -320,77 +356,84 @@ export function iniciarGeneradorStickers() {
   // que siempre muestran cada filtro a pleno para poder compararlos.
   function actualizarFiltro() {
     if (!canvasBase) return;
+    canvasFiltrado = filtrar(canvasBase, scratchFiltro);
+    dibujarSticker();
+  }
+
+  // El filtro y la textura elegidos sobre "origen" (la copia de pantalla o el
+  // recorte a tamaño completo, para la descarga). Devuelve un canvas nuevo, o
+  // el mismo origen si no hay nada que aplicar.
+  function filtrar(origen, scratch) {
+    let resultado = origen;
     const preset = ProcesarFiltros.PRESETS[presetActual];
-    if (!preset || presetActual === 'ninguno') {
-      canvasFiltrado = canvasBase;
-    } else {
-      const copia = ProcesarFiltros.copiarCanvas(canvasBase);
+    if (preset && presetActual !== 'ninguno') {
+      const copia = ProcesarFiltros.copiarCanvas(origen);
       const alfaOriginal = copia.getContext('2d').getImageData(0, 0, copia.width, copia.height);
       const ajustes = { ...preset, intensidadFiltro: Number(entradaIntensidad.value) };
       // El tamaño de bloque de una textura (pixelar/puntos) viene calibrado
-      // para fotos de resolución normal — en un sticker (máx. 512px) el mismo
+      // para fotos de resolución normal — en un sticker el mismo
       // número de píxeles se ve enorme en proporción, por eso queda ajustable
       // en vez de usar siempre el valor fijo del preset.
       const textura = preset.textura
         ? { ...preset.textura, intensidad: Number(entradaTextura.value) }
         : ProcesarFiltros.SIN_TEXTURA;
-      ProcesarFiltros.renderizarFiltro(copia, ajustes, preset.capasExtra, textura, 1, scratchFiltro);
+      ProcesarFiltros.renderizarFiltro(copia, ajustes, preset.capasExtra, textura, escalaDe(copia), scratch);
       restaurarAlfa(copia, alfaOriginal);
-      canvasFiltrado = copia;
+      resultado = copia;
     }
     // La textura va después del filtro
     if (texturaActual !== 'ninguno') {
-      if (canvasFiltrado === canvasBase) canvasFiltrado = ProcesarFiltros.copiarCanvas(canvasBase);
-      aplicarTextura(canvasFiltrado, texturaActual, Number(entradaTamanoTextura.value), panelTextura.leer());
+      if (resultado === origen) resultado = ProcesarFiltros.copiarCanvas(origen);
+      aplicarTextura(resultado, texturaActual, Number(entradaTamanoTextura.value), panelTextura.leer());
     }
-    dibujarSticker();
+    return resultado;
   }
 
-  // Agranda una silueta hacia afuera "estampándola" desplazada en varios
-  // ángulos alrededor de un círculo — truco de canvas clásico para lograr un
-  // contorno grueso sin depender de ninguna librería nueva. Con suficientes
-  // pasos, la zona pegada al recorte queda cubierta por muchas copias
-  // superpuestas (borde sólido) y el límite exterior sale con un
-  // antialiasing suave solo.
-  function agrandarSilueta(canvasOrigen, radio) {
-    const salida = document.createElement('canvas');
-    salida.width = canvasOrigen.width;
-    salida.height = canvasOrigen.height;
-    const ctx = salida.getContext('2d');
-    const pasos = Math.min(48, Math.max(24, Math.round(radio * 2)));
-    for (let i = 0; i < pasos; i++) {
-      const angulo = (i / pasos) * Math.PI * 2;
-      ctx.drawImage(canvasOrigen, Math.round(Math.cos(angulo) * radio), Math.round(Math.sin(angulo) * radio));
+  // El sticker completo (borde + recorte filtrado) en "destino". El borde es
+  // una figura (assets/js/borde-sticker.js): contorno del recorte agrandado,
+  // suavizado y unido con curvas. Se guarda la última figura de la vista para
+  // no recalcularla si solo cambia el color.
+  let figuraEnCache = { origen: null, radio: -1, suavidad: -1, figura: null };
+  // El área máxima de un canvas en iPhone (4096²): más grande, no se dibuja.
+  const AREA_MAXIMA = 4096 * 4096;
+  function margenDe(filtrado) {
+    const escala = escalaDe(filtrado);
+    return Math.ceil((parseInt(entradaGrosor.value, 10) || 0) * escala) + Math.ceil(4 * escala);
+  }
+  function componerSticker(destino, filtrado, usarCache) {
+    const escala = escalaDe(filtrado);
+    const radio = (parseInt(entradaGrosor.value, 10) || 0) * escala;
+    const suavidad = (parseInt(entradaSuavidad.value, 10) || 0) * escala;
+    const margen = margenDe(filtrado);
+    destino.width = filtrado.width + margen * 2;
+    destino.height = filtrado.height + margen * 2;
+    const ctx = destino.getContext('2d');
+    ctx.clearRect(0, 0, destino.width, destino.height);
+    if (radio > 0) {
+      let figura;
+      // La forma sale del alfa. Los filtros y las texturas de siempre lo
+      // devuelven intacto (restaurarAlfa), así que se mide sobre el recorte
+      // sin filtrar y la caché sirve aunque se muevan sus deslizadores; los
+      // mosaicos y el cómic sí cambian el alfa.
+      const fuente = EfectosTextura.esMosaico(texturaActual) || !canvasBase || filtrado.width !== canvasBase.width ? filtrado : canvasBase;
+      const c = figuraEnCache;
+      if (usarCache && c.origen === fuente && c.radio === radio && c.suavidad === suavidad) figura = c.figura;
+      else {
+        figura = BordeSticker.figura(fuente, radio, suavidad);
+        if (usarCache) figuraEnCache = { origen: fuente, radio, suavidad, figura };
+      }
+      ctx.save();
+      ctx.translate(margen, margen);
+      ctx.fillStyle = entradaColorBorde.value;
+      ctx.fill(figura, 'evenodd');
+      ctx.restore();
     }
-    return salida;
+    ctx.drawImage(filtrado, margen, margen);
   }
 
   function dibujarSticker() {
     if (!canvasFiltrado) return;
-    const grosor = parseInt(entradaGrosor.value, 10) || 0;
-    const margen = grosor + 4;
-    const ancho = canvasFiltrado.width + margen * 2;
-    const alto = canvasFiltrado.height + margen * 2;
-
-    vistaResultado.width = ancho;
-    vistaResultado.height = alto;
-    contextoResultado.clearRect(0, 0, ancho, alto);
-
-    if (grosor > 0) {
-      const silueta = document.createElement('canvas');
-      silueta.width = canvasFiltrado.width;
-      silueta.height = canvasFiltrado.height;
-      const ctxSil = silueta.getContext('2d');
-      ctxSil.fillStyle = entradaColorBorde.value;
-      ctxSil.fillRect(0, 0, silueta.width, silueta.height);
-      ctxSil.globalCompositeOperation = 'destination-in';
-      ctxSil.drawImage(canvasFiltrado, 0, 0);
-
-      const borde = agrandarSilueta(silueta, grosor);
-      contextoResultado.drawImage(borde, margen, margen);
-    }
-
-    contextoResultado.drawImage(canvasFiltrado, margen, margen);
+    componerSticker(vistaResultado, canvasFiltrado, true);
     vistaResultado.style.display = 'block';
   }
 
@@ -398,6 +441,7 @@ export function iniciarGeneradorStickers() {
     ocultarError();
     vistaResultado.style.display = 'none';
     editorCompleto.style.display = 'none';
+    canvasAlta = null;
     canvasBase = null;
     canvasFiltrado = null;
     const url = URL.createObjectURL(archivo);
@@ -408,8 +452,10 @@ export function iniciarGeneradorStickers() {
       textoProgreso.textContent = tt('estado-recortando', 'Recortando el fondo...');
 
       const recorte = await modelo(url);
-      canvasBase = escalarRecorte(recorte.toCanvas());
-      limpiarMascara(canvasBase);
+      canvasAlta = escalarRecorte(recorte.toCanvas(), LADO_DESCARGA);
+      limpiarMascara(canvasAlta);
+      canvasAlta = ajustarAlSujeto(canvasAlta);
+      canvasBase = escalarRecorte(canvasAlta, LADO_VISTA);
       editorCompleto.style.display = 'block';
       presetActual = 'ninguno';
       entradaIntensidad.value = 100;
@@ -422,7 +468,7 @@ export function iniciarGeneradorStickers() {
       actualizarMiniaturasTexturas();
       actualizarFiltro();
     } catch (error) {
-      const sinMemoria = /bad_alloc|memory|out of memory|OrtRun/i.test(error.message);
+      const sinMemoria = /bad_alloc|memory|out of memory|OrtRun|allocation failed|RangeError/i.test(error.message);
       mostrarError(sinMemoria
         ? tt('error-sin-memoria', 'Tu navegador se quedó sin memoria para correr este modelo.')
         : tt('error-recortar', 'No se pudo recortar la imagen: ') + error.message);
@@ -453,6 +499,10 @@ export function iniciarGeneradorStickers() {
     programarDibujarSticker();
   });
   entradaColorBorde.addEventListener('input', programarDibujarSticker);
+  entradaSuavidad.addEventListener('input', () => {
+    etiquetaSuavidad.textContent = entradaSuavidad.value;
+    programarDibujarSticker();
+  });
 
   entradaIntensidad.addEventListener('input', () => {
     valorIntensidad.textContent = entradaIntensidad.value + '%';
@@ -502,11 +552,44 @@ export function iniciarGeneradorStickers() {
     actualizarFiltro();
   });
 
+  // La descarga rehace filtro, textura y borde sobre el recorte a tamaño
+  // completo (puede tardar un par de segundos en una foto grande). Si el
+  // sticker no entra en el área máxima de un canvas, o el navegador se queda
+  // sin memoria, se reintenta más chico: 2048 y, último recurso, la vista.
+  async function generarDescarga(lado) {
+    let origen = escalarRecorte(canvasAlta, lado);
+    const margen = margenDe(origen);
+    const area = (origen.width + margen * 2) * (origen.height + margen * 2);
+    if (area > AREA_MAXIMA) origen = escalarRecorte(origen, Math.floor(Math.max(origen.width, origen.height) * Math.sqrt(AREA_MAXIMA / area) * 0.98));
+    const final = document.createElement('canvas');
+    componerSticker(final, filtrar(origen, null), false);
+    return new Promise((resolve) => final.toBlob(resolve, 'image/png'));
+  }
+
   botonDescargar.addEventListener('click', async () => {
-    const blob = await new Promise((resolve) => vistaResultado.toBlob(resolve, 'image/png'));
-    const enlace = document.createElement('a');
-    enlace.href = URL.createObjectURL(blob);
-    enlace.download = 'sticker.png';
-    enlace.click();
+    if (!canvasAlta) return;
+    const textoBoton = botonDescargar.textContent;
+    botonDescargar.disabled = true;
+    botonDescargar.textContent = tt('boton-descargar-preparando', 'Preparando el sticker…');
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+    try {
+      let blob = null;
+      for (const lado of [LADO_DESCARGA, 2048, LADO_VISTA]) {
+        try { blob = await generarDescarga(lado); } catch (error) { blob = null; }
+        if (blob) break;
+      }
+      if (!blob) throw new Error('sin memoria');
+      const enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = 'sticker.png';
+      enlace.click();
+      // Un PNG de varios MB: se libera cuando el navegador ya lo tomó.
+      setTimeout(() => URL.revokeObjectURL(enlace.href), 60000);
+    } catch (error) {
+      mostrarError(tt('error-descargar', 'No se pudo armar el sticker para descargar: tu navegador se quedó sin memoria.'));
+    } finally {
+      botonDescargar.disabled = false;
+      botonDescargar.textContent = textoBoton;
+    }
   });
 }

@@ -796,6 +796,24 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'colspan, varios párrafos, barra y tabla anidada';
   });
 
+  // Borde de los stickers como figura (borde-sticker.js, 2026-10-08): exacto
+  // y centrado, los huecos grandes quedan huecos y la suavidad cierra los
+  // angostos. Sin el modelo de IA: figuras dibujadas.
+  await prueba('borde-sticker: grosor exacto, huecos y suavidad', async () => {
+    await abrir('/herramientas/generador-stickers.html'); await esperar(300);
+    const B = W().eval('BordeSticker');
+    const lienzo = (w, h, dibujar) => { const c = D().createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.fillStyle = '#000'; dibujar(x); return c; };
+    const dentro = (f, x, y) => D().createElement('canvas').getContext('2d').isPointInPath(f, x, y, 'evenodd');
+    const cuadrado = B.figura(lienzo(30, 30, (x) => x.fillRect(10, 10, 10, 10)), 5, 0);
+    afirmar(dentro(cuadrado, 5.1, 15) && !dentro(cuadrado, 4.9, 15) && dentro(cuadrado, 24.9, 15) && !dentro(cuadrado, 25.1, 15), 'el borde de 5 alrededor de [10,20) no termina en [5,25]');
+    const anillo = B.figura(lienzo(400, 400, (x) => { x.beginPath(); x.arc(200, 200, 180, 0, 7); x.arc(200, 200, 100, 0, 7, true); x.fill(); }), 15, 5);
+    afirmar(!dentro(anillo, 200, 200) && dentro(anillo, 200, 60), 'el anillo perdió su hueco o su relleno');
+    const dos = (x) => { x.beginPath(); x.arc(100, 100, 80, 0, 7); x.fill(); x.beginPath(); x.arc(300, 100, 80, 0, 7); x.fill(); };
+    afirmar(!dentro(B.figura(lienzo(400, 200, dos), 10, 0), 200, 100), 'sin suavidad se cerró el hueco entre las dos figuras');
+    afirmar(dentro(B.figura(lienzo(400, 200, dos), 10, 30), 200, 100), 'con suavidad no se cerró el hueco angosto');
+    return 'cuadrado [5,25], anillo con hueco, suavidad cierra lo angosto';
+  });
+
   // La carpeta de medios de Office guarda también audio y video.
   await prueba('extraer-imagenes-powerpoint: solo imágenes, sin audio ni video', async () => {
     await abrir('/herramientas/extraer-imagenes-powerpoint.html'); await esperar(200);
