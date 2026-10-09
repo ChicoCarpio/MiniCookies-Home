@@ -1778,9 +1778,11 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
     // Elegir objeto: tocar algo que NO es el primer plano (la "flor" del
     // medio) también lo encuentra; mientras tanto, el velo sobre la imagen.
-    const tocar = (x) => {
+    // Se toca arriba (y = 15 de 100) para que la marca numerada que queda
+    // dibujada no tape la fila que se lee (y = 50); el SlimSAM falso solo mira x.
+    const tocar = (x, y = 0.15) => {
       const r = lienzo.getBoundingClientRect();
-      lienzo.dispatchEvent(new (W().MouseEvent)('click', { bubbles: true, clientX: r.left + (x / 200) * r.width, clientY: r.top + r.height / 2 }));
+      lienzo.dispatchEvent(new (W().MouseEvent)('click', { bubbles: true, clientX: r.left + (x / 200) * r.width, clientY: r.top + y * r.height }));
     };
     const velo = D().getElementById('trabajandoIA');
     tocar(100);
@@ -1790,10 +1792,20 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
     h.flor = await leer();
     afirmar(cerca(h.flor, [128, 64, 128]), 'un objeto que no es el primer plano: ' + h.flor);
+    // Varios objetos marcados (2026-10-09): un segundo toque SUMA su objeto
+    // a la zona, con su marca numerada dibujada donde se tocó.
     tocar(160);
     afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
+    h.dos = await leer();
+    afirmar(cerca(h.dos, [128, 64, 64]), 'dos objetos marcados (la flor y el derecho): ' + h.dos);
+    afirmar(W().piezaActiva().puntos.length === 2 && W().nombreDePieza(W().piezaActiva()) === W().t('pieza-objetos').replace('{n}', 2), 'la pieza no dice "Objetos (2)"');
+    const marca = lienzo.getContext('2d').getImageData(Math.round(160 * lienzo.width / 200), Math.round(0.15 * lienzo.height), 1, 1).data;
+    afirmar(marca[0] > 200, 'no se ve la marca donde se tocó: ' + [...marca].join(','));
+    // Tocar una marca la quita: queda solo el objeto derecho.
+    tocar(100);
     h.objeto = await leer();
-    afirmar(cerca(h.objeto, [128, 128, 64]), 'solo el objeto derecho: ' + h.objeto);
+    afirmar(cerca(h.objeto, [128, 128, 64]), 'quitar la marca de la flor: ' + h.objeto);
+    afirmar(W().piezaActiva().puntos.length === 1, 'tocar la marca no la quitó');
     afirmar(W().piezaActiva().tipo === 'objeto', 'tocar no pasó la pieza a "Objeto"');
     invertirPieza(true);
     h.fondoMenosObjeto = await leer();
@@ -1873,6 +1885,12 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(await hasta(() => W().esObjeto(W().itemActivo()), 5000), 'la imagen no entró como objeto');
     const capa = W().itemActivo(); // el objeto: su zona dice qué parte de la imagen se ve
     const cont = W().capaDeContenido(capa);
+    // Color por tipo en la lista de capas (2026-10-09): el objeto y su
+    // contenido con la franja violeta; la capa de la foto, otra.
+    const franja = (sel) => { const f = D().querySelector('#listaCapas ' + sel + ' > .fila-capa'); return f ? W().getComputedStyle(f).borderLeftColor : 'no está'; };
+    const violeta = franja('.contenedor-capa.tipo-objeto');
+    afirmar(violeta === 'rgb(139, 92, 246)' && franja('.contenedor-capa.tipo-contenido') === violeta, 'la franja del objeto no es violeta: ' + violeta);
+    afirmar(franja('.contenedor-capa.tipo-ajuste') !== violeta, 'la capa de ajuste tiene el color del objeto: ' + franja('.contenedor-capa.tipo-ajuste'));
 
     const lienzo = D().getElementById('canvasTrabajo');
     const color = (cv, x) => { const d = cv.getContext('2d').getImageData(Math.round(x * cv.width / 200), Math.round(cv.height / 2), 1, 1).data; return d[0] > 200 && d[2] < 60 ? 'rojo' : (d[2] > 200 && d[0] < 60 ? 'azul' : (Math.abs(d[0] - 128) <= 3 && Math.abs(d[2] - 128) <= 3 ? 'gris' : d[0] + ',' + d[1] + ',' + d[2])); };
@@ -1914,13 +1932,21 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(h.volteada === 'gris rojo', 'volteada: ' + h.volteada);
     cont.contenido.voltearH = false; cont.contenido.centro = { x: 0.5, y: 0.5 }; W().programarRenderizado();
 
-    // Elegir objeto: tocar la mitad azul de la capa (x 125 de la foto = 0,75 de la capa).
+    // Elegir objeto: tocar la mitad azul de la capa (x 125 de la foto = 0,75
+    // de la capa), arriba (y = 30; la capa va de 25 a 75) para que la marca
+    // no tape la fila que se lee.
     afirmar(D().querySelector('#herramientasLienzo [data-herramienta="objeto"]').classList.contains('activo'), '"Elegir objeto" no quedó elegida');
-    tocar(125);
+    {
+      const r = lienzo.getBoundingClientRect();
+      lienzo.dispatchEvent(new (W().MouseEvent)('click', { bubbles: true, clientX: r.left + (125 / 200) * r.width, clientY: r.top + 0.3 * r.height }));
+    }
     await esperar(100);
     afirmar(await hasta(() => velo.hidden, 5000), 'el velo no se fue al terminar');
     h.objeto = await leer([75, 125]);
     afirmar(h.objeto === 'gris azul', 'objeto elegido en la capa: ' + h.objeto);
+    // La marca se dibuja donde se tocó, pasada de las coordenadas de la capa al lienzo.
+    const marcaCapa = lienzo.getContext('2d').getImageData(Math.round(125 * lienzo.width / 200), Math.round(0.3 * lienzo.height), 1, 1).data;
+    afirmar(marcaCapa[0] > 200 && marcaCapa[2] < 200 || (marcaCapa[0] > 240 && marcaCapa[1] > 240), 'no se ve la marca sobre la capa: ' + [...marcaCapa].join(','));
     afirmar(tamanos.filter((t) => t === '100x50').length === 2, 'elegir objeto no analizó la capa: ' + tamanos.join(', '));
     // Un toque fuera de la capa no elige nada y lo dice.
     tocar(10);
@@ -2447,7 +2473,9 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       forma(M.desdeV7(null)),
     ].join(' / ');
     afirmar(h.bases === 'sujeto:sumar:inv:capa / objeto:sumar:inv:foto / objeto:sumar:foto / color:sumar:foto / degradado:sumar / toda:sumar', 'bases convertidas: ' + h.bases);
-    afirmar(M.desdeV7({ base: 'sujeto', objeto: { x: 0.2, y: 0.3 } }).piezas[0].punto.x === 0.2
+    afirmar(M.desdeV7({ base: 'sujeto', objeto: { x: 0.2, y: 0.3 } }).piezas[0].puntos[0].x === 0.2
+      // Una pieza de objeto guardada con un solo "punto" (hasta 2026-10-08) abre con ese punto.
+      && M.normalizar({ piezas: [{ tipo: 'objeto', punto: { x: 0.4, y: 0.5 } }] }).piezas[0].puntos.length === 1
       && M.desdeV7({ base: 'color', color: { r: 1, g: 2, b: 3 }, tolerancia: 40 }).piezas[0].tolerancia === 40
       && M.desdeV7({ base: 'degradado', degradado: { tipo: 'radial', a: { x: 0, y: 0 }, b: { x: 1, y: 1 } } }).piezas[0].degradado.tipo === 'radial', 'la conversión perdió la configuración de la base');
     afirmar(M.esTodaLaImagen(M.neutra()) && !M.esTodaLaImagen({ piezas: [], invertir: false }) && M.esTodaLaImagen({ piezas: [M.pieza('luz'), M.pieza('toda')], invertir: false }), 'esTodaLaImagen');

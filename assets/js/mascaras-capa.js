@@ -62,13 +62,19 @@ window.MascarasCapa = (function () {
     // píxeles de la imagen original (ver recortarBorde).
     if (tipo === 'croma') { p.color = null; p.tolerancia = 25; p.suavidad = 10; p.recorte = 1; }
     if (tipo === 'luz') p.luz = { desde: RANGOS_LUZ.sombras[0], hasta: RANGOS_LUZ.sombras[1], suavidad: 15 };
-    if (tipo === 'objeto') p.punto = null; // {x,y} en 0..1: lo que se tocó
+    // [{x,y}] en 0..1: lo que se marcó; la pieza es la unión de esos objetos
+    // (hasta el 2026-10-08 era uno solo, "punto").
+    if (tipo === 'objeto') p.puntos = [];
     if (MIDEN.includes(tipo)) p.fuente = 'foto'; // 'foto' | 'capa'
     return Object.assign(p, extra);
   }
 
   function neutra() {
     return { piezas: [pieza('toda')], invertir: false };
+  }
+
+  function puntosValidos(lista) {
+    return lista.filter((o) => o && Number.isFinite(o.x) && Number.isFinite(o.y)).map((o) => ({ x: o.x, y: o.y }));
   }
 
   // Completa una pieza guardada con lo que le falte. El lienzo del pincel
@@ -96,7 +102,7 @@ window.MascarasCapa = (function () {
       p.tolerancia = Number.isFinite(g.tolerancia) ? g.tolerancia : n.tolerancia;
     }
     if (tipo === 'luz') p.luz = { ...n.luz, ...(g.luz || {}) };
-    if (tipo === 'objeto') p.punto = g.punto && Number.isFinite(g.punto.x) && Number.isFinite(g.punto.y) ? { x: g.punto.x, y: g.punto.y } : null;
+    if (tipo === 'objeto') p.puntos = puntosValidos(Array.isArray(g.puntos) ? g.puntos : [g.punto]);
     if (MIDEN.includes(tipo)) p.fuente = g.fuente === 'capa' ? 'capa' : 'foto';
     return p;
   }
@@ -123,8 +129,8 @@ window.MascarasCapa = (function () {
       piezas.push(pieza('luz', { luz: { ...pieza('luz').luz, ...(v.luz || {}) }, fuente }));
     } else if (base === 'sujeto' || base === 'fondo') {
       // "Fondo" era todo menos el sujeto (o el objeto): la misma pieza, invertida.
-      const objeto = v.objeto && Number.isFinite(v.objeto.x) && Number.isFinite(v.objeto.y) ? { x: v.objeto.x, y: v.objeto.y } : null;
-      piezas.push(objeto ? pieza('objeto', { punto: objeto, fuente }) : pieza('sujeto', { fuente }));
+      const puntos = puntosValidos([v.objeto]);
+      piezas.push(puntos.length ? pieza('objeto', { puntos, fuente }) : pieza('sujeto', { fuente }));
       if (base === 'fondo') piezas[0].invertir = true;
     }
     // 'nada': sin pieza de base; solo cuenta lo pintado.

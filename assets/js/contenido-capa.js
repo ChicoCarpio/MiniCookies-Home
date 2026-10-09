@@ -183,6 +183,6 @@ window.ContenidoCapa = (function () {
 
   return {
     FAMILIAS, textoNuevo, imagenNueva, firma, firmaFuente, fuenteDeTexto,
-    caja, puntoLocal, manijas, dibujar, recortarATransparencia,
+    caja, puntoLocal, puntoLienzo, manijas, dibujar, recortarATransparencia,
   };
 })();

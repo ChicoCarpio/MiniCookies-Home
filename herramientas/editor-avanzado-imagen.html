@@ -173,6 +173,16 @@
     border: 1px solid var(--gris-borde); border-top: none; border-radius: 0 0 8px 8px;
     background: var(--gris-fondo);
   }
+  /* Color por tipo (plan del rediseño): una franja a la izquierda de la fila
+     y de su opacidad. Objeto violeta (también su contenido fijo), grupo de
+     ajustes verde azulado, capa de ajuste suelta del mismo tono más suave,
+     carpeta gris. Ninguno es naranja: ese es el de "elegida". */
+  .contenedor-capa { --color-tipo: transparent; }
+  .contenedor-capa.tipo-objeto, .contenedor-capa.tipo-contenido { --color-tipo: #8b5cf6; }
+  .contenedor-capa.tipo-ajustes { --color-tipo: #14b8a6; }
+  .contenedor-capa.tipo-ajuste { --color-tipo: color-mix(in srgb, #14b8a6 45%, transparent); }
+  .contenedor-capa.tipo-carpeta { --color-tipo: var(--texto-suave); }
+  .contenedor-capa > .fila-capa, .contenedor-capa > .fila-opacidad { border-left: 4px solid var(--color-tipo); }
   .fila-opacidad input[type="range"] { flex: 1; margin: 0; min-width: 0; }
   .fila-opacidad select { flex: 0 1 auto; min-width: 0; max-width: 55%; font-size: 0.75rem; padding: 2px 4px; }
   .fila-opacidad span { font-size: 0.72rem; color: var(--texto-suave); width: 30px; text-align: right; }
@@ -307,8 +317,12 @@ window.i18nPagina = {
     'aviso-zona-toda': 'La zona de «{nombre}» es toda la imagen: elegí una en 🎯 Zona (por ejemplo, Primer plano).',
     'aviso-zona-esperando-ia': 'La IA todavía está separando la zona: probá de nuevo cuando termine.',
     'nota-descarga-png': 'Sale en PNG, para que lo borrado quede transparente.',
-    'ayuda-objeto': 'Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella.',
+    'ayuda-objeto': 'Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella. Cada toque deja una marca numerada y suma su objeto: marcá varios para elegirlos juntos. Tocar una marca la quita.',
     'fondo-listo-objeto': 'Fondo: todo menos el objeto elegido.',
+    'fondo-listo-objetos': 'Fondo: todo menos los {n} objetos marcados.',
+    'sujeto-listo-objetos': 'Primer plano: los {n} objetos marcados.',
+    'boton-borrar-marcas-objeto': 'Quitar todas las marcas',
+    'pieza-objetos': 'Objetos ({n})',
     'ia-buscando-objeto': 'Buscando el objeto que tocaste…',
     'ia-analizando-objetos': 'Analizando la foto para encontrar objetos…',
     'ia-descargando-objetos': 'Descargando el modelo para elegir objetos… {p}% (solo la primera vez)',
@@ -572,7 +586,11 @@ window.i18nPagina = {
     'aviso-zona-toda': 'The area of “{nombre}” is the whole image: pick one in 🎯 Area (for example, Foreground).',
     'aviso-zona-esperando-ia': 'The AI is still separating the area: try again when it finishes.',
     'nota-descarga-png': 'Saved as PNG, so the erased parts stay transparent.',
-    'ayuda-objeto': 'With "Pick object", tap anything in the photo (a flower, a person) to keep only that.',
+    'ayuda-objeto': 'With "Pick object", tap anything in the photo (a flower, a person) to keep only that. Each tap leaves a numbered mark and adds its object: mark several to pick them together. Tap a mark to remove it.',
+    'fondo-listo-objetos': 'Background: everything but the {n} marked objects.',
+    'sujeto-listo-objetos': 'Foreground: the {n} marked objects.',
+    'boton-borrar-marcas-objeto': 'Remove all marks',
+    'pieza-objetos': 'Objects ({n})',
     'fondo-listo-objeto': 'Background: everything but the picked object.',
     'ia-buscando-objeto': 'Finding the object you tapped…',
     'ia-analizando-objetos': 'Analyzing the photo to find objects…',
@@ -926,7 +944,8 @@ window.i18nPagina = {
 
                 <div id="controlesSujeto" class="controles controles-apilados" style="display:none;">
                   <span class="nota-lateral" id="estadoSujeto" role="status" aria-live="polite"></span>
-                  <span class="nota-lateral" data-i18n="ayuda-objeto">Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella.</span>
+                  <span class="nota-lateral" data-i18n="ayuda-objeto">Con "Elegir objeto", tocá cualquier cosa de la foto (una flor, una persona) para quedarte solo con ella. Cada toque deja una marca numerada y suma su objeto: marcá varios para elegirlos juntos. Tocar una marca la quita.</span>
+                  <button type="button" class="boton-capa-accion" id="botonBorrarMarcasObjeto" data-i18n="boton-borrar-marcas-objeto" hidden>Quitar todas las marcas</button>
                   <button type="button" class="boton-capa-accion" id="botonTodoSujeto" data-i18n="boton-todo-sujeto">Todo el primer plano</button>
                 </div>
 
@@ -1407,6 +1426,7 @@ window.i18nPagina = {
 <script src="../assets/js/zoom-anclado.js"></script>
 <script src="../assets/js/mascaras-capa.js"></script>
 <script src="../assets/js/trabajando-ia.js"></script>
+<script src="../assets/js/marcas-objetos.js"></script>
 <script src="../assets/js/contenido-capa.js"></script>
 <script src="../assets/js/tipos-grupo.js"></script>
 <script src="../assets/js/atajos.js"></script>
@@ -1796,10 +1816,8 @@ function fuenteDePieza(item, pieza) {
 function iaDePieza(item, pieza) {
   const fuente = fuenteDePieza(item, pieza);
   if (pieza.tipo === 'objeto') {
-    if (!pieza.punto) return null;
-    const listo = objetoListo(fuente, pieza.punto);
-    if (!listo) pedirObjeto(fuente, pieza.punto);
-    return listo;
+    pieza.puntos.forEach((o) => pedirObjeto(fuente, o)); // los que falten
+    return objetosListos(fuente, pieza.puntos);
   }
   const listo = sujetoListo(fuente);
   if (!listo) pedirSujeto(fuente);
@@ -1849,7 +1867,7 @@ const iaPorFuente = new WeakMap(); // fuente -> { sujeto, sujetoPromesa, analisi
 function estadoIA(fuente) {
   let estado = iaPorFuente.get(fuente);
   if (!estado) {
-    estado = { sujeto: null, sujetoPromesa: null, analisis: null, objetos: new Map(), pedidos: new Set() };
+    estado = { sujeto: null, sujetoPromesa: null, analisis: null, objetos: new Map(), uniones: new Map(), pedidos: new Set() };
     iaPorFuente.set(fuente, estado);
   }
   return estado;
@@ -1897,6 +1915,32 @@ function analizarParaObjetos(url, alProgresar) {
 function claveObjeto(o) { return o.x.toFixed(4) + ',' + o.y.toFixed(4); }
 function objetoListo(fuente, o) {
   return (fuente && iaPorFuente.has(fuente) && iaPorFuente.get(fuente).objetos.get(claveObjeto(o))) || null;
+}
+// Varios objetos marcados (idea del usuario, 2026-10-08, como en el Generador
+// de stickers): la unión de los que ya llegaron, o null si no llegó ninguno.
+// Mientras llegan los demás la zona crece de a uno. La unión se guarda por
+// conjunto de objetos: el mismo lienzo mientras no cambie, así la caché de la
+// máscara (que compara el lienzo) no rehace nada.
+function objetosListos(fuente, puntos) {
+  const listos = puntos.filter((o) => objetoListo(fuente, o));
+  if (!listos.length) return null;
+  if (listos.length === 1) return objetoListo(fuente, listos[0]);
+  const estado = estadoIA(fuente);
+  const clave = listos.map(claveObjeto).sort().join(';');
+  let union = estado.uniones.get(clave);
+  if (!union) {
+    const primero = objetoListo(fuente, listos[0]);
+    union = document.createElement('canvas');
+    union.width = primero.width; union.height = primero.height;
+    const ctx = union.getContext('2d');
+    listos.forEach((o) => ctx.drawImage(objetoListo(fuente, o), 0, 0));
+    estado.uniones.set(clave, union);
+  }
+  return union;
+}
+// Hay marcas cuyo objeto todavía no llegó.
+function objetosPendientes(fuente, puntos) {
+  return puntos.some((o) => !objetoListo(fuente, o));
 }
 
 function pedirObjeto(fuente, o) {
@@ -2371,6 +2415,10 @@ function dibujarAyudasLienzo(ancho, alto) {
     }
     ctxTrabajo.restore();
   }
+  // Las marcas de "Elegir objeto", numeradas, mientras la herramienta está elegida.
+  if (herramientaLienzo === 'objeto' && pieza && pieza.tipo === 'objeto' && pieza.puntos.length) {
+    MarcasObjetos.dibujar(ctxTrabajo, marcasEnLienzo(capa, pieza), radioDeMarca());
+  }
 }
 
 function programarRenderizado() {
@@ -2736,6 +2784,7 @@ const SIGNO_OPERACION = { sumar: '＋', restar: '－', intersecar: '∩' };
 
 function nombreDePieza(p) {
   if (p.tipo === 'degradado') return t(p.degradado.tipo === 'radial' ? 'pieza-degradado-radial' : 'pieza-degradado-lineal');
+  if (p.tipo === 'objeto' && p.puntos.length > 1) return t('pieza-objetos').replace('{n}', p.puntos.length);
   return t('pieza-' + p.tipo);
 }
 
@@ -2992,12 +3041,16 @@ function actualizarControlesSeleccion() {
   const conSujeto = tipo === 'sujeto' || tipo === 'objeto';
   document.getElementById('controlesSujeto').style.display = conSujeto ? 'flex' : 'none';
   document.getElementById('botonTodoSujeto').disabled = tipo !== 'objeto';
+  document.getElementById('botonBorrarMarcasObjeto').hidden = !(tipo === 'objeto' && pieza.puntos.length);
   if (conSujeto) {
     const fuente = fuenteDePieza(capa, pieza);
     if (tipo === 'objeto') {
-      if (!pieza.punto) mostrarEstadoSujeto(t('objeto-sin-tocar'));
-      else if (objetoListo(fuente, pieza.punto)) mostrarEstadoSujeto(t(pieza.invertir ? 'fondo-listo-objeto' : 'sujeto-listo-objeto'));
-      else pedirObjeto(fuente, pieza.punto);
+      const n = pieza.puntos.length;
+      if (!n) mostrarEstadoSujeto(t('objeto-sin-tocar'));
+      else if (!objetosPendientes(fuente, pieza.puntos)) {
+        mostrarEstadoSujeto(n === 1 ? t(pieza.invertir ? 'fondo-listo-objeto' : 'sujeto-listo-objeto')
+          : t(pieza.invertir ? 'fondo-listo-objetos' : 'sujeto-listo-objetos').replace('{n}', n));
+      } else pieza.puntos.forEach((o) => pedirObjeto(fuente, o));
     } else if (sujetoListo(fuente)) {
       mostrarEstadoSujeto(t(pieza.invertir ? 'fondo-listo-todo' : 'sujeto-listo-todo'));
     } else {
@@ -3208,18 +3261,50 @@ function puntoEnContenido(capa, e) {
   return u >= 0 && u <= 1 && v >= 0 && v <= 1 ? { x: u, y: v } : null;
 }
 
-// Elegir objeto: lo que esté bajo el dedo, sea o no el sujeto principal. Una
-// pieza de primer plano pasa a ser de objeto (y "Todo el primer plano" la
-// devuelve).
+// Las marcas de una pieza de objeto, en píxeles del lienzo de trabajo (sobre
+// la capa, desde las coordenadas de su contenido), y el radio con que se ven:
+// unos 12 px de pantalla, con cualquier zoom.
+function marcasEnLienzo(capa, pieza) {
+  const sobreLaCapa = piezaMideSobreLaCapa(capa, pieza);
+  const contenido = sobreLaCapa ? capaDeContenido(capa) : null;
+  const k = contenido ? cajaDeContenido(contenido) : null;
+  return pieza.puntos.map((o) => {
+    if (!k) return { x: o.x * canvasTrabajo.width, y: o.y * canvasTrabajo.height };
+    const u = contenido.contenido.voltearH ? 1 - o.x : o.x;
+    const v = contenido.contenido.voltearV ? 1 - o.y : o.y;
+    return ContenidoCapa.puntoLienzo(k, (u - 0.5) * 2 * k.mx, (v - 0.5) * 2 * k.my);
+  });
+}
+function radioDeMarca() { return 12 * pixelesPorPuntoDePantalla(); }
+
+// Elegir objeto: lo que esté bajo el dedo, sea o no el sujeto principal. Cada
+// toque deja una marca numerada y la IA busca su objeto; la zona es la unión
+// de todos (como "Los objetos que marco" del Generador de stickers). Tocar una
+// marca la quita. Una pieza de primer plano pasa a ser de objeto (y "Todo el
+// primer plano" la devuelve).
 canvasTrabajo.addEventListener('click', (e) => {
   const capa = itemActivo(), pieza = piezaActiva(capa);
   if (!pieza || herramientaLienzo !== 'objeto' || huboPan) return;
+  if (pieza.tipo === 'objeto' && pieza.puntos.length) {
+    const { x, y } = coordenadasEnCanvasTrabajo(e);
+    const i = MarcasObjetos.cercana(marcasEnLienzo(capa, pieza), x, y, radioDeMarca());
+    // Arreglos nuevos, nunca modificados en el lugar: el historial puede
+    // guardar la pieza copiada por arriba y compartir el de antes.
+    if (i >= 0) {
+      pieza.puntos = pieza.puntos.filter((_, j) => j !== i);
+      actualizarControlesSeleccion();
+      return;
+    }
+  }
   const p = piezaMideSobreLaCapa(capa, pieza) ? puntoEnContenido(capaDeContenido(capa), e) : puntoRelativo(e);
   if (!p) { mostrarEstadoSujeto(t('objeto-fuera-de-capa')); return; }
-  pieza.tipo = 'objeto';
-  pieza.punto = { x: p.x, y: p.y };
-  actualizarControlesSeleccion();
-  programarRenderizado(); // pide el objeto a la IA (ver generarMascaraCapa)
+  if (pieza.tipo !== 'objeto') { pieza.tipo = 'objeto'; pieza.puntos = []; }
+  pieza.puntos = [...pieza.puntos, { x: p.x, y: p.y }];
+  actualizarControlesSeleccion(); // pide el objeto a la IA y vuelve a dibujar
+});
+
+document.getElementById('botonBorrarMarcasObjeto').addEventListener('click', () => {
+  cambiarPieza((p) => { p.puntos = []; }, ['objeto']);
 });
 
 document.querySelectorAll('#modosFuenteMascara button').forEach((boton) => {
@@ -3229,7 +3314,7 @@ document.querySelectorAll('#modosFuenteMascara button').forEach((boton) => {
     cambiarPieza((p) => {
       p.fuente = boton.dataset.fuente;
       // El objeto tocado y el color elegido eran de la otra fuente.
-      if (p.tipo === 'objeto') p.punto = null;
+      if (p.tipo === 'objeto') p.puntos = [];
       if (p.tipo === 'color') p.color = null;
       if (p.tipo === 'croma') p.color = detectarCroma(itemActivo(), p);
     });
@@ -3237,7 +3322,7 @@ document.querySelectorAll('#modosFuenteMascara button').forEach((boton) => {
 });
 
 document.getElementById('botonTodoSujeto').addEventListener('click', () => {
-  cambiarPieza((p) => { p.tipo = 'sujeto'; delete p.punto; }, ['objeto']);
+  cambiarPieza((p) => { p.tipo = 'sujeto'; delete p.puntos; }, ['objeto']);
 });
 
 canvasTrabajo.addEventListener('click', (e) => {
@@ -3365,7 +3450,8 @@ botonRestaurarBorrado.addEventListener('click', () => {
 // ya se eligió (el primer plano, un objeto tocado, un color…): la forma de
 // quitar el fondo. Se suma a lo ya borrado y se deshace como un trazo.
 function zonaEsperandoIA(item) {
-  return item.mascara.piezas.some((p) => p.visible && (p.tipo === 'sujeto' || p.tipo === 'objeto') && !iaDePieza(item, p));
+  return item.mascara.piezas.some((p) => p.visible && (p.tipo === 'sujeto' || p.tipo === 'objeto')
+    && (!iaDePieza(item, p) || (p.tipo === 'objeto' && objetosPendientes(fuenteDePieza(item, p), p.puntos))));
 }
 function borrarConZona(fuera) {
   const item = itemActivo();
@@ -3922,7 +4008,7 @@ function pintarNivel(lista, nivel, padre = null) {
 // objeto (los ajustes del objeto van en capas arriba de ella).
 function crearFilaContenido(capa, objeto, nivel) {
   const contenedor = document.createElement('div');
-  contenedor.className = 'contenedor-capa contenido-fijo';
+  contenedor.className = 'contenedor-capa contenido-fijo tipo-contenido';
   contenedor.dataset.id = capa.id;
   contenedor.style.marginLeft = (nivel * 14) + 'px';
   const fila = document.createElement('div');
@@ -3949,7 +4035,7 @@ function crearFilaContenido(capa, objeto, nivel) {
 function crearFilaItem(capa, nivel) {
   const grupo = esGrupo(capa);
   const contenedor = document.createElement('div');
-  contenedor.className = 'contenedor-capa' + (grupo ? ' es-grupo' : '');
+  contenedor.className = 'contenedor-capa' + (grupo ? ' es-grupo' : '') + ' tipo-' + TiposGrupo.claseDe(capa);
   contenedor.dataset.id = capa.id;
   contenedor.style.marginLeft = (nivel * 14) + 'px';
 

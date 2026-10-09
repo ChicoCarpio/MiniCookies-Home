@@ -487,22 +487,8 @@ export function iniciarGeneradorStickers() {
     vistaResultado.width = Math.round(imagen.naturalWidth * escala);
     vistaResultado.height = Math.round(imagen.naturalHeight * escala);
     contextoResultado.drawImage(imagen, 0, 0, vistaResultado.width, vistaResultado.height);
-    const radio = radioDeMarca();
-    contextoResultado.font = `bold ${Math.round(radio * 1.1)}px system-ui, sans-serif`;
-    contextoResultado.textAlign = 'center';
-    contextoResultado.textBaseline = 'middle';
-    marcas.forEach((m, i) => {
-      const x = m.x * vistaResultado.width, y = m.y * vistaResultado.height;
-      contextoResultado.beginPath();
-      contextoResultado.arc(x, y, radio, 0, Math.PI * 2);
-      contextoResultado.fillStyle = '#ffffff';
-      contextoResultado.fill();
-      contextoResultado.lineWidth = Math.max(2, radio * 0.22);
-      contextoResultado.strokeStyle = '#e11d48';
-      contextoResultado.stroke();
-      contextoResultado.fillStyle = '#e11d48';
-      contextoResultado.fillText(String(i + 1), x, y + 1);
-    });
+    const enVista = marcas.map((m) => ({ x: m.x * vistaResultado.width, y: m.y * vistaResultado.height }));
+    MarcasObjetos.dibujar(contextoResultado, enVista, radioDeMarca());
     vistaResultado.style.display = 'block';
   }
 
@@ -540,8 +526,9 @@ export function iniciarGeneradorStickers() {
     if (x < 0 || x > 1 || y < 0 || y > 1) return;
     // Tocar sobre una marca (o casi) la quita; la distancia se mide en
     // píxeles de la vista, con el mismo radio con que se dibuja.
-    const ancho = vistaResultado.width, alto = vistaResultado.height, radio = radioDeMarca();
-    const cerca = marcas.findIndex((m) => Math.hypot((m.x - x) * ancho, (m.y - y) * alto) < radio * 1.3);
+    const ancho = vistaResultado.width, alto = vistaResultado.height;
+    const enVista = marcas.map((m) => ({ x: m.x * ancho, y: m.y * alto }));
+    const cerca = MarcasObjetos.cercana(enVista, x * ancho, y * alto, radioDeMarca());
     if (cerca >= 0) marcas.splice(cerca, 1);
     else marcas.push({ x, y });
     mostrarControlesModo();
