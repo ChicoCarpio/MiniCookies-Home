@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Rotar y voltear imagen gratis — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Rotá 90/180/270° o volteá una imagen horizontal o verticalmente, gratis y sin subirla a ningún servidor.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Rotá una imagen 90°, 180° o en cualquier ángulo para enderezarla, o volteala horizontal o verticalmente, gratis y sin subirla a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   #vistaPrevia { max-width: 100%; max-height: 400px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
 </style>
@@ -16,7 +17,7 @@
 window.i18nPagina = {
   es: {
     'hero-titulo': 'Rotar y voltear imagen',
-    'intro': 'Elegí una imagen y rotala o volteala las veces que quieras antes de descargar.',
+    'intro': 'Elegí una imagen y rotala, enderezala en cualquier ángulo o volteala las veces que quieras antes de descargar.',
     'boton-izquierda': '↺ Rotar 90° izquierda',
     'boton-derecha': '↻ Rotar 90° derecha',
     'boton-volteo-h': '⇋ Voltear horizontal',
@@ -25,11 +26,18 @@ window.i18nPagina = {
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Rotar y voltear imagen gratis — Mini Cookies',
-    'meta-descripcion': 'Rotá 90/180/270° o volteá una imagen horizontal o verticalmente, gratis y sin subirla a ningún servidor.',
+    'meta-descripcion': 'Rotá una imagen 90°, 180° o en cualquier ángulo para enderezarla, o volteala horizontal o verticalmente, gratis y sin subirla a ningún servidor.',
+    'campo-angulo-a': 'Ángulo: ',
+    'campo-angulo-numero': 'Ángulo exacto',
+    'campo-esquinas-transparentes': 'Esquinas transparentes',
+    'campo-color-esquinas': 'Color de las esquinas',
+    'campo-recortar-esquinas': 'Recortar las esquinas vacías',
+    'ayuda-esquinas': 'Al girar en un ángulo que no es recto, la imagen ya no entra en un rectángulo y quedan cuatro esquinas vacías: se pueden dejar transparentes, pintarlas de un color o recortarlas. Recortar deja el rectángulo más grande que entra sin esquinas, así que se pierde un poco de cada borde.',
+    'nota-png': 'Sale en PNG para que las esquinas queden transparentes.',
   },
   en: {
     'hero-titulo': 'Rotate and flip an image',
-    'intro': 'Pick an image and rotate or flip it as many times as you like before downloading.',
+    'intro': 'Pick an image and rotate it, straighten it by any angle or flip it as many times as you like before downloading.',
     'boton-izquierda': '↺ Rotate 90° left',
     'boton-derecha': '↻ Rotate 90° right',
     'boton-volteo-h': '⇋ Flip horizontally',
@@ -38,7 +46,14 @@ window.i18nPagina = {
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download image',
     'titulo-pagina': 'Rotate and flip an image, free — Mini Cookies',
-    'meta-descripcion': 'Rotate 90/180/270° or flip an image horizontally or vertically — free, and nothing is uploaded to a server.',
+    'meta-descripcion': 'Rotate an image 90°, 180° or by any angle to straighten it, or flip it horizontally or vertically — free, and nothing is uploaded to a server.',
+    'campo-angulo-a': 'Angle: ',
+    'campo-angulo-numero': 'Exact angle',
+    'campo-esquinas-transparentes': 'Transparent corners',
+    'campo-color-esquinas': 'Corner color',
+    'campo-recortar-esquinas': 'Crop the empty corners',
+    'ayuda-esquinas': 'When you rotate by an angle that is not a right angle, the image no longer fits a rectangle and four corners are left empty: you can leave them transparent, fill them with a color or crop them. Cropping keeps the largest rectangle that fits without corners, so a little of each edge is lost.',
+    'nota-png': 'Saved as PNG so the corners stay transparent.',
   }
 };
 </script>
@@ -58,7 +73,7 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="hero-titulo">Rotar y voltear imagen</h1>
-  <p data-i18n="intro">Elegí una imagen y rotala o volteala las veces que quieras antes de descargar.</p>
+  <p data-i18n="intro">Elegí una imagen y rotala, enderezala en cualquier ángulo o volteala las veces que quieras antes de descargar.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
@@ -73,7 +88,34 @@ window.i18nPagina = {
       <button class="boton" id="botonDerecha" type="button" disabled style="background:#64748b;" data-i18n="boton-derecha">↻ Rotar 90° derecha</button>
       <button class="boton" id="botonVolteoH" type="button" disabled style="background:#64748b;" data-i18n="boton-volteo-h">⇋ Voltear horizontal</button>
       <button class="boton" id="botonVolteoV" type="button" disabled style="background:#64748b;" data-i18n="boton-volteo-v">⇵ Voltear vertical</button>
+    </div>
+    <div class="controles">
+      <label class="campo">
+        <span><span data-i18n="campo-angulo-a">Ángulo: </span><span id="etiquetaAngulo">0</span>°</span>
+        <input type="range" id="angulo" min="-180" max="180" step="0.5" value="0" disabled>
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-angulo-numero">Ángulo exacto</span>
+        <input type="number" id="anguloNumero" min="-180" max="180" step="0.1" value="0" disabled style="width:110px;">
+      </label>
+      <label class="campo">
+        <span><input type="checkbox" id="esquinasTransparentes" checked disabled> <span data-i18n="campo-esquinas-transparentes">Esquinas transparentes</span></span>
+      </label>
+      <label class="campo">
+        <span data-i18n="campo-color-esquinas">Color de las esquinas</span>
+        <input type="color" id="colorEsquinas" value="#ffffff" disabled>
+      </label>
+      <label class="campo">
+        <span><input type="checkbox" id="recortarEsquinas" disabled> <span data-i18n="campo-recortar-esquinas">Recortar las esquinas vacías</span></span>
+      </label>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-esquinas">Al girar en un ángulo que no es recto, la imagen ya no entra en un rectángulo y quedan cuatro esquinas vacías: se pueden dejar transparentes, pintarlas de un color o recortarlas. Recortar deja el rectángulo más grande que entra sin esquinas, así que se pierde un poco de cada borde.</span>
+      </span>
+    </div>
+    <div class="controles">
       <button class="boton" id="botonDescargar" disabled data-i18n="boton-descargar">Descargar imagen</button>
+      <span id="notaPng" data-i18n="nota-png" hidden>Sale en PNG para que las esquinas queden transparentes.</span>
     </div>
 
     <div class="resultado" id="resultado">
@@ -90,6 +132,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -97,10 +140,24 @@ const vistaPrevia = document.getElementById('vistaPrevia');
 const contexto = vistaPrevia.getContext('2d');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
-const botones = ['botonIzquierda', 'botonDerecha', 'botonVolteoH', 'botonVolteoV', 'botonDescargar'].map(id => document.getElementById(id));
+const botones = ['botonIzquierda', 'botonDerecha', 'botonVolteoH', 'botonVolteoV', 'botonDescargar',
+  'angulo', 'anguloNumero', 'esquinasTransparentes', 'recortarEsquinas'].map(id => document.getElementById(id));
+const campoAngulo = document.getElementById('angulo');
+const campoAnguloNumero = document.getElementById('anguloNumero');
+const etiquetaAngulo = document.getElementById('etiquetaAngulo');
+const esquinasTransparentes = document.getElementById('esquinasTransparentes');
+const colorEsquinas = document.getElementById('colorEsquinas');
+const recortarEsquinas = document.getElementById('recortarEsquinas');
+const notaPng = document.getElementById('notaPng');
 
 let archivoActual = null;
 let imagenActual = null;
+// Los giros de 90° y los volteos se hacen sobre esta copia (no pierden
+// calidad); el ángulo libre se aplica después, siempre desde ella, así que
+// moverlo muchas veces no degrada la imagen.
+const lienzoBase = document.createElement('canvas');
+const contextoBase = lienzoBase.getContext('2d');
+let anguloLibre = 0;
 
 // Formato de la imagen descargada: se respetan PNG y WebP (guardan
 // transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
@@ -108,9 +165,14 @@ let imagenActual = null;
 // transparencia de un WebP/GIF quedaba pintada de negro.
 const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
 function formatoDeSalida(archivo) {
-  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+  const formato = EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
+  // Un JPG no tiene transparencia: con esquinas transparentes sale en PNG.
+  return formato === 'image/jpeg' && quedanEsquinasTransparentes() ? 'image/png' : formato;
 }
 
+function quedanEsquinasTransparentes() {
+  return anguloLibre % 90 !== 0 && esquinasTransparentes.checked && !recortarEsquinas.checked;
+}
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -121,10 +183,50 @@ function cargarImagen(archivo) {
   });
 }
 
-function dibujar(imagen) {
-  vistaPrevia.width = imagen.naturalWidth ?? imagen.width;
-  vistaPrevia.height = imagen.naturalHeight ?? imagen.height;
-  contexto.drawImage(imagen, 0, 0);
+// El rectángulo más grande, con los lados derechos, que entra en una imagen
+// de ancho × alto girada `radianes` (para recortar las esquinas vacías).
+function rectanguloSinEsquinas(ancho, alto, radianes) {
+  const seno = Math.abs(Math.sin(radianes)), coseno = Math.abs(Math.cos(radianes));
+  const largo = Math.max(ancho, alto), corto = Math.min(ancho, alto);
+  if (corto <= 2 * seno * coseno * largo || Math.abs(seno - coseno) < 1e-10) {
+    // Toca los dos lados largos: medio lado corto en cada dirección.
+    const medio = corto / 2;
+    return ancho >= alto ? [medio / seno, medio / coseno] : [medio / coseno, medio / seno];
+  }
+  const coseno2 = coseno * coseno - seno * seno;
+  return [(ancho * coseno - alto * seno) / coseno2, (alto * coseno - ancho * seno) / coseno2];
+}
+
+function dibujar() {
+  const ancho = lienzoBase.width, alto = lienzoBase.height;
+  const radianes = anguloLibre * Math.PI / 180;
+  const seno = Math.abs(Math.sin(radianes)), coseno = Math.abs(Math.cos(radianes));
+  let anchoFinal = Math.round(ancho * coseno + alto * seno);
+  let altoFinal = Math.round(ancho * seno + alto * coseno);
+  if (recortarEsquinas.checked && anguloLibre % 90 !== 0) {
+    [anchoFinal, altoFinal] = rectanguloSinEsquinas(ancho, alto, radianes).map((v) => Math.max(1, Math.floor(v)));
+  }
+  vistaPrevia.width = anchoFinal;
+  vistaPrevia.height = altoFinal;
+  if (!esquinasTransparentes.checked) {
+    contexto.fillStyle = colorEsquinas.value;
+    contexto.fillRect(0, 0, anchoFinal, altoFinal);
+  }
+  contexto.save();
+  contexto.translate(anchoFinal / 2, altoFinal / 2);
+  contexto.rotate(radianes);
+  contexto.drawImage(lienzoBase, -ancho / 2, -alto / 2);
+  contexto.restore();
+  notaPng.hidden = !(archivoActual && archivoActual.type === 'image/jpeg' && quedanEsquinasTransparentes());
+  colorEsquinas.disabled = !imagenActual || esquinasTransparentes.checked;
+  resultado.classList.remove('visible');
+}
+
+// Mover el deslizador redibuja una vez por cuadro, no por cada evento.
+let cuadroPendiente = 0;
+function dibujarPronto() {
+  if (cuadroPendiente) return;
+  cuadroPendiente = requestAnimationFrame(() => { cuadroPendiente = 0; dibujar(); });
 }
 
 async function mostrarArchivo(archivo) {
@@ -135,10 +237,13 @@ async function mostrarArchivo(archivo) {
     return;
   }
   imagenActual = await cargarImagen(archivo);
-  dibujar(imagenActual);
+  lienzoBase.width = imagenActual.naturalWidth;
+  lienzoBase.height = imagenActual.naturalHeight;
+  contextoBase.drawImage(imagenActual, 0, 0);
+  ponerAngulo(0);
   vistaPrevia.style.display = 'block';
   botones.forEach(b => b.disabled = false);
-  resultado.classList.remove('visible');
+  dibujar();
 }
 
 function elegirArchivo(listaFileList) {
@@ -148,50 +253,51 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-function rotar(grados) {
-  const anchoOriginal = vistaPrevia.width;
-  const altoOriginal = vistaPrevia.height;
+// Copia la base, le da el tamaño nuevo y la redibuja con la transformación.
+function transformarBase(anchoNuevo, altoNuevo, transformar) {
   const temporal = document.createElement('canvas');
-  temporal.width = anchoOriginal;
-  temporal.height = altoOriginal;
-  temporal.getContext('2d').drawImage(vistaPrevia, 0, 0);
+  temporal.width = lienzoBase.width;
+  temporal.height = lienzoBase.height;
+  temporal.getContext('2d').drawImage(lienzoBase, 0, 0);
+  lienzoBase.width = anchoNuevo;
+  lienzoBase.height = altoNuevo;
+  contextoBase.save();
+  transformar(contextoBase, temporal);
+  contextoBase.drawImage(temporal, 0, 0);
+  contextoBase.restore();
+  dibujar();
+}
 
-  vistaPrevia.width = altoOriginal;
-  vistaPrevia.height = anchoOriginal;
-  contexto.save();
-  contexto.translate(vistaPrevia.width / 2, vistaPrevia.height / 2);
-  contexto.rotate(grados * Math.PI / 180);
-  contexto.drawImage(temporal, -anchoOriginal / 2, -altoOriginal / 2);
-  contexto.restore();
-  resultado.classList.remove('visible');
+function rotar(grados) {
+  transformarBase(lienzoBase.height, lienzoBase.width, (cx, temporal) => {
+    cx.translate(lienzoBase.width / 2, lienzoBase.height / 2);
+    cx.rotate(grados * Math.PI / 180);
+    cx.translate(-temporal.width / 2, -temporal.height / 2);
+  });
 }
 
 function voltear(horizontal) {
-  const ancho = vistaPrevia.width;
-  const alto = vistaPrevia.height;
-  const temporal = document.createElement('canvas');
-  temporal.width = ancho;
-  temporal.height = alto;
-  temporal.getContext('2d').drawImage(vistaPrevia, 0, 0);
+  transformarBase(lienzoBase.width, lienzoBase.height, (cx) => {
+    if (horizontal) { cx.translate(lienzoBase.width, 0); cx.scale(-1, 1); }
+    else { cx.translate(0, lienzoBase.height); cx.scale(1, -1); }
+  });
+}
 
-  contexto.save();
-  contexto.clearRect(0, 0, ancho, alto);
-  if (horizontal) {
-    contexto.translate(ancho, 0);
-    contexto.scale(-1, 1);
-  } else {
-    contexto.translate(0, alto);
-    contexto.scale(1, -1);
-  }
-  contexto.drawImage(temporal, 0, 0);
-  contexto.restore();
-  resultado.classList.remove('visible');
+function ponerAngulo(valor) {
+  const numero = Math.max(-180, Math.min(180, Number(valor) || 0));
+  anguloLibre = numero;
+  campoAngulo.value = numero;
+  campoAnguloNumero.value = numero;
+  etiquetaAngulo.textContent = numero.toLocaleString(idiomaActual());
 }
 
 document.getElementById('botonIzquierda').addEventListener('click', () => rotar(-90));
 document.getElementById('botonDerecha').addEventListener('click', () => rotar(90));
 document.getElementById('botonVolteoH').addEventListener('click', () => voltear(true));
 document.getElementById('botonVolteoV').addEventListener('click', () => voltear(false));
+campoAngulo.addEventListener('input', () => { ponerAngulo(campoAngulo.value); dibujarPronto(); });
+campoAnguloNumero.addEventListener('change', () => { ponerAngulo(campoAnguloNumero.value); dibujar(); });
+[esquinasTransparentes, colorEsquinas, recortarEsquinas].forEach((c) => c.addEventListener('input', dibujar));
 
 document.getElementById('botonDescargar').addEventListener('click', async () => {
   const formato = formatoDeSalida(archivoActual);

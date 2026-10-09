@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Extraer paleta de colores de una imagen gratis — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Sacá los colores dominantes de una imagen con su código hexadecimal, gratis y sin subirla a ningún servidor.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Sacá los colores dominantes de una imagen con su código hexadecimal, tomá cualquier color con el cuentagotas y armá esquemas complementarios, análogos o triádicos, gratis y sin subirla a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   #vistaPrevia { max-width: 100%; max-height: 350px; border: 1px solid var(--gris-borde); border-radius: 8px; display: none; margin: 16px 0; }
   .paleta { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin: 16px 0; }
@@ -31,23 +32,45 @@ window.i18nPagina = {
     'hero-titulo': 'Extraer paleta de colores',
     'intro': 'Elegí una imagen y obtené sus colores dominantes con el código hexadecimal, listo para copiar.',
     'campo-cantidad-a': 'Cantidad de colores: ',
-    'ayuda-copiar': 'Tocá un color para copiar su código.',
+    'ayuda-copiar': 'Tocá un color para copiar su código y usarlo como base de los esquemas. 💧 Tocá la imagen para tomar un color con el cuentagotas.',
+    'titulo-esquemas': 'Esquemas de color',
+    'campo-color-base': 'Color base',
+    'campo-esquema': 'Esquema',
+    'esquema-complementario': 'Complementario',
+    'esquema-analogo': 'Análogos',
+    'esquema-triadico': 'Triádico',
+    'esquema-dividido': 'Complementario dividido',
+    'esquema-tetradico': 'Tetrádico',
+    'ayuda-esquemas': 'Cada esquema gira el tono del color base en el círculo cromático y conserva su saturación y su luminosidad. Complementario: el color opuesto (180°). Análogos: los vecinos (±30°). Triádico: tres colores a 120°. Complementario dividido: los dos vecinos del opuesto (150° y 210°). Tetrádico: cuatro colores a 90°.',
+    'txt-titulo': 'Paleta de {nombre}',
+    'txt-esquema': 'Esquema {esquema} a partir de {hex}',
     'boton-png': 'Descargar paleta (.png)',
     'boton-txt': 'Descargar códigos (.txt)',
     'aviso-codigo': 'Código: ',
     'titulo-pagina': 'Extraer paleta de colores de una imagen gratis — Mini Cookies',
-    'meta-descripcion': 'Sacá los colores dominantes de una imagen con su código hexadecimal, gratis y sin subirla a ningún servidor.',
+    'meta-descripcion': 'Sacá los colores dominantes de una imagen con su código hexadecimal, tomá cualquier color con el cuentagotas y armá esquemas complementarios, análogos o triádicos, gratis y sin subirla a ningún servidor.',
   },
   en: {
     'hero-titulo': 'Extract a color palette',
     'intro': 'Pick an image and get its dominant colors with their hex codes, ready to copy.',
     'campo-cantidad-a': 'Number of colors: ',
-    'ayuda-copiar': 'Tap a color to copy its code.',
+    'ayuda-copiar': 'Tap a color to copy its code and use it as the base for the schemes. 💧 Tap the image to pick a color with the eyedropper.',
+    'titulo-esquemas': 'Color schemes',
+    'campo-color-base': 'Base color',
+    'campo-esquema': 'Scheme',
+    'esquema-complementario': 'Complementary',
+    'esquema-analogo': 'Analogous',
+    'esquema-triadico': 'Triadic',
+    'esquema-dividido': 'Split complementary',
+    'esquema-tetradico': 'Tetradic',
+    'ayuda-esquemas': 'Each scheme turns the hue of the base color around the color wheel and keeps its saturation and lightness. Complementary: the opposite color (180°). Analogous: its neighbors (±30°). Triadic: three colors 120° apart. Split complementary: the two neighbors of the opposite (150° and 210°). Tetradic: four colors 90° apart.',
+    'txt-titulo': 'Palette of {nombre}',
+    'txt-esquema': '{esquema} scheme from {hex}',
     'boton-png': 'Download palette (.png)',
     'boton-txt': 'Download codes (.txt)',
     'aviso-codigo': 'Code: ',
     'titulo-pagina': 'Extract a color palette from an image, free — Mini Cookies',
-    'meta-descripcion': 'Pull the dominant colors out of an image with their hex codes — free, and nothing is uploaded to a server.',
+    'meta-descripcion': 'Pull the dominant colors out of an image with their hex codes, pick any color with the eyedropper and build complementary, analogous or triadic schemes — free, and nothing is uploaded to a server.',
   }
 };
 </script>
@@ -84,7 +107,36 @@ window.i18nPagina = {
 
     <div class="paleta" id="paleta"></div>
 
-    <p id="ayudaCopiar" style="display:none; color: var(--texto-suave); font-size: 0.9rem;" data-i18n="ayuda-copiar">Tocá un color para copiar su código.</p>
+    <p id="ayudaCopiar" style="display:none; color: var(--texto-suave); font-size: 0.9rem;" data-i18n="ayuda-copiar">Tocá un color para copiar su código y usarlo como base de los esquemas. 💧 Tocá la imagen para tomar un color con el cuentagotas.</p>
+
+    <div id="bloqueEsquemas" style="display:none;">
+      <h2 data-i18n="titulo-esquemas">Esquemas de color</h2>
+      <div class="controles">
+        <div class="campo">
+          <span data-i18n="campo-color-base">Color base</span>
+          <div class="color-swatch" id="muestraBase" style="width:120px; cursor:default;">
+            <div class="muestra"></div>
+            <div class="codigo"></div>
+          </div>
+        </div>
+        <label class="campo">
+          <span data-i18n="campo-esquema">Esquema</span>
+          <select id="tipoEsquema">
+            <option value="complementario" data-i18n="esquema-complementario">Complementario</option>
+            <option value="analogo" data-i18n="esquema-analogo">Análogos</option>
+            <option value="triadico" data-i18n="esquema-triadico">Triádico</option>
+            <option value="dividido" data-i18n="esquema-dividido">Complementario dividido</option>
+            <option value="tetradico" data-i18n="esquema-tetradico">Tetrádico</option>
+          </select>
+        </label>
+        <span class="ayuda-tip">
+          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+          <span class="ayuda-burbuja" data-i18n="ayuda-esquemas">Cada esquema gira el tono del color base en el círculo cromático y conserva su saturación y su luminosidad. Complementario: el color opuesto (180°). Análogos: los vecinos (±30°). Triádico: tres colores a 120°. Complementario dividido: los dos vecinos del opuesto (150° y 210°). Tetrádico: cuatro colores a 90°.</span>
+        </span>
+      </div>
+      <div class="paleta" id="esquema"></div>
+    </div>
+
     <div class="controles" id="controlesDescarga" style="display:none;">
       <button class="boton" id="botonDescargarPng" type="button" data-i18n="boton-png">Descargar paleta (.png)</button>
       <button class="boton" id="botonDescargarTxt" type="button" style="background:#64748b;" data-i18n="boton-txt">Descargar códigos (.txt)</button>
@@ -101,18 +153,23 @@ window.i18nPagina = {
 
 <script src="../assets/js/descargar.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
 const vistaPrevia = document.getElementById('vistaPrevia');
-const contexto = vistaPrevia.getContext('2d');
+const contexto = vistaPrevia.getContext('2d', { willReadFrequently: true });
 const paleta = document.getElementById('paleta');
 const ayudaCopiar = document.getElementById('ayudaCopiar');
 const elCantidad = document.getElementById('cantidad');
 const etiquetaCantidad = document.getElementById('etiquetaCantidad');
+const bloqueEsquemas = document.getElementById('bloqueEsquemas');
+const muestraBase = document.getElementById('muestraBase');
+const tipoEsquema = document.getElementById('tipoEsquema');
+const esquema = document.getElementById('esquema');
 
 let imagenActual = null;
-
+let colorBase = null;
 
 function cargarImagen(archivo) {
   return new Promise((resolve, reject) => {
@@ -157,26 +214,57 @@ function extraerColoresDominantes(imageData, cantidad) {
 }
 
 let coloresActuales = [];
+let coloresEsquema = [];
 let nombreImagen = 'imagen';
 
 function hexDe(c) { return `#${componenteHex(c.r)}${componenteHex(c.g)}${componenteHex(c.b)}`; }
 
-function mostrarPaleta(colores) {
-  coloresActuales = colores;
-  document.getElementById('controlesDescarga').style.display = colores.length ? 'flex' : 'none';
-  paleta.innerHTML = colores.map((c) => {
-    const hex = `#${componenteHex(c.r)}${componenteHex(c.g)}${componenteHex(c.b)}`;
-    return `
-      <div class="color-swatch" data-hex="${hex}">
-        <div class="muestra" style="background:${hex};"></div>
-        <div class="codigo">${hex}</div>
-        <div class="porcentaje">${c.porcentaje.toFixed(1)}%</div>
-      </div>
-    `;
-  }).join('');
+// RGB (0–255) ⇄ HSL (tono 0–360, saturación y luminosidad 0–1).
+function rgbAHsl({ r, g, b }) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return { h: h * 60, s, l };
+}
+function hslARgb({ h, s, l }) {
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const canal = (t) => {
+    t = ((t % 1) + 1) % 1;
+    const v = t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p;
+    // Se redondea en dos pasos: 127,5 llega como 127,4999… o 127,5000…
+    // según el giro, y los análogos de un rojo salían #ff0080 y #ff7f00.
+    return Math.round(Math.round(v * 255 * 1e6) / 1e6);
+  };
+  return s === 0 ? { r: Math.round(l * 255), g: Math.round(l * 255), b: Math.round(l * 255) }
+    : { r: canal(h / 360 + 1 / 3), g: canal(h / 360), b: canal(h / 360 - 1 / 3) };
+}
 
-  paleta.querySelectorAll('.color-swatch').forEach((elemento) => {
-    elemento.addEventListener('click', async () => {
+// Cuánto se gira el tono del color base en cada esquema.
+const GIROS_ESQUEMA = {
+  complementario: [0, 180],
+  analogo: [-30, 0, 30],
+  triadico: [0, 120, 240],
+  dividido: [0, 150, 210],
+  tetradico: [0, 90, 180, 270],
+};
+
+// Tarjetas de color (muestra, código y, si hay, porcentaje). Tocar una copia
+// su código; las de la paleta, además, la vuelven el color base de los
+// esquemas (las del esquema no: rehacerlo al tocar una la cambiaba de lugar).
+function pintarTarjetas(contenedor, colores, volverBase) {
+  contenedor.innerHTML = colores.map((c) => `
+      <div class="color-swatch" data-hex="${hexDe(c)}" tabindex="0" role="button">
+        <div class="muestra" style="background:${hexDe(c)};"></div>
+        <div class="codigo">${hexDe(c)}</div>
+        ${c.porcentaje === undefined ? '' : `<div class="porcentaje">${c.porcentaje.toFixed(1)}%</div>`}
+      </div>
+    `).join('');
+  contenedor.querySelectorAll('.color-swatch').forEach((elemento, i) => {
+    const usar = async () => {
+      if (volverBase) ponerColorBase(colores[i]);
       try {
         await navigator.clipboard.writeText(elemento.dataset.hex);
         elemento.classList.add('copiado');
@@ -184,11 +272,49 @@ function mostrarPaleta(colores) {
       } catch (error) {
         alert(t('aviso-codigo') + elemento.dataset.hex);
       }
-    });
+    };
+    elemento.addEventListener('click', usar);
+    elemento.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); usar(); } });
   });
-
-  ayudaCopiar.style.display = colores.length ? 'block' : 'none';
 }
+
+function mostrarPaleta(colores) {
+  coloresActuales = colores;
+  document.getElementById('controlesDescarga').style.display = colores.length ? 'flex' : 'none';
+  pintarTarjetas(paleta, colores, true);
+  ayudaCopiar.style.display = colores.length ? 'block' : 'none';
+  if (!colorBase && colores.length) ponerColorBase(colores[0]);
+}
+
+function ponerColorBase(color) {
+  colorBase = { r: color.r, g: color.g, b: color.b };
+  muestraBase.querySelector('.muestra').style.background = hexDe(colorBase);
+  muestraBase.querySelector('.codigo').textContent = hexDe(colorBase);
+  bloqueEsquemas.style.display = 'block';
+  mostrarEsquema();
+}
+
+function mostrarEsquema() {
+  if (!colorBase) return;
+  const hsl = rgbAHsl(colorBase);
+  coloresEsquema = GIROS_ESQUEMA[tipoEsquema.value].map((giro) =>
+    (giro === 0 ? colorBase : hslARgb({ ...hsl, h: (hsl.h + giro + 360) % 360 })));
+  pintarTarjetas(esquema, coloresEsquema, false);
+}
+tipoEsquema.addEventListener('change', mostrarEsquema);
+
+// Cuentagotas: tocar la imagen toma el color de ese punto.
+vistaPrevia.addEventListener('click', (e) => {
+  if (!imagenActual) return;
+  // Sin el borde del lienzo (clientLeft/clientTop), que corría el punto.
+  const caja = vistaPrevia.getBoundingClientRect();
+  const x = Math.min(vistaPrevia.width - 1, Math.floor((e.clientX - caja.left - vistaPrevia.clientLeft) / vistaPrevia.clientWidth * vistaPrevia.width));
+  const y = Math.min(vistaPrevia.height - 1, Math.floor((e.clientY - caja.top - vistaPrevia.clientTop) / vistaPrevia.clientHeight * vistaPrevia.height));
+  const [r, g, b, a] = contexto.getImageData(Math.max(0, x), Math.max(0, y), 1, 1).data;
+  // Una zona transparente no tiene color (daba negro): se ignora, como en los dominantes.
+  if (a < 128) return;
+  ponerColorBase({ r, g, b });
+});
 
 function analizarImagenActual() {
   if (!imagenActual) return;
@@ -227,6 +353,8 @@ async function mostrarArchivo(archivo) {
   vistaPrevia.height = imagenActual.naturalHeight;
   contexto.drawImage(imagenActual, 0, 0);
   vistaPrevia.style.display = 'block';
+  vistaPrevia.style.cursor = 'crosshair';
+  colorBase = null;
   analizarImagenActual();
 }
 
@@ -267,11 +395,16 @@ document.getElementById('botonDescargarPng').addEventListener('click', () => {
   canvas.toBlob((blob) => descargarBlob(blob, `${nombreImagen}-paleta.png`), 'image/png');
 });
 
-// TXT: un color por línea (código HEX, RGB y porcentaje).
+// TXT: un color por línea (código HEX, RGB y porcentaje), y el esquema elegido.
 document.getElementById('botonDescargarTxt').addEventListener('click', () => {
   if (!coloresActuales.length) return;
-  const lineas = coloresActuales.map((c) => `${hexDe(c).toUpperCase()}\trgb(${c.r}, ${c.g}, ${c.b})\t${c.porcentaje.toFixed(1)}%`);
-  descargarTexto(`Paleta de ${nombreImagen}\n\n${lineas.join('\n')}\n`, `${nombreImagen}-paleta.txt`);
+  const linea = (c) => `${hexDe(c).toUpperCase()}\trgb(${c.r}, ${c.g}, ${c.b})` + (c.porcentaje === undefined ? '' : `\t${c.porcentaje.toFixed(1)}%`);
+  let texto = `${t('txt-titulo').replace('{nombre}', () => nombreImagen)}\n\n${coloresActuales.map(linea).join('\n')}\n`;
+  if (colorBase && coloresEsquema.length) {
+    const nombreEsquema = tipoEsquema.options[tipoEsquema.selectedIndex].textContent;
+    texto += `\n${t('txt-esquema').replace('{esquema}', () => nombreEsquema).replace('{hex}', () => hexDe(colorBase).toUpperCase())}\n\n${coloresEsquema.map(linea).join('\n')}\n`;
+  }
+  descargarTexto(texto, `${nombreImagen}-paleta.txt`);
 });
 </script>
 <script src="../assets/js/tema.js"></script>
