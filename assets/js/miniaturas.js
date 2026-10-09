@@ -139,22 +139,17 @@ function generarMiniaturaImagen(archivo) {
 // alQuitar, arrastrable, indiceOrden, conMover, nombre }
 // conMover: número de posición y botones ◀ ▶ para moverla sin arrastrar (los
 // maneja crearBarraOrden). nombre: lo que usa "Nombre A → Z".
-function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, arrastrable, indiceOrden, conMover, nombre }) {
+// cargando: la tarjeta aparece enseguida con una barra de carga en lugar de la
+// miniatura; después, progresoTarjeta(tarjeta, fraccion) la avanza y
+// completarTarjeta(tarjeta, { elementoVisual, etiqueta }) pone la miniatura.
+function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, arrastrable, indiceOrden, conMover, nombre, cargando }) {
   const tarjeta = document.createElement('div');
   tarjeta.className = 'miniatura-pagina';
   if (arrastrable) tarjeta.draggable = true;
   if (indiceOrden !== undefined) tarjeta.dataset.indiceOrden = indiceOrden;
   if (nombre !== undefined) tarjeta.dataset.nombre = nombre;
 
-  if (elementoVisual) {
-    tarjeta.appendChild(elementoVisual);
-  } else {
-    const marcador = document.createElement('div');
-    marcador.textContent = '📄';
-    marcador.style.fontSize = '2rem';
-    marcador.style.padding = '20px 0';
-    tarjeta.appendChild(marcador);
-  }
+  tarjeta.appendChild(cargando ? crearVisualCargando() : visualDeTarjeta(elementoVisual));
 
   const etiquetaEl = document.createElement('div');
   etiquetaEl.className = 'numero-pagina';
@@ -192,6 +187,62 @@ function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, 
   }
 
   return tarjeta;
+}
+
+function visualDeTarjeta(elementoVisual) {
+  if (elementoVisual) {
+    elementoVisual.classList.add('visual-tarjeta');
+    return elementoVisual;
+  }
+  const marcador = document.createElement('div');
+  marcador.className = 'visual-tarjeta';
+  marcador.textContent = '📄';
+  marcador.style.fontSize = '2rem';
+  marcador.style.padding = '20px 0';
+  return marcador;
+}
+
+// La barra va con transform y no con width: así su animación la mueve el
+// compositor del navegador y sigue andando aunque la página esté ocupada
+// convirtiendo (que es justo cuando hace falta ver que algo pasa).
+function crearVisualCargando() {
+  const caja = document.createElement('div');
+  caja.className = 'visual-tarjeta carga-tarjeta';
+  const barra = document.createElement('div');
+  barra.className = 'barra-carga indeterminada';
+  barra.setAttribute('role', 'progressbar');
+  barra.setAttribute('aria-valuemin', '0');
+  barra.setAttribute('aria-valuemax', '100');
+  barra.setAttribute('data-i18n-attr', 'aria-label:cargando-archivo');
+  barra.setAttribute('aria-label', window.t ? t('cargando-archivo') : 'Cargando');
+  const relleno = document.createElement('div');
+  relleno.className = 'relleno-carga';
+  barra.appendChild(relleno);
+  caja.appendChild(barra);
+  return caja;
+}
+
+// fraccion entre 0 y 1; null = sin saber cuánto falta (la barra va y viene).
+function progresoTarjeta(tarjeta, fraccion) {
+  const barra = tarjeta.querySelector('.barra-carga');
+  if (!barra) return;
+  const conValor = typeof fraccion === 'number' && Number.isFinite(fraccion);
+  barra.classList.toggle('indeterminada', !conValor);
+  if (conValor) {
+    const f = Math.min(1, Math.max(0, fraccion));
+    barra.firstChild.style.transform = `scaleX(${f})`;
+    barra.setAttribute('aria-valuenow', String(Math.round(f * 100)));
+  } else {
+    barra.firstChild.style.transform = '';
+    barra.removeAttribute('aria-valuenow');
+  }
+}
+
+function completarTarjeta(tarjeta, { elementoVisual, etiqueta }) {
+  const anterior = tarjeta.querySelector('.visual-tarjeta');
+  const nuevo = visualDeTarjeta(elementoVisual);
+  if (anterior) anterior.replaceWith(nuevo); else tarjeta.prepend(nuevo);
+  if (etiqueta !== undefined) tarjeta.querySelector('.numero-pagina').textContent = etiqueta;
 }
 
 // Crea el par de botones "Lista"/"Cuadrícula" que alternan la clase vista-lista /

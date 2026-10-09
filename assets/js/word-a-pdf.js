@@ -28,7 +28,8 @@
     };
   }
 
-  async function aPdf(documento) {
+  // alAvanzar(hoja, total), como en HtmlAPdf.convertir.
+  async function aPdf(documento, alAvanzar) {
     const lienzo = HtmlAPdf.crearLienzo();
     try {
       lienzo.innerHTML = documento.html;
@@ -46,7 +47,7 @@
           margenAbajoPx: parseFloat(e.paddingBottom),
         };
       });
-      return await HtmlAPdf.convertir(paginas, { titulo: documento.nombre });
+      return await HtmlAPdf.convertir(paginas, { titulo: documento.nombre, alAvanzar });
     } finally {
       lienzo.remove();
     }

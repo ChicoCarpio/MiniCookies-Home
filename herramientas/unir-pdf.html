@@ -19,10 +19,10 @@ window.i18nPagina = {
     'intro': 'Elegí dos o más archivos, en cualquier combinación: PDF, imágenes (JPG, PNG, WebP, GIF, BMP), Word, Excel o CSV, PowerPoint, EPUB, Markdown o texto. Cada uno entra entero, en el orden de la lista: para cambiarlo, arrastrá las miniaturas, usá las flechas u ordenalos por nombre.',
     'ayuda-conversion': 'Los documentos que no son PDF se convierten con el mismo motor que la herramienta de su formato (Word → PDF, Excel → PDF…), así que pueden no quedar idénticos al original. De un Excel entran todas sus hojas, en A4 vertical; un PowerPoint que no se puede dibujar entra solo con su texto. En texto y Markdown, los caracteres que la letra del PDF no tiene (emojis, ideogramas) salen como «?». Cada imagen es una página nueva.',
     'zona-arrastre': '📎 Arrastrá tus archivos acá o hacé clic para elegirlos',
-    'convirtiendo': 'Convirtiendo {nombre} a PDF ({n} de {total})...',
-    'convirtiendo-hoja': 'Convirtiendo {nombre} a PDF ({n} de {total}): hoja {h} de {th}...',
+    'preparando': 'Preparando {nombre} ({n} de {total})...',
     'no-convertidos': 'No se pudieron agregar:',
     'formato-no-soportado': 'ese tipo de archivo no se puede unir',
+    'formato-antiguo': 'es un formato antiguo de Office (97-2003) que todavía no se puede leer. Abrilo en Word o PowerPoint y guardalo como .docx o .pptx',
     'campo-tamano': 'Tamaño de página para las imágenes',
     'opcion-ajustar-a4': 'Ancho A4, alto según la imagen (recomendado, sin recorte ni márgenes)',
     'opcion-ajustar-carta': 'Ancho Carta, alto según la imagen (sin recorte ni márgenes)',
@@ -42,10 +42,10 @@ window.i18nPagina = {
     'intro': 'Pick two or more files, in any combination: PDF, images (JPG, PNG, WebP, GIF, BMP), Word, Excel or CSV, PowerPoint, EPUB, Markdown or text. Each one goes in whole, in the order of the list: to change it, drag the thumbnails, use the arrows or sort them by name.',
     'ayuda-conversion': 'Documents that aren’t PDFs are converted with the same engine as the tool for their format (Word → PDF, Excel → PDF…), so they may not look identical to the original. All the sheets of an Excel file go in, on portrait A4; a PowerPoint that can’t be drawn goes in with its text only. In text and Markdown, characters the PDF font doesn’t have (emoji, CJK) come out as “?”. Each image becomes a new page.',
     'zona-arrastre': '📎 Drag your files here or click to choose them',
-    'convirtiendo': 'Converting {nombre} to PDF ({n} of {total})...',
-    'convirtiendo-hoja': 'Converting {nombre} to PDF ({n} of {total}): page {h} of {th}...',
+    'preparando': 'Preparing {nombre} ({n} of {total})...',
     'no-convertidos': 'Couldn’t add:',
     'formato-no-soportado': 'that file type can’t be merged',
+    'formato-antiguo': 'it’s an old Office format (97-2003) that can’t be read yet. Open it in Word or PowerPoint and save it as .docx or .pptx',
     'campo-tamano': 'Page size for the images',
     'opcion-ajustar-a4': 'A4 width, height matched to the image (recommended, no cropping or margins)',
     'opcion-ajustar-carta': 'Letter width, height matched to the image (no cropping or margins)',
@@ -169,7 +169,8 @@ const esImagen = (archivo) => archivo.type.startsWith('image/');
 // Los demás formatos se convierten a PDF al agregarlos (no al unir): así la
 // miniatura es la de verdad, la cantidad de páginas se ve antes, y si uno no
 // se puede convertir se avisa enseguida en vez de arruinar la unión.
-async function prepararEntrada(archivo, avance) {
+// alAvanzar(fraccion): la barra de la tarjeta.
+async function prepararEntrada(archivo, alAvanzar) {
   if (esPdf(archivo)) {
     const { elemento, totalPaginas } = await generarMiniaturaPdf(archivo, 0.28);
     return { entrada: { archivo, tipo: 'pdf' }, elemento, totalPaginas };
@@ -178,11 +179,8 @@ async function prepararEntrada(archivo, avance) {
     const { elemento } = await generarMiniaturaImagen(archivo);
     return { entrada: { archivo, tipo: 'imagen' }, elemento, totalPaginas: null };
   }
-  cargando.textContent = t('convirtiendo').replace('{nombre}', archivo.name).replace('{n}', avance.n).replace('{total}', avance.total);
-  const bytes = await ArchivoAPdf.convertir(archivo, (h, th) => {
-    cargando.textContent = t('convirtiendo-hoja').replace('{nombre}', archivo.name).replace('{n}', avance.n)
-      .replace('{total}', avance.total).replace('{h}', h + 1).replace('{th}', th);
-  });
+  const bytes = await ArchivoAPdf.convertir(archivo, alAvanzar);
+  alAvanzar(1);
   // Se guarda como Blob: PDF.js (la miniatura) se queda con el ArrayBuffer que
   // recibe, y cada arrayBuffer() de un Blob es una copia nueva.
   const pdf = new Blob([bytes], { type: 'application/pdf' });
@@ -190,12 +188,13 @@ async function prepararEntrada(archivo, avance) {
   return { entrada: { archivo, tipo: 'convertido', pdf }, elemento, totalPaginas };
 }
 
-function agregarTarjeta(id, archivo, elemento, totalPaginas) {
+// La tarjeta aparece en el acto, en su lugar, con una barra de carga; la
+// miniatura llega cuando el archivo está listo. Se puede mover o quitar
+// mientras tanto.
+function crearTarjetaPendiente(id, archivo) {
   const tarjeta = crearTarjetaMiniatura({
-    elementoVisual: elemento,
-    etiqueta: elemento
-      ? (totalPaginas ? `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` : archivo.name)
-      : `${archivo.name} ${t('previsualizar-fallo')}`,
+    cargando: true,
+    etiqueta: archivo.name,
     conQuitar: true,
     alQuitar: () => { entradasPorId.delete(id); tarjeta.remove(); actualizarBoton(); },
     arrastrable: true,
@@ -204,6 +203,7 @@ function agregarTarjeta(id, archivo, elemento, totalPaginas) {
     nombre: archivo.name,
   });
   gridArchivos.appendChild(tarjeta);
+  return tarjeta;
 }
 
 function mostrarNoConvertidos(fallos) {
@@ -222,53 +222,76 @@ function mostrarNoConvertidos(fallos) {
   noConvertidos.append(titulo, lista);
 }
 
-// De a un archivo por vez y en el orden en que llegaron, también si se
-// sueltan más mientras se convierten los anteriores.
-// Los fallos se juntan entre los lotes que se encadenan (soltar más mientras
-// se convierte) y se vacían recién con una selección nueva sin nada pendiente.
-let cola = Promise.resolve();
-let lotesPendientes = 0;
-let fallos = [];
-function agregarArchivos(archivos) {
-  if (lotesPendientes === 0) fallos = [];
-  lotesPendientes++;
-  cola = cola.then(() => procesarArchivos(archivos)).finally(() => { lotesPendientes--; });
+function motivoRechazo(archivo) {
+  // Word y PowerPoint 97-2003: formatos binarios que el sitio todavía no lee.
+  return /.(doc|ppt|pps|dot|pot)$/i.test(archivo.name) ? t('formato-antiguo') : t('formato-no-soportado');
 }
 
-async function procesarArchivos(archivos) {
-  const aceptados = archivos.filter((archivo) => {
-    if (esPdf(archivo) || esImagen(archivo) || ArchivoAPdf.formatoDe(archivo)) return true;
-    fallos.push({ nombre: archivo.name, motivo: t('formato-no-soportado') });
-    return false;
-  });
-  agregando = true;
-  actualizarBoton();
-  cargando.textContent = t('generando-miniaturas');
-  cargando.style.display = aceptados.length ? 'block' : 'none';
-  const aConvertir = aceptados.filter((a) => !esPdf(a) && !esImagen(a));
-  let numeroConversion = 0;
-  for (const archivo of aceptados) {
+// De a un archivo por vez y en el orden en que llegaron, también si se
+// sueltan más mientras se preparan los anteriores. Los fallos se juntan
+// mientras quede algo pendiente y se vacían con una selección nueva.
+let cola = Promise.resolve();
+let pendientes = 0;
+let enEstaTanda = 0;
+let listosEnEstaTanda = 0;
+let fallos = [];
+
+function agregarArchivos(archivos) {
+  if (pendientes === 0) { fallos = []; enEstaTanda = 0; listosEnEstaTanda = 0; }
+  for (const archivo of archivos) {
+    if (!esPdf(archivo) && !esImagen(archivo) && !ArchivoAPdf.formatoDe(archivo)) {
+      fallos.push({ nombre: archivo.name, motivo: motivoRechazo(archivo) });
+      continue;
+    }
     const id = siguienteId++;
-    const avance = { n: esPdf(archivo) || esImagen(archivo) ? 0 : ++numeroConversion, total: aConvertir.length };
+    const tarjeta = crearTarjetaPendiente(id, archivo);
+    pendientes++;
+    enEstaTanda++;
+    cola = cola.then(() => prepararTarjeta(id, archivo, tarjeta));
+  }
+  mostrarNoConvertidos(fallos);
+  agregando = pendientes > 0;
+  actualizarBoton();
+}
+
+async function prepararTarjeta(id, archivo, tarjeta) {
+  try {
+    if (!tarjeta.isConnected) return; // la quitaron antes de que le tocara
+    cargando.textContent = t('preparando').replace('{nombre}', archivo.name)
+      .replace('{n}', listosEnEstaTanda + 1).replace('{total}', enEstaTanda);
+    cargando.style.display = 'block';
+    // Un respiro para que se pinten la tarjeta y el texto antes del trabajo pesado.
+    await new Promise((r) => setTimeout(r, 0));
     try {
-      const { entrada, elemento, totalPaginas } = await prepararEntrada(archivo, avance);
+      const { entrada, elemento, totalPaginas } = await prepararEntrada(archivo, (f) => progresoTarjeta(tarjeta, f));
+      if (!tarjeta.isConnected) return;
       entradasPorId.set(id, entrada);
-      agregarTarjeta(id, archivo, elemento, totalPaginas);
+      completarTarjeta(tarjeta, {
+        elementoVisual: elemento,
+        etiqueta: totalPaginas ? `${archivo.name} (${totalPaginas} ${t('sufijo-pag')})` : archivo.name,
+      });
     } catch (error) {
       if (esPdf(archivo) || esImagen(archivo)) {
         // Como antes: un PDF o una imagen sin miniatura igual se puede unir
         // (si de verdad está dañado, lo dice el botón de unir).
+        if (!tarjeta.isConnected) return;
         entradasPorId.set(id, { archivo, tipo: esPdf(archivo) ? 'pdf' : 'imagen' });
-        agregarTarjeta(id, archivo, null, null);
+        completarTarjeta(tarjeta, { elementoVisual: null, etiqueta: `${archivo.name} ${t('previsualizar-fallo')}` });
       } else {
+        tarjeta.remove();
         fallos.push({ nombre: archivo.name, motivo: detalleError(error) });
+        mostrarNoConvertidos(fallos);
       }
     }
+  } finally {
+    pendientes--;
+    listosEnEstaTanda++;
+    if (pendientes === 0) {
+      cargando.style.display = 'none';
+      agregando = false;
+    }
+    actualizarBoton();
   }
-  cargando.style.display = 'none';
-  mostrarNoConvertidos(fallos);
-  agregando = false;
-  actualizarBoton();
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivos, agregarArchivos);

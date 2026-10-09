@@ -9,7 +9,7 @@
 //
 // Requiere, ya cargados: vendor.js (rutaVendor) y pdf-lib.
 // Uso: ArchivoAPdf.formatoDe(archivo) → 'word' | 'excel' | … | null
-//      const bytes = await ArchivoAPdf.convertir(archivo, alAvanzar);
+//      const bytes = await ArchivoAPdf.convertir(archivo, alAvanzar); // alAvanzar(fracción 0–1)
 //      ArchivoAPdf.EXTENSIONES → '.docx,.xlsx,…' (para el accept del selector)
 
 (function () {
@@ -74,7 +74,12 @@
         }
         await cargarScript(propio('word-a-pdf.js'));
       },
-      convertir: async (archivo) => WordAPdf.aPdf(await WordAPdf.aHtml(archivo)),
+      // Dibujar el Word es un solo paso sin avance: la mitad de la barra.
+      convertir: async (archivo, alAvanzar) => {
+        const documento = await WordAPdf.aHtml(archivo);
+        alAvanzar(0.5);
+        return WordAPdf.aPdf(documento, (h, th) => alAvanzar(0.5 + 0.5 * (h + 1) / th));
+      },
     },
     excel: {
       extensiones: ['xlsx', 'xlsm', 'xlsb', 'xls', 'ods', 'csv'],
@@ -82,7 +87,7 @@
         rutaVendor('xlsx/0.20.3/xlsx.full.min.js'), JSZIP(), rutaVendor('Chart.js/4.5.1/chart.umd.min.js'),
         propio('lector-planillas.js'), propio('excel-a-pdf.js'),
       ]),
-      convertir: (archivo) => libroExcelAPdf(archivo),
+      convertir: (archivo, alAvanzar) => libroExcelAPdf(archivo, alAvanzar),
     },
     powerpoint: {
       extensiones: ['pptx'],
@@ -100,12 +105,13 @@
         }
         await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-visual.js')]);
       },
-      convertir: async (archivo) => (await powerPointAPdf(archivo)).pdf.save(),
+      // Sin conImagenes: Unir PDF no muestra las diapositivas sueltas ni arma su .zip.
+      convertir: async (archivo, alAvanzar) => (await powerPointAPdf(archivo, null, (n, total) => alAvanzar(0.9 * n / total), { conImagenes: false })).pdf.save(),
     },
     epub: {
       extensiones: ['epub'],
       preparar: () => cargarEnOrden([JSZIP(), propio('seguridad-html.js'), propio('epub.js'), propio('html-a-pdf.js')]),
-      convertir: (archivo, alAvanzar) => epubAPdf(archivo, alAvanzar),
+      convertir: (archivo, alAvanzar) => epubAPdf(archivo, (h, th) => alAvanzar((h + 1) / th)),
     },
     markdown: {
       extensiones: ['md', 'markdown'],
@@ -126,9 +132,9 @@
     return Object.keys(FORMATOS).find((f) => FORMATOS[f].extensiones.includes(minuscula)) || null;
   }
 
-  // Devuelve los bytes del PDF. alAvanzar(hoja, total): solo los formatos
-  // que se paginan de a poco (EPUB) lo llaman.
-  async function convertir(archivo, alAvanzar) {
+  // Devuelve los bytes del PDF. alAvanzar(fraccion): de 0 a 1 en los formatos
+  // que saben cuánto les falta (Word, Excel, PowerPoint, EPUB).
+  async function convertir(archivo, alAvanzar = () => {}) {
     const formato = FORMATOS[formatoDe(archivo)];
     if (!formato) throw new Error(t('archivo-a-pdf-no-soportado') + ' ' + archivo.name);
     await formato.preparar();

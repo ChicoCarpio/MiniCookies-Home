@@ -665,6 +665,49 @@ table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
 }
 .contenedor-miniaturas.vista-lista .miniatura-pagina .mover-tarjeta button { transform: rotate(90deg); }
 
+/* Tarjeta que todavía se está preparando (crearTarjetaMiniatura con cargando,
+   progresoTarjeta). La barra se mueve con transform: la anima el compositor,
+   así sigue andando aunque la página esté ocupada convirtiendo. */
+.miniatura-pagina .carga-tarjeta {
+  aspect-ratio: 210 / 297;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gris-borde);
+  border-radius: 4px;
+  background: var(--superficie);
+}
+.barra-carga {
+  width: 76%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--gris-borde);
+  overflow: hidden;
+}
+.barra-carga .relleno-carga {
+  height: 100%;
+  background: var(--azul);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.2s ease-out;
+}
+.barra-carga.indeterminada .relleno-carga {
+  width: 40%;
+  transition: none;
+  animation: barra-carga-ida 1.2s ease-in-out infinite;
+}
+@keyframes barra-carga-ida {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-carga.indeterminada .relleno-carga { animation: none; transform: none; opacity: 0.6; }
+}
+.contenedor-miniaturas.vista-lista .miniatura-pagina .carga-tarjeta {
+  width: 60px;
+  flex-shrink: 0;
+}
+
 footer.sitio {
   text-align: center;
   padding: 24px;

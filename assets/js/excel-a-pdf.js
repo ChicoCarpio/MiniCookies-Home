@@ -1000,8 +1000,9 @@ async function construirPdfDeHoja({
 
 // Un libro entero → un PDF, hoja tras hoja, con las opciones de fábrica
 // (lo que usa "Unir PDF"). Las hojas vacías se saltan; si no hay ninguna con
-// datos, error. Devuelve los bytes del PDF.
-async function libroExcelAPdf(archivo) {
+// datos, error. Devuelve los bytes del PDF. alAvanzar(fraccion): de 0 a 1,
+// por hojas y filas.
+async function libroExcelAPdf(archivo, alAvanzar) {
   const bytesArchivo = await archivo.arrayBuffer();
   const libro = await leerLibroDesdeArchivo(archivo, { cellStyles: true });
   const esXlsx = /\.(xlsx|xlsm)$/i.test(archivo.name);
@@ -1010,12 +1011,15 @@ async function libroExcelAPdf(archivo) {
   }
   const { PDFDocument } = PDFLib;
   const unido = await PDFDocument.create();
-  for (const nombreHoja of libro.SheetNames) {
+  for (const [indiceHoja, nombreHoja] of libro.SheetNames.entries()) {
     const hoja = libro.Sheets[nombreHoja];
     if (!hoja || !hoja['!ref']) continue;
     let bytes;
     try {
-      ({ bytes } = await construirPdfDeHoja({ libro, nombreHoja, bytesArchivo, esXlsx }));
+      ({ bytes } = await construirPdfDeHoja({
+        libro, nombreHoja, bytesArchivo, esXlsx,
+        alAvanzar: alAvanzar ? (n, total) => alAvanzar((indiceHoja + n / total) / libro.SheetNames.length) : null,
+      }));
     } catch (error) {
       if (error.sinDatos) continue;
       throw error;

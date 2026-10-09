@@ -65,6 +65,7 @@ window.i18nComun = {
     'orden-invertir': '⇅ Invertir',
     'mover-antes': 'Mover antes',
     'mover-despues': 'Mover después',
+    'cargando-archivo': 'Preparando el archivo',
     // Usadas por assets/js/pdf-texto.js (extraerTextoPowerPoint), compartida
     // entre powerpoint-a-pdf.html y extraer-texto-powerpoint.html.
     'ppt-sin-diapositivas': 'No se encontraron diapositivas legibles en este archivo.',
@@ -143,6 +144,7 @@ window.i18nComun = {
     'orden-invertir': '⇅ Reverse',
     'mover-antes': 'Move earlier',
     'mover-despues': 'Move later',
+    'cargando-archivo': 'Preparing the file',
     'ppt-sin-diapositivas': 'No readable slides were found in this file.',
     'ppt-diapositiva-titulo': '--- Slide {n} ---',
     'ppt-sin-texto': '(no text)',

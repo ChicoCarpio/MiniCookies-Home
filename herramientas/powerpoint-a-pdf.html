@@ -180,9 +180,9 @@ botonProcesar.addEventListener('click', async () => {
     // PDF trae solo el texto (compartido con "Unir PDF").
     const { pdf, imagenes } = await powerPointAPdf(archivoActual, document.getElementById('canvasRender'));
     if (imagenes) {
-      imagenes.forEach(({ dataUrl }) => {
+      imagenes.forEach(({ url }) => {
         const img = document.createElement('img');
-        img.src = dataUrl;
+        img.src = url;
         vistaPreviaDiapositivas.appendChild(img);
       });
 
