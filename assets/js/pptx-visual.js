@@ -133,6 +133,21 @@ async function construirPdfDesdeImagenes(imagenes) {
   return pdf;
 }
 
+// PowerPoint → PDF con su respaldo: si las diapositivas no se pueden dibujar,
+// un PDF con solo su texto (necesita además assets/js/pdf-texto.js). Lo usan
+// "PowerPoint → PDF" y "Unir PDF". Devuelve { pdf, imagenes }: el PDFDocument
+// de pdf-lib y las imágenes de cada diapositiva, o null si salió solo texto.
+// Sin canvas, usa uno propio.
+async function powerPointAPdf(archivo, canvas) {
+  try {
+    const imagenes = await renderizarDiapositivasComoImagenes(archivo, canvas || document.createElement('canvas'));
+    return { pdf: await construirPdfDesdeImagenes(imagenes), imagenes };
+  } catch (errorVisual) {
+    console.warn('No se pudo renderizar el PowerPoint visualmente, se usa solo texto:', errorVisual);
+    return { pdf: await generarPdfDeTexto(await extraerTextoPowerPoint(archivo)), imagenes: null };
+  }
+}
+
 async function construirZipDesdeImagenes(imagenes) {
   const zip = new JSZip();
   const cantidadDigitos = String(imagenes.length).length;

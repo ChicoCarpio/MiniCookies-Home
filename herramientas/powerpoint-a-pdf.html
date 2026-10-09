@@ -33,7 +33,6 @@ window.i18nPagina = {
     'progreso-renderizando': 'Renderizando diapositivas...',
     'progreso-zip': 'Generando .zip de imágenes...',
     'mensaje-visual-ok': '✅ Listo — se generó el PDF con las diapositivas reales.',
-    'progreso-solo-texto': 'No se pudo renderizar visualmente. Generando PDF de solo texto...',
     'mensaje-solo-texto': '⚠️ No se pudo renderizar el diseño visual de las diapositivas — el PDF generado tiene solo el texto.',
     'error-generar': 'No se pudo generar el PDF'
   },
@@ -59,7 +58,6 @@ window.i18nPagina = {
     'progreso-renderizando': 'Rendering slides...',
     'progreso-zip': 'Generating image .zip...',
     'mensaje-visual-ok': '✅ Done — the PDF was generated with the real slides.',
-    'progreso-solo-texto': 'Couldn’t render it visually. Generating text-only PDF...',
     'mensaje-solo-texto': '⚠️ Couldn’t render the slides’ visual design — the generated PDF has only the text.',
     'error-generar': 'Couldn’t generate the PDF'
   }
@@ -176,14 +174,12 @@ botonProcesar.addEventListener('click', async () => {
   progreso.style.display = 'none';
   mensajeResultado.textContent = t('mensaje-listo');
   try {
-    let pdf;
-    try {
-      progreso.style.display = 'block';
-      progreso.textContent = t('progreso-renderizando');
-      const canvasRender = document.getElementById('canvasRender');
-      const imagenes = await renderizarDiapositivasComoImagenes(archivoActual, canvasRender);
-      pdf = await construirPdfDesdeImagenes(imagenes);
-
+    progreso.style.display = 'block';
+    progreso.textContent = t('progreso-renderizando');
+    // assets/js/pptx-visual.js: si no se puede dibujar, imagenes = null y el
+    // PDF trae solo el texto (compartido con "Unir PDF").
+    const { pdf, imagenes } = await powerPointAPdf(archivoActual, document.getElementById('canvasRender'));
+    if (imagenes) {
       imagenes.forEach(({ dataUrl }) => {
         const img = document.createElement('img');
         img.src = dataUrl;
@@ -196,11 +192,7 @@ botonProcesar.addEventListener('click', async () => {
       enlaceDescargaImagenes.style.display = 'inline';
       separadorDescargas.style.display = 'inline';
       mensajeResultado.textContent = t('mensaje-visual-ok');
-    } catch (errorVisual) {
-      console.warn('No se pudo renderizar el PowerPoint visualmente, se usa solo texto:', errorVisual);
-      progreso.textContent = t('progreso-solo-texto');
-      const texto = await extraerTextoPowerPoint(archivoActual);
-      pdf = await generarPdfDeTexto(texto);
+    } else {
       mensajeResultado.textContent = t('mensaje-solo-texto');
     }
 

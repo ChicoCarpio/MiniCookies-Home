@@ -58,6 +58,13 @@ window.i18nComun = {
     'title-salir-pantalla-completa': 'Salir de pantalla completa (Esc o F)',
     'vista-cuadricula': '▦ Cuadrícula',
     'vista-lista': '☰ Lista',
+    // Ordenar archivos (crearBarraOrden y conMover de assets/js/miniaturas.js).
+    'orden-titulo': 'Ordenar:',
+    'orden-nombre-az': 'Nombre A → Z',
+    'orden-nombre-za': 'Nombre Z → A',
+    'orden-invertir': '⇅ Invertir',
+    'mover-antes': 'Mover antes',
+    'mover-despues': 'Mover después',
     // Usadas por assets/js/pdf-texto.js (extraerTextoPowerPoint), compartida
     // entre powerpoint-a-pdf.html y extraer-texto-powerpoint.html.
     'ppt-sin-diapositivas': 'No se encontraron diapositivas legibles en este archivo.',
@@ -130,6 +137,12 @@ window.i18nComun = {
     'title-salir-pantalla-completa': 'Exit full screen (Esc or F)',
     'vista-cuadricula': '▦ Grid',
     'vista-lista': '☰ List',
+    'orden-titulo': 'Sort:',
+    'orden-nombre-az': 'Name A → Z',
+    'orden-nombre-za': 'Name Z → A',
+    'orden-invertir': '⇅ Reverse',
+    'mover-antes': 'Move earlier',
+    'mover-despues': 'Move later',
     'ppt-sin-diapositivas': 'No readable slides were found in this file.',
     'ppt-diapositiva-titulo': '--- Slide {n} ---',
     'ppt-sin-texto': '(no text)',

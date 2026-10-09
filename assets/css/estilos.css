@@ -393,6 +393,25 @@ a.boton { text-decoration: none; display: inline-block; }
 .vista-previa-diapositivas { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
 .vista-previa-diapositivas img { width: 100%; border: 1px solid var(--gris-borde); border-radius: 6px; background: #fff; }
 
+/* Hoja fuera de pantalla donde assets/js/html-a-pdf.js mide un documento
+   antes de escribir el PDF (HtmlAPdf.crearLienzo). Estaba como <div> con sus
+   estilos en Word → PDF y en EPUB → PDF; ahora la usa también Unir PDF. */
+.lienzo-pdf { position: fixed; left: -30000px; top: 0; }
+/* Un libro (EPUB): hoja A4 de 794 × 1123 px, márgenes de 2 cm. Blanca también
+   en modo oscuro: es la hoja, no la página. */
+.lienzo-pdf.libro {
+  width: 794px; box-sizing: border-box; padding: 76px;
+  background: #fff; color: #1a1a1a;
+  font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.5;
+}
+/* Una imagen entra entera en la hoja (971 px útiles) con margen para su párrafo. */
+.lienzo-pdf.libro img { max-width: 100%; max-height: 900px; width: auto; height: auto; }
+.lienzo-pdf.libro table { border-collapse: collapse; margin: 12px 0; }
+.lienzo-pdf.libro td, .lienzo-pdf.libro th { border: 1px solid #ccc; padding: 6px 10px; }
+.lienzo-pdf.libro .capitulo { break-before: page; }
+.lienzo-pdf.libro .portada { text-align: center; padding-top: 300px; }
+.lienzo-pdf.libro .portada h1 { font-size: 34px; }
+
 /* --- Páginas de texto (arquetipo E: privacidad, términos, créditos) --- */
 .texto-actualizacion { color: var(--texto-suave); font-size: 0.85rem; }
 /* La tabla de créditos tenía el relleno escrito celda por celda (104 estilos
@@ -578,6 +597,73 @@ table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
   position: static;
   flex-shrink: 0;
 }
+
+/* Ordenar archivos enteros (crearBarraOrden y conMover en assets/js/miniaturas.js):
+   barra "Ordenar: A → Z · Z → A · Invertir", número de posición y botones ◀ ▶. */
+.barra-orden {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.barra-orden[hidden] { display: none; }
+.barra-orden .titulo-orden { font-size: 0.85rem; color: var(--texto-suave); }
+.barra-orden button,
+.miniatura-pagina .mover-tarjeta button {
+  background: var(--superficie);
+  border: 1px solid var(--gris-borde);
+  color: var(--texto);
+  cursor: pointer;
+}
+.barra-orden button {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.barra-orden button:hover,
+.miniatura-pagina .mover-tarjeta button:hover:not(:disabled) { border-color: var(--azul); }
+
+.miniatura-pagina .posicion-orden {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  background: var(--azul);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 22px;
+}
+.miniatura-pagina .mover-tarjeta {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.miniatura-pagina .mover-tarjeta button {
+  min-width: 40px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+.miniatura-pagina .mover-tarjeta button:disabled { opacity: 0.35; cursor: default; }
+
+/* En la lista, la posición va primero y las flechas apuntan arriba / abajo. */
+.contenedor-miniaturas.vista-lista .miniatura-pagina .posicion-orden {
+  position: static;
+  order: -1;
+  flex-shrink: 0;
+}
+.contenedor-miniaturas.vista-lista .miniatura-pagina .mover-tarjeta {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+.contenedor-miniaturas.vista-lista .miniatura-pagina .mover-tarjeta button { transform: rotate(90deg); }
 
 footer.sitio {
   text-align: center;

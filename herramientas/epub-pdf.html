@@ -9,22 +9,6 @@
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<style>
-  /* Hoja A4 fuera de pantalla donde se mide el libro (html-a-pdf.js): 794 × 1123 px, márgenes de 2 cm. */
-  #lienzoPdf {
-    position: fixed; left: -30000px; top: 0;
-    width: 794px; box-sizing: border-box; padding: 76px;
-    background: #fff; color: #1a1a1a;
-    font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.5;
-  }
-  /* Una imagen entra entera en la hoja (971 px útiles) con margen para su párrafo. */
-  #lienzoPdf img { max-width: 100%; max-height: 900px; width: auto; height: auto; }
-  #lienzoPdf table { border-collapse: collapse; margin: 12px 0; }
-  #lienzoPdf td, #lienzoPdf th { border: 1px solid #ccc; padding: 6px 10px; }
-  #lienzoPdf .capitulo { break-before: page; }
-  #lienzoPdf .portada { text-align: center; padding-top: 300px; }
-  #lienzoPdf .portada h1 { font-size: 34px; }
-</style>
 <script>
 window.i18nPagina = {
   es: {
@@ -179,7 +163,6 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<div id="lienzoPdf" aria-hidden="true"></div>
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
@@ -205,7 +188,6 @@ const botonAPdf = document.getElementById('botonAPdf');
 const resultadoPdf = document.getElementById('resultadoPdf');
 const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
 const resumenLotePdf = document.getElementById('resumenLotePdf');
-const lienzoPdf = document.getElementById('lienzoPdf');
 
 let epubsActuales = [];
 
@@ -229,20 +211,10 @@ function elegirArchivosEpub(listaFileList) {
 
 conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
 
-// Un libro → un PDF, sin imprimir: se arma en una hoja A4 fuera de pantalla
-// (portada y cada capítulo en hoja nueva) y html-a-pdf.js lo escribe. Varios
-// libros → un .zip con un PDF por libro.
+// Un libro → un PDF (epubAPdf, en assets/js/epub.js). Varios libros → un
+// .zip con un PDF por libro.
 async function libroAPdf(archivo, alAvanzar) {
-  const { titulo, autor, capitulos } = await leerEpub(archivo);
-  const portada = `<div class="portada"><h1>${escaparHtml(titulo)}</h1>${autor ? `<p>${escaparHtml(autor)}</p>` : ''}</div>`;
-  lienzoPdf.innerHTML = portada + capitulos.map((cap) => `<section class="capitulo">${cap.html}</section>`).join('');
-  try {
-    await Promise.all([...lienzoPdf.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
-    const bytes = await HtmlAPdf.convertir([{ elemento: lienzoPdf, anchoPx: 794, altoPx: 1123, margenArribaPx: 76, margenAbajoPx: 76 }], { titulo, alAvanzar });
-    return new Blob([bytes], { type: 'application/pdf' });
-  } finally {
-    lienzoPdf.innerHTML = '';
-  }
+  return new Blob([await epubAPdf(archivo, alAvanzar)], { type: 'application/pdf' });
 }
 
 botonAPdf.addEventListener('click', async () => {

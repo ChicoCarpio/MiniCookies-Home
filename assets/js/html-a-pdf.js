@@ -26,6 +26,8 @@
 // Un break-before: page dentro del elemento fuerza una hoja nueva.
 // El elemento tiene que estar en el documento y visible (puede estar fuera de
 // pantalla) para que el navegador lo mida.
+// La hoja para eso: const lienzo = HtmlAPdf.crearLienzo('libro'), y al final
+// lienzo.remove().
 
 (function () {
   const PX_A_PT = 0.75; // 96 px = 72 pt
@@ -330,5 +332,17 @@
     return pdf.save();
   }
 
-  window.HtmlAPdf = { convertir };
+  // La hoja fuera de pantalla donde se arma el documento para medirlo
+  // (.lienzo-pdf en estilos.css; con clase 'libro', una hoja A4 con letra de
+  // libro). Quien la pide la saca con remove() al terminar. Antes cada página
+  // tenía su propio <div id="lienzoPdf"> con sus estilos.
+  function crearLienzo(clase) {
+    const lienzo = document.createElement('div');
+    lienzo.className = 'lienzo-pdf' + (clase ? ' ' + clase : '');
+    lienzo.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(lienzo);
+    return lienzo;
+  }
+
+  window.HtmlAPdf = { convertir, crearLienzo };
 })();

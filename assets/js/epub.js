@@ -193,7 +193,9 @@ async function leerEpub(archivo) {
   await fuentesOfuscadasEpub(zip); // corta si hay DRM de verdad
 
   const parser = new DOMParser();
-  const containerXml = await zip.file('META-INF/container.xml').async('string');
+  const entradaContainer = zip.file('META-INF/container.xml');
+  if (!entradaContainer) throw new Error(window.t ? t('epub-sin-container') : 'El EPUB no tiene un container.xml válido.');
+  const containerXml = await entradaContainer.async('string');
   const containerDoc = parser.parseFromString(containerXml, 'application/xml');
   const rutaOpf = containerDoc.getElementsByTagName('rootfile')[0]?.getAttribute('full-path');
   if (!rutaOpf) throw new Error(window.t ? t('epub-sin-container') : 'El EPUB no tiene un container.xml válido.');
@@ -276,6 +278,23 @@ async function leerEpub(archivo) {
   if (capitulos.length === 0) throw new Error(window.t ? t('epub-sin-contenido') : 'No se encontró contenido legible dentro del EPUB.');
 
   return { titulo, autor, idioma, identificador, capitulos };
+}
+
+// Un libro → un PDF, sin imprimir: se arma en una hoja A4 fuera de pantalla
+// (portada y cada capítulo en hoja nueva) y html-a-pdf.js lo escribe.
+// Compartido por EPUB → PDF y Unir PDF; requiere además seguridad-html.js,
+// pdf-lib y html-a-pdf.js. Devuelve los bytes del PDF.
+async function epubAPdf(archivo, alAvanzar) {
+  const { titulo, autor, capitulos } = await leerEpub(archivo);
+  const lienzo = HtmlAPdf.crearLienzo('libro');
+  const portada = `<div class="portada"><h1>${escaparHtml(titulo)}</h1>${autor ? `<p>${escaparHtml(autor)}</p>` : ''}</div>`;
+  lienzo.innerHTML = portada + capitulos.map((cap) => `<section class="capitulo">${cap.html}</section>`).join('');
+  try {
+    await Promise.all([...lienzo.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
+    return await HtmlAPdf.convertir([{ elemento: lienzo, anchoPx: 794, altoPx: 1123, margenArribaPx: 76, margenAbajoPx: 76 }], { titulo, alAvanzar });
+  } finally {
+    lienzo.remove();
+  }
 }
 
 // ===========================================================================
