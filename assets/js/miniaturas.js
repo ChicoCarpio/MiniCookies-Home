@@ -136,27 +136,45 @@ function generarMiniaturaImagen(archivo) {
 
 // Crea una tarjeta de miniatura estilo grilla (misma clase .miniatura-pagina que ya
 // usa administrar-paginas.html). options: { elementoVisual, etiqueta, conQuitar,
-// alQuitar, arrastrable, indiceOrden }
-function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, arrastrable, indiceOrden }) {
+// alQuitar, arrastrable, indiceOrden, conMover, nombre }
+// conMover: número de posición y botones ◀ ▶ para moverla sin arrastrar (los
+// maneja crearBarraOrden). nombre: lo que usa "Nombre A → Z".
+// cargando: la tarjeta aparece enseguida con una barra de carga en lugar de la
+// miniatura; después, progresoTarjeta(tarjeta, fraccion) la avanza y
+// completarTarjeta(tarjeta, { elementoVisual, etiqueta }) pone la miniatura.
+function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, arrastrable, indiceOrden, conMover, nombre, cargando }) {
   const tarjeta = document.createElement('div');
   tarjeta.className = 'miniatura-pagina';
   if (arrastrable) tarjeta.draggable = true;
   if (indiceOrden !== undefined) tarjeta.dataset.indiceOrden = indiceOrden;
+  if (nombre !== undefined) tarjeta.dataset.nombre = nombre;
 
-  if (elementoVisual) {
-    tarjeta.appendChild(elementoVisual);
-  } else {
-    const marcador = document.createElement('div');
-    marcador.textContent = '📄';
-    marcador.style.fontSize = '2rem';
-    marcador.style.padding = '20px 0';
-    tarjeta.appendChild(marcador);
-  }
+  tarjeta.appendChild(cargando ? crearVisualCargando() : visualDeTarjeta(elementoVisual));
 
   const etiquetaEl = document.createElement('div');
   etiquetaEl.className = 'numero-pagina';
   etiquetaEl.textContent = etiqueta;
   tarjeta.appendChild(etiquetaEl);
+
+  if (conMover) {
+    const posicion = document.createElement('span');
+    posicion.className = 'posicion-orden';
+    tarjeta.appendChild(posicion);
+    const mover = document.createElement('div');
+    mover.className = 'mover-tarjeta';
+    [['-1', '◀', 'mover-antes'], ['1', '▶', 'mover-despues']].forEach(([paso, icono, clave]) => {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.textContent = icono;
+      boton.dataset.mover = paso;
+      // data-i18n-attr: idioma.js los vuelve a traducir al cambiar de idioma.
+      boton.title = window.t ? t(clave) : clave;
+      boton.setAttribute('aria-label', boton.title);
+      boton.setAttribute('data-i18n-attr', `title:${clave};aria-label:${clave}`);
+      mover.appendChild(boton);
+    });
+    tarjeta.appendChild(mover);
+  }
 
   if (conQuitar) {
     const botonQuitar = document.createElement('button');
@@ -169,6 +187,62 @@ function crearTarjetaMiniatura({ elementoVisual, etiqueta, conQuitar, alQuitar, 
   }
 
   return tarjeta;
+}
+
+function visualDeTarjeta(elementoVisual) {
+  if (elementoVisual) {
+    elementoVisual.classList.add('visual-tarjeta');
+    return elementoVisual;
+  }
+  const marcador = document.createElement('div');
+  marcador.className = 'visual-tarjeta';
+  marcador.textContent = '📄';
+  marcador.style.fontSize = '2rem';
+  marcador.style.padding = '20px 0';
+  return marcador;
+}
+
+// La barra va con transform y no con width: así su animación la mueve el
+// compositor del navegador y sigue andando aunque la página esté ocupada
+// convirtiendo (que es justo cuando hace falta ver que algo pasa).
+function crearVisualCargando() {
+  const caja = document.createElement('div');
+  caja.className = 'visual-tarjeta carga-tarjeta';
+  const barra = document.createElement('div');
+  barra.className = 'barra-carga indeterminada';
+  barra.setAttribute('role', 'progressbar');
+  barra.setAttribute('aria-valuemin', '0');
+  barra.setAttribute('aria-valuemax', '100');
+  barra.setAttribute('data-i18n-attr', 'aria-label:cargando-archivo');
+  barra.setAttribute('aria-label', window.t ? t('cargando-archivo') : 'Cargando');
+  const relleno = document.createElement('div');
+  relleno.className = 'relleno-carga';
+  barra.appendChild(relleno);
+  caja.appendChild(barra);
+  return caja;
+}
+
+// fraccion entre 0 y 1; null = sin saber cuánto falta (la barra va y viene).
+function progresoTarjeta(tarjeta, fraccion) {
+  const barra = tarjeta.querySelector('.barra-carga');
+  if (!barra) return;
+  const conValor = typeof fraccion === 'number' && Number.isFinite(fraccion);
+  barra.classList.toggle('indeterminada', !conValor);
+  if (conValor) {
+    const f = Math.min(1, Math.max(0, fraccion));
+    barra.firstChild.style.transform = `scaleX(${f})`;
+    barra.setAttribute('aria-valuenow', String(Math.round(f * 100)));
+  } else {
+    barra.firstChild.style.transform = '';
+    barra.removeAttribute('aria-valuenow');
+  }
+}
+
+function completarTarjeta(tarjeta, { elementoVisual, etiqueta }) {
+  const anterior = tarjeta.querySelector('.visual-tarjeta');
+  const nuevo = visualDeTarjeta(elementoVisual);
+  if (anterior) anterior.replaceWith(nuevo); else tarjeta.prepend(nuevo);
+  if (etiqueta !== undefined) tarjeta.querySelector('.numero-pagina').textContent = etiqueta;
 }
 
 // Crea el par de botones "Lista"/"Cuadrícula" que alternan la clase vista-lista /
@@ -214,6 +288,84 @@ function crearSelectorVista(contenedor, claveAlmacenamiento) {
   aplicarVista(vistaGuardada);
 
   return selector;
+}
+
+// Ordenar archivos enteros sin depender del arrastre (que en una lista larga o
+// con el teclado no alcanza): devuelve una barra "Ordenar: Nombre A → Z ·
+// Nombre Z → A · Invertir" y maneja los botones ◀ ▶ de las tarjetas creadas con
+// conMover. Mantiene al día el número de posición de cada tarjeta y desactiva
+// ◀ en la primera y ▶ en la última, también después de arrastrar, agregar o
+// quitar. La barra se oculta con menos de dos tarjetas. alReordenar() se llama
+// después de cada cambio de orden hecho desde acá.
+function crearBarraOrden(contenedor, alReordenar) {
+  const barra = document.createElement('div');
+  barra.className = 'barra-orden';
+  const titulo = document.createElement('span');
+  titulo.className = 'titulo-orden';
+  titulo.setAttribute('data-i18n', 'orden-titulo');
+  titulo.textContent = window.t ? t('orden-titulo') : 'Ordenar:';
+  barra.appendChild(titulo);
+
+  const tarjetas = () => [...contenedor.children].filter((el) => el.classList.contains('miniatura-pagina'));
+
+  function numerar() {
+    const lista = tarjetas();
+    lista.forEach((tarjeta, i) => {
+      const posicion = tarjeta.querySelector('.posicion-orden');
+      if (posicion) posicion.textContent = i + 1;
+      const antes = tarjeta.querySelector('[data-mover="-1"]');
+      const despues = tarjeta.querySelector('[data-mover="1"]');
+      if (antes) antes.disabled = i === 0;
+      if (despues) despues.disabled = i === lista.length - 1;
+    });
+    barra.hidden = lista.length < 2;
+  }
+
+  function aplicarOrden(nuevas) {
+    nuevas.forEach((tarjeta) => contenedor.appendChild(tarjeta));
+    numerar();
+    if (alReordenar) alReordenar();
+  }
+
+  // "archivo 2" antes que "archivo 10", sin distinguir mayúsculas ni tildes.
+  const porNombre = (a, b) => (a.dataset.nombre || '').localeCompare(b.dataset.nombre || '',
+    window.idiomaActual ? idiomaActual() : 'es', { numeric: true, sensitivity: 'base' });
+
+  [
+    ['orden-nombre-az', () => tarjetas().sort(porNombre)],
+    ['orden-nombre-za', () => tarjetas().sort((a, b) => porNombre(b, a))],
+    ['orden-invertir', () => tarjetas().reverse()],
+  ].forEach(([clave, ordenar]) => {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.setAttribute('data-i18n', clave);
+    boton.textContent = window.t ? t(clave) : clave;
+    boton.addEventListener('click', () => aplicarOrden(ordenar()));
+    barra.appendChild(boton);
+  });
+
+  contenedor.addEventListener('click', (e) => {
+    const boton = e.target.closest('[data-mover]');
+    if (!boton || !contenedor.contains(boton)) return;
+    const tarjeta = boton.closest('.miniatura-pagina');
+    if (boton.dataset.mover === '-1' && tarjeta.previousElementSibling) {
+      contenedor.insertBefore(tarjeta, tarjeta.previousElementSibling);
+    } else if (boton.dataset.mover === '1' && tarjeta.nextElementSibling) {
+      contenedor.insertBefore(tarjeta.nextElementSibling, tarjeta);
+    } else {
+      return;
+    }
+    numerar();
+    // Mover el nodo le saca el foco: se devuelve, así con el teclado se puede
+    // apretar varias veces seguidas. Al llegar a un extremo, al otro botón.
+    (boton.disabled ? tarjeta.querySelector('[data-mover]:not(:disabled)') : boton)?.focus();
+    if (alReordenar) alReordenar();
+  });
+
+  // Arrastrar, agregar o quitar también cambian las posiciones.
+  new MutationObserver(numerar).observe(contenedor, { childList: true });
+  numerar();
+  return barra;
 }
 
 // Habilita arrastrar-y-soltar para reordenar tarjetas dentro de un contenedor grid,

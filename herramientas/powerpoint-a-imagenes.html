@@ -154,9 +154,9 @@ botonConvertir.addEventListener('click', async () => {
     const canvasRender = document.getElementById('canvasRender');
     const imagenes = await renderizarDiapositivasComoImagenes(archivoActual, canvasRender);
 
-    imagenes.forEach(({ dataUrl }) => {
+    imagenes.forEach(({ url }) => {
       const img = document.createElement('img');
-      img.src = dataUrl;
+      img.src = url;
       vistaPreviaDiapositivas.appendChild(img);
     });
 

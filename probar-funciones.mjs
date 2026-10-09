@@ -2660,7 +2660,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return Object.entries(h).map(([k, v]) => k + ' ' + v).join(' · ') + ' · ' + blob.type;
   });
 
-  for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDFs and images']]) {
+  for (const [ruta, texto, espera] of [['/index.html', 'sticker', 'Generador de stickers'], ['/en/index.html', 'merge pdf', 'Merge PDF, images and documents']]) {
     await prueba('buscador "' + texto + '"', async () => {
       await abrir(ruta); await esperar(200);
       const e = D().getElementById('buscador'); e.value = texto; e.dispatchEvent(new (W().Event)('input'));

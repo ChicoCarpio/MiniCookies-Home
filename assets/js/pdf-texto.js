@@ -15,7 +15,10 @@ const EQUIVALENTES_WINANSI = {
 function adaptarTextoAFuente(texto, fuente) {
   const permitidos = new Set(fuente.getCharacterSet());
   return [...texto.normalize('NFC')].map((c) => {
-    if (permitidos.has(c.codePointAt(0))) return c;
+    // El salto de línea no es un carácter de la fuente, pero quien llama parte
+    // el texto por "\n" después de adaptarlo: como "?", Texto → PDF salía en
+    // un solo renglón (encontrado el 2026-10-09).
+    if (c === '\n' || permitidos.has(c.codePointAt(0))) return c;
     if (EQUIVALENTES_WINANSI[c] !== undefined) return EQUIVALENTES_WINANSI[c];
     if (/[\u200B-\u200D\uFE0F\u20E3]/.test(c)) return ''; // caracteres invisibles de unión/emoji
     return '?';

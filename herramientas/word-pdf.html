@@ -164,9 +164,6 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<!-- Fuera de pantalla: el navegador mide acá el documento para escribir el PDF (html-a-pdf.js). -->
-<div id="lienzoPdf" style="position:fixed; left:-30000px; top:0;" aria-hidden="true"></div>
-
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
@@ -181,6 +178,7 @@ window.i18nPagina = {
 <script src="../assets/js/imagenes-office.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/html-a-pdf.js"></script>
+<script src="../assets/js/word-a-pdf.js"></script>
 <script src="../assets/js/pdf-estructura.js"></script>
 <script src="../assets/js/pdf-a-docx.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -233,19 +231,8 @@ botonAPdf.addEventListener('click', async () => {
       botonAPdf.textContent = wordsActuales.length > 1
         ? t('lote-progreso').replace('{n}', i + 1).replace('{total}', wordsActuales.length)
         : t('boton-a-pdf-generando');
-      // docx-preview dibuja el documento con su diseño (páginas, tamaños, posiciones).
-      // Su CSS es de la propia librería; el contenido pasa por el mismo sanitizador.
-      // useBase64URL: por defecto las imágenes salen como blob:, que el
-      // sanitizador descarta (y dejaba los recuadros vacíos); como data:image pasan.
-      const cuerpo = document.createElement('div');
-      const estilos = document.createElement('div');
-      // Las tablas pegadas de Excel (EMF) pasan antes a PNG: docx-preview no las dibuja.
-      const docx = await ImagenesOffice.docxConImagenesComunes(await wordsActuales[i].arrayBuffer());
-      await docxPreview.renderAsync(docx, cuerpo, estilos, { inWrapper: true, useBase64URL: true });
-      documentosHtml.push({
-        nombre: wordsActuales[i].name.replace(/\.docx$/i, ''),
-        html: `<section>${estilos.innerHTML}${sanitizarHtml(cuerpo.innerHTML)}</section>`,
-      });
+      // assets/js/word-a-pdf.js (compartido con "Unir PDF").
+      documentosHtml.push(await WordAPdf.aHtml(wordsActuales[i]));
     }
 
     vistaPrevia.innerHTML = documentosHtml.map((d) => d.html).join('');
@@ -265,27 +252,9 @@ const botonDescargarPdf = document.getElementById('botonDescargarPdf');
 const resultadoPdf = document.getElementById('resultadoPdf');
 const enlaceDescargaPdf = document.getElementById('enlaceDescargaPdf');
 const resumenDescargaPdf = document.getElementById('resumenDescargaPdf');
-const lienzoPdf = document.getElementById('lienzoPdf');
 
 async function documentoAPdf(documento) {
-  lienzoPdf.innerHTML = documento.html;
-  await Promise.all([...lienzoPdf.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
-  await document.fonts.ready;
-  // docx-preview arma un <section class="docx"> por sección del Word, con el
-  // tamaño de hoja como ancho/alto mínimo y los márgenes como relleno.
-  const paginas = [...lienzoPdf.querySelectorAll('section.docx')].map((seccion) => {
-    const e = getComputedStyle(seccion);
-    return {
-      elemento: seccion,
-      anchoPx: parseFloat(e.width),
-      altoPx: parseFloat(e.minHeight) || seccion.getBoundingClientRect().height,
-      margenArribaPx: parseFloat(e.paddingTop),
-      margenAbajoPx: parseFloat(e.paddingBottom),
-    };
-  });
-  const bytes = await HtmlAPdf.convertir(paginas, { titulo: documento.nombre });
-  lienzoPdf.innerHTML = '';
-  return new Blob([bytes], { type: 'application/pdf' });
+  return new Blob([await WordAPdf.aPdf(documento)], { type: 'application/pdf' });
 }
 
 botonDescargarPdf.addEventListener('click', async () => {
