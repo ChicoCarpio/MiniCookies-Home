@@ -903,6 +903,52 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return nombres;
   });
 
+  // pptx-preparar.js: el rectángulo "useBgFill" (relleno = fondo) que
+  // PowerPoint pone en sus diseños salía del color accent1 del tema y tapaba
+  // la diapositiva (19 de 22 en la presentación del usuario). Se arma una
+  // diapositiva blanca con ese rectángulo; el centro tiene que quedar blanco.
+  // Para demostrar que la prueba ve el error, el original sin preparar se
+  // dibuja también y ahí el centro sale de color.
+  await prueba('powerpoint: el fondo useBgFill no tapa la diapositiva, y una blanca con poco texto no es vacía', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    const pres = new (W().PptxGenJS)();
+    pres.addSlide().addText('Hola', { x: 0.5, y: 0.3, w: 3, h: 0.6 });
+    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const fondo = '<p:sp useBgFill="1"><p:nvSpPr><p:cNvPr id="90" name="Fondo"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
+      + '<p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="12192000" cy="6858000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:ln><a:noFill/></a:ln></p:spPr>'
+      + '<p:style><a:lnRef idx="2"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef>'
+      + '<a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></p:style></p:sp>';
+    const xml = await zip.file('ppt/slides/slide1.xml').async('string');
+    afirmar(xml.includes('</p:grpSpPr>'), 'la diapositiva de PptxGenJS cambió de forma');
+    zip.file('ppt/slides/slide1.xml', xml.replace('</p:grpSpPr>', '</p:grpSpPr>' + fondo));
+    const archivo = new (W().File)([await zip.generateAsync({ type: 'blob' })], 'fondo.pptx');
+
+    const { cambios } = await W().eval('PptxPreparar').preparar(archivo);
+    afirmar(cambios.fondo === 1, 'no se preparó el fondo: ' + JSON.stringify(cambios));
+    const centro = (lienzo) => [...lienzo.getContext('2d').getImageData(lienzo.width >> 1, lienzo.height >> 1, 1, 1).data].slice(0, 3);
+
+    const lienzo = D().createElement('canvas');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+    afirmar(imagenes.length === 1, imagenes.length + ' diapositivas');
+    const preparado = centro(lienzo);
+    afirmar(preparado.every((c) => c > 245), 'el centro no es blanco: ' + preparado);
+
+    const crudo = D().createElement('canvas'); crudo.width = 960; crudo.height = 540;
+    const visor = new (W().PptxViewJS.PPTXViewer)({ canvas: crudo, slideSizeMode: 'custom', autoChartRerenderDelayMs: 0 });
+    await visor.loadFile(await archivo.arrayBuffer());
+    await visor.renderSlide(0, crudo, { scale: 1 });
+    const original = centro(crudo);
+    if (visor.destroy) visor.destroy();
+    afirmar(!original.every((c) => c > 245), 'sin preparar también sale blanco (la prueba no vería el error): ' + original);
+    return 'centro ' + preparado + ' (sin preparar: ' + original + ')';
+  });
+
   // Modos de fusión del editor avanzado: con una capa sin ajustes, Multiplicar
   // funde la imagen consigo misma (gris 128 -> 64) y Trama la aclara (-> 192).
   // Se mira el píxel en la vista previa Y en la imagen descargada, que se

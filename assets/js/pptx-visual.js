@@ -33,22 +33,19 @@ async function obtenerTamanoDiapositivaEmu(archivo) {
   return { cx, cy };
 }
 
-// Heurística simple: si al muestrear una grilla de puntos de la diapositiva
-// todos dan exactamente el mismo color, asumimos que no se dibujó nada
-// reconocible. Lee de los píxeles ya sacados del canvas: antes eran 64
-// getImageData de un píxel sobre un canvas enorme, más de un segundo en total.
+// Si toda la diapositiva es de un solo color, la librería no dibujó nada
+// reconocible. Se recorre la imagen entera con un paso de 3 píxeles (a la
+// escala de 6, ningún trazo de letra es tan fino): antes se miraba una grilla
+// de 8×8 puntos y un título chico sobre fondo blanco caía entre ellos, así que
+// una presentación de texto sobre blanco salía como "vacía" y se convertía
+// solo como texto. Lee de los píxeles ya sacados del canvas.
 function pixelesParecenVacios({ data, width: ancho, height: alto }) {
   if (ancho === 0 || alto === 0) return true;
-  const puntos = 8;
-  let primerColor = null;
-  for (let i = 0; i < puntos; i++) {
-    for (let j = 0; j < puntos; j++) {
-      const x = Math.floor((ancho - 1) * (i / (puntos - 1)));
-      const y = Math.floor((alto - 1) * (j / (puntos - 1)));
-      const k = (y * ancho + x) * 4;
-      const color = `${data[k]},${data[k + 1]},${data[k + 2]}`;
-      if (primerColor === null) primerColor = color;
-      else if (color !== primerColor) return false;
+  const paso = 3;
+  const r = data[0], g = data[1], b = data[2];
+  for (let y = 0; y < alto; y += paso) {
+    for (let k = y * ancho * 4, finFila = k + ancho * 4; k < finFila; k += paso * 4) {
+      if (data[k] !== r || data[k + 1] !== g || data[k + 2] !== b) return false;
     }
   }
   return true;
@@ -93,7 +90,31 @@ async function rgbComprimido(pixeles) {
 // de lo esperado, o si ninguna diapositiva produjo contenido visible — en
 // cualquiera de esos casos el llamador debería usar el nivel de respaldo
 // (extraerTextoPowerPoint + generarPdfDeTexto).
-async function renderizarDiapositivasComoImagenes(archivo, canvas, alAvanzar, { conImagenes = true } = {}) {
+async function renderizarDiapositivasComoImagenes(archivo, canvas, alAvanzar, opciones = {}) {
+  // assets/js/pptx-preparar.js corrige, sobre una copia, lo que la librería
+  // dibuja mal (fondo, SmartArt, autoajuste, interlineado…). Si preparar o
+  // dibujar la copia falla, se dibuja el original, como antes.
+  if (typeof PptxPreparar !== 'undefined') {
+    let preparado = null;
+    try {
+      preparado = (await PptxPreparar.preparar(archivo)).buffer;
+    } catch (errorPreparar) {
+      console.warn('No se pudo preparar el PowerPoint, se dibuja el original:', errorPreparar);
+    }
+    if (preparado) {
+      try {
+        return await dibujarDiapositivas(archivo, preparado, canvas, alAvanzar, opciones);
+      } catch (errorCopia) {
+        console.warn('No se pudo dibujar el PowerPoint preparado, se dibuja el original:', errorCopia);
+      }
+    }
+  }
+  return dibujarDiapositivas(archivo, archivo, canvas, alAvanzar, opciones);
+}
+
+// archivo: el .pptx del usuario (de ahí sale el tamaño); paraDibujar: lo que
+// recibe la librería (el original o la copia preparada).
+async function dibujarDiapositivas(archivo, paraDibujar, canvas, alAvanzar, { conImagenes = true } = {}) {
   const { cx, cy } = await obtenerTamanoDiapositivaEmu(archivo);
   const anchoPuntos = (cx / EMU_POR_PULGADA) * PUNTOS_POR_PULGADA;
   const altoPuntos = (cy / EMU_POR_PULGADA) * PUNTOS_POR_PULGADA;
@@ -109,7 +130,7 @@ async function renderizarDiapositivasComoImagenes(archivo, canvas, alAvanzar, { 
   // captura de otra, y si caía después de destroy() tiraba "No PPTX loaded".
   // El segundo dibujado para los gráficos se hace a mano en cada diapositiva.
   const viewer = new PptxViewJS.PPTXViewer({ canvas, slideSizeMode: 'custom', autoChartRerenderDelayMs: 0 });
-  await viewer.loadFile(archivo);
+  await viewer.loadFile(paraDibujar);
   const totalDiapositivas = viewer.getSlideCount();
   if (!totalDiapositivas || totalDiapositivas === 0) throw new Error('No se detectaron diapositivas.');
 

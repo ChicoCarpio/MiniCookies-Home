@@ -103,7 +103,7 @@
             window.FileReader = fileReaderNativo;
           }
         }
-        await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-visual.js')]);
+        await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-preparar.js'), propio('pptx-visual.js')]);
       },
       // Sin conImagenes: Unir PDF no muestra las diapositivas sueltas ni arma su .zip.
       convertir: async (archivo, alAvanzar) => (await powerPointAPdf(archivo, null, (n, total) => alAvanzar(0.9 * n / total), { conImagenes: false })).pdf.save(),
