@@ -91,6 +91,14 @@ async function rgbComprimido(pixeles) {
 // cualquiera de esos casos el llamador debería usar el nivel de respaldo
 // (extraerTextoPowerPoint + generarPdfDeTexto).
 async function renderizarDiapositivasComoImagenes(archivo, canvas, alAvanzar, opciones = {}) {
+  // Motor propio (etapa 2, todavía detrás de una opción): ver dibujarConMotorPropio.
+  if (opciones.motor === 'propio' && typeof PptxModelo !== 'undefined') {
+    try {
+      return await dibujarConMotorPropio(archivo, canvas, alAvanzar, opciones);
+    } catch (errorPropio) {
+      console.warn('El motor propio no pudo con el PowerPoint, se usa PptxViewJS:', errorPropio);
+    }
+  }
   // assets/js/pptx-preparar.js corrige, sobre una copia, lo que la librería
   // dibuja mal (fondo, SmartArt, autoajuste, interlineado…). Si preparar o
   // dibujar la copia falla, se dibuja el original, como antes.
@@ -159,26 +167,86 @@ async function dibujarDiapositivas(archivo, paraDibujar, canvas, alAvanzar, { co
       throw new Error(window.t ? t('ppt-render-inconsistente') : 'El renderizado devolvió un tamaño de diapositiva inconsistente.');
     }
 
-    const pixeles = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-    if (pixelesParecenVacios(pixeles)) {
+    const imagen = await capturarDiapositiva(canvas, anchoPuntos, altoPuntos, conImagenes);
+    if (imagen.vacia) {
       vaciasSeguidas++;
       if (vaciasSeguidas === totalDiapositivas) throw new Error('El renderizado no produjo contenido visible.');
-    }
-
-    const rgb = await rgbComprimido(pixeles);
-    const imagen = { anchoPuntos, altoPuntos, ancho: pixeles.width, alto: pixeles.height, rgb, png: null, url: null };
-    // PNG en vez de JPEG: sin artefactos de compresión en el texto/las formas,
-    // que es la mayor parte del contenido típico de una diapositiva. toBlob y
-    // no toDataURL: codifica sin trabar la página.
-    if (conImagenes || !rgb) {
-      imagen.png = await new Promise((listo) => canvas.toBlob(listo, 'image/png'));
-      if (conImagenes) imagen.url = URL.createObjectURL(imagen.png);
     }
     imagenes.push(imagen);
     if (alAvanzar) alAvanzar(i + 1, totalDiapositivas);
   }
 
   if (viewer.destroy) viewer.destroy();
+  return imagenes;
+}
+
+// Los píxeles del canvas como una entrada de la lista que devuelve
+// renderizarDiapositivasComoImagenes. vacia: todo de un solo color.
+async function capturarDiapositiva(canvas, anchoPuntos, altoPuntos, conImagenes) {
+  const pixeles = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+  const rgb = await rgbComprimido(pixeles);
+  const imagen = { anchoPuntos, altoPuntos, ancho: pixeles.width, alto: pixeles.height, rgb, png: null, url: null, vacia: pixelesParecenVacios(pixeles) };
+  // PNG en vez de JPEG: sin artefactos de compresión en el texto/las formas,
+  // que es la mayor parte del contenido típico de una diapositiva. toBlob y
+  // no toDataURL: codifica sin trabar la página.
+  if (conImagenes || !rgb) {
+    imagen.png = await new Promise((listo) => canvas.toBlob(listo, 'image/png'));
+    if (conImagenes) imagen.url = URL.createObjectURL(imagen.png);
+  }
+  return imagen;
+}
+
+// Motor propio (assets/js/pptx-modelo.js, pptx-geometria.js, pptx-texto.js,
+// pptx-dibujo.js). Las diapositivas que todavía no sabe dibujar (tablas,
+// gráficos) las dibuja PptxViewJS con la copia preparada, como hasta ahora.
+// Cada imagen lleva motor: 'propio' | 'pptxviewjs'.
+async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes = true } = {}) {
+  const pres = await PptxModelo.abrir(archivo);
+  const anchoPuntos = (pres.ancho / EMU_POR_PULGADA) * PUNTOS_POR_PULGADA;
+  const altoPuntos = (pres.alto / EMU_POR_PULGADA) * PUNTOS_POR_PULGADA;
+  const anchoPx = Math.round((pres.ancho / EMU_POR_PULGADA) * PIXELES_BASE_POR_PULGADA * ESCALA_RENDERIZADO);
+  const altoPx = Math.round((pres.alto / EMU_POR_PULGADA) * PIXELES_BASE_POR_PULGADA * ESCALA_RENDERIZADO);
+  let visor = null;
+  const imagenes = [];
+  let vacias = 0;
+  for (let i = 0; i < pres.cantidad; i++) {
+    canvas.width = anchoPx;
+    canvas.height = altoPx;
+    let diapositiva = null;
+    try {
+      diapositiva = await pres.diapositiva(i);
+    } catch (errorDiapositiva) {
+      console.warn('Diapositiva ' + (i + 1) + ' ilegible para el motor propio:', errorDiapositiva);
+    }
+    let motor = 'propio';
+    if (diapositiva && diapositiva.soportada) {
+      await PptxDibujo.dibujar(pres, diapositiva, canvas);
+    } else {
+      motor = 'pptxviewjs';
+      if (!visor) {
+        let paraDibujar = archivo;
+        if (typeof PptxPreparar !== 'undefined') {
+          try { paraDibujar = (await PptxPreparar.preparar(archivo)).buffer; } catch (e) { /* el original */ }
+        }
+        visor = new PptxViewJS.PPTXViewer({ canvas, slideSizeMode: 'custom', autoChartRerenderDelayMs: 0 });
+        await visor.loadFile(paraDibujar);
+      }
+      for (let vez = 0; vez < 2; vez++) {
+        if (vez) await new Promise((listo) => setTimeout(listo, 200));
+        canvas.width = anchoPx;
+        canvas.height = altoPx;
+        await visor.renderSlide(i, canvas, { scale: ESCALA_RENDERIZADO, quality: 'high' });
+      }
+    }
+    const imagen = await capturarDiapositiva(canvas, anchoPuntos, altoPuntos, conImagenes);
+    imagen.motor = motor;
+    if (diapositiva && !diapositiva.soportada) imagen.motivos = diapositiva.motivos;
+    if (imagen.vacia) vacias++;
+    imagenes.push(imagen);
+    if (alAvanzar) alAvanzar(i + 1, pres.cantidad);
+  }
+  if (visor && visor.destroy) visor.destroy();
+  if (pres.cantidad && vacias === pres.cantidad) throw new Error('El renderizado no produjo contenido visible.');
   return imagenes;
 }
 

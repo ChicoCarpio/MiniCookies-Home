@@ -14,7 +14,13 @@ Detalle y opciones: el encabezado de `comparar-pptx.mjs`.
 | `powerpoint.ps1` | Referencia: PNG por diapositiva + `referencia.json` (caja de cada forma y de cada **línea de texto** como la cortó PowerPoint) | sí |
 | `linea-base.json` | Resultado aceptado; el comando falla si una diapositiva empeora (> 1 punto de % o > 0,01 de SSIM) | sí |
 | `salida\` | Referencias en caché (por SHA-256) e `informe.html` lado a lado | no |
+| `ecma\presetShapeDefinitions.xml` | Las formas predefinidas tal como vienen en ECMA-376 Parte 1, 5.ª ed. (no se publica) | sí |
+| `convertir-geometrias.mjs` | Las pasa a `vendor/ecma-376-geometrias/5ed-2016/geometrias.js` (solo cambia el formato) | sí |
 
 Flujo de cada cambio en el motor: `npm run comparar-pptx`, revisar
 `salida\actual\informe.html`, y si mejoró, `npm run comparar-pptx -- --base`.
 `--sin-preparar` mide sin `pptx-preparar.js` (cuánto aporta la etapa 0).
+`--motor-propio` mide el motor nuevo (`pptx-modelo.js` y compañía, desde la
+etapa 2): la salida va a `salida\propio\` y el informe marca las diapositivas
+que todavía dibuja PptxViewJS (tablas, gráficos) y por qué. La línea base es
+la del motor que esté como predeterminado.
