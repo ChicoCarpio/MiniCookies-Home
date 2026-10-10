@@ -35,13 +35,19 @@ const PptxTexto = (() => {
   // las de Windows (anchos de 317 letras y una frase con kerning): Carlito =
   // Calibri y Liberation = Arial / Times New Roman / Courier New, idénticas;
   // Gelasio ≈ Georgia (la frase igual, 7 letras raras distintas). Caladea NO
-  // coincide con Cambria (5 % más angosta): no se usa.
+  // coincide con Cambria (5 % más angosta): no se usa. Intos = Aptos, Aptos
+  // Display y Aptos Narrow (anchos, kerning y alto idénticos a la Aptos de
+  // Office en 11 estilos; la de Office viene de la nube, ninguna PC sin
+  // Office la tiene). Intos sin versiones publicadas: fijada en el commit.
   // Estilos: r normal, b negrita, i cursiva, bi negrita cursiva.
   const METRICAS = {
     calibri: { familia: 'MC Carlito', r: rutaVendor('carlito/1.104/Carlito-Regular.ttf'), b: rutaVendor('carlito/1.104/Carlito-Bold.ttf'), i: rutaVendor('carlito/1.104/Carlito-Italic.ttf'), bi: rutaVendor('carlito/1.104/Carlito-BoldItalic.ttf') },
     arial: { familia: 'MC Liberation Sans', r: rutaVendor('liberation-fonts/2.1.5/LiberationSans-Regular.ttf'), b: rutaVendor('liberation-fonts/2.1.5/LiberationSans-Bold.ttf'), i: rutaVendor('liberation-fonts/2.1.5/LiberationSans-Italic.ttf'), bi: rutaVendor('liberation-fonts/2.1.5/LiberationSans-BoldItalic.ttf') },
     'times new roman': { familia: 'MC Liberation Serif', r: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-Regular.ttf'), b: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-Bold.ttf'), i: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-Italic.ttf'), bi: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-BoldItalic.ttf') },
     'courier new': { familia: 'MC Liberation Mono', r: rutaVendor('liberation-fonts/2.1.5/LiberationMono-Regular.ttf'), b: rutaVendor('liberation-fonts/2.1.5/LiberationMono-Bold.ttf'), i: rutaVendor('liberation-fonts/2.1.5/LiberationMono-Italic.ttf'), bi: rutaVendor('liberation-fonts/2.1.5/LiberationMono-BoldItalic.ttf') },
+    aptos: { familia: 'MC Intos', r: rutaVendor('intos/fef9315/Intos-Regular.ttf'), b: rutaVendor('intos/fef9315/Intos-Bold.ttf'), i: rutaVendor('intos/fef9315/Intos-Italic.ttf'), bi: rutaVendor('intos/fef9315/Intos-BoldItalic.ttf') },
+    'aptos display': { familia: 'MC Intos Display', r: rutaVendor('intos/fef9315/IntosDisplay-Regular.ttf'), b: rutaVendor('intos/fef9315/IntosDisplay-Bold.ttf'), i: rutaVendor('intos/fef9315/IntosDisplay-Italic.ttf'), bi: rutaVendor('intos/fef9315/IntosDisplay-BoldItalic.ttf') },
+    'aptos narrow': { familia: 'MC Intos Narrow', r: rutaVendor('intos/fef9315/IntosNarrow-Regular.ttf'), b: rutaVendor('intos/fef9315/IntosNarrow-Bold.ttf'), i: rutaVendor('intos/fef9315/IntosNarrow-Italic.ttf'), bi: rutaVendor('intos/fef9315/IntosNarrow-BoldItalic.ttf') },
     // Variable (peso 400 a 700): el mismo archivo para normal y negrita.
     georgia: { familia: 'MC Gelasio', variable: true, r: rutaVendor('gelasio/1.008/Gelasio-VF.ttf'), i: rutaVendor('gelasio/1.008/Gelasio-Italic-VF.ttf') },
   };
@@ -124,7 +130,11 @@ const PptxTexto = (() => {
     const lineas = [];
     let y = 0;
 
+    // PowerPoint hace kerning solo con kern y desde ese tamaño (sin kern, nunca);
+    // el canvas lo hace siempre si no se le dice.
+    const kerning = (t, px) => t.kern > 0 && px / ptPx >= t.kern - 0.001 ? 'normal' : 'none';
     const medir = (t, s, px) => {
+      ctx.fontKerning = kerning(t, px);
       ctx.font = css(t, px);
       ctx.letterSpacing = t.espaciado ? `${t.espaciado * ptPx}px` : '0px';
       return ctx.measureText(s).width;
@@ -209,13 +219,18 @@ const PptxTexto = (() => {
         const paso = (p.tabulacion || 914400) * pxPorEmu;
         return (Math.floor(abs / paso) + 1) * paso - actual.inicio;
       };
-      for (const pz of piezas) {
-        if (pz.salto) { actual.salto = pz.t; actual.final = true; nueva(false); continue; }
-        if (pz.tab) { const x = proximoTab(actual.ancho); actual.piezas.push({ ...pz, texto: '', ancho: x - actual.ancho }); actual.ancho = x; continue; }
-        if (pz.espacio) { actual.piezas.push(pz); actual.ancho += pz.ancho; continue; }
-        const ocupado = anchoSinEspacioFinal(actual);
-        if (actual.piezas.length && ocupado > 0 && actual.ancho + pz.ancho > actual.limite + 0.01) {
-          nueva(false);
+      // Una palabra puede venir en varios trozos (un enlace, una letra en
+      // negrita): solo se corta donde hay espacio, así que se mide entera.
+      const esPalabra = (pz) => pz && !pz.salto && !pz.tab && !pz.espacio;
+      piezas.forEach((pz, i) => {
+        if (pz.salto) { actual.salto = pz.t; actual.final = true; nueva(false); return; }
+        if (pz.tab) { const x = proximoTab(actual.ancho); actual.piezas.push({ ...pz, texto: '', ancho: x - actual.ancho }); actual.ancho = x; return; }
+        if (pz.espacio) { actual.piezas.push(pz); actual.ancho += pz.ancho; return; }
+        if (!esPalabra(piezas[i - 1])) {
+          let palabra = 0;
+          for (let k = i; esPalabra(piezas[k]); k++) palabra += piezas[k].ancho;
+          const ocupado = anchoSinEspacioFinal(actual);
+          if (actual.piezas.length && ocupado > 0 && actual.ancho + palabra > actual.limite + 0.01) nueva(false);
         }
         if (pz.ancho > actual.limite && !sinAjuste) {
           // Una palabra más ancha que la línea se corta por letras.
@@ -229,10 +244,10 @@ const PptxTexto = (() => {
             resto = resto.slice(n);
             if (resto) nueva(false);
           }
-          continue;
+          return;
         }
         actual.piezas.push(pz); actual.ancho += pz.ancho;
-      }
+      });
       actual.final = true;
 
       // Altura de cada línea y posición vertical.
@@ -290,7 +305,7 @@ const PptxTexto = (() => {
           const t = pz.t;
           l.trozos.push({
             texto: pz.texto, x, ancho: pz.ancho, css: css(t, pz.px), px: pz.px,
-            espaciado: t.espaciado ? t.espaciado * ptPx : 0, color: colorCss(colorDeRelleno(t.relleno)),
+            espaciado: t.espaciado ? t.espaciado * ptPx : 0, kerning: kerning(t, pz.px), color: colorCss(colorDeRelleno(t.relleno)),
             subrayado: t.subrayado, tachado: t.tachado, resaltado: colorCss(t.resaltado),
             desplazamiento: -t.base * escalar(t.tamano) * ptPx, sombra: t.sombra,
           });

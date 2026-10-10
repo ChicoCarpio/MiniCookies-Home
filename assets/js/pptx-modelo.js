@@ -685,6 +685,8 @@ const PptxModelo = (() => {
       tachado: at('strike') && at('strike') !== 'noStrike' ? at('strike') : null,
       base: parseInt(at('baseline') || '0', 10) / 100000, mayusculas: at('cap') || 'none',
       espaciado: parseInt(at('spc') || '0', 10) / 100,
+      // Kerning solo desde este tamaño (pt); sin el atributo, PowerPoint no lo aplica.
+      kern: parseInt(at('kern') || '0', 10) / 100,
       fuente: resolverFuente(fuente || '+mn-lt', ctx) || 'Calibri', fuenteEa: resolverFuente(fuenteEa, ctx),
       relleno: rell === undefined ? { tipo: 'solido', color: color({ localName: 'schemeClr', getAttribute: () => 'tx1', children: [] }, ctx.cc) } : rell,
       resaltado: resaltado ? color(resaltado, ctx.cc) : null,

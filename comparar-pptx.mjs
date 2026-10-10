@@ -26,7 +26,8 @@
 //   npm run comparar-pptx                     corpus\*.pptx y locales\*.pptx
 //   npm run comparar-pptx -- a.pptx b.pptx    esos archivos
 // Opciones: --sin-preparar (el original sin pptx-preparar.js, para medir
-// cuánto aporta), --motor-propio (el motor nuevo, etapa 2 en adelante), --base (guarda el resultado como nueva línea base),
+// cuánto aporta), --pptxviewjs (la librería que el motor propio
+// reemplazó como predeterminado el 2026-10-10, para comparar), --base (guarda el resultado como nueva línea base),
 // --sin-build, --pdf (exporta también el PDF de PowerPoint).
 // Código de salida 1 si una diapositiva empeoró respecto de la línea base
 // (más de 1 punto de % de píxeles o más de 0,01 de SSIM) o si faltó dibujar
@@ -62,7 +63,7 @@ const TIPOS = {
 const argumentos = process.argv.slice(2);
 const opcion = (n) => argumentos.includes(n);
 const sinPreparar = opcion('--sin-preparar');
-const motorPropio = opcion('--motor-propio');
+const conPptxViewJS = opcion('--pptxviewjs');
 let archivos = argumentos.filter((a) => !a.startsWith('--')).map((a) => resolve(a));
 // Sin archivos: el corpus sintético (en git) y comparar-pptx\locales (fuera de
 // git: presentaciones reales que no se pueden publicar, como la charla del
@@ -99,7 +100,7 @@ if (!opcion('--sin-build')) {
   const b = spawnSync(process.execPath, [join(RAIZ, 'build.mjs')], { stdio: 'inherit' });
   if (b.status !== 0) process.exit(1);
 }
-const corrida = sinPreparar ? 'sin-preparar' : motorPropio ? 'propio' : 'actual';
+const corrida = sinPreparar ? 'sin-preparar' : conPptxViewJS ? 'pptxviewjs' : 'actual';
 const destino = join(SALIDA, corrida);
 rmSync(destino, { recursive: true, force: true });
 
@@ -108,7 +109,7 @@ rmSync(destino, { recursive: true, force: true });
 const CONTROL = String.raw`<!doctype html><meta charset="utf-8"><iframe id="m" style="width:1280px;height:900px"></iframe><script>
 const CASOS = __CASOS__;
 const SIN_PREPARAR = __SIN_PREPARAR__;
-const MOTOR_PROPIO = __MOTOR_PROPIO__;
+const CON_PPTXVIEWJS = __CON_PPTXVIEWJS__;
 const enviar = (ruta, cuerpo) => fetch(ruta, { method: 'POST', body: cuerpo });
 const imagen = (src) => new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error('no cargó ' + src)); i.src = src; });
 function lienzo(fuente, w, h) {
@@ -155,7 +156,7 @@ function ssim(a, b, w, h) {
         imagenes = await W.dibujarDiapositivas(archivo, archivo, lienzoRender, null, { conImagenes: true });
       } else {
         resultado.cambios = (await W.eval('PptxPreparar').preparar(archivo)).cambios;
-        imagenes = await W.renderizarDiapositivasComoImagenes(archivo, lienzoRender, null, { conImagenes: true, motor: MOTOR_PROPIO ? 'propio' : undefined });
+        imagenes = await W.renderizarDiapositivasComoImagenes(archivo, lienzoRender, null, { conImagenes: true, motor: CON_PPTXVIEWJS ? 'pptxviewjs' : undefined });
       }
       resultado.ms = Math.round(performance.now() - t0);
       for (let i = 0; i < caso.total; i++) {
@@ -227,7 +228,7 @@ const servidor = createServer(async (q, s) => {
   }
   if (ruta === '/__control') {
     s.setHeader('content-type', 'text/html; charset=utf-8');
-    return s.end(CONTROL.replace('__CASOS__', JSON.stringify(datosCasos)).replace('__SIN_PREPARAR__', String(sinPreparar)).replace('__MOTOR_PROPIO__', String(motorPropio)));
+    return s.end(CONTROL.replace('__CASOS__', JSON.stringify(datosCasos)).replace('__SIN_PREPARAR__', String(sinPreparar)).replace('__CON_PPTXVIEWJS__', String(conPptxViewJS)));
   }
   if (ruta.startsWith('/__pptx/')) return s.end(readFileSync(casos[+ruta.split('/')[2]].ruta));
   if (ruta.startsWith('/__ref/')) {
@@ -285,7 +286,7 @@ const cortes = conCortes.length ? sumarCortes(conCortes.map((d) => d.cortes)) : 
 const media = (k) => todas.length ? (todas.reduce((a, d) => a + d[k], 0) / todas.length) : 0;
 writeFileSync(join(destino, 'resultado.json'), JSON.stringify(resultados, null, 1));
 escribirInforme();
-if (opcion('--base') && !sinPreparar) {
+if (opcion('--base') && !sinPreparar && !conPptxViewJS) {
   const nueva = { ...base };
   for (const r of resultados) {
     if (r.error) continue;

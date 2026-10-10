@@ -91,8 +91,11 @@ async function rgbComprimido(pixeles) {
 // cualquiera de esos casos el llamador debería usar el nivel de respaldo
 // (extraerTextoPowerPoint + generarPdfDeTexto).
 async function renderizarDiapositivasComoImagenes(archivo, canvas, alAvanzar, opciones = {}) {
-  // Motor propio (etapa 2, todavía detrás de una opción): ver dibujarConMotorPropio.
-  if (opciones.motor === 'propio' && typeof PptxModelo !== 'undefined') {
+  // Motor propio: el predeterminado desde el 2026-10-10 (mejor o igual que
+  // PptxViewJS en las 118 diapositivas de npm run comparar-pptx; ver
+  // dibujarConMotorPropio). { motor: 'pptxviewjs' } fuerza la librería (para
+  // medirla); las páginas que no cargan el motor (Unir PDF) la usan siempre.
+  if (opciones.motor !== 'pptxviewjs' && typeof PptxModelo !== 'undefined') {
     try {
       return await dibujarConMotorPropio(archivo, canvas, alAvanzar, opciones);
     } catch (errorPropio) {

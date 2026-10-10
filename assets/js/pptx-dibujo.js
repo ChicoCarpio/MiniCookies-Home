@@ -478,7 +478,7 @@ const PptxDibujo = (() => {
         const x = area.x + t.x, y = base + t.desplazamiento;
         if (t.resaltado) { ctx.fillStyle = t.resaltado; ctx.fillRect(x, y - t.px * 0.95, t.ancho, t.px * 1.2); }
         if (!t.color) continue;
-        ctx.font = t.css; ctx.letterSpacing = t.espaciado ? `${t.espaciado}px` : '0px'; ctx.fillStyle = t.color;
+        ctx.font = t.css; ctx.letterSpacing = t.espaciado ? `${t.espaciado}px` : '0px'; ctx.fontKerning = t.kerning || 'normal'; ctx.fillStyle = t.color;
         conSombra(ctx, t.sombra, entorno, () => ctx.fillText(t.texto, x, y));
         if (t.subrayado || t.tachado) {
           ctx.fillStyle = t.color;

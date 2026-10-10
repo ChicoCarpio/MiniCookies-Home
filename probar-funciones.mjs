@@ -911,13 +911,15 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // por eso se exige también que cada cara esté "loaded" en document.fonts.
   // Anchos esperados: "El veloz murciélago hindú" a 100 px, calculados con
   // fontkit sobre esos mismos archivos (2026-10-10).
-  await prueba('powerpoint: fuentes con métricas de Office (Carlito, Liberation, Gelasio) cargan y miden', async () => {
+  await prueba('powerpoint: fuentes con métricas de Office (Carlito, Liberation, Gelasio, Intos) cargan y miden', async () => {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     const PT = W().eval('PptxTexto');
     const casos = [
       ['Calibri', false, false, 'MC Carlito', 1031.30], ['Calibri', true, false, 'MC Carlito', 1054.15],
       ['Arial', false, false, 'MC Liberation Sans', 1139.50], ['Times New Roman', false, true, 'MC Liberation Serif', 1048.88],
       ['Courier New', false, false, 'MC Liberation Mono', 1500.24], ['Georgia', false, false, 'MC Gelasio', 1146.19],
+      ['Aptos', false, false, 'MC Intos', 1093.80], ['Aptos', true, false, 'MC Intos', 1156.79],
+      ['Aptos Display', false, false, 'MC Intos Display', 1017.58], ['Aptos Narrow', false, true, 'MC Intos Narrow', 1000.29],
     ];
     await PT.cargarFuentes(casos.map(([fuente, negrita, cursiva]) => ({ fuente, negrita, cursiva })));
     const caras = [...D().fonts].filter((f) => f.family.startsWith('MC ') || f.family.startsWith('"MC '));

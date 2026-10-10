@@ -131,9 +131,18 @@ const PptxGeometria = (() => {
     return { rutas, texto };
   }
 
+  // Erratas de presetShapeDefinitions.xml que PowerPoint no sigue. Los datos
+  // de Ecma no se tocan (vendor/ecma-376-geometrias, AVISO-ECMA.txt): la
+  // corrección va acá. pie trae <rect l="il" t="ir" r="it" b="ib"/>, con t y r
+  // cruzados; PowerPoint usa il/it/ir/ib (medido 2026-10-10: "142" a 8 pt
+  // entra en una línea en un pie de 96 pt).
+  const ERRATAS_RECT = { pie: { errata: 'il,ir,it,ib', rect: ['il', 'it', 'ir', 'ib'] } };
   function predefinida(nombre) {
     const g = typeof GeometriasEcma !== 'undefined' ? GeometriasEcma : null;
-    return (g && g[nombre]) || null;
+    const def = (g && g[nombre]) || null;
+    const e = ERRATAS_RECT[nombre];
+    if (def && e && String(def.rect) === e.errata) return { ...def, rect: e.rect };
+    return def;
   }
 
   // custGeom (o prstGeom con avLst) del XML → la misma forma que las predefinidas.
