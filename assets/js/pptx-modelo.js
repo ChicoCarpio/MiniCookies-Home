@@ -9,7 +9,7 @@
 // fuera del repo). La herencia sigue lo medido con pptx-preparar.js y
 // comparar-pptx; donde la norma y PowerPoint no coinciden, manda PowerPoint.
 //
-// Requiere JSZip y pptx-geometria.js. Uso:
+// Requiere JSZip y pptx-geometria.js (y pptx-estilos-tabla.js para las tablas). Uso:
 //   const pres = await PptxModelo.abrir(archivo);
 //   pres.ancho, pres.alto (EMU), pres.cantidad
 //   const d = await pres.diapositiva(i);  // { fondo, elementos, soportada, motivos }
@@ -559,8 +559,11 @@ const PptxModelo = (() => {
   function tabla(tbl, xfrm, ctx, motivos) {
     const tblPr = hijo(tbl, 'tblPr');
     const id = ((hijo(tblPr, 'tableStyleId') || {}).textContent || '').trim().toUpperCase();
-    const estilo = hijo(tblPr, 'tableStyle') ? hijo(hijo(tblPr, 'tableStyle'), 'tblStyle') : id ? ctx.estilosTabla.get(id) : null;
-    if (id && !estilo) { motivos.push('estilo de tabla que el archivo no trae'); return { tipo: 'tabla', xfrm }; }
+    // El estilo: el que viene escrito en la tabla, el del archivo o, si el
+    // archivo trae solo el GUID, el integrado (pptx-estilos-tabla.js).
+    const estilo = hijo(tblPr, 'tableStyle') ? hijo(hijo(tblPr, 'tableStyle'), 'tblStyle')
+      : id ? ctx.estilosTabla.get(id) || (typeof PptxEstilosTabla !== 'undefined' ? PptxEstilosTabla.definicion(id) : null) : null;
+    if (id && !estilo) { motivos.push('estilo de tabla desconocido'); return { tipo: 'tabla', xfrm }; }
     const bandera = (a) => bool(tblPr, a);
     const columnas = hijos(hijo(tbl, 'tblGrid'), 'gridCol').map((c) => ent(c, 'w', 0));
     const trs = hijos(tbl, 'tr');

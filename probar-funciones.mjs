@@ -938,6 +938,57 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return res.join(', ');
   });
 
+  // pptx-estilos-tabla.js (etapa 5 del motor propio): PowerPoint muchas veces
+  // guarda solo el GUID del estilo de tabla, sin su definición (así venía la
+  // charla del usuario). Se arma una tabla con "Estilo medio 2 - Énfasis 1"
+  // solo por GUID: el motor propio tiene que dibujarla (sin pasar a
+  // PptxViewJS) con el encabezado del color accent1 y la primera banda más
+  // clara. Con un GUID inventado, la diapositiva tiene que caer al respaldo:
+  // así se ve que es la regla integrada la que la resuelve. Que las 74 reglas
+  // den lo mismo que lo que escribe PowerPoint se comprobó contra
+  // comparar-pptx/corpus/08-tablas.pptx (ver el encabezado del módulo).
+  await prueba('powerpoint: tabla con un estilo integrado que el archivo trae solo por GUID', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    afirmar(W().eval('PptxEstilosTabla').cantidad() === 74, 'no hay 74 estilos integrados');
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    const armar = async (guid) => {
+      const pres = new (W().PptxGenJS)();
+      pres.addSlide().addTable([['Encabezado', 'B'], ['uno', 'dos'], ['tres', 'cuatro']], { x: 0.5, y: 0.5, w: 6, colW: [3, 3], rowH: 0.8, fontSize: 14 });
+      const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+      const xml = await zip.file('ppt/slides/slide1.xml').async('string');
+      afirmar(/<a:tblPr/.test(xml), 'la tabla de PptxGenJS cambió de forma');
+      // Sin formato directo en las celdas: que mande el estilo.
+      const limpio = xml.replace(/<a:tblPr[^>]*\/>|<a:tblPr[^>]*>[\s\S]*?<\/a:tblPr>/, '<a:tblPr firstRow="1" bandRow="1"><a:tableStyleId>{' + guid + '}</a:tableStyleId></a:tblPr>')
+        .replace(/<a:tcPr[^>]*\/>|<a:tcPr[^>]*>[\s\S]*?<\/a:tcPr>/g, '<a:tcPr/>');
+      zip.file('ppt/slides/slide1.xml', limpio);
+      zip.file('ppt/tableStyles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><a:tblStyleLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" def="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"/>');
+      return new (W().File)([await zip.generateAsync({ type: 'blob' })], 'tabla.pptx');
+    };
+    const inventado = await W().eval('PptxModelo').abrir(await armar('00000000-1111-2222-3333-444444444444'));
+    const dInventado = await inventado.diapositiva(0);
+    afirmar(!dInventado.soportada, 'con un GUID inventado la tabla igual se dibujó: la prueba no vería el error');
+
+    const archivo = await armar('5C22544A-7EE6-4342-B048-85BDC9FD1C3A');
+    const pres = await W().eval('PptxModelo').abrir(archivo);
+    const d = await pres.diapositiva(0);
+    afirmar(d.soportada, 'el motor propio no tomó la tabla: ' + d.motivos.join(', '));
+    const lienzo = D().createElement('canvas');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+    afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio', 'no la dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor));
+    // Un punto sin texto: a la derecha de cada celda de la primera columna.
+    const k = lienzo.width / 10;
+    const punto = (fila) => [...lienzo.getContext('2d').getImageData(Math.round(3.3 * k), Math.round((0.5 + 0.8 * fila + 0.4) * k), 1, 1).data].slice(0, 3);
+    const encabezado = punto(0), banda = punto(1), sinBanda = punto(2);
+    afirmar(Math.abs(encabezado[0] - 0x44) < 6 && Math.abs(encabezado[1] - 0x72) < 6 && Math.abs(encabezado[2] - 0xc4) < 6, 'el encabezado no es accent1 (4472C4): ' + encabezado);
+    afirmar(banda.every((c, i) => c > encabezado[i]) && sinBanda.every((c, i) => c >= banda[i]) && sinBanda.join() !== banda.join(), 'bandas: ' + banda + ' / ' + sinBanda);
+    return 'encabezado ' + encabezado + ', banda ' + banda + ', sin banda ' + sinBanda;
+  });
+
   // pptx-preparar.js: el rectángulo "useBgFill" (relleno = fondo) que
   // PowerPoint pone en sus diseños salía del color accent1 del tema y tapaba
   // la diapositiva (19 de 22 en la presentación del usuario). Se arma una
