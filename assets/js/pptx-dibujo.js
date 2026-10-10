@@ -37,6 +37,7 @@ const PptxDibujo = (() => {
         juntar(el.relleno);
         if (el.imagen) juntar(el.imagen);
         if (el.texto) for (const p of el.texto.parrafos) usos.push(...p.trozos, p.fin);
+        if (el.grafico) usos.push(...PptxGrafico.letras(el.grafico));
         for (const c of el.celdas || []) {
           juntar(c.relleno);
           if (c.texto) for (const p of c.texto.parrafos) usos.push(...p.trozos, p.fin);
@@ -47,13 +48,13 @@ const PptxDibujo = (() => {
     const imagenes = new Map();
     await Promise.all([...[...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))), PptxTexto.cargarFuentes(usos.filter(Boolean))]);
 
-    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [] };
+    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [], graficos: [] };
     const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap);
     if (diap.fondo) pintar(ctx, diap.fondo, todo, entorno.anchoDiap, entorno.altoDiap, entorno);
 
     const mapa = (x) => ({ x: x.x * s, y: x.y * s, w: x.w * s, h: x.h * s });
     for (const el of diap.elementos) dibujarElemento(ctx, el, mapa, entorno, null);
-    return { textos: entorno.textos };
+    return { textos: entorno.textos, graficos: entorno.graficos };
   }
 
   function aplicarTransformacion(ctx, caja, x) {
@@ -64,13 +65,15 @@ const PptxDibujo = (() => {
   }
 
   function dibujarElemento(ctx, el, mapa, entorno, rellenoGrupo) {
-    if (!el.xfrm || el.tipo === 'grafico' || (el.tipo === 'tabla' && !el.celdas)) return;
+    if (!el.xfrm || (el.tipo === 'grafico' && !el.grafico) || (el.tipo === 'tabla' && !el.celdas)) return;
     const caja = mapa(el.xfrm);
     ctx.save();
     aplicarTransformacion(ctx, caja, el.xfrm);
     try {
       if (el.tipo === 'tabla') {
         dibujarTabla(ctx, el, mapa({ x: 0, y: 0, w: 914400, h: 914400 }).w / 914400, entorno);
+      } else if (el.tipo === 'grafico') {
+        dibujarGrafico(ctx, el, caja, entorno);
       } else if (el.tipo === 'grupo') {
         const h = el.xfrm.hijos || { x: el.xfrm.x, y: el.xfrm.y, w: el.xfrm.w, h: el.xfrm.h };
         const kx = h.w ? caja.w / h.w : 1, ky = h.h ? caja.h / h.h : 1;
@@ -514,6 +517,20 @@ const PptxDibujo = (() => {
       dibujarTexto(ctx, celda, r.w, r.h, { l: 0, t: 0, r: r.w, b: r.h }, r, { ...entorno, s: k });
       ctx.restore();
     }
+  }
+
+  // --- Gráficos -------------------------------------------------------------------------------------
+  // Los dibuja pptx-grafico.js con las mismas rutinas de relleno y línea que
+  // las formas. Su geometría (en pt, relativa a la forma) va a entorno.graficos
+  // para comparar con la que da PowerPoint (comparar-pptx.mjs).
+  function dibujarGrafico(ctx, el, caja, entorno) {
+    const pxPorPt = entorno.s * 12700;
+    const rutinas = {
+      relleno: (c, rell, path, w, h) => pintar(c, rell, path, w, h, entorno),
+      linea: (c, l, path) => trazarLinea(c, l, { path }, entorno),
+    };
+    const geo = PptxGrafico.dibujar(ctx, el.grafico, caja.w, caja.h, pxPorPt, rutinas);
+    entorno.graficos.push({ nombre: el.nombre, ...geo });
   }
 
   // --- Texto ----------------------------------------------------------------------------------------

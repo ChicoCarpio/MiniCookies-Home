@@ -42,6 +42,60 @@ function Lineas($tr) {
   , $lista
 }
 
+# Lo que PowerPoint calculó de un gráfico, todo en puntos relativos a la
+# esquina de la forma: área de trazado interior, título, leyenda, cada eje
+# (caja y escala) y la caja de cada punto y de su etiqueta. La verdad para
+# comparar el diseño automático del motor propio. Ojo (comprobado contra los
+# píxeles de la exportación): COM da los puntos relativos a la forma, pero el
+# título, la leyenda, los ejes, el trazado y las etiquetas relativos al área
+# del gráfico (ChartArea.Left/Top, 4 pt): se les suma para que todo quede igual.
+function Grafico($ch) {
+  $dx = [double]$ch.ChartArea.Left; $dy = [double]$ch.ChartArea.Top
+  $r2 = { param($v) [math]::Round([double]$v, 2) }
+  $cj = { param($x, $y, $w, $h) [ordered]@{ x = (& $r2 ($x + $dx)); y = (& $r2 ($y + $dy)); w = (& $r2 $w); h = (& $r2 $h) } }
+  $g = [ordered]@{ tipo = [int]$ch.ChartType }
+  $pa = $ch.PlotArea
+  $g.trazado = (& $cj $pa.InsideLeft $pa.InsideTop $pa.InsideWidth $pa.InsideHeight)
+  if ($ch.HasTitle) { $t = $ch.ChartTitle; $g.titulo = (& $cj $t.Left $t.Top $t.Width $t.Height) }
+  if ($ch.HasLegend) {
+    $l = $ch.Legend; $g.leyenda = (& $cj $l.Left $l.Top $l.Width $l.Height)
+    # Cada entrada y su muestra de color (para calibrar los anchos de la leyenda).
+    $g.entradas = @()
+    try {
+      $n = $l.LegendEntries().Count
+      for ($i = 1; $i -le $n; $i++) {
+        $en = $l.LegendEntries($i); $k = $en.LegendKey
+        $g.entradas += [ordered]@{ caja = (& $cj $en.Left $en.Top $en.Width $en.Height); muestra = (& $cj $k.Left $k.Top $k.Width $k.Height) }
+      }
+    } catch { }
+  }
+  $g.ejes = @()
+  foreach ($grupo in 1, 2) {
+    foreach ($tipo in 1, 2) {
+      try { if (-not $ch.HasAxis($tipo, $grupo)) { continue }; $e = $ch.Axes($tipo, $grupo) } catch { continue }
+      $eje = [ordered]@{ tipo = $tipo; grupo = $grupo; caja = (& $cj $e.Left $e.Top $e.Width $e.Height) }
+      try { $eje.min = $e.MinimumScale; $eje.max = $e.MaximumScale; $eje.unidad = $e.MajorUnit } catch { }
+      $g.ejes += $eje
+    }
+  }
+  $g.series = @()
+  $n = $ch.SeriesCollection().Count
+  for ($k = 1; $k -le $n; $k++) {
+    $se = $ch.SeriesCollection($k)
+    $pts = @()
+    $np = 0; try { $np = $se.Points().Count } catch { }
+    for ($i = 1; $i -le $np; $i++) {
+      $p = $se.Points($i)
+      $q = [ordered]@{}
+      try { $q.caja = (Caja $p) } catch { }
+      if ($p.HasDataLabel) { $l = $p.DataLabel; $q.etiqueta = (& $cj $l.Left $l.Top $l.Width $l.Height); $q.etiqueta.texto = $l.Text }
+      $pts += $q
+    }
+    $g.series += [ordered]@{ nombre = $se.Name; puntos = $pts }
+  }
+  $g
+}
+
 function Forma($s) {
   $f = [ordered]@{ nombre = $s.Name; tipo = [int]$s.Type; caja = (Caja $s); giro = [math]::Round($s.Rotation, 2) }
   try {
@@ -50,6 +104,7 @@ function Forma($s) {
       $f.hijos = @(); foreach ($h in $s.GroupItems) { $f.hijos += (Forma $h) }
     }
     if ($s.HasTextFrame -and $s.TextFrame2.HasText) { $f.lineas = (Lineas $s.TextFrame2.TextRange) }
+    if ($s.HasChart) { $f.grafico = (Grafico $s.Chart) }
     if ($s.HasTable) {
       # Alto real de cada fila (crece con el texto) y ancho de cada columna, en
       # puntos: con ellos las líneas de una celda (relativas a la celda) pasan
@@ -74,7 +129,7 @@ try {
   $anchoPt = $p.PageSetup.SlideWidth; $altoPt = $p.PageSetup.SlideHeight
   $alto = [int][math]::Round($Ancho * $altoPt / $anchoPt)
   $ref = [ordered]@{
-    version = 2
+    version = 4
     archivo = [IO.Path]::GetFileName($Archivo)
     ancho = $anchoPt; alto = $altoPt; pxAncho = $Ancho; pxAlto = $alto
     powerpoint = $app.Version

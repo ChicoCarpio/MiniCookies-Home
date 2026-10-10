@@ -540,9 +540,44 @@ const PptxModelo = (() => {
       return null;
     }
     if (uri === URI_TABLA) return tabla(hijo(datos, 'tbl'), xfrm, ctx, motivos);
-    if (uri === URI_GRAFICO) { motivos.push('gráfico'); return { tipo: 'grafico', xfrm }; }
+    if (uri === URI_GRAFICO) {
+      const g = await grafico(datos, ctx);
+      if (g.modelo) return { tipo: 'grafico', xfrm, grafico: g.modelo };
+      motivos.push(g.motivo);
+      return { tipo: 'grafico', xfrm };
+    }
     motivos.push('marco desconocido ' + uri);
     return null;
+  }
+
+  // --- Gráficos ---------------------------------------------------------------------------
+  // La parte del gráfico (c:chart r:id) leída por pptx-grafico.js con los
+  // colores, rellenos, líneas y fuentes de esta diapositiva. Devuelve
+  // { modelo } o { motivo } (lo que no sabe dibujar queda para el respaldo).
+  async function grafico(datos, ctx) {
+    if (typeof PptxGrafico === 'undefined') return { motivo: 'gráfico' };
+    const ref = hijo(datos, 'chart');
+    const rel = ref && ctx.parteActual.rels.porId(ref.getAttributeNS(NS_R, 'id'));
+    const parteGrafico = rel && rel.destino ? await ctx.parte(rel.destino) : null;
+    if (!parteGrafico) return { motivo: 'gráfico sin datos' };
+    const r = {
+      relleno: (spPr) => { if (!spPr) return undefined; const e = primero(spPr, RELLENOS); return e ? relleno(e, ctx.cc, parteGrafico) : undefined; },
+      // Un a:ln sin relleno (solo el ancho) no apaga la línea: lleva el color automático.
+      linea: (spPr) => {
+        const ln = hijo(spPr, 'ln');
+        if (!ln) return undefined;
+        if (!primero(ln, ['noFill', 'solidFill', 'gradFill', 'pattFill'])) return { sinColor: true, ancho: ln.hasAttribute('w') ? parseInt(ln.getAttribute('w'), 10) : null };
+        return linea([spPr], [], ctx);
+      },
+      color: (el) => color(el, ctx.cc),
+      fuente: (nombre) => resolverFuente(nombre, ctx),
+      acento: (i) => { const [rr, g, b] = ctx.temaColor('accent' + i); return { r: rr, g, b, a: 1 }; },
+    };
+    try {
+      return { modelo: PptxGrafico.leer(parteGrafico.raiz, r) };
+    } catch (e) {
+      return { motivo: e && e.message ? e.message : 'gráfico' };
+    }
   }
 
   // --- Tablas -----------------------------------------------------------------------------

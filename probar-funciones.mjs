@@ -989,6 +989,109 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'encabezado ' + encabezado + ', banda ' + banda + ', sin banda ' + sinBanda;
   });
 
+  // pptx-grafico.js (etapa 7 del motor propio): la escala automática del eje
+  // tiene que dar lo mismo que Excel en casos medidos por COM (alto del
+  // trazado de 208 pt con letra de 12: 10 divisiones; ver
+  // investigacion-motor-powerpoint\06-graficos.md, 6.3), y un gráfico de
+  // columnas armado con PptxGenJS lo tiene que dibujar el motor propio, con
+  // color dentro de la barra. Un gráfico de radar (todavía no soportado) tiene
+  // que caer al respaldo: así se ve que la prueba distingue.
+  await prueba('powerpoint: gráfico de columnas con la escala de Excel, dibujado por el motor propio', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    const G = W().eval('PptxGrafico');
+    const casos = [[0.29, 9.11, [0, 10, 1]], [10.1, 10.97, [9.6, 11.2, 0.2]], [-551.3, -493.98, [-560, -460, 10]], [1087.13, 1536.15, [0, 1800, 200]], [-2.32, 6.71, [-3, 8, 1]]];
+    for (const [a, b, esperado] of casos) {
+      const e = G.escala(a, b, G.divisiones(207.93, 12, 12 * 1.2207, false));
+      afirmar(Math.abs(e.min - esperado[0]) < 1e-9 && Math.abs(e.max - esperado[1]) < 1e-9 && Math.abs(e.unidad - esperado[2]) < 1e-9, 'escala de ' + a + '…' + b + ': ' + e.min + ', ' + e.max + ', ' + e.unidad + ' (Excel: ' + esperado + ')');
+    }
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    const armar = async (tipo) => {
+      const pres = new (W().PptxGenJS)();
+      pres.addSlide().addChart(tipo, [{ name: 'Ventas', labels: ['Uno', 'Dos', 'Tres'], values: [3, 5, 4] }], { x: 0.5, y: 0.5, w: 6, h: 4, chartColors: ['1F77B4'] });
+      return new (W().File)([await pres.write({ outputType: 'blob' })], 'grafico.pptx');
+    };
+    const Tipos = new (W().PptxGenJS)().ChartType;
+    const radar = await (await W().eval('PptxModelo').abrir(await armar(Tipos.radar))).diapositiva(0);
+    afirmar(!radar.soportada, 'un radar no debería estar soportado todavía: la prueba no vería el error');
+    const archivo = await armar(Tipos.bar);
+    const d = await (await W().eval('PptxModelo').abrir(archivo)).diapositiva(0);
+    afirmar(d.soportada, 'el motor propio no tomó el gráfico: ' + d.motivos.join(', '));
+    const lienzo = D().createElement('canvas');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+    afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio' && imagenes[0].graficos, 'no lo dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor));
+    const g = imagenes[0].graficos[0];
+    const barra = g.series[0].puntos[1].caja;
+    afirmar(barra.h > barra.w, 'la barra de 5 no es una columna: ' + JSON.stringify(barra));
+    // Del punto de la forma a píxeles: la forma está en (0,5; 0,5) pulgadas.
+    const kPt = lienzo.width / (10 * 72);
+    const px = [...lienzo.getContext('2d').getImageData(Math.round((36 + barra.x + barra.w / 2) * kPt), Math.round((36 + barra.y + barra.h / 2) * kPt), 1, 1).data].slice(0, 3);
+    afirmar(Math.abs(px[0] - 0x1f) < 8 && Math.abs(px[1] - 0x77) < 8 && Math.abs(px[2] - 0xb4) < 8, 'el centro de la barra no es del color de la serie (1F77B4): ' + px);
+    const eje = g.ejes.find((e) => e.tipo === 2);
+    return 'escala ' + eje.min + '…' + eje.max + ' de a ' + eje.unidad + ', centro de la barra ' + px;
+  });
+
+  // Casos raros de pptx-grafico.js que encontró la revisión del 2026-10-10:
+  // fondo <a:noFill/> que salía blanco, a:ln sin color (python-pptx) que
+  // dejaba la línea invisible, barras que salían del gráfico con un máximo
+  // fijo, #N/A, un idx enorme que colgaba la pestaña y formatos de número.
+  await prueba('powerpoint: casos raros de gráficos (transparencia, recorte, #N/A, formatos)', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    const G = W().eval('PptxGrafico');
+    const rojo = { r: 255, g: 0, b: 0, a: 1 };
+    const r = {
+      relleno: (spPr) => { if (!spPr) return undefined; for (const h of spPr.children) { if (h.localName === 'noFill') return null; if (h.localName === 'solidFill') return { tipo: 'solido', color: rojo }; } return undefined; },
+      linea: (spPr) => { const ln = spPr && [...spPr.children].find((h) => h.localName === 'ln'); if (!ln) return undefined; if (!ln.children.length) return { sinColor: true, ancho: 28575 }; return ln.firstElementChild.localName === 'noFill' ? null : { ancho: 9525, relleno: { tipo: 'solido', color: rojo } }; },
+      color: () => null, fuente: () => 'Arial', acento: () => ({ r: 0, g: 0, b: 255, a: 1 }),
+    };
+    const NS = 'xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"';
+    const ejes = (max) => '<c:catAx><c:axId val="1"/><c:axPos val="b"/><c:crossAx val="2"/></c:catAx><c:valAx><c:axId val="2"/><c:scaling>' + (max ? '<c:max val="' + max + '"/>' : '') + '</c:scaling><c:axPos val="l"/><c:crossAx val="1"/></c:valAx>';
+    const serie = (puntos, spPr = '') => '<c:ser><c:idx val="0"/>' + spPr + '<c:val><c:numRef><c:numCache><c:ptCount val="2"/>' + puntos + '</c:numCache></c:numRef></c:val></c:ser>';
+    const leer = (xml) => G.leer(new (W().DOMParser)().parseFromString('<c:chartSpace ' + NS + '>' + xml + '</c:chartSpace>', 'application/xml').documentElement, r);
+    const pintar = {
+      relleno: (ctx, rell, path) => { const c = rell.color; ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')'; ctx.fill(path); },
+      linea: (ctx, l, path) => { const c = l.relleno.color; ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',1)'; ctx.lineWidth = 2; ctx.stroke(path); },
+    };
+    const dibujar = (g) => { const lienzo = D().createElement('canvas'); lienzo.width = 400; lienzo.height = 300; const ctx = lienzo.getContext('2d'); const geo = G.dibujar(ctx, g, 400, 300, 1, pintar); return { ctx, geo }; };
+    const pt = (i, v) => '<c:pt idx="' + i + '"><c:v>' + v + '</c:v></c:pt>';
+
+    // Fondo transparente: la esquina queda sin pintar.
+    const transparente = leer('<c:chart><c:plotArea><c:barChart><c:barDir val="col"/>' + serie(pt(0, 1) + pt(1, 2)) + '<c:axId val="1"/><c:axId val="2"/></c:barChart>' + ejes() + '</c:plotArea></c:chart><c:spPr><a:noFill/><a:ln><a:noFill/></a:ln></c:spPr>');
+    afirmar(transparente.fondo.relleno === null, 'el fondo <a:noFill/> no quedó transparente: ' + JSON.stringify(transparente.fondo.relleno));
+    afirmar(dibujar(transparente).ctx.getImageData(2, 2, 1, 1).data[3] === 0, 'la esquina de un gráfico transparente quedó pintada');
+    // Sin decir nada, blanco (como PowerPoint).
+    const sinFondo = leer('<c:chart><c:plotArea><c:barChart>' + serie(pt(0, 1) + pt(1, 2)) + '<c:axId val="1"/><c:axId val="2"/></c:barChart>' + ejes() + '</c:plotArea></c:chart>');
+    afirmar(sinFondo.fondo.relleno && sinFondo.fondo.relleno.color.r === 255, 'un gráfico sin spPr no salió blanco');
+
+    // a:ln con ancho y sin color: la línea lleva el color automático.
+    const linea = leer('<c:chart><c:plotArea><c:lineChart>' + serie(pt(0, 1) + pt(1, 2), '<c:spPr><a:ln w="28575"/></c:spPr>') + '<c:axId val="1"/><c:axId val="2"/></c:lineChart>' + ejes() + '</c:plotArea></c:chart>');
+    const ls = linea.grupos[0].series[0].linea;
+    afirmar(ls && ls.relleno && ls.relleno.color.b === 255, 'la línea sin color propio quedó invisible: ' + JSON.stringify(ls));
+
+    // Máximo fijo 40 con un dato de 80: nada sale del área de trazado.
+    const alto = leer('<c:chart><c:plotArea><c:barChart><c:barDir val="col"/>' + serie(pt(0, 10) + pt(1, 80), '<c:spPr><a:solidFill/></c:spPr>') + '<c:axId val="1"/><c:axId val="2"/></c:barChart>' + ejes(40) + '</c:plotArea></c:chart><c:spPr><a:noFill/></c:spPr>');
+    const { ctx, geo } = dibujar(alto);
+    const caja = geo.series[0].puntos[1].caja;
+    const encima = ctx.getImageData(Math.round(caja.x + caja.w / 2), Math.max(0, Math.round(geo.trazado.y - 3)), 1, 1).data;
+    afirmar(caja.y < geo.trazado.y && encima[3] === 0, 'la barra de 80 con máximo 40 salió del trazado (alfa ' + encima[3] + ' encima)');
+
+    // #N/A es un hueco; un idx fuera de ptCount no cuenta.
+    const huecos = leer('<c:chart><c:plotArea><c:lineChart>' + serie(pt(0, '#N/A') + pt(1, 2) + pt(5000000, 3)) + '<c:axId val="1"/><c:axId val="2"/></c:lineChart>' + ejes() + '</c:plotArea></c:chart>');
+    const vals = huecos.grupos[0].series[0].valores;
+    afirmar(vals.length === 2 && vals[0] === null && vals[1] === 2, '#N/A o el idx enorme mal leídos: ' + vals.length + ' valores, primero ' + vals[0]);
+
+    // Formatos: miles con coma, condiciones, científico, fechas y lo que no entiende.
+    const dec = G.formatear(1.5, '0.0').charAt(1);
+    const formatos = [[1234567, '#,##0,"K"', '1' + G.formatear(1235, '#,##0').slice(1) + 'K'], [5000, '[>=1000000]0.0,,"M";[>=1000]0.0,"K";0', '5' + dec + '0K'], [12345.678, '0.00E+00', '1' + dec + '23E+04'],
+      [1.5e20, 'General', '1' + dec + '5E+20'], [44000, 'm/d/yyyy', '6/18/2020'], [0.5, '@', '0' + dec + '5']];
+    for (const [v, codigo, esperado] of formatos) afirmar(G.formatear(v, codigo) === esperado, 'formato ' + codigo + ' con ' + v + ': ' + G.formatear(v, codigo) + ' (esperado ' + esperado + ')');
+    return 'transparente, línea automática, recorte, #N/A y ' + formatos.length + ' formatos bien';
+  });
+
   // pptx-preparar.js: el rectángulo "useBgFill" (relleno = fondo) que
   // PowerPoint pone en sus diseños salía del color accent1 del tema y tapaba
   // la diapositiva (19 de 22 en la presentación del usuario). Se arma una

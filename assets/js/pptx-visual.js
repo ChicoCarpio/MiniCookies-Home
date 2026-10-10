@@ -200,8 +200,8 @@ async function capturarDiapositiva(canvas, anchoPuntos, altoPuntos, conImagenes)
 }
 
 // Motor propio (assets/js/pptx-modelo.js, pptx-geometria.js, pptx-texto.js,
-// pptx-dibujo.js). Las diapositivas que todavía no sabe dibujar (tablas,
-// gráficos) las dibuja PptxViewJS con la copia preparada, como hasta ahora.
+// pptx-grafico.js, pptx-dibujo.js). Las diapositivas que todavía no sabe
+// dibujar (gráficos de tipos raros, objetos sin imagen) las dibuja PptxViewJS con la copia preparada, como hasta ahora.
 // Cada imagen lleva motor: 'propio' | 'pptxviewjs'.
 async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes = true } = {}) {
   const pres = await PptxModelo.abrir(archivo);
@@ -222,9 +222,9 @@ async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes =
       console.warn('Diapositiva ' + (i + 1) + ' ilegible para el motor propio:', errorDiapositiva);
     }
     let motor = 'propio';
-    let textos = null;
+    let textos = null, graficos = null;
     if (diapositiva && diapositiva.soportada) {
-      ({ textos } = await PptxDibujo.dibujar(pres, diapositiva, canvas));
+      ({ textos, graficos } = await PptxDibujo.dibujar(pres, diapositiva, canvas));
     } else {
       motor = 'pptxviewjs';
       if (!visor) {
@@ -245,6 +245,7 @@ async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes =
     const imagen = await capturarDiapositiva(canvas, anchoPuntos, altoPuntos, conImagenes);
     imagen.motor = motor;
     if (textos) imagen.textos = textos;
+    if (graficos && graficos.length) imagen.graficos = graficos;
     if (diapositiva && !diapositiva.soportada) imagen.motivos = diapositiva.motivos;
     if (imagen.vacia) vacias++;
     imagenes.push(imagen);

@@ -124,6 +124,7 @@ function RGB([int]$r, [int]$g, [int]$b) { return ($r + 256 * $g + 65536 * $b) }
 
 function Registrar([string]$caso, $err) {
     $msg = ($err.Exception.Message -replace '\s+', ' ').Trim()
+    if ($err.InvocationInfo -and $err.InvocationInfo.ScriptLineNumber) { $msg += ' (línea ' + $err.InvocationInfo.ScriptLineNumber + ')' }
     [void]$script:Errores.Add([pscustomobject]@{ Archivo = $script:ArchivoActual; Caso = $caso; Error = $msg })
     Write-Host ("  [ERROR] {0}: {1}" -f $caso, $msg) -ForegroundColor Red
 }
@@ -193,6 +194,38 @@ function Palabras([int]$n) {
     $o = New-Object System.Collections.ArrayList
     for ($i = 0; $i -lt $n; $i++) { [void]$o.Add($b[$i % $b.Count]) }
     return (($o -join ' ') + '.')
+}
+
+# Un gráfico con sus datos: categorías (texto o números) y series (nombre →
+# valores). La tabla de datos se ajusta al rango exacto: si no, quedan filas
+# de los datos de ejemplo de Excel (los de áreas traen cinco filas).
+function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h, [string]$nombre, $categorias, $series, [string]$titulo = '') {
+    $sh = $d.Shapes.AddChart2(-1, $tipo, $x, $y, $w, $h, $msoTrue)
+    $sh.Name = $nombre
+    $ch = $sh.Chart
+    $wb = $null
+    try {
+        $ch.ChartData.ActivateChartDataWindow()
+        $wb = $ch.ChartData.Workbook
+        $ws = $wb.Worksheets.Item(1)
+        $ws.Range('A1:Z60').ClearContents()
+        $nombres = @($series.Keys)
+        for ($c = 0; $c -lt $nombres.Count; $c++) { $ws.Cells.Item(1, $c + 2).Value2 = [string]$nombres[$c] }
+        for ($r = 0; $r -lt $categorias.Count; $r++) {
+            # Un número por Value2 falla en esta celda (el adaptador de COM la
+            # toma como texto): va como fórmula, que Excel lee en inglés.
+            $v = $categorias[$r]
+            if ($v -is [string]) { $ws.Cells.Item($r + 2, 1).Value2 = $v }
+            else { $ws.Cells.Item($r + 2, 1).Formula = [string]::Format([cultureinfo]::InvariantCulture, '{0}', $v) }
+            for ($c = 0; $c -lt $nombres.Count; $c++) { $ws.Cells.Item($r + 2, $c + 2).Value2 = [double]$series[$nombres[$c]][$r] }
+        }
+        $rango = $ws.Range($ws.Cells.Item(1, 1), $ws.Cells.Item($categorias.Count + 1, $nombres.Count + 1))
+        try { $ch.SetSourceData("='" + $ws.Name + "'!" + $rango.Address()) } catch { Registrar ('origen de datos de ' + $nombre) $_ }
+        try { $ch.Refresh() } catch { }
+        Start-Sleep -Milliseconds 700   # que PowerPoint vuelque los datos al gráfico antes de cerrar la hoja
+    } finally { if ($wb -ne $null) { try { $wb.Close() } catch { } } }
+    if ($titulo) { $ch.HasTitle = $true; $ch.ChartTitle.Text = $titulo } else { $ch.HasTitle = $false }
+    return $sh
 }
 
 # Garantiza que haya una instancia viva de PowerPoint (si se cayó, abre otra).
@@ -1670,34 +1703,60 @@ try {
             @('Circular', 5), @('Anillo', -4120), @('Áreas', 1), @('Dispersión', -4169),
             @('Columnas 100 % apiladas', 53), @('Barras apiladas', 58), @('Líneas', 4), @('Áreas apiladas', 76)
         )
+        $series = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
         $d = $null
         for ($i = 0; $i -lt $tipos.Count; $i++) {
             $t = $tipos[$i]
             if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Gráficos " + ($i + 1) + '–' + ($i + 4)) }
             Caso ("Gráfico " + $t[0]) {
                 $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
-                $sh = $d.Shapes.AddChart2(-1, $t[1], $x, $y, 456, 244, $msoTrue)
-                $sh.Name = "Grafico_$i"
+                $cats = if ($t[1] -eq -4169) { @(1, 2, 3, 4) } else { @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4') }
+                $sh = Grafico $d $t[1] $x $y 456 244 "Grafico_$i" $cats $series $t[0]
                 $ch = $sh.Chart
-                try {
-                    $ch.ChartData.ActivateChartDataWindow()
-                    $wb = $ch.ChartData.Workbook
-                    $ws = $wb.Worksheets.Item(1)
-                    $ws.Range('B1').Value2 = 'Norte'; $ws.Range('C1').Value2 = 'Centro'; $ws.Range('D1').Value2 = 'Sur'
-                    $vals = @(@(4.3, 2.4, 2), @(2.5, 4.4, 2), @(3.5, 1.8, 3), @(4.5, 2.8, 5))
-                    for ($r = 0; $r -lt 4; $r++) {
-                        if ($t[1] -eq -4169) { $ws.Cells.Item($r + 2, 1).Value2 = [double]($r + 1) } else { $ws.Cells.Item($r + 2, 1).Value2 = "Trim $($r + 1)" }
-                        for ($c = 0; $c -lt 3; $c++) { $ws.Cells.Item($r + 2, $c + 2).Value2 = [double]$vals[$r][$c] }
-                    }
-                    try { $ch.Refresh() } catch { }
-                    Start-Sleep -Milliseconds 700   # dar tiempo a PowerPoint de volcar los datos al gráfico antes de cerrar la hoja
-                } catch { Registrar ("Datos del gráfico " + $t[0]) $_ } finally { if ($wb -ne $null) { try { $wb.Close() } catch { } } }
-                $ch.HasTitle = $true; $ch.ChartTitle.Text = $t[0]
                 $ch.HasLegend = $true; $ch.Legend.Position = -4107
                 $ch.SeriesCollection(1).HasDataLabels = $true
-                Nota ("gráfico '" + $t[0] + "': series = " + $ch.SeriesCollection().Count) | Out-Null
+                Nota ("gráfico '" + $t[0] + "': series = " + $ch.SeriesCollection().Count + ", puntos = " + $ch.SeriesCollection(1).Points().Count) | Out-Null
             }
         }
+    } 960 540 $true
+
+    # ============================================================ 15 gráficos: variantes
+    # Lo que cambia el diseño automático y la escala: posición de la leyenda,
+    # sin título, negativos, miles, categorías largas, eje secundario,
+    # circular con porcentajes, dispersión con líneas, tamaños.
+    Nuevo-Archivo '15-graficos-variantes.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        $casos = @(
+            @{ n = 'Leyenda a la derecha'; t = 51; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Leyenda arriba'; t = 4; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4160 } },
+            @{ n = 'Leyenda a la izquierda'; t = 57; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4131 } },
+            @{ n = ''; t = 51; f = { param($ch) $ch.HasLegend = $false } },
+            @{ n = 'Negativos'; t = 51; s = [ordered]@{ Saldo = @(-3.2, 1.5, -0.8, 4.6); Meta = @(1, 2, -2, 3) } },
+            @{ n = 'Miles'; t = 51; s = [ordered]@{ Ventas = @(12500, 31800, 27400, 48900) }; f = { param($ch) $ch.Axes(2).TickLabels.NumberFormat = '#,##0' } },
+            @{ n = 'Categorías largas'; t = 51; c = @('Enero de 2025', 'Febrero de 2025', 'Marzo de 2025', 'Abril de 2025', 'Mayo de 2025', 'Junio de 2025', 'Julio de 2025', 'Agosto de 2025'); s = [ordered]@{ Visitas = @(120, 340, 290, 410, 380, 520, 610, 580) } },
+            @{ n = 'Eje secundario'; t = 51; s = [ordered]@{ Unidades = @(120, 340, 290, 410); Margen = @(0.12, 0.31, 0.22, 0.4) }; f = { param($ch) $s2 = $ch.SeriesCollection(2); $s2.ChartType = 65; $s2.AxisGroup = 2; $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Circular con porcentajes'; t = 5; s = [ordered]@{ Partes = @(45, 25, 20, 10) }; f = { param($ch) $se = $ch.SeriesCollection(1); $se.HasDataLabels = $true; $dl = $se.DataLabels(); $dl.ShowPercentage = $true; $dl.ShowValue = $false; $dl.ShowCategoryName = $true; $se.Points(1).Explosion = 12; $ch.HasLegend = $false } },
+            @{ n = 'Anillo'; t = -4120; s = [ordered]@{ Partes = @(45, 25, 20, 10) }; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Dispersión con líneas'; t = 72; c = @(0.5, 1.7, 2.2, 3.9); s = [ordered]@{ A = @(1.2, 3.4, 2.1, 4.8); B = @(0.4, 1.1, 3.3, 2.9) } },
+            @{ n = 'Decimales chicos'; t = 65; s = [ordered]@{ Tasa = @(0.12, 0.27, 0.19, 0.47) } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Variantes " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $trim }
+                $ser = if ($k.s) { $k.s } else { $tres }
+                $sh = Grafico $d $k.t $x $y 456 244 "Variante_$i" $cats $ser $k.n
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+        $d = Nueva-Diap $pres 'Tamaños'
+        Caso 'Gráfico chico' { $sh = Grafico $d 52 14 36 240 160 'Chico' $trim $tres 'Chico'; $sh.Chart.HasLegend = $true; $sh.Chart.Legend.Position = -4107 }
+        Caso 'Gráfico grande' { $sh = Grafico $d 51 270 36 676 470 'Grande' $trim $tres 'Grande'; $sh.Chart.HasLegend = $true; $sh.Chart.Legend.Position = -4107 }
     } 960 540 $true
 
     # ============================================================ 13 patrón y diseño

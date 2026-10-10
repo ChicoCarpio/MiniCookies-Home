@@ -83,7 +83,9 @@ const casos = archivos.map((ruta) => {
 });
 // Sube cuando powerpoint.ps1 anota algo nuevo: las referencias más viejas se rehacen.
 // 2 (2026-10-10): alto de cada fila y ancho de cada columna de las tablas.
-const VERSION_REFERENCIA = 2;
+// 3 (2026-10-10): geometría de cada gráfico (trazado, ejes, puntos, etiquetas).
+// 4 (2026-10-10): caja de cada entrada de la leyenda y de su muestra.
+const VERSION_REFERENCIA = 4;
 const versionDe = (json) => { try { return JSON.parse(readFileSync(json, 'utf8').replace(/^﻿/, '')).version || 1; } catch { return 0; } };
 for (const c of casos) {
   const json = join(c.ref, 'referencia.json');
@@ -173,6 +175,7 @@ function ssim(a, b, w, h) {
         if (imagenes[i].motor) fila.motor = imagenes[i].motor;
         if (imagenes[i].motivos) fila.motivos = imagenes[i].motivos;
         if (imagenes[i].textos) fila.textos = imagenes[i].textos;
+        if (imagenes[i].graficos) fila.graficos = imagenes[i].graficos;
         const nuestra = await imagen(imagenes[i].url);
         const cNos = lienzo(nuestra, w, h);
         const a = cRef.getContext('2d').getImageData(0, 0, w, h).data;
@@ -249,7 +252,7 @@ const servidor = createServer(async (q, s) => {
 }).listen(PUERTO);
 
 const perfil = mkdtempSync(join(tmpdir(), 'comparar-pptx-'));
-const edge = spawn(EDGE, ['--headless=new', '--disable-gpu', '--user-data-dir=' + perfil,
+const edge = spawn(EDGE, ['--headless=new', '--disable-gpu', '--lang=es-CR', '--user-data-dir=' + perfil,
   '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE localhost', '--window-size=1300,950',
   `http://localhost:${PUERTO}/__control`], { stdio: 'ignore' });
 console.log(`Nuestro motor (${corrida}): ${casos.length} archivo(s)…`);
@@ -285,6 +288,13 @@ for (const r of resultados) {
   const c = casos.find((x) => x.nombre === r.nombre);
   for (const d of r.diapositivas) if (d.textos) d.cortes = compararCortes(c.referencia.diapositivas[d.n - 1], d.textos);
 }
+// Gráficos (motor propio): la geometría de cada parte contra la que calculó
+// PowerPoint (referencia versión 3), en pt.
+for (const r of resultados) {
+  const c = casos.find((x) => x.nombre === r.nombre);
+  for (const d of r.diapositivas) if (d.graficos) d.compGraficos = compararGraficos(c.referencia.diapositivas[d.n - 1], d.graficos);
+}
+const compGraficos = resultados.flatMap((r) => r.diapositivas.flatMap((d) => (d.compGraficos || []).map((g) => ({ ...g, archivo: r.nombre, n: d.n }))));
 const conCortes = todas.filter((d) => d.cortes);
 const cortes = conCortes.length ? sumarCortes(conCortes.map((d) => d.cortes)) : null;
 const media = (k) => todas.length ? (todas.reduce((a, d) => a + d[k], 0) / todas.length) : 0;
@@ -302,6 +312,7 @@ if (opcion('--base') && !sinPreparar && !conPptxViewJS) {
 
 console.log(`\n${todas.length} diapositivas: media ${media('pct').toFixed(2)} % de píxeles distintos, SSIM ${media('ssim').toFixed(4)}`);
 if (cortes) console.log(textoCortes(cortes));
+if (compGraficos.length) console.log(textoGraficos(compGraficos, opcion('--detalle-graficos')));
 console.log('Informe: ' + join(destino, 'informe.html'));
 if (peores.length) console.log('\nEmpeoraron respecto de la línea base:\n  ' + peores.join('\n  '));
 if (fallas) console.log(`\n${fallas} diapositiva(s) o archivo(s) sin dibujar o con error (ver el informe).`);
@@ -352,6 +363,53 @@ function compararCortes(refDiap, textos) {
     }
   }
   return res;
+}
+// Por cada gráfico (por nombre): diferencia de cada caja (x, y, w, h) en pt,
+// si la escala de cada eje es la misma, y la mediana de |diferencia| de las
+// cajas de los puntos y de las etiquetas de datos.
+function compararGraficos(refDiap, graficos) {
+  const refs = [];
+  (function aplanar(formas) { for (const f of formas || []) { if (f.grafico) refs.push(f); aplanar(f.hijos); } })(refDiap && refDiap.formas);
+  const dif = (a, b) => (a && b ? ['x', 'y', 'w', 'h'].map((k) => Math.round((a[k] - b[k]) * 100) / 100) : null);
+  const salida = [];
+  for (const g of graficos) {
+    const ref = refs.find((f) => f.nombre === g.nombre);
+    if (!ref) continue;
+    const R = ref.grafico;
+    const ejes = (R.ejes || []).map((e) => {
+      const nuestro = (g.ejes || []).find((x) => x.tipo === e.tipo && x.grupo === e.grupo);
+      const igual = e.min == null || (nuestro && Math.abs(nuestro.min - e.min) < 1e-9 && Math.abs(nuestro.max - e.max) < 1e-9 && Math.abs(nuestro.unidad - e.unidad) < 1e-9);
+      return { tipo: e.tipo, grupo: e.grupo, igual, powerpoint: e.min == null ? null : [e.min, e.max, e.unidad], nuestro: nuestro && nuestro.min != null ? [nuestro.min, nuestro.max, nuestro.unidad] : null };
+    });
+    const puntos = [], etiquetas = [];
+    (R.series || []).forEach((s, i) => {
+      const ns = (g.series || [])[i];
+      if (!ns) return;
+      s.puntos.forEach((p, j) => {
+        const q = ns.puntos[j];
+        if (!q) return;
+        if (p.caja && q.caja) puntos.push(...dif(q.caja, p.caja).map(Math.abs));
+        if (p.etiqueta && q.etiqueta) etiquetas.push(...dif(q.etiqueta, p.etiqueta).map(Math.abs));
+      });
+    });
+    salida.push({ nombre: g.nombre, trazado: dif(g.trazado, R.trazado), titulo: dif(g.titulo, R.titulo), leyenda: dif(g.leyenda, R.leyenda),
+      faltaTitulo: !!R.titulo !== !!g.titulo, faltaLeyenda: !!R.leyenda !== !!g.leyenda, ejes, puntos: mediana(puntos), puntosMax: puntos.length ? Math.max(...puntos) : NaN, etiquetas: mediana(etiquetas) });
+  }
+  return salida;
+}
+function textoGraficos(lista, detalle) {
+  const absTodas = (k) => lista.flatMap((g) => (g[k] || []).map(Math.abs));
+  const ejes = lista.flatMap((g) => g.ejes.filter((e) => e.powerpoint));
+  let t = `Gráficos: ${lista.length}; escala de ejes igual a PowerPoint en ${ejes.filter((e) => e.igual).length}/${ejes.length}; ` +
+    `|Δ| mediana del trazado ${mediana(absTodas('trazado')).toFixed(2)} pt, título ${mediana(absTodas('titulo')).toFixed(2)}, leyenda ${mediana(absTodas('leyenda')).toFixed(2)}, ` +
+    `puntos ${mediana(lista.map((g) => g.puntos).filter(Number.isFinite)).toFixed(2)}, etiquetas ${mediana(lista.map((g) => g.etiquetas).filter(Number.isFinite)).toFixed(2)}`;
+  if (detalle) {
+    for (const g of lista) {
+      t += `\n  ${g.archivo} d${g.n} ${g.nombre}: trazado ${JSON.stringify(g.trazado)} título ${JSON.stringify(g.titulo)}${g.faltaTitulo ? '(FALTA/SOBRA)' : ''} leyenda ${JSON.stringify(g.leyenda)}${g.faltaLeyenda ? '(FALTA/SOBRA)' : ''} puntos ${Number(g.puntos).toFixed(2)} (máx ${Number(g.puntosMax).toFixed(2)}) etiquetas ${Number(g.etiquetas).toFixed(2)}`;
+      for (const e of g.ejes) if (!e.igual) t += `\n      eje ${e.tipo}/${e.grupo}: PowerPoint ${JSON.stringify(e.powerpoint)} nuestro ${JSON.stringify(e.nuestro)}`;
+    }
+  }
+  return t;
 }
 function sumarCortes(lista) {
   const s = { formas: 0, iguales: 0, lineasRef: 0, lineasNos: 0, anchos: [], dy: [] };
