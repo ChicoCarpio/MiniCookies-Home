@@ -27,3 +27,9 @@ compañía); el informe marca las diapositivas que todavía dibuja PptxViewJS
 compara además los **cortes de línea** con los de PowerPoint (las líneas de
 cada forma, por nombre); ojo: la caja de línea de PowerPoint incluye el espacio
 antes/después del párrafo y los espacios del final de la línea.
+Desde el 2026-10-10 compara también el texto de cada **celda de tabla**
+(`Tabla [fila,col]`). PowerPoint da esas líneas relativas a la celda, y la
+referencia (versión 2) trae el alto real de cada fila para pasarlas a la
+diapositiva; aun así, PowerPoint mide la línea desde adentro del margen
+superior de la celda: un desfase vertical de exactamente `marT` (3,6 pt por
+defecto) en todas las celdas es esa convención, no un error de alto de fila.

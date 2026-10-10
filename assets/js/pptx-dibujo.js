@@ -37,6 +37,10 @@ const PptxDibujo = (() => {
         juntar(el.relleno);
         if (el.imagen) juntar(el.imagen);
         if (el.texto) for (const p of el.texto.parrafos) usos.push(...p.trozos, p.fin);
+        for (const c of el.celdas || []) {
+          juntar(c.relleno);
+          if (c.texto) for (const p of c.texto.parrafos) usos.push(...p.trozos, p.fin);
+        }
         if (el.hijos) recorrer(el.hijos);
       }
     })(diap.elementos);
@@ -60,12 +64,14 @@ const PptxDibujo = (() => {
   }
 
   function dibujarElemento(ctx, el, mapa, entorno, rellenoGrupo) {
-    if (!el.xfrm || el.tipo === 'tabla' || el.tipo === 'grafico') return;
+    if (!el.xfrm || el.tipo === 'grafico' || (el.tipo === 'tabla' && !el.celdas)) return;
     const caja = mapa(el.xfrm);
     ctx.save();
     aplicarTransformacion(ctx, caja, el.xfrm);
     try {
-      if (el.tipo === 'grupo') {
+      if (el.tipo === 'tabla') {
+        dibujarTabla(ctx, el, mapa({ x: 0, y: 0, w: 914400, h: 914400 }).w / 914400, entorno);
+      } else if (el.tipo === 'grupo') {
         const h = el.xfrm.hijos || { x: el.xfrm.x, y: el.xfrm.y, w: el.xfrm.w, h: el.xfrm.h };
         const kx = h.w ? caja.w / h.w : 1, ky = h.h ? caja.h / h.h : 1;
         const mapaHijos = (x) => ({ x: (x.x - h.x) * kx, y: (x.y - h.y) * ky, w: x.w * kx, h: x.h * ky });
@@ -433,6 +439,83 @@ const PptxDibujo = (() => {
     if (l.fin) { const pts = puntos(abiertas[abiertas.length - 1].cmds); const p = pts[pts.length - 1]; dibujarPunta(p, l.fin, distinto(pts.slice(0, -1), p, true)); }
   }
 
+  // --- Tablas ---------------------------------------------------------------------------------------
+  // k: px por EMU. El ancho sale de las columnas; el alto de cada fila es un
+  // mínimo: crece si el texto de una celda (con sus márgenes) no entra, y lo
+  // que falta a una celda combinada en vertical se suma a su última fila.
+  // Orden: fondo, rellenos, bordes, texto (un borde grueso no queda tapado
+  // por el relleno de la celda vecina).
+  function dibujarTabla(ctx, t, k, entorno) {
+    const xs = [0], ys = [0];
+    for (const w of t.columnas) xs.push(xs[xs.length - 1] + w * k);
+    const altos = t.filas.map((h) => h * k);
+    const maquetados = new Map();
+    const anchoDe = (c) => xs[c.col + c.cols] - xs[c.col];
+    const necesita = (c) => {
+      if (!c.texto || c.texto.cuerpo.vertical !== 'horz') return 0;
+      const m = c.texto.cuerpo.margenes;
+      const alto = PptxTexto.maquetar(c.texto, Math.max(0, anchoDe(c) - (m.l + m.r) * k), Infinity, k, ctx).alto;
+      return alto + (m.t + m.b) * k;
+    };
+    for (const c of t.celdas) if (c.filas === 1) altos[c.fila] = Math.max(altos[c.fila], necesita(c));
+    for (const c of t.celdas) {
+      if (c.filas === 1) continue;
+      const suma = altos.slice(c.fila, c.fila + c.filas).reduce((a, b) => a + b, 0);
+      const falta = necesita(c) - suma;
+      if (falta > 0) altos[c.fila + c.filas - 1] += falta;
+    }
+    for (const h of altos) ys.push(ys[ys.length - 1] + h);
+    const rect = (c) => ({ x: xs[c.col], y: ys[c.fila], w: anchoDe(c), h: ys[c.fila + c.filas] - ys[c.fila] });
+    const path = (r) => { const p = new Path2D(); p.rect(r.x, r.y, r.w, r.h); return p; };
+
+    if (t.fondo) { const r = { x: 0, y: 0, w: xs[xs.length - 1], h: ys[ys.length - 1] }; pintar(ctx, t.fondo, path(r), r.w, r.h, entorno); }
+    for (const c of t.celdas) {
+      if (!c.relleno) continue;
+      const r = rect(c);
+      ctx.save(); ctx.translate(r.x, r.y);
+      pintar(ctx, c.relleno, path({ x: 0, y: 0, w: r.w, h: r.h }), r.w, r.h, entorno);
+      ctx.restore();
+    }
+
+    // Bordes: cada tramo de la grilla una sola vez. Entre dos celdas gana el
+    // lado de mayor prioridad (formato directo > parte del estilo más
+    // específica); si empatan, la celda de abajo o de la derecha. [calibrar]
+    const tramos = new Map();
+    const poner = (clave, b, x0, y0, x1, y1, desempate) => {
+      if (!b) return;
+      const ya = tramos.get(clave);
+      if (ya && (ya.b.prioridad > b.prioridad || (ya.b.prioridad === b.prioridad && ya.desempate > desempate))) return;
+      tramos.set(clave, { b, x0, y0, x1, y1, desempate });
+    };
+    for (const c of t.celdas) {
+      for (let i = c.col; i < c.col + c.cols; i++) {
+        poner(`h${c.fila},${i}`, c.bordes.t, xs[i], ys[c.fila], xs[i + 1], ys[c.fila], 1);
+        poner(`h${c.fila + c.filas},${i}`, c.bordes.b, xs[i], ys[c.fila + c.filas], xs[i + 1], ys[c.fila + c.filas], 0);
+      }
+      for (let j = c.fila; j < c.fila + c.filas; j++) {
+        poner(`v${j},${c.col}`, c.bordes.l, xs[c.col], ys[j], xs[c.col], ys[j + 1], 1);
+        poner(`v${j},${c.col + c.cols}`, c.bordes.r, xs[c.col + c.cols], ys[j], xs[c.col + c.cols], ys[j + 1], 0);
+      }
+      const r = rect(c);
+      if (c.bordes.tlbr) poner(`d${c.fila},${c.col}`, c.bordes.tlbr, r.x, r.y, r.x + r.w, r.y + r.h, 0);
+      if (c.bordes.bltr) poner(`e${c.fila},${c.col}`, c.bordes.bltr, r.x, r.y + r.h, r.x + r.w, r.y, 0);
+    }
+    for (const tr of tramos.values()) {
+      if (!tr.b.linea) continue;
+      const p = new Path2D(); p.moveTo(tr.x0, tr.y0); p.lineTo(tr.x1, tr.y1);
+      trazarLinea(ctx, tr.b.linea, { path: p }, entorno);
+    }
+
+    for (const c of t.celdas) {
+      if (!c.texto || !c.texto.parrafos.some((p) => p.trozos.some((z) => z.texto))) continue;
+      const r = rect(c);
+      ctx.save(); ctx.translate(r.x, r.y);
+      const celda = { texto: c.texto, xfrm: { rot: 0 }, nombre: t.nombre, celda: { fila: c.fila + 1, col: c.col + 1 } };
+      dibujarTexto(ctx, celda, r.w, r.h, { l: 0, t: 0, r: r.w, b: r.h }, r, { ...entorno, s: k });
+      ctx.restore();
+    }
+  }
+
   // --- Texto ----------------------------------------------------------------------------------------
   function dibujarTexto(ctx, el, w, h, rect, caja, entorno) {
     const s = entorno.s;
@@ -513,7 +596,7 @@ const PptxDibujo = (() => {
       const p1 = punto(area.x + (z ? z.x + z.ancho : 0), y0 + l.arriba + l.alto + (l.despues || 0));
       lineas.push({ texto, x: p0.x, y: p0.y, w: p1.x - p0.x, h: p1.y - p0.y });
     }
-    if (lineas.length) entorno.textos.push({ nombre: el.nombre, lineas });
+    if (lineas.length) entorno.textos.push(el.celda ? { nombre: el.nombre, celda: el.celda, lineas } : { nombre: el.nombre, lineas });
   }
 
   return { dibujar };

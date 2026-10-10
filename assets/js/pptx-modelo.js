@@ -230,6 +230,12 @@ const PptxModelo = (() => {
     const diapositivas = hijos(hijo(pres.raiz, 'sldIdLst'), 'sldId')
       .map((s) => pres.rels.porId(s.getAttributeNS(NS_R, 'id'))).filter((r) => r && r.destino).map((r) => r.destino);
     const textoPorDefecto = hijo(pres.raiz, 'defaultTextStyle');
+    // Estilos de tabla que trae el archivo (PowerPoint guarda solo los usados,
+    // y a veces ni esos: entonces la tabla queda sin estilo propio, ver tabla()).
+    const estilosTabla = new Map();
+    const relEstilos = pres.rels.porTipo('tableStyles')[0];
+    const partEstilos = relEstilos && await parte(relEstilos.destino);
+    for (const e of partEstilos ? hijos(partEstilos.raiz, 'tblStyle') : []) estilosTabla.set((e.getAttribute('styleId') || '').toUpperCase(), e);
 
     const imagenes = new Map();
     function imagen(rutaImagen) {
@@ -247,6 +253,7 @@ const PptxModelo = (() => {
       const relTema = master && master.rels.porTipo('theme')[0];
       const tema = relTema ? await parte(relTema.destino) : null;
       const ctx = crearContexto({ sld, layout, master, tema, textoPorDefecto, numero: i + 1, parte });
+      ctx.estilosTabla = estilosTabla;
       const salida = { numero: i + 1, oculta: sld.raiz.getAttribute('show') === '0', elementos: [], motivos: [] };
       salida.fondo = fondo(ctx);
       const mostrarPatron = sld.raiz.getAttribute('showMasterSp') !== '0' && sld.raiz.getAttribute('showMasterSp') !== 'false';
@@ -440,8 +447,9 @@ const PptxModelo = (() => {
     return { xfrm, geometria, relleno: rell, linea: linea(spPrs, estilos, ctx), sombra: sombra(spPrs, estilos, ctx) };
   }
 
-  function linea(spPrs, estilos, ctx) {
-    const lns = spPrs.map((s) => hijo(s, 'ln')).filter(Boolean);
+  // nombreLn: el elemento de la línea dentro de cada spPr (lnL, lnT… en una celda).
+  function linea(spPrs, estilos, ctx, nombreLn = 'ln') {
+    const lns = spPrs.map((s) => hijo(s, nombreLn)).filter(Boolean);
     const ref = estilos.map((s) => hijo(s, 'lnRef')).find(Boolean);
     const idx = ref ? ent(ref, 'idx', 0) : 0;
     const delTema = idx > 0 ? ctx.estilosTema.linea[idx - 1] : null;
@@ -531,10 +539,151 @@ const PptxModelo = (() => {
       motivos.push('objeto OLE sin imagen');
       return null;
     }
-    if (uri === URI_TABLA) { motivos.push('tabla'); return { tipo: 'tabla', xfrm, tbl: hijo(datos, 'tbl') }; }
+    if (uri === URI_TABLA) return tabla(hijo(datos, 'tbl'), xfrm, ctx, motivos);
     if (uri === URI_GRAFICO) { motivos.push('gráfico'); return { tipo: 'grafico', xfrm }; }
     motivos.push('marco desconocido ' + uri);
     return null;
+  }
+
+  // --- Tablas -----------------------------------------------------------------------------
+  // Partes de un estilo de tabla, de menor a mayor prioridad (cada una pisa a
+  // las anteriores solo en lo que define), y qué bandera de tblPr la activa.
+  const PARTES_TABLA = ['wholeTbl', 'band1H', 'band2H', 'band1V', 'band2V', 'lastCol', 'firstCol', 'lastRow', 'firstRow', 'seCell', 'swCell', 'neCell', 'nwCell'];
+  const NS_A = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+  const LADOS_CELDA = { l: 'lnL', r: 'lnR', t: 'lnT', b: 'lnB', tlbr: 'lnTlToBr', bltr: 'lnBlToTr' };
+
+  // Devuelve { tipo: 'tabla', xfrm, columnas: [EMU], filas: [EMU mínimo],
+  // celdas: [{ fila, col, filas, cols, relleno, bordes, texto }], fondo }.
+  // Cada borde: { linea (null = sin línea), prioridad }; quien dibuja decide
+  // entre los dos lados de un borde compartido por la prioridad.
+  function tabla(tbl, xfrm, ctx, motivos) {
+    const tblPr = hijo(tbl, 'tblPr');
+    const id = ((hijo(tblPr, 'tableStyleId') || {}).textContent || '').trim().toUpperCase();
+    const estilo = hijo(tblPr, 'tableStyle') ? hijo(hijo(tblPr, 'tableStyle'), 'tblStyle') : id ? ctx.estilosTabla.get(id) : null;
+    if (id && !estilo) { motivos.push('estilo de tabla que el archivo no trae'); return { tipo: 'tabla', xfrm }; }
+    const bandera = (a) => bool(tblPr, a);
+    const columnas = hijos(hijo(tbl, 'tblGrid'), 'gridCol').map((c) => ent(c, 'w', 0));
+    const trs = hijos(tbl, 'tr');
+    const nF = trs.length, nC = columnas.length;
+    if (!nF || !nC) return null;
+    const parteDe = (n) => estilo && hijo(estilo, n);
+
+    // Qué partes del estilo tocan la celda (fila r, columna c, con su tamaño).
+    function partesDe(r, c, rs, cs) {
+      const lista = [];
+      const filaDatos = r - (bandera('firstRow') ? 1 : 0), colDatos = c - (bandera('firstCol') ? 1 : 0);
+      const enDatosF = filaDatos >= 0 && !(bandera('lastRow') && r + rs - 1 === nF - 1);
+      const enDatosC = colDatos >= 0 && !(bandera('lastCol') && c + cs - 1 === nC - 1);
+      lista.push({ n: 'wholeTbl', zona: 'tabla' });
+      if (bandera('bandRow') && enDatosF) lista.push({ n: filaDatos % 2 ? 'band2H' : 'band1H', zona: 'fila' });
+      if (bandera('bandCol') && enDatosC) lista.push({ n: colDatos % 2 ? 'band2V' : 'band1V', zona: 'col' });
+      if (bandera('lastCol') && c + cs - 1 === nC - 1) lista.push({ n: 'lastCol', zona: 'col' });
+      if (bandera('firstCol') && c === 0) lista.push({ n: 'firstCol', zona: 'col' });
+      if (bandera('lastRow') && r + rs - 1 === nF - 1) lista.push({ n: 'lastRow', zona: 'fila' });
+      if (bandera('firstRow') && r === 0) lista.push({ n: 'firstRow', zona: 'fila' });
+      const arriba = r === 0 && bandera('firstRow'), abajo = r + rs - 1 === nF - 1 && bandera('lastRow');
+      const izq = c === 0 && bandera('firstCol'), der = c + cs - 1 === nC - 1 && bandera('lastCol');
+      if (abajo && der) lista.push({ n: 'seCell', zona: 'celda' });
+      if (abajo && izq) lista.push({ n: 'swCell', zona: 'celda' });
+      if (arriba && der) lista.push({ n: 'neCell', zona: 'celda' });
+      if (arriba && izq) lista.push({ n: 'nwCell', zona: 'celda' });
+      return lista.map((p) => ({ ...p, el: parteDe(p.n), prioridad: PARTES_TABLA.indexOf(p.n) + 1 })).filter((p) => p.el);
+    }
+
+    // El borde de un lado según la zona de la parte: los de afuera (left…) solo
+    // en el borde de la zona; adentro, insideH / insideV.
+    function bordeDeParte(p, lado, r, c, rs, cs) {
+      const tcBdr = ruta(p.el, 'tcStyle', 'tcBdr');
+      if (!tcBdr) return undefined;
+      const primeraF = r === 0, ultimaF = r + rs - 1 === nF - 1, primeraC = c === 0, ultimaC = c + cs - 1 === nC - 1;
+      let nombre;
+      const enFila = p.zona === 'fila' || p.zona === 'celda', enCol = p.zona === 'col' || p.zona === 'celda';
+      switch (lado) {
+        case 'l': nombre = enCol || primeraC ? 'left' : 'insideV'; break;
+        case 'r': nombre = enCol || ultimaC ? 'right' : 'insideV'; break;
+        case 't': nombre = enFila || primeraF ? 'top' : 'insideH'; break;
+        case 'b': nombre = enFila || ultimaF ? 'bottom' : 'insideH'; break;
+        case 'tlbr': nombre = 'tl2br'; break;
+        case 'bltr': nombre = 'tr2bl'; break;
+      }
+      const el = hijo(tcBdr, nombre);
+      if (!el) return undefined;
+      return linea([el], [el], ctx);
+    }
+
+    // tcTxStyle de las partes, juntado en una lista de estilos de texto (los
+    // nueve niveles iguales) que entra debajo del lstStyle de la celda.
+    function estiloTexto(partes) {
+      let b = null, i = null, colorXml = null, fuente = null;
+      for (const p of partes) {
+        const t = hijo(p.el, 'tcTxStyle');
+        if (!t) continue;
+        const sino = (v) => (v === 'on' ? '1' : v === 'off' ? '0' : null);
+        b = sino(t.getAttribute('b')) || b; i = sino(t.getAttribute('i')) || i;
+        const c = primero(t, COLORES);
+        const ref = hijo(t, 'fontRef');
+        if (c) colorXml = new XMLSerializer().serializeToString(c);
+        else if (ref && primero(ref, COLORES)) colorXml = new XMLSerializer().serializeToString(primero(ref, COLORES));
+        if (ref) fuente = ref.getAttribute('idx') === 'major' ? '+mj-lt' : '+mn-lt';
+        const f = ruta(t, 'font', 'latin');
+        if (f && f.getAttribute('typeface')) fuente = f.getAttribute('typeface');
+      }
+      if (b == null && i == null && !colorXml && !fuente) return null;
+      const def = `<a:defRPr${b ? ` b="${b}"` : ''}${i ? ` i="${i}"` : ''}>${colorXml ? `<a:solidFill>${colorXml}</a:solidFill>` : ''}${fuente ? `<a:latin typeface="${fuente.replace(/[<&"]/g, '')}"/>` : ''}</a:defRPr>`;
+      let niveles = '';
+      for (let n = 1; n <= 9; n++) niveles += `<a:lvl${n}pPr>${def}</a:lvl${n}pPr>`;
+      return parsear(`<a:lstStyle xmlns:a="${NS_A}">${niveles}</a:lstStyle>`).documentElement;
+    }
+
+    function rellenoDeParte(p) {
+      const tcStyle = hijo(p.el, 'tcStyle');
+      const f = hijo(tcStyle, 'fill');
+      if (f) { const r = primero(f, RELLENOS); if (r) return { valor: relleno(r, ctx.cc, ctx.parteActual) }; }
+      const ref = hijo(tcStyle, 'fillRef');
+      if (ref) return { valor: rellenoDeReferencia(ref, ctx) || null };
+      return undefined;
+    }
+
+    const celdas = [];
+    trs.forEach((tr, r) => {
+      hijos(tr, 'tc').forEach((tc, c) => {
+        if (c >= nC || bool(tc, 'hMerge') || bool(tc, 'vMerge')) return;
+        const rs = Math.max(1, Math.min(nF - r, ent(tc, 'rowSpan', 1))), cs = Math.max(1, Math.min(nC - c, ent(tc, 'gridSpan', 1)));
+        const tcPr = hijo(tc, 'tcPr');
+        const partes = partesDe(r, c, rs, cs);
+        let rell = null;
+        for (const p of partes) { const v = rellenoDeParte(p); if (v !== undefined) rell = v.valor; }
+        const directo = primero(tcPr, RELLENOS);
+        if (directo) rell = relleno(directo, ctx.cc, ctx.parteActual);
+        const bordes = {};
+        for (const [lado, nombre] of Object.entries(LADOS_CELDA)) {
+          let b;
+          for (const p of partes) { const v = bordeDeParte(p, lado, r, c, rs, cs); if (v !== undefined) b = { linea: v, prioridad: p.prioridad }; }
+          if (hijo(tcPr, nombre)) b = { linea: linea([tcPr], [], ctx, nombre), prioridad: 100 };
+          if (b) bordes[lado] = b;
+        }
+        const txBody = hijo(tc, 'txBody');
+        const listas = [hijo(txBody, 'lstStyle'), 'estilo', estiloTexto(partes), hijo(ctx.txStyles, 'otherStyle'), ctx.textoPorDefecto].filter(Boolean);
+        const margen = (a, def) => ent(tcPr, a, def);
+        const cuerpoCelda = {
+          margenes: { l: margen('marL', 91440), t: margen('marT', 45720), r: margen('marR', 91440), b: margen('marB', 45720) },
+          ancla: (tcPr && tcPr.getAttribute('anchor')) || 't', anclaCentro: bool(tcPr, 'anchorCtr'), ajuste: 'square',
+          vertical: (tcPr && tcPr.getAttribute('vert')) || 'horz', giro: 0, derecho: false, columnas: 1, espacioColumnas: 0,
+          autoajuste: { tipo: 'no' }, primeroYUltimo: false,
+        };
+        const parrafos = hijos(txBody, 'p').map((p) => parrafo(p, listas, null, ctx));
+        celdas.push({ fila: r, col: c, filas: rs, cols: cs, relleno: rell, bordes, texto: parrafos.length ? { cuerpo: cuerpoCelda, parrafos } : null });
+      });
+    });
+
+    // Fondo de toda la tabla (tblBg), debajo de las celdas.
+    const tblBg = parteDe('tblBg');
+    let fondoTabla = null;
+    if (tblBg) {
+      const r = primero(tblBg, RELLENOS);
+      fondoTabla = r ? relleno(r, ctx.cc, ctx.parteActual) : hijo(tblBg, 'fillRef') ? rellenoDeReferencia(hijo(tblBg, 'fillRef'), ctx) || null : null;
+    }
+    return { tipo: 'tabla', xfrm, columnas, filas: trs.map((tr) => ent(tr, 'h', 0)), celdas, fondo: fondoTabla, rtl: bandera('rtl') };
   }
 
   async function dibujoDeDiagrama(datos, ctx) {

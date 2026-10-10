@@ -51,7 +51,12 @@ function Forma($s) {
     }
     if ($s.HasTextFrame -and $s.TextFrame2.HasText) { $f.lineas = (Lineas $s.TextFrame2.TextRange) }
     if ($s.HasTable) {
-      $t = $s.Table; $f.celdas = @()
+      # Alto real de cada fila (crece con el texto) y ancho de cada columna, en
+      # puntos: con ellos las líneas de una celda (relativas a la celda) pasan
+      # a la diapositiva.
+      $t = $s.Table; $f.celdas = @(); $f.filas = @(); $f.columnas = @()
+      for ($r = 1; $r -le $t.Rows.Count; $r++) { $f.filas += [math]::Round($t.Rows($r).Height, 2) }
+      for ($c = 1; $c -le $t.Columns.Count; $c++) { $f.columnas += [math]::Round($t.Columns($c).Width, 2) }
       for ($r = 1; $r -le $t.Rows.Count; $r++) {
         for ($c = 1; $c -le $t.Columns.Count; $c++) {
           $tf = $t.Cell($r, $c).Shape.TextFrame2
@@ -69,6 +74,7 @@ try {
   $anchoPt = $p.PageSetup.SlideWidth; $altoPt = $p.PageSetup.SlideHeight
   $alto = [int][math]::Round($Ancho * $altoPt / $anchoPt)
   $ref = [ordered]@{
+    version = 2
     archivo = [IO.Path]::GetFileName($Archivo)
     ancho = $anchoPt; alto = $altoPt; pxAncho = $Ancho; pxAlto = $alto
     powerpoint = $app.Version

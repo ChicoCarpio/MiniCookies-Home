@@ -81,9 +81,13 @@ const casos = archivos.map((ruta) => {
   const sha = createHash('sha256').update(readFileSync(ruta)).digest('hex');
   return { ruta, nombre: basename(ruta), sha, ref: join(SALIDA, 'referencias', sha.slice(0, 16)) };
 });
+// Sube cuando powerpoint.ps1 anota algo nuevo: las referencias más viejas se rehacen.
+// 2 (2026-10-10): alto de cada fila y ancho de cada columna de las tablas.
+const VERSION_REFERENCIA = 2;
+const versionDe = (json) => { try { return JSON.parse(readFileSync(json, 'utf8').replace(/^﻿/, '')).version || 1; } catch { return 0; } };
 for (const c of casos) {
   const json = join(c.ref, 'referencia.json');
-  if (existsSync(json) && (!opcion('--pdf') || existsSync(join(c.ref, 'powerpoint.pdf')))) continue;
+  if (existsSync(json) && versionDe(json) >= VERSION_REFERENCIA && (!opcion('--pdf') || existsSync(join(c.ref, 'powerpoint.pdf')))) continue;
   console.log(`PowerPoint: ${c.nombre}…`);
   const r = spawnSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', join(CARPETA, 'powerpoint.ps1'),
     '-Archivo', c.ruta, '-Salida', c.ref, ...(opcion('--pdf') ? ['-Pdf'] : [])], { encoding: 'utf8', timeout: 15 * 60 * 1000 });
@@ -306,11 +310,29 @@ process.exit(peores.length || fallas || resultados.length !== casos.length ? 1 :
 function compararCortes(refDiap, textos) {
   const norma = (t) => String(t).replace(/[\s\u000b­]+/g, ' ').trim().toLowerCase();
   const refs = [];
-  (function aplanar(formas) { for (const f of formas || []) { if (f.lineas && f.lineas.length) refs.push(f); aplanar(f.hijos); } })(refDiap && refDiap.formas);
+  (function aplanar(formas) {
+    for (const f of formas || []) {
+      if (f.lineas && f.lineas.length) refs.push(f);
+      // Celdas de tabla: por nombre de la tabla, fila y columna (desde 1).
+      // PowerPoint da sus líneas relativas a la celda: se pasan a la
+      // diapositiva con el alto real de las filas (referencia versión 2).
+      for (const c of f.celdas || []) {
+        if (!c.lineas || !c.lineas.length) continue;
+        const suma = (v, n) => (v || []).slice(0, n).reduce((a, b) => a + b, 0);
+        const dx = f.columnas ? f.caja.x + suma(f.columnas, c.col - 1) : NaN, dy = f.filas ? f.caja.y + suma(f.filas, c.fila - 1) : NaN;
+        refs.push({ nombre: f.nombre, celda: `${c.fila},${c.col}`, lineas: c.lineas.map((l) => ({ ...l, x: l.x + dx, y: l.y + dy })) });
+      }
+      aplanar(f.hijos);
+    }
+  })(refDiap && refDiap.formas);
   const usadas = new Set();
   const res = { formas: 0, iguales: 0, lineasRef: 0, lineasNos: 0, anchos: [], dy: [], distintas: [] };
   for (const t of textos) {
-    const ref = refs.find((f) => !usadas.has(f) && f.nombre === t.nombre);
+    const celda = t.celda ? `${t.celda.fila},${t.celda.col}` : undefined;
+    // PowerPoint por COM da los nombres por defecto en el idioma de Office
+    // ("Tabla 2" en el archivo, "Table 2" en la referencia).
+    const nombreBase = (n) => String(n).replace(/^(Tabla|Table) (\d+)$/, 'T $2');
+    const ref = refs.find((f) => !usadas.has(f) && nombreBase(f.nombre) === nombreBase(t.nombre) && f.celda === celda);
     if (!ref) continue;
     usadas.add(ref);
     const a = ref.lineas.map((l) => norma(l.texto)).filter(Boolean);
@@ -320,12 +342,13 @@ function compararCortes(refDiap, textos) {
     res.formas++; res.lineasRef += a.length; res.lineasNos += b.length;
     const igual = a.length === b.length && a.every((x, i) => x === b[i]);
     if (igual) res.iguales++;
-    else res.distintas.push({ nombre: t.nombre, powerpoint: a, nuestro: b });
+    else res.distintas.push({ nombre: celda ? `${t.nombre} [${celda}]` : t.nombre, powerpoint: a, nuestro: b });
     const refL = ref.lineas.filter((l) => norma(l.texto));
     for (let i = 0; i < Math.min(refL.length, t.lineas.length); i++) {
       if (norma(refL[i].texto) !== b[i]) break;
       if (refL[i].w > 20) res.anchos.push(t.lineas[i].w / refL[i].w);
-      res.dy.push(t.lineas[i].y + t.lineas[i].h - (refL[i].y + refL[i].h));
+      const dy = t.lineas[i].y + t.lineas[i].h - (refL[i].y + refL[i].h);
+      if (Number.isFinite(dy)) res.dy.push(dy);
     }
   }
   return res;
