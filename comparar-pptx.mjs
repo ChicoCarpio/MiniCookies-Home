@@ -167,6 +167,7 @@ function ssim(a, b, w, h) {
         if (!imagenes[i]) { fila.falta = true; resultado.diapositivas.push(fila); continue; }
         if (imagenes[i].motor) fila.motor = imagenes[i].motor;
         if (imagenes[i].motivos) fila.motivos = imagenes[i].motivos;
+        if (imagenes[i].textos) fila.textos = imagenes[i].textos;
         const nuestra = await imagen(imagenes[i].url);
         const cNos = lienzo(nuestra, w, h);
         const a = cRef.getContext('2d').getImageData(0, 0, w, h).data;
@@ -271,6 +272,16 @@ for (const r of resultados) {
   if (r.error) fallas++;
 }
 const todas = resultados.flatMap((r) => r.diapositivas.filter((d) => d.pct != null));
+// Cortes de línea (motor propio): cada forma con texto contra la misma forma
+// de PowerPoint (por nombre). "iguales": las mismas líneas con el mismo texto.
+// En las líneas iguales, ancho nuestro / ancho de PowerPoint (si la fuente
+// mide como la de PowerPoint, ≈ 1) y desfase vertical en puntos.
+for (const r of resultados) {
+  const c = casos.find((x) => x.nombre === r.nombre);
+  for (const d of r.diapositivas) if (d.textos) d.cortes = compararCortes(c.referencia.diapositivas[d.n - 1], d.textos);
+}
+const conCortes = todas.filter((d) => d.cortes);
+const cortes = conCortes.length ? sumarCortes(conCortes.map((d) => d.cortes)) : null;
 const media = (k) => todas.length ? (todas.reduce((a, d) => a + d[k], 0) / todas.length) : 0;
 writeFileSync(join(destino, 'resultado.json'), JSON.stringify(resultados, null, 1));
 escribirInforme();
@@ -285,10 +296,51 @@ if (opcion('--base') && !sinPreparar) {
 }
 
 console.log(`\n${todas.length} diapositivas: media ${media('pct').toFixed(2)} % de píxeles distintos, SSIM ${media('ssim').toFixed(4)}`);
+if (cortes) console.log(textoCortes(cortes));
 console.log('Informe: ' + join(destino, 'informe.html'));
 if (peores.length) console.log('\nEmpeoraron respecto de la línea base:\n  ' + peores.join('\n  '));
 if (fallas) console.log(`\n${fallas} diapositiva(s) o archivo(s) sin dibujar o con error (ver el informe).`);
 process.exit(peores.length || fallas || resultados.length !== casos.length ? 1 : 0);
+
+function compararCortes(refDiap, textos) {
+  const norma = (t) => String(t).replace(/[\s\u000b­]+/g, ' ').trim().toLowerCase();
+  const refs = [];
+  (function aplanar(formas) { for (const f of formas || []) { if (f.lineas && f.lineas.length) refs.push(f); aplanar(f.hijos); } })(refDiap && refDiap.formas);
+  const usadas = new Set();
+  const res = { formas: 0, iguales: 0, lineasRef: 0, lineasNos: 0, anchos: [], dy: [], distintas: [] };
+  for (const t of textos) {
+    const ref = refs.find((f) => !usadas.has(f) && f.nombre === t.nombre);
+    if (!ref) continue;
+    usadas.add(ref);
+    const a = ref.lineas.map((l) => norma(l.texto)).filter(Boolean);
+    const b = t.lineas.map((l) => norma(l.texto));
+    // Si PowerPoint no da texto por línea (solo una caja), no se puede comparar.
+    if (!a.length) continue;
+    res.formas++; res.lineasRef += a.length; res.lineasNos += b.length;
+    const igual = a.length === b.length && a.every((x, i) => x === b[i]);
+    if (igual) res.iguales++;
+    else res.distintas.push({ nombre: t.nombre, powerpoint: a, nuestro: b });
+    const refL = ref.lineas.filter((l) => norma(l.texto));
+    for (let i = 0; i < Math.min(refL.length, t.lineas.length); i++) {
+      if (norma(refL[i].texto) !== b[i]) break;
+      if (refL[i].w > 20) res.anchos.push(t.lineas[i].w / refL[i].w);
+      res.dy.push(t.lineas[i].y + t.lineas[i].h - (refL[i].y + refL[i].h));
+    }
+  }
+  return res;
+}
+function sumarCortes(lista) {
+  const s = { formas: 0, iguales: 0, lineasRef: 0, lineasNos: 0, anchos: [], dy: [] };
+  for (const c of lista) { for (const k of ['formas', 'iguales', 'lineasRef', 'lineasNos']) s[k] += c[k]; s.anchos.push(...c.anchos); s.dy.push(...c.dy); }
+  return s;
+}
+function mediana(v) { if (!v.length) return NaN; const o = [...v].sort((a, b) => a - b); return o[Math.floor(o.length / 2)]; }
+function textoCortes(c) {
+  const absDy = c.dy.map(Math.abs);
+  return `Cortes de línea: ${c.iguales}/${c.formas} formas iguales a PowerPoint (${(100 * c.iguales / (c.formas || 1)).toFixed(1)} %), ` +
+    `${c.lineasNos} líneas nuestras vs ${c.lineasRef}; ancho nuestro/PowerPoint mediana ${mediana(c.anchos).toFixed(3)} ` +
+    `(${c.anchos.length} líneas), |desfase vertical| mediana ${mediana(absDy).toFixed(2)} pt`;
+}
 
 function escribirInforme() {
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -299,7 +351,7 @@ td,th{border:1px solid #ccc;padding:4px 8px;text-align:right;background:#fff}th{
 .fila{display:flex;gap:6px;margin:6px 0 18px}.fila figure{margin:0;flex:1}.fila img{width:100%;border:1px solid #bbb;background:#fff}
 figcaption{font-size:12px;color:#555}.peor{color:#b00;font-weight:600}.mejor{color:#070;font-weight:600}h2{margin-top:32px}</style>
 <h1>Motor de diapositivas vs. PowerPoint (${corrida})</h1>
-<p>${todas.length} diapositivas · media ${media('pct').toFixed(2)} % de píxeles distintos · SSIM ${media('ssim').toFixed(4)} · ${new Date().toLocaleString('es')}</p>`;
+<p>${todas.length} diapositivas · media ${media('pct').toFixed(2)} % de píxeles distintos · SSIM ${media('ssim').toFixed(4)} · ${new Date().toLocaleString('es')}</p>${cortes ? `<p>${esc(textoCortes(cortes))}</p>` : ''}`;
   html += '<table><tr><th class="t">Archivo</th><th>Diap.</th><th>Media %</th><th>SSIM</th><th>ms</th><th class="t">Avisos</th></tr>';
   for (const r of resultados) {
     const ds = r.diapositivas.filter((d) => d.pct != null);
@@ -317,6 +369,11 @@ figcaption{font-size:12px;color:#555}.peor{color:#b00;font-weight:600}.mejor{col
       const delta = d.antes ? d.pct - d.antes.pct : 0;
       const clase = delta > MARGEN_PCT ? 'peor' : delta < -MARGEN_PCT ? 'mejor' : '';
       html += `<p><b>Diapositiva ${d.n}</b> — ${d.falta ? 'NO SE DIBUJÓ' : `${d.pct} % · SSIM ${d.ssim}`}${d.motor === 'pptxviewjs' ? ` · <i>PptxViewJS (${esc((d.motivos || []).join(', '))})</i>` : ''}${d.antes ? ` <span class="${clase}">(antes ${d.antes.pct} %)</span>` : ''}</p>`;
+      if (d.cortes && d.cortes.distintas.length) {
+        html += '<details><summary>Cortes de línea distintos de PowerPoint: ' + d.cortes.distintas.length + '</summary><table><tr><th class="t">Forma</th><th class="t">PowerPoint</th><th class="t">Nuestro</th></tr>';
+        for (const x of d.cortes.distintas) html += `<tr><td class="t">${esc(x.nombre)}</td><td class="t">${x.powerpoint.map(esc).join('<br>')}</td><td class="t">${x.nuestro.map(esc).join('<br>')}</td></tr>`;
+        html += '</table></details>';
+      }
       if (!d.falta) html += `<div class="fila"><figure><img loading="lazy" src="${relRef(c, n)}"><figcaption>PowerPoint</figcaption></figure><figure><img loading="lazy" src="${carpeta}/n${n}.png"><figcaption>Nuestro motor</figcaption></figure><figure><img loading="lazy" src="${carpeta}/x${n}.png"><figcaption>Diferencias (rojo)</figcaption></figure></div>`;
     }
   }

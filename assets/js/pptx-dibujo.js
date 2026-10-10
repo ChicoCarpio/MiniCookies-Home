@@ -8,7 +8,10 @@
 // "[calibrar]" y se ajusta midiendo con npm run comparar-pptx.
 //
 // Uso: await PptxDibujo.dibujar(pres, diapositiva, canvas)  (canvas ya del
-// tamaño final; la escala sale de canvas.width / pres.ancho).
+// tamaño final; la escala sale de canvas.width / pres.ancho). Devuelve
+// { textos }: por cada forma con texto, su nombre y sus líneas (texto y caja
+// en puntos de la diapositiva), para comparar los cortes de línea con
+// PowerPoint (comparar-pptx.mjs).
 
 const PptxDibujo = (() => {
   const EMU_POR_PX96 = 9525;
@@ -37,12 +40,13 @@ const PptxDibujo = (() => {
     const imagenes = new Map();
     await Promise.all([...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))));
 
-    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s };
+    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [] };
     const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap);
     if (diap.fondo) pintar(ctx, diap.fondo, todo, entorno.anchoDiap, entorno.altoDiap, entorno);
 
     const mapa = (x) => ({ x: x.x * s, y: x.y * s, w: x.w * s, h: x.h * s });
     for (const el of diap.elementos) dibujarElemento(ctx, el, mapa, entorno, null);
+    return { textos: entorno.textos };
   }
 
   function aplicarTransformacion(ctx, caja, x) {
@@ -460,6 +464,7 @@ const PptxDibujo = (() => {
     else if (cuerpo.ancla === 'b') y0 += area.h - maquetado.alto;
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
+    registrarLineas(ctx, el, maquetado, area, y0, entorno);
     for (const l of maquetado.lineas) {
       const base = y0 + l.base;
       if (l.vineta && l.vineta.color) {
@@ -488,6 +493,24 @@ const PptxDibujo = (() => {
       }
     }
     ctx.restore();
+  }
+
+  // Las líneas tal como quedaron cortadas, en puntos de la diapositiva (la
+  // caja es la del texto sin girar: vale para formas sin giro).
+  function registrarLineas(ctx, el, maquetado, area, y0, entorno) {
+    const m = ctx.getTransform();
+    const aPt = 1 / (entorno.s * 12700);
+    const punto = (x, y) => ({ x: (m.a * x + m.c * y + m.e) * aPt, y: (m.b * x + m.d * y + m.f) * aPt });
+    const lineas = [];
+    for (const l of maquetado.lineas) {
+      const texto = l.piezas.map((pz) => pz.tab ? '\t' : pz.texto || '').join('').trim();
+      if (!texto) continue;
+      const a = l.trozos[0], z = l.trozos[l.trozos.length - 1];
+      const p0 = punto(area.x + (a ? a.x : 0), y0 + l.arriba - (l.antes || 0));
+      const p1 = punto(area.x + (z ? z.x + z.ancho : 0), y0 + l.arriba + l.alto + (l.despues || 0));
+      lineas.push({ texto, x: p0.x, y: p0.y, w: p1.x - p0.x, h: p1.y - p0.y });
+    }
+    if (lineas.length) entorno.textos.push({ nombre: el.nombre, lineas });
   }
 
   return { dibujar };

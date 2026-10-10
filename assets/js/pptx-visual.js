@@ -219,8 +219,9 @@ async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes =
       console.warn('Diapositiva ' + (i + 1) + ' ilegible para el motor propio:', errorDiapositiva);
     }
     let motor = 'propio';
+    let textos = null;
     if (diapositiva && diapositiva.soportada) {
-      await PptxDibujo.dibujar(pres, diapositiva, canvas);
+      ({ textos } = await PptxDibujo.dibujar(pres, diapositiva, canvas));
     } else {
       motor = 'pptxviewjs';
       if (!visor) {
@@ -240,6 +241,7 @@ async function dibujarConMotorPropio(archivo, canvas, alAvanzar, { conImagenes =
     }
     const imagen = await capturarDiapositiva(canvas, anchoPuntos, altoPuntos, conImagenes);
     imagen.motor = motor;
+    if (textos) imagen.textos = textos;
     if (diapositiva && !diapositiva.soportada) imagen.motivos = diapositiva.motivos;
     if (imagen.vacia) vacias++;
     imagenes.push(imagen);

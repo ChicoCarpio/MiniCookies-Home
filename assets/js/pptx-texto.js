@@ -70,6 +70,9 @@ const PptxTexto = (() => {
     const { cuerpo, parrafos } = texto;
     const ptPx = EMU_POR_PT * pxPorEmu;
     const auto = cuerpo.autoajuste.tipo === 'reducir' ? cuerpo.autoajuste : { escala: 1, reduccion: 0 };
+    // Con fontScale, PowerPoint usa el tamaño reducido redondeado al punto
+    // entero (medido: 18 pt × 92,5 % → 17; × 62,5 % → 11; 16 × 77,5 % → 12).
+    const escalar = (tam) => auto.escala === 1 ? tam : Math.max(1, Math.round(tam * auto.escala));
     const sinAjuste = cuerpo.ajuste === 'none';
     const columnas = Math.max(1, cuerpo.columnas);
     const espacioCol = cuerpo.espacioColumnas * pxPorEmu;
@@ -93,8 +96,8 @@ const PptxTexto = (() => {
     parrafos.forEach((p, ip) => {
       const visibles = p.trozos.filter((t) => !t.salto && t.texto);
       const vacio = !visibles.length;
-      const tamDe = (t) => t.tamano * auto.escala * (t.base ? 2 / 3 : 1);
-      const primerTam = (visibles[0] || p.fin).tamano * auto.escala;
+      const tamDe = (t) => escalar(t.tamano) * (t.base ? 2 / 3 : 1);
+      const primerTam = escalar((visibles[0] || p.fin).tamano);
 
       // Numeración: sigue en el mismo nivel; un nivel menor reinicia los mayores.
       contadores.length = Math.min(contadores.length, p.nivel + 1);
@@ -110,7 +113,8 @@ const PptxTexto = (() => {
 
       // Espacio antes (no en el primer párrafo, salvo spcFirstLastPara).
       const espacio = (e) => e.pts != null ? e.pts * ptPx : e.pct * primerTam * ALTO_LINEA * ptPx; // [calibrar] base del %
-      if (ip > 0 || cuerpo.primeroYUltimo) y += espacio(p.antes);
+      const antes = ip > 0 || cuerpo.primeroYUltimo ? espacio(p.antes) : 0;
+      y += antes;
 
       // Trozos → palabras (con su estilo), para cortar.
       const piezas = [];
@@ -134,7 +138,7 @@ const PptxTexto = (() => {
       let inicioPrimera = margen + sangria;
       if (textoVineta != null) {
         const base = visibles[0] || p.fin;
-        const px = (p.vineta.puntos != null ? p.vineta.puntos * auto.escala : base.tamano * auto.escala * (p.vineta.escala || 1)) * ptPx;
+        const px = (p.vineta.puntos != null ? escalar(p.vineta.puntos) : escalar(base.tamano) * (p.vineta.escala || 1)) * ptPx;
         let car = textoVineta, fam = familia(p.vineta.fuente || base.fuente);
         const tabla = SIMBOLOS[(p.vineta.fuente || '').toLowerCase()];
         if (tabla && p.vineta.tipo === 'caracter') { car = tabla[car] || car; fam = FUENTES_SIMBOLO; }
@@ -205,12 +209,17 @@ const PptxTexto = (() => {
         const bajoLaBase = unaLinea * (desc / (asc + desc || 1));
         const altoLinea = interlineado.pts != null ? interlineado.pts * ptPx : unaLinea * Math.max(0, interlineado.pct - auto.reduccion);
         l.alto = altoLinea;
+        l.arriba = y;
         l.base = y + altoLinea - bajoLaBase;
         y += altoLinea;
         l.parrafo = p; l.ultimaDelParrafo = il === lineasP.length - 1;
       });
       lineas.push(...lineasP);
-      if (ip < parrafos.length - 1 || cuerpo.primeroYUltimo) y += espacio(p.despues);
+      const despues = ip < parrafos.length - 1 || cuerpo.primeroYUltimo ? espacio(p.despues) : 0;
+      y += despues;
+      // PowerPoint cuenta estos espacios dentro de la caja de la primera y la
+      // última línea del párrafo (TextRange2.Lines): para comparar igual.
+      lineasP[0].antes = antes; lineasP[lineasP.length - 1].despues = despues;
     });
 
     // Alineación horizontal de cada línea.
@@ -240,7 +249,7 @@ const PptxTexto = (() => {
             texto: pz.texto, x, ancho: pz.ancho, css: css(t, pz.px), px: pz.px,
             espaciado: t.espaciado ? t.espaciado * ptPx : 0, color: colorCss(colorDeRelleno(t.relleno)),
             subrayado: t.subrayado, tachado: t.tachado, resaltado: colorCss(t.resaltado),
-            desplazamiento: -t.base * t.tamano * auto.escala * ptPx, sombra: t.sombra,
+            desplazamiento: -t.base * escalar(t.tamano) * ptPx, sombra: t.sombra,
           });
         }
         x += pz.ancho + (pz.espacio ? extraPorEspacio : 0);
@@ -252,7 +261,7 @@ const PptxTexto = (() => {
       let col = 0, desplazamiento = 0;
       for (const l of lineas) {
         if (l.base - desplazamiento > alto && col < columnas - 1 && l !== lineas[0]) { col++; desplazamiento = l.base - l.alto * 0.8; }
-        l.base -= desplazamiento;
+        l.base -= desplazamiento; l.arriba -= desplazamiento;
         const dx = col * (anchoCol + espacioCol);
         for (const t of l.trozos) t.x += dx;
         if (l.vineta) l.vineta.x += dx;
