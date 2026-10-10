@@ -189,6 +189,9 @@ function recorrer(carpeta) {
     const rel = relative(RAIZ, origen);
     if (rel === 'vendor') { copiarVendor(origen); continue; }
     if (EXCLUIR_NOMBRES.has(nombre)) continue;
+    // Nada oculto se publica (.vscode, .cbmignore, .gitattributes…): son
+    // configuración del editor o de herramientas, no parte del sitio.
+    if (nombre.startsWith('.')) continue;
     if (statSync(origen).isDirectory()) { recorrer(origen); continue; }
     const ext = extname(nombre).toLowerCase();
     if (EXCLUIR_EXTENSIONES.has(ext)) continue;
