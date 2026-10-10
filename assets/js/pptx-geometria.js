@@ -8,6 +8,11 @@
 // geometrias.js (window.GeometriasEcma). Las formas libres (custGeom) traen
 // sus propias fórmulas en el XML y se evalúan igual.
 //
+// LICENCIA: esas formas están bajo el aviso de copyright de Ecma, aprobado
+// por el usuario con la condición de cumplirlo al pie de la letra (CLAUDE.md
+// de la raíz, "Formas de PowerPoint de ECMA-376"). No se edita geometrias.js:
+// cualquier corrección de una forma va acá, en código propio.
+//
 // Uso:
 //   const def = PptxGeometria.predefinida('roundRect') | PptxGeometria.desdeXml(custGeom)
 //   const { rutas, texto } = PptxGeometria.trazar(def, ancho, alto, ajustes)

@@ -8,6 +8,10 @@
 // fórmulas, los nombres y los números van tal cual. Se omiten las partes que
 // el motor no usa (manijas de ajuste ahLst y puntos de conexión cxnLst).
 //
+// LICENCIA: el aviso de Ecma se cumple al pie de la letra (aprobado así por
+// el usuario el 2026-10-09; regla en CLAUDE.md de la raíz). Este conversor no
+// puede cambiar fórmulas, nombres ni números: solo el formato.
+//
 // Uso: node comparar-pptx/convertir-geometrias.mjs
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
