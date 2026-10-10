@@ -1759,6 +1759,84 @@ try {
         Caso 'Gráfico grande' { $sh = Grafico $d 51 270 36 676 470 'Grande' $trim $tres 'Grande'; $sh.Chart.HasLegend = $true; $sh.Chart.Legend.Position = -4107 }
     } 960 540 $true
 
+    # ============================================================ 16 gráficos: lo que la etapa 7 dejó afuera
+    # Títulos de eje, piezas movidas a mano (c:manualLayout), etiquetas
+    # giradas o salteadas, leyendas que no caben, eje de fechas y radar.
+    Nuevo-Archivo '16-graficos-avanzados.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        $veinte = 1..20 | ForEach-Object { "Categoría $_" }
+        $doce = @('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre')
+        $ocho = [ordered]@{}; foreach ($k in 1..8) { $ocho["Sucursal número $k"] = @((($k * 3) % 7 + 1), (($k * 5) % 7 + 2), (($k * 2) % 5 + 1), (($k * 4) % 6 + 2)) }
+        $casos = @(
+            @{ n = 'Títulos de eje'; t = 51; f = { param($ch) $a = $ch.Axes(1); $a.HasTitle = $true; $a.AxisTitle.Text = 'Trimestre'; $v = $ch.Axes(2); $v.HasTitle = $true; $v.AxisTitle.Text = 'Millones de colones' } },
+            @{ n = 'Títulos de eje en barras'; t = 57; f = { param($ch) $a = $ch.Axes(1); $a.HasTitle = $true; $a.AxisTitle.Text = 'Trimestre'; $v = $ch.Axes(2); $v.HasTitle = $true; $v.AxisTitle.Text = 'Unidades' } },
+            @{ n = 'Trazado movido'; t = 51; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4107; $p = $ch.PlotArea; $p.InsideLeft = 80; $p.InsideTop = 50; $p.InsideWidth = 250; $p.InsideHeight = 120 } },
+            @{ n = 'Leyenda y título movidos'; t = 51; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152; $ch.Legend.Left = 330; $ch.Legend.Top = 20; $ch.ChartTitle.Left = 20; $ch.ChartTitle.Top = 4 } },
+            @{ n = 'Etiquetas a 45 grados'; t = 51; c = $doce; s = [ordered]@{ Visitas = @(120, 340, 290, 410, 380, 520, 610, 580, 430, 390, 450, 700) }; f = { param($ch) $ch.Axes(1).TickLabels.Orientation = 45 } },
+            @{ n = 'Veinte categorías'; t = 51; c = $veinte; s = [ordered]@{ Valor = @(1..20 | ForEach-Object { ($_ * 37) % 11 + 1 }) } },
+            @{ n = 'Doce meses'; t = 4; c = $doce; s = [ordered]@{ Visitas = @(120, 340, 290, 410, 380, 520, 610, 580, 430, 390, 450, 700) } },
+            @{ n = 'Leyenda con ocho series'; t = 51; s = $ocho; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Circular con doce partes'; t = 5; c = $doce; s = [ordered]@{ Partes = @(12, 9, 8, 7, 7, 6, 6, 5, 5, 4, 3, 2) }; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Eje de fechas'; t = 4; c = @(45658, 45689, 45717, 45748, 45778, 45809, 45839, 45870); s = [ordered]@{ Ventas = @(5, 7, 6, 9, 8, 11, 10, 12) }; f = { param($ch) $a = $ch.Axes(1); $a.CategoryType = 3; $a.TickLabels.NumberFormat = 'mmm-yy' } },
+            @{ n = 'Radar'; t = 81 },
+            @{ n = 'Radar relleno'; t = 82 },
+            @{ n = 'Etiquetas largas giradas'; t = 51; c = @(1..8 | ForEach-Object { "Categoría número $_ de la lista" }); s = [ordered]@{ Valor = @(5, 9, 2, 6, 10, 3, 7, 11) } },
+            @{ n = 'Treinta categorías'; t = 51; c = @(1..30 | ForEach-Object { "Categoría $_" }); s = [ordered]@{ Valor = @(1..30 | ForEach-Object { ($_ * 37) % 11 + 1 }) } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Avanzados " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $trim }
+                $ser = if ($k.s) { $k.s } else { $tres }
+                $sh = Grafico $d $k.t $x $y 456 244 "Avanzado_$i" $cats $ser $k.n
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
+    # ============================================================ 17 gráficos: tipos y agregados raros
+    # 3D, burbujas, cotizaciones, escala logarítmica, línea de tendencia,
+    # barras de error, tabla de datos, unidades de miles, leyenda horizontal
+    # que no cabe y barras con categorías largas.
+    Nuevo-Archivo '17-graficos-raros.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        $dias = @('Lun', 'Mar', 'Mié', 'Jue', 'Vie')
+        $muchas = [ordered]@{}; foreach ($k in 1..7) { $muchas["Serie de ventas número $k"] = @((($k * 3) % 7 + 1), (($k * 5) % 7 + 2), (($k * 2) % 5 + 1), (($k * 4) % 6 + 2)) }
+        $casos = @(
+            @{ n = 'Columnas 3D'; t = 54 },
+            @{ n = 'Circular 3D'; t = -4102; s = [ordered]@{ Partes = @(45, 25, 20, 10) } },
+            @{ n = 'Burbujas'; t = 15; c = @(1, 2.5, 4, 5.5); s = [ordered]@{ Y = @(3, 6, 2, 5); Tamano = @(10, 40, 25, 60) } },
+            @{ n = 'Cotizaciones'; t = 88; c = $dias; s = [ordered]@{ Alto = @(12, 14, 13, 15, 16); Bajo = @(9, 10, 10, 11, 12); Cierre = @(11, 13, 11, 14, 15) } },
+            @{ n = 'Escala logarítmica'; t = 51; s = [ordered]@{ Visitas = @(3, 80, 1500, 42000) }; f = { param($ch) $ch.Axes(2).ScaleType = -4133 } },
+            @{ n = 'Línea de tendencia'; t = 51; s = [ordered]@{ Ventas = @(3, 5, 4, 7) }; f = { param($ch) $null = $ch.SeriesCollection(1).Trendlines().Add(-4132) } },
+            @{ n = 'Barras de error'; t = 51; s = [ordered]@{ Ventas = @(3, 5, 4, 7) }; f = { param($ch) $null = $ch.SeriesCollection(1).ErrorBar(1, 1, 1, 0.5) } },
+            @{ n = 'Tabla de datos'; t = 51; f = { param($ch) $ch.HasDataTable = $true } },
+            @{ n = 'Unidades de miles'; t = 51; s = [ordered]@{ Ventas = @(125000, 318000, 274000, 489000) }; f = { param($ch) $ch.Axes(2).DisplayUnit = -3; $ch.Axes(2).HasDisplayUnitLabel = $true } },
+            @{ n = 'Leyenda que no cabe'; t = 51; s = $muchas; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Barras con categorías largas'; t = 57; c = @(1..4 | ForEach-Object { "Categoría número $_ de la lista" }); s = [ordered]@{ Valor = @(5, 9, 2, 6) } },
+            @{ n = 'Barras 3D'; t = 60 }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Raros " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $trim }
+                $ser = if ($k.s) { $k.s } else { $tres }
+                $sh = Grafico $d $k.t $x $y 456 244 "Raro_$i" $cats $ser $k.n
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
     # ============================================================ 13 patrón y diseño
     Nuevo-Archivo '13-patron-y-diseno.pptx' {
         param($pres)

@@ -1016,8 +1016,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       return new (W().File)([await pres.write({ outputType: 'blob' })], 'grafico.pptx');
     };
     const Tipos = new (W().PptxGenJS)().ChartType;
-    const radar = await (await W().eval('PptxModelo').abrir(await armar(Tipos.radar))).diapositiva(0);
-    afirmar(!radar.soportada, 'un radar no debería estar soportado todavía: la prueba no vería el error');
+    const burbujas = await (await W().eval('PptxModelo').abrir(await armar(Tipos.bubble))).diapositiva(0);
+    afirmar(!burbujas.soportada, 'un gráfico de burbujas no debería estar soportado todavía: la prueba no vería el error');
     const archivo = await armar(Tipos.bar);
     const d = await (await W().eval('PptxModelo').abrir(archivo)).diapositiva(0);
     afirmar(d.soportada, 'el motor propio no tomó el gráfico: ' + d.motivos.join(', '));

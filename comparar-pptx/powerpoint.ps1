@@ -75,6 +75,7 @@ function Grafico($ch) {
       try { if (-not $ch.HasAxis($tipo, $grupo)) { continue }; $e = $ch.Axes($tipo, $grupo) } catch { continue }
       $eje = [ordered]@{ tipo = $tipo; grupo = $grupo; caja = (& $cj $e.Left $e.Top $e.Width $e.Height) }
       try { $eje.min = $e.MinimumScale; $eje.max = $e.MaximumScale; $eje.unidad = $e.MajorUnit } catch { }
+      try { if ($e.HasTitle) { $t = $e.AxisTitle; $eje.titulo = (& $cj $t.Left $t.Top $t.Width $t.Height) } } catch { }
       $g.ejes += $eje
     }
   }

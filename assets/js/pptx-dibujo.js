@@ -396,7 +396,11 @@ const PptxDibujo = (() => {
     ctx.lineCap = l.tapa === 'rnd' ? 'round' : l.tapa === 'sq' ? 'square' : 'butt';
     ctx.lineJoin = l.union === 'bevel' ? 'bevel' : l.union === 'miter' ? 'miter' : 'round';
     const g = Array.isArray(l.guion) ? l.guion : GUIONES[l.guion] || [];
-    if (g.length) ctx.setLineDash(g.map((v) => v * lw));
+    // Con tapa redonda o cuadrada, la tapa suma medio ancho a cada lado del
+    // guion: se acorta el guion y se alarga el hueco en un ancho, sin cambiar
+    // el período (así sysDot con tapa redonda son puntos, como en Office).
+    const tapa = ctx.lineCap !== 'butt';
+    if (g.length) ctx.setLineDash(g.map((v, i) => Math.max(tapa && i % 2 === 0 ? 0.001 : 0, (v + (tapa ? (i % 2 ? 1 : -1) : 0)) * lw)));
     // Las líneas compuestas (doble, triple) salen simples por ahora: borrar el
     // hueco del medio borraría también lo que hay debajo. [etapa 5]
     ctx.stroke(ruta.path);
