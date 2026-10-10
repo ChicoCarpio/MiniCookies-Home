@@ -903,6 +903,39 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return nombres;
   });
 
+  // pptx-texto.js (etapa 3 del motor propio): las fuentes de vendor/ con los
+  // mismos anchos que las de Office se cargan y el canvas mide con ellas. Sin
+  // esto, el corte de líneas depende de la PC (sin Calibri, el navegador
+  // pone otra sin avisar). Medir solo no alcanza: si no cargara, el navegador
+  // usaría la original instalada (mismos anchos) y la prueba pasaría igual;
+  // por eso se exige también que cada cara esté "loaded" en document.fonts.
+  // Anchos esperados: "El veloz murciélago hindú" a 100 px, calculados con
+  // fontkit sobre esos mismos archivos (2026-10-10).
+  await prueba('powerpoint: fuentes con métricas de Office (Carlito, Liberation, Gelasio) cargan y miden', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    const PT = W().eval('PptxTexto');
+    const casos = [
+      ['Calibri', false, false, 'MC Carlito', 1031.30], ['Calibri', true, false, 'MC Carlito', 1054.15],
+      ['Arial', false, false, 'MC Liberation Sans', 1139.50], ['Times New Roman', false, true, 'MC Liberation Serif', 1048.88],
+      ['Courier New', false, false, 'MC Liberation Mono', 1500.24], ['Georgia', false, false, 'MC Gelasio', 1146.19],
+    ];
+    await PT.cargarFuentes(casos.map(([fuente, negrita, cursiva]) => ({ fuente, negrita, cursiva })));
+    const caras = [...D().fonts].filter((f) => f.family.startsWith('MC ') || f.family.startsWith('"MC '));
+    const ctx = D().createElement('canvas').getContext('2d');
+    const res = [];
+    for (const [fuente, negrita, cursiva, familia, esperado] of casos) {
+      const estilo = cursiva ? 'italic' : 'normal';
+      const cara = caras.find((f) => f.family.replace(/"/g, '') === familia && f.style === estilo && (familia === 'MC Gelasio' || f.weight === (negrita ? '700' : '400')));
+      afirmar(cara && cara.status === 'loaded', fuente + ': la cara ' + familia + ' ' + (negrita ? 'negrita ' : '') + estilo + ' no está cargada');
+      ctx.font = (cursiva ? 'italic ' : '') + (negrita ? 'bold ' : '') + '100px "' + familia + '"';
+      const w = ctx.measureText('El veloz murciélago hindú').width;
+      afirmar(Math.abs(w - esperado) < 0.5, familia + ': mide ' + w.toFixed(2) + ' px, se esperaba ' + esperado);
+      res.push(familia.slice(3) + ' ' + w.toFixed(1));
+    }
+    afirmar(PT.familia('Calibri').includes('"MC Carlito"'), 'familia() no ofrece la sustituta: ' + PT.familia('Calibri'));
+    return res.join(', ');
+  });
+
   // pptx-preparar.js: el rectángulo "useBgFill" (relleno = fondo) que
   // PowerPoint pone en sus diseños salía del color accent1 del tema y tapaba
   // la diapositiva (19 de 22 en la presentación del usuario). Se arma una

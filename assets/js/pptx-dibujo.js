@@ -27,18 +27,21 @@ const PptxDibujo = (() => {
     ctx.imageSmoothingQuality = 'high';
 
     // Todas las imágenes se cargan antes de dibujar (el dibujo es síncrono).
+    // Y las fuentes, antes de medir el texto.
     const rutas = new Set();
+    const usos = [];
     const juntar = (r) => { if (r && r.tipo === 'imagen') rutas.add(r.ruta); };
     juntar(diap.fondo);
     (function recorrer(lista) {
       for (const el of lista) {
         juntar(el.relleno);
         if (el.imagen) juntar(el.imagen);
+        if (el.texto) for (const p of el.texto.parrafos) usos.push(...p.trozos, p.fin);
         if (el.hijos) recorrer(el.hijos);
       }
     })(diap.elementos);
     const imagenes = new Map();
-    await Promise.all([...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))));
+    await Promise.all([...[...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))), PptxTexto.cargarFuentes(usos.filter(Boolean))]);
 
     const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [] };
     const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap);

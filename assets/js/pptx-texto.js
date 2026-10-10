@@ -4,10 +4,12 @@
 // alineación (también justificado) y anclaje vertical, y devuelve cada trozo
 // con su posición. Lo dibuja pptx-dibujo.js.
 //
-// Etapa 2 del motor propio: mide con el navegador (measureText). La etapa 3
-// lo reemplaza por fuentes propias y lo calibra contra los cortes de línea que
-// da PowerPoint por COM (comparar-pptx\powerpoint.ps1, "lineas"). Lo que
-// todavía no está calibrado está marcado "[calibrar]".
+// Mide con el navegador (measureText), pero con fuentes de vendor/ que tienen
+// los mismos anchos que las de Office (METRICAS, etapa 3): así el corte de
+// líneas no depende de las fuentes de la PC. Se calibra contra los cortes de
+// línea que da PowerPoint por COM (npm run comparar-pptx -- --motor-propio,
+// "Cortes de línea"). Lo que todavía no está calibrado está marcado
+// "[calibrar]". Necesita assets/js/vendor.js (rutaVendor) cargado antes.
 //
 // Uso: const m = PptxTexto.maquetar(texto, anchoPx, altoPx, pxPorEmu, ctx2d)
 //   texto: { cuerpo, parrafos } de pptx-modelo.js; ancho/alto: el área de
@@ -26,10 +28,51 @@ const PptxTexto = (() => {
 
   // Fuentes que el navegador no tiene: la sustituta más parecida en Windows. [calibrar]
   const SUSTITUTAS = { aptos: 'Segoe UI', 'aptos display': 'Segoe UI', 'aptos narrow': 'Arial Narrow' };
+
+  // Fuentes libres con los mismos anchos de letra que las de Office, servidas
+  // desde vendor/: si la PC no tiene la original, el navegador usa esta y las
+  // líneas se cortan igual que en PowerPoint. Comprobado el 2026-10-10 contra
+  // las de Windows (anchos de 317 letras y una frase con kerning): Carlito =
+  // Calibri y Liberation = Arial / Times New Roman / Courier New, idénticas;
+  // Gelasio ≈ Georgia (la frase igual, 7 letras raras distintas). Caladea NO
+  // coincide con Cambria (5 % más angosta): no se usa.
+  // Estilos: r normal, b negrita, i cursiva, bi negrita cursiva.
+  const METRICAS = {
+    calibri: { familia: 'MC Carlito', r: rutaVendor('carlito/1.104/Carlito-Regular.ttf'), b: rutaVendor('carlito/1.104/Carlito-Bold.ttf'), i: rutaVendor('carlito/1.104/Carlito-Italic.ttf'), bi: rutaVendor('carlito/1.104/Carlito-BoldItalic.ttf') },
+    arial: { familia: 'MC Liberation Sans', r: rutaVendor('liberation-fonts/2.1.5/LiberationSans-Regular.ttf'), b: rutaVendor('liberation-fonts/2.1.5/LiberationSans-Bold.ttf'), i: rutaVendor('liberation-fonts/2.1.5/LiberationSans-Italic.ttf'), bi: rutaVendor('liberation-fonts/2.1.5/LiberationSans-BoldItalic.ttf') },
+    'times new roman': { familia: 'MC Liberation Serif', r: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-Regular.ttf'), b: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-Bold.ttf'), i: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-Italic.ttf'), bi: rutaVendor('liberation-fonts/2.1.5/LiberationSerif-BoldItalic.ttf') },
+    'courier new': { familia: 'MC Liberation Mono', r: rutaVendor('liberation-fonts/2.1.5/LiberationMono-Regular.ttf'), b: rutaVendor('liberation-fonts/2.1.5/LiberationMono-Bold.ttf'), i: rutaVendor('liberation-fonts/2.1.5/LiberationMono-Italic.ttf'), bi: rutaVendor('liberation-fonts/2.1.5/LiberationMono-BoldItalic.ttf') },
+    // Variable (peso 400 a 700): el mismo archivo para normal y negrita.
+    georgia: { familia: 'MC Gelasio', variable: true, r: rutaVendor('gelasio/1.008/Gelasio-VF.ttf'), i: rutaVendor('gelasio/1.008/Gelasio-Italic-VF.ttf') },
+  };
+  const cargadas = new Map();
+  // Carga (una sola vez) los estilos que se van a usar. Hay que esperarla antes
+  // de medir: si la fuente no terminó de cargar, el canvas mide con otra sin
+  // avisar. Sin FontFace o si falla, queda la cadena de familia() como antes.
+  // usos: [{ fuente, negrita, cursiva }].
+  async function cargarFuentes(usos) {
+    if (typeof FontFace === 'undefined' || !document.fonts) return;
+    const pendientes = [];
+    for (const u of usos) {
+      const m = METRICAS[(u.fuente || 'Calibri').replace(/"/g, '').toLowerCase()];
+      if (!m) continue;
+      const clave = m.variable ? (u.cursiva ? 'i' : 'r') : (u.negrita ? 'b' : '') + (u.cursiva ? 'i' : '') || 'r';
+      const id = m.familia + ':' + clave;
+      if (!cargadas.has(id)) {
+        const cara = new FontFace(m.familia, `url("${m[clave]}")`, {
+          weight: m.variable ? '400 700' : clave.includes('b') ? '700' : '400', style: clave.includes('i') ? 'italic' : 'normal',
+        });
+        cargadas.set(id, cara.load().then((c) => { document.fonts.add(c); }).catch((e) => console.warn('No cargó la fuente', id, e)));
+      }
+      pendientes.push(cargadas.get(id));
+    }
+    await Promise.all(pendientes);
+  }
   function familia(nombre) {
     const n = (nombre || 'Calibri').replace(/"/g, '');
     const sust = SUSTITUTAS[n.toLowerCase()];
-    return `"${n}"${sust ? `, "${sust}"` : ''}, "Segoe UI", sans-serif`;
+    const metricas = METRICAS[n.toLowerCase()];
+    return `"${n}"${metricas ? `, "${metricas.familia}"` : ''}${sust ? `, "${sust}"` : ''}, "Segoe UI", sans-serif`;
   }
   const css = (t, px) => `${t.cursiva ? 'italic ' : ''}${t.negrita ? 'bold ' : ''}${px.toFixed(3)}px ${familia(t.fuente)}`;
   const colorCss = (c) => c ? `rgba(${c.r},${c.g},${c.b},${c.a})` : null;
@@ -277,5 +320,5 @@ const PptxTexto = (() => {
     return w;
   }
 
-  return { maquetar, familia, colorCss };
+  return { maquetar, familia, colorCss, cargarFuentes };
 })();
