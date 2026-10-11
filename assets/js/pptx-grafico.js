@@ -107,6 +107,7 @@ const PptxGrafico = (() => {
         separacion: num(hijo(el, 'gapWidth'), 150) / 100, solapamiento: num(hijo(el, 'overlap'), 0) / 100,
         hueco: num(hijo(el, 'holeSize'), 10) / 100, anguloInicial: num(hijo(el, 'firstSliceAng'), 0),
         variarColores: si(hijo(el, 'varyColors')), estiloDispersion: val(hijo(el, 'scatterStyle'), 'marker'), estiloRadar: val(hijo(el, 'radarStyle'), 'marker'),
+        separacionProf: num(hijo(el, 'gapDepth'), 150) / 100,
         escalaBurbuja: num(hijo(el, 'bubbleScale'), 100), burbujaAncho: val(hijo(el, 'sizeRepresents'), 'area') === 'w', burbujasNegativas: si(hijo(el, 'showNegBubbles')),
         ejes: hijos(el, 'axId').map((a) => val(a)),
         etiquetas: etiquetasDe(hijo(el, 'dLbls'), r, letraBase, null),
@@ -211,6 +212,10 @@ const PptxGrafico = (() => {
       disenoTrazado: disenoDe(plot),
       tabla: tablaDe(hijo(plot, 'dTable'), r, letraBase, linea),
       rotX: num(ruta(chart, 'view3D', 'rotX'), 30),
+      rotY: num(ruta(chart, 'view3D', 'rotY'), 20),
+      perspectiva: num(ruta(chart, 'view3D', 'perspective'), 30),
+      profundidad: num(ruta(chart, 'view3D', 'depthPercent'), 100),
+      ejesRectos: si(ruta(chart, 'view3D', 'rAngAx'), true),
     };
   }
 
@@ -645,7 +650,6 @@ const PptxGrafico = (() => {
   // si nada alcanza se salta de a 2, 3… Girada, cada etiqueta es una línea
   // anclada por su punta derecha al centro de la categoría.
   const TOLERANCIA_CORTE = 0.5;
-  const ESPESOR_3D = 0.213;    // [calibrar] espesor del circular 3D, en radios
   // Tabla de datos (medido por COM, letra de 11,97): filas de 17,99 pt; la
   // columna de nombres mide el texto más 16,13 y empieza 11,02 adentro del
   // margen; la tabla termina 0,68 pt por debajo del límite de abajo.
@@ -681,15 +685,50 @@ const PptxGrafico = (() => {
       const porEntrada = (e) => (e.larga ? M.paso : PASO_CAJA) * l.tamano;
       const padV = (5.85 / 14.61) * lh;
       let w, h;
+      let grilla = null, fila = null, lineas = null;
       if (pos === 'b' || pos === 't') {
         w = M.inicio + ley.reduce((a, e, i) => a + porEntrada(e) + anchos[i], 0);
         h = lh + padV;
+        // Una fila (medido por COM, sondeo-leyenda-fila2.ps1): cada entrada
+        // mide su texto + 13,14 (muestra cuadrada) o + 24 (línea); la leyenda,
+        // 1,2 veces la suma (hasta 0,9 del ancho de la forma), y lo que sobra
+        // va repartido parejo antes, entre y después de las entradas.
+        if (M === MUESTRAS.comun) {
+          const extraFila = (ley.some((e) => e.larga) ? 24 : 13.14) / 11.97 * l.tamano;
+          const suma = anchos.reduce((a, x) => a + x + extraFila, 0);
+          w = Math.min(1.2 * suma, 0.9 * W);
+          fila = { extra: extraFila, hueco: Math.max(0, (w - suma) / (ley.length + 1)) };
+        }
+        // Si las entradas no caben en una fila (0,9 del ancho de la forma),
+        // PowerPoint arma una grilla de columnas iguales: la entrada más
+        // ancha (texto + 13,14 con muestra cuadrada, + 24 con línea, letra
+        // de 11,97), tantas filas como hagan falta y las columnas repartidas
+        // parejo (10 entradas que caben de a 7 → 2 filas de 5). Medido por
+        // COM (sondeo-leyenda-filas.ps1).
+        const limite = 0.9 * W, extra = (ley.some((e) => e.larga) ? 24 : 13.14) / 11.97 * l.tamano;
+        const columna = Math.max(0, ...anchos) + extra;
+        if (anchos.reduce((a, x) => a + x + extra, 0) > limite && ley.length > 1) {
+          const maximo = Math.max(1, Math.floor(limite / columna + 1e-6));
+          let filas = Math.ceil(ley.length / maximo);
+          const columnas = Math.ceil(ley.length / filas);
+          // Las filas que no caben a lo alto no se muestran.
+          const caben = Math.max(1, Math.floor((abajo - arriba) / 2 / (lh + padV) + 1e-6));
+          if (filas > caben) { filas = caben; ley = ley.slice(0, filas * columnas); anchos = anchos.slice(0, ley.length); }
+          grilla = { columnas, columna }; fila = null;
+          w = columnas * columna;
+          h = filas * (lh + padV) - (filas > 1 ? 1.49 / 14.61 * lh : 0);
+        }
       } else {
         // Las que no caben a lo alto no se muestran (medido: 9 de 12 en un circular).
         const caben = Math.max(1, Math.floor((abajo - arriba) / (lh + padV) + 1e-6));
         if (ley.length > caben) { ley = ley.slice(0, caben); anchos = anchos.slice(0, caben); }
-        w = Math.max(0, ...anchos) + (ley.some((e) => e.larga) ? 32.1 : 19.31) / 11.97 * l.tamano; // medido: 19,31 con muestra cuadrada
-        h = ley.length * (lh + padV);
+        // Medido por COM con Aptos: texto + 19,15 (cuadrada) o + 30 (línea).
+        // Lo que pasa de un tercio del ancho de la forma se parte en líneas.
+        const extraV = (ley.some((e) => e.larga) ? 30 : 19.15) / 11.97 * l.tamano;
+        lineas = ley.map((e) => cortar(e.texto, l, Math.max(1, W / 3 - extraV), med));
+        anchos = lineas.map((ls) => Math.max(0, ...ls.map((t) => med.ancho(t, l))));
+        w = Math.max(0, ...anchos) + extraV;
+        h = lineas.reduce((a, ls) => a + ls.length * lh + padV, 0);
       }
       w = Math.min(w, der - izq);
       let x, y;
@@ -698,7 +737,7 @@ const PptxGrafico = (() => {
       else if (pos === 'l') { x = izq; y = (arriba + abajo) / 2 - h / 2; izq = x + w + SEPARACION; }
       else { x = der - w; y = (pos === 'tr' ? arriba : (arriba + abajo) / 2 - h / 2); der = x - SEPARACION; }
       ({ x, y, w, h } = aplicarDiseno({ x, y, w, h }, g.leyenda.diseno, W, H));
-      geo.leyenda = { x, y, w, h, entradas: ley, anchos, letra: l, horizontal: pos === 'b' || pos === 't', padV };
+      geo.leyenda = { x, y, w, h, entradas: ley, anchos, letra: l, horizontal: pos === 'b' || pos === 't', padV, grilla, fila, lineas };
     }
 
     // Trazado movido a mano: "outer" incluye las etiquetas de los ejes (lo
@@ -717,13 +756,16 @@ const PptxGrafico = (() => {
       if (conEtiquetas) lado *= 0.86;
       geo.trazado = { x: zona.x + zona.w / 2 - lado / 2, y: zona.y + zona.h / 2 - lado / 2, w: lado, h: lado };
       if (g.grupos[0].es3D && g.grupos[0].tipo === 'circular') {
-        // Circular 3D (aproximado): la cara de arriba es una elipse de alto
-        // ancho·sen(rotX) y el espesor, 0,213 del radio (medido en una imagen
-        // de PowerPoint con rotX 30). El área de trazado es toda la zona.
-        const sen = Math.sin(Math.max(10, Math.min(90, g.rotX)) * Math.PI / 180);
-        const a = Math.max(1, Math.min(zona.w / 2, zona.h / (2 * sen + ESPESOR_3D)));
+        // Circular 3D: el contorno (lejos + cerca + espesor de alto, el ancho
+        // mayor a lo ancho) entra en el trazado menos 11,5 de ancho y 7 de
+        // alto, centrado (medido; ver forma3D).
+        const f = forma3D(g.rotX, g.perspectiva);
+        const lejos = f.b / (1 + f.u), cerca = f.b / (1 - f.u), medioAncho = 1 / Math.sqrt(1 - f.u * f.u);
+        const dw = Math.max(1, zona.w - 11.5), dh = Math.max(1, zona.h - 7);
+        const a = Math.max(1, Math.min(dw / (2 * medioAncho), dh / (lejos + cerca + f.d)));
+        const arribaC = zona.y + 2.5 + (dh - a * (lejos + cerca + f.d)) / 2;
         geo.trazado = { ...zona };
-        geo.circular3D = { cx: zona.x + zona.w / 2, cy: zona.y + zona.h / 2 - a * ESPESOR_3D / 2, a, b: a * sen, d: a * ESPESOR_3D };
+        geo.circular3D = { cx: zona.x + zona.w / 2, cy: arribaC + lejos * a, a, b: f.b * a, u: f.u, d: f.d * a };
       }
       geo.circular = true;
       return geo;
@@ -869,8 +911,10 @@ const PptxGrafico = (() => {
     const enBordes = (e) => claseEje(e) !== 'valor' && g.grupos.some((x) => x.ejes.includes(e.id) && (g.ejes.get(x.ejes[1]) || {}).entre === 'midCat');
 
     // Espacio de las etiquetas de cada lado.
-    let interior;
+    let interior, sobraAnterior = 0;
+    const disposiciones = new Map();
     for (let vuelta = 0; vuelta < 5; vuelta++) {
+      let sobraVuelta = 0;
       let l = izq, rr = der, t = arriba, b = abajo;
       const reserva = { l: 0, r: 0, t: 0, b: 0 };
       // Lo que las etiquetas partidas o giradas ocupan de más sobre una línea:
@@ -890,7 +934,9 @@ const PptxGrafico = (() => {
           // el margen (medido: +1,3 pt con 11,97 pt, arriba y abajo).
           if (claseEje(e) === 'valor') { extra.t = Math.max(extra.t, lh / 2 - MARGEN); extra.b = Math.max(extra.b, lh / 2 - MARGEN); }
         } else {
-          const ancho = interior ? interior.w : rr - l;
+          // El ancho de antes del recorte de la derecha por la última
+          // etiqueta (si no, girar o no puede ir y venir entre vueltas).
+          const ancho = interior ? interior.w + sobraAnterior : rr - l;
           const n = Math.max(1, lista.length);
           let lineas = 1;
           let alto = null;
@@ -900,9 +946,27 @@ const PptxGrafico = (() => {
             const nombres = Math.max(0, ...g.grupos.flatMap((x) => x.series.map((sr) => med.ancho(sr.nombre, tl))));
             extra.l = Math.max(extra.l, MARGEN + INICIO_TABLA + nombres + COLUMNA_TABLA * tl.tamano - izq);
           } else if (claseEje(e) !== 'valor') {
-            const d = disposicion(e, lista, ancho, H, med, enBordes(e));
+            // PowerPoint recorta primero la derecha como si la última
+            // etiqueta fuera sin girar y con ese ancho decide si gira o salta.
+            let sobraRecta = 0;
+            if (!enBordes(e) && lista.length) {
+              const ultima = cortar(lista[lista.length - 1].texto, e.letra, ancho / n + TOLERANCIA_CORTE, med);
+              sobraRecta = Math.max(0, (0.95 * Math.max(0, ...ultima.map((x) => med.ancho(x, e.letra))) - ancho / n) / (2 - 1 / n));
+            }
+            const d = disposicion(e, lista, ancho - sobraRecta, H, med, enBordes(e));
+            disposiciones.set(e.id, d);
             alto = d.alto;
             if (d.giro) extra.l = Math.max(extra.l, LIMITE_IZQ + d.sobraIzq - izq);
+            // El trazado se achica a la derecha lo que la mitad de la última
+            // etiqueta (aunque el salto la oculte) pasa de la mitad de su
+            // categoría, con el 95 % de su ancho; girada, cuenta el ancho de
+            // su renglón (alto de línea / sen del giro), sea cual sea el texto
+            // (medido, barrido-salto.ps1 y barrido-etiquetas.ps1).
+            if (!enBordes(e) && lista.length) {
+              // Se resuelve junto con el ancho final: s = (0,95·w − (ancho − s)/n) / 2.
+              const sobra = d.giro ? (0.95 * lh / Math.sin(Math.abs(d.giro) * Math.PI / 180) - ancho / n) / (2 - 1 / n) : sobraRecta;
+              if (sobra > 0) { extra.r = Math.max(extra.r, AIRE_TRAZADO + sobra); sobraVuelta = Math.max(sobraVuelta, sobra); }
+            }
             if (enBordes(e) && lista.length && !d.giro) {
               extra.l = Math.max(extra.l, med.ancho(lista[0].texto, e.letra) / 2 + AIRE_BORDE);
               extra.r = Math.max(extra.r, med.ancho(lista[lista.length - 1].texto, e.letra) / 2 + AIRE_BORDE);
@@ -923,11 +987,14 @@ const PptxGrafico = (() => {
       const nuevo = { x: l, y: t, w: Math.max(1, rr - l), h: Math.max(1, b - t) };
       const igual = interior && Math.abs(interior.w - nuevo.w) < 0.01 && Math.abs(interior.h - nuevo.h) < 0.01;
       interior = nuevo;
+      sobraAnterior = sobraVuelta;
       calcularEscalas(interior.w, interior.h + deMas);
       if (igual) break;
     }
     if (manual && dt.objetivo === 'inner') { interior = { x: manual.x, y: manual.y, w: Math.max(1, manual.w), h: Math.max(1, manual.h) }; calcularEscalas(interior.w, interior.h); }
     geo.trazado = interior;
+    const grupo3D = g.grupos.find((x) => x.es3D && x.tipo === 'barra');
+    if (grupo3D && g.ejesRectos) geo.caja3D = caja3D(g, grupo3D, interior);
     // Centrados en el trazado (sin pasar de su borde de arriba o izquierdo).
     for (const c of titulosEje) {
       if (c.x == null) c.x = Math.max(interior.x, interior.x + interior.w / 2 - c.w / 2);
@@ -936,9 +1003,40 @@ const PptxGrafico = (() => {
     geo.titulosEje = titulosEje;
     geo.horizontal = horizontal;
     geo.escalas = escalas;
-    for (const e of visibles) { const lista = etiquetasDeEje(e, escalas.get(e.id)); const acostado = e.pos === 'b' || e.pos === 't'; geo.ejes.push({ eje: e, etiquetas: lista, adentro: adentro(e), enBordes: enBordes(e), disp: claseEje(e) !== 'valor' && acostado ? disposicion(e, lista, interior.w, H, med, enBordes(e)) : null }); }
+    for (const e of visibles) { const lista = etiquetasDeEje(e, escalas.get(e.id)); const acostado = e.pos === 'b' || e.pos === 't'; geo.ejes.push({ eje: e, etiquetas: lista, adentro: adentro(e), enBordes: enBordes(e), disp: claseEje(e) !== 'valor' && acostado ? (disposiciones.get(e.id) || disposicion(e, lista, interior.w, H, med, enBordes(e))) : null }); }
     geo.todosLosEjes = ejes;
     return geo;
+  }
+
+  // Columnas y barras 3D con ejes en ángulo recto (medido por COM y en las
+  // imágenes de PowerPoint, sondeo-3d.ps1; 06-graficos.md 6.4 quater): una
+  // proyección oblicua en la que la profundidad z corre z·sen(rotY) a la
+  // derecha y z·sen(rotX) hacia arriba. Cada barra tiene de profundidad su
+  // ancho × depthPercent; el piso, eso × (1 + gapDepth), con las barras en
+  // el medio. Devuelve el frente (z = 0), la profundidad
+  // del piso (D), la de la barra (d) y dónde empieza la barra (a).
+  function caja3D(g, grupo, P) {
+    const rad = (x) => Math.max(0, Math.min(90, x)) * Math.PI / 180;
+    const sx = Math.sin(rad(g.rotY)), sy = Math.sin(rad(g.rotX));
+    const n = Math.max(1, ...grupo.series.map((s) => s.valores.length));
+    const apilado = grupo.agrupacion === 'stacked' || grupo.agrupacion === 'percentStacked';
+    const ns = apilado ? 1 : grupo.series.length, ov = apilado ? 1 : grupo.solapamiento;
+    const q = 1 / (n * (ns - (ns - 1) * ov + grupo.separacion)); // ancho de barra por pt del eje de categorías
+    const k = q * g.profundidad / 100 * (1 + grupo.separacionProf); // profundidad del piso, ídem
+    // El frente tiene la proporción del trazado (alto / ancho igual, en los 8
+    // casos medidos) y la caja entra en el trazado menos 5,5 de ancho y 4,3
+    // de alto, centrada.
+    const dw = Math.max(1, P.w - 5.5), dh = Math.max(1, P.h - 4.3), r = P.h / P.w;
+    let A, B, D;
+    if (grupo.dir === 'bar') {
+      B = Math.max(1, Math.min(dh / (1 + k * sy), dw / (1 / r + k * sx))); D = B * k; A = B / r;
+    } else {
+      A = Math.max(1, Math.min(dw / (1 + k * sx), dh / (r + k * sy))); D = A * k; B = A * r;
+    }
+    const anchoCaja = A + D * sx, altoCaja = B + D * sy;
+    const x0 = P.x + (P.w - anchoCaja) / 2, y0 = P.y + (P.h - altoCaja) / 2;
+    const d = D / (1 + grupo.separacionProf);
+    return { F: { x: x0, y: y0 + D * sy, w: A, h: B }, D, d, a: (D - d) / 2, sx, sy };
   }
 
   // Cómo van las etiquetas de un eje de categorías horizontal en un ancho dado:
@@ -1022,7 +1120,10 @@ const PptxGrafico = (() => {
       return lista;
     }
     for (const grupo of g.grupos) {
-      for (const s of grupo.series) {
+      // En las barras horizontales la leyenda va al revés, como se ven de
+      // arriba abajo (medido en el corpus 16 y 17).
+      const series = grupo.tipo === 'barra' && grupo.dir === 'bar' ? [...grupo.series].reverse() : grupo.series;
+      for (const s of series) {
         if (g.leyenda.borradas.has(s.idx)) continue;
         const conLinea = grupo.tipo === 'linea' || (grupo.tipo === 'dispersion' && grupo.estiloDispersion !== 'marker') || (grupo.tipo === 'radar' && grupo.estiloRadar !== 'filled');
         // La dispersión de solo puntos ocupa en la leyenda lo mismo que una línea (medido).
@@ -1107,7 +1208,8 @@ const PptxGrafico = (() => {
   }
 
   function dibujarEjesYSeries(ctx, g, geo, med, rellenar, trazar, salida) {
-    const t = geo.trazado;
+    const c3 = geo.caja3D;
+    const t = c3 ? c3.F : geo.trazado;
     const escalas = geo.escalas;
     // Posición en el trazado de un valor de un eje de valores.
     const aPos = (e, v) => {
@@ -1125,10 +1227,15 @@ const PptxGrafico = (() => {
         if (!s) continue;
         for (const v of marcas(s)) {
           const p = new Path2D(); const q = aPos(e, v);
-          if (vertical) { p.moveTo(q, t.y); p.lineTo(q, t.y + t.h); } else { p.moveTo(t.x, q); p.lineTo(t.x + t.w, q); }
+          if (c3) {
+            // 3D: en la pared del fondo y en el piso o la pared de la izquierda.
+            const dx = c3.D * c3.sx, dy = c3.D * c3.sy;
+            if (vertical) { p.moveTo(q, t.y + t.h); p.lineTo(q + dx, t.y + t.h - dy); p.lineTo(q + dx, t.y - dy); }
+            else { p.moveTo(t.x, q); p.lineTo(t.x + dx, q - dy); p.lineTo(t.x + t.w + dx, q - dy); }
+          } else if (vertical) { p.moveTo(q, t.y); p.lineTo(q, t.y + t.h); } else { p.moveTo(t.x, q); p.lineTo(t.x + t.w, q); }
           trazar(e.cuadricula, p);
         }
-      } else {
+      } else if (!c3) {
         const n = Math.max(1, categoriasDe(g, e).length);
         for (let i = 0; i <= n; i++) {
           const p = new Path2D();
@@ -1148,7 +1255,8 @@ const PptxGrafico = (() => {
       // Áreas primero, después barras, después líneas (como PowerPoint).
       // Las barras y áreas se cortan en el borde del trazado (un máximo fijo
       // menor que los datos); las líneas y marcadores, con un poco de aire.
-      const recortar = (aire) => { ctx.save(); ctx.beginPath(); ctx.rect(t.x - aire, t.y - aire, t.w + 2 * aire, t.h + 2 * aire); ctx.clip(); };
+      const tc = c3 ? geo.trazado : t;
+      const recortar = (aire) => { ctx.save(); ctx.beginPath(); ctx.rect(tc.x - aire, tc.y - aire, tc.w + 2 * aire, tc.h + 2 * aire); ctx.clip(); };
       recortar(0);
       for (const sg of geoGrupo) {
         const s = sg.serie;
@@ -1171,6 +1279,32 @@ const PptxGrafico = (() => {
             ctx.restore();
             trazar(pt.linea !== undefined ? pt.linea : s.linea, c);
             p.x -= d / 2; p.y -= d / 2; p.w = p.h = d;
+          });
+        } else if (grupo.tipo === 'barra' && c3 && grupo.es3D) {
+          // Prisma: frente, arriba (× 0,75) y costado derecho (× 0,64), medido
+          // en las imágenes. Se dibujan de izquierda a derecha y de abajo
+          // hacia arriba, así cada barra tapa el costado de la anterior.
+          const ox = c3.a * c3.sx, oy = c3.a * c3.sy, ex2 = c3.d * c3.sx, ey2 = c3.d * c3.sy;
+          sg.puntos.forEach((p, i) => {
+            if (!p) return;
+            const pt = s.puntos.get(i) || {};
+            const rell = pt.relleno !== undefined && pt.relleno !== null ? pt.relleno : s.relleno;
+            const lin = pt.linea !== undefined ? pt.linea : s.linea;
+            const x = p.x + ox, y = p.y - oy;
+            const cara = (puntos, r) => {
+              const path = new Path2D(); puntos.forEach(([a, b], j) => (j ? path.lineTo(a, b) : path.moveTo(a, b))); path.closePath();
+              const xs = puntos.map((z) => z[0]), ys = puntos.map((z) => z[1]), mx = Math.min(...xs), my = Math.min(...ys);
+              ctx.save(); ctx.translate(mx, my);
+              const local = new Path2D(); local.addPath(path, new DOMMatrix().translate(-mx, -my));
+              rellenar(r, local, Math.max(...xs) - mx, Math.max(...ys) - my);
+              ctx.restore();
+              trazar(lin, path);
+            };
+            cara([[x + p.w, y], [x + p.w + ex2, y - ey2], [x + p.w + ex2, y + p.h - ey2], [x + p.w, y + p.h]], sombra(rell, 0.64));
+            cara([[x, y], [x + ex2, y - ey2], [x + p.w + ex2, y - ey2], [x + p.w, y]], sombra(rell, 0.75));
+            cara([[x, y], [x + p.w, y], [x + p.w, y + p.h], [x, y + p.h]], rell);
+            // Como COM: la caja de todo el prisma.
+            p.x = x; p.y = y - ey2; p.w += ex2; p.h += ey2;
           });
         } else if (grupo.tipo === 'barra') {
           sg.puntos.forEach((p, i) => {
@@ -1273,7 +1407,8 @@ const PptxGrafico = (() => {
         etiquetas.forEach((x, i) => {
           if (i % salto) return;
           const u = paso * (i + desplazamiento);
-          const centro = vertical ? (e.invertido ? t.y + u : t.y + t.h - u) : (e.invertido ? t.x + t.w - u : t.x + u);
+          // En 3D, centradas en el frente de las barras (medido).
+          const centro = (vertical ? (e.invertido ? t.y + u : t.y + t.h - u) : (e.invertido ? t.x + t.w - u : t.x + u)) + (c3 ? (vertical ? -c3.a * c3.sy : c3.a * c3.sx) : 0);
           if (vertical) {
             const xDer = e.pos === 'l' ? bordeX - AIRE_CATEGORIAS_IZQ : bordeX + AIRE_CATEGORIAS_IZQ;
             const lineas = [x.texto];
@@ -1681,11 +1816,54 @@ const PptxGrafico = (() => {
     });
   }
 
-  // Circular 3D (aproximado): primero los costados de la mitad de adelante,
-  // más oscuros, y encima las caras de arriba.
+  // Un relleno liso oscurecido (las caras de los 3D); los demás, igual.
+  function sombra(r, f) {
+    return r && r.tipo === 'solido' ? { tipo: 'solido', color: { r: Math.round(r.color.r * f), g: Math.round(r.color.g * f), b: Math.round(r.color.b * f), a: r.color.a } } : r;
+  }
+
+  // Circular 3D (medido en imágenes de PowerPoint, sondeo-circular-3d.ps1;
+  // 06-graficos.md 6.4 quater). La cara de arriba es el círculo en
+  // perspectiva: el punto de ángulo θ va a (a·cos θ·k, b·sen θ·k) desde el
+  // centro, con k = 1 / (1 − u·sen θ) (lo de adelante, más grande); el
+  // costado baja d·k. u, b/a y d/a salen de tablas por elevación (rotX) con
+  // la perspectiva 30 de siempre, corregidas por perspectiva. Los costados
+  // tienen un degradado de izquierda a derecha: el color × 0,89 en el borde
+  // izquierdo, que baja parejo hasta × 0,395 al 73 % del ancho y sigue así.
+  const CIRCULAR_3D = {
+    u: [[0, 0.27], [15, 0.248], [30, 0.19], [60, 0.074], [80, 0.028], [90, 0]],
+    b: [[0, 0], [15, 0.202], [30, 0.463], [60, 0.874], [80, 0.999], [90, 1]],
+    d: [[0, 0.33], [15, 0.303], [30, 0.244], [60, 0.104], [80, 0.019], [90, 0]],
+  };
+  // Por perspectiva (medido solo con rotX 30; [calibrar] más allá de 100).
+  const PERSPECTIVA_3D = {
+    u: [[0, 0], [30, 1], [60, 2.09], [100, 3.26], [240, 4.5]],
+    b: [[0, 1.09], [30, 1], [60, 0.811], [100, 0.447], [240, 0.3]],
+    d: [[0, 0.877], [30, 1], [60, 1.217], [100, 1.8], [240, 2.2]],
+  };
+  function interpolar(tabla, x) {
+    if (x <= tabla[0][0]) return tabla[0][1];
+    for (let i = 1; i < tabla.length; i++) if (x <= tabla[i][0]) { const [x0, y0] = tabla[i - 1], [x1, y1] = tabla[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); }
+    return tabla[tabla.length - 1][1];
+  }
+  function forma3D(rotX, perspectiva) {
+    const e = Math.max(0, Math.min(90, rotX)), p = Math.max(0, Math.min(240, perspectiva));
+    return {
+      u: Math.min(0.9, interpolar(CIRCULAR_3D.u, e) * interpolar(PERSPECTIVA_3D.u, p)),
+      b: interpolar(CIRCULAR_3D.b, e) * interpolar(PERSPECTIVA_3D.b, p),
+      d: interpolar(CIRCULAR_3D.d, e) * interpolar(PERSPECTIVA_3D.d, p),
+    };
+  }
+
+  // Primero los costados de la mitad de adelante y encima las caras de arriba.
   function dibujarCircular3D(ctx, g, geo, rellenar, trazar, salida) {
     const grupo = g.grupos[0], s = grupo.series[0];
-    const { cx, cy, a, b, d } = geo.circular3D;
+    const { cx, cy, a, b, u, d } = geo.circular3D;
+    const k = (th) => 1 / (1 - u * Math.sin(th)), kFrente = k(Math.PI / 2);
+    const punto = (ox, oy, th, abajo) => { const f = k(th); return [ox + a * Math.cos(th) * f, oy + b * Math.sin(th) * f + (abajo ? d * f / kFrente : 0)]; };
+    const arco = (p, ox, oy, desde, hasta, abajo, mover) => {
+      const n = Math.max(2, Math.ceil(Math.abs(hasta - desde) / (Math.PI / 90)));
+      for (let j = 0; j <= n; j++) { const [x, y] = punto(ox, oy, desde + (hasta - desde) * j / n, abajo); if (j === 0 && mover) p.moveTo(x, y); else p.lineTo(x, y); }
+    };
     const vals = s.valores.map((v) => (v != null && v > 0 ? v : 0));
     const total = vals.reduce((x, y) => x + y, 0) || 1;
     const rebanadas = [];
@@ -1698,13 +1876,20 @@ const PptxGrafico = (() => {
       rebanadas.push({ i, desde: ang, hasta: ang + da, dx: Math.cos(medio) * expl * a, dy: Math.sin(medio) * expl * b, rell, linea: pt.linea !== undefined ? pt.linea : s.linea });
       ang += da;
     });
-    const oscuro = (r) => (r && r.tipo === 'solido' ? { tipo: 'solido', color: { r: Math.round(r.color.r * 0.7), g: Math.round(r.color.g * 0.7), b: Math.round(r.color.b * 0.7), a: r.color.a } } : r);
     const pintar = (path, rell) => {
       const t = geo.trazado;
       ctx.save(); ctx.translate(t.x, t.y);
       const local = new Path2D(); local.addPath(path, new DOMMatrix().translate(-t.x, -t.y));
       rellenar(rell, local, t.w, t.h);
       ctx.restore();
+    };
+    const medioAncho = a / Math.sqrt(1 - u * u);
+    const degradado = (r) => {
+      if (!r || r.tipo !== 'solido') return null;
+      const c = r.color, tono = (f) => `rgba(${Math.round(c.r * f)},${Math.round(c.g * f)},${Math.round(c.b * f)},${c.a})`;
+      const gr = ctx.createLinearGradient(cx - medioAncho, 0, cx + medioAncho, 0);
+      gr.addColorStop(0, tono(0.89)); gr.addColorStop(0.728, tono(0.395)); gr.addColorStop(1, tono(0.395));
+      return gr;
     };
     // Costados: la parte de cada rebanada que cae en la mitad de adelante (seno > 0).
     for (const r of rebanadas) {
@@ -1713,21 +1898,21 @@ const PptxGrafico = (() => {
         if (fin <= ini) continue;
         const ox = cx + r.dx, oy = cy + r.dy;
         const p = new Path2D();
-        p.ellipse(ox, oy, a, b, 0, ini, fin);
-        p.lineTo(ox + a * Math.cos(fin), oy + b * Math.sin(fin) + d);
-        p.ellipse(ox, oy + d, a, b, 0, fin, ini, true);
+        arco(p, ox, oy, ini, fin, false, true);
+        arco(p, ox, oy, fin, ini, true, false);
         p.closePath();
-        pintar(p, oscuro(r.rell));
+        const gr = degradado(r.rell);
+        if (gr) { ctx.save(); ctx.fillStyle = gr; ctx.fill(p); ctx.restore(); } else pintar(p, sombra(r.rell, 0.6));
       }
     }
     const registro = { nombre: s.nombre, puntos: [] };
     for (const r of rebanadas) {
       const ox = cx + r.dx, oy = cy + r.dy;
       const p = new Path2D();
-      p.moveTo(ox, oy); p.ellipse(ox, oy, a, b, 0, r.desde, r.hasta); p.closePath();
+      p.moveTo(ox, oy); arco(p, ox, oy, r.desde, r.hasta, false, false); p.closePath();
       pintar(p, r.rell);
       trazar(r.linea, p);
-      registro.puntos.push({ caja: { x: ox - a, y: oy - b, w: 2 * a, h: 2 * b + d } });
+      registro.puntos.push({ caja: { x: ox - medioAncho, y: oy - b / (1 + u), w: 2 * medioAncho, h: b / (1 + u) + b / (1 - u) + d } });
     }
     salida.series.push(registro);
   }
@@ -1823,8 +2008,11 @@ const PptxGrafico = (() => {
     const pasos = L.entradas.map((en, i) => (en.larga ? M.paso : PASO_CAJA) * l.tamano + L.anchos[i]);
     let x = L.horizontal ? L.x + (L.w - M.inicio - pasos.reduce((a, b) => a + b, 0)) / 2 + M.inicio : L.x + 1.5, y = L.y + L.padV / 2;
     L.entradas.forEach((en, i) => {
+      if (L.grilla) { x = L.x + (i % L.grilla.columnas) * L.grilla.columna; y = L.y + L.padV / 2 + Math.floor(i / L.grilla.columnas) * (lh + L.padV); }
+      else if (L.fila) x = L.x + L.fila.hueco * (i + 1) + L.entradas.slice(0, i).reduce((a, _, j) => a + L.anchos[j] + L.fila.extra, 0);
+      const lineasEntrada = L.lineas ? L.lineas[i] : [en.texto];
       const largoMuestra = en.larga ? M.largo * l.tamano : lado;
-      const centroY = y + lh / 2;
+      const centroY = y + lineasEntrada.length * lh / 2;
       const mx = x + (en.larga ? M.desde : 3.29);
       if (en.tipoMuestra === 'linea') {
         const p = new Path2D(); p.moveTo(mx, centroY); p.lineTo(mx + largoMuestra, centroY);
@@ -1842,9 +2030,9 @@ const PptxGrafico = (() => {
         trazar(blanca ? null : en.linea, rect(mx, centroY - lado / 2, largoMuestra, lado));
       }
       const tx = mx + largoMuestra + 3.5; // medido en píxeles
-      escribir(ctx, en.texto, l, tx, y + asc, 'left');
+      lineasEntrada.forEach((t, k) => escribir(ctx, t, l, tx, y + asc + k * lh, 'left'));
       if (L.horizontal) x += pasos[i];
-      else y += lh + L.padV;
+      else y += lineasEntrada.length * lh + L.padV;
     });
   }
 

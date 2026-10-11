@@ -199,7 +199,7 @@ function Palabras([int]$n) {
 # Un gráfico con sus datos: categorías (texto o números) y series (nombre →
 # valores). La tabla de datos se ajusta al rango exacto: si no, quedan filas
 # de los datos de ejemplo de Excel (los de áreas traen cinco filas).
-function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h, [string]$nombre, $categorias, $series, [string]$titulo = '') {
+function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h, [string]$nombre, $categorias, $series, [string]$titulo = '', [switch]$PorColumnas) {
     $sh = $d.Shapes.AddChart2(-1, $tipo, $x, $y, $w, $h, $msoTrue)
     $sh.Name = $nombre
     $ch = $sh.Chart
@@ -220,7 +220,9 @@ function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h,
             for ($c = 0; $c -lt $nombres.Count; $c++) { $ws.Cells.Item($r + 2, $c + 2).Value2 = [double]$series[$nombres[$c]][$r] }
         }
         $rango = $ws.Range($ws.Cells.Item(1, 1), $ws.Cells.Item($categorias.Count + 1, $nombres.Count + 1))
-        try { $ch.SetSourceData("='" + $ws.Name + "'!" + $rango.Address()) } catch { Registrar ('origen de datos de ' + $nombre) $_ }
+        # Sin PorColumnas, PowerPoint toma las filas como series si hay más
+        # series que categorías (los corpus viejos quedaron así).
+        try { if ($PorColumnas) { $ch.SetSourceData("='" + $ws.Name + "'!" + $rango.Address(), 2) } else { $ch.SetSourceData("='" + $ws.Name + "'!" + $rango.Address()) } } catch { Registrar ('origen de datos de ' + $nombre) $_ }
         try { $ch.Refresh() } catch { }
         Start-Sleep -Milliseconds 700   # que PowerPoint vuelque los datos al gráfico antes de cerrar la hoja
     } finally { if ($wb -ne $null) { try { $wb.Close() } catch { } } }
@@ -1832,6 +1834,45 @@ try {
                 $cats = if ($k.c) { $k.c } else { $trim }
                 $ser = if ($k.s) { $k.s } else { $tres }
                 $sh = Grafico $d $k.t $x $y 456 244 "Raro_$i" $cats $ser $k.n
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
+    # ============================================================ 18 gráficos: leyendas, 3D y salto
+    # Casos que no se usaron para calibrar las reglas de 06-graficos.md 6.4
+    # quater: leyenda en filas, leyenda partida, tabla con seis series, 3D
+    # con otros ángulos, profundidad y apiladas, y etiquetas salteadas.
+    Nuevo-Archivo '18-graficos-leyendas-3d.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        $seis = [ordered]@{}; foreach ($k in 1..6) { $seis["Región $k"] = @((($k * 3) % 7 + 1), (($k * 5) % 7 + 2), (($k * 2) % 5 + 1), (($k * 4) % 6 + 2)) }
+        $nueve = [ordered]@{}; foreach ($k in 1..9) { $nueve["Producto $k"] = @((($k * 3) % 7 + 1), (($k * 5) % 7 + 2), (($k * 2) % 5 + 1), (($k * 4) % 6 + 2)) }
+        $largas = [ordered]@{ 'Ventas del primer semestre del año' = @(4, 5, 3, 6); 'Ventas del segundo semestre' = @(3, 4, 5, 4) }
+        $casos = @(
+            @{ n = 'Leyenda en dos filas'; t = 51; s = $nueve; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Leyenda de líneas abajo'; t = 4; s = $seis; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Leyenda partida a la derecha'; t = 51; s = $largas; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Tabla con seis series'; t = 51; s = $seis; f = { param($ch) $ch.HasDataTable = $true; $ch.HasLegend = $false } },
+            @{ n = 'Columnas 3D giradas'; t = 54; f = { param($ch) $ch.Elevation = 30; $ch.Rotation = 35 } },
+            @{ n = 'Columnas 3D apiladas'; t = 55 },
+            @{ n = 'Barras 3D profundas'; t = 60; f = { param($ch) $ch.DepthPercent = 200 } },
+            @{ n = 'Circular 3D alto'; t = -4102; s = [ordered]@{ Partes = @(30, 30, 25, 15) }; f = { param($ch) $ch.Elevation = 50 } },
+            @{ n = 'Cuarenta categorías'; t = 51; c = @(1..40 | ForEach-Object { "C$_" }); s = [ordered]@{ Valor = @(1..40 | ForEach-Object { ($_ * 37) % 11 + 1 }) } },
+            @{ n = 'Leyenda arriba en filas'; t = 51; s = $nueve; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4160 } },
+            @{ n = 'Barras con tres series'; t = 57; s = $tres; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Circular 3D sin perspectiva'; t = -4102; s = [ordered]@{ Partes = @(45, 25, 20, 10) }; f = { param($ch) $ch.Perspective = 0 } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Leyendas y 3D " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $trim }
+                $ser = if ($k.s) { $k.s } else { $tres }
+                $sh = Grafico $d $k.t $x $y 456 244 "Leyenda3D_$i" $cats $ser $k.n -PorColumnas
                 if ($k.f) { & $k.f $sh.Chart }
             }
         }
