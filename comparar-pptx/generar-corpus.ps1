@@ -1985,6 +1985,30 @@ try {
         }
     } 960 540 $true
 
+    # ============================================================ 22 gráficos: paredes y piso 3D
+    # Paredes y piso con relleno y línea en columnas y barras 3D.
+    Nuevo-Archivo '22-graficos-paredes.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        $pintar = { param($f, $r, $g, $b) $f.Visible = $msoTrue; $f.Solid(); $f.ForeColor.RGB = (RGB $r $g $b) }
+        $casos = @(
+            @{ n = 'Columnas 3D con fondo y piso'; t = 54; f = { param($ch) & $pintar $ch.BackWall.Format.Fill 220 230 242; & $pintar $ch.Floor.Format.Fill 200 200 200 } },
+            @{ n = 'Barras 3D con paredes'; t = 60; f = { param($ch) & $pintar $ch.BackWall.Format.Fill 255 242 204; & $pintar $ch.SideWall.Format.Fill 226 239 218; $ch.BackWall.Format.Line.Visible = $msoTrue; $ch.BackWall.Format.Line.ForeColor.RGB = (RGB 120 120 120) } },
+            @{ n = 'Columnas 3D con piso'; t = 54; f = { param($ch) & $pintar $ch.Floor.Format.Fill 191 191 191 } },
+            @{ n = 'Columnas 3D apiladas con paredes'; t = 55; f = { param($ch) & $pintar $ch.SideWall.Format.Fill 242 220 219; & $pintar $ch.BackWall.Format.Fill 221 235 247; & $pintar $ch.Floor.Format.Fill 217 217 217 } }
+        )
+        $d = Nueva-Diap $pres 'Paredes y piso 3D'
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $sh = Grafico $d $k.t $x $y 456 244 "Paredes_$i" $trim $tres $k.n -PorColumnas
+                & $k.f $sh.Chart
+            }
+        }
+    } 960 540 $true
+
     # ============================================================ 13 patrón y diseño
     Nuevo-Archivo '13-patron-y-diseno.pptx' {
         param($pres)

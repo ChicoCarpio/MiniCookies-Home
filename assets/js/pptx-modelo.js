@@ -26,12 +26,8 @@ const PptxModelo = (() => {
   const COLORES = ['srgbClr', 'schemeClr', 'sysClr', 'prstClr', 'hslClr', 'scrgbClr'];
 
   // --- XML ---------------------------------------------------------------------
-  const hijos = (el, nombre) => el ? [...el.children].filter((h) => h.localName === nombre) : [];
-  const hijo = (el, nombre) => { if (!el) return null; for (const h of el.children) if (h.localName === nombre) return h; return null; };
-  const ruta = (el, ...nombres) => nombres.reduce((e, n) => hijo(e, n), el);
-  const todos = (el, nombre) => el ? [...el.getElementsByTagNameNS('*', nombre)] : [];
+  const { hijo, hijos, ruta, todos, parsear } = PptxXml;
   const primero = (el, nombres) => { if (!el) return null; for (const h of el.children) if (nombres.includes(h.localName)) return h; return null; };
-  const parsear = (texto) => new DOMParser().parseFromString(texto, 'application/xml');
   const ent = (el, a, def = null) => { if (!el || !el.hasAttribute(a)) return def; const n = parseInt(el.getAttribute(a), 10); return Number.isFinite(n) ? n : def; };
   const bool = (el, a, def = false) => { if (!el || !el.hasAttribute(a)) return def; const v = el.getAttribute(a); return v === '1' || v === 'true'; };
 

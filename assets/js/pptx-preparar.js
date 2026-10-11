@@ -35,11 +35,7 @@ const PptxPreparar = (() => {
     symbol: { '·': '•', 'Þ': '⇒', '®': '→', 'à': '◊', '¨': '♣', '©': '♦', 'ª': '♥', '«': '♠' },
   };
 
-  const hijos = (el, nombre) => el ? [...el.children].filter((h) => h.localName === nombre) : [];
-  const hijo = (el, nombre) => hijos(el, nombre)[0] || null;
-  const ruta = (el, ...nombres) => nombres.reduce((e, n) => hijo(e, n), el);
-  const todos = (el, nombre) => el ? [...el.getElementsByTagNameNS('*', nombre)] : [];
-  const parsear = (texto) => new DOMParser().parseFromString(texto, 'application/xml');
+  const { hijo, hijos, ruta, todos, parsear } = PptxXml;
   const crear = (doc, ns, nombre) => doc.createElementNS(NS[ns], `${ns}:${nombre}`);
 
   // "../media/x.png" relativo a "ppt/slides/slide1.xml" → "ppt/media/x.png"

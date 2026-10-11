@@ -80,7 +80,12 @@ const PptxTexto = (() => {
     const metricas = METRICAS[n.toLowerCase()];
     return `"${n}"${metricas ? `, "${metricas.familia}"` : ''}${sust ? `, "${sust}"` : ''}, "Segoe UI", sans-serif`;
   }
+  // La fuente CSS de una letra { fuente, tamano, negrita, cursiva } a px
+  // píxeles. Compartida con pptx-grafico.js.
   const css = (t, px) => `${t.cursiva ? 'italic ' : ''}${t.negrita ? 'bold ' : ''}${px.toFixed(3)}px ${familia(t.fuente)}`;
+  // PowerPoint hace kerning solo con kern y desde ese tamaño (sin kern, nunca);
+  // el canvas lo hace siempre si no se le dice. tamPt: el tamaño en pt.
+  const kerningDe = (t, tamPt) => (t.kern > 0 && tamPt >= t.kern - 0.001 ? 'normal' : 'none');
   const colorCss = (c) => c ? `rgba(${c.r},${c.g},${c.b},${c.a})` : null;
   function colorDeRelleno(r) {
     if (!r) return null;
@@ -130,9 +135,7 @@ const PptxTexto = (() => {
     const lineas = [];
     let y = 0;
 
-    // PowerPoint hace kerning solo con kern y desde ese tamaño (sin kern, nunca);
-    // el canvas lo hace siempre si no se le dice.
-    const kerning = (t, px) => t.kern > 0 && px / ptPx >= t.kern - 0.001 ? 'normal' : 'none';
+    const kerning = (t, px) => kerningDe(t, px / ptPx);
     const medir = (t, s, px) => {
       ctx.fontKerning = kerning(t, px);
       ctx.font = css(t, px);
@@ -335,5 +338,5 @@ const PptxTexto = (() => {
     return w;
   }
 
-  return { maquetar, familia, colorCss, cargarFuentes };
+  return { maquetar, familia, colorCss, cargarFuentes, fuenteCss: css, kerningDe };
 })();

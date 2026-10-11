@@ -23,9 +23,7 @@
 
 const PptxGrafico = (() => {
   // --- XML -------------------------------------------------------------------------
-  const hijos = (el, nombre) => el ? [...el.children].filter((h) => h.localName === nombre) : [];
-  const hijo = (el, nombre) => { if (!el) return null; for (const h of el.children) if (h.localName === nombre) return h; return null; };
-  const ruta = (el, ...nombres) => nombres.reduce((e, n) => hijo(e, n), el);
+  const { hijo, hijos, ruta } = PptxXml;
   const val = (el, def = null) => (el && el.hasAttribute('val') ? el.getAttribute('val') : def);
   const num = (el, def = null) => { const v = val(el); const n = v == null ? NaN : parseFloat(v); return Number.isFinite(n) ? n : def; };
   const si = (el, def = false) => { if (!el) return def; const v = val(el, '1'); return v === '1' || v === 'true'; };
@@ -222,6 +220,11 @@ const PptxGrafico = (() => {
       perspectiva: num(ruta(chart, 'view3D', 'perspective'), 30),
       profundidad: num(ruta(chart, 'view3D', 'depthPercent'), 100),
       ejesRectos: si(ruta(chart, 'view3D', 'rAngAx'), true),
+      // Paredes y piso de un 3D: su relleno y su línea (sin spPr, nada).
+      paredes: Object.fromEntries([['fondo', 'backWall'], ['lado', 'sideWall'], ['piso', 'floor']].map(([k, n]) => {
+        const spPr = ruta(chart, n, 'spPr');
+        return [k, { relleno: r.relleno(spPr) ?? null, linea: linea(spPr) ?? null }];
+      })),
     };
   }
 
@@ -591,7 +594,7 @@ const PptxGrafico = (() => {
   }
 
   // --- Medir texto ---------------------------------------------------------------------------------
-  function cssLetra(l, px) { return `${l.cursiva ? 'italic ' : ''}${l.negrita ? 'bold ' : ''}${px.toFixed(3)}px ${PptxTexto.familia(l.fuente)}`; }
+  const cssLetra = (l, px) => PptxTexto.fuenteCss(l, px);
   function medidor(ctx) {
     const cache = new Map();
     return {
@@ -600,7 +603,7 @@ const PptxGrafico = (() => {
         if (!cache.has(clave)) {
           ctx.save();
           ctx.font = cssLetra(l, 100);
-          ctx.fontKerning = l.kern > 0 && l.tamano >= l.kern ? 'normal' : 'none';
+          ctx.fontKerning = PptxTexto.kerningDe(l, l.tamano);
           ctx.letterSpacing = '0px';
           cache.set(clave, ctx.measureText(texto).width / 100 * l.tamano);
           ctx.restore();
@@ -1284,7 +1287,7 @@ const PptxGrafico = (() => {
   function escribir(ctx, texto, l, x, yBase, alinear = 'left', giro = 0) {
     ctx.save();
     ctx.font = cssLetra(l, l.tamano);
-    ctx.fontKerning = l.kern > 0 && l.tamano >= l.kern ? 'normal' : 'none';
+    ctx.fontKerning = PptxTexto.kerningDe(l, l.tamano);
     ctx.letterSpacing = '0px';
     ctx.fillStyle = `rgba(${l.color.r},${l.color.g},${l.color.b},${l.color.a})`;
     ctx.textAlign = alinear; ctx.textBaseline = 'alphabetic';
@@ -1304,6 +1307,29 @@ const PptxGrafico = (() => {
       if (e.invertido) u = 1 - u;
       return e.pos === 'b' || e.pos === 't' ? t.x + u * t.w : t.y + t.h - u * t.h;
     };
+    // Paredes y piso de un 3D (debajo de todo): el piso abajo del frente
+    // hacia el fondo, la pared de la izquierda y la del fondo. Con la luz de
+    // PowerPoint (medido, corpus 22): piso × 0,76, pared izquierda × 0,64,
+    // fondo tal cual. [calibrar] el grosor (c:thickness) y el piso cuando el
+    // eje cruza en el medio.
+    if (c3 && g.paredes) {
+      const dx = c3.D * c3.sx, dy = c3.D * c3.sy, b = t.y + t.h;
+      const caras = [
+        [g.paredes.piso, 0.76, [[t.x, b], [t.x + t.w, b], [t.x + t.w + dx, b - dy], [t.x + dx, b - dy]]],
+        [g.paredes.lado, 0.64, [[t.x, b], [t.x + dx, b - dy], [t.x + dx, t.y - dy], [t.x, t.y]]],
+        [g.paredes.fondo, 1, [[t.x + dx, t.y - dy], [t.x + t.w + dx, t.y - dy], [t.x + t.w + dx, b - dy], [t.x + dx, b - dy]]],
+      ];
+      for (const [cara, luz, pts] of caras) {
+        if (!cara || (!cara.relleno && !cara.linea)) continue;
+        const path = new Path2D(); pts.forEach(([x, y], j) => (j ? path.lineTo(x, y) : path.moveTo(x, y))); path.closePath();
+        const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]), mx = Math.min(...xs), my = Math.min(...ys);
+        ctx.save(); ctx.translate(mx, my);
+        const local = new Path2D(); local.addPath(path, new DOMMatrix().translate(-mx, -my));
+        rellenar(luz === 1 ? cara.relleno : sombra(cara.relleno, luz), local, Math.max(...xs) - mx, Math.max(...ys) - my);
+        ctx.restore();
+        trazar(cara.linea, path);
+      }
+    }
     // Cuadrícula (debajo de todo).
     for (const e of geo.todosLosEjes) {
       if (!e.cuadricula || e.borrado && !e.cuadricula) continue;

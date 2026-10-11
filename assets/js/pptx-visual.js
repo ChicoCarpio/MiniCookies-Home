@@ -9,6 +9,13 @@
 // resolución en vez de 1 píxel de canvas = 1 punto de PDF, que se ve borroso.
 const ESCALA_RENDERIZADO = 6;
 
+// El motor propio, en el orden en que se carga: la lista única. Unir PDF lo
+// carga de acá (archivo-a-pdf.js) y PowerPoint → PDF e → imágenes lo traen en
+// <script> en este mismo orden, lo que el build comprueba (motor-pptx.mjs):
+// cuando cada página tenía su copia de la lista, Unir PDF se quedó sin el
+// motor propio y dibujaba con PptxViewJS. Necesita además vendor.js y JSZip.
+const SCRIPTS_MOTOR_PPTX = ['pptx-xml.js', 'pptx-preparar.js', 'vendor/ecma-376-geometrias/5ed-2016/geometrias.js', 'emf.js', 'pptx-geometria.js', 'pptx-estilos-tabla.js', 'pptx-modelo.js', 'pptx-texto.js', 'pptx-grafico.js', 'pptx-dibujo.js', 'pptx-visual.js'];
+
 const EMU_POR_PULGADA = 914400; // unidad interna de PowerPoint (English Metric Units)
 const PUNTOS_POR_PULGADA = 72;  // unidad de PDF
 const PIXELES_BASE_POR_PULGADA = 96; // referencia estándar de pantalla, antes de aplicar ESCALA_RENDERIZADO
@@ -94,7 +101,7 @@ async function renderizarDiapositivasComoImagenes(archivo, canvas, alAvanzar, op
   // Motor propio: el predeterminado desde el 2026-10-10 (mejor o igual que
   // PptxViewJS en las 118 diapositivas de npm run comparar-pptx; ver
   // dibujarConMotorPropio). { motor: 'pptxviewjs' } fuerza la librería (para
-  // medirla); las páginas que no cargan el motor (Unir PDF) la usan siempre.
+  // medirla); una página que no cargó el motor (SCRIPTS_MOTOR_PPTX) la usa siempre.
   if (opciones.motor !== 'pptxviewjs' && typeof PptxModelo !== 'undefined') {
     try {
       return await dibujarConMotorPropio(archivo, canvas, alAvanzar, opciones);

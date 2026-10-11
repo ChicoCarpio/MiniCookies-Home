@@ -1039,6 +1039,32 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'escala ' + eje.min + '…' + eje.max + ' de a ' + eje.unidad + ', centro de la barra ' + px;
   });
 
+  // Unir PDF carga el motor de PowerPoint de la lista única de pptx-visual.js
+  // (SCRIPTS_MOTOR_PPTX). Antes tenía su propia lista, se quedó sin el motor
+  // propio cuando pasó a ser el predeterminado y dibujaba con PptxViewJS. El
+  // motor no tiene que estar antes de convertir (si no, la prueba no vería
+  // nada) y después un gráfico tiene que salir del motor propio.
+  await prueba('unir-pdf: un PowerPoint se dibuja con el motor propio', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    afirmar(W().eval('typeof PptxModelo') === 'undefined', 'el motor ya estaba cargado antes de convertir: la prueba no vería si Unir PDF lo carga');
+    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+      await new Promise((listo, error) => {
+        const s = D().createElement('script');
+        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        D().head.appendChild(s);
+      });
+    }
+    const pres = new (W().PptxGenJS)();
+    pres.addSlide().addChart(pres.ChartType.bar, [{ name: 'Ventas', labels: ['Uno', 'Dos', 'Tres'], values: [3, 5, 4] }], { x: 0.5, y: 0.5, w: 6, h: 4 });
+    const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'grafico.pptx');
+    const bytes = new Uint8Array(await W().ArchivoAPdf.convertir(archivo, () => {}));
+    afirmar(String.fromCharCode(...bytes.slice(0, 5)) === '%PDF-', 'no salió un PDF');
+    afirmar(W().eval('typeof PptxModelo') !== 'undefined' && W().eval('typeof PptxGrafico') !== 'undefined', 'Unir PDF no cargó el motor propio');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, D().createElement('canvas'), null, { conImagenes: false });
+    afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio' && imagenes[0].graficos, 'no lo dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor));
+    return 'PDF de ' + bytes.length + ' bytes, motor ' + imagenes[0].motor;
+  });
+
   // Casos raros de pptx-grafico.js que encontró la revisión del 2026-10-10:
   // fondo <a:noFill/> que salía blanco, a:ln sin color (python-pptx) que
   // dejaba la línea invisible, barras que salían del gráfico con un máximo
@@ -1091,7 +1117,9 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     // Formatos: miles con coma, condiciones, científico, fechas y lo que no entiende.
     const dec = G.formatear(1.5, '0.0').charAt(1);
     const formatos = [[1234567, '#,##0,"K"', '1' + G.formatear(1235, '#,##0').slice(1) + 'K'], [5000, '[>=1000000]0.0,,"M";[>=1000]0.0,"K";0', '5' + dec + '0K'], [12345.678, '0.00E+00', '1' + dec + '23E+04'],
-      [1.5e20, 'General', '1' + dec + '5E+20'], [44000, 'm/d/yyyy', '6/18/2020'], [0.5, '@', '0' + dec + '5']];
+      [1.5e20, 'General', '1' + dec + '5E+20'], [44000, 'd/m/yyyy', '18/6/2020'], [0.5, '@', '0' + dec + '5'],
+      // "m/d/yyyy" es la fecha corta del sistema (formato 14 de Excel): en el idioma de quien mira, como PowerPoint.
+      [44000, 'm/d/yyyy', new (W().Intl.DateTimeFormat)(undefined, { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new (W().Date)(Date.UTC(2020, 5, 18)))]];
     for (const [v, codigo, esperado] of formatos) afirmar(G.formatear(v, codigo) === esperado, 'formato ' + codigo + ' con ' + v + ': ' + G.formatear(v, codigo) + ' (esperado ' + esperado + ')');
     return 'transparente, línea automática, recorte, #N/A y ' + formatos.length + ' formatos bien';
   });

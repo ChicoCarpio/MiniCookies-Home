@@ -148,7 +148,7 @@ const PptxGeometria = (() => {
   // custGeom (o prstGeom con avLst) del XML → la misma forma que las predefinidas.
   const LETRAS = { moveTo: 'M', lnTo: 'L', arcTo: 'A', quadBezTo: 'Q', cubicBezTo: 'C', close: 'Z' };
   function desdeXml(custGeom) {
-    const hijo = (el, n) => el && [...el.children].find((h) => h.localName === n);
+    const { hijo } = PptxXml;
     const guias = (n) => { const l = hijo(custGeom, n); return l ? [...l.children].filter((g) => g.localName === 'gd').map((g) => [g.getAttribute('name'), g.getAttribute('fmla')]) : []; };
     const rect = hijo(custGeom, 'rect');
     const pathLst = hijo(custGeom, 'pathLst');

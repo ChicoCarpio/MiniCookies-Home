@@ -103,7 +103,9 @@
             window.FileReader = fileReaderNativo;
           }
         }
-        await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-preparar.js'), propio('pptx-visual.js')]);
+        // El motor propio, con la lista única de pptx-visual.js.
+        await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-visual.js')]);
+        await cargarEnOrden(SCRIPTS_MOTOR_PPTX.map((x) => (x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : propio(x))));
       },
       // Sin conImagenes: Unir PDF no muestra las diapositivas sueltas ni arma su .zip.
       convertir: async (archivo, alAvanzar) => (await powerPointAPdf(archivo, null, (n, total) => alAvanzar(0.9 * n / total), { conImagenes: false })).pdf.save(),
