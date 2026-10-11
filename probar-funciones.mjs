@@ -1016,8 +1016,12 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       return new (W().File)([await pres.write({ outputType: 'blob' })], 'grafico.pptx');
     };
     const Tipos = new (W().PptxGenJS)().ChartType;
-    const burbujas = await (await W().eval('PptxModelo').abrir(await armar(Tipos.bubble))).diapositiva(0);
-    afirmar(!burbujas.soportada, 'un gráfico de burbujas no debería estar soportado todavía: la prueba no vería el error');
+    // Superficie no está soportado: el mismo gráfico de barras con el tipo cambiado.
+    const zipSup = await W().JSZip.loadAsync(await armar(Tipos.bar));
+    const nombreSup = Object.keys(zipSup.files).find((n) => /charts\/chart\d+\.xml$/.test(n));
+    zipSup.file(nombreSup, (await zipSup.file(nombreSup).async('string')).replace(/c:barChart>/g, 'c:surfaceChart>'));
+    const superficie = await (await W().eval('PptxModelo').abrir(new (W().File)([await zipSup.generateAsync({ type: 'blob' })], 'sup.pptx'))).diapositiva(0);
+    afirmar(!superficie.soportada, 'un gráfico de superficie no debería estar soportado todavía: la prueba no vería el error');
     const archivo = await armar(Tipos.bar);
     const d = await (await W().eval('PptxModelo').abrir(archivo)).diapositiva(0);
     afirmar(d.soportada, 'el motor propio no tomó el gráfico: ' + d.motivos.join(', '));

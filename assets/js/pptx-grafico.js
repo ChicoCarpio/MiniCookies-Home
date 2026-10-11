@@ -54,7 +54,7 @@ const PptxGrafico = (() => {
   const DIVISORES = { hundreds: 1e2, thousands: 1e3, tenThousands: 1e4, hundredThousands: 1e5, millions: 1e6, tenMillions: 1e7, hundredMillions: 1e8, billions: 1e9, trillions: 1e12 };
   // Los que sabe dibujar; con otro, el gráfico queda sin soporte (lo dibuja
   // la librería de respaldo).
-  const SOPORTADOS = new Set(['barra', 'linea', 'area', 'circular', 'anillo', 'dispersion', 'radar']);
+  const SOPORTADOS = new Set(['barra', 'linea', 'area', 'circular', 'anillo', 'dispersion', 'radar', 'burbuja']);
 
   // raiz: <c:chartSpace>. r (de pptx-modelo.js):
   //   r.relleno(spPr) → relleno | null (sin relleno) | undefined (no dice)
@@ -107,6 +107,7 @@ const PptxGrafico = (() => {
         separacion: num(hijo(el, 'gapWidth'), 150) / 100, solapamiento: num(hijo(el, 'overlap'), 0) / 100,
         hueco: num(hijo(el, 'holeSize'), 10) / 100, anguloInicial: num(hijo(el, 'firstSliceAng'), 0),
         variarColores: si(hijo(el, 'varyColors')), estiloDispersion: val(hijo(el, 'scatterStyle'), 'marker'), estiloRadar: val(hijo(el, 'radarStyle'), 'marker'),
+        escalaBurbuja: num(hijo(el, 'bubbleScale'), 100), burbujaAncho: val(hijo(el, 'sizeRepresents'), 'area') === 'w', burbujasNegativas: si(hijo(el, 'showNegBubbles')),
         ejes: hijos(el, 'axId').map((a) => val(a)),
         etiquetas: etiquetasDe(hijo(el, 'dLbls'), r, letraBase, null),
         maxMin: hijo(el, 'hiLowLines') ? conDefecto(linea(hijo(hijo(el, 'hiLowLines'), 'spPr')), lineaFina({ r: 0, g: 0, b: 0, a: 1 })) : null,
@@ -123,6 +124,7 @@ const PptxGrafico = (() => {
           categorias: cat ? cat.valores : null, formatoCategorias: cat ? cat.formato : null,
           valores: (datos('val') || datos('yVal') || { valores: [] }).valores,
           formato: (datos('val') || datos('yVal') || {}).formato || 'General',
+          tamanos: (datos('bubbleSize') || {}).valores || null,
           relleno: r.relleno(spPr), linea: r.linea(spPr), // sinColor: lo completa automatico
           suave: si(hijo(s, 'smooth')), explosion: num(hijo(s, 'explosion'), 0) / 100,
           // Sin c:marker, la norma dice automático: en la dispersión (salvo
@@ -369,6 +371,14 @@ const PptxGrafico = (() => {
   // a, b: mínimo y máximo de los datos; n: divisiones que caben. Devuelve
   // { min, max, unidad }.
   function escala(a, b, n, fijo = {}) {
+    if (fijo.exacto && Number.isFinite(a) && Number.isFinite(b) && b > a) {
+      // Rango ya agrandado (burbujas): solo redondear a la unidad.
+      const lo = fijo.min != null ? fijo.min : a, hi = fijo.max != null ? fijo.max : b;
+      const unidad = fijo.unidad || agradable((hi - lo) / Math.max(1, n));
+      const min = fijo.min != null ? fijo.min : parseFloat((Math.floor(lo / unidad + 1e-9) * unidad).toFixed(10));
+      const max = fijo.max != null ? fijo.max : parseFloat((Math.ceil(hi / unidad - 1e-9) * unidad).toFixed(10));
+      return { min, max: max > min ? max : min + unidad, unidad };
+    }
     if (fijo.log) {
       // Logarítmica: de una potencia de la base a otra, una división por potencia.
       const B = fijo.log, lg = (x) => Math.log(x) / Math.log(B);
@@ -399,6 +409,14 @@ const PptxGrafico = (() => {
     const min = fijo.min != null ? fijo.min : ceroAbajo ? 0 : r(Math.floor(lo / unidad + 1e-9) * unidad);
     const max = fijo.max != null ? fijo.max : ceroArriba ? 0 : r(Math.ceil(hi / unidad - 1e-9) * unidad);
     return { min, max: max > min ? max : min + unidad, unidad };
+  }
+  // Diámetro de la burbuja mayor como fracción del lado menor del trazado,
+  // según bubbleScale (medido: 50 → 0,139, 100 → 0,2475, 200 → 0,40). [calibrar] el resto.
+  function fraccionBurbuja(escala) {
+    const puntos = [[0, 0], [50, 0.139], [100, 0.2475], [200, 0.4], [300, 0.52]];
+    const e = Math.max(0, Math.min(300, escala));
+    for (let i = 1; i < puntos.length; i++) if (e <= puntos[i][0]) { const [x0, y0] = puntos[i - 1], [x1, y1] = puntos[i]; return y0 + (y1 - y0) * (e - x0) / (x1 - x0); }
+    return 0.52;
   }
   // Valores de las marcas de una escala, y dónde cae un valor (0 a 1).
   function marcas(esc) {
@@ -727,6 +745,23 @@ const PptxGrafico = (() => {
     for (const grupo of g.grupos) {
       const ex = ejeDe(grupo, 0), ey = ejeDe(grupo, 1);
       const agregar = (e, v) => { if (!e || v == null || !Number.isFinite(v)) return; const r = rangos.get(e.id) || { a: Infinity, b: -Infinity }; r.a = Math.min(r.a, v); r.b = Math.max(r.b, v); rangos.set(e.id, r); };
+      if (grupo.tipo === 'burbuja') {
+        // Burbujas (medido, 06-graficos.md 6.4 ter): cada eje se agranda un
+        // radio de burbuja (f/2 del tramo final, f = diámetro de la mayor) a
+        // cada lado; el Y incluye siempre el 0; sin el 5 % de aire.
+        const f = fraccionBurbuja(grupo.escalaBurbuja);
+        const xs = [], ys = [];
+        for (const s of grupo.series) s.valores.forEach((v, i) => { if (v == null) return; ys.push(v); xs.push(s.categorias && typeof s.categorias[i] === 'number' ? s.categorias[i] : i + 1); });
+        const extender = (e, lista, conCero) => {
+          if (!e || !lista.length) return;
+          let a = Math.min(...lista), b = Math.max(...lista);
+          if (conCero) { a = Math.min(a, 0); b = Math.max(b, 0); }
+          const S = (b - a || Math.abs(b) || 1) / (1 - f), r = f / 2 * S;
+          rangos.set(e.id, { a: a - r, b: b + r, exacto: true });
+        };
+        extender(ex, xs, false); extender(ey, ys, true);
+        continue;
+      }
       if (grupo.tipo === 'dispersion') {
         for (const s of grupo.series) { (s.categorias || []).forEach((x, i) => agregar(ex, typeof x === 'number' ? x : i + 1)); s.valores.forEach((v) => agregar(ey, v)); }
         continue;
@@ -812,7 +847,7 @@ const PptxGrafico = (() => {
         const lh = med.linea(e.letra);
         const n = divisiones(acostado ? tw : th, e.letra.tamano, lh, acostado);
         // Los 3D, como el radar, no dejan aire después del dato (medido).
-        const fijo = { min: e.minFijo, max: e.maxFijo, unidad: e.unidadFija, log: e.log, sinAire: g.grupos.some((x) => x.es3D) };
+        const fijo = { min: e.minFijo, max: e.maxFijo, unidad: e.unidadFija, log: e.log, exacto: r.exacto, sinAire: g.grupos.some((x) => x.es3D) };
         if (r.porcentaje) { fijo.min = fijo.min ?? 0; fijo.max = fijo.max ?? 1; }
         escalas.set(e.id, escala(r.a, r.b, n, fijo));
       }
@@ -968,7 +1003,7 @@ const PptxGrafico = (() => {
       if (!grupo.ejes.includes(e.id)) continue;
       const s0 = grupo.series[0];
       // En la dispersión, el eje horizontal lleva el formato de los X.
-      const f = s0 && (grupo.tipo === 'dispersion' && grupo.ejes[0] === e.id ? s0.formatoCategorias : s0.formato);
+      const f = s0 && ((grupo.tipo === 'dispersion' || grupo.tipo === 'burbuja') && grupo.ejes[0] === e.id ? s0.formatoCategorias : s0.formato);
       if (f && !/^general$/i.test(f)) return formatear(v, f);
     }
     return formatear(v, 'General', dec);
@@ -1108,7 +1143,7 @@ const PptxGrafico = (() => {
       const ex = g.ejes.get(grupo.ejes[0]), ey = g.ejes.get(grupo.ejes[1]);
       if (!ex || !ey) continue;
       const geoGrupo = grupo.tipo === 'barra' ? barras(g, grupo, ex, ey, t, aPos, escalas)
-        : grupo.tipo === 'dispersion' ? dispersion(grupo, ex, ey, aPos)
+        : grupo.tipo === 'dispersion' || grupo.tipo === 'burbuja' ? dispersion(grupo, ex, ey, aPos)
           : lineasOAreas(g, grupo, ex, ey, t, aPos, escalas);
       // Áreas primero, después barras, después líneas (como PowerPoint).
       // Las barras y áreas se cortan en el borde del trazado (un máximo fijo
@@ -1117,7 +1152,27 @@ const PptxGrafico = (() => {
       recortar(0);
       for (const sg of geoGrupo) {
         const s = sg.serie;
-        if (grupo.tipo === 'barra') {
+        if (grupo.tipo === 'burbuja') {
+          // Diámetro: el de la mayor es f × el lado menor del trazado; el resto
+          // según el área (o el ancho, con sizeRepresents="w").
+          const tam = s.tamanos || [];
+          const mayor = Math.max(0, ...grupo.series.flatMap((x) => (x.tamanos || []).map((v) => Math.abs(v || 0))));
+          const dMax = fraccionBurbuja(grupo.escalaBurbuja) * Math.min(t.w, t.h);
+          sg.puntos.forEach((p, i) => {
+            const v = tam[i];
+            if (!p || v == null || !mayor || (v < 0 && !grupo.burbujasNegativas)) { if (p) p.w = p.h = 0; return; }
+            const k = Math.abs(v) / mayor, d = dMax * (grupo.burbujaAncho ? k : Math.sqrt(k));
+            const pt = s.puntos.get(i) || {};
+            const rell = pt.relleno !== undefined && pt.relleno !== null ? pt.relleno : grupo.variarColores ? { tipo: 'solido', color: g.automatico(i) } : s.relleno;
+            const c = new Path2D(); c.ellipse(p.x, p.y, d / 2, d / 2, 0, 0, Math.PI * 2);
+            ctx.save(); ctx.translate(p.x - d / 2, p.y - d / 2);
+            const local = new Path2D(); local.ellipse(d / 2, d / 2, d / 2, d / 2, 0, 0, Math.PI * 2);
+            rellenar(rell, local, d, d);
+            ctx.restore();
+            trazar(pt.linea !== undefined ? pt.linea : s.linea, c);
+            p.x -= d / 2; p.y -= d / 2; p.w = p.h = d;
+          });
+        } else if (grupo.tipo === 'barra') {
           sg.puntos.forEach((p, i) => {
             if (!p) return;
             const pt = s.puntos.get(i) || {};
@@ -1197,12 +1252,14 @@ const PptxGrafico = (() => {
       }
       if (claseEje(e) === 'valor') {
         // De pie: alineados contra el trazado, a AIRE_VALORES; acostados, centrados en su marca.
+        // Si el otro eje cruza en el medio, junto a la línea del eje (adentro).
+        const borde = (lado) => (adentro && donde != null ? donde : lado);
         for (const x of etiquetas) {
           const q = aPos(e, x.v);
-          if (e.pos === 'l') escribir(ctx, x.texto, e.letra, t.x - AIRE_VALORES + CORRE_VALORES, q - lh / 2 + asc, 'right');
-          else if (e.pos === 'r') escribir(ctx, x.texto, e.letra, t.x + t.w + AIRE_VALORES - CORRE_VALORES, q - lh / 2 + asc, 'left');
-          else if (e.pos === 'b') escribir(ctx, x.texto, e.letra, q, t.y + t.h + BAJA_ETIQUETAS + asc, 'center');
-          else escribir(ctx, x.texto, e.letra, q, t.y - BAJA_ETIQUETAS - lh + asc, 'center');
+          if (e.pos === 'l') escribir(ctx, x.texto, e.letra, borde(t.x) - AIRE_VALORES + CORRE_VALORES, q - lh / 2 + asc, 'right');
+          else if (e.pos === 'r') escribir(ctx, x.texto, e.letra, borde(t.x + t.w) + AIRE_VALORES - CORRE_VALORES, q - lh / 2 + asc, 'left');
+          else if (e.pos === 'b') escribir(ctx, x.texto, e.letra, q, borde(t.y + t.h) + BAJA_ETIQUETAS + asc, 'center');
+          else escribir(ctx, x.texto, e.letra, q, borde(t.y) - BAJA_ETIQUETAS - lh + asc, 'center');
         }
       } else if (!(g.tabla && e.pos === 'b')) {
         const n = Math.max(1, etiquetas.length);
@@ -1244,7 +1301,7 @@ const PptxGrafico = (() => {
     for (const e of geo.todosLosEjes) {
       const s = escalas.get(e.id);
       const grupoEje = g.grupos.findIndex((x) => x.ejes.includes(e.id));
-      const tipoCom = (claseEje(e) === 'valor' && !(g.grupos[grupoEje] && g.grupos[grupoEje].tipo === 'dispersion' && (e.pos === 'b' || e.pos === 't'))) ? 2 : 1;
+      const tipoCom = (claseEje(e) === 'valor' && !(g.grupos[grupoEje] && ['dispersion', 'burbuja'].includes(g.grupos[grupoEje].tipo) && (e.pos === 'b' || e.pos === 't'))) ? 2 : 1;
       const secundario = grupoEje > 0 && g.grupos[grupoEje].ejes.some((id) => !g.grupos[0].ejes.includes(id));
       // Eje de fechas: de la primera a la última fecha, de a una unidad base (como lo informa COM).
       let fechas = null;
@@ -1259,7 +1316,7 @@ const PptxGrafico = (() => {
 
   // Líneas de tendencia, barras de error y líneas de máximo a mínimo.
   function agregados(ctx, g, grupo, geoGrupo, ex, ey, t, aPos, escalas, trazar) {
-    const dispersion = grupo.tipo === 'dispersion', horizontal = grupo.tipo === 'barra' && grupo.dir === 'bar';
+    const dispersion = grupo.tipo === 'dispersion' || grupo.tipo === 'burbuja', horizontal = grupo.tipo === 'barra' && grupo.dir === 'bar';
     const n = Math.max(1, ...grupo.series.map((s) => s.valores.length));
     // Dónde cae una x (1, 2, 3… en categorías; el valor en dispersión) a lo largo del eje de categorías.
     const midCat = ey.entre === 'midCat';
