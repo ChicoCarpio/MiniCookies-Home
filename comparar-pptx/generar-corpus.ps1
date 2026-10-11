@@ -199,7 +199,7 @@ function Palabras([int]$n) {
 # Un gráfico con sus datos: categorías (texto o números) y series (nombre →
 # valores). La tabla de datos se ajusta al rango exacto: si no, quedan filas
 # de los datos de ejemplo de Excel (los de áreas traen cinco filas).
-function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h, [string]$nombre, $categorias, $series, [string]$titulo = '', [switch]$PorColumnas) {
+function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h, [string]$nombre, $categorias, $series, [string]$titulo = '', [switch]$PorColumnas, [string]$FormatoCategorias = '') {
     $sh = $d.Shapes.AddChart2(-1, $tipo, $x, $y, $w, $h, $msoTrue)
     $sh.Name = $nombre
     $ch = $sh.Chart
@@ -219,6 +219,8 @@ function Grafico($d, [int]$tipo, [double]$x, [double]$y, [double]$w, [double]$h,
             else { $ws.Cells.Item($r + 2, 1).Formula = [string]::Format([cultureinfo]::InvariantCulture, '{0}', $v) }
             for ($c = 0; $c -lt $nombres.Count; $c++) { $ws.Cells.Item($r + 2, $c + 2).Value2 = [double]$series[$nombres[$c]][$r] }
         }
+        # Con formato de fecha, PowerPoint arma un eje de fechas (c:dateAx).
+        if ($FormatoCategorias) { $ws.Range($ws.Cells.Item(2, 1), $ws.Cells.Item($categorias.Count + 1, 1)).NumberFormat = $FormatoCategorias }
         $rango = $ws.Range($ws.Cells.Item(1, 1), $ws.Cells.Item($categorias.Count + 1, $nombres.Count + 1))
         # Sin PorColumnas, PowerPoint toma las filas como series si hay más
         # series que categorías (los corpus viejos quedaron así).
@@ -1942,6 +1944,43 @@ try {
                 $tipo = if ($k.t) { $k.t } else { 5 }
                 $sh = Grafico $d $tipo $x $y 456 244 "EtiqCirc_$i" $cats $ser $k.n -PorColumnas
                 if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
+    # ============================================================ 21 gráficos: ejes de fechas
+    # Casos que no se usaron para calibrar el eje de fechas (06-graficos.md
+    # 6.4 quinquies): días hábiles, fechas sueltas, meses, trimestres,
+    # semanas y años, en columnas, líneas y áreas.
+    Nuevo-Archivo '21-graficos-fechas.pptx' {
+        param($pres)
+        $serial = { param([datetime]$f) [int]$f.ToOADate() }
+        $habiles = @(); $f = Get-Date '2026-03-02'; while ($habiles.Count -lt 15) { if ($f.DayOfWeek -ne 'Saturday' -and $f.DayOfWeek -ne 'Sunday') { $habiles += (& $serial $f) }; $f = $f.AddDays(1) }
+        $sueltas = @(0, 2, 3, 9, 16, 17, 24) | ForEach-Object { & $serial ((Get-Date '2026-02-01').AddDays($_)) }
+        $meses = 0..23 | ForEach-Object { & $serial ((Get-Date '2025-01-01').AddMonths($_)) }
+        $trim = 0..7 | ForEach-Object { & $serial ((Get-Date '2025-01-01').AddMonths(3 * $_)) }
+        $dias30 = 0..29 | ForEach-Object { & $serial ((Get-Date '2026-04-01').AddDays($_)) }
+        $semanas = 0..11 | ForEach-Object { & $serial ((Get-Date '2026-01-05').AddDays(7 * $_)) }
+        $anios = 0..5 | ForEach-Object { & $serial ((Get-Date '2021-01-01').AddYears($_)) }
+        $dias90 = 0..89 | ForEach-Object { & $serial ((Get-Date '2026-01-01').AddDays($_)) }
+        $val = { param($n) [ordered]@{ Ventas = @(0..($n - 1) | ForEach-Object { (($_ * 7) % 11) + 3 }) } }
+        $casos = @(
+            @{ n = 'Columnas de días hábiles'; t = 51; c = $habiles; f = 'd/m/yyyy' },
+            @{ n = 'Líneas con fechas sueltas'; t = 4; c = $sueltas; f = 'd/m/yyyy' },
+            @{ n = 'Líneas de 24 meses'; t = 4; c = $meses; f = 'mmm-yy' },
+            @{ n = 'Columnas por trimestre'; t = 51; c = $trim; f = 'm/yyyy' },
+            @{ n = 'Líneas de 30 días'; t = 65; c = $dias30; f = 'd-mmm' },
+            @{ n = 'Áreas semanales'; t = 1; c = $semanas; f = 'd/m' },
+            @{ n = 'Columnas por año'; t = 51; c = $anios; f = 'yyyy' },
+            @{ n = 'Líneas de 90 días'; t = 4; c = $dias90; f = 'd/m/yy' }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Ejes de fechas " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $null = Grafico $d $k.t $x $y 456 244 "Fechas_$i" $k.c (& $val $k.c.Count) $k.n -PorColumnas -FormatoCategorias $k.f
             }
         }
     } 960 540 $true

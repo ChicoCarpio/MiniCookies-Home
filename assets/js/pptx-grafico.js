@@ -90,6 +90,7 @@ const PptxGrafico = (() => {
         cruza: hijo(el, 'crossesAt') ? num(hijo(el, 'crossesAt')) : val(hijo(el, 'crosses'), 'autoZero'),
         cruzaCon: val(hijo(el, 'crossAx')), entre: val(hijo(el, 'crossBetween'), 'between'),
         salto: num(hijo(el, 'tickLblSkip')),
+        unidadBase: val(hijo(el, 'baseTimeUnit')), unidadPrincipal: val(hijo(el, 'majorTimeUnit')),
         titulo: tituloDeEje(hijo(el, 'title'), r, letraBase, ['l', 'r'].includes(val(hijo(el, 'axPos'), 'l')), linea),
         unidades: unidadesDe(hijo(el, 'dispUnits'), r, letraBase, ['l', 'r'].includes(val(hijo(el, 'axPos'), 'l')), linea),
       });
@@ -505,7 +506,10 @@ const PptxGrafico = (() => {
     const literales = [];
     fmt = fmt.replace(/"([^"]*)"|\\(.)/g, (_, a, b) => { literales.push(a != null ? a : b); return '\u0001'; });
     const conLiterales = (t) => { let k = 0; return t.replace(/\u0001/g, () => literales[k++]).replace(/[_*]./g, ' ').trim(); };
-    // Fechas y horas (número de serie de Excel, sistema 1900).
+    // Fechas y horas (número de serie de Excel, sistema 1900). "m/d/yyyy" es
+    // la fecha corta del sistema (formato 14 de Excel): Office la muestra en
+    // el idioma de quien mira (2/3/2026 en español, 3/2/2026 en inglés).
+    if (/^m\/d\/yyyy$/i.test(fmt.trim())) return new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(1899, 11, 30) + Math.round(v) * 86400000));
     if (!/[#0?]/.test(fmt) && /[dmyhs]/i.test(fmt)) return conLiterales(fecha(v, fmt));
     // Lo que no entiende (texto @, fracciones, letras sueltas): General, nunca el código tal cual.
     if (/[@\/]/.test(fmt) || /[a-df-zA-DF-Z]/.test(fmt.replace(/E[+-]/g, ''))) return general(v, null, s);
@@ -910,7 +914,10 @@ const PptxGrafico = (() => {
         }
         return lista;
       }
-      return categoriasDe(g, e).map((t, i) => ({ i, texto: t }));
+      const lista = categoriasDe(g, e).map((t, i) => ({ i, texto: t }));
+      const F = fechasDe(g, e);
+      if (F) lista.pasos = PASOS_FECHA[F.base];
+      return lista;
     };
 
     // Primera pasada: escala con el alto/ancho aproximado, para medir las
@@ -1082,16 +1089,22 @@ const PptxGrafico = (() => {
     const paso = ancho / (enBordes ? Math.max(1, n - 1) : n);
     const fijo = e.giro;
     const palabra = Math.max(0, ...lista.flatMap((x) => String(x.texto).split(/\s+/).map((w) => med.ancho(w, l))));
+    // En un eje de fechas, girada necesita más lugar: el paso por el seno
+    // del giro ≥ 1,5 × la letra (medido en 13 casos de sondeo-fechas.ps1 y
+    // el corpus 21).
+    const girada = lista.pasos ? 1.5 * l.tamano : null;
     const probar = (s) => {
       const p = paso * s;
       if (fijo != null) return fijo === 0 || p * Math.abs(Math.sin(fijo * Math.PI / 180)) >= l.tamano ? fijo : undefined;
       if (palabra <= p + TOLERANCIA_CORTE) return 0;
-      if (p * Math.SQRT1_2 >= l.tamano) return -45;
-      if (p >= lh) return -90;
+      if (p * Math.SQRT1_2 >= (girada || l.tamano)) return -45;
+      if (p >= (girada || lh)) return -90;
       return undefined;
     };
     let salto = e.salto || 1, giro = probar(salto);
-    if (!e.salto) while (giro === undefined && salto < n) giro = probar(++salto);
+    // En un eje de fechas, solo los pasos de fecha (y después de a varios del último).
+    const siguiente = (x) => { if (!lista.pasos) return x + 1; const p = lista.pasos.find((y) => y > x); return p || x + lista.pasos[lista.pasos.length - 1]; };
+    if (!e.salto) while (giro === undefined && salto < n) giro = probar(salto = siguiente(salto));
     if (giro === undefined) giro = fijo != null ? fijo : -90;
     if (!giro) {
       const lineas = lista.map((x, i) => (i % salto ? [] : cortar(x.texto, l, paso * salto + TOLERANCIA_CORTE, med)));
@@ -1114,8 +1127,45 @@ const PptxGrafico = (() => {
     return texto.slice(0, a) + '…';
   }
 
+  // Eje de fechas (c:dateAx con fechas en las categorías), medido por COM e
+  // imágenes (sondeo-fechas.ps1; 06-graficos.md 6.4 quinquies): del primer
+  // al último dato hay un lugar por unidad base (días, meses o años) y cada
+  // punto va en el de su fecha, así que las fechas que faltan dejan hueco
+  // (los fines de semana de una serie de días hábiles). Sin baseTimeUnit, la
+  // unidad sale de las fechas: años si todas caen el mismo día del año,
+  // meses si el mismo día del mes, si no días. Las etiquetas son las fechas
+  // de cada lugar (también las sin dato) y se saltean de a 1, 2, 7 o 14
+  // días, o 1, 2, 3, 6 o 12 meses. [calibrar] PowerPoint a veces prefiere
+  // pasar a meses sin girar (60 días en 260 pt).
+  const DIA_CERO = Date.UTC(1899, 11, 30);
+  const PASOS_FECHA = { days: [1, 2, 7, 14], months: [1, 2, 3, 6, 12], years: [1, 2, 5, 10, 20, 50] };
+  function fechasDe(g, e) {
+    if (!e || e.clase !== 'dateAx') return null;
+    for (const grupo of g.grupos) {
+      if (!grupo.ejes.includes(e.id) || grupo.tipo === 'dispersion' || grupo.tipo === 'burbuja') continue;
+      const s = grupo.series.find((x) => x.categorias && x.categorias.length);
+      if (!s || !s.categorias.every((c) => c == null || typeof c === 'number')) return null;
+      const nums = s.categorias.filter((c) => c != null).map((c) => Math.floor(c));
+      if (!nums.length) return null;
+      const dia = (v) => { const d = new Date(DIA_CERO + v * 86400000); return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate() }; };
+      const ds = nums.map(dia);
+      let base = e.unidadBase;
+      if (!base) base = ds.every((x) => x.d === ds[0].d && x.m === ds[0].m) && nums.length > 1 ? 'years' : ds.every((x) => x.d === ds[0].d) && nums.length > 1 ? 'months' : 'days';
+      const min = Math.min(...nums), d0 = dia(min);
+      const lugar = (v) => { const x = dia(v); return base === 'days' ? v - min : base === 'months' ? (x.y - d0.y) * 12 + x.m - d0.m : x.y - d0.y; };
+      const lugares = s.categorias.map((c) => (c == null ? null : lugar(Math.floor(c))));
+      const n = Math.max(...lugares.filter((x) => x != null)) + 1;
+      if (n > 5000) return null;
+      const fechaDe = (k) => (base === 'days' ? min + k : (Date.UTC(d0.y + (base === 'years' ? k : 0), d0.m + (base === 'months' ? k : 0), d0.d) - DIA_CERO) / 86400000);
+      return { base, n, lugares, fechaDe, formato: s.formatoCategorias };
+    }
+    return null;
+  }
+
   // Texto de las categorías del eje (de la primera serie que las tenga).
   function categoriasDe(g, e) {
+    const F = fechasDe(g, e);
+    if (F) return Array.from({ length: F.n }, (_, k) => formatear(F.fechaDe(k), e.formato && !e.formato.enlazado ? e.formato.codigo : F.formato));
     for (const grupo of g.grupos) {
       if (!grupo.ejes.includes(e.id)) continue;
       const s = grupo.series.find((x) => x.categorias && x.categorias.length);
@@ -1498,12 +1548,14 @@ const PptxGrafico = (() => {
       const grupoEje = g.grupos.findIndex((x) => x.ejes.includes(e.id));
       const tipoCom = (claseEje(e) === 'valor' && !(g.grupos[grupoEje] && ['dispersion', 'burbuja'].includes(g.grupos[grupoEje].tipo) && (e.pos === 'b' || e.pos === 't'))) ? 2 : 1;
       const secundario = grupoEje > 0 && g.grupos[grupoEje].ejes.some((id) => !g.grupos[0].ejes.includes(id));
-      // Eje de fechas: de la primera a la última fecha, de a una unidad base (como lo informa COM).
+      // Eje de fechas: de la primera a la última fecha y, como unidad
+      // principal, el paso de las etiquetas en unidades base (como COM).
       let fechas = null;
       if (claseEje(e) === 'fecha') {
         const grupo = g.grupos[grupoEje], serie = grupo && grupo.series.find((x) => x.categorias && typeof x.categorias[0] === 'number');
         const nums = serie ? serie.categorias.filter((x) => typeof x === 'number') : [];
-        if (nums.length) fechas = { min: Math.min(...nums), max: Math.max(...nums), unidad: 1 };
+        const ge = geo.ejes.find((x) => x.eje === e);
+        if (nums.length) fechas = { min: Math.min(...nums), max: Math.max(...nums), unidad: (ge && ge.disp && ge.disp.salto) || 1 };
       }
       salida.ejes.push({ tipo: tipoCom, grupo: secundario ? 2 : 1, borrado: e.borrado, ...(s ? { min: s.min, max: s.max, unidad: s.unidad } : fechas || {}) });
     }
@@ -1628,7 +1680,8 @@ const PptxGrafico = (() => {
   // 18,37 pt exactos en el corpus).
   function barras(g, grupo, ex, ey, t, aPos, escalas) {
     const horizontal = grupo.dir === 'bar';
-    const n = Math.max(1, ...grupo.series.map((s) => s.valores.length));
+    const F = fechasDe(g, ex);
+    const n = F ? F.n : Math.max(1, ...grupo.series.map((s) => s.valores.length));
     const largo = horizontal ? t.h : t.w;
     const cw = largo / n;
     const apilado = grupo.agrupacion === 'stacked' || grupo.agrupacion === 'percentStacked';
@@ -1637,9 +1690,10 @@ const PptxGrafico = (() => {
     const bw = cw / (ns - (ns - 1) * ov + grupo.separacion);
     const sy = escalas.get(ey.id);
     const cero = Math.min(sy.max, Math.max(sy.min, 0));
+    const nv = Math.max(1, ...grupo.series.map((s) => s.valores.length));
     const totales = [];
-    if (grupo.agrupacion === 'percentStacked') for (let i = 0; i < n; i++) totales[i] = grupo.series.reduce((a, s) => a + Math.abs(s.valores[i] || 0), 0) || 1;
-    const acumPos = new Array(n).fill(0), acumNeg = new Array(n).fill(0);
+    if (grupo.agrupacion === 'percentStacked') for (let i = 0; i < nv; i++) totales[i] = grupo.series.reduce((a, s) => a + Math.abs(s.valores[i] || 0), 0) || 1;
+    const acumPos = new Array(nv).fill(0), acumNeg = new Array(nv).fill(0);
     return grupo.series.map((s, k) => {
       const puntos = s.valores.map((v, i) => {
         if (v == null) return null;
@@ -1648,7 +1702,9 @@ const PptxGrafico = (() => {
           const vv = grupo.agrupacion === 'percentStacked' ? v / totales[i] : v;
           if (vv >= 0) { desde = acumPos[i]; hasta = desde + vv; acumPos[i] = hasta; } else { desde = acumNeg[i]; hasta = desde + vv; acumNeg[i] = hasta; }
         }
-        const inicioCat = cw * i + bw * grupo.separacion / 2 + (apilado ? 0 : k * bw * (1 - ov));
+        const j = F ? F.lugares[i] : i;
+        if (j == null) return null;
+        const inicioCat = cw * j + bw * grupo.separacion / 2 + (apilado ? 0 : k * bw * (1 - ov));
         const p0 = aPos(ey, desde), p1 = aPos(ey, hasta);
         if (horizontal) {
           const y = (ex.invertido ? t.y + inicioCat : t.y + t.h - inicioCat - bw);
@@ -1662,11 +1718,13 @@ const PptxGrafico = (() => {
   }
   function lineasOAreas(g, grupo, ex, ey, t, aPos, escalas) {
     const n = Math.max(1, ...grupo.series.map((s) => s.valores.length));
+    const F = fechasDe(g, ex), nx = F ? F.n : n;
     // crossBetween (en el eje de valores): "between" pone cada punto en el
     // centro de su categoría; "midCat", en los bordes.
     const entre = ey.entre !== 'midCat';
     const xDe = (i) => {
-      const u = entre ? (i + 0.5) / n : n > 1 ? i / (n - 1) : 0.5;
+      const j = F ? F.lugares[i] ?? i : i;
+      const u = entre ? (j + 0.5) / nx : nx > 1 ? j / (nx - 1) : 0.5;
       return ex.invertido ? t.x + t.w * (1 - u) : t.x + t.w * u;
     };
     const apilado = grupo.agrupacion === 'stacked' || grupo.agrupacion === 'percentStacked';
