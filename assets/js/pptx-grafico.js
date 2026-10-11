@@ -37,9 +37,8 @@ const PptxGrafico = (() => {
     radarChart: 'radar', bubbleChart: 'burbuja', stockChart: 'linea',
   };
   // Lo que cambia mucho el dibujo y todavía no sabe hacer: con eso, el
-  // gráfico va al respaldo en vez de salir distinto sin aviso. Los 3D sí se
-  // dibujan, planos: la librería de respaldo también los dibuja planos, y peor.
-  const NO_SOPORTADOS = ['ofPieChart', 'upDownBars'];
+  // gráfico va al respaldo en vez de salir distinto sin aviso.
+  const NO_SOPORTADOS = [];
   // Lo que PowerPoint escribe cuando el archivo no trae el texto: en el idioma
   // de quien mira (como Office, que lo pone en el de su instalación).
   const TEXTOS = /^es/i.test((typeof navigator !== 'undefined' && navigator.language) || '') ? {
@@ -112,6 +111,12 @@ const PptxGrafico = (() => {
         ejes: hijos(el, 'axId').map((a) => val(a)),
         etiquetas: etiquetasDe(hijo(el, 'dLbls'), r, letraBase, null),
         maxMin: hijo(el, 'hiLowLines') ? conDefecto(linea(hijo(hijo(el, 'hiLowLines'), 'spPr')), lineaFina({ r: 0, g: 0, b: 0, a: 1 })) : null,
+        arribaAbajo: barrasArribaAbajo(hijo(el, 'upDownBars'), r, linea),
+        de: el.localName === 'ofPieChart' ? {
+          barra: val(hijo(el, 'ofPieType'), 'pie') === 'bar', corte: val(hijo(el, 'splitType'), 'auto'), pos: num(hijo(el, 'splitPos')),
+          propios: hijos(hijo(el, 'custSplit'), 'secondPiePt').map((x) => num(x)), segundo: num(hijo(el, 'secondPieSize'), 75) / 100,
+          lineas: hijo(el, 'serLines') ? conDefecto(linea(hijo(hijo(el, 'serLines'), 'spPr')), lineaFina({ r: 0, g: 0, b: 0, a: 1 })) : null,
+        } : null,
         series: [],
       };
       for (const s of hijos(el, 'ser')) {
@@ -243,6 +248,18 @@ const PptxGrafico = (() => {
     if (d.w != null) c.w = d.wModo === 'edge' ? d.w * W - c.x : d.w * W;
     if (d.h != null) c.h = d.hModo === 'edge' ? d.h * H - c.y : d.h * H;
     return c;
+  }
+
+  // Barras arriba-abajo (c:upDownBars) de un gráfico de líneas: sin spPr,
+  // blancas las de subida y negras las de bajada, con borde negro.
+  function barrasArribaAbajo(el, r, linea) {
+    if (!el) return null;
+    const negro = { r: 0, g: 0, b: 0, a: 1 };
+    const de = (nombre, color) => {
+      const spPr = hijo(hijo(el, nombre), 'spPr');
+      return { relleno: conDefecto(r.relleno(spPr), { tipo: 'solido', color }), linea: conDefecto(linea(spPr), lineaFina(negro)) };
+    };
+    return { separacion: num(hijo(el, 'gapWidth'), 150) / 100, arriba: de('upBars', { r: 255, g: 255, b: 255, a: 1 }), abajo: de('downBars', negro) };
   }
 
   // Unidades de visualización (c:dispUnits): los números del eje divididos
@@ -767,6 +784,20 @@ const PptxGrafico = (() => {
         geo.trazado = { ...zona };
         geo.circular3D = { cx: zona.x + zona.w / 2, cy: arribaC + lejos * a, a, b: f.b * a, u: f.u, d: f.d * a };
       }
+      if (g.grupos[0].de) {
+        // Circular o barra de circular (medido en imágenes, sondeo-de-circular.ps1;
+        // 06-graficos.md 6.4 quinquies): el radio R del primero sale de que
+        // todo entre a lo ancho (2R + hueco + el segundo) y a lo alto; el
+        // hueco es gapWidth × R (la mitad con barra); el segundo circular
+        // tiene radio secondPieSize × R; la barra, ese ancho y el doble de
+        // alto. Todo centrado en lo que queda.
+        const de = g.grupos[0].de, sep = g.grupos[0].separacion, s2 = de.segundo;
+        const hueco = de.barra ? sep / 2 : sep, ancho = 2 + hueco + (de.barra ? s2 : 2 * s2);
+        const R = Math.max(0, Math.min(zona.w / ancho, zona.h / (2 * Math.max(1, s2))));
+        const x0 = zona.x + zona.w / 2 - ancho * R / 2;
+        geo.trazado = { ...zona };
+        geo.deCircular = { cx: x0 + R, cy: zona.y + zona.h / 2, R, x2: x0 + (2 + hueco) * R, R2: s2 * R };
+      }
       geo.circular = true;
       return geo;
     }
@@ -1172,6 +1203,7 @@ const PptxGrafico = (() => {
       if (geo.leyenda) salida.leyenda = { x: geo.leyenda.x, y: geo.leyenda.y, w: geo.leyenda.w, h: geo.leyenda.h };
 
       if (geo.circular3D) dibujarCircular3D(ctx, g, geo, rellenar, trazar, salida);
+      else if (geo.deCircular) dibujarDeCircular(ctx, g, geo, rellenar, trazar, salida);
       else if (geo.circular) dibujarCircular(ctx, g, geo, med, rellenar, trazar, salida);
       else if (geo.radar) dibujarRadar(ctx, g, geo, med, rellenar, trazar, salida);
       else dibujarEjesYSeries(ctx, g, geo, med, rellenar, trazar, salida);
@@ -1367,6 +1399,30 @@ const PptxGrafico = (() => {
         }
       }
       agregados(ctx, g, grupo, geoGrupo, ex, ey, t, aPos, escalas, trazar);
+      // Barras arriba-abajo: de la primera serie a la última en cada
+      // categoría, del ancho de la categoría / (1 + gapWidth), encima de las
+      // líneas y los marcadores; con los dos valores iguales, una de bajada
+      // de alto cero (medido en imágenes).
+      const aa = grupo.arribaAbajo;
+      if (aa && geoGrupo.length > 1) {
+        const primera = geoGrupo[0], ultima = geoGrupo[geoGrupo.length - 1];
+        const xs = primera.puntos.filter(Boolean).map((p) => p.x);
+        const paso = xs.length > 1 ? Math.abs(xs[1] - xs[0]) : t.w;
+        const ancho = paso / (1 + aa.separacion);
+        primera.puntos.forEach((p, i) => {
+          const q = ultima.puntos[i];
+          if (!p || !q) return;
+          const sube = (ultima.serie.valores[i] ?? 0) > (primera.serie.valores[i] ?? 0);
+          const b = sube ? aa.arriba : aa.abajo;
+          const y = Math.min(p.y, q.y), h = Math.abs(p.y - q.y);
+          const path = new Path2D(); path.rect(p.x - ancho / 2, y, ancho, h);
+          ctx.save(); ctx.translate(p.x - ancho / 2, y);
+          const local = new Path2D(); local.rect(0, 0, ancho, h);
+          rellenar(b.relleno, local, ancho, h);
+          ctx.restore();
+          trazar(b.linea, path);
+        });
+      }
       ctx.restore();
       // Etiquetas de datos.
       for (const sg of geoGrupo) etiquetasDeSerie(ctx, g, grupo, sg, med, t, salida);
@@ -1917,6 +1973,79 @@ const PptxGrafico = (() => {
     salida.series.push(registro);
   }
 
+  // Circular o barra de circular (ofPieChart; medido en imágenes,
+  // sondeo-de-circular.ps1). Los puntos que van al segundo (los últimos
+  // splitPos, o sin splitType el último tercio redondeado arriba (COM: 6 → 2,
+  // 8 → 3, 10 → 4), por valor, por porcentaje o elegidos) se juntan en el primero
+  // en un sector "otros", centrado a la derecha y del color del punto n (el
+  // que sigue al último). Los dos empiezan en el borde de abajo de "otros" y
+  // siguen en el orden de los datos; en la barra, el primero va arriba. Las
+  // líneas de serie van de los bordes de "otros" a las tangentes del segundo
+  // circular o a las esquinas de la barra.
+  function puntosDelSegundo(de, vals) {
+    const n = vals.length, total = vals.reduce((a, b) => a + b, 0) || 1;
+    const lista = [];
+    vals.forEach((v, i) => {
+      if (de.corte === 'val' ? v < (de.pos ?? 0) : de.corte === 'percent' ? v / total * 100 < (de.pos ?? 0) : de.corte === 'cust' ? de.propios.includes(i) : i >= n - Math.min(n - 1, de.pos ?? Math.ceil(n / 3))) lista.push(i);
+    });
+    return lista;
+  }
+  function dibujarDeCircular(ctx, g, geo, rellenar, trazar, salida) {
+    const grupo = g.grupos[0], s = grupo.series[0], de = grupo.de;
+    const { cx, cy, R, x2, R2 } = geo.deCircular;
+    const vals = s.valores.map((v) => (v != null && v > 0 ? v : 0));
+    const total = vals.reduce((a, b) => a + b, 0) || 1;
+    const segundo = puntosDelSegundo(de, vals);
+    const otros = segundo.reduce((a, i) => a + vals[i], 0);
+    const relleno = (i) => { const pt = s.puntos.get(i) || {}; return pt.relleno !== undefined && pt.relleno !== null ? pt.relleno : colorPunto(g, s, i); };
+    const lineaDe = (i) => { const pt = s.puntos.get(i) || {}; return pt.linea !== undefined ? pt.linea : s.linea; };
+    const pintar = (path, rell, caja) => {
+      ctx.save(); ctx.translate(caja.x, caja.y);
+      const local = new Path2D(); local.addPath(path, new DOMMatrix().translate(-caja.x, -caja.y));
+      rellenar(rell, local, caja.w, caja.h);
+      ctx.restore();
+    };
+    const cajas = [];
+    const sector = (ox, oy, r, a0, a1, i) => {
+      const p = new Path2D(); p.moveTo(ox, oy); p.arc(ox, oy, r, a0, a1); p.closePath();
+      pintar(p, relleno(i), { x: ox - r, y: oy - r, w: 2 * r, h: 2 * r });
+      trazar(lineaDe(i), p);
+      cajas[i] = cajaSector(ox, oy, r, 0, a0, a1);
+    };
+    const alfa = otros / total * Math.PI;
+    let ang = alfa;
+    vals.forEach((v, i) => { if (segundo.includes(i)) return; const da = v / total * Math.PI * 2; sector(cx, cy, R, ang, ang + da, i); ang += da; });
+    if (otros > 0) sector(cx, cy, R, ang, alfa + Math.PI * 2, vals.length);
+    const arriba = [cx + R * Math.cos(alfa), cy - R * Math.sin(alfa)], abajo = [cx + R * Math.cos(alfa), cy + R * Math.sin(alfa)];
+    const lineas = new Path2D();
+    if (de.barra) {
+      const bw = R2, bh = 2 * R2, by = cy - R2;
+      let y = by;
+      for (const i of segundo) {
+        const h = otros > 0 ? vals[i] / otros * bh : 0;
+        const p = new Path2D(); p.rect(x2, y, bw, h);
+        pintar(p, relleno(i), { x: x2, y, w: bw, h });
+        trazar(lineaDe(i), p);
+        cajas[i] = { x: x2, y, w: bw, h };
+        y += h;
+      }
+      lineas.moveTo(...arriba); lineas.lineTo(x2, by); lineas.moveTo(...abajo); lineas.lineTo(x2, by + bh);
+    } else {
+      const c2 = x2 + R2;
+      ang = alfa;
+      for (const i of segundo) { const da = otros > 0 ? vals[i] / otros * Math.PI * 2 : 0; sector(c2, cy, R2, ang, ang + da, i); ang += da; }
+      // Tangente al segundo desde cada borde de "otros" (la de arriba y la de abajo).
+      for (const [px, py, lado] of [[...arriba, -1], [...abajo, 1]]) {
+        const dx = c2 - px, dy = cy - py, d = Math.hypot(dx, dy);
+        if (d <= R2) continue;
+        const th = Math.atan2(dy, dx) + lado * Math.asin(R2 / d), l = Math.sqrt(d * d - R2 * R2);
+        lineas.moveTo(px, py); lineas.lineTo(px + l * Math.cos(th), py + l * Math.sin(th));
+      }
+    }
+    if (de.lineas && segundo.length) trazar(de.lineas, lineas);
+    salida.series.push({ nombre: s.nombre, puntos: vals.map((_, i) => (cajas[i] ? { caja: cajas[i] } : {})) });
+  }
+
   // Circular: solo la primera serie. Anillo: cada serie es una corona, de
   // adentro hacia afuera, repartidas en partes iguales entre el hueco
   // (holeSize) y el borde (medido por COM: tres series, coronas de 5,87 pt).
@@ -2015,9 +2144,14 @@ const PptxGrafico = (() => {
       const centroY = y + lineasEntrada.length * lh / 2;
       const mx = x + (en.larga ? M.desde : 3.29);
       if (en.tipoMuestra === 'linea') {
-        const p = new Path2D(); p.moveTo(mx, centroY); p.lineTo(mx + largoMuestra, centroY);
+        let a0 = mx, a1 = mx + largoMuestra;
+        if (M === MUESTRAS.comun) {
+          const k = l.tamano / 11.97, tapa = en.linea && en.linea.tapa && en.linea.tapa !== 'flat' ? (en.linea.ancho || 9525) / 12700 / 2 : 0;
+          a0 = x + 2.04 * k + tapa; a1 = x + 23.54 * k - tapa;
+        }
+        const p = new Path2D(); p.moveTo(a0, centroY); p.lineTo(a1, centroY);
         trazar(en.linea, p);
-        if (en.marcador) dibujarMarcador(ctx, en.marcador, en.serie, mx + largoMuestra / 2, centroY, rellenar, trazar, en.grupo);
+        if (en.marcador) dibujarMarcador(ctx, en.marcador, en.serie, (a0 + a1) / 2, centroY, rellenar, trazar, en.grupo);
       } else if (en.tipoMuestra === 'marcador') {
         dibujarMarcador(ctx, en.marcador || { simbolo: 'auto', tamano: 5 }, en.serie, mx + largoMuestra / 2, centroY, rellenar, trazar, en.grupo);
       } else {
@@ -2029,7 +2163,10 @@ const PptxGrafico = (() => {
         const blanca = en.linea && en.linea.relleno && en.linea.relleno.tipo === 'solido' && en.linea.relleno.color.r === 255 && en.linea.relleno.color.g === 255 && en.linea.relleno.color.b === 255;
         trazar(blanca ? null : en.linea, rect(mx, centroY - lado / 2, largoMuestra, lado));
       }
-      const tx = mx + largoMuestra + 3.5; // medido en píxeles
+      // La de línea (muestras comunes), medida en las imágenes de 18
+      // gráficos: COM da una caja de 12 pt, pero se ve de 2 a 23,5 pt de la
+      // entrada (con la tapa) y el texto empieza a 24,8 (letra de 11,97).
+      const tx = en.tipoMuestra === 'linea' && M === MUESTRAS.comun ? x + 24.8 / 11.97 * l.tamano : mx + largoMuestra + 3.5; // medido en píxeles
       lineasEntrada.forEach((t, k) => escribir(ctx, t, l, tx, y + asc + k * lh, 'left'));
       if (L.horizontal) x += pasos[i];
       else y += lineasEntrada.length * lh + L.padV;

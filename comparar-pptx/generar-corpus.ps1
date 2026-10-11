@@ -1878,6 +1878,41 @@ try {
         }
     } 960 540 $true
 
+    # ============================================================ 19 gráficos: de circular y arriba-abajo
+    # Casos que no se usaron para calibrar 06-graficos.md 6.4 quinquies:
+    # circular y barra de circular con otros cortes, tamaños, títulos y
+    # leyendas, y líneas con barras arriba-abajo.
+    Nuevo-Archivo '19-graficos-de-circular.pptx' {
+        param($pres)
+        $ocho = @('Norte', 'Sur', 'Este', 'Oeste', 'Centro', 'Islas', 'Costa', 'Valle')
+        $vals = [ordered]@{ Ventas = @(30, 25, 18, 12, 6, 4, 3, 2) }
+        $meses = @('Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun')
+        $dos = [ordered]@{ Apertura = @(12, 15, 11, 14, 10, 13); Cierre = @(14, 12, 13, 15, 9, 10) }
+        $tres = [ordered]@{ Apertura = @(12, 15, 11, 14, 10, 13); Medio = @(13, 14, 12, 13, 11, 12); Cierre = @(14, 12, 13, 15, 9, 10) }
+        $casos = @(
+            @{ n = 'Circular de circular'; t = 68; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Barra de circular por valor'; t = 71; f = { param($ch) $g = $ch.ChartGroups(1); $g.SplitType = 2; $g.SplitValue = 10 } },
+            @{ n = 'Circular de circular por porcentaje'; t = 68; f = { param($ch) $g = $ch.ChartGroups(1); $g.SplitType = 3; $g.SplitValue = 10; $g.GapWidth = 150; $g.SecondPlotSize = 60; $ch.HasLegend = $false } },
+            @{ n = 'Barra de circular con tres'; t = 71; c = @('Norte', 'Sur', 'Este', 'Oeste', 'Centro'); s = [ordered]@{ Ventas = @(40, 30, 15, 10, 5) }; f = { param($ch) $g = $ch.ChartGroups(1); $g.SplitType = 1; $g.SplitValue = 3; $g.SecondPlotSize = 100 } },
+            @{ n = 'Líneas con barras arriba-abajo'; t = 4; c = $meses; s = $dos; f = { param($ch) $ch.ChartGroups(1).HasUpDownBars = $true; $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Tres líneas con barras angostas'; t = 65; c = $meses; s = $tres; f = { param($ch) $g = $ch.ChartGroups(1); $g.HasUpDownBars = $true; $g.GapWidth = 80 } },
+            @{ n = 'Doce meses arriba-abajo'; t = 4; c = @(1..12 | ForEach-Object { "M$_" }); s = [ordered]@{ A = @(1..12 | ForEach-Object { ($_ * 7) % 10 + 5 }); B = @(1..12 | ForEach-Object { ($_ * 3) % 10 + 5 }) }; f = { param($ch) $ch.ChartGroups(1).HasUpDownBars = $true } },
+            @{ n = 'Circular de circular sin título'; t = 68; s = [ordered]@{ Ventas = @(30, 25, 18, 12, 6, 4, 3, 2) }; f = { param($ch) $ch.HasTitle = $false; $ch.HasLegend = $false; $ch.ChartGroups(1).SecondPlotSize = 120 } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("De circular y arriba-abajo " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $ocho }
+                $ser = if ($k.s) { $k.s } else { $vals }
+                $sh = Grafico $d $k.t $x $y 456 244 "DeCircular_$i" $cats $ser $k.n -PorColumnas
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
     # ============================================================ 13 patrón y diseño
     Nuevo-Archivo '13-patron-y-diseno.pptx' {
         param($pres)
