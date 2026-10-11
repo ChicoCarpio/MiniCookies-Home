@@ -764,13 +764,17 @@ const PptxGrafico = (() => {
     if (manual && (dt.objetivo !== 'inner' || circular)) { izq = manual.x; der = manual.x + manual.w; arriba = manual.y; abajo = manual.y + manual.h; }
 
     if (circular) {
-      // El círculo, cuadrado y centrado en lo que queda. Con etiquetas de datos,
-      // un 14 % más chico (medido: 140,58 de 163,81 y 163,74 de 190,27). [calibrar]
+      // El círculo, cuadrado y centrado en lo que queda. Con etiquetas de
+      // datos afuera o en "mejor ajuste" (aunque queden adentro), el diámetro
+      // es 0,875 × el lado − 2,75 (medido: 163,81 → 140,58, 190,27 → 163,74,
+      // 222 → 191,5 y 428 → 371,75, sin importar el tamaño de las
+      // etiquetas); al centro o en el extremo interno no se achica.
       const zona = { x: izq + AIRE_TRAZADO, y: arriba + AIRE_TRAZADO, w: der - izq - 2 * AIRE_TRAZADO, h: abajo - arriba - 2 * AIRE_TRAZADO };
       let lado = Math.max(0, Math.min(zona.w, zona.h));
-      const s0 = g.grupos[0].series[0];
-      const conEtiquetas = s0 && s0.etiquetas && !s0.etiquetas.borrar && (s0.etiquetas.showVal || s0.etiquetas.showPercent || s0.etiquetas.showCatName || s0.etiquetas.showSerName);
-      if (conEtiquetas) lado *= 0.86;
+      const s0 = g.grupos[0].series[0], e0 = s0 && s0.etiquetas;
+      const conEtiquetas = e0 && !e0.borrar && (e0.showVal || e0.showPercent || e0.showCatName || e0.showSerName);
+      const anilloG = g.grupos[0].tipo === 'anillo';
+      if (conEtiquetas && (anilloG || ['bestFit', 'outEnd'].includes(e0.pos || 'bestFit'))) lado = anilloG ? lado * 0.86 : Math.max(0, 0.875 * lado - 2.75);
       geo.trazado = { x: zona.x + zona.w / 2 - lado / 2, y: zona.y + zona.h / 2 - lado / 2, w: lado, h: lado };
       if (g.grupos[0].es3D && g.grupos[0].tipo === 'circular') {
         // Circular 3D: el contorno (lejos + cerca + espesor de alto, el ancho
@@ -1920,7 +1924,7 @@ const PptxGrafico = (() => {
       const n = Math.max(2, Math.ceil(Math.abs(hasta - desde) / (Math.PI / 90)));
       for (let j = 0; j <= n; j++) { const [x, y] = punto(ox, oy, desde + (hasta - desde) * j / n, abajo); if (j === 0 && mover) p.moveTo(x, y); else p.lineTo(x, y); }
     };
-    const vals = s.valores.map((v) => (v != null && v > 0 ? v : 0));
+    const vals = s.valores.map((v) => (v != null ? Math.abs(v) : 0)); // un negativo, como su valor absoluto (medido)
     const total = vals.reduce((x, y) => x + y, 0) || 1;
     const rebanadas = [];
     let ang = (grupo.anguloInicial - 90) * Math.PI / 180;
@@ -1993,7 +1997,7 @@ const PptxGrafico = (() => {
   function dibujarDeCircular(ctx, g, geo, rellenar, trazar, salida) {
     const grupo = g.grupos[0], s = grupo.series[0], de = grupo.de;
     const { cx, cy, R, x2, R2 } = geo.deCircular;
-    const vals = s.valores.map((v) => (v != null && v > 0 ? v : 0));
+    const vals = s.valores.map((v) => (v != null ? Math.abs(v) : 0)); // un negativo, como su valor absoluto (medido)
     const total = vals.reduce((a, b) => a + b, 0) || 1;
     const segundo = puntosDelSegundo(de, vals);
     const otros = segundo.reduce((a, i) => a + vals[i], 0);
@@ -2056,13 +2060,15 @@ const PptxGrafico = (() => {
     const t = geo.trazado;
     const cx = t.x + t.w / 2, cy = t.y + t.h / 2;
     const s0 = series[0];
-    const maxExpl = Math.max(s0.explosion || 0, ...[...s0.puntos.values()].map((p) => p.explosion || 0));
-    const R = (t.w / 2) / (1 + maxExpl);
+    // La separación de la serie (c:ser/c:explosion) achica el círculo para
+    // que entre; la de un sector suelto, no (medido: con etiquetas, todos al
+    // 20 % → radio / 1,2; uno solo al 12 % → el mismo radio).
+    const R = (t.w / 2) / (1 + (s0.explosion || 0));
     const hueco = anillo ? R * Math.max(0.1, Math.min(0.9, grupo.hueco || 0.5)) : 0;
     const grosor = anillo ? (R - hueco) / series.length : R;
     series.forEach((s, k) => {
       const rIn = anillo ? hueco + k * grosor : 0, rOut = anillo ? rIn + grosor : R;
-      const vals = s.valores.map((v) => (v != null && v > 0 ? v : 0));
+      const vals = s.valores.map((v) => (v != null ? Math.abs(v) : 0)); // un negativo, como su valor absoluto (medido)
       const total = vals.reduce((a, b) => a + b, 0) || 1;
       let ang = (grupo.anguloInicial - 90) * Math.PI / 180;
       const registro = { nombre: s.nombre, puntos: [] };
@@ -2088,21 +2094,46 @@ const PptxGrafico = (() => {
       const e = s.etiquetas;
       if (e && !e.borrar && (e.showVal || e.showCatName || e.showPercent || e.showSerName)) {
         const l = e.letra, lh = med.linea(l), asc = med.ascendente(l);
+        const adentro = [];
         registro.puntos.forEach((p, i) => {
           const partes = [];
           if (e.showSerName) partes.push(s.nombre);
           if (e.showCatName) partes.push(s.categorias ? String(s.categorias[i] ?? '') : String(i + 1));
           if (e.showVal) partes.push(formatear(p._v, e.formato || s.formato));
           if (e.showPercent) partes.push(formatear(p._pct, '0%'));
-          const sepTexto = e.separador || (e.showCatName && (e.showVal || e.showPercent) ? '\n' : '; ');
+          // Sin separador propio: nombre y porcentaje en dos líneas; lo demás, con "; " (medido).
+          const sepTexto = e.separador || (e.showCatName && e.showPercent && !e.showVal ? '\n' : '; ');
           const lineas = partes.join(sepTexto).split('\n');
           const w = Math.max(...lineas.map((x) => med.ancho(x, l))) + 2 * PAD_TEXTO.x, h = lineas.length * lh + 2 * PAD_TEXTO.y;
           const pos = e.pos || (anillo ? 'ctr' : 'bestFit');
-          // Afuera (outEnd y, en lo medido, también bestFit): a 6 pt del borde, más
-          // la mitad de la etiqueta en esa dirección. [calibrar] cuándo bestFit la deja adentro.
-          const fuera = Math.hypot(w / 2 * Math.cos(p._medio), h / 2 * Math.sin(p._medio));
-          const radio = anillo || pos === 'ctr' ? (rOut + rIn) / 2 : pos === 'inEnd' ? rOut - Math.max(w, h) / 2 : rOut + 6 + fuera;
-          const lx = cx + Math.cos(p._medio) * (radio + p._expl * R), ly = cy + Math.sin(p._medio) * (radio + p._expl * R);
+          const c = Math.cos(p._medio), sn = Math.sin(p._medio), ex = c * p._expl * R, ey = sn * p._expl * R;
+          // Medido en imágenes y por COM (sondeo-etiquetas-circular.ps1;
+          // 06-graficos.md 6.4 quinquies). Lo que la etiqueta ocupa hacia el centro:
+          const apoyo = w / 2 * Math.abs(c) + h / 2 * Math.abs(sn);
+          let lx, ly;
+          const afuera = () => {
+            // Extremo externo: un punto de apoyo en la mitad del sector a
+            // 1,044 R − 0,32; hasta 66° de la horizontal la etiqueta se apoya
+            // por su costado (a 1 pt) y se corre en vertical con el ángulo;
+            // más arriba o abajo, por su borde de arriba o de abajo. Nunca
+            // sale de la forma del gráfico.
+            const ta = rOut * 1.0438 - 0.32, ax = cx + ex + c * ta, ay = cy + ey + sn * ta;
+            const dh = Math.atan2(Math.abs(sn), Math.abs(c)) * 180 / Math.PI, sx = c >= 0 ? 1 : -1, sy = sn >= 0 ? 1 : -1;
+            if (dh < 65.7) { lx = ax + sx * (w / 2 + 1.02); ly = ay + sy * Math.min(0.5, dh / 98.9) * h; }
+            else { lx = ax + sx * Math.min(0.5, (90 - dh) / 35.24) * w; ly = ay + sy * h / 2; }
+            lx = Math.max(w / 2, Math.min(geo.W - w / 2, lx)); ly = Math.max(h / 2, Math.min(geo.H - h / 2, ly));
+          };
+          const radial = (r) => { lx = cx + ex + c * r; ly = cy + ey + sn * r; };
+          if (anillo || pos === 'ctr') radial((rOut + rIn) / 2);
+          else if (pos === 'inEnd') radial(rOut - 3.06 - apoyo);
+          else if (pos === 'bestFit') {
+            // Adentro, cerca del borde, salvo que choque con una que ya quedó
+            // adentro (se reparten en orden): entonces va afuera.
+            radial(rOut - 1.5 - apoyo);
+            const caja = { x: lx - w / 2, y: ly - h / 2, w, h };
+            if (adentro.some((o) => caja.x < o.x + o.w && o.x < caja.x + caja.w && caja.y < o.y + o.h && o.y < caja.y + caja.h)) afuera();
+            else adentro.push(caja);
+          } else afuera();
           lineas.forEach((x, k2) => escribir(ctx, x, l, lx, ly - h / 2 + PAD_TEXTO.y + k2 * lh + asc, 'center'));
           p.etiqueta = { texto: lineas.join('\n'), x: lx - w / 2, y: ly - h / 2, w, h };
         });

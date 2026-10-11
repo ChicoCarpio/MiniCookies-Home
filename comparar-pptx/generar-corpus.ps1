@@ -1913,6 +1913,39 @@ try {
         }
     } 960 540 $true
 
+    # ============================================================ 20 gráficos: etiquetas de circular
+    # Casos que no se usaron para calibrar 06-graficos.md 6.4 quinquies:
+    # mejor ajuste, extremos, centro, sector separado, negativos y anillo.
+    Nuevo-Archivo '20-graficos-etiquetas-circular.pptx' {
+        param($pres)
+        $seis = @('Norte', 'Sur', 'Este', 'Oeste', 'Centro', 'Islas')
+        $vals = [ordered]@{ Ventas = @(34, 22, 18, 12, 9, 5) }
+        $etq = { param($ch, $pos, $val, $pct, $cat) $se = $ch.SeriesCollection(1); $se.HasDataLabels = $true; $dl = $se.DataLabels(); $dl.ShowValue = $val; $dl.ShowPercentage = $pct; $dl.ShowCategoryName = $cat; if ($pos -ne 0) { $dl.Position = $pos }; $dl }
+        $casos = @(
+            @{ n = 'Porcentajes con leyenda'; f = { param($ch) $null = & $etq $ch 0 $false $true $false; $ch.HasLegend = $true; $ch.Legend.Position = -4152 } },
+            @{ n = 'Extremo interno grande'; f = { param($ch) $dl = & $etq $ch 3 $true $false $false; $dl.Format.TextFrame2.TextRange.Font.Size = 14; $ch.HasLegend = $false } },
+            @{ n = 'Extremo externo con nombre'; c = @('Norte', 'Sur', 'Este', 'Oeste', 'Centro'); s = [ordered]@{ Ventas = @(40, 25, 15, 12, 8) }; f = { param($ch) $null = & $etq $ch 2 $true $false $true; $ch.HasLegend = $false } },
+            @{ n = 'Con un negativo'; s = [ordered]@{ Ventas = @(30, -10, 25, 15, 12, 8) }; f = { param($ch) $null = & $etq $ch 0 $true $false $false } },
+            @{ n = 'Doce sectores'; c = @(1..12 | ForEach-Object { "S$_" }); s = [ordered]@{ Ventas = @(22, 18, 14, 11, 9, 7, 6, 5, 3, 2, 2, 1) }; f = { param($ch) $null = & $etq $ch 0 $true $false $false; $ch.HasLegend = $false } },
+            @{ n = 'Anillo con etiquetas'; t = -4120; f = { param($ch) $null = & $etq $ch 0 $true $false $false } },
+            @{ n = 'Separado con nombre'; f = { param($ch) $null = & $etq $ch 0 $false $true $true; $ch.SeriesCollection(1).Explosion = 20; $ch.HasLegend = $false } },
+            @{ n = 'Al centro con porcentaje'; f = { param($ch) $null = & $etq $ch -4108 $false $true $false; $ch.HasLegend = $true; $ch.Legend.Position = -4107 } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Etiquetas de circular " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $seis }
+                $ser = if ($k.s) { $k.s } else { $vals }
+                $tipo = if ($k.t) { $k.t } else { 5 }
+                $sh = Grafico $d $tipo $x $y 456 244 "EtiqCirc_$i" $cats $ser $k.n -PorColumnas
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
     # ============================================================ 13 patrón y diseño
     Nuevo-Archivo '13-patron-y-diseno.pptx' {
         param($pres)
