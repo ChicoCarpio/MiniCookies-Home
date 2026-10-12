@@ -1243,8 +1243,9 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const id = 'prueba-' + Date.now();
     const canal = new (W().MessageChannel)();
     const trozos = [0, 1, 2].map((k) => new (W().Uint8Array)(100000).map((_, i) => (i + k * 77) & 255));
-    let enviados = 0, pidieron = 0;
+    let enviados = 0, pidieron = 0, leyendo = 0;
     canal.port1.onmessage = (e) => {
+      if (e.data === 'leyendo') leyendo++;
       if (e.data !== 'pull') return;
       pidieron++;
       if (enviados < 3) { const b = trozos[enviados++].slice(); canal.port1.postMessage(b.buffer, [b.buffer]); }
@@ -1261,6 +1262,9 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const igual = [0, 1, 2].every((k) => trozos[k].every((v, i) => bytes[k * 100000 + i] === v));
     afirmar(igual, 'el contenido llegó distinto');
     afirmar(pidieron >= 3, 'no pidió los trozos de a uno: ' + pidieron);
+    afirmar(leyendo === 1, 'el aviso de que el navegador pidió la descarga llegó ' + leyendo + ' veces');
+    const sondeo = await W().fetch('/enviar-descarga/sondeo/x');
+    afirmar(sondeo.status === 204 && sondeo.headers.get('x-mc-sw') === '1', 'el sondeo no respondió el service worker: ' + sondeo.status);
     const faltante = await W().fetch('/enviar-descarga/no-existe/x.bin');
     afirmar(faltante.status === 404, 'una descarga inexistente dio ' + faltante.status);
     return '300000 bytes en 3 trozos, pidió ' + pidieron + ' veces';

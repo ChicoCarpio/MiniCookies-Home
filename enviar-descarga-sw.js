@@ -18,6 +18,8 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('message', (e) => {
   const d = e.data;
+  // 'ping': la página lo manda cada pocos segundos para que el navegador no apague
+  // este service worker (lo hace tras ~30 s sin eventos) en medio de una descarga larga.
   if (!d || d.tipo !== 'preparar' || !e.ports[0]) return;
   const puerto = e.ports[0];
   let controlador;
@@ -33,12 +35,13 @@ self.addEventListener('message', (e) => {
       else controlador.enqueue(new Uint8Array(m.data));
     } catch (error) { /* el navegador ya canceló la descarga */ }
   };
-  const info = { nombre: d.nombre, tam: d.tam, tipo: d.mime, flujo };
+  const info = { nombre: d.nombre, tam: d.tam, tipo: d.mime, flujo, puerto };
   if (esperando.has(d.id)) { esperando.get(d.id)(info); esperando.delete(d.id); }
   else pendientes.set(d.id, info);
 });
 
 function respuesta(info) {
+  info.puerto.postMessage('leyendo'); // el navegador ya pidió la descarga: esto sí confirma que arrancó
   const cabeceras = {
     'Content-Type': info.tipo || 'application/octet-stream',
     'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(info.nombre),
@@ -52,6 +55,8 @@ self.addEventListener('fetch', (e) => {
   const m = /^\/enviar-descarga\/([A-Za-z0-9-]+)\//.exec(new URL(e.request.url).pathname);
   if (!m) return;
   const id = m[1];
+  // Sondeo: la página comprueba que este service worker atiende las descargas antes de abrir una.
+  if (id === 'sondeo') { e.respondWith(new Response(null, { status: 204, headers: { 'X-MC-SW': '1' } })); return; }
   if (pendientes.has(id)) {
     const info = pendientes.get(id);
     pendientes.delete(id);

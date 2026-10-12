@@ -338,12 +338,18 @@ const EnviarQR = (() => {
       await navigator.serviceWorker.register('/enviar-descarga-sw.js');
       const activo = (await navigator.serviceWorker.ready).active;
       if (!activo) return null;
+      // Antes de abrir nada, comprobar que el service worker atiende estas direcciones
+      // (si no, el navegador mostraría una descarga fallida).
+      for (let i = 0; i < 20 && !navigator.serviceWorker.controller; i++) await new Promise((r) => setTimeout(r, 100));
+      const sondeo = navigator.serviceWorker.controller ? await fetch('/enviar-descarga/sondeo/x').catch(() => null) : null;
+      if (!sondeo || sondeo.headers.get('X-MC-SW') !== '1') return null;
       const id = crypto.randomUUID();
       const canal = new MessageChannel();
-      let puede = false, cancelado = false, despertar = null;
+      let puede = false, leyendo = false, cancelado = false, despertar = null;
       const avisar = () => { if (despertar) { const d = despertar; despertar = null; d(); } };
       canal.port1.onmessage = (e) => {
         if (e.data === 'pull') puede = true;
+        else if (e.data === 'leyendo') leyendo = true;
         else if (e.data === 'cancelado') cancelado = true;
         avisar();
       };
@@ -352,13 +358,12 @@ const EnviarQR = (() => {
       marco.hidden = true;
       marco.src = '/enviar-descarga/' + id + '/' + encodeURIComponent(meta.nombre);
       document.body.append(marco);
-      // Si el navegador no empieza a leer la descarga en 4 s, no sirve.
-      await Promise.race([
-        new Promise((listo) => { despertar = listo; if (puede) avisar(); }),
-        new Promise((listo) => setTimeout(listo, 4000)),
-      ]);
-      if (!puede) { marco.remove(); canal.port1.close(); return null; }
-      const quitar = () => setTimeout(() => marco.remove(), 60000);
+      // Si el navegador no pide la descarga en 4 s, no sirve.
+      const limite = Date.now() + 4000;
+      while (!leyendo && Date.now() < limite) await new Promise((listo) => { despertar = listo; setTimeout(avisar, 100); });
+      if (!leyendo) { marco.remove(); canal.port1.close(); return null; }
+      const latido = setInterval(() => activo.postMessage({ tipo: 'ping' }), 10000);
+      const quitar = () => { clearInterval(latido); setTimeout(() => marco.remove(), 60000); };
       return {
         async escribir(bytes) {
           while (!puede && !cancelado) await new Promise((listo) => { despertar = listo; });
