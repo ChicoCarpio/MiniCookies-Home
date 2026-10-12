@@ -186,7 +186,10 @@ const EnviarQR = (() => {
       this.cierres = new Set();
       this.ultima = Date.now();   // último mensaje enviado o recibido
       this.recibiendo = false;    // hay una transferencia entrante en curso (o esperando respuesta de la persona)
-      this.motivo = null;         // por qué se cerró: 'inactividad' o null
+      this.motivo = null;         // por qué se cerró: 'inactividad', 'codigo' o null
+      this.esAnfitrion = soyAnfitrion;
+      this.verificado = false;    // las dos personas confirmaron el código de verificación
+      this.alVerificado = null;
       this.reloj = null;
       this.cerrado = false;
       this.cola = Promise.resolve();
@@ -246,6 +249,12 @@ const EnviarQR = (() => {
     repartir(tipo, datos) {
       if (tipo === TIPO_TROZO) return this.receptor ? this.receptor(tipo, datos) : undefined;
       const t = JSON.parse(new TextDecoder().decode(datos)).t;
+      if (t === 'verificado') {
+        // La manda el anfitrión al aceptar el código. Solo el invitado la acepta: si el
+        // anfitrión también la aceptara, quien se colara con el QR se daría por verificado solo.
+        if (!this.esAnfitrion && !this.verificado) { this.verificado = true; if (this.alVerificado) this.alVerificado(); }
+        return;
+      }
       const paraEmisor = t === 'acepta' || t === 'rechaza' || t === 'sigue' || t === 'ok' || t === 'ocupado' || (t === 'cancela' && this.emisor);
       const manejador = paraEmisor ? this.emisor : this.receptor;
       return manejador ? manejador(tipo, datos) : undefined;
@@ -261,9 +270,31 @@ const EnviarQR = (() => {
 
   function crearSesion(pc, dc, clave, soyAnfitrion, sdpOferta, sdpRespuesta, rawClave) {
     const canal = new Canal(dc, clave, soyAnfitrion);
+    // Verificación: el código de 6 dígitos (clave + huellas de los dos) lo muestra el
+    // invitado y el anfitrión, que mostró el QR, lo escribe. Quien se coló con un QR
+    // visto de lejos no tiene a nadie al lado que le muestre un código, y un
+    // intermediario que reenvía la conexión tiene huellas distintas en cada tramo.
+    // Hasta que se confirme, no se puede enviar ni recibir.
     const sesion = {
       canal,
       verificacion: '',
+      muestraCodigo: !soyAnfitrion,
+      escribeCodigo: soyAnfitrion,
+      intentos: 0,
+      get verificado() { return canal.verificado; },
+      // Solo el anfitrión. Tres intentos fallidos cierran la conexión.
+      async confirmarCodigo(texto) {
+        if (!this.escribeCodigo) return false;
+        if (canal.verificado) return true;
+        const limpio = (x) => String(x || '').replace(/\D/g, '');
+        if (limpio(texto).length === 6 && limpio(texto) === limpio(this.verificacion)) {
+          canal.verificado = true;
+          await canal.enviarControl({ t: 'verificado' });
+          return true;
+        }
+        if (++this.intentos >= 3) { canal.motivo = 'codigo'; this.cerrar(); }
+        return false;
+      },
       cerrar() { canal.cerrar(); try { pc.close(); } catch (e) {} },
     };
     // Cierre por inactividad.
@@ -344,6 +375,7 @@ const EnviarQR = (() => {
   // recibiendo o enviando otra cosa en ese momento).
   async function enviarArchivos(sesion, archivos, opciones = {}) {
     const canal = sesion.canal;
+    if (!sesion.verificado) throw new Error('sin-verificar');
     if (canal.emisor) throw new Error('ocupado');
     try {
       return await enviarInterno(sesion, archivos, opciones);
