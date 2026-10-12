@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Helper compartido para dibujar las diapositivas de un .pptx como imágenes
 // reales (no solo texto) con el motor propio (pptx-modelo.js, pptx-dibujo.js…),
-// y empaquetarlas como PDF o .zip. Requiere que la página ya haya cargado JSZip
+// y empaquetarlas como PDF o .zip. Requiere que la página ya haya cargado ZipPropio
 // y pdf-lib, y que exista un <canvas id="canvasRender"> oculto en el documento.
 
 // Factor de sobre-muestreo: renderizamos los píxeles a esta escala y después
@@ -13,7 +13,7 @@ const ESCALA_RENDERIZADO = 6;
 // carga de acá (archivo-a-pdf.js) y PowerPoint → PDF e → imágenes lo traen en
 // <script> en este mismo orden, lo que el build comprueba (motor-pptx.mjs):
 // cuando cada página tenía su copia de la lista, Unir PDF se quedó sin el
-// motor propio. Necesita además vendor.js y JSZip.
+// motor propio. Necesita además vendor.js y ZipPropio.
 const SCRIPTS_MOTOR_PPTX = ['pptx-xml.js', 'vendor/ecma-376-geometrias/5ed-2016/geometrias.js', 'emf.js', 'pptx-geometria.js', 'pptx-estilos-tabla.js', 'pptx-modelo.js', 'pptx-texto.js', 'pptx-grafico-3d.js', 'pptx-grafico-superficie.js', 'pptx-grafico.js', 'pdf-lienzo.js', 'pptx-dibujo.js', 'pptx-visual.js'];
 
 const EMU_POR_PULGADA = 914400; // unidad interna de PowerPoint (English Metric Units)
@@ -281,7 +281,7 @@ async function powerPointAPdf(archivo, canvas, alAvanzar, opciones) {
 }
 
 async function construirZipDesdeImagenes(imagenes) {
-  const zip = new JSZip();
+  const zip = new ZipPropio();
   const cantidadDigitos = String(imagenes.length).length;
   for (let i = 0; i < imagenes.length; i++) {
     const numero = String(i + 1).padStart(cantidadDigitos, '0');

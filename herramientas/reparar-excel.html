@@ -110,7 +110,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -152,7 +152,7 @@ const controlesForzar = document.getElementById('controlesForzar');
 // ({ quitadas: [] } si no hay nada dañado) o tira un error si hace falta el
 // nivel 2.
 async function repararConservandoFormato(bytes) {
-  const zip = await JSZip.loadAsync(bytes);
+  const zip = await ZipPropio.loadAsync(bytes);
   // Partes generales: si alguna está rota, el nivel 1 no alcanza.
   for (const ruta of ['[Content_Types].xml', 'xl/_rels/workbook.xml.rels', 'xl/styles.xml', 'xl/sharedStrings.xml']) {
     if (zip.file(ruta)) await leerXmlDeZip(zip, ruta);

@@ -6,7 +6,7 @@
 // convertir(archivo) devuelve { nombre, blob } o lanza un error con el mensaje
 // ya traducido. Opcional: extras, archivos que acompañan al resultado dentro del
 // zip ([{ nombre: 'Doc-imagenes/imagen-1.png', datos }], datos en lo que acepte
-// JSZip). Se usa con JSZip, que ya está en vendor/.
+// ZipPropio). Se usa con ZipPropio, que ya está en vendor/.
 (function () {
   // Dos archivos con el mismo nombre (libro.pdf de dos carpetas) no pueden
   // pisarse dentro del zip: el segundo sale como libro-2.md.
@@ -39,7 +39,7 @@
   }
 
   async function zipDeResultados(resultados) {
-    const zip = new JSZip();
+    const zip = new ZipPropio();
     resultados.filter((r) => r.ok).forEach((r) => {
       zip.file(r.nombre, r.blob);
       (r.extras || []).forEach((extra) => zip.file(extra.nombre, extra.datos));

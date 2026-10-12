@@ -9,7 +9,7 @@
 // fuera del repo). La herencia sigue lo medido con comparar-pptx; donde la
 // norma y PowerPoint no coinciden, manda PowerPoint.
 //
-// Requiere JSZip y pptx-geometria.js (y pptx-estilos-tabla.js para las tablas). Uso:
+// Requiere ZipPropio y pptx-geometria.js (y pptx-estilos-tabla.js para las tablas). Uso:
 //   const pres = await PptxModelo.abrir(archivo);
 //   pres.ancho, pres.alto (EMU), pres.cantidad
 //   const d = await pres.diapositiva(i);  // { fondo, elementos, soportada, motivos }; motivos: lo que se omitió o se dibujó sin su formato
@@ -227,7 +227,7 @@ const PptxModelo = (() => {
   }
 
   async function abrir(archivo) {
-    const zip = await JSZip.loadAsync(archivo);
+    const zip = await ZipPropio.loadAsync(archivo);
     const { parte, imagen } = paquete(zip);
 
     const pres = await parte('ppt/presentation.xml');
@@ -592,7 +592,7 @@ const PptxModelo = (() => {
   // Un gráfico que no vive en una diapositiva —el de una hoja de Excel (con su
   // propio tema) o uno armado con datos— hecho una diapositiva de un solo
   // gráfico, para dibujarlo con PptxDibujo.dibujar igual que a los de un .pptx.
-  //   zip: JSZip del paquete (opcional; da el tema, las imágenes y las relaciones)
+  //   zip: ZipPropio del paquete (opcional; da el tema, las imágenes y las relaciones)
   //   rutaGrafico: la parte c:chartSpace dentro del zip; o raiz: el c:chartSpace ya leído
   //   ancho, alto: EMU
   //   excel: los valores que Excel usa cuando el gráfico no dice nada (estilo clásico); sin él, los de PowerPoint

@@ -104,7 +104,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -119,7 +119,7 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let libroActual = null; // SheetJS — solo para la vista previa de celdas
-let zipActual = null;   // JSZip — para reordenar/eliminar sin perder formato
+let zipActual = null;   // ZipPropio — para reordenar/eliminar sin perder formato
 let bytesActuales = null;
 let nombresHojas = [];
 let extensionActual = 'xlsx';
@@ -204,7 +204,7 @@ async function cargarLibro(archivo) {
   try {
     const bytes = await archivo.arrayBuffer();
     libroActual = XLSX.read(bytes, { type: 'array' });
-    zipActual = await JSZip.loadAsync(bytes);
+    zipActual = await ZipPropio.loadAsync(bytes);
     bytesActuales = bytes;
     nombresHojas = [...libroActual.SheetNames];
     // El nombre de descarga tiene que conservar la extensión original — un
@@ -230,7 +230,7 @@ botonGuardar.addEventListener('click', async () => {
     // anterior). reordenarHojasExcel (assets/js/ooxml-paquete.js) reordena
     // la lista de hojas y, si se quitó alguna, borra también su contenido
     // del paquete y corrige nombres definidos, pestaña activa, etc.
-    const zip = await JSZip.loadAsync(bytesActuales);
+    const zip = await ZipPropio.loadAsync(bytesActuales);
     await reordenarHojasExcel(zip, nombresHojas);
 
     const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });

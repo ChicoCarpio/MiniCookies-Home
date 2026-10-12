@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Edición de paquetes OOXML (.xlsx, .xlsm, .pptx: un .zip con partes XML
-// unidas por relaciones) con JSZip, compartida por las herramientas que
+// unidas por relaciones) con ZipPropio, compartida por las herramientas que
 // reordenan, quitan o separan hojas y diapositivas.
 //
 // Quitar una hoja o diapositiva de la lista del libro/presentación no alcanza:

@@ -103,7 +103,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -147,7 +147,7 @@ botonDividir.addEventListener('click', async () => {
       throw new Error(t('error-sin-titulos'));
     }
 
-    const zip = new JSZip();
+    const zip = new ZipPropio();
     const cantidadDigitos = String(capitulos.length).length;
 
     for (let i = 0; i < capitulos.length; i++) {

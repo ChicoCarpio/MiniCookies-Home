@@ -59,9 +59,7 @@
     for (const src of lista) await cargarScript(src);
   }
 
-  // Las rutas de vendor/ van escritas completas: el build las busca así para
-  // comprobar que se publican (referencias-vendor.mjs).
-  const JSZIP = () => rutaVendor('jszip/3.10.1/jszip.min.js');
+  const JSZIP = () => propio('zip-propio.js');
 
   const FORMATOS = {
     word: {
@@ -72,6 +70,7 @@
           // docx-preview se publica como window.docx, el mismo nombre que la
           // librería docx: se guarda aparte y se devuelve lo que hubiera.
           const anterior = window.docx;
+          window.JSZip = window.ZipPropio; // docx-preview pide un JSZip global
           await cargarScript(rutaVendor('docx-preview/0.4.1/docx-preview.min.js'));
           window.docxPreview = window.docx;
           window.docx = anterior;
@@ -137,11 +136,11 @@
     try {
       return await formato.convertir(archivo, alAvanzar);
     } catch (error) {
-      // Word, Excel, PowerPoint y EPUB son .zip por dentro: si no lo es, JSZip
-      // tira un mensaje técnico en inglés (con una URL) que no le sirve a nadie.
-      // Lo mismo con un zip que no es del formato (un .docx sin documento
-      // adentro): la librería termina leyendo algo que no está, un TypeError.
-      if (error instanceof TypeError || /central directory|zip file|corrupted zip|unsupported zip/i.test((error && error.message) || '')) {
+      // Word, Excel, PowerPoint y EPUB son .zip por dentro: si no lo es, el zip
+      // propio tira un ErrorZip con un mensaje técnico en inglés que no le sirve
+      // a nadie. Lo mismo con un zip que no es del formato (un .docx sin
+      // documento adentro): se termina leyendo algo que no está, un TypeError.
+      if (error instanceof TypeError || (error && error.name === 'ErrorZip')) {
         console.warn('No se pudo convertir ' + archivo.name + ':', error);
         throw new Error(t('archivo-a-pdf-danado'));
       }

@@ -312,7 +312,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return (async () => {
       const l = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(l, XLSX.utils.aoa_to_sheet([['A', 'B', 'C', 'D', 'E'], ['Normal', 'Negrita', 'Cursiva', 'Subrayado', 'Blanco']]), 'Hoja1');
-      const zip = await JSZip.loadAsync(XLSX.write(l, { type: 'array', bookType: 'xlsx' }));
+      const zip = await ZipPropio.loadAsync(XLSX.write(l, { type: 'array', bookType: 'xlsx' }));
       const fuente = (extra) => '<font>' + extra + '<sz val="11"/><name val="Calibri"/></font>';
       zip.file('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
         + '<fonts count="5">' + fuente('<color rgb="FF000000"/>') + fuente('<b/>') + fuente('<i/>') + fuente('<u/>') + fuente('<color rgb="FFFFFFFF"/>') + '</fonts>'
@@ -362,7 +362,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return (async () => {
       const l = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(l, XLSX.utils.aoa_to_sheet([['Mes', 'Ventas'], ['Ene', 120], ['Feb', 150], ['Mar', 90]]), 'Datos');
-      const zip = await JSZip.loadAsync(XLSX.write(l, { type: 'array', bookType: 'xlsx' }));
+      const zip = await ZipPropio.loadAsync(XLSX.write(l, { type: 'array', bookType: 'xlsx' }));
       const NS = 'xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
       const cache = (v) => '<c:ptCount val="3"/>' + v.map((x, i) => '<c:pt idx="' + i + '"><c:v>' + x + '</c:v></c:pt>').join('');
       zip.file('xl/charts/chart1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><c:chartSpace ' + NS + '><c:chart><c:autoTitleDeleted val="1"/><c:plotArea><c:layout/>'
@@ -456,7 +456,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   function armarEpubDePrueba(fuenteOfuscada) {
     return (async () => {
       const uuid = 'urn:uuid:1b4e28ba-2fa1-41d2-883f-0016d3cca427';
-      const zip = new JSZip();
+      const zip = new ZipPropio();
       zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
       zip.file('META-INF/container.xml', '<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
       const fuente = new Uint8Array(await (await fetch('/vendor/google-fonts/d2761cb6ca3b.woff2')).arrayBuffer());
@@ -488,7 +488,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   }
   // Lo que tiene que sobrevivir, y el orden de lectura resultante.
   async function revisarEpub(bytes) {
-    const zip = await W().JSZip.loadAsync(new (W().Uint8Array)(bytes));
+    const zip = await W().ZipPropio.loadAsync(new (W().Uint8Array)(bytes));
     const opf = await zip.file('OEBPS/content.opf').async('string');
     const faltan = ['OEBPS/Styles/estilo.css', 'OEBPS/Fonts/fuente.woff2', 'OEBPS/Images/portada.png'].filter((r) => !zip.file(r));
     if (!/Editorial Prueba/.test(opf)) faltan.push('editorial');
@@ -545,7 +545,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     alertas = []; W().alert = (m) => alertas.push(m);
     W().mostrarArchivo(new (W().File)([libro], 'libro.epub'));
     D().getElementById('botonDividir').click();
-    const zipPartes = await W().JSZip.loadAsync(new (W().Uint8Array)(await descargarResultado()));
+    const zipPartes = await W().ZipPropio.loadAsync(new (W().Uint8Array)(await descargarResultado()));
     const partes = Object.keys(zipPartes.files).sort();
     afirmar(!alertas.length && partes.length === 3, 'dividir: ' + alertas.join(' | ') + partes.join(', '));
     const parte2 = await revisarEpub(await zipPartes.file(partes[1]).async('uint8array'));
@@ -594,9 +594,9 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const alertas = []; W().alert = (m) => alertas.push(m);
     W().mostrarArchivo(new (W().File)([libro], 'libro.epub'));
     D().getElementById('botonDividir').click();
-    const zipPartes = await W().JSZip.loadAsync(new (W().Uint8Array)(await descargarResultado()));
+    const zipPartes = await W().ZipPropio.loadAsync(new (W().Uint8Array)(await descargarResultado()));
     afirmar(!alertas.length, 'error: ' + alertas.join(' | '));
-    const parte = await W().JSZip.loadAsync(await zipPartes.file(Object.keys(zipPartes.files)[0]).async('uint8array'));
+    const parte = await W().ZipPropio.loadAsync(await zipPartes.file(Object.keys(zipPartes.files)[0]).async('uint8array'));
     const fuente = await parte.file('OEBPS/Fonts/fuente.woff2').async('uint8array');
     afirmar(!parte.file('META-INF/encryption.xml') && fuente.length === original.length && fuente.every((b, i) => b === original[i]), 'la fuente de la parte no es la original');
     return 'fuente desofuscada, idéntica a la original';
@@ -790,7 +790,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href);
     afirmar(!alertas.length, 'error: ' + alertas.join(' | '));
     afirmar(enlace, 'no terminó (¿sin imágenes?): ' + D().getElementById('sinImagenes').style.display);
-    const zip = await W().JSZip.loadAsync(await (await W().fetch(enlace)).arrayBuffer());
+    const zip = await W().ZipPropio.loadAsync(await (await W().fetch(enlace)).arrayBuffer());
     const nombres = Object.keys(zip.files);
     afirmar(nombres.length === 2, 'imágenes: ' + nombres.join(', '));
     return nombres.join(', ');
@@ -1019,7 +1019,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // La carpeta de medios de Office guarda también audio y video.
   await prueba('extraer-imagenes-powerpoint: solo imágenes, sin audio ni video', async () => {
     await abrir('/herramientas/extraer-imagenes-powerpoint.html'); await esperar(200);
-    const zip = new (W().JSZip)();
+    const zip = new (W().ZipPropio)();
     for (const n of ['image1.png', 'image2.emf', 'image3.svg', 'media1.mp4', 'media2.wav']) zip.file('ppt/media/' + n, 'x');
     const entrada = D().getElementById('entradaArchivo');
     entrada.files = archivos([new (W().File)([await zip.generateAsync({ type: 'blob' })], 'medios.pptx')]).files;
@@ -1027,7 +1027,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     D().getElementById('botonExtraer').click();
     const enlace = await hasta(() => D().getElementById('resultado').classList.contains('visible') && D().getElementById('enlaceDescarga').href, 15000);
     afirmar(enlace, 'no terminó');
-    const salida = await W().JSZip.loadAsync(await (await W().fetch(enlace)).blob());
+    const salida = await W().ZipPropio.loadAsync(await (await W().fetch(enlace)).blob());
     const nombres = Object.keys(salida.files).sort().join(',');
     afirmar(nombres === 'image1.png,image2.emf,image3.svg', 'salieron: ' + nombres);
     return nombres;
@@ -1082,6 +1082,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(W().eval('PptxEstilosTabla').cantidad() === 74, 'no hay 74 estilos integrados');
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
@@ -1089,7 +1090,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const armar = async (guid) => {
       const pres = new (W().PptxGenJS)();
       pres.addSlide().addTable([['Encabezado', 'B'], ['uno', 'dos'], ['tres', 'cuatro']], { x: 0.5, y: 0.5, w: 6, colW: [3, 3], rowH: 0.8, fontSize: 14 });
-      const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+      const zip = await W().ZipPropio.loadAsync(await pres.write({ outputType: 'blob' }));
       const xml = await zip.file('ppt/slides/slide1.xml').async('string');
       afirmar(/<a:tblPr/.test(xml), 'la tabla de PptxGenJS cambió de forma');
       // Sin formato directo en las celdas: que mande el estilo.
@@ -1128,13 +1129,14 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
     });
     const pres = new (W().PptxGenJS)();
     pres.addSlide().addTable([['A', 'B'], ['uno', 'dos']], { x: 0.5, y: 0.5, w: 6, colW: [3, 3], rowH: 0.8, fontSize: 14 });
-    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const zip = await W().ZipPropio.loadAsync(await pres.write({ outputType: 'blob' }));
     const xml = await zip.file('ppt/slides/slide1.xml').async('string');
     afirmar(/<a:tblPr/.test(xml) && (xml.match(/<a:tcPr/g) || []).length === 4, 'la tabla de PptxGenJS cambió de forma');
     let n = 0;
@@ -1167,13 +1169,14 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
     });
     const pres = new (W().PptxGenJS)();
     pres.addSlide().addShape(pres.ShapeType.ellipse, { x: 1, y: 1, w: 4, h: 3, fill: { type: 'none' }, line: { color: 'FF0000', width: 12 } });
-    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const zip = await W().ZipPropio.loadAsync(await pres.write({ outputType: 'blob' }));
     const xml = await zip.file('ppt/slides/slide1.xml').async('string');
     afirmar(/<a:ln w="152400"/.test(xml), 'el contorno de PptxGenJS cambió de forma');
     zip.file('ppt/slides/slide1.xml', xml.replace('<a:ln w="152400"', '<a:ln w="152400" cmpd="dbl"'));
@@ -1987,6 +1990,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
@@ -2032,6 +2036,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
@@ -2042,7 +2047,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     pres.addSlide().addChart(pres.ChartType.bar, [
       { name: 'S1', labels: cats, values: [1, 4, 8, 3] }, { name: 'S2', labels: cats, values: [2, 6, 9, 5] }, { name: 'S3', labels: cats, values: [3, 5, 7, 1] }],
     { x: 0.5, y: 0.5, w: 8, h: 4.5, showTitle: false, showLegend: false });
-    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const zip = await W().ZipPropio.loadAsync(await pres.write({ outputType: 'blob' }));
     const nombre = Object.keys(zip.files).find((n) => /charts\/chart\d+\.xml$/.test(n));
     let xml = await zip.file(nombre).async('string');
     // Los tres ejes de una superficie: el de series al final.
@@ -2084,6 +2089,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     }
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
@@ -2096,7 +2102,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const Tipos = new (W().PptxGenJS)().ChartType;
     // Un tipo que el motor no conoce tiene que caer al respaldo: el mismo
     // gráfico de barras con un tipo inventado (así la prueba ve el error).
-    const zipSup = await W().JSZip.loadAsync(await armar(Tipos.bar));
+    const zipSup = await W().ZipPropio.loadAsync(await armar(Tipos.bar));
     const nombreSup = Object.keys(zipSup.files).find((n) => /charts\/chart\d+\.xml$/.test(n));
     zipSup.file(nombreSup, (await zipSup.file(nombreSup).async('string')).replace(/c:barChart>/g, 'c:futureChart>'));
     const superficie = await (await W().eval('PptxModelo').abrir(new (W().File)([await zipSup.generateAsync({ type: 'blob' })], 'sup.pptx'))).diapositiva(0);
@@ -2126,10 +2132,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   await prueba('unir-pdf: un PowerPoint se dibuja con el motor propio', async () => {
     await abrir('/herramientas/unir-pdf.html'); await esperar(200);
     afirmar(W().eval('typeof PptxModelo') === 'undefined', 'el motor ya estaba cargado antes de convertir: la prueba no vería si Unir PDF lo carga');
-    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+    for (const src of ['../assets/js/zip-propio.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
       await new Promise((listo, error) => {
         const s = D().createElement('script');
-        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        s.src = src; s.onload = () => { W().JSZip = W().JSZip || W().ZipPropio; listo(); }; s.onerror = () => error(new Error('no cargó ' + src));
         D().head.appendChild(s);
       });
     }
@@ -2149,10 +2155,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // (con tilde y eñe) y caer donde se dibujó, y el giro se tiene que respetar.
   await prueba('powerpoint → pdf: el texto de las diapositivas es seleccionable y está en su lugar', async () => {
     await abrir('/herramientas/unir-pdf.html'); await esperar(200);
-    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+    for (const src of ['../assets/js/zip-propio.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
       await new Promise((listo, error) => {
         const s = D().createElement('script');
-        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        s.src = src; s.onload = () => { W().JSZip = W().JSZip || W().ZipPropio; listo(); }; s.onerror = () => error(new Error('no cargó ' + src));
         D().head.appendChild(s);
       });
     }
@@ -2251,10 +2257,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // (que va como imagen), una imagen y texto. Y pesa poco.
   await prueba('powerpoint → pdf: la diapositiva es vectorial y se ve como el dibujo directo', async () => {
     await abrir('/herramientas/unir-pdf.html'); await esperar(200);
-    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+    for (const src of ['../assets/js/zip-propio.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
       await new Promise((listo, error) => {
         const s = D().createElement('script');
-        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        s.src = src; s.onload = () => { W().JSZip = W().JSZip || W().ZipPropio; listo(); }; s.onerror = () => error(new Error('no cargó ' + src));
         D().head.appendChild(s);
       });
     }
@@ -2309,10 +2315,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // fuente incrustada en el PDF y comprueba que todos sus glifos se leen.
   await prueba('powerpoint → pdf: el subconjunto de Carlito (Calibri) queda sano', async () => {
     await abrir('/herramientas/unir-pdf.html'); await esperar(200);
-    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+    for (const src of ['../assets/js/zip-propio.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
       await new Promise((listo, error) => {
         const s = D().createElement('script');
-        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        s.src = src; s.onload = () => { W().JSZip = W().JSZip || W().ZipPropio; listo(); }; s.onerror = () => error(new Error('no cargó ' + src));
         D().head.appendChild(s);
       });
     }
@@ -2344,10 +2350,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // 2026-10-11 midió 2,3 MB y 125 imágenes por diapositiva con Segoe UI).
   await prueba('powerpoint → pdf: el texto en una fuente sin archivo sigue siendo texto', async () => {
     await abrir('/herramientas/unir-pdf.html'); await esperar(200);
-    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+    for (const src of ['../assets/js/zip-propio.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
       await new Promise((listo, error) => {
         const s = D().createElement('script');
-        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        s.src = src; s.onload = () => { W().JSZip = W().JSZip || W().ZipPropio; listo(); }; s.onerror = () => error(new Error('no cargó ' + src));
         D().head.appendChild(s);
       });
     }
@@ -2373,10 +2379,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // imagen en vez de perderse (y las demás siguen como vectores).
   await prueba('powerpoint → pdf: si falla la página de vectores, la diapositiva va como imagen', async () => {
     await abrir('/herramientas/unir-pdf.html'); await esperar(200);
-    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+    for (const src of ['../assets/js/zip-propio.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
       await new Promise((listo, error) => {
         const s = D().createElement('script');
-        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        s.src = src; s.onload = () => { W().JSZip = W().JSZip || W().ZipPropio; listo(); }; s.onerror = () => error(new Error('no cargó ' + src));
         D().head.appendChild(s);
       });
     }
@@ -2468,13 +2474,14 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     await new Promise((listo, error) => {
       const s = D().createElement('script');
+      W().JSZip = W().JSZip || W().ZipPropio; // PptxGenJS pide el JSZip global
       s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
       s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
       D().head.appendChild(s);
     });
     const pres = new (W().PptxGenJS)();
     pres.addSlide().addText('Hola', { x: 0.5, y: 0.3, w: 3, h: 0.6 });
-    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const zip = await W().ZipPropio.loadAsync(await pres.write({ outputType: 'blob' }));
     const fondo = '<p:sp useBgFill="1"><p:nvSpPr><p:cNvPr id="90" name="Fondo"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
       + '<p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="12192000" cy="6858000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:ln><a:noFill/></a:ln></p:spPr>'
       + '<p:style><a:lnRef idx="2"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="1"><a:schemeClr val="accent1"/></a:fillRef>'
@@ -4039,6 +4046,46 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // mitades (40 | 220) con la capa en Multiplicar: donde se aplica, 40 -> 6 y
   // 220 -> 190. La comparación píxel por píxel con la rama anterior se hizo
   // aparte (hallazgos/editores-rediseno.md).
+  await prueba('zip propio: ida y vuelta, mimetype primero, carpetas, zip dañado, cifrado y zip bomba', async () => {
+    await abrir('/herramientas/dividir-texto.html'); await esperar(200);
+    const cuerpo = async () => {
+      const Z = ZipPropio, informe = {};
+      const z = new Z();
+      z.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+      z.file('a/ñandú.txt', 'hola ñandú '.repeat(2000));
+      z.file('bin.dat', new Uint8Array(70000).map((_, i) => (i * 7) & 255));
+      z.folder('ppt/x').file('y.xml', '<a/>');
+      for (let i = 0; i < 300; i++) z.file('chicos/' + i + '.txt', 'archivo ' + i);
+      const bytes = await z.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+      const l = await Z.loadAsync(bytes);
+      informe.primero = Object.keys(l.files)[0];
+      informe.texto = (await l.file('a/ñandú.txt').async('string')) === 'hola ñandú '.repeat(2000);
+      informe.bin = (await l.file('bin.dat').async('uint8array'))[123] === ((123 * 7) & 255);
+      informe.chicos = (await l.file('chicos/299.txt').async('string')) === 'archivo 299';
+      informe.carpeta = l.file('ppt/x') === null && l.files['ppt/x/'].dir === true && (await l.file('ppt/x/y.xml').async('string')) === '<a/>';
+      l.remove('a'); l.file('nuevo.txt', 'x');
+      const otra = await Z.loadAsync(await l.generateAsync({ type: 'blob', compression: 'DEFLATE' }));
+      informe.copia = !otra.file('a/ñandú.txt') && !!otra.file('nuevo.txt') && (await otra.file('bin.dat').async('uint8array')).length === 70000;
+      const falla = async (datos) => { try { const q = await Z.loadAsync(datos); for (const k of Object.keys(q.files)) if (!q.files[k].dir) await q.files[k].async('uint8array'); return 'sin error'; } catch (e) { return e.name + ':' + e.codigo; } };
+      informe.noZip = await falla(new Uint8Array(100));
+      const cif = bytes.slice(); const dv = new DataView(cif.buffer);
+      dv.setUint16(dv.getUint32(cif.length - 6, true) + 8, 1, true);
+      informe.cifrado = await falla(cif);
+      informe.truncado = (await falla(bytes.slice(0, bytes.length - 40))).startsWith('ErrorZip');
+      const b = new Z(); b.file('z.bin', new Uint8Array(5e6), { compression: 'DEFLATE' });
+      const bb = await b.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+      const dvb = new DataView(bb.buffer); dvb.setUint32(dvb.getUint32(bb.length - 6, true) + 24, 10, true);
+      informe.bomba = await falla(bb);
+      return informe;
+    };
+    const r = await W().eval('(' + cuerpo.toString() + ')()');
+    afirmar(r.primero === 'mimetype', 'mimetype no quedó primero: ' + r.primero);
+    for (const k of ['texto', 'bin', 'chicos', 'carpeta', 'copia', 'truncado']) afirmar(r[k] === true, 'zip propio: falló ' + k);
+    afirmar(r.noZip === 'ErrorZip:invalido', 'no-zip: ' + r.noZip);
+    afirmar(r.cifrado === 'ErrorZip:cifrado', 'cifrado: ' + r.cifrado);
+    afirmar(r.bomba === 'ErrorZip:danado', 'zip bomba: ' + r.bomba);
+  });
+
   await prueba('editor avanzado: máscara por piezas (sumar, restar, intersecar, invertir, ojo, proyecto v7)', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const base = D().createElement('canvas'); base.width = 100; base.height = 50;

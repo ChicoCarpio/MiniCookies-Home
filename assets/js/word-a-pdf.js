@@ -8,7 +8,7 @@
 //  - aPdf(documento): se vuelve a dibujar fuera de pantalla y html-a-pdf.js
 //    escribe el PDF, sin imprimir.
 //
-// Requiere: JSZip, docx-preview (como window.docxPreview: su nombre global,
+// Requiere: ZipPropio, docx-preview (como window.docxPreview: su nombre global,
 // "docx", choca con la librería docx), emf.js + imagenes-office.js,
 // seguridad-html.js, pdf-lib y html-a-pdf.js.
 // Uso: const bytes = await WordAPdf.aPdf(await WordAPdf.aHtml(archivo));

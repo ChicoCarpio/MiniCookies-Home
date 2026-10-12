@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Excel / CSV → PDF, compartido por "Excel/CSV → PDF" y "Unir PDF".
-// Requiere SheetJS (XLSX), assets/js/lector-planillas.js, pdf-lib, JSZip y
+// Requiere SheetJS (XLSX), assets/js/lector-planillas.js, pdf-lib, ZipPropio y
 // assets/js/grafico-suelto.js (los gráficos de un .xlsx: el motor de gráficos
 // de PowerPoint), y assets/js/vendor.js (rutaVendor).
 //
@@ -331,7 +331,7 @@ function leerHojaConEstilos(hoja, maxFilas = Infinity, incluirOcultas = true) {
 
 // --- Gráficos embebidos (solo .xlsx) ---
 // SheetJS no expone la definición de gráficos, así que se vuelve a abrir el
-// mismo archivo con JSZip y se parsean a mano el OPF de relaciones y el XML
+// mismo archivo con ZipPropio y se parsean a mano el OPF de relaciones y el XML
 // de dibujo — mismo patrón ya usado en este proyecto para PowerPoint/Word/
 // EPUB (ver administrar-diapositivas.html, epub.js). No se incluyen imágenes
 // embebidas, únicamente celdas (tabla) y gráficos. No se intenta ubicar cada
@@ -420,7 +420,7 @@ function estiloFuenteDeFormato(estilos, indice) {
 async function leerFuentesDeCeldas(libro, bytes) {
   const estilos = libro.Styles;
   if (!estilos || !estilos.CellXf || !estilos.Fonts) return;
-  const zip = await JSZip.loadAsync(bytes);
+  const zip = await ZipPropio.loadAsync(bytes);
   const rutas = await mapaHojaARutaXml(zip);
   const porFormato = new Map(); // índice de formato -> estilo o null, calculado una vez
   for (const nombre of libro.SheetNames) {
@@ -842,7 +842,7 @@ async function construirPdfDeHoja({
   // generada: se avisa y se sigue con lo que sí se pudo procesar.
   if (esXlsx && bytesArchivo && !soloCeldas) {
     try {
-      const zip = await JSZip.loadAsync(bytesArchivo);
+      const zip = await ZipPropio.loadAsync(bytesArchivo);
       const mapaHojas = await mapaHojaARutaXml(zip);
       const rutaHojaXml = mapaHojas.get(nombreHoja);
       const { graficos } = rutaHojaXml ? await objetosDeHoja(zip, rutaHojaXml, libro.Sheets[nombreHoja]) : { graficos: [] };
