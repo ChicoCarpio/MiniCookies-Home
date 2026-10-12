@@ -14,9 +14,10 @@
 // Este mismo archivo está en los dos repos (MiniCookies-Home y
 // HerramientasOfimaticas): si se cambia, copiarlo al otro.
 import { transformSync } from 'esbuild';
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, statSync, existsSync } from 'node:fs';
 import { inyectarSeo, generarRobotsYSitemap, indiceDeCategorias, esNoIndex } from './seo.mjs';
-import { traducir, diccionarioComun, paginasConIngles } from './ingles.mjs';
+import { traducir, diccionarioComun, paginasConIngles, tieneIngles } from './ingles.mjs';
+import { DESTINO, ES_SEGURO, SEGURAS, CARPETA_SALIDA, SITIO_PRINCIPAL, esHerramientaSegura, urlSegura } from './destinos.mjs';
 import { contarHerramientas, aplicarConteos } from './conteo.mjs';
 import { leerCatalogo, aplicarCatalogo } from './catalogo.mjs';
 import { revisarTerceros } from './terceros.mjs';
@@ -25,11 +26,11 @@ import { revisarMotorPptx } from './motor-pptx.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 
 const RAIZ = process.cwd();
-const SALIDA = join(RAIZ, 'dist');
+const SALIDA = join(RAIZ, CARPETA_SALIDA);
 
 // Lo que no se publica: herramientas del build, notas internas (.md) y
 // archivos del repo.
-const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist',
+const EXCLUIR_NOMBRES = new Set(['.git', '.github', '.claude', '.wrangler', 'node_modules', 'dist', 'dist-seguro', 'destinos.mjs', 'seguro-index.html',
   'build.mjs', 'seo.mjs', 'ingles.mjs', 'conteo.mjs', 'catalogo.mjs', 'catalogo.json', 'terceros.mjs', 'referencias-vendor.mjs', 'motor-pptx.mjs', 'revisar-interfaz.mjs', 'probar-funciones.mjs', 'respaldar-librerias.mjs', 'comparar-pptx.mjs', 'comparar-pptx', 'package.json', 'package-lock.json', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUIR_EXTENSIONES = new Set(['.md', '.log']);
 
@@ -127,7 +128,8 @@ function procesarHtml(html, archivo) {
   // anuncios en páginas de error o sin contenido.
   // Tampoco en las páginas que guardan datos sensibles (administrador de contraseñas): un
   // script de anuncios correría en la misma página que la contraseña maestra.
-  if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js') && !esNoIndex(html) && !html.includes('<meta name="sin-terceros"')) {
+  // El sitio seguro no lleva anuncios en ninguna página (destinos.mjs).
+  if (ETIQUETA_ADSENSE && !ES_SEGURO && !html.includes('adsbygoogle.js') && !esNoIndex(html) && !html.includes('<meta name="sin-terceros"')) {
     if (!/<\/head>/i.test(html)) throw new Error('Sin </head>, no se puede poner AdSense: ' + archivo);
     html = html.replace(/<\/head>/i, ETIQUETA_ADSENSE + '\n</head>');
     if (SLOT_ADSENSE) html = ponerUnidadesDeAnuncio(html, archivo);
@@ -186,6 +188,85 @@ function copiarVendor(carpeta) {
   }
 }
 
+// Páginas de la raíz del repo que, en el sitio seguro, apuntan al principal
+// (el sitio seguro no tiene portada de herramientas, ni categorías, ni textos
+// legales propios: los legales viven una sola vez, en www).
+function enlacesAlPrincipal(html, rel, relSalida) {
+  const dirOrigen = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
+  // Lo que SÍ existe en el sitio seguro (por su ruta de salida).
+  const propias = new Set([...SEGURAS.map((h) => 'herramientas/' + h + '.html'), 'seguro-index.html', '404.html']);
+  return html.replace(/(\shref\s*=\s*")([^"#:][^"]*\.html)(")/gi, (todo, antes, url, despues) => {
+    if (url.startsWith('/')) return todo;
+    const pila = [];
+    for (const parte of (dirOrigen ? dirOrigen.split('/') : []).concat(url.split('/'))) {
+      if (parte === '.' || parte === '') continue;
+      if (parte === '..') pila.pop(); else pila.push(parte);
+    }
+    const resuelto = pila.join('/');
+    if (propias.has(resuelto)) return todo;
+    // index.html (la marca del encabezado) también va a www: la portada del sitio seguro es otra cosa.
+    const limpio = resuelto.replace(/\.html$/i, '').replace(/(^|\/)index$/i, '$1');
+    return antes + SITIO_PRINCIPAL + '/' + limpio + despues;
+  });
+}
+
+// En la versión en inglés, los enlaces absolutos a www que tienen gemela en
+// inglés pasan a /en/ (los de arriba se escriben una vez, en español).
+function inglesDelPrincipal(html) {
+  return html.replace(new RegExp('(\\shref\\s*=\\s*")' + SITIO_PRINCIPAL.replace(/\./g, '\\.') + '/([a-z0-9-]*)(")', 'gi'), (todo, antes, nombre, despues) => {
+    if (nombre === '' || conInglesPrincipal.has(nombre + '.html')) return antes + SITIO_PRINCIPAL + '/en/' + nombre + despues;
+    return todo;
+  });
+}
+
+// Recursos locales (scripts, estilos, imágenes) que cargan las páginas del
+// sitio seguro: es lo único que se copia de assets/ y vendor/.
+const recursos = new Set();
+function anotarRecursos(crudo, rel) {
+  const dir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
+  for (const m of crudo.matchAll(/\s(?:src|href)\s*=\s*"([^"#?:][^"#?]*)/gi)) {
+    const pila = [];
+    for (const parte of (dir ? dir.split('/') : []).concat(m[1].split('/'))) {
+      if (parte === '.' || parte === '') continue;
+      if (parte === '..') pila.pop(); else pila.push(parte);
+    }
+    const ruta = pila.join('/');
+    if (/^(assets|marca-logo|vendor)\//.test(ruta)) recursos.add(ruta);
+  }
+}
+
+function procesarArchivo(origen, rel, relSalida = rel) {
+  const ext = extname(origen).toLowerCase();
+  const destino = join(SALIDA, relSalida);
+  mkdirSync(dirname(destino), { recursive: true });
+  if (ext === '.js' || ext === '.mjs') writeFileSync(destino, minificarJs(readFileSync(origen, 'utf8'), rel) + '\n');
+  else if (ext === '.css') writeFileSync(destino, minificarCss(readFileSync(origen, 'utf8'), rel) + '\n');
+  else if (ext === '.html') {
+    const rutaWeb = relSalida.replace(/\\/g, '/');
+    let fuente = readFileSync(origen, 'utf8');
+    if (ES_SEGURO) { anotarRecursos(fuente, rel); fuente = enlacesAlPrincipal(fuente, rel.replace(/\\/g, '/'), rutaWeb); }
+    // Primero el catálogo (genera las tarjetas), después los conteos.
+    const crudo = aplicarConteos(aplicarCatalogo(fuente, catalogo, rutaWeb, opcionesCatalogo), conteo, rutaWeb);
+    // Al sitemap solo van las páginas que se indexan (no la 404).
+    if (!esNoIndex(crudo)) paginas.push(relSalida);
+    writeFileSync(destino, enlacesLimpios(inyectarSeo(procesarHtml(crudo, relSalida), relSalida, indiceCategorias, conIngles)));
+
+    // Gemela en inglés bajo /en/, con su propia URL para que Google la vea.
+    if (conIngles.has(rutaWeb)) {
+      let en = traducir(crudo, RAIZ, comun, rutaWeb, conIngles);
+      if (!en) throw new Error('No se pudo traducir ' + rutaWeb);
+      // Las tarjetas hacia el sitio seguro (y desde él hacia www) en su versión en inglés.
+      en = en.split(SITIO_SEGURO_HERRAMIENTAS).join(SITIO_SEGURO_HERRAMIENTAS_EN);
+      if (ES_SEGURO) en = inglesDelPrincipal(en);
+      const destinoEn = join(SALIDA, 'en', relSalida);
+      mkdirSync(dirname(destinoEn), { recursive: true });
+      writeFileSync(destinoEn, enlacesLimpios(inyectarSeo(procesarHtml(en, 'en/' + relSalida), relSalida, indiceCategorias, conIngles, true)));
+      if (!esNoIndex(crudo)) paginasEn.push('en/' + rutaWeb);
+    }
+  }
+  else copyFileSync(origen, destino);
+}
+
 function recorrer(carpeta) {
   for (const nombre of readdirSync(carpeta)) {
     const origen = join(carpeta, nombre);
@@ -196,32 +277,59 @@ function recorrer(carpeta) {
     // configuración del editor o de herramientas, no parte del sitio.
     if (nombre.startsWith('.')) continue;
     if (statSync(origen).isDirectory()) { recorrer(origen); continue; }
-    const ext = extname(nombre).toLowerCase();
-    if (EXCLUIR_EXTENSIONES.has(ext)) continue;
-    const destino = join(SALIDA, rel);
-    mkdirSync(dirname(destino), { recursive: true });
-    if (ext === '.js' || ext === '.mjs') writeFileSync(destino, minificarJs(readFileSync(origen, 'utf8'), rel) + '\n');
-    else if (ext === '.css') writeFileSync(destino, minificarCss(readFileSync(origen, 'utf8'), rel) + '\n');
-    else if (ext === '.html') {
-      const rutaWeb = rel.replace(/\\/g, '/');
-      // Primero el catálogo (genera las tarjetas), después los conteos.
-      const crudo = aplicarConteos(aplicarCatalogo(readFileSync(origen, 'utf8'), catalogo, rutaWeb), conteo, rutaWeb);
-      // Al sitemap solo van las páginas que se indexan (no la 404).
-      if (!esNoIndex(crudo)) paginas.push(rel);
-      writeFileSync(destino, enlacesLimpios(inyectarSeo(procesarHtml(crudo, rel), rel, indiceCategorias, conIngles)));
-
-      // Gemela en inglés bajo /en/, con su propia URL para que Google la vea.
-      if (conIngles.has(rutaWeb)) {
-        const en = traducir(crudo, RAIZ, comun, rutaWeb, conIngles);
-        if (!en) throw new Error('No se pudo traducir ' + rutaWeb);
-        const destinoEn = join(SALIDA, 'en', rel);
-        mkdirSync(dirname(destinoEn), { recursive: true });
-        writeFileSync(destinoEn, enlacesLimpios(inyectarSeo(procesarHtml(en, 'en/' + rel), rel, indiceCategorias, conIngles, true)));
-        if (!esNoIndex(crudo)) paginasEn.push('en/' + rutaWeb);
-      }
-    }
-    else copyFileSync(origen, destino);
+    if (EXCLUIR_EXTENSIONES.has(extname(nombre).toLowerCase())) continue;
+    // Las herramientas seguras solo se publican en el sitio seguro.
+    if (esHerramientaSegura(rel)) continue;
+    procesarArchivo(origen, rel);
   }
+}
+
+// El sitio seguro se arma al revés: se parte de sus pocas páginas y se copia
+// solo lo que ellas cargan. Menos archivos publicados, menos superficie.
+function construirSeguro() {
+  const paginasSeguras = [['seguro-index.html', 'index.html'], ['404.html', '404.html'],
+    ...SEGURAS.map((h) => ['herramientas/' + h + '.html', 'herramientas/' + h + '.html'])];
+  for (const [origen, salida] of paginasSeguras) procesarArchivo(join(RAIZ, origen), origen, salida);
+  procesarArchivo(join(RAIZ, 'enviar-descarga-sw.js'), 'enviar-descarga-sw.js');
+  // Imágenes, tipos de letra y marca: completos (son chicos y los scripts los nombran por dentro).
+  for (const carpeta of ['marca-logo', 'assets/img', 'assets/fonts']) if (existsSync(join(RAIZ, carpeta))) recorrer(join(RAIZ, carpeta));
+  const paquetes = new Set();
+  for (const ruta of recursos) {
+    if (/^assets\/(js|css)\//.test(ruta)) {
+      if (existsSync(join(RAIZ, ruta))) procesarArchivo(join(RAIZ, ruta), ruta);
+    } else if (ruta.startsWith('vendor/')) {
+      const m = /^vendor\/((?:@[^/]+\/)?[^/]+\/[^/]+)\//.exec(ruta);
+      if (m) paquetes.add(m[1]);
+    }
+  }
+  for (const paquete of paquetes) copiarVendor(join(RAIZ, 'vendor', paquete));
+}
+
+// Cabeceras del sitio seguro, una regla por página (Cloudflare las aplica por
+// ruta, sin la extensión). Más estrictas que las de www: acá no hay nada más
+// en el origen. La política de contenido también va dentro de la página del
+// administrador (meta) para poder probarla sin Cloudflare.
+function cabecerasSeguro(rutas) {
+  const comun = [
+    'X-Frame-Options: DENY', 'Referrer-Policy: no-referrer', 'X-Content-Type-Options: nosniff',
+    'Cross-Origin-Opener-Policy: same-origin', 'Strict-Transport-Security: max-age=31536000',
+  ];
+  const csp = (extra) => "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+    + extra + "; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
+  const POLITICAS = {
+    'administrador-contrasenas': { csp: csp("img-src 'self' data:; connect-src 'none'; frame-src 'none'; worker-src 'none'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: ['Cache-Control: no-store'] },
+    'enviar-archivos-qr': { csp: csp("img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-src 'self'; worker-src 'self'"), permisos: 'camera=(self), microphone=(), geolocation=(), clipboard-read=()', extra: [] },
+  };
+  const general = { csp: csp("img-src 'self' data:; connect-src 'none'; frame-src 'none'; worker-src 'none'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: [] };
+  const lineas = ['# Generado por build.mjs (cabecerasSeguro): no editar.',
+    '# Las librerías de /vendor/ llevan la versión en la ruta: se guardan un año.', '/vendor/*', '  Cache-Control: public, max-age=31536000, immutable', ''];
+  for (const r of rutas.map((x) => x.replace(/\\/g, '/')).filter((x) => x !== '404.html')) {
+    const ruta = r === 'index.html' ? '/' : r === 'en/index.html' ? '/en/' : '/' + r.replace(/\.html$/, '');
+    const nombre = (/herramientas\/([^/]+)\.html$/.exec(r) || [])[1];
+    const p = POLITICAS[nombre] || general;
+    lineas.push(ruta, ...comun.concat([p.csp, 'Permissions-Policy: ' + p.permisos], p.extra).map((l) => '  ' + l), '');
+  }
+  writeFileSync(join(SALIDA, '_headers'), lineas.join('\n'));
 }
 
 // Rutas de todas las páginas publicadas, para armar el sitemap al final.
@@ -231,19 +339,33 @@ const paginasEn = [];
 const catalogo = leerCatalogo(RAIZ);
 const indiceCategorias = indiceDeCategorias(catalogo);
 const comun = diccionarioComun(RAIZ);
-const conIngles = paginasConIngles(RAIZ, EXCLUIR_NOMBRES);
+const SITIO_SEGURO_HERRAMIENTAS = 'https://seguro.minicookies.net/herramientas/';
+const SITIO_SEGURO_HERRAMIENTAS_EN = 'https://seguro.minicookies.net/en/herramientas/';
+// Páginas de www con versión en inglés (para enlazarlas desde el sitio seguro).
+const conInglesPrincipal = paginasConIngles(RAIZ, EXCLUIR_NOMBRES);
+// En el sitio seguro: solo sus propias páginas tienen gemela.
+const conIngles = ES_SEGURO
+  ? new Set([['seguro-index.html', 'index.html'], ['404.html', '404.html'], ...SEGURAS.map((h) => ['herramientas/' + h + '.html', 'herramientas/' + h + '.html'])]
+    .filter(([origen]) => tieneIngles(readFileSync(join(RAIZ, origen), 'utf8'))).map(([, salida]) => salida))
+  : conInglesPrincipal;
 const conteo = contarHerramientas(RAIZ, catalogo);
+// Las tarjetas de las herramientas seguras apuntan al otro sitio.
+const opcionesCatalogo = ES_SEGURO
+  ? { seguras: SEGURAS }
+  : { hrefDe: (h) => (SEGURAS.includes(h) ? urlSegura(h) : undefined) };
 
 rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);
-recorrer(RAIZ);
+if (ES_SEGURO) construirSeguro(); else recorrer(RAIZ);
 generarRobotsYSitemap(SALIDA, paginas.concat(paginasEn));
+if (ES_SEGURO) cabecerasSeguro(paginas.concat(paginasEn).concat(['404.html']));
 // Todo servidor ajeno que el sitio carga tiene que estar en la política de
 // privacidad. Si no, el build falla y Cloudflare deja la versión anterior.
-const terceros = revisarTerceros(SALIDA, RAIZ);
+// (La política vive en www: el sitio seguro la lee del build principal.)
+const terceros = revisarTerceros(SALIDA, RAIZ, ES_SEGURO ? { politicaEn: join(RAIZ, 'dist') } : {});
 // Todo archivo de vendor/ que las páginas piden tiene que publicarse (y estar
 // en git, que es de donde compila Cloudflare).
 const rutasVendor = revisarReferenciasVendor(SALIDA, RAIZ);
 // Las páginas con el motor de PowerPoint en <script> lo traen completo (motor-pptx.mjs).
-revisarMotorPptx(RAIZ);
-console.log(`Build listo en dist/ — ${conteo.total} herramientas, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados; servidores externos declarados: ${[...terceros.keys()].sort().join(', ')}; ${rutasVendor} rutas de vendor/ comprobadas`);
+if (!ES_SEGURO) revisarMotorPptx(RAIZ);
+console.log(`Build ${DESTINO} listo en ${CARPETA_SALIDA}/ — ${conteo.total} herramientas en el catálogo, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados; servidores externos declarados: ${[...terceros.keys()].sort().join(', ') || 'ninguno'}; ${rutasVendor} rutas de vendor/ comprobadas`);

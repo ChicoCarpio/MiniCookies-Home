@@ -86,7 +86,7 @@ export function cargasExternas(dist) {
 }
 
 /** Corta el build si un dominio cargado no está declarado o la política no lo nombra. */
-export function revisarTerceros(dist, raiz) {
+export function revisarTerceros(dist, raiz, opciones = {}) {
   const errores = [];
   const avisos = [];
   const vistos = cargasExternas(dist);
@@ -98,13 +98,15 @@ export function revisarTerceros(dist, raiz) {
     }
   }
 
-  const politica = ['privacidad.html', 'en/privacidad.html'].map((p) => [p, existsSync(join(dist, p)) ? readFileSync(join(dist, p), 'utf8') : '']);
+  // La política de privacidad vive en www; el sitio seguro la lee de ahí (opciones.politicaEn).
+  const dirPolitica = opciones.politicaEn || dist;
+  const politica = ['privacidad.html', 'en/privacidad.html'].map((p) => [p, existsSync(join(dirPolitica, p)) ? readFileSync(join(dirPolitica, p), 'utf8') : '']);
   for (const [h, { menciona, interno, inyectado }] of Object.entries(TERCEROS)) {
     for (const [p, texto] of politica) {
       if (!texto.includes(menciona)) errores.push(`${p} no menciona "${menciona}" (por ${h})`);
     }
     if (interno && !existsSync(join(raiz, interno))) avisos.push(`${h} figura como carga de ${interno}, que ya no existe: ¿sigue haciendo falta declararlo?`);
-    if (!interno && !inyectado && !vistos.has(h)) avisos.push(`${h} está declarado pero ninguna página lo carga: ¿la política habla de algo que ya no se usa?`);
+    if (!opciones.politicaEn && !interno && !inyectado && !vistos.has(h)) avisos.push(`${h} está declarado pero ninguna página lo carga: ¿la política habla de algo que ya no se usa?`);
   }
 
   for (const a of avisos) console.warn('Aviso (terceros): ' + a);

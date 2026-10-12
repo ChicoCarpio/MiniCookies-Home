@@ -38,6 +38,8 @@ import { tmpdir } from 'node:os';
 
 const RAIZ = new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const DIST = join(RAIZ, 'dist');
+// Las herramientas seguras viven en otro sitio (dist-seguro/): se revisan igual, en las mismas direcciones.
+const DIST_SEGURO = join(RAIZ, 'dist-seguro');
 const PUERTO = 8788;
 // Una pasada completa por cada vista. Al principio solo existía la de
 // celular, y la mitad del sitio —todo lo que se ve en una computadora— quedaba
@@ -71,7 +73,7 @@ const TIPOS = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
-function paginasDe(dir, acumulado = []) {
+function paginasDe(dir, acumulado = [], base = dir) {
   for (const nombre of readdirSync(dir)) {
     const ruta = join(dir, nombre);
     if (statSync(ruta).isDirectory()) {
@@ -79,9 +81,9 @@ function paginasDe(dir, acumulado = []) {
       // alcanza para la distribución. (Si algún día el inglés diverge, sacar
       // esta línea.)
       if (nombre === 'en') continue;
-      paginasDe(ruta, acumulado);
+      paginasDe(ruta, acumulado, base);
     } else if (extname(nombre) === '.html') {
-      acumulado.push('/' + relative(DIST, ruta).split(sep).join('/'));
+      acumulado.push('/' + relative(base, ruta).split(sep).join('/'));
     }
   }
   return acumulado;
@@ -299,10 +301,13 @@ function archivoDePrueba(win) {
 function servir(dir) {
   const servidor = createServer((pedido, respuesta) => {
     const ruta = decodeURIComponent(pedido.url.split('?')[0]);
-    const archivo = join(dir, ruta === '/' ? 'index.html' : ruta);
+    let archivo = join(dir, ruta === '/' ? 'index.html' : ruta);
     if (!archivo.startsWith(dir) || !existsSync(archivo) || statSync(archivo).isDirectory()) {
-      respuesta.writeHead(404).end('no');
-      return;
+      archivo = join(DIST_SEGURO, ruta);
+      if (!archivo.startsWith(DIST_SEGURO) || !existsSync(archivo) || statSync(archivo).isDirectory()) {
+        respuesta.writeHead(404).end('no');
+        return;
+      }
     }
     respuesta.writeHead(200, { 'Content-Type': TIPOS[extname(archivo)] || 'application/octet-stream' });
     respuesta.end(readFileSync(archivo));
@@ -360,7 +365,8 @@ if (!existsSync(DIST)) {
   process.exit(1);
 }
 
-const paginas = paginasDe(DIST).sort();
+const paginas = paginasDe(DIST)
+  .concat(existsSync(DIST_SEGURO) ? paginasDe(DIST_SEGURO).filter((p) => p.startsWith('/herramientas/')).map((p) => p) : []).sort();
 const archivoControl = join(DIST, '__revision.html');
 writeFileSync(archivoControl, paginaDeControl(paginas), 'utf8');
 

@@ -81,8 +81,8 @@ export function categoriaPrincipal(catalogo, orden) {
   return indice;
 }
 
-function tarjeta(h, icono, t) {
-  return `      <a class="tarjeta-herramienta" href="herramientas/${h}.html">
+function tarjeta(h, icono, t, href) {
+  return `      <a class="tarjeta-herramienta" href="${href || `herramientas/${h}.html`}">
         <div class="icono">${icono}</div>
         <h3 data-i18n="tool-${h}-titulo">${esc(t.es[0])}</h3>
         <p data-i18n="tool-${h}-desc">${esc(t.es[1])}</p>
@@ -90,16 +90,20 @@ function tarjeta(h, icono, t) {
 }
 
 /** Resuelve los marcadores del catálogo en una página. */
-export function aplicarCatalogo(html, catalogo, archivo) {
+// opciones.hrefDe(h): dirección de la tarjeta de una herramienta (para las que viven en otro sitio).
+// opciones.seguras: lista de herramientas del sitio seguro; habilita data-catalogo="seguras".
+export function aplicarCatalogo(html, catalogo, archivo, opciones = {}) {
   const usadas = new Set();
 
   html = html.replace(/(<div class="grid-herramientas" data-catalogo="([a-z0-9-]+)">)\s*(<\/div>)/g,
     (todo, apertura, categoria, cierre) => {
-      const lista = catalogo.categorias[categoria];
+      const lista = categoria === 'seguras' && opciones.seguras
+        ? Object.fromEntries(opciones.seguras.map((h) => [h, catalogo.categorias.generales[h]]))
+        : catalogo.categorias[categoria];
       if (!lista) throw new Error(`${archivo}: data-catalogo="${categoria}" no es una categoría de catalogo.json`);
       const tarjetas = Object.entries(lista).map(([h, icono]) => {
         usadas.add(h);
-        return tarjeta(h, icono, catalogo.herramientas[h]);
+        return tarjeta(h, icono, catalogo.herramientas[h], opciones.hrefDe && opciones.hrefDe(h));
       });
       return `${apertura}\n${tarjetas.join('\n')}\n    ${cierre}`;
     });
@@ -111,7 +115,7 @@ export function aplicarCatalogo(html, catalogo, archivo) {
       for (const [h, icono] of Object.entries(lista)) if (!vistas.has(h)) vistas.set(h, icono);
     }
     const lista = [...vistas].map(([h, icono]) => ({
-      h: h + '.html', i: icono, es: catalogo.herramientas[h].es, en: catalogo.herramientas[h].en,
+      h: h + '.html', i: icono, u: (opciones.hrefDe && opciones.hrefDe(h)) || undefined, es: catalogo.herramientas[h].es, en: catalogo.herramientas[h].en,
     }));
     html = html.replace('{{CATALOGO_BUSCADOR}}', () => JSON.stringify(lista));
   }

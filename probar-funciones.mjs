@@ -31,6 +31,10 @@ import { tmpdir } from 'node:os';
 
 const RAIZ = new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const DIST = join(RAIZ, 'dist');
+// Las herramientas seguras se publican en otro sitio (dist-seguro/, seguro.minicookies.net),
+// pero acá se prueban en las mismas direcciones: el servidor las busca en dist/ y, si no
+// están, en dist-seguro/ (con las cabeceras de seguridad que le toca poner a Cloudflare).
+const DIST_SEGURO = join(RAIZ, 'dist-seguro');
 const PUERTO = 8789;
 const LIMITE_MS = 10 * 60 * 1000;
 const EDGE = [process.env.EDGE,
@@ -44,11 +48,34 @@ const TIPOS = {
   '.woff2': 'font/woff2', '.gz': 'application/gzip', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml',
 };
 
-function paginas(dir, acc = []) {
+// Cabeceras que el build arma para el sitio seguro (_headers), por ruta sin extensión.
+// Sin las que impiden enmarcar la página: las pruebas la cargan dentro de un iframe.
+function cabecerasSeguro() {
+  const mapa = new Map();
+  const archivo = join(DIST_SEGURO, '_headers');
+  if (!existsSync(archivo)) return mapa;
+  let actual = null;
+  for (const linea of readFileSync(archivo, 'utf8').split('\n')) {
+    if (!linea.trim() || linea.startsWith('#')) continue;
+    if (!/^\s/.test(linea)) { actual = linea.trim(); mapa.set(actual, {}); continue; }
+    const i = linea.indexOf(':');
+    const nombre = linea.slice(0, i).trim();
+    if (!actual || /^x-frame-options$/i.test(nombre)) continue;
+    mapa.get(actual)[nombre] = linea.slice(i + 1).trim().replace("; frame-ancestors 'none'", '');
+    // Las pruebas miran dentro de la página con eval; la política de producción NO lo permite.
+    // Una prueba aparte (?csp=estricta) carga la página con la política tal cual.
+    if (/^content-security-policy$/i.test(nombre)) mapa.get(actual)['__estricta'] = mapa.get(actual)[nombre];
+    if (/^content-security-policy$/i.test(nombre)) mapa.get(actual)[nombre] = mapa.get(actual)[nombre].replace("script-src 'self'", "script-src 'self' 'unsafe-eval'");
+  }
+  return mapa;
+}
+const CABECERAS_SEGURO = cabecerasSeguro();
+
+function paginas(dir, acc = [], base = dir) {
   for (const n of readdirSync(dir)) {
     const r = join(dir, n);
-    if (statSync(r).isDirectory()) { if (n !== 'vendor') paginas(r, acc); } else if (n.endsWith('.html') && !n.startsWith('__')) {
-      acc.push('/' + relative(DIST, r).split(sep).join('/'));
+    if (statSync(r).isDirectory()) { if (n !== 'vendor') paginas(r, acc, base); } else if (n.endsWith('.html') && !n.startsWith('__')) {
+      acc.push('/' + relative(base, r).split(sep).join('/'));
     }
   }
   return acc;
@@ -1914,6 +1941,40 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     d.getElementById('botonBloquear').click();
     for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
     return 'archivo cifrado, otro navegador vacío, maestra + clave secreta, caja guardada en el nuevo dispositivo';
+  });
+
+  // Sitio seguro (2026-10-12): las dos herramientas seguras funcionan con la
+  // política de contenido EXACTA que les pone Cloudflare (sin eval, sin
+  // conexiones a otros servidores). Las demás pruebas cargan la página con
+  // 'unsafe-eval' para poder mirar adentro; esta no.
+  await prueba('sitio seguro: las herramientas andan con la política estricta, sin violaciones', async () => {
+    const violaciones = [];
+    const vigilar = () => { W().document.addEventListener('securitypolicyviolation', (e) => violaciones.push(W().location.pathname + ': ' + e.violatedDirective + ' ' + e.blockedURI + ' en ' + e.sourceFile + ':' + e.lineNumber + ' ' + (e.sample || ''))); };
+    // Enviar archivos: muestra el QR de la oferta (usa qrcode, WebRTC y cifrado).
+    await abrir('/herramientas/enviar-archivos-qr.html?csp=estricta'); await esperar(500);
+    afirmar(!!W().eval === true && (() => { try { W().eval('1'); return false; } catch (e) { return true; } })(), 'la página admite eval: no se está probando la política estricta');
+    await esperar(200); // el aviso del eval de arriba llega después
+    vigilar();
+    D().getElementById('botonRecibir').click();
+    const lienzo = await hasta(() => D().querySelector('#cajaQrOferta canvas'), 15000);
+    afirmar(lienzo && lienzo.width > 200, 'no apareció el QR con la política estricta');
+    // Administrador: crear una caja, guardar una entrada, bloquear y exportar.
+    await abrir('/herramientas/administrador-contrasenas.html?csp=estricta'); await esperar(500);
+    vigilar();
+    const d = D(), w = W();
+    const poner = (id, v) => { const n = d.getElementById(id); n.value = v; n.dispatchEvent(new w.Event('input', { bubbles: true })); };
+    for (const c of await w.BovedaContrasenas.Almacen.listar()) await w.BovedaContrasenas.Almacen.borrar(c.id);
+    poner('crearMaestra', 'Maestra-larga 123'); poner('crearMaestra2', 'Maestra-larga 123');
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(await hasta(() => !d.getElementById('vistaCaja').hidden, 20000), 'no abrió la caja con la política estricta');
+    d.getElementById('botonNueva').click();
+    poner('eSitio', 'Prueba'); d.getElementById('eGenerar').click();
+    d.getElementById('vistaEntrada').requestSubmit();
+    afirmar(await hasta(() => d.querySelectorAll('#listaEntradas li').length === 1, 5000), 'no guardó la entrada');
+    d.getElementById('botonBloquear').click();
+    for (const c of await w.BovedaContrasenas.Almacen.listar()) await w.BovedaContrasenas.Almacen.borrar(c.id);
+    afirmar(violaciones.length === 0, 'la política bloqueó: ' + violaciones.join(' | '));
+    return 'QR + administrador completos sin ninguna violación de la política';
   });
 
   // Gráficos 3D, fase 2.2 de tablas y gráficos (2026-10-11): columnas de
@@ -4221,7 +4282,8 @@ function paginaDeControl(lista) {
 if (!existsSync(DIST)) { console.error('No existe dist/. Corré primero: npm run build'); process.exit(1); }
 if (!EDGE) { console.error('No se encontró Edge. Indicá la ruta con la variable EDGE.'); process.exit(1); }
 
-const lista = paginas(DIST).sort();
+const lista = paginas(DIST).concat(existsSync(DIST_SEGURO)
+  ? paginas(DIST_SEGURO).filter((p) => /^\/(en\/)?herramientas\//.test(p)).map((p) => p) : []).sort();
 const control = join(DIST, '__pruebas.html');
 writeFileSync(control, paginaDeControl(lista), 'utf8');
 
@@ -4254,14 +4316,27 @@ const servidor = createServer((q, r) => {
     return;
   }
   const ruta = decodeURIComponent(q.url.split('?')[0]);
-  let archivo = join(DIST, ruta);
-  if (existsSync(archivo) && statSync(archivo).isDirectory()) archivo = join(archivo, 'index.html');
-  if (!existsSync(archivo) && existsSync(archivo + '.html')) archivo += '.html';
-  if (!archivo.startsWith(DIST) || !existsSync(archivo)) {
+  const buscar = (base) => {
+    let archivo = join(base, ruta);
+    if (existsSync(archivo) && statSync(archivo).isDirectory()) archivo = join(archivo, 'index.html');
+    if (!existsSync(archivo) && existsSync(archivo + '.html')) archivo += '.html';
+    return archivo.startsWith(base) && existsSync(archivo) && !statSync(archivo).isDirectory() ? archivo : null;
+  };
+  let archivo = buscar(DIST), cabeceras = {};
+  if (!archivo && existsSync(DIST_SEGURO)) {
+    archivo = buscar(DIST_SEGURO);
+    // Solo las páginas de herramientas seguras llevan las cabeceras del sitio seguro.
+    if (archivo) {
+      cabeceras = Object.assign({}, CABECERAS_SEGURO.get(ruta.replace(/\.html$/, '')) || {});
+      if (q.url.includes('csp=estricta') && cabeceras.__estricta) cabeceras['Content-Security-Policy'] = cabeceras.__estricta;
+      delete cabeceras.__estricta;
+    }
+  }
+  if (!archivo) {
     if (ruta !== '/favicon.ico' && !FALTAN_A_PROPOSITO.has(ruta)) faltantes.add(ruta);
     r.writeHead(404).end(); return;
   }
-  r.writeHead(200, { 'Content-Type': TIPOS[extname(archivo)] || 'application/octet-stream' });
+  r.writeHead(200, Object.assign({ 'Content-Type': TIPOS[extname(archivo)] || 'application/octet-stream' }, cabeceras));
   r.end(readFileSync(archivo));
 });
 await new Promise((r) => servidor.listen(PUERTO, r));
