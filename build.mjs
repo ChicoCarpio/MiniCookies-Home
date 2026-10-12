@@ -125,7 +125,9 @@ function procesarHtml(html, archivo) {
     (codigo.trim() ? `<style${atributos}>${minificarCss(codigo, `${archivo} <style>`)}</style>` : completo));
   // Sin AdSense en las páginas que no se indexan (la 404): Google no admite
   // anuncios en páginas de error o sin contenido.
-  if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js') && !esNoIndex(html)) {
+  // Tampoco en las páginas que guardan datos sensibles (administrador de contraseñas): un
+  // script de anuncios correría en la misma página que la contraseña maestra.
+  if (ETIQUETA_ADSENSE && !html.includes('adsbygoogle.js') && !esNoIndex(html) && !html.includes('<meta name="sin-terceros"')) {
     if (!/<\/head>/i.test(html)) throw new Error('Sin </head>, no se puede poner AdSense: ' + archivo);
     html = html.replace(/<\/head>/i, ETIQUETA_ADSENSE + '\n</head>');
     if (SLOT_ADSENSE) html = ponerUnidadesDeAnuncio(html, archivo);

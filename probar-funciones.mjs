@@ -1562,6 +1562,360 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'QR de ' + lienzo.width + ' px y respuesta de ' + qr.width + ' px';
   });
 
+  // Administrador de contraseñas (2026-10-12): el motor cifra y descifra de
+  // verdad (AES-GCM + PBKDF2), rechaza la contraseña maestra equivocada y
+  // cualquier cabecera alterada, usa un IV nuevo en cada guardado y no deja el
+  // texto claro en el archivo.
+  await prueba('administrador de contraseñas: cifrado, maestra equivocada y cabecera alterada', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const B = W().BovedaContrasenas;
+    const s = await B.crear('Frase-Maestra ñandú 1', 'Prueba');
+    const e = s.agregar({ sitio: 'Banco', usuario: 'ana@correo.cr', contrasena: 'S3cr3to-Único!', url: 'https://banco.cr', notas: 'línea 1\nlínea 2' });
+    const a1 = await s.cifrar(), a2 = await s.cifrar();
+    afirmar(a1.iv !== a2.iv && a1.datos !== a2.datos, 'dos guardados seguidos repitieron el IV');
+    afirmar(a1.iteraciones === 2000000 && a1.kdf === 'PBKDF2-SHA256' && a1.cifrado === 'AES-256-GCM', 'parámetros: ' + a1.iteraciones + ' ' + a1.kdf);
+    const texto = JSON.stringify(a1);
+    afirmar(!texto.includes('S3cr3to') && !texto.includes('Banco') && !texto.includes('ana@correo'), 'quedó texto claro en el archivo');
+    const abierta = await B.abrir(JSON.parse(texto), 'Frase-Maestra ñandú 1');
+    const leida = abierta.entradas()[0];
+    afirmar(leida.id === e.id && leida.contrasena === 'S3cr3to-Único!' && leida.notas === 'línea 1\nlínea 2', 'no volvió igual');
+    // La misma ñ escrita con otra normalización de Unicode abre igual.
+    const otraForma = await B.abrir(a1, 'Frase-Maestra ñandú 1');
+    afirmar(otraForma.entradas().length === 1, 'la normalización Unicode no abrió');
+    const codigo = async (f) => { try { await f(); return 'abrió'; } catch (x) { return x.codigo; } };
+    afirmar(await codigo(() => B.abrir(a1, 'otra frase maestra')) === 'maestra-incorrecta', 'aceptó una maestra equivocada');
+    afirmar(await codigo(() => B.abrir(Object.assign({}, a1, { nombre: 'Otro' }), 'Frase-Maestra ñandú 1')) === 'maestra-incorrecta', 'aceptó un nombre alterado');
+    afirmar(await codigo(() => B.abrir(Object.assign({}, a1, { iteraciones: 2000001 }), 'Frase-Maestra ñandú 1')) === 'maestra-incorrecta', 'aceptó vueltas alteradas');
+    afirmar(await codigo(() => B.abrir(Object.assign({}, a1, { iteraciones: 100001 }), 'Frase-Maestra ñandú 1')) === 'danado', 'aceptó vueltas por debajo del mínimo');
+    afirmar(await codigo(() => B.abrir(Object.assign({}, a1, { iteraciones: 2 }), 'Frase-Maestra ñandú 1')) === 'danado', 'aceptó muy pocas vueltas');
+    afirmar(await codigo(() => B.abrir('no es json', 'x')) === 'formato', 'texto cualquiera no dio formato');
+    afirmar(await codigo(() => B.abrir(Object.assign({}, a1, { version: 9 }), 'x')) === 'version', 'versión desconocida');
+    afirmar(await codigo(() => B.crear('corta', 'x')) === 'maestra-corta', 'aceptó una maestra corta');
+    // Cambiar la maestra: la vieja deja de abrir, la nueva sí, y la sal cambia.
+    await abierta.cambiarMaestra('Otra-frase-nueva 22');
+    const a3 = await abierta.cifrar();
+    afirmar(a3.sal !== a1.sal, 'la sal no cambió');
+    afirmar(await codigo(() => B.abrir(a3, 'Frase-Maestra ñandú 1')) === 'maestra-incorrecta', 'la maestra vieja siguió abriendo');
+    afirmar((await B.abrir(a3, 'Otra-frase-nueva 22')).entradas().length === 1, 'la nueva no abrió');
+    abierta.cerrar();
+    afirmar(await codigo(async () => abierta.entradas()) === 'cerrada', 'una caja cerrada siguió dando datos');
+    return 'IV distinto, ' + texto.length + ' bytes de archivo, maestra/cabecera/versión verificadas';
+  });
+
+  // CSV de Chrome/Edge y Firefox, con comillas, comas y saltos de línea dentro
+  // de un campo; vuelve igual al exportarlo; y la comparación al importar.
+  await prueba('administrador de contraseñas: CSV de navegadores e importación', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const B = W().BovedaContrasenas;
+    const entradas = [
+      { id: 'a', sitio: 'Banco "Principal"', usuario: 'ana,perez', contrasena: 'a"b,c\nd', url: 'https://banco.cr/x?y=1', notas: 'una nota' },
+      { id: 'b', sitio: 'Correo', usuario: 'ana', contrasena: 'ñandú-1', url: 'https://www.correo.com', notas: '' },
+    ];
+    const chrome = B.aCsv(entradas, 'chrome');
+    afirmar(chrome.startsWith('name,url,username,password,note\r\n'), 'cabecera de Chrome: ' + chrome.slice(0, 40));
+    const vuelta = B.leerCsv('﻿' + chrome);
+    afirmar(vuelta.length === 2 && vuelta[0].sitio === 'Banco "Principal"' && vuelta[0].usuario === 'ana,perez' && vuelta[0].contrasena === 'a"b,c\nd' && vuelta[0].notas === 'una nota', 'Chrome no volvió igual: ' + JSON.stringify(vuelta[0]));
+    const firefox = B.aCsv(entradas, 'firefox');
+    const deFirefox = B.leerCsv(firefox);
+    afirmar(deFirefox.length === 2 && deFirefox[1].sitio === 'correo.com' && deFirefox[1].contrasena === 'ñandú-1', 'Firefox: ' + JSON.stringify(deFirefox[1]));
+    let fallo = '';
+    try { B.leerCsv('a,b,c\n1,2,3\n'); } catch (x) { fallo = x.codigo; }
+    afirmar(fallo === 'formato', 'un CSV ajeno no dio formato: ' + fallo);
+    const c = B.compararImportadas(entradas, [
+      { sitio: 'banco "principal"', usuario: 'ANA,perez', contrasena: 'otra', url: '', notas: '' },
+      { sitio: 'Correo', usuario: 'ana', contrasena: 'ñandú-1', url: 'https://www.correo.com', notas: '' },
+      { sitio: 'Nuevo', usuario: 'x', contrasena: 'y', url: '', notas: '' },
+    ]);
+    afirmar(c.nuevas.length === 1 && c.iguales.length === 1 && c.conflictos.length === 1 && c.conflictos[0].existente.id === 'a', 'comparación: ' + c.nuevas.length + '/' + c.iguales.length + '/' + c.conflictos.length);
+    const rev = B.auditar([{ id: '1', contrasena: 'Aa1!Zq9#Xw2$Lm' }, { id: '2', contrasena: 'misma' }, { id: '3', contrasena: 'misma' }]);
+    afirmar(rev.reutilizadas.join() === '2,3' && rev.debiles.join() === '2,3', 'auditoría: ' + JSON.stringify(rev));
+    return 'Chrome, Firefox, formato ajeno, comparación y auditoría';
+  });
+
+  // La página de punta a punta con el IndexedDB real: crear una caja, agregar
+  // una entrada, bloquear (la pantalla no deja nada), volver a abrir con una
+  // maestra equivocada y con la buena, y descargar el respaldo.
+  await prueba('administrador de contraseñas: la página crea, bloquea y reabre una caja', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const d = D(), w = W();
+    const B = w.BovedaContrasenas;
+    const poner = (id, v) => { const n = d.getElementById(id); n.value = v; n.dispatchEvent(new w.Event('input', { bubbles: true })); };
+    const visible = (id) => !d.getElementById(id).hidden;
+    const vaciarAlmacen = async () => { for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id); };
+    await vaciarAlmacen();
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(d.getElementById('crearError').textContent.length > 0, 'dejó crear sin maestra');
+    poner('crearNombre', 'Casa'); poner('crearMaestra', 'Maestra-larga 123'); poner('crearMaestra2', 'otra distinta');
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(/coinciden/.test(d.getElementById('crearError').textContent), 'no avisó que no coinciden: ' + d.getElementById('crearError').textContent);
+    poner('crearMaestra2', 'Maestra-larga 123');
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(await hasta(() => visible('vistaCaja'), 15000), 'no abrió la caja nueva');
+    afirmar(d.getElementById('cajaNombre').textContent === 'Casa', 'nombre: ' + d.getElementById('cajaNombre').textContent);
+    d.getElementById('botonNueva').click();
+    poner('eSitio', 'Banco <b>x</b>'); poner('eUsuario', 'ana'); d.getElementById('eGenerar').click();
+    const generada = d.getElementById('eContrasena').value;
+    afirmar(generada.length === 20, 'la contraseña generada tiene ' + generada.length);
+    d.getElementById('vistaEntrada').requestSubmit();
+    afirmar(await hasta(() => visible('vistaCaja') && d.querySelectorAll('#listaEntradas li').length === 1, 5000), 'no apareció la entrada');
+    afirmar(d.querySelector('#listaEntradas b') === null, 'el nombre se interpretó como HTML');
+    afirmar(!d.getElementById('listaEntradas').textContent.includes(generada), 'la contraseña estaba visible en la lista');
+    afirmar(visible('avisoRespaldo'), 'no avisó que falta un respaldo');
+    d.getElementById('botonBloquear').click();
+    afirmar(visible('vistaInicio') && d.querySelectorAll('#listaEntradas li').length === 0 && !d.body.textContent.includes(generada), 'al bloquear quedó algo en pantalla');
+    await hasta(() => d.querySelectorAll('#listaCajas li').length === 1, 5000);
+    afirmar(d.querySelectorAll('#listaCajas li').length === 1, 'no listó la caja guardada');
+    d.querySelector('#listaCajas button').click();
+    poner('desbloquearMaestra', 'equivocada-123');
+    d.getElementById('vistaDesbloquear').requestSubmit();
+    afirmar(await hasta(() => /incorrecta/.test(d.getElementById('desbloquearError').textContent), 15000), 'no avisó la maestra incorrecta');
+    poner('desbloquearMaestra', 'Maestra-larga 123');
+    d.getElementById('vistaDesbloquear').requestSubmit();
+    afirmar(await hasta(() => visible('vistaCaja') && d.querySelectorAll('#listaEntradas li').length === 1, 15000), 'no reabrió con la maestra buena');
+    d.getElementById('listaEntradas').querySelectorAll('button')[2].click();
+    afirmar(d.querySelector('.entrada-clave').textContent === generada, 'mostrar no enseñó la contraseña');
+    // Respaldo descargable: se abre con la maestra y trae la entrada.
+    let descargado = null;
+    const original = w.descargarTexto;
+    w.descargarTexto = (texto) => { descargado = texto; };
+    d.getElementById('botonMas').click();
+    d.getElementById('ajRespaldo').click();
+    await esperar(200);
+    w.descargarTexto = original;
+    afirmar(descargado && JSON.parse(descargado).formato === 'minicookies-boveda' && !descargado.includes('Banco'), 'el respaldo no se generó cifrado');
+    const otra = await B.abrir(descargado, 'Maestra-larga 123');
+    afirmar(otra.entradas()[0].contrasena === generada, 'el respaldo no trae la contraseña');
+    await vaciarAlmacen();
+    return 'crear, agregar, bloquear, maestra mala y buena, respaldo cifrado';
+  });
+
+  // Refuerzos de seguridad del administrador de contraseñas (2026-10-12): clave
+  // secreta opcional, relleno del tamaño, cambio de maestra que no deja la caja
+  // ilegible aunque se guarde en medio, y CSV que no se vuelve fórmula.
+  await prueba('administrador de contraseñas: clave secreta, relleno y cambio de maestra seguro', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const B = W().BovedaContrasenas;
+    const codigo = async (f) => { try { await f(); return 'abrió'; } catch (x) { return x.codigo; } };
+    const s = await B.crear('Frase-Maestra ñandú 1', 'Con secreta', { claveSecreta: true });
+    const secreta = s.claveSecreta;
+    afirmar(/^([A-HJ-NP-Z2-9]{4}-){6}[A-HJ-NP-Z2-9]{2}$/.test(secreta), 'formato de la clave secreta: ' + secreta);
+    s.agregar({ sitio: 'A', usuario: 'u', contrasena: 'p' });
+    const a1 = await s.cifrar();
+    afirmar(a1.claveSecreta === true && a1.sal.length >= 43, 'la cabecera no marca la clave secreta o la sal es corta: ' + a1.sal.length);
+    afirmar(await codigo(() => B.abrir(a1, 'Frase-Maestra ñandú 1')) === 'clave-secreta', 'abrió sin la clave secreta');
+    afirmar(await codigo(() => B.abrir(a1, 'Frase-Maestra ñandú 1', 'AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AA')) === 'maestra-incorrecta', 'abrió con otra clave secreta');
+    afirmar(await codigo(() => B.abrir(a1, 'Frase-Maestra ñandú 1', 'corta')) === 'clave-secreta', 'aceptó una clave mal escrita');
+    afirmar(await codigo(() => B.abrir(Object.assign({}, a1, { claveSecreta: false }), 'Frase-Maestra ñandú 1', secreta)) === 'maestra-incorrecta', 'aceptó quitar la marca de clave secreta');
+    const abierta = await B.abrir(a1, 'Frase-Maestra ñandú 1', secreta.toLowerCase().replace(/-/g, ' '));
+    afirmar(abierta.entradas().length === 1 && abierta.claveSecreta === secreta, 'no abrió con la clave bien dada (en minúsculas y con espacios)');
+    // Relleno: una caja con 1 entrada y otra con 10 pesan lo mismo (bloques de 2 KB).
+    const chica = await (await B.crear('Frase-Maestra ñandú 1', 'x')).cifrar();
+    const grande = await B.crear('Frase-Maestra ñandú 1', 'x');
+    for (let i = 0; i < 10; i++) grande.agregar({ sitio: 'Sitio ' + i, usuario: 'usuario' + i, contrasena: 'clave-' + i });
+    const g = await grande.cifrar();
+    afirmar(chica.datos.length === g.datos.length, 'el tamaño delata la cantidad de entradas: ' + chica.datos.length + ' / ' + g.datos.length);
+    // Cambiar la maestra mientras se guarda: cualquier archivo que salga abre con la maestra vieja o con la nueva.
+    const cambio = abierta.cambiarMaestra('Otra-frase-nueva 22');
+    const enMedio = await abierta.cifrar();
+    await cambio;
+    afirmar((await B.abrir(enMedio, 'Frase-Maestra ñandú 1', secreta)).entradas().length === 1, 'el archivo guardado en medio del cambio no abre con la maestra vieja');
+    const despues = await abierta.cifrar();
+    afirmar((await B.abrir(despues, 'Otra-frase-nueva 22', secreta)).entradas().length === 1, 'tras el cambio no abre con la nueva');
+    afirmar(await codigo(() => B.abrir(despues, 'Frase-Maestra ñandú 1', secreta)) === 'maestra-incorrecta', 'la vieja siguió abriendo');
+    // Una caja cerrada mientras se cambia la maestra no queda viva.
+    const t = await B.crear('Frase-Maestra ñandú 1', 'y');
+    const pendiente = t.cambiarMaestra('Otra-frase-nueva 22');
+    t.cerrar();
+    afirmar(await codigo(() => pendiente) === 'cerrada', 'el cambio terminó sobre una caja cerrada');
+    afirmar(await codigo(() => B.crear('onceletras1', 'z')) === 'maestra-corta', 'aceptó una maestra de 11 caracteres');
+    return 'clave secreta de ' + secreta.length + ' caracteres, archivos de ' + g.datos.length + ' bytes de datos';
+  });
+
+  await prueba('administrador de contraseñas: CSV sin fórmulas y auditoría rápida', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const B = W().BovedaContrasenas;
+    const csv = B.aCsv([{ sitio: '=cmd|"/c calc"!A1', usuario: '+1234', contrasena: '=NoTocar+1', url: 'https://x.cr', notas: '@suma' }], 'chrome');
+    afirmar(csv.includes("'=cmd") && csv.includes("'+1234") && csv.includes("'@suma"), 'no protegió los textos: ' + csv);
+    afirmar(csv.includes(',=NoTocar+1,'), 'tocó la contraseña: ' + csv);
+    const muchas = []; for (let i = 0; i < 50000; i++) muchas.push({ id: 'i' + i, contrasena: 'repetida' });
+    const t0 = performance.now(); const r = B.auditar(muchas); const ms = performance.now() - t0;
+    afirmar(r.reutilizadas.length === 50000 && ms < 1500, 'auditar 50.000 repetidas tardó ' + Math.round(ms) + ' ms');
+    let fallo = '';
+    try { B.leerCsv('url,username,password\n' + 'a,b,c\n'.repeat(20001)); } catch (x) { fallo = x.codigo; }
+    afirmar(fallo === 'demasiadas', 'aceptó un CSV de más de 20.000 filas: ' + fallo);
+    return 'fórmulas neutralizadas, 50.000 repetidas en ' + Math.round(ms) + ' ms';
+  });
+
+  // La página no trae anuncios ni nada de terceros, tiene su política de
+  // contenido, no usa type=password (para que el navegador no ofrezca guardar la
+  // maestra) y deja ocultos los campos secretos.
+  await prueba('administrador de contraseñas: sin terceros, con política de contenido y campos ocultos', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const d = D(), w = W();
+    const html = d.documentElement.outerHTML;
+    afirmar(!/adsbygoogle|googlesyndication|cloudflareinsights/.test(html), 'hay scripts de terceros en la página');
+    afirmar(!d.querySelector('.anuncio'), 'quedó un hueco de anuncio');
+    const csp = d.querySelector('meta[http-equiv="Content-Security-Policy"]');
+    afirmar(csp && /connect-src 'none'/.test(csp.content) && /form-action 'none'/.test(csp.content), 'falta la política de contenido');
+    const secretos = ['crearMaestra', 'crearMaestra2', 'desbloquearMaestra', 'eContrasena', 'cambiarActual', 'exportarMaestra'];
+    for (const id of secretos) {
+      const n = d.getElementById(id);
+      const oculto = w.getComputedStyle(n).webkitTextSecurity === 'disc' || n.type === 'password';
+      afirmar(oculto, id + ' no está oculto');
+      afirmar(n.getAttribute('spellcheck') === 'false' && n.getAttribute('autocomplete') === 'off', id + ' sin spellcheck/autocomplete apagados');
+    }
+    afirmar(d.getElementById('eNotas').getAttribute('spellcheck') === 'false', 'las notas siguen con corrector ortográfico');
+    return secretos.length + ' campos secretos ocultos, política de contenido presente';
+  });
+
+  // La página con clave secreta: se muestra una vez, hay que confirmar que se
+  // guardó, al reabrir la pide, y tras tres maestras malas hace esperar.
+  await prueba('administrador de contraseñas: la página con clave secreta y espera tras fallar', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const d = D(), w = W();
+    const B = w.BovedaContrasenas;
+    const poner = (id, v) => { const n = d.getElementById(id); n.value = v; n.dispatchEvent(new w.Event('input', { bubbles: true })); };
+    const visible = (id) => !d.getElementById(id).hidden;
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    try { w.localStorage.removeItem('boveda-fallos'); } catch (e) {}
+    poner('crearNombre', 'Segura'); poner('crearMaestra', 'Maestra-larga 123'); poner('crearMaestra2', 'Maestra-larga 123');
+    d.getElementById('crearConSecreta').checked = true;
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(await hasta(() => visible('vistaSecreta'), 20000), 'no mostró la clave secreta');
+    const secreta = d.getElementById('secretaTexto').textContent;
+    afirmar(/^([A-HJ-NP-Z2-9]{4}-){6}[A-HJ-NP-Z2-9]{2}$/.test(secreta), 'clave secreta mostrada: ' + secreta);
+    afirmar(d.getElementById('secretaSeguir').disabled, 'dejó continuar sin confirmar que la guardó');
+    d.getElementById('secretaYa').click();
+    afirmar(!d.getElementById('secretaSeguir').disabled, 'no habilitó continuar');
+    d.getElementById('secretaSeguir').click();
+    afirmar(visible('vistaCaja') && d.getElementById('secretaTexto').textContent === '', 'no abrió la caja o dejó la clave en pantalla');
+    d.getElementById('botonBloquear').click();
+    await hasta(() => d.querySelectorAll('#listaCajas li').length === 1, 5000);
+    d.querySelector('#listaCajas button').click();
+    afirmar(await hasta(() => visible('desbloquearSecretoCampo'), 5000), 'no pidió la clave secreta');
+    // Sin la clave secreta o con la maestra mala: error, y a la tercera mala hay espera.
+    for (let i = 0; i < 3; i++) {
+      poner('desbloquearMaestra', 'equivocada-123456'); poner('desbloquearSecreto', secreta);
+      d.getElementById('vistaDesbloquear').requestSubmit();
+      afirmar(await hasta(() => /incorrecta/.test(d.getElementById('desbloquearError').textContent), 20000), 'no avisó el intento ' + (i + 1));
+      await esperar(100);
+    }
+    afirmar(/Esper|Wait/.test(d.getElementById('desbloquearError').textContent), 'no hizo esperar tras 3 fallos: ' + d.getElementById('desbloquearError').textContent);
+    poner('desbloquearMaestra', 'Maestra-larga 123');
+    d.getElementById('vistaDesbloquear').requestSubmit();
+    afirmar(/Esper|Wait/.test(d.getElementById('desbloquearError').textContent) && !visible('vistaCaja'), 'abrió durante la espera');
+    w.localStorage.removeItem('boveda-fallos');
+    poner('desbloquearSecreto', secreta);
+    d.getElementById('vistaDesbloquear').requestSubmit();
+    afirmar(await hasta(() => visible('vistaCaja'), 20000), 'no abrió con la maestra y la clave secreta buenas');
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    return 'clave secreta mostrada una vez, pedida al abrir y espera tras 3 fallos';
+  });
+
+  // Hallazgos de la auditoría avanzada (2026-10-12): el medidor no llama fuerte a
+  // "Password1234567!", el CSV hostil se corta pronto, el relleno crece por
+  // potencias de 2, la página usa type=password de verdad y el portapapeles no se lee.
+  await prueba('administrador de contraseñas: medidor, CSV hostil, relleno y campos password', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const w = W(), d = D(), B = w.BovedaContrasenas, G = w.GeneradorContrasenas;
+    afirmar(G.fortaleza('Password1234567!') === 'debil' && G.fortaleza('Qwerty123456789!') === 'debil', 'llamó fuerte a una contraseña de diccionario');
+    afirmar(G.fortaleza('correcto caballo bateria grapa') === 'fuerte', 'una frase larga no es fuerte: ' + G.fortaleza('correcto caballo bateria grapa'));
+    const t0 = performance.now(); let fallo = '';
+    try { B.leerCsv('url,username,password\n' + 'a,b,c\n'.repeat(3000000)); } catch (x) { fallo = x.codigo; }
+    afirmar(fallo === 'demasiadas', 'no cortó el CSV hostil: ' + fallo);
+    const s = await B.crear('Frase-Maestra ñandú 1', 'x');
+    const largos = new Set();
+    for (let n = 0; n <= 300; n += 25) {
+      while (s.entradas().length < n) s.agregar({ sitio: 'Sitio largo ' + s.entradas().length, usuario: 'usuario@correo.com', contrasena: 'Aa1!Zq9#Xw2$LmNo' });
+      largos.add((await s.cifrar()).datos.length);
+    }
+    afirmar(largos.size <= 6, 'el relleno no agrupa en potencias de 2: ' + largos.size + ' tamaños distintos para 13 cantidades');
+    for (const id of ['crearMaestra', 'desbloquearMaestra', 'desbloquearSecreto', 'eContrasena']) afirmar(d.getElementById(id).type === 'password', id + ' no es type=password');
+    const fuente = Array.from(d.scripts).map((x) => x.textContent).join('\n');
+    afirmar(!/readText\s*\(/.test(fuente), 'la página lee el portapapeles');
+    return 'medidor, CSV cortado en ' + Math.round(performance.now() - t0) + ' ms, ' + largos.size + ' tamaños de archivo, campos password';
+  });
+
+  // Nada obliga a llenar campos: una entrada se guarda con lo que la persona
+  // quiera, incluso vacía o solo con una nota, y no hay ningún campo "required".
+  await prueba('administrador de contraseñas: una entrada se guarda sin llenar ningún campo', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    const d = D(), w = W(), B = w.BovedaContrasenas;
+    const poner = (id, v) => { const n = d.getElementById(id); n.value = v; n.dispatchEvent(new w.Event('input', { bubbles: true })); };
+    const visible = (id) => !d.getElementById(id).hidden;
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    afirmar(d.querySelectorAll('#vistaEntrada [required]').length === 0, 'hay campos obligatorios');
+    poner('crearMaestra', 'Maestra-larga 123'); poner('crearMaestra2', 'Maestra-larga 123');
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(await hasta(() => visible('vistaCaja'), 20000), 'no abrió la caja');
+    d.getElementById('botonNueva').click();
+    d.getElementById('vistaEntrada').requestSubmit(); // todo vacío
+    afirmar(await hasta(() => visible('vistaCaja') && d.querySelectorAll('#listaEntradas li').length === 1, 5000), 'no guardó la entrada vacía: ' + d.getElementById('entradaError').textContent);
+    d.getElementById('botonNueva').click();
+    poner('eNotas', 'solo una nota');
+    d.getElementById('vistaEntrada').requestSubmit();
+    afirmar(await hasta(() => d.querySelectorAll('#listaEntradas li').length === 2, 5000), 'no guardó la entrada con solo una nota');
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    return 'entrada vacía y entrada solo con nota guardadas';
+  });
+
+  // Llevar la caja a otro dispositivo: se exporta como archivo cifrado y, en un
+  // navegador sin ninguna caja, se abre solo con ese archivo + la maestra + la
+  // clave secreta. Sin las credenciales el archivo no abre.
+  await prueba('administrador de contraseñas: exportar la caja y abrirla en otro dispositivo', async () => {
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(300);
+    let d = D(), w = W(), B = w.BovedaContrasenas;
+    const poner = (id, v) => { const n = d.getElementById(id); n.value = v; n.dispatchEvent(new w.Event('input', { bubbles: true })); };
+    const visible = (id) => !d.getElementById(id).hidden;
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    try { w.localStorage.removeItem('boveda-fallos'); } catch (e) {}
+    poner('crearNombre', 'Viaje'); poner('crearMaestra', 'Maestra-larga 123'); poner('crearMaestra2', 'Maestra-larga 123');
+    d.getElementById('crearConSecreta').checked = true;
+    d.getElementById('formCrear').requestSubmit();
+    afirmar(await hasta(() => visible('vistaSecreta'), 20000), 'no mostró la clave secreta');
+    const secreta = d.getElementById('secretaTexto').textContent;
+    d.getElementById('secretaYa').click(); d.getElementById('secretaSeguir').click();
+    d.getElementById('botonNueva').click();
+    poner('eSitio', 'Banco'); poner('eUsuario', 'ana'); poner('eContrasena', 'Clave-del-banco-9');
+    d.getElementById('vistaEntrada').requestSubmit();
+    afirmar(await hasta(() => d.querySelectorAll('#listaEntradas li').length === 1, 5000), 'no guardó la entrada');
+    let archivo = null;
+    const original = w.descargarTexto;
+    w.descargarTexto = (texto) => { archivo = texto; };
+    d.getElementById('botonMas').click();
+    d.getElementById('ajRespaldo').click();
+    await esperar(300);
+    w.descargarTexto = original;
+    afirmar(archivo && !archivo.includes('Banco') && !archivo.includes('Clave-del-banco') && JSON.parse(archivo).claveSecreta === true, 'el archivo exportado no salió cifrado');
+    // "Otro dispositivo": se vacía el almacén del navegador y se recarga la página.
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    await abrir('/herramientas/administrador-contrasenas.html'); await esperar(400);
+    d = D(); w = W(); B = w.BovedaContrasenas;
+    afirmar((await B.Almacen.listar()).length === 0 && d.querySelectorAll('#listaCajas li').length === 0, 'el otro dispositivo no estaba vacío');
+    const cargar = async () => {
+      const entrada = d.getElementById('entradaRespaldo');
+      const dt = new w.DataTransfer(); dt.items.add(new w.File([archivo], 'caja.json', { type: 'application/json' }));
+      entrada.files = dt.files; entrada.dispatchEvent(new w.Event('change', { bubbles: true }));
+      afirmar(await hasta(() => visible('vistaDesbloquear'), 5000), 'no pidió las credenciales al abrir el archivo');
+      afirmar(visible('desbloquearSecretoCampo'), 'no pidió la clave secreta');
+    };
+    const intentar = async (maestra, clave) => {
+      poner('desbloquearMaestra', maestra); poner('desbloquearSecreto', clave);
+      d.getElementById('vistaDesbloquear').requestSubmit();
+    };
+    await cargar();
+    await intentar('Maestra-larga 123', 'AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AA');
+    afirmar(await hasta(() => /incorrecta/.test(d.getElementById('desbloquearError').textContent), 20000) && !visible('vistaCaja'), 'abrió con una clave secreta equivocada');
+    try { w.localStorage.removeItem('boveda-fallos'); } catch (e) {}
+    await intentar('Maestra-larga 123', secreta);
+    afirmar(await hasta(() => visible('vistaCaja') && d.querySelectorAll('#listaEntradas li').length === 1, 20000), 'no abrió con las credenciales buenas');
+    afirmar(d.getElementById('cajaNombre').textContent === 'Viaje', 'nombre: ' + d.getElementById('cajaNombre').textContent);
+    afirmar((await B.Almacen.listar()).length === 1, 'la caja no quedó guardada en el dispositivo nuevo');
+    d.getElementById('botonBloquear').click();
+    for (const c of await B.Almacen.listar()) await B.Almacen.borrar(c.id);
+    return 'archivo cifrado, otro navegador vacío, maestra + clave secreta, caja guardada en el nuevo dispositivo';
+  });
+
   // Gráficos 3D, fase 2.2 de tablas y gráficos (2026-10-11): columnas de
   // cilindros (el costado es un degradado medido en PowerPoint: los bordes
   // bastante más oscuros que el medio, no un color parejo como una caja) y
@@ -1655,7 +2009,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // pptx-grafico.js (etapa 7 del motor propio): la escala automática del eje
   // tiene que dar lo mismo que Excel en casos medidos por COM (alto del
   // trazado de 208 pt con letra de 12: 10 divisiones; ver
-  // investigacion-motor-powerpoint\06-graficos.md, 6.3), y un gráfico de
+  // Investigaciones\investigacion-motor-powerpoint\06-graficos.md, 6.3), y un gráfico de
   // columnas armado con PptxGenJS lo tiene que dibujar el motor propio, con
   // color dentro de la barra. Un gráfico de radar (todavía no soportado) tiene
   // que caer al respaldo: así se ve que la prueba distingue.

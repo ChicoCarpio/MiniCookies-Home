@@ -355,6 +355,13 @@ main {
    padding aplicado como bloque. Antes iba en línea en cada página. */
 a.boton { text-decoration: none; display: inline-block; }
 .boton:disabled { background: #94a3b8; cursor: not-allowed; }
+/* Acciones secundarias y destructivas: mismo botón, sin competir con la principal. */
+.boton.secundario { background: transparent; color: var(--texto); border: 1px solid var(--gris-borde); }
+.boton.secundario:hover { background: var(--gris-fondo); }
+.boton.secundario:disabled { color: var(--texto-suave); background: transparent; }
+.boton.peligro { background: transparent; color: #b91c1c; border: 1px solid #b91c1c; }
+.boton.peligro:hover { background: rgba(185, 28, 28, 0.1); }
+.boton.chico { padding: 5px 10px; font-size: 0.85rem; }
 
 .lista-archivos {
   list-style: none;
@@ -742,7 +749,7 @@ label.campo { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem
    la página. */
 .tabla-ancha { max-width: 100%; overflow-x: auto; }
 
-input[type="range"], input[type="number"], input[type="text"], input[type="email"], select {
+input[type="range"], input[type="number"], input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
   padding: 6px 8px;
   border: 1px solid var(--gris-borde);
   border-radius: 6px;
