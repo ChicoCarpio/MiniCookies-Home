@@ -15,7 +15,7 @@ window.i18nPagina = {
   es: {
     'hero-titulo': 'Enviar archivos con un QR',
     'intro': 'Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrados de extremo a extremo. Una vez conectados, cualquiera de los dos puede enviar y recibir.',
-    'ayuda-como': 'El que recibe muestra un QR con una oferta de conexión y una clave secreta; el que envía lo lee y muestra otro QR de respuesta, que el que recibe lee. Los archivos viajan directo entre los dos equipos (WebRTC), cifrados dos veces: por la propia conexión y con AES-256 usando la clave que solo viajó en el QR. En la misma red (WiFi o el punto de acceso del celular) conecta siempre. Entre redes distintas, como datos móviles contra WiFi, intenta abrir la conexión con ayuda de un servidor STUN de Cloudflare (que solo ve las direcciones IP, no los archivos); según el operador puede no lograrlo, y entonces la salida es el punto de acceso del celular.',
+    'ayuda-como': 'Los dos dispositivos se conectan directo, sin servidor de por medio: el QR lleva lo necesario para encontrarse. Los archivos viajan cifrados de extremo a extremo y solo se pueden enviar después de confirmar un código de verificación. Funciona en la misma red (WiFi o el punto de acceso del celular); entre redes distintas puede no conectar.',
     'boton-recibir': '📱 Mostrar mi QR',
     'boton-enviar': '📷 Leer el QR del otro',
     'recibir-paso1': 'Pedile al otro dispositivo que escanee este QR. Si lo lee con la cámara del celular, se abre esta misma página lista para enviar.',
@@ -23,7 +23,7 @@ window.i18nPagina = {
     'copiar-codigo': 'Copiar código',
     'copiar-protegido': '🔒 Copiar código con PIN',
     'pin-mostrar': 'PIN: {pin}. Decíselo a la otra persona (en voz alta o por otro medio): sin el PIN, el código copiado no sirve. Vence junto con el QR.',
-    'pedir-pin': 'Este código está protegido. Escribí el PIN de 6 dígitos que se ve en el otro dispositivo:',
+    'pedir-pin': 'Este código está protegido. Escribí el PIN de 8 dígitos que se ve en el otro dispositivo:',
     'usar-pin': 'Usar PIN',
     'error-pin': '❌ El PIN no es correcto. Revisalo y volvé a intentar.',
     'copiado': '✅ Copiado',
@@ -53,6 +53,16 @@ window.i18nPagina = {
     'rechazado-enviar': 'El otro dispositivo rechazó el envío.',
     'error-inactividad': '⏱️ Se cerró la conexión: pasaron 3 minutos sin enviar nada.',
     'aviso-inactividad': 'Cualquiera de los dos puede enviar y recibir. Si pasan 3 minutos sin enviar nada, la conexión se cierra sola.',
+    'verif-titulo': '🔐 Verificación de seguridad',
+    'verif-muestra': 'Decile este código a la otra persona, en voz alta y no por chat. Cuando lo escriba en su dispositivo y te diga que le funcionó, tocá «Ya lo confirmó».',
+    'verif-confirmo': '✅ Ya lo confirmó',
+    'verif-escribe': 'Pedile a la otra persona el código que se ve en su dispositivo y escribilo acá. Así se confirma que están conectados entre sí y no con alguien más.',
+    'verif-aceptar': 'Aceptar',
+    'verif-mal': '❌ El código no coincide. Pedíselo de nuevo. Si falla otra vez, la conexión se cierra: puede haber alguien más conectado.',
+    'verif-espera': 'Esperando que el otro dispositivo confirme el código…',
+    'verif-listo-anfitrion': '✅ Código correcto. Decile a la otra persona que toque «Ya lo confirmó» en su dispositivo.',
+    'no-verificado-otro': 'La otra persona todavía no tocó «Ya lo confirmó» en su dispositivo. Probá de nuevo en un momento.',
+    'error-codigo-verif': '🔒 Se cerró la conexión: el código de verificación no coincidió 3 veces.',
     'ocupado-otro': 'El otro dispositivo está ocupado con otra transferencia. Probá de nuevo en un momento.',
     'rechazado-recibir': 'Rechazaste el envío.',
     'cancelado': 'El envío se canceló.',
@@ -74,7 +84,7 @@ window.i18nPagina = {
   en: {
     'hero-titulo': 'Send files with a QR code',
     'intro': 'Move files from one device to another with a QR code, straight between the two and end-to-end encrypted. Once connected, either of the two can send and receive.',
-    'ayuda-como': 'The receiver shows a QR with a connection offer and a secret key; the sender reads it and shows another QR with the answer, which the receiver reads. Files travel straight between the two devices (WebRTC), encrypted twice: by the connection itself and with AES-256 using a key that only traveled in the QR. On the same network (WiFi or the phone\'s hotspot) it always connects. Between different networks, such as mobile data against WiFi, it tries to open the connection with the help of a Cloudflare STUN server (which only sees IP addresses, not the files); depending on the carrier it may fail, and then the way out is the phone\'s hotspot.',
+    'ayuda-como': 'The two devices connect directly, with no server in between: the QR carries what they need to find each other. Files travel end-to-end encrypted and can only be sent after confirming a verification code. It works on the same network (WiFi or the phone\'s hotspot); between different networks it may not connect.',
     'boton-recibir': '📱 Show my QR',
     'boton-enviar': '📷 Read the other\'s QR',
     'recibir-paso1': 'Ask the other device to scan this QR. If it reads it with the phone camera, this same page opens ready to send.',
@@ -82,7 +92,7 @@ window.i18nPagina = {
     'copiar-codigo': 'Copy code',
     'copiar-protegido': '🔒 Copy code with PIN',
     'pin-mostrar': 'PIN: {pin}. Tell it to the other person (out loud or another way): without the PIN, the copied code is useless. It expires along with the QR.',
-    'pedir-pin': 'This code is protected. Type the 6-digit PIN shown on the other device:',
+    'pedir-pin': 'This code is protected. Type the 8-digit PIN shown on the other device:',
     'usar-pin': 'Use PIN',
     'error-pin': '❌ The PIN is not correct. Check it and try again.',
     'copiado': '✅ Copied',
@@ -112,6 +122,16 @@ window.i18nPagina = {
     'rechazado-enviar': 'The other device declined the transfer.',
     'error-inactividad': '⏱️ The connection was closed: 3 minutes passed without sending anything.',
     'aviso-inactividad': 'Either of you can send and receive. If 3 minutes pass without sending anything, the connection closes by itself.',
+    'verif-titulo': '🔐 Security check',
+    'verif-muestra': 'Tell this code to the other person, out loud and not by chat. When they type it on their device and tell you it worked, tap “They confirmed it”.',
+    'verif-confirmo': '✅ They confirmed it',
+    'verif-escribe': 'Ask the other person for the code shown on their device and type it here. This confirms you are connected to each other and not to someone else.',
+    'verif-aceptar': 'Accept',
+    'verif-mal': '❌ The code does not match. Ask for it again. If it fails once more, the connection closes: someone else may be connected.',
+    'verif-espera': 'Waiting for the other device to confirm the code…',
+    'verif-listo-anfitrion': '✅ Correct code. Tell the other person to tap “They confirmed it” on their device.',
+    'no-verificado-otro': 'The other person hasn’t tapped “They confirmed it” on their device yet. Try again in a moment.',
+    'error-codigo-verif': '🔒 The connection was closed: the verification code did not match 3 times.',
     'ocupado-otro': 'The other device is busy with another transfer. Try again in a moment.',
     'rechazado-recibir': 'You declined the transfer.',
     'cancelado': 'The transfer was canceled.',
@@ -213,7 +233,7 @@ window.i18nPagina = {
         </div>
         <div id="pasoPin" hidden>
           <p data-i18n="pedir-pin">Este código está protegido. Escribí el PIN de 6 dígitos que se ve en el otro dispositivo:</p>
-          <input class="codigo-pegado" id="campoPin" inputmode="numeric" autocomplete="off" maxlength="9" style="min-height:0;max-width:12em;">
+          <input class="codigo-pegado" id="campoPin" inputmode="numeric" autocomplete="off" maxlength="12" style="min-height:0;max-width:12em;">
           <div class="controles">
             <button class="boton" id="botonUsarPin" data-i18n="usar-pin">Usar PIN</button>
           </div>
@@ -233,7 +253,24 @@ window.i18nPagina = {
     <!-- Conectados -->
     <div id="panelConectado" hidden>
       <p><strong data-i18n="conectado">✅ Conectados</strong></p>
-      <p id="textoVerificacion"></p>
+      <div id="bloqueVerificar">
+        <p><strong data-i18n="verif-titulo">🔐 Verificación de seguridad</strong></p>
+        <div id="verMuestra" hidden>
+          <p data-i18n="verif-muestra">Decile este código a la otra persona…</p>
+          <p class="codigo-verificacion" id="codigoGrande" style="font-size:2rem;text-align:center;"></p>
+          <div class="controles">
+            <button class="boton" id="botonConfirmoMostrado" data-i18n="verif-confirmo">✅ Ya lo confirmó</button>
+          </div>
+          <p id="verEspera" data-i18n="verif-espera" hidden>Esperando que el otro dispositivo confirme el código…</p>
+        </div>
+        <div id="verEscribe" hidden>
+          <p data-i18n="verif-escribe">Pedile a la otra persona el código que se ve en su dispositivo y escribilo acá.</p>
+          <input class="codigo-pegado" id="campoCodigo" inputmode="numeric" autocomplete="off" maxlength="12" style="min-height:0;max-width:12em;font-size:1.5rem;">
+          <div class="controles">
+            <button class="boton" id="botonConfirmarCodigo" data-i18n="verif-aceptar">Aceptar</button>
+          </div>
+        </div>
+      </div>
       <p data-i18n="aviso-inactividad">Cualquiera de los dos puede enviar y recibir. Si pasan 3 minutos sin enviar nada, la conexión se cierra sola.</p>
 
       <div id="zonaEnvio" hidden>
@@ -383,7 +420,7 @@ async function nuevaOferta() {
   $('botonCopiarProtegido').onclick = async () => {
     const { pin, codigo } = await esta.protegido();
     copiar(location.href.split('#')[0] + '#' + codigo, $('botonCopiarProtegido'));
-    $('textoPin').textContent = llenar('pin-mostrar', { pin: pin.slice(0, 3) + ' ' + pin.slice(3) });
+    $('textoPin').textContent = llenar('pin-mostrar', { pin: pin.slice(0, 4) + ' ' + pin.slice(4) });
     $('textoPin').hidden = false;
   };
   let resta = VIDA_QR_S;
@@ -482,15 +519,44 @@ function conectar(s) {
   clearInterval(relojQr);
   pantalla('conectado');
   mostrarMensaje('');
-  $('textoVerificacion').replaceChildren(...llenar('verificacion', { c: '\u0001' }).split('\u0001').flatMap((parte, i, a) => {
-    const nodos = [document.createTextNode(parte)];
-    if (i < a.length - 1) { const b = document.createElement('span'); b.className = 'codigo-verificacion'; b.textContent = s.verificacion; nodos.push(b); }
-    return nodos;
-  }));
-  s.canal.cierres.add(() => falla(s.canal.motivo === 'inactividad' ? 'error-inactividad' : 'error-cerrado'));
-  // Una vez conectados, cualquiera de los dos puede enviar y recibir.
+  s.canal.cierres.add(() => falla(s.canal.motivo === 'inactividad' ? 'error-inactividad' : s.canal.motivo === 'codigo' ? 'error-codigo-verif' : 'error-cerrado'));
+  // Antes de enviar o recibir hay que verificar el código: uno lo ve (el que leyó el QR)
+  // y el otro (el que lo mostró) lo escribe. El que lo ve toca además «Ya lo confirmó»:
+  // el aviso del otro dispositivo solo no alcanza para habilitar nada.
+  $('zonaEnvio').hidden = true;
+  $('bloqueVerificar').hidden = false;
+  if (s.muestraCodigo) {
+    $('codigoGrande').textContent = s.verificacion;
+    $('verMuestra').hidden = false;
+    $('botonConfirmoMostrado').hidden = false;
+    $('verEspera').hidden = true;
+    s.canal.alVerificado = habilitarTransferencia;
+  } else {
+    $('verEscribe').hidden = false;
+    $('campoCodigo').focus();
+  }
+}
+// Verificado el código, cualquiera de los dos puede enviar y recibir.
+function habilitarTransferencia() {
+  $('bloqueVerificar').hidden = true;
+  mostrarMensaje('');
   $('zonaEnvio').hidden = false;
   escucharEnvio();
+}
+async function confirmarCodigo() {
+  if (!await sesion.confirmarCodigo($('campoCodigo').value)) {
+    if (!sesion.canal.cerrado) { mostrarMensaje(t('verif-mal')); $('campoCodigo').select(); }
+    return;
+  }
+  habilitarTransferencia();
+  mostrarMensaje(t('verif-listo-anfitrion'));
+}
+// El que muestra el código: la otra persona le dijo que le funcionó.
+function confirmoMostrado() {
+  if (!sesion || !sesion.confirmarMostrado()) return;
+  $('botonConfirmoMostrado').hidden = true;
+  // Si el aviso del otro dispositivo ya había llegado, habilitarTransferencia ya corrió.
+  if (!sesion.verificado) $('verEspera').hidden = false;
 }
 
 // Recibir
@@ -578,7 +644,7 @@ $('botonEnviarArchivos').onclick = async () => {
       cancelado: () => cancelarEnvio,
     });
     $('bloqueProgreso').hidden = true;
-    mostrarMensaje(fin === 'listo' ? t('listo-enviado') : fin === 'rechazado' ? t('rechazado-enviar') : fin === 'ocupado' ? t('ocupado-otro') : t('cancelado'));
+    mostrarMensaje(fin === 'listo' ? t('listo-enviado') : fin === 'rechazado' ? t('rechazado-enviar') : fin === 'ocupado' ? t('ocupado-otro') : fin === 'no-verificado' ? t('no-verificado-otro') : t('cancelado'));
     if (fin === 'listo') { archivosEnvio = []; pintarListaEnvio(); }
   } catch (e) { falla('error-cerrado'); }
   ocupado = false; actualizarBotonEnvio();
@@ -595,6 +661,9 @@ $('botonConectarRespuesta').onclick = () => usarRespuesta($('pegarRespuesta').va
 $('botonEscanearOferta').onclick = () => iniciarCamara($('videoOferta'), usarOferta);
 $('botonUsarOferta').onclick = () => usarOferta($('pegarOferta').value);
 $('botonUsarPin').onclick = () => usarOferta(ofertaPendiente || $('pegarOferta').value, $('campoPin').value);
+$('botonConfirmarCodigo').onclick = confirmarCodigo;
+$('botonConfirmoMostrado').onclick = confirmoMostrado;
+$('campoCodigo').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmarCodigo(); });
 $('botonCerrar').onclick = $('botonReintentar').onclick = () => location.replace(location.href.split('#')[0]);
 
 // Abierta desde el QR con la cámara del celular: la oferta viene en la dirección.

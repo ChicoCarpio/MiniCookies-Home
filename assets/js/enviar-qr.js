@@ -17,9 +17,10 @@
 //   aleatoria que viaja solo en el QR (nunca por la red). El número de cada
 //   mensaje va en el IV y se exige consecutivo: un mensaje repetido, perdido
 //   o reordenado corta la conexión.
-// - Un código de verificación de 6 dígitos, calculado con la clave y las dos
-//   huellas, se muestra en las dos pantallas: si alguien se coló con el QR
-//   visto de lejos, no coinciden.
+// - Un código de verificación de 8 dígitos, calculado con la clave y las dos
+//   huellas: uno lo ve y se lo dice al otro, que lo escribe. Si alguien se coló
+//   con el QR visto de lejos o se puso en el medio, no coincide. Hasta que los
+//   dos confirman, el canal no acepta ni envía archivos.
 //
 // Los archivos grandes (más de 64 MB) no se juntan en memoria: el receptor los
 // entrega a una descarga directa del navegador (service worker) o, si no se
@@ -57,16 +58,33 @@ const EnviarQR = (() => {
     for (let i = 0; i < b.length; i++) bytes[i] = b.charCodeAt(i);
     return bytes;
   }
-  async function pasar(bytes, flujo) {
-    const salida = new Response(new Blob([bytes]).stream().pipeThrough(flujo));
-    return new Uint8Array(await salida.arrayBuffer());
+  // Un código real ocupa ~630 caracteres y su contenido unos pocos KB. Un código
+  // pegado puede venir de cualquiera: con estos topes, uno armado para inflarse
+  // (deflate multiplica hasta ~1000 veces) no llena la memoria ni cuelga la pestaña.
+  const LARGO_MAXIMO_CODIGO = 16 * 1024;
+  const MAXIMO_DESCOMPRIMIDO = 64 * 1024;
+  async function pasar(bytes, flujo, maximo = Infinity) {
+    const lector = new Blob([bytes]).stream().pipeThrough(flujo).getReader();
+    const partes = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await lector.read();
+      if (done) break;
+      total += value.length;
+      if (total > maximo) { lector.cancel().catch(() => {}); throw new Error('codigo'); }
+      partes.push(value);
+    }
+    const salida = new Uint8Array(total);
+    let o = 0;
+    for (const p of partes) { salida.set(p, o); o += p.length; }
+    return salida;
   }
   async function empaquetar(objeto) {
     const bytes = new TextEncoder().encode(JSON.stringify(objeto));
     return PREFIJO + aBase64Url(await pasar(bytes, new CompressionStream('deflate-raw')));
   }
   async function desempaquetar(codigo) {
-    const bytes = await pasar(deBase64Url(codigo.slice(PREFIJO.length)), new DecompressionStream('deflate-raw'));
+    const bytes = await pasar(deBase64Url(codigo.slice(PREFIJO.length)), new DecompressionStream('deflate-raw'), MAXIMO_DESCOMPRIMIDO);
     return JSON.parse(new TextDecoder().decode(bytes));
   }
   // Acepta la dirección completa del QR ("…#MC1.xxxx"), el código solo o texto
@@ -77,6 +95,7 @@ const EnviarQR = (() => {
   // 'pin-requerido' y con un PIN equivocado, 'pin'.
   async function leerCodigo(texto, pin) {
     texto = String(texto || '').replace(/\s+/g, '');
+    if (texto.length > LARGO_MAXIMO_CODIGO) return null;
     const protegido = /MC2\.[A-Za-z0-9_-]+/.exec(texto);
     if (protegido) {
       if (!pin) throw new Error('pin-requerido');
@@ -95,10 +114,12 @@ const EnviarQR = (() => {
   // ---------- PIN opcional para el código de texto ----------
 
   // Si el código va por un chat o un correo, lleva la clave de cifrado a la
-  // vista de quien lo vea. Con un PIN de 6 dígitos que se dice aparte, el
+  // vista de quien lo vea. Con un PIN de 8 dígitos que se dice aparte, el
   // código viaja cifrado (AES-GCM con una clave sacada del PIN con PBKDF2) y
-  // sin el PIN no sirve. Con 6 dígitos alguien podría probar todas las
-  // combinaciones: PBKDF2 lo hace lento y el código vence en 2 minutos.
+  // sin el PIN no sirve. Límite conocido: quien capture el código y tenga mucho
+  // cómputo (GPU) puede probar los 100 millones de PIN fuera de línea; PBKDF2
+  // lo hace caro (horas, no segundos como con 6 dígitos) y el código vence en
+  // 2 minutos. Por eso el PIN se dice por otro medio, nunca junto al código.
   // El QR no lleva PIN: se lee de pantalla a cámara.
   const PREFIJO_PIN = 'MC2.';
   const ITERACIONES_PIN = 200000;
@@ -107,7 +128,7 @@ const EnviarQR = (() => {
     return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: sal, iterations: ITERACIONES_PIN, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
   }
   function nuevoPin() {
-    return String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
+    return String(crypto.getRandomValues(new Uint32Array(1))[0] % 100000000).padStart(8, '0');
   }
   async function proteger(codigo, pin) {
     const sal = crypto.getRandomValues(new Uint8Array(16));
@@ -152,11 +173,14 @@ const EnviarQR = (() => {
     const m = /a=fingerprint:\S+\s+([0-9A-Fa-f:]+)/.exec(sdp);
     return m ? m[1].toUpperCase() : '';
   }
+  // 8 dígitos: un intermediario que quisiera fabricar certificados hasta que los
+  // códigos de sus dos tramos coincidan tendría que probar ~100 millones.
+  const DIGITOS_VERIFICACION = 8;
   async function codigoDeVerificacion(clave, sdpOferta, sdpRespuesta) {
     const datos = new TextEncoder().encode(aBase64Url(clave) + '|' + huella(sdpOferta) + '|' + huella(sdpRespuesta));
     const h = new DataView(await crypto.subtle.digest('SHA-256', datos));
-    const n = String(h.getUint32(0) % 1000000).padStart(6, '0');
-    return n.slice(0, 3) + ' ' + n.slice(3);
+    const n = String(h.getUint32(0) % 10 ** DIGITOS_VERIFICACION).padStart(DIGITOS_VERIFICACION, '0');
+    return n.slice(0, 4) + ' ' + n.slice(4);
   }
   function importarClave(bytes) {
     return crypto.subtle.importKey('raw', bytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
@@ -186,7 +210,15 @@ const EnviarQR = (() => {
       this.cierres = new Set();
       this.ultima = Date.now();   // último mensaje enviado o recibido
       this.recibiendo = false;    // hay una transferencia entrante en curso (o esperando respuesta de la persona)
-      this.motivo = null;         // por qué se cerró: 'inactividad' o null
+      this.motivo = null;         // por qué se cerró: 'inactividad', 'codigo' o null
+      this.esAnfitrion = soyAnfitrion;
+      this.verificado = false;    // las dos personas confirmaron el código de verificación
+      // En el invitado hacen falta las dos cosas: que el anfitrión avise que escribió
+      // bien el código y que la persona de este lado toque "ya lo confirmó". El aviso
+      // solo no alcanza: un anfitrión malicioso podría mandarlo sin que nadie escriba nada.
+      this.anfitrionConfirmo = false;
+      this.yoConfirme = false;
+      this.alVerificado = null;
       this.reloj = null;
       this.cerrado = false;
       this.cola = Promise.resolve();
@@ -244,11 +276,29 @@ const EnviarQR = (() => {
     }
     // Reparte un mensaje que llegó: al emisor (respuestas) o al receptor (transferencia ajena).
     repartir(tipo, datos) {
-      if (tipo === TIPO_TROZO) return this.receptor ? this.receptor(tipo, datos) : undefined;
+      // Sin verificar, el canal no entrega nada: ni trozos ni ofertas. Así la regla
+      // vive acá y no depende de que la página espere a la verificación.
+      if (tipo === TIPO_TROZO) return this.verificado && this.receptor ? this.receptor(tipo, datos) : undefined;
       const t = JSON.parse(new TextDecoder().decode(datos)).t;
-      const paraEmisor = t === 'acepta' || t === 'rechaza' || t === 'sigue' || t === 'ok' || t === 'ocupado' || (t === 'cancela' && this.emisor);
+      if (t === 'verificado') {
+        // La manda el anfitrión al aceptar el código. Solo el invitado la acepta: si el
+        // anfitrión también la aceptara, quien se colara con el QR se daría por verificado solo.
+        if (!this.esAnfitrion) { this.anfitrionConfirmo = true; this.revisarVerificado(); }
+        return;
+      }
+      if (!this.verificado) {
+        // Si el otro ya verificó y quiere enviar antes de que esta persona confirme, se le avisa.
+        if (t === 'lista') return this.enviarControl({ t: 'no-verificado' });
+        return;
+      }
+      const paraEmisor = t === 'acepta' || t === 'rechaza' || t === 'sigue' || t === 'ok' || t === 'ocupado' || t === 'no-verificado' || (t === 'cancela' && this.emisor);
       const manejador = paraEmisor ? this.emisor : this.receptor;
       return manejador ? manejador(tipo, datos) : undefined;
+    }
+    revisarVerificado() {
+      if (this.verificado || !this.anfitrionConfirmo || !this.yoConfirme) return;
+      this.verificado = true;
+      if (this.alVerificado) this.alVerificado();
     }
     cerrar() {
       if (this.cerrado) return;
@@ -261,9 +311,42 @@ const EnviarQR = (() => {
 
   function crearSesion(pc, dc, clave, soyAnfitrion, sdpOferta, sdpRespuesta, rawClave) {
     const canal = new Canal(dc, clave, soyAnfitrion);
+    // Verificación: el código de 8 dígitos (clave + huellas de los dos) lo muestra el
+    // invitado y el anfitrión, que mostró el QR, lo escribe. Quien se coló con un QR
+    // visto de lejos no tiene a nadie al lado que le muestre un código, y un
+    // intermediario que reenvía la conexión tiene huellas distintas en cada tramo.
+    // El invitado, además, toca "ya lo confirmó" cuando el otro le dice que le
+    // funcionó: el aviso del anfitrión solo no basta (ver Canal.anfitrionConfirmo).
+    // Hasta que se confirme, no se puede enviar ni recibir.
     const sesion = {
       canal,
       verificacion: '',
+      muestraCodigo: !soyAnfitrion,
+      escribeCodigo: soyAnfitrion,
+      intentos: 0,
+      get verificado() { return canal.verificado; },
+      // Solo el anfitrión. Tres intentos fallidos cierran la conexión.
+      async confirmarCodigo(texto) {
+        if (!this.escribeCodigo) return false;
+        if (canal.verificado) return true;
+        const limpio = (x) => String(x || '').replace(/\D/g, '');
+        if (limpio(texto).length === DIGITOS_VERIFICACION && limpio(texto) === limpio(this.verificacion)) {
+          canal.verificado = true;
+          await canal.enviarControl({ t: 'verificado' });
+          return true;
+        }
+        if (++this.intentos >= 3) { canal.motivo = 'codigo'; this.cerrar(); }
+        return false;
+      },
+      // Solo el invitado: la persona confirma que el otro escribió el código y le funcionó.
+      // Queda verificado cuando además llegó el aviso del anfitrión (en cualquier orden).
+      confirmarMostrado() {
+        if (!this.muestraCodigo || canal.cerrado) return false;
+        canal.yoConfirme = true;
+        canal.revisarVerificado();
+        return true;
+      },
+      get anfitrionConfirmo() { return canal.anfitrionConfirmo; },
       cerrar() { canal.cerrar(); try { pc.close(); } catch (e) {} },
     };
     // Cierre por inactividad.
@@ -340,10 +423,12 @@ const EnviarQR = (() => {
   // Envía `archivos` (File[]). Espera a que el otro equipo acepte; devuelve
   // 'listo' si recibió todo o 'rechazado'. `alProgreso({ nombre, hecho, tam,
   // totalHecho, totalTam })` y `cancelado()` (devuelve true para parar).
-  // Devuelve 'listo', 'rechazado', 'cancelado' u 'ocupado' (el otro equipo está
-  // recibiendo o enviando otra cosa en ese momento).
+  // Devuelve 'listo', 'rechazado', 'cancelado', 'ocupado' (el otro equipo está
+  // recibiendo o enviando otra cosa en ese momento) o 'no-verificado' (la otra
+  // persona todavía no confirmó el código de verificación).
   async function enviarArchivos(sesion, archivos, opciones = {}) {
     const canal = sesion.canal;
+    if (!sesion.verificado) throw new Error('sin-verificar');
     if (canal.emisor) throw new Error('ocupado');
     try {
       return await enviarInterno(sesion, archivos, opciones);
@@ -364,14 +449,14 @@ const EnviarQR = (() => {
       const m = JSON.parse(new TextDecoder().decode(datos));
       if (m.t === 'cancela') { cancelaOtro = true; if (sigue) sigue(); }
       if (m.t === 'sigue' && sigue) sigue();
-      if (m.t === 'acepta' || m.t === 'rechaza' || m.t === 'ocupado' || m.t === 'ok' || m.t === 'cancela') espera.listo(m.t);
+      if (m.t === 'acepta' || m.t === 'rechaza' || m.t === 'ocupado' || m.t === 'no-verificado' || m.t === 'ok' || m.t === 'cancela') espera.listo(m.t);
     };
     canal.cierreEmisor = () => { espera.error(new Error('cerrado')); rechazarCierre(new Error('cerrado')); };
     canal.cierres.add(canal.cierreEmisor);
     const totalTam = archivos.reduce((s, f) => s + f.size, 0);
     await canal.enviarControl({ t: 'lista', archivos: archivos.map((f, id) => ({ id, nombre: f.name, tam: f.size, tipo: f.type })) });
     const contesto = await respuesta;
-    if (contesto !== 'acepta') return contesto === 'ocupado' ? 'ocupado' : 'rechazado';
+    if (contesto !== 'acepta') return contesto === 'ocupado' || contesto === 'no-verificado' ? contesto : 'rechazado';
     let totalHecho = 0;
     for (let id = 0; id < archivos.length; id++) {
       const f = archivos[id];

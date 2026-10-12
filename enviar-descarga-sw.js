@@ -40,14 +40,17 @@ self.addEventListener('message', (e) => {
   else pendientes.set(d.id, info);
 });
 
+// El tipo, el nombre y el tamaño los dice el otro dispositivo: un tipo raro o un
+// tamaño inválido haría fallar la descarga, así que se normalizan.
+const TIPO_VALIDO = /^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*\/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*$/;
 function respuesta(info) {
   info.puerto.postMessage('leyendo'); // el navegador ya pidió la descarga: esto sí confirma que arrancó
   const cabeceras = {
-    'Content-Type': info.tipo || 'application/octet-stream',
-    'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(info.nombre),
+    'Content-Type': TIPO_VALIDO.test(info.tipo || '') ? info.tipo : 'application/octet-stream',
+    'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(String(info.nombre || 'archivo')),
     'Cache-Control': 'no-store',
   };
-  if (Number.isFinite(info.tam)) cabeceras['Content-Length'] = String(info.tam);
+  if (Number.isSafeInteger(info.tam) && info.tam >= 0) cabeceras['Content-Length'] = String(info.tam);
   return new Response(info.flujo, { headers: cabeceras });
 }
 

@@ -85,6 +85,14 @@ async function prueba(nombre, fn) {
 }
 const afirmar = (cond, msj) => { if (!cond) throw new Error(msj); };
 const W = () => marco.contentWindow, D = () => marco.contentDocument;
+// Verificación de "Enviar archivos": el invitado muestra el código, el anfitrión lo
+// escribe y el invitado toca «Ya lo confirmó».
+async function verificar(x, y) {
+  const muestra = x.muestraCodigo ? x : y, escribe = x.muestraCodigo ? y : x;
+  if (!(await escribe.confirmarCodigo(muestra.verificacion))) throw new Error('el código de verificación no se aceptó');
+  muestra.confirmarMostrado();
+  await hasta(() => muestra.verificado, 5000);
+}
 
 // Espía los clics sobre <input type=file> para no abrir el diálogo real.
 function espiarSelector() {
@@ -1169,7 +1177,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const invitado = await E.invitado('https://x.test/herramientas/enviar-archivos-qr#' + anfitrion.codigo);
     const sesionR = await anfitrion.aceptarRespuesta(invitado.codigo);
     const sesionE = await invitado.conexion;
-    afirmar(/^\d{3} \d{3}$/.test(sesionR.verificacion) && sesionR.verificacion === sesionE.verificacion, 'verificación: ' + sesionR.verificacion + ' / ' + sesionE.verificacion);
+    await verificar(sesionR, sesionE);
+    afirmar(/^\d{4} \d{4}$/.test(sesionR.verificacion) && sesionR.verificacion === sesionE.verificacion, 'verificación: ' + sesionR.verificacion + ' / ' + sesionE.verificacion);
     const bytes = new (W().Uint8Array)(100000).map((_, i) => (i * 7 + 3) & 255);
     const lista = [new (W().File)([bytes], 'datos.bin', { type: 'application/octet-stream' }), new (W().File)([], 'vacio.txt', { type: 'text/plain' })];
     const llegados = []; const sitio = [];
@@ -1194,6 +1203,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const a = await E.anfitrion();
     const i = await E.invitado(a.codigo);
     const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    await verificar(sR, sE);
     const recibiendo = E.recibirArchivos(sR, { alOferta: async () => false, alProgreso: () => {}, alArchivo: () => {} });
     const fin = await E.enviarArchivos(sE, [new (W().File)(['x'], 'a.txt')], {});
     afirmar(fin === 'rechazado' && (await recibiendo) === 'rechazado', 'resultado: ' + fin);
@@ -1212,6 +1222,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const E = W().eval('EnviarQR');
     const a = await E.anfitrion(), i = await E.invitado(a.codigo);
     const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    await verificar(sR, sE);
     const bytes = new (W().Uint8Array)(E.UMBRAL_DISCO + 8 * 1024 * 1024).map((_, k) => (k * 31 + (k >> 8)) & 255);
     const llegados = []; let destino = null;
     const recibiendo = E.recibirArchivos(sR, { alOferta: async () => true, sinDescargaDirecta: true, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); destino = info.destino; } });
@@ -1267,7 +1278,15 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(sondeo.status === 204 && sondeo.headers.get('x-mc-sw') === '1', 'el sondeo no respondió el service worker: ' + sondeo.status);
     const faltante = await W().fetch('/enviar-descarga/no-existe/x.bin');
     afirmar(faltante.status === 404, 'una descarga inexistente dio ' + faltante.status);
-    return '300000 bytes en 3 trozos, pidió ' + pidieron + ' veces';
+    // Auditoría F6 (2026-10-12): tipo y tamaño los dice el otro dispositivo; uno raro no rompe la descarga.
+    const id2 = 'prueba-raro-' + Date.now(), canal2 = new (W().MessageChannel)();
+    canal2.port1.onmessage = (e) => { if (e.data === 'pull') canal2.port1.postMessage('fin'); };
+    activo.postMessage({ tipo: 'preparar', id: id2, nombre: 'x.html', tam: 'mucho', mime: 'text/html\r\nX-Malo: 1' }, [canal2.port2]);
+    const raro = await W().fetch('/enviar-descarga/' + id2 + '/x.html');
+    afirmar(raro.status === 200 && raro.headers.get('content-type') === 'application/octet-stream', 'tipo raro: ' + raro.status + ' ' + raro.headers.get('content-type'));
+    afirmar(!raro.headers.get('x-malo') && /attachment/.test(raro.headers.get('content-disposition') || ''), 'cabeceras del tipo raro');
+    await raro.arrayBuffer();
+    return '300000 bytes en 3 trozos, pidió ' + pidieron + ' veces; tipo raro normalizado';
   });
 
   // Si el navegador cancela la descarga directa de un archivo grande (pasó en
@@ -1278,6 +1297,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const E = W().eval('EnviarQR');
     const a = await E.anfitrion(), i = await E.invitado(a.codigo);
     const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    await verificar(sR, sE);
     let esperoToque = false;
     const falsa = { async escribir() { throw new Error('cancelado'); }, async cerrar() {}, async abortar() {} };
     const recibiendo = E.recibirArchivos(sR, {
@@ -1301,14 +1321,14 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const E = W().eval('EnviarQR');
     const a = await E.anfitrion();
     const { pin, codigo } = await a.protegido();
-    afirmar(/^\d{6}$/.test(pin), 'PIN: ' + pin);
+    afirmar(/^\d{8}$/.test(pin), 'PIN: ' + pin);
     afirmar(/^MC2\./.test(codigo) && E.esProtegido(codigo) && !E.esProtegido(a.codigo), 'prefijo del código protegido');
     afirmar(codigo.indexOf(a.codigo.slice(4, 40)) === -1, 'el código protegido deja ver la oferta');
     let sinPin = '', malPin = '';
     try { await E.invitado('https://x.test/#' + codigo); } catch (e) { sinPin = e.message; }
-    try { await E.invitado(codigo, '000000' === pin ? '111111' : '000000'); } catch (e) { malPin = e.message; }
+    try { await E.invitado(codigo, '00000000' === pin ? '11111111' : '00000000'); } catch (e) { malPin = e.message; }
     afirmar(sinPin === 'pin-requerido' && malPin === 'pin', 'sin PIN: ' + sinPin + ' / PIN malo: ' + malPin);
-    const i = await E.invitado(codigo, pin.slice(0, 3) + ' ' + pin.slice(3));
+    const i = await E.invitado(codigo, pin.slice(0, 4) + ' ' + pin.slice(4));
     afirmar(i.codigoProtegido && E.esProtegido(i.codigoProtegido), 'la respuesta no volvió protegida');
     const sR = await a.aceptarRespuesta(i.codigoProtegido), sE = await i.conexion;
     afirmar(sR.verificacion === sE.verificacion, 'verificación distinta');
@@ -1325,6 +1345,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const E = W().eval('EnviarQR');
     const a = await E.anfitrion(), i = await E.invitado(a.codigo);
     const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    await verificar(sR, sE);
     let recibidos = 0, cerrado = false, ultimo = null;
     const falsa = {
       async escribir(bytes) { recibidos += bytes.length; W().structuredClone(bytes.buffer, { transfer: [bytes.buffer] }); },
@@ -1351,6 +1372,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const E = W().eval('EnviarQR');
     const a = await E.anfitrion(), i = await E.invitado(a.codigo);
     const sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+    await verificar(sA, sB);
     const enA = [], enB = [];
     E.escucharEnvios(sA, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f) => enA.push(f.name + ':' + f.size) });
     E.escucharEnvios(sB, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f) => enB.push(f.name + ':' + f.size) });
@@ -1381,6 +1403,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     try {
       const a = await E.anfitrion(), i = await E.invitado(a.codigo);
       const sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+      await verificar(sA, sB);
       const motivos = [];
       sA.canal.cierres.add(() => motivos.push('A:' + sA.canal.motivo));
       sB.canal.cierres.add(() => motivos.push('B:' + sB.canal.motivo));
@@ -1395,6 +1418,131 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       afirmar(sA.canal.motivo === 'inactividad' || sB.canal.motivo === 'inactividad', 'motivo: ' + motivos);
       return 'cerró sola: ' + motivos.join(' ');
     } finally { E.configurar({ inactividadMs: 180000, revisionMs: 5000 }); }
+  });
+
+  // Verificación del código (2026-10-12): el invitado ve el código de 6 dígitos y el
+  // anfitrión, que mostró el QR, lo escribe. Hasta entonces no se puede enviar. Tres
+  // códigos mal cierran la conexión. Un anfitrión no acepta un "verificado" que mande
+  // el invitado (si no, quien se colara con el QR se daría por verificado solo).
+  await prueba('enviar archivos: sin verificar el código no se puede enviar', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    const sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+    afirmar(sB.muestraCodigo && !sB.escribeCodigo && sA.escribeCodigo && !sA.muestraCodigo, 'roles de la verificación');
+    afirmar(!sA.verificado && !sB.verificado, 'ya venían verificados');
+    let sin = '';
+    try { await E.enviarArchivos(sA, [new (W().File)(['x'], 'x.txt')], {}); } catch (e) { sin = e.message; }
+    afirmar(sin === 'sin-verificar', 'enviar sin verificar: ' + sin);
+    afirmar((await sB.confirmarCodigo(sB.verificacion)) === false, 'el invitado no debería poder confirmar');
+    afirmar((await sA.confirmarCodigo('000 000')) === false && !sA.verificado, 'aceptó un código malo');
+    afirmar((await sA.confirmarCodigo(sA.verificacion.replace(/\d$/, (d) => String((Number(d) + 1) % 10)))) === false, 'aceptó un código casi igual');
+    afirmar((await sA.confirmarCodigo('111 111')) === false, 'aceptó otro código malo');
+    afirmar(sA.canal.cerrado && sA.canal.motivo === 'codigo', 'tres fallos no cerraron la conexión: ' + sA.canal.motivo);
+    // Una conexión nueva: el código correcto verifica al anfitrión; el invitado recién
+    // cuando además toca «Ya lo confirmó».
+    const a2 = await E.anfitrion(), i2 = await E.invitado(a2.codigo);
+    const s2 = await a2.aceptarRespuesta(i2.codigo), s3 = await i2.conexion;
+    afirmar((await s2.confirmarCodigo(s3.verificacion)) === true, 'no aceptó el código correcto');
+    afirmar(await hasta(() => s3.anfitrionConfirmo, 5000) && !s3.verificado, 'el invitado quedó verificado sin tocar «Ya lo confirmó»');
+    // El anfitrión ya puede intentar enviar, pero el invitado sin confirmar no recibe nada.
+    E.escucharEnvios(s3, { alOferta: async () => { throw new Error('ofreció archivos sin verificar'); }, alProgreso: () => {}, alArchivo: () => {} });
+    const antes = await E.enviarArchivos(s2, [new (W().File)(['x'], 'x.txt')], {});
+    afirmar(antes === 'no-verificado', 'enviar al invitado sin confirmar: ' + antes);
+    afirmar(s3.confirmarMostrado() && s3.verificado, 'el invitado no quedó verificado al confirmar');
+    s2.cerrar(); s3.cerrar();
+    return 'roles, bloqueo previo, 3 fallos, invitado sin confirmar rechaza y código correcto';
+  });
+
+  // Auditoría F1 (2026-10-12): un anfitrión malicioso que manda "verificado" sin que
+  // nadie escriba el código no habilita nada en el invitado; hace falta el toque de la
+  // persona. Y el canal no entrega trozos ni ofertas a quien no verificó (F5).
+  await prueba('enviar archivos: un "verificado" falso no habilita al invitado', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    const sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+    let ofertas = 0;
+    E.escucharEnvios(sB, { alOferta: async () => { ofertas++; return true; }, alProgreso: () => {}, alArchivo: () => {} });
+    // El "atacante" manda el aviso y una oferta de archivos, sin haber escrito ningún código.
+    await sA.canal.enviarControl({ t: 'verificado' });
+    await sA.canal.enviarControl({ t: 'lista', archivos: [{ id: 0, nombre: 'malo.exe', tam: 3, tipo: '' }] });
+    await esperar(500);
+    afirmar(sB.anfitrionConfirmo && !sB.verificado, 'el aviso falso verificó al invitado');
+    afirmar(ofertas === 0, 'el invitado sin verificar recibió una oferta');
+    let sin = '';
+    try { await E.enviarArchivos(sB, [new (W().File)(['x'], 'x.txt')], {}); } catch (e) { sin = e.message; }
+    afirmar(sin === 'sin-verificar', 'el invitado pudo enviar sin confirmar: ' + sin);
+    sA.cerrar(); sB.cerrar();
+    return 'aviso falso ignorado, oferta descartada, envío bloqueado';
+  });
+
+  // Auditoría F4 (2026-10-12): un código pegado enorme o armado para inflarse al
+  // descomprimirse se rechaza sin llenar la memoria.
+  await prueba('enviar archivos: un código gigante o inflable se rechaza', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    afirmar((await E.leerCodigo('MC1.' + 'A'.repeat(20000))) === null, 'aceptó un código de 20.000 caracteres');
+    // ~300 KB de JSON válido comprimido en pocos cientos de bytes.
+    const json = new (W().TextEncoder)().encode(JSON.stringify({ t: 'o', s: 'x'.repeat(300000), k: 'a' }));
+    const comprimido = new (W().Uint8Array)(await new (W().Response)(new (W().Blob)([json]).stream().pipeThrough(new (W().CompressionStream)('deflate-raw'))).arrayBuffer());
+    let bin = ''; for (const b of comprimido) bin += String.fromCharCode(b);
+    const bomba = 'MC1.' + W().btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    afirmar(bomba.length < 16384, 'la bomba de prueba quedó larga: ' + bomba.length);
+    afirmar((await E.leerCodigo(bomba)) === null, 'aceptó un código que se infla a 300 KB');
+    const a = await E.anfitrion();
+    afirmar((await E.leerCodigo(a.codigo)) !== null, 'rechazó un código real');
+    a.cerrar();
+    return 'bomba de ' + bomba.length + ' caracteres rechazada; código real de ' + a.codigo.length + ' aceptado';
+  });
+
+  // La pantalla de verificación (2026-10-12): el invitado ve el código en grande y
+  // la zona de envío aparece cuando el anfitrión lo confirma; el anfitrión ve el campo
+  // para escribirlo, un código malo deja el mensaje de error y el bueno habilita enviar.
+  await prueba('enviar archivos: la página muestra y pide el código de verificación', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const visible = (id) => !D().getElementById(id).hidden;
+    // Vista del que muestra el código (el que leyó el QR).
+    let a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    let sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+    W().eval('conectar').call(W(), sB);
+    afirmar(visible('bloqueVerificar') && visible('verMuestra') && !visible('verEscribe') && !visible('zonaEnvio'), 'vista del que muestra');
+    afirmar(D().getElementById('codigoGrande').textContent === sB.verificacion, 'el código en pantalla no es el de la sesión');
+    afirmar((await sA.confirmarCodigo(sB.verificacion)) === true, 'el anfitrión no pudo confirmar');
+    await hasta(() => sB.anfitrionConfirmo, 5000);
+    await esperar(200);
+    afirmar(!visible('zonaEnvio') && visible('botonConfirmoMostrado'), 'habilitó enviar sin el toque de «Ya lo confirmó»');
+    D().getElementById('botonConfirmoMostrado').click();
+    afirmar(await hasta(() => visible('zonaEnvio') && !visible('bloqueVerificar'), 5000), 'no apareció la zona de envío al confirmar');
+    sA.cerrar(); sB.cerrar();
+    // Al revés: la persona toca primero y el aviso del otro llega después.
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E3 = W().eval('EnviarQR');
+    a = await E3.anfitrion(); i = await E3.invitado(a.codigo);
+    sA = await a.aceptarRespuesta(i.codigo); sB = await i.conexion;
+    W().eval('conectar').call(W(), sB);
+    D().getElementById('botonConfirmoMostrado').click();
+    afirmar(visible('verEspera') && !visible('zonaEnvio'), 'no quedó esperando al otro dispositivo');
+    afirmar((await sA.confirmarCodigo(sB.verificacion)) === true, 'el anfitrión no pudo confirmar (2)');
+    afirmar(await hasta(() => visible('zonaEnvio') && !visible('bloqueVerificar'), 5000), 'no habilitó al llegar el aviso después del toque');
+    sA.cerrar(); sB.cerrar();
+    // Vista del que escribe el código (el que mostró el QR).
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E2 = W().eval('EnviarQR');
+    a = await E2.anfitrion(); i = await E2.invitado(a.codigo);
+    sA = await a.aceptarRespuesta(i.codigo); sB = await i.conexion;
+    W().eval('conectar').call(W(), sA);
+    afirmar(visible('bloqueVerificar') && visible('verEscribe') && !visible('verMuestra') && !visible('zonaEnvio'), 'vista del que escribe');
+    D().getElementById('campoCodigo').value = '0000 0000';
+    D().getElementById('botonConfirmarCodigo').click();
+    afirmar(await hasta(() => /no coincide/.test(D().getElementById('mensaje').textContent), 5000), 'no avisó del código malo');
+    afirmar(!visible('zonaEnvio'), 'habilitó enviar con un código malo');
+    D().getElementById('campoCodigo').value = sB.verificacion;
+    D().getElementById('botonConfirmarCodigo').click();
+    afirmar(await hasta(() => visible('zonaEnvio') && !visible('bloqueVerificar'), 5000), 'el código bueno no habilitó enviar');
+    sA.cerrar(); sB.cerrar();
+    return 'las dos vistas y el flujo de confirmar';
   });
 
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
