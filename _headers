@@ -12,23 +12,3 @@
 # (referencias-vendor.mjs).
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
-
-# Administrador de contraseñas: el navegador no deja que se enmarque (clickjacking), no manda el
-# origen al salir y no adivina tipos. La política de contenido (sin enviar datos a ningún lado) va en la
-# propia página, para poder probarla.
-/herramientas/administrador-contrasenas*
-  X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'
-  Referrer-Policy: no-referrer
-  X-Content-Type-Options: nosniff
-  Cross-Origin-Opener-Policy: same-origin
-  Permissions-Policy: clipboard-read=(), camera=(), microphone=(), geolocation=()
-  Cache-Control: no-store
-/en/herramientas/administrador-contrasenas*
-  X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'
-  Referrer-Policy: no-referrer
-  X-Content-Type-Options: nosniff
-  Cross-Origin-Opener-Policy: same-origin
-  Permissions-Policy: clipboard-read=(), camera=(), microphone=(), geolocation=()
-  Cache-Control: no-store

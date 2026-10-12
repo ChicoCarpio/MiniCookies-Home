@@ -22,7 +22,10 @@ import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { categoriaPrincipal } from './catalogo.mjs';
 
-export const SITIO = 'https://www.minicookies.net';
+import { SITIO_ACTUAL, ES_SEGURO } from './destinos.mjs';
+
+// El sitio que se está construyendo (www o seguro): ver destinos.mjs.
+export const SITIO = SITIO_ACTUAL;
 const IMAGEN_SOCIAL = SITIO + '/marca-logo/minicookies_expandido.png';
 
 // Las 9 páginas de categoría, para las migas de pan de cada herramienta.
@@ -96,7 +99,8 @@ export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
   const migas = [{ name: 'Inicio', item: SITIO + '/' }];
   if (esHerramienta) {
     const cat = indice.get(archivo);
-    if (cat) migas.push({ name: CATEGORIAS[cat], item: `${SITIO}/${cat}.html` });
+    // El sitio seguro no tiene páginas de categoría.
+    if (cat && !ES_SEGURO) migas.push({ name: CATEGORIAS[cat], item: `${SITIO}/${cat}.html` });
     migas.push({ name: titulo.split('—')[0].split('|')[0].trim(), item: url });
   } else if (ruta !== 'index.html') {
     migas.push({ name: titulo.split('—')[0].split('|')[0].trim(), item: url });

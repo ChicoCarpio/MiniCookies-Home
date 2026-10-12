@@ -8,12 +8,14 @@
     "adsenseSlot": "6008492181"
   },
   "scripts": {
-    "build": "node build.mjs",
-    "revisar": "node build.mjs && node revisar-interfaz.mjs",
-    "probar": "node build.mjs && node probar-funciones.mjs",
+    "build": "node build.mjs && node build.mjs --destino=seguro",
+    "revisar": "npm run build && node revisar-interfaz.mjs",
+    "probar": "npm run build && node probar-funciones.mjs",
     "preview": "node build.mjs && npx --yes http-server dist -p 8899 -c-1 -o",
     "respaldar": "node respaldar-librerias.mjs",
-    "comparar-pptx": "node comparar-pptx.mjs"
+    "comparar-pptx": "node comparar-pptx.mjs",
+    "build:principal": "node build.mjs",
+    "build:seguro": "node build.mjs --destino=seguro"
   },
   "devDependencies": {
     "esbuild": "0.28.2"

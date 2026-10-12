@@ -668,12 +668,16 @@ $('botonCerrar').onclick = $('botonReintentar').onclick = () => location.replace
 
 // Abierta desde el QR con la cámara del celular: la oferta viene en la dirección.
 // Se saca de la barra enseguida para que la clave no quede en el historial.
-if (location.hash.indexOf('MC1.') !== -1 || location.hash.indexOf('MC2.') !== -1) {
-  const direccion = location.hash;
-  history.replaceState(null, '', location.pathname + location.search);
-  iniciarEnviar();
-  usarOferta(direccion);
-}
+// Se espera a que termine de cargar la página: idioma.js (que define t(), al final del body) tiene que haber
+// corrido antes de que usarOferta muestre sus mensajes. Antes dependía de quién ganaba la carrera.
+document.addEventListener('DOMContentLoaded', () => {
+  if (location.hash.indexOf('MC1.') !== -1 || location.hash.indexOf('MC2.') !== -1) {
+    const direccion = location.hash;
+    history.replaceState(null, '', location.pathname + location.search);
+    iniciarEnviar();
+    usarOferta(direccion);
+  }
+});
 </script>
 <script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/tema.js"></script>
