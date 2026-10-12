@@ -38,6 +38,9 @@ const EnviarQR = (() => {
   const ESPERA_CONEXION_MS = 20000;
   const TIPO_CONTROL = 1;
   const TIPO_TROZO = 2;
+  // La conexión se corta sola si pasan 3 minutos sin que ninguno de los dos envíe
+  // ni reciba nada (no cuenta mientras hay una transferencia en curso).
+  let inactividadMs = 3 * 60 * 1000, revisionMs = 5000;
   const DIR_ANFITRION = 1;
   const DIR_INVITADO = 2;
 
@@ -176,7 +179,15 @@ const EnviarQR = (() => {
       this.dirPropia = soyAnfitrion ? DIR_ANFITRION : DIR_INVITADO;
       this.dirAjena = soyAnfitrion ? DIR_INVITADO : DIR_ANFITRION;
       this.enviados = 0; this.recibidos = 0;
-      this.alMensaje = null; this.alCerrar = null;
+      // Un mismo canal sirve para enviar y recibir (de a una transferencia por vez):
+      // lo que contesta el otro lado va al `emisor` y lo que inicia una transferencia
+      // ajena, al `receptor`. Los dos se registran en enviarArchivos / recibirArchivos.
+      this.emisor = null; this.receptor = null; this.cierreEmisor = null;
+      this.cierres = new Set();
+      this.ultima = Date.now();   // último mensaje enviado o recibido
+      this.recibiendo = false;    // hay una transferencia entrante en curso (o esperando respuesta de la persona)
+      this.motivo = null;         // por qué se cerró: 'inactividad' o null
+      this.reloj = null;
       this.cerrado = false;
       this.cola = Promise.resolve();
       dc.binaryType = 'arraybuffer';
@@ -189,6 +200,7 @@ const EnviarQR = (() => {
     // varios a la vez y enviarlos en orden con `despachar`.
     preparar(tipo, datos) {
       if (this.cerrado) return Promise.reject(new Error('cerrado'));
+      this.ultima = Date.now();
       const iv = new Uint8Array(12);
       iv[0] = this.dirPropia;
       new DataView(iv.buffer).setBigUint64(4, BigInt(this.enviados++));
@@ -227,13 +239,23 @@ const EnviarQR = (() => {
       }
       const plano = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, this.clave, m.subarray(12)));
       this.recibidos++;
-      if (this.alMensaje) await this.alMensaje(plano[0], plano.subarray(1));
+      this.ultima = Date.now();
+      await this.repartir(plano[0], plano.subarray(1));
+    }
+    // Reparte un mensaje que llegó: al emisor (respuestas) o al receptor (transferencia ajena).
+    repartir(tipo, datos) {
+      if (tipo === TIPO_TROZO) return this.receptor ? this.receptor(tipo, datos) : undefined;
+      const t = JSON.parse(new TextDecoder().decode(datos)).t;
+      const paraEmisor = t === 'acepta' || t === 'rechaza' || t === 'sigue' || t === 'ok' || t === 'ocupado' || (t === 'cancela' && this.emisor);
+      const manejador = paraEmisor ? this.emisor : this.receptor;
+      return manejador ? manejador(tipo, datos) : undefined;
     }
     cerrar() {
       if (this.cerrado) return;
       this.cerrado = true;
+      clearInterval(this.reloj);
       try { this.dc.close(); } catch (e) {}
-      if (this.alCerrar) this.alCerrar();
+      for (const f of [...this.cierres]) f();
     }
   }
 
@@ -244,6 +266,11 @@ const EnviarQR = (() => {
       verificacion: '',
       cerrar() { canal.cerrar(); try { pc.close(); } catch (e) {} },
     };
+    // Cierre por inactividad.
+    canal.reloj = setInterval(() => {
+      if (canal.cerrado || canal.emisor || canal.recibiendo) return;
+      if (Date.now() - canal.ultima > inactividadMs) { canal.motivo = 'inactividad'; sesion.cerrar(); }
+    }, revisionMs);
     pc.addEventListener('connectionstatechange', () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'closed') canal.cerrar();
     });
@@ -313,24 +340,38 @@ const EnviarQR = (() => {
   // Envía `archivos` (File[]). Espera a que el otro equipo acepte; devuelve
   // 'listo' si recibió todo o 'rechazado'. `alProgreso({ nombre, hecho, tam,
   // totalHecho, totalTam })` y `cancelado()` (devuelve true para parar).
-  async function enviarArchivos(sesion, archivos, { alProgreso, cancelado } = {}) {
+  // Devuelve 'listo', 'rechazado', 'cancelado' u 'ocupado' (el otro equipo está
+  // recibiendo o enviando otra cosa en ese momento).
+  async function enviarArchivos(sesion, archivos, opciones = {}) {
+    const canal = sesion.canal;
+    if (canal.emisor) throw new Error('ocupado');
+    try {
+      return await enviarInterno(sesion, archivos, opciones);
+    } finally {
+      canal.emisor = null;
+      if (canal.cierreEmisor) { canal.cierres.delete(canal.cierreEmisor); canal.cierreEmisor = null; }
+    }
+  }
+  async function enviarInterno(sesion, archivos, { alProgreso, cancelado }) {
     const canal = sesion.canal;
     const espera = {};
     let cancelaOtro = false, sigue = null, rechazarCierre = null;
     const cierre = new Promise((_, rechazar) => { rechazarCierre = rechazar; });
     cierre.catch(() => {});
     const respuesta = new Promise((listo, error) => { espera.listo = listo; espera.error = error; });
-    canal.alMensaje = (tipo, datos) => {
+    canal.emisor = (tipo, datos) => {
       if (tipo !== TIPO_CONTROL) return;
       const m = JSON.parse(new TextDecoder().decode(datos));
       if (m.t === 'cancela') { cancelaOtro = true; if (sigue) sigue(); }
       if (m.t === 'sigue' && sigue) sigue();
-      if (m.t === 'acepta' || m.t === 'rechaza' || m.t === 'ok' || m.t === 'cancela') espera.listo(m.t);
+      if (m.t === 'acepta' || m.t === 'rechaza' || m.t === 'ocupado' || m.t === 'ok' || m.t === 'cancela') espera.listo(m.t);
     };
-    canal.alCerrar = () => { espera.error(new Error('cerrado')); rechazarCierre(new Error('cerrado')); };
+    canal.cierreEmisor = () => { espera.error(new Error('cerrado')); rechazarCierre(new Error('cerrado')); };
+    canal.cierres.add(canal.cierreEmisor);
     const totalTam = archivos.reduce((s, f) => s + f.size, 0);
     await canal.enviarControl({ t: 'lista', archivos: archivos.map((f, id) => ({ id, nombre: f.name, tam: f.size, tipo: f.type })) });
-    if ((await respuesta) !== 'acepta') return 'rechazado';
+    const contesto = await respuesta;
+    if (contesto !== 'acepta') return contesto === 'ocupado' ? 'ocupado' : 'rechazado';
     let totalHecho = 0;
     for (let id = 0; id < archivos.length; id++) {
       const f = archivos[id];
@@ -470,13 +511,16 @@ const EnviarQR = (() => {
   // son avisos. Devuelve una promesa con 'listo', 'rechazado' o 'cancelado'.
   function recibirArchivos(sesion, { alOferta, alProgreso, alArchivo, alGrande, sinDescargaDirecta }) {
     const canal = sesion.canal;
+    let cierreFn = null, manejador = null;
+    const quitar = () => { canal.recibiendo = false; if (cierreFn) canal.cierres.delete(cierreFn); if (canal.receptor === manejador) canal.receptor = null; };
     return new Promise((fin, error) => {
       let lista = [], actual = null, totalHecho = 0, totalTam = 0;
       // Tras una cancelación siguen llegando los trozos que el emisor ya había mandado: se ignoran.
       let anulado = false;
       const soltar = () => { anulado = true; if (actual && actual.destino) { actual.destino.abortar().catch(() => {}); } actual = null; };
-      canal.alCerrar = () => { soltar(); error(new Error('cerrado')); };
-      canal.alMensaje = async (tipo, datos) => {
+      cierreFn = () => { soltar(); error(new Error('cerrado')); };
+      canal.cierres.add(cierreFn);
+      manejador = async (tipo, datos) => {
         if (anulado) return;
         if (tipo === TIPO_TROZO) {
           const id = new DataView(datos.buffer, datos.byteOffset).getUint32(0);
@@ -499,6 +543,9 @@ const EnviarQR = (() => {
         }
         const m = JSON.parse(new TextDecoder().decode(datos));
         if (m.t === 'lista') {
+          // Si este equipo está enviando, no puede recibir a la vez.
+          if (canal.emisor) { await canal.enviarControl({ t: 'ocupado' }); return; }
+          canal.recibiendo = true;
           lista = m.archivos;
           totalTam = lista.reduce((s, f) => s + f.tam, 0);
           const ok = await alOferta(lista);
@@ -535,8 +582,19 @@ const EnviarQR = (() => {
           fin('cancelado');
         }
       };
-    });
+      canal.receptor = manejador;
+    }).finally(quitar);
   }
 
-  return { anfitrion, invitado, leerCodigo, esProtegido, enviarArchivos, recibirArchivos, limpiarTemporales, espacioLibre, prepararSW, UMBRAL_DISCO, TROZO };
+  // Queda recibiendo todo lo que el otro equipo quiera mandar, una transferencia
+  // tras otra. `alTerminar(fin)` se llama al terminar cada una y `alError(e)` si
+  // el canal se cierra o falla el almacenamiento.
+  function escucharEnvios(sesion, opciones) {
+    const ciclo = () => recibirArchivos(sesion, opciones).then(
+      (fin) => { if (opciones.alTerminar) opciones.alTerminar(fin); if (!sesion.canal.cerrado) ciclo(); },
+      (e) => { if (opciones.alError) opciones.alError(e); });
+    ciclo();
+  }
+
+  return { anfitrion, invitado, leerCodigo, esProtegido, enviarArchivos, recibirArchivos, escucharEnvios, configurar(o) { if (o.inactividadMs) inactividadMs = o.inactividadMs; if (o.revisionMs) revisionMs = o.revisionMs; }, limpiarTemporales, espacioLibre, prepararSW, UMBRAL_DISCO, TROZO };
 })();

@@ -1343,6 +1343,60 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return tam + ' bytes entregados y contados';
   });
 
+  // Los dos sentidos (2026-10-12): una vez conectados, cualquiera de los dos envía y
+  // recibe por el mismo canal, uno tras otro; si uno está enviando, el otro no
+  // puede empezar a la vez y recibe "ocupado".
+  await prueba('enviar archivos: los dos lados pueden enviar y recibir por la misma conexión', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    const sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+    const enA = [], enB = [];
+    E.escucharEnvios(sA, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f) => enA.push(f.name + ':' + f.size) });
+    E.escucharEnvios(sB, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f) => enB.push(f.name + ':' + f.size) });
+    const f = (n, tam) => new (W().File)([new (W().Uint8Array)(tam)], n);
+    const r1 = await E.enviarArchivos(sB, [f('de-b-a-a.bin', 1000)], {});     // el que lee el QR envía
+    const r2 = await E.enviarArchivos(sA, [f('de-a-a-b.bin', 2000), f('otro.bin', 5)], {}); // el que mostró el QR envía
+    const r3 = await E.enviarArchivos(sB, [f('de-nuevo-b.bin', 7)], {});
+    afirmar(r1 === 'listo' && r2 === 'listo' && r3 === 'listo', 'resultados: ' + [r1, r2, r3]);
+    afirmar(enA.join() === 'de-b-a-a.bin:1000,de-nuevo-b.bin:7', 'llegó a A: ' + enA);
+    afirmar(enB.join() === 'de-a-a-b.bin:2000,otro.bin:5', 'llegó a B: ' + enB);
+    // Los dos mandan a la vez: se atiende uno y el otro recibe "ocupado" (o se rechazan los dos).
+    const [x, y] = await Promise.all([E.enviarArchivos(sA, [f('x.bin', 10)], {}), E.enviarArchivos(sB, [f('y.bin', 10)], {})]);
+    afirmar(['listo', 'ocupado'].includes(x) && ['listo', 'ocupado'].includes(y), 'simultáneos: ' + x + ' / ' + y);
+    // Y después de eso se puede seguir.
+    const r4 = await E.enviarArchivos(sA, [f('despues.bin', 3)], {});
+    afirmar(r4 === 'listo', 'después de los simultáneos: ' + r4);
+    sA.cerrar(); sB.cerrar();
+    return 'A→B, B→A y de nuevo B→A; simultáneos: ' + x + '/' + y;
+  });
+
+  // Cierre por inactividad (2026-10-12): a los 3 minutos sin enviar ni recibir nada
+  // la conexión se corta sola en los dos lados (acá con 1,5 s para poder probarlo),
+  // y no se corta mientras hay una transferencia en curso.
+  await prueba('enviar archivos: la conexión se cierra sola por inactividad', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    E.configurar({ inactividadMs: 1500, revisionMs: 200 });
+    try {
+      const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+      const sA = await a.aceptarRespuesta(i.codigo), sB = await i.conexion;
+      const motivos = [];
+      sA.canal.cierres.add(() => motivos.push('A:' + sA.canal.motivo));
+      sB.canal.cierres.add(() => motivos.push('B:' + sB.canal.motivo));
+      E.escucharEnvios(sA, { alOferta: async () => true, alProgreso: () => {}, alArchivo: () => {} });
+      // Una transferencia que dura más que el límite no se corta (la persona tarda en aceptar).
+      const demora = new Promise((r) => setTimeout(r, 2500));
+      E.escucharEnvios(sB, { alOferta: async () => { await demora; return true; }, alProgreso: () => {}, alArchivo: () => {} });
+      const r = await E.enviarArchivos(sA, [new (W().File)(['hola'], 'a.txt')], {});
+      afirmar(r === 'listo' && !sA.canal.cerrado, 'la transferencia lenta se cortó: ' + r + ' ' + motivos);
+      await esperar(2500);
+      afirmar(sA.canal.cerrado && sB.canal.cerrado, 'no se cerró por inactividad: ' + sA.canal.cerrado + '/' + sB.canal.cerrado);
+      afirmar(sA.canal.motivo === 'inactividad' || sB.canal.motivo === 'inactividad', 'motivo: ' + motivos);
+      return 'cerró sola: ' + motivos.join(' ');
+    } finally { E.configurar({ inactividadMs: 180000, revisionMs: 5000 }); }
+  });
+
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
   // oferta en la dirección, saca el código de la barra y muestra el QR de respuesta.
   await prueba('enviar archivos: la página dibuja el QR de recibir y el de respuesta', async () => {

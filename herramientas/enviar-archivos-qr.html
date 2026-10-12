@@ -14,10 +14,10 @@
 window.i18nPagina = {
   es: {
     'hero-titulo': 'Enviar archivos con un QR',
-    'intro': 'Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrados de extremo a extremo.',
+    'intro': 'Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrados de extremo a extremo. Una vez conectados, cualquiera de los dos puede enviar y recibir.',
     'ayuda-como': 'El que recibe muestra un QR con una oferta de conexión y una clave secreta; el que envía lo lee y muestra otro QR de respuesta, que el que recibe lee. Los archivos viajan directo entre los dos equipos (WebRTC), cifrados dos veces: por la propia conexión y con AES-256 usando la clave que solo viajó en el QR. En la misma red (WiFi o el punto de acceso del celular) conecta siempre. Entre redes distintas, como datos móviles contra WiFi, intenta abrir la conexión con ayuda de un servidor STUN de Cloudflare (que solo ve las direcciones IP, no los archivos); según el operador puede no lograrlo, y entonces la salida es el punto de acceso del celular.',
-    'boton-recibir': '📥 Quiero recibir',
-    'boton-enviar': '📤 Quiero enviar',
+    'boton-recibir': '📱 Mostrar mi QR',
+    'boton-enviar': '📷 Leer el QR del otro',
     'recibir-paso1': 'Pedile al otro dispositivo que escanee este QR. Si lo lee con la cámara del celular, se abre esta misma página lista para enviar.',
     'qr-cambia': 'El QR cambia en {s} s',
     'copiar-codigo': 'Copiar código',
@@ -51,6 +51,9 @@ window.i18nPagina = {
     'listo-enviado': '✅ Listo: se enviaron todos los archivos.',
     'listo-recibido': '✅ Listo: llegaron todos los archivos. Los grandes ya están en tu carpeta de descargas; los demás, guardalos con los botones de abajo.',
     'rechazado-enviar': 'El otro dispositivo rechazó el envío.',
+    'error-inactividad': '⏱️ Se cerró la conexión: pasaron 3 minutos sin enviar nada.',
+    'aviso-inactividad': 'Cualquiera de los dos puede enviar y recibir. Si pasan 3 minutos sin enviar nada, la conexión se cierra sola.',
+    'ocupado-otro': 'El otro dispositivo está ocupado con otra transferencia. Probá de nuevo en un momento.',
     'rechazado-recibir': 'Rechazaste el envío.',
     'cancelado': 'El envío se canceló.',
     'guardar': '⬇️ Guardar',
@@ -70,10 +73,10 @@ window.i18nPagina = {
   },
   en: {
     'hero-titulo': 'Send files with a QR code',
-    'intro': 'Move files from one device to another with a QR code, straight between the two and end-to-end encrypted.',
+    'intro': 'Move files from one device to another with a QR code, straight between the two and end-to-end encrypted. Once connected, either of the two can send and receive.',
     'ayuda-como': 'The receiver shows a QR with a connection offer and a secret key; the sender reads it and shows another QR with the answer, which the receiver reads. Files travel straight between the two devices (WebRTC), encrypted twice: by the connection itself and with AES-256 using a key that only traveled in the QR. On the same network (WiFi or the phone\'s hotspot) it always connects. Between different networks, such as mobile data against WiFi, it tries to open the connection with the help of a Cloudflare STUN server (which only sees IP addresses, not the files); depending on the carrier it may fail, and then the way out is the phone\'s hotspot.',
-    'boton-recibir': '📥 I want to receive',
-    'boton-enviar': '📤 I want to send',
+    'boton-recibir': '📱 Show my QR',
+    'boton-enviar': '📷 Read the other\'s QR',
     'recibir-paso1': 'Ask the other device to scan this QR. If it reads it with the phone camera, this same page opens ready to send.',
     'qr-cambia': 'The QR changes in {s} s',
     'copiar-codigo': 'Copy code',
@@ -107,6 +110,9 @@ window.i18nPagina = {
     'listo-enviado': '✅ Done: all the files were sent.',
     'listo-recibido': '✅ Done: all the files arrived. The big ones are already in your downloads folder; save the rest with the buttons below.',
     'rechazado-enviar': 'The other device declined the transfer.',
+    'error-inactividad': '⏱️ The connection was closed: 3 minutes passed without sending anything.',
+    'aviso-inactividad': 'Either of you can send and receive. If 3 minutes pass without sending anything, the connection closes by itself.',
+    'ocupado-otro': 'The other device is busy with another transfer. Try again in a moment.',
     'rechazado-recibir': 'You declined the transfer.',
     'cancelado': 'The transfer was canceled.',
     'guardar': '⬇️ Save',
@@ -228,6 +234,7 @@ window.i18nPagina = {
     <div id="panelConectado" hidden>
       <p><strong data-i18n="conectado">✅ Conectados</strong></p>
       <p id="textoVerificacion"></p>
+      <p data-i18n="aviso-inactividad">Cualquiera de los dos puede enviar y recibir. Si pasan 3 minutos sin enviar nada, la conexión se cierra sola.</p>
 
       <div id="zonaEnvio" hidden>
         <div class="zona-arrastre" id="zonaArrastre">
@@ -294,7 +301,7 @@ const llenar = (clave, valores) => Object.entries(valores || {}).reduce((s, [k, 
 
 let anfitrion = null, invitado = null, sesion = null;
 let ofertaActual = '';
-let relojQr = null, camaraActiva = null, conectando = false, terminado = false;
+let relojQr = null, camaraActiva = null, conectando = false;
 let archivosEnvio = [], cancelarEnvio = false, bloqueoPantalla = null;
 
 function mostrarMensaje(texto) { $('mensaje').textContent = texto || ''; }
@@ -403,7 +410,7 @@ async function usarRespuesta(texto) {
   mostrarMensaje(t('conectando'));
   try {
     const s = await anfitrion.aceptarRespuesta(texto);
-    conectar(s, 'recibir');
+    conectar(s);
   } catch (e) {
     conectando = false;
     if (e.message === 'codigo' || e.message === 'pin' || e.message === 'pin-requerido') { mostrarMensaje(t(e.message === 'codigo' ? 'error-codigo' : 'error-pin')); return; }
@@ -446,7 +453,7 @@ async function usarOferta(texto, pin) {
     $('botonCopiarRespuestaPin').hidden = false;
     $('botonCopiarRespuestaPin').onclick = () => copiar(invitado.codigoProtegido, $('botonCopiarRespuestaPin'));
   }
-  invitado.conexion.then((s) => conectar(s, 'enviar')).catch((e) => {
+  invitado.conexion.then((s) => conectar(s)).catch((e) => {
     conectando = false;
     falla(e.message === 'tiempo' ? 'error-tiempo' : 'error-cerrado');
   });
@@ -470,7 +477,7 @@ function progreso(clave, p) {
   $('textoProgreso').textContent = llenar(clave, { nombre: p.nombre }) + ' ' + porcentaje + ' % (' + tamano(p.totalHecho) + ' / ' + tamano(p.totalTam) + ')';
   $('rellenoProgreso').style.transform = 'scaleX(' + (p.totalTam ? p.totalHecho / p.totalTam : 1) + ')';
 }
-function conectar(s, rol) {
+function conectar(s) {
   sesion = s;
   clearInterval(relojQr);
   pantalla('conectado');
@@ -480,9 +487,10 @@ function conectar(s, rol) {
     if (i < a.length - 1) { const b = document.createElement('span'); b.className = 'codigo-verificacion'; b.textContent = s.verificacion; nodos.push(b); }
     return nodos;
   }));
-  s.canal.alCerrar = () => { if (!terminado) { falla('error-cerrado'); } };
-  if (rol === 'enviar') $('zonaEnvio').hidden = false;
-  else escucharEnvio();
+  s.canal.cierres.add(() => falla(s.canal.motivo === 'inactividad' ? 'error-inactividad' : 'error-cerrado'));
+  // Una vez conectados, cualquiera de los dos puede enviar y recibir.
+  $('zonaEnvio').hidden = false;
+  escucharEnvio();
 }
 
 // Recibir
@@ -491,8 +499,9 @@ function escucharEnvio() {
   const respuesta = (ok) => { $('ofertaRecibida').hidden = true; if (decidir) decidir(ok); };
   $('botonAceptar').onclick = () => respuesta(true);
   $('botonRechazar').onclick = () => respuesta(false);
-  EnviarQR.recibirArchivos(sesion, {
+  EnviarQR.escucharEnvios(sesion, {
     alOferta: async (lista) => {
+      ocupado = true; actualizarBotonEnvio();
       const total = lista.reduce((x, f) => x + f.tam, 0);
       const libre = await EnviarQR.espacioLibre();
       if (libre !== null && libre < total * 1.1) mostrarMensaje(t('poco-espacio'));
@@ -531,14 +540,19 @@ function escucharEnvio() {
       }
       $('archivosRecibidos').append(li);
     },
-  }).then((fin) => {
-    terminado = true; mantenerPantalla(false);
-    $('bloqueProgreso').hidden = true;
-    mostrarMensaje(fin === 'listo' ? t('listo-recibido') : fin === 'rechazado' ? t('rechazado-recibir') : t('cancelado'));
-  }).catch((e) => { if (!terminado) falla(e.message === 'almacenamiento' ? 'error-espacio' : 'error-cerrado'); });
+    alTerminar: (fin) => {
+      ocupado = false; actualizarBotonEnvio(); mantenerPantalla(false);
+      $('bloqueProgreso').hidden = true;
+      $('pedirDescarga').hidden = true; $('ofertaRecibida').hidden = true;
+      mostrarMensaje(fin === 'listo' ? t('listo-recibido') : fin === 'rechazado' ? t('rechazado-recibir') : t('cancelado'));
+    },
+    alError: (e) => falla(e.message === 'almacenamiento' ? 'error-espacio' : 'error-cerrado'),
+  });
 }
 
-// Enviar
+// Enviar y recibir son de a una por vez: mientras uno de los dos transfiere, el botón queda quieto.
+let ocupado = false;
+function actualizarBotonEnvio() { $('botonEnviarArchivos').disabled = ocupado || !archivosEnvio.length; }
 function pintarListaEnvio() {
   $('listaEnvio').replaceChildren(...archivosEnvio.map((f, i) => {
     const li = document.createElement('li');
@@ -548,13 +562,13 @@ function pintarListaEnvio() {
     li.append(nombre, quitar);
     return li;
   }));
-  $('botonEnviarArchivos').disabled = !archivosEnvio.length;
+  actualizarBotonEnvio();
 }
 conectarZonaArrastre($('zonaArrastre'), $('entradaArchivo'), (archivos) => { archivosEnvio.push(...archivos); pintarListaEnvio(); });
 
 $('botonEnviarArchivos').onclick = async () => {
   cancelarEnvio = false;
-  $('botonEnviarArchivos').disabled = true;
+  ocupado = true; actualizarBotonEnvio();
   $('botonCancelar').hidden = false;
   mostrarMensaje(t('esperando-aceptar'));
   mantenerPantalla(true);
@@ -563,11 +577,11 @@ $('botonEnviarArchivos').onclick = async () => {
       alProgreso: (p) => { mostrarMensaje(''); progreso('enviando', p); },
       cancelado: () => cancelarEnvio,
     });
-    terminado = true;
     $('bloqueProgreso').hidden = true;
-    mostrarMensaje(fin === 'listo' ? t('listo-enviado') : fin === 'rechazado' ? t('rechazado-enviar') : t('cancelado'));
-    if (fin !== 'listo') { terminado = false; $('botonEnviarArchivos').disabled = false; }
+    mostrarMensaje(fin === 'listo' ? t('listo-enviado') : fin === 'rechazado' ? t('rechazado-enviar') : fin === 'ocupado' ? t('ocupado-otro') : t('cancelado'));
+    if (fin === 'listo') { archivosEnvio = []; pintarListaEnvio(); }
   } catch (e) { falla('error-cerrado'); }
+  ocupado = false; actualizarBotonEnvio();
   $('botonCancelar').hidden = true;
   mantenerPantalla(false);
 };
