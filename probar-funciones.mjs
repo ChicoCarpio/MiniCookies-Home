@@ -1292,6 +1292,30 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'cancelación avisada, conexión sin cortar';
   });
 
+  // Código de texto protegido con PIN (2026-10-12): para pasarlo por un chat sin
+  // regalar la clave. Sin PIN o con otro no abre; con el PIN conecta, y la
+  // respuesta también puede volver protegida. El texto protegido no contiene la
+  // oferta ni la clave a la vista.
+  await prueba('enviar archivos: el código protegido con PIN solo abre con el PIN', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion();
+    const { pin, codigo } = await a.protegido();
+    afirmar(/^\d{6}$/.test(pin), 'PIN: ' + pin);
+    afirmar(/^MC2\./.test(codigo) && E.esProtegido(codigo) && !E.esProtegido(a.codigo), 'prefijo del código protegido');
+    afirmar(codigo.indexOf(a.codigo.slice(4, 40)) === -1, 'el código protegido deja ver la oferta');
+    let sinPin = '', malPin = '';
+    try { await E.invitado('https://x.test/#' + codigo); } catch (e) { sinPin = e.message; }
+    try { await E.invitado(codigo, '000000' === pin ? '111111' : '000000'); } catch (e) { malPin = e.message; }
+    afirmar(sinPin === 'pin-requerido' && malPin === 'pin', 'sin PIN: ' + sinPin + ' / PIN malo: ' + malPin);
+    const i = await E.invitado(codigo, pin.slice(0, 3) + ' ' + pin.slice(3));
+    afirmar(i.codigoProtegido && E.esProtegido(i.codigoProtegido), 'la respuesta no volvió protegida');
+    const sR = await a.aceptarRespuesta(i.codigoProtegido), sE = await i.conexion;
+    afirmar(sR.verificacion === sE.verificacion, 'verificación distinta');
+    sE.cerrar(); sR.cerrar();
+    return 'PIN ' + pin + ', código protegido de ' + codigo.length + ' caracteres';
+  });
+
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
   // oferta en la dirección, saca el código de la barra y muestra el QR de respuesta.
   await prueba('enviar archivos: la página dibuja el QR de recibir y el de respuesta', async () => {

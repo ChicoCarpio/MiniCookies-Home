@@ -69,8 +69,17 @@ const EnviarQR = (() => {
   // Acepta la dirección completa del QR ("…#MC1.xxxx"), el código solo o texto
   // con espacios y saltos de línea de más (al pegar). Devuelve el contenido
   // ({ t: 'o' | 'r', s, k? }) o null si no es un código de esta herramienta.
-  async function leerCodigo(texto) {
-    const m = /MC1\.[A-Za-z0-9_-]+/.exec(String(texto || '').replace(/\s+/g, ''));
+  //
+  // Un código protegido con PIN ("MC2.…") se abre con `pin`: sin PIN lanza
+  // 'pin-requerido' y con un PIN equivocado, 'pin'.
+  async function leerCodigo(texto, pin) {
+    texto = String(texto || '').replace(/\s+/g, '');
+    const protegido = /MC2\.[A-Za-z0-9_-]+/.exec(texto);
+    if (protegido) {
+      if (!pin) throw new Error('pin-requerido');
+      texto = await abrirProtegido(protegido[0], pin);
+    }
+    const m = /MC1\.[A-Za-z0-9_-]+/.exec(texto);
     if (!m) return null;
     try {
       const datos = await desempaquetar(m[0]);
@@ -78,6 +87,45 @@ const EnviarQR = (() => {
     } catch (e) {
       return null;
     }
+  }
+
+  // ---------- PIN opcional para el código de texto ----------
+
+  // Si el código va por un chat o un correo, lleva la clave de cifrado a la
+  // vista de quien lo vea. Con un PIN de 6 dígitos que se dice aparte, el
+  // código viaja cifrado (AES-GCM con una clave sacada del PIN con PBKDF2) y
+  // sin el PIN no sirve. Con 6 dígitos alguien podría probar todas las
+  // combinaciones: PBKDF2 lo hace lento y el código vence en 2 minutos.
+  // El QR no lleva PIN: se lee de pantalla a cámara.
+  const PREFIJO_PIN = 'MC2.';
+  const ITERACIONES_PIN = 200000;
+  async function claveDePin(pin, sal) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(pin).replace(/\D/g, '')), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: sal, iterations: ITERACIONES_PIN, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  function nuevoPin() {
+    return String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
+  }
+  async function proteger(codigo, pin) {
+    const sal = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const cifrado = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await claveDePin(pin, sal), new TextEncoder().encode(codigo)));
+    const salida = new Uint8Array(28 + cifrado.length);
+    salida.set(sal); salida.set(iv, 16); salida.set(cifrado, 28);
+    return PREFIJO_PIN + aBase64Url(salida);
+  }
+  async function abrirProtegido(codigo, pin) {
+    try {
+      const b = deBase64Url(codigo.slice(PREFIJO_PIN.length));
+      const plano = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.subarray(16, 28) }, await claveDePin(pin, b.subarray(0, 16)), b.subarray(28));
+      return new TextDecoder().decode(plano);
+    } catch (e) {
+      throw new Error('pin');
+    }
+  }
+  // ¿Este texto es un código protegido con PIN?
+  function esProtegido(texto) {
+    return /MC2\.[A-Za-z0-9_-]+/.test(String(texto || '').replace(/\s+/g, ''));
   }
 
   // ---------- Conexión ----------
@@ -211,14 +259,19 @@ const EnviarQR = (() => {
     await esperarIce(pc);
     const sdp = pc.localDescription.sdp;
     const codigo = await empaquetar({ t: 'o', s: sdp, k: aBase64Url(rawClave) });
-    let usado = false;
+    let usado = false, pin = null;
     return {
       codigo,
+      // El mismo código cifrado con un PIN nuevo (el PIN se crea la primera vez).
+      async protegido() {
+        if (!pin) pin = nuevoPin();
+        return { pin, codigo: await proteger(codigo, pin) };
+      },
       // Recibe el código de la respuesta (leído del QR del otro equipo) y
       // espera a que el canal abra. Una oferta sirve para una sola respuesta.
       async aceptarRespuesta(texto) {
         if (usado) throw new Error('usado');
-        const datos = await leerCodigo(texto);
+        const datos = await leerCodigo(texto, pin);
         if (!datos || datos.t !== 'r') throw new Error('codigo');
         usado = true;
         await pc.setRemoteDescription({ type: 'answer', sdp: datos.s });
@@ -231,8 +284,8 @@ const EnviarQR = (() => {
 
   // El que envía: lee la oferta del QR y arma la respuesta. `conexion` se
   // cumple cuando el canal abre (con la sesión) o falla (por tiempo).
-  async function invitado(texto) {
-    const datos = await leerCodigo(texto);
+  async function invitado(texto, pin) {
+    const datos = await leerCodigo(texto, pin);
     if (!datos || datos.t !== 'o' || !datos.k) throw new Error('codigo');
     const pc = nuevaConexion();
     const rawClave = deBase64Url(datos.k);
@@ -250,7 +303,9 @@ const EnviarQR = (() => {
       await esperarApertura(dc, ESPERA_CONEXION_MS);
       return crearSesion(pc, dc, await importarClave(rawClave), false, datos.s, sdp, rawClave);
     })();
-    return { codigo, conexion, cerrar() { try { pc.close(); } catch (e) {} } };
+    // Si la oferta vino protegida, la respuesta también puede ir protegida con el mismo PIN.
+    const protegida = pin && esProtegido(texto) ? await proteger(codigo, pin) : null;
+    return { codigo, codigoProtegido: protegida, conexion, cerrar() { try { pc.close(); } catch (e) {} } };
   }
 
   // ---------- Transferencia de archivos ----------
@@ -481,5 +536,5 @@ const EnviarQR = (() => {
     });
   }
 
-  return { anfitrion, invitado, leerCodigo, enviarArchivos, recibirArchivos, limpiarTemporales, espacioLibre, prepararSW, UMBRAL_DISCO, TROZO };
+  return { anfitrion, invitado, leerCodigo, esProtegido, enviarArchivos, recibirArchivos, limpiarTemporales, espacioLibre, prepararSW, UMBRAL_DISCO, TROZO };
 })();

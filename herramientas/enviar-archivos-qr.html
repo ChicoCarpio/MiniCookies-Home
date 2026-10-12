@@ -21,6 +21,11 @@ window.i18nPagina = {
     'recibir-paso1': 'Pedile al otro dispositivo que escanee este QR. Si lo lee con la cámara del celular, se abre esta misma página lista para enviar.',
     'qr-cambia': 'El QR cambia en {s} s',
     'copiar-codigo': 'Copiar código',
+    'copiar-protegido': '🔒 Copiar código con PIN',
+    'pin-mostrar': 'PIN: {pin}. Decíselo a la otra persona (en voz alta o por otro medio): sin el PIN, el código copiado no sirve. Vence junto con el QR.',
+    'pedir-pin': 'Este código está protegido. Escribí el PIN de 6 dígitos que se ve en el otro dispositivo:',
+    'usar-pin': 'Usar PIN',
+    'error-pin': '❌ El PIN no es correcto. Revisalo y volvé a intentar.',
     'copiado': '✅ Copiado',
     'recibir-paso2': 'Cuando el otro dispositivo muestre su QR de respuesta, escanealo:',
     'escanear-respuesta': '📷 Escanear su QR',
@@ -72,6 +77,11 @@ window.i18nPagina = {
     'recibir-paso1': 'Ask the other device to scan this QR. If it reads it with the phone camera, this same page opens ready to send.',
     'qr-cambia': 'The QR changes in {s} s',
     'copiar-codigo': 'Copy code',
+    'copiar-protegido': '🔒 Copy code with PIN',
+    'pin-mostrar': 'PIN: {pin}. Tell it to the other person (out loud or another way): without the PIN, the copied code is useless. It expires along with the QR.',
+    'pedir-pin': 'This code is protected. Type the 6-digit PIN shown on the other device:',
+    'usar-pin': 'Use PIN',
+    'error-pin': '❌ The PIN is not correct. Check it and try again.',
     'copiado': '✅ Copied',
     'recibir-paso2': 'When the other device shows its answer QR, scan it:',
     'escanear-respuesta': '📷 Scan their QR',
@@ -162,7 +172,9 @@ window.i18nPagina = {
       <p id="cuentaAtras" style="text-align:center;"></p>
       <div class="controles">
         <button class="boton" id="botonCopiarOferta" data-i18n="copiar-codigo">Copiar código</button>
+        <button class="boton" id="botonCopiarProtegido" data-i18n="copiar-protegido">🔒 Copiar código con PIN</button>
       </div>
+      <p id="textoPin" class="codigo-verificacion" hidden></p>
       <p data-i18n="recibir-paso2">Cuando el otro dispositivo muestre su QR de respuesta, escanealo:</p>
       <div class="controles">
         <button class="boton" id="botonEscanearRespuesta" data-i18n="escanear-respuesta">📷 Escanear su QR</button>
@@ -192,12 +204,20 @@ window.i18nPagina = {
         <div class="controles">
           <button class="boton" id="botonUsarOferta" data-i18n="usar-codigo">Usar código</button>
         </div>
+        <div id="pasoPin" hidden>
+          <p data-i18n="pedir-pin">Este código está protegido. Escribí el PIN de 6 dígitos que se ve en el otro dispositivo:</p>
+          <input class="codigo-pegado" id="campoPin" inputmode="numeric" autocomplete="off" maxlength="9" style="min-height:0;max-width:12em;">
+          <div class="controles">
+            <button class="boton" id="botonUsarPin" data-i18n="usar-pin">Usar PIN</button>
+          </div>
+        </div>
       </div>
       <div id="pasoMostrarRespuesta" hidden>
         <p data-i18n="enviar-paso2">Ahora mostrale este QR de respuesta al dispositivo que recibe:</p>
         <div class="caja-qr" id="cajaQrRespuesta"></div>
         <div class="controles">
           <button class="boton" id="botonCopiarRespuesta" data-i18n="copiar-codigo">Copiar código</button>
+          <button class="boton" id="botonCopiarRespuestaPin" hidden data-i18n="copiar-protegido">🔒 Copiar código con PIN</button>
         </div>
         <p id="estadoConectando" data-i18n="conectando">Conectando…</p>
       </div>
@@ -350,6 +370,14 @@ async function nuevaOferta() {
   ofertaActual = direccion;
   dibujarQR($('cajaQrOferta'), direccion);
   $('botonCopiarOferta').onclick = () => copiar(direccion, $('botonCopiarOferta'));
+  $('textoPin').hidden = true;
+  const esta = anfitrion;
+  $('botonCopiarProtegido').onclick = async () => {
+    const { pin, codigo } = await esta.protegido();
+    copiar(location.href.split('#')[0] + '#' + codigo, $('botonCopiarProtegido'));
+    $('textoPin').textContent = llenar('pin-mostrar', { pin: pin.slice(0, 3) + ' ' + pin.slice(3) });
+    $('textoPin').hidden = false;
+  };
   let resta = VIDA_QR_S;
   const pintar = () => { $('cuentaAtras').textContent = llenar('qr-cambia', { s: resta }); };
   pintar();
@@ -362,8 +390,12 @@ async function nuevaOferta() {
 }
 async function usarRespuesta(texto) {
   if (conectando || sesion || !anfitrion) return;
-  const datos = await EnviarQR.leerCodigo(texto);
-  if (!datos || datos.t !== 'r') { mostrarMensaje(t('error-codigo')); return; }
+  if (EnviarQR.esProtegido(texto)) {
+    // Una respuesta protegida se abre con el PIN que mostró este equipo: se prueba al conectar.
+  } else {
+    const datos = await EnviarQR.leerCodigo(texto);
+    if (!datos || datos.t !== 'r') { mostrarMensaje(t('error-codigo')); return; }
+  }
   conectando = true;
   detenerCamara();
   clearInterval(relojQr);
@@ -373,6 +405,7 @@ async function usarRespuesta(texto) {
     conectar(s, 'recibir');
   } catch (e) {
     conectando = false;
+    if (e.message === 'codigo' || e.message === 'pin' || e.message === 'pin-requerido') { mostrarMensaje(t(e.message === 'codigo' ? 'error-codigo' : 'error-pin')); return; }
     falla(e.message === 'tiempo' ? 'error-tiempo' : 'error-cerrado');
   }
 }
@@ -382,22 +415,36 @@ function iniciarEnviar() {
   pantalla('enviar');
   mostrarMensaje('');
 }
-async function usarOferta(texto) {
+let ofertaPendiente = '';
+async function usarOferta(texto, pin) {
   if (conectando || invitado) return;
-  const datos = await EnviarQR.leerCodigo(texto);
+  let datos;
+  try {
+    datos = await EnviarQR.leerCodigo(texto, pin);
+  } catch (e) {
+    // El código viene protegido: pedir el PIN (o avisar que no es correcto).
+    ofertaPendiente = texto;
+    $('pasoPin').hidden = false;
+    mostrarMensaje(e.message === 'pin' ? t('error-pin') : '');
+    return;
+  }
   if (!datos || datos.t !== 'o') { mostrarMensaje(t('error-codigo')); return; }
   detenerCamara();
   conectando = true;
   pantalla('enviar');
   mostrarMensaje(t('conectando'));
   try {
-    invitado = await EnviarQR.invitado(texto);
+    invitado = await EnviarQR.invitado(texto, pin);
   } catch (e) { conectando = false; falla('error-codigo'); return; }
   mostrarMensaje('');
   $('pasoLeerOferta').hidden = true;
   $('pasoMostrarRespuesta').hidden = false;
   dibujarQR($('cajaQrRespuesta'), invitado.codigo);
   $('botonCopiarRespuesta').onclick = () => copiar(invitado.codigo, $('botonCopiarRespuesta'));
+  if (invitado.codigoProtegido) {
+    $('botonCopiarRespuestaPin').hidden = false;
+    $('botonCopiarRespuestaPin').onclick = () => copiar(invitado.codigoProtegido, $('botonCopiarRespuestaPin'));
+  }
   invitado.conexion.then((s) => conectar(s, 'enviar')).catch((e) => {
     conectando = false;
     falla(e.message === 'tiempo' ? 'error-tiempo' : 'error-cerrado');
@@ -532,11 +579,12 @@ $('botonEscanearRespuesta').onclick = () => iniciarCamara($('videoRespuesta'), u
 $('botonConectarRespuesta').onclick = () => usarRespuesta($('pegarRespuesta').value);
 $('botonEscanearOferta').onclick = () => iniciarCamara($('videoOferta'), usarOferta);
 $('botonUsarOferta').onclick = () => usarOferta($('pegarOferta').value);
+$('botonUsarPin').onclick = () => usarOferta(ofertaPendiente || $('pegarOferta').value, $('campoPin').value);
 $('botonCerrar').onclick = $('botonReintentar').onclick = () => location.replace(location.href.split('#')[0]);
 
 // Abierta desde el QR con la cámara del celular: la oferta viene en la dirección.
 // Se saca de la barra enseguida para que la clave no quede en el historial.
-if (location.hash.indexOf('MC1.') !== -1) {
+if (location.hash.indexOf('MC1.') !== -1 || location.hash.indexOf('MC2.') !== -1) {
   const direccion = location.hash;
   history.replaceState(null, '', location.pathname + location.search);
   iniciarEnviar();
