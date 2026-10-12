@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Lector y escritor de ZIP propio (reemplaza a JSZip). Un .docx, .xlsx, .pptx
 // o .epub es un zip por dentro; todas las herramientas que los abren o los
 // guardan pasan por acá.
@@ -17,7 +17,7 @@
 //   zip.file('ruta', datos, { compression: 'STORE', base64: true });
 //   await zip.generateAsync({ type: 'blob' | 'uint8array' | 'arraybuffer' | 'base64', compression: 'DEFLATE', mimeType });
 //
-// Lo que no hace (se rechaza con un ErrorZip claro): zip cifrado, ZIP64 y
+// Lo que no hace (se rechaza con un ErrorZip claro): zip cifrado, ZIP64 en el final del zip (las entradas ZIP64 de a una sí se leen) y
 // métodos de compresión distintos de STORE y DEFLATE. En Office y EPUB reales
 // no aparecen; si aparece un caso, se agrega.
 //
@@ -29,7 +29,6 @@
 
   const LIMITE_ENTRADAS = 100000;
   const LIMITE_POR_ENTRADA = 512 * 1024 * 1024;
-  const LIMITE_TOTAL = 2 * 1024 * 1024 * 1024;
   const MAXIMO_ZIP = 0xFFFFFFFF;
 
   // Lo que ve quien usa la herramienta (muchas páginas muestran error.message tal cual).
@@ -37,12 +36,13 @@
     invalido: { es: 'el archivo no es un .zip válido', en: 'the file is not a valid .zip' },
     danado: { es: 'el archivo está dañado', en: 'the file is damaged' },
     cifrado: { es: 'el archivo está cifrado con contraseña, y eso no se puede abrir acá', en: 'the file is password-encrypted, which can’t be opened here' },
-    zip64: { es: 'el archivo es demasiado grande para este formato', en: 'the file is too large for this format' },
+    zip64: { es: 'el archivo es demasiado grande o usa ZIP64, que no se admite', en: 'the file is too large or uses ZIP64, which isn’t supported' },
     metodo: { es: 'el archivo usa una compresión no soportada', en: 'the file uses an unsupported compression' },
     grande: { es: 'el archivo es demasiado grande para abrirlo en el navegador', en: 'the file is too large to open in the browser' },
+    navegador: { es: 'este navegador es demasiado viejo para abrir este archivo; actualízalo', en: 'this browser is too old to open this file; please update it' },
   };
 
-  // codigo: 'invalido' | 'danado' | 'cifrado' | 'zip64' | 'metodo' | 'grande'
+  // codigo: 'invalido' | 'danado' | 'cifrado' | 'zip64' | 'metodo' | 'grande' | 'navegador'
   // detalle: el motivo técnico, en inglés, para la consola.
   class ErrorZip extends Error {
     constructor(codigo, detalle) {
@@ -110,14 +110,30 @@
   }
 
   // ---------- Compresión nativa ----------
+  // Los datos entran al compresor de a 64 KB y solo cuando él los pide: si entraran
+  // de una vez, una zip bomba se descomprimiría entera en memoria antes de poder cortarla.
   function flujoDe(bytes) {
-    return new ReadableStream({ start(c) { if (bytes.length) c.enqueue(bytes); c.close(); } });
+    let pos = 0;
+    return new ReadableStream({
+      pull(control) {
+        if (pos >= bytes.length) { control.close(); return; }
+        control.enqueue(bytes.subarray(pos, pos += 65536));
+      },
+    }, { highWaterMark: 0 });
+  }
+
+  function transformar(bytes, tipo) {
+    try {
+      return flujoDe(bytes).pipeThrough(new (tipo === 'inflar' ? DecompressionStream : CompressionStream)('deflate-raw')).getReader();
+    } catch (error) {
+      throw new ErrorZip('navegador', 'DecompressionStream/CompressionStream with deflate-raw is not available');
+    }
   }
 
   async function inflar(bytes, esperado) {
     // Algunos programas guardan una entrada vacía como DEFLATE sin ningún byte.
     if (esperado === 0 && bytes.length === 0) return new Uint8Array(0);
-    const lector = flujoDe(bytes).pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+    const lector = transformar(bytes, 'inflar');
     const partes = [];
     let total = 0;
     try {
@@ -131,14 +147,15 @@
       }
     } catch (error) {
       if (error instanceof ErrorZip) { lector.cancel().catch(() => {}); throw error; }
-      throw new ErrorZip('danado', 'Corrupted zip: an entry cannot be decompressed');
+      // Bytes sobrantes después del final del deflate (JSZip los ignoraba): si ya salió todo, se acepta.
+      if (total !== esperado) throw new ErrorZip('danado', 'Corrupted zip: an entry cannot be decompressed');
     }
     if (total !== esperado) throw new ErrorZip('danado', 'Corrupted zip: an entry has a different size than it declares');
     return partes.length === 1 ? partes[0] : unir(partes, total);
   }
 
   async function deflar(bytes) {
-    const lector = flujoDe(bytes).pipeThrough(new CompressionStream('deflate-raw')).getReader();
+    const lector = transformar(bytes, 'deflar');
     const partes = [];
     for (;;) {
       const { done, value } = await lector.read();
@@ -163,7 +180,6 @@
     if (total === 0xFFFF || tamanoDir === MAXIMO_ZIP || desdeDir === MAXIMO_ZIP) {
       throw new ErrorZip('zip64', 'Unsupported zip: ZIP64 archives are not supported');
     }
-    if (total > LIMITE_ENTRADAS) throw new ErrorZip('grande', 'Zip with too many entries');
     // Bytes extra antes del zip (instaladores, adjuntos): el directorio está más
     // adelante de lo que dice su propio desplazamiento.
     const hayDirectorioEn = (pos) => pos >= 0 && pos + 4 <= bytes.length && vista.getUint32(pos, true) === 0x02014b50;
@@ -174,8 +190,9 @@
 
     const entradas = [];
     let pos = desdeDir + desplazamiento;
-    let declarado = 0;
-    for (let i = 0; i < total; i++) {
+    // Se lee mientras haya registros (no se confía en el conteo del final: algunos programas lo escriben mal).
+    for (let i = 0; hayDirectorioEn(pos) || i < total; i++) {
+      if (i >= LIMITE_ENTRADAS) throw new ErrorZip('grande', 'Zip with too many entries');
       if (pos + 46 > bytes.length || vista.getUint32(pos, true) !== 0x02014b50) {
         throw new ErrorZip('danado', 'Corrupted zip: bad central directory');
       }
@@ -184,27 +201,42 @@
       const hora = vista.getUint16(pos + 12, true);
       const fecha = vista.getUint16(pos + 14, true);
       const crc = vista.getUint32(pos + 16, true);
-      const comprimido = vista.getUint32(pos + 20, true);
-      const real = vista.getUint32(pos + 24, true);
+      let comprimido = vista.getUint32(pos + 20, true);
+      let real = vista.getUint32(pos + 24, true);
       const largoNombre = vista.getUint16(pos + 28, true);
       const largoExtra = vista.getUint16(pos + 30, true);
       const largoComentario = vista.getUint16(pos + 32, true);
-      const local = vista.getUint32(pos + 42, true);
-      if (pos + 46 + largoNombre > bytes.length) throw new ErrorZip('danado', 'Corrupted zip: bad central directory');
+      let local = vista.getUint32(pos + 42, true);
+      if (pos + 46 + largoNombre + largoExtra > bytes.length) throw new ErrorZip('danado', 'Corrupted zip: bad central directory');
       const nombre = nombreDe(bytes.subarray(pos + 46, pos + 46 + largoNombre), (banderas & 0x800) !== 0);
-      pos += 46 + largoNombre + largoExtra + largoComentario;
-
       if ((banderas & 1) || metodo === 99) throw new ErrorZip('cifrado', 'Encrypted zip is not supported');
       if (comprimido === MAXIMO_ZIP || real === MAXIMO_ZIP || local === MAXIMO_ZIP) {
-        throw new ErrorZip('zip64', 'Unsupported zip: ZIP64 archives are not supported');
+        // ZIP64 en la entrada: los valores de 8 bytes van en el campo extra 0x0001, en este orden.
+        const extra = bytes.subarray(pos + 46 + largoNombre, pos + 46 + largoNombre + largoExtra);
+        const ve = new DataView(extra.buffer, extra.byteOffset, extra.byteLength);
+        let valores = null;
+        for (let e = 0; e + 4 <= extra.length;) {
+          const largo = ve.getUint16(e + 2, true);
+          if (ve.getUint16(e, true) === 1) { valores = { desde: e + 4, hasta: Math.min(e + 4 + largo, extra.length) }; break; }
+          e += 4 + largo;
+        }
+        let leer = valores ? valores.desde : 0;
+        const siguiente = () => {
+          if (!valores || leer + 8 > valores.hasta) throw new ErrorZip('zip64', 'Unsupported zip: bad ZIP64 extra field');
+          const n = ve.getUint32(leer, true) + ve.getUint32(leer + 4, true) * 4294967296;
+          leer += 8;
+          if (!Number.isSafeInteger(n)) throw new ErrorZip('zip64', 'Unsupported zip: ZIP64 value too large');
+          return n;
+        };
+        if (real === MAXIMO_ZIP) real = siguiente();
+        if (comprimido === MAXIMO_ZIP) comprimido = siguiente();
+        if (local === MAXIMO_ZIP) local = siguiente();
       }
+      pos += 46 + largoNombre + largoExtra + largoComentario;
       const carpeta = nombre.endsWith('/');
       if (!carpeta && metodo !== 0 && metodo !== 8) {
         throw new ErrorZip('metodo', 'Unsupported zip: compression method ' + metodo + ' is not supported');
       }
-      if (real > LIMITE_POR_ENTRADA) throw new ErrorZip('grande', 'Zip entry too large');
-      declarado += real;
-      if (declarado > LIMITE_TOTAL) throw new ErrorZip('grande', 'Zip too large once decompressed');
       entradas.push({ nombre, carpeta, metodo, hora, fecha, crc, comprimido, real, local: local + desplazamiento });
     }
     return entradas;
@@ -237,6 +269,8 @@
       if (this.dir) return new Uint8Array(0);
       if (this._origen) {
         const o = this._origen;
+        // El tope se aplica al descomprimir, no al abrir: un video enorme que nunca se lee no impide abrir el archivo.
+        if (o.real > LIMITE_POR_ENTRADA) throw new ErrorZip('grande', 'Zip entry too large');
         const crudos = bytesCrudos(o);
         if (o.metodo === 0) {
           if (crudos.length !== o.real) throw new ErrorZip('danado', 'Corrupted zip: an entry has a different size than it declares');
@@ -343,7 +377,9 @@
 
     remove(nombre) {
       const ruta = this._prefijo + nombre.replace(/\/$/, '');
-      delete this.files[ruta];
+      const entrada = this.files[ruta];
+      // Un archivo se borra directo; recorrer todas las claves solo hace falta para una carpeta.
+      if (entrada && !entrada.dir) { delete this.files[ruta]; return this; }
       delete this.files[ruta + '/'];
       for (const clave of Object.keys(this.files)) if (clave.startsWith(ruta + '/')) delete this.files[clave];
       return this;
@@ -419,7 +455,7 @@
       partes.push(fin);
 
       switch (tipo) {
-        case 'blob': return new Blob(partes, { type: opciones.mimeType || '' });
+        case 'blob': return new Blob(partes, { type: opciones.mimeType || 'application/zip' });
         case 'uint8array': case 'nodebuffer': return unir(partes);
         case 'arraybuffer': return unir(partes).buffer;
         case 'base64': return aBase64(unir(partes));
