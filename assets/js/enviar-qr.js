@@ -277,6 +277,7 @@ const EnviarQR = (() => {
     for (let id = 0; id < archivos.length; id++) {
       const f = archivos[id];
       await canal.enviarControl({ t: 'inicio', id });
+      if (alProgreso) alProgreso({ nombre: f.name, hecho: 0, tam: f.size, totalHecho, totalTam });
       for (let bloque = 0; bloque < f.size; bloque += BLOQUE) {
         if (cancelaOtro) return 'cancelado';
         if (cancelado && cancelado()) { await canal.enviarControl({ t: 'cancela' }); return 'cancelado'; }
@@ -418,6 +419,8 @@ const EnviarQR = (() => {
           actual = { id: f.id, nombre: f.nombre, tam: f.tam, tipo: f.tipo, partes: [], hecho: 0, destino: null };
           if (f.tam > UMBRAL_DISCO) actual.destino = (!sinDescargaDirecta && (await descargaDirecta(actual))) || (await abrirTemporal());
           actual.directa = !!actual.destino && !actual.destino.manija;
+          // Avisa que empezó el archivo: la barra aparece ya, sin esperar el primer trozo.
+          if (alProgreso) alProgreso({ nombre: actual.nombre, hecho: 0, tam: actual.tam, totalHecho, totalTam });
         } else if (m.t === 'fin') {
           if (!actual || actual.id !== m.id || actual.hecho !== actual.tam) throw new Error('archivo incompleto');
           if (actual.destino) await actual.destino.cerrar();

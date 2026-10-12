@@ -406,7 +406,8 @@ function progreso(clave, p) {
   if (ahora - ultimoProgreso < 100 && p.totalHecho < p.totalTam) return;
   ultimoProgreso = ahora;
   $('bloqueProgreso').hidden = false;
-  $('textoProgreso').textContent = llenar(clave, { nombre: p.nombre }) + ' ' + tamano(p.totalHecho) + ' / ' + tamano(p.totalTam);
+  const porcentaje = p.totalTam ? Math.floor(p.totalHecho * 100 / p.totalTam) : 100;
+  $('textoProgreso').textContent = llenar(clave, { nombre: p.nombre }) + ' ' + porcentaje + ' % (' + tamano(p.totalHecho) + ' / ' + tamano(p.totalTam) + ')';
   $('rellenoProgreso').style.transform = 'scaleX(' + (p.totalTam ? p.totalHecho / p.totalTam : 1) + ')';
 }
 function conectar(s, rol) {
