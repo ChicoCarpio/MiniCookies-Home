@@ -240,6 +240,18 @@ main {
   text-align: center;
 }
 
+/* Subgrupos de una categoría: un encabezado y su cuadrícula (los arma catalogo.mjs). */
+.grupo-herramientas { margin-top: 36px; }
+.grupo-herramientas:first-child { margin-top: 0; }
+.titulo-grupo {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gris-borde);
+  font-size: 1.1rem;
+  color: var(--texto);
+}
+.grupo-herramientas .grid-herramientas { margin-top: 16px; }
+
 .grid-herramientas {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -966,3 +978,8 @@ textarea {
 }
 
 .indice-catalogo a:hover { border-color: var(--azul); text-decoration: none; }
+
+/* En todas.html el subgrupo es un título más chico que el de la categoría. */
+.grupo-catalogo .grupo-herramientas { margin-top: 24px; }
+.grupo-catalogo .grupo-herramientas:first-of-type { margin-top: 0; }
+.grupo-catalogo .titulo-grupo { font-size: 1rem; color: var(--texto-suave); }

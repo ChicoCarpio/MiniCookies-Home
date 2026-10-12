@@ -61,6 +61,21 @@ export function leerCatalogo(raiz) {
     if (!conCategoria.has(h)) errores.push(`"${h}" no aparece en ninguna categoría: nadie podría llegar a ella desde un menú`);
   }
 
+  // Subgrupos: opcionales por categoría; si hay, cada herramienta de la categoría va en uno solo.
+  for (const [categoria, lista] of Object.entries(catalogo.grupos || {})) {
+    if (!categorias[categoria]) { errores.push(`"grupos" habla de "${categoria}", que no es una categoría`); continue; }
+    const vistas = new Set();
+    for (const g of lista) {
+      if (!g.id || !g.es || !g.en) errores.push(`un grupo de "${categoria}" no tiene id, es o en`);
+      for (const h of g.herramientas || []) {
+        if (!categorias[categoria][h]) errores.push(`el grupo "${g.id}" de "${categoria}" lista "${h}", que no está en esa categoría`);
+        if (vistas.has(h)) errores.push(`"${h}" está en dos grupos de "${categoria}"`);
+        vistas.add(h);
+      }
+    }
+    for (const h of Object.keys(categorias[categoria])) if (!vistas.has(h)) errores.push(`"${h}" no está en ningún grupo de "${categoria}"`);
+  }
+
   if (errores.length) throw new Error('catalogo.json:\n  - ' + errores.join('\n  - '));
   return catalogo;
 }
@@ -94,6 +109,7 @@ function tarjeta(h, icono, t, href) {
 // opciones.seguras: lista de herramientas del sitio seguro; habilita data-catalogo="seguras".
 export function aplicarCatalogo(html, catalogo, archivo, opciones = {}) {
   const usadas = new Set();
+  const gruposUsados = [];
 
   html = html.replace(/(<div class="grid-herramientas" data-catalogo="([a-z0-9-]+)">)\s*(<\/div>)/g,
     (todo, apertura, categoria, cierre) => {
@@ -101,11 +117,26 @@ export function aplicarCatalogo(html, catalogo, archivo, opciones = {}) {
         ? Object.fromEntries(opciones.seguras.map((h) => [h, catalogo.categorias.generales[h]]))
         : catalogo.categorias[categoria];
       if (!lista) throw new Error(`${archivo}: data-catalogo="${categoria}" no es una categoría de catalogo.json`);
-      const tarjetas = Object.entries(lista).map(([h, icono]) => {
+      const tarjetas = (nombres) => nombres.map((h) => {
         usadas.add(h);
-        return tarjeta(h, icono, catalogo.herramientas[h], opciones.hrefDe && opciones.hrefDe(h));
+        return tarjeta(h, lista[h], catalogo.herramientas[h], opciones.hrefDe && opciones.hrefDe(h));
       });
-      return `${apertura}\n${tarjetas.join('\n')}\n    ${cierre}`;
+      // Con subgrupos (h2 en la página de cada categoría; h3 en todas.html, donde h2 es la categoría):
+      // un encabezado y su cuadrícula por grupo.
+      const grupos = categoria !== 'seguras' && (catalogo.grupos || {})[categoria];
+      const nivel = archivo === 'todas.html' ? 3 : 2;
+      if (grupos) {
+        return grupos.map((g) => {
+          gruposUsados.push([categoria, g]);
+          return `<div class="grupo-herramientas">
+      <h${nivel} class="titulo-grupo" data-i18n="grupo-${categoria}-${g.id}">${esc(g.es)}</h${nivel}>
+      ${apertura}
+${tarjetas(g.herramientas).join('\n')}
+      ${cierre}
+    </div>`;
+        }).join('\n    ');
+      }
+      return `${apertura}\n${tarjetas(Object.keys(lista)).join('\n')}\n    ${cierre}`;
     });
 
   if (html.includes('{{CATALOGO_BUSCADOR}}')) {
@@ -122,6 +153,9 @@ export function aplicarCatalogo(html, catalogo, archivo, opciones = {}) {
 
   if (usadas.size) {
     const dic = { es: {}, en: {} };
+    for (const [categoria, g] of gruposUsados) {
+      for (const idioma of ['es', 'en']) dic[idioma][`grupo-${categoria}-${g.id}`] = g[idioma];
+    }
     for (const h of usadas) {
       for (const idioma of ['es', 'en']) {
         dic[idioma][`tool-${h}-titulo`] = catalogo.herramientas[h][idioma][0];
