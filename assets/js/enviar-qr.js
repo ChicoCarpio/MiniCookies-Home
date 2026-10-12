@@ -25,9 +25,10 @@
 // `recibirArchivos` hablan por ese canal.
 const EnviarQR = (() => {
   const PREFIJO = 'MC1.';
-  const TROZO = 15 * 1024;            // bytes de archivo por mensaje (el límite seguro de WebRTC es 16 KiB)
-  const BUFFER_ALTO = 4 * 1024 * 1024; // pausa el envío si el canal acumula más que esto
-  const BUFFER_BAJO = 512 * 1024;
+  const TROZO = 48 * 1024;            // bytes de archivo por mensaje (bajo los 64 KiB que aceptan todos los navegadores)
+  const BLOQUE = 1024 * 1024;         // cuánto se lee del archivo de una vez (leer en pedacitos es lo lento, sobre todo en celular)
+  const BUFFER_ALTO = 8 * 1024 * 1024; // pausa el envío si el canal acumula más que esto
+  const BUFFER_BAJO = 1024 * 1024;
   const ESPERA_ICE_MS = 4000;
   const ESPERA_CONEXION_MS = 20000;
   const TIPO_CONTROL = 1;
@@ -128,16 +129,24 @@ const EnviarQR = (() => {
       dc.onmessage = (e) => { this.cola = this.cola.then(() => this.recibir(e.data)).catch(() => this.cerrar()); };
       dc.onclose = () => this.cerrar();
     }
-    async enviar(tipo, datos) {
-      if (this.cerrado) throw new Error('cerrado');
+    // Asigna el número de mensaje en el acto (el orden queda fijo) y empieza a
+    // cifrar; devuelve la promesa del mensaje listo. Así se pueden cifrar
+    // varios a la vez y enviarlos en orden con `despachar`.
+    preparar(tipo, datos) {
+      if (this.cerrado) return Promise.reject(new Error('cerrado'));
       const iv = new Uint8Array(12);
       iv[0] = this.dirPropia;
       new DataView(iv.buffer).setBigUint64(4, BigInt(this.enviados++));
       const plano = new Uint8Array(1 + datos.length);
       plano[0] = tipo; plano.set(datos, 1);
-      const cifrado = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this.clave, plano));
-      const mensaje = new Uint8Array(12 + cifrado.length);
-      mensaje.set(iv); mensaje.set(cifrado, 12);
+      return crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this.clave, plano).then((c) => {
+        const mensaje = new Uint8Array(12 + c.byteLength);
+        mensaje.set(iv); mensaje.set(new Uint8Array(c), 12);
+        return mensaje;
+      });
+    }
+    async despachar(preparado) {
+      const mensaje = await preparado;
       if (this.dc.bufferedAmount > BUFFER_ALTO) {
         await new Promise((listo) => {
           const seguir = () => { this.dc.removeEventListener('bufferedamountlow', seguir); this.dc.removeEventListener('close', seguir); listo(); };
@@ -148,6 +157,7 @@ const EnviarQR = (() => {
       if (this.dc.readyState !== 'open') throw new Error('cerrado');
       this.dc.send(mensaje);
     }
+    enviar(tipo, datos) { return this.despachar(this.preparar(tipo, datos)); }
     enviarControl(objeto) {
       return this.enviar(TIPO_CONTROL, new TextEncoder().encode(JSON.stringify(objeto)));
     }
@@ -260,16 +270,24 @@ const EnviarQR = (() => {
     for (let id = 0; id < archivos.length; id++) {
       const f = archivos[id];
       await canal.enviarControl({ t: 'inicio', id });
-      for (let o = 0; o < f.size; o += TROZO) {
+      for (let bloque = 0; bloque < f.size; bloque += BLOQUE) {
         if (cancelaOtro) return 'cancelado';
         if (cancelado && cancelado()) { await canal.enviarControl({ t: 'cancela' }); return 'cancelado'; }
-        const datos = new Uint8Array(await f.slice(o, o + TROZO).arrayBuffer());
-        const cuerpo = new Uint8Array(4 + datos.length);
-        new DataView(cuerpo.buffer).setUint32(0, id);
-        cuerpo.set(datos, 4);
-        await canal.enviar(TIPO_TROZO, cuerpo);
-        totalHecho += datos.length;
-        if (alProgreso) alProgreso({ nombre: f.name, hecho: o + datos.length, tam: f.size, totalHecho, totalTam });
+        const datos = new Uint8Array(await f.slice(bloque, bloque + BLOQUE).arrayBuffer());
+        const preparados = [];
+        for (let o = 0; o < datos.length; o += TROZO) {
+          const parte = datos.subarray(o, o + TROZO);
+          const cuerpo = new Uint8Array(4 + parte.length);
+          new DataView(cuerpo.buffer).setUint32(0, id);
+          cuerpo.set(parte, 4);
+          preparados.push([parte.length, canal.preparar(TIPO_TROZO, cuerpo)]);
+        }
+        let hecho = bloque;
+        for (const [largo, preparado] of preparados) {
+          await canal.despachar(preparado);
+          hecho += largo; totalHecho += largo;
+          if (alProgreso) alProgreso({ nombre: f.name, hecho, tam: f.size, totalHecho, totalTam });
+        }
       }
       await canal.enviarControl({ t: 'fin', id });
     }

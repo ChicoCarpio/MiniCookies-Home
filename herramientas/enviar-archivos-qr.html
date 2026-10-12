@@ -392,7 +392,12 @@ async function mantenerPantalla(si) {
     else if (bloqueoPantalla) { await bloqueoPantalla.release(); bloqueoPantalla = null; }
   } catch (e) {}
 }
+let ultimoProgreso = 0;
 function progreso(clave, p) {
+  // Pintar en cada mensaje frena la transferencia: como mucho cada 100 ms (y al terminar).
+  const ahora = Date.now();
+  if (ahora - ultimoProgreso < 100 && p.totalHecho < p.totalTam) return;
+  ultimoProgreso = ahora;
   $('bloqueProgreso').hidden = false;
   $('textoProgreso').textContent = llenar(clave, { nombre: p.nombre }) + ' ' + tamano(p.totalHecho) + ' / ' + tamano(p.totalTam);
   $('rellenoProgreso').style.transform = 'scaleX(' + (p.totalTam ? p.totalHecho / p.totalTam : 1) + ')';

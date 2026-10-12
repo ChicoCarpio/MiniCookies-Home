@@ -1203,6 +1203,30 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'rechazo y códigos inválidos bien';
   });
 
+  // Velocidad (2026-10-12): en el celular iba a 200 KB/s por leer y cifrar el
+  // archivo en pedacitos de 15 KB uno tras otro. 16 MB por el mismo equipo tienen
+  // que pasar a más de 3 MB/s (en la práctica van a decenas) y llegar intactos.
+  await prueba('enviar archivos: un archivo grande pasa rápido y completo', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    const bytes = new (W().Uint8Array)(16 * 1024 * 1024).map((_, k) => (k * 31 + (k >> 8)) & 255);
+    const llegados = [];
+    const recibiendo = E.recibirArchivos(sR, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f) => llegados.push(f) });
+    const t0 = Date.now();
+    const fin = await E.enviarArchivos(sE, [new (W().File)([bytes], 'grande.bin')], {});
+    await recibiendo;
+    const mbs = 16 / ((Date.now() - t0) / 1000);
+    afirmar(fin === 'listo' && llegados.length === 1 && llegados[0].size === bytes.length, 'resultado: ' + fin);
+    const copia = new (W().Uint8Array)(await llegados[0].arrayBuffer());
+    let igual = true; for (let k = 0; k < copia.length; k += 997) if (copia[k] !== bytes[k]) { igual = false; break; }
+    afirmar(igual, 'el contenido llegó distinto');
+    afirmar(mbs > 3, 'velocidad ' + mbs.toFixed(1) + ' MB/s');
+    sE.cerrar(); sR.cerrar();
+    return mbs.toFixed(1) + ' MB/s';
+  });
+
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
   // oferta en la dirección, saca el código de la barra y muestra el QR de respuesta.
   await prueba('enviar archivos: la página dibuja el QR de recibir y el de respuesta', async () => {
