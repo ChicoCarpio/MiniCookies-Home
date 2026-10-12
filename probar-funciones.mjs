@@ -1173,7 +1173,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const bytes = new (W().Uint8Array)(100000).map((_, i) => (i * 7 + 3) & 255);
     const lista = [new (W().File)([bytes], 'datos.bin', { type: 'application/octet-stream' }), new (W().File)([], 'vacio.txt', { type: 'text/plain' })];
     const llegados = []; const sitio = [];
-    const recibiendo = E.recibirArchivos(sesionR, { alOferta: async (l) => l.length === 2, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); sitio.push(info.enDisco); } });
+    const recibiendo = E.recibirArchivos(sesionR, { alOferta: async (l) => l.length === 2, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); sitio.push(info.destino); } });
     let ultimo = 0;
     const fin = await E.enviarArchivos(sesionE, lista, { alProgreso: (p) => { ultimo = p.totalHecho; } });
     afirmar(fin === 'listo' && (await recibiendo) === 'listo', 'resultado: ' + fin);
@@ -1181,7 +1181,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const copia = new (W().Uint8Array)(await llegados[0].arrayBuffer());
     afirmar(copia.length === bytes.length && copia.every((v, i) => v === bytes[i]), 'el contenido llegó distinto');
     afirmar(ultimo === 100000, 'progreso final ' + ultimo);
-    afirmar(sitio.every((x) => x === false), 'un archivo chico no tenía que ir al disco: ' + sitio);
+    afirmar(sitio.every((x) => x === 'memoria'), 'un archivo chico no tenía que ir al disco: ' + sitio);
     sesionE.cerrar(); sesionR.cerrar();
     return 'oferta ' + anfitrion.codigo.length + ' caracteres, respuesta ' + invitado.codigo.length + ', verificación ' + sesionR.verificacion;
   });
@@ -1213,8 +1213,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const a = await E.anfitrion(), i = await E.invitado(a.codigo);
     const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
     const bytes = new (W().Uint8Array)(E.UMBRAL_DISCO + 8 * 1024 * 1024).map((_, k) => (k * 31 + (k >> 8)) & 255);
-    const llegados = []; let enDisco = null;
-    const recibiendo = E.recibirArchivos(sR, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); enDisco = info.enDisco; } });
+    const llegados = []; let destino = null;
+    const recibiendo = E.recibirArchivos(sR, { alOferta: async () => true, sinDescargaDirecta: true, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); destino = info.destino; } });
     const t0 = Date.now();
     const fin = await E.enviarArchivos(sE, [new (W().File)([bytes], 'grande.bin')], {});
     await recibiendo;
@@ -1224,9 +1224,46 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     let igual = true; for (let k = 0; k < copia.length; k += 997) if (copia[k] !== bytes[k]) { igual = false; break; }
     afirmar(igual, 'el contenido llegó distinto');
     afirmar(mbs > 3, 'velocidad ' + mbs.toFixed(1) + ' MB/s');
-    afirmar(enDisco === true, 'el archivo grande no se escribió en el disco (OPFS)');
+    afirmar(destino === 'disco', 'el archivo grande no fue al disco: ' + destino);
     sE.cerrar(); sR.cerrar();
     return mbs.toFixed(1) + ' MB/s';
+  });
+
+  // El service worker de la descarga directa (2026-10-12): le llega el archivo
+  // por un canal, trozo a trozo y solo cuando él pide más, y lo entrega a quien
+  // lo pide en /enviar-descarga/<id>/<nombre> con nombre y tamaño en las
+  // cabeceras. Se prueba con una petición normal (la descarga real es del navegador).
+  await prueba('enviar archivos: el service worker entrega la descarga trozo a trozo', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const nav = W().navigator;
+    await nav.serviceWorker.register('/enviar-descarga-sw.js');
+    const activo = (await nav.serviceWorker.ready).active;
+    afirmar(activo, 'el service worker no quedó activo');
+    afirmar(await hasta(() => nav.serviceWorker.controller, 10000), 'la página no quedó controlada por el service worker');
+    const id = 'prueba-' + Date.now();
+    const canal = new (W().MessageChannel)();
+    const trozos = [0, 1, 2].map((k) => new (W().Uint8Array)(100000).map((_, i) => (i + k * 77) & 255));
+    let enviados = 0, pidieron = 0;
+    canal.port1.onmessage = (e) => {
+      if (e.data !== 'pull') return;
+      pidieron++;
+      if (enviados < 3) { const b = trozos[enviados++].slice(); canal.port1.postMessage(b.buffer, [b.buffer]); }
+      else canal.port1.postMessage('fin');
+    };
+    activo.postMessage({ tipo: 'preparar', id, nombre: 'mi archivo ñ.bin', tam: 300000, mime: 'application/octet-stream' }, [canal.port2]);
+    const resp = await W().fetch('/enviar-descarga/' + id + '/mi%20archivo.bin');
+    afirmar(resp.status === 200, 'estado ' + resp.status);
+    const disp = resp.headers.get('content-disposition') || '';
+    afirmar(/attachment/.test(disp) && disp.indexOf(encodeURIComponent('mi archivo ñ.bin')) !== -1, 'content-disposition: ' + disp);
+    afirmar(resp.headers.get('content-length') === '300000', 'content-length: ' + resp.headers.get('content-length'));
+    const bytes = new (W().Uint8Array)(await resp.arrayBuffer());
+    afirmar(bytes.length === 300000, 'llegaron ' + bytes.length + ' bytes');
+    const igual = [0, 1, 2].every((k) => trozos[k].every((v, i) => bytes[k * 100000 + i] === v));
+    afirmar(igual, 'el contenido llegó distinto');
+    afirmar(pidieron >= 3, 'no pidió los trozos de a uno: ' + pidieron);
+    const faltante = await W().fetch('/enviar-descarga/no-existe/x.bin');
+    afirmar(faltante.status === 404, 'una descarga inexistente dio ' + faltante.status);
+    return '300000 bytes en 3 trozos, pidió ' + pidieron + ' veces';
   });
 
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una

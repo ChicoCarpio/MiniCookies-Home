@@ -44,11 +44,12 @@ window.i18nPagina = {
     'enviando': 'Enviando {nombre}…',
     'recibiendo': 'Recibiendo {nombre}…',
     'listo-enviado': '✅ Listo: se enviaron todos los archivos.',
-    'listo-recibido': '✅ Listo: llegaron todos los archivos. Guardalos con los botones de abajo.',
+    'listo-recibido': '✅ Listo: llegaron todos los archivos. Los grandes ya están en tu carpeta de descargas; los demás, guardalos con los botones de abajo.',
     'rechazado-enviar': 'El otro dispositivo rechazó el envío.',
     'rechazado-recibir': 'Rechazaste el envío.',
     'cancelado': 'El envío se canceló.',
     'guardar': '⬇️ Guardar',
+    'guardado-descargas': '✅ En tu carpeta de descargas',
     'error-codigo': '❌ Ese código no es de esta herramienta o está incompleto. Volvé a escanearlo.',
     'error-tiempo': '❌ No se pudo conectar. Revisá que los dos dispositivos estén en la misma red WiFi. Si uno usa datos móviles y no conecta, activá el punto de acceso del celular y conectá el otro equipo a esa WiFi. Después volvé a intentar.',
     'error-cerrado': '❌ Se cortó la conexión.',
@@ -92,11 +93,12 @@ window.i18nPagina = {
     'enviando': 'Sending {nombre}…',
     'recibiendo': 'Receiving {nombre}…',
     'listo-enviado': '✅ Done: all the files were sent.',
-    'listo-recibido': '✅ Done: all the files arrived. Save them with the buttons below.',
+    'listo-recibido': '✅ Done: all the files arrived. The big ones are already in your downloads folder; save the rest with the buttons below.',
     'rechazado-enviar': 'The other device declined the transfer.',
     'rechazado-recibir': 'You declined the transfer.',
     'cancelado': 'The transfer was canceled.',
     'guardar': '⬇️ Save',
+    'guardado-descargas': '✅ In your downloads folder',
     'error-codigo': '❌ That code is not from this tool or it is incomplete. Scan it again.',
     'error-tiempo': '❌ Could not connect. Check that both devices are on the same WiFi network. If one is on mobile data and it won\'t connect, turn on the phone\'s hotspot and connect the other device to that WiFi. Then try again.',
     'error-cerrado': '❌ The connection was lost.',
@@ -448,12 +450,18 @@ function escucharEnvio() {
       });
     },
     alProgreso: (p) => progreso('recibiendo', p),
-    alArchivo: (archivo) => {
-      const url = URL.createObjectURL(archivo);
+    alArchivo: (archivo, info) => {
       const li = document.createElement('li');
       const nombre = document.createElement('span'); nombre.textContent = archivo.name + ' (' + tamano(archivo.size) + ')';
-      const a = document.createElement('a'); a.className = 'boton'; a.href = url; a.download = archivo.name; a.textContent = t('guardar');
-      li.append(nombre, a);
+      li.append(nombre);
+      if (info.destino === 'descarga') {
+        // Los grandes bajaron solos a la carpeta de descargas, a medida que llegaban.
+        const listo = document.createElement('span'); listo.textContent = t('guardado-descargas');
+        li.append(listo);
+      } else {
+        const a = document.createElement('a'); a.className = 'boton'; a.href = URL.createObjectURL(archivo); a.download = archivo.name; a.textContent = t('guardar');
+        li.append(a);
+      }
       $('archivosRecibidos').append(li);
     },
   }).then((fin) => {

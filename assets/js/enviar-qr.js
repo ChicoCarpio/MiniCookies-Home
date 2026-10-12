@@ -21,9 +21,9 @@
 //   huellas, se muestra en las dos pantallas: si alguien se coló con el QR
 //   visto de lejos, no coinciden.
 //
-// Los archivos grandes (más de 64 MB) el receptor los escribe en el disco
-// (almacenamiento privado del sitio) en vez de juntarlos en memoria, para que
-// no cierren la pestaña; los chicos se arman en memoria.
+// Los archivos grandes (más de 64 MB) no se juntan en memoria: el receptor los
+// entrega a una descarga directa del navegador (service worker) o, si no se
+// puede, los escribe en el disco del sitio. Los chicos se arman en memoria.
 //
 // Piezas: `anfitrion()` (el que recibe) e `invitado(codigo)` (el que envía)
 // devuelven una sesión con un canal cifrado; `enviarArchivos` y
@@ -308,9 +308,9 @@ const EnviarQR = (() => {
   // Un archivo grande no se junta en memoria: se va escribiendo en el
   // almacenamiento privado del sitio (OPFS, que vive en el disco) y de ahí sale
   // el File que se guarda. Se decide por el tamaño, que se conoce de antemano.
-  // Si el navegador no ofrece OPFS, se junta en memoria.
+  // Orden para los grandes: descarga directa, disco del sitio, memoria.
   const CARPETA_TEMPORAL = 'mc-recibidos';
-  const UMBRAL_DISCO = 64 * 1024 * 1024; // hasta acá el archivo se arma en memoria (más rápido); más grande, al disco
+  const UMBRAL_DISCO = 64 * 1024 * 1024; // hasta acá el archivo se arma en memoria (más rápido); más grande, directo a la descarga o al disco
   async function limpiarTemporales() {
     try { await (await navigator.storage.getDirectory()).removeEntry(CARPETA_TEMPORAL, { recursive: true }); } catch (e) {}
   }
@@ -319,8 +319,58 @@ const EnviarQR = (() => {
       const raiz = await navigator.storage.getDirectory();
       const carpeta = await raiz.getDirectoryHandle(CARPETA_TEMPORAL, { create: true });
       const manija = await carpeta.getFileHandle(crypto.randomUUID(), { create: true });
-      return { manija, escritor: await manija.createWritable() };
+      const escritor = await manija.createWritable();
+      return { manija, escribir: (b) => escritor.write(b), cerrar: () => escritor.close(), abortar: () => escritor.abort() };
     } catch (e) {
+      return null;
+    }
+  }
+  // Descarga directa: lo que llega se entrega, trozo a trozo, a un service
+  // worker (enviar-descarga-sw.js, en la raíz del sitio) que lo convierte en una
+  // descarga normal del navegador. No pasa por la memoria ni por el disco del
+  // sitio: solo hace falta el espacio final en la carpeta de descargas. Devuelve
+  // null si el navegador no puede (sin service worker, sin HTTPS, o si la
+  // descarga no arranca): entonces se usa el disco del sitio o la memoria.
+  async function descargaDirecta(meta) {
+    if (!window.isSecureContext || !('serviceWorker' in navigator)) return null;
+    let marco = null;
+    try {
+      await navigator.serviceWorker.register('/enviar-descarga-sw.js');
+      const activo = (await navigator.serviceWorker.ready).active;
+      if (!activo) return null;
+      const id = crypto.randomUUID();
+      const canal = new MessageChannel();
+      let puede = false, cancelado = false, despertar = null;
+      const avisar = () => { if (despertar) { const d = despertar; despertar = null; d(); } };
+      canal.port1.onmessage = (e) => {
+        if (e.data === 'pull') puede = true;
+        else if (e.data === 'cancelado') cancelado = true;
+        avisar();
+      };
+      activo.postMessage({ tipo: 'preparar', id, nombre: meta.nombre, tam: meta.tam, mime: meta.tipo }, [canal.port2]);
+      marco = document.createElement('iframe');
+      marco.hidden = true;
+      marco.src = '/enviar-descarga/' + id + '/' + encodeURIComponent(meta.nombre);
+      document.body.append(marco);
+      // Si el navegador no empieza a leer la descarga en 4 s, no sirve.
+      await Promise.race([
+        new Promise((listo) => { despertar = listo; if (puede) avisar(); }),
+        new Promise((listo) => setTimeout(listo, 4000)),
+      ]);
+      if (!puede) { marco.remove(); canal.port1.close(); return null; }
+      const quitar = () => setTimeout(() => marco.remove(), 60000);
+      return {
+        async escribir(bytes) {
+          while (!puede && !cancelado) await new Promise((listo) => { despertar = listo; });
+          if (cancelado) throw new Error('cancelado');
+          puede = false;
+          canal.port1.postMessage(bytes.buffer, [bytes.buffer]);
+        },
+        async cerrar() { canal.port1.postMessage('fin'); quitar(); },
+        async abortar() { canal.port1.postMessage('abortar'); quitar(); },
+      };
+    } catch (e) {
+      if (marco) marco.remove();
       return null;
     }
   }
@@ -332,19 +382,19 @@ const EnviarQR = (() => {
   // Recibe lo que manda el otro equipo. `alOferta(lista)` devuelve (o promete)
   // true para aceptar; `alArchivo(File)` por cada archivo terminado; el resto
   // son avisos. Devuelve una promesa con 'listo', 'rechazado' o 'cancelado'.
-  function recibirArchivos(sesion, { alOferta, alProgreso, alArchivo }) {
+  function recibirArchivos(sesion, { alOferta, alProgreso, alArchivo, sinDescargaDirecta }) {
     const canal = sesion.canal;
     return new Promise((fin, error) => {
       let lista = [], actual = null, totalHecho = 0, totalTam = 0;
-      const soltar = () => { if (actual && actual.disco) { actual.disco.escritor.abort().catch(() => {}); } actual = null; };
+      const soltar = () => { if (actual && actual.destino) { actual.destino.abortar().catch(() => {}); } actual = null; };
       canal.alCerrar = () => { soltar(); error(new Error('cerrado')); };
       canal.alMensaje = async (tipo, datos) => {
         if (tipo === TIPO_TROZO) {
           const id = new DataView(datos.buffer, datos.byteOffset).getUint32(0);
           if (!actual || actual.id !== id) throw new Error('trozo inesperado');
           const parte = datos.slice(4);
-          if (actual.disco) {
-            try { await actual.disco.escritor.write(parte); } catch (e) { soltar(); error(new Error('almacenamiento')); canal.cerrar(); return; }
+          if (actual.destino) {
+            try { await actual.destino.escribir(parte); } catch (e) { soltar(); error(new Error('almacenamiento')); canal.cerrar(); return; }
           } else actual.partes.push(parte);
           actual.hecho += parte.length; totalHecho += parte.length;
           if (alProgreso) alProgreso({ nombre: actual.nombre, hecho: actual.hecho, tam: actual.tam, totalHecho, totalTam });
@@ -360,13 +410,17 @@ const EnviarQR = (() => {
         } else if (m.t === 'inicio') {
           const f = lista.find((x) => x.id === m.id);
           if (!f) throw new Error('archivo desconocido');
-          actual = { id: f.id, nombre: f.nombre, tam: f.tam, tipo: f.tipo, partes: [], hecho: 0, disco: f.tam > UMBRAL_DISCO ? await abrirTemporal() : null };
+          actual = { id: f.id, nombre: f.nombre, tam: f.tam, tipo: f.tipo, partes: [], hecho: 0, destino: null };
+          if (f.tam > UMBRAL_DISCO) actual.destino = (!sinDescargaDirecta && (await descargaDirecta(actual))) || (await abrirTemporal());
+          actual.directa = !!actual.destino && !actual.destino.manija;
         } else if (m.t === 'fin') {
           if (!actual || actual.id !== m.id || actual.hecho !== actual.tam) throw new Error('archivo incompleto');
-          if (actual.disco) {
-            await actual.disco.escritor.close();
-            alArchivo(new File([await actual.disco.manija.getFile()], actual.nombre, { type: actual.tipo }), { enDisco: true });
-          } else alArchivo(new File(actual.partes, actual.nombre, { type: actual.tipo }), { enDisco: false });
+          if (actual.destino) await actual.destino.cerrar();
+          // `destino`: 'descarga' (ya bajó a la carpeta de descargas), 'disco' (File
+          // respaldado en el disco del sitio) o 'memoria'.
+          if (actual.directa) alArchivo({ name: actual.nombre, size: actual.tam, type: actual.tipo }, { destino: 'descarga' });
+          else if (actual.destino) alArchivo(new File([await actual.destino.manija.getFile()], actual.nombre, { type: actual.tipo }), { destino: 'disco' });
+          else alArchivo(new File(actual.partes, actual.nombre, { type: actual.tipo }), { destino: 'memoria' });
           actual = null;
         } else if (m.t === 'listo') {
           await canal.enviarControl({ t: 'ok' });
