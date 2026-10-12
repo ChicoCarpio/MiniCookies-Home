@@ -319,6 +319,101 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return obtenido + ' · ' + fuentes.join(', ');
   });
 
+  // Gráficos de una hoja de Excel: el .xlsx trae la parte xl/charts/chart1.xml
+  // y el PDF la dibuja con el motor de gráficos de PowerPoint (grafico-suelto.js;
+  // antes, con Chart.js y sin respetar colores, ejes ni tipo). La prueba arma un
+  // .xlsx con un gráfico de barras rojo, lo convierte y mira la página del gráfico.
+  function armarExcelConGrafico() {
+    return (async () => {
+      const l = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(l, XLSX.utils.aoa_to_sheet([['Mes', 'Ventas'], ['Ene', 120], ['Feb', 150], ['Mar', 90]]), 'Datos');
+      const zip = await JSZip.loadAsync(XLSX.write(l, { type: 'array', bookType: 'xlsx' }));
+      const NS = 'xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+      const cache = (v) => '<c:ptCount val="3"/>' + v.map((x, i) => '<c:pt idx="' + i + '"><c:v>' + x + '</c:v></c:pt>').join('');
+      zip.file('xl/charts/chart1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><c:chartSpace ' + NS + '><c:chart><c:autoTitleDeleted val="1"/><c:plotArea><c:layout/>'
+        + '<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/><c:varyColors val="0"/><c:ser><c:idx val="0"/><c:order val="0"/>'
+        + '<c:tx><c:strRef><c:f>Datos!$B$1</c:f><c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>Ventas</c:v></c:pt></c:strCache></c:strRef></c:tx>'
+        + '<c:spPr><a:solidFill><a:srgbClr val="E00000"/></a:solidFill></c:spPr><c:invertIfNegative val="0"/>'
+        + '<c:cat><c:strRef><c:f>Datos!$A$2:$A$4</c:f><c:strCache>' + cache(['Ene', 'Feb', 'Mar']) + '</c:strCache></c:strRef></c:cat>'
+        + '<c:val><c:numRef><c:f>Datos!$B$2:$B$4</c:f><c:numCache><c:formatCode>General</c:formatCode>' + cache([120, 150, 90]) + '</c:numCache></c:numRef></c:val></c:ser>'
+        + '<c:gapWidth val="100"/><c:axId val="1"/><c:axId val="2"/></c:barChart>'
+        + '<c:catAx><c:axId val="1"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="2"/></c:catAx>'
+        + '<c:valAx><c:axId val="2"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:majorGridlines/><c:crossAx val="1"/></c:valAx>'
+        + '</c:plotArea><c:plotVisOnly val="1"/></c:chart></c:chartSpace>');
+      zip.file('xl/drawings/drawing1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
+        + '<xdr:twoCellAnchor><xdr:from><xdr:col>3</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>11</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>17</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>'
+        + '<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="2" name="Grafico 1"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm>'
+        + '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>');
+      const rels = (destino, tipo) => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/' + tipo + '" Target="' + destino + '"/></Relationships>';
+      zip.file('xl/drawings/_rels/drawing1.xml.rels', rels('../charts/chart1.xml', 'chart'));
+      zip.file('xl/worksheets/_rels/sheet1.xml.rels', rels('../drawings/drawing1.xml', 'drawing'));
+      let hoja = await zip.file('xl/worksheets/sheet1.xml').async('text');
+      if (!/xmlns:r=/.test(hoja)) hoja = hoja.replace('<worksheet ', '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
+      zip.file('xl/worksheets/sheet1.xml', hoja.replace('</worksheet>', '<drawing r:id="rId1"/></worksheet>'));
+      let tipos = await zip.file('[Content_Types].xml').async('text');
+      tipos = tipos.replace('</Types>', '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>');
+      zip.file('[Content_Types].xml', tipos);
+      return zip.generateAsync({ type: 'uint8array' });
+    })();
+  }
+
+  await prueba('Excel → PDF: el gráfico de la hoja lo dibuja el motor de gráficos', async () => {
+    await abrir('/herramientas/excel-csv-a-pdf.html'); await esperar(300);
+    afirmar(W().eval('typeof Chart') === 'undefined', 'la página todavía carga Chart.js');
+    const bytes = new Uint8Array(await W().eval('(' + armarExcelConGrafico + ')')());
+    await W().mostrarArchivo(new (W().File)([bytes], 'grafico.xlsx'));
+    await hasta(() => D().getElementById('visorPdf').getAttribute('src'));
+    // La vista previa ya armó un PDF (y su enlace); el de verdad llega cuando el botón vuelve a estar activo.
+    const boton = D().getElementById('botonConvertir');
+    boton.click(); await esperar(300);
+    afirmar(await hasta(() => !boton.disabled, 90000), 'la conversión no terminó');
+    const pdf = new Uint8Array(await (await W().fetch(D().getElementById('enlaceDescarga').href)).arrayBuffer());
+    await abrir('/herramientas/rotar-pdf.html'); await esperar(300);
+    const doc = await W().abrirPdf(new (W().Uint8Array)(pdf));
+    afirmar(doc.numPages === 2, 'páginas: ' + doc.numPages + ' (tabla + gráfico)');
+    const pagina = await doc.getPage(2);
+    const vista = pagina.getViewport({ scale: 1 });
+    const lienzo = document.createElement('canvas'); lienzo.width = Math.round(vista.width); lienzo.height = Math.round(vista.height);
+    await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
+    const d = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data;
+    let rojos = 0, grises = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i] > 200 && d[i + 1] < 60 && d[i + 2] < 60) rojos++;
+      else if (Math.abs(d[i] - 137) < 6 && Math.abs(d[i + 1] - 137) < 6 && Math.abs(d[i + 2] - 137) < 6) grises++;
+    }
+    // Las tres barras de su color (E00000) y la cuadrícula gris que Excel dibuja cuando el archivo no dice nada.
+    afirmar(rojos > 3000, 'las barras rojas no se dibujaron: ' + rojos + ' píxeles');
+    afirmar(grises > 300, 'no se ven las líneas grises de Excel: ' + grises + ' píxeles');
+    return rojos + ' píxeles rojos, ' + grises + ' grises, ' + pdf.byteLength + ' bytes';
+  });
+
+  // "Gráfico desde Excel / CSV": el mismo motor, sin Chart.js. Los tres tipos
+  // tienen que dejar el lienzo con color y texto.
+  await prueba('gráfico desde CSV: barras, líneas y torta con el motor de gráficos', async () => {
+    await abrir('/herramientas/grafico-desde-csv.html'); await esperar(300);
+    afirmar(W().eval('typeof Chart') === 'undefined', 'la página todavía carga Chart.js');
+    await W().mostrarArchivo(new (W().File)(['Mes,Ventas\nEnero,120\nFebrero,150\nMarzo,90\nAbril,200'], 'datos.csv'));
+    const detalle = [];
+    for (const tipo of ['bar', 'line', 'pie']) {
+      D().getElementById('tipoGrafico').value = tipo;
+      D().getElementById('botonGraficar').click();
+      await esperar(300);
+      const lienzo = await hasta(() => { const c = D().getElementById('canvasGrafico'); return c && D().getElementById('contenedorGrafico').style.display === 'block' && c.width > 100 ? c : null; }, 20000);
+      afirmar(lienzo, tipo + ': no apareció el gráfico');
+      const px = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data;
+      let color = 0, oscuros = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        if (Math.max(px[i], px[i + 1], px[i + 2]) - Math.min(px[i], px[i + 1], px[i + 2]) > 60) color++;
+        if (px[i] + px[i + 1] + px[i + 2] < 330) oscuros++;
+      }
+      afirmar(color > 2000, tipo + ': casi sin color (' + color + ' píxeles)');
+      afirmar(oscuros > 200, tipo + ': sin texto (' + oscuros + ' píxeles oscuros)');
+      afirmar(px[3] === 255, tipo + ': el fondo no es opaco');
+      detalle.push(tipo + ' ' + color);
+    }
+    return detalle.join(' · ');
+  });
+
   // EPUB: las herramientas que modifican un libro lo editan en su lugar
   // (assets/js/epub.js) y conservan estilos, fuentes, portada y metadatos.
   // Antes lo rearmaban con un estilo genérico. El libro de prueba trae todo
@@ -941,10 +1036,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // pptx-estilos-tabla.js (etapa 5 del motor propio): PowerPoint muchas veces
   // guarda solo el GUID del estilo de tabla, sin su definición (así venía la
   // charla del usuario). Se arma una tabla con "Estilo medio 2 - Énfasis 1"
-  // solo por GUID: el motor propio tiene que dibujarla (sin pasar a
-  // PptxViewJS) con el encabezado del color accent1 y la primera banda más
-  // clara. Con un GUID inventado, la diapositiva tiene que caer al respaldo:
-  // así se ve que es la regla integrada la que la resuelve. Que las 74 reglas
+  // solo por GUID: el motor propio tiene que dibujarla con el encabezado del
+  // color accent1 y la primera banda más clara. Con un GUID inventado, la
+  // diapositiva queda anotada como "estilo de tabla desconocido" (y la tabla se
+  // dibuja sin estilo): así se ve que es la regla integrada la que la resuelve. Que las 74 reglas
   // den lo mismo que lo que escribe PowerPoint se comprobó contra
   // comparar-pptx/corpus/08-tablas.pptx (ver el encabezado del módulo).
   await prueba('powerpoint: tabla con un estilo integrado que el archivo trae solo por GUID', async () => {
@@ -971,7 +1066,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     };
     const inventado = await W().eval('PptxModelo').abrir(await armar('00000000-1111-2222-3333-444444444444'));
     const dInventado = await inventado.diapositiva(0);
-    afirmar(!dInventado.soportada, 'con un GUID inventado la tabla igual se dibujó: la prueba no vería el error');
+    afirmar(!dInventado.soportada, 'con un GUID inventado no quedó anotado el estilo desconocido: la prueba no vería el error');
 
     const archivo = await armar('5C22544A-7EE6-4342-B048-85BDC9FD1C3A');
     const pres = await W().eval('PptxModelo').abrir(archivo);
@@ -987,6 +1082,168 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(Math.abs(encabezado[0] - 0x44) < 6 && Math.abs(encabezado[1] - 0x72) < 6 && Math.abs(encabezado[2] - 0xc4) < 6, 'el encabezado no es accent1 (4472C4): ' + encabezado);
     afirmar(banda.every((c, i) => c > encabezado[i]) && sinBanda.every((c, i) => c >= banda[i]) && sinBanda.join() !== banda.join(), 'bandas: ' + banda + ' / ' + sinBanda);
     return 'encabezado ' + encabezado + ', banda ' + banda + ', sin banda ' + sinBanda;
+  });
+
+  // Tablas, fase 1 de tablas y gráficos (2026-10-11): una tabla de derecha a
+  // izquierda (la columna 1 va a la derecha), con fondo propio en tblPr (se ve
+  // donde la celda no tiene relleno) y un borde doble (dos franjas con un
+  // hueco en el medio, no una línea gruesa). Medido contra PowerPoint en
+  // comparar-pptx/corpus/23-tablas-avanzadas.pptx.
+  await prueba('powerpoint: tabla de derecha a izquierda, con fondo y borde doble', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    const pres = new (W().PptxGenJS)();
+    pres.addSlide().addTable([['A', 'B'], ['uno', 'dos']], { x: 0.5, y: 0.5, w: 6, colW: [3, 3], rowH: 0.8, fontSize: 14 });
+    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const xml = await zip.file('ppt/slides/slide1.xml').async('string');
+    afirmar(/<a:tblPr/.test(xml) && (xml.match(/<a:tcPr/g) || []).length === 4, 'la tabla de PptxGenJS cambió de forma');
+    let n = 0;
+    const verde = '<a:tcPr><a:lnB w="76200" cmpd="dbl"><a:solidFill><a:srgbClr val="000000"/></a:solidFill></a:lnB><a:solidFill><a:srgbClr val="00FF00"/></a:solidFill></a:tcPr>';
+    zip.file('ppt/slides/slide1.xml', xml
+      .replace(/<a:tblPr[^>]*\/>|<a:tblPr[^>]*>[\s\S]*?<\/a:tblPr>/, '<a:tblPr rtl="1"><a:solidFill><a:srgbClr val="0000FF"/></a:solidFill></a:tblPr>')
+      .replace(/<a:tcPr[^>]*\/>|<a:tcPr[^>]*>[\s\S]*?<\/a:tcPr>/g, () => (n++ === 0 ? verde : '<a:tcPr><a:noFill/></a:tcPr>')));
+    const archivo = new (W().File)([await zip.generateAsync({ type: 'blob' })], 'tabla-rtl.pptx');
+    const lienzo = D().createElement('canvas');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+    afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio', 'no la dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor));
+    const k = lienzo.width / 10;
+    const punto = (x, y) => [...lienzo.getContext('2d').getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data].slice(0, 3);
+    const es = (p, r, g, b) => Math.abs(p[0] - r) < 40 && Math.abs(p[1] - g) < 40 && Math.abs(p[2] - b) < 40;
+    const derecha = punto(6.2, 0.7), izquierda = punto(0.8, 0.7), fondo = punto(3.2, 1.6);
+    afirmar(es(derecha, 0, 255, 0) && es(izquierda, 0, 0, 255), 'la columna 1 no quedó a la derecha: derecha ' + derecha + ', izquierda ' + izquierda);
+    afirmar(es(fondo, 0, 0, 255), 'el fondo de la tabla no se ve en una celda sin relleno: ' + fondo);
+    // Borde doble de 6 pt bajo la celda verde (y = 1,3"): dos franjas de 2 pt
+    // a ±2 pt del centro y el hueco en el medio.
+    const lw = 6 / 72;
+    const arriba = punto(5.5, 1.3 - lw / 3), centro = punto(5.5, 1.3), abajo = punto(5.5, 1.3 + lw / 3);
+    afirmar(es(arriba, 0, 0, 0) && es(abajo, 0, 0, 0) && !es(centro, 0, 0, 0), 'borde doble: ' + arriba + ' / ' + centro + ' / ' + abajo);
+    return 'columna 1 a la derecha, fondo azul, borde doble ' + arriba + ' / ' + centro + ' / ' + abajo;
+  });
+
+  // Contorno doble en una curva (2026-10-11): el óvalo de 12 pt con cmpd="dbl"
+  // lleva dos franjas de 4 pt con un hueco en el medio (antes salía una sola
+  // línea gruesa). Medido contra PowerPoint en comparar-pptx/corpus/27-contornos-compuestos.pptx.
+  await prueba('powerpoint: contorno doble en una forma con curvas', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    const pres = new (W().PptxGenJS)();
+    pres.addSlide().addShape(pres.ShapeType.ellipse, { x: 1, y: 1, w: 4, h: 3, fill: { type: 'none' }, line: { color: 'FF0000', width: 12 } });
+    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const xml = await zip.file('ppt/slides/slide1.xml').async('string');
+    afirmar(/<a:ln w="152400"/.test(xml), 'el contorno de PptxGenJS cambió de forma');
+    zip.file('ppt/slides/slide1.xml', xml.replace('<a:ln w="152400"', '<a:ln w="152400" cmpd="dbl"'));
+    const archivo = new (W().File)([await zip.generateAsync({ type: 'blob' })], 'ovalo-doble.pptx');
+    const lienzo = D().createElement('canvas');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+    afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio', 'no lo dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor));
+    const k = lienzo.width / 10;
+    const punto = (x, y) => [...lienzo.getContext('2d').getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data].slice(0, 3);
+    const rojo = (p) => p[0] > 200 && p[1] < 80 && p[2] < 80;
+    // Extremo derecho del óvalo (x = 5", y = 2,5"): franjas a ±4 pt del borde.
+    const d = 4 / 72;
+    const fuera = punto(5 + d, 2.5), centro = punto(5, 2.5), dentro = punto(5 - d, 2.5);
+    afirmar(rojo(fuera) && rojo(dentro) && !rojo(centro), 'contorno doble: ' + fuera + ' / ' + centro + ' / ' + dentro);
+    return 'franjas ' + fuera + ' y ' + dentro + ', hueco ' + centro;
+  });
+
+  // Gráficos 3D, fase 2.2 de tablas y gráficos (2026-10-11): columnas de
+  // cilindros (el costado es un degradado medido en PowerPoint: los bordes
+  // bastante más oscuros que el medio, no un color parejo como una caja) y
+  // columnas en perspectiva (rAngAx = 0, que antes salían planas), las dos
+  // dibujadas por el motor propio (pptx-grafico-3d.js). Medido contra
+  // PowerPoint en comparar-pptx/corpus/25-graficos-3d.pptx.
+  await prueba('powerpoint: gráficos 3D de cilindros y en perspectiva', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    afirmar(W().eval('typeof PptxGrafico3D') === 'object', 'no cargó pptx-grafico-3d.js');
+    const dibujar = async (opciones) => {
+      const pres = new (W().PptxGenJS)();
+      pres.addSlide().addChart(pres.ChartType.bar3d, [{ name: 'Serie', labels: ['A'], values: [5] }],
+        { x: 0.5, y: 0.5, w: 4, h: 4.5, barDir: 'col', chartColors: ['0000FF'], showLegend: false, showTitle: false, barGapWidthPct: 50, ...opciones });
+      const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'grafico-3d.pptx');
+      const lienzo = D().createElement('canvas');
+      const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+      afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio', 'no lo dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor) + ' (' + ((imagenes[0] && imagenes[0].motivos) || []).join('; ') + ')');
+      const k = lienzo.width / 10, ctx = lienzo.getContext('2d');
+      // Los azules de la serie (las caras son el azul más o menos oscuro).
+      const fila = (y) => { const d = ctx.getImageData(0, Math.round(y * k), Math.round(5 * k), 1).data; const lista = []; for (let i = 0; i < d.length; i += 4) if (d[i + 2] > 60 && d[i + 2] > 2 * d[i] + 20 && d[i + 2] > 2 * d[i + 1] + 20) lista.push(d[i + 2]); return lista; };
+      return { fila };
+    };
+    // Cilindro: una fila por la mitad de la barra; los DOS bordes más oscuros
+    // que el medio (en PowerPoint de 0,45 a 1,07 del color). Una caja no
+    // pasa: su borde izquierdo es el frente, el azul más claro.
+    const cil = await dibujar({ bar3DShape: 'cylinder' });
+    let azules = [];
+    for (let y = 2; y <= 3.5 && azules.length < 10; y += 0.25) azules = cil.fila(y);
+    afirmar(azules.length >= 10, 'no se encontró el cilindro: ' + azules.length + ' píxeles azules');
+    const borde = Math.max(azules[1], azules[azules.length - 2]), medio = Math.max(...azules);
+    afirmar(medio - borde > 50, 'el costado del cilindro no es un degradado: bordes ' + azules[1] + ' y ' + azules[azules.length - 2] + ', medio ' + medio);
+    // Perspectiva: la dibuja el motor propio y la barra tiene caras de dos tonos.
+    const per = await dibujar({ v3DRAngAx: false, v3DPerspective: 30, v3DRotX: 15, v3DRotY: 20 });
+    let tonos = [];
+    for (let y = 2; y <= 3.5 && tonos.length < 10; y += 0.25) tonos = per.fila(y);
+    afirmar(tonos.length >= 10, 'no se encontró la barra en perspectiva: ' + tonos.length + ' píxeles azules');
+    afirmar(Math.max(...tonos) - Math.min(...tonos) > 40, 'la barra en perspectiva no muestra dos caras: ' + Math.min(...tonos) + '–' + Math.max(...tonos));
+    return 'cilindro: borde ' + borde + ', medio ' + medio + '; perspectiva: caras ' + Math.min(...tonos) + '–' + Math.max(...tonos);
+  });
+
+  // Gráficos de superficie, fase 2.3 (2026-10-11): una malla de 3 series × 4
+  // categorías (el gráfico de columnas de PptxGenJS con el tipo cambiado a
+  // surface3DChart) la dibuja el motor propio (antes caía a otra librería) y la
+  // superficie sale pintada con los colores de sus bandas. Medido contra
+  // PowerPoint en comparar-pptx/corpus/26-graficos-superficie.pptx.
+  await prueba('powerpoint: gráfico de superficie dibujado por el motor propio', async () => {
+    await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
+    await new Promise((listo, error) => {
+      const s = D().createElement('script');
+      s.src = '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2';
+      s.onload = listo; s.onerror = () => error(new Error('no cargó PptxGenJS'));
+      D().head.appendChild(s);
+    });
+    afirmar(W().eval('typeof PptxSuperficie') === 'object', 'no cargó pptx-grafico-superficie.js');
+    const pres = new (W().PptxGenJS)();
+    const cats = ['A', 'B', 'C', 'D'];
+    pres.addSlide().addChart(pres.ChartType.bar, [
+      { name: 'S1', labels: cats, values: [1, 4, 8, 3] }, { name: 'S2', labels: cats, values: [2, 6, 9, 5] }, { name: 'S3', labels: cats, values: [3, 5, 7, 1] }],
+    { x: 0.5, y: 0.5, w: 8, h: 4.5, showTitle: false, showLegend: false });
+    const zip = await W().JSZip.loadAsync(await pres.write({ outputType: 'blob' }));
+    const nombre = Object.keys(zip.files).find((n) => /charts\/chart\d+\.xml$/.test(n));
+    let xml = await zip.file(nombre).async('string');
+    // Los tres ejes de una superficie: el de series al final.
+    xml = xml.replace(/c:barChart>/g, 'c:surface3DChart>').replace(/<c:barDir[^>]*>/, '').replace(/<c:grouping[^>]*>/, '').replace(/<c:gapWidth[^>]*>/, '').replace(/<c:varyColors[^>]*>/, '<c:wireframe val="0"/>')
+      .replace(/(<c:axId val="\d+"\/>)(<c:axId val="\d+"\/>)/, '$1$2<c:axId val="3"/>')
+      .replace(/<c:plotArea>/, '<c:plotArea>').replace(/<\/c:plotArea>/, '<c:serAx><c:axId val="3"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:majorTickMark val="out"/><c:minorTickMark val="none"/><c:tickLblPos val="nextTo"/><c:crossAx val="2"/></c:serAx></c:plotArea>');
+    zip.file(nombre, xml);
+    const archivo = new (W().File)([await zip.generateAsync({ type: 'blob' })], 'superficie.pptx');
+    const d = await (await W().eval('PptxModelo').abrir(archivo)).diapositiva(0);
+    afirmar(d.soportada, 'el motor propio no tomó la superficie: ' + d.motivos.join(', '));
+    const lienzo = D().createElement('canvas');
+    const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
+    afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio', 'no lo dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor) + ' (' + ((imagenes[0] && imagenes[0].motivos) || []).join('; ') + ')');
+    // Píxeles de color (no blancos ni grises) en la zona del gráfico, y de al menos dos bandas distintas.
+    const d2 = lienzo.getContext('2d').getImageData(0, 0, lienzo.width, lienzo.height).data;
+    const colores = new Set(); let coloreados = 0;
+    for (let i = 0; i < d2.length; i += 4) {
+      if (Math.max(d2[i], d2[i + 1], d2[i + 2]) - Math.min(d2[i], d2[i + 1], d2[i + 2]) > 60) { coloreados++; colores.add((d2[i] >> 5) + ',' + (d2[i + 1] >> 5) + ',' + (d2[i + 2] >> 5)); }
+    }
+    afirmar(coloreados > 2000, 'la superficie no se pintó: ' + coloreados + ' píxeles de color');
+    afirmar(colores.size >= 3, 'la superficie no tiene bandas de colores distintos: ' + colores.size);
+    return coloreados + ' píxeles de color en ' + colores.size + ' tonos';
   });
 
   // pptx-grafico.js (etapa 7 del motor propio): la escala automática del eje
@@ -1016,12 +1273,13 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
       return new (W().File)([await pres.write({ outputType: 'blob' })], 'grafico.pptx');
     };
     const Tipos = new (W().PptxGenJS)().ChartType;
-    // Superficie no está soportado: el mismo gráfico de barras con el tipo cambiado.
+    // Un tipo que el motor no conoce tiene que caer al respaldo: el mismo
+    // gráfico de barras con un tipo inventado (así la prueba ve el error).
     const zipSup = await W().JSZip.loadAsync(await armar(Tipos.bar));
     const nombreSup = Object.keys(zipSup.files).find((n) => /charts\/chart\d+\.xml$/.test(n));
-    zipSup.file(nombreSup, (await zipSup.file(nombreSup).async('string')).replace(/c:barChart>/g, 'c:surfaceChart>'));
+    zipSup.file(nombreSup, (await zipSup.file(nombreSup).async('string')).replace(/c:barChart>/g, 'c:futureChart>'));
     const superficie = await (await W().eval('PptxModelo').abrir(new (W().File)([await zipSup.generateAsync({ type: 'blob' })], 'sup.pptx'))).diapositiva(0);
-    afirmar(!superficie.soportada, 'un gráfico de superficie no debería estar soportado todavía: la prueba no vería el error');
+    afirmar(!superficie.soportada, 'un gráfico de un tipo desconocido no debería estar soportado: la prueba no vería el error');
     const archivo = await armar(Tipos.bar);
     const d = await (await W().eval('PptxModelo').abrir(archivo)).diapositiva(0);
     afirmar(d.soportada, 'el motor propio no tomó el gráfico: ' + d.motivos.join(', '));
@@ -1041,7 +1299,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
 
   // Unir PDF carga el motor de PowerPoint de la lista única de pptx-visual.js
   // (SCRIPTS_MOTOR_PPTX). Antes tenía su propia lista, se quedó sin el motor
-  // propio cuando pasó a ser el predeterminado y dibujaba con PptxViewJS. El
+  // propio cuando pasó a ser el predeterminado y dibujaba con otra librería. El
   // motor no tiene que estar antes de convertir (si no, la prueba no vería
   // nada) y después un gráfico tiene que salir del motor propio.
   await prueba('unir-pdf: un PowerPoint se dibuja con el motor propio', async () => {
@@ -1063,6 +1321,263 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, D().createElement('canvas'), null, { conImagenes: false });
     afirmar(imagenes.length === 1 && imagenes[0].motor === 'propio' && imagenes[0].graficos, 'no lo dibujó el motor propio: ' + (imagenes[0] && imagenes[0].motor));
     return 'PDF de ' + bytes.length + ' bytes, motor ' + imagenes[0].motor;
+  });
+
+  // Etapa 4a del motor de PowerPoint: el PDF lleva una capa de texto invisible
+  // sobre la imagen de cada diapositiva. El texto se tiene que poder extraer
+  // (con tilde y eñe) y caer donde se dibujó, y el giro se tiene que respetar.
+  await prueba('powerpoint → pdf: el texto de las diapositivas es seleccionable y está en su lugar', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+      await new Promise((listo, error) => {
+        const s = D().createElement('script');
+        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        D().head.appendChild(s);
+      });
+    }
+    const pres = new (W().PptxGenJS)();
+    const d1 = pres.addSlide();
+    d1.addText('Canción número uno', { x: 1, y: 1, w: 6, h: 0.8, fontSize: 24, fontFace: 'Arial', valign: 'top' });
+    d1.addText('Girado', { x: 6, y: 3, w: 2, h: 0.6, fontSize: 20, fontFace: 'Arial', rotate: 90 });
+    pres.addSlide().addText('Segunda diapositiva', { x: 1, y: 1, w: 6, h: 0.8, fontSize: 24, fontFace: 'Arial' });
+    const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'texto.pptx');
+    const bytes = new Uint8Array(await W().ArchivoAPdf.convertir(archivo, () => {}));
+    const doc = await W().abrirPdf(new (W().Uint8Array)(bytes));
+    afirmar(doc.numPages === 2, 'páginas: ' + doc.numPages);
+    const p1 = await doc.getPage(1);
+    const items = (await p1.getTextContent()).items.filter((i) => i.str.trim());
+    const todo = items.map((i) => i.str).join('');
+    afirmar(/Canción/.test(todo) && /número/.test(todo) && /uno/.test(todo), 'el texto no sale tal cual (tildes): ' + JSON.stringify(todo));
+    const item = items.find((i) => /Canci/.test(i.str));
+    const alto = p1.view[3];
+    afirmar(alto > 300 && alto < 420, 'alto de página raro: ' + alto);
+    // El cuadro está a 1 in (72 pt) del borde izquierdo más 7,2 pt de margen, y
+    // a 72 pt del borde de arriba más 3,6 de margen y ~22 pt hasta la línea base.
+    const x = item.transform[4], y = item.transform[5];
+    afirmar(Math.abs(x - 79.2) < 3, 'x del texto: ' + x + ' (se esperaba ~79,2)');
+    afirmar(Math.abs((alto - y) - 98) < 6, 'y del texto: ' + (alto - y) + ' pt desde arriba (se esperaba ~98)');
+    afirmar(Math.abs(item.transform[1]) < 0.01, 'el texto horizontal salió girado');
+    const girado = items.find((i) => /Girad/.test(i.str));
+    afirmar(girado && Math.abs(girado.transform[1]) > Math.abs(girado.transform[0]), 'el texto girado 90° no salió girado: ' + (girado && girado.transform.slice(0, 4)));
+    const p2 = await doc.getPage(2);
+    afirmar((await p2.getTextContent()).items.some((i) => /Segunda/.test(i.str)), 'la segunda diapositiva no trae su texto');
+    return items.length + ' trozos en la página 1; "Canción" en x=' + x.toFixed(1) + ', y=' + (alto - y).toFixed(1) + ' desde arriba; PDF de ' + bytes.length + ' bytes';
+  });
+
+  // pdf-lienzo.js (etapa 4b): el mismo dibujo sobre un canvas y sobre un lienzo
+  // de PDF (trazados, degradados con y sin transparencia, recorte, líneas de
+  // guiones, sombra, trama, imagen con transparencia y giros) tiene que verse
+  // igual al abrir el PDF con pdf.js, y casi todo tiene que ir como vectores.
+  await prueba('pdf-lienzo: el mismo dibujo en un PDF y en un canvas se ve igual', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    await new Promise((listo, error) => { const s = D().createElement('script'); s.src = '../assets/js/pdf-lienzo.js'; s.onload = listo; s.onerror = () => error(new Error('no cargó pdf-lienzo.js')); D().head.appendChild(s); });
+    const LP = W().LienzoPdf || W().eval('LienzoPdf');
+    const ancho = 600, alto = 360;
+    const tile = D().createElement('canvas'); tile.width = tile.height = 8;
+    const tx = tile.getContext('2d'); tx.fillStyle = '#c00'; tx.fillRect(0, 0, 4, 4); tx.fillStyle = '#06c'; tx.fillRect(4, 4, 4, 4);
+    const foto = D().createElement('canvas'); foto.width = 40; foto.height = 20;
+    const fx = foto.getContext('2d'); fx.fillStyle = '#f4b400'; fx.fillRect(0, 0, 40, 20); fx.fillStyle = '#0f9d58'; fx.fillRect(0, 0, 20, 10); fx.fillStyle = 'rgba(0,0,0,0.5)'; fx.fillRect(20, 10, 20, 10);
+    const dibujo = (ctx, Ruta) => {
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, ancho, alto);
+      ctx.fillStyle = '#d33'; ctx.fillRect(20, 20, 100, 60);
+      let g = ctx.createLinearGradient(140, 0, 240, 0); g.addColorStop(0, '#fc0'); g.addColorStop(1, '#06c');
+      ctx.fillStyle = g; const p1 = new Ruta(); p1.rect(140, 20, 100, 60); ctx.fill(p1);
+      g = ctx.createRadialGradient(310, 50, 0, 310, 50, 50); g.addColorStop(0, 'rgba(0,128,0,1)'); g.addColorStop(1, 'rgba(0,128,0,0)');
+      ctx.fillStyle = '#ddd'; ctx.fillRect(260, 20, 100, 60); ctx.fillStyle = g; ctx.fillRect(260, 20, 100, 60);
+      ctx.save(); const c1 = new Ruta(); c1.ellipse(430, 50, 40, 30, 0, 0, Math.PI * 2); ctx.clip(c1); ctx.fillStyle = '#639'; ctx.fillRect(380, 10, 100, 100); ctx.restore();
+      ctx.strokeStyle = '#2a5'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.setLineDash([12, 9]);
+      ctx.beginPath(); ctx.moveTo(20, 120); ctx.bezierCurveTo(120, 90, 200, 160, 300, 120); ctx.stroke(); ctx.setLineDash([]);
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 12; ctx.shadowOffsetX = 6; ctx.shadowOffsetY = 6;
+      ctx.fillStyle = '#48f'; ctx.fillRect(340, 110, 90, 50); ctx.restore();
+      const patron = ctx.createPattern(tile, 'repeat'); patron.setTransform(new DOMMatrix().scale(3, 3));
+      ctx.fillStyle = patron; ctx.fillRect(20, 190, 130, 70);
+      ctx.save(); ctx.globalAlpha = 0.6; ctx.drawImage(foto, 10, 5, 25, 12, 180, 190, 100, 48); ctx.restore();
+      ctx.save(); ctx.translate(450, 250); ctx.rotate(Math.PI / 6); ctx.scale(1.5, 1); ctx.fillStyle = '#e60'; ctx.fillRect(-30, -20, 60, 40); ctx.restore();
+      ctx.fillStyle = '#222'; ctx.font = '28px Arial'; ctx.textBaseline = 'alphabetic'; ctx.fillText('Hola vectores', 30, 320);
+    };
+    const directo = D().createElement('canvas'); directo.width = ancho; directo.height = alto;
+    dibujo(directo.getContext('2d'), W().Path2D);
+    const lienzo = new LP.Lienzo({ ancho, alto, anchoPt: ancho, altoPt: alto });
+    const Original = W().Path2D; W().Path2D = LP.Ruta;
+    try { dibujo(lienzo, LP.Ruta); } finally { W().Path2D = Original; }
+    afirmar(!lienzo.fallo, 'el lienzo falló: ' + lienzo.fallo);
+    const pdf = await W().PDFLib.PDFDocument.create();
+    await lienzo.aPagina(pdf);
+    const bytes = await pdf.save();
+    const doc = await W().abrirPdf(new (W().Uint8Array)(bytes));
+    const pagina = await doc.getPage(1);
+    const vista = pagina.getViewport({ scale: 1 });
+    const dePdf = D().createElement('canvas'); dePdf.width = ancho; dePdf.height = alto;
+    const pc = dePdf.getContext('2d', { willReadFrequently: true }); pc.fillStyle = '#fff'; pc.fillRect(0, 0, ancho, alto);
+    await pagina.render({ canvasContext: pc, viewport: vista }).promise;
+    const a = pc.getImageData(0, 0, ancho, alto).data, b = directo.getContext('2d').getImageData(0, 0, ancho, alto).data;
+    let distintos = 0;
+    for (let k = 0; k < a.length; k += 4) if (Math.max(Math.abs(a[k] - b[k]), Math.abs(a[k + 1] - b[k + 1]), Math.abs(a[k + 2] - b[k + 2])) > 48) distintos++;
+    const pct = 100 * distintos / (ancho * alto);
+    const OPS = W().pdfjsLib.OPS;
+    const ops = await pagina.getOperatorList();
+    const imagenes = ops.fnArray.filter((f) => f === OPS.paintImageXObject || f === OPS.paintInlineImageXObject).length;
+    const motivos = [...new Set(lienzo.motivos)].join(',');
+    afirmar(pct < 3, 'el PDF se ve distinto del canvas: ' + pct.toFixed(2) + ' % de píxeles (como imagen: ' + motivos + ')');
+    // Como imagen solo la sombra (1), el texto sin fuente de archivo (1) y la foto (1).
+    afirmar(imagenes <= 4, 'demasiadas imágenes: ' + imagenes + ' (' + lienzo.motivos.join(',') + ')');
+    return pct.toFixed(2) + ' % de diferencia, ' + imagenes + ' imágenes en la página (' + motivos + '), PDF de ' + bytes.length + ' bytes';
+  });
+
+  // Etapa 4b: la página del PDF son vectores, no una foto. Se compara el PDF
+  // (dibujado por pdf.js) con el dibujo directo del motor en un canvas: el
+  // mismo contenido con formas, transparencia, línea de guiones, una sombra
+  // (que va como imagen), una imagen y texto. Y pesa poco.
+  await prueba('powerpoint → pdf: la diapositiva es vectorial y se ve como el dibujo directo', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+      await new Promise((listo, error) => {
+        const s = D().createElement('script');
+        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        D().head.appendChild(s);
+      });
+    }
+    const foto = D().createElement('canvas'); foto.width = 40; foto.height = 20;
+    const fc = foto.getContext('2d'); fc.fillStyle = '#f4b400'; fc.fillRect(0, 0, 40, 20); fc.fillStyle = '#0f9d58'; fc.fillRect(0, 0, 20, 10);
+    const pres = new (W().PptxGenJS)();
+    const d = pres.addSlide();
+    d.addShape(pres.ShapeType.rect, { x: 0.5, y: 0.5, w: 2, h: 1, fill: { color: 'FF0000' } });
+    d.addShape(pres.ShapeType.roundRect, { x: 3, y: 0.5, w: 2, h: 1, fill: { color: '4285F4' }, shadow: { type: 'outer', color: '000000', opacity: 0.5, blur: 8, offset: 6, angle: 45 } });
+    d.addShape(pres.ShapeType.ellipse, { x: 5.5, y: 0.5, w: 2, h: 1.5, fill: { color: '0070C0', transparency: 40 }, line: { color: '202020', width: 3 } });
+    d.addShape(pres.ShapeType.line, { x: 0.5, y: 2.5, w: 4, h: 0, line: { color: '00B050', width: 4, dashType: 'dash' } });
+    d.addImage({ data: foto.toDataURL('image/png'), x: 6, y: 2.5, w: 2, h: 1 });
+    d.addText('Hola Mundo ñandú', { x: 0.5, y: 3.2, w: 5, h: 1, fontFace: 'Arial', fontSize: 28, color: 'FFFFFF', fill: { color: '7030A0' } });
+    const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'vectores.pptx');
+    const bytes = new Uint8Array(await W().ArchivoAPdf.convertir(archivo, () => {}));
+    const raster = (await W().renderizarDiapositivasComoImagenes(archivo, D().createElement('canvas'), null, { conImagenes: true }))[0];
+    afirmar(raster && raster.motor === 'propio', 'el dibujo directo no es del motor propio');
+
+    const doc = await W().abrirPdf(new (W().Uint8Array)(bytes));
+    const pagina = await doc.getPage(1);
+    const ancho = 960, escala = ancho / pagina.view[2];
+    const vista = pagina.getViewport({ scale: escala });
+    const dePdf = D().createElement('canvas'); dePdf.width = Math.round(vista.width); dePdf.height = Math.round(vista.height);
+    await pagina.render({ canvasContext: dePdf.getContext('2d'), viewport: vista }).promise;
+    const directo = D().createElement('canvas'); directo.width = dePdf.width; directo.height = dePdf.height;
+    const imagenDirecta = await W().createImageBitmap(raster.png);
+    directo.getContext('2d').drawImage(imagenDirecta, 0, 0, directo.width, directo.height);
+    const a = dePdf.getContext('2d').getImageData(0, 0, dePdf.width, dePdf.height).data, b = directo.getContext('2d').getImageData(0, 0, directo.width, directo.height).data;
+    let distintos = 0;
+    for (let k = 0; k < a.length; k += 4) if (Math.abs(a[k] - b[k]) > 48 || Math.abs(a[k + 1] - b[k + 1]) > 48 || Math.abs(a[k + 2] - b[k + 2]) > 48) distintos++;
+    const pct = 100 * distintos / (a.length / 4);
+
+    const ops = await pagina.getOperatorList();
+    const OPS = W().pdfjsLib.OPS;
+    const imagenes = ops.fnArray.filter((f) => f === OPS.paintImageXObject).length;
+    const rellenos = ops.fnArray.filter((f) => f === OPS.fill || f === OPS.eoFill || f === OPS.fillStroke || f === OPS.constructPath).length;
+    const texto = (await pagina.getTextContent()).items.map((i) => i.str).join('');
+    afirmar(/Hola Mundo/.test(texto) && /ñandú/.test(texto), 'texto: ' + JSON.stringify(texto));
+    afirmar(rellenos > 0, 'no hay trazados de vectores en la página');
+    // La sombra y la foto van como imagen; nada más. Una foto de toda la
+    // diapositiva (el camino viejo) sería 1 imagen de 7680 px y pesaría MB.
+    afirmar(imagenes >= 1 && imagenes <= 4, 'imágenes en la página: ' + imagenes);
+    afirmar(bytes.length < 150000, 'el PDF pesa ' + bytes.length + ' bytes');
+    afirmar(pct < 4, 'el PDF se ve distinto del dibujo directo: ' + pct.toFixed(2) + ' % de píxeles');
+    return 'PDF de ' + bytes.length + ' bytes, ' + imagenes + ' imágenes, ' + pct.toFixed(2) + ' % de diferencia con el dibujo directo';
+  });
+
+  // Carlito (Calibri) tiene glifos de longitud impar: fontkit armaba el
+  // subconjunto con la tabla loca corta y las letras salían corridas (la fila
+  // "Las compras de bienes…" de la diap. 4 de la charla salía casi sin letras).
+  // pdf-lienzo.js rellena cada glifo hasta una longitud par. La prueba abre la
+  // fuente incrustada en el PDF y comprueba que todos sus glifos se leen.
+  await prueba('powerpoint → pdf: el subconjunto de Carlito (Calibri) queda sano', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+      await new Promise((listo, error) => {
+        const s = D().createElement('script');
+        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        D().head.appendChild(s);
+      });
+    }
+    const pres = new (W().PptxGenJS)();
+    pres.addSlide().addText('Las compras de bienes y servicios para mantenimiento de maquinaria, equipo y vehículos institucionales se regularán por la normativa', { x: 0.5, y: 0.5, w: 8, h: 2, fontFace: 'Calibri', fontSize: 20 });
+    const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'calibri.pptx');
+    const bytes = new Uint8Array(await W().ArchivoAPdf.convertir(archivo, () => {}));
+    const PDFLib = W().PDFLib, { PDFName } = PDFLib;
+    const doc = await PDFLib.PDFDocument.load(new (W().Uint8Array)(bytes));
+    const detalle = [];
+    doc.context.enumerateIndirectObjects().forEach(([, o]) => {
+      if (!o.dict || !o.dict.get || String(o.dict.get(PDFName.of('Type'))) !== '/FontDescriptor') return;
+      const nombre = String(o.dict.get(PDFName.of('FontName')));
+      const datos = PDFLib.decodePDFRawStream(doc.context.lookup(o.dict.get(PDFName.of('FontFile2')))).decode();
+      const fuente = W().fontkit.create(datos);
+      let conContorno = 0, rotos = 0;
+      for (let g = 0; g < fuente.numGlyphs; g++) { try { if (fuente.getGlyph(g).path.commands.length) conContorno++; } catch (e) { rotos++; } }
+      detalle.push({ nombre, glifos: fuente.numGlyphs, conContorno, rotos });
+    });
+    const carlito = detalle.find((x) => /Carlito/.test(x.nombre));
+    afirmar(carlito, 'el PDF no trae Carlito incrustada: ' + JSON.stringify(detalle));
+    afirmar(carlito.rotos === 0 && carlito.conContorno >= 25, 'subconjunto de Carlito dañado: ' + JSON.stringify(carlito));
+    return carlito.nombre + ': ' + carlito.glifos + ' glifos, ' + carlito.conContorno + ' con contorno, ' + carlito.rotos + ' rotos';
+  });
+
+  // Una fuente de la que no se tiene archivo (Segoe UI, Calibri Light, Cambria,
+  // Consolas…) no puede convertir cada trozo de texto en una imagen: se usa la
+  // parecida de vendor/ y el texto queda de verdad en el PDF (la revisión del
+  // 2026-10-11 midió 2,3 MB y 125 imágenes por diapositiva con Segoe UI).
+  await prueba('powerpoint → pdf: el texto en una fuente sin archivo sigue siendo texto', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+      await new Promise((listo, error) => {
+        const s = D().createElement('script');
+        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        D().head.appendChild(s);
+      });
+    }
+    const pres = new (W().PptxGenJS)();
+    const d = pres.addSlide();
+    const fuentes = ['Segoe UI', 'Calibri Light', 'Cambria', 'Consolas'];
+    fuentes.forEach((f, i) => d.addText('Texto en ' + f + ' ñandú', { x: 0.5, y: 0.4 + i * 1.1, w: 8, h: 0.9, fontFace: f, fontSize: 28 }));
+    const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'fuentes.pptx');
+    const bytes = new Uint8Array(await W().ArchivoAPdf.convertir(archivo, () => {}));
+    const doc = await W().abrirPdf(new (W().Uint8Array)(bytes));
+    const pagina = await doc.getPage(1);
+    const texto = (await pagina.getTextContent()).items.map((i) => i.str).join(' ');
+    const OPS = W().pdfjsLib.OPS;
+    const imagenes = (await pagina.getOperatorList()).fnArray.filter((f) => f === OPS.paintImageXObject).length;
+    afirmar(fuentes.every((f) => texto.includes('Texto en ' + f)), 'texto extraído: ' + JSON.stringify(texto));
+    afirmar(/ñandú/.test(texto), 'sin ñandú: ' + JSON.stringify(texto));
+    afirmar(imagenes === 0, 'el texto fue como imagen: ' + imagenes + ' imágenes');
+    afirmar(bytes.length < 200000, 'el PDF pesa ' + bytes.length + ' bytes');
+    return 'cuatro fuentes como texto, 0 imágenes, PDF de ' + bytes.length + ' bytes';
+  });
+
+  // Si la página de vectores no se puede escribir, esa diapositiva va como
+  // imagen en vez de perderse (y las demás siguen como vectores).
+  await prueba('powerpoint → pdf: si falla la página de vectores, la diapositiva va como imagen', async () => {
+    await abrir('/herramientas/unir-pdf.html'); await esperar(200);
+    for (const src of ['../vendor/jszip/3.10.1/jszip.min.js', '../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2']) {
+      await new Promise((listo, error) => {
+        const s = D().createElement('script');
+        s.src = src; s.onload = listo; s.onerror = () => error(new Error('no cargó ' + src));
+        D().head.appendChild(s);
+      });
+    }
+    const pres = new (W().PptxGenJS)();
+    pres.addSlide().addText('Primera', { x: 1, y: 1, w: 4, h: 1, fontSize: 30, fontFace: 'Arial' });
+    pres.addSlide().addText('Segunda', { x: 1, y: 1, w: 4, h: 1, fontSize: 30, fontFace: 'Arial' });
+    const archivo = new (W().File)([await pres.write({ outputType: 'blob' })], 'falla.pptx');
+    await W().ArchivoAPdf.convertir(archivo, () => {}); // carga el motor
+    const LP = W().eval('LienzoPdf');
+    const original = LP.Lienzo.prototype.aPagina;
+    let llamadas = 0;
+    LP.Lienzo.prototype.aPagina = function (...a) { if (llamadas++ === 0) throw new Error('falla de prueba'); return original.apply(this, a); };
+    let bytes;
+    try { bytes = new Uint8Array(await W().ArchivoAPdf.convertir(archivo, () => {})); } finally { LP.Lienzo.prototype.aPagina = original; }
+    const doc = await W().abrirPdf(new (W().Uint8Array)(bytes));
+    afirmar(doc.numPages === 2, 'páginas: ' + doc.numPages);
+    const OPS = W().pdfjsLib.OPS;
+    const imagenesDe = async (n) => (await (await doc.getPage(n)).getOperatorList()).fnArray.filter((f) => f === OPS.paintImageXObject).length;
+    const textoDe = async (n) => (await (await doc.getPage(n)).getTextContent()).items.map((i) => i.str).join('');
+    afirmar(await imagenesDe(1) === 1 && !/Primera/.test(await textoDe(1)), 'la página 1 no quedó como imagen');
+    afirmar(/Segunda/.test(await textoDe(2)) && await imagenesDe(2) === 0, 'la página 2 no quedó como vectores');
+    return 'página 1 como imagen y página 2 como vectores, PDF de ' + bytes.length + ' bytes';
   });
 
   // Casos raros de pptx-grafico.js que encontró la revisión del 2026-10-10:
@@ -1124,12 +1639,10 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'transparente, línea automática, recorte, #N/A y ' + formatos.length + ' formatos bien';
   });
 
-  // pptx-preparar.js: el rectángulo "useBgFill" (relleno = fondo) que
-  // PowerPoint pone en sus diseños salía del color accent1 del tema y tapaba
-  // la diapositiva (19 de 22 en la presentación del usuario). Se arma una
+  // El rectángulo "useBgFill" (relleno = fondo) que PowerPoint pone en sus
+  // diseños: con el color del tema (accent1) tapaba la diapositiva (19 de 22 en
+  // la presentación del usuario, cuando la dibujaba PptxViewJS). Se arma una
   // diapositiva blanca con ese rectángulo; el centro tiene que quedar blanco.
-  // Para demostrar que la prueba ve el error, el original sin preparar se
-  // dibuja también y ahí el centro sale de color.
   await prueba('powerpoint: el fondo useBgFill no tapa la diapositiva, y una blanca con poco texto no es vacía', async () => {
     await abrir('/herramientas/powerpoint-a-imagenes.html'); await esperar(200);
     await new Promise((listo, error) => {
@@ -1150,24 +1663,15 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     zip.file('ppt/slides/slide1.xml', xml.replace('</p:grpSpPr>', '</p:grpSpPr>' + fondo));
     const archivo = new (W().File)([await zip.generateAsync({ type: 'blob' })], 'fondo.pptx');
 
-    const { cambios } = await W().eval('PptxPreparar').preparar(archivo);
-    afirmar(cambios.fondo === 1, 'no se preparó el fondo: ' + JSON.stringify(cambios));
     const centro = (lienzo) => [...lienzo.getContext('2d').getImageData(lienzo.width >> 1, lienzo.height >> 1, 1, 1).data].slice(0, 3);
 
     const lienzo = D().createElement('canvas');
     const imagenes = await W().renderizarDiapositivasComoImagenes(archivo, lienzo, null, { conImagenes: false });
     afirmar(imagenes.length === 1, imagenes.length + ' diapositivas');
-    const preparado = centro(lienzo);
-    afirmar(preparado.every((c) => c > 245), 'el centro no es blanco: ' + preparado);
-
-    const crudo = D().createElement('canvas'); crudo.width = 960; crudo.height = 540;
-    const visor = new (W().PptxViewJS.PPTXViewer)({ canvas: crudo, slideSizeMode: 'custom', autoChartRerenderDelayMs: 0 });
-    await visor.loadFile(await archivo.arrayBuffer());
-    await visor.renderSlide(0, crudo, { scale: 1 });
-    const original = centro(crudo);
-    if (visor.destroy) visor.destroy();
-    afirmar(!original.every((c) => c > 245), 'sin preparar también sale blanco (la prueba no vería el error): ' + original);
-    return 'centro ' + preparado + ' (sin preparar: ' + original + ')';
+    const blanco = centro(lienzo);
+    afirmar(blanco.every((c) => c > 245), 'el centro no es blanco: ' + blanco);
+    afirmar(!imagenes[0].vacia, 'la diapositiva con poco texto salió como vacía');
+    return 'centro ' + blanco + ', con texto';
   });
 
   // Modos de fusión del editor avanzado: con una capa sin ajustes, Multiplicar
@@ -1548,7 +2052,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // motivo al soltar donde no se puede, y los proyectos viejos convertidos.
   // Foto de dos mitades (40 | 220) y una imagen gris 40 de 50x50 puesta sobre
   // la mitad derecha. La equivalencia exacta con la versión vieja se comprobó
-  // aparte, píxel por píxel, contra la rama anterior (hallazgos.md).
+  // aparte, píxel por píxel, contra la rama anterior (hallazgos/editores-rediseno.md).
   await prueba('editor avanzado: tipos de grupo (reglas, soltar, proyectos viejos)', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const base = D().createElement('canvas'); base.width = 100; base.height = 50;
@@ -2558,7 +3062,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   });
 
   // Fase 8 del rediseño (2026-10-08): el inventario de controles
-  // (hallazgos.md), de punta a punta.
+  // (hallazgos/editores-checklist-y-extras.md), de punta a punta.
   // Cada control de la lista tiene que existir y estar donde dice el plan: en
   // el bloque de su categoría (que la barra de íconos de PC y la de abajo del
   // celular abren) o en la barra superior / "⋯". En PC y a 390 px. Y todo
@@ -2713,7 +3217,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   // los proyectos de la versión 7 (base + pincel) a piezas. Imagen de dos
   // mitades (40 | 220) con la capa en Multiplicar: donde se aplica, 40 -> 6 y
   // 220 -> 190. La comparación píxel por píxel con la rama anterior se hizo
-  // aparte (hallazgos.md).
+  // aparte (hallazgos/editores-rediseno.md).
   await prueba('editor avanzado: máscara por piezas (sumar, restar, intersecar, invertir, ojo, proyecto v7)', async () => {
     await abrir('/herramientas/editor-avanzado-imagen.html'); await esperar(300);
     const base = D().createElement('canvas'); base.width = 100; base.height = 50;

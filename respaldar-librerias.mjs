@@ -46,7 +46,7 @@ const MODELOS = ['Xenova/whisper-tiny', 'Xenova/whisper-base', 'Xenova/whisper-s
 // Paquete de npm de cada librería de cdnjs, para bajar su licencia.
 const NPM_DE_CDNJS = {
   jszip: 'jszip', 'pdf.js': 'pdfjs-dist', 'pdf-lib': 'pdf-lib', xlsx: 'xlsx', mammoth: 'mammoth',
-  marked: 'marked', 'Chart.js': 'chart.js', turndown: 'turndown', jsdiff: 'diff', jsbarcode: 'jsbarcode',
+  marked: 'marked', turndown: 'turndown', jsdiff: 'diff', jsbarcode: 'jsbarcode',
 };
 // Las que no están en npm con esa versión: licencia desde su repositorio.
 // También las fuentes (OFL), que no son paquetes de npm.

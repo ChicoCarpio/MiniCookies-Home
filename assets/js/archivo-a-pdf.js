@@ -38,6 +38,10 @@
   const cargas = new Map(); // src → promesa: cada script se pide una sola vez
   function cargarScript(src) {
     if (!cargas.has(src)) {
+      // Ya lo puso otro cargador (grafico-suelto.js trae parte del motor de PowerPoint): no repetirlo.
+      if (document.querySelector('script[src="' + src + '"]')) cargas.set(src, Promise.resolve());
+    }
+    if (!cargas.has(src)) {
       cargas.set(src, new Promise((resolver, rechazar) => {
         const s = document.createElement('script');
         s.src = src;
@@ -84,25 +88,15 @@
     excel: {
       extensiones: ['xlsx', 'xlsm', 'xlsb', 'xls', 'ods', 'csv'],
       preparar: () => cargarEnOrden([
-        rutaVendor('xlsx/0.20.3/xlsx.full.min.js'), JSZIP(), rutaVendor('Chart.js/4.5.1/chart.umd.min.js'),
-        propio('lector-planillas.js'), propio('excel-a-pdf.js'),
+        rutaVendor('xlsx/0.20.3/xlsx.full.min.js'), JSZIP(),
+        propio('lector-planillas.js'), propio('grafico-suelto.js'), propio('excel-a-pdf.js'),
       ]),
       convertir: (archivo, alAvanzar) => libroExcelAPdf(archivo, alAvanzar),
     },
     powerpoint: {
       extensiones: ['pptx'],
       async preparar() {
-        await cargarEnOrden([JSZIP(), rutaVendor('Chart.js/4.5.1/chart.umd.min.js')]);
-        if (!window.PptxViewJS) {
-          // PptxViewJS pisa el FileReader del navegador con uno propio, y eso
-          // rompe JSZip: se devuelve el original (igual que en PowerPoint → PDF).
-          const fileReaderNativo = window.FileReader;
-          try {
-            await cargarScript(rutaVendor('pptxviewjs/1.1.9/dist/PptxViewJS.min.js?v=2'));
-          } finally {
-            window.FileReader = fileReaderNativo;
-          }
-        }
+        await cargarEnOrden([JSZIP()]);
         // El motor propio, con la lista única de pptx-visual.js.
         await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-visual.js')]);
         await cargarEnOrden(SCRIPTS_MOTOR_PPTX.map((x) => (x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : propio(x))));

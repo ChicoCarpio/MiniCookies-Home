@@ -2009,6 +2009,258 @@ try {
         }
     } 960 540 $true
 
+    # ============================================================ 23 tablas avanzadas
+    # Lo que 08-tablas no cubre: bordes compuestos (dobles, triples), tabla de
+    # derecha a izquierda, texto vertical en celdas y fondo de tabla.
+    Nuevo-Archivo '23-tablas-avanzadas.pptx' {
+        param($pres)
+        function Llenar([object]$tbl, [int]$filas, [int]$cols, [double]$tam = 12) {
+            for ($r = 1; $r -le $filas; $r++) {
+                for ($c = 1; $c -le $cols; $c++) {
+                    $tx = $tbl.Cell($r, $c).Shape.TextFrame.TextRange
+                    if ($r -eq 1) { $tx.Text = "Col $c" } else { $tx.Text = "f$($r - 1)c$c" }
+                    $tx.Font.Size = $tam
+                }
+            }
+        }
+        # --- bordes compuestos: MsoLineStyle 2 fino-fino, 3 fino-grueso, 4 grueso-fino, 5 triple
+        $d = Nueva-Diap $pres 'Tablas: bordes compuestos'
+        $estilos = @(@(2, 'Doble'), @(3, 'Fino-grueso'), @(4, 'Grueso-fino'), @(5, 'Triple'))
+        for ($i = 0; $i -lt $estilos.Count; $i++) {
+            $e = $estilos[$i]
+            Caso ("Borde compuesto " + $e[1]) {
+                $x = 20 + ($i % 2) * 470; $y = 50 + [math]::Floor($i / 2) * 240
+                $null = Etiqueta $d $x ($y - 16) 300 ($e[1] + ' (6 pt y 3 pt)')
+                $sf = $d.Shapes.AddTable(3, 3, $x, $y, 420, 180); $sf.Name = 'Compuesto_' + $i; $tbl = $sf.Table
+                Llenar $tbl 3 3
+                for ($r = 1; $r -le 3; $r++) {
+                    for ($c = 1; $c -le 3; $c++) {
+                        foreach ($b in 1, 2, 3, 4) {
+                            $bd = $tbl.Cell($r, $c).Borders($b)
+                            $bd.Visible = $msoTrue; $bd.ForeColor.RGB = (RGB 30 60 120)
+                            $bd.Weight = $(if ($r -eq 1) { 6 } else { 3 })
+                            $bd.Style = $e[0]
+                        }
+                    }
+                }
+            }
+        }
+        # --- de derecha a izquierda
+        $d = Nueva-Diap $pres 'Tablas: de derecha a izquierda'
+        Caso 'Tabla RTL con estilo y combinadas' {
+            $sf = $d.Shapes.AddTable(4, 4, 20, 50, 560, 200); $sf.Name = 'TablaRTL'; $tbl = $sf.Table
+            Llenar $tbl 4 4
+            $tbl.Columns(1).Width = 80; $tbl.Columns(2).Width = 200; $tbl.Columns(3).Width = 120; $tbl.Columns(4).Width = 160
+            $tbl.FirstCol = $msoTrue
+            $tbl.Cell(2, 1).Merge($tbl.Cell(3, 2))
+            $tbl.Cell(2, 1).Shape.TextFrame.TextRange.Text = 'Combinada 2x2'
+            $tbl.TableDirection = 2   # ppDirectionRightToLeft
+        }
+        Caso 'Tabla RTL con bordes distintos' {
+            $sf = $d.Shapes.AddTable(3, 3, 600, 50, 340, 150); $sf.Name = 'TablaRTLBordes'; $tbl = $sf.Table
+            Llenar $tbl 3 3
+            $bd = $tbl.Cell(2, 1).Borders(2); $bd.Visible = $msoTrue; $bd.ForeColor.RGB = (RGB 200 0 0); $bd.Weight = 4   # izquierda
+            $bd = $tbl.Cell(2, 3).Borders(4); $bd.Visible = $msoTrue; $bd.ForeColor.RGB = (RGB 0 150 0); $bd.Weight = 4   # derecha
+            $tbl.TableDirection = 2
+        }
+        # --- texto vertical: MsoTextOrientation 2 hacia arriba, 3 hacia abajo, 5 vertical, 4 vertical de Asia
+        $d = Nueva-Diap $pres 'Tablas: texto vertical en celdas'
+        Caso 'Texto vertical en la fila de encabezado' {
+            $sf = $d.Shapes.AddTable(3, 5, 20, 50, 600, 120); $sf.Name = 'TablaVertical'; $tbl = $sf.Table
+            Llenar $tbl 3 5
+            $orient = @(1, 2, 3, 5, 4)
+            for ($c = 1; $c -le 5; $c++) {
+                $tf = $tbl.Cell(1, $c).Shape.TextFrame
+                $tf.TextRange.Text = "Encabezado $c"
+                $tf.Orientation = $orient[$c - 1]
+            }
+            Nota ("tabla 'TablaVertical': alto tras girar = " + $sf.Height + '; fila 1 = ' + $tbl.Rows(1).Height)
+        }
+        Caso 'Texto vertical largo con anclaje' {
+            $sf = $d.Shapes.AddTable(2, 4, 20, 330, 600, 80); $sf.Name = 'TablaVerticalLarga'; $tbl = $sf.Table
+            Llenar $tbl 2 4
+            $anclas = @(1, 3, 4, 1)
+            for ($c = 1; $c -le 4; $c++) {
+                $tf = $tbl.Cell(2, $c).Shape.TextFrame
+                $tf.TextRange.Text = (Palabras (4 + 3 * $c))
+                $tf.Orientation = $(if ($c -le 2) { 2 } else { 3 })
+                $tf.VerticalAnchor = $anclas[$c - 1]
+                $tf.TextRange.ParagraphFormat.Alignment = (1, 2, 3, 2)[$c - 1]
+            }
+        }
+        # --- fondo de tabla (a:tblBg)
+        $d = Nueva-Diap $pres 'Tablas: fondo de tabla'
+        Caso 'Fondo de tabla sólido con celdas transparentes' {
+            $sf = $d.Shapes.AddTable(3, 3, 20, 50, 420, 150); $sf.Name = 'FondoSolido'; $tbl = $sf.Table
+            Llenar $tbl 3 3
+            for ($r = 1; $r -le 3; $r++) { for ($c = 1; $c -le 3; $c++) { $tbl.Cell($r, $c).Shape.Fill.Visible = $msoFalse } }
+            $tbl.Background.Fill.Visible = $msoTrue; $tbl.Background.Fill.Solid(); $tbl.Background.Fill.ForeColor.RGB = (RGB 255 230 180)
+        }
+        Caso 'Fondo de tabla con imagen' {
+            $sf = $d.Shapes.AddTable(3, 3, 480, 50, 420, 150); $sf.Name = 'FondoImagen'; $tbl = $sf.Table
+            Llenar $tbl 3 3
+            for ($r = 1; $r -le 3; $r++) { for ($c = 1; $c -le 3; $c++) { $tbl.Cell($r, $c).Shape.Fill.Visible = $msoFalse } }
+            $tbl.Background.Fill.UserPicture($JPG)
+        }
+        Caso 'Fondo de tabla con sombra' {
+            $sf = $d.Shapes.AddTable(3, 3, 20, 290, 420, 150); $sf.Name = 'FondoSombra'; $tbl = $sf.Table
+            Llenar $tbl 3 3
+            $s = $tbl.Background.Shadow; $s.Visible = $msoTrue; $s.OffsetX = 6; $s.OffsetY = 6; $s.Blur = 8; $s.ForeColor.RGB = (RGB 0 0 0); $s.Transparency = 0.5
+        }
+        Caso 'Fondo de tabla con mosaico' {
+            $sf = $d.Shapes.AddTable(3, 3, 480, 290, 420, 150); $sf.Name = 'FondoMosaico'; $tbl = $sf.Table
+            Llenar $tbl 3 3
+            $tbl.Cell(2, 2).Shape.Fill.Visible = $msoFalse
+            $tbl.Background.Fill.UserTextured($MOS)
+        }
+    }
+
+    # ============================================================ 24 gráficos: detalles
+    # Líneas guía del circular, rellenos de imagen y ejes de meses sin girar.
+    Nuevo-Archivo '24-graficos-detalles.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        $doce = @(1..12 | ForEach-Object { "Región $_" })
+        $chicos = [ordered]@{ Ventas = @(40, 22, 12, 8, 5, 4, 3, 2, 1.5, 1, 1, 0.5) }
+        $serial = { param([datetime]$f) [int]$f.ToOADate() }
+        $meses12 = 0..11 | ForEach-Object { & $serial ((Get-Date '2026-01-01').AddMonths($_)) }
+        $meses36 = 0..35 | ForEach-Object { & $serial ((Get-Date '2024-01-01').AddMonths($_)) }
+        $val = { param($n) [ordered]@{ Ventas = @(0..($n - 1) | ForEach-Object { (($_ * 7) % 11) + 3 }) } }
+        $mover = { param($ch, $dx, $dy) $se = $ch.SeriesCollection(1); for ($p = 1; $p -le 3; $p++) { $dl = $se.Points($p).DataLabel; $dl.Left = $dl.Left + $dx; $dl.Top = $dl.Top + $dy } }
+        $casos = @(
+            @{ n = 'Circular con etiquetas afuera (guías)'; t = 5; c = $doce; s = $chicos; f = { param($ch) $se = $ch.SeriesCollection(1); $se.HasDataLabels = $true; $se.DataLabels().ShowCategoryName = $true; $se.DataLabels().Position = 5; $se.HasLeaderLines = $true; $ch.HasLegend = $false } },
+            @{ n = 'Circular con etiquetas movidas'; t = 5; c = @('Norte', 'Sur', 'Este', 'Oeste', 'Centro'); s = [ordered]@{ Ventas = @(40, 25, 15, 12, 8) }; f = { param($ch) $se = $ch.SeriesCollection(1); $se.HasDataLabels = $true; $se.DataLabels().Position = 2; $se.HasLeaderLines = $true; & $mover $ch 40 -25; $ch.HasLegend = $false } },
+            @{ n = 'Anillo con guías de color'; t = 5; c = $doce; s = $chicos; f = { param($ch) $se = $ch.SeriesCollection(1); $se.HasDataLabels = $true; $se.DataLabels().Position = 5; $se.HasLeaderLines = $true; $ll = $se.LeaderLines.Format.Line; $ll.ForeColor.RGB = (RGB 200 0 0); $ll.Weight = 1.5; $ch.HasLegend = $false } },
+            @{ n = 'Columnas con imagen estirada'; t = 51; f = { param($ch) $ch.SeriesCollection(1).Format.Fill.UserPicture($JPG) } },
+            @{ n = 'Columnas con imagen apilada'; t = 51; f = { param($ch) $ch.SeriesCollection(1).Fill.UserPicture($PNG, 2, 1) } },
+            @{ n = 'Barras con mosaico'; t = 57; f = { param($ch) $ch.SeriesCollection(2).Format.Fill.UserTextured($MOS) } },
+            @{ n = 'Trazado con imagen de fondo'; t = 4; f = { param($ch) $ch.PlotArea.Format.Fill.UserPicture($JPG) } },
+            @{ n = 'Gráfico con mosaico de fondo'; t = 51; f = { param($ch) $ch.ChartArea.Format.Fill.UserTextured($MOS) } },
+            @{ n = '12 meses en líneas'; t = 4; c = $meses12; fc = 'mmm'; s = (& $val 12) },
+            @{ n = '12 meses en columnas'; t = 51; c = $meses12; fc = 'mmm-yy'; s = (& $val 12) },
+            @{ n = '36 meses en líneas'; t = 4; c = $meses36; fc = 'mmm'; s = (& $val 36) },
+            @{ n = '12 meses angosto'; t = 4; c = $meses12; fc = 'mmmm'; s = (& $val 12); w = 300 }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Detalles de gráficos " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $cats = if ($k.c) { $k.c } else { $trim }
+                $ser = if ($k.s) { $k.s } else { $tres }
+                $w = if ($k.w) { $k.w } else { 456 }
+                if ($k.fc) { $sh = Grafico $d $k.t $x $y $w 244 "Detalle_$i" $cats $ser $k.n -PorColumnas -FormatoCategorias $k.fc }
+                else { $sh = Grafico $d $k.t $x $y $w 244 "Detalle_$i" $cats $ser $k.n -PorColumnas }
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
+    # ============================================================ 25 gráficos: 3D
+    # Formas de barra (cilindro, cono, pirámide), grosor de paredes y piso, y
+    # perspectiva real (ejes no perpendiculares, c:rAngAx = 0).
+    Nuevo-Archivo '25-graficos-3d.pptx' {
+        param($pres)
+        $trim = @('Trim 1', 'Trim 2', 'Trim 3', 'Trim 4')
+        $tres = [ordered]@{ Norte = @(4.3, 2.5, 3.5, 4.5); Centro = @(2.4, 4.4, 1.8, 2.8); Sur = @(2, 2, 3, 5) }
+        # XlBarShape: 0 caja, 1 pirámide a punta, 2 pirámide truncada al máximo, 3 cilindro, 4 cono a punta, 5 cono al máximo
+        $forma = { param($ch, $f) for ($s = 1; $s -le $ch.SeriesCollection().Count; $s++) { $ch.SeriesCollection($s).BarShape = $f } }
+        $persp = { param($ch, $rot, $elev, $per) $ch.RightAngleAxes = $false; $ch.Rotation = $rot; $ch.Elevation = $elev; $ch.Perspective = $per }
+        $casos = @(
+            @{ n = 'Columnas de cilindros'; t = 54; f = { param($ch) & $forma $ch 3 } },
+            @{ n = 'Columnas de conos'; t = 54; f = { param($ch) & $forma $ch 4 } },
+            @{ n = 'Columnas de pirámides'; t = 54; f = { param($ch) & $forma $ch 1 } },
+            @{ n = 'Apiladas al máximo (cono y pirámide)'; t = 55; f = { param($ch) & $forma $ch 5; $ch.SeriesCollection(2).BarShape = 2 } },
+            @{ n = 'Barras de cilindros'; t = 60; f = { param($ch) & $forma $ch 3 } },
+            @{ n = 'Barras apiladas de conos'; t = 61; f = { param($ch) & $forma $ch 4 } },
+            @{ n = 'Paredes y piso gruesos'; t = 54; f = { param($ch) $ch.Walls.Thickness = 10; $ch.Floor.Thickness = 15; $ch.BackWall.Format.Fill.ForeColor.RGB = (RGB 220 230 242); $ch.Floor.Format.Fill.ForeColor.RGB = (RGB 200 200 200) } },
+            @{ n = 'Barras con piso grueso'; t = 60; f = { param($ch) $ch.Floor.Thickness = 20; $ch.Floor.Format.Fill.ForeColor.RGB = (RGB 191 191 191) } },
+            @{ n = 'Columnas 3D (profundidad)'; t = -4100 },
+            @{ n = 'Perspectiva 30'; t = 54; f = { param($ch) & $persp $ch 20 15 30 } },
+            @{ n = 'Perspectiva 80 girada'; t = 54; f = { param($ch) & $persp $ch 50 25 80 } },
+            @{ n = 'Barras con perspectiva'; t = 60; f = { param($ch) & $persp $ch 30 20 45 } },
+            @{ n = 'Líneas 3D'; t = -4101 },
+            @{ n = 'Áreas 3D'; t = -4098 },
+            @{ n = 'Columnas 3D cilindros con profundidad'; t = -4100; f = { param($ch) & $forma $ch 3; $ch.DepthPercent = 150 } },
+            @{ n = 'Circular 3D en perspectiva'; t = -4102; s = [ordered]@{ Partes = @(45, 25, 20, 10) }; f = { param($ch) $ch.Perspective = 60; $ch.Elevation = 35 } },
+            @{ n = 'Líneas 3D con ejes rectos'; t = -4101; f = { param($ch) $ch.RightAngleAxes = $true } },
+            @{ n = 'Áreas 3D apiladas'; t = 78 },
+            @{ n = 'Áreas 3D con ejes rectos'; t = -4098; f = { param($ch) $ch.RightAngleAxes = $true } },
+            @{ n = 'Columnas apiladas en perspectiva'; t = 55; f = { param($ch) & $persp $ch 20 15 30 } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Gráficos 3D " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $ser = if ($k.s) { $k.s } else { $tres }
+                $sh = Grafico $d $k.t $x $y 456 244 "Tres_$i" $trim $ser $k.n -PorColumnas
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
+    # ============================================================ 26 gráficos: superficie
+    # Superficie 3D, de alambre, de contorno (vista superior) y contorno de
+    # alambre, con otras escalas, giros y cantidades de series.
+    Nuevo-Archivo '26-graficos-superficie.pptx' {
+        param($pres)
+        $cats = @('X1', 'X2', 'X3', 'X4', 'X5', 'X6')
+        $malla = [ordered]@{}
+        foreach ($s in 1..5) { $malla["Y$s"] = @(1..6 | ForEach-Object { [math]::Round(5 + 4 * [math]::Sin($_ / 1.7) * [math]::Cos($s / 1.9), 2) }) }
+        $pocas = [ordered]@{ Fila1 = @(1, 3, 5, 3, 1, 0); Fila2 = @(2, 5, 8, 5, 2, 1) }
+        $muchas = [ordered]@{}; foreach ($s in 1..10) { $muchas["S$s"] = @(1..6 | ForEach-Object { ($_ * $s) % 13 }) }
+        $casos = @(
+            @{ n = 'Superficie 3D'; t = 83 },
+            @{ n = 'Superficie de alambre'; t = 84 },
+            @{ n = 'Contorno'; t = 85 },
+            @{ n = 'Contorno de alambre'; t = 86 },
+            @{ n = 'Superficie girada'; t = 83; f = { param($ch) $ch.Rotation = 60; $ch.Elevation = 30 } },
+            @{ n = 'Superficie con perspectiva'; t = 83; f = { param($ch) $ch.RightAngleAxes = $false; $ch.Perspective = 40 } },
+            @{ n = 'Contorno con unidad 1'; t = 85; f = { param($ch) $ch.Axes(2).MajorUnit = 1 } },
+            @{ n = 'Superficie de dos filas'; t = 83; s = $pocas },
+            @{ n = 'Superficie de diez series'; t = 83; s = $muchas },
+            @{ n = 'Contorno con leyenda abajo'; t = 85; f = { param($ch) $ch.HasLegend = $true; $ch.Legend.Position = -4107 } },
+            @{ n = 'Superficie sin leyenda'; t = 83; f = { param($ch) $ch.HasLegend = $false } },
+            @{ n = 'Superficie con eje de 0 a 20'; t = 83; f = { param($ch) $ch.Axes(2).MinimumScale = 0; $ch.Axes(2).MaximumScale = 20 } }
+        )
+        $d = $null
+        for ($i = 0; $i -lt $casos.Count; $i++) {
+            $k = $casos[$i]
+            if (($i % 4) -eq 0) { $d = Nueva-Diap $pres ("Superficie " + ($i + 1) + '–' + ($i + 4)) }
+            Caso ("Gráfico " + $k.n) {
+                $x = 14 + ($i % 2) * 468; $y = 36 + [math]::Floor(($i % 4) / 2) * 252
+                $ser = if ($k.s) { $k.s } else { $malla }
+                $sh = Grafico $d $k.t $x $y 456 244 "Superficie_$i" $cats $ser $k.n -PorColumnas
+                if ($k.f) { & $k.f $sh.Chart }
+            }
+        }
+    } 960 540 $true
+
+    # ============================================================ 27 contornos compuestos en formas
+    # Contorno doble, grueso-fino, fino-grueso y triple en formas con curvas
+    # (óvalo, rectángulo redondeado, corazón, nube, arco abierto, onda), a 10 y 4 pt.
+    Nuevo-Archivo '27-contornos-compuestos.pptx' {
+        param($pres)
+        $formas = @(9, 5, 21, 179, 25, 103)
+        $nomE = @('2 ThinThin', '3 ThinThick', '4 ThickThin', '5 ThickBetweenThin')
+        foreach ($peso in 10, 4) {
+            $d = Nueva-Diap $pres ("Contornos compuestos en formas a $peso pt")
+            for ($e = 0; $e -lt 4; $e++) {
+                for ($j = 0; $j -lt $formas.Count; $j++) {
+                    Caso ("Forma " + $formas[$j] + " estilo " + ($e + 2) + " a $peso pt") {
+                        $s = $d.Shapes.AddShape($formas[$j], 20 + $j * 150, 50 + $e * 120, 120, 90)
+                        $s.Fill.Visible = $msoFalse
+                        $s.Line.Weight = $peso; $s.Line.Style = $e + 2; $s.Line.ForeColor.RGB = (RGB 0 0 160)
+                    }
+                }
+            }
+        }
+    } 960 540
+
     # ============================================================ 13 patrón y diseño
     Nuevo-Archivo '13-patron-y-diseno.pptx' {
         param($pres)

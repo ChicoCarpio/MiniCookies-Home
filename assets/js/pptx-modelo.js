@@ -6,13 +6,13 @@
 // tema. Quien dibuja (pptx-dibujo.js) no vuelve a mirar el XML.
 //
 // Es la etapa 2 del motor propio (investigacion-motor-powerpoint\00-resumen.md,
-// fuera del repo). La herencia sigue lo medido con pptx-preparar.js y
-// comparar-pptx; donde la norma y PowerPoint no coinciden, manda PowerPoint.
+// fuera del repo). La herencia sigue lo medido con comparar-pptx; donde la
+// norma y PowerPoint no coinciden, manda PowerPoint.
 //
 // Requiere JSZip y pptx-geometria.js (y pptx-estilos-tabla.js para las tablas). Uso:
 //   const pres = await PptxModelo.abrir(archivo);
 //   pres.ancho, pres.alto (EMU), pres.cantidad
-//   const d = await pres.diapositiva(i);  // { fondo, elementos, soportada, motivos }
+//   const d = await pres.diapositiva(i);  // { fondo, elementos, soportada, motivos }; motivos: lo que se omitió o se dibujó sin su formato
 //   const img = await pres.imagen(ruta);  // { fuente, ancho, alto, dpiX, dpiY } | null
 
 const PptxModelo = (() => {
@@ -45,7 +45,7 @@ const PptxModelo = (() => {
 
   // --- Colores -------------------------------------------------------------------
   // tint y shade en RGB lineal, lumMod/lumOff/satMod en HSL: así coincide con
-  // los píxeles de PowerPoint (ver pptx-preparar.js).
+  // los píxeles de PowerPoint (medido con comparar-pptx).
   const aLineal = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
   const aSrgb = (c) => { const v = c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; return Math.max(0, Math.min(255, Math.round(v * 255))); };
   function aHsl([r, g, b]) {
@@ -193,8 +193,9 @@ const PptxModelo = (() => {
   }
 
   // --- Paquete --------------------------------------------------------------------
-  async function abrir(archivo) {
-    const zip = await JSZip.loadAsync(archivo);
+  // Las partes XML de un paquete OOXML (con sus relaciones) y sus imágenes, ya
+  // leídas una sola vez. Sirve igual para un .pptx que para un .xlsx.
+  function paquete(zip) {
     const cache = new Map();
     async function leerRels(parte) {
       const a = zip.file(rutaRels(parte));
@@ -217,6 +218,17 @@ const PptxModelo = (() => {
       }
       return cache.get(rutaParte);
     }
+    const imagenes = new Map();
+    function imagen(rutaImagen) {
+      if (!imagenes.has(rutaImagen)) imagenes.set(rutaImagen, cargarImagen(zip, rutaImagen).catch(() => null));
+      return imagenes.get(rutaImagen);
+    }
+    return { parte, imagen };
+  }
+
+  async function abrir(archivo) {
+    const zip = await JSZip.loadAsync(archivo);
+    const { parte, imagen } = paquete(zip);
 
     const pres = await parte('ppt/presentation.xml');
     if (!pres) throw new Error('No se pudo leer ppt/presentation.xml');
@@ -232,12 +244,6 @@ const PptxModelo = (() => {
     const relEstilos = pres.rels.porTipo('tableStyles')[0];
     const partEstilos = relEstilos && await parte(relEstilos.destino);
     for (const e of partEstilos ? hijos(partEstilos.raiz, 'tblStyle') : []) estilosTabla.set((e.getAttribute('styleId') || '').toUpperCase(), e);
-
-    const imagenes = new Map();
-    function imagen(rutaImagen) {
-      if (!imagenes.has(rutaImagen)) imagenes.set(rutaImagen, cargarImagen(zip, rutaImagen).catch(() => null));
-      return imagenes.get(rutaImagen);
-    }
 
     async function diapositiva(i) {
       const sld = await parte(diapositivas[i]);
@@ -556,6 +562,12 @@ const PptxModelo = (() => {
     const rel = ref && ctx.parteActual.rels.porId(ref.getAttributeNS(NS_R, 'id'));
     const parteGrafico = rel && rel.destino ? await ctx.parte(rel.destino) : null;
     if (!parteGrafico) return { motivo: 'gráfico sin datos' };
+    return modeloDeGrafico(parteGrafico, ctx);
+  }
+
+  // El modelo de una parte c:chartSpace con los resolvedores del contexto
+  // (tema, mapa de colores, fuentes).
+  function modeloDeGrafico(parteGrafico, ctx) {
     const r = {
       relleno: (spPr) => { if (!spPr) return undefined; const e = primero(spPr, RELLENOS); return e ? relleno(e, ctx.cc, parteGrafico) : undefined; },
       // Un a:ln sin relleno (solo el ancho) no apaga la línea: lleva el color automático.
@@ -568,6 +580,7 @@ const PptxModelo = (() => {
       color: (el) => color(el, ctx.cc),
       fuente: (nombre) => resolverFuente(nombre, ctx),
       acento: (i) => { const [rr, g, b] = ctx.temaColor('accent' + i); return { r: rr, g, b, a: 1 }; },
+      excel: !!ctx.excel,
     };
     try {
       return { modelo: PptxGrafico.leer(parteGrafico.raiz, r) };
@@ -575,6 +588,45 @@ const PptxModelo = (() => {
       return { motivo: e && e.message ? e.message : 'gráfico' };
     }
   }
+
+  // Un gráfico que no vive en una diapositiva —el de una hoja de Excel (con su
+  // propio tema) o uno armado con datos— hecho una diapositiva de un solo
+  // gráfico, para dibujarlo con PptxDibujo.dibujar igual que a los de un .pptx.
+  //   zip: JSZip del paquete (opcional; da el tema, las imágenes y las relaciones)
+  //   rutaGrafico: la parte c:chartSpace dentro del zip; o raiz: el c:chartSpace ya leído
+  //   ancho, alto: EMU
+  //   excel: los valores que Excel usa cuando el gráfico no dice nada (estilo clásico); sin él, los de PowerPoint
+  // Devuelve { pres, diapositiva } o tira un Error con el motivo.
+  async function graficoSuelto({ zip, rutaGrafico, raiz, ancho, alto, excel = true }) {
+    const paq = zip ? paquete(zip) : null;
+    const sinRels = { lista: [], porId: () => undefined, porTipo: () => [] };
+    const parteGrafico = rutaGrafico ? paq && await paq.parte(rutaGrafico) : raiz && { ruta: '', doc: raiz.ownerDocument, raiz, rels: sinRels };
+    if (!parteGrafico) throw new Error('gráfico sin datos');
+    let tema = null;
+    for (const rutaTema of paq ? ['xl/theme/theme1.xml', 'ppt/theme/theme1.xml'] : []) { tema = await paq.parte(rutaTema); if (tema) break; }
+    if (!tema) tema = { doc: parsear(TEMA_OFFICE) };
+    const ctx = crearContexto({ sld: null, layout: null, master: null, tema, textoPorDefecto: null, numero: 1, parte: paq ? paq.parte : async () => null });
+    ctx.parteActual = parteGrafico; ctx.cadena = []; ctx.estilosTabla = new Map(); ctx.excel = excel;
+    const g = modeloDeGrafico(parteGrafico, ctx);
+    if (!g.modelo) throw new Error(g.motivo);
+    return {
+      pres: { ancho, alto, cantidad: 1, imagen: paq ? paq.imagen : async () => null },
+      diapositiva: {
+        fondo: { tipo: 'solido', color: { r: 255, g: 255, b: 255, a: 1 } }, motivos: [], soportada: true,
+        elementos: [{ tipo: 'grafico', nombre: 'Gráfico', xfrm: { x: 0, y: 0, w: ancho, h: alto, rot: 0 }, grafico: g.modelo }],
+      },
+    };
+  }
+
+  // El tema de Office de siempre (Calibri y sus seis colores de acento), para
+  // un gráfico que no trae el suyo.
+  const TEMA_OFFICE = '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:themeElements><a:clrScheme name="Office">'
+    + '<a:dk1><a:srgbClr val="000000"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="44546A"/></a:dk2><a:lt2><a:srgbClr val="E7E6E6"/></a:lt2>'
+    + '<a:accent1><a:srgbClr val="4472C4"/></a:accent1><a:accent2><a:srgbClr val="ED7D31"/></a:accent2><a:accent3><a:srgbClr val="A5A5A5"/></a:accent3>'
+    + '<a:accent4><a:srgbClr val="FFC000"/></a:accent4><a:accent5><a:srgbClr val="5B9BD5"/></a:accent5><a:accent6><a:srgbClr val="70AD47"/></a:accent6>'
+    + '<a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink></a:clrScheme>'
+    + '<a:fontScheme name="Office"><a:majorFont><a:latin typeface="Calibri Light"/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/></a:minorFont></a:fontScheme>'
+    + '</a:themeElements></a:theme>';
 
   // --- Tablas -----------------------------------------------------------------------------
   // Partes de un estilo de tabla, de menor a mayor prioridad (cada una pisa a
@@ -594,7 +646,8 @@ const PptxModelo = (() => {
     // archivo trae solo el GUID, el integrado (pptx-estilos-tabla.js).
     const estilo = hijo(tblPr, 'tableStyle') ? hijo(hijo(tblPr, 'tableStyle'), 'tblStyle')
       : id ? ctx.estilosTabla.get(id) || (typeof PptxEstilosTabla !== 'undefined' ? PptxEstilosTabla.definicion(id) : null) : null;
-    if (id && !estilo) { motivos.push('estilo de tabla desconocido'); return { tipo: 'tabla', xfrm }; }
+    // Un estilo que no está en el archivo ni entre los integrados: la tabla se dibuja sin estilo (con lo que cada celda dice por su cuenta).
+    if (id && !estilo) motivos.push('estilo de tabla desconocido');
     const bandera = (a) => bool(tblPr, a);
     const columnas = hijos(hijo(tbl, 'tblGrid'), 'gridCol').map((c) => ent(c, 'w', 0));
     const trs = hijos(tbl, 'tr');
@@ -710,14 +763,21 @@ const PptxModelo = (() => {
       });
     });
 
-    // Fondo de toda la tabla (tblBg), debajo de las celdas.
+    // Fondo de toda la tabla, debajo de las celdas: el relleno escrito en
+    // tblPr (Tabla.Background en PowerPoint) o, si no hay, el tblBg del
+    // estilo. Su sombra (effectLst de tblPr o del tblBg) es la del rectángulo
+    // de la tabla entera (23-tablas-avanzadas, diapositiva 4).
     const tblBg = parteDe('tblBg');
-    let fondoTabla = null;
-    if (tblBg) {
+    let fondoTabla = null, sombraTabla = null;
+    const propio = primero(tblPr, RELLENOS);
+    if (propio) fondoTabla = relleno(propio, ctx.cc, ctx.parteActual);
+    else if (tblBg) {
       const r = primero(tblBg, RELLENOS);
       fondoTabla = r ? relleno(r, ctx.cc, ctx.parteActual) : hijo(tblBg, 'fillRef') ? rellenoDeReferencia(hijo(tblBg, 'fillRef'), ctx) || null : null;
     }
-    return { tipo: 'tabla', xfrm, columnas, filas: trs.map((tr) => ent(tr, 'h', 0)), celdas, fondo: fondoTabla, rtl: bandera('rtl') };
+    const efectos = hijo(tblPr, 'effectLst') || ruta(tblBg, 'effect', 'effectLst');
+    if (efectos) sombraTabla = sombraDeLista(efectos, ctx.cc);
+    return { tipo: 'tabla', xfrm, columnas, filas: trs.map((tr) => ent(tr, 'h', 0)), celdas, fondo: fondoTabla, sombra: sombraTabla, rtl: bandera('rtl') };
   }
 
   async function dibujoDeDiagrama(datos, ctx) {
@@ -932,8 +992,10 @@ const PptxModelo = (() => {
     }
     const bmp = await createImageBitmap(new Blob([bytes]));
     const [dpiX, dpiY] = dpiDe(bytes, tipo);
+    // El JPEG original va tal cual al PDF (pdf-lienzo.js), sin volver a comprimir.
+    if (tipo === 'jpg') bmp.bytesJpeg = bytes;
     return { fuente: bmp, ancho: bmp.width, alto: bmp.height, dpiX, dpiY };
   }
 
-  return { abrir, color };
+  return { abrir, graficoSuelto, color };
 })();

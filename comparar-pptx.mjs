@@ -25,10 +25,11 @@
 // Uso:
 //   npm run comparar-pptx                     corpus\*.pptx y locales\*.pptx
 //   npm run comparar-pptx -- a.pptx b.pptx    esos archivos
-// Opciones: --sin-preparar (el original sin pptx-preparar.js, para medir
-// cuánto aporta), --pptxviewjs (la librería que el motor propio
-// reemplazó como predeterminado el 2026-10-10, para comparar), --base (guarda el resultado como nueva línea base),
-// --sin-build, --pdf (exporta también el PDF de PowerPoint).
+// Opciones: --base (guarda el resultado como nueva línea base),
+// --sin-build, --pdf (exporta también el PDF de PowerPoint), --vectorial (arma
+// además el PDF de vectores de pdf-lienzo.js y mide cada página contra el dibujo
+// directo del motor: píxeles distintos, páginas que cayeron a imagen y trazos que
+// fueron como imagen; no toca la línea base).
 // Código de salida 1 si una diapositiva empeoró respecto de la línea base
 // (más de 1 punto de % de píxeles o más de 0,01 de SSIM) o si faltó dibujar
 // alguna. Necesita Windows con PowerPoint y Edge: NO conectar a "npm run
@@ -62,8 +63,6 @@ const TIPOS = {
 
 const argumentos = process.argv.slice(2);
 const opcion = (n) => argumentos.includes(n);
-const sinPreparar = opcion('--sin-preparar');
-const conPptxViewJS = opcion('--pptxviewjs');
 let archivos = argumentos.filter((a) => !a.startsWith('--')).map((a) => resolve(a));
 // Sin archivos: el corpus sintético (en git) y comparar-pptx\locales (fuera de
 // git: presentaciones reales que no se pueden publicar, como la charla del
@@ -106,7 +105,7 @@ if (!opcion('--sin-build')) {
   const b = spawnSync(process.execPath, [join(RAIZ, 'build.mjs')], { stdio: 'inherit' });
   if (b.status !== 0) process.exit(1);
 }
-const corrida = sinPreparar ? 'sin-preparar' : conPptxViewJS ? 'pptxviewjs' : 'actual';
+const corrida = 'actual';
 const destino = join(SALIDA, corrida);
 rmSync(destino, { recursive: true, force: true });
 
@@ -114,8 +113,7 @@ rmSync(destino, { recursive: true, force: true });
 // las imágenes y las medidas al servidor.
 const CONTROL = String.raw`<!doctype html><meta charset="utf-8"><iframe id="m" style="width:1280px;height:900px"></iframe><script>
 const CASOS = __CASOS__;
-const SIN_PREPARAR = __SIN_PREPARAR__;
-const CON_PPTXVIEWJS = __CON_PPTXVIEWJS__;
+const VECTORIAL = __VECTORIAL__;
 const enviar = (ruta, cuerpo) => fetch(ruta, { method: 'POST', body: cuerpo });
 const imagen = (src) => new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error('no cargó ' + src)); i.src = src; });
 function lienzo(fuente, w, h) {
@@ -148,6 +146,11 @@ function ssim(a, b, w, h) {
   await new Promise((r) => { m.onload = r; m.src = '/herramientas/powerpoint-a-imagenes.html'; });
   const W = m.contentWindow;
   const avisos = [];
+  if (VECTORIAL) {
+    for (const src of ['/vendor/pdf-lib/1.17.1/pdf-lib.min.js', '/assets/js/pdfjs.js']) {
+      await new Promise((ok, mal) => { const s = W.document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => mal(new Error('no cargó ' + src)); W.document.head.appendChild(s); });
+    }
+  }
   for (const nivel of ['warn', 'error']) { const o = W.console[nivel]; W.console[nivel] = (...a) => { avisos.push(nivel + ': ' + a.map(String).join(' ').slice(0, 300)); o.apply(W.console, a); }; }
   for (const caso of CASOS) {
     const t0 = performance.now();
@@ -157,14 +160,19 @@ function ssim(a, b, w, h) {
       const archivo = new W.File([bytes], caso.nombre);
       const lienzoRender = W.document.createElement('canvas');
       avisos.length = 0;
-      let imagenes;
-      if (SIN_PREPARAR) {
-        imagenes = await W.dibujarDiapositivas(archivo, archivo, lienzoRender, null, { conImagenes: true });
-      } else {
-        resultado.cambios = (await W.eval('PptxPreparar').preparar(archivo)).cambios;
-        imagenes = await W.renderizarDiapositivasComoImagenes(archivo, lienzoRender, null, { conImagenes: true, motor: CON_PPTXVIEWJS ? 'pptxviewjs' : undefined });
-      }
+      const imagenes = await W.renderizarDiapositivasComoImagenes(archivo, lienzoRender, null, { conImagenes: true });
       resultado.ms = Math.round(performance.now() - t0);
+      // --vectorial: el PDF de vectores (pdf-lienzo.js) contra el dibujo directo.
+      let docVec = null, vec = null;
+      if (VECTORIAL) {
+        const tv = performance.now();
+        vec = await W.renderizarDiapositivasComoImagenes(archivo, W.document.createElement('canvas'), null, { conImagenes: false, paraPdf: true });
+        const bytesPdf = await (await W.construirPdfDesdeImagenes(vec)).save();
+        resultado.tamPdf = bytesPdf.length;
+        resultado.msVec = Math.round(performance.now() - tv);
+        await enviar('/__pdf/' + caso.indice, new Blob([bytesPdf]));
+        docVec = await W.abrirPdf(bytesPdf);
+      }
       for (let i = 0; i < caso.total; i++) {
         const n = String(i + 1).padStart(3, '0');
         const ref = await imagen('/__ref/' + caso.indice + '/d' + n + '.png');
@@ -188,6 +196,24 @@ function ssim(a, b, w, h) {
           else { const v = 255 - Math.min(80, d * 2); dif.data[k] = dif.data[k + 1] = dif.data[k + 2] = v; dif.data[k + 3] = 255; }
         }
         fila.pct = Math.round(10000 * distintos / (w * h)) / 100;
+        if (docVec) {
+          const pag = await docVec.getPage(i + 1);
+          const cv = W.document.createElement('canvas'); cv.width = w; cv.height = h;
+          const cx = cv.getContext('2d', { willReadFrequently: true });
+          cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h);
+          await pag.render({ canvasContext: cx, viewport: pag.getViewport({ scale: w / pag.view[2] }) }).promise;
+          const c = cx.getImageData(0, 0, w, h).data;
+          let dv = 0;
+          for (let k = 0; k < c.length; k += 4) if (Math.max(Math.abs(c[k] - b[k]), Math.abs(c[k + 1] - b[k + 1]), Math.abs(c[k + 2] - b[k + 2])) > 48) dv++;
+          fila.pctVec = Math.round(10000 * dv / (w * h)) / 100;
+          if (fila.pctVec > 2) {
+            const toBlob = (c) => new Promise((r) => c.toBlob(r, 'image/png'));
+            await enviar('/__img/' + caso.indice + '/v' + String(i + 1).padStart(3, '0') + '.png', await toBlob(cv));
+          }
+          fila.vec = !!(vec[i] && vec[i].vector);
+          fila.respaldos = vec[i] && vec[i].vector ? vec[i].vector.respaldos : null;
+          fila.motivos = vec[i] && vec[i].vector ? vec[i].vector.motivos : null;
+        }
         fila.ssim = Math.round(10000 * ssim(a, b, w, h)) / 10000;
         const cDif = document.createElement('canvas'); cDif.width = w; cDif.height = h; cDif.getContext('2d').putImageData(dif, 0, 0);
         const png = (c) => new Promise((r) => c.toBlob(r, 'image/png'));
@@ -221,13 +247,27 @@ const servidor = createServer(async (q, s) => {
       const carpeta = join(destino, casos[+indice].nombre.replace(/\.pptx$/i, ''));
       mkdirSync(carpeta, { recursive: true });
       writeFileSync(join(carpeta, nombre), cuerpo);
+    } else if (ruta.startsWith('/__pdf/')) {
+      mkdirSync(destino, { recursive: true });
+      writeFileSync(join(destino, casos[+ruta.split('/')[2]].nombre.replace(/\.pptx$/i, '') + '.vectorial.pdf'), cuerpo);
     } else if (ruta === '/__resultado') {
       const r = JSON.parse(cuerpo.toString());
       resultados.push(r);
       const ps = r.diapositivas.filter((d) => d.pct != null);
       const media = ps.length ? (ps.reduce((a, d) => a + d.pct, 0) / ps.length).toFixed(2) : '—';
-      const ajenas = r.diapositivas.filter((d) => d.motor === 'pptxviewjs').length;
-      console.log(`  ${r.nombre}: ${ps.length} diapositivas${ajenas ? ` (${ajenas} con PptxViewJS)` : ''}, media ${media} %${r.error ? ' — ERROR ' + r.error.split('\n')[0] : ''}`);
+      const conMotivos = r.diapositivas.filter((d) => d.motivos && d.motivos.length && !d.pctVec).length;
+      console.log(`  ${r.nombre}: ${ps.length} diapositivas${conMotivos ? ` (${conMotivos} con partes omitidas)` : ''}, media ${media} %${r.error ? ' — ERROR ' + r.error.split('\n')[0] : ''}`);
+      if (r.tamPdf) {
+        const v = r.diapositivas.filter((d) => d.pctVec != null);
+        const mv = v.length ? (v.reduce((a, d) => a + d.pctVec, 0) / v.length).toFixed(2) : '-';
+        const enVector = v.filter((d) => d.vec).length;
+        const resp = v.reduce((a, d) => a + (d.respaldos || 0), 0);
+        console.log(`    PDF vectorial: ${(r.tamPdf / 1024).toFixed(0)} KB en ${(r.msVec / 1000).toFixed(1)} s, ${enVector}/${v.length} paginas de vectores, ${resp} trazos como imagen, diferencia media con el dibujo directo ${mv} %`);
+        const motivos = {};
+        for (const d of v) for (const m of d.motivos || []) motivos[m] = (motivos[m] || 0) + 1;
+        if (Object.keys(motivos).length) console.log('    como imagen: ' + Object.entries(motivos).map(([m, n]) => m + ' ' + n).join(', '));
+        for (const d of v.filter((x) => x.pctVec > 3 || !x.vec).sort((a, b) => b.pctVec - a.pctVec).slice(0, 6)) console.log(`      diap. ${d.n}: ${d.pctVec} %${d.vec ? '' : ' (pagina como imagen)'}, ${d.respaldos ?? '-'} como imagen`);
+      }
     } else if (ruta === '/__fin') {
       const t = cuerpo.toString(); if (t !== '1') console.error(t); terminar();
     }
@@ -235,7 +275,7 @@ const servidor = createServer(async (q, s) => {
   }
   if (ruta === '/__control') {
     s.setHeader('content-type', 'text/html; charset=utf-8');
-    return s.end(CONTROL.replace('__CASOS__', JSON.stringify(datosCasos)).replace('__SIN_PREPARAR__', String(sinPreparar)).replace('__CON_PPTXVIEWJS__', String(conPptxViewJS)));
+    return s.end(CONTROL.replace('__CASOS__', JSON.stringify(datosCasos)).replace('__VECTORIAL__', String(opcion('--vectorial'))));
   }
   if (ruta.startsWith('/__pptx/')) return s.end(readFileSync(casos[+ruta.split('/')[2]].ruta));
   if (ruta.startsWith('/__ref/')) {
@@ -298,9 +338,10 @@ const compGraficos = resultados.flatMap((r) => r.diapositivas.flatMap((d) => (d.
 const conCortes = todas.filter((d) => d.cortes);
 const cortes = conCortes.length ? sumarCortes(conCortes.map((d) => d.cortes)) : null;
 const media = (k) => todas.length ? (todas.reduce((a, d) => a + d[k], 0) / todas.length) : 0;
+mkdirSync(destino, { recursive: true });
 writeFileSync(join(destino, 'resultado.json'), JSON.stringify(resultados, null, 1));
 escribirInforme();
-if (opcion('--base') && !sinPreparar && !conPptxViewJS) {
+if (opcion('--base')) {
   const nueva = { ...base };
   for (const r of resultados) {
     if (r.error) continue;
@@ -445,12 +486,11 @@ figcaption{font-size:12px;color:#555}.peor{color:#b00;font-weight:600}.mejor{col
     const c = casos.find((x) => x.nombre === r.nombre);
     const carpeta = encodeURIComponent(r.nombre.replace(/\.pptx$/i, ''));
     html += `<h2 id="${esc(r.nombre)}">${esc(r.nombre)}</h2>`;
-    if (r.cambios) html += `<p>pptx-preparar: ${esc(JSON.stringify(r.cambios))}</p>`;
     for (const d of r.diapositivas) {
       const n = String(d.n).padStart(3, '0');
       const delta = d.antes ? d.pct - d.antes.pct : 0;
       const clase = delta > MARGEN_PCT ? 'peor' : delta < -MARGEN_PCT ? 'mejor' : '';
-      html += `<p><b>Diapositiva ${d.n}</b> — ${d.falta ? 'NO SE DIBUJÓ' : `${d.pct} % · SSIM ${d.ssim}`}${d.motor === 'pptxviewjs' ? ` · <i>PptxViewJS (${esc((d.motivos || []).join(', '))})</i>` : ''}${d.antes ? ` <span class="${clase}">(antes ${d.antes.pct} %)</span>` : ''}</p>`;
+      html += `<p><b>Diapositiva ${d.n}</b> — ${d.falta ? 'NO SE DIBUJÓ' : `${d.pct} % · SSIM ${d.ssim}`}${d.motivos && d.motivos.length ? ` · <i>omitido: ${esc(d.motivos.join(', '))}</i>` : ''}${d.antes ? ` <span class="${clase}">(antes ${d.antes.pct} %)</span>` : ''}</p>`;
       if (d.cortes && d.cortes.distintas.length) {
         html += '<details><summary>Cortes de línea distintos de PowerPoint: ' + d.cortes.distintas.length + '</summary><table><tr><th class="t">Forma</th><th class="t">PowerPoint</th><th class="t">Nuestro</th></tr>';
         for (const x of d.cortes.distintas) html += `<tr><td class="t">${esc(x.nombre)}</td><td class="t">${x.powerpoint.map(esc).join('<br>')}</td><td class="t">${x.nuestro.map(esc).join('<br>')}</td></tr>`;

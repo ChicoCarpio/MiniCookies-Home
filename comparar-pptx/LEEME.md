@@ -19,11 +19,9 @@ Detalle y opciones: el encabezado de `comparar-pptx.mjs`.
 
 Flujo de cada cambio en el motor: `npm run comparar-pptx`, revisar
 `salida\actual\informe.html`, y si mejoró, `npm run comparar-pptx -- --base`.
-`--sin-preparar` mide sin `pptx-preparar.js` (cuánto aporta la etapa 0).
 Desde el 2026-10-10 el predeterminado es el motor propio (`pptx-modelo.js` y
-compañía); el informe marca las diapositivas que todavía dibuja PptxViewJS
-(tablas, gráficos) y por qué. `--pptxviewjs` mide la librería sola (salida en
-`salida\pptxviewjs\`, no cambia la línea base). Con el motor propio el informe
+compañía) y desde el 2026-10-11 el único (PptxViewJS y `pptx-preparar.js` se
+quitaron; el informe marca lo que el motor omitió). Con el motor propio el informe
 compara además los **cortes de línea** con los de PowerPoint (las líneas de
 cada forma, por nombre); ojo: la caja de línea de PowerPoint incluye el espacio
 antes/después del párrafo y los espacios del final de la línea.

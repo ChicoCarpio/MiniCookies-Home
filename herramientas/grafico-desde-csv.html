@@ -25,7 +25,8 @@ window.i18nPagina = {
     'opcion-torta': 'Torta',
     'boton-graficar': 'Generar gráfico',
     'boton-descargar-png': 'Descargar como PNG',
-    'error-sin-filas': 'No se encontraron filas de datos en este archivo.'
+    'error-sin-filas': 'No se encontraron filas de datos en este archivo.',
+    'error-grafico': 'No se pudo dibujar el gráfico'
   },
   en: {
     'titulo-pagina': 'Generate a Chart from Excel or CSV Free — Mini Cookies',
@@ -41,7 +42,8 @@ window.i18nPagina = {
     'opcion-torta': 'Pie',
     'boton-graficar': 'Generate chart',
     'boton-descargar-png': 'Download as PNG',
-    'error-sin-filas': 'No data rows were found in this file.'
+    'error-sin-filas': 'No data rows were found in this file.',
+    'error-grafico': 'Couldn’t draw the chart'
   }
 };
 </script>
@@ -90,7 +92,7 @@ window.i18nPagina = {
     </div>
 
     <div style="margin-top:20px; background:#fff; padding:16px; border-radius:8px; display:none;" id="contenedorGrafico">
-      <canvas id="canvasGrafico"></canvas>
+      <canvas id="canvasGrafico" style="max-width:100%; height:auto;"></canvas>
     </div>
 
     <div class="controles" id="controlesDescarga" style="display:none;">
@@ -108,7 +110,8 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
-<script src="../vendor/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/grafico-suelto.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -123,7 +126,7 @@ const contenedorGrafico = document.getElementById('contenedorGrafico');
 const controlesDescarga = document.getElementById('controlesDescarga');
 
 let filasDatos = [];
-let graficoActual = null;
+let hayGrafico = false;
 let comaDecimalArchivo = false;
 
 // Los números ya vienen convertidos desde lector-planillas.js; esto cubre
@@ -173,9 +176,9 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-const COLORES = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
-
-botonGraficar.addEventListener('click', () => {
+// El gráfico lo dibuja el mismo motor que los de PowerPoint y Excel
+// (assets/js/grafico-suelto.js): 540 × 315 pt, a 8/3 píxeles por punto (pantallas de densidad doble).
+botonGraficar.addEventListener('click', async () => {
   const claveEtiqueta = columnaEtiquetas.value;
   const claveValor = columnaValores.value;
   const tipo = document.getElementById('tipoGrafico').value;
@@ -183,45 +186,29 @@ botonGraficar.addEventListener('click', () => {
   const etiquetas = filasDatos.map(fila => String(fila[claveEtiqueta]));
   const valores = filasDatos.map(fila => valorNumerico(fila[claveValor]));
 
-  if (graficoActual) graficoActual.destroy();
-  contenedorGrafico.style.display = 'block';
-  controlesDescarga.style.display = 'flex';
-
-  const ctx = document.getElementById('canvasGrafico').getContext('2d');
-  graficoActual = new Chart(ctx, {
-    type: tipo,
-    data: {
-      labels: etiquetas,
-      datasets: [{
-        label: claveValor,
-        data: valores,
-        backgroundColor: tipo === 'pie' ? COLORES : COLORES[0],
-        borderColor: COLORES[0],
-        borderWidth: tipo === 'line' ? 2 : 1,
-      }],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: tipo === 'pie' } },
-    },
-  });
+  botonGraficar.disabled = true;
+  try {
+    const raiz = GraficoSuelto.xmlDeDatos({ tipo, titulo: claveValor, categorias: etiquetas, series: [{ nombre: claveValor, valores }] });
+    await GraficoSuelto.dibujarEn(document.getElementById('canvasGrafico'), { raiz, anchoPt: 540, altoPt: 315, escala: 8 / 3, excel: false });
+    hayGrafico = true;
+    contenedorGrafico.style.display = 'block';
+    controlesDescarga.style.display = 'flex';
+  } catch (error) {
+    hayGrafico = false;
+    controlesDescarga.style.display = 'none';
+    console.warn('No se pudo dibujar el gráfico:', error);
+    alert(t('error-grafico') + ': ' + error.message);
+  } finally {
+    botonGraficar.disabled = false;
+  }
 });
 
 document.getElementById('botonDescargarPng').addEventListener('click', () => {
-  if (!graficoActual) return;
-  // El canvas de Chart.js es transparente: se copia sobre fondo blanco para
-  // que el PNG no se vea negro en visores con fondo oscuro.
-  const origen = graficoActual.canvas;
-  const lienzo = document.createElement('canvas');
-  lienzo.width = origen.width;
-  lienzo.height = origen.height;
-  const contexto = lienzo.getContext('2d');
-  contexto.fillStyle = '#ffffff';
-  contexto.fillRect(0, 0, lienzo.width, lienzo.height);
-  contexto.drawImage(origen, 0, 0);
+  if (!hayGrafico) return;
+  // El motor pinta el fondo blanco del gráfico, así que el PNG sale opaco.
   const enlace = document.createElement('a');
   enlace.download = 'grafico.png';
-  enlace.href = lienzo.toDataURL('image/png');
+  enlace.href = document.getElementById('canvasGrafico').toDataURL('image/png');
   enlace.click();
 });
 </script>

@@ -1,7 +1,8 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Excel / CSV → PDF, compartido por "Excel/CSV → PDF" y "Unir PDF".
 // Requiere SheetJS (XLSX), assets/js/lector-planillas.js, pdf-lib, JSZip y
-// Chart.js (los gráficos de un .xlsx), y assets/js/vendor.js (rutaVendor).
+// assets/js/grafico-suelto.js (los gráficos de un .xlsx: el motor de gráficos
+// de PowerPoint), y assets/js/vendor.js (rutaVendor).
 //
 // La tabla se dibuja escribiendo los operadores PDF a mano (ver "Dibujo
 // directo"): así un Excel de 20.000 filas entra en memoria. Las funciones son
@@ -13,16 +14,14 @@
     es: {
       'aviso-caracteres': 'La fuente de respaldo no representa todos los caracteres del archivo ({n} sustituidos); los signos monetarios disponibles se conservaron.',
       'error-sin-datos': 'La hoja no tiene datos.',
-      'serie-defecto': 'Serie {n}',
-      'leyenda-tipo-no-soportado': ' (tipo de gráfico no soportado — mostrado como barras)',
-      'leyenda-grafico': 'Gráfico{titulo}, celda {celda} de "{hoja}"{tipo} — reconstruido a partir de los datos, el estilo puede no ser idéntico al original',
+      'aviso-grafico-omitido': '{n} gráfico(s) de la hoja no se pudieron dibujar y quedaron fuera del PDF.',
+      'leyenda-grafico': 'Gráfico{titulo}, celda {celda} de "{hoja}" — dibujado por Mini Cookies, puede no verse idéntico al original',
     },
     en: {
       'aviso-caracteres': 'The fallback font does not cover every character in the file ({n} replaced); available currency symbols were preserved.',
       'error-sin-datos': 'The sheet has no data.',
-      'serie-defecto': 'Series {n}',
-      'leyenda-tipo-no-soportado': ' (chart type not supported — shown as bars)',
-      'leyenda-grafico': 'Chart{titulo}, cell {celda} of "{hoja}"{tipo} — rebuilt from the data, the style may not be identical to the original',
+      'aviso-grafico-omitido': '{n} chart(s) on the sheet couldn’t be drawn and were left out of the PDF.',
+      'leyenda-grafico': 'Chart{titulo}, cell {celda} of "{hoja}" — drawn by Mini Cookies, may not look identical to the original',
     },
   };
   // Se suman a los textos de la página (los de la página mandan).
@@ -349,7 +348,8 @@ function carpetaDe(ruta) {
 }
 
 function resolverRutaRelativa(carpetaBase, relativa) {
-  const partes = (carpetaBase + relativa).split('/');
+  // Un destino que empieza con "/" cuenta desde la raíz del paquete (así los escribe openpyxl).
+  const partes = (relativa.startsWith('/') ? relativa : carpetaBase + relativa).split('/');
   const resultado = [];
   partes.forEach((parte) => {
     if (parte === '..') resultado.pop();
@@ -457,7 +457,7 @@ function celdaDesdeAncla(ancla) {
   return XLSX.utils.encode_cell({ r: row, c: col });
 }
 
-async function objetosDeHoja(zip, rutaSheetXml) {
+async function objetosDeHoja(zip, rutaSheetXml, hoja = {}) {
   const vacio = { graficos: [] };
   const hojaDoc = await leerXmlDeZip(zip, rutaSheetXml);
   if (!hojaDoc) return vacio;
@@ -487,70 +487,10 @@ async function objetosDeHoja(zip, rutaSheetXml) {
     if (!targetGrafico) continue;
     const rutaGrafico = resolverRutaRelativa(carpetaDrawing, targetGrafico);
     const graficoDoc = await leerXmlDeZip(zip, rutaGrafico);
-    if (graficoDoc) graficos.push({ doc: graficoDoc, celda: celdaDesdeAncla(ancla) });
+    if (graficoDoc) graficos.push({ doc: graficoDoc, ruta: rutaGrafico, celda: celdaDesdeAncla(ancla), medida: medidaDeAncla(ancla, hoja) });
   }
 
   return { graficos };
-}
-
-const PALETA_GRAFICOS = ['#4f7cff', '#22c55e', '#f97316', '#ef4444', '#a855f7', '#14b8a6', '#eab308', '#64748b'];
-
-function valoresDeCache(nodo) {
-  if (!nodo) return [];
-  const pts = [...nodo.getElementsByTagName('c:pt')];
-  const maxIdx = pts.reduce((m, p) => Math.max(m, parseInt(p.getAttribute('idx') || '0', 10)), -1);
-  const arr = new Array(maxIdx + 1).fill('');
-  pts.forEach((p) => {
-    const idx = parseInt(p.getAttribute('idx') || '0', 10);
-    const v = p.getElementsByTagName('c:v')[0];
-    arr[idx] = v ? v.textContent : '';
-  });
-  return arr;
-}
-
-function nombreSerie(ser, indice) {
-  const tx = primerHijoDirecto(ser, 'c:tx');
-  const vDirecto = tx && primerHijoDirecto(tx, 'c:v');
-  if (vDirecto) return vDirecto.textContent;
-  const strRef = tx && primerHijoDirecto(tx, 'c:strRef');
-  const cache = strRef && primerHijoDirecto(strRef, 'c:strCache');
-  const valores = cache ? valoresDeCache(cache) : [];
-  return valores[0] || t('serie-defecto').replace('{n}', indice + 1);
-}
-
-function categoriasDe(ser) {
-  const cat = primerHijoDirecto(ser, 'c:cat');
-  if (!cat) return [];
-  const ref = primerHijoDirecto(cat, 'c:strRef') || primerHijoDirecto(cat, 'c:numRef');
-  if (ref) {
-    const cache = primerHijoDirecto(ref, 'c:strCache') || primerHijoDirecto(ref, 'c:numCache');
-    return cache ? valoresDeCache(cache) : [];
-  }
-  // Categorías de varios niveles (ej. una tabla de Excel con dos columnas
-  // como categoría, "lugar" + "casa") vienen en c:multiLvlStrRef en vez de
-  // c:strRef — sin este caso las categorías quedaban vacías y el gráfico de
-  // barras no dibujaba nada (0 categorías = barras de ancho 0 en Chart.js).
-  const multiRef = primerHijoDirecto(cat, 'c:multiLvlStrRef');
-  const multiCache = multiRef && primerHijoDirecto(multiRef, 'c:multiLvlStrCache');
-  if (!multiCache) return [];
-  const niveles = [...multiCache.children].filter((n) => n.tagName === 'c:lvl').map((nivel) => valoresDeCache(nivel));
-  const cantidad = niveles.reduce((max, nivel) => Math.max(max, nivel.length), 0);
-  return Array.from({ length: cantidad }, (_, i) => niveles.map((nivel) => nivel[i]).filter(Boolean).join(' / '));
-}
-
-function valoresDe(ser) {
-  const val = primerHijoDirecto(ser, 'c:val');
-  const ref = val && primerHijoDirecto(val, 'c:numRef');
-  const cache = ref && primerHijoDirecto(ref, 'c:numCache');
-  const bruto = cache ? valoresDeCache(cache) : [];
-  return bruto.map((v) => parseFloat(v) || 0);
-}
-
-function colorDeSerie(ser, indice) {
-  const spPr = primerHijoDirecto(ser, 'c:spPr');
-  const solidFill = spPr && primerHijoDirecto(spPr, 'a:solidFill');
-  const srgb = solidFill && primerHijoDirecto(solidFill, 'a:srgbClr');
-  return srgb ? '#' + srgb.getAttribute('val') : PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length];
 }
 
 function extraerTituloGrafico(doc) {
@@ -560,88 +500,45 @@ function extraerTituloGrafico(doc) {
   return [...titleNodo.getElementsByTagName('a:t')].map((r) => r.textContent).join('').trim();
 }
 
-const TIPOS_GRAFICO_SOPORTADOS = [
-  ['c:barChart', 'bar'], ['c:bar3DChart', 'bar'],
-  ['c:lineChart', 'line'], ['c:line3DChart', 'line'],
-  ['c:areaChart', 'line'], ['c:area3DChart', 'line'],
-  ['c:pieChart', 'pie'], ['c:pie3DChart', 'pie'],
-  ['c:doughnutChart', 'doughnut'],
-  ['c:radarChart', 'radar'],
-  ['c:scatterChart', 'line'],
-];
-
-function parsearGrafico(doc) {
-  let elementoChart = null, tipo = 'bar', soportado = true;
-  for (const [tag, t] of TIPOS_GRAFICO_SOPORTADOS) {
-    const nodo = doc.getElementsByTagName(tag)[0];
-    if (nodo) { elementoChart = nodo; tipo = t; break; }
+// Cuánto mide un gráfico en la hoja (puntos), según su ancla: la de una celda
+// trae su tamaño (xdr:ext, en EMU); la de dos celdas va de una a otra, con los
+// anchos de columna y alto de fila de la hoja (las filas sin alto propio miden 15 pt).
+function medidaDeAncla(ancla, hoja) {
+  const PT_POR_EMU = 1 / 12700, PX_POR_EMU = 1 / 9525;
+  const ext = primerHijoDirecto(ancla, 'xdr:ext');
+  if (ext) {
+    const w = parseInt(ext.getAttribute('cx'), 10) * PT_POR_EMU, h = parseInt(ext.getAttribute('cy'), 10) * PT_POR_EMU;
+    if (w > 0 && h > 0) return { anchoPt: w, altoPt: h };
   }
-  if (!elementoChart) {
-    const plotArea = doc.getElementsByTagName('c:plotArea')[0];
-    const cualquiera = plotArea && [...plotArea.children].find((n) => /Chart$/.test(n.tagName));
-    if (!cualquiera) return null;
-    elementoChart = cualquiera;
-    soportado = false;
+  const punto = (nodo) => {
+    const n = (tag) => parseInt(nodo?.getElementsByTagName(tag)[0]?.textContent || '0', 10);
+    return { col: n('xdr:col'), colOff: n('xdr:colOff'), fila: n('xdr:row'), filaOff: n('xdr:rowOff') };
+  };
+  const desde = punto(ancla.getElementsByTagName('xdr:from')[0]), hasta = punto(ancla.getElementsByTagName('xdr:to')[0]);
+  if (hasta.col || hasta.fila) {
+    let anchoPx = hasta.colOff * PX_POR_EMU - desde.colOff * PX_POR_EMU;
+    for (let c = desde.col; c < hasta.col; c++) anchoPx += anchoColumnaDesdeHoja(hoja, c, 64);
+    let altoPt = (hasta.filaOff - desde.filaOff) * PT_POR_EMU;
+    for (let f = desde.fila; f < hasta.fila; f++) {
+      const fila = hoja['!rows']?.[f];
+      altoPt += Number(fila?.hpt) > 0 ? Number(fila.hpt) : Number(fila?.hpx) > 0 ? Number(fila.hpx) * 0.75 : 15;
+    }
+    if (anchoPx > 0 && altoPt > 0) return { anchoPt: anchoPx * 0.75, altoPt };
   }
-
-  const seriesNodos = [...elementoChart.getElementsByTagName('c:ser')];
-  if (seriesNodos.length === 0) return null;
-
-  let categorias = [];
-  const series = seriesNodos.map((ser, indice) => {
-    const cats = categoriasDe(ser);
-    if (cats.length > categorias.length) categorias = cats;
-    return { nombre: nombreSerie(ser, indice), valores: valoresDe(ser), color: colorDeSerie(ser, indice) };
-  });
-
-  // Si el gráfico no tiene un título explícito, Excel muestra automáticamente
-  // el nombre de la única serie como título cuando hay solo una — se imita
-  // ese comportamiento en vez de dejar el título vacío.
-  const titulo = extraerTituloGrafico(doc) || (series.length === 1 ? series[0].nombre : '');
-
-  return { tipo, soportado, titulo, categorias, series };
+  return { anchoPt: 360, altoPt: 216 }; // 5 × 3 pulgadas: el gráfico nuevo de Excel
 }
 
-async function renderizarGraficoComoPng(datosGrafico) {
+// Un gráfico de la hoja, dibujado con el motor de gráficos de PowerPoint
+// (grafico-suelto.js) como PNG. Devuelve los bytes del PNG.
+async function renderizarGraficoComoPng(zip, grafico) {
   const canvas = document.createElement('canvas');
-  canvas.width = 900;
-  canvas.height = 550;
-  // Chart.js necesita el canvas dentro del documento para medir/dibujar bien
-  // (con uno desconectado del DOM, en algunos navegadores el gráfico sale en
-  // blanco) — se agrega fuera de pantalla y se saca apenas se captura la imagen.
-  canvas.style.position = 'fixed';
-  canvas.style.left = '-99999px';
-  canvas.style.top = '0';
-  document.body.appendChild(canvas);
-
-  const esCircular = datosGrafico.tipo === 'pie' || datosGrafico.tipo === 'doughnut';
-  const datasets = esCircular
-    ? [{ data: datosGrafico.series[0]?.valores || [], backgroundColor: datosGrafico.categorias.map((_, i) => PALETA_GRAFICOS[i % PALETA_GRAFICOS.length]) }]
-    : datosGrafico.series.map((serie) => ({
-        label: serie.nombre,
-        data: serie.valores,
-        backgroundColor: serie.color,
-        borderColor: serie.color,
-        fill: false,
-      }));
-
-  const chart = new Chart(canvas.getContext('2d'), {
-    type: datosGrafico.tipo,
-    data: { labels: datosGrafico.categorias, datasets },
-    options: {
-      responsive: false,
-      animation: false,
-      plugins: {
-        title: { display: !!datosGrafico.titulo, text: datosGrafico.titulo, font: { size: 18 } },
-        legend: { display: datasets.length > 1 || esCircular },
-      },
-    },
-  });
-
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  const { anchoPt, altoPt } = grafico.medida;
+  // Unos 216 puntos por pulgada, sin pasar de ~4000 píxeles de lado.
+  const escala = Math.min(3, 4000 / Math.max(anchoPt, altoPt));
+  await GraficoSuelto.dibujarEn(canvas, { zip, rutaGrafico: grafico.ruta, anchoPt, altoPt, escala });
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-  chart.destroy();
-  canvas.remove();
+  canvas.width = canvas.height = 0; // suelta la memoria del canvas
+  if (!blob) throw new Error('No se pudo codificar el gráfico.');
   return blob.arrayBuffer();
 }
 
@@ -948,7 +845,7 @@ async function construirPdfDeHoja({
       const zip = await JSZip.loadAsync(bytesArchivo);
       const mapaHojas = await mapaHojaARutaXml(zip);
       const rutaHojaXml = mapaHojas.get(nombreHoja);
-      const { graficos } = rutaHojaXml ? await objetosDeHoja(zip, rutaHojaXml) : { graficos: [] };
+      const { graficos } = rutaHojaXml ? await objetosDeHoja(zip, rutaHojaXml, libro.Sheets[nombreHoja]) : { graficos: [] };
 
       function agregarPaginaConImagen(imagenPdf, leyenda) {
         const p = pdf.addPage([anchoPagina, altoPagina]);
@@ -969,23 +866,23 @@ async function construirPdfDeHoja({
         cerrarLienzoPdf(lienzoLeyenda);
       }
 
+      let graficosOmitidos = 0;
       for (const grafico of graficos) {
         try {
-          const datos = parsearGrafico(grafico.doc);
-          if (!datos) continue;
-          const bytesGrafico = await renderizarGraficoComoPng(datos);
+          const titulo = extraerTituloGrafico(grafico.doc);
+          const bytesGrafico = await renderizarGraficoComoPng(zip, grafico);
           const imagenPdf = await pdf.embedPng(bytesGrafico);
-          const leyendaTipo = datos.soportado ? '' : t('leyenda-tipo-no-soportado');
           const leyenda = t('leyenda-grafico')
-            .replace('{titulo}', datos.titulo ? `: ${datos.titulo}` : '')
+            .replace('{titulo}', titulo ? `: ${titulo}` : '')
             .replace('{celda}', grafico.celda || '?')
-            .replace('{hoja}', nombreHoja)
-            .replace('{tipo}', leyendaTipo);
+            .replace('{hoja}', nombreHoja);
           agregarPaginaConImagen(imagenPdf, leyenda);
         } catch (errorGrafico) {
-          console.warn('No se pudo reconstruir un gráfico de la hoja:', errorGrafico);
+          graficosOmitidos++;
+          console.warn('No se pudo dibujar un gráfico de la hoja:', errorGrafico);
         }
       }
+      if (graficosOmitidos) mensajesAdvertencia.push(t('aviso-grafico-omitido').replace('{n}', graficosOmitidos));
     } catch (errorObjetos) {
       console.warn('No se pudieron leer los gráficos del archivo:', errorObjetos);
     }

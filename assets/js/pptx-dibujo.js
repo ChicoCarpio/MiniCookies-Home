@@ -31,13 +31,22 @@ const PptxDibujo = (() => {
     const rutas = new Set();
     const usos = [];
     const juntar = (r) => { if (r && r.tipo === 'imagen') rutas.add(r.ruta); };
+    // En un gráfico, las imágenes pueden estar en cualquier relleno (series,
+    // puntos, fondos, paredes, leyenda): se recorre el modelo entero.
+    const juntarGrafico = (o, vistos = new Set()) => {
+      if (!o || typeof o !== 'object' || vistos.has(o)) return;
+      vistos.add(o);
+      if (o.tipo === 'imagen' && o.ruta) { rutas.add(o.ruta); return; }
+      for (const v of o instanceof Map ? o.values() : Object.values(o)) juntarGrafico(v, vistos);
+    };
     juntar(diap.fondo);
     (function recorrer(lista) {
       for (const el of lista) {
         juntar(el.relleno);
         if (el.imagen) juntar(el.imagen);
         if (el.texto) for (const p of el.texto.parrafos) usos.push(...p.trozos, p.fin);
-        if (el.grafico) usos.push(...PptxGrafico.letras(el.grafico));
+        if (el.grafico) { usos.push(...PptxGrafico.letras(el.grafico)); juntarGrafico(el.grafico); }
+        if (el.tipo === 'tabla') juntar(el.fondo);
         for (const c of el.celdas || []) {
           juntar(c.relleno);
           if (c.texto) for (const p of c.texto.parrafos) usos.push(...p.trozos, p.fin);
@@ -46,15 +55,26 @@ const PptxDibujo = (() => {
       }
     })(diap.elementos);
     const imagenes = new Map();
-    await Promise.all([...[...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))), PptxTexto.cargarFuentes(usos.filter(Boolean))]);
+    const letras = usos.filter(Boolean);
+    await Promise.all([...[...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))), PptxTexto.cargarFuentes(letras),
+      // Un lienzo de PDF (pdf-lienzo.js) necesita además los bytes de las fuentes.
+      canvas.precargarFuentes ? canvas.precargarFuentes(letras) : null]);
 
-    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [], graficos: [] };
-    const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap);
-    if (diap.fondo) pintar(ctx, diap.fondo, todo, entorno.anchoDiap, entorno.altoDiap, entorno);
+    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [], graficos: [], trozosPdf: [] };
+    // Sobre un lienzo de PDF, los trazados (Path2D) son los suyos. Todo lo que
+    // sigue es síncrono, así que el reemplazo no se cruza con otro dibujo.
+    const Path2DOriginal = globalThis.Path2D;
+    if (canvas.precargarFuentes) globalThis.Path2D = canvas.constructor.Ruta;
+    try {
+      const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap);
+      if (diap.fondo) pintar(ctx, diap.fondo, todo, entorno.anchoDiap, entorno.altoDiap, entorno);
 
-    const mapa = (x) => ({ x: x.x * s, y: x.y * s, w: x.w * s, h: x.h * s });
-    for (const el of diap.elementos) dibujarElemento(ctx, el, mapa, entorno, null);
-    return { textos: entorno.textos, graficos: entorno.graficos };
+      const mapa = (x) => ({ x: x.x * s, y: x.y * s, w: x.w * s, h: x.h * s });
+      for (const el of diap.elementos) dibujarElemento(ctx, el, mapa, entorno, null);
+    } finally {
+      globalThis.Path2D = Path2DOriginal;
+    }
+    return { textos: entorno.textos, graficos: entorno.graficos, trozosPdf: entorno.trozosPdf };
   }
 
   function aplicarTransformacion(ctx, caja, x) {
@@ -352,6 +372,19 @@ const PptxDibujo = (() => {
     const fuente = conEfectos(img, r.efectos);
     ctx.clip(path, 'evenodd');
     ctx.globalAlpha *= r.alfa;
+    if (r.apilar) {
+      // Imagen apilada (c:pictureFormat stack, barras de un gráfico): del ancho
+      // de la barra (o del alto, si es horizontal), con su proporción, y
+      // repetida desde la base.
+      const a = r.apilar, v = a.dir === 'v';
+      const tw = v ? w : h * img.ancho / img.alto, th = v ? w * img.alto / img.ancho : h;
+      if (!(tw > 0 && th > 0)) return;
+      const patron = ctx.createPattern(fuente, 'repeat');
+      patron.setTransform(new DOMMatrix([tw / img.ancho, 0, 0, th / img.alto, a.desde === 'derecha' ? w : 0, a.desde === 'abajo' ? h : 0]));
+      ctx.fillStyle = patron;
+      ctx.fillRect(0, 0, w, h);
+      return;
+    }
     if (r.mosaico) {
       const m = r.mosaico, s = entorno.s;
       const tw = img.ancho / img.dpiX * 914400 * m.sx * s, th = img.alto / img.dpiY * 914400 * m.sy * s;
@@ -401,11 +434,101 @@ const PptxDibujo = (() => {
     // el período (así sysDot con tapa redonda son puntos, como en Office).
     const tapa = ctx.lineCap !== 'butt';
     if (g.length) ctx.setLineDash(g.map((v, i) => Math.max(tapa && i % 2 === 0 ? 0.001 : 0, (v + (tapa ? (i % 2 ? 1 : -1) : 0)) * lw)));
-    // Las líneas compuestas (doble, triple) salen simples por ahora: borrar el
-    // hueco del medio borraría también lo que hay debajo. [etapa 5]
-    ctx.stroke(ruta.path);
+    // Líneas compuestas: un trazo por franja, corrido hacia un costado; en los
+    // huecos se ve lo de abajo. En un tramo recto (los bordes de tabla) se
+    // corre el segmento; en un trazado cualquiera (formas, curvas) se corre su
+    // polilínea (el trazo corrido de una curva no es otra curva: se aplana).
+    const franjas = (ruta.recta || ruta.cmds) && FRANJAS[l.compuesto];
+    if (franjas && !ruta.recta) {
+      const lineas = polilineas(ruta.cmds);
+      ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+      for (const [a, b] of franjas) {
+        const p = new Path2D();
+        for (const pl of lineas) desplazar(p, pl, ((a + b) / 2 - 0.5) * lw);
+        ctx.lineWidth = Math.max((b - a) * lw, 0.5);
+        ctx.stroke(p);
+      }
+    } else if (franjas) {
+      const [x0, y0, x1, y1] = ruta.recta;
+      const largo = Math.hypot(x1 - x0, y1 - y0) || 1;
+      const ux = (x1 - x0) / largo, uy = (y1 - y0) / largo, nx = -uy, ny = ux;
+      // Cada franja se alarga medio ancho de la línea entera en cada punta:
+      // así se cierran las esquinas, como en PowerPoint.
+      const e = lw / 2;
+      for (const [a, b] of franjas) {
+        const d = ((a + b) / 2 - 0.5) * lw;
+        const p = new Path2D();
+        p.moveTo(x0 - ux * e + nx * d, y0 - uy * e + ny * d); p.lineTo(x1 + ux * e + nx * d, y1 + uy * e + ny * d);
+        ctx.lineWidth = Math.max((b - a) * lw, 0.5);
+        ctx.lineCap = 'butt';
+        ctx.stroke(p);
+      }
+    } else {
+      ctx.stroke(ruta.path);
+    }
     ctx.restore();
   }
+  // Aplana un trazado (M/L/C/Z) en polilíneas: [{ pts: [[x, y]…], cerrada }].
+  function polilineas(cmds) {
+    const salida = [];
+    let actual = null, x = 0, y = 0, x0 = 0, y0 = 0;
+    const empezar = () => { actual = { pts: [[x, y]], cerrada: false }; salida.push(actual); };
+    for (const c of cmds) {
+      if (c[0] === 'M') { x = x0 = c[1]; y = y0 = c[2]; empezar(); continue; }
+      if (c[0] === 'Z') { if (actual) actual.cerrada = true; actual = null; x = x0; y = y0; continue; }
+      if (!actual) empezar();
+      if (c[0] === 'L') { x = c[1]; y = c[2]; actual.pts.push([x, y]); continue; }
+      if (c[0] === 'C') {
+        const [x1, y1, x2, y2, x3, y3] = c.slice(1);
+        const largo = Math.hypot(x1 - x, y1 - y) + Math.hypot(x2 - x1, y2 - y1) + Math.hypot(x3 - x2, y3 - y2);
+        const n = Math.min(120, Math.max(6, Math.ceil(largo / 1.5)));
+        for (let i = 1; i <= n; i++) {
+          const t = i / n, u = 1 - t;
+          actual.pts.push([u * u * u * x + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x3, u * u * u * y + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y3]);
+        }
+        x = x3; y = y3;
+      }
+    }
+    return salida;
+  }
+  // Agrega a p la polilínea corrida d hacia su derecha (n = (-uy, ux), igual
+  // que en los tramos rectos), con las esquinas en inglete; si el ángulo es
+  // muy cerrado, en bisel (dos puntos).
+  function desplazar(p, pl, d) {
+    const pts = pl.pts.filter((q, i, a) => !i || Math.hypot(q[0] - a[i - 1][0], q[1] - a[i - 1][1]) > 1e-6);
+    if (pl.cerrada && pts.length > 1 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
+    const n = pts.length;
+    if (n < 2) return;
+    const tramos = pl.cerrada ? n : n - 1;
+    const normal = [];
+    for (let i = 0; i < tramos; i++) {
+      const a = pts[i], b = pts[(i + 1) % n], largo = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+      normal.push([-(b[1] - a[1]) / largo, (b[0] - a[0]) / largo]);
+    }
+    const salida = [];
+    for (let k = 0; k < n; k++) {
+      const antes = pl.cerrada ? normal[(k - 1 + n) % n] : normal[k - 1];
+      const despues = pl.cerrada ? normal[k] : normal[k];
+      const q = pts[k];
+      if (!antes || !despues) { const m = antes || despues; salida.push([q[0] + m[0] * d, q[1] + m[1] * d]); continue; }
+      const mx = antes[0] + despues[0], my = antes[1] + despues[1], cos = (mx * antes[0] + my * antes[1]) / (Math.hypot(mx, my) || 1);
+      if (cos < 0.25) { salida.push([q[0] + antes[0] * d, q[1] + antes[1] * d], [q[0] + despues[0] * d, q[1] + despues[1] * d]); continue; }
+      const k2 = d / (cos * (Math.hypot(mx, my) || 1));
+      salida.push([q[0] + mx * k2, q[1] + my * k2]);
+    }
+    salida.forEach((q, i) => (i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])));
+    if (pl.cerrada) p.closePath();
+  }
+  // Franjas de cada línea compuesta, en fracciones del ancho, desde el lado
+  // izquierdo del sentido del trazo. Medidas de PowerPoint el 2026-10-11
+  // (comparar-pptx/corpus/23-tablas-avanzadas, diapositiva 1, a 6 pt): doble
+  // en tercios, triple 1·1·2·1·1 sextos, fino-grueso y grueso-fino 0,2·0,2·0,6.
+  const FRANJAS = {
+    dbl: [[0, 1 / 3], [2 / 3, 1]],
+    thickThin: [[0, 0.6], [0.8, 1]],
+    thinThick: [[0, 0.2], [0.4, 1]],
+    tri: [[0, 1 / 6], [2 / 6, 4 / 6], [5 / 6, 1]],
+  };
 
   // Puntas de flecha: en el comienzo (headEnd) del primer trazado abierto y en
   // el final (tailEnd) del último.
@@ -453,11 +576,16 @@ const PptxDibujo = (() => {
   // Orden: fondo, rellenos, bordes, texto (un borde grueso no queda tapado
   // por el relleno de la celda vecina).
   function dibujarTabla(ctx, t, k, entorno) {
+    // xs: la línea de la grilla antes de cada columna. En una tabla de derecha
+    // a izquierda (rtl) la grilla va en espejo: la columna 1 a la derecha, y
+    // el borde izquierdo de cada celda (lnL) del lado derecho (medido en
+    // 23-tablas-avanzadas, diapositiva 2).
     const xs = [0], ys = [0];
     for (const w of t.columnas) xs.push(xs[xs.length - 1] + w * k);
+    if (t.rtl) { const total = xs[xs.length - 1]; for (let i = 0; i < xs.length; i++) xs[i] = total - xs[i]; }
     const altos = t.filas.map((h) => h * k);
-    const maquetados = new Map();
-    const anchoDe = (c) => xs[c.col + c.cols] - xs[c.col];
+    const anchoDe = (c) => Math.abs(xs[c.col + c.cols] - xs[c.col]);
+    const izquierda = (c) => Math.min(xs[c.col], xs[c.col + c.cols]);
     const necesita = (c) => {
       if (!c.texto || c.texto.cuerpo.vertical !== 'horz') return 0;
       const m = c.texto.cuerpo.margenes;
@@ -472,10 +600,23 @@ const PptxDibujo = (() => {
       if (falta > 0) altos[c.fila + c.filas - 1] += falta;
     }
     for (const h of altos) ys.push(ys[ys.length - 1] + h);
-    const rect = (c) => ({ x: xs[c.col], y: ys[c.fila], w: anchoDe(c), h: ys[c.fila + c.filas] - ys[c.fila] });
+    const rect = (c) => ({ x: izquierda(c), y: ys[c.fila], w: anchoDe(c), h: ys[c.fila + c.filas] - ys[c.fila] });
     const path = (r) => { const p = new Path2D(); p.rect(r.x, r.y, r.w, r.h); return p; };
 
-    if (t.fondo) { const r = { x: 0, y: 0, w: xs[xs.length - 1], h: ys[ys.length - 1] }; pintar(ctx, t.fondo, path(r), r.w, r.h, entorno); }
+    const todo = { x: 0, y: 0, w: Math.max(xs[0], xs[xs.length - 1]), h: ys[ys.length - 1] };
+    if (t.sombra) {
+      // La sombra de la tabla entera, solo afuera de ella (un recorte que deja
+      // afuera la tabla): adentro la tapan las celdas. Así se ve igual con o
+      // sin fondo, y las celdas transparentes no muestran un relleno que no hay.
+      const s = t.sombra, m = (s.distancia + s.desenfoque * 2) * k + 2;
+      const afuera = new Path2D();
+      afuera.rect(-m, -m, todo.w + 2 * m, todo.h + 2 * m); afuera.rect(todo.x, todo.y, todo.w, todo.h);
+      ctx.save();
+      ctx.clip(afuera, 'evenodd');
+      conSombra(ctx, s, { ...entorno, s: k }, () => { ctx.fillStyle = '#000'; ctx.fill(path(todo)); });
+      ctx.restore();
+    }
+    if (t.fondo) pintar(ctx, t.fondo, path(todo), todo.w, todo.h, entorno);
     for (const c of t.celdas) {
       if (!c.relleno) continue;
       const r = rect(c);
@@ -509,8 +650,12 @@ const PptxDibujo = (() => {
     }
     for (const tr of tramos.values()) {
       if (!tr.b.linea) continue;
-      const p = new Path2D(); p.moveTo(tr.x0, tr.y0); p.lineTo(tr.x1, tr.y1);
-      trazarLinea(ctx, tr.b.linea, { path: p }, entorno);
+      // Los horizontales de izquierda a derecha y los verticales de arriba
+      // abajo: de eso depende el lado de cada franja de una línea compuesta.
+      let { x0, y0, x1, y1 } = tr;
+      if (y0 === y1 && x0 > x1) [x0, x1] = [x1, x0];
+      const p = new Path2D(); p.moveTo(x0, y0); p.lineTo(x1, y1);
+      trazarLinea(ctx, tr.b.linea, { path: p, recta: [x0, y0, x1, y1] }, entorno);
     }
 
     for (const c of t.celdas) {
@@ -556,24 +701,36 @@ const PptxDibujo = (() => {
     }
     let giro = cuerpo.giro || 0;
     if (cuerpo.derecho) giro -= el.xfrm.rot || 0;
-    if (el.cajaTexto && el.cajaTexto.rot) giro += el.cajaTexto.rot - (el.xfrm.rot || 0);
-    const vertical = cuerpo.vertical === 'vert' || cuerpo.vertical === 'eaVert' || cuerpo.vertical === 'wordArtVert' ? 90 : cuerpo.vertical === 'vert270' ? -90 : 0;
+    // El giro de txXfrm va sumado al de la forma (ya aplicado): un hexágono de
+    // SmartArt girado 90° con txXfrm de −90° deja el texto horizontal.
+    if (el.cajaTexto && el.cajaTexto.rot) giro += el.cajaTexto.rot;
+    const vertical = ['vert', 'eaVert', 'wordArtVert', 'mongolianVert'].includes(cuerpo.vertical) ? 90 : cuerpo.vertical === 'vert270' ? -90 : 0;
     const centro = [r.x + r.w / 2, r.y + r.h / 2];
     if (giro || vertical) {
       ctx.translate(centro[0], centro[1]); ctx.rotate((giro + vertical) * Math.PI / 180); ctx.translate(-centro[0], -centro[1]);
       if (vertical) r = { x: centro[0] - r.h / 2, y: centro[1] - r.w / 2, w: r.h, h: r.w };
     }
-    const m = cuerpo.margenes;
+    // Los márgenes no giran con el texto vertical: el de arriba de la caja
+    // sigue arriba (en el texto girado, a un costado). Así el ancho de corte
+    // de una celda con texto vertical es su alto menos marT y marB, como en
+    // PowerPoint (23-tablas-avanzadas, diapositiva 3).
+    let m = cuerpo.margenes;
+    if (vertical === 90) m = { l: m.t, r: m.b, t: m.r, b: m.l };
+    else if (vertical === -90) m = { l: m.b, r: m.t, t: m.l, b: m.r };
     const area = { x: r.x + m.l * s, y: r.y + m.t * s, w: Math.max(0, r.w - (m.l + m.r) * s), h: Math.max(0, r.h - (m.t + m.b) * s) };
     const maquetado = PptxTexto.maquetar(el.texto, area.w, area.h, s, ctx);
     let y0 = area.y;
     if (cuerpo.ancla === 'ctr') y0 += (area.h - maquetado.alto) / 2;
     else if (cuerpo.ancla === 'b') y0 += area.h - maquetado.alto;
+    // mongolianVert: girado como vert, pero las líneas se apilan de izquierda
+    // a derecha (el bloque entero en espejo, cada línea derecha).
+    const corrida = cuerpo.vertical === 'mongolianVert'
+      ? (l) => 2 * area.y + area.h - 2 * y0 - 2 * l.arriba - l.alto : () => 0;
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
-    registrarLineas(ctx, el, maquetado, area, y0, entorno);
+    registrarLineas(ctx, el, maquetado, area, y0, entorno, corrida);
     for (const l of maquetado.lineas) {
-      const base = y0 + l.base;
+      const base = y0 + l.base + corrida(l);
       if (l.vineta && l.vineta.color) {
         ctx.font = l.vineta.css; ctx.letterSpacing = '0px'; ctx.fillStyle = l.vineta.color;
         ctx.fillText(l.vineta.texto, area.x + l.vineta.x, base);
@@ -582,6 +739,7 @@ const PptxDibujo = (() => {
         const x = area.x + t.x, y = base + t.desplazamiento;
         if (t.resaltado) { ctx.fillStyle = t.resaltado; ctx.fillRect(x, y - t.px * 0.95, t.ancho, t.px * 1.2); }
         if (!t.color) continue;
+        registrarTrozo(ctx, t, x, y, entorno);
         ctx.font = t.css; ctx.letterSpacing = t.espaciado ? `${t.espaciado}px` : '0px'; ctx.fontKerning = t.kerning || 'normal'; ctx.fillStyle = t.color;
         conSombra(ctx, t.sombra, entorno, () => ctx.fillText(t.texto, x, y));
         if (t.subrayado || t.tachado) {
@@ -604,7 +762,7 @@ const PptxDibujo = (() => {
 
   // Las líneas tal como quedaron cortadas, en puntos de la diapositiva (la
   // caja es la del texto sin girar: vale para formas sin giro).
-  function registrarLineas(ctx, el, maquetado, area, y0, entorno) {
+  function registrarLineas(ctx, el, maquetado, area, y0, entorno, corrida = () => 0) {
     const m = ctx.getTransform();
     const aPt = 1 / (entorno.s * 12700);
     const punto = (x, y) => ({ x: (m.a * x + m.c * y + m.e) * aPt, y: (m.b * x + m.d * y + m.f) * aPt });
@@ -613,11 +771,28 @@ const PptxDibujo = (() => {
       const texto = l.piezas.map((pz) => pz.tab ? '\t' : pz.texto || '').join('').trim();
       if (!texto) continue;
       const a = l.trozos[0], z = l.trozos[l.trozos.length - 1];
-      const p0 = punto(area.x + (a ? a.x : 0), y0 + l.arriba - (l.antes || 0));
-      const p1 = punto(area.x + (z ? z.x + z.ancho : 0), y0 + l.arriba + l.alto + (l.despues || 0));
+      const p0 = punto(area.x + (a ? a.x : 0), y0 + l.arriba + corrida(l) - (l.antes || 0));
+      const p1 = punto(area.x + (z ? z.x + z.ancho : 0), y0 + l.arriba + corrida(l) + l.alto + (l.despues || 0));
       lineas.push({ texto, x: p0.x, y: p0.y, w: p1.x - p0.x, h: p1.y - p0.y });
     }
     if (lineas.length) entorno.textos.push(el.celda ? { nombre: el.nombre, celda: el.celda, lineas } : { nombre: el.nombre, lineas });
+  }
+
+  // Cada trozo de texto dibujado, ya en píxeles del canvas (con la transformación
+  // de ese momento aplicada): para ponerle al PDF una capa de texto
+  // seleccionable (pptx-visual.js, construirPdfDesdeImagenes). x, y: el origen
+  // de la línea base; ang: giro en radianes (sentido horario); px y ancho: tamaño
+  // de letra y ancho del trozo. Los espejados no se registran.
+  function registrarTrozo(ctx, t, x, y, entorno) {
+    if (!entorno.trozosPdf || !t.texto || !t.texto.trim()) return;
+    const m = ctx.getTransform();
+    if (m.a * m.d - m.b * m.c <= 0) return;
+    const k = Math.hypot(m.a, m.b);
+    entorno.trozosPdf.push({
+      texto: t.texto,
+      x: m.a * x + m.c * y + m.e, y: m.b * x + m.d * y + m.f,
+      ang: Math.atan2(m.b, m.a), px: t.px * k, ancho: t.ancho * k,
+    });
   }
 
   return { dibujar };

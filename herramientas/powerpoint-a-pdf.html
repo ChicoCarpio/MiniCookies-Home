@@ -34,6 +34,7 @@ window.i18nPagina = {
     'progreso-zip': 'Generando .zip de imágenes...',
     'mensaje-visual-ok': '✅ Listo — se generó el PDF con las diapositivas reales.',
     'mensaje-solo-texto': '⚠️ No se pudo renderizar el diseño visual de las diapositivas — el PDF generado tiene solo el texto.',
+    'mensaje-omitido': '⚠️ Listo, pero {n} elemento(s) de las diapositivas no se pudieron dibujar y quedaron fuera del PDF (un SmartArt sin su dibujo, un objeto incrustado o un gráfico que no se pudo leer).',
     'error-generar': 'No se pudo generar el PDF'
   },
   en: {
@@ -59,6 +60,7 @@ window.i18nPagina = {
     'progreso-zip': 'Generating image .zip...',
     'mensaje-visual-ok': '✅ Done — the PDF was generated with the real slides.',
     'mensaje-solo-texto': '⚠️ Couldn’t render the slides’ visual design — the generated PDF has only the text.',
+    'mensaje-omitido': '⚠️ Done, but {n} slide element(s) couldn’t be drawn and were left out of the PDF (a SmartArt without its drawing, an embedded object or a chart that couldn’t be read).',
     'error-generar': 'Couldn’t generate the PDF'
   }
 };
@@ -123,18 +125,8 @@ window.i18nPagina = {
 
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
-<script src="../vendor/Chart.js/4.5.1/chart.umd.min.js"></script>
-<script>window.__FileReaderNativo = window.FileReader;</script>
-<script src="../vendor/pptxviewjs/1.1.9/dist/PptxViewJS.min.js?v=2"></script>
-<script>
-  // PptxViewJS pisa el FileReader nativo del navegador con uno propio (para uso
-  // interno de la librería), lo que rompe JSZip.loadAsync() apenas se carga.
-  // Lo restauramos acá.
-  window.FileReader = window.__FileReaderNativo;
-</script>
 <script src="../assets/js/pdf-texto.js"></script>
 <script src="../assets/js/pptx-xml.js"></script>
-<script src="../assets/js/pptx-preparar.js"></script>
 <script src="../vendor/ecma-376-geometrias/5ed-2016/geometrias.js"></script>
 <script src="../assets/js/emf.js"></script>
 <script src="../assets/js/pptx-geometria.js"></script>
@@ -142,7 +134,10 @@ window.i18nPagina = {
 <script src="../assets/js/pptx-modelo.js"></script>
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pptx-texto.js"></script>
+<script src="../assets/js/pptx-grafico-3d.js"></script>
+<script src="../assets/js/pptx-grafico-superficie.js"></script>
 <script src="../assets/js/pptx-grafico.js"></script>
+<script src="../assets/js/pdf-lienzo.js"></script>
 <script src="../assets/js/pptx-dibujo.js"></script>
 <script src="../assets/js/pptx-visual.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -203,6 +198,8 @@ botonProcesar.addEventListener('click', async () => {
       enlaceDescargaImagenes.style.display = 'inline';
       separadorDescargas.style.display = 'inline';
       mensajeResultado.textContent = t('mensaje-visual-ok');
+      const omitidos = imagenes.reduce((n, im) => n + ((im.motivos || []).filter((m) => m !== 'estilo de tabla desconocido').length), 0);
+      if (omitidos) mensajeResultado.textContent = t('mensaje-omitido').replace('{n}', omitidos);
     } else {
       mensajeResultado.textContent = t('mensaje-solo-texto');
     }

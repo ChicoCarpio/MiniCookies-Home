@@ -106,17 +106,7 @@ window.i18nPagina = {
 <canvas id="canvasRender" style="display:none;"></canvas>
 
 <script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
-<script src="../vendor/Chart.js/4.5.1/chart.umd.min.js"></script>
-<script>window.__FileReaderNativo = window.FileReader;</script>
-<script src="../vendor/pptxviewjs/1.1.9/dist/PptxViewJS.min.js?v=2"></script>
-<script>
-  // PptxViewJS pisa el FileReader nativo del navegador con uno propio (para uso
-  // interno de la librería), lo que rompe JSZip.loadAsync() apenas se carga.
-  // Lo restauramos acá.
-  window.FileReader = window.__FileReaderNativo;
-</script>
 <script src="../assets/js/pptx-xml.js"></script>
-<script src="../assets/js/pptx-preparar.js"></script>
 <script src="../vendor/ecma-376-geometrias/5ed-2016/geometrias.js"></script>
 <script src="../assets/js/emf.js"></script>
 <script src="../assets/js/pptx-geometria.js"></script>
@@ -124,7 +114,10 @@ window.i18nPagina = {
 <script src="../assets/js/pptx-modelo.js"></script>
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pptx-texto.js"></script>
+<script src="../assets/js/pptx-grafico-3d.js"></script>
+<script src="../assets/js/pptx-grafico-superficie.js"></script>
 <script src="../assets/js/pptx-grafico.js"></script>
+<script src="../assets/js/pdf-lienzo.js"></script>
 <script src="../assets/js/pptx-dibujo.js"></script>
 <script src="../assets/js/pptx-visual.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>

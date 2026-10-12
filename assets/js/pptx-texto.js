@@ -74,6 +74,37 @@ const PptxTexto = (() => {
     }
     await Promise.all(pendientes);
   }
+  // El archivo de fuente de vendor/ que corresponde a un uso { fuente, negrita,
+  // cursiva } o a una fuente de canvas ('italic bold 12px "Arial", "MC Liberation
+  // Sans", …'), o null si no se tienen sus bytes (fuente del sistema, o la variable
+  // Gelasio, que fontkit no puede recortar). Lo usa pdf-lienzo.js para incrustar
+  // la fuente en el PDF.
+  // sustituir: si no hay archivo de esa fuente (Segoe UI, Verdana, Cambria,
+  // Calibri Light, Georgia…), la parecida que sí se tiene (serif → Liberation
+  // Serif, monoespaciada → Liberation Mono, Calibri Light → Carlito, el resto →
+  // Liberation Sans): el PDF lleva texto de verdad con otra forma de letra, y el
+  // ancho se iguala con Tz. Mejor que una imagen por cada trozo de texto.
+  const SERIF = /cambria|georgia|garamond|palatino|bookman|century|constantia|baskerville|didot|minion|serif|times|book antiqua|rockwell|sylfaen/;
+  const MONO = /consolas|courier|lucida console|monaco|menlo|mono|cascadia|andale/;
+  function archivoDeFuente(uso, sustituir = false) {
+    let m, negrita, cursiva, nombres;
+    if (typeof uso === 'string') {
+      m = Object.values(METRICAS).find((x) => uso.includes(`"${x.familia}"`));
+      negrita = /\bbold\b/.test(uso); cursiva = /\bitalic\b/.test(uso);
+      nombres = (uso.match(/"([^"]+)"/g) || []).map((x) => x.replace(/"/g, '').toLowerCase());
+    } else {
+      m = METRICAS[(uso.fuente || 'Calibri').replace(/"/g, '').toLowerCase()];
+      negrita = !!uso.negrita; cursiva = !!uso.cursiva;
+      nombres = [(uso.fuente || 'Calibri').replace(/"/g, '').toLowerCase()];
+    }
+    if ((!m || m.variable) && sustituir) {
+      const n = nombres.find((x) => !/^mc /.test(x) && !/segoe ui (symbol|emoji)/.test(x)) || '';
+      m = METRICAS[MONO.test(n) ? 'courier new' : SERIF.test(n) ? 'times new roman' : /^calibri/.test(n) ? 'calibri' : 'arial'];
+    }
+    if (!m || m.variable) return null;
+    const clave = (negrita ? 'b' : '') + (cursiva ? 'i' : '') || 'r';
+    return { url: m[clave], clave: m.familia + ':' + clave };
+  }
   function familia(nombre) {
     const n = (nombre || 'Calibri').replace(/"/g, '');
     const sust = SUSTITUTAS[n.toLowerCase()];
@@ -338,5 +369,5 @@ const PptxTexto = (() => {
     return w;
   }
 
-  return { maquetar, familia, colorCss, cargarFuentes, fuenteCss: css, kerningDe };
+  return { maquetar, familia, colorCss, cargarFuentes, archivoDeFuente, fuenteCss: css, kerningDe };
 })();
