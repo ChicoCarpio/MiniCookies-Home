@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Enviar archivos con un QR gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrado de extremo a extremo. Sin registro, sin cables y sin servidor de por medio.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'hero-titulo': 'Enviar archivos con un QR',
+    'intro': 'Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrados de extremo a extremo.',
+    'ayuda-como': 'El que recibe muestra un QR con una oferta de conexión y una clave secreta; el que envía lo lee y muestra otro QR de respuesta, que el que recibe lee. Los archivos viajan directo entre los dos equipos (WebRTC), cifrados dos veces: por la propia conexión y con AES-256 usando la clave que solo viajó en el QR. Sirve en la misma red (WiFi o el punto de acceso del celular); entre redes distintas, como datos móviles contra WiFi, la conexión directa no es posible.',
+    'boton-recibir': '📥 Quiero recibir',
+    'boton-enviar': '📤 Quiero enviar',
+    'recibir-paso1': 'Pedile al otro dispositivo que escanee este QR. Si lo lee con la cámara del celular, se abre esta misma página lista para enviar.',
+    'qr-cambia': 'El QR cambia en {s} s',
+    'copiar-codigo': 'Copiar código',
+    'copiado': '✅ Copiado',
+    'recibir-paso2': 'Cuando el otro dispositivo muestre su QR de respuesta, escanealo:',
+    'escanear-respuesta': '📷 Escanear su QR',
+    'o-pegar-respuesta': 'o pegá aquí su código:',
+    'conectar': 'Conectar',
+    'enviar-paso1': 'Escaneá el QR del dispositivo que va a recibir. Con la cámara del celular se abre solo esta página; también podés escanearlo acá o pegar su código.',
+    'escanear-oferta': '📷 Escanear el QR',
+    'o-pegar-oferta': 'o pegá aquí su código:',
+    'usar-codigo': 'Usar código',
+    'enviar-paso2': 'Ahora mostrale este QR de respuesta al dispositivo que recibe, para que lo escanee:',
+    'conectado': '✅ Conectados',
+    'verificacion': 'Código de verificación: {c}. Tiene que ser el mismo en los dos dispositivos; si no coincide, cerrá la conexión.',
+    'cerrar': 'Cerrar conexión',
+    'zona-archivos': '📄 Arrastrá los archivos acá o tocá para elegirlos',
+    'boton-enviar-archivos': 'Enviar',
+    'cancelar': 'Cancelar',
+    'esperando-aceptar': 'Esperando que el otro dispositivo acepte…',
+    'oferta-titulo': 'Quieren enviarte {n} archivo(s) ({tam}):',
+    'aceptar': 'Aceptar y recibir',
+    'rechazar': 'Rechazar',
+    'enviando': 'Enviando {nombre}…',
+    'recibiendo': 'Recibiendo {nombre}…',
+    'listo-enviado': '✅ Listo: se enviaron todos los archivos.',
+    'listo-recibido': '✅ Listo: llegaron todos los archivos. Guardalos con los botones de abajo.',
+    'rechazado-enviar': 'El otro dispositivo rechazó el envío.',
+    'rechazado-recibir': 'Rechazaste el envío.',
+    'cancelado': 'El envío se canceló.',
+    'guardar': '⬇️ Guardar',
+    'error-codigo': '❌ Ese código no es de esta herramienta o está incompleto. Volvé a escanearlo.',
+    'error-tiempo': '❌ No se pudo conectar. Revisá que los dos dispositivos estén en la misma red WiFi (o conectá la PC al punto de acceso del celular) y volvé a intentar.',
+    'error-cerrado': '❌ Se cortó la conexión.',
+    'error-camara': '❌ No se pudo usar la cámara: ',
+    'error-nuevo-intento': 'Empezar de nuevo',
+    'conectando': 'Conectando…',
+    'titulo-pagina': 'Enviar archivos con un QR gratis — Mini Cookies',
+    'meta-descripcion': 'Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrado de extremo a extremo. Sin registro, sin cables y sin servidor de por medio.',
+  },
+  en: {
+    'hero-titulo': 'Send files with a QR code',
+    'intro': 'Move files from one device to another with a QR code, straight between the two and end-to-end encrypted.',
+    'ayuda-como': 'The receiver shows a QR with a connection offer and a secret key; the sender reads it and shows another QR with the answer, which the receiver reads. Files travel straight between the two devices (WebRTC), encrypted twice: by the connection itself and with AES-256 using a key that only traveled in the QR. It works on the same network (WiFi or the phone\'s hotspot); between different networks, such as mobile data against WiFi, a direct connection is not possible.',
+    'boton-recibir': '📥 I want to receive',
+    'boton-enviar': '📤 I want to send',
+    'recibir-paso1': 'Ask the other device to scan this QR. If it reads it with the phone camera, this same page opens ready to send.',
+    'qr-cambia': 'The QR changes in {s} s',
+    'copiar-codigo': 'Copy code',
+    'copiado': '✅ Copied',
+    'recibir-paso2': 'When the other device shows its answer QR, scan it:',
+    'escanear-respuesta': '📷 Scan their QR',
+    'o-pegar-respuesta': 'or paste their code here:',
+    'conectar': 'Connect',
+    'enviar-paso1': 'Scan the QR of the device that will receive. With the phone camera this page opens by itself; you can also scan it here or paste its code.',
+    'escanear-oferta': '📷 Scan the QR',
+    'o-pegar-oferta': 'or paste its code here:',
+    'usar-codigo': 'Use code',
+    'enviar-paso2': 'Now show this answer QR to the receiving device so it scans it:',
+    'conectado': '✅ Connected',
+    'verificacion': 'Verification code: {c}. It must be the same on both devices; if it differs, close the connection.',
+    'cerrar': 'Close connection',
+    'zona-archivos': '📄 Drag the files here or tap to choose them',
+    'boton-enviar-archivos': 'Send',
+    'cancelar': 'Cancel',
+    'esperando-aceptar': 'Waiting for the other device to accept…',
+    'oferta-titulo': 'They want to send you {n} file(s) ({tam}):',
+    'aceptar': 'Accept and receive',
+    'rechazar': 'Decline',
+    'enviando': 'Sending {nombre}…',
+    'recibiendo': 'Receiving {nombre}…',
+    'listo-enviado': '✅ Done: all the files were sent.',
+    'listo-recibido': '✅ Done: all the files arrived. Save them with the buttons below.',
+    'rechazado-enviar': 'The other device declined the transfer.',
+    'rechazado-recibir': 'You declined the transfer.',
+    'cancelado': 'The transfer was canceled.',
+    'guardar': '⬇️ Save',
+    'error-codigo': '❌ That code is not from this tool or it is incomplete. Scan it again.',
+    'error-tiempo': '❌ Could not connect. Check that both devices are on the same WiFi network (or connect the PC to the phone\'s hotspot) and try again.',
+    'error-cerrado': '❌ The connection was lost.',
+    'error-camara': '❌ Could not use the camera: ',
+    'error-nuevo-intento': 'Start over',
+    'conectando': 'Connecting…',
+    'titulo-pagina': 'Send files with a QR code — Mini Cookies',
+    'meta-descripcion': 'Move files from one device to another with a QR code, straight between the two and end-to-end encrypted. No sign-up, no cables and no server in between.',
+  }
+};
+</script>
+<style>
+.caja-qr { display: flex; justify-content: center; margin: 12px 0; }
+.caja-qr canvas { max-width: 100%; height: auto; border-radius: 8px; }
+.camara-qr { display: none; width: 100%; max-width: 360px; margin: 8px auto; border-radius: 8px; }
+.codigo-pegado { width: 100%; box-sizing: border-box; min-height: 64px; padding: 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font-family: monospace; }
+.codigo-verificacion { font-weight: 700; letter-spacing: 0.08em; }
+.paso-qr[hidden], .camara-qr[hidden] { display: none; }
+.barra-envio { width: 100%; margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">Enviar archivos con un QR</h1>
+  <p data-i18n="intro">Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrados de extremo a extremo.</p>
+
+  <div class="panel-herramienta">
+    <span class="ayuda-tip">
+      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+      <span class="ayuda-burbuja" data-i18n="ayuda-como">El que recibe muestra un QR…</span>
+    </span>
+
+    <!-- Elegir rol -->
+    <div class="controles" id="pasoInicio">
+      <button class="boton" id="botonRecibir" data-i18n="boton-recibir">📥 Quiero recibir</button>
+      <button class="boton" id="botonEnviar" data-i18n="boton-enviar">📤 Quiero enviar</button>
+    </div>
+
+    <!-- Recibir: muestra su QR y lee la respuesta -->
+    <div id="panelRecibir" hidden>
+      <p data-i18n="recibir-paso1">Pedile al otro dispositivo que escanee este QR.</p>
+      <div class="caja-qr" id="cajaQrOferta"></div>
+      <p id="cuentaAtras" style="text-align:center;"></p>
+      <div class="controles">
+        <button class="boton" id="botonCopiarOferta" data-i18n="copiar-codigo">Copiar código</button>
+      </div>
+      <p data-i18n="recibir-paso2">Cuando el otro dispositivo muestre su QR de respuesta, escanealo:</p>
+      <div class="controles">
+        <button class="boton" id="botonEscanearRespuesta" data-i18n="escanear-respuesta">📷 Escanear su QR</button>
+      </div>
+      <video class="camara-qr" id="videoRespuesta" muted playsinline></video>
+      <label class="campo">
+        <span data-i18n="o-pegar-respuesta">o pegá aquí su código:</span>
+        <textarea class="codigo-pegado" id="pegarRespuesta" spellcheck="false"></textarea>
+      </label>
+      <div class="controles">
+        <button class="boton" id="botonConectarRespuesta" data-i18n="conectar">Conectar</button>
+      </div>
+    </div>
+
+    <!-- Enviar: lee el QR del que recibe y muestra su respuesta -->
+    <div id="panelEnviar" hidden>
+      <div id="pasoLeerOferta">
+        <p data-i18n="enviar-paso1">Escaneá el QR del dispositivo que va a recibir.</p>
+        <div class="controles">
+          <button class="boton" id="botonEscanearOferta" data-i18n="escanear-oferta">📷 Escanear el QR</button>
+        </div>
+        <video class="camara-qr" id="videoOferta" muted playsinline></video>
+        <label class="campo">
+          <span data-i18n="o-pegar-oferta">o pegá aquí su código:</span>
+          <textarea class="codigo-pegado" id="pegarOferta" spellcheck="false"></textarea>
+        </label>
+        <div class="controles">
+          <button class="boton" id="botonUsarOferta" data-i18n="usar-codigo">Usar código</button>
+        </div>
+      </div>
+      <div id="pasoMostrarRespuesta" hidden>
+        <p data-i18n="enviar-paso2">Ahora mostrale este QR de respuesta al dispositivo que recibe:</p>
+        <div class="caja-qr" id="cajaQrRespuesta"></div>
+        <div class="controles">
+          <button class="boton" id="botonCopiarRespuesta" data-i18n="copiar-codigo">Copiar código</button>
+        </div>
+        <p id="estadoConectando" data-i18n="conectando">Conectando…</p>
+      </div>
+    </div>
+
+    <!-- Conectados -->
+    <div id="panelConectado" hidden>
+      <p><strong data-i18n="conectado">✅ Conectados</strong></p>
+      <p id="textoVerificacion"></p>
+
+      <div id="zonaEnvio" hidden>
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="zona-archivos">📄 Arrastrá los archivos acá o tocá para elegirlos</span>
+          <input type="file" id="entradaArchivo" multiple hidden>
+        </div>
+        <ul class="lista-archivos" id="listaEnvio"></ul>
+        <div class="controles">
+          <button class="boton" id="botonEnviarArchivos" disabled data-i18n="boton-enviar-archivos">Enviar</button>
+          <button class="boton" id="botonCancelar" hidden data-i18n="cancelar">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="ofertaRecibida" hidden>
+        <p id="ofertaTitulo"></p>
+        <ul class="lista-archivos" id="ofertaLista"></ul>
+        <div class="controles">
+          <button class="boton" id="botonAceptar" data-i18n="aceptar">Aceptar y recibir</button>
+          <button class="boton" id="botonRechazar" data-i18n="rechazar">Rechazar</button>
+        </div>
+      </div>
+
+      <div id="bloqueProgreso" hidden>
+        <p id="textoProgreso"></p>
+        <div class="barra-carga barra-envio"><div class="relleno-carga" id="rellenoProgreso"></div></div>
+      </div>
+      <ul class="lista-archivos" id="archivosRecibidos"></ul>
+
+      <div class="controles">
+        <button class="boton" id="botonCerrar" data-i18n="cerrar">Cerrar conexión</button>
+      </div>
+    </div>
+
+    <p id="mensaje" role="status"></p>
+    <div class="controles" id="pasoReintentar" hidden>
+      <button class="boton" id="botonReintentar" data-i18n="error-nuevo-intento">Empezar de nuevo</button>
+    </div>
+    <div id="contenedorQR" hidden></div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../vendor/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/enviar-qr.js"></script>
+<script>
+const VIDA_QR_S = 120;
+const $ = (id) => document.getElementById(id);
+const llenar = (clave, valores) => Object.entries(valores || {}).reduce((s, [k, v]) => s.replace('{' + k + '}', v), t(clave));
+
+let anfitrion = null, invitado = null, sesion = null;
+let ofertaActual = '';
+let relojQr = null, camaraActiva = null, conectando = false, terminado = false;
+let archivosEnvio = [], cancelarEnvio = false, bloqueoPantalla = null;
+
+function mostrarMensaje(texto) { $('mensaje').textContent = texto || ''; }
+function falla(clave) { mostrarMensaje(t(clave)); $('pasoReintentar').hidden = false; }
+function tamano(n) {
+  return n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : n < 1073741824 ? (n / 1048576).toFixed(1) + ' MB' : (n / 1073741824).toFixed(2) + ' GB';
+}
+function pantalla(cual) {
+  $('pasoInicio').hidden = cual !== 'inicio';
+  $('panelRecibir').hidden = cual !== 'recibir';
+  $('panelEnviar').hidden = cual !== 'enviar';
+  $('panelConectado').hidden = cual !== 'conectado';
+}
+
+// El QR lleva 4 módulos de margen blanco (zona de silencio), igual que el
+// generador de QR del sitio: sin él, muchos lectores no lo encuentran.
+function dibujarQR(caja, texto) {
+  const oculto = $('contenedorQR');
+  oculto.replaceChildren();
+  const lado = Math.min(360, Math.max(240, Math.floor(caja.clientWidth || 300)));
+  let qr;
+  try {
+    qr = new QRCode(oculto, { text: texto, width: lado, height: lado, correctLevel: QRCode.CorrectLevel.L });
+  } catch (e) { mostrarMensaje(t('error-codigo')); return; }
+  const origen = oculto.querySelector('canvas');
+  const modulos = (qr._oQRCode && qr._oQRCode.getModuleCount && qr._oQRCode.getModuleCount()) || 41;
+  const margen = Math.ceil(4 * lado / modulos);
+  const c = document.createElement('canvas');
+  c.width = c.height = lado + margen * 2;
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);
+  cx.drawImage(origen, margen, margen);
+  caja.replaceChildren(c);
+}
+
+function copiar(texto, boton) {
+  const ok = () => { const antes = boton.textContent; boton.textContent = t('copiado'); setTimeout(() => { boton.textContent = antes; }, 1500); };
+  if (navigator.clipboard) navigator.clipboard.writeText(texto).then(ok, () => {});
+}
+
+// ---------- Cámara ----------
+function detenerCamara() {
+  if (camaraActiva) { try { camaraActiva.lector.reset(); } catch (e) {} camaraActiva.video.style.display = 'none'; camaraActiva = null; }
+}
+async function iniciarCamara(video, alTexto) {
+  detenerCamara();
+  const lector = new ZXing.BrowserMultiFormatReader();
+  video.style.display = 'block';
+  camaraActiva = { lector, video };
+  try {
+    await lector.decodeFromVideoDevice(null, video, (r) => { if (r) alTexto(r.getText()); });
+  } catch (e) {
+    detenerCamara();
+    mostrarMensaje(t('error-camara') + e.message);
+  }
+}
+
+// ---------- Rol: recibir ----------
+async function iniciarRecibir() {
+  pantalla('recibir');
+  mostrarMensaje('');
+  // Con el permiso de cámara el navegador entrega las direcciones reales de la
+  // red local (si no, las oculta tras nombres .local y a veces no conecta).
+  try { (await navigator.mediaDevices.getUserMedia({ video: true })).getTracks().forEach((p) => p.stop()); } catch (e) {}
+  await nuevaOferta();
+}
+async function nuevaOferta() {
+  if (anfitrion) anfitrion.cerrar();
+  clearInterval(relojQr);
+  anfitrion = await EnviarQR.anfitrion();
+  const direccion = location.href.split('#')[0] + '#' + anfitrion.codigo;
+  ofertaActual = direccion;
+  dibujarQR($('cajaQrOferta'), direccion);
+  $('botonCopiarOferta').onclick = () => copiar(direccion, $('botonCopiarOferta'));
+  let resta = VIDA_QR_S;
+  const pintar = () => { $('cuentaAtras').textContent = llenar('qr-cambia', { s: resta }); };
+  pintar();
+  relojQr = setInterval(() => {
+    if (conectando || sesion) return;
+    resta--;
+    if (resta <= 0) { nuevaOferta(); return; }
+    pintar();
+  }, 1000);
+}
+async function usarRespuesta(texto) {
+  if (conectando || sesion || !anfitrion) return;
+  const datos = await EnviarQR.leerCodigo(texto);
+  if (!datos || datos.t !== 'r') { mostrarMensaje(t('error-codigo')); return; }
+  conectando = true;
+  detenerCamara();
+  clearInterval(relojQr);
+  mostrarMensaje(t('conectando'));
+  try {
+    const s = await anfitrion.aceptarRespuesta(texto);
+    conectar(s, 'recibir');
+  } catch (e) {
+    conectando = false;
+    falla(e.message === 'tiempo' ? 'error-tiempo' : 'error-cerrado');
+  }
+}
+
+// ---------- Rol: enviar ----------
+function iniciarEnviar() {
+  pantalla('enviar');
+  mostrarMensaje('');
+}
+async function usarOferta(texto) {
+  if (conectando || invitado) return;
+  const datos = await EnviarQR.leerCodigo(texto);
+  if (!datos || datos.t !== 'o') { mostrarMensaje(t('error-codigo')); return; }
+  detenerCamara();
+  conectando = true;
+  pantalla('enviar');
+  mostrarMensaje(t('conectando'));
+  try {
+    invitado = await EnviarQR.invitado(texto);
+  } catch (e) { conectando = false; falla('error-codigo'); return; }
+  mostrarMensaje('');
+  $('pasoLeerOferta').hidden = true;
+  $('pasoMostrarRespuesta').hidden = false;
+  dibujarQR($('cajaQrRespuesta'), invitado.codigo);
+  $('botonCopiarRespuesta').onclick = () => copiar(invitado.codigo, $('botonCopiarRespuesta'));
+  invitado.conexion.then((s) => conectar(s, 'enviar')).catch((e) => {
+    conectando = false;
+    falla(e.message === 'tiempo' ? 'error-tiempo' : 'error-cerrado');
+  });
+}
+
+// ---------- Conectados ----------
+async function mantenerPantalla(si) {
+  try {
+    if (si && navigator.wakeLock) bloqueoPantalla = await navigator.wakeLock.request('screen');
+    else if (bloqueoPantalla) { await bloqueoPantalla.release(); bloqueoPantalla = null; }
+  } catch (e) {}
+}
+function progreso(clave, p) {
+  $('bloqueProgreso').hidden = false;
+  $('textoProgreso').textContent = llenar(clave, { nombre: p.nombre }) + ' ' + tamano(p.totalHecho) + ' / ' + tamano(p.totalTam);
+  $('rellenoProgreso').style.transform = 'scaleX(' + (p.totalTam ? p.totalHecho / p.totalTam : 1) + ')';
+}
+function conectar(s, rol) {
+  sesion = s;
+  clearInterval(relojQr);
+  pantalla('conectado');
+  mostrarMensaje('');
+  $('textoVerificacion').replaceChildren(...llenar('verificacion', { c: '\u0001' }).split('\u0001').flatMap((parte, i, a) => {
+    const nodos = [document.createTextNode(parte)];
+    if (i < a.length - 1) { const b = document.createElement('span'); b.className = 'codigo-verificacion'; b.textContent = s.verificacion; nodos.push(b); }
+    return nodos;
+  }));
+  s.canal.alCerrar = () => { if (!terminado) { falla('error-cerrado'); } };
+  if (rol === 'enviar') $('zonaEnvio').hidden = false;
+  else escucharEnvio();
+}
+
+// Recibir
+function escucharEnvio() {
+  let decidir = null;
+  const respuesta = (ok) => { $('ofertaRecibida').hidden = true; if (decidir) decidir(ok); };
+  $('botonAceptar').onclick = () => respuesta(true);
+  $('botonRechazar').onclick = () => respuesta(false);
+  EnviarQR.recibirArchivos(sesion, {
+    alOferta: (lista) => new Promise((listo) => {
+      decidir = listo;
+      $('ofertaTitulo').textContent = llenar('oferta-titulo', { n: lista.length, tam: tamano(lista.reduce((x, f) => x + f.tam, 0)) });
+      $('ofertaLista').replaceChildren(...lista.map((f) => {
+        const li = document.createElement('li');
+        const nombre = document.createElement('span'); nombre.textContent = f.nombre;
+        const peso = document.createElement('span'); peso.textContent = tamano(f.tam);
+        li.append(nombre, peso);
+        return li;
+      }));
+      $('ofertaRecibida').hidden = false;
+      mantenerPantalla(true);
+    }),
+    alProgreso: (p) => progreso('recibiendo', p),
+    alArchivo: (archivo) => {
+      const url = URL.createObjectURL(archivo);
+      const li = document.createElement('li');
+      const nombre = document.createElement('span'); nombre.textContent = archivo.name + ' (' + tamano(archivo.size) + ')';
+      const a = document.createElement('a'); a.className = 'boton'; a.href = url; a.download = archivo.name; a.textContent = t('guardar');
+      li.append(nombre, a);
+      $('archivosRecibidos').append(li);
+    },
+  }).then((fin) => {
+    terminado = true; mantenerPantalla(false);
+    $('bloqueProgreso').hidden = true;
+    mostrarMensaje(fin === 'listo' ? t('listo-recibido') : fin === 'rechazado' ? t('rechazado-recibir') : t('cancelado'));
+  }).catch(() => { if (!terminado) falla('error-cerrado'); });
+}
+
+// Enviar
+function pintarListaEnvio() {
+  $('listaEnvio').replaceChildren(...archivosEnvio.map((f, i) => {
+    const li = document.createElement('li');
+    const nombre = document.createElement('span'); nombre.textContent = f.name + ' (' + tamano(f.size) + ')';
+    const quitar = document.createElement('button'); quitar.className = 'quitar'; quitar.textContent = '✕';
+    quitar.onclick = () => { archivosEnvio.splice(i, 1); pintarListaEnvio(); };
+    li.append(nombre, quitar);
+    return li;
+  }));
+  $('botonEnviarArchivos').disabled = !archivosEnvio.length;
+}
+conectarZonaArrastre($('zonaArrastre'), $('entradaArchivo'), (archivos) => { archivosEnvio.push(...archivos); pintarListaEnvio(); });
+
+$('botonEnviarArchivos').onclick = async () => {
+  cancelarEnvio = false;
+  $('botonEnviarArchivos').disabled = true;
+  $('botonCancelar').hidden = false;
+  mostrarMensaje(t('esperando-aceptar'));
+  mantenerPantalla(true);
+  try {
+    const fin = await EnviarQR.enviarArchivos(sesion, archivosEnvio, {
+      alProgreso: (p) => { mostrarMensaje(''); progreso('enviando', p); },
+      cancelado: () => cancelarEnvio,
+    });
+    terminado = true;
+    $('bloqueProgreso').hidden = true;
+    mostrarMensaje(fin === 'listo' ? t('listo-enviado') : fin === 'rechazado' ? t('rechazado-enviar') : t('cancelado'));
+    if (fin !== 'listo') { terminado = false; $('botonEnviarArchivos').disabled = false; }
+  } catch (e) { falla('error-cerrado'); }
+  $('botonCancelar').hidden = true;
+  mantenerPantalla(false);
+};
+$('botonCancelar').onclick = () => { cancelarEnvio = true; };
+
+// ---------- Botones generales ----------
+$('botonRecibir').onclick = iniciarRecibir;
+$('botonEnviar').onclick = iniciarEnviar;
+$('botonEscanearRespuesta').onclick = () => iniciarCamara($('videoRespuesta'), usarRespuesta);
+$('botonConectarRespuesta').onclick = () => usarRespuesta($('pegarRespuesta').value);
+$('botonEscanearOferta').onclick = () => iniciarCamara($('videoOferta'), usarOferta);
+$('botonUsarOferta').onclick = () => usarOferta($('pegarOferta').value);
+$('botonCerrar').onclick = $('botonReintentar').onclick = () => location.replace(location.href.split('#')[0]);
+
+// Abierta desde el QR con la cámara del celular: la oferta viene en la dirección.
+// Se saca de la barra enseguida para que la clave no quede en el historial.
+if (location.hash.indexOf('MC1.') !== -1) {
+  const direccion = location.hash;
+  history.replaceState(null, '', location.pathname + location.search);
+  iniciarEnviar();
+  usarOferta(direccion);
+}
+</script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

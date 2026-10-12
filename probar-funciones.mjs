@@ -1156,6 +1156,70 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'franjas ' + fuera + ' y ' + dentro + ', hueco ' + centro;
   });
 
+  // Enviar archivos con un QR (2026-10-12): dos pares WebRTC en la misma página
+  // se conectan solo con los códigos (oferta y respuesta, como si fueran los QR),
+  // el código de verificación coincide, y un archivo de 100 KB y otro vacío
+  // llegan idénticos y cifrados (un mensaje repetido corta la conexión).
+  await prueba('enviar archivos: dos pares se conectan por código y se pasan archivos', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const anfitrion = await E.anfitrion();
+    afirmar(/^MC1\./.test(anfitrion.codigo), 'el código de la oferta no empieza con MC1.');
+    afirmar(anfitrion.codigo.length < 2500, 'la oferta no entra en un QR: ' + anfitrion.codigo.length + ' caracteres');
+    const invitado = await E.invitado('https://x.test/herramientas/enviar-archivos-qr#' + anfitrion.codigo);
+    const sesionR = await anfitrion.aceptarRespuesta(invitado.codigo);
+    const sesionE = await invitado.conexion;
+    afirmar(/^\d{3} \d{3}$/.test(sesionR.verificacion) && sesionR.verificacion === sesionE.verificacion, 'verificación: ' + sesionR.verificacion + ' / ' + sesionE.verificacion);
+    const bytes = new (W().Uint8Array)(100000).map((_, i) => (i * 7 + 3) & 255);
+    const lista = [new (W().File)([bytes], 'datos.bin', { type: 'application/octet-stream' }), new (W().File)([], 'vacio.txt', { type: 'text/plain' })];
+    const llegados = [];
+    const recibiendo = E.recibirArchivos(sesionR, { alOferta: async (l) => l.length === 2, alProgreso: () => {}, alArchivo: (f) => llegados.push(f) });
+    let ultimo = 0;
+    const fin = await E.enviarArchivos(sesionE, lista, { alProgreso: (p) => { ultimo = p.totalHecho; } });
+    afirmar(fin === 'listo' && (await recibiendo) === 'listo', 'resultado: ' + fin);
+    afirmar(llegados.length === 2 && llegados[0].name === 'datos.bin' && llegados[1].size === 0, 'archivos llegados: ' + llegados.map((f) => f.name + ':' + f.size));
+    const copia = new (W().Uint8Array)(await llegados[0].arrayBuffer());
+    afirmar(copia.length === bytes.length && copia.every((v, i) => v === bytes[i]), 'el contenido llegó distinto');
+    afirmar(ultimo === 100000, 'progreso final ' + ultimo);
+    sesionE.cerrar(); sesionR.cerrar();
+    return 'oferta ' + anfitrion.codigo.length + ' caracteres, respuesta ' + invitado.codigo.length + ', verificación ' + sesionR.verificacion;
+  });
+
+  // Un código ajeno no se acepta y el rechazo del receptor llega al emisor.
+  await prueba('enviar archivos: el receptor puede rechazar y un código ajeno no vale', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    afirmar((await E.leerCodigo('hola mundo')) === null && (await E.leerCodigo('MC1.@@@')) === null, 'aceptó un código inválido');
+    const a = await E.anfitrion();
+    const i = await E.invitado(a.codigo);
+    const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    const recibiendo = E.recibirArchivos(sR, { alOferta: async () => false, alProgreso: () => {}, alArchivo: () => {} });
+    const fin = await E.enviarArchivos(sE, [new (W().File)(['x'], 'a.txt')], {});
+    afirmar(fin === 'rechazado' && (await recibiendo) === 'rechazado', 'resultado: ' + fin);
+    let segundaVez = '';
+    try { await a.aceptarRespuesta(i.codigo); } catch (e) { segundaVez = e.message; }
+    afirmar(segundaVez === 'usado', 'una oferta sirvió dos veces: ' + segundaVez);
+    sE.cerrar(); sR.cerrar();
+    return 'rechazo y códigos inválidos bien';
+  });
+
+  // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
+  // oferta en la dirección, saca el código de la barra y muestra el QR de respuesta.
+  await prueba('enviar archivos: la página dibuja el QR de recibir y el de respuesta', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    D().getElementById('botonRecibir').click();
+    const lienzo = await hasta(() => D().querySelector('#cajaQrOferta canvas'), 15000);
+    afirmar(lienzo && lienzo.width > 200, 'no apareció el QR de la oferta');
+    const direccion = W().eval('ofertaActual') ;
+    afirmar(/#MC1\./.test(direccion), 'la dirección del QR no lleva la oferta: ' + direccion);
+    await abrir('about:blank'); // solo cambia la barra: sin esto el marco no recarga
+    await abrir('/herramientas/enviar-archivos-qr.html' + direccion.slice(direccion.indexOf('#'))); await esperar(300);
+    const qr = await hasta(() => D().querySelector('#cajaQrRespuesta canvas'), 15000);
+    afirmar(qr && qr.width > 200, 'no apareció el QR de respuesta');
+    afirmar(W().location.hash === '', 'la oferta quedó en la barra de direcciones');
+    return 'QR de ' + lienzo.width + ' px y respuesta de ' + qr.width + ' px';
+  });
+
   // Gráficos 3D, fase 2.2 de tablas y gráficos (2026-10-11): columnas de
   // cilindros (el costado es un degradado medido en PowerPoint: los bordes
   // bastante más oscuros que el medio, no un color parejo como una caja) y
@@ -3514,6 +3578,8 @@ const edge = spawn(EDGE, [
   '--headless=new', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
   '--disable-backgrounding-occluded-windows', `--user-data-dir=${perfil}`, '--no-first-run',
   '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
+  // WebRTC sin nombres .local: la prueba de "Enviar archivos" conecta dos pares en la misma página.
+  '--disable-features=WebRtcHideLocalIpsWithMdns',
   `http://localhost:${PUERTO}/__pruebas.html`,
 ], { windowsHide: true, stdio: 'ignore' });
 
