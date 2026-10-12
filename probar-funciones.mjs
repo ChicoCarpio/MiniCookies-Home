@@ -1316,6 +1316,33 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return 'PIN ' + pin + ', código protegido de ' + codigo.length + ' caracteres';
   });
 
+  // La descarga directa transfiere el buffer de cada trozo al service worker y el
+  // trozo queda vacío: el progreso y la comprobación de "archivo completo" tienen
+  // que usar el largo tomado antes (en Edge de Android el progreso se quedaba en
+  // 0 % y, al final, "se cortó la conexión" por "archivo incompleto").
+  await prueba('enviar archivos: la descarga directa cuenta bien los bytes aunque transfiera el buffer', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    let recibidos = 0, cerrado = false, ultimo = null;
+    const falsa = {
+      async escribir(bytes) { recibidos += bytes.length; W().structuredClone(bytes.buffer, { transfer: [bytes.buffer] }); },
+      async cerrar() { cerrado = true; }, async abortar() {},
+    };
+    const recibiendo = E.recibirArchivos(sR, {
+      alOferta: async () => true, alProgreso: (p) => { ultimo = p; }, alArchivo: () => {},
+      alGrande: async () => falsa,
+    });
+    const tam = E.UMBRAL_DISCO + 3 * 1024 * 1024;
+    const fin = await E.enviarArchivos(sE, [new (W().File)([new (W().Uint8Array)(tam)], 'grande.bin')], {});
+    afirmar(fin === 'listo' && (await recibiendo) === 'listo', 'resultado: ' + fin);
+    afirmar(recibidos === tam && cerrado, 'bytes entregados ' + recibidos + ' de ' + tam);
+    afirmar(ultimo && ultimo.hecho === tam && ultimo.totalHecho === tam, 'el progreso no llegó al final: ' + (ultimo && ultimo.hecho));
+    sE.cerrar(); sR.cerrar();
+    return tam + ' bytes entregados y contados';
+  });
+
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
   // oferta en la dirección, saca el código de la barra y muestra el QR de respuesta.
   await prueba('enviar archivos: la página dibuja el QR de recibir y el de respuesta', async () => {

@@ -482,6 +482,8 @@ const EnviarQR = (() => {
           const id = new DataView(datos.buffer, datos.byteOffset).getUint32(0);
           if (!actual || actual.id !== id) throw new Error('trozo inesperado');
           const parte = datos.slice(4);
+          // El largo se toma antes: la descarga directa transfiere el buffer y `parte` queda vacía.
+          const largo = parte.length;
           if (actual.destino) {
             try { await actual.destino.escribir(parte); } catch (e) {
               // Si la persona canceló la descarga en el navegador se avisa al emisor; si no, es el almacenamiento.
@@ -491,7 +493,7 @@ const EnviarQR = (() => {
               return;
             }
           } else actual.partes.push(parte);
-          actual.hecho += parte.length; totalHecho += parte.length;
+          actual.hecho += largo; totalHecho += largo;
           if (alProgreso) alProgreso({ nombre: actual.nombre, hecho: actual.hecho, tam: actual.tam, totalHecho, totalTam });
           return;
         }

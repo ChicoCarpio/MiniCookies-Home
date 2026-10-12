@@ -132,7 +132,8 @@ window.i18nPagina = {
 .camara-qr { display: none; width: 100%; max-width: 360px; margin: 8px auto; border-radius: 8px; }
 .codigo-pegado { width: 100%; box-sizing: border-box; min-height: 64px; padding: 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font-family: monospace; }
 .codigo-verificacion { font-weight: 700; letter-spacing: 0.08em; }
-.paso-qr[hidden], .camara-qr[hidden] { display: none; }
+/* .controles y .boton son flex/inline-block y pisarían el atributo hidden */
+[hidden] { display: none !important; }
 .barra-envio { width: 100%; margin: 8px 0; }
 </style>
 </head>
