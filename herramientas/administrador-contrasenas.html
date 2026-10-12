@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Esta página guarda contraseñas: no carga nada de terceros (ni anuncios ni analítica) y el navegador
+     no deja que ningún script envíe datos a otro lado. El build la reconoce por sin-terceros y no le
+     pone AdSense. -->
+<meta name="sin-terceros" content="1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'">
+<title data-i18n="titulo-pagina">Administrador de contraseñas gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Guardá tus contraseñas en una caja fuerte cifrada con una contraseña maestra, gratis y sin registro. Importá y exportá desde Chrome, Edge y Firefox, y llevá un respaldo cifrado.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Administrador de contraseñas gratis — Mini Cookies',
+    'meta-descripcion': 'Guardá tus contraseñas en una caja fuerte cifrada con una contraseña maestra, gratis y sin registro. Importá y exportá desde Chrome, Edge y Firefox, y llevá un respaldo cifrado.',
+    'hero-titulo': 'Administrador de contraseñas',
+    'intro': 'Guardá tus contraseñas en una caja fuerte protegida por una contraseña maestra. Genera contraseñas nuevas, importa las de tu navegador y se bloquea sola.',
+    'ayuda-como': 'La contraseña maestra se convierte en una clave con PBKDF2-SHA256 (2.000.000 vueltas) y todo el contenido se cifra con AES-256-GCM; el tamaño del archivo solo da una idea aproximada de cuántas contraseñas hay. La contraseña maestra no se guarda en ningún lado, por eso no se puede recuperar. La caja cifrada se guarda en este navegador (IndexedDB) y podés descargar un respaldo cifrado para llevarla a otro equipo. Esta página no carga anuncios ni nada de terceros y el navegador le bloquea las conexiones a otros servidores. Aun así comparte sitio con las demás herramientas: por eso conviene la clave secreta. Ojo: el historial del portapapeles de Windows (Win+V) puede guardar lo que copies.',
+    'cajas-titulo': 'Tus cajas fuertes en este navegador',
+    'cajas-vacio': 'Todavía no hay ninguna caja fuerte en este navegador. Creá una o abrí un respaldo.',
+    'abrir-caja': 'Abrir',
+    'actualizada': 'Actualizada: {f}',
+    'crear-titulo': 'Crear una caja fuerte nueva',
+    'campo-nombre-caja': 'Nombre de la caja (no pongas datos sensibles: se ve sin la contraseña)',
+    'campo-maestra': 'Contraseña maestra',
+    'campo-maestra-repetir': 'Repetí la contraseña maestra',
+    'maestra-aviso': '⚠️ Si olvidás la contraseña maestra no hay forma de recuperar tus contraseñas: nadie, tampoco este sitio, la tiene. Usá una frase larga que recuerdes y, si podés, anotala en un lugar seguro.',
+    'boton-crear': 'Crear caja fuerte',
+    'respaldo-abrir-titulo': 'Abrir una caja exportada',
+    'zona-respaldo': '📂 Arrastrá el archivo de una caja exportada (.json) o tocá para elegirlo',
+    'desbloquear-titulo': 'Abrir «{n}»',
+    'boton-desbloquear': 'Desbloquear',
+    'boton-cancelar': 'Cancelar',
+    'error-maestra-corta': 'La contraseña maestra necesita al menos {n} caracteres.',
+    'error-maestra-distinta': 'Las dos contraseñas maestras no coinciden.',
+    'error-maestra-incorrecta': '❌ La contraseña maestra es incorrecta.',
+    'error-formato': '❌ Ese archivo no es una caja fuerte de Mini Cookies.',
+    'error-version': '❌ Esa caja fuerte es de una versión que esta página no conoce.',
+    'error-danado': '❌ El archivo está dañado y no se pudo leer.',
+    'error-guardar': '⚠️ No se pudo guardar en este navegador. Descargá un respaldo para no perder los cambios.',
+    'error-sin-almacen': '⚠️ Este navegador no permite guardar datos locales (¿ventana privada?). Podés usar la caja, pero descargá un respaldo antes de cerrarla.',
+    'fuerza-debil': 'Débil',
+    'fuerza-media': 'Media',
+    'fuerza-fuerte': 'Fuerte',
+    'fuerza-etiqueta': 'Fortaleza: {f}',
+    'caja-bloquear': '🔒 Bloquear',
+    'caja-mas': '⚙️ Más opciones',
+    'caja-nueva': '➕ Nueva entrada',
+    'caja-buscar': 'Buscar por sitio, usuario o dirección',
+    'caja-vacia': 'Esta caja todavía no tiene contraseñas. Agregá una o importá las de tu navegador.',
+    'caja-sin-resultados': 'No hay entradas que coincidan con la búsqueda.',
+    'caja-recorte': 'Se muestran {n} de {m}. Afiná la búsqueda para ver el resto.',
+    'sin-sitio': '(sin nombre)',
+    'respaldo-pendiente': '💾 Esta caja solo existe en este navegador y tiene cambios que no están en un respaldo.',
+    'respaldo-descargar': 'Exportar caja fuerte',
+    'copiar-usuario': 'Copiar usuario',
+    'copiar-contrasena': 'Copiar contraseña',
+    'copiado-usuario': '✅ Usuario copiado',
+    'copiado-contrasena': '✅ Contraseña copiada. Se borra del portapapeles a los 30 segundos si seguís en esta página, o al volver a ella.',
+    'error-copiar': 'No se pudo copiar. Tu navegador no dio permiso.',
+    'ver': 'Mostrar',
+    'ocultar': 'Ocultar',
+    'editar': 'Editar',
+    'marca-reutilizada': 'Reutilizada',
+    'marca-debil': 'Débil',
+    'abrir-sitio': 'Abrir sitio',
+    'entrada-nueva': 'Nueva entrada',
+    'entrada-editar': 'Editar entrada',
+    'campo-sitio': 'Sitio o nombre',
+    'campo-usuario': 'Usuario o correo',
+    'campo-contrasena': 'Contraseña',
+    'campo-url': 'Dirección del sitio',
+    'campo-notas': 'Notas',
+    'generar': '🎲 Generar',
+    'gen-longitud': 'Largo',
+    'gen-simbolos': 'Símbolos',
+    'boton-guardar': 'Guardar',
+    'boton-eliminar': 'Eliminar',
+    'confirmar-eliminar': '¿Eliminar «{n}»? No se puede deshacer.',
+    'ajustes-titulo': 'Más opciones',
+    'volver': '← Volver a la caja',
+    'aj-respaldo': 'Exportar la caja fuerte',
+    'aj-respaldo-txt': 'Descarga la caja como un archivo cifrado con tu contraseña maestra. En otro dispositivo, abrila con «Abrir una caja exportada» en la pantalla de inicio e ingresá tu contraseña maestra (y tu clave secreta, si la caja tiene una). El archivo solo no sirve sin esas credenciales.',
+    'aj-importar': 'Importar contraseñas',
+    'aj-importar-csv': 'CSV de Chrome, Edge o Firefox',
+    'zona-csv': '📄 Arrastrá el CSV exportado del navegador o tocá para elegirlo',
+    'boton-importar': 'Importar',
+    'error-csv': '❌ Ese archivo no tiene el formato de Chrome, Edge o Firefox.',
+    'aj-exportar': 'Exportar a CSV',
+    'aj-exportar-txt': '⚠️ El CSV queda en texto plano: cualquiera que lo tenga ve todas tus contraseñas. Importalo en el navegador y borralo enseguida. No lo abras con Excel: lo puede alterar.',
+    'exp-chrome': 'Chrome / Edge',
+    'exp-firefox': 'Firefox',
+    'boton-exportar': 'Exportar',
+    'aj-revision': 'Revisar contraseñas',
+    'revision-resultado': '{r} entradas con contraseña repetida y {d} con contraseña débil.',
+    'revision-ok': '✅ No se encontraron contraseñas repetidas ni débiles.',
+    'aj-cambiar': 'Cambiar la contraseña maestra',
+    'campo-maestra-actual': 'Contraseña maestra actual',
+    'campo-maestra-nueva': 'Contraseña maestra nueva',
+    'boton-cambiar': 'Cambiar contraseña maestra',
+    'ok-cambiada': '✅ Contraseña maestra cambiada. Los respaldos anteriores siguen usando la contraseña vieja.',
+    'aj-nombre': 'Nombre de la caja',
+    'boton-renombrar': 'Cambiar nombre',
+    'aj-bloqueo': 'Bloqueo automático',
+    'bloqueo-min': 'Después de {n} min sin usarla',
+    'aj-borrar': 'Eliminar esta caja de este navegador',
+    'aj-borrar-txt': 'Borra la copia guardada acá. Si no tenés un respaldo, se pierde para siempre.',
+    'boton-borrar-caja': 'Eliminar caja de este navegador',
+    'confirmar-borrar-caja': '¿Eliminar la caja «{n}» de este navegador? Si no tenés un respaldo, se pierde para siempre.',
+    'import-titulo': 'Importar {n} contraseñas',
+    'import-resumen': '{a} nuevas, {b} ya estaban iguales (se omiten) y {c} coinciden con una existente.',
+    'import-conflicto': 'Ya tenés «{n}» ({u}) con otra contraseña. ¿Qué hacemos?',
+    'import-conservar': 'Conservar la actual',
+    'import-reemplazar': 'Reemplazar por la importada',
+    'import-ambas': 'Guardar las dos',
+    'import-aplicar': 'Aplicar importación',
+    'import-listo': '✅ Se importaron {n} contraseñas.',
+    'bloqueada-inactividad': '🔒 La caja se bloqueó por inactividad.',
+    'error-maestra-o-secreta': '❌ La contraseña maestra o la clave secreta es incorrecta.',
+    'error-clave-secreta': '❌ La clave secreta no es válida. Tiene 26 letras y números (por ejemplo ABCD-EFGH-…).',
+    'error-abierta-otra': '⚠️ Esa caja ya está abierta en otra pestaña o ventana. Cerrala (bloqueala) allá primero, así no se pisan los cambios.',
+    'error-demasiado': '❌ El archivo es demasiado grande o tiene demasiadas contraseñas (el máximo es 20.000).',
+    'error-espera': '⏳ Demasiados intentos. Esperá {s} segundos antes de volver a probar.',
+    'crear-secreta': 'Agregar una clave secreta (más seguridad)',
+    'crear-secreta-txt': 'Una clave aleatoria que se suma a la contraseña maestra: aunque alguien robe tu respaldo, sin ella no puede ni empezar a adivinar la maestra. Te la mostramos una sola vez y la vas a necesitar para abrir la caja.',
+    'campo-clave-secreta': 'Clave secreta',
+    'secreta-titulo': '🔑 Guardá tu clave secreta',
+    'secreta-txt': 'Sin esta clave no se puede abrir la caja, ni siquiera con la contraseña maestra. Descargala o anotala y guardala lejos del respaldo (no en el mismo lugar).',
+    'secreta-descargar': 'Descargar como archivo de texto',
+    'secreta-ya': 'Ya la guardé en un lugar seguro',
+    'secreta-seguir': 'Continuar',
+    'aj-ver-secreta': 'Ver la clave secreta',
+    'boton-ver-secreta': 'Mostrar clave secreta',
+    'secreta-archivo-linea': 'Clave secreta de la caja «{n}»: {c}',
+  },
+  en: {
+    'titulo-pagina': 'Free password manager — Mini Cookies',
+    'meta-descripcion': 'Keep your passwords in a vault encrypted with a master password, free and with no sign-up. Import and export from Chrome, Edge and Firefox, and keep an encrypted backup.',
+    'hero-titulo': 'Password manager',
+    'intro': 'Keep your passwords in a vault protected by a master password. It generates new passwords, imports the ones from your browser and locks itself.',
+    'ayuda-como': 'The master password is turned into a key with PBKDF2-SHA256 (2,000,000 rounds) and everything is encrypted with AES-256-GCM; the file size only gives a rough idea of how many passwords there are. The master password is not stored anywhere, which is why it cannot be recovered. The encrypted vault is kept in this browser (IndexedDB) and you can download an encrypted backup to take it to another computer. This page loads no ads or anything from third parties and the browser blocks its connections to other servers. It still shares a site with the other tools, which is why the secret key is worth using. Note: the Windows clipboard history (Win+V) may keep what you copy.',
+    'cajas-titulo': 'Your vaults in this browser',
+    'cajas-vacio': 'There is no vault in this browser yet. Create one or open a backup.',
+    'abrir-caja': 'Open',
+    'actualizada': 'Updated: {f}',
+    'crear-titulo': 'Create a new vault',
+    'campo-nombre-caja': 'Vault name (don’t put sensitive data in it: it is visible without the password)',
+    'campo-maestra': 'Master password',
+    'campo-maestra-repetir': 'Repeat the master password',
+    'maestra-aviso': '⚠️ If you forget the master password there is no way to recover your passwords: nobody, this site included, has it. Use a long phrase you will remember and, if you can, write it down somewhere safe.',
+    'boton-crear': 'Create vault',
+    'respaldo-abrir-titulo': 'Open an exported vault',
+    'zona-respaldo': '📂 Drag the file of an exported vault (.json) here or tap to pick it',
+    'desbloquear-titulo': 'Open “{n}”',
+    'boton-desbloquear': 'Unlock',
+    'boton-cancelar': 'Cancel',
+    'error-maestra-corta': 'The master password needs at least {n} characters.',
+    'error-maestra-distinta': 'The two master passwords don’t match.',
+    'error-maestra-incorrecta': '❌ The master password is wrong.',
+    'error-formato': '❌ That file is not a Mini Cookies vault.',
+    'error-version': '❌ That vault is from a version this page doesn’t know.',
+    'error-danado': '❌ The file is damaged and couldn’t be read.',
+    'error-guardar': '⚠️ Couldn’t save in this browser. Download a backup so you don’t lose your changes.',
+    'error-sin-almacen': '⚠️ This browser doesn’t allow saving local data (private window?). You can use the vault, but download a backup before closing it.',
+    'fuerza-debil': 'Weak',
+    'fuerza-media': 'Fair',
+    'fuerza-fuerte': 'Strong',
+    'fuerza-etiqueta': 'Strength: {f}',
+    'caja-bloquear': '🔒 Lock',
+    'caja-mas': '⚙️ More options',
+    'caja-nueva': '➕ New entry',
+    'caja-buscar': 'Search by site, user or address',
+    'caja-vacia': 'This vault has no passwords yet. Add one or import the ones from your browser.',
+    'caja-sin-resultados': 'No entries match the search.',
+    'caja-recorte': 'Showing {n} of {m}. Narrow the search to see the rest.',
+    'sin-sitio': '(no name)',
+    'respaldo-pendiente': '💾 This vault only exists in this browser and has changes that are not in a backup.',
+    'respaldo-descargar': 'Export vault',
+    'copiar-usuario': 'Copy username',
+    'copiar-contrasena': 'Copy password',
+    'copiado-usuario': '✅ Username copied',
+    'copiado-contrasena': '✅ Password copied. It is cleared from the clipboard after 30 seconds if you stay on this page, or when you come back to it.',
+    'error-copiar': 'Couldn’t copy. Your browser didn’t allow it.',
+    'ver': 'Show',
+    'ocultar': 'Hide',
+    'editar': 'Edit',
+    'marca-reutilizada': 'Reused',
+    'marca-debil': 'Weak',
+    'abrir-sitio': 'Open site',
+    'entrada-nueva': 'New entry',
+    'entrada-editar': 'Edit entry',
+    'campo-sitio': 'Site or name',
+    'campo-usuario': 'Username or email',
+    'campo-contrasena': 'Password',
+    'campo-url': 'Site address',
+    'campo-notas': 'Notes',
+    'generar': '🎲 Generate',
+    'gen-longitud': 'Length',
+    'gen-simbolos': 'Symbols',
+    'boton-guardar': 'Save',
+    'boton-eliminar': 'Delete',
+    'confirmar-eliminar': 'Delete “{n}”? This can’t be undone.',
+    'ajustes-titulo': 'More options',
+    'volver': '← Back to the vault',
+    'aj-respaldo': 'Export the vault',
+    'aj-respaldo-txt': 'Downloads the vault as a file encrypted with your master password. On another device, open it with “Open an exported vault” on the start screen and enter your master password (and your secret key, if the vault has one). The file alone is useless without those credentials.',
+    'aj-importar': 'Import passwords',
+    'aj-importar-csv': 'CSV from Chrome, Edge or Firefox',
+    'zona-csv': '📄 Drag the CSV exported from your browser here or tap to pick it',
+    'boton-importar': 'Import',
+    'error-csv': '❌ That file doesn’t have the Chrome, Edge or Firefox format.',
+    'aj-exportar': 'Export to CSV',
+    'aj-exportar-txt': '⚠️ The CSV is plain text: anyone who has it sees all your passwords. Import it into the browser and delete it right away. Don’t open it in Excel: it can alter it.',
+    'exp-chrome': 'Chrome / Edge',
+    'exp-firefox': 'Firefox',
+    'boton-exportar': 'Export',
+    'aj-revision': 'Check passwords',
+    'revision-resultado': '{r} entries with a reused password and {d} with a weak password.',
+    'revision-ok': '✅ No reused or weak passwords found.',
+    'aj-cambiar': 'Change the master password',
+    'campo-maestra-actual': 'Current master password',
+    'campo-maestra-nueva': 'New master password',
+    'boton-cambiar': 'Change master password',
+    'ok-cambiada': '✅ Master password changed. Older backups still use the old password.',
+    'aj-nombre': 'Vault name',
+    'boton-renombrar': 'Rename',
+    'aj-bloqueo': 'Automatic lock',
+    'bloqueo-min': 'After {n} min without use',
+    'aj-borrar': 'Delete this vault from this browser',
+    'aj-borrar-txt': 'Deletes the copy saved here. Without a backup it is lost forever.',
+    'boton-borrar-caja': 'Delete vault from this browser',
+    'confirmar-borrar-caja': 'Delete the vault “{n}” from this browser? Without a backup it is lost forever.',
+    'import-titulo': 'Import {n} passwords',
+    'import-resumen': '{a} new, {b} already the same (skipped) and {c} match an existing entry.',
+    'import-conflicto': 'You already have “{n}” ({u}) with a different password. What now?',
+    'import-conservar': 'Keep the current one',
+    'import-reemplazar': 'Replace with the imported one',
+    'import-ambas': 'Keep both',
+    'import-aplicar': 'Apply import',
+    'import-listo': '✅ Imported {n} passwords.',
+    'bloqueada-inactividad': '🔒 The vault locked after being idle.',
+    'error-maestra-o-secreta': '❌ The master password or the secret key is wrong.',
+    'error-clave-secreta': '❌ The secret key is not valid. It has 26 letters and numbers (for example ABCD-EFGH-…).',
+    'error-abierta-otra': '⚠️ That vault is already open in another tab or window. Lock it there first so changes don’t overwrite each other.',
+    'error-demasiado': '❌ The file is too large or has too many passwords (the maximum is 20,000).',
+    'error-espera': '⏳ Too many attempts. Wait {s} seconds before trying again.',
+    'crear-secreta': 'Add a secret key (more security)',
+    'crear-secreta-txt': 'A random key added to the master password: even if someone steals your backup, without it they can’t even start guessing the master password. We show it only once and you will need it to open the vault.',
+    'campo-clave-secreta': 'Secret key',
+    'secreta-titulo': '🔑 Save your secret key',
+    'secreta-txt': 'Without this key the vault can’t be opened, not even with the master password. Download it or write it down and keep it away from the backup (not in the same place).',
+    'secreta-descargar': 'Download as a text file',
+    'secreta-ya': 'I saved it in a safe place',
+    'secreta-seguir': 'Continue',
+    'aj-ver-secreta': 'View the secret key',
+    'boton-ver-secreta': 'Show secret key',
+    'secreta-archivo-linea': 'Secret key of the vault “{n}”: {c}',
+  }
+};
+</script>
+<style>
+/* .controles, .boton y .campo son flex/inline-block y pisarían el atributo hidden */
+[hidden] { display: none !important; }
+.vista > * + * { margin-top: 14px; }
+.vista h2, .vista h3 { margin: 0; }
+.fila { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.fila.entre { justify-content: space-between; }
+.fila > .crece { flex: 1 1 200px; min-width: 0; }
+.mensaje { padding: 10px 12px; border-radius: var(--radio); background: var(--aviso-fondo, var(--superficie-alt)); border: 1px solid var(--gris-borde); }
+.mensaje.error { border-color: #b91c1c; }
+.mensaje.ok { border-color: var(--verde); }
+.fuerza { font-size: 0.85rem; color: var(--texto-suave); }
+.lista-cajas, .lista-entradas { list-style: none; margin: 0; padding: 0; }
+.lista-cajas li, .lista-entradas li { border: 1px solid var(--gris-borde); border-radius: var(--radio); background: var(--superficie); padding: 10px 12px; }
+.lista-cajas li + li, .lista-entradas li + li { margin-top: 8px; }
+.entrada-titulo { font-weight: 700; overflow-wrap: anywhere; }
+.entrada-sub { color: var(--texto-suave); font-size: 0.9rem; overflow-wrap: anywhere; }
+.entrada-clave { font-family: Consolas, monospace; overflow-wrap: anywhere; margin-top: 6px; }
+.marca-aviso { font-size: 0.75rem; border: 1px solid #b45309; color: #b45309; border-radius: 999px; padding: 1px 8px; margin-left: 6px; white-space: nowrap; }
+.bloque { border-top: 1px solid var(--gris-borde); padding-top: 14px; }
+.campo-clave { display: flex; gap: 6px; }
+.campo-clave input { flex: 1 1 auto; min-width: 0; }
+.conflicto { border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 10px 12px; }
+.conflicto label { display: block; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">Administrador de contraseñas</h1>
+  <p>
+    <span data-i18n="intro">Guardá tus contraseñas en una caja fuerte protegida por una contraseña maestra.</span>
+    <span class="ayuda-tip">
+      <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+      <span class="ayuda-burbuja" data-i18n="ayuda-como">La contraseña maestra se convierte en una clave…</span>
+    </span>
+  </p>
+
+  <div class="panel-herramienta">
+    <div id="mensajeGlobal" class="mensaje" role="status" aria-live="polite" hidden></div>
+
+    <!-- ─── Inicio: elegir, crear o abrir un respaldo ─── -->
+    <section id="vistaInicio" class="vista">
+      <h2 data-i18n="cajas-titulo">Tus cajas fuertes en este navegador</h2>
+      <ul id="listaCajas" class="lista-cajas"></ul>
+      <p id="cajasVacio" class="entrada-sub" data-i18n="cajas-vacio" hidden>Todavía no hay ninguna caja fuerte en este navegador.</p>
+
+      <form id="formCrear" class="bloque vista" autocomplete="off">
+        <h3 data-i18n="crear-titulo">Crear una caja fuerte nueva</h3>
+        <label class="campo"><span data-i18n="campo-nombre-caja">Nombre de la caja</span>
+          <input type="text" id="crearNombre" maxlength="80" autocomplete="off"></label>
+        <label class="campo"><span data-i18n="campo-maestra">Contraseña maestra</span>
+          <input type="password" id="crearMaestra" autocomplete="off"></label>
+        <div id="crearFuerza" class="fuerza"></div>
+        <label class="campo"><span data-i18n="campo-maestra-repetir">Repetí la contraseña maestra</span>
+          <input type="password" id="crearMaestra2" autocomplete="off"></label>
+        <label class="fila"><input type="checkbox" id="crearConSecreta"><span data-i18n="crear-secreta">Agregar una clave secreta (más seguridad)</span></label>
+        <div class="fuerza" data-i18n="crear-secreta-txt"></div>
+        <div class="mensaje" data-i18n="maestra-aviso">⚠️ Si olvidás la contraseña maestra no hay forma de recuperar tus contraseñas.</div>
+        <div id="crearError" class="mensaje error" role="alert" hidden></div>
+        <button class="boton" type="submit" data-i18n="boton-crear">Crear caja fuerte</button>
+      </form>
+
+      <div class="bloque vista">
+        <h3 data-i18n="respaldo-abrir-titulo">Abrir un respaldo</h3>
+        <div class="zona-arrastre" id="zonaRespaldo">
+          <span data-i18n="zona-respaldo">📂 Arrastrá un respaldo de caja fuerte (.json) o tocá para elegirlo</span>
+          <input type="file" id="entradaRespaldo" accept=".json,application/json" hidden>
+        </div>
+        <div id="respaldoError" class="mensaje error" role="alert" hidden></div>
+      </div>
+    </section>
+
+    <!-- ─── Desbloquear ─── -->
+    <form id="vistaDesbloquear" class="vista" autocomplete="off" hidden>
+      <h2 id="desbloquearTitulo"></h2>
+      <label class="campo"><span data-i18n="campo-maestra">Contraseña maestra</span>
+        <input type="password" id="desbloquearMaestra" autocomplete="off"></label>
+      <label class="campo" id="desbloquearSecretoCampo" hidden><span data-i18n="campo-clave-secreta">Clave secreta</span>
+        <input type="password" id="desbloquearSecreto" autocomplete="off"></label>
+      <div id="desbloquearError" class="mensaje error" role="alert" hidden></div>
+      <div class="fila">
+        <button class="boton" type="submit" id="botonDesbloquear" data-i18n="boton-desbloquear">Desbloquear</button>
+        <button class="boton secundario" type="button" id="cancelarDesbloquear" data-i18n="boton-cancelar">Cancelar</button>
+      </div>
+    </form>
+
+    <!-- ─── Clave secreta recién creada ─── -->
+    <section id="vistaSecreta" class="vista" hidden>
+      <h2 data-i18n="secreta-titulo">🔑 Guardá tu clave secreta</h2>
+      <p data-i18n="secreta-txt"></p>
+      <div id="secretaTexto" class="resultado visible" style="font-family:Consolas,monospace;font-size:1.2rem;overflow-wrap:anywhere;user-select:all"></div>
+      <div><button class="boton secundario" type="button" id="secretaDescargar" data-i18n="secreta-descargar">Descargar como archivo de texto</button></div>
+      <label class="fila"><input type="checkbox" id="secretaYa"><span data-i18n="secreta-ya">Ya la guardé en un lugar seguro</span></label>
+      <div><button class="boton" type="button" id="secretaSeguir" disabled data-i18n="secreta-seguir">Continuar</button></div>
+    </section>
+
+    <!-- ─── Caja abierta ─── -->
+    <section id="vistaCaja" class="vista" hidden>
+      <div class="fila entre">
+        <h2 id="cajaNombre"></h2>
+        <div class="fila">
+          <button class="boton secundario chico" type="button" id="botonMas" data-i18n="caja-mas">⚙️ Más opciones</button>
+          <button class="boton chico" type="button" id="botonBloquear" data-i18n="caja-bloquear">🔒 Bloquear</button>
+        </div>
+      </div>
+      <div id="avisoRespaldo" class="mensaje fila entre" hidden>
+        <span class="crece" data-i18n="respaldo-pendiente">💾 Esta caja solo existe en este navegador y tiene cambios que no están en un respaldo.</span>
+        <button class="boton chico" type="button" id="botonRespaldoAviso" data-i18n="respaldo-descargar">Descargar respaldo</button>
+      </div>
+      <div class="fila">
+        <input type="search" id="buscar" class="crece" data-i18n-attr="placeholder:caja-buscar;aria-label:caja-buscar" placeholder="Buscar" autocomplete="off">
+        <button class="boton" type="button" id="botonNueva" data-i18n="caja-nueva">➕ Nueva entrada</button>
+      </div>
+      <div id="mensajeCaja" class="mensaje" role="status" aria-live="polite" hidden></div>
+      <ul id="listaEntradas" class="lista-entradas"></ul>
+      <p id="cajaVacia" class="entrada-sub" hidden></p>
+    </section>
+
+    <!-- ─── Formulario de entrada ─── -->
+    <form id="vistaEntrada" class="vista" autocomplete="off" hidden>
+      <h2 id="entradaTitulo"></h2>
+      <label class="campo"><span data-i18n="campo-sitio">Sitio o nombre</span>
+        <input type="text" id="eSitio" autocomplete="off"></label>
+      <label class="campo"><span data-i18n="campo-usuario">Usuario o correo</span>
+        <input type="text" id="eUsuario" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label class="campo"><span data-i18n="campo-contrasena">Contraseña</span>
+        <span class="campo-clave">
+          <input type="password" id="eContrasena" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="boton secundario chico" type="button" id="eVer" data-i18n="ver">Mostrar</button>
+        </span>
+      </label>
+      <div id="eFuerza" class="fuerza"></div>
+      <div class="fila">
+        <button class="boton secundario chico" type="button" id="eGenerar" data-i18n="generar">🎲 Generar</button>
+        <label class="fila"><span class="fuerza" data-i18n="gen-longitud">Largo</span>
+          <input type="number" id="genLongitud" min="8" max="64" value="20" style="width:4.5em"></label>
+        <label class="fila"><input type="checkbox" id="genSimbolos" checked><span class="fuerza" data-i18n="gen-simbolos">Símbolos</span></label>
+      </div>
+      <label class="campo"><span data-i18n="campo-url">Dirección del sitio</span>
+        <input type="url" id="eUrl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://"></label>
+      <label class="campo"><span data-i18n="campo-notas">Notas</span>
+        <textarea id="eNotas" style="min-height:90px" autocomplete="off"></textarea></label>
+      <div id="entradaError" class="mensaje error" role="alert" hidden></div>
+      <div class="fila">
+        <button class="boton" type="submit" data-i18n="boton-guardar">Guardar</button>
+        <button class="boton secundario" type="button" id="eCancelar" data-i18n="boton-cancelar">Cancelar</button>
+        <button class="boton peligro" type="button" id="eEliminar" data-i18n="boton-eliminar">Eliminar</button>
+      </div>
+    </form>
+
+    <!-- ─── Más opciones ─── -->
+    <section id="vistaAjustes" class="vista" hidden>
+      <div class="fila entre">
+        <h2 data-i18n="ajustes-titulo">Más opciones</h2>
+        <button class="boton secundario chico" type="button" id="ajVolver" data-i18n="volver">← Volver a la caja</button>
+      </div>
+      <div id="mensajeAjustes" class="mensaje" role="status" aria-live="polite" hidden></div>
+
+      <div class="bloque vista">
+        <h3 data-i18n="aj-respaldo">Respaldo</h3>
+        <p class="entrada-sub" data-i18n="aj-respaldo-txt"></p>
+        <div><button class="boton" type="button" id="ajRespaldo" data-i18n="respaldo-descargar">Descargar respaldo</button></div>
+      </div>
+
+      <div class="bloque vista">
+        <h3 data-i18n="aj-importar">Importar contraseñas</h3>
+        <p class="entrada-sub" data-i18n="aj-importar-csv">CSV de Chrome, Edge o Firefox</p>
+        <div class="zona-arrastre" id="zonaCsv">
+          <span data-i18n="zona-csv">📄 Arrastrá el CSV exportado del navegador o tocá para elegirlo</span>
+          <input type="file" id="entradaCsv" accept=".csv,text/csv" hidden>
+        </div>
+      </div>
+
+      <div class="bloque vista">
+        <h3 data-i18n="aj-exportar">Exportar a CSV</h3>
+        <div class="mensaje" data-i18n="aj-exportar-txt"></div>
+        <div class="fila">
+          <select id="exportarFormato" aria-label="CSV">
+            <option value="chrome" data-i18n="exp-chrome">Chrome / Edge</option>
+            <option value="firefox" data-i18n="exp-firefox">Firefox</option>
+          </select>
+          <input type="password" id="exportarMaestra" class="crece" autocomplete="off" data-i18n-attr="placeholder:campo-maestra;aria-label:campo-maestra" placeholder="Contraseña maestra">
+          <button class="boton" type="button" id="ajExportar" data-i18n="boton-exportar">Exportar</button>
+        </div>
+      </div>
+
+      <div class="bloque vista">
+        <h3 data-i18n="aj-revision">Revisar contraseñas</h3>
+        <div id="revisionResultado" class="entrada-sub"></div>
+      </div>
+
+      <div id="bloqueSecreta" class="bloque vista" hidden>
+        <h3 data-i18n="aj-ver-secreta">Ver la clave secreta</h3>
+        <div class="fila">
+          <input type="password" id="verSecretaMaestra" class="crece" autocomplete="off" data-i18n-attr="placeholder:campo-maestra;aria-label:campo-maestra" placeholder="Contraseña maestra">
+          <button class="boton secundario" type="button" id="botonVerSecreta" data-i18n="boton-ver-secreta">Mostrar clave secreta</button>
+        </div>
+        <div id="verSecretaTexto" class="resultado" style="font-family:Consolas,monospace;overflow-wrap:anywhere"></div>
+      </div>
+
+      <form id="formCambiar" class="bloque vista" autocomplete="off">
+        <h3 data-i18n="aj-cambiar">Cambiar la contraseña maestra</h3>
+        <label class="campo"><span data-i18n="campo-maestra-actual">Contraseña maestra actual</span>
+          <input type="password" id="cambiarActual" autocomplete="off"></label>
+        <label class="campo"><span data-i18n="campo-maestra-nueva">Contraseña maestra nueva</span>
+          <input type="password" id="cambiarNueva" autocomplete="off"></label>
+        <div id="cambiarFuerza" class="fuerza"></div>
+        <label class="campo"><span data-i18n="campo-maestra-repetir">Repetí la contraseña maestra</span>
+          <input type="password" id="cambiarNueva2" autocomplete="off"></label>
+        <div id="cambiarError" class="mensaje error" role="alert" hidden></div>
+        <div><button class="boton" type="submit" data-i18n="boton-cambiar">Cambiar contraseña maestra</button></div>
+      </form>
+
+      <form id="formRenombrar" class="bloque vista" autocomplete="off">
+        <h3 data-i18n="aj-nombre">Nombre de la caja</h3>
+        <div class="fila">
+          <input type="text" id="renombrarNombre" class="crece" maxlength="80" autocomplete="off" data-i18n-attr="aria-label:aj-nombre">
+          <button class="boton secundario" type="submit" data-i18n="boton-renombrar">Cambiar nombre</button>
+        </div>
+      </form>
+
+      <div class="bloque vista">
+        <h3 data-i18n="aj-bloqueo">Bloqueo automático</h3>
+        <select id="bloqueoMinutos" data-i18n-attr="aria-label:aj-bloqueo"></select>
+      </div>
+
+      <div class="bloque vista">
+        <h3 data-i18n="aj-borrar">Eliminar esta caja de este navegador</h3>
+        <p class="entrada-sub" data-i18n="aj-borrar-txt"></p>
+        <div><button class="boton peligro" type="button" id="ajBorrarCaja" data-i18n="boton-borrar-caja">Eliminar caja de este navegador</button></div>
+      </div>
+    </section>
+
+    <!-- ─── Importar: conflictos ─── -->
+    <section id="vistaImportar" class="vista" hidden>
+      <h2 id="importarTitulo"></h2>
+      <p id="importarResumen" class="entrada-sub"></p>
+      <div id="importarConflictos"></div>
+      <div class="fila">
+        <button class="boton" type="button" id="importarAplicar" data-i18n="import-aplicar">Aplicar importación</button>
+        <button class="boton secundario" type="button" id="importarCancelar" data-i18n="boton-cancelar">Cancelar</button>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/generador-contrasenas.js"></script>
+<script src="../assets/js/boveda-contrasenas.js"></script>
+<script>
+(function () {
+  'use strict';
+  const B = BovedaContrasenas;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (clave, vars) => t(clave).replace(/\{(\w+)\}/g, (m, k) => (vars && vars[k] != null ? vars[k] : m));
+  const VISTAS = ['vistaInicio', 'vistaDesbloquear', 'vistaSecreta', 'vistaCaja', 'vistaEntrada', 'vistaAjustes', 'vistaImportar'];
+  const LIMITE_LISTA = 200;
+
+  let sesion = null;        // caja abierta
+  let idCaja = null;        // clave en el almacén local
+  let pendiente = null;     // caja que se está por abrir: { id } o { archivo }
+  let editandoId = null;    // entrada en edición (null: nueva)
+  let revisionRespaldo = 0; // revisión de la sesión en el último respaldo
+  let sinAlmacen = false;
+  let importacion = null;   // { nuevas, conflictos }
+  let vistaActual = 'vistaInicio';
+  let ultimaActividad = 0;
+  let vigilante = null;
+  let liberarCandado = null; // suelta el candado de la caja abierta (una sola pestaña a la vez)
+  let temporizadorPortapapeles = null;
+  let portapapelesSucio = false; // se copió una contraseña y todavía hay que vaciar el portapapeles
+  let ocultarClaves = new Map();
+  let ultimoMensaje = null; // para volver a escribirlo al cambiar de idioma
+
+  // ─── Utilidades ───
+  // Campos secretos.
+  // (2026-10-12, auditoría avanzada) Se volvió a type=password: con -webkit-text-security el
+  // lector de pantalla leía la maestra en voz alta y el campo dejaba copiar. El navegador puede
+  // ofrecer guardarla en su gestor: se rechaza ese ofrecimiento.
+  const OCULTA_CON_CSS = false;
+  function ponerOculto(campo, oculto) {
+    if (OCULTA_CON_CSS) campo.classList.toggle('texto-oculto', oculto); else campo.type = oculto ? 'password' : 'text';
+  }
+  function estaOculto(campo) { return OCULTA_CON_CSS ? campo.classList.contains('texto-oculto') : campo.type === 'password'; }
+  for (const campo of document.querySelectorAll('input, textarea')) {
+    campo.setAttribute('spellcheck', 'false'); // el corrector del navegador puede mandar el texto a un servidor
+    campo.setAttribute('autocorrect', 'off');
+    campo.setAttribute('autocomplete', 'off');
+    if (campo.type !== 'checkbox' && campo.type !== 'radio' && campo.type !== 'file') {
+      campo.setAttribute('autocapitalize', 'off');
+      for (const marca of ['data-lpignore', 'data-1p-ignore', 'data-bwignore', 'data-form-type']) campo.setAttribute(marca, marca === 'data-form-type' ? 'other' : 'true');
+    }
+    if (campo.type === 'password') ponerOculto(campo, true);
+    if (campo.type === 'password' && OCULTA_CON_CSS) campo.type = 'text';
+  }
+
+  function el(etiqueta, atributos, ...hijos) {
+    const nodo = document.createElement(etiqueta);
+    for (const [k, v] of Object.entries(atributos || {})) {
+      if (k === 'class') nodo.className = v; else if (k === 'text') nodo.textContent = v; else if (k.startsWith('on')) nodo.addEventListener(k.slice(2), v); else nodo.setAttribute(k, v);
+    }
+    for (const h of hijos) if (h != null) nodo.append(h);
+    return nodo;
+  }
+
+  function mostrar(nodo, texto) {
+    nodo.textContent = texto || '';
+    nodo.hidden = !texto;
+  }
+
+  function mensaje(nodo, clave, vars, tipo) {
+    ultimoMensaje = { nodo, clave, vars, tipo };
+    nodo.className = 'mensaje' + (tipo ? ' ' + tipo : '');
+    mostrar(nodo, clave ? fmt(clave, vars) : '');
+  }
+
+  function textoError(e) {
+    const mapa = { 'maestra-incorrecta': 'error-maestra-incorrecta', formato: 'error-formato', version: 'error-version', danado: 'error-danado', 'sin-almacen': 'error-sin-almacen', 'maestra-corta': 'error-maestra-corta', 'clave-secreta': 'error-clave-secreta', 'abierta-otra': 'error-abierta-otra', demasiadas: 'error-demasiado' };
+    return fmt(mapa[e && e.codigo] || 'error-danado', { n: B.MAESTRA_MIN });
+  }
+
+  function ir(vista) {
+    vistaActual = vista;
+    for (const v of VISTAS) $(v).hidden = v !== vista;
+  }
+
+  function etiquetaFuerza(contrasena) {
+    if (!contrasena) return '';
+    const nivel = GeneradorContrasenas.fortaleza(contrasena);
+    return fmt('fuerza-etiqueta', { f: t({ debil: 'fuerza-debil', media: 'fuerza-media', fuerte: 'fuerza-fuerte' }[nivel]) });
+  }
+
+  function ligarFuerza(campo, destino) {
+    const pintar = () => { destino.textContent = etiquetaFuerza(campo.value); };
+    campo.addEventListener('input', pintar);
+    document.addEventListener('cambioIdioma', pintar);
+  }
+
+  function fechaLocal(iso) {
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleString(idiomaActual() === 'en' ? 'en-US' : 'es', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  // ─── Bloqueo automático y portapapeles ───
+  function minutosBloqueo() {
+    try { const n = parseInt(localStorage.getItem('boveda-bloqueo'), 10); if ([1, 5, 15, 30].includes(n)) return n; } catch (e) {}
+    return 5;
+  }
+
+  // Se compara la hora real: si el equipo estuvo suspendido o la página
+  // congelada (atrás/adelante del navegador), al volver se bloquea en el acto.
+  function revisarInactividad() {
+    if (!sesion) { clearInterval(vigilante); vigilante = null; return; }
+    if (Date.now() - ultimaActividad >= minutosBloqueo() * 60000) bloquear(true);
+  }
+
+  function reiniciarBloqueo() {
+    ultimaActividad = Date.now();
+    if (sesion && !vigilante) vigilante = setInterval(revisarInactividad, 5000);
+  }
+
+  ['pointerdown', 'keydown', 'input', 'scroll'].forEach((ev) => document.addEventListener(ev, reiniciarBloqueo, { passive: true, capture: true }));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) revisarInactividad(); });
+  window.addEventListener('pageshow', revisarInactividad);
+  window.addEventListener('pagehide', () => { if (sesion) bloquear(false); });
+  window.addEventListener('focus', () => { if (portapapelesSucio) borrarPortapapeles(); });
+
+  // Candado entre pestañas: una caja abierta en dos lugares a la vez se
+  // pisaría los cambios. Devuelve false si ya está abierta en otra pestaña.
+  function tomarCandado(id) {
+    return new Promise((resolver) => {
+      if (!navigator.locks || !navigator.locks.request) return resolver(true);
+      navigator.locks.request('mc-boveda-' + id, { ifAvailable: true }, (candado) => {
+        if (!candado) { resolver(false); return undefined; }
+        resolver(true);
+        return new Promise((soltar) => { liberarCandado = soltar; });
+      }).catch(() => resolver(true));
+    });
+  }
+
+  function soltarCandado() { if (liberarCandado) { liberarCandado(); liberarCandado = null; } }
+
+  // Intentos fallidos de abrir una caja: tras tres, hay que esperar (5 s, 10 s,
+  // 20 s… hasta 5 min). Se guarda en este navegador; no frena a quien copie el
+  // respaldo y lo ataque por su cuenta (eso lo frenan las vueltas de PBKDF2).
+  function leerFallos() { try { return JSON.parse(localStorage.getItem('boveda-fallos')) || {}; } catch (e) { return {}; } }
+  function guardarFallos(f) { try { localStorage.setItem('boveda-fallos', JSON.stringify(f)); } catch (e) {} }
+  function segundosDeEspera(clave) {
+    const f = leerFallos()[clave];
+    return f && f.hasta > Date.now() ? Math.ceil((f.hasta - Date.now()) / 1000) : 0;
+  }
+  function anotarFallo(clave) {
+    const todos = leerFallos(), f = todos[clave] || { n: 0, hasta: 0 };
+    f.n++;
+    if (f.n >= 3) f.hasta = Date.now() + Math.min(5 * Math.pow(2, f.n - 3), 300) * 1000;
+    todos[clave] = f; guardarFallos(todos);
+  }
+  function limpiarFallos(clave) { const todos = leerFallos(); delete todos[clave]; guardarFallos(todos); }
+
+  // No se lee nunca el portapapeles (pediría un permiso que, una vez dado, valdría
+  // para todo el sitio) y no se guarda la contraseña: se vacía y listo. Sin foco
+  // el navegador no deja escribir; se reintenta cuando la página lo recupera.
+  async function borrarPortapapeles() {
+    if (!portapapelesSucio || !document.hasFocus()) return;
+    try { await navigator.clipboard.writeText(''); portapapelesSucio = false; } catch (e) { /* se reintenta al volver */ }
+  }
+
+  async function copiar(texto, esClave, clave) {
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch (e) { mensaje($('mensajeCaja'), 'error-copiar', null, 'error'); return; }
+    mensaje($('mensajeCaja'), clave, null, 'ok');
+    clearTimeout(temporizadorPortapapeles);
+    if (esClave) {
+      portapapelesSucio = true;
+      temporizadorPortapapeles = setTimeout(borrarPortapapeles, 30000);
+    }
+  }
+
+  function limpiarPantalla() {
+    for (const id of ['listaEntradas', 'importarConflictos']) $(id).replaceChildren();
+    for (const id of ['eSitio', 'eUsuario', 'eContrasena', 'eUrl', 'eNotas', 'buscar', 'desbloquearMaestra', 'crearMaestra', 'crearMaestra2',
+      'cambiarActual', 'cambiarNueva', 'cambiarNueva2', 'exportarMaestra', 'desbloquearSecreto', 'verSecretaMaestra']) $(id).value = '';
+    ponerOculto($('eContrasena'), true);
+    $('crearConSecreta').checked = false; $('secretaTexto').textContent = ''; $('secretaYa').checked = false;
+    $('verSecretaTexto').textContent = ''; $('verSecretaTexto').classList.remove('visible');
+    $('revisionResultado').textContent = '';
+    for (const id of ['mensajeCaja', 'mensajeAjustes', 'entradaError', 'cambiarError']) mostrar($(id), '');
+    importacion = null; editandoId = null; ocultarClaves.forEach(clearTimeout); ocultarClaves = new Map();
+  }
+
+  function bloquear(porInactividad) {
+    clearInterval(vigilante); vigilante = null;
+    if (sesion) sesion.cerrar();
+    sesion = null; idCaja = null; pendiente = null;
+    soltarCandado();
+    if (portapapelesSucio) borrarPortapapeles();
+    limpiarPantalla();
+    ir('vistaInicio');
+    mensaje($('mensajeGlobal'), porInactividad ? 'bloqueada-inactividad' : null);
+    cargarCajas();
+  }
+
+  // ─── Inicio ───
+  async function cargarCajas() {
+    const lista = $('listaCajas');
+    lista.replaceChildren();
+    let cajas = [];
+    try { cajas = await B.Almacen.listar(); sinAlmacen = false; } catch (e) { sinAlmacen = true; }
+    $('cajasVacio').hidden = cajas.length > 0;
+    for (const c of cajas) {
+      lista.append(el('li', { class: 'fila entre' },
+        el('div', { class: 'crece' }, el('div', { class: 'entrada-titulo', text: c.nombre }), el('div', { class: 'entrada-sub', text: fmt('actualizada', { f: fechaLocal(c.actualizado) }) })),
+        el('button', { class: 'boton', type: 'button', onclick: () => pedirMaestra({ id: c.id }, c.nombre) }, fmt('abrir-caja'))));
+    }
+    if (sinAlmacen && !sesion && $('mensajeGlobal').hidden) mensaje($('mensajeGlobal'), 'error-sin-almacen', null, 'error');
+  }
+
+  async function pedirMaestra(destino, nombre) {
+    pendiente = destino;
+    let requiereSecreto = false;
+    try {
+      const a = destino.archivo || await B.Almacen.leer(destino.id);
+      requiereSecreto = !!(a && a.claveSecreta === true);
+    } catch (e) {}
+    $('desbloquearSecretoCampo').hidden = !requiereSecreto;
+    $('desbloquearSecreto').value = '';
+    $('desbloquearTitulo').textContent = fmt('desbloquear-titulo', { n: nombre });
+    $('desbloquearMaestra').value = '';
+    mostrar($('desbloquearError'), '');
+    ir('vistaDesbloquear');
+    $('desbloquearMaestra').focus();
+  }
+
+  ligarFuerza($('crearMaestra'), $('crearFuerza'));
+  ligarFuerza($('cambiarNueva'), $('cambiarFuerza'));
+  ligarFuerza($('eContrasena'), $('eFuerza'));
+
+  $('formCrear').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const error = $('crearError');
+    const maestra = $('crearMaestra').value;
+    if (maestra.length < B.MAESTRA_MIN) return mostrar(error, fmt('error-maestra-corta', { n: B.MAESTRA_MIN }));
+    if (maestra !== $('crearMaestra2').value) return mostrar(error, fmt('error-maestra-distinta'));
+    mostrar(error, '');
+    const boton = ev.submitter; if (boton) boton.disabled = true;
+    try {
+      const conSecreta = $('crearConSecreta').checked;
+      sesion = await B.crear(maestra, $('crearNombre').value, { claveSecreta: conSecreta });
+      idCaja = B.Almacen.nuevoId();
+      await tomarCandado(idCaja);
+      revisionRespaldo = -1; // una caja nueva todavía no tiene respaldo
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+      await guardarLocal();
+      const secreta = sesion.claveSecreta;
+      limpiarPantalla();
+      if (secreta) {
+        $('secretaTexto').textContent = secreta;
+        $('secretaYa').checked = false; $('secretaSeguir').disabled = true;
+        reiniciarBloqueo();
+        ir('vistaSecreta');
+      } else abrirCaja();
+    } catch (e) { mostrar(error, textoError(e)); } finally { if (boton) boton.disabled = false; }
+  });
+
+  conectarZonaArrastre($('zonaRespaldo'), $('entradaRespaldo'), async (archivos) => {
+    const error = $('respaldoError');
+    mostrar(error, '');
+    if (!archivos.length) return;
+    try {
+      if (archivos[0].size > 50 * 1024 * 1024) throw Object.assign(new Error(), { codigo: 'formato' });
+      const objeto = JSON.parse(await archivos[0].text());
+      if (!objeto || objeto.formato !== 'minicookies-boveda') throw Object.assign(new Error(), { codigo: 'formato' });
+      pedirMaestra({ archivo: objeto }, String(objeto.nombre || ''));
+    } catch (e) { mostrar(error, textoError(e.codigo ? e : { codigo: 'formato' })); }
+  });
+
+  $('cancelarDesbloquear').addEventListener('click', () => { pendiente = null; $('desbloquearMaestra').value = ''; ir('vistaInicio'); });
+
+  $('vistaDesbloquear').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const error = $('desbloquearError');
+    const maestra = $('desbloquearMaestra').value;
+    if (!pendiente || !maestra) return;
+    mostrar(error, '');
+    const claveFallos = pendiente.id || 'archivo';
+    const espera = segundosDeEspera(claveFallos);
+    if (espera) return mostrar(error, fmt('error-espera', { s: espera }));
+    const boton = $('botonDesbloquear'); boton.disabled = true;
+    let candadoTomado = false;
+    try {
+      let archivo, id, esArchivo = false;
+      if (pendiente.id) { archivo = await B.Almacen.leer(pendiente.id); id = pendiente.id; } else { archivo = pendiente.archivo; id = B.Almacen.nuevoId(); esArchivo = true; }
+      if (!archivo) throw Object.assign(new Error(), { codigo: 'danado' });
+      if (!(await tomarCandado(id))) throw Object.assign(new Error(), { codigo: 'abierta-otra' });
+      candadoTomado = true;
+      sesion = await B.abrir(archivo, maestra, $('desbloquearSecreto').value);
+      limpiarFallos(claveFallos);
+      idCaja = id;
+      revisionRespaldo = sesion.revision; // el aviso aparece cuando hay cambios nuevos
+      if (esArchivo) await guardarLocal();
+      pendiente = null;
+      limpiarPantalla();
+      abrirCaja();
+    } catch (e) {
+      if (candadoTomado) soltarCandado();
+      if (e.codigo === 'maestra-incorrecta') {
+        anotarFallo(claveFallos);
+        const w = segundosDeEspera(claveFallos);
+        mostrar(error, (!$('desbloquearSecretoCampo').hidden ? fmt('error-maestra-o-secreta') : textoError(e)) + (w ? ' ' + fmt('error-espera', { s: w }) : ''));
+      } else mostrar(error, textoError(e));
+    } finally { boton.disabled = false; }
+  });
+
+  $('secretaYa').addEventListener('change', () => { $('secretaSeguir').disabled = !$('secretaYa').checked; });
+  $('secretaSeguir').addEventListener('click', () => { $('secretaTexto').textContent = ''; abrirCaja(); });
+  $('secretaDescargar').addEventListener('click', () => {
+    if (!sesion) return;
+    descargarTexto(fmt('secreta-archivo-linea', { n: sesion.nombre, c: $('secretaTexto').textContent }) + '\r\n', nombreConFecha('clave-secreta', 'txt'));
+  });
+
+  // ─── Caja abierta ───
+  async function guardarLocal() {
+    if (!sesion) return;
+    try {
+      await B.Almacen.guardar(idCaja, await sesion.cifrar());
+      sinAlmacen = false;
+    } catch (e) {
+      sinAlmacen = true;
+      mensaje($('mensajeGlobal'), 'error-guardar', null, 'error');
+    }
+  }
+
+  function abrirCaja() {
+    mensaje($('mensajeGlobal'), null);
+    $('cajaNombre').textContent = sesion.nombre;
+    ir('vistaCaja');
+    pintarLista();
+    reiniciarBloqueo();
+  }
+
+  function actualizarAvisoRespaldo() {
+    $('avisoRespaldo').hidden = !sesion || sesion.revision <= revisionRespaldo;
+  }
+
+  function pintarLista() {
+    if (!sesion) return;
+    actualizarAvisoRespaldo();
+    const todas = sesion.entradas().sort((a, b) => (a.sitio || a.usuario).localeCompare(b.sitio || b.usuario, undefined, { sensitivity: 'base' }));
+    const filtro = $('buscar').value.trim().toLowerCase();
+    const visibles = filtro ? todas.filter((e) => [e.sitio, e.usuario, e.url].some((c) => c.toLowerCase().includes(filtro))) : todas;
+    const revision = B.auditar(todas);
+    const repetidas = new Set(revision.reutilizadas), debiles = new Set(revision.debiles);
+    const lista = $('listaEntradas');
+    ocultarClaves.forEach(clearTimeout); ocultarClaves = new Map();
+    lista.replaceChildren();
+    for (const e of visibles.slice(0, LIMITE_LISTA)) lista.append(filaEntrada(e, repetidas.has(e.id), debiles.has(e.id)));
+    const vacia = $('cajaVacia');
+    if (!todas.length) mostrar(vacia, fmt('caja-vacia'));
+    else if (!visibles.length) mostrar(vacia, fmt('caja-sin-resultados'));
+    else if (visibles.length > LIMITE_LISTA) mostrar(vacia, fmt('caja-recorte', { n: LIMITE_LISTA, m: visibles.length }));
+    else mostrar(vacia, '');
+  }
+
+  function filaEntrada(e, repetida, debil) {
+    const clave = el('div', { class: 'entrada-clave', hidden: '' });
+    const botonVer = el('button', { class: 'boton secundario chico', type: 'button', onclick: () => {
+      const visible = clave.hidden;
+      clearTimeout(ocultarClaves.get(e.id));
+      clave.hidden = !visible;
+      clave.textContent = visible ? e.contrasena : '';
+      botonVer.textContent = fmt(visible ? 'ocultar' : 'ver');
+      if (visible) ocultarClaves.set(e.id, setTimeout(() => { clave.hidden = true; clave.textContent = ''; botonVer.textContent = fmt('ver'); }, 15000));
+    } }, fmt('ver'));
+    const marcas = [];
+    if (repetida) marcas.push(el('span', { class: 'marca-aviso', text: fmt('marca-reutilizada') }));
+    if (debil) marcas.push(el('span', { class: 'marca-aviso', text: fmt('marca-debil') }));
+    const titulo = el('div', { class: 'entrada-titulo' }, e.sitio || fmt('sin-sitio'), ...marcas);
+    return el('li', {},
+      el('div', { class: 'fila entre' },
+        el('div', { class: 'crece' }, titulo, el('div', { class: 'entrada-sub', text: e.usuario })),
+        el('div', { class: 'fila' },
+          el('button', { class: 'boton secundario chico', type: 'button', title: fmt('copiar-usuario'), 'aria-label': fmt('copiar-usuario'), onclick: () => copiar(e.usuario, false, 'copiado-usuario') }, '👤'),
+          el('button', { class: 'boton secundario chico', type: 'button', title: fmt('copiar-contrasena'), 'aria-label': fmt('copiar-contrasena'), onclick: () => copiar(e.contrasena, true, 'copiado-contrasena') }, '🔑'),
+          botonVer,
+          el('button', { class: 'boton secundario chico', type: 'button', onclick: () => abrirEntrada(e.id) }, fmt('editar')))),
+      clave);
+  }
+
+  $('buscar').addEventListener('input', pintarLista);
+  $('botonBloquear').addEventListener('click', () => bloquear(false));
+  $('botonNueva').addEventListener('click', () => abrirEntrada(null));
+  $('botonMas').addEventListener('click', abrirAjustes);
+
+  // ─── Entrada ───
+  function abrirEntrada(id) {
+    editandoId = id;
+    const e = id ? sesion.obtener(id) : { sitio: '', usuario: '', contrasena: '', url: '', notas: '' };
+    $('entradaTitulo').textContent = fmt(id ? 'entrada-editar' : 'entrada-nueva');
+    $('eSitio').value = e.sitio; $('eUsuario').value = e.usuario; $('eContrasena').value = e.contrasena;
+    $('eUrl').value = e.url; $('eNotas').value = e.notas;
+    ponerOculto($('eContrasena'), true); $('eVer').textContent = fmt('ver');
+    $('eFuerza').textContent = etiquetaFuerza(e.contrasena);
+    $('eEliminar').hidden = !id;
+    mostrar($('entradaError'), '');
+    ir('vistaEntrada');
+    $('eSitio').focus();
+  }
+
+  $('eVer').addEventListener('click', () => {
+    const oculta = estaOculto($('eContrasena'));
+    ponerOculto($('eContrasena'), !oculta);
+    $('eVer').textContent = fmt(oculta ? 'ocultar' : 'ver');
+  });
+
+  $('eGenerar').addEventListener('click', () => {
+    const largo = Math.min(64, Math.max(8, parseInt($('genLongitud').value, 10) || 20));
+    try {
+      $('eContrasena').value = GeneradorContrasenas.generar(largo, { mayusculas: true, minusculas: true, numeros: true, simbolos: $('genSimbolos').checked });
+      ponerOculto($('eContrasena'), false); $('eVer').textContent = fmt('ocultar');
+      $('eFuerza').textContent = etiquetaFuerza($('eContrasena').value);
+    } catch (e) { mostrar($('entradaError'), e.message); }
+  });
+
+  $('eCancelar').addEventListener('click', () => { limpiarFormEntrada(); abrirCaja(); });
+  function limpiarFormEntrada() { for (const id of ['eSitio', 'eUsuario', 'eContrasena', 'eUrl', 'eNotas']) $(id).value = ''; editandoId = null; }
+
+  $('vistaEntrada').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const datos = { sitio: $('eSitio').value.trim(), usuario: $('eUsuario').value.trim(), contrasena: $('eContrasena').value, url: $('eUrl').value.trim(), notas: $('eNotas').value };
+    if (editandoId) sesion.actualizar(editandoId, datos); else sesion.agregar(datos);
+    limpiarFormEntrada();
+    await guardarLocal();
+    abrirCaja();
+  });
+
+  $('eEliminar').addEventListener('click', async () => {
+    if (!editandoId) return;
+    const e = sesion.obtener(editandoId);
+    if (!confirm(fmt('confirmar-eliminar', { n: e.sitio || e.usuario }))) return;
+    sesion.borrar(editandoId);
+    limpiarFormEntrada();
+    await guardarLocal();
+    abrirCaja();
+  });
+
+  // ─── Más opciones ───
+  function abrirAjustes() {
+    mostrar($('mensajeAjustes'), '');
+    $('renombrarNombre').value = sesion.nombre;
+    const revision = B.auditar(sesion.entradas());
+    $('revisionResultado').textContent = revision.reutilizadas.length || revision.debiles.length
+      ? fmt('revision-resultado', { r: revision.reutilizadas.length, d: revision.debiles.length }) : fmt('revision-ok');
+    pintarBloqueo();
+    $('bloqueSecreta').hidden = !sesion.conClaveSecreta;
+    ir('vistaAjustes');
+  }
+
+  function pintarBloqueo() {
+    const sel = $('bloqueoMinutos');
+    sel.replaceChildren(...[1, 5, 15, 30].map((n) => el('option', { value: String(n), text: fmt('bloqueo-min', { n }) })));
+    sel.value = String(minutosBloqueo());
+  }
+
+  $('bloqueoMinutos').addEventListener('change', () => {
+    try { localStorage.setItem('boveda-bloqueo', $('bloqueoMinutos').value); } catch (e) {}
+    reiniciarBloqueo();
+  });
+  $('ajVolver').addEventListener('click', abrirCaja);
+
+  async function descargarRespaldo() {
+    const archivo = await sesion.cifrar();
+    const base = 'caja-fuerte-' + (sesion.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mini-cookies');
+    descargarTexto(JSON.stringify(archivo, null, 1), nombreConFecha(base, 'json'), 'application/json');
+    revisionRespaldo = sesion.revision;
+    actualizarAvisoRespaldo();
+  }
+  $('ajRespaldo').addEventListener('click', descargarRespaldo);
+  $('botonRespaldoAviso').addEventListener('click', descargarRespaldo);
+
+  const MAX_IMPORTAR_BYTES = 20 * 1024 * 1024;
+
+  // Importación: CSV de navegadores
+  conectarZonaArrastre($('zonaCsv'), $('entradaCsv'), async (archivos) => {
+    if (!archivos.length || !sesion) return;
+    if (archivos[0].size > MAX_IMPORTAR_BYTES) return mensaje($('mensajeAjustes'), 'error-demasiado', null, 'error');
+    try {
+      const importadas = B.leerCsv(await archivos[0].text());
+      prepararImportacion(importadas);
+    } catch (e) { mensaje($('mensajeAjustes'), e.codigo === 'demasiadas' ? 'error-demasiado' : 'error-csv', null, 'error'); }
+  });
+
+  function prepararImportacion(importadas) {
+    const r = B.compararImportadas(sesion.entradas(), importadas);
+    importacion = r;
+    $('importarTitulo').textContent = fmt('import-titulo', { n: importadas.length });
+    $('importarResumen').textContent = fmt('import-resumen', { a: r.nuevas.length, b: r.iguales.length, c: r.conflictos.length });
+    const cont = $('importarConflictos');
+    cont.replaceChildren();
+    r.conflictos.forEach((c, i) => {
+      const opcion = (valor, clave, marcada) => el('label', {}, el('input', Object.assign({ type: 'radio', name: 'conflicto' + i, value: valor }, marcada ? { checked: '' } : {})), ' ' + fmt(clave));
+      cont.append(el('div', { class: 'conflicto' },
+        el('div', { text: fmt('import-conflicto', { n: c.existente.sitio, u: c.existente.usuario }) }),
+        opcion('conservar', 'import-conservar', true), opcion('reemplazar', 'import-reemplazar'), opcion('ambas', 'import-ambas')));
+    });
+    ir('vistaImportar');
+  }
+
+  $('importarCancelar').addEventListener('click', abrirAjustes);
+  $('importarAplicar').addEventListener('click', async () => {
+    if (!importacion || !sesion) return;
+    let total = 0;
+    for (const n of importacion.nuevas) { sesion.agregar(n); total++; }
+    importacion.conflictos.forEach((c, i) => {
+      const marcado = document.querySelector('input[name="conflicto' + i + '"]:checked');
+      const eleccion = marcado ? marcado.value : 'conservar';
+      if (eleccion === 'reemplazar') {
+        const cambios = {};
+        for (const campo of ['sitio', 'usuario', 'contrasena', 'url', 'notas']) if (c.importada[campo]) cambios[campo] = c.importada[campo]; // un CSV sin notas no borra las notas
+        sesion.actualizar(c.existente.id, cambios); total++;
+      }
+      else if (eleccion === 'ambas') { sesion.agregar(c.importada); total++; }
+    });
+    importacion = null;
+    await guardarLocal();
+    abrirCaja();
+    mensaje($('mensajeCaja'), 'import-listo', { n: total }, 'ok');
+  });
+
+  // Exportar a CSV (pide la contraseña maestra otra vez: es texto plano)
+  $('ajExportar').addEventListener('click', async () => {
+    const maestra = $('exportarMaestra').value;
+    if (!maestra) return $('exportarMaestra').focus();
+    const boton = $('ajExportar'); boton.disabled = true;
+    try {
+      await B.abrir(await sesion.cifrar(), maestra, sesion.claveSecreta); // comprueba que es la maestra
+      const formato = $('exportarFormato').value;
+      descargarTexto(B.aCsv(sesion.entradas(), formato), nombreConFecha('contrasenas-' + formato, 'csv'), 'text/csv');
+      $('exportarMaestra').value = '';
+      mostrar($('mensajeAjustes'), '');
+    } catch (e) { mensaje($('mensajeAjustes'), 'error-maestra-incorrecta', null, 'error'); } finally { boton.disabled = false; }
+  });
+
+  // Cambiar contraseña maestra
+  $('formCambiar').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const error = $('cambiarError');
+    const nueva = $('cambiarNueva').value;
+    if (nueva.length < B.MAESTRA_MIN) return mostrar(error, fmt('error-maestra-corta', { n: B.MAESTRA_MIN }));
+    if (nueva !== $('cambiarNueva2').value) return mostrar(error, fmt('error-maestra-distinta'));
+    const boton = ev.submitter; if (boton) boton.disabled = true;
+    try {
+      await B.abrir(await sesion.cifrar(), $('cambiarActual').value, sesion.claveSecreta);
+    } catch (e) { mostrar(error, fmt('error-maestra-incorrecta')); if (boton) boton.disabled = false; return; }
+    try {
+      await sesion.cambiarMaestra(nueva);
+      // Antes de guardar se comprueba que la caja se abre con la maestra nueva:
+      // si algo falló, no se pisa la copia buena.
+      await B.abrir(await sesion.cifrar(), nueva, sesion.claveSecreta);
+      await guardarLocal();
+      for (const id of ['cambiarActual', 'cambiarNueva', 'cambiarNueva2']) $(id).value = '';
+      mostrar(error, '');
+      $('cambiarFuerza').textContent = '';
+      actualizarAvisoRespaldo();
+      mensaje($('mensajeAjustes'), 'ok-cambiada', null, 'ok');
+    } catch (e) { mostrar(error, textoError(e)); } finally { if (boton) boton.disabled = false; }
+  });
+
+  $('botonVerSecreta').addEventListener('click', async () => {
+    const maestra = $('verSecretaMaestra').value;
+    if (!maestra || !sesion || !sesion.conClaveSecreta) return;
+    try {
+      await B.abrir(await sesion.cifrar(), maestra, sesion.claveSecreta);
+      $('verSecretaTexto').textContent = sesion.claveSecreta;
+      $('verSecretaTexto').classList.add('visible');
+      $('verSecretaMaestra').value = '';
+      setTimeout(() => { $('verSecretaTexto').textContent = ''; $('verSecretaTexto').classList.remove('visible'); }, 30000);
+    } catch (e) { mensaje($('mensajeAjustes'), 'error-maestra-incorrecta', null, 'error'); }
+  });
+
+  $('formRenombrar').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    sesion.renombrar($('renombrarNombre').value);
+    $('cajaNombre').textContent = sesion.nombre;
+    await guardarLocal();
+    actualizarAvisoRespaldo();
+  });
+
+  $('ajBorrarCaja').addEventListener('click', async () => {
+    if (!confirm(fmt('confirmar-borrar-caja', { n: sesion.nombre }))) return;
+    try { await B.Almacen.borrar(idCaja); } catch (e) {}
+    bloquear(false);
+  });
+
+  // Al cambiar el idioma se vuelve a escribir lo que se generó con JavaScript.
+  document.addEventListener('cambioIdioma', () => {
+    if (ultimoMensaje && !ultimoMensaje.nodo.hidden && ultimoMensaje.clave) mensaje(ultimoMensaje.nodo, ultimoMensaje.clave, ultimoMensaje.vars, ultimoMensaje.tipo);
+    if (sesion && vistaActual === 'vistaCaja') pintarLista();
+    if (vistaActual === 'vistaInicio') cargarCajas();
+    if (sesion && vistaActual === 'vistaAjustes') abrirAjustes();
+    if (vistaActual === 'vistaEntrada') $('entradaTitulo').textContent = fmt(editandoId ? 'entrada-editar' : 'entrada-nueva');
+  });
+
+  cargarCajas();
+})();
+</script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
