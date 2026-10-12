@@ -24,6 +24,7 @@ import { revisarTerceros } from './terceros.mjs';
 import { revisarReferenciasVendor } from './referencias-vendor.mjs';
 import { revisarMotorPptx } from './motor-pptx.mjs';
 import { join, relative, extname, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 
 const RAIZ = process.cwd();
 const SALIDA = join(RAIZ, CARPETA_SALIDA);
@@ -235,6 +236,46 @@ function anotarRecursos(crudo, rel) {
   }
 }
 
+// Cuerpos de los <script> en línea que el navegador ejecuta (no los JSON-LD ni las plantillas).
+function scriptsEnLinea(html) {
+  const cuerpos = [];
+  html.replace(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi, (todo, atributos = '', codigo) => {
+    if (/\ssrc\s*=/i.test(atributos) || !codigo.trim()) return todo;
+    const tipo = (atributos.match(/\stype\s*=\s*["']?([^"'\s>]+)/i) || [])[1];
+    if (!tipo || /^(module|text\/javascript|application\/javascript)$/i.test(tipo)) cuerpos.push(codigo);
+    return todo;
+  });
+  return cuerpos;
+}
+
+// Política de contenido del sitio seguro. En vez de 'unsafe-inline' para los scripts, la lista
+// exacta de los que la página trae (por su hash SHA-256): lo que Cloudflare inyecta al servir
+// (detección de bots, analítica) y cualquier HTML colado quedan bloqueados. Los estilos sí
+// siguen con 'unsafe-inline' (las páginas usan style="…"; no ejecutan código).
+function politicaSeguro(nombre, hashes) {
+  const fuentes = ["'self'"].concat(hashes.map((h) => "'sha256-" + h + "'")).join(' ');
+  const csp = (extra) => "default-src 'self'; script-src " + fuentes + "; style-src 'self' 'unsafe-inline'; "
+    + extra + "; form-action 'none'; base-uri 'none'; object-src 'none'";
+  const general = { csp: csp("img-src 'self' data:; connect-src 'none'; frame-src 'none'; worker-src 'none'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: [] };
+  const politicas = {
+    'administrador-contrasenas': Object.assign({}, general, { extra: ['Cache-Control: no-store'] }),
+    'enviar-archivos-qr': { csp: csp("img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-src 'self'; worker-src 'self'"), permisos: 'camera=(self), microphone=(), geolocation=(), clipboard-read=()', extra: [] },
+  };
+  return politicas[nombre] || general;
+}
+
+const hashesPorPagina = new Map(); // ruta de salida → hashes de sus scripts en línea
+
+// Pone la CSP (con los hashes de lo que la página trae) en un <meta> y la anota para _headers.
+function sellarSeguro(html, relSalida) {
+  html = html.replace(/<meta\s+http-equiv="Content-Security-Policy"[^>]*>\s*/gi, '');
+  const hashes = [...new Set(scriptsEnLinea(html).map((c) => createHash('sha256').update(c, 'utf8').digest('base64')))];
+  hashesPorPagina.set(relSalida.replace(/\\/g, '/'), hashes);
+  const nombre = (/herramientas\/([^/]+)\.html$/.exec(relSalida.replace(/\\/g, '/')) || [])[1];
+  const meta = '<meta http-equiv="Content-Security-Policy" content="' + politicaSeguro(nombre, hashes).csp + '">';
+  return html.replace(/<head>/i, () => '<head>\n' + meta);
+}
+
 function procesarArchivo(origen, rel, relSalida = rel) {
   const ext = extname(origen).toLowerCase();
   const destino = join(SALIDA, relSalida);
@@ -244,12 +285,18 @@ function procesarArchivo(origen, rel, relSalida = rel) {
   else if (ext === '.html') {
     const rutaWeb = relSalida.replace(/\\/g, '/');
     let fuente = readFileSync(origen, 'utf8');
-    if (ES_SEGURO) { anotarRecursos(fuente, rel); fuente = enlacesAlPrincipal(fuente, rel.replace(/\\/g, '/'), rutaWeb); }
+    if (ES_SEGURO) {
+      anotarRecursos(fuente, rel);
+      fuente = enlacesAlPrincipal(fuente, rel.replace(/\\/g, '/'), rutaWeb);
+      // Este sitio no tiene anuncios: tampoco el hueco que dice "Espacio publicitario".
+      fuente = fuente.replace(/<div class="anuncio"[^>]*>[\s\S]*?<\/div>\s*/g, '');
+    }
     // Primero el catálogo (genera las tarjetas), después los conteos.
     const crudo = aplicarConteos(aplicarCatalogo(fuente, catalogo, rutaWeb, opcionesCatalogo), conteo, rutaWeb);
     // Al sitemap solo van las páginas que se indexan (no la 404).
     if (!esNoIndex(crudo)) paginas.push(relSalida);
-    writeFileSync(destino, enlacesLimpios(inyectarSeo(procesarHtml(crudo, relSalida), relSalida, indiceCategorias, conIngles)));
+    const final = enlacesLimpios(inyectarSeo(procesarHtml(crudo, relSalida), relSalida, indiceCategorias, conIngles));
+    writeFileSync(destino, ES_SEGURO ? sellarSeguro(final, relSalida) : final);
 
     // Gemela en inglés bajo /en/, con su propia URL para que Google la vea.
     if (conIngles.has(rutaWeb)) {
@@ -260,7 +307,8 @@ function procesarArchivo(origen, rel, relSalida = rel) {
       if (ES_SEGURO) en = inglesDelPrincipal(en);
       const destinoEn = join(SALIDA, 'en', relSalida);
       mkdirSync(dirname(destinoEn), { recursive: true });
-      writeFileSync(destinoEn, enlacesLimpios(inyectarSeo(procesarHtml(en, 'en/' + relSalida), relSalida, indiceCategorias, conIngles, true)));
+      const finalEn = enlacesLimpios(inyectarSeo(procesarHtml(en, 'en/' + relSalida), relSalida, indiceCategorias, conIngles, true));
+      writeFileSync(destinoEn, ES_SEGURO ? sellarSeguro(finalEn, 'en/' + relSalida) : finalEn);
       if (!esNoIndex(crudo)) paginasEn.push('en/' + rutaWeb);
     }
   }
@@ -310,26 +358,50 @@ function construirSeguro() {
 // en el origen. La política de contenido también va dentro de la página del
 // administrador (meta) para poder probarla sin Cloudflare.
 function cabecerasSeguro(rutas) {
-  const comun = [
-    'X-Frame-Options: DENY', 'Referrer-Policy: no-referrer', 'X-Content-Type-Options: nosniff',
-    'Cross-Origin-Opener-Policy: same-origin', 'Strict-Transport-Security: max-age=31536000',
-  ];
-  const csp = (extra) => "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-    + extra + "; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
-  const POLITICAS = {
-    'administrador-contrasenas': { csp: csp("img-src 'self' data:; connect-src 'none'; frame-src 'none'; worker-src 'none'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: ['Cache-Control: no-store'] },
-    'enviar-archivos-qr': { csp: csp("img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-src 'self'; worker-src 'self'"), permisos: 'camera=(self), microphone=(), geolocation=(), clipboard-read=()', extra: [] },
-  };
-  const general = { csp: csp("img-src 'self' data:; connect-src 'none'; frame-src 'none'; worker-src 'none'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: [] };
+  // Lo común va en una sola regla /* (también cubre las respuestas 404 y el service worker). Cloudflare
+  // une con coma los valores de una misma cabecera si coinciden varias reglas: por eso no se repite abajo.
   const lineas = ['# Generado por build.mjs (cabecerasSeguro): no editar.',
+    '/*', '  X-Frame-Options: DENY', '  Referrer-Policy: no-referrer', '  X-Content-Type-Options: nosniff',
+    '  Cross-Origin-Opener-Policy: same-origin', '  Strict-Transport-Security: max-age=31536000', '',
     '# Las librerías de /vendor/ llevan la versión en la ruta: se guardan un año.', '/vendor/*', '  Cache-Control: public, max-age=31536000, immutable', ''];
-  for (const r of rutas.map((x) => x.replace(/\\/g, '/')).filter((x) => x !== '404.html')) {
+  for (const r of rutas.map((x) => x.replace(/\\/g, '/')).filter((x) => x !== '404.html' && x !== 'en/404.html')) {
     const ruta = r === 'index.html' ? '/' : r === 'en/index.html' ? '/en/' : '/' + r.replace(/\.html$/, '');
     const nombre = (/herramientas\/([^/]+)\.html$/.exec(r) || [])[1];
-    const p = POLITICAS[nombre] || general;
-    lineas.push(ruta, ...comun.concat([p.csp, 'Permissions-Policy: ' + p.permisos], p.extra).map((l) => '  ' + l), '');
+    const p = politicaSeguro(nombre, hashesPorPagina.get(r) || []);
+    lineas.push(ruta, ...['Content-Security-Policy: ' + p.csp + "; frame-ancestors 'none'", 'Permissions-Policy: ' + p.permisos].concat(p.extra).map((l) => '  ' + l), '');
   }
   writeFileSync(join(SALIDA, '_headers'), lineas.join('\n'));
+}
+
+// Antes de publicar el sitio seguro: ningún enlace ni recurso local roto, y nada cargado de afuera.
+function revisarSeguro() {
+  const problemas = [];
+  (function recorrerSalida(dir) {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n);
+      if (statSync(p).isDirectory()) { recorrerSalida(p); continue; }
+      if (extname(n).toLowerCase() !== '.html') continue;
+      const rel = relative(SALIDA, p).replace(/\\/g, '/');
+      const html = readFileSync(p, 'utf8');
+      for (const m of html.matchAll(/<(?:script|img|iframe|link)\b[^>]*\s(?:src|href)\s*=\s*"(https?:\/\/[^"]+)"[^>]*>/gi)) {
+        if (!/rel="(canonical|alternate)"/i.test(m[0]) && !/<link\b[^>]*rel="icon"/i.test(m[0]) && /<(script|img|iframe)\b/i.test(m[0])) problemas.push(rel + ' carga de afuera: ' + m[1]);
+        if (/<link\b[^>]*rel="stylesheet"/i.test(m[0])) problemas.push(rel + ' carga un estilo de afuera: ' + m[1]);
+      }
+      const base = rel === '404.html' || rel === 'en/404.html' ? '' : dirname(rel) === '.' ? '' : dirname(rel);
+      for (const m of html.matchAll(/\s(?:href|src)\s*=\s*"([^"]+)"/gi)) {
+        const url = m[1].split('#')[0].split('?')[0];
+        if (!url || /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('//')) continue;
+        const pila = [];
+        const partes = (url.startsWith('/') ? url.slice(1).split('/') : (base ? base.split('/') : []).concat(url.split('/')));
+        for (const parte of partes) { if (parte === '.' || parte === '') continue; if (parte === '..') pila.pop(); else pila.push(parte); }
+        const ruta = pila.join('/');
+        const existe = existsSync(join(SALIDA, ruta)) && !statSync(join(SALIDA, ruta)).isDirectory()
+          || existsSync(join(SALIDA, ruta + '.html')) || existsSync(join(SALIDA, ruta, 'index.html')) || ruta === '';
+        if (!existe) problemas.push(rel + ' enlaza a ' + m[1] + ', que no existe en el sitio seguro');
+      }
+    }
+  })(SALIDA);
+  if (problemas.length) throw new Error('Sitio seguro con problemas:\n  - ' + [...new Set(problemas)].join('\n  - '));
 }
 
 // Rutas de todas las páginas publicadas, para armar el sitemap al final.
@@ -358,7 +430,7 @@ rmSync(SALIDA, { recursive: true, force: true });
 mkdirSync(SALIDA);
 if (ES_SEGURO) construirSeguro(); else recorrer(RAIZ);
 generarRobotsYSitemap(SALIDA, paginas.concat(paginasEn));
-if (ES_SEGURO) cabecerasSeguro(paginas.concat(paginasEn).concat(['404.html']));
+if (ES_SEGURO) { cabecerasSeguro(paginas.concat(paginasEn)); revisarSeguro(); }
 // Todo servidor ajeno que el sitio carga tiene que estar en la política de
 // privacidad. Si no, el build falla y Cloudflare deja la versión anterior.
 // (La política vive en www: el sitio seguro la lee del build principal.)

@@ -262,7 +262,7 @@ window.i18nPagina = {
       var textos = t[lang] || t.es;
       var a = document.createElement('a');
       a.className = 'tarjeta-herramienta';
-      a.href = t.u ? (document.documentElement.lang === 'en' ? t.u.replace('.net/', '.net/en/') : t.u) : 'herramientas/' + t.h; // u: herramienta que vive en otro sitio
+      a.href = t.u || 'herramientas/' + t.h; // u: herramienta que vive en otro sitio (el build ya la deja en /en/ en la versión en inglés)
       var ic = document.createElement('div');
       ic.className = 'icono';
       ic.textContent = t.i;

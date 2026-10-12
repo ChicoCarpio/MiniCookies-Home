@@ -4327,7 +4327,7 @@ const servidor = createServer((q, r) => {
     archivo = buscar(DIST_SEGURO);
     // Solo las páginas de herramientas seguras llevan las cabeceras del sitio seguro.
     if (archivo) {
-      cabeceras = Object.assign({}, CABECERAS_SEGURO.get(ruta.replace(/\.html$/, '')) || {});
+      cabeceras = Object.assign({}, CABECERAS_SEGURO.get('/*') || {}, CABECERAS_SEGURO.get(ruta.replace(/\.html$/, '')) || {});
       if (q.url.includes('csp=estricta') && cabeceras.__estricta) cabeceras['Content-Security-Policy'] = cabeceras.__estricta;
       delete cabeceras.__estricta;
     }
@@ -4337,6 +4337,11 @@ const servidor = createServer((q, r) => {
     r.writeHead(404).end(); return;
   }
   r.writeHead(200, Object.assign({ 'Content-Type': TIPOS[extname(archivo)] || 'application/octet-stream' }, cabeceras));
+  if (archivo.startsWith(DIST_SEGURO) && extname(archivo) === '.html' && !q.url.includes('csp=estricta')) {
+    // Las pruebas miran dentro de la página con eval: solo en las pruebas, el <meta> lo admite.
+    r.end(readFileSync(archivo, 'utf8').replace(/(http-equiv="Content-Security-Policy" content="[^"]*?script-src 'self')/, "$1 'unsafe-eval'"));
+    return;
+  }
   r.end(readFileSync(archivo));
 });
 await new Promise((r) => servidor.listen(PUERTO, r));
@@ -4347,12 +4352,12 @@ const edge = spawn(EDGE, [
   // headless=new y sin frenar temporizadores: con el modo viejo, una página en
   // segundo plano (el iframe) quedaba frenada y la primera prueba no terminaba.
   '--headless=new', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
-  '--disable-backgrounding-occluded-windows', `--user-data-dir=${perfil}`, '--no-first-run',
+  '--disable-backgrounding-occluded-windows', `--user-data-dir=${perfil}`, '--no-first-run', ...(process.env.EDGE_LOG ? ['--enable-logging=stderr', '--v=0'] : []),
   '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
   // WebRTC sin nombres .local: la prueba de "Enviar archivos" conecta dos pares en la misma página.
   '--disable-features=WebRtcHideLocalIpsWithMdns',
   `http://localhost:${PUERTO}/__pruebas.html`,
-], { windowsHide: true, stdio: 'ignore' });
+], { windowsHide: true, stdio: ['ignore', 'ignore', process.env.EDGE_LOG ? 'inherit' : 'ignore'] });
 
 const vencido = setTimeout(() => terminar('tiempo'), LIMITE_MS);
 const motivo = await final;
