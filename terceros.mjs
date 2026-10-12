@@ -30,6 +30,8 @@ export const TERCEROS = {
   'api.web3forms.com': { menciona: 'Web3Forms', motivo: 'envío del formulario de contacto' },
   'huggingface.co': { menciona: 'huggingface.co', motivo: 'modelos de IA que baja transformers.js (dictado, stickers, máscaras de primer plano/fondo y "Elegir objeto" del Editor avanzado)', interno: 'vendor/@huggingface/transformers' },
   'cdn.jsdelivr.net': { menciona: 'cdn.jsdelivr.net', motivo: 'onnxruntime-web, que baja transformers.js', interno: 'vendor/@huggingface/transformers' },
+  // STUN no es una dirección http: el build no lo ve en el código, por eso va con `interno`.
+  'stun.cloudflare.com': { menciona: 'stun.cloudflare.com', motivo: 'servidor STUN de Cloudflare que usa "Enviar archivos con un QR" para descubrir la dirección pública (solo ve direcciones IP, nunca los archivos)', interno: 'assets/js/enviar-qr.js' },
   // No está en el código: Cloudflare inyecta el script de Web Analytics al
   // servir cada página (decisión del usuario, 2026-10-02: se conserva).
   'static.cloudflareinsights.com': { menciona: 'static.cloudflareinsights.com', motivo: 'Cloudflare Web Analytics, que inyecta Cloudflare en cada página', inyectado: 'Cloudflare' },

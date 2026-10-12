@@ -29,13 +29,15 @@ window.i18nPagina = {
     'datos-p2': 'Para saber cuántas visitas recibe el sitio usamos Cloudflare Web Analytics, las estadísticas de la empresa que aloja el sitio. Cuentan qué páginas se abren, desde qué sitio llegaste, tu país, tu navegador y cuánto tarda en cargar la página. No usan cookies, no te reconocen de una visita a otra y no ven nada de lo que procesás con las herramientas.',
     'datos-p3': 'Lo único que se guarda en tu equipo son dos preferencias tuyas (el tema claro u oscuro y el idioma), en el almacenamiento local de tu navegador. Nunca salen de tu dispositivo y las borrás vos limpiando los datos del sitio.',
     'h-terceros': 'Servicios de terceros',
-    'terceros-p1': 'Para ser exactos, hay cuatro momentos en los que sí interviene algo externo. Los detallamos porque una política que dice "nada sale de tu navegador" sin aclarar esto estaría incompleta:',
+    'terceros-p1': 'Para ser exactos, hay cinco momentos en los que sí interviene algo externo. Los detallamos porque una política que dice "nada sale de tu navegador" sin aclarar esto estaría incompleta:',
     'terceros-cdn-t': 'Inteligencia artificial.',
     'terceros-cdn-d': 'Las librerías de código abierto que usan las herramientas se sirven desde este mismo sitio. Las únicas que descargan algo de otro servidor son Dictado por voz, Generador de stickers y Editor avanzado (este último, solo si usás las máscaras de Primer plano o Fondo): la primera vez que las usás, bajan un modelo de inteligencia artificial de huggingface.co y el motor que lo ejecuta de cdn.jsdelivr.net. Como en cualquier descarga, esos servidores ven tu dirección IP y el navegador que usás. Lo que no ven, ni reciben, es tu archivo, tu imagen ni tu voz: el modelo viaja hacia vos, nunca al revés.',
     'terceros-ads-t': 'Publicidad.',
     'terceros-ads-d': 'Este sitio puede mostrar anuncios de Google AdSense. Google puede usar cookies para personalizar los anuncios según tu actividad de navegación. Podés gestionar esa personalización desde la configuración de anuncios de Google.',
     'terceros-stats-t': 'Estadísticas de visitas.',
     'terceros-stats-d': 'Cada página carga un script de Cloudflare Web Analytics desde static.cloudflareinsights.com, que le envía a Cloudflare los datos de la visita descritos arriba (página, sitio de origen, país, navegador y tiempos de carga). No incluye tus archivos ni lo que escribís en las herramientas.',
+    'terceros-stun-t': 'Enviar archivos con un QR.',
+    'terceros-stun-d': 'Para que dos dispositivos de redes distintas puedan conectarse, la herramienta le pregunta a stun.cloudflare.com (un servidor STUN de Cloudflare) cuál es tu dirección pública. Ese servidor solo ve tu dirección IP: no recibe tus archivos, que viajan directo entre los dos dispositivos y cifrados de extremo a extremo. Pasa solamente al usar esa herramienta.',
     'terceros-form-t': 'Formulario de contacto.',
     'terceros-form-d': 'Es la única excepción a todo lo anterior. Si completás y enviás el formulario de contacto, el nombre, correo y mensaje que escribas se envían a Web3Forms, que nos los reenvía por correo. Pasa solamente si vos decidís apretar enviar, y nunca al usar una herramienta.',
     'h-filosofia': 'Por qué lo hacemos así',
@@ -65,13 +67,15 @@ window.i18nPagina = {
     'datos-p2': 'To know how many visits the site gets, we use Cloudflare Web Analytics, the statistics of the company that hosts the site. It counts which pages are opened, which site you came from, your country, your browser and how long the page takes to load. It uses no cookies, does not recognise you from one visit to the next and sees nothing of what you process with the tools.',
     'datos-p3': 'The only things stored on your machine are two of your own preferences (light or dark theme, and language), in your browser local storage. They never leave your device and you can clear them by clearing this site data.',
     'h-terceros': 'Third-party services',
-    'terceros-p1': 'To be precise, there are four points where something external is involved. We spell them out because a policy claiming "nothing leaves your browser" without mentioning them would be incomplete:',
+    'terceros-p1': 'To be precise, there are five points where something external is involved. We spell them out because a policy claiming "nothing leaves your browser" without mentioning them would be incomplete:',
     'terceros-cdn-t': 'Artificial intelligence.',
     'terceros-cdn-d': 'The open-source libraries the tools use are served from this same site. The only ones that download anything from another server are Voice dictation, Sticker generator and Advanced editor (the latter only if you use the Foreground or Background masks): the first time you use them, they fetch an artificial intelligence model from huggingface.co and the engine that runs it from cdn.jsdelivr.net. As with any download, those servers can see your IP address and which browser you use. What they do not see, and never receive, is your file, your image or your voice: the model travels to you, never the other way round.',
     'terceros-ads-t': 'Advertising.',
     'terceros-ads-d': 'This site may show Google AdSense ads. Google may use cookies to personalise those ads based on your browsing activity. You can manage that personalisation from your Google ad settings.',
     'terceros-stats-t': 'Visit statistics.',
     'terceros-stats-d': 'Every page loads a Cloudflare Web Analytics script from static.cloudflareinsights.com, which sends Cloudflare the visit data described above (page, referring site, country, browser and load times). It does not include your files or anything you type into the tools.',
+    'terceros-stun-t': 'Send files with a QR code.',
+    'terceros-stun-d': 'So that two devices on different networks can connect, the tool asks stun.cloudflare.com (a Cloudflare STUN server) what your public address is. That server only sees your IP address: it does not receive your files, which travel directly between the two devices, end-to-end encrypted. This only happens when you use that tool.',
     'terceros-form-t': 'Contact form.',
     'terceros-form-d': 'This is the one exception to everything above. If you fill in and send the contact form, the name, email and message you type are sent to Web3Forms, which forwards them to us by email. It happens only if you choose to press send, and never while using a tool.',
     'h-filosofia': 'Why we built it this way',
@@ -147,6 +151,10 @@ window.i18nPagina = {
       <li>
         <strong data-i18n="terceros-stats-t">Estadísticas de visitas.</strong>
         <span data-i18n="terceros-stats-d">Cada página carga un script de Cloudflare Web Analytics desde static.cloudflareinsights.com, que le envía a Cloudflare los datos de la visita descritos arriba (página, sitio de origen, país, navegador y tiempos de carga). No incluye tus archivos ni lo que escribís en las herramientas.</span>
+      </li>
+      <li>
+        <strong data-i18n="terceros-stun-t">Enviar archivos con un QR.</strong>
+        <span data-i18n="terceros-stun-d">Para que dos dispositivos de redes distintas puedan conectarse, la herramienta le pregunta a stun.cloudflare.com (un servidor STUN de Cloudflare) cuál es tu dirección pública. Ese servidor solo ve tu dirección IP: no recibe tus archivos, que viajan directo entre los dos dispositivos y cifrados de extremo a extremo. Pasa solamente al usar esa herramienta.</span>
       </li>
       <li>
         <strong data-i18n="terceros-form-t">Formulario de contacto.</strong>

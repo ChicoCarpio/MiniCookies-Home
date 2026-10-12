@@ -6,8 +6,9 @@
 // respuesta antes de abrir el canal. Acá viajan por QR (o por un código de
 // texto): el que recibe muestra un QR con su oferta y una clave; el que envía
 // lo lee, muestra el QR de su respuesta y el que recibe lo lee. No se usa
-// ningún servidor STUN ni TURN (iceServers vacío), así que los dos equipos
-// tienen que estar en la misma red.
+// ningún servidor propio: solo el STUN de Cloudflare, que dice cuál es la
+// dirección pública de cada equipo. Sin TURN (reenvío), entre redes distintas
+// funciona solo si los NAT lo permiten; en la misma red siempre.
 //
 // Qué protege qué:
 // - WebRTC cifra el canal (DTLS) y la huella del certificado viaja en el QR,
@@ -87,8 +88,10 @@ const EnviarQR = (() => {
     });
   }
   function nuevaConexion() {
-    // Sin servidores ICE: solo candidatos de la red local.
-    return new RTCPeerConnection({ iceServers: [] });
+    // El STUN de Cloudflare solo descubre la dirección pública (no ve los
+    // archivos): con él se puede conectar entre redes distintas cuando el NAT
+    // no es estricto. Sin TURN, con datos móviles todavía puede fallar.
+    return new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.cloudflare.com:3478' }] });
   }
   function huella(sdp) {
     const m = /a=fingerprint:\S+\s+([0-9A-Fa-f:]+)/.exec(sdp);
