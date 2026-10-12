@@ -28,16 +28,29 @@
   'use strict';
 
   const LIMITE_ENTRADAS = 100000;
-  const LIMITE_POR_ENTRADA = 1024 * 1024 * 1024;
-  const LIMITE_TOTAL = 4 * 1024 * 1024 * 1024;
+  const LIMITE_POR_ENTRADA = 512 * 1024 * 1024;
+  const LIMITE_TOTAL = 2 * 1024 * 1024 * 1024;
   const MAXIMO_ZIP = 0xFFFFFFFF;
 
+  // Lo que ve quien usa la herramienta (muchas páginas muestran error.message tal cual).
+  const TEXTOS_ERROR = {
+    invalido: { es: 'el archivo no es un .zip válido', en: 'the file is not a valid .zip' },
+    danado: { es: 'el archivo está dañado', en: 'the file is damaged' },
+    cifrado: { es: 'el archivo está cifrado con contraseña, y eso no se puede abrir acá', en: 'the file is password-encrypted, which can’t be opened here' },
+    zip64: { es: 'el archivo es demasiado grande para este formato', en: 'the file is too large for this format' },
+    metodo: { es: 'el archivo usa una compresión no soportada', en: 'the file uses an unsupported compression' },
+    grande: { es: 'el archivo es demasiado grande para abrirlo en el navegador', en: 'the file is too large to open in the browser' },
+  };
+
   // codigo: 'invalido' | 'danado' | 'cifrado' | 'zip64' | 'metodo' | 'grande'
+  // detalle: el motivo técnico, en inglés, para la consola.
   class ErrorZip extends Error {
-    constructor(codigo, mensaje) {
-      super(mensaje);
+    constructor(codigo, detalle) {
+      const idioma = typeof globalThis.idiomaActual === 'function' && globalThis.idiomaActual() === 'es' ? 'es' : 'en';
+      super(TEXTOS_ERROR[codigo][idioma]);
       this.name = 'ErrorZip';
       this.codigo = codigo;
+      this.detalle = detalle;
     }
   }
 
@@ -102,6 +115,8 @@
   }
 
   async function inflar(bytes, esperado) {
+    // Algunos programas guardan una entrada vacía como DEFLATE sin ningún byte.
+    if (esperado === 0 && bytes.length === 0) return new Uint8Array(0);
     const lector = flujoDe(bytes).pipeThrough(new DecompressionStream('deflate-raw')).getReader();
     const partes = [];
     let total = 0;
@@ -138,7 +153,8 @@
     const vista = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     let fin = -1;
     for (let i = bytes.length - 22; i >= 0 && i >= bytes.length - 22 - 65535; i--) {
-      if (vista.getUint32(i, true) === 0x06054b50) { fin = i; break; }
+      // El comentario del zip puede contener la firma por casualidad: el largo del comentario tiene que cuadrar.
+      if (vista.getUint32(i, true) === 0x06054b50 && i + 22 + vista.getUint16(i + 20, true) <= bytes.length) { fin = i; break; }
     }
     if (fin < 0) throw new ErrorZip('invalido', 'Not a zip file (end of central directory not found)');
     const total = vista.getUint16(fin + 10, true);
@@ -150,7 +166,10 @@
     if (total > LIMITE_ENTRADAS) throw new ErrorZip('grande', 'Zip with too many entries');
     // Bytes extra antes del zip (instaladores, adjuntos): el directorio está más
     // adelante de lo que dice su propio desplazamiento.
-    const desplazamiento = fin - tamanoDir - desdeDir;
+    const hayDirectorioEn = (pos) => pos >= 0 && pos + 4 <= bytes.length && vista.getUint32(pos, true) === 0x02014b50;
+    let desplazamiento = fin - tamanoDir - desdeDir;
+    // Si el directorio está donde dice, no hay bytes extra antes (aunque haya relleno después de él).
+    if (!hayDirectorioEn(desdeDir + desplazamiento) && hayDirectorioEn(desdeDir)) desplazamiento = 0;
     if (desplazamiento < 0) throw new ErrorZip('danado', 'Corrupted zip: the central directory is out of place');
 
     const entradas = [];
@@ -221,7 +240,7 @@
         const crudos = bytesCrudos(o);
         if (o.metodo === 0) {
           if (crudos.length !== o.real) throw new ErrorZip('danado', 'Corrupted zip: an entry has a different size than it declares');
-          return crudos;
+          return crudos.slice(); // copia: el que llama puede modificarla (epub.js desofusca fuentes en el lugar)
         }
         return inflar(crudos, o.real);
       }
