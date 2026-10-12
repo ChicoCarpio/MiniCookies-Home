@@ -261,23 +261,31 @@ const EnviarQR = (() => {
   async function enviarArchivos(sesion, archivos, { alProgreso, cancelado } = {}) {
     const canal = sesion.canal;
     const espera = {};
-    let cancelaOtro = false;
+    let cancelaOtro = false, sigue = null, rechazarCierre = null;
+    const cierre = new Promise((_, rechazar) => { rechazarCierre = rechazar; });
+    cierre.catch(() => {});
     const respuesta = new Promise((listo, error) => { espera.listo = listo; espera.error = error; });
     canal.alMensaje = (tipo, datos) => {
       if (tipo !== TIPO_CONTROL) return;
       const m = JSON.parse(new TextDecoder().decode(datos));
-      if (m.t === 'cancela') cancelaOtro = true;
+      if (m.t === 'cancela') { cancelaOtro = true; if (sigue) sigue(); }
+      if (m.t === 'sigue' && sigue) sigue();
       if (m.t === 'acepta' || m.t === 'rechaza' || m.t === 'ok' || m.t === 'cancela') espera.listo(m.t);
     };
-    canal.alCerrar = () => espera.error(new Error('cerrado'));
+    canal.alCerrar = () => { espera.error(new Error('cerrado')); rechazarCierre(new Error('cerrado')); };
     const totalTam = archivos.reduce((s, f) => s + f.size, 0);
     await canal.enviarControl({ t: 'lista', archivos: archivos.map((f, id) => ({ id, nombre: f.name, tam: f.size, tipo: f.type })) });
     if ((await respuesta) !== 'acepta') return 'rechazado';
     let totalHecho = 0;
     for (let id = 0; id < archivos.length; id++) {
       const f = archivos[id];
+      // El receptor contesta 'sigue' cuando está listo para recibir este archivo
+      // (en un archivo grande, cuando la persona tocó "Empezar descarga").
+      const listoElOtro = new Promise((listo) => { sigue = listo; });
       await canal.enviarControl({ t: 'inicio', id });
       if (alProgreso) alProgreso({ nombre: f.name, hecho: 0, tam: f.size, totalHecho, totalTam });
+      await Promise.race([listoElOtro, cierre]);
+      if (cancelaOtro) return 'cancelado';
       for (let bloque = 0; bloque < f.size; bloque += BLOQUE) {
         if (cancelaOtro) return 'cancelado';
         if (cancelado && cancelado()) { await canal.enviarControl({ t: 'cancela' }); return 'cancelado'; }
@@ -332,18 +340,35 @@ const EnviarQR = (() => {
   // sitio: solo hace falta el espacio final en la carpeta de descargas. Devuelve
   // null si el navegador no puede (sin service worker, sin HTTPS, o si la
   // descarga no arranca): entonces se usa el disco del sitio o la memoria.
+  //
+  // Un navegador de celular solo deja bajar un archivo si la descarga nace de un
+  // toque de la persona, así que `descargaDirecta` se llama desde el botón
+  // "Empezar descarga" y el service worker se deja listo antes con `prepararSW`.
+  let swListo = null;
+  function prepararSW() {
+    if (!swListo) {
+      swListo = (async () => {
+        if (!window.isSecureContext || !('serviceWorker' in navigator)) return null;
+        try {
+          await navigator.serviceWorker.register('/enviar-descarga-sw.js');
+          const activo = (await navigator.serviceWorker.ready).active;
+          if (!activo) return null;
+          // Comprobar que atiende estas direcciones (si no, el navegador mostraría una descarga fallida).
+          for (let i = 0; i < 20 && !navigator.serviceWorker.controller; i++) await new Promise((r) => setTimeout(r, 100));
+          const sondeo = navigator.serviceWorker.controller ? await fetch('/enviar-descarga/sondeo/x').catch(() => null) : null;
+          return sondeo && sondeo.headers.get('X-MC-SW') === '1' ? activo : null;
+        } catch (e) {
+          return null;
+        }
+      })();
+    }
+    return swListo;
+  }
   async function descargaDirecta(meta) {
-    if (!window.isSecureContext || !('serviceWorker' in navigator)) return null;
     let marco = null;
     try {
-      await navigator.serviceWorker.register('/enviar-descarga-sw.js');
-      const activo = (await navigator.serviceWorker.ready).active;
+      const activo = await prepararSW();
       if (!activo) return null;
-      // Antes de abrir nada, comprobar que el service worker atiende estas direcciones
-      // (si no, el navegador mostraría una descarga fallida).
-      for (let i = 0; i < 20 && !navigator.serviceWorker.controller; i++) await new Promise((r) => setTimeout(r, 100));
-      const sondeo = navigator.serviceWorker.controller ? await fetch('/enviar-descarga/sondeo/x').catch(() => null) : null;
-      if (!sondeo || sondeo.headers.get('X-MC-SW') !== '1') return null;
       const id = crypto.randomUUID();
       const canal = new MessageChannel();
       let puede = false, leyendo = false, cancelado = false, despertar = null;
@@ -388,19 +413,28 @@ const EnviarQR = (() => {
   // Recibe lo que manda el otro equipo. `alOferta(lista)` devuelve (o promete)
   // true para aceptar; `alArchivo(File)` por cada archivo terminado; el resto
   // son avisos. Devuelve una promesa con 'listo', 'rechazado' o 'cancelado'.
-  function recibirArchivos(sesion, { alOferta, alProgreso, alArchivo, sinDescargaDirecta }) {
+  function recibirArchivos(sesion, { alOferta, alProgreso, alArchivo, alGrande, sinDescargaDirecta }) {
     const canal = sesion.canal;
     return new Promise((fin, error) => {
       let lista = [], actual = null, totalHecho = 0, totalTam = 0;
-      const soltar = () => { if (actual && actual.destino) { actual.destino.abortar().catch(() => {}); } actual = null; };
+      // Tras una cancelación siguen llegando los trozos que el emisor ya había mandado: se ignoran.
+      let anulado = false;
+      const soltar = () => { anulado = true; if (actual && actual.destino) { actual.destino.abortar().catch(() => {}); } actual = null; };
       canal.alCerrar = () => { soltar(); error(new Error('cerrado')); };
       canal.alMensaje = async (tipo, datos) => {
+        if (anulado) return;
         if (tipo === TIPO_TROZO) {
           const id = new DataView(datos.buffer, datos.byteOffset).getUint32(0);
           if (!actual || actual.id !== id) throw new Error('trozo inesperado');
           const parte = datos.slice(4);
           if (actual.destino) {
-            try { await actual.destino.escribir(parte); } catch (e) { soltar(); error(new Error('almacenamiento')); canal.cerrar(); return; }
+            try { await actual.destino.escribir(parte); } catch (e) {
+              // Si la persona canceló la descarga en el navegador se avisa al emisor; si no, es el almacenamiento.
+              const cancelo = e.message === 'cancelado';
+              soltar();
+              if (cancelo) { canal.enviarControl({ t: 'cancela' }).catch(() => {}); fin('cancelado'); } else { error(new Error('almacenamiento')); canal.cerrar(); }
+              return;
+            }
           } else actual.partes.push(parte);
           actual.hecho += parte.length; totalHecho += parte.length;
           if (alProgreso) alProgreso({ nombre: actual.nombre, hecho: actual.hecho, tam: actual.tam, totalHecho, totalTam });
@@ -417,10 +451,16 @@ const EnviarQR = (() => {
           const f = lista.find((x) => x.id === m.id);
           if (!f) throw new Error('archivo desconocido');
           actual = { id: f.id, nombre: f.nombre, tam: f.tam, tipo: f.tipo, partes: [], hecho: 0, destino: null };
-          if (f.tam > UMBRAL_DISCO) actual.destino = (!sinDescargaDirecta && (await descargaDirecta(actual))) || (await abrirTemporal());
+          if (f.tam > UMBRAL_DISCO) {
+            // `alGrande(meta, iniciar)`: la página pide el toque de la persona y llama a `iniciar()` desde ese toque.
+            const iniciar = () => descargaDirecta(actual);
+            const directo = sinDescargaDirecta ? null : await (alGrande ? alGrande(actual, iniciar) : iniciar());
+            actual.destino = directo || (await abrirTemporal());
+          }
           actual.directa = !!actual.destino && !actual.destino.manija;
           // Avisa que empezó el archivo: la barra aparece ya, sin esperar el primer trozo.
           if (alProgreso) alProgreso({ nombre: actual.nombre, hecho: 0, tam: actual.tam, totalHecho, totalTam });
+          await canal.enviarControl({ t: 'sigue', id: f.id }); // el emisor espera esto para mandar el archivo
         } else if (m.t === 'fin') {
           if (!actual || actual.id !== m.id || actual.hecho !== actual.tam) throw new Error('archivo incompleto');
           if (actual.destino) await actual.destino.cerrar();
@@ -441,5 +481,5 @@ const EnviarQR = (() => {
     });
   }
 
-  return { anfitrion, invitado, leerCodigo, enviarArchivos, recibirArchivos, limpiarTemporales, espacioLibre, UMBRAL_DISCO, TROZO };
+  return { anfitrion, invitado, leerCodigo, enviarArchivos, recibirArchivos, limpiarTemporales, espacioLibre, prepararSW, UMBRAL_DISCO, TROZO };
 })();

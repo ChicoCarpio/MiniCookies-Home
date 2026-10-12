@@ -49,6 +49,8 @@ window.i18nPagina = {
     'rechazado-recibir': 'Rechazaste el envío.',
     'cancelado': 'El envío se canceló.',
     'guardar': '⬇️ Guardar',
+    'pedir-descarga': 'Es un archivo grande: tocá el botón para empezar a guardar {nombre} ({tam}) en tu carpeta de descargas. El envío espera tu toque.',
+    'boton-iniciar-descarga': '⬇️ Empezar descarga',
     'guardado-descargas': '✅ En tu carpeta de descargas',
     'error-codigo': '❌ Ese código no es de esta herramienta o está incompleto. Volvé a escanearlo.',
     'error-tiempo': '❌ No se pudo conectar. Revisá que los dos dispositivos estén en la misma red WiFi. Si uno usa datos móviles y no conecta, activá el punto de acceso del celular y conectá el otro equipo a esa WiFi. Después volvé a intentar.',
@@ -98,6 +100,8 @@ window.i18nPagina = {
     'rechazado-recibir': 'You declined the transfer.',
     'cancelado': 'The transfer was canceled.',
     'guardar': '⬇️ Save',
+    'pedir-descarga': 'This is a big file: tap the button to start saving {nombre} ({tam}) to your downloads folder. The transfer waits for your tap.',
+    'boton-iniciar-descarga': '⬇️ Start download',
     'guardado-descargas': '✅ In your downloads folder',
     'error-codigo': '❌ That code is not from this tool or it is incomplete. Scan it again.',
     'error-tiempo': '❌ Could not connect. Check that both devices are on the same WiFi network. If one is on mobile data and it won\'t connect, turn on the phone\'s hotspot and connect the other device to that WiFi. Then try again.',
@@ -225,6 +229,13 @@ window.i18nPagina = {
         </div>
       </div>
 
+      <div id="pedirDescarga" hidden>
+        <p id="textoPedirDescarga"></p>
+        <div class="controles">
+          <button class="boton" id="botonIniciarDescarga" data-i18n="boton-iniciar-descarga">⬇️ Empezar descarga</button>
+        </div>
+      </div>
+
       <div id="bloqueProgreso" hidden>
         <p id="textoProgreso"></p>
         <div class="barra-carga barra-envio"><div class="relleno-carga" id="rellenoProgreso"></div></div>
@@ -324,6 +335,7 @@ async function iniciarCamara(video, alTexto) {
 async function iniciarRecibir() {
   pantalla('recibir');
   mostrarMensaje('');
+  EnviarQR.prepararSW(); // deja listo el service worker de la descarga directa
   EnviarQR.limpiarTemporales(); // restos de una recepción anterior (los archivos se escriben en el disco del navegador)
   // Con el permiso de cámara el navegador entrega las direcciones reales de la
   // red local (si no, las oculta tras nombres .local y a veces no conecta).
@@ -451,6 +463,12 @@ function escucharEnvio() {
       });
     },
     alProgreso: (p) => progreso('recibiendo', p),
+    // Un archivo grande baja directo a Descargas, pero el navegador del celular solo lo permite si nace de un toque.
+    alGrande: (meta, iniciar) => new Promise((listo) => {
+      $('textoPedirDescarga').textContent = llenar('pedir-descarga', { nombre: meta.nombre, tam: tamano(meta.tam) });
+      $('pedirDescarga').hidden = false;
+      $('botonIniciarDescarga').onclick = () => { $('pedirDescarga').hidden = true; listo(iniciar()); };
+    }),
     alArchivo: (archivo, info) => {
       const li = document.createElement('li');
       const nombre = document.createElement('span'); nombre.textContent = archivo.name + ' (' + tamano(archivo.size) + ')';

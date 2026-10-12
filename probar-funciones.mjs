@@ -1270,6 +1270,28 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     return '300000 bytes en 3 trozos, pidió ' + pidieron + ' veces';
   });
 
+  // Si el navegador cancela la descarga directa de un archivo grande (pasó en
+  // Edge de Android cuando la descarga no nacía de un toque), el emisor se
+  // entera como cancelación y la conexión no se corta (antes: "se cortó la conexión").
+  await prueba('enviar archivos: una descarga cancelada por el navegador se avisa como cancelación', async () => {
+    await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
+    const E = W().eval('EnviarQR');
+    const a = await E.anfitrion(), i = await E.invitado(a.codigo);
+    const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
+    let esperoToque = false;
+    const falsa = { async escribir() { throw new Error('cancelado'); }, async cerrar() {}, async abortar() {} };
+    const recibiendo = E.recibirArchivos(sR, {
+      alOferta: async () => true, alProgreso: () => {}, alArchivo: () => {},
+      alGrande: async (meta, iniciar) => { esperoToque = true; return falsa; },
+    });
+    const grande = new (W().File)([new (W().Uint8Array)(E.UMBRAL_DISCO + 1024)], 'grande.bin');
+    const fin = await E.enviarArchivos(sE, [grande], {});
+    afirmar(esperoToque, 'no pidió el toque para el archivo grande');
+    afirmar(fin === 'cancelado' && (await recibiendo) === 'cancelado', 'resultado: ' + fin);
+    sE.cerrar(); sR.cerrar();
+    return 'cancelación avisada, conexión sin cortar';
+  });
+
   // La página: "Quiero recibir" dibuja el QR de la oferta; abierta con una
   // oferta en la dirección, saca el código de la barra y muestra el QR de respuesta.
   await prueba('enviar archivos: la página dibuja el QR de recibir y el de respuesta', async () => {
