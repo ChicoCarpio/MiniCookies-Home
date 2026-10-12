@@ -21,6 +21,10 @@
 //   huellas, se muestra en las dos pantallas: si alguien se coló con el QR
 //   visto de lejos, no coinciden.
 //
+// Los archivos grandes (más de 64 MB) el receptor los escribe en el disco
+// (almacenamiento privado del sitio) en vez de juntarlos en memoria, para que
+// no cierren la pestaña; los chicos se arman en memoria.
+//
 // Piezas: `anfitrion()` (el que recibe) e `invitado(codigo)` (el que envía)
 // devuelven una sesión con un canal cifrado; `enviarArchivos` y
 // `recibirArchivos` hablan por ese canal.
@@ -299,6 +303,32 @@ const EnviarQR = (() => {
     return (await fin) === 'ok' ? 'listo' : 'cancelado';
   }
 
+  // ---------- Almacenamiento en disco del receptor ----------
+
+  // Un archivo grande no se junta en memoria: se va escribiendo en el
+  // almacenamiento privado del sitio (OPFS, que vive en el disco) y de ahí sale
+  // el File que se guarda. Se decide por el tamaño, que se conoce de antemano.
+  // Si el navegador no ofrece OPFS, se junta en memoria.
+  const CARPETA_TEMPORAL = 'mc-recibidos';
+  const UMBRAL_DISCO = 64 * 1024 * 1024; // hasta acá el archivo se arma en memoria (más rápido); más grande, al disco
+  async function limpiarTemporales() {
+    try { await (await navigator.storage.getDirectory()).removeEntry(CARPETA_TEMPORAL, { recursive: true }); } catch (e) {}
+  }
+  async function abrirTemporal() {
+    try {
+      const raiz = await navigator.storage.getDirectory();
+      const carpeta = await raiz.getDirectoryHandle(CARPETA_TEMPORAL, { create: true });
+      const manija = await carpeta.getFileHandle(crypto.randomUUID(), { create: true });
+      return { manija, escritor: await manija.createWritable() };
+    } catch (e) {
+      return null;
+    }
+  }
+  // Espacio libre del navegador para guardar (o null si no lo dice).
+  async function espacioLibre() {
+    try { const e = await navigator.storage.estimate(); return e.quota - e.usage; } catch (e) { return null; }
+  }
+
   // Recibe lo que manda el otro equipo. `alOferta(lista)` devuelve (o promete)
   // true para aceptar; `alArchivo(File)` por cada archivo terminado; el resto
   // son avisos. Devuelve una promesa con 'listo', 'rechazado' o 'cancelado'.
@@ -306,13 +336,17 @@ const EnviarQR = (() => {
     const canal = sesion.canal;
     return new Promise((fin, error) => {
       let lista = [], actual = null, totalHecho = 0, totalTam = 0;
-      canal.alCerrar = () => error(new Error('cerrado'));
+      const soltar = () => { if (actual && actual.disco) { actual.disco.escritor.abort().catch(() => {}); } actual = null; };
+      canal.alCerrar = () => { soltar(); error(new Error('cerrado')); };
       canal.alMensaje = async (tipo, datos) => {
         if (tipo === TIPO_TROZO) {
           const id = new DataView(datos.buffer, datos.byteOffset).getUint32(0);
           if (!actual || actual.id !== id) throw new Error('trozo inesperado');
           const parte = datos.slice(4);
-          actual.partes.push(parte); actual.hecho += parte.length; totalHecho += parte.length;
+          if (actual.disco) {
+            try { await actual.disco.escritor.write(parte); } catch (e) { soltar(); error(new Error('almacenamiento')); canal.cerrar(); return; }
+          } else actual.partes.push(parte);
+          actual.hecho += parte.length; totalHecho += parte.length;
           if (alProgreso) alProgreso({ nombre: actual.nombre, hecho: actual.hecho, tam: actual.tam, totalHecho, totalTam });
           return;
         }
@@ -326,20 +360,24 @@ const EnviarQR = (() => {
         } else if (m.t === 'inicio') {
           const f = lista.find((x) => x.id === m.id);
           if (!f) throw new Error('archivo desconocido');
-          actual = { id: f.id, nombre: f.nombre, tam: f.tam, tipo: f.tipo, partes: [], hecho: 0 };
+          actual = { id: f.id, nombre: f.nombre, tam: f.tam, tipo: f.tipo, partes: [], hecho: 0, disco: f.tam > UMBRAL_DISCO ? await abrirTemporal() : null };
         } else if (m.t === 'fin') {
           if (!actual || actual.id !== m.id || actual.hecho !== actual.tam) throw new Error('archivo incompleto');
-          alArchivo(new File(actual.partes, actual.nombre, { type: actual.tipo }));
+          if (actual.disco) {
+            await actual.disco.escritor.close();
+            alArchivo(new File([await actual.disco.manija.getFile()], actual.nombre, { type: actual.tipo }), { enDisco: true });
+          } else alArchivo(new File(actual.partes, actual.nombre, { type: actual.tipo }), { enDisco: false });
           actual = null;
         } else if (m.t === 'listo') {
           await canal.enviarControl({ t: 'ok' });
           fin('listo');
         } else if (m.t === 'cancela') {
+          soltar();
           fin('cancelado');
         }
       };
     });
   }
 
-  return { anfitrion, invitado, leerCodigo, enviarArchivos, recibirArchivos, TROZO };
+  return { anfitrion, invitado, leerCodigo, enviarArchivos, recibirArchivos, limpiarTemporales, espacioLibre, UMBRAL_DISCO, TROZO };
 })();

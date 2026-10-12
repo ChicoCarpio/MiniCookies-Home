@@ -55,6 +55,8 @@ window.i18nPagina = {
     'error-camara': '❌ No se pudo usar la cámara: ',
     'error-nuevo-intento': 'Empezar de nuevo',
     'conectando': 'Conectando…',
+    'error-espacio': '❌ No hay espacio suficiente para guardar el archivo en este dispositivo. Liberá espacio y volvé a intentar.',
+    'poco-espacio': '⚠️ Parece que no hay espacio suficiente en este dispositivo para recibir todo.',
     'titulo-pagina': 'Enviar archivos con un QR gratis — Mini Cookies',
     'meta-descripcion': 'Pasá archivos de un dispositivo a otro con un código QR, directo entre los dos y cifrado de extremo a extremo. Sin registro, sin cables y sin servidor de por medio.',
   },
@@ -101,6 +103,8 @@ window.i18nPagina = {
     'error-camara': '❌ Could not use the camera: ',
     'error-nuevo-intento': 'Start over',
     'conectando': 'Connecting…',
+    'error-espacio': '❌ There is not enough space to save the file on this device. Free some space and try again.',
+    'poco-espacio': '⚠️ It looks like this device does not have enough space to receive everything.',
     'titulo-pagina': 'Send files with a QR code — Mini Cookies',
     'meta-descripcion': 'Move files from one device to another with a QR code, straight between the two and end-to-end encrypted. No sign-up, no cables and no server in between.',
   }
@@ -318,6 +322,7 @@ async function iniciarCamara(video, alTexto) {
 async function iniciarRecibir() {
   pantalla('recibir');
   mostrarMensaje('');
+  EnviarQR.limpiarTemporales(); // restos de una recepción anterior (los archivos se escriben en el disco del navegador)
   // Con el permiso de cámara el navegador entrega las direcciones reales de la
   // red local (si no, las oculta tras nombres .local y a veces no conecta).
   try { (await navigator.mediaDevices.getUserMedia({ video: true })).getTracks().forEach((p) => p.stop()); } catch (e) {}
@@ -424,9 +429,13 @@ function escucharEnvio() {
   $('botonAceptar').onclick = () => respuesta(true);
   $('botonRechazar').onclick = () => respuesta(false);
   EnviarQR.recibirArchivos(sesion, {
-    alOferta: (lista) => new Promise((listo) => {
+    alOferta: async (lista) => {
+      const total = lista.reduce((x, f) => x + f.tam, 0);
+      const libre = await EnviarQR.espacioLibre();
+      if (libre !== null && libre < total * 1.1) mostrarMensaje(t('poco-espacio'));
+      return new Promise((listo) => {
       decidir = listo;
-      $('ofertaTitulo').textContent = llenar('oferta-titulo', { n: lista.length, tam: tamano(lista.reduce((x, f) => x + f.tam, 0)) });
+      $('ofertaTitulo').textContent = llenar('oferta-titulo', { n: lista.length, tam: tamano(total) });
       $('ofertaLista').replaceChildren(...lista.map((f) => {
         const li = document.createElement('li');
         const nombre = document.createElement('span'); nombre.textContent = f.nombre;
@@ -436,7 +445,8 @@ function escucharEnvio() {
       }));
       $('ofertaRecibida').hidden = false;
       mantenerPantalla(true);
-    }),
+      });
+    },
     alProgreso: (p) => progreso('recibiendo', p),
     alArchivo: (archivo) => {
       const url = URL.createObjectURL(archivo);
@@ -450,7 +460,7 @@ function escucharEnvio() {
     terminado = true; mantenerPantalla(false);
     $('bloqueProgreso').hidden = true;
     mostrarMensaje(fin === 'listo' ? t('listo-recibido') : fin === 'rechazado' ? t('rechazado-recibir') : t('cancelado'));
-  }).catch(() => { if (!terminado) falla('error-cerrado'); });
+  }).catch((e) => { if (!terminado) falla(e.message === 'almacenamiento' ? 'error-espacio' : 'error-cerrado'); });
 }
 
 // Enviar

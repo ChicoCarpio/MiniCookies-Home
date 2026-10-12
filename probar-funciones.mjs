@@ -1172,8 +1172,8 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     afirmar(/^\d{3} \d{3}$/.test(sesionR.verificacion) && sesionR.verificacion === sesionE.verificacion, 'verificación: ' + sesionR.verificacion + ' / ' + sesionE.verificacion);
     const bytes = new (W().Uint8Array)(100000).map((_, i) => (i * 7 + 3) & 255);
     const lista = [new (W().File)([bytes], 'datos.bin', { type: 'application/octet-stream' }), new (W().File)([], 'vacio.txt', { type: 'text/plain' })];
-    const llegados = [];
-    const recibiendo = E.recibirArchivos(sesionR, { alOferta: async (l) => l.length === 2, alProgreso: () => {}, alArchivo: (f) => llegados.push(f) });
+    const llegados = []; const sitio = [];
+    const recibiendo = E.recibirArchivos(sesionR, { alOferta: async (l) => l.length === 2, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); sitio.push(info.enDisco); } });
     let ultimo = 0;
     const fin = await E.enviarArchivos(sesionE, lista, { alProgreso: (p) => { ultimo = p.totalHecho; } });
     afirmar(fin === 'listo' && (await recibiendo) === 'listo', 'resultado: ' + fin);
@@ -1181,6 +1181,7 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
     const copia = new (W().Uint8Array)(await llegados[0].arrayBuffer());
     afirmar(copia.length === bytes.length && copia.every((v, i) => v === bytes[i]), 'el contenido llegó distinto');
     afirmar(ultimo === 100000, 'progreso final ' + ultimo);
+    afirmar(sitio.every((x) => x === false), 'un archivo chico no tenía que ir al disco: ' + sitio);
     sesionE.cerrar(); sesionR.cerrar();
     return 'oferta ' + anfitrion.codigo.length + ' caracteres, respuesta ' + invitado.codigo.length + ', verificación ' + sesionR.verificacion;
   });
@@ -1204,25 +1205,26 @@ async function imagenDePrueba(texto, ancho = 600, alto = 200) {
   });
 
   // Velocidad (2026-10-12): en el celular iba a 200 KB/s por leer y cifrar el
-  // archivo en pedacitos de 15 KB uno tras otro. 16 MB por el mismo equipo tienen
+  // archivo en pedacitos de 15 KB uno tras otro. 72 MB por el mismo equipo tienen
   // que pasar a más de 3 MB/s (en la práctica van a decenas) y llegar intactos.
-  await prueba('enviar archivos: un archivo grande pasa rápido y completo', async () => {
+  await prueba('enviar archivos: un archivo grande pasa rápido, completo y por el disco', async () => {
     await abrir('/herramientas/enviar-archivos-qr.html'); await esperar(300);
     const E = W().eval('EnviarQR');
     const a = await E.anfitrion(), i = await E.invitado(a.codigo);
     const sR = await a.aceptarRespuesta(i.codigo), sE = await i.conexion;
-    const bytes = new (W().Uint8Array)(16 * 1024 * 1024).map((_, k) => (k * 31 + (k >> 8)) & 255);
-    const llegados = [];
-    const recibiendo = E.recibirArchivos(sR, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f) => llegados.push(f) });
+    const bytes = new (W().Uint8Array)(E.UMBRAL_DISCO + 8 * 1024 * 1024).map((_, k) => (k * 31 + (k >> 8)) & 255);
+    const llegados = []; let enDisco = null;
+    const recibiendo = E.recibirArchivos(sR, { alOferta: async () => true, alProgreso: () => {}, alArchivo: (f, info) => { llegados.push(f); enDisco = info.enDisco; } });
     const t0 = Date.now();
     const fin = await E.enviarArchivos(sE, [new (W().File)([bytes], 'grande.bin')], {});
     await recibiendo;
-    const mbs = 16 / ((Date.now() - t0) / 1000);
+    const mbs = (bytes.length / 1048576) / ((Date.now() - t0) / 1000);
     afirmar(fin === 'listo' && llegados.length === 1 && llegados[0].size === bytes.length, 'resultado: ' + fin);
     const copia = new (W().Uint8Array)(await llegados[0].arrayBuffer());
     let igual = true; for (let k = 0; k < copia.length; k += 997) if (copia[k] !== bytes[k]) { igual = false; break; }
     afirmar(igual, 'el contenido llegó distinto');
     afirmar(mbs > 3, 'velocidad ' + mbs.toFixed(1) + ' MB/s');
+    afirmar(enDisco === true, 'el archivo grande no se escribió en el disco (OPFS)');
     sE.cerrar(); sR.cerrar();
     return mbs.toFixed(1) + ' MB/s';
   });
