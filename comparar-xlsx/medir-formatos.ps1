@@ -3,9 +3,9 @@
 # También lee los errores (#DIV/0! etc.), los formatos integrados (NumberFormatLocal por id) y
 # el formato que Excel asigna a "General" según el idioma.
 # Uso: powershell -ExecutionPolicy Bypass -File medir-formatos.ps1  → medidas\formatos.json
-param([string]$Salida = (Join-Path $PSScriptRoot 'medidas\formatos.json'), [ValidateSet('en','sistema')][string]$Separadores = 'en')
+param([string]$Salida = (Join-Path $PSScriptRoot 'medidas\formatos.json'), [ValidateSet('en','sistema')][string]$Separadores = 'en', [string]$ArchivoCasos = (Join-Path $PSScriptRoot 'casos-formato.json'))
 $ErrorActionPreference = 'Stop'
-$casos = Get-Content -Raw -Encoding UTF8 (Join-Path $PSScriptRoot 'casos-formato.json') | ConvertFrom-Json
+$casos = Get-Content -Raw -Encoding UTF8 $ArchivoCasos | ConvertFrom-Json
 $xl = New-Object -ComObject Excel.Application
 $xl.Visible = $false; $xl.DisplayAlerts = $false
 # Los códigos de formato de COM se interpretan con la cultura del hilo y los separadores de Excel: se miden en en-US ("." decimal, "," miles) salvo que se pida 'sistema'.

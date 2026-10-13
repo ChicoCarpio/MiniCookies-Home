@@ -676,5 +676,23 @@
 
   const hojaVacia = () => leerHoja('<worksheet/>', { textos: [], fecha1904: false });
 
-  globalThis.LibroXlsx = { abrir, hojaVacia, ErrorXlsx, TIPO, colANumero, numeroACol, decodificarDireccion, codificarDireccion, decodificarRango, serialDeIso, desplazarFormula };
+  // El texto que Excel muestra en la celda i de la hoja: el valor con el formato de número de su estilo
+  // (requiere xlsx-formato.js). Para un CSV, el número sale con el texto original ("1.234,50").
+  // opciones: las de XlsxFormato.formatear (idioma, decimal, miles, ancho…). Devuelve { texto, color, desborde }.
+  function textoCelda(libro, hoja, i, opciones) {
+    const C = hoja.celdas;
+    const tipo = C.tipo[i], valor = C.valor[i];
+    const opc = Object.assign({}, opciones || {}, { fecha1904: libro.fecha1904 });
+    if (tipo === TIPO.vacio) return { texto: '', color: null };
+    if (C.textoOriginal.has(i)) return { texto: C.textoOriginal.get(i), color: null };
+    if (tipo === TIPO.error) {
+      const nombres = XlsxFormato.NOMBRES[opc.idioma] || XlsxFormato.NOMBRES.en;
+      return { texto: nombres.errores[valor] || valor, color: null };
+    }
+    const xf = libro.estilos.xf(C.estilo[i]);
+    opc.idFormato = xf.numFmtId;
+    return XlsxFormato.formatear(valor, xf.formato, opc);
+  }
+
+  globalThis.LibroXlsx = { abrir, hojaVacia, textoCelda, ErrorXlsx, TIPO, colANumero, numeroACol, decodificarDireccion, codificarDireccion, decodificarRango, serialDeIso, desplazarFormula };
 })();

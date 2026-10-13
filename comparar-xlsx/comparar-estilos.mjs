@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 const raiz = path.resolve(import.meta.dirname, '..');
-for (const f of ['zip-propio.js', 'xml-ligero.js', 'xlsx-estilos.js', 'xlsx-modelo.js']) vm.runInThisContext(fs.readFileSync(path.join(raiz, 'assets/js', f), 'utf8'), { filename: f });
+for (const f of ['zip-propio.js', 'xml-ligero.js', 'xlsx-estilos.js', 'xlsx-modelo.js', 'xlsx-formato.js']) vm.runInThisContext(fs.readFileSync(path.join(raiz, 'assets/js', f), 'utf8'), { filename: f });
 
 const [archivo, volcado] = process.argv.slice(2);
 const libro = await LibroXlsx.abrir(new Uint8Array(fs.readFileSync(archivo)));
@@ -56,6 +56,13 @@ for (const x of celdas) {
   // formato de número (Excel escribe los nombres de color en su idioma y a veces reordena)
   const norm = (s) => s.replace(/\[(Red|Rojo)\]/gi, '[Red]').replace(/\[(Blue|Azul)\]/gi, '[Blue]').replace(/\\/g, '');
   if (norm(e.formato) !== norm(x.formato)) falla('formato', `${ref} ${e.formato} vs ${x.formato}`);
+  // texto mostrado (Range.Text): lo que Excel dibuja en la celda. Las celdas en "####" dependen del ancho y se omiten.
+  if (k >= 0 && !/^#+$/.test(x.texto)) {
+    const mio = LibroXlsx.textoCelda(libro, hoja, k, { idioma: 'es', decimal: '.', miles: ',', ancho: 0 }).texto;
+    // el relleno "*x" ocupa el ancho de la columna: se compara sin el largo de las tiras de espacios
+    const sinTiras = (t) => t.replace(/ {2,}/g, ' ').trim();
+    if (sinTiras(mio) !== sinTiras(x.texto)) falla('texto', `${ref} propio ${JSON.stringify(mio)} vs Excel ${JSON.stringify(x.texto)} (formato ${e.formato})`);
+  }
   // alineación
   const a = e.alineacion;
   if ((H[a.h] ?? 1) !== x.alineacion.h) falla('alin-h', `${ref} ${a.h} vs ${x.alineacion.h}`);
