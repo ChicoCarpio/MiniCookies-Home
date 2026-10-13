@@ -192,7 +192,20 @@
         const b = r.barras, cv = b.cfvo;
         const lo = umbral(reg, d, cv[0], f, c, 'min'), hi = umbral(reg, d, cv[1], f, c, 'max');
         const fr = hi > lo ? Math.min(1, Math.max(0, (v - lo) / (hi - lo))) : 0;
-        return { barra: { fraccion: fr, largoMin: b.min, largoMax: b.max, color: hexDe(libro, b.color) || '#638EC6', mostrarValor: b.mostrarValor, valor: v, lo, hi } };
+        const color = hexDe(libro, b.color) || '#638EC6';
+        const barra = { fraccion: fr, largoMin: b.min, largoMax: b.max, color, mostrarValor: b.mostrarValor, valor: v, lo, hi };
+        const x = b.x14; // extensión de Excel 2010: eje, negativos, relleno liso, borde y dirección
+        if (x) {
+          const borde = hexDe(libro, x.colorBorde) || color;
+          barra.x14 = {
+            largoMin: x.min, largoMax: x.max, eje: x.eje, direccion: x.direccion, gradiente: x.gradiente, borde: x.borde ? borde : null,
+            colorNeg: x.negIgual ? color : hexDe(libro, x.colorNeg) || '#FF0000',
+            bordeNeg: x.borde ? (x.negBordeIgual ? borde : hexDe(libro, x.colorBordeNeg) || '#FF0000') : null,
+            colorEje: hexDe(libro, x.colorEje) || '#000000',
+          };
+          barra.largoMin = x.min; barra.largoMax = x.max; barra.mostrarValor = x.mostrarValor !== false && b.mostrarValor;
+        }
+        return { barra };
       }
       if (r.iconos) {
         const ic = r.iconos, cv = ic.cfvo;

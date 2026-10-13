@@ -347,6 +347,7 @@
       imprimir: { margenes: null, pagina: null, opciones: null, encabezadoPie: null, saltosFila: [], saltosCol: [], ajustarAPagina: false, autoSaltos: true },
       filtroAuto: null,
       proteccion: null,
+      minigraficos: [],            // grupos de minigráficos x14: { tipo, colores…, items: [{ f, sqref }] }
       formatosCondicionales: [],   // { rangos: [rango], reglas: [{ tipo, prioridad, dxf, … }] } — lectura completa en la etapa 6
       validaciones: [],            // { rangos, tipo, … }
       anclas: [],                  // dónde están los objetos del dibujo de la hoja (ver leerAnclas); su contenido lo lee xlsx-objetos.js
@@ -363,6 +364,70 @@
     let sheetView = true;
     let enVistasPersonalizadas = false;
     let cf = null, regla = null, enFormulaCf = false, validacion = null, enFormulaVal = null, hf = null, enHf = null;
+    // Extensiones x14 de Excel 2010 (extLst): barras de datos con eje y negativos, conjuntos de iconos propios y minigráficos.
+    // Las reglas con su par clásico se unen por el id (x14:id); las que solo existen en x14 se agregan como reglas nuevas.
+    const URI_CF14 = '{78C0D931-6437-407d-A8EE-F0AAD7539E65}', URI_SPARK = '{05C60535-1F16-4fd2-B633-F4F36F0B64E0}';
+    let ext14 = null, x14cf = null, x14r = null, x14v = null, enX14 = null, enId14 = false, spark = null, sparkItem = null;
+    const ids14 = new Map();
+    const rangosX14 = (t) => t.split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean);
+    const x14Abrir = (nombre, a) => {
+      switch (nombre) {
+        case 'conditionalFormatting': x14cf = { rangos: [], reglas: [] }; break;
+        case 'cfRule': if (x14cf) { x14r = { id: a.id || null, tipo: a.type || '', prioridad: parseInt(a.priority, 10) || 0, barras: null, iconos: null }; x14cf.reglas.push(x14r); } break;
+        case 'dataBar': if (x14r) x14r.barras = {
+          min: a.minLength !== undefined ? parseFloat(a.minLength) : 0, max: a.maxLength !== undefined ? parseFloat(a.maxLength) : 100,
+          gradiente: a.gradient !== '0' && a.gradient !== 'false', borde: a.border === '1' || a.border === 'true',
+          negIgual: a.negativeBarColorSameAsPositive === '1' || a.negativeBarColorSameAsPositive === 'true', // sin el atributo: color propio de los negativos
+          negBordeIgual: a.negativeBarBorderColorSameAsPositive !== '0' && a.negativeBarBorderColorSameAsPositive !== 'false',
+          eje: a.axisPosition || 'automatic', direccion: a.direction || 'context', mostrarValor: a.showValue !== '0' && a.showValue !== 'false',
+          cfvo: [], colorBorde: null, colorNeg: null, colorBordeNeg: null, colorEje: null }; break;
+        case 'iconSet': if (x14r) x14r.iconos = { conjunto: a.iconSet || '3TrafficLights1', cfvo: [], mostrarValor: a.showValue !== '0' && a.showValue !== 'false', invertir: a.reverse === '1' || a.reverse === 'true', soloIcono: false, propios: [] }; break;
+        case 'cfIcon': if (x14r && x14r.iconos) x14r.iconos.propios.push({ conjunto: a.iconSet || null, id: parseInt(a.iconId, 10) }); break;
+        case 'cfvo': { const d = x14r && (x14r.barras || x14r.iconos); if (d) { x14v = { tipo: a.type || 'num', valor: a.val !== undefined ? a.val : null, gte: a.gte !== '0' }; d.cfvo.push(x14v); } break; }
+        case 'borderColor': if (x14r && x14r.barras) x14r.barras.colorBorde = XlsxEstilos.colorRef(a); break;
+        case 'negativeFillColor': if (x14r && x14r.barras) x14r.barras.colorNeg = XlsxEstilos.colorRef(a); break;
+        case 'negativeBorderColor': if (x14r && x14r.barras) x14r.barras.colorBordeNeg = XlsxEstilos.colorRef(a); break;
+        case 'axisColor': if (x14r && x14r.barras) x14r.barras.colorEje = XlsxEstilos.colorRef(a); break;
+        case 'f': if (x14v || sparkItem) { enX14 = 'f'; textoCelda = ''; } break;
+        case 'sqref': enX14 = 'sqref'; textoCelda = ''; break;
+        case 'sparklineGroup':
+          spark = {
+            tipo: a.type || 'line', grosor: a.lineWeight !== undefined ? parseFloat(a.lineWeight) : 0.75, vacias: a.displayEmptyCellsAs || 'zero',
+            marcadores: a.markers === '1', alto: a.high === '1', bajo: a.low === '1', primero: a.first === '1', ultimo: a.last === '1', negativos: a.negative === '1',
+            ejeX: a.displayXAxis === '1', ocultas: a.displayHidden === '1', derechaAIzquierda: a.rightToLeft === '1', ejeFechas: a.dateAxis === '1',
+            minTipo: a.minAxisType || 'individual', maxTipo: a.maxAxisType || 'individual', minManual: a.manualMin !== undefined ? parseFloat(a.manualMin) : null, maxManual: a.manualMax !== undefined ? parseFloat(a.manualMax) : null,
+            colores: {}, items: [] };
+          if (hoja.minigraficos.length < MAX_ELEMENTOS) hoja.minigraficos.push(spark);
+          break;
+        case 'colorSeries': case 'colorNegative': case 'colorAxis': case 'colorMarkers': case 'colorFirst': case 'colorLast': case 'colorHigh': case 'colorLow':
+          if (spark) spark.colores[nombre.slice(5).toLowerCase()] = XlsxEstilos.colorRef(a); break;
+        case 'sparkline': if (spark) { sparkItem = { f: '', sqref: '' }; spark.items.push(sparkItem); } break;
+        default: break;
+      }
+    };
+    const x14Cerrar = (nombre) => {
+      switch (nombre) {
+        case 'f': if (enX14 === 'f') { const t = textoCelda.trim(); if (sparkItem) sparkItem.f = t; else if (x14v) x14v.valor = t; } enX14 = null; break;
+        case 'cfvo': x14v = null; break;
+        case 'sqref': if (enX14 === 'sqref') { const t = textoCelda.trim(); if (sparkItem) sparkItem.sqref = t; else if (x14cf) x14cf.rangos = rangosX14(t); } enX14 = null; break;
+        case 'cfRule': x14r = null; break;
+        case 'sparkline': sparkItem = null; break;
+        case 'sparklineGroup': spark = null; break;
+        case 'conditionalFormatting':
+          if (x14cf) {
+            for (const r of x14cf.reglas) {
+              const par = r.id ? ids14.get(r.id) : null;
+              if (par && par.barras && r.barras) par.barras.x14 = r.barras;
+              else if (!par && (r.barras || r.iconos) && hoja.formatosCondicionales.length < MAX_ELEMENTOS) {
+                hoja.formatosCondicionales.push({ rangos: x14cf.rangos, reglas: [{ tipo: r.iconos ? 'iconSet' : 'dataBar', prioridad: r.prioridad, dxf: null, operador: null, texto: null, detener: false, encima: true, igual: false, rango: null, porcentaje: false, abajo: false, periodo: null, desvEst: null, formulas: [], escala: null,
+                  barras: r.barras ? { cfvo: r.barras.cfvo, color: null, mostrarValor: r.barras.mostrarValor, min: r.barras.min, max: r.barras.max, x14: r.barras } : null, iconos: r.iconos }] });
+              }
+            }
+          }
+          x14cf = null; break;
+        default: break;
+      }
+    };
     const cerrarCelda = () => {
       if (!celda) return;
       // Fuera de la hoja (o sin sentido): se descarta. Un tope total evita que un archivo chico agote la memoria.
@@ -396,6 +461,8 @@
       abrir(nombre, a, vacio) {
         if (nombre === 'customSheetViews') enVistasPersonalizadas = true;
         if (enVistasPersonalizadas) return;
+        if (nombre === 'ext') ext14 = a.uri === URI_CF14 ? 'cf' : a.uri === URI_SPARK ? 'spark' : null;
+        if (ext14) { x14Abrir(nombre, a); return; }
         switch (nombre) {
           case 'sheetPr': seccion = 'sheetPr'; break;
           case 'tabColor': hoja.color = XlsxEstilos.colorRef(a); break;
@@ -493,6 +560,7 @@
           case 'colorScale': if (regla) regla.escala = { cfvo: [], colores: [] }; break;
           case 'dataBar': if (regla) regla.barras = { cfvo: [], color: null, mostrarValor: a.showValue !== '0', min: a.minLength !== undefined ? parseInt(a.minLength, 10) : 10, max: a.maxLength !== undefined ? parseInt(a.maxLength, 10) : 90 }; break;
           case 'iconSet': if (regla) regla.iconos = { conjunto: a.iconSet || '3TrafficLights1', cfvo: [], mostrarValor: a.showValue !== '0', invertir: a.reverse === '1', soloIcono: false }; break;
+          case 'id': if (regla) { enId14 = true; textoCelda = ''; } break;
           case 'cfvo': if (regla) { const v = { tipo: a.type || 'num', valor: a.val !== undefined ? a.val : null, gte: a.gte !== '0' }; (regla.escala || regla.barras || regla.iconos || { cfvo: [] }).cfvo.push(v); } break;
           case 'color': if (regla && regla.escala) regla.escala.colores.push(XlsxEstilos.colorRef(a)); else if (regla && regla.barras) regla.barras.color = XlsxEstilos.colorRef(a); break;
           case 'dataValidation': validacion = { rangos: (a.sqref || '').split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean), tipo: a.type || 'none', operador: a.operator || 'between', permitirVacio: a.allowBlank === '1', ocultarFlecha: a.showDropDown === '1', mostrarEntrada: a.showInputMessage === '1', mostrarError: a.showErrorMessage === '1', estiloError: a.errorStyle || 'stop', tituloError: a.errorTitle || '', error: a.error || '', tituloEntrada: a.promptTitle || '', entrada: a.prompt || '', formula1: null, formula2: null }; if (hoja.validaciones.length < MAX_ELEMENTOS) hoja.validaciones.push(validacion); break;
@@ -500,13 +568,15 @@
         }
       },
       texto(t) {
-        if (enV || enF || enFormulaCf || enFormulaVal || enHf) textoCelda += t;
+        if (enV || enF || enFormulaCf || enFormulaVal || enHf || enId14 || enX14) textoCelda += t;
         else if (enT && celda) celda.is += t;
       },
       cerrar(nombre) {
         if (nombre === 'customSheetViews') { enVistasPersonalizadas = false; return; }
         if (enVistasPersonalizadas) return;
+        if (ext14) { if (nombre === 'ext') ext14 = null; else x14Cerrar(nombre); return; }
         switch (nombre) {
+          case 'id': if (enId14 && regla) ids14.set(textoCelda.trim(), regla); enId14 = false; break;
           case 'v': if (enV && celda) { celda.v = textoCelda; } enV = false; break;
           case 'f': if (enF && celda && celda.formula) { celda.formula.texto = textoCelda === '' && celda.formula.tipo === 'shared' && celda.formula.ref === null ? null : XmlLigero.sinEscapes(textoCelda); } enF = false; break;
           case 'is': enIs = false; break;
