@@ -273,8 +273,9 @@ async function mostrarHoja(indiceHoja) {
 async function leerHojas(archivo) {
   libroActual = null;
   if (/\.(xlsx|xlsm|csv)$/i.test(archivo.name)) {
+    let bytes = null;
     try {
-      const bytes = new Uint8Array(await archivo.arrayBuffer());
+      bytes = new Uint8Array(await archivo.arrayBuffer());
       const libro = /\.csv$/i.test(archivo.name) ? CsvPlanilla.leer(bytes, archivo.name.replace(/\.csv$/i, '')) : await LibroXlsx.abrir(bytes);
       const hojas = [];
       libro.hojas.forEach((h, k) => {
@@ -283,6 +284,8 @@ async function leerHojas(archivo) {
       if (hojas.length) return hojas;
     } catch (error) {
       if (error && error.codigo === 'cifrado') throw error;
+      // Un "xlsx" que no es zip ni formato antiguo no es un libro: SheetJS lo leería como texto plano y mostraría basura sin avisar.
+      if (error && error.codigo === 'noZip' && bytes && !(bytes[0] === 0x50 && bytes[1] === 0x4B)) throw error;
       console.warn('El motor propio no pudo leer el archivo, se usa SheetJS:', error);
     }
   }
