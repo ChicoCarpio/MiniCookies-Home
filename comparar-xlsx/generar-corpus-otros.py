@@ -74,4 +74,93 @@ import pandas as pd
 df = pd.DataFrame({'texto': ['x', 'y', None], 'entero': [1, 2, 3], 'real': [1.5, None, 3.25], 'fecha': pd.to_datetime(['2024-01-01', '2024-06-15', None]), 'logico': [True, False, True]})
 with pd.ExcelWriter(os.path.join(destino, '22-pandas.xlsx'), engine='openpyxl') as w:
     df.to_excel(w, sheet_name='df', index=True)
+# 23: geometria y dibujo (etapa 4). openpyxl no guarda alto de fila salvo que se pida: Excel ajusta las filas al abrir.
+wb = openpyxl.Workbook()
+ws = wb.active
+ws.title = 'Geometria'
+tam = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36]
+for i, t in enumerate(tam, start=1):
+    ws.cell(row=i, column=1, value='Calibri %d' % t).font = Font(name='Calibri', size=t)
+    ws.cell(row=i, column=2, value='Arial %d' % t).font = Font(name='Arial', size=t)
+    ws.cell(row=i, column=3, value='Times %d' % t).font = Font(name='Times New Roman', size=t)
+    ws.cell(row=i, column=4, value='Courier %d' % t).font = Font(name='Courier New', size=t)
+ws.row_dimensions[14].height = 30
+ws.row_dimensions[16].hidden = True
+for i, a in enumerate([4, 8.43, 12, 20, 33.7, 50, 1, 0.5], start=6):
+    ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = a
+ws.column_dimensions['M'].hidden = True
+ws['A14'] = 'alto 30'
+ws['A15'] = 'antes de oculta'
+ws['A17'] = 'despues de oculta'
+
+# Estilos de celda: rellenos, patrones, fuentes y colores
+es = wb.create_sheet('Estilos')
+es.column_dimensions['A'].width = 18
+es.column_dimensions['B'].width = 14
+for i, (n, b, it, u, tc) in enumerate([('normal', 0, 0, None, '000000'), ('negrita', 1, 0, None, '000000'), ('cursiva', 0, 1, None, '000000'), ('subrayado', 0, 0, 'single', '000000'),
+                                        ('doble subrayado', 0, 0, 'double', '000000'), ('negrita cursiva', 1, 1, None, '000000'), ('tachado', 0, 0, None, 'C00000'), ('rojo', 0, 0, None, 'FF0000'),
+                                        ('azul', 0, 0, None, '0000FF'), ('verde sobre amarillo', 0, 0, None, '006100')], start=1):
+    c = es.cell(row=i, column=1, value=n)
+    c.font = Font(bold=bool(b), italic=bool(it), underline=u, strike=(n == 'tachado'), color=tc)
+    if n.startswith('verde'):
+        c.fill = PatternFill('solid', fgColor='FFFF00')
+patrones = ['solid', 'gray125', 'gray0625', 'darkGray', 'mediumGray', 'lightGray', 'darkHorizontal', 'darkVertical', 'darkDown', 'darkUp', 'darkGrid', 'darkTrellis',
+            'lightHorizontal', 'lightVertical', 'lightDown', 'lightUp', 'lightGrid', 'lightTrellis']
+for i, p in enumerate(patrones, start=1):
+    c = es.cell(row=i, column=3, value=p)
+    c.fill = PatternFill(patternType=p, fgColor='2F5597', bgColor='FFE699')
+for i, col in enumerate(['FF0000', '00B050', '0070C0', 'FFC000', '7030A0', 'D9D9D9', '000000'], start=1):
+    es.cell(row=i, column=5).fill = PatternFill('solid', fgColor=col)
+
+# Bordes
+bo = wb.create_sheet('Bordes')
+estilos = ['thin', 'medium', 'thick', 'dashed', 'dotted', 'double', 'hair', 'mediumDashed', 'dashDot', 'mediumDashDot', 'dashDotDot', 'mediumDashDotDot', 'slantDashDot']
+for i, e in enumerate(estilos, start=2):
+    s = Side(style=e, color='000000')
+    bo.cell(row=i * 2, column=2, value=e).border = Border(left=s, right=s, top=s, bottom=s)
+    bo.cell(row=i * 2, column=4).border = Border(bottom=Side(style=e, color='C00000'))
+    bo.cell(row=i * 2, column=6).border = Border(left=Side(style=e, color='0000FF'), diagonal=Side(style='thin', color='00B050'), diagonalUp=True, diagonalDown=True)
+bo.column_dimensions['B'].width = 22
+
+# Alineacion, ajuste de texto, sangria, rotacion
+al = wb.create_sheet('Alineacion')
+for c in range(1, 5):
+    al.column_dimensions[openpyxl.utils.get_column_letter(c)].width = 18
+horiz = ['general', 'left', 'center', 'right', 'fill', 'justify', 'centerContinuous', 'distributed']
+vert = ['top', 'center', 'bottom']
+for i, h in enumerate(horiz, start=1):
+    for j, v in enumerate(vert, start=1):
+        c = al.cell(row=i * 2, column=j, value='%s %s' % (h, v))
+        c.alignment = Alignment(horizontal=h, vertical=v)
+        al.row_dimensions[i * 2].height = 30
+al['E2'] = 'texto largo que se ajusta al ancho de la celda y ocupa varias lineas'
+al['E2'].alignment = Alignment(wrap_text=True)
+al['F2'] = 'sangria 3'
+al['F2'].alignment = Alignment(horizontal='left', indent=3)
+for k, r in enumerate([0, 45, 90, 135, 180], start=0):
+    c = al.cell(row=4 + k * 3, column=5, value='rot %d' % r)
+    c.alignment = Alignment(text_rotation=r)
+    al.row_dimensions[4 + k * 3].height = 60
+al['G2'] = 'reducir hasta ajustar a la celda'
+al['G2'].alignment = Alignment(shrink_to_fit=True)
+al.column_dimensions['G'].width = 12
+al['A20'] = 'Desborde a la derecha de un texto largo sobre celdas vacias'
+al['A22'] = 'No desborda'
+al['B22'] = 'bloquea'
+al['D24'] = 'derecha: desborda hacia la izquierda'
+al['D24'].alignment = Alignment(horizontal='right')
+al['D26'] = 'centrado: desborda a ambos lados'
+al['D26'].alignment = Alignment(horizontal='center')
+al['A28'] = 1234567890123
+al['B28'] = 'numero que no cabe se ve como ###'
+al.merge_cells('A30:C32')
+al['A30'] = 'combinada centrada'
+al['A30'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+al['A30'].fill = PatternFill('solid', fgColor='DDEBF7')
+ai = wb.create_sheet('Aislado')
+ai['B2'].fill = PatternFill('solid', fgColor='FF0000')
+ai['D4'].fill = PatternFill('solid', fgColor='0000FF')
+ai['B2'] = 'x'
+wb.save(os.path.join(destino, '23-openpyxl-dibujo.xlsx'))
+
 print('ok')
