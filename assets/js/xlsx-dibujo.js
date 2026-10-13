@@ -36,7 +36,7 @@
     return c.measureText('0').width;
   }
   // Carga las fuentes que usa el libro (hay que esperarla antes de medir: si no, el Canvas mide con otra sin avisar).
-  async function cargarFuentes(libro) {
+  function usosDeFuentes(libro) {
     const usos = [];
     const vistos = new Set();
     for (const f of libro.estilos.fuentes) {
@@ -55,14 +55,19 @@
         }
       }
     }
-    await PptxTexto.cargarFuentes(usos);
+    return usos;
   }
+  async function cargarFuentes(libro) { await PptxTexto.cargarFuentes(usosDeFuentes(libro)); }
 
   // Excel (GDI) coloca cada letra en un píxel entero y no hace kerning; el Canvas usa avances fraccionarios. CONFIG.avance:
   // 0 = los del Canvas, 1 = redondeados, 2 = redondeados hacia arriba. (Se calibra contra Excel: comparar-dibujo.mjs --avance=N.)
   const CONFIG = { avance: 0, pxExacto: false };
   const memoAvance = new Map();
   let DIGITO = 0; // mientras se dibuja un número: ancho fijo del dígito (el MDW, como Excel)
+  // Al imprimir (PDF) las unidades no son píxeles enteros: `fino` deja las posiciones sin redondear y `pxDe` da el tamaño de letra.
+  let FINO = false, PXDE = null, TXT = { x: 0, y: 0 }, DXT = 0; // TXT: desplazamiento del texto según su alineación (x a la izquierda, xDer a la derecha, xCen al centro) y DXT el de la celda que se escribe: al imprimir a escala menor que 100 % el relleno de la celda no se achica en proporción
+  const RD = (v) => (FINO ? v : Math.round(v));
+  const pxLetra = (pt) => (PXDE ? PXDE(pt) : tamPx(pt));
   function avance(ctx, ch) {
     if (DIGITO && ch >= '0' && ch <= '9') return DIGITO;
     const k = ctx.font + '|' + ch;
@@ -81,6 +86,7 @@
     return w;
   }
   function escribir(ctx, t, x, y) {
+    x += DXT; y += TXT.y;
     if (!CONFIG.avance && !DIGITO) { ctx.fillText(t, x, y); return; }
     for (const ch of t) { ctx.fillText(ch, x, y); x += avance(ctx, ch); }
   }
@@ -228,15 +234,15 @@
       let tam = f.tam || 11;
       const sup = f.alinVertical === 'superscript', sub = f.alinVertical === 'subscript';
       if (sup || sub) tam = tam * 0.65;
-      const px = tamPx(tam);
+      const px = pxLetra(tam);
       ctx.font = fuenteCss(f, px);
       const w = anchoTexto(ctx, run.texto);
       if (dibujar) {
         ctx.fillStyle = f.color ? colorDe(libro, f.color, colorBase) : colorBase;
         const dy = sup ? -Math.round(px * 0.55) : sub ? Math.round(px * 0.2) : 0;
-        escribir(ctx, run.texto, Math.round(ax), y + dy);
-        if (f.subrayado && f.subrayado !== 'none') ctx.fillRect(Math.round(ax), y + dy + 1, Math.round(w), 1);
-        if (f.tachado) ctx.fillRect(Math.round(ax), y + dy - Math.round(px * 0.3), Math.round(w), 1);
+        escribir(ctx, run.texto, RD(ax), y + dy);
+        if (f.subrayado && f.subrayado !== 'none') ctx.fillRect(RD(ax), y + dy + 1, RD(w), 1);
+        if (f.tachado) ctx.fillRect(RD(ax), y + dy - Math.round(px * 0.3), RD(w), 1);
       }
       ax += w;
     }
@@ -247,6 +253,7 @@
 
   function dibujarRango(ctx, libro, hoja, g, r, op) {
     op = op || {};
+    FINO = !!op.fino; PXDE = op.pxDe || null; TXT = op.desplazarTexto || { x: 0, y: 0 }; DXT = 0;
     const ox = op.x || 0, oy = op.y || 0;
     const X = (c) => ox + g.x(c) - g.x(r.c0), Y = (f) => oy + g.y(f) - g.y(r.f0);
     const C = hoja.celdas;
@@ -280,11 +287,12 @@
       // 1. cuadrícula (no se ve dentro de una combinada)
       const rejilla = op.cuadricula !== undefined ? op.cuadricula : hoja.vista.cuadricula;
       if (rejilla) {
-        ctx.fillStyle = REJILLA;
-        for (const c of cols) ctx.fillRect(X(c), oy, 1, altoTotal + 1);
-        ctx.fillRect(X(r.c1 + 1), oy, 1, altoTotal + 1);
-        for (const f of filas) ctx.fillRect(ox, Y(f), anchoTotal + 1, 1);
-        ctx.fillRect(ox, Y(r.f1 + 1), anchoTotal + 1, 1);
+        const gr = op.grosorRejilla || 1;
+        ctx.fillStyle = op.colorRejilla || REJILLA;
+        for (const c of cols) ctx.fillRect(X(c), oy, gr, altoTotal + gr);
+        ctx.fillRect(X(r.c1 + 1), oy, gr, altoTotal + gr);
+        for (const f of filas) ctx.fillRect(ox, Y(f), anchoTotal + gr, gr);
+        ctx.fillRect(ox, Y(r.f1 + 1), anchoTotal + gr, gr);
         ctx.fillStyle = '#FFFFFF';
         for (const m of combinada.values()) ctx.fillRect(X(m.c0) + 1, Y(m.f0) + 1, X(m.c1 + 1) - X(m.c0) - 1, Y(m.f1 + 1) - Y(m.f0) - 1);
       }
@@ -347,6 +355,13 @@
       // las celdas del rango (por el índice de filas, no recorriendo toda la hoja), la más cercana con contenido a cada lado (su texto
       // puede desbordar hacia el rango) y las combinadas que entran desde fuera
       C._indexar();
+      const desborda = (q, haciaDonde) => { // ¿el texto de esta celda vecina puede entrar en el rango? (los números y los textos con ajuste no desbordan)
+        if (C.tipo[q] === TIPO.numero || C.tipo[q] === TIPO.logico || C.tipo[q] === TIPO.error) return false;
+        const al = libro.estilos.xf(C.estilo[q]).alineacion;
+        if (al.ajustar) return false;
+        const h = al.h === 'general' ? 'left' : al.h;
+        return h === 'center' || h === 'centerContinuous' || h === (haciaDonde === 'der' ? 'right' : 'left') || h === 'distributed' || h === 'justify' || h === 'fill';
+      };
       const visibles = [];
       for (const f of filas) {
         const ini = C._inicioFila.get(f);
@@ -355,8 +370,9 @@
         while (lo < hi) { const mid = (lo + hi) >> 1; if (C.fila[mid] < f || (C.fila[mid] === f && C.col[mid] < r.c0)) lo = mid + 1; else hi = mid; }
         let k = lo;
         for (; k < C.n && C.fila[k] === f && C.col[k] <= r.c1; k++) visibles.push(k);
-        if (k < C.n && C.fila[k] === f) { for (let q = k; q < C.n && C.fila[q] === f && q < k + 8; q++) if (C.tipo[q] !== TIPO.vacio) { visibles.push(q); break; } }
-        for (let q = lo - 1; q >= ini && q > lo - 9; q--) if (C.tipo[q] !== TIPO.vacio) { visibles.push(q); break; }
+        // la vecina de cada lado solo cuenta si su texto puede desbordar hacia el rango (la de la derecha, alineada a la derecha o al centro; la de la izquierda, a la izquierda o al centro)
+        if (k < C.n && C.fila[k] === f) { for (let q = k; q < C.n && C.fila[q] === f && q < k + 8; q++) if (C.tipo[q] !== TIPO.vacio) { if (desborda(q, 'der')) visibles.push(q); break; } }
+        for (let q = lo - 1; q >= ini && q > lo - 9; q--) if (C.tipo[q] !== TIPO.vacio) { if (desborda(q, 'izq')) visibles.push(q); break; }
       }
       for (const m of fuera) { const k = C.indiceDe(m.f0, m.c0); if (k >= 0) visibles.push(k); }
       for (const k of visibles) {
@@ -373,7 +389,7 @@
         const x0 = X(c), x1 = X(c1 + 1), y0 = Y(f), y1 = Y(f1 + 1); // bordes reales de la celda o la combinada (el recorte al rango ya está puesto)
         const anchoCelda = g.x(c1 + 1) - g.x(c);
         const fu = xf.fuente;
-        let px = tamPx(fu.tam || 11);
+        let px = pxLetra(fu.tam || 11);
         const al = xf.alineacion;
         const anchoChars = Math.max(1, Math.floor((anchoCelda - 5) / mdw));
         const opcTexto = { idioma, decimal: op.decimal || (idioma === 'es' ? ',' : '.'), miles: op.miles || (idioma === 'es' ? ' ' : ','), ancho: anchoChars, anchoGeneral: Math.min(11, Math.max(1, anchoChars)) };
@@ -402,6 +418,7 @@
         }
         let h = al.h;
         if (h === 'general') h = esNumero || C.tipo[k] === TIPO.logico || C.tipo[k] === TIPO.error ? (esNumero ? 'right' : 'center') : 'left';
+        DXT = h === 'right' ? (TXT.xDer || 0) : h === 'center' || h === 'centerContinuous' ? (TXT.xCen || 0) : (TXT.x || 0);
         const sangria = Math.round((al.sangria || 0) * mdw * 1.2381);
         let lineas;
         if (al.ajustar && !esNumero) lineas = romper(ctx, texto, interior - (h === 'left' || h === 'right' ? sangria : 0));
@@ -425,7 +442,7 @@
         const altoTexto = (lineas.length - 1) * paso + asc + desc;
         const altoDisp = y1 - y0;
         let v = al.v || 'bottom';
-        if (v === 'bottom' && altoTexto > altoDisp) v = 'top'; // si no cabe, Excel muestra las primeras líneas
+        if (v === 'bottom' && altoTexto > altoDisp && !(FINO && lineas.length === 1)) v = 'top'; // si no cabe, Excel muestra las primeras líneas (impreso, una sola línea queda abajo aunque la fila sea más baja)
         let yBase;
         if (v === 'top') yBase = y0 + 2 + asc;
         else if (v === 'center') yBase = y0 + 1 + Math.floor((altoDisp - altoTexto) / 2) + asc;
@@ -442,13 +459,17 @@
           const by = v === 'top' ? y0 + 2 : v === 'center' ? y0 + (altoDisp - Hp) / 2 : y1 - Hp;
           ctx.save();
           ctx.beginPath(); ctx.rect(x0 + 1, y0 + 1, x1 - x0 - 1, y1 - y0 - 1); ctx.clip();
-          ctx.translate(Math.round(bx - mnx), Math.round(by - mny)); ctx.rotate(-th);
+          ctx.translate(RD(bx - mnx), RD(by - mny)); ctx.rotate(-th);
           escribir(ctx, texto, 0, 0);
           ctx.restore();
           continue;
         }
         // sobre qué ancho se puede desbordar: hasta la próxima celda con contenido (o el borde del rango)
         const ancho = lineas.reduce((u, l) => Math.max(u, anchoTexto(ctx, l)), 0);
+        if (!m && (c < r.c0 || c > r.c1)) { // vecina de fuera: solo se dibuja si su texto llega a entrar en el rango
+          const ti = h === 'right' ? x1 - PAD_X - ancho : h === 'center' || h === 'centerContinuous' ? x0 + (x1 - x0 - ancho) / 2 : x0 + 1 + PAD_X + sangria;
+          if (ti + ancho <= X(r.c0) || ti >= X(r.c1 + 1)) continue;
+        }
         let izqLim = x0, derLim = x1;
         if (!al.ajustar && !esNumero && !m) {
           const haciaDerecha = (h === 'left' && ancho + PAD_X + sangria > anchoCelda) || (h === 'center' && ancho + 2 * PAD_X > anchoCelda);
@@ -477,25 +498,25 @@
           if (h === 'distributed' && /\S\s+\S/.test(l.trim())) { // reparte el espacio sobrante entre las palabras
             const pal = l.trim().split(/\s+/), wp = pal.map((q) => anchoTexto(ctx, q)), hueco = (interior - wp.reduce((u, q) => u + q, 0)) / (pal.length - 1);
             let xx = x0 + 1 + PAD_X;
-            pal.forEach((q, j) => { escribir(ctx, q, Math.round(xx), y); xx += wp[j] + hueco; });
+            pal.forEach((q, j) => { escribir(ctx, q, RD(xx), y); xx += wp[j] + hueco; });
             continue;
           }
           if (h === 'right') x = x1 - PAD_X - w - sangria;
           else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w) / 2 + (sangria ? sangria / 2 : 0);
           else x = x0 + 1 + PAD_X + sangria + Math.max(0, Math.round((px - 15) / 10));
-          if (runs) { tramos(ctx, libro, runs, fu, Math.round(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
-          escribir(ctx, l, Math.round(x), y);
+          if (runs) { tramos(ctx, libro, runs, fu, RD(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
+          escribir(ctx, l, RD(x), y);
           if (fu.subrayado && fu.subrayado !== 'none') {
             const doble = /double/.test(fu.subrayado);
-            ctx.fillRect(Math.round(x), y + 1, Math.round(w), 1);
-            if (doble) ctx.fillRect(Math.round(x), y + 3, Math.round(w), 1);
+            ctx.fillRect(RD(x), y + 1, RD(w), 1);
+            if (doble) ctx.fillRect(RD(x), y + 3, RD(w), 1);
           }
-          if (fu.tachado) ctx.fillRect(Math.round(x), y - Math.round(px * 0.3), Math.round(w), 1);
+          if (fu.tachado) ctx.fillRect(RD(x), y - Math.round(px * 0.3), RD(w), 1);
         }
         ctx.restore();
       }
     } finally {
-      DIGITO = 0;
+      DIGITO = 0; FINO = false; PXDE = null; TXT = { x: 0, y: 0 }; DXT = 0;
       ctx.restore();
     }
   }
@@ -559,5 +580,5 @@
     return { f0, f1, c0, c1, areaX: anchoEnc, areaY: altoEnc };
   }
 
-  globalThis.XlsxDibujo = { geometria, dibujarRango, dibujarVista, cargarFuentes, medirDigito, tamPx, config: CONFIG };
+  globalThis.XlsxDibujo = { geometria, dibujarRango, dibujarVista, cargarFuentes, usosDeFuentes, medirDigito, tamPx, fuenteCss, anchoTexto, config: CONFIG };
 })();

@@ -28,3 +28,15 @@ su tabla es/en, no de esta medición.
 | `tinta-por-celda.mjs`, `desfase-dibujo.mjs`, `resumen-tinta.sh` | Calibración del texto: caja de tinta por celda en Excel y en el motor, desfase global, resumen |
 | `png.mjs` | Lector/escritor mínimo de PNG para esas herramientas |
 Corpus nuevo: `corpus\23-openpyxl-dibujo.xlsx` (fuentes y tamaños, estilos, tramas, bordes, alineación, rotación, ajuste de texto, números en columnas angostas). Solo archivos sintéticos.
+
+## Etapa 5 (paginación y PDF)
+| Archivo | Para qué |
+|---|---|
+| `generar-corpus-impresion.py`, `-calibre.py`, `-ajuste.py`, `-encabezados.py` | Libros sintéticos `24`–`27` (papel, escalas, "ajustar a", saltos, áreas, títulos, encabezados, centrado) |
+| `volcar-paginas.ps1` | Por hoja: saltos, `Pages.Count` y el PDF de Excel (`-CarpetaPdf`; los de `medidas\tmp\pdf-excel\<libro>`) |
+| `anotar-escala-pdf.mjs`, `leer-pdf-excel.mjs` | Escala real y posiciones de textos/trazos leídas del PDF de Excel |
+| `comparar-paginas.mjs` | Páginas y saltos del motor contra el volcado (sin Excel; va en `npm run comparar-xlsx`) |
+| `probar-paginas.mjs` | Pruebas sin navegador (áreas, títulos, saltos, orden, hostiles, códigos del encabezado) |
+| `comparar-pdf.mjs <libro> [hojas]` | Genera el PDF del motor en Edge y lo compara con el de Excel (páginas, papel, posición del texto) |
+| `ver-pdf.mjs <libro> <hoja> [pág] [escala]` | Imagen lado a lado (Excel \| motor) con PDF.js |
+Para rehacer las referencias: `generar-corpus-*.py`, luego `volcar-paginas.ps1 -Libro … -Salida medidas\paginas\<libro>.json -CarpetaPdf medidas\tmp\pdf-excel\<libro>` y `anotar-escala-pdf.mjs`.
