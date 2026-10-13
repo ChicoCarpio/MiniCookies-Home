@@ -105,7 +105,9 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
-<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -227,11 +229,11 @@ botonGuardar.addEventListener('click', async () => {
     if (nombresHojas.length === 0) throw new Error(t('error-sin-hojas'));
     if (!zipActual.file('xl/workbook.xml')) throw new Error(t('error-estructura'));
     // Se parte siempre del archivo original (no del resultado de un guardado
-    // anterior). reordenarHojasExcel (assets/js/ooxml-paquete.js) reordena
+    // anterior). XlsxPaquete.reordenarHojas (assets/js/xlsx-paquete.js) reordena
     // la lista de hojas y, si se quitó alguna, borra también su contenido
     // del paquete y corrige nombres definidos, pestaña activa, etc.
     const zip = await ZipPropio.loadAsync(bytesActuales);
-    await reordenarHojasExcel(zip, nombresHojas);
+    await XlsxPaquete.reordenarHojas(zip, nombresHojas);
 
     const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobFinal);

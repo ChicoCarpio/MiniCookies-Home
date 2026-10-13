@@ -113,6 +113,9 @@ window.i18nPagina = {
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -144,7 +147,7 @@ const controlesForzar = document.getElementById('controlesForzar');
 
 // Nivel 1 (solo .xlsx/.xlsm, que son un .zip con partes XML): revisa el
 // libro, sus relaciones y cada hoja; si hay hojas con XML inválido o que
-// faltan, las quita con reordenarHojasExcel (ooxml-paquete.js), que además
+// faltan, las quita con XlsxPaquete.reordenarHojas (xlsx-paquete.js), que además
 // limpia sus relaciones, nombres definidos y referencias — el resto del libro
 // no se toca (formato, gráficos, imágenes, tablas). Antes la herramienta
 // siempre rearmaba el libro desde cero con SheetJS y un archivo sano o con
@@ -174,7 +177,7 @@ async function repararConservandoFormato(bytes) {
   }
   if (sanas.length === 0) throw new Error(t('error-sin-datos'));
   if (quitadas.length === 0) return { bytes, quitadas };
-  await reordenarHojasExcel(zip, sanas);
+  await XlsxPaquete.reordenarHojas(zip, sanas);
   const tipo = /\.xlsm$/i.test(archivoActual.name) ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
   return { bytes: await zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE', mimeType: tipo }), quitadas };
 }
