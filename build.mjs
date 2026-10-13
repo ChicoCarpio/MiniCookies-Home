@@ -23,6 +23,7 @@ import { leerCatalogo, aplicarCatalogo } from './catalogo.mjs';
 import { revisarTerceros } from './terceros.mjs';
 import { revisarReferenciasVendor } from './referencias-vendor.mjs';
 import { revisarMotorPptx } from './motor-pptx.mjs';
+import { revisarDependenciasScripts } from './dependencias-scripts.mjs';
 import { join, relative, extname, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -440,4 +441,5 @@ const terceros = revisarTerceros(SALIDA, RAIZ, ES_SEGURO ? { politicaEn: join(RA
 const rutasVendor = revisarReferenciasVendor(SALIDA, RAIZ);
 // Las páginas con el motor de PowerPoint en <script> lo traen completo (motor-pptx.mjs).
 if (!ES_SEGURO) revisarMotorPptx(RAIZ);
+if (!ES_SEGURO) revisarDependenciasScripts(RAIZ);
 console.log(`Build ${DESTINO} listo en ${CARPETA_SALIDA}/ — ${conteo.total} herramientas en el catálogo, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados; servidores externos declarados: ${[...terceros.keys()].sort().join(', ') || 'ninguno'}; ${rutasVendor} rutas de vendor/ comprobadas`);
