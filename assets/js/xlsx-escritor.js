@@ -11,7 +11,7 @@
 //
 //   await XlsxEscritor.crearLibro(hojas, opciones) → Uint8Array
 //     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n }]; valor: número,
-//     texto, lógico, Date, null o { error }. opciones: { negritaPrimeraFila: bool, ajustarTexto: bool }. Los nombres de hoja se corrigen
+//     texto, lógico, Date, null o { error }. opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
 (function () {
   const X = XmlEditar;
@@ -242,9 +242,29 @@
   const ESTILO = { normal: 0, negrita: 1, fecha: 2, fechaHora: 3, ajustar: 4, negritaAjustar: 5 };
   const ESTILOS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="22" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
 
-  const serialDeFecha = (d) => d.getTime() / 86400000 + 25569;   // base 1900 (las fechas anteriores al 1-mar-1900 no se usan)
+  // Un Date de JavaScript es un instante; Excel guarda la hora "de pared". Por defecto se toma la del reloj local del Date (new Date(2024, 2, 15) → 15/3/2024
+  // sin hora, en cualquier zona); con opciones.fechasUtc se toma la hora UTC (new Date(Date.UTC(2024, 2, 15))).
+  // Base 1900 (las fechas anteriores al 1-mar-1900 no se usan). Se redondea al milisegundo para que 15/3/2024 00:00 dé un entero exacto.
+  const serialDeFecha = (d, utc) => {
+    const ms = utc ? d.getTime() : Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
+    return Math.round(ms / 86400000 * 1e9) / 1e9 + 25569;
+  };
+  const MAX_CARACTERES = 400000000;   // el límite de una cadena en V8 es ~536 millones de caracteres
 
+  // Rechaza con ErrorEscritor lo que no cabe en memoria en vez de dejar escapar un RangeError ("Invalid string length").
   async function crearLibro(hojas, opciones) {
+    if (Array.isArray(hojas)) {
+      let est = 0;
+      for (const h of hojas) for (const fila of (h && h.filas) || []) { if (!Array.isArray(fila)) continue; est += fila.length * 48; for (const v of fila) if (typeof v === 'string') est += v.length * 2; }
+      if (est > MAX_CARACTERES) throw new ErrorEscritor('el libro es demasiado grande para armarlo en memoria');
+    }
+    try { return await crearLibroInterno(hojas, opciones); } catch (e) {
+      if (e instanceof RangeError) throw new ErrorEscritor('el libro es demasiado grande para armarlo en memoria');
+      throw e;
+    }
+  }
+
+  async function crearLibroInterno(hojas, opciones) {
     opciones = opciones || {};
     if (!Array.isArray(hojas) || !hojas.length) throw new ErrorEscritor('un libro necesita al menos una hoja');
     if (hojas.length > 255) throw new ErrorEscritor('demasiadas hojas');
@@ -269,7 +289,7 @@
           maxCol = Math.max(maxCol, c + 1);
           const ref = numeroACol(c) + (f + 1);
           const cab = f === 0 && opciones.negritaPrimeraFila;
-          if (v instanceof Date) { if (Number.isNaN(v.getTime())) return; const s = serialDeFecha(v); celdas.push(celdaXml(ref, Number.isInteger(s) ? ESTILO.fecha : ESTILO.fechaHora, s)); return; }
+          if (v instanceof Date) { if (Number.isNaN(v.getTime())) return; const s = serialDeFecha(v, opciones.fechasUtc); celdas.push(celdaXml(ref, Number.isInteger(s) ? ESTILO.fecha : ESTILO.fechaHora, s)); return; }
           if (typeof v === 'string') {
             if (v.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
             const est = cab ? (opciones.ajustarTexto ? ESTILO.negritaAjustar : ESTILO.negrita) : (opciones.ajustarTexto && /\n/.test(v) ? ESTILO.ajustar : 0);
