@@ -11,7 +11,7 @@
 //
 //   await XlsxEscritor.crearLibro(hojas, opciones) → Uint8Array
 //     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n }]; valor: número,
-//     texto, lógico, Date, null o { error }. opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
+//     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy'; hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
 (function () {
   const X = XmlEditar;
@@ -242,6 +242,16 @@
   const ESTILO = { normal: 0, negrita: 1, fecha: 2, fechaHora: 3, ajustar: 4, negritaAjustar: 5 };
   const ESTILOS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="22" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
 
+  const MAX_FORMATOS = 200;
+  // Los estilos base más un cellXfs por cada formato de número pedido (ids de formato propios desde 164).
+  function estilosConFormatos(formatos) {
+    if (!formatos.size) return ESTILOS_XML;
+    const codigos = [...formatos.keys()];
+    const numFmts = `<numFmts count="${codigos.length}">${codigos.map((c, k) => `<numFmt numFmtId="${164 + k}" formatCode="${X.escAttr(c)}"/>`).join('')}</numFmts>`;
+    const xfs = codigos.map((_, k) => `<xf numFmtId="${164 + k}" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>`).join('');
+    return ESTILOS_XML.replace('<fonts ', numFmts + '<fonts ').replace('<cellXfs count="6">', `<cellXfs count="${6 + codigos.length}">`).replace('</cellXfs>', xfs + '</cellXfs>');
+  }
+
   // Un Date de JavaScript es un instante; Excel guarda la hora "de pared". Por defecto se toma la del reloj local del Date (new Date(2024, 2, 15) → 15/3/2024
   // sin hora, en cualquier zona); con opciones.fechasUtc se toma la hora UTC (new Date(Date.UTC(2024, 2, 15))).
   // Base 1900 (las fechas anteriores al 1-mar-1900 no se usan). Se redondea al milisegundo para que 15/3/2024 00:00 dé un entero exacto.
@@ -272,6 +282,12 @@
     const usados = new Set(), nombres = [];
     const textos = [], indiceTexto = new Map();
     let totalTextos = 0;
+    const formatos = new Map();   // código de formato → índice de cellXfs (se añaden después de los de ESTILO)
+    const estiloDeFormato = (codigo) => {
+      if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[ -]/.test(codigo)) return 0;
+      if (!formatos.has(codigo)) { if (formatos.size >= MAX_FORMATOS) return 0; formatos.set(codigo, 6 + formatos.size); }
+      return formatos.get(codigo);
+    };
     const idTexto = (t) => { totalTextos++; if (!indiceTexto.has(t)) { indiceTexto.set(t, textos.length); textos.push(t); } return indiceTexto.get(t); };
     const hojasXml = hojas.map((h, k) => {
       const nombre = nombreHoja(h.nombre, usados);
@@ -289,6 +305,13 @@
           maxCol = Math.max(maxCol, c + 1);
           const ref = numeroACol(c) + (f + 1);
           const cab = f === 0 && opciones.negritaPrimeraFila;
+          if (v && typeof v === 'object' && !(v instanceof Date) && 'formato' in v && 'valor' in v) {
+            const est = estiloDeFormato(v.formato), x = v.valor;
+            if (x instanceof Date) { if (Number.isNaN(x.getTime())) return; celdas.push(celdaXml(ref, est, serialDeFecha(x, opciones.fechasUtc))); return; }
+            if (typeof x === 'number') { celdas.push(celdaXml(ref, est, x)); return; }
+            v = x;   // un formato sobre un texto, un lógico o nada no cambia nada
+            if (v === null || v === undefined || v === '') return;
+          }
           if (v instanceof Date) { if (Number.isNaN(v.getTime())) return; const s = serialDeFecha(v, opciones.fechasUtc); celdas.push(celdaXml(ref, Number.isInteger(s) ? ESTILO.fecha : ESTILO.fechaHora, s)); return; }
           if (typeof v === 'string') {
             if (v.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
@@ -325,7 +348,7 @@
     zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       + hojasXml.map((_, k) => `<Relationship Id="rId${k + 1}" Type="${R}/worksheet" Target="worksheets/sheet${k + 1}.xml"/>`).join('')
       + `<Relationship Id="rId${hojasXml.length + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${hojasXml.length + 2}" Type="${R}/sharedStrings" Target="sharedStrings.xml"/></Relationships>`);
-    zip.file('xl/styles.xml', ESTILOS_XML);
+    zip.file('xl/styles.xml', estilosConFormatos(formatos));
     zip.file('xl/sharedStrings.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${totalTextos}" uniqueCount="${textos.length}">`
       + textos.map((t) => `<si><t xml:space="preserve">${escTexto(t)}</t></si>`).join('') + '</sst>');
     hojasXml.forEach((x, k) => zip.file(`xl/worksheets/sheet${k + 1}.xml`, x));

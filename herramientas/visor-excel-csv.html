@@ -89,6 +89,7 @@ window.i18nPagina = {
 <script src="../assets/js/xlsx-estilos.js"></script>
 <script src="../assets/js/xlsx-modelo.js"></script>
 <script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -98,11 +99,9 @@ const listaArchivo = document.getElementById('listaArchivo');
 const pestanas = document.getElementById('pestanas');
 const contenedorTabla = document.getElementById('contenedorTabla');
 
-// Los .xlsx, .xlsm y .csv los lee el motor propio (LibroXlsx / CsvPlanilla): cada celda sale con el texto que
-// muestra Excel (formato de número, fechas, porcentajes). Solo se piden las filas que se ven. Los formatos
-// que el motor no lee todavía (.xls, .xlsb, .ods) pasan por SheetJS.
-let libroActual = null;   // SheetJS, o null si el archivo lo leyó el motor
-let hojasActuales = [];   // [{ nombre, abrir: async () => ({ ncols, nfilas, fila(i) }) }]
+// LectorHojas (assets/js/lector-hojas.js) lee .xlsx, .xlsm y .csv con el motor propio y el resto con SheetJS; cada fila se arma
+// con el texto que muestra Excel solo cuando se ve.
+let hojasActuales = [];   // [{ nombre, abrir: async () => hoja de LectorHojas }]
 let numeroDeHoja = 0;     // para descartar una hoja que terminó de cargar cuando ya se eligió otra
 
 function esArchivoValido(archivo) {
@@ -180,37 +179,6 @@ contenedorTabla.addEventListener('scroll', () => {
   if (filasDatosActuales.length > UMBRAL_VIRTUALIZACION) alManejarScroll();
 });
 
-// Textos de una hoja de SheetJS, ya completos en memoria.
-function hojaDesdeSheetJs(nombreHoja) {
-  const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombreHoja], { header: 1, raw: false, defval: '' });
-  return { ncols: filas.length ? filas[0].length : 0, nfilas: filas.length, fila: (i) => filas[i] };
-}
-
-// Textos de una hoja del motor: el rango ocupado, y cada fila se arma (con su formato) solo cuando se muestra.
-function hojaDesdeMotor(libro, hoja) {
-  const C = hoja.celdas;
-  const en = typeof idiomaActual === 'function' && idiomaActual() === 'en';
-  const opciones = { idioma: en ? 'en' : 'es', decimal: en ? '.' : ',', miles: en ? ',' : '.' };
-  let f0 = Infinity, f1 = -1, c0 = Infinity, c1 = -1;
-  C.paraCada((f, c, i) => {
-    if (C.tipo[i] === LibroXlsx.TIPO.vacio) return;
-    if (f < f0) f0 = f; if (f > f1) f1 = f; if (c < c0) c0 = c; if (c > c1) c1 = c;
-  });
-  if (f1 < 0) return { ncols: 0, nfilas: 0, fila: () => [] };
-  const ncols = c1 - c0 + 1;
-  return {
-    ncols, nfilas: f1 - f0 + 1,
-    fila(r) {
-      const fila = new Array(ncols);
-      for (let c = 0; c < ncols; c++) {
-        const i = C.indiceDe(f0 + r, c0 + c);
-        fila[c] = i < 0 ? '' : LibroXlsx.textoCelda(libro, hoja, i, opciones).texto;
-      }
-      return fila;
-    },
-  };
-}
-
 async function mostrarHoja(indiceHoja) {
   const miNumero = ++numeroDeHoja;
   [...pestanas.children].forEach((boton, k) => boton.classList.toggle('activa', k === indiceHoja));
@@ -269,34 +237,11 @@ async function mostrarHoja(indiceHoja) {
   });
 }
 
-// Devuelve la lista de hojas del archivo, por el motor propio o, si no puede, por SheetJS.
-async function leerHojas(archivo) {
-  libroActual = null;
-  if (/\.(xlsx|xlsm|csv)$/i.test(archivo.name)) {
-    let bytes = null;
-    try {
-      bytes = new Uint8Array(await archivo.arrayBuffer());
-      const libro = /\.csv$/i.test(archivo.name) ? CsvPlanilla.leer(bytes, archivo.name.replace(/\.csv$/i, '')) : await LibroXlsx.abrir(bytes);
-      const hojas = [];
-      libro.hojas.forEach((h, k) => {
-        if (h.tipo === 'hoja') hojas.push({ nombre: h.nombre, abrir: async () => hojaDesdeMotor(libro, await libro.cargarHoja(k)) });
-      });
-      if (hojas.length) return hojas;
-    } catch (error) {
-      if (error && error.codigo === 'cifrado') throw error;
-      // Un "xlsx" que no es zip ni formato antiguo no es un libro: SheetJS lo leería como texto plano y mostraría basura sin avisar.
-      if (error && error.codigo === 'noZip' && bytes && !(bytes[0] === 0x50 && bytes[1] === 0x4B)) throw error;
-      console.warn('El motor propio no pudo leer el archivo, se usa SheetJS:', error);
-    }
-  }
-  libroActual = await leerLibroDesdeArchivo(archivo);
-  return libroActual.SheetNames.map((nombre) => ({ nombre, abrir: async () => hojaDesdeSheetJs(nombre) }));
-}
-
 async function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   try {
-    hojasActuales = await leerHojas(archivo);
+    const libro = await LectorHojas.abrir(archivo);
+    hojasActuales = libro.hojas.map((h) => ({ nombre: h.nombre, abrir: () => libro.cargar(h.indice) }));
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
     return;
