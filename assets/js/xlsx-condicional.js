@@ -15,6 +15,8 @@
 (function () {
   const MAX_REGLAS = 2000;          // reglas que se tienen en cuenta por hoja
   const PRESUPUESTO = 400000;       // celdas leídas por cuadro al evaluar expresiones
+  const MAX_RANGOS = 10000;         // rangos (de todos los bloques, por prioridad) que se tienen en cuenta por hoja: cada celda se compara con ellos
+  const MAX_COMPROBACIONES = 200000000; // celdas × rangos que recorren las estadísticas de un bloque (superiores, promedio, duplicados) antes de cortar
   const ref = (hex) => ({ tipo: 'rgb', valor: hex.replace('#', '').toUpperCase(), tint: 0 });
   const hexDe = (libro, r) => (r ? libro.estilos.color(r) : null);
 
@@ -36,7 +38,31 @@
     if (reglas.length > MAX_REGLAS) reglas.length = MAX_REGLAS;
     let gasto = 0;
 
-    const enRangos = (rg, f, c) => { for (const q of rg) if (f >= q.f0 && f <= q.f1 && c >= q.c0 && c <= q.c1) return true; return false; };
+    // Las reglas de un bloque comparten su lista de rangos: se compara cada celda con cada lista una sola vez (con su caja antes) y las
+    // estadísticas se calculan una vez por lista. Un archivo con miles de reglas sobre miles de rangos no multiplica el trabajo de cada celda.
+    const listas = new Map();
+    let quedan = MAX_RANGOS;
+    for (const reg of reglas) {
+      let L = listas.get(reg.rangos);
+      if (!L) {
+        const rg = reg.rangos.length > quedan ? reg.rangos.slice(0, quedan) : reg.rangos;
+        quedan -= rg.length;
+        L = { rg, f0: Infinity, c0: Infinity, f1: -1, c1: -1, datos: null, marca: -1, dentro: false };
+        for (const q of rg) { if (q.f0 < L.f0) L.f0 = q.f0; if (q.c0 < L.c0) L.c0 = q.c0; if (q.f1 > L.f1) L.f1 = q.f1; if (q.c1 > L.c1) L.c1 = q.c1; }
+        listas.set(reg.rangos, L);
+      }
+      reg.lista = L;
+    }
+    const dentroDe = (L, f, c) => {
+      if (f < L.f0 || f > L.f1 || c < L.c0 || c > L.c1) return false;
+      for (const q of L.rg) if (f >= q.f0 && f <= q.f1 && c >= q.c0 && c <= q.c1) return true;
+      return false;
+    };
+    const enRangos = (reg, f, c) => { // con la respuesta de la última celda guardada en la lista
+      const L = reg.lista, k = f * 16384 + c;
+      if (L.marca !== k) { L.marca = k; L.dentro = dentroDe(L, f, c); }
+      return L.dentro;
+    };
     function valorDe(f, c) { // valor tal como lo ve una expresión
       const i = C.indiceDe(f, c);
       if (i < 0) return null;
@@ -99,13 +125,19 @@
     }
     const verdadero = (v) => v === true || (typeof v === 'number' && v !== 0);
 
-    // Estadísticas de los valores numéricos de los rangos de una regla (una vez por hoja).
+    // Estadísticas de los valores numéricos de los rangos de una regla (una vez por hoja y por lista de rangos).
     function datosDe(reg) {
-      if (reg.datos) return reg.datos;
+      const L = reg.lista;
+      if (L.datos) return L.datos;
       const nums = [];
       const cuenta = new Map();
+      let comprobadas = 0;
       for (let i = 0; i < C.n; i++) {
-        if (C.tipo[i] === TIPO.vacio || !enRangos(reg.rangos, C.fila[i], C.col[i])) continue;
+        if (C.tipo[i] === TIPO.vacio) continue;
+        const f = C.fila[i], c = C.col[i];
+        if (f < L.f0 || f > L.f1 || c < L.c0 || c > L.c1) continue;
+        if ((comprobadas += L.rg.length) > MAX_COMPROBACIONES) break; // un archivo hostil: estadísticas de lo recorrido
+        if (!dentroDe(L, f, c)) continue;
         const t = C.tipo[i], v = C.valor[i];
         if (t === TIPO.numero) nums.push(v);
         if (t === TIPO.numero || t === TIPO.texto || t === TIPO.logico) { const k = t === TIPO.texto ? 's' + String(v).toLowerCase() : t === TIPO.logico ? 'b' + (v ? 1 : 0) : 'n' + v; cuenta.set(k, (cuenta.get(k) || 0) + 1); }
@@ -117,8 +149,8 @@
       const media = n ? suma / n : 0;
       let ss = 0;
       for (const v of nums) ss += (v - media) * (v - media);
-      reg.datos = { nums, n, min: n ? nums[0] : 0, max: n ? nums[n - 1] : 0, media, desv: n > 1 ? Math.sqrt(ss / (n - 1)) : 0, cuenta };
-      return reg.datos;
+      L.datos = { nums, n, min: n ? nums[0] : 0, max: n ? nums[n - 1] : 0, media, desv: n > 1 ? Math.sqrt(ss / (n - 1)) : 0, cuenta };
+      return L.datos;
     }
     function percentil(d, p) { // PERCENTILE.INC
       if (!d.n) return 0;
@@ -126,6 +158,7 @@
       const i = Math.floor(x), fr = x - i;
       return i + 1 < d.n ? d.nums[i] + (d.nums[i + 1] - d.nums[i]) * fr : d.nums[i];
     }
+    const formulasCorte = new Map();
     function umbral(reg, d, cfvo, f, c, porDefecto) { // valor de un punto de corte (escalas, barras, iconos)
       const v = cfvo && cfvo.valor !== null && cfvo.valor !== undefined ? parseFloat(cfvo.valor) : NaN;
       switch (cfvo ? cfvo.tipo : porDefecto) {
@@ -134,7 +167,12 @@
         case 'num': return Number.isFinite(v) ? v : d.min;
         case 'percent': return Number.isFinite(v) ? d.min + (d.max - d.min) * v / 100 : d.min;
         case 'percentile': return Number.isFinite(v) ? percentil(d, v / 100) : d.min;
-        case 'formula': { const x = evaluarFormula({ r: { formulas: [cfvo.valor] }, origen: reg.origen, comp: null }, 0, f, c); return typeof x === 'number' ? x : d.min; }
+        case 'formula': { // compilada una vez por punto de corte (antes, una vez por celda: 1,3 s por cuadro con una fórmula larga)
+          let q = formulasCorte.get(cfvo);
+          if (!q) { q = { r: { formulas: [cfvo.valor] }, origen: reg.origen, comp: null }; formulasCorte.set(cfvo, q); }
+          const x = evaluarFormula(q, 0, f, c);
+          return typeof x === 'number' ? x : d.min;
+        }
         default: return d.min;
       }
     }
@@ -260,7 +298,7 @@
       let res = null;
       const fijo = { relleno: false, color: false, negrita: false, cursiva: false, subrayado: false, tachado: false, formato: false, izq: false, der: false, arr: false, aba: false };
       for (const reg of reglas) {
-        if (!enRangos(reg.rangos, f, c)) continue;
+        if (!enRangos(reg, f, c)) continue;
         const visual = !!(reg.r.escala || reg.r.barras || reg.r.iconos);
         if (!cumple(reg, f, c, i)) continue;
         res = res || { fuente: null, relleno: null, borde: null, formato: null, barra: null, icono: null };
@@ -339,11 +377,24 @@
     hoja._condHojas = new Map();
     const propia = libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre;
     const pedidas = new Set();
+    // Un nombre de hoja es 'texto (con '' por comilla)' o un identificador, seguido de "!". Se recorre de una pasada: la expresión regular de
+    // antes volvía a empezar en cada letra de un identificador largo (una fórmula de 40.000 letras tardaba 0,7 s; una de 1 MB, minutos).
+    const inicio = /[A-Za-z_\u00C0-\uFFFF]/, sigue = /[\w.\u00C0-\uFFFF]/;
     const buscar = (txt) => {
       if (typeof txt !== 'string' || txt.indexOf('!') < 0) return;
-      for (const m of txt.matchAll(/(?:'((?:[^']|'')+)'|([A-Za-z_\u00C0-\uFFFF][\w.\u00C0-\uFFFF]*))!/g)) {
-        const nom = m[1] !== undefined ? m[1].replace(/''/g, "'") : m[2];
+      for (let i = 0; i < txt.length;) {
+        let nom = null, j;
+        if (txt[i] === "'") {
+          let s = '';
+          for (j = i + 1; j < txt.length; j++) { if (txt[j] === "'") { if (txt[j + 1] === "'") { s += "'"; j++; continue; } break; } s += txt[j]; }
+          if (j < txt.length && txt[j + 1] === '!') nom = s;
+          j++;
+        } else if (inicio.test(txt[i])) {
+          for (j = i + 1; j < txt.length && sigue.test(txt[j]); j++);
+          if (txt[j] === '!') nom = txt.slice(i, j);
+        } else j = i + 1;
         if (nom && nom !== propia) pedidas.add(nom.toLowerCase());
+        i = j;
       }
     };
     for (const b of hoja.formatosCondicionales || []) {

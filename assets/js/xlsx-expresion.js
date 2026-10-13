@@ -151,6 +151,40 @@
   const deSerie = (n) => new Date(Date.UTC(1899, 11, 30) + n * 86400000);
   const aSerie = (ms) => Math.round((ms - Date.UTC(1899, 11, 30)) / 86400000);
 
+  // SEARCH con comodines (? = un carácter, * = cualquier cantidad, ~ escapa ? * ~) sin expresiones regulares: una expresión con muchos * colgaba
+  // el navegador con texto largo (retroceso exponencial) y el . de una expresión no toma los saltos de línea. Los trozos entre * se buscan de
+  // izquierda a derecha, cada uno en la primera posición posible: si el primero aparece en i y los demás no caben después, tampoco caben más
+  // adelante. Devuelve la posición (desde 0), -1 si no está o null si la búsqueda pasa del tope de trabajo.
+  const MAX_COMPARACIONES = 2000000;
+  function buscarComodin(patron, texto, desde) {
+    const trozos = [[]];
+    for (let k = 0; k < patron.length; k++) {
+      const ch = patron[k];
+      if (ch === '~' && k + 1 < patron.length && '?*~'.includes(patron[k + 1])) trozos[trozos.length - 1].push(patron[++k]);
+      else if (ch === '*') trozos.push([]);
+      else trozos[trozos.length - 1].push(ch === '?' ? null : ch);
+    }
+    let trabajo = 0;
+    const buscar = (s, p) => {
+      for (let q = p; q + s.length <= texto.length; q++) {
+        let k = 0;
+        while (k < s.length && (s[k] === null || s[k] === texto[q + k])) k++;
+        if ((trabajo += k + 1) > MAX_COMPARACIONES) return null;
+        if (k === s.length) return q;
+      }
+      return -1;
+    };
+    const ini = buscar(trozos[0], desde);
+    if (ini === null || ini < 0) return ini;
+    let p = ini + trozos[0].length;
+    for (let k = 1; k < trozos.length; k++) {
+      const q = buscar(trozos[k], p);
+      if (q === null || q < 0) return q;
+      p = q + trozos[k].length;
+    }
+    return ini;
+  }
+
   // ---- Evaluación ---------------------------------------------------------------------------------------
   function evaluar(nodo, ctx) {
     if (!nodo) return ERR.valor;
@@ -230,7 +264,7 @@
           case '>': return comparaValores(a, b) > 0;
           case '<=': return comparaValores(a, b) <= 0;
           case '>=': return comparaValores(a, b) >= 0;
-          case '&': return aTexto(a) + aTexto(b);
+          case '&': { const s = aTexto(a) + aTexto(b); return s.length > 32767 ? ERR.valor : s; } // el texto más largo de Excel: 32.767 caracteres
         }
         const x = aNumero(a), y = aNumero(b);
         if (esError(x)) return x;
@@ -306,10 +340,7 @@
         if (ini < 1 || ini > t.length + 1) return ERR.valor;
         let i;
         if (n.n === 'FIND') i = t.indexOf(b, ini - 1);
-        else { // SEARCH: sin mayúsculas y con comodines ? y *
-          const re = new RegExp(b.toLowerCase().replace(/~([?*~])|([.+^${}()|[\]\\])|(\?)|(\*)/g, (m, lit, esp, q, e) => (lit ? '\\' + lit : esp ? '\\' + esp : q ? '.' : '.*')));
-          const m = re.exec(t.toLowerCase().slice(ini - 1)); i = m ? m.index + ini - 1 : -1;
-        }
+        else { i = buscarComodin(b.toLowerCase(), t.toLowerCase(), ini - 1); if (i === null) return ERR.valor; } // SEARCH: sin mayúsculas y con comodines ? y *
         return i < 0 ? ERR.valor : i + 1;
       }
       case 'EXACT': { const a = txt(0), b = txt(1); return esError(a) ? a : esError(b) ? b : a === b; }

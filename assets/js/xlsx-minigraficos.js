@@ -13,7 +13,8 @@
 //   XlsxMinigraficos.dibujar(ctx, libro, s, x0, y0, x1, y1, u); // u: el píxel de la impresora en unidades del lienzo (1 en pantalla)
 
 (function () {
-  const MAX_VALORES = 5000;
+  const MAX_VALORES = 5000;          // valores por minigráfico (y minigráficos que se dibujan por hoja)
+  const MAX_VALORES_HOJA = 5000000;  // valores leídos entre todos los minigráficos de una hoja
   const MAX_HOJAS = 50;
   const PT = 0.96; // pt por u
 
@@ -48,15 +49,18 @@
     const TIPO = LibroXlsx.TIPO;
     const nombreHoja = libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre;
     const porCelda = new Map();
+    let quedan = MAX_VALORES_HOJA; // un archivo con miles de minigráficos de miles de valores no agota la memoria
     function valoresDe(r, origen) { // los números del rango en orden de lectura (null: vacía o que no es número)
       const C = origen.celdas;
       const out = [];
-      for (let f = r.f0; f <= r.f1 && out.length < MAX_VALORES; f++) {
-        for (let c = r.c0; c <= r.c1 && out.length < MAX_VALORES; c++) {
+      const tope = Math.min(MAX_VALORES, Math.max(0, quedan));
+      for (let f = r.f0; f <= r.f1 && out.length < tope; f++) {
+        for (let c = r.c0; c <= r.c1 && out.length < tope; c++) {
           const i = C.indiceDe(f, c);
           out.push(i >= 0 && C.tipo[i] === TIPO.numero && Number.isFinite(C.valor[i]) ? C.valor[i] : null);
         }
       }
+      quedan -= out.length;
       return out;
     }
     for (const g of grupos) {
@@ -71,9 +75,10 @@
         if (porCelda.size < MAX_VALORES) porCelda.set(d.f0 * 16384 + d.c0, s);
       }
     }
-    for (const g of grupos) { // escala común del grupo (minAxisType / maxAxisType = 'group')
-      const todos = [].concat(...(g.hechos || []).map((s) => s.valores.filter((v) => v !== null)));
-      g.comun = todos.length ? { min: Math.min(...todos), max: Math.max(...todos) } : null;
+    for (const g of grupos) { // escala común del grupo (minAxisType / maxAxisType = 'group'); sin Math.min(...): con unos 120.000 valores revienta la pila
+      let min = Infinity, max = -Infinity;
+      for (const s of g.hechos || []) for (const v of s.valores) if (v !== null) { if (v < min) min = v; if (v > max) max = v; }
+      g.comun = max >= min ? { min, max } : null;
     }
     return { para: (f, c) => porCelda.get(f * 16384 + c) || null };
   }

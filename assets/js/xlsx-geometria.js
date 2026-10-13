@@ -114,11 +114,13 @@
   // Calibri 12 → 8, Arial 10 → 7, Arial 11 → 8, Times New Roman 11 → 7, Calibri Light 11 → 8, Aptos 11 → 8, Aptos Narrow 11 → 7.)
   const DIGITO = { calibri: 0.5068, 'calibri light': 0.5405, arial: 0.5562, 'times new roman': 0.5, 'courier new': 0.6, verdana: 0.6362, tahoma: 0.5459, 'segoe ui': 0.5498, consolas: 0.5498, cambria: 0.5513, georgia: 0.6123, 'arial narrow': 0.456, aptos: 0.5469, 'aptos narrow': 0.4795 };
 
-  const clave = (nombre) => { const k = String(nombre || '').toLowerCase().trim(); return ALIAS[k] && !DIGITO[k] ? ALIAS[k] : k; };
+  // el nombre de la fuente viene del archivo: solo cuentan las claves propias de las tablas ("constructor" o "__proto__" no son fuentes y antes tumbaban la hoja)
+  const de = (tabla, k) => (Object.prototype.hasOwnProperty.call(tabla, k) ? tabla[k] : undefined);
+  const clave = (nombre) => { const k = String(nombre || '').toLowerCase().trim(); return de(ALIAS, k) && !de(DIGITO, k) ? ALIAS[k] : k; };
 
   // Alto de texto (pt) de una fuente con ese tamaño, tal como lo deja Excel en la fila.
   function altoTexto(nombre, tam, negrita, cursiva) {
-    const fuente = ALTOS[clave(nombre)] || ALTOS[ALIAS[clave(nombre)]] || ALTOS.calibri;
+    const fuente = de(ALTOS, clave(nombre)) || de(ALTOS, de(ALIAS, clave(nombre))) || ALTOS.calibri;
     const tabla = fuente[(negrita ? 'b' : '') + (cursiva ? 'i' : '') || 'n'];
     const t = tam > 0 ? Math.min(409.5, tam) : 11;
     if (t <= TAMANOS[0]) return tabla[0];
@@ -134,7 +136,7 @@
   function mdwDe(nombre, tam, medirDigito) {
     const px = (tam || 11) * 96 / 72;
     if (medirDigito) { const m = medirDigito(nombre, px); if (m > 0) return Math.max(1, Math.round(m)); }
-    return Math.max(1, Math.round(px * (DIGITO[clave(nombre)] || DIGITO.calibri)));
+    return Math.max(1, Math.round(px * (de(DIGITO, clave(nombre)) || DIGITO.calibri)));
   }
 
   // Los tamaños salen del archivo: se limitan a los de Excel (ancho de columna 255 caracteres, alto de fila 409,5 pt) y lo que no es un número válido cuenta como 0.

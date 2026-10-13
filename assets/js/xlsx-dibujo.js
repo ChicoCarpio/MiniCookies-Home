@@ -124,7 +124,7 @@
   function patron(ctx, nombre, fg, bg) {
     const k = nombre + fg + bg;
     if (cachePatron.has(k)) return cachePatron.get(k);
-    const m = TRAMAS[nombre];
+    const m = Object.prototype.hasOwnProperty.call(TRAMAS, nombre) ? TRAMAS[nombre] : null; // el nombre viene del archivo ("constructor" no es una trama)
     if (!m) return null;
     const c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(8, 8) : Object.assign(document.createElement('canvas'), { width: 8, height: 8 });
     const x = c.getContext('2d');
@@ -164,7 +164,7 @@
 
   // (x0,y0)-(x1,y1): línea horizontal o vertical; ini = coordenada de la hoja donde empieza (para anclar el patrón)
   function trazo(ctx, x0, y0, x1, y1, borde, color, ini) {
-    const def = BORDES[borde.estilo] || BORDES.thin;
+    const def = (Object.prototype.hasOwnProperty.call(BORDES, borde.estilo) && BORDES[borde.estilo]) || BORDES.thin; // el estilo viene del archivo
     ctx.fillStyle = color;
     const horizontal = y0 === y1;
     const largo = horizontal ? x1 - x0 : y1 - y0;

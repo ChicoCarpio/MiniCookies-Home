@@ -924,7 +924,10 @@
       abrir(nombre, at) {
         profundidad++;
         if (!a) {
-          if ((nombre === 'twoCellAnchor' || nombre === 'oneCellAnchor' || nombre === 'absoluteAnchor') && anclas.length < MAX_ANCLAS) {
+          // solo las hijas directas de xdr:wsDr, como las que lee xlsx-objetos.js (PptxModelo.dibujoExcel): las dos listas van por índice. Las que Excel
+          // envuelve en mc:AlternateContent (segmentaciones, controles de formulario) no cuentan en ninguna; si contaran aquí, todos los objetos
+          // siguientes quedarían con el ancla de otro.
+          if (profundidad === 2 && (nombre === 'twoCellAnchor' || nombre === 'oneCellAnchor' || nombre === 'absoluteAnchor') && anclas.length < MAX_ANCLAS) {
             a = { tipo: nombre === 'twoCellAnchor' ? 'dos' : nombre === 'oneCellAnchor' ? 'uno' : 'abs', de: null, a: null, ext: null, pos: null, imprimible: true, oculto: false };
             anclas.push(a); nivelAncla = profundidad; primeraCNvPr = true;
           }
@@ -1017,7 +1020,9 @@
         if (th !== null) {
           if (!libro._personas) libro._personas = leerPersonas(libro.rutaPersonas ? await textoDe(libro.zip, libro.rutaPersonas) : null);
           hoja.hilos = leerHilos(th, libro._personas);
-          for (const h of hoja.hilos) { const n = hoja.comentarios.find((x) => x.f === h.f && x.c === h.c); if (n) { n.hilo = h; n.visible = false; } }
+          const notaDe = new Map(); // la primera nota de cada celda (con find por hilo eran N × M: minutos con 100.000 de cada uno)
+          for (const x of hoja.comentarios) if (!notaDe.has(x.f * 16384 + x.c)) notaDe.set(x.f * 16384 + x.c, x);
+          for (const h of hoja.hilos) { const n = notaDe.get(h.f * 16384 + h.c); if (n) { n.hilo = h; n.visible = false; } }
         }
       }
       if (hoja.partes.dibujo) { const t = await textoDe(libro.zip, hoja.partes.dibujo); if (t !== null) hoja.anclas = leerAnclas(t); }

@@ -118,7 +118,7 @@
     '5Boxes': [0, 1, 2, 3, 4].map(cajas),
   };
   function dibujar(ctx, conjunto, indice, x, y, tam) {
-    const lista = CONJUNTOS[conjunto];
+    const lista = Object.prototype.hasOwnProperty.call(CONJUNTOS, conjunto) ? CONJUNTOS[conjunto] : null; // el nombre viene del archivo: "constructor" no es un conjunto
     if (!lista || !(tam > 0)) return false;
     const f = lista[Math.max(0, Math.min(lista.length - 1, indice | 0))];
     ctx.save();

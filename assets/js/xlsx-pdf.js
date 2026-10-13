@@ -268,28 +268,30 @@
       for (const a of p.areas) { hasta.c = Math.max(hasta.c, a.c1); hasta.f = Math.max(hasta.f, a.f1); }
       if (p.titulos.filas) hasta.f = Math.max(hasta.f, p.titulos.filas.f1);
       if (p.titulos.columnas) hasta.c = Math.max(hasta.c, p.titulos.columnas.c1);
-      const G = geometriaImpresion(g, p, hasta);
       // "al final de la hoja": las notas se imprimen en páginas aparte, una fila de la hoja por línea
       const notas = [];
       if (opc.imprimirNotas && hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'atEnd' && hoja.comentarios && hoja.comentarios.length && typeof XlsxNotas !== 'undefined' && !p.cortado) {
+        const G = geometriaImpresion(g, p, hasta); // no se guarda: son dos arreglos de hasta 1.048.576 posiciones por hoja (8 MB); se vuelve a armar al dibujar
         const filas = XlsxNotas.filas(hoja, idioma);
+        const etiquetas = [...new Set(filas.map((x) => x.et).filter((e) => e && e !== 'celda'))]; // las mismas en todas las páginas: una vez, no una por página
         const filaPt = U_PT * (p.escala / 100) * G.altoFila(hasta.f + 1);
         const porPagina = Math.max(1, Math.round((p.papel.alto - p.margenes.arr - p.margenes.aba) / filaPt)); // medido: 45 filas de 15,24 pt en 684 pt (44,9): la última cabe aunque se pase un poco
         for (let i = 0; i < filas.length && acumuladas + p.paginas.length + notas.length < tope; i += porPagina) {
           while (i > 0 && i < filas.length && !filas[i].et && !filas[i].txt) i++; // la línea en blanco que cae arriba de una página no se imprime (medido)
           if (i >= filas.length) break;
-          notas.push({ filas: filas.slice(i, i + porPagina), filaPt, etiquetas: [...new Set(filas.map((x) => x.et).filter((e) => e && e !== 'celda'))] });
+          notas.push({ filas: filas.slice(i, i + porPagina), filaPt, etiquetas });
         }
       }
       acumuladas += p.paginas.length + notas.length;
       if (p.cortado) truncado = true;
-      trabajos.push({ hoja, g, p, G, hasta, notas });
+      trabajos.push({ hoja, g, p, hasta, notas });
     }
     const total = trabajos.reduce((a, t) => a + t.p.paginas.length + t.notas.length, 0);
     const fecha = new Date();
     let numero = 0, hechas = 0;
     for (const t of trabajos) {
-      const { hoja, g, p, G, hasta } = t;
+      const { hoja, g, p, hasta } = t;
+      const G = geometriaImpresion(g, p, hasta);
       if (!hoja.imprimir.pagina || !hoja.imprimir.pagina.usarPrimeraPagina || !(hoja.imprimir.pagina.primeraPagina >= 0)) { if (opc.numeracion === 'porHoja') numero = 0; }
       else numero = hoja.imprimir.pagina.primeraPagina - 1;
       const f = U_PT * (p.escala / 100);

@@ -35,11 +35,12 @@
   const DIGITO = { calibri: 0.5068, 'calibri light': 0.5405, arial: 0.5562, 'times new roman': 0.5, 'courier new': 0.6, verdana: 0.6362, tahoma: 0.5459, 'segoe ui': 0.5498, consolas: 0.5498, cambria: 0.5513, georgia: 0.6123, 'arial narrow': 0.456, aptos: 0.5331 };  // Aptos Narrow (la letra de los libros nuevos de Excel) imprime con las mismas medidas que Calibri: sin entrada, cae en calibri (medido: igual en 7 tamaños)
   const ALIAS = { carlito: 'calibri', 'liberation sans': 'arial', arimo: 'arial', 'liberation serif': 'times new roman', tinos: 'times new roman', 'liberation mono': 'courier new', cousine: 'courier new', 'liberation sans narrow': 'arial narrow' };
 
+  const de = (tabla, k) => (Object.prototype.hasOwnProperty.call(tabla, k) ? tabla[k] : undefined); // el nombre viene del archivo: "constructor" no es una fuente
   // Fuente → clave de la tabla de medidas de impresión (xlsx-fuentes-impresion.js), o null si no la tiene.
   function claveImpresion(nombre) {
     if (typeof XlsxFuentesImpresion === 'undefined') return null;
     const k = String(nombre || '').toLowerCase().trim();
-    const c = XlsxFuentesImpresion.conocida(k) ? k : ALIAS[k];
+    const c = XlsxFuentesImpresion.conocida(k) ? k : de(ALIAS, k);
     return c && XlsxFuentesImpresion.conocida(c) ? c : null;
   }
   // MDW de la impresora: lo medido en Excel para esa fuente y tamaño; si no hay, la fuente se pide al tamaño redondeado en píxeles de 600 dpi y el dígito se redondea de nuevo.
@@ -47,7 +48,7 @@
     const t = tam > 0 ? tam : 11, c = claveImpresion(nombre);
     if (c) return Math.max(1, Math.round(XlsxFuentesImpresion.mdwPx(c, t)));
     const k = String(nombre || '').toLowerCase().trim();
-    const d = DIGITO[k] || DIGITO[ALIAS[k]] || DIGITO.calibri;
+    const d = de(DIGITO, k) || de(DIGITO, de(ALIAS, k)) || DIGITO.calibri;
     return Math.max(1, Math.round(d * Math.round(t * DPI / 72)));
   }
   // Píxeles de impresora por píxel de pantalla en vertical: sale de la fuente Normal del libro (Calibri 11: 6,05; Aptos Narrow 11: 6,35; Arial 11: 6,00),

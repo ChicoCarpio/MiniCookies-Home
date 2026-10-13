@@ -27,7 +27,7 @@
   };
   // El valor para un tamaño cualquiera: el medido, o la interpolación lineal entre vecinos (y la pendiente de los dos últimos fuera del rango).
   function valor(nombre, tam, que) {
-    const d = FUENTES[nombre];
+    const d = conocida(nombre) ? FUENTES[nombre] : null;
     if (!d || !(tam > 0)) return null;
     const t = d.t, v = d[que];
     let i = 0;
@@ -36,5 +36,6 @@
     const j = Math.min(i, t.length - 2);
     return v[j] + (v[j + 1] - v[j]) * (tam - t[j]) / (t[j + 1] - t[j]);
   }
-  globalThis.XlsxFuentesImpresion = { FUENTES, filaPx: (n, t) => valor(n, t, 'f'), mdwPx: (n, t) => valor(n, t, 'm'), conocida: (n) => !!FUENTES[n] };
+  function conocida(n) { return Object.prototype.hasOwnProperty.call(FUENTES, n); } // el nombre viene del archivo: "constructor" no es una fuente
+  globalThis.XlsxFuentesImpresion = { FUENTES, filaPx: (n, t) => valor(n, t, 'f'), mdwPx: (n, t) => valor(n, t, 'm'), conocida };
 })();
