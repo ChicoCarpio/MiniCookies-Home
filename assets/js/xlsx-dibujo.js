@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Dibujo de una hoja de Excel en un Canvas 2D, como la pinta Excel en pantalla al 100 % (96 dpi): cuadrícula, rellenos y
 // tramas, bordes, texto (alineación, sangría, ajuste, desborde, rotación, reducir hasta ajustar) y celdas combinadas.
-// Se calibra contra las imágenes que da Excel real (comparar-xlsx\exportar-rango.ps1 + comparar-dibujo.mjs).
+// Se calibra contra las imágenes que da Excel real (investigacion-motor-excel\arnes-xlsx\exportar-rango.ps1 + comparar-dibujo.mjs).
 //
 // Convención de píxeles (medida en Excel): la cuadrícula de cada celda es la línea del borde izquierdo y del superior, en el
 // píxel x(c) / y(f); el relleno de una celda cubre x(c)…x(c+1) e y(f)…y(f+1) (los dos extremos incluidos: tapa sus dos líneas

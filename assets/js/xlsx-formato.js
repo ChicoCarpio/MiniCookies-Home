@@ -2,7 +2,7 @@
 // Formato de número de Excel (los "códigos de formato" de la celda: 0.00, #,##0, 0%, d/m/yyyy, [h]:mm,
 // # ?/?, 0.00E+00, "texto"@, secciones, condiciones y colores) del motor propio. Valor + código →
 // el texto que muestra Excel. Se probó contra 1.996 casos medidos en Excel real
-// (comparar-xlsx\medidas\formatos.json). No depende del navegador.
+// (investigacion-motor-excel\arnes-xlsx\medidas\formatos.json). No depende del navegador.
 //
 // Uso:
 //   const r = XlsxFormato.formatear(valor, codigo, opciones);   // → { texto, color, relleno, desborde }
