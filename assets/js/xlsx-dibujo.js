@@ -370,7 +370,7 @@
             if (!e || (!e.barra && !e.icono)) continue;
             const m = combinada.get(clave);
             const bx0 = X(c), by0 = Y(f), bx1 = X((m ? m.c1 : c) + 1), by1 = Y((m ? m.f1 : f) + 1);
-            if (e.barra) dibujarBarra(ctx, e.barra, bx0, by0, bx1, by1);
+            if (e.barra) dibujarBarra(ctx, e.barra, bx0, by0, bx1, by1, oy);
             if (e.icono && typeof XlsxIconos !== 'undefined') {
               const lado = 16, alto = by1 - by0;
               XlsxIconos.dibujar(ctx, e.icono.conjunto, e.icono.indice, bx0 + RD(1.28), by0 + RD(Math.max(0, (alto - lado) * 0.76)), lado);
@@ -609,7 +609,7 @@
   // 1 u más alta que la de 2007; sin eje las barras salen del lado de la dirección y miden (v − mín)/(máx − mín) de la región; con eje
   // (automático: en la proporción del cero; en el medio: al centro) la línea del eje mide 1 u, va a rayas (3 u y 1 u) y las barras positivas
   // y las negativas salen de sus lados, a escala del mayor valor absoluto del lado.
-  function dibujarBarraX14(ctx, b, x0, y0, x1, y1) {
+  function dibujarBarraX14(ctx, b, x0, y0, x1, y1, yBase) {
     const e = b.x14;
     const U = UIMP; // un píxel de la impresora (op.grosorRejilla, 0,96 pt); en pantalla, 1 px
     const xa = x0 + 2 * U, ancho = x1 - x0 - 3 * U, ya = y0 + 2 * U, alto = y1 - y0 - 4 * U;
@@ -634,7 +634,7 @@
     ctx.save();
     if (hasta - desde > 0.2) {
       const xi = Math.min(X(desde), X(hasta)), xd = Math.max(X(desde), X(hasta));
-      const col = negativa ? e.colorNeg : b.color;
+      const col = v < 0 ? e.colorNeg : b.color; // los negativos llevan su color también sin eje
       if (e.gradiente) {
         const c = [1, 3, 5].map((i) => parseInt(col.slice(i, i + 2), 16));
         const tinte = '#' + c.map((q) => (q + Math.trunc((255 - q) * 0.85)).toString(16).padStart(2, '0')).join('');
@@ -645,7 +645,7 @@
         ctx.fillStyle = g;
       } else ctx.fillStyle = col;
       ctx.fillRect(xi, ya, xd - xi, alto);
-      const bc = negativa ? e.bordeNeg : e.borde;
+      const bc = v < 0 ? e.bordeNeg : e.borde;
       if (bc) {
         ctx.fillStyle = bc;
         ctx.fillRect(xi, ya, xd - xi, U); ctx.fillRect(xi, ya + alto - U, xd - xi, U);
@@ -653,15 +653,15 @@
       }
     }
     if (ejeT !== null) {
-      ctx.strokeStyle = e.colorEje; ctx.lineWidth = U; ctx.setLineDash([3 * U, U]); ctx.lineDashOffset = -((y0 % (4 * U) + 4 * U) % (4 * U));
+      ctx.strokeStyle = e.colorEje; ctx.lineWidth = U; ctx.setLineDash([3 * U, U]); ctx.lineDashOffset = (((y0 + U - yBase - 0.25 * U) % (4 * U)) + 4 * U) % (4 * U); // las rayas siguen una sola pauta desde la primera fila (medido)
       ctx.beginPath(); const xe = X(ejeT); ctx.moveTo(xe, y0 + U); ctx.lineTo(xe, y1 + U); ctx.stroke();
     }
     ctx.restore();
   }
 
   // Barra de datos (estilo 2007): del color de la regla a su tinte del 85 % hacia el blanco, de izquierda a derecha por la barra.
-  function dibujarBarra(ctx, b, x0, y0, x1, y1) {
-    if (b.x14) { dibujarBarraX14(ctx, b, x0, y0, x1, y1); return; }
+  function dibujarBarra(ctx, b, x0, y0, x1, y1, yBase) {
+    if (b.x14) { dibujarBarraX14(ctx, b, x0, y0, x1, y1, yBase || 0); return; }
     const region = x1 - x0 - 4;
     const largo = region * (b.largoMin + (b.largoMax - b.largoMin) * b.fraccion) / 100;
     if (!(largo > 0.2) || !(y1 - y0 > 6)) return;
@@ -734,7 +734,12 @@
   }
 
   // Lee los objetos de la hoja y carga sus imágenes y fuentes (hay que esperarlo antes de dibujarla; sin él se dibuja sin objetos).
-  const prepararObjetos = (libro, hoja, lienzo) => (typeof XlsxObjetos === 'undefined' ? Promise.resolve([]) : XlsxObjetos.preparar(libro, hoja, lienzo));
+  // Lo que se carga de forma asíncrona antes de dibujar una hoja: los objetos (imágenes, formas, gráficos), las hojas que citan las fórmulas condicionales y las de los datos de los minigráficos.
+  const prepararObjetos = async (libro, hoja, lienzo) => {
+    if (typeof XlsxCondicional !== 'undefined' && hoja.formatosCondicionales && hoja.formatosCondicionales.length) await XlsxCondicional.cargar(libro, hoja);
+    if (typeof XlsxMinigraficos !== 'undefined' && hoja.minigraficos && hoja.minigraficos.length) await XlsxMinigraficos.cargar(libro, hoja);
+    return typeof XlsxObjetos === 'undefined' ? [] : XlsxObjetos.preparar(libro, hoja, lienzo);
+  };
 
   globalThis.XlsxDibujo = { geometria, dibujarRango, prepararObjetos, dibujarVista, cargarFuentes, usosDeFuentes, medirDigito, tamPx, fuenteCss, anchoTexto, config: CONFIG };
 })();

@@ -264,7 +264,7 @@
     const tema = leerTema(textoTema);
     const paleta = crudo.paletaPropia && crudo.paletaPropia.length ? crudo.paletaPropia : PALETA_INDEXADA;
     const memoColor = new Map();
-    const memoXf = [];
+    const memoXf = [], dxfsEnLinea = new Map();
 
     // Un libro sin styles.xml (o con listas vacías) usa el estilo 0: Calibri 11, sin relleno ni bordes.
     const fuentePorDefecto = crudo.fuentes[0] || Object.assign(fuenteVacia(), { nombre: tema.fuenteCuerpo, tam: 11 });
@@ -311,6 +311,10 @@
       cantidadXfs: crudo.xfs.length,
       fuentes: crudo.fuentes, rellenos: crudo.rellenos, bordes: crudo.bordes,
       dxf: (i) => crudo.dxfs[i] || null,
+      dxfDeXml: (xml) => { // un <dxf> escrito en línea (extensión x14 de las reglas condicionales), leído con el mismo lector de estilos
+        if (!dxfsEnLinea.has(xml)) dxfsEnLinea.set(xml, leerStyles('<styleSheet><dxfs>' + xml + '</dxfs></styleSheet>').dxfs[0] || null);
+        return dxfsEnLinea.get(xml);
+      },
       dxfs: crudo.dxfs,
       estiloTabla: (nombre) => crudo.estilosTabla.get(nombre) || null,   // { nombre, elementos: { wholeTable: { dxf, tam }, … } } de los estilos propios del libro
       formatosPropios: crudo.numFmts,

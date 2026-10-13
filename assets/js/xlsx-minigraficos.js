@@ -7,12 +7,14 @@
 // cada barra ocupa media región. Sin DOM: solo la API de contexto 2D. Requiere xlsx-modelo.js y xlsx-estilos.js.
 //
 // Uso:
+//   await XlsxMinigraficos.cargar(libro, hoja);               // una vez: carga las hojas de donde salen los datos (si no son las de la propia hoja)
 //   const mini = XlsxMinigraficos.preparar(libro, hoja);       // null si la hoja no tiene minigráficos
 //   const s = mini.para(fila, col);                             // null o { grupo, valores } de la celda
 //   XlsxMinigraficos.dibujar(ctx, libro, s, x0, y0, x1, y1, u); // u: el píxel de la impresora en unidades del lienzo (1 en pantalla)
 
 (function () {
   const MAX_VALORES = 5000;
+  const MAX_HOJAS = 50;
   const PT = 0.96; // pt por u
 
   // 'Hoja1'!A1:F1 → { hoja: nombre | null, f0, c0, f1, c1 }
@@ -24,13 +26,30 @@
     return { hoja: m[1] !== undefined ? m[1].replace(/''/g, "'") : m[2] !== undefined ? m[2] : null, f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1 };
   }
 
+  // Carga las hojas que traen los datos de los minigráficos de la hoja (el dibujo es síncrono): hoja._miniHojas = Map(nombre en minúsculas → hoja).
+  async function cargar(libro, hoja) {
+    if (hoja._miniHojas) return;
+    hoja._miniHojas = new Map();
+    const propia = libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre;
+    const pedidas = new Set();
+    for (const g of hoja.minigraficos || []) for (const it of g.items) { const r = leerReferencia(it.f); if (r && r.hoja !== null && r.hoja !== propia) pedidas.add(r.hoja.toLowerCase()); }
+    let n = 0;
+    for (const nombre of pedidas) {
+      if (++n > MAX_HOJAS) break;
+      const i = libro.hojas.findIndex((h) => h.nombre.toLowerCase() === nombre);
+      if (i < 0) continue;
+      try { hoja._miniHojas.set(nombre, await libro.cargarHoja(i)); } catch (e) { /* una hoja que no se lee: sus minigráficos quedan vacíos */ }
+    }
+  }
+
   function preparar(libro, hoja) {
     const grupos = hoja.minigraficos || [];
     if (!grupos.length) return null;
-    const C = hoja.celdas, TIPO = LibroXlsx.TIPO;
+    const TIPO = LibroXlsx.TIPO;
     const nombreHoja = libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre;
     const porCelda = new Map();
-    function valoresDe(r) { // los números del rango en orden de lectura (null: vacía o que no es número)
+    function valoresDe(r, origen) { // los números del rango en orden de lectura (null: vacía o que no es número)
+      const C = origen.celdas;
       const out = [];
       for (let f = r.f0; f <= r.f1 && out.length < MAX_VALORES; f++) {
         for (let c = r.c0; c <= r.c1 && out.length < MAX_VALORES; c++) {
@@ -44,8 +63,10 @@
       g.hechos = [];
       for (const it of g.items) {
         const r = leerReferencia(it.f), d = LibroXlsx.decodificarRango((it.sqref || '').replace(/\$/g, ''));
-        if (!r || !d || (r.hoja !== null && r.hoja !== nombreHoja)) continue; // los datos de otra hoja no están cargados aquí
-        const s = { grupo: g, valores: valoresDe(r) };
+        if (!r || !d) continue;
+        const origen = r.hoja === null || r.hoja === nombreHoja ? hoja : (hoja._miniHojas && hoja._miniHojas.get(r.hoja.toLowerCase()));
+        if (!origen) continue; // la hoja de los datos no existe o no se cargó (falta XlsxMinigraficos.cargar)
+        const s = { grupo: g, valores: valoresDe(r, origen) };
         g.hechos.push(s);
         if (porCelda.size < MAX_VALORES) porCelda.set(d.f0 * 16384 + d.c0, s);
       }
@@ -138,5 +159,5 @@
     ctx.restore();
   }
 
-  globalThis.XlsxMinigraficos = { preparar, dibujar };
+  globalThis.XlsxMinigraficos = { cargar, preparar, dibujar };
 })();

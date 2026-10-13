@@ -7,6 +7,7 @@
 // Requiere xlsx-modelo.js, xlsx-estilos.js y xlsx-expresion.js.
 //
 // Uso:
+//   await XlsxCondicional.cargar(libro, hoja);                                  // una vez: carga las hojas que citan las fórmulas (Hoja2!A1)
 //   const cond = XlsxCondicional.preparar(libro, hoja, { hoy: serialDeHoy });   // null si la hoja no tiene reglas
 //   const r = cond.para(fila, col);   // null o { fuente, relleno, borde, formato, barra, icono } (colores como referencias de estilo)
 //   cond.reiniciar();                 // al empezar un cuadro: reinicia el presupuesto de trabajo
@@ -56,12 +57,45 @@
       for (let i = 0; i < C.n; i++) if (C.fila[i] >= f0 && C.fila[i] <= f1 && C.col[i] >= c0 && C.col[i] <= c1) { const v = valorDe(C.fila[i], C.col[i]); if (v !== null) out.push(v); }
       return out;
     }
+    // las demás hojas que citan las fórmulas (XlsxCondicional.cargar las dejó en hoja._condHojas)
+    const accesos = new Map();
+    function otra(nombre) {
+      const k = nombre.toLowerCase();
+      if (accesos.has(k)) return accesos.get(k);
+      const h2 = hoja._condHojas && hoja._condHojas.get(k);
+      let acc = null;
+      if (h2) {
+        const C2 = h2.celdas;
+        const valor = (f, c) => {
+          const i = C2.indiceDe(f, c);
+          if (i < 0) return null;
+          switch (C2.tipo[i]) {
+            case TIPO.numero: case TIPO.texto: return C2.valor[i];
+            case TIPO.logico: return !!C2.valor[i];
+            case TIPO.error: return new XlsxExpresion.ErrorExcel(String(C2.valor[i]));
+            default: return null;
+          }
+        };
+        const rango = (f0, c0, f1, c1) => {
+          const out = [];
+          const area = (f1 - f0 + 1) * (c1 - c0 + 1);
+          gasto += Math.min(area, C2.n);
+          if (gasto > PRESUPUESTO) return out;
+          if (area <= 4096) { for (let f = f0; f <= f1; f++) for (let c = c0; c <= c1; c++) { const v = valor(f, c); if (v !== null) out.push(v); } return out; }
+          for (let i = 0; i < C2.n; i++) if (C2.fila[i] >= f0 && C2.fila[i] <= f1 && C2.col[i] >= c0 && C2.col[i] <= c1) { const v = valor(C2.fila[i], C2.col[i]); if (v !== null) out.push(v); }
+          return out;
+        };
+        acc = { valor, rango };
+      }
+      accesos.set(k, acc);
+      return acc;
+    }
     const expr = (txt) => { const e = XlsxExpresion.compilar(txt); return e; };
     function evaluarFormula(reg, k, f, c) {
       reg.comp = reg.comp || [];
       if (reg.comp[k] === undefined) reg.comp[k] = reg.r.formulas[k] !== undefined ? expr(reg.r.formulas[k]) : null;
       if (!reg.comp[k]) return XlsxExpresion.ERR.nombre;
-      return XlsxExpresion.evaluar(reg.comp[k], { fila: f, col: c, origen: reg.origen, valor: valorDe, rango: valoresRango, hoy, hojaActual: libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre, gasto: 0 });
+      return XlsxExpresion.evaluar(reg.comp[k], { fila: f, col: c, origen: reg.origen, valor: valorDe, rango: valoresRango, otra, hoy, hojaActual: libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre, gasto: 0 });
     }
     const verdadero = (v) => v === true || (typeof v === 'number' && v !== 0);
 
@@ -212,7 +246,10 @@
         const pts = cv.map((q, k) => (k === 0 ? -Infinity : umbral(reg, d, q, f, c, 'num')));
         let k = 0;
         for (let j = 1; j < pts.length; j++) { const gte = cv[j].gte !== false; if (gte ? v >= pts[j] : v > pts[j]) k = j; }
-        return { icono: { conjunto: ic.conjunto, indice: ic.invertir ? cv.length - 1 - k : k, de: cv.length, mostrarValor: ic.mostrarValor } };
+        const nivel = ic.invertir ? cv.length - 1 - k : k;
+        const propio = ic.propios && ic.propios.length ? ic.propios[nivel] : null; // iconos personalizados (x14): cada nivel con su conjunto y su número, o sin icono ('NoIcons')
+        if (propio) return { icono: { conjunto: propio.conjunto, indice: propio.id, de: cv.length, mostrarValor: ic.mostrarValor } };
+        return { icono: { conjunto: ic.conjunto, indice: nivel, de: cv.length, mostrarValor: ic.mostrarValor } };
       }
       return null;
     }
@@ -232,8 +269,8 @@
           if (e && e.escala && !fijo.relleno) { res.relleno = { patron: 'solid', fg: ref(e.escala), bg: null }; fijo.relleno = true; }
           if (e && e.barra && !res.barra) res.barra = e.barra;
           if (e && e.icono && !res.icono) res.icono = e.icono;
-        } else if (reg.r.dxf !== null && reg.r.dxf !== undefined) {
-          const dx = libro.estilos.dxf(reg.r.dxf);
+        } else if (reg.r.dxfXml || (reg.r.dxf !== null && reg.r.dxf !== undefined)) {
+          const dx = reg.r.dxfXml ? libro.estilos.dxfDeXml(reg.r.dxfXml) : libro.estilos.dxf(reg.r.dxf);
           if (dx) {
             const fu = dx.fuente;
             if (fu) {
@@ -296,5 +333,33 @@
     return r;
   }
 
-  globalThis.XlsxCondicional = { preparar, aplicar };
+  // Carga las hojas que citan las fórmulas de las reglas (Hoja2!$A$1: el dibujo es síncrono): hoja._condHojas = Map(nombre en minúsculas → hoja).
+  async function cargar(libro, hoja) {
+    if (hoja._condHojas) return;
+    hoja._condHojas = new Map();
+    const propia = libro.hojas[hoja.indice] && libro.hojas[hoja.indice].nombre;
+    const pedidas = new Set();
+    const buscar = (txt) => {
+      if (typeof txt !== 'string' || txt.indexOf('!') < 0) return;
+      for (const m of txt.matchAll(/(?:'((?:[^']|'')+)'|([A-Za-z_\u00C0-\uFFFF][\w.\u00C0-\uFFFF]*))!/g)) {
+        const nom = m[1] !== undefined ? m[1].replace(/''/g, "'") : m[2];
+        if (nom && nom !== propia) pedidas.add(nom.toLowerCase());
+      }
+    };
+    for (const b of hoja.formatosCondicionales || []) {
+      for (const r of b.reglas) {
+        for (const f of r.formulas || []) buscar(f);
+        for (const k of [r.escala, r.barras, r.iconos]) if (k) for (const v of k.cfvo || []) buscar(v.valor);
+      }
+    }
+    let n = 0;
+    for (const nombre of pedidas) {
+      if (++n > 50) break;
+      const i = libro.hojas.findIndex((h) => h.nombre.toLowerCase() === nombre);
+      if (i < 0) continue;
+      try { hoja._condHojas.set(nombre, await libro.cargarHoja(i)); } catch (e) { /* una hoja que no se lee: las fórmulas que la citan dan #REF! */ }
+    }
+  }
+
+  globalThis.XlsxCondicional = { cargar, preparar, aplicar };
 })();

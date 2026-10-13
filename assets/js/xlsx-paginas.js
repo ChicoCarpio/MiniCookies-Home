@@ -137,6 +137,13 @@
       if (f > f1) f1 = f;
       if (c > c1) c1 = c;
     }
+    // los minigráficos (x14) también: la celda donde van (medido: Excel imprime la columna aunque no tenga más contenido)
+    for (const gr of hoja.minigraficos || []) for (const it of gr.items) {
+      const d = LibroXlsx.decodificarRango((it.sqref || '').replace(/\$/g, ''));
+      if (!d || fuera(d.f1, d.c1) || oculta(d.f0, d.c0)) continue;
+      if (d.f1 > f1) f1 = d.f1;
+      if (d.c1 > c1) c1 = d.c1;
+    }
     return { f1, c1 };
   }
 

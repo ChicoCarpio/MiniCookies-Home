@@ -167,13 +167,23 @@
     if (!a || !b) return null;
     return { f0: Math.min(a.f, b.f), c0: Math.min(a.c, b.c), f1: Math.max(a.f, b.f), c1: Math.max(a.c, b.c) };
   }
+  // De dónde se leen los valores de una referencia: de la propia hoja (ctx) o, si la referencia trae el nombre de otra, de lo que da ctx.otra(nombre)
+  // ({ valor, rango }); null si esa hoja no está disponible.
+  function acceso(n, ctx) {
+    if (!n.hoja || !ctx.hojaActual) return ctx;
+    const nombre = n.hoja.replace(/^'|'$/g, '').replace(/''/g, "'");
+    if (nombre.toLowerCase() === ctx.hojaActual.toLowerCase()) return ctx;
+    return (ctx.otra && ctx.otra(nombre)) || null;
+  }
   function valoresDe(n, ctx) { // lista plana de los valores de un rango (ErrorExcel incluido)
     const r = rangoDe(n, ctx);
     if (!r) return ERR.ref;
-    if ((r.f1 - r.f0 + 1) * (r.c1 - r.c0 + 1) > MAX_CELDAS_RANGO && !ctx.rango) return ERR.valor;
+    const acc = acceso(n, ctx);
+    if (!acc) return ERR.ref;
+    if ((r.f1 - r.f0 + 1) * (r.c1 - r.c0 + 1) > MAX_CELDAS_RANGO && !acc.rango) return ERR.valor;
     ctx.gasto += 1;
     if (ctx.gasto > 200000) return ERR.valor;
-    return ctx.rango(r.f0, r.c0, r.f1, r.c1);
+    return acc.rango(r.f0, r.c0, r.f1, r.c1);
   }
   const planos = (args, ctx, prof) => { // argumentos de una función de agregado: números de rangos (texto y vacías se ignoran) y valores sueltos
     const out = [];
@@ -196,10 +206,11 @@
       case 'vacio': return null;
       case 'nombre': return ERR.nombre;
       case 'ref': {
-        if (n.hoja && ctx.hojaActual && n.hoja.replace(/^'|'$/g, '').replace(/''/g, "'") !== ctx.hojaActual) return ERR.ref; // otras hojas: aún no
+        const acc = acceso(n, ctx);
+        if (!acc) return ERR.ref;
         if (n.b) { const v = valoresDe(n, ctx); return esError(v) ? v : v[0] === undefined ? null : v[0]; } // un rango suelto: su primera celda (aprox.)
         const a = celda(n.a, ctx);
-        return a ? ctx.valor(a.f, a.c) : ERR.ref;
+        return a ? acc.valor(a.f, a.c) : ERR.ref;
       }
       case 'un': {
         const v = ev(n.a, ctx, prof + 1);
