@@ -294,7 +294,7 @@
         for (const f of filas) ctx.fillRect(ox, Y(f), anchoTotal + gr, gr);
         ctx.fillRect(ox, Y(r.f1 + 1), anchoTotal + gr, gr);
         ctx.fillStyle = '#FFFFFF';
-        for (const m of combinada.values()) ctx.fillRect(X(m.c0) + 1, Y(m.f0) + 1, X(m.c1 + 1) - X(m.c0) - 1, Y(m.f1 + 1) - Y(m.f0) - 1);
+        for (const m of combinada.values()) ctx.fillRect(X(m.c0) + gr, Y(m.f0) + gr, X(m.c1 + 1) - X(m.c0) - gr, Y(m.f1 + 1) - Y(m.f0) - gr); // sin tapar la línea de arriba ni la de la izquierda (impresa mide 0,96 pt, más de 1 u)
       }
 
       // estilo de cada celda del rango

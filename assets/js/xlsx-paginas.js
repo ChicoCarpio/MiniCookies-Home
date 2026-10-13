@@ -48,6 +48,8 @@
     const medida = (v) => { const m = /^([\d.]+)(mm|cm|in|pt|pc|pi)$/.exec(v || ''); if (!m) return 0; return parseFloat(m[1]) * { mm: 72 / 25.4, cm: 72 / 2.54, in: 72, pt: 1, pc: 12, pi: 12 }[m[2]]; };
     if (p && medida(p.anchoPapel) > 0 && medida(p.altoPapel) > 0) { ancho = medida(p.anchoPapel); alto = medida(p.altoPapel); }
     else { const t = PAPELES[p ? p.papel : 1] || PAPELES[9]; ancho = t[0]; alto = t[1]; }
+    // un archivo puede pedir cualquier medida ("999…9in" da Infinity): se acota a 3–14400 pt (lo que admite una página PDF)
+    ancho = Math.min(14400, Math.max(3, ancho)); alto = Math.min(14400, Math.max(3, alto));
     if (p && p.orientacion === 'landscape' && alto > ancho) [ancho, alto] = [alto, ancho];
     else if (p && p.orientacion === 'portrait' && ancho > alto) [ancho, alto] = [alto, ancho];
     return { ancho, alto };
@@ -58,19 +60,27 @@
     const salida = [];
     const def = libro.nombres.find((n) => n.nombre === nombre && n.hojaLocal === hoja.indice);
     if (!def || !def.ref) return salida;
-    const re = /(?:'((?:[^']|'')*)'|([^!,'()]+))!(\$?[A-Za-z]+\$?\d+(?::\$?[A-Za-z]+\$?\d+)?|\$?[A-Za-z]{1,3}:\$?[A-Za-z]{1,3}|\$?\d+:\$?\d+)/g;
+    // la expresión es cuadrática con una cadena larga sin "!": se lee hasta 8192 caracteres (el máximo de una fórmula en Excel)
+    // y cada rango se acota a la hoja (A1:XFD1048576); uno que queda vacío se descarta
+    const ref = String(def.ref).slice(0, 8192);
+    const poner = (r) => {
+      const q = { f0: Math.max(0, r.f0), c0: Math.max(0, r.c0), f1: Math.min(1048575, r.f1), c1: Math.min(16383, r.c1) };
+      if (r.soloFilas) q.soloFilas = true; if (r.soloCols) q.soloCols = true;
+      if (q.f0 <= q.f1 && q.c0 <= q.c1) salida.push(q);
+    };
+    const re =/(?:'((?:[^']|'')*)'|([^!,'()]+))!(\$?[A-Za-z]+\$?\d+(?::\$?[A-Za-z]+\$?\d+)?|\$?[A-Za-z]{1,3}:\$?[A-Za-z]{1,3}|\$?\d+:\$?\d+)/g;
     let m;
-    while ((m = re.exec(def.ref))) {
+    while ((m = re.exec(ref))) {
       const nombreHoja = (m[1] !== undefined ? m[1].replace(/''/g, "'") : m[2]).trim();
       const info = libro.hojas[hoja.indice];
       if (info && info.nombre !== undefined && info.nombre !== nombreHoja) continue;
       const r = m[3].replace(/\$/g, '');
       let x = /^([A-Za-z]{1,3}):([A-Za-z]{1,3})$/.exec(r);
-      if (x) { const a = LibroXlsx.colANumero(x[1].toUpperCase()), b = LibroXlsx.colANumero(x[2].toUpperCase()); salida.push({ f0: 0, c0: Math.min(a, b), f1: 1048575, c1: Math.max(a, b), soloCols: true }); continue; }
+      if (x) { const a = LibroXlsx.colANumero(x[1].toUpperCase()), b = LibroXlsx.colANumero(x[2].toUpperCase()); poner({ f0: 0, c0: Math.min(a, b), f1: 1048575, c1: Math.max(a, b), soloCols: true }); continue; }
       x = /^(\d+):(\d+)$/.exec(r);
-      if (x) { const a = +x[1] - 1, b = +x[2] - 1; salida.push({ f0: Math.min(a, b), c0: 0, f1: Math.max(a, b), c1: 16383, soloFilas: true }); continue; }
+      if (x) { const a = +x[1] - 1, b = +x[2] - 1; poner({ f0: Math.min(a, b), c0: 0, f1: Math.max(a, b), c1: 16383, soloFilas: true }); continue; }
       const rg = LibroXlsx.decodificarRango(r);
-      if (rg) salida.push(rg);
+      if (rg) poner(rg);
     }
     return salida;
   }
@@ -124,7 +134,7 @@
     const papel = papelDe(imp);
     const mg = Object.assign({ izq: 0.7, der: 0.7, arr: 0.75, aba: 0.75, encabezado: 0.3, pie: 0.3 }, imp.margenes || {});
     const margenes = {};
-    for (const k of Object.keys(mg)) margenes[k] = (Number.isFinite(mg[k]) ? Math.max(0, mg[k]) : 0) * 72;
+    for (const k of Object.keys(mg)) margenes[k] = (Number.isFinite(mg[k]) ? Math.min(200, Math.max(0, mg[k])) : 0) * 72; // hasta 200" (el papel más grande): un margen de 1e300 llegaba al PDF como "1e+303"
     const opciones = imp.opciones || { cuadricula: false, encabezados: false, centrarH: false, centrarV: false };
 
     // Áreas: las del nombre Print_Area, o desde A1 hasta lo último que tenga algo.
@@ -154,32 +164,43 @@
     if (!imp.ajustarAPagina) for (const s of imp.saltosFila || []) if (s.manual !== false && s.id >= 1) saltosF.add(s.id); // el salto `id` es después de la fila id (desde 1): empieza en el índice id
     if (!imp.ajustarAPagina) for (const s of imp.saltosCol || []) if (s.manual !== false && s.id >= 1) saltosC.add(s.id);
 
-    // Páginas de todas las áreas a una escala dada.
-    const paginar = (escala) => {
+    // Páginas de todas las áreas a una escala dada. Con `cuenta` { N, M } solo cuenta las páginas de ancho y de alto, y deja de cortar
+    // apenas pasa de N y M (para "ajustar a", que prueba varias escalas). Nunca se recorren más de MAX_PAGINAS páginas en total.
+    const paginar = (escala, cuenta) => {
       const k = escala / 100;
       const tc = (c) => Math.round(baseCol(c) * k), tf = (f) => Math.round(baseFila(f) * k);
       const salida = [];
       const resumen = { ancho: 0, alto: 0 };
-      areas.forEach((a, area) => {
-        const tituloF = tFilas ? { hasta: Math.min(tFilas.f1, a.f1), px: sumar(tf, tFilas.f0, tFilas.f1) } : null;
-        const tituloC = tCols ? { hasta: Math.min(tCols.c1, a.c1), px: sumar(tc, tCols.c0, tCols.c1) } : null;
-        const cols = cortar(tc, a.c0, a.c1, anchoUtil, saltosC, tituloC, MAX_PAGINAS);
-        const filas = cortar(tf, a.f0, a.f1, altoUtil, saltosF, tituloF, MAX_PAGINAS);
+      const sobre = imp.pagina && imp.pagina.orden === 'overThenDown';
+      const lleno = () => salida.length >= MAX_PAGINAS;
+      const pxTF = tFilas ? sumar(tf, tFilas.f0, tFilas.f1) : 0, pxTC = tCols ? sumar(tc, tCols.c0, tCols.c1) : 0;
+      // cada página lleva solo los títulos que caben en ella (los de más caerían fuera del papel, y con "$1:$100000" serían
+      // 100.000 filas que dibujar en cada una de 20.000 páginas)
+      const tfHasta = tFilas ? hastaQueCabe(tf, tFilas.f0, tFilas.f1, altoUtil) : 0, tcHasta = tCols ? hastaQueCabe(tc, tCols.c0, tCols.c1, anchoUtil) : 0;
+      for (let area = 0; area < areas.length && !lleno(); area++) {
+        const a = areas[area];
+        const tituloF = tFilas ? { hasta: Math.min(tFilas.f1, a.f1), px: pxTF } : null;
+        const tituloC = tCols ? { hasta: Math.min(tCols.c1, a.c1), px: pxTC } : null;
+        const limC = cuenta ? (cuenta.N > 0 ? cuenta.N + 1 : 1) : MAX_PAGINAS, limF = cuenta ? (cuenta.M > 0 ? cuenta.M + 1 : 1) : MAX_PAGINAS;
+        const cols = cortar(tc, a.c0, a.c1, anchoUtil, saltosC, tituloC, limC);
+        const filas = cortar(tf, a.f0, a.f1, altoUtil, saltosF, tituloF, limF);
         if (cols.length > resumen.ancho) resumen.ancho = cols.length;
         if (filas.length > resumen.alto) resumen.alto = filas.length;
-        const sobre = imp.pagina && imp.pagina.orden === 'overThenDown';
+        if (cuenta) continue;
         const poner = (cb, fb) => {
-          if (salida.length < MAX_PAGINAS) salida.push({
+          salida.push({
             f0: fb[0], f1: fb[1], c0: cb[0], c1: cb[1], area,
-            titulos: { filas: tFilas && fb[0] > tFilas.f1 ? { f0: tFilas.f0, f1: tFilas.f1 } : null, columnas: tCols && cb[0] > tCols.c1 ? { c0: tCols.c0, c1: tCols.c1 } : null },
+            titulos: { filas: tFilas && fb[0] > tFilas.f1 ? { f0: tFilas.f0, f1: tfHasta } : null, columnas: tCols && cb[0] > tCols.c1 ? { c0: tCols.c0, c1: tcHasta } : null },
           });
         };
-        if (sobre) for (const fb of filas) for (const cb of cols) poner(cb, fb);
-        else for (const cb of cols) for (const fb of filas) poner(cb, fb);
-      });
+        const [externas, internas] = sobre ? [filas, cols] : [cols, filas];
+        for (const e of externas) { if (lleno()) break; for (const q of internas) { if (lleno()) break; if (sobre) poner(q, e); else poner(e, q); } }
+      }
       return { paginas: salida, resumen };
     };
     const sumar = (tam, a, b) => { let s = 0; for (let i = a; i <= b && i - a < 100000; i++) s += tam(i); return s; };
+    // última fila/columna de [a, b] que todavía empieza dentro de `disp` (al menos la primera)
+    const hastaQueCabe = (tam, a, b, disp) => { let s = 0, i = a; for (; i < b && i - a < 100000; i++) { s += tam(i); if (s >= disp) break; } return i; };
 
     let escala = 100;
     const pag = imp.pagina || {};
@@ -197,7 +218,7 @@
         }
         return true;
       };
-      const cabe = (s) => { const r = paginar(s).resumen; return (!(N > 0) || r.ancho <= N) && (!(M > 0) || r.alto <= M) && anchoCabe(s); };
+      const cabe = (s) => { const r = paginar(s, { N, M }).resumen; return (!(N > 0) || r.ancho <= N) && (!(M > 0) || r.alto <= M) && anchoCabe(s); };
       if (!cabe(100)) {
         let lo = 10, hi = 99; // la mayor escala que cabe (si ni a 10 % cabe, se queda en 10)
         if (!cabe(10)) hi = 10;
