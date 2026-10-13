@@ -575,6 +575,8 @@
         }
         ctx.restore();
       }
+      // 5. objetos de la hoja (imágenes, formas, gráficos…): encima de todo, con el motor de PowerPoint
+      if (op.objetos !== false && hoja.objetos && hoja.objetos.length && typeof XlsxObjetos !== 'undefined') XlsxObjetos.dibujar(ctx, hoja, g, r, { x: ox, y: oy, lienzo: op.lienzo });
     } finally {
       DIGITO = 0; FINO = false; PXDE = null; TXT = { x: 0, y: 0 }; DXT = 0;
       ctx.restore();
@@ -654,5 +656,8 @@
     return { f0, f1, c0, c1, areaX: anchoEnc, areaY: altoEnc };
   }
 
-  globalThis.XlsxDibujo = { geometria, dibujarRango, dibujarVista, cargarFuentes, usosDeFuentes, medirDigito, tamPx, fuenteCss, anchoTexto, config: CONFIG };
+  // Lee los objetos de la hoja y carga sus imágenes y fuentes (hay que esperarlo antes de dibujarla; sin él se dibuja sin objetos).
+  const prepararObjetos = (libro, hoja, lienzo) => (typeof XlsxObjetos === 'undefined' ? Promise.resolve([]) : XlsxObjetos.preparar(libro, hoja, lienzo));
+
+  globalThis.XlsxDibujo = { geometria, dibujarRango, prepararObjetos, dibujarVista, cargarFuentes, usosDeFuentes, medirDigito, tamPx, fuenteCss, anchoTexto, config: CONFIG };
 })();

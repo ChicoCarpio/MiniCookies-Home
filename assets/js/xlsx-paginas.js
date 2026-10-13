@@ -128,6 +128,15 @@
       if (v) { if (fi > f1) f1 = fi; if (ci > c1) c1 = ci; }
     }
     for (const m of hoja.combinadas) { if (fuera(m.f0, m.c0) || oculta(m.f0, m.c0)) continue; if (m.f1 > f1) f1 = m.f1; if (m.c1 > c1) c1 = m.c1; }
+    // los objetos (imágenes, formas, gráficos) que se imprimen también cuentan: hasta la celda donde acaba cada uno
+    if (!banda) for (const a of hoja.anclas || []) {
+      if (a.oculto || !a.imprimible) continue;
+      const q = XlsxGeometria.rectanguloAncla(a, g);
+      if (!q || !(q.x1 > q.x0) || !(q.y1 > q.y0)) continue;
+      const f = g.filaEn(q.y1 - 1e-6), c = g.colEn(q.x1 - 1e-6);
+      if (f > f1) f1 = f;
+      if (c > c1) c1 = c;
+    }
     return { f1, c1 };
   }
 

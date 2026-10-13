@@ -997,5 +997,19 @@ const PptxModelo = (() => {
     return { fuente: bmp, ancho: bmp.width, alto: bmp.height, dpiX, dpiY };
   }
 
-  return { abrir, graficoSuelto, color };
+  // Los objetos de una hoja de Excel (xl/drawings/drawingN.xml: formas, imágenes, gráficos, grupos, cuadros de texto) resueltos con el mismo
+  // motor: el dibujo de una hoja es DrawingML igual que el de una diapositiva, solo cambia el envoltorio (xdr:twoCellAnchor…) y el tema, que es el del libro.
+  // Devuelve { anclajes: [elemento xdr:*Anchor], elementos(ancla, motivos) → elementos resueltos de esa ancla, imagen(ruta) } o null.
+  async function dibujoExcel(zip, rutaDibujo, rutaTema) {
+    const { parte, imagen } = paquete(zip);
+    const dib = await parte(rutaDibujo);
+    if (!dib) return null;
+    const tema = rutaTema ? await parte(rutaTema) : null;
+    const base = crearContexto({ sld: dib, layout: null, master: null, tema, textoPorDefecto: null, numero: 1, parte });
+    const ctx = { ...base, estilosTabla: new Map(), parteActual: dib, cadena: [], esDiapositiva: true };
+    const anclajes = [...dib.raiz.children].filter((e) => /Anchor$/.test(e.localName));
+    return { anclajes, elementos: (ancla, motivos) => leerArbol(ancla, ctx, motivos), imagen };
+  }
+
+  return { abrir, graficoSuelto, color, dibujoExcel };
 })();

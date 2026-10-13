@@ -349,6 +349,7 @@
       proteccion: null,
       formatosCondicionales: [],   // { rangos: [rango], reglas: [{ tipo, prioridad, dxf, … }] } — lectura completa en la etapa 6
       validaciones: [],            // { rangos, tipo, … }
+      anclas: [],                  // dónde están los objetos del dibujo de la hoja (ver leerAnclas); su contenido lo lee xlsx-objetos.js
       tablas: [],                  // { nombre, ref: { f0, c0, f1, c1 }, encabezados (0|1), totales (0|1), estilo, primeraCol, ultimaCol, bandasFilas, bandasCols } (se llenan al cargar la hoja)
       partes: { dibujo: null, dibujoVml: null, tablas: [], comentarios: null, otras: [] },
       relaciones: [],
@@ -641,6 +642,7 @@
     const relTextos = relDe('sharedStrings'), relEstilos = relDe('styles'), relTema = relDe('theme');
     libro.textos = leerTextosCompartidos(relTextos ? await textoDe(zip, relTextos.destino) : null);
     libro.estilos = XlsxEstilos.leer(relEstilos ? await textoDe(zip, relEstilos.destino) : null, relTema ? await textoDe(zip, relTema.destino) : null);
+    libro.rutaTema = relTema ? relTema.destino : null;
     libro.tieneMacros = !!rels.find((r) => r.tipo === 'vbaProject');
 
     libro.cargarHoja = (indice) => envolver(() => cargarHoja(libro, indice));
@@ -648,6 +650,42 @@
   }
 
   const MAX_TABLAS = 5000;
+  const MAX_ANCLAS = 5000;
+  // Las anclas del dibujo de una hoja (xl/drawings/drawingN.xml), sin DOM: dónde está cada objeto. Las posiciones en EMU.
+  // { tipo: 'dos' | 'uno' | 'abs', de: { col, fila, dx, dy }, a: {…}, ext: { w, h }, pos: { x, y }, imprimible, oculto }, en el orden del archivo.
+  function leerAnclas(texto) {
+    const anclas = [];
+    let profundidad = 0, a = null, nivelAncla = -1, modo = null, campo = '', primeraCNvPr = true;
+    XmlLigero.recorrer(texto, {
+      abrir(nombre, at) {
+        profundidad++;
+        if (!a) {
+          if ((nombre === 'twoCellAnchor' || nombre === 'oneCellAnchor' || nombre === 'absoluteAnchor') && anclas.length < MAX_ANCLAS) {
+            a = { tipo: nombre === 'twoCellAnchor' ? 'dos' : nombre === 'oneCellAnchor' ? 'uno' : 'abs', de: null, a: null, ext: null, pos: null, imprimible: true, oculto: false };
+            anclas.push(a); nivelAncla = profundidad; primeraCNvPr = true;
+          }
+          return;
+        }
+        const hijoDirecto = profundidad === nivelAncla + 1;
+        if (hijoDirecto && (nombre === 'from' || nombre === 'to')) { modo = nombre === 'from' ? 'de' : 'a'; a[modo] = { col: 0, fila: 0, dx: 0, dy: 0 }; }
+        else if (hijoDirecto && nombre === 'pos') a.pos = { x: parseInt(at.x, 10) || 0, y: parseInt(at.y, 10) || 0 };
+        else if (hijoDirecto && nombre === 'ext') a.ext = { w: parseInt(at.cx, 10) || 0, h: parseInt(at.cy, 10) || 0 };
+        else if (hijoDirecto && nombre === 'clientData') a.imprimible = !(at.fPrintsWithSheet === '0' || at.fPrintsWithSheet === 'false');
+        else if (modo && profundidad === nivelAncla + 2 && (nombre === 'col' || nombre === 'colOff' || nombre === 'row' || nombre === 'rowOff')) campo = nombre;
+        else if (nombre === 'cNvPr' && primeraCNvPr) { primeraCNvPr = false; a.oculto = at.hidden === '1' || at.hidden === 'true'; }
+      },
+      texto(t) {
+        if (a && modo && campo) { const v = parseInt(t, 10) || 0; const d = a[modo]; if (campo === 'col') d.col = v; else if (campo === 'colOff') d.dx = v; else if (campo === 'row') d.fila = v; else d.dy = v; }
+      },
+      cerrar(nombre) {
+        if (a && profundidad === nivelAncla) { a = null; modo = null; }
+        else if (nombre === 'from' || nombre === 'to') modo = null;
+        campo = '';
+        profundidad--;
+      },
+    });
+    return anclas;
+  }
   // Una tabla (xl/tables/tableN.xml): su rango, si lleva encabezado y totales, y las opciones de estilo.
   function leerTabla(texto) {
     let tabla = null;
@@ -696,6 +734,7 @@
       if (rv) hoja.partes.dibujoVml = rv.destino;
       const rc = hoja.relaciones.find((r) => r.tipo === 'comments');
       if (rc) hoja.partes.comentarios = rc.destino;
+      if (hoja.partes.dibujo) { const t = await textoDe(libro.zip, hoja.partes.dibujo); if (t !== null) hoja.anclas = leerAnclas(t); }
       hoja.partes.tablas = hoja.relaciones.filter((r) => r.tipo === 'table').map((r) => r.destino);
       for (const ruta of hoja.partes.tablas.slice(0, MAX_TABLAS)) {
         const t = await textoDe(libro.zip, ruta);

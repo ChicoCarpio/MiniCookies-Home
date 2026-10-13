@@ -224,5 +224,16 @@
     };
   }
 
-  globalThis.XlsxGeometria = { crear, altoTexto, mdwDe, pxAncho, pxAlto };
+  // El rectángulo de un ancla de dibujo (ver leerAnclas en xlsx-modelo.js) en las unidades de la geometría g (px de pantalla; u al imprimir):
+  // { x0, y0, x1, y1 } o null. Los desplazamientos vienen en EMU (9.525 por píxel).
+  function rectanguloAncla(a, g) {
+    const x = (col, dx) => g.x(col) + dx / 9525, y = (fila, dy) => g.y(fila) + dy / 9525;
+    if (a.tipo === 'abs') return a.pos && a.ext ? { x0: a.pos.x / 9525, y0: a.pos.y / 9525, x1: (a.pos.x + a.ext.w) / 9525, y1: (a.pos.y + a.ext.h) / 9525 } : null;
+    if (!a.de) return null;
+    const x0 = x(a.de.col, a.de.dx), y0 = y(a.de.fila, a.de.dy);
+    if (a.tipo === 'uno') return a.ext ? { x0, y0, x1: x0 + a.ext.w / 9525, y1: y0 + a.ext.h / 9525 } : null;
+    return a.a ? { x0, y0, x1: x(a.a.col, a.a.dx), y1: y(a.a.fila, a.a.dy) } : null;
+  }
+
+  globalThis.XlsxGeometria = { crear, altoTexto, mdwDe, pxAncho, pxAlto, rectanguloAncla };
 })();

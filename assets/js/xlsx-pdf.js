@@ -81,6 +81,9 @@
     for (let c = 0; c < nC; c++) X[c + 1] = X[c] + ancho(c);
     for (let f = 0; f < nF; f++) Y[f + 1] = Y[f] + alto(f);
     return {
+      // los objetos (imágenes, formas, gráficos) no siguen las celdas impresas: Excel toma su posición en píxeles de pantalla y la escala entera
+      // por la razón impresora/pantalla de cada eje (medido: 3 imágenes a ±0,5 pt)
+      pantalla: g, escalaX: p.mdwImpresora / g.mdw * PT_PX / (U_PT * s), escalaY: p.kFila * PT_PX / (U_PT * s),
       mdw: p.mdwImpresora * PT_PX / U_PT, // sin escala: el dígito mide lo mismo respecto a la letra
       anchoCol: (c) => (c < nC ? X[c + 1] - X[c] : 0), altoFila: (f) => (f < nF ? Y[f + 1] - Y[f] : 0),
       x: (c) => X[Math.min(c, nC)], y: (f) => Y[Math.min(f, nF)],
@@ -112,7 +115,7 @@
     const e = p.escala / 100;
     // a escala menor que 100 % Excel deja el texto más abajo y a la derecha de lo que da la escala exacta (medido: el relleno de la celda no se achica con la escala; ≈ +0,95 pt a la izquierda, +0,25 a la derecha y +1,05 hacia abajo por cada 100 % que falta)
     const desplazarTexto = { x: 0.95 * (1 - e) / f, xDer: 0.25 * (1 - e) / f, xCen: 0, y: 1.05 * (1 - e) / f };
-    const comun = { desplazarTexto, fino: true, idioma: ctxP.idioma, cuadricula: !!op.cuadricula, colorRejilla: '#000000', grosorRejilla: 0.96 / f, pxDe: estilo.pxDe };
+    const comun = { lienzo: ctx, desplazarTexto, fino: true, idioma: ctxP.idioma, cuadricula: !!op.cuadricula, colorRejilla: '#000000', grosorRejilla: 0.96 / f, pxDe: estilo.pxDe };
     const R = (f0, c0, f1, c1, x, y) => XlsxDibujo.dibujarRango(ctx, libro, hoja, G, { f0, c0, f1, c1 }, Object.assign({ x, y }, comun));
     const xCuerpo = ox + cabeW + anchoTit, yCuerpo = oy + cabeH + altoTit;
     R(pagina.f0, pagina.c0, pagina.f1, pagina.c1, xCuerpo, yCuerpo);
@@ -222,7 +225,8 @@
     await XlsxDibujo.cargarFuentes(libro);
     const usos = XlsxDibujo.usosDeFuentes(libro);
     for (const hf of ['Calibri', 'Arial', 'Times New Roman']) for (const [n, c] of [[false, false], [true, false], [false, true], [true, true]]) usos.push({ fuente: hf, negrita: n, cursiva: c });
-    await new LienzoPdf.Lienzo({ ancho: 1, alto: 1, anchoPt: 1, altoPt: 1 }).precargarFuentes(usos); // las deja listas para dibujar sin esperar
+    const auxiliar = new LienzoPdf.Lienzo({ ancho: 1, alto: 1, anchoPt: 1, altoPt: 1 });
+    await auxiliar.precargarFuentes(usos); // las deja listas para dibujar sin esperar
     const normal = libro.estilos.xf(0).fuente;
     const estilo = { normal: { nombre: normal.nombre || 'Calibri', tam: normal.tam || 11 } };
     // El tope vale para todo el libro: cada hoja recibe lo que queda y, al agotarse, las hojas que faltan no se calculan.
@@ -232,6 +236,7 @@
     for (const i of indices) {
       if (acumuladas >= tope) { truncado = true; break; }
       const hoja = await libro.cargarHoja(i);
+      await XlsxDibujo.prepararObjetos(libro, hoja, auxiliar); // imágenes, formas y gráficos de la hoja
       const g = XlsxDibujo.geometria(libro, hoja);
       const p = XlsxPaginas.calcular(libro, hoja, g, { maxPaginas: tope - acumuladas });
       acumuladas += p.paginas.length;
