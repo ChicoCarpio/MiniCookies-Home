@@ -1,4 +1,4 @@
-# Oráculo del formato de número (etapa 1): cada caso de casos-formato.json se escribe en una celda,
+﻿# Oráculo del formato de número (etapa 1): cada caso de casos-formato.json se escribe en una celda,
 # se le pone el formato y se lee lo que muestra Excel (Range.Text) con la columna bien ancha.
 # También lee los errores (#DIV/0! etc.), los formatos integrados (NumberFormatLocal por id) y
 # el formato que Excel asigna a "General" según el idioma.

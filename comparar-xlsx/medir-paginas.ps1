@@ -1,4 +1,4 @@
-# Paginación de Excel (etapa 1): dónde corta las páginas y qué factor usa en "ajustar a".
+﻿# Paginación de Excel (etapa 1): dónde corta las páginas y qué factor usa en "ajustar a".
 # Para cada configuración arma una hoja con filas de altos conocidos y columnas de anchos conocidos y lee
 # HPageBreaks / VPageBreaks (posición y tipo), Pages.Count y PageSetup.Zoom.
 # Uso: powershell -ExecutionPolicy Bypass -File medir-paginas.ps1  → medidas\paginas.json

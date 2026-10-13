@@ -1,4 +1,4 @@
-# Ancho y alto IMPRESOS de columnas y filas (etapa 1).
+﻿# Ancho y alto IMPRESOS de columnas y filas (etapa 1).
 # En pantalla una columna de 8.43 caracteres mide 48 pt (64 px), pero en la paginación entran menos columnas
 # de las que salen de ese cálculo. Aquí se halla el ancho de página mínimo (moviendo el margen derecho, o el inferior
 # para las filas) con el que caben k columnas / filas, y de ahí el ancho impreso de cada una.

@@ -1,4 +1,4 @@
-# Primera medición del motor de Excel (etapa 1): lo que la norma no dice y Excel sí.
+﻿# Primera medición del motor de Excel (etapa 1): lo que la norma no dice y Excel sí.
 #   - ancho de dígito (MDW) y ancho/alto por defecto según la fuente del estilo Normal
 #   - ancho en puntos de columnas con ancho conocido (para verificar las fórmulas de la norma)
 #   - alto de fila por fuente y tamaño

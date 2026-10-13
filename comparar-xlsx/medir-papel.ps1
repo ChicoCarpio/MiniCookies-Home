@@ -1,4 +1,4 @@
-# Tamaño de página (puntos) que exporta Excel para cada código paperSize (1-118).
+﻿# Tamaño de página (puntos) que exporta Excel para cada código paperSize (1-118).
 # Se lee el MediaBox del PDF que genera ExportAsFixedFormat. Ojo: depende de lo que acepte la impresora
 # activa ("Microsoft Print to PDF"); los códigos que no acepta salen como Letter o dan error.
 # Uso: powershell -ExecutionPolicy Bypass -File medir-papel.ps1  → medidas\papel.json
