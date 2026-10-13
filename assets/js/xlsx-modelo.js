@@ -347,6 +347,8 @@
       imprimir: { margenes: null, pagina: null, opciones: null, encabezadoPie: null, saltosFila: [], saltosCol: [], ajustarAPagina: false, autoSaltos: true },
       filtroAuto: null,
       proteccion: null,
+      celdasVm: new Map(),         // celdas con valor enriquecido (imagen en la celda): fila × 16384 + columna → índice vm de metadata.xml
+      imagenesCelda: new Map(),    // las mismas celdas → ruta de la imagen en el paquete (se resuelve al cargar la hoja)
       hilos: [],                   // comentarios en hilo: { ref, f, c, entradas: [{ autor, fecha, texto, respuesta }] }
       comentarios: [],             // notas de celda: { f, c, autor, texto, runs, visible, ancla, ancho, alto, relleno } (comments + VML)
       minigraficos: [],            // grupos de minigráficos x14: { tipo, colores…, items: [{ f, sqref }] }
@@ -365,6 +367,7 @@
     let seccion = '';
     let sheetView = true;
     let enVistasPersonalizadas = false;
+    let enFiltro = null, colFiltro = null;   // autoFilter y filterColumn abiertos
     let cf = null, regla = null, enFormulaCf = false, validacion = null, enFormulaVal = null, hf = null, enHf = null;
     // Extensiones x14 de Excel 2010 (extLst): barras de datos con eje y negativos, conjuntos de iconos propios y minigráficos.
     // Las reglas con su par clásico se unen por el id (x14:id); las que solo existen en x14 se agregan como reglas nuevas.
@@ -461,6 +464,7 @@
         }
       }
       const i = C.agregar(celda.f, celda.c, tipo, valor, celda.estilo);
+      if (celda.vm > 0 && hoja.celdasVm.size < MAX_ELEMENTOS) hoja.celdasVm.set(celda.f * 16384 + celda.c, celda.vm);
       if (celda.rico) C.ricos.set(i, celda.rico);
       if (celda.formula) {
         const fx = celda.formula;
@@ -528,7 +532,7 @@
             let c = colSiguiente;
             if (a.r !== undefined) { const d = decodificarDireccion(a.r); if (d && d.f >= 0 && d.f < MAX_FILAS && d.c < MAX_COLUMNAS) { c = d.c; if (d.f !== fila) fila = d.f; } }
             colSiguiente = c + 1;
-            celda = { f: fila, c, t: a.t || 'n', estilo: parseInt(a.s, 10) || 0, v: null, is: '', formula: null, rico: null };
+            celda = { f: fila, c, t: a.t || 'n', estilo: parseInt(a.s, 10) || 0, v: null, is: '', formula: null, rico: null, vm: a.vm !== undefined ? parseInt(a.vm, 10) || 0 : 0 };
             if (vacio) cerrarCelda();
             break;
           }
@@ -561,7 +565,9 @@
           }
           case 'headerFooter': hf = { distintoPrimera: a.differentFirst === '1' || a.differentFirst === 'true', distintoParImpar: a.differentOddEven === '1' || a.differentOddEven === 'true', escalar: a.scaleWithDoc !== '0' && a.scaleWithDoc !== 'false', alinear: a.alignWithMargins !== '0' && a.alignWithMargins !== 'false', impar: {}, par: {}, primera: {} }; hoja.imprimir.encabezadoPie = hf; break;
           case 'oddHeader': case 'oddFooter': case 'evenHeader': case 'evenFooter': case 'firstHeader': case 'firstFooter': enHf = nombre; textoCelda = ''; break;
-          case 'autoFilter': if (!hoja.filtroAuto) hoja.filtroAuto = { ref: a.ref || null }; break;
+          case 'autoFilter': if (!hoja.filtroAuto) hoja.filtroAuto = { ref: a.ref || null, columnas: new Map() }; enFiltro = hoja.filtroAuto; break;
+          case 'filterColumn': if (enFiltro && enFiltro.columnas.size < 16384) { colFiltro = { col: parseInt(a.colId, 10) || 0, oculto: a.hiddenButton === '1' || a.hiddenButton === 'true', filtrada: false }; enFiltro.columnas.set(colFiltro.col, colFiltro); } break;
+          case 'filters': case 'customFilters': case 'top10': case 'colorFilter': case 'dynamicFilter': case 'iconFilter': if (colFiltro) colFiltro.filtrada = true; break;
           case 'sheetProtection': hoja.proteccion = { hoja: a.sheet === '1' || a.sheet === 'true', objetos: a.objects === '1', escenarios: a.scenarios === '1', conClave: !!(a.password || a.hashValue || a.algorithmName) }; break;
           case 'drawing': hoja.partes.dibujoRid = a.id || null; break;
           case 'legacyDrawing': hoja.partes.dibujoVmlRid = a.id || null; break;
@@ -601,6 +607,8 @@
           case 'sheetData': seccion = ''; break;
           case 'rowBreaks': case 'colBreaks': seccion = ''; break;
           case 'conditionalFormatting': cf = null; regla = null; break;
+          case 'autoFilter': enFiltro = null; colFiltro = null; break;
+          case 'filterColumn': colFiltro = null; break;
           case 'cfRule': regla = null; break;
           case 'formula': if (enFormulaCf && regla) regla.formulas.push(textoCelda); else if (enFormulaVal && validacion) validacion.formula1 = textoCelda; enFormulaCf = false; enFormulaVal = null; break;
           case 'formula1': if (validacion) validacion.formula1 = textoCelda; enFormulaVal = null; break;
@@ -727,6 +735,7 @@
     libro.textos = leerTextosCompartidos(relTextos ? await textoDe(zip, relTextos.destino) : null);
     libro.estilos = XlsxEstilos.leer(relEstilos ? await textoDe(zip, relEstilos.destino) : null, relTema ? await textoDe(zip, relTema.destino) : null);
     libro.rutaTema = relTema ? relTema.destino : null;
+    libro.relaciones = rels;
     const relPersonas = relDe('person');
     libro.rutaPersonas = relPersonas ? relPersonas.destino : null;   // quiénes escriben los comentarios en hilo
     libro.tieneMacros = !!rels.find((r) => r.tipo === 'vbaProject');
@@ -820,6 +829,68 @@
     return lista;
   }
 
+  // Imágenes dentro de las celdas (Excel 365, "colocar en la celda"): la celda trae vm="k" (1 en adelante) → xl/metadata.xml (valueMetadata: el k-ésimo
+  // bk → rc v = índice en futureMetadata; su xlrd:rvb i = índice del valor en rdrichvalue.xml) → ese rv, cuya estructura (rdrichvaluestructure.xml)
+  // dice qué <v> es el _rvRel:LocalImageIdentifier → richValueRel.xml (la rel r:id número ese) → su .rels → la imagen. Devuelve k → ruta.
+  async function leerImagenesEnCeldas(libro) {
+    const salida = new Map();
+    const rels = libro.relaciones || [];
+    const destino = (tipo) => { const r = rels.find((x) => x.tipo === tipo && !x.externa); return r ? r.destino : null; };
+    const rutaMeta = destino('sheetMetadata'), rutaValores = destino('rdRichValue'), rutaEstructura = destino('rdRichValueStructure'), rutaRel = destino('richValueRel');
+    if (!rutaMeta || !rutaValores || !rutaEstructura || !rutaRel) return salida;
+    const [meta, valores, estructura, rel] = await Promise.all([textoDe(libro.zip, rutaMeta), textoDe(libro.zip, rutaValores), textoDe(libro.zip, rutaEstructura), textoDe(libro.zip, rutaRel)]);
+    if (meta === null || valores === null || estructura === null || rel === null) return salida;
+    // 1. metadata: vm → índice del bloque de futuro, y de este → índice del valor
+    const valueMeta = [], futuro = [];
+    let enValueMeta = false, enFuturo = false;
+    XmlLigero.recorrer(meta, {
+      abrir(nombre, a) {
+        if (nombre === 'valueMetadata') enValueMeta = true;
+        else if (nombre === 'futureMetadata' && a.name === 'XLRICHVALUE') enFuturo = true;
+        else if (enValueMeta && nombre === 'rc') valueMeta.push(parseInt(a.v, 10));
+        else if (enFuturo && nombre === 'rvb') futuro.push(parseInt(a.i, 10));
+      },
+      cerrar(nombre) { if (nombre === 'valueMetadata') enValueMeta = false; else if (nombre === 'futureMetadata') enFuturo = false; },
+    });
+    // 2. estructuras: para cada una, la posición de la clave _rvRel:LocalImageIdentifier
+    const estructuras = [];
+    let est = null;
+    XmlLigero.recorrer(estructura, {
+      abrir(nombre, a) {
+        if (nombre === 's') { est = { tipo: a.t || '', claves: [] }; estructuras.push(est); }
+        else if (nombre === 'k' && est) est.claves.push(a.n || '');
+      },
+      cerrar(nombre) { if (nombre === 's') est = null; },
+    });
+    // 3. valores
+    const rvs = [];
+    let rv = null, enV = false;
+    XmlLigero.recorrer(valores, {
+      abrir(nombre, a) {
+        if (nombre === 'rv' && rvs.length < MAX_ELEMENTOS) { rv = { s: parseInt(a.s, 10), v: [] }; rvs.push(rv); }
+        else if (nombre === 'v' && rv) { enV = true; rv.v.push(''); }
+      },
+      texto(t) { if (enV && rv) rv.v[rv.v.length - 1] += t; },
+      cerrar(nombre) { if (nombre === 'v') enV = false; else if (nombre === 'rv') rv = null; },
+    });
+    // 4. richValueRel: orden de las rel → su r:id → destino de la imagen
+    const ids = [];
+    XmlLigero.recorrer(rel, { abrir(nombre, a) { if (nombre === 'rel') ids.push(a.id || a['r:id'] || ''); } });
+    const relsRel = await leerRelaciones(libro.zip, rutaRel);
+    const porId = new Map(relsRel.map((r) => [r.id, r]));
+    valueMeta.forEach((rc, k) => {
+      const iv = futuro[rc];
+      const valor = rvs[iv];
+      const e = valor && estructuras[valor.s];
+      if (!e || e.tipo !== '_localImage') return;
+      const pos = e.claves.indexOf('_rvRel:LocalImageIdentifier');
+      const idx = pos >= 0 ? parseInt(valor.v[pos], 10) : NaN;
+      const r = Number.isFinite(idx) ? porId.get(ids[idx]) : null;
+      if (r && !r.externa && r.tipo === 'image') salida.set(k + 1, r.destino);
+    });
+    return salida;
+  }
+
   // Comentarios en hilo (Excel 365): xl/threadedComments/threadedCommentN.xml, con los nombres de xl/persons/person.xml.
   // Devuelve [{ ref, f, c, entradas: [{ autor, fecha (ISO UTC), texto, respuesta }] }] en el orden del archivo (cada respuesta tras su comentario).
   function leerHilos(xml, personas) {
@@ -881,7 +952,7 @@
   }
   // Una tabla (xl/tables/tableN.xml): su rango, si lleva encabezado y totales, y las opciones de estilo.
   function leerTabla(texto) {
-    let tabla = null;
+    let tabla = null, enFiltroT = null, colFiltroT = null;
     XmlLigero.recorrer(texto, {
       abrir(nombre, a) {
         if (nombre === 'table' && !tabla) {
@@ -889,7 +960,10 @@
           if (!ref) return;
           const encabezados = a.headerRowCount === undefined ? 1 : (parseInt(a.headerRowCount, 10) > 0 ? 1 : 0);
           const totales = parseInt(a.totalsRowCount, 10) > 0 ? 1 : 0;
-          tabla = { nombre: a.name || a.displayName || '', ref, encabezados, totales, estilo: null, primeraCol: false, ultimaCol: false, bandasFilas: false, bandasCols: false };
+          tabla = { nombre: a.name || a.displayName || '', ref, encabezados, totales, estilo: null, primeraCol: false, ultimaCol: false, bandasFilas: false, bandasCols: false, filtro: null };
+        } else if (nombre === 'autoFilter' && tabla && !tabla.filtro) { tabla.filtro = { columnas: new Map() }; enFiltroT = tabla.filtro;
+        } else if (nombre === 'filterColumn' && enFiltroT && enFiltroT.columnas.size < 16384) { colFiltroT = { col: parseInt(a.colId, 10) || 0, oculto: a.hiddenButton === '1' || a.hiddenButton === 'true', filtrada: false }; enFiltroT.columnas.set(colFiltroT.col, colFiltroT);
+        } else if (colFiltroT && (nombre === 'filters' || nombre === 'customFilters' || nombre === 'top10' || nombre === 'colorFilter' || nombre === 'dynamicFilter' || nombre === 'iconFilter')) { colFiltroT.filtrada = true;
         } else if (nombre === 'tableStyleInfo' && tabla) {
           tabla.estilo = a.name || null;
           tabla.primeraCol = a.showFirstColumn === '1' || a.showFirstColumn === 'true';
@@ -931,6 +1005,11 @@
         const tc = await textoDe(libro.zip, hoja.partes.comentarios);
         const tv = hoja.partes.dibujoVml ? await textoDe(libro.zip, hoja.partes.dibujoVml) : null;
         if (tc !== null) hoja.comentarios = leerComentarios(tc, tv);
+      }
+      if (hoja.celdasVm.size) { // imágenes en celdas
+        if (!libro._imagenesEnCeldas) libro._imagenesEnCeldas = leerImagenesEnCeldas(libro).catch(() => new Map());
+        const porVm = await libro._imagenesEnCeldas;
+        for (const [clave, vm] of hoja.celdasVm) { const ruta = porVm.get(vm); if (ruta) hoja.imagenesCelda.set(clave, ruta); }
       }
       const rh = hoja.relaciones.find((r) => r.tipo === 'threadedComment');
       if (rh) { // los hilos reemplazan a la nota de relleno ("[Comentario encadenado]…") que Excel deja para las versiones viejas

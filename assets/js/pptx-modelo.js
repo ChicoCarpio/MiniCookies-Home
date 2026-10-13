@@ -1011,5 +1011,8 @@ const PptxModelo = (() => {
     return { anclajes, elementos: (ancla, motivos) => leerArbol(ancla, ctx, motivos), imagen };
   }
 
-  return { abrir, graficoSuelto, color, dibujoExcel };
+  // El cargador de imágenes de un paquete (zip): imagen(ruta) → { fuente, ancho, alto, dpiX, dpiY } (las imágenes dentro de las celdas de Excel)
+  const cargadorImagenes = (zip) => paquete(zip).imagen;
+
+  return { abrir, graficoSuelto, color, dibujoExcel, cargadorImagenes };
 })();

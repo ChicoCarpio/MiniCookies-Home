@@ -79,6 +79,19 @@
     }
     if (!tablas.length) return null;
 
+    // Las filas visibles del cuerpo de una tabla (null si no hay ninguna oculta): ordinal(f) = su posición entre las visibles, -1 si está oculta.
+    function filasVisibles(T) {
+      if (T.vis !== undefined) return T.vis;
+      const ocultas = [];
+      for (let f = T.fb0; f <= T.fb1 && f - T.fb0 < 100000; f++) { const i = hoja.filas.get(f); if (i && i.oculta) ocultas.push(f); }
+      if (!ocultas.length) { T.vis = null; return null; }
+      const visibles = [];
+      for (let f = T.fb0; f <= T.fb1 && f - T.fb0 < 100000; f++) { const i = hoja.filas.get(f); if (!(i && i.oculta)) visibles.push(f); }
+      const pos = new Map(visibles.map((f, k) => [f, k]));
+      T.vis = { n: visibles.length, ordinal: (f) => (pos.has(f) ? pos.get(f) : -1), fila: (k) => visibles[Math.max(0, Math.min(visibles.length - 1, k))] };
+      return T.vis;
+    }
+
     // La región (rectángulo) de cada elemento que cubre la celda, o null.
     function region(T, k, f, c) {
       const { t } = T;
@@ -91,9 +104,13 @@
         case 5: case 6: {
           if (!t.bandasFilas || f < T.fb0 || f > T.fb1) return null;
           const tam = (T.els[5] || T.els[6] || { tam: 1 }).tam || 1;
-          const banda = Math.floor((f - T.fb0) / tam);
+          // las bandas cuentan solo las filas visibles (con un filtro aplicado Excel vuelve a alternar los colores entre las que quedan; medido en 41-autofiltro)
+          const vis = filasVisibles(T), ordinal = vis ? vis.ordinal(f) : f - T.fb0;
+          if (ordinal < 0) return null;
+          const banda = Math.floor(ordinal / tam);
           if ((banda % 2 === 0) !== (k === 5)) return null;
-          return { f0: T.fb0 + banda * tam, f1: Math.min(T.fb1, T.fb0 + (banda + 1) * tam - 1), c0: T.c0, c1: T.c1 };
+          if (!vis) return { f0: T.fb0 + banda * tam, f1: Math.min(T.fb1, T.fb0 + (banda + 1) * tam - 1), c0: T.c0, c1: T.c1 };
+          return { f0: vis.fila(banda * tam), f1: vis.fila(Math.min(vis.n - 1, (banda + 1) * tam - 1)), c0: T.c0, c1: T.c1 };
         }
         case 7: case 8: {
           if (!t.bandasCols || f < T.fb0 || f > T.fb1) return null;

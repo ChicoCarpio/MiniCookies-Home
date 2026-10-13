@@ -394,6 +394,19 @@
         }
       }
 
+      // 2d. imágenes dentro de las celdas (Excel 365): cabe entera en la celda, pegada abajo y a la izquierda
+      if (hoja.imagenesCelda && hoja.imagenesCelda.size && typeof XlsxObjetos !== 'undefined') {
+        for (const f of filas) {
+          for (const c of cols) {
+            const clave = f * 16384 + c;
+            const ruta = hoja.imagenesCelda.get(clave);
+            if (!ruta || cubierta.has(clave)) continue;
+            const m = combinada.get(clave);
+            XlsxObjetos.dibujarCelda(ctx, hoja, ruta, X(c), Y(f), X((m ? m.c1 : c) + 1), Y((m ? m.f1 : f) + 1), { lienzo: op.lienzo, margenIzq: FINO ? 0.12 * UIMP / 0.96 : 0 });
+          }
+        }
+      }
+
       // 3. bordes
       const lado = (f, c, cual) => { if (f < 0 || c < 0 || f > 1048575 || c > 16383) return null; const b = estiloDe(f, c).borde; return b && b[cual] ? b[cual] : null; };
       // la línea que comparten dos celdas: gana el borde más pesado, luego el más oscuro y luego el propio de la celda (no el de un estilo de tabla)
@@ -464,6 +477,7 @@
         const esNumero = C.tipo[k] === TIPO.numero;
         if (esNumero && C.valor[k] === 0 && hoja.vista.ceros === false) continue; // "mostrar ceros" desactivado
         const efecto = cond && cond.para(f, c);
+        if (hoja.imagenesCelda && hoja.imagenesCelda.has(clave) && hoja._celdaImagenes && hoja._celdaImagenes.has(hoja.imagenesCelda.get(clave))) continue; // una celda con imagen no escribe su valor de error (#VALOR!)
         if (efecto && ((efecto.barra && !efecto.barra.mostrarValor) || (efecto.icono && !efecto.icono.mostrarValor))) continue; // "mostrar solo la barra / el icono"
         const xf = estiloDe(f, c);
         const f1 = m ? m.f1 : f, c1 = m ? m.c1 : c;
@@ -596,6 +610,15 @@
           if (fu.tachado) ctx.fillRect(RD(x), y - Math.round(px * 0.3), RD(w), 1);
         }
         ctx.restore();
+      }
+      // 4b. botones del autofiltro (solo en pantalla: Excel no los imprime)
+      if (!FINO && op.filtros !== false && typeof XlsxFiltros !== 'undefined' && (hoja.filtroAuto || (hoja.tablas && hoja.tablas.length))) {
+        if (!hoja._botonesFiltro) hoja._botonesFiltro = XlsxFiltros.botones(hoja);
+        for (const b of hoja._botonesFiltro) {
+          if (b.f < r.f0 || b.f > r.f1 || b.c < r.c0 || b.c > r.c1 || g.altoFila(b.f) <= 0 || g.anchoCol(b.c) <= 0) continue;
+          const m = combinada.get(b.f * 16384 + b.c);
+          XlsxFiltros.dibujar(ctx, b, X(b.c), Y(b.f), X((m ? m.c1 : b.c) + 1), Y((m ? m.f1 : b.f) + 1));
+        }
       }
       // 5. objetos de la hoja (imágenes, formas, gráficos…): encima de todo, con el motor de PowerPoint
       if (op.objetos !== false && hoja.objetos && hoja.objetos.length && typeof XlsxObjetos !== 'undefined') XlsxObjetos.dibujar(ctx, hoja, g, r, { x: ox, y: oy, lienzo: op.lienzo });
@@ -740,7 +763,9 @@
   const prepararObjetos = async (libro, hoja, lienzo) => {
     if (typeof XlsxCondicional !== 'undefined' && hoja.formatosCondicionales && hoja.formatosCondicionales.length) await XlsxCondicional.cargar(libro, hoja);
     if (typeof XlsxMinigraficos !== 'undefined' && hoja.minigraficos && hoja.minigraficos.length) await XlsxMinigraficos.cargar(libro, hoja);
-    return typeof XlsxObjetos === 'undefined' ? [] : XlsxObjetos.preparar(libro, hoja, lienzo);
+    if (typeof XlsxObjetos === 'undefined') return [];
+    if (hoja.imagenesCelda && hoja.imagenesCelda.size) await XlsxObjetos.prepararCeldas(libro, hoja, lienzo);
+    return XlsxObjetos.preparar(libro, hoja, lienzo);
   };
 
   globalThis.XlsxDibujo = { geometria, dibujarRango, prepararObjetos, dibujarVista, cargarFuentes, usosDeFuentes, medirDigito, tamPx, fuenteCss, anchoTexto, config: CONFIG };

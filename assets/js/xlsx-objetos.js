@@ -12,6 +12,7 @@
 (function () {
   const EMU_PX = 9525;           // un píxel de pantalla a 96 dpi (y una unidad "u" del PDF a escala 100 %)
   const MAX_OBJETOS = 5000;
+  const MAX_IMAGENES_CELDA = 2000;
 
   async function preparar(libro, hoja, lienzo) {
     if (hoja.objetos) return hoja.objetos;
@@ -32,6 +33,39 @@
     }
     try { hoja._objetosImagenes = await PptxDibujo.precargar((r) => dib.imagen(r), null, todos, lienzo || null); } catch (e) { /* sin imágenes */ }
     return hoja.objetos;
+  }
+
+  // Las imágenes dentro de las celdas (hoja.imagenesCelda: celda → ruta): se cargan una vez por ruta y se dibujan con el mismo motor.
+  async function prepararCeldas(libro, hoja, lienzo) {
+    if (hoja._celdaImagenes) return hoja._celdaImagenes;
+    hoja._celdaImagenes = new Map();
+    if (!hoja.imagenesCelda || !hoja.imagenesCelda.size || typeof PptxModelo === 'undefined' || typeof PptxDibujo === 'undefined' || !PptxModelo.cargadorImagenes) return hoja._celdaImagenes;
+    const rutas = [...new Set(hoja.imagenesCelda.values())].slice(0, MAX_IMAGENES_CELDA);
+    const elementos = rutas.map((ruta) => ({ tipo: 'imagen', ruta, xfrm: { x: 0, y: 0, w: 0, h: 0, rot: 0, flipH: false, flipV: false }, geometria: null, relleno: null, linea: null, sombra: null,
+      imagen: { tipo: 'imagen', ruta, recorte: null, efectos: [], alfa: 1, rotarConForma: true } }));
+    try {
+      const imagenes = await PptxDibujo.precargar(PptxModelo.cargadorImagenes(libro.zip), null, elementos, lienzo || null);
+      elementos.forEach((el) => { const im = imagenes.get(el.ruta); if (im && im.ancho > 0 && im.alto > 0) hoja._celdaImagenes.set(el.ruta, { el, im, imagenes }); });
+    } catch (e) { /* sin imágenes */ }
+    return hoja._celdaImagenes;
+  }
+
+  // La imagen de una celda: cabe entera en la celda (sin deformarse), pegada a su borde de abajo y a su borde izquierdo (medido en el PDF de Excel).
+  // x0, y0, x1, y1: la celda (o la combinada) en unidades del lienzo; px: unidades del lienzo por píxel de pantalla.
+  function dibujarCelda(ctx, hoja, ruta, x0, y0, x1, y1, op) {
+    const d = hoja._celdaImagenes && hoja._celdaImagenes.get(ruta);
+    if (!d || typeof PptxDibujo === 'undefined') return;
+    op = op || {};
+    const W = x1 - x0 - (op.margenIzq || 0), H = y1 - y0;
+    if (!(W > 0.5) || !(H > 0.5)) return;
+    const k = Math.min(W / d.im.ancho, H / d.im.alto);
+    const w = d.im.ancho * k, h = d.im.alto * k;
+    const el = { ...d.el, xfrm: { ...d.el.xfrm, x: 0, y: 0, w: w * EMU_PX, h: h * EMU_PX } };
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+    ctx.translate(x0 + (op.margenIzq || 0), y1 - h);
+    try { PptxDibujo.dibujarElementos(ctx, [el], d.imagenes, 1 / EMU_PX, op.lienzo || null); } catch (e) { /* una imagen que no se puede dibujar no tumba la hoja */ }
+    ctx.restore();
   }
 
   // Dibuja los objetos que tocan el rango r, con el mismo origen que dibujarRango (op.x, op.y: dónde cae la esquina del rango).
@@ -58,5 +92,5 @@
     }
   }
 
-  globalThis.XlsxObjetos = { preparar, dibujar };
+  globalThis.XlsxObjetos = { preparar, prepararCeldas, dibujar, dibujarCelda };
 })();
