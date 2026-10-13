@@ -538,5 +538,34 @@
     }
   }
 
-  globalThis.XlsxPaquete = { reordenarHojas, leerRels, resolver, limpiarHuerfanas, quitarCalcChain, marcarRecalculo, rutaLibroDe: async (zip) => { const p = (await leerRels(zip, '')).find((r) => r.tipo === R_OFICINA); return p ? p.destino : 'xl/workbook.xml'; } };
+  // Nombres de las hojas que Excel no abriría sin reparar porque algo que usan ya no está en el paquete: la propia hoja, o cualquier parte a la
+  // que llegan por relaciones (dibujo, tabla, tabla dinámica y su caché, comentarios…) hasta 4 niveles. Una relación a otro libro (externa) no cuenta.
+  // Sirve a "reparar": quita esas hojas con reordenarHojas y el resto del libro queda como estaba.
+  async function hojasConPartesRotas(zip) {
+    const principal = (await leerRels(zip, '')).find((r) => r.tipo === R_OFICINA);
+    const rutaLibro = principal ? principal.destino : 'xl/workbook.xml';
+    const wb = await textoDe(zip, rutaLibro);
+    if (wb === null) throw new Error(rutaLibro);
+    const hojas = X.hijos(X.hijo(X.analizar(wb, { profundidad: 3 }), 'sheets'), 'sheet');
+    const relsLibro = await leerRels(zip, rutaLibro);
+    const rotas = [];
+    for (const h of hojas) {
+      const rel = relsLibro.find((r) => r.id === X.attr(h, 'id'));
+      if (!rel || rel.externa) { rotas.push(h.attrs.name); continue; }
+      const vistos = new Set();
+      let rota = false;
+      const visitar = async (parte, nivel) => {
+        if (rota || vistos.has(parte) || vistos.size > 2000) return;
+        vistos.add(parte);
+        if (!zip.file(real(zip, parte))) { rota = true; return; }
+        if (nivel >= 4) return;
+        for (const r of await leerRels(zip, parte)) if (!r.externa) await visitar(r.destino, nivel + 1);
+      };
+      await visitar(rel.destino, 0);
+      if (rota) rotas.push(h.attrs.name);
+    }
+    return rotas;
+  }
+
+  globalThis.XlsxPaquete = { hojasConPartesRotas, reordenarHojas, leerRels, resolver, limpiarHuerfanas, quitarCalcChain, marcarRecalculo, rutaLibroDe: async (zip) => { const p = (await leerRels(zip, '')).find((r) => r.tipo === R_OFICINA); return p ? p.destino : 'xl/workbook.xml'; } };
 })();

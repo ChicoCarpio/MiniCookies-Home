@@ -10,7 +10,7 @@
 //     celdas de una fórmula matricial y encabezados de tabla (cambiarlos sin cambiar la tabla hace que Excel repare el archivo).
 //
 //   await XlsxEscritor.crearLibro(hojas, opciones) → Uint8Array
-//     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n }]; valor: número,
+//     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n, autofiltro?: bool (botones de filtro sobre todo el rango) }]; valor: número,
 //     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy'; hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
 (function () {
@@ -284,7 +284,7 @@
     let totalTextos = 0;
     const formatos = new Map();   // código de formato → índice de cellXfs (se añaden después de los de ESTILO)
     const estiloDeFormato = (codigo) => {
-      if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[ -]/.test(codigo)) return 0;
+      if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) return 0;
       if (!formatos.has(codigo)) { if (formatos.size >= MAX_FORMATOS) return 0; formatos.set(codigo, 6 + formatos.size); }
       return formatos.get(codigo);
     };
@@ -336,6 +336,7 @@
       return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
         + `<dimension ref="A1${maxCol && filas.length ? ':' + numeroACol(maxCol - 1) + filas.length : ''}"/>` + congelar + '<sheetFormatPr defaultRowHeight="15"/>'
         + (anchos ? `<cols>${anchos}</cols>` : '') + `<sheetData>${filasXml.join('')}</sheetData>`
+        + (h.autofiltro && maxCol && filas.length ? `<autoFilter ref="A1:${numeroACol(maxCol - 1)}${filas.length}"/>` : '')
         + (comb.length ? `<mergeCells count="${comb.length}">${comb.map((r) => `<mergeCell ref="${r}"/>`).join('')}</mergeCells>` : '') + '</worksheet>';
     });
     const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';

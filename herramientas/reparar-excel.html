@@ -112,10 +112,17 @@ window.i18nPagina = {
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
 <script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -165,6 +172,9 @@ async function repararConservandoFormato(bytes) {
   const relaciones = await relacionesDeParte(zip, 'xl/workbook.xml');
   const hojas = [...libro.getElementsByTagName('sheet')];
   const sanas = [], quitadas = [];
+  // Además del XML ilegible, una hoja que usa una parte que ya no está (la caché de su tabla dinámica, un dibujo…) hace que Excel pida reparar.
+  let rotas = new Set();
+  try { rotas = new Set(await XlsxPaquete.hojasConPartesRotas(zip)); } catch (error) { console.warn('No se pudieron revisar las relaciones:', error); }
   for (const hoja of hojas) {
     const idRel = hoja.getAttributeNS(NS_RELACIONES_OOXML, 'id') || hoja.getAttribute('r:id');
     const rel = relaciones.find((r) => r.id === idRel);
@@ -173,7 +183,7 @@ async function repararConservandoFormato(bytes) {
       const doc = new DOMParser().parseFromString(await zip.file(rel.destino).async('string'), 'application/xml');
       sana = doc.getElementsByTagName('parsererror').length === 0;
     }
-    (sana ? sanas : quitadas).push(hoja.getAttribute('name'));
+    (sana && !rotas.has(hoja.getAttribute('name')) ? sanas : quitadas).push(hoja.getAttribute('name'));
   }
   if (sanas.length === 0) throw new Error(t('error-sin-datos'));
   if (quitadas.length === 0) return { bytes, quitadas };
@@ -182,8 +192,27 @@ async function repararConservandoFormato(bytes) {
   return { bytes: await zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE', mimeType: tipo }), quitadas };
 }
 
-// Nivel 2: vuelve a armar el libro con los datos que SheetJS pueda leer.
-function repararSoloDatos(bytes) {
+// Nivel 2: vuelve a armar el libro con los datos que se puedan leer. Primero con el motor propio (conserva fechas y formato de número,
+// anchos y celdas combinadas); si no puede, con SheetJS.
+async function repararSoloDatos(archivo, bytes) {
+  try {
+    const libro = await LectorHojas.abrir(archivo);
+    const hojasConDatos = [];
+    for (const h of libro.hojas) {
+      try {
+        const hoja = await libro.cargar(h.indice);
+        if (hoja.nfilas > 0) hojasConDatos.push({ nombre: h.nombre, filas: hoja.matrizValores(true), anchos: hoja.anchos, combinadas: hoja.combinadas });
+      } catch (errorHoja) { console.warn('Hoja ilegible:', h.nombre, errorHoja); }
+    }
+    if (hojasConDatos.length) {
+      const mensaje = hojasConDatos.length === libro.hojas.length
+        ? t('mensaje-todo-ok')
+        : t('mensaje-parcial').replace('{n}', hojasConDatos.length).replace('{total}', libro.hojas.length);
+      return { bytes: await XlsxEscritor.crearLibro(hojasConDatos), mensaje };
+    }
+  } catch (errorMotor) {
+    console.warn('El motor propio no pudo leer el archivo, se prueba con SheetJS:', errorMotor);
+  }
   const libro = XLSX.read(bytes, { type: 'array', cellNF: true, cellStyles: false, cellHTML: false });
   const hojasConDatos = libro.SheetNames.filter((nombre) => libro.Sheets[nombre] && libro.Sheets[nombre]['!ref']);
   if (hojasConDatos.length === 0) throw new Error(t('error-sin-datos'));
@@ -230,7 +259,7 @@ async function reparar(forzarNivel2) {
         console.warn('Nivel 1 no alcanzó, probando nivel 2:', errorNivel1);
       }
     }
-    const { bytes: reparados, mensaje } = repararSoloDatos(bytes);
+    const { bytes: reparados, mensaje } = await repararSoloDatos(archivoActual, bytes);
     mostrarResultado(reparados, `${nombreBase()}-reparado.xlsx`, mensaje, true, false);
   } catch (error) {
     alert(t('error-reparar') + ': ' + error.message);

@@ -110,6 +110,13 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/grafico-suelto.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -125,18 +132,20 @@ const botonGraficar = document.getElementById('botonGraficar');
 const contenedorGrafico = document.getElementById('contenedorGrafico');
 const controlesDescarga = document.getElementById('controlesDescarga');
 
-let filasDatos = [];
+let filasDatos = [];   // [{ textos: [...], valores: [...] }] (ver LectorHojas)
+let columnas = [];
 let hayGrafico = false;
 let comaDecimalArchivo = false;
 
 // Los números ya vienen convertidos desde lector-planillas.js; esto cubre
 // celdas de texto con números ("1.234,56" escrito a mano en un .xlsx), que
 // parseFloat leía como 1.234.
-function valorNumerico(valor) {
+function valorNumerico(valor, texto) {
+  if (valor && typeof valor === 'object' && typeof valor.valor === 'number') return valor.valor;   // número con formato
   if (typeof valor === 'number') return valor;
-  const numero = interpretarNumeroTexto(valor, comaDecimalArchivo);
+  const numero = interpretarNumeroTexto(texto, comaDecimalArchivo);
   if (numero !== null) return numero;
-  const alternativo = interpretarNumeroTexto(valor, !comaDecimalArchivo);
+  const alternativo = interpretarNumeroTexto(texto, !comaDecimalArchivo);
   return alternativo !== null ? alternativo : 0;
 }
 
@@ -145,26 +154,41 @@ async function mostrarArchivo(archivo) {
   contenedorGrafico.style.display = 'none';
   controlesDescarga.style.display = 'none';
 
-  let libro;
+  let hoja;
   try {
-    libro = await leerLibroDesdeArchivo(archivo);
+    const libro = await LectorHojas.abrir(archivo);
+    comaDecimalArchivo = libro.comaDecimalCsv !== undefined ? libro.comaDecimalCsv : (1.5).toLocaleString().includes(',');
+    hoja = await libro.cargar(libro.hojas[0].indice);
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
-  comaDecimalArchivo = libro.comaDecimalCsv !== undefined ? libro.comaDecimalCsv : (1.5).toLocaleString().includes(',');
-  const primeraHoja = libro.Sheets[libro.SheetNames[0]];
-  filasDatos = XLSX.utils.sheet_to_json(primeraHoja, { defval: '' });
+  // La primera fila da los nombres de las columnas (los repetidos llevan _2, _3…); cada celda guarda el texto que muestra Excel
+  // (para las etiquetas) y su valor (para el gráfico). Las filas totalmente vacías no cuentan.
+  const usados = new Map();
+  columnas = [];
+  for (let c = 0; c < hoja.ncols; c++) {
+    const base = hoja.texto(0, c).trim() || '#' + (c + 1);
+    const n = (usados.get(base) || 0) + 1;
+    usados.set(base, n);
+    columnas.push(n === 1 ? base : base + '_' + n);
+  }
+  filasDatos = [];
+  for (let r = 1; r < hoja.nfilas; r++) {
+    const textos = hoja.fila(r);
+    if (textos.every(x => x === '')) continue;
+    filasDatos.push({ textos, valores: textos.map((_, c) => hoja.valor(r, c)) });
+  }
 
   if (filasDatos.length === 0) {
     alert(t('error-sin-filas'));
     return;
   }
 
-  const columnas = Object.keys(filasDatos[0]);
-  columnaEtiquetas.innerHTML = columnas.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
-  columnaValores.innerHTML = columnas.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
-  if (columnas.length > 1) columnaValores.value = columnas[1];
+  const opciones = columnas.map((c, i) => `<option value="${i}">${escaparHtml(c)}</option>`).join('');
+  columnaEtiquetas.innerHTML = opciones;
+  columnaValores.innerHTML = opciones;
+  if (columnas.length > 1) columnaValores.value = '1';
 
   controles.style.display = 'flex';
 }
@@ -179,12 +203,13 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 // El gráfico lo dibuja el mismo motor que los de PowerPoint y Excel
 // (assets/js/grafico-suelto.js): 540 × 315 pt, a 8/3 píxeles por punto (pantallas de densidad doble).
 botonGraficar.addEventListener('click', async () => {
-  const claveEtiqueta = columnaEtiquetas.value;
-  const claveValor = columnaValores.value;
+  const iEtiqueta = Number(columnaEtiquetas.value);
+  const iValor = Number(columnaValores.value);
+  const claveValor = columnas[iValor];
   const tipo = document.getElementById('tipoGrafico').value;
 
-  const etiquetas = filasDatos.map(fila => String(fila[claveEtiqueta]));
-  const valores = filasDatos.map(fila => valorNumerico(fila[claveValor]));
+  const etiquetas = filasDatos.map(fila => fila.textos[iEtiqueta]);
+  const valores = filasDatos.map(fila => valorNumerico(fila.valores[iValor], fila.textos[iValor]));
 
   botonGraficar.disabled = true;
   try {

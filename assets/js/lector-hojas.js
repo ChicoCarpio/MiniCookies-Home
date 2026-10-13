@@ -7,10 +7,12 @@
 //
 // Uso:
 //   const libro = await LectorHojas.abrir(archivo);          // lanza Error si no se puede leer (mensaje listo para mostrar)
+//   libro.comaDecimalCsv                                     // solo CSV: true si el archivo usa coma decimal
 //   libro.motor                                              // true si lo leyó el motor propio; false si SheetJS
 //   libro.hojas                                              // [{ nombre, indice, estado: 'visible'|'oculta'|'muyOculta' }]  (sin hojas de gráfico)
 //   const hoja = await libro.cargar(i);                      // i = hojas[k].indice
 //   hoja.nfilas, hoja.ncols                                  // el rango ocupado (empieza en su primera celda con contenido)
+//   hoja.f0, hoja.c0                                         // dónde empieza ese rango en la hoja (desde 0); hoja.anchos / hoja.combinadas: en la hoja ('A1:B2'), no en el rango
 //   hoja.texto(r, c) / hoja.fila(r)                          // lo que Excel muestra (formato de número aplicado); r y c desde 0 dentro del rango
 //   hoja.valor(r, c)                                         // el valor para XlsxEscritor.crearLibro: número | texto | lógico | { error } | { valor, formato } | undefined
 //   hoja.formula(r, c)                                       // texto de la fórmula sin "=" (o null)
@@ -24,12 +26,18 @@
     return { idioma: en ? 'en' : 'es', decimal: en ? '.' : ',', miles: en ? ',' : '.' };
   }
 
-  const VACIA = { nfilas: 0, ncols: 0, texto: () => '', fila: () => [], valor: () => undefined, formula: () => null, matrizTextos: () => [], matrizValores: () => [] };
+  const VACIA = { f0: 0, c0: 0, anchos: [], combinadas: [], nfilas: 0, ncols: 0, texto: () => '', fila: () => [], valor: () => undefined, formula: () => null, matrizTextos: () => [], matrizValores: () => [] };
 
   function completar(h) {
     h.fila = h.fila || ((r) => { const a = new Array(h.ncols); for (let c = 0; c < h.ncols; c++) a[c] = h.texto(r, c); return a; });
     h.matrizTextos = () => { const m = []; for (let r = 0; r < h.nfilas; r++) m.push(h.fila(r)); return m; };
-    h.matrizValores = () => { const m = []; for (let r = 0; r < h.nfilas; r++) { const a = new Array(h.ncols); for (let c = 0; c < h.ncols; c++) a[c] = h.valor(r, c); m.push(a); } return m; };
+    // desdeA1: deja las filas y columnas vacías de antes del rango, para que cada dato quede en la misma celda que en el original.
+    h.matrizValores = (desdeA1) => {
+      const m = [], f0 = desdeA1 ? h.f0 : 0, c0 = desdeA1 ? h.c0 : 0;
+      for (let f = 0; f < f0; f++) m.push([]);
+      for (let r = 0; r < h.nfilas; r++) { const a = new Array(c0 + h.ncols).fill(undefined); for (let c = 0; c < h.ncols; c++) a[c0 + c] = h.valor(r, c); m.push(a); }
+      return m;
+    };
     return h;
   }
 
@@ -44,7 +52,11 @@
     if (f1 < 0) return completar(Object.assign({}, VACIA));
     const indice = (r, c) => C.indiceDe(f0 + r, c0 + c);
     const errores = (XlsxFormato.NOMBRES.en || {}).errores || {};
+    const anchos = [];
+    for (const col of hoja.columnas) if (col.ancho > 0 && !col.oculta) for (let q = col.min; q <= Math.min(col.max, 255); q++) anchos[q] = col.ancho;
+    const combinadas = hoja.combinadas.map((m) => LibroXlsx.numeroACol(m.c0) + (m.f0 + 1) + ':' + LibroXlsx.numeroACol(m.c1) + (m.f1 + 1));
     return completar({
+      f0, c0, anchos, combinadas,
       nfilas: f1 - f0 + 1, ncols: c1 - c0 + 1,
       texto(r, c) {
         const i = indice(r, c);
@@ -68,14 +80,24 @@
   }
 
   // ---- SheetJS (respaldo) ------------------------------------------------------------------------------------------
-  function hojaDeSheetJs(hojaSheetJs) {
+  function hojaDeSheetJs(hojaSheetJs, libroLector) {
     const ref = hojaSheetJs['!ref'];
     if (!ref) return completar(Object.assign({}, VACIA));
     const rango = XLSX.utils.decode_range(ref);
     const celda = (r, c) => hojaSheetJs[XLSX.utils.encode_cell({ r: rango.s.r + r, c: rango.s.c + c })];
+    const anchos = (hojaSheetJs['!cols'] || []).map((col) => (col && col.wch > 0 && !col.hidden ? col.wch : 0));
+    const combinadas = (hojaSheetJs['!merges'] || []).map((m) => XLSX.utils.encode_range(m));
     return completar({
+      f0: rango.s.r, c0: rango.s.c, anchos, combinadas,
       nfilas: rango.e.r - rango.s.r + 1, ncols: rango.e.c - rango.s.c + 1,
-      texto(r, c) { const x = celda(r, c); return x ? (x.w !== undefined ? String(x.w) : (x.v === undefined || x.v === null ? '' : String(x.v))) : ''; },
+      texto(r, c) {
+        const x = celda(r, c);
+        if (!x) return '';
+        const t = x.w !== undefined ? String(x.w) : (x.v === undefined || x.v === null ? '' : String(x.v));
+        // SheetJS formatea los números al estilo inglés: se pasan a los separadores pedidos
+        const o = libroLector.opciones;
+        return x.t === 'n' && (o.decimal !== '.' || o.miles !== ',') ? t.replace(/[.,]/g, (ch) => (ch === '.' ? o.decimal : o.miles)) : t;
+      },
       valor(r, c) {
         const x = celda(r, c);
         if (!x || x.v === undefined || x.v === null || x.t === 'z') return undefined;
@@ -95,6 +117,7 @@
         const bytes = new Uint8Array(await archivo.arrayBuffer());
         const csv = /\.csv$/i.test(archivo.name);
         const libro = csv ? CsvPlanilla.leer(bytes, archivo.name.replace(/\.csv$/i, '')) : await LibroXlsx.abrir(bytes);
+        libroLector.comaDecimalCsv = libro.comaDecimalCsv;   // CSV: si el archivo usa coma decimal (undefined en un libro de Excel)
         libro.hojas.forEach((h, k) => { if (h.tipo === 'hoja') libroLector.hojas.push({ nombre: h.nombre, indice: k, estado: h.estado }); });
         if (libroLector.hojas.length) {
           libroLector.motor = true;
@@ -108,9 +131,10 @@
         console.warn('El motor propio no pudo leer el archivo, se usa SheetJS:', error);
       }
     }
-    const sheetjs = await leerLibroDesdeArchivo(archivo);
+    const sheetjs = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });   // cellNF: formato de número; cellStyles: anchos
+    libroLector.comaDecimalCsv = sheetjs.comaDecimalCsv;
     libroLector.hojas = sheetjs.SheetNames.map((nombre, k) => ({ nombre, indice: k, estado: 'visible' }));
-    libroLector.cargar = async (k) => hojaDeSheetJs(sheetjs.Sheets[sheetjs.SheetNames[k]]);
+    libroLector.cargar = async (k) => hojaDeSheetJs(sheetjs.Sheets[sheetjs.SheetNames[k]], libroLector);
     return libroLector;
   }
 

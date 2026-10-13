@@ -110,6 +110,16 @@ window.i18nPagina = {
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -129,7 +139,7 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 let archivoActual = null;
 let esCsv = false;
-let libro = null;
+let libro = null;   // LectorHojas (assets/js/lector-hojas.js)
 
 function esArchivoValido(archivo) {
   return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
@@ -145,15 +155,15 @@ async function mostrarArchivo(archivo) {
   botonConvertir.disabled = true;
 
   try {
-    libro = await leerLibroDesdeArchivo(archivo);
+    libro = await LectorHojas.abrir(archivo);
   } catch (error) {
     libro = null;
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
 
-  if (!esCsv && libro.SheetNames.length > 1) {
-    selectorHoja.innerHTML = libro.SheetNames.map(nombre => `<option value="${escaparHtml(nombre)}">${escaparHtml(nombre)}</option>`).join('');
+  if (!esCsv && libro.hojas.length > 1) {
+    selectorHoja.innerHTML = libro.hojas.map(h => `<option value="${h.indice}">${escaparHtml(h.nombre)}</option>`).join('');
     controlesHoja.style.display = 'flex';
   }
   if (!esCsv) controlesSeparador.style.display = 'flex';
@@ -169,44 +179,42 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Con ";" los números se escriben con coma decimal y punto de miles (como
-// los muestra Excel en español): se intercambian "," y "." en el texto ya
-// formateado de cada celda numérica, sobre una copia de la hoja.
-function hojaParaCsv(hoja, separador) {
-  if (separador !== ';') return hoja;
-  const copia = {};
-  Object.keys(hoja).forEach((direccion) => {
-    const celda = hoja[direccion];
-    if (direccion[0] !== '!' && celda && celda.t === 'n') {
-      const texto = celda.w !== undefined ? celda.w : String(celda.v);
-      copia[direccion] = Object.assign({}, celda, { w: texto.replace(/[.,]/g, (c) => (c === '.' ? ',' : '.')) });
-    } else {
-      copia[direccion] = celda;
-    }
-  });
-  return copia;
+// Un campo del CSV se entrecomilla si lleva el separador, comillas o saltos de línea.
+function campoCsv(texto, separador) {
+  return /["\r\n]/.test(texto) || texto.includes(separador) ? '"' + texto.replace(/"/g, '""') + '"' : texto;
 }
 
-botonConvertir.addEventListener('click', () => {
-  const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+botonConvertir.addEventListener('click', async () => {
+  botonConvertir.disabled = true;
+  try {
+    const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
 
-  if (esCsv) {
-    const libroNuevo = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libroNuevo, libro.Sheets[libro.SheetNames[0]], t('nombre-hoja-defecto'));
-    const bytesXlsx = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([bytesXlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `${nombreBase}.xlsx`;
-  } else {
-    const nombreHoja = controlesHoja.style.display !== 'none' ? selectorHoja.value : libro.SheetNames[0];
-    const separador = selectorSeparador.value;
-    const csv = XLSX.utils.sheet_to_csv(hojaParaCsv(libro.Sheets[nombreHoja], separador), { FS: separador });
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-    enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `${nombreBase}.csv`;
+    if (esCsv) {
+      // Los números del CSV pasan a números de Excel (los códigos como "00123" y las fechas quedan como texto).
+      const hoja = await libro.cargar(libro.hojas[0].indice);
+      const bytesXlsx = await XlsxEscritor.crearLibro([{ nombre: t('nombre-hoja-defecto'), filas: hoja.matrizValores() }]);
+      const blob = new Blob([bytesXlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      enlaceDescarga.download = `${nombreBase}.xlsx`;
+    } else {
+      const indiceHoja = controlesHoja.style.display !== 'none' ? Number(selectorHoja.value) : libro.hojas[0].indice;
+      const separador = selectorSeparador.value;
+      // Cada celda sale con el texto que muestra Excel. Con ";" los números llevan coma decimal y punto de miles (como Excel en español).
+      libro.opciones = Object.assign({}, libro.opciones, separador === ';' ? { decimal: ',', miles: '.' } : { decimal: '.', miles: ',' });
+      const hoja = await libro.cargar(indiceHoja);
+      const lineas = [];
+      for (let r = 0; r < hoja.nfilas; r++) lineas.push(hoja.fila(r).map((x) => campoCsv(x, separador)).join(separador));
+      const blob = new Blob(['﻿' + lineas.join('\n')], { type: 'text/csv;charset=utf-8' });
+      enlaceDescarga.href = URL.createObjectURL(blob);
+      enlaceDescarga.download = `${nombreBase}.csv`;
+    }
+
+    resultado.classList.add('visible');
+  } catch (error) {
+    alert(t('error-leer') + ': ' + error.message);
+  } finally {
+    botonConvertir.disabled = false;
   }
-
-  resultado.classList.add('visible');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

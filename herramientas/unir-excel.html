@@ -86,6 +86,16 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -148,28 +158,30 @@ botonUnir.addEventListener('click', async () => {
   botonUnir.disabled = true;
   botonUnir.textContent = t('boton-unir-procesando');
   try {
-    const libroFinal = XLSX.utils.book_new();
+    const hojasFinal = [];
     const nombresUsados = new Set();
 
     for (const archivo of archivos) {
-      const libroOrigen = await leerLibroDesdeArchivo(archivo, { cellStyles: true, cellNF: true });
+      const libroOrigen = await LectorHojas.abrir(archivo);
       const nombreBase = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
-      const tieneVariasHojas = libroOrigen.SheetNames.length > 1;
+      const tieneVariasHojas = libroOrigen.hojas.length > 1;
 
       // Antes solo se tomaba la primera hoja de cada archivo — si un Excel de
       // origen tenía varias, el resto se perdía en silencio. Ahora se agregan
       // todas, y si el archivo tiene más de una se usa "archivo - Hoja" para
       // distinguirlas (si solo tiene una, se usa directamente el nombre del
       // archivo, como antes).
-      for (const nombreHojaOrigen of libroOrigen.SheetNames) {
-        const hoja = libroOrigen.Sheets[nombreHojaOrigen];
-        const etiquetaDeseada = tieneVariasHojas ? `${nombreBase} - ${nombreHojaOrigen}` : nombreBase;
+      // Cada hoja se copia con sus valores (números y fechas siguen siendo números), su formato de número, los anchos de
+      // columna y las celdas combinadas, en las mismas celdas que en el original.
+      for (const hojaOrigen of libroOrigen.hojas) {
+        const hoja = await libroOrigen.cargar(hojaOrigen.indice);
+        const etiquetaDeseada = tieneVariasHojas ? `${nombreBase} - ${hojaOrigen.nombre}` : nombreBase;
         const nombreHoja = nombreDeHojaUnico(etiquetaDeseada, nombresUsados);
-        XLSX.utils.book_append_sheet(libroFinal, hoja, nombreHoja);
+        hojasFinal.push({ nombre: nombreHoja, filas: hoja.matrizValores(true), anchos: hoja.anchos, combinadas: hoja.combinadas });
       }
     }
 
-    const bytesFinales = XLSX.write(libroFinal, { bookType: 'xlsx', type: 'array', cellStyles: true });
+    const bytesFinales = await XlsxEscritor.crearLibro(hojasFinal);
     const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
