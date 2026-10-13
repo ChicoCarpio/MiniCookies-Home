@@ -416,5 +416,41 @@
     }
   }
 
-  globalThis.XlsxPaquete = { reordenarHojas, leerRels, resolver, limpiarHuerfanas };
+  // calcChain (el orden de recálculo) deja de ser válido en cuanto una celda con fórmula cambia: se borra con su relación y su Override, y Excel lo regenera.
+  async function quitarCalcChain(zip) {
+    const raizRels = await leerRels(zip, '');
+    const principal = raizRels.find((r) => r.tipo === R_OFICINA);
+    const rutaLibro = principal ? principal.destino : 'xl/workbook.xml';
+    const calc = (await leerRels(zip, rutaLibro)).find((r) => r.tipo === 'calcChain');
+    if (!calc) return false;
+    await quitarRels(zip, rutaLibro, new Set([calc.id]));
+    zip.remove(calc.destino);
+    const ct = await textoDe(zip, '[Content_Types].xml');
+    if (ct !== null) {
+      const ed = [];
+      for (const n of X.analizar(ct, { profundidad: 2 }).hijos) if (n.local === 'Override' && (n.attrs.PartName || '').toLowerCase() === '/' + calc.destino.toLowerCase()) ed.push({ ini: n.ini, fin: n.fin, texto: '' });
+      if (ed.length) zip.file('[Content_Types].xml', X.aplicar(ct, ed));
+    }
+    return true;
+  }
+
+  // Excel recalcula todas las fórmulas al abrir el libro (calcPr fullCalcOnLoad="1").
+  const DESPUES_DE_CALCPR = ['oleSize', 'customWorkbookViews', 'pivotCaches', 'smartTagPr', 'smartTagTypes', 'webPublishing', 'fileRecoveryPr', 'webPublishObjects', 'extLst'];
+  async function marcarRecalculo(zip) {
+    const raizRels = await leerRels(zip, '');
+    const principal = raizRels.find((r) => r.tipo === R_OFICINA);
+    const rutaLibro = principal ? principal.destino : 'xl/workbook.xml';
+    const wb = await textoDe(zip, rutaLibro);
+    if (wb === null) return;
+    const raiz = X.analizar(wb, { profundidad: 2 });
+    const calc = X.hijo(raiz, 'calcPr');
+    if (calc) zip.file(rutaLibro, X.aplicar(wb, [{ ini: calc.ini, fin: calc.finApertura, texto: X.ponerAtributo(wb.slice(calc.ini, calc.finApertura), 'fullCalcOnLoad', '1') }]));
+    else {
+      const sig = raiz.hijos.find((h) => DESPUES_DE_CALCPR.includes(h.local));
+      const pos = sig ? sig.ini : raiz.iniCierre;
+      zip.file(rutaLibro, X.aplicar(wb, [{ ini: pos, fin: pos, texto: '<calcPr fullCalcOnLoad="1"/>' }]));
+    }
+  }
+
+  globalThis.XlsxPaquete = { reordenarHojas, leerRels, resolver, limpiarHuerfanas, quitarCalcChain, marcarRecalculo, rutaLibroDe: async (zip) => { const p = (await leerRels(zip, '')).find((r) => r.tipo === R_OFICINA); return p ? p.destino : 'xl/workbook.xml'; } };
 })();
