@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Formato de número de Excel (los "códigos de formato" de la celda: 0.00, #,##0, 0%, d/m/yyyy, [h]:mm,
 // # ?/?, 0.00E+00, "texto"@, secciones, condiciones y colores) del motor propio. Valor + código →
-// el texto que muestra Excel. Se probó contra 226 casos medidos en Excel real
+// el texto que muestra Excel. Se probó contra 1.996 casos medidos en Excel real
 // (comparar-xlsx\medidas\formatos.json). No depende del navegador.
 //
 // Uso:
@@ -30,7 +30,8 @@
       mesesCortos: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic'],
       dias: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
       diasCortos: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
-      am: 'a. m.', pm: 'p. m.', verdadero: 'VERDADERO', // Excel en español separa con un espacio fino no separable (U+202F) falso: 'FALSO',
+      // Excel en español separa "a. m." y "p. m." con un espacio fino no separable (U+202F)
+      am: 'a.\u202Fm.', pm: 'p.\u202Fm.', verdadero: 'VERDADERO', falso: 'FALSO',
       fechaCorta: 'd/m/yyyy', fechaLarga: 'dddd, d "de" mmmm "de" yyyy', horaLarga: 'h:mm:ss',
       errores: { '#DIV/0!': '#¡DIV/0!', '#N/A': '#N/D', '#NAME?': '#¿NOMBRE?', '#NULL!': '#¡NULO!', '#NUM!': '#¡NUM!', '#REF!': '#¡REF!', '#VALUE!': '#¡VALOR!' },
     },
@@ -45,6 +46,14 @@
     },
   };
   const COLORES = /^(black|blue|cyan|green|magenta|red|white|yellow|color\s*\d+)$/i;
+
+  // 'red' / 'RED' → 'Red'; 'color 3' → 'Color3' (Color1 a Color56); otro → null
+  function colorCanonico(nombre) {
+    const limpio = nombre.replace(/\s+/g, '').toLowerCase();
+    const m = /^color(\d+)$/.exec(limpio);
+    if (m) return +m[1] >= 1 && +m[1] <= 56 ? 'Color' + +m[1] : null;
+    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
+  }
 
   // ---- Análisis del código -----------------------------------------------------------------------------
 
@@ -65,6 +74,7 @@
   }
 
   function tokenizar(texto) {
+    texto = texto.replace(/[\u0001\u0002]/g, ''); // las marcas internas (relleno) no pueden venir del archivo
     const tokens = [];
     let cond = null, color = null, lcid = null;
     const n = texto.length;
@@ -78,15 +88,15 @@
       if (c === '*') { tokens.push({ t: 'fill', v: texto[i + 1] || ' ' }); i += 2; continue; }
       if (c === '[') {
         const f = texto.indexOf(']', i);
-        const dentro = texto.slice(i + 1, f < 0 ? n : f);
-        i = f < 0 ? n : f + 1;
+        if (f < 0) { i = n; continue; } // corchete sin cerrar: no es un código
+        const dentro = texto.slice(i + 1, f);
+        i = f + 1;
         let m;
-        if (COLORES.test(dentro)) { color = dentro.replace(/\s+/g, ''); continue; }
+        if (COLORES.test(dentro)) { color = colorCanonico(dentro); if (color) continue; }
         if ((m = /^(<=|>=|<>|<|>|=)\s*(-?[\d.]+(?:E[+-]?\d+)?)$/i.exec(dentro))) { cond = { op: m[1], n: parseFloat(m[2]) }; continue; }
         if ((m = /^\$([^-\]]*)(?:-([0-9A-Fa-f]+))?$/.exec(dentro))) { // [$€-2], [$-409], [$$-409]
           if (m[1]) tokens.push({ t: 'lit', v: m[1] });
-          if (m[2] && !m[1]) lcid = parseInt(m[2], 16);
-          else if (m[2]) lcid = lcid === null ? null : lcid;
+          if (m[2]) lcid = parseInt(m[2], 16);
           continue;
         }
         if ((m = /^(h+|m+|s+)$/i.exec(dentro))) { tokens.push({ t: 'tr', u: m[1][0].toLowerCase(), n: m[1].length }); continue; }
@@ -94,6 +104,7 @@
       }
       if (/^general/i.test(resto)) { tokens.push({ t: 'gen' }); i += 7; continue; }
       if (/^AM\/PM/i.test(resto)) { tokens.push({ t: 'ampm', forma: 'AM/PM' }); i += 5; continue; }
+      if (/^A\/P/i.test(resto)) { tokens.push({ t: 'ampm', forma: 'A/P' }); i += 3; continue; }
       if (/^E[+-]/i.test(resto)) { tokens.push({ t: 'exp', signo: resto[1] }); i += 2; continue; }
       if (c === '0' || c === '#' || c === '?') { tokens.push({ t: 'dig', c }); i++; continue; }
       if (c === '.') { tokens.push({ t: 'pto' }); i++; continue; }
@@ -125,17 +136,25 @@
       if ((antes && (antes.t === 'h' || (antes.t === 'tr' && antes.u === 'h'))) || (despues && (despues.t === 's' || (despues.t === 'tr' && despues.u === 's')))) t.t = 'min';
     });
     // ".0" detrás de segundos (o de una hora, como lo hace Excel) son décimas de segundo
+    const salida = [];
+    let previos = 0;
     for (let i = 0; i < tokens.length; i++) {
-      if (tokens[i].t !== 'pto') continue;
-      const previos = tokens.slice(0, i).filter((t) => ['h', 'min', 's', 'tr'].includes(t.t)).length;
-      let k = i + 1;
-      while (tokens[k] && tokens[k].t === 'dig' && tokens[k].c === '0') k++;
-      if (previos && k > i + 1) { tokens.splice(i, k - i, { t: 'frs', n: k - i - 1 }); }
+      const t = tokens[i];
+      if (['h', 'min', 's', 'tr'].includes(t.t)) previos++;
+      if (t.t === 'pto' && previos) {
+        let k = i + 1;
+        while (tokens[k] && tokens[k].t === 'dig' && tokens[k].c === '0') k++;
+        if (k > i + 1) { salida.push({ t: 'frs', n: k - i - 1 }); i = k - 1; continue; }
+      }
+      salida.push(t);
     }
+    tokens.length = 0;
+    for (const t of salida) tokens.push(t);
     return tokens;
   }
 
   function analizar(codigo) {
+    if (codigo.length > 255) codigo = 'General'; // el máximo de Excel; evita análisis enormes con códigos hostiles
     if (cache.has(codigo)) return cache.get(codigo);
     const secciones = partirSecciones(codigo).map((texto) => {
       const a = tokenizar(texto);
@@ -240,7 +259,6 @@
         rango = r;
       } else salida += textoLiteral(t);
     }
-    void marcas; void rango;
     return salida;
   }
   function textoLiteral(t) {
@@ -261,20 +279,18 @@
     tokens.forEach((t, i) => { if (t.t === 'dig') ult = i; });
     let escala = 0;
     for (let i = ult + 1; i < tokens.length && tokens[i].t === 'coma'; i++) escala++;
-    const marcasEnteras = [], marcasDec = [];
     let iPunto = tokens.findIndex((t) => t.t === 'pto');
-    const iExp = tokens.findIndex((t) => t.t === 'exp');
     const iBarra = tokens.findIndex((t) => t.t === 'barra');
     let valor = Math.abs(v);
     if (pct) valor = Number((valor * Math.pow(100, pct)).toPrecision(15));
     if (escala) valor = Number((valor / Math.pow(1000, escala)).toPrecision(15));
+    if (!Number.isFinite(valor) || valor >= 1e300) return { texto: '#', desborde: true };
     // las comas entre marcas (no las finales de escala) agrupan miles
     const primeraDig = tokens.findIndex((t) => t.t === 'dig');
     const miles = tokens.some((t, i) => t.t === 'coma' && i > primeraDig && i < ult + 1 && tokens.slice(0, i).some((x) => x.t === 'dig') && tokens.slice(i + 1, ult + 1).some((x) => x.t === 'dig'));
     const sinEscala = tokens.filter((t, i) => !(t.t === 'coma' && (i > ult || i < primeraDig)));
     const sinComas = sinEscala.filter((t) => t.t !== 'coma');
     iPunto = sinComas.findIndex((t) => t.t === 'pto');
-    void marcasEnteras; void marcasDec; void iExp;
     if (iBarra >= 0) return renderFraccion(sinComas, valor, v < 0, opc);
     const iE = sinComas.findIndex((t) => t.t === 'exp');
     if (iE >= 0) return renderCientifica(sinComas, valor, miles, opc);
@@ -299,15 +315,8 @@
         else texto += textoLiteral(t);
       }
     }
-    // los % y literales que quedaron fuera de las marcas
-    texto = insertarPct(sinComas, texto);
     const algoMostrado = /[1-9]/.test(r.ent + r.frac);
     return { texto, negativoVisible: algoMostrado };
-  }
-  // El % se emite en su sitio del código; emitirEntera/decimales lo ignoran, así que se reinserta contando sus posiciones.
-  function insertarPct(tokens, texto) {
-    if (!tokens.some((t) => t.t === 'pct')) return texto;
-    return texto;
   }
 
   // ---- Científica ---------------------------------------------------------------------------------------
@@ -377,9 +386,11 @@
     let iDen = 0;
     while (iDen < despues.length && (despues[iDen].t === 'dig' || (despues[iDen].t === 'lit' && /^\d$/.test(despues[iDen].v)))) iDen++;
     const tokDen = despues.slice(0, iDen), cola = despues.slice(iDen);
-    const fijo = tokDen.length && tokDen.every((t) => t.t === 'lit') ? parseInt(tokDen.map((t) => t.v).join(''), 10) : null;
+    // Denominador fijo: hay un dígito 1-9 literal (?/10, ??/100, ?/50: el 0 también viene como marca, pero aquí es una cifra)
+    const fijo = tokDen.some((t) => t.t === 'lit') && tokDen.every((t) => t.t === 'lit' || (t.t === 'dig' && t.c === '0')) ? parseInt(tokDen.map((t) => (t.t === 'lit' ? t.v : '0')).join(''), 10) : null;
     const nMarcasDen = tokDen.filter((t) => t.t === 'dig').length;
     const maxDen = fijo || Math.pow(10, nMarcasDen) - 1;
+    const aTexto = (x) => (x >= 1e15 ? BigInt(Math.floor(x)).toString() : String(x)); // String(1e21) daría "1e+21"
     let ent = conEntera ? Math.floor(valor + 1e-12) : 0;
     let f = valor - ent;
     if (f < 0) f = 0;
@@ -398,7 +409,7 @@
       return r;
     };
     let texto = '';
-    if (conEntera) texto += emitirEntera(prefijo, ent === 0 && num !== 0 && prefijo.every((t) => t.t !== 'dig' || t.c !== '0') ? '' : String(ent), false, opc); // 0 con fracción 0 se ve como "0"
+    if (conEntera) texto += emitirEntera(prefijo, ent === 0 && num !== 0 && prefijo.every((t) => t.t !== 'dig' || t.c !== '0') ? '' : aTexto(ent), false, opc); // 0 con fracción 0 se ve como "0"
     else texto += prefijo.map(textoLiteral).join('');
     const sinFraccion = conEntera && num === 0;
     if (sinFraccion) {
@@ -406,11 +417,12 @@
       texto += ' '.repeat(marcasNum.length + 1 + (nMarcasDen || String(den).length));
     } else {
       const numerador = conEntera ? num : ent * den + num;
-      const numTexto = conEntera ? pad(String(numerador), anchoNum, marcasNum, true) : (String(numerador).length > anchoNum ? String(numerador) : pad(String(numerador), anchoNum, marcasNum, true));
+      const numTexto = conEntera ? pad(aTexto(numerador), anchoNum, marcasNum, true) : (aTexto(numerador).length > anchoNum ? aTexto(numerador) : pad(aTexto(numerador), anchoNum, marcasNum, true));
       texto += numTexto + '/' + pad(String(den), fijo ? String(fijo).length : anchoDen, tokDen.filter((t) => t.t === 'dig'), false);
     }
     for (const t of cola) texto += textoLiteral(t);
-    return { texto, negativoVisible: valor !== 0 };
+    // Sin parte entera, un valor que se redondea a 0/1 pierde el signo (Excel muestra "0/1"); con parte entera lo conserva ("-0    ")
+    return { texto, negativoVisible: conEntera ? valor !== 0 : ent * den + num !== 0 };
   }
 
   // ---- Fechas y horas -----------------------------------------------------------------------------------
@@ -450,12 +462,15 @@
     let ms = Math.round((valor - dias) * MS_DIA);
     if (hayTiempo) ms = Math.round(ms / unidad) * unidad;
     if (ms >= MS_DIA) { ms -= MS_DIA; dias += 1; }
+    if (opc.fecha1904 ? dias >= 2957004 : dias >= 2958466) return { texto: '#', desborde: true };
     const totalMs = dias * MS_DIA + ms;
     const c = componentesFecha(dias, opc.fecha1904);
     const h = Math.floor(ms / 3600000), mi = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60, mil = ms % 1000;
     const dos = (n) => String(n).padStart(2, '0');
     let salida = '';
-    const ampm = tokens.some((t) => t.t === 'ampm');
+    const enIngles = nombres === NOMBRES.en;
+    const marcaAmpm = (t) => t.t === 'ampm' && (t.forma === 'AM/PM' || enIngles);
+    const ampm = tokens.some(marcaAmpm);
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i];
       switch (t.t) {
@@ -468,7 +483,7 @@
         case 'min': salida += t.n === 1 ? mi : dos(mi); break;
         case 's': salida += t.n === 1 ? s : dos(s); break;
         case 'frs': salida += opc.decimal + String(mil).padStart(3, '0').slice(0, t.n); break;
-        case 'ampm': salida += t.forma === 'AM/PM' ? (h < 12 ? nombres.am : nombres.pm) : (h < 12 ? 'A' : 'P'); break;
+        case 'ampm': salida += !marcaAmpm(t) ? 'A/P' : t.forma === 'AM/PM' ? (h < 12 ? nombres.am : nombres.pm) : (h < 12 ? 'A' : 'P'); break;
         case 'tr': {
           const total = Math.floor(totalMs / ({ h: 3600000, m: 60000, s: 1000 })[t.u]);
           const n = t.u === 'h' ? total : t.u === 'm' ? total : total;
@@ -480,10 +495,13 @@
     return { texto: salida };
   }
 
+  const formateadoresEra = [null, null];
   function eraJaponesa(c, t) {
     try {
       const f = new Date(Date.UTC(c.a, c.m - 1, Math.max(1, c.d)));
-      const partes = new Intl.DateTimeFormat('ja-JP-u-ca-japanese', { era: t.t === 'g' && t.n >= 3 ? 'long' : 'short', year: 'numeric', timeZone: 'UTC' }).formatToParts(f);
+      const largo = t.t === 'g' && t.n >= 3;
+      if (!formateadoresEra[largo ? 1 : 0]) formateadoresEra[largo ? 1 : 0] = new Intl.DateTimeFormat('ja-JP-u-ca-japanese', { era: largo ? 'long' : 'short', year: 'numeric', timeZone: 'UTC' });
+      const partes = formateadoresEra[largo ? 1 : 0].formatToParts(f);
       const era = partes.find((p) => p.type === 'era'), anio = partes.find((p) => p.type === 'year');
       return { era: era ? era.value : '', anio: anio ? anio.value : c.a };
     } catch (e) { return { era: '', anio: c.a }; }
@@ -523,16 +541,18 @@
   }
 
   function rellenar(texto, ancho) {
-    // el relleno "*x" está marcado con \u0001x\u0001; se expande hasta el ancho de la columna (o queda en uno)
+    // el relleno "*x" está marcado con \u0001x\u0001; el primero se expande hasta el ancho de la columna (o queda en uno) y los demás se quitan
     const m = /\u0001([^\u0001])\u0001/.exec(texto);
-    if (!m) return { texto, relleno: null };
-    const sinMarca = texto.replace(/\u0001[^\u0001]\u0001/, '');
-    const faltan = Math.max(1, ancho - sinMarca.length);
-    return { texto: texto.slice(0, m.index) + m[1].repeat(faltan) + texto.slice(m.index + m[0].length), relleno: { caracter: m[1] } };
+    if (!m) return { texto: texto.replace(/[\u0001\u0002]/g, ''), relleno: null };
+    const sinMarcas = texto.replace(/\u0001[^\u0001]\u0001/g, '');
+    const faltan = Math.max(1, Math.min(255, ancho) - sinMarcas.length);
+    const antes = texto.slice(0, m.index).replace(/\u0001[^\u0001]\u0001/g, ''), despues = texto.slice(m.index + m[0].length).replace(/\u0001[^\u0001]\u0001/g, '');
+    return { texto: antes + m[1].repeat(faltan) + despues, relleno: { caracter: m[1] } };
   }
 
   function formatear(valor, codigo, opciones) {
     const opc = Object.assign({ idioma: 'en', decimal: '.', miles: ',', fecha1904: false, ancho: 0, anchoGeneral: 11 }, opciones || {});
+    opc.ancho = Math.max(0, Math.min(255, Number(opc.ancho) || 0)); // el máximo de una columna de Excel
     codigo = codigo === undefined || codigo === null || codigo === '' ? 'General' : String(codigo);
     const nombres = NOMBRES[opc.idioma] || NOMBRES.en;
     if (valor === null || valor === undefined) return { texto: '', color: null };
@@ -543,12 +563,13 @@
     const secciones = analisis.secciones;
 
     if (typeof valor === 'string') {
+      valor = valor.replace(/[\u0001\u0002]/g, '');
       const sec = secciones.length >= 4 ? secciones[3] : (secciones.length === 1 || secciones.every((s) => !s.tokens.some((t) => t.t === 'txt'))) && secciones.length < 4 ? (secciones.length === 1 && secciones[0].tokens.some((t) => t.t === 'txt') ? secciones[0] : null) : secciones.find((s) => s.tokens.some((t) => t.t === 'txt')) || null;
       if (!sec) return { texto: valor, color: null };
       const r = rellenar(renderTexto(sec, valor, opc), opc.ancho);
       return { texto: r.texto, color: sec.color, relleno: r.relleno };
     }
-    if (!Number.isFinite(valor)) return { texto: '#NUM!', color: null };
+    if (!Number.isFinite(valor)) return { texto: nombres.errores['#NUM!'] || '#NUM!', color: null };
 
     const { sec, absoluto } = elegir(secciones, valor);
     const v = valor;
@@ -560,7 +581,8 @@
       else if (sec.lcid === 0xF800 || sec.lcid === 0xF400) {
         const sustituto = analizar(sec.lcid === 0xF800 ? nombres.fechaLarga : nombres.horaLarga).secciones[0];
         const r = renderFecha(sustituto, v, opc, nombres);
-        return { texto: r.texto, color: sec.color, desborde: !!r.desborde };
+        if (r.desborde) return { texto: '#'.repeat(Math.max(1, opc.ancho || 8)), color: sec.color, desborde: true };
+        return { texto: r.texto, color: sec.color };
       }
     }
     if (sec.soloMeta) return { texto: general(absoluto ? Math.abs(v) : v, opc), color: sec.color };
@@ -577,22 +599,18 @@
       let visto = false;
       for (const t of sec.tokens) { if (t.t === 'gen') visto = true; else (visto ? despues : antes).push(t); }
       const g = general(absoluto ? Math.abs(v) : v, opc);
-      return { texto: antes.map(textoLiteral).join('') + g + despues.map(textoLiteral).join(''), color: sec.color };
+      const rg = rellenar(antes.map(textoLiteral).join('') + g + despues.map(textoLiteral).join(''), opc.ancho);
+      return { texto: rg.texto, color: sec.color, relleno: rg.relleno };
     }
     if (sec.tokens.some((t) => t.t === 'txt') && !sec.tokens.some((t) => t.t === 'dig')) return { texto: general(absoluto ? Math.abs(v) : v, opc), color: sec.color };
     const r = renderNumero(sec.tokens, v, opc);
+    if (r.desborde) return { texto: '#'.repeat(Math.max(1, opc.ancho || 8)), color: sec.color, desborde: true };
     const conSigno = v < 0 && !absoluto && r.negativoVisible;
     // el signo va al principio, antes de cualquier literal
-    const f = rellenar((conSigno ? '-' : '') + insertarPorcentajes(sec.tokens, r.texto), opc.ancho);
+    const f = rellenar((conSigno ? '-' : '') + r.texto, opc.ancho);
     return { texto: f.texto, color: sec.color, relleno: f.relleno };
   }
 
-  // Los literales (comillas, $, %, texto) que van antes o después de las marcas numéricas se emiten aquí
-  // si el renderizador de dígitos no los puso (todas las rutas los ponen; este paso solo agrega los "%").
-  function insertarPorcentajes(tokens, texto) {
-    void tokens;
-    return texto;
-  }
 
   globalThis.XlsxFormato = { formatear, esFecha, general, NOMBRES };
 })();
