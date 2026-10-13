@@ -696,6 +696,7 @@
     }
     const xf = libro.estilos.xf(C.estilo[i]);
     opc.idFormato = xf.numFmtId;
+    if (opc.formatoCf) { opc.idFormato = -1; return XlsxFormato.formatear(valor, opc.formatoCf, opc); } // el formato de número de una regla condicional
     return XlsxFormato.formatear(valor, xf.formato, opc);
   }
 

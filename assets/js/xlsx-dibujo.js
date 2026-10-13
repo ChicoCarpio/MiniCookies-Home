@@ -10,7 +10,8 @@
 // Uso:
 //   const g = XlsxGeometria.crear(libro, hoja, { medirDigito: XlsxDibujo.medirDigito });
 //   XlsxDibujo.dibujarRango(ctx, libro, hoja, g, { f0, c0, f1, c1 }, { x: 0, y: 0, idioma: 'es', cuadricula: true });
-// Requiere xlsx-modelo.js, xlsx-estilos.js, xlsx-formato.js, xlsx-geometria.js y pptx-texto.js (fuentes con las medidas de Office).
+// Requiere xlsx-modelo.js, xlsx-estilos.js, xlsx-formato.js, xlsx-geometria.js y pptx-texto.js (fuentes con las medidas de Office);
+// para el formato condicional, también xlsx-expresion.js y xlsx-condicional.js (sin ellos se dibuja la hoja sin sus reglas).
 
 (function () {
   const REJILLA = '#E0E0E0';
@@ -251,6 +252,15 @@
 
   // ---- Dibujo de un rango -----------------------------------------------------------------------------
 
+  // Las reglas condicionales de una hoja, preparadas una vez (guardan estadísticas de sus rangos).
+  const REGLAS = new WeakMap();
+  function condicionalDe(libro, hoja, op) {
+    if (op.condicional === false || typeof XlsxCondicional === 'undefined' || !(hoja.formatosCondicionales && hoja.formatosCondicionales.length)) return null;
+    let c = REGLAS.get(hoja);
+    if (c === undefined) { c = XlsxCondicional.preparar(libro, hoja, { hoy: op.hoy }); REGLAS.set(hoja, c); }
+    return c;
+  }
+
   function dibujarRango(ctx, libro, hoja, g, r, op) {
     op = op || {};
     FINO = !!op.fino; PXDE = op.pxDe || null; TXT = op.desplazarTexto || { x: 0, y: 0 }; DXT = 0;
@@ -258,6 +268,8 @@
     const X = (c) => ox + g.x(c) - g.x(r.c0), Y = (f) => oy + g.y(f) - g.y(r.f0);
     const C = hoja.celdas;
     const TIPO = LibroXlsx.TIPO;
+    const cond = condicionalDe(libro, hoja, op);
+    if (cond) cond.reiniciar();
     const anclaje = { tx: ((ox - g.x(r.c0)) % 8 + 8) % 8, ty: ((oy - g.y(r.f0)) % 8 + 8) % 8 };
     const filas = [], cols = [];
     for (let f = r.f0; f <= r.f1; f++) if (g.altoFila(f) > 0) filas.push(f);
@@ -298,7 +310,15 @@
       }
 
       // estilo de cada celda del rango
-      const estiloDe = (f, c) => libro.estilos.xf(hoja.estiloDe(f, c));
+      const aplicados = new WeakMap();
+      const estiloDe = (f, c) => {
+        const xf = libro.estilos.xf(hoja.estiloDe(f, c));
+        const e = cond && cond.para(f, c);
+        if (!e) return xf;
+        let r = aplicados.get(e);
+        if (!r) { r = XlsxCondicional.aplicar(xf, e); aplicados.set(e, r); }
+        return r;
+      };
 
       // 2. rellenos (en orden de fila: el relleno de la fila de abajo cubre la línea que comparten)
       const rellenar = (f, c, m) => {
@@ -315,6 +335,26 @@
         }
       }
       for (const m of fuera) rellenar(m.f0, m.c0, m);
+
+      // 2b. barras de datos e iconos de las reglas condicionales (medido en el PDF de Excel: la barra va 2 u adentro de la celda a cada
+      // lado y 2 u abajo del borde de arriba, con un degradado del color de la regla a su tinte hacia el blanco; el icono mide 16 u)
+      if (cond) {
+        for (const f of filas) {
+          for (const c of cols) {
+            const clave = f * 16384 + c;
+            if (cubierta.has(clave)) continue;
+            const e = cond.para(f, c);
+            if (!e || (!e.barra && !e.icono)) continue;
+            const m = combinada.get(clave);
+            const bx0 = X(c), by0 = Y(f), bx1 = X((m ? m.c1 : c) + 1), by1 = Y((m ? m.f1 : f) + 1);
+            if (e.barra) dibujarBarra(ctx, e.barra, bx0, by0, bx1, by1);
+            if (e.icono && typeof XlsxIconos !== 'undefined') {
+              const lado = 16, alto = by1 - by0;
+              XlsxIconos.dibujar(ctx, e.icono.conjunto, e.icono.indice, bx0 + RD(1.28), by0 + RD(Math.max(0, (alto - lado) * 0.76)), lado);
+            }
+          }
+        }
+      }
 
       // 3. bordes
       const lado = (f, c, cual) => { if (f < 0 || c < 0 || f > 1048575 || c > 16383) return null; const b = estiloDe(f, c).borde; return b && b[cual] ? b[cual] : null; };
@@ -384,7 +424,9 @@
         if (!m && (g.altoFila(f) === 0 || g.anchoCol(c) === 0)) continue;
         const esNumero = C.tipo[k] === TIPO.numero;
         if (esNumero && C.valor[k] === 0 && hoja.vista.ceros === false) continue; // "mostrar ceros" desactivado
-        const xf = libro.estilos.xf(C.estilo[k]);
+        const efecto = cond && cond.para(f, c);
+        if (efecto && ((efecto.barra && !efecto.barra.mostrarValor) || (efecto.icono && !efecto.icono.mostrarValor))) continue; // "mostrar solo la barra / el icono"
+        const xf = estiloDe(f, c);
         const f1 = m ? m.f1 : f, c1 = m ? m.c1 : c;
         const x0 = X(c), x1 = X(c1 + 1), y0 = Y(f), y1 = Y(f1 + 1); // bordes reales de la celda o la combinada (el recorte al rango ya está puesto)
         const anchoCelda = g.x(c1 + 1) - g.x(c);
@@ -393,6 +435,7 @@
         const al = xf.alineacion;
         const anchoChars = Math.max(1, Math.floor((anchoCelda - 5) / mdw));
         const opcTexto = { idioma, decimal: op.decimal || (idioma === 'es' ? ',' : '.'), miles: op.miles || (idioma === 'es' ? ' ' : ','), ancho: anchoChars, anchoGeneral: Math.min(11, Math.max(1, anchoChars)) };
+        if (efecto && efecto.formato) opcTexto.formatoCf = efecto.formato;
         let fm = LibroXlsx.textoCelda(libro, hoja, k, opcTexto);
         let relleno = null;
         if (fm.relleno) { relleno = fm.relleno; fm = LibroXlsx.textoCelda(libro, hoja, k, Object.assign({}, opcTexto, { ancho: 0 })); relleno = fm.relleno || relleno; } // "*x": se reparte por píxeles
@@ -519,6 +562,20 @@
       DIGITO = 0; FINO = false; PXDE = null; TXT = { x: 0, y: 0 }; DXT = 0;
       ctx.restore();
     }
+  }
+
+  // Barra de datos (estilo 2007): del color de la regla a su tinte del 85 % hacia el blanco, de izquierda a derecha por la barra.
+  function dibujarBarra(ctx, b, x0, y0, x1, y1) {
+    const region = x1 - x0 - 4;
+    const largo = region * (b.largoMin + (b.largoMax - b.largoMin) * b.fraccion) / 100;
+    if (!(largo > 0.2) || !(y1 - y0 > 6)) return;
+    const col = /^#[0-9A-F]{6}$/i.test(b.color) ? b.color : '#638EC6';
+    const c = [1, 3, 5].map((i) => parseInt(col.slice(i, i + 2), 16));
+    const tinte = '#' + c.map((v) => (v + Math.trunc((255 - v) * 0.85)).toString(16).padStart(2, '0')).join('');
+    const g = ctx.createLinearGradient(x0 + 2, 0, x0 + 2 + largo, 0);
+    g.addColorStop(0, col); g.addColorStop(1, tinte);
+    ctx.fillStyle = g;
+    ctx.fillRect(x0 + 2, y0 + 2, largo, y1 - y0 - 5);
   }
 
   // La geometría de la hoja con las dos medidas que necesitan el Canvas: el ancho del dígito (MDW) y las líneas que ocupa un texto con

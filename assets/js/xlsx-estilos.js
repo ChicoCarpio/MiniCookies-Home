@@ -138,6 +138,7 @@
   function fuenteVacia() { return { nombre: null, tam: null, negrita: false, cursiva: false, subrayado: null, tachado: false, color: null, alinVertical: null, familia: null, esquema: null }; }
 
   function leerFormatoFuente(a, destino, nombre) {
+    (destino.dado || (destino.dado = new Set())).add(nombre); // qué propiedades trae el archivo (un formato diferencial solo cambia esas)
     switch (nombre) {
       case 'b': destino.negrita = bool(a.val, true); break;
       case 'i': destino.cursiva = bool(a.val, true); break;
