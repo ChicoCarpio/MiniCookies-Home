@@ -13,7 +13,7 @@
 //   const g = XlsxGeometria.crear(libro, hoja);
 //   const p = XlsxPaginas.calcular(libro, hoja, g);
 //   p.paginas → [{ f0, c0, f1, c1, area, titulos: { filas: {f0, f1}|null, columnas: {c0, c1}|null } }] en el orden de impresión
-//   p.escala (%) · p.papel { ancho, alto } (pt, ya girado) · p.margenes (pt) · p.areas · p.opciones
+//   p.escala (%) · p.papel { ancho, alto } (pt, ya girado) · p.margenes (pt) · p.areas · p.opciones · p.cortado (true si hubo más páginas que el tope)
 
 (function () {
   const DPI = 600;
@@ -86,13 +86,18 @@
   }
 
   // Última fila y columna que Excel imprime sin área: la última con contenido, con relleno o con borde, o el fin de una combinada.
-  function extension(libro, hoja) {
+  // Las celdas de filas o columnas ocultas no cuentan (una hoja con todo oculto no imprime ninguna página). `banda` { f0, f1, c0, c1 }
+  // limita el cálculo a ese rectángulo: es lo que Excel hace con un área de solo filas o de solo columnas (medido, etapa 5).
+  function extension(libro, hoja, g, banda) {
     let f1 = -1, c1 = -1;
     const C = hoja.celdas;
     const visible = new Map();
+    const oculta = (fi, ci) => g.altoFila(fi) <= 0 || g.anchoCol(ci) <= 0;
+    const fuera = (fi, ci) => !!banda && (fi < banda.f0 || fi > banda.f1 || ci < banda.c0 || ci > banda.c1);
     for (let i = 0; i < C.n; i++) {
       const fi = C.fila[i], ci = C.col[i];
       if (fi <= f1 && ci <= c1) continue;
+      if (fuera(fi, ci) || oculta(fi, ci)) continue;
       let v = C.tipo[i] !== LibroXlsx.TIPO.vacio;
       if (!v) {
         const e = C.estilo[i];
@@ -105,7 +110,7 @@
       }
       if (v) { if (fi > f1) f1 = fi; if (ci > c1) c1 = ci; }
     }
-    for (const m of hoja.combinadas) { if (m.f1 > f1) f1 = m.f1; if (m.c1 > c1) c1 = m.c1; }
+    for (const m of hoja.combinadas) { if (fuera(m.f0, m.c0) || oculta(m.f0, m.c0)) continue; if (m.f1 > f1) f1 = m.f1; if (m.c1 > c1) c1 = m.c1; }
     return { f1, c1 };
   }
 
@@ -125,6 +130,7 @@
       bloques.push([i, j - 1]);
       i = j;
     }
+    bloques.cortado = i <= fin; // quedó sin cortar lo que sigue: se llegó al límite
     return bloques;
   }
 
@@ -137,10 +143,21 @@
     for (const k of Object.keys(mg)) margenes[k] = (Number.isFinite(mg[k]) ? Math.min(200, Math.max(0, mg[k])) : 0) * 72; // hasta 200" (el papel más grande): un margen de 1e300 llegaba al PDF como "1e+303"
     const opciones = imp.opciones || { cuadricula: false, encabezados: false, centrarH: false, centrarV: false };
 
-    // Áreas: las del nombre Print_Area, o desde A1 hasta lo último que tenga algo.
-    let areas = rangosDeNombre(libro, hoja, '_xlnm.Print_Area').filter((r) => !r.soloFilas && !r.soloCols);
-    if (!areas.length) {
-      const e = extension(libro, hoja);
+    // Áreas: las del nombre Print_Area, o desde A1 hasta lo último que tenga algo. Un área de solo filas ($3:$6) o de solo
+    // columnas ($C:$D) mantiene lo que dice y toma la otra dimensión del contenido de su franja (medido en Excel): $2:$3 llega hasta
+    // la última columna con algo en esas filas; una franja sin nada no imprime ninguna página; y si el área llega al borde de la hoja
+    // ($1:$1048576) también se recorta al contenido. Un área de celdas se respeta tal cual, aunque esté vacía u oculta (una página en blanco).
+    const nombradas = rangosDeNombre(libro, hoja, '_xlnm.Print_Area');
+    let areas = [];
+    for (const r of nombradas) {
+      if (!r.soloFilas && !r.soloCols) { areas.push(r); continue; }
+      const e = extension(libro, hoja, g, r.soloFilas ? { f0: r.f0, f1: r.f1, c0: 0, c1: 16383 } : { f0: 0, f1: 1048575, c0: r.c0, c1: r.c1 });
+      if (e.f1 < 0) continue;
+      areas.push(r.soloFilas ? { f0: r.f0, f1: r.f1 >= 1048575 ? Math.min(r.f1, e.f1) : r.f1, c0: 0, c1: e.c1 }
+        : { f0: 0, f1: e.f1, c0: r.c0, c1: r.c1 >= 16383 ? Math.min(r.c1, e.c1) : r.c1 });
+    }
+    if (!nombradas.length) {
+      const e = extension(libro, hoja, g);
       areas = e.f1 < 0 ? [] : [{ f0: 0, c0: 0, f1: e.f1, c1: e.c1 }];
     }
     areas = areas.slice(0, 256);
@@ -165,28 +182,33 @@
     if (!imp.ajustarAPagina) for (const s of imp.saltosCol || []) if (s.manual !== false && s.id >= 1) saltosC.add(s.id);
 
     // Páginas de todas las áreas a una escala dada. Con `cuenta` { N, M } solo cuenta las páginas de ancho y de alto, y deja de cortar
-    // apenas pasa de N y M (para "ajustar a", que prueba varias escalas). Nunca se recorren más de MAX_PAGINAS páginas en total.
+    // apenas pasa de N y M (para "ajustar a", que prueba varias escalas). Nunca se recorren más de `tope` páginas en total (MAX_PAGINAS,
+    // o menos si quien llama ya gastó parte de su presupuesto en otras hojas: `opc.maxPaginas`); `cortado` avisa que quedaron páginas sin dar.
+    const tope = Math.min(MAX_PAGINAS, Math.max(1, Math.floor(opc.maxPaginas) || MAX_PAGINAS));
     const paginar = (escala, cuenta) => {
       const k = escala / 100;
       const tc = (c) => Math.round(baseCol(c) * k), tf = (f) => Math.round(baseFila(f) * k);
       const salida = [];
       const resumen = { ancho: 0, alto: 0 };
       const sobre = imp.pagina && imp.pagina.orden === 'overThenDown';
-      const lleno = () => salida.length >= MAX_PAGINAS;
+      const lleno = () => salida.length >= tope;
+      let cortado = false;
       const pxTF = tFilas ? sumar(tf, tFilas.f0, tFilas.f1) : 0, pxTC = tCols ? sumar(tc, tCols.c0, tCols.c1) : 0;
       // cada página lleva solo los títulos que caben en ella (los de más caerían fuera del papel, y con "$1:$100000" serían
       // 100.000 filas que dibujar en cada una de 20.000 páginas)
       const tfHasta = tFilas ? hastaQueCabe(tf, tFilas.f0, tFilas.f1, altoUtil) : 0, tcHasta = tCols ? hastaQueCabe(tc, tCols.c0, tCols.c1, anchoUtil) : 0;
-      for (let area = 0; area < areas.length && !lleno(); area++) {
+      for (let area = 0; area < areas.length; area++) {
+        if (lleno()) { cortado = true; break; }
         const a = areas[area];
         const tituloF = tFilas ? { hasta: Math.min(tFilas.f1, a.f1), px: pxTF } : null;
         const tituloC = tCols ? { hasta: Math.min(tCols.c1, a.c1), px: pxTC } : null;
-        const limC = cuenta ? (cuenta.N > 0 ? cuenta.N + 1 : 1) : MAX_PAGINAS, limF = cuenta ? (cuenta.M > 0 ? cuenta.M + 1 : 1) : MAX_PAGINAS;
+        const limC = cuenta ? (cuenta.N > 0 ? cuenta.N + 1 : 1) : tope, limF = cuenta ? (cuenta.M > 0 ? cuenta.M + 1 : 1) : tope;
         const cols = cortar(tc, a.c0, a.c1, anchoUtil, saltosC, tituloC, limC);
         const filas = cortar(tf, a.f0, a.f1, altoUtil, saltosF, tituloF, limF);
         if (cols.length > resumen.ancho) resumen.ancho = cols.length;
         if (filas.length > resumen.alto) resumen.alto = filas.length;
         if (cuenta) continue;
+        if (cols.cortado || filas.cortado) cortado = true;
         const poner = (cb, fb) => {
           salida.push({
             f0: fb[0], f1: fb[1], c0: cb[0], c1: cb[1], area,
@@ -194,9 +216,9 @@
           });
         };
         const [externas, internas] = sobre ? [filas, cols] : [cols, filas];
-        for (const e of externas) { if (lleno()) break; for (const q of internas) { if (lleno()) break; if (sobre) poner(q, e); else poner(e, q); } }
+        for (const e of externas) { if (lleno()) { cortado = true; break; } for (const q of internas) { if (lleno()) { cortado = true; break; } if (sobre) poner(q, e); else poner(e, q); } }
       }
-      return { paginas: salida, resumen };
+      return { paginas: salida, resumen, cortado };
     };
     const sumar = (tam, a, b) => { let s = 0; for (let i = a; i <= b && i - a < 100000; i++) s += tam(i); return s; };
     // última fila/columna de [a, b] que todavía empieza dentro de `disp` (al menos la primera)
@@ -227,8 +249,8 @@
       }
     } else if (pag.escala > 0) escala = Math.min(400, Math.max(10, pag.escala));
 
-    const { paginas } = paginar(escala);
-    return { escala, papel, margenes, areas, opciones, titulos: { filas: tFilas, columnas: tCols }, paginas, anchoUtil, altoUtil, mdwImpresora: mdwImp };
+    const { paginas, cortado } = paginar(escala);
+    return { escala, papel, margenes, areas, opciones, titulos: { filas: tFilas, columnas: tCols }, paginas, cortado, anchoUtil, altoUtil, mdwImpresora: mdwImp };
   }
 
   globalThis.XlsxPaginas = { calcular, papelDe, mdwImpresora, PAPELES, cortar };

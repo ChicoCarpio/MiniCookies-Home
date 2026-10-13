@@ -9,13 +9,15 @@
 // proporción celda/letra es la de la impresión.
 //
 // Uso:
-//   const { bytes, paginas } = await XlsxPdf.generar(libro, [0, 1], { idioma: 'es', nombreArchivo: 'Libro.xlsx' });
+//   const { bytes, paginas, truncado } = await XlsxPdf.generar(libro, [0, 1], { idioma: 'es', nombreArchivo: 'Libro.xlsx' });
+//   `truncado` es true si el libro pasaba de 20.000 páginas (opc.maxPaginas lo baja): el PDF trae las primeras.
 // Requiere pdf-lib, pdf-lienzo.js, pptx-texto.js, xlsx-modelo.js, xlsx-geometria.js, xlsx-paginas.js y xlsx-dibujo.js.
 
 (function () {
   const PT_PX = 72 / 600;        // puntos por píxel de impresora
   const U_PT = 0.75;             // puntos por u a escala 100 %
   const ENC_ANCHO_PX = 173, ENC_ALTO_PX = 121; // encabezados de fila/columna impresos (píxeles de impresora, medidos)
+  const MAX_PAGINAS_LIBRO = 20000; // páginas de todo el PDF (suma de las hojas): más son minutos de trabajo y cientos de MB
 
   // ---- Encabezado y pie de página ---------------------------------------------------------------------
   // Códigos de ECMA-376 18.3.1.40: &L &C &R secciones, &P página, &N total, &D fecha, &T hora, &F archivo, &A hoja, &Z ruta,
@@ -223,11 +225,17 @@
     await new LienzoPdf.Lienzo({ ancho: 1, alto: 1, anchoPt: 1, altoPt: 1 }).precargarFuentes(usos); // las deja listas para dibujar sin esperar
     const normal = libro.estilos.xf(0).fuente;
     const estilo = { normal: { nombre: normal.nombre || 'Calibri', tam: normal.tam || 11 } };
+    // El tope vale para todo el libro: cada hoja recibe lo que queda y, al agotarse, las hojas que faltan no se calculan.
+    const tope = Math.min(MAX_PAGINAS_LIBRO, Math.max(1, Math.floor(opc.maxPaginas) || MAX_PAGINAS_LIBRO));
     const trabajos = [];
+    let acumuladas = 0, truncado = false;
     for (const i of indices) {
+      if (acumuladas >= tope) { truncado = true; break; }
       const hoja = await libro.cargarHoja(i);
       const g = XlsxDibujo.geometria(libro, hoja);
-      const p = XlsxPaginas.calcular(libro, hoja, g);
+      const p = XlsxPaginas.calcular(libro, hoja, g, { maxPaginas: tope - acumuladas });
+      acumuladas += p.paginas.length;
+      if (p.cortado) truncado = true;
       trabajos.push({ hoja, g, p });
     }
     const total = trabajos.reduce((a, t) => a + t.p.paginas.length, 0);
@@ -259,7 +267,7 @@
       }
     }
     if (!pdf.getPageCount()) pdf.addPage([612, 792]);
-    return { bytes: await pdf.save(), paginas: total };
+    return { bytes: await pdf.save(), paginas: total, truncado };
   }
 
   globalThis.XlsxPdf = { generar, analizarHF, geometriaImpresion };
