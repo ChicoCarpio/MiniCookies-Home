@@ -23,6 +23,8 @@
   const numeroACol = (n) => LibroXlsx.numeroACol(n);
 
   // ---- valores a XML de celda ------------------------------------------------------------------------------------
+  // Excel lee _xHHHH_ como el carácter HHHH ("_x0041_" sería "A") y el XML convierte un \r suelto en \n: se escriben como Excel (_x005F_ y _x000D_).
+  const escTexto = (t) => X.esc(t.replace(/_(x[0-9A-Fa-f]{4}_)/g, '_x005F_$1').replace(/\r/g, '_x000D_'));
   const ERRORES = new Set(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA']);
   function celdaXml(ref, estilo, valor) {
     const s = estilo ? ` s="${estilo}"` : '';
@@ -38,7 +40,7 @@
     }
     const t = String(valor);
     if (t.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
-    return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${X.esc(t)}</t></is></c>`;
+    return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${escTexto(t)}</t></is></c>`;
   }
 
   async function texto(zip, ruta) { const f = zip.file(ruta); return f ? f.async('string') : null; }
@@ -61,6 +63,7 @@
     const mapa = new Map();   // fila → Map(columna → cambio)  (el último cambio de una celda gana)
     for (const c of cambios) {
       if (!Number.isInteger(c.f) || !Number.isInteger(c.c) || c.f < 0 || c.c < 0 || c.f >= MAX_FILA || c.c >= MAX_COL) throw new ErrorEscritor('celda fuera de los límites de Excel');
+      if (c.estilo !== undefined && !(Number.isInteger(c.estilo) && c.estilo >= 0)) throw new ErrorEscritor('estilo que no es un índice de cellXfs');
       if (!mapa.has(c.f)) mapa.set(c.f, new Map());
       mapa.get(c.f).set(c.c, c);
     }
@@ -78,14 +81,17 @@
 
     // celdas dentro del rango de una fórmula matricial (no solo la maestra): cambiarlas deja la matriz rota
     {
-      const re = /<f\b[^>]*\bt="(?:array|dataTable)"[^>]*\bref="([^"]+)"/g;
+      // los atributos en cualquier orden (ref antes que t también vale); se recorren las filas cambiadas, no las del rango (que puede ser A1:XFD1048576)
+      const re = /<(?:[\w.-]+:)?f\s([^>]*)>/g, filasCambiadas = [...mapa.keys()];
       let m;
       while ((m = re.exec(xml))) {
-        const r = LibroXlsx.decodificarRango(m[1]);
+        if (!/\bt\s*=\s*["'](?:array|dataTable)["']/.test(m[1])) continue;
+        const ref = /\bref\s*=\s*["']([^"']+)["']/.exec(m[1]);
+        const r = ref && LibroXlsx.decodificarRango(ref[1]);
         if (!r) continue;
-        for (let f = r.f0; f <= r.f1; f++) {
-          const cm = mapa.get(f);
-          if (cm) for (const c of cm.keys()) if (c >= r.c0 && c <= r.c1) throw new ErrorEscritor('la celda ' + numeroACol(c) + (f + 1) + ' está dentro de una fórmula matricial o de una tabla de datos (' + m[1] + ')');
+        for (const f of filasCambiadas) {
+          if (f < r.f0 || f > r.f1) continue;
+          for (const c of mapa.get(f).keys()) if (c >= r.c0 && c <= r.c1) throw new ErrorEscritor('la celda ' + numeroACol(c) + (f + 1) + ' está dentro de una fórmula matricial o de una tabla de datos (' + ref[1] + ')');
         }
       }
     }
@@ -109,7 +115,8 @@
           const f = X.hijo(celda, 'f');
           if (!f) continue;
           if (f.attrs.t === 'array' || f.attrs.t === 'dataTable') throw new ErrorEscritor('la celda ' + numeroACol(col) + n + ' es de una fórmula matricial o de una tabla de datos');
-          if (f.attrs.t === 'shared' && f.attrs.ref && f.fin > f.finApertura) promociones.push({ si: f.attrs.si, ref: f.attrs.ref, formula: X.decodificar(X.interior(texFila, f)), f: n - 1, c: col, borrar: cm });
+          // si va dentro de una expresión regular y de un atributo: solo dígitos (un libro hostil podría traer cualquier cosa)
+          if (f.attrs.t === 'shared' && f.attrs.ref && f.fin > f.finApertura && /^\d+$/.test(f.attrs.si || '')) promociones.push({ si: f.attrs.si, ref: f.attrs.ref, formula: X.decodificar(X.interior(texFila, f)), f: n - 1, c: col, desde: fila.ini });
         }
       }
     }
@@ -119,6 +126,7 @@
         // la primera otra celda del grupo que no se vaya a pisar
         const re = new RegExp('<c\\b[^>]*\\br="([A-Za-z]{1,3})(\\d+)"[^>]*>\\s*<f\\b(?=[^>]*\\bsi="' + p.si + '")(?=[^>]*\\bt="shared")[^>]*?/>', 'g');
         let m, destino = null;
+        re.lastIndex = p.desde;   // las demás celdas del grupo van después de la maestra: no se recorre la hoja desde el principio por cada una
         while ((m = re.exec(xml))) {
           const f = parseInt(m[2], 10) - 1, c = colANumero(m[1].toUpperCase());
           const pisada = mapa.has(f) && mapa.get(f).has(c);
@@ -142,6 +150,8 @@
     }
     const ed = [], nuevasFilas = new Map();   // posición de inserción → texto
     const porNumero = new Map(filas.map((x) => [x.n, x.nodo]));
+    const ordenadas = filas.every((x, k) => !k || filas[k - 1].n < x.n);
+    let sigFila = 0;   // con las filas en orden, la siguiente mayor avanza con f (antes: una búsqueda lineal por fila nueva, cuadrático)
     let f0 = Infinity, f1 = -1, c0 = Infinity, c1 = -1;
     const marcar = (f, c) => { if (f < f0) f0 = f; if (f > f1) f1 = f; if (c < c0) c0 = c; if (c > c1) c1 = c; };
     const refDe = (f, c) => numeroACol(c) + (f + 1);
@@ -151,7 +161,8 @@
       cols.forEach((c) => marcar(f, c));
       const nodo = porNumero.get(f + 1);
       if (!nodo) { // fila nueva: va antes de la primera fila mayor, o al final
-        const sig = filas.find((x) => x.n > f + 1);
+        let sig;
+        if (ordenadas) { while (sigFila < filas.length && filas[sigFila].n <= f + 1) sigFila++; sig = filas[sigFila]; } else sig = filas.find((x) => x.n > f + 1);
         const pos = sig ? sig.nodo.ini : sd.iniCierre >= 0 ? sd.iniCierre : -1;
         const textoFila = `<row r="${f + 1}">` + cols.map((c) => celdaXml(refDe(f, c), cm.get(c).estilo, cm.get(c).valor)).join('') + '</row>';
         const clave = pos < 0 ? 'vacio' : pos;
@@ -166,7 +177,8 @@
       const piezas = [], pendientes = cols.slice();
       const nueva = (c, previa) => {
         const cam = cm.get(c);
-        return celdaXml(refDe(f, c), cam.estilo !== undefined ? cam.estilo : (previa ? previa.attrs.s : undefined), cam.valor);
+        const s = previa && /^\d+$/.test(previa.attrs.s || '') ? previa.attrs.s : undefined;   // el de la celda, si es un índice
+        return celdaXml(refDe(f, c), cam.estilo !== undefined ? cam.estilo : s, cam.valor);
       };
       const soltar = (hasta) => { while (pendientes.length && pendientes[0] < hasta) piezas.push(nueva(pendientes.shift(), null)); };
       let pos = 3, col = -1;
@@ -201,23 +213,26 @@
       }
     }
     zip.file(entrada.ruta, X.aplicar(xml, ed));
+    if (libro._hojasCargadas) libro._hojasCargadas.delete(i);   // el modelo leído antes ya no vale: cargarHoja(i) vuelve a leer la hoja editada
     await XlsxPaquete.quitarCalcChain(zip);
     await XlsxPaquete.marcarRecalculo(zip);
   }
 
   // ---- libro nuevo --------------------------------------------------------------------------------------------------
   // Nombre de hoja que Excel acepta: sin : \ / ? * [ ], sin apóstrofo al principio ni al final, 31 caracteres como máximo, único sin distinguir mayúsculas.
+  // Los 31 caracteres de Excel son unidades UTF-16 (un emoji cuenta 2; con 20 emojis Excel no abre el libro): se corta sin partir un par.
+  const corte = (s, max) => (s.length <= max ? s : s.slice(0, /[\uD800-\uDBFF]/.test(s[max - 1]) ? max - 1 : max));
   function nombreHoja(nombre, usados) {
-    let n = String(nombre === undefined || nombre === null ? '' : nombre).replace(/[:\\\/?*\[\]\u0000-\u001F]/g, ' ').replace(/^['\s]+|['\s]+$/g, '');
+    let n = String(nombre === undefined || nombre === null ? '' : nombre).replace(/[:\\\/?*\[\]\u0000-\u001F￾￿]/g, ' ').replace(/^['\s]+|['\s]+$/g, '');
     if (!n) n = 'Hoja';
-    n = Array.from(n).slice(0, 31).join('').replace(/^'+|'+$/g, '');
+    n = corte(n, 31).replace(/^'+|'+$/g, '');
     if (!n) n = 'Hoja';
     const clave = (x) => x.toLowerCase();
     if (usados) {
       let base = n, k = 2;
       while ([...usados].some((u) => clave(u) === clave(n)) || clave(n) === 'history') {
         const suf = ' (' + k++ + ')';
-        n = Array.from(base).slice(0, 31 - suf.length).join('') + suf;
+        n = corte(base, 31 - suf.length) + suf;
       }
       usados.add(n);
     }
@@ -266,8 +281,15 @@
         if (celdas.length) filasXml.push(`<row r="${f + 1}">${celdas.join('')}</row>`);
       });
       const anchos = (h.anchos || []).slice(0, MAX_COL).map((w, c) => (w > 0 ? `<col min="${c + 1}" max="${c + 1}" width="${Math.min(255, w)}" customWidth="1"/>` : '')).join('');
-      const comb = (h.combinadas || []).filter((r) => LibroXlsx.decodificarRango(r) && /:/.test(r));
-      const congelar = h.inmovilizarFilas > 0 ? `<sheetViews><sheetView workbookViewId="0"${k === 0 ? ' tabSelected="1"' : ''}><pane ySplit="${h.inmovilizarFilas}" topLeftCell="A${h.inmovilizarFilas + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` : `<sheetViews><sheetView workbookViewId="0"${k === 0 ? ' tabSelected="1"' : ''}/></sheetViews>`;
+      // combinadas: solo rangos A1:B2 válidos y que no se pisen con una anterior (dos que se solapan: Excel no abre el libro)
+      const comb = [], rangos = [];
+      for (const r of h.combinadas || []) {
+        const d = typeof r === 'string' && /^\$?[A-Za-z]{1,3}\$?\d+:\$?[A-Za-z]{1,3}\$?\d+$/.test(r) ? LibroXlsx.decodificarRango(r) : null;
+        if (!d || d.f1 >= MAX_FILA || d.c1 >= MAX_COL || rangos.some((o) => d.f0 <= o.f1 && o.f0 <= d.f1 && d.c0 <= o.c1 && o.c0 <= d.c1)) continue;
+        rangos.push(d); comb.push(numeroACol(d.c0) + (d.f0 + 1) + ':' + numeroACol(d.c1) + (d.f1 + 1));
+      }
+      const inm = Math.min(MAX_FILA - 1, Math.floor(Number(h.inmovilizarFilas) || 0));   // entero y dentro de la hoja: 2.5 o 1048576 y Excel no abre el libro
+      const congelar = inm > 0 ? `<sheetViews><sheetView workbookViewId="0"${k === 0 ? ' tabSelected="1"' : ''}><pane ySplit="${inm}" topLeftCell="A${inm + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` : `<sheetViews><sheetView workbookViewId="0"${k === 0 ? ' tabSelected="1"' : ''}/></sheetViews>`;
       return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
         + `<dimension ref="A1${maxCol && filas.length ? ':' + numeroACol(maxCol - 1) + filas.length : ''}"/>` + congelar + '<sheetFormatPr defaultRowHeight="15"/>'
         + (anchos ? `<cols>${anchos}</cols>` : '') + `<sheetData>${filasXml.join('')}</sheetData>`
@@ -285,7 +307,7 @@
       + `<Relationship Id="rId${hojasXml.length + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${hojasXml.length + 2}" Type="${R}/sharedStrings" Target="sharedStrings.xml"/></Relationships>`);
     zip.file('xl/styles.xml', ESTILOS_XML);
     zip.file('xl/sharedStrings.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${totalTextos}" uniqueCount="${textos.length}">`
-      + textos.map((t) => `<si><t xml:space="preserve">${X.esc(t)}</t></si>`).join('') + '</sst>');
+      + textos.map((t) => `<si><t xml:space="preserve">${escTexto(t)}</t></si>`).join('') + '</sst>');
     hojasXml.forEach((x, k) => zip.file(`xl/worksheets/sheet${k + 1}.xml`, x));
     return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   }

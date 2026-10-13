@@ -39,7 +39,9 @@
   const esc = (v) => String(v).replace(SIN_CONTROL, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const escAttr = (v) => esc(v).replace(/"/g, '&quot;').replace(/\n/g, '&#10;').replace(/\r/g, '&#13;').replace(/\t/g, '&#9;');
 
-  const RE_ATTR = /([^\s=\/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
+  // El nombre solo puede empezar tras un espacio o una comilla: sin eso, una etiqueta con un texto largo sin "=" se reintentaba desde cada carácter
+  // (cuadrático: 80.000 caracteres tardaban 3 s).
+  const RE_ATTR = /(?<=^|[\s"'])([^\s=\/>"']+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
 
   // Fin de la etiqueta que empieza en `lt`: el ">" que no está dentro de comillas. -1 si no cierra.
   function finEtiqueta(t, lt) {
