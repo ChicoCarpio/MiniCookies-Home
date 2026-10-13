@@ -28,12 +28,18 @@
     antiguo: { es: 'es un libro en formato antiguo (.xls) o binario', en: 'this is a workbook in an old (.xls) or binary format' },
     sinLibro: { es: 'el archivo no contiene un libro de Excel', en: 'the file does not contain an Excel workbook' },
     danado: { es: 'el libro está dañado', en: 'the workbook is damaged' },
+    grande: { es: 'el libro es demasiado grande para abrirlo en el navegador', en: 'the workbook is too large to open in the browser' },
   };
+
+  // Límites de Excel (filas y columnas) y topes propios contra archivos que, chicos comprimidos, agotarían la memoria.
+  const MAX_FILAS = 1048576, MAX_COLUMNAS = 16384;
+  const MAX_CELDAS = 25000000;      // ~600 MB de memoria; un libro real de 2,5 M celdas ocupa ~80 MB
+  const MAX_ELEMENTOS = 500000;     // combinadas, hipervínculos, reglas y validaciones por hoja
 
   class ErrorXlsx extends Error {
     constructor(codigo, detalle) {
       const t = TEXTOS_ERROR[codigo] || TEXTOS_ERROR.danado;
-      const en = typeof window !== 'undefined' && typeof window.idiomaActual === 'function' && window.idiomaActual() === 'en';
+      const en = typeof globalThis.idiomaActual === 'function' && globalThis.idiomaActual() === 'en';
       super(en ? t.en : t.es);
       this.name = 'ErrorXlsx';
       this.codigo = codigo;
@@ -76,8 +82,9 @@
     const dias = Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000;
     const fraccion = ((+m[4] || 0) * 3600 + (+m[5] || 0) * 60 + (+m[6] || 0) + (m[7] ? +('0.' + m[7]) : 0)) / 86400;
     if (fecha1904) return dias + 24107 + fraccion; // 1904-01-01 = serial 0
-    let serial = dias + 25569; // 1970-01-01 = 25569
-    if (serial >= 61) serial += 1; // el día inexistente 29-feb-1900 (serial 60)
+    // 1970-01-01 = serial 25569 (ya cuenta el 29-feb-1900 que no existió); antes del 1-mar-1900 ese día no está.
+    let serial = dias + 25569;
+    if (serial < 61) serial -= 1;
     return serial + fraccion;
   }
 
@@ -95,17 +102,23 @@
   }
   const rutaRels = (ruta) => ruta.slice(0, ruta.lastIndexOf('/') + 1) + '_rels/' + ruta.slice(ruta.lastIndexOf('/') + 1) + '.rels';
 
-  async function textoDe(zip, ruta) {
-    const e = zip.file(ruta) || zip.file(ruta.toLowerCase());
-    return e ? e.async('string') : null;
-  }
-  async function buscarEntrada(zip, ruta) {
+  // Los nombres de las partes no distinguen mayúsculas (OPC): un índice en minúsculas por zip, armado una vez.
+  const indicesZip = new WeakMap();
+  function nombreReal(zip, ruta) {
     if (zip.file(ruta)) return ruta;
-    const minuscula = ruta.toLowerCase();
-    let hallada = null;
-    zip.forEach((nombre) => { if (!hallada && nombre.toLowerCase() === minuscula) hallada = nombre; });
-    return hallada;
+    let indice = indicesZip.get(zip);
+    if (!indice) {
+      indice = new Map();
+      zip.forEach((nombre) => { const k = nombre.toLowerCase(); if (!indice.has(k)) indice.set(k, nombre); });
+      indicesZip.set(zip, indice);
+    }
+    return indice.get(ruta.toLowerCase()) || null;
   }
+  async function textoDe(zip, ruta) {
+    const real = nombreReal(zip, ruta);
+    return real ? zip.file(real).async('string') : null;
+  }
+  async function buscarEntrada(zip, ruta) { return nombreReal(zip, ruta); }
 
   // [{ id, tipo (último segmento del Type), destino (ruta resuelta o URL si es externa), externa }]
   async function leerRelaciones(zip, rutaParte) {
@@ -146,7 +159,7 @@
               else if (nombre === 'sz') run.fuente.tam = parseFloat(a.val);
               else if (nombre === 'rFont') run.fuente.nombre = a.val;
               else if (nombre === 'vertAlign') run.fuente.alinVertical = a.val;
-              else if (nombre === 'color') run.fuente.color = a.rgb ? { tipo: 'rgb', valor: a.rgb.slice(-6), tint: 0 } : a.theme !== undefined ? { tipo: 'tema', valor: +a.theme, tint: parseFloat(a.tint) || 0 } : a.indexed !== undefined ? { tipo: 'indexado', valor: +a.indexed, tint: 0 } : null;
+              else if (nombre === 'color') run.fuente.color = XlsxEstilos.colorRef(a);
             }
         }
       },
@@ -176,6 +189,8 @@
       this.estilo = new Int32Array(1024);
       this.tipo = new Uint8Array(1024);
       this.valor = [];          // número | texto | boolean según tipo
+      this.ricos = new Map();    // índice → [{ texto, fuente }] (texto con formato por tramos)
+      this.textoOriginal = new Map(); // índice → texto tal como venía (CSV: "1.234,50")
       this.formulas = new Map(); // índice → { texto, tipo, ref, si, maestra:bool }
       this.compartidas = new Map(); // si → { texto, f, c } de la celda maestra
       this._inicioFila = null;
@@ -206,14 +221,25 @@
       for (let i = 0; i < this.n; i++) if (!inicio.has(this.fila[i])) inicio.set(this.fila[i], i);
       this._inicioFila = inicio;
     }
+    // Ordena por (fila, columna) y, si una celda aparece dos veces, deja la última del archivo (como Excel).
+    // Todo lo que está indexado por posición (fórmulas, textos con formato, texto original del CSV) se reubica.
     _ordenar() {
-      const idx = Array.from({ length: this.n }, (_, i) => i).sort((a, b) => this.fila[a] - this.fila[b] || this.col[a] - this.col[b]);
+      const idx = Array.from({ length: this.n }, (_, i) => i).sort((a, b) => this.fila[a] - this.fila[b] || this.col[a] - this.col[b] || a - b);
       const f = new Int32Array(this.fila.length), c = new Int32Array(this.col.length), e = new Int32Array(this.estilo.length), t = new Uint8Array(this.tipo.length);
-      const v = new Array(this.n);
-      const nuevas = new Map();
-      const viejas = this.formulas;
-      idx.forEach((vieja, nueva) => { f[nueva] = this.fila[vieja]; c[nueva] = this.col[vieja]; e[nueva] = this.estilo[vieja]; t[nueva] = this.tipo[vieja]; v[nueva] = this.valor[vieja]; if (viejas.has(vieja)) nuevas.set(nueva, viejas.get(vieja)); });
-      this.fila = f; this.col = c; this.estilo = e; this.tipo = t; this.valor = v; this.formulas = nuevas;
+      const v = [];
+      const mapas = ['formulas', 'ricos', 'textoOriginal'];
+      const nuevos = mapas.map(() => new Map());
+      let nueva = 0;
+      for (let k = 0; k < idx.length; k++) {
+        const vieja = idx[k];
+        const sig = idx[k + 1];
+        if (sig !== undefined && this.fila[sig] === this.fila[vieja] && this.col[sig] === this.col[vieja]) continue; // duplicada: manda la última
+        f[nueva] = this.fila[vieja]; c[nueva] = this.col[vieja]; e[nueva] = this.estilo[vieja]; t[nueva] = this.tipo[vieja]; v[nueva] = this.valor[vieja];
+        mapas.forEach((nombre, m) => { if (this[nombre].has(vieja)) nuevos[m].set(nueva, this[nombre].get(vieja)); });
+        nueva++;
+      }
+      mapas.forEach((nombre, m) => { this[nombre] = nuevos[m]; });
+      this.fila = f; this.col = c; this.estilo = e; this.tipo = t; this.valor = v; this.n = nueva;
     }
     indiceDe(f, c) {
       this._indexar();
@@ -272,7 +298,7 @@
           let fila = parseInt(m[4], 10), col = colANumero(m[2].toUpperCase());
           if (!m[3]) fila += df;
           if (!m[1]) col += dc;
-          if (fila < 1 || col < 0 || col > 16383) salida += '#REF!'; // se salió de la hoja
+          if (fila < 1 || fila > MAX_FILAS || col < 0 || col > 16383) salida += '#REF!'; // se salió de la hoja
           else salida += m[1] + numeroACol(col) + m[3] + fila;
           i += m[0].length; continue;
         }
@@ -288,7 +314,7 @@
         const mf = /^(\$?)(\d+):(\$?)(\d+)(?![A-Za-z0-9_(.!])/.exec(texto.slice(i, i + 16));
         if (mf) {
           const a = parseInt(mf[2], 10) + (mf[1] ? 0 : df), b = parseInt(mf[4], 10) + (mf[3] ? 0 : df);
-          salida += (a < 1 || b < 1) ? '#REF!' : mf[1] + a + ':' + mf[3] + b;
+          salida += (a < 1 || b < 1 || a > MAX_FILAS || b > MAX_FILAS) ? '#REF!' : mf[1] + a + ':' + mf[3] + b;
           i += mf[0].length; continue;
         }
         // un número cualquiera (1.5E+3, 100): se copia entero para no tomar su "E3" por una referencia
@@ -322,16 +348,19 @@
       relaciones: [],
     };
     const C = hoja.celdas;
-    const compartidas = new Map(); // si → maestra
     let fila = -1, colSiguiente = 0;
     let celda = null;              // { f, c, tipo, estilo, v, formula, enIs }
     let enV = false, enF = false, enIs = false, enT = false, enFonetico = false;
     let textoCelda = '';
     let seccion = '';
     let sheetView = true;
+    let enVistasPersonalizadas = false;
     let cf = null, regla = null, enFormulaCf = false, validacion = null, enFormulaVal = null, hf = null, enHf = null;
     const cerrarCelda = () => {
       if (!celda) return;
+      // Fuera de la hoja (o sin sentido): se descarta. Un tope total evita que un archivo chico agote la memoria.
+      if (celda.f < 0 || celda.f >= MAX_FILAS || celda.c < 0 || celda.c >= MAX_COLUMNAS) { celda = null; return; }
+      if (C.n >= MAX_CELDAS) throw new ErrorXlsx('grande', 'más de ' + MAX_CELDAS + ' celdas');
       let tipo = TIPO.vacio, valor = null;
       const t = celda.t;
       if (t === 'inlineStr') { tipo = TIPO.texto; valor = XmlLigero.sinEscapes(celda.is); }
@@ -347,7 +376,7 @@
         }
       }
       const i = C.agregar(celda.f, celda.c, tipo, valor, celda.estilo);
-      if (celda.rico) { if (!hoja.textosRicos) hoja.textosRicos = new Map(); hoja.textosRicos.set(i, celda.rico); }
+      if (celda.rico) C.ricos.set(i, celda.rico);
       if (celda.formula) {
         const fx = celda.formula;
         C.formulas.set(i, fx);
@@ -358,9 +387,11 @@
 
     XmlLigero.recorrer(texto, {
       abrir(nombre, a, vacio) {
+        if (nombre === 'customSheetViews') enVistasPersonalizadas = true;
+        if (enVistasPersonalizadas) return;
         switch (nombre) {
           case 'sheetPr': seccion = 'sheetPr'; break;
-          case 'tabColor': hoja.color = a.rgb ? { tipo: 'rgb', valor: a.rgb.slice(-6), tint: 0 } : a.theme !== undefined ? { tipo: 'tema', valor: +a.theme, tint: parseFloat(a.tint) || 0 } : a.indexed !== undefined ? { tipo: 'indexado', valor: +a.indexed, tint: 0 } : null; break;
+          case 'tabColor': hoja.color = XlsxEstilos.colorRef(a); break;
           case 'pageSetUpPr': hoja.imprimir.ajustarAPagina = a.fitToPage === '1' || a.fitToPage === 'true'; if (a.autoPageBreaks === '0' || a.autoPageBreaks === 'false') hoja.imprimir.autoSaltos = false; break;
           case 'dimension': hoja.dimension = a.ref ? decodificarRango(a.ref) : null; break;
           case 'sheetView':
@@ -391,23 +422,24 @@
             break;
           case 'col': {
             const min = parseInt(a.min, 10), max = parseInt(a.max, 10);
-            if (min >= 1 && max >= min) hoja.columnas.push({ min: min - 1, max: Math.min(max, 16384) - 1, ancho: a.width !== undefined ? parseFloat(a.width) : null,
+            if (min >= 1 && min <= MAX_COLUMNAS && max >= min && hoja.columnas.length < MAX_COLUMNAS) hoja.columnas.push({ min: min - 1, max: Math.min(max, MAX_COLUMNAS) - 1, ancho: a.width !== undefined ? parseFloat(a.width) : null,
               oculta: a.hidden === '1' || a.hidden === 'true', personalizado: a.customWidth === '1' || a.customWidth === 'true', estilo: parseInt(a.style, 10) || 0,
               nivel: parseInt(a.outlineLevel, 10) || 0, colapsada: a.collapsed === '1' || a.collapsed === 'true', ajusteAuto: a.bestFit === '1' || a.bestFit === 'true' });
             break;
           }
           case 'sheetData': seccion = 'sheetData'; break;
           case 'row': {
-            fila = a.r !== undefined ? parseInt(a.r, 10) - 1 : fila + 1;
+            const rf = a.r !== undefined ? parseInt(a.r, 10) : NaN;
+            fila = rf >= 1 && rf <= MAX_FILAS ? rf - 1 : fila + 1; // r ausente o absurdo: la fila siguiente
             colSiguiente = 0;
             const info = { alto: a.ht !== undefined ? parseFloat(a.ht) : null, oculta: a.hidden === '1' || a.hidden === 'true', personalizada: a.customHeight === '1' || a.customHeight === 'true',
               estilo: parseInt(a.s, 10) || 0, formatoPersonalizado: a.customFormat === '1' || a.customFormat === 'true', nivel: parseInt(a.outlineLevel, 10) || 0, colapsada: a.collapsed === '1' || a.collapsed === 'true' };
-            if (info.alto !== null || info.oculta || info.estilo || info.nivel || info.colapsada || info.personalizada) hoja.filas.set(fila, info);
+            if (fila < MAX_FILAS && (info.alto !== null || info.oculta || info.estilo || info.nivel || info.colapsada || info.personalizada)) hoja.filas.set(fila, info);
             break;
           }
           case 'c': {
             let c = colSiguiente;
-            if (a.r !== undefined) { const d = decodificarDireccion(a.r); if (d) { c = d.c; if (d.f !== fila) fila = d.f; } }
+            if (a.r !== undefined) { const d = decodificarDireccion(a.r); if (d && d.f >= 0 && d.f < MAX_FILAS && d.c < MAX_COLUMNAS) { c = d.c; if (d.f !== fila) fila = d.f; } }
             colSiguiente = c + 1;
             celda = { f: fila, c, t: a.t || 'n', estilo: parseInt(a.s, 10) || 0, v: null, is: '', formula: null, rico: null };
             if (vacio) cerrarCelda();
@@ -422,10 +454,10 @@
           case 'is': if (celda) enIs = true; break;
           case 'rPh': enFonetico = true; break;
           case 't': if (enIs && !enFonetico) enT = true; break;
-          case 'mergeCell': { const r = a.ref ? decodificarRango(a.ref) : null; if (r) hoja.combinadas.push(r); break; }
+          case 'mergeCell': { const r = a.ref ? decodificarRango(a.ref) : null; if (r && hoja.combinadas.length < MAX_ELEMENTOS) hoja.combinadas.push(r); break; }
           case 'hyperlink': {
             const r = a.ref ? decodificarRango(a.ref) : null;
-            if (r) hoja.hipervinculos.push({ f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1, rid: a.id || null, destino: null, ubicacion: a.location || null, visible: a.display || null, ayuda: a.tooltip || null, externo: false });
+            if (r && hoja.hipervinculos.length < MAX_ELEMENTOS) hoja.hipervinculos.push({ f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1, rid: a.id || null, destino: null, ubicacion: a.location || null, visible: a.display || null, ayuda: a.tooltip || null, externo: false });
             break;
           }
           case 'pageMargins': hoja.imprimir.margenes = { izq: parseFloat(a.left), der: parseFloat(a.right), arr: parseFloat(a.top), aba: parseFloat(a.bottom), encabezado: parseFloat(a.header), pie: parseFloat(a.footer) }; break;
@@ -447,7 +479,7 @@
           case 'drawing': hoja.partes.dibujoRid = a.id || null; break;
           case 'legacyDrawing': hoja.partes.dibujoVmlRid = a.id || null; break;
           case 'tablePart': if (a.id) hoja.partes.otras.push({ tipo: 'tabla', rid: a.id }); break;
-          case 'conditionalFormatting': cf = { rangos: (a.sqref || '').split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean), reglas: [] }; hoja.formatosCondicionales.push(cf); break;
+          case 'conditionalFormatting': cf = { rangos: (a.sqref || '').split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean), reglas: [] }; if (hoja.formatosCondicionales.length < MAX_ELEMENTOS) hoja.formatosCondicionales.push(cf); break;
           case 'cfRule': if (cf) { regla = { tipo: a.type || 'expression', prioridad: parseInt(a.priority, 10) || 0, dxf: a.dxfId !== undefined ? parseInt(a.dxfId, 10) : null, operador: a.operator || null, texto: a.text || null, detener: a.stopIfTrue === '1', encima: a.aboveAverage !== '0', igual: a.equalAverage === '1', rango: a.rank !== undefined ? parseInt(a.rank, 10) : null, porcentaje: a.percent === '1', abajo: a.bottom === '1', periodo: a.timePeriod || null, desvEst: a.stdDev !== undefined ? parseInt(a.stdDev, 10) : null, formulas: [], escala: null, barras: null, iconos: null }; cf.reglas.push(regla); } break;
           case 'formula': if (regla) { enFormulaCf = true; textoCelda = ''; } else if (validacion) { enFormulaVal = 'formula'; textoCelda = ''; } break;
           case 'formula1': case 'formula2': if (validacion) { enFormulaVal = nombre; textoCelda = ''; } break;
@@ -455,8 +487,8 @@
           case 'dataBar': if (regla) regla.barras = { cfvo: [], color: null, mostrarValor: a.showValue !== '0', min: a.minLength !== undefined ? parseInt(a.minLength, 10) : 10, max: a.maxLength !== undefined ? parseInt(a.maxLength, 10) : 90 }; break;
           case 'iconSet': if (regla) regla.iconos = { conjunto: a.iconSet || '3TrafficLights1', cfvo: [], mostrarValor: a.showValue !== '0', invertir: a.reverse === '1', soloIcono: false }; break;
           case 'cfvo': if (regla) { const v = { tipo: a.type || 'num', valor: a.val !== undefined ? a.val : null, gte: a.gte !== '0' }; (regla.escala || regla.barras || regla.iconos || { cfvo: [] }).cfvo.push(v); } break;
-          case 'color': if (regla && regla.escala) regla.escala.colores.push(a.rgb ? { tipo: 'rgb', valor: a.rgb.slice(-6), tint: 0 } : a.theme !== undefined ? { tipo: 'tema', valor: +a.theme, tint: parseFloat(a.tint) || 0 } : a.indexed !== undefined ? { tipo: 'indexado', valor: +a.indexed, tint: 0 } : null); else if (regla && regla.barras) regla.barras.color = a.rgb ? { tipo: 'rgb', valor: a.rgb.slice(-6), tint: 0 } : a.theme !== undefined ? { tipo: 'tema', valor: +a.theme, tint: parseFloat(a.tint) || 0 } : null; break;
-          case 'dataValidation': validacion = { rangos: (a.sqref || '').split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean), tipo: a.type || 'none', operador: a.operator || 'between', permitirVacio: a.allowBlank === '1', ocultarFlecha: a.showDropDown === '1', mostrarEntrada: a.showInputMessage === '1', mostrarError: a.showErrorMessage === '1', estiloError: a.errorStyle || 'stop', tituloError: a.errorTitle || '', error: a.error || '', tituloEntrada: a.promptTitle || '', entrada: a.prompt || '', formula1: null, formula2: null }; hoja.validaciones.push(validacion); break;
+          case 'color': if (regla && regla.escala) regla.escala.colores.push(XlsxEstilos.colorRef(a)); else if (regla && regla.barras) regla.barras.color = XlsxEstilos.colorRef(a); break;
+          case 'dataValidation': validacion = { rangos: (a.sqref || '').split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean), tipo: a.type || 'none', operador: a.operator || 'between', permitirVacio: a.allowBlank === '1', ocultarFlecha: a.showDropDown === '1', mostrarEntrada: a.showInputMessage === '1', mostrarError: a.showErrorMessage === '1', estiloError: a.errorStyle || 'stop', tituloError: a.errorTitle || '', error: a.error || '', tituloEntrada: a.promptTitle || '', entrada: a.prompt || '', formula1: null, formula2: null }; if (hoja.validaciones.length < MAX_ELEMENTOS) hoja.validaciones.push(validacion); break;
           default: break;
         }
       },
@@ -465,6 +497,8 @@
         else if (enT && celda) celda.is += t;
       },
       cerrar(nombre) {
+        if (nombre === 'customSheetViews') { enVistasPersonalizadas = false; return; }
+        if (enVistasPersonalizadas) return;
         switch (nombre) {
           case 'v': if (enV && celda) { celda.v = textoCelda; } enV = false; break;
           case 'f': if (enF && celda && celda.formula) { celda.formula.texto = textoCelda === '' && celda.formula.tipo === 'shared' && celda.formula.ref === null ? null : XmlLigero.sinEscapes(textoCelda); } enF = false; break;
@@ -501,7 +535,7 @@
       }
       return estiloColumna[c] || 0;
     };
-    // Las fórmulas compartidas cuya maestra llegó después de una dependiente (poco común): ya se resuelven al pedirlas.
+    C._indexar(); // deja las celdas en orden (fila, columna) y sin duplicadas: los índices de paraCada no cambian después
     return hoja;
   }
 
@@ -532,7 +566,19 @@
     return false;
   }
 
-  async function abrir(origen) {
+  // Cualquier fallo al leer sale como ErrorXlsx: un zip dañado o enorme (ErrorZip) o una hoja que agota la memoria
+  // (RangeError) no deben llegar a la interfaz como mensajes técnicos.
+  async function envolver(trabajo) {
+    try { return await trabajo(); } catch (error) {
+      if (error instanceof ErrorXlsx) throw error;
+      if (error && error.name === 'ErrorZip') throw new ErrorXlsx(error.codigo === 'grande' ? 'grande' : error.codigo === 'cifrado' ? 'cifrado' : 'danado', error.detalle || '');
+      if (error instanceof RangeError) throw new ErrorXlsx('grande', String(error.message));
+      throw new ErrorXlsx('danado', error && error.message ? error.message : String(error));
+    }
+  }
+  const abrir = (origen) => envolver(() => abrirInterno(origen));
+
+  async function abrirInterno(origen) {
     const bytes = await aBytes(origen);
     if (esContenedorBinario(bytes)) {
       throw new ErrorXlsx(contieneUtf16(bytes, 'EncryptedPackage') ? 'cifrado' : 'antiguo');
@@ -549,7 +595,7 @@
       XmlLigero.recorrer(textoRaiz, { abrir(nombre, a) { if (nombre === 'Relationship' && /officeDocument$/.test(a.Type || '') && !rutaLibro) rutaLibro = resolverRuta('.rels', a.Target || ''); } });
     }
     if (!rutaLibro || !(await buscarEntrada(zip, rutaLibro))) rutaLibro = await buscarEntrada(zip, 'xl/workbook.xml');
-    if (!rutaLibro) throw new ErrorXlsx('sinLibro');
+    if (!rutaLibro) throw new ErrorXlsx(await buscarEntrada(zip, 'xl/workbook.bin') ? 'antiguo' : 'sinLibro'); // .xlsb: binario
     rutaLibro = (await buscarEntrada(zip, rutaLibro)) || rutaLibro;
 
     const textoLibro = await textoDe(zip, rutaLibro);
@@ -571,7 +617,7 @@
           case 'sheet': {
             const rel = relPorId.get(a.id);
             libro.hojas.push({ nombre: a.name || ('Hoja' + (libro.hojas.length + 1)), id: parseInt(a.sheetId, 10), estado: a.state === 'hidden' ? 'oculta' : a.state === 'veryHidden' ? 'muyOculta' : 'visible',
-              tipo: rel ? (TIPOS_HOJA[rel.tipo] || 'otra') : 'hoja', ruta: rel && !rel.externa ? rel.destino : null, rid: a.id || null });
+              tipo: rel ? (Object.prototype.hasOwnProperty.call(TIPOS_HOJA, rel.tipo) ? TIPOS_HOJA[rel.tipo] : 'otra') : 'hoja', ruta: rel && !rel.externa ? rel.destino : null, rid: a.id || null });
             break;
           }
           case 'definedName': enNombre = { nombre: a.name, hojaLocal: a.localSheetId !== undefined ? parseInt(a.localSheetId, 10) : null, oculto: a.hidden === '1' || a.hidden === 'true', comentario: a.comment || '', ref: '' }; textoNombre = ''; break;
@@ -591,7 +637,7 @@
     libro.estilos = XlsxEstilos.leer(relEstilos ? await textoDe(zip, relEstilos.destino) : null, relTema ? await textoDe(zip, relTema.destino) : null);
     libro.tieneMacros = !!rels.find((r) => r.tipo === 'vbaProject');
 
-    libro.cargarHoja = (indice) => cargarHoja(libro, indice);
+    libro.cargarHoja = (indice) => envolver(() => cargarHoja(libro, indice));
     return libro;
   }
 
@@ -611,6 +657,8 @@
       for (const h of hoja.hipervinculos) {
         const rel = h.rid ? porId.get(h.rid) : null;
         if (rel) { h.destino = rel.destino; h.externo = rel.externa; }
+        // Solo estos esquemas se pueden usar como enlace de página (un libro hostil puede traer javascript:, data:…).
+        h.destinoSeguro = h.externo && /^(https?:|mailto:|tel:|ftp:)/i.test(h.destino || '') ? h.destino : null;
       }
       const rd = hoja.partes.dibujoRid ? porId.get(hoja.partes.dibujoRid) : null;
       if (rd) hoja.partes.dibujo = rd.destino;

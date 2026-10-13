@@ -25,25 +25,47 @@
     try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch (e) { return new TextDecoder('windows-1252').decode(bytes); }
   }
 
-  // Separador más frecuente en las primeras líneas, contando solo fuera de comillas.
+  // Separador: el que parte las primeras líneas en la MISMA cantidad de campos (más de uno), contando fuera de comillas.
+  // Contar solo cuál aparece más falla con un CSV en español de puras cifras ("1,5;2,5": hay más comas que ";").
   function detectarSeparador(texto) {
-    const muestra = texto.slice(0, 20000);
-    const cuentas = { ',': 0, ';': 0, '\t': 0, '|': 0 };
-    let entreComillas = false, lineas = 0;
-    for (const caracter of muestra) {
-      if (caracter === '"') entreComillas = !entreComillas;
-      else if (!entreComillas && caracter in cuentas) cuentas[caracter]++;
-      else if (!entreComillas && caracter === '\n' && ++lineas >= 20) break;
+    const candidatos = [',', ';', '\t', '|'];
+    const muestra = texto.length > 20000 ? texto.slice(0, texto.lastIndexOf('\n', 20000) + 1) || texto.slice(0, 20000) : texto;
+    const lineas = []; // por línea, cuántas veces aparece cada candidato
+    let cuentas = [0, 0, 0, 0], entreComillas = false, hayDatos = false;
+    for (let i = 0; i < muestra.length && lineas.length < 20; i++) {
+      const c = muestra[i];
+      if (c === '"') { entreComillas = !entreComillas; hayDatos = true; } else if (!entreComillas) {
+        if (c === '\n') { if (hayDatos) lineas.push(cuentas); cuentas = [0, 0, 0, 0]; hayDatos = false; } else {
+          const k = candidatos.indexOf(c);
+          if (k >= 0) cuentas[k]++;
+          if (c !== '\r') hayDatos = true;
+        }
+      }
     }
-    return Object.keys(cuentas).reduce((a, b) => (cuentas[b] > cuentas[a] ? b : a), ',');
+    if (hayDatos && lineas.length < 20) lineas.push(cuentas);
+    let mejor = 0, mejorPuntos = 0;
+    candidatos.forEach((cand, k) => {
+      const frecuencias = new Map();
+      for (const l of lineas) if (l[k] > 0) frecuencias.set(l[k], (frecuencias.get(l[k]) || 0) + 1);
+      let moda = 0, veces = 0;
+      for (const [campos, n] of frecuencias) if (n > veces || (n === veces && campos > moda)) { moda = campos; veces = n; }
+      const puntos = veces * 1000 + moda;
+      if (puntos > mejorPuntos) { mejorPuntos = puntos; mejor = k; }
+    });
+    return candidatos[mejor];
   }
 
+  function contar(texto, patron) { let n = 0; const re = new RegExp(patron, 'g'); while (re.exec(texto) !== null) n++; return n; }
+
+  // Con ";" la coma suele ser decimal (Excel en español), pero pandas y otros escriben ";" con punto decimal ("1.5;2",
+  // "2.250"): si los datos no tienen ninguna coma entre dígitos y sí un punto con 1-2 o 4+ decimales, el punto es el decimal.
   function detectarComaDecimal(texto, separador) {
-    if (separador === ';') return true;
+    if (separador === ';') {
+      if (!/\d,\d/.test(texto) && /\d\.\d{1,2}(?!\d)|\d\.\d{4,}/.test(texto)) return false;
+      return true;
+    }
     if (separador === ',') return false;
-    const conComa = (texto.match(/\d,\d/g) || []).length;
-    const conPunto = (texto.match(/\d\.\d/g) || []).length;
-    return conComa > conPunto;
+    return contar(texto, '\\d,\\d') > contar(texto, '\\d\\.\\d');
   }
 
   // El número que representa el texto, o null si no es un número "limpio".
@@ -99,8 +121,11 @@
   }
 
   function leer(origen, nombreHoja) {
-    const texto = typeof origen === 'string' ? origen.replace(/^﻿/, '') : decodificar(origen instanceof Uint8Array ? origen : new Uint8Array(origen));
-    const separador = detectarSeparador(texto);
+    let texto = typeof origen === 'string' ? origen.replace(/^\uFEFF/, '') : decodificar(origen instanceof Uint8Array ? origen : new Uint8Array(origen));
+    // La primera línea "sep=;" que escribe Excel indica el separador y no es un dato.
+    const indicado = /^sep=(.)\r?\n/i.exec(texto);
+    if (indicado) texto = texto.slice(indicado[0].length);
+    const separador = indicado ? indicado[1] : detectarSeparador(texto);
     const comaDecimal = detectarComaDecimal(texto, separador);
     const estilos = XlsxEstilos.leer(null, null);
     // Reutiliza la construcción de la hoja de LibroXlsx: una hoja vacía y se le agregan las celdas.
@@ -111,7 +136,7 @@
       const numero = interpretarNumero(campo, comaDecimal);
       if (numero !== null) { const i = C.agregar(f, c, LibroXlsx.TIPO.numero, numero, 0); C.textoOriginal.set(i, campo); } else C.agregar(f, c, LibroXlsx.TIPO.texto, campo, 0);
     });
-    hoja.dimension = { f0: 0, c0: 0, f1: Math.max(0, resumen.filas - 1), c1: Math.max(0, resumen.columnas - 1) };
+    hoja.dimension = { f0: 0, c0: 0, f1: Math.max(0, resumen.filas - 1), c1: Math.min(MAX_COLUMNAS, Math.max(1, resumen.columnas)) - 1 };
     hoja.nombre = nombreHoja || 'Hoja1';
     hoja.indice = 0;
     const libro = {

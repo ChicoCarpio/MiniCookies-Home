@@ -52,8 +52,13 @@
   const num = (v, porDefecto) => { const n = parseFloat(v); return Number.isFinite(n) ? n : porDefecto; };
   const entero = (v, porDefecto) => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : porDefecto; };
 
+  // Atributos de un <color> → { tipo, valor, tint }. El rgb solo se acepta si son 6 u 8 dígitos hexadecimales:
+  // el valor acaba en estilos de página (CSS), así que no puede pasar nada más del archivo.
   function colorRef(a) {
-    if (a.rgb !== undefined) return { tipo: 'rgb', valor: a.rgb.length === 8 ? a.rgb.slice(2) : a.rgb.slice(-6).padStart(6, '0'), tint: num(a.tint, 0) };
+    if (a.rgb !== undefined) {
+      if (!/^[0-9A-Fa-f]{6}$|^[0-9A-Fa-f]{8}$/.test(a.rgb)) return null;
+      return { tipo: 'rgb', valor: (a.rgb.length === 8 ? a.rgb.slice(2) : a.rgb).toUpperCase(), tint: num(a.tint, 0) };
+    }
     if (a.theme !== undefined) return { tipo: 'tema', valor: entero(a.theme, 0), tint: num(a.tint, 0) };
     if (a.indexed !== undefined) return { tipo: 'indexado', valor: entero(a.indexed, 0), tint: num(a.tint, 0) };
     if (a.auto !== undefined) return { tipo: 'auto', valor: 0, tint: 0 };
@@ -101,19 +106,26 @@
   function leerTema(texto) {
     if (!texto) return TEMA_POR_DEFECTO;
     const porNombre = {};
-    let enEsquema = false, actual = null, fuenteActual = null;
+    let enEsquema = false, esquemaLeido = false, enExtra = false, actual = null, fuenteActual = null;
     const tema = { colores: TEMA_POR_DEFECTO.colores.slice(), fuenteTitulos: TEMA_POR_DEFECTO.fuenteTitulos, fuenteCuerpo: TEMA_POR_DEFECTO.fuenteCuerpo };
+    const hex6 = (v) => (typeof v === 'string' && /^[0-9A-Fa-f]{6}$/.test(v) ? v.toUpperCase() : null);
     XmlLigero.recorrer(texto, {
       abrir(nombre, a) {
-        if (nombre === 'clrScheme') enEsquema = true;
+        if (nombre === 'extraClrSchemeLst') enExtra = true; // esquemas alternativos: no son los del libro
+        if (enExtra) return;
+        if (nombre === 'clrScheme' && !esquemaLeido) enEsquema = true;
         else if (enEsquema && NOMBRES_COLOR_TEMA.includes(nombre)) actual = nombre;
-        else if (actual && nombre === 'srgbClr' && a.val) porNombre[actual] = a.val.toUpperCase();
-        else if (actual && nombre === 'sysClr') porNombre[actual] = (a.lastClr || (a.val === 'window' ? 'FFFFFF' : '000000')).toUpperCase();
+        else if (actual && nombre === 'srgbClr' && hex6(a.val)) porNombre[actual] = hex6(a.val);
+        else if (actual && nombre === 'sysClr') porNombre[actual] = hex6(a.lastClr) || (a.val === 'window' ? 'FFFFFF' : '000000');
         else if (nombre === 'majorFont') fuenteActual = 'fuenteTitulos';
         else if (nombre === 'minorFont') fuenteActual = 'fuenteCuerpo';
         else if (fuenteActual && nombre === 'latin' && a.typeface) { tema[fuenteActual] = a.typeface; fuenteActual = null; }
       },
-      cerrar(nombre) { if (nombre === 'clrScheme') enEsquema = false; if (NOMBRES_COLOR_TEMA.includes(nombre)) actual = null; },
+      cerrar(nombre) {
+        if (nombre === 'extraClrSchemeLst') enExtra = false;
+        if (nombre === 'clrScheme' && enEsquema) { enEsquema = false; esquemaLeido = true; }
+        if (NOMBRES_COLOR_TEMA.includes(nombre)) actual = null;
+      },
     });
     // En el archivo, theme="0" es lt1 y "1" es dk1 (y "2" lt2, "3" dk2): van cambiados respecto del orden del esquema.
     const orden = ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'];
@@ -178,7 +190,7 @@
             else if (fuente) fuente.color = colorRef(a);
             return;
           case 'indexedColors': enIndexed = true; r.paletaPropia = []; return;
-          case 'rgbColor': if (enIndexed && a.rgb) r.paletaPropia.push(a.rgb.slice(-6).toUpperCase()); return;
+          case 'rgbColor': if (enIndexed) { const c = colorRef({ rgb: a.rgb || '' }); r.paletaPropia.push(c ? c.valor : '000000'); } return;
           case 'xf': {
             xf = { numFmtId: entero(a.numFmtId, 0), fuenteId: entero(a.fontId, 0), rellenoId: entero(a.fillId, 0), bordeId: entero(a.borderId, 0), xfId: entero(a.xfId, 0),
               alineacion: null, proteccion: null, comillaPrefijo: bool(a.quotePrefix, false), botonDinamica: bool(a.pivotButton, false) };
@@ -278,5 +290,5 @@
     };
   }
 
-  globalThis.XlsxEstilos = { leer, aplicarTint, FORMATOS_INTEGRADOS, PALETA_INDEXADA, TEMA_POR_DEFECTO };
+  globalThis.XlsxEstilos = { leer, colorRef, aplicarTint, FORMATOS_INTEGRADOS, PALETA_INDEXADA, TEMA_POR_DEFECTO };
 })();
