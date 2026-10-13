@@ -1007,7 +1007,13 @@ const PptxModelo = (() => {
     const tema = rutaTema ? await parte(rutaTema) : null;
     const base = crearContexto({ sld: dib, layout: null, master: null, tema, textoPorDefecto: null, numero: 1, parte });
     const ctx = { ...base, estilosTabla: new Map(), parteActual: dib, cadena: [], esDiapositiva: true, excel: true }; // excel: los gráficos sin formato salen con el estilo clásico de Excel, no con el de PowerPoint
-    const anclajes = [...dib.raiz.children].filter((e) => /Anchor$/.test(e.localName));
+    // Las anclas hijas directas de la raíz y, de las que Excel envuelve en mc:AlternateContent (segmentaciones, controles de formulario), las de la rama
+    // principal (Choice); el respaldo (Fallback) no se dibuja. xlsx-modelo.js (leerAnclas) cuenta las mismas, en el mismo orden.
+    const anclajes = [];
+    for (const e of dib.raiz.children) {
+      if (/Anchor$/.test(e.localName)) anclajes.push(e);
+      else if (e.localName === 'AlternateContent') { const ch = hijo(e, 'Choice'); for (const h of ch ? ch.children : []) if (/Anchor$/.test(h.localName)) anclajes.push(h); }
+    }
     return { anclajes, elementos: (ancla, motivos) => leerArbol(ancla, ctx, motivos), imagen };
   }
 

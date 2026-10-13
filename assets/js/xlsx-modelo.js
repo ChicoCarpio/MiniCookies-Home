@@ -372,6 +372,7 @@
     // Extensiones x14 de Excel 2010 (extLst): barras de datos con eje y negativos, conjuntos de iconos propios y minigráficos.
     // Las reglas con su par clásico se unen por el id (x14:id); las que solo existen en x14 se agregan como reglas nuevas.
     const URI_CF14 = '{78C0D931-6437-407d-A8EE-F0AAD7539E65}', URI_SPARK = '{05C60535-1F16-4fd2-B633-F4F36F0B64E0}';
+    let extHondo = 0;   // <ext> anidados dentro de un bloque x14 abierto
     let ext14 = null, x14cf = null, x14r = null, x14v = null, x14dxf = null, enX14 = null, enId14 = false, spark = null, sparkItem = null;
     const ids14 = new Map();
     const rangosX14 = (t) => t.split(/\s+/).filter(Boolean).map(decodificarRango).filter(Boolean);
@@ -478,7 +479,7 @@
       abrir(nombre, a, vacio) {
         if (nombre === 'customSheetViews') enVistasPersonalizadas = true;
         if (enVistasPersonalizadas) return;
-        if (nombre === 'ext') ext14 = a.uri === URI_CF14 ? 'cf' : a.uri === URI_SPARK ? 'spark' : null;
+        if (nombre === 'ext') { if (ext14) extHondo++; else ext14 = a.uri === URI_CF14 ? 'cf' : a.uri === URI_SPARK ? 'spark' : null; } // un <ext> dentro del bloque x14 no lo cierra
         if (ext14) { x14Abrir(nombre, a); return; }
         switch (nombre) {
           case 'sheetPr': seccion = 'sheetPr'; break;
@@ -594,7 +595,7 @@
       cerrar(nombre) {
         if (nombre === 'customSheetViews') { enVistasPersonalizadas = false; return; }
         if (enVistasPersonalizadas) return;
-        if (ext14) { if (nombre === 'ext') ext14 = null; else x14Cerrar(nombre); return; }
+        if (ext14) { if (nombre === 'ext' && extHondo === 0) ext14 = null; else { if (nombre === 'ext') extHondo--; x14Cerrar(nombre); } return; }
         switch (nombre) {
           case 'id': if (enId14 && regla) ids14.set(textoCelda.trim(), regla); enId14 = false; break;
           case 'v': if (enV && celda) { celda.v = textoCelda; } enV = false; break;
@@ -842,15 +843,17 @@
     if (meta === null || valores === null || estructura === null || rel === null) return salida;
     // 1. metadata: vm → índice del bloque de futuro, y de este → índice del valor
     const valueMeta = [], futuro = [];
-    let enValueMeta = false, enFuturo = false;
+    let enValueMeta = false, enFuturo = false, tipoRico = 0, nTipos = 0, enBk = false;
     XmlLigero.recorrer(meta, {
       abrir(nombre, a) {
-        if (nombre === 'valueMetadata') enValueMeta = true;
+        if (nombre === 'metadataType') { nTipos++; if (a.name === 'XLRICHVALUE') tipoRico = nTipos; }
+        else if (nombre === 'valueMetadata') enValueMeta = true;
         else if (nombre === 'futureMetadata' && a.name === 'XLRICHVALUE') enFuturo = true;
-        else if (enValueMeta && nombre === 'rc') valueMeta.push(parseInt(a.v, 10));
+        else if (enValueMeta && nombre === 'bk') { enBk = true; valueMeta.push(NaN); } // un bk por vm, aunque traiga más de un rc: vale el del tipo XLRICHVALUE
+        else if (enValueMeta && enBk && nombre === 'rc' && (!tipoRico || parseInt(a.t, 10) === tipoRico) && Number.isNaN(valueMeta[valueMeta.length - 1])) valueMeta[valueMeta.length - 1] = parseInt(a.v, 10);
         else if (enFuturo && nombre === 'rvb') futuro.push(parseInt(a.i, 10));
       },
-      cerrar(nombre) { if (nombre === 'valueMetadata') enValueMeta = false; else if (nombre === 'futureMetadata') enFuturo = false; },
+      cerrar(nombre) { if (nombre === 'valueMetadata') enValueMeta = false; else if (nombre === 'futureMetadata') enFuturo = false; else if (nombre === 'bk') enBk = false; },
     });
     // 2. estructuras: para cada una, la posición de la clave _rvRel:LocalImageIdentifier
     const estructuras = [];
@@ -919,15 +922,16 @@
 
   function leerAnclas(texto) {
     const anclas = [];
-    let profundidad = 0, a = null, nivelAncla = -1, modo = null, campo = '', primeraCNvPr = true;
+    let profundidad = 0, a = null, nivelAncla = -1, modo = null, campo = '', primeraCNvPr = true, enChoice = false;
     XmlLigero.recorrer(texto, {
       abrir(nombre, at) {
         profundidad++;
         if (!a) {
           // solo las hijas directas de xdr:wsDr, como las que lee xlsx-objetos.js (PptxModelo.dibujoExcel): las dos listas van por índice. Las que Excel
           // envuelve en mc:AlternateContent (segmentaciones, controles de formulario) no cuentan en ninguna; si contaran aquí, todos los objetos
-          // siguientes quedarían con el ancla de otro.
-          if (profundidad === 2 && (nombre === 'twoCellAnchor' || nombre === 'oneCellAnchor' || nombre === 'absoluteAnchor') && anclas.length < MAX_ANCLAS) {
+          // siguientes quedarían con el ancla de otro. Las de la rama principal (mc:Choice) de esos envoltorios sí cuentan, igual que allá.
+          if (nombre === 'Choice' && profundidad === 3) enChoice = true;
+          if ((profundidad === 2 || (profundidad === 4 && enChoice)) && (nombre === 'twoCellAnchor' || nombre === 'oneCellAnchor' || nombre === 'absoluteAnchor') && anclas.length < MAX_ANCLAS) {
             a = { tipo: nombre === 'twoCellAnchor' ? 'dos' : nombre === 'oneCellAnchor' ? 'uno' : 'abs', de: null, a: null, ext: null, pos: null, imprimible: true, oculto: false };
             anclas.push(a); nivelAncla = profundidad; primeraCNvPr = true;
           }
@@ -945,6 +949,7 @@
         if (a && modo && campo) { const v = parseInt(t, 10) || 0; const d = a[modo]; if (campo === 'col') d.col = v; else if (campo === 'colOff') d.dx = v; else if (campo === 'row') d.fila = v; else d.dy = v; }
       },
       cerrar(nombre) {
+        if (nombre === 'Choice' && profundidad === 3) enChoice = false;
         if (a && profundidad === nivelAncla) { a = null; modo = null; }
         else if (nombre === 'from' || nombre === 'to') modo = null;
         campo = '';

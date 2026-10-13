@@ -83,7 +83,10 @@
       const tam = (rn) => (rn.tam || 9) * UPT;
       const fuente = (rn) => XlsxDibujo.fuenteCss({ nombre: rn.fuente || 'Tahoma', negrita: rn.negrita, cursiva: rn.cursiva }, tam(rn));
       const medir = (t, rn) => { ctx.font = fuente(rn); return ctx.measureText(t).width; };
-      const lineas = partir(n.runs.length ? n.runs : [{ texto: n.texto, negrita: false, cursiva: false, tam: 9, fuente: 'Tahoma' }], w - 3.58 * UPT, medir);
+      // el ajuste del texto se guarda en la nota mientras no cambien el ancho ni la escala (se dibuja en cada cuadro)
+      const clave = w.toFixed(3) + '|' + UPT.toFixed(5);
+      if (!n._lineas || n._lineas.clave !== clave) n._lineas = { clave, lineas: partir(n.runs.length ? n.runs : [{ texto: n.texto, negrita: false, cursiva: false, tam: 9, fuente: 'Tahoma' }], w - 3.58 * UPT, medir) };
+      const lineas = n._lineas.lineas;
       let by = y0 + 9.36 * UPT;
       ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
       for (const l of lineas) {
