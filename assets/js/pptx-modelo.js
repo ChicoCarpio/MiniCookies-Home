@@ -1006,7 +1006,7 @@ const PptxModelo = (() => {
     if (!dib) return null;
     const tema = rutaTema ? await parte(rutaTema) : null;
     const base = crearContexto({ sld: dib, layout: null, master: null, tema, textoPorDefecto: null, numero: 1, parte });
-    const ctx = { ...base, estilosTabla: new Map(), parteActual: dib, cadena: [], esDiapositiva: true };
+    const ctx = { ...base, estilosTabla: new Map(), parteActual: dib, cadena: [], esDiapositiva: true, excel: true }; // excel: los gráficos sin formato salen con el estilo clásico de Excel, no con el de PowerPoint
     const anclajes = [...dib.raiz.children].filter((e) => /Anchor$/.test(e.localName));
     return { anclajes, elementos: (ancla, motivos) => leerArbol(ancla, ctx, motivos), imagen };
   }
