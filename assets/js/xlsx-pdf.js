@@ -115,7 +115,7 @@
     const e = p.escala / 100;
     // a escala menor que 100 % Excel deja el texto más abajo y a la derecha de lo que da la escala exacta (medido: el relleno de la celda no se achica con la escala; ≈ +0,95 pt a la izquierda, +0,25 a la derecha y +1,05 hacia abajo por cada 100 % que falta)
     const desplazarTexto = { x: 0.95 * (1 - e) / f, xDer: 0.25 * (1 - e) / f, xCen: 0, y: 1.05 * (1 - e) / f };
-    const comun = { lienzo: ctx, desplazarTexto, fino: true, idioma: ctxP.idioma, cuadricula: !!op.cuadricula, colorRejilla: '#000000', grosorRejilla: 0.96 / f, pxDe: estilo.pxDe, notas: !!(hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'asDisplayed') };
+    const comun = { lienzo: ctx, desplazarTexto, fino: true, idioma: ctxP.idioma, cuadricula: !!op.cuadricula, colorRejilla: '#000000', grosorRejilla: 0.96 / f, pxDe: estilo.pxDe, notas: !!(ctxP.imprimirNotas && hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'asDisplayed') };
     const R = (f0, c0, f1, c1, x, y) => XlsxDibujo.dibujarRango(ctx, libro, hoja, G, { f0, c0, f1, c1 }, Object.assign({ x, y }, comun));
     if (pagina.listaNotas) { // página de notas "al final de la hoja" (medido en el PDF de Excel, 38-comentarios)
       const et = XlsxNotas.etiquetas(ctxP.idioma);
@@ -271,7 +271,7 @@
       const G = geometriaImpresion(g, p, hasta);
       // "al final de la hoja": las notas se imprimen en páginas aparte, una fila de la hoja por línea
       const notas = [];
-      if (hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'atEnd' && hoja.comentarios && hoja.comentarios.length && typeof XlsxNotas !== 'undefined' && !p.cortado) {
+      if (opc.imprimirNotas && hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'atEnd' && hoja.comentarios && hoja.comentarios.length && typeof XlsxNotas !== 'undefined' && !p.cortado) {
         const filas = XlsxNotas.filas(hoja, idioma);
         const filaPt = U_PT * (p.escala / 100) * G.altoFila(hasta.f + 1);
         const porPagina = Math.max(1, Math.round((p.papel.alto - p.margenes.arr - p.margenes.aba) / filaPt)); // medido: 45 filas de 15,24 pt en 684 pt (44,9): la última cabe aunque se pase un poco
@@ -300,7 +300,7 @@
       for (const pagina of p.paginas) {
         numero++; hechas++;
         const L = new LienzoPdf.Lienzo({ ancho: p.papel.ancho / f, alto: p.papel.alto / f, anchoPt: p.papel.ancho, altoPt: p.papel.alto });
-        dibujarPagina(L, libro, hoja, G, p, pagina, { idioma, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: primera, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
+        dibujarPagina(L, libro, hoja, G, p, pagina, { idioma, imprimirNotas: !!opc.imprimirNotas, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: primera, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
         primera = false;
         if (L.fallo) throw L.fallo;
         await L.aPagina(pdf);
@@ -310,7 +310,7 @@
       for (const pn of t.notas) { // las páginas de las notas "al final de la hoja"
         numero++; hechas++;
         const L = new LienzoPdf.Lienzo({ ancho: p.papel.ancho / f, alto: p.papel.alto / f, anchoPt: p.papel.ancho, altoPt: p.papel.alto });
-        dibujarPagina(L, libro, hoja, G, p, { f0: 0, c0: 0, f1: 0, c1: 0, titulos: { filas: null, columnas: null }, listaNotas: pn }, { idioma, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: false, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
+        dibujarPagina(L, libro, hoja, G, p, { f0: 0, c0: 0, f1: 0, c1: 0, titulos: { filas: null, columnas: null }, listaNotas: pn }, { idioma, imprimirNotas: !!opc.imprimirNotas, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: false, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
         if (L.fallo) throw L.fallo;
         await L.aPagina(pdf);
         if (opc.progreso) opc.progreso(hechas, total);
