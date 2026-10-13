@@ -172,6 +172,32 @@ for i, pt in enumerate(patrones):
     for rep in range(3):
         tr.cell(row=i * 3 + rep + 1, column=1).fill = PatternFill(patternType=pt, fgColor='000000', bgColor='FFFFFF')
         tr.cell(row=i * 3 + rep + 1, column=2).fill = PatternFill(patternType=pt, fgColor='FF0000', bgColor='FFFF00')
+aj = wb.create_sheet('Ajuste')
+for col, ancho in zip('ABC', [12, 20, 30]):
+    aj.column_dimensions[col].width = ancho
+frases = ['corto', 'un texto un poco mas largo que una linea', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore',
+          'palabrasuperlargasinespaciosquenocabeenlacolumnadeterminada y otra', 'linea uno\nlinea dos\nlinea tres', 'ñandú café, canción — acentos y símbolos € £ ¥ © ® ™']
+for i, t in enumerate(frases, start=1):
+    for j, col in enumerate('ABC'):
+        c = aj['%s%d' % (col, i)]
+        c.value = t
+        c.alignment = Alignment(wrap_text=True, vertical=['top', 'center', 'bottom'][j])
+        if i % 2 == 0:
+            c.font = Font(name=['Arial', 'Times New Roman', 'Calibri'][j], size=[9, 12, 14][j])
+aj['A8'] = 'linea uno\nlinea dos (sin ajuste)'
+aj.merge_cells('B8:C9')
+aj['B8'] = 'combinada con ajuste y bastante texto para ocupar mas de una linea dentro de la combinada'
+aj['B8'].alignment = Alignment(wrap_text=True, vertical='top')
+
+nu = wb.create_sheet('NumerosAngostos')
+anchos = [4, 6, 8, 8.43, 10, 12, 16]
+valores = [(123456789012, 'General'), (0.000012345, 'General'), (1234.5678, 'General'), (12345678.9, 'General'), (-123456789, 'General'), (0.1234567890123, 'General'),
+           (45000, 'dd/mm/yyyy'), (0.7291666, 'h:mm:ss'), (0.256, '0.00%'), (1234567.891, '#,##0.00'), (1234567.891, '0.000'), (9.99999999, 'General'), (100000000, 'General')]
+for j, a in enumerate(anchos, start=1):
+    nu.column_dimensions[openpyxl.utils.get_column_letter(j)].width = a
+    for i, (v, f) in enumerate(valores, start=1):
+        c = nu.cell(row=i, column=j, value=v)
+        c.number_format = f
 ai = wb.create_sheet('Aislado')
 ai['B2'].fill = PatternFill('solid', fgColor='FF0000')
 ai['D4'].fill = PatternFill('solid', fgColor='0000FF')

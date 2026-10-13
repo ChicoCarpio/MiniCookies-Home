@@ -24,7 +24,7 @@
   const tamPx = (pt) => Math.max(1, CONFIG.pxExacto ? pt * 96 / 72 : Math.round(pt * 96 / 72));
   let canvasMedida = null;
   function ctxMedida() {
-    if (!canvasMedida) canvasMedida = (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(8, 8) : document.createElement('canvas')).getContext('2d');
+    if (!canvasMedida) canvasMedida = (typeof document !== 'undefined' ? document.createElement('canvas') : new OffscreenCanvas(8, 8)).getContext('2d'); // con los FontFace del documento
     return canvasMedida;
   }
   // Ancho del "0" con esa fuente (para el MDW de la geometría).
@@ -187,6 +187,30 @@
       salida.push(linea.replace(/ +$/, ''));
     }
     return salida;
+  }
+
+  // Texto con formato por tramos (una sola línea). Las propiedades que el tramo no trae salen de la fuente de la celda.
+  // Con dibujar = false solo mide. Devuelve el ancho.
+  function tramos(ctx, libro, runs, fu, x, y, colorBase, dibujar) {
+    let ax = x;
+    for (const run of runs) {
+      const f = Object.assign({}, fu, run.fuente);
+      let tam = f.tam || 11;
+      const sup = f.alinVertical === 'superscript', sub = f.alinVertical === 'subscript';
+      if (sup || sub) tam = tam * 0.65;
+      const px = tamPx(tam);
+      ctx.font = fuenteCss(f, px);
+      const w = anchoTexto(ctx, run.texto);
+      if (dibujar) {
+        ctx.fillStyle = f.color ? colorDe(libro, f.color, colorBase) : colorBase;
+        const dy = sup ? -Math.round(px * 0.55) : sub ? Math.round(px * 0.2) : 0;
+        escribir(ctx, run.texto, Math.round(ax), y + dy);
+        if (f.subrayado && f.subrayado !== 'none') ctx.fillRect(Math.round(ax), y + dy + 1, Math.round(w), 1);
+        if (f.tachado) ctx.fillRect(Math.round(ax), y + dy - Math.round(px * 0.3), Math.round(w), 1);
+      }
+      ax += w;
+    }
+    return ax - x;
   }
 
   // ---- Dibujo de un rango -----------------------------------------------------------------------------
@@ -381,7 +405,10 @@
       ctx.clip();
       for (let i = 0; i < lineas.length; i++) {
         const l = lineas[i];
-        const w = anchoTexto(ctx, l);
+        const runs = lineas.length === 1 && C.ricos.get(k);
+        const base = ctx.font;
+        const w = runs ? tramos(ctx, libro, runs, fu, 0, 0, color, false) : anchoTexto(ctx, l);
+        ctx.font = base;
         const y = yBase + i * paso;
         let x;
         if (h === 'distributed' && /\S\s+\S/.test(l.trim())) { // reparte el espacio sobrante entre las palabras
@@ -393,6 +420,7 @@
         if (h === 'right') x = x1 - PAD_X - w - sangria;
         else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w) / 2 + (sangria ? sangria / 2 : 0);
         else x = x0 + 1 + PAD_X + sangria + Math.max(0, Math.round((px - 15) / 10));
+        if (runs) { tramos(ctx, libro, runs, fu, Math.round(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
         escribir(ctx, l, Math.round(x), y);
         if (fu.subrayado && fu.subrayado !== 'none') {
           const doble = /double/.test(fu.subrayado);
@@ -404,6 +432,21 @@
       ctx.restore();
     }
     ctx.restore();
+  }
+
+  // La geometría de la hoja con las dos medidas que necesitan el Canvas: el ancho del dígito (MDW) y las líneas que ocupa un texto con
+  // ajuste (para el alto automático de las filas).
+  function geometria(libro, hoja, opc) {
+    const c = ctxMedida();
+    const C = hoja.celdas;
+    return XlsxGeometria.crear(libro, hoja, Object.assign({
+      medirDigito,
+      lineasDe(i, anchoCol) {
+        const fu = libro.estilos.xf(C.estilo[i]).fuente;
+        c.font = fuenteCss(fu, tamPx(fu.tam || 11));
+        return romper(c, C.valor[i], anchoCol - 2 * PAD_X - 1).length;
+      },
+    }, opc || {}));
   }
 
   // ---- Vista con desplazamiento -------------------------------------------------------------------------
@@ -450,5 +493,5 @@
     return { f0, f1, c0, c1, areaX: anchoEnc, areaY: altoEnc };
   }
 
-  globalThis.XlsxDibujo = { dibujarRango, dibujarVista, cargarFuentes, medirDigito, tamPx, config: CONFIG };
+  globalThis.XlsxDibujo = { geometria, dibujarRango, dibujarVista, cargarFuentes, medirDigito, tamPx, config: CONFIG };
 })();

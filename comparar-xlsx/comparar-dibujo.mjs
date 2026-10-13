@@ -55,6 +55,7 @@ if (opcion('--solo-referencia')) { console.log(`${casos.length} imagenes de Exce
 // --- 2. El motor propio, en Edge ---
 const CONTROL = String.raw`<!doctype html><meta charset="utf-8"><body><script>
 const CASOS = __CASOS__;
+const process_filas = new URLSearchParams(location.search).get('filas') || 3;
 const enviar = (ruta, cuerpo) => fetch(ruta, { method: 'POST', body: cuerpo });
 const cargar = (src) => new Promise((ok, mal) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => mal(new Error('no cargo ' + src)); document.head.appendChild(s); });
 const imagen = (src) => new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error('no cargo ' + src)); i.src = src; });
@@ -69,13 +70,17 @@ const aPng = (c) => new Promise((ok) => c.toBlob(ok, 'image/png'));
       const libro = await LibroXlsx.abrir(new Uint8Array(await (await fetch('/__xlsx/' + caso.n)).arrayBuffer()));
       await XlsxDibujo.cargarFuentes(libro);
       const hoja = await libro.cargarHoja(caso.hoja - 1);
-      const g = XlsxGeometria.crear(libro, hoja, { medirDigito: XlsxDibujo.medirDigito });
+      const g = XlsxDibujo.geometria(libro, hoja);
       const rg = LibroXlsx.decodificarRango(caso.rango);
+      if (!caso.sinReferencia) { // posiciones de columnas y filas contra el volcado de Excel (si existe)
+        const geo = await fetch('/__geo/' + caso.n); 
+        if (geo.ok) { const hs = await geo.json(); const x = hs.find((q) => q.indice === caso.hoja - 1); if (x) { let mal = 0, tot = 0; const peq = []; x.columnas.forEach((v, i) => { tot++; if (Math.abs(Math.round(v / 0.75) - g.x(i)) > 1) { mal++; peq.push('col ' + (i + 1) + ' E' + Math.round(v / 0.75) + '/M' + g.x(i)); } }); x.filas.forEach((v, i) => { tot++; if (Math.abs(Math.round(v / 0.75) - g.y(i)) > 1) { mal++; peq.push('fila ' + (i + 1) + ' E' + Math.round(v / 0.75) + '/M' + g.y(i)); } }); r.geo = { mal, tot, ej: peq.slice(0, process_filas).join(' ') }; } }
+      }
       if (caso.sinReferencia) {
         const lienzo = document.createElement('canvas'); lienzo.width = 1000; lienzo.height = 600;
         const cv = lienzo.getContext('2d');
         const t0 = performance.now();
-        const gg = XlsxGeometria.crear(libro, hoja, { medirDigito: XlsxDibujo.medirDigito });
+        const gg = XlsxDibujo.geometria(libro, hoja);
         r.msGeometria = Math.round(performance.now() - t0);
         const tiempos = [];
         let vista;
@@ -141,7 +146,7 @@ const servidor = createServer(async (q, s) => {
       writeFileSync(join(SALIDA, `${String(c.n).padStart(2, '0')}-${c.nombre}.png`), cuerpo);
     } else if (ruta === '/__resultado') {
       const r = JSON.parse(cuerpo.toString()); resultados.push(r);
-      console.log(r.error ? `  ${r.n} ${r.nombre}: ERROR ${r.error.split('\n').slice(0, 3).join(' | ')}` : r.ms !== undefined ? `  ${String(r.n).padStart(2)} ${r.nombre.padEnd(28)} ${r.celdas} celdas: geometria ${r.msGeometria} ms, dibujo ${r.ms} ms (el primero ${r.msPrimero} ms), filas ${r.filas}` : `  ${String(r.n).padStart(2)} ${r.nombre.padEnd(28)} ${r.ancho}x${r.alto}  ${String(r.pct).padStart(5)} % de la imagen, ${String(r.pctTinta).padStart(5)} % de lo pintado`);
+      console.log(r.error ? `  ${r.n} ${r.nombre}: ERROR ${r.error.split('\n').slice(0, 3).join(' | ')}` : r.ms !== undefined ? `  ${String(r.n).padStart(2)} ${r.nombre.padEnd(28)} ${r.celdas} celdas: geometria ${r.msGeometria} ms, dibujo ${r.ms} ms (el primero ${r.msPrimero} ms), filas ${r.filas}` : `  ${String(r.n).padStart(2)} ${r.nombre.padEnd(28)} ${r.ancho}x${r.alto}  ${String(r.pct).padStart(5)} % de la imagen, ${String(r.pctTinta).padStart(5)} % de lo pintado${(r.geo ? (r.geo.mal ? `  ⚠ geometria ${r.geo.mal}/${r.geo.tot} fuera (${r.geo.ej})` : '  geometria ok') : '')}`);
     } else if (ruta === '/__fin') { const t = cuerpo.toString(); if (t !== '1') console.error(t); terminar(); }
     s.end('ok'); return;
   }
@@ -149,6 +154,7 @@ const servidor = createServer(async (q, s) => {
     s.setHeader('content-type', 'text/html; charset=utf-8');
     return s.end(CONTROL.replace('__CASOS__', JSON.stringify(casos.map((c) => ({ n: c.n, nombre: c.nombre, hoja: c.hoja, rango: c.rango, cuadricula: c.cuadricula, sinReferencia: c.sinReferencia, fila: c.fila, x: c.x })))));
   }
+  if (ruta.startsWith('/__geo/')) { const c = casos.find((x) => x.n === +ruta.split('/')[2]); const f = join(CARPETA, 'medidas', 'geometria', c.archivo.replace(/.xlsx$/, '.json')); if (!existsSync(f)) { s.statusCode = 404; return s.end('no'); } s.setHeader('content-type', 'application/json'); return s.end(readFileSync(f, 'utf8').replace(/^﻿/, '')); }
   if (ruta.startsWith('/__xlsx/')) return s.end(readFileSync(casos.find((x) => x.n === +ruta.split('/')[2]).ruta));
   if (ruta.startsWith('/__ref/')) { s.setHeader('content-type', 'image/png'); return s.end(readFileSync(casos.find((x) => x.n === +ruta.split('/')[2]).ref)); }
   const p = join(RAIZ, ruta);
@@ -158,7 +164,7 @@ const servidor = createServer(async (q, s) => {
 }).listen(PUERTO);
 
 const perfil = mkdtempSync(join(tmpdir(), 'comparar-xlsx-'));
-const edge = spawn(EDGE, ['--headless=new', '--disable-gpu', '--lang=es-CR', '--user-data-dir=' + perfil, '--window-size=1300,950', `http://localhost:${PUERTO}/__control?avance=${process.env.AVANCE || 0}&exacto=${process.env.EXACTO || 0}`], { stdio: 'ignore' });
+const edge = spawn(EDGE, ['--headless=new', '--disable-gpu', '--lang=es-CR', '--user-data-dir=' + perfil, '--window-size=1300,950', `http://localhost:${PUERTO}/__control?avance=${process.env.AVANCE || 0}&exacto=${process.env.EXACTO || 0}&filas=${process.env.FILAS || 3}`], { stdio: 'ignore' });
 const reloj = setTimeout(() => { console.error('Se paso el tiempo limite.'); terminar(); }, 10 * 60 * 1000);
 await fin;
 clearTimeout(reloj); edge.kill(); servidor.close();
