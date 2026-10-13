@@ -243,10 +243,15 @@
     }
     indiceDe(f, c) {
       this._indexar();
-      let i = this._inicioFila.get(f);
+      const i = this._inicioFila.get(f);
       if (i === undefined) return -1;
-      for (; i < this.n && this.fila[i] === f; i++) if (this.col[i] === c) return i; else if (this.col[i] > c) break;
-      return -1;
+      // búsqueda binaria dentro de la fila (las celdas están ordenadas por fila y columna): primera con (fila, col) >= (f, c)
+      let lo = i, hi = this.n;
+      while (lo < hi) {
+        const m = (lo + hi) >> 1;
+        if (this.fila[m] < f || (this.fila[m] === f && this.col[m] < c)) lo = m + 1; else hi = m;
+      }
+      return lo < this.n && this.fila[lo] === f && this.col[lo] === c ? lo : -1;
     }
     obtener(f, c) {
       const i = this.indiceDe(f, c);

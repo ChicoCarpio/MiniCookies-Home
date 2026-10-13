@@ -120,7 +120,7 @@
   function altoTexto(nombre, tam, negrita, cursiva) {
     const fuente = ALTOS[clave(nombre)] || ALTOS[ALIAS[clave(nombre)]] || ALTOS.calibri;
     const tabla = fuente[(negrita ? 'b' : '') + (cursiva ? 'i' : '') || 'n'];
-    const t = tam || 11;
+    const t = tam > 0 ? Math.min(409.5, tam) : 11;
     if (t <= TAMANOS[0]) return tabla[0];
     if (t >= TAMANOS[TAMANOS.length - 1]) return tabla[TAMANOS.length - 1] * t / TAMANOS[TAMANOS.length - 1];
     let i = 0;
@@ -137,8 +137,10 @@
     return Math.max(1, Math.round(px * (DIGITO[clave(nombre)] || DIGITO.calibri)));
   }
 
-  const pxAncho = (w, mdw) => Math.trunc(((256 * w + Math.trunc(128 / mdw)) / 256) * mdw);
-  const pxAlto = (pt) => Math.floor(pt * 96 / 72 + 1e-6); // Excel trunca al píxel: 8,1 pt (10,8 px) → 10 px
+  // Los tamaños salen del archivo: se limitan a los de Excel (ancho de columna 255 caracteres, alto de fila 409,5 pt) y lo que no es un número válido cuenta como 0.
+  const pxAncho = (w, mdw) => { w = Number.isFinite(w) ? Math.min(255, Math.max(0, w)) : 0; return Math.trunc(((256 * w + Math.trunc(128 / mdw)) / 256) * mdw); };
+  const pxAlto = (pt) => Math.floor((Number.isFinite(pt) ? Math.min(409.5, Math.max(0, pt)) : 0) * 96 / 72 + 1e-6);
+  const altoValido = (v) => v !== null && v !== undefined && Number.isFinite(v) && v >= 0; // Excel trunca al píxel: 8,1 pt (10,8 px) → 10 px
 
   function crear(libro, hoja, opc) {
     opc = opc || {};
@@ -149,7 +151,7 @@
 
     // --- columnas ---
     let anchoDef;
-    if (f.anchoPorDefecto) anchoDef = pxAncho(f.anchoPorDefecto, mdw);
+    if (f.anchoPorDefecto > 0) anchoDef = pxAncho(f.anchoPorDefecto, mdw);
     else anchoDef = Math.ceil(((f.anchoBase || 8) * mdw + 5) / 8) * 8;
     let topeC = hoja.celdas.n ? 0 : -1;
     hoja.celdas.paraCada((fi, c) => { if (c > topeC) topeC = c; });
@@ -157,14 +159,14 @@
     const nC = topeC + 1;
     const anchos = new Int32Array(Math.max(nC, 0)).fill(anchoDef);
     for (const col of hoja.columnas) {
-      const px = col.oculta ? 0 : (col.ancho === null || col.ancho === undefined ? anchoDef : pxAncho(col.ancho, mdw));
+      const px = col.oculta ? 0 : (!altoValido(col.ancho) ? anchoDef : pxAncho(col.ancho, mdw));
       for (let c = col.min; c <= col.max && c < nC; c++) anchos[c] = px;
     }
     const izq = new Float64Array(nC + 1);
     for (let c = 0; c < nC; c++) izq[c + 1] = izq[c] + anchos[c];
 
     // --- filas ---
-    const ptDef = f.altoPorDefecto || altoTexto(nombreNormal, tamNormal);
+    const ptDef = f.altoPorDefecto > 0 ? Math.min(409.5, f.altoPorDefecto) : altoTexto(nombreNormal, tamNormal);
     const altoDef = f.filasOcultasPorDefecto ? 0 : pxAlto(ptDef);
     let topeF = -1;
     for (const k of hoja.filas.keys()) if (k > topeF) topeF = k;
@@ -178,13 +180,14 @@
       if (C.tipo[i] === LibroXlsx.TIPO.vacio) continue;
       const fi = C.fila[i];
       const info = hoja.filas.get(fi);
-      if (info && info.alto !== null && info.alto !== undefined) continue;
+      if (info && altoValido(info.alto)) continue;
       const fu = libro.estilos.xf(C.estilo[i]).fuente;
       let h = altoTexto(fu.nombre || nombreNormal, fu.tam || tamNormal, fu.negrita, fu.cursiva);
       // Texto con ajuste: una línea por cada salto o por cada vez que no cabe (lo cuenta lineasDe, que sabe medir texto).
       // Excel no ajusta la fila al contenido de una celda combinada.
       if (C.tipo[i] === LibroXlsx.TIPO.texto && libro.estilos.xf(C.estilo[i]).alineacion.ajustar && !combinadasArriba.has(fi * 16384 + C.col[i])) {
-        const n = opc.lineasDe ? opc.lineasDe(i, anchos[C.col[i]] !== undefined ? anchos[C.col[i]] : anchoDef) : String(C.valor[i]).split('\n').length;
+        const ac = anchos[C.col[i]] !== undefined ? anchos[C.col[i]] : anchoDef;
+        const n = ac === 0 ? 1 : opc.lineasDe ? opc.lineasDe(i, ac) : String(C.valor[i]).split('\n').length;
         h *= Math.max(1, n); // con n líneas Excel da n veces el alto de una (medido al abrir un libro sin altos guardados)
       }
       if (h > ptAuto[fi]) ptAuto[fi] = h;
@@ -193,20 +196,20 @@
     for (let fi = 0; fi < nF; fi++) {
       const info = hoja.filas.get(fi);
       if (info && info.oculta) { altos[fi] = 0; continue; }
-      if (info && info.alto !== null && info.alto !== undefined) { altos[fi] = pxAlto(info.alto); continue; }
+      if (info && altoValido(info.alto)) { altos[fi] = pxAlto(info.alto); continue; }
       altos[fi] = f.filasOcultasPorDefecto ? 0 : pxAlto(Math.max(ptDef, ptAuto[fi]));
     }
     const arr = new Float64Array(nF + 1);
     for (let fi = 0; fi < nF; fi++) arr[fi + 1] = arr[fi] + altos[fi];
 
-    const busca = (pref, n, def, v) => {
-      if (v < 0) return -1;
-      if (v >= pref[n]) return def > 0 ? n + Math.floor((v - pref[n]) / def) : -1;
+    const busca = (pref, n, def, v, max) => {
+      if (!(v >= 0)) return -1;
+      if (v >= pref[n]) return def > 0 ? Math.min(max, n + Math.floor((v - pref[n]) / def)) : -1;
       let a = 0, b = n - 1;
       while (a < b) { const m = (a + b + 1) >> 1; if (pref[m] <= v) a = m; else b = m - 1; }
       // salta las de tamaño cero: la columna que contiene el píxel es la última con inicio <= v y tamaño > 0
       while (a < n - 1 && pref[a + 1] <= v) a++;
-      return a;
+      return Math.min(a, max);
     };
 
     return {
@@ -215,8 +218,8 @@
       altoFila: (fi) => (fi < nF ? altos[fi] : altoDef),
       x: (c) => (c < nC ? izq[c] : izq[nC] + (c - nC) * anchoDef),
       y: (fi) => (fi < nF ? arr[fi] : arr[nF] + (fi - nF) * altoDef),
-      colEn: (x) => busca(izq, nC, anchoDef, x),
-      filaEn: (y) => busca(arr, nF, altoDef, y),
+      colEn: (x) => busca(izq, nC, anchoDef, x, 16383),
+      filaEn: (y) => busca(arr, nF, altoDef, y, 1048575),
       altoTexto, normal: { nombre: nombreNormal, tam: tamNormal },
     };
   }

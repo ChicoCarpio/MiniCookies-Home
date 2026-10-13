@@ -550,7 +550,7 @@
     const sinMarcas = texto.replace(/\u0001[^\u0001]\u0001/g, '');
     const faltan = Math.max(1, Math.min(255, ancho) - sinMarcas.length);
     const antes = texto.slice(0, m.index).replace(/\u0001[^\u0001]\u0001/g, ''), despues = texto.slice(m.index + m[0].length).replace(/\u0001[^\u0001]\u0001/g, '');
-    return { texto: antes + m[1].repeat(faltan) + despues, relleno: { caracter: m[1] } };
+    return { texto: antes + m[1].repeat(faltan) + despues, relleno: { caracter: m[1], indice: antes.length } };
   }
 
   function formatear(valor, codigo, opciones) {
