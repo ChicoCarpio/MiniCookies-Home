@@ -157,6 +157,21 @@ al.merge_cells('A30:C32')
 al['A30'] = 'combinada centrada'
 al['A30'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
 al['A30'].fill = PatternFill('solid', fgColor='DDEBF7')
+ro = wb.create_sheet('Rotacion')
+for c in range(1, 4):
+    ro.column_dimensions[openpyxl.utils.get_column_letter(c)].width = 11.4
+fila = 1
+for ang in [45, 90, 135, 180]:
+    for v in ['top', 'center', 'bottom']:
+        ro.row_dimensions[fila].height = 60
+        for j, h in enumerate(['left', 'center', 'right'], start=1):
+            ro.cell(row=fila, column=j, value='Ab %d' % ang).alignment = Alignment(horizontal=h, vertical=v, text_rotation=ang)
+        fila += 1
+tr = wb.create_sheet('Tramas')
+for i, pt in enumerate(patrones):
+    for rep in range(3):
+        tr.cell(row=i * 3 + rep + 1, column=1).fill = PatternFill(patternType=pt, fgColor='000000', bgColor='FFFFFF')
+        tr.cell(row=i * 3 + rep + 1, column=2).fill = PatternFill(patternType=pt, fgColor='FF0000', bgColor='FFFF00')
 ai = wb.create_sheet('Aislado')
 ai['B2'].fill = PatternFill('solid', fgColor='FF0000')
 ai['D4'].fill = PatternFill('solid', fgColor='0000FF')

@@ -214,7 +214,10 @@
     const dosPuntos = (t) => t.replace('.', opc.decimal);
     // notación científica con hasta 6 cifras significativas
     const cientifica = () => {
-      const m = abs.toExponential(5).split('e');
+      // hasta 6 cifras; en una columna angosta (max < 11) las que quepan: cifras + coma + E+dd
+      const largoExp = Math.abs(parseInt(abs.toExponential(5).split('e')[1], 10)) >= 100 ? 5 : 4;
+      const cifras = Math.max(1, Math.min(6, max - largoExp - 1));
+      const m = abs.toExponential(cifras - 1).split('e');
       let mant = m[0].replace(/0+$/, '').replace(/\.$/, '');
       const e = parseInt(m[1], 10);
       return signo + dosPuntos(mant) + 'E' + (e < 0 ? '-' : '+') + String(Math.abs(e)).padStart(2, '0');

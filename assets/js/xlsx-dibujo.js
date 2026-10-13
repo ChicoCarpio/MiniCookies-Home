@@ -21,7 +21,7 @@
 
   const fuenteCss = (fu, tamPx) => `${fu.cursiva ? 'italic ' : ''}${fu.negrita ? 'bold ' : ''}${tamPx}px ${PptxTexto.familia(fu.nombre)}`;
   // Excel pinta con GDI a un tamaño entero de píxeles: 11 pt → 15 px.
-  const tamPx = (pt) => Math.max(1, Math.round(pt * 96 / 72));
+  const tamPx = (pt) => Math.max(1, CONFIG.pxExacto ? pt * 96 / 72 : Math.round(pt * 96 / 72));
   let canvasMedida = null;
   function ctxMedida() {
     if (!canvasMedida) canvasMedida = (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(8, 8) : document.createElement('canvas')).getContext('2d');
@@ -48,9 +48,11 @@
 
   // Excel (GDI) coloca cada letra en un píxel entero y no hace kerning; el Canvas usa avances fraccionarios. CONFIG.avance:
   // 0 = los del Canvas, 1 = redondeados, 2 = redondeados hacia arriba. (Se calibra contra Excel: comparar-dibujo.mjs --avance=N.)
-  const CONFIG = { avance: 0 };
+  const CONFIG = { avance: 0, pxExacto: false };
   const memoAvance = new Map();
+  let DIGITO = 0; // mientras se dibuja un número: ancho fijo del dígito (el MDW, como Excel)
   function avance(ctx, ch) {
+    if (DIGITO && ch >= '0' && ch <= '9') return DIGITO;
     const k = ctx.font + '|' + ch;
     let a = memoAvance.get(k);
     if (a === undefined) {
@@ -61,13 +63,13 @@
     return a;
   }
   function anchoTexto(ctx, t) {
-    if (!CONFIG.avance) return ctx.measureText(t).width;
+    if (!CONFIG.avance && !DIGITO) return ctx.measureText(t).width;
     let w = 0;
     for (const ch of t) w += avance(ctx, ch);
     return w;
   }
   function escribir(ctx, t, x, y) {
-    if (!CONFIG.avance) { ctx.fillText(t, x, y); return; }
+    if (!CONFIG.avance && !DIGITO) { ctx.fillText(t, x, y); return; }
     for (const ch of t) { ctx.fillText(ch, x, y); x += avance(ctx, ch); }
   }
 
@@ -75,25 +77,26 @@
 
   const colorDe = (libro, ref, porDefecto) => (ref ? libro.estilos.color(ref) || porDefecto : porDefecto);
 
-  // Tramas de la norma (18.18.55 ST_PatternType): matrices 8×8 (1 = primer plano). Aproximaciones calibradas contra Excel.
+  // Tramas de la norma (18.18.55 ST_PatternType): matrices 8×8 (1 = primer plano) medidas en Excel (comparar-dibujo.mjs, caso tramas-puras).
+  // Excel las ancla a las coordenadas de la hoja (no al inicio de cada celda), con período 8.
   const TRAMAS = {
     gray125: ['10001000', '00000000', '00100010', '00000000', '10001000', '00000000', '00100010', '00000000'],
     gray0625: ['10000000', '00000000', '00001000', '00000000', '10000000', '00000000', '00001000', '00000000'],
-    lightGray: ['10001000', '00100010', '10001000', '00100010', '10001000', '00100010', '10001000', '00100010'],
+    darkGray: ['11101110', '10111011', '11101110', '10111011', '11101110', '10111011', '11101110', '10111011'],
     mediumGray: ['10101010', '01010101', '10101010', '01010101', '10101010', '01010101', '10101010', '01010101'],
-    darkGray: ['01110111', '11011101', '01110111', '11011101', '01110111', '11011101', '01110111', '11011101'],
+    lightGray: ['10001000', '00100010', '10001000', '00100010', '10001000', '00100010', '10001000', '00100010'],
     darkHorizontal: ['11111111', '11111111', '00000000', '00000000', '11111111', '11111111', '00000000', '00000000'],
     darkVertical: ['11001100', '11001100', '11001100', '11001100', '11001100', '11001100', '11001100', '11001100'],
     darkDown: ['11001100', '01100110', '00110011', '10011001', '11001100', '01100110', '00110011', '10011001'],
     darkUp: ['00110011', '01100110', '11001100', '10011001', '00110011', '01100110', '11001100', '10011001'],
-    darkGrid: ['11111111', '11001100', '11001100', '11111111', '11001100', '11001100', '11111111', '11001100'],
-    darkTrellis: ['11001100', '11111111', '00110011', '11111111', '11001100', '11111111', '00110011', '11111111'],
+    darkGrid: ['10011001', '01100110', '01100110', '10011001', '10011001', '01100110', '01100110', '10011001'],
+    darkTrellis: ['11111111', '01100110', '11111111', '10011001', '11111111', '01100110', '11111111', '10011001'],
     lightHorizontal: ['11111111', '00000000', '00000000', '00000000', '11111111', '00000000', '00000000', '00000000'],
     lightVertical: ['10001000', '10001000', '10001000', '10001000', '10001000', '10001000', '10001000', '10001000'],
     lightDown: ['10001000', '01000100', '00100010', '00010001', '10001000', '01000100', '00100010', '00010001'],
     lightUp: ['00010001', '00100010', '01000100', '10001000', '00010001', '00100010', '01000100', '10001000'],
     lightGrid: ['11111111', '10001000', '10001000', '10001000', '11111111', '10001000', '10001000', '10001000'],
-    lightTrellis: ['10001000', '11111111', '00100010', '11111111', '10001000', '11111111', '00100010', '11111111'],
+    lightTrellis: ['10001000', '01010101', '00100010', '01010101', '10001000', '01010101', '00100010', '01010101'],
   };
   // Distancia de la línea base al borde inferior de la fila, por tamaño de letra en píxeles (medida en Excel con Calibri, Arial, Times y Courier).
   const DESCENSO = { 19: 5, 21: 6, 24: 7, 27: 7, 32: 9, 37: 10, 48: 13 };
@@ -112,7 +115,7 @@
     cachePatron.set(k, p);
     return p;
   }
-  function estiloRelleno(ctx, libro, relleno) {
+  function estiloRelleno(ctx, libro, relleno, anc) {
     if (!relleno || relleno.tipo === 'ninguno') return null;
     if (relleno.tipo === 'degradado') {
       const p = relleno.degradado && relleno.degradado.paradas;
@@ -121,7 +124,10 @@
     const fg = colorDe(libro, relleno.fg, '#000000');
     if (relleno.patron === 'solid') return fg;
     const bg = colorDe(libro, relleno.bg, '#FFFFFF');
-    return patron(ctx, relleno.patron, fg, bg) || fg;
+    const pt = patron(ctx, relleno.patron, fg, bg);
+    if (!pt) return fg;
+    if (pt.setTransform && anc) pt.setTransform(new DOMMatrix().translate(anc.tx, anc.ty));
+    return pt;
   }
 
   // ---- Bordes ------------------------------------------------------------------------------------------
@@ -190,6 +196,7 @@
     const ox = op.x || 0, oy = op.y || 0;
     const X = (c) => ox + g.x(c) - g.x(r.c0), Y = (f) => oy + g.y(f) - g.y(r.f0);
     const C = hoja.celdas;
+    const anclaje = { tx: ((ox - g.x(r.c0)) % 8 + 8) % 8, ty: ((oy - g.y(r.f0)) % 8 + 8) % 8 };
     const filas = [], cols = [];
     for (let f = r.f0; f <= r.f1; f++) if (g.altoFila(f) > 0) filas.push(f);
     for (let c = r.c0; c <= r.c1; c++) if (g.anchoCol(c) > 0) cols.push(c);
@@ -225,13 +232,20 @@
         const clave = f * 16384 + c;
         if (cubierta.has(clave)) continue;
         const xf = estiloDe(f, c);
-        const est = estiloRelleno(ctx, libro, xf.relleno);
+        const est = estiloRelleno(ctx, libro, xf.relleno, anclaje);
         if (!est) continue;
         const m = combinada.get(clave);
         const f1 = m ? Math.min(m.f1, r.f1) : f, c1 = m ? Math.min(m.c1, r.c1) : c;
         ctx.fillStyle = est;
         ctx.fillRect(X(c), Y(f), X(c1 + 1) - X(c) + 1, Y(f1 + 1) - Y(f) + 1);
       }
+    }
+    for (const m of combinada.values()) { // combinadas que empiezan antes del rango: su relleno entra desde fuera
+      if (m.f0 >= r.f0 && m.c0 >= r.c0) continue;
+      const est = estiloRelleno(ctx, libro, estiloDe(m.f0, m.c0).relleno, anclaje);
+      if (!est) continue;
+      ctx.fillStyle = est;
+      ctx.fillRect(X(Math.max(m.c0, r.c0)), Y(Math.max(m.f0, r.f0)), X(Math.min(m.c1, r.c1) + 1) - X(Math.max(m.c0, r.c0)) + 1, Y(Math.min(m.f1, r.f1) + 1) - Y(Math.max(m.f0, r.f0)) + 1);
     }
 
     // 3. bordes
@@ -267,9 +281,18 @@
     const idioma = op.idioma || 'es';
     const mdw = g.mdw;
     const hayCelda = (f, c) => { const i = C.indiceDe(f, c); return i >= 0 && C.tipo[i] !== LibroXlsx.TIPO.vacio && !(C.tipo[i] === LibroXlsx.TIPO.texto && C.valor[i] === ''); };
-    for (let k = 0; k < C.n; k++) {
+    // solo las celdas del rango (por el índice de filas, no recorriendo toda la hoja) y las combinadas que empiezan antes del rango
+    C._indexar();
+    const visibles = [];
+    for (const f of filas) {
+      let k = C._inicioFila.get(f);
+      if (k === undefined) continue;
+      for (; k < C.n && C.fila[k] === f; k++) { if (C.col[k] < r.c0) continue; if (C.col[k] > r.c1) break; visibles.push(k); }
+    }
+    for (const m of combinada.values()) if (m.f0 < r.f0 || m.c0 < r.c0) { const k = C.indiceDe(m.f0, m.c0); if (k >= 0) visibles.push(k); }
+    for (const k of visibles) {
       const f = C.fila[k], c = C.col[k];
-      if (f < r.f0 || f > r.f1 || c < r.c0 || c > r.c1 || C.tipo[k] === LibroXlsx.TIPO.vacio) continue;
+      if (C.tipo[k] === LibroXlsx.TIPO.vacio) continue;
       if (g.altoFila(f) === 0 || g.anchoCol(c) === 0) continue;
       const clave = f * 16384 + c;
       if (cubierta.has(clave)) continue;
@@ -279,7 +302,7 @@
       const x0 = X(c), x1 = X(Math.min(c1, r.c1) + 1), y0 = Y(f), y1 = Y(Math.min(f1, r.f1) + 1);
       const anchoCelda = g.x(c1 + 1) - g.x(c);
       const fu = xf.fuente;
-      const px = tamPx(fu.tam || 11);
+      let px = tamPx(fu.tam || 11);
       const al = xf.alineacion;
       const anchoChars = Math.max(1, Math.floor((anchoCelda - 5) / mdw));
       const fm = LibroXlsx.textoCelda(libro, hoja, k, { idioma, decimal: op.decimal || (idioma === 'es' ? ',' : '.'), miles: op.miles || (idioma === 'es' ? '\u00A0' : ','), ancho: anchoChars, anchoGeneral: Math.min(11, Math.max(1, anchoChars)) });
@@ -291,7 +314,11 @@
       let color = fm.color && COLORES_FORMATO[fm.color] ? COLORES_FORMATO[fm.color] : colorDe(libro, fu.color, '#000000');
       if (fm.color && /^Color\d+$/.test(fm.color)) color = '#' + (XlsxEstilos.PALETA_INDEXADA[+fm.color.slice(5) + 7] || '000000');
       ctx.fillStyle = color;
+      DIGITO = esNumero ? mdw : 0;
       const interior = anchoCelda - 2 * PAD_X - 1;
+      if (al.reducir && !al.ajustar) { // reducir hasta ajustar: la letra baja de tamaño hasta que el texto cabe
+        while (px > 4 && anchoTexto(ctx, texto) > interior) { px--; ctx.font = fuenteCss(fu, px); }
+      }
       let h = al.h;
       if (h === 'general') h = esNumero || C.tipo[k] === LibroXlsx.TIPO.logico || C.tipo[k] === LibroXlsx.TIPO.error ? (C.tipo[k] === LibroXlsx.TIPO.numero ? 'right' : 'center') : 'left';
       const sangria = Math.round((al.sangria || 0) * mdw * 1.2381);
@@ -307,14 +334,32 @@
       }
       const altoLinea = Math.round(px * 1.2207) + 0;
       const asc = Math.round(px * 0.952), desc = DESCENSO[px] !== undefined ? DESCENSO[px] : px <= 16 ? 4 : Math.round(px * 0.269);
-      const altoTexto = lineas.length * (asc + desc);
+      const paso = Math.floor(g.altoTexto(fu.nombre || 'Calibri', fu.tam || 11, fu.negrita, fu.cursiva) * 4 / 3 + 1e-6);
+      const altoTexto = (lineas.length - 1) * paso + asc + desc;
       const altoDisp = y1 - y0;
       let v = al.v || 'bottom';
       if (v === 'bottom' && altoTexto > altoDisp) v = 'top'; // si no cabe, Excel muestra las primeras líneas
       let yBase;
       if (v === 'top') yBase = y0 + 2 + asc;
       else if (v === 'center') yBase = y0 + 1 + Math.floor((altoDisp - altoTexto) / 2) + asc;
-      else yBase = y1 - desc - (lineas.length - 1) * (asc + desc);
+      else yBase = y1 - desc - (lineas.length - 1) * paso;
+      // texto girado: se alinea la caja que ocupa la línea ya girada (rotación 1-90 sube, 91-180 baja, 255 apila las letras)
+      const rot = al.rotacion || 0;
+      if (rot && rot !== 255 && !esNumero || rot && rot !== 255 && esNumero) {
+        const grados = rot <= 90 ? rot : -(rot - 90), th = grados * Math.PI / 180;
+        const w = anchoTexto(ctx, texto), cs = Math.cos(th), sn = Math.sin(th);
+        const esq = [[0, -asc], [w, -asc], [w, desc], [0, desc]].map(([qx, qy]) => [qx * cs + qy * sn, -qx * sn + qy * cs]);
+        const mnx = Math.min(...esq.map((q) => q[0])), mxx = Math.max(...esq.map((q) => q[0])), mny = Math.min(...esq.map((q) => q[1])), mxy = Math.max(...esq.map((q) => q[1]));
+        const Wp = mxx - mnx, Hp = mxy - mny;
+        const bx = h === 'right' ? x1 - PAD_X - Wp : h === 'center' || h === 'centerContinuous' ? x0 + (x1 - x0 - Wp) / 2 : x0 + 1 + PAD_X;
+        const by = v === 'top' ? y0 + 2 : v === 'center' ? y0 + (altoDisp - Hp) / 2 : y1 - Hp;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(x0 + 1, y0 + 1, x1 - x0 - 1, y1 - y0 - 1); ctx.clip();
+        ctx.translate(Math.round(bx - mnx), Math.round(by - mny)); ctx.rotate(-th);
+        ctx.fillText(texto, 0, 0);
+        ctx.restore();
+        continue;
+      }
       // sobre qué ancho se puede desbordar
       let izqLim = x0, derLim = x1;
       if (!al.ajustar && !esNumero && !m) {
@@ -337,7 +382,7 @@
       for (let i = 0; i < lineas.length; i++) {
         const l = lineas[i];
         const w = anchoTexto(ctx, l);
-        const y = yBase + i * (asc + desc);
+        const y = yBase + i * paso;
         let x;
         if (h === 'distributed' && /\S\s+\S/.test(l.trim())) { // reparte el espacio sobrante entre las palabras
           const pal = l.trim().split(/\s+/), wp = pal.map((q) => anchoTexto(ctx, q)), hueco = (interior - wp.reduce((u, q) => u + q, 0)) / (pal.length - 1);
@@ -361,5 +406,49 @@
     ctx.restore();
   }
 
-  globalThis.XlsxDibujo = { dibujarRango, cargarFuentes, medirDigito, tamPx, config: CONFIG };
+  // ---- Vista con desplazamiento -------------------------------------------------------------------------
+
+  // Dibuja lo que se ve de la hoja con su desplazamiento: encabezados de columna (A, B, C…) y de fila (1, 2, 3…) y solo las celdas
+  // visibles (el costo no depende del tamaño de la hoja). v = { x, y (desplazamiento en px de hoja), ancho, alto (px del lienzo),
+  // encabezados (true) }. Devuelve { f0, f1, c0, c1, areaX, areaY } (lo visible), útil para saber qué celda está bajo el puntero.
+  function dibujarVista(ctx, libro, hoja, g, v, op) {
+    op = op || {};
+    const conEnc = v.encabezados !== false;
+    const altoEnc = conEnc ? 20 : 0;
+    const f0 = Math.max(0, g.filaEn(v.y)), c0 = Math.max(0, g.colEn(v.x));
+    let f1 = f0, c1 = c0;
+    while (f1 < 1048575 && g.y(f1 + 1) - v.y < v.alto - altoEnc) f1++;
+    const ultima = Math.min(1048576, f1 + 1);
+    const anchoEnc = conEnc ? Math.max(26, String(ultima).length * 8 + 12) : 0;
+    while (c1 < 16383 && g.x(c1 + 1) - v.x < v.ancho - anchoEnc) c1++;
+    ctx.save();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, v.ancho, v.alto);
+    ctx.beginPath(); ctx.rect(anchoEnc, altoEnc, v.ancho - anchoEnc, v.alto - altoEnc); ctx.clip();
+    dibujarRango(ctx, libro, hoja, g, { f0, c0, f1, c1 }, Object.assign({}, op, { x: anchoEnc + g.x(c0) - v.x, y: altoEnc + g.y(f0) - v.y }));
+    ctx.restore();
+    if (conEnc) {
+      ctx.save();
+      ctx.fillStyle = '#E6E6E6'; ctx.fillRect(0, 0, v.ancho, altoEnc); ctx.fillRect(0, 0, anchoEnc, v.alto);
+      ctx.fillStyle = '#BAB9B9';
+      ctx.fillRect(0, altoEnc - 1, v.ancho, 1); ctx.fillRect(anchoEnc - 1, 0, 1, v.alto);
+      ctx.font = '15px ' + PptxTexto.familia('Calibri'); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center'; ctx.fillStyle = '#444444';
+      for (let c = c0; c <= c1; c++) {
+        const xa = anchoEnc + g.x(c) - v.x, w = g.anchoCol(c);
+        if (w === 0) continue;
+        ctx.fillRect(xa + w - 1, 0, 1, altoEnc);
+        ctx.fillText(LibroXlsx.numeroACol(c), xa + w / 2, 15);
+      }
+      for (let f = f0; f <= f1; f++) {
+        const ya = altoEnc + g.y(f) - v.y, h = g.altoFila(f);
+        if (h === 0) continue;
+        ctx.fillRect(0, ya + h - 1, anchoEnc, 1);
+        ctx.fillText(String(f + 1), anchoEnc / 2, ya + Math.min(h, 20) - 5);
+      }
+      ctx.restore();
+    }
+    return { f0, f1, c0, c1, areaX: anchoEnc, areaY: altoEnc };
+  }
+
+  globalThis.XlsxDibujo = { dibujarRango, dibujarVista, cargarFuentes, medirDigito, tamPx, config: CONFIG };
 })();

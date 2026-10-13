@@ -30,6 +30,7 @@ for (let k = 0; k < C.n; k++) {
   const E = caja(0), N = caja(W + 10);
   if (!E || !N) { filas.push(`${LibroXlsx.codificarDireccion(f, c)} ${JSON.stringify(C.valor[k]).slice(0, 24)}: ${E ? 'falta en el motor' : N ? 'sobra en el motor' : 'sin tinta'}`); continue; }
   const xf = libro.estilos.xf(C.estilo[k]);
+  if (process.env.ABS) { filas.push(`${LibroXlsx.codificarDireccion(f, c).padEnd(5)} rot=${String(xf.alineacion.rotacion).padStart(3)} h=${xf.alineacion.h.padEnd(7)} v=${(xf.alineacion.v || 'bottom').padEnd(7)} Excel: izq ${E.izq} der ${E.der} arr ${E.arr} aba ${E.aba} ancho ${E.ancho} alto ${E.alto}`); continue; }
   filas.push(`${LibroXlsx.codificarDireccion(f, c).padEnd(5)} ${String(C.valor[k]).slice(0, 18).padEnd(18)} h=${xf.alineacion.h.padEnd(10)} v=${(xf.alineacion.v || 'bottom').padEnd(7)} dIzq ${String(N.izq - E.izq).padStart(3)}  dDer ${String(N.der - E.der).padStart(3)}  dArr ${String(N.arr - E.arr).padStart(3)}  dAba ${String(N.aba - E.aba).padStart(3)}  dAncho ${String(N.ancho - E.ancho).padStart(3)}  dAlto ${String(N.alto - E.alto).padStart(3)}`);
 }
 console.log(filas.join('\n'));
