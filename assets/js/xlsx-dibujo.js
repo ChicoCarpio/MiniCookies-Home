@@ -603,6 +603,8 @@
       DIGITO = 0; FINO = false; PXDE = null; TXT = { x: 0, y: 0 }; DXT = 0;
       ctx.restore();
     }
+    // 6. notas de celda: el triángulo rojo (pantalla) y el cuadro de las que se muestran siempre; sin el recorte del rango (al imprimir el cuadro se sale de la hoja)
+    if (hoja.comentarios && hoja.comentarios.length && typeof XlsxNotas !== 'undefined') XlsxNotas.dibujar(ctx, libro, hoja, g, r, { x: ox, y: oy, fino: !!op.fino, grosorRejilla: op.grosorRejilla, notas: op.notas, indicadores: op.indicadores });
   }
 
   // Barra de datos con la extensión de Excel 2010 (medida en el PDF de Excel, 36-x14; u = un píxel de la impresora, 0,96 pt): la región va de 2 u a 1 u del borde de la celda,

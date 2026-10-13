@@ -115,8 +115,31 @@
     const e = p.escala / 100;
     // a escala menor que 100 % Excel deja el texto más abajo y a la derecha de lo que da la escala exacta (medido: el relleno de la celda no se achica con la escala; ≈ +0,95 pt a la izquierda, +0,25 a la derecha y +1,05 hacia abajo por cada 100 % que falta)
     const desplazarTexto = { x: 0.95 * (1 - e) / f, xDer: 0.25 * (1 - e) / f, xCen: 0, y: 1.05 * (1 - e) / f };
-    const comun = { lienzo: ctx, desplazarTexto, fino: true, idioma: ctxP.idioma, cuadricula: !!op.cuadricula, colorRejilla: '#000000', grosorRejilla: 0.96 / f, pxDe: estilo.pxDe };
+    const comun = { lienzo: ctx, desplazarTexto, fino: true, idioma: ctxP.idioma, cuadricula: !!op.cuadricula, colorRejilla: '#000000', grosorRejilla: 0.96 / f, pxDe: estilo.pxDe, notas: !!(hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'asDisplayed') };
     const R = (f0, c0, f1, c1, x, y) => XlsxDibujo.dibujarRango(ctx, libro, hoja, G, { f0, c0, f1, c1 }, Object.assign({ x, y }, comun));
+    if (pagina.listaNotas) { // página de notas "al final de la hoja" (medido en el PDF de Excel, 38-comentarios)
+      const et = XlsxNotas.etiquetas(ctxP.idioma);
+      const px = estilo.pxDe(estilo.normal.tam);
+      const filaPt = pagina.listaNotas.filaPt;
+      ctx.save();
+      ctx.fillStyle = '#000000'; ctx.textBaseline = 'alphabetic';
+      // "Nota:" va pegada al margen y "Celda:" termina donde ella termina; el texto empieza 26,9 pt después del margen (o 2 pt después de la etiqueta si es más larga)
+      ctx.font = XlsxDibujo.fuenteCss({ nombre: estilo.normal.nombre, negrita: true, cursiva: false }, px);
+      // la etiqueta más ancha de las notas (Nota:, Comentario:, Responder:) queda pegada al margen y "Celda:" termina donde ella termina
+      const xR = mI + Math.max(0, ...pagina.listaNotas.etiquetas.map((k) => ctx.measureText(et[k]).width)), xV = Math.max(mI + 26.9 / f, xR + 2 / f);
+      pagina.listaNotas.filas.forEach((fila, i) => {
+        const y = mA + (i * filaPt + 11.16) / f;
+        if (fila.et) {
+          ctx.font = XlsxDibujo.fuenteCss({ nombre: estilo.normal.nombre, negrita: true, cursiva: false }, px);
+          ctx.textAlign = 'right'; ctx.fillText(et[fila.et], xR, y);
+        }
+        if (fila.txt) {
+          ctx.font = XlsxDibujo.fuenteCss({ nombre: estilo.normal.nombre, negrita: false, cursiva: false }, px);
+          ctx.textAlign = 'left'; ctx.fillText(fila.txt, xV, y);
+        }
+      });
+      ctx.restore();
+    } else {
     const xCuerpo = ox + cabeW + anchoTit, yCuerpo = oy + cabeH + altoTit;
     R(pagina.f0, pagina.c0, pagina.f1, pagina.c1, xCuerpo, yCuerpo);
     if (tf) R(tf.f0, pagina.c0, tf.f1, pagina.c1, xCuerpo, oy + cabeH);
@@ -153,6 +176,8 @@
       }
       ctx.restore();
     }
+
+    } // fin de las celdas (no hay en las páginas de notas)
 
     // encabezado y pie: el texto cuelga del margen de encabezado y el pie sube desde el margen de pie (medido contra Excel:
     // línea base del encabezado = margen + 0,952·letra + 1 pt; la del pie = alto − margen − (0,28·letra + 1,72 pt))
@@ -224,7 +249,7 @@
     const pdf = await PDFLib.PDFDocument.create();
     await XlsxDibujo.cargarFuentes(libro);
     const usos = XlsxDibujo.usosDeFuentes(libro);
-    for (const hf of ['Calibri', 'Arial', 'Times New Roman']) for (const [n, c] of [[false, false], [true, false], [false, true], [true, true]]) usos.push({ fuente: hf, negrita: n, cursiva: c });
+    for (const hf of ['Calibri', 'Arial', 'Times New Roman', 'Tahoma']) for (const [n, c] of [[false, false], [true, false], [false, true], [true, true]]) usos.push({ fuente: hf, negrita: n, cursiva: c });
     const auxiliar = new LienzoPdf.Lienzo({ ancho: 1, alto: 1, anchoPt: 1, altoPt: 1 });
     await auxiliar.precargarFuentes(usos); // las deja listas para dibujar sin esperar
     const normal = libro.estilos.xf(0).fuente;
@@ -239,22 +264,34 @@
       await XlsxDibujo.prepararObjetos(libro, hoja, auxiliar); // imágenes, formas y gráficos de la hoja
       const g = XlsxDibujo.geometria(libro, hoja);
       const p = XlsxPaginas.calcular(libro, hoja, g, { maxPaginas: tope - acumuladas });
-      acumuladas += p.paginas.length;
-      if (p.cortado) truncado = true;
-      trabajos.push({ hoja, g, p });
-    }
-    const total = trabajos.reduce((a, t) => a + t.p.paginas.length, 0);
-    const fecha = new Date();
-    let numero = 0, hechas = 0;
-    for (const t of trabajos) {
-      const { hoja, g, p } = t;
-      if (!hoja.imprimir.pagina || !hoja.imprimir.pagina.usarPrimeraPagina || !(hoja.imprimir.pagina.primeraPagina >= 0)) { if (opc.numeracion === 'porHoja') numero = 0; }
-      else numero = hoja.imprimir.pagina.primeraPagina - 1;
       let hasta = { c: 0, f: 0 };
       for (const a of p.areas) { hasta.c = Math.max(hasta.c, a.c1); hasta.f = Math.max(hasta.f, a.f1); }
       if (p.titulos.filas) hasta.f = Math.max(hasta.f, p.titulos.filas.f1);
       if (p.titulos.columnas) hasta.c = Math.max(hasta.c, p.titulos.columnas.c1);
       const G = geometriaImpresion(g, p, hasta);
+      // "al final de la hoja": las notas se imprimen en páginas aparte, una fila de la hoja por línea
+      const notas = [];
+      if (hoja.imprimir.pagina && hoja.imprimir.pagina.comentarios === 'atEnd' && hoja.comentarios && hoja.comentarios.length && typeof XlsxNotas !== 'undefined' && !p.cortado) {
+        const filas = XlsxNotas.filas(hoja, idioma);
+        const filaPt = U_PT * (p.escala / 100) * G.altoFila(hasta.f + 1);
+        const porPagina = Math.max(1, Math.round((p.papel.alto - p.margenes.arr - p.margenes.aba) / filaPt)); // medido: 45 filas de 15,24 pt en 684 pt (44,9): la última cabe aunque se pase un poco
+        for (let i = 0; i < filas.length && acumuladas + p.paginas.length + notas.length < tope; i += porPagina) {
+          while (i > 0 && i < filas.length && !filas[i].et && !filas[i].txt) i++; // la línea en blanco que cae arriba de una página no se imprime (medido)
+          if (i >= filas.length) break;
+          notas.push({ filas: filas.slice(i, i + porPagina), filaPt, etiquetas: [...new Set(filas.map((x) => x.et).filter((e) => e && e !== 'celda'))] });
+        }
+      }
+      acumuladas += p.paginas.length + notas.length;
+      if (p.cortado) truncado = true;
+      trabajos.push({ hoja, g, p, G, hasta, notas });
+    }
+    const total = trabajos.reduce((a, t) => a + t.p.paginas.length + t.notas.length, 0);
+    const fecha = new Date();
+    let numero = 0, hechas = 0;
+    for (const t of trabajos) {
+      const { hoja, g, p, G, hasta } = t;
+      if (!hoja.imprimir.pagina || !hoja.imprimir.pagina.usarPrimeraPagina || !(hoja.imprimir.pagina.primeraPagina >= 0)) { if (opc.numeracion === 'porHoja') numero = 0; }
+      else numero = hoja.imprimir.pagina.primeraPagina - 1;
       const f = U_PT * (p.escala / 100);
       // letra: píxeles de impresora redondeados (11 pt → 92 px → 11,04 pt) vistos en u
       const pxDe = (pt) => { const t = Number.isFinite(pt) && pt > 0 ? Math.min(409.5, pt) : 11; return Math.max(1, Math.round(t * (p.escala / 100) * 600 / 72)) * PT_PX / f; };
@@ -269,6 +306,14 @@
         await L.aPagina(pdf);
         if (opc.progreso) opc.progreso(hechas, total);
         if ((hechas & 7) === 7) await new Promise((r) => setTimeout(r, 0));
+      }
+      for (const pn of t.notas) { // las páginas de las notas "al final de la hoja"
+        numero++; hechas++;
+        const L = new LienzoPdf.Lienzo({ ancho: p.papel.ancho / f, alto: p.papel.alto / f, anchoPt: p.papel.ancho, altoPt: p.papel.alto });
+        dibujarPagina(L, libro, hoja, G, p, { f0: 0, c0: 0, f1: 0, c1: 0, titulos: { filas: null, columnas: null }, listaNotas: pn }, { idioma, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: false, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
+        if (L.fallo) throw L.fallo;
+        await L.aPagina(pdf);
+        if (opc.progreso) opc.progreso(hechas, total);
       }
     }
     if (!pdf.getPageCount()) pdf.addPage([612, 792]);

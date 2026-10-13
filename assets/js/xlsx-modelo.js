@@ -347,6 +347,8 @@
       imprimir: { margenes: null, pagina: null, opciones: null, encabezadoPie: null, saltosFila: [], saltosCol: [], ajustarAPagina: false, autoSaltos: true },
       filtroAuto: null,
       proteccion: null,
+      hilos: [],                   // comentarios en hilo: { ref, f, c, entradas: [{ autor, fecha, texto, respuesta }] }
+      comentarios: [],             // notas de celda: { f, c, autor, texto, runs, visible, ancla, ancho, alto, relleno } (comments + VML)
       minigraficos: [],            // grupos de minigráficos x14: { tipo, colores…, items: [{ f, sqref }] }
       formatosCondicionales: [],   // { rangos: [rango], reglas: [{ tipo, prioridad, dxf, … }] } — lectura completa en la etapa 6
       validaciones: [],            // { rangos, tipo, … }
@@ -725,6 +727,8 @@
     libro.textos = leerTextosCompartidos(relTextos ? await textoDe(zip, relTextos.destino) : null);
     libro.estilos = XlsxEstilos.leer(relEstilos ? await textoDe(zip, relEstilos.destino) : null, relTema ? await textoDe(zip, relTema.destino) : null);
     libro.rutaTema = relTema ? relTema.destino : null;
+    const relPersonas = relDe('person');
+    libro.rutaPersonas = relPersonas ? relPersonas.destino : null;   // quiénes escriben los comentarios en hilo
     libro.tieneMacros = !!rels.find((r) => r.tipo === 'vbaProject');
 
     libro.cargarHoja = (indice) => envolver(() => cargarHoja(libro, indice));
@@ -735,6 +739,113 @@
   const MAX_ANCLAS = 5000;
   // Las anclas del dibujo de una hoja (xl/drawings/drawingN.xml), sin DOM: dónde está cada objeto. Las posiciones en EMU.
   // { tipo: 'dos' | 'uno' | 'abs', de: { col, fila, dx, dy }, a: {…}, ext: { w, h }, pos: { x, y }, imprimible, oculto }, en el orden del archivo.
+  // Notas de celda (xl/commentsN.xml) con su cuadro (xl/drawings/vmlDrawingN.vml: dónde va, si se muestra siempre y de qué tamaño).
+  // El VML no es XML estricto pero el lector ligero lo traga; solo se miran las formas con ObjectType="Note".
+  function leerComentarios(xml, vml) {
+    const lista = [];
+    const autores = [];
+    let enAutor = false, c = null, enR = false, enText = false, enT = false, rpr = null, run = null;
+    if (xml) XmlLigero.recorrer(xml, {
+      abrir(nombre, a) {
+        if (c && enText) {
+          if (nombre === 'r') { enR = true; run = { texto: '', negrita: false, cursiva: false, subrayado: false, tachado: false, tam: null, fuente: null, color: null }; }
+          else if (nombre === 'rPr' && enR) rpr = run;
+          else if (rpr) {
+            if (nombre === 'b') rpr.negrita = a.val !== '0' && a.val !== 'false';
+            else if (nombre === 'i') rpr.cursiva = a.val !== '0' && a.val !== 'false';
+            else if (nombre === 'u') rpr.subrayado = a.val !== 'none';
+            else if (nombre === 'strike') rpr.tachado = a.val !== '0' && a.val !== 'false';
+            else if (nombre === 'sz') rpr.tam = parseFloat(a.val) || null;
+            else if (nombre === 'rFont') rpr.fuente = a.val || null;
+            else if (nombre === 'color') rpr.color = XlsxEstilos.colorRef(a);
+          }
+          if (nombre === 't') enT = true;
+          return;
+        }
+        if (nombre === 'author') { enAutor = true; autores.push(''); }
+        else if (nombre === 'comment' && lista.length < MAX_ELEMENTOS) {
+          const d = a.ref ? decodificarDireccion(a.ref) : null;
+          c = d ? { f: d.f, c: d.c, autor: autores[parseInt(a.authorId, 10)] || '', texto: '', runs: [], visible: false, ancla: null, ancho: null, alto: null, relleno: null, borde: null } : null;
+          if (c) lista.push(c);
+        } else if (nombre === 'text' && c) { enText = true; }
+      },
+      texto(t) { if (enAutor) autores[autores.length - 1] += t; else if (enT && run) run.texto += t; else if (enT && c && !enR) c.runs.push({ texto: t, negrita: false, cursiva: false, subrayado: false, tachado: false, tam: null, fuente: null, color: null }); },
+      cerrar(nombre) {
+        if (nombre === 'author') { enAutor = false; }
+        else if (nombre === 'rPr') rpr = null;
+        else if (nombre === 't') enT = false;
+        else if (nombre === 'r' && enR) { if (c) c.runs.push(run); run = null; enR = false; rpr = null; }
+        else if (nombre === 'text') { enText = false; if (c) c.texto = c.runs.map((r) => r.texto).join(''); }
+        else if (nombre === 'comment') c = null;
+      },
+    });
+    // el elemento author llega vacío si no hay texto: se rellena al abrir
+    // (autores se arma con un push por <author>)
+    if (vml && lista.length) {
+      const porCelda = new Map(lista.map((x) => [x.f * 16384 + x.c, x]));
+      let forma = null, enTxt = null;
+      XmlLigero.recorrer(vml, {
+        abrir(nombre, a) {
+          if (nombre === 'shape') { forma = { estilo: a.style || '', relleno: a.fillcolor || null, borde: a.strokecolor || null, esNota: false, visible: false, f: -1, c: -1, anclaje: null }; }
+          else if (!forma) return;
+          else if (nombre === 'ClientData') forma.esNota = a.ObjectType === 'Note';
+          else if (nombre === 'Visible') forma.visible = true;
+          else if (nombre === 'Anchor' || nombre === 'Row' || nombre === 'Column') enTxt = nombre;
+        },
+        texto(t) {
+          if (!forma || !enTxt) return;
+          if (enTxt === 'Anchor') forma.anclaje = (forma.anclaje || '') + t; else if (enTxt === 'Row') forma.f = parseInt(t, 10); else forma.c = parseInt(t, 10);
+        },
+        cerrar(nombre) {
+          if (nombre === 'Anchor' || nombre === 'Row' || nombre === 'Column') enTxt = null;
+          if (nombre !== 'shape' || !forma) return;
+          const x = forma.esNota ? porCelda.get(forma.f * 16384 + forma.c) : null;
+          if (x) {
+            x.visible = forma.visible || /visibility:\s*visible/i.test(forma.estilo);
+            const n = (forma.anclaje || '').split(',').map((v) => parseInt(v, 10));
+            if (n.length >= 8 && n.every(Number.isFinite)) {
+              const PX = 9525; // 1 px de pantalla en EMU
+              x.ancla = { tipo: 'dos', de: { col: n[0], dx: n[1] * PX, fila: n[2], dy: n[3] * PX }, a: { col: n[4], dx: n[5] * PX, fila: n[6], dy: n[7] * PX }, ext: null, pos: null, imprimible: true, oculto: false };
+            }
+            const w = /width:\s*([\d.]+)pt/i.exec(forma.estilo), h = /height:\s*([\d.]+)pt/i.exec(forma.estilo);
+            if (w) x.ancho = parseFloat(w[1]);
+            if (h) x.alto = parseFloat(h[1]);
+            const col = (v) => { const m = /^#([0-9a-f]{6})$/i.exec(v || ''); return m ? '#' + m[1].toUpperCase() : null; };
+            x.relleno = col(forma.relleno); x.borde = col(forma.borde);
+          }
+          forma = null;
+        },
+      });
+    }
+    return lista;
+  }
+
+  // Comentarios en hilo (Excel 365): xl/threadedComments/threadedCommentN.xml, con los nombres de xl/persons/person.xml.
+  // Devuelve [{ ref, f, c, entradas: [{ autor, fecha (ISO UTC), texto, respuesta }] }] en el orden del archivo (cada respuesta tras su comentario).
+  function leerHilos(xml, personas) {
+    const por = new Map();
+    let t = null, enText = false;
+    XmlLigero.recorrer(xml, {
+      abrir(nombre, a) {
+        if (nombre === 'threadedComment' && por.size < MAX_ELEMENTOS && a.ref) {
+          const d = decodificarDireccion(a.ref);
+          if (!d) { t = null; return; }
+          if (!por.has(a.ref)) por.set(a.ref, { ref: a.ref, f: d.f, c: d.c, entradas: [] });
+          t = { autor: personas.get(a.personId) || '', fecha: a.dT || null, texto: '', respuesta: !!a.parentId };
+          por.get(a.ref).entradas.push(t);
+        } else if (nombre === 'text' && t) enText = true;
+      },
+      texto(x) { if (enText && t) t.texto += x; },
+      cerrar(nombre) { if (nombre === 'text') enText = false; else if (nombre === 'threadedComment') t = null; },
+    });
+    return [...por.values()];
+  }
+  function leerPersonas(xml) {
+    const m = new Map();
+    if (xml) XmlLigero.recorrer(xml, { abrir(nombre, a) { if (nombre === 'person' && a.id) m.set(a.id, a.displayName || ''); } });
+    return m;
+  }
+
   function leerAnclas(texto) {
     const anclas = [];
     let profundidad = 0, a = null, nivelAncla = -1, modo = null, campo = '', primeraCNvPr = true;
@@ -816,6 +927,20 @@
       if (rv) hoja.partes.dibujoVml = rv.destino;
       const rc = hoja.relaciones.find((r) => r.tipo === 'comments');
       if (rc) hoja.partes.comentarios = rc.destino;
+      if (hoja.partes.comentarios) { // las notas: sus textos y, del VML, su cuadro
+        const tc = await textoDe(libro.zip, hoja.partes.comentarios);
+        const tv = hoja.partes.dibujoVml ? await textoDe(libro.zip, hoja.partes.dibujoVml) : null;
+        if (tc !== null) hoja.comentarios = leerComentarios(tc, tv);
+      }
+      const rh = hoja.relaciones.find((r) => r.tipo === 'threadedComment');
+      if (rh) { // los hilos reemplazan a la nota de relleno ("[Comentario encadenado]…") que Excel deja para las versiones viejas
+        const th = await textoDe(libro.zip, rh.destino);
+        if (th !== null) {
+          if (!libro._personas) libro._personas = leerPersonas(libro.rutaPersonas ? await textoDe(libro.zip, libro.rutaPersonas) : null);
+          hoja.hilos = leerHilos(th, libro._personas);
+          for (const h of hoja.hilos) { const n = hoja.comentarios.find((x) => x.f === h.f && x.c === h.c); if (n) { n.hilo = h; n.visible = false; } }
+        }
+      }
       if (hoja.partes.dibujo) { const t = await textoDe(libro.zip, hoja.partes.dibujo); if (t !== null) hoja.anclas = leerAnclas(t); }
       hoja.partes.tablas = hoja.relaciones.filter((r) => r.tipo === 'table').map((r) => r.destino);
       for (const ruta of hoja.partes.tablas.slice(0, MAX_TABLAS)) {
