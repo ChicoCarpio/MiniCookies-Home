@@ -7,7 +7,7 @@
 //  - el área útil es el papel menos los márgenes; la página se llena de a una columna/fila entera y la que no cabe pasa a la siguiente;
 //  - "ajustar a N × M páginas" toma la escala entera más grande (10-100) con la que caben en N de ancho y M de alto (0 = libre);
 //  - los saltos manuales cortan siempre; el área de impresión y las filas/columnas de título se leen de los nombres definidos.
-// No depende del navegador. Requiere xlsx-modelo.js y xlsx-geometria.js.
+// No depende del navegador. Requiere xlsx-modelo.js, xlsx-geometria.js y xlsx-fuentes-impresion.js (sin él usa las medidas de Calibri 11).
 //
 // Uso:
 //   const g = XlsxGeometria.crear(libro, hoja);
@@ -17,7 +17,7 @@
 
 (function () {
   const DPI = 600;
-  const PX_FILA = 6.05; // píxeles de impresora por píxel de pantalla, en vertical
+  const PX_FILA = 6.05; // píxeles de impresora por píxel de pantalla en vertical con Calibri 11 de letra Normal (el factor real depende de esa letra: ver factorFila)
   const PT_PX = 72 / DPI;
   const RECORTE = -8; // píxeles que Excel le quita al área útil (medido: 7 a 9)
   const PENALIZACION = 0.81; // "ajustar a" con N ≥ 2 páginas de ancho: por cada salto Excel cuenta como si sobrara esta fracción de la columna "típica" (media ponderada por ancho)
@@ -31,15 +31,32 @@
     25: [1584, 2448], 26: [2448, 3168], 27: [311.76, 623.64], 28: [459.24, 649.08], 30: [649.08, 918.48], 34: [498.84, 708.72],
     37: [279, 540], 43: [283.44, 419.52], 66: [1190.52, 1683.72], 70: [297.6, 419.52], 71: [680.28, 941.16],
   };
-  // Ancho del "0" como fracción del em (el mismo que usa xlsx-geometria para el MDW de pantalla).
-  const DIGITO = { calibri: 0.5068, 'calibri light': 0.5405, arial: 0.5562, 'times new roman': 0.5, 'courier new': 0.6, verdana: 0.6362, tahoma: 0.5459, 'segoe ui': 0.5498, consolas: 0.5498, cambria: 0.5513, georgia: 0.6123, 'arial narrow': 0.456, aptos: 0.546, 'aptos narrow': 0.4829 };
+  // Ancho del "0" como fracción del em, medido en el PDF de Excel a 600 dpi (medir-mdw-impresora.ps1).
+  const DIGITO = { calibri: 0.5068, 'calibri light': 0.5405, arial: 0.5562, 'times new roman': 0.5, 'courier new': 0.6, verdana: 0.6362, tahoma: 0.5459, 'segoe ui': 0.5498, consolas: 0.5498, cambria: 0.5513, georgia: 0.6123, 'arial narrow': 0.456, aptos: 0.5331 };  // Aptos Narrow (la letra de los libros nuevos de Excel) imprime con las mismas medidas que Calibri: sin entrada, cae en calibri (medido: igual en 7 tamaños)
   const ALIAS = { carlito: 'calibri', 'liberation sans': 'arial', arimo: 'arial', 'liberation serif': 'times new roman', tinos: 'times new roman', 'liberation mono': 'courier new', cousine: 'courier new', 'liberation sans narrow': 'arial narrow' };
 
-  // MDW de la impresora: la fuente se pide al tamaño redondeado en píxeles de 600 dpi y el dígito se redondea de nuevo.
+  // Fuente → clave de la tabla de medidas de impresión (xlsx-fuentes-impresion.js), o null si no la tiene.
+  function claveImpresion(nombre) {
+    if (typeof XlsxFuentesImpresion === 'undefined') return null;
+    const k = String(nombre || '').toLowerCase().trim();
+    const c = XlsxFuentesImpresion.conocida(k) ? k : ALIAS[k];
+    return c && XlsxFuentesImpresion.conocida(c) ? c : null;
+  }
+  // MDW de la impresora: lo medido en Excel para esa fuente y tamaño; si no hay, la fuente se pide al tamaño redondeado en píxeles de 600 dpi y el dígito se redondea de nuevo.
   function mdwImpresora(nombre, tam) {
+    const t = tam > 0 ? tam : 11, c = claveImpresion(nombre);
+    if (c) return Math.max(1, Math.round(XlsxFuentesImpresion.mdwPx(c, t)));
     const k = String(nombre || '').toLowerCase().trim();
     const d = DIGITO[k] || DIGITO[ALIAS[k]] || DIGITO.calibri;
-    return Math.max(1, Math.round(d * Math.round((tam > 0 ? tam : 11) * DPI / 72)));
+    return Math.max(1, Math.round(d * Math.round(t * DPI / 72)));
+  }
+  // Píxeles de impresora por píxel de pantalla en vertical: sale de la fuente Normal del libro (Calibri 11: 6,05; Aptos Narrow 11: 6,35; Arial 11: 6,00),
+  // la misma para filas automáticas y de alto fijo. Se mide como alto de la fila de esa fuente impresa / alto en pantalla (más 0,005: los píxeles se truncan).
+  function factorFila(nombre, tam) {
+    const t = tam > 0 ? tam : 11, c = claveImpresion(nombre);
+    if (!c) return PX_FILA;
+    const pantalla = XlsxGeometria.pxAlto(XlsxGeometria.altoTexto(nombre, t));
+    return pantalla > 0 ? XlsxFuentesImpresion.filaPx(c, t) / pantalla + 0.005 : PX_FILA;
   }
 
   function papelDe(imprimir) {
@@ -169,7 +186,8 @@
     const mdwImp = mdwImpresora(normal.nombre, normal.tam);
     const razonCol = mdwImp / g.mdw;
     const baseCol = (c) => Math.round(g.anchoCol(c) * razonCol);
-    const baseFila = (f) => Math.floor(g.altoFila(f) * PX_FILA + 1e-6);
+    const kFila = factorFila(normal.nombre, normal.tam);
+    const baseFila = (f) => Math.floor(g.altoFila(f) * kFila + 1e-6);
 
     const encFilas = opciones.encabezados ? (opc.altoEncabezado || 121) : 0;
     const encCols = opciones.encabezados ? (opc.anchoEncabezado || 173) : 0;
@@ -250,8 +268,8 @@
     } else if (pag.escala > 0) escala = Math.min(400, Math.max(10, pag.escala));
 
     const { paginas, cortado } = paginar(escala);
-    return { escala, papel, margenes, areas, opciones, titulos: { filas: tFilas, columnas: tCols }, paginas, cortado, anchoUtil, altoUtil, mdwImpresora: mdwImp };
+    return { escala, papel, margenes, areas, opciones, titulos: { filas: tFilas, columnas: tCols }, paginas, cortado, anchoUtil, altoUtil, mdwImpresora: mdwImp, kFila };
   }
 
-  globalThis.XlsxPaginas = { calcular, papelDe, mdwImpresora, PAPELES, cortar };
+  globalThis.XlsxPaginas = { calcular, papelDe, mdwImpresora, factorFila, PAPELES, cortar };
 })();

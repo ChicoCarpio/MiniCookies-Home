@@ -11,7 +11,8 @@
 //   const g = XlsxGeometria.crear(libro, hoja, { medirDigito: XlsxDibujo.medirDigito });
 //   XlsxDibujo.dibujarRango(ctx, libro, hoja, g, { f0, c0, f1, c1 }, { x: 0, y: 0, idioma: 'es', cuadricula: true });
 // Requiere xlsx-modelo.js, xlsx-estilos.js, xlsx-formato.js, xlsx-geometria.js y pptx-texto.js (fuentes con las medidas de Office);
-// para el formato condicional, también xlsx-expresion.js y xlsx-condicional.js (sin ellos se dibuja la hoja sin sus reglas).
+// para el formato condicional, también xlsx-expresion.js y xlsx-condicional.js, y xlsx-tablas-estilos.js y xlsx-tablas.js para los estilos de tabla
+// (sin ellos se dibuja la hoja sin esas reglas).
 
 (function () {
   const REJILLA = '#E0E0E0';
@@ -160,7 +161,6 @@
     dashDot: { o: [0], patron: [9, 3, 3, 3] }, mediumDashDot: { o: [-1, 0], patron: [9, 3, 3, 3] },
     dashDotDot: { o: [0], patron: [9, 3, 3, 3, 3, 3] }, mediumDashDotDot: { o: [-1, 0], patron: [9, 3, 3, 3, 3, 3] }, slantDashDot: { o: [-1, 0], patron: [9, 3, 3, 3] },
   };
-  const PESO = { hair: 1, dotted: 2, dashed: 3, thin: 4, dashDotDot: 5, dashDot: 6, mediumDashDotDot: 7, slantDashDot: 8, mediumDashDot: 9, mediumDashed: 10, medium: 11, double: 12, thick: 13 };
 
   // (x0,y0)-(x1,y1): línea horizontal o vertical; ini = coordenada de la hoja donde empieza (para anclar el patrón)
   function trazo(ctx, x0, y0, x1, y1, borde, color, ini) {
@@ -252,6 +252,14 @@
 
   // ---- Dibujo de un rango -----------------------------------------------------------------------------
 
+  // Los estilos de las tablas de una hoja, preparados una vez.
+  const TABLAS = new WeakMap();
+  function tablasDe(libro, hoja, op) {
+    if (op.tablas === false || typeof XlsxTablas === 'undefined' || !(hoja.tablas && hoja.tablas.length)) return null;
+    let t = TABLAS.get(hoja);
+    if (t === undefined) { t = XlsxTablas.preparar(libro, hoja); TABLAS.set(hoja, t); }
+    return t;
+  }
   // Las reglas condicionales de una hoja, preparadas una vez (guardan estadísticas de sus rangos).
   const REGLAS = new WeakMap();
   function condicionalDe(libro, hoja, op) {
@@ -270,6 +278,7 @@
     const TIPO = LibroXlsx.TIPO;
     const cond = condicionalDe(libro, hoja, op);
     if (cond) cond.reiniciar();
+    const tablas = tablasDe(libro, hoja, op);
     const anclaje = { tx: ((ox - g.x(r.c0)) % 8 + 8) % 8, ty: ((oy - g.y(r.f0)) % 8 + 8) % 8 };
     const filas = [], cols = [];
     for (let f = r.f0; f <= r.f1; f++) if (g.altoFila(f) > 0) filas.push(f);
@@ -310,9 +319,16 @@
       }
 
       // estilo de cada celda del rango
-      const aplicados = new WeakMap();
+      // el estilo de la celda, con el de su tabla debajo de su formato propio y el formato condicional encima de todo
+      const aplicados = new WeakMap(), aplicadosT = new WeakMap();
       const estiloDe = (f, c) => {
-        const xf = libro.estilos.xf(hoja.estiloDe(f, c));
+        let xf = libro.estilos.xf(hoja.estiloDe(f, c));
+        const t = tablas && tablas.para(f, c);
+        if (t) {
+          let rt = aplicadosT.get(t);
+          if (!rt) { rt = XlsxTablas.aplicar(libro, xf, t); aplicadosT.set(t, rt); }
+          xf = rt;
+        }
         const e = cond && cond.para(f, c);
         if (!e) return xf;
         let r = aplicados.get(e);
@@ -358,7 +374,8 @@
 
       // 3. bordes
       const lado = (f, c, cual) => { if (f < 0 || c < 0 || f > 1048575 || c > 16383) return null; const b = estiloDe(f, c).borde; return b && b[cual] ? b[cual] : null; };
-      const mejor = (a, b) => (!a ? b : !b ? a : (PESO[b.estilo] || 0) >= (PESO[a.estilo] || 0) ? b : a);
+      // la línea que comparten dos celdas: gana el borde más pesado, luego el más oscuro y luego el propio de la celda (no el de un estilo de tabla)
+      const mejor = (a, b) => XlsxEstilos.mejorBorde(b, a, (x) => libro.estilos.color(x)); // empate total: gana el de la derecha / de abajo (b)
       const bordes = (f, c, m) => {
         const f1 = m ? m.f1 : f, c1 = m ? m.c1 : c;
         const x0 = X(c), x1 = X(c1 + 1), y0 = Y(f), y1 = Y(f1 + 1);

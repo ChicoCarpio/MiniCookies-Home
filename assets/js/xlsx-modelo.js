@@ -349,6 +349,7 @@
       proteccion: null,
       formatosCondicionales: [],   // { rangos: [rango], reglas: [{ tipo, prioridad, dxf, … }] } — lectura completa en la etapa 6
       validaciones: [],            // { rangos, tipo, … }
+      tablas: [],                  // { nombre, ref: { f0, c0, f1, c1 }, encabezados (0|1), totales (0|1), estilo, primeraCol, ultimaCol, bandasFilas, bandasCols } (se llenan al cargar la hoja)
       partes: { dibujo: null, dibujoVml: null, tablas: [], comentarios: null, otras: [] },
       relaciones: [],
     };
@@ -646,6 +647,30 @@
     return libro;
   }
 
+  const MAX_TABLAS = 5000;
+  // Una tabla (xl/tables/tableN.xml): su rango, si lleva encabezado y totales, y las opciones de estilo.
+  function leerTabla(texto) {
+    let tabla = null;
+    XmlLigero.recorrer(texto, {
+      abrir(nombre, a) {
+        if (nombre === 'table' && !tabla) {
+          const ref = decodificarRango(a.ref || '');
+          if (!ref) return;
+          const encabezados = a.headerRowCount === undefined ? 1 : (parseInt(a.headerRowCount, 10) > 0 ? 1 : 0);
+          const totales = parseInt(a.totalsRowCount, 10) > 0 ? 1 : 0;
+          tabla = { nombre: a.name || a.displayName || '', ref, encabezados, totales, estilo: null, primeraCol: false, ultimaCol: false, bandasFilas: false, bandasCols: false };
+        } else if (nombre === 'tableStyleInfo' && tabla) {
+          tabla.estilo = a.name || null;
+          tabla.primeraCol = a.showFirstColumn === '1' || a.showFirstColumn === 'true';
+          tabla.ultimaCol = a.showLastColumn === '1' || a.showLastColumn === 'true';
+          tabla.bandasFilas = a.showRowStripes === '1' || a.showRowStripes === 'true';
+          tabla.bandasCols = a.showColumnStripes === '1' || a.showColumnStripes === 'true';
+        }
+      },
+    });
+    return tabla;
+  }
+
   async function cargarHoja(libro, indice) {
     if (libro._hojasCargadas.has(indice)) return libro._hojasCargadas.get(indice);
     const meta = libro.hojas[indice];
@@ -672,6 +697,11 @@
       const rc = hoja.relaciones.find((r) => r.tipo === 'comments');
       if (rc) hoja.partes.comentarios = rc.destino;
       hoja.partes.tablas = hoja.relaciones.filter((r) => r.tipo === 'table').map((r) => r.destino);
+      for (const ruta of hoja.partes.tablas.slice(0, MAX_TABLAS)) {
+        const t = await textoDe(libro.zip, ruta);
+        const tabla = t === null ? null : leerTabla(t);
+        if (tabla) hoja.tablas.push(tabla);
+      }
     }
     hoja.nombre = meta.nombre;
     hoja.indice = indice;

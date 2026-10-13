@@ -75,7 +75,7 @@
     const uPorPx = PT_PX / (U_PT * s);
     const razon = p.mdwImpresora / g.mdw;
     const ancho = (c) => (g.anchoCol(c) > 0 ? Math.round(Math.round(g.anchoCol(c) * razon) * s) * uPorPx : 0);
-    const alto = (f) => (g.altoFila(f) > 0 ? Math.round(Math.floor(g.altoFila(f) * 6.05 + 1e-6) * s) * uPorPx : 0);
+    const alto = (f) => (g.altoFila(f) > 0 ? Math.round(Math.floor(g.altoFila(f) * p.kFila + 1e-6) * s) * uPorPx : 0);
     const nC = Math.min(16384, hasta.c + 2), nF = Math.min(1048576, hasta.f + 2);
     const X = new Float64Array(nC + 1), Y = new Float64Array(nF + 1);
     for (let c = 0; c < nC; c++) X[c + 1] = X[c] + ancho(c);
