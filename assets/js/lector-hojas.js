@@ -121,6 +121,7 @@
         libro.hojas.forEach((h, k) => { if (h.tipo === 'hoja') libroLector.hojas.push({ nombre: h.nombre, indice: k, estado: h.estado }); });
         if (libroLector.hojas.length) {
           libroLector.motor = true;
+          if (!csv) libroLector.libroXlsx = libro;   // el libro del motor (solo lectura aquí: para editar se abre otro con LibroXlsx.abrir)
           libroLector.cargar = async (k) => hojaDelMotor(libro, await libro.cargarHoja(k), libroLector);
           return libroLector;
         }

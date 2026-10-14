@@ -53,6 +53,20 @@
   }
 
   // ---- edición en el lugar -----------------------------------------------------------------------------------------
+  // Predicado (f, c) → true para las celdas que editarCeldas rechazaría: encabezados de tabla y celdas de fórmulas matriciales o tablas de datos.
+  // `hoja` es la hoja ya leída (await libro.cargarHoja(i)). Sirve a las herramientas que quieren saltarlas en vez de fallar.
+  function celdasProtegidas(hoja) {
+    const rangos = [];
+    for (const t of hoja.tablas || []) {
+      if (t.encabezados) rangos.push({ f0: t.ref.f0, f1: t.ref.f0, c0: t.ref.c0, c1: t.ref.c1 });
+      if (t.totales) rangos.push({ f0: t.ref.f1, f1: t.ref.f1, c0: t.ref.c0, c1: t.ref.c1 });   // la fila de totales: su etiqueta también está en table.xml
+    }
+    for (const fx of hoja.celdas.formulas.values()) {
+      if ((fx.tipo === 'array' || fx.tipo === 'dataTable') && fx.ref) { const r = LibroXlsx.decodificarRango(fx.ref); if (r) rangos.push(r); }
+    }
+    return (f, c) => rangos.some((r) => f >= r.f0 && f <= r.f1 && c >= r.c0 && c <= r.c1);
+  }
+
   async function editarCeldas(libro, hoja, cambios) {
     const zip = libro.zip;
     const i = typeof hoja === 'number' ? hoja : libro.hojas.findIndex((h) => h.nombre === hoja);
@@ -74,9 +88,14 @@
     // encabezados de tabla: no se pueden cambiar sin tocar la tabla
     const modelo = await libro.cargarHoja(i);
     for (const t of modelo.tablas || []) {
-      if (!t.encabezados) continue;
-      const fil = mapa.get(t.ref.f0);
-      if (fil) for (const c of fil.keys()) if (c >= t.ref.c0 && c <= t.ref.c1) throw new ErrorEscritor('la celda ' + numeroACol(c) + (t.ref.f0 + 1) + ' es un encabezado de la tabla ' + t.nombre);
+      if (t.encabezados) {
+        const fil = mapa.get(t.ref.f0);
+        if (fil) for (const c of fil.keys()) if (c >= t.ref.c0 && c <= t.ref.c1) throw new ErrorEscritor('la celda ' + numeroACol(c) + (t.ref.f0 + 1) + ' es un encabezado de la tabla ' + t.nombre);
+      }
+      if (t.totales) {
+        const fil = mapa.get(t.ref.f1);
+        if (fil) for (const c of fil.keys()) if (c >= t.ref.c0 && c <= t.ref.c1) throw new ErrorEscritor('la celda ' + numeroACol(c) + (t.ref.f1 + 1) + ' es de la fila de totales de la tabla ' + t.nombre);
+      }
     }
 
     // celdas dentro del rango de una fórmula matricial (no solo la maestra): cambiarlas deja la matriz rota
@@ -249,7 +268,8 @@
     const codigos = [...formatos.keys()];
     const numFmts = `<numFmts count="${codigos.length}">${codigos.map((c, k) => `<numFmt numFmtId="${164 + k}" formatCode="${X.escAttr(c)}"/>`).join('')}</numFmts>`;
     const xfs = codigos.map((_, k) => `<xf numFmtId="${164 + k}" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>`).join('');
-    return ESTILOS_XML.replace('<fonts ', numFmts + '<fonts ').replace('<cellXfs count="6">', `<cellXfs count="${6 + codigos.length}">`).replace('</cellXfs>', xfs + '</cellXfs>');
+    // con funciones: un formato como "$"#,##0 lleva $& o $$, que replace con una cadena interpretaría
+    return ESTILOS_XML.replace('<fonts ', () => numFmts + '<fonts ').replace('<cellXfs count="6">', () => `<cellXfs count="${6 + codigos.length}">`).replace('</cellXfs>', () => xfs + '</cellXfs>');
   }
 
   // Un Date de JavaScript es un instante; Excel guarda la hora "de pared". Por defecto se toma la del reloj local del Date (new Date(2024, 2, 15) → 15/3/2024
@@ -356,5 +376,5 @@
     return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   }
 
-  globalThis.XlsxEscritor = { editarCeldas, crearLibro, nombreHoja, ErrorEscritor };
+  globalThis.XlsxEscritor = { editarCeldas, celdasProtegidas, crearLibro, nombreHoja, ErrorEscritor };
 })();

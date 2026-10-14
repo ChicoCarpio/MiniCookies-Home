@@ -39,6 +39,7 @@ window.i18nPagina = {
     'error-sin-columna': 'Tildá al menos una columna como criterio para detectar duplicados.',
     'mensaje-sin-duplicados': 'No se encontró ninguna fila duplicada en "{hoja}".',
     'mensaje-con-duplicados': 'Se encontraron y quitaron {n} fila(s) duplicada(s) en "{hoja}".',
+    'nota-formato': 'El archivo resultante guarda los valores de todas las hojas con su formato de número (fechas, monedas), los anchos de columna y las celdas combinadas. Las fórmulas pasan a ser sus valores, y se pierden colores, bordes, fuentes, imágenes y gráficos.',
     'error-procesar': 'No se pudo procesar el archivo'
   },
   en: {
@@ -62,6 +63,7 @@ window.i18nPagina = {
     'error-sin-columna': 'Check at least one column to use as the criteria to detect duplicates.',
     'mensaje-sin-duplicados': 'No duplicate rows were found in "{hoja}".',
     'mensaje-con-duplicados': '{n} duplicate row(s) were found and removed in "{hoja}".',
+    'nota-formato': 'The resulting file keeps the values of all sheets with their number format (dates, currencies), column widths and merged cells. Formulas become their values, and colors, borders, fonts, images and charts are lost.',
     'error-procesar': 'Couldn’t process the file'
   }
 };
@@ -121,6 +123,10 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <p style="color:var(--texto-suave);" data-i18n="nota-formato">El archivo resultante guarda los valores de todas las hojas con su formato de número (fechas, monedas), los anchos de columna y las celdas combinadas. Las fórmulas pasan a ser sus valores, y se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
+  </div>
 </main>
 
 <footer class="sitio">
@@ -130,6 +136,16 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -148,40 +164,45 @@ const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
 const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
 const nombreHojaVista = document.getElementById('nombreHojaVista');
 
+// LectorHojas (assets/js/lector-hojas.js) lee el archivo (motor propio, o SheetJS para .xlsb/.xls/.ods) y XlsxEscritor.crearLibro escribe
+// el resultado: valores, formato de número, anchos de columna y celdas combinadas.
 let libroActual = null;
-let columnasSeleccionadas = new Set(); // índices de columna a usar como criterio de duplicado
-
+let hojasLeidas = new Map();   // índice de hoja → hoja de LectorHojas
+let columnasSeleccionadas = new Set(); // posiciones de columna (desde 0 dentro del rango de la hoja) a usar como criterio de duplicado
+let numeroDeVista = 0;         // para descartar una vista previa que terminó cuando ya se pidió otra
 
 const FILAS_VISTA_PREVIA = 200; // más que suficiente para revisar visualmente sin trabar el navegador
 
-// Separa la hoja en: preámbulo (filas sueltas/título arriba de la tabla, se
-// devuelven tal cual y nunca se tocan), encabezado (si corresponde) y datos —
-// según la fila de inicio y el checkbox que elige el usuario.
-function separarHoja(filas) {
-  const inicioIdx = Math.max(1, parseInt(filaInicioTabla.value, 10) || 1) - 1;
-  const preambulo = filas.slice(0, inicioIdx);
-  const conEncabezado = tieneEncabezado.checked;
-  const encabezado = conEncabezado ? (filas[inicioIdx] || []) : null;
-  const datos = filas.slice(inicioIdx + (conEncabezado ? 1 : 0));
-  return { preambulo, encabezado, datos };
+async function hojaLeida(indice) {
+  if (!hojasLeidas.has(indice)) hojasLeidas.set(indice, await libroActual.cargar(indice));
+  return hojasLeidas.get(indice);
 }
 
-function mostrarVistaPrevia(nombreHoja) {
-  nombreHojaVista.textContent = nombreHoja;
-  const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombreHoja], { header: 1, raw: false, defval: '' });
-  bloqueVistaPrevia.style.display = 'block';
+// Divide las filas de la hoja en: preámbulo (filas sueltas o título arriba de la tabla, no se tocan), encabezado (si corresponde) y datos,
+// según la fila de inicio y el checkbox que elige el usuario. Devuelve posiciones dentro del rango de la hoja.
+function separarHoja(nfilas) {
+  const inicio = Math.min(nfilas, Math.max(1, parseInt(filaInicioTabla.value, 10) || 1) - 1);
+  const conEncabezado = tieneEncabezado.checked && inicio < nfilas;
+  return { preambulo: inicio, filaEncabezado: conEncabezado ? inicio : -1, primerDato: inicio + (conEncabezado ? 1 : 0) };
+}
 
-  if (filas.length === 0) {
+async function mostrarVistaPrevia(indiceHoja) {
+  const miNumero = ++numeroDeVista;
+  nombreHojaVista.textContent = libroActual.hojas.find(h => h.indice === indiceHoja).nombre;
+  bloqueVistaPrevia.style.display = 'block';
+  let hoja;
+  try { hoja = await hojaLeida(indiceHoja); } catch (error) { alert(t('error-leer') + ': ' + error.message); return; }
+  if (miNumero !== numeroDeVista) return;
+
+  if (hoja.nfilas === 0) {
     contenedorVistaPrevia.innerHTML = `<p style="padding:10px; color:var(--texto-suave);">${t('hoja-vacia')}</p>`;
     columnasSeleccionadas = new Set();
     return;
   }
 
-  const { preambulo, encabezado, datos } = separarHoja(filas);
-  const hoja = libroActual.Sheets[nombreHoja];
-  const columnaInicial = hoja['!ref'] ? XLSX.utils.decode_range(hoja['!ref']).s.c : 0;
-  const datosVisibles = datos.slice(0, FILAS_VISTA_PREVIA);
-  const cantidadColumnas = filas.reduce((max, fila) => Math.max(max, fila.length), 0);
+  const { preambulo, filaEncabezado, primerDato } = separarHoja(hoja.nfilas);
+  const encabezado = filaEncabezado >= 0 ? hoja.fila(filaEncabezado) : null;
+  const ultimaVisible = Math.min(hoja.nfilas, primerDato + FILAS_VISTA_PREVIA);
 
   // A pedido explícito del usuario, arranca todo destildado — el criterio
   // de duplicado lo tiene que elegir a propósito, no viene con la fila
@@ -190,32 +211,32 @@ function mostrarVistaPrevia(nombreHoja) {
 
   let html = '<table class="tabla-datos">';
 
-  if (preambulo.length > 0) {
+  if (preambulo > 0) {
     html += '<tbody>';
-    preambulo.forEach((fila) => {
+    for (let r = 0; r < preambulo; r++) {
       html += '<tr class="fila-preambulo">';
-      for (let i = 0; i < cantidadColumnas; i++) html += `<td>${escaparHtml(fila[i])}</td>`;
+      hoja.fila(r).forEach((texto) => { html += `<td>${escaparHtml(texto)}</td>`; });
       html += '</tr>';
-    });
+    }
     html += '</tbody>';
   }
 
   html += '<thead><tr>';
-  for (let i = 0; i < cantidadColumnas; i++) {
-    const letra = XLSX.utils.encode_col(columnaInicial + i);
+  for (let i = 0; i < hoja.ncols; i++) {
+    const letra = LibroXlsx.numeroACol(hoja.c0 + i);
     const nombreColumna = encabezado && encabezado[i] ? String(encabezado[i]) : t('columna-defecto').replace('{letra}', letra);
     html += `<th><label><input type="checkbox" class="chk-columna" data-columna="${i}">${escaparHtml(nombreColumna)}</label>`;
     if (encabezado && encabezado[i]) html += `<div class="letra-columna">${letra}</div>`;
     html += '</th>';
   }
   html += '</tr></thead><tbody>';
-  datosVisibles.forEach((fila) => {
+  for (let r = primerDato; r < ultimaVisible; r++) {
     html += '<tr>';
-    for (let i = 0; i < cantidadColumnas; i++) html += `<td>${escaparHtml(fila[i])}</td>`;
+    hoja.fila(r).forEach((texto) => { html += `<td>${escaparHtml(texto)}</td>`; });
     html += '</tr>';
-  });
+  }
   html += '</tbody></table>';
-  if (datos.length > FILAS_VISTA_PREVIA) {
+  if (hoja.nfilas - primerDato > FILAS_VISTA_PREVIA) {
     html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">${t('mostrando-primeras').replace('{n}', FILAS_VISTA_PREVIA)}</p>`;
   }
   contenedorVistaPrevia.innerHTML = html;
@@ -230,18 +251,11 @@ function mostrarVistaPrevia(nombreHoja) {
 }
 
 function hojaActualSeleccionada() {
-  return campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
+  return campoHoja.style.display !== 'none' ? Number(selectorHoja.value) : libroActual.hojas[0].indice;
 }
 
 function actualizarVistaPreviaSiHayArchivo() {
   if (libroActual) mostrarVistaPrevia(hojaActualSeleccionada());
-}
-
-function mostrarArchivo(archivo) {
-  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
-  botonProcesar.disabled = false;
-  resultado.classList.remove('visible');
-  mensaje.style.display = 'none';
 }
 
 function elegirArchivo(listaFileList) {
@@ -251,17 +265,25 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
+let archivoActual = null;
+
 async function cargarLibro(archivo) {
+  let libro;
   try {
-    // cellNF: conserva el formato de número de cada celda (fechas, monedas).
-    libroActual = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });
+    libro = await LectorHojas.abrir(archivo);
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
-  mostrarArchivo(archivo);
-  if (libroActual.SheetNames.length > 1) {
-    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
+  libroActual = libro;
+  archivoActual = archivo;
+  hojasLeidas = new Map();
+  listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  botonProcesar.disabled = false;
+  resultado.classList.remove('visible');
+  mensaje.style.display = 'none';
+  if (libro.hojas.length > 1) {
+    selectorHoja.innerHTML = libro.hojas.map(h => `<option value="${h.indice}">${escaparHtml(h.nombre)}</option>`).join('');
     campoHoja.style.display = 'flex';
   } else {
     campoHoja.style.display = 'none';
@@ -274,69 +296,77 @@ selectorHoja.addEventListener('change', actualizarVistaPreviaSiHayArchivo);
 tieneEncabezado.addEventListener('change', actualizarVistaPreviaSiHayArchivo);
 filaInicioTabla.addEventListener('change', actualizarVistaPreviaSiHayArchivo);
 
-botonProcesar.addEventListener('click', () => {
-  try {
-    const nombreHoja = hojaActualSeleccionada();
-    const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombreHoja], { header: 1, raw: false, defval: '' });
-    if (filas.length === 0) throw new Error(t('error-sin-datos'));
+// Las celdas combinadas ('A1:B2', en la hoja) de una hoja a la que se le quitaron filas: la que contiene una fila quitada se descarta; las demás
+// suben tantas filas como se quitaron por encima de ellas.
+function combinadasTrasQuitar(combinadas, quitadasAbsolutas) {
+  const orden = [...quitadasAbsolutas].sort((a, b) => a - b);
+  const quitadasHasta = (fila) => { let n = 0; while (n < orden.length && orden[n] < fila) n++; return n; };
+  const salida = [];
+  for (const ref of combinadas) {
+    const d = LibroXlsx.decodificarRango(ref);
+    if (!d) continue;
+    const contiene = orden.some((f) => f >= d.f0 && f <= d.f1);
+    if (contiene) continue;
+    const baja = quitadasHasta(d.f0);
+    salida.push(LibroXlsx.numeroACol(d.c0) + (d.f0 - baja + 1) + ':' + LibroXlsx.numeroACol(d.c1) + (d.f1 - baja + 1));
+  }
+  return salida;
+}
 
+botonProcesar.addEventListener('click', async () => {
+  botonProcesar.disabled = true;
+  try {
+    const indiceElegido = hojaActualSeleccionada();
+    const hojaElegida = await hojaLeida(indiceElegido);
+    if (hojaElegida.nfilas === 0) throw new Error(t('error-sin-datos'));
     if (columnasSeleccionadas.size === 0) throw new Error(t('error-sin-columna'));
 
-    const { preambulo, encabezado, datos } = separarHoja(filas);
+    const { filaEncabezado, primerDato } = separarHoja(hojaElegida.nfilas);
     const indicesClave = [...columnasSeleccionadas].sort((a, b) => a - b);
-    const primerDato = preambulo.length + (encabezado ? 1 : 0);
 
-    // Las filas se comparan por su texto formateado (lo que se ve en Excel),
-    // pero se copian las celdas originales, con su tipo y formato de número:
-    // antes números y fechas quedaban como texto en el resultado.
-    const claveDe = (fila) => JSON.stringify(indicesClave.map((c) => fila[c] ?? ''));
+    // Las filas se comparan por su texto formateado (lo que se ve en Excel), pero se copian los valores originales, con su formato
+    // de número: números y fechas siguen siendo números y fechas.
+    const claveDe = (r) => JSON.stringify(indicesClave.map((c) => hojaElegida.texto(r, c)));
     const vistas = new Set();
     // El encabezado cuenta como primera aparición: así se quitan sus
     // repeticiones en medio de los datos (el caso principal de esta herramienta).
-    if (encabezado) vistas.add(claveDe(encabezado));
-    const repetidas = new Set();
-    datos.forEach((fila, i) => {
-      const clave = claveDe(fila);
-      if (vistas.has(clave)) repetidas.add(primerDato + i);
+    if (filaEncabezado >= 0) vistas.add(claveDe(filaEncabezado));
+    const repetidas = new Set();   // posiciones dentro del rango
+    for (let r = primerDato; r < hojaElegida.nfilas; r++) {
+      const clave = claveDe(r);
+      if (vistas.has(clave)) repetidas.add(r);
       else vistas.add(clave);
-    });
+    }
     const duplicadas = repetidas.size;
 
-    const hojaOriginal = libroActual.Sheets[nombreHoja];
-    const rango = XLSX.utils.decode_range(hojaOriginal['!ref']);
-    const hojaNueva = {};
-    let filaSalida = rango.s.r;
-    filas.forEach((fila, i) => {
-      if (repetidas.has(i)) return;
-      copiarFilaDeHoja(hojaOriginal, rango.s.r + i, hojaNueva, filaSalida, rango.s.c, rango.e.c);
-      filaSalida++;
-    });
-    hojaNueva['!ref'] = XLSX.utils.encode_range({ s: rango.s, e: { r: Math.max(filaSalida - 1, rango.s.r), c: rango.e.c } });
-    if (hojaOriginal['!cols']) hojaNueva['!cols'] = hojaOriginal['!cols'];
-    // Celdas combinadas: se conservan las que están antes de la primera
-    // fila quitada (título, encabezado), que no cambian de lugar.
-    const primeraQuitada = duplicadas > 0 ? rango.s.r + Math.min(...repetidas) : Infinity;
-    if (hojaOriginal['!merges']) hojaNueva['!merges'] = hojaOriginal['!merges'].filter((m) => m.e.r < primeraQuitada);
-
-    // Solo se limpia la hoja elegida — las demás hojas del archivo se
-    // conservan tal cual, en el mismo orden (antes se perdían: el archivo
-    // resultante solo tenía la hoja procesada).
-    const libroNuevo = XLSX.utils.book_new();
-    libroActual.SheetNames.forEach((nombre) => {
-      XLSX.utils.book_append_sheet(libroNuevo, nombre === nombreHoja ? hojaNueva : libroActual.Sheets[nombre], nombre);
-    });
-
-    const bytesFinales = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
+    // Solo se limpia la hoja elegida — las demás hojas del archivo se conservan, en el mismo orden.
+    const hojasSalida = [];
+    for (const h of libroActual.hojas) {
+      const hoja = await hojaLeida(h.indice);
+      let filas = hoja.matrizValores(true);
+      let combinadas = hoja.combinadas;
+      if (h.indice === indiceElegido && duplicadas > 0) {
+        const absolutas = new Set([...repetidas].map((r) => hoja.f0 + r));
+        filas = filas.filter((_, f) => !absolutas.has(f));
+        combinadas = combinadasTrasQuitar(combinadas, absolutas);
+      }
+      hojasSalida.push({ nombre: h.nombre, filas, anchos: hoja.anchos, combinadas });
+    }
+    const bytesFinales = await XlsxEscritor.crearLibro(hojasSalida);
+    const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
+    enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}-sin-duplicados.xlsx`;
     resultado.classList.add('visible');
 
+    const nombreHoja = libroActual.hojas.find(h => h.indice === indiceElegido).nombre;
     mensaje.textContent = duplicadas === 0
       ? t('mensaje-sin-duplicados').replace('{hoja}', nombreHoja)
       : t('mensaje-con-duplicados').replace('{n}', duplicadas).replace('{hoja}', nombreHoja);
     mensaje.style.display = 'block';
   } catch (error) {
     alert(t('error-procesar') + ': ' + error.message);
+  } finally {
+    botonProcesar.disabled = false;
   }
 });
 </script>
