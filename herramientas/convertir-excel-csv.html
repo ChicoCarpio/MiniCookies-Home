@@ -190,9 +190,10 @@ botonConvertir.addEventListener('click', async () => {
     const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
 
     if (esCsv) {
-      // Los números del CSV pasan a números de Excel (los códigos como "00123" y las fechas quedan como texto).
+      // Los números del CSV pasan a números de Excel (los códigos como "00123" y las fechas quedan como texto). Desde A1: las líneas y
+      // columnas vacías del principio se conservan, como en el CSV.
       const hoja = await libro.cargar(libro.hojas[0].indice);
-      const bytesXlsx = await XlsxEscritor.crearLibro([{ nombre: t('nombre-hoja-defecto'), filas: hoja.matrizValores() }]);
+      const bytesXlsx = await XlsxEscritor.crearLibro([{ nombre: t('nombre-hoja-defecto'), filas: hoja.matrizValores(true) }]);
       const blob = new Blob([bytesXlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       enlaceDescarga.href = URL.createObjectURL(blob);
       enlaceDescarga.download = `${nombreBase}.xlsx`;

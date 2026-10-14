@@ -198,15 +198,23 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
+let numeroDeCarga = 0;   // si se elige otro archivo mientras se lee uno, el primero se descarta
+
 async function cargarLibro(archivo) {
+  const miNumero = ++numeroDeCarga;
+  // Se lee en variables locales: si falla o llega otro archivo a medias, libroActual y hojasCargadas siguen siendo del mismo libro.
+  let libro, hojas;
   try {
-    libroActual = await LectorHojas.abrir(archivo);
-    hojasCargadas = [];
-    for (const h of libroActual.hojas) hojasCargadas.push(await libroActual.cargar(h.indice));
+    libro = await LectorHojas.abrir(archivo);
+    hojas = [];
+    for (const h of libro.hojas) hojas.push(await libro.cargar(h.indice));
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    if (miNumero === numeroDeCarga) alert(t('error-leer') + ': ' + error.message);
     return;
   }
+  if (miNumero !== numeroDeCarga) return;
+  libroActual = libro;
+  hojasCargadas = hojas;
   hojasSeleccionadas = new Set(libroActual.hojas.map((_, k) => k));
   renderizarLista();
   botonCombinar.disabled = hojasSeleccionadas.size < 2;

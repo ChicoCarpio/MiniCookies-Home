@@ -24,13 +24,13 @@ window.i18nPagina = {
     'limitaciones-titulo': 'Limitaciones',
     'limitaciones-item': 'No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.',
     'error-sin-datos': 'No se encontraron datos legibles en ninguna hoja.',
-    'mensaje-todo-ok': '⚠️ Reparado con el nivel 2: el libro se volvió a armar con los datos (valores, fórmulas y formatos de número). Se perdieron colores, bordes, fuentes, imágenes y gráficos.',
+    'mensaje-todo-ok': '⚠️ Reparado con el nivel 2: el libro se volvió a armar con los datos (valores y formatos de número; las fórmulas pasan a sus valores). Se perdieron colores, bordes, fuentes, imágenes y gráficos.',
     'mensaje-parcial': '⚠️ Reparado con el nivel 2: se recuperaron {n} de {total} hojas, solo con los datos (se perdieron colores, bordes, fuentes, imágenes y gráficos).',
     'mensaje-sano': '✅ El archivo no tiene partes dañadas: no hace falta repararlo (el archivo de abajo es igual al original). Si Excel igual no lo abre, podés reconstruirlo solo con los datos.',
     'mensaje-nivel1': '✅ Reparado con el nivel 1: se quitaron las hojas dañadas ({hojas}) y el resto del libro quedó intacto, con su formato, gráficos e imágenes.',
     'boton-forzar': 'Reconstruir solo con los datos (nivel 2)',
     'error-reparar': 'No se pudo reparar el archivo',
-    'nota-formato': 'Nivel 1: se revisa cada parte del archivo y se quitan solo las hojas dañadas; el resto queda intacto (formato, gráficos, imágenes, tablas). Nivel 2, si el 1 no alcanza: el libro se vuelve a armar con los datos (valores, fórmulas y formatos de número) y se pierden colores, bordes, fuentes, imágenes y gráficos.'
+    'nota-formato': 'Nivel 1: se revisa cada parte del archivo y se quitan solo las hojas dañadas; el resto queda intacto (formato, gráficos, imágenes, tablas). Nivel 2, si el 1 no alcanza: el libro se vuelve a armar con los datos (valores y formatos de número; las fórmulas pasan a sus valores) y se pierden colores, bordes, fuentes, imágenes y gráficos.'
   },
   en: {
     'titulo-pagina': 'Repair Excel Free — Mini Cookies',
@@ -45,13 +45,13 @@ window.i18nPagina = {
     'limitaciones-titulo': 'Limitations',
     'limitaciones-item': 'There’s no "text-only rescue" like there is for Word/PDF: if no row in the file can be read, there’s no reliable way to rescue unstructured tabular data — it reports that it couldn’t be repaired instead of making up a result.',
     'error-sin-datos': 'No readable data was found on any sheet.',
-    'mensaje-todo-ok': '⚠️ Repaired with level 2: the workbook was rebuilt from its data (values, formulas and number formats). Colors, borders, fonts, images and charts were lost.',
+    'mensaje-todo-ok': '⚠️ Repaired with level 2: the workbook was rebuilt from its data (values and number formats; formulas become their values). Colors, borders, fonts, images and charts were lost.',
     'mensaje-parcial': '⚠️ Repaired with level 2: {n} of {total} sheets were recovered, data only (colors, borders, fonts, images and charts were lost).',
     'mensaje-sano': '✅ The file has no damaged parts: it doesn’t need repairing (the file below is the same as the original). If Excel still won’t open it, you can rebuild it from its data only.',
     'mensaje-nivel1': '✅ Repaired with level 1: the damaged sheets were removed ({hojas}) and the rest of the workbook was kept intact, with its formatting, charts and images.',
     'boton-forzar': 'Rebuild from data only (level 2)',
     'error-reparar': 'Couldn’t repair the file',
-    'nota-formato': 'Level 1: each part of the file is checked and only the damaged sheets are removed; the rest stays intact (formatting, charts, images, tables). Level 2, if level 1 isn’t enough: the workbook is rebuilt from its data (values, formulas and number formats) and colors, borders, fonts, images and charts are lost.'
+    'nota-formato': 'Level 1: each part of the file is checked and only the damaged sheets are removed; the rest stays intact (formatting, charts, images, tables). Level 2, if level 1 isn’t enough: the workbook is rebuilt from its data (values and number formats; formulas become their values) and colors, borders, fonts, images and charts are lost.'
   }
 };
 </script>
@@ -83,7 +83,7 @@ window.i18nPagina = {
       <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Reparar</button>
     </div>
 
-    <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
+    <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores y formatos de número; las fórmulas pasan a sus valores (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
     <p id="mensajeNivel" style="display:none; font-size:0.9rem;"></p>
     <div class="controles" id="controlesForzar" style="display:none;">
       <button class="boton" id="botonForzar" type="button" style="background:#64748b;" data-i18n="boton-forzar">Reconstruir solo con los datos (nivel 2)</button>

@@ -26,6 +26,17 @@
     return { idioma: en ? 'en' : 'es', decimal: en ? '.' : ',', miles: en ? ',' : '.' };
   }
 
+  // Los errores que se pueden escribir en una celda (los de XlsxEscritor). Uno desconocido (#SPILL! de otro programa, o un libro hostil) queda
+  // como texto: crearLibro lo rechazaría y la herramienta entera fallaría por una celda.
+  const ERRORES = new Set(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA']);
+
+  // Un número con formato de fecha de un libro con base 1904 se pasa a la base 1900 (la de crearLibro), salvo que el formato sea solo de horas
+  // ("h:mm", "[h]:mm"): una duración de 1,5 días es 1,5 en las dos bases (sumarle 1462 daría 35124:00 en vez de 36:00).
+  function tieneCalendario(codigo) {
+    const s = codigo.replace(/"[^"]*"|\\./g, '').replace(/\[(h+|m+|s+)\]/gi, '$1').replace(/\[[^\]]*\]/g, '').replace(/AM\/PM|A\/P/gi, '');
+    return /[ydeg]/i.test(s) || (/m/i.test(s) && !/[hs]/i.test(s));
+  }
+
   const VACIA = { f0: 0, c0: 0, anchos: [], combinadas: [], nfilas: 0, ncols: 0, texto: () => '', fila: () => [], valor: () => undefined, formula: () => null, matrizTextos: () => [], matrizValores: () => [] };
 
   function completar(h) {
@@ -68,10 +79,10 @@
         const tipo = C.tipo[i], v = C.valor[i];
         if (tipo === T.vacio) return undefined;
         if (tipo === T.texto || tipo === T.logico) return v;
-        if (tipo === T.error) { const e = errores[v] || String(v); return /^#/.test(e) ? { error: e } : e; }
+        if (tipo === T.error) { const e = errores[v] || String(v); return ERRORES.has(e) ? { error: e } : e; }
         // número: un CSV conserva el texto original ("1.234,50") pero el valor es el número; el formato viene del estilo
         const codigo = libro.estilos.xf(C.estilo[i]).formato;
-        const fecha1904 = libro.fecha1904 && codigo && XlsxFormato.esFecha(codigo);
+        const fecha1904 = libro.fecha1904 && codigo && XlsxFormato.esFecha(codigo) && tieneCalendario(codigo);
         const n = fecha1904 ? v + 1462 : v;
         return codigo && codigo !== 'General' ? { valor: n, formato: codigo } : n;
       },
@@ -80,7 +91,7 @@
   }
 
   // ---- SheetJS (respaldo) ------------------------------------------------------------------------------------------
-  function hojaDeSheetJs(hojaSheetJs, libroLector) {
+  function hojaDeSheetJs(hojaSheetJs, libroLector, fecha1904) {
     const ref = hojaSheetJs['!ref'];
     if (!ref) return completar(Object.assign({}, VACIA));
     const rango = XLSX.utils.decode_range(ref);
@@ -101,8 +112,12 @@
       valor(r, c) {
         const x = celda(r, c);
         if (!x || x.v === undefined || x.v === null || x.t === 'z') return undefined;
-        if (x.t === 'e') return { error: x.w && /^#/.test(x.w) ? x.w : '#VALUE!' };
-        if (x.t === 'n') return x.z && x.z !== 'General' ? { valor: x.v, formato: x.z } : x.v;
+        if (x.t === 'e') return { error: x.w && ERRORES.has(x.w) ? x.w : '#VALUE!' };
+        if (x.t === 'n') {
+          if (!x.z || x.z === 'General') return x.v;
+          const z = String(x.z);   // SheetJS deja el número de serie en la base del libro: un .xls de base 1904 se pasa a 1900, como en el motor
+          return { valor: fecha1904 && XlsxFormato.esFecha(z) && tieneCalendario(z) ? x.v + 1462 : x.v, formato: z };
+        }
         if (x.t === 'd') return x.v;
         return x.t === 'b' ? !!x.v : String(x.v);
       },
@@ -135,7 +150,8 @@
     const sheetjs = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });   // cellNF: formato de número; cellStyles: anchos
     libroLector.comaDecimalCsv = sheetjs.comaDecimalCsv;
     libroLector.hojas = sheetjs.SheetNames.map((nombre, k) => ({ nombre, indice: k, estado: 'visible' }));
-    libroLector.cargar = async (k) => hojaDeSheetJs(sheetjs.Sheets[sheetjs.SheetNames[k]], libroLector);
+    const fecha1904 = !!(sheetjs.Workbook && sheetjs.Workbook.WBProps && sheetjs.Workbook.WBProps.date1904);
+    libroLector.cargar = async (k) => hojaDeSheetJs(sheetjs.Sheets[sheetjs.SheetNames[k]], libroLector, fecha1904);
     return libroLector;
   }
 

@@ -541,6 +541,9 @@
   // Nombres de las hojas que Excel no abriría sin reparar porque algo que usan ya no está en el paquete: la propia hoja, o cualquier parte a la
   // que llegan por relaciones (dibujo, tabla, tabla dinámica y su caché, comentarios…) hasta 4 niveles. Una relación a otro libro (externa) no cuenta.
   // Sirve a "reparar": quita esas hojas con reordenarHojas y el resto del libro queda como estaba.
+  // Sin estas partes Excel abre el libro sin reparar (medido 2026-10-13 con CorruptLoad=0): la configuración de impresora, los registros de la caché
+  // dinámica y una imagen (también Target="NULL"). Quitar la hoja por eso perdería sus datos.
+  const PRESCINDIBLES = new Set(['printerSettings', 'pivotCacheRecords', 'image']);
   async function hojasConPartesRotas(zip) {
     const principal = (await leerRels(zip, '')).find((r) => r.tipo === R_OFICINA);
     const rutaLibro = principal ? principal.destino : 'xl/workbook.xml';
@@ -559,7 +562,7 @@
         vistos.add(parte);
         if (!zip.file(real(zip, parte))) { rota = true; return; }
         if (nivel >= 4) return;
-        for (const r of await leerRels(zip, parte)) if (!r.externa) await visitar(r.destino, nivel + 1);
+        for (const r of await leerRels(zip, parte)) if (!r.externa && !PRESCINDIBLES.has(r.tipo)) await visitar(r.destino, nivel + 1);
       };
       await visitar(rel.destino, 0);
       if (rota) rotas.push(h.attrs.name);

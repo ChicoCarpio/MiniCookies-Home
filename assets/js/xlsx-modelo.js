@@ -712,7 +712,11 @@
     XmlLigero.recorrer(textoLibro, {
       abrir(nombre, a) {
         switch (nombre) {
-          case 'workbookPr': libro.fecha1904 = a.date1904 === '1' || a.date1904 === 'true'; libro.propiedades.codeName = a.codeName || null; break;
+          case 'workbookPr':
+            // solo el primero: Excel 2013+ escribe otro <x15:workbookPr> dentro de extLst (sin date1904) que no debe pisar la base de fechas
+            if (libro._workbookPr) break;
+            libro._workbookPr = true;
+            libro.fecha1904 = a.date1904 === '1' || a.date1904 === 'true'; libro.propiedades.codeName = a.codeName || null; break;
           case 'workbookView': libro.vistaLibro = { hojaActiva: parseInt(a.activeTab, 10) || 0, primeraHoja: parseInt(a.firstSheet, 10) || 0 }; break;
           case 'sheet': {
             const rel = relPorId.get(a.id);

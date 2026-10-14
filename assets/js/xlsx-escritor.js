@@ -64,7 +64,14 @@
     for (const fx of hoja.celdas.formulas.values()) {
       if ((fx.tipo === 'array' || fx.tipo === 'dataTable') && fx.ref) { const r = LibroXlsx.decodificarRango(fx.ref); if (r) rangos.push(r); }
     }
-    return (f, c) => rangos.some((r) => f >= r.f0 && f <= r.f1 && c >= r.c0 && c <= r.c1);
+    // por fila: con miles de fórmulas matriciales de una celda, recorrer todos los rangos por cada celda consultada era cuadrático
+    const porFila = new Map(), altos = [];
+    for (const r of rangos) {
+      if (r.f1 - r.f0 >= 64) { altos.push(r); continue; }
+      for (let f = r.f0; f <= r.f1; f++) { if (!porFila.has(f)) porFila.set(f, []); porFila.get(f).push(r); }
+    }
+    const dentro = (f, c) => (r) => f >= r.f0 && f <= r.f1 && c >= r.c0 && c <= r.c1;
+    return (f, c) => { const l = porFila.get(f); return (!!l && l.some(dentro(f, c))) || altos.some(dentro(f, c)); };
   }
 
   async function editarCeldas(libro, hoja, cambios) {
