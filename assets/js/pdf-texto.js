@@ -2,7 +2,7 @@
 // Helpers compartidos de "texto plano -> PDF", "texto de un PDF con sus
 // renglones y párrafos" y "extraer texto de un .pptx".
 // Requiere que la página ya haya cargado pdf-lib (global PDFLib) y, para
-// extraerTextoPowerPoint, JSZip (global JSZip).
+// extraerTextoPowerPoint, ZipPropio (global ZipPropio).
 
 // Las fuentes estándar de PDF (Helvetica) solo traen los caracteres de
 // Windows-1252: un solo emoji, una flecha "→" o un ideograma hacían fallar
@@ -244,7 +244,7 @@ function unirRenglonesDeParrafo(parrafo) {
 }
 
 async function extraerTextoPowerPoint(archivo) {
-  const zip = await JSZip.loadAsync(archivo);
+  const zip = await ZipPropio.loadAsync(archivo);
   const nombresDiapositivas = Object.keys(zip.files)
     .filter(nombre => /^ppt\/slides\/slide\d+\.xml$/.test(nombre))
     .sort((a, b) => parseInt(a.match(/slide(\d+)/)[1], 10) - parseInt(b.match(/slide(\d+)/)[1], 10));

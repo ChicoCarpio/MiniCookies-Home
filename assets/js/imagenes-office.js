@@ -10,9 +10,9 @@
 //  - Otros que el navegador sí abre (BMP, WebP...) pasan a PNG.
 //  - Lo que no se puede abrir (WMF, TIFF) se devuelve tal cual.
 //
-// Requiere: emf.js (y JSZip para docxConImagenesComunes).
+// Requiere: emf.js (y ZipPropio para docxConImagenesComunes).
 // Uso: const { bytes, extension, tipo } = await ImagenesOffice.aFormatoComun(bytes, contentType);
-//      const docxLimpio = await ImagenesOffice.docxConImagenesComunes(arrayBuffer); // requiere JSZip
+//      const docxLimpio = await ImagenesOffice.docxConImagenesComunes(arrayBuffer); // requiere ZipPropio
 
 (function () {
   function tipoDe(bytes, contentType) {
@@ -66,9 +66,9 @@
   // Un .docx con sus imágenes en formato común: cada EMF (u otro que el
   // navegador no muestra) de word/media/ pasa a PNG, y se actualizan las
   // relaciones (*.rels) y [Content_Types].xml. Lo que se dibuje después
-  // (docx-preview, mammoth) ve un Word normal. Requiere JSZip.
+  // (docx-preview, mammoth) ve un Word normal. Requiere ZipPropio.
   async function docxConImagenesComunes(entrada) {
-    const zip = await JSZip.loadAsync(entrada);
+    const zip = await ZipPropio.loadAsync(entrada);
     const cambios = new Map(); // 'media/image1.emf' → 'media/image1.png'
     for (const ruta of Object.keys(zip.files).filter((n) => /^word\/media\/[^/]+$/.test(n))) {
       const extension = ruta.split('.').pop().toLowerCase();

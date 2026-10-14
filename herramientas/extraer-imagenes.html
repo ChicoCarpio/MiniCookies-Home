@@ -87,7 +87,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -177,7 +177,7 @@ botonExtraer.addEventListener('click', async () => {
   try {
     const bytes = await archivoActual.arrayBuffer();
     const pdf = await abrirPdf(bytes);
-    const zip = new JSZip();
+    const zip = new ZipPropio();
     let contadorImagenes = 0;
     const imagenesComunesVistas = new Set();
     const huellasVistas = new Set();

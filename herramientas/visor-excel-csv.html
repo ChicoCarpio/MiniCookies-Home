@@ -83,6 +83,13 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -92,7 +99,10 @@ const listaArchivo = document.getElementById('listaArchivo');
 const pestanas = document.getElementById('pestanas');
 const contenedorTabla = document.getElementById('contenedorTabla');
 
-let libroActual = null;
+// LectorHojas (assets/js/lector-hojas.js) lee .xlsx, .xlsm y .csv con el motor propio y el resto con SheetJS; cada fila se arma
+// con el texto que muestra Excel solo cuando se ve.
+let hojasActuales = [];   // [{ nombre, abrir: async () => hoja de LectorHojas }]
+let numeroDeHoja = 0;     // para descartar una hoja que terminó de cargar cuando ya se eligió otra
 
 function esArchivoValido(archivo) {
   return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
@@ -110,12 +120,13 @@ const SOBRESCANEO = 10; // filas extra renderizadas arriba/abajo de lo visible, 
 const ALTURA_FILA_ESTIMADA = 32; // se corrige apenas se puede medir una fila real
 
 let columnasActuales = [];
-let filasDatosActuales = [];
+let filasDatosActuales = { length: 0, fila: () => [] };   // length = filas de datos; fila(i) = textos de la fila i
 let alturaFilaMedida = ALTURA_FILA_ESTIMADA;
 let ventanaRenderizada = { inicio: -1, fin: -1 };
 let renderizadoPendiente = false;
 
 function filaHtml(indiceGlobal, valoresFila) {
+  valoresFila = valoresFila();
   const clase = indiceGlobal % 2 === 0 ? '' : ' class="fila-par"';
   let html = `<tr${clase}>`;
   columnasActuales.forEach((_, indice) => html += `<td>${escaparHtml(valoresFila[indice])}</td>`);
@@ -133,7 +144,7 @@ function renderizarVentana(inicio, fin) {
   const alturaDespues = (total - fin) * alturaFilaMedida;
 
   let html = filaEspaciadoraHtml(alturaAntes);
-  for (let i = inicio; i < fin; i++) html += filaHtml(i, filasDatosActuales[i]);
+  for (let i = inicio; i < fin; i++) html += filaHtml(i, () => filasDatosActuales.fila(i));
   html += filaEspaciadoraHtml(alturaDespues);
 
   const tbody = contenedorTabla.querySelector('tbody');
@@ -168,19 +179,27 @@ contenedorTabla.addEventListener('scroll', () => {
   if (filasDatosActuales.length > UMBRAL_VIRTUALIZACION) alManejarScroll();
 });
 
-function mostrarHoja(nombreHoja) {
-  [...pestanas.children].forEach(boton => boton.classList.toggle('activa', boton.textContent === nombreHoja));
-  const filas = XLSX.utils.sheet_to_json(libroActual.Sheets[nombreHoja], { header: 1, raw: false, defval: '' });
+async function mostrarHoja(indiceHoja) {
+  const miNumero = ++numeroDeHoja;
+  [...pestanas.children].forEach((boton, k) => boton.classList.toggle('activa', k === indiceHoja));
+  let datos;
+  try {
+    datos = await hojasActuales[indiceHoja].abrir();
+  } catch (error) {
+    if (miNumero === numeroDeHoja) alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
+  if (miNumero !== numeroDeHoja) return;
 
-  if (filas.length === 0) {
+  if (datos.nfilas === 0) {
     contenedorTabla.innerHTML = `<p style="padding:16px; color:var(--texto-suave);">${t('hoja-vacia')}</p>`;
     columnasActuales = [];
-    filasDatosActuales = [];
+    filasDatosActuales = { length: 0, fila: () => [] };
     return;
   }
 
-  columnasActuales = filas[0];
-  filasDatosActuales = filas.slice(1);
+  columnasActuales = datos.fila(0);
+  filasDatosActuales = { length: datos.nfilas - 1, fila: (i) => datos.fila(i + 1) };
   ventanaRenderizada = { inicio: -1, fin: -1 };
 
   let htmlEncabezado = '<thead><tr>';
@@ -191,7 +210,7 @@ function mostrarHoja(nombreHoja) {
     // Tabla chica: se renderiza entera de una, sin virtualizar — más simple
     // y ya es fluido para este tamaño.
     let htmlFilas = '<tbody>';
-    filasDatosActuales.forEach((fila, indice) => htmlFilas += filaHtml(indice, fila));
+    for (let indice = 0; indice < filasDatosActuales.length; indice++) htmlFilas += filaHtml(indice, () => filasDatosActuales.fila(indice));
     htmlFilas += '</tbody>';
     contenedorTabla.innerHTML = `<table class="tabla-datos">${htmlEncabezado}${htmlFilas}</table>`;
     return;
@@ -221,22 +240,23 @@ function mostrarHoja(nombreHoja) {
 async function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   try {
-    libroActual = await leerLibroDesdeArchivo(archivo);
+    const libro = await LectorHojas.abrir(archivo);
+    hojasActuales = libro.hojas.map((h) => ({ nombre: h.nombre, abrir: () => libro.cargar(h.indice) }));
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
 
   pestanas.innerHTML = '';
-  libroActual.SheetNames.forEach((nombre) => {
+  hojasActuales.forEach((hoja, k) => {
     const boton = document.createElement('button');
     boton.type = 'button';
-    boton.textContent = nombre;
-    boton.addEventListener('click', () => mostrarHoja(nombre));
+    boton.textContent = hoja.nombre;
+    boton.addEventListener('click', () => mostrarHoja(k));
     pestanas.appendChild(boton);
   });
 
-  mostrarHoja(libroActual.SheetNames[0]);
+  mostrarHoja(0);
 }
 
 function elegirArchivo(listaFileList) {

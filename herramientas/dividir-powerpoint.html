@@ -100,7 +100,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -134,7 +134,7 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.textContent = t('boton-dividir-procesando');
   progreso.style.display = 'block';
   try {
-    const zipOriginal = await JSZip.loadAsync(archivoActual);
+    const zipOriginal = await ZipPropio.loadAsync(archivoActual);
     const parser = new DOMParser();
 
     const presentacionXmlTexto = await zipOriginal.file('ppt/presentation.xml').async('string');
@@ -147,12 +147,12 @@ botonDividir.addEventListener('click', async () => {
     // de la presentación con la lista recortada: pesaba lo mismo que el
     // original y cualquiera podía recuperar las demás diapositivas.
     const bytesOriginales = await archivoActual.arrayBuffer();
-    const zipSalida = new JSZip();
+    const zipSalida = new ZipPropio();
     const cantidadDigitos = String(nodosSldId.length).length;
 
     for (let i = 0; i < nodosSldId.length; i++) {
       progreso.textContent = t('progreso-generando').replace('{actual}', i + 1).replace('{total}', nodosSldId.length);
-      const miniZip = await JSZip.loadAsync(bytesOriginales);
+      const miniZip = await ZipPropio.loadAsync(bytesOriginales);
       await conservarDiapositivas(miniZip, [nodosSldId[i].getAttribute('r:id')]);
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
       const blobMini = await miniZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });

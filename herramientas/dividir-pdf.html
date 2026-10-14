@@ -80,7 +80,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -124,7 +124,7 @@ botonDividir.addEventListener('click', async () => {
     const bytes = await archivoActual.arrayBuffer();
     const pdfOrigen = await PDFDocument.load(bytes);
     const totalPaginas = pdfOrigen.getPageCount();
-    const zip = new JSZip();
+    const zip = new ZipPropio();
     const cantidadDigitos = String(totalPaginas).length;
 
     for (let i = 0; i < totalPaginas; i++) {

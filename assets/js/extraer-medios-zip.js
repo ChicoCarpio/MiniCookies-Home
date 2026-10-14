@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Helper compartido para extraer archivos embebidos (imágenes) de formatos que
 // son en el fondo un .zip con estructura interna (.docx, .xlsx, .pptx, .epub).
-// Requiere que la página ya haya cargado JSZip.
+// Requiere que la página ya haya cargado ZipPropio.
 
 // ¿La ruta es una imagen? La carpeta de medios de Office guarda también audio
 // y video (un .mp4 de una diapositiva): sin esto salían en el .zip de
@@ -14,7 +14,7 @@ function esRutaDeImagen(ruta) {
 // Devuelve [{ nombre, blob }] para cada entrada del zip cuyo nombre de ruta
 // haga match con filtro(rutaCompleta).
 async function extraerArchivosDeZip(archivo, filtro) {
-  const zip = await JSZip.loadAsync(archivo);
+  const zip = await ZipPropio.loadAsync(archivo);
   const rutas = Object.keys(zip.files).filter(ruta => !zip.files[ruta].dir && filtro(ruta));
   const resultado = [];
   for (const ruta of rutas) {
@@ -28,7 +28,7 @@ async function extraerArchivosDeZip(archivo, filtro) {
 // nombres repetidos (ej. dos imágenes que se llamaban igual en carpetas
 // distintas del original).
 async function construirZipDeArchivos(archivos) {
-  const zip = new JSZip();
+  const zip = new ZipPropio();
   const contadorPorNombre = new Map();
   for (const { nombre, blob } of archivos) {
     let nombreFinal = nombre;

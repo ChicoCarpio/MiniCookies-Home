@@ -10,7 +10,7 @@
 //   await GraficoSuelto.dibujarEn(canvas, { zip, rutaGrafico, anchoPt, altoPt, escala });
 //   const raiz = GraficoSuelto.xmlDeDatos({ tipo, titulo, categorias, series });
 //   await GraficoSuelto.dibujarEn(canvas, { raiz, anchoPt, altoPt, escala });
-// Requiere vendor.js (rutaVendor) y, para un .xlsx, JSZip.
+// Requiere vendor.js (rutaVendor) y, para un .xlsx, ZipPropio.
 
 const GraficoSuelto = (() => {
   // Los módulos propios están al lado de este archivo, en assets/js/.

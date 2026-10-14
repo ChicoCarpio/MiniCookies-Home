@@ -350,7 +350,7 @@ window.i18nPagina = {
 <script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/excel-a-pdf.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/grafico-suelto.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -1245,7 +1245,7 @@ async function actualizarAvisoObjetosHoja(nombreHoja) {
   avisoObjetosHoja.style.display = 'none';
   if (!esXlsxActual) return;
   try {
-    const zip = await JSZip.loadAsync(bytesArchivoActual);
+    const zip = await ZipPropio.loadAsync(bytesArchivoActual);
     const mapaHojas = await mapaHojaARutaXml(zip);
     const rutaHojaXml = mapaHojas.get(nombreHoja);
     if (!rutaHojaXml) return;

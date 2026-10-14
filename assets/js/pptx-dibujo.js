@@ -26,8 +26,15 @@ const PptxDibujo = (() => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingQuality = 'high';
 
-    // Todas las imágenes se cargan antes de dibujar (el dibujo es síncrono).
-    // Y las fuentes, antes de medir el texto.
+    const imagenes = await precargar((r) => pres.imagen(r), diap.fondo, diap.elementos, canvas);
+    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [], graficos: [], trozosPdf: [] };
+    pintarTodo(ctx, canvas, diap.fondo, diap.elementos, entorno);
+    return { textos: entorno.textos, graficos: entorno.graficos, trozosPdf: entorno.trozosPdf };
+  }
+
+  // Todas las imágenes se cargan antes de dibujar (el dibujo es síncrono). Y las fuentes, antes de medir el texto.
+  // imagenDe(ruta) → imagen cargada; devuelve el mapa ruta → imagen.
+  async function precargar(imagenDe, fondo, elementos, canvas) {
     const rutas = new Set();
     const usos = [];
     const juntar = (r) => { if (r && r.tipo === 'imagen') rutas.add(r.ruta); };
@@ -39,7 +46,7 @@ const PptxDibujo = (() => {
       if (o.tipo === 'imagen' && o.ruta) { rutas.add(o.ruta); return; }
       for (const v of o instanceof Map ? o.values() : Object.values(o)) juntarGrafico(v, vistos);
     };
-    juntar(diap.fondo);
+    juntar(fondo);
     (function recorrer(lista) {
       for (const el of lista) {
         juntar(el.relleno);
@@ -53,28 +60,37 @@ const PptxDibujo = (() => {
         }
         if (el.hijos) recorrer(el.hijos);
       }
-    })(diap.elementos);
+    })(elementos);
     const imagenes = new Map();
     const letras = usos.filter(Boolean);
-    await Promise.all([...[...rutas].map(async (r) => imagenes.set(r, await pres.imagen(r))), PptxTexto.cargarFuentes(letras),
+    await Promise.all([...[...rutas].map(async (r) => imagenes.set(r, await imagenDe(r))), PptxTexto.cargarFuentes(letras),
       // Un lienzo de PDF (pdf-lienzo.js) necesita además los bytes de las fuentes.
-      canvas.precargarFuentes ? canvas.precargarFuentes(letras) : null]);
+      canvas && canvas.precargarFuentes ? canvas.precargarFuentes(letras) : null]);
+    return imagenes;
+  }
 
-    const entorno = { s, imagenes, fondo: diap.fondo, base: ctx.getTransform(), anchoDiap: pres.ancho * s, altoDiap: pres.alto * s, textos: [], graficos: [], trozosPdf: [] };
+  // El dibujo síncrono: el fondo y los elementos, en las unidades del lienzo (entorno.s = unidades por EMU). `lienzo` es el canvas o el lienzo de PDF.
+  function pintarTodo(ctx, lienzo, fondo, elementos, entorno) {
     // Sobre un lienzo de PDF, los trazados (Path2D) son los suyos. Todo lo que
     // sigue es síncrono, así que el reemplazo no se cruza con otro dibujo.
     const Path2DOriginal = globalThis.Path2D;
-    if (canvas.precargarFuentes) globalThis.Path2D = canvas.constructor.Ruta;
+    if (lienzo && lienzo.precargarFuentes) globalThis.Path2D = lienzo.constructor.Ruta;
     try {
-      const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap);
-      if (diap.fondo) pintar(ctx, diap.fondo, todo, entorno.anchoDiap, entorno.altoDiap, entorno);
-
+      if (fondo) { const todo = new Path2D(); todo.rect(0, 0, entorno.anchoDiap, entorno.altoDiap); pintar(ctx, fondo, todo, entorno.anchoDiap, entorno.altoDiap, entorno); }
+      const s = entorno.s;
       const mapa = (x) => ({ x: x.x * s, y: x.y * s, w: x.w * s, h: x.h * s });
-      for (const el of diap.elementos) dibujarElemento(ctx, el, mapa, entorno, null);
+      for (const el of elementos) dibujarElemento(ctx, el, mapa, entorno, null);
     } finally {
       globalThis.Path2D = Path2DOriginal;
     }
-    return { textos: entorno.textos, graficos: entorno.graficos, trozosPdf: entorno.trozosPdf };
+  }
+
+  // Dibuja elementos ya resueltos (los de los objetos de una hoja de Excel, xlsx-objetos.js) sobre `ctx` con la transformación actual:
+  // `s` = unidades del lienzo por EMU. Hay que haber llamado a precargar antes. `lienzo` solo hace falta si es un lienzo de PDF.
+  function dibujarElementos(ctx, elementos, imagenes, s, lienzo) {
+    const entorno = { s, imagenes, fondo: null, base: ctx.getTransform ? ctx.getTransform() : null, anchoDiap: 0, altoDiap: 0, textos: [], graficos: [], trozosPdf: [] };
+    pintarTodo(ctx, lienzo, null, elementos, entorno);
+    return { graficos: entorno.graficos, trozosPdf: entorno.trozosPdf };
   }
 
   function aplicarTransformacion(ctx, caja, x) {
@@ -795,5 +811,5 @@ const PptxDibujo = (() => {
     });
   }
 
-  return { dibujar };
+  return { dibujar, precargar, dibujarElementos };
 })();

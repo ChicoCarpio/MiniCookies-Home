@@ -40,7 +40,10 @@ window.i18nPagina = {
     'mostrando-primeras': 'Mostrando las primeras {n} filas — el reemplazo sí procesa todas.',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar Excel',
-    'nota-formato': 'El archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.',
+    'nota-conserva': 'El archivo original se edita en el lugar: solo cambian las celdas que coinciden, y se conservan colores, bordes, fuentes, fórmulas, imágenes y gráficos. Las celdas de un encabezado de tabla o de una fórmula matricial no se cambian.',
+    'mensaje-omitidas': 'Se omitieron {n} coincidencia(s) en celdas que no se pueden cambiar (encabezados o totales de tabla, o fórmulas matriciales).',
+    'error-solo-omitidas': 'Las coincidencias están todas en celdas que no se pueden cambiar (encabezados o totales de tabla, o fórmulas matriciales).',
+    'nota-formato': 'Este formato (.xlsb, .xls u .ods) no se puede editar en el lugar: el archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.',
     'nota-formulas': 'Las fórmulas nunca se tocan (para no romper cálculos). Si el texto que reemplazás está dentro de una fecha, número o moneda formateada, esa celda pasa a ser texto plano con el resultado — deja de ser una fecha/número real (por ejemplo, ya no se podría usar en una cuenta).',
     'error-sin-buscar': 'Escribí el texto a buscar.',
     'error-sin-columna': 'Tildá al menos una columna, o elegí "Toda la hoja".',
@@ -70,7 +73,10 @@ window.i18nPagina = {
     'mostrando-primeras': 'Showing the first {n} rows — the replacement does process all of them.',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download Excel',
-    'nota-formato': 'The file is rebuilt from its data: values, formulas and number formats (dates, currencies) are kept, but colors, borders, fonts, images and charts are lost.',
+    'nota-conserva': 'The original file is edited in place: only the matching cells change, and colors, borders, fonts, formulas, images and charts are kept. Cells in a table header or an array formula are not changed.',
+    'mensaje-omitidas': '{n} match(es) in cells that can’t be changed were skipped (table headers or totals, or array formulas).',
+    'error-solo-omitidas': 'All the matches are in cells that can’t be changed (table headers or totals, or array formulas).',
+    'nota-formato': 'This format (.xlsb, .xls or .ods) can’t be edited in place: the file is rebuilt from its data: values, formulas and number formats (dates, currencies) are kept, but colors, borders, fonts, images and charts are lost.',
     'nota-formulas': 'Formulas are never touched (so calculations don’t break). If the text you’re replacing is inside a formatted date, number or currency, that cell becomes plain text with the result — it stops being a real date/number (for example, it could no longer be used in a calculation).',
     'error-sin-buscar': 'Type the text to search for.',
     'error-sin-columna': 'Check at least one column, or choose "The whole sheet".',
@@ -159,7 +165,8 @@ window.i18nPagina = {
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <p style="color:var(--texto-suave);" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
+    <p id="notaConserva" style="color:var(--texto-suave);" data-i18n="nota-conserva">El archivo original se edita en el lugar: solo cambian las celdas que coinciden, y se conservan colores, bordes, fuentes, fórmulas, imágenes y gráficos. Las celdas de un encabezado de tabla o de una fórmula matricial no se cambian.</p>
+    <p id="notaReconstruye" style="color:var(--texto-suave); display:none;" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
     <p style="color:var(--texto-suave);" data-i18n="nota-formulas">
       Las fórmulas nunca se tocan (para no romper cálculos). Si el texto que reemplazás está dentro de una
       fecha, número o moneda formateada, esa celda pasa a ser texto plano con el resultado — deja de ser
@@ -174,6 +181,17 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
+<script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -190,13 +208,26 @@ const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
 const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
 const nombreHojaVista = document.getElementById('nombreHojaVista');
 const avisoTodasHojas = document.getElementById('avisoTodasHojas');
+const notaConserva = document.getElementById('notaConserva');
+const notaReconstruye = document.getElementById('notaReconstruye');
 
-let libroActual = null;
-let columnasSeleccionadas = new Set(); // índices de columna, solo se usa si el ámbito es "columnas"
+// LectorHojas (assets/js/lector-hojas.js) lee el archivo para la vista previa y para buscar. Un .xlsx o .xlsm se EDITA EN EL LUGAR con
+// XlsxEscritor.editarCeldas: solo cambian las celdas que coinciden y el resto del archivo queda tal cual. Lo que el motor aún no lee
+// (.xlsb, .xls, .ods) se rearma con SheetJS, como siempre.
+let libroActual = null;        // LectorHojas
+let archivoActual = null;
+let editaEnElLugar = false;    // .xlsx / .xlsm
+let hojasLeidas = new Map();   // índice de hoja → hoja de LectorHojas
+let columnasSeleccionadas = new Set(); // índices de columna (desde 0 en la hoja), solo se usa si el ámbito es "columnas"
+let numeroDeVista = 0;         // para descartar una vista previa que terminó cuando ya se pidió otra
 
+async function hojaLeida(indice) {
+  if (!hojasLeidas.has(indice)) hojasLeidas.set(indice, await libroActual.cargar(indice));
+  return hojasLeidas.get(indice);
+}
 
 function hojaActualSeleccionada() {
-  return campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
+  return campoHoja.style.display !== 'none' ? Number(selectorHoja.value) : libroActual.hojas[0].indice;
 }
 
 function ambitoActual() {
@@ -205,48 +236,53 @@ function ambitoActual() {
 
 const FILAS_VISTA_PREVIA = 200;
 
-function mostrarVistaPrevia() {
+async function mostrarVistaPrevia() {
+  if (!libroActual) return;
+  const miNumero = ++numeroDeVista;
   const todasLasHojas = document.getElementById('todasLasHojas').checked;
-  const nombreHoja = hojaActualSeleccionada();
+  const indiceHoja = hojaActualSeleccionada();
   const ambito = ambitoActual();
   avisoTodasHojas.textContent = todasLasHojas ? t('aviso-todas-hojas') : '';
-  nombreHojaVista.textContent = nombreHoja;
+  nombreHojaVista.textContent = libroActual.hojas.find(h => h.indice === indiceHoja).nombre;
   bloqueVistaPrevia.style.display = 'block';
 
   const buscar = document.getElementById('textoBuscar').value;
   const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
   const regex = buscar ? new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi') : null;
 
-  const hoja = libroActual.Sheets[nombreHoja];
-  if (!hoja['!ref']) {
+  let hoja;
+  try { hoja = await hojaLeida(indiceHoja); } catch (error) { alert(t('error-leer') + ': ' + error.message); return; }
+  if (miNumero !== numeroDeVista) return;
+  if (hoja.nfilas === 0) {
     contenedorVistaPrevia.innerHTML = `<p style="padding:10px; color:var(--texto-suave);">${t('hoja-vacia')}</p>`;
     return;
   }
 
-  // Se leen las celdas crudas (no con sheet_to_json) para saber si cada una
-  // es una fórmula — esas nunca se tocan, para no romper cálculos. El resto
-  // (texto, fechas, números) se compara contra el texto tal como se ve, que
-  // es lo mismo que compara el reemplazo real.
-  const rango = XLSX.utils.decode_range(hoja['!ref']);
-  const filaLimite = Math.min(rango.e.r, rango.s.r + FILAS_VISTA_PREVIA - 1);
-
+  // Las fórmulas nunca se tocan, para no romper cálculos. El resto (texto, fechas, números) se compara contra el texto tal como
+  // se ve, que es lo mismo que compara el reemplazo real.
+  const filaLimite = Math.min(hoja.nfilas, FILAS_VISTA_PREVIA);
+  // las celdas que el reemplazo se salta (encabezados y totales de tabla, fórmulas matriciales) no se pintan como cambiables
+  let protegida = () => false;
+  if (editaEnElLugar) { try { protegida = XlsxEscritor.celdasProtegidas(await libroActual.libroXlsx.cargarHoja(indiceHoja)); } catch (error) { console.warn(error); } }
+  if (miNumero !== numeroDeVista) return;
   let html = '<table class="tabla-datos"><thead><tr>';
-  for (let c = rango.s.c; c <= rango.e.c; c++) {
-    const letra = XLSX.utils.encode_col(c);
+  for (let c = 0; c < hoja.ncols; c++) {
+    const columna = hoja.c0 + c;
+    const letra = LibroXlsx.numeroACol(columna);
     if (ambito === 'columnas') {
-      html += `<th><label><input type="checkbox" class="chk-columna" data-columna="${c}"${columnasSeleccionadas.has(c) ? ' checked' : ''}>${letra}</label></th>`;
+      html += `<th><label><input type="checkbox" class="chk-columna" data-columna="${columna}"${columnasSeleccionadas.has(columna) ? ' checked' : ''}>${letra}</label></th>`;
     } else {
       html += `<th><div class="letra-columna">${letra}</div></th>`;
     }
   }
   html += '</tr></thead><tbody>';
-  for (let r = rango.s.r; r <= filaLimite; r++) {
+  for (let r = 0; r < filaLimite; r++) {
     html += '<tr>';
-    for (let c = rango.s.c; c <= rango.e.c; c++) {
-      const celda = hoja[XLSX.utils.encode_cell({ r, c })];
-      const texto = celda ? XLSX.utils.format_cell(celda) : '';
-      const columnaHabilitada = ambito === 'toda' || columnasSeleccionadas.has(c);
-      const coincide = regex && celda && !celda.f && texto !== '' && columnaHabilitada && regex.test(texto);
+    for (let c = 0; c < hoja.ncols; c++) {
+      const columna = hoja.c0 + c;
+      const texto = hoja.texto(r, c);
+      const columnaHabilitada = ambito === 'toda' || columnasSeleccionadas.has(columna);
+      const coincide = regex && texto !== '' && columnaHabilitada && !hoja.formula(r, c) && !protegida(hoja.f0 + r, columna) && regex.test(texto);
       if (regex) regex.lastIndex = 0; // regex con flag "g" guarda posición entre usos, hay que resetear
       const clase = coincide ? ' class="coincidencia"' : (ambito === 'columnas' && !columnaHabilitada ? ' class="columna-excluida"' : '');
       html += `<td${clase}>${escaparHtml(texto)}</td>`;
@@ -254,7 +290,7 @@ function mostrarVistaPrevia() {
     html += '</tr>';
   }
   html += '</tbody></table>';
-  if (rango.e.r - rango.s.r + 1 > FILAS_VISTA_PREVIA) {
+  if (hoja.nfilas > FILAS_VISTA_PREVIA) {
     html += `<p style="padding:8px 10px; color:var(--texto-suave); font-size:0.8rem;">${t('mostrando-primeras').replace('{n}', FILAS_VISTA_PREVIA)}</p>`;
   }
   contenedorVistaPrevia.innerHTML = html;
@@ -277,19 +313,25 @@ function elegirArchivo(listaFileList) {
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 async function cargarLibro(archivo) {
+  let libro;
   try {
-    // cellNF: conserva el formato de número (si no, las fechas se guardaban como números sueltos).
-    libroActual = XLSX.read(await archivo.arrayBuffer(), { type: 'array', cellNF: true, cellStyles: true });
+    libro = await LectorHojas.abrir(archivo);
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
+  libroActual = libro;
+  archivoActual = archivo;
+  hojasLeidas = new Map();
+  editaEnElLugar = libro.motor && /\.(xlsx|xlsm)$/i.test(archivo.name);
+  notaConserva.style.display = editaEnElLugar ? '' : 'none';
+  notaReconstruye.style.display = editaEnElLugar ? 'none' : '';
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonProcesar.disabled = false;
   resultado.classList.remove('visible');
   mensaje.style.display = 'none';
-  if (libroActual.SheetNames.length > 1) {
-    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
+  if (libro.hojas.length > 1) {
+    selectorHoja.innerHTML = libro.hojas.map(h => `<option value="${h.indice}">${escaparHtml(h.nombre)}</option>`).join('');
     campoHoja.style.display = 'flex';
   } else {
     campoHoja.style.display = 'none';
@@ -309,7 +351,92 @@ document.getElementById('coincidirMayusculas').addEventListener('change', mostra
 document.getElementById('ambitoToda').addEventListener('change', mostrarVistaPrevia);
 document.getElementById('ambitoColumnas').addEventListener('change', mostrarVistaPrevia);
 
-botonProcesar.addEventListener('click', () => {
+// Recorre la hoja y llama a alEncontrar(r, c, textoNuevo, cantidad) por cada celda que coincide. Una celda de texto se compara por su
+// texto; una con formato (fecha, número, moneda…) contra el texto tal como se ve, y si coincide pasa a ser texto plano con el resultado:
+// deja de ser una fecha o un número real.
+function recorrerCoincidencias(hoja, regex, reemplazo, ambito, alEncontrar) {
+  for (let r = 0; r < hoja.nfilas; r++) {
+    for (let c = 0; c < hoja.ncols; c++) {
+      if (ambito === 'columnas' && !columnasSeleccionadas.has(hoja.c0 + c)) continue;
+      if (hoja.formula(r, c)) continue;   // no se tocan fórmulas, para no romper cálculos
+      const valor = hoja.valor(r, c);
+      if (valor === undefined) continue;
+      const texto = typeof valor === 'string' ? valor : hoja.texto(r, c);
+      if (!texto) continue;
+      const coincidencias = texto.match(regex);
+      if (coincidencias) alEncontrar(r, c, texto.replace(regex, () => reemplazo), coincidencias.length);
+    }
+  }
+}
+
+// .xlsx / .xlsm: edita el original en el lugar.
+async function reemplazarEnElLugar(indices, regex, reemplazo, ambito) {
+  const libro = await LibroXlsx.abrir(new Uint8Array(await archivoActual.arrayBuffer()));   // siempre del original: otro clic no suma cambios
+  const pendientes = [];
+  let total = 0, omitidas = 0;
+  for (const indice of indices) {
+    const hoja = await hojaLeida(indice);
+    if (!hoja.nfilas) continue;
+    const protegida = XlsxEscritor.celdasProtegidas(await libro.cargarHoja(indice));
+    const cambios = [];
+    recorrerCoincidencias(hoja, regex, reemplazo, ambito, (r, c, nuevo, n) => {
+      const f = hoja.f0 + r, col = hoja.c0 + c;
+      if (protegida(f, col)) { omitidas++; return; }   // encabezados de tabla y fórmulas matriciales: cambiarlos rompería la tabla o la matriz
+      cambios.push({ f, c: col, valor: nuevo });
+      total += n;
+    });
+    if (cambios.length) pendientes.push({ indice, cambios });
+  }
+  if (total === 0) throw new Error(t(omitidas ? 'error-solo-omitidas' : 'error-sin-coincidencias'));
+  for (const p of pendientes) await XlsxEscritor.editarCeldas(libro, p.indice, p.cambios);
+  const bytes = await libro.zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  return { bytes, total, omitidas, extension: /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx' };
+}
+
+// .xlsb / .xls / .ods: el libro se vuelve a armar con SheetJS.
+async function reemplazarConSheetJs(indices, regex, reemplazo, ambito) {
+  const leidas = new Map();
+  for (const indice of indices) leidas.set(indice, await hojaLeida(indice));   // su texto es el de la vista previa
+  const libro = XLSX.read(await archivoActual.arrayBuffer(), { type: 'array', cellNF: true, cellStyles: true });
+  let totalReemplazos = 0;
+  indices.forEach((indice) => {
+    const hoja = libro.Sheets[libro.SheetNames[indice]];
+    const vista = leidas.get(indice);
+    Object.keys(hoja).forEach((direccionCelda) => {
+      if (direccionCelda.startsWith('!')) return;
+      const celda = hoja[direccionCelda];
+      if (celda.f) return; // no se tocan fórmulas, para no romper cálculos
+      if (ambito === 'columnas' && !columnasSeleccionadas.has(XLSX.utils.decode_cell(direccionCelda).c)) return;
+
+      if (celda.t === 's' && typeof celda.v === 'string') {
+        const coincidencias = celda.v.match(regex);
+        if (coincidencias) {
+          totalReemplazos += coincidencias.length;
+          celda.v = celda.v.replace(regex, () => reemplazo);
+          if (celda.w !== undefined) celda.w = celda.v;
+        }
+        return;
+      }
+      const posicion = XLSX.utils.decode_cell(direccionCelda);
+      const fr = posicion.r - vista.f0, fc = posicion.c - vista.c0;
+      const textoMostrado = fr >= 0 && fc >= 0 && fr < vista.nfilas && fc < vista.ncols ? vista.texto(fr, fc) : '';
+      if (!textoMostrado) return;
+      const coincidencias = textoMostrado.match(regex);
+      if (coincidencias) {
+        totalReemplazos += coincidencias.length;
+        celda.t = 's';
+        celda.v = textoMostrado.replace(regex, () => reemplazo);
+        celda.w = celda.v;
+        delete celda.z; // formato numérico/fecha — ya no aplica a una celda de texto
+      }
+    });
+  });
+  if (totalReemplazos === 0) throw new Error(t('error-sin-coincidencias'));
+  return { bytes: XLSX.write(libro, { bookType: 'xlsx', type: 'array' }), total: totalReemplazos, omitidas: 0, extension: 'xlsx' };
+}
+
+botonProcesar.addEventListener('click', async () => {
+  botonProcesar.disabled = true;
   try {
     const buscar = document.getElementById('textoBuscar').value;
     if (!buscar) throw new Error(t('error-sin-buscar'));
@@ -322,57 +449,22 @@ botonProcesar.addEventListener('click', () => {
     }
 
     const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
-    const hojasAProcesar = todasLasHojas
-      ? libroActual.SheetNames
-      : [campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0]];
+    const indices = todasLasHojas ? libroActual.hojas.map(h => h.indice) : [hojaActualSeleccionada()];
+    const { bytes, total, omitidas, extension } = editaEnElLugar
+      ? await reemplazarEnElLugar(indices, regex, reemplazo, ambito)
+      : await reemplazarConSheetJs(indices, regex, reemplazo, ambito);
 
-    let totalReemplazos = 0;
-    hojasAProcesar.forEach((nombreHoja) => {
-      const hoja = libroActual.Sheets[nombreHoja];
-      Object.keys(hoja).forEach((direccionCelda) => {
-        if (direccionCelda.startsWith('!')) return;
-        const celda = hoja[direccionCelda];
-        if (celda.f) return; // no se tocan fórmulas, para no romper cálculos
-        if (ambito === 'columnas' && !columnasSeleccionadas.has(XLSX.utils.decode_cell(direccionCelda).c)) return;
-
-        if (celda.t === 's' && typeof celda.v === 'string') {
-          const coincidencias = celda.v.match(regex);
-          if (coincidencias) {
-            totalReemplazos += coincidencias.length;
-            celda.v = celda.v.replace(regex, () => reemplazo);
-            if (celda.w !== undefined) celda.w = celda.v;
-          }
-          return;
-        }
-
-        // Celdas con formato (fechas, números, moneda, etc.): se compara
-        // contra el texto tal como se ve, y si coincide la celda pasa a ser
-        // texto plano con el resultado — deja de ser una fecha/número real.
-        const textoMostrado = XLSX.utils.format_cell(celda);
-        if (!textoMostrado) return;
-        const coincidencias = textoMostrado.match(regex);
-        if (coincidencias) {
-          totalReemplazos += coincidencias.length;
-          celda.t = 's';
-          celda.v = textoMostrado.replace(regex, () => reemplazo);
-          celda.w = celda.v;
-          delete celda.z; // formato numérico/fecha — ya no aplica a una celda de texto
-        }
-      });
-    });
-
-    if (totalReemplazos === 0) throw new Error(t('error-sin-coincidencias'));
-
-    const bytesFinales = XLSX.write(libroActual, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
-    enlaceDescarga.href = URL.createObjectURL(blob);
+    const tipo = extension === 'xlsm' ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    enlaceDescarga.href = URL.createObjectURL(new Blob([bytes], { type: tipo }));
+    enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}-reemplazado.${extension}`;
     resultado.classList.add('visible');
 
-    mensaje.textContent = t('mensaje-reemplazos').replace('{n}', totalReemplazos);
+    mensaje.textContent = t('mensaje-reemplazos').replace('{n}', total) + (omitidas ? ' ' + t('mensaje-omitidas').replace('{n}', omitidas) : '');
     mensaje.style.display = 'block';
-    mostrarVistaPrevia();
   } catch (error) {
     alert(t('error-procesar') + ': ' + error.message);
+  } finally {
+    botonProcesar.disabled = false;
   }
 });
 </script>

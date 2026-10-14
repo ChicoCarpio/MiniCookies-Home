@@ -148,7 +148,7 @@ const PptxGrafico = (() => {
           // Sin c:marker, la norma dice automático: en la dispersión (salvo
           // estilo de solo línea) y en las líneas con <c:marker val="1"/> en el grupo.
           marcador: hijo(s, 'marker') ? marcadorDe(hijo(s, 'marker'), r, clasico ? 7 : 5)
-            : (tipo === 'dispersion' && !['line', 'smooth'].includes(g.estiloDispersion)) || (tipo === 'linea' && si(hijo(el, 'marker'))) || (tipo === 'radar' && g.estiloRadar === 'marker') ? { simbolo: 'auto', tamano: clasico ? 7 : 5, relleno: undefined, linea: undefined } : null,
+            : (tipo === 'dispersion' && !['line', 'smooth'].includes(g.estiloDispersion)) || (tipo === 'linea' && si(hijo(el, 'marker'))) || (tipo === 'radar' && g.estiloRadar === 'marker') ? { simbolo: 'auto', tamano: clasico ? (tipo === 'linea' ? 9 : 7) : 5, relleno: undefined, linea: undefined } : null,
           puntos: new Map(),
           etiquetas: etiquetasDe(hijo(s, 'dLbls'), r, letraBase, g.etiquetas),
           tendencias: hijos(s, 'trendline').map((t) => ({

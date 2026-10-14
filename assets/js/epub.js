@@ -2,9 +2,9 @@
 // Helpers compartidos para leer y construir archivos EPUB. Un .epub es un .zip
 // con estructura fija (mimetype sin comprimir, META-INF/container.xml, un OPF
 // con manifest/spine, capítulos en XHTML) — no hace falta una librería de EPUB
-// dedicada, alcanza con JSZip + DOMParser (mismo criterio que el resto del
+// dedicada, alcanza con ZipPropio + DOMParser (mismo criterio que el resto del
 // proyecto: no sumar una dependencia si ya se puede resolver con lo que hay).
-// Requiere que la página ya haya cargado JSZip antes de usar estas funciones.
+// Requiere que la página ya haya cargado ZipPropio antes de usar estas funciones.
 
 const ESPACIO_NOMBRES_XHTML = 'http://www.w3.org/1999/xhtml';
 
@@ -60,7 +60,7 @@ function htmlAXhtmlEpub(html) {
 async function construirEpub({ titulo, autor, idioma = 'es', identificador, capitulos }) {
   if (!capitulos || capitulos.length === 0) throw new Error('No hay contenido para armar el EPUB.');
 
-  const zip = new JSZip();
+  const zip = new ZipPropio();
   const uuid = identificador || generarUuidEpub();
   const fecha = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 
@@ -188,7 +188,7 @@ function resolverRutaRelativaEpub(base, relativa) {
 }
 
 async function leerEpub(archivo) {
-  const zip = await JSZip.loadAsync(archivo);
+  const zip = await ZipPropio.loadAsync(archivo);
 
   await fuentesOfuscadasEpub(zip); // corta si hay DRM de verdad
 
@@ -420,7 +420,7 @@ async function rutaOpfDeZipEpub(zip) {
 // o bytes: cada herramienta vuelve a abrir el original en cada guardado, así
 // una edición nunca arrastra los cambios de la anterior.
 async function abrirPaqueteEpub(archivo) {
-  const zip = await JSZip.loadAsync(archivo);
+  const zip = await ZipPropio.loadAsync(archivo);
   await fuentesOfuscadasEpub(zip); // corta si hay DRM de verdad
   const rutaOpf = await rutaOpfDeZipEpub(zip);
   const opf = parsearXmlEpub(await zip.file(rutaOpf).async('string'), rutaOpf);
@@ -446,7 +446,7 @@ function serializarXmlEpub(doc) {
 // Un .epub es un .zip con una regla propia: "mimetype" va primero y sin
 // comprimir. Compartido con editar-metadatos-epub.html.
 async function generarBlobEpub(zip) {
-  const salida = new JSZip();
+  const salida = new ZipPropio();
   salida.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
   for (const ruta of Object.keys(zip.files)) {
     const entrada = zip.files[ruta];
@@ -952,7 +952,7 @@ async function unirPaquetesEpub(paquetes, { titulo, autor }) {
 // generarBlobEpub siempre escribe bien). Devuelve el paquete y la lista de
 // arreglos hechos. Si el OPF no se puede leer, lanza: ahí corresponde rearmar.
 async function repararPaqueteEpub(archivo) {
-  const zip = await JSZip.loadAsync(archivo);
+  const zip = await ZipPropio.loadAsync(archivo);
   await fuentesOfuscadasEpub(zip);
   const arreglos = [];
   let rutaOpf;

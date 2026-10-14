@@ -147,6 +147,16 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/descargar.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -160,9 +170,32 @@ function esArchivoValido(archivo) {
   return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
 }
 
+// Primera hoja del archivo como filas { encabezado: texto mostrado }. La primera fila da los encabezados (los vacíos se llaman __EMPTY,
+// __EMPTY_1…; los repetidos llevan _1, _2…); las filas totalmente vacías no cuentan.
 async function leerFilas(archivo) {
-  const libro = await leerLibroDesdeArchivo(archivo);
-  return XLSX.utils.sheet_to_json(libro.Sheets[libro.SheetNames[0]], { defval: '', raw: false });
+  const libro = await LectorHojas.abrir(archivo);
+  // Los separadores del texto mostrado no dependen del idioma de la página: así un número igual se ve igual venga de un CSV o de un Excel.
+  libro.opciones = Object.assign({}, libro.opciones, { decimal: '.', miles: ',' });
+  const hoja = await libro.cargar(libro.hojas[0].indice);
+  const usados = new Map();
+  const encabezados = [];
+  let vacios = 0;
+  for (let c = 0; c < hoja.ncols; c++) {
+    const base = hoja.texto(0, c) || (vacios++ === 0 ? '__EMPTY' : '__EMPTY_' + (vacios - 1));
+    const veces = usados.get(base) || 0;
+    usados.set(base, veces + 1);
+    encabezados.push(veces === 0 ? base : base + '_' + veces);
+  }
+  const filas = [];
+  for (let r = 1; r < hoja.nfilas; r++) {
+    // un número sin formato propio se compara por su valor (1234.5), no por cómo lo escribió el archivo ("1.234,50" de un CSV)
+    const textos = hoja.fila(r).map((x, c) => { const v = hoja.valor(r, c); return typeof v === 'number' ? String(v) : x; });
+    if (textos.every((x) => x === '')) continue;
+    const fila = {};
+    encabezados.forEach((e, c) => { fila[e] = textos[c]; });
+    filas.push(fila);
+  }
+  return filas;
 }
 
 function configurarZona(idZona, idEntrada, idLista, onElegido) {
@@ -268,22 +301,20 @@ document.getElementById('botonComparar').addEventListener('click', () => {
 // Descarga la comparación como Excel: estado, las columnas (valores de la
 // versión nueva; de la vieja en las eliminadas) y "Qué cambió" con el valor
 // anterior → nuevo de cada columna modificada.
-document.getElementById('botonDescargar').addEventListener('click', () => {
+document.getElementById('botonDescargar').addEventListener('click', async () => {
   if (!ultimaComparacion) return;
   const { filasResultado, mapaA, clave } = ultimaComparacion;
   const nombresEstado = { agregada: t('estado-agregada'), eliminada: t('estado-eliminada'), modificada: t('estado-modificada'), igual: t('estado-igual') };
   const filas = [[t('columna-estado'), ...columnas, t('columna-cambios')]];
   filasResultado.forEach(({ estado, fila, camposCambiados }) => {
     const anterior = estado === 'modificada' ? mapaA.get(String(fila[clave])) : null;
-    const cambios = [...camposCambiados].map((col) => `${col}: ${anterior[col] ?? ''} → ${fila[col] ?? ''}`).join('; ');
+    let cambios = [...camposCambiados].map((col) => `${col}: ${anterior[col] ?? ''} → ${fila[col] ?? ''}`).join('; ');
+    // una celda de Excel admite 32.767 caracteres: con textos largos en varias columnas, crearLibro rechazaría el libro entero
+    if (cambios.length > 32767) { const corte = /[\uD800-\uDBFF]/.test(cambios[32765]) ? 32765 : 32766; cambios = cambios.slice(0, corte) + '…'; }
     filas.push([nombresEstado[estado], ...columnas.map((col) => fila[col] ?? ''), cambios]);
   });
-  const hoja = XLSX.utils.aoa_to_sheet(filas);
-  hoja['!cols'] = filas[0].map((_, i) => ({ wch: Math.min(50, Math.max(10, ...filas.map((f) => String(f[i] ?? '').length))) }));
-  hoja['!autofilter'] = { ref: hoja['!ref'] };
-  const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, hoja, t('hoja-resultado'));
-  const datos = XLSX.write(libro, { bookType: 'xlsx', type: 'array', compression: true });
+  const anchos = filas[0].map((_, i) => Math.min(50, Math.max(10, ...filas.map((f) => String(f[i] ?? '').length))));
+  const datos = await XlsxEscritor.crearLibro([{ nombre: t('hoja-resultado'), filas, anchos, inmovilizarFilas: 1, autofiltro: true }], { negritaPrimeraFila: true });
   descargarBlob(new Blob([datos], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nombreConFecha('comparacion', 'xlsx'));
 });
 </script>

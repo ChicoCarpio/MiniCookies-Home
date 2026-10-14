@@ -117,6 +117,16 @@ window.i18nPagina = {
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -127,8 +137,9 @@ const botonCombinar = document.getElementById('botonCombinar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
-let libroActual = null;
-let hojasSeleccionadas = new Set();
+let libroActual = null;   // LectorHojas (assets/js/lector-hojas.js)
+let hojasCargadas = [];   // una por hoja de libroActual.hojas, ya leída
+let hojasSeleccionadas = new Set();   // posiciones en libroActual.hojas
 
 
 // Mini tabla con las primeras celdas de cada hoja — para identificarlas de
@@ -136,9 +147,10 @@ let hojasSeleccionadas = new Set();
 const FILAS_VISTA_PREVIA = 4;
 const COLUMNAS_VISTA_PREVIA = 4;
 
-function miniVistaPreviaHtml(nombre) {
-  const hoja = libroActual.Sheets[nombre];
-  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false, defval: '' }).slice(0, FILAS_VISTA_PREVIA);
+function miniVistaPreviaHtml(posicion) {
+  const hoja = hojasCargadas[posicion];
+  const filas = [];
+  for (let r = 0; r < Math.min(hoja.nfilas, FILAS_VISTA_PREVIA); r++) filas.push(hoja.fila(r));
   if (filas.length === 0) return `<div class="mini-vista-vacia">${t('hoja-vacia')}</div>`;
 
   let html = '<div class="mini-vista-previa"><table class="mini-tabla">';
@@ -157,7 +169,8 @@ function miniVistaPreviaHtml(nombre) {
 
 function renderizarLista() {
   listaHojas.innerHTML = '';
-  libroActual.SheetNames.forEach((nombre) => {
+  libroActual.hojas.forEach((hojaLibro, posicion) => {
+    const nombre = hojaLibro.nombre;
     const item = document.createElement('li');
     const label = document.createElement('label');
     label.style.display = 'flex';
@@ -165,15 +178,15 @@ function renderizarLista() {
     label.style.gap = '8px';
     const check = document.createElement('input');
     check.type = 'checkbox';
-    check.checked = hojasSeleccionadas.has(nombre);
+    check.checked = hojasSeleccionadas.has(posicion);
     check.addEventListener('change', () => {
-      if (check.checked) hojasSeleccionadas.add(nombre); else hojasSeleccionadas.delete(nombre);
+      if (check.checked) hojasSeleccionadas.add(posicion); else hojasSeleccionadas.delete(posicion);
       botonCombinar.disabled = hojasSeleccionadas.size < 2;
     });
     label.appendChild(check);
     label.appendChild(document.createTextNode(nombre));
     item.appendChild(label);
-    item.insertAdjacentHTML('beforeend', miniVistaPreviaHtml(nombre));
+    item.insertAdjacentHTML('beforeend', miniVistaPreviaHtml(posicion));
     listaHojas.appendChild(item);
   });
 }
@@ -185,55 +198,57 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
+let numeroDeCarga = 0;   // si se elige otro archivo mientras se lee uno, el primero se descarta
+
 async function cargarLibro(archivo) {
+  const miNumero = ++numeroDeCarga;
+  // Se lee en variables locales: si falla o llega otro archivo a medias, libroActual y hojasCargadas siguen siendo del mismo libro.
+  let libro, hojas;
   try {
-    // cellNF: conserva el formato de número de cada celda (fechas, monedas).
-    libroActual = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });
+    libro = await LectorHojas.abrir(archivo);
+    hojas = [];
+    for (const h of libro.hojas) hojas.push(await libro.cargar(h.indice));
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    if (miNumero === numeroDeCarga) alert(t('error-leer') + ': ' + error.message);
     return;
   }
-  hojasSeleccionadas = new Set(libroActual.SheetNames);
+  if (miNumero !== numeroDeCarga) return;
+  libroActual = libro;
+  hojasCargadas = hojas;
+  hojasSeleccionadas = new Set(libroActual.hojas.map((_, k) => k));
   renderizarLista();
   botonCombinar.disabled = hojasSeleccionadas.size < 2;
   resultado.classList.remove('visible');
 }
 
-botonCombinar.addEventListener('click', () => {
+botonCombinar.addEventListener('click', async () => {
   try {
-    const nombresElegidos = libroActual.SheetNames.filter(n => hojasSeleccionadas.has(n));
-    if (nombresElegidos.length < 2) throw new Error(t('error-min-hojas'));
+    const elegidas = libroActual.hojas.map((_, k) => k).filter(k => hojasSeleccionadas.has(k));
+    if (elegidas.length < 2) throw new Error(t('error-min-hojas'));
 
     const tieneEncabezado = document.getElementById('tieneEncabezado').checked;
-    // Se copian las celdas (con su tipo y formato de número), no el texto
-    // formateado: antes números y fechas quedaban como texto en el resultado.
-    const hojaNueva = {};
-    let filaSalida = 0;
-    let ultimaColumna = 0;
+    // Se copian los valores (números y fechas siguen siendo números) con su formato de número, no el texto formateado.
+    const filas = [];
+    let anchos = null;
     let encabezadoPuesto = false;
 
-    nombresElegidos.forEach((nombre) => {
-      const hoja = libroActual.Sheets[nombre];
-      if (!hoja['!ref']) return;
-      const rango = XLSX.utils.decode_range(hoja['!ref']);
-      let inicio = rango.s.r;
+    elegidas.forEach((k) => {
+      const hoja = hojasCargadas[k];
+      if (hoja.nfilas === 0) return;
+      let inicio = 0;
       if (tieneEncabezado) {
         if (encabezadoPuesto) inicio++;
         encabezadoPuesto = true;
       }
-      for (let r = inicio; r <= rango.e.r; r++) {
-        copiarFilaDeHoja(hoja, r, hojaNueva, filaSalida, rango.s.c, rango.e.c, 0);
-        filaSalida++;
+      for (let r = inicio; r < hoja.nfilas; r++) {
+        const fila = new Array(hoja.ncols);
+        for (let c = 0; c < hoja.ncols; c++) fila[c] = hoja.valor(r, c);
+        filas.push(fila);
       }
-      ultimaColumna = Math.max(ultimaColumna, rango.e.c - rango.s.c);
-      if (!hojaNueva['!cols'] && hoja['!cols'] && rango.s.c === 0) hojaNueva['!cols'] = hoja['!cols'];
+      if (!anchos && hoja.c0 === 0 && hoja.anchos.length) anchos = hoja.anchos;
     });
-    hojaNueva['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(filaSalida - 1, 0), c: ultimaColumna } });
-    const libroNuevo = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libroNuevo, hojaNueva, t('nombre-hoja-combinado'));
-
-    const bytesFinales = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([bytesFinales], { type: 'application/octet-stream' });
+    const bytesFinales = await XlsxEscritor.crearLibro([{ nombre: t('nombre-hoja-combinado'), filas, anchos: anchos || [] }]);
+    const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

@@ -9,7 +9,7 @@
 // fuera del repo). La herencia sigue lo medido con comparar-pptx; donde la
 // norma y PowerPoint no coinciden, manda PowerPoint.
 //
-// Requiere JSZip y pptx-geometria.js (y pptx-estilos-tabla.js para las tablas). Uso:
+// Requiere ZipPropio y pptx-geometria.js (y pptx-estilos-tabla.js para las tablas). Uso:
 //   const pres = await PptxModelo.abrir(archivo);
 //   pres.ancho, pres.alto (EMU), pres.cantidad
 //   const d = await pres.diapositiva(i);  // { fondo, elementos, soportada, motivos }; motivos: lo que se omitió o se dibujó sin su formato
@@ -227,7 +227,7 @@ const PptxModelo = (() => {
   }
 
   async function abrir(archivo) {
-    const zip = await JSZip.loadAsync(archivo);
+    const zip = await ZipPropio.loadAsync(archivo);
     const { parte, imagen } = paquete(zip);
 
     const pres = await parte('ppt/presentation.xml');
@@ -592,7 +592,7 @@ const PptxModelo = (() => {
   // Un gráfico que no vive en una diapositiva —el de una hoja de Excel (con su
   // propio tema) o uno armado con datos— hecho una diapositiva de un solo
   // gráfico, para dibujarlo con PptxDibujo.dibujar igual que a los de un .pptx.
-  //   zip: JSZip del paquete (opcional; da el tema, las imágenes y las relaciones)
+  //   zip: ZipPropio del paquete (opcional; da el tema, las imágenes y las relaciones)
   //   rutaGrafico: la parte c:chartSpace dentro del zip; o raiz: el c:chartSpace ya leído
   //   ancho, alto: EMU
   //   excel: los valores que Excel usa cuando el gráfico no dice nada (estilo clásico); sin él, los de PowerPoint
@@ -997,5 +997,28 @@ const PptxModelo = (() => {
     return { fuente: bmp, ancho: bmp.width, alto: bmp.height, dpiX, dpiY };
   }
 
-  return { abrir, graficoSuelto, color };
+  // Los objetos de una hoja de Excel (xl/drawings/drawingN.xml: formas, imágenes, gráficos, grupos, cuadros de texto) resueltos con el mismo
+  // motor: el dibujo de una hoja es DrawingML igual que el de una diapositiva, solo cambia el envoltorio (xdr:twoCellAnchor…) y el tema, que es el del libro.
+  // Devuelve { anclajes: [elemento xdr:*Anchor], elementos(ancla, motivos) → elementos resueltos de esa ancla, imagen(ruta) } o null.
+  async function dibujoExcel(zip, rutaDibujo, rutaTema) {
+    const { parte, imagen } = paquete(zip);
+    const dib = await parte(rutaDibujo);
+    if (!dib) return null;
+    const tema = rutaTema ? await parte(rutaTema) : null;
+    const base = crearContexto({ sld: dib, layout: null, master: null, tema, textoPorDefecto: null, numero: 1, parte });
+    const ctx = { ...base, estilosTabla: new Map(), parteActual: dib, cadena: [], esDiapositiva: true, excel: true }; // excel: los gráficos sin formato salen con el estilo clásico de Excel, no con el de PowerPoint
+    // Las anclas hijas directas de la raíz y, de las que Excel envuelve en mc:AlternateContent (segmentaciones, controles de formulario), las de la rama
+    // principal (Choice); el respaldo (Fallback) no se dibuja. xlsx-modelo.js (leerAnclas) cuenta las mismas, en el mismo orden.
+    const anclajes = [];
+    for (const e of dib.raiz.children) {
+      if (/Anchor$/.test(e.localName)) anclajes.push(e);
+      else if (e.localName === 'AlternateContent') { const ch = hijo(e, 'Choice'); for (const h of ch ? ch.children : []) if (/Anchor$/.test(h.localName)) anclajes.push(h); }
+    }
+    return { anclajes, elementos: (ancla, motivos) => leerArbol(ancla, ctx, motivos), imagen };
+  }
+
+  // El cargador de imágenes de un paquete (zip): imagen(ruta) → { fuente, ancho, alto, dpiX, dpiY } (las imágenes dentro de las celdas de Excel)
+  const cargadorImagenes = (zip) => paquete(zip).imagen;
+
+  return { abrir, graficoSuelto, color, dibujoExcel, cargadorImagenes };
 })();

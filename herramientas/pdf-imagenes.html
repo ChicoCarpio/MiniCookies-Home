@@ -172,7 +172,7 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -304,7 +304,7 @@ botonAImagenes.addEventListener('click', async () => {
     const formato = document.getElementById('formato').value;
     const extension = formato === 'image/png' ? 'png' : 'jpg';
     const escala = parseFloat(document.getElementById('escala').value);
-    const zip = new JSZip();
+    const zip = new ZipPropio();
     const cantidadDigitos = String(pdf.numPages).length;
 
     for (let i = 1; i <= pdf.numPages; i++) {

@@ -9,11 +9,11 @@
   },
   "scripts": {
     "build": "node build.mjs && node build.mjs --destino=seguro",
-    "revisar": "npm run build && node revisar-interfaz.mjs",
-    "probar": "npm run build && node probar-funciones.mjs",
+    "revisar": "npm run build && node ../Herramientas-del-sitio/revisar-interfaz.mjs",
+    "probar": "npm run build && node ../Herramientas-del-sitio/probar-funciones.mjs",
     "preview": "node build.mjs && npx --yes http-server dist -p 8899 -c-1 -o",
-    "respaldar": "node respaldar-librerias.mjs",
-    "comparar-pptx": "node comparar-pptx.mjs",
+    "respaldar": "node ../Herramientas-del-sitio/respaldar-librerias.mjs",
+    "comparar-pptx": "node ../Investigaciones/investigacion-motor-powerpoint/comparar-pptx/comparar-pptx.mjs",
     "build:principal": "node build.mjs",
     "build:seguro": "node build.mjs --destino=seguro"
   },

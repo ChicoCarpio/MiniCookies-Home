@@ -87,8 +87,10 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
-<script src="../assets/js/ooxml-paquete.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -139,7 +141,7 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.disabled = true;
   botonDividir.textContent = t('boton-dividir-procesando');
   try {
-    const zip = new JSZip();
+    const zip = new ZipPropio();
     const usados = new Set();
     const nombreUnico = (nombreHoja) => {
       const base = nombreHoja.replace(/[\/\\?*\[\]:"<>|]/g, '-').trim() || 'hoja';
@@ -151,13 +153,13 @@ botonDividir.addEventListener('click', async () => {
 
     if (esOoxml(archivoActual)) {
       // .xlsx/.xlsm: cada archivo sale del original con solo su hoja
-      // (reordenarHojasExcel en assets/js/ooxml-paquete.js), así se conserva
+      // (XlsxPaquete.reordenarHojas en assets/js/xlsx-paquete.js), así se conserva
       // todo el formato, las imágenes y los gráficos de esa hoja.
       const bytesOriginales = await archivoActual.arrayBuffer();
       const extension = /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
       for (const nombreHoja of libroActual.SheetNames) {
-        const libroZip = await JSZip.loadAsync(bytesOriginales);
-        await reordenarHojasExcel(libroZip, [nombreHoja]);
+        const libroZip = await ZipPropio.loadAsync(bytesOriginales);
+        await XlsxPaquete.reordenarHojas(libroZip, [nombreHoja]);
         const bytes = await libroZip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
         zip.file(`${nombreUnico(nombreHoja)}.${extension}`, bytes);
       }

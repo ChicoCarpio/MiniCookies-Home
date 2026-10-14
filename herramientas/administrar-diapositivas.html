@@ -100,7 +100,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/jszip/3.10.1/jszip.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
@@ -171,7 +171,7 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 async function cargarPresentacion(archivo) {
   cargando.style.display = 'block';
   try {
-    zipActual = await JSZip.loadAsync(archivo);
+    zipActual = await ZipPropio.loadAsync(archivo);
     archivoOriginal = archivo;
     const archivoRels = zipActual.file('ppt/_rels/presentation.xml.rels');
     const archivoPresentacion = zipActual.file('ppt/presentation.xml');
@@ -222,7 +222,7 @@ botonGuardar.addEventListener('click', async () => {
     // (assets/js/ooxml-paquete.js) reordena la lista y, si se quitó alguna
     // diapositiva, borra también su contenido (XML, imágenes, notas) del
     // paquete y la saca de secciones y presentaciones personalizadas.
-    const zip = await JSZip.loadAsync(archivoOriginal);
+    const zip = await ZipPropio.loadAsync(archivoOriginal);
     await conservarDiapositivas(zip, diapositivas.map(({ rId }) => rId));
 
     const blobFinal = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
