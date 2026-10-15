@@ -181,7 +181,9 @@ const PptxGrafico = (() => {
     const sombrear = clasico && grupos.some((g) => g.tipo === 'circular' || g.tipo === 'anillo');
     const automatico = (i) => {
       const acento = r.acento((i % 6) + 1);
-      const base = sombrear ? { r: Math.round(acento.r * 0.876), g: Math.round(acento.g * 0.876), b: Math.round(acento.b * 0.876), a: acento.a } : acento;
+      // Los sectores de un circular de Excel van oscurecidos como un `shade` de 76 % en luz lineal (exacto en los 6 colores del tema medidos en el PDF de Excel)
+      const sombra = (c) => { const l = c / 255 <= 0.04045 ? c / 255 / 12.92 : Math.pow((c / 255 + 0.055) / 1.055, 2.4), v = 0.76 * l; return Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); };
+      const base = sombrear ? { r: sombra(acento.r), g: sombra(acento.g), b: sombra(acento.b), a: acento.a } : acento;
       const vuelta = Math.floor(i / 6);
       if (!vuelta) return base;
       const k = [1, 0.6, 1.4, 0.8, 1.2][vuelta % 5];
