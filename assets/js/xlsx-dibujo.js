@@ -597,8 +597,11 @@
             pal.forEach((q, j) => { escribir(ctx, q, RD(xx), y); xx += wp[j] + hueco; });
             continue;
           }
-          if (h === 'right') x = x1 - PAD_X - w - sangria;
-          else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w) / 2 + (sangria ? sangria / 2 : 0);
+          // medido contra Excel (corpus 42-cursiva, 5 fuentes × 5 tamaños): en cursiva Excel cuenta ≈ 0,18 × la letra de más al ancho del texto,
+          // y al centrar suma además ≈ 0,075 × la letra a la derecha, sea cursiva o no
+          const sobreCursiva = fu.cursiva ? 0.18 * px : 0;
+          if (h === 'right') x = x1 - PAD_X - w - sangria - sobreCursiva;
+          else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w - sobreCursiva) / 2 + (sangria ? sangria / 2 : 0) + 0.075 * px;
           else x = x0 + 1 + PAD_X + sangria + Math.max(0, Math.round((px - 15) / 10));
           if (runs) { tramos(ctx, libro, runs, fu, RD(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
           escribir(ctx, l, RD(x), y);
