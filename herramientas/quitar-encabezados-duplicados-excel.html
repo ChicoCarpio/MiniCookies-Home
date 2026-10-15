@@ -370,7 +370,8 @@ botonProcesar.addEventListener('click', async () => {
       const hojasSalida = [];
       for (const h of libroActual.hojas) {
         const hoja = await hojaLeida(h.indice);
-        let filas = hoja.matrizValores(true);
+        // sin filas quitadas las fórmulas siguen valiendo tal cual; con filas quitadas sus referencias cambiarían y quedan como valor
+        let filas = hoja.matrizValores(true, duplicadas === 0 ? { formulas: { hojas: new Set(libroActual.hojas.map((x) => x.nombre.toLowerCase())) } } : undefined);
         let combinadas = hoja.combinadas;
         if (h.indice === indiceElegido && duplicadas > 0) {
           const absolutas = new Set([...repetidas].map((r) => hoja.f0 + r));

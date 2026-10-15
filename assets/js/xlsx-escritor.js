@@ -13,6 +13,10 @@
 //     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n, autofiltro?: bool (botones de filtro sobre todo el rango) }]; valor: número,
 //     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy'; hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
+//     Fórmulas: un valor { formula: 'SUM(A1:A3)', valor?: …, formato? } escribe la fórmula (sin '=') con su último resultado guardado (valor: lo mismo que una celda
+//     normal, incluido { valor, formato }, o nada) y pide a Excel recalcular al abrir. Para pasar fórmulas de otro libro sin romperlas: XlsxEscritor.formulaConservable(formula,
+//     nombresDeHojas) dice si se puede llevar tal cual (sin nombres definidos, tablas ni libros externos, y solo con hojas que existen) y renombrarHojas(formula, mapa) cambia
+//     los nombres de hoja que la fórmula cita.
 (function () {
   const X = XmlEditar;
   const MAX_FILA = 1048576, MAX_COL = 16384, MAX_TEXTO = 32767, MAX_CAMBIOS = 5000000;
@@ -288,6 +292,60 @@
   };
   const MAX_CARACTERES = 400000000;   // el límite de una cadena en V8 es ~536 millones de caracteres
 
+  // ---- fórmulas ---------------------------------------------------------------------------------------------------
+  const MAX_FORMULA = 8192;
+  // <c> de una celda con fórmula y su último resultado; null si la fórmula no se puede escribir.
+  function formulaXml(ref, v, estiloDeFormato) {
+    const f = v.formula.replace(/^=/, '');
+    if (!f || f.length > MAX_FORMULA || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(f)) return null;
+    let x = v.valor, est = 0;
+    if (x && typeof x === 'object' && !(x instanceof Date) && 'formato' in x && 'valor' in x) { est = estiloDeFormato(x.formato); x = x.valor; }
+    const s = est ? ` s="${est}"` : '';
+    const ft = `<f>${X.esc(f)}</f>`;
+    if (x instanceof Date) { if (Number.isNaN(x.getTime())) x = null; else { x = serialDeFecha(x, false); if (!est) return `<c r="${ref}" s="${Number.isInteger(x) ? ESTILO.fecha : ESTILO.fechaHora}">${ft}<v>${x}</v></c>`; } }
+    if (typeof x === 'number') return Number.isFinite(x) ? `<c r="${ref}"${s}>${ft}<v>${String(x)}</v></c>` : `<c r="${ref}"${s}>${ft}</c>`;
+    if (typeof x === 'boolean') return `<c r="${ref}"${s} t="b">${ft}<v>${x ? 1 : 0}</v></c>`;
+    if (x && typeof x === 'object' && typeof x.error === 'string' && ERRORES.has(x.error)) return `<c r="${ref}"${s} t="e">${ft}<v>${x.error}</v></c>`;
+    if (typeof x === 'string' && x.length <= MAX_TEXTO) return `<c r="${ref}"${s} t="str">${ft}<v>${escTexto(x)}</v></c>`;
+    return `<c r="${ref}"${s}>${ft}</c>`;
+  }
+
+  // ¿Se puede llevar esta fórmula a otro libro sin que cambie de sentido? Solo si cita hojas que existen en el libro nuevo (`nombresHojas`: Set en minúsculas) y no usa
+  // nombres definidos, referencias de tabla ni otros libros: esos no viajan con las celdas.
+  const PREFIJO_HOJA = /('(?:[^']|'')*'|[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*)!/g;
+  function formulaConservable(formula, nombresHojas) {
+    if (typeof formula !== 'string') return false;
+    let t = formula.replace(/^=/, '');
+    if (!t || t.length > MAX_FORMULA) return false;
+    t = t.replace(/"(?:[^"]|"")*"/g, '""').replace(/#(?:REF!|N\/A|DIV\/0!|NAME\?|NULL!|NUM!|VALUE!)/g, ' ');   // los errores literales no son hojas
+    if (t.includes('[')) return false;
+    let ok = true;
+    t = t.replace(PREFIJO_HOJA, (m, p) => {
+      const nombre = (p[0] === "'" ? p.slice(1, -1).replace(/''/g, "'") : p).toLowerCase();
+      if (!nombresHojas.has(nombre)) ok = false;
+      return ' ';
+    });
+    if (!ok) return false;
+    const re = /[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*/g;
+    let m;
+    while ((m = re.exec(t))) {
+      const sig = t[m.index + m[0].length];
+      if (sig === '(') continue;   // función
+      if (/^[A-Za-z]{1,3}\d+$/.test(m[0]) || /^[A-Za-z]{1,3}$/.test(m[0]) || /^(?:TRUE|FALSE)$/i.test(m[0])) continue;   // celda, columna entera, lógico
+      return false;                // un nombre definido
+    }
+    return true;
+  }
+
+  // Cambia los nombres de hoja que cita una fórmula. mapa: Map (nombre en minúsculas → nombre nuevo).
+  function renombrarHojas(formula, mapa) {
+    return formula.replace(/"(?:[^"]|"")*"|#REF!|('(?:[^']|'')*'|[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*)!/g, (m, p) => {
+      if (!p) return m;
+      const nombre = (p[0] === "'" ? p.slice(1, -1).replace(/''/g, "'") : p).toLowerCase();
+      return mapa.has(nombre) ? "'" + mapa.get(nombre).replace(/'/g, "''") + "'!" : m;
+    });
+  }
+
   // Rechaza con ErrorEscritor lo que no cabe en memoria en vez de dejar escapar un RangeError ("Invalid string length").
   async function crearLibro(hojas, opciones) {
     if (Array.isArray(hojas)) {
@@ -308,7 +366,7 @@
     const zip = new ZipPropio();
     const usados = new Set(), nombres = [];
     const textos = [], indiceTexto = new Map();
-    let totalTextos = 0;
+    let totalTextos = 0, hayFormulas = false;
     const formatos = new Map();   // código de formato → índice de cellXfs (se añaden después de los de ESTILO)
     const estiloDeFormato = (codigo) => {
       if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) return 0;
@@ -332,6 +390,12 @@
           maxCol = Math.max(maxCol, c + 1);
           const ref = numeroACol(c) + (f + 1);
           const cab = f === 0 && opciones.negritaPrimeraFila;
+          if (v && typeof v === 'object' && !(v instanceof Date) && typeof v.formula === 'string') {
+            const x = formulaXml(ref, v, estiloDeFormato);
+            if (x) { celdas.push(x); hayFormulas = true; return; }
+            v = v.valor;   // fórmula que no se puede escribir (vacía, enorme o con caracteres de control): queda su valor
+            if (v === null || v === undefined || v === '') return;
+          }
           if (v && typeof v === 'object' && !(v instanceof Date) && 'formato' in v && 'valor' in v) {
             const est = estiloDeFormato(v.formato), x = v.valor;
             if (x instanceof Date) { if (Number.isNaN(x.getTime())) return; celdas.push(celdaXml(ref, est, serialDeFecha(x, opciones.fechasUtc))); return; }
@@ -372,7 +436,7 @@
       + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>');
     zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
     zip.file('xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView/></bookViews><sheets>`
-      + nombres.map((n, k) => `<sheet name="${X.escAttr(n)}" sheetId="${k + 1}" r:id="rId${k + 1}"/>`).join('') + '</sheets></workbook>');
+      + nombres.map((n, k) => `<sheet name="${X.escAttr(n)}" sheetId="${k + 1}" r:id="rId${k + 1}"/>`).join('') + '</sheets>' + (hayFormulas ? '<calcPr fullCalcOnLoad="1"/>' : '') + '</workbook>');
     zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       + hojasXml.map((_, k) => `<Relationship Id="rId${k + 1}" Type="${R}/worksheet" Target="worksheets/sheet${k + 1}.xml"/>`).join('')
       + `<Relationship Id="rId${hojasXml.length + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${hojasXml.length + 2}" Type="${R}/sharedStrings" Target="sharedStrings.xml"/></Relationships>`);
@@ -383,5 +447,5 @@
     return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   }
 
-  globalThis.XlsxEscritor = { editarCeldas, celdasProtegidas, crearLibro, nombreHoja, ErrorEscritor };
+  globalThis.XlsxEscritor = { editarCeldas, celdasProtegidas, crearLibro, nombreHoja, formulaConservable, renombrarHojas, ErrorEscritor };
 })();

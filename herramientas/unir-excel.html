@@ -160,6 +160,7 @@ botonUnir.addEventListener('click', async () => {
   try {
     const hojasFinal = [];
     const nombresUsados = new Set();
+    const pendientes = [];   // [{ archivo hoja, nombre, hoja }] y, por archivo, cómo se llamaba cada hoja y cómo quedó
 
     for (const archivo of archivos) {
       const libroOrigen = await LectorHojas.abrir(archivo);
@@ -173,12 +174,20 @@ botonUnir.addEventListener('click', async () => {
       // archivo, como antes).
       // Cada hoja se copia con sus valores (números y fechas siguen siendo números), su formato de número, los anchos de
       // columna y las celdas combinadas, en las mismas celdas que en el original.
+      // Las fórmulas viajan si siguen valiendo en el libro nuevo: sus citas a otras hojas del mismo archivo se renombran como las hojas, y las que usan
+      // nombres definidos, tablas o hojas que no vinieron quedan como valor.
+      const mapa = new Map(), propias = new Set();
       for (const hojaOrigen of libroOrigen.hojas) {
         const hoja = await libroOrigen.cargar(hojaOrigen.indice);
         const etiquetaDeseada = tieneVariasHojas ? `${nombreBase} - ${hojaOrigen.nombre}` : nombreBase;
         const nombreHoja = nombreDeHojaUnico(etiquetaDeseada, nombresUsados);
-        hojasFinal.push({ nombre: nombreHoja, filas: hoja.matrizValores(true), anchos: hoja.anchos, combinadas: hoja.combinadas });
+        mapa.set(hojaOrigen.nombre.toLowerCase(), nombreHoja);
+        propias.add(nombreHoja.toLowerCase());
+        pendientes.push({ nombre: nombreHoja, hoja, mapa, propias });
       }
+    }
+    for (const p of pendientes) {
+      hojasFinal.push({ nombre: p.nombre, filas: p.hoja.matrizValores(true, { formulas: { hojas: p.propias, mapa: p.mapa } }), anchos: p.hoja.anchos, combinadas: p.hoja.combinadas });
     }
 
     const bytesFinales = await XlsxEscritor.crearLibro(hojasFinal);

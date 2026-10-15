@@ -198,12 +198,16 @@ async function repararSoloDatos(archivo, bytes) {
   try {
     const libro = await LectorHojas.abrir(archivo);
     const hojasConDatos = [];
+    const leidas = [];
     for (const h of libro.hojas) {
       try {
         const hoja = await libro.cargar(h.indice);
-        if (hoja.nfilas > 0) hojasConDatos.push({ nombre: h.nombre, filas: hoja.matrizValores(true), anchos: hoja.anchos, combinadas: hoja.combinadas });
+        if (hoja.nfilas > 0) leidas.push({ h, hoja });
       } catch (errorHoja) { console.warn('Hoja ilegible:', h.nombre, errorHoja); }
     }
+    // Las fórmulas se conservan mientras solo citen hojas que quedan en el libro reparado (sin nombres definidos ni tablas: no viajan).
+    const formulas = { hojas: new Set(leidas.map(({ h }) => h.nombre.toLowerCase())) };
+    for (const { h, hoja } of leidas) hojasConDatos.push({ nombre: h.nombre, filas: hoja.matrizValores(true, { formulas }), anchos: hoja.anchos, combinadas: hoja.combinadas });
     if (hojasConDatos.length) {
       const mensaje = hojasConDatos.length === libro.hojas.length
         ? t('mensaje-todo-ok')

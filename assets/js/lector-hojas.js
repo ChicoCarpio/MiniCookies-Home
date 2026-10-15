@@ -17,6 +17,8 @@
 //   hoja.texto(r, c) / hoja.fila(r)                          // lo que Excel muestra (formato de número aplicado); r y c desde 0 dentro del rango
 //   hoja.valor(r, c)                                         // el valor para XlsxEscritor.crearLibro: número | texto | lógico | { error } | { valor, formato } | undefined
 //   hoja.formula(r, c)                                       // texto de la fórmula sin "=" (o null)
+//   hoja.formulaSimple(r, c)                                 // lo mismo, pero null si es matricial o tabla de datos
+//   hoja.matrizValores(true, { formulas: { hojas, mapa } })  // con las fórmulas que se puedan llevar al libro de destino (ver abajo)
 //   hoja.matrizTextos() / hoja.matrizValores()               // todo el rango (para hojas chicas)
 // Los separadores del texto siguen el idioma de la página (es: 1.234,50; en: 1,234.50); libro.opciones los cambia.
 (function () {
@@ -44,10 +46,19 @@
     h.fila = h.fila || ((r) => { const a = new Array(h.ncols); for (let c = 0; c < h.ncols; c++) a[c] = h.texto(r, c); return a; });
     h.matrizTextos = () => { const m = []; for (let r = 0; r < h.nfilas; r++) m.push(h.fila(r)); return m; };
     // desdeA1: deja las filas y columnas vacías de antes del rango, para que cada dato quede en la misma celda que en el original.
-    h.matrizValores = (desdeA1) => {
+    // opc.formulas = { hojas: Set de nombres (minúsculas) del libro de destino, mapa?: Map nombre viejo (minúsculas) → nombre nuevo }: las celdas con fórmula salen como
+    // { formula, valor } cuando la fórmula se puede llevar al libro nuevo (XlsxEscritor.formulaConservable); si no, solo su valor. Requiere xlsx-escritor.js.
+    h.matrizValores = (desdeA1, opc) => {
       const m = [], f0 = desdeA1 ? h.f0 : 0, c0 = desdeA1 ? h.c0 : 0;
+      const pf = opc && opc.formulas;
+      const celda = !pf || !h.formulaSimple ? (r, c) => h.valor(r, c) : (r, c) => {
+        const v = h.valor(r, c), fx = h.formulaSimple(r, c);
+        if (!fx) return v;
+        const f = pf.mapa ? XlsxEscritor.renombrarHojas(fx, pf.mapa) : fx;
+        return XlsxEscritor.formulaConservable(f, pf.hojas) ? { formula: f, valor: v } : v;
+      };
       for (let f = 0; f < f0; f++) m.push([]);
-      for (let r = 0; r < h.nfilas; r++) { const a = new Array(c0 + h.ncols).fill(undefined); for (let c = 0; c < h.ncols; c++) a[c0 + c] = h.valor(r, c); m.push(a); }
+      for (let r = 0; r < h.nfilas; r++) { const a = new Array(c0 + h.ncols).fill(undefined); for (let c = 0; c < h.ncols; c++) a[c0 + c] = celda(r, c); m.push(a); }
       return m;
     };
     return h;
@@ -88,6 +99,8 @@
         return codigo && codigo !== 'General' ? { valor: n, formato: codigo } : n;
       },
       formula(r, c) { const i = indice(r, c); return i < 0 ? null : C.formulaDe(i); },
+      // la fórmula de una celda que se puede escribir sola: sin las matriciales ni las tablas de datos (esas viven en un rango)
+      formulaSimple(r, c) { const i = indice(r, c); if (i < 0) return null; const fx = C.formulas.get(i); return !fx || fx.tipo === 'array' || fx.tipo === 'dataTable' ? null : C.formulaDe(i); },
     });
   }
 
@@ -123,6 +136,7 @@
         return x.t === 'b' ? !!x.v : String(x.v);
       },
       formula(r, c) { const x = celda(r, c); return x && x.f ? String(x.f) : null; },
+      formulaSimple(r, c) { const x = celda(r, c); return x && x.f && !x.F ? String(x.f) : null; },
     });
   }
 
