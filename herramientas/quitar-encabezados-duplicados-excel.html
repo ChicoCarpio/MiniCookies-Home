@@ -40,7 +40,6 @@ window.i18nPagina = {
     'mensaje-sin-duplicados': 'No se encontró ninguna fila duplicada en "{hoja}".',
     'mensaje-con-duplicados': 'Se encontraron y quitaron {n} fila(s) duplicada(s) en "{hoja}".',
     'aviso-reconstruido': 'No se pudo conservar el archivo tal cual ({motivo}): se creó un libro nuevo con los valores, el formato básico y las celdas combinadas.',
-    'motivo-otro-formato': 'este formato no se puede editar en el lugar',
     'motivo-no-movible': 'el archivo tiene algo que no se puede mover con las filas, como notas, tablas dinámicas, controles o fórmulas matriciales',
     'nota-formato': 'En un .xlsx o .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas (sus referencias se acomodan), tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si el archivo tiene algo que no se puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores, el formato de número, los anchos de columna y las celdas combinadas.',
     'error-procesar': 'No se pudo procesar el archivo'
@@ -67,7 +66,6 @@ window.i18nPagina = {
     'mensaje-sin-duplicados': 'No duplicate rows were found in "{hoja}".',
     'mensaje-con-duplicados': '{n} duplicate row(s) were found and removed in "{hoja}".',
     'aviso-reconstruido': 'The file could not be kept as it was ({motivo}): a new workbook was created with the values, basic formatting and merged cells.',
-    'motivo-otro-formato': 'this format cannot be edited in place',
     'motivo-no-movible': 'the file has something that cannot move with the rows, such as notes, pivot tables, controls or array formulas',
     'nota-formato': 'In an .xlsx or .xlsm file the rows are removed in the file itself, like Excel’s “Delete rows”: colors, borders, formulas (their references are adjusted), tables, images and charts are kept. With .xls, .xlsb or .ods, or if the file has something that can’t be moved that way (notes, pivot tables…), a new workbook is built with the values, number formats, column widths and merged cells.',
     'error-procesar': 'Couldn’t process the file'
@@ -140,8 +138,6 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
@@ -171,8 +167,8 @@ const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
 const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
 const nombreHojaVista = document.getElementById('nombreHojaVista');
 
-// LectorHojas (assets/js/lector-hojas.js) lee el archivo (motor propio, o SheetJS para .xlsb/.xls/.ods) y XlsxEscritor.crearLibro escribe
-// el resultado: valores, formato de número, anchos de columna y celdas combinadas.
+// LectorHojas (assets/js/lector-hojas.js) lee el archivo (un .xlsb, .xls u .ods se pasa antes a .xlsx) y, si no se puede
+// quitar en el lugar, XlsxEscritor.crearLibro escribe el resultado: valores, formato de número, anchos de columna y celdas combinadas.
 let libroActual = null;
 let hojasLeidas = new Map();   // índice de hoja → hoja de LectorHojas
 let columnasSeleccionadas = new Set(); // posiciones de columna (desde 0 dentro del rango de la hoja) a usar como criterio de duplicado
@@ -347,13 +343,13 @@ botonProcesar.addEventListener('click', async () => {
     const duplicadas = repetidas.size;
 
     // En un .xlsx o .xlsm las filas se quitan en el lugar, como "Eliminar filas" de Excel: lo demás (estilos, fórmulas, tablas, gráficos…) queda
-    // tal cual y las referencias se acomodan. Si el archivo trae algo que no se puede mover así (notas, tablas dinámicas…), o es de otro formato,
-    // se arma un libro nuevo con los valores y el formato básico.
+    // tal cual y las referencias se acomodan (un .xlsb, .xls u .ods, igual, sobre el .xlsx en que se convirtió). Si el archivo trae algo que no se
+    // puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores y el formato básico.
     let bytesFinales = null;
     let motivoReconstruido = '';
     if (libroActual.libroXlsx) {
       try {
-        const bytesOriginal = new Uint8Array(await archivoActual.arrayBuffer());
+        const bytesOriginal = libroActual.bytesXlsx || new Uint8Array(await archivoActual.arrayBuffer());
         if (duplicadas === 0) bytesFinales = bytesOriginal;
         else {
           const libroEdicion = await LibroXlsx.abrir(bytesOriginal);
@@ -364,11 +360,9 @@ botonProcesar.addEventListener('click', async () => {
         console.warn('No se pudo quitar en el lugar:', error);
         motivoReconstruido = t('motivo-no-movible');
       }
-    } else if (!libroActual.motor) {
-      motivoReconstruido = t('motivo-otro-formato');
     }
     // Un .xlsm editado en el lugar sigue siendo un libro con macros: con extensión .xlsx Excel no lo abre ("el formato o la extensión no son válidos").
-    const extension = bytesFinales && /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
+    const extension = bytesFinales && !libroActual.bytesXlsx && /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
     if (!bytesFinales) {
       // Solo se limpia la hoja elegida: las demás hojas del archivo se conservan, en el mismo orden.
       const hojasSalida = [];
@@ -376,13 +370,16 @@ botonProcesar.addEventListener('click', async () => {
         const hoja = await hojaLeida(h.indice);
         // sin filas quitadas las fórmulas siguen valiendo tal cual; con filas quitadas sus referencias cambiarían y quedan como valor
         let filas = hoja.matrizValores(true, duplicadas === 0 ? { formulas: { hojas: new Set(libroActual.hojas.map((x) => x.nombre.toLowerCase())) } } : undefined);
-        let combinadas = hoja.combinadas;
+        let combinadas = hoja.combinadas, filasOcultas = hoja.filasOcultas;
         if (h.indice === indiceElegido && duplicadas > 0) {
           const absolutas = new Set([...repetidas].map((r) => hoja.f0 + r));
           filas = filas.filter((_, f) => !absolutas.has(f));
           combinadas = combinadasTrasQuitar(combinadas, absolutas);
+          // las filas ocultas que quedan suben tantos lugares como filas quitadas tenían encima
+          const quitadas = [...absolutas].sort((a, b) => a - b);
+          filasOcultas = filasOcultas.filter((f) => !absolutas.has(f)).map((f) => f - quitadas.filter((q) => q < f).length);
         }
-        hojasSalida.push({ nombre: h.nombre, filas, anchos: hoja.anchos, combinadas });
+        hojasSalida.push({ nombre: h.nombre, filas, ...hoja.opcionesLibro(), combinadas, filasOcultas, estado: h.estado });
       }
       bytesFinales = await XlsxEscritor.crearLibro(hojasSalida);
     }

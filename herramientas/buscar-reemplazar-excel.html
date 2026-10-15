@@ -43,7 +43,7 @@ window.i18nPagina = {
     'nota-conserva': 'El archivo original se edita en el lugar: solo cambian las celdas que coinciden, y se conservan colores, bordes, fuentes, fórmulas, imágenes y gráficos. Las celdas de un encabezado de tabla o de una fórmula matricial no se cambian.',
     'mensaje-omitidas': 'Se omitieron {n} coincidencia(s) en celdas que no se pueden cambiar (encabezados o totales de tabla, o fórmulas matriciales).',
     'error-solo-omitidas': 'Las coincidencias están todas en celdas que no se pueden cambiar (encabezados o totales de tabla, o fórmulas matriciales).',
-    'nota-formato': 'Este formato (.xlsb, .xls u .ods) no se puede editar en el lugar: el archivo se vuelve a armar con los datos: se conservan los valores, fórmulas y formatos de número (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.',
+    'nota-formato': 'Este formato (.xlsb, .xls u .ods) no se puede editar en el lugar: el archivo se vuelve a armar con los datos: se conservan los valores y los formatos de número (fechas, monedas), pero se pierden las fórmulas (quedan sus valores), colores, bordes, fuentes, imágenes y gráficos.',
     'nota-formulas': 'Las fórmulas nunca se tocan (para no romper cálculos). Si el texto que reemplazás está dentro de una fecha, número o moneda formateada, esa celda pasa a ser texto plano con el resultado — deja de ser una fecha/número real (por ejemplo, ya no se podría usar en una cuenta).',
     'error-sin-buscar': 'Escribí el texto a buscar.',
     'error-sin-columna': 'Tildá al menos una columna, o elegí "Toda la hoja".',
@@ -76,7 +76,7 @@ window.i18nPagina = {
     'nota-conserva': 'The original file is edited in place: only the matching cells change, and colors, borders, fonts, formulas, images and charts are kept. Cells in a table header or an array formula are not changed.',
     'mensaje-omitidas': '{n} match(es) in cells that can’t be changed were skipped (table headers or totals, or array formulas).',
     'error-solo-omitidas': 'All the matches are in cells that can’t be changed (table headers or totals, or array formulas).',
-    'nota-formato': 'This format (.xlsb, .xls or .ods) can’t be edited in place: the file is rebuilt from its data: values, formulas and number formats (dates, currencies) are kept, but colors, borders, fonts, images and charts are lost.',
+    'nota-formato': 'This format (.xlsb, .xls or .ods) can’t be edited in place: the file is rebuilt from its data: values and number formats (dates, currencies) are kept, but formulas (their values stay), colors, borders, fonts, images and charts are lost.',
     'nota-formulas': 'Formulas are never touched (so calculations don’t break). If the text you’re replacing is inside a formatted date, number or currency, that cell becomes plain text with the result — it stops being a real date/number (for example, it could no longer be used in a calculation).',
     'error-sin-buscar': 'Type the text to search for.',
     'error-sin-columna': 'Check at least one column, or choose "The whole sheet".',
@@ -180,8 +180,6 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
@@ -212,11 +210,11 @@ const notaConserva = document.getElementById('notaConserva');
 const notaReconstruye = document.getElementById('notaReconstruye');
 
 // LectorHojas (assets/js/lector-hojas.js) lee el archivo para la vista previa y para buscar. Un .xlsx o .xlsm se EDITA EN EL LUGAR con
-// XlsxEscritor.editarCeldas: solo cambian las celdas que coinciden y el resto del archivo queda tal cual. Lo que el motor aún no lee
-// (.xlsb, .xls, .ods) se rearma con SheetJS, como siempre.
+// XlsxEscritor.editarCeldas: solo cambian las celdas que coinciden y el resto del archivo queda tal cual. Un .xlsb, .xls u .ods
+// se pasa antes a .xlsx (valores y formatos de número) y se edita igual.
 let libroActual = null;        // LectorHojas
 let archivoActual = null;
-let editaEnElLugar = false;    // .xlsx / .xlsm
+let esOoxml = false;           // el archivo es un .xlsx / .xlsm (si no, se edita el .xlsx en que LectorHojas convirtió un .xlsb, .xls u .ods)
 let hojasLeidas = new Map();   // índice de hoja → hoja de LectorHojas
 let columnasSeleccionadas = new Set(); // índices de columna (desde 0 en la hoja), solo se usa si el ámbito es "columnas"
 let numeroDeVista = 0;         // para descartar una vista previa que terminó cuando ya se pidió otra
@@ -263,7 +261,7 @@ async function mostrarVistaPrevia() {
   const filaLimite = Math.min(hoja.nfilas, FILAS_VISTA_PREVIA);
   // las celdas que el reemplazo se salta (encabezados y totales de tabla, fórmulas matriciales) no se pintan como cambiables
   let protegida = () => false;
-  if (editaEnElLugar) { try { protegida = XlsxEscritor.celdasProtegidas(await libroActual.libroXlsx.cargarHoja(indiceHoja)); } catch (error) { console.warn(error); } }
+  try { protegida = XlsxEscritor.celdasProtegidas(await libroActual.libroXlsx.cargarHoja(indiceHoja)); } catch (error) { console.warn(error); }
   if (miNumero !== numeroDeVista) return;
   let html = '<table class="tabla-datos"><thead><tr>';
   for (let c = 0; c < hoja.ncols; c++) {
@@ -323,9 +321,9 @@ async function cargarLibro(archivo) {
   libroActual = libro;
   archivoActual = archivo;
   hojasLeidas = new Map();
-  editaEnElLugar = libro.motor && /\.(xlsx|xlsm)$/i.test(archivo.name);
-  notaConserva.style.display = editaEnElLugar ? '' : 'none';
-  notaReconstruye.style.display = editaEnElLugar ? 'none' : '';
+  esOoxml = !libro.bytesXlsx;
+  notaConserva.style.display = esOoxml ? '' : 'none';
+  notaReconstruye.style.display = esOoxml ? 'none' : '';
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonProcesar.disabled = false;
   resultado.classList.remove('visible');
@@ -369,9 +367,9 @@ function recorrerCoincidencias(hoja, regex, reemplazo, ambito, alEncontrar) {
   }
 }
 
-// .xlsx / .xlsm: edita el original en el lugar.
+// Edita el libro en el lugar: el original (.xlsx / .xlsm) o el .xlsx en que se convirtió un .xlsb, .xls u .ods.
 async function reemplazarEnElLugar(indices, regex, reemplazo, ambito) {
-  const libro = await LibroXlsx.abrir(new Uint8Array(await archivoActual.arrayBuffer()));   // siempre del original: otro clic no suma cambios
+  const libro = await LibroXlsx.abrir(libroActual.bytesXlsx || new Uint8Array(await archivoActual.arrayBuffer()));   // siempre del original: otro clic no suma cambios
   const pendientes = [];
   let total = 0, omitidas = 0;
   for (const indice of indices) {
@@ -390,49 +388,7 @@ async function reemplazarEnElLugar(indices, regex, reemplazo, ambito) {
   if (total === 0) throw new Error(t(omitidas ? 'error-solo-omitidas' : 'error-sin-coincidencias'));
   for (const p of pendientes) await XlsxEscritor.editarCeldas(libro, p.indice, p.cambios);
   const bytes = await libro.zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
-  return { bytes, total, omitidas, extension: /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx' };
-}
-
-// .xlsb / .xls / .ods: el libro se vuelve a armar con SheetJS.
-async function reemplazarConSheetJs(indices, regex, reemplazo, ambito) {
-  const leidas = new Map();
-  for (const indice of indices) leidas.set(indice, await hojaLeida(indice));   // su texto es el de la vista previa
-  const libro = XLSX.read(await archivoActual.arrayBuffer(), { type: 'array', cellNF: true, cellStyles: true });
-  let totalReemplazos = 0;
-  indices.forEach((indice) => {
-    const hoja = libro.Sheets[libro.SheetNames[indice]];
-    const vista = leidas.get(indice);
-    Object.keys(hoja).forEach((direccionCelda) => {
-      if (direccionCelda.startsWith('!')) return;
-      const celda = hoja[direccionCelda];
-      if (celda.f) return; // no se tocan fórmulas, para no romper cálculos
-      if (ambito === 'columnas' && !columnasSeleccionadas.has(XLSX.utils.decode_cell(direccionCelda).c)) return;
-
-      if (celda.t === 's' && typeof celda.v === 'string') {
-        const coincidencias = celda.v.match(regex);
-        if (coincidencias) {
-          totalReemplazos += coincidencias.length;
-          celda.v = celda.v.replace(regex, () => reemplazo);
-          if (celda.w !== undefined) celda.w = celda.v;
-        }
-        return;
-      }
-      const posicion = XLSX.utils.decode_cell(direccionCelda);
-      const fr = posicion.r - vista.f0, fc = posicion.c - vista.c0;
-      const textoMostrado = fr >= 0 && fc >= 0 && fr < vista.nfilas && fc < vista.ncols ? vista.texto(fr, fc) : '';
-      if (!textoMostrado) return;
-      const coincidencias = textoMostrado.match(regex);
-      if (coincidencias) {
-        totalReemplazos += coincidencias.length;
-        celda.t = 's';
-        celda.v = textoMostrado.replace(regex, () => reemplazo);
-        celda.w = celda.v;
-        delete celda.z; // formato numérico/fecha — ya no aplica a una celda de texto
-      }
-    });
-  });
-  if (totalReemplazos === 0) throw new Error(t('error-sin-coincidencias'));
-  return { bytes: XLSX.write(libro, { bookType: 'xlsx', type: 'array' }), total: totalReemplazos, omitidas: 0, extension: 'xlsx' };
+  return { bytes, total, omitidas, extension: esOoxml && /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx' };
 }
 
 botonProcesar.addEventListener('click', async () => {
@@ -450,9 +406,7 @@ botonProcesar.addEventListener('click', async () => {
 
     const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
     const indices = todasLasHojas ? libroActual.hojas.map(h => h.indice) : [hojaActualSeleccionada()];
-    const { bytes, total, omitidas, extension } = editaEnElLugar
-      ? await reemplazarEnElLugar(indices, regex, reemplazo, ambito)
-      : await reemplazarConSheetJs(indices, regex, reemplazo, ambito);
+    const { bytes, total, omitidas, extension } = await reemplazarEnElLugar(indices, regex, reemplazo, ambito);
 
     const tipo = extension === 'xlsm' ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     enlaceDescarga.href = URL.createObjectURL(new Blob([bytes], { type: tipo }));

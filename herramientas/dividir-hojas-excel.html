@@ -86,11 +86,15 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
 <script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -103,7 +107,8 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 const avisoFormato = document.getElementById('avisoFormato');
 
-let libroActual = null;
+let nombresHojas = [];   // las hojas del libro (y de gráfico), en su orden
+let lectorActual = null; // LectorHojas (assets/js/lector-hojas.js)
 let archivoActual = null;
 
 function esOoxml(archivo) {
@@ -116,16 +121,17 @@ async function mostrarArchivo(archivo) {
 
   archivoActual = archivo;
   try {
-    libroActual = XLSX.read(await archivo.arrayBuffer(), { type: 'array', cellNF: true, cellStyles: true });
+    lectorActual = await LectorHojas.abrir(archivo);
+    nombresHojas = lectorActual.libroMotor.hojas.filter((h) => h.tipo === 'hoja' || h.tipo === 'grafico').map((h) => h.nombre);
   } catch (error) {
     botonDividir.disabled = true;
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
   avisoFormato.style.display = esOoxml(archivo) ? 'none' : 'block';
-  infoHojas.textContent = t('info-hojas').replace('{n}', libroActual.SheetNames.length).replace('{lista}', libroActual.SheetNames.join(', '));
-  botonDividir.disabled = libroActual.SheetNames.length < 2;
-  if (libroActual.SheetNames.length < 2) {
+  infoHojas.textContent = t('info-hojas').replace('{n}', nombresHojas.length).replace('{lista}', nombresHojas.join(', '));
+  botonDividir.disabled = nombresHojas.length < 2;
+  if (nombresHojas.length < 2) {
     infoHojas.textContent += t('info-necesita-dos');
   }
 }
@@ -151,25 +157,15 @@ botonDividir.addEventListener('click', async () => {
       return nombre;
     };
 
-    if (esOoxml(archivoActual)) {
-      // .xlsx/.xlsm: cada archivo sale del original con solo su hoja
-      // (XlsxPaquete.reordenarHojas en assets/js/xlsx-paquete.js), así se conserva
-      // todo el formato, las imágenes y los gráficos de esa hoja.
-      const bytesOriginales = await archivoActual.arrayBuffer();
-      const extension = /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
-      for (const nombreHoja of libroActual.SheetNames) {
-        const libroZip = await ZipPropio.loadAsync(bytesOriginales);
-        await XlsxPaquete.reordenarHojas(libroZip, [nombreHoja]);
-        const bytes = await libroZip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
-        zip.file(`${nombreUnico(nombreHoja)}.${extension}`, bytes);
-      }
-    } else {
-      libroActual.SheetNames.forEach((nombreHoja) => {
-        const libroNuevo = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(libroNuevo, libroActual.Sheets[nombreHoja], nombreHoja);
-        const bytes = XLSX.write(libroNuevo, { bookType: 'xlsx', type: 'array' });
-        zip.file(`${nombreUnico(nombreHoja)}.xlsx`, bytes);
-      });
+    // Cada archivo sale del original con solo su hoja (XlsxPaquete.reordenarHojas en assets/js/xlsx-paquete.js), así se conserva todo el
+    // formato, las imágenes y los gráficos de esa hoja. Un .xlsb, .xls u .ods parte del .xlsx en que LectorHojas lo convirtió.
+    const bytesOriginales = lectorActual.bytesXlsx || new Uint8Array(await archivoActual.arrayBuffer());
+    const extension = !lectorActual.bytesXlsx && /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
+    for (const nombreHoja of nombresHojas) {
+      const libroZip = await ZipPropio.loadAsync(bytesOriginales);
+      await XlsxPaquete.reordenarHojas(libroZip, [nombreHoja]);
+      const bytes = await libroZip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+      zip.file(`${nombreUnico(nombreHoja)}.${extension}`, bytes);
     }
 
     // Los .xlsx ya van comprimidos: guardarlos sin recomprimir es más rápido.

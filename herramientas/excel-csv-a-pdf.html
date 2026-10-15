@@ -357,8 +357,6 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -408,7 +406,7 @@ let columnasOcultasHoja = new Set();
 let nombreArchivoActual = '';
 let nombreCompletoActual = '';
 let esCsvActual = false;
-let convertidoActual = false; // .xls, .xlsb u .ods: se pasaron a .xlsx con SheetJS antes de imprimir
+let convertidoActual = false; // .xls, .xlsb u .ods: se pasaron a .xlsx (sin estilos de celda) antes de imprimir
 let secuenciaCargaArchivo = 0;
 let secuenciaHoja = 0;
 let urlDescargaActual = null;
@@ -1140,7 +1138,7 @@ async function mostrarArchivo(archivo) {
   nombreCompletoActual = archivo.name;
   nombreArchivoActual = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
   esCsvActual = /\.csv$/i.test(archivo.name);
-  convertidoActual = !lector.motor;
+  convertidoActual = !!lector.bytesXlsx;
 
   const visibles = lector.hojas.filter(h => h.estado === 'visible').length;
   let opciones = lector.hojas.map(h => `<option value="${h.indice}">${escaparHtml(h.nombre)}</option>`).join('');

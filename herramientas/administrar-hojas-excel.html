@@ -103,11 +103,15 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
 <script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -120,7 +124,9 @@ const botonGuardar = document.getElementById('botonGuardar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
-let libroActual = null; // SheetJS — solo para la vista previa de celdas
+let lectorActual = null; // LectorHojas (assets/js/lector-hojas.js) — solo para la vista previa de celdas
+const previas = new Map(); // nombre de hoja → HTML de su vista previa (se arman de a una, al terminar de abrir el libro)
+let generacion = 0;        // para descartar las vistas previas de un libro que ya se cambió
 let zipActual = null;   // ZipPropio — para reordenar/eliminar sin perder formato
 let bytesActuales = null;
 let nombresHojas = [];
@@ -134,23 +140,43 @@ let nombreBaseActual = 'excel-reordenado';
 const FILAS_VISTA_PREVIA = 4;
 const COLUMNAS_VISTA_PREVIA = 4;
 
-function miniVistaPreviaHtml(nombre) {
-  const hoja = libroActual.Sheets[nombre];
-  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false, defval: '' }).slice(0, FILAS_VISTA_PREVIA);
-  if (filas.length === 0) return `<div class="mini-vista-vacia">${t('hoja-vacia')}</div>`;
+function miniVistaPreviaHtml(hoja) {
+  const filas = Math.min(hoja.nfilas, FILAS_VISTA_PREVIA);
+  if (filas === 0) return `<div class="mini-vista-vacia">${t('hoja-vacia')}</div>`;
 
   let html = '<div class="mini-vista-previa"><table class="mini-tabla">';
-  filas.forEach((fila) => {
+  for (let r = 0; r < filas; r++) {
     html += '<tr>';
     for (let i = 0; i < COLUMNAS_VISTA_PREVIA; i++) {
-      const texto = String(fila[i] ?? '');
+      const texto = i < hoja.ncols ? hoja.texto(r, i) : '';
       const recortado = texto.length > 14 ? texto.slice(0, 14) + '…' : texto;
       html += `<td>${escaparHtml(recortado)}</td>`;
     }
     html += '</tr>';
-  });
+  }
   html += '</table></div>';
   return html;
+}
+
+// Una hoja de gráfico o de macros no tiene celdas; las demás se leen de a una, sin frenar la lista.
+async function previaDe(nombre) {
+  if (previas.has(nombre)) return previas.get(nombre);
+  const k = lectorActual.libroMotor.hojas.findIndex((h) => h.nombre === nombre);
+  let html;
+  try { html = miniVistaPreviaHtml(k >= 0 && lectorActual.libroMotor.hojas[k].tipo === 'hoja' ? await lectorActual.cargar(k) : { nfilas: 0 }); } catch (error) { console.warn(error); html = miniVistaPreviaHtml({ nfilas: 0 }); }
+  previas.set(nombre, html);
+  return html;
+}
+
+async function completarPrevias() {
+  const miGeneracion = generacion;
+  for (const item of [...listaHojas.children]) {
+    if (item.dataset.lista === '1') continue;
+    const html = await previaDe(item.dataset.nombre);
+    if (miGeneracion !== generacion) return;
+    const hueco = item.querySelector('.mini-vista-previa, .mini-vista-vacia');
+    if (hueco) { hueco.outerHTML = html; item.dataset.lista = '1'; }
+  }
 }
 
 function renderizarLista() {
@@ -165,11 +191,13 @@ function renderizarLista() {
     quitar.textContent = '✕';
     quitar.onclick = () => { nombresHojas = nombresHojas.filter(n => n !== nombre); renderizarLista(); };
     item.appendChild(quitar);
-    item.insertAdjacentHTML('beforeend', miniVistaPreviaHtml(nombre));
+    if (previas.has(nombre)) item.dataset.lista = '1';
+    item.insertAdjacentHTML('beforeend', previas.has(nombre) ? previas.get(nombre) : '<div class="mini-vista-vacia"></div>');
     listaHojas.appendChild(item);
   });
   botonGuardar.disabled = nombresHojas.length === 0;
   resultado.classList.remove('visible');
+  if (lectorActual) completarPrevias();
 }
 
 let arrastrando = null;
@@ -205,10 +233,12 @@ async function cargarLibro(archivo) {
   cargando.style.display = 'block';
   try {
     const bytes = await archivo.arrayBuffer();
-    libroActual = XLSX.read(bytes, { type: 'array' });
+    const lector = await LectorHojas.abrir(archivo);
     zipActual = await ZipPropio.loadAsync(bytes);
+    lectorActual = lector;
+    previas.clear(); generacion++;
     bytesActuales = bytes;
-    nombresHojas = [...libroActual.SheetNames];
+    nombresHojas = lector.libroMotor.hojas.map((h) => h.nombre);
     // El nombre de descarga tiene que conservar la extensión original — un
     // .xlsm renombrado a .xlsx no abre bien en Excel (el formato interno
     // sigue siendo macro-habilitado, pero la extensión ya no coincide).

@@ -60,13 +60,10 @@ const ExcelAPdfMotor = (() => {
     for (const x of MODULOS) if (!(typeof PDFLib !== 'undefined' && /pdf-lib/.test(x))) await cargarScript(x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : base + x);
   }
 
-  // El libro del motor para imprimir: el que ya abrió LectorHojas (xlsx, xlsm y csv) o, si el archivo es de otro formato (xls, xlsb, ods),
-  // el que sale de pasarlo a .xlsx con SheetJS: conserva valores, formatos de número, anchos, combinadas y columnas ocultas.
+  // El libro del motor para imprimir: el que ya abrió LectorHojas. Un .xls, .xlsb u .ods ya viene pasado a .xlsx (valores, formatos de número,
+  // anchos y combinadas; sin estilos de celda).
   async function libroDeMotor(libroLector) {
-    if (libroLector.libroMotor) return libroLector.libroMotor;
-    if (!libroLector.sheetjs) throw new Error('No se pudo preparar el libro para imprimir.');
-    const bytes = XLSX.write(libroLector.sheetjs, { type: 'array', bookType: 'xlsx', cellStyles: true });
-    libroLector.libroMotor = await LibroXlsx.abrir(new Uint8Array(bytes));
+    if (!libroLector.libroMotor) throw new Error('No se pudo preparar el libro para imprimir.');
     return libroLector.libroMotor;
   }
 

@@ -108,8 +108,6 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -137,15 +135,15 @@ let columnas = [];
 let hayGrafico = false;
 let comaDecimalArchivo = false;
 
-// Los números ya vienen convertidos desde lector-planillas.js; esto cubre
+// Los números ya vienen convertidos desde LectorHojas; esto cubre
 // celdas de texto con números ("1.234,56" escrito a mano en un .xlsx), que
 // parseFloat leía como 1.234.
 function valorNumerico(valor, texto) {
   if (valor && typeof valor === 'object' && typeof valor.valor === 'number') return valor.valor;   // número con formato
   if (typeof valor === 'number') return valor;
-  const numero = interpretarNumeroTexto(texto, comaDecimalArchivo);
+  const numero = CsvPlanilla.interpretarNumero(texto, comaDecimalArchivo);
   if (numero !== null) return numero;
-  const alternativo = interpretarNumeroTexto(texto, !comaDecimalArchivo);
+  const alternativo = CsvPlanilla.interpretarNumero(texto, !comaDecimalArchivo);
   return alternativo !== null ? alternativo : 0;
 }
 

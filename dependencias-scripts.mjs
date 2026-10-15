@@ -6,7 +6,11 @@ import { join } from 'node:path';
 const NECESITA = {
   'xlsx-paquete.js': ['zip-propio.js', 'xml-ligero.js', 'xml-editar.js'],
   'xlsx-modelo.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js'],
-  'lector-hojas.js': ['lector-planillas.js', 'zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-modelo.js', 'csv-planilla.js'],
+  'lector-hojas.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-modelo.js', 'csv-planilla.js'],
+  'ods-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-modelo.js'],
+  'xlsb-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-estilos.js', 'xlsx-modelo.js'],
+  'xls-lector.js': ['xlsx-estilos.js', 'xlsx-modelo.js'],
+  'formatos-antiguos.js': ['zip-propio.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-escritor.js', 'ods-lector.js', 'xlsb-lector.js', 'xls-lector.js'],
   'csv-planilla.js': ['xlsx-estilos.js', 'xlsx-modelo.js'],
   'xlsx-escritor.js': ['zip-propio.js', 'xml-editar.js', 'xlsx-paquete.js', 'xlsx-modelo.js'],
 };
