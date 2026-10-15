@@ -10,7 +10,7 @@
 
 (function () {
   const MAX_BOTONES = 20000;
-  const LADO = 16;
+  const LADO = 17; // medido en pantalla (Excel 365, 100 %): caja de 17 × 17 px pegada a la esquina de abajo a la derecha de la celda (sobre el borde de la derecha, 1 px sobre el de abajo)
 
   function botones(hoja) {
     const lista = [];
@@ -32,16 +32,21 @@
     const w = x1 - x0, h = y1 - y0;
     if (!(w > LADO + 4) || !(h > 8)) return;
     const lado = Math.min(LADO, h - 2);
-    const x = x1 - lado - 1, y = y1 - lado - 1;
+    const x = x1 - lado, y = y1 - lado - 1;
     ctx.save();
-    ctx.fillStyle = '#F3F3F3'; ctx.fillRect(x, y, lado, lado);
-    ctx.strokeStyle = '#A6A6A6'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, lado - 1, lado - 1);
-    ctx.fillStyle = '#404040';
-    const cx = x + lado / 2, cy = y + lado / 2;
-    ctx.beginPath(); ctx.moveTo(cx - 3.5, cy - 1.5); ctx.lineTo(cx + 3.5, cy - 1.5); ctx.lineTo(cx, cy + 2.5); ctx.closePath(); ctx.fill();
-    if (b.filtrada) { // embudo azul sobre la flecha
-      ctx.fillStyle = '#1F6FB5';
-      ctx.beginPath(); ctx.moveTo(x + 2, y + 2); ctx.lineTo(x + lado - 2, y + 2); ctx.lineTo(cx + 1, cy + 1); ctx.lineTo(cx + 1, y + lado - 3); ctx.lineTo(cx - 1, y + lado - 4); ctx.lineTo(cx - 1, cy + 1); ctx.closePath(); ctx.fill();
+    ctx.translate(x, y); ctx.scale(lado / LADO, lado / LADO); // todo lo siguiente en píxeles de una caja de 17 × 17
+    const relleno = ctx.createLinearGradient(0, 1, 0, 16); relleno.addColorStop(0, '#FFFFFF'); relleno.addColorStop(1, '#EFF2F7');
+    ctx.fillStyle = relleno; ctx.fillRect(0, 0, LADO, LADO);
+    ctx.strokeStyle = '#A6ACB3'; ctx.lineWidth = 1; ctx.strokeRect(0.5, 0.5, LADO - 1, LADO - 1);
+    const grisar = (y0, y1) => { const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#868A8D'); g.addColorStop(1, '#4E5052'); return g; };
+    if (b.filtrada) { // columna filtrada: un embudo y, abajo a la izquierda, una flecha pequeña (sin la flecha grande de la lista)
+      ctx.fillStyle = grisar(4, 12);
+      ctx.beginPath(); ctx.moveTo(5, 4); ctx.lineTo(14, 4); ctx.lineTo(11, 7); ctx.lineTo(11, 12); ctx.lineTo(8, 12); ctx.lineTo(8, 7); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = grisar(10, 13);
+      ctx.beginPath(); ctx.moveTo(2, 10); ctx.lineTo(7, 10); ctx.lineTo(5, 13); ctx.closePath(); ctx.fill();
+    } else { // flecha de la lista: triángulo de 7 px de ancho y 4 de alto, centrado
+      ctx.fillStyle = grisar(7, 11);
+      ctx.beginPath(); ctx.moveTo(5, 7); ctx.lineTo(12, 7); ctx.lineTo(8.5, 11); ctx.closePath(); ctx.fill();
     }
     ctx.restore();
   }
