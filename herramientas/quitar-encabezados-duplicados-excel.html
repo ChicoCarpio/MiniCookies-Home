@@ -41,6 +41,7 @@ window.i18nPagina = {
     'mensaje-con-duplicados': 'Se encontraron y quitaron {n} fila(s) duplicada(s) en "{hoja}".',
     'aviso-reconstruido': 'No se pudo conservar el archivo tal cual ({motivo}): se creó un libro nuevo con los valores, el formato básico y las celdas combinadas.',
     'motivo-otro-formato': 'este formato no se puede editar en el lugar',
+    'motivo-no-movible': 'el archivo tiene algo que no se puede mover con las filas, como notas, tablas dinámicas, controles o fórmulas matriciales',
     'nota-formato': 'En un .xlsx o .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas (sus referencias se acomodan), tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si el archivo tiene algo que no se puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores, el formato de número, los anchos de columna y las celdas combinadas.',
     'error-procesar': 'No se pudo procesar el archivo'
   },
@@ -67,6 +68,7 @@ window.i18nPagina = {
     'mensaje-con-duplicados': '{n} duplicate row(s) were found and removed in "{hoja}".',
     'aviso-reconstruido': 'The file could not be kept as it was ({motivo}): a new workbook was created with the values, basic formatting and merged cells.',
     'motivo-otro-formato': 'this format cannot be edited in place',
+    'motivo-no-movible': 'the file has something that cannot move with the rows, such as notes, pivot tables, controls or array formulas',
     'nota-formato': 'In an .xlsx or .xlsm file the rows are removed in the file itself, like Excel’s “Delete rows”: colors, borders, formulas (their references are adjusted), tables, images and charts are kept. With .xls, .xlsb or .ods, or if the file has something that can’t be moved that way (notes, pivot tables…), a new workbook is built with the values, number formats, column widths and merged cells.',
     'error-procesar': 'Couldn’t process the file'
   }
@@ -360,7 +362,7 @@ botonProcesar.addEventListener('click', async () => {
         }
       } catch (error) {
         console.warn('No se pudo quitar en el lugar:', error);
-        motivoReconstruido = error && error.message ? error.message : String(error);
+        motivoReconstruido = t('motivo-no-movible');
       }
     } else if (!libroActual.motor) {
       motivoReconstruido = t('motivo-otro-formato');

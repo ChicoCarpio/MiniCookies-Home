@@ -161,6 +161,7 @@ botonUnir.addEventListener('click', async () => {
     const hojasFinal = [];
     const nombresUsados = new Set();
     const pendientes = [];   // [{ archivo hoja, nombre, hoja }] y, por archivo, cómo se llamaba cada hoja y cómo quedó
+    const nombresDelLibro = new Set();   // los nombres tal como los deja crearLibro (limpia espacios y caracteres de control): las citas de las fórmulas tienen que usar esos
 
     for (const archivo of archivos) {
       const libroOrigen = await LectorHojas.abrir(archivo);
@@ -180,7 +181,7 @@ botonUnir.addEventListener('click', async () => {
       for (const hojaOrigen of libroOrigen.hojas) {
         const hoja = await libroOrigen.cargar(hojaOrigen.indice);
         const etiquetaDeseada = tieneVariasHojas ? `${nombreBase} - ${hojaOrigen.nombre}` : nombreBase;
-        const nombreHoja = nombreDeHojaUnico(etiquetaDeseada, nombresUsados);
+        const nombreHoja = XlsxEscritor.nombreHoja(nombreDeHojaUnico(etiquetaDeseada, nombresUsados), nombresDelLibro);
         mapa.set(hojaOrigen.nombre.toLowerCase(), nombreHoja);
         propias.add(nombreHoja.toLowerCase());
         pendientes.push({ nombre: nombreHoja, hoja, mapa, propias });

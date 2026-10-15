@@ -105,8 +105,10 @@ const ExcelAPdfMotor = (() => {
     }
 
     if (o.incluirOcultas) {
-      for (const col of hoja.columnas) if (col.oculta) { col.oculta = false; deshacer.push(() => { col.oculta = true; }); }
-      for (const info of hoja.filas.values()) if (info.oculta) { info.oculta = false; deshacer.push(() => { info.oculta = true; }); }
+      // `ocultaOriginal` deja constancia de lo que decía el archivo mientras dura la impresión: quien lea la hoja entretanto (la cuadrícula de selección de la página)
+      // usa `oculta || ocultaOriginal`
+      for (const col of hoja.columnas) if (col.oculta) { col.oculta = false; col.ocultaOriginal = true; deshacer.push(() => { col.oculta = true; delete col.ocultaOriginal; }); }
+      for (const info of hoja.filas.values()) if (info.oculta) { info.oculta = false; info.ocultaOriginal = true; deshacer.push(() => { info.oculta = true; delete info.ocultaOriginal; }); }
     }
     return () => { for (let i = deshacer.length - 1; i >= 0; i--) deshacer[i](); };
   }

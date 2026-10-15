@@ -517,7 +517,7 @@ async function cargarHojaActual() {
   const ocultas = new Set();
   try {
     const hojaMotor = await libroImpresion.cargarHoja(indice);
-    for (const col of hojaMotor.columnas) if (col.oculta) for (let c = col.min; c <= col.max && c < col.min + 16384; c++) ocultas.add(c);
+    for (const col of hojaMotor.columnas) if (col.oculta || col.ocultaOriginal) for (let c = col.min; c <= col.max && c < col.min + 16384; c++) ocultas.add(c);
   } catch (error) { console.warn('No se pudieron leer las columnas ocultas:', error); }
   hojaDatos = datos;
   columnasOcultasHoja = ocultas;
