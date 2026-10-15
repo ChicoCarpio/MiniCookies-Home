@@ -376,8 +376,10 @@ botonProcesar.addEventListener('click', async () => {
           filas = filas.filter((_, f) => !absolutas.has(f));
           combinadas = combinadasTrasQuitar(combinadas, absolutas);
           // las filas ocultas que quedan suben tantos lugares como filas quitadas tenían encima
+          // (búsqueda binaria: con 100.000 filas ocultas y 50.000 quitadas, contar una por una tardaba segundos)
           const quitadas = [...absolutas].sort((a, b) => a - b);
-          filasOcultas = filasOcultas.filter((f) => !absolutas.has(f)).map((f) => f - quitadas.filter((q) => q < f).length);
+          const encima = (f) => { let a = 0, b = quitadas.length; while (a < b) { const m = (a + b) >> 1; if (quitadas[m] < f) a = m + 1; else b = m; } return a; };
+          filasOcultas = filasOcultas.filter((f) => !absolutas.has(f)).map((f) => f - encima(f));
         }
         hojasSalida.push({ nombre: h.nombre, filas, ...hoja.opcionesLibro(), combinadas, filasOcultas, estado: h.estado });
       }

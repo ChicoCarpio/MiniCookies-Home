@@ -1,9 +1,9 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Formatos de hoja de cálculo que no son .xlsx (etapa 9 del motor de Excel, reemplaza a SheetJS): .ods, .xlsb y .xls. Cada uno tiene su lector
-// (ods-lector.js, xlsb-lector.js, xls-lector.js) y los tres devuelven lo mismo; este módulo elige el lector por el contenido del archivo (no por la
+// (ods-lector.js, xlsb-lector.js, xls-lector.js, html-tabla-lector.js) y los tres devuelven lo mismo; este módulo elige el lector por el contenido del archivo (no por la
 // extensión) y lo pasa a un .xlsx con XlsxEscritor.crearLibro, que es lo que el resto del motor ya sabe leer, mostrar e imprimir.
 //
-//   FormatosAntiguos.detectar(bytes)          → 'ods' | 'xlsb' | 'xls' | null
+//   await FormatosAntiguos.detectar(bytes)    → 'ods' | 'xlsb' | 'xls' | 'html' | null   ('html': una página con tablas guardada como .xls, que muchos sistemas "exportan a Excel")
 //   await FormatosAntiguos.leer(bytes)        → { hojas: [{ nombre, filas, anchos, combinadas }], fecha1904? }   (ver OdsLector)
 //   await FormatosAntiguos.aXlsx(bytes)       → Uint8Array con un .xlsx (valores y formato de número; sin fórmulas ni estilos de celda)
 //
@@ -19,7 +19,9 @@
       try { zip = await ZipPropio.loadAsync(bytes); } catch (e) { return null; }
       if (zip.file('xl/workbook.bin')) return 'xlsb';
       if (zip.file('content.xml') && (zip.file('mimetype') || zip.file('META-INF/manifest.xml'))) return 'ods';
+      return null;
     }
+    if (typeof HtmlTablaLector !== 'undefined' && HtmlTablaLector.parece(bytes)) return 'html';
     return null;
   }
 
@@ -28,6 +30,7 @@
     if (tipo === 'ods') return OdsLector.leer(bytes);
     if (tipo === 'xlsb') return XlsbLector.leer(bytes);
     if (tipo === 'xls') return XlsLector.leer(bytes);
+    if (tipo === 'html') return HtmlTablaLector.leer(bytes);
     throw new Error('el archivo no es una hoja de cálculo que se pueda leer');
   }
 

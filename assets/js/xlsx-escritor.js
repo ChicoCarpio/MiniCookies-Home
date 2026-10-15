@@ -442,12 +442,26 @@
         const w = anchosHoja[c], oculta = colsOcultas.has(c);
         if (w > 0 || oculta) anchos += `<col min="${c + 1}" max="${c + 1}" width="${Math.min(255, w > 0 ? w : 8.43)}"${oculta ? ' hidden="1"' : ''} customWidth="1"/>`;
       }
-      // combinadas: solo rangos A1:B2 válidos y que no se pisen con una anterior (dos que se solapan: Excel no abre el libro)
-      const comb = [], rangos = [];
+      // combinadas: solo rangos A1:B2 válidos y que no se pisen con una anterior (dos que se solapan: Excel no abre el libro). Se buscan por fila, como en
+      // celdasProtegidas (contra todas las anteriores era cuadrático: 80.000 combinadas de un .xlsb, segundos), y con un tope de comparaciones para un
+      // archivo hostil: pasado el tope, el resto no se combina.
+      const comb = [], porFila = new Map(), altos = [];
+      let comparaciones = 0;
+      const pisa = (d) => (o) => d.f0 <= o.f1 && o.f0 <= d.f1 && d.c0 <= o.c1 && o.c0 <= d.c1;
       for (const r of h.combinadas || []) {
         const d = typeof r === 'string' && /^\$?[A-Za-z]{1,3}\$?\d+:\$?[A-Za-z]{1,3}\$?\d+$/.test(r) ? LibroXlsx.decodificarRango(r) : null;
-        if (!d || d.f1 >= MAX_FILA || d.c1 >= MAX_COL || rangos.some((o) => d.f0 <= o.f1 && o.f0 <= d.f1 && d.c0 <= o.c1 && o.c0 <= d.c1)) continue;
-        rangos.push(d); comb.push(numeroACol(d.c0) + (d.f0 + 1) + ':' + numeroACol(d.c1) + (d.f1 + 1));
+        if (!d || d.f1 >= MAX_FILA || d.c1 >= MAX_COL) continue;
+        const alto = d.f1 - d.f0 >= 64;
+        let choca = altos.some(pisa(d));
+        comparaciones += altos.length;
+        const enFila = (l) => { comparaciones += l.length; return l.some(pisa(d)); };
+        if (!choca && (!alto || d.f1 - d.f0 < porFila.size)) for (let f = d.f0; f <= d.f1 && !choca; f++) { const l = porFila.get(f); if (l) choca = enFila(l); }
+        else if (!choca) for (const [f, l] of porFila) { comparaciones++; if (f >= d.f0 && f <= d.f1 && enFila(l)) { choca = true; break; } }
+        if (comparaciones > 2e8) break;
+        if (choca) continue;
+        if (alto) altos.push(d);
+        else for (let f = d.f0; f <= d.f1; f++) { const l = porFila.get(f); if (l) l.push(d); else porFila.set(f, [d]); }
+        comb.push(numeroACol(d.c0) + (d.f0 + 1) + ':' + numeroACol(d.c1) + (d.f1 + 1));
       }
       const inm = Math.min(MAX_FILA - 1, Math.floor(Number(h.inmovilizarFilas) || 0));   // entero y dentro de la hoja: 2.5 o 1048576 y Excel no abre el libro
       const congelar = inm > 0 ? `<sheetViews><sheetView workbookViewId="0"${k === primeraVisible ? ' tabSelected="1"' : ''}><pane ySplit="${inm}" topLeftCell="A${inm + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` : `<sheetViews><sheetView workbookViewId="0"${k === primeraVisible ? ' tabSelected="1"' : ''}/></sheetViews>`;

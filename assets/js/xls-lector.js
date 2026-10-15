@@ -9,6 +9,7 @@
 // Las fórmulas no se leen (queda su último valor, que el archivo guarda). Con contraseña (FILEPASS) se rechaza. Se omiten las hojas de gráfico y de macros.
 (function () {
   const MAX_FILAS = 65536, MAX_COLS = 256, MAX_TEXTO = 32767;   // los límites de un .xls
+  const MAX_CELDAS = 10000000;   // en todo el libro: crearLibro no arma un .xlsx de más de ~8 M celdas, y antes de llegar ahí la memoria ya se fue
   const ERRORES = { 0x00: '#NULL!', 0x07: '#DIV/0!', 0x0F: '#VALUE!', 0x17: '#REF!', 0x1D: '#NAME?', 0x24: '#NUM!', 0x2A: '#N/A' };
   const danado = (detalle) => new LibroXlsx.ErrorXlsx('danado', detalle);
   const u16 = (b, p) => b[p] | (b[p + 1] << 8);
@@ -27,28 +28,31 @@
       if (id >= nSect + 1 || ini >= b.length) throw danado('sector fuera del archivo');
       return b.subarray(ini, Math.min(ini + tam, b.length));
     };
-    // tabla de asignación (FAT): sus sectores los dice el encabezado y, si son más de 109, la cadena DIFAT
+    // tabla de asignación (FAT): sus sectores los dice el encabezado y, si son más de 109, la cadena DIFAT. No puede haber más sectores de FAT que
+    // sectores en el archivo: una DIFAT hostil que repite el mismo id armaba una FAT de gigas con un archivo de 10 MB.
     const idsFat = [];
     for (let k = 0; k < 109; k++) { const id = u32(b, 0x4C + k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
     let dif = u32(b, 0x44), vueltas = 0;
-    while (dif < 0xFFFFFFFA && vueltas++ < nSect) {
+    while (dif < 0xFFFFFFFA && vueltas++ < nSect && idsFat.length <= nSect) {
       const s = sector(dif);
       for (let k = 0; k < tam / 4 - 1; k++) { const id = u32(s, k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
       dif = u32(s, tam - 4);
     }
+    if (idsFat.length > nSect) throw danado('FAT más grande que el archivo');
     const fat = new Uint32Array(idsFat.length * (tam / 4));
     idsFat.forEach((id, k) => { const s = sector(id); for (let j = 0; j < tam / 4; j++) fat[k * (tam / 4) + j] = u32(s, j * 4); });
-    const cadena = (inicio, tabla) => {
+    // una cadena no pasa por más sectores que los que tiene el archivo (con un ciclo, la tabla entera: un flujo de cientos de megas)
+    const cadena = (inicio, tabla, max) => {
       const ids = [];
       let id = inicio;
       while (id < 0xFFFFFFFA) {
-        if (ids.length > tabla.length || id >= tabla.length) throw danado('cadena de sectores');
+        if (ids.length >= max || id >= tabla.length) throw danado('cadena de sectores');
         ids.push(id); id = tabla[id];
       }
       return ids;
     };
     const leerCadena = (inicio, tamano) => {
-      const ids = cadena(inicio, fat), r = new Uint8Array(ids.length * tam);
+      const ids = cadena(inicio, fat, nSect), r = new Uint8Array(ids.length * tam);
       ids.forEach((id, k) => r.set(sector(id), k * tam));
       return tamano === undefined ? r : r.subarray(0, tamano);
     };
@@ -71,7 +75,7 @@
           for (let k = 0; k < miniFat.length; k++) miniFat[k] = u32(bytes, k * 4);
           miniFlujo = leerCadena(raiz.inicio, raiz.tam);
         }
-        const ids = cadena(e.inicio, miniFat), r = new Uint8Array(ids.length * tamMini);
+        const ids = cadena(e.inicio, miniFat, Math.ceil(miniFlujo.length / tamMini)), r = new Uint8Array(ids.length * tamMini);
         ids.forEach((id, k) => { const ini = id * tamMini; if (ini + tamMini > miniFlujo.length + tamMini) throw danado('minisector'); r.set(miniFlujo.subarray(ini, ini + tamMini), k * tamMini); });
         return r.subarray(0, e.tam);
       }
@@ -104,7 +108,10 @@
   }
 
   const utf16 = new TextDecoder('utf-16le');
-  const latin = new TextDecoder('windows-1252');
+  // BIFF5 (Excel 5/95) guarda los textos en la página de códigos del libro (registro CODEPAGE; casi siempre 1252: "€", comillas tipográficas).
+  // BIFF8 no: sus textos "comprimidos" son UTF-16 sin el byte alto (latin1).
+  const PAGINAS = { 874: 'windows-874', 932: 'shift_jis', 936: 'gbk', 949: 'euc-kr', 950: 'big5', 1250: 'windows-1250', 1251: 'windows-1251', 1252: 'windows-1252', 1253: 'windows-1253', 1254: 'windows-1254', 1255: 'windows-1255', 1256: 'windows-1256', 1257: 'windows-1257', 1258: 'windows-1258', 10000: 'macintosh', 32768: 'macintosh' };
+  const decodificador = (pagina) => { try { return new TextDecoder(PAGINAS[pagina] || 'windows-1252'); } catch (e) { return new TextDecoder('windows-1252'); } };
   const vista = new DataView(new ArrayBuffer(8));
   function doble(b, p) { vista.setUint32(0, u32(b, p), true); vista.setUint32(4, u32(b, p + 4), true); return vista.getFloat64(0, true); }
   function numeroRk(v) {
@@ -171,7 +178,8 @@
     // ---- globales ----
     let version = 0x0600, fecha1904 = false, fin = false;
     const hojasDef = [], textos = [], formatos = new Map(), xfFormato = [];
-    let primero = true, profundidad = 0;
+    let primero = true, profundidad = 0, pagina = decodificador(1252);
+    const texto5 = (crudo) => pagina.decode(crudo);   // un texto de BIFF5
     for (const r of registros(wb)) {
       const d = r.d;
       if (r.id === 0x0809) {
@@ -181,12 +189,13 @@
       else if (profundidad !== 1) continue;
       else if (r.id === 0x002F) throw new LibroXlsx.ErrorXlsx('cifrado');                       // FILEPASS
       else if (r.id === 0x0022) fecha1904 = u16(d, 0) === 1;                                    // DATEMODE
+      else if (r.id === 0x0042) pagina = decodificador(u16(d, 0));                              // CODEPAGE
       else if (r.id === 0x0085) {                                                              // BOUNDSHEET: posición, estado, tipo, nombre
-        const nombre = version >= 0x0600 ? cadenaBiff8(d, 6, 1).texto : latin1(d.subarray(7, 7 + d[6]));
+        const nombre = version >= 0x0600 ? cadenaBiff8(d, 6, 1).texto : texto5(d.subarray(7, 7 + d[6]));
         hojasDef.push({ pos: u32(d, 0), tipo: d[5], nombre, estado: d[4] === 1 ? 'oculta' : d[4] === 2 ? 'muyOculta' : 'visible' });
       } else if (r.id === 0x00FC) { for (const t of leerSst(r.partes)) textos.push(t); }       // SST
       else if (r.id === 0x041E) {                                                              // FORMAT: id y código
-        formatos.set(u16(d, 0), version >= 0x0600 ? cadenaBiff8(d, 2, 2).texto : latin1(d.subarray(3, 3 + d[2])));
+        formatos.set(u16(d, 0), version >= 0x0600 ? cadenaBiff8(d, 2, 2).texto : texto5(d.subarray(3, 3 + d[2])));
       } else if (r.id === 0x00E0) xfFormato.push(u16(d, 2));                                   // XF: fuente, formato…
     }
     if (!fin && !hojasDef.length) throw danado('libro sin hojas');
@@ -199,17 +208,22 @@
     };
 
     const hojas = [];
+    // Los subflujos de las hojas no se pisan: entre todas no recorren más que el flujo entero. Un libro hostil con cientos de hojas que apuntan al mismo
+    // subflujo (o a uno sin EOF) lo leería una vez por hoja: 400 KB armaban gigas. Se deja margen para un EOF que falte en un libro real.
+    let presupuesto = 4 * wb.length + 65536, celdas = 0;
     for (const def of hojasDef) {
       if (def.tipo !== 0) continue;   // 0: hoja de cálculo; 2: gráfico; 1 y 6: macros
-      const filas = [], anchos = [], combinadas = [], columnasOcultas = [], filasOcultas = [];
+      const filas = [], anchos = [], combinadas = [], columnasOcultas = new Set(), filasOcultas = [];
       let profund = 0, ultimaFormula = null;
       const poner = (f, c, v) => {
         if (f >= MAX_FILAS || c >= MAX_COLS) return;
+        if (++celdas > MAX_CELDAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_CELDAS + ' celdas');
         (filas[f] || (filas[f] = []))[c] = v;
       };
       const numero = (f, c, xf, n) => { if (!Number.isFinite(n)) return; const cod = codigoDe(xf); poner(f, c, cod ? { valor: n, formato: cod } : n); };
       for (const r of registros(wb, def.pos)) {
         const d = r.d;
+        if ((presupuesto -= 4 + d.length) < 0) throw danado('hojas que comparten su subflujo');
         if (r.id === 0x0809) { profund++; continue; }
         if (r.id === 0x000A) { if (--profund <= 0) break; continue; }
         if (profund !== 1) continue;
@@ -225,8 +239,8 @@
             break;
           }
           case 0x00FD: { const t = textos[u32(d, 6)]; if (t) poner(u16(d, 0), u16(d, 2), t); break; }    // LABELSST
-          case 0x0204: {                                                                               // LABEL (BIFF5, y algún BIFF8 antiguo)
-            const t = version >= 0x0600 ? cadenaBiff8(d, 6, 2).texto : latin1(d.subarray(8, 8 + u16(d, 6)));
+          case 0x0204: case 0x00D6: {                                                                  // LABEL y RSTRING (texto con formato) de BIFF5, y algún BIFF8 antiguo
+            const t = version >= 0x0600 ? cadenaBiff8(d, 6, 2).texto : texto5(d.subarray(8, 8 + u16(d, 6)));
             if (t) poner(u16(d, 0), u16(d, 2), t.length > MAX_TEXTO ? t.slice(0, MAX_TEXTO) : t);
             break;
           }
@@ -244,7 +258,7 @@
           }
           case 0x0207:                                                                                 // STRING (resultado de una fórmula)
             if (ultimaFormula) {
-              const t = version >= 0x0600 ? cadenaBiff8(d, 0, 2).texto : latin1(d.subarray(2, 2 + u16(d, 0)));
+              const t = version >= 0x0600 ? cadenaBiff8(d, 0, 2).texto : texto5(d.subarray(2, 2 + u16(d, 0)));
               if (t) poner(ultimaFormula.f, ultimaFormula.c, t.length > MAX_TEXTO ? t.slice(0, MAX_TEXTO) : t);
               ultimaFormula = null;
             }
@@ -259,7 +273,7 @@
           }
           case 0x007D: {                                                                               // COLINFO: ancho en 1/256 de carácter, oculta en el bit 0
             const c0 = u16(d, 0), c1 = Math.min(u16(d, 2), MAX_COLS - 1), w = u16(d, 4) / 256, oculta = (u16(d, 8) & 1) === 1;
-            for (let c = c0; c <= c1; c++) { anchos[c] = w; if (oculta) columnasOcultas.push(c); }
+            for (let c = c0; c <= c1; c++) { anchos[c] = w; if (oculta) columnasOcultas.add(c); }
             break;
           }
           default: break;
@@ -267,7 +281,7 @@
       }
       let ancho = 0;
       for (let f = 0; f < filas.length; f++) { if (!filas[f]) filas[f] = []; if (filas[f].length > ancho) ancho = filas[f].length; }
-      hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: columnasOcultas.filter((c) => c < ancho), filasOcultas: filasOcultas.filter((r) => r < filas.length) });
+      hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: [...columnasOcultas].filter((c) => c < ancho).sort((a, b) => a - b), filasOcultas: filasOcultas.filter((r) => r < filas.length) });
     }
     if (!hojas.length) throw new LibroXlsx.ErrorXlsx('sinLibro', 'sin hojas');
     return { hojas, fecha1904 };

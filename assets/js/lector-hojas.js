@@ -4,7 +4,7 @@
 // se arman bajo demanda: un libro grande no genera una matriz entera de textos.
 //
 // Requiere: zip-propio.js, xml-ligero.js, xml-editar.js, xlsx-formato.js, xlsx-estilos.js, xlsx-modelo.js, csv-planilla.js y, para los formatos antiguos,
-// xlsx-escritor.js, formatos-antiguos.js, ods-lector.js, xlsb-lector.js y xls-lector.js.
+// xlsx-escritor.js, formatos-antiguos.js, ods-lector.js, xlsb-lector.js, xls-lector.js y html-tabla-lector.js.
 //
 // Uso:
 //   const libro = await LectorHojas.abrir(archivo);          // lanza Error si no se puede leer (mensaje listo para mostrar)
@@ -30,7 +30,7 @@
   // Los lectores de .xls, .xlsb y .ods están al lado de este archivo y se piden recién cuando llega uno: la mayoría de los archivos son .xlsx o .csv.
   // La ruta sale de este script y no de la página (que existe también bajo /en/).
   const base = typeof document !== 'undefined' && document.currentScript ? new URL('./', document.currentScript.src).href : null;
-  const ANTIGUOS = [['XmlEditar', 'xml-editar.js'], ['XlsxEscritor', 'xlsx-escritor.js'], ['OdsLector', 'ods-lector.js'], ['XlsbLector', 'xlsb-lector.js'], ['XlsLector', 'xls-lector.js'], ['FormatosAntiguos', 'formatos-antiguos.js']];
+  const ANTIGUOS = [['XmlEditar', 'xml-editar.js'], ['XlsxEscritor', 'xlsx-escritor.js'], ['OdsLector', 'ods-lector.js'], ['XlsbLector', 'xlsb-lector.js'], ['XlsLector', 'xls-lector.js'], ['HtmlTablaLector', 'html-tabla-lector.js'], ['FormatosAntiguos', 'formatos-antiguos.js']];
   async function cargarAntiguos() {
     for (const [global, archivo] of ANTIGUOS) {
       if (globalThis[global] || !base) continue;
@@ -92,8 +92,10 @@
     const errores = (XlsxFormato.NOMBRES.en || {}).errores || {};
     const anchos = [];
     for (const col of hoja.columnas) if (col.ancho > 0 && !col.oculta) for (let q = col.min; q <= Math.min(col.max, 255); q++) anchos[q] = col.ancho;
-    const columnasOcultas = [], filasOcultas = [];
-    for (const col of hoja.columnas) if (col.oculta) for (let q = col.min; q <= Math.min(col.max, 16383); q++) columnasOcultas.push(q);
+    // se marcan y después se listan: 16.384 <col> "A:XFD ocultas" (3 KB comprimidos) eran 268 millones de entradas repetidas
+    const columnasOcultas = [], filasOcultas = [], marcas = new Uint8Array(16384);
+    for (const col of hoja.columnas) if (col.oculta) marcas.fill(1, col.min, Math.min(col.max, 16383) + 1);
+    for (let q = 0; q < 16384; q++) if (marcas[q]) columnasOcultas.push(q);
     hoja.filas.forEach((info, fila) => { if (info.oculta) filasOcultas.push(fila); });
     const combinadas = hoja.combinadas.map((m) => LibroXlsx.numeroACol(m.c0) + (m.f0 + 1) + ':' + LibroXlsx.numeroACol(m.c1) + (m.f1 + 1));
     return completar({
@@ -122,13 +124,26 @@
     });
   }
 
+  // Un lector de formato antiguo o crearLibro que fallan con un archivo raro dejan un error técnico ("Invalid array length", "demasiadas hojas", el de un
+  // zip): sale como ErrorXlsx, con su mensaje en el idioma de la página, igual que lo que lanza LibroXlsx.abrir.
+  function comoErrorXlsx(error) {
+    if (error instanceof LibroXlsx.ErrorXlsx) return error;
+    const detalle = error && error.message ? error.message : String(error);
+    if (error && error.name === 'ErrorZip') return new LibroXlsx.ErrorXlsx(error.codigo === 'grande' ? 'grande' : error.codigo === 'cifrado' ? 'cifrado' : 'danado', detalle);
+    const grande = error instanceof RangeError || (typeof XlsxEscritor !== 'undefined' && error instanceof XlsxEscritor.ErrorEscritor);   // crearLibro: muy grande, demasiadas hojas o filas
+    return new LibroXlsx.ErrorXlsx(grande ? 'grande' : 'danado', detalle);
+  }
+
+  // Sin ningún byte nulo en el principio: texto, no un binario dañado. Con la marca de UTF-16 también ("Texto Unicode" de Excel: UTF-16 con tabuladores)
+  const esTextoPlano = (bytes) => (bytes.length >= 2 && ((bytes[0] === 0xFF && bytes[1] === 0xFE) || (bytes[0] === 0xFE && bytes[1] === 0xFF))) || (bytes.length > 0 && !bytes.subarray(0, 4096).includes(0));
+
   // CSV, TSV y texto delimitado: CsvPlanilla (decodifica, detecta el separador y distingue números de códigos)
   const esTexto = (archivo) => /\.(csv|tsv|txt)$/i.test(archivo.name) || archivo.type === 'text/csv';
 
   async function abrir(archivo) {
     const libroLector = { motor: true, hojas: [], opciones: opcionesDeIdioma(), cargar: null };
     let bytes = new Uint8Array(await archivo.arrayBuffer());
-    const texto = esTexto(archivo);
+    let texto = esTexto(archivo);
     let libro;
     if (texto) libro = CsvPlanilla.leer(bytes, archivo.name.replace(/\.(csv|tsv|txt)$/i, ''));
     else {
@@ -136,10 +151,19 @@
         // .xls, .xlsb y .ods: los lectores de formatos-antiguos.js los pasan a un .xlsx en memoria, que el motor ya sabe leer e imprimir
         if (!error || error.codigo === 'cifrado' || !['antiguo', 'sinLibro', 'noZip'].includes(error.codigo)) throw error;
         await cargarAntiguos();
-        if (!(await FormatosAntiguos.detectar(bytes))) throw error;
-        bytes = await FormatosAntiguos.aXlsx(bytes);
-        libro = await LibroXlsx.abrir(bytes);
-        libroLector.bytesXlsx = bytes;
+        if (await FormatosAntiguos.detectar(bytes)) {
+          bytes = await FormatosAntiguos.aXlsx(bytes).catch((e) => { throw comoErrorXlsx(e); });
+          libro = await LibroXlsx.abrir(bytes);
+          libroLector.bytesXlsx = bytes;
+        } else if (/\.xls$/i.test(archivo.name) && esTextoPlano(bytes)) {
+          // un ".xls" que es texto separado por tabuladores o comas (también lo hacen algunos sistemas); un ".xlsx" de texto sí es un archivo dañado.
+          // Se pasa a .xlsx como un .xls de verdad: las herramientas que editan (buscar y reemplazar, dividir…) trabajan sobre bytesXlsx.
+          const csv = CsvPlanilla.leer(bytes, archivo.name.replace(/\.[^.]+$/, ''));
+          const hoja = hojaDelMotor(csv, await csv.cargarHoja(0), libroLector);
+          bytes = await XlsxEscritor.crearLibro([{ nombre: csv.hojas[0].nombre, filas: hoja.matrizValores(true) }]).catch((e) => { throw comoErrorXlsx(e); });
+          libro = await LibroXlsx.abrir(bytes);
+          libroLector.bytesXlsx = bytes;
+        } else throw error;
       }
     }
     libroLector.comaDecimalCsv = libro.comaDecimalCsv;   // texto: si el archivo usa coma decimal (undefined en un libro de Excel)

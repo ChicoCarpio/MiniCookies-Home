@@ -11,6 +11,8 @@
 // el archivo guarda (el sintaxis de fórmulas de ODF — "of:=[.A1]+1" — no es la de Excel). Formatos con color, relleno o bordes no se llevan.
 (function () {
   const MAX_FILAS = 1048576, MAX_COLS = 16384, MAX_TEXTO = 32767;
+  const MAX_CELDAS = 10000000;    // en todo el libro: crearLibro no arma un .xlsx de más de ~8 M celdas (una fila repetida un millón de veces cabe en 200 bytes)
+  const MAX_COMBINADAS = 500000;  // por hoja, como LibroXlsx
   const ERRORES = new Set(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA']);
 
   const ent = (a, k) => (a[k] === undefined ? null : a[k]);
@@ -50,7 +52,9 @@
 
   // ---- formatos de número de ODF → código de Excel -------------------------------------------------------------
   // estilo = { tipo, partes: [{ k, a }], mapas: [{ cond, estilo }] }; se traduce al final, cuando ya están todos.
-  function traducirEstilo(estilos, nombre, vistos) {
+  // El estilo al que lleva un style:map se traduce sin sus propios mapas: Excel admite dos condiciones y una sección más, y una cadena hostil de miles
+  // de mapas desbordaba la pila.
+  function traducirEstilo(estilos, nombre, vistos, sinMapas) {
     const e = estilos.datos.get(nombre);
     if (!e) return null;
     vistos = vistos || new Set();
@@ -102,9 +106,9 @@
     if (e.tipo === 'text-style' && !s) s = '@';
     // style:map: "si el valor cumple la condición, usa el otro estilo"; Excel lo expresa como [condición]formato1;formato2
     const secciones = [];
-    for (const m of e.mapas) {
+    for (const m of sinMapas ? [] : e.mapas.slice(0, 3)) {
       const c = /^value\(\)\s*(&gt;=|&lt;=|>=|<=|!=|<>|=|>|<)\s*(-?[\d.]+)$/.exec(m.cond.replace(/&gt;/g, '>').replace(/&lt;/g, '<'));
-      const otro = c ? traducirEstilo(estilos, m.estilo, vistos) : null;
+      const otro = c ? traducirEstilo(estilos, m.estilo, vistos, true) : null;
       // "valor >= 0" es el reparto normal de Excel (positivos;negativos): la segunda sección muestra el valor absoluto, y el estilo base ya trae su "-"
       if (c && otro) secciones.push((c[1] === '>=' && c[2] === '0' ? '' : '[' + (c[1] === '!=' ? '<>' : c[1]) + c[2] + ']') + otro);
     }
@@ -172,7 +176,7 @@
     const hojas = [];
     const memo = new Map();
     let hoja = null, fila = 0, col = 0, repFila = 1, filaActual = null, celda = null;
-    let enCelda = false, parrafos = [], parrafoActual = null, profundidadTabla = 0, enNota = 0;
+    let enCelda = false, parrafos = [], parrafoActual = null, profundidadTabla = 0, enNota = 0, celdas = 0;
     // Los estilos automáticos de content.xml se leen aparte, con el lector de estilos, antes de recorrer el cuerpo.
     const a0 = texto.indexOf('<office:automatic-styles'), a1 = texto.indexOf('</office:automatic-styles>');
     if (a0 >= 0 && a1 > a0) leerEstilos(texto.slice(a0, a1 + 26), estilos);
@@ -208,11 +212,12 @@
       const f = filaActual; filaActual = null;
       if (f.celdas.length && fila < MAX_FILAS) {
         const n = Math.max(1, Math.min(repFila, MAX_FILAS - fila, Math.floor(5e6 / f.celdas.length)));
+        if ((celdas += n * f.celdas.length) > MAX_CELDAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_CELDAS + ' celdas');
         // una fila repetida con contenido se copia (el contenido es el mismo)
         for (let k = 0; k < n; k++) hoja.filas[fila + k] = k === 0 ? f.celdas : f.celdas.slice();
       }
       if (f.oculta) for (let k = 0; k < Math.min(repFila, 100000) && fila + k < MAX_FILAS; k++) hoja.filasOcultas.push(fila + k);
-      for (const m of f.combinadas) hoja.combinadasBrutas.push(m);
+      for (const m of f.combinadas) if (hoja.combinadasBrutas.length < MAX_COMBINADAS) hoja.combinadasBrutas.push(m);
       fila += repFila;
     };
 

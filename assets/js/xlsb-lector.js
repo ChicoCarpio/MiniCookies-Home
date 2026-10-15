@@ -9,6 +9,8 @@
 // Las fórmulas no se leen (queda su último valor, que el archivo guarda). Las hojas de gráfico y de macros se omiten.
 (function () {
   const MAX_FILAS = 1048576, MAX_COLS = 16384, MAX_TEXTO = 32767;
+  const MAX_CELDAS = 10000000;   // en todo el libro: crearLibro no arma un .xlsx de más de ~8 M celdas, y antes de llegar ahí la memoria ya se fue
+  const MAX_COMBINADAS = 500000; // por hoja, como LibroXlsx
   const ERRORES = { 0x00: '#NULL!', 0x07: '#DIV/0!', 0x0F: '#VALUE!', 0x17: '#REF!', 0x1D: '#NAME?', 0x24: '#NUM!', 0x2A: '#N/A', 0x2B: '#GETTING_DATA' };
   const danado = (detalle) => new LibroXlsx.ErrorXlsx('danado', detalle);
 
@@ -114,20 +116,27 @@
     };
 
     const hojas = [];
+    // una parte se lee una sola vez: un libro hostil con mil hojas sobre la misma parte de celdas multiplicaba la memoria por mil
+    const partesLeidas = new Set();
+    let celdas = 0;
     for (const def of hojasDef) {
       const rel = rels.get(def.rid);
-      if (!rel || !/\/worksheet$/.test(rel.tipo)) continue;
+      if (!rel || !/\/worksheet$/.test(rel.tipo) || partesLeidas.has(rel.destino)) continue;
       const entrada = zip.file(rel.destino);
       if (!entrada) continue;
+      partesLeidas.add(rel.destino);
       const b = new Uint8Array(await entrada.async('uint8array'));
-      const filas = [], anchos = [], combinadas = [], columnasOcultas = [], filasOcultas = [];
+      const filas = [], anchos = [], combinadas = [], columnasOcultas = new Set(), filasOcultas = [];
       let fila = 0;
       const poner = (c, valor) => {
         if (fila >= MAX_FILAS || c >= MAX_COLS) return;
+        if (++celdas > MAX_CELDAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_CELDAS + ' celdas');
         const f = filas[fila] || (filas[fila] = []);
         f[c] = valor;
       };
       const numero = (c, xf, n) => { const cod = codigoDe(xf); poner(c, cod ? { valor: n, formato: cod } : n); };
+      // BrtColInfo: en un libro real los rangos no se pisan (entre todos, 16.384 columnas); uno hostil repetía "A:XFD" un millón de veces en 1 KB comprimido
+      let presupuestoCols = 4 * MAX_COLS;
       let sigCol = 0;   // la columna que sigue a la última celda: la usan los registros "cortos" (BrtShort*), que no la traen
       for (const r of registros(b)) {
         const p = r.p;
@@ -157,12 +166,13 @@
           case 7: { const t = textos[leerU32(b, v)]; if (t) poner(col, t); break; }   // BrtCellIsst
           case 1176: {                                                           // BrtMergeCell: filas y columnas, de la primera a la última
             const f0 = leerU32(b, p), f1 = leerU32(b, p + 4), c0 = leerU32(b, p + 8), c1 = leerU32(b, p + 12);
-            if (f1 >= f0 && c1 >= c0 && f1 < MAX_FILAS && c1 < MAX_COLS && (f1 > f0 || c1 > c0)) combinadas.push(LibroXlsx.numeroACol(c0) + (f0 + 1) + ':' + LibroXlsx.numeroACol(c1) + (f1 + 1));
+            if (f1 >= f0 && c1 >= c0 && f1 < MAX_FILAS && c1 < MAX_COLS && (f1 > f0 || c1 > c0) && combinadas.length < MAX_COMBINADAS) combinadas.push(LibroXlsx.numeroACol(c0) + (f0 + 1) + ':' + LibroXlsx.numeroACol(c1) + (f1 + 1));
             break;
           }
           case 1060: {                                                            // BrtColInfo: ancho en 1/256 de carácter, oculta en el bit 0 de las banderas
             const c0 = leerU32(b, p), c1 = Math.min(leerU32(b, p + 4), MAX_COLS - 1), w = leerU32(b, p + 8) / 256, oculta = (leerU16(b, p + 16) & 1) === 1;
-            for (let c = c0; c <= c1 && c < MAX_COLS; c++) { anchos[c] = w; if (oculta) columnasOcultas.push(c); }
+            if ((presupuestoCols -= Math.max(0, c1 - c0 + 1)) < 0) break;
+            for (let c = c0; c <= c1 && c < MAX_COLS; c++) { anchos[c] = w; if (oculta) columnasOcultas.add(c); }
             break;
           }
           default: break;
@@ -170,7 +180,7 @@
       }
       let ancho = 0;
       for (let r = 0; r < filas.length; r++) { if (!filas[r]) filas[r] = []; if (filas[r].length > ancho) ancho = filas[r].length; }
-      hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: columnasOcultas.filter((c) => c < ancho), filasOcultas: filasOcultas.filter((r) => r < filas.length) });
+      hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: [...columnasOcultas].filter((c) => c < ancho).sort((a, b) => a - b), filasOcultas: filasOcultas.filter((r) => r < filas.length) });
     }
     if (!hojas.length) throw new LibroXlsx.ErrorXlsx('sinLibro', 'sin hojas');
     return { hojas, fecha1904 };
