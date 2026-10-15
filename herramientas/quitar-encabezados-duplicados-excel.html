@@ -41,7 +41,7 @@ window.i18nPagina = {
     'mensaje-con-duplicados': 'Se encontraron y quitaron {n} fila(s) duplicada(s) en "{hoja}".',
     'aviso-reconstruido': 'No se pudo conservar el archivo tal cual ({motivo}): se creó un libro nuevo con los valores, el formato básico y las celdas combinadas.',
     'motivo-otro-formato': 'este formato no se puede editar en el lugar',
-    'nota-formato': 'El archivo resultante guarda los valores de todas las hojas con su formato de número (fechas, monedas), los anchos de columna y las celdas combinadas. Las fórmulas pasan a ser sus valores, y se pierden colores, bordes, fuentes, imágenes y gráficos.',
+    'nota-formato': 'En un .xlsx o .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas (sus referencias se acomodan), tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si el archivo tiene algo que no se puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores, el formato de número, los anchos de columna y las celdas combinadas.',
     'error-procesar': 'No se pudo procesar el archivo'
   },
   en: {
@@ -67,7 +67,7 @@ window.i18nPagina = {
     'mensaje-con-duplicados': '{n} duplicate row(s) were found and removed in "{hoja}".',
     'aviso-reconstruido': 'The file could not be kept as it was ({motivo}): a new workbook was created with the values, basic formatting and merged cells.',
     'motivo-otro-formato': 'this format cannot be edited in place',
-    'nota-formato': 'The resulting file keeps the values of all sheets with their number format (dates, currencies), column widths and merged cells. Formulas become their values, and colors, borders, fonts, images and charts are lost.',
+    'nota-formato': 'In an .xlsx or .xlsm file the rows are removed in the file itself, like Excel’s “Delete rows”: colors, borders, formulas (their references are adjusted), tables, images and charts are kept. With .xls, .xlsb or .ods, or if the file has something that can’t be moved that way (notes, pivot tables…), a new workbook is built with the values, number formats, column widths and merged cells.',
     'error-procesar': 'Couldn’t process the file'
   }
 };
@@ -129,7 +129,7 @@ window.i18nPagina = {
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <p style="color:var(--texto-suave);" data-i18n="nota-formato">El archivo resultante guarda los valores de todas las hojas con su formato de número (fechas, monedas), los anchos de columna y las celdas combinadas. Las fórmulas pasan a ser sus valores, y se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
+    <p style="color:var(--texto-suave);" data-i18n="nota-formato">En un .xlsx o .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas (sus referencias se acomodan), tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si el archivo tiene algo que no se puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores, el formato de número, los anchos de columna y las celdas combinadas.</p>
   </div>
 </main>
 
@@ -365,6 +365,8 @@ botonProcesar.addEventListener('click', async () => {
     } else if (!libroActual.motor) {
       motivoReconstruido = t('motivo-otro-formato');
     }
+    // Un .xlsm editado en el lugar sigue siendo un libro con macros: con extensión .xlsx Excel no lo abre ("el formato o la extensión no son válidos").
+    const extension = bytesFinales && /\.xlsm$/i.test(archivoActual.name) ? 'xlsm' : 'xlsx';
     if (!bytesFinales) {
       // Solo se limpia la hoja elegida: las demás hojas del archivo se conservan, en el mismo orden.
       const hojasSalida = [];
@@ -382,9 +384,9 @@ botonProcesar.addEventListener('click', async () => {
       }
       bytesFinales = await XlsxEscritor.crearLibro(hojasSalida);
     }
-    const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([bytesFinales], { type: extension === 'xlsm' ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}-sin-duplicados.xlsx`;
+    enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}-sin-duplicados.${extension}`;
     resultado.classList.add('visible');
 
     const nombreHoja = libroActual.hojas.find(h => h.indice === indiceElegido).nombre;

@@ -331,7 +331,14 @@
     while ((m = re.exec(t))) {
       const sig = t[m.index + m[0].length];
       if (sig === '(') continue;   // función
-      if (/^[A-Za-z]{1,3}\d+$/.test(m[0]) || /^[A-Za-z]{1,3}$/.test(m[0]) || /^(?:TRUE|FALSE)$/i.test(m[0])) continue;   // celda, columna entera, lógico
+      if (/^(?:TRUE|FALSE)$/i.test(m[0]) || /[\d.]/.test(t[m.index - 1] || '')) continue;   // lógico, o el exponente de un número (1E+5)
+      // celda (A1, A$1) o columna entera (A:C, $A:$C) hasta XFD. Unas letras solas o una "celda" más allá de XFD son un nombre definido: Excel
+      // acepta IVA, tax, x o XFE1 como nombres (medido)
+      const col = /^([A-Za-z]{1,3})(\d*)$/.exec(m[0]);
+      if (col && colANumero(col[1].toUpperCase()) <= 16383) {
+        const fin = m.index + m[0].length, ant = t[m.index - 1] === '$' ? t[m.index - 2] : t[m.index - 1];
+        if (col[2] || sig === ':' || ant === ':' || /^\$\d/.test(t.slice(fin, fin + 2))) continue;
+      }
       return false;                // un nombre definido
     }
     return true;

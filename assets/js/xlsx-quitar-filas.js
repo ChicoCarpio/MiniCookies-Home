@@ -8,7 +8,8 @@
 //   // r = { quitadas: n }  · después se guarda con libro.zip.generateAsync(...)
 // Rechaza (ErrorEscritor, sin tocar nada) lo que no sabe mover sin dejar un archivo que Excel repare: comentarios y notas, tablas dinámicas y
 // segmentaciones de la hoja o con ella de origen, fórmulas matriciales y tablas de datos, controles y objetos OLE, consultas, extensiones x14 de
-// formato condicional, validación o minigráficos, el encabezado o la fila de totales de una tabla, y una tabla que quedaría sin filas.
+// formato condicional, validación o minigráficos, el encabezado o la fila de totales de una tabla, una tabla que quedaría sin filas, hojas
+// escritas con prefijo de espacio de nombres (<x:row>) y formato condicional con fórmulas relativas que obligaría a partirlo en demasiadas reglas.
 // Las fórmulas compartidas de las hojas afectadas se escriben una a una (al quitar filas el desplazamiento entre la maestra y sus copias cambia).
 // Requiere xlsx-modelo.js, xml-editar.js, xlsx-paquete.js y xlsx-escritor.js.
 (function () {
@@ -18,12 +19,19 @@
   const numeroACol = (n) => LibroXlsx.numeroACol(n);
   const IDENT = /[A-Za-z0-9_.À-￿]/;
   const MAX_PARTES = 5000;
+  // elementos de la hoja que Excel nunca escribe con prefijo (sí escribe <xm:f>, <x14:dataValidation>…)
+  const PREFIJADOS = /<[A-Za-z_][\w.-]*:(?:sheetData|row|c|mergeCells|hyperlinks)[\s/>]/;
 
   // ---- qué fila va a dónde ---------------------------------------------------------------------------------------
   function mapeo(filas) {
     const q = filas;   // ordenadas y sin repetir
     const hasta = (f, incluye) => { let lo = 0, hi = q.length; while (lo < hi) { const m = (lo + hi) >> 1; if (incluye ? q[m] <= f : q[m] < f) lo = m + 1; else hi = m; } return lo; };
+    const finRacha = new Int32Array(q.length);   // índice de la última fila de cada tramo de filas quitadas seguidas
+    for (let k = q.length - 1; k >= 0; k--) finRacha[k] = k + 1 < q.length && q[k + 1] === q[k] + 1 ? finRacha[k + 1] : k;
     return {
+      lista: q,
+      // la primera fila desde f (incluida) que no se quita
+      siguiente(f) { const k = hasta(f, false); return k < q.length && q[k] === f ? q[finRacha[k]] + 1 : f; },
       // fila nueva, o -1 si se quitó
       fila(f) { const k = hasta(f, false); return k < q.length && q[k] === f ? -1 : f - k; },
       // rango nuevo [a, b], o null si todas sus filas se quitaron: el inicio sube a la primera fila que queda, el final baja a la última
@@ -65,27 +73,31 @@
         if (m && (colANumero(m[2].toUpperCase()) > 16383 || (m[6] && colANumero(m[6].toUpperCase()) > 16383))) m = null;
         const mf = m ? null : REF_FILAS.exec(resto);
         if (!m && !mf) {
+          externo = false;
           if (prefijo) { salida += prefijo; i = pos; continue; }
           salida += ch; i++; continue;
         }
         const todo = (m || mf)[0];
-        const aplica = !externo && (prefijo ? hoja.toLowerCase() === destino : enObjetivo);
+        // Hoja1:Hoja3!A1 (referencia 3D): Excel no la toca al quitar filas de una de sus hojas (medido)
+        const aplica = !externo && !(prefijo && previo === ':') && (prefijo ? hoja.toLowerCase() === destino : enObjetivo);
         externo = false;
         if (!aplica) { salida += prefijo + todo; i = pos + todo.length; continue; }
+        // M.fila y M.rango reciben además qué extremos son relativos (sin $ en la fila): lo usa partirPorFilas
         let nuevo;
         if (m) {
           const f0 = parseInt(m[4], 10) - 1;
-          if (!m[8]) { const f = M.fila(f0); nuevo = f < 0 ? '#REF!' : m[1] + m[2] + m[3] + (f + 1); }
+          if (!m[8]) { const f = M.fila(f0, !m[3]); nuevo = f < 0 ? '#REF!' : m[1] + m[2] + m[3] + (f + 1); }
           else {
-            const f1 = parseInt(m[8], 10) - 1, r = M.rango(Math.min(f0, f1), Math.max(f0, f1));
+            const f1 = parseInt(m[8], 10) - 1, r = M.rango(Math.min(f0, f1), Math.max(f0, f1), [[f0, !m[3]], [f1, !m[7]]]);
             nuevo = r ? m[1] + m[2] + m[3] + (r[0] + 1) + ':' + m[5] + m[6] + m[7] + (r[1] + 1) : '#REF!';
           }
         } else {
-          const a = parseInt(mf[2], 10) - 1, b = parseInt(mf[4], 10) - 1, r = M.rango(Math.min(a, b), Math.max(a, b));
+          const a = parseInt(mf[2], 10) - 1, b = parseInt(mf[4], 10) - 1, r = M.rango(Math.min(a, b), Math.max(a, b), [[a, !mf[1]], [b, !mf[3]]]);
           nuevo = r ? mf[1] + (r[0] + 1) + ':' + mf[3] + (r[1] + 1) : '#REF!';
         }
         salida += prefijo + nuevo; i = pos + todo.length; continue;
       }
+      if (ch !== '!') externo = false;   // [1]!Nombre: el libro externo vale hasta el final del nombre
       salida += ch; i++;
     }
     return salida;
@@ -104,6 +116,89 @@
       salida.push(a === b ? a : a + ':' + b);
     }
     return salida.join(' ');
+  }
+
+  // ---- formato condicional y validación: fórmulas relativas a la esquina del sqref -------------------------------
+  // Lo relativo de estas fórmulas cuenta desde la esquina superior izquierda de todo el sqref. Al quitar filas Excel parte la regla en varias
+  // (medido, corpus 45-quitar-filas-cf, con un solo "Eliminar" de varias filas): recorre las filas que quedan en tramos seguidos (sin filas
+  // quitadas en medio) y, dentro de cada tramo, en rachas donde cada extremo de referencia sigue igual de "quitado o no"; la primera celda de
+  // cada racha recibe su fórmula exacta (como una fórmula de celda) y las demás de la racha la copian relativa. Las rachas con la misma fórmula
+  // relativa vuelven a ser una sola regla. Una racha solo puede cambiar cerca de una fila quitada (a la distancia de cada referencia relativa),
+  // así que se evalúa una vez por tramo y no una vez por fila.
+  // → [{ sqref, formulas }] (vacío si no queda ninguna celda). `cuenta` = { n } lleva las evaluaciones de toda la hoja (tope MAX_EVALUACIONES).
+  const MAX_EVALUACIONES = 1000000;
+  function partirPorFilas(sqref, formulas, M, objetivo, cuenta) {
+    const partes = String(sqref).split(/\s+/).filter(Boolean).map((p) => LibroXlsx.decodificarRango(p.replace(/\$/g, '')));
+    if (!partes.length || partes.some((r) => !r)) {   // un sqref que no se entiende: se acomoda como un rango cualquiera
+      const sq = reescribirSqref(sqref, M);
+      return sq ? [{ sqref: sq, formulas: formulas.map((f) => reescribirFormula(f, true, objetivo, M)) }] : [];
+    }
+    let af = Infinity, ac = Infinity;
+    for (const r of partes) { af = Math.min(af, r.f0); ac = Math.min(ac, r.c0); }
+    // desplazamientos de las filas relativas (desde la esquina) y filas absolutas que citan las fórmulas
+    const desp = new Set(), abs = new Set();
+    const anota = (f, rel) => { if (rel) desp.add(f - af); else abs.add(f); };
+    const espia = { fila: (f, rel) => { anota(f, rel); return f; }, rango: (a, b, ext) => { for (const [f, rel] of ext) anota(f, rel); return [a, b]; } };
+    for (const f of formulas) reescribirFormula(f, true, objetivo, espia);
+    desp.delete(0);   // la fila de la propia celda nunca se quita: no cambia nada
+    // la fila r (que queda): su racha (qué extremos de referencia se quitan) y su fórmula exacta, escrita como si estuviera en la esquina vieja
+    let fija = null;
+    const evaluar = (r) => {
+      if (!desp.size && fija) return fija;
+      if (++cuenta.n > MAX_EVALUACIONES) throw new ErrorEscritor('demasiado formato condicional o validación con fórmulas relativas para acomodar');
+      let racha = '';
+      const Mr = {
+        fila: (f) => { const n = M.fila(f); racha += n < 0 ? 'q' : '-'; return n; },
+        rango: (a, b, ext) => { const n = M.rango(a, b); for (const [f] of ext) racha += M.fila(f) < 0 ? 'q' : '-'; racha += n ? '-' : 'x'; return n; },
+      };
+      const nr = M.fila(r);
+      const fx = formulas.map((f) => LibroXlsx.desplazarFormula(reescribirFormula(LibroXlsx.desplazarFormula(f, r - af, 0), true, objetivo, Mr), af - nr, 0));
+      fija = { racha, fx };
+      return fija;
+    };
+    // filas donde la fórmula puede cambiar: cerca de cada fila quitada, a la distancia de cada desplazamiento
+    let cortes = [];
+    if (desp.size) {
+      let lo = Infinity, hi = -Infinity, dmax = 0;
+      for (const r of partes) { lo = Math.min(lo, r.f0); hi = Math.max(hi, r.f1); }
+      for (const d of desp) dmax = Math.max(dmax, Math.abs(d));
+      const q = M.lista, k0 = M.antes(lo - dmax - 1), k1 = M.hasta(hi + dmax + 1);
+      if ((k1 - k0 + abs.size) * (desp.size + 1) * 2 > MAX_EVALUACIONES * 4) throw new ErrorEscritor('demasiado formato condicional o validación con fórmulas relativas para acomodar');
+      for (let k = k0; k < k1; k++) { cortes.push(q[k], q[k] + 1); for (const d of desp) cortes.push(q[k] - d, q[k] - d + 1); }
+      for (const a of abs) for (const d of desp) cortes.push(a - d, a - d + 1);
+      cortes = [...new Set(cortes)].sort((a, b) => a - b);
+    }
+    const grupos = new Map();   // fórmulas → { formulas, tramos: [{ f0, f1, c0, c1 }] }
+    for (const r of partes) {
+      let k = 0, actual = null;   // actual: la racha en curso { racha, fx (de su primera celda), desde (su primera fila) }
+      for (let hi = cortes.length; k < hi;) { const m = (k + hi) >> 1; if (cortes[m] <= r.f0) k = m + 1; else hi = m; }   // el primer corte después de f0
+      for (let s = r.f0; s <= r.f1;) {
+        const e = k < cortes.length && cortes[k] <= r.f1 ? cortes[k++] - 1 : r.f1;
+        const x = M.siguiente(s);
+        if (x > e) { actual = null; s = e + 1; continue; }   // un tramo de filas quitadas corta la racha
+        const ev = evaluar(x);
+        if (!actual || actual.racha !== ev.racha) actual = { racha: ev.racha, fx: ev.fx };
+        const fx = actual.fx;   // las celdas de la racha copian relativa la fórmula de su primera celda (fx ya está escrita desde la esquina)
+        const clave = fx.join('\u0000');
+        let g = grupos.get(clave);
+        if (!g) grupos.set(clave, g = { formulas: fx, tramos: [] });
+        const u = g.tramos[g.tramos.length - 1];
+        if (u && u.c0 === r.c0 && u.c1 === r.c1 && u.f1 === s - 1) u.f1 = e; else g.tramos.push({ f0: s, f1: e, c0: r.c0, c1: r.c1 });
+        s = e + 1;
+      }
+    }
+    const salida = [];
+    for (const g of grupos.values()) {
+      let gf = Infinity, gc = Infinity;
+      const sq = g.tramos.map((t) => {
+        const nf = M.rango(t.f0, t.f1);
+        gf = Math.min(gf, nf[0]); gc = Math.min(gc, t.c0);
+        const a = numeroACol(t.c0) + (nf[0] + 1), b = numeroACol(t.c1) + (nf[1] + 1);
+        return a === b ? a : a + ':' + b;
+      });
+      salida.push({ sqref: sq.join(' '), formulas: g.formulas.map((f) => LibroXlsx.desplazarFormula(f, gf - af, gc - ac)) });
+    }
+    return salida;
   }
 
   // ---- fórmulas compartidas → una por celda -----------------------------------------------------------------------
@@ -135,11 +230,16 @@
   }
 
   // ---- la hoja de la que se quitan filas -------------------------------------------------------------------------
+  // <f>…</f> y <formula>, <formula1>, <formula2>; sin tomar un <f/> vacío por la apertura de otra fórmula
+  const RE_F_CELDA = /(<f\b[^>]*(?<!\/)>)([\s\S]*?)(<\/f>)/g;
+  const RE_FORMULA = /(<formula[12]?\b[^>]*(?<!\/)>)([\s\S]*?)(<\/formula[12]?>)/g;
   function procesarFormulasDeTexto(texto, enObjetivo, objetivo, M) {
     // <f>…</f> de celdas y <formula>, <formula1>, <formula2> de formato condicional y validación
     return texto
-      .replace(/(<f\b[^>]*>)([\s\S]*?)(<\/f>)/g, (t, a, f, c) => a + X.esc(reescribirFormula(X.decodificar(f), enObjetivo, objetivo, M)) + c)
-      .replace(/(<formula[12]?\b[^>]*>)([\s\S]*?)(<\/formula[12]?>)/g, (t, a, f, c) => a + X.esc(reescribirFormula(X.decodificar(f), enObjetivo, objetivo, M)) + c);
+      .replace(RE_F_CELDA, (t, a, f, c) => a + X.esc(reescribirFormula(X.decodificar(f), enObjetivo, objetivo, M)) + c)
+      .replace(RE_FORMULA, (t, a, f, c) => a + X.esc(reescribirFormula(X.decodificar(f), enObjetivo, objetivo, M)) + c)
+      // <xm:f> de las extensiones x14: así guarda Excel una lista desplegable o un formato condicional que cita otra hoja (medido, corpus 46)
+      .replace(/(<xm:f>)([\s\S]*?)(<\/xm:f>)/g, (t, a, f, c) => a + X.esc(reescribirFormula(X.decodificar(f), enObjetivo, objetivo, M)) + c);
   }
 
   function filasDeLaHoja(xml, M, objetivo) {
@@ -174,17 +274,30 @@
       return k ? `<mergeCells${attrs.replace(/\bcount\s*=\s*"\d+"/, `count="${k}"`)}>${hijos}</mergeCells>` : '';
     });
     t = t.replace(/<mergeCells\b[^>]*\/>/g, '');
-    // formato condicional
-    t = t.replace(/<conditionalFormatting\b([^>]*?)\bsqref\s*=\s*"([^"]*)"([^>]*)>([\s\S]*?)<\/conditionalFormatting>/g, (todo, a, sq, b, hijos) => {
-      const nuevo = reescribirSqref(sq, M);
-      return nuevo ? `<conditionalFormatting${a}sqref="${nuevo}"${b}>${procesarFormulasDeTexto(hijos, true, objetivo, M)}</conditionalFormatting>` : '';
-    });
-    // validación de datos
-    t = t.replace(/<dataValidation\b([^>]*?)\bsqref\s*=\s*"([^"]*)"([^>]*?)(\/>|>([\s\S]*?)<\/dataValidation>)/g, (todo, a, sq, b, cierre, hijos) => {
-      const nuevo = reescribirSqref(sq, M);
-      if (!nuevo) return '';
-      return cierre === '/>' ? `<dataValidation${a}sqref="${nuevo}"${b}/>` : `<dataValidation${a}sqref="${nuevo}"${b}>${procesarFormulasDeTexto(hijos, true, objetivo, M)}</dataValidation>`;
-    });
+    // formato condicional y validación de datos: una regla puede partirse en varias (partirPorFilas)
+    const cuenta = { n: 0 };
+    let partida = false;
+    const conFormulas = (hijos, formulas) => { let k = 0; return hijos.replace(RE_FORMULA, (x, a, f, c) => a + X.esc(formulas[k++]) + c); };
+    const partir = (sq, hijos) => {
+      const g = partirPorFilas(sq, hijos ? [...hijos.matchAll(RE_FORMULA)].map((m) => X.decodificar(m[2])) : [], M, objetivo, cuenta);
+      if (g.length > 1) partida = true;
+      return g;
+    };
+    t = t.replace(/<conditionalFormatting\b([^>]*?)\bsqref\s*=\s*"([^"]*)"([^>]*)>([\s\S]*?)<\/conditionalFormatting>/g, (todo, a, sq, b, hijos) =>
+      partir(sq, hijos).map((g) => `<conditionalFormatting${a}sqref="${g.sqref}"${b}>${conFormulas(hijos, g.formulas)}</conditionalFormatting>`).join(''));
+    t = t.replace(/<dataValidation\b([^>]*?)\bsqref\s*=\s*"([^"]*)"([^>]*?)(\/>|>([\s\S]*?)<\/dataValidation>)/g, (todo, a, sq, b, cierre, hijos) =>
+      partir(sq, hijos).map((g, k) => {
+        const b2 = k ? b.replace(/\s+xr:uid\s*=\s*"[^"]*"/, '') : b, a2 = k ? a.replace(/\s+xr:uid\s*=\s*"[^"]*"/, '') : a;   // el identificador, solo en la primera
+        return cierre === '/>' ? `<dataValidation${a2}sqref="${g.sqref}"${b2}/>` : `<dataValidation${a2}sqref="${g.sqref}"${b2}>${conFormulas(hijos, g.formulas)}</dataValidation>`;
+      }).join(''));
+    // si una regla se partió, las prioridades se vuelven a numerar 1, 2, 3… en el mismo orden (las partes de una regla, seguidas)
+    if (partida) {
+      const RE_P = /(<cfRule\b[^>]*?\bpriority\s*=\s*")(\d+)(")/g;
+      const ps = [...t.matchAll(RE_P)].map((m, i) => [parseInt(m[2], 10), i]).sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+      const nueva = []; ps.forEach(([, i], k) => { nueva[i] = k + 1; });
+      let i = 0;
+      t = t.replace(RE_P, (x, a, p, c) => a + nueva[i++] + c);
+    }
     t = t.replace(/<dataValidations\b([^>]*)>([\s\S]*?)<\/dataValidations>/g, (todo, attrs, hijos) => {
       const k = (hijos.match(/<dataValidation\b/g) || []).length;
       return k ? `<dataValidations${attrs.replace(/\bcount\s*=\s*"\d+"/, `count="${k}"`)}>${hijos}</dataValidations>` : '';
@@ -249,13 +362,21 @@
     if (/<legacyDrawing\b|<controls\b|<oleObjects\b/.test(xmlObjetivo)) throw new ErrorEscritor('la hoja tiene notas, controles u objetos OLE');
     if (/\bt\s*=\s*["'](?:array|dataTable)["']/.test(xmlObjetivo)) throw new ErrorEscritor('la hoja tiene fórmulas matriciales o tablas de datos');
     if (/<x14:(?:conditionalFormatting|dataValidation|sparklineGroup)|<xm:sqref/.test(xmlObjetivo)) throw new ErrorEscritor('la hoja tiene formato condicional, validación o minigráficos de Excel 2010 o posterior');
+    // <x:row>, <x:c>…: otros programas escriben la hoja con prefijo; las expresiones de aquí buscan los nombres sin prefijo
+    if (PREFIJADOS.test(xmlObjetivo)) throw new ErrorEscritor('la hoja está escrita con prefijos de espacio de nombres');
+    // el nombre de la hoja tal como puede aparecer en el XML de otra parte (con '' en las fórmulas y con &amp; &lt; &apos;…)
+    const formas = new Set();
+    for (const base of [objetivo, objetivo.replace(/'/g, "''")]) { const e = X.esc(base); formas.add(base); formas.add(e); formas.add(e.replace(/'/g, '&apos;')); formas.add(e.replace(/'/g, '&#39;')); formas.add(X.escAttr(base)); }
+    const marcas = [...formas].map((s) => s.toLowerCase());
+    const menciona = (t) => { const b = t.toLowerCase(); return marcas.some((m) => b.includes(m)); };
     // una tabla dinámica de otra hoja que toma sus datos de esta
     for (const h of libro.hojas) {
       if (h.tipo !== 'hoja' || !h.ruta) continue;
       for (const r of await XlsxPaquete.leerRels(zip, h.ruta)) if (r.tipo === 'pivotTable' && h.ruta !== entrada.ruta) {
         const cache = (await XlsxPaquete.leerRels(zip, r.destino)).find((c) => c.tipo === 'pivotCacheDefinition');
         const t = cache && await leerTexto(zip, cache.destino);
-        if (t && new RegExp('<worksheetSource\\b[^>]*\\bsheet\\s*=\\s*"' + objetivo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"', 'i').test(t)) throw new ErrorEscritor('una tabla dinámica toma sus datos de esta hoja');
+        const fuente = t && /<worksheetSource\b[^>]*\bsheet\s*=\s*"([^"]*)"/.exec(t);
+        if (fuente && X.decodificar(fuente[1]).toLowerCase() === objetivo.toLowerCase()) throw new ErrorEscritor('una tabla dinámica toma sus datos de esta hoja');
       }
     }
 
@@ -293,28 +414,47 @@
       const nf = M.rango(rg.f0, rg.f1) || [0, 0];
       return a + numeroACol(rg.c0) + (nf[0] + 1) + ':' + numeroACol(rg.c1) + (nf[1] + 1) + c;
     });
+    // paneles inmovilizados: las filas fijas que se quitan dejan de contar (medido, corpus 47: ySplit 3 → 2 y topLeftCell A4 → A3)
+    antes = antes.replace(/<pane\b[^>]*\/?>/, (p) => {
+      const y = /\bySplit\s*=\s*"(\d+)"/.exec(p);
+      if (!y || !/\bstate\s*=\s*"frozen(?:Split)?"/.test(p)) return p;
+      const n = parseInt(y[1], 10), ny = n - M.quita(0, n - 1);
+      if (ny === n || ny <= 0) return p;   // si se quitan todas las filas fijas, el panel queda como estaba
+      return p.replace(y[0], `ySplit="${ny}"`).replace(/(\btopLeftCell\s*=\s*"[A-Za-z]{1,3})(\d+)(")/, (x, a, f, c) => a + (M.fila(M.siguiente(parseInt(f, 10) - 1)) + 1) + c);
+    });
     nuevos.set(entrada.ruta, antes + datos + cola);
 
-    // 4. dibujos de la hoja: las anclas suben con sus filas
+    // 4. dibujos de la hoja: las anclas suben con sus filas según cómo están colocadas (medido, corpus 47): "mover y cambiar tamaño" (twoCell, lo
+    // normal) sube el inicio y el final; "mover sin cambiar tamaño" (editAs="oneCell") sube el inicio y conserva su alto en filas; "no mover"
+    // (editAs="absolute") se queda donde está
+    const filaDe = (s, cual) => { const m = new RegExp('<(?:\\w+:)?' + cual + '>[\\s\\S]*?<(?:\\w+:)?row>(\\d+)<\\/').exec(s); return m ? parseInt(m[1], 10) : null; };
+    const ponerFila = (s, cual, f) => s.replace(new RegExp('(<(?:\\w+:)?' + cual + '>[\\s\\S]*?<(?:\\w+:)?row>)(\\d+)(<\\/)'), (x, a, v, c) => a + f + c);
     for (const r of rels.filter((x) => x.tipo === 'drawing')) {
       const t = await leerTexto(zip, r.destino);
       if (t === null) continue;
-      const u = t
-        .replace(/(<(?:\w+:)?from>[\s\S]*?<(?:\w+:)?row>)(\d+)(<\/)/g, (x, a, fila, c) => a + (parseInt(fila, 10) - M.antes(parseInt(fila, 10))) + c)
-        .replace(/(<(?:\w+:)?to>[\s\S]*?<(?:\w+:)?row>)(\d+)(<\/)/g, (x, a, fila, c) => a + Math.max(0, parseInt(fila, 10) - M.hasta(parseInt(fila, 10))) + c);
+      const u = t.replace(/<((?:\w+:)?)(twoCellAnchor|oneCellAnchor)\b([^>]*)>([\s\S]*?)<\/\1\2>/g, (todo, p, tipo, attrs, cuerpo) => {
+        const como = tipo === 'oneCellAnchor' ? 'oneCell' : (/\beditAs\s*=\s*"(\w+)"/.exec(attrs) || [])[1] || 'twoCell';
+        if (como === 'absolute') return todo;
+        const de = filaDe(cuerpo, 'from'), a = filaDe(cuerpo, 'to');
+        if (de === null) return todo;
+        const nde = de - M.antes(de);
+        let c = ponerFila(cuerpo, 'from', nde);
+        if (a !== null) c = ponerFila(c, 'to', como === 'oneCell' ? nde + Math.max(0, a - de) : Math.max(0, a - M.hasta(a)));
+        return `<${p}${tipo}${attrs}>${c}</${p}${tipo}>`;
+      });
       nuevos.set(r.destino, u);
     }
 
     // 5. otras hojas, nombres definidos y gráficos: solo las referencias que llevan el nombre de esta hoja
-    const marca = objetivo.toLowerCase();
     const rutaLibro = await XlsxPaquete.rutaLibroDe(zip);
     const wb = await leerTexto(zip, rutaLibro);
     let partes = 0;
     for (const h of libro.hojas) {
       if (h.tipo !== 'hoja' || !h.ruta || h.ruta === entrada.ruta) continue;
       const t = await leerTexto(zip, h.ruta);
-      if (t === null || !t.toLowerCase().includes(marca)) continue;
+      if (t === null || !menciona(t)) continue;
       if (++partes > MAX_PARTES) throw new ErrorEscritor('demasiadas partes');
+      if (PREFIJADOS.test(t)) throw new ErrorEscritor('una hoja que cita a esta está escrita con prefijos de espacio de nombres');
       let u = descompartir(t);
       u = procesarFormulasDeTexto(u, false, objetivo, M);
       nuevos.set(h.ruta, u);
@@ -327,7 +467,7 @@
     zip.forEach((nombre) => { if (/^xl\/charts\/[^/]+\.xml$/i.test(nombre)) graficos.push(nombre); });
     for (const nombre of graficos) {
       const t = await leerTexto(zip, nombre);
-      if (t === null || !t.toLowerCase().includes(marca)) continue;
+      if (t === null || !menciona(t)) continue;
       nuevos.set(nombre, t.replace(/(<(?:\w+:)?f>)([\s\S]*?)(<\/(?:\w+:)?f>)/g, (x, a, f, c) => a + X.esc(reescribirFormula(X.decodificar(f), false, objetivo, M)) + c));
     }
 
@@ -340,5 +480,5 @@
   }
 
   XlsxEscritor.quitarFilas = quitarFilas;
-  XlsxEscritor._quitarFilasInterno = { reescribirFormula, reescribirSqref, mapeo };
+  XlsxEscritor._quitarFilasInterno = { reescribirFormula, reescribirSqref, mapeo, partirPorFilas };
 })();
