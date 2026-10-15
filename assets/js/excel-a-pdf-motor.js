@@ -17,6 +17,13 @@
 //     maxPaginas, progreso(n, total), idioma, nombreArchivo });
 // Requiere vendor.js (rutaVendor), lector-hojas.js y los módulos de xlsx-*.js que lector-hojas.js ya necesita.
 
+// Se suman a los textos de la página (los de la página mandan).
+(function () {
+  const pagina = window.i18nPagina || (window.i18nPagina = {});
+  pagina.es = Object.assign({ 'excel-pdf-sin-datos': 'El archivo no tiene nada que imprimir.' }, pagina.es);
+  pagina.en = Object.assign({ 'excel-pdf-sin-datos': 'The file has nothing to print.' }, pagina.en);
+})();
+
 const ExcelAPdfMotor = (() => {
   const base = new URL('./', document.currentScript.src).href;
   const MODULOS = [
@@ -50,7 +57,7 @@ const ExcelAPdfMotor = (() => {
   }
   async function cargarMotor() {
     if (typeof XlsxPdf !== 'undefined') return;
-    for (const x of MODULOS) await cargarScript(x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : base + x);
+    for (const x of MODULOS) if (!(typeof PDFLib !== 'undefined' && /pdf-lib/.test(x))) await cargarScript(x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : base + x);
   }
 
   // El libro del motor para imprimir: el que ya abrió LectorHojas (xlsx, xlsm y csv) o, si el archivo es de otro formato (xls, xlsb, ods),
@@ -118,5 +125,23 @@ const ExcelAPdfMotor = (() => {
     }
   }
 
-  return { cargarMotor, libroDeMotor, generar, PAPELES };
+  // Un libro entero → los bytes de un PDF con las páginas que imprime Excel (lo que usa "Unir PDF"): todas las hojas visibles, con la
+  // configuración del archivo; un CSV sale con cuadrícula y a una página de ancho. Falla con `t('excel-pdf-sin-datos')` si no hay nada que imprimir.
+  // alAvanzar(fracción 0–1).
+  async function libroAPdf(archivo, alAvanzar) {
+    const lector = await LectorHojas.abrir(archivo);
+    const libro = await libroDeMotor(lector);
+    const csv = /\.csv$/i.test(archivo.name);
+    const hojas = lector.hojas.filter((h) => h.estado === 'visible').map((h) => h.indice);
+    const idioma = typeof idiomaActual === 'function' && idiomaActual() === 'en' ? 'en' : 'es';
+    const { bytes, paginas } = await generar(libro, {
+      hojas, idioma, nombreArchivo: archivo.name,
+      ajustar: csv ? 1 : 'archivo', cuadricula: csv ? 'si' : 'archivo',
+      progreso: alAvanzar ? (n, total) => alAvanzar(n / total) : null,
+    });
+    if (!paginas) throw new Error(t('excel-pdf-sin-datos'));
+    return bytes;
+  }
+
+  return { cargarMotor, libroDeMotor, generar, libroAPdf, PAPELES };
 })();
