@@ -282,6 +282,8 @@
       if (r.iconos) {
         const ic = r.iconos, cv = ic.cfvo;
         const pts = cv.map((q, k) => (k === 0 ? -Infinity : umbral(reg, d, q, f, c, 'num')));
+        pts[0] = umbral(reg, d, cv[0], f, c, 'min'); // un valor por debajo del primer umbral no lleva icono (medido en pantalla: 3Symbols con umbrales 0/5/15 y un -2)
+        if (cv[0].gte !== false ? v < pts[0] : v <= pts[0]) return { icono: null };
         let k = 0;
         for (let j = 1; j < pts.length; j++) { const gte = cv[j].gte !== false; if (gte ? v >= pts[j] : v > pts[j]) k = j; }
         const nivel = ic.invertir ? cv.length - 1 - k : k;

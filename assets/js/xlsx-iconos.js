@@ -49,13 +49,17 @@
   const simbolo = (col, k) => (ctx) => { circulo(ctx, 12, 12, 10.5, col); GLIFO[k](ctx, '#FFFFFF'); };
   const simboloSolo = (col, k) => (ctx) => GLIFO[k](ctx, col[0]);
 
-  // valoración: escalera de cuatro escalones, `n` en azul y el resto en gris
+  // valoración: cuatro barras de 4 px de ancho cada 3 px (comparten el borde), de 7, 10, 13 y 16 px de alto, con borde de 1 px y relleno más claro; `n` en azul y el resto en gris
+  // (medido en pantalla con píxeles exactos, en unidades de 24 = 16 px). Las vacías se pintan primero: en el borde que comparten gana el de la barra llena.
   const escalera = (n) => (ctx) => {
-    for (let k = 0; k < 4; k++) {
-      const x = 1 + 5 * k, alto = 10 + 4 * k;
-      ctx.fillStyle = k < n ? C.azul[0] : C.grisClaro[0];
-      ctx.fillRect(x, 22.5 - alto, k === 3 ? 6 : 5.6, alto);
-    }
+    const u = 1.5;
+    const barra = (k, col) => {
+      const x = 3.5 + 4.5 * k, alto = 10.5 + 4.5 * k, y = 24 - alto;
+      ctx.fillStyle = col[1]; ctx.fillRect(x, y, 4 * u, alto);
+      ctx.fillStyle = col[0]; ctx.fillRect(x + u, y + u, 2 * u, alto - 2 * u);
+    };
+    for (let k = 3; k >= 0; k--) if (k >= n) barra(k, C.grisClaro);
+    for (let k = 0; k < 4; k++) if (k < n) barra(k, C.azul);
   };
   // cuartos: círculo blanco con borde oscuro y `n` cuartos oscuros desde las 12 en punto, en el sentido del reloj
   const cuartos = (n) => (ctx) => {
