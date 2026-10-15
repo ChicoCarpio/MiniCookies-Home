@@ -62,13 +62,14 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Convertir Excel o CSV a PDF gratis — Mini Cookies',
-    'meta-descripcion': 'Exportá una hoja de Excel o un CSV como tabla PDF lista para imprimir, gratis y sin subir tu archivo a ningún servidor.',
+    'meta-descripcion': 'Exportá una hoja de Excel o un CSV como PDF con las mismas páginas que imprime Excel, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Excel / CSV a PDF',
-    'intro': 'Elegí un archivo y lo convertimos en una tabla PDF, lista para imprimir o compartir. Las columnas y filas completamente vacías se omiten, y se conserva negrita, cursiva, subrayado y color de texto de las celdas cuando el archivo los tiene (no se replican fuentes personalizadas, bordes ni tamaños de letra por celda). Si el archivo tiene gráficos, se agregan como páginas extra después de la tabla, reconstruidos a partir de sus datos — el estilo puede no ser idéntico al del original. No se incluyen imágenes embebidas.',
+    'intro': 'Elegí un archivo y lo imprimimos en PDF como lo haría Excel: las mismas páginas, con los saltos de página, el área de impresión, los títulos que se repiten y el encabezado y pie del archivo, y con sus bordes, colores, formatos, gráficos e imágenes. Podés cambiar el papel, la orientación y cuántas páginas de ancho ocupa la hoja. Un CSV sale con cuadrícula y en una página de ancho. Los archivos .xls, .xlsb y .ods se convierten antes de imprimirlos y pueden perder parte del formato.',
     'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)',
     'campo-hoja': 'Hoja',
+    'opcion-todas-hojas': 'Todas las hojas',
     'campo-que-imprimir': 'Qué imprimir',
-    'campo-columnas-ocultas': 'Mostrar columnas ocultas',
+    'campo-columnas-ocultas': 'Imprimir columnas y filas ocultas',
     'opcion-todo': 'Todo',
     'opcion-celdas': 'Solo celdas seleccionadas',
     'aria-cuadricula': 'Cuadrícula de celdas',
@@ -79,11 +80,12 @@ window.i18nPagina = {
     'quitar-rango': 'Quitar rango',
     'error-rango-invalido': 'El rango no es válido o queda fuera del área usada de la hoja.',
     'error-sin-rangos': 'Agregá al menos un rango de celdas para generar el PDF.',
-    'error-rangos-ocultos': 'Los rangos seleccionados solo contienen columnas ocultas. Activá “Mostrar columnas ocultas” o elegí otras celdas.',
     'campo-orientacion': 'Orientación',
+    'opcion-orientacion-archivo': 'La del archivo',
     'opcion-vertical': 'Vertical',
-    'opcion-horizontal': 'Horizontal (más columnas)',
+    'opcion-horizontal': 'Horizontal',
     'campo-tamano': 'Tamaño de página',
+    'opcion-papel-archivo': 'El del archivo',
     'opcion-a4': 'A4 (210 x 297 mm)',
     'opcion-carta': 'Carta / Letter (216 x 279 mm)',
     'opcion-legal': 'Legal (216 x 356 mm)',
@@ -105,42 +107,45 @@ window.i18nPagina = {
     'opcion-media-carta': 'Media carta (140 x 216 mm)',
     'opcion-folio': 'Folio (216 x 330 mm)',
     'opcion-personalizado': 'Personalizado',
+    'campo-ajustar': 'Ajustar a',
+    'opcion-ajustar-archivo': 'Lo que dice el archivo',
+    'opcion-ajustar-no': 'Sin ajustar (100 %)',
+    'opcion-ajustar-1': '1 página de ancho',
+    'opcion-ajustar-2': '2 páginas de ancho',
+    'opcion-ajustar-3': '3 páginas de ancho',
+    'campo-cuadricula': 'Cuadrícula',
+    'opcion-cuad-archivo': 'Lo que dice el archivo',
+    'opcion-cuad-si': 'Imprimirla',
+    'opcion-cuad-no': 'No imprimirla',
     'campo-ancho-personalizado': 'Ancho (mm)',
     'campo-alto-personalizado': 'Alto (mm)',
     'vista-pdf-titulo': 'Vista previa del PDF',
     'vista-pdf-cargando': 'Preparando vista previa del PDF…',
     'error-tamano-personalizado': 'El tamaño personalizado debe tener medidas válidas mayores a 25 mm.',
-    'campo-fuente': 'Tamaño de letra',
-    'campo-limite-lineas': 'Líneas por celda',
-    'opcion-sin-limite-lineas': 'Sin límite',
-    'opcion-ocho-lineas': 'Máximo 8 líneas',
     'campo-zoom': 'Zoom de vista',
-    'opcion-chico': 'Chico',
-    'opcion-mediano': 'Mediano',
-    'opcion-grande': 'Grande',
     'boton-convertir': 'Generar PDF',
     'boton-convertir-generando': 'Generando...',
-    'boton-convertir-progreso': 'Generando PDF: {n} de {total} filas...',
+    'boton-convertir-progreso': 'Generando PDF: {n} de {total} páginas...',
     'boton-convertir-finalizando': 'Finalizando PDF...',
-    'vista-previa-titulo': 'Vista previa',
-    'vista-previa-desc': 'Así se ve lo que se va a convertir a PDF (ya sin filas ni columnas vacías, con negrita/cursiva/subrayado/color cuando el archivo los tiene).',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar PDF',
     'sin-datos': 'No hay datos para mostrar (la hoja está vacía o todas sus filas/columnas están vacías).',
-    'aviso-graficos': '📊 Esta hoja tiene {n} gráfico{s} — se van a agregar como páginas extra después de la tabla.',
-    'aviso-vista-parcial': 'La vista previa muestra las primeras {n} filas de {total}. El PDF que descargues incluye todas.',
-    'aviso-columnas': '⚠️ Tenés {n} columnas — el texto puede quedar muy recortado. Probá "Horizontal" o letra "Chica".',
+    'aviso-vista-parcial': 'La vista previa muestra las primeras {n} páginas. El PDF que descargues incluye todas.',
+    'aviso-truncado': 'El archivo da más de {n} páginas: el PDF trae solo las primeras {n}.',
+    'aviso-sin-paginas': 'No hay nada para imprimir en lo elegido (la hoja está vacía o su área de impresión no tiene nada).',
+    'aviso-conversion': 'Este formato se convierte antes de imprimirlo: puede perder colores, bordes o gráficos.',
     'error-generar': 'No se pudo generar el PDF',
   },
   en: {
     'titulo-pagina': 'Convert Excel or CSV to PDF Free — Mini Cookies',
-    'meta-descripcion': 'Export an Excel sheet or a CSV as a print-ready PDF table, free and without uploading your file anywhere.',
+    'meta-descripcion': 'Export an Excel sheet or a CSV as a PDF with the same pages Excel prints, free and without uploading your file anywhere.',
     'h1': 'Excel / CSV to PDF',
-    'intro': 'Pick a file and we’ll convert it into a PDF table, ready to print or share. Completely empty columns and rows are skipped, and bold, italics, underline and text color are kept when the file has them (custom fonts, borders and per-cell font sizes aren’t replicated). If the file has charts, they’re added as extra pages after the table, rebuilt from their data — the style may not be identical to the original. Embedded images aren’t included.',
+    'intro': 'Pick a file and we’ll print it to PDF the way Excel would: the same pages, with its page breaks, print area, repeated titles, header and footer, and with its borders, colors, formats, charts and images. You can change the paper, the orientation and how many pages wide the sheet is. A CSV comes out with gridlines and one page wide. .xls, .xlsb and .ods files are converted before printing and may lose some formatting.',
     'zona-arrastre': '📊 Drag your file here or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv)',
     'campo-hoja': 'Sheet',
+    'opcion-todas-hojas': 'All sheets',
     'campo-que-imprimir': 'What to print',
-    'campo-columnas-ocultas': 'Show hidden columns',
+    'campo-columnas-ocultas': 'Print hidden columns and rows',
     'opcion-todo': 'Everything',
     'opcion-celdas': 'Selected cells only',
     'aria-cuadricula': 'Cell selection grid',
@@ -151,11 +156,12 @@ window.i18nPagina = {
     'quitar-rango': 'Remove range',
     'error-rango-invalido': 'The range is invalid or outside the used area of the sheet.',
     'error-sin-rangos': 'Add at least one cell range to generate the PDF.',
-    'error-rangos-ocultos': 'The selected ranges only contain hidden columns. Turn on “Show hidden columns” or choose different cells.',
     'campo-orientacion': 'Orientation',
+    'opcion-orientacion-archivo': 'The file’s',
     'opcion-vertical': 'Portrait',
-    'opcion-horizontal': 'Landscape (more columns)',
+    'opcion-horizontal': 'Landscape',
     'campo-tamano': 'Page size',
+    'opcion-papel-archivo': 'The file’s',
     'opcion-a4': 'A4 (210 x 297 mm)',
     'opcion-carta': 'Letter (216 x 279 mm)',
     'opcion-legal': 'Legal (216 x 356 mm)',
@@ -177,31 +183,33 @@ window.i18nPagina = {
     'opcion-media-carta': 'Statement (140 x 216 mm)',
     'opcion-folio': 'Folio (216 x 330 mm)',
     'opcion-personalizado': 'Custom',
+    'campo-ajustar': 'Fit to',
+    'opcion-ajustar-archivo': 'What the file says',
+    'opcion-ajustar-no': 'Don’t fit (100 %)',
+    'opcion-ajustar-1': '1 page wide',
+    'opcion-ajustar-2': '2 pages wide',
+    'opcion-ajustar-3': '3 pages wide',
+    'campo-cuadricula': 'Gridlines',
+    'opcion-cuad-archivo': 'What the file says',
+    'opcion-cuad-si': 'Print them',
+    'opcion-cuad-no': 'Don’t print them',
     'campo-ancho-personalizado': 'Width (mm)',
     'campo-alto-personalizado': 'Height (mm)',
     'vista-pdf-titulo': 'PDF preview',
     'vista-pdf-cargando': 'Preparing PDF preview…',
     'error-tamano-personalizado': 'Custom page dimensions must be valid and greater than 25 mm.',
-    'campo-fuente': 'Font size',
-    'campo-limite-lineas': 'Lines per cell',
-    'opcion-sin-limite-lineas': 'No limit',
-    'opcion-ocho-lineas': 'Maximum 8 lines',
     'campo-zoom': 'View zoom',
-    'opcion-chico': 'Small',
-    'opcion-mediano': 'Medium',
-    'opcion-grande': 'Large',
     'boton-convertir': 'Generate PDF',
     'boton-convertir-generando': 'Generating...',
-    'boton-convertir-progreso': 'Generating PDF: {n} of {total} rows...',
+    'boton-convertir-progreso': 'Generating PDF: {n} of {total} pages...',
     'boton-convertir-finalizando': 'Finishing PDF...',
-    'vista-previa-titulo': 'Preview',
-    'vista-previa-desc': 'This is what will be converted to PDF (already without empty rows/columns, with bold/italics/underline/color when the file has them).',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download PDF',
     'sin-datos': 'No data to show (the sheet is empty or all its rows/columns are empty).',
-    'aviso-graficos': '📊 This sheet has {n} chart{s} — they’ll be added as extra pages after the table.',
-    'aviso-vista-parcial': 'The preview shows the first {n} of {total} rows. The PDF you download includes all of them.',
-    'aviso-columnas': '⚠️ You have {n} columns — the text may end up very cropped. Try "Landscape" or "Small" font size.',
+    'aviso-vista-parcial': 'The preview shows the first {n} pages. The PDF you download includes all of them.',
+    'aviso-truncado': 'The file makes more than {n} pages: the PDF only has the first {n}.',
+    'aviso-sin-paginas': 'There is nothing to print in what you chose (the sheet is empty or its print area has nothing).',
+    'aviso-conversion': 'This format is converted before printing: it may lose colors, borders or charts.',
     'error-generar': 'Couldn’t generate the PDF',
   }
 };
@@ -243,7 +251,7 @@ window.i18nPagina = {
         </select>
       </label>
       <label class="campo campo-opcion">
-        <input id="mostrarColumnasOcultas" type="checkbox" checked>
+        <input id="mostrarColumnasOcultas" type="checkbox">
         <span data-i18n="campo-columnas-ocultas">Mostrar columnas ocultas</span>
       </label>
       <label class="campo campo-zoom">
@@ -271,6 +279,7 @@ window.i18nPagina = {
       <label class="campo">
         <span data-i18n="campo-orientacion">Orientación</span>
         <select id="orientacion">
+          <option value="archivo" selected data-i18n="opcion-orientacion-archivo">La del archivo</option>
           <option value="vertical" data-i18n="opcion-vertical">Vertical</option>
           <option value="horizontal" data-i18n="opcion-horizontal">Horizontal (más columnas)</option>
         </select>
@@ -278,6 +287,7 @@ window.i18nPagina = {
       <label class="campo">
         <span data-i18n="campo-tamano">Tamaño de página</span>
         <select id="tamanoPagina">
+          <option value="archivo" selected data-i18n="opcion-papel-archivo">El del archivo</option>
           <option value="4a0" data-i18n="opcion-4a0">4A0 (1682 x 2378 mm)</option>
           <option value="2a0" data-i18n="opcion-2a0">2A0 (1189 x 1682 mm)</option>
           <option value="arch-e" data-i18n="opcion-arch-e">Architectural E (914 x 1219 mm)</option>
@@ -286,7 +296,7 @@ window.i18nPagina = {
           <option value="a1" data-i18n="opcion-a1">A1 (594 x 841 mm)</option>
           <option value="a2" data-i18n="opcion-a2">A2 (420 x 594 mm)</option>
           <option value="a3" data-i18n="opcion-a3">A3 (297 x 420 mm)</option>
-          <option value="a4" selected data-i18n="opcion-a4">A4 (210 x 297 mm)</option>
+          <option value="a4" data-i18n="opcion-a4">A4 (210 x 297 mm)</option>
           <option value="a5" data-i18n="opcion-a5">A5 (148 x 210 mm)</option>
           <option value="a6" data-i18n="opcion-a6">A6 (105 x 148 mm)</option>
           <option value="b4" data-i18n="opcion-b4">B4 JIS (257 x 364 mm)</option>
@@ -306,18 +316,21 @@ window.i18nPagina = {
         <label class="campo"><span data-i18n="campo-alto-personalizado">Alto (mm)</span><input id="altoPaginaPersonalizada" type="number" min="25" max="2000" step="1" value="297"></label>
       </div>
       <label class="campo">
-        <span data-i18n="campo-fuente">Tamaño de letra</span>
-        <select id="tamanoFuente">
-          <option value="7" data-i18n="opcion-chico">Chico</option>
-          <option value="9" selected data-i18n="opcion-mediano">Mediano</option>
-          <option value="11" data-i18n="opcion-grande">Grande</option>
+        <span data-i18n="campo-ajustar">Ajustar a</span>
+        <select id="ajustarA">
+          <option value="archivo" selected data-i18n="opcion-ajustar-archivo">Lo que dice el archivo</option>
+          <option value="no" data-i18n="opcion-ajustar-no">Sin ajustar (100 %)</option>
+          <option value="1" data-i18n="opcion-ajustar-1">1 página de ancho</option>
+          <option value="2" data-i18n="opcion-ajustar-2">2 páginas de ancho</option>
+          <option value="3" data-i18n="opcion-ajustar-3">3 páginas de ancho</option>
         </select>
       </label>
       <label class="campo">
-        <span data-i18n="campo-limite-lineas">Líneas por celda</span>
-        <select id="limiteLineasCelda">
-          <option value="sin-limite" selected data-i18n="opcion-sin-limite-lineas">Sin límite</option>
-          <option value="8" data-i18n="opcion-ocho-lineas">Máximo 8 líneas</option>
+        <span data-i18n="campo-cuadricula">Cuadrícula</span>
+        <select id="cuadricula">
+          <option value="archivo" selected data-i18n="opcion-cuad-archivo">Lo que dice el archivo</option>
+          <option value="si" data-i18n="opcion-cuad-si">Imprimirla</option>
+          <option value="no" data-i18n="opcion-cuad-no">No imprimirla</option>
         </select>
       </label>
       <button class="boton" id="botonConvertir" type="button" data-i18n="boton-convertir">Generar PDF</button>
@@ -325,9 +338,7 @@ window.i18nPagina = {
 
     <div id="bloqueVistaPrevia" style="display:none;">
       <h2 style="font-size:1.05rem; margin:20px 0 0;" data-i18n="vista-pdf-titulo">Vista previa del PDF</h2>
-      <p id="avisoObjetosHoja" style="color:var(--texto-suave); margin:4px 0 0; display:none;"></p>
       <iframe id="visorPdf" class="visor-pdf" title="Vista previa del PDF" data-i18n-attr="title:vista-pdf-titulo"></iframe>
-      <div class="contenedor-tabla" id="contenedorVistaPrevia" style="display:none;"></div>
     </div>
 
     <p id="advertencia" style="color:#b45309; display:none;"></p>
@@ -348,10 +359,14 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/lector-planillas.js"></script>
-<script src="../assets/js/excel-a-pdf.js"></script>
-<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
-<script src="../assets/js/grafico-suelto.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
+<script src="../assets/js/excel-a-pdf-motor.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -371,26 +386,31 @@ const advertencia = document.getElementById('advertencia');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 const bloqueVistaPrevia = document.getElementById('bloqueVistaPrevia');
-const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
 const visorPdf = document.getElementById('visorPdf');
-const avisoObjetosHoja = document.getElementById('avisoObjetosHoja');
 const bloqueSeleccion = document.getElementById('bloqueSeleccion');
 const controlesRangos = document.getElementById('controlesRangos');
 const entradaRangoCeldas = document.getElementById('entradaRangoCeldas');
 const botonAgregarRango = document.getElementById('botonAgregarRango');
 const listaRangos = document.getElementById('listaRangos');
 const contenedorSeleccion = document.getElementById('contenedorSeleccion');
+const orientacion = document.getElementById('orientacion');
 const tamanoPagina = document.getElementById('tamanoPagina');
 const camposPaginaPersonalizada = document.getElementById('camposPaginaPersonalizada');
 const anchoPaginaPersonalizada = document.getElementById('anchoPaginaPersonalizada');
 const altoPaginaPersonalizada = document.getElementById('altoPaginaPersonalizada');
-const limiteLineasCelda = document.getElementById('limiteLineasCelda');
+const ajustarA = document.getElementById('ajustarA');
+const cuadricula = document.getElementById('cuadricula');
 
-let libroActual = null;
+let libroLector = null;       // lo que devuelve LectorHojas.abrir (de aquí sale la cuadrícula de selección)
+let libroImpresion = null;    // el libro del motor con el que se imprime (ExcelAPdfMotor.libroDeMotor)
+let hojaDatos = null;         // la hoja elegida, leída con LectorHojas
+let columnasOcultasHoja = new Set();
 let nombreArchivoActual = '';
-let bytesArchivoActual = null;
-let esXlsxActual = false;
+let nombreCompletoActual = '';
+let esCsvActual = false;
+let convertidoActual = false; // .xls, .xlsb u .ods: se pasaron a .xlsx con SheetJS antes de imprimir
 let secuenciaCargaArchivo = 0;
+let secuenciaHoja = 0;
 let urlDescargaActual = null;
 let rangosPorHoja = new Map();
 let rangoHojaActual = null;
@@ -408,8 +428,6 @@ let zoomVistaTabla = 100;
 let punterosVista = new Map();
 let gestoPinza = null;
 let gestoPaneoVista = null;
-let indicesColumnasVistaPrevia = [];
-let anchosColumnasVistaPrevia = [];
 let indicesColumnasSeleccion = [];
 let anchosColumnasSeleccion = [];
 let cacheAnchosColumnas = new Map();
@@ -418,6 +436,10 @@ let urlVistaPreviaActual = null;
 let temporizadorVistaPreviaPdf = 0;
 let secuenciaVistaPreviaPdf = 0;
 let colaGeneracionPdf = Promise.resolve();
+
+// La vista previa arma un PDF de verdad y lo hace sola apenas se carga el archivo: con unas páginas alcanza para ver cómo queda
+// (un libro de miles de páginas llevaba la pestaña a gigas). El PDF que se descarga sí lleva todas.
+const PAGINAS_VISTA_PREVIA = 20;
 
 function liberarUrlDescarga() {
   if (!urlDescargaActual) return;
@@ -444,11 +466,13 @@ function mostrarMensajeVistaPrevia(mensaje) {
 }
 
 function programarVistaPreviaPdf() {
-  if (!libroActual) return;
+  if (!libroLector) return;
   const secuencia = ++secuenciaVistaPreviaPdf;
   clearTimeout(temporizadorVistaPreviaPdf);
+  resultado.classList.remove('visible'); // el PDF ya listo deja de coincidir con lo elegido
   temporizadorVistaPreviaPdf = setTimeout(() => {
-    if (modoImpresion.value === 'celdas' && rangosActuales().length === 0) {
+    const areas = areasElegidas();
+    if (areas && areas.length === 0) {
       mostrarMensajeVistaPrevia(t('error-sin-rangos'));
       return;
     }
@@ -466,43 +490,46 @@ window.addEventListener('pagehide', () => {
   liberarUrlVistaPrevia();
 });
 
-
-function estiloCeldaHtml(celdaInfo) {
-  const partes = [];
-  if (celdaInfo.negrita) partes.push('font-weight:700');
-  if (celdaInfo.cursiva) partes.push('font-style:italic');
-  if (celdaInfo.subrayado) partes.push('text-decoration:underline');
-  if (celdaInfo.color) partes.push(`color:rgb(${Math.round(celdaInfo.color.r * 255)},${Math.round(celdaInfo.color.g * 255)},${Math.round(celdaInfo.color.b * 255)})`);
-  if (celdaInfo.relleno) partes.push(`background:rgb(${Math.round(celdaInfo.relleno.r * 255)},${Math.round(celdaInfo.relleno.g * 255)},${Math.round(celdaInfo.relleno.b * 255)})`);
-  return partes.length ? ` style="${partes.join(';')}"` : '';
+// ---- Hoja elegida ----------------------------------------------------------------------------------------------
+// El selector guarda el índice de la hoja en el libro; '*' son todas las visibles.
+function nombreHojaActual() { return selectorHoja.value || '0'; }
+function todasLasHojas() { return selectorHoja.value === '*'; }
+function indicesAImprimir() {
+  if (!libroLector) return [];
+  if (todasLasHojas()) return libroLector.hojas.filter(h => h.estado === 'visible').map(h => h.indice);
+  return [Number(selectorHoja.value)];
 }
 
-function anchoBaseColumna(hoja, columna) {
-  const movil = window.matchMedia('(max-width: 600px)').matches;
-  const cacheKey = `${nombreHojaActual()}|${mostrarColumnasOcultas.checked}|${columna}|${movil}`;
-  if (cacheAnchosColumnas.has(cacheKey)) return cacheAnchosColumnas.get(cacheKey);
+// Los rangos a imprimir como áreas de impresión (desde 0), o null si se imprime todo.
+function areasElegidas() {
+  if (modoImpresion.value !== 'celdas' || todasLasHojas()) return null;
+  return rangosActuales().map(r => ({ f0: r.s.r, c0: r.s.c, f1: r.e.r, c1: r.e.c }));
+}
 
-  const metadato = hoja['!cols']?.[columna] || {};
-  let ancho;
-  if (metadato.hidden && mostrarColumnasOcultas.checked && hoja['!ref']) {
-    const contexto = document.createElement('canvas').getContext('2d');
-    contexto.font = `${movil ? 11 : 14}px Arial`;
-    const rango = XLSX.utils.decode_range(hoja['!ref']);
-    let anchoTexto = 0;
-    for (let fila = rango.s.r; fila <= rango.e.r; fila++) {
-      const celda = hoja[XLSX.utils.encode_cell({ r: fila, c: columna })];
-      if (celda) anchoTexto = Math.max(anchoTexto, contexto.measureText(XLSX.utils.format_cell(celda)).width);
-    }
-    ancho = Math.max(movil ? 48 : 72, Math.ceil(anchoTexto + (movil ? 12 : 20)));
-  } else if (Number(metadato.wpx) > 0) {
-    ancho = Number(metadato.wpx);
-  } else if (Number(metadato.wch) > 0) {
-    ancho = Math.ceil(Number(metadato.wch) * 7 + 5);
-  } else {
-    ancho = movil ? 84 : 140;
+async function cargarHojaActual() {
+  if (todasLasHojas()) {
+    hojaDatos = null;
+    columnasOcultasHoja = new Set();
+    return;
   }
+  const indice = Number(selectorHoja.value);
+  const datos = await libroLector.cargar(indice);
+  const ocultas = new Set();
+  try {
+    const hojaMotor = await libroImpresion.cargarHoja(indice);
+    for (const col of hojaMotor.columnas) if (col.oculta) for (let c = col.min; c <= col.max && c < col.min + 16384; c++) ocultas.add(c);
+  } catch (error) { console.warn('No se pudieron leer las columnas ocultas:', error); }
+  hojaDatos = datos;
+  columnasOcultasHoja = ocultas;
+}
 
-  cacheAnchosColumnas.set(cacheKey, ancho);
+function anchoBaseColumna(columna) {
+  const movil = window.matchMedia('(max-width: 600px)').matches;
+  const claveCache = `${nombreHojaActual()}|${columna}|${movil}`;
+  if (cacheAnchosColumnas.has(claveCache)) return cacheAnchosColumnas.get(claveCache);
+  const caracteres = Number(hojaDatos?.anchos?.[columna]);
+  const ancho = caracteres > 0 ? Math.min(400, Math.max(24, Math.ceil(caracteres * 7 + 5))) : (movil ? 84 : 140);
+  cacheAnchosColumnas.set(claveCache, ancho);
   return ancho;
 }
 
@@ -511,7 +538,7 @@ function aplicarZoomATabla(tabla, anchosBase, incluyeIndice = false) {
   const escala = zoomVistaTabla / 100;
   const movil = window.matchMedia('(max-width: 600px)').matches;
   const raizPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-  const anchos = anchosBase || (tabla.classList.contains('tabla-seleccion') ? anchosColumnasSeleccion : anchosColumnasVistaPrevia);
+  const anchos = anchosBase || anchosColumnasSeleccion;
   const scroller = tabla.closest('.contenedor-tabla');
   const anchoIndice = (movil ? 18 : 48) * escala;
   tabla.style.setProperty('--tamano-fuente-vista', `${raizPx * (movil ? 0.7 : 0.85) * escala}px`);
@@ -564,12 +591,6 @@ function aplicarZoomConAncla(nuevoZoom, scroller, puntoCliente, anclaContenido =
   aplicarZoomATabla(tabla);
   if (scroller === contenedorSeleccion) {
     renderizarCuadriculaSeleccion();
-  } else if (filasVistaPrevia.length > UMBRAL_VIRTUALIZACION) {
-    const fila = scroller.querySelector('tbody tr:not(.fila-espaciadora)');
-    const altura = fila?.getBoundingClientRect().height || 0;
-    if (altura > 0) alturaFilaMedida = altura;
-    ventanaRenderizada = { inicio: -1, fin: -1 };
-    actualizarVentanaSiHaceFalta();
   }
 
   scroller.scrollLeft = ancla.x * factor - puntoLocal.x;
@@ -584,21 +605,6 @@ function actualizarZoomDesdeControl() {
 }
 
 controlZoom.addEventListener('input', actualizarZoomDesdeControl);
-
-// Misma virtualización que ya usa visor-excel-csv.html: por debajo del umbral
-// se renderiza la tabla entera de una, y por encima solo las filas visibles
-// (+ sobrescaneo) para que el scroll no se sienta trabado con archivos grandes.
-const UMBRAL_VIRTUALIZACION = 200;
-const SOBRESCANEO = 10;
-const ALTURA_FILA_ESTIMADA = 32;
-
-let columnasVistaPrevia = [];
-let filasVistaPrevia = [];
-let alturaFilaMedida = ALTURA_FILA_ESTIMADA;
-let alturasFilasVistaPrevia = [];
-let prefijosAlturasVistaPrevia = [0];
-let ventanaRenderizada = { inicio: -1, fin: -1 };
-let renderizadoPendiente = false;
 
 function crearPrefijosAltura(alturas) {
   const prefijos = new Array(alturas.length + 1).fill(0);
@@ -617,123 +623,6 @@ function indiceEnPrefijosAltura(prefijos, posicion) {
   return Math.max(0, Math.min(prefijos.length - 2, izquierda));
 }
 
-function filaVistaPreviaHtml(indiceGlobal, celdasFila) {
-  const clase = indiceGlobal % 2 === 0 ? '' : ' class="fila-par"';
-  let html = `<tr${clase} data-indice="${indiceGlobal}">`;
-  celdasFila.forEach((celdaInfo) => html += `<td${estiloCeldaHtml(celdaInfo)} title="${escaparHtml(celdaInfo.texto)}">${escaparHtml(celdaInfo.texto)}</td>`);
-  return html + '</tr>';
-}
-
-function filaEspaciadoraHtml(alturaPx) {
-  return `<tr class="fila-espaciadora" aria-hidden="true" style="height:${alturaPx}px;"><td colspan="${columnasVistaPrevia.length}"></td></tr>`;
-}
-
-function renderizarVentana(inicio, fin) {
-  ventanaRenderizada = { inicio, fin };
-  const total = filasVistaPrevia.length;
-  const alturaAntes = prefijosAlturasVistaPrevia[inicio] || 0;
-  const alturaDespues = (prefijosAlturasVistaPrevia[total] || 0) - (prefijosAlturasVistaPrevia[fin] || 0);
-
-  let html = filaEspaciadoraHtml(alturaAntes);
-  for (let i = inicio; i < fin; i++) html += filaVistaPreviaHtml(i, filasVistaPrevia[i]);
-  html += filaEspaciadoraHtml(alturaDespues);
-
-  const tbody = contenedorVistaPrevia.querySelector('tbody');
-  tbody.innerHTML = html;
-  medirVentanaVistaPrevia();
-}
-
-function calcularVentanaVisible() {
-  const alturaEncabezado = contenedorVistaPrevia.querySelector('thead')?.getBoundingClientRect().height || 0;
-  const scrollTop = Math.max(0, contenedorVistaPrevia.scrollTop - alturaEncabezado);
-  const alturaVisible = contenedorVistaPrevia.clientHeight;
-  const primeroVisible = indiceEnPrefijosAltura(prefijosAlturasVistaPrevia, scrollTop);
-  const ultimoVisible = indiceEnPrefijosAltura(prefijosAlturasVistaPrevia, scrollTop + alturaVisible);
-  const inicio = Math.max(0, primeroVisible - SOBRESCANEO);
-  const fin = Math.min(filasVistaPrevia.length, ultimoVisible + SOBRESCANEO + 1);
-  return { inicio, fin };
-}
-
-function medirVentanaVistaPrevia() {
-  requestAnimationFrame(() => {
-    const filas = [...contenedorVistaPrevia.querySelectorAll('tbody tr[data-indice]')];
-    if (filas.length === 0) return;
-    const alturaEncabezado = contenedorVistaPrevia.querySelector('thead')?.getBoundingClientRect().height || 0;
-    const scrollCuerpo = Math.max(0, contenedorVistaPrevia.scrollTop - alturaEncabezado);
-    const filaAncla = indiceEnPrefijosAltura(prefijosAlturasVistaPrevia, scrollCuerpo);
-    const desplazamientoAncla = scrollCuerpo - prefijosAlturasVistaPrevia[filaAncla];
-    let cambio = false;
-    filas.forEach(fila => {
-      const indice = Number(fila.dataset.indice);
-      const altura = fila.getBoundingClientRect().height;
-      if (altura > 0 && Math.abs(altura - alturasFilasVistaPrevia[indice]) > 0.5) {
-        alturasFilasVistaPrevia[indice] = altura;
-        cambio = true;
-      }
-    });
-    if (!cambio) return;
-    prefijosAlturasVistaPrevia = crearPrefijosAltura(alturasFilasVistaPrevia);
-    contenedorVistaPrevia.scrollTop = alturaEncabezado + prefijosAlturasVistaPrevia[filaAncla] + desplazamientoAncla;
-    ventanaRenderizada = { inicio: -1, fin: -1 };
-    actualizarVentanaSiHaceFalta();
-  });
-}
-
-function actualizarVentanaSiHaceFalta() {
-  const { inicio, fin } = calcularVentanaVisible();
-  if (inicio === ventanaRenderizada.inicio && fin === ventanaRenderizada.fin) return;
-  renderizarVentana(inicio, fin);
-}
-
-contenedorVistaPrevia.addEventListener('scroll', () => {
-  if (filasVistaPrevia.length <= UMBRAL_VIRTUALIZACION) return;
-  if (renderizadoPendiente) return;
-  renderizadoPendiente = true;
-  requestAnimationFrame(() => {
-    renderizadoPendiente = false;
-    actualizarVentanaSiHaceFalta();
-  });
-});
-
-function mostrarVistaPrevia(matriz) {
-  bloqueVistaPrevia.style.display = 'block';
-
-  if (matriz.length === 0) {
-    columnasVistaPrevia = [];
-    filasVistaPrevia = [];
-    contenedorVistaPrevia.innerHTML = `<p style="padding:16px; color:var(--texto-suave);">${t('sin-datos')}</p>`;
-    return;
-  }
-
-  columnasVistaPrevia = matriz[0];
-  filasVistaPrevia = matriz.slice(1);
-  indicesColumnasVistaPrevia = matriz.indicesColumnas || columnasVistaPrevia.map((_, i) => i);
-  anchosColumnasVistaPrevia = indicesColumnasVistaPrevia.map(columna => anchoBaseColumna(libroActual.Sheets[nombreHojaActual()], columna));
-  ventanaRenderizada = { inicio: -1, fin: -1 };
-  alturaFilaMedida = ALTURA_FILA_ESTIMADA * zoomVistaTabla / 100;
-  alturasFilasVistaPrevia = Array(filasVistaPrevia.length).fill(alturaFilaMedida);
-  prefijosAlturasVistaPrevia = crearPrefijosAltura(alturasFilasVistaPrevia);
-
-  let htmlEncabezado = '<thead><tr>';
-  columnasVistaPrevia.forEach((celdaInfo) => htmlEncabezado += `<th${estiloCeldaHtml(celdaInfo)} title="${escaparHtml(celdaInfo.texto)}">${escaparHtml(celdaInfo.texto)}</th>`);
-  htmlEncabezado += '</tr></thead>';
-
-  if (filasVistaPrevia.length <= UMBRAL_VIRTUALIZACION) {
-    let htmlFilas = '<tbody>';
-    filasVistaPrevia.forEach((fila, indice) => htmlFilas += filaVistaPreviaHtml(indice, fila));
-    htmlFilas += '</tbody>';
-    contenedorVistaPrevia.innerHTML = `<table class="tabla-datos">${htmlEncabezado}${htmlFilas}</table>`;
-    aplicarZoomATabla(contenedorVistaPrevia.querySelector('table'), anchosColumnasVistaPrevia);
-    return;
-  }
-
-  contenedorVistaPrevia.scrollTop = 0;
-  contenedorVistaPrevia.innerHTML = `<table class="tabla-datos">${htmlEncabezado}<tbody></tbody></table>`;
-  aplicarZoomATabla(contenedorVistaPrevia.querySelector('table'), anchosColumnasVistaPrevia);
-  const { inicio, fin } = calcularVentanaVisible();
-  renderizarVentana(inicio, fin);
-
-}
 
 let alturaFilaSeleccion = 34;
 let alturasFilasSeleccion = [];
@@ -741,19 +630,17 @@ let prefijosAlturasSeleccion = [0];
 let claveAlturasSeleccion = '';
 const SOBRESCANEO_SELECCION = 8;
 
-function nombreHojaActual() {
-  return campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual?.SheetNames[0];
+function rangosActuales() {
+  const clave = nombreHojaActual();
+  if (!rangosPorHoja.has(clave)) rangosPorHoja.set(clave, []);
+  return rangosPorHoja.get(clave);
 }
 
-function rangosActuales() {
-  const nombreHoja = nombreHojaActual();
-  if (!rangosPorHoja.has(nombreHoja)) rangosPorHoja.set(nombreHoja, []);
-  return rangosPorHoja.get(nombreHoja);
-}
+const referenciaCelda = (fila, columna) => LibroXlsx.numeroACol(columna) + (fila + 1);
 
 function referenciaRango(rango) {
-  const inicio = XLSX.utils.encode_cell(rango.s);
-  const fin = XLSX.utils.encode_cell(rango.e);
+  const inicio = referenciaCelda(rango.s.r, rango.s.c);
+  const fin = referenciaCelda(rango.e.r, rango.e.c);
   return inicio === fin ? inicio : `${inicio}:${fin}`;
 }
 
@@ -765,16 +652,13 @@ function normalizarRango(rango) {
 }
 
 function rangoDesdeTexto(texto) {
-  const hoja = libroActual?.Sheets[nombreHojaActual()];
-  if (!hoja?.['!ref']) return null;
-  try {
-    const rango = normalizarRango(XLSX.utils.decode_range(texto.trim().toUpperCase()));
-    const limites = XLSX.utils.decode_range(hoja['!ref']);
-    if (rango.s.r < limites.s.r || rango.s.c < limites.s.c || rango.e.r > limites.e.r || rango.e.c > limites.e.c) return null;
-    return rango;
-  } catch {
-    return null;
-  }
+  if (!hojaDatos || !hojaDatos.nfilas) return null;
+  const a1 = LibroXlsx.decodificarRango(texto.trim().toUpperCase().replace(/\$/g, ''));
+  if (!a1) return null;
+  const rango = { s: { r: a1.f0, c: a1.c0 }, e: { r: a1.f1, c: a1.c1 } };
+  const fMax = hojaDatos.f0 + hojaDatos.nfilas - 1, cMax = hojaDatos.c0 + hojaDatos.ncols - 1;
+  if (rango.s.r < hojaDatos.f0 || rango.s.c < hojaDatos.c0 || rango.e.r > fMax || rango.e.c > cMax) return null;
+  return rango;
 }
 
 function celdaDentroDeRango(fila, columna, rango) {
@@ -811,19 +695,22 @@ function actualizarMarcasSeleccion() {
 }
 
 function renderizarCuadriculaSeleccion() {
-  const hoja = libroActual?.Sheets[nombreHojaActual()];
-  if (!hoja?.['!ref']) {
+  const hoja = hojaDatos;
+  if (!hoja || !hoja.nfilas) {
     contenedorSeleccion.innerHTML = `<p>${t('sin-datos')}</p>`;
     rangoHojaActual = null;
     return;
   }
 
-  rangoHojaActual = XLSX.utils.decode_range(hoja['!ref']);
-  indicesColumnasSeleccion = columnasVisiblesDeHoja(hoja, rangoHojaActual.s.c, rangoHojaActual.e.c, mostrarColumnasOcultas.checked);
-  anchosColumnasSeleccion = indicesColumnasSeleccion.map(columna => anchoBaseColumna(hoja, columna));
+  rangoHojaActual = { s: { r: hoja.f0, c: hoja.c0 }, e: { r: hoja.f0 + hoja.nfilas - 1, c: hoja.c0 + hoja.ncols - 1 } };
+  indicesColumnasSeleccion = [];
+  for (let columna = rangoHojaActual.s.c; columna <= rangoHojaActual.e.c; columna++) {
+    if (mostrarColumnasOcultas.checked || !columnasOcultasHoja.has(columna)) indicesColumnasSeleccion.push(columna);
+  }
+  anchosColumnasSeleccion = indicesColumnasSeleccion.map(columna => anchoBaseColumna(columna));
   const columnas = indicesColumnasSeleccion.length;
-  const totalFilas = rangoHojaActual.e.r - rangoHojaActual.s.r + 1;
-  const claveActual = `${nombreHojaActual()}|${hoja['!ref']}|${zoomVistaTabla}|${mostrarColumnasOcultas.checked}|${window.matchMedia('(max-width: 600px)').matches}`;
+  const totalFilas = hoja.nfilas;
+  const claveActual = `${nombreHojaActual()}|${totalFilas}|${hoja.ncols}|${zoomVistaTabla}|${mostrarColumnasOcultas.checked}|${window.matchMedia('(max-width: 600px)').matches}`;
   if (claveActual !== claveAlturasSeleccion || alturasFilasSeleccion.length !== totalFilas) {
     claveAlturasSeleccion = claveActual;
     alturaFilaSeleccion = (window.matchMedia('(max-width: 600px)').matches ? 17 : 34) * zoomVistaTabla / 100;
@@ -837,16 +724,15 @@ function renderizarCuadriculaSeleccion() {
   const inicio = Math.max(0, primeroVisible - SOBRESCANEO_SELECCION);
   const fin = Math.min(totalFilas, ultimoVisible + SOBRESCANEO_SELECCION + 1);
   let html = '<table class="tabla-datos tabla-seleccion"><thead><tr><th class="indice-fila"></th>';
-  for (const columna of indicesColumnasSeleccion) html += `<th>${XLSX.utils.encode_col(columna)}</th>`;
+  for (const columna of indicesColumnasSeleccion) html += `<th>${LibroXlsx.numeroACol(columna)}</th>`;
   html += '</tr></thead><tbody>';
   if (inicio > 0) html += `<tr class="fila-espaciadora" aria-hidden="true" style="height:${prefijosAlturasSeleccion[inicio]}px"><td colspan="${columnas + 1}"></td></tr>`;
   for (let indice = inicio; indice < fin; indice++) {
-    const fila = rangoHojaActual.s.r + indice;
+    const fila = hoja.f0 + indice;
     html += `<tr data-indice="${indice}"><th class="indice-fila">${fila + 1}</th>`;
     for (const columna of indicesColumnasSeleccion) {
-      const celda = leerCeldaConEstilo(hoja, fila, columna);
-      const referencia = XLSX.utils.encode_cell({ r: fila, c: columna });
-      html += `<td data-fila="${fila}" data-columna="${columna}"${estiloCeldaHtml(celda)} title="${escaparHtml(celda.texto)}" aria-label="${referencia}: ${escaparHtml(celda.texto)}">${escaparHtml(celda.texto)}</td>`;
+      const texto = hoja.texto(indice, columna - hoja.c0);
+      html += `<td data-fila="${fila}" data-columna="${columna}" title="${escaparHtml(texto)}" aria-label="${referenciaCelda(fila, columna)}: ${escaparHtml(texto)}">${escaparHtml(texto)}</td>`;
     }
     html += '</tr>';
   }
@@ -921,10 +807,6 @@ function agregarRangoSeleccionado() {
   actualizarMarcasSeleccion();
 }
 
-function actualizarModoImpresion() {
-  if (!libroActual) return;
-  actualizarVistaPrevia();
-}
 
 function medirPunterosPinza() {
   const puntos = [...punterosVista.values()].slice(0, 2);
@@ -982,36 +864,6 @@ function soltarPunteroTactil(evento, scroller) {
   }
   if (gestoPaneoVista?.scroller === scroller && gestoPaneoVista.id === evento.pointerId) gestoPaneoVista = null;
 }
-
-contenedorVistaPrevia.addEventListener('pointerdown', evento => {
-  if (!registrarPunteroTactil(evento, contenedorVistaPrevia)) return;
-  if (punterosVista.size >= 2) iniciarGestoPinza(contenedorVistaPrevia);
-  else gestoPaneoVista = {
-    id: evento.pointerId,
-    scroller: contenedorVistaPrevia,
-    x: evento.clientX,
-    y: evento.clientY,
-    left: contenedorVistaPrevia.scrollLeft,
-    top: contenedorVistaPrevia.scrollTop,
-  };
-});
-contenedorVistaPrevia.addEventListener('pointermove', evento => {
-  if (evento.pointerType !== 'touch' || !punterosVista.has(evento.pointerId)) return;
-  punterosVista.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
-  if (gestoPinza?.scroller === contenedorVistaPrevia) {
-    programarZoomPinza();
-  } else if (gestoPaneoVista?.id === evento.pointerId) {
-    contenedorVistaPrevia.scrollLeft = gestoPaneoVista.left - (evento.clientX - gestoPaneoVista.x);
-    contenedorVistaPrevia.scrollTop = gestoPaneoVista.top - (evento.clientY - gestoPaneoVista.y);
-  }
-});
-contenedorVistaPrevia.addEventListener('pointerup', evento => soltarPunteroTactil(evento, contenedorVistaPrevia));
-contenedorVistaPrevia.addEventListener('pointercancel', evento => {
-  if (evento.pointerType !== 'touch') return;
-  punterosVista.clear();
-  gestoPinza = null;
-  gestoPaneoVista = null;
-});
 
 function velocidadAutoScroll(posicion, inicio, fin, zona) {
   if (posicion < inicio + zona) return -Math.min(18, Math.ceil((inicio + zona - posicion) / 4));
@@ -1139,6 +991,7 @@ function cancelarArrastreSeleccion(evento) {
   actualizarMarcasSeleccion();
 }
 
+
 contenedorSeleccion.addEventListener('scroll', programarRenderCuadriculaSeleccion);
 contenedorSeleccion.addEventListener('pointerdown', evento => {
   if (registrarPunteroTactil(evento, contenedorSeleccion)) {
@@ -1206,66 +1059,54 @@ listaRangos.addEventListener('click', evento => {
   renderizarListaRangos();
   actualizarMarcasSeleccion();
 });
-modoImpresion.addEventListener('change', actualizarModoImpresion);
+
+modoImpresion.addEventListener('change', actualizarVistaPrevia);
 mostrarColumnasOcultas.addEventListener('change', () => {
   cacheAnchosColumnas.clear();
-  actualizarVistaPrevia();
+  renderizarCuadriculaSeleccion();
+  programarVistaPreviaPdf();
 });
 
-function actualizarVistaPrevia() {
-  if (!libroActual) return;
-  const nombreHoja = nombreHojaActual();
+async function actualizarVistaPrevia() {
+  if (!libroLector) return;
+  const idHoja = ++secuenciaHoja;
+  const todas = todasLasHojas();
+  modoImpresion.disabled = todas;
+  if (todas) modoImpresion.value = 'todo';
   bloqueVistaPrevia.style.display = 'block';
-  bloqueSeleccion.style.display = 'block';
+  try {
+    await cargarHojaActual();
+  } catch (error) {
+    if (idHoja === secuenciaHoja) alert(t('error-leer') + ': ' + error.message);
+    return;
+  }
+  if (!libroLector || idHoja !== secuenciaHoja) return;
+  bloqueSeleccion.style.display = todas ? 'none' : 'block';
   controlesRangos.style.display = modoImpresion.value === 'celdas' ? 'flex' : 'none';
   renderizarListaRangos();
   renderizarCuadriculaSeleccion();
   actualizarCamposPaginaPersonalizada();
   programarVistaPreviaPdf();
-  actualizarAvisoObjetosHoja(nombreHoja);
 }
 
 tamanoPagina.addEventListener('change', () => {
   actualizarCamposPaginaPersonalizada();
   programarVistaPreviaPdf();
 });
-document.getElementById('orientacion').addEventListener('change', programarVistaPreviaPdf);
-document.getElementById('tamanoFuente').addEventListener('change', programarVistaPreviaPdf);
-limiteLineasCelda.addEventListener('change', programarVistaPreviaPdf);
+[orientacion, ajustarA, cuadricula].forEach(campo => campo.addEventListener('change', programarVistaPreviaPdf));
 [anchoPaginaPersonalizada, altoPaginaPersonalizada].forEach(input => input.addEventListener('input', programarVistaPreviaPdf));
-modoImpresion.addEventListener('change', programarVistaPreviaPdf);
 listaRangos.addEventListener('click', () => programarVistaPreviaPdf());
 botonAgregarRango.addEventListener('click', () => programarVistaPreviaPdf());
-
-// Muestra cuántas imágenes/gráficos tiene la hoja antes de generar el PDF,
-// para que no sea sorpresa recién al descargar. Usa las mismas funciones que
-// el generador de PDF (ver más abajo) — si algo falla acá, simplemente no se
-// muestra el aviso, no bloquea la vista previa de la tabla.
-async function actualizarAvisoObjetosHoja(nombreHoja) {
-  avisoObjetosHoja.style.display = 'none';
-  if (!esXlsxActual) return;
-  try {
-    const zip = await ZipPropio.loadAsync(bytesArchivoActual);
-    const mapaHojas = await mapaHojaARutaXml(zip);
-    const rutaHojaXml = mapaHojas.get(nombreHoja);
-    if (!rutaHojaXml) return;
-    const { graficos } = await objetosDeHoja(zip, rutaHojaXml);
-    if (graficos.length === 0) return;
-    avisoObjetosHoja.textContent = t('aviso-graficos').replace('{n}', graficos.length).replace('{s}', graficos.length === 1 ? '' : 's');
-    avisoObjetosHoja.style.display = 'block';
-  } catch (error) {
-    console.warn('No se pudo revisar si la hoja tiene gráficos:', error);
-  }
-}
 
 async function mostrarArchivo(archivo) {
   const idCarga = ++secuenciaCargaArchivo;
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   resultado.classList.remove('visible');
-  libroActual = null;
+  libroLector = null;
+  libroImpresion = null;
+  hojaDatos = null;
   nombreArchivoActual = '';
-  bytesArchivoActual = null;
-  esXlsxActual = false;
+  nombreCompletoActual = '';
   rangosPorHoja.clear();
   cacheAnchosColumnas.clear();
   rangoEnCurso = null;
@@ -1277,40 +1118,40 @@ async function mostrarArchivo(archivo) {
   campoHoja.style.display = 'none';
   bloqueVistaPrevia.style.display = 'none';
   bloqueSeleccion.style.display = 'none';
-  avisoObjetosHoja.style.display = 'none';
-  contenedorVistaPrevia.innerHTML = '';
+  advertencia.style.display = 'none';
   mostrarMensajeVistaPrevia(t('vista-pdf-cargando'));
   liberarUrlVistaPrevia();
   liberarUrlDescarga();
 
-  let bytes;
-  let libro;
+  let lector;
+  let impresion;
   try {
-    bytes = await archivo.arrayBuffer();
-    libro = await leerLibroDesdeArchivo(archivo, { cellStyles: true });
+    lector = await LectorHojas.abrir(archivo);
+    impresion = await ExcelAPdfMotor.libroDeMotor(lector);
   } catch (error) {
     if (idCarga !== secuenciaCargaArchivo) return;
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
   if (idCarga !== secuenciaCargaArchivo) return;
-  if (/\.(xlsx|xlsm)$/i.test(archivo.name)) {
-    // Si falla, la tabla sale igual, solo sin negrita, cursiva ni color de letra.
-    try { await leerFuentesDeCeldas(libro, bytes); } catch (error) { console.warn('No se pudieron leer los estilos de letra:', error); }
-    if (idCarga !== secuenciaCargaArchivo) return;
-  }
 
-  libroActual = libro;
+  libroLector = lector;
+  libroImpresion = impresion;
+  nombreCompletoActual = archivo.name;
   nombreArchivoActual = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
-  bytesArchivoActual = bytes;
-  esXlsxActual = /\.(xlsx|xlsm)$/i.test(archivo.name);
+  esCsvActual = /\.csv$/i.test(archivo.name);
+  convertidoActual = !lector.motor;
 
-  if (libroActual.SheetNames.length > 1) {
-    selectorHoja.innerHTML = libroActual.SheetNames.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
-    campoHoja.style.display = 'flex';
-  } else {
-    campoHoja.style.display = 'none';
-  }
+  const visibles = lector.hojas.filter(h => h.estado === 'visible').length;
+  let opciones = lector.hojas.map(h => `<option value="${h.indice}">${escaparHtml(h.nombre)}</option>`).join('');
+  if (visibles > 1) opciones += `<option value="*">${escaparHtml(t('opcion-todas-hojas'))}</option>`;
+  selectorHoja.innerHTML = opciones;
+  selectorHoja.value = String((lector.hojas.find(h => h.estado === 'visible') || lector.hojas[0]).indice);
+  campoHoja.style.display = lector.hojas.length > 1 ? 'flex' : 'none';
+
+  // Un CSV no trae configuración de página: sin bordes en papel no se lee y a 100 % se parte en varias páginas de ancho.
+  ajustarA.value = esCsvActual ? '1' : 'archivo';
+  cuadricula.value = esCsvActual ? 'si' : 'archivo';
 
   controles.style.display = 'flex';
   controlesFormatoPdf.style.display = 'flex';
@@ -1326,13 +1167,6 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// La vista previa automática arma un PDF de verdad, y lo hace sola apenas se
-// carga el archivo. Con la hoja entera, un Excel de 20.000 filas llevaba la
-// pestaña a 1,7 GB y uno más grande la mataba ("Render process gone: oom")
-// antes de que el usuario tocara nada. Para ver cómo queda alcanza con unas
-// páginas; el PDF que se descarga sí lleva todas las filas.
-const FILAS_VISTA_PREVIA = 200;
-
 async function construirPdf(esPrevisualizacion = false, secuencia = 0) {
   if (esPrevisualizacion && secuencia !== secuenciaVistaPreviaPdf) return;
   if (!esPrevisualizacion) {
@@ -1340,36 +1174,46 @@ async function construirPdf(esPrevisualizacion = false, secuencia = 0) {
     botonConvertir.textContent = t('boton-convertir-generando');
   }
   advertencia.style.display = 'none';
-  liberarUrlDescarga();
+  if (!esPrevisualizacion) liberarUrlDescarga(); // una vista previa que llega tarde no puede anular el enlace del PDF ya listo
   try {
-    const nombreHoja = campoHoja.style.display !== 'none' ? selectorHoja.value : libroActual.SheetNames[0];
-    const tamano = tamanoPagina.value === 'personalizado'
-      ? [Number(anchoPaginaPersonalizada.value) * 72 / 25.4, Number(altoPaginaPersonalizada.value) * 72 / 25.4]
-      : TAMANOS_PAGINA_PTS[tamanoPagina.value];
-    // El dibujo está en assets/js/excel-a-pdf.js (compartido con "Unir PDF").
-    const { bytes: bytesFinales, avisos } = await construirPdfDeHoja({
-      libro: libroActual,
-      nombreHoja,
-      bytesArchivo: bytesArchivoActual,
-      esXlsx: esXlsxActual,
-      rangos: modoImpresion.value === 'celdas' ? rangosActuales() : null,
+    let papel = tamanoPagina.value;
+    if (papel === 'personalizado') {
+      papel = [Number(anchoPaginaPersonalizada.value) * 72 / 25.4, Number(altoPaginaPersonalizada.value) * 72 / 25.4];
+      if (!(papel[0] > 25 * 72 / 25.4) || !(papel[1] > 25 * 72 / 25.4)) throw new Error(t('error-tamano-personalizado'));
+    }
+    const areas = areasElegidas();
+    if (areas && areas.length === 0) throw new Error(t('error-sin-rangos'));
+    const idioma = typeof idiomaActual === 'function' && idiomaActual() === 'en' ? 'en' : 'es';
+    const limite = esPrevisualizacion ? PAGINAS_VISTA_PREVIA : undefined;
+    const { bytes, paginas, truncado } = await ExcelAPdfMotor.generar(libroImpresion, {
+      hojas: indicesAImprimir(),
+      papel,
+      orientacion: orientacion.value,
+      ajustar: /^\d+$/.test(ajustarA.value) ? Number(ajustarA.value) : ajustarA.value,
+      cuadricula: cuadricula.value,
+      areas,
       incluirOcultas: mostrarColumnasOcultas.checked,
-      horizontal: document.getElementById('orientacion').value === 'horizontal',
-      tamanoPagina: tamano,
-      tamanoFuente: parseInt(document.getElementById('tamanoFuente').value, 10),
-      limitarAOchoLineas: limiteLineasCelda.value === '8',
-      limiteFilas: esPrevisualizacion ? FILAS_VISTA_PREVIA : Infinity,
-      alAvanzar: esPrevisualizacion ? null : (n, total) => {
+      maxPaginas: limite,
+      idioma,
+      nombreArchivo: nombreCompletoActual,
+      progreso: esPrevisualizacion ? null : (n, total) => {
         botonConvertir.textContent = t('boton-convertir-progreso').replace('{n}', n).replace('{total}', total);
       },
-      alGuardar: esPrevisualizacion ? null : () => { botonConvertir.textContent = t('boton-convertir-finalizando'); },
     });
+    if (esPrevisualizacion && secuencia !== secuenciaVistaPreviaPdf) return;
+    const avisos = [];
+    if (convertidoActual) avisos.push(t('aviso-conversion'));
+    if (truncado) avisos.push(esPrevisualizacion ? t('aviso-vista-parcial').replace('{n}', limite) : t('aviso-truncado').replace(/\{n\}/g, paginas));
     advertencia.textContent = avisos.join(' ');
     advertencia.style.display = avisos.length ? 'block' : 'none';
-    if (esPrevisualizacion && secuencia !== secuenciaVistaPreviaPdf) return;
-    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
+    if (!paginas) {
+      if (esPrevisualizacion) mostrarMensajeVistaPrevia(t('aviso-sin-paginas'));
+      else alert(t('aviso-sin-paginas'));
+      return;
+    }
+    const blob = new Blob([bytes], { type: 'application/pdf' });
     mostrarPdfEnVistaPrevia(blob);
-    liberarUrlDescarga();
+    if (esPrevisualizacion) return;
     urlDescargaActual = URL.createObjectURL(blob);
     enlaceDescarga.href = urlDescargaActual;
     enlaceDescarga.download = `${nombreArchivoActual}.pdf`;

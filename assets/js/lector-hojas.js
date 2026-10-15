@@ -9,6 +9,7 @@
 //   const libro = await LectorHojas.abrir(archivo);          // lanza Error si no se puede leer (mensaje listo para mostrar)
 //   libro.comaDecimalCsv                                     // solo CSV: true si el archivo usa coma decimal
 //   libro.motor                                              // true si lo leyó el motor propio; false si SheetJS
+//   libro.libroMotor / libro.sheetjs                         // el libro del motor (xlsx, xlsm, csv) o el de SheetJS (el resto): para imprimir
 //   libro.hojas                                              // [{ nombre, indice, estado: 'visible'|'oculta'|'muyOculta' }]  (sin hojas de gráfico)
 //   const hoja = await libro.cargar(i);                      // i = hojas[k].indice
 //   hoja.nfilas, hoja.ncols                                  // el rango ocupado (empieza en su primera celda con contenido)
@@ -137,6 +138,7 @@
         if (libroLector.hojas.length) {
           libroLector.motor = true;
           if (!csv) libroLector.libroXlsx = libro;   // el libro del motor (solo lectura aquí: para editar se abre otro con LibroXlsx.abrir)
+          libroLector.libroMotor = libro;            // el mismo, también en CSV: para imprimir (excel-a-pdf-motor.js)
           libroLector.cargar = async (k) => hojaDelMotor(libro, await libro.cargarHoja(k), libroLector);
           return libroLector;
         }
@@ -149,6 +151,7 @@
     }
     const sheetjs = await leerLibroDesdeArchivo(archivo, { cellNF: true, cellStyles: true });   // cellNF: formato de número; cellStyles: anchos
     libroLector.comaDecimalCsv = sheetjs.comaDecimalCsv;
+    libroLector.sheetjs = sheetjs;   // el libro de SheetJS: excel-a-pdf-motor.js lo pasa a .xlsx para imprimir
     libroLector.hojas = sheetjs.SheetNames.map((nombre, k) => ({ nombre, indice: k, estado: 'visible' }));
     const fecha1904 = !!(sheetjs.Workbook && sheetjs.Workbook.WBProps && sheetjs.Workbook.WBProps.date1904);
     libroLector.cargar = async (k) => hojaDeSheetJs(sheetjs.Sheets[sheetjs.SheetNames[k]], libroLector, fecha1904);
