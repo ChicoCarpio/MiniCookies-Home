@@ -39,6 +39,8 @@ window.i18nPagina = {
     'error-sin-columna': 'Tildá al menos una columna como criterio para detectar duplicados.',
     'mensaje-sin-duplicados': 'No se encontró ninguna fila duplicada en "{hoja}".',
     'mensaje-con-duplicados': 'Se encontraron y quitaron {n} fila(s) duplicada(s) en "{hoja}".',
+    'aviso-reconstruido': 'No se pudo conservar el archivo tal cual ({motivo}): se creó un libro nuevo con los valores, el formato básico y las celdas combinadas.',
+    'motivo-otro-formato': 'este formato no se puede editar en el lugar',
     'nota-formato': 'El archivo resultante guarda los valores de todas las hojas con su formato de número (fechas, monedas), los anchos de columna y las celdas combinadas. Las fórmulas pasan a ser sus valores, y se pierden colores, bordes, fuentes, imágenes y gráficos.',
     'error-procesar': 'No se pudo procesar el archivo'
   },
@@ -63,6 +65,8 @@ window.i18nPagina = {
     'error-sin-columna': 'Check at least one column to use as the criteria to detect duplicates.',
     'mensaje-sin-duplicados': 'No duplicate rows were found in "{hoja}".',
     'mensaje-con-duplicados': '{n} duplicate row(s) were found and removed in "{hoja}".',
+    'aviso-reconstruido': 'The file could not be kept as it was ({motivo}): a new workbook was created with the values, basic formatting and merged cells.',
+    'motivo-otro-formato': 'this format cannot be edited in place',
     'nota-formato': 'The resulting file keeps the values of all sheets with their number format (dates, currencies), column widths and merged cells. Formulas become their values, and colors, borders, fonts, images and charts are lost.',
     'error-procesar': 'Couldn’t process the file'
   }
@@ -144,6 +148,7 @@ window.i18nPagina = {
 <script src="../assets/js/xlsx-modelo.js"></script>
 <script src="../assets/js/xlsx-paquete.js"></script>
 <script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/xlsx-quitar-filas.js"></script>
 <script src="../assets/js/csv-planilla.js"></script>
 <script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -339,20 +344,43 @@ botonProcesar.addEventListener('click', async () => {
     }
     const duplicadas = repetidas.size;
 
-    // Solo se limpia la hoja elegida — las demás hojas del archivo se conservan, en el mismo orden.
-    const hojasSalida = [];
-    for (const h of libroActual.hojas) {
-      const hoja = await hojaLeida(h.indice);
-      let filas = hoja.matrizValores(true);
-      let combinadas = hoja.combinadas;
-      if (h.indice === indiceElegido && duplicadas > 0) {
-        const absolutas = new Set([...repetidas].map((r) => hoja.f0 + r));
-        filas = filas.filter((_, f) => !absolutas.has(f));
-        combinadas = combinadasTrasQuitar(combinadas, absolutas);
+    // En un .xlsx o .xlsm las filas se quitan en el lugar, como "Eliminar filas" de Excel: lo demás (estilos, fórmulas, tablas, gráficos…) queda
+    // tal cual y las referencias se acomodan. Si el archivo trae algo que no se puede mover así (notas, tablas dinámicas…), o es de otro formato,
+    // se arma un libro nuevo con los valores y el formato básico.
+    let bytesFinales = null;
+    let motivoReconstruido = '';
+    if (libroActual.libroXlsx) {
+      try {
+        const bytesOriginal = new Uint8Array(await archivoActual.arrayBuffer());
+        if (duplicadas === 0) bytesFinales = bytesOriginal;
+        else {
+          const libroEdicion = await LibroXlsx.abrir(bytesOriginal);
+          await XlsxEscritor.quitarFilas(libroEdicion, indiceElegido, [...repetidas].map((r) => hojaElegida.f0 + r));
+          bytesFinales = await libroEdicion.zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+        }
+      } catch (error) {
+        console.warn('No se pudo quitar en el lugar:', error);
+        motivoReconstruido = error && error.message ? error.message : String(error);
       }
-      hojasSalida.push({ nombre: h.nombre, filas, anchos: hoja.anchos, combinadas });
+    } else if (!libroActual.motor) {
+      motivoReconstruido = t('motivo-otro-formato');
     }
-    const bytesFinales = await XlsxEscritor.crearLibro(hojasSalida);
+    if (!bytesFinales) {
+      // Solo se limpia la hoja elegida: las demás hojas del archivo se conservan, en el mismo orden.
+      const hojasSalida = [];
+      for (const h of libroActual.hojas) {
+        const hoja = await hojaLeida(h.indice);
+        let filas = hoja.matrizValores(true);
+        let combinadas = hoja.combinadas;
+        if (h.indice === indiceElegido && duplicadas > 0) {
+          const absolutas = new Set([...repetidas].map((r) => hoja.f0 + r));
+          filas = filas.filter((_, f) => !absolutas.has(f));
+          combinadas = combinadasTrasQuitar(combinadas, absolutas);
+        }
+        hojasSalida.push({ nombre: h.nombre, filas, anchos: hoja.anchos, combinadas });
+      }
+      bytesFinales = await XlsxEscritor.crearLibro(hojasSalida);
+    }
     const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}-sin-duplicados.xlsx`;
@@ -362,6 +390,7 @@ botonProcesar.addEventListener('click', async () => {
     mensaje.textContent = duplicadas === 0
       ? t('mensaje-sin-duplicados').replace('{hoja}', nombreHoja)
       : t('mensaje-con-duplicados').replace('{n}', duplicadas).replace('{hoja}', nombreHoja);
+    if (motivoReconstruido && duplicadas > 0) mensaje.textContent += ' ' + t('aviso-reconstruido').replace('{motivo}', motivoReconstruido);
     mensaje.style.display = 'block';
   } catch (error) {
     alert(t('error-procesar') + ': ' + error.message);
