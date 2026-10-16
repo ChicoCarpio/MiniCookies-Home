@@ -28,6 +28,24 @@ window.i18nPagina = {
     'csv-link': 'Link',
     'titulo-pagina': 'Extraer emails, teléfonos y links de un texto — Mini Cookies',
     'meta-descripcion': 'Extraé todos los emails, teléfonos y links de un texto pegado, gratis y sin enviar nada a ningún servidor.',
+    'guia-titulo': 'Cómo extraer emails, teléfonos y links de un texto',
+    'guia-intro': 'Pegás cualquier texto (un correo largo, el contenido de una página web, un listado de notas) y la herramienta busca todas las direcciones de email, números de teléfono y enlaces que contiene, los separa por tipo y elimina los repetidos. Sirve para armar una lista de contactos a partir de un texto desordenado.',
+    'guia-paso-1': 'Pegá el texto en el cuadro «Pegá acá el texto donde buscar...».',
+    'guia-paso-2': 'Tocá «Extraer». Aparecen tres contadores («Emails», «Teléfonos», «Links») y debajo tres cuadros con los datos, uno por línea.',
+    'guia-paso-3': 'Copiá lo que necesites desde los cuadros, o tocá «Descargar todo (.csv para Excel)» para bajar un archivo con dos columnas, «Tipo» y «Valor».',
+    'guia-paso-4': 'Si preferís un archivo de texto, tocá «Descargar .txt»: queda dividido en secciones con la cantidad de cada tipo.',
+    'guia-consejo-1': 'Los links reconocidos son los que empiezan con http:// o https://; una dirección escrita como www.ejemplo.com no se detecta.',
+    'guia-consejo-2': 'Los teléfonos se aceptan con o sin prefijo internacional y con espacios, puntos o guiones; solo se listan los que tienen al menos 7 dígitos, para no confundirlos con otros números.',
+    'guia-consejo-3': 'Si un enlace aparece al final de una frase, se le quitan el punto o la coma pegados.',
+    'guia-consejo-4': 'Los archivos descargados se llaman contactos seguido de la fecha; el CSV se puede abrir directo en Excel con los acentos bien.',
+    'guia-p1': '¿Elimina los repetidos?',
+    'guia-r1': 'Sí, dentro de cada categoría cada dato aparece una sola vez.',
+    'guia-p2': '¿Puede equivocarse con los teléfonos?',
+    'guia-r2': 'Puede, porque cualquier secuencia de al menos 7 dígitos con la forma de un teléfono entra; conviene revisar el listado.',
+    'guia-p3': '¿Acepta archivos?',
+    'guia-r3': 'No, solo texto pegado.',
+    'guia-p4': '¿Un número dentro de un link o de un email aparece también como teléfono?',
+    'guia-r4': 'No, esas partes se excluyen de la búsqueda de teléfonos.'
   },
   en: {
     'hero-titulo': 'Extract emails, phone numbers and links',
@@ -46,6 +64,24 @@ window.i18nPagina = {
     'csv-link': 'Link',
     'titulo-pagina': 'Extract emails, phone numbers and links from text — Mini Cookies',
     'meta-descripcion': 'Pull every email address, phone number and link out of a block of text — free, and nothing is sent to a server.',
+    'guia-titulo': 'How to extract emails, phone numbers and links from a text',
+    'guia-intro': 'You paste any text (a long email, the content of a web page, a list of notes) and the tool finds all the email addresses, phone numbers and links it contains, separates them by type and removes the duplicates. It’s handy for building a contact list from a messy text.',
+    'guia-paso-1': 'Paste the text in the “Paste the text to search here...” box.',
+    'guia-paso-2': 'Tap “Extract”. Three counters appear (“Emails”, “Phone numbers”, “Links”) and below them three boxes with the data, one per line.',
+    'guia-paso-3': 'Copy what you need from the boxes, or tap “Download everything (.csv for Excel)” to get a file with two columns, “Type” and “Value”.',
+    'guia-paso-4': 'If you prefer a text file, tap “Download .txt”: it’s divided into sections with the count of each type.',
+    'guia-consejo-1': 'The links it recognizes are those that start with http:// or https://; an address written as www.example.com isn’t detected.',
+    'guia-consejo-2': 'Phone numbers are accepted with or without an international prefix and with spaces, dots or hyphens; only those with at least 7 digits are listed, so they aren’t confused with other numbers.',
+    'guia-consejo-3': 'If a link appears at the end of a sentence, the period or comma stuck to it is removed.',
+    'guia-consejo-4': 'Downloaded files are named contactos followed by the date; the CSV can be opened straight in Excel with the accents displayed correctly.',
+    'guia-p1': 'Does it remove duplicates?',
+    'guia-r1': 'Yes, within each category every item appears only once.',
+    'guia-p2': 'Can it get phone numbers wrong?',
+    'guia-r2': 'It can, because any sequence of at least 7 digits shaped like a phone number gets in; it’s a good idea to review the list.',
+    'guia-p3': 'Does it accept files?',
+    'guia-r3': 'No, only pasted text.',
+    'guia-p4': 'Does a number inside a link or an email also show up as a phone number?',
+    'guia-r4': 'No, those parts are excluded from the phone search.'
   }
 };
 </script>
@@ -101,6 +137,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo extraer emails, teléfonos y links de un texto</h2>
+    <p data-i18n="guia-intro">Pegás cualquier texto (un correo largo, el contenido de una página web, un listado de notas) y la herramienta busca todas las direcciones de email, números de teléfono y enlaces que contiene, los separa por tipo y elimina los repetidos. Sirve para armar una lista de contactos a partir de un texto desordenado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Pegá el texto en el cuadro «Pegá acá el texto donde buscar...».</li>
+      <li data-i18n="guia-paso-2">Tocá «Extraer». Aparecen tres contadores («Emails», «Teléfonos», «Links») y debajo tres cuadros con los datos, uno por línea.</li>
+      <li data-i18n="guia-paso-3">Copiá lo que necesites desde los cuadros, o tocá «Descargar todo (.csv para Excel)» para bajar un archivo con dos columnas, «Tipo» y «Valor».</li>
+      <li data-i18n="guia-paso-4">Si preferís un archivo de texto, tocá «Descargar .txt»: queda dividido en secciones con la cantidad de cada tipo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Los links reconocidos son los que empiezan con http:// o https://; una dirección escrita como www.ejemplo.com no se detecta.</li>
+      <li data-i18n="guia-consejo-2">Los teléfonos se aceptan con o sin prefijo internacional y con espacios, puntos o guiones; solo se listan los que tienen al menos 7 dígitos, para no confundirlos con otros números.</li>
+      <li data-i18n="guia-consejo-3">Si un enlace aparece al final de una frase, se le quitan el punto o la coma pegados.</li>
+      <li data-i18n="guia-consejo-4">Los archivos descargados se llaman contactos seguido de la fecha; el CSV se puede abrir directo en Excel con los acentos bien.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Elimina los repetidos?</summary>
+      <p data-i18n="guia-r1">Sí, dentro de cada categoría cada dato aparece una sola vez.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puede equivocarse con los teléfonos?</summary>
+      <p data-i18n="guia-r2">Puede, porque cualquier secuencia de al menos 7 dígitos con la forma de un teléfono entra; conviene revisar el listado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Acepta archivos?</summary>
+      <p data-i18n="guia-r3">No, solo texto pegado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Un número dentro de un link o de un email aparece también como teléfono?</summary>
+      <p data-i18n="guia-r4">No, esas partes se excluyen de la búsqueda de teléfonos.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

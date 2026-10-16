@@ -160,7 +160,26 @@ window.i18nPagina = {
     'err-nada-formatear': 'No hay nada que formatear.',
     'err-sobran-caracteres': 'Sobran caracteres al final de la fórmula — revisá los paréntesis o si el separador elegido ({sep}) es el correcto.',
     'err-varias-expresiones': 'Se encontraron {n} expresiones sueltas de nivel superior; una fórmula válida tiene una sola.',
-    'err-integridad': 'La verificación de integridad falló: el árbol reconstruido no coincide con la fórmula original. No se aplicó ningún formato, por seguridad.'
+    'err-integridad': 'La verificación de integridad falló: el árbol reconstruido no coincide con la fórmula original. No se aplicó ningún formato, por seguridad.',
+    'guia-titulo': 'Cómo formatear una fórmula anidada de Excel',
+    'guia-intro': 'Una fórmula con muchos SI anidados o un SI.CONJUNTO largo es casi imposible de leer en la barra de fórmulas. Esta herramienta la reordena en líneas con sangría, para que veas qué condición lleva a qué resultado, y comprueba token por token que la lógica quede idéntica a la original. Pegás la fórmula y el resultado aparece al instante; después lo copiás o lo descargás para volver a pegarlo en Excel.',
+    'guia-paso-1': 'Pegá la fórmula tal como sale de Excel en el panel «Fórmula original» (empezando por el signo igual).',
+    'guia-paso-2': 'Elegí el «Separador» que usa tu Excel: «; (ES/LatAm)» si tus argumentos se separan con punto y coma, o «, (EN)» si usás comas.',
+    'guia-paso-3': 'Ajustá la «Sangría (espacios)» con los botones − y + y el control «Ancho antes de partir línea» (de 60 a 160 caracteres), que decide cuándo una expresión se corta en varias líneas.',
+    'guia-paso-4': 'Revisá el resultado en «Fórmula formateada» y el «Estado»: debe decir «Estructura verificada».',
+    'guia-paso-5': 'Tocá «Copiar» o «Descargar .txt». «Limpiar» vacía el panel y «Restablecer ejemplo» vuelve a cargar el ejemplo.',
+    'guia-consejo-1': 'Mirá el contador «Compacta (mínimo)» frente a «Formateada»: la barra inferior muestra el límite de 8192 caracteres de una celda de Excel. Si la versión formateada lo supera, reducí la sangría o ampliá el ancho; la versión compacta es la que importa a Excel.',
+    'guia-consejo-2': 'Si elegís el separador equivocado, la herramienta suele avisar de caracteres sobrantes o de un error de sintaxis: probá cambiarlo.',
+    'guia-consejo-3': 'Reconoce referencias a otro libro ([Libro.xlsx]Hoja1!A1), fórmulas matriciales con llaves, el operador de porcentaje y nombres de tabla con [@Columna].',
+    'guia-consejo-4': 'Excel acepta los saltos de línea y espacios dentro de una fórmula; si pegás la fórmula formateada en la celda, solo se ve ordenada en la barra de fórmulas.',
+    'guia-p1': '¿Cambia mi fórmula?',
+    'guia-r1': 'No: solo agrega saltos de línea y sangría. Antes de mostrar nada verifica que el resultado equivalga a la original; si no, no formatea y muestra el error.',
+    'guia-p2': '¿Por qué dice «Error de sintaxis»?',
+    'guia-r2': 'Falta un paréntesis, hay un carácter no reconocido o el separador elegido no es el correcto. El mensaje indica la posición.',
+    'guia-p3': '¿Sirve solo con SI y SI.CONJUNTO?',
+    'guia-r3': 'Sirve con cualquier función anidada; SI y SI.CONJUNTO son los casos típicos.',
+    'guia-p4': '¿Qué hago con una fórmula de más de 8192 caracteres?',
+    'guia-r4': 'Tendrás que simplificarla: ese es el límite de Excel y la herramienta solo avisa.'
   },
   en: {
     'titulo-pagina': 'Format Nested Excel Formulas Free — Mini Cookies',
@@ -226,7 +245,26 @@ window.i18nPagina = {
     'err-nada-formatear': 'There’s nothing to format.',
     'err-sobran-caracteres': 'There are extra characters at the end of the formula — check the parentheses or whether the chosen separator ({sep}) is the right one.',
     'err-varias-expresiones': '{n} loose top-level expressions were found; a valid formula has only one.',
-    'err-integridad': 'The integrity check failed: the rebuilt tree doesn’t match the original formula. No formatting was applied, for safety.'
+    'err-integridad': 'The integrity check failed: the rebuilt tree doesn’t match the original formula. No formatting was applied, for safety.',
+    'guia-titulo': 'How to format a nested Excel formula',
+    'guia-intro': 'A formula with many nested IFs or a long IFS is almost impossible to read in the formula bar. This tool reorders it into indented lines, so you can see which condition leads to which result, and checks token by token that the logic stays identical to the original. You paste the formula and the result appears instantly; then you copy or download it to paste it back into Excel.',
+    'guia-paso-1': 'Paste the formula exactly as it comes from Excel into the “Original formula” panel (starting with the equals sign).',
+    'guia-paso-2': 'Choose the “Separator” your Excel uses: “; (ES/LatAm)” if your arguments are separated by semicolons, or “, (EN)” if you use commas.',
+    'guia-paso-3': 'Adjust the “Indent (spaces)” with the − and + buttons and the “Width before wrapping a line” control (60 to 160 characters), which decides when an expression is split across several lines.',
+    'guia-paso-4': 'Check the result in “Formatted formula” and the “Status”: it should say “Structure verified”.',
+    'guia-paso-5': 'Tap “Copy” or “Download .txt”. “Clear” empties the panel and “Reset to example” loads the example again.',
+    'guia-consejo-1': 'Look at the “Compact (minimum)” counter against “Formatted”: the bar below shows Excel’s 8192-character cell limit. If the formatted version goes over it, reduce the indent or widen the width; the compact version is the one that matters to Excel.',
+    'guia-consejo-2': 'If you choose the wrong separator, the tool usually warns about extra characters or a syntax error: try changing it.',
+    'guia-consejo-3': 'It recognizes references to another workbook ([Book.xlsx]Sheet1!A1), array formulas with braces, the percent operator and table names with [@Column].',
+    'guia-consejo-4': 'Excel accepts line breaks and spaces inside a formula; if you paste the formatted formula into the cell, it only looks tidy in the formula bar.',
+    'guia-p1': 'Does it change my formula?',
+    'guia-r1': 'No: it only adds line breaks and indentation. Before showing anything it checks that the result is equivalent to the original; if not, it doesn’t format and shows the error.',
+    'guia-p2': 'Why does it say “Syntax error”?',
+    'guia-r2': 'A parenthesis is missing, there’s an unrecognized character or the chosen separator isn’t the right one. The message indicates the position.',
+    'guia-p3': 'Does it only work with IF and IFS?',
+    'guia-r3': 'It works with any nested function; IF and IFS are the typical cases.',
+    'guia-p4': 'What do I do with a formula of more than 8192 characters?',
+    'guia-r4': 'You’ll have to simplify it: that’s Excel’s limit and the tool only warns you.'
   }
 };
 </script>
@@ -337,6 +375,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo formatear una fórmula anidada de Excel</h2>
+    <p data-i18n="guia-intro">Una fórmula con muchos SI anidados o un SI.CONJUNTO largo es casi imposible de leer en la barra de fórmulas. Esta herramienta la reordena en líneas con sangría, para que veas qué condición lleva a qué resultado, y comprueba token por token que la lógica quede idéntica a la original. Pegás la fórmula y el resultado aparece al instante; después lo copiás o lo descargás para volver a pegarlo en Excel.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Pegá la fórmula tal como sale de Excel en el panel «Fórmula original» (empezando por el signo igual).</li>
+      <li data-i18n="guia-paso-2">Elegí el «Separador» que usa tu Excel: «; (ES/LatAm)» si tus argumentos se separan con punto y coma, o «, (EN)» si usás comas.</li>
+      <li data-i18n="guia-paso-3">Ajustá la «Sangría (espacios)» con los botones − y + y el control «Ancho antes de partir línea» (de 60 a 160 caracteres), que decide cuándo una expresión se corta en varias líneas.</li>
+      <li data-i18n="guia-paso-4">Revisá el resultado en «Fórmula formateada» y el «Estado»: debe decir «Estructura verificada».</li>
+      <li data-i18n="guia-paso-5">Tocá «Copiar» o «Descargar .txt». «Limpiar» vacía el panel y «Restablecer ejemplo» vuelve a cargar el ejemplo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Mirá el contador «Compacta (mínimo)» frente a «Formateada»: la barra inferior muestra el límite de 8192 caracteres de una celda de Excel. Si la versión formateada lo supera, reducí la sangría o ampliá el ancho; la versión compacta es la que importa a Excel.</li>
+      <li data-i18n="guia-consejo-2">Si elegís el separador equivocado, la herramienta suele avisar de caracteres sobrantes o de un error de sintaxis: probá cambiarlo.</li>
+      <li data-i18n="guia-consejo-3">Reconoce referencias a otro libro ([Libro.xlsx]Hoja1!A1), fórmulas matriciales con llaves, el operador de porcentaje y nombres de tabla con [@Columna].</li>
+      <li data-i18n="guia-consejo-4">Excel acepta los saltos de línea y espacios dentro de una fórmula; si pegás la fórmula formateada en la celda, solo se ve ordenada en la barra de fórmulas.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cambia mi fórmula?</summary>
+      <p data-i18n="guia-r1">No: solo agrega saltos de línea y sangría. Antes de mostrar nada verifica que el resultado equivalga a la original; si no, no formatea y muestra el error.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Por qué dice «Error de sintaxis»?</summary>
+      <p data-i18n="guia-r2">Falta un paréntesis, hay un carácter no reconocido o el separador elegido no es el correcto. El mensaje indica la posición.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Sirve solo con SI y SI.CONJUNTO?</summary>
+      <p data-i18n="guia-r3">Sirve con cualquier función anidada; SI y SI.CONJUNTO son los casos típicos.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué hago con una fórmula de más de 8192 caracteres?</summary>
+      <p data-i18n="guia-r4">Tendrás que simplificarla: ese es el límite de Excel y la herramienta solo avisa.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

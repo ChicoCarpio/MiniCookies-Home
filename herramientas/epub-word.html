@@ -38,7 +38,26 @@ window.i18nPagina = {
     'error-sin-contenido': 'No se encontró contenido en el EPUB.',
     'error-convertir': 'No se pudo convertir el EPUB',
     'progreso-leyendo-word': 'Leyendo el Word...',
-    'progreso-armando': 'Armando el EPUB...'
+    'progreso-armando': 'Armando el EPUB...',
+    'guia-titulo': 'Cómo convertir un EPUB a Word y un Word a EPUB',
+    'guia-intro': 'Convierte un libro EPUB en un documento Word (.docx) que podés editar, o un documento Word en un EPUB para leerlo en un lector de libros electrónicos. Es útil para corregir o adaptar un libro sin protección, o para publicar un manuscrito escrito en Word. Entra un .epub o un .docx; sale un .docx o un .epub.',
+    'guia-paso-1': 'Elegí la dirección: «EPUB → Word» o «Word → EPUB».',
+    'guia-paso-2': 'En EPUB → Word, cargá uno o varios .epub. Con un solo libro, el «Nombre del archivo» se completa con el del libro y lo podés cambiar.',
+    'guia-paso-3': 'Tocá «Convertir a Word». Verás el avance capítulo por capítulo; al terminar, «Descargar Word» (o word-desde-epub.zip si cargaste varios libros).',
+    'guia-paso-4': 'En Word → EPUB, cargá el .docx, completá «Título del libro» y, si querés, «Autor (opcional)», y tocá «Convertir a EPUB».',
+    'guia-paso-5': 'Tocá «Descargar EPUB» (con varios documentos, epub-desde-word.zip).',
+    'guia-consejo-1': 'Para que tu Word se separe en capítulos, usá el estilo Título 1 (Heading 1) en cada título principal: cada uno abre un capítulo nuevo en el EPUB.',
+    'guia-consejo-2': 'En EPUB → Word, cada capítulo empieza en una página nueva del documento.',
+    'guia-consejo-3': 'Se conservan títulos, negrita, cursiva, listas, tablas e imágenes. Los diseños de página fija (como un cómic) pueden no verse igual.',
+    'guia-consejo-4': 'Las tablas pegadas desde Excel como imagen EMF se convierten a PNG para que el lector de EPUB las pueda mostrar.',
+    'guia-p1': '¿Acepta archivos .doc?',
+    'guia-r1': 'No, solo .docx.',
+    'guia-p2': '¿Funciona con EPUB protegidos con DRM?',
+    'guia-r2': 'No, solo con EPUB sin protección.',
+    'guia-p3': '¿Puedo convertir varios archivos?',
+    'guia-r3': 'Sí, en las dos direcciones; recibís un .zip con un archivo por entrada.',
+    'guia-p4': '¿Qué título tendrá cada EPUB si cargo varios Word?',
+    'guia-r4': 'El nombre de cada archivo.'
   },
   en: {
     'titulo-pagina': 'Convert EPUB and Word Free — Mini Cookies',
@@ -67,7 +86,26 @@ window.i18nPagina = {
     'error-sin-contenido': 'No content was found in the EPUB.',
     'error-convertir': 'Couldn’t convert the EPUB',
     'progreso-leyendo-word': 'Reading the Word document...',
-    'progreso-armando': 'Building the EPUB...'
+    'progreso-armando': 'Building the EPUB...',
+    'guia-titulo': 'How to convert an EPUB to Word and a Word document to EPUB',
+    'guia-intro': 'It converts an EPUB book into a Word (.docx) document you can edit, or a Word document into an EPUB to read on an e-book reader. It’s useful for correcting or adapting an unprotected book, or for publishing a manuscript written in Word. An .epub or a .docx goes in; a .docx or an .epub comes out.',
+    'guia-paso-1': 'Choose the direction: “EPUB → Word” or “Word → EPUB”.',
+    'guia-paso-2': 'In EPUB → Word, load one or several .epub files. With a single book, the “File name” is filled in with the book’s name and you can change it.',
+    'guia-paso-3': 'Tap “Convert to Word”. You’ll see the progress chapter by chapter; when it’s done, “Download Word” (or word-desde-epub.zip if you loaded several books).',
+    'guia-paso-4': 'In Word → EPUB, load the .docx, fill in “Book title” and, if you want, “Author (optional)”, and tap “Convert to EPUB”.',
+    'guia-paso-5': 'Tap “Download EPUB” (with several documents, epub-desde-word.zip).',
+    'guia-consejo-1': 'For your Word document to be split into chapters, use the Heading 1 style on each main heading: each one starts a new chapter in the EPUB.',
+    'guia-consejo-2': 'In EPUB → Word, each chapter starts on a new page of the document.',
+    'guia-consejo-3': 'Headings, bold, italics, lists, tables and images are kept. Fixed-layout designs (like a comic) may not look the same.',
+    'guia-consejo-4': 'Tables pasted from Excel as an EMF image are converted to PNG so the EPUB reader can show them.',
+    'guia-p1': 'Does it accept .doc files?',
+    'guia-r1': 'No, only .docx.',
+    'guia-p2': 'Does it work with DRM-protected EPUBs?',
+    'guia-r2': 'No, only with unprotected EPUBs.',
+    'guia-p3': 'Can I convert several files?',
+    'guia-r3': 'Yes, in both directions; you get a .zip with one file per input.',
+    'guia-p4': 'What title will each EPUB have if I load several Word files?',
+    'guia-r4': 'The name of each file.'
   }
 };
 </script>
@@ -149,6 +187,43 @@ window.i18nPagina = {
       <li data-i18n="item3">Word → EPUB: cada título principal (Heading 1) empieza un capítulo nuevo. EPUB → Word: cada capítulo empieza en una página nueva.</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir un EPUB a Word y un Word a EPUB</h2>
+    <p data-i18n="guia-intro">Convierte un libro EPUB en un documento Word (.docx) que podés editar, o un documento Word en un EPUB para leerlo en un lector de libros electrónicos. Es útil para corregir o adaptar un libro sin protección, o para publicar un manuscrito escrito en Word. Entra un .epub o un .docx; sale un .docx o un .epub.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí la dirección: «EPUB → Word» o «Word → EPUB».</li>
+      <li data-i18n="guia-paso-2">En EPUB → Word, cargá uno o varios .epub. Con un solo libro, el «Nombre del archivo» se completa con el del libro y lo podés cambiar.</li>
+      <li data-i18n="guia-paso-3">Tocá «Convertir a Word». Verás el avance capítulo por capítulo; al terminar, «Descargar Word» (o word-desde-epub.zip si cargaste varios libros).</li>
+      <li data-i18n="guia-paso-4">En Word → EPUB, cargá el .docx, completá «Título del libro» y, si querés, «Autor (opcional)», y tocá «Convertir a EPUB».</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar EPUB» (con varios documentos, epub-desde-word.zip).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para que tu Word se separe en capítulos, usá el estilo Título 1 (Heading 1) en cada título principal: cada uno abre un capítulo nuevo en el EPUB.</li>
+      <li data-i18n="guia-consejo-2">En EPUB → Word, cada capítulo empieza en una página nueva del documento.</li>
+      <li data-i18n="guia-consejo-3">Se conservan títulos, negrita, cursiva, listas, tablas e imágenes. Los diseños de página fija (como un cómic) pueden no verse igual.</li>
+      <li data-i18n="guia-consejo-4">Las tablas pegadas desde Excel como imagen EMF se convierten a PNG para que el lector de EPUB las pueda mostrar.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Acepta archivos .doc?</summary>
+      <p data-i18n="guia-r1">No, solo .docx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Funciona con EPUB protegidos con DRM?</summary>
+      <p data-i18n="guia-r2">No, solo con EPUB sin protección.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo convertir varios archivos?</summary>
+      <p data-i18n="guia-r3">Sí, en las dos direcciones; recibís un .zip con un archivo por entrada.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué título tendrá cada EPUB si cargo varios Word?</summary>
+      <p data-i18n="guia-r4">El nombre de cada archivo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

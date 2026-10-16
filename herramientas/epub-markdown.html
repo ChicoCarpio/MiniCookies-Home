@@ -40,7 +40,26 @@ window.i18nPagina = {
     'titulo-defecto': 'Documento',
     'progreso-leyendo': 'Leyendo el Markdown...',
     'progreso-armando': 'Armando el EPUB...',
-    'error-generar': 'No se pudo generar el EPUB'
+    'error-generar': 'No se pudo generar el EPUB',
+    'guia-titulo': 'Cómo convertir un EPUB a Markdown y un Markdown a EPUB',
+    'guia-intro': 'Convierte un libro EPUB sin protección a un archivo Markdown (.md), o un archivo Markdown a un libro EPUB. Es útil para llevar un libro a un editor de notas como Obsidian, para editar su texto en un formato liviano o para publicar un texto escrito en Markdown como libro electrónico. Entra un .epub o un .md/.markdown y sale un .md o un .epub.',
+    'guia-paso-1': 'Arriba elegí la dirección: «EPUB → Markdown» o «Markdown → EPUB».',
+    'guia-paso-2': 'En EPUB → Markdown, arrastrá uno o varios archivos .epub (o hacé clic para elegirlos) y tocá «Convertir a Markdown».',
+    'guia-paso-3': 'Con un solo libro se muestra el texto resultante: podés usar «Copiar Markdown» o «Descargar .md» (se guarda como libro.md). Con varios libros se baja un .zip llamado markdown-desde-epub.zip con un .md por libro.',
+    'guia-paso-4': 'En Markdown → EPUB, cargá el archivo .md; el campo «Título del libro» se completa con el nombre del archivo y podés cambiarlo. Si querés, escribí el «Autor (opcional)».',
+    'guia-paso-5': 'Tocá «Convertir a EPUB» y después «Descargar EPUB». El archivo se llama como el título que pusiste.',
+    'guia-consejo-1': 'Al pasar de EPUB a Markdown, cada capítulo queda separado por una línea horizontal (---); las tablas se convierten en tablas de Markdown.',
+    'guia-consejo-2': 'Al pasar de Markdown a EPUB, cada título de primer nivel (#) abre un capítulo nuevo. Si tu texto no tiene #, queda como un solo capítulo.',
+    'guia-consejo-3': 'Las imágenes del libro no se incluyen en el Markdown de salida como archivos aparte; revisá el resultado si dependés de ellas.',
+    'guia-consejo-4': 'No funciona con EPUB que tienen DRM (candado editorial).',
+    'guia-p1': '¿Puedo convertir varios EPUB juntos?',
+    'guia-r1': 'Sí, en la dirección EPUB → Markdown. Recibís un .zip con un .md por libro.',
+    'guia-p2': '¿Qué pasa con el HTML dentro de mi Markdown?',
+    'guia-r2': 'Antes de armar el EPUB el contenido pasa por una limpieza de HTML, así que lo peligroso (scripts, por ejemplo) se elimina.',
+    'guia-p3': '¿Se conserva el formato?',
+    'guia-r3': 'Títulos, listas, negritas, cursivas, enlaces y tablas, en la medida en que Markdown las admite.',
+    'guia-p4': '¿Funciona con un EPUB comprado en una tienda?',
+    'guia-r4': 'Solo si no tiene DRM.'
   },
   en: {
     'titulo-pagina': 'Convert EPUB and Markdown Free — Mini Cookies',
@@ -68,7 +87,26 @@ window.i18nPagina = {
     'titulo-defecto': 'Document',
     'progreso-leyendo': 'Reading the Markdown...',
     'progreso-armando': 'Building the EPUB...',
-    'error-generar': 'Couldn’t generate the EPUB'
+    'error-generar': 'Couldn’t generate the EPUB',
+    'guia-titulo': 'How to convert an EPUB to Markdown and a Markdown file to EPUB',
+    'guia-intro': 'It converts an unprotected EPUB book into a Markdown (.md) file, or a Markdown file into an EPUB book. It’s useful for taking a book into a note editor such as Obsidian, for editing its text in a lightweight format, or for publishing a text written in Markdown as an e-book. An .epub or an .md/.markdown goes in, and an .md or an .epub comes out.',
+    'guia-paso-1': 'At the top, choose the direction: “EPUB → Markdown” or “Markdown → EPUB”.',
+    'guia-paso-2': 'In EPUB → Markdown, drag one or several .epub files (or click to choose them) and tap “Convert to Markdown”.',
+    'guia-paso-3': 'With a single book the resulting text is shown: you can use “Copy Markdown” or “Download .md” (saved as libro.md). With several books a .zip named markdown-desde-epub.zip is downloaded, with one .md per book.',
+    'guia-paso-4': 'In Markdown → EPUB, load the .md file; the “Book title” field is filled in with the file name and you can change it. If you want, type the “Author (optional)”.',
+    'guia-paso-5': 'Tap “Convert to EPUB” and then “Download EPUB”. The file is named after the title you entered.',
+    'guia-consejo-1': 'When going from EPUB to Markdown, each chapter is separated by a horizontal rule (---); tables become Markdown tables.',
+    'guia-consejo-2': 'When going from Markdown to EPUB, each first-level heading (#) starts a new chapter. If your text has no #, it ends up as a single chapter.',
+    'guia-consejo-3': 'The book’s images are not included in the output Markdown as separate files; check the result if you depend on them.',
+    'guia-consejo-4': 'It doesn’t work with DRM-protected EPUBs (publisher lock).',
+    'guia-p1': 'Can I convert several EPUBs together?',
+    'guia-r1': 'Yes, in the EPUB → Markdown direction. You get a .zip with one .md per book.',
+    'guia-p2': 'What happens to the HTML inside my Markdown?',
+    'guia-r2': 'Before the EPUB is built the content goes through an HTML cleanup, so anything dangerous (scripts, for example) is removed.',
+    'guia-p3': 'Is the formatting kept?',
+    'guia-r3': 'Headings, lists, bold, italics, links and tables, as far as Markdown supports them.',
+    'guia-p4': 'Does it work with an EPUB bought in a store?',
+    'guia-r4': 'Only if it has no DRM.'
   }
 };
 </script>
@@ -149,6 +187,43 @@ window.i18nPagina = {
       <li><span data-i18n="item2-a">EPUB → Markdown separa cada capítulo con una línea horizontal (</span><code>---</code><span data-i18n="item2-b">). Markdown → EPUB empieza un capítulo nuevo en cada </span><code>#</code><span data-i18n="item2-c"> de primer nivel.</span></li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir un EPUB a Markdown y un Markdown a EPUB</h2>
+    <p data-i18n="guia-intro">Convierte un libro EPUB sin protección a un archivo Markdown (.md), o un archivo Markdown a un libro EPUB. Es útil para llevar un libro a un editor de notas como Obsidian, para editar su texto en un formato liviano o para publicar un texto escrito en Markdown como libro electrónico. Entra un .epub o un .md/.markdown y sale un .md o un .epub.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arriba elegí la dirección: «EPUB → Markdown» o «Markdown → EPUB».</li>
+      <li data-i18n="guia-paso-2">En EPUB → Markdown, arrastrá uno o varios archivos .epub (o hacé clic para elegirlos) y tocá «Convertir a Markdown».</li>
+      <li data-i18n="guia-paso-3">Con un solo libro se muestra el texto resultante: podés usar «Copiar Markdown» o «Descargar .md» (se guarda como libro.md). Con varios libros se baja un .zip llamado markdown-desde-epub.zip con un .md por libro.</li>
+      <li data-i18n="guia-paso-4">En Markdown → EPUB, cargá el archivo .md; el campo «Título del libro» se completa con el nombre del archivo y podés cambiarlo. Si querés, escribí el «Autor (opcional)».</li>
+      <li data-i18n="guia-paso-5">Tocá «Convertir a EPUB» y después «Descargar EPUB». El archivo se llama como el título que pusiste.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Al pasar de EPUB a Markdown, cada capítulo queda separado por una línea horizontal (---); las tablas se convierten en tablas de Markdown.</li>
+      <li data-i18n="guia-consejo-2">Al pasar de Markdown a EPUB, cada título de primer nivel (#) abre un capítulo nuevo. Si tu texto no tiene #, queda como un solo capítulo.</li>
+      <li data-i18n="guia-consejo-3">Las imágenes del libro no se incluyen en el Markdown de salida como archivos aparte; revisá el resultado si dependés de ellas.</li>
+      <li data-i18n="guia-consejo-4">No funciona con EPUB que tienen DRM (candado editorial).</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo convertir varios EPUB juntos?</summary>
+      <p data-i18n="guia-r1">Sí, en la dirección EPUB → Markdown. Recibís un .zip con un .md por libro.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa con el HTML dentro de mi Markdown?</summary>
+      <p data-i18n="guia-r2">Antes de armar el EPUB el contenido pasa por una limpieza de HTML, así que lo peligroso (scripts, por ejemplo) se elimina.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se conserva el formato?</summary>
+      <p data-i18n="guia-r3">Títulos, listas, negritas, cursivas, enlaces y tablas, en la medida en que Markdown las admite.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Funciona con un EPUB comprado en una tienda?</summary>
+      <p data-i18n="guia-r4">Solo si no tiene DRM.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
