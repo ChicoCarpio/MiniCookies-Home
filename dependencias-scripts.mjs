@@ -10,8 +10,9 @@ const NECESITA = {
   'ods-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-modelo.js'],
   'xlsb-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-estilos.js', 'xlsx-modelo.js'],
   'xls-lector.js': ['xlsx-estilos.js', 'xlsx-modelo.js'],
+  'xml2003-lector.js': ['xml-ligero.js', 'xlsx-modelo.js', 'xlsx-formato.js'],
   'html-tabla-lector.js': ['csv-planilla.js', 'xlsx-modelo.js'],
-  'formatos-antiguos.js': ['zip-propio.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-escritor.js', 'ods-lector.js', 'xlsb-lector.js', 'xls-lector.js'],
+  'formatos-antiguos.js': ['zip-propio.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-escritor.js', 'ods-lector.js', 'xlsb-lector.js', 'xls-lector.js', 'xml2003-lector.js'],
   'csv-planilla.js': ['xlsx-estilos.js', 'xlsx-modelo.js'],
   'xlsx-escritor.js': ['zip-propio.js', 'xml-editar.js', 'xlsx-paquete.js', 'xlsx-modelo.js'],
 };

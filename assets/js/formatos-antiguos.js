@@ -3,7 +3,7 @@
 // (ods-lector.js, xlsb-lector.js, xls-lector.js, html-tabla-lector.js) y los tres devuelven lo mismo; este módulo elige el lector por el contenido del archivo (no por la
 // extensión) y lo pasa a un .xlsx con XlsxEscritor.crearLibro, que es lo que el resto del motor ya sabe leer, mostrar e imprimir.
 //
-//   await FormatosAntiguos.detectar(bytes)    → 'ods' | 'xlsb' | 'xls' | 'html' | null   ('html': una página con tablas guardada como .xls, que muchos sistemas "exportan a Excel")
+//   await FormatosAntiguos.detectar(bytes)    → 'ods' | 'xlsb' | 'xls' | 'xml' | 'html' | null   ('html': una página con tablas guardada como .xls, que muchos sistemas "exportan a Excel")
 //   await FormatosAntiguos.leer(bytes)        → { hojas: [{ nombre, filas, anchos, combinadas }], fecha1904? }   (ver OdsLector)
 //   await FormatosAntiguos.aXlsx(bytes)       → Uint8Array con un .xlsx (valores y formato de número; sin fórmulas ni estilos de celda)
 //
@@ -21,6 +21,7 @@
       if (zip.file('content.xml') && (zip.file('mimetype') || zip.file('META-INF/manifest.xml'))) return 'ods';
       return null;
     }
+    if (typeof Xml2003Lector !== 'undefined' && Xml2003Lector.parece(bytes)) return 'xml';   // antes que 'html': su <Table> también parece una tabla HTML
     if (typeof HtmlTablaLector !== 'undefined' && HtmlTablaLector.parece(bytes)) return 'html';
     return null;
   }
@@ -30,6 +31,7 @@
     if (tipo === 'ods') return OdsLector.leer(bytes);
     if (tipo === 'xlsb') return XlsbLector.leer(bytes);
     if (tipo === 'xls') return XlsLector.leer(bytes);
+    if (tipo === 'xml') return Xml2003Lector.leer(bytes);
     if (tipo === 'html') return HtmlTablaLector.leer(bytes);
     throw new Error('el archivo no es una hoja de cálculo que se pueda leer');
   }

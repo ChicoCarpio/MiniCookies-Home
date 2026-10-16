@@ -4,7 +4,7 @@
 // se arman bajo demanda: un libro grande no genera una matriz entera de textos.
 //
 // Requiere: zip-propio.js, xml-ligero.js, xml-editar.js, xlsx-formato.js, xlsx-estilos.js, xlsx-modelo.js, csv-planilla.js y, para los formatos antiguos,
-// xlsx-escritor.js, formatos-antiguos.js, ods-lector.js, xlsb-lector.js, xls-lector.js y html-tabla-lector.js.
+// xlsx-escritor.js, formatos-antiguos.js, ods-lector.js, xlsb-lector.js, xls-lector.js, xml2003-lector.js y html-tabla-lector.js.
 //
 // Uso:
 //   const libro = await LectorHojas.abrir(archivo);          // lanza Error si no se puede leer (mensaje listo para mostrar)
@@ -30,7 +30,7 @@
   // Los lectores de .xls, .xlsb y .ods están al lado de este archivo y se piden recién cuando llega uno: la mayoría de los archivos son .xlsx o .csv.
   // La ruta sale de este script y no de la página (que existe también bajo /en/).
   const base = typeof document !== 'undefined' && document.currentScript ? new URL('./', document.currentScript.src).href : null;
-  const ANTIGUOS = [['XmlEditar', 'xml-editar.js'], ['XlsxEscritor', 'xlsx-escritor.js'], ['OdsLector', 'ods-lector.js'], ['XlsbLector', 'xlsb-lector.js'], ['XlsLector', 'xls-lector.js'], ['HtmlTablaLector', 'html-tabla-lector.js'], ['FormatosAntiguos', 'formatos-antiguos.js']];
+  const ANTIGUOS = [['XmlEditar', 'xml-editar.js'], ['XlsxEscritor', 'xlsx-escritor.js'], ['OdsLector', 'ods-lector.js'], ['XlsbLector', 'xlsb-lector.js'], ['XlsLector', 'xls-lector.js'], ['Xml2003Lector', 'xml2003-lector.js'], ['HtmlTablaLector', 'html-tabla-lector.js'], ['FormatosAntiguos', 'formatos-antiguos.js']];
   async function cargarAntiguos() {
     for (const [global, archivo] of ANTIGUOS) {
       if (globalThis[global] || !base) continue;
