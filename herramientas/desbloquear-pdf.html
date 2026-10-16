@@ -27,7 +27,22 @@ window.i18nPagina = {
     'etiqueta-sin-proteccion': '{nombre} — este PDF no tiene contraseña ni restricciones',
     'error-necesita-contrasena': 'Este PDF pide una contraseña para abrirse: ingresala para desbloquearlo.',
     'error-contrasena-incorrecta': 'La contraseña no es correcta. Revisá mayúsculas, minúsculas y espacios.',
-    'error-desbloquear': 'No se pudo desbloquear el PDF.\n\nDetalle: '
+    'error-desbloquear': 'No se pudo desbloquear el PDF.\n\nDetalle: ',
+    'guia-titulo': 'Cómo quitar la contraseña o las restricciones de un PDF',
+    'guia-intro': 'Ingresar la contraseña cada vez que abrís un PDF que ya es tuyo es un fastidio, y hay documentos que se abren pero no dejan imprimir, copiar texto o editar. Esta herramienta genera una copia sin contraseña ni restricciones. Hace falta conocer la clave: no la adivina ni la rompe.',
+    'guia-paso-1': 'Arrastrá el PDF protegido a la zona de carga o hacé clic para elegirlo. La tarjeta te dice si pide contraseña, si se abre pero tiene restricciones o si no tiene protección.',
+    'guia-paso-2': 'Si pide contraseña para abrirse, escribila en «Contraseña del PDF». Si solo tiene restricciones (no deja imprimir, copiar o editar), dejá el campo vacío.',
+    'guia-paso-3': 'Pulsá «Desbloquear PDF». Si la contraseña es incorrecta o falta, un aviso te lo indica.',
+    'guia-paso-4': 'Descargá el «PDF sin contraseña», que se abre y se puede imprimir o copiar sin pedir nada.',
+    'guia-consejo-1': 'Revisá mayúsculas, minúsculas y espacios al escribir la clave: son la causa más común del aviso de contraseña incorrecta.',
+    'guia-consejo-2': 'Usalo con documentos tuyos o con permiso de quien los creó; la herramienta no puede abrir un PDF cuya clave no conocés.',
+    'guia-consejo-3': 'Después de desbloquear, podés volver a protegerlo con otra clave usando «Proteger PDF».',
+    'guia-p1': 'Perdí la contraseña, ¿me sirve esta herramienta?',
+    'guia-r1': 'No. Hace falta la contraseña correcta para abrir el archivo. Solo funciona sin clave cuando el PDF se abre libremente y tiene únicamente restricciones.',
+    'guia-p2': '¿Qué diferencia hay entre contraseña y restricciones?',
+    'guia-r2': 'La contraseña impide abrir el documento. Las restricciones lo dejan abrir pero bloquean acciones como imprimir, copiar o editar. En este segundo caso alcanza con el campo vacío.',
+    'guia-p3': '¿Cambia el contenido del PDF?',
+    'guia-r3': 'No: se guarda una copia con las mismas páginas, solo sin cifrado.'
   },
   en: {
     'titulo-pagina': 'Unlock PDF Free — Mini Cookies',
@@ -45,7 +60,22 @@ window.i18nPagina = {
     'etiqueta-sin-proteccion': '{nombre} — this PDF has no password or restrictions',
     'error-necesita-contrasena': 'This PDF asks for a password to open: enter it to unlock it.',
     'error-contrasena-incorrecta': 'The password is not correct. Check upper/lower case and spaces.',
-    'error-desbloquear': 'Couldn’t unlock the PDF.\n\nDetail: '
+    'error-desbloquear': 'Couldn’t unlock the PDF.\n\nDetail: ',
+    'guia-titulo': 'How to remove the password or restrictions from a PDF',
+    'guia-intro': 'Typing the password every time you open a PDF that is already yours is a nuisance, and some documents open but won’t let you print, copy text or edit. This tool creates a copy with no password and no restrictions. You need to know the key: it doesn’t guess it or crack it.',
+    'guia-paso-1': 'Drag the protected PDF onto the upload area or click to choose it. The card tells you whether it asks for a password, opens but has restrictions, or has no protection.',
+    'guia-paso-2': 'If it asks for a password to open, type it in “PDF password”. If it only has restrictions (won’t let you print, copy or edit), leave the field empty.',
+    'guia-paso-3': 'Press “Unlock PDF”. If the password is wrong or missing, a notice tells you.',
+    'guia-paso-4': 'Download the “PDF without password”, which opens and can be printed or copied without asking for anything.',
+    'guia-consejo-1': 'Check upper and lower case and spaces when typing the key: they are the most common cause of the incorrect-password notice.',
+    'guia-consejo-2': 'Use it on your own documents or with the creator’s permission; the tool can’t open a PDF whose key you don’t know.',
+    'guia-consejo-3': 'After unlocking, you can protect it again with a different key using “Protect PDF”.',
+    'guia-p1': 'I lost the password, will this tool help?',
+    'guia-r1': 'No. You need the correct password to open the file. It only works without a key when the PDF opens freely and has restrictions only.',
+    'guia-p2': 'What is the difference between a password and restrictions?',
+    'guia-r2': 'A password prevents opening the document. Restrictions let it open but block actions such as printing, copying or editing. In that second case the empty field is enough.',
+    'guia-p3': 'Does it change the PDF’s content?',
+    'guia-r3': 'No: a copy is saved with the same pages, just without encryption.'
   }
 };
 </script>
@@ -87,6 +117,37 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo quitar la contraseña o las restricciones de un PDF</h2>
+    <p data-i18n="guia-intro">Ingresar la contraseña cada vez que abrís un PDF que ya es tuyo es un fastidio, y hay documentos que se abren pero no dejan imprimir, copiar texto o editar. Esta herramienta genera una copia sin contraseña ni restricciones. Hace falta conocer la clave: no la adivina ni la rompe.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el PDF protegido a la zona de carga o hacé clic para elegirlo. La tarjeta te dice si pide contraseña, si se abre pero tiene restricciones o si no tiene protección.</li>
+      <li data-i18n="guia-paso-2">Si pide contraseña para abrirse, escribila en «Contraseña del PDF». Si solo tiene restricciones (no deja imprimir, copiar o editar), dejá el campo vacío.</li>
+      <li data-i18n="guia-paso-3">Pulsá «Desbloquear PDF». Si la contraseña es incorrecta o falta, un aviso te lo indica.</li>
+      <li data-i18n="guia-paso-4">Descargá el «PDF sin contraseña», que se abre y se puede imprimir o copiar sin pedir nada.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Revisá mayúsculas, minúsculas y espacios al escribir la clave: son la causa más común del aviso de contraseña incorrecta.</li>
+      <li data-i18n="guia-consejo-2">Usalo con documentos tuyos o con permiso de quien los creó; la herramienta no puede abrir un PDF cuya clave no conocés.</li>
+      <li data-i18n="guia-consejo-3">Después de desbloquear, podés volver a protegerlo con otra clave usando «Proteger PDF».</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">Perdí la contraseña, ¿me sirve esta herramienta?</summary>
+      <p data-i18n="guia-r1">No. Hace falta la contraseña correcta para abrir el archivo. Solo funciona sin clave cuando el PDF se abre libremente y tiene únicamente restricciones.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué diferencia hay entre contraseña y restricciones?</summary>
+      <p data-i18n="guia-r2">La contraseña impide abrir el documento. Las restricciones lo dejan abrir pero bloquean acciones como imprimir, copiar o editar. En este segundo caso alcanza con el campo vacío.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Cambia el contenido del PDF?</summary>
+      <p data-i18n="guia-r3">No: se guarda una copia con las mismas páginas, solo sin cifrado.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

@@ -279,6 +279,18 @@ El 85% del sitio.
 
 Desplazamiento normal de página. **No** la conviertas en pantalla completa.
 
+**Guía de uso (2026-10-16, por el rechazo de AdSense «contenido de poco valor»).**
+Debajo de la herramienta y de su `.anuncio` (último hijo de `<main>`) va
+`<section class="guia-uso">`: `h2` con el título, un párrafo de introducción,
+`h3` «Paso a paso» (`<ol>`), `h3` «Consejos» (`<ul>`) y `h3` «Preguntas
+frecuentes» (`<details><summary>` + `<p>`). Los tres `h3` usan las claves
+comunes `guia-pasos`, `guia-consejos` y `guia-faq` (en `i18nComun`); el resto
+son claves `guia-*` de la página, en es y en. El texto es propio de cada
+herramienta (250–400 palabras, escrito leyendo lo que hace de verdad), nunca una
+plantilla con el nombre cambiado, y no repite el aviso de privacidad. Modelo:
+`herramientas/optimizar-pdf.html`. Va en HTML estático para que el buscador lo
+lea (la versión `/en/` la genera el build).
+
 ### C — Edición a pantalla completa
 
 Ver sección 6: el esqueleto es el de B, más los marcadores del módulo.

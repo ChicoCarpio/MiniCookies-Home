@@ -81,6 +81,21 @@ window.i18nPagina = {
     'error-megapixeles': 'Esa combinación pesaría {mp} megapíxeles — los navegadores no soportan más de {max}. Probá con un tamaño menor.',
     'titulo-pagina': 'Redimensionar imagen gratis — Mini Cookies',
     'meta-descripcion': 'Cambiá el ancho y alto de una imagen, gratis y sin subirla a ningún servidor.',
+    'guia-titulo': 'Cómo cambiar el ancho y el alto de una imagen',
+    'guia-intro': 'A veces una imagen no entra donde la necesitás: un formulario pide exactamente 800 píxeles de ancho, una foto es enorme para una presentación o querés una versión chica para un perfil. Esta herramienta cambia las medidas en píxeles de una imagen y te muestra, antes de confirmar, una comparación entre el tamaño original y el nuevo.',
+    'guia-paso-1': 'Arrastrá una imagen a la zona de carga o hacé clic para elegirla. Se cargan sus medidas actuales en «Ancho (px)» y «Alto (px)».',
+    'guia-paso-2': 'Escribí el ancho o el alto que querés, o usá las flechas de cada campo (si las mantenés apretadas, el valor sigue cambiando). Con «Mantener proporción» marcada, el otro valor se calcula solo para que la imagen no se deforme.',
+    'guia-paso-3': 'Desmarcá «Mantener proporción» si de verdad querés estirar o achatar la imagen. Mirá la comparación para ver cómo queda.',
+    'guia-paso-4': 'Elegí la «Calidad de reescalado» y pulsá «Redimensionar». Después descargá la imagen.',
+    'guia-consejo-1': '«Suave (recomendado)» sirve para fotos y dibujos: al achicar mucho, la imagen se reduce en etapas para evitar bordes dentados. «Nítido (pixel art)» no suaviza nada y mantiene los bloques duros, ideal para pixel art o íconos pequeños que querés ampliar.',
+    'guia-consejo-2': 'Achicar da buenos resultados; agrandar no puede inventar detalle que la imagen no tiene, así que una foto muy ampliada se verá borrosa.',
+    'guia-consejo-3': 'El archivo sale en el mismo formato que el de origen si es PNG, JPG o WebP. Cualquier otro formato (por ejemplo GIF) se descarga como PNG.',
+    'guia-p1': '¿Hay un tamaño máximo?',
+    'guia-r1': 'Sí. Ni el ancho ni el alto pueden superar los 8.000 px, y la imagen resultante no puede pasar de 40 megapíxeles. Son límites que los navegadores soportan, sobre todo en celulares; si te pasás, la herramienta te avisa.',
+    'guia-p2': '¿Se mantiene la transparencia?',
+    'guia-r2': 'Sí, en PNG y WebP. Si la imagen original es un JPG, no tiene transparencia que conservar.',
+    'guia-p3': '¿Esto reduce el peso del archivo?',
+    'guia-r3': 'Normalmente sí, porque una imagen con menos píxeles pesa menos, pero el objetivo es cambiar las medidas. Para controlar el peso con más precisión, usá Comprimir imagen.',
   },
   en: {
     'hero-titulo': 'Resize an image',
@@ -105,6 +120,21 @@ window.i18nPagina = {
     'error-megapixeles': 'That combination would come to {mp} megapixels — browsers do not support more than {max}. Try a smaller size.',
     'titulo-pagina': 'Resize an image, free — Mini Cookies',
     'meta-descripcion': 'Change the width and height of an image — free, and nothing is uploaded to a server.',
+    'guia-titulo': 'How to change the width and height of an image',
+    'guia-intro': 'Sometimes an image doesn’t fit where you need it: a form asks for exactly 800 pixels of width, a photo is huge for a presentation or you want a small version for a profile. This tool changes an image’s dimensions in pixels and, before you confirm, shows a comparison between the original size and the new one.',
+    'guia-paso-1': 'Drag an image onto the upload area or click to choose it. Its current dimensions are loaded into “Width (px)” and “Height (px)”.',
+    'guia-paso-2': 'Type the width or height you want, or use the arrows on each field (hold them down and the value keeps changing). With “Keep aspect ratio” ticked, the other value is calculated for you so the image doesn’t get distorted.',
+    'guia-paso-3': 'Untick “Keep aspect ratio” if you really want to stretch or squash the image. Look at the comparison to see how it will turn out.',
+    'guia-paso-4': 'Choose the “Rescaling quality” and press “Resize”. Then download the image.',
+    'guia-consejo-1': '“Smooth (recommended)” suits photos and drawings: when shrinking a lot, the image is reduced in stages to avoid jagged edges. “Sharp (pixel art)” doesn’t smooth anything and keeps the hard blocks, ideal for pixel art or small icons you want to enlarge.',
+    'guia-consejo-2': 'Shrinking gives good results; enlarging can’t invent detail the image doesn’t have, so a heavily enlarged photo will look blurry.',
+    'guia-consejo-3': 'The file comes out in the same format as the source if it is PNG, JPG or WebP. Any other format (GIF, for example) downloads as PNG.',
+    'guia-p1': 'Is there a maximum size?',
+    'guia-r1': 'Yes. Neither the width nor the height can exceed 8,000 px, and the resulting image can’t go over 40 megapixels. These are limits browsers can handle, especially on phones; if you go over, the tool tells you.',
+    'guia-p2': 'Is transparency kept?',
+    'guia-r2': 'Yes, in PNG and WebP. If the original is a JPG, it has no transparency to keep.',
+    'guia-p3': 'Does this reduce the file size?',
+    'guia-r3': 'Usually yes, because an image with fewer pixels weighs less, but the goal is to change the dimensions. For more precise control over file size, use Compress an image.',
   }
 };
 </script>
@@ -186,6 +216,37 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo cambiar el ancho y el alto de una imagen</h2>
+    <p data-i18n="guia-intro">A veces una imagen no entra donde la necesitás: un formulario pide exactamente 800 píxeles de ancho, una foto es enorme para una presentación o querés una versión chica para un perfil. Esta herramienta cambia las medidas en píxeles de una imagen y te muestra, antes de confirmar, una comparación entre el tamaño original y el nuevo.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá una imagen a la zona de carga o hacé clic para elegirla. Se cargan sus medidas actuales en «Ancho (px)» y «Alto (px)».</li>
+      <li data-i18n="guia-paso-2">Escribí el ancho o el alto que querés, o usá las flechas de cada campo (si las mantenés apretadas, el valor sigue cambiando). Con «Mantener proporción» marcada, el otro valor se calcula solo para que la imagen no se deforme.</li>
+      <li data-i18n="guia-paso-3">Desmarcá «Mantener proporción» si de verdad querés estirar o achatar la imagen. Mirá la comparación para ver cómo queda.</li>
+      <li data-i18n="guia-paso-4">Elegí la «Calidad de reescalado» y pulsá «Redimensionar». Después descargá la imagen.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">«Suave (recomendado)» sirve para fotos y dibujos: al achicar mucho, la imagen se reduce en etapas para evitar bordes dentados. «Nítido (pixel art)» no suaviza nada y mantiene los bloques duros, ideal para pixel art o íconos pequeños que querés ampliar.</li>
+      <li data-i18n="guia-consejo-2">Achicar da buenos resultados; agrandar no puede inventar detalle que la imagen no tiene, así que una foto muy ampliada se verá borrosa.</li>
+      <li data-i18n="guia-consejo-3">El archivo sale en el mismo formato que el de origen si es PNG, JPG o WebP. Cualquier otro formato (por ejemplo GIF) se descarga como PNG.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Hay un tamaño máximo?</summary>
+      <p data-i18n="guia-r1">Sí. Ni el ancho ni el alto pueden superar los 8.000 px, y la imagen resultante no puede pasar de 40 megapíxeles. Son límites que los navegadores soportan, sobre todo en celulares; si te pasás, la herramienta te avisa.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se mantiene la transparencia?</summary>
+      <p data-i18n="guia-r2">Sí, en PNG y WebP. Si la imagen original es un JPG, no tiene transparencia que conservar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Esto reduce el peso del archivo?</summary>
+      <p data-i18n="guia-r3">Normalmente sí, porque una imagen con menos píxeles pesa menos, pero el objetivo es cambiar las medidas. Para controlar el peso con más precisión, usá Comprimir imagen.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

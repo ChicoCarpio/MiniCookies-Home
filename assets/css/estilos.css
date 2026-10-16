@@ -507,6 +507,19 @@ table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
 }
 .anuncio:has(> ins.adsbygoogle[data-ad-status="filled"]) > .anuncio-texto { display: none; }
 
+/* --- Guía de uso (debajo de la herramienta y de su .anuncio) ---
+   Texto propio de cada herramienta: título, introducción, pasos, consejos y
+   preguntas frecuentes. Va después del anuncio para que lo primero que se vea
+   siga siendo la herramienta. */
+.guia-uso { margin: 32px auto 0; max-width: 760px; line-height: 1.65; }
+.guia-uso h2 { font-size: 1.35rem; margin-bottom: 10px; }
+.guia-uso h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+.guia-uso ol, .guia-uso ul { padding-left: 1.4em; margin: 0 0 8px; }
+.guia-uso li { margin-bottom: 6px; }
+.guia-uso details { border: 1px solid var(--gris-borde); border-radius: var(--radio); background: var(--superficie); margin-bottom: 8px; }
+.guia-uso summary { cursor: pointer; padding: 12px 14px; font-weight: 600; }
+.guia-uso details > p { margin: 0; padding: 0 14px 14px; color: var(--texto-suave); }
+
 .grid-miniaturas, .contenedor-miniaturas.vista-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

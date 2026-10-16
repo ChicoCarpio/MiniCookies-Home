@@ -33,7 +33,22 @@ window.i18nPagina = {
     'boton-unir-procesando': 'Uniendo...',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar PDF combinado',
-    'error-unir': 'No se pudo unir los archivos'
+    'error-unir': 'No se pudo unir los archivos',
+    'guia-titulo': 'Cómo unir PDF, imágenes y documentos en un solo archivo',
+    'guia-intro': 'Armar un expediente con el contrato escaneado, las fotos de un recibo y el informe en Word suele obligar a abrir varios programas. Acá podés mezclar PDF, imágenes (JPG, PNG, WebP, GIF, BMP), Word, Excel o CSV, PowerPoint, EPUB, Markdown y texto: cada archivo entra completo y el resultado es un único PDF con las páginas en el orden que definas.',
+    'guia-paso-1': 'Arrastrá los archivos a la zona de carga o hacé clic para elegirlos. Podés sumar más cuando quieras; cada uno aparece como una tarjeta con su miniatura y, si tiene varias páginas, la cantidad.',
+    'guia-paso-2': 'Ordenalos como los querés en el documento final: arrastrá las tarjetas, usá las flechas de cada una o la barra de orden para clasificarlos por nombre. Con el botón de quitar sacás los que sobren.',
+    'guia-paso-3': 'Si hay imágenes, elegí en «Tamaño de página para las imágenes» cómo se acomodan. La opción recomendada usa ancho A4 y ajusta el alto a cada imagen, sin recortes ni márgenes.',
+    'guia-paso-4': 'Pulsá «Unir en un PDF» (se habilita con dos archivos o más) y descargá el «PDF combinado».',
+    'guia-consejo-1': 'Los documentos de Office se convierten con el mismo motor que sus herramientas propias, así que revisá la miniatura antes de unir. Los formatos antiguos (.doc, .ppt) no se pueden leer: guardalos primero como .docx o .pptx.',
+    'guia-consejo-2': 'Para fotos de documentos, dejá «Ancho A4, alto según la imagen»: cada foto ocupa una página completa sin cortarse. Elegí «A4 exacto» si querés que todas las páginas midan lo mismo, aunque queden bordes blancos.',
+    'guia-consejo-3': 'Si el PDF final pesa demasiado para enviarlo por correo, pasalo después por «Comprimir / optimizar PDF».',
+    'guia-p1': '¿Qué pasa si un archivo no se puede agregar?',
+    'guia-r1': 'Debajo de la zona de carga aparece un aviso con el nombre del archivo y el motivo, por ejemplo un formato no admitido. Los demás archivos se pueden unir igual.',
+    'guia-p2': '¿Puedo unir un PDF protegido con contraseña?',
+    'guia-r2': 'No directamente. Quitale antes la contraseña con «Desbloquear PDF» y después agregalo acá.',
+    'guia-p3': '¿Hay un máximo de archivos?',
+    'guia-r3': 'La herramienta no pone un tope; con muchos archivos grandes el proceso tarda más y depende de la memoria de tu equipo.'
   },
   en: {
     'titulo-pagina': 'Merge PDF, Images and Documents Free — Mini Cookies',
@@ -56,7 +71,22 @@ window.i18nPagina = {
     'boton-unir-procesando': 'Merging...',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download combined PDF',
-    'error-unir': 'Couldn’t merge the files'
+    'error-unir': 'Couldn’t merge the files',
+    'guia-titulo': 'How to merge PDFs, images and documents into one file',
+    'guia-intro': 'Putting together a case file with a scanned contract, photos of a receipt and a report in Word usually means opening several programs. Here you can mix PDF, images (JPG, PNG, WebP, GIF, BMP), Word, Excel or CSV, PowerPoint, EPUB, Markdown and text: each file goes in whole and the result is a single PDF with the pages in the order you set.',
+    'guia-paso-1': 'Drag the files onto the upload area or click to choose them. You can add more whenever you like; each one shows up as a card with its thumbnail and, if it has several pages, the page count.',
+    'guia-paso-2': 'Put them in the order you want in the final document: drag the cards, use the arrows on each one, or use the order bar to sort them by name. The remove button takes out any you don’t need.',
+    'guia-paso-3': 'If there are images, choose in “Page size for the images” how they are placed. The recommended option uses A4 width and adjusts the height to each image, with no cropping or margins.',
+    'guia-paso-4': 'Press “Merge into a PDF” (it turns on with two files or more) and download the “combined PDF”.',
+    'guia-consejo-1': 'Office documents are converted with the same engine as their own tools, so check the thumbnail before merging. Old formats (.doc, .ppt) can’t be read: save them as .docx or .pptx first.',
+    'guia-consejo-2': 'For photos of documents, keep “A4 width, height matched to the image”: each photo fills a whole page without being cut. Choose “Exact A4” if you want every page to be the same size, even with white borders.',
+    'guia-consejo-3': 'If the final PDF is too heavy to send by email, run it through “Compress / optimize PDF” afterwards.',
+    'guia-p1': 'What happens if a file can’t be added?',
+    'guia-r1': 'A notice appears below the upload area with the file name and the reason, for example an unsupported format. The other files can still be merged.',
+    'guia-p2': 'Can I merge a password-protected PDF?',
+    'guia-r2': 'Not directly. Remove its password first with “Unlock PDF” and then add it here.',
+    'guia-p3': 'Is there a maximum number of files?',
+    'guia-r3': 'The tool sets no limit; with many large files it takes longer and depends on your computer’s memory.'
   }
 };
 </script>
@@ -118,6 +148,37 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo unir PDF, imágenes y documentos en un solo archivo</h2>
+    <p data-i18n="guia-intro">Armar un expediente con el contrato escaneado, las fotos de un recibo y el informe en Word suele obligar a abrir varios programas. Acá podés mezclar PDF, imágenes (JPG, PNG, WebP, GIF, BMP), Word, Excel o CSV, PowerPoint, EPUB, Markdown y texto: cada archivo entra completo y el resultado es un único PDF con las páginas en el orden que definas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá los archivos a la zona de carga o hacé clic para elegirlos. Podés sumar más cuando quieras; cada uno aparece como una tarjeta con su miniatura y, si tiene varias páginas, la cantidad.</li>
+      <li data-i18n="guia-paso-2">Ordenalos como los querés en el documento final: arrastrá las tarjetas, usá las flechas de cada una o la barra de orden para clasificarlos por nombre. Con el botón de quitar sacás los que sobren.</li>
+      <li data-i18n="guia-paso-3">Si hay imágenes, elegí en «Tamaño de página para las imágenes» cómo se acomodan. La opción recomendada usa ancho A4 y ajusta el alto a cada imagen, sin recortes ni márgenes.</li>
+      <li data-i18n="guia-paso-4">Pulsá «Unir en un PDF» (se habilita con dos archivos o más) y descargá el «PDF combinado».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Los documentos de Office se convierten con el mismo motor que sus herramientas propias, así que revisá la miniatura antes de unir. Los formatos antiguos (.doc, .ppt) no se pueden leer: guardalos primero como .docx o .pptx.</li>
+      <li data-i18n="guia-consejo-2">Para fotos de documentos, dejá «Ancho A4, alto según la imagen»: cada foto ocupa una página completa sin cortarse. Elegí «A4 exacto» si querés que todas las páginas midan lo mismo, aunque queden bordes blancos.</li>
+      <li data-i18n="guia-consejo-3">Si el PDF final pesa demasiado para enviarlo por correo, pasalo después por «Comprimir / optimizar PDF».</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa si un archivo no se puede agregar?</summary>
+      <p data-i18n="guia-r1">Debajo de la zona de carga aparece un aviso con el nombre del archivo y el motivo, por ejemplo un formato no admitido. Los demás archivos se pueden unir igual.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo unir un PDF protegido con contraseña?</summary>
+      <p data-i18n="guia-r2">No directamente. Quitale antes la contraseña con «Desbloquear PDF» y después agregalo acá.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Hay un máximo de archivos?</summary>
+      <p data-i18n="guia-r3">La herramienta no pone un tope; con muchos archivos grandes el proceso tarda más y depende de la memoria de tu equipo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

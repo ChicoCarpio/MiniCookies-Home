@@ -33,7 +33,22 @@ window.i18nPagina = {
     'aviso-sin-texto-enlace': 'Ir a OCR de PDF escaneado',
     'separador-pagina': '\n\n--- Página siguiente ---\n\n',
     'error-extraer': 'No se pudo extraer el texto',
-    'error-generar': 'No se pudo generar el PDF'
+    'error-generar': 'No se pudo generar el PDF',
+    'guia-titulo': 'Cómo pasar texto de un PDF a .txt y al revés',
+    'guia-intro': 'Extraer el texto de un PDF sirve para copiar un párrafo sin los saltos de línea raros, buscarlo en otro programa o reutilizarlo en un correo. En sentido contrario, un archivo .txt se convierte en un PDF para compartirlo con formato fijo. Elegí el sentido con el selector de arriba.',
+    'guia-paso-1': 'PDF → Texto: arrastrá uno o varios PDF y pulsá «Extraer texto».',
+    'guia-paso-2': 'Con un solo PDF aparece el texto en un cuadro: usá «Copiar texto» o «Descargar .txt». Entre una página y la siguiente se inserta una línea separadora.',
+    'guia-paso-3': 'Con varios PDF no se muestra el texto: se descarga un .zip con un .txt por cada PDF y un resumen de cuáles se pudieron procesar.',
+    'guia-paso-4': 'Texto → PDF: elegí «Texto → PDF», cargá un archivo .txt, pulsá «Convertir a PDF» y descargá el resultado, que lleva el mismo nombre que el .txt.',
+    'guia-consejo-1': 'Si sale el aviso de que no se encontró texto, el PDF es un escaneo (una foto por página): el texto no está guardado como texto. Usá la herramienta de OCR de PDF escaneado que enlaza el mismo aviso.',
+    'guia-consejo-2': 'El PDF generado desde un .txt es sencillo: páginas A4, letra Helvetica de 11 puntos y líneas ajustadas al ancho. Sirve para texto plano, no para diseños.',
+    'guia-consejo-3': 'Los caracteres que esa letra no incluye (emojis, ideogramas) no se pueden dibujar y se reemplazan por otro símbolo.',
+    'guia-p1': '¿Se conserva el formato del PDF al extraer el texto?',
+    'guia-r1': 'No, se obtiene texto plano: sin negritas, colores ni imágenes. Es lo que la hace útil para copiar y pegar.',
+    'guia-p2': '¿Puedo convertir varios archivos .txt a PDF a la vez?',
+    'guia-r2': 'No, el sentido Texto → PDF trabaja con un archivo por vez. Para extraer texto de PDF sí podés elegir varios.',
+    'guia-p3': '¿Qué es la línea entre páginas del texto extraído?',
+    'guia-r3': 'Es un separador de página que marca dónde terminaba cada una en el PDF. Podés borrarlo con buscar y reemplazar si no lo querés.'
   },
   en: {
     'titulo-pagina': 'Convert PDF and Plain Text Free — Mini Cookies',
@@ -57,7 +72,22 @@ window.i18nPagina = {
     'aviso-sin-texto-enlace': 'Go to OCR for scanned PDFs',
     'separador-pagina': '\n\n--- Next page ---\n\n',
     'error-extraer': 'Couldn’t extract the text',
-    'error-generar': 'Couldn’t generate the PDF'
+    'error-generar': 'Couldn’t generate the PDF',
+    'guia-titulo': 'How to turn PDF text into .txt and back',
+    'guia-intro': 'Extracting the text of a PDF is useful for copying a paragraph without odd line breaks, searching it in another program or reusing it in an email. In the other direction, a .txt file becomes a PDF you can share with fixed layout. Choose the direction with the selector above.',
+    'guia-paso-1': 'PDF → Text: drag one or more PDFs and press “Extract text”.',
+    'guia-paso-2': 'With a single PDF the text appears in a box: use “Copy text” or “Download .txt”. A separator line is inserted between one page and the next.',
+    'guia-paso-3': 'With several PDFs the text isn’t shown: a .zip is downloaded with one .txt per PDF, plus a summary of which ones could be processed.',
+    'guia-paso-4': 'Text → PDF: choose “Text → PDF”, load a .txt file, press “Convert to PDF” and download the result, which has the same name as the .txt.',
+    'guia-consejo-1': 'If the notice says no text was found, the PDF is a scan (a picture of each page): the text isn’t stored as text. Use the OCR tool for scanned PDFs that the same notice links to.',
+    'guia-consejo-2': 'The PDF generated from a .txt is simple: A4 pages, 11-point Helvetica and lines wrapped to the width. It works for plain text, not for layouts.',
+    'guia-consejo-3': 'Characters that font doesn’t include (emoji, CJK) can’t be drawn and are replaced by another symbol.',
+    'guia-p1': 'Is the PDF’s formatting kept when extracting the text?',
+    'guia-r1': 'No, you get plain text: no bold, colors or images. That’s what makes it handy for copy and paste.',
+    'guia-p2': 'Can I convert several .txt files to PDF at once?',
+    'guia-r2': 'No, the Text → PDF direction works with one file at a time. For extracting text from PDFs you can choose several.',
+    'guia-p3': 'What is the line between pages in the extracted text?',
+    'guia-r3': 'It’s a page separator that marks where each page ended in the PDF. You can remove it with find and replace if you don’t want it.'
   }
 };
 </script>
@@ -121,6 +151,37 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo pasar texto de un PDF a .txt y al revés</h2>
+    <p data-i18n="guia-intro">Extraer el texto de un PDF sirve para copiar un párrafo sin los saltos de línea raros, buscarlo en otro programa o reutilizarlo en un correo. En sentido contrario, un archivo .txt se convierte en un PDF para compartirlo con formato fijo. Elegí el sentido con el selector de arriba.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">PDF → Texto: arrastrá uno o varios PDF y pulsá «Extraer texto».</li>
+      <li data-i18n="guia-paso-2">Con un solo PDF aparece el texto en un cuadro: usá «Copiar texto» o «Descargar .txt». Entre una página y la siguiente se inserta una línea separadora.</li>
+      <li data-i18n="guia-paso-3">Con varios PDF no se muestra el texto: se descarga un .zip con un .txt por cada PDF y un resumen de cuáles se pudieron procesar.</li>
+      <li data-i18n="guia-paso-4">Texto → PDF: elegí «Texto → PDF», cargá un archivo .txt, pulsá «Convertir a PDF» y descargá el resultado, que lleva el mismo nombre que el .txt.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si sale el aviso de que no se encontró texto, el PDF es un escaneo (una foto por página): el texto no está guardado como texto. Usá la herramienta de OCR de PDF escaneado que enlaza el mismo aviso.</li>
+      <li data-i18n="guia-consejo-2">El PDF generado desde un .txt es sencillo: páginas A4, letra Helvetica de 11 puntos y líneas ajustadas al ancho. Sirve para texto plano, no para diseños.</li>
+      <li data-i18n="guia-consejo-3">Los caracteres que esa letra no incluye (emojis, ideogramas) no se pueden dibujar y se reemplazan por otro símbolo.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Se conserva el formato del PDF al extraer el texto?</summary>
+      <p data-i18n="guia-r1">No, se obtiene texto plano: sin negritas, colores ni imágenes. Es lo que la hace útil para copiar y pegar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo convertir varios archivos .txt a PDF a la vez?</summary>
+      <p data-i18n="guia-r2">No, el sentido Texto → PDF trabaja con un archivo por vez. Para extraer texto de PDF sí podés elegir varios.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué es la línea entre páginas del texto extraído?</summary>
+      <p data-i18n="guia-r3">Es un separador de página que marca dónde terminaba cada una en el PDF. Podés borrarlo con buscar y reemplazar si no lo querés.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
