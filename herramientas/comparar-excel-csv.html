@@ -53,7 +53,26 @@ window.i18nPagina = {
     'estado-eliminada': 'Eliminada',
     'estado-modificada': 'Modificada',
     'estado-igual': 'Sin cambios',
-    'columna-estado': 'Estado'
+    'columna-estado': 'Estado',
+    'guia-titulo': 'Cómo comparar dos versiones de una planilla Excel o CSV',
+    'guia-intro': 'Sirve para saber qué cambió entre dos versiones de una planilla: por ejemplo, el listado de precios de este mes contra el del mes pasado, o una exportación de clientes antes y después de limpiarla. Elegís el archivo original, el nuevo y una columna que identifique cada fila (un código, un ID, un correo). La herramienta clasifica cada fila como agregada, eliminada, modificada o sin cambios, resalta las celdas que cambiaron y te permite descargar el resultado como un Excel.',
+    'guia-paso-1': 'En «Versión original» arrastrá o elegí el archivo viejo (.xlsx, .xlsm, .xlsb, .xls, .xml, .ods o .csv).',
+    'guia-paso-2': 'En «Versión nueva» elegí el archivo actualizado, que puede ser de otro formato.',
+    'guia-paso-3': 'Cuando aparezcan los controles, elegí la «Columna clave (identifica cada fila)» y tocá «Comparar».',
+    'guia-paso-4': 'Mirá los contadores (Agregadas, Eliminadas, Modificadas, Sin cambios) y la tabla, con la columna Estado y las celdas cambiadas resaltadas.',
+    'guia-paso-5': 'Tocá «Descargar resultado (.xlsx)» para guardar el informe.',
+    'guia-consejo-1': 'La columna clave debería tener valores únicos y estables. Si dos filas comparten el mismo valor en esa columna, solo se considera una de ellas.',
+    'guia-consejo-2': 'La primera fila de cada archivo se toma como encabezados, y solo se lee la primera hoja de cada libro.',
+    'guia-consejo-3': 'Para que una columna aparezca en la comparación tiene que tener encabezado en alguna de las dos versiones; las columnas sin nombre se descartan.',
+    'guia-consejo-4': 'El Excel descargado agrega una columna «Qué cambió» con el valor anterior y el nuevo de cada celda modificada, con la fila de títulos inmovilizada y filtros activados.',
+    'guia-p1': '¿Puedo comparar un CSV con un Excel?',
+    'guia-r1': 'Sí, cada lado acepta cualquiera de los formatos. Los números se comparan por su valor, de modo que no importa cómo los escribió cada archivo.',
+    'guia-p2': '¿Qué pasa si las columnas no coinciden entre versiones?',
+    'guia-r2': 'Se unen las columnas de ambos archivos. Una columna que existe solo en uno aparece vacía en el otro y la fila cuenta como modificada.',
+    'guia-p3': '¿Compara fórmulas o formato?',
+    'guia-r3': 'No. Compara el texto que muestra cada celda, no las fórmulas ni los colores.',
+    'guia-p4': '¿Cómo se llama el archivo descargado?',
+    'guia-r4': 'Empieza con «comparacion», seguido de la fecha y la hora.',
   },
   en: {
     'titulo-pagina': 'Compare Excel or CSV Free — Mini Cookies',
@@ -77,7 +96,26 @@ window.i18nPagina = {
     'estado-eliminada': 'Removed',
     'estado-modificada': 'Changed',
     'estado-igual': 'Unchanged',
-    'columna-estado': 'Status'
+    'columna-estado': 'Status',
+    'guia-titulo': 'How to compare two versions of an Excel or CSV spreadsheet',
+    'guia-intro': 'It helps you find out what changed between two versions of a spreadsheet: for example, this month’s price list against last month’s, or a customer export before and after cleaning it up. You choose the original file, the new one and a column that identifies each row (a code, an ID, an email). The tool classifies each row as added, removed, changed or unchanged, highlights the cells that changed and lets you download the result as an Excel file.',
+    'guia-paso-1': 'Under “Original version”, drag or choose the old file (.xlsx, .xlsm, .xlsb, .xls, .xml, .ods or .csv).',
+    'guia-paso-2': 'Under “New version”, choose the updated file, which can be in a different format.',
+    'guia-paso-3': 'When the controls appear, choose the “Key column (identifies each row)” and tap “Compare”.',
+    'guia-paso-4': 'Look at the counters (Added, Removed, Changed, Unchanged) and the table, with the Status column and the changed cells highlighted.',
+    'guia-paso-5': 'Tap “Download result (.xlsx)” to save the report.',
+    'guia-consejo-1': 'The key column should have unique, stable values. If two rows share the same value in that column, only one of them is considered.',
+    'guia-consejo-2': 'The first row of each file is taken as the headers, and only the first sheet of each workbook is read.',
+    'guia-consejo-3': 'For a column to appear in the comparison it must have a header in at least one of the two versions; unnamed columns are discarded.',
+    'guia-consejo-4': 'The downloaded Excel adds a “What changed” column with the previous and new value of each changed cell, with the header row frozen and filters turned on.',
+    'guia-p1': 'Can I compare a CSV with an Excel file?',
+    'guia-r1': 'Yes, each side accepts any of the formats. Numbers are compared by their value, so it doesn’t matter how each file wrote them.',
+    'guia-p2': 'What happens if the columns don’t match between versions?',
+    'guia-r2': 'The columns of both files are merged. A column that exists in only one appears empty in the other and the row counts as changed.',
+    'guia-p3': 'Does it compare formulas or formatting?',
+    'guia-r3': 'No. It compares the text each cell displays, not formulas or colors.',
+    'guia-p4': 'What is the downloaded file called?',
+    'guia-r4': 'It starts with “comparacion”, followed by the date and time.',
   }
 };
 </script>
@@ -138,6 +176,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo comparar dos versiones de una planilla Excel o CSV</h2>
+    <p data-i18n="guia-intro">Sirve para saber qué cambió entre dos versiones de una planilla: por ejemplo, el listado de precios de este mes contra el del mes pasado, o una exportación de clientes antes y después de limpiarla. Elegís el archivo original, el nuevo y una columna que identifique cada fila (un código, un ID, un correo). La herramienta clasifica cada fila como agregada, eliminada, modificada o sin cambios, resalta las celdas que cambiaron y te permite descargar el resultado como un Excel.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">En «Versión original» arrastrá o elegí el archivo viejo (.xlsx, .xlsm, .xlsb, .xls, .xml, .ods o .csv).</li>
+      <li data-i18n="guia-paso-2">En «Versión nueva» elegí el archivo actualizado, que puede ser de otro formato.</li>
+      <li data-i18n="guia-paso-3">Cuando aparezcan los controles, elegí la «Columna clave (identifica cada fila)» y tocá «Comparar».</li>
+      <li data-i18n="guia-paso-4">Mirá los contadores (Agregadas, Eliminadas, Modificadas, Sin cambios) y la tabla, con la columna Estado y las celdas cambiadas resaltadas.</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar resultado (.xlsx)» para guardar el informe.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La columna clave debería tener valores únicos y estables. Si dos filas comparten el mismo valor en esa columna, solo se considera una de ellas.</li>
+      <li data-i18n="guia-consejo-2">La primera fila de cada archivo se toma como encabezados, y solo se lee la primera hoja de cada libro.</li>
+      <li data-i18n="guia-consejo-3">Para que una columna aparezca en la comparación tiene que tener encabezado en alguna de las dos versiones; las columnas sin nombre se descartan.</li>
+      <li data-i18n="guia-consejo-4">El Excel descargado agrega una columna «Qué cambió» con el valor anterior y el nuevo de cada celda modificada, con la fila de títulos inmovilizada y filtros activados.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo comparar un CSV con un Excel?</summary>
+      <p data-i18n="guia-r1">Sí, cada lado acepta cualquiera de los formatos. Los números se comparan por su valor, de modo que no importa cómo los escribió cada archivo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa si las columnas no coinciden entre versiones?</summary>
+      <p data-i18n="guia-r2">Se unen las columnas de ambos archivos. Una columna que existe solo en uno aparece vacía en el otro y la fila cuenta como modificada.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Compara fórmulas o formato?</summary>
+      <p data-i18n="guia-r3">No. Compara el texto que muestra cada celda, no las fórmulas ni los colores.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Cómo se llama el archivo descargado?</summary>
+      <p data-i18n="guia-r4">Empieza con «comparacion», seguido de la fecha y la hora.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

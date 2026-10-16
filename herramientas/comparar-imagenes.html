@@ -34,6 +34,25 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar imagen de diferencias',
     'titulo-pagina': 'Comparar dos imágenes (diff visual) gratis — Mini Cookies',
     'meta-descripcion': 'Compará dos imágenes y resaltá visualmente las diferencias entre ellas, gratis y sin subirlas a ningún servidor.',
+    'guia-titulo': 'Cómo comparar dos imágenes y ver qué cambió',
+    'guia-intro': 'Esta herramienta pone en evidencia qué cambió entre dos imágenes: dos versiones de un diseño, dos capturas de pantalla de una misma página, una foto antes y después de un retoque. Cargás una imagen A y una imagen B, y recibís una imagen donde los píxeles distintos están pintados de rojo intenso y el resto aparece atenuado en gris, como referencia. También te muestra qué porcentaje de píxeles difiere.',
+    'guia-paso-1': 'En la zona «Imagen A» arrastrá o elegí la primera imagen; aparece una miniatura.',
+    'guia-paso-2': 'Hacé lo mismo en la zona «Imagen B» con la segunda.',
+    'guia-paso-3': 'Ajustá la «Tolerancia» con el control deslizante. Un valor más alto ignora las diferencias pequeñas; el predeterminado es 30 y el rango va de 5 a 120.',
+    'guia-paso-4': 'Tocá «Comparar». Se dibuja el resultado y, debajo, el valor de «Píxeles distintos» en porcentaje.',
+    'guia-paso-5': 'Tocá «Descargar imagen de diferencias» para guardar el resultado.',
+    'guia-consejo-1': 'Si las dos imágenes tienen medidas distintas, aparece un aviso: la B se estira al tamaño de la A antes de comparar. Para resultados fiables conviene usar imágenes del mismo tamaño y proporción.',
+    'guia-consejo-2': 'Subí la tolerancia cuando compares JPG o capturas con compresión: las pequeñas variaciones de color del formato no deberían contar como cambios.',
+    'guia-consejo-3': 'Bajala si buscás diferencias sutiles, como un cambio leve de tono.',
+    'guia-consejo-4': 'La imagen de diferencias se descarga como PNG con el nombre «comparacion.png».',
+    'guia-p1': '¿Qué formatos acepta?',
+    'guia-r1': 'Cualquier imagen que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.',
+    'guia-p2': '¿Cómo se mide la diferencia?',
+    'guia-r2': 'Para cada píxel se suman las diferencias de rojo, verde y azul entre A y B; si la suma supera la tolerancia, el píxel se marca como distinto.',
+    'guia-p3': '¿El porcentaje es exacto?',
+    'guia-r3': 'Es la proporción de píxeles marcados sobre el total de la imagen A, con dos decimales.',
+    'guia-p4': '¿Se puede comparar con la transparencia?',
+    'guia-r4': 'La comparación usa solo los canales de color; la transparencia no se toma en cuenta.',
   },
   en: {
     'hero-titulo': 'Compare two images',
@@ -51,6 +70,25 @@ window.i18nPagina = {
     'resultado-enlace': 'Download the difference image',
     'titulo-pagina': 'Compare two images (visual diff), free — Mini Cookies',
     'meta-descripcion': 'Compare two images and highlight the differences between them — free, and nothing is uploaded to a server.',
+    'guia-titulo': 'How to compare two images and see what changed',
+    'guia-intro': 'This tool shows what changed between two images: two versions of a design, two screenshots of the same page, a photo before and after retouching. You load an image A and an image B, and you get an image where the differing pixels are painted bright red and the rest appears dimmed in gray, as a reference. It also shows what percentage of pixels differs.',
+    'guia-paso-1': 'In the “Image A” area, drag or choose the first image; a thumbnail appears.',
+    'guia-paso-2': 'Do the same in the “Image B” area with the second one.',
+    'guia-paso-3': 'Adjust the “Tolerance” with the slider. A higher value ignores small differences; the default is 30 and the range goes from 5 to 120.',
+    'guia-paso-4': 'Tap “Compare”. The result is drawn and, below it, the “Pixels that differ” value as a percentage.',
+    'guia-paso-5': 'Tap “Download the difference image” to save the result.',
+    'guia-consejo-1': 'If the two images have different dimensions, a notice appears: B is stretched to A’s size before comparing. For reliable results it’s best to use images of the same size and proportions.',
+    'guia-consejo-2': 'Raise the tolerance when comparing JPGs or compressed screenshots: the small color variations of the format shouldn’t count as changes.',
+    'guia-consejo-3': 'Lower it if you’re looking for subtle differences, such as a slight change of tone.',
+    'guia-consejo-4': 'The difference image is downloaded as a PNG named “comparacion.png”.',
+    'guia-p1': 'What formats does it accept?',
+    'guia-r1': 'Any image your browser can open, such as JPG, PNG, WebP or GIF.',
+    'guia-p2': 'How is the difference measured?',
+    'guia-r2': 'For each pixel, the red, green and blue differences between A and B are added up; if the sum exceeds the tolerance, the pixel is marked as different.',
+    'guia-p3': 'Is the percentage exact?',
+    'guia-r3': 'It is the proportion of marked pixels over the total of image A, with two decimals.',
+    'guia-p4': 'Can transparency be compared?',
+    'guia-r4': 'The comparison uses only the color channels; transparency isn’t taken into account.',
   }
 };
 </script>
@@ -108,6 +146,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo comparar dos imágenes y ver qué cambió</h2>
+    <p data-i18n="guia-intro">Esta herramienta pone en evidencia qué cambió entre dos imágenes: dos versiones de un diseño, dos capturas de pantalla de una misma página, una foto antes y después de un retoque. Cargás una imagen A y una imagen B, y recibís una imagen donde los píxeles distintos están pintados de rojo intenso y el resto aparece atenuado en gris, como referencia. También te muestra qué porcentaje de píxeles difiere.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">En la zona «Imagen A» arrastrá o elegí la primera imagen; aparece una miniatura.</li>
+      <li data-i18n="guia-paso-2">Hacé lo mismo en la zona «Imagen B» con la segunda.</li>
+      <li data-i18n="guia-paso-3">Ajustá la «Tolerancia» con el control deslizante. Un valor más alto ignora las diferencias pequeñas; el predeterminado es 30 y el rango va de 5 a 120.</li>
+      <li data-i18n="guia-paso-4">Tocá «Comparar». Se dibuja el resultado y, debajo, el valor de «Píxeles distintos» en porcentaje.</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar imagen de diferencias» para guardar el resultado.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si las dos imágenes tienen medidas distintas, aparece un aviso: la B se estira al tamaño de la A antes de comparar. Para resultados fiables conviene usar imágenes del mismo tamaño y proporción.</li>
+      <li data-i18n="guia-consejo-2">Subí la tolerancia cuando compares JPG o capturas con compresión: las pequeñas variaciones de color del formato no deberían contar como cambios.</li>
+      <li data-i18n="guia-consejo-3">Bajala si buscás diferencias sutiles, como un cambio leve de tono.</li>
+      <li data-i18n="guia-consejo-4">La imagen de diferencias se descarga como PNG con el nombre «comparacion.png».</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué formatos acepta?</summary>
+      <p data-i18n="guia-r1">Cualquier imagen que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Cómo se mide la diferencia?</summary>
+      <p data-i18n="guia-r2">Para cada píxel se suman las diferencias de rojo, verde y azul entre A y B; si la suma supera la tolerancia, el píxel se marca como distinto.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿El porcentaje es exacto?</summary>
+      <p data-i18n="guia-r3">Es la proporción de píxeles marcados sobre el total de la imagen A, con dos decimales.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se puede comparar con la transparencia?</summary>
+      <p data-i18n="guia-r4">La comparación usa solo los canales de color; la transparencia no se toma en cuenta.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

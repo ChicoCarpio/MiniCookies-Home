@@ -29,6 +29,25 @@ window.i18nPagina = {
     'informe-por-linea': 'por línea',
     'titulo-pagina': 'Comparar dos textos gratis — Mini Cookies',
     'meta-descripcion': 'Compará dos versiones de un texto y mirá exactamente qué cambió, gratis y sin enviar nada a ningún servidor.',
+    'guia-titulo': 'Cómo comparar dos versiones de un texto',
+    'guia-intro': 'Cuando tenés dos versiones de un mismo texto (un contrato revisado, un artículo antes y después de la edición, un fragmento de código o una carta que alguien corrigió) y no sabés qué se tocó, esta herramienta lo marca por vos. Pegás el texto original en un cuadro y el nuevo en otro, y te devuelve un único texto donde lo agregado aparece resaltado en verde y lo quitado en rojo. No hace falta subir archivos: todo se pega y se compara en la página. Además podés bajar el resultado como un informe en HTML.',
+    'guia-paso-1': 'Pegá la versión anterior en el cuadro «Texto original».',
+    'guia-paso-2': 'Pegá la versión modificada en el cuadro «Texto nuevo».',
+    'guia-paso-3': 'Dejá tildada la opción «Comparar por palabra (si no, por línea)» si querés ver cada palabra cambiada; destildala para comparar renglón por renglón.',
+    'guia-paso-4': 'Tocá «Comparar». Debajo aparece el texto combinado con lo agregado en verde y lo quitado en rojo.',
+    'guia-paso-5': 'Si querés guardarlo, tocá «Descargar informe (.html)».',
+    'guia-consejo-1': 'La comparación por palabra sirve para textos corridos, donde un cambio mínimo en una frase no debería marcar el párrafo entero.',
+    'guia-consejo-2': 'La comparación por línea es mejor para listas, código o versos, donde cada renglón es una unidad. Con un cambio pequeño dentro de un renglón, se marca el renglón completo.',
+    'guia-consejo-3': 'El informe descargado es una página HTML independiente: se abre en cualquier navegador, y desde ahí podés imprimirla o guardarla como PDF. Incluye la fecha, la cantidad de cambios agregados y quitados, y el tipo de comparación usado.',
+    'guia-consejo-4': 'Si copiás el texto desde un documento, revisá los espacios y saltos de línea sobrantes: también cuentan como diferencias.',
+    'guia-p1': '¿Puedo comparar archivos Word o PDF acá?',
+    'guia-r1': 'Esta herramienta trabaja con texto pegado. Para documentos Word existe Comparar dos documentos Word, que lee el .docx directamente.',
+    'guia-p2': '¿Qué significa cada color?',
+    'guia-r2': 'El verde marca texto que está en la versión nueva y no estaba en la original. El rojo marca texto que estaba en la original y ya no está en la nueva.',
+    'guia-p3': '¿Hay un límite de tamaño?',
+    'guia-r3': 'El código no impone ninguno, pero con textos muy largos la comparación puede tardar según tu equipo.',
+    'guia-p4': '¿Cómo se llama el archivo descargado?',
+    'guia-r4': 'Empieza con «comparacion-textos» y lleva la fecha y la hora en el nombre.',
   },
   en: {
     'hero-titulo': 'Compare two texts',
@@ -48,6 +67,25 @@ window.i18nPagina = {
     'informe-por-linea': 'line by line',
     'titulo-pagina': 'Compare two texts, free — Mini Cookies',
     'meta-descripcion': 'Compare two versions of a text and see exactly what changed — free, and nothing is sent to a server.',
+    'guia-titulo': 'How to compare two versions of a text',
+    'guia-intro': 'When you have two versions of the same text (a revised contract, an article before and after editing, a code snippet or a letter someone corrected) and you don’t know what was touched, this tool marks it for you. You paste the original text in one box and the new one in another, and it gives you a single text where what was added is highlighted in green and what was removed in red. There’s no need to upload files: everything is pasted and compared on the page. You can also download the result as an HTML report.',
+    'guia-paso-1': 'Paste the earlier version into the “Original text” box.',
+    'guia-paso-2': 'Paste the modified version into the “New text” box.',
+    'guia-paso-3': 'Leave “Compare word by word (otherwise line by line)” ticked if you want to see each changed word; untick it to compare line by line.',
+    'guia-paso-4': 'Tap “Compare”. The combined text appears below, with additions in green and removals in red.',
+    'guia-paso-5': 'If you want to save it, tap “Download report (.html)”.',
+    'guia-consejo-1': 'Word-by-word comparison suits running text, where a tiny change in a sentence shouldn’t flag the whole paragraph.',
+    'guia-consejo-2': 'Line-by-line comparison is better for lists, code or verses, where each line is a unit. With a small change inside a line, the whole line is flagged.',
+    'guia-consejo-3': 'The downloaded report is a standalone HTML page: it opens in any browser, and from there you can print it or save it as a PDF. It includes the date, the number of additions and removals, and the type of comparison used.',
+    'guia-consejo-4': 'If you copy the text from a document, check for extra spaces and line breaks: they count as differences too.',
+    'guia-p1': 'Can I compare Word or PDF files here?',
+    'guia-r1': 'This tool works with pasted text. For Word documents there’s Compare two Word documents, which reads the .docx directly.',
+    'guia-p2': 'What does each color mean?',
+    'guia-r2': 'Green marks text that is in the new version and wasn’t in the original. Red marks text that was in the original and is no longer in the new one.',
+    'guia-p3': 'Is there a size limit?',
+    'guia-r3': 'The code doesn’t impose one, but with very long texts the comparison may take a while depending on your computer.',
+    'guia-p4': 'What is the downloaded file called?',
+    'guia-r4': 'It starts with “comparacion-textos” and has the date and time in the name.',
   }
 };
 </script>
@@ -111,6 +149,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo comparar dos versiones de un texto</h2>
+    <p data-i18n="guia-intro">Cuando tenés dos versiones de un mismo texto (un contrato revisado, un artículo antes y después de la edición, un fragmento de código o una carta que alguien corrigió) y no sabés qué se tocó, esta herramienta lo marca por vos. Pegás el texto original en un cuadro y el nuevo en otro, y te devuelve un único texto donde lo agregado aparece resaltado en verde y lo quitado en rojo. No hace falta subir archivos: todo se pega y se compara en la página. Además podés bajar el resultado como un informe en HTML.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Pegá la versión anterior en el cuadro «Texto original».</li>
+      <li data-i18n="guia-paso-2">Pegá la versión modificada en el cuadro «Texto nuevo».</li>
+      <li data-i18n="guia-paso-3">Dejá tildada la opción «Comparar por palabra (si no, por línea)» si querés ver cada palabra cambiada; destildala para comparar renglón por renglón.</li>
+      <li data-i18n="guia-paso-4">Tocá «Comparar». Debajo aparece el texto combinado con lo agregado en verde y lo quitado en rojo.</li>
+      <li data-i18n="guia-paso-5">Si querés guardarlo, tocá «Descargar informe (.html)».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La comparación por palabra sirve para textos corridos, donde un cambio mínimo en una frase no debería marcar el párrafo entero.</li>
+      <li data-i18n="guia-consejo-2">La comparación por línea es mejor para listas, código o versos, donde cada renglón es una unidad. Con un cambio pequeño dentro de un renglón, se marca el renglón completo.</li>
+      <li data-i18n="guia-consejo-3">El informe descargado es una página HTML independiente: se abre en cualquier navegador, y desde ahí podés imprimirla o guardarla como PDF. Incluye la fecha, la cantidad de cambios agregados y quitados, y el tipo de comparación usado.</li>
+      <li data-i18n="guia-consejo-4">Si copiás el texto desde un documento, revisá los espacios y saltos de línea sobrantes: también cuentan como diferencias.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo comparar archivos Word o PDF acá?</summary>
+      <p data-i18n="guia-r1">Esta herramienta trabaja con texto pegado. Para documentos Word existe Comparar dos documentos Word, que lee el .docx directamente.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué significa cada color?</summary>
+      <p data-i18n="guia-r2">El verde marca texto que está en la versión nueva y no estaba en la original. El rojo marca texto que estaba en la original y ya no está en la nueva.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Hay un límite de tamaño?</summary>
+      <p data-i18n="guia-r3">El código no impone ninguno, pero con textos muy largos la comparación puede tardar según tu equipo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Cómo se llama el archivo descargado?</summary>
+      <p data-i18n="guia-r4">Empieza con «comparacion-textos» y lleva la fecha y la hora en el nombre.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

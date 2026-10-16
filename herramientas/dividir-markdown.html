@@ -28,7 +28,26 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar .zip con las secciones',
     'ayuda-dividir': 'Lo que va antes del primer encabezado del nivel elegido (por ejemplo el front matter YAML entre ---) queda en el primer archivo. Con segundo nivel, el título general (#) queda ahí también. Los enlaces y las imágenes se copian tal cual: un enlace a otra sección o a otro .md apunta a un archivo que ya no está en el mismo lugar, y una imagen con ruta relativa no viaja con el .zip. Una línea que empieza con # dentro del front matter también corta el documento. Los # dentro de bloques de código no cortan.',
     'error-pocas-secciones': 'El archivo tiene menos de dos encabezados de ese nivel — no hay nada que dividir.',
-    'error-dividir': 'No se pudo dividir el archivo'
+    'error-dividir': 'No se pudo dividir el archivo',
+    'guia-titulo': 'Cómo dividir un documento Markdown en secciones',
+    'guia-intro': 'Para cuando tenés un documento Markdown largo (una documentación, un manual, notas de un curso) y querés partirlo en archivos más manejables. La herramienta corta el archivo en cada encabezado del nivel que elijas y genera un .md por sección, todos empaquetados en un .zip. Es útil para armar wikis, repartir capítulos o trabajar por partes.',
+    'guia-paso-1': 'En «Dividir por» elegí «Primer nivel (#)» o «Segundo nivel (##)».',
+    'guia-paso-2': 'Arrastrá tu archivo .md (o .markdown) o hacé clic para elegirlo.',
+    'guia-paso-3': 'Tocá «Dividir».',
+    'guia-paso-4': 'Cuando aparezca «Listo», tocá «Descargar .zip con las secciones».',
+    'guia-consejo-1': 'Cada sección empieza en su encabezado e incluye todo hasta el siguiente del mismo nivel. Con segundo nivel, los subtítulos de nivel 3 y más profundo se quedan dentro de su sección.',
+    'guia-consejo-2': 'Lo que está antes del primer encabezado del nivel elegido (por ejemplo, el front matter YAML o el título general #) queda en el primer archivo.',
+    'guia-consejo-3': 'Los # dentro de bloques de código (``` o ~~~) no cortan el documento.',
+    'guia-consejo-4': 'Los enlaces y las imágenes se copian tal cual: un enlace a otra sección o a otro .md apuntará a un archivo que ya no está en el mismo lugar, y las imágenes con ruta relativa no viajan en el zip. Revisalos después.',
+    'guia-consejo-5': 'Los archivos se numeran con ceros a la izquierda y llevan el título de la sección, por ejemplo «01-Instalación.md».',
+    'guia-p1': '¿Qué pasa si hay menos de dos encabezados del nivel elegido?',
+    'guia-r1': 'La herramienta avisa que no hay nada que dividir.',
+    'guia-p2': '¿Se conserva el formato de fin de línea del archivo?',
+    'guia-r2': 'Sí: si el original usaba saltos de estilo Windows, los archivos de salida también.',
+    'guia-p3': '¿Qué pasa si una línea con # está dentro del front matter?',
+    'guia-r3': 'También corta el documento; es una limitación que la propia página explica en la burbuja de ayuda.',
+    'guia-p4': '¿Cómo se llama el zip?',
+    'guia-r4': '«secciones-markdown.zip».'
   },
   en: {
     'titulo-pagina': 'Split Markdown Free — Mini Cookies',
@@ -46,7 +65,26 @@ window.i18nPagina = {
     'resultado-enlace': 'Download .zip with the sections',
     'ayuda-dividir': 'Anything before the first heading of the chosen level (for example YAML front matter between ---) stays in the first file. With second level, the document title (#) stays there too. Links and images are copied as they are: a link to another section or another .md points to a file that is no longer in the same place, and an image with a relative path doesn’t travel with the .zip. A line starting with # inside the front matter also splits the document. # inside code blocks does not.',
     'error-pocas-secciones': 'The file has fewer than two headings of that level — there’s nothing to split.',
-    'error-dividir': 'Couldn’t split the file'
+    'error-dividir': 'Couldn’t split the file',
+    'guia-titulo': 'How to split a Markdown document into sections',
+    'guia-intro': 'For when you have a long Markdown document (documentation, a manual, course notes) and want to break it into more manageable files. The tool cuts the file at every heading of the level you choose and generates one .md per section, all packed in a .zip. It’s useful for building wikis, handing out chapters or working in parts.',
+    'guia-paso-1': 'Under “Split by” choose “First level (#)” or “Second level (##)”.',
+    'guia-paso-2': 'Drag your .md (or .markdown) file or click to choose it.',
+    'guia-paso-3': 'Tap “Split”.',
+    'guia-paso-4': 'When “Done” appears, tap “Download .zip with the sections”.',
+    'guia-consejo-1': 'Each section starts at its heading and includes everything up to the next one of the same level. With second level, level 3 and deeper subheadings stay inside their section.',
+    'guia-consejo-2': 'Whatever comes before the first heading of the chosen level (for example, the YAML front matter or the general # title) stays in the first file.',
+    'guia-consejo-3': 'A # inside code blocks (``` or ~~~) does not split the document.',
+    'guia-consejo-4': 'Links and images are copied as they are: a link to another section or to another .md will point to a file that is no longer in the same place, and images with a relative path don’t travel in the zip. Check them afterwards.',
+    'guia-consejo-5': 'Files are numbered with leading zeros and carry the section title, for example “01-Instalación.md”.',
+    'guia-p1': 'What happens if there are fewer than two headings of the chosen level?',
+    'guia-r1': 'The tool says there’s nothing to split.',
+    'guia-p2': 'Is the file’s line-ending format kept?',
+    'guia-r2': 'Yes: if the original used Windows-style line breaks, the output files do too.',
+    'guia-p3': 'What happens if a line with # is inside the front matter?',
+    'guia-r3': 'It also splits the document; it’s a limitation that the page itself explains in the help bubble.',
+    'guia-p4': 'What is the zip called?',
+    'guia-r4': '“secciones-markdown.zip”.'
   }
 };
 </script>
@@ -96,6 +134,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo dividir un documento Markdown en secciones</h2>
+    <p data-i18n="guia-intro">Para cuando tenés un documento Markdown largo (una documentación, un manual, notas de un curso) y querés partirlo en archivos más manejables. La herramienta corta el archivo en cada encabezado del nivel que elijas y genera un .md por sección, todos empaquetados en un .zip. Es útil para armar wikis, repartir capítulos o trabajar por partes.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">En «Dividir por» elegí «Primer nivel (#)» o «Segundo nivel (##)».</li>
+      <li data-i18n="guia-paso-2">Arrastrá tu archivo .md (o .markdown) o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-3">Tocá «Dividir».</li>
+      <li data-i18n="guia-paso-4">Cuando aparezca «Listo», tocá «Descargar .zip con las secciones».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Cada sección empieza en su encabezado e incluye todo hasta el siguiente del mismo nivel. Con segundo nivel, los subtítulos de nivel 3 y más profundo se quedan dentro de su sección.</li>
+      <li data-i18n="guia-consejo-2">Lo que está antes del primer encabezado del nivel elegido (por ejemplo, el front matter YAML o el título general #) queda en el primer archivo.</li>
+      <li data-i18n="guia-consejo-3">Los # dentro de bloques de código (``` o ~~~) no cortan el documento.</li>
+      <li data-i18n="guia-consejo-4">Los enlaces y las imágenes se copian tal cual: un enlace a otra sección o a otro .md apuntará a un archivo que ya no está en el mismo lugar, y las imágenes con ruta relativa no viajan en el zip. Revisalos después.</li>
+      <li data-i18n="guia-consejo-5">Los archivos se numeran con ceros a la izquierda y llevan el título de la sección, por ejemplo «01-Instalación.md».</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa si hay menos de dos encabezados del nivel elegido?</summary>
+      <p data-i18n="guia-r1">La herramienta avisa que no hay nada que dividir.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se conserva el formato de fin de línea del archivo?</summary>
+      <p data-i18n="guia-r2">Sí: si el original usaba saltos de estilo Windows, los archivos de salida también.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué pasa si una línea con # está dentro del front matter?</summary>
+      <p data-i18n="guia-r3">También corta el documento; es una limitación que la propia página explica en la burbuja de ayuda.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Cómo se llama el zip?</summary>
+      <p data-i18n="guia-r4">«secciones-markdown.zip».</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

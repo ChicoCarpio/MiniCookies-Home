@@ -31,7 +31,25 @@ window.i18nPagina = {
     'error-sin-metadata': 'el .opf no tiene <metadata>',
     'error-leer-epub': 'No se pudo leer el EPUB',
     'error-guardar': 'No se pudo guardar el EPUB',
-    'titulo-defecto': 'Documento'
+    'titulo-defecto': 'Documento',
+    'guia-titulo': 'Cómo editar el título, el autor y el idioma de un EPUB',
+    'guia-intro': 'Los libros electrónicos descargados de distintas fuentes suelen traer títulos mal escritos, autores en blanco o el idioma incorrecto, y eso desordena tu biblioteca en el lector. Con esta herramienta corregís el título, el autor y el idioma de un EPUB sin tocar el contenido del libro. Los capítulos, la portada, las imágenes, los estilos, el índice y datos como el ISBN quedan exactamente iguales.',
+    'guia-paso-1': 'Arrastrá tu archivo .epub o hacé clic para elegirlo.',
+    'guia-paso-2': 'Cuando aparezcan los campos, revisá los valores actuales y editá «Título», «Autor» e «Idioma (código, ej. "es", "en")».',
+    'guia-paso-3': 'Tocá «Guardar y descargar».',
+    'guia-paso-4': 'Cuando aparezca «Listo», tocá «Descargar EPUB».',
+    'guia-consejo-1': 'El idioma se escribe con su código corto: «es» para español, «en» para inglés, «fr» para francés, «pt» para portugués.',
+    'guia-consejo-2': 'Si dejás el autor vacío, se quita ese dato del libro. El título y el idioma son obligatorios: si los dejás vacíos se usa «Documento» y «es», respectivamente.',
+    'guia-consejo-3': 'Además del dato principal, la herramienta actualiza el nombre para ordenar por autor (en libros EPUB 3), la fecha de última modificación y el título del índice antiguo, que algunos lectores muestran.',
+    'guia-consejo-4': 'El archivo descargado toma como nombre el título nuevo.',
+    'guia-p1': '¿Puedo cambiar la portada o la descripción?',
+    'guia-r1': 'No, solo título, autor e idioma.',
+    'guia-p2': '¿Funciona con un libro con varios autores?',
+    'guia-r2': 'El campo edita el primer autor registrado.',
+    'guia-p3': '¿Puedo editar un EPUB con DRM?',
+    'guia-r3': 'No es el objetivo de la herramienta; el contenido cifrado no se modifica.',
+    'guia-p4': '¿Qué pasa si el archivo no es un EPUB válido?',
+    'guia-r4': 'Aparece un aviso con el motivo, por ejemplo que falta el archivo de contenedor o el .opf.'
   },
   en: {
     'titulo-pagina': 'Edit EPUB Metadata Free — Mini Cookies',
@@ -53,7 +71,25 @@ window.i18nPagina = {
     'error-sin-metadata': 'the .opf has no <metadata>',
     'error-leer-epub': 'Couldn’t read the EPUB',
     'error-guardar': 'Couldn’t save the EPUB',
-    'titulo-defecto': 'Document'
+    'titulo-defecto': 'Document',
+    'guia-titulo': 'How to edit the title, author and language of an EPUB',
+    'guia-intro': 'E-books downloaded from different sources often come with misspelled titles, blank authors or the wrong language, and that clutters your library in the reader. With this tool you correct the title, author and language of an EPUB without touching the book’s content. The chapters, cover, images, styles, table of contents and data like the ISBN stay exactly the same.',
+    'guia-paso-1': 'Drag your .epub file or click to choose it.',
+    'guia-paso-2': 'When the fields appear, check the current values and edit “Title”, “Author” and “Language (code, e.g. "en", "es")”.',
+    'guia-paso-3': 'Tap “Save and download”.',
+    'guia-paso-4': 'When “Done” appears, tap “Download EPUB”.',
+    'guia-consejo-1': 'The language is written with its short code: “es” for Spanish, “en” for English, “fr” for French, “pt” for Portuguese.',
+    'guia-consejo-2': 'If you leave the author empty, that data is removed from the book. The title and language are required: if you leave them empty, “Document” and “es” are used, respectively.',
+    'guia-consejo-3': 'Besides the main field, the tool updates the author sort name (in EPUB 3 books), the last-modified date and the old table-of-contents title, which some readers display.',
+    'guia-consejo-4': 'The downloaded file takes the new title as its name.',
+    'guia-p1': 'Can I change the cover or the description?',
+    'guia-r1': 'No, only title, author and language.',
+    'guia-p2': 'Does it work with a book that has several authors?',
+    'guia-r2': 'The field edits the first registered author.',
+    'guia-p3': 'Can I edit an EPUB with DRM?',
+    'guia-r3': 'That’s not what the tool is for; encrypted content isn’t modified.',
+    'guia-p4': 'What happens if the file isn’t a valid EPUB?',
+    'guia-r4': 'A notice appears with the reason, for example that the container file or the .opf is missing.'
   }
 };
 </script>
@@ -107,6 +143,42 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <p style="color:var(--texto-suave);" data-i18n="nota">Solo se cambian el título, el autor y el idioma dentro del archivo del libro: los capítulos, la portada, las imágenes, los estilos, el índice y el resto de los datos (como el ISBN) quedan exactamente igual.</p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo editar el título, el autor y el idioma de un EPUB</h2>
+    <p data-i18n="guia-intro">Los libros electrónicos descargados de distintas fuentes suelen traer títulos mal escritos, autores en blanco o el idioma incorrecto, y eso desordena tu biblioteca en el lector. Con esta herramienta corregís el título, el autor y el idioma de un EPUB sin tocar el contenido del libro. Los capítulos, la portada, las imágenes, los estilos, el índice y datos como el ISBN quedan exactamente iguales.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .epub o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Cuando aparezcan los campos, revisá los valores actuales y editá «Título», «Autor» e «Idioma (código, ej. "es", "en")».</li>
+      <li data-i18n="guia-paso-3">Tocá «Guardar y descargar».</li>
+      <li data-i18n="guia-paso-4">Cuando aparezca «Listo», tocá «Descargar EPUB».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El idioma se escribe con su código corto: «es» para español, «en» para inglés, «fr» para francés, «pt» para portugués.</li>
+      <li data-i18n="guia-consejo-2">Si dejás el autor vacío, se quita ese dato del libro. El título y el idioma son obligatorios: si los dejás vacíos se usa «Documento» y «es», respectivamente.</li>
+      <li data-i18n="guia-consejo-3">Además del dato principal, la herramienta actualiza el nombre para ordenar por autor (en libros EPUB 3), la fecha de última modificación y el título del índice antiguo, que algunos lectores muestran.</li>
+      <li data-i18n="guia-consejo-4">El archivo descargado toma como nombre el título nuevo.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo cambiar la portada o la descripción?</summary>
+      <p data-i18n="guia-r1">No, solo título, autor e idioma.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Funciona con un libro con varios autores?</summary>
+      <p data-i18n="guia-r2">El campo edita el primer autor registrado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo editar un EPUB con DRM?</summary>
+      <p data-i18n="guia-r3">No es el objetivo de la herramienta; el contenido cifrado no se modifica.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa si el archivo no es un EPUB válido?</summary>
+      <p data-i18n="guia-r4">Aparece un aviso con el motivo, por ejemplo que falta el archivo de contenedor o el .opf.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
