@@ -61,8 +61,7 @@
       '<div class="rh-barra"><div class="rh-nombre" role="textbox" aria-readonly="true" aria-label="' + tx('rh-nombre') + '"></div><span class="rh-fx" aria-hidden="true">fx</span>' +
       '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div></div>' +
       '<div class="rh-cuerpo" tabindex="0" role="application" aria-roledescription="' + tx('rh-rejilla') + '" aria-label="' + tx('rh-rejilla') + '">' +
-      '<div class="rh-vista"><canvas class="rh-lienzo"></canvas><div class="rh-capa"><div class="rh-enc-col"></div><div class="rh-enc-fila"></div>' +
-      '<div class="rh-recorte"><div class="rh-rango"></div><div class="rh-activa"></div></div></div></div><div class="rh-espaciador"></div></div>' +
+      '<div class="rh-vista"><canvas class="rh-lienzo"></canvas><div class="rh-capa"></div></div><div class="rh-espaciador"></div></div>' +
       '<div class="rh-pestanas" role="tablist" aria-label="' + tx('rh-hojas') + '"></div>' +
       '<div class="rh-estado"><span class="rh-info"></span><span class="rh-anuncio" role="status" aria-live="polite"></span><span class="rh-zoom">' +
       '<button type="button" class="rh-menos" aria-label="' + tx('rh-alejar') + '">−</button>' +
@@ -71,7 +70,25 @@
     contenedor.appendChild(raiz);   // la rejilla solo toca lo suyo: dos rejillas que se pisan (un archivo nuevo mientras carga el anterior) no se borran entre sí
     const q = (s) => raiz.querySelector(s);
     const cajaNombre = q('.rh-nombre'), cajaFormula = q('.rh-formula'), cuerpo = q('.rh-cuerpo'), vista = q('.rh-vista'), lienzo = q('.rh-lienzo');
-    const capa = q('.rh-capa'), encCol = q('.rh-enc-col'), encFila = q('.rh-enc-fila'), recorte = q('.rh-recorte'), rangoDiv = q('.rh-rango'), activaDiv = q('.rh-activa');
+    const capa = q('.rh-capa');
+    // Cada selección se dibuja en piezas, una por zona de la hoja (con paneles inmovilizados hay hasta cuatro): cada pieza es una ventana que recorta
+    // (overflow) y, adentro, el rectángulo entero, así los bordes de lo que se sale de la zona no se ven
+    function crearPiezas(clase) {
+      const lista = [];
+      return (piezas) => {
+        while (lista.length < piezas.length) { const fuera = document.createElement('div'); fuera.className = 'rh-zona'; const dentro = document.createElement('div'); dentro.className = clase; fuera.appendChild(dentro); capa.appendChild(fuera); lista.push({ fuera, dentro }); }
+        lista.forEach((e, k) => {
+          const pz = piezas[k];
+          if (!pz) { e.fuera.style.display = 'none'; return; }
+          const w = pz.win, r = pz.rect;
+          e.fuera.style.display = 'block';
+          e.fuera.style.left = w.x + 'px'; e.fuera.style.top = w.y + 'px'; e.fuera.style.width = w.w + 'px'; e.fuera.style.height = w.h + 'px';
+          const x0 = limitar(r.x0 - w.x, -50, w.w + 50), x1 = limitar(r.x1 - w.x, -50, w.w + 50), y0 = limitar(r.y0 - w.y, -50, w.h + 50), y1 = limitar(r.y1 - w.y, -50, w.h + 50);
+          e.dentro.style.left = x0 + 'px'; e.dentro.style.top = y0 + 'px'; e.dentro.style.width = Math.max(0, x1 - x0) + 'px'; e.dentro.style.height = Math.max(0, y1 - y0) + 'px';
+        });
+      };
+    }
+    const ponerEncCol = crearPiezas('rh-enc-col'), ponerEncFila = crearPiezas('rh-enc-fila'), ponerRango = crearPiezas('rh-rango'), ponerActiva = crearPiezas('rh-activa');
     const espaciador = q('.rh-espaciador'), pestanas = q('.rh-pestanas'), info = q('.rh-info'), anuncio = q('.rh-anuncio');
     const controlZoom = q('.rh-control-zoom'), valorZoom = q('.rh-valor-zoom');
     const ctx = lienzo.getContext('2d');
@@ -79,7 +96,7 @@
     // ---- La hoja abierta -------------------------------------------------------------------------------------------
     let est = null;          // { indice, hoja, g, nFilas, nCols, fm, cm, sel, zoom, areaX, areaY, combinadas }
     const estados = new Map();   // por hoja: selección, desplazamiento y zoom que tenía
-    let W = 0, H = 0, dpr = 1, pendiente = false, vistaReal = { areaX: 26, areaY: 20 };
+    let W = 0, H = 0, dpr = 1, pendiente = false, vistaReal = { areaX: 26, areaY: 20, fx: 0, fy: 0, nf: 0, nc: 0 };
 
     function indiceCombinadas(hoja) {
       const lista = (hoja.combinadas || []).slice();
@@ -139,10 +156,15 @@
       const C = hoja.celdas;
       const fm = C.filaMax, cm = C.colMax;
       const guardado = estados.get(indice);
+      // paneles inmovilizados del archivo (los "split" no inmovilizan nada); si el archivo trae zoom, la hoja se abre con él
+      const pn = hoja.vista && hoja.vista.paneles, congelado = !!pn && (pn.estado === 'frozen' || pn.estado === 'frozenSplit');
+      const fijas = congelado ? { filas: limitar(Math.round(pn.y) || 0, 0, 1048575), columnas: limitar(Math.round(pn.x) || 0, 0, 16383) } : { filas: 0, columnas: 0 };
+      const zoomArchivo = limitar(Math.round((+hoja.vista.zoom || 100) / 10) * 10, ZOOM_MIN, ZOOM_MAX);
+      const geo = XlsxDibujo.geometria(libro, hoja);
       const e = {
-        indice, hoja, g: XlsxDibujo.geometria(libro, hoja), fm, cm,
+        indice, hoja, g: geo, fm, cm, fijas, fx: fijas.columnas ? geo.x(fijas.columnas) : 0, fy: fijas.filas ? geo.y(fijas.filas) : 0,
         nFilas: limitar(fm + 41, 60, MAX_FILAS), nCols: limitar(cm + 11, 26, MAX_COLS),
-        sel: guardado ? guardado.sel : { f: 0, c: 0, f2: 0, c2: 0 }, zoom: guardado ? guardado.zoom : 100, scrollX: guardado ? guardado.scrollX : 0, scrollY: guardado ? guardado.scrollY : 0,
+        sel: guardado ? guardado.sel : { f: 0, c: 0, f2: 0, c2: 0 }, zoom: guardado ? guardado.zoom : zoomArchivo, scrollX: guardado ? guardado.scrollX : 0, scrollY: guardado ? guardado.scrollY : 0,
         combinadas: indiceCombinadas(hoja),
       };
       if (est) estados.set(est.indice, { sel: est.sel, zoom: est.zoom, scrollX: cuerpo.scrollLeft, scrollY: cuerpo.scrollTop });
@@ -160,8 +182,8 @@
       if (!est) return;
       const z = est.zoom / 100;
       const encMax = Math.max(26, String(est.nFilas).length * 8 + 12);
-      espaciador.style.width = Math.ceil((est.g.x(est.nCols) + encMax) * z) + 'px';
-      espaciador.style.height = Math.ceil((est.g.y(est.nFilas) + 20) * z) + 'px';
+      espaciador.style.width = Math.ceil((est.g.x(est.nCols) - est.fx + encMax) * z) + 'px';
+      espaciador.style.height = Math.ceil((est.g.y(est.nFilas) - est.fy + 20) * z) + 'px';
     }
     function medirVista() {
       W = cuerpo.clientWidth; H = cuerpo.clientHeight; dpr = window.devicePixelRatio || 1;
@@ -175,32 +197,49 @@
       if ((window.devicePixelRatio || 1) !== dpr) medirVista();   // la ventana pasó a otra pantalla
       const z = est.zoom / 100;
       ctx.setTransform(dpr * z, 0, 0, dpr * z, 0, 0);
-      vistaReal = XlsxDibujo.dibujarVista(ctx, libro, est.hoja, est.g, { x: cuerpo.scrollLeft / z, y: cuerpo.scrollTop / z, ancho: W / z, alto: H / z }, { idioma });
+      vistaReal = XlsxDibujo.dibujarVista(ctx, libro, est.hoja, est.g, { x: cuerpo.scrollLeft / z, y: cuerpo.scrollTop / z, ancho: W / z, alto: H / z, fijas: est.fijas }, { idioma });
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       pintarSeleccion();
     }
 
-    // posición en la pantalla (px de la vista) de una columna / fila, con el zoom y el desplazamiento de ahora
-    const pantallaX = (c) => (vistaReal.areaX + est.g.x(c) - cuerpo.scrollLeft / (est.zoom / 100)) * (est.zoom / 100);
-    const pantallaY = (f) => (vistaReal.areaY + est.g.y(f) - cuerpo.scrollTop / (est.zoom / 100)) * (est.zoom / 100);
-    function colocar(div, x0, y0, x1, y1) {
-      const a = limitar(x0, -20, W + 20), b = limitar(x1, -20, W + 20), c = limitar(y0, -20, H + 20), d = limitar(y1, -20, H + 20);
-      div.style.display = b <= a || d <= c ? 'none' : 'block';
-      div.style.left = a + 'px'; div.style.top = c + 'px'; div.style.width = (b - a) + 'px'; div.style.height = (d - c) + 'px';
+    // posición en la pantalla (px de la vista) del borde de una columna / fila: las fijas no se desplazan, las demás restan lo que se corrió la hoja
+    const pantallaX = (c) => (vistaReal.areaX + est.g.x(c) - (c < est.fijas.columnas ? 0 : cuerpo.scrollLeft / (est.zoom / 100))) * (est.zoom / 100);
+    const pantallaY = (f) => (vistaReal.areaY + est.g.y(f) - (f < est.fijas.filas ? 0 : cuerpo.scrollTop / (est.zoom / 100))) * (est.zoom / 100);
+    const pxCol = (col, fija) => (vistaReal.areaX + est.g.x(col) - (fija ? 0 : cuerpo.scrollLeft / (est.zoom / 100))) * (est.zoom / 100);
+    const pyFila = (fila, fija) => (vistaReal.areaY + est.g.y(fila) - (fija ? 0 : cuerpo.scrollTop / (est.zoom / 100))) * (est.zoom / 100);
+    // un tramo [a0, a1] se parte en el que cae en la zona fija (índices < nFija) y el que cae en la zona que se desplaza
+    function trozos(a0, a1, nFija) {
+      const t = [];
+      if (nFija && a0 < nFija) t.push({ a0, a1: Math.min(a1, nFija - 1), fija: true });
+      if (a1 >= nFija) t.push({ a0: Math.max(a0, nFija), a1, fija: false });
+      return t;
     }
     function pintarSeleccion() {
-      const z = est.zoom / 100, ax = vistaReal.areaX * z, ay = vistaReal.areaY * z, r = rango();
-      const x0 = pantallaX(r.c0), x1 = pantallaX(r.c1 + 1), y0 = pantallaY(r.f0), y1 = pantallaY(r.f1 + 1);
-      colocar(encCol, Math.max(x0, ax), 0, x1, ay);
-      colocar(encFila, 0, Math.max(y0, ay), ax, y1);
-      recorte.style.left = ax + 'px'; recorte.style.top = ay + 'px'; recorte.style.width = Math.max(0, W - ax) + 'px'; recorte.style.height = Math.max(0, H - ay) + 'px';
-      const unica = r.f0 === r.f1 && r.c0 === r.c1;
+      const z = est.zoom / 100, g = est.g, V = vistaReal, ax = V.areaX * z, ay = V.areaY * z, fx = V.fx * z, fy = V.fy * z, sx = cuerpo.scrollLeft / z, sy = cuerpo.scrollTop / z;
+      const pxC = (col, fija) => (V.areaX + (fija ? g.x(col) : g.x(col) - sx)) * z;
+      const pyF = (fila, fija) => (V.areaY + (fija ? g.y(fila) : g.y(fila) - sy)) * z;
+      const zonaX = (fija) => (fija ? { x: ax, w: fx } : { x: ax + fx, w: Math.max(0, W - ax - fx) });
+      const zonaY = (fija) => (fija ? { x: ay, w: fy } : { x: ay + fy, w: Math.max(0, H - ay - fy) });
+      // las piezas de un rango en la hoja, y las de sus encabezados
+      const piezasDe = (rg) => {
+        const out = [];
+        for (const tc of trozos(rg.c0, rg.c1, V.nc)) for (const tf of trozos(rg.f0, rg.f1, V.nf)) {
+          const zx = zonaX(tc.fija), zy = zonaY(tf.fija);
+          if (zx.w <= 0 || zy.w <= 0) continue;
+          out.push({ win: { x: zx.x, y: zy.x, w: zx.w, h: zy.w }, rect: { x0: pxC(tc.a0, tc.fija), x1: pxC(tc.a1 + 1, tc.fija), y0: pyF(tf.a0, tf.fija), y1: pyF(tf.a1 + 1, tf.fija) } });
+        }
+        return out;
+      };
+      const r = rango();
+      const encC = [], encF = [];
+      for (const tc of trozos(r.c0, r.c1, V.nc)) { const zx = zonaX(tc.fija); if (zx.w > 0) encC.push({ win: { x: zx.x, y: 0, w: zx.w, h: ay }, rect: { x0: pxC(tc.a0, tc.fija), x1: pxC(tc.a1 + 1, tc.fija), y0: 0, y1: ay } }); }
+      for (const tf of trozos(r.f0, r.f1, V.nf)) { const zy = zonaY(tf.fija); if (zy.w > 0) encF.push({ win: { x: 0, y: zy.x, w: ax, h: zy.w }, rect: { x0: 0, x1: ax, y0: pyF(tf.a0, tf.fija), y1: pyF(tf.a1 + 1, tf.fija) } }); }
+      ponerEncCol(encC); ponerEncFila(encF);
       const m = combinadaEn(est.sel.f, est.sel.c);
       const ac = m || { f0: est.sel.f, c0: est.sel.c, f1: est.sel.f, c1: est.sel.c };
-      colocar(activaDiv, pantallaX(ac.c0) - ax, pantallaY(ac.f0) - ay, pantallaX(ac.c1 + 1) - ax, pantallaY(ac.f1 + 1) - ay);
-      const mismo = unica || (m && r.f0 === m.f0 && r.c0 === m.c0 && r.f1 === m.f1 && r.c1 === m.c1);
-      colocar(rangoDiv, x0 - ax, y0 - ay, x1 - ax, y1 - ay);
-      rangoDiv.hidden = !!mismo;
+      ponerActiva(piezasDe(ac));
+      const mismo = (r.f0 === r.f1 && r.c0 === r.c1) || (m && r.f0 === m.f0 && r.c0 === m.c0 && r.f1 === m.f1 && r.c1 === m.c1);
+      ponerRango(mismo ? [] : piezasDe(r));
     }
 
     // ---- Barras ----------------------------------------------------------------------------------------------------
@@ -276,11 +315,16 @@
       pintarSeleccion(); actualizarBarras();
     }
     function mostrarCelda(f, c) {
-      const z = est.zoom / 100, g = est.g;
-      const ax = vistaReal.areaX * z, ay = vistaReal.areaY * z;
-      const x0 = g.x(c) * z, x1 = g.x(c + 1) * z, y0 = g.y(f) * z, y1 = g.y(f + 1) * z;
-      if (x0 < cuerpo.scrollLeft) cuerpo.scrollLeft = x0; else if (x1 > cuerpo.scrollLeft + W - ax) cuerpo.scrollLeft = x1 - (W - ax);
-      if (y0 < cuerpo.scrollTop) cuerpo.scrollTop = y0; else if (y1 > cuerpo.scrollTop + H - ay) cuerpo.scrollTop = y1 - (H - ay);
+      const z = est.zoom / 100, g = est.g, V = vistaReal;
+      // la zona fija siempre se ve; la libre se corre lo justo: scrollLeft entre (borde derecho de la celda − ancho libre) y (borde izquierdo − zona fija)
+      if (c >= est.fijas.columnas) {
+        const bajo = (g.x(c + 1) - (W / z - V.areaX)) * z, alto = (g.x(c) - V.fx) * z;
+        if (cuerpo.scrollLeft > alto) cuerpo.scrollLeft = Math.max(0, alto); else if (cuerpo.scrollLeft < bajo) cuerpo.scrollLeft = bajo;
+      }
+      if (f >= est.fijas.filas) {
+        const bajo = (g.y(f + 1) - (H / z - V.areaY)) * z, alto = (g.y(f) - V.fy) * z;
+        if (cuerpo.scrollTop > alto) cuerpo.scrollTop = Math.max(0, alto); else if (cuerpo.scrollTop < bajo) cuerpo.scrollTop = bajo;
+      }
     }
     // la siguiente fila o columna que se ve (las ocultas miden 0)
     function salto(desde, paso, mide, tope) {
@@ -330,12 +374,12 @@
       return { x: (e.clientX - r.left) / z, y: (e.clientY - r.top) / z };
     }
     function celdaEn(p) {
-      const z = est.zoom / 100, vx = cuerpo.scrollLeft / z, vy = cuerpo.scrollTop / z, g = est.g;
-      const dentroX = p.x >= vistaReal.areaX, dentroY = p.y >= vistaReal.areaY;
+      const z = est.zoom / 100, sx = cuerpo.scrollLeft / z, sy = cuerpo.scrollTop / z, g = est.g, V = vistaReal;
+      const u = p.x - V.areaX, w = p.y - V.areaY, dentroX = u >= 0, dentroY = w >= 0;
       return {
         enc: !dentroX || !dentroY, esquina: !dentroX && !dentroY,
-        c: dentroX ? limitar(g.colEn(p.x - vistaReal.areaX + vx), 0, MAX_COLS - 1) : -1,
-        f: dentroY ? limitar(g.filaEn(p.y - vistaReal.areaY + vy), 0, MAX_FILAS - 1) : -1,
+        c: dentroX ? limitar(g.colEn(u < V.fx ? u : u + sx), 0, MAX_COLS - 1) : -1,
+        f: dentroY ? limitar(g.filaEn(w < V.fy ? w : w + sy), 0, MAX_FILAS - 1) : -1,
       };
     }
     let arrastre = null, toque = null;
@@ -503,7 +547,11 @@
       seleccion,
       copiar,
       // dónde está una celda en la vista (px, con el zoom y el desplazamiento de ahora): para las pruebas y para quien dibuje encima
-      rectCelda(f, c) { const x = pantallaX(c), y = pantallaY(f); return { x, y, ancho: pantallaX(c + 1) - x, alto: pantallaY(f + 1) - y }; },
+      rectCelda(f, c) {
+        const fc = c < est.fijas.columnas, ff = f < est.fijas.filas;   // el borde de la derecha / de abajo de una celda fija también es fijo
+        const x = pxCol(c, fc), y = pyFila(f, ff);
+        return { x, y, ancho: pxCol(c + 1, fc) - x, alto: pyFila(f + 1, ff) - y };
+      },
       zoom(z) { if (z === undefined) return est ? est.zoom : 100; ponerZoom(z); return est.zoom; },
       alCambiar(fn) { cambios.push(fn); },
       enfocar() { cuerpo.focus({ preventScroll: true }); },

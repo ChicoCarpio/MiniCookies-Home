@@ -20,14 +20,13 @@
 .rh-espaciador { grid-area: 1 / 1; pointer-events: none; }
 .rh-lienzo { display: block; }
 .rh-capa { position: absolute; inset: 0; pointer-events: none; }
-.rh-enc-col, .rh-enc-fila, .rh-rango, .rh-activa { position: absolute; display: none; }
+.rh-zona { position: absolute; overflow: hidden; display: none; }
+.rh-enc-col, .rh-enc-fila, .rh-rango, .rh-activa { position: absolute; }
 /* La hoja se dibuja blanca en los dos temas (como Excel): lo que va encima usa colores fijos, no los tokens del tema */
 .rh-enc-col, .rh-enc-fila { background: rgba(231, 164, 89, 0.5); }
 .rh-enc-col { border-bottom: 2px solid #c9853a; }
 .rh-enc-fila { border-right: 2px solid #c9853a; }
-.rh-recorte { position: absolute; overflow: hidden; }
 .rh-rango { background: rgba(231, 164, 89, 0.2); border: 1px solid #c9853a; }
-.rh-rango[hidden] { display: none !important; }
 .rh-activa { border: 2px solid #c9853a; }
 
 .rh-pestanas { flex: none; display: flex; overflow-x: auto; border-top: 1px solid var(--gris-borde); background: var(--superficie-alt); scrollbar-width: thin; }
