@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Deshacer y rehacer de los editores de imagen (Editor avanzado, Editor de
-// color y collage; plan del rediseño, hallazgos.md, fase 3).
+// color y collage; plan del rediseño, hallazgos/editores-rediseno.md, fase 3).
 //
 // Cada editor dice solo dos cosas: cómo sacar una foto de su estado
 // (capturar, con una "firma" que la resume) y cómo volver a una

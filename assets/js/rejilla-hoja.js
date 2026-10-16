@@ -30,6 +30,10 @@
       'rh-buscar': 'Buscar', 'rh-buscar-ph': 'Buscar en la hoja', 'rh-anterior': 'Coincidencia anterior', 'rh-siguiente': 'Coincidencia siguiente', 'rh-todo-libro': 'Todo el libro', 'rh-cerrar': 'Cerrar',
       'rh-pantalla': 'Pantalla completa', 'rh-salir-pantalla': 'Salir de pantalla completa',
       'rh-ocultas': 'Hojas ocultas ({0})', 'rh-hoja-oculta': 'oculta', 'rh-asa': 'Ajustar la selección',
+      'rh-of': 'Ordenar y filtrar', 'rh-of-ayuda': 'Ordena o filtra lo que ves; el archivo no se modifica', 'rh-of-asc': 'Ordenar de menor a mayor (A → Z)', 'rh-of-desc': 'Ordenar de mayor a menor (Z → A)',
+      'rh-of-quitar-orden': 'Quitar el orden', 'rh-of-buscar-valor': 'Buscar valor', 'rh-of-todo': '(Seleccionar todo)', 'rh-of-vacias': '(Vacías)', 'rh-of-aceptar': 'Aceptar', 'rh-of-cancelar': 'Cancelar',
+      'rh-of-borrar': 'Borrar filtro', 'rh-of-aviso-celda': 'Elige una celda dentro de los datos', 'rh-of-combinadas': 'No se puede ordenar: hay celdas combinadas en los datos',
+      'rh-of-registros': '{0} de {1} registros', 'rh-of-total': '{0} registros', 'rh-of-col': 'Ordenar y filtrar la columna {0}', 'rh-of-filtrada': 'filtrada', 'rh-of-mas': 'Hay más valores de los que se listan: usa el buscador',
       'rh-sin-coincidencias': 'Sin coincidencias', 'rh-buscando': 'Buscando…', 'rh-cuenta': '{0} de {1}', 'rh-cuenta-libro': '{0} de {1} en el libro', 'rh-muchas': 'más de {0}',
     };
     const en = {
@@ -39,6 +43,10 @@
       'rh-buscar': 'Find', 'rh-buscar-ph': 'Find in sheet', 'rh-anterior': 'Previous match', 'rh-siguiente': 'Next match', 'rh-todo-libro': 'Whole workbook', 'rh-cerrar': 'Close',
       'rh-pantalla': 'Full screen', 'rh-salir-pantalla': 'Exit full screen',
       'rh-ocultas': 'Hidden sheets ({0})', 'rh-hoja-oculta': 'hidden', 'rh-asa': 'Adjust the selection',
+      'rh-of': 'Sort & filter', 'rh-of-ayuda': 'Sorts or filters what you see; the file is not modified', 'rh-of-asc': 'Sort smallest to largest (A → Z)', 'rh-of-desc': 'Sort largest to smallest (Z → A)',
+      'rh-of-quitar-orden': 'Clear sort', 'rh-of-buscar-valor': 'Search values', 'rh-of-todo': '(Select all)', 'rh-of-vacias': '(Blanks)', 'rh-of-aceptar': 'OK', 'rh-of-cancelar': 'Cancel',
+      'rh-of-borrar': 'Clear filter', 'rh-of-aviso-celda': 'Pick a cell inside the data', 'rh-of-combinadas': 'Cannot sort: the data has merged cells',
+      'rh-of-registros': '{0} of {1} records', 'rh-of-total': '{0} records', 'rh-of-col': 'Sort and filter column {0}', 'rh-of-filtrada': 'filtered', 'rh-of-mas': 'There are more values than the list shows: use the search box',
       'rh-sin-coincidencias': 'No matches', 'rh-buscando': 'Searching…', 'rh-cuenta': '{0} of {1}', 'rh-cuenta-libro': '{0} of {1} in the workbook', 'rh-muchas': 'more than {0}',
     };
     pagina.es = Object.assign(es, pagina.es);
@@ -69,7 +77,7 @@
     raiz.className = 'rh';
     raiz.innerHTML =
       '<div class="rh-barra"><div class="rh-nombre" role="textbox" aria-readonly="true" aria-label="' + tx('rh-nombre') + '"></div><span class="rh-fx" aria-hidden="true">fx</span>' +
-      '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div><button type="button" class="rh-boton-buscar">' + tx('rh-buscar') + '</button><button type="button" class="rh-boton-completa" aria-pressed="false" aria-label="' + tx('rh-pantalla') + '" title="' + tx('rh-pantalla') + '">⤢</button></div>' +
+      '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div><button type="button" class="rh-boton-of" aria-pressed="false" title="' + tx('rh-of-ayuda') + '">' + tx('rh-of') + '</button><button type="button" class="rh-boton-buscar">' + tx('rh-buscar') + '</button><button type="button" class="rh-boton-completa" aria-pressed="false" aria-label="' + tx('rh-pantalla') + '" title="' + tx('rh-pantalla') + '">⤢</button></div>' +
       '<div class="rh-buscador" role="search" hidden><input type="search" class="rh-busca-texto" autocomplete="off" spellcheck="false" placeholder="' + tx('rh-buscar-ph') + '" aria-label="' + tx('rh-buscar-ph') + '">' +
       '<span class="rh-busca-cuenta" aria-live="polite"></span>' +
       '<button type="button" class="rh-busca-ant" aria-label="' + tx('rh-anterior') + '">▲</button><button type="button" class="rh-busca-sig" aria-label="' + tx('rh-siguiente') + '">▼</button>' +
@@ -78,7 +86,7 @@
       '<div class="rh-cuerpo" tabindex="0" role="application" aria-roledescription="' + tx('rh-rejilla') + '" aria-label="' + tx('rh-rejilla') + '">' +
       '<div class="rh-vista"><canvas class="rh-lienzo"></canvas><div class="rh-capa"><div class="rh-guia" hidden></div><div class="rh-asa rh-asa-ini" hidden></div><div class="rh-asa rh-asa-fin" hidden></div></div></div><div class="rh-espaciador"></div></div>' +
       '<div class="rh-pestanas" role="tablist" aria-label="' + tx('rh-hojas') + '"></div>' +
-      '<div class="rh-estado"><span class="rh-info"></span><span class="rh-anuncio" role="status" aria-live="polite"></span><span class="rh-zoom">' +
+      '<div class="rh-estado"><span class="rh-info"></span><span class="rh-of-info" hidden></span><span class="rh-anuncio" role="status" aria-live="polite"></span><span class="rh-zoom">' +
       '<button type="button" class="rh-menos" aria-label="' + tx('rh-alejar') + '">−</button>' +
       '<input type="range" class="rh-control-zoom" min="' + ZOOM_MIN + '" max="' + ZOOM_MAX + '" step="10" value="100" aria-label="' + tx('rh-zoom') + '">' +
       '<button type="button" class="rh-mas" aria-label="' + tx('rh-acercar') + '">+</button><output class="rh-valor-zoom">100%</output></span></div>';
@@ -87,7 +95,7 @@
     const cajaNombre = q('.rh-nombre'), cajaFormula = q('.rh-formula'), cuerpo = q('.rh-cuerpo'), vista = q('.rh-vista'), lienzo = q('.rh-lienzo');
     const capa = q('.rh-capa'), guia = q('.rh-guia'), asaIni = q('.rh-asa-ini'), asaFin = q('.rh-asa-fin');
     let modoTactil = false;   // la última selección se hizo con el dedo: se ofrecen las asas para ajustarla
-    const botonCompleta = q('.rh-boton-completa');
+    const botonCompleta = q('.rh-boton-completa'), botonOF = q('.rh-boton-of'), infoOF = q('.rh-of-info');
     const buscador = q('.rh-buscador'), cajaBusca = q('.rh-busca-texto'), cuentaBusca = q('.rh-busca-cuenta'), checkLibro = q('.rh-busca-libro');
     // Cada selección se dibuja en piezas, una por zona de la hoja (con paneles inmovilizados hay hasta cuatro): cada pieza es una ventana que recorta
     // (overflow) y, adentro, el rectángulo entero, así los bordes de lo que se sale de la zona no se ven
@@ -180,13 +188,16 @@
       const zoomArchivo = limitar(Math.round((+hoja.vista.zoom || 100) / 10) * 10, ZOOM_MIN, ZOOM_MAX);
       const geo = XlsxDibujo.geometria(libro, hoja);
       const e = {
-        indice, hoja, g: geo, fm, cm, fijas, fx: fijas.columnas ? geo.x(fijas.columnas) : 0, fy: fijas.filas ? geo.y(fijas.filas) : 0,
+        indice, hoja, base: hoja, of: guardado && guardado.of ? guardado.of : null, g: geo, fm, cm, fijas, fx: fijas.columnas ? geo.x(fijas.columnas) : 0, fy: fijas.filas ? geo.y(fijas.filas) : 0,
         nFilas: limitar(fm + 41, 60, MAX_FILAS), nCols: limitar(cm + 11, 26, MAX_COLS),
         sel: guardado ? guardado.sel : { f: 0, c: 0, f2: 0, c2: 0 }, zoom: guardado ? guardado.zoom : zoomArchivo, scrollX: guardado ? guardado.scrollX : 0, scrollY: guardado ? guardado.scrollY : 0,
         combinadas: indiceCombinadas(hoja),
       };
-      if (est) estados.set(est.indice, { sel: est.sel, zoom: est.zoom, scrollX: cuerpo.scrollLeft, scrollY: cuerpo.scrollTop });
+      cerrarMenuOF();
+      if (est) estados.set(est.indice, { sel: est.sel, zoom: est.zoom, scrollX: cuerpo.scrollLeft, scrollY: cuerpo.scrollTop, of: est.of });
       est = e;
+      if (e.of) { aplicarVista(); calcularGeometria(); }
+      actualizarResumenOF();
       colocarTamano();
       cuerpo.scrollLeft = e.scrollX; cuerpo.scrollTop = e.scrollY;
       aplicarZoomControles();
@@ -215,7 +226,7 @@
       if ((window.devicePixelRatio || 1) !== dpr) medirVista();   // la ventana pasó a otra pantalla
       const z = est.zoom / 100;
       ctx.setTransform(dpr * z, 0, 0, dpr * z, 0, 0);
-      vistaReal = XlsxDibujo.dibujarVista(ctx, libro, est.hoja, est.g, { x: cuerpo.scrollLeft / z, y: cuerpo.scrollTop / z, ancho: W / z, alto: H / z, fijas: est.fijas }, { idioma });
+      vistaReal = XlsxDibujo.dibujarVista(ctx, libro, est.hoja, est.g, { x: cuerpo.scrollLeft / z, y: cuerpo.scrollTop / z, ancho: W / z, alto: H / z, fijas: est.fijas }, { idioma, filtros: !est.of });   // con ordenar y filtrar los botones de las columnas son de la rejilla
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       pintarSeleccion();
     }
@@ -223,6 +234,11 @@
     // posición en la pantalla (px de la vista) del borde de una columna / fila: las fijas no se desplazan, las demás restan lo que se corrió la hoja
     const pantallaX = (c) => (vistaReal.areaX + est.g.x(c) - (c < est.fijas.columnas ? 0 : cuerpo.scrollLeft / (est.zoom / 100))) * (est.zoom / 100);
     const pantallaY = (f) => (vistaReal.areaY + est.g.y(f) - (f < est.fijas.filas ? 0 : cuerpo.scrollTop / (est.zoom / 100))) * (est.zoom / 100);
+    function rectaDe(f, c) {
+      const fc = c < est.fijas.columnas, ff = f < est.fijas.filas;   // el borde de la derecha / de abajo de una celda fija también es fijo
+      const x = pxCol(c, fc), y = pyFila(f, ff);
+      return { x, y, ancho: pxCol(c + 1, fc) - x, alto: pyFila(f + 1, ff) - y };
+    }
     const pxCol = (col, fija) => (vistaReal.areaX + est.g.x(col) - (fija ? 0 : cuerpo.scrollLeft / (est.zoom / 100))) * (est.zoom / 100);
     const pyFila = (fila, fija) => (vistaReal.areaY + est.g.y(fila) - (fija ? 0 : cuerpo.scrollTop / (est.zoom / 100))) * (est.zoom / 100);
     // un tramo [a0, a1] se parte en el que cae en la zona fija (índices < nFija) y el que cae en la zona que se desplaza
@@ -259,12 +275,161 @@
       const mismo = (r.f0 === r.f1 && r.c0 === r.c1) || (m && r.f0 === m.f0 && r.c0 === m.c0 && r.f1 === m.f1 && r.c1 === m.c1);
       ponerRango(mismo ? [] : piezasDe(r));
       ponerBusqueda(piezasBusqueda(piezasDe));
+      posicionarBotonesOF();
       // asas en las esquinas del rango (solo con el tacto y cuando la selección es de celdas, no de columnas o filas enteras)
       const celdas = r.f1 < MAX_FILAS - 1 && r.c1 < MAX_COLS - 1;
       const colocarAsa = (div, x, y) => { const visible = modoTactil && celdas && x >= ax - 1 && x <= W + 1 && y >= ay - 1 && y <= H + 1; div.hidden = !visible; if (visible) { div.style.left = x + 'px'; div.style.top = y + 'px'; } };
       colocarAsa(asaIni, pxC(r.c0, r.c0 < V.nc), pyF(r.f0, r.f0 < V.nf));
       colocarAsa(asaFin, pxC(r.c1 + 1, r.c1 < V.nc), pyF(r.f1 + 1, r.f1 < V.nf));
     }
+
+    // ---- Ordenar y filtrar (solo para mirar) --------------------------------------------------------------------------------------
+    // est.of = { rango, orden: { col, descendente } | null, filtros: Map(col → Set de valores que se ocultan) }; est.hoja pasa a ser una vista de est.base
+    // con las filas reordenadas / ocultas (RejillaOrdenFiltro). El archivo y la hoja leída no se tocan.
+    let resumenOF = null, temporizadorAviso = 0, avisoActivo = false;
+    function avisoOF(texto) { avisoActivo = true; infoOF.textContent = texto; infoOF.hidden = false; anunciar(texto); clearTimeout(temporizadorAviso); temporizadorAviso = setTimeout(() => { avisoActivo = false; if (!destruida) actualizarResumenOF(); }, 4000); }
+    function aplicarVista() {
+      const o = est.of;
+      if (!o) { est.hoja = est.base; resumenOF = null; return; }
+      const v = RejillaOrdenFiltro.construirVista(libro, est.base, o.rango, { orden: o.orden, filtros: o.filtros, idioma }, lector.opciones);
+      est.hoja = v.hoja; resumenOF = v;
+      if (!v.orden.ok) { o.orden = null; avisoOF(tx('rh-of-combinadas')); }
+    }
+    function actualizarResumenOF() {
+      const o = est && est.of;
+      botonOF.setAttribute('aria-pressed', String(!!o));
+      infoOF.hidden = !o && !avisoActivo;
+      if (o && resumenOF && !avisoActivo) infoOF.textContent = resumenOF.filtrada ? tx('rh-of-registros').replace('{0}', formatoNumero.format(resumenOF.visibles)).replace('{1}', formatoNumero.format(resumenOF.total)) : tx('rh-of-total').replace('{0}', formatoNumero.format(resumenOF.total));
+    }
+    function reaplicarOF() {
+      cerrarMenuOF();
+      aplicarVista(); calcularGeometria(); actualizarResumenOF(); ultimoInfo = '';
+      colocarTamano(); pintar(); actualizarBarras();
+    }
+    function activarOF(si) {
+      if (!est) return;
+      if (!si) { if (est.of) { est.of = null; reaplicarOF(); } return; }
+      const r = RejillaOrdenFiltro.rangoDeTrabajo(est.base, est.sel.f, est.sel.c);
+      if (r.f1 <= r.f0) { avisoOF(tx('rh-of-aviso-celda')); return; }
+      est.of = { rango: r, orden: null, filtros: new Map() };
+      reaplicarOF();
+    }
+    escuchar(botonOF, 'click', () => { activarOF(!(est && est.of)); cuerpo.focus({ preventScroll: true }); });
+
+    // los botones de las columnas del encabezado
+    const botonesOF = [];
+    function posicionarBotonesOF() {
+      const o = est && est.of;
+      let usados = 0;
+      if (o) {
+        const V = vistaReal, z = est.zoom / 100, ax = V.areaX * z, ay = V.areaY * z, fx = V.fx * z, fy = V.fy * z, f0 = o.rango.f0;
+        const filaFija = f0 < V.nf;
+        if (est.g.altoFila(f0) > 0 && (filaFija || (f0 >= V.f0 && f0 <= V.f1))) {
+          const cols = [];
+          for (let col = o.rango.c0; col <= Math.min(o.rango.c1, V.nc - 1) && cols.length < 300; col++) cols.push(col);
+          for (let col = Math.max(o.rango.c0, V.nc, V.c0); col <= Math.min(o.rango.c1, V.c1) && cols.length < 300; col++) cols.push(col);
+          for (const col of cols) {
+            if (est.g.anchoCol(col) <= 0) continue;
+            const r = rectaDe(f0, col), lado = Math.min(18, r.alto - 2, r.ancho - 2);
+            if (lado < 10) continue;
+            const x = r.x + r.ancho - lado - 1, y = r.y + r.alto - lado - 1;
+            if (x < (col < V.nc ? ax : ax + fx) || x + lado > W || y < (filaFija ? ay : ay + fy) || y + lado > H) continue;
+            let b = botonesOF[usados];
+            if (!b) {
+              b = document.createElement('button'); b.type = 'button'; b.className = 'rh-of-col'; b.setAttribute('aria-haspopup', 'dialog');
+              b.addEventListener('pointerdown', (e) => e.stopPropagation());
+              b.addEventListener('dblclick', (e) => e.stopPropagation());
+              b.addEventListener('keydown', (e) => e.stopPropagation());
+              b.addEventListener('click', (e) => { e.stopPropagation(); abrirMenuOF(+b.dataset.col, b); });
+              capa.appendChild(b); botonesOF.push(b);
+            }
+            usados++;
+            const filtrada = o.filtros.has(col) && o.filtros.get(col).size > 0, orden = o.orden && o.orden.col === col ? o.orden : null;
+            b.dataset.col = col; b.hidden = false;
+            b.style.left = x + 'px'; b.style.top = y + 'px'; b.style.width = lado + 'px'; b.style.height = lado + 'px';
+            b.classList.toggle('rh-of-activa', filtrada || !!orden);
+            b.textContent = orden ? (orden.descendente ? '▼' : '▲') : '▾';
+            b.setAttribute('aria-label', tx('rh-of-col').replace('{0}', colNombre(col)) + (filtrada ? ' (' + tx('rh-of-filtrada') + ')' : ''));
+          }
+        }
+      }
+      for (let k = usados; k < botonesOF.length; k++) botonesOF[k].hidden = true;
+    }
+
+    // el menú de una columna: orden y lista de valores con casillas
+    const menuOF = document.createElement('div');
+    menuOF.className = 'rh-of-menu'; menuOF.setAttribute('role', 'dialog'); menuOF.setAttribute('aria-label', tx('rh-of')); menuOF.hidden = true;
+    raiz.appendChild(menuOF);
+    let menuColOF = -1, menuBotonOF = null, menuValores = [], menuMarcadas = new Set(), menuBusca = '';
+    const MAX_LISTA_OF = 400;
+    function cerrarMenuOF(devolverFoco) { if (menuOF.hidden) return; menuOF.hidden = true; menuOF.textContent = ''; if (devolverFoco && menuBotonOF) menuBotonOF.focus(); menuBotonOF = null; }
+    function abrirMenuOF(col, boton) {
+      if (!est || !est.of) return;
+      const o = est.of;
+      const { lista, truncado } = RejillaOrdenFiltro.valoresColumna(libro, est.base, o.rango, col, lector.opciones);
+      const cmp = new Intl.Collator(idioma === 'en' ? 'en-US' : 'es-CR', { numeric: true }).compare;
+      lista.sort((a, b) => (a.vacias ? 1 : b.vacias ? -1 : cmp(a.texto, b.texto)));
+      const excluidas = o.filtros.get(col);
+      menuColOF = col; menuBotonOF = boton; menuValores = lista; menuBusca = '';
+      menuMarcadas = new Set(lista.filter((v) => !(excluidas && excluidas.has(v.clave))).map((v) => v.clave));
+      menuOF.textContent = '';
+      const boton1 = (clase, texto, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = clase; b.textContent = texto; b.addEventListener('click', fn); return b; };
+      const fijar = (descendente) => { o.orden = { col, descendente }; reaplicarOF(); };
+      menuOF.appendChild(boton1('rh-of-op', tx('rh-of-asc'), () => fijar(false)));
+      menuOF.appendChild(boton1('rh-of-op', tx('rh-of-desc'), () => fijar(true)));
+      if (o.orden && o.orden.col === col) menuOF.appendChild(boton1('rh-of-op', tx('rh-of-quitar-orden'), () => { o.orden = null; reaplicarOF(); }));
+      const caja = document.createElement('input');
+      caja.type = 'search'; caja.className = 'rh-of-q'; caja.autocomplete = 'off'; caja.spellcheck = false; caja.placeholder = tx('rh-of-buscar-valor'); caja.setAttribute('aria-label', tx('rh-of-buscar-valor'));
+      menuOF.appendChild(caja);
+      const todo = document.createElement('label'); todo.className = 'rh-of-todo';
+      const todoCheck = document.createElement('input'); todoCheck.type = 'checkbox';
+      todo.appendChild(todoCheck); todo.appendChild(document.createTextNode(' ' + tx('rh-of-todo')));
+      menuOF.appendChild(todo);
+      const zona = document.createElement('div'); zona.className = 'rh-of-lista'; zona.setAttribute('role', 'group'); zona.setAttribute('aria-label', tx('rh-of'));
+      menuOF.appendChild(zona);
+      const aviso = document.createElement('div'); aviso.className = 'rh-of-nota'; aviso.hidden = true; aviso.textContent = tx('rh-of-mas');
+      menuOF.appendChild(aviso);
+      const pie = document.createElement('div'); pie.className = 'rh-of-pie';
+      const ok = boton1('rh-of-ok', tx('rh-of-aceptar'), () => {
+        if (menuMarcadas.size === menuValores.length) o.filtros.delete(col);
+        else o.filtros.set(col, new Set(menuValores.filter((v) => !menuMarcadas.has(v.clave)).map((v) => v.clave)));
+        reaplicarOF();
+      });
+      pie.appendChild(ok);
+      pie.appendChild(boton1('rh-of-cancelar', tx('rh-of-cancelar'), () => cerrarMenuOF(true)));
+      if (excluidas && excluidas.size) pie.appendChild(boton1('rh-of-borrar', tx('rh-of-borrar'), () => { o.filtros.delete(col); reaplicarOF(); }));
+      menuOF.appendChild(pie);
+      const coincide = (v) => !menuBusca || (v.vacias ? tx('rh-of-vacias') : v.texto).toLowerCase().includes(menuBusca);
+      const pintarLista = () => {
+        zona.textContent = '';
+        const visibles = menuValores.filter(coincide);
+        for (const v of visibles.slice(0, MAX_LISTA_OF)) {
+          const l = document.createElement('label'); l.className = 'rh-of-valor';
+          const ch = document.createElement('input'); ch.type = 'checkbox'; ch.checked = menuMarcadas.has(v.clave);
+          ch.addEventListener('change', () => { if (ch.checked) menuMarcadas.add(v.clave); else menuMarcadas.delete(v.clave); estadoTodo(); });
+          const sp = document.createElement('span'); sp.textContent = v.vacias ? tx('rh-of-vacias') : v.texto;
+          const n = document.createElement('small'); n.textContent = formatoNumero.format(v.cuenta);
+          l.appendChild(ch); l.appendChild(sp); l.appendChild(n); zona.appendChild(l);
+        }
+        aviso.hidden = !(truncado || visibles.length > MAX_LISTA_OF);
+        estadoTodo();
+      };
+      const estadoTodo = () => {
+        const visibles = menuValores.filter(coincide), marcadas = visibles.filter((v) => menuMarcadas.has(v.clave)).length;
+        todoCheck.checked = visibles.length > 0 && marcadas === visibles.length; todoCheck.indeterminate = marcadas > 0 && marcadas < visibles.length;
+        ok.disabled = menuMarcadas.size === 0;
+      };
+      todoCheck.addEventListener('change', () => { for (const v of menuValores.filter(coincide)) { if (todoCheck.checked) menuMarcadas.add(v.clave); else menuMarcadas.delete(v.clave); } pintarLista(); });
+      caja.addEventListener('input', () => { menuBusca = caja.value.trim().toLowerCase(); pintarLista(); });
+      pintarLista();
+      menuOF.hidden = false;
+      const rr = raiz.getBoundingClientRect(), rb = boton.getBoundingClientRect(), ancho = menuOF.offsetWidth;
+      menuOF.style.left = limitar(rb.right - rr.left - ancho, 4, Math.max(4, rr.width - ancho - 4)) + 'px';
+      menuOF.style.top = Math.max(4, Math.min(rb.bottom - rr.top + 2, rr.height - 120)) + 'px';
+      caja.focus({ preventScroll: true });
+    }
+    escuchar(menuOF, 'keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrarMenuOF(true); } });
+    escuchar(document, 'pointerdown', (e) => { if (!menuOF.hidden && !menuOF.contains(e.target) && !e.target.closest('.rh-of-col')) cerrarMenuOF(); });
 
     // ---- Pantalla completa ----------------------------------------------------------------------------------------------------
     let enCompleta = false;
@@ -513,6 +678,10 @@
       pedirPintado();
     }
     function enTecla(e) {
+      if (est && est.of && e.altKey && e.key === 'ArrowDown' && est.sel.f === est.of.rango.f0 && est.sel.c >= est.of.rango.c0 && est.sel.c <= est.of.rango.c1) {   // como en Excel
+        const b = botonesOF.find((x) => !x.hidden && +x.dataset.col === est.sel.c);
+        if (b) { e.preventDefault(); abrirMenuOF(est.sel.c, b); return; }
+      }
       if (!est || e.altKey) return;   // Alt + flecha es Atrás / Adelante del navegador
       const ctrl = e.ctrlKey || e.metaKey, ext = e.shiftKey, s = est.sel;
       if (ctrl && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); abrirBuscador(); return; }
@@ -565,11 +734,11 @@
       for (let col = V.c0; col <= V.c1; col++) { const r = mira(col, false); if (r) return r; }
       return null;
     }
-    function recalcularGeometria() {
+    function calcularGeometria() {
       est.g = XlsxDibujo.geometria(libro, est.hoja);
       est.fx = est.fijas.columnas ? est.g.x(est.fijas.columnas) : 0; est.fy = est.fijas.filas ? est.g.y(est.fijas.filas) : 0;
-      colocarTamano(); pintar();
     }
+    function recalcularGeometria() { calcularGeometria(); colocarTamano(); pintar(); }
     function fijarAnchoColumna(col, px) {
       px = limitar(Math.round(px), 12, 1200);
       // el ancho del modelo está en caracteres de la fuente Normal: px / mdw da esos px otra vez en la geometría (el último <col> manda)
@@ -841,11 +1010,8 @@
       copiar,
       buscar: async (texto, opciones) => { abrirBuscador(); cajaBusca.value = texto; if (opciones && 'todoElLibro' in opciones) { checkLibro.checked = !!opciones.todoElLibro; busq.todo = checkLibro.checked; } await buscar(texto); },
       // dónde está una celda en la vista (px, con el zoom y el desplazamiento de ahora): para las pruebas y para quien dibuje encima
-      rectCelda(f, c) {
-        const fc = c < est.fijas.columnas, ff = f < est.fijas.filas;   // el borde de la derecha / de abajo de una celda fija también es fijo
-        const x = pxCol(c, fc), y = pyFila(f, ff);
-        return { x, y, ancho: pxCol(c + 1, fc) - x, alto: pyFila(f + 1, ff) - y };
-      },
+      rectCelda: rectaDe,
+      ordenarYFiltrar(si) { if (si === undefined) return !!(est && est.of); activarOF(si); return !!(est && est.of); },
       zoom(z) { if (z === undefined) return est ? est.zoom : 100; ponerZoom(z); return est.zoom; },
       alCambiar(fn) { cambios.push(fn); },
       enfocar() { cuerpo.focus({ preventScroll: true }); },

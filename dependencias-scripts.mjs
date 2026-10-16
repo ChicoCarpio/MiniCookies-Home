@@ -11,7 +11,7 @@ const NECESITA = {
   'xlsb-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-estilos.js', 'xlsx-modelo.js'],
   'xls-lector.js': ['xlsx-estilos.js', 'xlsx-modelo.js'],
   'motor-hojas.js': ['vendor.js'],
-  'rejilla-hoja.js': ['vendor.js', 'lector-hojas.js', 'motor-hojas.js'],
+  'rejilla-hoja.js': ['vendor.js', 'lector-hojas.js', 'motor-hojas.js', 'rejilla-orden-filtro.js'],
   'excel-a-pdf-motor.js': ['vendor.js', 'motor-hojas.js', 'lector-hojas.js'],
   'xml2003-lector.js': ['xml-ligero.js', 'xlsx-modelo.js', 'xlsx-formato.js'],
   'html-tabla-lector.js': ['csv-planilla.js', 'xlsx-modelo.js'],
