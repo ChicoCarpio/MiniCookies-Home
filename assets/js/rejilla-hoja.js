@@ -15,7 +15,7 @@
   const MAX_FILAS = 1048576, MAX_COLS = 16384;
   const ZOOM_MIN = 50, ZOOM_MAX = 200;
   const AREA_DIRECTA = 20000;        // hasta esta cantidad de celdas la barra de estado recorre el rango; más, recorre las celdas con contenido
-  const MAX_COPIA = 2000000;         // celdas que se copian como mucho
+  const MAX_COPIA = 4000000;         // celdas que se copian como mucho (si la selección es mayor, se avisa en la barra de estado)
   const MAX_COMBINADAS_INDICE = 5000;
 
   // Textos de la rejilla: se suman a los de la página (los de la página mandan)
@@ -24,12 +24,12 @@
     const es = {
       'rh-rejilla': 'Hoja de cálculo', 'rh-hojas': 'Hojas', 'rh-nombre': 'Cuadro de nombre', 'rh-contenido': 'Contenido de la celda', 'rh-listo': 'Listo',
       'rh-promedio': 'Promedio', 'rh-recuento': 'Recuento', 'rh-suma': 'Suma', 'rh-zoom': 'Zoom', 'rh-alejar': 'Alejar', 'rh-acercar': 'Acercar', 'rh-vacia': 'Hoja vacía',
-      'rh-seleccion': 'Selección',
+      'rh-seleccion': 'Selección', 'rh-copia-parcial': 'Copiado parcial: la selección es demasiado grande', 'error-leer-hoja': 'No se pudo abrir la hoja',
     };
     const en = {
       'rh-rejilla': 'Spreadsheet', 'rh-hojas': 'Sheets', 'rh-nombre': 'Name box', 'rh-contenido': 'Cell contents', 'rh-listo': 'Ready',
       'rh-promedio': 'Average', 'rh-recuento': 'Count', 'rh-suma': 'Sum', 'rh-zoom': 'Zoom', 'rh-alejar': 'Zoom out', 'rh-acercar': 'Zoom in', 'rh-vacia': 'Empty sheet',
-      'rh-seleccion': 'Selection',
+      'rh-seleccion': 'Selection', 'rh-copia-parcial': 'Partial copy: the selection is too large', 'error-leer-hoja': 'The sheet could not be opened',
     };
     pagina.es = Object.assign(es, pagina.es);
     pagina.en = Object.assign(en, pagina.en);
@@ -55,25 +55,24 @@
     await XlsxDibujo.cargarFuentes(libro);
 
     // ---- DOM -----------------------------------------------------------------------------------------------------
-    contenedor.textContent = '';
     const raiz = document.createElement('div');
     raiz.className = 'rh';
     raiz.innerHTML =
-      '<div class="rh-barra"><output class="rh-nombre" aria-label="' + tx('rh-nombre') + '"></output><span class="rh-fx" aria-hidden="true">fx</span>' +
+      '<div class="rh-barra"><div class="rh-nombre" role="textbox" aria-readonly="true" aria-label="' + tx('rh-nombre') + '"></div><span class="rh-fx" aria-hidden="true">fx</span>' +
       '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div></div>' +
-      '<div class="rh-cuerpo" tabindex="0" role="grid" aria-label="' + tx('rh-rejilla') + '">' +
+      '<div class="rh-cuerpo" tabindex="0" role="application" aria-roledescription="' + tx('rh-rejilla') + '" aria-label="' + tx('rh-rejilla') + '">' +
       '<div class="rh-vista"><canvas class="rh-lienzo"></canvas><div class="rh-capa"><div class="rh-enc-col"></div><div class="rh-enc-fila"></div>' +
       '<div class="rh-recorte"><div class="rh-rango"></div><div class="rh-activa"></div></div></div></div><div class="rh-espaciador"></div></div>' +
       '<div class="rh-pestanas" role="tablist" aria-label="' + tx('rh-hojas') + '"></div>' +
-      '<div class="rh-estado"><span class="rh-info" role="status" aria-live="polite"></span><span class="rh-zoom">' +
+      '<div class="rh-estado"><span class="rh-info"></span><span class="rh-anuncio" role="status" aria-live="polite"></span><span class="rh-zoom">' +
       '<button type="button" class="rh-menos" aria-label="' + tx('rh-alejar') + '">−</button>' +
       '<input type="range" class="rh-control-zoom" min="' + ZOOM_MIN + '" max="' + ZOOM_MAX + '" step="10" value="100" aria-label="' + tx('rh-zoom') + '">' +
       '<button type="button" class="rh-mas" aria-label="' + tx('rh-acercar') + '">+</button><output class="rh-valor-zoom">100%</output></span></div>';
-    contenedor.appendChild(raiz);
+    contenedor.appendChild(raiz);   // la rejilla solo toca lo suyo: dos rejillas que se pisan (un archivo nuevo mientras carga el anterior) no se borran entre sí
     const q = (s) => raiz.querySelector(s);
     const cajaNombre = q('.rh-nombre'), cajaFormula = q('.rh-formula'), cuerpo = q('.rh-cuerpo'), vista = q('.rh-vista'), lienzo = q('.rh-lienzo');
     const capa = q('.rh-capa'), encCol = q('.rh-enc-col'), encFila = q('.rh-enc-fila'), recorte = q('.rh-recorte'), rangoDiv = q('.rh-rango'), activaDiv = q('.rh-activa');
-    const espaciador = q('.rh-espaciador'), pestanas = q('.rh-pestanas'), info = q('.rh-info');
+    const espaciador = q('.rh-espaciador'), pestanas = q('.rh-pestanas'), info = q('.rh-info'), anuncio = q('.rh-anuncio');
     const controlZoom = q('.rh-control-zoom'), valorZoom = q('.rh-valor-zoom');
     const ctx = lienzo.getContext('2d');
 
@@ -84,12 +83,24 @@
 
     function indiceCombinadas(hoja) {
       const lista = (hoja.combinadas || []).slice();
-      if (lista.length > MAX_COMBINADAS_INDICE) return { lista: [], mapa: new Map(lista.map((m) => [m.f0 * MAX_COLS + m.c0, m])) };
-      return { lista, mapa: null };
+      if (lista.length <= MAX_COMBINADAS_INDICE) return { lista, filas: null, altas: [] };
+      // muchas combinadas: se buscan por fila (las de pocas filas) y las altas, que son pocas, se recorren
+      const filas = new Map(), altas = [];
+      let entradas = 0;
+      for (const m of lista) {
+        const alto = m.f1 - m.f0 + 1;
+        if (alto > 8 || entradas > 3000000) { if (altas.length < MAX_COMBINADAS_INDICE) altas.push(m); continue; }
+        for (let f = m.f0; f <= m.f1; f++) { let a = filas.get(f); if (!a) filas.set(f, a = []); a.push(m); entradas++; }
+      }
+      return { lista: [], filas, altas };
     }
     function combinadaEn(f, c) {
       const ic = est.combinadas;
-      if (ic.mapa) return ic.mapa.get(f * MAX_COLS + c) || null;
+      if (ic.filas) {
+        for (const m of ic.filas.get(f) || []) if (c >= m.c0 && c <= m.c1) return m;
+        for (const m of ic.altas) if (f >= m.f0 && f <= m.f1 && c >= m.c0 && c <= m.c1) return m;
+        return null;
+      }
       for (const m of ic.lista) if (f >= m.f0 && f <= m.f1 && c >= m.c0 && c <= m.c1) return m;
       return null;
     }
@@ -119,9 +130,12 @@
       return r.f0 === r.f1 && r.c0 === r.c1 ? aA1(r.f0, r.c0) : aA1(r.f0, r.c0) + ':' + aA1(r.f1, r.c1);
     }
 
+    let peticion = 0;
     async function abrirHoja(indice) {
+      const mia = ++peticion;
       const hoja = await libro.cargarHoja(indice);
       await XlsxDibujo.prepararObjetos(libro, hoja, null);
+      if (mia !== peticion || destruida) return;   // otro clic llegó después: gana el último
       const C = hoja.celdas;
       const fm = C.filaMax, cm = C.colMax;
       const guardado = estados.get(indice);
@@ -158,6 +172,7 @@
     function pedirPintado() { if (pendiente || destruida) return; pendiente = true; requestAnimationFrame(() => { pendiente = false; if (!destruida) pintar(); }); }
     function pintar() {
       if (!est || !W || !H) return;
+      if ((window.devicePixelRatio || 1) !== dpr) medirVista();   // la ventana pasó a otra pantalla
       const z = est.zoom / 100;
       ctx.setTransform(dpr * z, 0, 0, dpr * z, 0, 0);
       vistaReal = XlsxDibujo.dibujarVista(ctx, libro, est.hoja, est.g, { x: cuerpo.scrollLeft / z, y: cuerpo.scrollTop / z, ancho: W / z, alto: H / z }, { idioma });
@@ -202,12 +217,16 @@
       if (tipo === T.vacio) return '';
       if (tipo === T.numero) {
         const codigo = libro.estilos.xf(C.estilo[i]).formato;
-        if (codigo && XlsxFormato.esFecha(codigo)) return textoDeCelda(f, c);
-        return formatoBarra.format(C.valor[i]);
+        if (codigo && (XlsxFormato.esFecha(codigo) || /%/.test(codigo))) return textoDeCelda(f, c);
+        const v = C.valor[i];
+        if (v !== 0 && (Math.abs(v) >= 1e15 || Math.abs(v) < 1e-6)) return String(v).toUpperCase().replace('.', idioma === 'en' ? '.' : ',');
+        return formatoBarra.format(v);
       }
       return textoDeCelda(f, c);
     }
-    let temporizadorEstado = 0;
+    let temporizadorEstado = 0, ultimoInfo = '', temporizadorAnuncio = 0;
+    // una sola región viva (oculta a la vista) para el lector de pantalla: la celda y su contenido
+    function anunciar(texto) { clearTimeout(temporizadorAnuncio); temporizadorAnuncio = setTimeout(() => { anuncio.textContent = texto; }, 150); }
     function estadistica() {
       const r = rango(), C = est.hoja.celdas, T = LibroXlsx.TIPO;
       const f1 = Math.min(r.f1, est.fm), c1 = Math.min(r.c1, est.cm);
@@ -223,12 +242,18 @@
         if (area <= AREA_DIRECTA) { for (let f = r.f0; f <= f1; f++) for (let c = r.c0; c <= c1; c++) { const i = C.indiceDe(f, c); if (i >= 0) cuenta(i); } }
         else C.paraCada((f, c, i) => { if (f >= r.f0 && f <= f1 && c >= r.c0 && c <= c1) cuenta(i); });
       }
+      const partes = [];
+      if (n > 1 || nums > 1) {
+        if (nums > 1) partes.push(['rh-promedio', formatoNumero.format(suma / nums)]);
+        partes.push(['rh-recuento', formatoNumero.format(n)]);
+        if (nums > 1) partes.push(['rh-suma', formatoNumero.format(suma)]);
+      }
+      const clave = JSON.stringify(partes);
+      if (clave === ultimoInfo) return;
+      ultimoInfo = clave;
       info.textContent = '';
-      if (n <= 1 && nums <= 1) { info.textContent = tx('rh-listo'); return; }
-      const parte = (clave, valor) => { const s = document.createElement('span'); s.textContent = tx(clave) + ': '; const b = document.createElement('b'); b.textContent = valor; s.appendChild(b); info.appendChild(s); };
-      if (nums > 1) parte('rh-promedio', formatoNumero.format(suma / nums));
-      parte('rh-recuento', formatoNumero.format(n));
-      if (nums > 1) parte('rh-suma', formatoNumero.format(suma));
+      if (!partes.length) { info.textContent = tx('rh-listo'); return; }
+      for (const [k, v] of partes) { const sp = document.createElement('span'); sp.textContent = tx(k) + ': '; const b = document.createElement('b'); b.textContent = v; sp.appendChild(b); info.appendChild(sp); }
     }
     function actualizarBarras() {
       const r = rango();
@@ -237,6 +262,7 @@
       const texto = contenidoDeCelda(m ? m.f0 : est.sel.f, m ? m.c0 : est.sel.c);
       cajaFormula.textContent = texto;
       cajaFormula.classList.toggle('es-formula', texto.charAt(0) === '=');
+      anunciar(cajaNombre.textContent + (texto ? ': ' + texto : ''));
       clearTimeout(temporizadorEstado);
       const area = (r.f1 - r.f0 + 1) * (r.c1 - r.c0 + 1);
       if (area > AREA_DIRECTA) temporizadorEstado = setTimeout(() => { if (!destruida && est) estadistica(); }, 120); else estadistica();
@@ -258,6 +284,7 @@
     }
     // la siguiente fila o columna que se ve (las ocultas miden 0)
     function salto(desde, paso, mide, tope) {
+      tope = Math.max(tope, desde + 1);   // una selección que ya pasa del borde visible (columna entera) no se encoge
       let k = desde + paso;
       while (k > 0 && k < tope - 1 && mide(k) === 0) k += paso;
       return limitar(k, 0, tope - 1);
@@ -266,7 +293,7 @@
       const g = est.g, s = est.sel;
       let f = extender ? s.f2 : s.f, c = extender ? s.c2 : s.c;
       if (ctrl) {   // Ctrl + flecha: hasta el borde del contenido
-        if (df) f = df < 0 ? 0 : Math.max(est.fm, 0); if (dc) c = dc < 0 ? 0 : Math.max(est.cm, 0);
+        if (df) f = df < 0 ? 0 : (f < est.fm ? est.fm : f); if (dc) c = dc < 0 ? 0 : (c < est.cm ? est.cm : c);   // abajo y a la derecha: hasta lo último con contenido; si ya se pasó, se queda
       } else {
         if (df) f = salto(f, df, g.altoFila, est.nFilas);
         if (dc) c = salto(c, dc, g.anchoCol, est.nCols);
@@ -276,7 +303,7 @@
       pedirPintado();
     }
     function enTecla(e) {
-      if (!est) return;
+      if (!est || e.altKey) return;   // Alt + flecha es Atrás / Adelante del navegador
       const ctrl = e.ctrlKey || e.metaKey, ext = e.shiftKey, s = est.sel;
       const pagina = Math.max(1, Math.floor((H / (est.zoom / 100) - vistaReal.areaY) / Math.max(1, est.g.altoPorDefecto)) - 1);
       let hecho = true;
@@ -286,7 +313,7 @@
         case 'ArrowLeft': mover(0, -1, ext, ctrl); break;
         case 'ArrowRight': mover(0, 1, ext, ctrl); break;
         case 'PageUp': { const f = Math.max(0, (ext ? s.f2 : s.f) - pagina); ext ? ponerSeleccion(s.f, s.c, f, s.c2) : ponerSeleccion(f, s.c, f, s.c); mostrarCelda(f, ext ? s.c2 : s.c); pedirPintado(); break; }
-        case 'PageDown': { const f = Math.min(MAX_FILAS - 1, (ext ? s.f2 : s.f) + pagina); ext ? ponerSeleccion(s.f, s.c, f, s.c2) : ponerSeleccion(f, s.c, f, s.c); mostrarCelda(f, ext ? s.c2 : s.c); pedirPintado(); break; }
+        case 'PageDown': { const f = Math.min(est.nFilas - 1, (ext ? s.f2 : s.f) + pagina); ext ? ponerSeleccion(s.f, s.c, f, s.c2) : ponerSeleccion(f, s.c, f, s.c); mostrarCelda(f, ext ? s.c2 : s.c); pedirPintado(); break; }
         case 'Home': if (ctrl) { ponerSeleccion(0, 0, 0, 0); mostrarCelda(0, 0); } else { const f = ext ? s.f2 : s.f; ext ? ponerSeleccion(s.f, s.c, f, 0) : ponerSeleccion(f, 0, f, 0); mostrarCelda(f, 0); } pedirPintado(); break;
         case 'End': if (ctrl) { const f = Math.max(0, est.fm), c = Math.max(0, est.cm); ponerSeleccion(f, c, f, c); mostrarCelda(f, c); pedirPintado(); } else hecho = false; break;
         case 'a': case 'A': if (ctrl) { ponerSeleccion(0, 0, MAX_FILAS - 1, MAX_COLS - 1); } else hecho = false; break;
@@ -355,15 +382,18 @@
       if (!est) return;
       const texto = textoCopia();
       if (e.clipboardData) { e.clipboardData.setData('text/plain', texto); e.preventDefault(); }
+      if (copiaParcial) { ultimoInfo = ''; info.textContent = tx('rh-copia-parcial'); }
     });
+    let copiaParcial = false;
     function textoCopia() {
+      copiaParcial = false;
       const r = rango(), f1 = Math.min(r.f1, est.fm), c1 = Math.min(r.c1, est.cm);
       if (f1 < r.f0 || c1 < r.c0) return '';
       const filas = [], columnas = c1 - r.c0 + 1;
       let celdas = 0;
       for (let f = r.f0; f <= f1; f++) {
         if (est.g.altoFila(f) === 0) continue;
-        celdas += columnas; if (celdas > MAX_COPIA) break;
+        celdas += columnas; if (celdas > MAX_COPIA) { copiaParcial = true; break; }
         const fila = [];
         for (let c = r.c0; c <= c1; c++) if (est.g.anchoCol(c) !== 0) fila.push(textoDeCelda(f, c).replace(/[\t\r\n]+/g, ' '));
         filas.push(fila.join('\t'));
@@ -372,6 +402,7 @@
     }
     async function copiar() {
       const texto = textoCopia();
+      if (copiaParcial) { ultimoInfo = ''; info.textContent = tx('rh-copia-parcial'); }
       try { await navigator.clipboard.writeText(texto); return true; } catch (e) {
         const a = document.createElement('textarea'); a.value = texto; a.style.position = 'fixed'; a.style.opacity = '0'; document.body.appendChild(a); a.select();
         let ok = false; try { ok = document.execCommand('copy'); } catch (x) { ok = false; }
@@ -381,9 +412,10 @@
 
     // ---- Zoom ------------------------------------------------------------------------------------------------------------
     function aplicarZoomControles() { controlZoom.value = est.zoom; valorZoom.textContent = est.zoom + '%'; }
-    function ponerZoom(z, ancla) {
+    function ponerZoom(z, ancla, fino) {
       if (!est) return;
       z = limitar(Math.round(z / 10) * 10, ZOOM_MIN, ZOOM_MAX);
+      if (!fino) est.zoomFino = z;
       if (z === est.zoom) return;
       const antes = est.zoom / 100;
       // se mantiene fijo el punto de la hoja que está bajo el ancla (la esquina de las celdas, como Excel; con Ctrl + rueda o pellizco, el puntero)
@@ -402,7 +434,9 @@
       if (!e.ctrlKey || !est) return;
       e.preventDefault();
       const r = vista.getBoundingClientRect();
-      ponerZoom(est.zoom + (e.deltaY < 0 ? 10 : -10), { x: e.clientX - r.left, y: e.clientY - r.top });
+      // lo que mide la rueda se acumula: un gesto de pellizco del panel táctil manda decenas de eventos pequeños
+      est.zoomFino = limitar((est.zoomFino || est.zoom) * Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0025)), ZOOM_MIN, ZOOM_MAX);
+      ponerZoom(est.zoomFino, { x: e.clientX - r.left, y: e.clientY - r.top }, true);
     }, { passive: false });
     // pellizco en pantallas táctiles
     let distanciaInicial = 0, zoomInicial = 100;
@@ -439,12 +473,17 @@
     }
     escuchar(pestanas, 'click', async (e) => {
       const b = e.target.closest('.rh-pestana'); if (!b || (est && +b.dataset.indice === est.indice)) return;
-      b.disabled = true;
-      try { await abrirHoja(+b.dataset.indice); } finally { b.disabled = false; }
-      cuerpo.focus({ preventScroll: true });
+      try { await abrirHoja(+b.dataset.indice); } catch (error) {
+        if (typeof opciones.alError === 'function') opciones.alError(error); else alert(tx('error-leer-hoja') + ': ' + (error && error.message ? error.message : error));
+      }
     });
 
     // ---- Arranque ---------------------------------------------------------------------------------------------------------
+    escuchar(pestanas, 'keydown', (e) => {   // flechas entre pestañas
+      const lista = [...pestanas.querySelectorAll('.rh-pestana')], k = lista.indexOf(document.activeElement);
+      if (k < 0 || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      e.preventDefault(); lista[limitar(k + (e.key === 'ArrowRight' ? 1 : -1), 0, lista.length - 1)].focus();
+    });
     escuchar(cuerpo, 'scroll', pedirPintado);
     // el cambio de tamaño se atiende fuera de la entrega del observador: cambiar el tamaño de la vista desde adentro provoca "ResizeObserver loop completed with undelivered notifications"
     let medidaPendiente = false;
@@ -468,7 +507,7 @@
       zoom(z) { if (z === undefined) return est ? est.zoom : 100; ponerZoom(z); return est.zoom; },
       alCambiar(fn) { cambios.push(fn); },
       enfocar() { cuerpo.focus({ preventScroll: true }); },
-      destruir() { destruida = true; observador.disconnect(); for (const quitar of escuchas) quitar(); clearTimeout(temporizadorEstado); contenedor.textContent = ''; },
+      destruir() { destruida = true; observador.disconnect(); for (const quitar of escuchas) quitar(); clearTimeout(temporizadorEstado); clearTimeout(temporizadorAnuncio); raiz.remove(); },
     };
   }
 

@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="../assets/css/rejilla-hoja.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
-  .barra-visor { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 8px; }
+  .barra-visor { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 8px; }
   .rejilla-contenedor { height: min(72vh, 680px); min-height: 360px; }
   .rejilla-contenedor[hidden], #vistaTabla[hidden], .barra-visor[hidden] { display: none; }
   .cargando-visor { color: var(--texto-suave); margin: 12px 0; }
@@ -40,7 +40,8 @@ window.i18nPagina = {
     'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
     'hoja-vacia': 'Esta hoja está vacía.',
     'ver-como-tabla': 'Ver como tabla',
-    'ver-como-hoja': 'Ver como hoja',
+    'copiar': 'Copiar selección',
+    'copiado': 'Copiado',
     'cargando-visor': 'Preparando la hoja…'
   },
   en: {
@@ -51,7 +52,8 @@ window.i18nPagina = {
     'zona-arrastre': '📊 Drag your file here or click to choose it',
     'hoja-vacia': 'This sheet is empty.',
     'ver-como-tabla': 'View as table',
-    'ver-como-hoja': 'View as spreadsheet',
+    'copiar': 'Copy selection',
+    'copiado': 'Copied',
     'cargando-visor': 'Preparing the sheet…'
   }
 };
@@ -82,7 +84,7 @@ window.i18nPagina = {
 
     <p class="cargando-visor" id="cargandoVisor" role="status" hidden data-i18n="cargando-visor">Preparando la hoja…</p>
     <div class="barra-visor" id="barraVisor" hidden>
-      <span></span>
+      <button class="boton" id="botonCopiar" type="button" data-i18n="copiar">Copiar selección</button>
       <button class="boton" id="botonVista" type="button" aria-pressed="false" data-i18n="ver-como-tabla">Ver como tabla</button>
     </div>
     <div class="rejilla-contenedor" id="rejillaContenedor" hidden></div>
@@ -122,7 +124,10 @@ const rejillaContenedor = document.getElementById('rejillaContenedor');
 const vistaTabla = document.getElementById('vistaTabla');
 const barraVisor = document.getElementById('barraVisor');
 const botonVista = document.getElementById('botonVista');
+const botonCopiar = document.getElementById('botonCopiar');
 const cargandoVisor = document.getElementById('cargandoVisor');
+let libroActual = null;      // lo que devolvió LectorHojas.abrir
+let hojaTablaActual = 0;    // la hoja que muestra la tabla (posición en libroActual.hojas)
 let rejillaActual = null;   // RejillaHoja de la hoja abierta (null si el motor de dibujo no cargó: se ve la tabla)
 let verTabla = false;
 let numeroDeArchivo = 0;
@@ -209,6 +214,7 @@ contenedorTabla.addEventListener('scroll', () => {
 
 async function mostrarHoja(indiceHoja) {
   const miNumero = ++numeroDeHoja;
+  hojaTablaActual = indiceHoja;
   [...pestanas.children].forEach((boton, k) => boton.classList.toggle('activa', k === indiceHoja));
   let datos;
   try {
@@ -270,31 +276,55 @@ function aplicarVista() {
   rejillaContenedor.hidden = !hayRejilla || verTabla;
   vistaTabla.hidden = hayRejilla && !verTabla;
   barraVisor.hidden = !hayRejilla;
+  botonCopiar.hidden = verTabla;
   botonVista.setAttribute('aria-pressed', String(verTabla));
-  botonVista.setAttribute('data-i18n', verTabla ? 'ver-como-hoja' : 'ver-como-tabla');
-  botonVista.textContent = t(verTabla ? 'ver-como-hoja' : 'ver-como-tabla');
 }
-botonVista.addEventListener('click', () => { verTabla = !verTabla; aplicarVista(); if (!verTabla && rejillaActual) rejillaActual.enfocar(); });
+botonVista.addEventListener('click', () => {
+  if (!rejillaActual || !libroActual) return;
+  verTabla = !verTabla;
+  if (verTabla) {   // la tabla se abre en la hoja que se estaba mirando; al volver, la hoja sigue a la tabla
+    const k = libroActual.hojas.findIndex((h) => h.indice === rejillaActual.seleccion().hoja);
+    if (k >= 0 && k !== hojaTablaActual) mostrarHoja(k);
+  } else {
+    const h = libroActual.hojas[hojaTablaActual];
+    if (h && h.indice !== rejillaActual.seleccion().hoja) rejillaActual.mostrarHoja(h.indice).catch(() => {});
+  }
+  aplicarVista();
+  if (!verTabla) rejillaActual.enfocar();
+});
+let temporizadorCopiado = 0;
+botonCopiar.addEventListener('click', async () => {
+  if (!rejillaActual) return;
+  const ok = await rejillaActual.copiar();
+  if (!ok) return;
+  botonCopiar.textContent = t('copiado');
+  clearTimeout(temporizadorCopiado);
+  temporizadorCopiado = setTimeout(() => { botonCopiar.textContent = t('copiar'); }, 1500);
+});
 
 async function mostrarArchivo(archivo) {
   const miArchivo = ++numeroDeArchivo;
+  const vigente = () => miArchivo === numeroDeArchivo;   // otro archivo elegido después: este ya no importa
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   if (rejillaActual) { rejillaActual.destruir(); rejillaActual = null; }
+  libroActual = null; hojasActuales = [];
   rejillaContenedor.hidden = true; vistaTabla.hidden = true; barraVisor.hidden = true;
+  pestanas.innerHTML = ''; contenedorTabla.innerHTML = '';
   cargandoVisor.hidden = false;
   let libro;
   try {
     libro = await LectorHojas.abrir(archivo);
-    hojasActuales = libro.hojas.map((h) => ({ nombre: h.nombre, abrir: () => libro.cargar(h.indice) }));
   } catch (error) {
+    if (!vigente()) return;
     cargandoVisor.hidden = true;
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
-  if (miArchivo !== numeroDeArchivo) return;
+  if (!vigente()) return;
+  libroActual = libro;
+  hojasActuales = libro.hojas.map((h) => ({ nombre: h.nombre, abrir: () => libro.cargar(h.indice) }));
 
   // La tabla (texto real) siempre se arma: es la alternativa para lectores de pantalla y lo que se ve si el motor de dibujo no carga
-  pestanas.innerHTML = '';
   hojasActuales.forEach((hoja, k) => {
     const boton = document.createElement('button');
     boton.type = 'button';
@@ -303,17 +333,19 @@ async function mostrarArchivo(archivo) {
     pestanas.appendChild(boton);
   });
 
+  let rejilla = null;
   try {
     await MotorHojas.cargarDibujo();
-    if (miArchivo !== numeroDeArchivo) return;
+    if (!vigente()) return;
     rejillaContenedor.hidden = false;   // con el contenedor visible la rejilla mide su tamaño real
-    const rejilla = await RejillaHoja.crear(rejillaContenedor, { libro });
-    if (miArchivo !== numeroDeArchivo) { rejilla.destruir(); return; }
-    rejillaActual = rejilla;
+    rejilla = await RejillaHoja.crear(rejillaContenedor, { libro });
+    if (!vigente()) { rejilla.destruir(); return; }   // la rejilla solo borra lo suyo: no toca la del archivo que llegó después
   } catch (error) {
-    rejillaActual = null;   // sin rejilla: se ve la tabla de siempre
+    if (!vigente()) return;
+    rejilla = null;   // sin rejilla: se ve la tabla de siempre
     rejillaContenedor.textContent = '';
   }
+  rejillaActual = rejilla;
   cargandoVisor.hidden = true;
   aplicarVista();
   mostrarHoja(0);

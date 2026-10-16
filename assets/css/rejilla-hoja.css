@@ -1,7 +1,7 @@
 /* Rejilla de hoja de cálculo (assets/js/rejilla-hoja.js). El contenedor que la recibe le da el alto: la rejilla llena todo lo que tiene.
    Colores con los tokens del sitio; la hoja misma (el Canvas) se dibuja blanca, como en Excel. */
 .rh {
-  display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
+  position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
   background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: var(--radio); overflow: hidden;
 }
 .rh-barra { display: flex; align-items: stretch; border-bottom: 1px solid var(--gris-borde); font-size: 0.88rem; }
@@ -54,3 +54,6 @@
   .rh-control-zoom { width: 64px; }
 }
 @media (prefers-reduced-motion: reduce) { .rh * { scroll-behavior: auto !important; } }
+
+/* Solo para el lector de pantalla: la celda activa y su contenido */
+.rh-anuncio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
