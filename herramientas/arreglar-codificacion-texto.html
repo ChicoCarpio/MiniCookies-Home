@@ -40,7 +40,26 @@ window.i18nPagina = {
     'item2': 'Convierte a UTF-8 los archivos en UTF-16 (lo que el Bloc de notas llama "Unicode").',
     'item3': 'Corrige el texto que ya se guardó con la codificación equivocada, donde "canción" aparece como "canciÃ³n" o las comillas como "â€™".',
     'item4': 'Si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252 (la codificación más común en archivos viejos de Windows) en vez de mostrar los acentos rotos.',
-    'item5': 'Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.'
+    'item5': 'Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.',
+    'guia-titulo': 'Cómo arreglar los acentos rotos y la codificación de un archivo de texto',
+    'guia-intro': 'Repara archivos de texto que se ven con acentos rotos (por ejemplo «canciÃ³n» en lugar de «canción»), que tienen saltos de línea mezclados o que están en una codificación poco común. Acepta .txt, .csv, .tsv, .srt, .vtt, .md y .log, y devuelve una copia en UTF-8 limpia. Es habitual necesitarlo con subtítulos descargados, exportaciones de programas viejos o archivos CSV que Excel abre con caracteres extraños.',
+    'guia-paso-1': 'Arrastrá el archivo de texto a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'En «Saltos de línea de salida» elegí «Unix / Mac (LF)» (por defecto) o «Windows (CRLF)».',
+    'guia-paso-3': 'Revisá la casilla «Guardar con BOM». Se marca sola si el archivo es .csv o .tsv, porque el BOM ayuda a que Excel muestre bien los acentos.',
+    'guia-paso-4': 'Tocá «Arreglar». Aparece un diagnóstico con la codificación detectada y la lista de correcciones hechas.',
+    'guia-paso-5': 'Tocá «Descargar archivo corregido». El archivo conserva su nombre con el sufijo «-corregido» (por ejemplo, «subtitulos-corregido.srt»).',
+    'guia-consejo-1': 'La herramienta quita el BOM de UTF-8, convierte archivos UTF-16 (lo que el Bloc de notas llama «Unicode») a UTF-8 y, si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252.',
+    'guia-consejo-2': 'También deshace el texto «roto» por haber sido guardado con la codificación equivocada, como «â€™» en lugar de una comilla. Revisa hasta dos pasadas, por si el daño se repitió.',
+    'guia-consejo-3': 'Si el archivo ya estaba bien, igualmente genera una copia normalizada y lo avisa.',
+    'guia-consejo-4': 'Con subtítulos .srt, el sufijo en el nombre evita pisar el original.',
+    'guia-p1': '¿Para qué sirve el BOM?',
+    'guia-r1': 'Es una marca al comienzo del archivo que indica que está en UTF-8. Excel la usa para mostrar bien los acentos de un CSV; otros programas pueden verla como un carácter raro, por eso es opcional.',
+    'guia-p2': '¿Qué diferencia hay entre LF y CRLF?',
+    'guia-r2': 'Son las dos formas de marcar el fin de línea: LF en Unix y Mac, CRLF en Windows. Elegí según el programa que vaya a abrir el archivo.',
+    'guia-p3': '¿Siempre arregla el texto?',
+    'guia-r3': 'No hay garantía: si el archivo está en otra codificación distinta de las contempladas, el resultado puede seguir mostrando símbolos extraños.',
+    'guia-p4': '¿Acepta archivos de Word o PDF?',
+    'guia-r4': 'No, solo texto plano.',
   },
   en: {
     'titulo-pagina': 'Fix Text File Encoding Free — Mini Cookies',
@@ -71,7 +90,26 @@ window.i18nPagina = {
     'item2': 'Converts UTF-16 files (what Notepad calls "Unicode") to UTF-8.',
     'item3': 'Fixes text that was already saved with the wrong encoding, where "café" shows up as "cafÃ©" or quotes as "â€™".',
     'item4': 'If the file isn’t valid UTF-8, it’s read as Windows-1252 (the most common encoding in older Windows files) instead of showing broken accents.',
-    'item5': 'Normalizes line breaks (a mix of Windows/Unix/Mac styles) to the format you choose.'
+    'item5': 'Normalizes line breaks (a mix of Windows/Unix/Mac styles) to the format you choose.',
+    'guia-titulo': 'How to fix broken accents and the encoding of a text file',
+    'guia-intro': 'It repairs text files that show broken accents (for example “canciÃ³n” instead of “canción”), have mixed line breaks or are in an uncommon encoding. It accepts .txt, .csv, .tsv, .srt, .vtt, .md and .log, and returns a clean UTF-8 copy. You often need it with downloaded subtitles, exports from old programs, or CSV files that Excel opens with strange characters.',
+    'guia-paso-1': 'Drag the text file onto the upload area or click to choose it.',
+    'guia-paso-2': 'Under “Output line breaks” choose “Unix / Mac (LF)” (the default) or “Windows (CRLF)”.',
+    'guia-paso-3': 'Check the “Save with BOM” box. It ticks itself if the file is .csv or .tsv, because the BOM helps Excel show the accents correctly.',
+    'guia-paso-4': 'Tap “Fix”. A diagnosis appears with the detected encoding and the list of corrections made.',
+    'guia-paso-5': 'Tap “Download fixed file”. The file keeps its name with the “-corregido” suffix (for example, “subtitulos-corregido.srt”).',
+    'guia-consejo-1': 'The tool removes the UTF-8 BOM, converts UTF-16 files (what Notepad calls “Unicode”) to UTF-8 and, if the file isn’t valid UTF-8, reinterprets it as Windows-1252.',
+    'guia-consejo-2': 'It also undoes text “broken” by having been saved with the wrong encoding, such as “â€™” instead of an apostrophe. It checks up to two passes, in case the damage was repeated.',
+    'guia-consejo-3': 'If the file was already fine, it still generates a normalized copy and tells you so.',
+    'guia-consejo-4': 'With .srt subtitles, the suffix in the name keeps you from overwriting the original.',
+    'guia-p1': 'What is the BOM for?',
+    'guia-r1': 'It’s a mark at the start of the file that says it’s in UTF-8. Excel uses it to display the accents of a CSV correctly; other programs may see it as a strange character, which is why it’s optional.',
+    'guia-p2': 'What’s the difference between LF and CRLF?',
+    'guia-r2': 'They’re the two ways of marking the end of a line: LF on Unix and Mac, CRLF on Windows. Choose according to the program that will open the file.',
+    'guia-p3': 'Does it always fix the text?',
+    'guia-r3': 'There’s no guarantee: if the file is in an encoding other than the ones covered, the result may still show strange symbols.',
+    'guia-p4': 'Does it accept Word or PDF files?',
+    'guia-r4': 'No, only plain text.',
   }
 };
 </script>
@@ -133,6 +171,43 @@ window.i18nPagina = {
       <li data-i18n="item5">Normaliza los saltos de línea (mezcla de estilo Windows/Unix/Mac) al formato que elijas.</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo arreglar los acentos rotos y la codificación de un archivo de texto</h2>
+    <p data-i18n="guia-intro">Repara archivos de texto que se ven con acentos rotos (por ejemplo «canciÃ³n» en lugar de «canción»), que tienen saltos de línea mezclados o que están en una codificación poco común. Acepta .txt, .csv, .tsv, .srt, .vtt, .md y .log, y devuelve una copia en UTF-8 limpia. Es habitual necesitarlo con subtítulos descargados, exportaciones de programas viejos o archivos CSV que Excel abre con caracteres extraños.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el archivo de texto a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">En «Saltos de línea de salida» elegí «Unix / Mac (LF)» (por defecto) o «Windows (CRLF)».</li>
+      <li data-i18n="guia-paso-3">Revisá la casilla «Guardar con BOM». Se marca sola si el archivo es .csv o .tsv, porque el BOM ayuda a que Excel muestre bien los acentos.</li>
+      <li data-i18n="guia-paso-4">Tocá «Arreglar». Aparece un diagnóstico con la codificación detectada y la lista de correcciones hechas.</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar archivo corregido». El archivo conserva su nombre con el sufijo «-corregido» (por ejemplo, «subtitulos-corregido.srt»).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La herramienta quita el BOM de UTF-8, convierte archivos UTF-16 (lo que el Bloc de notas llama «Unicode») a UTF-8 y, si el archivo no es UTF-8 válido, lo reinterpreta como Windows-1252.</li>
+      <li data-i18n="guia-consejo-2">También deshace el texto «roto» por haber sido guardado con la codificación equivocada, como «â€™» en lugar de una comilla. Revisa hasta dos pasadas, por si el daño se repitió.</li>
+      <li data-i18n="guia-consejo-3">Si el archivo ya estaba bien, igualmente genera una copia normalizada y lo avisa.</li>
+      <li data-i18n="guia-consejo-4">Con subtítulos .srt, el sufijo en el nombre evita pisar el original.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Para qué sirve el BOM?</summary>
+      <p data-i18n="guia-r1">Es una marca al comienzo del archivo que indica que está en UTF-8. Excel la usa para mostrar bien los acentos de un CSV; otros programas pueden verla como un carácter raro, por eso es opcional.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué diferencia hay entre LF y CRLF?</summary>
+      <p data-i18n="guia-r2">Son las dos formas de marcar el fin de línea: LF en Unix y Mac, CRLF en Windows. Elegí según el programa que vaya a abrir el archivo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Siempre arregla el texto?</summary>
+      <p data-i18n="guia-r3">No hay garantía: si el archivo está en otra codificación distinta de las contempladas, el resultado puede seguir mostrando símbolos extraños.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Acepta archivos de Word o PDF?</summary>
+      <p data-i18n="guia-r4">No, solo texto plano.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

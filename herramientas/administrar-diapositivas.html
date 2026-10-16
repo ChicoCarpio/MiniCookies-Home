@@ -30,7 +30,26 @@ window.i18nPagina = {
     'etiqueta-diapositiva-con-texto': 'Diapositiva {n} — {texto}',
     'error-leer': 'No se pudo leer la presentación',
     'error-sin-ninguna': 'No queda ninguna diapositiva.',
-    'error-generar': 'No se pudo generar la presentación'
+    'error-generar': 'No se pudo generar la presentación',
+    'guia-titulo': 'Cómo reordenar o quitar diapositivas de una presentación',
+    'guia-intro': 'Permite cambiar el orden de las diapositivas de una presentación de PowerPoint (.pptx) o quitar las que no necesitás, sin abrir PowerPoint. Entra un archivo .pptx y sale otro .pptx con las diapositivas que dejaste en el orden que elegiste. Es práctico para armar una versión corta de una presentación, reordenar una charla o sacar diapositivas que no querés compartir.',
+    'guia-paso-1': 'Arrastrá el archivo .pptx a la zona de carga o hacé clic para elegirlo. La herramienta lee la presentación y lista las diapositivas.',
+    'guia-paso-2': 'Cada diapositiva aparece como «Diapositiva N» y, si tiene texto, con los primeros caracteres del primer texto que encuentra. Arrastrá cada fila para cambiar su posición.',
+    'guia-paso-3': 'Para quitar una diapositiva, tocá la ✕ de su fila. La barra de deshacer y rehacer permite recuperar lo que quitaste o volver al orden anterior.',
+    'guia-paso-4': 'Tocá «Descargar reordenada». Cuando termina aparece el enlace «Descargar PowerPoint» y el archivo se llama «presentacion-reordenada.pptx».',
+    'guia-consejo-1': 'La etiqueta de cada fila usa el primer texto de la diapositiva, así que sirve para reconocerlas aunque no tengan título. Si una diapositiva solo tiene imágenes, aparece solo con su número original.',
+    'guia-consejo-2': 'Al quitar diapositivas, también se borra su contenido interno (imágenes y notas) y se las saca de las secciones y de las presentaciones personalizadas.',
+    'guia-consejo-3': 'Las notas y las diapositivas ocultas de las que quedan se conservan.',
+    'guia-consejo-4': 'Si una diapositiva que queda tiene un enlace a una que quitaste, ese enlace se elimina y el texto queda como texto normal (se explica en la burbuja «?» de la página).',
+    'guia-consejo-5': 'Siempre se parte del archivo original, por lo que podés generar varias versiones distintas sin acumular cambios.',
+    'guia-p1': '¿Puedo dejar el archivo sin diapositivas?',
+    'guia-r1': 'No. Si quitás todas, el botón de descargar queda deshabilitado.',
+    'guia-p2': '¿Se pierde el formato de las diapositivas?',
+    'guia-r2': 'La herramienta no las vuelve a dibujar: reordena y elimina partes del propio archivo, de modo que el contenido de las que quedan no cambia.',
+    'guia-p3': '¿Acepta archivos .ppt antiguos?',
+    'guia-r3': 'No, solo .pptx.',
+    'guia-p4': '¿Puedo duplicar una diapositiva?',
+    'guia-r4': 'No, solo reordenar y quitar.'
   },
   en: {
     'titulo-pagina': 'Reorder PowerPoint Slides Free — Mini Cookies',
@@ -50,7 +69,26 @@ window.i18nPagina = {
     'etiqueta-diapositiva-con-texto': 'Slide {n} — {texto}',
     'error-leer': 'Couldn’t read the presentation',
     'error-sin-ninguna': 'There are no slides left.',
-    'error-generar': 'Couldn’t generate the presentation'
+    'error-generar': 'Couldn’t generate the presentation',
+    'guia-titulo': 'How to reorder or remove slides in a presentation',
+    'guia-intro': 'It lets you change the order of the slides in a PowerPoint (.pptx) presentation or remove the ones you don’t need, without opening PowerPoint. You give it a .pptx file and get back another .pptx with the slides you kept, in the order you chose. It is handy for putting together a short version of a presentation, rearranging a talk or taking out slides you don’t want to share.',
+    'guia-paso-1': 'Drag the .pptx file onto the upload area or click to choose it. The tool reads the presentation and lists the slides.',
+    'guia-paso-2': 'Each slide appears as “Slide N” and, if it has text, with the first characters of the first text it finds. Drag each row to change its position.',
+    'guia-paso-3': 'To remove a slide, tap the ✕ on its row. The undo and redo bar lets you get back what you removed or return to the previous order.',
+    'guia-paso-4': 'Tap “Download reordered”. When it finishes, the “Download PowerPoint” link appears and the file is named “presentacion-reordenada.pptx”.',
+    'guia-consejo-1': 'Each row’s label uses the slide’s first text, so it helps you recognize slides even if they have no title. If a slide has only images, it appears with just its original number.',
+    'guia-consejo-2': 'When you remove slides, their internal content (images and notes) is deleted too, and they are taken out of the sections and custom shows.',
+    'guia-consejo-3': 'The notes and hidden slides of the ones that remain are kept.',
+    'guia-consejo-4': 'If a remaining slide has a link to a slide you removed, that link is removed and the text stays as plain text (this is explained in the page’s “?” bubble).',
+    'guia-consejo-5': 'It always starts from the original file, so you can generate several different versions without piling up changes.',
+    'guia-p1': 'Can I leave the file with no slides?',
+    'guia-r1': 'No. If you remove them all, the download button is disabled.',
+    'guia-p2': 'Do the slides lose their formatting?',
+    'guia-r2': 'The tool doesn’t redraw them: it reorders and deletes parts of the file itself, so the content of the slides that remain doesn’t change.',
+    'guia-p3': 'Does it accept old .ppt files?',
+    'guia-r3': 'No, only .pptx.',
+    'guia-p4': 'Can I duplicate a slide?',
+    'guia-r4': 'No, only reorder and remove.'
   }
 };
 </script>
@@ -94,6 +132,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reordenar o quitar diapositivas de una presentación</h2>
+    <p data-i18n="guia-intro">Permite cambiar el orden de las diapositivas de una presentación de PowerPoint (.pptx) o quitar las que no necesitás, sin abrir PowerPoint. Entra un archivo .pptx y sale otro .pptx con las diapositivas que dejaste en el orden que elegiste. Es práctico para armar una versión corta de una presentación, reordenar una charla o sacar diapositivas que no querés compartir.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el archivo .pptx a la zona de carga o hacé clic para elegirlo. La herramienta lee la presentación y lista las diapositivas.</li>
+      <li data-i18n="guia-paso-2">Cada diapositiva aparece como «Diapositiva N» y, si tiene texto, con los primeros caracteres del primer texto que encuentra. Arrastrá cada fila para cambiar su posición.</li>
+      <li data-i18n="guia-paso-3">Para quitar una diapositiva, tocá la ✕ de su fila. La barra de deshacer y rehacer permite recuperar lo que quitaste o volver al orden anterior.</li>
+      <li data-i18n="guia-paso-4">Tocá «Descargar reordenada». Cuando termina aparece el enlace «Descargar PowerPoint» y el archivo se llama «presentacion-reordenada.pptx».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La etiqueta de cada fila usa el primer texto de la diapositiva, así que sirve para reconocerlas aunque no tengan título. Si una diapositiva solo tiene imágenes, aparece solo con su número original.</li>
+      <li data-i18n="guia-consejo-2">Al quitar diapositivas, también se borra su contenido interno (imágenes y notas) y se las saca de las secciones y de las presentaciones personalizadas.</li>
+      <li data-i18n="guia-consejo-3">Las notas y las diapositivas ocultas de las que quedan se conservan.</li>
+      <li data-i18n="guia-consejo-4">Si una diapositiva que queda tiene un enlace a una que quitaste, ese enlace se elimina y el texto queda como texto normal (se explica en la burbuja «?» de la página).</li>
+      <li data-i18n="guia-consejo-5">Siempre se parte del archivo original, por lo que podés generar varias versiones distintas sin acumular cambios.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo dejar el archivo sin diapositivas?</summary>
+      <p data-i18n="guia-r1">No. Si quitás todas, el botón de descargar queda deshabilitado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se pierde el formato de las diapositivas?</summary>
+      <p data-i18n="guia-r2">La herramienta no las vuelve a dibujar: reordena y elimina partes del propio archivo, de modo que el contenido de las que quedan no cambia.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Acepta archivos .ppt antiguos?</summary>
+      <p data-i18n="guia-r3">No, solo .pptx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puedo duplicar una diapositiva?</summary>
+      <p data-i18n="guia-r4">No, solo reordenar y quitar.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

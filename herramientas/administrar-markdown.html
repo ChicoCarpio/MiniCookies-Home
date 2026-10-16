@@ -25,7 +25,25 @@ window.i18nPagina = {
     'seccion-intro': 'Introducción (antes del primer encabezado)',
     'error-leer-archivo': 'No se pudo leer el archivo',
     'error-sin-secciones': 'No queda ninguna sección.',
-    'error-generar': 'No se pudo generar el archivo'
+    'error-generar': 'No se pudo generar el archivo',
+    'guia-titulo': 'Cómo reordenar o quitar secciones de un archivo Markdown',
+    'guia-intro': 'Divide un archivo Markdown (.md o .markdown) en secciones y te deja reordenarlas o quitar las que no querés. Cada sección empieza en un encabezado de primer nivel (una línea que arranca con «# »). Es útil para reorganizar un manual, unas notas o un README largo sin cortar y pegar a mano. Entra un archivo .md y sale otro .md con las secciones en el nuevo orden.',
+    'guia-paso-1': 'Arrastrá el archivo .md a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'Aparece una fila por sección, con el texto del título. Si el archivo tiene contenido antes del primer encabezado, aparece una fila «Introducción (antes del primer encabezado)».',
+    'guia-paso-3': 'Arrastrá las filas para reordenarlas o tocá la ✕ para quitar una sección completa.',
+    'guia-paso-4': 'Tocá «Descargar reordenado» y después el enlace «Descargar .md». El archivo se llama «documento-reordenado.md».',
+    'guia-consejo-1': 'Solo se cortan las secciones en los encabezados de primer nivel. Los subtítulos («##», «###») viajan junto con la sección a la que pertenecen.',
+    'guia-consejo-2': 'Dentro de un bloque de código (entre ``` o ~~~) una línea que empieza con # no se toma como título, así que los comentarios de Python o Bash no rompen el documento.',
+    'guia-consejo-3': 'Si el archivo usa saltos de línea de Windows, el resultado conserva ese estilo.',
+    'guia-consejo-4': 'Quitar una sección es definitivo en el archivo descargado, pero tu original no se toca.',
+    'guia-p1': '¿Qué pasa si mi documento no tiene encabezados de primer nivel?',
+    'guia-r1': 'Se muestra como una sola sección y no hay nada para reordenar.',
+    'guia-p2': '¿Puedo mover una sección a un nivel distinto de encabezado?',
+    'guia-r2': 'No; solo se cambian de lugar.',
+    'guia-p3': '¿Entiende la codificación del archivo?',
+    'guia-r3': 'Lee el archivo como texto y respeta su final de línea; si tenés acentos rotos, probá primero con Arreglar codificación de un texto.',
+    'guia-p4': '¿Acepta archivos con extensión distinta de .md?',
+    'guia-r4': 'Solo .md y .markdown.'
   },
   en: {
     'titulo-pagina': 'Reorder Markdown Sections Free — Mini Cookies',
@@ -41,7 +59,25 @@ window.i18nPagina = {
     'seccion-intro': 'Introduction (before the first heading)',
     'error-leer-archivo': 'Couldn’t read the file',
     'error-sin-secciones': 'There are no sections left.',
-    'error-generar': 'Couldn’t generate the file'
+    'error-generar': 'Couldn’t generate the file',
+    'guia-titulo': 'How to reorder or remove sections in a Markdown file',
+    'guia-intro': 'It splits a Markdown file (.md or .markdown) into sections and lets you reorder them or remove the ones you don’t want. Each section starts at a top-level heading (a line that begins with “# ”). It is useful for reorganizing a manual, some notes or a long README without cutting and pasting by hand. You give it an .md file and get back another .md with the sections in the new order.',
+    'guia-paso-1': 'Drag the .md file onto the upload area or click to choose it.',
+    'guia-paso-2': 'One row appears per section, with the title text. If the file has content before the first heading, an “Introduction (before the first heading)” row appears.',
+    'guia-paso-3': 'Drag the rows to reorder them or tap the ✕ to remove a whole section.',
+    'guia-paso-4': 'Tap “Download reordered” and then the “Download .md” link. The file is named “documento-reordenado.md”.',
+    'guia-consejo-1': 'Sections are only split at top-level headings. Subheadings (“##”, “###”) travel with the section they belong to.',
+    'guia-consejo-2': 'Inside a code block (between ``` or ~~~), a line that starts with # is not taken as a title, so Python or Bash comments don’t break the document.',
+    'guia-consejo-3': 'If the file uses Windows line breaks, the result keeps that style.',
+    'guia-consejo-4': 'Removing a section is final in the downloaded file, but your original is not touched.',
+    'guia-p1': 'What happens if my document has no top-level headings?',
+    'guia-r1': 'It is shown as a single section and there is nothing to reorder.',
+    'guia-p2': 'Can I move a section to a different heading level?',
+    'guia-r2': 'No; they are only moved around.',
+    'guia-p3': 'Does it understand the file’s encoding?',
+    'guia-r3': 'It reads the file as text and respects its line endings; if you have broken accents, first try “Fix a text file’s encoding”.',
+    'guia-p4': 'Does it accept files with an extension other than .md?',
+    'guia-r4': 'Only .md and .markdown.'
   }
 };
 </script>
@@ -80,6 +116,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reordenar o quitar secciones de un archivo Markdown</h2>
+    <p data-i18n="guia-intro">Divide un archivo Markdown (.md o .markdown) en secciones y te deja reordenarlas o quitar las que no querés. Cada sección empieza en un encabezado de primer nivel (una línea que arranca con «# »). Es útil para reorganizar un manual, unas notas o un README largo sin cortar y pegar a mano. Entra un archivo .md y sale otro .md con las secciones en el nuevo orden.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el archivo .md a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Aparece una fila por sección, con el texto del título. Si el archivo tiene contenido antes del primer encabezado, aparece una fila «Introducción (antes del primer encabezado)».</li>
+      <li data-i18n="guia-paso-3">Arrastrá las filas para reordenarlas o tocá la ✕ para quitar una sección completa.</li>
+      <li data-i18n="guia-paso-4">Tocá «Descargar reordenado» y después el enlace «Descargar .md». El archivo se llama «documento-reordenado.md».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Solo se cortan las secciones en los encabezados de primer nivel. Los subtítulos («##», «###») viajan junto con la sección a la que pertenecen.</li>
+      <li data-i18n="guia-consejo-2">Dentro de un bloque de código (entre ``` o ~~~) una línea que empieza con # no se toma como título, así que los comentarios de Python o Bash no rompen el documento.</li>
+      <li data-i18n="guia-consejo-3">Si el archivo usa saltos de línea de Windows, el resultado conserva ese estilo.</li>
+      <li data-i18n="guia-consejo-4">Quitar una sección es definitivo en el archivo descargado, pero tu original no se toca.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa si mi documento no tiene encabezados de primer nivel?</summary>
+      <p data-i18n="guia-r1">Se muestra como una sola sección y no hay nada para reordenar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo mover una sección a un nivel distinto de encabezado?</summary>
+      <p data-i18n="guia-r2">No; solo se cambian de lugar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Entiende la codificación del archivo?</summary>
+      <p data-i18n="guia-r3">Lee el archivo como texto y respeta su final de línea; si tenés acentos rotos, probá primero con Arreglar codificación de un texto.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Acepta archivos con extensión distinta de .md?</summary>
+      <p data-i18n="guia-r4">Solo .md y .markdown.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

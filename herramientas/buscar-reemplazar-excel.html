@@ -55,7 +55,27 @@ window.i18nPagina = {
     'error-sin-columna': 'Tildá al menos una columna, o elegí "Toda la hoja".',
     'error-sin-coincidencias': 'No se encontró ninguna coincidencia.',
     'mensaje-reemplazos': 'Se hicieron {n} reemplazo(s).',
-    'error-procesar': 'No se pudo procesar el archivo'
+    'error-procesar': 'No se pudo procesar el archivo',
+    'guia-titulo': 'Cómo buscar y reemplazar texto en un archivo de Excel',
+    'guia-intro': 'Busca un texto en las celdas de un archivo de Excel y lo reemplaza por otro, en toda una hoja, en varias columnas elegidas o en todas las hojas del libro. Es ideal para corregir un nombre mal escrito, cambiar un código en miles de filas o limpiar un dato repetido. Acepta .xlsx, .xlsm, .xlsb, .xls y .ods. Compara contra texto, fechas y números tal como se ven, pero nunca modifica fórmulas.',
+    'guia-paso-1': 'Arrastrá tu archivo o hacé clic para elegirlo. Se muestra una vista previa de la hoja.',
+    'guia-paso-2': 'Si el libro tiene varias hojas, elegí una en «Hoja» o marcá «Aplicar a todas las hojas».',
+    'guia-paso-3': 'Elegí el ámbito: «Toda la hoja» o «Solo columnas elegidas» (en ese caso tildá las columnas en la vista previa).',
+    'guia-paso-4': 'Escribí el texto en «Buscar» y el texto nuevo en «Reemplazar por». Si hace falta, activá «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular». La vista previa pinta en amarillo las celdas que van a cambiar.',
+    'guia-paso-5': 'Tocá «Reemplazar» y luego «Descargar Excel». El archivo se llama como el original más «-reemplazado».',
+    'guia-consejo-1': 'En un .xlsx o .xlsm el archivo se edita en el lugar: solo cambian las celdas que coinciden y se conservan colores, bordes, fuentes, fórmulas, imágenes y gráficos.',
+    'guia-consejo-2': 'Un .xlsb, .xls u .ods no se puede editar así: se convierte a .xlsx sin fórmulas (quedan sus valores) y se pierden además colores, bordes, fuentes, imágenes y gráficos. Las fórmulas se pierden solo en estos tres formatos. La página lo avisa.',
+    'guia-consejo-3': 'Las celdas de encabezados de tabla o de fórmulas matriciales no se cambian; al terminar se indica cuántas coincidencias se omitieron.',
+    'guia-consejo-4': 'La vista previa muestra las primeras 200 filas, pero el reemplazo procesa todas.',
+    'guia-consejo-5': 'Si el texto que reemplazás está dentro de una fecha, número o moneda con formato, esa celda pasa a ser texto plano con el resultado y deja de ser un número real.',
+    'guia-p1': '¿Toca las fórmulas?',
+    'guia-r1': 'Nunca, para no romper cálculos, aunque su resultado coincida con lo buscado.',
+    'guia-p2': '¿Cuántas coincidencias se reemplazaron?',
+    'guia-r2': 'Al terminar se muestra «Se hicieron N reemplazo(s)».',
+    'guia-p3': '¿Para qué sirve la expresión regular?',
+    'guia-r3': 'Para buscar patrones, como números o inicios de texto. Con ella podés usar $1, $2… en «Reemplazar por». El texto a buscar tiene un máximo de 500 caracteres.',
+    'guia-p4': '¿Qué pasa si no hay coincidencias?',
+    'guia-r4': 'Se avisa y no se genera archivo.',
   },
   en: {
     'titulo-pagina': 'Find and Replace in Excel Free — Mini Cookies',
@@ -93,7 +113,27 @@ window.i18nPagina = {
     'error-sin-columna': 'Check at least one column, or choose "The whole sheet".',
     'error-sin-coincidencias': 'No matches were found.',
     'mensaje-reemplazos': '{n} replacement(s) were made.',
-    'error-procesar': 'Couldn’t process the file'
+    'error-procesar': 'Couldn’t process the file',
+    'guia-titulo': 'How to find and replace text in an Excel file',
+    'guia-intro': 'It looks for a piece of text in the cells of an Excel file and replaces it with another, across a whole sheet, in several chosen columns or in all the sheets of the workbook. It’s ideal for fixing a misspelled name, changing a code across thousands of rows or cleaning up a repeated value. It accepts .xlsx, .xlsm, .xlsb, .xls and .ods. It compares against text, dates and numbers as they look, but never modifies formulas.',
+    'guia-paso-1': 'Drag your file or click to choose it. A preview of the sheet is shown.',
+    'guia-paso-2': 'If the workbook has several sheets, choose one under “Sheet” or tick “Apply to all sheets”.',
+    'guia-paso-3': 'Choose the scope: “The whole sheet” or “Only chosen columns” (in that case tick the columns in the preview).',
+    'guia-paso-4': 'Type the text under “Find” and the new text under “Replace with”. If needed, turn on “Match case”, “Whole words only” or “Use regular expression”. The preview paints the cells that are going to change in yellow.',
+    'guia-paso-5': 'Tap “Replace” and then “Download Excel”. The file is named like the original plus “-reemplazado”.',
+    'guia-consejo-1': 'In an .xlsx or .xlsm the file is edited in place: only the matching cells change, and colors, borders, fonts, formulas, images and charts are kept.',
+    'guia-consejo-2': 'An .xlsb, .xls or .ods can’t be edited that way: it’s converted to .xlsx without formulas (their values stay) and colors, borders, fonts, images and charts are lost as well. Formulas are lost only in these three formats. The page warns you about it.',
+    'guia-consejo-3': 'Cells in table headers or array formulas are not changed; when it finishes, it tells you how many matches were skipped.',
+    'guia-consejo-4': 'The preview shows the first 200 rows, but the replacement processes all of them.',
+    'guia-consejo-5': 'If the text you’re replacing is inside a formatted date, number or currency, that cell becomes plain text with the result and stops being a real number.',
+    'guia-p1': 'Does it touch formulas?',
+    'guia-r1': 'Never, so calculations don’t break, even if their result matches what you searched for.',
+    'guia-p2': 'How many matches were replaced?',
+    'guia-r2': 'When it finishes it shows “N replacement(s) were made”.',
+    'guia-p3': 'What is the regular expression for?',
+    'guia-r3': 'For searching patterns, such as numbers or the start of a text. With it you can use $1, $2… in “Replace with”. The text to search for has a maximum of 500 characters.',
+    'guia-p4': 'What happens if there are no matches?',
+    'guia-r4': 'You’re told so and no file is generated.',
   }
 };
 </script>
@@ -198,6 +238,44 @@ window.i18nPagina = {
       una fecha/número real (por ejemplo, ya no se podría usar en una cuenta).
     </p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo buscar y reemplazar texto en un archivo de Excel</h2>
+    <p data-i18n="guia-intro">Busca un texto en las celdas de un archivo de Excel y lo reemplaza por otro, en toda una hoja, en varias columnas elegidas o en todas las hojas del libro. Es ideal para corregir un nombre mal escrito, cambiar un código en miles de filas o limpiar un dato repetido. Acepta .xlsx, .xlsm, .xlsb, .xls y .ods. Compara contra texto, fechas y números tal como se ven, pero nunca modifica fórmulas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo o hacé clic para elegirlo. Se muestra una vista previa de la hoja.</li>
+      <li data-i18n="guia-paso-2">Si el libro tiene varias hojas, elegí una en «Hoja» o marcá «Aplicar a todas las hojas».</li>
+      <li data-i18n="guia-paso-3">Elegí el ámbito: «Toda la hoja» o «Solo columnas elegidas» (en ese caso tildá las columnas en la vista previa).</li>
+      <li data-i18n="guia-paso-4">Escribí el texto en «Buscar» y el texto nuevo en «Reemplazar por». Si hace falta, activá «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular». La vista previa pinta en amarillo las celdas que van a cambiar.</li>
+      <li data-i18n="guia-paso-5">Tocá «Reemplazar» y luego «Descargar Excel». El archivo se llama como el original más «-reemplazado».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">En un .xlsx o .xlsm el archivo se edita en el lugar: solo cambian las celdas que coinciden y se conservan colores, bordes, fuentes, fórmulas, imágenes y gráficos.</li>
+      <li data-i18n="guia-consejo-2">Un .xlsb, .xls u .ods no se puede editar así: se convierte a .xlsx sin fórmulas (quedan sus valores) y se pierden además colores, bordes, fuentes, imágenes y gráficos. Las fórmulas se pierden solo en estos tres formatos. La página lo avisa.</li>
+      <li data-i18n="guia-consejo-3">Las celdas de encabezados de tabla o de fórmulas matriciales no se cambian; al terminar se indica cuántas coincidencias se omitieron.</li>
+      <li data-i18n="guia-consejo-4">La vista previa muestra las primeras 200 filas, pero el reemplazo procesa todas.</li>
+      <li data-i18n="guia-consejo-5">Si el texto que reemplazás está dentro de una fecha, número o moneda con formato, esa celda pasa a ser texto plano con el resultado y deja de ser un número real.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Toca las fórmulas?</summary>
+      <p data-i18n="guia-r1">Nunca, para no romper cálculos, aunque su resultado coincida con lo buscado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Cuántas coincidencias se reemplazaron?</summary>
+      <p data-i18n="guia-r2">Al terminar se muestra «Se hicieron N reemplazo(s)».</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Para qué sirve la expresión regular?</summary>
+      <p data-i18n="guia-r3">Para buscar patrones, como números o inicios de texto. Con ella podés usar $1, $2… en «Reemplazar por». El texto a buscar tiene un máximo de 500 caracteres.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa si no hay coincidencias?</summary>
+      <p data-i18n="guia-r4">Se avisa y no se genera archivo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

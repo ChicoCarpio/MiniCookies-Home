@@ -43,7 +43,25 @@ window.i18nPagina = {
     'hoja-vacia': '(hoja vacía)',
     'error-min-hojas': 'Elegí al menos dos hojas.',
     'nombre-hoja-combinado': 'Combinado',
-    'error-combinar': 'No se pudo combinar las hojas'
+    'error-combinar': 'No se pudo combinar las hojas',
+    'guia-titulo': 'Cómo combinar varias hojas de Excel en una sola tabla',
+    'guia-intro': 'Toma un archivo de Excel con varias hojas que comparten las mismas columnas (por ejemplo, ventas de enero, febrero y marzo, una hoja por mes) y las apila en una sola tabla. Entra un libro de Excel y sale un .xlsx con una única hoja llamada «Combinado» que contiene todas las filas, una debajo de otra. No sirve para juntar archivos distintos: para eso existe la herramienta Unir Excel / CSV.',
+    'guia-paso-1': 'Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo. Acepta .xlsx, .xlsm, .xlsb, .xls, .xml y .ods.',
+    'guia-paso-2': 'Se listan todas las hojas con una casilla y una pequeña vista previa de sus primeras filas y columnas. Todas vienen tildadas; destildá las que no querés incluir. Hacen falta al menos dos hojas.',
+    'guia-paso-3': 'Dejá marcada «Cada hoja tiene fila de encabezado» (la casilla habla de la «primera hoja») si la primera fila de cada hoja es un título de columna: se conserva la del primer bloque y se descartan las de las demás hojas.',
+    'guia-paso-4': 'Tocá «Combinar en una tabla» y luego «Descargar Excel». El archivo se llama «tabla-combinada.xlsx».',
+    'guia-consejo-1': 'Las hojas se apilan en el orden en que aparecen en el libro, no en el orden en que las tildaste.',
+    'guia-consejo-2': 'Se copian los valores (números y fechas siguen siendo números) con su formato de número, pero no colores, bordes ni fórmulas: la tabla resultante contiene valores.',
+    'guia-consejo-3': 'La herramienta no compara los títulos de las columnas entre hojas: si una hoja tiene las columnas en otro orden, quedarán desalineadas. Revisá que todas tengan la misma estructura.',
+    'guia-consejo-4': 'Si desmarcás la casilla de encabezado, se copian todas las filas de todas las hojas, incluidos los títulos.',
+    'guia-p1': '¿Cuál es la diferencia con Unir Excel / CSV?',
+    'guia-r1': 'Aquella junta archivos separados; esta combina hojas que ya están dentro de un mismo archivo.',
+    'guia-p2': '¿Qué pasa con las hojas vacías?',
+    'guia-r2': 'Se omiten.',
+    'guia-p3': '¿Puedo combinar una sola hoja?',
+    'guia-r3': 'No: el botón se activa con dos o más hojas tildadas.',
+    'guia-p4': '¿Se conservan las fórmulas?',
+    'guia-r4': 'No, se copian los valores calculados.',
   },
   en: {
     'titulo-pagina': 'Combine Excel Sheets into One Table Free — Mini Cookies',
@@ -63,7 +81,25 @@ window.i18nPagina = {
     'hoja-vacia': '(empty sheet)',
     'error-min-hojas': 'Pick at least two sheets.',
     'nombre-hoja-combinado': 'Combined',
-    'error-combinar': 'Couldn’t combine the sheets'
+    'error-combinar': 'Couldn’t combine the sheets',
+    'guia-titulo': 'How to combine several Excel sheets into one table',
+    'guia-intro': 'It takes an Excel file with several sheets that share the same columns (for example, January, February and March sales, one sheet per month) and stacks them into a single table. An Excel workbook goes in and an .xlsx comes out with a single sheet called “Combined” that holds all the rows, one below the other. It isn’t for joining different files: for that there’s the Merge Excel / CSV tool.',
+    'guia-paso-1': 'Drag your file onto the upload area or click to choose it. It accepts .xlsx, .xlsm, .xlsb, .xls, .xml and .ods.',
+    'guia-paso-2': 'All the sheets are listed with a checkbox and a small preview of their first rows and columns. All of them come ticked; untick the ones you don’t want to include. At least two sheets are needed.',
+    'guia-paso-3': 'Leave “Each sheet has a header row” ticked (the checkbox mentions the “first sheet”) if the first row of each sheet is a column title: the one from the first block is kept and those from the other sheets are discarded.',
+    'guia-paso-4': 'Tap “Combine into one table” and then “Download Excel”. The file is named “tabla-combinada.xlsx”.',
+    'guia-consejo-1': 'Sheets are stacked in the order they appear in the workbook, not in the order you ticked them.',
+    'guia-consejo-2': 'Values are copied (numbers and dates stay numbers) with their number format, but not colors, borders or formulas: the resulting table contains values.',
+    'guia-consejo-3': 'The tool doesn’t compare column titles between sheets: if a sheet has its columns in a different order, they will end up misaligned. Check that they all have the same structure.',
+    'guia-consejo-4': 'If you untick the header checkbox, all the rows of all the sheets are copied, titles included.',
+    'guia-p1': 'What’s the difference with Merge Excel / CSV?',
+    'guia-r1': 'That one joins separate files; this one combines sheets that are already inside a single file.',
+    'guia-p2': 'What happens with empty sheets?',
+    'guia-r2': 'They’re skipped.',
+    'guia-p3': 'Can I combine just one sheet?',
+    'guia-r3': 'No: the button becomes active with two or more sheets ticked.',
+    'guia-p4': 'Are formulas kept?',
+    'guia-r4': 'No, the calculated values are copied.',
   }
 };
 </script>
@@ -108,6 +144,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo combinar varias hojas de Excel en una sola tabla</h2>
+    <p data-i18n="guia-intro">Toma un archivo de Excel con varias hojas que comparten las mismas columnas (por ejemplo, ventas de enero, febrero y marzo, una hoja por mes) y las apila en una sola tabla. Entra un libro de Excel y sale un .xlsx con una única hoja llamada «Combinado» que contiene todas las filas, una debajo de otra. No sirve para juntar archivos distintos: para eso existe la herramienta Unir Excel / CSV.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo. Acepta .xlsx, .xlsm, .xlsb, .xls, .xml y .ods.</li>
+      <li data-i18n="guia-paso-2">Se listan todas las hojas con una casilla y una pequeña vista previa de sus primeras filas y columnas. Todas vienen tildadas; destildá las que no querés incluir. Hacen falta al menos dos hojas.</li>
+      <li data-i18n="guia-paso-3">Dejá marcada «Cada hoja tiene fila de encabezado» (la casilla habla de la «primera hoja») si la primera fila de cada hoja es un título de columna: se conserva la del primer bloque y se descartan las de las demás hojas.</li>
+      <li data-i18n="guia-paso-4">Tocá «Combinar en una tabla» y luego «Descargar Excel». El archivo se llama «tabla-combinada.xlsx».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Las hojas se apilan en el orden en que aparecen en el libro, no en el orden en que las tildaste.</li>
+      <li data-i18n="guia-consejo-2">Se copian los valores (números y fechas siguen siendo números) con su formato de número, pero no colores, bordes ni fórmulas: la tabla resultante contiene valores.</li>
+      <li data-i18n="guia-consejo-3">La herramienta no compara los títulos de las columnas entre hojas: si una hoja tiene las columnas en otro orden, quedarán desalineadas. Revisá que todas tengan la misma estructura.</li>
+      <li data-i18n="guia-consejo-4">Si desmarcás la casilla de encabezado, se copian todas las filas de todas las hojas, incluidos los títulos.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuál es la diferencia con Unir Excel / CSV?</summary>
+      <p data-i18n="guia-r1">Aquella junta archivos separados; esta combina hojas que ya están dentro de un mismo archivo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa con las hojas vacías?</summary>
+      <p data-i18n="guia-r2">Se omiten.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo combinar una sola hoja?</summary>
+      <p data-i18n="guia-r3">No: el botón se activa con dos o más hojas tildadas.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se conservan las fórmulas?</summary>
+      <p data-i18n="guia-r4">No, se copian los valores calculados.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

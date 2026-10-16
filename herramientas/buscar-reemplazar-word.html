@@ -35,7 +35,25 @@ window.i18nPagina = {
     'error-sin-buscar': 'Escribí el texto a buscar.',
     'error-sin-coincidencias': 'No se encontró ninguna coincidencia.',
     'mensaje-reemplazos': 'Se hicieron {n} reemplazo(s).',
-    'error-procesar': 'No se pudo procesar el documento'
+    'error-procesar': 'No se pudo procesar el documento',
+    'guia-titulo': 'Cómo buscar y reemplazar texto en un documento de Word',
+    'guia-intro': 'Reemplaza un texto por otro en todo un documento de Word (.docx) sin perder el formato. Sirve para actualizar un nombre en un contrato, cambiar una fecha repetida o corregir un término en un informe largo. A diferencia de herramientas que reconstruyen el documento, esta modifica el texto directamente dentro del archivo, por lo que fuentes, colores, tablas, imágenes, encabezados y pies de página se mantienen tal cual.',
+    'guia-paso-1': 'Arrastrá el documento .docx a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'Escribí lo que querés encontrar en «Buscar» y el texto nuevo en «Reemplazar por» (puede quedar vacío para borrar el texto).',
+    'guia-paso-3': 'Elegí las opciones que necesites: «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular».',
+    'guia-paso-4': 'Tocá «Reemplazar y descargar». Se muestra cuántos reemplazos se hicieron y aparece el enlace «Descargar Word». El archivo se llama «documento-reemplazado.docx».',
+    'guia-consejo-1': 'También se busca en los encabezados, pies de página, notas al pie, notas finales y comentarios.',
+    'guia-consejo-2': 'Encuentra la frase aunque tenga partes con distinto formato (por ejemplo, una palabra en negrita en el medio). En ese caso, el texto nuevo toma el formato del comienzo de la frase encontrada.',
+    'guia-consejo-3': 'Un tabulador o un salto de línea corta la búsqueda: no se encuentran frases que atraviesen uno.',
+    'guia-consejo-4': 'El texto a buscar admite hasta 500 caracteres. Con expresión regular podés usar $1, $2… en el reemplazo y $& para todo lo encontrado.',
+    'guia-p1': '¿Qué pasa si no hay coincidencias?',
+    'guia-r1': 'Se avisa que no se encontró ninguna y no se descarga nada.',
+    'guia-p2': '¿Puedo reemplazar texto que está en un cuadro de texto?',
+    'guia-r2': 'Los párrafos dentro de cuadros de texto se procesan por separado.',
+    'guia-p3': '¿Distingue mayúsculas de minúsculas?',
+    'guia-r3': 'Solo si activás «Coincidir mayúsculas/minúsculas».',
+    'guia-p4': '¿Funciona con archivos .doc antiguos?',
+    'guia-r4': 'No, solo .docx.',
   },
   en: {
     'titulo-pagina': 'Find and Replace in Word Free — Mini Cookies',
@@ -60,7 +78,25 @@ window.i18nPagina = {
     'error-sin-buscar': 'Type the text to search for.',
     'error-sin-coincidencias': 'No matches were found.',
     'mensaje-reemplazos': '{n} replacement(s) were made.',
-    'error-procesar': 'Couldn’t process the document'
+    'error-procesar': 'Couldn’t process the document',
+    'guia-titulo': 'How to find and replace text in a Word document',
+    'guia-intro': 'It replaces one piece of text with another throughout a Word document (.docx) without losing the formatting. It’s useful for updating a name in a contract, changing a repeated date or correcting a term in a long report. Unlike tools that rebuild the document, this one modifies the text directly inside the file, so fonts, colors, tables, images, headers and footers stay exactly as they were.',
+    'guia-paso-1': 'Drag the .docx document onto the upload area or click to choose it.',
+    'guia-paso-2': 'Type what you want to find under “Find” and the new text under “Replace with” (it can be left empty to delete the text).',
+    'guia-paso-3': 'Choose the options you need: “Match case”, “Whole words only” or “Use regular expression”.',
+    'guia-paso-4': 'Tap “Replace and download”. It shows how many replacements were made and the “Download Word” link appears. The file is named “documento-reemplazado.docx”.',
+    'guia-consejo-1': 'It also searches headers, footers, footnotes, endnotes and comments.',
+    'guia-consejo-2': 'It finds the phrase even if parts of it have different formatting (for example, a bold word in the middle). In that case, the new text takes the formatting of the start of the phrase found.',
+    'guia-consejo-3': 'A tab or a line break cuts the search: phrases that span one are not found.',
+    'guia-consejo-4': 'The text to search for accepts up to 500 characters. With a regular expression you can use $1, $2… in the replacement and $& for everything found.',
+    'guia-p1': 'What happens if there are no matches?',
+    'guia-r1': 'You’re told that none was found and nothing is downloaded.',
+    'guia-p2': 'Can I replace text that is inside a text box?',
+    'guia-r2': 'Paragraphs inside text boxes are processed separately.',
+    'guia-p3': 'Is it case-sensitive?',
+    'guia-r3': 'Only if you turn on “Match case”.',
+    'guia-p4': 'Does it work with old .doc files?',
+    'guia-r4': 'No, only .docx.',
   }
 };
 </script>
@@ -128,6 +164,42 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <p style="color:var(--texto-suave);" data-i18n="nota">El reemplazo se hace directamente dentro del documento, así que todo lo demás queda igual: fuentes, colores, tablas, imágenes, encabezados y pies de página (donde también se busca). Encuentra la frase aunque tenga partes con distinto formato (por ejemplo, una palabra en negrita en el medio); en ese caso el texto nuevo toma el formato del comienzo de la frase encontrada.</p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo buscar y reemplazar texto en un documento de Word</h2>
+    <p data-i18n="guia-intro">Reemplaza un texto por otro en todo un documento de Word (.docx) sin perder el formato. Sirve para actualizar un nombre en un contrato, cambiar una fecha repetida o corregir un término en un informe largo. A diferencia de herramientas que reconstruyen el documento, esta modifica el texto directamente dentro del archivo, por lo que fuentes, colores, tablas, imágenes, encabezados y pies de página se mantienen tal cual.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el documento .docx a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Escribí lo que querés encontrar en «Buscar» y el texto nuevo en «Reemplazar por» (puede quedar vacío para borrar el texto).</li>
+      <li data-i18n="guia-paso-3">Elegí las opciones que necesites: «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular».</li>
+      <li data-i18n="guia-paso-4">Tocá «Reemplazar y descargar». Se muestra cuántos reemplazos se hicieron y aparece el enlace «Descargar Word». El archivo se llama «documento-reemplazado.docx».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">También se busca en los encabezados, pies de página, notas al pie, notas finales y comentarios.</li>
+      <li data-i18n="guia-consejo-2">Encuentra la frase aunque tenga partes con distinto formato (por ejemplo, una palabra en negrita en el medio). En ese caso, el texto nuevo toma el formato del comienzo de la frase encontrada.</li>
+      <li data-i18n="guia-consejo-3">Un tabulador o un salto de línea corta la búsqueda: no se encuentran frases que atraviesen uno.</li>
+      <li data-i18n="guia-consejo-4">El texto a buscar admite hasta 500 caracteres. Con expresión regular podés usar $1, $2… en el reemplazo y $&amp; para todo lo encontrado.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa si no hay coincidencias?</summary>
+      <p data-i18n="guia-r1">Se avisa que no se encontró ninguna y no se descarga nada.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo reemplazar texto que está en un cuadro de texto?</summary>
+      <p data-i18n="guia-r2">Los párrafos dentro de cuadros de texto se procesan por separado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Distingue mayúsculas de minúsculas?</summary>
+      <p data-i18n="guia-r3">Solo si activás «Coincidir mayúsculas/minúsculas».</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Funciona con archivos .doc antiguos?</summary>
+      <p data-i18n="guia-r4">No, solo .docx.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

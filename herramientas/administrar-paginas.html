@@ -26,7 +26,25 @@ window.i18nPagina = {
     'quitar-pagina-title': 'Eliminar esta página',
     'error-vacio': 'No quedan páginas para guardar.',
     'error-guardar': 'No se pudo guardar el PDF',
-    'error-abrir': 'No se pudo abrir el PDF'
+    'error-abrir': 'No se pudo abrir el PDF',
+    'guia-titulo': 'Cómo reordenar o eliminar páginas de un PDF',
+    'guia-intro': 'Permite reordenar y eliminar las páginas de un PDF viendo sus miniaturas. Entra un PDF y sale un PDF nuevo con las páginas que dejaste, en el orden que elegiste. Sirve para sacar páginas en blanco o sobrantes, pasar una hoja al principio o corregir un escaneo que quedó desordenado.',
+    'guia-paso-1': 'Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Se generan las miniaturas de todas las páginas (en un PDF grande puede tardar).',
+    'guia-paso-2': 'Cada miniatura trae la etiqueta «Original: página N». Arrastrá las miniaturas para cambiar el orden.',
+    'guia-paso-3': 'Tocá la ✕ de una miniatura para eliminar esa página. Si te equivocás, usá los botones de deshacer y rehacer, o «Restaurar orden original» para volver a todas las páginas en su orden inicial.',
+    'guia-paso-4': 'Tocá «Guardar PDF modificado» y después el enlace «Descargar PDF modificado». El archivo se llama «documento-modificado.pdf».',
+    'guia-consejo-1': 'Hay un selector de vista sobre las miniaturas para cambiar el tamaño con el que se muestran, útil en PDF con muchas páginas.',
+    'guia-consejo-2': '«Restaurar orden original» no vuelve a leer el archivo y también se puede deshacer.',
+    'guia-consejo-3': 'El PDF nuevo se arma copiando las páginas elegidas del original, por lo que el contenido de cada página queda igual.',
+    'guia-consejo-4': 'En el celular podés reordenar arrastrando con el dedo.',
+    'guia-p1': '¿Puedo quitar todas las páginas?',
+    'guia-r1': 'No. Si no queda ninguna, se avisa que no hay páginas para guardar.',
+    'guia-p2': '¿Puedo girar páginas con esta herramienta?',
+    'guia-r2': 'No; solo reordena y elimina.',
+    'guia-p3': '¿Funciona con PDF protegidos con contraseña?',
+    'guia-r3': 'No hay un campo para ingresar contraseña; es probable que el PDF no se pueda abrir.',
+    'guia-p4': '¿Se pierden los marcadores o enlaces internos?',
+    'guia-r4': 'Al copiar solo las páginas a un documento nuevo, es posible que no se conserven elementos del documento como índices o marcadores.'
   },
   en: {
     'titulo-pagina': 'Reorder and Manage PDF Pages — Mini Cookies',
@@ -43,7 +61,25 @@ window.i18nPagina = {
     'quitar-pagina-title': 'Delete this page',
     'error-vacio': 'No pages left to save.',
     'error-guardar': 'Couldn’t save the PDF',
-    'error-abrir': 'Couldn’t open the PDF'
+    'error-abrir': 'Couldn’t open the PDF',
+    'guia-titulo': 'How to reorder or delete pages in a PDF',
+    'guia-intro': 'It lets you reorder and delete the pages of a PDF while looking at their thumbnails. You give it a PDF and get back a new PDF with the pages you kept, in the order you chose. It is useful for removing blank or extra pages, moving a sheet to the beginning or fixing a scan that came out out of order.',
+    'guia-paso-1': 'Drag the PDF onto the upload area or click to choose it. Thumbnails of all the pages are generated (in a large PDF this can take a while).',
+    'guia-paso-2': 'Each thumbnail carries the label “Original: page N”. Drag the thumbnails to change the order.',
+    'guia-paso-3': 'Tap the ✕ on a thumbnail to delete that page. If you make a mistake, use the undo and redo buttons, or “Restore original order” to go back to all the pages in their initial order.',
+    'guia-paso-4': 'Tap “Save modified PDF” and then the “Download modified PDF” link. The file is named “documento-modificado.pdf”.',
+    'guia-consejo-1': 'There is a view selector above the thumbnails to change the size they are shown at, which helps with PDFs that have many pages.',
+    'guia-consejo-2': '“Restore original order” doesn’t read the file again and can also be undone.',
+    'guia-consejo-3': 'The new PDF is built by copying the chosen pages from the original, so the content of each page stays the same.',
+    'guia-consejo-4': 'On a phone you can reorder by dragging with your finger.',
+    'guia-p1': 'Can I remove all the pages?',
+    'guia-r1': 'No. If none is left, a notice says there are no pages to save.',
+    'guia-p2': 'Can I rotate pages with this tool?',
+    'guia-r2': 'No; it only reorders and deletes.',
+    'guia-p3': 'Does it work with password-protected PDFs?',
+    'guia-r3': 'There is no field to enter a password; the PDF probably can’t be opened.',
+    'guia-p4': 'Are bookmarks or internal links lost?',
+    'guia-r4': 'Since only the pages are copied into a new document, document elements such as outlines or bookmarks may not be kept.'
   }
 };
 </script>
@@ -86,6 +122,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reordenar o eliminar páginas de un PDF</h2>
+    <p data-i18n="guia-intro">Permite reordenar y eliminar las páginas de un PDF viendo sus miniaturas. Entra un PDF y sale un PDF nuevo con las páginas que dejaste, en el orden que elegiste. Sirve para sacar páginas en blanco o sobrantes, pasar una hoja al principio o corregir un escaneo que quedó desordenado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Se generan las miniaturas de todas las páginas (en un PDF grande puede tardar).</li>
+      <li data-i18n="guia-paso-2">Cada miniatura trae la etiqueta «Original: página N». Arrastrá las miniaturas para cambiar el orden.</li>
+      <li data-i18n="guia-paso-3">Tocá la ✕ de una miniatura para eliminar esa página. Si te equivocás, usá los botones de deshacer y rehacer, o «Restaurar orden original» para volver a todas las páginas en su orden inicial.</li>
+      <li data-i18n="guia-paso-4">Tocá «Guardar PDF modificado» y después el enlace «Descargar PDF modificado». El archivo se llama «documento-modificado.pdf».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Hay un selector de vista sobre las miniaturas para cambiar el tamaño con el que se muestran, útil en PDF con muchas páginas.</li>
+      <li data-i18n="guia-consejo-2">«Restaurar orden original» no vuelve a leer el archivo y también se puede deshacer.</li>
+      <li data-i18n="guia-consejo-3">El PDF nuevo se arma copiando las páginas elegidas del original, por lo que el contenido de cada página queda igual.</li>
+      <li data-i18n="guia-consejo-4">En el celular podés reordenar arrastrando con el dedo.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo quitar todas las páginas?</summary>
+      <p data-i18n="guia-r1">No. Si no queda ninguna, se avisa que no hay páginas para guardar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo girar páginas con esta herramienta?</summary>
+      <p data-i18n="guia-r2">No; solo reordena y elimina.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Funciona con PDF protegidos con contraseña?</summary>
+      <p data-i18n="guia-r3">No hay un campo para ingresar contraseña; es probable que el PDF no se pueda abrir.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se pierden los marcadores o enlaces internos?</summary>
+      <p data-i18n="guia-r4">Al copiar solo las páginas a un documento nuevo, es posible que no se conserven elementos del documento como índices o marcadores.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

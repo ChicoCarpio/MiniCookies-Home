@@ -40,7 +40,25 @@ window.i18nPagina = {
     'error-leer': 'No se pudo leer el archivo',
     'error-sin-hojas': 'No queda ninguna hoja.',
     'error-estructura': 'El archivo no tiene la estructura de un .xlsx válido.',
-    'error-generar': 'No se pudo generar el archivo'
+    'error-generar': 'No se pudo generar el archivo',
+    'guia-titulo': 'Cómo reordenar o quitar hojas de un libro de Excel',
+    'guia-intro': 'Permite cambiar el orden de las hojas de un libro de Excel o quitar las que no necesitás, sin abrir Excel. Acepta archivos .xlsx y .xlsm (Excel con macros) y devuelve un archivo con la misma extensión. Cada hoja muestra una pequeña vista previa de sus primeras celdas, para que no dependas solo del nombre de la pestaña.',
+    'guia-paso-1': 'Arrastrá tu archivo .xlsx o .xlsm a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'Se listan las hojas con su nombre y, debajo, una mini tabla con hasta 4 filas y 4 columnas de sus primeras celdas (las hojas de gráficos o de macros se muestran como «(hoja vacía)»).',
+    'guia-paso-3': 'Arrastrá las hojas para reordenarlas o tocá la ✕ para quitar las que no querés. La barra de deshacer y rehacer permite revertir cambios.',
+    'guia-paso-4': 'Tocá «Descargar reordenado» y luego «Descargar Excel». El archivo se llama como el original más «-reordenado» (por ejemplo, «ventas-reordenado.xlsx»).',
+    'guia-consejo-1': 'Las macros de un .xlsm se conservan. El archivo mantiene su extensión original para que Excel lo abra bien.',
+    'guia-consejo-2': 'Al quitar una hoja se elimina también su contenido interno y se ajustan los nombres definidos y la pestaña activa.',
+    'guia-consejo-3': 'Si una fórmula de una hoja que queda apunta a otra hoja que quitaste, esa fórmula puede quedar con error al abrirla en Excel. Revisalo antes de quitar hojas de las que dependen otras.',
+    'guia-consejo-4': 'Siempre se parte del archivo original: podés probar varias versiones sin acumular cambios.',
+    'guia-p1': '¿Se pierde el formato de las celdas?',
+    'guia-r1': 'No, la herramienta no reescribe las hojas: reordena y elimina partes del propio archivo.',
+    'guia-p2': '¿Puedo renombrar una hoja?',
+    'guia-r2': 'No, solo reordenar y quitar.',
+    'guia-p3': '¿Qué pasa si quito todas las hojas?',
+    'guia-r3': 'No se puede: el botón de descargar se deshabilita.',
+    'guia-p4': '¿Funciona con .xls o .ods?',
+    'guia-r4': 'No; esta herramienta acepta solo .xlsx y .xlsm.'
   },
   en: {
     'titulo-pagina': 'Reorder Excel Sheets Free — Mini Cookies',
@@ -57,7 +75,25 @@ window.i18nPagina = {
     'error-leer': 'Couldn’t read the file',
     'error-sin-hojas': 'There are no sheets left.',
     'error-estructura': 'The file doesn’t have the structure of a valid .xlsx.',
-    'error-generar': 'Couldn’t generate the file'
+    'error-generar': 'Couldn’t generate the file',
+    'guia-titulo': 'How to reorder or remove sheets in an Excel workbook',
+    'guia-intro': 'It lets you change the order of the sheets in an Excel workbook or remove the ones you don’t need, without opening Excel. It accepts .xlsx and .xlsm (macro-enabled Excel) files and returns a file with the same extension. Each sheet shows a small preview of its first cells, so you don’t have to rely only on the tab name.',
+    'guia-paso-1': 'Drag your .xlsx or .xlsm file onto the upload area or click to choose it.',
+    'guia-paso-2': 'The sheets are listed with their name and, below it, a mini table with up to 4 rows and 4 columns of their first cells (chart or macro sheets are shown as “(empty sheet)”).',
+    'guia-paso-3': 'Drag the sheets to reorder them or tap the ✕ to remove the ones you don’t want. The undo and redo bar lets you revert changes.',
+    'guia-paso-4': 'Tap “Download reordered” and then “Download Excel”. The file is named like the original plus “-reordenado” (for example, “ventas-reordenado.xlsx”).',
+    'guia-consejo-1': 'The macros in an .xlsm are kept. The file keeps its original extension so that Excel opens it properly.',
+    'guia-consejo-2': 'When a sheet is removed, its internal content is deleted too, and the defined names and the active tab are adjusted.',
+    'guia-consejo-3': 'If a formula in a sheet that remains points to a sheet you removed, that formula may show an error when opened in Excel. Check this before removing sheets that others depend on.',
+    'guia-consejo-4': 'It always starts from the original file: you can try several versions without piling up changes.',
+    'guia-p1': 'Is the cell formatting lost?',
+    'guia-r1': 'No, the tool doesn’t rewrite the sheets: it reorders and deletes parts of the file itself.',
+    'guia-p2': 'Can I rename a sheet?',
+    'guia-r2': 'No, only reorder and remove.',
+    'guia-p3': 'What happens if I remove all the sheets?',
+    'guia-r3': 'You can’t: the download button is disabled.',
+    'guia-p4': 'Does it work with .xls or .ods?',
+    'guia-r4': 'No; this tool accepts only .xlsx and .xlsm.'
   }
 };
 </script>
@@ -97,6 +133,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reordenar o quitar hojas de un libro de Excel</h2>
+    <p data-i18n="guia-intro">Permite cambiar el orden de las hojas de un libro de Excel o quitar las que no necesitás, sin abrir Excel. Acepta archivos .xlsx y .xlsm (Excel con macros) y devuelve un archivo con la misma extensión. Cada hoja muestra una pequeña vista previa de sus primeras celdas, para que no dependas solo del nombre de la pestaña.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .xlsx o .xlsm a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Se listan las hojas con su nombre y, debajo, una mini tabla con hasta 4 filas y 4 columnas de sus primeras celdas (las hojas de gráficos o de macros se muestran como «(hoja vacía)»).</li>
+      <li data-i18n="guia-paso-3">Arrastrá las hojas para reordenarlas o tocá la ✕ para quitar las que no querés. La barra de deshacer y rehacer permite revertir cambios.</li>
+      <li data-i18n="guia-paso-4">Tocá «Descargar reordenado» y luego «Descargar Excel». El archivo se llama como el original más «-reordenado» (por ejemplo, «ventas-reordenado.xlsx»).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Las macros de un .xlsm se conservan. El archivo mantiene su extensión original para que Excel lo abra bien.</li>
+      <li data-i18n="guia-consejo-2">Al quitar una hoja se elimina también su contenido interno y se ajustan los nombres definidos y la pestaña activa.</li>
+      <li data-i18n="guia-consejo-3">Si una fórmula de una hoja que queda apunta a otra hoja que quitaste, esa fórmula puede quedar con error al abrirla en Excel. Revisalo antes de quitar hojas de las que dependen otras.</li>
+      <li data-i18n="guia-consejo-4">Siempre se parte del archivo original: podés probar varias versiones sin acumular cambios.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Se pierde el formato de las celdas?</summary>
+      <p data-i18n="guia-r1">No, la herramienta no reescribe las hojas: reordena y elimina partes del propio archivo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo renombrar una hoja?</summary>
+      <p data-i18n="guia-r2">No, solo reordenar y quitar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué pasa si quito todas las hojas?</summary>
+      <p data-i18n="guia-r3">No se puede: el botón de descargar se deshabilita.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Funciona con .xls o .ods?</summary>
+      <p data-i18n="guia-r4">No; esta herramienta acepta solo .xlsx y .xlsm.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
