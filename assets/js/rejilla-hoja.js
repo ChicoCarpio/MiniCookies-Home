@@ -34,6 +34,7 @@
       'rh-of-quitar-orden': 'Quitar el orden', 'rh-of-buscar-valor': 'Buscar valor', 'rh-of-todo': '(Seleccionar todo)', 'rh-of-vacias': '(Vacías)', 'rh-of-aceptar': 'Aceptar', 'rh-of-cancelar': 'Cancelar',
       'rh-of-borrar': 'Borrar filtro', 'rh-of-aviso-celda': 'Elige una celda dentro de los datos', 'rh-of-combinadas': 'No se puede ordenar: hay celdas combinadas en los datos',
       'rh-of-registros': '{0} de {1} registros', 'rh-of-total': '{0} registros', 'rh-of-col': 'Ordenar y filtrar la columna {0}', 'rh-of-filtrada': 'filtrada', 'rh-of-mas': 'Hay más valores de los que se listan: usa el buscador',
+      'rh-formulas-ingles': 'Las fórmulas se muestran en inglés (SUM, IF…) y con coma entre los argumentos, tal como las guarda el archivo. Excel las traduce a tu idioma al abrirlo.', 'rh-ayuda': 'Ayuda',
       'rh-sin-coincidencias': 'Sin coincidencias', 'rh-buscando': 'Buscando…', 'rh-cuenta': '{0} de {1}', 'rh-cuenta-libro': '{0} de {1} en el libro', 'rh-muchas': 'más de {0}',
     };
     const en = {
@@ -47,6 +48,7 @@
       'rh-of-quitar-orden': 'Clear sort', 'rh-of-buscar-valor': 'Search values', 'rh-of-todo': '(Select all)', 'rh-of-vacias': '(Blanks)', 'rh-of-aceptar': 'OK', 'rh-of-cancelar': 'Cancel',
       'rh-of-borrar': 'Clear filter', 'rh-of-aviso-celda': 'Pick a cell inside the data', 'rh-of-combinadas': 'Cannot sort: the data has merged cells',
       'rh-of-registros': '{0} of {1} records', 'rh-of-total': '{0} records', 'rh-of-col': 'Sort and filter column {0}', 'rh-of-filtrada': 'filtered', 'rh-of-mas': 'There are more values than the list shows: use the search box',
+      'rh-formulas-ingles': 'Formulas are shown in English (SUM, IF…) with commas between arguments, exactly as the file stores them. Excel translates them to your language when it opens the file.', 'rh-ayuda': 'Help',
       'rh-sin-coincidencias': 'No matches', 'rh-buscando': 'Searching…', 'rh-cuenta': '{0} of {1}', 'rh-cuenta-libro': '{0} of {1} in the workbook', 'rh-muchas': 'more than {0}',
     };
     pagina.es = Object.assign(es, pagina.es);
@@ -77,6 +79,7 @@
     raiz.className = 'rh';
     raiz.innerHTML =
       '<div class="rh-barra"><div class="rh-nombre" role="textbox" aria-readonly="true" aria-label="' + tx('rh-nombre') + '"></div><span class="rh-fx" aria-hidden="true">fx</span>' +
+      '<span class="ayuda-tip rh-ayuda-formula" hidden><button type="button" class="ayuda-boton" aria-label="' + tx('rh-ayuda') + '">?</button><span class="ayuda-burbuja">' + tx('rh-formulas-ingles') + '</span></span>' +
       '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div><button type="button" class="rh-boton-of" aria-pressed="false" title="' + tx('rh-of-ayuda') + '">' + tx('rh-of') + '</button><button type="button" class="rh-boton-buscar">' + tx('rh-buscar') + '</button><button type="button" class="rh-boton-completa" aria-pressed="false" aria-label="' + tx('rh-pantalla') + '" title="' + tx('rh-pantalla') + '">⤢</button></div>' +
       '<div class="rh-buscador" role="search" hidden><input type="search" class="rh-busca-texto" autocomplete="off" spellcheck="false" placeholder="' + tx('rh-buscar-ph') + '" aria-label="' + tx('rh-buscar-ph') + '">' +
       '<span class="rh-busca-cuenta" aria-live="polite"></span>' +
@@ -95,6 +98,8 @@
     const cajaNombre = q('.rh-nombre'), cajaFormula = q('.rh-formula'), cuerpo = q('.rh-cuerpo'), vista = q('.rh-vista'), lienzo = q('.rh-lienzo');
     const capa = q('.rh-capa'), guia = q('.rh-guia'), asaIni = q('.rh-asa-ini'), asaFin = q('.rh-asa-fin');
     let modoTactil = false;   // la última selección se hizo con el dedo: se ofrecen las asas para ajustarla
+    const ayudaFormula = q('.rh-ayuda-formula');
+    if (typeof window.AyudaTipIniciar === 'function') window.AyudaTipIniciar(ayudaFormula);
     const botonCompleta = q('.rh-boton-completa'), botonOF = q('.rh-boton-of'), infoOF = q('.rh-of-info');
     const buscador = q('.rh-buscador'), cajaBusca = q('.rh-busca-texto'), cuentaBusca = q('.rh-busca-cuenta'), checkLibro = q('.rh-busca-libro');
     // Cada selección se dibuja en piezas, una por zona de la hoja (con paneles inmovilizados hay hasta cuatro): cada pieza es una ventana que recorta
@@ -632,6 +637,7 @@
       const texto = contenidoDeCelda(m ? m.f0 : est.sel.f, m ? m.c0 : est.sel.c);
       cajaFormula.textContent = texto;
       cajaFormula.classList.toggle('es-formula', texto.charAt(0) === '=');
+      ayudaFormula.hidden = texto.charAt(0) !== '=';   // la explicación solo hace falta cuando se ve una fórmula
       anunciar(cajaNombre.textContent + (texto ? ': ' + texto : ''));
       clearTimeout(temporizadorEstado);
       const area = (r.f1 - r.f0 + 1) * (r.c1 - r.c0 + 1);
