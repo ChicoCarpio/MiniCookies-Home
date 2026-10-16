@@ -153,6 +153,7 @@ window.i18nPagina = {
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/tablas-texto.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -193,11 +194,10 @@ function elegirArchivosEpub(listaFileList) {
 
 conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
 
-// Saca el texto plano de un HTML de capítulo, usando el propio parser del navegador.
+// Saca el texto plano de un HTML de capítulo con el propio parser del navegador:
+// párrafos separados, listas con su viñeta y las tablas con sus columnas.
 function htmlATextoPlano(html) {
-  const contenedor = document.createElement('div');
-  contenedor.innerHTML = html;
-  return contenedor.textContent.replace(/\n{3,}/g, '\n\n').trim();
+  return TablasTexto.htmlATexto(new DOMParser().parseFromString(html, 'text/html').body);
 }
 
 // Un EPUB da un texto. Con uno solo se muestra y se baja un .txt; con varios,
