@@ -548,11 +548,87 @@ const FiltrosColor = (() => {
 
   // Llena "contenedor" con un botón por filtro (clase preset-miniatura, con
   // un <canvas> para la miniatura y data-preset = clave), agrupados.
+  // Favoritos: una estrella en cada miniatura (o la tecla F con la miniatura enfocada) la manda a un grupo "Favoritos" al principio de la
+  // grilla. Se guardan en este navegador (localStorage) y los comparten los editores y el generador de stickers. Reordenar MUEVE los
+  // botones, no los rehace: conservan la miniatura dibujada, los clics conectados y cuál está elegido.
+  const CLAVE_FAVORITOS = 'minicookies-filtros-favoritos';
+  function leerFavoritos() {
+    try {
+      const lista = JSON.parse(localStorage.getItem(CLAVE_FAVORITOS));
+      return Array.isArray(lista) ? lista.filter((k) => typeof k === 'string' && k !== 'ninguno') : [];
+    } catch (error) { return []; }
+  }
+  function guardarFavoritos(lista) {
+    try { localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(lista)); } catch (error) { /* sin almacenamiento: dura mientras la página esté abierta */ }
+  }
+  function textoFavoritos() { return enIngles() ? 'Favorites' : 'Favoritos'; }
+  function textoMarcar(esFavorito) {
+    if (enIngles()) return esFavorito ? 'Remove from favorites' : 'Add to favorites';
+    return esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  }
+
   function crearGrilla(contenedor) {
-    const boton = (clave) => `<button type="button" class="preset-miniatura" data-preset="${clave}" title="${nombre(clave)}"><canvas></canvas><span>${nombre(clave)}</span></button>`;
+    const boton = (clave) => `<button type="button" class="preset-miniatura" data-preset="${clave}" title="${nombre(clave)}"><canvas></canvas><span>${nombre(clave)}</span>`
+      + (clave === 'ninguno' ? '' : '<i class="estrella-preset" aria-hidden="true">☆</i>') + '</button>';
     contenedor.innerHTML = boton('ninguno') + GRUPOS.map((g, i) =>
       `<div class="titulo-grupo-presets">${tituloGrupo(i)}</div>` + g.filtros.map(([clave]) => boton(clave)).join('')).join('');
     contenedor.querySelector('[data-preset="ninguno"]').classList.add('activo');
+
+    // Orden original, para devolver un botón a su sitio al quitarlo de favoritos.
+    const nodos = [...contenedor.children];
+    const botonesPorClave = new Map(nodos.filter((n) => n.dataset && n.dataset.preset).map((n) => [n.dataset.preset, n]));
+    const tituloFavoritos = document.createElement('div');
+    tituloFavoritos.className = 'titulo-grupo-presets titulo-favoritos';
+    let favoritos = leerFavoritos().filter((k) => botonesPorClave.has(k));
+
+    function reordenar() {
+      const marcados = new Set(favoritos);
+      const orden = [botonesPorClave.get('ninguno')];
+      if (favoritos.length) {
+        tituloFavoritos.textContent = '★ ' + textoFavoritos();
+        orden.push(tituloFavoritos, ...favoritos.map((k) => botonesPorClave.get(k)));
+      } else {
+        tituloFavoritos.remove();
+      }
+      for (const n of nodos) if (n !== orden[0] && !(n.dataset.preset && marcados.has(n.dataset.preset))) orden.push(n);
+      orden.forEach((n) => contenedor.appendChild(n));
+      for (const [clave, b] of botonesPorClave) {
+        const estrella = b.querySelector('.estrella-preset');
+        if (!estrella) continue;
+        const es = marcados.has(clave);
+        estrella.textContent = es ? '★' : '☆';
+        estrella.title = textoMarcar(es) + ' (F)';
+        estrella.classList.toggle('es-favorito', es);
+        b.dataset.favorito = es ? '1' : '0';
+        b.setAttribute('aria-keyshortcuts', 'F');
+      }
+    }
+    function alternar(boton) {
+      const clave = boton.dataset.preset;
+      favoritos = favoritos.includes(clave) ? favoritos.filter((k) => k !== clave) : [...favoritos, clave];
+      guardarFavoritos(favoritos);
+      reordenar();
+      if (document.activeElement === document.body) boton.focus({ preventScroll: true });
+    }
+    reordenar();
+
+    // En captura, para que el clic en la estrella no llegue al botón (eso elegiría el filtro).
+    contenedor.addEventListener('click', (e) => {
+      const estrella = e.target.closest('.estrella-preset');
+      if (!estrella) return;
+      e.stopPropagation();
+      e.preventDefault();
+      alternar(estrella.closest('.preset-miniatura'));
+    }, true);
+    contenedor.addEventListener('keydown', (e) => {
+      const b = e.target.closest && e.target.closest('.preset-miniatura');
+      if (!b || b.dataset.preset === 'ninguno' || e.ctrlKey || e.metaKey || e.altKey || e.key.toLowerCase() !== 'f') return;
+      e.preventDefault();
+      e.stopPropagation(); // la F suelta es el atajo de pantalla completa
+      alternar(b);
+      b.focus({ preventScroll: true });
+    });
+
     // Se reescriben los textos en vez de rehacer la grilla: rehacerla borraria
     // las miniaturas ya dibujadas en cada <canvas> y cual esta seleccionado.
     document.addEventListener('cambioIdioma', () => {
@@ -561,7 +637,8 @@ const FiltrosColor = (() => {
         b.title = texto;
         b.querySelector('span').textContent = texto;
       });
-      contenedor.querySelectorAll('.titulo-grupo-presets').forEach((d, i) => { d.textContent = tituloGrupo(i); });
+      contenedor.querySelectorAll('.titulo-grupo-presets:not(.titulo-favoritos)').forEach((d, i) => { d.textContent = tituloGrupo(i); });
+      reordenar();
     });
   }
 

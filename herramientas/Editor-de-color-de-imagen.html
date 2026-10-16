@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <link rel="stylesheet" href="../assets/css/app-movil.css">
 <link rel="stylesheet" href="../assets/css/editor-imagen.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <style>
   /* Esta herramienta necesita todo el ancho posible (a diferencia del resto
      del sitio, pensado como columna angosta de lectura). Mismo esqueleto que
@@ -104,6 +105,13 @@ window.i18nPagina = {
     'grupo-filtros': 'Filtros',
     'grupo-acciones': 'Acciones',
     'lbl-intensidad-filtro': 'Intensidad del filtro',
+    'lut-cargar': '🎞️ Cargar un LUT (.cube)',
+    'lut-quitar': 'Quitar el LUT',
+    'lut-ayuda': 'Un LUT es una tabla que cambia cada color por otro: con un solo archivo .cube aplicás un estilo completo (cine, película, blanco y negro…). Los encontrás gratis en internet o los exportás desde Lightroom, DaVinci Resolve y similares. Se aplica después del filtro y su intensidad es aparte (pasado el 100 % se exagera).',
+    'lut-intensidad': 'Intensidad del LUT',
+    'lut-error-grande': 'El archivo es demasiado grande para ser un LUT (máximo 40 MB).',
+    'lut-error-formato': 'Ese archivo no parece un LUT .cube',
+    'lut-error-detalle': 'No se pudo leer el LUT',
     'titulo-textura': 'Textura extra',
     'lbl-intensidad-textura': 'Intensidad de textura',
     'orden-debajo': 'Debajo de los filtros',
@@ -169,6 +177,13 @@ window.i18nPagina = {
     'grupo-filtros': 'Filters',
     'grupo-acciones': 'Actions',
     'lbl-intensidad-filtro': 'Filter strength',
+    'lut-cargar': '🎞️ Load a LUT (.cube)',
+    'lut-quitar': 'Remove the LUT',
+    'lut-ayuda': 'A LUT is a table that swaps every color for another one: a single .cube file applies a complete look (cinema, film, black and white…). You can find them free online or export them from Lightroom, DaVinci Resolve and similar. It is applied after the filter and has its own strength (past 100 % it is exaggerated).',
+    'lut-intensidad': 'LUT strength',
+    'lut-error-grande': 'The file is too large to be a LUT (40 MB at most).',
+    'lut-error-formato': 'That file doesn\u2019t look like a .cube LUT',
+    'lut-error-detalle': 'Couldn\u2019t read the LUT',
     'titulo-textura': 'Extra texture',
     'lbl-intensidad-textura': 'Texture strength',
     'orden-debajo': 'Under the filters',
@@ -266,8 +281,29 @@ window.i18nPagina = {
             <div class="acordeon-contenido">
               <label class="campo-deslizador">
                 <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-filtro">Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
-                <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
+                <input type="range" id="intensidadFiltro" min="0" max="200" value="100">
               </label>
+              <div class="bloque-lut">
+                <div class="fila-lut">
+                  <button type="button" class="boton-secundario-editor" id="botonCargarLut" data-i18n="lut-cargar">🎞️ Cargar un LUT (.cube)</button>
+                  <span class="ayuda-tip">
+                    <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                    <span class="ayuda-burbuja" data-i18n="lut-ayuda">Un LUT es una tabla que cambia cada color por otro.</span>
+                  </span>
+                  <input type="file" id="entradaLut" accept=".cube,text/plain" hidden>
+                </div>
+                <p class="nota-lateral" id="errorLut" role="alert" hidden></p>
+                <div id="estadoLut" hidden>
+                  <div class="fila-lut">
+                    <span class="nombre-lut" id="nombreLut"></span>
+                    <button type="button" class="boton-secundario-editor" id="botonQuitarLut" data-i18n="lut-quitar">Quitar el LUT</button>
+                  </div>
+                  <label class="campo-deslizador">
+                    <span class="etiqueta-deslizador"><span data-i18n="lut-intensidad">Intensidad del LUT</span><span id="valorIntensidadLut">100%</span></span>
+                    <input type="range" id="intensidadLut" min="0" max="200" value="100">
+                  </label>
+                </div>
+              </div>
               <div class="presets-scroll">
                 <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
                 <div class="presets" id="presets"></div>
@@ -518,6 +554,7 @@ window.i18nPagina = {
 <script src="../assets/js/ajuste-por-color.js"></script>
 <script src="../assets/js/filtros-gpu.js"></script>
 <script src="../assets/js/filtros-color.js"></script>
+<script src="../assets/js/lut-cube.js"></script>
 <script src="../assets/js/procesar-filtros.js"></script>
 <script src="../assets/js/atajos.js"></script>
 <script src="../assets/js/historial.js"></script>
@@ -624,6 +661,7 @@ const deslizadores = {
   aberracionAngulo: { input: document.getElementById('aberracionAngulo'), valor: document.getElementById('valorAberracionAngulo'), unidad: '°', porDefecto: 0 },
   aberracionMatiz: { input: document.getElementById('aberracionMatiz'), valor: document.getElementById('valorAberracionMatiz'), unidad: '°', porDefecto: 0, conSigno: true },
   intensidadFiltro: { input: document.getElementById('intensidadFiltro'), valor: document.getElementById('valorIntensidadFiltro'), unidad: '%', porDefecto: 100 },
+  intensidadLut: { input: document.getElementById('intensidadLut'), valor: document.getElementById('valorIntensidadLut'), unidad: '%', porDefecto: 100 },
 };
 CLAVES_MEZCLA_BN.forEach((clave) => {
   deslizadores[clave] = { input: document.getElementById(clave), valor: document.getElementById('valor-' + clave), unidad: '', porDefecto: 0, conSigno: true };
@@ -662,11 +700,45 @@ function cargarImagen(archivo) {
   });
 }
 
+// LUT .cube cargado ({ lut, nombre }) o null. Se aplica después del filtro (ProcesarFiltros.renderizarFiltro, ajustes.lut).
+let lutActual = null;
+const TAMANO_MAXIMO_LUT = 40 * 1024 * 1024;
+
+function mostrarLut() {
+  document.getElementById('estadoLut').hidden = !lutActual;
+  document.getElementById('nombreLut').textContent = lutActual ? lutActual.nombre : '';
+}
+
+function ponerLut(valor) {
+  lutActual = valor;
+  document.getElementById('errorLut').hidden = true;
+  mostrarLut();
+}
+
+document.getElementById('botonCargarLut').addEventListener('click', () => document.getElementById('entradaLut').click());
+document.getElementById('entradaLut').addEventListener('change', async (e) => {
+  const archivo = e.target.files[0];
+  e.target.value = '';
+  if (!archivo) return;
+  const error = document.getElementById('errorLut');
+  try {
+    if (archivo.size > TAMANO_MAXIMO_LUT) throw Object.assign(new Error('grande'), { codigo: 'grande' });
+    const lut = LutCube.leer(await archivo.text());
+    ponerLut({ lut, nombre: lut.titulo || archivo.name.replace(/\.cube$/i, '') });
+    programarRenderizado();
+  } catch (fallo) {
+    error.textContent = fallo.codigo === 'grande' ? t('lut-error-grande') : fallo.codigo ? t('lut-error-detalle') + ': ' + fallo.message : t('lut-error-formato');
+    error.hidden = false;
+  }
+});
+document.getElementById('botonQuitarLut').addEventListener('click', () => { ponerLut(null); programarRenderizado(); });
+
 function leerAjustes() {
   const a = {};
   Object.entries(deslizadores).forEach(([clave, d]) => { a[clave] = Number(d.input.value); });
   a.bn = activarBN.checked;
   a.hsl = AjustePorColor.enUso(hslRangos) ? JSON.parse(JSON.stringify(hslRangos)) : null;
+  a.lut = lutActual ? lutActual.lut : null;
   return a;
 }
 
@@ -998,6 +1070,7 @@ botonRestablecer.addEventListener('click', () => {
   capasFiltroActivo = [];
   ponerTextura(SIN_TEXTURA);
   texturaPuestaPorFiltro = false;
+  ponerLut(null);
 
   programarRenderizado();
 });
@@ -1040,8 +1113,9 @@ function capturarEstado() {
   const paso = {
     valores, bn: activarBN.checked, hsl: hslRangos ? JSON.stringify(hslRangos) : null, textura: texturaActual(),
     capas: capasFiltroActivo, puestaPorFiltro: texturaPuestaPorFiltro, filtro: activo ? activo.dataset.preset : null,
+    lut: lutActual,
   };
-  paso.firma = JSON.stringify([valores, paso.bn, paso.hsl, paso.textura, paso.filtro, capasFiltroActivo.length]);
+  paso.firma = JSON.stringify([valores, paso.bn, paso.hsl, paso.textura, paso.filtro, capasFiltroActivo.length, lutActual ? lutActual.nombre + lutActual.lut.tamano : null]);
   return paso;
 }
 
@@ -1054,6 +1128,7 @@ function restaurarEstado(paso) {
   });
   hslRangos = paso.hsl ? JSON.parse(paso.hsl) : null;
   panelAjustePorColor.refrescar();
+  ponerLut(paso.lut || null);
   ponerTextura(paso.textura);
   capasFiltroActivo = paso.capas;
   texturaPuestaPorFiltro = paso.puestaPorFiltro;
@@ -1339,6 +1414,7 @@ document.getElementById('fondoPanelMovil').addEventListener('click', () => {
 consultaMovil.addEventListener('change', estadoInicialPaneles);
 estadoInicialPaneles();
 </script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>
