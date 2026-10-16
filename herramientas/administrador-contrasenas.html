@@ -24,7 +24,7 @@ window.i18nPagina = {
     'intro': 'Guardá tus contraseñas en una caja fuerte protegida por una contraseña maestra. Genera contraseñas nuevas, importa las de tu navegador y se bloquea sola.',
     'ayuda-como': 'La contraseña maestra se convierte en una clave con PBKDF2-SHA256 (2.000.000 vueltas) y todo el contenido se cifra con AES-256-GCM; el tamaño del archivo solo da una idea aproximada de cuántas contraseñas hay. La contraseña maestra no se guarda en ningún lado, por eso no se puede recuperar. La caja cifrada se guarda en este navegador (IndexedDB) y podés descargar un respaldo cifrado para llevarla a otro equipo. Esta página no carga anuncios ni nada de terceros y el navegador le bloquea las conexiones a otros servidores. Aun así comparte sitio con las demás herramientas: por eso conviene la clave secreta. Ojo: el historial del portapapeles de Windows (Win+V) puede guardar lo que copies.',
     'cajas-titulo': 'Tus cajas fuertes en este navegador',
-    'cajas-vacio': 'Todavía no hay ninguna caja fuerte en este navegador. Creá una o abrí un respaldo.',
+    'cajas-vacio': 'Todavía no hay ninguna caja fuerte en este navegador. Creá una o abrí una caja exportada.',
     'abrir-caja': 'Abrir',
     'actualizada': 'Actualizada: {f}',
     'crear-titulo': 'Crear una caja fuerte nueva',
@@ -147,7 +147,7 @@ window.i18nPagina = {
     'intro': 'Keep your passwords in a vault protected by a master password. It generates new passwords, imports the ones from your browser and locks itself.',
     'ayuda-como': 'The master password is turned into a key with PBKDF2-SHA256 (2,000,000 rounds) and everything is encrypted with AES-256-GCM; the file size only gives a rough idea of how many passwords there are. The master password is not stored anywhere, which is why it cannot be recovered. The encrypted vault is kept in this browser (IndexedDB) and you can download an encrypted backup to take it to another computer. This page loads no ads or anything from third parties and the browser blocks its connections to other servers. It still shares a site with the other tools, which is why the secret key is worth using. Note: the Windows clipboard history (Win+V) may keep what you copy.',
     'cajas-titulo': 'Your vaults in this browser',
-    'cajas-vacio': 'There is no vault in this browser yet. Create one or open a backup.',
+    'cajas-vacio': 'There is no vault in this browser yet. Create one or open an exported vault.',
     'abrir-caja': 'Open',
     'actualizada': 'Updated: {f}',
     'crear-titulo': 'Create a new vault',
@@ -317,11 +317,11 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <div id="mensajeGlobal" class="mensaje" role="status" aria-live="polite" hidden></div>
 
-    <!-- ─── Inicio: elegir, crear o abrir un respaldo ─── -->
+    <!-- ─── Inicio: elegir, crear o abrir una caja exportada ─── -->
     <section id="vistaInicio" class="vista">
       <h2 data-i18n="cajas-titulo">Tus cajas fuertes en este navegador</h2>
       <ul id="listaCajas" class="lista-cajas"></ul>
-      <p id="cajasVacio" class="entrada-sub" data-i18n="cajas-vacio" hidden>Todavía no hay ninguna caja fuerte en este navegador.</p>
+      <p id="cajasVacio" class="entrada-sub" data-i18n="cajas-vacio" hidden>Todavía no hay ninguna caja fuerte en este navegador. Creá una o abrí una caja exportada.</p>
 
       <form id="formCrear" class="bloque vista" autocomplete="off">
         <h3 data-i18n="crear-titulo">Crear una caja fuerte nueva</h3>
@@ -340,9 +340,9 @@ window.i18nPagina = {
       </form>
 
       <div class="bloque vista">
-        <h3 data-i18n="respaldo-abrir-titulo">Abrir un respaldo</h3>
+        <h3 data-i18n="respaldo-abrir-titulo">Abrir una caja exportada</h3>
         <div class="zona-arrastre" id="zonaRespaldo">
-          <span data-i18n="zona-respaldo">📂 Arrastrá un respaldo de caja fuerte (.json) o tocá para elegirlo</span>
+          <span data-i18n="zona-respaldo">📂 Arrastrá el archivo de una caja exportada (.json) o tocá para elegirlo</span>
           <input type="file" id="entradaRespaldo" accept=".json,application/json" hidden>
         </div>
         <div id="respaldoError" class="mensaje error" role="alert" hidden></div>
@@ -384,7 +384,7 @@ window.i18nPagina = {
       </div>
       <div id="avisoRespaldo" class="mensaje fila entre" hidden>
         <span class="crece" data-i18n="respaldo-pendiente">💾 Esta caja solo existe en este navegador y tiene cambios que no están en un respaldo.</span>
-        <button class="boton chico" type="button" id="botonRespaldoAviso" data-i18n="respaldo-descargar">Descargar respaldo</button>
+        <button class="boton chico" type="button" id="botonRespaldoAviso" data-i18n="respaldo-descargar">Exportar caja fuerte</button>
       </div>
       <div class="fila">
         <input type="search" id="buscar" class="crece" data-i18n-attr="placeholder:caja-buscar;aria-label:caja-buscar" placeholder="Buscar" autocomplete="off">
@@ -436,9 +436,9 @@ window.i18nPagina = {
       <div id="mensajeAjustes" class="mensaje" role="status" aria-live="polite" hidden></div>
 
       <div class="bloque vista">
-        <h3 data-i18n="aj-respaldo">Respaldo</h3>
+        <h3 data-i18n="aj-respaldo">Exportar la caja fuerte</h3>
         <p class="entrada-sub" data-i18n="aj-respaldo-txt"></p>
-        <div><button class="boton" type="button" id="ajRespaldo" data-i18n="respaldo-descargar">Descargar respaldo</button></div>
+        <div><button class="boton" type="button" id="ajRespaldo" data-i18n="respaldo-descargar">Exportar caja fuerte</button></div>
       </div>
 
       <div class="bloque vista">

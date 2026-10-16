@@ -31,6 +31,7 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar PDF',
     'aviso-sin-texto': '⚠️ No se encontró texto en este PDF. Si es un documento escaneado (una foto de cada página), el texto no está guardado como texto: usá la herramienta de OCR para reconocerlo.',
     'aviso-sin-texto-enlace': 'Ir a OCR de PDF escaneado',
+    'lote-sin-texto': '⚠️ Estos PDF no tenían texto (su .txt salió vacío); si son escaneos, usá la herramienta de OCR:',
     'separador-pagina': '\n\n--- Página siguiente ---\n\n',
     'error-extraer': 'No se pudo extraer el texto',
     'error-generar': 'No se pudo generar el PDF',
@@ -70,6 +71,7 @@ window.i18nPagina = {
     'resultado-enlace': 'Download PDF',
     'aviso-sin-texto': '⚠️ No text was found in this PDF. If it’s a scanned document (a picture of each page), the text isn’t stored as text: use the OCR tool to recognize it.',
     'aviso-sin-texto-enlace': 'Go to OCR for scanned PDFs',
+    'lote-sin-texto': '⚠️ These PDFs had no text (their .txt came out empty); if they are scans, use the OCR tool:',
     'separador-pagina': '\n\n--- Next page ---\n\n',
     'error-extraer': 'Couldn’t extract the text',
     'error-generar': 'Couldn’t generate the PDF',
@@ -281,8 +283,10 @@ botonExtraer.addEventListener('click', async () => {
       bloqueResultadoTexto.style.display = 'block';
     } else {
       avisoSinTexto.style.display = 'none';
+      const sinTextoNombres = [];
       const resultados = await LoteArchivos.convertirLote(pdfsActuales, async (archivo) => {
-        const { texto } = await convertirPdfATexto(archivo);
+        const { texto, sinTexto } = await convertirPdfATexto(archivo);
+        if (sinTexto) sinTextoNombres.push(archivo.name);
         return { nombre: archivo.name.replace(/\.pdf$/i, '') + '.txt', blob: new Blob([texto], { type: 'text/plain;charset=utf-8' }) };
       }, (i, total) => {
         botonExtraer.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
@@ -295,6 +299,16 @@ botonExtraer.addEventListener('click', async () => {
       enlaceDescargaTxt.textContent = t('lote-enlace-zip');
       bloqueResultadoTexto.style.display = 'block';
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
+      // Un PDF escaneado da un .txt vacío: se avisa cuáles fueron y se sugiere el OCR (con DOM: el nombre viene del archivo).
+      if (sinTextoNombres.length) {
+        const aviso = document.createElement('p');
+        aviso.textContent = t('lote-sin-texto') + ' ' + sinTextoNombres.join(', ') + '. ';
+        const enlaceOcr = document.createElement('a');
+        enlaceOcr.href = 'ocr-pdf.html';
+        enlaceOcr.textContent = t('aviso-sin-texto-enlace');
+        aviso.appendChild(enlaceOcr);
+        resumenLote.appendChild(aviso);
+      }
     }
   } catch (error) {
     alert(t('error-extraer') + ': ' + detalleError(error));

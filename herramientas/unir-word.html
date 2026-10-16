@@ -181,7 +181,7 @@ botonUnir.addEventListener('click', async () => {
     });
 
     const blob = await docx.Packer.toBlob(documento);
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
+    const nombreArchivo = (document.getElementById('nombreArchivo').value || '').replace(/[\\/:*?"<>|]/g, '').trim() || t('nombre-defecto');
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `${nombreArchivo}.docx`;
     resultado.classList.add('visible');

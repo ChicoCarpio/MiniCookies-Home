@@ -104,6 +104,7 @@ window.i18nPagina = {
     'efecto-esmerilado': 'Esmerilado',
     'campo-intensidad-a': 'Intensidad: ',
     'boton-aplicar': 'Aplicar',
+    'estado-generando': 'Generando...',
     'boton-otra-zona': 'Tapar otra zona',
     'boton-descargar': 'Descargar imagen',
     'resultado-listo': '✅ Listo. ',
@@ -130,6 +131,7 @@ window.i18nPagina = {
     'efecto-esmerilado': 'Frosted',
     'campo-intensidad-a': 'Strength: ',
     'boton-aplicar': 'Apply',
+    'estado-generando': 'Generating...',
     'boton-otra-zona': 'Cover another area',
     'boton-descargar': 'Download image',
     'resultado-listo': '✅ Done. ',
@@ -626,7 +628,7 @@ window.addEventListener('resize', () => {
 
 botonAplicar.addEventListener('click', () => {
   botonAplicar.disabled = true;
-  botonAplicar.textContent = 'Generando...';
+  botonAplicar.textContent = t('estado-generando');
   try {
     const ancho = imagenActual.naturalWidth, alto = imagenActual.naturalHeight;
     vistaResultado.width = ancho;
@@ -667,7 +669,7 @@ botonAplicar.addEventListener('click', () => {
     resultado.classList.remove('visible');
   } finally {
     botonAplicar.disabled = false;
-    botonAplicar.textContent = 'Aplicar';
+    botonAplicar.textContent = t('boton-aplicar');
   }
 });
 

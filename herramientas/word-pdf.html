@@ -50,6 +50,7 @@ window.i18nPagina = {
     'boton-a-word-procesando': 'Convirtiendo...',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar Word',
+    'no-agregados': 'No se pudieron agregar (solo se aceptan archivos .docx; un .doc antiguo hay que guardarlo antes como .docx):',
     'advertencias-texto': '⚠️ {n} advertencia(s) — algunos elementos pueden no verse exactamente igual que en Word.',
     'error-vista-previa': 'No se pudo generar la vista previa',
     'error-generar-doc': 'No se pudo generar el documento',
@@ -93,6 +94,7 @@ window.i18nPagina = {
     'boton-a-word-procesando': 'Converting...',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download Word',
+    'no-agregados': 'Couldn’t add (only .docx files are accepted; an old .doc has to be saved as .docx first):',
     'advertencias-texto': '⚠️ {n} warning(s) — some elements may not look exactly like they do in Word.',
     'error-vista-previa': 'Couldn’t generate the preview',
     'error-generar-doc': 'Couldn’t generate the document',
@@ -274,8 +276,15 @@ function mostrarArchivosWord(archivos) {
 }
 
 function elegirArchivosWord(listaFileList) {
-  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  const todos = [...listaFileList];
+  const archivos = todos.filter(f => f.name.toLowerCase().endsWith('.docx'));
   if (archivos.length) mostrarArchivosWord(archivos);
+  // Lo que no es .docx (un .doc antiguo, por ejemplo) no se agrega: se avisa cuáles quedaron afuera.
+  const omitidos = todos.filter(f => !archivos.includes(f)).map(f => f.name);
+  if (omitidos.length) {
+    advertencias.textContent = t('no-agregados') + ' ' + omitidos.join(', ');
+    advertencias.style.display = 'block';
+  }
 }
 
 conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);

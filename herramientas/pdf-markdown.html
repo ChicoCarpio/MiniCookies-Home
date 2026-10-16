@@ -38,7 +38,7 @@ window.i18nPagina = {
     'intro': 'Convertí un PDF a Markdown, o Markdown a PDF, según lo que necesites.',
     'dir-pdf-a-md': 'PDF → Markdown',
     'dir-md-a-pdf': 'Markdown → PDF',
-    'aviso-solo-texto-antes': '⚠️ Solo se extrae el texto. Detecta títulos cuando la letra es más grande que el texto normal, pero no negritas, listas ni tablas del PDF original. Cada página se separa con una línea horizontal (',
+    'aviso-solo-texto-antes': '⚠️ Solo se extrae el texto. Detecta títulos cuando la letra es más grande que el texto normal, y también listas y tablas sencillas, pero puede fallar con diseños complejos; las negritas y cursivas no se conservan. Cada página se separa con una línea horizontal (',
     'aviso-solo-texto-final': ').',
     'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
     'boton-extraer': 'Convertir a Markdown',
@@ -55,6 +55,7 @@ window.i18nPagina = {
     'boton-convertir-pdf-procesando': 'Convirtiendo...',
     'boton-convertir-pdf-progreso': 'Convirtiendo {n} de {total}...',
     'enlace-descargar-pdf': 'Descargar PDF',
+    'resultado-listo': '✅ Listo. ',
     'enlace-descargar-pdf-zip': 'Descargar .zip con los PDF',
     'md-manual-titulo': 'O escribilo a mano',
     'boton-imprimir': '🖨️ Guardar como PDF / Imprimir',
@@ -69,7 +70,7 @@ window.i18nPagina = {
     'intro': 'Convert a PDF to Markdown, or Markdown to PDF, whichever you need.',
     'dir-pdf-a-md': 'PDF → Markdown',
     'dir-md-a-pdf': 'Markdown → PDF',
-    'aviso-solo-texto-antes': '⚠️ Only the text is extracted. Headings are detected when the type is larger than the body text, but not bold text, lists or tables from the original PDF. Each page is separated with a horizontal rule (',
+    'aviso-solo-texto-antes': '⚠️ Only the text is extracted. Headings are detected when the type is larger than the body text, and so are simple lists and tables, but this can fail on complex layouts; bold and italics are not kept. Each page is separated with a horizontal rule (',
     'aviso-solo-texto-final': ').',
     'zona-arrastre': '📄 Drag your PDF here or click to choose it',
     'boton-extraer': 'Convert to Markdown',
@@ -86,6 +87,7 @@ window.i18nPagina = {
     'boton-convertir-pdf-procesando': 'Converting...',
     'boton-convertir-pdf-progreso': 'Converting {n} of {total}...',
     'enlace-descargar-pdf': 'Download PDF',
+    'resultado-listo': '✅ Done. ',
     'enlace-descargar-pdf-zip': 'Download .zip with the PDFs',
     'md-manual-titulo': 'Or write it by hand',
     'boton-imprimir': '🖨️ Save as PDF / Print',
@@ -120,7 +122,7 @@ window.i18nPagina = {
     <!-- PDF → Markdown -->
     <div id="panelPdfAMd" data-panel-direccion="pdf-a-md">
       <p style="color:var(--texto-suave); font-size:0.9rem;">
-        <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto. Detecta títulos cuando la letra es más grande que el texto normal, pero no negritas, listas ni tablas del PDF original. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
+        <span data-i18n="aviso-solo-texto-antes">⚠️ Solo se extrae el texto. Detecta títulos cuando la letra es más grande que el texto normal, y también listas y tablas sencillas, pero puede fallar con diseños complejos; las negritas y cursivas no se conservan. Cada página se separa con una línea horizontal (</span><code>---</code><span data-i18n="aviso-solo-texto-final">).</span>
       </p>
       <div class="zona-arrastre" id="zonaArrastre">
         <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>

@@ -32,6 +32,9 @@ window.i18nPagina = {
     'campo-formato': 'Formato de salida',
     'campo-calidad-a': 'Calidad: ',
     'boton-convertir': 'Convertir imagen',
+    'estado-convirtiendo': 'Convirtiendo...',
+    'error-convertir': 'No se pudo convertir la imagen: ',
+    'error-sin-formato': 'El navegador no pudo generar ese formato.',
     'aviso-transparencia': '⚠️ JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco.',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen',
@@ -61,6 +64,9 @@ window.i18nPagina = {
     'campo-formato': 'Output format',
     'campo-calidad-a': 'Quality: ',
     'boton-convertir': 'Convert image',
+    'estado-convirtiendo': 'Converting...',
+    'error-convertir': 'The image could not be converted: ',
+    'error-sin-formato': 'The browser could not generate that format.',
     'aviso-transparencia': '⚠️ JPG has no transparency — a transparent background will be filled with white.',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download image',
@@ -257,7 +263,7 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
-  botonConvertir.textContent = 'Convirtiendo...';
+  botonConvertir.textContent = t('estado-convirtiendo');
   try {
     const canvas = document.createElement('canvas');
     canvas.width = imagenActual.naturalWidth;
@@ -273,17 +279,17 @@ botonConvertir.addEventListener('click', async () => {
 
     const calidad = formatoElegido === 'image/png' ? undefined : parseInt(elCalidad.value, 10) / 100;
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formatoElegido, calidad));
-    if (!blob) throw new Error('El navegador no pudo generar ese formato.');
+    if (!blob) throw new Error(t('error-sin-formato'));
 
     const extension = EXTENSIONES[formatoElegido];
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `imagen-convertida.${extension}`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo convertir la imagen: ' + error.message);
+    alert(t('error-convertir') + error.message);
   } finally {
     botonConvertir.disabled = false;
-    botonConvertir.textContent = 'Convertir imagen';
+    botonConvertir.textContent = t('boton-convertir');
   }
 });
 </script>

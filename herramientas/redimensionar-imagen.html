@@ -74,6 +74,8 @@ window.i18nPagina = {
     'calidad-suave': 'Suave (recomendado)',
     'calidad-nitido': 'Nítido (pixel art)',
     'boton-redimensionar': 'Redimensionar',
+    'estado-redimensionando': 'Redimensionando...',
+    'error-redimensionar': 'No se pudo redimensionar la imagen: ',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen redimensionada',
     'error-medidas': 'Indicá un ancho y alto válidos.',
@@ -113,6 +115,8 @@ window.i18nPagina = {
     'calidad-suave': 'Smooth (recommended)',
     'calidad-nitido': 'Sharp (pixel art)',
     'boton-redimensionar': 'Resize',
+    'estado-redimensionando': 'Resizing...',
+    'error-redimensionar': 'The image could not be resized: ',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download the resized image',
     'error-medidas': 'Enter a valid width and height.',
@@ -456,7 +460,7 @@ elAlto.addEventListener('input', () => {
 
 botonRedimensionar.addEventListener('click', async () => {
   botonRedimensionar.disabled = true;
-  botonRedimensionar.textContent = 'Redimensionando...';
+  botonRedimensionar.textContent = t('estado-redimensionando');
   try {
     const ancho = parseInt(elAncho.value, 10);
     const alto = parseInt(elAlto.value, 10);
@@ -479,10 +483,10 @@ botonRedimensionar.addEventListener('click', async () => {
     enlaceDescarga.download = `imagen-redimensionada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo redimensionar la imagen: ' + error.message);
+    alert(t('error-redimensionar') + error.message);
   } finally {
     botonRedimensionar.disabled = false;
-    botonRedimensionar.textContent = 'Redimensionar';
+    botonRedimensionar.textContent = t('boton-redimensionar');
   }
 });
 </script>

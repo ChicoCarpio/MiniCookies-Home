@@ -17,6 +17,9 @@ window.i18nPagina = {
     'campo-calidad-a': 'Calidad: ',
     'campo-formato': 'Formato de salida',
     'boton-comprimir': 'Comprimir imagen',
+    'estado-comprimiendo': 'Comprimiendo...',
+    'error-comprimir': 'No se pudo comprimir la imagen: ',
+    'error-sin-imagen': 'El navegador no pudo generar la imagen.',
     'et-peso-original': 'Peso original',
     'et-peso-final': 'Peso comprimido',
     'et-reduccion': 'Reducción',
@@ -50,6 +53,9 @@ window.i18nPagina = {
     'campo-calidad-a': 'Quality: ',
     'campo-formato': 'Output format',
     'boton-comprimir': 'Compress image',
+    'estado-comprimiendo': 'Compressing...',
+    'error-comprimir': 'The image could not be compressed: ',
+    'error-sin-imagen': 'The browser could not generate the image.',
     'et-peso-original': 'Original size',
     'et-peso-final': 'Compressed size',
     'et-reduccion': 'Saved',
@@ -229,7 +235,7 @@ function cargarImagen(archivo) {
 
 botonComprimir.addEventListener('click', async () => {
   botonComprimir.disabled = true;
-  botonComprimir.textContent = 'Comprimiendo...';
+  botonComprimir.textContent = t('estado-comprimiendo');
   try {
     const img = await cargarImagen(archivoActual);
     const canvas = document.createElement('canvas');
@@ -248,7 +254,7 @@ botonComprimir.addEventListener('click', async () => {
     const calidad = parseInt(elCalidad.value, 10) / 100;
 
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, calidad));
-    if (!blob) throw new Error('El navegador no pudo generar la imagen.');
+    if (!blob) throw new Error(t('error-sin-imagen'));
 
     // Si el navegador no sabe generar WebP (Safari viejo), devuelve PNG: la
     // extensión sale del tipo real del resultado, no del elegido.
@@ -270,10 +276,10 @@ botonComprimir.addEventListener('click', async () => {
 
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo comprimir la imagen: ' + error.message);
+    alert(t('error-comprimir') + error.message);
   } finally {
     botonComprimir.disabled = false;
-    botonComprimir.textContent = 'Comprimir imagen';
+    botonComprimir.textContent = t('boton-comprimir');
   }
 });
 </script>

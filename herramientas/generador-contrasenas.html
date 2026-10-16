@@ -32,6 +32,7 @@ window.i18nPagina = {
     'seg-li2-b': '), caracteres repetidos (',
     'seg-li2-c': ') o fragmentos de contraseñas comunes (',
     'seg-li2-d': '...).',
+    'error-sin-tipos': 'Elegí al menos un tipo de carácter.',
     'error-longitud': 'La longitud mínima para lo elegido es {n}.',
     'titulo-pagina': 'Generador de contraseñas seguras — Mini Cookies',
     'meta-descripcion': 'Generá contraseñas seguras y aleatorias, gratis y sin salir de tu navegador. Nunca se envían a ningún servidor.',
@@ -57,6 +58,7 @@ window.i18nPagina = {
     'seg-li2-b': '), repeated characters (',
     'seg-li2-c': ') or chunks of common passwords (',
     'seg-li2-d': '...).',
+    'error-sin-tipos': 'Pick at least one character type.',
     'error-longitud': 'The minimum length for the options you picked is {n}.',
     'titulo-pagina': 'Strong password generator — Mini Cookies',
     'meta-descripcion': 'Generate strong random passwords without leaving your browser. They are never sent to a server.',
@@ -136,6 +138,7 @@ function generarContrasena(longitud, usarMayus, usarMinus, usarNumeros, usarSimb
   try {
     return GeneradorContrasenas.generar(longitud, { mayusculas: usarMayus, minusculas: usarMinus, numeros: usarNumeros, simbolos: usarSimbolos });
   } catch (e) {
+    if (e.codigo === 'sin-tipos') throw new Error(t('error-sin-tipos'));
     if (e.codigo === 'longitud') throw new Error(t('error-longitud').replace('{n}', e.minimo));
     throw e;
   }

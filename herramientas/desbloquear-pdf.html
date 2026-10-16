@@ -17,6 +17,7 @@ window.i18nPagina = {
     'h1': 'Desbloquear PDF',
     'intro': 'Elegí un PDF protegido e ingresá su contraseña para generar una copia sin protección. Necesitás conocer la contraseña — esto no la "rompe" ni la adivina. Si el PDF se abre sin contraseña pero no deja imprimir, copiar o editar, dejá el campo vacío.',
     'zona-arrastre': '📄 Arrastrá tu PDF protegido acá o hacé clic para elegirlo',
+    'placeholder-contrasena': 'Contraseña del PDF',
     'campo-contrasena': 'Contraseña del PDF (vacía si solo tiene restricciones)',
     'boton-desbloquear': 'Desbloquear PDF',
     'boton-desbloquear-procesando': 'Desbloqueando...',
@@ -50,6 +51,7 @@ window.i18nPagina = {
     'h1': 'Unlock PDF',
     'intro': 'Pick a protected PDF and enter its password to generate an unprotected copy. You need to know the password — this doesn’t "crack" it or guess it. If the PDF opens without a password but won’t let you print, copy or edit, leave the field empty.',
     'zona-arrastre': '📄 Drag your protected PDF here or click to choose it',
+    'placeholder-contrasena': 'PDF password',
     'campo-contrasena': 'PDF password (empty if it only has restrictions)',
     'boton-desbloquear': 'Unlock PDF',
     'boton-desbloquear-procesando': 'Unlocking...',
@@ -106,7 +108,7 @@ window.i18nPagina = {
     <div class="controles">
       <label class="campo" style="flex:1; min-width:220px;">
         <span data-i18n="campo-contrasena">Contraseña del PDF</span>
-        <input type="password" id="contrasena" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        <input type="password" id="contrasena" data-i18n-attr="placeholder:placeholder-contrasena" placeholder="Contraseña del PDF" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
       <button class="boton" id="botonDesbloquear" disabled data-i18n="boton-desbloquear">Desbloquear PDF</button>
     </div>
