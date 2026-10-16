@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Tachar texto de un PDF gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Tachá nombres, números o cualquier texto de un PDF de verdad: el texto original se borra del archivo, no solo se tapa. Gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .area-tachado { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; align-items: flex-start; }
+  .lista-aciertos { flex: 1 1 240px; min-width: 0; max-height: 440px; overflow-y: auto; border: 1px solid var(--gris-borde); border-radius: 8px; padding: 6px 10px; margin: 0; list-style: none; }
+  .lista-aciertos li { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--gris-borde); font-size: 0.9rem; }
+  .lista-aciertos li:last-child { border-bottom: none; }
+  .lista-aciertos li.pagina-actual { background: var(--activo-fondo); }
+  .lista-aciertos button.ir { all: unset; cursor: pointer; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lista-aciertos button.ir:focus-visible { outline: 2px solid var(--azul); }
+  .vista-tachado { flex: 1 1 320px; min-width: 0; }
+  .vista-tachado canvas { max-width: 100%; height: auto; border: 1px solid var(--gris-borde); border-radius: 6px; background: #fff; }
+  .navegar-pagina { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.9rem; }
+  .aviso-tachado { color: var(--texto-suave); font-size: 0.9rem; margin: 8px 0 0; }
+  .aviso-tachado.error { color: #c0392b; }
+  textarea#terminos { width: 100%; min-height: 96px; padding: 8px; border: 1px solid var(--gris-borde); border-radius: 6px; font: inherit; resize: vertical; box-sizing: border-box; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Tachar texto de un PDF gratis — Mini Cookies',
+    'meta-descripcion': 'Tachá nombres, números o cualquier texto de un PDF de verdad: el texto original se borra del archivo, no solo se tapa. Gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Tachar texto de un PDF',
+    'intro': 'Elegí un PDF, escribí las palabras o los datos que querés ocultar y revisá dónde aparecen. Las páginas con coincidencias se convierten en imagen: el texto que encontró y tachó deja de existir en el archivo y no se puede copiar ni recuperar.',
+    'nota-limite': 'Solo se encuentra el texto real del PDF. El texto que está dentro de una imagen (un escaneo, una captura, un logo) o las letras convertidas en dibujo no se detectan, y esas partes no se tachan: revisá el resultado antes de compartirlo.',
+    'con-imagenes': '{n} página(s) tienen imágenes. Si una imagen contiene texto que querés ocultar, esta herramienta no lo puede encontrar.',
+    'aviso-capas': 'Este PDF tiene capas opcionales (pueden esconder contenido), así que se convirtieron todas las páginas en imagen.',
+    'error-demasiados': 'Hay demasiadas coincidencias (más de {n}). Afiná lo que buscás, por ejemplo con "Solo palabras completas".',
+    'zona-arrastre': '📄 Arrastrá tu PDF acá o hacé clic para elegirlo',
+    'campo-terminos': 'Qué tachar (uno por línea)',
+    'ayuda-terminos': 'Cada línea es una palabra o frase a buscar en todo el documento. Con "Usar expresión regular" cada línea es un patrón, por ejemplo \\d{3}-\\d{4} para teléfonos o [A-Z]{2}\\d{6} para códigos. Solo se busca el texto real del PDF: si tu PDF es un escaneo (una foto de una hoja), primero pasalo por la herramienta de OCR.',
+    'campo-mayusculas': 'Coincidir mayúsculas/minúsculas',
+    'campo-palabra': 'Solo palabras completas',
+    'campo-regex': 'Usar expresión regular',
+    'boton-buscar': 'Buscar en el PDF',
+    'boton-buscar-procesando': 'Buscando… página {n} de {total}',
+    'resumen': 'Se encontraron {n} coincidencia(s) en {p} página(s). Destildá las que no quieras tachar.',
+    'resumen-nada': 'No se encontró ninguna coincidencia.',
+    'sin-texto': '{n} página(s) no tienen texto que se pueda buscar (probablemente son un escaneo): ahí no se puede tachar. Pasá el PDF por la herramienta de OCR primero.',
+    'lista-pagina': 'Página {n}',
+    'pagina-de': 'Página {n} de {total}',
+    'pagina-anterior': 'Página anterior',
+    'pagina-siguiente': 'Página siguiente',
+    'vista-aria': 'Vista de la página con lo que se va a tachar marcado en rojo',
+    'opcion-resolucion': 'Calidad de las páginas tachadas',
+    'res-150': 'Normal (150 ppp)',
+    'res-200': 'Buena (200 ppp)',
+    'res-300': 'Alta (300 ppp, pesa más)',
+    'opcion-todo': 'Convertir todas las páginas en imagen (máxima seguridad)',
+    'ayuda-todo': 'Por defecto solo se convierten las páginas con coincidencias y el resto queda igual, con su texto. Si el PDF puede tener texto escondido, conviene convertirlo entero. Si el PDF tiene capas opcionales, se convierte entero solo.',
+    'boton-tachar': 'Tachar y descargar',
+    'boton-tachar-procesando': 'Tachando… página {n} de {total}',
+    'resultado-listo': '✅ Listo. Se comprobó que el texto tachado ya no se encuentra en el archivo. ',
+    'resultado-enlace': 'Descargar PDF tachado',
+    'nota-quita': 'Del PDF final también se quitan los comentarios, enlaces, formularios, marcadores, archivos adjuntos y los datos del documento (autor, título…), porque pueden contener lo que querés ocultar.',
+    'error-leer': 'No se pudo leer el PDF',
+    'error-sin-terminos': 'Escribí al menos una palabra o frase a tachar.',
+    'error-patron': 'La expresión regular de la línea {n} no es válida',
+    'error-patron-largo': 'La línea {n} es demasiado larga (máximo 500 caracteres).',
+    'error-muchas-lineas': 'Hay demasiadas líneas (máximo 200).',
+    'error-nada': 'No hay nada para tachar: elegí al menos una coincidencia o activá convertir todo.',
+    'error-quedan': 'No se pudo garantizar que el texto desapareciera ({n} coincidencias siguen en el archivo), así que no se entrega. Probá con "Convertir todas las páginas en imagen".',
+    'error-generar': 'No se pudo tachar el PDF'
+  },
+  en: {
+    'titulo-pagina': 'Redact Text in a PDF Free — Mini Cookies',
+    'meta-descripcion': 'Redact names, numbers or any text in a PDF for real: the original text is removed from the file, not just covered. Free and without uploading your file anywhere.',
+    'h1': 'Redact text in a PDF',
+    'intro': 'Pick a PDF, type the words or data you want to hide and review where they appear. Pages with matches are turned into images: the text it found and redacted no longer exists in the file and can’t be copied or recovered.',
+    'nota-limite': 'Only the real text of the PDF is found. Text inside an image (a scan, a screenshot, a logo) or letters converted to drawings are not detected, and those parts are not redacted: check the result before sharing it.',
+    'con-imagenes': '{n} page(s) have images. If an image contains text you want to hide, this tool can’t find it.',
+    'aviso-capas': 'This PDF has optional layers (they can hide content), so every page was turned into an image.',
+    'error-demasiados': 'There are too many matches (more than {n}). Narrow down what you search for, for example with "Whole words only".',
+    'zona-arrastre': '📄 Drag your PDF here or click to choose it',
+    'campo-terminos': 'What to redact (one per line)',
+    'ayuda-terminos': 'Each line is a word or phrase to look for across the whole document. With "Use regular expression" each line is a pattern, for example \\d{3}-\\d{4} for phone numbers or [A-Z]{2}\\d{6} for codes. Only the real text of the PDF is searched: if your PDF is a scan (a picture of a page), run it through the OCR tool first.',
+    'campo-mayusculas': 'Match case',
+    'campo-palabra': 'Whole words only',
+    'campo-regex': 'Use regular expression',
+    'boton-buscar': 'Search the PDF',
+    'boton-buscar-procesando': 'Searching… page {n} of {total}',
+    'resumen': '{n} match(es) found on {p} page(s). Uncheck the ones you don’t want to redact.',
+    'resumen-nada': 'No matches were found.',
+    'sin-texto': '{n} page(s) have no searchable text (they are probably a scan): nothing can be redacted there. Run the PDF through the OCR tool first.',
+    'lista-pagina': 'Page {n}',
+    'pagina-de': 'Page {n} of {total}',
+    'pagina-anterior': 'Previous page',
+    'pagina-siguiente': 'Next page',
+    'vista-aria': 'View of the page with what will be redacted marked in red',
+    'opcion-resolucion': 'Quality of the redacted pages',
+    'res-150': 'Normal (150 dpi)',
+    'res-200': 'Good (200 dpi)',
+    'res-300': 'High (300 dpi, larger file)',
+    'opcion-todo': 'Turn every page into an image (maximum security)',
+    'ayuda-todo': 'By default only the pages with matches are converted and the rest stays as it was, with its text. If the PDF may hold hidden text, it is better to convert all of it. If the PDF has optional layers, it is converted entirely on its own.',
+    'boton-tachar': 'Redact and download',
+    'boton-tachar-procesando': 'Redacting… page {n} of {total}',
+    'resultado-listo': '✅ Done. We checked that the redacted text can no longer be found in the file. ',
+    'resultado-enlace': 'Download redacted PDF',
+    'nota-quita': 'The final PDF also drops comments, links, forms, bookmarks, attachments and the document data (author, title…), because they may contain what you want to hide.',
+    'error-leer': 'Couldn’t read the PDF',
+    'error-sin-terminos': 'Type at least one word or phrase to redact.',
+    'error-patron': 'The regular expression on line {n} is not valid',
+    'error-patron-largo': 'Line {n} is too long (500 characters at most).',
+    'error-muchas-lineas': 'There are too many lines (200 at most).',
+    'error-nada': 'There is nothing to redact: pick at least one match or turn on convert everything.',
+    'error-quedan': 'We couldn’t guarantee that the text was gone ({n} matches are still in the file), so it isn’t delivered. Try "Turn every page into an image".',
+    'error-generar': 'Couldn’t redact the PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../pdf.html" data-i18n="nav-cat-pdf">Herramientas de PDF</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Tachar texto de un PDF</h1>
+  <p data-i18n="intro">Elegí un PDF, escribí las palabras o los datos que querés ocultar y revisá dónde aparecen. Las páginas tachadas se convierten en imagen, así que el texto original deja de existir en el archivo: no se puede copiar ni recuperar.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📄 Arrastrá tu PDF acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept="application/pdf" hidden>
+    </div>
+
+    <ul class="lista-archivos" id="listaArchivo"></ul>
+
+    <div id="bloqueBuscar" style="display:none;">
+      <label class="campo">
+        <span><span data-i18n="campo-terminos">Qué tachar (uno por línea)</span>
+          <span class="ayuda-tip">
+            <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+            <span class="ayuda-burbuja" data-i18n="ayuda-terminos">Cada línea es una palabra o frase a buscar.</span>
+          </span>
+        </span>
+        <textarea id="terminos" spellcheck="false"></textarea>
+      </label>
+      <div class="controles">
+        <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+          <input type="checkbox" id="coincidirMayusculas">
+          <span data-i18n="campo-mayusculas">Coincidir mayúsculas/minúsculas</span>
+        </label>
+        <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+          <input type="checkbox" id="palabraCompleta">
+          <span data-i18n="campo-palabra">Solo palabras completas</span>
+        </label>
+        <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+          <input type="checkbox" id="usarRegex">
+          <span data-i18n="campo-regex">Usar expresión regular</span>
+        </label>
+        <button class="boton" id="botonBuscar" type="button" data-i18n="boton-buscar">Buscar en el PDF</button>
+      </div>
+      <p class="aviso-tachado error" id="errorBuscar" role="alert" hidden></p>
+      <p class="aviso-tachado" data-i18n="nota-limite">Solo se encuentra el texto real del PDF. El texto que está dentro de una imagen (un escaneo, una captura, un logo) o las letras convertidas en dibujo no se detectan, y esas partes no se tachan: revisá el resultado antes de compartirlo.</p>
+    </div>
+
+    <div id="bloqueResultados" style="display:none;">
+      <p class="aviso-tachado" id="resumen" role="status"></p>
+      <p class="aviso-tachado" id="avisoSinTexto" hidden></p>
+      <p class="aviso-tachado" id="avisoImagenes" hidden></p>
+      <div class="area-tachado" id="areaTachado">
+        <ul class="lista-aciertos" id="listaAciertos"></ul>
+        <div class="vista-tachado">
+          <div class="navegar-pagina">
+            <button type="button" class="boton" id="paginaAnterior" data-i18n-attr="aria-label:pagina-anterior;title:pagina-anterior" style="padding:4px 10px;">‹</button>
+            <span id="etiquetaPagina"></span>
+            <button type="button" class="boton" id="paginaSiguiente" data-i18n-attr="aria-label:pagina-siguiente;title:pagina-siguiente" style="padding:4px 10px;">›</button>
+          </div>
+          <canvas id="vistaPagina" role="img" data-i18n-attr="aria-label:vista-aria"></canvas>
+        </div>
+      </div>
+
+      <div class="controles" style="margin-top:14px;">
+        <label class="campo">
+          <span data-i18n="opcion-resolucion">Calidad de las páginas tachadas</span>
+          <select id="resolucion">
+            <option value="150" data-i18n="res-150">Normal (150 ppp)</option>
+            <option value="200" selected data-i18n="res-200">Buena (200 ppp)</option>
+            <option value="300" data-i18n="res-300">Alta (300 ppp, pesa más)</option>
+          </select>
+        </label>
+        <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+          <input type="checkbox" id="todoImagen">
+          <span><span data-i18n="opcion-todo">Convertir todas las páginas en imagen (máxima seguridad)</span>
+            <span class="ayuda-tip">
+              <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+              <span class="ayuda-burbuja" data-i18n="ayuda-todo">Por defecto solo se convierten las páginas con coincidencias.</span>
+            </span>
+          </span>
+        </label>
+        <button class="boton" id="botonTachar" type="button" data-i18n="boton-tachar">Tachar y descargar</button>
+      </div>
+      <p class="aviso-tachado" data-i18n="nota-quita">Del PDF final también se quitan los comentarios, enlaces, formularios, marcadores, archivos adjuntos y los datos del documento (autor, título…), porque pueden contener lo que querés ocultar.</p>
+      <p class="aviso-tachado error" id="errorTachar" role="alert" hidden></p>
+    </div>
+
+    <p class="aviso-tachado" id="avisoCapas" role="status" hidden></p>
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. Se comprobó que el texto tachado ya no está en el archivo. </span><a id="enlaceDescarga" download="documento-tachado.pdf" data-i18n="resultado-enlace">Descargar PDF tachado</a>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/pdfjs.js"></script>
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/patron-busqueda.js"></script>
+<script src="../assets/js/pdf-tachado.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivo = document.getElementById('entradaArchivo');
+const listaArchivo = document.getElementById('listaArchivo');
+const bloqueBuscar = document.getElementById('bloqueBuscar');
+const bloqueResultados = document.getElementById('bloqueResultados');
+const botonBuscar = document.getElementById('botonBuscar');
+const botonTachar = document.getElementById('botonTachar');
+const errorBuscar = document.getElementById('errorBuscar');
+const errorTachar = document.getElementById('errorTachar');
+const listaAciertos = document.getElementById('listaAciertos');
+const vistaPagina = document.getElementById('vistaPagina');
+const etiquetaPagina = document.getElementById('etiquetaPagina');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+
+const LINEAS_MAXIMAS = 200;
+let bytesActuales = null;
+let pdfActual = null;
+let nombreBase = 'documento';
+let aciertos = [];           // los que encontró PdfTachado.buscar
+let elegidos = new Set();    // ids de los que se van a tachar
+let reglasActuales = [];     // las RegExp con que se buscó (también sirven para comprobar el resultado)
+let paginaVista = 1;
+let ocupado = false;         // buscando o tachando: no se acepta otro archivo hasta que termine
+let urlResultado = null;
+let cargaActual = 0;
+let numeroVista = 0;
+
+function mostrarError(el, texto) {
+  el.textContent = texto || '';
+  el.hidden = !texto;
+}
+
+function elegirArchivo(listaFileList) {
+  if (ocupado) return;
+  const archivo = [...listaFileList].find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  if (archivo) cargarPdf(archivo);
+}
+conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
+
+async function cargarPdf(archivo) {
+  const miCarga = ++cargaActual;
+  try {
+    const bytes = await archivo.arrayBuffer();
+    const pdf = await abrirPdf(bytes.slice(0));
+    if (miCarga !== cargaActual) { PdfTachado.liberar(pdf); return; }
+    if (pdfActual) PdfTachado.liberar(pdfActual);
+    pdfActual = pdf;
+    bytesActuales = bytes;
+    nombreBase = archivo.name.replace(/\.pdf$/i, '');
+    listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+    aciertos = []; elegidos = new Set();
+    bloqueBuscar.style.display = 'block';
+    bloqueResultados.style.display = 'none';
+    resultado.classList.remove('visible');
+    mostrarError(errorBuscar, ''); mostrarError(errorTachar, '');
+    document.getElementById('avisoCapas').hidden = true;
+  } catch (error) {
+    alert(t('error-leer') + ': ' + detalleError(error));
+  }
+}
+
+// Las líneas del cuadro de texto a RegExp (PatronBusqueda, el mismo de Buscar y reemplazar). Devuelve { reglas } o { error }.
+function leerReglas() {
+  const lineas = document.getElementById('terminos').value.split(/\r\n|\r|\n/).map((l) => l.trim()).filter(Boolean);
+  if (!lineas.length) return { error: t('error-sin-terminos') };
+  if (lineas.length > LINEAS_MAXIMAS) return { error: t('error-muchas-lineas') };
+  const reglas = [];
+  for (let i = 0; i < lineas.length; i++) {
+    const p = PatronBusqueda.crear(lineas[i], {
+      regex: document.getElementById('usarRegex').checked,
+      palabra: document.getElementById('palabraCompleta').checked,
+      mayusculas: document.getElementById('coincidirMayusculas').checked,
+    });
+    if (p.error === 'largo') return { error: t('error-patron-largo').replace('{n}', i + 1) };
+    if (p.error) return { error: t('error-patron').replace('{n}', i + 1) + ' (' + p.detalle + ')' };
+    reglas.push(p.regex);
+  }
+  return { reglas };
+}
+
+botonBuscar.addEventListener('click', async () => {
+  mostrarError(errorBuscar, ''); mostrarError(errorTachar, '');
+  const { reglas, error } = leerReglas();
+  if (error) { mostrarError(errorBuscar, error); return; }
+  botonBuscar.disabled = true;
+  ocupado = true;
+  resultado.classList.remove('visible');
+  document.getElementById('avisoCapas').hidden = true;
+  try {
+    reglasActuales = reglas;
+    const { aciertos: hallados, paginasSinTexto, paginasConImagenes } = await PdfTachado.buscar(pdfActual, reglas, {
+      alProgreso: (n, total) => { botonBuscar.textContent = t('boton-buscar-procesando').replace('{n}', n).replace('{total}', total); },
+    });
+    aciertos = hallados;
+    elegidos = new Set(aciertos.map((a) => a.id));
+    mostrarResultados(paginasSinTexto, paginasConImagenes);
+  } catch (fallo) {
+    mostrarError(errorBuscar, fallo.codigo === 'demasiados' ? t('error-demasiados').replace('{n}', fallo.maximo) : t('error-generar') + ': ' + detalleError(fallo));
+  } finally {
+    ocupado = false;
+    botonBuscar.disabled = false;
+    botonBuscar.textContent = t('boton-buscar');
+  }
+});
+
+function paginasConAciertos() { return new Set(aciertos.map((a) => a.pagina)); }
+
+function actualizarResumen() {
+  const el = document.getElementById('resumen');
+  if (!aciertos.length) { el.textContent = t('resumen-nada'); return; }
+  const marcadas = aciertos.filter((a) => elegidos.has(a.id));
+  const paginas = new Set(marcadas.map((a) => a.pagina)).size;
+  el.textContent = t('resumen').replace('{n}', marcadas.length).replace('{p}', paginas);
+}
+
+function mostrarResultados(paginasSinTexto, paginasConImagenes) {
+  bloqueResultados.style.display = 'block';
+  const avisoImagenes = document.getElementById('avisoImagenes');
+  avisoImagenes.hidden = paginasConImagenes.length === 0;
+  avisoImagenes.textContent = paginasConImagenes.length ? t('con-imagenes').replace('{n}', paginasConImagenes.length) : '';
+  const aviso = document.getElementById('avisoSinTexto');
+  aviso.hidden = paginasSinTexto.length === 0;
+  aviso.textContent = paginasSinTexto.length ? t('sin-texto').replace('{n}', paginasSinTexto.length) : '';
+  document.getElementById('areaTachado').style.display = aciertos.length ? '' : 'none';
+  listaAciertos.innerHTML = '';
+  for (const a of aciertos) {
+    const li = document.createElement('li');
+    li.dataset.pagina = a.pagina;
+    const caja = document.createElement('input');
+    caja.type = 'checkbox';
+    caja.checked = true;
+    caja.addEventListener('change', () => {
+      if (caja.checked) elegidos.add(a.id); else elegidos.delete(a.id);
+      actualizarResumen();
+      dibujarVista();
+    });
+    const ir = document.createElement('button');
+    ir.type = 'button';
+    ir.className = 'ir';
+    ir.textContent = t('lista-pagina').replace('{n}', a.pagina) + ' — «' + a.texto + '»';   // texto del PDF: siempre textContent
+    ir.addEventListener('click', () => mostrarPagina(a.pagina));
+    li.append(caja, ir);
+    listaAciertos.appendChild(li);
+  }
+  actualizarResumen();
+  if (aciertos.length) mostrarPagina(aciertos[0].pagina);
+}
+
+async function dibujarVista() {
+  const miVista = ++numeroVista;
+  const pagina = await pdfActual.getPage(paginaVista);
+  const base = pagina.getViewport({ scale: 1 });
+  const escala = Math.min(1.5, 640 / base.width);
+  const vp = pagina.getViewport({ scale: escala });
+  const lienzo = document.createElement('canvas');
+  lienzo.width = Math.ceil(vp.width); lienzo.height = Math.ceil(vp.height);
+  await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vp }).promise;
+  pagina.cleanup();
+  if (miVista !== numeroVista) return;
+  vistaPagina.width = lienzo.width; vistaPagina.height = lienzo.height;
+  const ctx = vistaPagina.getContext('2d');
+  ctx.drawImage(lienzo, 0, 0);
+  ctx.fillStyle = 'rgba(220, 38, 38, 0.38)';
+  ctx.strokeStyle = 'rgba(220, 38, 38, 0.95)';
+  ctx.lineWidth = 1.5;
+  for (const a of aciertos) {
+    if (a.pagina !== paginaVista || !elegidos.has(a.id)) continue;
+    for (const caja of a.cajas) {
+      ctx.beginPath();
+      caja.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x * escala, p.y * escala); else ctx.lineTo(p.x * escala, p.y * escala); });
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    }
+  }
+}
+
+function mostrarPagina(n) {
+  paginaVista = Math.min(Math.max(1, n), pdfActual.numPages);
+  etiquetaPagina.textContent = t('pagina-de').replace('{n}', paginaVista).replace('{total}', pdfActual.numPages);
+  [...listaAciertos.children].forEach((li) => li.classList.toggle('pagina-actual', Number(li.dataset.pagina) === paginaVista));
+  dibujarVista();
+}
+document.getElementById('paginaAnterior').addEventListener('click', () => mostrarPagina(paginaVista - 1));
+document.getElementById('paginaSiguiente').addEventListener('click', () => mostrarPagina(paginaVista + 1));
+document.addEventListener('cambioIdioma', () => {
+  if (pdfActual && bloqueResultados.style.display !== 'none') {
+    etiquetaPagina.textContent = t('pagina-de').replace('{n}', paginaVista).replace('{total}', pdfActual.numPages);
+    actualizarResumen();
+  }
+});
+
+botonTachar.addEventListener('click', async () => {
+  mostrarError(errorTachar, '');
+  const todo = document.getElementById('todoImagen').checked;
+  const aTachar = aciertos.filter((a) => elegidos.has(a.id));
+  if (!aTachar.length && !todo) { mostrarError(errorTachar, t('error-nada')); return; }
+  botonTachar.disabled = true;
+  ocupado = true;
+  resultado.classList.remove('visible');
+  document.getElementById('avisoCapas').hidden = true;
+  try {
+    // Las coincidencias que la persona destildó se quedan a propósito: son las que todavía se pueden encontrar en las páginas que no se convierten.
+    const conTachado = new Set(aTachar.map((a) => a.pagina));
+    const permitidas = todo ? 0 : aciertos.filter((a) => !elegidos.has(a.id) && !conTachado.has(a.pagina)).length;
+    const { bytes, todo: seConvirtioTodo } = await PdfTachado.generar(bytesActuales, pdfActual, aTachar, {
+      reglas: reglasActuales, dpi: Number(document.getElementById('resolucion').value), todo, permitidas,
+      alProgreso: (n, total) => { botonTachar.textContent = t('boton-tachar-procesando').replace('{n}', n).replace('{total}', total); },
+    });
+    if (urlResultado) URL.revokeObjectURL(urlResultado);
+    urlResultado = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    enlaceDescarga.href = urlResultado;
+    const avisoCapas = document.getElementById('avisoCapas');
+    avisoCapas.hidden = !(seConvirtioTodo && !todo);
+    avisoCapas.textContent = avisoCapas.hidden ? '' : t('aviso-capas');
+    enlaceDescarga.download = `${nombreBase}-tachado.pdf`;
+    resultado.classList.add('visible');
+  } catch (fallo) {
+    mostrarError(errorTachar, fallo.codigo === 'quedan' ? t('error-quedan').replace('{n}', fallo.quedan) : t('error-generar') + ': ' + detalleError(fallo));
+  } finally {
+    ocupado = false;
+    botonTachar.disabled = false;
+    botonTachar.textContent = t('boton-tachar');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
