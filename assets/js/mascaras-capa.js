@@ -2,7 +2,7 @@
 // Máscaras de capa del Editor avanzado: dónde se aplica cada capa.
 //
 // Desde el 2026-10-07 (proyecto versión 8) una máscara es una LISTA ORDENADA
-// DE PIEZAS, como en Lightroom (plan del rediseño, hallazgos.md, 3.2). Cada pieza
+// DE PIEZAS, como en Lightroom (plan del rediseño, hallazgos/editores-rediseno.md, 3.2). Cada pieza
 // marca una zona (toda la imagen, lo pintado con un pincel, un degradado, un
 // color, un rango de luz, lo que no es el fondo de un croma —verde, azul…—,
 // o el primer plano o un objeto que separa la IA:

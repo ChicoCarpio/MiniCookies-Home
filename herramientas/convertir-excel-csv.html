@@ -68,7 +68,7 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)</span>
-      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
@@ -107,9 +107,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
@@ -142,7 +140,7 @@ let esCsv = false;
 let libro = null;   // LectorHojas (assets/js/lector-hojas.js)
 
 function esArchivoValido(archivo) {
-  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+  return /\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i.test(archivo.name);
 }
 
 async function mostrarArchivo(archivo) {
@@ -187,7 +185,7 @@ function campoCsv(texto, separador) {
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
   try {
-    const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+    const nombreBase = archivoActual.name.replace(/\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i, '');
 
     if (esCsv) {
       // Los números del CSV pasan a números de Excel (los códigos como "00123" y las fechas quedan como texto). Desde A1: las líneas y

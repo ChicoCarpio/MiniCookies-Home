@@ -10,9 +10,14 @@
 //     celdas de una fórmula matricial y encabezados de tabla (cambiarlos sin cambiar la tabla hace que Excel repare el archivo).
 //
 //   await XlsxEscritor.crearLibro(hojas, opciones) → Uint8Array
-//     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n, autofiltro?: bool (botones de filtro sobre todo el rango) }]; valor: número,
-//     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy'; hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
+//     Libro nuevo desde matrices. hojas: [{ nombre, filas: [[valor…]…], anchos?: [caracteres…], combinadas?: ['A1:B2'…], inmovilizarFilas?: n, autofiltro?: bool (botones de filtro sobre todo el rango),
+//     estado?: 'visible' | 'oculta' | 'muyOculta', columnasOcultas?: [columna desde 0…], filasOcultas?: [fila desde 0…] }]; valor: número,
+//     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy', o el número de uno integrado, p. ej. 14 (fecha corta del idioma de quien abre el libro); hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
+//     Fórmulas: un valor { formula: 'SUM(A1:A3)', valor?: …, formato? } escribe la fórmula (sin '=') con su último resultado guardado (valor: lo mismo que una celda
+//     normal, incluido { valor, formato }, o nada) y pide a Excel recalcular al abrir. Para pasar fórmulas de otro libro sin romperlas: XlsxEscritor.formulaConservable(formula,
+//     nombresDeHojas) dice si se puede llevar tal cual (sin nombres definidos, tablas ni libros externos, y solo con hojas que existen) y renombrarHojas(formula, mapa) cambia
+//     los nombres de hoja que la fórmula cita.
 (function () {
   const X = XmlEditar;
   const MAX_FILA = 1048576, MAX_COL = 16384, MAX_TEXTO = 32767, MAX_CAMBIOS = 5000000;
@@ -272,11 +277,12 @@
   // Los estilos base más un cellXfs por cada formato de número pedido (ids de formato propios desde 164).
   function estilosConFormatos(formatos) {
     if (!formatos.size) return ESTILOS_XML;
-    const codigos = [...formatos.keys()];
-    const numFmts = `<numFmts count="${codigos.length}">${codigos.map((c, k) => `<numFmt numFmtId="${164 + k}" formatCode="${X.escAttr(c)}"/>`).join('')}</numFmts>`;
-    const xfs = codigos.map((_, k) => `<xf numFmtId="${164 + k}" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>`).join('');
+    const claves = [...formatos.keys()], cadenas = claves.filter((c) => typeof c === 'string');
+    const idDe = (c) => (typeof c === 'number' ? c : 164 + cadenas.indexOf(c));   // un número es un formato integrado de Excel (14, 22…): se usa su id
+    const numFmts = cadenas.length ? `<numFmts count="${cadenas.length}">${cadenas.map((c, k) => `<numFmt numFmtId="${164 + k}" formatCode="${X.escAttr(c)}"/>`).join('')}</numFmts>` : '';
+    const xfs = claves.map((c) => `<xf numFmtId="${idDe(c)}" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>`).join('');
     // con funciones: un formato como "$"#,##0 lleva $& o $$, que replace con una cadena interpretaría
-    return ESTILOS_XML.replace('<fonts ', () => numFmts + '<fonts ').replace('<cellXfs count="6">', () => `<cellXfs count="${6 + codigos.length}">`).replace('</cellXfs>', () => xfs + '</cellXfs>');
+    return ESTILOS_XML.replace('<fonts ', () => numFmts + '<fonts ').replace('<cellXfs count="6">', () => `<cellXfs count="${6 + claves.length}">`).replace('</cellXfs>', () => xfs + '</cellXfs>');
   }
 
   // Un Date de JavaScript es un instante; Excel guarda la hora "de pared". Por defecto se toma la del reloj local del Date (new Date(2024, 2, 15) → 15/3/2024
@@ -287,6 +293,67 @@
     return Math.round(ms / 86400000 * 1e9) / 1e9 + 25569;
   };
   const MAX_CARACTERES = 400000000;   // el límite de una cadena en V8 es ~536 millones de caracteres
+
+  // ---- fórmulas ---------------------------------------------------------------------------------------------------
+  const MAX_FORMULA = 8192;
+  // <c> de una celda con fórmula y su último resultado; null si la fórmula no se puede escribir.
+  function formulaXml(ref, v, estiloDeFormato) {
+    const f = v.formula.replace(/^=/, '');
+    if (!f || f.length > MAX_FORMULA || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(f)) return null;
+    let x = v.valor, est = 0;
+    if (x && typeof x === 'object' && !(x instanceof Date) && 'formato' in x && 'valor' in x) { est = estiloDeFormato(x.formato); x = x.valor; }
+    const s = est ? ` s="${est}"` : '';
+    const ft = `<f>${X.esc(f)}</f>`;
+    if (x instanceof Date) { if (Number.isNaN(x.getTime())) x = null; else { x = serialDeFecha(x, false); if (!est) return `<c r="${ref}" s="${Number.isInteger(x) ? ESTILO.fecha : ESTILO.fechaHora}">${ft}<v>${x}</v></c>`; } }
+    if (typeof x === 'number') return Number.isFinite(x) ? `<c r="${ref}"${s}>${ft}<v>${String(x)}</v></c>` : `<c r="${ref}"${s}>${ft}</c>`;
+    if (typeof x === 'boolean') return `<c r="${ref}"${s} t="b">${ft}<v>${x ? 1 : 0}</v></c>`;
+    if (x && typeof x === 'object' && typeof x.error === 'string' && ERRORES.has(x.error)) return `<c r="${ref}"${s} t="e">${ft}<v>${x.error}</v></c>`;
+    if (typeof x === 'string' && x.length <= MAX_TEXTO) return `<c r="${ref}"${s} t="str">${ft}<v>${escTexto(x)}</v></c>`;
+    return `<c r="${ref}"${s}>${ft}</c>`;
+  }
+
+  // ¿Se puede llevar esta fórmula a otro libro sin que cambie de sentido? Solo si cita hojas que existen en el libro nuevo (`nombresHojas`: Set en minúsculas) y no usa
+  // nombres definidos, referencias de tabla ni otros libros: esos no viajan con las celdas.
+  const PREFIJO_HOJA = /('(?:[^']|'')*'|[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*)!/g;
+  function formulaConservable(formula, nombresHojas) {
+    if (typeof formula !== 'string') return false;
+    let t = formula.replace(/^=/, '');
+    if (!t || t.length > MAX_FORMULA) return false;
+    t = t.replace(/"(?:[^"]|"")*"/g, '""').replace(/#(?:REF!|N\/A|DIV\/0!|NAME\?|NULL!|NUM!|VALUE!)/g, ' ');   // los errores literales no son hojas
+    if (t.includes('[')) return false;
+    let ok = true;
+    t = t.replace(PREFIJO_HOJA, (m, p) => {
+      const nombre = (p[0] === "'" ? p.slice(1, -1).replace(/''/g, "'") : p).toLowerCase();
+      if (!nombresHojas.has(nombre)) ok = false;
+      return ' ';
+    });
+    if (!ok) return false;
+    const re = /[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*/g;
+    let m;
+    while ((m = re.exec(t))) {
+      const sig = t[m.index + m[0].length];
+      if (sig === '(') continue;   // función
+      if (/^(?:TRUE|FALSE)$/i.test(m[0]) || /[\d.]/.test(t[m.index - 1] || '')) continue;   // lógico, o el exponente de un número (1E+5)
+      // celda (A1, A$1) o columna entera (A:C, $A:$C) hasta XFD. Unas letras solas o una "celda" más allá de XFD son un nombre definido: Excel
+      // acepta IVA, tax, x o XFE1 como nombres (medido)
+      const col = /^([A-Za-z]{1,3})(\d*)$/.exec(m[0]);
+      if (col && colANumero(col[1].toUpperCase()) <= 16383) {
+        const fin = m.index + m[0].length, ant = t[m.index - 1] === '$' ? t[m.index - 2] : t[m.index - 1];
+        if (col[2] || sig === ':' || ant === ':' || /^\$\d/.test(t.slice(fin, fin + 2))) continue;
+      }
+      return false;                // un nombre definido
+    }
+    return true;
+  }
+
+  // Cambia los nombres de hoja que cita una fórmula. mapa: Map (nombre en minúsculas → nombre nuevo).
+  function renombrarHojas(formula, mapa) {
+    return formula.replace(/"(?:[^"]|"")*"|#REF!|('(?:[^']|'')*'|[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*)!/g, (m, p) => {
+      if (!p) return m;
+      const nombre = (p[0] === "'" ? p.slice(1, -1).replace(/''/g, "'") : p).toLowerCase();
+      return mapa.has(nombre) ? "'" + mapa.get(nombre).replace(/'/g, "''") + "'!" : m;
+    });
+  }
 
   // Rechaza con ErrorEscritor lo que no cabe en memoria en vez de dejar escapar un RangeError ("Invalid string length").
   async function crearLibro(hojas, opciones) {
@@ -304,17 +371,22 @@
   async function crearLibroInterno(hojas, opciones) {
     opciones = opciones || {};
     if (!Array.isArray(hojas) || !hojas.length) throw new ErrorEscritor('un libro necesita al menos una hoja');
-    if (hojas.length > 255) throw new ErrorEscritor('demasiadas hojas');
+    if (hojas.length > 1000) throw new ErrorEscritor('demasiadas hojas');   // Excel abre 1000 sin repararlo (medido 2026-10-15); no tiene un tope propio
     const zip = new ZipPropio();
     const usados = new Set(), nombres = [];
     const textos = [], indiceTexto = new Map();
-    let totalTextos = 0;
+    let totalTextos = 0, hayFormulas = false;
     const formatos = new Map();   // código de formato → índice de cellXfs (se añaden después de los de ESTILO)
     const estiloDeFormato = (codigo) => {
-      if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) return 0;
+      if (typeof codigo === 'number') { if (!Number.isInteger(codigo) || codigo < 1 || codigo > 163) return 0; }
+      else if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) return 0;
       if (!formatos.has(codigo)) { if (formatos.size >= MAX_FORMATOS) return 0; formatos.set(codigo, 6 + formatos.size); }
       return formatos.get(codigo);
     };
+    // hojas ocultas: Excel necesita al menos una visible (y la pestaña activa tiene que ser una visible)
+    const estados = hojas.map((h) => (h && (h.estado === 'oculta' || h.estado === 'muyOculta') ? h.estado : 'visible'));
+    const primeraVisible = Math.max(0, estados.indexOf('visible'));
+    if (!estados.includes('visible')) estados[0] = 'visible';
     const idTexto = (t) => { totalTextos++; if (!indiceTexto.has(t)) { indiceTexto.set(t, textos.length); textos.push(t); } return indiceTexto.get(t); };
     const hojasXml = hojas.map((h, k) => {
       const nombre = nombreHoja(h.nombre, usados);
@@ -322,7 +394,8 @@
       const filas = h.filas || [];
       if (filas.length > MAX_FILA) throw new ErrorEscritor('demasiadas filas');
       let maxCol = 0;
-      const filasXml = [];
+      const filasXml = [];   // [fila, xml]
+      const filasOcultas = new Set((Array.isArray(h.filasOcultas) ? h.filasOcultas : []).filter((f) => Number.isInteger(f) && f >= 0 && f < MAX_FILA));
       filas.forEach((fila, f) => {
         if (!Array.isArray(fila) || !fila.length) return;
         if (fila.length > MAX_COL) throw new ErrorEscritor('demasiadas columnas');
@@ -332,6 +405,12 @@
           maxCol = Math.max(maxCol, c + 1);
           const ref = numeroACol(c) + (f + 1);
           const cab = f === 0 && opciones.negritaPrimeraFila;
+          if (v && typeof v === 'object' && !(v instanceof Date) && typeof v.formula === 'string') {
+            const x = formulaXml(ref, v, estiloDeFormato);
+            if (x) { celdas.push(x); hayFormulas = true; return; }
+            v = v.valor;   // fórmula que no se puede escribir (vacía, enorme o con caracteres de control): queda su valor
+            if (v === null || v === undefined || v === '') return;
+          }
           if (v && typeof v === 'object' && !(v instanceof Date) && 'formato' in v && 'valor' in v) {
             const est = estiloDeFormato(v.formato), x = v.valor;
             if (x instanceof Date) { if (Number.isNaN(x.getTime())) return; celdas.push(celdaXml(ref, est, serialDeFecha(x, opciones.fechasUtc))); return; }
@@ -348,21 +427,47 @@
           }
           celdas.push(celdaXml(ref, cab ? ESTILO.negrita : 0, v));
         });
-        if (celdas.length) filasXml.push(`<row r="${f + 1}">${celdas.join('')}</row>`);
+        if (celdas.length) filasXml.push([f, `<row r="${f + 1}"${filasOcultas.has(f) ? ' hidden="1"' : ''}>${celdas.join('')}</row>`]);
       });
-      const anchos = (h.anchos || []).slice(0, MAX_COL).map((w, c) => (w > 0 ? `<col min="${c + 1}" max="${c + 1}" width="${Math.min(255, w)}" customWidth="1"/>` : '')).join('');
-      // combinadas: solo rangos A1:B2 válidos y que no se pisen con una anterior (dos que se solapan: Excel no abre el libro)
-      const comb = [], rangos = [];
+      // una fila oculta sin celdas también se escribe (si no, reaparecería): se inserta en su lugar
+      if (filasOcultas.size) {
+        const hay = new Set(filasXml.map((x) => x[0]));
+        for (const f of filasOcultas) if (!hay.has(f)) filasXml.push([f, `<row r="${f + 1}" hidden="1"/>`]);
+        filasXml.sort((a, b) => a[0] - b[0]);
+      }
+      const colsOcultas = new Set((Array.isArray(h.columnasOcultas) ? h.columnasOcultas : []).filter((c) => Number.isInteger(c) && c >= 0 && c < MAX_COL));
+      const anchosHoja = (h.anchos || []).slice(0, MAX_COL);
+      let anchos = '';
+      for (let c = 0, n = Math.max(anchosHoja.length, colsOcultas.size ? Math.max(...colsOcultas) + 1 : 0); c < n; c++) {
+        const w = anchosHoja[c], oculta = colsOcultas.has(c);
+        if (w > 0 || oculta) anchos += `<col min="${c + 1}" max="${c + 1}" width="${Math.min(255, w > 0 ? w : 8.43)}"${oculta ? ' hidden="1"' : ''} customWidth="1"/>`;
+      }
+      // combinadas: solo rangos A1:B2 válidos y que no se pisen con una anterior (dos que se solapan: Excel no abre el libro). Se buscan por fila, como en
+      // celdasProtegidas (contra todas las anteriores era cuadrático: 80.000 combinadas de un .xlsb, segundos), y con un tope de comparaciones para un
+      // archivo hostil: pasado el tope, el resto no se combina.
+      const comb = [], porFila = new Map(), altos = [];
+      let comparaciones = 0;
+      const pisa = (d) => (o) => d.f0 <= o.f1 && o.f0 <= d.f1 && d.c0 <= o.c1 && o.c0 <= d.c1;
       for (const r of h.combinadas || []) {
         const d = typeof r === 'string' && /^\$?[A-Za-z]{1,3}\$?\d+:\$?[A-Za-z]{1,3}\$?\d+$/.test(r) ? LibroXlsx.decodificarRango(r) : null;
-        if (!d || d.f1 >= MAX_FILA || d.c1 >= MAX_COL || rangos.some((o) => d.f0 <= o.f1 && o.f0 <= d.f1 && d.c0 <= o.c1 && o.c0 <= d.c1)) continue;
-        rangos.push(d); comb.push(numeroACol(d.c0) + (d.f0 + 1) + ':' + numeroACol(d.c1) + (d.f1 + 1));
+        if (!d || d.f1 >= MAX_FILA || d.c1 >= MAX_COL) continue;
+        const alto = d.f1 - d.f0 >= 64;
+        let choca = altos.some(pisa(d));
+        comparaciones += altos.length;
+        const enFila = (l) => { comparaciones += l.length; return l.some(pisa(d)); };
+        if (!choca && (!alto || d.f1 - d.f0 < porFila.size)) for (let f = d.f0; f <= d.f1 && !choca; f++) { const l = porFila.get(f); if (l) choca = enFila(l); }
+        else if (!choca) for (const [f, l] of porFila) { comparaciones++; if (f >= d.f0 && f <= d.f1 && enFila(l)) { choca = true; break; } }
+        if (comparaciones > 2e8) break;
+        if (choca) continue;
+        if (alto) altos.push(d);
+        else for (let f = d.f0; f <= d.f1; f++) { const l = porFila.get(f); if (l) l.push(d); else porFila.set(f, [d]); }
+        comb.push(numeroACol(d.c0) + (d.f0 + 1) + ':' + numeroACol(d.c1) + (d.f1 + 1));
       }
       const inm = Math.min(MAX_FILA - 1, Math.floor(Number(h.inmovilizarFilas) || 0));   // entero y dentro de la hoja: 2.5 o 1048576 y Excel no abre el libro
-      const congelar = inm > 0 ? `<sheetViews><sheetView workbookViewId="0"${k === 0 ? ' tabSelected="1"' : ''}><pane ySplit="${inm}" topLeftCell="A${inm + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` : `<sheetViews><sheetView workbookViewId="0"${k === 0 ? ' tabSelected="1"' : ''}/></sheetViews>`;
+      const congelar = inm > 0 ? `<sheetViews><sheetView workbookViewId="0"${k === primeraVisible ? ' tabSelected="1"' : ''}><pane ySplit="${inm}" topLeftCell="A${inm + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` : `<sheetViews><sheetView workbookViewId="0"${k === primeraVisible ? ' tabSelected="1"' : ''}/></sheetViews>`;
       return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
         + `<dimension ref="A1${maxCol && filas.length ? ':' + numeroACol(maxCol - 1) + filas.length : ''}"/>` + congelar + '<sheetFormatPr defaultRowHeight="15"/>'
-        + (anchos ? `<cols>${anchos}</cols>` : '') + `<sheetData>${filasXml.join('')}</sheetData>`
+        + (anchos ? `<cols>${anchos}</cols>` : '') + `<sheetData>${filasXml.map((x) => x[1]).join('')}</sheetData>`
         + (h.autofiltro && maxCol && filas.length ? `<autoFilter ref="A1:${numeroACol(maxCol - 1)}${filas.length}"/>` : '')
         + (comb.length ? `<mergeCells count="${comb.length}">${comb.map((r) => `<mergeCell ref="${r}"/>`).join('')}</mergeCells>` : '') + '</worksheet>';
     });
@@ -371,8 +476,8 @@
       + hojasXml.map((_, k) => `<Override PartName="/xl/worksheets/sheet${k + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')
       + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>');
     zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
-    zip.file('xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView/></bookViews><sheets>`
-      + nombres.map((n, k) => `<sheet name="${X.escAttr(n)}" sheetId="${k + 1}" r:id="rId${k + 1}"/>`).join('') + '</sheets></workbook>');
+    zip.file('xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView${primeraVisible ? ` activeTab="${primeraVisible}"` : ''}/></bookViews><sheets>`
+      + nombres.map((n, k) => `<sheet name="${X.escAttr(n)}" sheetId="${k + 1}"${estados[k] === 'oculta' ? ' state="hidden"' : estados[k] === 'muyOculta' ? ' state="veryHidden"' : ''} r:id="rId${k + 1}"/>`).join('') + '</sheets>' + (hayFormulas ? '<calcPr fullCalcOnLoad="1"/>' : '') + '</workbook>');
     zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       + hojasXml.map((_, k) => `<Relationship Id="rId${k + 1}" Type="${R}/worksheet" Target="worksheets/sheet${k + 1}.xml"/>`).join('')
       + `<Relationship Id="rId${hojasXml.length + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${hojasXml.length + 2}" Type="${R}/sharedStrings" Target="sharedStrings.xml"/></Relationships>`);
@@ -383,5 +488,5 @@
     return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   }
 
-  globalThis.XlsxEscritor = { editarCeldas, celdasProtegidas, crearLibro, nombreHoja, ErrorEscritor };
+  globalThis.XlsxEscritor = { editarCeldas, celdasProtegidas, crearLibro, nombreHoja, formulaConservable, renombrarHojas, ErrorEscritor };
 })();

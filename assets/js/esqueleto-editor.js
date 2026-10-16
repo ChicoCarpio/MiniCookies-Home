@@ -1,5 +1,5 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
-// Esqueleto de PC de los editores de imagen (plan del rediseño, hallazgos.md, 4.1,
+// Esqueleto de PC de los editores de imagen (plan del rediseño, hallazgos/editores-rediseno.md, 4.1,
 // 4.2 y fase 6). Con una foto cargada y 901 px o más de ancho:
 //
 //   ┌ barra superior: ↶ ↷ │ 👁 Original │ zoom │ vista │ ⛶ │   [Descargar] ⋯ ┐

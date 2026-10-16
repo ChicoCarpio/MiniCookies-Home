@@ -181,7 +181,9 @@ const PptxGrafico = (() => {
     const sombrear = clasico && grupos.some((g) => g.tipo === 'circular' || g.tipo === 'anillo');
     const automatico = (i) => {
       const acento = r.acento((i % 6) + 1);
-      const base = sombrear ? { r: Math.round(acento.r * 0.876), g: Math.round(acento.g * 0.876), b: Math.round(acento.b * 0.876), a: acento.a } : acento;
+      // Los sectores de un circular de Excel van oscurecidos como un `shade` de 76 % en luz lineal (exacto en los 6 colores del tema medidos en el PDF de Excel)
+      const sombra = (c) => { const l = c / 255 <= 0.04045 ? c / 255 / 12.92 : Math.pow((c / 255 + 0.055) / 1.055, 2.4), v = 0.76 * l; return Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); };
+      const base = sombrear ? { r: sombra(acento.r), g: sombra(acento.g), b: sombra(acento.b), a: acento.a } : acento;
       const vuelta = Math.floor(i / 6);
       if (!vuelta) return base;
       const k = [1, 0.6, 1.4, 0.8, 1.2][vuelta % 5];
@@ -676,12 +678,14 @@ const PptxGrafico = (() => {
   const PAD_TEXTO = { x: 3, y: 1.5 }; // márgenes del cuadro de título y etiquetas
   const AIRE_VALORES = 11.56;  // de las etiquetas de un eje de pie (valores o categorías) al trazado
   const AIRE_CATEGORIAS_IZQ = AIRE_VALORES;
+  const AIRE_VALORES_EXCEL = 10.0; // en un gráfico de Excel las etiquetas de los valores quedan 1,5 pt más cerca del trazado (medido en pantalla y en el PDF)
   // Eje de series de un 3D (medido en 25-graficos-3d): del borde del piso al
   // nombre y lo que el trazado se achica a la derecha además del nombre.
   const AIRE_SERIES_3D = 14.7, RESERVA_SERIES_3D = 7.8;
   const AIRE_SERIES_CONTORNO = 7.5, MARCA_3D = 4.5, SALTO_SERIES_3D = 1.05; // [calibrar] los tres (superficies)
   const AIRE_BORDE = 5.27;     // de la mitad de una etiqueta centrada en el borde del trazado al contenido
   const AIRE_ABAJO = 8;        // alto extra de la fila de etiquetas de abajo
+  const MARCA_EJE = 4.5;       // largo de las marcas de un eje 2D (medido en pantalla en Excel)
   const BAJA_ETIQUETAS = 7.5;  // del borde del trazado a la línea de las etiquetas de abajo (medido en píxeles)
   const CORRE_VALORES = 0.7;   // los números de pie quedan 0,7 pt más cerca del trazado que su reserva (medido)
   // Leyenda horizontal (medida en píxeles y con LegendEntries por COM, letra de
@@ -740,7 +744,7 @@ const PptxGrafico = (() => {
       // [calibrar] la muestra: 20,4 pt por entrada con letra de 11,97 (medido).
       const M = muestrasDe(g);
       const porEntrada = (e) => (e.larga ? M.paso : PASO_CAJA) * l.tamano;
-      const padV = (5.85 / 14.61) * lh;
+      const padV = (g.clasico ? 5.875 / 12.195 : 5.85 / 14.61) * lh; // en un gráfico de Excel la leyenda vertical tiene más aire (paso de 18,07 pt con letra de 10; medido en el PDF y en pantalla)
       let w, h;
       let grilla = null, fila = null, lineas = null;
       if (pos === 'b' || pos === 't') {
@@ -781,7 +785,7 @@ const PptxGrafico = (() => {
         if (ley.length > caben) { ley = ley.slice(0, caben); anchos = anchos.slice(0, caben); }
         // Medido por COM con Aptos: texto + 19,15 (cuadrada) o + 30 (línea).
         // Lo que pasa de un tercio del ancho de la forma se parte en líneas.
-        const extraV = (ley.some((e) => e.larga) ? 30 : 19.15) / 11.97 * l.tamano;
+        const extraV = (ley.some((e) => e.larga) ? 30 + (g.clasico ? 6.35 : 0) : 19.15) / 11.97 * l.tamano; // con muestra de línea, en Excel la leyenda es 5,3 pt más ancha (la muestra es más larga)
         lineas = ley.map((e) => cortar(e.texto, l, Math.max(1, W / 3 - extraV), med));
         anchos = lineas.map((ls) => Math.max(0, ...ls.map((t) => med.ancho(t, l))));
         w = Math.max(0, ...anchos) + extraV;
@@ -1014,7 +1018,7 @@ const PptxGrafico = (() => {
         const fuera = !adentro(e);
         if (ladoE === 'l' || ladoE === 'r') {
           const w = Math.max(0, ...lista.map((x) => med.ancho(x.texto, e.letra)));
-          if (fuera) reserva[ladoE] = Math.max(reserva[ladoE], w + (claseEje(e) === 'valor' ? AIRE_VALORES : AIRE_CATEGORIAS_IZQ));
+          if (fuera) reserva[ladoE] = Math.max(reserva[ladoE], w + (g.clasico ? AIRE_VALORES_EXCEL : claseEje(e) === 'valor' ? AIRE_VALORES : AIRE_CATEGORIAS_IZQ));
           // Los números de los extremos sobresalen la mitad de su alto, menos
           // el margen (medido: +1,3 pt con 11,97 pt, arriba y abajo).
           if (claseEje(e) === 'valor') { extra.t = Math.max(extra.t, lh / 2 - MARGEN); extra.b = Math.max(extra.b, lh / 2 - MARGEN); }
@@ -1766,8 +1770,8 @@ const PptxGrafico = (() => {
         const borde = (lado) => (adentro && donde != null ? donde : lado);
         for (const x of etiquetas) {
           const q = aPos(e, x.v);
-          if (e.pos === 'l') escribir(ctx, x.texto, e.letra, borde(t.x - gIzq) - AIRE_VALORES + CORRE_VALORES, q - lh / 2 + asc, 'right');
-          else if (e.pos === 'r') escribir(ctx, x.texto, e.letra, borde(t.x + t.w) + AIRE_VALORES - CORRE_VALORES, q - lh / 2 + asc, 'left');
+          if (e.pos === 'l') escribir(ctx, x.texto, e.letra, borde(t.x - gIzq) - (g.clasico ? AIRE_VALORES_EXCEL : AIRE_VALORES) + CORRE_VALORES, q - lh / 2 + asc, 'right');
+          else if (e.pos === 'r') escribir(ctx, x.texto, e.letra, borde(t.x + t.w) + (g.clasico ? AIRE_VALORES_EXCEL : AIRE_VALORES) - CORRE_VALORES, q - lh / 2 + asc, 'left');
           else if (e.pos === 'b') escribir(ctx, x.texto, e.letra, q, borde(t.y + t.h + gAbajo) + BAJA_ETIQUETAS + asc, 'center');
           else escribir(ctx, x.texto, e.letra, q, borde(t.y) - BAJA_ETIQUETAS - lh + asc, 'center');
         }
@@ -1807,6 +1811,22 @@ const PptxGrafico = (() => {
         if (e.pos === 'b' || e.pos === 't') { const y = donde ?? (e.pos === 'b' ? t.y + t.h : t.y); p.moveTo(t.x, y); p.lineTo(t.x + t.w, y); }
         else { const x = donde ?? (e.pos === 'l' ? t.x : t.x + t.w); p.moveTo(x, t.y); p.lineTo(x, t.y + t.h); }
         trazar(e.linea, p);
+        // Marcas principales del eje (medido en pantalla en Excel: 4,5 px, con el trazo del eje; hacia afuera, hacia adentro o las dos).
+        if (!c3 && (e.marca === 'out' || e.marca === 'in' || e.marca === 'cross')) {
+          const horizontal = e.pos === 'b' || e.pos === 't';
+          const lineaEje = horizontal ? (donde ?? (e.pos === 'b' ? t.y + t.h : t.y)) : (donde ?? (e.pos === 'l' ? t.x : t.x + t.w));
+          const afuera = e.pos === 'b' || e.pos === 'r' ? 1 : -1;
+          const lados = e.marca === 'out' ? [afuera] : e.marca === 'in' ? [-afuera] : [afuera, -afuera];
+          let lugares = [];
+          if (claseEje(e) === 'valor') { const sc = escalas.get(e.id); if (sc) lugares = marcas(sc).map((v) => aPos(e, v)); }
+          else {
+            const n = Math.max(1, etiquetas.length), nm = enBordes ? Math.max(1, n - 1) : n, total = enBordes ? nm + 1 : n + 1;
+            for (let i = 0; i < total; i++) { const u = (horizontal ? t.w : t.h) * i / nm; lugares.push(horizontal ? (e.invertido ? t.x + t.w - u : t.x + u) : (e.invertido ? t.y + u : t.y + t.h - u)); }
+          }
+          const pm = new Path2D();
+          for (const u of lugares) for (const l of lados) { if (horizontal) { pm.moveTo(u, lineaEje); pm.lineTo(u, lineaEje + l * MARCA_EJE); } else { pm.moveTo(lineaEje, u); pm.lineTo(lineaEje + l * MARCA_EJE, u); } }
+          trazar(e.linea, pm);
+        }
       }
     }
     for (const e of geo.todosLosEjes) {
@@ -2853,16 +2873,16 @@ const PptxGrafico = (() => {
       const lineasEntrada = L.lineas ? L.lineas[i] : [en.texto];
       const largoMuestra = en.larga ? M.largo * l.tamano : lado;
       const centroY = y + lineasEntrada.length * lh / 2;
-      const mx = x + (en.larga ? M.desde : 3.29);
+      const mx = x + (en.larga ? M.desde : g.clasico ? 2.47 : 3.29);
       if (en.tipoMuestra === 'linea') {
         let a0 = mx, a1 = mx + largoMuestra;
         if (M === MUESTRAS.comun) {
           const k = l.tamano / 11.97, tapa = en.linea && en.linea.tapa && en.linea.tapa !== 'flat' ? (en.linea.ancho || 9525) / 12700 / 2 : 0;
-          a0 = x + 2.04 * k + tapa; a1 = x + 23.54 * k - tapa;
+          a0 = x + 2.04 * k + tapa; a1 = x + 23.54 * k - tapa + (g.clasico ? 4.55 : 0); // en Excel la muestra de la leyenda es 4,5 pt más larga (la leyenda, 5,3 pt más ancha)
         }
         const p = new Path2D(); p.moveTo(a0, centroY); p.lineTo(a1, centroY);
         trazar(en.linea, p);
-        if (en.marcador) dibujarMarcador(ctx, en.marcador, en.serie, (a0 + a1) / 2, centroY, rellenar, trazar, en.grupo);
+        if (en.marcador) dibujarMarcador(ctx, g.clasico && en.marcador.tamano > 5 ? { ...en.marcador, tamano: en.marcador.tamano * 2 / 3 } : en.marcador, en.serie, (a0 + a1) / 2, centroY, rellenar, trazar, en.grupo); // y su marcador, a 2/3 (6 pt con el de 9; medido en el PDF)
       } else if (en.tipoMuestra === 'marcador') {
         dibujarMarcador(ctx, en.marcador || { simbolo: 'auto', tamano: 5 }, en.serie, mx + largoMuestra / 2, centroY, rellenar, trazar, en.grupo);
       } else {
@@ -2877,8 +2897,8 @@ const PptxGrafico = (() => {
       // La de línea (muestras comunes), medida en las imágenes de 18
       // gráficos: COM da una caja de 12 pt, pero se ve de 2 a 23,5 pt de la
       // entrada (con la tapa) y el texto empieza a 24,8 (letra de 11,97).
-      const tx = en.tipoMuestra === 'linea' && M === MUESTRAS.comun ? x + 24.8 / 11.97 * l.tamano : mx + largoMuestra + 3.5; // medido en píxeles
-      lineasEntrada.forEach((t, k) => escribir(ctx, t, l, tx, y + asc + k * lh, 'left'));
+      const tx = en.tipoMuestra === 'linea' && M === MUESTRAS.comun ? x + 24.8 / 11.97 * l.tamano + (g.clasico ? 4.0 : 0) : mx + largoMuestra + (g.clasico ? 2.4 : 3.5); // medido en píxeles
+      lineasEntrada.forEach((t, k) => escribir(ctx, t, l, tx, y + asc + k * lh - (g.clasico && !L.horizontal ? 0.54 : 0), 'left')); // en Excel el texto de una leyenda vertical queda 0,54 pt más arriba
       if (L.horizontal) x += pasos[i];
       else y += lineasEntrada.length * lh + L.padV;
     });

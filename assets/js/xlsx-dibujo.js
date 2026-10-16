@@ -597,8 +597,11 @@
             pal.forEach((q, j) => { escribir(ctx, q, RD(xx), y); xx += wp[j] + hueco; });
             continue;
           }
-          if (h === 'right') x = x1 - PAD_X - w - sangria;
-          else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w) / 2 + (sangria ? sangria / 2 : 0);
+          // medido contra Excel (corpus 42-cursiva, 5 fuentes × 5 tamaños): en cursiva Excel cuenta ≈ 0,18 × la letra de más al ancho del texto,
+          // y al centrar suma además ≈ 0,075 × la letra a la derecha, sea cursiva o no
+          const sobreCursiva = fu.cursiva ? 0.18 * px : 0;
+          if (h === 'right') x = x1 - PAD_X - w - sangria - sobreCursiva;
+          else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w - sobreCursiva) / 2 + (sangria ? sangria / 2 : 0) + 0.075 * px;
           else x = x0 + 1 + PAD_X + sangria + Math.max(0, Math.round((px - 15) / 10));
           if (runs) { tramos(ctx, libro, runs, fu, RD(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
           escribir(ctx, l, RD(x), y);
@@ -718,44 +721,65 @@
 
   // Dibuja lo que se ve de la hoja con su desplazamiento: encabezados de columna (A, B, C…) y de fila (1, 2, 3…) y solo las celdas
   // visibles (el costo no depende del tamaño de la hoja). v = { x, y (desplazamiento en px de hoja), ancho, alto (px del lienzo),
-  // encabezados (true) }. Devuelve { f0, f1, c0, c1, areaX, areaY } (lo visible), útil para saber qué celda está bajo el puntero.
+  // encabezados (true), fijas: { filas, columnas } (paneles inmovilizados) }. Con paneles inmovilizados las primeras `filas` y `columnas` no se
+  // desplazan y x e y miden lo que se corrió el resto: la pantalla muestra la zona fija (sheet 0…fx) y, a su derecha, lo que sigue desde fx + x.
+  // Devuelve { f0, f1, c0, c1, areaX, areaY, fx, fy, nf, nc } (lo visible; fx y fy son el tamaño en px de la zona fija), útil para saber qué
+  // celda está bajo el puntero.
   function dibujarVista(ctx, libro, hoja, g, v, op) {
     op = op || {};
     const conEnc = v.encabezados !== false;
     const altoEnc = conEnc ? 20 : 0;
-    const f0 = Math.max(0, g.filaEn(v.y)), c0 = Math.max(0, g.colEn(v.x));
+    const nf = v.fijas ? Math.max(0, Math.min(1048575, Math.floor(+v.fijas.filas) || 0)) : 0, nc = v.fijas ? Math.max(0, Math.min(16383, Math.floor(+v.fijas.columnas) || 0)) : 0;
+    const fx = nc ? g.x(nc) : 0, fy = nf ? g.y(nf) : 0;
+    const f0 = Math.max(nf, g.filaEn(fy + v.y)), c0 = Math.max(nc, g.colEn(fx + v.x));
     let f1 = f0, c1 = c0;
     while (f1 < 1048575 && g.y(f1 + 1) - v.y < v.alto - altoEnc) { if (f1 + 1 >= g.filasConocidas && g.altoPorDefecto === 0) break; f1++; }
     const ultima = Math.min(1048576, f1 + 1);
     const anchoEnc = conEnc ? Math.max(26, String(ultima).length * 8 + 12) : 0;
     while (c1 < 16383 && g.x(c1 + 1) - v.x < v.ancho - anchoEnc) { if (c1 + 1 >= g.columnasConocidas && g.anchoPorDefecto === 0) break; c1++; }
+    // la zona fija solo se dibuja hasta donde llega la pantalla (nunca miles de filas fijas que no se ven)
+    const fFija = nf ? Math.min(nf - 1, Math.max(0, g.filaEn(v.alto - altoEnc))) : -1, cFija = nc ? Math.min(nc - 1, Math.max(0, g.colEn(v.ancho - anchoEnc))) : -1;
     ctx.save();
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, v.ancho, v.alto);
-    ctx.beginPath(); ctx.rect(anchoEnc, altoEnc, v.ancho - anchoEnc, v.alto - altoEnc); ctx.clip();
-    dibujarRango(ctx, libro, hoja, g, { f0, c0, f1, c1 }, Object.assign({}, op, { x: anchoEnc + g.x(c0) - v.x, y: altoEnc + g.y(f0) - v.y }));
     ctx.restore();
+    const zona = (x0, y0, x1, y1, r, ox, oy) => {
+      if (x1 <= x0 || y1 <= y0 || r.f1 < r.f0 || r.c1 < r.c0) return;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+      dibujarRango(ctx, libro, hoja, g, r, Object.assign({}, op, { x: ox, y: oy }));
+      ctx.restore();
+    };
+    const xLibre = anchoEnc + fx, yLibre = altoEnc + fy;
+    zona(xLibre, yLibre, v.ancho, v.alto, { f0, c0, f1, c1 }, anchoEnc + g.x(c0) - v.x, altoEnc + g.y(f0) - v.y);                            // lo que se desplaza
+    if (nf) zona(xLibre, altoEnc, v.ancho, yLibre, { f0: 0, c0, f1: fFija, c1 }, anchoEnc + g.x(c0) - v.x, altoEnc);                         // filas fijas
+    if (nc) zona(anchoEnc, yLibre, xLibre, v.alto, { f0, c0: 0, f1, c1: cFija }, anchoEnc, altoEnc + g.y(f0) - v.y);                          // columnas fijas
+    if (nf && nc) zona(anchoEnc, altoEnc, xLibre, yLibre, { f0: 0, c0: 0, f1: fFija, c1: cFija }, anchoEnc, altoEnc);                           // la esquina
     if (conEnc) {
       ctx.save();
       ctx.fillStyle = '#E6E6E6'; ctx.fillRect(0, 0, v.ancho, altoEnc); ctx.fillRect(0, 0, anchoEnc, v.alto);
       ctx.fillStyle = '#BAB9B9';
       ctx.fillRect(0, altoEnc - 1, v.ancho, 1); ctx.fillRect(anchoEnc - 1, 0, 1, v.alto);
       ctx.font = '15px ' + PptxTexto.familia('Calibri'); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center'; ctx.fillStyle = '#444444';
-      for (let c = c0; c <= c1; c++) {
-        const xa = anchoEnc + g.x(c) - v.x, w = g.anchoCol(c);
-        if (w === 0) continue;
-        ctx.fillRect(xa + w - 1, 0, 1, altoEnc);
-        ctx.fillText(LibroXlsx.numeroACol(c), xa + w / 2, 15);
-      }
-      for (let f = f0; f <= f1; f++) {
-        const ya = altoEnc + g.y(f) - v.y, h = g.altoFila(f);
-        if (h === 0) continue;
-        ctx.fillRect(0, ya + h - 1, anchoEnc, 1);
-        ctx.fillText(String(f + 1), anchoEnc / 2, ya + Math.min(h, 20) - 5);
-      }
+      const colEnc = (c, xa) => { const w = g.anchoCol(c); if (w === 0) return; ctx.fillRect(xa + w - 1, 0, 1, altoEnc); ctx.fillText(LibroXlsx.numeroACol(c), xa + w / 2, 15); };
+      const filaEnc = (f, ya) => { const h = g.altoFila(f); if (h === 0) return; ctx.fillRect(0, ya + h - 1, anchoEnc, 1); ctx.fillText(String(f + 1), anchoEnc / 2, ya + Math.min(h, 20) - 5); };
+      for (let c = 0; c <= cFija; c++) colEnc(c, anchoEnc + g.x(c));
+      ctx.save(); ctx.beginPath(); ctx.rect(xLibre, 0, Math.max(0, v.ancho - xLibre), altoEnc); ctx.clip();
+      for (let c = c0; c <= c1; c++) colEnc(c, anchoEnc + g.x(c) - v.x);
+      ctx.restore();
+      for (let f = 0; f <= fFija; f++) filaEnc(f, altoEnc + g.y(f));
+      ctx.save(); ctx.beginPath(); ctx.rect(0, yLibre, anchoEnc, Math.max(0, v.alto - yLibre)); ctx.clip();
+      for (let f = f0; f <= f1; f++) filaEnc(f, altoEnc + g.y(f) - v.y);
+      ctx.restore();
       ctx.restore();
     }
-    return { f0, f1, c0, c1, areaX: anchoEnc, areaY: altoEnc };
+    if (nc || nf) {   // la línea que separa lo fijo de lo que se desplaza (la de Excel: gris oscuro, de 2 px)
+      ctx.save(); ctx.fillStyle = '#7F7F7F';
+      if (nc) ctx.fillRect(xLibre - 1, altoEnc, 2, v.alto - altoEnc);
+      if (nf) ctx.fillRect(anchoEnc, yLibre - 1, v.ancho - anchoEnc, 2);
+      ctx.restore();
+    }
+    return { f0, f1, c0, c1, areaX: anchoEnc, areaY: altoEnc, fx, fy, nf, nc };
   }
 
   // Lee los objetos de la hoja y carga sus imágenes y fuentes (hay que esperarlo antes de dibujarla; sin él se dibuja sin objetos).

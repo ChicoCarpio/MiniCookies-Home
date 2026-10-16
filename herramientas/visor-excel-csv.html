@@ -8,8 +8,14 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<link rel="stylesheet" href="../assets/css/rejilla-hoja.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
+  .barra-visor { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 8px; }
+  .rejilla-contenedor { height: min(72vh, 680px); min-height: 360px; }
+  .rejilla-contenedor[hidden], #vistaTabla[hidden], .barra-visor[hidden] { display: none; }
+  .cargando-visor { color: var(--texto-suave); margin: 12px 0; }
   .pestanas { display: flex; gap: 4px; flex-wrap: wrap; margin: 16px 0 0; }
   .pestanas button {
     background: var(--gris-fondo);
@@ -31,17 +37,25 @@ window.i18nPagina = {
     'titulo-pagina': 'Ver Excel o CSV sin abrir Excel — Mini Cookies',
     'meta-descripcion': 'Mirá el contenido de un archivo Excel o CSV como una tabla, sin necesidad de tener Excel instalado. Gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Ver Excel o CSV',
-    'intro': 'Elegí un archivo .xlsx, .xlsm, .xlsb, .xls, .ods o .csv y mirá su contenido como tabla, sin necesidad de tener Excel instalado.',
+    'intro': 'Elegí un archivo .xlsx, .xlsm, .xlsb, .xls, .ods o .csv y mirá su contenido como se ve en una hoja de cálculo, sin necesidad de tener Excel instalado.',
     'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
-    'hoja-vacia': 'Esta hoja está vacía.'
+    'hoja-vacia': 'Esta hoja está vacía.',
+    'ver-como-tabla': 'Ver como tabla',
+    'copiar': 'Copiar selección',
+    'copiado': 'Copiado',
+    'cargando-visor': 'Preparando la hoja…'
   },
   en: {
     'titulo-pagina': 'View Excel or CSV Without Opening Excel — Mini Cookies',
     'meta-descripcion': 'Look at the content of an Excel or CSV file as a table, with no need to have Excel installed. Free and without uploading your file anywhere.',
     'h1': 'View Excel or CSV',
-    'intro': 'Pick an .xlsx, .xlsm, .xlsb, .xls, .ods or .csv file and view its content as a table, with no need to have Excel installed.',
+    'intro': 'Pick an .xlsx, .xlsm, .xlsb, .xls, .ods or .csv file and view its content the way it looks in a spreadsheet, with no need to have Excel installed.',
     'zona-arrastre': '📊 Drag your file here or click to choose it',
-    'hoja-vacia': 'This sheet is empty.'
+    'hoja-vacia': 'This sheet is empty.',
+    'ver-como-tabla': 'View as table',
+    'copiar': 'Copy selection',
+    'copiado': 'Copied',
+    'cargando-visor': 'Preparing the sheet…'
   }
 };
 </script>
@@ -59,18 +73,26 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="h1">Ver Excel o CSV</h1>
-  <p data-i18n="intro">Elegí un archivo .xlsx, .xlsm, .xlsb, .xls, .ods o .csv y mirá su contenido como tabla, sin necesidad de tener Excel instalado.</p>
+  <p data-i18n="intro">Elegí un archivo .xlsx, .xlsm, .xlsb, .xls, .ods o .csv y mirá su contenido como se ve en una hoja de cálculo, sin necesidad de tener Excel instalado.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
-      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
 
-    <div class="pestanas" id="pestanas"></div>
-    <div class="contenedor-tabla" id="contenedorTabla"></div>
+    <p class="cargando-visor" id="cargandoVisor" role="status" hidden data-i18n="cargando-visor">Preparando la hoja…</p>
+    <div class="barra-visor" id="barraVisor" hidden>
+      <button class="boton" id="botonCopiar" type="button" data-i18n="copiar">Copiar selección</button>
+      <button class="boton" id="botonVista" type="button" aria-pressed="false" data-i18n="ver-como-tabla">Ver como tabla</button>
+    </div>
+    <div class="rejilla-contenedor" id="rejillaContenedor" hidden></div>
+    <div id="vistaTabla" hidden>
+      <div class="pestanas" id="pestanas"></div>
+      <div class="contenedor-tabla" id="contenedorTabla"></div>
+    </div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -81,8 +103,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
+<script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xlsx-formato.js"></script>
@@ -90,6 +111,10 @@ window.i18nPagina = {
 <script src="../assets/js/xlsx-modelo.js"></script>
 <script src="../assets/js/csv-planilla.js"></script>
 <script src="../assets/js/lector-hojas.js"></script>
+<script src="../assets/js/motor-hojas.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/rejilla-orden-filtro.js"></script>
+<script src="../assets/js/rejilla-hoja.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -98,14 +123,25 @@ const entradaArchivo = document.getElementById('entradaArchivo');
 const listaArchivo = document.getElementById('listaArchivo');
 const pestanas = document.getElementById('pestanas');
 const contenedorTabla = document.getElementById('contenedorTabla');
+const rejillaContenedor = document.getElementById('rejillaContenedor');
+const vistaTabla = document.getElementById('vistaTabla');
+const barraVisor = document.getElementById('barraVisor');
+const botonVista = document.getElementById('botonVista');
+const botonCopiar = document.getElementById('botonCopiar');
+const cargandoVisor = document.getElementById('cargandoVisor');
+let libroActual = null;      // lo que devolvió LectorHojas.abrir
+let hojaTablaActual = 0;    // la hoja que muestra la tabla (posición en libroActual.hojas)
+let rejillaActual = null;   // RejillaHoja de la hoja abierta (null si el motor de dibujo no cargó: se ve la tabla)
+let verTabla = false;
+let numeroDeArchivo = 0;
 
-// LectorHojas (assets/js/lector-hojas.js) lee .xlsx, .xlsm y .csv con el motor propio y el resto con SheetJS; cada fila se arma
+// LectorHojas (assets/js/lector-hojas.js) lee .xlsx, .xlsm, .csv, .xlsb, .xls y .ods con el motor propio; cada fila se arma
 // con el texto que muestra Excel solo cuando se ve.
 let hojasActuales = [];   // [{ nombre, abrir: async () => hoja de LectorHojas }]
 let numeroDeHoja = 0;     // para descartar una hoja que terminó de cargar cuando ya se eligió otra
 
 function esArchivoValido(archivo) {
-  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+  return /\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i.test(archivo.name);
 }
 
 
@@ -181,6 +217,7 @@ contenedorTabla.addEventListener('scroll', () => {
 
 async function mostrarHoja(indiceHoja) {
   const miNumero = ++numeroDeHoja;
+  hojaTablaActual = indiceHoja;
   [...pestanas.children].forEach((boton, k) => boton.classList.toggle('activa', k === indiceHoja));
   let datos;
   try {
@@ -237,17 +274,60 @@ async function mostrarHoja(indiceHoja) {
   });
 }
 
+function aplicarVista() {
+  const hayRejilla = !!rejillaActual;
+  rejillaContenedor.hidden = !hayRejilla || verTabla;
+  vistaTabla.hidden = hayRejilla && !verTabla;
+  barraVisor.hidden = !hayRejilla;
+  botonCopiar.hidden = verTabla;
+  botonVista.setAttribute('aria-pressed', String(verTabla));
+}
+botonVista.addEventListener('click', () => {
+  if (!rejillaActual || !libroActual) return;
+  verTabla = !verTabla;
+  if (verTabla) {   // la tabla se abre en la hoja que se estaba mirando; al volver, la hoja sigue a la tabla
+    const k = libroActual.hojas.findIndex((h) => h.indice === rejillaActual.seleccion().hoja);
+    if (k >= 0 && k !== hojaTablaActual) mostrarHoja(k);
+  } else {
+    const h = libroActual.hojas[hojaTablaActual];
+    if (h && h.indice !== rejillaActual.seleccion().hoja) rejillaActual.mostrarHoja(h.indice).catch(() => {});
+  }
+  aplicarVista();
+  if (!verTabla) rejillaActual.enfocar();
+});
+let temporizadorCopiado = 0;
+botonCopiar.addEventListener('click', async () => {
+  if (!rejillaActual) return;
+  const ok = await rejillaActual.copiar();
+  if (!ok) return;
+  botonCopiar.textContent = t('copiado');
+  clearTimeout(temporizadorCopiado);
+  temporizadorCopiado = setTimeout(() => { botonCopiar.textContent = t('copiar'); }, 1500);
+});
+
 async function mostrarArchivo(archivo) {
+  const miArchivo = ++numeroDeArchivo;
+  const vigente = () => miArchivo === numeroDeArchivo;   // otro archivo elegido después: este ya no importa
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
+  if (rejillaActual) { rejillaActual.destruir(); rejillaActual = null; }
+  libroActual = null; hojasActuales = [];
+  rejillaContenedor.hidden = true; vistaTabla.hidden = true; barraVisor.hidden = true;
+  pestanas.innerHTML = ''; contenedorTabla.innerHTML = '';
+  cargandoVisor.hidden = false;
+  let libro;
   try {
-    const libro = await LectorHojas.abrir(archivo);
-    hojasActuales = libro.hojas.map((h) => ({ nombre: h.nombre, abrir: () => libro.cargar(h.indice) }));
+    libro = await LectorHojas.abrir(archivo);
   } catch (error) {
+    if (!vigente()) return;
+    cargandoVisor.hidden = true;
     alert(t('error-leer') + ': ' + error.message);
     return;
   }
+  if (!vigente()) return;
+  libroActual = libro;
+  hojasActuales = libro.hojas.map((h) => ({ nombre: h.nombre, abrir: () => libro.cargar(h.indice) }));
 
-  pestanas.innerHTML = '';
+  // La tabla (texto real) siempre se arma: es la alternativa para lectores de pantalla y lo que se ve si el motor de dibujo no carga
   hojasActuales.forEach((hoja, k) => {
     const boton = document.createElement('button');
     boton.type = 'button';
@@ -256,6 +336,21 @@ async function mostrarArchivo(archivo) {
     pestanas.appendChild(boton);
   });
 
+  let rejilla = null;
+  try {
+    await MotorHojas.cargarDibujo();
+    if (!vigente()) return;
+    rejillaContenedor.hidden = false;   // con el contenedor visible la rejilla mide su tamaño real
+    rejilla = await RejillaHoja.crear(rejillaContenedor, { libro });
+    if (!vigente()) { rejilla.destruir(); return; }   // la rejilla solo borra lo suyo: no toca la del archivo que llegó después
+  } catch (error) {
+    if (!vigente()) return;
+    rejilla = null;   // sin rejilla: se ve la tabla de siempre
+    rejillaContenedor.textContent = '';
+  }
+  rejillaActual = rejilla;
+  cargandoVisor.hidden = true;
+  aplicarVista();
   mostrarHoja(0);
 }
 

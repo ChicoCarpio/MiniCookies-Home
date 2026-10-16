@@ -82,6 +82,9 @@
     for (const o of objs) {
       const q = XlsxGeometria.rectanguloAncla(o.ancla, P);
       if (!q) continue;
+      // En pantalla Excel ensancha el recuadro de un gráfico al píxel entero (izquierda y arriba hacia abajo, derecha y abajo hacia arriba) y dibuja su borde nítido por dentro
+      const esGrafico = !g.pantalla && o.elementos.length === 1 && o.elementos[0].tipo === 'grafico';
+      if (esGrafico) { q.x0 = Math.floor(q.x0 + 1e-6); q.y0 = Math.floor(q.y0 + 1e-6); q.x1 = Math.ceil(q.x1 - 1e-6); q.y1 = Math.ceil(q.y1 - 1e-6); }
       const x0 = px + (q.x0 - sx0) * ex, y0 = py + (q.y0 - sy0) * ey, w = (q.x1 - q.x0) * ex, h = (q.y1 - q.y0) * ey;
       if (!(w > 0) || !(h > 0) || x0 + w < px - 1 || x0 > px + ancho + 1 || y0 + h < py - 1 || y0 > py + alto + 1) continue; // fuera del rango
       const els = o.elementos.map((e) => ({ ...e, xfrm: { ...e.xfrm, x: 0, y: 0, w: w * EMU_PX, h: h * EMU_PX } }));

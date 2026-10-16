@@ -113,4 +113,6 @@
   window.addEventListener('resize', cerrar);
 
   document.querySelectorAll('.ayuda-tip').forEach(iniciar);
+  // para los "?" que una pieza crea después de cargada la página (la rejilla de hoja)
+  window.AyudaTipIniciar = iniciar;
 })();

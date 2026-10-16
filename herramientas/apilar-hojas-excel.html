@@ -89,7 +89,7 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
-      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods" hidden>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaHojas"></ul>
@@ -115,8 +115,6 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/xlsx/0.20.3/xlsx.full.min.js"></script>
-<script src="../assets/js/lector-planillas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/xml-editar.js"></script>
@@ -192,7 +190,7 @@ function renderizarLista() {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods)$/i.test(f.name));
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|xml|ods)$/i.test(f.name));
   if (archivo) cargarLibro(archivo);
 }
 

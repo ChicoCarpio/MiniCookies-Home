@@ -1,0 +1,134 @@
+/* Rejilla de hoja de cálculo (assets/js/rejilla-hoja.js). El contenedor que la recibe le da el alto: la rejilla llena todo lo que tiene.
+   Colores con los tokens del sitio; la hoja misma (el Canvas) se dibuja blanca, como en Excel. */
+.rh {
+  position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
+  background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: var(--radio); overflow: hidden;
+}
+.rh-barra { display: flex; align-items: stretch; border-bottom: 1px solid var(--gris-borde); font-size: 0.88rem; }
+.rh-nombre {
+  flex: none; width: 96px; padding: 6px 10px; border-right: 1px solid var(--gris-borde);
+  font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rh-fx { flex: none; display: grid; place-items: center; padding: 0 10px; border-right: 1px solid var(--gris-borde); color: var(--texto-suave); font: italic 0.95rem Georgia, serif; }
+.rh-formula { flex: 1; min-width: 0; padding: 6px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.rh-formula.es-formula { color: var(--azul-oscuro); font-family: ui-monospace, Consolas, monospace; }
+
+.rh-cuerpo { flex: 1; min-height: 0; overflow: auto; display: grid; background: var(--superficie-alt); outline: none; }
+.rh-cuerpo:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+/* la vista (el Canvas y la selección) se queda fija en la esquina mientras el espaciador, del tamaño de la hoja, da el desplazamiento */
+.rh-vista { grid-area: 1 / 1; position: sticky; top: 0; left: 0; align-self: start; justify-self: start; overflow: hidden; touch-action: pan-x pan-y; user-select: none; -webkit-user-select: none; }
+.rh-espaciador { grid-area: 1 / 1; pointer-events: none; }
+.rh-lienzo { display: block; }
+.rh-capa { position: absolute; inset: 0; pointer-events: none; }
+.rh-zona { position: absolute; overflow: hidden; display: none; }
+.rh-enc-col, .rh-enc-fila, .rh-rango, .rh-activa { position: absolute; }
+/* La hoja se dibuja blanca en los dos temas (como Excel): lo que va encima usa colores fijos, no los tokens del tema */
+.rh-enc-col, .rh-enc-fila { background: rgba(231, 164, 89, 0.5); }
+.rh-enc-col { border-bottom: 2px solid #c9853a; }
+.rh-enc-fila { border-right: 2px solid #c9853a; }
+.rh-rango { background: rgba(231, 164, 89, 0.2); border: 1px solid #c9853a; }
+.rh-activa { border: 2px solid #c9853a; }
+
+.rh-pestanas { flex: none; display: flex; overflow-x: auto; border-top: 1px solid var(--gris-borde); background: var(--superficie-alt); scrollbar-width: thin; }
+.rh-pestana {
+  flex: none; border: 0; border-right: 1px solid var(--gris-borde); border-bottom: 3px solid var(--rh-color, transparent); background: transparent;
+  color: var(--texto-suave); padding: 7px 14px 5px; font: inherit; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+}
+.rh-pestana[aria-selected="true"] { background: var(--superficie); color: var(--texto); font-weight: 600; }
+.rh-pestana:focus-visible, .rh-menos:focus-visible, .rh-mas:focus-visible, .rh-control-zoom:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-pestana:disabled { opacity: 0.6; cursor: progress; }
+
+.rh-estado {
+  flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; padding: 5px 10px; border-top: 1px solid var(--gris-borde);
+  font-size: 0.8rem; color: var(--texto-suave); font-variant-numeric: tabular-nums;
+}
+.rh-info { min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.rh-info b { color: var(--texto); font-weight: 600; }
+.rh-zoom { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.rh-menos, .rh-mas { width: 24px; height: 24px; padding: 0; line-height: 1; border: 1px solid var(--gris-borde); background: var(--superficie); color: var(--texto); border-radius: 6px; cursor: pointer; font-size: 1rem; }
+.rh-control-zoom { width: 96px; accent-color: var(--azul-oscuro); }
+.rh-valor-zoom { min-width: 3.2em; text-align: right; }
+@media (max-width: 600px) {
+  .rh-nombre { width: 74px; }
+  .rh-control-zoom { width: 64px; }
+  .rh-barra { flex-wrap: wrap; }
+  .rh-formula { order: 9; flex: 1 1 100%; border-top: 1px solid var(--gris-borde); }
+  .rh-nombre { flex: 1; min-width: 64px; }
+  .rh-fx { display: none; }
+  .rh-boton-of, .rh-boton-buscar, .rh-boton-completa { padding: 6px 9px; }
+}
+@media (prefers-reduced-motion: reduce) { .rh * { scroll-behavior: auto !important; } }
+
+/* Solo para el lector de pantalla: la celda activa y su contenido */
+.rh-anuncio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* Buscar */
+.rh-boton-buscar { flex: none; border: 0; border-left: 1px solid var(--gris-borde); background: transparent; color: var(--texto); padding: 0 12px; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.rh-boton-buscar:hover { background: var(--superficie-alt); }
+.rh-boton-buscar:focus-visible, .rh-busca-ant:focus-visible, .rh-busca-sig:focus-visible, .rh-busca-cerrar:focus-visible, .rh-busca-texto:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-buscador {
+  position: absolute; top: 40px; right: 18px; z-index: 5; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; max-width: calc(100% - 36px);
+  background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: 8px; padding: 6px 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); font-size: 0.85rem;
+}
+.rh-buscador[hidden] { display: none; }
+.rh-busca-texto { width: 180px; max-width: 100%; padding: 4px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font: inherit; }
+.rh-busca-cuenta { min-width: 6em; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.rh-busca-ant, .rh-busca-sig, .rh-busca-cerrar { width: 26px; height: 26px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); cursor: pointer; font-size: 0.75rem; }
+.rh-busca-todo { display: inline-flex; align-items: center; gap: 4px; color: var(--texto-suave); white-space: nowrap; }
+.rh-coinc { position: absolute; background: rgba(255, 226, 69, 0.55); outline: 1px solid rgba(180, 140, 0, 0.7); outline-offset: -1px; }
+.rh-guia { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed #c9853a; pointer-events: none; }
+.rh-guia[hidden] { display: none; }
+
+/* Hojas ocultas */
+.rh-pestana.rh-oculta { font-style: italic; opacity: 0.85; }
+.rh-boton-ocultas { flex: none; border: 0; background: transparent; color: var(--texto-suave); padding: 7px 14px 5px; font: inherit; font-size: 0.85rem; cursor: pointer; white-space: nowrap; text-decoration: underline dotted; }
+.rh-boton-ocultas:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-menu-ocultas { position: absolute; bottom: 62px; z-index: 6; display: flex; flex-direction: column; min-width: 160px; max-height: 40%; overflow-y: auto; background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); padding: 4px; }
+.rh-menu-ocultas[hidden] { display: none; }
+.rh-menu-ocultas button { text-align: left; border: 0; background: transparent; color: var(--texto); padding: 6px 10px; border-radius: 6px; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.rh-menu-ocultas button:hover, .rh-menu-ocultas button:focus-visible { background: var(--activo-fondo); outline: none; }
+/* Asas de selección (tacto) */
+.rh-asa { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #c9853a; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); pointer-events: auto; touch-action: none; }
+.rh-asa::after { content: ""; position: absolute; inset: -14px; }
+.rh-asa[hidden] { display: none; }
+
+/* Pantalla completa: la rejilla cubre la ventana (más espacio para la hoja, sobre todo en el celular) */
+.rh-boton-completa { flex: none; border: 0; border-left: 1px solid var(--gris-borde); background: transparent; color: var(--texto); padding: 0 12px; font: inherit; font-size: 1rem; cursor: pointer; }
+.rh-boton-completa:hover, .rh-boton-completa[aria-pressed="true"] { background: var(--activo-fondo); }
+.rh-boton-completa:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh.rh-completa {
+  position: fixed; inset: 0; z-index: 1000; height: auto; border: 0; border-radius: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+html.rh-bloqueo, html.rh-bloqueo body { overflow: hidden; }
+
+/* Ordenar y filtrar (solo para mirar) */
+.rh-boton-of { flex: none; border: 0; border-left: 1px solid var(--gris-borde); background: transparent; color: var(--texto); padding: 0 12px; font: inherit; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+.rh-boton-of:hover, .rh-boton-of[aria-pressed="true"] { background: var(--activo-fondo); }
+.rh-boton-of:focus-visible, .rh-of-col:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-of-info { margin-left: 12px; color: var(--texto-suave); }
+.rh-of-info[hidden] { display: none; }
+.rh-of-col { position: absolute; padding: 0; display: grid; place-items: center; border: 1px solid #a6acb3; background: linear-gradient(#fff, #eff2f7); color: #4e5052; font: 11px/1 system-ui, sans-serif; cursor: pointer; pointer-events: auto; touch-action: manipulation; }
+.rh-of-col::after { content: ""; position: absolute; inset: -6px; }
+.rh-of-col.rh-of-activa { background: #fde9c9; border-color: #c9853a; color: #7a4a0b; }
+.rh-of-col[hidden] { display: none; }
+.rh-of-menu { position: absolute; z-index: 7; width: 250px; max-width: calc(100% - 8px); display: flex; flex-direction: column; gap: 4px; background: var(--superficie); color: var(--texto); border: 1px solid var(--gris-borde); border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22); padding: 6px; font-size: 0.85rem; }
+.rh-of-menu[hidden] { display: none; }
+.rh-of-op { text-align: left; border: 0; background: transparent; color: inherit; padding: 6px 8px; border-radius: 6px; font: inherit; cursor: pointer; }
+.rh-of-op:hover, .rh-of-op:focus-visible { background: var(--activo-fondo); outline: none; }
+.rh-of-q { font: inherit; padding: 5px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: inherit; min-width: 0; }
+.rh-of-q:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -1px; }
+.rh-of-todo, .rh-of-valor { display: flex; align-items: center; gap: 6px; padding: 3px 4px; cursor: pointer; }
+.rh-of-lista { max-height: 210px; overflow-y: auto; border: 1px solid var(--gris-borde); border-radius: 6px; }
+.rh-of-valor span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rh-of-valor small { color: var(--texto-suave); }
+.rh-of-nota { color: var(--texto-suave); font-size: 0.78rem; padding: 0 4px; }
+.rh-of-pie { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; padding-top: 2px; }
+.rh-of-pie button { font: inherit; padding: 5px 12px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie-alt); color: inherit; cursor: pointer; }
+.rh-of-pie button:disabled { opacity: 0.5; cursor: default; }
+.rh-of-pie .rh-of-ok:not(:disabled) { background: var(--azul-oscuro); border-color: var(--azul-oscuro); color: #fff; }
+.rh-of-pie button:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: 1px; }
+
+/* "?" que explica por qué las fórmulas están en inglés (solo se ve sobre una fórmula) */
+.rh-ayuda-formula { flex: none; padding: 0 8px; border-right: 1px solid var(--gris-borde); }
+.rh-ayuda-formula[hidden] { display: none; }

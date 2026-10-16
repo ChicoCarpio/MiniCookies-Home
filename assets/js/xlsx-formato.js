@@ -615,5 +615,12 @@
   }
 
 
-  globalThis.XlsxFormato = { formatear, esFecha, general, NOMBRES };
+  // Un número con formato de fecha de un libro con base 1904 se pasa a la base 1900 (sumando 1462), salvo que el formato sea solo de horas
+  // ("h:mm", "[h]:mm"): una duración de 1,5 días es 1,5 en las dos bases (sumarle 1462 daría 35124:00 en vez de 36:00).
+  function tieneCalendario(codigo) {
+    const s = codigo.replace(/"[^"]*"|\\./g, '').replace(/\[(h+|m+|s+)\]/gi, '$1').replace(/\[[^\]]*\]/g, '').replace(/AM\/PM|A\/P/gi, '');
+    return /[ydeg]/i.test(s) || (/m/i.test(s) && !/[hs]/i.test(s));
+  }
+
+  globalThis.XlsxFormato = { formatear, esFecha, tieneCalendario, general, NOMBRES };
 })();
