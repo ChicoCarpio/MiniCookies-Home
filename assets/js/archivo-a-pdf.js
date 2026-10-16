@@ -88,7 +88,7 @@
       extensiones: ['xlsx', 'xlsm', 'xlsb', 'xls', 'ods', 'csv'],
       preparar: () => cargarEnOrden([
         JSZIP(), propio('xml-ligero.js'), propio('xlsx-formato.js'), propio('xlsx-estilos.js'), propio('xlsx-modelo.js'),
-        propio('csv-planilla.js'), propio('lector-hojas.js'), propio('excel-a-pdf-motor.js'),
+        propio('csv-planilla.js'), propio('lector-hojas.js'), propio('motor-hojas.js'), propio('excel-a-pdf-motor.js'),
       ]),
       convertir: (archivo, alAvanzar) => ExcelAPdfMotor.libroAPdf(archivo, alAvanzar),
     },

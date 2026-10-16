@@ -15,7 +15,7 @@
 //     areas: [{ f0, c0, f1, c1 }] | null,                // desde 0; solo con una hoja
 //     incluirOcultas: false,                             // imprimir también columnas y filas ocultas
 //     maxPaginas, progreso(n, total), idioma, nombreArchivo });
-// Requiere vendor.js (rutaVendor), lector-hojas.js y los módulos de xlsx-*.js que lector-hojas.js ya necesita.
+// Requiere vendor.js (rutaVendor), motor-hojas.js, lector-hojas.js y los módulos de xlsx-*.js que lector-hojas.js ya necesita.
 
 // Se suman a los textos de la página (los de la página mandan).
 (function () {
@@ -25,14 +25,6 @@
 })();
 
 const ExcelAPdfMotor = (() => {
-  const base = new URL('./', document.currentScript.src).href;
-  const MODULOS = [
-    'pptx-xml.js', 'vendor/ecma-376-geometrias/5ed-2016/geometrias.js', 'emf.js', 'pptx-geometria.js', 'pptx-estilos-tabla.js', 'pptx-modelo.js', 'pptx-texto.js',
-    'pptx-grafico-3d.js', 'pptx-grafico-superficie.js', 'pptx-grafico.js', 'pptx-dibujo.js', 'xlsx-objetos.js',
-    'xlsx-geometria.js', 'xlsx-fuentes-impresion.js', 'xlsx-paginas.js', 'xlsx-expresion.js', 'xlsx-condicional.js', 'xlsx-iconos.js', 'xlsx-minigraficos.js',
-    'xlsx-notas.js', 'xlsx-filtros.js', 'xlsx-tablas-estilos.js', 'xlsx-tablas.js', 'xlsx-dibujo.js', 'vendor/pdf-lib/1.17.1/pdf-lib.min.js', 'pdf-lienzo.js', 'xlsx-pdf.js',
-  ];
-
   // Papel en puntos (vertical). Los A son los de la norma ISO redondeados como los usa Excel; el resto, los de la lista de la herramienta.
   const mm = (a, b) => [a * 72 / 25.4, b * 72 / 25.4];
   const PAPELES = {
@@ -41,24 +33,8 @@ const ExcelAPdfMotor = (() => {
     carta: [612, 792], legal: [612, 1008], oficio: [612, 936], tabloide: [792, 1224], ejecutivo: [522, 756], 'media-carta': [396, 612], folio: [612, 936],
   };
 
-  const cargas = new Map();
-  function cargarScript(src) {
-    if (!cargas.has(src) && document.querySelector('script[src="' + src + '"]')) cargas.set(src, Promise.resolve());
-    if (!cargas.has(src)) {
-      cargas.set(src, new Promise((resolver, rechazar) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolver;
-        s.onerror = () => { cargas.delete(src); rechazar(new Error('No se pudo cargar ' + src.split('/').pop().replace(/\?.*$/, ''))); };
-        document.head.appendChild(s);
-      }));
-    }
-    return cargas.get(src);
-  }
-  async function cargarMotor() {
-    if (typeof XlsxPdf !== 'undefined') return;
-    for (const x of MODULOS) if (!(typeof PDFLib !== 'undefined' && /pdf-lib/.test(x))) await cargarScript(x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : base + x);
-  }
+  // Los módulos pesados los trae MotorHojas (motor-hojas.js), que comparte con el visor
+  const cargarMotor = () => MotorHojas.cargarPdf();
 
   // El libro del motor para imprimir: el que ya abrió LectorHojas. Un .xls, .xlsb u .ods ya viene pasado a .xlsx (valores, formatos de número,
   // anchos y combinadas; sin estilos de celda).

@@ -1,0 +1,56 @@
+/* Rejilla de hoja de cálculo (assets/js/rejilla-hoja.js). El contenedor que la recibe le da el alto: la rejilla llena todo lo que tiene.
+   Colores con los tokens del sitio; la hoja misma (el Canvas) se dibuja blanca, como en Excel. */
+.rh {
+  display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
+  background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: var(--radio); overflow: hidden;
+}
+.rh-barra { display: flex; align-items: stretch; border-bottom: 1px solid var(--gris-borde); font-size: 0.88rem; }
+.rh-nombre {
+  flex: none; width: 96px; padding: 6px 10px; border-right: 1px solid var(--gris-borde);
+  font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rh-fx { flex: none; display: grid; place-items: center; padding: 0 10px; border-right: 1px solid var(--gris-borde); color: var(--texto-suave); font: italic 0.95rem Georgia, serif; }
+.rh-formula { flex: 1; min-width: 0; padding: 6px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.rh-formula.es-formula { color: var(--azul-oscuro); font-family: ui-monospace, Consolas, monospace; }
+
+.rh-cuerpo { flex: 1; min-height: 0; overflow: auto; display: grid; background: var(--superficie-alt); outline: none; }
+.rh-cuerpo:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+/* la vista (el Canvas y la selección) se queda fija en la esquina mientras el espaciador, del tamaño de la hoja, da el desplazamiento */
+.rh-vista { grid-area: 1 / 1; position: sticky; top: 0; left: 0; align-self: start; justify-self: start; overflow: hidden; touch-action: pan-x pan-y; user-select: none; -webkit-user-select: none; }
+.rh-espaciador { grid-area: 1 / 1; pointer-events: none; }
+.rh-lienzo { display: block; }
+.rh-capa { position: absolute; inset: 0; pointer-events: none; }
+.rh-enc-col, .rh-enc-fila, .rh-rango, .rh-activa { position: absolute; display: none; }
+/* La hoja se dibuja blanca en los dos temas (como Excel): lo que va encima usa colores fijos, no los tokens del tema */
+.rh-enc-col, .rh-enc-fila { background: rgba(231, 164, 89, 0.5); }
+.rh-enc-col { border-bottom: 2px solid #c9853a; }
+.rh-enc-fila { border-right: 2px solid #c9853a; }
+.rh-recorte { position: absolute; overflow: hidden; }
+.rh-rango { background: rgba(231, 164, 89, 0.2); border: 1px solid #c9853a; }
+.rh-rango[hidden] { display: none !important; }
+.rh-activa { border: 2px solid #c9853a; }
+
+.rh-pestanas { flex: none; display: flex; overflow-x: auto; border-top: 1px solid var(--gris-borde); background: var(--superficie-alt); scrollbar-width: thin; }
+.rh-pestana {
+  flex: none; border: 0; border-right: 1px solid var(--gris-borde); border-bottom: 3px solid var(--rh-color, transparent); background: transparent;
+  color: var(--texto-suave); padding: 7px 14px 5px; font: inherit; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+}
+.rh-pestana[aria-selected="true"] { background: var(--superficie); color: var(--texto); font-weight: 600; }
+.rh-pestana:focus-visible, .rh-menos:focus-visible, .rh-mas:focus-visible, .rh-control-zoom:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-pestana:disabled { opacity: 0.6; cursor: progress; }
+
+.rh-estado {
+  flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; padding: 5px 10px; border-top: 1px solid var(--gris-borde);
+  font-size: 0.8rem; color: var(--texto-suave); font-variant-numeric: tabular-nums;
+}
+.rh-info { min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.rh-info b { color: var(--texto); font-weight: 600; }
+.rh-zoom { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.rh-menos, .rh-mas { width: 24px; height: 24px; padding: 0; line-height: 1; border: 1px solid var(--gris-borde); background: var(--superficie); color: var(--texto); border-radius: 6px; cursor: pointer; font-size: 1rem; }
+.rh-control-zoom { width: 96px; accent-color: var(--azul-oscuro); }
+.rh-valor-zoom { min-width: 3.2em; text-align: right; }
+@media (max-width: 600px) {
+  .rh-nombre { width: 74px; }
+  .rh-control-zoom { width: 64px; }
+}
+@media (prefers-reduced-motion: reduce) { .rh * { scroll-behavior: auto !important; } }
