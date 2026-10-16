@@ -18,7 +18,6 @@
   const U_PT = 0.75;             // puntos por u a escala 100 %
   const ENC_ANCHO_PX = 173, ENC_ALTO_PX = 121; // encabezados de fila/columna impresos (píxeles de impresora, medidos)
   const MAX_PAGINAS_LIBRO = 20000; // páginas de todo el PDF (suma de las hojas): más son minutos de trabajo y cientos de MB
-
   // ---- Encabezado y pie de página ---------------------------------------------------------------------
   // Códigos de ECMA-376 18.3.1.40: &L &C &R secciones, &P página, &N total, &D fecha, &T hora, &F archivo, &A hoja, &Z ruta,
   // &B negrita, &I cursiva, &U subrayado, &E doble subrayado, &S tachado, &X &Y superíndice/subíndice, &nn tamaño, &"fuente,estilo", &K color, && el signo.
@@ -242,16 +241,21 @@
     }
   }
 
-  // ---- Hojas a PDF ------------------------------------------------------------------------------------
-  async function generar(libro, indices, opc) {
+  // ---- Plan de impresión: las páginas de las hojas, sin dibujar nada ---------------------------------
+  // Lo comparten el PDF (generar) y la vista previa en pantalla (dibujarEnCanvas): las dos dibujan cada página con dibujarPagina.
+  // opc.paraPantalla: no prepara nada para PDF (el lienzo de PDF y sus fuentes), solo para dibujar en un <canvas>.
+  async function planificar(libro, indices, opc) {
     opc = opc || {};
     const idioma = opc.idioma || 'es';
-    const pdf = await PDFLib.PDFDocument.create();
     await XlsxDibujo.cargarFuentes(libro);
     const usos = XlsxDibujo.usosDeFuentes(libro);
     for (const hf of ['Calibri', 'Arial', 'Times New Roman', 'Tahoma']) for (const [n, c] of [[false, false], [true, false], [false, true], [true, true]]) usos.push({ fuente: hf, negrita: n, cursiva: c });
-    const auxiliar = new LienzoPdf.Lienzo({ ancho: 1, alto: 1, anchoPt: 1, altoPt: 1 });
-    await auxiliar.precargarFuentes(usos); // las deja listas para dibujar sin esperar
+    let auxiliar = null;
+    if (opc.paraPantalla) await PptxTexto.cargarFuentes(usos); // el encabezado y el pie también se dibujan en pantalla
+    else {
+      auxiliar = new LienzoPdf.Lienzo({ ancho: 1, alto: 1, anchoPt: 1, altoPt: 1 });
+      await auxiliar.precargarFuentes(usos); // las deja listas para dibujar sin esperar
+    }
     const normal = libro.estilos.xf(0).fuente;
     const estilo = { normal: { nombre: normal.nombre || 'Calibri', tam: normal.tam || 11 } };
     // El tope vale para todo el libro: cada hoja recibe lo que queda y, al agotarse, las hojas que faltan no se calculan.
@@ -262,6 +266,9 @@
       if (acumuladas >= tope) { truncado = true; break; }
       const hoja = await libro.cargarHoja(i);
       await XlsxDibujo.prepararObjetos(libro, hoja, auxiliar); // imágenes, formas y gráficos de la hoja
+      // los objetos se preparan una sola vez por hoja: si los preparó antes la pantalla (vista previa, rejilla), al PDF le faltan los bytes de
+      // sus fuentes y su texto saldría como imagen; se cargan aquí (las imágenes ya están)
+      if (auxiliar && hoja.objetos && hoja.objetos.length && typeof PptxDibujo !== 'undefined') await PptxDibujo.precargar(() => null, null, hoja.objetos.flatMap((o) => o.elementos), auxiliar);
       const g = XlsxDibujo.geometria(libro, hoja);
       const p = XlsxPaginas.calcular(libro, hoja, g, { maxPaginas: tope - acumuladas });
       let hasta = { c: 0, f: 0 };
@@ -287,40 +294,93 @@
       trabajos.push({ hoja, g, p, hasta, notas });
     }
     const total = trabajos.reduce((a, t) => a + t.p.paginas.length + t.notas.length, 0);
-    const fecha = new Date();
-    let numero = 0, hechas = 0;
+    // La lista de páginas en el orden en que salen, con el número que lleva cada una (el de "Página N de M").
+    const entradas = [];
+    let numero = 0;
     for (const t of trabajos) {
-      const { hoja, g, p, hasta } = t;
-      const G = geometriaImpresion(g, p, hasta);
+      const hoja = t.hoja;
       if (!hoja.imprimir.pagina || !hoja.imprimir.pagina.usarPrimeraPagina || !(hoja.imprimir.pagina.primeraPagina >= 0)) { if (opc.numeracion === 'porHoja') numero = 0; }
       else numero = hoja.imprimir.pagina.primeraPagina - 1;
-      const f = U_PT * (p.escala / 100);
-      // letra: píxeles de impresora redondeados (11 pt → 92 px → 11,04 pt) vistos en u
-      const pxDe = (pt) => { const t = Number.isFinite(pt) && pt > 0 ? Math.min(409.5, pt) : 11; return Math.max(1, Math.round(t * (p.escala / 100) * 600 / 72)) * PT_PX / f; };
-      estilo.pxDe = pxDe;
-      let primera = true;
-      for (const pagina of p.paginas) {
-        numero++; hechas++;
-        const L = new LienzoPdf.Lienzo({ ancho: p.papel.ancho / f, alto: p.papel.alto / f, anchoPt: p.papel.ancho, altoPt: p.papel.alto });
-        dibujarPagina(L, libro, hoja, G, p, pagina, { idioma, imprimirNotas: !!opc.imprimirNotas, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: primera, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
-        primera = false;
-        if (L.fallo) throw L.fallo;
-        await L.aPagina(pdf);
-        if (opc.progreso) opc.progreso(hechas, total);
-        if ((hechas & 7) === 7) await new Promise((r) => setTimeout(r, 0));
-      }
-      for (const pn of t.notas) { // las páginas de las notas "al final de la hoja"
-        numero++; hechas++;
-        const L = new LienzoPdf.Lienzo({ ancho: p.papel.ancho / f, alto: p.papel.alto / f, anchoPt: p.papel.ancho, altoPt: p.papel.alto });
-        dibujarPagina(L, libro, hoja, G, p, { f0: 0, c0: 0, f1: 0, c1: 0, titulos: { filas: null, columnas: null }, listaNotas: pn }, { idioma, imprimirNotas: !!opc.imprimirNotas, numeroPagina: numero, totalPaginas: opc.totalPaginas || total, primeraDeLaHoja: false, fecha, nombreArchivo: opc.nombreArchivo }, estilo);
-        if (L.fallo) throw L.fallo;
-        await L.aPagina(pdf);
-        if (opc.progreso) opc.progreso(hechas, total);
-      }
+      t.p.paginas.forEach((pagina, k) => { numero++; entradas.push({ t, pagina, numero, primera: k === 0 }); });
+      for (const nota of t.notas) { numero++; entradas.push({ t, nota, numero, primera: false }); }
     }
-    if (!pdf.getPageCount()) pdf.addPage([612, 792]);
-    return { bytes: await pdf.save(), paginas: total, truncado };
+    return { libro, trabajos, entradas, total, truncado, idioma, estilo, fecha: new Date(), opc, _g: null };
   }
 
-  globalThis.XlsxPdf = { generar, analizarHF, geometriaImpresion };
+  // Medidas de una hoja del plan (se guardan las de la última: cada una son dos arreglos de hasta 1.048.576 posiciones).
+  function medidasDe(plan, t) {
+    if (plan._g && plan._g.t === t) return plan._g;
+    const G = geometriaImpresion(t.g, t.p, t.hasta);
+    const f = U_PT * (t.p.escala / 100);
+    // letra: píxeles de impresora redondeados (11 pt → 92 px → 11,04 pt) vistos en u
+    const pxDe = (pt) => { const x = Number.isFinite(pt) && pt > 0 ? Math.min(409.5, pt) : 11; return Math.max(1, Math.round(x * (t.p.escala / 100) * 600 / 72)) * PT_PX / f; };
+    plan._g = { t, G, f, pxDe };
+    return plan._g;
+  }
+
+  // Dibuja la página `e` (una entrada del plan) sobre un lienzo con la API de Canvas (el de PDF o un CanvasRenderingContext2D ya escalado a u).
+  function dibujarEntrada(L, plan, e) {
+    const { t } = e;
+    const m = medidasDe(plan, t);
+    plan.estilo.pxDe = m.pxDe;
+    const ctxP = { idioma: plan.idioma, imprimirNotas: !!plan.opc.imprimirNotas, numeroPagina: e.numero, totalPaginas: plan.opc.totalPaginas || plan.total, primeraDeLaHoja: e.primera, fecha: plan.fecha, nombreArchivo: plan.opc.nombreArchivo };
+    const pagina = e.pagina || { f0: 0, c0: 0, f1: 0, c1: 0, titulos: { filas: null, columnas: null }, listaNotas: e.nota };
+    dibujarPagina(L, plan.libro, t.hoja, m.G, t.p, pagina, ctxP, plan.estilo);
+  }
+
+  // Tamaño de la página `n` en puntos (el papel ya girado).
+  function medidaPagina(plan, n) {
+    const e = plan.entradas[n];
+    return e ? { ancho: e.t.p.papel.ancho, alto: e.t.p.papel.alto, hoja: e.t.hoja.nombre, indiceHoja: plan.trabajos.indexOf(e.t) } : null;
+  }
+
+  // La página `n` (desde 0) tal como saldrá en el PDF, en un <canvas> de `ancho` píxeles de ancho (css) a la densidad `dpr`.
+  // `o.margenes`: marca con línea de puntos los márgenes del papel. Hay que llamarla con las sobreposiciones de la hoja puestas
+  // (ExcelAPdfMotor lo hace) y con el plan hecho con paraPantalla.
+  async function dibujarEnCanvas(plan, n, canvas, o) {
+    o = o || {};
+    const e = plan.entradas[n];
+    if (!e) throw new Error('Página fuera de rango');
+    const p = e.t.p, f = U_PT * (p.escala / 100);
+    const dpr = o.dpr || 1;
+    const wPx = Math.max(1, Math.round((o.ancho || 600) * dpr)), hPx = Math.max(1, Math.round(wPx * p.papel.alto / p.papel.ancho));
+    canvas.width = wPx; canvas.height = hPx;
+    const ctx = canvas.getContext('2d');
+    const k = wPx / (p.papel.ancho / f);        // píxeles del canvas por u
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, wPx, hPx);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.save();
+    dibujarEntrada(ctx, plan, e);
+    ctx.restore();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (o.margenes) {
+      const pt = wPx / p.papel.ancho, m = p.margenes;
+      ctx.save(); ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = Math.max(1, dpr); ctx.setLineDash([4 * dpr, 3 * dpr]);
+      ctx.strokeRect(m.izq * pt, m.arr * pt, wPx - (m.izq + m.der) * pt, hPx - (m.arr + m.aba) * pt);
+      ctx.restore();
+    }
+  }
+
+  // ---- Hojas a PDF ------------------------------------------------------------------------------------
+  async function generar(libro, indices, opc) {
+    opc = opc || {};
+    const pdf = await PDFLib.PDFDocument.create();
+    const plan = await planificar(libro, indices, opc);
+    let hechas = 0;
+    for (const e of plan.entradas) {
+      const p = e.t.p, f = U_PT * (p.escala / 100);
+      const L = new LienzoPdf.Lienzo({ ancho: p.papel.ancho / f, alto: p.papel.alto / f, anchoPt: p.papel.ancho, altoPt: p.papel.alto });
+      dibujarEntrada(L, plan, e);
+      hechas++;
+      if (L.fallo) throw L.fallo;
+      await L.aPagina(pdf);
+      if (opc.progreso) opc.progreso(hechas, plan.total);
+      if ((hechas & 7) === 7) await new Promise((r) => setTimeout(r, 0));
+    }
+    if (!pdf.getPageCount()) pdf.addPage([612, 792]);
+    return { bytes: await pdf.save(), paginas: plan.total, truncado: plan.truncado };
+  }
+
+  globalThis.XlsxPdf = { generar, analizarHF, geometriaImpresion, planificar, dibujarEnCanvas, medidaPagina };
 })();
