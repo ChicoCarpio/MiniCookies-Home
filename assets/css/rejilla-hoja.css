@@ -56,3 +56,43 @@
 
 /* Solo para el lector de pantalla: la celda activa y su contenido */
 .rh-anuncio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* Buscar */
+.rh-boton-buscar { flex: none; border: 0; border-left: 1px solid var(--gris-borde); background: transparent; color: var(--texto); padding: 0 12px; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.rh-boton-buscar:hover { background: var(--superficie-alt); }
+.rh-boton-buscar:focus-visible, .rh-busca-ant:focus-visible, .rh-busca-sig:focus-visible, .rh-busca-cerrar:focus-visible, .rh-busca-texto:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-buscador {
+  position: absolute; top: 40px; right: 18px; z-index: 5; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; max-width: calc(100% - 36px);
+  background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: 8px; padding: 6px 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); font-size: 0.85rem;
+}
+.rh-buscador[hidden] { display: none; }
+.rh-busca-texto { width: 180px; max-width: 100%; padding: 4px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); font: inherit; }
+.rh-busca-cuenta { min-width: 6em; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.rh-busca-ant, .rh-busca-sig, .rh-busca-cerrar { width: 26px; height: 26px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); cursor: pointer; font-size: 0.75rem; }
+.rh-busca-todo { display: inline-flex; align-items: center; gap: 4px; color: var(--texto-suave); white-space: nowrap; }
+.rh-coinc { position: absolute; background: rgba(255, 226, 69, 0.55); outline: 1px solid rgba(180, 140, 0, 0.7); outline-offset: -1px; }
+.rh-guia { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed #c9853a; pointer-events: none; }
+.rh-guia[hidden] { display: none; }
+
+/* Hojas ocultas */
+.rh-pestana.rh-oculta { font-style: italic; opacity: 0.85; }
+.rh-boton-ocultas { flex: none; border: 0; background: transparent; color: var(--texto-suave); padding: 7px 14px 5px; font: inherit; font-size: 0.85rem; cursor: pointer; white-space: nowrap; text-decoration: underline dotted; }
+.rh-boton-ocultas:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh-menu-ocultas { position: absolute; bottom: 62px; z-index: 6; display: flex; flex-direction: column; min-width: 160px; max-height: 40%; overflow-y: auto; background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); padding: 4px; }
+.rh-menu-ocultas[hidden] { display: none; }
+.rh-menu-ocultas button { text-align: left; border: 0; background: transparent; color: var(--texto); padding: 6px 10px; border-radius: 6px; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.rh-menu-ocultas button:hover, .rh-menu-ocultas button:focus-visible { background: var(--activo-fondo); outline: none; }
+/* Asas de selección (tacto) */
+.rh-asa { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #c9853a; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); pointer-events: auto; touch-action: none; }
+.rh-asa::after { content: ""; position: absolute; inset: -14px; }
+.rh-asa[hidden] { display: none; }
+
+/* Pantalla completa: la rejilla cubre la ventana (más espacio para la hoja, sobre todo en el celular) */
+.rh-boton-completa { flex: none; border: 0; border-left: 1px solid var(--gris-borde); background: transparent; color: var(--texto); padding: 0 12px; font: inherit; font-size: 1rem; cursor: pointer; }
+.rh-boton-completa:hover, .rh-boton-completa[aria-pressed="true"] { background: var(--activo-fondo); }
+.rh-boton-completa:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.rh.rh-completa {
+  position: fixed; inset: 0; z-index: 1000; height: auto; border: 0; border-radius: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+html.rh-bloqueo, html.rh-bloqueo body { overflow: hidden; }

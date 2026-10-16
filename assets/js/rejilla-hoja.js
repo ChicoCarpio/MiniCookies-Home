@@ -17,6 +17,8 @@
   const AREA_DIRECTA = 20000;        // hasta esta cantidad de celdas la barra de estado recorre el rango; más, recorre las celdas con contenido
   const MAX_COPIA = 4000000;         // celdas que se copian como mucho (si la selección es mayor, se avisa en la barra de estado)
   const MAX_COMBINADAS_INDICE = 5000;
+  const MAX_COINCIDENCIAS = 100000;   // por hoja
+  const MAX_RESALTADAS = 400;         // coincidencias que se pintan a la vez
 
   // Textos de la rejilla: se suman a los de la página (los de la página mandan)
   (function () {
@@ -25,11 +27,19 @@
       'rh-rejilla': 'Hoja de cálculo', 'rh-hojas': 'Hojas', 'rh-nombre': 'Cuadro de nombre', 'rh-contenido': 'Contenido de la celda', 'rh-listo': 'Listo',
       'rh-promedio': 'Promedio', 'rh-recuento': 'Recuento', 'rh-suma': 'Suma', 'rh-zoom': 'Zoom', 'rh-alejar': 'Alejar', 'rh-acercar': 'Acercar', 'rh-vacia': 'Hoja vacía',
       'rh-seleccion': 'Selección', 'rh-copia-parcial': 'Copiado parcial: la selección es demasiado grande', 'error-leer-hoja': 'No se pudo abrir la hoja',
+      'rh-buscar': 'Buscar', 'rh-buscar-ph': 'Buscar en la hoja', 'rh-anterior': 'Coincidencia anterior', 'rh-siguiente': 'Coincidencia siguiente', 'rh-todo-libro': 'Todo el libro', 'rh-cerrar': 'Cerrar',
+      'rh-pantalla': 'Pantalla completa', 'rh-salir-pantalla': 'Salir de pantalla completa',
+      'rh-ocultas': 'Hojas ocultas ({0})', 'rh-hoja-oculta': 'oculta', 'rh-asa': 'Ajustar la selección',
+      'rh-sin-coincidencias': 'Sin coincidencias', 'rh-buscando': 'Buscando…', 'rh-cuenta': '{0} de {1}', 'rh-cuenta-libro': '{0} de {1} en el libro', 'rh-muchas': 'más de {0}',
     };
     const en = {
       'rh-rejilla': 'Spreadsheet', 'rh-hojas': 'Sheets', 'rh-nombre': 'Name box', 'rh-contenido': 'Cell contents', 'rh-listo': 'Ready',
       'rh-promedio': 'Average', 'rh-recuento': 'Count', 'rh-suma': 'Sum', 'rh-zoom': 'Zoom', 'rh-alejar': 'Zoom out', 'rh-acercar': 'Zoom in', 'rh-vacia': 'Empty sheet',
       'rh-seleccion': 'Selection', 'rh-copia-parcial': 'Partial copy: the selection is too large', 'error-leer-hoja': 'The sheet could not be opened',
+      'rh-buscar': 'Find', 'rh-buscar-ph': 'Find in sheet', 'rh-anterior': 'Previous match', 'rh-siguiente': 'Next match', 'rh-todo-libro': 'Whole workbook', 'rh-cerrar': 'Close',
+      'rh-pantalla': 'Full screen', 'rh-salir-pantalla': 'Exit full screen',
+      'rh-ocultas': 'Hidden sheets ({0})', 'rh-hoja-oculta': 'hidden', 'rh-asa': 'Adjust the selection',
+      'rh-sin-coincidencias': 'No matches', 'rh-buscando': 'Searching…', 'rh-cuenta': '{0} of {1}', 'rh-cuenta-libro': '{0} of {1} in the workbook', 'rh-muchas': 'more than {0}',
     };
     pagina.es = Object.assign(es, pagina.es);
     pagina.en = Object.assign(en, pagina.en);
@@ -59,9 +69,14 @@
     raiz.className = 'rh';
     raiz.innerHTML =
       '<div class="rh-barra"><div class="rh-nombre" role="textbox" aria-readonly="true" aria-label="' + tx('rh-nombre') + '"></div><span class="rh-fx" aria-hidden="true">fx</span>' +
-      '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div></div>' +
+      '<div class="rh-formula" role="textbox" aria-readonly="true" aria-label="' + tx('rh-contenido') + '"></div><button type="button" class="rh-boton-buscar">' + tx('rh-buscar') + '</button><button type="button" class="rh-boton-completa" aria-pressed="false" aria-label="' + tx('rh-pantalla') + '" title="' + tx('rh-pantalla') + '">⤢</button></div>' +
+      '<div class="rh-buscador" role="search" hidden><input type="search" class="rh-busca-texto" autocomplete="off" spellcheck="false" placeholder="' + tx('rh-buscar-ph') + '" aria-label="' + tx('rh-buscar-ph') + '">' +
+      '<span class="rh-busca-cuenta" aria-live="polite"></span>' +
+      '<button type="button" class="rh-busca-ant" aria-label="' + tx('rh-anterior') + '">▲</button><button type="button" class="rh-busca-sig" aria-label="' + tx('rh-siguiente') + '">▼</button>' +
+      '<label class="rh-busca-todo"><input type="checkbox" class="rh-busca-libro"> ' + tx('rh-todo-libro') + '</label>' +
+      '<button type="button" class="rh-busca-cerrar" aria-label="' + tx('rh-cerrar') + '">✕</button></div>' +
       '<div class="rh-cuerpo" tabindex="0" role="application" aria-roledescription="' + tx('rh-rejilla') + '" aria-label="' + tx('rh-rejilla') + '">' +
-      '<div class="rh-vista"><canvas class="rh-lienzo"></canvas><div class="rh-capa"></div></div><div class="rh-espaciador"></div></div>' +
+      '<div class="rh-vista"><canvas class="rh-lienzo"></canvas><div class="rh-capa"><div class="rh-guia" hidden></div><div class="rh-asa rh-asa-ini" hidden></div><div class="rh-asa rh-asa-fin" hidden></div></div></div><div class="rh-espaciador"></div></div>' +
       '<div class="rh-pestanas" role="tablist" aria-label="' + tx('rh-hojas') + '"></div>' +
       '<div class="rh-estado"><span class="rh-info"></span><span class="rh-anuncio" role="status" aria-live="polite"></span><span class="rh-zoom">' +
       '<button type="button" class="rh-menos" aria-label="' + tx('rh-alejar') + '">−</button>' +
@@ -70,7 +85,10 @@
     contenedor.appendChild(raiz);   // la rejilla solo toca lo suyo: dos rejillas que se pisan (un archivo nuevo mientras carga el anterior) no se borran entre sí
     const q = (s) => raiz.querySelector(s);
     const cajaNombre = q('.rh-nombre'), cajaFormula = q('.rh-formula'), cuerpo = q('.rh-cuerpo'), vista = q('.rh-vista'), lienzo = q('.rh-lienzo');
-    const capa = q('.rh-capa');
+    const capa = q('.rh-capa'), guia = q('.rh-guia'), asaIni = q('.rh-asa-ini'), asaFin = q('.rh-asa-fin');
+    let modoTactil = false;   // la última selección se hizo con el dedo: se ofrecen las asas para ajustarla
+    const botonCompleta = q('.rh-boton-completa');
+    const buscador = q('.rh-buscador'), cajaBusca = q('.rh-busca-texto'), cuentaBusca = q('.rh-busca-cuenta'), checkLibro = q('.rh-busca-libro');
     // Cada selección se dibuja en piezas, una por zona de la hoja (con paneles inmovilizados hay hasta cuatro): cada pieza es una ventana que recorta
     // (overflow) y, adentro, el rectángulo entero, así los bordes de lo que se sale de la zona no se ven
     function crearPiezas(clase) {
@@ -88,7 +106,7 @@
         });
       };
     }
-    const ponerEncCol = crearPiezas('rh-enc-col'), ponerEncFila = crearPiezas('rh-enc-fila'), ponerRango = crearPiezas('rh-rango'), ponerActiva = crearPiezas('rh-activa');
+    const ponerBusqueda = crearPiezas('rh-coinc'), ponerEncCol = crearPiezas('rh-enc-col'), ponerEncFila = crearPiezas('rh-enc-fila'), ponerRango = crearPiezas('rh-rango'), ponerActiva = crearPiezas('rh-activa');
     const espaciador = q('.rh-espaciador'), pestanas = q('.rh-pestanas'), info = q('.rh-info'), anuncio = q('.rh-anuncio');
     const controlZoom = q('.rh-control-zoom'), valorZoom = q('.rh-valor-zoom');
     const ctx = lienzo.getContext('2d');
@@ -240,7 +258,155 @@
       ponerActiva(piezasDe(ac));
       const mismo = (r.f0 === r.f1 && r.c0 === r.c1) || (m && r.f0 === m.f0 && r.c0 === m.c0 && r.f1 === m.f1 && r.c1 === m.c1);
       ponerRango(mismo ? [] : piezasDe(r));
+      ponerBusqueda(piezasBusqueda(piezasDe));
+      // asas en las esquinas del rango (solo con el tacto y cuando la selección es de celdas, no de columnas o filas enteras)
+      const celdas = r.f1 < MAX_FILAS - 1 && r.c1 < MAX_COLS - 1;
+      const colocarAsa = (div, x, y) => { const visible = modoTactil && celdas && x >= ax - 1 && x <= W + 1 && y >= ay - 1 && y <= H + 1; div.hidden = !visible; if (visible) { div.style.left = x + 'px'; div.style.top = y + 'px'; } };
+      colocarAsa(asaIni, pxC(r.c0, r.c0 < V.nc), pyF(r.f0, r.f0 < V.nf));
+      colocarAsa(asaFin, pxC(r.c1 + 1, r.c1 < V.nc), pyF(r.f1 + 1, r.f1 < V.nf));
     }
+
+    // ---- Pantalla completa ----------------------------------------------------------------------------------------------------
+    let enCompleta = false;
+    function ponerCompleta(si) {
+      enCompleta = !!si;
+      raiz.classList.toggle('rh-completa', enCompleta);
+      document.documentElement.classList.toggle('rh-bloqueo', enCompleta);   // la página de atrás no se desplaza
+      botonCompleta.setAttribute('aria-pressed', String(enCompleta));
+      const etiqueta = tx(enCompleta ? 'rh-salir-pantalla' : 'rh-pantalla');
+      botonCompleta.setAttribute('aria-label', etiqueta); botonCompleta.title = etiqueta;
+      pedirPintado();
+    }
+    escuchar(botonCompleta, 'click', () => { ponerCompleta(!enCompleta); cuerpo.focus({ preventScroll: true }); });
+
+    // ---- Buscar ------------------------------------------------------------------------------------------------------------
+    // porHoja: índice de hoja → Float64Array ordenado con fila * 16384 + columna de cada celda cuyo texto (el que se ve) contiene lo buscado, sin
+    // distinguir mayúsculas. Se lee a trozos para no congelar la página con hojas de millones de celdas.
+    const busq = { texto: '', todo: false, token: 0, porHoja: new Map(), completo: false };
+    const llave = (f, col) => f * MAX_COLS + col;
+    const cuenta = (clave, a, b) => tx(clave).replace('{0}', a).replace('{1}', b);
+    const dormir = () => new Promise((r) => setTimeout(r, 0));
+    async function escanear(indice, token) {
+      const hoja = est && indice === est.indice ? est.hoja : await libro.cargarHoja(indice);
+      if (token !== busq.token) return null;
+      const C = hoja.celdas, T = LibroXlsx.TIPO, q = busq.texto.toLowerCase(), res = [], n = C.n;
+      for (let i = 0; i < n && res.length < MAX_COINCIDENCIAS;) {
+        const fin = Math.min(n, i + 20000);
+        for (; i < fin; i++) {
+          if (C.tipo[i] === T.vacio) continue;
+          const t = LibroXlsx.textoCelda(libro, hoja, i, lector.opciones).texto;
+          if (t && t.toLowerCase().indexOf(q) >= 0) { res.push(llave(C.fila[i], C.col[i])); if (res.length >= MAX_COINCIDENCIAS) break; }
+        }
+        if (token !== busq.token || destruida) return null;
+        if (i < n) await dormir();
+      }
+      res.sort((a, b) => a - b);
+      return Float64Array.from(res);
+    }
+    const hojasBuscables = () => lector.hojas.filter((h) => h.estado === 'visible').map((h) => h.indice);
+    const primeraMayor = (L, valor) => { let a = 0, b = L.length; while (a < b) { const m = (a + b) >> 1; if (L[m] > valor) b = m; else a = m + 1; } return a; };       // primer índice con L[i] > valor
+    const primeraMayorOIgual = (L, valor) => { let a = 0, b = L.length; while (a < b) { const m = (a + b) >> 1; if (L[m] >= valor) b = m; else a = m + 1; } return a; };
+    function actualizarCuentaBusqueda(buscando) {
+      if (!busq.texto) { cuentaBusca.textContent = ''; return; }
+      const L = est ? busq.porHoja.get(est.indice) : null;
+      if (!L) { cuentaBusca.textContent = tx('rh-buscando'); return; }
+      if (!L.length && (!busq.todo || busq.completo)) { cuentaBusca.textContent = busq.todo && [...busq.porHoja.values()].some((x) => x.length) ? cuenta('rh-cuenta-libro', 0, [...busq.porHoja.values()].reduce((a, x) => a + x.length, 0)) : tx('rh-sin-coincidencias'); return; }
+      const clave = llave(est.sel.f, est.sel.c), k = primeraMayor(L, clave);   // coincidencias hasta la celda activa
+      const esCoincidencia = k > 0 && L[k - 1] === clave;
+      const tope = L.length >= MAX_COINCIDENCIAS ? tx('rh-muchas').replace('{0}', MAX_COINCIDENCIAS) : String(L.length);
+      if (busq.todo) {
+        let antes = 0, total = 0;
+        for (const [ind, X] of busq.porHoja) { total += X.length; if (est.indice !== ind && lector.hojas.findIndex((h) => h.indice === ind) < lector.hojas.findIndex((h) => h.indice === est.indice)) antes += X.length; }
+        cuentaBusca.textContent = (esCoincidencia ? cuenta('rh-cuenta-libro', antes + k, total) : cuenta('rh-cuenta-libro', '–', total)) + (busq.completo ? '' : '…');
+      } else cuentaBusca.textContent = esCoincidencia ? cuenta('rh-cuenta', k, tope) : cuenta('rh-cuenta', '–', tope);
+    }
+    function irACoincidencia(clave) {
+      const f = Math.floor(clave / MAX_COLS), col = clave % MAX_COLS;
+      ponerSeleccion(f, col, f, col); mostrarCelda(f, col); pedirPintado(); actualizarCuentaBusqueda();
+    }
+    async function buscar(texto) {
+      const token = ++busq.token;
+      busq.texto = texto; busq.porHoja = new Map(); busq.completo = false;
+      pintarSeleccion();
+      if (!texto) { actualizarCuentaBusqueda(); return; }
+      actualizarCuentaBusqueda();
+      const indiceAqui = est.indice;
+      const aqui = await escanear(indiceAqui, token);
+      if (!aqui || token !== busq.token) return;
+      busq.porHoja.set(indiceAqui, aqui);
+      // la primera coincidencia a partir de la celda activa (o desde el principio)
+      const clave = llave(est.sel.f, est.sel.c), k = primeraMayorOIgual(aqui, clave);
+      if (aqui.length) irACoincidencia(aqui[k < aqui.length ? k : 0]); else { pintarSeleccion(); actualizarCuentaBusqueda(); }
+      if (busq.todo) {
+        for (const ind of hojasBuscables()) {
+          if (busq.porHoja.has(ind)) continue;
+          const r = await escanear(ind, token);
+          if (!r || token !== busq.token) return;
+          busq.porHoja.set(ind, r); actualizarCuentaBusqueda();
+        }
+        busq.completo = true; actualizarCuentaBusqueda();
+      } else busq.completo = true;
+    }
+    // siguiente (dir = 1) o anterior (dir = -1), pasando a otra hoja si se busca en todo el libro
+    async function irSiguiente(dir) {
+      if (!busq.texto || !est) return;
+      const L = busq.porHoja.get(est.indice);
+      if (!L) return;
+      const clave = llave(est.sel.f, est.sel.c);
+      if (dir > 0) { const k = primeraMayor(L, clave); if (k < L.length) { irACoincidencia(L[k]); return; } }
+      else { const k = primeraMayorOIgual(L, clave) - 1; if (k >= 0) { irACoincidencia(L[k]); return; } }
+      if (busq.todo) {
+        const orden = hojasBuscables(), aqui = orden.indexOf(est.indice);
+        for (let paso = 1; paso <= orden.length; paso++) {
+          const ind = orden[(aqui + dir * paso + orden.length * paso) % orden.length];
+          let X = busq.porHoja.get(ind);
+          if (!X) { X = await escanear(ind, busq.token); if (!X) return; busq.porHoja.set(ind, X); }
+          if (!X.length) continue;
+          if (ind !== est.indice) await abrirHoja(ind);
+          irACoincidencia(dir > 0 ? X[0] : X[X.length - 1]);
+          return;
+        }
+      } else if (L.length) irACoincidencia(dir > 0 ? L[0] : L[L.length - 1]);   // se da la vuelta en la misma hoja
+    }
+    // las coincidencias a la vista, como piezas que se pintan encima de la hoja
+    function piezasBusqueda(piezasDe) {
+      const L = busq.texto && est ? busq.porHoja.get(est.indice) : null;
+      if (!L || !L.length) return [];
+      const V = vistaReal, out = [];
+      const tramos = [];
+      if (V.nf) tramos.push([0, Math.min(V.nf - 1, V.f1)]);
+      tramos.push([Math.max(V.f0, V.nf), V.f1]);
+      for (const [fa, fb] of tramos) {
+        for (let k = primeraMayorOIgual(L, llave(fa, 0)); k < L.length && L[k] < llave(fb + 1, 0) && out.length < MAX_RESALTADAS; k++) {
+          const f = Math.floor(L[k] / MAX_COLS), col = L[k] % MAX_COLS;
+          if (!(col < V.nc || (col >= V.c0 && col <= V.c1))) continue;
+          const m = combinadaEn(f, col);
+          for (const pz of piezasDe(m && m.f0 === f && m.c0 === col ? m : { f0: f, c0: col, f1: f, c1: col })) out.push(pz);
+        }
+      }
+      return out;
+    }
+    let temporizadorBusca = 0;
+    function abrirBuscador() {
+      buscador.hidden = false;
+      cajaBusca.focus(); cajaBusca.select();
+      if (cajaBusca.value && !busq.texto) buscar(cajaBusca.value);
+    }
+    function cerrarBuscador() {
+      buscador.hidden = true; clearTimeout(temporizadorBusca);
+      busq.token++; busq.texto = ''; busq.porHoja = new Map(); busq.completo = false; cuentaBusca.textContent = '';
+      pintarSeleccion(); cuerpo.focus({ preventScroll: true });
+    }
+    escuchar(q('.rh-boton-buscar'), 'click', abrirBuscador);
+    escuchar(q('.rh-busca-cerrar'), 'click', cerrarBuscador);
+    escuchar(q('.rh-busca-ant'), 'click', () => irSiguiente(-1));
+    escuchar(q('.rh-busca-sig'), 'click', () => irSiguiente(1));
+    escuchar(cajaBusca, 'input', () => { clearTimeout(temporizadorBusca); temporizadorBusca = setTimeout(() => buscar(cajaBusca.value.trim()), 250); });
+    escuchar(checkLibro, 'change', () => { busq.todo = checkLibro.checked; if (cajaBusca.value.trim()) buscar(cajaBusca.value.trim()); });
+    escuchar(buscador, 'keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); cerrarBuscador(); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (busq.texto !== cajaBusca.value.trim()) { clearTimeout(temporizadorBusca); buscar(cajaBusca.value.trim()); } else irSiguiente(e.shiftKey ? -1 : 1); }
+    });
 
     // ---- Barras ----------------------------------------------------------------------------------------------------
     function textoDeCelda(f, c) {
@@ -349,6 +515,9 @@
     function enTecla(e) {
       if (!est || e.altKey) return;   // Alt + flecha es Atrás / Adelante del navegador
       const ctrl = e.ctrlKey || e.metaKey, ext = e.shiftKey, s = est.sel;
+      if (ctrl && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); abrirBuscador(); return; }
+      if (e.key === 'Escape' && !buscador.hidden) { e.preventDefault(); cerrarBuscador(); return; }
+      if (e.key === 'Escape' && enCompleta) { e.preventDefault(); ponerCompleta(false); return; }
       const pagina = Math.max(1, Math.floor((H / (est.zoom / 100) - vistaReal.areaY) / Math.max(1, est.g.altoPorDefecto)) - 1);
       let hecho = true;
       switch (e.key) {
@@ -382,7 +551,77 @@
         f: dentroY ? limitar(g.filaEn(w < V.fy ? w : w + sy), 0, MAX_FILAS - 1) : -1,
       };
     }
-    let arrastre = null, toque = null;
+    // El borde derecho de la columna (en el encabezado) bajo el puntero, o null. Las columnas fijas y las que se ven.
+    function bordeColumna(p) {
+      const V = vistaReal, z = est.zoom / 100, sx = cuerpo.scrollLeft / z;
+      if (p.y >= V.areaY || p.x < V.areaX) return null;
+      const tol = 4 / z;
+      const mira = (col, fija) => {
+        if (est.g.anchoCol(col) === 0) return null;
+        const borde = V.areaX + est.g.x(col + 1) - (fija ? 0 : sx);
+        return Math.abs(p.x - borde) <= tol && borde >= (fija ? V.areaX : V.areaX + V.fx) - tol ? { c: col, borde: borde - (fija ? 0 : 0), fija } : null;
+      };
+      for (let col = 0; col < Math.min(V.nc, 400); col++) { const r = mira(col, true); if (r) return r; }
+      for (let col = V.c0; col <= V.c1; col++) { const r = mira(col, false); if (r) return r; }
+      return null;
+    }
+    function recalcularGeometria() {
+      est.g = XlsxDibujo.geometria(libro, est.hoja);
+      est.fx = est.fijas.columnas ? est.g.x(est.fijas.columnas) : 0; est.fy = est.fijas.filas ? est.g.y(est.fijas.filas) : 0;
+      colocarTamano(); pintar();
+    }
+    function fijarAnchoColumna(col, px) {
+      px = limitar(Math.round(px), 12, 1200);
+      // el ancho del modelo está en caracteres de la fuente Normal: px / mdw da esos px otra vez en la geometría (el último <col> manda)
+      est.hoja.columnas.push({ min: col, max: col, ancho: px / est.g.mdw, oculta: false, personalizado: true, estilo: 0 });
+      recalcularGeometria();
+    }
+    // lo que mide el texto más ancho de la columna (como el doble clic de Excel), con un margen
+    function anchoAjustado(col) {
+      const C = est.hoja.celdas, T = LibroXlsx.TIPO;
+      let max = 0, vistas = 0;
+      C.paraCada((f, cl, i) => {
+        if (cl !== col || C.tipo[i] === T.vacio || vistas > 100000 || combinadaEn(f, col)) return;
+        vistas++;
+        const fu = libro.estilos.xf(C.estilo[i]).fuente;
+        ctx.font = XlsxDibujo.fuenteCss(fu, XlsxDibujo.tamPx(fu.tam || 11));
+        const w = XlsxDibujo.anchoTexto(ctx, textoDeCelda(f, col));
+        if (w > max) max = w;
+      });
+      return limitar(Math.ceil(max) + 10, 12, 600);
+    }
+    let redimension = null;
+    escuchar(vista, 'dblclick', (e) => {
+      if (!est) return;
+      const b = bordeColumna(punto(e));
+      if (b) { fijarAnchoColumna(b.c, anchoAjustado(b.c)); e.preventDefault(); }
+    });
+    escuchar(vista, 'pointermove', (e) => {   // el cursor avisa que ahí se puede arrastrar
+      if (!est || e.pointerType !== 'mouse' || e.buttons) return;
+      vista.style.cursor = bordeColumna(punto(e)) ? 'col-resize' : '';
+    });
+    let arrastre = null, toque = null, asaActiva = null;
+    function enlazarAsa(div, esFin) {
+      escuchar(div, 'pointerdown', (e) => {
+        if (!est) return;
+        e.stopPropagation(); e.preventDefault();
+        const r = rango();
+        asaActiva = { id: e.pointerId, ancla: esFin ? { f: r.f0, c: r.c0 } : { f: r.f1, c: r.c1 } };
+        try { div.setPointerCapture(e.pointerId); } catch (x) { /* sin captura */ }
+      });
+      escuchar(div, 'pointermove', (e) => {
+        if (!asaActiva || e.pointerId !== asaActiva.id || !est) return;
+        const z = est.zoom / 100, pt = punto(e);
+        const h = celdaEn({ x: pt.x + (esFin ? -6 : 6) / z, y: pt.y + (esFin ? -6 : 6) / z });   // la celda que queda bajo la esquina, no la que tapa el dedo
+        if (h.f >= 0 && h.c >= 0) ponerSeleccion(asaActiva.ancla.f, asaActiva.ancla.c, h.f, h.c);
+        const rv = vista.getBoundingClientRect();   // junto al borde, la hoja se desplaza sola
+        cuerpo.scrollLeft += e.clientX > rv.right - 24 ? 20 : e.clientX < rv.left + vistaReal.areaX * z + 24 ? -20 : 0;
+        cuerpo.scrollTop += e.clientY > rv.bottom - 24 ? 20 : e.clientY < rv.top + vistaReal.areaY * z + 24 ? -20 : 0;
+      });
+      const fin = (e) => { if (asaActiva && e.pointerId === asaActiva.id) { asaActiva = null; } };
+      escuchar(div, 'pointerup', fin); escuchar(div, 'pointercancel', fin);
+    }
+    enlazarAsa(asaIni, false); enlazarAsa(asaFin, true);
     function aplicarPunto(h, extender) {
       const s = est.sel;
       if (h.esquina) { ponerSeleccion(0, 0, MAX_FILAS - 1, MAX_COLS - 1); return; }
@@ -393,14 +632,30 @@
     escuchar(vista, 'pointerdown', (e) => {
       if (!est || e.button !== 0) return;
       cuerpo.focus({ preventScroll: true });
+      if (e.pointerType === 'mouse') {
+        const b = bordeColumna(punto(e));
+        if (b) {   // se arrastra el borde de una columna
+          redimension = { id: e.pointerId, col: b.c, x0: punto(e).x, ancho0: est.g.anchoCol(b.c), fija: b.fija, nuevo: est.g.anchoCol(b.c) };
+          try { vista.setPointerCapture(e.pointerId); } catch (x) { /* sin captura */ }
+          return;
+        }
+      }
       const h = celdaEn(punto(e));
       if (e.pointerType === 'mouse') {
         aplicarPunto(h, e.shiftKey);
         arrastre = { id: e.pointerId, columnas: h.f < 0 && !h.esquina, filas: h.c < 0 && !h.esquina };
         try { vista.setPointerCapture(e.pointerId); } catch (x) { /* sin captura */ }
       } else toque = { x: e.clientX, y: e.clientY, t: Date.now(), h, id: e.pointerId };
+      modoTactil = e.pointerType !== 'mouse';
     });
     escuchar(vista, 'pointermove', (e) => {
+      if (redimension && e.pointerId === redimension.id) {
+        const z = est.zoom / 100, V = vistaReal;
+        redimension.nuevo = limitar(redimension.ancho0 + (punto(e).x - redimension.x0), 12, 1200);
+        const xg = (V.areaX + est.g.x(redimension.col) + redimension.nuevo - (redimension.fija ? 0 : cuerpo.scrollLeft / z)) * z;
+        guia.hidden = false; guia.style.left = xg + 'px';
+        return;
+      }
       if (!est || !arrastre || e.pointerId !== arrastre.id || !(e.buttons & 1)) return;
       const h = celdaEn(punto(e)), s = est.sel;
       if (arrastre.columnas) ponerSeleccion(s.f, s.c, s.f2, Math.max(0, h.c));
@@ -411,12 +666,18 @@
       cuerpo.scrollLeft += e.clientX > r.right - 12 ? 24 : e.clientX < r.left + vistaReal.areaX * (est.zoom / 100) + 12 ? -24 : 0;
       cuerpo.scrollTop += e.clientY > r.bottom - 12 ? 24 : e.clientY < r.top + vistaReal.areaY * (est.zoom / 100) + 12 ? -24 : 0;
     });
-    const soltar = (e) => { if (arrastre && e.pointerId === arrastre.id) arrastre = null; };
+    const soltar = (e) => {
+      if (arrastre && e.pointerId === arrastre.id) arrastre = null;
+      if (redimension && e.pointerId === redimension.id) {
+        const r = redimension; redimension = null; guia.hidden = true;
+        if (Math.abs(r.nuevo - r.ancho0) >= 1) fijarAnchoColumna(r.col, r.nuevo);
+      }
+    };
     escuchar(vista, 'pointerup', (e) => {
       soltar(e);
       if (toque && e.pointerId === toque.id) {
         const t = toque; toque = null;
-        if (Math.abs(e.clientX - t.x) < 8 && Math.abs(e.clientY - t.y) < 8 && Date.now() - t.t < 600 && est) aplicarPunto(t.h, false);
+        if (Math.abs(e.clientX - t.x) < 8 && Math.abs(e.clientY - t.y) < 8 && Date.now() - t.t < 600 && est) { modoTactil = true; aplicarPunto(t.h, false); }
       }
     });
     escuchar(vista, 'pointercancel', (e) => { soltar(e); toque = null; });
@@ -495,16 +756,48 @@
     escuchar(vista, 'touchend', () => { distanciaInicial = 0; }, { passive: true });
 
     // ---- Pestañas ------------------------------------------------------------------------------------------------------------
+    const ocultasAbiertas = new Set();   // hojas ocultas que se abrieron para mirarlas (el archivo no se toca)
+    const menuOcultas = document.createElement('div');
+    menuOcultas.className = 'rh-menu-ocultas'; menuOcultas.setAttribute('role', 'menu'); menuOcultas.hidden = true;
+    raiz.appendChild(menuOcultas);
     function dibujarPestanas() {
       pestanas.textContent = '';
-      for (const h of lector.hojas) {
-        if (h.estado !== 'visible') continue;
+      const nueva = (h, oculta) => {
         const b = document.createElement('button');
-        b.type = 'button'; b.className = 'rh-pestana'; b.setAttribute('role', 'tab'); b.dataset.indice = h.indice; b.textContent = h.nombre;
+        b.type = 'button'; b.className = 'rh-pestana' + (oculta ? ' rh-oculta' : ''); b.setAttribute('role', 'tab'); b.dataset.indice = h.indice; b.textContent = h.nombre;
+        if (oculta) b.title = tx('rh-hoja-oculta');
         b.setAttribute('aria-selected', 'false');
         pestanas.appendChild(b);
+      };
+      for (const h of lector.hojas) if (h.estado === 'visible') nueva(h, false);
+      for (const h of lector.hojas) if (h.estado === 'oculta' && ocultasAbiertas.has(h.indice)) nueva(h, true);
+      const ocultas = lector.hojas.filter((h) => h.estado === 'oculta' && !ocultasAbiertas.has(h.indice));   // las muy ocultas no se ofrecen, como en Excel
+      if (ocultas.length) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'rh-boton-ocultas'; b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.textContent = tx('rh-ocultas').replace('{0}', ocultas.length);
+        pestanas.appendChild(b);
+        menuOcultas.textContent = '';
+        for (const h of ocultas) {
+          const it = document.createElement('button');
+          it.type = 'button'; it.setAttribute('role', 'menuitem'); it.dataset.indice = h.indice; it.textContent = h.nombre;
+          menuOcultas.appendChild(it);
+        }
       }
+      marcarPestana();
     }
+    function cerrarMenuOcultas() { menuOcultas.hidden = true; const b = pestanas.querySelector('.rh-boton-ocultas'); if (b) b.setAttribute('aria-expanded', 'false'); }
+    escuchar(pestanas, 'click', (e) => {
+      const b = e.target.closest('.rh-boton-ocultas'); if (!b) return;
+      menuOcultas.hidden = !menuOcultas.hidden; b.setAttribute('aria-expanded', String(!menuOcultas.hidden));
+      if (!menuOcultas.hidden) { const r = b.getBoundingClientRect(), rr = raiz.getBoundingClientRect(); menuOcultas.style.left = Math.max(4, r.left - rr.left) + 'px'; const it = menuOcultas.querySelector('button'); if (it) it.focus(); }
+    });
+    escuchar(menuOcultas, 'click', async (e) => {
+      const it = e.target.closest('button[data-indice]'); if (!it) return;
+      cerrarMenuOcultas(); ocultasAbiertas.add(+it.dataset.indice); dibujarPestanas();
+      try { await abrirHoja(+it.dataset.indice); } catch (error) { if (typeof opciones.alError === 'function') opciones.alError(error); else alert(tx('error-leer-hoja') + ': ' + (error && error.message ? error.message : error)); }
+    });
+    escuchar(menuOcultas, 'keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); cerrarMenuOcultas(); const b = pestanas.querySelector('.rh-boton-ocultas'); if (b) b.focus(); } });
+    escuchar(document, 'pointerdown', (e) => { if (!menuOcultas.hidden && !menuOcultas.contains(e.target) && !e.target.closest('.rh-boton-ocultas')) cerrarMenuOcultas(); });
     const colorPestana = new Map();   // color de pestaña de las hojas ya abiertas (el de una hoja sin abrir no se conoce sin leerla entera)
     function marcarPestana() {
       if (est && est.hoja.color && !colorPestana.has(est.indice)) colorPestana.set(est.indice, libro.estilos.color(est.hoja.color));
@@ -546,6 +839,7 @@
       mostrarHoja: abrirHoja,
       seleccion,
       copiar,
+      buscar: async (texto, opciones) => { abrirBuscador(); cajaBusca.value = texto; if (opciones && 'todoElLibro' in opciones) { checkLibro.checked = !!opciones.todoElLibro; busq.todo = checkLibro.checked; } await buscar(texto); },
       // dónde está una celda en la vista (px, con el zoom y el desplazamiento de ahora): para las pruebas y para quien dibuje encima
       rectCelda(f, c) {
         const fc = c < est.fijas.columnas, ff = f < est.fijas.filas;   // el borde de la derecha / de abajo de una celda fija también es fijo
@@ -555,7 +849,8 @@
       zoom(z) { if (z === undefined) return est ? est.zoom : 100; ponerZoom(z); return est.zoom; },
       alCambiar(fn) { cambios.push(fn); },
       enfocar() { cuerpo.focus({ preventScroll: true }); },
-      destruir() { destruida = true; observador.disconnect(); for (const quitar of escuchas) quitar(); clearTimeout(temporizadorEstado); clearTimeout(temporizadorAnuncio); raiz.remove(); },
+      pantallaCompleta(si) { if (si === undefined) return enCompleta; ponerCompleta(si); return enCompleta; },
+      destruir() { destruida = true; observador.disconnect(); for (const quitar of escuchas) quitar(); clearTimeout(temporizadorEstado); clearTimeout(temporizadorAnuncio); clearTimeout(temporizadorBusca); busq.token++; if (enCompleta) ponerCompleta(false); raiz.remove(); },
     };
   }
 
