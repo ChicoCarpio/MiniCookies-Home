@@ -438,6 +438,17 @@
       rutasHojas.push(parte);
       const nuevo = arreglarHoja(xml, usa, quitadas, activa, n === activa);
       if (nuevo !== xml) zip.file(parte, nuevo);
+      // la columna calculada de una tabla que cita una hoja quitada: sus celdas ya pasaron a valor (arreglarHoja), así que la columna deja de ser
+      // calculada (Excel la deja con #REF!; corpus 49). Si no, la tabla seguiría pidiendo una hoja que no existe al agregarle filas.
+      if (quitadas.length) {
+        for (const r of await leerRels(zip, parte)) {
+          if (r.externa || r.tipo !== 'table') continue;
+          const t = await textoDe(zip, r.destino);
+          if (t === null) continue;
+          const u = t.replace(/<(?:[\w.-]+:)?calculatedColumnFormula\b[^>]*?(?:\/>|>[^<]*<\/(?:[\w.-]+:)?calculatedColumnFormula>)/g, (x) => (usa(X.decodificar(x.replace(/<[^>]*>/g, ''))) ? '' : x));
+          if (u !== t) zip.file(real(zip, r.destino), u);
+        }
+      }
       if (quitadas.length && segmentacionesQuitadas.size) await quitarSegmentaciones(zip, parte, segmentacionesQuitadas);
     }
     // las vistas personalizadas de cada hoja dependen de las del libro

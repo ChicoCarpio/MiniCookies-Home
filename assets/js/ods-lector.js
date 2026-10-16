@@ -167,7 +167,8 @@
     if (!contenido) throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument');
     if (zip.file('META-INF/manifest.xml')) {
       const man = await zip.file('META-INF/manifest.xml').async('string');
-      if (/manifest:encryption-data/.test(man)) throw new LibroXlsx.ErrorXlsx('cifrado');
+      // con cualquier prefijo (o ninguno) del espacio de nombres del manifiesto: LibreOffice usa "manifest:", otros programas no siempre
+      if (/<(?:[\w.-]+:)?encryption-data\b/.test(man)) throw new LibroXlsx.ErrorXlsx('cifrado');
     }
     const estilos = { datos: new Map(), celdas: new Map(), columnas: new Map(), hojasOcultas: new Set() };
     if (zip.file('styles.xml')) leerEstilos(await zip.file('styles.xml').async('string'), estilos);
