@@ -24,7 +24,7 @@ window.i18nPagina = {
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar .zip con las imágenes',
     'limites-titulo': 'Límites conocidos',
-    'limites-antes': 'Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse distinto. Si no se puede renderizar el diseño visual, se avisa el error en vez de generar imágenes en blanco — para el texto de todas formas está ',
+    'limites-antes': 'Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse distinto. Si no se puede renderizar ninguna diapositiva, se avisa el error; una diapositiva ilegible sale en blanco y lo que no se sabe dibujar se omite — para el texto de todas formas está ',
     'limites-enlace': 'Extraer texto de PowerPoint',
     'limites-final': '.',
     'error-renderizar': 'No se pudo renderizar las diapositivas'
@@ -42,7 +42,7 @@ window.i18nPagina = {
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download .zip with the images',
     'limites-titulo': 'Known limits',
-    'limites-antes': 'Since this runs 100% in your browser (not in real PowerPoint), the result may not be 100% faithful to the original — slides with very complex designs, animations or unusual elements may look different. If the visual design can’t be rendered, the error is reported instead of generating blank images — for the text there’s also ',
+    'limites-antes': 'Since this runs 100% in your browser (not in real PowerPoint), the result may not be 100% faithful to the original — slides with very complex designs, animations or unusual elements may look different. If no slide can be rendered, the error is reported; an unreadable slide comes out blank and anything that can’t be drawn is left out — for the text there’s also ',
     'limites-enlace': 'Extract text from PowerPoint',
     'limites-final': '.',
     'error-renderizar': 'Couldn’t render the slides'
@@ -92,15 +92,14 @@ window.i18nPagina = {
     <p style="color:var(--texto-suave);">
       <span data-i18n="limites-antes">Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al
       original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse
-      distinto. Si no se puede renderizar el diseño visual, se avisa el error en vez de generar imágenes en
-      blanco — para el texto de todas formas está </span><a href="extraer-texto-powerpoint.html" data-i18n="limites-enlace">Extraer texto de PowerPoint</a><span data-i18n="limites-final">.</span>
+      distinto. Si no se puede renderizar ninguna diapositiva, se avisa el error; una diapositiva ilegible sale en blanco y lo que no se sabe dibujar se omite — para el texto de todas formas está </span><a href="extraer-texto-powerpoint.html" data-i18n="limites-enlace">Extraer texto de PowerPoint</a><span data-i18n="limites-final">.</span>
     </p>
   </div>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <canvas id="canvasRender" style="display:none;"></canvas>

@@ -35,7 +35,22 @@ window.i18nPagina = {
     'mensaje-visual-ok': '✅ Listo — se generó el PDF con las diapositivas reales.',
     'mensaje-solo-texto': '⚠️ No se pudo renderizar el diseño visual de las diapositivas — el PDF generado tiene solo el texto.',
     'mensaje-omitido': '⚠️ Listo, pero {n} elemento(s) de las diapositivas no se pudieron dibujar y quedaron fuera del PDF (un SmartArt sin su dibujo, un objeto incrustado o un gráfico que no se pudo leer).',
-    'error-generar': 'No se pudo generar el PDF'
+    'error-generar': 'No se pudo generar el PDF',
+    'guia-titulo': 'Cómo convertir una presentación de PowerPoint a PDF',
+    'guia-intro': 'Un PDF se ve igual en cualquier computadora o celular, no depende de que el destinatario tenga PowerPoint ni de que tenga instaladas las mismas fuentes. Es el formato más cómodo para enviar una presentación por correo, entregarla como tarea o imprimirla. Esta herramienta recibe un archivo .pptx, dibuja cada diapositiva y arma un PDF con una página por diapositiva. Además te ofrece las diapositivas como imágenes PNG en un .zip.',
+    'guia-paso-1': 'Arrastrá tu archivo .pptx a la zona de carga o hacé clic para elegirlo. Solo se acepta ese formato.',
+    'guia-paso-2': 'Pulsá «Convertir a PDF». Mientras trabaja ves el mensaje de progreso y, al terminar, una vista previa de las diapositivas.',
+    'guia-paso-3': 'Leé el mensaje de resultado: te dice si el PDF se generó con las diapositivas reales, si algún elemento no se pudo dibujar o si solo se pudo guardar el texto.',
+    'guia-paso-4': 'Descargá el PDF, que conserva el nombre de tu presentación con la extensión .pdf, o las imágenes en el .zip si las querés por separado.',
+    'guia-consejo-1': 'Revisá la vista previa antes de enviar el PDF: los diseños complejos, las animaciones y algunos elementos poco comunes pueden verse distintos de como aparecen en PowerPoint.',
+    'guia-consejo-2': 'Si tu archivo está en el formato antiguo .ppt, abrilo en PowerPoint y guardalo como .pptx antes de usar esta herramienta.',
+    'guia-consejo-3': 'El .zip trae un PNG por diapositiva (diapositiva-01.png, diapositiva-02.png, etc.), útil para pegarlas en un documento, un correo o una publicación.',
+    'guia-p1': '¿Por qué mi PDF solo tiene texto?',
+    'guia-r1': 'Cuando una presentación no se puede dibujar, la herramienta no falla: genera igualmente un PDF con el texto de cada diapositiva y te avisa con un mensaje. Si lo único que necesitás es el texto, también existe la herramienta Extraer texto de PowerPoint.',
+    'guia-p2': '¿Qué significa que algunos elementos «no se pudieron dibujar»?',
+    'guia-r2': 'Que el PDF está hecho, pero faltan piezas puntuales, por ejemplo un SmartArt sin su dibujo guardado, un objeto incrustado o un gráfico que no se pudo leer. El mensaje indica cuántos fueron.',
+    'guia-p3': '¿El resultado es idéntico a lo que muestra PowerPoint?',
+    'guia-r3': 'No siempre. La conversión se hace dentro del navegador, sin el programa original, así que conviene comparar el PDF con tu presentación antes de entregarlo.',
   },
   en: {
     'titulo-pagina': 'Convert PowerPoint to PDF Free — Mini Cookies',
@@ -61,7 +76,22 @@ window.i18nPagina = {
     'mensaje-visual-ok': '✅ Done — the PDF was generated with the real slides.',
     'mensaje-solo-texto': '⚠️ Couldn’t render the slides’ visual design — the generated PDF has only the text.',
     'mensaje-omitido': '⚠️ Done, but {n} slide element(s) couldn’t be drawn and were left out of the PDF (a SmartArt without its drawing, an embedded object or a chart that couldn’t be read).',
-    'error-generar': 'Couldn’t generate the PDF'
+    'error-generar': 'Couldn’t generate the PDF',
+    'guia-titulo': 'How to convert a PowerPoint presentation to PDF',
+    'guia-intro': 'A PDF looks the same on any computer or phone; it doesn’t depend on the recipient having PowerPoint or the same fonts installed. It is the most convenient format for emailing a presentation, handing it in as homework or printing it. This tool takes a .pptx file, draws each slide and builds a PDF with one page per slide. It also offers the slides as PNG images in a .zip.',
+    'guia-paso-1': 'Drag your .pptx file onto the upload area or click to choose it. Only that format is accepted.',
+    'guia-paso-2': 'Press “Convert to PDF”. While it works you see a progress message and, when it finishes, a preview of the slides.',
+    'guia-paso-3': 'Read the result message: it tells you whether the PDF was generated with the real slides, whether some element couldn’t be drawn, or whether only the text could be saved.',
+    'guia-paso-4': 'Download the PDF, which keeps your presentation’s name with a .pdf extension, or the images in the .zip if you want them separately.',
+    'guia-consejo-1': 'Check the preview before sending the PDF: complex designs, animations and some unusual elements may look different from how they appear in PowerPoint.',
+    'guia-consejo-2': 'If your file is in the old .ppt format, open it in PowerPoint and save it as .pptx before using this tool.',
+    'guia-consejo-3': 'The .zip contains one PNG per slide (diapositiva-01.png, diapositiva-02.png, and so on), handy for pasting into a document, an email or a post.',
+    'guia-p1': 'Why does my PDF only have text?',
+    'guia-r1': 'When a presentation can’t be drawn, the tool doesn’t fail: it still generates a PDF with the text of each slide and tells you with a message. If all you need is the text, there is also the Extract text from PowerPoint tool.',
+    'guia-p2': 'What does it mean that some elements “couldn’t be drawn”?',
+    'guia-r2': 'The PDF was made, but specific pieces are missing, for example a SmartArt without its saved drawing, an embedded object or a chart that couldn’t be read. The message tells you how many.',
+    'guia-p3': 'Is the result identical to what PowerPoint shows?',
+    'guia-r3': 'Not always. The conversion happens inside the browser, without the original program, so it’s worth comparing the PDF with your presentation before handing it in.',
   }
 };
 </script>
@@ -114,11 +144,42 @@ window.i18nPagina = {
       <li><em data-i18n="item3">Nota: como esto corre 100% en tu navegador (no en un servicio especializado en un servidor, como PowerPoint o LibreOffice reales), el resultado puede no ser 100% fiel al original — diapositivas con diseños complejos, animaciones o elementos poco comunes pueden verse distinto.</em></li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir una presentación de PowerPoint a PDF</h2>
+    <p data-i18n="guia-intro">Un PDF se ve igual en cualquier computadora o celular, no depende de que el destinatario tenga PowerPoint ni de que tenga instaladas las mismas fuentes. Es el formato más cómodo para enviar una presentación por correo, entregarla como tarea o imprimirla. Esta herramienta recibe un archivo .pptx, dibuja cada diapositiva y arma un PDF con una página por diapositiva. Además te ofrece las diapositivas como imágenes PNG en un .zip.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .pptx a la zona de carga o hacé clic para elegirlo. Solo se acepta ese formato.</li>
+      <li data-i18n="guia-paso-2">Pulsá «Convertir a PDF». Mientras trabaja ves el mensaje de progreso y, al terminar, una vista previa de las diapositivas.</li>
+      <li data-i18n="guia-paso-3">Leé el mensaje de resultado: te dice si el PDF se generó con las diapositivas reales, si algún elemento no se pudo dibujar o si solo se pudo guardar el texto.</li>
+      <li data-i18n="guia-paso-4">Descargá el PDF, que conserva el nombre de tu presentación con la extensión .pdf, o las imágenes en el .zip si las querés por separado.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Revisá la vista previa antes de enviar el PDF: los diseños complejos, las animaciones y algunos elementos poco comunes pueden verse distintos de como aparecen en PowerPoint.</li>
+      <li data-i18n="guia-consejo-2">Si tu archivo está en el formato antiguo .ppt, abrilo en PowerPoint y guardalo como .pptx antes de usar esta herramienta.</li>
+      <li data-i18n="guia-consejo-3">El .zip trae un PNG por diapositiva (diapositiva-01.png, diapositiva-02.png, etc.), útil para pegarlas en un documento, un correo o una publicación.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Por qué mi PDF solo tiene texto?</summary>
+      <p data-i18n="guia-r1">Cuando una presentación no se puede dibujar, la herramienta no falla: genera igualmente un PDF con el texto de cada diapositiva y te avisa con un mensaje. Si lo único que necesitás es el texto, también existe la herramienta Extraer texto de PowerPoint.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué significa que algunos elementos «no se pudieron dibujar»?</summary>
+      <p data-i18n="guia-r2">Que el PDF está hecho, pero faltan piezas puntuales, por ejemplo un SmartArt sin su dibujo guardado, un objeto incrustado o un gráfico que no se pudo leer. El mensaje indica cuántos fueron.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿El resultado es idéntico a lo que muestra PowerPoint?</summary>
+      <p data-i18n="guia-r3">No siempre. La conversión se hace dentro del navegador, sin el programa original, así que conviene comparar el PDF con tu presentación antes de entregarlo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <canvas id="canvasRender" style="display:none;"></canvas>

@@ -42,7 +42,22 @@ window.i18nPagina = {
     'progreso-pagina': 'Procesando página {actual} de {total}...',
     'progreso-zip': 'Generando .zip...',
     'error-a-pdf': 'No se pudo convertir a PDF',
-    'error-a-imagenes': 'No se pudo convertir el PDF'
+    'error-a-imagenes': 'No se pudo convertir el PDF',
+    'guia-titulo': 'Cómo convertir entre PDF e imágenes',
+    'guia-intro': 'Pasar fotos a PDF sirve para entregar un trámite en un solo archivo; pasar un PDF a imágenes, para subir una página a una web o insertarla en una presentación. Esta página hace las dos cosas: elegí el sentido con el selector y seguí los pasos correspondientes.',
+    'guia-paso-1': 'Imágenes → PDF: elegí «Imágenes → PDF» y arrastrá una o varias imágenes (JPG, PNG, WebP, GIF o BMP). Cada una será una página.',
+    'guia-paso-2': 'Arrastrá las tarjetas para ordenarlas, quitá las que no quieras y elegí el «Tamaño de página». Pulsá «Convertir a PDF» y descargá el PDF.',
+    'guia-paso-3': 'PDF → Imágenes: elegí «PDF → Imágenes» y cargá el PDF. Elegí el «Formato» (PNG o JPG) y la «Calidad de render» (Normal, Alta o Muy alta).',
+    'guia-paso-4': 'Pulsá «Convertir a imágenes»: se procesa una página por vez y descargás un .zip con un archivo por página (pagina-1, pagina-2…).',
+    'guia-consejo-1': 'Las fotos de celular se enderezan solas según la orientación guardada en el archivo, así que no hace falta rotarlas antes.',
+    'guia-consejo-2': 'Para páginas con texto o dibujos, PNG da bordes más nítidos; para fotos o para archivos más livianos, JPG. Con «Muy alta» las imágenes salen más grandes y tardan más en generarse.',
+    'guia-consejo-3': 'Con «Ancho A4, alto según la imagen» las fotos no se recortan ni quedan con márgenes; «A4 exacto» o «Carta exacto» dan páginas del mismo tamaño, con bordes blancos.',
+    'guia-p1': '¿Se puede cambiar el orden de las imágenes después de cargarlas?',
+    'guia-r1': 'Sí, arrastrando las tarjetas antes de convertir. El PDF respeta el orden que ves en pantalla.',
+    'guia-p2': '¿Cómo se llaman las imágenes que salen del PDF?',
+    'guia-r2': 'pagina-1, pagina-2… con la extensión del formato elegido, y con ceros a la izquierda si el PDF tiene muchas páginas, para que se ordenen bien.',
+    'guia-p3': '¿Puedo convertir solo algunas páginas del PDF?',
+    'guia-r3': 'No: se convierten todas. Podés descartar del .zip las que no necesites.'
   },
   en: {
     'titulo-pagina': 'Convert PDF and Images Free — Mini Cookies',
@@ -75,7 +90,22 @@ window.i18nPagina = {
     'progreso-pagina': 'Processing page {actual} of {total}...',
     'progreso-zip': 'Generating .zip...',
     'error-a-pdf': 'Couldn’t convert to PDF',
-    'error-a-imagenes': 'Couldn’t convert the PDF'
+    'error-a-imagenes': 'Couldn’t convert the PDF',
+    'guia-titulo': 'How to convert between PDF and images',
+    'guia-intro': 'Turning photos into a PDF is useful for handing in paperwork as a single file; turning a PDF into images helps when you need to upload one page to a website or place it in a presentation. This page does both: choose the direction with the selector and follow the matching steps.',
+    'guia-paso-1': 'Images → PDF: choose “Images → PDF” and drag one or more images (JPG, PNG, WebP, GIF or BMP). Each one becomes a page.',
+    'guia-paso-2': 'Drag the cards to reorder them, remove any you don’t want and choose the “Page size”. Press “Convert to PDF” and download the PDF.',
+    'guia-paso-3': 'PDF → Images: choose “PDF → Images” and load the PDF. Pick the “Format” (PNG or JPG) and the “Render quality” (Normal, High or Very high).',
+    'guia-paso-4': 'Press “Convert to images”: one page is processed at a time and you download a .zip with one file per page (pagina-1, pagina-2…).',
+    'guia-consejo-1': 'Phone photos are straightened automatically according to the orientation stored in the file, so there’s no need to rotate them beforehand.',
+    'guia-consejo-2': 'For pages with text or drawings, PNG gives sharper edges; for photos or lighter files, JPG. With “Very high” the images come out bigger and take longer to generate.',
+    'guia-consejo-3': 'With “A4 width, height matched to the image” photos are neither cropped nor given margins; “Exact A4” or “Exact Letter” give pages of the same size, with white borders.',
+    'guia-p1': 'Can I change the order of the images after loading them?',
+    'guia-r1': 'Yes, by dragging the cards before converting. The PDF follows the order you see on screen.',
+    'guia-p2': 'What are the images from the PDF called?',
+    'guia-r2': 'pagina-1, pagina-2… with the extension of the chosen format, and with leading zeros if the PDF has many pages so they sort correctly.',
+    'guia-p3': 'Can I convert only some pages of the PDF?',
+    'guia-r3': 'No: all of them are converted. You can discard the ones you don’t need from the .zip.'
   }
 };
 </script>
@@ -162,11 +192,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir entre PDF e imágenes</h2>
+    <p data-i18n="guia-intro">Pasar fotos a PDF sirve para entregar un trámite en un solo archivo; pasar un PDF a imágenes, para subir una página a una web o insertarla en una presentación. Esta página hace las dos cosas: elegí el sentido con el selector y seguí los pasos correspondientes.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Imágenes → PDF: elegí «Imágenes → PDF» y arrastrá una o varias imágenes (JPG, PNG, WebP, GIF o BMP). Cada una será una página.</li>
+      <li data-i18n="guia-paso-2">Arrastrá las tarjetas para ordenarlas, quitá las que no quieras y elegí el «Tamaño de página». Pulsá «Convertir a PDF» y descargá el PDF.</li>
+      <li data-i18n="guia-paso-3">PDF → Imágenes: elegí «PDF → Imágenes» y cargá el PDF. Elegí el «Formato» (PNG o JPG) y la «Calidad de render» (Normal, Alta o Muy alta).</li>
+      <li data-i18n="guia-paso-4">Pulsá «Convertir a imágenes»: se procesa una página por vez y descargás un .zip con un archivo por página (pagina-1, pagina-2…).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Las fotos de celular se enderezan solas según la orientación guardada en el archivo, así que no hace falta rotarlas antes.</li>
+      <li data-i18n="guia-consejo-2">Para páginas con texto o dibujos, PNG da bordes más nítidos; para fotos o para archivos más livianos, JPG. Con «Muy alta» las imágenes salen más grandes y tardan más en generarse.</li>
+      <li data-i18n="guia-consejo-3">Con «Ancho A4, alto según la imagen» las fotos no se recortan ni quedan con márgenes; «A4 exacto» o «Carta exacto» dan páginas del mismo tamaño, con bordes blancos.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Se puede cambiar el orden de las imágenes después de cargarlas?</summary>
+      <p data-i18n="guia-r1">Sí, arrastrando las tarjetas antes de convertir. El PDF respeta el orden que ves en pantalla.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Cómo se llaman las imágenes que salen del PDF?</summary>
+      <p data-i18n="guia-r2">pagina-1, pagina-2… con la extensión del formato elegido, y con ceros a la izquierda si el PDF tiene muchas páginas, para que se ordenen bien.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo convertir solo algunas páginas del PDF?</summary>
+      <p data-i18n="guia-r3">No: se convierten todas. Podés descartar del .zip las que no necesites.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/vendor.js"></script>

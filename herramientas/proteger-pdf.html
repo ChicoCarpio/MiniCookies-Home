@@ -33,7 +33,24 @@ window.i18nPagina = {
     'item1-final': ').',
     'item2': 'Se usa cifrado AES-256, el estándar actual de protección de PDF (compatible con Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos).',
     'error-vacio': 'Ingresá una contraseña para abrir el PDF.',
-    'error-proteger': 'No se pudo proteger el PDF'
+    'error-proteger': 'No se pudo proteger el PDF',
+    'guia-titulo': 'Cómo proteger un PDF con contraseña',
+    'guia-intro': 'Un contrato, una nómina o un informe médico que viaja por correo o queda en una carpeta compartida conviene que solo lo abra quien tenga la clave. Esta herramienta cifra el PDF con AES-256 y te devuelve una copia que pide contraseña para abrirse; el archivo original no se modifica.',
+    'guia-paso-1': 'Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver su miniatura y la cantidad de páginas.',
+    'guia-paso-2': 'Escribí la «Contraseña para abrir el PDF». Es obligatoria: sin ella el botón avisa que falta.',
+    'guia-paso-3': 'Si querés, completá la «Contraseña de propietario». Si la dejás vacía se usa la misma de apertura.',
+    'guia-paso-4': 'Pulsá «Proteger PDF» y descargá el «PDF protegido». Probalo abriéndolo antes de enviarlo.',
+    'guia-consejo-1': 'Mandá la contraseña por un medio distinto al del archivo (por ejemplo, el PDF por correo y la clave por mensaje).',
+    'guia-consejo-2': 'Una clave larga con mezcla de letras, números y símbolos resiste mejor que una palabra común; podés generarla con el generador de contraseñas del sitio y guardarla en un gestor.',
+    'guia-consejo-3': 'Conservá una copia sin protección en un lugar seguro: el cifrado de la copia nueva no se puede deshacer sin la clave.',
+    'guia-p1': '¿Qué pasa si olvido la contraseña?',
+    'guia-r1': 'No hay forma de recuperar el contenido: la herramienta no guarda ninguna clave y el cifrado AES-256 no se puede saltear.',
+    'guia-p2': '¿Con qué programas se abre el PDF protegido?',
+    'guia-r2': 'Con Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos, que piden la contraseña al abrirlo.',
+    'guia-p3': '¿Para qué sirve la contraseña de propietario?',
+    'guia-r3': 'Es la clave de administración que define el estándar de PDF, separada de la de apertura. Si no escribís una, se usa la de apertura, y para abrir el archivo siempre hace falta la primera.',
+    'guia-p4': '¿Puedo quitar la contraseña más adelante?',
+    'guia-r4': 'Sí, con «Desbloquear PDF», siempre que la conozcas.'
   },
   en: {
     'titulo-pagina': 'Password-Protect a PDF Free — Mini Cookies',
@@ -57,7 +74,24 @@ window.i18nPagina = {
     'item1-final': ').',
     'item2': 'AES-256 encryption is used, the current standard for protecting PDFs (compatible with Adobe Reader, Chrome, Edge, Firefox and most modern readers).',
     'error-vacio': 'Enter a password to open the PDF.',
-    'error-proteger': 'Couldn’t protect the PDF'
+    'error-proteger': 'Couldn’t protect the PDF',
+    'guia-titulo': 'How to protect a PDF with a password',
+    'guia-intro': 'A contract, a payslip or a medical report that travels by email or sits in a shared folder should only be opened by whoever has the key. This tool encrypts the PDF with AES-256 and gives you back a copy that asks for a password to open; the original file isn’t modified.',
+    'guia-paso-1': 'Drag the PDF onto the upload area or click to choose it. You’ll see its thumbnail and the number of pages.',
+    'guia-paso-2': 'Type the “Password to open the PDF”. It is required: without it, the button warns that it’s missing.',
+    'guia-paso-3': 'If you like, fill in the “Owner password”. If you leave it empty, the opening password is used.',
+    'guia-paso-4': 'Press “Protect PDF” and download the “protected PDF”. Try opening it before sending it.',
+    'guia-consejo-1': 'Send the password through a different channel than the file (for example, the PDF by email and the key by message).',
+    'guia-consejo-2': 'A long key mixing letters, numbers and symbols holds up better than a common word; you can create it with the site’s password generator and keep it in a password manager.',
+    'guia-consejo-3': 'Keep an unprotected copy somewhere safe: the encryption of the new copy can’t be undone without the key.',
+    'guia-p1': 'What if I forget the password?',
+    'guia-r1': 'There is no way to recover the content: the tool stores no key and AES-256 encryption can’t be bypassed.',
+    'guia-p2': 'Which programs open the protected PDF?',
+    'guia-r2': 'Adobe Reader, Chrome, Edge, Firefox and most modern readers, which ask for the password when opening it.',
+    'guia-p3': 'What is the owner password for?',
+    'guia-r3': 'It’s the administration key defined by the PDF standard, separate from the opening one. If you don’t type one, the opening password is used, and the first one is always needed to open the file.',
+    'guia-p4': 'Can I remove the password later?',
+    'guia-r4': 'Yes, with “Unlock PDF”, as long as you know it.'
   }
 };
 </script>
@@ -114,11 +148,46 @@ window.i18nPagina = {
       <li data-i18n="item2">Se usa cifrado AES-256, el estándar actual de protección de PDF (compatible con Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos).</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo proteger un PDF con contraseña</h2>
+    <p data-i18n="guia-intro">Un contrato, una nómina o un informe médico que viaja por correo o queda en una carpeta compartida conviene que solo lo abra quien tenga la clave. Esta herramienta cifra el PDF con AES-256 y te devuelve una copia que pide contraseña para abrirse; el archivo original no se modifica.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver su miniatura y la cantidad de páginas.</li>
+      <li data-i18n="guia-paso-2">Escribí la «Contraseña para abrir el PDF». Es obligatoria: sin ella el botón avisa que falta.</li>
+      <li data-i18n="guia-paso-3">Si querés, completá la «Contraseña de propietario». Si la dejás vacía se usa la misma de apertura.</li>
+      <li data-i18n="guia-paso-4">Pulsá «Proteger PDF» y descargá el «PDF protegido». Probalo abriéndolo antes de enviarlo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Mandá la contraseña por un medio distinto al del archivo (por ejemplo, el PDF por correo y la clave por mensaje).</li>
+      <li data-i18n="guia-consejo-2">Una clave larga con mezcla de letras, números y símbolos resiste mejor que una palabra común; podés generarla con el generador de contraseñas del sitio y guardarla en un gestor.</li>
+      <li data-i18n="guia-consejo-3">Conservá una copia sin protección en un lugar seguro: el cifrado de la copia nueva no se puede deshacer sin la clave.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa si olvido la contraseña?</summary>
+      <p data-i18n="guia-r1">No hay forma de recuperar el contenido: la herramienta no guarda ninguna clave y el cifrado AES-256 no se puede saltear.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Con qué programas se abre el PDF protegido?</summary>
+      <p data-i18n="guia-r2">Con Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos, que piden la contraseña al abrirlo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Para qué sirve la contraseña de propietario?</summary>
+      <p data-i18n="guia-r3">Es la clave de administración que define el estándar de PDF, separada de la de apertura. Si no escribís una, se usa la de apertura, y para abrir el archivo siempre hace falta la primera.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puedo quitar la contraseña más adelante?</summary>
+      <p data-i18n="guia-r4">Sí, con «Desbloquear PDF», siempre que la conozcas.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/vendor.js"></script>

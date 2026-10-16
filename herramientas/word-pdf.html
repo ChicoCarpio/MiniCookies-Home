@@ -50,10 +50,26 @@ window.i18nPagina = {
     'boton-a-word-procesando': 'Convirtiendo...',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar Word',
+    'no-agregados': 'No se pudieron agregar (solo se aceptan archivos .docx; un .doc antiguo hay que guardarlo antes como .docx):',
     'advertencias-texto': '⚠️ {n} advertencia(s) — algunos elementos pueden no verse exactamente igual que en Word.',
     'error-vista-previa': 'No se pudo generar la vista previa',
     'error-generar-doc': 'No se pudo generar el documento',
-    'nombre-defecto': 'documento'
+    'nombre-defecto': 'documento',
+    'guia-titulo': 'Cómo convertir entre Word y PDF',
+    'guia-intro': 'Un Word (.docx) conviene mandarlo como PDF para que se vea igual en cualquier dispositivo, y un PDF hay que pasarlo a Word cuando necesitás corregirlo o reutilizar su contenido. Esta página hace las dos conversiones; elegí el sentido con el selector de arriba y mirá abajo los pasos de cada una.',
+    'guia-paso-1': 'Word → PDF: elegí «Word → PDF», arrastrá uno o varios archivos .docx y pulsá «Generar vista previa» para ver el documento con su formato.',
+    'guia-paso-2': 'Si la vista previa se ve bien, pulsá «Descargar PDF». Con un documento baja un PDF con su mismo nombre; con varios, un .zip con un PDF por documento.',
+    'guia-paso-3': 'PDF → Word: elegí «PDF → Word» y arrastrá uno o varios PDF. Con un solo archivo podés cambiar el «Nombre del archivo» antes de convertir.',
+    'guia-paso-4': 'Pulsá «Convertir a Word» y descargá el resultado: un .docx, o un .zip con un .docx por cada PDF si elegiste varios.',
+    'guia-consejo-1': 'En PDF → Word, el .docx conserva estilos de letra, párrafos, imágenes y saltos de página, pero las tablas salen como texto separado por tabulaciones: si el PDF tiene tablas importantes, rehacelas en Word.',
+    'guia-consejo-2': 'Un PDF escaneado no tiene texto real: cada página entra al Word como imagen y no se puede editar. Para obtener texto editable de un escaneo, usá antes la herramienta de OCR.',
+    'guia-consejo-3': 'Si aparece el aviso con advertencias en Word → PDF, hay elementos que pueden verse distinto a como los muestra Word; comparalos en la vista previa antes de descargar.',
+    'guia-p1': '¿Acepta archivos .doc antiguos?',
+    'guia-r1': 'No, solo .docx. Abrí el .doc en Word y guardalo como .docx antes de subirlo.',
+    'guia-p2': '¿Puedo convertir varios archivos a la vez?',
+    'guia-r2': 'Sí, en los dos sentidos. Los resultados vienen en un .zip y se muestra un resumen de cuáles se convirtieron.',
+    'guia-p3': '¿Cómo se llama el archivo que descargo?',
+    'guia-r3': 'En Word → PDF usa el nombre del documento original. En PDF → Word con un solo archivo usa lo que escribas en «Nombre del archivo»; con varios, el nombre de cada PDF.'
   },
   en: {
     'titulo-pagina': 'Convert Word and PDF Free — Mini Cookies',
@@ -78,10 +94,26 @@ window.i18nPagina = {
     'boton-a-word-procesando': 'Converting...',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download Word',
+    'no-agregados': 'Couldn’t add (only .docx files are accepted; an old .doc has to be saved as .docx first):',
     'advertencias-texto': '⚠️ {n} warning(s) — some elements may not look exactly like they do in Word.',
     'error-vista-previa': 'Couldn’t generate the preview',
     'error-generar-doc': 'Couldn’t generate the document',
-    'nombre-defecto': 'document'
+    'nombre-defecto': 'document',
+    'guia-titulo': 'How to convert between Word and PDF',
+    'guia-intro': 'A Word document (.docx) is best sent as a PDF so it looks the same on any device, and a PDF needs to become a Word file when you must correct it or reuse its content. This page does both conversions; choose the direction with the selector above and see the steps for each below.',
+    'guia-paso-1': 'Word → PDF: choose “Word → PDF”, drag one or more .docx files and press “Generate preview” to see the document with its formatting.',
+    'guia-paso-2': 'If the preview looks right, press “Download PDF”. With one document you get a PDF with the same name; with several, a .zip with one PDF per document.',
+    'guia-paso-3': 'PDF → Word: choose “PDF → Word” and drag one or more PDFs. With a single file you can change the “File name” before converting.',
+    'guia-paso-4': 'Press “Convert to Word” and download the result: a .docx, or a .zip with one .docx per PDF if you chose several.',
+    'guia-consejo-1': 'In PDF → Word, the .docx keeps text styles, paragraphs, images and page breaks, but tables come out as tab-separated text: if the PDF has important tables, rebuild them in Word.',
+    'guia-consejo-2': 'A scanned PDF has no real text: each page goes into the Word file as an image and can’t be edited. To get editable text from a scan, use the OCR tool first.',
+    'guia-consejo-3': 'If the warnings notice appears in Word → PDF, some elements may look different from how Word shows them; compare them in the preview before downloading.',
+    'guia-p1': 'Does it accept old .doc files?',
+    'guia-r1': 'No, only .docx. Open the .doc in Word and save it as .docx before adding it.',
+    'guia-p2': 'Can I convert several files at once?',
+    'guia-r2': 'Yes, in both directions. The results come in a .zip and a summary shows which ones were converted.',
+    'guia-p3': 'What is the downloaded file called?',
+    'guia-r3': 'In Word → PDF it uses the original document’s name. In PDF → Word with a single file it uses what you type in “File name”; with several, each PDF’s own name.'
   }
 };
 </script>
@@ -157,11 +189,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir entre Word y PDF</h2>
+    <p data-i18n="guia-intro">Un Word (.docx) conviene mandarlo como PDF para que se vea igual en cualquier dispositivo, y un PDF hay que pasarlo a Word cuando necesitás corregirlo o reutilizar su contenido. Esta página hace las dos conversiones; elegí el sentido con el selector de arriba y mirá abajo los pasos de cada una.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Word → PDF: elegí «Word → PDF», arrastrá uno o varios archivos .docx y pulsá «Generar vista previa» para ver el documento con su formato.</li>
+      <li data-i18n="guia-paso-2">Si la vista previa se ve bien, pulsá «Descargar PDF». Con un documento baja un PDF con su mismo nombre; con varios, un .zip con un PDF por documento.</li>
+      <li data-i18n="guia-paso-3">PDF → Word: elegí «PDF → Word» y arrastrá uno o varios PDF. Con un solo archivo podés cambiar el «Nombre del archivo» antes de convertir.</li>
+      <li data-i18n="guia-paso-4">Pulsá «Convertir a Word» y descargá el resultado: un .docx, o un .zip con un .docx por cada PDF si elegiste varios.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">En PDF → Word, el .docx conserva estilos de letra, párrafos, imágenes y saltos de página, pero las tablas salen como texto separado por tabulaciones: si el PDF tiene tablas importantes, rehacelas en Word.</li>
+      <li data-i18n="guia-consejo-2">Un PDF escaneado no tiene texto real: cada página entra al Word como imagen y no se puede editar. Para obtener texto editable de un escaneo, usá antes la herramienta de OCR.</li>
+      <li data-i18n="guia-consejo-3">Si aparece el aviso con advertencias en Word → PDF, hay elementos que pueden verse distinto a como los muestra Word; comparalos en la vista previa antes de descargar.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Acepta archivos .doc antiguos?</summary>
+      <p data-i18n="guia-r1">No, solo .docx. Abrí el .doc en Word y guardalo como .docx antes de subirlo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo convertir varios archivos a la vez?</summary>
+      <p data-i18n="guia-r2">Sí, en los dos sentidos. Los resultados vienen en un .zip y se muestra un resumen de cuáles se convirtieron.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Cómo se llama el archivo que descargo?</summary>
+      <p data-i18n="guia-r3">En Word → PDF usa el nombre del documento original. En PDF → Word con un solo archivo usa lo que escribas en «Nombre del archivo»; con varios, el nombre de cada PDF.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
@@ -213,8 +276,15 @@ function mostrarArchivosWord(archivos) {
 }
 
 function elegirArchivosWord(listaFileList) {
-  const archivos = [...listaFileList].filter(f => f.name.toLowerCase().endsWith('.docx'));
+  const todos = [...listaFileList];
+  const archivos = todos.filter(f => f.name.toLowerCase().endsWith('.docx'));
   if (archivos.length) mostrarArchivosWord(archivos);
+  // Lo que no es .docx (un .doc antiguo, por ejemplo) no se agrega: se avisa cuáles quedaron afuera.
+  const omitidos = todos.filter(f => !archivos.includes(f)).map(f => f.name);
+  if (omitidos.length) {
+    advertencias.textContent = t('no-agregados') + ' ' + omitidos.join(', ');
+    advertencias.style.display = 'block';
+  }
 }
 
 conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);

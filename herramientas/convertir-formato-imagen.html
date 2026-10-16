@@ -32,11 +32,31 @@ window.i18nPagina = {
     'campo-formato': 'Formato de salida',
     'campo-calidad-a': 'Calidad: ',
     'boton-convertir': 'Convertir imagen',
+    'estado-convirtiendo': 'Convirtiendo...',
+    'error-convertir': 'No se pudo convertir la imagen: ',
+    'error-sin-formato': 'El navegador no pudo generar ese formato.',
     'aviso-transparencia': '⚠️ JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco.',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar imagen',
     'titulo-pagina': 'Convertir formato de imagen gratis — Mini Cookies',
     'meta-descripcion': 'Convertí una imagen entre PNG, JPG y WebP, gratis y sin subirla a ningún servidor.',
+    'guia-titulo': 'Cómo convertir una imagen entre PNG, JPG y WebP',
+    'guia-intro': 'Cada formato de imagen tiene su uso. PNG conserva todo el detalle y la transparencia, ideal para logos y capturas. JPG pesa poco y lo abre cualquier programa, ideal para fotos. WebP suele lograr archivos aún más livianos y es habitual en sitios web. Esta herramienta toma una imagen en cualquiera de esos tres formatos y la guarda en el que elijas.',
+    'guia-paso-1': 'Arrastrá una imagen PNG, JPG o WebP a la zona de carga, o hacé clic para elegirla. Aparece una vista previa.',
+    'guia-paso-2': 'En «Formato de salida» tocá PNG, JPG o WebP. Con JPG y WebP aparece el deslizador de «Calidad».',
+    'guia-paso-3': 'Si elegiste JPG o WebP, ajustá la calidad (de 10 a 100; viene en 85). Un valor más alto conserva más detalle y genera un archivo más pesado.',
+    'guia-paso-4': 'Pulsá «Convertir imagen» y descargá el archivo, que se llama imagen-convertida con la extensión del formato elegido.',
+    'guia-consejo-1': 'Para fotos que vas a enviar o publicar, JPG o WebP con calidad entre 75 y 90 suele verse igual que el original con mucho menos peso.',
+    'guia-consejo-2': 'Para logos, capturas de pantalla, gráficos o cualquier imagen con texto y bordes nítidos, PNG evita las manchas que JPG deja alrededor de las letras.',
+    'guia-consejo-3': 'Convertir de un formato con pérdida (JPG o WebP) a PNG no recupera el detalle perdido: el PNG saldrá más pesado y con la misma calidad que el original.',
+    'guia-p1': '¿Qué pasa con la transparencia al convertir a JPG?',
+    'guia-r1': 'JPG no admite transparencia, así que las zonas transparentes se rellenan de blanco. La herramienta muestra un aviso cuando elegís ese formato. PNG y WebP sí la conservan.',
+    'guia-p2': '¿Por qué PNG no tiene control de calidad?',
+    'guia-r2': 'Porque PNG guarda la imagen sin pérdida de detalle: no hay una calidad que ajustar, y el peso depende del contenido de la imagen.',
+    'guia-p3': '¿Cambia el tamaño en píxeles?',
+    'guia-r3': 'No, la imagen conserva sus medidas. Para cambiarlas, usá Redimensionar imagen.',
+    'guia-p4': '¿Puedo convertir varias imágenes a la vez?',
+    'guia-r4': 'No, se convierte una imagen por vez.',
   },
   en: {
     'hero-titulo': 'Convert image format',
@@ -44,11 +64,31 @@ window.i18nPagina = {
     'campo-formato': 'Output format',
     'campo-calidad-a': 'Quality: ',
     'boton-convertir': 'Convert image',
+    'estado-convirtiendo': 'Converting...',
+    'error-convertir': 'The image could not be converted: ',
+    'error-sin-formato': 'The browser could not generate that format.',
     'aviso-transparencia': '⚠️ JPG has no transparency — a transparent background will be filled with white.',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download image',
     'titulo-pagina': 'Convert image format, free — Mini Cookies',
     'meta-descripcion': 'Convert an image between PNG, JPG and WebP — free, and nothing is uploaded to a server.',
+    'guia-titulo': 'How to convert an image between PNG, JPG and WebP',
+    'guia-intro': 'Each image format has its use. PNG keeps all the detail and transparency, ideal for logos and screenshots. JPG is light and opens in any program, ideal for photos. WebP often produces even lighter files and is common on websites. This tool takes an image in any of those three formats and saves it in the one you choose.',
+    'guia-paso-1': 'Drag a PNG, JPG or WebP image onto the upload area, or click to choose it. A preview appears.',
+    'guia-paso-2': 'Under “Output format”, click PNG, JPG or WebP. With JPG and WebP the “Quality” slider appears.',
+    'guia-paso-3': 'If you chose JPG or WebP, adjust the quality (from 10 to 100; it starts at 85). A higher value keeps more detail and makes a heavier file.',
+    'guia-paso-4': 'Press “Convert image” and download the file, which is named imagen-convertida with the extension of the chosen format.',
+    'guia-consejo-1': 'For photos you’re going to send or publish, JPG or WebP at a quality between 75 and 90 usually looks the same as the original at a much lower size.',
+    'guia-consejo-2': 'For logos, screenshots, charts or any image with text and sharp edges, PNG avoids the blotches JPG leaves around letters.',
+    'guia-consejo-3': 'Converting from a lossy format (JPG or WebP) to PNG doesn’t recover lost detail: the PNG will be heavier and have the same quality as the original.',
+    'guia-p1': 'What happens to transparency when converting to JPG?',
+    'guia-r1': 'JPG doesn’t support transparency, so transparent areas are filled with white. The tool shows a warning when you pick that format. PNG and WebP do keep it.',
+    'guia-p2': 'Why does PNG have no quality control?',
+    'guia-r2': 'Because PNG stores the image without losing detail: there is no quality to adjust, and the file size depends on the image’s content.',
+    'guia-p3': 'Does it change the size in pixels?',
+    'guia-r3': 'No, the image keeps its dimensions. To change them, use Resize an image.',
+    'guia-p4': 'Can I convert several images at once?',
+    'guia-r4': 'No, one image is converted at a time.',
   }
 };
 </script>
@@ -102,11 +142,46 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir una imagen entre PNG, JPG y WebP</h2>
+    <p data-i18n="guia-intro">Cada formato de imagen tiene su uso. PNG conserva todo el detalle y la transparencia, ideal para logos y capturas. JPG pesa poco y lo abre cualquier programa, ideal para fotos. WebP suele lograr archivos aún más livianos y es habitual en sitios web. Esta herramienta toma una imagen en cualquiera de esos tres formatos y la guarda en el que elijas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá una imagen PNG, JPG o WebP a la zona de carga, o hacé clic para elegirla. Aparece una vista previa.</li>
+      <li data-i18n="guia-paso-2">En «Formato de salida» tocá PNG, JPG o WebP. Con JPG y WebP aparece el deslizador de «Calidad».</li>
+      <li data-i18n="guia-paso-3">Si elegiste JPG o WebP, ajustá la calidad (de 10 a 100; viene en 85). Un valor más alto conserva más detalle y genera un archivo más pesado.</li>
+      <li data-i18n="guia-paso-4">Pulsá «Convertir imagen» y descargá el archivo, que se llama imagen-convertida con la extensión del formato elegido.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para fotos que vas a enviar o publicar, JPG o WebP con calidad entre 75 y 90 suele verse igual que el original con mucho menos peso.</li>
+      <li data-i18n="guia-consejo-2">Para logos, capturas de pantalla, gráficos o cualquier imagen con texto y bordes nítidos, PNG evita las manchas que JPG deja alrededor de las letras.</li>
+      <li data-i18n="guia-consejo-3">Convertir de un formato con pérdida (JPG o WebP) a PNG no recupera el detalle perdido: el PNG saldrá más pesado y con la misma calidad que el original.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa con la transparencia al convertir a JPG?</summary>
+      <p data-i18n="guia-r1">JPG no admite transparencia, así que las zonas transparentes se rellenan de blanco. La herramienta muestra un aviso cuando elegís ese formato. PNG y WebP sí la conservan.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Por qué PNG no tiene control de calidad?</summary>
+      <p data-i18n="guia-r2">Porque PNG guarda la imagen sin pérdida de detalle: no hay una calidad que ajustar, y el peso depende del contenido de la imagen.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Cambia el tamaño en píxeles?</summary>
+      <p data-i18n="guia-r3">No, la imagen conserva sus medidas. Para cambiarlas, usá Redimensionar imagen.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puedo convertir varias imágenes a la vez?</summary>
+      <p data-i18n="guia-r4">No, se convierte una imagen por vez.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -188,7 +263,7 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
 botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
-  botonConvertir.textContent = 'Convirtiendo...';
+  botonConvertir.textContent = t('estado-convirtiendo');
   try {
     const canvas = document.createElement('canvas');
     canvas.width = imagenActual.naturalWidth;
@@ -204,17 +279,17 @@ botonConvertir.addEventListener('click', async () => {
 
     const calidad = formatoElegido === 'image/png' ? undefined : parseInt(elCalidad.value, 10) / 100;
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formatoElegido, calidad));
-    if (!blob) throw new Error('El navegador no pudo generar ese formato.');
+    if (!blob) throw new Error(t('error-sin-formato'));
 
     const extension = EXTENSIONES[formatoElegido];
     enlaceDescarga.href = URL.createObjectURL(blob);
     enlaceDescarga.download = `imagen-convertida.${extension}`;
     resultado.classList.add('visible');
   } catch (error) {
-    alert('No se pudo convertir la imagen: ' + error.message);
+    alert(t('error-convertir') + error.message);
   } finally {
     botonConvertir.disabled = false;
-    botonConvertir.textContent = 'Convertir imagen';
+    botonConvertir.textContent = t('boton-convertir');
   }
 });
 </script>

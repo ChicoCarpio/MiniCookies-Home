@@ -25,6 +25,21 @@ window.i18nPagina = {
     'error-largo': '❌ El texto es demasiado largo para un código QR. Probá acortarlo (por ejemplo, con un acortador de links).',
     'titulo-pagina': 'Generador de códigos QR gratis — Mini Cookies',
     'meta-descripcion': 'Generá un código QR a partir de un link o texto, gratis y sin enviar nada a ningún servidor.',
+    'guia-titulo': 'Cómo crear un código QR a partir de un link o un texto',
+    'guia-intro': 'Un código QR convierte una dirección web o un texto corto en un dibujo que cualquier celular lee con la cámara. Es útil para llevar a alguien a tu sitio desde un cartel, una tarjeta o una presentación, para compartir una dirección sin dictarla, o para pasar un texto breve a otro dispositivo. Esta herramienta genera el QR en el momento y te deja descargarlo como imagen PNG.',
+    'guia-paso-1': 'Escribí o pegá el link o el texto en el campo «Texto o URL». Para un sitio web conviene incluir la dirección completa, con https://.',
+    'guia-paso-2': 'Elegí el «Tamaño»: Pequeño (200px), Mediano (300px) o Grande (500px).',
+    'guia-paso-3': 'Pulsá «Generar QR» o la tecla Enter. El código aparece debajo, rodeado de un margen blanco.',
+    'guia-paso-4': 'Probalo con la cámara de tu celular y, si lee bien, usá «Descargar QR como imagen» para guardar el archivo codigo-qr.png.',
+    'guia-consejo-1': 'Para imprimir, elegí el tamaño Grande: tiene más píxeles y se imprime más nítido. En un cartel, dejá el código lo bastante grande como para leerlo desde la distancia a la que se va a escanear.',
+    'guia-consejo-2': 'Al diseñar el material, no recortes el margen blanco ni pongas el código sobre un fondo con dibujos: el lector necesita buen contraste y esa zona libre alrededor para encontrarlo.',
+    'guia-consejo-3': 'Un texto más corto produce un QR más simple, con módulos más grandes y más fácil de leer. Si tu link es larguísimo, acortalo antes.',
+    'guia-p1': '¿Por qué dice que el texto es demasiado largo?',
+    'guia-r1': 'Un código QR tiene un límite de datos. Si lo superás, la herramienta muestra un aviso en vez de generar algo ilegible; acortá el texto o usá un acortador de links.',
+    'guia-p2': '¿El QR vence o deja de funcionar?',
+    'guia-r2': 'No. El código contiene el texto en sí, no depende de ningún servicio. Funciona mientras la dirección a la que apunta siga existiendo.',
+    'guia-p3': '¿Puedo cambiar el contenido después de imprimirlo?',
+    'guia-r3': 'No: el contenido está dentro del dibujo. Si necesitás poder cambiar el destino más adelante, generá el QR con un link que vos controles y que luego puedas redirigir.',
   },
   en: {
     'hero-titulo': 'QR code generator',
@@ -40,6 +55,21 @@ window.i18nPagina = {
     'error-largo': '❌ That text is too long for a QR code. Try shortening it (with a link shortener, for example).',
     'titulo-pagina': 'Free QR code generator — Mini Cookies',
     'meta-descripcion': 'Generate a QR code from a link or a piece of text — free, and nothing is sent to a server.',
+    'guia-titulo': 'How to create a QR code from a link or text',
+    'guia-intro': 'A QR code turns a web address or a short text into a pattern that any phone can read with its camera. It is useful for sending someone to your site from a poster, a card or a presentation, for sharing an address without dictating it, or for passing a short text to another device. This tool generates the QR on the spot and lets you download it as a PNG image.',
+    'guia-paso-1': 'Type or paste the link or text into the “Text or URL” field. For a website, it’s best to include the full address, starting with https://.',
+    'guia-paso-2': 'Choose the “Size”: Small (200px), Medium (300px) or Large (500px).',
+    'guia-paso-3': 'Press “Generate QR” or the Enter key. The code appears below, surrounded by a white margin.',
+    'guia-paso-4': 'Try it with your phone’s camera and, if it reads fine, use “Download the QR as an image” to save the codigo-qr.png file.',
+    'guia-consejo-1': 'For printing, pick the Large size: it has more pixels and prints sharper. On a poster, make the code big enough to be read from the distance it will be scanned at.',
+    'guia-consejo-2': 'When designing your material, don’t crop the white margin or place the code over a busy background: the reader needs good contrast and that clear area around it to find the code.',
+    'guia-consejo-3': 'Shorter text produces a simpler QR with larger modules that is easier to read. If your link is very long, shorten it first.',
+    'guia-p1': 'Why does it say the text is too long?',
+    'guia-r1': 'A QR code has a data limit. If you go over it, the tool shows a warning instead of producing something unreadable; shorten the text or use a link shortener.',
+    'guia-p2': 'Does the QR expire or stop working?',
+    'guia-r2': 'No. The code contains the text itself and doesn’t depend on any service. It works as long as the address it points to still exists.',
+    'guia-p3': 'Can I change the content after printing it?',
+    'guia-r3': 'No: the content is inside the pattern. If you need to change the destination later, generate the QR with a link you control and can redirect afterwards.',
   }
 };
 </script>
@@ -91,11 +121,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo crear un código QR a partir de un link o un texto</h2>
+    <p data-i18n="guia-intro">Un código QR convierte una dirección web o un texto corto en un dibujo que cualquier celular lee con la cámara. Es útil para llevar a alguien a tu sitio desde un cartel, una tarjeta o una presentación, para compartir una dirección sin dictarla, o para pasar un texto breve a otro dispositivo. Esta herramienta genera el QR en el momento y te deja descargarlo como imagen PNG.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Escribí o pegá el link o el texto en el campo «Texto o URL». Para un sitio web conviene incluir la dirección completa, con https://.</li>
+      <li data-i18n="guia-paso-2">Elegí el «Tamaño»: Pequeño (200px), Mediano (300px) o Grande (500px).</li>
+      <li data-i18n="guia-paso-3">Pulsá «Generar QR» o la tecla Enter. El código aparece debajo, rodeado de un margen blanco.</li>
+      <li data-i18n="guia-paso-4">Probalo con la cámara de tu celular y, si lee bien, usá «Descargar QR como imagen» para guardar el archivo codigo-qr.png.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para imprimir, elegí el tamaño Grande: tiene más píxeles y se imprime más nítido. En un cartel, dejá el código lo bastante grande como para leerlo desde la distancia a la que se va a escanear.</li>
+      <li data-i18n="guia-consejo-2">Al diseñar el material, no recortes el margen blanco ni pongas el código sobre un fondo con dibujos: el lector necesita buen contraste y esa zona libre alrededor para encontrarlo.</li>
+      <li data-i18n="guia-consejo-3">Un texto más corto produce un QR más simple, con módulos más grandes y más fácil de leer. Si tu link es larguísimo, acortalo antes.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Por qué dice que el texto es demasiado largo?</summary>
+      <p data-i18n="guia-r1">Un código QR tiene un límite de datos. Si lo superás, la herramienta muestra un aviso en vez de generar algo ilegible; acortá el texto o usá un acortador de links.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿El QR vence o deja de funcionar?</summary>
+      <p data-i18n="guia-r2">No. El código contiene el texto en sí, no depende de ningún servicio. Funciona mientras la dirección a la que apunta siga existiendo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo cambiar el contenido después de imprimirlo?</summary>
+      <p data-i18n="guia-r3">No: el contenido está dentro del dibujo. Si necesitás poder cambiar el destino más adelante, generá el QR con un link que vos controles y que luego puedas redirigir.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../vendor/qrcodejs/1.0.0/qrcode.min.js"></script>

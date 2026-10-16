@@ -51,7 +51,23 @@ window.i18nPagina = {
     'progreso-reconociendo': 'Reconociendo texto de la página {actual} de {total}...',
     'separador-pagina': '\n\n--- Página siguiente ---\n\n',
     'resultado-mensaje': '✅ Listo. Se reconoció el texto de {n} página{s}.',
-    'error-ocr': 'No se pudo hacer OCR'
+    'error-ocr': 'No se pudo hacer OCR',
+    'guia-titulo': 'Cómo hacer OCR a un PDF escaneado o a fotos de documentos',
+    'guia-intro': 'Un PDF escaneado es, en el fondo, una pila de fotos: se ve bien, pero no podés buscar una palabra, copiar un párrafo ni pegar su contenido en otro documento. El OCR (reconocimiento óptico de caracteres) lee esas imágenes y recupera el texto. Esta herramienta te devuelve un PDF con el mismo aspecto que el original pero con una capa de texto invisible, y además un archivo .txt con todo lo reconocido. Sirve para contratos escaneados, apuntes fotografiados o facturas en papel.',
+    'guia-paso-1': 'Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.',
+    'guia-paso-2': 'Dejá activado «Enderezar automáticamente páginas/fotos torcidas» si sacaste fotos con el celular; desactivalo si ya están derechas.',
+    'guia-paso-3': 'Elegí el preprocesamiento: «Contraste automático» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y «Ninguno» conviene si el escaneo ya es nítido y a color.',
+    'guia-paso-4': 'Arrastrá uno o varios PDF e imágenes a la zona de carga. Podés combinarlos y reordenar las miniaturas: el resultado respeta ese orden.',
+    'guia-paso-5': 'Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.',
+    'guia-consejo-1': 'Escaneá a 200–300 ppp y con el texto derecho. Las fotos angostas (menos de 1800 px de ancho) se agrandan antes de leerlas.',
+    'guia-consejo-2': 'Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático» que con blanco y negro puro.',
+    'guia-consejo-3': 'Cada página del PDF resultante se guarda como imagen JPEG con el texto encima, así que el peso puede cambiar y lo que era vectorial en el original deja de serlo. Conservá siempre el archivo original.',
+    'guia-p1': '¿Cuánto tarda?',
+    'guia-r1': 'Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.',
+    'guia-p2': '¿Reconoce letra manuscrita?',
+    'guia-r2': 'No de forma confiable. El motor está pensado para texto impreso; la escritura a mano, el texto borroso o las fotos con sombras fuertes pueden salir con errores o no reconocerse.',
+    'guia-p3': '¿Qué pasa si mi documento mezcla idiomas?',
+    'guia-r3': 'Marcá todos los que aparecen. Se pueden usar a la vez, pero cuantos más elijas más lenta es la lectura, así que marcá solo los necesarios.',
   },
   en: {
     'titulo-pagina': 'OCR for Scanned PDFs and Images Free — Mini Cookies',
@@ -87,7 +103,23 @@ window.i18nPagina = {
     'progreso-reconociendo': 'Recognizing text on page {actual} of {total}...',
     'separador-pagina': '\n\n--- Next page ---\n\n',
     'resultado-mensaje': '✅ Done. Text was recognized on {n} page{s}.',
-    'error-ocr': 'Couldn’t run OCR'
+    'error-ocr': 'Couldn’t run OCR',
+    'guia-titulo': 'How to run OCR on a scanned PDF or on photos of documents',
+    'guia-intro': 'A scanned PDF is really a stack of pictures: it looks fine, but you can’t search for a word, copy a paragraph or paste its content into another document. OCR (optical character recognition) reads those images and recovers the text. This tool gives you back a PDF that looks like the original but carries an invisible text layer, plus a .txt file with everything it recognized. It works for scanned contracts, photographed notes or paper invoices.',
+    'guia-paso-1': 'Tick the languages that appear in your document under “Languages to recognize”. Spanish and English are ticked by default; add another only if you need it, because each language adds a download the first time.',
+    'guia-paso-2': 'Leave “Automatically straighten tilted pages/photos” on if you took photos with your phone; turn it off if they’re already straight.',
+    'guia-paso-3': 'Choose the preprocessing: “Automatic contrast” works well almost every time, “Pure black and white (Otsu)” helps with very clean scans, and “None” is best when the scan is already sharp and in color.',
+    'guia-paso-4': 'Drag one or more PDFs and images onto the upload area. You can mix them and reorder the thumbnails: the result follows that order.',
+    'guia-paso-5': 'Press “Recognize text (OCR)”, wait for the progress bar to finish and download the PDF with searchable text or the .txt.',
+    'guia-consejo-1': 'Scan at 200–300 dpi with the text upright. Narrow photos (under 1800 px wide) are enlarged before being read.',
+    'guia-consejo-2': 'If the reading has mistakes, try a different preprocessing: a photo with shadows usually reads better with “Automatic contrast” than with pure black and white.',
+    'guia-consejo-3': 'Each page of the resulting PDF is stored as a JPEG image with the text on top, so the file size may change and anything that was vector in the original no longer is. Always keep the original file.',
+    'guia-p1': 'How long does it take?',
+    'guia-r1': 'It depends on the number of pages and languages. Pages are recognized one at a time, and the first run takes longer because the engine and each language’s data have to load.',
+    'guia-p2': 'Does it recognize handwriting?',
+    'guia-r2': 'Not reliably. The engine is designed for printed text; handwriting, blurry text or photos with strong shadows may come out with errors or not be recognized.',
+    'guia-p3': 'What if my document mixes languages?',
+    'guia-r3': 'Tick all the ones that appear. They can be used together, but the more you pick the slower the reading gets, so tick only the ones you need.',
   }
 };
 </script>
@@ -166,11 +198,43 @@ window.i18nPagina = {
     <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <p style="color:var(--texto-suave);" data-i18n="limitaciones-texto">El resultado se ve igual que el original (salvo si corregís la inclinación), pero el texto queda seleccionable y buscable — también podés descargar solo el texto reconocido como .txt. El OCR es más lento cuanto más páginas/imágenes e idiomas elijas, y funciona mejor con escaneos nítidos y derechos — texto borroso, manuscrito o una foto con sombras fuertes puede reconocerse mal o no reconocerse. El enderezado automático corrige inclinaciones chicas (hasta unos 9°); si tu documento ya viene bien derecho o querés conservarlo exactamente como está, podés destildar esa casilla. Sobre el preprocesamiento: "Contraste automático" funciona bien en la mayoría de los casos; "Blanco y negro puro (Otsu)" puede dar mejores resultados en escaneos muy limpios y parejos, pero en fotos con sombras irregulares o texto con resaltador de color puede perder información — si tu escaneo ya es nítido y a color, probá "Ninguno".</p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo hacer OCR a un PDF escaneado o a fotos de documentos</h2>
+    <p data-i18n="guia-intro">Un PDF escaneado es, en el fondo, una pila de fotos: se ve bien, pero no podés buscar una palabra, copiar un párrafo ni pegar su contenido en otro documento. El OCR (reconocimiento óptico de caracteres) lee esas imágenes y recupera el texto. Esta herramienta te devuelve un PDF con el mismo aspecto que el original pero con una capa de texto invisible, y además un archivo .txt con todo lo reconocido. Sirve para contratos escaneados, apuntes fotografiados o facturas en papel.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.</li>
+      <li data-i18n="guia-paso-2">Dejá activado «Enderezar automáticamente páginas/fotos torcidas» si sacaste fotos con el celular; desactivalo si ya están derechas.</li>
+      <li data-i18n="guia-paso-3">Elegí el preprocesamiento: «Contraste automático» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y «Ninguno» conviene si el escaneo ya es nítido y a color.</li>
+      <li data-i18n="guia-paso-4">Arrastrá uno o varios PDF e imágenes a la zona de carga. Podés combinarlos y reordenar las miniaturas: el resultado respeta ese orden.</li>
+      <li data-i18n="guia-paso-5">Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Escaneá a 200–300 ppp y con el texto derecho. Las fotos angostas (menos de 1800 px de ancho) se agrandan antes de leerlas.</li>
+      <li data-i18n="guia-consejo-2">Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático» que con blanco y negro puro.</li>
+      <li data-i18n="guia-consejo-3">Cada página del PDF resultante se guarda como imagen JPEG con el texto encima, así que el peso puede cambiar y lo que era vectorial en el original deja de serlo. Conservá siempre el archivo original.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuánto tarda?</summary>
+      <p data-i18n="guia-r1">Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Reconoce letra manuscrita?</summary>
+      <p data-i18n="guia-r2">No de forma confiable. El motor está pensado para texto impreso; la escritura a mano, el texto borroso o las fotos con sombras fuertes pueden salir con errores o no reconocerse.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué pasa si mi documento mezcla idiomas?</summary>
+      <p data-i18n="guia-r3">Marcá todos los que aparecen. Se pueden usar a la vez, pero cuantos más elijas más lenta es la lectura, así que marcá solo los necesarios.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
   <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
-  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
