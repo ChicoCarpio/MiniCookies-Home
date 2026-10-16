@@ -22,7 +22,7 @@ export const SITIO_PRINCIPAL = 'https://www.minicookies.net';
 export const SITIO_SEGURO = 'https://seguro.minicookies.net';
 
 // Herramientas que viven SOLO en el sitio seguro (nombre de archivo sin .html).
-export const SEGURAS = ['administrador-contrasenas', 'enviar-archivos-qr'];
+export const SEGURAS = ['administrador-contrasenas', 'enviar-archivos-qr', 'tachar-pdf'];
 
 export const DESTINO = process.argv.includes('--destino=seguro') ? 'seguro' : 'principal';
 export const ES_SEGURO = DESTINO === 'seguro';

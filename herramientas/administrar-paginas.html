@@ -71,6 +71,7 @@ window.i18nPagina = {
 
     <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="generando-miniaturas">Generando miniaturas...</p>
 
+    <div id="barraHistorial"></div>
     <div id="envoltorioSelectorVista"></div>
     <div class="contenedor-miniaturas" id="gridMiniaturas"></div>
 
@@ -97,6 +98,7 @@ window.i18nPagina = {
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/historial.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 document.getElementById('envoltorioSelectorVista').appendChild(
@@ -118,6 +120,20 @@ let ordenPaginas = []; // índices 0-based en el orden actual (lo que sobrevive 
 let ordenOriginal = [];
 let archivoActual = null; // para "Restaurar" (entradaArchivo.files está vacío si el PDF se arrastró)
 let cargaActual = 0;      // si se elige otro PDF mientras se generan miniaturas, la carga vieja se descarta
+let tarjetas = new Map(); // índice original → su miniatura (las quitadas se guardan acá para poder deshacer)
+
+// Deshacer y rehacer (assets/js/historial.js): el estado es el orden de las páginas que quedan.
+function ponerOrden(ids) {
+  ordenPaginas = ids.map(Number);
+  gridMiniaturas.replaceChildren(...ordenPaginas.map((i) => tarjetas.get(i)));
+  resultado.classList.remove('visible');
+}
+const historial = Historial.conectarLista({
+  donde: document.getElementById('barraHistorial'),
+  capturar: () => ordenPaginas,
+  restaurar: ponerOrden,
+  activo: () => ordenOriginal.length > 0,
+});
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, (archivos) => {
   const archivo = archivos.find(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
@@ -130,6 +146,8 @@ async function cargarPdf(archivo) {
   resultado.classList.remove('visible');
   controles.style.display = 'none';
   gridMiniaturas.innerHTML = '';
+  tarjetas = new Map();
+  ordenOriginal = [];
   cargando.style.display = 'block';
 
   try {
@@ -153,6 +171,7 @@ async function cargarPdf(archivo) {
 
     ordenOriginal = [...ordenPaginas];
     controles.style.display = 'flex';
+    historial.reiniciar();
   } catch (error) {
     if (estaCarga === cargaActual) alert(t('error-abrir') + ': ' + detalleError(error));
   } finally {
@@ -165,6 +184,7 @@ function agregarMiniatura(canvas, indiceOriginal) {
   tarjeta.className = 'miniatura-pagina';
   tarjeta.draggable = true;
   tarjeta.dataset.indiceOriginal = indiceOriginal;
+  tarjetas.set(indiceOriginal, tarjeta);
 
   tarjeta.appendChild(canvas);
 
@@ -202,8 +222,10 @@ function sincronizarOrdenDesdeDOM() {
 
 habilitarReordenTactil(gridMiniaturas, '.miniatura-pagina', sincronizarOrdenDesdeDOM);
 
-botonRestaurar.addEventListener('click', async () => {
-  if (archivoActual) cargarPdf(archivoActual);
+// Vuelve al orden y a las páginas del principio sin releer el PDF; se puede deshacer.
+botonRestaurar.addEventListener('click', () => {
+  if (ordenOriginal.length === 0) return;
+  ponerOrden(ordenOriginal);
 });
 
 botonGuardar.addEventListener('click', async () => {

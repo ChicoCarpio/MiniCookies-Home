@@ -495,7 +495,7 @@ window.ProcesarFiltros = (function () {
     // mezcla de intensidad. Sin ninguna de las dos no hace falta copiarla.
     const hayCapas = capasExtra && capasExtra.length > 0;
     const factorIntensidad = ajustes.intensidadFiltro / 100;
-    const base = hayCapas || factorIntensidad < 1 ? copiarCanvas(canvas, scratch ? scratch.base : null) : null;
+    const base = hayCapas || factorIntensidad !== 1 ? copiarCanvas(canvas, scratch ? scratch.base : null) : null;
 
     procesarCanvas(canvas, { ...ajustes, intensidadFiltro: 100 }, scratch, memo);
 
@@ -505,13 +505,17 @@ window.ProcesarFiltros = (function () {
     // dibujar el resultado encima de la base suma opacidad, y las zonas
     // semitransparentes de un PNG/WebP quedaban más opacas en el Editor de
     // color (alfa 128 → 153 con la intensidad en 40%).
-    if (factorIntensidad < 1 && !(window.FiltrosGPU && FiltrosGPU.mezclar(base, canvas, factorIntensidad))) {
+    if (factorIntensidad !== 1 && !(window.FiltrosGPU && FiltrosGPU.mezclar(base, canvas, factorIntensidad))) {
       const original = base.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
       const resultado = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const datos = resultado.data;
       for (let i = 0; i < datos.length; i++) datos[i] = original[i] + (datos[i] - original[i]) * factorIntensidad;
       ctx.putImageData(resultado, 0, 0);
     }
+
+    // LUT (.cube, assets/js/lut-cube.js): un paso más después del filtro, con su propia intensidad (0 a 200 %). No va por la GPU ni se
+    // guarda en la memoria de la vista previa: solo depende del canvas que recibe.
+    if (ajustes.lut && window.LutCube) LutCube.aplicar(canvas, ajustes.lut, (ajustes.intensidadLut === undefined ? 100 : ajustes.intensidadLut) / 100);
 
     if (textura.tipo !== 'ninguno' && textura.orden === 'encima') {
       EfectosTextura.aplicarCompleto(textura.tipo, ctx, undefined, canvas.width, canvas.height, intensidadTextura, textura.opciones);

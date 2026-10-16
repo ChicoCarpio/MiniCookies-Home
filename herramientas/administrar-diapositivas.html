@@ -77,6 +77,7 @@ window.i18nPagina = {
     </div>
 
     <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo la presentación...</p>
+    <div id="barraHistorial"></div>
     <ul class="lista-archivos" id="listaDiapositivas"></ul>
 
     <div class="controles">
@@ -104,6 +105,7 @@ window.i18nPagina = {
 <script src="../assets/js/ooxml-paquete.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/historial.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/ayuda-tip.js"></script>
 <script>
@@ -118,7 +120,16 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let zipActual = null;
 let archivoOriginal = null;
 let diapositivas = []; // [{ rId, etiqueta }]
+let todasLasDiapositivas = new Map(); // rId → { rId, etiqueta }, también las quitadas (para poder deshacer)
 let parser = new DOMParser();
+
+// Deshacer y rehacer (assets/js/historial.js): el estado es el orden de las diapositivas que quedan.
+const historial = Historial.conectarLista({
+  donde: document.getElementById('barraHistorial'),
+  capturar: () => diapositivas.map((d) => d.rId),
+  restaurar: (ids) => { diapositivas = ids.map((id) => todasLasDiapositivas.get(id)); renderizarLista(); },
+  activo: () => todasLasDiapositivas.size > 0,
+});
 
 function renderizarLista() {
   listaDiapositivas.innerHTML = '';
@@ -189,6 +200,7 @@ async function cargarPresentacion(archivo) {
     if (nodosSldId.length === 0) throw new Error(t('error-sin-diapositivas'));
 
     diapositivas = [];
+    todasLasDiapositivas = new Map();
     for (let i = 0; i < nodosSldId.length; i++) {
       const rId = nodosSldId[i].getAttribute('r:id');
       const destino = mapaRels[rId];
@@ -201,10 +213,13 @@ async function cargarPresentacion(archivo) {
           etiqueta = t('etiqueta-diapositiva-con-texto').replace('{n}', i + 1).replace('{texto}', primerTexto[1].trim().slice(0, 40));
         }
       }
-      diapositivas.push({ rId, etiqueta });
+      const diapo = { rId, etiqueta };
+      diapositivas.push(diapo);
+      todasLasDiapositivas.set(rId, diapo);
     }
 
     renderizarLista();
+    historial.reiniciar();
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
   } finally {

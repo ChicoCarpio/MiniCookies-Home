@@ -14,6 +14,13 @@
 .preset-miniatura:hover canvas { border-color: var(--azul); }
 .preset-miniatura.activo canvas { border-color: var(--azul); transform: scale(1.08); }
 .preset-miniatura.activo span { color: var(--azul); font-weight: 600; }
+/* Estrella de favoritos (filtros-color.js, crearGrilla): aparece al pasar el mouse o enfocar; con pantalla táctil (sin hover) queda siempre a la vista. */
+.preset-miniatura { position: relative; }
+.estrella-preset { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0, 0, 0, .45); color: #fff; font-size: 14px; font-style: normal; line-height: 1; opacity: 0; transition: opacity .15s; }
+.preset-miniatura:hover .estrella-preset, .preset-miniatura:focus-visible .estrella-preset, .estrella-preset.es-favorito { opacity: 1; }
+.estrella-preset.es-favorito { color: #ffd54a; }
+@media (hover: none) { .estrella-preset { opacity: .8; } }
+.titulo-favoritos { color: #b8860b; }
 .miniatura-textura { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: none; background: none; color: var(--texto); cursor: pointer; font: inherit; }
 .miniatura-textura canvas { display: block; width: 100%; aspect-ratio: 1; height: auto; border: 2px solid var(--gris-borde); border-radius: 8px; background: var(--gris-fondo); }
 .miniatura-textura.activo canvas { border-color: var(--azul); }
@@ -94,14 +101,6 @@
 @media (prefers-reduced-motion: reduce) {
   .trabajando-ia::before, .trabajando-ia .trabajando-ia-texto { animation: none; }
 }
-
-/* Deshacer / rehacer (assets/js/historial.js): los dos botones debajo de la
-   imagen, iguales en los tres editores. Se habilitan solos. */
-.botones-historial { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
-.botones-historial button { min-width: 44px; height: 34px; padding: 0 10px; border: 1px solid var(--gris-borde); border-radius: 999px; background: var(--gris-fondo); color: var(--texto); font-size: 1.1rem; line-height: 1; cursor: pointer; }
-.botones-historial button:hover:not(:disabled) { border-color: var(--azul); }
-.botones-historial button:disabled { opacity: 0.35; cursor: default; }
-.botones-historial button.activo { border-color: var(--azul); background: var(--activo-fondo); }
 
 /* Pantalla completa (assets/js/pantalla-completa.js). El navegador ya le da
    al elemento todo el alto y el ancho; acá, el fondo y el reparto: en PC una
@@ -287,3 +286,7 @@ body:not(.app-activo) .pantalla-completa-activa:not(.esqueleto-pc) > * { min-hei
      barra de la PC. */
   .app-chips-sep { flex: none; align-self: center; width: 1px; height: 32px; margin: 0 4px; background: var(--gris-borde); }
 }
+/* LUT .cube (lut-cube.js): botón de carga, nombre del archivo cargado y su intensidad. */
+.bloque-lut { margin-bottom: 10px; }
+.fila-lut { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.nombre-lut { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; font-weight: 600; }

@@ -255,11 +255,14 @@ function scriptsEnLinea(html) {
 // siguen con 'unsafe-inline' (las páginas usan style="…"; no ejecutan código).
 function politicaSeguro(nombre, hashes) {
   const fuentes = ["'self'"].concat(hashes.map((h) => "'sha256-" + h + "'")).join(' ');
-  const csp = (extra) => "default-src 'self'; script-src " + fuentes + "; style-src 'self' 'unsafe-inline'; "
+  const csp = (extra, scriptExtra = '') => "default-src 'self'; script-src " + fuentes + scriptExtra + "; style-src 'self' 'unsafe-inline'; "
     + extra + "; form-action 'none'; base-uri 'none'; object-src 'none'";
   const general = { csp: csp("img-src 'self' data:; connect-src 'none'; frame-src 'none'; worker-src 'none'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: [] };
   const politicas = {
     'administrador-contrasenas': Object.assign({}, general, { extra: ['Cache-Control: no-store'] }),
+    // PDF.js (connect-src blob: = leer sus propios datos locales; no abre ninguna conexión): su worker (del mismo origen, a veces como blob), sus tipos de letra (blob/data), y los módulos WebAssembly de los formatos
+    // de imagen (JPEG 2000, JBIG2), que se descargan del mismo origen y se compilan ('wasm-unsafe-eval': solo WebAssembly, no eval de texto).
+    'tachar-pdf': { csp: csp("img-src 'self' data: blob:; font-src 'self' data: blob:; connect-src 'self' blob:; frame-src 'none'; worker-src 'self' blob:", " 'wasm-unsafe-eval'"), permisos: 'camera=(), microphone=(), geolocation=(), clipboard-read=()', extra: ['Cache-Control: no-store'] },
     'enviar-archivos-qr': { csp: csp("img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-src 'self'; worker-src 'self'"), permisos: 'camera=(self), microphone=(), geolocation=(), clipboard-read=()', extra: [] },
   };
   return politicas[nombre] || general;
@@ -350,6 +353,12 @@ function construirSeguro() {
       const m = /^vendor\/((?:@[^/]+\/)?[^/]+\/[^/]+)\//.exec(ruta);
       if (m) paquetes.add(m[1]);
     }
+  }
+  // Lo que un script nombra por dentro con rutaVendor('paquete/versión/…') (el worker y el WebAssembly de PDF.js, por ejemplo) no está en
+  // ninguna etiqueta <script src>: se busca en los scripts que se copiaron.
+  for (const ruta of recursos) {
+    if (!/^assets\/js\/.+\.js$/.test(ruta) || !existsSync(join(RAIZ, ruta))) continue;
+    for (const m of readFileSync(join(RAIZ, ruta), 'utf8').matchAll(/rutaVendor\(\s*'((?:@[^/']+\/)?[^/']+\/[^/']+)\//g)) paquetes.add(m[1]);
   }
   for (const paquete of paquetes) copiarVendor(join(RAIZ, 'vendor', paquete));
 }

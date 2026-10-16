@@ -1170,7 +1170,7 @@ window.i18nPagina = {
               <div id="controlesIntensidadFiltro" style="display:none;">
                 <label class="campo-deslizador">
                   <span class="etiqueta-deslizador"><span data-i18n="lbl-intensidad-filtro">Intensidad del filtro</span><span id="valorIntensidadFiltro">100%</span></span>
-                  <input type="range" id="intensidadFiltro" min="0" max="100" value="100">
+                  <input type="range" id="intensidadFiltro" min="0" max="200" value="100">
                 </label>
               </div>
               <!-- Las miniaturas se generan desde assets/js/filtros-color.js -->
@@ -1783,7 +1783,7 @@ function crearCanvasConImagen(imagen, anchoDestino, altoDestino) {
 function procesarCapaEnCanvas(canvas, capa, escala, scratch = null, memo = null) {
   const ajustes = capa.ajustes;
   // Proyectos guardados antes de "Intensidad del filtro" no la traen.
-  const intensidadFiltro = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100)));
+  const intensidadFiltro = Math.max(0, Math.min(200, Number(ajustes.intensidadFiltro ?? 100)));
   const capasFiltro = (FiltrosColor.FILTROS[ajustes.filtro] || {}).capas || [];
   const textura = { tipo: ajustes.textura, intensidad: ajustes.texturaIntensidad, orden: ajustes.texturaOrden, opciones: ajustes.texturaOpciones };
   ProcesarFiltros.renderizarFiltro(canvas, { ...ajustes, intensidadFiltro }, capasFiltro, textura, escala, scratch, memo);
@@ -2756,7 +2756,7 @@ function escribirAjustesEnUI(ajustes) {
 }
 
 function escribirIntensidadFiltroEnUI(ajustes) {
-  const intensidad = Math.max(0, Math.min(100, Number(ajustes.intensidadFiltro ?? 100)));
+  const intensidad = Math.max(0, Math.min(200, Number(ajustes.intensidadFiltro ?? 100)));
   elIntensidadFiltro.value = intensidad;
   valorIntensidadFiltro.textContent = intensidad + '%';
   controlesIntensidadFiltro.style.display = ajustes.filtro && ajustes.filtro !== 'ninguno' ? 'block' : 'none';

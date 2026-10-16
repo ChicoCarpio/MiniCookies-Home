@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
   table.tabla-datos th { vertical-align: top; }
@@ -31,6 +32,11 @@ window.i18nPagina = {
     'campo-buscar': 'Buscar',
     'campo-reemplazar': 'Reemplazar por',
     'campo-mayusculas': 'Coincidir mayúsculas/minúsculas',
+    'campo-palabra': 'Solo palabras completas',
+    'campo-regex': 'Usar expresión regular',
+    'ayuda-regex': 'Una expresión regular describe un patrón: \\d+ son números, [aeiou] una vocal, ^ y $ el principio y el final de la celda. En "Reemplazar por" podés usar $1, $2… para repetir lo que capturaron los paréntesis, y $& para todo lo encontrado. Si no la activás, lo que escribís se busca tal cual.',
+    'error-regex': 'La expresión regular no es válida',
+    'error-patron-largo': 'El texto a buscar es demasiado largo (máximo 500 caracteres).',
     'boton-procesar': 'Reemplazar',
     'vista-previa-antes': 'Vista previa de "',
     'vista-previa-medio': '"',
@@ -64,6 +70,11 @@ window.i18nPagina = {
     'campo-buscar': 'Find',
     'campo-reemplazar': 'Replace with',
     'campo-mayusculas': 'Match case',
+    'campo-palabra': 'Whole words only',
+    'campo-regex': 'Use regular expression',
+    'ayuda-regex': 'A regular expression describes a pattern: \\d+ is numbers, [aeiou] a vowel, ^ and $ the start and end of the cell. In "Replace with" you can use $1, $2… to repeat what the parentheses captured, and $& for everything found. If you leave it off, what you type is searched exactly as written.',
+    'error-regex': 'The regular expression is not valid',
+    'error-patron-largo': 'The text to search for is too long (500 characters at most).',
     'boton-procesar': 'Replace',
     'vista-previa-antes': 'Preview of "',
     'vista-previa-medio': '"',
@@ -145,8 +156,22 @@ window.i18nPagina = {
         <input type="checkbox" id="coincidirMayusculas">
         <span data-i18n="campo-mayusculas">Coincidir mayúsculas/minúsculas</span>
       </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="palabraCompleta">
+        <span data-i18n="campo-palabra">Solo palabras completas</span>
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="usarRegex">
+        <span data-i18n="campo-regex">Usar expresión regular</span>
+        <span class="ayuda-tip">
+          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+          <span class="ayuda-burbuja" data-i18n="ayuda-regex">Una expresión regular describe un patrón.</span>
+        </span>
+      </label>
       <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Reemplazar</button>
     </div>
+
+    <p id="avisoPatron" role="alert" style="color:var(--rojo, #c0392b); margin:6px 0 0; font-size:0.9rem;"></p>
 
     <div id="bloqueVistaPrevia" style="display:none;">
       <p style="color:var(--texto-suave); margin:10px 0 0; font-size:0.9rem;">
@@ -192,6 +217,8 @@ window.i18nPagina = {
 <script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/patron-busqueda.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -208,6 +235,7 @@ const nombreHojaVista = document.getElementById('nombreHojaVista');
 const avisoTodasHojas = document.getElementById('avisoTodasHojas');
 const notaConserva = document.getElementById('notaConserva');
 const notaReconstruye = document.getElementById('notaReconstruye');
+const avisoPatron = document.getElementById('avisoPatron');
 
 // LectorHojas (assets/js/lector-hojas.js) lee el archivo para la vista previa y para buscar. Un .xlsx o .xlsm se EDITA EN EL LUGAR con
 // XlsxEscritor.editarCeldas: solo cambian las celdas que coinciden y el resto del archivo queda tal cual. Un .xlsb, .xls u .ods
@@ -245,8 +273,9 @@ async function mostrarVistaPrevia() {
   bloqueVistaPrevia.style.display = 'block';
 
   const buscar = document.getElementById('textoBuscar').value;
-  const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
-  const regex = buscar ? new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi') : null;
+  const patron = patronActual();
+  const regex = patron.regex || null;
+  avisoPatron.textContent = patron.error === 'largo' ? t('error-patron-largo') : patron.error ? t('error-regex') + ' (' + patron.detalle + ')' : '';
 
   let hoja;
   try { hoja = await hojaLeida(indiceHoja); } catch (error) { alert(t('error-leer') + ': ' + error.message); return; }
@@ -280,8 +309,7 @@ async function mostrarVistaPrevia() {
       const columna = hoja.c0 + c;
       const texto = hoja.texto(r, c);
       const columnaHabilitada = ambito === 'toda' || columnasSeleccionadas.has(columna);
-      const coincide = regex && texto !== '' && columnaHabilitada && !hoja.formula(r, c) && !protegida(hoja.f0 + r, columna) && regex.test(texto);
-      if (regex) regex.lastIndex = 0; // regex con flag "g" guarda posición entre usos, hay que resetear
+      const coincide = regex && texto !== '' && columnaHabilitada && !hoja.formula(r, c) && !protegida(hoja.f0 + r, columna) && PatronBusqueda.reemplazarEn(texto, regex, '', false).cantidad > 0;
       const clase = coincide ? ' class="coincidencia"' : (ambito === 'columnas' && !columnaHabilitada ? ' class="columna-excluida"' : '');
       html += `<td${clase}>${escaparHtml(texto)}</td>`;
     }
@@ -338,21 +366,26 @@ async function cargarLibro(archivo) {
   mostrarVistaPrevia();
 }
 
-function escaparRegex(texto) {
-  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// El patrón que describen el texto a buscar y las tres casillas (expresión regular, palabra completa, mayúsculas).
+function patronActual() {
+  return PatronBusqueda.crear(document.getElementById('textoBuscar').value, {
+    regex: document.getElementById('usarRegex').checked,
+    palabra: document.getElementById('palabraCompleta').checked,
+    mayusculas: document.getElementById('coincidirMayusculas').checked,
+  });
 }
 
 selectorHoja.addEventListener('change', () => { columnasSeleccionadas = new Set(); mostrarVistaPrevia(); });
 document.getElementById('todasLasHojas').addEventListener('change', mostrarVistaPrevia);
 document.getElementById('textoBuscar').addEventListener('input', mostrarVistaPrevia);
-document.getElementById('coincidirMayusculas').addEventListener('change', mostrarVistaPrevia);
+for (const id of ['coincidirMayusculas', 'palabraCompleta', 'usarRegex']) document.getElementById(id).addEventListener('change', mostrarVistaPrevia);
 document.getElementById('ambitoToda').addEventListener('change', mostrarVistaPrevia);
 document.getElementById('ambitoColumnas').addEventListener('change', mostrarVistaPrevia);
 
 // Recorre la hoja y llama a alEncontrar(r, c, textoNuevo, cantidad) por cada celda que coincide. Una celda de texto se compara por su
 // texto; una con formato (fecha, número, moneda…) contra el texto tal como se ve, y si coincide pasa a ser texto plano con el resultado:
 // deja de ser una fecha o un número real.
-function recorrerCoincidencias(hoja, regex, reemplazo, ambito, alEncontrar) {
+function recorrerCoincidencias(hoja, regex, reemplazo, esRegex, ambito, alEncontrar) {
   for (let r = 0; r < hoja.nfilas; r++) {
     for (let c = 0; c < hoja.ncols; c++) {
       if (ambito === 'columnas' && !columnasSeleccionadas.has(hoja.c0 + c)) continue;
@@ -361,14 +394,14 @@ function recorrerCoincidencias(hoja, regex, reemplazo, ambito, alEncontrar) {
       if (valor === undefined) continue;
       const texto = typeof valor === 'string' ? valor : hoja.texto(r, c);
       if (!texto) continue;
-      const coincidencias = texto.match(regex);
-      if (coincidencias) alEncontrar(r, c, texto.replace(regex, () => reemplazo), coincidencias.length);
+      const hecho = PatronBusqueda.reemplazarEn(texto, regex, reemplazo, esRegex);
+      if (hecho.cantidad > 0) alEncontrar(r, c, hecho.texto, hecho.cantidad);
     }
   }
 }
 
 // Edita el libro en el lugar: el original (.xlsx / .xlsm) o el .xlsx en que se convirtió un .xlsb, .xls u .ods.
-async function reemplazarEnElLugar(indices, regex, reemplazo, ambito) {
+async function reemplazarEnElLugar(indices, regex, reemplazo, esRegex, ambito) {
   const libro = await LibroXlsx.abrir(libroActual.bytesXlsx || new Uint8Array(await archivoActual.arrayBuffer()));   // siempre del original: otro clic no suma cambios
   const pendientes = [];
   let total = 0, omitidas = 0;
@@ -377,7 +410,7 @@ async function reemplazarEnElLugar(indices, regex, reemplazo, ambito) {
     if (!hoja.nfilas) continue;
     const protegida = XlsxEscritor.celdasProtegidas(await libro.cargarHoja(indice));
     const cambios = [];
-    recorrerCoincidencias(hoja, regex, reemplazo, ambito, (r, c, nuevo, n) => {
+    recorrerCoincidencias(hoja, regex, reemplazo, esRegex, ambito, (r, c, nuevo, n) => {
       const f = hoja.f0 + r, col = hoja.c0 + c;
       if (protegida(f, col)) { omitidas++; return; }   // encabezados de tabla y fórmulas matriciales: cambiarlos rompería la tabla o la matriz
       cambios.push({ f, c: col, valor: nuevo });
@@ -397,16 +430,17 @@ botonProcesar.addEventListener('click', async () => {
     const buscar = document.getElementById('textoBuscar').value;
     if (!buscar) throw new Error(t('error-sin-buscar'));
     const reemplazo = document.getElementById('textoReemplazo').value;
-    const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
     const todasLasHojas = document.getElementById('todasLasHojas').checked;
     const ambito = ambitoActual();
     if (ambito === 'columnas' && columnasSeleccionadas.size === 0) {
       throw new Error(t('error-sin-columna'));
     }
 
-    const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
+    const patron = patronActual();
+    if (patron.error === 'largo') throw new Error(t('error-patron-largo'));
+    if (patron.error) throw new Error(t('error-regex') + ' (' + patron.detalle + ')');
     const indices = todasLasHojas ? libroActual.hojas.map(h => h.indice) : [hojaActualSeleccionada()];
-    const { bytes, total, omitidas, extension } = await reemplazarEnElLugar(indices, regex, reemplazo, ambito);
+    const { bytes, total, omitidas, extension } = await reemplazarEnElLugar(indices, patron.regex, reemplazo, document.getElementById('usarRegex').checked, ambito);
 
     const tipo = extension === 'xlsm' ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     enlaceDescarga.href = URL.createObjectURL(new Blob([bytes], { type: tipo }));
