@@ -86,6 +86,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/tablas-texto.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -116,12 +117,8 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 function extraerTextoDeXmlDiapositiva(xmlTexto) {
   const doc = new DOMParser().parseFromString(xmlTexto, 'application/xml');
   // Cada <a:p> es un párrafo; dentro, cada <a:t> es un fragmento de texto.
-  const parrafos = [...doc.getElementsByTagName('a:p')];
-  const lineas = parrafos.map((parrafo) => {
-    const fragmentos = [...parrafo.getElementsByTagName('a:t')];
-    return fragmentos.map(f => f.textContent).join('');
-  });
-  return lineas.filter(linea => linea.trim() !== '');
+  // Las tablas (a:tbl) salen con sus columnas alineadas, no una celda por renglón.
+  return TablasTexto.diapositivaARenglones(doc);
 }
 
 botonExtraer.addEventListener('click', async () => {
