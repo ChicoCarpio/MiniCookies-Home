@@ -197,5 +197,39 @@ window.Historial = (function () {
     return historial;
   }
 
-  return { crear, crearCopiador, conectar, conectarTeclado, conectarToqueDosDedos };
+  // Deshacer y rehacer para una LISTA que se reordena y se recorta (páginas de un PDF, diapositivas, hojas): el estado es solo el orden de
+  // los elementos que quedan, como una lista de identificadores. Pone los dos botones ↶ ↷ (clase .botones-historial, textos en i18nComun)
+  // al principio de "donde" y conecta Ctrl+Z / Ctrl+Shift+Z. El editor dice:
+  //   capturar() → los identificadores en el orden actual (texto o número);
+  //   restaurar(ids) → deja la lista y la pantalla como dicen ids (en el orden dado, como texto);
+  //   activo() → si hay un archivo abierto (por defecto, siempre).
+  // Devuelve el historial: reiniciar() al cargar un archivo nuevo, comprobar() tras un cambio que no sea un clic (los clics, los cambios y
+  // soltar un elemento arrastrado ya se vigilan solos).
+  function conectarLista(opciones) {
+    const { donde, capturar, restaurar, activo = () => true } = opciones;
+    const barra = document.createElement('div');
+    barra.className = 'botones-historial';
+    const boton = (simbolo, clave) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = simbolo;
+      b.disabled = true;
+      b.setAttribute('data-i18n-attr', 'title:' + clave + ';aria-label:' + clave);
+      if (window.t) { b.title = window.t(clave); b.setAttribute('aria-label', b.title); }
+      return b;
+    };
+    const deshacer = boton('↶', 'title-deshacer-lista');
+    const rehacer = boton('↷', 'title-rehacer');
+    barra.append(deshacer, rehacer);
+    donde.insertBefore(barra, donde.firstChild);
+    const historial = conectar({
+      capturar: () => { const ids = capturar().map(String); return { ids, firma: JSON.stringify(ids) }; },
+      restaurar: (paso) => restaurar(paso.ids),
+      deshacer, rehacer, activo,
+    });
+    donde.addEventListener('dragend', () => { if (activo()) historial.programar(); });
+    return historial;
+  }
+
+  return { crear, crearCopiador, conectar, conectarLista, conectarTeclado, conectarToqueDosDedos };
 })();

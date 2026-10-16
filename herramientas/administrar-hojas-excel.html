@@ -84,6 +84,7 @@ window.i18nPagina = {
     </div>
 
     <p id="cargando" style="display:none; color:var(--texto-suave);" data-i18n="cargando">Leyendo el archivo...</p>
+    <div id="barraHistorial"></div>
     <ul class="lista-archivos" id="listaHojas"></ul>
 
     <div class="controles">
@@ -113,6 +114,7 @@ window.i18nPagina = {
 <script src="../assets/js/csv-planilla.js"></script>
 <script src="../assets/js/lector-hojas.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/historial.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script>
@@ -130,6 +132,15 @@ let generacion = 0;        // para descartar las vistas previas de un libro que 
 let zipActual = null;   // ZipPropio — para reordenar/eliminar sin perder formato
 let bytesActuales = null;
 let nombresHojas = [];
+let hojasAbiertas = 0;     // cuántas hojas tiene el libro abierto (0 = ninguno)
+
+// Deshacer y rehacer (assets/js/historial.js): el estado es el orden de las hojas que quedan.
+const historial = Historial.conectarLista({
+  donde: document.getElementById('barraHistorial'),
+  capturar: () => nombresHojas,
+  restaurar: (nombres) => { nombresHojas = nombres; renderizarLista(); },
+  activo: () => hojasAbiertas > 0,
+});
 let extensionActual = 'xlsx';
 let nombreBaseActual = 'excel-reordenado';
 
@@ -239,12 +250,14 @@ async function cargarLibro(archivo) {
     previas.clear(); generacion++;
     bytesActuales = bytes;
     nombresHojas = lector.libroMotor.hojas.map((h) => h.nombre);
+    hojasAbiertas = nombresHojas.length;
     // El nombre de descarga tiene que conservar la extensión original — un
     // .xlsm renombrado a .xlsx no abre bien en Excel (el formato interno
     // sigue siendo macro-habilitado, pero la extensión ya no coincide).
     extensionActual = /\.xlsm$/i.test(archivo.name) ? 'xlsm' : 'xlsx';
     nombreBaseActual = archivo.name.replace(/\.(xlsx|xlsm)$/i, '');
     renderizarLista();
+    historial.reiniciar();
   } catch (error) {
     alert(t('error-leer') + ': ' + error.message);
   } finally {
