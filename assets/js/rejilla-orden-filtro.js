@@ -7,10 +7,12 @@
 // Uso: const rango = RejillaOrdenFiltro.regionActual(hoja, fila, columna);              // { f0, c0, f1, c1 }: la fila f0 es el encabezado
 //      const valores = RejillaOrdenFiltro.valoresColumna(libro, hoja, rango, col, opc); // [{ clave, texto, cuenta }]
 //      const v = RejillaOrdenFiltro.construirVista(libro, hoja, rango, { orden: { col, descendente }, filtros: Map(col → Set(clave excluida)), idioma }, opc);
+//        (un Set con .solo = true lista las claves que QUEDAN: así se filtra cuando la lista de valores está cortada en MAX_VALORES)
 //      v.hoja (la vista), v.visibles, v.total, v.orden ({ ok:false, motivo:'combinadas' } si no se pudo ordenar)
 
 (function () {
-  const MAX_ITERACIONES_REGION = 2000000;
+  const MAX_ITERACIONES_REGION = 30000000;   // celdas que mira regionActual como mucho (una tabla de 1.000.000 × 25 entra)
+  const MAX_FILA = 1048575, MAX_COL = 16383;
   const MAX_VALORES = 5000;          // valores distintos que ofrece la lista de un filtro
   const CLAVE_VACIAS = '\u0000vacias';
 
@@ -24,13 +26,14 @@
       for (let ff = f0; ff <= f1; ff++) for (let cc = c0; cc <= c1; cc++) { if (++gasto > MAX_ITERACIONES_REGION) return false; if (lleno(ff, cc)) return true; }
       return false;
     };
-    for (let cambio = true; cambio;) {
+    // cada lado crece mientras pueda antes de mirar los otros: crecer una fila y volver a recorrer las columnas enteras en cada vuelta era cuadrático
+    // (con 2.000 filas se gastaba el tope y la región quedaba cortada sin avisar)
+    for (let cambio = true; cambio && gasto <= MAX_ITERACIONES_REGION;) {
       cambio = false;
-      if (r.f0 > 0 && hayEn(r.f0 - 1, Math.max(0, r.c0 - 1), r.f0 - 1, r.c1 + 1)) { r.f0--; cambio = true; }
-      if (hayEn(r.f1 + 1, Math.max(0, r.c0 - 1), r.f1 + 1, r.c1 + 1)) { r.f1++; cambio = true; }
-      if (r.c0 > 0 && hayEn(Math.max(0, r.f0 - 1), r.c0 - 1, r.f1 + 1, r.c0 - 1)) { r.c0--; cambio = true; }
-      if (hayEn(Math.max(0, r.f0 - 1), r.c1 + 1, r.f1 + 1, r.c1 + 1)) { r.c1++; cambio = true; }
-      if (gasto > MAX_ITERACIONES_REGION) break;
+      while (r.f0 > 0 && hayEn(r.f0 - 1, Math.max(0, r.c0 - 1), r.f0 - 1, r.c1 + 1)) { r.f0--; cambio = true; }
+      while (r.f1 < MAX_FILA && hayEn(r.f1 + 1, Math.max(0, r.c0 - 1), r.f1 + 1, r.c1 + 1)) { r.f1++; cambio = true; }
+      while (r.c0 > 0 && hayEn(Math.max(0, r.f0 - 1), r.c0 - 1, r.f1 + 1, r.c0 - 1)) { r.c0--; cambio = true; }
+      while (r.c1 < MAX_COL && hayEn(Math.max(0, r.f0 - 1), r.c1 + 1, r.f1 + 1, r.c1 + 1)) { r.c1++; cambio = true; }
     }
     return r;
   }
@@ -41,8 +44,9 @@
   function rangoDeTrabajo(hoja, f, c) {
     const candidatos = [];
     if (hoja.filtroAuto && hoja.filtroAuto.ref) candidatos.push(LibroXlsx.decodificarRango(hoja.filtroAuto.ref));
-    for (const t of hoja.tablas || []) if (t.ref) candidatos.push(t.ref);
-    for (const r of candidatos) if (r && dentro(r, f, c)) return { f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1 };
+    for (const t of hoja.tablas || []) if (t.ref && t.encabezados !== 0 && t.encabezados !== false) candidatos.push(Object.assign({}, t.ref, { totales: t.totales ? 1 : 0 }));
+    // la fila de totales de una tabla no se ordena ni se filtra (como en Excel)
+    for (const r of candidatos) if (r && dentro(r, f, c)) return { f0: r.f0, c0: r.c0, f1: r.f1 - (r.totales || 0), c1: r.c1 };
     const g = regionActual(hoja, f, c);
     // una sola celda aislada no es una tabla
     return g;
@@ -123,21 +127,28 @@
     // la vista es una hoja con las filas de datos permutadas
     const cambia = resultadoOrden.ok && orden && nDatos > 1;
     const vista = Object.create(base);
-    const almacen = new C.constructor();
-    almacen.compartidas = C.compartidas;
     const nuevaFilaDe = new Map();   // fila de origen → fila destino (solo las de datos)
     for (let k = 0; k < nDatos; k++) nuevaFilaDe.set(perm[k], fD0 + k);
-    for (let i = 0; i < C.n; i++) {
-      const f = C.fila[i], c = C.col[i];
-      const mueve = cambia && f >= fD0 && f <= fD1 && c >= rango.c0 && c <= rango.c1;
-      const destino = mueve ? nuevaFilaDe.get(f) : f;
-      const j = almacen.agregar(destino, c, C.tipo[i], C.valor[i], C.estilo[i]);
-      if (C.ricos.has(i)) almacen.ricos.set(j, C.ricos.get(i));
-      if (C.textoOriginal.has(i)) almacen.textoOriginal.set(j, C.textoOriginal.get(i));
-      const fx = C.formulas.get(i);
-      if (fx) almacen.formulas.set(j, mueve ? { texto: C.formulaDe(i), tipo: fx.tipo, ref: null, si: null, maestra: false } : fx);
-    }
-    vista.celdas = almacen;
+    const mueve = (f, c) => cambia && f >= fD0 && f <= fD1 && c >= rango.c0 && c <= rango.c1;
+    if (cambia) {
+      const almacen = new C.constructor();
+      almacen.compartidas = C.compartidas;
+      for (let i = 0; i < C.n; i++) {
+        const f = C.fila[i], c = C.col[i], m = mueve(f, c);
+        const j = almacen.agregar(m ? nuevaFilaDe.get(f) : f, c, C.tipo[i], C.valor[i], C.estilo[i]);
+        if (C.ricos.has(i)) almacen.ricos.set(j, C.ricos.get(i));
+        if (C.textoOriginal.has(i)) almacen.textoOriginal.set(j, C.textoOriginal.get(i));
+        const fx = C.formulas.get(i);
+        if (fx) almacen.formulas.set(j, m ? { texto: C.formulaDe(i), tipo: fx.tipo, ref: null, si: null, maestra: false } : fx);
+      }
+      vista.celdas = almacen;
+      // lo que el archivo guarda por celda fuera del almacén va con su fila: las notas y las imágenes dentro de las celdas
+      if (base.comentarios && base.comentarios.length) vista.comentarios = base.comentarios.map((n) => (mueve(n.f, n.c) ? Object.assign({}, n, { f: nuevaFilaDe.get(n.f) }) : n));
+      if (base.imagenesCelda && base.imagenesCelda.size) {
+        vista.imagenesCelda = new Map();
+        for (const [clave, ruta] of base.imagenesCelda) { const f = Math.floor(clave / 16384), c = clave % 16384; vista.imagenesCelda.set(mueve(f, c) ? nuevaFilaDe.get(f) * 16384 + c : clave, ruta); }
+      }
+    }   // sin orden la vista usa el mismo almacén de celdas (solo cambian las filas ocultas)
 
     // filas: las propiedades (alto, oculta) siguen a los datos; y se ocultan las que no pasan los filtros
     const filas = new Map(base.filas);
@@ -154,7 +165,8 @@
       for (const [col, excluidas] of activos) {
         const i = C.indiceDe(origen, col);
         const t = i < 0 || C.tipo[i] === T.vacio ? '' : textoVisible(libro, base, i, opc);
-        if (excluidas.has(t === '' ? CLAVE_VACIAS : t.toLowerCase())) { pasa = false; break; }
+        const clave = t === '' ? CLAVE_VACIAS : t.toLowerCase();
+        if (excluidas.solo ? !excluidas.has(clave) : excluidas.has(clave)) { pasa = false; break; }
       }
       const info = filas.get(destino);
       if (!pasa) filas.set(destino, Object.assign({}, info || {}, { oculta: true }));

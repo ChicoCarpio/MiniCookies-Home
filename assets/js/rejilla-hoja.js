@@ -98,7 +98,7 @@
     const cajaNombre = q('.rh-nombre'), cajaFormula = q('.rh-formula'), cuerpo = q('.rh-cuerpo'), vista = q('.rh-vista'), lienzo = q('.rh-lienzo');
     const capa = q('.rh-capa'), guia = q('.rh-guia'), asaIni = q('.rh-asa-ini'), asaFin = q('.rh-asa-fin');
     let modoTactil = false;   // la última selección se hizo con el dedo: se ofrecen las asas para ajustarla
-    const ayudaFormula = q('.rh-ayuda-formula');
+    const ayudaFormula = q('.rh-ayuda-formula'), burbujaFormula = q('.ayuda-burbuja');   // abierta, ayuda-tip.js la cuelga de <body>
     if (typeof window.AyudaTipIniciar === 'function') window.AyudaTipIniciar(ayudaFormula);
     const botonCompleta = q('.rh-boton-completa'), botonOF = q('.rh-boton-of'), infoOF = q('.rh-of-info');
     const buscador = q('.rh-buscador'), cajaBusca = q('.rh-busca-texto'), cuentaBusca = q('.rh-busca-cuenta'), checkLibro = q('.rh-busca-libro');
@@ -217,7 +217,7 @@
       const z = est.zoom / 100;
       const encMax = Math.max(26, String(est.nFilas).length * 8 + 12);
       espaciador.style.width = Math.ceil((est.g.x(est.nCols) - est.fx + encMax) * z) + 'px';
-      espaciador.style.height = Math.ceil((est.g.y(est.nFilas) - est.fy + 20) * z) + 'px';
+      espaciador.style.height = Math.max(0, Math.ceil((est.g.y(est.nFilas) - est.fy + 20) * z)) + 'px';
     }
     function medirVista() {
       W = cuerpo.clientWidth; H = cuerpo.clientHeight; dpr = window.devicePixelRatio || 1;
@@ -310,6 +310,7 @@
       cerrarMenuOF();
       aplicarVista(); calcularGeometria(); actualizarResumenOF(); ultimoInfo = '';
       colocarTamano(); pintar(); actualizarBarras();
+      refrescarBusqueda();   // las coincidencias de esta hoja eran posiciones de antes del orden
     }
     function activarOF(si) {
       if (!est) return;
@@ -344,7 +345,7 @@
               b = document.createElement('button'); b.type = 'button'; b.className = 'rh-of-col'; b.setAttribute('aria-haspopup', 'dialog');
               b.addEventListener('pointerdown', (e) => e.stopPropagation());
               b.addEventListener('dblclick', (e) => e.stopPropagation());
-              b.addEventListener('keydown', (e) => e.stopPropagation());
+              b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') e.stopPropagation(); });   // las flechas, Esc y Ctrl+F siguen llegando a la rejilla
               b.addEventListener('click', (e) => { e.stopPropagation(); abrirMenuOF(+b.dataset.col, b); });
               capa.appendChild(b); botonesOF.push(b);
             }
@@ -376,7 +377,7 @@
       lista.sort((a, b) => (a.vacias ? 1 : b.vacias ? -1 : cmp(a.texto, b.texto)));
       const excluidas = o.filtros.get(col);
       menuColOF = col; menuBotonOF = boton; menuValores = lista; menuBusca = '';
-      menuMarcadas = new Set(lista.filter((v) => !(excluidas && excluidas.has(v.clave))).map((v) => v.clave));
+      menuMarcadas = new Set(lista.filter((v) => !excluidas || (excluidas.solo ? excluidas.has(v.clave) : !excluidas.has(v.clave))).map((v) => v.clave));
       menuOF.textContent = '';
       const boton1 = (clase, texto, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = clase; b.textContent = texto; b.addEventListener('click', fn); return b; };
       const fijar = (descendente) => { o.orden = { col, descendente }; reaplicarOF(); };
@@ -397,6 +398,7 @@
       const pie = document.createElement('div'); pie.className = 'rh-of-pie';
       const ok = boton1('rh-of-ok', tx('rh-of-aceptar'), () => {
         if (menuMarcadas.size === menuValores.length) o.filtros.delete(col);
+        else if (truncado) { const solo = new Set(menuMarcadas); solo.solo = true; o.filtros.set(col, solo); }   // la lista no tiene todos los valores: se guarda lo que queda, no lo que se quita
         else o.filtros.set(col, new Set(menuValores.filter((v) => !menuMarcadas.has(v.clave)).map((v) => v.clave)));
         reaplicarOF();
       });
@@ -517,6 +519,15 @@
         busq.completo = true; actualizarCuentaBusqueda();
       } else busq.completo = true;
     }
+    // la hoja abierta cambió de orden o de filtro: se vuelve a leer solo ella, sin mover la selección
+    async function refrescarBusqueda() {
+      if (!busq.texto || !est) return;
+      const token = busq.token, ind = est.indice;
+      busq.porHoja.delete(ind); actualizarCuentaBusqueda();
+      const L = await escanear(ind, token);
+      if (!L || token !== busq.token || !est || est.indice !== ind) return;
+      busq.porHoja.set(ind, L); pintarSeleccion(); actualizarCuentaBusqueda();
+    }
     // siguiente (dir = 1) o anterior (dir = -1), pasando a otra hoja si se busca en todo el libro
     async function irSiguiente(dir) {
       if (!busq.texto || !est) return;
@@ -610,7 +621,7 @@
         const area = (f1 - r.f0 + 1) * (c1 - r.c0 + 1);
         const cuenta = (i) => {
           const tipo = C.tipo[i];
-          if (tipo === T.vacio) return;
+          if (tipo === T.vacio || est.g.altoFila(C.fila[i]) === 0 || est.g.anchoCol(C.col[i]) === 0) return;   // las filas y columnas ocultas (o filtradas) no cuentan, como en la copia
           n++;
           if (tipo === T.numero) { nums++; suma += C.valor[i]; }
         };
@@ -1007,8 +1018,15 @@
     observador.observe(cuerpo);
     medirVista();
     dibujarPestanas();
+    function destruir() {
+      destruida = true; observador.disconnect(); for (const quitar of escuchas) quitar();
+      clearTimeout(temporizadorEstado); clearTimeout(temporizadorAnuncio); clearTimeout(temporizadorBusca); clearTimeout(temporizadorAviso); busq.token++;
+      if (enCompleta) ponerCompleta(false);
+      if (!raiz.contains(burbujaFormula)) burbujaFormula.remove();   // la burbuja abierta no queda suelta en la página
+      raiz.remove();
+    }
     const primera = lector.hojas.find((h) => h.estado === 'visible') || lector.hojas[0];
-    if (primera) await abrirHoja(primera.indice);
+    if (primera) { try { await abrirHoja(primera.indice); } catch (e) { destruir(); throw e; } }   // sin rejilla, que no queden escuchas en el documento
 
     return {
       mostrarHoja: abrirHoja,
@@ -1022,7 +1040,7 @@
       alCambiar(fn) { cambios.push(fn); },
       enfocar() { cuerpo.focus({ preventScroll: true }); },
       pantallaCompleta(si) { if (si === undefined) return enCompleta; ponerCompleta(si); return enCompleta; },
-      destruir() { destruida = true; observador.disconnect(); for (const quitar of escuchas) quitar(); clearTimeout(temporizadorEstado); clearTimeout(temporizadorAnuncio); clearTimeout(temporizadorBusca); busq.token++; if (enCompleta) ponerCompleta(false); raiz.remove(); },
+      destruir,
     };
   }
 

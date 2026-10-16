@@ -3,7 +3,7 @@
 // Requiere xml-ligero.js, xlsx-modelo.js (para los errores) y xlsx-formato.js (fechas). No depende del navegador.
 //
 //   Xml2003Lector.parece(bytes)   → true si el archivo es SpreadsheetML (declara urn:schemas-microsoft-com:office:spreadsheet al principio)
-//   Xml2003Lector.leer(bytes)     → { hojas: [{ nombre, filas, anchos, combinadas, estado, columnasOcultas, filasOcultas }] }   (mismo formato que OdsLector)
+//   Xml2003Lector.leer(bytes)     → { hojas: [{ nombre, filas, anchos, combinadas, estado, columnasOcultas, filasOcultas }] }   (mismo formato que OdsLector; filas puede tener huecos)
 //
 // Qué lee: valores (Number, String, DateTime, Boolean, Error), el formato de número de cada celda (los nombres de Excel —"Fixed", "Short Date"…— y los
 // códigos propios), combinadas (MergeAcross/MergeDown), anchos, columnas y filas ocultas, hojas ocultas, y los saltos de Index/Span. Las fórmulas no se
@@ -101,7 +101,8 @@
               const hasta = Math.min(MAX_COLS - 1, desde + (a.Span !== undefined ? Math.max(0, parseInt(a.Span, 10) || 0) : 0));
               const w = a.Width !== undefined ? ancho(parseFloat(a.Width)) : 0;
               const oculta = a.Hidden === '1';
-              for (let c = desde; c <= hasta && c < MAX_COLS; c++) { if (w > 0) hoja.anchos[c] = w; if (oculta) hoja.columnasOcultas.push(c); }
+              // _ancho cuenta las columnas recorridas: una hoja bien formada no pasa de 16.384; miles de <Column Span="16383"> repetidas no se recorren
+              if (hoja._ancho <= 4 * MAX_COLS) for (let c = desde; c <= hasta && c < MAX_COLS; c++) { hoja._ancho++; if (w > 0) hoja.anchos[c] = w; if (oculta) hoja.columnasOcultas.push(c); }
               hoja._col = hasta + 1;
             }
             return;
@@ -171,7 +172,7 @@
     if (!hojas.length) throw error('sinLibro', 'sin hojas');
     for (const h of hojas) {
       delete h._col; delete h._ancho;
-      for (let r = 0; r < h.filas.length; r++) if (!h.filas[r]) h.filas[r] = [];
+      // las filas que no vienen quedan como huecos (XlsxEscritor los salta): llenarlas con [] gastaba ~45 MB por hoja con un Row Index="1048576"
       h.columnasOcultas = [...new Set(h.columnasOcultas)];
       h.filasOcultas = [...new Set(h.filasOcultas)];
     }
