@@ -26,6 +26,7 @@ window.i18nComun = {
     'footer-privacidad': 'Política de privacidad',
     'footer-terminos': 'Términos de uso',
     'footer-creditos': 'Créditos',
+    'footer-acerca': 'Acerca de',
     'footer-contacto': 'Contacto',
     // Compartidas por las 76 páginas de herramientas (header/nav y helpers JS).
     'nav-cat-pdf': 'Herramientas de PDF',
@@ -112,6 +113,7 @@ window.i18nComun = {
     'footer-privacidad': 'Privacy policy',
     'footer-terminos': 'Terms of use',
     'footer-creditos': 'Credits',
+    'footer-acerca': 'About',
     'footer-contacto': 'Contact',
     'nav-cat-pdf': 'PDF tools',
     'nav-cat-excel': 'Excel / CSV tools',
