@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -20,6 +21,11 @@ window.i18nPagina = {
     'campo-buscar': 'Buscar',
     'campo-reemplazar': 'Reemplazar por',
     'campo-mayusculas': 'Coincidir mayúsculas/minúsculas',
+    'campo-palabra': 'Solo palabras completas',
+    'campo-regex': 'Usar expresión regular',
+    'ayuda-regex': 'Una expresión regular describe un patrón: \\d+ son números, [aeiou] una vocal, ^ y $ el principio y el final de un párrafo. En "Reemplazar por" podés usar $1, $2… para repetir lo que capturaron los paréntesis, y $& para todo lo encontrado. Si no la activás, lo que escribís se busca tal cual.',
+    'error-regex': 'La expresión regular no es válida',
+    'error-patron-largo': 'El texto a buscar es demasiado largo (máximo 500 caracteres).',
     'boton-procesar': 'Reemplazar y descargar',
     'boton-procesar-procesando': 'Procesando...',
     'resultado-listo': '✅ Listo. ',
@@ -40,6 +46,11 @@ window.i18nPagina = {
     'campo-buscar': 'Find',
     'campo-reemplazar': 'Replace with',
     'campo-mayusculas': 'Match case',
+    'campo-palabra': 'Whole words only',
+    'campo-regex': 'Use regular expression',
+    'ayuda-regex': 'A regular expression describes a pattern: \\d+ is numbers, [aeiou] a vowel, ^ and $ the start and end of a paragraph. In "Replace with" you can use $1, $2… to repeat what the parentheses captured, and $& for everything found. If you leave it off, what you type is searched exactly as written.',
+    'error-regex': 'The regular expression is not valid',
+    'error-patron-largo': 'The text to search for is too long (500 characters at most).',
     'boton-procesar': 'Replace and download',
     'boton-procesar-procesando': 'Processing...',
     'resultado-listo': '✅ Done. ',
@@ -90,6 +101,18 @@ window.i18nPagina = {
         <input type="checkbox" id="coincidirMayusculas">
         <span data-i18n="campo-mayusculas">Coincidir mayúsculas/minúsculas</span>
       </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="palabraCompleta">
+        <span data-i18n="campo-palabra">Solo palabras completas</span>
+      </label>
+      <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="usarRegex">
+        <span data-i18n="campo-regex">Usar expresión regular</span>
+        <span class="ayuda-tip">
+          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+          <span class="ayuda-burbuja" data-i18n="ayuda-regex">Una expresión regular describe un patrón.</span>
+        </span>
+      </label>
       <button class="boton" id="botonProcesar" disabled data-i18n="boton-procesar">Reemplazar y descargar</button>
     </div>
 
@@ -115,6 +138,8 @@ window.i18nPagina = {
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/patron-busqueda.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -141,10 +166,6 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-function escaparRegex(texto) {
-  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 // El reemplazo se hace directamente sobre el XML del .docx (antes se
 // convertía a HTML con mammoth y se reconstruía con docx.js, y se perdían
 // fuentes, colores, encabezados, pies de página y más). En Word el texto de
@@ -164,7 +185,7 @@ function parrafoDe(nodo) {
   return actual;
 }
 
-function reemplazarEnParrafo(parrafo, regex, reemplazo) {
+function reemplazarEnParrafo(parrafo, regex, reemplazo, esRegex) {
   let texto = '';
   const fragmentos = [];
   for (const el of parrafo.getElementsByTagNameNS(NS_WORD, '*')) {
@@ -182,6 +203,7 @@ function reemplazarEnParrafo(parrafo, regex, reemplazo) {
   for (const coincidencia of coincidencias.reverse()) {
     const inicio = coincidencia.index;
     const fin = inicio + coincidencia[0].length;
+    const textoNuevo = PatronBusqueda.expandir(reemplazo, coincidencia, esRegex);
     let primero = true;
     for (const fragmento of fragmentos) {
       const largo = fragmento.nodo.textContent.length;
@@ -189,7 +211,7 @@ function reemplazarEnParrafo(parrafo, regex, reemplazo) {
       const hasta = Math.min(fin, fragmento.inicio + largo) - fragmento.inicio;
       if (desde >= hasta) continue;
       const actual = fragmento.nodo.textContent;
-      fragmento.nodo.textContent = actual.slice(0, desde) + (primero ? reemplazo : '') + actual.slice(hasta);
+      fragmento.nodo.textContent = actual.slice(0, desde) + (primero ? textoNuevo : '') + actual.slice(hasta);
       fragmento.nodo.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
       primero = false;
     }
@@ -205,7 +227,11 @@ botonProcesar.addEventListener('click', async () => {
     if (!buscar) throw new Error(t('error-sin-buscar'));
     const reemplazo = document.getElementById('textoReemplazo').value;
     const coincidirMayusculas = document.getElementById('coincidirMayusculas').checked;
-    const regex = new RegExp(escaparRegex(buscar), coincidirMayusculas ? 'g' : 'gi');
+    const esRegex = document.getElementById('usarRegex').checked;
+    const patron = PatronBusqueda.crear(buscar, { regex: esRegex, palabra: document.getElementById('palabraCompleta').checked, mayusculas: coincidirMayusculas });
+    if (patron.error === 'largo') throw new Error(t('error-patron-largo'));
+    if (patron.error) throw new Error(t('error-regex') + ' (' + patron.detalle + ')');
+    const regex = patron.regex;
 
     const zip = await ZipPropio.loadAsync(await archivoActual.arrayBuffer());
     if (!zip.file('word/document.xml')) throw new Error(t('error-no-docx'));
@@ -215,7 +241,7 @@ botonProcesar.addEventListener('click', async () => {
       if (doc.getElementsByTagName('parsererror').length > 0) continue;
       let enParte = 0;
       for (const parrafo of [...doc.getElementsByTagNameNS(NS_WORD, 'p')]) {
-        enParte += reemplazarEnParrafo(parrafo, regex, reemplazo);
+        enParte += reemplazarEnParrafo(parrafo, regex, reemplazo, esRegex);
       }
       if (enParte > 0) {
         zip.file(ruta, new XMLSerializer().serializeToString(doc));
