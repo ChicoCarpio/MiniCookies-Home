@@ -66,7 +66,7 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv)</span>
-      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
@@ -192,7 +192,7 @@ async function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(f.name));
+  const archivo = [...listaFileList].find(f => /\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i.test(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 

@@ -62,7 +62,7 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📊 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
-      <input type="file" id="entradaArchivos" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" multiple hidden>
+      <input type="file" id="entradaArchivos" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" multiple hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivos"></ul>
@@ -107,7 +107,7 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let archivos = [];
 
 function esArchivoValido(archivo) {
-  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+  return /\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i.test(archivo.name);
 }
 
 function actualizarLista() {
@@ -140,7 +140,7 @@ function nombreDeHojaUnico(nombreDeseado, nombresUsados) {
   // ni que empiece o termine con apóstrofo, ni "History" (reservado): Excel
   // no abre un libro con cualquiera de esos casos. Excel además
   // no distingue mayúsculas: "Datos" y "datos" son la misma hoja.
-  let base = nombreDeseado.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '').replace(/[:\/\\?*\[\]]/g, '-').slice(0, 31).replace(/^'+|'+$/g, '');
+  let base = nombreDeseado.replace(/\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i, '').replace(/[:\/\\?*\[\]]/g, '-').slice(0, 31).replace(/^'+|'+$/g, '');
   if (base.trim() === '' || base.toLowerCase() === 'history') base = t('nombre-hoja-defecto');
   let nombreFinal = base;
   let sufijo = 2;
@@ -163,7 +163,7 @@ botonUnir.addEventListener('click', async () => {
 
     for (const archivo of archivos) {
       const libroOrigen = await LectorHojas.abrir(archivo);
-      const nombreBase = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i, '');
+      const nombreBase = archivo.name.replace(/\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i, '');
       const tieneVariasHojas = libroOrigen.hojas.length > 1;
 
       // Antes solo se tomaba la primera hoja de cada archivo — si un Excel de

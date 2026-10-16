@@ -102,7 +102,7 @@ window.i18nPagina = {
       <span data-i18n="campo-original">Versión original</span>
       <div class="zona-arrastre" id="zonaA" style="padding:20px;">
         <span data-i18n="zona-a">📊 Arrastrá el archivo original acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaA" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+        <input type="file" id="entradaA" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" hidden>
       </div>
       <ul class="lista-archivos" id="listaA"></ul>
     </label>
@@ -111,7 +111,7 @@ window.i18nPagina = {
       <span data-i18n="campo-nueva">Versión nueva</span>
       <div class="zona-arrastre" id="zonaB" style="padding:20px;">
         <span data-i18n="zona-b">📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo</span>
-        <input type="file" id="entradaB" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+        <input type="file" id="entradaB" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" hidden>
       </div>
       <ul class="lista-archivos" id="listaB"></ul>
     </label>
@@ -165,7 +165,7 @@ let columnas = [];
 let ultimaComparacion = null; // { filasResultado, mapaA, clave } para descargar
 
 function esArchivoValido(archivo) {
-  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+  return /\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i.test(archivo.name);
 }
 
 // Primera hoja del archivo como filas { encabezado: texto mostrado }. La primera fila da los encabezados (los vacíos se llaman __EMPTY,

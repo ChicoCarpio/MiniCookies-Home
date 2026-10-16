@@ -64,7 +64,7 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
       <span data-i18n="zona-arrastre">📊 Arrastrá tu archivo acá o hacé clic para elegirlo</span>
-      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.ods,.csv" hidden>
+      <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.xlsb,.xls,.xml,.ods,.csv" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
@@ -103,7 +103,7 @@ let hojasActuales = [];   // [{ nombre, abrir: async () => hoja de LectorHojas }
 let numeroDeHoja = 0;     // para descartar una hoja que terminó de cargar cuando ya se eligió otra
 
 function esArchivoValido(archivo) {
-  return /\.(xlsx|xlsm|xlsb|xls|ods|csv)$/i.test(archivo.name);
+  return /\.(xlsx|xlsm|xlsb|xls|xml|ods|csv)$/i.test(archivo.name);
 }
 
 
