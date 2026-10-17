@@ -47,7 +47,7 @@
         if (codigo && XlsxFormato.esFecha(codigo) && XlsxFormato.tieneCalendario(codigo)) fila[c] = { valor: v.valor + 1462, formato: v.formato };
       }
     }
-    return XlsxEscritor.crearLibro(libro.hojas.map((h) => ({ nombre: h.nombre, filas: h.filas, anchos: h.anchos, combinadas: h.combinadas, estado: h.estado, columnasOcultas: h.columnasOcultas, filasOcultas: h.filasOcultas })));
+    return XlsxEscritor.crearLibro(libro.hojas.map((h) => ({ nombre: h.nombre, filas: h.filas, anchos: h.anchos, combinadas: h.combinadas, estado: h.estado, columnasOcultas: h.columnasOcultas, filasOcultas: h.filasOcultas, altosFila: h.altosFila })));
   }
 
   globalThis.FormatosAntiguos = { detectar, leer, aXlsx };
