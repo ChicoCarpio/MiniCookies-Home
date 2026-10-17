@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo dictar un texto con tu voz: guía práctica — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo funciona el dictado por voz con Whisper en el navegador, qué modelo elegir, cómo grabar para que reconozca mejor y qué límites tiene.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo dictar un texto con tu voz: guía práctica — Mini Cookies',
+    'meta-descripcion': 'Cómo funciona el dictado por voz con Whisper en el navegador, qué modelo elegir, cómo grabar para que reconozca mejor y qué límites tiene.',
+    'h1': 'Cómo dictar un texto con tu voz: modelos, consejos y límites',
+    'b1': 'Hablar es más rápido que escribir para casi todo el mundo, y dictar sirve para borradores, notas de una reunión o ideas que no querés perder mientras caminás. El problema es la calidad del resultado: depende de cómo grabás y de qué modelo de reconocimiento usás. Esta guía explica cómo funciona <a href="../herramientas/dictado-voz.html">Dictado por voz</a> y cómo sacarle el mejor resultado.',
+    'b2': 'Cómo funciona',
+    'b3': 'La herramienta usa <strong>Whisper</strong>, un modelo de reconocimiento de voz que se ejecuta dentro del navegador. El proceso tiene tres pasos:',
+    'b4-1': 'Grabás con el micrófono. El navegador guarda la grabación en la memoria de la página.',
+    'b4-2': 'Al detener la grabación, el audio se convierte a la frecuencia que usa el modelo y se le recortan los silencios del principio y del final.',
+    'b4-3': 'El modelo reconoce el habla y escribe el texto en un cuadro que podés editar.',
+    'b5': 'Hay tres modelos, de la familia Whisper en versión comprimida:',
+    'b6-c1': 'Opción en la página',
+    'b6-c2': 'Modelo',
+    'b6-c3': 'Tamaño aproximado',
+    'b6-f1c1': 'Rápido',
+    'b6-f1c2': 'whisper-tiny',
+    'b6-f1c3': '41 MB',
+    'b6-f2c1': 'Preciso',
+    'b6-f2c2': 'whisper-base',
+    'b6-f2c3': '77 MB',
+    'b6-f3c1': 'Muy preciso',
+    'b6-f3c2': 'whisper-small',
+    'b6-f3c3': '249 MB',
+    'b7': 'Un modelo más grande suele reconocer mejor, sobre todo con ruido de fondo o un acento marcado, pero tarda más y usa más memoria.',
+    'b8': 'La descarga de la primera vez',
+    'b9': 'El modelo no viene incluido en la página. La primera vez que lo usás, el navegador lo descarga desde el servidor de Hugging Face (y el motor que lo ejecuta, desde jsDelivr, dos servicios que la política de privacidad del sitio nombra). Se muestra una barra con el porcentaje, y después el modelo queda guardado en el navegador para las próximas veces.',
+    'b10': 'Un detalle útil: la descarga <strong>no empieza al abrir la página</strong>, sino cuando pulsás «Empezar a grabar». Así no se gastan 41 a 249 MB de datos en quien solo entra a mirar. Como la descarga corre mientras hablás, en una grabación de varios minutos el modelo suele estar listo cuando terminás. Si cambiás de modelo después de haber grabado, la descarga del nuevo también arranca sola.',
+    'b11': 'Paso a paso',
+    'b12-1': 'Elegí el <strong>Modelo</strong>. Para notas cortas, «Rápido» alcanza; si hay ruido o acento marcado, probá «Preciso».',
+    'b12-2': 'Elegí el <strong>Idioma</strong>: Español, Inglés o Detectar automáticamente. La página viene en español. Si dictás en español, dejarlo fijado evita que el modelo adivine el idioma equivocado.',
+    'b12-3': 'Pulsá <strong>Empezar a grabar</strong> y permití el micrófono cuando el navegador lo pida. Vas a ver un contador de tiempo. Mientras grabás, el selector de modelo queda bloqueado.',
+    'b12-4': 'Pulsá <strong>Detener grabación</strong>. Aparece el avance y después el texto en «Texto transcripto (editable)».',
+    'b12-5': 'Corregí lo necesario y usá <strong>Copiar</strong> o <strong>Descargar .txt</strong> (el archivo se llama «dictado.txt»).',
+    'b13': 'Cada grabación nueva se <strong>agrega al final</strong> del texto que ya tenías, sin borrar lo anterior ni tus correcciones. Podés dictar por partes, corregir y seguir.',
+    'b14': 'El permiso del micrófono',
+    'b15': 'El navegador pide permiso la primera vez, porque la grabación se inicia al pulsar el botón. Si lo denegaste, la herramienta muestra «No se pudo acceder al micrófono». Revisá entonces los permisos del sitio en el navegador (suele estar en el candado junto a la dirección) y comprobá que ninguna otra aplicación esté usando el micrófono. Una videollamada abierta, por ejemplo, puede ocuparlo.',
+    'b16': 'Consejos para que reconozca mejor',
+    'b17-1': '<strong>Un lugar silencioso.</strong> Es lo que más influye. Cerrá la ventana, apagá el ventilador o la tele.',
+    'b17-2': '<strong>Cerca del micrófono, a distancia constante.</strong> Como referencia general (no es una medida exacta), una distancia corta, de unos 15 a 30 cm del micrófono del auricular o del equipo, suele dar mejor resultado que hablar desde lejos. La herramienta activa la supresión de ruido y el control de volumen del navegador, pero no puede reconstruir una voz que llega débil.',
+    'b17-3': '<strong>Ritmo natural y frases completas.</strong> Hablá como si leyeras con calma. Gritar o hablar muy bajo suele empeorar el resultado; en general conviene hacer las pausas entre frases y no en medio de ellas.',
+    'b17-4': '<strong>Nombres propios y términos técnicos.</strong> Son lo que más se confunde. Dictalos y revisá esas palabras después.',
+    'b17-5': '<strong>Grabaciones por partes.</strong> Es más fácil revisar tres tandas de un par de minutos que una larga, y si algo sale mal, repetís solo esa parte.',
+    'b17-6': '<strong>Pausas al principio.</strong> No hace falta apurarse: los silencios iniciales y finales se recortan antes de reconocer, para reducir el riesgo de que el modelo «invente» texto de relleno.',
+    'b18': 'La puntuación',
+    'b19': 'La herramienta <strong>no tiene comandos de voz</strong> para la puntuación: decir «punto» o «coma» no es una orden que ella entienda como tal, y es posible que el modelo escriba la palabra tal cual. El modelo suele añadir por su cuenta puntos, comas y signos de interrogación según la entonación y el contexto, pero no se puede controlar y a veces se equivoca. Por eso conviene un repaso final del texto.',
+    'b20': 'Qué hacer con el texto después',
+    'b21-1': '<strong>Leelo de corrido con el audio en la cabeza.</strong> Corregí números, nombres y siglas.',
+    'b21-2': '<strong>Ajustá las mayúsculas</strong> si hace falta. Con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> podés dejar el formato como lo necesitás.',
+    'b21-3': '<strong>Medí la extensión</strong> con <a href="../herramientas/contador-palabras.html">Contador de palabras</a> si tu texto tiene un tope de palabras, y consultá el tiempo de lectura estimado.',
+    'b21-4': '<strong>Compará versiones</strong> con <a href="../herramientas/comparador-texto.html">Comparar dos textos</a> si dictaste dos veces lo mismo y querés ver qué cambió.',
+    'b21-5': '<strong>Guardalo</strong>: copiá el texto a tu editor o descargá «dictado.txt».',
+    'b22': 'Límites que conviene conocer',
+    'b23-1': '<strong>No es perfecto.</strong> Un modelo de reconocimiento comete errores, y más con ruido, voces superpuestas, acentos poco representados en sus datos de entrenamiento o vocabulario especializado. Tratá el resultado como un borrador.',
+    'b23-2': '<strong>Idiomas:</strong> la página ofrece español, inglés y detección automática. No tiene otros idiomas en el selector.',
+    'b23-3': '<strong>Una voz.</strong> No identifica quién habla, así que no sirve para separar a los participantes de una reunión.',
+    'b23-4': '<strong>Memoria.</strong> Los modelos grandes consumen mucha memoria. En un teléfono o en una computadora con poca memoria puede aparecer el aviso «Tu navegador se quedó sin memoria»; en ese caso elegí un modelo más liviano.',
+    'b23-5': '<strong>Grabaciones largas.</strong> El audio se procesa en tramos, pero una grabación de muchos minutos mantiene todo el audio en memoria y tarda más en transcribirse. No hay un límite de duración indicado en la página; si dictás mucho, grabá por partes.',
+    'b23-6': '<strong>Internet, sobre todo la primera vez</strong>, para descargar el modelo y el motor que lo ejecuta. Sin conexión y sin el modelo guardado, la herramienta no puede arrancar; con el modelo ya guardado puede funcionar sin conexión, pero no está garantizado.',
+    'b24': 'Preguntas frecuentes',
+    'b25': '<strong>¿Qué modelo elijo?</strong> Empezá con «Rápido». Si ves muchos errores, pasá a «Preciso», y a «Muy preciso» cuando la calidad importe más que la velocidad. Cada modelo se descarga normalmente una sola vez: después queda guardado en el navegador.',
+    'b26': '<strong>¿Funciona en el celular?</strong> Puede funcionar, pero los modelos más grandes pueden quedarse sin memoria. Probá primero con el más liviano.',
+    'b27': '<strong>¿Puedo cambiar de modelo mientras grabo?</strong> No: el selector se bloquea durante la grabación y se habilita al detenerla.',
+    'b28': 'Resumen',
+    'b29': 'El dictado usa Whisper dentro del navegador, con tres tamaños de modelo que se descargan una vez desde Hugging Face. Para el mejor resultado, grabá en silencio, cerca del micrófono y por partes; elegí el idioma en lugar de la detección automática si ya lo sabés, y revisá siempre nombres, números y puntuación antes de usar el texto.',
+    'rel1': 'Dictado por voz',
+    'rel2': 'Contador de palabras',
+    'rel3': 'Convertir mayúsculas y minúsculas',
+    'rel4': 'Comparar dos textos'
+  },
+  en: {
+    'titulo-pagina': 'How to Dictate Text With Your Voice: A Practical Guide — Mini Cookies',
+    'meta-descripcion': 'How voice dictation with Whisper works in your browser, which model to choose, how to record for better recognition and what its limits are.',
+    'h1': 'How to Dictate Text With Your Voice: Models, Tips and Limits',
+    'b1': 'Speaking is faster than typing for almost everyone, and dictation is great for drafts, meeting notes or ideas you don’t want to lose while you’re out walking. The catch is the quality of the result: it depends on how you record and on which recognition model you use. This guide explains how <a href="../herramientas/dictado-voz.html">Voice dictation</a> works and how to get the best results from it.',
+    'b2': 'How it works',
+    'b3': 'The tool uses <strong>Whisper</strong>, a speech recognition model that runs inside your browser. The process has three steps:',
+    'b4-1': 'You record with the microphone. The browser keeps the recording in the page’s memory.',
+    'b4-2': 'When you stop recording, the audio is converted to the sample rate the model uses, and the silences at the beginning and end are trimmed.',
+    'b4-3': 'The model recognizes the speech and writes the text into a box that you can edit.',
+    'b5': 'There are three models, from the Whisper family in compressed form:',
+    'b6-c1': 'Option on the page',
+    'b6-c2': 'Model',
+    'b6-c3': 'Approximate size',
+    'b6-f1c1': 'Fast',
+    'b6-f1c2': 'whisper-tiny',
+    'b6-f1c3': '41 MB',
+    'b6-f2c1': 'Accurate',
+    'b6-f2c2': 'whisper-base',
+    'b6-f2c3': '77 MB',
+    'b6-f3c1': 'Very accurate',
+    'b6-f3c2': 'whisper-small',
+    'b6-f3c3': '249 MB',
+    'b7': 'A larger model usually recognizes speech better, especially with background noise or a strong accent, but it takes longer and uses more memory.',
+    'b8': 'The first-time download',
+    'b9': 'The model isn’t included in the page. The first time you use it, your browser downloads it from the Hugging Face server (and the engine that runs it from jsDelivr, two services named in the site’s privacy policy). A bar shows the percentage, and afterwards the model stays saved in your browser for next time.',
+    'b10': 'One useful detail: the download <strong>doesn’t start when you open the page</strong>, but when you click "Start recording". That way no 41 to 249 MB of data is spent on someone who just visits to take a look. Since the download runs while you speak, in a recording of several minutes the model is usually ready by the time you finish. If you switch models after recording, the download of the new one also starts on its own.',
+    'b11': 'Step by step',
+    'b12-1': 'Choose the <strong>Model</strong>. For short notes, "Fast" is enough; if there is noise or a strong accent, try "Accurate".',
+    'b12-2': 'Choose the <strong>Language</strong>: Spanish, English or Detect automatically. The page defaults to Spanish. If you’re dictating in Spanish, leaving it fixed keeps the model from guessing the wrong language.',
+    'b12-3': 'Click <strong>Start recording</strong> and allow the microphone when the browser asks. You’ll see a timer. While you record, the model selector is locked.',
+    'b12-4': 'Click <strong>Stop recording</strong>. Progress appears, and then the text shows up in "Transcribed text (editable)".',
+    'b12-5': 'Fix whatever is needed and use <strong>Copy</strong> or <strong>Download .txt</strong> (the file is called "dictado.txt").',
+    'b13': 'Each new recording is <strong>added to the end</strong> of the text you already had, without erasing what was there before or your corrections. You can dictate in parts, correct, and carry on.',
+    'b14': 'Microphone permission',
+    'b15': 'The browser asks for permission the first time, because recording starts when you click the button. If you denied it, the tool shows "The microphone could not be accessed". Check the site’s permissions in your browser (usually under the padlock next to the address) and make sure no other application is using the microphone. An open video call, for example, can occupy it.',
+    'b16': 'Tips for better recognition',
+    'b17-1': '<strong>A quiet place.</strong> This matters most. Close the window, switch off the fan or the TV.',
+    'b17-2': '<strong>Close to the microphone, at a steady distance.</strong> As a general guide (not an exact measurement), a short distance of about 15 to 30 cm from the headset or device microphone usually gives better results than speaking from far away. The tool turns on the browser’s noise suppression and volume control, but it can’t rebuild a voice that arrives weak.',
+    'b17-3': '<strong>Natural rhythm and complete sentences.</strong> Speak as if you were reading calmly. Shouting or speaking very softly tends to make the result worse; as a general rule, it’s better to pause between sentences than in the middle of them.',
+    'b17-4': '<strong>Proper names and technical terms.</strong> These are what gets confused most. Dictate them and check those words afterwards.',
+    'b17-5': '<strong>Recording in parts.</strong> It’s easier to review three batches of a couple of minutes than one long one, and if something goes wrong, you repeat only that part.',
+    'b17-6': '<strong>Pauses at the start.</strong> There’s no need to rush: the silences at the beginning and end are trimmed before recognition, which reduces the risk of the model “inventing” filler text.',
+    'b18': 'Punctuation',
+    'b19': 'The tool has <strong>no voice commands</strong> for punctuation: saying “period” or “comma” isn’t an instruction it understands as such, and the model may write the word out as it is. The model usually adds periods, commas and question marks on its own, based on intonation and context, but you can’t control it and it sometimes gets it wrong. That’s why a final read-through of the text is a good idea.',
+    'b20': 'What to do with the text afterwards',
+    'b21-1': '<strong>Read it through with the audio in your head.</strong> Correct numbers, names and acronyms.',
+    'b21-2': '<strong>Adjust the capitalization</strong> if needed. With <a href="../herramientas/convertidor-mayusculas.html">Change text case</a> you can set the format the way you need it.',
+    'b21-3': '<strong>Measure the length</strong> with <a href="../herramientas/contador-palabras.html">Word counter</a> if your text has a word limit, and check the estimated reading time.',
+    'b21-4': '<strong>Compare versions</strong> with <a href="../herramientas/comparador-texto.html">Compare two texts</a> if you dictated the same thing twice and want to see what changed.',
+    'b21-5': '<strong>Save it</strong>: copy the text to your editor or download "dictado.txt".',
+    'b22': 'Limits worth knowing',
+    'b23-1': '<strong>It isn’t perfect.</strong> A recognition model makes mistakes, more so with noise, overlapping voices, accents that are poorly represented in its training data or specialized vocabulary. Treat the result as a draft.',
+    'b23-2': '<strong>Languages:</strong> the page offers Spanish, English and automatic detection. There are no other languages in the selector.',
+    'b23-3': '<strong>One voice.</strong> It doesn’t identify who is speaking, so it isn’t suitable for separating the participants of a meeting.',
+    'b23-4': '<strong>Memory.</strong> The large models use a lot of memory. On a phone or a computer with little memory, the notice "Your browser ran out of memory running this model" may appear; in that case choose a lighter model.',
+    'b23-5': '<strong>Long recordings.</strong> The audio is processed in chunks, but a recording of many minutes keeps all the audio in memory and takes longer to transcribe. The page doesn’t state a duration limit; if you dictate a lot, record in parts.',
+    'b23-6': '<strong>Internet, mainly the first time</strong>, to download the model and the engine that runs it. Without a connection and without the model saved, the tool can’t start; with the model already saved it may work offline, but that is not guaranteed.',
+    'b24': 'Frequently asked questions',
+    'b25': '<strong>Which model should I choose?</strong> Start with "Fast". If you see many errors, move up to "Accurate", and to "Very accurate" when quality matters more than speed. Each model is normally downloaded only once: after that it stays saved in the browser.',
+    'b26': '<strong>Does it work on a phone?</strong> It may work, but the larger models can run out of memory. Try the lightest one first.',
+    'b27': '<strong>Can I switch models while recording?</strong> No: the selector is locked during recording and enabled again when you stop.',
+    'b28': 'Summary',
+    'b29': 'Dictation uses Whisper inside the browser, with three model sizes that are downloaded once from Hugging Face. For the best result, record in a quiet place, close to the microphone and in parts; choose the language instead of automatic detection if you already know it, and always check names, numbers and punctuation before using the text.',
+    'rel1': 'Voice dictation',
+    'rel2': 'Word counter',
+    'rel3': 'Change text case',
+    'rel4': 'Compare two texts'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo dictar un texto con tu voz: modelos, consejos y límites</h1>
+    <p data-i18n-html="b1">Hablar es más rápido que escribir para casi todo el mundo, y dictar sirve para borradores, notas de una reunión o ideas que no querés perder mientras caminás. El problema es la calidad del resultado: depende de cómo grabás y de qué modelo de reconocimiento usás. Esta guía explica cómo funciona <a href="../herramientas/dictado-voz.html">Dictado por voz</a> y cómo sacarle el mejor resultado.</p>
+    <h2 data-i18n="b2">Cómo funciona</h2>
+    <p data-i18n-html="b3">La herramienta usa <strong>Whisper</strong>, un modelo de reconocimiento de voz que se ejecuta dentro del navegador. El proceso tiene tres pasos:</p>
+    <ol>
+      <li data-i18n-html="b4-1">Grabás con el micrófono. El navegador guarda la grabación en la memoria de la página.</li>
+      <li data-i18n-html="b4-2">Al detener la grabación, el audio se convierte a la frecuencia que usa el modelo y se le recortan los silencios del principio y del final.</li>
+      <li data-i18n-html="b4-3">El modelo reconoce el habla y escribe el texto en un cuadro que podés editar.</li>
+    </ol>
+    <p data-i18n-html="b5">Hay tres modelos, de la familia Whisper en versión comprimida:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b6-c1">Opción en la página</th><th data-i18n-html="b6-c2">Modelo</th><th data-i18n-html="b6-c3">Tamaño aproximado</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b6-f1c1">Rápido</td><td data-i18n-html="b6-f1c2">whisper-tiny</td><td data-i18n-html="b6-f1c3">41 MB</td></tr>
+        <tr><td data-i18n-html="b6-f2c1">Preciso</td><td data-i18n-html="b6-f2c2">whisper-base</td><td data-i18n-html="b6-f2c3">77 MB</td></tr>
+        <tr><td data-i18n-html="b6-f3c1">Muy preciso</td><td data-i18n-html="b6-f3c2">whisper-small</td><td data-i18n-html="b6-f3c3">249 MB</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b7">Un modelo más grande suele reconocer mejor, sobre todo con ruido de fondo o un acento marcado, pero tarda más y usa más memoria.</p>
+    <h3 data-i18n="b8">La descarga de la primera vez</h3>
+    <p data-i18n-html="b9">El modelo no viene incluido en la página. La primera vez que lo usás, el navegador lo descarga desde el servidor de Hugging Face (y el motor que lo ejecuta, desde jsDelivr, dos servicios que la política de privacidad del sitio nombra). Se muestra una barra con el porcentaje, y después el modelo queda guardado en el navegador para las próximas veces.</p>
+    <p data-i18n-html="b10">Un detalle útil: la descarga <strong>no empieza al abrir la página</strong>, sino cuando pulsás «Empezar a grabar». Así no se gastan 41 a 249 MB de datos en quien solo entra a mirar. Como la descarga corre mientras hablás, en una grabación de varios minutos el modelo suele estar listo cuando terminás. Si cambiás de modelo después de haber grabado, la descarga del nuevo también arranca sola.</p>
+    <h2 data-i18n="b11">Paso a paso</h2>
+    <ol>
+      <li data-i18n-html="b12-1">Elegí el <strong>Modelo</strong>. Para notas cortas, «Rápido» alcanza; si hay ruido o acento marcado, probá «Preciso».</li>
+      <li data-i18n-html="b12-2">Elegí el <strong>Idioma</strong>: Español, Inglés o Detectar automáticamente. La página viene en español. Si dictás en español, dejarlo fijado evita que el modelo adivine el idioma equivocado.</li>
+      <li data-i18n-html="b12-3">Pulsá <strong>Empezar a grabar</strong> y permití el micrófono cuando el navegador lo pida. Vas a ver un contador de tiempo. Mientras grabás, el selector de modelo queda bloqueado.</li>
+      <li data-i18n-html="b12-4">Pulsá <strong>Detener grabación</strong>. Aparece el avance y después el texto en «Texto transcripto (editable)».</li>
+      <li data-i18n-html="b12-5">Corregí lo necesario y usá <strong>Copiar</strong> o <strong>Descargar .txt</strong> (el archivo se llama «dictado.txt»).</li>
+    </ol>
+    <p data-i18n-html="b13">Cada grabación nueva se <strong>agrega al final</strong> del texto que ya tenías, sin borrar lo anterior ni tus correcciones. Podés dictar por partes, corregir y seguir.</p>
+    <h2 data-i18n="b14">El permiso del micrófono</h2>
+    <p data-i18n-html="b15">El navegador pide permiso la primera vez, porque la grabación se inicia al pulsar el botón. Si lo denegaste, la herramienta muestra «No se pudo acceder al micrófono». Revisá entonces los permisos del sitio en el navegador (suele estar en el candado junto a la dirección) y comprobá que ninguna otra aplicación esté usando el micrófono. Una videollamada abierta, por ejemplo, puede ocuparlo.</p>
+    <h2 data-i18n="b16">Consejos para que reconozca mejor</h2>
+    <ul>
+      <li data-i18n-html="b17-1"><strong>Un lugar silencioso.</strong> Es lo que más influye. Cerrá la ventana, apagá el ventilador o la tele.</li>
+      <li data-i18n-html="b17-2"><strong>Cerca del micrófono, a distancia constante.</strong> Como referencia general (no es una medida exacta), una distancia corta, de unos 15 a 30 cm del micrófono del auricular o del equipo, suele dar mejor resultado que hablar desde lejos. La herramienta activa la supresión de ruido y el control de volumen del navegador, pero no puede reconstruir una voz que llega débil.</li>
+      <li data-i18n-html="b17-3"><strong>Ritmo natural y frases completas.</strong> Hablá como si leyeras con calma. Gritar o hablar muy bajo suele empeorar el resultado; en general conviene hacer las pausas entre frases y no en medio de ellas.</li>
+      <li data-i18n-html="b17-4"><strong>Nombres propios y términos técnicos.</strong> Son lo que más se confunde. Dictalos y revisá esas palabras después.</li>
+      <li data-i18n-html="b17-5"><strong>Grabaciones por partes.</strong> Es más fácil revisar tres tandas de un par de minutos que una larga, y si algo sale mal, repetís solo esa parte.</li>
+      <li data-i18n-html="b17-6"><strong>Pausas al principio.</strong> No hace falta apurarse: los silencios iniciales y finales se recortan antes de reconocer, para reducir el riesgo de que el modelo «invente» texto de relleno.</li>
+    </ul>
+    <h2 data-i18n="b18">La puntuación</h2>
+    <p data-i18n-html="b19">La herramienta <strong>no tiene comandos de voz</strong> para la puntuación: decir «punto» o «coma» no es una orden que ella entienda como tal, y es posible que el modelo escriba la palabra tal cual. El modelo suele añadir por su cuenta puntos, comas y signos de interrogación según la entonación y el contexto, pero no se puede controlar y a veces se equivoca. Por eso conviene un repaso final del texto.</p>
+    <h2 data-i18n="b20">Qué hacer con el texto después</h2>
+    <ol>
+      <li data-i18n-html="b21-1"><strong>Leelo de corrido con el audio en la cabeza.</strong> Corregí números, nombres y siglas.</li>
+      <li data-i18n-html="b21-2"><strong>Ajustá las mayúsculas</strong> si hace falta. Con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> podés dejar el formato como lo necesitás.</li>
+      <li data-i18n-html="b21-3"><strong>Medí la extensión</strong> con <a href="../herramientas/contador-palabras.html">Contador de palabras</a> si tu texto tiene un tope de palabras, y consultá el tiempo de lectura estimado.</li>
+      <li data-i18n-html="b21-4"><strong>Compará versiones</strong> con <a href="../herramientas/comparador-texto.html">Comparar dos textos</a> si dictaste dos veces lo mismo y querés ver qué cambió.</li>
+      <li data-i18n-html="b21-5"><strong>Guardalo</strong>: copiá el texto a tu editor o descargá «dictado.txt».</li>
+    </ol>
+    <h2 data-i18n="b22">Límites que conviene conocer</h2>
+    <ul>
+      <li data-i18n-html="b23-1"><strong>No es perfecto.</strong> Un modelo de reconocimiento comete errores, y más con ruido, voces superpuestas, acentos poco representados en sus datos de entrenamiento o vocabulario especializado. Tratá el resultado como un borrador.</li>
+      <li data-i18n-html="b23-2"><strong>Idiomas:</strong> la página ofrece español, inglés y detección automática. No tiene otros idiomas en el selector.</li>
+      <li data-i18n-html="b23-3"><strong>Una voz.</strong> No identifica quién habla, así que no sirve para separar a los participantes de una reunión.</li>
+      <li data-i18n-html="b23-4"><strong>Memoria.</strong> Los modelos grandes consumen mucha memoria. En un teléfono o en una computadora con poca memoria puede aparecer el aviso «Tu navegador se quedó sin memoria»; en ese caso elegí un modelo más liviano.</li>
+      <li data-i18n-html="b23-5"><strong>Grabaciones largas.</strong> El audio se procesa en tramos, pero una grabación de muchos minutos mantiene todo el audio en memoria y tarda más en transcribirse. No hay un límite de duración indicado en la página; si dictás mucho, grabá por partes.</li>
+      <li data-i18n-html="b23-6"><strong>Internet, sobre todo la primera vez</strong>, para descargar el modelo y el motor que lo ejecuta. Sin conexión y sin el modelo guardado, la herramienta no puede arrancar; con el modelo ya guardado puede funcionar sin conexión, pero no está garantizado.</li>
+    </ul>
+    <h2 data-i18n="b24">Preguntas frecuentes</h2>
+    <p data-i18n-html="b25"><strong>¿Qué modelo elijo?</strong> Empezá con «Rápido». Si ves muchos errores, pasá a «Preciso», y a «Muy preciso» cuando la calidad importe más que la velocidad. Cada modelo se descarga normalmente una sola vez: después queda guardado en el navegador.</p>
+    <p data-i18n-html="b26"><strong>¿Funciona en el celular?</strong> Puede funcionar, pero los modelos más grandes pueden quedarse sin memoria. Probá primero con el más liviano.</p>
+    <p data-i18n-html="b27"><strong>¿Puedo cambiar de modelo mientras grabo?</strong> No: el selector se bloquea durante la grabación y se habilita al detenerla.</p>
+    <h2 data-i18n="b28">Resumen</h2>
+    <p data-i18n-html="b29">El dictado usa Whisper dentro del navegador, con tres tamaños de modelo que se descargan una vez desde Hugging Face. Para el mejor resultado, grabá en silencio, cerca del micrófono y por partes; elegí el idioma en lugar de la detección automática si ya lo sabés, y revisá siempre nombres, números y puntuación antes de usar el texto.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/dictado-voz.html" data-i18n="rel1">Dictado por voz</a></li>
+      <li><a href="../herramientas/contador-palabras.html" data-i18n="rel2">Contador de palabras</a></li>
+      <li><a href="../herramientas/convertidor-mayusculas.html" data-i18n="rel3">Convertir mayúsculas y minúsculas</a></li>
+      <li><a href="../herramientas/comparador-texto.html" data-i18n="rel4">Comparar dos textos</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

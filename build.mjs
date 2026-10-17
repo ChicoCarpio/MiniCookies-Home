@@ -215,8 +215,9 @@ function enlacesAlPrincipal(html, rel, relSalida) {
 // En la versión en inglés, los enlaces absolutos a www que tienen gemela en
 // inglés pasan a /en/ (los de arriba se escriben una vez, en español).
 function inglesDelPrincipal(html) {
-  return html.replace(new RegExp('(\\shref\\s*=\\s*")' + SITIO_PRINCIPAL.replace(/\./g, '\\.') + '/([a-z0-9-]*)(")', 'gi'), (todo, antes, nombre, despues) => {
-    if (nombre === '' || conInglesPrincipal.has(nombre + '.html')) return antes + SITIO_PRINCIPAL + '/en/' + nombre + despues;
+  return html.replace(new RegExp('(\\shref\\s*=\\s*")' + SITIO_PRINCIPAL.replace(/\./g, '\\.') + '/([a-z0-9/-]*)(")', 'gi'), (todo, antes, nombre, despues) => {
+    const llave = nombre.endsWith('/') ? nombre + 'index.html' : nombre + '.html';
+    if (nombre === '' || conInglesPrincipal.has(llave)) return antes + SITIO_PRINCIPAL + '/en/' + nombre + despues;
     return todo;
   });
 }

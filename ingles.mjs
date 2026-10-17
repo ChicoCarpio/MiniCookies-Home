@@ -79,6 +79,14 @@ export function traducir(html, raiz, comun, rutaWeb, conIngles) {
     (todo, apertura, etiqueta, clave, contenido, cierre) =>
       (dic[clave] === undefined ? todo : apertura + escHtml(dic[clave]) + cierre));
 
+  // Texto con formato: data-i18n-html pone el valor del diccionario como HTML
+  // (lo escribimos nosotros; ver idioma.js). Va antes de reescribir los enlaces
+  // de más abajo, para que también valgan para los que trae el texto.
+  html = html.replace(
+    /(<([a-zA-Z0-9]+)\b[^>]*\bdata-i18n-html="([^"]+)"[^>]*>)([\s\S]*?)(<\/\2>)/g,
+    (todo, apertura, etiqueta, clave, contenido, cierre) =>
+      (dic[clave] === undefined ? todo : apertura + dic[clave] + cierre));
+
   // Atributos traducibles: data-i18n-attr="content:clave;placeholder:otra"
   html = html.replace(/<[^>]*\bdata-i18n-attr="([^"]+)"[^>]*>/g, (etiqueta, reglas) => {
     let salida = etiqueta;

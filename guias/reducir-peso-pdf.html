@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo reducir el peso de un PDF sin perder calidad — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Por qué un PDF pesa tanto y cómo bajarlo para enviarlo por correo o subirlo a un formulario, sin que se vea mal. Guía paso a paso.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo reducir el peso de un PDF sin perder calidad — Mini Cookies',
+    'meta-descripcion': 'Por qué un PDF pesa tanto y cómo bajarlo para enviarlo por correo o subirlo a un formulario, sin que se vea mal. Guía paso a paso.',
+    'h1': 'Cómo reducir el peso de un PDF sin perder calidad',
+    'b1': 'Preparaste el documento, lo adjuntás al correo y aparece el aviso: el archivo es demasiado grande. Es de lo más común, y casi siempre tiene arreglo sin que el PDF se vea peor en pantalla. Lo primero es entender de dónde viene el peso.',
+    'b2': 'Por qué un PDF pesa tanto',
+    'b3': 'Un PDF de puro texto pesa muy poco: unas decenas de kilobytes por página, incluso con tablas y gráficos hechos con líneas. Lo que lo infla casi siempre son las <strong>fotos</strong>:',
+    'b4-1': '<strong>Escaneos.</strong> Cada página escaneada es una foto de la hoja entera. Un escaneo de 20 páginas a alta resolución puede pasar fácilmente de decenas de megabytes.',
+    'b4-2': '<strong>Capturas de pantalla y fotos de cámara</strong> pegadas en un informe o una presentación.',
+    'b4-3': '<strong>Imágenes con más resolución de la que hace falta.</strong> Una foto de 4000 píxeles de ancho en una página que se lee en pantalla o se imprime en tamaño carta tiene muchos más datos de los que ese tamaño puede mostrar.',
+    'b5': 'Por eso la forma más eficaz de bajar el peso es <strong>recomprimir esas fotos</strong>, no tocar el texto.',
+    'b6': 'Cómo reducirlo con Comprimir / optimizar PDF',
+    'b7': 'La herramienta <a href="../herramientas/optimizar-pdf.html">Comprimir / optimizar PDF</a> hace exactamente eso: busca las fotos que hay dentro del PDF, las vuelve a comprimir y, si querés, las achica, y arma un archivo nuevo con las mismas páginas. El texto, los enlaces y la estructura no se tocan.',
+    'b8-1': 'Arrastrá el PDF a la zona de carga.',
+    'b8-2': 'Elegí la <strong>calidad de las fotos</strong> con el deslizador. Más baja da un archivo más liviano pero con menos detalle; 65 % es un buen punto de partida.',
+    'b8-3': 'Elegí el <strong>tamaño máximo de las fotos</strong>: «Hasta 1600 px» para leer en pantalla o enviar por correo, «Hasta 2500 px» si lo vas a imprimir.',
+    'b8-4': 'Pulsá «Comprimir PDF», mirá cuánto bajó el peso y descargá el resultado.',
+    'b9': 'Qué valores usar según para qué lo necesitás',
+    'b10-c1': 'Para qué',
+    'b10-c2': 'Calidad',
+    'b10-c3': 'Tamaño máximo de las fotos',
+    'b10-f1c1': 'Enviar por correo o subir a un formulario con límite',
+    'b10-f1c2': '50–65 %',
+    'b10-f1c3': 'Hasta 1600 px',
+    'b10-f2c1': 'Leer en pantalla, guardar en un archivo',
+    'b10-f2c2': '65 %',
+    'b10-f2c3': 'Hasta 1600 px',
+    'b10-f3c1': 'Imprimir',
+    'b10-f3c2': 'por encima de 75 %',
+    'b10-f3c3': 'Hasta 2500 px o «Sin reducir»',
+    'b11': 'Qué esperar (y qué no)',
+    'b12': 'La herramienta solo recomprime las fotos que ya están en formato JPEG y en color, que es el caso típico de los PDF pesados: escaneos y fotos de alta resolución. Las imágenes en blanco y negro puro, las indexadas o las que ya estaban muy comprimidas se dejan como están para no arriesgar la calidad. Y cada foto solo se reemplaza si la nueva versión pesa menos que la original.',
+    'b13': 'Eso explica los dos casos en que el peso casi no cambia:',
+    'b14-1': '<strong>El PDF es solo texto.</strong> No hay fotos que comprimir, y un PDF de texto ya es liviano de por sí.',
+    'b14-2': '<strong>Las imágenes ya estaban muy comprimidas.</strong> Si la versión nueva no pesa menos, la herramienta te ofrece el archivo sin cambios y te sugiere probar con una calidad más baja o con fotos más chicas.',
+    'b15': 'Otras formas de aligerar un PDF',
+    'b16': 'A veces conviene combinar la compresión con otros pasos:',
+    'b17-1': '<strong>Quitá las páginas que no necesitás.</strong> Con <a href="../herramientas/extraer-paginas.html">Extraer páginas</a> te quedás solo con las que van, y con <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a> podés quitar y reordenar páginas antes de enviar.',
+    'b17-2': '<strong>Si vas a unir varios archivos, comprimí después.</strong> Con <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> armás el PDF final y recién entonces lo pasás por la compresión: es más cómodo que comprimir cada pieza por separado.',
+    'b17-3': '<strong>Escaneá con la resolución justa.</strong> Para texto, 200 a 300 puntos por pulgada suelen alcanzar. Escanear a mucho más aumenta el peso sin mejorar lo que se lee.',
+    'b17-4': '<strong>Guardá siempre el original.</strong> La compresión de fotos no se puede deshacer en el archivo nuevo: trabajá sobre una copia.',
+    'b18': 'Resumen',
+    'b19': 'Un PDF pesa por sus fotos, no por su texto. Recomprimí las fotos con una calidad entre 50 y 65 % y un tamaño máximo de 1600 px para pantalla y correo, subí a más de 75 % y 2500 px si vas a imprimir, y revisá el resultado antes de enviarlo.',
+    'rel1': 'Comprimir / optimizar PDF',
+    'rel2': 'Unir PDF, imágenes y documentos',
+    'rel3': 'Extraer páginas',
+    'rel4': 'Administrar páginas de PDF'
+  },
+  en: {
+    'titulo-pagina': 'How to Reduce the Size of a PDF Without Losing Quality — Mini Cookies',
+    'meta-descripcion': 'Why a PDF gets so big and how to shrink it so you can email it or upload it to a form without it looking bad. Step-by-step guide.',
+    'h1': 'How to reduce the size of a PDF without losing quality',
+    'b1': 'You’ve finished the document, you attach it to the email, and a warning pops up: the file is too large. It’s one of the most common problems, and it almost always has a fix that doesn’t make the PDF look worse on screen. The first step is understanding where the size comes from.',
+    'b2': 'Why a PDF is so big',
+    'b3': 'A text-only PDF is very small: a few dozen kilobytes per page, even with tables and charts drawn with lines. What bloats it is almost always <strong>photos</strong>:',
+    'b4-1': '<strong>Scans.</strong> Every scanned page is a photo of the whole sheet. A 20-page scan at high resolution can easily run to tens of megabytes.',
+    'b4-2': '<strong>Screenshots and camera photos</strong> pasted into a report or a presentation.',
+    'b4-3': '<strong>Images with more resolution than needed.</strong> A photo 4000 pixels wide on a page that is read on screen or printed at Letter size holds far more data than that size can display.',
+    'b5': 'That’s why the most effective way to cut the size is to <strong>recompress those photos</strong>, not to touch the text.',
+    'b6': 'How to shrink it with Compress / optimize PDF',
+    'b7': 'The <a href="../herramientas/optimizar-pdf.html">Compress / optimize PDF</a> tool does exactly that: it finds the photos inside the PDF, recompresses them and, if you want, makes them smaller, then builds a new file with the same pages. The text, links and structure are left untouched.',
+    'b8-1': 'Drag the PDF onto the upload area.',
+    'b8-2': 'Choose the <strong>photo quality</strong> with the slider. Lower gives a lighter file but with less detail; 65% is a good starting point.',
+    'b8-3': 'Choose the <strong>maximum photo size</strong>: "Up to 1600 px" for reading on screen or sending by email, "Up to 2500 px" if you’re going to print it.',
+    'b8-4': 'Press "Compress PDF", see how much the size dropped, and download the result.',
+    'b9': 'Which values to use depending on what you need',
+    'b10-c1': 'What for',
+    'b10-c2': 'Quality',
+    'b10-c3': 'Maximum photo size',
+    'b10-f1c1': 'Emailing it or uploading it to a form with a size limit',
+    'b10-f1c2': '50–65%',
+    'b10-f1c3': 'Up to 1600 px',
+    'b10-f2c1': 'Reading on screen, filing it away',
+    'b10-f2c2': '65%',
+    'b10-f2c3': 'Up to 1600 px',
+    'b10-f3c1': 'Printing',
+    'b10-f3c2': 'above 75%',
+    'b10-f3c3': 'Up to 2500 px or "Don’t shrink"',
+    'b11': 'What to expect (and what not to)',
+    'b12': 'The tool only recompresses photos that are already in JPEG format and in color, which is the typical case for heavy PDFs: scans and high-resolution photos. Pure black-and-white images, indexed ones, and ones that were already heavily compressed are left as they are so the quality isn’t put at risk. And each photo is only replaced if the new version is smaller than the original.',
+    'b13': 'That explains the two cases where the size barely changes:',
+    'b14-1': '<strong>The PDF is text only.</strong> There are no photos to compress, and a text PDF is already light.',
+    'b14-2': '<strong>The images were already heavily compressed.</strong> If the new version isn’t smaller, the tool gives you the file unchanged and suggests trying a lower quality or smaller photos.',
+    'b15': 'Other ways to lighten a PDF',
+    'b16': 'Sometimes it pays to combine compression with other steps:',
+    'b17-1': '<strong>Remove the pages you don’t need.</strong> With <a href="../herramientas/extraer-paginas.html">Extract pages</a> you keep only the ones you want, and with <a href="../herramientas/administrar-paginas.html">Manage PDF pages</a> you can delete and reorder pages before sending.',
+    'b17-2': '<strong>If you’re merging several files, compress afterwards.</strong> With <a href="../herramientas/unir-pdf.html">Merge PDF, images and documents</a> you build the final PDF and only then run it through compression: it’s easier than compressing each piece separately.',
+    'b17-3': '<strong>Scan at just the right resolution.</strong> For text, 200 to 300 dots per inch is usually enough. Scanning at much higher resolution increases the size without improving what you can read.',
+    'b17-4': '<strong>Always keep the original.</strong> Photo compression can’t be undone in the new file, so work on a copy.',
+    'b18': 'Summary',
+    'b19': 'A PDF is heavy because of its photos, not its text. Recompress the photos at a quality between 50 and 65% and a maximum size of 1600 px for screen and email, go above 75% and 2500 px if you’re going to print, and check the result before sending it.',
+    'rel1': 'Compress / optimize PDF',
+    'rel2': 'Merge PDF, images and documents',
+    'rel3': 'Extract pages',
+    'rel4': 'Manage PDF pages'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo reducir el peso de un PDF sin perder calidad</h1>
+    <p data-i18n-html="b1">Preparaste el documento, lo adjuntás al correo y aparece el aviso: el archivo es demasiado grande. Es de lo más común, y casi siempre tiene arreglo sin que el PDF se vea peor en pantalla. Lo primero es entender de dónde viene el peso.</p>
+    <h2 data-i18n="b2">Por qué un PDF pesa tanto</h2>
+    <p data-i18n-html="b3">Un PDF de puro texto pesa muy poco: unas decenas de kilobytes por página, incluso con tablas y gráficos hechos con líneas. Lo que lo infla casi siempre son las <strong>fotos</strong>:</p>
+    <ul>
+      <li data-i18n-html="b4-1"><strong>Escaneos.</strong> Cada página escaneada es una foto de la hoja entera. Un escaneo de 20 páginas a alta resolución puede pasar fácilmente de decenas de megabytes.</li>
+      <li data-i18n-html="b4-2"><strong>Capturas de pantalla y fotos de cámara</strong> pegadas en un informe o una presentación.</li>
+      <li data-i18n-html="b4-3"><strong>Imágenes con más resolución de la que hace falta.</strong> Una foto de 4000 píxeles de ancho en una página que se lee en pantalla o se imprime en tamaño carta tiene muchos más datos de los que ese tamaño puede mostrar.</li>
+    </ul>
+    <p data-i18n-html="b5">Por eso la forma más eficaz de bajar el peso es <strong>recomprimir esas fotos</strong>, no tocar el texto.</p>
+    <h2 data-i18n="b6">Cómo reducirlo con Comprimir / optimizar PDF</h2>
+    <p data-i18n-html="b7">La herramienta <a href="../herramientas/optimizar-pdf.html">Comprimir / optimizar PDF</a> hace exactamente eso: busca las fotos que hay dentro del PDF, las vuelve a comprimir y, si querés, las achica, y arma un archivo nuevo con las mismas páginas. El texto, los enlaces y la estructura no se tocan.</p>
+    <ol>
+      <li data-i18n-html="b8-1">Arrastrá el PDF a la zona de carga.</li>
+      <li data-i18n-html="b8-2">Elegí la <strong>calidad de las fotos</strong> con el deslizador. Más baja da un archivo más liviano pero con menos detalle; 65 % es un buen punto de partida.</li>
+      <li data-i18n-html="b8-3">Elegí el <strong>tamaño máximo de las fotos</strong>: «Hasta 1600 px» para leer en pantalla o enviar por correo, «Hasta 2500 px» si lo vas a imprimir.</li>
+      <li data-i18n-html="b8-4">Pulsá «Comprimir PDF», mirá cuánto bajó el peso y descargá el resultado.</li>
+    </ol>
+    <h3 data-i18n="b9">Qué valores usar según para qué lo necesitás</h3>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b10-c1">Para qué</th><th data-i18n-html="b10-c2">Calidad</th><th data-i18n-html="b10-c3">Tamaño máximo de las fotos</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b10-f1c1">Enviar por correo o subir a un formulario con límite</td><td data-i18n-html="b10-f1c2">50–65 %</td><td data-i18n-html="b10-f1c3">Hasta 1600 px</td></tr>
+        <tr><td data-i18n-html="b10-f2c1">Leer en pantalla, guardar en un archivo</td><td data-i18n-html="b10-f2c2">65 %</td><td data-i18n-html="b10-f2c3">Hasta 1600 px</td></tr>
+        <tr><td data-i18n-html="b10-f3c1">Imprimir</td><td data-i18n-html="b10-f3c2">por encima de 75 %</td><td data-i18n-html="b10-f3c3">Hasta 2500 px o «Sin reducir»</td></tr>
+      </tbody>
+    </table></div>
+    <h2 data-i18n="b11">Qué esperar (y qué no)</h2>
+    <p data-i18n-html="b12">La herramienta solo recomprime las fotos que ya están en formato JPEG y en color, que es el caso típico de los PDF pesados: escaneos y fotos de alta resolución. Las imágenes en blanco y negro puro, las indexadas o las que ya estaban muy comprimidas se dejan como están para no arriesgar la calidad. Y cada foto solo se reemplaza si la nueva versión pesa menos que la original.</p>
+    <p data-i18n-html="b13">Eso explica los dos casos en que el peso casi no cambia:</p>
+    <ul>
+      <li data-i18n-html="b14-1"><strong>El PDF es solo texto.</strong> No hay fotos que comprimir, y un PDF de texto ya es liviano de por sí.</li>
+      <li data-i18n-html="b14-2"><strong>Las imágenes ya estaban muy comprimidas.</strong> Si la versión nueva no pesa menos, la herramienta te ofrece el archivo sin cambios y te sugiere probar con una calidad más baja o con fotos más chicas.</li>
+    </ul>
+    <h2 data-i18n="b15">Otras formas de aligerar un PDF</h2>
+    <p data-i18n-html="b16">A veces conviene combinar la compresión con otros pasos:</p>
+    <ul>
+      <li data-i18n-html="b17-1"><strong>Quitá las páginas que no necesitás.</strong> Con <a href="../herramientas/extraer-paginas.html">Extraer páginas</a> te quedás solo con las que van, y con <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a> podés quitar y reordenar páginas antes de enviar.</li>
+      <li data-i18n-html="b17-2"><strong>Si vas a unir varios archivos, comprimí después.</strong> Con <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> armás el PDF final y recién entonces lo pasás por la compresión: es más cómodo que comprimir cada pieza por separado.</li>
+      <li data-i18n-html="b17-3"><strong>Escaneá con la resolución justa.</strong> Para texto, 200 a 300 puntos por pulgada suelen alcanzar. Escanear a mucho más aumenta el peso sin mejorar lo que se lee.</li>
+      <li data-i18n-html="b17-4"><strong>Guardá siempre el original.</strong> La compresión de fotos no se puede deshacer en el archivo nuevo: trabajá sobre una copia.</li>
+    </ul>
+    <h2 data-i18n="b18">Resumen</h2>
+    <p data-i18n-html="b19">Un PDF pesa por sus fotos, no por su texto. Recomprimí las fotos con una calidad entre 50 y 65 % y un tamaño máximo de 1600 px para pantalla y correo, subí a más de 75 % y 2500 px si vas a imprimir, y revisá el resultado antes de enviarlo.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/optimizar-pdf.html" data-i18n="rel1">Comprimir / optimizar PDF</a></li>
+      <li><a href="../herramientas/unir-pdf.html" data-i18n="rel2">Unir PDF, imágenes y documentos</a></li>
+      <li><a href="../herramientas/extraer-paginas.html" data-i18n="rel3">Extraer páginas</a></li>
+      <li><a href="../herramientas/administrar-paginas.html" data-i18n="rel4">Administrar páginas de PDF</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

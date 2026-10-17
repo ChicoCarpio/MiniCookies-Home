@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo crear un favicon y ponerlo en tu sitio web — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué es un favicon, qué tamaños hacen falta y cómo instalarlo con etiquetas link. Incluye consejos de diseño para que se vea bien a 16 px.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo crear un favicon y ponerlo en tu sitio web — Mini Cookies',
+    'meta-descripcion': 'Qué es un favicon, qué tamaños hacen falta y cómo instalarlo con etiquetas link. Incluye consejos de diseño para que se vea bien a 16 px.',
+    'h1': 'Cómo crear un favicon y ponerlo en tu sitio web',
+    'b1': 'Mirá la pestaña de tu navegador: junto al título de cada página hay un iconito. Es el favicon. Aparece también en los favoritos, en el historial y, con otro tamaño, en la pantalla de inicio del celular cuando guardás un sitio como acceso directo. Un sitio sin favicon se ve genérico y es más difícil de ubicar entre muchas pestañas abiertas. Esta guía explica qué archivos necesitás y cómo instalarlos.',
+    'b2': 'Por qué hace falta más de un tamaño',
+    'b3': 'El mismo icono se muestra en lugares muy distintos: una pestaña de 16 píxeles, un acceso directo de 180 o una pantalla de inicio de Android de 192. Si usás una sola imagen, el navegador la reduce o la amplía y queda borrosa. Por eso se prepara el icono en varios tamaños.',
+    'b4': 'Qué genera la herramienta',
+    'b5': 'Con <a href="../herramientas/generar-favicon.html">Generar favicon</a> subís una imagen y obtenés, de una vez:',
+    'b6-c1': 'Archivo',
+    'b6-c2': 'Tamaño',
+    'b6-c3': 'Para qué sirve',
+    'b6-f1c1': '<code>favicon-16x16.png</code>',
+    'b6-f1c2': '16 px',
+    'b6-f1c3': 'Pestañas del navegador',
+    'b6-f2c1': '<code>favicon-32x32.png</code>',
+    'b6-f2c2': '32 px',
+    'b6-f2c3': 'Pestañas en pantallas de alta densidad y accesos directos',
+    'b6-f3c1': '<code>favicon-48x48.png</code>',
+    'b6-f3c2': '48 px',
+    'b6-f3c3': 'Algunos navegadores y buscadores',
+    'b6-f4c1': '<code>apple-touch-icon.png</code>',
+    'b6-f4c2': '180 px',
+    'b6-f4c3': 'Pantalla de inicio de iPhone y iPad',
+    'b6-f5c1': '<code>icon-192.png</code>',
+    'b6-f5c2': '192 px',
+    'b6-f5c3': 'Pantalla de inicio de Android',
+    'b6-f6c1': '<code>icon-512.png</code>',
+    'b6-f6c2': '512 px',
+    'b6-f6c3': 'Pantalla de carga y aplicaciones web instalables',
+    'b6-f7c1': '<code>favicon.ico</code>',
+    'b6-f7c2': '16, 32 y 48 px en un solo archivo',
+    'b6-f7c3': 'El formato clásico, que muchos navegadores piden por su cuenta en la raíz del sitio',
+    'b7': 'La herramienta <strong>no</strong> genera iconos en SVG ni el archivo de manifiesto de las aplicaciones web. Los PNG sí conservan la transparencia si tu imagen la tiene.',
+    'b8': 'Paso a paso',
+    'b9-1': 'Arrastrá tu imagen a la zona de carga o hacé clic para elegirla.',
+    'b9-2': 'Mirá la vista previa. Si la imagen no era cuadrada, se recorta desde el centro al cuadrado más grande posible (no se deforma) y se avisa con qué tamaño quedó. Si querés decidir vos qué parte se conserva, recortala antes con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.',
+    'b9-3': 'Revisá las tarjetas de cada tamaño.',
+    'b9-4': 'Tocá <strong>Descargar</strong> en las que necesites. Cada archivo se descarga por separado.',
+    'b10': 'Para el icono de 512 px conviene partir de una imagen de al menos 512 px de lado. Con una menor, la herramienta la amplía y pierde nitidez.',
+    'b11': 'Cómo instalarlo en tu sitio',
+    'b12': 'Subí los archivos a tu sitio y declaralos dentro de la etiqueta <code>&lt;head&gt;</code> de tus páginas. Una configuración sencilla con lo que genera la herramienta, suponiendo que los archivos están en la raíz del sitio:',
+    'b13': '<code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;\n&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;\n&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;\n&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code>',
+    'b14': 'Muchos navegadores piden además <code>/favicon.ico</code> por su cuenta aunque no lo declares, así que conviene dejarlo en la raíz. Los iconos de 192 y 512 px se usan cuando tu sitio es una aplicación web instalable: se enlazan desde un archivo de manifiesto (<code>site.webmanifest</code>) que escribís vos, porque la herramienta no lo crea.',
+    'b15': 'Si tu sitio está hecho con un gestor como WordPress, normalmente hay un campo en la configuración del tema para subir el "icono del sitio"; ahí subís el PNG de 512 px.',
+    'b16': 'Para buscadores, Google indica que el favicon debe ser cuadrado y de al menos 8×8 píxeles, y recomienda uno mayor de 48×48 para que se vea bien en distintos lugares; además, su dirección tiene que mantenerse estable. Los favicons suelen quedar en caché: si lo cambiás y seguís viendo el anterior, puede tardar un tiempo en actualizarse (en Google, de varios días a varias semanas).',
+    'b17': 'Consejos de diseño para tamaños diminutos',
+    'b18-1': '<strong>Una idea, una forma.</strong> A 16 px tenés 256 píxeles en total. Una inicial, una forma simple o un símbolo con dos colores funciona; una ilustración detallada se vuelve una mancha.',
+    'b18-2': '<strong>Contraste fuerte.</strong> Se ve sobre pestañas claras y oscuras. Evitá colores que se confundan con el fondo del navegador.',
+    'b18-3': '<strong>Sin texto, salvo una o dos letras.</strong> Una palabra completa no se lee a ese tamaño.',
+    'b18-4': '<strong>Dejá un pequeño margen</strong> para que nada quede pegado al borde.',
+    'b18-5': '<strong>Fondo transparente o sólido, según el caso.</strong> Un fondo transparente queda bien en la pestaña. En el icono de pantalla de inicio de iPhone, según varias fuentes la transparencia puede rellenarse con negro, por lo que ahí conviene un fondo sólido.',
+    'b18-6': '<strong>Probalo pequeño.</strong> Mirá la vista previa a su tamaño real, no ampliada.',
+    'b19': 'Preguntas frecuentes',
+    'b20': '¿Qué imagen me conviene subir?',
+    'b21': 'Una imagen cuadrada, simple y grande (512 px o más). Si tu logo es muy detallado, hacé una versión simplificada solo para el favicon.',
+    'b22': '¿El favicon.ico es obligatorio?',
+    'b23': 'No, pero conviene tenerlo en la raíz porque muchos navegadores y herramientas lo piden por su cuenta.',
+    'b24': 'Mi imagen está en otro formato, ¿sirve?',
+    'b25': 'Si el navegador puede abrirla, se puede cargar. Si no, convertila antes con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a>.',
+    'b26': 'Resumen',
+    'b27': 'Un favicon necesita varios tamaños para verse bien en pestañas, accesos directos y pantallas de inicio. Subí una imagen cuadrada y simple a <a href="../herramientas/generar-favicon.html">Generar favicon</a>, descargá los PNG y el <code>favicon.ico</code>, subilos a tu sitio y declarálos con etiquetas <code>link</code> en el <code>&lt;head&gt;</code>. Diseñá pensando en 16 px y revisalo ahí.',
+    'rel1': 'Generar favicon',
+    'rel2': 'Recortar imagen',
+    'rel3': 'Redimensionar imagen',
+    'rel4': 'Convertir formato de imagen'
+  },
+  en: {
+    'titulo-pagina': 'How to create a favicon and add it to your website — Mini Cookies',
+    'meta-descripcion': 'What a favicon is, which sizes you need and how to install it with link tags. Includes design tips so it looks good at 16 px.',
+    'h1': 'How to create a favicon and add it to your website',
+    'b1': 'Look at your browser tab: next to the title of each page there is a tiny icon. That’s the favicon. It also shows up in bookmarks, in your history and, at a different size, on your phone’s home screen when you save a site as a shortcut. A site without a favicon looks generic and is harder to find among many open tabs. This guide explains which files you need and how to install them.',
+    'b2': 'Why you need more than one size',
+    'b3': 'The same icon is displayed in very different places: a 16-pixel tab, a 180-pixel shortcut or a 192-pixel Android home screen. If you use a single image, the browser shrinks or enlarges it and it ends up blurry. That’s why the icon is prepared in several sizes.',
+    'b4': 'What the tool generates',
+    'b5': 'With <a href="../herramientas/generar-favicon.html">Generate a favicon</a> you upload one image and get all of this at once:',
+    'b6-c1': 'File',
+    'b6-c2': 'Size',
+    'b6-c3': 'What it’s for',
+    'b6-f1c1': '<code>favicon-16x16.png</code>',
+    'b6-f1c2': '16 px',
+    'b6-f1c3': 'Browser tabs',
+    'b6-f2c1': '<code>favicon-32x32.png</code>',
+    'b6-f2c2': '32 px',
+    'b6-f2c3': 'Tabs on high-density screens and shortcuts',
+    'b6-f3c1': '<code>favicon-48x48.png</code>',
+    'b6-f3c2': '48 px',
+    'b6-f3c3': 'Some browsers and search engines',
+    'b6-f4c1': '<code>apple-touch-icon.png</code>',
+    'b6-f4c2': '180 px',
+    'b6-f4c3': 'iPhone and iPad home screen',
+    'b6-f5c1': '<code>icon-192.png</code>',
+    'b6-f5c2': '192 px',
+    'b6-f5c3': 'Android home screen',
+    'b6-f6c1': '<code>icon-512.png</code>',
+    'b6-f6c2': '512 px',
+    'b6-f6c3': 'Splash screen and installable web apps',
+    'b6-f7c1': '<code>favicon.ico</code>',
+    'b6-f7c2': '16, 32 and 48 px in a single file',
+    'b6-f7c3': 'The classic format, which many browsers request on their own at the root of the site',
+    'b7': 'The tool does <strong>not</strong> generate SVG icons or the web app manifest file. The PNGs do keep transparency if your image has it.',
+    'b8': 'Step by step',
+    'b9-1': 'Drag your image to the upload area or click to choose it.',
+    'b9-2': 'Look at the preview. If the image wasn’t square, it is cropped from the center to the largest possible square (it isn’t distorted) and you are told what size it ended up at. If you want to decide which part to keep, crop it first with <a href="../herramientas/recortar-imagen.html">Crop an image</a>.',
+    'b9-3': 'Check the card for each size.',
+    'b9-4': 'Tap "Download" on the ones you need. Each file is downloaded separately.',
+    'b10': 'For the 512 px icon, it’s best to start from an image at least 512 px on a side. With a smaller one, the tool enlarges it and it loses sharpness.',
+    'b11': 'How to install it on your site',
+    'b12': 'Upload the files to your site and declare them inside the <code>&lt;head&gt;</code> tag of your pages. Here is a simple setup using what the tool generates, assuming the files are at the root of the site:',
+    'b13': '<code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;\n&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;\n&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;\n&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code>',
+    'b14': 'Many browsers also request <code>/favicon.ico</code> on their own even if you don’t declare it, so it’s a good idea to leave it at the root. The 192 and 512 px icons are used when your site is an installable web app: they are linked from a manifest file (<code>site.webmanifest</code>) that you write yourself, because the tool doesn’t create it.',
+    'b15': 'If your site is built with a platform like WordPress, there is usually a field in the theme settings to upload the "site icon"; that’s where you upload the 512 px PNG.',
+    'b16': 'For search engines, Google states that the favicon must be square and at least 8×8 pixels, and recommends one larger than 48×48 so it looks good in different places; its address should also stay stable. Favicons are often cached: if you change yours and still see the old one, it may take a while to update (on Google, from several days to several weeks).',
+    'b17': 'Design tips for tiny sizes',
+    'b18-1': '<strong>One idea, one shape.</strong> At 16 px you have 256 pixels in total. An initial, a simple shape or a two-color symbol works; a detailed illustration turns into a smudge.',
+    'b18-2': '<strong>Strong contrast.</strong> It shows up on both light and dark tabs. Avoid colors that blend in with the browser background.',
+    'b18-3': '<strong>No text, except one or two letters.</strong> A whole word can’t be read at that size.',
+    'b18-4': '<strong>Leave a small margin</strong> so nothing sits right at the edge.',
+    'b18-5': '<strong>Transparent or solid background, depending on the case.</strong> A transparent background looks good in the tab. On the iPhone home screen icon, according to several sources transparency can be filled in with black, so a solid background is better there.',
+    'b18-6': '<strong>Test it small.</strong> Look at the preview at its actual size, not enlarged.',
+    'b19': 'Frequently asked questions',
+    'b20': 'Which image should I upload?',
+    'b21': 'A square, simple, large image (512 px or more). If your logo is very detailed, make a simplified version just for the favicon.',
+    'b22': 'Is favicon.ico required?',
+    'b23': 'No, but it’s a good idea to have it at the root because many browsers and tools request it on their own.',
+    'b24': 'My image is in another format. Will it work?',
+    'b25': 'If the browser can open it, it can be loaded. If not, convert it first with <a href="../herramientas/convertir-formato-imagen.html">Convert image format</a>.',
+    'b26': 'Summary',
+    'b27': 'A favicon needs several sizes to look good in tabs, shortcuts and home screens. Upload a simple square image to <a href="../herramientas/generar-favicon.html">Generate a favicon</a>, download the PNGs and the <code>favicon.ico</code>, upload them to your site and declare them with <code>link</code> tags in the <code>&lt;head&gt;</code>. Design with 16 px in mind and check it at that size.',
+    'rel1': 'Generate a favicon',
+    'rel2': 'Crop an image',
+    'rel3': 'Resize an image',
+    'rel4': 'Convert image format'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo crear un favicon y ponerlo en tu sitio web</h1>
+    <p data-i18n-html="b1">Mirá la pestaña de tu navegador: junto al título de cada página hay un iconito. Es el favicon. Aparece también en los favoritos, en el historial y, con otro tamaño, en la pantalla de inicio del celular cuando guardás un sitio como acceso directo. Un sitio sin favicon se ve genérico y es más difícil de ubicar entre muchas pestañas abiertas. Esta guía explica qué archivos necesitás y cómo instalarlos.</p>
+    <h2 data-i18n="b2">Por qué hace falta más de un tamaño</h2>
+    <p data-i18n-html="b3">El mismo icono se muestra en lugares muy distintos: una pestaña de 16 píxeles, un acceso directo de 180 o una pantalla de inicio de Android de 192. Si usás una sola imagen, el navegador la reduce o la amplía y queda borrosa. Por eso se prepara el icono en varios tamaños.</p>
+    <h2 data-i18n="b4">Qué genera la herramienta</h2>
+    <p data-i18n-html="b5">Con <a href="../herramientas/generar-favicon.html">Generar favicon</a> subís una imagen y obtenés, de una vez:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b6-c1">Archivo</th><th data-i18n-html="b6-c2">Tamaño</th><th data-i18n-html="b6-c3">Para qué sirve</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b6-f1c1"><code>favicon-16x16.png</code></td><td data-i18n-html="b6-f1c2">16 px</td><td data-i18n-html="b6-f1c3">Pestañas del navegador</td></tr>
+        <tr><td data-i18n-html="b6-f2c1"><code>favicon-32x32.png</code></td><td data-i18n-html="b6-f2c2">32 px</td><td data-i18n-html="b6-f2c3">Pestañas en pantallas de alta densidad y accesos directos</td></tr>
+        <tr><td data-i18n-html="b6-f3c1"><code>favicon-48x48.png</code></td><td data-i18n-html="b6-f3c2">48 px</td><td data-i18n-html="b6-f3c3">Algunos navegadores y buscadores</td></tr>
+        <tr><td data-i18n-html="b6-f4c1"><code>apple-touch-icon.png</code></td><td data-i18n-html="b6-f4c2">180 px</td><td data-i18n-html="b6-f4c3">Pantalla de inicio de iPhone y iPad</td></tr>
+        <tr><td data-i18n-html="b6-f5c1"><code>icon-192.png</code></td><td data-i18n-html="b6-f5c2">192 px</td><td data-i18n-html="b6-f5c3">Pantalla de inicio de Android</td></tr>
+        <tr><td data-i18n-html="b6-f6c1"><code>icon-512.png</code></td><td data-i18n-html="b6-f6c2">512 px</td><td data-i18n-html="b6-f6c3">Pantalla de carga y aplicaciones web instalables</td></tr>
+        <tr><td data-i18n-html="b6-f7c1"><code>favicon.ico</code></td><td data-i18n-html="b6-f7c2">16, 32 y 48 px en un solo archivo</td><td data-i18n-html="b6-f7c3">El formato clásico, que muchos navegadores piden por su cuenta en la raíz del sitio</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b7">La herramienta <strong>no</strong> genera iconos en SVG ni el archivo de manifiesto de las aplicaciones web. Los PNG sí conservan la transparencia si tu imagen la tiene.</p>
+    <h3 data-i18n="b8">Paso a paso</h3>
+    <ol>
+      <li data-i18n-html="b9-1">Arrastrá tu imagen a la zona de carga o hacé clic para elegirla.</li>
+      <li data-i18n-html="b9-2">Mirá la vista previa. Si la imagen no era cuadrada, se recorta desde el centro al cuadrado más grande posible (no se deforma) y se avisa con qué tamaño quedó. Si querés decidir vos qué parte se conserva, recortala antes con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.</li>
+      <li data-i18n-html="b9-3">Revisá las tarjetas de cada tamaño.</li>
+      <li data-i18n-html="b9-4">Tocá <strong>Descargar</strong> en las que necesites. Cada archivo se descarga por separado.</li>
+    </ol>
+    <p data-i18n-html="b10">Para el icono de 512 px conviene partir de una imagen de al menos 512 px de lado. Con una menor, la herramienta la amplía y pierde nitidez.</p>
+    <h2 data-i18n="b11">Cómo instalarlo en tu sitio</h2>
+    <p data-i18n-html="b12">Subí los archivos a tu sitio y declaralos dentro de la etiqueta <code>&lt;head&gt;</code> de tus páginas. Una configuración sencilla con lo que genera la herramienta, suponiendo que los archivos están en la raíz del sitio:</p>
+    <pre data-i18n-html="b13"><code>&lt;link rel="icon" href="/favicon.ico" sizes="48x48"&gt;
+&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;
+&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code></pre>
+    <p data-i18n-html="b14">Muchos navegadores piden además <code>/favicon.ico</code> por su cuenta aunque no lo declares, así que conviene dejarlo en la raíz. Los iconos de 192 y 512 px se usan cuando tu sitio es una aplicación web instalable: se enlazan desde un archivo de manifiesto (<code>site.webmanifest</code>) que escribís vos, porque la herramienta no lo crea.</p>
+    <p data-i18n-html="b15">Si tu sitio está hecho con un gestor como WordPress, normalmente hay un campo en la configuración del tema para subir el "icono del sitio"; ahí subís el PNG de 512 px.</p>
+    <p data-i18n-html="b16">Para buscadores, Google indica que el favicon debe ser cuadrado y de al menos 8×8 píxeles, y recomienda uno mayor de 48×48 para que se vea bien en distintos lugares; además, su dirección tiene que mantenerse estable. Los favicons suelen quedar en caché: si lo cambiás y seguís viendo el anterior, puede tardar un tiempo en actualizarse (en Google, de varios días a varias semanas).</p>
+    <h2 data-i18n="b17">Consejos de diseño para tamaños diminutos</h2>
+    <ul>
+      <li data-i18n-html="b18-1"><strong>Una idea, una forma.</strong> A 16 px tenés 256 píxeles en total. Una inicial, una forma simple o un símbolo con dos colores funciona; una ilustración detallada se vuelve una mancha.</li>
+      <li data-i18n-html="b18-2"><strong>Contraste fuerte.</strong> Se ve sobre pestañas claras y oscuras. Evitá colores que se confundan con el fondo del navegador.</li>
+      <li data-i18n-html="b18-3"><strong>Sin texto, salvo una o dos letras.</strong> Una palabra completa no se lee a ese tamaño.</li>
+      <li data-i18n-html="b18-4"><strong>Dejá un pequeño margen</strong> para que nada quede pegado al borde.</li>
+      <li data-i18n-html="b18-5"><strong>Fondo transparente o sólido, según el caso.</strong> Un fondo transparente queda bien en la pestaña. En el icono de pantalla de inicio de iPhone, según varias fuentes la transparencia puede rellenarse con negro, por lo que ahí conviene un fondo sólido.</li>
+      <li data-i18n-html="b18-6"><strong>Probalo pequeño.</strong> Mirá la vista previa a su tamaño real, no ampliada.</li>
+    </ul>
+    <h2 data-i18n="b19">Preguntas frecuentes</h2>
+    <h3 data-i18n="b20">¿Qué imagen me conviene subir?</h3>
+    <p data-i18n-html="b21">Una imagen cuadrada, simple y grande (512 px o más). Si tu logo es muy detallado, hacé una versión simplificada solo para el favicon.</p>
+    <h3 data-i18n="b22">¿El favicon.ico es obligatorio?</h3>
+    <p data-i18n-html="b23">No, pero conviene tenerlo en la raíz porque muchos navegadores y herramientas lo piden por su cuenta.</p>
+    <h3 data-i18n="b24">Mi imagen está en otro formato, ¿sirve?</h3>
+    <p data-i18n-html="b25">Si el navegador puede abrirla, se puede cargar. Si no, convertila antes con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a>.</p>
+    <h2 data-i18n="b26">Resumen</h2>
+    <p data-i18n-html="b27">Un favicon necesita varios tamaños para verse bien en pestañas, accesos directos y pantallas de inicio. Subí una imagen cuadrada y simple a <a href="../herramientas/generar-favicon.html">Generar favicon</a>, descargá los PNG y el <code>favicon.ico</code>, subilos a tu sitio y declarálos con etiquetas <code>link</code> en el <code>&lt;head&gt;</code>. Diseñá pensando en 16 px y revisalo ahí.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/generar-favicon.html" data-i18n="rel1">Generar favicon</a></li>
+      <li><a href="../herramientas/recortar-imagen.html" data-i18n="rel2">Recortar imagen</a></li>
+      <li><a href="../herramientas/redimensionar-imagen.html" data-i18n="rel3">Redimensionar imagen</a></li>
+      <li><a href="../herramientas/convertir-formato-imagen.html" data-i18n="rel4">Convertir formato de imagen</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

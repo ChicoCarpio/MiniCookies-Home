@@ -451,6 +451,20 @@ Como B, con `.grid-miniaturas` / `.contenedor-miniaturas` dentro de
 (las 19 herramientas de PDF ya lo usan). Las diapositivas renderizadas de
 PowerPoint van en `.vista-previa-diapositivas`.
 
+### F — Artículo de la sección Guías (2026-10-16)
+
+`guias/index.html` (índice: `.grid-herramientas` con `.tarjeta-herramienta`) y un artículo por página (`guias/<nombre>.html`).
+Un artículo es `<article class="guia-uso articulo">` dentro de `<main>`, con `.articulo-volver` arriba, título `h1`,
+subtítulos, párrafos, listas, tablas (`.tabla-ancha` + `table`) y bloques de código (`<pre><code>`); después, un `.anuncio` y
+una `section.guia-uso.articulo-relacionadas` con enlaces a las herramientas. Estilos: `.articulo*` en `estilos.css`.
+**No se escriben a mano:** salen de `Herramientas-del-sitio\generar-guias.mjs` desde los Markdown de
+`Herramientas-del-sitio\guias-fuente\` (`articulos-es.md` y `en/<nombre>.md`, misma estructura de bloques). Para cambiar un artículo,
+se edita el Markdown y se vuelve a generar. Texto con formato (enlaces, negritas, código): `data-i18n-html="clave"` (en `idioma.js`
+y `ingles.mjs`); el diccionario es HTML escrito por nosotros, nunca de un usuario. Los enlaces a herramientas usan el nombre exacto
+(h1) de la herramienta, y las del sitio seguro apuntan a su dirección absoluta. `Herramientas-del-sitio\enlazar-guias.mjs` agrega
+«Guía completa: …» al final de la guía de uso de cada herramienta (mapa a mano, artículo → herramientas). Una guía nueva o un cambio de
+título obliga a regenerar y a revisar la tarjeta de la portada (`guia-N-titulo`, copiada del Markdown).
+
 ### E — Página de texto
 
 `privacidad.html`, `terminos.html`, `creditos.html`, `contacto.html` y `404.html`: el marco

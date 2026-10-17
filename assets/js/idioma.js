@@ -27,6 +27,12 @@ window.i18nComun = {
     'footer-terminos': 'Términos de uso',
     'footer-creditos': 'Créditos',
     'footer-acerca': 'Acerca de',
+    'footer-guias': 'Guías',
+    'guia-mas': 'Guía completa:',
+    'guias-volver': '← Todas las guías',
+    'guias-relacionadas': 'Herramientas relacionadas',
+    'guias-seccion': 'Guías',
+    'guias-ver-todas': 'Ver todas las guías',
     'footer-contacto': 'Contacto',
     // Compartidas por las 76 páginas de herramientas (header/nav y helpers JS).
     'nav-cat-pdf': 'Herramientas de PDF',
@@ -114,6 +120,12 @@ window.i18nComun = {
     'footer-terminos': 'Terms of use',
     'footer-creditos': 'Credits',
     'footer-acerca': 'About',
+    'footer-guias': 'Guides',
+    'guia-mas': 'Full guide:',
+    'guias-volver': '← All guides',
+    'guias-relacionadas': 'Related tools',
+    'guias-seccion': 'Guides',
+    'guias-ver-todas': 'See all guides',
     'footer-contacto': 'Contact',
     'nav-cat-pdf': 'PDF tools',
     'nav-cat-excel': 'Excel / CSV tools',
@@ -232,6 +244,14 @@ window.i18nComun = {
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       var clave = el.getAttribute('data-i18n');
       if (dic[clave] !== undefined) el.textContent = dic[clave];
+    });
+
+    // Texto con formato (negritas, enlaces, código): lo escribimos nosotros en el
+    // diccionario, nunca viene del usuario, así que se pone como HTML. Lo usan los
+    // artículos de guias/.
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      var clave = el.getAttribute('data-i18n-html');
+      if (dic[clave] !== undefined) el.innerHTML = dic[clave];
     });
 
     document.querySelectorAll('[data-i18n-attr]').forEach(function (el) {

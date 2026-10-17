@@ -520,6 +520,25 @@ table.tabla-datos tr.fila-espaciadora td { border: none; padding: 0; }
 .guia-uso summary { cursor: pointer; padding: 12px 14px; font-weight: 600; }
 .guia-uso details > p { margin: 0; padding: 0 14px 14px; color: var(--texto-suave); }
 
+/* --- Artículos de la sección Guías (guias/) ---
+   Comparten la tipografía de .guia-uso; esto agrega lo que un artículo tiene y
+   la guía de una herramienta no: título grande, tablas y enlaces de cierre. */
+.guia-uso .guia-mas { margin-top: 22px; font-weight: 600; }
+.articulo { margin-top: 8px; }
+.articulo pre { background: var(--superficie-alt); border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 12px 14px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5; margin: 0 0 14px; }
+.articulo pre code { background: none; padding: 0; font-size: inherit; }
+.articulo h1 { font-size: 2rem; line-height: 1.25; margin-bottom: 12px; }
+.articulo h2 { margin-top: 28px; }
+.articulo p { margin: 0 0 14px; }
+.articulo .articulo-volver { display: inline-block; margin-bottom: 14px; font-size: 0.9rem; }
+.articulo .tabla-ancha { margin: 14px 0; }
+.articulo table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+.articulo th, .articulo td { border: 1px solid var(--gris-borde); padding: 8px 10px; text-align: left; vertical-align: top; }
+.articulo th { background: var(--superficie-alt); }
+.articulo code { background: var(--superficie-alt); border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+.articulo-relacionadas ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.articulo-relacionadas a { display: inline-block; border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 6px 12px; background: var(--superficie); }
+
 .grid-miniaturas, .contenedor-miniaturas.vista-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
