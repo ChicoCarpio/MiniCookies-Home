@@ -177,12 +177,14 @@
       else if (t === 'medium') ancho = 1.75;
       else if (t === 'thick') ancho = 2.5;
       else if (/^(solid|dotted|dashed|double|dot-dash|dot-dot-dash|none|hidden)$/.test(t)) forma = t;
+      else if (/^double-thin$/.test(t)) forma = 'double';          // LibreOffice: «1.76pt double-thin» (Excel la lee como doble)
+      else if (/^(fine-dashed|long-dash|dash-dot|dash-dot-dot|dash|ultrafine-dashed)$/.test(t)) forma = /dot-dot/.test(t) ? 'dot-dot-dash' : /dot/.test(t) ? 'dot-dash' : 'dashed';   // LibreOffice
       else { const pt = puntosDe(t); if (pt !== null) ancho = pt; }
     }
     if (forma === 'none' || forma === 'hidden') return null;
     if (ancho === null) ancho = 0.75;
     const grueso = ancho >= 1.2;
-    const grosor = ancho <= 0.4 ? 'hair' : ancho < 1.2 ? 'thin' : ancho < 2.1 ? 'medium' : 'thick';
+    const grosor = ancho <= 0.4 ? 'hair' : ancho < 1.2 ? 'thin' : ancho < 2.5 ? 'medium' : 'thick';   // 2.49 pt (el «grueso» de LibreOffice) lo lee Excel como medio: medido con LibreOffice 26.8
     let e;
     if (forma === 'double') e = 'double';
     else if (forma === 'dotted') e = 'dotted';
@@ -311,6 +313,8 @@
     let zip;
     try { zip = await ZipPropio.loadAsync(bytes); } catch (e) { throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument'); }
     const contenido = zip.file('content.xml');
+    // LibreOffice 26 (ODF 1.4) cifra el paquete entero: un solo archivo «encrypted-package» y ningún content.xml a la vista (medido con LibreOffice 26.8, Argon2id + AES-256-GCM)
+    if (!contenido && zip.file('encrypted-package')) throw new LibroXlsx.ErrorXlsx('cifrado');
     if (!contenido) throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument');
     if (zip.file('META-INF/manifest.xml')) {
       const man = await zip.file('META-INF/manifest.xml').async('string');

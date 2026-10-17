@@ -19,6 +19,7 @@
       try { zip = await ZipPropio.loadAsync(bytes); } catch (e) { return null; }
       if (zip.file('xl/workbook.bin')) return 'xlsb';
       if (zip.file('content.xml') && (zip.file('mimetype') || zip.file('META-INF/manifest.xml'))) return 'ods';
+      if (zip.file('encrypted-package')) return 'ods';   // .ods cifrado por LibreOffice 26: OdsLector avisa que tiene contraseña
       return null;
     }
     if (typeof Xml2003Lector !== 'undefined' && Xml2003Lector.parece(bytes)) return 'xml';   // antes que 'html': su <Table> también parece una tabla HTML
