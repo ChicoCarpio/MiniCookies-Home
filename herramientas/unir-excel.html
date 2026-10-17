@@ -24,7 +24,25 @@ window.i18nPagina = {
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar Excel combinado',
     'nombre-hoja-defecto': 'Hoja',
-    'error-unir': 'No se pudo unir los archivos'
+    'error-unir': 'No se pudo unir los archivos',
+    'guia-titulo': 'Cómo unir varios archivos Excel o CSV en un solo libro',
+    'guia-intro': 'Cuando tenés varias planillas sueltas (un archivo por mes, por sucursal o por responsable) y querés tenerlas juntas, esta herramienta las combina en un solo libro de Excel. Cada hoja de cada archivo pasa a ser una hoja del libro nuevo. Acepta .xlsx, .xlsm, .xlsb, .xls, .ods, .csv y «Excel 2003 .xml», y devuelve un .xlsx.',
+    'guia-paso-1': 'Arrastrá los archivos a la zona «Arrastrá tus archivos acá o hacé clic para elegirlos», o elegilos con el selector múltiple. Se numeran en una lista y podés quitar los que sobren con la cruz.',
+    'guia-paso-2': 'Con al menos dos archivos, el botón «Unir en un Excel» se habilita; hacé clic.',
+    'guia-paso-3': 'Esperá a que termine «Uniendo...».',
+    'guia-paso-4': 'Descargá el resultado con «Descargar Excel combinado» (archivos-unidos.xlsx).',
+    'guia-consejo-1': 'Los nombres de hoja salen del nombre del archivo. Si un archivo tiene varias hojas, se llaman «archivo - hoja»; si tiene una sola, la hoja se llama como el archivo. Los nombres se acortan a 31 caracteres, se limpian los caracteres que Excel no admite y, si se repiten, se les agrega un sufijo _2, _3.',
+    'guia-consejo-2': 'Se conservan los valores, los formatos de número, los anchos de columna y las celdas combinadas, cada uno en la misma celda que en el original.',
+    'guia-consejo-3': 'No se conservan estilos de celda como colores y negrita, ni imágenes ni gráficos incrustados. Si necesitás ese formato, unilos desde Excel.',
+    'guia-consejo-4': 'Los archivos CSV pasan a ser una hoja con sus valores; revisá después que los números y fechas se hayan interpretado como esperabas.',
+    'guia-p1': '¿Qué pasa con las fórmulas?',
+    'guia-r1': 'Las fórmulas válidas se conservan (las referencias a otras hojas del mismo archivo se renombran junto con las hojas). Las que usan nombres definidos, tablas o hojas que no se unieron pasan a ser sus valores.',
+    'guia-p2': '¿Puedo cambiar el orden de las hojas?',
+    'guia-r2': 'Se agregan en el orden de la lista de archivos; para cambiarlo, quitá y volvé a agregar.',
+    'guia-p3': '¿Se modifican mis archivos originales?',
+    'guia-r3': 'No, se crea un libro nuevo.',
+    'guia-p4': '¿Puedo unir dos archivos con una sola hoja y de modo que queden en una única tabla?',
+    'guia-r4': 'No: cada hoja queda separada. Para apilar las filas de varios archivos en una sola hoja hace falta otra herramienta o hacerlo en Excel.'
   },
   en: {
     'titulo-pagina': 'Merge Several Excel or CSV Files Free — Mini Cookies',
@@ -39,7 +57,25 @@ window.i18nPagina = {
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download combined Excel file',
     'nombre-hoja-defecto': 'Sheet',
-    'error-unir': 'Couldn’t merge the files'
+    'error-unir': 'Couldn’t merge the files',
+    'guia-titulo': 'How to merge several Excel or CSV files into one workbook',
+    'guia-intro': 'When you have several loose spreadsheets (one file per month, per branch or per person in charge) and want them together, this tool combines them into a single Excel workbook. Each sheet of each file becomes a sheet of the new workbook. It accepts .xlsx, .xlsm, .xlsb, .xls, .ods, .csv and “Excel 2003 .xml”, and returns an .xlsx.',
+    'guia-paso-1': 'Drag the files onto the “Drag your files here or click to choose them” area, or pick them with the multiple selector. They’re numbered in a list and you can remove any extras with the cross.',
+    'guia-paso-2': 'With at least two files, the “Merge into an Excel file” button is enabled; click it.',
+    'guia-paso-3': 'Wait for “Merging...” to finish.',
+    'guia-paso-4': 'Download the result with “Download combined Excel file” (archivos-unidos.xlsx).',
+    'guia-consejo-1': 'Sheet names come from the file name. If a file has several sheets, they’re named “file - sheet”; if it has only one, the sheet is named after the file. Names are shortened to 31 characters, characters Excel doesn’t accept are cleaned up and, if they repeat, a suffix _2, _3 is added.',
+    'guia-consejo-2': 'Values, number formats, column widths and merged cells are kept, each in the same cell as in the original.',
+    'guia-consejo-3': 'Cell styles such as colors and bold, and embedded images and charts, are not kept. If you need that formatting, merge them from Excel.',
+    'guia-consejo-4': 'CSV files become a sheet with their values; afterwards check that numbers and dates were interpreted the way you expected.',
+    'guia-p1': 'What happens to formulas?',
+    'guia-r1': 'Valid formulas are kept (references to other sheets in the same file are renamed along with the sheets). Those that use defined names, tables or sheets that weren’t merged become their values.',
+    'guia-p2': 'Can I change the order of the sheets?',
+    'guia-r2': 'They’re added in the order of the file list; to change it, remove and add again.',
+    'guia-p3': 'Are my original files modified?',
+    'guia-r3': 'No, a new workbook is created.',
+    'guia-p4': 'Can I merge two single-sheet files so they end up in one table?',
+    'guia-r4': 'No: each sheet stays separate. To stack the rows of several files into one sheet you need another tool or to do it in Excel.'
   }
 };
 </script>
@@ -77,6 +113,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo unir varios archivos Excel o CSV en un solo libro</h2>
+    <p data-i18n="guia-intro">Cuando tenés varias planillas sueltas (un archivo por mes, por sucursal o por responsable) y querés tenerlas juntas, esta herramienta las combina en un solo libro de Excel. Cada hoja de cada archivo pasa a ser una hoja del libro nuevo. Acepta .xlsx, .xlsm, .xlsb, .xls, .ods, .csv y «Excel 2003 .xml», y devuelve un .xlsx.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá los archivos a la zona «Arrastrá tus archivos acá o hacé clic para elegirlos», o elegilos con el selector múltiple. Se numeran en una lista y podés quitar los que sobren con la cruz.</li>
+      <li data-i18n="guia-paso-2">Con al menos dos archivos, el botón «Unir en un Excel» se habilita; hacé clic.</li>
+      <li data-i18n="guia-paso-3">Esperá a que termine «Uniendo...».</li>
+      <li data-i18n="guia-paso-4">Descargá el resultado con «Descargar Excel combinado» (archivos-unidos.xlsx).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Los nombres de hoja salen del nombre del archivo. Si un archivo tiene varias hojas, se llaman «archivo - hoja»; si tiene una sola, la hoja se llama como el archivo. Los nombres se acortan a 31 caracteres, se limpian los caracteres que Excel no admite y, si se repiten, se les agrega un sufijo _2, _3.</li>
+      <li data-i18n="guia-consejo-2">Se conservan los valores, los formatos de número, los anchos de columna y las celdas combinadas, cada uno en la misma celda que en el original.</li>
+      <li data-i18n="guia-consejo-3">No se conservan estilos de celda como colores y negrita, ni imágenes ni gráficos incrustados. Si necesitás ese formato, unilos desde Excel.</li>
+      <li data-i18n="guia-consejo-4">Los archivos CSV pasan a ser una hoja con sus valores; revisá después que los números y fechas se hayan interpretado como esperabas.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa con las fórmulas?</summary>
+      <p data-i18n="guia-r1">Las fórmulas válidas se conservan (las referencias a otras hojas del mismo archivo se renombran junto con las hojas). Las que usan nombres definidos, tablas o hojas que no se unieron pasan a ser sus valores.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo cambiar el orden de las hojas?</summary>
+      <p data-i18n="guia-r2">Se agregan en el orden de la lista de archivos; para cambiarlo, quitá y volvé a agregar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se modifican mis archivos originales?</summary>
+      <p data-i18n="guia-r3">No, se crea un libro nuevo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puedo unir dos archivos con una sola hoja y de modo que queden en una única tabla?</summary>
+      <p data-i18n="guia-r4">No: cada hoja queda separada. Para apilar las filas de varios archivos en una sola hoja hace falta otra herramienta o hacerlo en Excel.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

@@ -34,7 +34,25 @@ window.i18nPagina = {
     'mensaje-nivel2-ok': '⚠️ Se pudo reparar solo con el nivel 2: el resultado son imágenes de cada página (se perdió el texto seleccionable).',
     'error-sin-paginas': 'El PDF no tiene páginas legibles.',
     'error-sin-nada': 'No se pudo leer ninguna página, ni siquiera para reconstruir visualmente.',
-    'error-reparar': 'No se pudo reparar el PDF con ninguno de los dos niveles'
+    'error-reparar': 'No se pudo reparar el PDF con ninguno de los dos niveles',
+    'guia-titulo': 'Cómo reparar un PDF dañado',
+    'guia-intro': 'A veces un PDF no abre porque la descarga se cortó, se copió mal o quedó con la estructura interna rota, aunque las páginas sigan ahí adentro. Esta herramienta recibe ese archivo y prueba rescatarlo en dos niveles, del menos al más invasivo. Primero intenta reescribir el PDF limpio, conservando texto y calidad. Si eso falla o pierde páginas, reconstruye cada página como imagen. Devuelve un PDF nuevo para descargar, junto con un aviso de cuántas páginas se pudieron recuperar.',
+    'guia-paso-1': 'Arrastrá el PDF dañado a la zona «Arrastrá tu PDF dañado acá o hacé clic para elegirlo», o hacé clic para buscarlo. Si no se puede previsualizar, aparece marcado con una advertencia, pero igual podés seguir.',
+    'guia-paso-2': 'Hacé clic en «Intentar reparar». Vas a ver el progreso: «Probando nivel 1» y, si hace falta, «Reconstruyendo página X de Y».',
+    'guia-paso-3': 'Leé el mensaje del resultado: dice si se reparó con el nivel 1 o solo con el nivel 2, y cuántas páginas se recuperaron del total.',
+    'guia-paso-4': 'Descargá el archivo con «Descargar PDF reparado» (se llama documento-reparado.pdf).',
+    'guia-consejo-1': 'Si el mensaje dice que se usó el nivel 2, el resultado son imágenes de cada página: ya no vas a poder seleccionar ni copiar texto, y se pierden enlaces, formularios, marcadores y adjuntos. Si necesitás volver a tener texto, pasalo después por la herramienta de OCR.',
+    'guia-consejo-2': 'Compará siempre «Páginas recuperadas: X de Y» con lo que esperabas. Un archivo cortado a la mitad puede devolver solo parte del documento.',
+    'guia-consejo-3': 'Los PDF protegidos con contraseña no están dañados: desbloqueálos primero con la herramienta correspondiente, porque reparar el archivo cifrado daría un resultado que no abre.',
+    'guia-consejo-4': 'Si el PDF ya abría bien y solo querés achicarlo o reordenarlo, hay otras herramientas más indicadas.',
+    'guia-p1': '¿Qué diferencia hay entre el nivel 1 y el nivel 2?',
+    'guia-r1': 'El nivel 1 vuelve a escribir el archivo y mantiene texto y calidad originales. El nivel 2 dibuja cada página y la guarda como imagen JPG, así que es más pesado y sin texto seleccionable.',
+    'guia-p2': '¿Qué pasa si el PDF está cortado al final?',
+    'guia-r2': 'La herramienta intenta reconstruir el final que falta (la tabla de referencias) a partir de los objetos que sí están y luego aplica los dos niveles.',
+    'guia-p3': '¿Siempre logra repararlo?',
+    'guia-r3': 'No. Si ni siquiera se puede leer una página, se muestra un error: el archivo está dañado más allá de lo que se puede arreglar desde el navegador.',
+    'guia-p4': '¿Acepta varios archivos a la vez?',
+    'guia-r4': 'No, trabaja con un PDF por vez.',
   },
   en: {
     'titulo-pagina': 'Repair a Damaged PDF Free — Mini Cookies',
@@ -58,7 +76,25 @@ window.i18nPagina = {
     'mensaje-nivel2-ok': '⚠️ Could only be repaired with level 2: the result is an image of each page (selectable text was lost).',
     'error-sin-paginas': 'The PDF has no readable pages.',
     'error-sin-nada': 'Couldn’t read any page, not even to rebuild it visually.',
-    'error-reparar': 'Couldn’t repair the PDF with either level'
+    'error-reparar': 'Couldn’t repair the PDF with either level',
+    'guia-titulo': 'How to repair a damaged PDF',
+    'guia-intro': 'Sometimes a PDF won’t open because the download was cut short, it was copied badly or its internal structure got broken, even though the pages are still in there. This tool takes that file and tries to rescue it in two levels, from least to most invasive. First it tries to rewrite the PDF cleanly, keeping the text and quality. If that fails or loses pages, it rebuilds each page as an image. It returns a new PDF to download, along with a notice of how many pages could be recovered.',
+    'guia-paso-1': 'Drag the damaged PDF to the “Drag your damaged PDF here or click to choose it” area, or click to browse for it. If it can’t be previewed, it appears flagged with a warning, but you can still continue.',
+    'guia-paso-2': 'Click “Try to repair”. You’ll see the progress: “Trying level 1” and, if needed, “Rebuilding page X of Y”.',
+    'guia-paso-3': 'Read the result message: it says whether it was repaired with level 1 or only with level 2, and how many pages out of the total were recovered.',
+    'guia-paso-4': 'Download the file with “Download repaired PDF” (it’s named documento-reparado.pdf).',
+    'guia-consejo-1': 'If the message says level 2 was used, the result is images of each page: you won’t be able to select or copy text any more, and links, forms, bookmarks and attachments are lost. If you need text again, run it through the OCR tool afterwards.',
+    'guia-consejo-2': 'Always compare “Pages recovered: X of Y” with what you expected. A file cut in half may return only part of the document.',
+    'guia-consejo-3': 'Password-protected PDFs aren’t damaged: unlock them first with the corresponding tool, because repairing the encrypted file would give a result that won’t open.',
+    'guia-consejo-4': 'If the PDF already opened fine and you only want to shrink or reorder it, there are other tools better suited to that.',
+    'guia-p1': 'What’s the difference between level 1 and level 2?',
+    'guia-r1': 'Level 1 rewrites the file and keeps the original text and quality. Level 2 draws each page and saves it as a JPG image, so it’s heavier and has no selectable text.',
+    'guia-p2': 'What happens if the PDF is cut off at the end?',
+    'guia-r2': 'The tool tries to rebuild the missing end (the reference table) from the objects that are there and then applies the two levels.',
+    'guia-p3': 'Does it always manage to repair it?',
+    'guia-r3': 'No. If not even a single page can be read, an error is shown: the file is damaged beyond what can be fixed from the browser.',
+    'guia-p4': 'Does it accept several files at once?',
+    'guia-r4': 'No, it works with one PDF at a time.'
   }
 };
 </script>
@@ -108,6 +144,41 @@ window.i18nPagina = {
       </span></h3>
     <p style="color:var(--texto-suave);"><span data-i18n="limitaciones-antes">Si el archivo está muy dañado, a veces solo se puede recuperar el contenido visual de cada página como imagen — en ese caso </span><strong data-i18n="limitaciones-enfasis">se pierde el texto seleccionable/copiable</strong><span data-i18n="limitaciones-final">. Si ni así se puede recuperar, el archivo está dañado más allá de lo que se puede arreglar desde el navegador.</span></p>
   </div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reparar un PDF dañado</h2>
+    <p data-i18n="guia-intro">A veces un PDF no abre porque la descarga se cortó, se copió mal o quedó con la estructura interna rota, aunque las páginas sigan ahí adentro. Esta herramienta recibe ese archivo y prueba rescatarlo en dos niveles, del menos al más invasivo. Primero intenta reescribir el PDF limpio, conservando texto y calidad. Si eso falla o pierde páginas, reconstruye cada página como imagen. Devuelve un PDF nuevo para descargar, junto con un aviso de cuántas páginas se pudieron recuperar.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el PDF dañado a la zona «Arrastrá tu PDF dañado acá o hacé clic para elegirlo», o hacé clic para buscarlo. Si no se puede previsualizar, aparece marcado con una advertencia, pero igual podés seguir.</li>
+      <li data-i18n="guia-paso-2">Hacé clic en «Intentar reparar». Vas a ver el progreso: «Probando nivel 1» y, si hace falta, «Reconstruyendo página X de Y».</li>
+      <li data-i18n="guia-paso-3">Leé el mensaje del resultado: dice si se reparó con el nivel 1 o solo con el nivel 2, y cuántas páginas se recuperaron del total.</li>
+      <li data-i18n="guia-paso-4">Descargá el archivo con «Descargar PDF reparado» (se llama documento-reparado.pdf).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si el mensaje dice que se usó el nivel 2, el resultado son imágenes de cada página: ya no vas a poder seleccionar ni copiar texto, y se pierden enlaces, formularios, marcadores y adjuntos. Si necesitás volver a tener texto, pasalo después por la herramienta de OCR.</li>
+      <li data-i18n="guia-consejo-2">Compará siempre «Páginas recuperadas: X de Y» con lo que esperabas. Un archivo cortado a la mitad puede devolver solo parte del documento.</li>
+      <li data-i18n="guia-consejo-3">Los PDF protegidos con contraseña no están dañados: desbloqueálos primero con la herramienta correspondiente, porque reparar el archivo cifrado daría un resultado que no abre.</li>
+      <li data-i18n="guia-consejo-4">Si el PDF ya abría bien y solo querés achicarlo o reordenarlo, hay otras herramientas más indicadas.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué diferencia hay entre el nivel 1 y el nivel 2?</summary>
+      <p data-i18n="guia-r1">El nivel 1 vuelve a escribir el archivo y mantiene texto y calidad originales. El nivel 2 dibuja cada página y la guarda como imagen JPG, así que es más pesado y sin texto seleccionable.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa si el PDF está cortado al final?</summary>
+      <p data-i18n="guia-r2">La herramienta intenta reconstruir el final que falta (la tabla de referencias) a partir de los objetos que sí están y luego aplica los dos niveles.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Siempre logra repararlo?</summary>
+      <p data-i18n="guia-r3">No. Si ni siquiera se puede leer una página, se muestra un error: el archivo está dañado más allá de lo que se puede arreglar desde el navegador.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Acepta varios archivos a la vez?</summary>
+      <p data-i18n="guia-r4">No, trabaja con un PDF por vez.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

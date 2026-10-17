@@ -36,7 +36,25 @@ window.i18nPagina = {
     'error-extraer': 'No se pudo extraer el texto',
     'error-sin-contenido': 'El archivo está vacío.',
     'nombre-defecto': 'documento',
-    'error-generar': 'No se pudo generar el documento'
+    'error-generar': 'No se pudo generar el documento',
+    'guia-titulo': 'Cómo pasar un Word a texto plano (y al revés)',
+    'guia-intro': 'Dos conversiones en una sola herramienta. En un sentido saca el texto de un documento Word (.docx) para llevarlo a un .txt sin formato, útil para pegarlo en otro programa o analizarlo. En el otro convierte un archivo de texto plano en un documento Word, listo para editar con formato. Elegís el sentido con el selector de dirección.',
+    'guia-paso-1': 'Elegí el sentido arriba: «Word → Texto» o «Texto → Word».',
+    'guia-paso-2': 'En Word → Texto, arrastrá uno o varios .docx a la zona y hacé clic en «Extraer texto». Con un solo archivo verás el texto en pantalla y podrás usar «Copiar texto» o «Descargar .txt» (texto-extraido.txt).',
+    'guia-paso-3': 'Con varios .docx, el resultado es un ZIP (texto-desde-word.zip) con un .txt por cada documento y un resumen del lote.',
+    'guia-paso-4': 'En Texto → Word, arrastrá un archivo .txt, escribí el «Nombre del archivo» (se propone el del .txt) y hacé clic en «Convertir a Word». Descargá con «Descargar Word».',
+    'guia-consejo-1': 'En Word → Texto sale el texto del cuerpo: párrafos, listas, cuadros de texto y tablas (cada celda en su renglón). No salen encabezados ni pies de página, notas al pie, comentarios ni el texto de SmartArt y gráficos. El botón «?» lo recuerda.',
+    'guia-consejo-2': 'De los campos (número de página, fórmulas) sale el último resultado que guardó Word.',
+    'guia-consejo-3': 'Al convertir un texto a Word, las líneas en blanco separan los párrafos y los saltos de línea simples se mantienen dentro del mismo párrafo.',
+    'guia-consejo-4': 'Si aparece un aviso naranja de advertencias al extraer, algún elemento del documento puede no haberse extraído perfectamente: revisá el texto.',
+    'guia-p1': '¿Se conservan las imágenes al extraer el texto?',
+    'guia-r1': 'No, el .txt contiene solo texto.',
+    'guia-p2': '¿Puedo convertir varios .txt a Word de una vez?',
+    'guia-r2': 'No, esa dirección trabaja con un archivo por vez.',
+    'guia-p3': '¿Se mantiene el formato (negrita, colores) al pasar a Word?',
+    'guia-r3': 'El texto plano no tiene formato, así que el documento sale con párrafos simples.',
+    'guia-p4': '¿Qué pasa con las tablas del Word?',
+    'guia-r4': 'Se escriben en el texto con sus columnas, no como celdas sueltas.'
   },
   en: {
     'titulo-pagina': 'Convert Word and Plain Text Free — Mini Cookies',
@@ -62,7 +80,25 @@ window.i18nPagina = {
     'error-extraer': 'Couldn’t extract the text',
     'error-sin-contenido': 'The file is empty.',
     'nombre-defecto': 'document',
-    'error-generar': 'Couldn’t generate the document'
+    'error-generar': 'Couldn’t generate the document',
+    'guia-titulo': 'How to turn a Word document into plain text (and back)',
+    'guia-intro': 'Two conversions in one tool. In one direction it pulls the text out of a Word document (.docx) into an unformatted .txt, handy for pasting into another program or analyzing it. In the other it turns a plain text file into a Word document, ready to edit with formatting. You choose the direction with the direction selector.',
+    'guia-paso-1': 'Choose the direction at the top: “Word → Text” or “Text → Word”.',
+    'guia-paso-2': 'In Word → Text, drag one or more .docx files onto the area and click “Extract text”. With a single file you’ll see the text on screen and can use “Copy text” or “Download .txt” (texto-extraido.txt).',
+    'guia-paso-3': 'With several .docx files, the result is a ZIP (texto-desde-word.zip) with one .txt per document and a summary of the batch.',
+    'guia-paso-4': 'In Text → Word, drag a .txt file, type the “File name” (the .txt’s name is suggested) and click “Convert to Word”. Download with “Download Word”.',
+    'guia-consejo-1': 'In Word → Text you get the body text: paragraphs, lists, text boxes and tables (each cell on its own line). Headers and footers, footnotes, comments and the text of SmartArt and charts are left out. The “?” button reminds you of this.',
+    'guia-consejo-2': 'For fields (page number, formulas) you get the last result Word saved.',
+    'guia-consejo-3': 'When converting text to Word, blank lines separate paragraphs and single line breaks stay within the same paragraph.',
+    'guia-consejo-4': 'If an orange warning notice appears when extracting, some element of the document may not have been extracted perfectly: check the text.',
+    'guia-p1': 'Are images kept when extracting the text?',
+    'guia-r1': 'No, the .txt contains only text.',
+    'guia-p2': 'Can I convert several .txt files to Word at once?',
+    'guia-r2': 'No, that direction works with one file at a time.',
+    'guia-p3': 'Is the formatting (bold, colors) kept when going to Word?',
+    'guia-r3': 'Plain text has no formatting, so the document comes out with simple paragraphs.',
+    'guia-p4': 'What happens with the tables in the Word document?',
+    'guia-r4': 'They’re written into the text with their columns, not as loose cells.'
   }
 };
 </script>
@@ -134,6 +170,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo pasar un Word a texto plano (y al revés)</h2>
+    <p data-i18n="guia-intro">Dos conversiones en una sola herramienta. En un sentido saca el texto de un documento Word (.docx) para llevarlo a un .txt sin formato, útil para pegarlo en otro programa o analizarlo. En el otro convierte un archivo de texto plano en un documento Word, listo para editar con formato. Elegís el sentido con el selector de dirección.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí el sentido arriba: «Word → Texto» o «Texto → Word».</li>
+      <li data-i18n="guia-paso-2">En Word → Texto, arrastrá uno o varios .docx a la zona y hacé clic en «Extraer texto». Con un solo archivo verás el texto en pantalla y podrás usar «Copiar texto» o «Descargar .txt» (texto-extraido.txt).</li>
+      <li data-i18n="guia-paso-3">Con varios .docx, el resultado es un ZIP (texto-desde-word.zip) con un .txt por cada documento y un resumen del lote.</li>
+      <li data-i18n="guia-paso-4">En Texto → Word, arrastrá un archivo .txt, escribí el «Nombre del archivo» (se propone el del .txt) y hacé clic en «Convertir a Word». Descargá con «Descargar Word».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">En Word → Texto sale el texto del cuerpo: párrafos, listas, cuadros de texto y tablas (cada celda en su renglón). No salen encabezados ni pies de página, notas al pie, comentarios ni el texto de SmartArt y gráficos. El botón «?» lo recuerda.</li>
+      <li data-i18n="guia-consejo-2">De los campos (número de página, fórmulas) sale el último resultado que guardó Word.</li>
+      <li data-i18n="guia-consejo-3">Al convertir un texto a Word, las líneas en blanco separan los párrafos y los saltos de línea simples se mantienen dentro del mismo párrafo.</li>
+      <li data-i18n="guia-consejo-4">Si aparece un aviso naranja de advertencias al extraer, algún elemento del documento puede no haberse extraído perfectamente: revisá el texto.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Se conservan las imágenes al extraer el texto?</summary>
+      <p data-i18n="guia-r1">No, el .txt contiene solo texto.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo convertir varios .txt a Word de una vez?</summary>
+      <p data-i18n="guia-r2">No, esa dirección trabaja con un archivo por vez.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se mantiene el formato (negrita, colores) al pasar a Word?</summary>
+      <p data-i18n="guia-r3">El texto plano no tiene formato, así que el documento sale con párrafos simples.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa con las tablas del Word?</summary>
+      <p data-i18n="guia-r4">Se escriben en el texto con sus columnas, no como celdas sueltas.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
