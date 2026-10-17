@@ -19,6 +19,8 @@
 //      Error si el texto no cabe.
 //      QRPropio.pintar(canvas, qr, lado, colores) lo dibuja con la zona de
 //      silencio (4 módulos) y deja el canvas de lado + 2 × margen.
+//      QRPropio.posicionesAlineacion(versión) da los centros de los patrones
+//      de alineación (los usa qr-estilos.js para no taparlos con un logo).
 (function () {
   'use strict';
 
@@ -339,5 +341,5 @@
     return canvas;
   }
 
-  globalThis.QRPropio = { crear, pintar };
+  globalThis.QRPropio = { crear, pintar, posicionesAlineacion };
 })();

@@ -788,6 +788,19 @@ label.campo { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem
 .controles > *, label.campo { min-width: 0; }
 .controles select, label.campo select, .controles input, label.campo input { max-width: 100%; }
 
+/* Opciones plegables (2026-10-17, generador de QR): un <details class="plegable"> guarda lo
+   opcional de una herramienta para que lo principal siga a la vista. El
+   cuerpo va en un .plegable-cuerpo; .nota-suave es una línea de estado o aviso
+   corto debajo de un control (con .error, en rojo). Un selector de color dentro de
+   label.campo queda del tamaño de un botón. */
+details.plegable { border: 1px solid var(--gris-borde); border-radius: var(--radio); background: var(--superficie); margin-top: 16px; }
+details.plegable > summary { cursor: pointer; padding: 12px 14px; font-weight: 600; }
+details.plegable > .plegable-cuerpo { padding: 0 14px 14px; }
+.controles[hidden], .nota-suave[hidden] { display: none; }
+.nota-suave { margin: 8px 0 0; font-size: 0.85rem; color: var(--texto-suave); }
+.nota-suave.error { color: #dc2626; }
+label.campo input[type="color"] { width: 44px; height: 34px; padding: 2px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); cursor: pointer; }
+
 /* Una tabla con muchas columnas no entra en un teléfono y no se puede
    reflujar sin romperla: se envuelve en esto y se desplaza sola, sin arrastrar
    la página. */
