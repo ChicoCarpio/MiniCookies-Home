@@ -36,7 +36,7 @@ window.i18nPagina = {
     'b6-f3c3': '249 MB',
     'b7': 'Un modelo más grande suele reconocer mejor, sobre todo con ruido de fondo o un acento marcado, pero tarda más y usa más memoria.',
     'b8': 'La descarga de la primera vez',
-    'b9': 'El modelo no viene incluido en la página. La primera vez que lo usás, el navegador lo descarga desde el servidor de Hugging Face (y la biblioteca que lo ejecuta, desde jsDelivr, dos servicios que la política de privacidad del sitio nombra). Se muestra una barra con el porcentaje, y después el modelo queda guardado en el navegador para las próximas veces.',
+    'b9': 'El modelo no viene incluido en la página. La primera vez que lo usás, el navegador lo descarga desde el servidor de Hugging Face (y el motor que lo ejecuta, desde jsDelivr, dos servicios que la política de privacidad del sitio nombra). Se muestra una barra con el porcentaje, y después el modelo queda guardado en el navegador para las próximas veces.',
     'b10': 'Un detalle útil: la descarga <strong>no empieza al abrir la página</strong>, sino cuando pulsás «Empezar a grabar». Así no se gastan 41 a 249 MB de datos en quien solo entra a mirar. Como la descarga corre mientras hablás, en una grabación de varios minutos el modelo suele estar listo cuando terminás. Si cambiás de modelo después de haber grabado, la descarga del nuevo también arranca sola.',
     'b11': 'Paso a paso',
     'b12-1': 'Elegí el <strong>Modelo</strong>. Para notas cortas, «Rápido» alcanza; si hay ruido o acento marcado, probá «Preciso».',
@@ -49,13 +49,13 @@ window.i18nPagina = {
     'b15': 'El navegador pide permiso la primera vez, porque la grabación se inicia al pulsar el botón. Si lo denegaste, la herramienta muestra «No se pudo acceder al micrófono». Revisá entonces los permisos del sitio en el navegador (suele estar en el candado junto a la dirección) y comprobá que ninguna otra aplicación esté usando el micrófono. Una videollamada abierta, por ejemplo, puede ocuparlo.',
     'b16': 'Consejos para que reconozca mejor',
     'b17-1': '<strong>Un lugar silencioso.</strong> Es lo que más influye. Cerrá la ventana, apagá el ventilador o la tele.',
-    'b17-2': '<strong>Cerca del micrófono, a distancia constante.</strong> Unos 15 a 30 cm del micrófono del auricular o del equipo dan mejor resultado que hablar desde lejos. La herramienta activa la supresión de ruido y el control de volumen del navegador, pero no puede reconstruir una voz que llega débil.',
-    'b17-3': '<strong>Ritmo natural y frases completas.</strong> Hablá como si leyeras con calma. Gritar o hablar muy bajo empeora el resultado, y las pausas largas entre palabras dan más margen de error que las pausas entre frases.',
+    'b17-2': '<strong>Cerca del micrófono, a distancia constante.</strong> Como referencia general (no es una medida exacta), una distancia corta, de unos 15 a 30 cm del micrófono del auricular o del equipo, suele dar mejor resultado que hablar desde lejos. La herramienta activa la supresión de ruido y el control de volumen del navegador, pero no puede reconstruir una voz que llega débil.',
+    'b17-3': '<strong>Ritmo natural y frases completas.</strong> Hablá como si leyeras con calma. Gritar o hablar muy bajo suele empeorar el resultado; en general conviene hacer las pausas entre frases y no en medio de ellas.',
     'b17-4': '<strong>Nombres propios y términos técnicos.</strong> Son lo que más se confunde. Dictalos y revisá esas palabras después.',
     'b17-5': '<strong>Grabaciones por partes.</strong> Es más fácil revisar tres tandas de un par de minutos que una larga, y si algo sale mal, repetís solo esa parte.',
-    'b17-6': '<strong>Pausas al principio.</strong> No hace falta apurarse: los silencios iniciales y finales se recortan antes de reconocer, para evitar que el modelo «invente» texto de relleno.',
+    'b17-6': '<strong>Pausas al principio.</strong> No hace falta apurarse: los silencios iniciales y finales se recortan antes de reconocer, para reducir el riesgo de que el modelo «invente» texto de relleno.',
     'b18': 'La puntuación',
-    'b19': 'La herramienta <strong>no tiene comandos de voz</strong> para la puntuación: decir «punto» o «coma» no es una orden que ella entienda como tal. El modelo suele añadir por su cuenta puntos, comas y signos de interrogación según la entonación y el contexto, pero no se puede controlar y a veces se equivoca. Por eso conviene un repaso final del texto.',
+    'b19': 'La herramienta <strong>no tiene comandos de voz</strong> para la puntuación: decir «punto» o «coma» no es una orden que ella entienda como tal, y es posible que el modelo escriba la palabra tal cual. El modelo suele añadir por su cuenta puntos, comas y signos de interrogación según la entonación y el contexto, pero no se puede controlar y a veces se equivoca. Por eso conviene un repaso final del texto.',
     'b20': 'Qué hacer con el texto después',
     'b21-1': '<strong>Leelo de corrido con el audio en la cabeza.</strong> Corregí números, nombres y siglas.',
     'b21-2': '<strong>Ajustá las mayúsculas</strong> si hace falta. Con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> podés dejar el formato como lo necesitás.',
@@ -68,9 +68,9 @@ window.i18nPagina = {
     'b23-3': '<strong>Una voz.</strong> No identifica quién habla, así que no sirve para separar a los participantes de una reunión.',
     'b23-4': '<strong>Memoria.</strong> Los modelos grandes consumen mucha memoria. En un teléfono o en una computadora con poca memoria puede aparecer el aviso «Tu navegador se quedó sin memoria»; en ese caso elegí un modelo más liviano.',
     'b23-5': '<strong>Grabaciones largas.</strong> El audio se procesa en tramos, pero una grabación de muchos minutos mantiene todo el audio en memoria y tarda más en transcribirse. No hay un límite de duración indicado en la página; si dictás mucho, grabá por partes.',
-    'b23-6': '<strong>Internet solo la primera vez</strong>, para la descarga del modelo. Sin conexión y sin el modelo guardado, la herramienta no puede arrancar.',
+    'b23-6': '<strong>Internet, sobre todo la primera vez</strong>, para descargar el modelo y el motor que lo ejecuta. Sin conexión y sin el modelo guardado, la herramienta no puede arrancar; con el modelo ya guardado puede funcionar sin conexión, pero no está garantizado.',
     'b24': 'Preguntas frecuentes',
-    'b25': '<strong>¿Qué modelo elijo?</strong> Empezá con «Rápido». Si ves muchos errores, pasá a «Preciso», y a «Muy preciso» cuando la calidad importe más que la velocidad. Cada modelo se descarga una sola vez.',
+    'b25': '<strong>¿Qué modelo elijo?</strong> Empezá con «Rápido». Si ves muchos errores, pasá a «Preciso», y a «Muy preciso» cuando la calidad importe más que la velocidad. Cada modelo se descarga normalmente una sola vez: después queda guardado en el navegador.',
     'b26': '<strong>¿Funciona en el celular?</strong> Puede funcionar, pero los modelos más grandes pueden quedarse sin memoria. Probá primero con el más liviano.',
     'b27': '<strong>¿Puedo cambiar de modelo mientras grabo?</strong> No: el selector se bloquea durante la grabación y se habilita al detenerla.',
     'b28': 'Resumen',
@@ -105,7 +105,7 @@ window.i18nPagina = {
     'b6-f3c3': '249 MB',
     'b7': 'A larger model usually recognizes speech better, especially with background noise or a strong accent, but it takes longer and uses more memory.',
     'b8': 'The first-time download',
-    'b9': 'The model isn’t included in the page. The first time you use it, your browser downloads it from the Hugging Face server (and the library that runs it from jsDelivr, two services named in the site’s privacy policy). A bar shows the percentage, and afterwards the model stays saved in your browser for next time.',
+    'b9': 'The model isn’t included in the page. The first time you use it, your browser downloads it from the Hugging Face server (and the engine that runs it from jsDelivr, two services named in the site’s privacy policy). A bar shows the percentage, and afterwards the model stays saved in your browser for next time.',
     'b10': 'One useful detail: the download <strong>doesn’t start when you open the page</strong>, but when you click "Start recording". That way no 41 to 249 MB of data is spent on someone who just visits to take a look. Since the download runs while you speak, in a recording of several minutes the model is usually ready by the time you finish. If you switch models after recording, the download of the new one also starts on its own.',
     'b11': 'Step by step',
     'b12-1': 'Choose the <strong>Model</strong>. For short notes, "Fast" is enough; if there is noise or a strong accent, try "Accurate".',
@@ -118,13 +118,13 @@ window.i18nPagina = {
     'b15': 'The browser asks for permission the first time, because recording starts when you click the button. If you denied it, the tool shows "The microphone could not be accessed". Check the site’s permissions in your browser (usually under the padlock next to the address) and make sure no other application is using the microphone. An open video call, for example, can occupy it.',
     'b16': 'Tips for better recognition',
     'b17-1': '<strong>A quiet place.</strong> This matters most. Close the window, switch off the fan or the TV.',
-    'b17-2': '<strong>Close to the microphone, at a steady distance.</strong> About 15 to 30 cm from the headset or device microphone gives better results than speaking from far away. The tool turns on the browser’s noise suppression and volume control, but it can’t rebuild a voice that arrives weak.',
-    'b17-3': '<strong>Natural rhythm and complete sentences.</strong> Speak as if you were reading calmly. Shouting or speaking very softly makes the result worse, and long pauses between words leave more room for error than pauses between sentences.',
+    'b17-2': '<strong>Close to the microphone, at a steady distance.</strong> As a general guide (not an exact measurement), a short distance of about 15 to 30 cm from the headset or device microphone usually gives better results than speaking from far away. The tool turns on the browser’s noise suppression and volume control, but it can’t rebuild a voice that arrives weak.',
+    'b17-3': '<strong>Natural rhythm and complete sentences.</strong> Speak as if you were reading calmly. Shouting or speaking very softly tends to make the result worse; as a general rule, it’s better to pause between sentences than in the middle of them.',
     'b17-4': '<strong>Proper names and technical terms.</strong> These are what gets confused most. Dictate them and check those words afterwards.',
     'b17-5': '<strong>Recording in parts.</strong> It’s easier to review three batches of a couple of minutes than one long one, and if something goes wrong, you repeat only that part.',
-    'b17-6': '<strong>Pauses at the start.</strong> There’s no need to rush: the silences at the beginning and end are trimmed before recognition, so the model doesn’t “invent” filler text.',
+    'b17-6': '<strong>Pauses at the start.</strong> There’s no need to rush: the silences at the beginning and end are trimmed before recognition, which reduces the risk of the model “inventing” filler text.',
     'b18': 'Punctuation',
-    'b19': 'The tool has <strong>no voice commands</strong> for punctuation: saying “period” or “comma” isn’t an instruction it understands as such. The model usually adds periods, commas and question marks on its own, based on intonation and context, but you can’t control it and it sometimes gets it wrong. That’s why a final read-through of the text is a good idea.',
+    'b19': 'The tool has <strong>no voice commands</strong> for punctuation: saying “period” or “comma” isn’t an instruction it understands as such, and the model may write the word out as it is. The model usually adds periods, commas and question marks on its own, based on intonation and context, but you can’t control it and it sometimes gets it wrong. That’s why a final read-through of the text is a good idea.',
     'b20': 'What to do with the text afterwards',
     'b21-1': '<strong>Read it through with the audio in your head.</strong> Correct numbers, names and acronyms.',
     'b21-2': '<strong>Adjust the capitalization</strong> if needed. With <a href="../herramientas/convertidor-mayusculas.html">Change text case</a> you can set the format the way you need it.',
@@ -137,9 +137,9 @@ window.i18nPagina = {
     'b23-3': '<strong>One voice.</strong> It doesn’t identify who is speaking, so it isn’t suitable for separating the participants of a meeting.',
     'b23-4': '<strong>Memory.</strong> The large models use a lot of memory. On a phone or a computer with little memory, the notice "Your browser ran out of memory running this model" may appear; in that case choose a lighter model.',
     'b23-5': '<strong>Long recordings.</strong> The audio is processed in chunks, but a recording of many minutes keeps all the audio in memory and takes longer to transcribe. The page doesn’t state a duration limit; if you dictate a lot, record in parts.',
-    'b23-6': '<strong>Internet only the first time</strong>, for the model download. Without a connection and without the model saved, the tool can’t start.',
+    'b23-6': '<strong>Internet, mainly the first time</strong>, to download the model and the engine that runs it. Without a connection and without the model saved, the tool can’t start; with the model already saved it may work offline, but that is not guaranteed.',
     'b24': 'Frequently asked questions',
-    'b25': '<strong>Which model should I choose?</strong> Start with "Fast". If you see many errors, move up to "Accurate", and to "Very accurate" when quality matters more than speed. Each model is downloaded only once.',
+    'b25': '<strong>Which model should I choose?</strong> Start with "Fast". If you see many errors, move up to "Accurate", and to "Very accurate" when quality matters more than speed. Each model is normally downloaded only once: after that it stays saved in the browser.',
     'b26': '<strong>Does it work on a phone?</strong> It may work, but the larger models can run out of memory. Try the lightest one first.',
     'b27': '<strong>Can I switch models while recording?</strong> No: the selector is locked during recording and enabled again when you stop.',
     'b28': 'Summary',
@@ -190,7 +190,7 @@ window.i18nPagina = {
     </table></div>
     <p data-i18n-html="b7">Un modelo más grande suele reconocer mejor, sobre todo con ruido de fondo o un acento marcado, pero tarda más y usa más memoria.</p>
     <h3 data-i18n="b8">La descarga de la primera vez</h3>
-    <p data-i18n-html="b9">El modelo no viene incluido en la página. La primera vez que lo usás, el navegador lo descarga desde el servidor de Hugging Face (y la biblioteca que lo ejecuta, desde jsDelivr, dos servicios que la política de privacidad del sitio nombra). Se muestra una barra con el porcentaje, y después el modelo queda guardado en el navegador para las próximas veces.</p>
+    <p data-i18n-html="b9">El modelo no viene incluido en la página. La primera vez que lo usás, el navegador lo descarga desde el servidor de Hugging Face (y el motor que lo ejecuta, desde jsDelivr, dos servicios que la política de privacidad del sitio nombra). Se muestra una barra con el porcentaje, y después el modelo queda guardado en el navegador para las próximas veces.</p>
     <p data-i18n-html="b10">Un detalle útil: la descarga <strong>no empieza al abrir la página</strong>, sino cuando pulsás «Empezar a grabar». Así no se gastan 41 a 249 MB de datos en quien solo entra a mirar. Como la descarga corre mientras hablás, en una grabación de varios minutos el modelo suele estar listo cuando terminás. Si cambiás de modelo después de haber grabado, la descarga del nuevo también arranca sola.</p>
     <h2 data-i18n="b11">Paso a paso</h2>
     <ol>
@@ -206,14 +206,14 @@ window.i18nPagina = {
     <h2 data-i18n="b16">Consejos para que reconozca mejor</h2>
     <ul>
       <li data-i18n-html="b17-1"><strong>Un lugar silencioso.</strong> Es lo que más influye. Cerrá la ventana, apagá el ventilador o la tele.</li>
-      <li data-i18n-html="b17-2"><strong>Cerca del micrófono, a distancia constante.</strong> Unos 15 a 30 cm del micrófono del auricular o del equipo dan mejor resultado que hablar desde lejos. La herramienta activa la supresión de ruido y el control de volumen del navegador, pero no puede reconstruir una voz que llega débil.</li>
-      <li data-i18n-html="b17-3"><strong>Ritmo natural y frases completas.</strong> Hablá como si leyeras con calma. Gritar o hablar muy bajo empeora el resultado, y las pausas largas entre palabras dan más margen de error que las pausas entre frases.</li>
+      <li data-i18n-html="b17-2"><strong>Cerca del micrófono, a distancia constante.</strong> Como referencia general (no es una medida exacta), una distancia corta, de unos 15 a 30 cm del micrófono del auricular o del equipo, suele dar mejor resultado que hablar desde lejos. La herramienta activa la supresión de ruido y el control de volumen del navegador, pero no puede reconstruir una voz que llega débil.</li>
+      <li data-i18n-html="b17-3"><strong>Ritmo natural y frases completas.</strong> Hablá como si leyeras con calma. Gritar o hablar muy bajo suele empeorar el resultado; en general conviene hacer las pausas entre frases y no en medio de ellas.</li>
       <li data-i18n-html="b17-4"><strong>Nombres propios y términos técnicos.</strong> Son lo que más se confunde. Dictalos y revisá esas palabras después.</li>
       <li data-i18n-html="b17-5"><strong>Grabaciones por partes.</strong> Es más fácil revisar tres tandas de un par de minutos que una larga, y si algo sale mal, repetís solo esa parte.</li>
-      <li data-i18n-html="b17-6"><strong>Pausas al principio.</strong> No hace falta apurarse: los silencios iniciales y finales se recortan antes de reconocer, para evitar que el modelo «invente» texto de relleno.</li>
+      <li data-i18n-html="b17-6"><strong>Pausas al principio.</strong> No hace falta apurarse: los silencios iniciales y finales se recortan antes de reconocer, para reducir el riesgo de que el modelo «invente» texto de relleno.</li>
     </ul>
     <h2 data-i18n="b18">La puntuación</h2>
-    <p data-i18n-html="b19">La herramienta <strong>no tiene comandos de voz</strong> para la puntuación: decir «punto» o «coma» no es una orden que ella entienda como tal. El modelo suele añadir por su cuenta puntos, comas y signos de interrogación según la entonación y el contexto, pero no se puede controlar y a veces se equivoca. Por eso conviene un repaso final del texto.</p>
+    <p data-i18n-html="b19">La herramienta <strong>no tiene comandos de voz</strong> para la puntuación: decir «punto» o «coma» no es una orden que ella entienda como tal, y es posible que el modelo escriba la palabra tal cual. El modelo suele añadir por su cuenta puntos, comas y signos de interrogación según la entonación y el contexto, pero no se puede controlar y a veces se equivoca. Por eso conviene un repaso final del texto.</p>
     <h2 data-i18n="b20">Qué hacer con el texto después</h2>
     <ol>
       <li data-i18n-html="b21-1"><strong>Leelo de corrido con el audio en la cabeza.</strong> Corregí números, nombres y siglas.</li>
@@ -229,10 +229,10 @@ window.i18nPagina = {
       <li data-i18n-html="b23-3"><strong>Una voz.</strong> No identifica quién habla, así que no sirve para separar a los participantes de una reunión.</li>
       <li data-i18n-html="b23-4"><strong>Memoria.</strong> Los modelos grandes consumen mucha memoria. En un teléfono o en una computadora con poca memoria puede aparecer el aviso «Tu navegador se quedó sin memoria»; en ese caso elegí un modelo más liviano.</li>
       <li data-i18n-html="b23-5"><strong>Grabaciones largas.</strong> El audio se procesa en tramos, pero una grabación de muchos minutos mantiene todo el audio en memoria y tarda más en transcribirse. No hay un límite de duración indicado en la página; si dictás mucho, grabá por partes.</li>
-      <li data-i18n-html="b23-6"><strong>Internet solo la primera vez</strong>, para la descarga del modelo. Sin conexión y sin el modelo guardado, la herramienta no puede arrancar.</li>
+      <li data-i18n-html="b23-6"><strong>Internet, sobre todo la primera vez</strong>, para descargar el modelo y el motor que lo ejecuta. Sin conexión y sin el modelo guardado, la herramienta no puede arrancar; con el modelo ya guardado puede funcionar sin conexión, pero no está garantizado.</li>
     </ul>
     <h2 data-i18n="b24">Preguntas frecuentes</h2>
-    <p data-i18n-html="b25"><strong>¿Qué modelo elijo?</strong> Empezá con «Rápido». Si ves muchos errores, pasá a «Preciso», y a «Muy preciso» cuando la calidad importe más que la velocidad. Cada modelo se descarga una sola vez.</p>
+    <p data-i18n-html="b25"><strong>¿Qué modelo elijo?</strong> Empezá con «Rápido». Si ves muchos errores, pasá a «Preciso», y a «Muy preciso» cuando la calidad importe más que la velocidad. Cada modelo se descarga normalmente una sola vez: después queda guardado en el navegador.</p>
     <p data-i18n-html="b26"><strong>¿Funciona en el celular?</strong> Puede funcionar, pero los modelos más grandes pueden quedarse sin memoria. Probá primero con el más liviano.</p>
     <p data-i18n-html="b27"><strong>¿Puedo cambiar de modelo mientras grabo?</strong> No: el selector se bloquea durante la grabación y se habilita al detenerla.</p>
     <h2 data-i18n="b28">Resumen</h2>

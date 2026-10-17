@@ -34,7 +34,7 @@ window.i18nPagina = {
     'b4-f4c2': 'Mayúscula inicial en cada oración, el resto en minúscula',
     'b4-f4c3': '«HOLA. ¿CÓMO ESTÁS?» pasa a «Hola. ¿Cómo estás?»',
     'b4-f5c1': '<strong>AltErNaDo</strong>',
-    'b4-f5c2': 'Alterna minúscula y mayúscula',
+    'b4-f5c2': 'Alterna minúscula y mayúscula según la posición de cada carácter (los espacios también cuentan)',
     'b4-f5c3': 'Efecto puramente decorativo',
     'b5': 'Después de convertir, <strong>Copiar</strong> lleva el resultado al portapapeles y <strong>Descargar .txt</strong> lo guarda como archivo de texto con la fecha y la hora en el nombre.',
     'b6': 'Cuándo conviene cada uno',
@@ -52,7 +52,7 @@ window.i18nPagina = {
     'b18-1': '<strong>Los números, los signos y los emojis no cambian</strong>, porque no tienen versión en mayúscula.',
     'b18-2': '<strong>Otros alfabetos</strong> (cirílico, griego) también se convierten.',
     'b18-3': '<strong>Algunas letras cambian de longitud al pasar a mayúscula.</strong> Un ejemplo es la «ß» alemana, que en mayúsculas se escribe «SS». No es un error de la herramienta, es la regla del idioma.',
-    'b18-4': '<strong>«Cada Palabra En Mayúscula» solo reconoce el inicio después de un espacio o un salto de línea.</strong> Una palabra que va después de un guion, una barra, un paréntesis o unas comillas no recibe mayúscula: «(hola)» y «ana-maría» conservan la minúscula inicial dentro del signo. Revisá esos casos a mano.',
+    'b18-4': '<strong>«Cada Palabra En Mayúscula» solo reconoce el inicio después de un espacio o un salto de línea.</strong> Una palabra que va después de un guion, una barra, un paréntesis o unas comillas no recibe mayúscula: «(hola)» queda igual y «ana-maría» queda como «Ana-maría», con la segunda parte todavía en minúscula. Revisá esos casos a mano.',
     'b19': 'Los límites del formato de título en español',
     'b20': 'Conviene ser claro con lo que un conversor automático <strong>no</strong> sabe hacer.',
     'b21-1': '<strong>No distingue artículos y preposiciones.</strong> En español, un título como «El señor de los anillos» suele escribirse solo con la primera palabra en mayúscula (y los nombres propios). El botón «Cada Palabra En Mayúscula» devolverá «El Señor De Los Anillos». Es el estilo del inglés (Title Case), no la norma habitual del español.',
@@ -67,7 +67,7 @@ window.i18nPagina = {
     'b25-4': 'Si el texto se ve con símbolos raros en lugar de tildes, probá <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a>.',
     'b25-5': 'Si te hace falta saber cuánto mide el resultado (por ejemplo, para un límite de palabras), <a href="../herramientas/contador-palabras.html">Contador de palabras</a> muestra palabras, caracteres y tiempo de lectura.',
     'b26': 'Preguntas frecuentes',
-    'b27': '<strong>¿Puedo deshacer una conversión?</strong> La página no tiene un botón de deshacer. Si querés conservar el original, copialo antes de convertir. Probá también el atajo de deshacer del teclado (Ctrl+Z): según el navegador, puede o no recuperar el texto anterior.',
+    'b27': '<strong>¿Puedo deshacer una conversión?</strong> La página no tiene un botón de deshacer, y el atajo del teclado (Ctrl+Z) no recupera el texto anterior: al convertir, el resultado reemplaza el contenido del cuadro y el navegador descarta su historial de deshacer (lo comprobamos en Edge; en otros navegadores no cuentes con ello). Por eso, si querés conservar el original, copialo antes de convertir.',
     'b28': '<strong>¿Cambia las tildes al pasar a minúsculas?</strong> No. Solo cambia entre mayúscula y minúscula; las tildes y la diéresis se mantienen.',
     'b29': '<strong>¿Hay un límite de longitud?</strong> La herramienta no impone ninguno; con textos enormes depende de la memoria del navegador.',
     'b30': 'Resumen',
@@ -100,7 +100,7 @@ window.i18nPagina = {
     'b4-f4c2': 'Capitalizes the first letter of each sentence and lowercases the rest',
     'b4-f4c3': '“HOLA. ¿CÓMO ESTÁS?” becomes “Hola. ¿Cómo estás?”',
     'b4-f5c1': '<strong>AlTeRnAtInG</strong>',
-    'b4-f5c2': 'Alternates lowercase and uppercase',
+    'b4-f5c2': 'Alternates lowercase and uppercase by the position of each character (spaces count too)',
     'b4-f5c3': 'A purely decorative effect',
     'b5': 'After converting, <strong>Copy</strong> puts the result on the clipboard and <strong>Download .txt</strong> saves it as a text file with the date and time in its name.',
     'b6': 'When to use each one',
@@ -118,7 +118,7 @@ window.i18nPagina = {
     'b18-1': '<strong>Numbers, punctuation and emojis don’t change</strong>, because they have no uppercase version.',
     'b18-2': '<strong>Other alphabets</strong> (Cyrillic, Greek) are converted too.',
     'b18-3': '<strong>Some letters change length when they become uppercase.</strong> One example is the German “ß”, which is written “SS” in capitals. That is not a bug in the tool; it is the rule of the language.',
-    'b18-4': '<strong>“Capitalize Each Word” only recognizes the start of a word after a space or a line break.</strong> A word that follows a hyphen, a slash, a parenthesis or a quotation mark doesn’t get a capital: “(hola)” and “ana-maría” keep their lowercase initial inside the punctuation. Check those cases by hand.',
+    'b18-4': '<strong>“Capitalize Each Word” only recognizes the start of a word after a space or a line break.</strong> A word that follows a hyphen, a slash, a parenthesis or a quotation mark doesn’t get a capital: “(hola)” stays as it is and “ana-maría” becomes “Ana-maría”, with the second part still in lowercase. Check those cases by hand.',
     'b19': 'The limits of title case',
     'b20': 'It’s worth being clear about what an automatic converter <strong>can’t</strong> do.',
     'b21-1': '<strong>It doesn’t tell articles and prepositions apart.</strong> In Spanish, a title such as “El señor de los anillos” is normally written with a capital only on the first word (plus proper names). The "Capitalize Each Word" button will return “El Señor De Los Anillos”. That is English-style Title Case, not the usual Spanish convention.',
@@ -133,7 +133,7 @@ window.i18nPagina = {
     'b25-4': 'If the text shows strange symbols instead of accents, try <a href="../herramientas/arreglar-codificacion-texto.html">Fix a text file’s encoding</a>.',
     'b25-5': 'If you need to know how long the result is (for example, for a word limit), <a href="../herramientas/contador-palabras.html">Word counter</a> shows words, characters and reading time.',
     'b26': 'Frequently asked questions',
-    'b27': '<strong>Can I undo a conversion?</strong> The page has no undo button. If you want to keep the original, copy it before converting. You can also try your keyboard’s undo shortcut (Ctrl+Z): depending on the browser, it may or may not bring back the previous text.',
+    'b27': '<strong>Can I undo a conversion?</strong> The page has no undo button, and the keyboard shortcut (Ctrl+Z) does not bring back the previous text: when you convert, the result replaces the contents of the box and the browser discards its undo history (we checked this in Edge; don’t count on it in other browsers). So if you want to keep the original, copy it before converting.',
     'b28': '<strong>Does it change accents when converting to lowercase?</strong> No. It only switches between uppercase and lowercase; accents and diaereses are kept.',
     'b29': '<strong>Is there a length limit?</strong> The tool doesn’t impose one; with enormous texts it depends on the browser’s memory.',
     'b30': 'Summary',
@@ -175,7 +175,7 @@ window.i18nPagina = {
         <tr><td data-i18n-html="b4-f2c1"><strong>minúsculas</strong></td><td data-i18n-html="b4-f2c2">Todas las letras en minúscula</td><td data-i18n-html="b4-f2c3">«HOLA MUNDO» pasa a «hola mundo»</td></tr>
         <tr><td data-i18n-html="b4-f3c1"><strong>Cada Palabra En Mayúscula</strong></td><td data-i18n-html="b4-f3c2">Pasa todo a minúsculas y pone mayúscula inicial a cada palabra</td><td data-i18n-html="b4-f3c3">«juan PÉREZ de la o» pasa a «Juan Pérez De La O»</td></tr>
         <tr><td data-i18n-html="b4-f4c1"><strong>Solo la primera letra</strong></td><td data-i18n-html="b4-f4c2">Mayúscula inicial en cada oración, el resto en minúscula</td><td data-i18n-html="b4-f4c3">«HOLA. ¿CÓMO ESTÁS?» pasa a «Hola. ¿Cómo estás?»</td></tr>
-        <tr><td data-i18n-html="b4-f5c1"><strong>AltErNaDo</strong></td><td data-i18n-html="b4-f5c2">Alterna minúscula y mayúscula</td><td data-i18n-html="b4-f5c3">Efecto puramente decorativo</td></tr>
+        <tr><td data-i18n-html="b4-f5c1"><strong>AltErNaDo</strong></td><td data-i18n-html="b4-f5c2">Alterna minúscula y mayúscula según la posición de cada carácter (los espacios también cuentan)</td><td data-i18n-html="b4-f5c3">Efecto puramente decorativo</td></tr>
       </tbody>
     </table></div>
     <p data-i18n-html="b5">Después de convertir, <strong>Copiar</strong> lleva el resultado al portapapeles y <strong>Descargar .txt</strong> lo guarda como archivo de texto con la fecha y la hora en el nombre.</p>
@@ -195,7 +195,7 @@ window.i18nPagina = {
       <li data-i18n-html="b18-1"><strong>Los números, los signos y los emojis no cambian</strong>, porque no tienen versión en mayúscula.</li>
       <li data-i18n-html="b18-2"><strong>Otros alfabetos</strong> (cirílico, griego) también se convierten.</li>
       <li data-i18n-html="b18-3"><strong>Algunas letras cambian de longitud al pasar a mayúscula.</strong> Un ejemplo es la «ß» alemana, que en mayúsculas se escribe «SS». No es un error de la herramienta, es la regla del idioma.</li>
-      <li data-i18n-html="b18-4"><strong>«Cada Palabra En Mayúscula» solo reconoce el inicio después de un espacio o un salto de línea.</strong> Una palabra que va después de un guion, una barra, un paréntesis o unas comillas no recibe mayúscula: «(hola)» y «ana-maría» conservan la minúscula inicial dentro del signo. Revisá esos casos a mano.</li>
+      <li data-i18n-html="b18-4"><strong>«Cada Palabra En Mayúscula» solo reconoce el inicio después de un espacio o un salto de línea.</strong> Una palabra que va después de un guion, una barra, un paréntesis o unas comillas no recibe mayúscula: «(hola)» queda igual y «ana-maría» queda como «Ana-maría», con la segunda parte todavía en minúscula. Revisá esos casos a mano.</li>
     </ul>
     <h2 data-i18n="b19">Los límites del formato de título en español</h2>
     <p data-i18n-html="b20">Conviene ser claro con lo que un conversor automático <strong>no</strong> sabe hacer.</p>
@@ -215,7 +215,7 @@ window.i18nPagina = {
       <li data-i18n-html="b25-5">Si te hace falta saber cuánto mide el resultado (por ejemplo, para un límite de palabras), <a href="../herramientas/contador-palabras.html">Contador de palabras</a> muestra palabras, caracteres y tiempo de lectura.</li>
     </ol>
     <h2 data-i18n="b26">Preguntas frecuentes</h2>
-    <p data-i18n-html="b27"><strong>¿Puedo deshacer una conversión?</strong> La página no tiene un botón de deshacer. Si querés conservar el original, copialo antes de convertir. Probá también el atajo de deshacer del teclado (Ctrl+Z): según el navegador, puede o no recuperar el texto anterior.</p>
+    <p data-i18n-html="b27"><strong>¿Puedo deshacer una conversión?</strong> La página no tiene un botón de deshacer, y el atajo del teclado (Ctrl+Z) no recupera el texto anterior: al convertir, el resultado reemplaza el contenido del cuadro y el navegador descarta su historial de deshacer (lo comprobamos en Edge; en otros navegadores no cuentes con ello). Por eso, si querés conservar el original, copialo antes de convertir.</p>
     <p data-i18n-html="b28"><strong>¿Cambia las tildes al pasar a minúsculas?</strong> No. Solo cambia entre mayúscula y minúscula; las tildes y la diéresis se mantienen.</p>
     <p data-i18n-html="b29"><strong>¿Hay un límite de longitud?</strong> La herramienta no impone ninguno; con textos enormes depende de la memoria del navegador.</p>
     <h2 data-i18n="b30">Resumen</h2>

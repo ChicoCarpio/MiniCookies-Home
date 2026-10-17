@@ -37,7 +37,7 @@ window.i18nPagina = {
     'b12': 'El informe descargable',
     'b13': 'Con <strong>Descargar informe (.html)</strong> obtenés una página independiente que se abre en cualquier navegador; desde ahí podés imprimirla o guardarla como PDF para compartirla. Incluye la fecha, la cantidad de cambios agregados y quitados y el tipo de comparación usado. El nombre del archivo empieza con «comparacion-textos» y lleva la fecha y la hora.',
     'b14': 'Consejos para un resultado limpio',
-    'b15-1': '<strong>Cuidado con los espacios y los saltos de línea.</strong> Si copiás desde un documento o desde un correo, los espacios sobrantes y los renglones partidos también cuentan como diferencias. La herramienta no tiene una opción para ignorarlos, así que conviene limpiar un poco los textos antes de pegarlos, por ejemplo igualando cómo están cortados los renglones.',
+    'b15-1': '<strong>Cuidado con los espacios y los saltos de línea.</strong> Si copiás desde un documento o desde un correo, el modo elegido cambia lo que pasa. Por palabra, los espacios sobrantes, los tabuladores y los renglones partidos de otra forma no se marcan (se tratan como un espacio), aunque sí se marca si en un texto falta del todo un espacio que en el otro está. Por línea, un espacio al final o un salto de línea distinto marca el renglón entero, y no hay una opción para ignorarlo, así que conviene limpiar un poco los textos antes de pegarlos, por ejemplo igualando cómo están cortados los renglones.',
     'b15-2': '<strong>Mayúsculas y minúsculas se distinguen.</strong> Un cambio de «Contrato» a «contrato» aparece como diferencia.',
     'b15-3': '<strong>Elegí bien el modo.</strong> Si el resultado se ve como un bloque enorme en rojo y verde, probá con el otro modo.',
     'b15-4': '<strong>Pegá el mismo contenido en el mismo orden.</strong> Si un texto tiene un párrafo movido de lugar, el diff lo muestra como quitado en un sitio y agregado en otro.',
@@ -53,7 +53,7 @@ window.i18nPagina = {
     'b22': '<strong>¿Puedo comparar archivos PDF aquí?</strong> Esta herramienta trabaja con texto pegado. Si tenés un PDF, copiá su texto y pegalo.',
     'b23': '<strong>¿Funciona con otros idiomas y con acentos?</strong> Sí, compara cualquier texto que puedas pegar.',
     'b24': 'Resumen',
-    'b25': 'Pegá el texto original y el nuevo, elegí comparar por palabra (textos corridos) o por línea (listas y código) y leé el resultado: verde es lo agregado y rojo lo quitado. Limpiá los espacios y saltos de línea sobrantes antes de comparar y usá el informe en HTML para guardarlo o compartirlo. Para archivos Word o planillas, hay herramientas específicas.',
+    'b25': 'Pegá el texto original y el nuevo, elegí comparar por palabra (textos corridos) o por línea (listas y código) y leé el resultado: verde es lo agregado y rojo lo quitado. Si comparás por línea, limpiá los espacios y saltos de línea sobrantes antes de comparar y usá el informe en HTML para guardarlo o compartirlo. Para archivos Word o planillas, hay herramientas específicas.',
     'rel1': 'Comparar dos textos',
     'rel2': 'Comparar dos documentos Word',
     'rel3': 'Comparar Excel / CSV'
@@ -84,7 +84,7 @@ window.i18nPagina = {
     'b12': 'The downloadable report',
     'b13': 'With "Download report (.html)" you get a standalone page that opens in any browser; from there you can print it or save it as a PDF to share. It includes the date, the number of additions and removals, and the type of comparison used. The file name starts with "comparacion-textos" and includes the date and time.',
     'b14': 'Tips for a clean result',
-    'b15-1': '<strong>Watch out for spaces and line breaks.</strong> If you copy from a document or an email, extra spaces and broken lines also count as differences. The tool has no option to ignore them, so it’s a good idea to clean the texts up a bit before pasting, for example by making the line breaks match.',
+    'b15-1': '<strong>Watch out for spaces and line breaks.</strong> If you copy from a document or an email, the mode you choose changes what happens. By word, extra spaces, tabs and lines broken in a different way are not flagged (they are treated as a single space), although it is flagged if a space that one text has is missing altogether in the other. By line, a trailing space or a different line break flags the whole line, and there is no option to ignore it, so it’s a good idea to clean the texts up a bit before pasting, for example by making the line breaks match.',
     'b15-2': '<strong>Uppercase and lowercase are treated as different.</strong> A change from "Contract" to "contract" shows up as a difference.',
     'b15-3': '<strong>Choose the right mode.</strong> If the result looks like one huge block of red and green, try the other mode.',
     'b15-4': '<strong>Paste the same content in the same order.</strong> If a paragraph has been moved in one text, the diff shows it as removed in one place and added in another.',
@@ -100,7 +100,7 @@ window.i18nPagina = {
     'b22': '<strong>Can I compare PDF files here?</strong> This tool works with pasted text. If you have a PDF, copy its text and paste it.',
     'b23': '<strong>Does it work with other languages and with accents?</strong> Yes, it compares any text you can paste.',
     'b24': 'Summary',
-    'b25': 'Paste the original and the new text, choose to compare by word (running text) or by line (lists and code) and read the result: green is what was added and red is what was removed. Clean up extra spaces and line breaks before comparing, and use the HTML report to save or share it. For Word files or spreadsheets, there are dedicated tools.',
+    'b25': 'Paste the original and the new text, choose to compare by word (running text) or by line (lists and code) and read the result: green is what was added and red is what was removed. If you compare by line, clean up extra spaces and line breaks before comparing, and use the HTML report to save or share it. For Word files or spreadsheets, there are dedicated tools.',
     'rel1': 'Compare two texts',
     'rel2': 'Compare two Word documents',
     'rel3': 'Compare Excel / CSV'
@@ -156,7 +156,7 @@ window.i18nPagina = {
     <p data-i18n-html="b13">Con <strong>Descargar informe (.html)</strong> obtenés una página independiente que se abre en cualquier navegador; desde ahí podés imprimirla o guardarla como PDF para compartirla. Incluye la fecha, la cantidad de cambios agregados y quitados y el tipo de comparación usado. El nombre del archivo empieza con «comparacion-textos» y lleva la fecha y la hora.</p>
     <h2 data-i18n="b14">Consejos para un resultado limpio</h2>
     <ol>
-      <li data-i18n-html="b15-1"><strong>Cuidado con los espacios y los saltos de línea.</strong> Si copiás desde un documento o desde un correo, los espacios sobrantes y los renglones partidos también cuentan como diferencias. La herramienta no tiene una opción para ignorarlos, así que conviene limpiar un poco los textos antes de pegarlos, por ejemplo igualando cómo están cortados los renglones.</li>
+      <li data-i18n-html="b15-1"><strong>Cuidado con los espacios y los saltos de línea.</strong> Si copiás desde un documento o desde un correo, el modo elegido cambia lo que pasa. Por palabra, los espacios sobrantes, los tabuladores y los renglones partidos de otra forma no se marcan (se tratan como un espacio), aunque sí se marca si en un texto falta del todo un espacio que en el otro está. Por línea, un espacio al final o un salto de línea distinto marca el renglón entero, y no hay una opción para ignorarlo, así que conviene limpiar un poco los textos antes de pegarlos, por ejemplo igualando cómo están cortados los renglones.</li>
       <li data-i18n-html="b15-2"><strong>Mayúsculas y minúsculas se distinguen.</strong> Un cambio de «Contrato» a «contrato» aparece como diferencia.</li>
       <li data-i18n-html="b15-3"><strong>Elegí bien el modo.</strong> Si el resultado se ve como un bloque enorme en rojo y verde, probá con el otro modo.</li>
       <li data-i18n-html="b15-4"><strong>Pegá el mismo contenido en el mismo orden.</strong> Si un texto tiene un párrafo movido de lugar, el diff lo muestra como quitado en un sitio y agregado en otro.</li>
@@ -177,7 +177,7 @@ window.i18nPagina = {
     <p data-i18n-html="b22"><strong>¿Puedo comparar archivos PDF aquí?</strong> Esta herramienta trabaja con texto pegado. Si tenés un PDF, copiá su texto y pegalo.</p>
     <p data-i18n-html="b23"><strong>¿Funciona con otros idiomas y con acentos?</strong> Sí, compara cualquier texto que puedas pegar.</p>
     <h2 data-i18n="b24">Resumen</h2>
-    <p data-i18n-html="b25">Pegá el texto original y el nuevo, elegí comparar por palabra (textos corridos) o por línea (listas y código) y leé el resultado: verde es lo agregado y rojo lo quitado. Limpiá los espacios y saltos de línea sobrantes antes de comparar y usá el informe en HTML para guardarlo o compartirlo. Para archivos Word o planillas, hay herramientas específicas.</p>
+    <p data-i18n-html="b25">Pegá el texto original y el nuevo, elegí comparar por palabra (textos corridos) o por línea (listas y código) y leé el resultado: verde es lo agregado y rojo lo quitado. Si comparás por línea, limpiá los espacios y saltos de línea sobrantes antes de comparar y usá el informe en HTML para guardarlo o compartirlo. Para archivos Word o planillas, hay herramientas específicas.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

@@ -29,19 +29,19 @@ window.i18nPagina = {
     'b5-5': 'Mirá el resultado y el valor de <strong>Píxeles distintos</strong>. Si te sirve, descargá la imagen de diferencias con <strong>Descargar imagen de diferencias</strong>: sale como <code>comparacion.png</code>.',
     'b6': 'Cómo leer el resultado',
     'b7': 'La imagen resultante tiene dos tipos de zonas. Lo <strong>rojo intenso</strong> son los píxeles que la herramienta considera distintos; lo <strong>gris atenuado</strong> es el resto, que se muestra solo como referencia para que ubiques cada cambio en la imagen. Debajo aparece el porcentaje de píxeles distintos, con dos decimales, calculado sobre el total de píxeles de la imagen A.',
-    'b8': 'Interpretalo con criterio: un 0,5 % repartido en puntitos dispersos suele ser ruido de compresión; un 0,5 % concentrado en un bloque es un cambio real, como un texto distinto. La ubicación y la forma de lo rojo importan tanto como el número.',
+    'b8': 'Interpretalo con criterio, porque el número solo no alcanza. Como orientación (no es una regla exacta): puntitos dispersos por toda la imagen suelen indicar ruido de compresión, y una zona roja compacta suele indicar un cambio real, como un texto distinto. La ubicación y la forma de lo rojo importan tanto como el número.',
     'b9': 'La tolerancia, el control clave',
     'b10': 'Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si esa suma supera la tolerancia, el píxel se marca como distinto.',
     'b11-1': '<strong>Tolerancia más alta:</strong> ignora diferencias pequeñas. Subila cuando compares JPG o capturas con compresión, porque esas variaciones mínimas de color no son cambios reales.',
     'b11-2': '<strong>Tolerancia más baja:</strong> detecta diferencias sutiles, como un leve cambio de tono.',
     'b12': 'Un buen método: empezá con el valor por defecto y, si ves ruido por toda la imagen, subila hasta que quede solo lo importante.',
     'b13': 'Consejos para comparar bien',
-    'b14-1': '<strong>Usá imágenes del mismo tamaño y proporción.</strong> Si difieren, la herramienta avisa que la B se estira al tamaño de la A antes de comparar, y esa deformación genera diferencias falsas. Si hace falta igualarlas antes, usá <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> o <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.',
+    'b14-1': '<strong>Usá imágenes del mismo tamaño y proporción.</strong> Si difieren, la herramienta avisa que la B se estira al tamaño de la A antes de comparar (sin conservar su proporción), y esa deformación genera diferencias falsas: el resultado deja de ser fiable. Si hace falta igualarlas antes, usá <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> o <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.',
     'b14-2': '<strong>Alineá las imágenes.</strong> Si una captura está desplazada unos pocos píxeles, casi todo aparecerá como distinto. Recortá ambas desde el mismo punto.',
     'b14-3': '<strong>Comparar JPG con PNG.</strong> Aunque el contenido sea el mismo, el JPG introduce pequeñas variaciones; compensalas con más tolerancia. Para cuantificar cuánto pierde una compresión, comparar el original con la versión de <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> es un buen ejercicio.',
     'b14-4': '<strong>Guardá el resultado.</strong> La imagen de diferencias es un buen respaldo para mostrar a otra persona qué cambió.',
     'b15': 'Límites',
-    'b16-1': 'La comparación usa solo los canales de color: la transparencia no se tiene en cuenta.',
+    'b16-1': 'La comparación usa solo los canales de color rojo, verde y azul: la transparencia no se compara, y un píxel transparente se lee como negro.',
     'b16-2': 'Compara píxeles, no significado: un desplazamiento mínimo o un cambio de brillo general puede marcarse como «distinto» aunque el contenido sea el mismo.',
     'b16-3': 'Acepta las imágenes que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.',
     'b17': 'Preguntas frecuentes',
@@ -73,19 +73,19 @@ window.i18nPagina = {
     'b5-5': 'Look at the result and the "Pixels that differ" value. If it’s useful, download the difference image with "Download the difference image": it comes out as <code>comparacion.png</code>.',
     'b6': 'How to read the result',
     'b7': 'The resulting image has two kinds of areas. The <strong>bright red</strong> is the pixels the tool considers different; the <strong>dimmed gray</strong> is everything else, shown only as a reference so you can locate each change in the image. Below it you’ll see the percentage of differing pixels, with two decimals, calculated over the total pixels of image A.',
-    'b8': 'Interpret it with judgment: 0.5% spread across scattered dots is usually compression noise; 0.5% concentrated in one block is a real change, such as different text. The location and shape of the red matter as much as the number.',
+    'b8': 'Interpret it with judgment, because the number alone is not enough. As a rough guide (not an exact rule): scattered dots all over the image often point to compression noise, and a compact red area often points to a real change, such as different text. The location and shape of the red matter as much as the number.',
     'b9': 'Tolerance, the key control',
     'b10': 'For each pixel, the tool adds up the red, green and blue differences between A and B. If that sum exceeds the tolerance, the pixel is marked as different.',
     'b11-1': '<strong>Higher tolerance:</strong> ignores small differences. Raise it when comparing JPGs or compressed screenshots, because those tiny color variations aren’t real changes.',
     'b11-2': '<strong>Lower tolerance:</strong> detects subtle differences, such as a slight change of tone.',
     'b12': 'A good method: start with the default value and, if you see noise all over the image, raise it until only what matters is left.',
     'b13': 'Tips for comparing well',
-    'b14-1': '<strong>Use images of the same size and proportions.</strong> If they differ, the tool warns you that B is stretched to A’s size before comparing, and that distortion creates false differences. If you need to match them first, use <a href="../herramientas/redimensionar-imagen.html">Resize an image</a> or <a href="../herramientas/recortar-imagen.html">Crop an image</a>.',
+    'b14-1': '<strong>Use images of the same size and proportions.</strong> If they differ, the tool warns you that B is stretched to A’s size before comparing (without keeping its proportions), and that distortion creates false differences, so the result is no longer reliable. If you need to match them first, use <a href="../herramientas/redimensionar-imagen.html">Resize an image</a> or <a href="../herramientas/recortar-imagen.html">Crop an image</a>.',
     'b14-2': '<strong>Align the images.</strong> If one screenshot is shifted by a few pixels, almost everything will show up as different. Crop both from the same point.',
     'b14-3': '<strong>Comparing JPG with PNG.</strong> Even if the content is the same, the JPG introduces small variations; compensate with more tolerance. To measure how much a compression loses, comparing the original with the version from <a href="../herramientas/comprimir-imagen.html">Compress an image</a> is a good exercise.',
     'b14-4': '<strong>Save the result.</strong> The difference image is a handy way to show someone else what changed.',
     'b15': 'Limits',
-    'b16-1': 'The comparison uses only the color channels: transparency isn’t taken into account.',
+    'b16-1': 'The comparison uses only the red, green and blue channels: transparency isn’t compared, and a transparent pixel is read as black.',
     'b16-2': 'It compares pixels, not meaning: a tiny shift or an overall change in brightness can be flagged as "different" even though the content is the same.',
     'b16-3': 'It accepts any image your browser can open, such as JPG, PNG, WebP or GIF.',
     'b17': 'Frequently asked questions',
@@ -139,7 +139,7 @@ window.i18nPagina = {
     </ol>
     <h2 data-i18n="b6">Cómo leer el resultado</h2>
     <p data-i18n-html="b7">La imagen resultante tiene dos tipos de zonas. Lo <strong>rojo intenso</strong> son los píxeles que la herramienta considera distintos; lo <strong>gris atenuado</strong> es el resto, que se muestra solo como referencia para que ubiques cada cambio en la imagen. Debajo aparece el porcentaje de píxeles distintos, con dos decimales, calculado sobre el total de píxeles de la imagen A.</p>
-    <p data-i18n-html="b8">Interpretalo con criterio: un 0,5 % repartido en puntitos dispersos suele ser ruido de compresión; un 0,5 % concentrado en un bloque es un cambio real, como un texto distinto. La ubicación y la forma de lo rojo importan tanto como el número.</p>
+    <p data-i18n-html="b8">Interpretalo con criterio, porque el número solo no alcanza. Como orientación (no es una regla exacta): puntitos dispersos por toda la imagen suelen indicar ruido de compresión, y una zona roja compacta suele indicar un cambio real, como un texto distinto. La ubicación y la forma de lo rojo importan tanto como el número.</p>
     <h2 data-i18n="b9">La tolerancia, el control clave</h2>
     <p data-i18n-html="b10">Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si esa suma supera la tolerancia, el píxel se marca como distinto.</p>
     <ul>
@@ -149,14 +149,14 @@ window.i18nPagina = {
     <p data-i18n-html="b12">Un buen método: empezá con el valor por defecto y, si ves ruido por toda la imagen, subila hasta que quede solo lo importante.</p>
     <h2 data-i18n="b13">Consejos para comparar bien</h2>
     <ol>
-      <li data-i18n-html="b14-1"><strong>Usá imágenes del mismo tamaño y proporción.</strong> Si difieren, la herramienta avisa que la B se estira al tamaño de la A antes de comparar, y esa deformación genera diferencias falsas. Si hace falta igualarlas antes, usá <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> o <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.</li>
+      <li data-i18n-html="b14-1"><strong>Usá imágenes del mismo tamaño y proporción.</strong> Si difieren, la herramienta avisa que la B se estira al tamaño de la A antes de comparar (sin conservar su proporción), y esa deformación genera diferencias falsas: el resultado deja de ser fiable. Si hace falta igualarlas antes, usá <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> o <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.</li>
       <li data-i18n-html="b14-2"><strong>Alineá las imágenes.</strong> Si una captura está desplazada unos pocos píxeles, casi todo aparecerá como distinto. Recortá ambas desde el mismo punto.</li>
       <li data-i18n-html="b14-3"><strong>Comparar JPG con PNG.</strong> Aunque el contenido sea el mismo, el JPG introduce pequeñas variaciones; compensalas con más tolerancia. Para cuantificar cuánto pierde una compresión, comparar el original con la versión de <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> es un buen ejercicio.</li>
       <li data-i18n-html="b14-4"><strong>Guardá el resultado.</strong> La imagen de diferencias es un buen respaldo para mostrar a otra persona qué cambió.</li>
     </ol>
     <h2 data-i18n="b15">Límites</h2>
     <ul>
-      <li data-i18n-html="b16-1">La comparación usa solo los canales de color: la transparencia no se tiene en cuenta.</li>
+      <li data-i18n-html="b16-1">La comparación usa solo los canales de color rojo, verde y azul: la transparencia no se compara, y un píxel transparente se lee como negro.</li>
       <li data-i18n-html="b16-2">Compara píxeles, no significado: un desplazamiento mínimo o un cambio de brillo general puede marcarse como «distinto» aunque el contenido sea el mismo.</li>
       <li data-i18n-html="b16-3">Acepta las imágenes que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.</li>
     </ul>
