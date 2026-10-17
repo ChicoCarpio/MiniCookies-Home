@@ -37,6 +37,9 @@
   const LADO_LOGO = 512;          // el logo se reduce a esto antes de usarse
   const LADO_PALETA = 64;         // y a esto para sacarle los colores
   const MAX_ARCHIVO = 30 * 1024 * 1024;
+  const LADO_EXPORTAR = 2048;     // el PNG que se descarga mide al menos esto (módulos de píxeles enteros)
+  const MAX_EXPORTAR = 4096;      // y nunca más que esto
+  const LADO_ORIGINAL = 4096;     // el logo original se conserva hasta este tamaño
 
   function fallo(codigo) {
     const e = new Error(codigo);
@@ -188,7 +191,7 @@
     if (!archivo) throw fallo('vacio');
     if (archivo.size > MAX_ARCHIVO) throw fallo('grande');
     if (archivo.type && !/^image\//i.test(archivo.type)) throw fallo('tipo');
-    let fuente = null, ancho = 0, alto = 0;
+    let fuente = null, ancho = 0, alto = 0, conservar = false;
     try {
       fuente = await createImageBitmap(archivo, { imageOrientation: 'from-image' });
       ancho = fuente.width; alto = fuente.height;
@@ -218,11 +221,21 @@
       let visible = false;
       for (let i = 3; i < d.length; i += 4) if (d[i] >= 16) { visible = true; break; }
       if (!visible) throw fallo('vacio');
+      // Para la descarga en alta calidad se conserva el logo original (decodificado a tamaño completo,
+      // hasta LADO_ORIGINAL); un SVG se vuelve a rasterizar al tamaño al que se dibuja.
+      let original = fuente;
+      if (fuente.close && Math.max(ancho, alto) > LADO_ORIGINAL) {
+        const g = Math.min(1, LADO_ORIGINAL / Math.max(ancho, alto));
+        original = document.createElement('canvas');
+        original.width = Math.round(ancho * g); original.height = Math.round(alto * g);
+        original.getContext('2d').drawImage(fuente, 0, 0, original.width, original.height);
+      } else conservar = true;
+      lienzo.original = { fuente: original, ancho: original.width || ancho, alto: original.height || alto };
       return lienzo;
     } catch (err) {
       throw err.codigo ? err : fallo('ilegible');
     } finally {
-      if (fuente && fuente.close) fuente.close();
+      if (fuente && fuente.close && !conservar) fuente.close();
     }
   }
 
@@ -419,21 +432,42 @@
       const pad = 0.35 * celda;
       const bx0 = P(a) + pad, by0 = P(a) + pad, bx1 = P(a + k) - pad, by1 = P(a + k) - pad;
       const bw = bx1 - bx0, bh = by1 - by0;
-      const esc = Math.min(bw / logo.width, bh / logo.height);
-      const dw = logo.width * esc, dh = logo.height * esc;
+      const alta = op.calidadAlta && logo.original ? logo.original : null;
+      const fuenteLogo = alta ? alta.fuente : logo;
+      const lw = alta ? alta.ancho : logo.width, lh = alta ? alta.alto : logo.height;
+      const esc = Math.min(bw / lw, bh / lh);
+      const dw = lw * esc, dh = lh * esc;
       cx.save();
       cx.beginPath();
       const r = Math.max(0, 0.25 * (P(a + k) - P(a)) - pad);
       rectRedondo(cx, bx0, by0, bx1, by1, r, r, r, r);
       cx.clip();
       cx.imageSmoothingQuality = 'high';
-      cx.drawImage(logo, bx0 + (bw - dw) / 2, by0 + (bh - dh) / 2, dw, dh);
+      cx.drawImage(fuenteLogo, bx0 + (bw - dw) / 2, by0 + (bh - dh) / 2, dw, dh);
       cx.restore();
     }
     return res;
   }
 
+  // PNG de alta calidad para descargar: un canvas aparte, de módulos de píxeles enteros (todos los bordes
+  // nítidos), de al menos LADO_EXPORTAR px y como mucho MAX_EXPORTAR, con la misma zona de silencio de 4
+  // módulos. No depende del tamaño de la vista previa. opciones: las de dibujar (sin lado).
+  // Devuelve Promise<{ blob, px, pxPorModulo, colores }>.
+  function exportarPNG(qr, opciones) {
+    const n = qr.tamano;
+    const ppm = Math.max(1, Math.min(Math.ceil(LADO_EXPORTAR / (n + 8)), Math.floor(MAX_EXPORTAR / (n + 8))));
+    const canvas = document.createElement('canvas');
+    const res = dibujar(canvas, qr, Object.assign({}, opciones, { lado: n * ppm, calidadAlta: true }));
+    return new Promise((ok, mal) => {
+      canvas.toBlob((blob) => {
+        if (blob) ok({ blob, px: canvas.width, pxPorModulo: ppm, colores: res.colores });
+        else mal(new Error('toBlob'));
+      }, 'image/png');
+    });
+  }
+
   globalThis.QREstilos = {
+    exportarPNG,
     ESTILOS_MODULO, ESTILOS_OJO, CONTRASTE_MIN,
     crearConLogo, placaPara, dibujar, cargarLogo, paleta, derivarColores, asegurarContraste, contraste
   };
