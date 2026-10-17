@@ -5,7 +5,7 @@
 //
 //   await FormatosAntiguos.detectar(bytes)    → 'ods' | 'xlsb' | 'xls' | 'xml' | 'html' | null   ('html': una página con tablas guardada como .xls, que muchos sistemas "exportan a Excel")
 //   await FormatosAntiguos.leer(bytes)        → { hojas: [{ nombre, filas, anchos, combinadas }], fecha1904? }   (ver OdsLector)
-//   await FormatosAntiguos.aXlsx(bytes)       → Uint8Array con un .xlsx (valores y formato de número; sin fórmulas ni estilos de celda)
+//   await FormatosAntiguos.aXlsx(bytes)       → Uint8Array con un .xlsx (valores y formato de número; sin fórmulas; con estilos de celda y alto de fila)
 //
 // Lanza Error (con .codigo = 'cifrado' si tiene contraseña) con un mensaje listo para mostrar. Requiere xlsx-escritor.js y los lectores que se usen.
 (function () {
@@ -44,7 +44,7 @@
         const v = fila[c];
         if (!v || typeof v !== 'object' || typeof v.valor !== 'number' || !v.formato) continue;
         const codigo = typeof v.formato === 'number' ? XlsxEstilos.FORMATOS_INTEGRADOS[v.formato] : v.formato;   // un número es un formato integrado
-        if (codigo && XlsxFormato.esFecha(codigo) && XlsxFormato.tieneCalendario(codigo)) fila[c] = { valor: v.valor + 1462, formato: v.formato };
+        if (codigo && XlsxFormato.esFecha(codigo) && XlsxFormato.tieneCalendario(codigo)) fila[c] = { valor: v.valor + 1462, formato: v.formato, estilo: v.estilo };
       }
     }
     return XlsxEscritor.crearLibro(libro.hojas.map((h) => ({ nombre: h.nombre, filas: h.filas, anchos: h.anchos, combinadas: h.combinadas, estado: h.estado, columnasOcultas: h.columnasOcultas, filasOcultas: h.filasOcultas, altosFila: h.altosFila })));
