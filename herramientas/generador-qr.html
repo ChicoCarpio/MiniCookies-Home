@@ -179,6 +179,8 @@ window.i18nPagina = {
   <p data-i18n="intro">Escribí un link o texto y generá un código QR al instante.</p>
 
   <div class="panel-herramienta">
+   <div class="columnas con-vista-fija">
+    <div class="columna-controles">
     <label class="campo">
       <span data-i18n="campo-texto">Texto o URL</span>
       <input type="text" id="entradaTexto" placeholder="https://ejemplo.com" style="padding:10px; border:1px solid var(--gris-borde); border-radius:6px; font-size:1rem;">
@@ -275,13 +277,15 @@ window.i18nPagina = {
     </details>
 
     <p id="mensajeError" style="color:#dc2626; display:none;"></p>
-    <div style="margin-top:20px; display:flex; justify-content:center;">
-      <canvas id="vistaQR" style="display:none; max-width:100%; height:auto; border-radius:8px;"></canvas>
     </div>
 
-    <div class="resultado" id="resultado" style="text-align:center;">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a>
+    <div class="vista-fija vacia" id="panelVista">
+      <canvas id="vistaQR" style="display:none;"></canvas>
+      <div class="resultado" id="resultado">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a>
+      </div>
     </div>
+   </div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -344,6 +348,7 @@ const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 const vistaQR = document.getElementById('vistaQR');
+const panelVista = document.getElementById('panelVista');
 const mensajeError = document.getElementById('mensajeError');
 
 // El QR se dibuja con 4 módulos de margen blanco ("zona de silencio") que los
@@ -390,6 +395,7 @@ function generarQR() {
   resultado.classList.remove('visible');
   mensajeError.style.display = 'none';
   vistaQR.style.display = 'none';
+  panelVista.classList.add('vacia');
   if (!texto) return;
 
   const tamano = parseInt(document.getElementById('tamano').value, 10);
@@ -420,6 +426,7 @@ function generarQR() {
     mostrarNota('nota-' + r.colores.motivo);
   }
   vistaQR.style.display = 'block';
+  panelVista.classList.remove('vacia');
 
   enlaceDescarga.href = vistaQR.toDataURL('image/png');
   resultado.classList.add('visible');

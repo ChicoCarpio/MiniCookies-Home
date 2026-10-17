@@ -116,6 +116,7 @@ No agregues reglas de encabezado en la página. Si algo no entra, se arregla en
 | `.boton-tema` | botón circular de icono (idioma, tema) |
 | `.selector-direccion` | opciones "A → B / B → A" de una herramienta bidireccional; con `assets/js/selector-direccion.js` y un `data-panel-direccion="valor"` en cada panel, muestra solo el de la opción elegida, sin código propio |
 | `.columnas` | dos columnas (entrada \| resultado) que se apilan abajo de 700px |
+| `.columnas.con-vista-fija` + `.vista-fija` | controles a la izquierda y una vista que se queda a la vista (sticky) a la derecha, para herramientas con vista previa en vivo (2026-10-17, generador de QR). Abajo de 900 px una sola columna con la vista arriba, pegada al borde, achicada solo por CSS (máx. 30vh) y con `scroll-padding` para no tapar el campo enfocado; `.vista-fija.vacia` no ocupa lugar hasta que hay algo que mostrar |
 | `details.plegable` | opciones opcionales plegadas (2026-10-17, generador de QR): `<details class="plegable"><summary>…</summary><div class="plegable-cuerpo">…</div></details>` guarda lo accesorio para que lo principal siga a la vista |
 | `.nota-suave` | una línea de estado o aviso corto debajo de un control (`.nota-suave.error` en rojo); con `hidden` se esconde. Un `input[type="color"]` dentro de `label.campo` toma el tamaño de un botón |
 
