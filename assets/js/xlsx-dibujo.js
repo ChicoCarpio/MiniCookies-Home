@@ -608,11 +608,12 @@
           if (FINO && !runs) {
             const pt = fu.tam || 11, kpt = px / pt; // unidades de dibujo por punto de letra
             wD = 0; for (const ch of l) wD += ctx.measureText(ch).width;
-            cor = (pt > 10 ? 0.0386 * Math.pow(pt - 10, 1.5) : pt < 10 ? -0.25 * (10 - pt) : 0) * kpt;
-            corIzq = pt > 9 ? 0.05 * Math.pow(pt - 9, 1.4) * kpt : 0;
+            // medido hasta 20 pt; más arriba (36 pt, FilasAuto de 25-impresion-calibre) crece en línea recta
+            cor = (pt > 20 ? 1.22 + 0.15 * (pt - 20) : pt > 10 ? 0.0386 * Math.pow(pt - 10, 1.5) : pt < 10 ? -0.25 * (10 - pt) : 0) * kpt;
+            corIzq = (pt > 20 ? 1.41 + 0.12 * (pt - 20) : pt > 9 ? 0.05 * Math.pow(pt - 9, 1.4) : 0) * kpt;
           }
           const sobreCursiva = fu.cursiva ? 0.18 * px : 0;
-          if (h === 'right') x = x1 - PAD_X - wD - sangria - sobreCursiva - cor;
+          if (h === 'right') { x = x1 - PAD_X - wD - sangria - sobreCursiva - cor; if (esNumero && FINO && x < x0 + 1) x = x0 + 1; } // un número que casi no cabe no se corre a la izquierda de su celda
           else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - wD - sobreCursiva - cor) / 2 + (sangria ? sangria / 2 : 0) + 0.075 * px;
           else x = x0 + 1 + PAD_X + sangria + (FINO && !runs ? corIzq : Math.max(0, Math.round((px - 15) / 10)));
           if (runs) { tramos(ctx, libro, runs, fu, RD(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
