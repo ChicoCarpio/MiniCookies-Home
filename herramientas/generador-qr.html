@@ -115,7 +115,6 @@ window.i18nPagina = {
     <div style="margin-top:20px; display:flex; justify-content:center;">
       <canvas id="vistaQR" style="display:none; max-width:100%; height:auto; border-radius:8px;"></canvas>
     </div>
-    <div id="contenedorQR" hidden></div>
 
     <div class="resultado" id="resultado" style="text-align:center;">
       <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a>
@@ -162,25 +161,22 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../assets/js/qr-propio.js"></script>
 <script>
 const entradaTexto = document.getElementById('entradaTexto');
 const botonGenerar = document.getElementById('botonGenerar');
-const contenedorQR = document.getElementById('contenedorQR');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 const vistaQR = document.getElementById('vistaQR');
 const mensajeError = document.getElementById('mensajeError');
 
-// La librería dibuja el QR pegado a los bordes, sin el margen blanco ("zona
-// de silencio") que los lectores necesitan para encontrarlo: sin él, el QR
-// puesto sobre un fondo oscuro (o en el modo oscuro del sitio) muchas veces
-// no se lee. Se arma un canvas final con 4 módulos de margen blanco, que es
-// el que se ve y el que se descarga.
+// El QR se dibuja con 4 módulos de margen blanco ("zona de silencio") que los
+// lectores necesitan para encontrarlo: sin él, el QR puesto sobre un fondo
+// oscuro (o en el modo oscuro del sitio) muchas veces no se lee. El canvas
+// final es el que se ve y el que se descarga.
 function generarQR() {
   const texto = entradaTexto.value.trim();
-  contenedorQR.innerHTML = '';
   resultado.classList.remove('visible');
   mensajeError.style.display = 'none';
   vistaQR.style.display = 'none';
@@ -189,28 +185,13 @@ function generarQR() {
   const tamano = parseInt(document.getElementById('tamano').value, 10);
   let qr;
   try {
-    qr = new QRCode(contenedorQR, {
-      text: texto,
-      width: tamano,
-      height: tamano,
-      correctLevel: QRCode.CorrectLevel.M,
-    });
+    qr = QRPropio.crear(texto, { nivel: 'M' });
   } catch (error) {
     mensajeError.textContent = t('error-largo');
     mensajeError.style.display = 'block';
     return;
   }
-  const canvasQR = contenedorQR.querySelector('canvas');
-  if (!canvasQR) return;
-
-  const modulos = (qr._oQRCode && qr._oQRCode.getModuleCount && qr._oQRCode.getModuleCount()) || 33;
-  const margen = Math.ceil(4 * tamano / modulos);
-  vistaQR.width = tamano + margen * 2;
-  vistaQR.height = tamano + margen * 2;
-  const ctx = vistaQR.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, vistaQR.width, vistaQR.height);
-  ctx.drawImage(canvasQR, margen, margen);
+  QRPropio.pintar(vistaQR, qr, tamano);
   vistaQR.style.display = 'block';
 
   enlaceDescarga.href = vistaQR.toDataURL('image/png');

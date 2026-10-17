@@ -356,7 +356,6 @@ window.i18nPagina = {
     <div class="controles" id="pasoReintentar" hidden>
       <button class="boton" id="botonReintentar" data-i18n="error-nuevo-intento">Empezar de nuevo</button>
     </div>
-    <div id="contenedorQR" hidden></div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -405,8 +404,8 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
+<script src="../assets/js/qr-propio.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/enviar-qr.js"></script>
 <script>
@@ -434,22 +433,12 @@ function pantalla(cual) {
 // El QR lleva 4 módulos de margen blanco (zona de silencio), igual que el
 // generador de QR del sitio: sin él, muchos lectores no lo encuentran.
 function dibujarQR(caja, texto) {
-  const oculto = $('contenedorQR');
-  oculto.replaceChildren();
   const lado = Math.min(360, Math.max(240, Math.floor(caja.clientWidth || 300)));
   let qr;
   try {
-    qr = new QRCode(oculto, { text: texto, width: lado, height: lado, correctLevel: QRCode.CorrectLevel.L });
+    qr = QRPropio.crear(texto, { nivel: 'L' });
   } catch (e) { mostrarMensaje(t('error-codigo')); return; }
-  const origen = oculto.querySelector('canvas');
-  const modulos = (qr._oQRCode && qr._oQRCode.getModuleCount && qr._oQRCode.getModuleCount()) || 41;
-  const margen = Math.ceil(4 * lado / modulos);
-  const c = document.createElement('canvas');
-  c.width = c.height = lado + margen * 2;
-  const cx = c.getContext('2d');
-  cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);
-  cx.drawImage(origen, margen, margen);
-  caja.replaceChildren(c);
+  caja.replaceChildren(QRPropio.pintar(document.createElement('canvas'), qr, lado));
 }
 
 function copiar(texto, boton) {
