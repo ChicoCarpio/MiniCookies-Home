@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo unir varios EPUB en un solo libro — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Juntá varios libros EPUB en un único archivo, en el orden que quieras: una saga, un curso o tus apuntes. Con sus estilos e imágenes.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo unir varios EPUB en un solo libro — Mini Cookies',
+    'meta-descripcion': 'Juntá varios libros EPUB en un único archivo, en el orden que quieras: una saga, un curso o tus apuntes. Con sus estilos e imágenes.',
+    'h1': 'Cómo unir varios EPUB en un solo libro',
+    'b1': 'Una saga en cinco tomos, los apuntes de una materia repartidos en archivos sueltos o varios cuentos que querés llevar juntos: a veces conviene tener todo en <strong>un solo EPUB</strong>, con un único lugar en la biblioteca y un índice general. <a href="../herramientas/unir-epub.html">Unir varios EPUB</a> combina dos o más libros en un archivo nuevo, en el orden de la lista.',
+    'b2': 'Cómo queda el libro combinado',
+    'b3-1': '<strong>Cada libro entra entero</strong>, con sus estilos, fuentes e imágenes.',
+    'b3-2': '<strong>Cada libro arranca con su propio título</strong> como capítulo separador, y el índice queda con un grupo por libro.',
+    'b3-3': '<strong>La portada y los metadatos del libro combinado los pone el primer libro de la lista.</strong>',
+    'b3-4': 'Los libros no tienen que compartir formato ni estilo.',
+    'b4': 'Paso a paso',
+    'b5-1': 'Arrastrá los archivos .epub a la zona de carga o hacé clic para elegirlos. Podés elegir varios a la vez o sumarlos de a poco; se numeran en el orden en que los agregás.',
+    'b5-2': 'Si te equivocaste con alguno, quitalo con la cruz de su renglón.',
+    'b5-3': 'Completá «Título del libro combinado» (por defecto, «Libros combinados») y, si querés, «Autor (opcional)».',
+    'b5-4': 'Hacé clic en «Unir en un EPUB». Vas a ver el progreso por libro.',
+    'b5-5': 'Descargá con «Descargar EPUB combinado». El archivo se llama como el título que elegiste (se quitan los caracteres que no se permiten en nombres de archivo).',
+    'b6': 'Cómo conseguir el orden correcto',
+    'b7': 'El orden es el de la lista, y <strong>no hay botones para reordenar</strong>. Si necesitás otro orden, quitá los libros y volvé a agregarlos en la secuencia correcta.',
+    'b8': 'Antes de unir',
+    'b9-1': '<strong>Hacen falta al menos dos libros</strong> para que el botón se habilite. No hay un máximo declarado; el límite práctico lo marca la memoria de tu navegador, así que con muchos libros grandes conviene unir de a tandas.',
+    'b9-2': '<strong>Elegí bien el primer libro:</strong> su portada y sus metadatos son los del resultado. Si querés cambiar el título o el autor después, usá <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>.',
+    'b9-3': '<strong>Si un libro tiene DRM</strong>, no se puede leer y no va a poder unirse.',
+    'b10': 'Después de unir',
+    'b11-1': 'Si el libro resultante quedó demasiado largo y querés sacar algún capítulo o cambiar su orden, usá <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>.',
+    'b11-2': 'Si más adelante necesitás volver a separarlo, <a href="../herramientas/dividir-epub.html">Dividir EPUB</a> lo parte por capítulo (según la estructura interna del libro).',
+    'b12': 'Preguntas frecuentes',
+    'b13': '<strong>¿Se pierden las imágenes o las fuentes?</strong> No: cada libro entra con sus estilos, fuentes e imágenes.',
+    'b14': '<strong>¿Funciona con MOBI o PDF?</strong> No: solo acepta .epub.',
+    'b15': '<strong>¿Puedo cambiar el nombre del archivo?</strong> Sí: es el título del libro combinado.',
+    'b16': 'Resumen',
+    'b17': 'Unir EPUB es juntar varios libros en uno nuevo, en el orden de la lista, con un grupo en el índice por cada libro. Elegí con cuidado el primer libro (pone la portada y los metadatos) y, si el orden no sale bien, volvé a agregar los archivos en la secuencia que querés.',
+    'rel1': 'Unir varios EPUB',
+    'rel2': 'Dividir EPUB',
+    'rel3': 'Administrar / reordenar capítulos',
+    'rel4': 'Editar metadatos de un EPUB'
+  },
+  en: {
+    'titulo-pagina': 'How to merge several EPUB books into one — Mini Cookies',
+    'meta-descripcion': 'Join several EPUB books into a single file, in the order you want: a series, a course or your notes. With their styles and images.',
+    'h1': 'How to merge several EPUB books into one',
+    'b1': 'A series in five volumes, the notes of a course scattered across loose files, or several short stories you want to carry together: sometimes it’s handy to have everything in <strong>a single EPUB</strong>, with one place in the library and one overall table of contents. <a href="../herramientas/unir-epub.html">Merge EPUB books</a> combines two or more books into a new file, in the order of the list.',
+    'b2': 'What the combined book looks like',
+    'b3-1': '<strong>Each book goes in whole</strong>, with its styles, fonts and images.',
+    'b3-2': '<strong>Each book starts with its own title</strong> as a separator chapter, and the table of contents gets one group per book.',
+    'b3-3': '<strong>The cover and the metadata of the combined book come from the first book in the list.</strong>',
+    'b3-4': 'The books don’t have to share format or style.',
+    'b4': 'Step by step',
+    'b5-1': 'Drag the .epub files to the upload area or click to choose them. You can pick several at once or add them little by little; they’re numbered in the order you add them.',
+    'b5-2': 'If you got one wrong, remove it with the cross on its row.',
+    'b5-3': 'Fill in “Title of the combined book” (“Combined books” by default) and, if you want, “Author (optional)”.',
+    'b5-4': 'Click “Merge into one EPUB”. You’ll see the progress per book.',
+    'b5-5': 'Download with “Download combined EPUB”. The file is named after the title you chose (characters not allowed in file names are removed).',
+    'b6': 'Getting the order right',
+    'b7': 'The order is the one in the list, and <strong>there are no buttons to reorder</strong>. If you need a different order, remove the books and add them again in the right sequence.',
+    'b8': 'Before merging',
+    'b9-1': '<strong>You need at least two books</strong> for the button to be enabled. There’s no stated maximum; the practical limit is set by your browser’s memory, so with many large books it’s best to merge in batches.',
+    'b9-2': '<strong>Choose the first book carefully:</strong> its cover and metadata become the result’s. If you want to change the title or author afterwards, use <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a>.',
+    'b9-3': '<strong>If a book has DRM</strong>, it can’t be read and it can’t be merged.',
+    'b10': 'After merging',
+    'b11-1': 'If the resulting book turned out too long and you want to remove a chapter or change its order, use <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a>.',
+    'b11-2': 'If you later need to separate it again, <a href="../herramientas/dividir-epub.html">Split EPUB</a> cuts it by chapter (following the book’s internal structure).',
+    'b12': 'Frequently asked questions',
+    'b13': '<strong>Are images or fonts lost?</strong> No: each book goes in with its styles, fonts and images.',
+    'b14': '<strong>Does it work with MOBI or PDF?</strong> No: it only accepts .epub.',
+    'b15': '<strong>Can I change the file name?</strong> Yes: it’s the title of the combined book.',
+    'b16': 'Summary',
+    'b17': 'Merging EPUB files means joining several books into a new one, in the order of the list, with one group in the table of contents per book. Choose the first book carefully (it sets the cover and metadata) and, if the order doesn’t come out right, add the files again in the sequence you want.',
+    'rel1': 'Merge EPUB books',
+    'rel2': 'Split EPUB',
+    'rel3': 'Manage / reorder chapters',
+    'rel4': 'Edit EPUB metadata'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo unir varios EPUB en un solo libro</h1>
+    <p data-i18n-html="b1">Una saga en cinco tomos, los apuntes de una materia repartidos en archivos sueltos o varios cuentos que querés llevar juntos: a veces conviene tener todo en <strong>un solo EPUB</strong>, con un único lugar en la biblioteca y un índice general. <a href="../herramientas/unir-epub.html">Unir varios EPUB</a> combina dos o más libros en un archivo nuevo, en el orden de la lista.</p>
+    <h2 data-i18n="b2">Cómo queda el libro combinado</h2>
+    <ul>
+      <li data-i18n-html="b3-1"><strong>Cada libro entra entero</strong>, con sus estilos, fuentes e imágenes.</li>
+      <li data-i18n-html="b3-2"><strong>Cada libro arranca con su propio título</strong> como capítulo separador, y el índice queda con un grupo por libro.</li>
+      <li data-i18n-html="b3-3"><strong>La portada y los metadatos del libro combinado los pone el primer libro de la lista.</strong></li>
+      <li data-i18n-html="b3-4">Los libros no tienen que compartir formato ni estilo.</li>
+    </ul>
+    <h2 data-i18n="b4">Paso a paso</h2>
+    <ol>
+      <li data-i18n-html="b5-1">Arrastrá los archivos .epub a la zona de carga o hacé clic para elegirlos. Podés elegir varios a la vez o sumarlos de a poco; se numeran en el orden en que los agregás.</li>
+      <li data-i18n-html="b5-2">Si te equivocaste con alguno, quitalo con la cruz de su renglón.</li>
+      <li data-i18n-html="b5-3">Completá «Título del libro combinado» (por defecto, «Libros combinados») y, si querés, «Autor (opcional)».</li>
+      <li data-i18n-html="b5-4">Hacé clic en «Unir en un EPUB». Vas a ver el progreso por libro.</li>
+      <li data-i18n-html="b5-5">Descargá con «Descargar EPUB combinado». El archivo se llama como el título que elegiste (se quitan los caracteres que no se permiten en nombres de archivo).</li>
+    </ol>
+    <h2 data-i18n="b6">Cómo conseguir el orden correcto</h2>
+    <p data-i18n-html="b7">El orden es el de la lista, y <strong>no hay botones para reordenar</strong>. Si necesitás otro orden, quitá los libros y volvé a agregarlos en la secuencia correcta.</p>
+    <h2 data-i18n="b8">Antes de unir</h2>
+    <ul>
+      <li data-i18n-html="b9-1"><strong>Hacen falta al menos dos libros</strong> para que el botón se habilite. No hay un máximo declarado; el límite práctico lo marca la memoria de tu navegador, así que con muchos libros grandes conviene unir de a tandas.</li>
+      <li data-i18n-html="b9-2"><strong>Elegí bien el primer libro:</strong> su portada y sus metadatos son los del resultado. Si querés cambiar el título o el autor después, usá <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>.</li>
+      <li data-i18n-html="b9-3"><strong>Si un libro tiene DRM</strong>, no se puede leer y no va a poder unirse.</li>
+    </ul>
+    <h2 data-i18n="b10">Después de unir</h2>
+    <ul>
+      <li data-i18n-html="b11-1">Si el libro resultante quedó demasiado largo y querés sacar algún capítulo o cambiar su orden, usá <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>.</li>
+      <li data-i18n-html="b11-2">Si más adelante necesitás volver a separarlo, <a href="../herramientas/dividir-epub.html">Dividir EPUB</a> lo parte por capítulo (según la estructura interna del libro).</li>
+    </ul>
+    <h2 data-i18n="b12">Preguntas frecuentes</h2>
+    <p data-i18n-html="b13"><strong>¿Se pierden las imágenes o las fuentes?</strong> No: cada libro entra con sus estilos, fuentes e imágenes.</p>
+    <p data-i18n-html="b14"><strong>¿Funciona con MOBI o PDF?</strong> No: solo acepta .epub.</p>
+    <p data-i18n-html="b15"><strong>¿Puedo cambiar el nombre del archivo?</strong> Sí: es el título del libro combinado.</p>
+    <h2 data-i18n="b16">Resumen</h2>
+    <p data-i18n-html="b17">Unir EPUB es juntar varios libros en uno nuevo, en el orden de la lista, con un grupo en el índice por cada libro. Elegí con cuidado el primer libro (pone la portada y los metadatos) y, si el orden no sale bien, volvé a agregar los archivos en la secuencia que querés.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/unir-epub.html" data-i18n="rel1">Unir varios EPUB</a></li>
+      <li><a href="../herramientas/dividir-epub.html" data-i18n="rel2">Dividir EPUB</a></li>
+      <li><a href="../herramientas/administrar-epub.html" data-i18n="rel3">Administrar / reordenar capítulos</a></li>
+      <li><a href="../herramientas/editar-metadatos-epub.html" data-i18n="rel4">Editar metadatos de un EPUB</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

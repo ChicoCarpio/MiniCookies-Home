@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo dividir un EPUB por capítulos — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separá un libro EPUB en un archivo por capítulo, sin perder estilos ni imágenes. Cuándo conviene dividirlo y qué esperar del resultado.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo dividir un EPUB por capítulos — Mini Cookies',
+    'meta-descripcion': 'Separá un libro EPUB en un archivo por capítulo, sin perder estilos ni imágenes. Cuándo conviene dividirlo y qué esperar del resultado.',
+    'h1': 'Cómo dividir un EPUB por capítulos',
+    'b1': 'Un libro electrónico de mil páginas es cómodo hasta que querés mandarle a alguien solo un capítulo, repartir un manual entre varias personas o abrir una parte en un lector que se pone lento con archivos grandes. Un EPUB, por dentro, es un conjunto de archivos de contenido (los capítulos) empaquetados junto con estilos, fuentes e imágenes, así que se puede partir sin tocar el texto. <a href="../herramientas/dividir-epub.html">Dividir EPUB</a> lo hace por vos: devuelve un EPUB por capítulo, todos juntos en un archivo .zip.',
+    'b2': 'Cuándo conviene dividir un libro',
+    'b3-1': '<strong>Compartir una parte.</strong> Un capítulo de un manual, un cuento de una antología o una lección de un curso.',
+    'b3-2': '<strong>Estudiar o leer por partes.</strong> Tener cada capítulo como un libro aparte, con su propio avance de lectura.',
+    'b3-3': '<strong>Archivos más manejables.</strong> Trabajar con piezas chicas en lugar de un archivo enorme.',
+    'b4': 'Paso a paso',
+    'b5-1': 'Arrastrá tu archivo .epub a la zona de carga o hacé clic para elegirlo; su nombre aparece en la lista.',
+    'b5-2': 'Tocá «Dividir».',
+    'b5-3': 'Esperá mientras avanza el mensaje «Generando capítulo X de Y».',
+    'b5-4': 'Cuando termine, tocá «Descargar .zip con los capítulos». El archivo se llama «capitulos-epub.zip».',
+    'b6': 'Cómo queda el resultado',
+    'b7': 'Cada capítulo se convierte en un mini-EPUB completo:',
+    'b8-1': '<strong>Conserva los estilos, las fuentes y los metadatos</strong> del libro original, e incluye solo las imágenes que usa ese capítulo.',
+    'b8-2': '<strong>Lleva el título del libro seguido del título del capítulo</strong> y su propio identificador, para que el lector no lo confunda con el libro completo.',
+    'b8-3': '<strong>Los archivos se ordenan solos:</strong> llevan un número con ceros a la izquierda y el título del capítulo, por ejemplo «01-Introducción.epub».',
+    'b9': 'Qué cuenta como «capítulo»',
+    'b10': 'La herramienta toma los capítulos según el <strong>orden de lectura interno del libro</strong>: cada archivo de contenido es un capítulo. Eso significa dos cosas:',
+    'b11-1': 'Si el libro trae un capítulo repartido en varios archivos internos, se va a dividir en varias partes.',
+    'b11-2': 'Si trae varios capítulos dentro de un solo archivo, quedan juntos en una parte.',
+    'b12': 'La división sigue esa estructura interna y no la que ves en la tabla de contenidos del lector. Si el libro tiene un solo capítulo, la herramienta avisa que no hay nada que dividir.',
+    'b13': 'Qué no hace',
+    'b14-1': '<strong>No funciona con libros con DRM</strong> (protección anticopia): su contenido no se puede leer.',
+    'b14-2': '<strong>No divide por páginas ni por tamaño</strong>: solo por capítulo.',
+    'b14-3': '<strong>No vuelve a juntar</strong> los capítulos. Para eso está <a href="../herramientas/unir-epub.html">Unir varios EPUB</a>.',
+    'b14-4': 'Si algún capítulo no se abre bien en tu lector, probá primero con <a href="../herramientas/reparar-epub.html">Reparar EPUB</a>.',
+    'b15': 'Preguntas frecuentes',
+    'b16': '<strong>¿El zip pesa lo mismo que el libro?</strong> Aproximadamente igual o algo más, porque cada parte repite estilos y fuentes.',
+    'b17': '<strong>¿Se pierden las imágenes?</strong> No: cada capítulo lleva las que usa.',
+    'b18': '<strong>¿Puedo quedarme solo con algunos capítulos en un único libro, en lugar de varios archivos?</strong> Sí, pero con otra herramienta: <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a> deja el libro entero y te permite quitar los capítulos que no querés.',
+    'b19': 'Resumen',
+    'b20': 'Dividir un EPUB es partirlo en un mini-libro por capítulo, con los estilos y las imágenes que necesita cada uno. Los capítulos salen según la estructura interna del libro, en un zip con nombres ordenados.',
+    'rel1': 'Dividir EPUB',
+    'rel2': 'Unir varios EPUB',
+    'rel3': 'Administrar / reordenar capítulos',
+    'rel4': 'Reparar EPUB'
+  },
+  en: {
+    'titulo-pagina': 'How to split an EPUB by chapter — Mini Cookies',
+    'meta-descripcion': 'Split an EPUB book into one file per chapter, keeping styles and images. When it’s worth doing and what to expect from the result.',
+    'h1': 'How to split an EPUB by chapter',
+    'b1': 'A thousand-page e-book is comfortable until you want to send someone just one chapter, hand out a manual in parts, or open a section in a reader that slows down with large files. Inside, an EPUB is a set of content files (the chapters) packaged together with styles, fonts and images, so it can be split without touching the text. <a href="../herramientas/dividir-epub.html">Split EPUB</a> does it for you: it returns one EPUB per chapter, all together in a .zip file.',
+    'b2': 'When it’s worth splitting a book',
+    'b3-1': '<strong>Sharing a part.</strong> A chapter of a manual, a story from an anthology or a lesson from a course.',
+    'b3-2': '<strong>Studying or reading in parts.</strong> Having each chapter as a separate book, with its own reading progress.',
+    'b3-3': '<strong>More manageable files.</strong> Working with small pieces instead of one huge file.',
+    'b4': 'Step by step',
+    'b5-1': 'Drag your .epub file to the upload area or click to choose it; its name appears in the list.',
+    'b5-2': 'Tap “Split”.',
+    'b5-3': 'Wait while the “Generating chapter X of Y” message advances.',
+    'b5-4': 'When it finishes, tap “Download .zip with the chapters”. The file is named “capitulos-epub.zip”.',
+    'b6': 'What the result looks like',
+    'b7': 'Each chapter becomes a complete mini-EPUB:',
+    'b8-1': '<strong>It keeps the styles, fonts and metadata</strong> of the original book, and includes only the images that chapter uses.',
+    'b8-2': '<strong>It carries the book’s title followed by the chapter title</strong> and its own identifier, so the reader doesn’t confuse it with the complete book.',
+    'b8-3': '<strong>The files sort themselves:</strong> their names carry a number with leading zeros and the chapter title, for example “01-Introducción.epub”.',
+    'b9': 'What counts as a “chapter”',
+    'b10': 'The tool takes the chapters following the book’s <strong>internal reading order</strong>: each content file is a chapter. That means two things:',
+    'b11-1': 'If the book has a chapter spread over several internal files, it will be split into several parts.',
+    'b11-2': 'If it has several chapters inside a single file, they stay together in one part.',
+    'b12': 'The split follows that internal structure and not the table of contents you see in the reader. If the book has only one chapter, the tool notifies you that there’s nothing to split.',
+    'b13': 'What it doesn’t do',
+    'b14-1': '<strong>It doesn’t work with DRM-protected books</strong> (copy protection): their content can’t be read.',
+    'b14-2': '<strong>It doesn’t split by pages or by size</strong>: only by chapter.',
+    'b14-3': '<strong>It doesn’t put the chapters back together.</strong> For that there’s <a href="../herramientas/unir-epub.html">Merge EPUB books</a>.',
+    'b14-4': 'If a chapter doesn’t open properly in your reader, try <a href="../herramientas/reparar-epub.html">Repair EPUB</a> first.',
+    'b15': 'Frequently asked questions',
+    'b16': '<strong>Does the zip weigh the same as the book?</strong> Roughly the same or somewhat more, because each part repeats styles and fonts.',
+    'b17': '<strong>Are the images lost?</strong> No: each chapter carries the ones it uses.',
+    'b18': '<strong>Can I keep only some chapters in a single book, instead of several files?</strong> Yes, but with another tool: <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a> keeps the whole book and lets you remove the chapters you don’t want.',
+    'b19': 'Summary',
+    'b20': 'Splitting an EPUB means cutting it into one mini-book per chapter, with the styles and images each one needs. The chapters come out following the book’s internal structure, in a zip with ordered names.',
+    'rel1': 'Split EPUB',
+    'rel2': 'Merge EPUB books',
+    'rel3': 'Manage / reorder chapters',
+    'rel4': 'Repair EPUB'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo dividir un EPUB por capítulos</h1>
+    <p data-i18n-html="b1">Un libro electrónico de mil páginas es cómodo hasta que querés mandarle a alguien solo un capítulo, repartir un manual entre varias personas o abrir una parte en un lector que se pone lento con archivos grandes. Un EPUB, por dentro, es un conjunto de archivos de contenido (los capítulos) empaquetados junto con estilos, fuentes e imágenes, así que se puede partir sin tocar el texto. <a href="../herramientas/dividir-epub.html">Dividir EPUB</a> lo hace por vos: devuelve un EPUB por capítulo, todos juntos en un archivo .zip.</p>
+    <h2 data-i18n="b2">Cuándo conviene dividir un libro</h2>
+    <ul>
+      <li data-i18n-html="b3-1"><strong>Compartir una parte.</strong> Un capítulo de un manual, un cuento de una antología o una lección de un curso.</li>
+      <li data-i18n-html="b3-2"><strong>Estudiar o leer por partes.</strong> Tener cada capítulo como un libro aparte, con su propio avance de lectura.</li>
+      <li data-i18n-html="b3-3"><strong>Archivos más manejables.</strong> Trabajar con piezas chicas en lugar de un archivo enorme.</li>
+    </ul>
+    <h2 data-i18n="b4">Paso a paso</h2>
+    <ol>
+      <li data-i18n-html="b5-1">Arrastrá tu archivo .epub a la zona de carga o hacé clic para elegirlo; su nombre aparece en la lista.</li>
+      <li data-i18n-html="b5-2">Tocá «Dividir».</li>
+      <li data-i18n-html="b5-3">Esperá mientras avanza el mensaje «Generando capítulo X de Y».</li>
+      <li data-i18n-html="b5-4">Cuando termine, tocá «Descargar .zip con los capítulos». El archivo se llama «capitulos-epub.zip».</li>
+    </ol>
+    <h2 data-i18n="b6">Cómo queda el resultado</h2>
+    <p data-i18n-html="b7">Cada capítulo se convierte en un mini-EPUB completo:</p>
+    <ul>
+      <li data-i18n-html="b8-1"><strong>Conserva los estilos, las fuentes y los metadatos</strong> del libro original, e incluye solo las imágenes que usa ese capítulo.</li>
+      <li data-i18n-html="b8-2"><strong>Lleva el título del libro seguido del título del capítulo</strong> y su propio identificador, para que el lector no lo confunda con el libro completo.</li>
+      <li data-i18n-html="b8-3"><strong>Los archivos se ordenan solos:</strong> llevan un número con ceros a la izquierda y el título del capítulo, por ejemplo «01-Introducción.epub».</li>
+    </ul>
+    <h2 data-i18n="b9">Qué cuenta como «capítulo»</h2>
+    <p data-i18n-html="b10">La herramienta toma los capítulos según el <strong>orden de lectura interno del libro</strong>: cada archivo de contenido es un capítulo. Eso significa dos cosas:</p>
+    <ul>
+      <li data-i18n-html="b11-1">Si el libro trae un capítulo repartido en varios archivos internos, se va a dividir en varias partes.</li>
+      <li data-i18n-html="b11-2">Si trae varios capítulos dentro de un solo archivo, quedan juntos en una parte.</li>
+    </ul>
+    <p data-i18n-html="b12">La división sigue esa estructura interna y no la que ves en la tabla de contenidos del lector. Si el libro tiene un solo capítulo, la herramienta avisa que no hay nada que dividir.</p>
+    <h2 data-i18n="b13">Qué no hace</h2>
+    <ul>
+      <li data-i18n-html="b14-1"><strong>No funciona con libros con DRM</strong> (protección anticopia): su contenido no se puede leer.</li>
+      <li data-i18n-html="b14-2"><strong>No divide por páginas ni por tamaño</strong>: solo por capítulo.</li>
+      <li data-i18n-html="b14-3"><strong>No vuelve a juntar</strong> los capítulos. Para eso está <a href="../herramientas/unir-epub.html">Unir varios EPUB</a>.</li>
+      <li data-i18n-html="b14-4">Si algún capítulo no se abre bien en tu lector, probá primero con <a href="../herramientas/reparar-epub.html">Reparar EPUB</a>.</li>
+    </ul>
+    <h2 data-i18n="b15">Preguntas frecuentes</h2>
+    <p data-i18n-html="b16"><strong>¿El zip pesa lo mismo que el libro?</strong> Aproximadamente igual o algo más, porque cada parte repite estilos y fuentes.</p>
+    <p data-i18n-html="b17"><strong>¿Se pierden las imágenes?</strong> No: cada capítulo lleva las que usa.</p>
+    <p data-i18n-html="b18"><strong>¿Puedo quedarme solo con algunos capítulos en un único libro, en lugar de varios archivos?</strong> Sí, pero con otra herramienta: <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a> deja el libro entero y te permite quitar los capítulos que no querés.</p>
+    <h2 data-i18n="b19">Resumen</h2>
+    <p data-i18n-html="b20">Dividir un EPUB es partirlo en un mini-libro por capítulo, con los estilos y las imágenes que necesita cada uno. Los capítulos salen según la estructura interna del libro, en un zip con nombres ordenados.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/dividir-epub.html" data-i18n="rel1">Dividir EPUB</a></li>
+      <li><a href="../herramientas/unir-epub.html" data-i18n="rel2">Unir varios EPUB</a></li>
+      <li><a href="../herramientas/administrar-epub.html" data-i18n="rel3">Administrar / reordenar capítulos</a></li>
+      <li><a href="../herramientas/reparar-epub.html" data-i18n="rel4">Reparar EPUB</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
