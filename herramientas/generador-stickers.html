@@ -92,6 +92,25 @@ window.i18nPagina = {
     'error-recortar': 'No se pudo recortar la imagen: ',
     'titulo-pagina': 'Generador de stickers gratis — Mini Cookies',
     'meta-descripcion': 'Convertí una foto en un sticker con fondo transparente y borde de color, usando inteligencia artificial que corre 100% en tu navegador.',
+    'guia-titulo': 'Cómo hacer un sticker a partir de una foto',
+    'guia-intro': 'Convierte una foto en un sticker: una inteligencia artificial recorta el sujeto, quita el fondo y le dibuja un borde de color alrededor, como el contorno de un sticker impreso. El resultado se descarga como PNG con fondo transparente. Es un editor con panel lateral y una vista central del resultado.',
+    'guia-paso-1': 'Arrastrá una imagen a la zona de carga o hacé clic para elegirla. La primera vez se descarga un modelo de recorte (unos 42 MB) que queda guardado en el navegador.',
+    'guia-paso-2': 'En «Qué recortar» elegí «El primer plano (automático)» o «Los objetos que marco». En el segundo modo tocás la foto sobre cada objeto que querés conservar y después usás «Recortar los objetos marcados»; con «Borrar las marcas» empezás de nuevo.',
+    'guia-paso-3': 'Ajustá debajo de la imagen el «Grosor del borde» (0 a 40 px) y la «Suavidad del contorno» (0 a 30), y elegí el «Color del borde».',
+    'guia-paso-4': 'Opcional: probá los «Filtros» (con su «Intensidad del filtro») y las «Texturas» (con su «Tamaño»).',
+    'guia-paso-5': 'Tocá «Descargar sticker (PNG)». El archivo se llama sticker.png.',
+    'guia-consejo-1': 'Con suavidad en 0 el borde sigue cada detalle del recorte (mechones de pelo, dedos); con más suavidad se rellenan las entradas angostas y el contorno queda redondeado.',
+    'guia-consejo-2': 'Si el recorte automático se equivoca, pasá al modo de objetos marcados y tocá directamente lo que querés conservar. Ese modo descarga un segundo modelo, más chico (unos 14 MB).',
+    'guia-consejo-3': 'Si el recorte ocupa casi toda la foto, la herramienta avisa que una marca puede haber caído sobre el fondo.',
+    'guia-consejo-4': '«Cambiar imagen» te deja volver a empezar con otra foto sin recargar la página.',
+    'guia-p1': '¿Por qué tarda la primera vez?',
+    'guia-r1': 'Porque baja el modelo de IA; después queda en la memoria del navegador y se abre más rápido.',
+    'guia-p2': '¿Qué formato tiene el resultado?',
+    'guia-r2': 'PNG con transparencia. Si es muy grande, se reduce para no superar unos 16 millones de píxeles (4096 x 4096).',
+    'guia-p3': '¿Funciona con cualquier foto?',
+    'guia-r3': 'Funciona mejor con un sujeto claro y separado del fondo. Con escenas confusas, usá las marcas.',
+    'guia-p4': '¿Qué pasa si el navegador se queda sin memoria?',
+    'guia-r4': 'Verás un mensaje de error; probá con una imagen más chica.',
   },
   en: {
     'hero-titulo': 'Sticker generator',
@@ -130,6 +149,25 @@ window.i18nPagina = {
     'error-recortar': 'The image could not be cut out: ',
     'titulo-pagina': 'Free sticker generator — Mini Cookies',
     'meta-descripcion': 'Turn a photo into a sticker with a transparent background and a colored border, using AI that runs entirely in your browser.',
+    'guia-titulo': 'How to make a sticker from a photo',
+    'guia-intro': 'It turns a photo into a sticker: an AI cuts out the subject, removes the background and draws a colored border around it, like the outline of a printed sticker. The result is downloaded as a PNG with a transparent background. It’s an editor with a side panel and a central view of the result.',
+    'guia-paso-1': 'Drag an image to the upload area or click to choose it. The first time, a cutout model (about 42 MB) is downloaded and kept in the browser.',
+    'guia-paso-2': 'Under “What to cut out” choose “The foreground (automatic)” or “The objects I mark”. In the second mode you tap the photo on each object you want to keep and then use “Cut out the marked objects”; with “Clear the marks” you start over.',
+    'guia-paso-3': 'Below the image, adjust the “Border thickness” (0 to 40 px) and the “Outline smoothness” (0 to 30), and choose the “Border color”.',
+    'guia-paso-4': 'Optional: try the “Filters” (with their “Filter intensity”) and the “Textures” (with their “Size”).',
+    'guia-paso-5': 'Tap “Download sticker (PNG)”. The file is named sticker.png.',
+    'guia-consejo-1': 'With smoothness at 0 the border follows every detail of the cutout (strands of hair, fingers); with more smoothness the narrow gaps are filled in and the outline ends up rounded.',
+    'guia-consejo-2': 'If the automatic cutout gets it wrong, switch to the marked-objects mode and tap directly on what you want to keep. That mode downloads a second, smaller model (about 14 MB).',
+    'guia-consejo-3': 'If the cutout covers almost the whole photo, the tool warns that a mark may have landed on the background.',
+    'guia-consejo-4': '“Change image” lets you start over with another photo without reloading the page.',
+    'guia-p1': 'Why does it take longer the first time?',
+    'guia-r1': 'Because it downloads the AI model; after that it’s kept in the browser’s memory and opens faster.',
+    'guia-p2': 'What format is the result?',
+    'guia-r2': 'PNG with transparency. If it’s very large, it’s scaled down so as not to exceed about 16 million pixels (4096 x 4096).',
+    'guia-p3': 'Does it work with any photo?',
+    'guia-r3': 'It works best with a clear subject separated from the background. With busy scenes, use the marks.',
+    'guia-p4': 'What happens if the browser runs out of memory?',
+    'guia-r4': 'You’ll see an error message; try a smaller image.',
   }
 };
 </script>
@@ -261,6 +299,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo hacer un sticker a partir de una foto</h2>
+    <p data-i18n="guia-intro">Convierte una foto en un sticker: una inteligencia artificial recorta el sujeto, quita el fondo y le dibuja un borde de color alrededor, como el contorno de un sticker impreso. El resultado se descarga como PNG con fondo transparente. Es un editor con panel lateral y una vista central del resultado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá una imagen a la zona de carga o hacé clic para elegirla. La primera vez se descarga un modelo de recorte (unos 42 MB) que queda guardado en el navegador.</li>
+      <li data-i18n="guia-paso-2">En «Qué recortar» elegí «El primer plano (automático)» o «Los objetos que marco». En el segundo modo tocás la foto sobre cada objeto que querés conservar y después usás «Recortar los objetos marcados»; con «Borrar las marcas» empezás de nuevo.</li>
+      <li data-i18n="guia-paso-3">Ajustá debajo de la imagen el «Grosor del borde» (0 a 40 px) y la «Suavidad del contorno» (0 a 30), y elegí el «Color del borde».</li>
+      <li data-i18n="guia-paso-4">Opcional: probá los «Filtros» (con su «Intensidad del filtro») y las «Texturas» (con su «Tamaño»).</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar sticker (PNG)». El archivo se llama sticker.png.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Con suavidad en 0 el borde sigue cada detalle del recorte (mechones de pelo, dedos); con más suavidad se rellenan las entradas angostas y el contorno queda redondeado.</li>
+      <li data-i18n="guia-consejo-2">Si el recorte automático se equivoca, pasá al modo de objetos marcados y tocá directamente lo que querés conservar. Ese modo descarga un segundo modelo, más chico (unos 14 MB).</li>
+      <li data-i18n="guia-consejo-3">Si el recorte ocupa casi toda la foto, la herramienta avisa que una marca puede haber caído sobre el fondo.</li>
+      <li data-i18n="guia-consejo-4">«Cambiar imagen» te deja volver a empezar con otra foto sin recargar la página.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Por qué tarda la primera vez?</summary>
+      <p data-i18n="guia-r1">Porque baja el modelo de IA; después queda en la memoria del navegador y se abre más rápido.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué formato tiene el resultado?</summary>
+      <p data-i18n="guia-r2">PNG con transparencia. Si es muy grande, se reduce para no superar unos 16 millones de píxeles (4096 x 4096).</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Funciona con cualquier foto?</summary>
+      <p data-i18n="guia-r3">Funciona mejor con un sujeto claro y separado del fondo. Con escenas confusas, usá las marcas.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa si el navegador se queda sin memoria?</summary>
+      <p data-i18n="guia-r4">Verás un mensaje de error; probá con una imagen más chica.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
