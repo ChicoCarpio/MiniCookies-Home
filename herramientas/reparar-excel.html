@@ -24,13 +24,29 @@ window.i18nPagina = {
     'limitaciones-titulo': 'Limitaciones',
     'limitaciones-item': 'No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.',
     'error-sin-datos': 'No se encontraron datos legibles en ninguna hoja.',
-    'mensaje-todo-ok': '⚠️ Reparado con el nivel 2: el libro se volvió a armar con los datos (valores y formatos de número; las fórmulas pasan a sus valores). Se perdieron colores, bordes, fuentes, imágenes y gráficos.',
-    'mensaje-parcial': '⚠️ Reparado con el nivel 2: se recuperaron {n} de {total} hojas, solo con los datos (se perdieron colores, bordes, fuentes, imágenes y gráficos).',
+    'mensaje-todo-ok': '⚠️ Reparado con el nivel 2: el libro se volvió a armar con los datos (valores y formatos de número; las fórmulas se conservan si solo citan hojas que quedan en el libro; si no, pasan a sus valores). Se perdieron colores, bordes, fuentes, imágenes y gráficos. Revisá el resultado: si el archivo estaba muy dañado, pueden faltar filas.',
+    'mensaje-parcial': '⚠️ Reparado con el nivel 2: se recuperaron {n} de {total} hojas, solo con los datos (se perdieron colores, bordes, fuentes, imágenes y gráficos). Revisá el resultado: si el archivo estaba muy dañado, pueden faltar filas.',
     'mensaje-sano': '✅ El archivo no tiene partes dañadas: no hace falta repararlo (el archivo de abajo es igual al original). Si Excel igual no lo abre, podés reconstruirlo solo con los datos.',
     'mensaje-nivel1': '✅ Reparado con el nivel 1: se quitaron las hojas dañadas ({hojas}) y el resto del libro quedó intacto, con su formato, gráficos e imágenes.',
     'boton-forzar': 'Reconstruir solo con los datos (nivel 2)',
     'error-reparar': 'No se pudo reparar el archivo',
-    'nota-formato': 'Nivel 1: se revisa cada parte del archivo y se quitan solo las hojas dañadas; el resto queda intacto (formato, gráficos, imágenes, tablas). Nivel 2, si el 1 no alcanza: el libro se vuelve a armar con los datos (valores y formatos de número; las fórmulas pasan a sus valores) y se pierden colores, bordes, fuentes, imágenes y gráficos.'
+    'nota-formato': 'Nivel 1: se revisa cada parte del archivo y se quitan solo las hojas dañadas; el resto queda intacto (formato, gráficos, imágenes, tablas). Nivel 2, si el 1 no alcanza: el libro se vuelve a armar con los datos (valores y formatos de número; las fórmulas se conservan si solo citan hojas que quedan en el libro; si no, pasan a sus valores) y se pierden colores, bordes, fuentes, imágenes y gráficos.',
+    'guia-titulo': 'Cómo reparar un archivo de Excel dañado',
+    'guia-intro': 'Si Excel te dice que un archivo está dañado, que hay contenido ilegible o directamente no lo abre, esta herramienta intenta salvar lo que se pueda. Funciona con .xlsx, .xlsm, .xlsb, .xls y .ods y prueba dos niveles: el primero quita solo las hojas dañadas y deja el resto del libro intacto; el segundo reconstruye el libro con los datos legibles, a costa del formato.',
+    'guia-paso-1': 'Arrastrá tu archivo o hacé clic para elegirlo.',
+    'guia-paso-2': 'Tocá «Reparar». La herramienta revisa el libro y te muestra un mensaje con el nivel aplicado.',
+    'guia-paso-3': 'Descargá el resultado con «Descargar Excel reparado».',
+    'guia-paso-4': 'Si el nivel 1 no alcanzó o el archivo sigue sin abrir, tocá «Reconstruir solo con los datos (nivel 2)» y descargá el nuevo archivo.',
+    'guia-consejo-1': 'El nivel 1 solo se aplica a .xlsx y .xlsm. Si encuentra hojas dañadas, las quita y el resto conserva formato, gráficos, imágenes y tablas. Si no encuentra nada roto, te avisa que no hace falta repararlo y el archivo que ofrece es igual al original.',
+    'guia-consejo-2': 'En el nivel 2 se conservan valores y formatos de número; las fórmulas se conservan si solo citan hojas que quedan en el libro; si no, pasan a sus valores y se pierden colores, bordes, fuentes, imágenes y gráficos. Los demás formatos (.xls, .xlsb, .ods) pasan directamente por este nivel.',
+    'guia-consejo-3': 'Si de un libro de varias hojas solo se pueden leer algunas, el mensaje indica cuántas se recuperaron del total.',
+    'guia-consejo-4': 'Si no se puede leer ninguna fila, la herramienta avisa que no pudo reparar el archivo en lugar de inventar un resultado.',
+    'guia-p1': '¿Cómo se llama el archivo reparado?',
+    'guia-r1': 'Como el original más -reparado; con el nivel 2 siempre sale como .xlsx. Si el archivo estaba sano, conserva su nombre original.',
+    'guia-p2': '¿Recupera las macros?',
+    'guia-r2': 'En el nivel 1, un .xlsm conserva su extensión; en el nivel 2 sale como .xlsx, sin macros.',
+    'guia-p3': '¿Puede devolverme una hoja que estaba rota?',
+    'guia-r3': 'Solo en parte: el nivel 1 elimina las hojas dañadas, pero el nivel 2 intenta leer sus datos y, si el daño no es total, te devuelve esa hoja con lo que se pudo leer, sin formato. Si no se puede leer nada, se pierde.'
   },
   en: {
     'titulo-pagina': 'Repair Excel Free — Mini Cookies',
@@ -45,13 +61,29 @@ window.i18nPagina = {
     'limitaciones-titulo': 'Limitations',
     'limitaciones-item': 'There’s no "text-only rescue" like there is for Word/PDF: if no row in the file can be read, there’s no reliable way to rescue unstructured tabular data — it reports that it couldn’t be repaired instead of making up a result.',
     'error-sin-datos': 'No readable data was found on any sheet.',
-    'mensaje-todo-ok': '⚠️ Repaired with level 2: the workbook was rebuilt from its data (values and number formats; formulas become their values). Colors, borders, fonts, images and charts were lost.',
-    'mensaje-parcial': '⚠️ Repaired with level 2: {n} of {total} sheets were recovered, data only (colors, borders, fonts, images and charts were lost).',
+    'mensaje-todo-ok': '⚠️ Repaired with level 2: the workbook was rebuilt from its data (values and number formats; formulas are kept if they only refer to sheets that remain in the workbook; otherwise they become their values). Colors, borders, fonts, images and charts were lost. Check the result: if the file was badly damaged, some rows may be missing.',
+    'mensaje-parcial': '⚠️ Repaired with level 2: {n} of {total} sheets were recovered, data only (colors, borders, fonts, images and charts were lost). Check the result: if the file was badly damaged, some rows may be missing.',
     'mensaje-sano': '✅ The file has no damaged parts: it doesn’t need repairing (the file below is the same as the original). If Excel still won’t open it, you can rebuild it from its data only.',
     'mensaje-nivel1': '✅ Repaired with level 1: the damaged sheets were removed ({hojas}) and the rest of the workbook was kept intact, with its formatting, charts and images.',
     'boton-forzar': 'Rebuild from data only (level 2)',
     'error-reparar': 'Couldn’t repair the file',
-    'nota-formato': 'Level 1: each part of the file is checked and only the damaged sheets are removed; the rest stays intact (formatting, charts, images, tables). Level 2, if level 1 isn’t enough: the workbook is rebuilt from its data (values and number formats; formulas become their values) and colors, borders, fonts, images and charts are lost.'
+    'nota-formato': 'Level 1: each part of the file is checked and only the damaged sheets are removed; the rest stays intact (formatting, charts, images, tables). Level 2, if level 1 isn’t enough: the workbook is rebuilt from its data (values and number formats; formulas are kept if they only refer to sheets that remain in the workbook; otherwise they become their values) and colors, borders, fonts, images and charts are lost.',
+    'guia-titulo': 'How to repair a damaged Excel file',
+    'guia-intro': 'If Excel tells you a file is damaged, that there is unreadable content, or simply won’t open it, this tool tries to salvage what it can. It works with .xlsx, .xlsm, .xlsb, .xls and .ods and tries two levels: the first removes only the damaged sheets and leaves the rest of the workbook intact; the second rebuilds the workbook from the readable data, at the cost of formatting.',
+    'guia-paso-1': 'Drag your file or click to choose it.',
+    'guia-paso-2': 'Tap “Repair”. The tool checks the workbook and shows you a message with the level applied.',
+    'guia-paso-3': 'Download the result with “Download repaired Excel”.',
+    'guia-paso-4': 'If level 1 wasn’t enough or the file still won’t open, tap “Rebuild from data only (level 2)” and download the new file.',
+    'guia-consejo-1': 'Level 1 only applies to .xlsx and .xlsm. If it finds damaged sheets, it removes them and the rest keeps its formatting, charts, images and tables. If it finds nothing broken, it tells you no repair is needed and the file it offers is identical to the original.',
+    'guia-consejo-2': 'At level 2, values and number formats are kept; formulas are kept if they only refer to sheets that remain in the workbook; otherwise they become their values, and colors, borders, fonts, images and charts are lost. The other formats (.xls, .xlsb, .ods) go straight through this level.',
+    'guia-consejo-3': 'If only some sheets of a multi-sheet workbook can be read, the message says how many of the total were recovered.',
+    'guia-consejo-4': 'If no row can be read, the tool says it couldn’t repair the file instead of making up a result.',
+    'guia-p1': 'What is the repaired file called?',
+    'guia-r1': 'The original name plus -reparado; with level 2 it always comes out as .xlsx. If the file was healthy, it keeps its original name.',
+    'guia-p2': 'Does it recover macros?',
+    'guia-r2': 'At level 1, an .xlsm keeps its extension; at level 2 it comes out as .xlsx, without macros.',
+    'guia-p3': 'Can it give me back a sheet that was broken?',
+    'guia-r3': 'Only partly: level 1 removes the damaged sheets, but level 2 tries to read their data and, if the damage isn’t total, gives that sheet back with whatever could be read, without formatting. If nothing can be read, it is lost.'
   }
 };
 </script>
@@ -83,7 +115,7 @@ window.i18nPagina = {
       <button class="boton" id="botonReparar" disabled data-i18n="boton-reparar">Reparar</button>
     </div>
 
-    <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores y formatos de número; las fórmulas pasan a sus valores (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
+    <p style="color:var(--texto-suave); font-size:0.9rem;" data-i18n="nota-formato">El archivo se vuelve a armar con los datos: se conservan los valores y formatos de número; las fórmulas se conservan si solo citan hojas que quedan en el libro; si no, pasan a sus valores (fechas, monedas), pero se pierden colores, bordes, fuentes, imágenes y gráficos.</p>
     <p id="mensajeNivel" style="display:none; font-size:0.9rem;"></p>
     <div class="controles" id="controlesForzar" style="display:none;">
       <button class="boton" id="botonForzar" type="button" style="background:#64748b;" data-i18n="boton-forzar">Reconstruir solo con los datos (nivel 2)</button>
@@ -102,6 +134,38 @@ window.i18nPagina = {
       <li data-i18n="limitaciones-item">No hay un "rescate de solo texto" como en Word/PDF: si no se puede leer ninguna fila del archivo, no hay una forma confiable de rescatar datos tabulares sin estructura — se avisa que no se pudo reparar en vez de inventar un resultado.</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reparar un archivo de Excel dañado</h2>
+    <p data-i18n="guia-intro">Si Excel te dice que un archivo está dañado, que hay contenido ilegible o directamente no lo abre, esta herramienta intenta salvar lo que se pueda. Funciona con .xlsx, .xlsm, .xlsb, .xls y .ods y prueba dos niveles: el primero quita solo las hojas dañadas y deja el resto del libro intacto; el segundo reconstruye el libro con los datos legibles, a costa del formato.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Tocá «Reparar». La herramienta revisa el libro y te muestra un mensaje con el nivel aplicado.</li>
+      <li data-i18n="guia-paso-3">Descargá el resultado con «Descargar Excel reparado».</li>
+      <li data-i18n="guia-paso-4">Si el nivel 1 no alcanzó o el archivo sigue sin abrir, tocá «Reconstruir solo con los datos (nivel 2)» y descargá el nuevo archivo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El nivel 1 solo se aplica a .xlsx y .xlsm. Si encuentra hojas dañadas, las quita y el resto conserva formato, gráficos, imágenes y tablas. Si no encuentra nada roto, te avisa que no hace falta repararlo y el archivo que ofrece es igual al original.</li>
+      <li data-i18n="guia-consejo-2">En el nivel 2 se conservan valores y formatos de número; las fórmulas se conservan si solo citan hojas que quedan en el libro; si no, pasan a sus valores y se pierden colores, bordes, fuentes, imágenes y gráficos. Los demás formatos (.xls, .xlsb, .ods) pasan directamente por este nivel.</li>
+      <li data-i18n="guia-consejo-3">Si de un libro de varias hojas solo se pueden leer algunas, el mensaje indica cuántas se recuperaron del total.</li>
+      <li data-i18n="guia-consejo-4">Si no se puede leer ninguna fila, la herramienta avisa que no pudo reparar el archivo en lugar de inventar un resultado.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cómo se llama el archivo reparado?</summary>
+      <p data-i18n="guia-r1">Como el original más -reparado; con el nivel 2 siempre sale como .xlsx. Si el archivo estaba sano, conserva su nombre original.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Recupera las macros?</summary>
+      <p data-i18n="guia-r2">En el nivel 1, un .xlsm conserva su extensión; en el nivel 2 sale como .xlsx, sin macros.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puede devolverme una hoja que estaba rota?</summary>
+      <p data-i18n="guia-r3">Solo en parte: el nivel 1 elimina las hojas dañadas, pero el nivel 2 intenta leer sus datos y, si el daño no es total, te devuelve esa hoja con lo que se pudo leer, sin formato. Si no se puede leer nada, se pierde.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

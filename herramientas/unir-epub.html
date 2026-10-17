@@ -27,7 +27,26 @@ window.i18nPagina = {
     'limitaciones': 'No es necesario que los libros compartan formato ni estilo. No funciona con libros con DRM (candado editorial).',
     'progreso-leyendo': 'Leyendo "{nombre}" ({actual} de {total})...',
     'progreso-armando': 'Armando el EPUB combinado...',
-    'error-unir': 'No se pudo unir los libros'
+    'error-unir': 'No se pudo unir los libros',
+    'guia-titulo': 'Cómo unir varios libros EPUB en uno solo',
+    'guia-intro': 'Si tenés una saga o varios libros relacionados en formato EPUB y querés llevarlos como un único libro, esta herramienta los combina en un solo archivo, en el orden de la lista. Cada libro entra entero, con sus estilos, fuentes e imágenes, y arranca con su propio título como capítulo separador. Recibe dos o más .epub y devuelve un .epub nuevo.',
+    'guia-paso-1': 'Arrastrá los archivos .epub a la zona «Arrastrá tus archivos .epub acá o hacé clic para elegirlos» (podés elegir varios a la vez o sumarlos de a poco). Se numeran en el orden en que los agregás.',
+    'guia-paso-2': 'Si te equivocaste con alguno, quitalo con la cruz de su renglón.',
+    'guia-paso-3': 'Completá «Título del libro combinado» (por defecto «Libros combinados») y, si querés, «Autor (opcional)».',
+    'guia-paso-4': 'Hacé clic en «Unir en un EPUB». Verás el progreso por libro.',
+    'guia-paso-5': 'Descargá con «Descargar EPUB combinado»; el archivo se llama como el título que elegiste.',
+    'guia-consejo-1': 'El orden es el de la lista y no hay botones para reordenar: si necesitás otro orden, quitá los libros y volvé a agregarlos en la secuencia correcta.',
+    'guia-consejo-2': 'La portada y los metadatos del libro combinado los pone el primer libro de la lista. El índice queda con un grupo por libro.',
+    'guia-consejo-3': 'Los libros no tienen que compartir formato ni estilo.',
+    'guia-consejo-4': 'No funciona con libros con DRM (candado editorial). Si un libro está protegido, no se va a poder leer su contenido.',
+    'guia-p1': '¿Cuántos libros puedo unir?',
+    'guia-r1': 'Hacen falta al menos dos para habilitar el botón; no hay un máximo declarado, aunque el límite práctico lo marca la memoria del navegador.',
+    'guia-p2': '¿Se pierden las imágenes o las fuentes?',
+    'guia-r2': 'No, cada libro entra con sus estilos, fuentes e imágenes.',
+    'guia-p3': '¿Puedo cambiar el nombre del archivo?',
+    'guia-r3': 'Sí, es el mismo que el título del libro combinado (se quitan los caracteres no permitidos en nombres de archivo).',
+    'guia-p4': '¿Funciona con otros formatos como MOBI o PDF?',
+    'guia-r4': 'No, solo acepta .epub.'
   },
   en: {
     'titulo-pagina': 'Merge EPUB Books Free — Mini Cookies',
@@ -45,7 +64,26 @@ window.i18nPagina = {
     'limitaciones': 'The books don’t need to share format or style. It doesn’t work with DRM-protected books (publisher lock).',
     'progreso-leyendo': 'Reading "{nombre}" ({actual} of {total})...',
     'progreso-armando': 'Building the combined EPUB...',
-    'error-unir': 'Couldn’t merge the books'
+    'error-unir': 'Couldn’t merge the books',
+    'guia-titulo': 'How to merge several EPUB books into one',
+    'guia-intro': 'If you have a saga or several related books in EPUB format and want to carry them as a single book, this tool combines them into one file, in list order. Each book goes in whole, with its styles, fonts and images, and starts with its own title as a divider chapter. It takes two or more .epub files and returns a new .epub.',
+    'guia-paso-1': 'Drag the .epub files onto the “Drag your .epub files here or click to choose them” area (you can pick several at once or add them little by little). They’re numbered in the order you add them.',
+    'guia-paso-2': 'If you got one wrong, remove it with the cross on its row.',
+    'guia-paso-3': 'Fill in “Title of the combined book” (“Combined books” by default) and, if you want, “Author (optional)”.',
+    'guia-paso-4': 'Click “Merge into one EPUB”. You’ll see the progress per book.',
+    'guia-paso-5': 'Download with “Download combined EPUB”; the file is named after the title you chose.',
+    'guia-consejo-1': 'The order is the one in the list and there are no buttons to reorder: if you need a different order, remove the books and add them again in the right sequence.',
+    'guia-consejo-2': 'The cover and the metadata of the combined book come from the first book in the list. The table of contents gets one group per book.',
+    'guia-consejo-3': 'The books don’t have to share format or style.',
+    'guia-consejo-4': 'It doesn’t work with DRM-protected books (publisher lock). If a book is protected, its content can’t be read.',
+    'guia-p1': 'How many books can I merge?',
+    'guia-r1': 'You need at least two to enable the button; there’s no stated maximum, although the practical limit is set by the browser’s memory.',
+    'guia-p2': 'Are images or fonts lost?',
+    'guia-r2': 'No, each book goes in with its styles, fonts and images.',
+    'guia-p3': 'Can I change the file name?',
+    'guia-r3': 'Yes, it’s the same as the title of the combined book (characters not allowed in file names are removed).',
+    'guia-p4': 'Does it work with other formats like MOBI or PDF?',
+    'guia-r4': 'No, it only accepts .epub.'
   }
 };
 </script>
@@ -98,6 +136,43 @@ window.i18nPagina = {
     <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <p style="color:var(--texto-suave);" data-i18n="limitaciones">No es necesario que los libros compartan formato ni estilo. No funciona con libros con DRM (candado editorial).</p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo unir varios libros EPUB en uno solo</h2>
+    <p data-i18n="guia-intro">Si tenés una saga o varios libros relacionados en formato EPUB y querés llevarlos como un único libro, esta herramienta los combina en un solo archivo, en el orden de la lista. Cada libro entra entero, con sus estilos, fuentes e imágenes, y arranca con su propio título como capítulo separador. Recibe dos o más .epub y devuelve un .epub nuevo.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá los archivos .epub a la zona «Arrastrá tus archivos .epub acá o hacé clic para elegirlos» (podés elegir varios a la vez o sumarlos de a poco). Se numeran en el orden en que los agregás.</li>
+      <li data-i18n="guia-paso-2">Si te equivocaste con alguno, quitalo con la cruz de su renglón.</li>
+      <li data-i18n="guia-paso-3">Completá «Título del libro combinado» (por defecto «Libros combinados») y, si querés, «Autor (opcional)».</li>
+      <li data-i18n="guia-paso-4">Hacé clic en «Unir en un EPUB». Verás el progreso por libro.</li>
+      <li data-i18n="guia-paso-5">Descargá con «Descargar EPUB combinado»; el archivo se llama como el título que elegiste.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El orden es el de la lista y no hay botones para reordenar: si necesitás otro orden, quitá los libros y volvé a agregarlos en la secuencia correcta.</li>
+      <li data-i18n="guia-consejo-2">La portada y los metadatos del libro combinado los pone el primer libro de la lista. El índice queda con un grupo por libro.</li>
+      <li data-i18n="guia-consejo-3">Los libros no tienen que compartir formato ni estilo.</li>
+      <li data-i18n="guia-consejo-4">No funciona con libros con DRM (candado editorial). Si un libro está protegido, no se va a poder leer su contenido.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuántos libros puedo unir?</summary>
+      <p data-i18n="guia-r1">Hacen falta al menos dos para habilitar el botón; no hay un máximo declarado, aunque el límite práctico lo marca la memoria del navegador.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se pierden las imágenes o las fuentes?</summary>
+      <p data-i18n="guia-r2">No, cada libro entra con sus estilos, fuentes e imágenes.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo cambiar el nombre del archivo?</summary>
+      <p data-i18n="guia-r3">Sí, es el mismo que el título del libro combinado (se quitan los caracteres no permitidos en nombres de archivo).</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Funciona con otros formatos como MOBI o PDF?</summary>
+      <p data-i18n="guia-r4">No, solo acepta .epub.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

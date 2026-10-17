@@ -24,6 +24,24 @@ window.i18nPagina = {
     'placeholder-salida': 'El texto Base64 aparece acá...',
     'titulo-pagina': 'Convertir imagen a Base64 gratis — Mini Cookies',
     'meta-descripcion': 'Convertí una imagen a texto Base64 (data URI) para pegar directo en HTML o CSS, gratis y sin subirla a ningún servidor.',
+    'guia-titulo': 'Cómo convertir una imagen a Base64',
+    'guia-intro': 'Base64 es una forma de escribir una imagen como texto para incrustarla directamente en HTML, CSS o un correo, sin depender de un archivo aparte. Esta herramienta lee una imagen y te entrega ese texto en formato data URI, con el encabezado correspondiente (data:image/png;base64,...), listo para pegar.',
+    'guia-paso-1': 'Arrastrá una imagen a la zona de carga o hacé clic para elegirla.',
+    'guia-paso-2': 'Revisá la vista previa y comprobá que sea la correcta.',
+    'guia-paso-3': 'El texto Base64 aparece en la caja de abajo.',
+    'guia-paso-4': 'Tocá «Copiar Base64» para llevarlo al portapapeles o «Descargar .txt» para guardarlo.',
+    'guia-consejo-1': 'El resultado incluye el prefijo data: completo, así que podés usarlo directo en <img src="..."> o en background: url(...) de CSS.',
+    'guia-consejo-2': 'El texto es cerca de un tercio más grande que la imagen original: conviene usarlo con íconos o imágenes chicas, no con fotos pesadas.',
+    'guia-consejo-3': 'Si la imagen es grande, la caja de texto puede ser muy extensa; usar «Copiar Base64» evita seleccionar a mano.',
+    'guia-consejo-4': 'El archivo descargado se llama como la imagen original, con el sufijo -base64.txt.',
+    'guia-p1': '¿Qué formatos de imagen acepta?',
+    'guia-r1': 'Cualquier imagen que el navegador reconozca, como PNG, JPG, GIF, WebP o SVG.',
+    'guia-p2': '¿Se modifica o comprime la imagen?',
+    'guia-r2': 'No, se codifica tal cual; el texto contiene los bytes originales.',
+    'guia-p3': '¿Puedo convertir de Base64 de vuelta a imagen?',
+    'guia-r3': 'No, esta herramienta solo hace el camino de imagen a texto.',
+    'guia-p4': '¿Para qué sirve incrustar una imagen así?',
+    'guia-r4': 'Para evitar una petición extra al cargar una página con iconos chicos, o para enviar un HTML autónomo en un solo archivo.'
   },
   en: {
     'hero-titulo': 'Convert an image to Base64',
@@ -35,6 +53,24 @@ window.i18nPagina = {
     'placeholder-salida': 'The Base64 text shows up here...',
     'titulo-pagina': 'Convert an image to Base64, free — Mini Cookies',
     'meta-descripcion': 'Turn an image into Base64 text (data URI) you can paste straight into HTML or CSS — free, and nothing is uploaded to a server.',
+    'guia-titulo': 'How to convert an image to Base64',
+    'guia-intro': 'Base64 is a way of writing an image as text so you can embed it directly in HTML, CSS or an email, without relying on a separate file. This tool reads an image and hands you that text as a data URI, with the matching header (data:image/png;base64,...), ready to paste.',
+    'guia-paso-1': 'Drag an image to the upload area or click to choose it.',
+    'guia-paso-2': 'Check the preview and make sure it’s the right one.',
+    'guia-paso-3': 'The Base64 text appears in the box below.',
+    'guia-paso-4': 'Tap “Copy Base64” to put it on the clipboard or “Download .txt” to save it.',
+    'guia-consejo-1': 'The result includes the full data: prefix, so you can use it straight in <img src="..."> or in CSS background: url(...).',
+    'guia-consejo-2': 'The text is about a third larger than the original image: it’s best used with icons or small images, not heavy photos.',
+    'guia-consejo-3': 'If the image is large, the text box can be very long; using “Copy Base64” saves you from selecting it by hand.',
+    'guia-consejo-4': 'The downloaded file is named after the original image, with the suffix -base64.txt.',
+    'guia-p1': 'Which image formats does it accept?',
+    'guia-r1': 'Any image the browser recognizes, such as PNG, JPG, GIF, WebP or SVG.',
+    'guia-p2': 'Is the image modified or compressed?',
+    'guia-r2': 'No, it’s encoded as is; the text contains the original bytes.',
+    'guia-p3': 'Can I convert Base64 back into an image?',
+    'guia-r3': 'No, this tool only goes from image to text.',
+    'guia-p4': 'What’s the point of embedding an image this way?',
+    'guia-r4': 'To avoid an extra request when loading a page with small icons, or to send a self-contained HTML in a single file.'
   }
 };
 </script>
@@ -73,6 +109,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir una imagen a Base64</h2>
+    <p data-i18n="guia-intro">Base64 es una forma de escribir una imagen como texto para incrustarla directamente en HTML, CSS o un correo, sin depender de un archivo aparte. Esta herramienta lee una imagen y te entrega ese texto en formato data URI, con el encabezado correspondiente (data:image/png;base64,...), listo para pegar.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá una imagen a la zona de carga o hacé clic para elegirla.</li>
+      <li data-i18n="guia-paso-2">Revisá la vista previa y comprobá que sea la correcta.</li>
+      <li data-i18n="guia-paso-3">El texto Base64 aparece en la caja de abajo.</li>
+      <li data-i18n="guia-paso-4">Tocá «Copiar Base64» para llevarlo al portapapeles o «Descargar .txt» para guardarlo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El resultado incluye el prefijo data: completo, así que podés usarlo directo en &lt;img src="..."> o en background: url(...) de CSS.</li>
+      <li data-i18n="guia-consejo-2">El texto es cerca de un tercio más grande que la imagen original: conviene usarlo con íconos o imágenes chicas, no con fotos pesadas.</li>
+      <li data-i18n="guia-consejo-3">Si la imagen es grande, la caja de texto puede ser muy extensa; usar «Copiar Base64» evita seleccionar a mano.</li>
+      <li data-i18n="guia-consejo-4">El archivo descargado se llama como la imagen original, con el sufijo -base64.txt.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué formatos de imagen acepta?</summary>
+      <p data-i18n="guia-r1">Cualquier imagen que el navegador reconozca, como PNG, JPG, GIF, WebP o SVG.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se modifica o comprime la imagen?</summary>
+      <p data-i18n="guia-r2">No, se codifica tal cual; el texto contiene los bytes originales.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo convertir de Base64 de vuelta a imagen?</summary>
+      <p data-i18n="guia-r3">No, esta herramienta solo hace el camino de imagen a texto.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Para qué sirve incrustar una imagen así?</summary>
+      <p data-i18n="guia-r4">Para evitar una petición extra al cargar una página con iconos chicos, o para enviar un HTML autónomo en un solo archivo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

@@ -36,6 +36,23 @@ window.i18nPagina = {
     'ayuda-metadatos': 'Se quitan todos los bloques de metadatos, no solo los que se muestran arriba: EXIF (cámara, fecha, GPS y la miniatura que guardan los celulares), XMP, IPTC, comentarios y los datos que algunos celulares agregan después de la imagen. En JPEG sin rotar, la imagen no se vuelve a comprimir: sus píxeles quedan iguales. Se conservan el perfil de color (ICC) y la orientación de píxeles. PNG y WebP se redibujan y se exportan de nuevo, así que tampoco conservan ningún metadato.',
     'titulo-pagina': 'Quitar metadatos EXIF de una foto gratis — Mini Cookies',
     'meta-descripcion': 'Sacá los metadatos EXIF (cámara, fecha, ubicación GPS) de una foto antes de compartirla, gratis y sin subirla a ningún servidor.',
+    'guia-titulo': 'Cómo quitar los metadatos EXIF de una foto',
+    'guia-intro': 'Las fotos, sobre todo las de celular, guardan datos ocultos: modelo de cámara, fecha y hora y, a veces, la ubicación GPS exacta. Esta herramienta te muestra qué metadatos tiene la foto y te deja descargarla sin ellos antes de compartirla en un foro, un anuncio de venta o un chat. Elegís la imagen, mirás el resumen y bajás la copia limpia.',
+    'guia-paso-1': 'Arrastrá tu foto o hacé clic para elegirla. Se muestra una vista previa.',
+    'guia-paso-2': 'Mirá la lista de metadatos detectados: «Cámara», «Fecha» y «Ubicación GPS» (esta última en rojo, para que no pase inadvertida). Si no hay, aparece un aviso indicándolo.',
+    'guia-paso-3': 'Tocá «Descargar sin metadatos» y luego «Descargar imagen».',
+    'guia-consejo-1': 'Aunque solo se muestren cámara, fecha y GPS, se quitan todos los bloques de metadatos: EXIF, XMP, IPTC, comentarios, la miniatura interna que guardan los celulares y datos que algunos teléfonos agregan después de la imagen. El botón «?» lo explica.',
+    'guia-consejo-2': 'En un JPEG sin rotar, la imagen no se vuelve a comprimir, así que no pierde calidad. Se conservan el perfil de color (ICC) y la orientación de píxeles.',
+    'guia-consejo-3': 'Si la foto depende de la etiqueta de orientación para verse derecha (típico de celulares), se redibuja y se exporta de nuevo, para que no quede girada.',
+    'guia-consejo-4': 'PNG y WebP también se redibujan y salen sin metadatos. Otros formatos (GIF, BMP, SVG) se descargan como PNG.',
+    'guia-p1': '¿Cómo se llama el archivo descargado?',
+    'guia-r1': 'imagen-sin-metadatos.jpg (o .png / .webp según el formato).',
+    'guia-p2': '¿Muestra todos los datos de la foto?',
+    'guia-r2': 'No: solo cámara, fecha y ubicación; es un resumen, y la limpieza es completa.',
+    'guia-p3': '¿Sirve para videos o PDF?',
+    'guia-r3': 'No, solo imágenes.',
+    'guia-p4': '¿Puedo procesar varias fotos a la vez?',
+    'guia-r4': 'No, una por vez.'
   },
   en: {
     'hero-titulo': 'Remove EXIF metadata from a photo',
@@ -52,6 +69,23 @@ window.i18nPagina = {
     'ayuda-metadatos': 'Every metadata block is removed, not only the ones listed above: EXIF (camera, date, GPS and the thumbnail phones store), XMP, IPTC, comments and any data some phones append after the image. For a JPEG that isn’t rotated, the image is not recompressed: its pixels stay exactly the same. The colour profile (ICC) and the pixel orientation are kept. PNG and WebP are redrawn and exported again, so they carry no metadata either.',
     'titulo-pagina': 'Remove EXIF metadata from a photo, free — Mini Cookies',
     'meta-descripcion': 'Strip the EXIF metadata (camera, date, GPS location) from a photo before you share it — free, and nothing is uploaded to a server.',
+    'guia-titulo': 'How to remove EXIF metadata from a photo',
+    'guia-intro': 'Photos, especially phone photos, store hidden data: camera model, date and time and, sometimes, the exact GPS location. This tool shows you what metadata the photo carries and lets you download it without any of it before you share it on a forum, a sales listing or a chat. You choose the image, look at the summary and download the clean copy.',
+    'guia-paso-1': 'Drag your photo or click to choose it. A preview is shown.',
+    'guia-paso-2': 'Look at the list of detected metadata: “Camera”, “Date” and “GPS location” (the last one in red, so it doesn’t go unnoticed). If there is none, a notice says so.',
+    'guia-paso-3': 'Tap “Download without metadata” and then “Download image”.',
+    'guia-consejo-1': 'Even though only camera, date and GPS are shown, every metadata block is removed: EXIF, XMP, IPTC, comments, the internal thumbnail phones store and data some phones append after the image. The “?” button explains it.',
+    'guia-consejo-2': 'In a JPEG that isn’t rotated, the image is not recompressed, so it loses no quality. The color profile (ICC) and the pixel orientation are kept.',
+    'guia-consejo-3': 'If the photo relies on the orientation tag to look upright (typical of phones), it is redrawn and exported again, so it doesn’t end up rotated.',
+    'guia-consejo-4': 'PNG and WebP are also redrawn and come out without metadata. Other formats (GIF, BMP, SVG) are downloaded as PNG.',
+    'guia-p1': 'What is the downloaded file called?',
+    'guia-r1': 'imagen-sin-metadatos.jpg (or .png / .webp depending on the format).',
+    'guia-p2': 'Does it show all the data in the photo?',
+    'guia-r2': 'No: only camera, date and location; it’s a summary, and the cleaning is complete.',
+    'guia-p3': 'Does it work for videos or PDFs?',
+    'guia-r3': 'No, only images.',
+    'guia-p4': 'Can I process several photos at once?',
+    'guia-r4': 'No, one at a time.'
   }
 };
 </script>
@@ -97,6 +131,41 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo quitar los metadatos EXIF de una foto</h2>
+    <p data-i18n="guia-intro">Las fotos, sobre todo las de celular, guardan datos ocultos: modelo de cámara, fecha y hora y, a veces, la ubicación GPS exacta. Esta herramienta te muestra qué metadatos tiene la foto y te deja descargarla sin ellos antes de compartirla en un foro, un anuncio de venta o un chat. Elegís la imagen, mirás el resumen y bajás la copia limpia.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu foto o hacé clic para elegirla. Se muestra una vista previa.</li>
+      <li data-i18n="guia-paso-2">Mirá la lista de metadatos detectados: «Cámara», «Fecha» y «Ubicación GPS» (esta última en rojo, para que no pase inadvertida). Si no hay, aparece un aviso indicándolo.</li>
+      <li data-i18n="guia-paso-3">Tocá «Descargar sin metadatos» y luego «Descargar imagen».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Aunque solo se muestren cámara, fecha y GPS, se quitan todos los bloques de metadatos: EXIF, XMP, IPTC, comentarios, la miniatura interna que guardan los celulares y datos que algunos teléfonos agregan después de la imagen. El botón «?» lo explica.</li>
+      <li data-i18n="guia-consejo-2">En un JPEG sin rotar, la imagen no se vuelve a comprimir, así que no pierde calidad. Se conservan el perfil de color (ICC) y la orientación de píxeles.</li>
+      <li data-i18n="guia-consejo-3">Si la foto depende de la etiqueta de orientación para verse derecha (típico de celulares), se redibuja y se exporta de nuevo, para que no quede girada.</li>
+      <li data-i18n="guia-consejo-4">PNG y WebP también se redibujan y salen sin metadatos. Otros formatos (GIF, BMP, SVG) se descargan como PNG.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cómo se llama el archivo descargado?</summary>
+      <p data-i18n="guia-r1">imagen-sin-metadatos.jpg (o .png / .webp según el formato).</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Muestra todos los datos de la foto?</summary>
+      <p data-i18n="guia-r2">No: solo cámara, fecha y ubicación; es un resumen, y la limpieza es completa.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Sirve para videos o PDF?</summary>
+      <p data-i18n="guia-r3">No, solo imágenes.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puedo procesar varias fotos a la vez?</summary>
+      <p data-i18n="guia-r4">No, una por vez.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

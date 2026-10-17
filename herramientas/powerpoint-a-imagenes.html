@@ -27,7 +27,25 @@ window.i18nPagina = {
     'limites-antes': 'Como esto corre 100% en tu navegador (no en PowerPoint real), el resultado puede no ser 100% fiel al original — diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse distinto. Si no se puede renderizar ninguna diapositiva, se avisa el error; una diapositiva ilegible sale en blanco y lo que no se sabe dibujar se omite — para el texto de todas formas está ',
     'limites-enlace': 'Extraer texto de PowerPoint',
     'limites-final': '.',
-    'error-renderizar': 'No se pudo renderizar las diapositivas'
+    'error-renderizar': 'No se pudo renderizar las diapositivas',
+    'guia-titulo': 'Cómo exportar las diapositivas de PowerPoint como imágenes',
+    'guia-intro': 'Exporta cada diapositiva de una presentación .pptx como una imagen PNG, agrupadas en un archivo .zip. Sirve para subir diapositivas a un documento o a una red social, armar un resumen visual, compartir una presentación sin enviar el archivo editable, o usar una diapositiva como imagen en otro programa. El dibujo lo hace la propia herramienta en tu navegador, no PowerPoint.',
+    'guia-paso-1': 'Arrastrá tu archivo .pptx o hacé clic para elegirlo.',
+    'guia-paso-2': 'Tocá «Convertir a imágenes». Mientras trabaja ves el avance («Renderizando diapositivas...») y luego se muestra la vista previa de cada diapositiva.',
+    'guia-paso-3': 'Cuando termina, tocá «Descargar .zip con las imágenes».',
+    'guia-paso-4': 'Descomprimí el .zip: cada diapositiva queda como diapositiva-01.png, diapositiva-02.png, etcétera (la cantidad de ceros se ajusta al total).',
+    'guia-consejo-1': 'Revisá la vista previa antes de descargar: como el dibujo no lo hace PowerPoint real, las diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse distintas del original.',
+    'guia-consejo-2': 'Los PNG no tienen compresión con pérdida, así que el texto y las formas salen nítidos; a cambio, pueden pesar bastante si la diapositiva tiene muchas fotos.',
+    'guia-consejo-3': 'Lo que no se puede dibujar se omite, y una diapositiva ilegible sale en blanco. Solo si todas las diapositivas salen vacías la herramienta avisa con un error.',
+    'guia-consejo-4': 'Si lo único que necesitás es el contenido de texto, usá Extraer texto de PowerPoint.',
+    'guia-p1': '¿Acepta archivos .ppt antiguos?',
+    'guia-r1': 'No, solo .pptx.',
+    'guia-p2': '¿Puedo elegir qué diapositivas exportar o la resolución?',
+    'guia-r2': 'No, se exportan todas, sin opciones de tamaño.',
+    'guia-p3': '¿Se pierden las animaciones y transiciones?',
+    'guia-r3': 'Sí: cada diapositiva es una imagen fija.',
+    'guia-p4': '¿Se exportan las notas del orador?',
+    'guia-r4': 'No, solo lo que se ve en la diapositiva.'
   },
   en: {
     'titulo-pagina': 'Convert PowerPoint to Images Free — Mini Cookies',
@@ -45,7 +63,25 @@ window.i18nPagina = {
     'limites-antes': 'Since this runs 100% in your browser (not in real PowerPoint), the result may not be 100% faithful to the original — slides with very complex designs, animations or unusual elements may look different. If no slide can be rendered, the error is reported; an unreadable slide comes out blank and anything that can’t be drawn is left out — for the text there’s also ',
     'limites-enlace': 'Extract text from PowerPoint',
     'limites-final': '.',
-    'error-renderizar': 'Couldn’t render the slides'
+    'error-renderizar': 'Couldn’t render the slides',
+    'guia-titulo': 'How to export PowerPoint slides as images',
+    'guia-intro': 'It exports each slide of a .pptx presentation as a PNG image, grouped in a .zip file. It’s handy for adding slides to a document or a social network post, putting together a visual summary, sharing a presentation without sending the editable file, or using a slide as an image in another program. The drawing is done by the tool itself in your browser, not by PowerPoint.',
+    'guia-paso-1': 'Drag your .pptx file or click to choose it.',
+    'guia-paso-2': 'Tap “Convert to images”. While it works you see the progress (“Rendering slides...”) and then a preview of each slide is shown.',
+    'guia-paso-3': 'When it finishes, tap “Download .zip with the images”.',
+    'guia-paso-4': 'Unzip the .zip: each slide ends up as diapositiva-01.png, diapositiva-02.png, and so on (the number of zeros adjusts to the total).',
+    'guia-consejo-1': 'Check the preview before downloading: since the drawing isn’t done by real PowerPoint, slides with very complex designs, animations or unusual elements may look different from the original.',
+    'guia-consejo-2': 'PNG files have no lossy compression, so text and shapes come out sharp; the trade-off is that they can be quite large if the slide has many photos.',
+    'guia-consejo-3': 'Whatever can’t be drawn is left out, and an unreadable slide comes out blank. The tool only shows an error if every slide comes out empty.',
+    'guia-consejo-4': 'If all you need is the text content, use Extract text from PowerPoint.',
+    'guia-p1': 'Does it accept old .ppt files?',
+    'guia-r1': 'No, only .pptx.',
+    'guia-p2': 'Can I choose which slides to export or the resolution?',
+    'guia-r2': 'No, all of them are exported, with no size options.',
+    'guia-p3': 'Are animations and transitions lost?',
+    'guia-r3': 'Yes: each slide is a still image.',
+    'guia-p4': 'Are the speaker notes exported?',
+    'guia-r4': 'No, only what is visible on the slide.'
   }
 };
 </script>
@@ -95,6 +131,42 @@ window.i18nPagina = {
       distinto. Si no se puede renderizar ninguna diapositiva, se avisa el error; una diapositiva ilegible sale en blanco y lo que no se sabe dibujar se omite — para el texto de todas formas está </span><a href="extraer-texto-powerpoint.html" data-i18n="limites-enlace">Extraer texto de PowerPoint</a><span data-i18n="limites-final">.</span>
     </p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo exportar las diapositivas de PowerPoint como imágenes</h2>
+    <p data-i18n="guia-intro">Exporta cada diapositiva de una presentación .pptx como una imagen PNG, agrupadas en un archivo .zip. Sirve para subir diapositivas a un documento o a una red social, armar un resumen visual, compartir una presentación sin enviar el archivo editable, o usar una diapositiva como imagen en otro programa. El dibujo lo hace la propia herramienta en tu navegador, no PowerPoint.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .pptx o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Tocá «Convertir a imágenes». Mientras trabaja ves el avance («Renderizando diapositivas...») y luego se muestra la vista previa de cada diapositiva.</li>
+      <li data-i18n="guia-paso-3">Cuando termina, tocá «Descargar .zip con las imágenes».</li>
+      <li data-i18n="guia-paso-4">Descomprimí el .zip: cada diapositiva queda como diapositiva-01.png, diapositiva-02.png, etcétera (la cantidad de ceros se ajusta al total).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Revisá la vista previa antes de descargar: como el dibujo no lo hace PowerPoint real, las diapositivas con diseños muy complejos, animaciones o elementos poco comunes pueden verse distintas del original.</li>
+      <li data-i18n="guia-consejo-2">Los PNG no tienen compresión con pérdida, así que el texto y las formas salen nítidos; a cambio, pueden pesar bastante si la diapositiva tiene muchas fotos.</li>
+      <li data-i18n="guia-consejo-3">Lo que no se puede dibujar se omite, y una diapositiva ilegible sale en blanco. Solo si todas las diapositivas salen vacías la herramienta avisa con un error.</li>
+      <li data-i18n="guia-consejo-4">Si lo único que necesitás es el contenido de texto, usá Extraer texto de PowerPoint.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Acepta archivos .ppt antiguos?</summary>
+      <p data-i18n="guia-r1">No, solo .pptx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo elegir qué diapositivas exportar o la resolución?</summary>
+      <p data-i18n="guia-r2">No, se exportan todas, sin opciones de tamaño.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se pierden las animaciones y transiciones?</summary>
+      <p data-i18n="guia-r3">Sí: cada diapositiva es una imagen fija.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se exportan las notas del orador?</summary>
+      <p data-i18n="guia-r4">No, solo lo que se ve en la diapositiva.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

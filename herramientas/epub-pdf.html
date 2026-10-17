@@ -42,7 +42,26 @@ window.i18nPagina = {
     'progreso-epub': 'PDF {n} de {total} · página {h} de {th}...',
     'enlace-descargar-zip-epub': 'Descargar .zip con los EPUB',
     'titulo-defecto': 'Documento',
-    'error-generar-epub': 'No se pudo generar el EPUB'
+    'error-generar-epub': 'No se pudo generar el EPUB',
+    'guia-titulo': 'Cómo convertir un EPUB a PDF y un PDF a EPUB',
+    'guia-intro': 'Convierte un libro EPUB en un PDF que se puede imprimir o leer en cualquier lado, o al revés, un PDF en un EPUB para leerlo cómodo en un lector de libros electrónicos. Entra un .epub sin DRM o un PDF; sale un PDF o un EPUB. El PDF → EPUB reconoce la estructura del documento (títulos, negritas, cursivas e imágenes) y descarta los números de página y encabezados repetidos.',
+    'guia-paso-1': 'Elegí la dirección: «EPUB → PDF» o «PDF → EPUB».',
+    'guia-paso-2': 'Para EPUB → PDF, cargá uno o varios .epub y tocá «Convertir a PDF». El botón muestra el avance («Hoja 3 de 120...»).',
+    'guia-paso-3': 'Cuando termine, tocá «Descargar PDF» (con el mismo nombre del libro) o, si cargaste varios libros, «Descargar .zip con los PDF».',
+    'guia-paso-4': 'Para PDF → EPUB, cargá uno o varios PDF. Con un solo PDF podés completar «Título del libro» y «Autor (opcional)»; con varios, cada EPUB lleva el nombre de su archivo.',
+    'guia-paso-5': 'Tocá «Convertir a EPUB» y después «Descargar EPUB» (o «Descargar .zip con los EPUB» si fueron varios).',
+    'guia-consejo-1': 'EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo, y cada capítulo empieza en una página nueva.',
+    'guia-consejo-2': 'PDF → EPUB conserva títulos, negritas, cursivas e imágenes, pero no listas ni tablas como tales (salen como texto corrido). Cada título principal abre un capítulo. Una página sin texto real (un escaneo) entra como imagen: no se convierte en texto reconocido.',
+    'guia-consejo-3': 'Un PDF con texto digital da mejores resultados que uno armado a partir de fotos.',
+    'guia-consejo-4': 'Los libros largos tardan; el botón muestra el avance hoja por hoja.',
+    'guia-p1': '¿Funciona con libros con DRM?',
+    'guia-r1': 'No, solo con EPUB sin protección.',
+    'guia-p2': '¿El PDF → EPUB reconoce el texto de un escaneo?',
+    'guia-r2': 'No: las páginas sin texto real se agregan como imagen.',
+    'guia-p3': '¿Puedo convertir varios archivos a la vez?',
+    'guia-r3': 'Sí, en las dos direcciones; el resultado se entrega en un .zip.',
+    'guia-p4': '¿Se conserva el diseño original del PDF?',
+    'guia-r4': 'No. El EPUB conserva el texto con sus títulos, negritas, cursivas e imágenes, pero se reacomoda para pantallas pequeñas.'
   },
   en: {
     'titulo-pagina': 'Convert EPUB and PDF Free — Mini Cookies',
@@ -75,7 +94,26 @@ window.i18nPagina = {
     'progreso-epub': 'PDF {n} of {total} · page {h} of {th}...',
     'enlace-descargar-zip-epub': 'Download .zip with the EPUBs',
     'titulo-defecto': 'Document',
-    'error-generar-epub': 'Couldn’t generate the EPUB'
+    'error-generar-epub': 'Couldn’t generate the EPUB',
+    'guia-titulo': 'How to convert an EPUB to PDF and a PDF to EPUB',
+    'guia-intro': 'It converts an EPUB book into a PDF that you can print or read anywhere, or the other way around, a PDF into an EPUB so you can read it comfortably on an e-book reader. An .epub without DRM or a PDF goes in; a PDF or an EPUB comes out. PDF → EPUB recognizes the structure of the document (headings, bold, italics and images) and discards page numbers and repeated headers.',
+    'guia-paso-1': 'Choose the direction: “EPUB → PDF” or “PDF → EPUB”.',
+    'guia-paso-2': 'For EPUB → PDF, load one or several .epub files and tap “Convert to PDF”. The button shows the progress (“Page 3 of 120...”).',
+    'guia-paso-3': 'When it finishes, tap “Download PDF” (with the same name as the book) or, if you loaded several books, “Download .zip with the PDFs”.',
+    'guia-paso-4': 'For PDF → EPUB, load one or several PDFs. With a single PDF you can fill in “Book title” and “Author (optional)”; with several, each EPUB takes the name of its file.',
+    'guia-paso-5': 'Tap “Convert to EPUB” and then “Download EPUB” (or “Download .zip with the EPUBs” if there were several).',
+    'guia-consejo-1': 'EPUB → PDF keeps the headings, bold, italics, lists, tables and images of each chapter, and each chapter starts on a new page.',
+    'guia-consejo-2': 'PDF → EPUB keeps headings, bold, italics and images, but not lists or tables as such (they come out as running text). Each main heading starts a chapter. A page with no real text (a scan) goes in as an image: it isn’t converted into recognized text.',
+    'guia-consejo-3': 'A PDF with digital text gives better results than one built from photos.',
+    'guia-consejo-4': 'Long books take a while; the button shows the progress page by page.',
+    'guia-p1': 'Does it work with DRM-protected books?',
+    'guia-r1': 'No, only with unprotected EPUBs.',
+    'guia-p2': 'Does PDF → EPUB recognize the text of a scan?',
+    'guia-r2': 'No: pages with no real text are added as an image.',
+    'guia-p3': 'Can I convert several files at once?',
+    'guia-r3': 'Yes, in both directions; the result is delivered in a .zip.',
+    'guia-p4': 'Is the PDF’s original layout kept?',
+    'guia-r4': 'No. The EPUB keeps the text with its headings, bold, italics and images, but it reflows for small screens.'
   }
 };
 </script>
@@ -156,6 +194,43 @@ window.i18nPagina = {
       <li data-i18n="limite3">Cada capítulo empieza en una página nueva.</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir un EPUB a PDF y un PDF a EPUB</h2>
+    <p data-i18n="guia-intro">Convierte un libro EPUB en un PDF que se puede imprimir o leer en cualquier lado, o al revés, un PDF en un EPUB para leerlo cómodo en un lector de libros electrónicos. Entra un .epub sin DRM o un PDF; sale un PDF o un EPUB. El PDF → EPUB reconoce la estructura del documento (títulos, negritas, cursivas e imágenes) y descarta los números de página y encabezados repetidos.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí la dirección: «EPUB → PDF» o «PDF → EPUB».</li>
+      <li data-i18n="guia-paso-2">Para EPUB → PDF, cargá uno o varios .epub y tocá «Convertir a PDF». El botón muestra el avance («Hoja 3 de 120...»).</li>
+      <li data-i18n="guia-paso-3">Cuando termine, tocá «Descargar PDF» (con el mismo nombre del libro) o, si cargaste varios libros, «Descargar .zip con los PDF».</li>
+      <li data-i18n="guia-paso-4">Para PDF → EPUB, cargá uno o varios PDF. Con un solo PDF podés completar «Título del libro» y «Autor (opcional)»; con varios, cada EPUB lleva el nombre de su archivo.</li>
+      <li data-i18n="guia-paso-5">Tocá «Convertir a EPUB» y después «Descargar EPUB» (o «Descargar .zip con los EPUB» si fueron varios).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">EPUB → PDF conserva títulos, negrita, cursiva, listas, tablas e imágenes de cada capítulo, y cada capítulo empieza en una página nueva.</li>
+      <li data-i18n="guia-consejo-2">PDF → EPUB conserva títulos, negritas, cursivas e imágenes, pero no listas ni tablas como tales (salen como texto corrido). Cada título principal abre un capítulo. Una página sin texto real (un escaneo) entra como imagen: no se convierte en texto reconocido.</li>
+      <li data-i18n="guia-consejo-3">Un PDF con texto digital da mejores resultados que uno armado a partir de fotos.</li>
+      <li data-i18n="guia-consejo-4">Los libros largos tardan; el botón muestra el avance hoja por hoja.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Funciona con libros con DRM?</summary>
+      <p data-i18n="guia-r1">No, solo con EPUB sin protección.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿El PDF → EPUB reconoce el texto de un escaneo?</summary>
+      <p data-i18n="guia-r2">No: las páginas sin texto real se agregan como imagen.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo convertir varios archivos a la vez?</summary>
+      <p data-i18n="guia-r3">Sí, en las dos direcciones; el resultado se entrega en un .zip.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se conserva el diseño original del PDF?</summary>
+      <p data-i18n="guia-r4">No. El EPUB conserva el texto con sus títulos, negritas, cursivas e imágenes, pero se reacomoda para pantallas pequeñas.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

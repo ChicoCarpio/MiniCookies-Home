@@ -36,7 +36,26 @@ window.i18nPagina = {
     'zona-arrastre-txt': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
     'boton-a-epub-procesando': 'Convirtiendo...',
     'item2': 'EPUB → Texto separa cada capítulo con dos líneas en blanco, sin formato (sin negrita, listas ni imágenes). Texto → EPUB arma un único capítulo, separando párrafos por líneas en blanco.',
-    'error-extraer': 'No se pudo extraer el texto'
+    'error-extraer': 'No se pudo extraer el texto',
+    'guia-titulo': 'Cómo extraer el texto de un EPUB y armar un EPUB desde un texto',
+    'guia-intro': 'Saca el texto de un libro EPUB sin formato, listo para pegar en otro lado o guardar como .txt, o arma un libro EPUB a partir de un archivo de texto plano. Sirve, por ejemplo, para pasar un libro a un editor sencillo o para convertir un texto largo en algo que puedas leer en un lector de libros electrónicos. Entra un .epub o un .txt; sale un .txt o un .epub.',
+    'guia-paso-1': 'Elegí la dirección: «EPUB → Texto» o «Texto → EPUB».',
+    'guia-paso-2': 'En EPUB → Texto, cargá uno o varios .epub y tocá «Extraer texto».',
+    'guia-paso-3': 'Con un solo libro, el texto aparece en el cuadro y podés usar «Copiar texto» o «Descargar .txt» (se guarda como texto-extraido.txt). Con varios libros se baja texto-desde-epub.zip con un .txt por libro.',
+    'guia-paso-4': 'En Texto → EPUB, cargá el .txt: el «Título del libro» se completa con el nombre del archivo y podés cambiarlo; el «Autor (opcional)» también es editable.',
+    'guia-paso-5': 'Tocá «Convertir a EPUB» y después «Descargar EPUB».',
+    'guia-consejo-1': 'El texto que sale no lleva formato: no hay negritas ni imágenes. Las listas conservan su viñeta y las tablas mantienen sus columnas alineadas.',
+    'guia-consejo-2': 'Los capítulos del libro se separan con dos líneas en blanco, así que es fácil buscarlos en un editor.',
+    'guia-consejo-3': 'En Texto → EPUB, los párrafos se separan por líneas en blanco; un salto de línea simple dentro de un párrafo se conserva como salto.',
+    'guia-consejo-4': 'No funciona con EPUB con DRM.',
+    'guia-p1': '¿El EPUB resultante tiene capítulos?',
+    'guia-r1': 'No: Texto → EPUB arma un único capítulo con todo el texto.',
+    'guia-p2': '¿Puedo extraer el texto de muchos libros de una vez?',
+    'guia-r2': 'Sí, cargá varios .epub y recibís un .zip.',
+    'guia-p3': '¿Qué codificación acepta el .txt?',
+    'guia-r3': 'La herramienta lee el texto con un detector propio de codificación; si ves caracteres raros, guardá el archivo como UTF-8.',
+    'guia-p4': '¿Se pierden las imágenes del EPUB?',
+    'guia-r4': 'Sí, esta herramienta devuelve solo texto. Para las imágenes está Extraer imágenes de EPUB.'
   },
   en: {
     'titulo-pagina': 'Convert EPUB and Text Free — Mini Cookies',
@@ -63,7 +82,26 @@ window.i18nPagina = {
     'zona-arrastre-txt': '📄 Drag your .txt file here or click to choose it',
     'boton-a-epub-procesando': 'Converting...',
     'item2': 'EPUB → Text separates each chapter with two blank lines, without formatting (no bold, lists or images). Text → EPUB builds a single chapter, splitting paragraphs at blank lines.',
-    'error-extraer': 'Couldn’t extract the text'
+    'error-extraer': 'Couldn’t extract the text',
+    'guia-titulo': 'How to extract the text of an EPUB and build an EPUB from a text',
+    'guia-intro': 'It pulls the text out of an EPUB book with no formatting, ready to paste somewhere else or save as .txt, or builds an EPUB book from a plain text file. It’s useful, for example, to move a book into a simple editor or to turn a long text into something you can read on an e-book reader. An .epub or a .txt goes in; a .txt or an .epub comes out.',
+    'guia-paso-1': 'Choose the direction: “EPUB → Text” or “Text → EPUB”.',
+    'guia-paso-2': 'In EPUB → Text, load one or several .epub files and tap “Extract text”.',
+    'guia-paso-3': 'With a single book, the text appears in the box and you can use “Copy text” or “Download .txt” (saved as texto-extraido.txt). With several books, texto-desde-epub.zip is downloaded with one .txt per book.',
+    'guia-paso-4': 'In Text → EPUB, load the .txt: the “Book title” is filled in with the file name and you can change it; the “Author (optional)” is also editable.',
+    'guia-paso-5': 'Tap “Convert to EPUB” and then “Download EPUB”.',
+    'guia-consejo-1': 'The text that comes out has no formatting: no bold and no images. Lists keep their bullets and tables keep their columns aligned.',
+    'guia-consejo-2': 'The book’s chapters are separated by two blank lines, so they’re easy to search for in an editor.',
+    'guia-consejo-3': 'In Text → EPUB, paragraphs are separated by blank lines; a single line break inside a paragraph is kept as a break.',
+    'guia-consejo-4': 'It doesn’t work with DRM-protected EPUBs.',
+    'guia-p1': 'Does the resulting EPUB have chapters?',
+    'guia-r1': 'No: Text → EPUB builds a single chapter with all the text.',
+    'guia-p2': 'Can I extract the text of many books at once?',
+    'guia-r2': 'Yes, load several .epub files and you get a .zip.',
+    'guia-p3': 'What encoding does the .txt accept?',
+    'guia-r3': 'The tool reads the text with its own encoding detector; if you see odd characters, save the file as UTF-8.',
+    'guia-p4': 'Are the EPUB’s images lost?',
+    'guia-r4': 'Yes, this tool returns text only. For the images there is Extract images from EPUB.'
   }
 };
 </script>
@@ -142,6 +180,43 @@ window.i18nPagina = {
       <li data-i18n="item2">EPUB → Texto separa cada capítulo con dos líneas en blanco, sin formato (sin negrita, listas ni imágenes). Texto → EPUB arma un único capítulo, separando párrafos por líneas en blanco.</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo extraer el texto de un EPUB y armar un EPUB desde un texto</h2>
+    <p data-i18n="guia-intro">Saca el texto de un libro EPUB sin formato, listo para pegar en otro lado o guardar como .txt, o arma un libro EPUB a partir de un archivo de texto plano. Sirve, por ejemplo, para pasar un libro a un editor sencillo o para convertir un texto largo en algo que puedas leer en un lector de libros electrónicos. Entra un .epub o un .txt; sale un .txt o un .epub.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí la dirección: «EPUB → Texto» o «Texto → EPUB».</li>
+      <li data-i18n="guia-paso-2">En EPUB → Texto, cargá uno o varios .epub y tocá «Extraer texto».</li>
+      <li data-i18n="guia-paso-3">Con un solo libro, el texto aparece en el cuadro y podés usar «Copiar texto» o «Descargar .txt» (se guarda como texto-extraido.txt). Con varios libros se baja texto-desde-epub.zip con un .txt por libro.</li>
+      <li data-i18n="guia-paso-4">En Texto → EPUB, cargá el .txt: el «Título del libro» se completa con el nombre del archivo y podés cambiarlo; el «Autor (opcional)» también es editable.</li>
+      <li data-i18n="guia-paso-5">Tocá «Convertir a EPUB» y después «Descargar EPUB».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El texto que sale no lleva formato: no hay negritas ni imágenes. Las listas conservan su viñeta y las tablas mantienen sus columnas alineadas.</li>
+      <li data-i18n="guia-consejo-2">Los capítulos del libro se separan con dos líneas en blanco, así que es fácil buscarlos en un editor.</li>
+      <li data-i18n="guia-consejo-3">En Texto → EPUB, los párrafos se separan por líneas en blanco; un salto de línea simple dentro de un párrafo se conserva como salto.</li>
+      <li data-i18n="guia-consejo-4">No funciona con EPUB con DRM.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿El EPUB resultante tiene capítulos?</summary>
+      <p data-i18n="guia-r1">No: Texto → EPUB arma un único capítulo con todo el texto.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo extraer el texto de muchos libros de una vez?</summary>
+      <p data-i18n="guia-r2">Sí, cargá varios .epub y recibís un .zip.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué codificación acepta el .txt?</summary>
+      <p data-i18n="guia-r3">La herramienta lee el texto con un detector propio de codificación; si ves caracteres raros, guardá el archivo como UTF-8.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se pierden las imágenes del EPUB?</summary>
+      <p data-i18n="guia-r4">Sí, esta herramienta devuelve solo texto. Para las imágenes está Extraer imágenes de EPUB.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

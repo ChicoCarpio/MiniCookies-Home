@@ -24,7 +24,25 @@ window.i18nPagina = {
     'error-un-capitulo': 'El EPUB tiene un solo capítulo — no hay nada que dividir.',
     'progreso-capitulo': 'Generando capítulo {actual} de {total}...',
     'progreso-zip': 'Generando .zip...',
-    'error-dividir': 'No se pudo dividir el EPUB'
+    'error-dividir': 'No se pudo dividir el EPUB',
+    'guia-titulo': 'Cómo dividir un EPUB en capítulos',
+    'guia-intro': 'Si tenés un libro electrónico largo y querés leerlo o compartirlo por partes, esta herramienta lo separa en varios EPUB más pequeños, uno por cada capítulo, y te los entrega juntos en un archivo .zip. Cada parte conserva los estilos, las fuentes y los metadatos del libro original, e incluye solo las imágenes que usa ese capítulo.',
+    'guia-paso-1': 'Arrastrá tu archivo .epub o hacé clic para elegirlo; su nombre aparece en la lista.',
+    'guia-paso-2': 'Tocá «Dividir».',
+    'guia-paso-3': 'Esperá mientras avanza el mensaje «Generando capítulo X de Y».',
+    'guia-paso-4': 'Cuando termine, tocá «Descargar .zip con los capítulos».',
+    'guia-consejo-1': 'Los capítulos se toman según el orden de lectura interno del libro (cada archivo de contenido es un capítulo). Si el libro trae un capítulo dividido en varios archivos, o varios capítulos en un solo archivo, la división seguirá esa estructura interna y no la que ves en el lector.',
+    'guia-consejo-2': 'Los nombres de los archivos del zip llevan un número con ceros a la izquierda y el título del capítulo, por ejemplo «01-Introducción.epub», para que se ordenen bien.',
+    'guia-consejo-3': 'Cada mini-EPUB lleva el título del libro seguido del título del capítulo y su propio identificador, de modo que el lector no lo confunda con el libro completo.',
+    'guia-consejo-4': 'Si el libro tiene un solo capítulo, la herramienta avisa que no hay nada que dividir.',
+    'guia-p1': '¿Funciona con cualquier EPUB?',
+    'guia-r1': 'Con libros EPUB estándar sí. Los archivos con protección anticopia (DRM) no se pueden leer.',
+    'guia-p2': '¿El zip pesa lo mismo que el libro?',
+    'guia-r2': 'Aproximadamente igual o algo más, porque cada parte repite estilos y fuentes.',
+    'guia-p3': '¿Puedo volver a juntar los capítulos?',
+    'guia-r3': 'Esta herramienta no lo hace.',
+    'guia-p4': '¿Cómo se llama el zip?',
+    'guia-r4': '«capitulos-epub.zip».',
   },
   en: {
     'titulo-pagina': 'Split EPUB Free — Mini Cookies',
@@ -39,7 +57,25 @@ window.i18nPagina = {
     'error-un-capitulo': 'The EPUB has only one chapter — there’s nothing to split.',
     'progreso-capitulo': 'Generating chapter {actual} of {total}...',
     'progreso-zip': 'Generating .zip...',
-    'error-dividir': 'Couldn’t split the EPUB'
+    'error-dividir': 'Couldn’t split the EPUB',
+    'guia-titulo': 'How to split an EPUB into chapters',
+    'guia-intro': 'If you have a long e-book and want to read or share it in parts, this tool splits it into several smaller EPUBs, one per chapter, and hands them to you together in a .zip file. Each part keeps the original book’s styles, fonts and metadata, and includes only the images that chapter uses.',
+    'guia-paso-1': 'Drag your .epub file or click to choose it; its name appears in the list.',
+    'guia-paso-2': 'Tap “Split”.',
+    'guia-paso-3': 'Wait while the “Generating chapter X of Y” message advances.',
+    'guia-paso-4': 'When it finishes, tap “Download .zip with the chapters”.',
+    'guia-consejo-1': 'Chapters are taken following the book’s internal reading order (each content file is a chapter). If the book has a chapter split across several files, or several chapters in a single file, the split will follow that internal structure and not the one you see in the reader.',
+    'guia-consejo-2': 'The file names inside the zip carry a number with leading zeros and the chapter title, for example “01-Introducción.epub”, so they sort properly.',
+    'guia-consejo-3': 'Each mini-EPUB carries the book’s title followed by the chapter title and its own identifier, so that the reader doesn’t confuse it with the complete book.',
+    'guia-consejo-4': 'If the book has only one chapter, the tool notifies you that there’s nothing to split.',
+    'guia-p1': 'Does it work with any EPUB?',
+    'guia-r1': 'With standard EPUB books, yes. Files with copy protection (DRM) can’t be read.',
+    'guia-p2': 'Does the zip weigh the same as the book?',
+    'guia-r2': 'Roughly the same or somewhat more, because each part repeats styles and fonts.',
+    'guia-p3': 'Can I put the chapters back together?',
+    'guia-r3': 'This tool doesn’t do that.',
+    'guia-p4': 'What is the zip called?',
+    'guia-r4': '“capitulos-epub.zip”.',
   }
 };
 </script>
@@ -79,6 +115,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo dividir un EPUB en capítulos</h2>
+    <p data-i18n="guia-intro">Si tenés un libro electrónico largo y querés leerlo o compartirlo por partes, esta herramienta lo separa en varios EPUB más pequeños, uno por cada capítulo, y te los entrega juntos en un archivo .zip. Cada parte conserva los estilos, las fuentes y los metadatos del libro original, e incluye solo las imágenes que usa ese capítulo.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .epub o hacé clic para elegirlo; su nombre aparece en la lista.</li>
+      <li data-i18n="guia-paso-2">Tocá «Dividir».</li>
+      <li data-i18n="guia-paso-3">Esperá mientras avanza el mensaje «Generando capítulo X de Y».</li>
+      <li data-i18n="guia-paso-4">Cuando termine, tocá «Descargar .zip con los capítulos».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Los capítulos se toman según el orden de lectura interno del libro (cada archivo de contenido es un capítulo). Si el libro trae un capítulo dividido en varios archivos, o varios capítulos en un solo archivo, la división seguirá esa estructura interna y no la que ves en el lector.</li>
+      <li data-i18n="guia-consejo-2">Los nombres de los archivos del zip llevan un número con ceros a la izquierda y el título del capítulo, por ejemplo «01-Introducción.epub», para que se ordenen bien.</li>
+      <li data-i18n="guia-consejo-3">Cada mini-EPUB lleva el título del libro seguido del título del capítulo y su propio identificador, de modo que el lector no lo confunda con el libro completo.</li>
+      <li data-i18n="guia-consejo-4">Si el libro tiene un solo capítulo, la herramienta avisa que no hay nada que dividir.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Funciona con cualquier EPUB?</summary>
+      <p data-i18n="guia-r1">Con libros EPUB estándar sí. Los archivos con protección anticopia (DRM) no se pueden leer.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿El zip pesa lo mismo que el libro?</summary>
+      <p data-i18n="guia-r2">Aproximadamente igual o algo más, porque cada parte repite estilos y fuentes.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo volver a juntar los capítulos?</summary>
+      <p data-i18n="guia-r3">Esta herramienta no lo hace.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Cómo se llama el zip?</summary>
+      <p data-i18n="guia-r4">«capitulos-epub.zip».</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

@@ -27,7 +27,26 @@ window.i18nPagina = {
     'campo-separador': 'Separador del CSV',
     'opcion-sep-punto-coma': 'Punto y coma (;) — Excel en español, con coma decimal',
     'opcion-sep-coma': 'Coma (,) — Excel en inglés, Google Sheets y otros programas',
-    'error-leer': 'No se pudo leer el archivo. Puede estar dañado o no ser una planilla válida'
+    'error-leer': 'No se pudo leer el archivo. Puede estar dañado o no ser una planilla válida',
+    'guia-titulo': 'Cómo convertir un Excel a CSV o un CSV a Excel',
+    'guia-intro': 'Un mismo botón resuelve las dos conversiones más comunes entre planillas: de Excel a CSV, para importar datos en otro sistema, y de CSV a Excel, para abrir un archivo de texto con formato de planilla. La herramienta detecta el sentido sola según el archivo que elijas: si es un CSV genera un .xlsx, y si es cualquier otro formato de planilla genera un .csv.',
+    'guia-paso-1': 'Arrastrá tu archivo o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv). El botón principal cambia a «Convertir a Excel (.xlsx)» o «Convertir a CSV» según el caso.',
+    'guia-paso-2': 'Si es un Excel con varias hojas, elegí la «Hoja a convertir».',
+    'guia-paso-3': 'Si vas a generar un CSV, elegí el «Separador del CSV»: punto y coma (para Excel en español, con coma decimal) o coma (para Excel en inglés, Google Sheets y otros programas).',
+    'guia-paso-4': 'Tocá el botón de conversión.',
+    'guia-paso-5': 'Cuando aparezca «Listo», tocá «Descargar resultado».',
+    'guia-consejo-1': 'El separador viene preseleccionado según la configuración regional de tu equipo: si usa coma decimal, propone punto y coma. Si abrís el CSV y todo aparece en una sola columna, probá con el otro separador.',
+    'guia-consejo-2': 'Al generar CSV, cada celda sale con el texto que muestra Excel; con punto y coma los números llevan coma decimal y punto de miles.',
+    'guia-consejo-3': 'El CSV se guarda en UTF-8 con marca de orden de bytes, para que Excel respete las tildes y la ñ.',
+    'guia-consejo-4': 'Al pasar de CSV a Excel, los números se convierten en números reales; los códigos que empiezan con ceros (como «00123») y las fechas quedan como texto.',
+    'guia-p1': '¿Convierte todas las hojas a la vez?',
+    'guia-r1': 'No: genera un CSV por vez, de la hoja que elijas. Para separar todas las hojas en archivos de Excel existe Dividir hojas de Excel.',
+    'guia-p2': '¿Se conservan los colores y fórmulas?',
+    'guia-r2': 'No. El CSV es texto plano, por lo que solo se guardan los valores mostrados.',
+    'guia-p3': '¿Cómo se llama el archivo resultante?',
+    'guia-r3': 'Conserva el nombre del original con la extensión nueva (.csv o .xlsx).',
+    'guia-p4': '¿Qué pasa con un archivo dañado?',
+    'guia-r4': 'Aparece un aviso de que no se pudo leer el archivo.',
   },
   en: {
     'titulo-pagina': 'Convert Excel to CSV and CSV to Excel Free — Mini Cookies',
@@ -45,7 +64,26 @@ window.i18nPagina = {
     'campo-separador': 'CSV separator',
     'opcion-sep-punto-coma': 'Semicolon (;) — Excel in Spanish and other languages that use a decimal comma',
     'opcion-sep-coma': 'Comma (,) — Excel in English, Google Sheets and most other programs',
-    'error-leer': 'Couldn’t read the file. It may be damaged or not a valid spreadsheet'
+    'error-leer': 'Couldn’t read the file. It may be damaged or not a valid spreadsheet',
+    'guia-titulo': 'How to convert an Excel file to CSV or a CSV to Excel',
+    'guia-intro': 'A single button handles the two most common conversions between spreadsheets: Excel to CSV, to import data into another system, and CSV to Excel, to open a text file in spreadsheet format. The tool detects the direction by itself from the file you choose: if it’s a CSV it generates an .xlsx, and if it’s any other spreadsheet format it generates a .csv.',
+    'guia-paso-1': 'Drag your file or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv). The main button changes to “Convert to Excel (.xlsx)” or “Convert to CSV” depending on the case.',
+    'guia-paso-2': 'If it’s an Excel file with several sheets, choose the “Sheet to convert”.',
+    'guia-paso-3': 'If you’re going to generate a CSV, choose the “CSV separator”: semicolon (for Excel in Spanish, with a decimal comma) or comma (for Excel in English, Google Sheets and other programs).',
+    'guia-paso-4': 'Tap the conversion button.',
+    'guia-paso-5': 'When “Done” appears, tap “Download result”.',
+    'guia-consejo-1': 'The separator comes preselected according to your computer’s regional settings: if it uses a decimal comma, it suggests a semicolon. If you open the CSV and everything shows up in a single column, try the other separator.',
+    'guia-consejo-2': 'When generating a CSV, each cell comes out with the text Excel displays; with a semicolon, numbers use a decimal comma and a period as thousands separator.',
+    'guia-consejo-3': 'The CSV is saved in UTF-8 with a byte order mark, so that Excel respects accents and the ñ.',
+    'guia-consejo-4': 'When going from CSV to Excel, numbers are converted into real numbers; codes that start with zeros (like “00123”) and dates stay as text.',
+    'guia-p1': 'Does it convert all the sheets at once?',
+    'guia-r1': 'No: it generates one CSV at a time, from the sheet you choose. To split all the sheets into Excel files there’s Split Excel sheets.',
+    'guia-p2': 'Are colors and formulas kept?',
+    'guia-r2': 'No. A CSV is plain text, so only the displayed values are saved.',
+    'guia-p3': 'What is the resulting file called?',
+    'guia-r3': 'It keeps the original’s name with the new extension (.csv or .xlsx).',
+    'guia-p4': 'What happens with a damaged file?',
+    'guia-r4': 'A notice appears saying the file couldn’t be read.',
   }
 };
 </script>
@@ -100,6 +138,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir un Excel a CSV o un CSV a Excel</h2>
+    <p data-i18n="guia-intro">Un mismo botón resuelve las dos conversiones más comunes entre planillas: de Excel a CSV, para importar datos en otro sistema, y de CSV a Excel, para abrir un archivo de texto con formato de planilla. La herramienta detecta el sentido sola según el archivo que elijas: si es un CSV genera un .xlsx, y si es cualquier otro formato de planilla genera un .csv.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv). El botón principal cambia a «Convertir a Excel (.xlsx)» o «Convertir a CSV» según el caso.</li>
+      <li data-i18n="guia-paso-2">Si es un Excel con varias hojas, elegí la «Hoja a convertir».</li>
+      <li data-i18n="guia-paso-3">Si vas a generar un CSV, elegí el «Separador del CSV»: punto y coma (para Excel en español, con coma decimal) o coma (para Excel en inglés, Google Sheets y otros programas).</li>
+      <li data-i18n="guia-paso-4">Tocá el botón de conversión.</li>
+      <li data-i18n="guia-paso-5">Cuando aparezca «Listo», tocá «Descargar resultado».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El separador viene preseleccionado según la configuración regional de tu equipo: si usa coma decimal, propone punto y coma. Si abrís el CSV y todo aparece en una sola columna, probá con el otro separador.</li>
+      <li data-i18n="guia-consejo-2">Al generar CSV, cada celda sale con el texto que muestra Excel; con punto y coma los números llevan coma decimal y punto de miles.</li>
+      <li data-i18n="guia-consejo-3">El CSV se guarda en UTF-8 con marca de orden de bytes, para que Excel respete las tildes y la ñ.</li>
+      <li data-i18n="guia-consejo-4">Al pasar de CSV a Excel, los números se convierten en números reales; los códigos que empiezan con ceros (como «00123») y las fechas quedan como texto.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Convierte todas las hojas a la vez?</summary>
+      <p data-i18n="guia-r1">No: genera un CSV por vez, de la hoja que elijas. Para separar todas las hojas en archivos de Excel existe Dividir hojas de Excel.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se conservan los colores y fórmulas?</summary>
+      <p data-i18n="guia-r2">No. El CSV es texto plano, por lo que solo se guardan los valores mostrados.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Cómo se llama el archivo resultante?</summary>
+      <p data-i18n="guia-r3">Conserva el nombre del original con la extensión nueva (.csv o .xlsx).</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa con un archivo dañado?</summary>
+      <p data-i18n="guia-r4">Aparece un aviso de que no se pudo leer el archivo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

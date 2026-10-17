@@ -30,7 +30,26 @@ window.i18nPagina = {
     'error-sin-estructura': 'El archivo no tiene la estructura mínima de un .docx — no se puede reparar.',
     'error-sin-texto': 'No se pudo rescatar texto legible de este archivo.',
     'mensaje-nivel2-ok': '⚠️ El documento estaba dañado — se recuperó solo el texto plano, sin el formato original.',
-    'error-reparar': 'No se pudo reparar el documento'
+    'error-reparar': 'No se pudo reparar el documento',
+    'guia-titulo': 'Cómo reparar un documento de Word dañado',
+    'guia-intro': 'Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado.',
+    'guia-paso-1': 'Arrastrá el documento a la zona «Arrastrá tu documento .docx acá o hacé clic para elegirlo».',
+    'guia-paso-2': 'Hacé clic en «Reparar» y esperá a que el botón deje de decir «Reparando...».',
+    'guia-paso-3': 'Leé el aviso de color: en verde, el documento se pudo leer y se reconstruyó; en naranja, solo se recuperó el texto plano.',
+    'guia-paso-4': 'Descargá el archivo con «Descargar Word reparado» (documento-reparado.docx).',
+    'guia-consejo-1': 'El archivo reparado es una reconstrucción, no una copia exacta: revisá títulos, listas, tablas e imágenes antes de reemplazar el original.',
+    'guia-consejo-2': 'Si el aviso indica texto plano, copiá el contenido a una plantilla propia y volvé a aplicar el formato.',
+    'guia-consejo-3': 'Conservá siempre el archivo original: la herramienta nunca lo modifica, pero el reparado puede perder detalles.',
+    'guia-consejo-4': 'Limitación importante: el primer nivel reconstruye el documento (lo lee con mammoth, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.',
+    'guia-consejo-5': 'Sirve también para documentos que Word marca como dañados tras una descarga interrumpida, siempre que el interior del archivo siga siendo un .docx legible.',
+    'guia-p1': '¿Qué pierdo en el modo de texto plano?',
+    'guia-r1': 'Negrita, tablas, imágenes y cualquier formato; se recupera solo el contenido escrito.',
+    'guia-p2': '¿Qué hago si da error?',
+    'guia-r2': 'El mensaje puede decir que falta la estructura mínima de un .docx o que no se encontró texto legible. En ese caso el archivo está demasiado dañado para esta herramienta.',
+    'guia-p3': '¿Acepta archivos .doc antiguos?',
+    'guia-r3': 'No, solo .docx.',
+    'guia-p4': '¿Puedo reparar varios a la vez?',
+    'guia-r4': 'No, se trabaja con un documento por vez.',
   },
   en: {
     'titulo-pagina': 'Repair Word Free — Mini Cookies',
@@ -51,7 +70,26 @@ window.i18nPagina = {
     'error-sin-estructura': 'The file doesn’t have the minimum structure of a .docx — it can’t be repaired.',
     'error-sin-texto': 'No readable text could be rescued from this file.',
     'mensaje-nivel2-ok': '⚠️ The document was damaged — only the plain text was recovered, without the original formatting.',
-    'error-reparar': 'Couldn’t repair the document'
+    'error-reparar': 'Couldn’t repair the document',
+    'guia-titulo': 'How to repair a damaged Word document',
+    'guia-intro': 'If a .docx document won’t open in Word or the unreadable-content message appears, this tool tries to rebuild it. First it reads it with a forgiving reader and builds a new document from scratch; if that fails, as a last resort it rescues the raw text of the file. It takes a .docx and returns a new .docx that will probably open without problems but with simplified formatting.',
+    'guia-paso-1': 'Drag the document to the “Drag your .docx document here or click to choose it” area.',
+    'guia-paso-2': 'Click “Repair” and wait until the button stops saying “Repairing...”.',
+    'guia-paso-3': 'Read the colored notice: in green, the document could be read and was rebuilt; in orange, only the plain text was recovered.',
+    'guia-paso-4': 'Download the file with “Download repaired Word” (documento-reparado.docx).',
+    'guia-consejo-1': 'The repaired file is a reconstruction, not an exact copy: check headings, lists, tables and images before replacing the original.',
+    'guia-consejo-2': 'If the notice says plain text, copy the content into your own template and apply the formatting again.',
+    'guia-consejo-3': 'Always keep the original file: the tool never modifies it, but the repaired one may lose details.',
+    'guia-consejo-4': 'Important limitation: the first level rebuilds the document (it reads it with mammoth, turns it into HTML and writes it back as a .docx), so headers, footers and styles may be lost.',
+    'guia-consejo-5': 'It also works for documents that Word flags as damaged after an interrupted download, as long as the inside of the file is still a readable .docx.',
+    'guia-p1': 'What do I lose in plain-text mode?',
+    'guia-r1': 'Bold, tables, images and any formatting; only the written content is recovered.',
+    'guia-p2': 'What do I do if it gives an error?',
+    'guia-r2': 'The message may say the minimum structure of a .docx is missing or that no readable text was found. In that case the file is too damaged for this tool.',
+    'guia-p3': 'Does it accept old .doc files?',
+    'guia-r3': 'No, only .docx.',
+    'guia-p4': 'Can I repair several at once?',
+    'guia-r4': 'No, it works with one document at a time.'
   }
 };
 </script>
@@ -100,6 +138,42 @@ window.i18nPagina = {
       <li data-i18n="limite2">Si ni así se puede leer, el archivo está demasiado dañado para esta herramienta.</li>
     </ul>
   </div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reparar un documento de Word dañado</h2>
+    <p data-i18n="guia-intro">Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el documento a la zona «Arrastrá tu documento .docx acá o hacé clic para elegirlo».</li>
+      <li data-i18n="guia-paso-2">Hacé clic en «Reparar» y esperá a que el botón deje de decir «Reparando...».</li>
+      <li data-i18n="guia-paso-3">Leé el aviso de color: en verde, el documento se pudo leer y se reconstruyó; en naranja, solo se recuperó el texto plano.</li>
+      <li data-i18n="guia-paso-4">Descargá el archivo con «Descargar Word reparado» (documento-reparado.docx).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El archivo reparado es una reconstrucción, no una copia exacta: revisá títulos, listas, tablas e imágenes antes de reemplazar el original.</li>
+      <li data-i18n="guia-consejo-2">Si el aviso indica texto plano, copiá el contenido a una plantilla propia y volvé a aplicar el formato.</li>
+      <li data-i18n="guia-consejo-3">Conservá siempre el archivo original: la herramienta nunca lo modifica, pero el reparado puede perder detalles.</li>
+      <li data-i18n="guia-consejo-4">Limitación importante: el primer nivel reconstruye el documento (lo lee con mammoth, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.</li>
+      <li data-i18n="guia-consejo-5">Sirve también para documentos que Word marca como dañados tras una descarga interrumpida, siempre que el interior del archivo siga siendo un .docx legible.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pierdo en el modo de texto plano?</summary>
+      <p data-i18n="guia-r1">Negrita, tablas, imágenes y cualquier formato; se recupera solo el contenido escrito.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué hago si da error?</summary>
+      <p data-i18n="guia-r2">El mensaje puede decir que falta la estructura mínima de un .docx o que no se encontró texto legible. En ese caso el archivo está demasiado dañado para esta herramienta.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Acepta archivos .doc antiguos?</summary>
+      <p data-i18n="guia-r3">No, solo .docx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puedo reparar varios a la vez?</summary>
+      <p data-i18n="guia-r4">No, se trabaja con un documento por vez.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

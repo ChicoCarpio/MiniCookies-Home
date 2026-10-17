@@ -43,7 +43,26 @@ window.i18nPagina = {
     'ver-como-tabla': 'Ver como tabla',
     'copiar': 'Copiar selección',
     'copiado': 'Copiado',
-    'cargando-visor': 'Preparando la hoja…'
+    'cargando-visor': 'Preparando la hoja…',
+    'guia-titulo': 'Cómo ver un archivo Excel o CSV sin abrir Excel',
+    'guia-intro': 'Para mirar el contenido de una planilla sin tener Excel instalado, por ejemplo desde una computadora ajena o un celular. La herramienta abre archivos .xlsx, .xlsm, .xlsb, .xls, .ods y .csv y los muestra como una hoja de cálculo: con letras y números en los bordes, celda activa, selección de rangos, pestañas de hojas, zoom y barra de estado con recuento, suma y promedio. Es solo de lectura: el archivo no se modifica.',
+    'guia-paso-1': 'Arrastrá el archivo a la zona «Arrastrá tu archivo acá o hacé clic para elegirlo». Mientras carga aparece «Preparando la hoja…».',
+    'guia-paso-2': 'Recorré la hoja con el desplazamiento normal, hacé clic en una celda para ver su contenido y cambiá de hoja con las pestañas inferiores.',
+    'guia-paso-3': 'Seleccioná un rango y usá «Copiar selección» para llevarlo al portapapeles; la barra de estado muestra recuento, suma y promedio de lo seleccionado.',
+    'guia-paso-4': 'Si preferís una vista más simple (o la hoja no se dibuja bien), hacé clic en «Ver como tabla» para cambiar a una tabla con una pestaña por hoja; el mismo botón vuelve a la rejilla.',
+    'guia-consejo-1': 'La rejilla permite buscar dentro de la hoja o en todo el libro, acercar y alejar con el zoom (50 a 200 por ciento) y pasar a pantalla completa.',
+    'guia-consejo-2': 'Podés ordenar o filtrar lo que ves desde el encabezado de cada columna; el cambio es solo visual y el archivo no se modifica.',
+    'guia-consejo-3': 'Las fórmulas se muestran como las guarda el archivo, en inglés (SUM, IF…) y con coma entre argumentos; Excel las traduce a tu idioma al abrir el original.',
+    'guia-consejo-4': 'Los archivos con hojas ocultas las listan aparte como «Hojas ocultas». Si una hoja está vacía, se indica «Hoja vacía».',
+    'guia-consejo-5': 'Para convertir a otro formato o editar el contenido, usá las otras herramientas de Excel / CSV del sitio.',
+    'guia-p1': '¿Puedo editar la planilla?',
+    'guia-r1': 'No, es un visor.',
+    'guia-p2': '¿Qué formatos abre?',
+    'guia-r2': '.xlsx, .xlsm, .xlsb, .xls, .ods y .csv.',
+    'guia-p3': '¿Qué pasa con las hojas muy grandes?',
+    'guia-r3': 'Se dibuja solo la parte visible, por lo que el desplazamiento se mantiene fluido; en la vista de tabla se virtualizan las filas a partir de 200.',
+    'guia-p4': '¿Para qué sirve «Ver como tabla»?',
+    'guia-r4': 'Es una vista alternativa en texto, útil con lectores de pantalla o si la rejilla no se pudo cargar.'
   },
   en: {
     'titulo-pagina': 'View Excel or CSV Without Opening Excel — Mini Cookies',
@@ -55,7 +74,26 @@ window.i18nPagina = {
     'ver-como-tabla': 'View as table',
     'copiar': 'Copy selection',
     'copiado': 'Copied',
-    'cargando-visor': 'Preparing the sheet…'
+    'cargando-visor': 'Preparing the sheet…',
+    'guia-titulo': 'How to view an Excel or CSV file without opening Excel',
+    'guia-intro': 'For looking at the content of a spreadsheet without having Excel installed, for example from someone else’s computer or a phone. The tool opens .xlsx, .xlsm, .xlsb, .xls, .ods and .csv files and shows them as a spreadsheet: with letters and numbers on the edges, an active cell, range selection, sheet tabs, zoom and a status bar with count, sum and average. It’s read-only: the file isn’t modified.',
+    'guia-paso-1': 'Drag the file onto the “Drag your file here or click to choose it” area. While it loads, “Preparing the sheet…” appears.',
+    'guia-paso-2': 'Move around the sheet with normal scrolling, click a cell to see its content and switch sheets with the tabs at the bottom.',
+    'guia-paso-3': 'Select a range and use “Copy selection” to put it on the clipboard; the status bar shows the count, sum and average of what’s selected.',
+    'guia-paso-4': 'If you prefer a simpler view (or the sheet doesn’t draw well), click “View as table” to switch to a table with one tab per sheet; the same button takes you back to the grid.',
+    'guia-consejo-1': 'The grid lets you search within the sheet or the whole workbook, zoom in and out (50 to 200 percent) and go full screen.',
+    'guia-consejo-2': 'You can sort or filter what you see from the header of each column; the change is only visual and the file isn’t modified.',
+    'guia-consejo-3': 'Formulas are shown the way the file stores them, in English (SUM, IF…) and with commas between arguments; Excel translates them into your language when you open the original.',
+    'guia-consejo-4': 'Files with hidden sheets list them separately as “Hidden sheets”. If a sheet is empty, “Empty sheet” is shown.',
+    'guia-consejo-5': 'To convert to another format or edit the content, use the site’s other Excel / CSV tools.',
+    'guia-p1': 'Can I edit the spreadsheet?',
+    'guia-r1': 'No, it’s a viewer.',
+    'guia-p2': 'Which formats does it open?',
+    'guia-r2': '.xlsx, .xlsm, .xlsb, .xls, .ods and .csv.',
+    'guia-p3': 'What happens with very large sheets?',
+    'guia-r3': 'Only the visible part is drawn, so scrolling stays smooth; in the table view, rows are virtualized from 200 on.',
+    'guia-p4': 'What is “View as table” for?',
+    'guia-r4': 'It’s an alternative text view, useful with screen readers or if the grid couldn’t load.'
   }
 };
 </script>
@@ -96,6 +134,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo ver un archivo Excel o CSV sin abrir Excel</h2>
+    <p data-i18n="guia-intro">Para mirar el contenido de una planilla sin tener Excel instalado, por ejemplo desde una computadora ajena o un celular. La herramienta abre archivos .xlsx, .xlsm, .xlsb, .xls, .ods y .csv y los muestra como una hoja de cálculo: con letras y números en los bordes, celda activa, selección de rangos, pestañas de hojas, zoom y barra de estado con recuento, suma y promedio. Es solo de lectura: el archivo no se modifica.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el archivo a la zona «Arrastrá tu archivo acá o hacé clic para elegirlo». Mientras carga aparece «Preparando la hoja…».</li>
+      <li data-i18n="guia-paso-2">Recorré la hoja con el desplazamiento normal, hacé clic en una celda para ver su contenido y cambiá de hoja con las pestañas inferiores.</li>
+      <li data-i18n="guia-paso-3">Seleccioná un rango y usá «Copiar selección» para llevarlo al portapapeles; la barra de estado muestra recuento, suma y promedio de lo seleccionado.</li>
+      <li data-i18n="guia-paso-4">Si preferís una vista más simple (o la hoja no se dibuja bien), hacé clic en «Ver como tabla» para cambiar a una tabla con una pestaña por hoja; el mismo botón vuelve a la rejilla.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La rejilla permite buscar dentro de la hoja o en todo el libro, acercar y alejar con el zoom (50 a 200 por ciento) y pasar a pantalla completa.</li>
+      <li data-i18n="guia-consejo-2">Podés ordenar o filtrar lo que ves desde el encabezado de cada columna; el cambio es solo visual y el archivo no se modifica.</li>
+      <li data-i18n="guia-consejo-3">Las fórmulas se muestran como las guarda el archivo, en inglés (SUM, IF…) y con coma entre argumentos; Excel las traduce a tu idioma al abrir el original.</li>
+      <li data-i18n="guia-consejo-4">Los archivos con hojas ocultas las listan aparte como «Hojas ocultas». Si una hoja está vacía, se indica «Hoja vacía».</li>
+      <li data-i18n="guia-consejo-5">Para convertir a otro formato o editar el contenido, usá las otras herramientas de Excel / CSV del sitio.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo editar la planilla?</summary>
+      <p data-i18n="guia-r1">No, es un visor.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué formatos abre?</summary>
+      <p data-i18n="guia-r2">.xlsx, .xlsm, .xlsb, .xls, .ods y .csv.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué pasa con las hojas muy grandes?</summary>
+      <p data-i18n="guia-r3">Se dibuja solo la parte visible, por lo que el desplazamiento se mantiene fluido; en la vista de tabla se virtualizan las filas a partir de 200.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Para qué sirve «Ver como tabla»?</summary>
+      <p data-i18n="guia-r4">Es una vista alternativa en texto, útil con lectores de pantalla o si la rejilla no se pudo cargar.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

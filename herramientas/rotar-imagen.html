@@ -34,6 +34,25 @@ window.i18nPagina = {
     'campo-recortar-esquinas': 'Recortar las esquinas vacías',
     'ayuda-esquinas': 'Al girar en un ángulo que no es recto, la imagen ya no entra en un rectángulo y quedan cuatro esquinas vacías: se pueden dejar transparentes, pintarlas de un color o recortarlas. Recortar deja el rectángulo más grande que entra sin esquinas, así que se pierde un poco de cada borde.',
     'nota-png': 'Sale en PNG para que las esquinas queden transparentes.',
+    'guia-titulo': 'Cómo rotar y voltear una imagen',
+    'guia-intro': 'Sirve para enderezar una foto que salió torcida o de costado, o para espejarla. Permite girar de a 90 grados, voltear horizontal o verticalmente y rotar en cualquier ángulo entre -180 y 180 grados. Recibe una imagen, muestra el resultado en pantalla y descarga el archivo ya transformado.',
+    'guia-paso-1': 'Arrastrá una imagen a la zona o hacé clic para elegirla. Aparece la vista previa y se habilitan los controles.',
+    'guia-paso-2': 'Usá «Rotar 90° izquierda», «Rotar 90° derecha», «Voltear horizontal» o «Voltear vertical» tantas veces como necesites.',
+    'guia-paso-3': 'Para un ángulo libre, mové el deslizador «Ángulo» o escribí el valor en «Ángulo exacto».',
+    'guia-paso-4': 'Si giraste en un ángulo que no es recto, decidí qué hacer con las esquinas vacías: dejar «Esquinas transparentes», elegir un «Color de las esquinas» o marcar «Recortar las esquinas vacías».',
+    'guia-paso-5': 'Hacé clic en «Descargar imagen» y luego en el enlace «Descargar imagen» que aparece.',
+    'guia-consejo-1': 'Los giros de 90 grados y los volteos se hacen sobre una copia de trabajo, y el ángulo libre siempre se aplica desde ella: podés mover el deslizador muchas veces sin que la imagen se degrade.',
+    'guia-consejo-2': 'Para enderezar un horizonte torcido, usá ángulos chicos (por ejemplo 1,5 grados) y activá «Recortar las esquinas vacías»: se conserva el mayor rectángulo sin bordes vacíos, a costa de perder un poco de cada borde.',
+    'guia-consejo-3': 'El archivo mantiene el formato de entrada si es PNG, JPG o WebP. Cualquier otro (GIF, BMP, SVG) sale en PNG.',
+    'guia-consejo-4': 'Si tu imagen es JPG y dejás las esquinas transparentes, se guarda como PNG, porque el JPG no admite transparencia; la página lo avisa.',
+    'guia-p1': '¿Puedo deshacer un cambio?',
+    'guia-r1': 'No hay botón de deshacer, pero podés girar de nuevo en sentido contrario o volver a cargar la imagen.',
+    'guia-p2': '¿Cómo se llama el archivo descargado?',
+    'guia-r2': 'imagen-editada con la extensión del formato de salida.',
+    'guia-p3': '¿Se pierde calidad al girar?',
+    'guia-r3': 'Los giros rectos no. El ángulo libre sí remuestrea la imagen una vez al dibujarla.',
+    'guia-p4': '¿Rota varias imágenes a la vez?',
+    'guia-r4': 'No, trabaja con una por vez.',
   },
   en: {
     'hero-titulo': 'Rotate and flip an image',
@@ -54,6 +73,25 @@ window.i18nPagina = {
     'campo-recortar-esquinas': 'Crop the empty corners',
     'ayuda-esquinas': 'When you rotate by an angle that is not a right angle, the image no longer fits a rectangle and four corners are left empty: you can leave them transparent, fill them with a color or crop them. Cropping keeps the largest rectangle that fits without corners, so a little of each edge is lost.',
     'nota-png': 'Saved as PNG so the corners stay transparent.',
+    'guia-titulo': 'How to rotate and flip an image',
+    'guia-intro': 'It’s for straightening a photo that came out crooked or sideways, or for mirroring it. You can turn it in 90-degree steps, flip it horizontally or vertically and rotate it by any angle between -180 and 180 degrees. It takes an image, shows the result on screen and downloads the transformed file.',
+    'guia-paso-1': 'Drag an image to the area or click to choose it. The preview appears and the controls are enabled.',
+    'guia-paso-2': 'Use “Rotate 90° left”, “Rotate 90° right”, “Flip horizontally” or “Flip vertically” as many times as you need.',
+    'guia-paso-3': 'For a free angle, move the “Angle” slider or type the value in “Exact angle”.',
+    'guia-paso-4': 'If you rotated by an angle that isn’t a right angle, decide what to do with the empty corners: leave “Transparent corners”, choose a “Corner color” or tick “Crop the empty corners”.',
+    'guia-paso-5': 'Click “Download image” and then the “Download image” link that appears.',
+    'guia-consejo-1': 'The 90-degree turns and flips are done on a working copy, and the free angle is always applied from it: you can move the slider many times without the image degrading.',
+    'guia-consejo-2': 'To straighten a crooked horizon, use small angles (for example 1.5 degrees) and turn on “Crop the empty corners”: the largest rectangle without empty edges is kept, at the cost of losing a little of each edge.',
+    'guia-consejo-3': 'The file keeps the input format if it’s PNG, JPG or WebP. Any other (GIF, BMP, SVG) comes out as PNG.',
+    'guia-consejo-4': 'If your image is a JPG and you leave the corners transparent, it’s saved as PNG, because JPG doesn’t support transparency; the page tells you so.',
+    'guia-p1': 'Can I undo a change?',
+    'guia-r1': 'There’s no undo button, but you can rotate again in the opposite direction or load the image again.',
+    'guia-p2': 'What is the downloaded file called?',
+    'guia-r2': 'imagen-editada with the extension of the output format.',
+    'guia-p3': 'Is quality lost when rotating?',
+    'guia-r3': 'Right-angle turns don’t lose any. The free angle does resample the image once when drawing it.',
+    'guia-p4': 'Does it rotate several images at once?',
+    'guia-r4': 'No, it works with one at a time.'
   }
 };
 </script>
@@ -124,6 +162,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo rotar y voltear una imagen</h2>
+    <p data-i18n="guia-intro">Sirve para enderezar una foto que salió torcida o de costado, o para espejarla. Permite girar de a 90 grados, voltear horizontal o verticalmente y rotar en cualquier ángulo entre -180 y 180 grados. Recibe una imagen, muestra el resultado en pantalla y descarga el archivo ya transformado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá una imagen a la zona o hacé clic para elegirla. Aparece la vista previa y se habilitan los controles.</li>
+      <li data-i18n="guia-paso-2">Usá «Rotar 90° izquierda», «Rotar 90° derecha», «Voltear horizontal» o «Voltear vertical» tantas veces como necesites.</li>
+      <li data-i18n="guia-paso-3">Para un ángulo libre, mové el deslizador «Ángulo» o escribí el valor en «Ángulo exacto».</li>
+      <li data-i18n="guia-paso-4">Si giraste en un ángulo que no es recto, decidí qué hacer con las esquinas vacías: dejar «Esquinas transparentes», elegir un «Color de las esquinas» o marcar «Recortar las esquinas vacías».</li>
+      <li data-i18n="guia-paso-5">Hacé clic en «Descargar imagen» y luego en el enlace «Descargar imagen» que aparece.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Los giros de 90 grados y los volteos se hacen sobre una copia de trabajo, y el ángulo libre siempre se aplica desde ella: podés mover el deslizador muchas veces sin que la imagen se degrade.</li>
+      <li data-i18n="guia-consejo-2">Para enderezar un horizonte torcido, usá ángulos chicos (por ejemplo 1,5 grados) y activá «Recortar las esquinas vacías»: se conserva el mayor rectángulo sin bordes vacíos, a costa de perder un poco de cada borde.</li>
+      <li data-i18n="guia-consejo-3">El archivo mantiene el formato de entrada si es PNG, JPG o WebP. Cualquier otro (GIF, BMP, SVG) sale en PNG.</li>
+      <li data-i18n="guia-consejo-4">Si tu imagen es JPG y dejás las esquinas transparentes, se guarda como PNG, porque el JPG no admite transparencia; la página lo avisa.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo deshacer un cambio?</summary>
+      <p data-i18n="guia-r1">No hay botón de deshacer, pero podés girar de nuevo en sentido contrario o volver a cargar la imagen.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Cómo se llama el archivo descargado?</summary>
+      <p data-i18n="guia-r2">imagen-editada con la extensión del formato de salida.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se pierde calidad al girar?</summary>
+      <p data-i18n="guia-r3">Los giros rectos no. El ángulo libre sí remuestrea la imagen una vez al dibujarla.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Rota varias imágenes a la vez?</summary>
+      <p data-i18n="guia-r4">No, trabaja con una por vez.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

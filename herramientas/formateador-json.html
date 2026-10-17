@@ -27,6 +27,24 @@ window.i18nPagina = {
     'error-ubicacion': ' — mirá la línea {linea}, columna {columna} (marcada abajo)',
     'titulo-pagina': 'Formatear y validar JSON gratis — Mini Cookies',
     'meta-descripcion': 'Formateá, validá y minificá JSON al instante, gratis y sin enviar nada a ningún servidor.',
+    'guia-titulo': 'Cómo formatear y validar un JSON',
+    'guia-intro': 'Cuando un JSON llega todo en una línea, o la aplicación se queja de que «hay un error en algún lado», leerlo a ojo es una pérdida de tiempo. Esta herramienta toma el texto que pegues, lo revisa con el analizador del navegador y te devuelve una versión con sangría legible o una versión compacta de una sola línea. Si el JSON está roto, te dice qué falló y en qué línea y columna, y deja marcado el carácter problemático en la caja de entrada.',
+    'guia-paso-1': 'Pegá tu JSON en la caja grande de arriba.',
+    'guia-paso-2': 'Tocá «Formatear (indentado)» para obtener el texto con sangría de 2 espacios, o «Minificar» para quitar espacios y saltos de línea.',
+    'guia-paso-3': 'Si es válido, aparece «JSON válido» y el resultado se muestra en la caja de abajo; si no, verás el mensaje de error con la línea y la columna.',
+    'guia-paso-4': 'Usá «Copiar resultado» para llevarlo al portapapeles o «Descargar .json» para guardarlo como archivo.',
+    'guia-consejo-1': 'Si el JSON es inválido, la caja de entrada se marca en rojo y el cursor queda sobre el punto del error: corregilo ahí y volvé a tocar el botón.',
+    'guia-consejo-2': 'Los errores más comunes son una coma sobrante después del último elemento, comillas simples en lugar de dobles y claves sin comillas.',
+    'guia-consejo-3': '«Descargar .json» también sirve como atajo: si todavía no formateaste nada, formatea primero y descarga el resultado. El archivo se llama json-formateado seguido de la fecha.',
+    'guia-consejo-4': 'Minificar es útil para pegar un JSON en un campo de una sola línea, o para reducir su tamaño antes de enviarlo.',
+    'guia-p1': '¿Puede arreglar un JSON roto?',
+    'guia-r1': 'No. Solo lo valida y te señala dónde está el error; la corrección la hacés vos.',
+    'guia-p2': '¿Cambia el orden de las claves o los valores?',
+    'guia-r2': 'No, se conserva el orden. Lo único que cambia es el espaciado.',
+    'guia-p3': '¿Acepta comentarios o comillas simples?',
+    'guia-r3': 'No, solo JSON estándar. Los comentarios y las comillas simples se reportan como error.',
+    'guia-p4': '¿Qué sangría usa?',
+    'guia-r4': 'Siempre 2 espacios; no hay opción para cambiarla.',
   },
   en: {
     'hero-titulo': 'Format and validate JSON',
@@ -40,6 +58,24 @@ window.i18nPagina = {
     'error-ubicacion': ' — look at line {linea}, column {columna} (highlighted below)',
     'titulo-pagina': 'Format and validate JSON, free — Mini Cookies',
     'meta-descripcion': 'Format, validate and minify JSON instantly — free, and nothing is sent to a server.',
+    'guia-titulo': 'How to format and validate JSON',
+    'guia-intro': 'When a JSON arrives all on one line, or an application complains that “there’s an error somewhere”, reading it by eye is a waste of time. This tool takes the text you paste, checks it with the browser’s parser and gives you back either a readable indented version or a compact single-line version. If the JSON is broken, it tells you what failed and on which line and column, and marks the problem character in the input box.',
+    'guia-paso-1': 'Paste your JSON into the big box at the top.',
+    'guia-paso-2': 'Tap “Format (indented)” to get the text with 2-space indentation, or “Minify” to remove spaces and line breaks.',
+    'guia-paso-3': 'If it’s valid, “Valid JSON” appears and the result is shown in the box below; if not, you’ll see the error message with the line and column.',
+    'guia-paso-4': 'Use “Copy result” to put it on the clipboard or “Download .json” to save it as a file.',
+    'guia-consejo-1': 'If the JSON is invalid, the input box turns red and the cursor is placed on the error spot: fix it there and tap the button again.',
+    'guia-consejo-2': 'The most common errors are a trailing comma after the last item, single quotes instead of double quotes, and keys without quotes.',
+    'guia-consejo-3': '“Download .json” also works as a shortcut: if you haven’t formatted anything yet, format first and download the result. The file is named json-formateado followed by the date.',
+    'guia-consejo-4': 'Minifying is useful for pasting a JSON into a single-line field, or for reducing its size before sending it.',
+    'guia-p1': 'Can it fix a broken JSON?',
+    'guia-r1': 'No. It only validates it and shows you where the error is; the fix is up to you.',
+    'guia-p2': 'Does it change the order of the keys or values?',
+    'guia-r2': 'No, the order is kept. The only thing that changes is the spacing.',
+    'guia-p3': 'Does it accept comments or single quotes?',
+    'guia-r3': 'No, only standard JSON. Comments and single quotes are reported as errors.',
+    'guia-p4': 'What indentation does it use?',
+    'guia-r4': 'Always 2 spaces; there is no option to change it.',
   }
 };
 </script>
@@ -78,6 +114,41 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo formatear y validar un JSON</h2>
+    <p data-i18n="guia-intro">Cuando un JSON llega todo en una línea, o la aplicación se queja de que «hay un error en algún lado», leerlo a ojo es una pérdida de tiempo. Esta herramienta toma el texto que pegues, lo revisa con el analizador del navegador y te devuelve una versión con sangría legible o una versión compacta de una sola línea. Si el JSON está roto, te dice qué falló y en qué línea y columna, y deja marcado el carácter problemático en la caja de entrada.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Pegá tu JSON en la caja grande de arriba.</li>
+      <li data-i18n="guia-paso-2">Tocá «Formatear (indentado)» para obtener el texto con sangría de 2 espacios, o «Minificar» para quitar espacios y saltos de línea.</li>
+      <li data-i18n="guia-paso-3">Si es válido, aparece «JSON válido» y el resultado se muestra en la caja de abajo; si no, verás el mensaje de error con la línea y la columna.</li>
+      <li data-i18n="guia-paso-4">Usá «Copiar resultado» para llevarlo al portapapeles o «Descargar .json» para guardarlo como archivo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si el JSON es inválido, la caja de entrada se marca en rojo y el cursor queda sobre el punto del error: corregilo ahí y volvé a tocar el botón.</li>
+      <li data-i18n="guia-consejo-2">Los errores más comunes son una coma sobrante después del último elemento, comillas simples en lugar de dobles y claves sin comillas.</li>
+      <li data-i18n="guia-consejo-3">«Descargar .json» también sirve como atajo: si todavía no formateaste nada, formatea primero y descarga el resultado. El archivo se llama json-formateado seguido de la fecha.</li>
+      <li data-i18n="guia-consejo-4">Minificar es útil para pegar un JSON en un campo de una sola línea, o para reducir su tamaño antes de enviarlo.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puede arreglar un JSON roto?</summary>
+      <p data-i18n="guia-r1">No. Solo lo valida y te señala dónde está el error; la corrección la hacés vos.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Cambia el orden de las claves o los valores?</summary>
+      <p data-i18n="guia-r2">No, se conserva el orden. Lo único que cambia es el espaciado.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Acepta comentarios o comillas simples?</summary>
+      <p data-i18n="guia-r3">No, solo JSON estándar. Los comentarios y las comillas simples se reportan como error.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué sangría usa?</summary>
+      <p data-i18n="guia-r4">Siempre 2 espacios; no hay opción para cambiarla.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

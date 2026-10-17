@@ -28,7 +28,27 @@ window.i18nPagina = {
     'error-sin-contenido': 'No se encontró contenido en los documentos.',
     'nombre-defecto': 'documentos-unidos',
     'advertencias-texto': '⚠️ {n} advertencia(s) al leer los documentos originales (puede haber elementos que no se transfirieron perfectamente).',
-    'error-unir': 'No se pudo unir los documentos'
+    'error-unir': 'No se pudo unir los documentos',
+    'guia-titulo': 'Cómo unir varios documentos Word en uno solo',
+    'guia-intro': 'Sirve para juntar capítulos, informes o anexos escritos por separado en un único documento. Elegís dos o más archivos .docx y la herramienta los combina en un solo Word, en el orden de la lista, haciendo que cada documento empiece en una página nueva. Devuelve un .docx con el nombre que le pongas.',
+    'guia-paso-1': 'Arrastrá los documentos a la zona «Arrastrá tus documentos .docx acá o hacé clic para elegirlos». Se numeran en el orden en que los agregás.',
+    'guia-paso-2': 'Quitá los que no correspondan con la cruz de cada renglón.',
+    'guia-paso-3': 'Escribí el «Nombre del archivo» (por defecto «documentos-unidos», sin la extensión). Los caracteres no válidos (/ \\ : * ? " < > |) se quitan, y si no queda nada se usa el nombre por defecto.',
+    'guia-paso-4': 'Hacé clic en «Unir en un Word» y esperá: verás «Procesando [nombre] (X de Y)».',
+    'guia-paso-5': 'Descargá con «Descargar Word combinado».',
+    'guia-consejo-1': 'El orden de unión es el de la lista. No se puede reordenar arrastrando: para cambiarlo, quitá los archivos y volvé a agregarlos en la secuencia deseada.',
+    'guia-consejo-2': 'Se conservan títulos, negrita, cursiva, subrayado, listas, tablas e imágenes, pero no es una copia exacta: fuentes, colores y saltos de sección pueden cambiar. Revisá el resultado antes de entregarlo.',
+    'guia-consejo-3': 'Escribí el nombre sin extensión: si ponés «.docx» en el campo, la descarga queda como «.docx.docx».',
+    'guia-consejo-4': 'Las imágenes se reinsertan reducidas a un ancho máximo para que entren en la página.',
+    'guia-consejo-5': 'Si aparece un aviso naranja con «advertencia(s)», significa que al leer los originales algún elemento no se pudo transferir perfectamente. Conviene revisar esos documentos.',
+    'guia-p1': '¿Por qué cada documento empieza en una página nueva?',
+    'guia-r1': 'La herramienta inserta un salto de página entre un documento y el siguiente.',
+    'guia-p2': '¿Puedo unir archivos .doc antiguos?',
+    'guia-r2': 'No, solo .docx.',
+    'guia-p3': '¿Se pierden los encabezados y pies de página de los originales?',
+    'guia-r3': 'Sí, se pierden: el Word unido se arma solo con el contenido del cuerpo de cada original, así que no lleva sus encabezados ni pies de página. Podés agregarlos después con la herramienta Encabezado / pie de página para Word.',
+    'guia-p4': '¿Se modifican mis archivos?',
+    'guia-r4': 'No, se genera uno nuevo.'
   },
   en: {
     'titulo-pagina': 'Merge Several Word Documents Free — Mini Cookies',
@@ -47,7 +67,27 @@ window.i18nPagina = {
     'error-sin-contenido': 'No content was found in the documents.',
     'nombre-defecto': 'merged-documents',
     'advertencias-texto': '⚠️ {n} warning(s) while reading the original documents (some elements may not have transferred perfectly).',
-    'error-unir': 'Couldn’t merge the documents'
+    'error-unir': 'Couldn’t merge the documents',
+    'guia-titulo': 'How to merge several Word documents into one',
+    'guia-intro': 'It’s for gathering chapters, reports or appendices written separately into a single document. You choose two or more .docx files and the tool combines them into one Word document, in list order, making each document start on a new page. It returns a .docx with the name you give it.',
+    'guia-paso-1': 'Drag the documents onto the “Drag your .docx documents here or click to choose them” area. They’re numbered in the order you add them.',
+    'guia-paso-2': 'Remove the ones that don’t belong with the cross on each row.',
+    'guia-paso-3': 'Type the “File name” (“merged-documents” by default, without the extension). Invalid characters (/ \\ : * ? " < > |) are removed, and if nothing is left the default name is used.',
+    'guia-paso-4': 'Click “Merge into a Word document” and wait: you’ll see “Processing [name] (X of Y)”.',
+    'guia-paso-5': 'Download with “Download combined Word document”.',
+    'guia-consejo-1': 'The merge order is the one in the list. You can’t reorder by dragging: to change it, remove the files and add them again in the sequence you want.',
+    'guia-consejo-2': 'Headings, bold, italics, underline, lists, tables and images are kept, but it’s not an exact copy: fonts, colors and section breaks may change. Check the result before handing it over.',
+    'guia-consejo-3': 'Type the name without an extension: if you put “.docx” in the field, the download ends up as “.docx.docx”.',
+    'guia-consejo-4': 'Images are reinserted scaled down to a maximum width so they fit on the page.',
+    'guia-consejo-5': 'If an orange notice with “warning(s)” appears, it means that when reading the originals some element couldn’t be transferred perfectly. It’s worth checking those documents.',
+    'guia-p1': 'Why does each document start on a new page?',
+    'guia-r1': 'The tool inserts a page break between one document and the next.',
+    'guia-p2': 'Can I merge old .doc files?',
+    'guia-r2': 'No, only .docx.',
+    'guia-p3': 'Are the headers and footers of the originals lost?',
+    'guia-r3': 'Yes, they are lost: the merged Word document is built only from the body content of each original, so it carries none of their headers or footers. You can add them afterwards with the Header / footer for Word tool.',
+    'guia-p4': 'Are my files modified?',
+    'guia-r4': 'No, a new one is generated.'
   }
 };
 </script>
@@ -100,6 +140,44 @@ window.i18nPagina = {
       <li data-i18n="limite2">Las imágenes se reinsertan, pero se ajustan a un ancho máximo para que entren bien en la página.</li>
     </ul>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo unir varios documentos Word en uno solo</h2>
+    <p data-i18n="guia-intro">Sirve para juntar capítulos, informes o anexos escritos por separado en un único documento. Elegís dos o más archivos .docx y la herramienta los combina en un solo Word, en el orden de la lista, haciendo que cada documento empiece en una página nueva. Devuelve un .docx con el nombre que le pongas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá los documentos a la zona «Arrastrá tus documentos .docx acá o hacé clic para elegirlos». Se numeran en el orden en que los agregás.</li>
+      <li data-i18n="guia-paso-2">Quitá los que no correspondan con la cruz de cada renglón.</li>
+      <li data-i18n="guia-paso-3">Escribí el «Nombre del archivo» (por defecto «documentos-unidos», sin la extensión). Los caracteres no válidos (/ \ : * ? " &lt; &gt; |) se quitan, y si no queda nada se usa el nombre por defecto.</li>
+      <li data-i18n="guia-paso-4">Hacé clic en «Unir en un Word» y esperá: verás «Procesando [nombre] (X de Y)».</li>
+      <li data-i18n="guia-paso-5">Descargá con «Descargar Word combinado».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El orden de unión es el de la lista. No se puede reordenar arrastrando: para cambiarlo, quitá los archivos y volvé a agregarlos en la secuencia deseada.</li>
+      <li data-i18n="guia-consejo-2">Se conservan títulos, negrita, cursiva, subrayado, listas, tablas e imágenes, pero no es una copia exacta: fuentes, colores y saltos de sección pueden cambiar. Revisá el resultado antes de entregarlo.</li>
+      <li data-i18n="guia-consejo-3">Escribí el nombre sin extensión: si ponés «.docx» en el campo, la descarga queda como «.docx.docx».</li>
+      <li data-i18n="guia-consejo-4">Las imágenes se reinsertan reducidas a un ancho máximo para que entren en la página.</li>
+      <li data-i18n="guia-consejo-5">Si aparece un aviso naranja con «advertencia(s)», significa que al leer los originales algún elemento no se pudo transferir perfectamente. Conviene revisar esos documentos.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Por qué cada documento empieza en una página nueva?</summary>
+      <p data-i18n="guia-r1">La herramienta inserta un salto de página entre un documento y el siguiente.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo unir archivos .doc antiguos?</summary>
+      <p data-i18n="guia-r2">No, solo .docx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se pierden los encabezados y pies de página de los originales?</summary>
+      <p data-i18n="guia-r3">Sí, se pierden: el Word unido se arma solo con el contenido del cuerpo de cada original, así que no lleva sus encabezados ni pies de página. Podés agregarlos después con la herramienta Encabezado / pie de página para Word.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se modifican mis archivos?</summary>
+      <p data-i18n="guia-r4">No, se genera uno nuevo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

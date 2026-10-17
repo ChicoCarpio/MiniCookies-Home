@@ -23,7 +23,23 @@ window.i18nPagina = {
     'resultado-medio': ' imagen(es). ',
     'resultado-enlace': 'Descargar .zip',
     'progreso-pagina': 'Revisando página {actual} de {total}...',
-    'error-extraer': 'No se pudo extraer las imágenes'
+    'error-extraer': 'No se pudo extraer las imágenes',
+    'guia-titulo': 'Cómo extraer las imágenes de un PDF',
+    'guia-intro': 'Recorre un PDF y guarda en un .zip las imágenes que lleva embebidas (fotos, logos, ilustraciones). No convierte las páginas en imágenes: para eso está PDF a imágenes. Es útil para recuperar la foto de un informe o el logo de un documento sin hacer capturas de pantalla. Entra un PDF; sale un .zip con archivos PNG.',
+    'guia-paso-1': 'Arrastrá tu PDF o hacé clic para elegirlo. Aparece una miniatura con su nombre y la cantidad de páginas.',
+    'guia-paso-2': 'Tocá «Extraer imágenes». Se muestra el avance («Revisando página 3 de 12...»).',
+    'guia-paso-3': 'Cuando termina, aparece «Listo, se encontraron N imagen(es)» y el enlace «Descargar .zip».',
+    'guia-paso-4': 'Descomprimí el .zip: cada imagen se llama pagina-X-imagen-N.png, donde X es la página donde se encontró.',
+    'guia-consejo-1': 'Si la misma imagen aparece en varias páginas (un logo repetido), se guarda una sola vez.',
+    'guia-consejo-2': 'Las imágenes salen en PNG, aunque en el PDF estuvieran en otro formato.',
+    'guia-consejo-3': 'Si el PDF es todo texto o dibujos vectoriales (gráficos), no hay imágenes para extraer y la herramienta lo avisa.',
+    'guia-consejo-4': 'Un PDF escaneado suele tener una imagen por página, así que obtendrás las páginas como fotos; para convertir páginas a imagen directamente, mirá PDF a imágenes.',
+    'guia-p1': '¿Por qué dice que no encontró imágenes si veo dibujos en el PDF?',
+    'guia-r1': 'Los dibujos vectoriales (gráficos, logos dibujados con trazos) no son imágenes embebidas, y algunas imágenes usan formatos que la herramienta no puede leer.',
+    'guia-p2': '¿Se conserva la calidad original?',
+    'guia-r2': 'Se extrae la imagen con su resolución propia y se guarda como PNG; no se redimensiona.',
+    'guia-p3': '¿Puedo cargar varios PDF?',
+    'guia-r3': 'No, un PDF por vez.'
   },
   en: {
     'titulo-pagina': 'Extract Images from PDF Free — Mini Cookies',
@@ -37,7 +53,23 @@ window.i18nPagina = {
     'resultado-medio': ' image(s). ',
     'resultado-enlace': 'Download .zip',
     'progreso-pagina': 'Checking page {actual} of {total}...',
-    'error-extraer': 'Couldn’t extract the images'
+    'error-extraer': 'Couldn’t extract the images',
+    'guia-titulo': 'How to extract the images from a PDF',
+    'guia-intro': 'It goes through a PDF and saves the images embedded in it (photos, logos, illustrations) into a .zip. It doesn’t turn pages into images: for that there is PDF to images. It’s useful for recovering the photo from a report or the logo from a document without taking screenshots. A PDF goes in; a .zip with PNG files comes out.',
+    'guia-paso-1': 'Drag your PDF or click to choose it. A thumbnail appears with its name and the number of pages.',
+    'guia-paso-2': 'Tap “Extract images”. The progress is shown (“Checking page 3 of 12...”).',
+    'guia-paso-3': 'When it finishes, “Done, we found N image(s)” appears along with the “Download .zip” link.',
+    'guia-paso-4': 'Unzip the .zip: each image is named pagina-X-imagen-N.png, where X is the page where it was found.',
+    'guia-consejo-1': 'If the same image appears on several pages (a repeated logo), it’s saved only once.',
+    'guia-consejo-2': 'Images come out as PNG, even if they were in another format in the PDF.',
+    'guia-consejo-3': 'If the PDF is all text or vector drawings (charts), there are no images to extract and the tool tells you so.',
+    'guia-consejo-4': 'A scanned PDF usually has one image per page, so you’ll get the pages as photos; to convert pages to images directly, see PDF to images.',
+    'guia-p1': 'Why does it say it found no images if I can see drawings in the PDF?',
+    'guia-r1': 'Vector drawings (charts, logos drawn with strokes) aren’t embedded images, and some images use formats the tool can’t read.',
+    'guia-p2': 'Is the original quality kept?',
+    'guia-r2': 'The image is extracted at its own resolution and saved as PNG; it isn’t resized.',
+    'guia-p3': 'Can I load several PDFs?',
+    'guia-r3': 'No, one PDF at a time.'
   }
 };
 </script>
@@ -78,6 +110,38 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo extraer las imágenes de un PDF</h2>
+    <p data-i18n="guia-intro">Recorre un PDF y guarda en un .zip las imágenes que lleva embebidas (fotos, logos, ilustraciones). No convierte las páginas en imágenes: para eso está PDF a imágenes. Es útil para recuperar la foto de un informe o el logo de un documento sin hacer capturas de pantalla. Entra un PDF; sale un .zip con archivos PNG.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu PDF o hacé clic para elegirlo. Aparece una miniatura con su nombre y la cantidad de páginas.</li>
+      <li data-i18n="guia-paso-2">Tocá «Extraer imágenes». Se muestra el avance («Revisando página 3 de 12...»).</li>
+      <li data-i18n="guia-paso-3">Cuando termina, aparece «Listo, se encontraron N imagen(es)» y el enlace «Descargar .zip».</li>
+      <li data-i18n="guia-paso-4">Descomprimí el .zip: cada imagen se llama pagina-X-imagen-N.png, donde X es la página donde se encontró.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si la misma imagen aparece en varias páginas (un logo repetido), se guarda una sola vez.</li>
+      <li data-i18n="guia-consejo-2">Las imágenes salen en PNG, aunque en el PDF estuvieran en otro formato.</li>
+      <li data-i18n="guia-consejo-3">Si el PDF es todo texto o dibujos vectoriales (gráficos), no hay imágenes para extraer y la herramienta lo avisa.</li>
+      <li data-i18n="guia-consejo-4">Un PDF escaneado suele tener una imagen por página, así que obtendrás las páginas como fotos; para convertir páginas a imagen directamente, mirá PDF a imágenes.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Por qué dice que no encontró imágenes si veo dibujos en el PDF?</summary>
+      <p data-i18n="guia-r1">Los dibujos vectoriales (gráficos, logos dibujados con trazos) no son imágenes embebidas, y algunas imágenes usan formatos que la herramienta no puede leer.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se conserva la calidad original?</summary>
+      <p data-i18n="guia-r2">Se extrae la imagen con su resolución propia y se guarda como PNG; no se redimensiona.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo cargar varios PDF?</summary>
+      <p data-i18n="guia-r3">No, un PDF por vez.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

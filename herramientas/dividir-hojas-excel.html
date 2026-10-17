@@ -24,7 +24,23 @@ window.i18nPagina = {
     'info-hojas': 'Este Excel tiene {n} hoja(s): {lista}.',
     'info-necesita-dos': ' Necesita al menos 2 hojas para poder dividir.',
     'error-dividir': 'No se pudo dividir el Excel',
-    'aviso-formato': 'Con archivos .xls, .xlsb u .ods cada hoja se copia solo con sus datos: se pierden los colores, bordes, anchos de columna y el formato de las celdas. Con .xlsx o .xlsm el formato se conserva completo.'
+    'aviso-formato': 'Con archivos .xls, .xlsb u .ods cada hoja se copia solo con sus datos: se pierden los colores, bordes, anchos de columna y el formato de las celdas. Con .xlsx o .xlsm el formato se conserva completo.',
+    'guia-titulo': 'Cómo dividir las hojas de un libro de Excel en archivos separados',
+    'guia-intro': 'Cuando un libro de Excel tiene varias hojas y querés enviar o archivar cada una por separado, esta herramienta las convierte en archivos individuales y te los entrega todos juntos en un .zip. Con archivos .xlsx o .xlsm cada hoja conserva su formato, las imágenes y los gráficos; con otros formatos de planilla solo se copian los datos.',
+    'guia-paso-1': 'Arrastrá tu archivo de Excel o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .xml u .ods).',
+    'guia-paso-2': 'Leé el resumen que aparece: la cantidad de hojas y sus nombres.',
+    'guia-paso-3': 'Tocá «Dividir en archivos separados».',
+    'guia-paso-4': 'Cuando aparezca «Listo», tocá «Descargar .zip con las hojas».',
+    'guia-consejo-1': 'El libro necesita al menos 2 hojas; si tiene una sola, la herramienta lo avisa y el botón queda deshabilitado.',
+    'guia-consejo-2': 'Cada archivo lleva el nombre de su hoja. Los caracteres que no se permiten en nombres de archivo se reemplazan por un guion, y si dos hojas quedan con el mismo nombre se agrega un número entre paréntesis.',
+    'guia-consejo-3': 'Con archivos .xls, .xlsb u .ods, la herramienta avisa que cada hoja se copia solo con sus datos: se pierden colores, bordes, anchos de columna y formato de celdas. Para conservar todo, guardá antes el libro como .xlsx.',
+    'guia-consejo-4': 'Los archivos .xlsm conservan su extensión; los demás se entregan como .xlsx.',
+    'guia-p1': '¿Las fórmulas que apuntan a otras hojas siguen funcionando?',
+    'guia-r1': 'No se ajustan: si una fórmula depende de otra hoja que ya no está en ese archivo, el resultado puede dejar de ser válido.',
+    'guia-p2': '¿El zip tiene un nombre fijo?',
+    'guia-r2': 'Sí, se descarga como «hojas-separadas.zip».',
+    'guia-p3': '¿Puedo elegir cuáles hojas dividir?',
+    'guia-r3': 'No, se generan archivos de todas.'
   },
   en: {
     'titulo-pagina': 'Split Excel Sheets Free — Mini Cookies',
@@ -39,7 +55,23 @@ window.i18nPagina = {
     'info-hojas': 'This Excel file has {n} sheet(s): {lista}.',
     'info-necesita-dos': ' It needs at least 2 sheets to be split.',
     'error-dividir': 'Couldn’t split the Excel file',
-    'aviso-formato': 'With .xls, .xlsb or .ods files each sheet is copied with its data only: colors, borders, column widths and cell formatting are lost. With .xlsx or .xlsm the formatting is fully kept.'
+    'aviso-formato': 'With .xls, .xlsb or .ods files each sheet is copied with its data only: colors, borders, column widths and cell formatting are lost. With .xlsx or .xlsm the formatting is fully kept.',
+    'guia-titulo': 'How to split the sheets of an Excel workbook into separate files',
+    'guia-intro': 'When an Excel workbook has several sheets and you want to send or archive each one separately, this tool turns them into individual files and hands them all over together in a .zip. With .xlsx or .xlsm files each sheet keeps its formatting, images and charts; with other spreadsheet formats only the data is copied.',
+    'guia-paso-1': 'Drag your Excel file or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .xml or .ods).',
+    'guia-paso-2': 'Read the summary that appears: the number of sheets and their names.',
+    'guia-paso-3': 'Tap “Split into separate files”.',
+    'guia-paso-4': 'When “Done” appears, tap “Download .zip with the sheets”.',
+    'guia-consejo-1': 'The workbook needs at least 2 sheets; if it has only one, the tool says so and the button stays disabled.',
+    'guia-consejo-2': 'Each file is named after its sheet. Characters that aren’t allowed in file names are replaced with a hyphen, and if two sheets end up with the same name a number in parentheses is added.',
+    'guia-consejo-3': 'With .xls, .xlsb or .ods files, the tool warns that each sheet is copied with its data only: colors, borders, column widths and cell formatting are lost. To keep everything, save the workbook as .xlsx first.',
+    'guia-consejo-4': '.xlsm files keep their extension; the rest are delivered as .xlsx.',
+    'guia-p1': 'Do formulas that point to other sheets keep working?',
+    'guia-r1': 'They aren’t adjusted: if a formula depends on another sheet that is no longer in that file, the result may stop being valid.',
+    'guia-p2': 'Does the zip have a fixed name?',
+    'guia-r2': 'Yes, it downloads as “hojas-separadas.zip”.',
+    'guia-p3': 'Can I choose which sheets to split?',
+    'guia-r3': 'No, files are generated for all of them.'
   }
 };
 </script>
@@ -79,6 +111,38 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo dividir las hojas de un libro de Excel en archivos separados</h2>
+    <p data-i18n="guia-intro">Cuando un libro de Excel tiene varias hojas y querés enviar o archivar cada una por separado, esta herramienta las convierte en archivos individuales y te los entrega todos juntos en un .zip. Con archivos .xlsx o .xlsm cada hoja conserva su formato, las imágenes y los gráficos; con otros formatos de planilla solo se copian los datos.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo de Excel o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .xml u .ods).</li>
+      <li data-i18n="guia-paso-2">Leé el resumen que aparece: la cantidad de hojas y sus nombres.</li>
+      <li data-i18n="guia-paso-3">Tocá «Dividir en archivos separados».</li>
+      <li data-i18n="guia-paso-4">Cuando aparezca «Listo», tocá «Descargar .zip con las hojas».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El libro necesita al menos 2 hojas; si tiene una sola, la herramienta lo avisa y el botón queda deshabilitado.</li>
+      <li data-i18n="guia-consejo-2">Cada archivo lleva el nombre de su hoja. Los caracteres que no se permiten en nombres de archivo se reemplazan por un guion, y si dos hojas quedan con el mismo nombre se agrega un número entre paréntesis.</li>
+      <li data-i18n="guia-consejo-3">Con archivos .xls, .xlsb u .ods, la herramienta avisa que cada hoja se copia solo con sus datos: se pierden colores, bordes, anchos de columna y formato de celdas. Para conservar todo, guardá antes el libro como .xlsx.</li>
+      <li data-i18n="guia-consejo-4">Los archivos .xlsm conservan su extensión; los demás se entregan como .xlsx.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Las fórmulas que apuntan a otras hojas siguen funcionando?</summary>
+      <p data-i18n="guia-r1">No se ajustan: si una fórmula depende de otra hoja que ya no está en ese archivo, el resultado puede dejar de ser válido.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿El zip tiene un nombre fijo?</summary>
+      <p data-i18n="guia-r2">Sí, se descarga como «hojas-separadas.zip».</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo elegir cuáles hojas dividir?</summary>
+      <p data-i18n="guia-r3">No, se generan archivos de todas.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

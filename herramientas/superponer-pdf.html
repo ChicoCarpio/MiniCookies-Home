@@ -24,7 +24,25 @@ window.i18nPagina = {
     'boton-superponer-procesando': 'Superponiendo...',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar PDF resultante',
-    'error-superponer': 'No se pudo superponer los PDFs'
+    'error-superponer': 'No se pudo superponer los PDFs',
+    'guia-titulo': 'Cómo superponer un PDF sobre otro',
+    'guia-intro': 'Pensada para poner un membrete, una plantilla, una marca de agua o un fondo en un documento ya terminado. Tomás un PDF base (el contenido) y otro PDF de superposición, y cada página del primero recibe encima la página correspondiente del segundo. Devuelve un único PDF con el resultado combinado.',
+    'guia-paso-1': 'En «PDF base (el contenido)» arrastrá o elegí el documento al que querés agregarle algo.',
+    'guia-paso-2': 'En «PDF de superposición (la plantilla/membrete)» elegí el PDF que va a quedar encima.',
+    'guia-paso-3': 'Hacé clic en «Superponer PDFs» cuando ambos tengan miniatura; el botón se habilita recién con los dos archivos cargados.',
+    'guia-paso-4': 'Descargá el resultado con «Descargar PDF resultante» (documento-superpuesto.pdf).',
+    'guia-consejo-1': 'La página 1 del PDF base recibe la página 1 de la superposición, la 2 la 2, y así. Si la superposición tiene menos páginas, se repite la última en el resto.',
+    'guia-consejo-2': 'Una plantilla de una sola página con fondo transparente es lo más práctico para un membrete que se repite en todo el documento.',
+    'guia-consejo-3': 'La superposición se dibuja encima del contenido y se ajusta al tamaño de cada página base. Si tu membrete tiene áreas opacas, va a tapar lo que esté debajo; usá una plantilla con zonas vacías o transparentes.',
+    'guia-consejo-4': 'Cuidá la proporción: si la superposición tiene otro tamaño o relación de aspecto que la página base, se estira para cubrirla.',
+    'guia-p1': '¿Cuál es el archivo base y cuál el de superposición?',
+    'guia-r1': 'El base es el contenido que querés conservar al fondo; el de superposición es la plantilla que se pone arriba.',
+    'guia-p2': '¿Puedo usar páginas distintas de la plantilla para cada hoja?',
+    'guia-r2': 'Sí, si la plantilla tiene varias páginas, cada hoja recibe la que le corresponde por número.',
+    'guia-p3': '¿Puedo mover o escalar la superposición?',
+    'guia-r3': 'No, no hay opciones de posición ni de tamaño; siempre cubre la página completa.',
+    'guia-p4': '¿Modifica los archivos originales?',
+    'guia-r4': 'No, se genera un PDF nuevo.',
   },
   en: {
     'titulo-pagina': 'Overlay PDFs Free — Mini Cookies',
@@ -39,7 +57,25 @@ window.i18nPagina = {
     'boton-superponer-procesando': 'Overlaying...',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download resulting PDF',
-    'error-superponer': 'Couldn’t overlay the PDFs'
+    'error-superponer': 'Couldn’t overlay the PDFs',
+    'guia-titulo': 'How to overlay one PDF on another',
+    'guia-intro': 'Designed for putting a letterhead, a template, a watermark or a background on an already finished document. You take a base PDF (the content) and another overlay PDF, and each page of the first gets the matching page of the second on top. It returns a single PDF with the combined result.',
+    'guia-paso-1': 'In “Base PDF (the content)” drag or choose the document you want to add something to.',
+    'guia-paso-2': 'In “Overlay PDF (the template/letterhead)” choose the PDF that will go on top.',
+    'guia-paso-3': 'Click “Overlay PDFs” once both have a thumbnail; the button is only enabled when both files are loaded.',
+    'guia-paso-4': 'Download the result with “Download resulting PDF” (documento-superpuesto.pdf).',
+    'guia-consejo-1': 'Page 1 of the base PDF gets page 1 of the overlay, page 2 gets page 2, and so on. If the overlay has fewer pages, the last one is repeated for the rest.',
+    'guia-consejo-2': 'A single-page template with a transparent background is the most practical for a letterhead that repeats across the whole document.',
+    'guia-consejo-3': 'The overlay is drawn on top of the content and fitted to the size of each base page. If your letterhead has opaque areas, it will cover whatever is underneath; use a template with empty or transparent areas.',
+    'guia-consejo-4': 'Mind the proportions: if the overlay has a different size or aspect ratio than the base page, it is stretched to cover it.',
+    'guia-p1': 'Which file is the base and which is the overlay?',
+    'guia-r1': 'The base is the content you want to keep at the back; the overlay is the template that goes on top.',
+    'guia-p2': 'Can I use different template pages for each sheet?',
+    'guia-r2': 'Yes, if the template has several pages, each sheet gets the one that matches its number.',
+    'guia-p3': 'Can I move or scale the overlay?',
+    'guia-r3': 'No, there are no position or size options; it always covers the whole page.',
+    'guia-p4': 'Does it modify the original files?',
+    'guia-r4': 'No, a new PDF is generated.'
   }
 };
 </script>
@@ -90,6 +126,41 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo superponer un PDF sobre otro</h2>
+    <p data-i18n="guia-intro">Pensada para poner un membrete, una plantilla, una marca de agua o un fondo en un documento ya terminado. Tomás un PDF base (el contenido) y otro PDF de superposición, y cada página del primero recibe encima la página correspondiente del segundo. Devuelve un único PDF con el resultado combinado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">En «PDF base (el contenido)» arrastrá o elegí el documento al que querés agregarle algo.</li>
+      <li data-i18n="guia-paso-2">En «PDF de superposición (la plantilla/membrete)» elegí el PDF que va a quedar encima.</li>
+      <li data-i18n="guia-paso-3">Hacé clic en «Superponer PDFs» cuando ambos tengan miniatura; el botón se habilita recién con los dos archivos cargados.</li>
+      <li data-i18n="guia-paso-4">Descargá el resultado con «Descargar PDF resultante» (documento-superpuesto.pdf).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La página 1 del PDF base recibe la página 1 de la superposición, la 2 la 2, y así. Si la superposición tiene menos páginas, se repite la última en el resto.</li>
+      <li data-i18n="guia-consejo-2">Una plantilla de una sola página con fondo transparente es lo más práctico para un membrete que se repite en todo el documento.</li>
+      <li data-i18n="guia-consejo-3">La superposición se dibuja encima del contenido y se ajusta al tamaño de cada página base. Si tu membrete tiene áreas opacas, va a tapar lo que esté debajo; usá una plantilla con zonas vacías o transparentes.</li>
+      <li data-i18n="guia-consejo-4">Cuidá la proporción: si la superposición tiene otro tamaño o relación de aspecto que la página base, se estira para cubrirla.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuál es el archivo base y cuál el de superposición?</summary>
+      <p data-i18n="guia-r1">El base es el contenido que querés conservar al fondo; el de superposición es la plantilla que se pone arriba.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo usar páginas distintas de la plantilla para cada hoja?</summary>
+      <p data-i18n="guia-r2">Sí, si la plantilla tiene varias páginas, cada hoja recibe la que le corresponde por número.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo mover o escalar la superposición?</summary>
+      <p data-i18n="guia-r3">No, no hay opciones de posición ni de tamaño; siempre cubre la página completa.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Modifica los archivos originales?</summary>
+      <p data-i18n="guia-r4">No, se genera un PDF nuevo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

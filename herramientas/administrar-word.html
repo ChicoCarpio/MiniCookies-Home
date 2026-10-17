@@ -27,7 +27,25 @@ window.i18nPagina = {
     'titulo-defecto': 'Documento',
     'error-leer': 'No se pudo leer el documento',
     'error-sin-secciones': 'No queda ninguna sección.',
-    'error-generar': 'No se pudo generar el documento'
+    'error-generar': 'No se pudo generar el documento',
+    'guia-titulo': 'Cómo reordenar las secciones de un documento de Word',
+    'guia-intro': 'Divide un documento de Word (.docx) en secciones, tomando como corte cada párrafo con estilo Título 1, y te deja reordenarlas o quitar las que no querés. Es útil para reorganizar capítulos de un informe, una tesis o un manual. Entra un .docx y sale un .docx nuevo con las secciones en el orden elegido, separadas por saltos de página.',
+    'guia-paso-1': 'Arrastrá el documento .docx a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'Aparece una fila por sección con el texto del Título 1 correspondiente.',
+    'guia-paso-3': 'Arrastrá las filas para reordenarlas o tocá la ✕ para quitar una sección.',
+    'guia-paso-4': 'Tocá «Descargar reordenado» y luego «Descargar Word». El archivo se llama «documento-reordenado.docx».',
+    'guia-consejo-1': 'Para que funcione, el documento tiene que usar el estilo «Título 1» de Word en los encabezados de sección. Si no hay ningún Título 1, se trata como una sola sección y no hay nada para reordenar (lo aclara la página en «Limitaciones»).',
+    'guia-consejo-2': 'Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada sección.',
+    'guia-consejo-3': 'El documento resultante se reconstruye: es un archivo nuevo que contiene el texto y esos elementos, así que revisá el aspecto final antes de entregarlo.',
+    'guia-consejo-4': 'Cada sección empieza en una página nueva en el resultado.',
+    'guia-p1': '¿Puedo reordenar subtítulos (Título 2)?',
+    'guia-r1': 'No, solo se corta en Título 1; los demás niveles viajan dentro de su sección.',
+    'guia-p2': '¿Se conservan encabezados y pies de página, fuentes y colores originales?',
+    'guia-r2': 'La página lista como conservados títulos, negrita, cursiva, listas, tablas e imágenes. Otros elementos, como encabezados, pies de página y estilos particulares, pueden no mantenerse.',
+    'guia-p3': '¿Funciona con .doc antiguos?',
+    'guia-r3': 'No, solo .docx.',
+    'guia-p4': '¿Qué pasa si el documento tiene texto antes del primer Título 1?',
+    'guia-r4': 'La herramienta lo trata como una sección más; el nombre que se le muestra se toma del documento o de un título por defecto, «Documento».',
   },
   en: {
     'titulo-pagina': 'Reorder Word Sections Free — Mini Cookies',
@@ -45,7 +63,25 @@ window.i18nPagina = {
     'titulo-defecto': 'Document',
     'error-leer': 'Couldn’t read the document',
     'error-sin-secciones': 'There are no sections left.',
-    'error-generar': 'Couldn’t generate the document'
+    'error-generar': 'Couldn’t generate the document',
+    'guia-titulo': 'How to reorder the sections of a Word document',
+    'guia-intro': 'It splits a Word document (.docx) into sections, cutting at every paragraph with the Heading 1 style, and lets you reorder them or remove the ones you don’t want. It’s useful for reorganizing the chapters of a report, a thesis or a manual. A .docx goes in and a new .docx comes out with the sections in the order you chose, separated by page breaks.',
+    'guia-paso-1': 'Drag the .docx document onto the upload area or click to choose it.',
+    'guia-paso-2': 'One row appears per section, showing the text of the matching Heading 1.',
+    'guia-paso-3': 'Drag the rows to reorder them or tap the ✕ to remove a section.',
+    'guia-paso-4': 'Tap “Download reordered” and then “Download Word”. The file is named “documento-reordenado.docx”.',
+    'guia-consejo-1': 'For this to work, the document has to use Word’s “Heading 1” style on the section headings. If there is no Heading 1, it’s treated as a single section and there is nothing to reorder (the page notes this under “Limitations”).',
+    'guia-consejo-2': 'Headings, bold, italics, lists, tables and images are kept for each section.',
+    'guia-consejo-3': 'The resulting document is rebuilt: it’s a new file that contains the text and those elements, so check the final look before handing it in.',
+    'guia-consejo-4': 'Each section starts on a new page in the result.',
+    'guia-p1': 'Can I reorder subheadings (Heading 2)?',
+    'guia-r1': 'No, it only cuts at Heading 1; the other levels travel inside their section.',
+    'guia-p2': 'Are the original headers, footers, fonts and colors kept?',
+    'guia-r2': 'The page lists headings, bold, italics, lists, tables and images as kept. Other elements, such as headers, footers and custom styles, may not be preserved.',
+    'guia-p3': 'Does it work with old .doc files?',
+    'guia-r3': 'No, only .docx.',
+    'guia-p4': 'What happens if the document has text before the first Heading 1?',
+    'guia-r4': 'The tool treats it as one more section; the name shown for it is taken from the document or from a default title, “Document”.',
   }
 };
 </script>
@@ -92,6 +128,42 @@ window.i18nPagina = {
       Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada sección.
     </p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reordenar las secciones de un documento de Word</h2>
+    <p data-i18n="guia-intro">Divide un documento de Word (.docx) en secciones, tomando como corte cada párrafo con estilo Título 1, y te deja reordenarlas o quitar las que no querés. Es útil para reorganizar capítulos de un informe, una tesis o un manual. Entra un .docx y sale un .docx nuevo con las secciones en el orden elegido, separadas por saltos de página.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá el documento .docx a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Aparece una fila por sección con el texto del Título 1 correspondiente.</li>
+      <li data-i18n="guia-paso-3">Arrastrá las filas para reordenarlas o tocá la ✕ para quitar una sección.</li>
+      <li data-i18n="guia-paso-4">Tocá «Descargar reordenado» y luego «Descargar Word». El archivo se llama «documento-reordenado.docx».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para que funcione, el documento tiene que usar el estilo «Título 1» de Word en los encabezados de sección. Si no hay ningún Título 1, se trata como una sola sección y no hay nada para reordenar (lo aclara la página en «Limitaciones»).</li>
+      <li data-i18n="guia-consejo-2">Se conservan títulos, negrita, cursiva, listas, tablas e imágenes de cada sección.</li>
+      <li data-i18n="guia-consejo-3">El documento resultante se reconstruye: es un archivo nuevo que contiene el texto y esos elementos, así que revisá el aspecto final antes de entregarlo.</li>
+      <li data-i18n="guia-consejo-4">Cada sección empieza en una página nueva en el resultado.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo reordenar subtítulos (Título 2)?</summary>
+      <p data-i18n="guia-r1">No, solo se corta en Título 1; los demás niveles viajan dentro de su sección.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se conservan encabezados y pies de página, fuentes y colores originales?</summary>
+      <p data-i18n="guia-r2">La página lista como conservados títulos, negrita, cursiva, listas, tablas e imágenes. Otros elementos, como encabezados, pies de página y estilos particulares, pueden no mantenerse.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Funciona con .doc antiguos?</summary>
+      <p data-i18n="guia-r3">No, solo .docx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa si el documento tiene texto antes del primer Título 1?</summary>
+      <p data-i18n="guia-r4">La herramienta lo trata como una sección más; el nombre que se le muestra se toma del documento o de un título por defecto, «Documento».</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

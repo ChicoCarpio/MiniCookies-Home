@@ -36,6 +36,25 @@ window.i18nPagina = {
     'error-longitud': 'La longitud mínima para lo elegido es {n}.',
     'titulo-pagina': 'Generador de contraseñas seguras — Mini Cookies',
     'meta-descripcion': 'Generá contraseñas seguras y aleatorias, gratis y sin salir de tu navegador. Nunca se envían a ningún servidor.',
+    'guia-titulo': 'Cómo generar una contraseña segura',
+    'guia-intro': 'Crea contraseñas aleatorias con el generador criptográfico del navegador, no con un sorteo simple. Podés elegir el largo y qué tipos de carácter incluir, y la contraseña cambia en el momento en que movés un control. Es para cuentas nuevas, claves de wifi o cualquier caso en que «123456» o tu mascota no sean buena idea.',
+    'guia-paso-1': 'Ajustá el deslizador «Longitud» (de 8 a 64 caracteres; empieza en 16).',
+    'guia-paso-2': 'Marcá o desmarcá «Mayúsculas», «Minúsculas», «Números» y «Símbolos».',
+    'guia-paso-3': 'Tocá «Generar nueva contraseña» para sortear otra con las mismas opciones.',
+    'guia-paso-4': 'Tocá «Copiar» para llevarla al portapapeles.',
+    'guia-consejo-1': 'Cada vez que cambiás el largo o una casilla se genera una contraseña nueva, así que copiá solo la que ves al final.',
+    'guia-consejo-2': 'Si el sitio donde la vas a usar no admite ciertos símbolos, desmarcá «Símbolos» y subí el largo para compensar.',
+    'guia-consejo-3': 'La contraseña incluye al menos un carácter de cada tipo marcado. Por eso, con las cuatro casillas, el largo mínimo útil es 4; si el largo es menor al número de tipos elegidos, se muestra un aviso con el mínimo.',
+    'guia-consejo-4': 'Las contraseñas con repetidos (aaa), secuencias (abc, 321) o fragmentos comunes (password, admin, qwerty...) se descartan y se vuelve a sortear.',
+    'guia-consejo-5': 'Guardala en un administrador de contraseñas en lugar de reutilizarla.',
+    'guia-p1': '¿Qué símbolos usa?',
+    'guia-r1': 'Los siguientes: ! @ # $ % ^ & * ( ) - _ = + [ ] { } ?',
+    'guia-p2': '¿Qué pasa si desmarco todo?',
+    'guia-r2': 'No se puede generar nada: hay que dejar al menos un tipo de carácter.',
+    'guia-p3': '¿Se guarda la contraseña en algún lado?',
+    'guia-r3': 'La página no la guarda: queda solo en pantalla hasta que generes otra o cierres la pestaña.',
+    'guia-p4': '¿Puede salir una contraseña débil?',
+    'guia-r4': 'Es difícil, por los filtros mencionados, pero la fortaleza real depende del largo: a más caracteres, mejor.',
   },
   en: {
     'hero-titulo': 'Password generator',
@@ -62,6 +81,25 @@ window.i18nPagina = {
     'error-longitud': 'The minimum length for the options you picked is {n}.',
     'titulo-pagina': 'Strong password generator — Mini Cookies',
     'meta-descripcion': 'Generate strong random passwords without leaving your browser. They are never sent to a server.',
+    'guia-titulo': 'How to generate a strong password',
+    'guia-intro': 'It creates random passwords with the browser’s cryptographic generator, not a simple draw. You can choose the length and which character types to include, and the password changes the moment you move a control. It’s for new accounts, wifi passwords or any case where “123456” or your pet’s name isn’t a good idea.',
+    'guia-paso-1': 'Adjust the “Length” slider (8 to 64 characters; it starts at 16).',
+    'guia-paso-2': 'Tick or untick “Uppercase”, “Lowercase”, “Numbers” and “Symbols”.',
+    'guia-paso-3': 'Tap “Generate a new password” to draw another one with the same options.',
+    'guia-paso-4': 'Tap “Copy” to put it on the clipboard.',
+    'guia-consejo-1': 'Every time you change the length or a checkbox a new password is generated, so copy only the one you see at the end.',
+    'guia-consejo-2': 'If the site where you’ll use it doesn’t accept certain symbols, untick “Symbols” and raise the length to compensate.',
+    'guia-consejo-3': 'The password includes at least one character of each type ticked. That’s why, with all four boxes, the minimum useful length is 4; if the length is smaller than the number of types chosen, a notice with the minimum is shown.',
+    'guia-consejo-4': 'Passwords with repeats (aaa), sequences (abc, 321) or common fragments (password, admin, qwerty...) are discarded and drawn again.',
+    'guia-consejo-5': 'Store it in a password manager instead of reusing it.',
+    'guia-p1': 'Which symbols does it use?',
+    'guia-r1': 'These: ! @ # $ % ^ & * ( ) - _ = + [ ] { } ?',
+    'guia-p2': 'What happens if I untick everything?',
+    'guia-r2': 'Nothing can be generated: at least one character type must be left on.',
+    'guia-p3': 'Is the password saved anywhere?',
+    'guia-r3': 'The page doesn’t save it: it stays on screen only until you generate another one or close the tab.',
+    'guia-p4': 'Can a weak password come out?',
+    'guia-r4': 'It’s unlikely, because of the filters mentioned, but the real strength depends on the length: the more characters, the better.',
   }
 };
 </script>
@@ -123,6 +161,42 @@ window.i18nPagina = {
       <li><span data-i18n="seg-li2-a">Rechaza y vuelve a generar si detecta secuencias (</span><code>abc</code>, <code>321</code><span data-i18n="seg-li2-b">), caracteres repetidos (</span><code>aaa</code><span data-i18n="seg-li2-c">) o fragmentos de contraseñas comunes (</span><code>password</code>, <code>admin</code>, <code>qwerty</code><span data-i18n="seg-li2-d">...).</span></li>
     </ul>
   </div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo generar una contraseña segura</h2>
+    <p data-i18n="guia-intro">Crea contraseñas aleatorias con el generador criptográfico del navegador, no con un sorteo simple. Podés elegir el largo y qué tipos de carácter incluir, y la contraseña cambia en el momento en que movés un control. Es para cuentas nuevas, claves de wifi o cualquier caso en que «123456» o tu mascota no sean buena idea.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Ajustá el deslizador «Longitud» (de 8 a 64 caracteres; empieza en 16).</li>
+      <li data-i18n="guia-paso-2">Marcá o desmarcá «Mayúsculas», «Minúsculas», «Números» y «Símbolos».</li>
+      <li data-i18n="guia-paso-3">Tocá «Generar nueva contraseña» para sortear otra con las mismas opciones.</li>
+      <li data-i18n="guia-paso-4">Tocá «Copiar» para llevarla al portapapeles.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Cada vez que cambiás el largo o una casilla se genera una contraseña nueva, así que copiá solo la que ves al final.</li>
+      <li data-i18n="guia-consejo-2">Si el sitio donde la vas a usar no admite ciertos símbolos, desmarcá «Símbolos» y subí el largo para compensar.</li>
+      <li data-i18n="guia-consejo-3">La contraseña incluye al menos un carácter de cada tipo marcado. Por eso, con las cuatro casillas, el largo mínimo útil es 4; si el largo es menor al número de tipos elegidos, se muestra un aviso con el mínimo.</li>
+      <li data-i18n="guia-consejo-4">Las contraseñas con repetidos (aaa), secuencias (abc, 321) o fragmentos comunes (password, admin, qwerty...) se descartan y se vuelve a sortear.</li>
+      <li data-i18n="guia-consejo-5">Guardala en un administrador de contraseñas en lugar de reutilizarla.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué símbolos usa?</summary>
+      <p data-i18n="guia-r1">Los siguientes: ! @ # $ % ^ &amp; * ( ) - _ = + [ ] { } ?</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa si desmarco todo?</summary>
+      <p data-i18n="guia-r2">No se puede generar nada: hay que dejar al menos un tipo de carácter.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se guarda la contraseña en algún lado?</summary>
+      <p data-i18n="guia-r3">La página no la guarda: queda solo en pantalla hasta que generes otra o cierres la pestaña.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Puede salir una contraseña débil?</summary>
+      <p data-i18n="guia-r4">Es difícil, por los filtros mencionados, pero la fortaleza real depende del largo: a más caracteres, mejor.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

@@ -42,7 +42,25 @@ window.i18nPagina = {
     'aviso-reconstruido': 'No se pudo conservar el archivo tal cual ({motivo}): se creó un libro nuevo con los valores, el formato básico y las celdas combinadas.',
     'motivo-no-movible': 'el archivo tiene algo que no se puede mover con las filas, como notas, tablas dinámicas, controles o fórmulas matriciales',
     'nota-formato': 'En un .xlsx o .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas (sus referencias se acomodan), tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si el archivo tiene algo que no se puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores, el formato de número, los anchos de columna y las celdas combinadas.',
-    'error-procesar': 'No se pudo procesar el archivo'
+    'error-procesar': 'No se pudo procesar el archivo',
+    'guia-titulo': 'Cómo quitar encabezados o filas duplicadas de una hoja de Excel',
+    'guia-intro': 'Muy común en reportes armados pegando varias tablas: la fila de encabezados se repite a mitad de los datos. Esta herramienta quita esas filas repetidas de una hoja de Excel, conservando la primera aparición. También sirve para eliminar cualquier otra fila duplicada, según las columnas que vos elijas como criterio. Lo que haya arriba de la tabla (un título o filas sueltas) no se toca.',
+    'guia-paso-1': 'Arrastrá tu archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) o hacé clic para elegirlo. Si tiene varias hojas, elegí una en «Hoja a limpiar».',
+    'guia-paso-2': 'En «La tabla empieza en la fila» indicá en qué fila arranca la tabla. Marcá o desmarcá «Esa fila es el encabezado de columnas (no es un dato)».',
+    'guia-paso-3': 'En la vista previa, tildá en el encabezado las columnas que querés usar para detectar duplicados. Arrancan todas sin tildar; hay que elegir al menos una.',
+    'guia-paso-4': 'Tocá «Quitar duplicados». Aparece cuántas filas se quitaron y el enlace «Descargar Excel».',
+    'guia-consejo-1': 'Para quitar encabezados repetidos, tildá una o más columnas del encabezado: la fila de encabezado cuenta como primera aparición, y se eliminan sus repeticiones.',
+    'guia-consejo-2': 'Las filas por encima de la fila de inicio se muestran en gris y cursiva en la vista previa y no se modifican.',
+    'guia-consejo-3': 'La vista previa muestra las primeras 200 filas de datos, pero el procesamiento usa todas.',
+    'guia-consejo-4': 'En .xlsx y .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas, tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si hay notas o tablas dinámicas, se arma un libro nuevo con los valores, formatos de número, anchos de columna y celdas combinadas.',
+    'guia-p1': '¿Cómo se llama el archivo que descargo?',
+    'guia-r1': 'Como el original más -sin-duplicados, por ejemplo ventas-sin-duplicados.xlsx (un .xlsm editado en el lugar sigue siendo .xlsm).',
+    'guia-p2': '¿Se limpian todas las hojas?',
+    'guia-r2': 'Solo la hoja elegida; las demás se conservan.',
+    'guia-p3': '¿Cómo decide que dos filas son iguales?',
+    'guia-r3': 'Compara el texto visible de las columnas tildadas, tal como se ve en Excel.',
+    'guia-p4': '¿Qué pasa si no hay duplicados?',
+    'guia-r4': 'Se avisa que no se encontró ninguna y el archivo que descargás es igual al original.'
   },
   en: {
     'titulo-pagina': 'Remove Duplicate Excel Headers Free — Mini Cookies',
@@ -68,7 +86,25 @@ window.i18nPagina = {
     'aviso-reconstruido': 'The file could not be kept as it was ({motivo}): a new workbook was created with the values, basic formatting and merged cells.',
     'motivo-no-movible': 'the file has something that cannot move with the rows, such as notes, pivot tables, controls or array formulas',
     'nota-formato': 'In an .xlsx or .xlsm file the rows are removed in the file itself, like Excel’s “Delete rows”: colors, borders, formulas (their references are adjusted), tables, images and charts are kept. With .xls, .xlsb or .ods, or if the file has something that can’t be moved that way (notes, pivot tables…), a new workbook is built with the values, number formats, column widths and merged cells.',
-    'error-procesar': 'Couldn’t process the file'
+    'error-procesar': 'Couldn’t process the file',
+    'guia-titulo': 'How to remove duplicate headers or rows from an Excel sheet',
+    'guia-intro': 'Very common in reports built by pasting several tables together: the header row repeats in the middle of the data. This tool removes those repeated rows from an Excel sheet, keeping the first occurrence. It can also remove any other duplicate row, based on the columns you choose as the criteria. Whatever sits above the table (a title or loose rows) is left untouched.',
+    'guia-paso-1': 'Drag your Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) or click to choose it. If it has several sheets, pick one in “Sheet to clean”.',
+    'guia-paso-2': 'In “The table starts at row” enter the row where the table begins. Tick or untick “That row is the column header (not data)”.',
+    'guia-paso-3': 'In the preview, tick in the header the columns you want to use to detect duplicates. They all start unticked; you must choose at least one.',
+    'guia-paso-4': 'Tap “Remove duplicates”. You see how many rows were removed and the “Download Excel” link.',
+    'guia-consejo-1': 'To remove repeated headers, tick one or more header columns: the header row counts as the first occurrence, and its repetitions are removed.',
+    'guia-consejo-2': 'Rows above the starting row are shown in gray italics in the preview and are not modified.',
+    'guia-consejo-3': 'The preview shows the first 200 data rows, but processing uses all of them.',
+    'guia-consejo-4': 'In .xlsx and .xlsm the rows are removed in the file itself, like Excel’s “Delete rows”: colors, borders, formulas, tables, images and charts are kept. With .xls, .xlsb or .ods, or if there are notes or pivot tables, a new workbook is built with the values, number formats, column widths and merged cells.',
+    'guia-p1': 'What is the downloaded file called?',
+    'guia-r1': 'The original name plus -sin-duplicados, for example ventas-sin-duplicados.xlsx (an .xlsm edited in place stays .xlsm).',
+    'guia-p2': 'Are all the sheets cleaned?',
+    'guia-r2': 'Only the chosen sheet; the others are kept.',
+    'guia-p3': 'How does it decide that two rows are the same?',
+    'guia-r3': 'It compares the visible text of the ticked columns, as it looks in Excel.',
+    'guia-p4': 'What happens if there are no duplicates?',
+    'guia-r4': 'You are told none was found and the file you download is identical to the original.'
   }
 };
 </script>
@@ -131,6 +167,42 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <p style="color:var(--texto-suave);" data-i18n="nota-formato">En un .xlsx o .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas (sus referencias se acomodan), tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si el archivo tiene algo que no se puede mover así (notas, tablas dinámicas…), se arma un libro nuevo con los valores, el formato de número, los anchos de columna y las celdas combinadas.</p>
   </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo quitar encabezados o filas duplicadas de una hoja de Excel</h2>
+    <p data-i18n="guia-intro">Muy común en reportes armados pegando varias tablas: la fila de encabezados se repite a mitad de los datos. Esta herramienta quita esas filas repetidas de una hoja de Excel, conservando la primera aparición. También sirve para eliminar cualquier otra fila duplicada, según las columnas que vos elijas como criterio. Lo que haya arriba de la tabla (un título o filas sueltas) no se toca.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) o hacé clic para elegirlo. Si tiene varias hojas, elegí una en «Hoja a limpiar».</li>
+      <li data-i18n="guia-paso-2">En «La tabla empieza en la fila» indicá en qué fila arranca la tabla. Marcá o desmarcá «Esa fila es el encabezado de columnas (no es un dato)».</li>
+      <li data-i18n="guia-paso-3">En la vista previa, tildá en el encabezado las columnas que querés usar para detectar duplicados. Arrancan todas sin tildar; hay que elegir al menos una.</li>
+      <li data-i18n="guia-paso-4">Tocá «Quitar duplicados». Aparece cuántas filas se quitaron y el enlace «Descargar Excel».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para quitar encabezados repetidos, tildá una o más columnas del encabezado: la fila de encabezado cuenta como primera aparición, y se eliminan sus repeticiones.</li>
+      <li data-i18n="guia-consejo-2">Las filas por encima de la fila de inicio se muestran en gris y cursiva en la vista previa y no se modifican.</li>
+      <li data-i18n="guia-consejo-3">La vista previa muestra las primeras 200 filas de datos, pero el procesamiento usa todas.</li>
+      <li data-i18n="guia-consejo-4">En .xlsx y .xlsm las filas se quitan en el mismo archivo, como «Eliminar filas» de Excel: se conservan colores, bordes, fórmulas, tablas, imágenes y gráficos. Con .xls, .xlsb u .ods, o si hay notas o tablas dinámicas, se arma un libro nuevo con los valores, formatos de número, anchos de columna y celdas combinadas.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cómo se llama el archivo que descargo?</summary>
+      <p data-i18n="guia-r1">Como el original más -sin-duplicados, por ejemplo ventas-sin-duplicados.xlsx (un .xlsm editado en el lugar sigue siendo .xlsm).</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se limpian todas las hojas?</summary>
+      <p data-i18n="guia-r2">Solo la hoja elegida; las demás se conservan.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Cómo decide que dos filas son iguales?</summary>
+      <p data-i18n="guia-r3">Compara el texto visible de las columnas tildadas, tal como se ve en Excel.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa si no hay duplicados?</summary>
+      <p data-i18n="guia-r4">Se avisa que no se encontró ninguna y el archivo que descargás es igual al original.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

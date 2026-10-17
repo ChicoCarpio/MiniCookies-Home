@@ -32,7 +32,25 @@ window.i18nPagina = {
     'error-todas-danadas': 'Ninguna diapositiva se pudo leer — el archivo está demasiado dañado.',
     'mensaje-todo-ok': '✅ Se pudo leer la presentación completa, no se descartó ninguna diapositiva.',
     'mensaje-parcial': '⚠️ Se descartaron {n} de {total} diapositivas por estar dañadas — el resto se conservó.',
-    'error-reparar': 'No se pudo reparar la presentación'
+    'error-reparar': 'No se pudo reparar la presentación',
+    'guia-titulo': 'Cómo reparar una presentación de PowerPoint dañada',
+    'guia-intro': 'Cuando una presentación .pptx no abre o PowerPoint ofrece «repararla» y falla, muchas veces el problema está en una o dos diapositivas con el XML interno dañado. Esta herramienta revisa una por una las diapositivas, descarta solo las que no se pueden interpretar y conserva el resto tal cual. Recibe un archivo .pptx y devuelve otro .pptx con las diapositivas sanas, sin tocar sus animaciones ni transiciones.',
+    'guia-paso-1': 'Arrastrá tu archivo a la zona «Arrastrá tu archivo .pptx acá o hacé clic para elegirlo».',
+    'guia-paso-2': 'Hacé clic en «Reparar». El botón pasa a «Reparando...» mientras se revisan las diapositivas.',
+    'guia-paso-3': 'Fijate en el mensaje: puede decir que se leyó la presentación completa sin descartar nada, o cuántas diapositivas se descartaron de un total.',
+    'guia-paso-4': 'Descargá el resultado con «Descargar PowerPoint reparado» (presentacion-reparada.pptx).',
+    'guia-consejo-1': 'Conviene guardar el original aparte: las diapositivas descartadas no se pueden recuperar del archivo nuevo.',
+    'guia-consejo-2': 'Si una diapositiva que se conserva tenía un enlace hacia una que se descartó, el enlace se borra pero el texto queda. Revisalo al abrir el resultado.',
+    'guia-consejo-3': 'También se sacan de las secciones y de las presentaciones personalizadas las diapositivas eliminadas, para que PowerPoint no vuelva a pedir reparación.',
+    'guia-consejo-4': 'El botón «?» junto a «Reparar» resume qué se descarta y qué se conserva.',
+    'guia-p1': '¿Qué se considera una diapositiva dañada?',
+    'guia-r1': 'Aquella cuyo XML no se puede leer o cuyo archivo falta dentro del paquete.',
+    'guia-p2': '¿Qué pasa si el daño es del archivo completo?',
+    'guia-r2': 'Si falta la estructura mínima de un .pptx, o está dañado el archivo principal de la presentación (presentation.xml), se muestra un error y no se intenta nada más.',
+    'guia-p3': '¿Y si todas las diapositivas están rotas?',
+    'guia-r3': 'Se avisa que el archivo está demasiado dañado y no se genera nada.',
+    'guia-p4': '¿Funciona con .ppt viejos?',
+    'guia-r4': 'No, solo acepta archivos .pptx.',
   },
   en: {
     'titulo-pagina': 'Repair PowerPoint Free — Mini Cookies',
@@ -54,7 +72,25 @@ window.i18nPagina = {
     'error-todas-danadas': 'No slide could be read — the file is too damaged.',
     'mensaje-todo-ok': '✅ The full presentation could be read, no slide was discarded.',
     'mensaje-parcial': '⚠️ {n} of {total} slides were discarded for being damaged — the rest were kept.',
-    'error-reparar': 'Couldn’t repair the presentation'
+    'error-reparar': 'Couldn’t repair the presentation',
+    'guia-titulo': 'How to repair a damaged PowerPoint presentation',
+    'guia-intro': 'When a .pptx presentation won’t open or PowerPoint offers to “repair” it and fails, the problem is often in one or two slides with damaged internal XML. This tool checks the slides one by one, discards only the ones that can’t be parsed and keeps the rest as they are. It takes a .pptx file and returns another .pptx with the healthy slides, without touching their animations or transitions.',
+    'guia-paso-1': 'Drag your file to the “Drag your .pptx file here or click to choose it” area.',
+    'guia-paso-2': 'Click “Repair”. The button changes to “Repairing...” while the slides are checked.',
+    'guia-paso-3': 'Look at the message: it may say the full presentation was read with nothing discarded, or how many slides were discarded out of a total.',
+    'guia-paso-4': 'Download the result with “Download repaired PowerPoint” (presentacion-reparada.pptx).',
+    'guia-consejo-1': 'It’s a good idea to keep the original somewhere else: discarded slides can’t be recovered from the new file.',
+    'guia-consejo-2': 'If a slide that is kept had a link to one that was discarded, the link is removed but the text stays. Check it when you open the result.',
+    'guia-consejo-3': 'Discarded slides are also removed from sections and custom shows, so PowerPoint doesn’t ask for repair again.',
+    'guia-consejo-4': 'The “?” button next to “Repair” summarizes what is discarded and what is kept.',
+    'guia-p1': 'What counts as a damaged slide?',
+    'guia-r1': 'One whose XML can’t be read or whose file is missing from the package.',
+    'guia-p2': 'What if the damage affects the whole file?',
+    'guia-r2': 'If the minimum structure of a .pptx is missing, or the main presentation file (presentation.xml) is damaged, an error is shown and nothing more is attempted.',
+    'guia-p3': 'And if all the slides are broken?',
+    'guia-r3': 'You’re told the file is too damaged and nothing is generated.',
+    'guia-p4': 'Does it work with old .ppt files?',
+    'guia-r4': 'No, it only accepts .pptx files.'
   }
 };
 </script>
@@ -106,6 +142,41 @@ window.i18nPagina = {
       <li data-i18n="limite2">Si el archivo en sí está dañado (no solo una diapositiva puntual), no hay forma de repararlo con esta técnica — se avisa en vez de intentar algo que no va a funcionar.</li>
     </ul>
   </div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo reparar una presentación de PowerPoint dañada</h2>
+    <p data-i18n="guia-intro">Cuando una presentación .pptx no abre o PowerPoint ofrece «repararla» y falla, muchas veces el problema está en una o dos diapositivas con el XML interno dañado. Esta herramienta revisa una por una las diapositivas, descarta solo las que no se pueden interpretar y conserva el resto tal cual. Recibe un archivo .pptx y devuelve otro .pptx con las diapositivas sanas, sin tocar sus animaciones ni transiciones.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo a la zona «Arrastrá tu archivo .pptx acá o hacé clic para elegirlo».</li>
+      <li data-i18n="guia-paso-2">Hacé clic en «Reparar». El botón pasa a «Reparando...» mientras se revisan las diapositivas.</li>
+      <li data-i18n="guia-paso-3">Fijate en el mensaje: puede decir que se leyó la presentación completa sin descartar nada, o cuántas diapositivas se descartaron de un total.</li>
+      <li data-i18n="guia-paso-4">Descargá el resultado con «Descargar PowerPoint reparado» (presentacion-reparada.pptx).</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Conviene guardar el original aparte: las diapositivas descartadas no se pueden recuperar del archivo nuevo.</li>
+      <li data-i18n="guia-consejo-2">Si una diapositiva que se conserva tenía un enlace hacia una que se descartó, el enlace se borra pero el texto queda. Revisalo al abrir el resultado.</li>
+      <li data-i18n="guia-consejo-3">También se sacan de las secciones y de las presentaciones personalizadas las diapositivas eliminadas, para que PowerPoint no vuelva a pedir reparación.</li>
+      <li data-i18n="guia-consejo-4">El botón «?» junto a «Reparar» resume qué se descarta y qué se conserva.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué se considera una diapositiva dañada?</summary>
+      <p data-i18n="guia-r1">Aquella cuyo XML no se puede leer o cuyo archivo falta dentro del paquete.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa si el daño es del archivo completo?</summary>
+      <p data-i18n="guia-r2">Si falta la estructura mínima de un .pptx, o está dañado el archivo principal de la presentación (presentation.xml), se muestra un error y no se intenta nada más.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Y si todas las diapositivas están rotas?</summary>
+      <p data-i18n="guia-r3">Se avisa que el archivo está demasiado dañado y no se genera nada.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Funciona con .ppt viejos?</summary>
+      <p data-i18n="guia-r4">No, solo acepta archivos .pptx.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

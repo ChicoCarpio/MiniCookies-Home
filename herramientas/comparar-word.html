@@ -50,7 +50,26 @@ window.i18nPagina = {
     'informe-agregados': 'agregado(s) en verde',
     'informe-quitados': 'quitado(s) en rojo',
     'boton-comparar-procesando': 'Comparando...',
-    'error-comparar': 'No se pudo comparar los documentos'
+    'error-comparar': 'No se pudo comparar los documentos',
+    'guia-titulo': 'Cómo comparar dos versiones de un documento Word',
+    'guia-intro': 'Si recibiste una nueva versión de un contrato, un informe o una tesis y querés saber qué texto se agregó o se quitó, esta herramienta lo hace por vos. Elegís el .docx original y el .docx nuevo, y te muestra un único texto con lo agregado en verde y lo quitado en rojo. Compara el texto de los documentos, no el formato: un cambio de negrita o de tipografía sin cambiar palabras no se marca como diferencia.',
+    'guia-paso-1': 'En «Documento original» arrastrá o elegí el .docx de la versión anterior.',
+    'guia-paso-2': 'En «Documento nuevo» elegí el .docx de la versión modificada. El botón Comparar se habilita cuando están los dos.',
+    'guia-paso-3': 'Decidí si dejás tildado «Comparar por palabra (si no, por línea)». El signo «?» al lado explica la diferencia.',
+    'guia-paso-4': 'Tocá «Comparar». Aparece el resultado con los cambios resaltados.',
+    'guia-paso-5': 'Tocá «Descargar informe (.html)» si querés conservarlo.',
+    'guia-consejo-1': 'Comparar por palabra marca cada palabra cambiada; es lo mejor para revisar redacción. Comparar por línea marca renglones enteros, así que un cambio mínimo puede mostrar el párrafo completo.',
+    'guia-consejo-2': 'El informe descargado indica los nombres de los dos archivos, la fecha, y cuántos fragmentos se agregaron y quitaron. Se abre en cualquier navegador y se puede imprimir o guardar como PDF.',
+    'guia-consejo-3': 'Como solo se lee el texto, no se ven cambios en imágenes, tablas con formato, encabezados o diseño.',
+    'guia-consejo-4': 'Si el documento original está en .doc, guardalo antes como .docx desde tu procesador de textos.',
+    'guia-p1': '¿Acepta archivos .doc?',
+    'guia-r1': 'No, solo .docx.',
+    'guia-p2': '¿Detecta los cambios con «control de cambios»?',
+    'guia-r2': 'No los interpreta: lee el texto tal como está en cada archivo.',
+    'guia-p3': '¿Por qué sale un error al comparar?',
+    'guia-r3': 'Puede ser un archivo dañado o un .docx que no se pueda leer; la página muestra el aviso «No se pudo comparar los documentos» con el detalle.',
+    'guia-p4': '¿Cómo se llama el informe?',
+    'guia-r4': 'Empieza con «comparacion-word» y lleva la fecha y la hora.',
   },
   en: {
     'titulo-pagina': 'Compare Two Word Documents Free — Mini Cookies',
@@ -74,7 +93,26 @@ window.i18nPagina = {
     'informe-agregados': 'added, in green',
     'informe-quitados': 'removed, in red',
     'boton-comparar-procesando': 'Comparing...',
-    'error-comparar': 'Couldn’t compare the documents'
+    'error-comparar': 'Couldn’t compare the documents',
+    'guia-titulo': 'How to compare two versions of a Word document',
+    'guia-intro': 'If you received a new version of a contract, a report or a thesis and you want to know what text was added or removed, this tool does it for you. You choose the original .docx and the new .docx, and it shows you a single text with additions in green and removals in red. It compares the text of the documents, not the formatting: a change in bold or typeface without changing any words isn’t flagged as a difference.',
+    'guia-paso-1': 'Under “Original document”, drag or choose the .docx of the earlier version.',
+    'guia-paso-2': 'Under “New document”, choose the .docx of the modified version. The Compare button is enabled once both are there.',
+    'guia-paso-3': 'Decide whether to leave “Compare by word (otherwise, by line)” ticked. The “?” sign next to it explains the difference.',
+    'guia-paso-4': 'Tap “Compare”. The result appears with the changes highlighted.',
+    'guia-paso-5': 'Tap “Download report (.html)” if you want to keep it.',
+    'guia-consejo-1': 'Comparing by word marks each changed word; it’s best for reviewing wording. Comparing by line marks whole lines, so a tiny change can show the entire paragraph.',
+    'guia-consejo-2': 'The downloaded report lists the names of both files, the date, and how many fragments were added and removed. It opens in any browser and can be printed or saved as a PDF.',
+    'guia-consejo-3': 'Since only the text is read, changes in images, formatted tables, headers or layout aren’t shown.',
+    'guia-consejo-4': 'If the original document is a .doc, save it as a .docx from your word processor first.',
+    'guia-p1': 'Does it accept .doc files?',
+    'guia-r1': 'No, only .docx.',
+    'guia-p2': 'Does it detect changes made with “track changes”?',
+    'guia-r2': 'It doesn’t interpret them: it reads the text as it is in each file.',
+    'guia-p3': 'Why does an error appear when comparing?',
+    'guia-r3': 'It may be a damaged file or a .docx that can’t be read; the page shows the notice “Couldn’t compare the documents” with the details.',
+    'guia-p4': 'What is the report called?',
+    'guia-r4': 'It starts with “comparacion-word” and has the date and time.',
   }
 };
 </script>
@@ -136,6 +174,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo comparar dos versiones de un documento Word</h2>
+    <p data-i18n="guia-intro">Si recibiste una nueva versión de un contrato, un informe o una tesis y querés saber qué texto se agregó o se quitó, esta herramienta lo hace por vos. Elegís el .docx original y el .docx nuevo, y te muestra un único texto con lo agregado en verde y lo quitado en rojo. Compara el texto de los documentos, no el formato: un cambio de negrita o de tipografía sin cambiar palabras no se marca como diferencia.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">En «Documento original» arrastrá o elegí el .docx de la versión anterior.</li>
+      <li data-i18n="guia-paso-2">En «Documento nuevo» elegí el .docx de la versión modificada. El botón Comparar se habilita cuando están los dos.</li>
+      <li data-i18n="guia-paso-3">Decidí si dejás tildado «Comparar por palabra (si no, por línea)». El signo «?» al lado explica la diferencia.</li>
+      <li data-i18n="guia-paso-4">Tocá «Comparar». Aparece el resultado con los cambios resaltados.</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar informe (.html)» si querés conservarlo.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Comparar por palabra marca cada palabra cambiada; es lo mejor para revisar redacción. Comparar por línea marca renglones enteros, así que un cambio mínimo puede mostrar el párrafo completo.</li>
+      <li data-i18n="guia-consejo-2">El informe descargado indica los nombres de los dos archivos, la fecha, y cuántos fragmentos se agregaron y quitaron. Se abre en cualquier navegador y se puede imprimir o guardar como PDF.</li>
+      <li data-i18n="guia-consejo-3">Como solo se lee el texto, no se ven cambios en imágenes, tablas con formato, encabezados o diseño.</li>
+      <li data-i18n="guia-consejo-4">Si el documento original está en .doc, guardalo antes como .docx desde tu procesador de textos.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Acepta archivos .doc?</summary>
+      <p data-i18n="guia-r1">No, solo .docx.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Detecta los cambios con «control de cambios»?</summary>
+      <p data-i18n="guia-r2">No los interpreta: lee el texto tal como está en cada archivo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Por qué sale un error al comparar?</summary>
+      <p data-i18n="guia-r3">Puede ser un archivo dañado o un .docx que no se pueda leer; la página muestra el aviso «No se pudo comparar los documentos» con el detalle.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Cómo se llama el informe?</summary>
+      <p data-i18n="guia-r4">Empieza con «comparacion-word» y lleva la fecha y la hora.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
