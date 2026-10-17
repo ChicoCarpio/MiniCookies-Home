@@ -20,6 +20,7 @@ window.i18nPagina = {
     'fmt-ean13': 'EAN-13 (13 dígitos, productos)',
     'fmt-upc': 'UPC (12 dígitos, productos EE.UU.)',
     'boton-generar': 'Generar',
+    'error-entrada': 'No se puede generar un código {formato} con «{texto}». Revisá el largo, los caracteres y el dígito de control.',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar como SVG',
     'titulo-pagina': 'Generador de códigos de barras gratis — Mini Cookies',
@@ -53,6 +54,7 @@ window.i18nPagina = {
     'fmt-ean13': 'EAN-13 (13 digits, retail products)',
     'fmt-upc': 'UPC (12 digits, US products)',
     'boton-generar': 'Generate',
+    'error-entrada': 'A {formato} barcode can’t be generated from “{texto}”. Check the length, the characters and the check digit.',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download as SVG',
     'titulo-pagina': 'Free barcode generator — Mini Cookies',
@@ -171,7 +173,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/jsbarcode/3.12.3/JsBarcode.all.min.js"></script>
+<script src="../assets/js/codigo-barras-propio.js"></script>
 <script>
 const entradaTexto = document.getElementById('entradaTexto');
 const botonGenerar = document.getElementById('botonGenerar');
@@ -187,12 +189,12 @@ function generar() {
   if (!texto) return;
 
   try {
-    JsBarcode(svgCodigo, texto, {
-      format: document.getElementById('formato').value,
-      lineColor: '#1e293b',
-      width: 2,
-      height: 80,
-      displayValue: true,
+    CodigoBarras.dibujarSvg(svgCodigo, texto, {
+      formato: document.getElementById('formato').value,
+      colorLinea: '#1e293b',
+      ancho: 2,
+      alto: 80,
+      mostrarTexto: true,
     });
     const svgSerializado = new XMLSerializer().serializeToString(svgCodigo);
     const blob = new Blob([svgSerializado], { type: 'image/svg+xml' });
@@ -200,7 +202,9 @@ function generar() {
     resultado.classList.add('visible');
   } catch (error) {
     svgCodigo.innerHTML = '';
-    mensajeError.textContent = '❌ ' + error.message;
+    mensajeError.textContent = '❌ ' + (error.name === 'EntradaNoValida'
+      ? t('error-entrada').replace('{formato}', error.formato).replace('{texto}', error.entrada)
+      : error.message);
     mensajeError.style.display = 'block';
   }
 }
