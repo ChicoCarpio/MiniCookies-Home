@@ -15,7 +15,7 @@
 //     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy', o el número de uno integrado, p. ej. 14 (fecha corta del idioma de quien abre el libro); hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
 //     Estilo de celda (lo que llevan los .xls, .xlsb y .ods al pasarlos a .xlsx): { valor, formato?, estilo } con estilo = { fuente?: { nombre, tam, negrita, cursiva, tachado, subrayado: true | 'double', color: 'RRGGBB' },
-//     relleno?: 'RRGGBB', bordes?: { izq, der, arr, aba, diagA, diagB: { e: 'thin' | 'medium' | …, c: 'RRGGBB' } }, alinea?: { h, v, ajustar, sangria, rotacion } }; una celda vacía con estilo (valor null) se escribe.
+//     relleno?: 'RRGGBB' | { patron: 'gray125' | 'lightGrid' | … (los de ECMA-376 18.18.55), fg?: 'RRGGBB', bg?: 'RRGGBB' }, bordes?: { izq, der, arr, aba, diagA, diagB: { e: 'thin' | 'medium' | …, c: 'RRGGBB' } }, alinea?: { h, v, ajustar, sangria, rotacion } }; una celda vacía con estilo (valor null) se escribe.
 //     Una hoja puede traer altosFila: { fila desde 0: puntos } (alto propio de cada fila).
 //     Fórmulas: un valor { formula: 'SUM(A1:A3)', valor?: …, formato? } escribe la fórmula (sin '=') con su último resultado guardado (valor: lo mismo que una celda
 //     normal, incluido { valor, formato }, o nada) y pide a Excel recalcular al abrir. Para pasar fórmulas de otro libro sin romperlas: XlsxEscritor.formulaConservable(formula,
@@ -282,6 +282,7 @@
   const ESTILOS_BORDE = new Set(['thin', 'medium', 'thick', 'dashed', 'dotted', 'double', 'hair', 'mediumDashed', 'dashDot', 'mediumDashDot', 'dashDotDot', 'mediumDashDotDot', 'slantDashDot']);
   const ALIN_H = new Set(['general', 'left', 'center', 'right', 'fill', 'justify', 'centerContinuous', 'distributed']);
   const ALIN_V = new Set(['top', 'center', 'bottom', 'justify', 'distributed']);
+  const PATRONES = new Set(['solid', 'darkDown', 'darkGray', 'darkGrid', 'darkHorizontal', 'darkTrellis', 'darkUp', 'darkVertical', 'gray0625', 'gray125', 'lightDown', 'lightGray', 'lightGrid', 'lightHorizontal', 'lightTrellis', 'lightUp', 'lightVertical', 'mediumGray']);
   const esColor = (c) => typeof c === 'string' && /^[0-9A-Fa-f]{6}$/.test(c);
   // Deja un estilo pedido en su forma canónica (para repartir los iguales) y descarta lo que Excel no aceptaría; null si no queda nada.
   function normalizarEstilo(e) {
@@ -300,6 +301,10 @@
       if (Object.keys(o).length) r.fuente = o;
     }
     if (esColor(e.relleno)) r.relleno = e.relleno.toUpperCase();
+    else if (e.relleno && typeof e.relleno === 'object' && PATRONES.has(e.relleno.patron) && (esColor(e.relleno.fg) || esColor(e.relleno.bg))) {   // trama: { patron, fg, bg }
+      r.relleno = e.relleno.patron === 'solid' && esColor(e.relleno.fg) ? e.relleno.fg.toUpperCase()
+        : { patron: e.relleno.patron, ...(esColor(e.relleno.fg) ? { fg: e.relleno.fg.toUpperCase() } : {}), ...(esColor(e.relleno.bg) ? { bg: e.relleno.bg.toUpperCase() } : {}) };
+    }
     if (e.bordes && typeof e.bordes === 'object') {
       const o = {};
       for (const lado of ['izq', 'der', 'arr', 'aba', 'diagA', 'diagB']) {
@@ -340,7 +345,10 @@
         fontId = idPieza(fuentes, '<font>' + (f.negrita ? '<b/>' : '') + (f.cursiva ? '<i/>' : '') + (f.tachado ? '<strike/>' : '') + (f.subrayado ? (f.subrayado === 'double' ? '<u val="double"/>' : '<u/>') : '')
           + `<sz val="${f.tam || 11}"/>` + (f.color ? colorXml(f.color) : '') + `<name val="${X.escAttr(f.nombre || 'Calibri')}"/><family val="2"/></font>`);
       }
-      if (e.relleno) fillId = idPieza(rellenos, `<fill><patternFill patternType="solid"><fgColor rgb="FF${e.relleno}"/><bgColor indexed="64"/></patternFill></fill>`);
+      if (e.relleno) {
+        const r = typeof e.relleno === 'string' ? { patron: 'solid', fg: e.relleno } : e.relleno;
+        fillId = idPieza(rellenos, `<fill><patternFill patternType="${r.patron}">` + (r.fg ? `<fgColor rgb="FF${r.fg}"/>` : '') + (r.bg ? `<bgColor rgb="FF${r.bg}"/>` : r.patron === 'solid' ? '<bgColor indexed="64"/>' : '') + '</patternFill></fill>');
+      }
       if (e.bordes) {
         const lado = (nombre, k) => { const b = e.bordes[k]; return b ? `<${nombre} style="${b.e}">${colorXml(b.c)}</${nombre}>` : `<${nombre}/>`; };
         const diag = e.bordes.diagA || e.bordes.diagB;
