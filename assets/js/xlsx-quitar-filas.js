@@ -380,7 +380,7 @@
       if (nueva < 0) {
         quitadas++;
         const ht = /\bht\s*=\s*"([\d.]+)"/.exec(attrs);
-        if (/\bhidden\s*=\s*"(?:1|true)"/.test(attrs)) altos.push({ f: n - 1, h: 0 }); else if (ht) altos.push({ f: n - 1, h: parseFloat(ht[1]) });
+        if (/\bhidden\s*=\s*"(?:1|true)"/.test(attrs)) altos.push({ f: n - 1, h: 0 }); else if (ht) altos.push({ f: n - 1, h: Math.round(parseFloat(ht[1]) * 4 / 3) * 0.75 });   // Excel cuenta la fila en píxeles: 39,95 pt son 53 px = 39,75 pt (medido)
         return '';
       }
       let t = todo;

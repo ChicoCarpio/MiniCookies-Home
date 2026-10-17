@@ -345,7 +345,9 @@
     const fuentes = ['<font><sz val="11"/><name val="Calibri"/><family val="2"/></font>', '<font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font>'];
     const rellenos = ['<fill><patternFill patternType="none"/></fill>', '<fill><patternFill patternType="gray125"/></fill>'];
     const bordes = ['<border><left/><right/><top/><bottom/><diagonal/></border>'];
-    const idPieza = (lista, xml) => { let i = lista.indexOf(xml); if (i < 0) { if (lista.length >= MAX_ESTILOS_PIEZA) return 0; i = lista.push(xml) - 1; } return i; };
+    // por un índice y no con indexOf: 60.000 xfs con 20.000 fuentes distintas eran 1.200 millones de comparaciones (35 s)
+    const indices = new Map([fuentes, rellenos, bordes].map((l) => [l, new Map(l.map((x, i) => [x, i]))]));
+    const idPieza = (lista, xml) => { const m = indices.get(lista); let i = m.get(xml); if (i === undefined) { if (lista.length >= MAX_ESTILOS_PIEZA) return 0; i = lista.push(xml) - 1; m.set(xml, i); } return i; };
     const xfs = combos.map(({ codigo, estilo }) => {
       let fontId = 0, fillId = 0, borderId = 0, alin = '';
       const e = estilo || {};

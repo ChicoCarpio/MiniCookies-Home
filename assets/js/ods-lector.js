@@ -423,7 +423,8 @@
           if ((celdas += n * f.largo) > MAX_CELDAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_CELDAS + ' celdas');
           if (f.vacias && n > 1) {
             // las celdas vacías con estilo de una fila repetida cuentan en su tope; si no caben, la fila pierde esas celdas
-            if (vacias + (n - 1) * f.vacias <= MAX_VACIAS) vacias += (n - 1) * f.vacias;
+            // (y la fila entera, que con una vacía al final mide 16.384, se copia n veces: sin el tope, 1 M de copias agotaba la memoria)
+            if (vacias + (n - 1) * f.vacias <= MAX_VACIAS && n * f.celdas.length <= 5e6) vacias += (n - 1) * f.vacias;
             else {
               for (let k = 0; k < f.celdas.length; k++) if (f.celdas[k] && f.celdas[k].valor === null) f.celdas[k] = undefined;
               while (f.celdas.length && f.celdas[f.celdas.length - 1] === undefined) f.celdas.length--;
@@ -431,7 +432,7 @@
             }
           }
         } else {
-          n = Math.max(1, Math.min(n, 1 + Math.floor((MAX_VACIAS - vacias) / f.vacias)));
+          n = Math.max(1, Math.min(n, 1 + Math.floor((MAX_VACIAS - vacias) / f.vacias), Math.floor(5e6 / f.celdas.length)));   // una sola vacía en XFD repetida 1 M de veces: 1 M de filas de 16.384
           vacias += (n - 1) * f.vacias;
         }
         // una fila repetida con contenido se copia (el contenido es el mismo)
