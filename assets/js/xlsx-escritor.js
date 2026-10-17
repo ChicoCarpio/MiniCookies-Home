@@ -285,8 +285,17 @@
   const PATRONES = new Set(['solid', 'darkDown', 'darkGray', 'darkGrid', 'darkHorizontal', 'darkTrellis', 'darkUp', 'darkVertical', 'gray0625', 'gray125', 'lightDown', 'lightGray', 'lightGrid', 'lightHorizontal', 'lightTrellis', 'lightUp', 'lightVertical', 'mediumGray']);
   const esColor = (c) => typeof c === 'string' && /^[0-9A-Fa-f]{6}$/.test(c);
   // Deja un estilo pedido en su forma canónica (para repartir los iguales) y descarta lo que Excel no aceptaría; null si no queda nada.
+  // Los lectores comparten un objeto por estilo de celda: un millón de celdas no normaliza ni serializa un millón de veces.
+  const cacheNormal = new WeakMap(), clavesEstilo = new WeakMap();
+  const claveEstilo = (e) => { let k = clavesEstilo.get(e); if (k === undefined) { k = JSON.stringify(e); clavesEstilo.set(e, k); } return k; };
   function normalizarEstilo(e) {
     if (!e || typeof e !== 'object') return null;
+    if (cacheNormal.has(e)) return cacheNormal.get(e);
+    const r = normalizarEstiloSinCache(e);
+    cacheNormal.set(e, r);
+    return r;
+  }
+  function normalizarEstiloSinCache(e) {
     const r = {};
     const f = e.fuente;
     if (f && typeof f === 'object') {
@@ -465,7 +474,7 @@
       if (typeof codigo === 'number') { if (!Number.isInteger(codigo) || codigo < 1 || codigo > 163) codigo = undefined; }
       else if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) codigo = undefined;
       if (codigo === undefined && !estilo) return 0;
-      const clave = JSON.stringify([codigo === undefined ? null : codigo, estilo]);
+      const clave = (codigo === undefined ? '' : typeof codigo === 'number' ? '#' + codigo : '"' + codigo) + '\u0001' + (estilo ? claveEstilo(estilo) : '');
       if (indiceCombo.has(clave)) return indiceCombo.get(clave);
       if (typeof codigo === 'string' && !codigosUsados.has(codigo)) { if (codigosUsados.size >= MAX_FORMATOS) codigo = undefined; else codigosUsados.add(codigo); }
       if (combos.length >= MAX_XFS || (codigo === undefined && !estilo)) return 0;
