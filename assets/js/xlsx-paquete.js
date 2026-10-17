@@ -446,7 +446,27 @@
           const t = await textoDe(zip, r.destino);
           if (t === null) continue;
           const u = t.replace(/<(?:[\w.-]+:)?calculatedColumnFormula\b[^>]*?(?:\/>|>[^<]*<\/(?:[\w.-]+:)?calculatedColumnFormula>)/g, (x) => (usa(X.decodificar(x.replace(/<[^>]*>/g, ''))) ? '' : x));
-          if (u !== t) zip.file(real(zip, r.destino), u);
+          // la fórmula de la fila de totales (corpus 55): Excel la deja como #REF! y su celda con el error; una columna "custom" sin fórmula, o una celda
+          // de totales con un valor suelto, hacen que Excel repare el libro. Se escribe igual que Excel: fórmula #REF! en la columna y en la celda.
+          const celdasTotales = [];
+          const ref = /\bref="\$?([A-Z]{1,3})\$?(\d+):\$?([A-Z]{1,3})\$?(\d+)"/.exec(t), conTotales = /\btotalsRowCount="[1-9]/.test(t);
+          let col = -1;
+          const v = u.replace(/<(?:[\w.-]+:)?tableColumn\b[^>]*?(?:\/>|>[\s\S]*?<\/(?:[\w.-]+:)?tableColumn>)/g, (bloque) => {
+            col++;
+            return bloque.replace(/(<(?:[\w.-]+:)?totalsRowFormula\b[^>]*>)([^<]*)(<\/)/, (x, ab, f, ce) => {
+              if (!usa(X.decodificar(f))) return x;
+              if (ref && conTotales) celdasTotales.push(LibroXlsx.numeroACol(LibroXlsx.colANumero(ref[1]) + col) + ref[4]);
+              return ab + '#REF!' + ce;
+            });
+          });
+          if (celdasTotales.length) {
+            let hojaXml = await textoDe(zip, parte);
+            for (const c of celdasTotales) {
+              hojaXml = hojaXml.replace(new RegExp('<c r="' + c + '"([^>]*?)(?:/>|>[\\s\\S]*?</c>)'), (x, atrs) => `<c r="${c}"${atrs.replace(/\s+t="[^"]*"/, '')} t="e"><f>#REF!</f><v>#REF!</v></c>`);
+            }
+            zip.file(parte, hojaXml);
+          }
+          if (v !== t) zip.file(real(zip, r.destino), v);
         }
       }
       if (quitadas.length && segmentacionesQuitadas.size) await quitarSegmentaciones(zip, parte, segmentacionesQuitadas);
