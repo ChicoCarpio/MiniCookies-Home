@@ -27,7 +27,25 @@ window.i18nPagina = {
     'boton-ordenar': 'Ordenar y descargar',
     'resultado-enlace': 'Descargar .txt',
     'nota': 'El orden numérico toma el primer número que encuentra al principio de cada línea — las líneas que no empiezan con un número quedan al final, en el orden en que aparecían.',
-    'error-ordenar': 'No se pudo ordenar el archivo'
+    'error-ordenar': 'No se pudo ordenar el archivo',
+    'guia-titulo': 'Cómo ordenar las líneas de un archivo de texto',
+    'guia-intro': 'Toma un archivo de texto plano (.txt) y ordena sus líneas, sea alfabéticamente o por números. Sirve para listas de nombres, de códigos, de tareas, de correos o cualquier archivo donde cada línea es un elemento. Subís el .txt, elegís el criterio y bajás un .txt nuevo con las líneas ordenadas.',
+    'guia-paso-1': 'Arrastrá tu archivo .txt a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'En «Orden» elegí una de las cuatro opciones: «Alfabético (A→Z)», «Alfabético (Z→A)», «Numérico (menor a mayor)» o «Numérico (mayor a menor)».',
+    'guia-paso-3': 'Si usás orden alfabético, decidí si dejás marcada la casilla «Ignorar mayúsculas/minúsculas (orden alfabético)», que viene activada.',
+    'guia-paso-4': 'Tocá «Ordenar y descargar» y después «Descargar .txt».',
+    'guia-consejo-1': 'El orden alfabético sigue el diccionario del idioma de la página: las tildes y la ñ quedan en su lugar («árbol» junto a «arco») y los números dentro del texto se ordenan como números («tema 2» va antes que «tema 10»).',
+    'guia-consejo-2': 'El orden numérico toma el primer número que encuentra al principio de cada línea; entiende coma o punto decimal y separadores de miles (por ejemplo 1.234,50). Las líneas que no empiezan con un número quedan al final, en su orden original.',
+    'guia-consejo-3': 'Si desmarcás «Ignorar mayúsculas/minúsculas», las mayúsculas se ordenan antes que las minúsculas de la misma letra.',
+    'guia-consejo-4': 'Se conservan el tipo de salto de línea del archivo original y el salto final, si lo había.',
+    'guia-p1': '¿Puedo ordenar un archivo de Word o de Excel?',
+    'guia-r1': 'No, solo .txt. Para planillas está la categoría de Excel y CSV.',
+    'guia-p2': '¿Quita las líneas repetidas?',
+    'guia-r2': 'No; para eso está Quitar líneas duplicadas o vacías.',
+    'guia-p3': '¿Las líneas vacías dónde quedan?',
+    'guia-r3': 'En el orden alfabético, las vacías se ordenan primero (o últimas en descendente); en el numérico, van al final porque no tienen número.',
+    'guia-p4': '¿Qué pasa con una línea como «Capítulo 3»?',
+    'guia-r4': 'En orden numérico no cuenta, porque el número tiene que estar al principio de la línea.'
   },
   en: {
     'titulo-pagina': 'Sort Text Lines Free — Mini Cookies',
@@ -45,7 +63,25 @@ window.i18nPagina = {
     'boton-ordenar': 'Sort and download',
     'resultado-enlace': 'Download .txt',
     'nota': 'Numeric order uses the first number found at the start of each line — lines that don’t start with a number go at the end, in the order they appeared.',
-    'error-ordenar': 'Couldn’t sort the file'
+    'error-ordenar': 'Couldn’t sort the file',
+    'guia-titulo': 'How to sort the lines of a text file',
+    'guia-intro': 'It takes a plain text file (.txt) and sorts its lines, either alphabetically or by numbers. It works for lists of names, codes, tasks, emails or any file where each line is an item. You upload the .txt, choose the criterion and download a new .txt with the lines sorted.',
+    'guia-paso-1': 'Drag your .txt file to the upload area or click to choose it.',
+    'guia-paso-2': 'In “Order” choose one of the four options: “Alphabetical (A→Z)”, “Alphabetical (Z→A)”, “Numeric (smallest to largest)” or “Numeric (largest to smallest)”.',
+    'guia-paso-3': 'If you use alphabetical order, decide whether to leave the “Ignore upper/lower case (alphabetical order)” box checked; it comes enabled.',
+    'guia-paso-4': 'Tap “Sort and download” and then “Download .txt”.',
+    'guia-consejo-1': 'Alphabetical order follows the dictionary of the page’s language: accents and the ñ fall into their proper place (“árbol” next to “arco”) and numbers inside the text are sorted as numbers (“tema 2” comes before “tema 10”).',
+    'guia-consejo-2': 'Numeric order takes the first number it finds at the start of each line; it understands a decimal comma or point and thousands separators (for example 1.234,50). Lines that don’t start with a number go at the end, in their original order.',
+    'guia-consejo-3': 'If you uncheck “Ignore upper/lower case”, uppercase letters are sorted before lowercase ones of the same letter.',
+    'guia-consejo-4': 'The original file’s line-break type and the final line break, if there was one, are preserved.',
+    'guia-p1': 'Can I sort a Word or Excel file?',
+    'guia-r1': 'No, only .txt. For spreadsheets there is the Excel and CSV category.',
+    'guia-p2': 'Does it remove repeated lines?',
+    'guia-r2': 'No; for that there is Remove duplicate or empty lines.',
+    'guia-p3': 'Where do empty lines end up?',
+    'guia-r3': 'In alphabetical order, empty lines are sorted first (or last in descending order); in numeric order they go to the end because they have no number.',
+    'guia-p4': 'What happens with a line like “Capítulo 3”?',
+    'guia-r4': 'In numeric order it doesn’t count, because the number has to be at the start of the line.'
   }
 };
 </script>
@@ -100,6 +136,41 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <p style="color:var(--texto-suave);" data-i18n="nota">El orden numérico toma el primer número que encuentra al principio de cada línea — las líneas que no empiezan con un número quedan al final, en el orden en que aparecían.</p>
   </div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo ordenar las líneas de un archivo de texto</h2>
+    <p data-i18n="guia-intro">Toma un archivo de texto plano (.txt) y ordena sus líneas, sea alfabéticamente o por números. Sirve para listas de nombres, de códigos, de tareas, de correos o cualquier archivo donde cada línea es un elemento. Subís el .txt, elegís el criterio y bajás un .txt nuevo con las líneas ordenadas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .txt a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">En «Orden» elegí una de las cuatro opciones: «Alfabético (A→Z)», «Alfabético (Z→A)», «Numérico (menor a mayor)» o «Numérico (mayor a menor)».</li>
+      <li data-i18n="guia-paso-3">Si usás orden alfabético, decidí si dejás marcada la casilla «Ignorar mayúsculas/minúsculas (orden alfabético)», que viene activada.</li>
+      <li data-i18n="guia-paso-4">Tocá «Ordenar y descargar» y después «Descargar .txt».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El orden alfabético sigue el diccionario del idioma de la página: las tildes y la ñ quedan en su lugar («árbol» junto a «arco») y los números dentro del texto se ordenan como números («tema 2» va antes que «tema 10»).</li>
+      <li data-i18n="guia-consejo-2">El orden numérico toma el primer número que encuentra al principio de cada línea; entiende coma o punto decimal y separadores de miles (por ejemplo 1.234,50). Las líneas que no empiezan con un número quedan al final, en su orden original.</li>
+      <li data-i18n="guia-consejo-3">Si desmarcás «Ignorar mayúsculas/minúsculas», las mayúsculas se ordenan antes que las minúsculas de la misma letra.</li>
+      <li data-i18n="guia-consejo-4">Se conservan el tipo de salto de línea del archivo original y el salto final, si lo había.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo ordenar un archivo de Word o de Excel?</summary>
+      <p data-i18n="guia-r1">No, solo .txt. Para planillas está la categoría de Excel y CSV.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Quita las líneas repetidas?</summary>
+      <p data-i18n="guia-r2">No; para eso está Quitar líneas duplicadas o vacías.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Las líneas vacías dónde quedan?</summary>
+      <p data-i18n="guia-r3">En el orden alfabético, las vacías se ordenan primero (o últimas en descendente); en el numérico, van al final porque no tienen número.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Qué pasa con una línea como «Capítulo 3»?</summary>
+      <p data-i18n="guia-r4">En orden numérico no cuenta, porque el número tiene que estar al principio de la línea.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

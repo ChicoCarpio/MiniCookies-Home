@@ -25,7 +25,25 @@ window.i18nPagina = {
     'error-sin-opcion': 'Marcá al menos una opción.',
     'mensaje-resultado': 'De {total} líneas originales, quedaron {quedan}',
     'mensaje-duplicadas': ' (se quitaron {n} duplicada(s))',
-    'error-procesar': 'No se pudo procesar el archivo'
+    'error-procesar': 'No se pudo procesar el archivo',
+    'guia-titulo': 'Cómo quitar líneas duplicadas o vacías de un texto',
+    'guia-intro': 'Limpia un archivo de texto plano (.txt) eliminando líneas repetidas, líneas vacías o ambas. Es útil para depurar listas de correos, nombres o códigos copiadas de varias fuentes, o para sacar los huecos que dejan algunos exportadores de texto. Elegís el archivo, marcás qué querés quitar y descargás el resultado.',
+    'guia-paso-1': 'Arrastrá tu archivo .txt a la zona de carga o hacé clic para elegirlo.',
+    'guia-paso-2': 'Marcá las opciones que quieras: «Quitar líneas vacías» y/o «Quitar líneas duplicadas (se conserva la primera aparición)». Las dos vienen marcadas.',
+    'guia-paso-3': 'Tocá «Procesar y descargar». Aparece un resumen del tipo «De 120 líneas originales, quedaron 95 (se quitaron 18 duplicada(s))».',
+    'guia-paso-4': 'Tocá «Descargar .txt» para bajar texto-limpio.txt.',
+    'guia-consejo-1': 'Si desmarcás las dos opciones, la herramienta te pide que marques al menos una.',
+    'guia-consejo-2': 'La comparación es exacta, letra por letra: «Ana» y «ana», o «Ana» y «Ana » (con un espacio al final), se consideran líneas distintas y se conservan las dos.',
+    'guia-consejo-3': 'Una línea con solo espacios cuenta como vacía y se elimina si está activada la primera opción.',
+    'guia-consejo-4': 'Queda la primera aparición de cada línea y el orden original se mantiene; si necesitás la lista ordenada, usá luego Ordenar líneas.',
+    'guia-p1': '¿Cuántas líneas puede tener el archivo?',
+    'guia-r1': 'No hay un límite fijado por la herramienta; depende de la memoria de tu navegador.',
+    'guia-p2': '¿Se modifica mi archivo original?',
+    'guia-r2': 'No, se descarga uno nuevo.',
+    'guia-p3': '¿Puedo quitar duplicados ignorando mayúsculas?',
+    'guia-r3': 'No, la comparación distingue mayúsculas y minúsculas.',
+    'guia-p4': '¿Conserva los acentos y la codificación?',
+    'guia-r4': 'Sí, el archivo se lee y se guarda como texto, respetando el tipo de salto de línea del original.'
   },
   en: {
     'titulo-pagina': 'Remove Duplicate or Empty Lines Free — Mini Cookies',
@@ -41,7 +59,25 @@ window.i18nPagina = {
     'error-sin-opcion': 'Check at least one option.',
     'mensaje-resultado': 'Of {total} original lines, {quedan} remain',
     'mensaje-duplicadas': ' ({n} duplicate(s) removed)',
-    'error-procesar': 'Couldn’t process the file'
+    'error-procesar': 'Couldn’t process the file',
+    'guia-titulo': 'How to remove duplicate or empty lines from a text',
+    'guia-intro': 'It cleans up a plain text file (.txt) by removing repeated lines, empty lines or both. It’s useful for tidying lists of emails, names or codes copied from several sources, or for removing the gaps some text exporters leave. You choose the file, tick what you want removed and download the result.',
+    'guia-paso-1': 'Drag your .txt file to the upload area or click to choose it.',
+    'guia-paso-2': 'Tick the options you want: “Remove empty lines” and/or “Remove duplicate lines (the first occurrence is kept)”. Both are ticked by default.',
+    'guia-paso-3': 'Tap “Process and download”. A summary like “Of 120 original lines, 95 remain (18 duplicate(s) removed)” appears.',
+    'guia-paso-4': 'Tap “Download .txt” to get texto-limpio.txt.',
+    'guia-consejo-1': 'If you untick both options, the tool asks you to tick at least one.',
+    'guia-consejo-2': 'The comparison is exact, letter by letter: “Ana” and “ana”, or “Ana” and “Ana ” (with a trailing space), count as different lines and both are kept.',
+    'guia-consejo-3': 'A line with only spaces counts as empty and is removed if the first option is on.',
+    'guia-consejo-4': 'The first occurrence of each line is kept and the original order is preserved; if you need the list sorted, use Sort lines afterwards.',
+    'guia-p1': 'How many lines can the file have?',
+    'guia-r1': 'The tool sets no limit; it depends on your browser’s memory.',
+    'guia-p2': 'Is my original file modified?',
+    'guia-r2': 'No, a new one is downloaded.',
+    'guia-p3': 'Can I remove duplicates ignoring upper and lower case?',
+    'guia-r3': 'No, the comparison is case-sensitive.',
+    'guia-p4': 'Does it keep accents and the encoding?',
+    'guia-r4': 'Yes, the file is read and saved as text, respecting the original’s line-break type.'
   }
 };
 </script>
@@ -89,6 +125,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo quitar líneas duplicadas o vacías de un texto</h2>
+    <p data-i18n="guia-intro">Limpia un archivo de texto plano (.txt) eliminando líneas repetidas, líneas vacías o ambas. Es útil para depurar listas de correos, nombres o códigos copiadas de varias fuentes, o para sacar los huecos que dejan algunos exportadores de texto. Elegís el archivo, marcás qué querés quitar y descargás el resultado.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo .txt a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-2">Marcá las opciones que quieras: «Quitar líneas vacías» y/o «Quitar líneas duplicadas (se conserva la primera aparición)». Las dos vienen marcadas.</li>
+      <li data-i18n="guia-paso-3">Tocá «Procesar y descargar». Aparece un resumen del tipo «De 120 líneas originales, quedaron 95 (se quitaron 18 duplicada(s))».</li>
+      <li data-i18n="guia-paso-4">Tocá «Descargar .txt» para bajar texto-limpio.txt.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si desmarcás las dos opciones, la herramienta te pide que marques al menos una.</li>
+      <li data-i18n="guia-consejo-2">La comparación es exacta, letra por letra: «Ana» y «ana», o «Ana» y «Ana » (con un espacio al final), se consideran líneas distintas y se conservan las dos.</li>
+      <li data-i18n="guia-consejo-3">Una línea con solo espacios cuenta como vacía y se elimina si está activada la primera opción.</li>
+      <li data-i18n="guia-consejo-4">Queda la primera aparición de cada línea y el orden original se mantiene; si necesitás la lista ordenada, usá luego Ordenar líneas.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuántas líneas puede tener el archivo?</summary>
+      <p data-i18n="guia-r1">No hay un límite fijado por la herramienta; depende de la memoria de tu navegador.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se modifica mi archivo original?</summary>
+      <p data-i18n="guia-r2">No, se descarga uno nuevo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo quitar duplicados ignorando mayúsculas?</summary>
+      <p data-i18n="guia-r3">No, la comparación distingue mayúsculas y minúsculas.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Conserva los acentos y la codificación?</summary>
+      <p data-i18n="guia-r4">Sí, el archivo se lee y se guarda como texto, respetando el tipo de salto de línea del original.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

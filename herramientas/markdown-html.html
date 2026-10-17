@@ -39,7 +39,26 @@ window.i18nPagina = {
     'boton-abrir': '📂 Abrir archivo',
     'boton-descargar-html': 'Descargar .html',
     'boton-descargar-md': 'Descargar .md',
-    'titulo-documento': 'Documento'
+    'titulo-documento': 'Documento',
+    'guia-titulo': 'Cómo convertir entre Markdown y HTML',
+    'guia-intro': 'Esta herramienta pasa texto de Markdown a HTML y de HTML a Markdown en la misma página. Sirve cuando escribís en Markdown (notas, un README, un borrador de blog) y necesitás el código HTML para pegarlo en una web, o cuando tenés una página o un fragmento HTML y lo querés limpio en Markdown. Podés escribir o pegar el texto en el cuadro, o abrir un archivo; el resultado se actualiza mientras tipeás.',
+    'guia-paso-1': 'Elegí la dirección arriba: «Markdown → HTML» o «HTML → Markdown».',
+    'guia-paso-2': 'Escribí o pegá tu texto en el cuadro de la izquierda, o tocá «Abrir archivo» para cargar un .md, .markdown, .txt, .html o .htm. Si el archivo es de la otra dirección, la herramienta cambia sola.',
+    'guia-paso-3': 'En Markdown → HTML, mirá la «Vista previa» a la derecha. Con «Ver / copiar código HTML» se despliega el código; con un segundo clic sobre el mismo botón se copia al portapapeles.',
+    'guia-paso-4': 'En HTML → Markdown, el resultado aparece en el cuadro de la derecha: usá «Copiar Markdown» o «Descargar .md».',
+    'guia-paso-5': 'En Markdown → HTML, «Descargar .html» baja una página completa (con <html>, <head> y <body>) que podés abrir directo en el navegador.',
+    'guia-consejo-1': 'Al cambiar de dirección, el cuadro de entrada vuelve a mostrar un texto de ejemplo, así que copiá antes lo que no quieras perder.',
+    'guia-consejo-2': 'El título de la página descargada se toma del primer encabezado del texto; si no hay ninguno, usa el nombre del archivo abierto o «Documento».',
+    'guia-consejo-3': 'El HTML → Markdown deja los títulos con almohadillas (##), los bloques de código entre triples comillas y las tablas como tablas de Markdown.',
+    'guia-consejo-4': 'Si tu archivo .md trae HTML crudo, la vista previa lo limpia por seguridad, pero el código que copiás o descargás queda tal como lo generó el conversor.',
+    'guia-p1': '¿Puedo convertir varios archivos a la vez?',
+    'guia-r1': 'No, trabaja con un texto o un archivo por vez.',
+    'guia-p2': '¿Se ve igual que en GitHub o en mi editor?',
+    'guia-r2': 'La vista previa usa un conversor estándar de Markdown; los detalles de estilo dependen de la página donde pegues el HTML.',
+    'guia-p3': '¿Qué pasa con las imágenes?',
+    'guia-r3': 'En Markdown → HTML se generan las etiquetas <img> con la dirección que escribiste. No se incrustan ni se descargan.',
+    'guia-p4': '¿Funciona con HTML de una página completa?',
+    'guia-r4': 'Sí, podés pegarlo o abrirlo; conviene revisar el resultado, porque menús o scripts de la página también se convierten en texto.'
   },
   en: {
     'titulo-pagina': 'Convert Markdown and HTML Free — Mini Cookies',
@@ -55,7 +74,26 @@ window.i18nPagina = {
     'boton-abrir': '📂 Open file',
     'boton-descargar-html': 'Download .html',
     'boton-descargar-md': 'Download .md',
-    'titulo-documento': 'Document'
+    'titulo-documento': 'Document',
+    'guia-titulo': 'How to convert between Markdown and HTML',
+    'guia-intro': 'This tool turns Markdown into HTML and HTML into Markdown on the same page. It’s useful when you write in Markdown (notes, a README, a blog draft) and need the HTML code to paste into a website, or when you have a web page or an HTML snippet and want it as clean Markdown. You can type or paste the text into the box, or open a file; the result updates as you type.',
+    'guia-paso-1': 'Choose the direction at the top: “Markdown → HTML” or “HTML → Markdown”.',
+    'guia-paso-2': 'Type or paste your text in the box on the left, or tap “📂 Open file” to load a .md, .markdown, .txt, .html or .htm file. If the file belongs to the other direction, the tool switches by itself.',
+    'guia-paso-3': 'In Markdown → HTML, look at the “Preview” on the right. “View / copy HTML code” unfolds the code; a second click on the same button copies it to the clipboard.',
+    'guia-paso-4': 'In HTML → Markdown, the result appears in the box on the right: use “Copy Markdown” or “Download .md”.',
+    'guia-paso-5': 'In Markdown → HTML, “Download .html” saves a complete page (with <html>, <head> and <body>) that you can open directly in the browser.',
+    'guia-consejo-1': 'When you switch direction, the input box shows a sample text again, so copy anything you don’t want to lose first.',
+    'guia-consejo-2': 'The title of the downloaded page is taken from the first heading in the text; if there is none, it uses the name of the opened file or “Document”.',
+    'guia-consejo-3': 'HTML → Markdown writes headings with hash signs (##), code blocks between triple backticks and tables as Markdown tables.',
+    'guia-consejo-4': 'If your .md file contains raw HTML, the preview sanitizes it for safety, but the code you copy or download stays exactly as the converter generated it.',
+    'guia-p1': 'Can I convert several files at once?',
+    'guia-r1': 'No, it works with one text or one file at a time.',
+    'guia-p2': 'Does it look the same as on GitHub or in my editor?',
+    'guia-r2': 'The preview uses a standard Markdown converter; styling details depend on the page where you paste the HTML.',
+    'guia-p3': 'What happens with images?',
+    'guia-r3': 'In Markdown → HTML, <img> tags are generated with the address you wrote. They are not embedded or downloaded.',
+    'guia-p4': 'Does it work with the HTML of a full web page?',
+    'guia-r4': 'Yes, you can paste or open it; it’s a good idea to review the result, because the page’s menus or scripts are also converted to text.'
   }
 };
 </script>
@@ -109,6 +147,42 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir entre Markdown y HTML</h2>
+    <p data-i18n="guia-intro">Esta herramienta pasa texto de Markdown a HTML y de HTML a Markdown en la misma página. Sirve cuando escribís en Markdown (notas, un README, un borrador de blog) y necesitás el código HTML para pegarlo en una web, o cuando tenés una página o un fragmento HTML y lo querés limpio en Markdown. Podés escribir o pegar el texto en el cuadro, o abrir un archivo; el resultado se actualiza mientras tipeás.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí la dirección arriba: «Markdown → HTML» o «HTML → Markdown».</li>
+      <li data-i18n="guia-paso-2">Escribí o pegá tu texto en el cuadro de la izquierda, o tocá «Abrir archivo» para cargar un .md, .markdown, .txt, .html o .htm. Si el archivo es de la otra dirección, la herramienta cambia sola.</li>
+      <li data-i18n="guia-paso-3">En Markdown → HTML, mirá la «Vista previa» a la derecha. Con «Ver / copiar código HTML» se despliega el código; con un segundo clic sobre el mismo botón se copia al portapapeles.</li>
+      <li data-i18n="guia-paso-4">En HTML → Markdown, el resultado aparece en el cuadro de la derecha: usá «Copiar Markdown» o «Descargar .md».</li>
+      <li data-i18n="guia-paso-5">En Markdown → HTML, «Descargar .html» baja una página completa (con &lt;html&gt;, &lt;head&gt; y &lt;body&gt;) que podés abrir directo en el navegador.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Al cambiar de dirección, el cuadro de entrada vuelve a mostrar un texto de ejemplo, así que copiá antes lo que no quieras perder.</li>
+      <li data-i18n="guia-consejo-2">El título de la página descargada se toma del primer encabezado del texto; si no hay ninguno, usa el nombre del archivo abierto o «Documento».</li>
+      <li data-i18n="guia-consejo-3">El HTML → Markdown deja los títulos con almohadillas (##), los bloques de código entre triples comillas y las tablas como tablas de Markdown.</li>
+      <li data-i18n="guia-consejo-4">Si tu archivo .md trae HTML crudo, la vista previa lo limpia por seguridad, pero el código que copiás o descargás queda tal como lo generó el conversor.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo convertir varios archivos a la vez?</summary>
+      <p data-i18n="guia-r1">No, trabaja con un texto o un archivo por vez.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se ve igual que en GitHub o en mi editor?</summary>
+      <p data-i18n="guia-r2">La vista previa usa un conversor estándar de Markdown; los detalles de estilo dependen de la página donde pegues el HTML.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Qué pasa con las imágenes?</summary>
+      <p data-i18n="guia-r3">En Markdown → HTML se generan las etiquetas &lt;img&gt; con la dirección que escribiste. No se incrustan ni se descargan.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Funciona con HTML de una página completa?</summary>
+      <p data-i18n="guia-r4">Sí, podés pegarlo o abrirlo; conviene revisar el resultado, porque menús o scripts de la página también se convierten en texto.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

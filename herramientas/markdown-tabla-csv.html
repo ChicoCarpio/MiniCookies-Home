@@ -27,7 +27,25 @@ window.i18nPagina = {
     'enlace-descargar': 'Descargar',
     'error-tabla-invalida': 'No se encontró una tabla Markdown válida (necesita encabezado + línea separadora).',
     'error-csv-vacio': 'El CSV está vacío.',
-    'error-convertir': 'No se pudo convertir'
+    'error-convertir': 'No se pudo convertir',
+    'guia-titulo': 'Cómo convertir una tabla Markdown a CSV (y al revés)',
+    'guia-intro': 'Convierte una tabla escrita en Markdown (con barras verticales) en un CSV listo para abrir en Excel o Google Sheets, y al revés: un CSV pasa a ser una tabla Markdown para pegar en un README, una wiki o una nota. Es útil para documentar datos sin armar a mano cada barra, o para sacar una tabla de un texto y trabajarla en una planilla.',
+    'guia-paso-1': 'Elegí «Markdown → CSV» o «CSV → Markdown».',
+    'guia-paso-2': 'Pegá o escribí tu contenido en el cuadro de la izquierda. Al cambiar de dirección aparece un ejemplo que podés reemplazar.',
+    'guia-paso-3': 'Tocá «Convertir». El resultado aparece en el cuadro de la derecha.',
+    'guia-paso-4': 'Usá «Copiar resultado» para llevarlo al portapapeles, o «Descargar» para bajar tabla.csv o tabla.md según la dirección.',
+    'guia-consejo-1': 'Una tabla Markdown válida necesita la fila de encabezado y la línea separadora (| --- | --- |). Si falta, la herramienta avisa que no encontró una tabla válida.',
+    'guia-consejo-2': 'En CSV → Markdown, el separador se detecta solo entre coma, punto y coma (el habitual de Excel en español) y tabulación, mirando la primera línea.',
+    'guia-consejo-3': 'Las celdas con comillas, comas o saltos de línea se manejan bien: en el CSV se encierran entre comillas, y en Markdown un salto de línea dentro de una celda se escribe como <br>.',
+    'guia-consejo-4': 'Si alguna fila tiene menos celdas que otras, se completa con celdas vacías para que todas queden con el mismo número de columnas.',
+    'guia-p1': '¿Puedo pegar texto que tenga más cosas además de la tabla?',
+    'guia-r1': 'Sí: al pasar de Markdown a CSV se toman solo las líneas que empiezan con |; lo demás se ignora.',
+    'guia-p2': '¿El CSV sale con coma o punto y coma?',
+    'guia-r2': 'Siempre con coma. Si tu Excel en español lo abre en una sola columna, importalo indicando la coma como separador.',
+    'guia-p3': '¿Y si una celda tiene una barra vertical?',
+    'guia-r3': 'En Markdown se escribe como \\|; la herramienta la entiende al leer y la escribe así al generar la tabla.',
+    'guia-p4': '¿Se pueden convertir varias tablas juntas?',
+    'guia-r4': 'El resultado es una sola tabla; si pegás dos tablas seguidas se leen como una.'
   },
   en: {
     'titulo-pagina': 'Convert Markdown Tables and CSV Free — Mini Cookies',
@@ -42,7 +60,25 @@ window.i18nPagina = {
     'enlace-descargar': 'Download',
     'error-tabla-invalida': 'No valid Markdown table was found (it needs a header row + separator line).',
     'error-csv-vacio': 'The CSV is empty.',
-    'error-convertir': 'Couldn’t convert'
+    'error-convertir': 'Couldn’t convert',
+    'guia-titulo': 'How to convert a Markdown table to CSV (and back)',
+    'guia-intro': 'It converts a table written in Markdown (with vertical bars) into a CSV ready to open in Excel or Google Sheets, and the other way around: a CSV becomes a Markdown table you can paste into a README, a wiki or a note. It’s useful for documenting data without typing every bar by hand, or for pulling a table out of a text and working on it in a spreadsheet.',
+    'guia-paso-1': 'Choose “Markdown → CSV” or “CSV → Markdown”.',
+    'guia-paso-2': 'Paste or type your content in the box on the left. When you switch direction an example appears that you can replace.',
+    'guia-paso-3': 'Tap “Convert”. The result appears in the box on the right.',
+    'guia-paso-4': 'Use “Copy result” to put it on the clipboard, or “Download” to save tabla.csv or tabla.md depending on the direction.',
+    'guia-consejo-1': 'A valid Markdown table needs the header row and the separator line (| --- | --- |). If it’s missing, the tool tells you it didn’t find a valid table.',
+    'guia-consejo-2': 'In CSV → Markdown, the separator is detected automatically among comma, semicolon (the usual one in Spanish-language Excel) and tab, by looking at the first line.',
+    'guia-consejo-3': 'Cells with quotes, commas or line breaks are handled properly: in the CSV they are wrapped in quotes, and in Markdown a line break inside a cell is written as <br>.',
+    'guia-consejo-4': 'If a row has fewer cells than the others, it is padded with empty cells so that every row has the same number of columns.',
+    'guia-p1': 'Can I paste text that has more than just the table?',
+    'guia-r1': 'Yes: when converting Markdown to CSV only the lines that start with | are used; everything else is ignored.',
+    'guia-p2': 'Does the CSV use a comma or a semicolon?',
+    'guia-r2': 'Always a comma. If your Excel opens it in a single column, import it and choose the comma as the separator.',
+    'guia-p3': 'What if a cell contains a vertical bar?',
+    'guia-r3': 'In Markdown it is written as \\|; the tool understands it when reading and writes it that way when generating the table.',
+    'guia-p4': 'Can several tables be converted together?',
+    'guia-r4': 'The result is a single table; if you paste two tables one after the other they are read as one.'
   }
 };
 </script>
@@ -87,6 +123,41 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir una tabla Markdown a CSV (y al revés)</h2>
+    <p data-i18n="guia-intro">Convierte una tabla escrita en Markdown (con barras verticales) en un CSV listo para abrir en Excel o Google Sheets, y al revés: un CSV pasa a ser una tabla Markdown para pegar en un README, una wiki o una nota. Es útil para documentar datos sin armar a mano cada barra, o para sacar una tabla de un texto y trabajarla en una planilla.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí «Markdown → CSV» o «CSV → Markdown».</li>
+      <li data-i18n="guia-paso-2">Pegá o escribí tu contenido en el cuadro de la izquierda. Al cambiar de dirección aparece un ejemplo que podés reemplazar.</li>
+      <li data-i18n="guia-paso-3">Tocá «Convertir». El resultado aparece en el cuadro de la derecha.</li>
+      <li data-i18n="guia-paso-4">Usá «Copiar resultado» para llevarlo al portapapeles, o «Descargar» para bajar tabla.csv o tabla.md según la dirección.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Una tabla Markdown válida necesita la fila de encabezado y la línea separadora (| --- | --- |). Si falta, la herramienta avisa que no encontró una tabla válida.</li>
+      <li data-i18n="guia-consejo-2">En CSV → Markdown, el separador se detecta solo entre coma, punto y coma (el habitual de Excel en español) y tabulación, mirando la primera línea.</li>
+      <li data-i18n="guia-consejo-3">Las celdas con comillas, comas o saltos de línea se manejan bien: en el CSV se encierran entre comillas, y en Markdown un salto de línea dentro de una celda se escribe como &lt;br&gt;.</li>
+      <li data-i18n="guia-consejo-4">Si alguna fila tiene menos celdas que otras, se completa con celdas vacías para que todas queden con el mismo número de columnas.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo pegar texto que tenga más cosas además de la tabla?</summary>
+      <p data-i18n="guia-r1">Sí: al pasar de Markdown a CSV se toman solo las líneas que empiezan con |; lo demás se ignora.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿El CSV sale con coma o punto y coma?</summary>
+      <p data-i18n="guia-r2">Siempre con coma. Si tu Excel en español lo abre en una sola columna, importalo indicando la coma como separador.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Y si una celda tiene una barra vertical?</summary>
+      <p data-i18n="guia-r3">En Markdown se escribe como \|; la herramienta la entiende al leer y la escribe así al generar la tabla.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se pueden convertir varias tablas juntas?</summary>
+      <p data-i18n="guia-r4">El resultado es una sola tabla; si pegás dos tablas seguidas se leen como una.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

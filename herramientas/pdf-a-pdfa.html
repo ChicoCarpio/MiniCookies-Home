@@ -63,7 +63,25 @@ window.i18nPagina = {
     'aviso-deteccion': 'ℹ️ Este archivo ya tiene marca PDF/A-{parte}{nivel}: se eligió «Quitar marca PDF/A» (podés cambiarlo arriba).',
     'progreso-procesando': 'Procesando...',
     'error-procesar': 'No se pudo procesar el PDF',
-    'error-perfil-icc': 'No se pudo cargar el perfil de color sRGB incluido en el sitio.'
+    'error-perfil-icc': 'No se pudo cargar el perfil de color sRGB incluido en el sitio.',
+    'guia-titulo': 'Cómo convertir un PDF a PDF/A (y quitar la marca)',
+    'guia-intro': 'PDF/A es una variante del PDF pensada para guardar documentos a largo plazo, y algunos trámites o archivos institucionales la piden. Esta herramienta agrega a un PDF normal un perfil de color embebido y los metadatos que lo identifican como PDF/A, o hace lo contrario: quita esa marca de conformidad. Es un trabajo «de mejor esfuerzo», no una certificación oficial.',
+    'guia-paso-1': 'Elegí la dirección: «PDF → PDF/A» o «PDF/A → PDF normal».',
+    'guia-paso-2': 'Arrastrá tu PDF a la zona de carga o hacé clic para elegirlo. Si el archivo ya tiene marca PDF/A, aparece un aviso y se selecciona sola la opción de quitarla (podés cambiarla).',
+    'guia-paso-3': 'Para convertir a PDF/A, elegí en «Parte del estándar»: PDF/A-1, PDF/A-2 (la recomendada) o PDF/A-3.',
+    'guia-paso-4': 'Tocá el botón («Convertir a PDF/A» o «Quitar marca PDF/A») y después «Descargar PDF».',
+    'guia-consejo-1': 'El archivo resultante se llama como el original más un sufijo: -PDFA2B (o 1B, 3B) al convertir y -normal al quitar la marca.',
+    'guia-consejo-2': 'Solo se ofrece el nivel B (básico); el nivel A exige contenido etiquetado que la herramienta no puede garantizar.',
+    'guia-consejo-3': 'La herramienta no puede forzar que todas las fuentes estén embebidas ni quitar transparencias o JavaScript del PDF original. Si necesitás conformidad certificada, validá el resultado con una herramienta especializada como veraPDF.',
+    'guia-consejo-4': 'Si el PDF tiene contraseña, quitala antes con Desbloquear PDF.',
+    'guia-p1': '¿Cuál parte del estándar conviene elegir?',
+    'guia-r1': 'PDF/A-2 es la recomendada; PDF/A-1 es la más estricta (PDF 1.4) y PDF/A-3 es como la 2 pero permite adjuntar archivos.',
+    'guia-p2': '¿Mi documento va a pasar la validación de un organismo?',
+    'guia-r2': 'No hay garantía; depende de cómo esté armado el PDF original.',
+    'guia-p3': 'Al quitar la marca, ¿se daña el PDF?',
+    'guia-r3': 'No, el archivo sigue siendo un PDF válido; solo desaparece la declaración de conformidad.',
+    'guia-p4': '¿Cambia el aspecto del documento?',
+    'guia-r4': 'No se redibuja nada: se agregan datos al archivo, el contenido de las páginas queda igual.'
   },
   en: {
     'titulo-pagina': 'Convert PDF to PDF/A Free — Mini Cookies',
@@ -94,7 +112,25 @@ window.i18nPagina = {
     'aviso-deteccion': 'ℹ️ This file already has a PDF/A-{parte}{nivel} mark: «Remove PDF/A mark» was selected (you can change it above).',
     'progreso-procesando': 'Processing...',
     'error-procesar': 'Couldn’t process the PDF',
-    'error-perfil-icc': 'Couldn’t load the sRGB colour profile included with the site.'
+    'error-perfil-icc': 'Couldn’t load the sRGB colour profile included with the site.',
+    'guia-titulo': 'How to convert a PDF to PDF/A (and remove the mark)',
+    'guia-intro': 'PDF/A is a variant of PDF designed for storing documents long-term, and some paperwork or institutional archives require it. This tool adds to a regular PDF an embedded color profile and the metadata that identifies it as PDF/A, or does the opposite: it removes that conformance mark. It is a “best effort” job, not an official certification.',
+    'guia-paso-1': 'Choose the direction: “PDF → PDF/A” or “PDF/A → regular PDF”.',
+    'guia-paso-2': 'Drag your PDF to the upload area or click to choose it. If the file already has a PDF/A mark, a notice appears and the option to remove it is selected automatically (you can change it).',
+    'guia-paso-3': 'To convert to PDF/A, choose under “Standard part”: PDF/A-1, PDF/A-2 (the recommended one) or PDF/A-3.',
+    'guia-paso-4': 'Tap the button (“Convert to PDF/A” or “Remove PDF/A mark”) and then “Download PDF”.',
+    'guia-consejo-1': 'The resulting file is named like the original plus a suffix: -PDFA2B (or 1B, 3B) when converting and -normal when removing the mark.',
+    'guia-consejo-2': 'Only level B (basic) is offered; level A requires tagged content that the tool can’t guarantee.',
+    'guia-consejo-3': 'The tool can’t force every font to be embedded or remove transparencies or JavaScript from the original PDF. If you need certified conformance, validate the result with a specialized tool such as veraPDF.',
+    'guia-consejo-4': 'If the PDF has a password, remove it first with Unlock PDF.',
+    'guia-p1': 'Which part of the standard should I choose?',
+    'guia-r1': 'PDF/A-2 is the recommended one; PDF/A-1 is the strictest (PDF 1.4) and PDF/A-3 is like 2 but allows attaching files.',
+    'guia-p2': 'Will my document pass an agency’s validation?',
+    'guia-r2': 'There is no guarantee; it depends on how the original PDF was built.',
+    'guia-p3': 'Does removing the mark damage the PDF?',
+    'guia-r3': 'No, the file remains a valid PDF; only the conformance declaration disappears.',
+    'guia-p4': 'Does the document’s appearance change?',
+    'guia-r4': 'Nothing is redrawn: data is added to the file and the content of the pages stays the same.'
   }
 };
 </script>
@@ -167,6 +203,41 @@ window.i18nPagina = {
       <li><span data-i18n="item4-antes">Si el PDF tiene contraseña, primero quitala con </span><a href="desbloquear-pdf.html" data-i18n="item4-enlace">Desbloquear PDF</a><span data-i18n="item4-final">.</span></li>
     </ul>
   </div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo convertir un PDF a PDF/A (y quitar la marca)</h2>
+    <p data-i18n="guia-intro">PDF/A es una variante del PDF pensada para guardar documentos a largo plazo, y algunos trámites o archivos institucionales la piden. Esta herramienta agrega a un PDF normal un perfil de color embebido y los metadatos que lo identifican como PDF/A, o hace lo contrario: quita esa marca de conformidad. Es un trabajo «de mejor esfuerzo», no una certificación oficial.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí la dirección: «PDF → PDF/A» o «PDF/A → PDF normal».</li>
+      <li data-i18n="guia-paso-2">Arrastrá tu PDF a la zona de carga o hacé clic para elegirlo. Si el archivo ya tiene marca PDF/A, aparece un aviso y se selecciona sola la opción de quitarla (podés cambiarla).</li>
+      <li data-i18n="guia-paso-3">Para convertir a PDF/A, elegí en «Parte del estándar»: PDF/A-1, PDF/A-2 (la recomendada) o PDF/A-3.</li>
+      <li data-i18n="guia-paso-4">Tocá el botón («Convertir a PDF/A» o «Quitar marca PDF/A») y después «Descargar PDF».</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El archivo resultante se llama como el original más un sufijo: -PDFA2B (o 1B, 3B) al convertir y -normal al quitar la marca.</li>
+      <li data-i18n="guia-consejo-2">Solo se ofrece el nivel B (básico); el nivel A exige contenido etiquetado que la herramienta no puede garantizar.</li>
+      <li data-i18n="guia-consejo-3">La herramienta no puede forzar que todas las fuentes estén embebidas ni quitar transparencias o JavaScript del PDF original. Si necesitás conformidad certificada, validá el resultado con una herramienta especializada como veraPDF.</li>
+      <li data-i18n="guia-consejo-4">Si el PDF tiene contraseña, quitala antes con Desbloquear PDF.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuál parte del estándar conviene elegir?</summary>
+      <p data-i18n="guia-r1">PDF/A-2 es la recomendada; PDF/A-1 es la más estricta (PDF 1.4) y PDF/A-3 es como la 2 pero permite adjuntar archivos.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Mi documento va a pasar la validación de un organismo?</summary>
+      <p data-i18n="guia-r2">No hay garantía; depende de cómo esté armado el PDF original.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">Al quitar la marca, ¿se daña el PDF?</summary>
+      <p data-i18n="guia-r3">No, el archivo sigue siendo un PDF válido; solo desaparece la declaración de conformidad.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Cambia el aspecto del documento?</summary>
+      <p data-i18n="guia-r4">No se redibuja nada: se agregan datos al archivo, el contenido de las páginas queda igual.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
