@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo enviar archivos del celular a la PC con un QR — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Pasá archivos entre dos dispositivos con un QR, sin cables ni cuenta. Cómo se conectan, qué se cifra, el código de verificación y sus límites.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo enviar archivos del celular a la PC con un QR — Mini Cookies',
+    'meta-descripcion': 'Pasá archivos entre dos dispositivos con un QR, sin cables ni cuenta. Cómo se conectan, qué se cifra, el código de verificación y sus límites.',
+    'h1': 'Cómo enviar archivos del celular a la PC con un QR',
+    'b1': 'Sacaste unas fotos con el celular y las necesitás en la computadora, o al revés. Las salidas habituales son el cable, el correo o un chat, y todas tienen su fricción. Hay otra forma: conectar los dos dispositivos directamente y mandar los archivos de uno al otro.',
+    'b2': 'Cómo funciona por dentro',
+    'b3': '<a href="https://seguro.minicookies.net/herramientas/enviar-archivos-qr">Enviar archivos con un QR</a> usa WebRTC, una tecnología que ya traen los navegadores y que permite abrir un canal directo entre dos equipos. Antes, los dos tienen que intercambiar unos datos de conexión (una "oferta" y una "respuesta"), algo que normalmente hace un servidor intermedio. Acá lo hacen los códigos QR: un dispositivo muestra el suyo, el otro lo lee, muestra su QR de respuesta y el primero lo lee a su vez.',
+    'b4': 'Una vez abierto el canal, los archivos viajan de un equipo al otro sin pasar por un servidor del sitio. Hay un solo servidor externo involucrado: un servidor STUN de Cloudflare, que solo sirve para que cada equipo averigüe su dirección pública. No ve los archivos.',
+    'b5': 'Paso a paso',
+    'b6-1': 'En el dispositivo que va a recibir, tocá <strong>Mostrar mi QR</strong>. Aparece un QR que se renueva cada 120 segundos.',
+    'b6-2': 'En el otro dispositivo, tocá <strong>Leer el QR del otro</strong> y escaneá ese QR. Si usás la cámara del celular, se abre esta misma página lista para enviar. También podés pegar el código de texto y tocar <strong>Usar código</strong>.',
+    'b6-3': 'El dispositivo que envía muestra un QR de respuesta. En el que recibe, tocá <strong>Escanear su QR</strong> (o pegá el código y tocá <strong>Conectar</strong>).',
+    'b6-4': 'Verificación de seguridad: el dispositivo que escaneó muestra un código de 8 dígitos. Se lo decís en voz alta a la otra persona, que lo escribe en su pantalla y toca <strong>Aceptar</strong>. Después, quien mostró el código toca <strong>Ya lo confirmó</strong>.',
+    'b6-5': 'Arrastrá los archivos a la zona (o tocá para elegirlos) y tocá <strong>Enviar</strong>. El otro dispositivo ve la lista y elige <strong>Aceptar y recibir</strong> o <strong>Rechazar</strong>.',
+    'b7': 'Una vez conectados, cualquiera de los dos puede enviar y recibir. Eso sí: una transferencia a la vez. Mientras una está en curso, el botón <strong>Enviar</strong> queda deshabilitado.',
+    'b8': 'Qué está cifrado y qué significa el código de verificación',
+    'b9': 'El canal de WebRTC ya viene cifrado. Además, la herramienta cifra cada mensaje con AES-GCM de 256 bits, con una clave aleatoria que viaja solo dentro del QR: nunca por la red. Por eso conviene que el QR se lea de pantalla a cámara y no se comparta por un chat.',
+    'b10': 'El código de verificación de 8 dígitos se calcula con esa clave y con las "huellas" de los certificados de ambos lados. Si alguien se hubiera puesto en el medio de la conexión, a cada lado le saldría un número distinto, y el código que escribe la otra persona no coincidiría. Hasta que los dos confirman, el canal no envía ni acepta archivos. Si el código se escribe mal 3 veces, la conexión se cierra.',
+    'b11': 'Archivos chicos y archivos grandes',
+    'b12': 'La herramienta no pone un límite fijo de tamaño. Lo que cambia es cómo se guarda:',
+    'b13-1': '<strong>Hasta 64 MB:</strong> el archivo se arma en la memoria del que recibe y lo guardás con el botón <strong>Guardar</strong>.',
+    'b13-2': '<strong>Más de 64 MB:</strong> en el que recibe aparece <strong>Empezar descarga</strong>, y el archivo se va escribiendo directo en la carpeta de descargas. Hace falta tocar el botón porque los navegadores del celular solo permiten una descarga que nace de un toque. Si el navegador no puede hacerlo así, usa el almacenamiento propio del sitio en el disco o, como último recurso, la memoria.',
+    'b14': 'Lo que limita es el espacio libre del dispositivo que recibe; la herramienta avisa cuando parece no alcanzar.',
+    'b15': 'Cuando no conecta',
+    'b16-1': 'Poné los dos dispositivos en la <strong>misma red WiFi</strong>: es el caso en que la conexión funciona siempre.',
+    'b16-2': 'Entre redes distintas puede funcionar o no, según los routers. No hay servidor de reenvío, así que con datos móviles puede fallar. Si te pasa, activá el punto de acceso del celular y conectá la computadora a esa WiFi.',
+    'b16-3': 'El QR dura 120 segundos. Si venció, se genera uno nuevo; escanealo de nuevo o tocá <strong>Empezar de nuevo</strong>.',
+    'b16-4': 'Al tocar <strong>Mostrar mi QR</strong>, el navegador puede pedir permiso de cámara en el dispositivo que recibe. Ese permiso hace que el navegador entregue las direcciones reales de la red local, lo que ayuda a conectar; si lo negás, a veces falla.',
+    'b17': 'Límites que conviene conocer',
+    'b18': 'Ninguna herramienta de este tipo es mágica, y esta tampoco:',
+    'b19-1': '<strong>Confirma que no hay un tercero en el medio, no que la otra punta sea de fiar.</strong> Si escaneás el QR de un desconocido, te conectás con un desconocido. Recibí solo de personas que tienen delante o que conocés.',
+    'b19-2': '<strong>El código con PIN tiene un límite.</strong> Si preferís pasar el código de texto por un chat, <strong>Copiar código con PIN</strong> lo protege con un PIN de 8 dígitos que se dice por otro medio. Quien capture el código y tenga mucho poder de cómputo podría intentar probar los 100 millones de PIN posibles; el cálculo lo vuelve costoso y el código vence junto con el QR, pero el límite existe.',
+    'b19-3': '<strong>La conexión se cierra sola</strong> si pasan 3 minutos sin enviar ni recibir nada (no cuenta mientras hay una transferencia en curso). Podés cerrarla antes con <strong>Cerrar conexión</strong>.',
+    'b20': 'Preguntas frecuentes',
+    'b21': '¿Necesito instalar algo o crear una cuenta?',
+    'b22': 'No. Solo abrir la herramienta en los dos dispositivos con un navegador actual. La conexión se arma con los códigos QR; no hay usuarios ni contraseñas.',
+    'b23': '¿Puedo mandar varios archivos juntos?',
+    'b24': 'Sí. Los elegís todos, tocás <strong>Enviar</strong>, y quien recibe acepta la lista completa o la rechaza.',
+    'b25': 'Resumen',
+    'b26': 'Para pasar archivos entre dos dispositivos sin cables ni cuentas, mostrá el QR en el que recibe, leelo con el otro, leé el QR de respuesta y confirmá el código de 8 dígitos en voz alta. Los archivos viajan directo, cifrados, y funciona mejor en la misma red WiFi. Es práctico para pasar fotos y documentos entre tus propios equipos; recordá que la verificación demuestra que no hay un intermediario, no que la persona del otro lado sea de confianza.',
+    'rel1': 'Enviar archivos con un QR',
+    'rel2': 'Lector de códigos QR y de barras',
+    'rel3': 'Generador de códigos QR',
+    'rel4': 'Administrador de contraseñas'
+  },
+  en: {
+    'titulo-pagina': 'How to Send Files from Your Phone to Your PC with a QR Code — Mini Cookies',
+    'meta-descripcion': 'Move files between two devices with a QR code, with no cables or account. How they connect, what gets encrypted, the verification code and its limits.',
+    'h1': 'How to Send Files from Your Phone to Your PC with a QR Code',
+    'b1': 'You took some photos with your phone and you need them on your computer, or the other way around. The usual routes are a cable, email or a chat, and each one has its friction. There’s another way: connect the two devices directly and send the files from one to the other.',
+    'b2': 'How it works under the hood',
+    'b3': '<a href="https://seguro.minicookies.net/en/herramientas/enviar-archivos-qr">Send files with a QR code</a> uses WebRTC, a technology that browsers already include and that lets two computers open a direct channel. Before that, the two have to exchange some connection details (an "offer" and an "answer"), something a middleman server normally does. Here, QR codes do it: one device shows its code, the other reads it, shows its own answer QR, and the first one reads that in turn.',
+    'b4': 'Once the channel is open, the files travel from one device to the other without passing through a server of the site. Only one external server is involved: a Cloudflare STUN server, which just helps each device find out its public address. It doesn’t see the files.',
+    'b5': 'Step by step',
+    'b6-1': 'On the device that will receive, tap <strong>Show my QR</strong>. A QR appears and renews every 120 seconds.',
+    'b6-2': 'On the other device, tap <strong>Read the other’s QR</strong> and scan that QR. If you use the phone’s camera, this same page opens ready to send. You can also paste the text code and tap <strong>Use code</strong>.',
+    'b6-3': 'The sending device shows an answer QR. On the receiving one, tap <strong>Scan their QR</strong> (or paste the code and tap <strong>Connect</strong>).',
+    'b6-4': 'Security check: the device that scanned shows an 8-digit code. You tell it out loud to the other person, who types it on their screen and taps <strong>Accept</strong>. Then the one who showed the code taps <strong>They confirmed it</strong>.',
+    'b6-5': 'Drag the files to the area (or tap to choose them) and tap <strong>Send</strong>. The other device sees the list and chooses <strong>Accept and receive</strong> or <strong>Decline</strong>.',
+    'b7': 'Once connected, either of you can send and receive. One catch: one transfer at a time. While one is in progress, the <strong>Send</strong> button stays disabled.',
+    'b8': 'What’s encrypted and what the verification code means',
+    'b9': 'The WebRTC channel is already encrypted. On top of that, the tool encrypts each message with 256-bit AES-GCM, using a random key that travels only inside the QR: never over the network. That’s why the QR should be read from screen to camera and not shared in a chat.',
+    'b10': 'The 8-digit verification code is calculated from that key and from the certificate "fingerprints" of both sides. If someone had gotten in the middle of the connection, each side would see a different number, and the code the other person types wouldn’t match. Until both confirm, the channel neither sends nor accepts files. If the code is typed wrong 3 times, the connection closes.',
+    'b11': 'Small files and large files',
+    'b12': 'The tool doesn’t set a fixed size limit. What changes is how the file is saved:',
+    'b13-1': '<strong>Up to 64 MB:</strong> the file is assembled in the receiver’s memory and you save it with the <strong>Save</strong> button.',
+    'b13-2': '<strong>Over 64 MB:</strong> on the receiving device <strong>Start download</strong> appears, and the file is written straight into the downloads folder. You have to tap the button because phone browsers only allow a download that starts from a tap. If the browser can’t do it that way, it uses the site’s own storage on disk or, as a last resort, memory.',
+    'b14': 'The limit is the free space on the receiving device; the tool warns you when it looks like it won’t be enough.',
+    'b15': 'When it won’t connect',
+    'b16-1': 'Put both devices on the <strong>same WiFi network</strong>: that’s the case where the connection always works.',
+    'b16-2': 'Between different networks it may or may not work, depending on the routers. There’s no relay server, so it can fail on mobile data. If that happens, turn on your phone’s hotspot and connect the computer to that WiFi.',
+    'b16-3': 'The QR lasts 120 seconds. If it expired, a new one is generated; scan it again or tap <strong>Start over</strong>.',
+    'b16-4': 'When you tap <strong>Show my QR</strong>, the browser may ask for camera permission on the receiving device. That permission makes the browser hand over the real local network addresses, which helps the connection; if you deny it, it sometimes fails.',
+    'b17': 'Limits worth knowing',
+    'b18': 'No tool like this is magic, and this one isn’t either:',
+    'b19-1': '<strong>It confirms there’s nobody in the middle, not that the other end is trustworthy.</strong> If you scan a stranger’s QR, you connect to a stranger. Only receive from people who are in front of you or whom you know.',
+    'b19-2': '<strong>The code with a PIN has a limit.</strong> If you’d rather pass the text code through a chat, <strong>Copy code with PIN</strong> protects it with an 8-digit PIN that you tell the other person by a different channel. Someone who captures the code and has a lot of computing power could try all 100 million possible PINs; the calculation makes that costly and the code expires along with the QR, but the limit exists.',
+    'b19-3': '<strong>The connection closes by itself</strong> after 3 minutes without sending or receiving anything (it doesn’t count while a transfer is in progress). You can close it sooner with <strong>Close connection</strong>.',
+    'b20': 'Frequently asked questions',
+    'b21': 'Do I need to install anything or create an account?',
+    'b22': 'No. Just open the tool on both devices with an up-to-date browser. The connection is set up with the QR codes; there are no users or passwords.',
+    'b23': 'Can I send several files together?',
+    'b24': 'Yes. Pick them all, tap <strong>Send</strong>, and the receiver accepts the whole list or declines it.',
+    'b25': 'Summary',
+    'b26': 'To move files between two devices with no cables or accounts, show the QR on the receiving device, read it with the other, read the answer QR and confirm the 8-digit code out loud. The files travel directly, encrypted, and it works best on the same WiFi network. It’s handy for moving photos and documents between your own devices; just remember that the verification shows there’s no middleman, not that the person on the other side can be trusted.',
+    'rel1': 'Send files with a QR code',
+    'rel2': 'QR and barcode reader',
+    'rel3': 'QR code generator',
+    'rel4': 'Password manager'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo enviar archivos del celular a la PC con un QR</h1>
+    <p data-i18n-html="b1">Sacaste unas fotos con el celular y las necesitás en la computadora, o al revés. Las salidas habituales son el cable, el correo o un chat, y todas tienen su fricción. Hay otra forma: conectar los dos dispositivos directamente y mandar los archivos de uno al otro.</p>
+    <h2 data-i18n="b2">Cómo funciona por dentro</h2>
+    <p data-i18n-html="b3"><a href="https://seguro.minicookies.net/herramientas/enviar-archivos-qr">Enviar archivos con un QR</a> usa WebRTC, una tecnología que ya traen los navegadores y que permite abrir un canal directo entre dos equipos. Antes, los dos tienen que intercambiar unos datos de conexión (una "oferta" y una "respuesta"), algo que normalmente hace un servidor intermedio. Acá lo hacen los códigos QR: un dispositivo muestra el suyo, el otro lo lee, muestra su QR de respuesta y el primero lo lee a su vez.</p>
+    <p data-i18n-html="b4">Una vez abierto el canal, los archivos viajan de un equipo al otro sin pasar por un servidor del sitio. Hay un solo servidor externo involucrado: un servidor STUN de Cloudflare, que solo sirve para que cada equipo averigüe su dirección pública. No ve los archivos.</p>
+    <h2 data-i18n="b5">Paso a paso</h2>
+    <ol>
+      <li data-i18n-html="b6-1">En el dispositivo que va a recibir, tocá <strong>Mostrar mi QR</strong>. Aparece un QR que se renueva cada 120 segundos.</li>
+      <li data-i18n-html="b6-2">En el otro dispositivo, tocá <strong>Leer el QR del otro</strong> y escaneá ese QR. Si usás la cámara del celular, se abre esta misma página lista para enviar. También podés pegar el código de texto y tocar <strong>Usar código</strong>.</li>
+      <li data-i18n-html="b6-3">El dispositivo que envía muestra un QR de respuesta. En el que recibe, tocá <strong>Escanear su QR</strong> (o pegá el código y tocá <strong>Conectar</strong>).</li>
+      <li data-i18n-html="b6-4">Verificación de seguridad: el dispositivo que escaneó muestra un código de 8 dígitos. Se lo decís en voz alta a la otra persona, que lo escribe en su pantalla y toca <strong>Aceptar</strong>. Después, quien mostró el código toca <strong>Ya lo confirmó</strong>.</li>
+      <li data-i18n-html="b6-5">Arrastrá los archivos a la zona (o tocá para elegirlos) y tocá <strong>Enviar</strong>. El otro dispositivo ve la lista y elige <strong>Aceptar y recibir</strong> o <strong>Rechazar</strong>.</li>
+    </ol>
+    <p data-i18n-html="b7">Una vez conectados, cualquiera de los dos puede enviar y recibir. Eso sí: una transferencia a la vez. Mientras una está en curso, el botón <strong>Enviar</strong> queda deshabilitado.</p>
+    <h2 data-i18n="b8">Qué está cifrado y qué significa el código de verificación</h2>
+    <p data-i18n-html="b9">El canal de WebRTC ya viene cifrado. Además, la herramienta cifra cada mensaje con AES-GCM de 256 bits, con una clave aleatoria que viaja solo dentro del QR: nunca por la red. Por eso conviene que el QR se lea de pantalla a cámara y no se comparta por un chat.</p>
+    <p data-i18n-html="b10">El código de verificación de 8 dígitos se calcula con esa clave y con las "huellas" de los certificados de ambos lados. Si alguien se hubiera puesto en el medio de la conexión, a cada lado le saldría un número distinto, y el código que escribe la otra persona no coincidiría. Hasta que los dos confirman, el canal no envía ni acepta archivos. Si el código se escribe mal 3 veces, la conexión se cierra.</p>
+    <h2 data-i18n="b11">Archivos chicos y archivos grandes</h2>
+    <p data-i18n-html="b12">La herramienta no pone un límite fijo de tamaño. Lo que cambia es cómo se guarda:</p>
+    <ul>
+      <li data-i18n-html="b13-1"><strong>Hasta 64 MB:</strong> el archivo se arma en la memoria del que recibe y lo guardás con el botón <strong>Guardar</strong>.</li>
+      <li data-i18n-html="b13-2"><strong>Más de 64 MB:</strong> en el que recibe aparece <strong>Empezar descarga</strong>, y el archivo se va escribiendo directo en la carpeta de descargas. Hace falta tocar el botón porque los navegadores del celular solo permiten una descarga que nace de un toque. Si el navegador no puede hacerlo así, usa el almacenamiento propio del sitio en el disco o, como último recurso, la memoria.</li>
+    </ul>
+    <p data-i18n-html="b14">Lo que limita es el espacio libre del dispositivo que recibe; la herramienta avisa cuando parece no alcanzar.</p>
+    <h2 data-i18n="b15">Cuando no conecta</h2>
+    <ul>
+      <li data-i18n-html="b16-1">Poné los dos dispositivos en la <strong>misma red WiFi</strong>: es el caso en que la conexión funciona siempre.</li>
+      <li data-i18n-html="b16-2">Entre redes distintas puede funcionar o no, según los routers. No hay servidor de reenvío, así que con datos móviles puede fallar. Si te pasa, activá el punto de acceso del celular y conectá la computadora a esa WiFi.</li>
+      <li data-i18n-html="b16-3">El QR dura 120 segundos. Si venció, se genera uno nuevo; escanealo de nuevo o tocá <strong>Empezar de nuevo</strong>.</li>
+      <li data-i18n-html="b16-4">Al tocar <strong>Mostrar mi QR</strong>, el navegador puede pedir permiso de cámara en el dispositivo que recibe. Ese permiso hace que el navegador entregue las direcciones reales de la red local, lo que ayuda a conectar; si lo negás, a veces falla.</li>
+    </ul>
+    <h2 data-i18n="b17">Límites que conviene conocer</h2>
+    <p data-i18n-html="b18">Ninguna herramienta de este tipo es mágica, y esta tampoco:</p>
+    <ul>
+      <li data-i18n-html="b19-1"><strong>Confirma que no hay un tercero en el medio, no que la otra punta sea de fiar.</strong> Si escaneás el QR de un desconocido, te conectás con un desconocido. Recibí solo de personas que tienen delante o que conocés.</li>
+      <li data-i18n-html="b19-2"><strong>El código con PIN tiene un límite.</strong> Si preferís pasar el código de texto por un chat, <strong>Copiar código con PIN</strong> lo protege con un PIN de 8 dígitos que se dice por otro medio. Quien capture el código y tenga mucho poder de cómputo podría intentar probar los 100 millones de PIN posibles; el cálculo lo vuelve costoso y el código vence junto con el QR, pero el límite existe.</li>
+      <li data-i18n-html="b19-3"><strong>La conexión se cierra sola</strong> si pasan 3 minutos sin enviar ni recibir nada (no cuenta mientras hay una transferencia en curso). Podés cerrarla antes con <strong>Cerrar conexión</strong>.</li>
+    </ul>
+    <h2 data-i18n="b20">Preguntas frecuentes</h2>
+    <h3 data-i18n="b21">¿Necesito instalar algo o crear una cuenta?</h3>
+    <p data-i18n-html="b22">No. Solo abrir la herramienta en los dos dispositivos con un navegador actual. La conexión se arma con los códigos QR; no hay usuarios ni contraseñas.</p>
+    <h3 data-i18n="b23">¿Puedo mandar varios archivos juntos?</h3>
+    <p data-i18n-html="b24">Sí. Los elegís todos, tocás <strong>Enviar</strong>, y quien recibe acepta la lista completa o la rechaza.</p>
+    <h2 data-i18n="b25">Resumen</h2>
+    <p data-i18n-html="b26">Para pasar archivos entre dos dispositivos sin cables ni cuentas, mostrá el QR en el que recibe, leelo con el otro, leé el QR de respuesta y confirmá el código de 8 dígitos en voz alta. Los archivos viajan directo, cifrados, y funciona mejor en la misma red WiFi. Es práctico para pasar fotos y documentos entre tus propios equipos; recordá que la verificación demuestra que no hay un intermediario, no que la persona del otro lado sea de confianza.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="https://seguro.minicookies.net/herramientas/enviar-archivos-qr" data-i18n="rel1">Enviar archivos con un QR</a></li>
+      <li><a href="../herramientas/lector-codigos.html" data-i18n="rel2">Lector de códigos QR y de barras</a></li>
+      <li><a href="../herramientas/generador-qr.html" data-i18n="rel3">Generador de códigos QR</a></li>
+      <li><a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas" data-i18n="rel4">Administrador de contraseñas</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo proteger un PDF con contraseña, y cómo quitarla — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué diferencia hay entre la contraseña para abrir y las restricciones de un PDF, cómo ponerle clave a un documento y cómo quitarla si la conocés.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo proteger un PDF con contraseña, y cómo quitarla — Mini Cookies',
+    'meta-descripcion': 'Qué diferencia hay entre la contraseña para abrir y las restricciones de un PDF, cómo ponerle clave a un documento y cómo quitarla si la conocés.',
+    'h1': 'Cómo proteger un PDF con contraseña, y cómo quitarla',
+    'b1': 'Un contrato, una nómina o un informe médico que viaja por correo o queda en una carpeta compartida conviene que solo lo abra quien debe. Un PDF puede llevar una contraseña, y también puede llevar restricciones. Son dos cosas distintas, y entender la diferencia evita confusiones.',
+    'b2': 'Contraseña y restricciones: no es lo mismo',
+    'b3-1': '<strong>La contraseña para abrir</strong> impide ver el documento. Sin ella, el archivo no se abre y su contenido está cifrado.',
+    'b3-2': '<strong>Las restricciones</strong> (o permisos) dejan abrir el documento pero indican a los programas que no permitan ciertas acciones: imprimir, copiar el texto o editar.',
+    'b4': 'Las restricciones dependen de que el programa que abre el PDF las respete; no protegen el contenido de la misma manera que el cifrado con contraseña de apertura. Si el documento es realmente confidencial, lo que cuenta es la contraseña para abrir.',
+    'b5': 'Cómo ponerle contraseña a un PDF',
+    'b6': 'Con <a href="../herramientas/proteger-pdf.html">Proteger PDF con contraseña</a> cifrás el PDF con AES-256 y obtenés una copia que pide contraseña para abrirse. El archivo original no se modifica.',
+    'b7-1': 'Arrastrá el PDF a la zona de carga. Vas a ver su miniatura y la cantidad de páginas.',
+    'b7-2': 'Escribí la <strong>contraseña para abrir el PDF</strong>. Es obligatoria.',
+    'b7-3': 'Si querés, completá la <strong>contraseña de propietario</strong>, la clave de administración que define el estándar de PDF, separada de la de apertura. Si la dejás vacía se usa la misma de apertura.',
+    'b7-4': 'Pulsá «Proteger PDF» y descargá el resultado. <strong>Probalo abriéndolo</strong> antes de enviarlo.',
+    'b8': 'La herramienta no guarda ninguna clave. Por eso, si la olvidás, <strong>no hay forma de recuperar el contenido</strong>.',
+    'b9': 'Cómo elegir una buena contraseña',
+    'b10-1': '<strong>Larga antes que complicada.</strong> Una frase de varias palabras o una clave de 14 caracteres o más resiste mejor que una palabra común con un número al final.',
+    'b10-2': '<strong>Que no se repita.</strong> No uses la misma clave que en el correo o en otros servicios.',
+    'b10-3': '<strong>Generala en lugar de inventarla.</strong> El <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a> del sitio crea claves aleatorias, y el <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a> te permite guardarlas sin depender de la memoria.',
+    'b10-4': '<strong>Envíala por otro medio.</strong> Si mandás el PDF por correo, mandá la contraseña por mensaje o por teléfono, no en el mismo correo.',
+    'b11': 'Cómo quitar la contraseña o las restricciones',
+    'b12': 'Quitar la clave de un PDF que es tuyo es útil cuando ya no necesitás protegerlo, o cuando hay que unirlo, dividirlo o editarlo, porque esas herramientas no pueden abrir un PDF cifrado.',
+    'b13': 'Con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>:',
+    'b14-1': 'Arrastrá el PDF protegido. La tarjeta te dice si pide contraseña, si se abre pero tiene restricciones, o si no tiene protección.',
+    'b14-2': 'Si pide contraseña, escribila en el campo «Contraseña del PDF». Si solo tiene restricciones, dejá el campo vacío.',
+    'b14-3': 'Pulsá «Desbloquear PDF» y descargá la copia sin contraseña ni restricciones.',
+    'b15': 'Hace falta <strong>conocer la clave</strong>: la herramienta no la adivina ni la rompe. Si el PDF pide contraseña y no la tenés, no hay forma de abrirlo con esta herramienta. Y conviene usarla con documentos propios o con permiso de quien los creó.',
+    'b16': 'Preguntas frecuentes',
+    'b17': '<strong>¿Se abre en cualquier programa?</strong> El PDF protegido se abre en Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos, que piden la contraseña al abrirlo.',
+    'b18': '<strong>¿Cambia el contenido al desbloquearlo?</strong> No: se guarda una copia con las mismas páginas, solo sin cifrado.',
+    'b19': '<strong>¿Puedo volver a protegerlo después?</strong> Sí. Desbloquealo, hacé lo que necesites y protegelo de nuevo con la clave que quieras.',
+    'b20': 'Resumen',
+    'b21': 'Para que solo lo abra quien debe, usá una contraseña para abrir, larga y generada, y envialá por otro canal. Las restricciones no sustituyen al cifrado. Guardá una copia sin protección en un lugar seguro: sin la clave, el archivo protegido no se puede recuperar.',
+    'rel1': 'Proteger PDF con contraseña',
+    'rel2': 'Desbloquear PDF',
+    'rel3': 'Generador de contraseñas',
+    'rel4': 'Administrador de contraseñas'
+  },
+  en: {
+    'titulo-pagina': 'How to Password-Protect a PDF, and How to Remove the Password — Mini Cookies',
+    'meta-descripcion': 'The difference between an open password and PDF restrictions, how to put a password on a document, and how to remove it if you know it.',
+    'h1': 'How to password-protect a PDF, and how to remove it',
+    'b1': 'A contract, a payslip or a medical report that travels by email or sits in a shared folder should only be opened by the people who are meant to see it. A PDF can carry a password, and it can also carry restrictions. They are two different things, and understanding the difference avoids confusion.',
+    'b2': 'Password vs. restrictions: they’re not the same',
+    'b3-1': '<strong>The open password</strong> prevents the document from being viewed. Without it, the file won’t open and its content is encrypted.',
+    'b3-2': '<strong>Restrictions</strong> (or permissions) let the document open but tell programs not to allow certain actions: printing, copying the text or editing.',
+    'b4': 'Restrictions depend on the program that opens the PDF respecting them; they don’t protect the content the way encryption with an open password does. If the document is truly confidential, what matters is the open password.',
+    'b5': 'How to put a password on a PDF',
+    'b6': 'With <a href="../herramientas/proteger-pdf.html">Password-protect a PDF</a> you encrypt the PDF with AES-256 and get a copy that asks for a password to open. The original file isn’t modified.',
+    'b7-1': 'Drag the PDF onto the upload area. You’ll see its thumbnail and page count.',
+    'b7-2': 'Type the <strong>password to open the PDF</strong>. It’s required.',
+    'b7-3': 'If you like, fill in the <strong>owner password</strong>, the administration key defined by the PDF standard, separate from the open password. If you leave it empty, the open password is used.',
+    'b7-4': 'Press "Protect PDF" and download the result. <strong>Try opening it</strong> before you send it.',
+    'b8': 'The tool doesn’t store any password. That’s why, if you forget it, <strong>there’s no way to recover the content</strong>.',
+    'b9': 'How to choose a good password',
+    'b10-1': '<strong>Long beats complicated.</strong> A phrase of several words or a key of 14 characters or more holds up better than a common word with a number at the end.',
+    'b10-2': '<strong>Don’t reuse it.</strong> Don’t use the same password as for your email or other services.',
+    'b10-3': '<strong>Generate it instead of making one up.</strong> The site’s <a href="../herramientas/generador-contrasenas.html">Password generator</a> creates random passwords, and the <a href="https://seguro.minicookies.net/en/herramientas/administrador-contrasenas">Password manager</a> lets you store them so you don’t depend on memory.',
+    'b10-4': '<strong>Send it a different way.</strong> If you email the PDF, send the password by message or phone, not in the same email.',
+    'b11': 'How to remove the password or restrictions',
+    'b12': 'Removing the password from a PDF that is yours is useful when you no longer need to protect it, or when you need to merge, split or edit it, because those tools can’t open an encrypted PDF.',
+    'b13': 'With <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a>:',
+    'b14-1': 'Drag the protected PDF onto the upload area. The card tells you whether it asks for a password, opens but has restrictions, or has no protection.',
+    'b14-2': 'If it asks for a password, type it in the "PDF password" field. If it only has restrictions, leave the field empty.',
+    'b14-3': 'Press "Unlock PDF" and download the copy without a password or restrictions.',
+    'b15': 'You need to <strong>know the password</strong>: the tool doesn’t guess it or crack it. If the PDF asks for a password and you don’t have it, there’s no way to open it with this tool. And it should be used on your own documents or with the permission of whoever created them.',
+    'b16': 'Frequently asked questions',
+    'b17': '<strong>Does it open in any program?</strong> The protected PDF opens in Adobe Reader, Chrome, Edge, Firefox and most modern readers, which ask for the password when you open it.',
+    'b18': '<strong>Does the content change when you unlock it?</strong> No: a copy is saved with the same pages, just without encryption.',
+    'b19': '<strong>Can I protect it again afterwards?</strong> Yes. Unlock it, do whatever you need, and protect it again with whatever password you like.',
+    'b20': 'Summary',
+    'b21': 'To make sure only the right people open it, use an open password that is long and generated, and send it through another channel. Restrictions are no substitute for encryption. Keep an unprotected copy in a safe place: without the password, the protected file can’t be recovered.',
+    'rel1': 'Password-protect a PDF',
+    'rel2': 'Unlock PDF',
+    'rel3': 'Password generator',
+    'rel4': 'Password manager'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo proteger un PDF con contraseña, y cómo quitarla</h1>
+    <p data-i18n-html="b1">Un contrato, una nómina o un informe médico que viaja por correo o queda en una carpeta compartida conviene que solo lo abra quien debe. Un PDF puede llevar una contraseña, y también puede llevar restricciones. Son dos cosas distintas, y entender la diferencia evita confusiones.</p>
+    <h2 data-i18n="b2">Contraseña y restricciones: no es lo mismo</h2>
+    <ul>
+      <li data-i18n-html="b3-1"><strong>La contraseña para abrir</strong> impide ver el documento. Sin ella, el archivo no se abre y su contenido está cifrado.</li>
+      <li data-i18n-html="b3-2"><strong>Las restricciones</strong> (o permisos) dejan abrir el documento pero indican a los programas que no permitan ciertas acciones: imprimir, copiar el texto o editar.</li>
+    </ul>
+    <p data-i18n-html="b4">Las restricciones dependen de que el programa que abre el PDF las respete; no protegen el contenido de la misma manera que el cifrado con contraseña de apertura. Si el documento es realmente confidencial, lo que cuenta es la contraseña para abrir.</p>
+    <h2 data-i18n="b5">Cómo ponerle contraseña a un PDF</h2>
+    <p data-i18n-html="b6">Con <a href="../herramientas/proteger-pdf.html">Proteger PDF con contraseña</a> cifrás el PDF con AES-256 y obtenés una copia que pide contraseña para abrirse. El archivo original no se modifica.</p>
+    <ol>
+      <li data-i18n-html="b7-1">Arrastrá el PDF a la zona de carga. Vas a ver su miniatura y la cantidad de páginas.</li>
+      <li data-i18n-html="b7-2">Escribí la <strong>contraseña para abrir el PDF</strong>. Es obligatoria.</li>
+      <li data-i18n-html="b7-3">Si querés, completá la <strong>contraseña de propietario</strong>, la clave de administración que define el estándar de PDF, separada de la de apertura. Si la dejás vacía se usa la misma de apertura.</li>
+      <li data-i18n-html="b7-4">Pulsá «Proteger PDF» y descargá el resultado. <strong>Probalo abriéndolo</strong> antes de enviarlo.</li>
+    </ol>
+    <p data-i18n-html="b8">La herramienta no guarda ninguna clave. Por eso, si la olvidás, <strong>no hay forma de recuperar el contenido</strong>.</p>
+    <h2 data-i18n="b9">Cómo elegir una buena contraseña</h2>
+    <ul>
+      <li data-i18n-html="b10-1"><strong>Larga antes que complicada.</strong> Una frase de varias palabras o una clave de 14 caracteres o más resiste mejor que una palabra común con un número al final.</li>
+      <li data-i18n-html="b10-2"><strong>Que no se repita.</strong> No uses la misma clave que en el correo o en otros servicios.</li>
+      <li data-i18n-html="b10-3"><strong>Generala en lugar de inventarla.</strong> El <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a> del sitio crea claves aleatorias, y el <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a> te permite guardarlas sin depender de la memoria.</li>
+      <li data-i18n-html="b10-4"><strong>Envíala por otro medio.</strong> Si mandás el PDF por correo, mandá la contraseña por mensaje o por teléfono, no en el mismo correo.</li>
+    </ul>
+    <h2 data-i18n="b11">Cómo quitar la contraseña o las restricciones</h2>
+    <p data-i18n-html="b12">Quitar la clave de un PDF que es tuyo es útil cuando ya no necesitás protegerlo, o cuando hay que unirlo, dividirlo o editarlo, porque esas herramientas no pueden abrir un PDF cifrado.</p>
+    <p data-i18n-html="b13">Con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>:</p>
+    <ol>
+      <li data-i18n-html="b14-1">Arrastrá el PDF protegido. La tarjeta te dice si pide contraseña, si se abre pero tiene restricciones, o si no tiene protección.</li>
+      <li data-i18n-html="b14-2">Si pide contraseña, escribila en el campo «Contraseña del PDF». Si solo tiene restricciones, dejá el campo vacío.</li>
+      <li data-i18n-html="b14-3">Pulsá «Desbloquear PDF» y descargá la copia sin contraseña ni restricciones.</li>
+    </ol>
+    <p data-i18n-html="b15">Hace falta <strong>conocer la clave</strong>: la herramienta no la adivina ni la rompe. Si el PDF pide contraseña y no la tenés, no hay forma de abrirlo con esta herramienta. Y conviene usarla con documentos propios o con permiso de quien los creó.</p>
+    <h2 data-i18n="b16">Preguntas frecuentes</h2>
+    <p data-i18n-html="b17"><strong>¿Se abre en cualquier programa?</strong> El PDF protegido se abre en Adobe Reader, Chrome, Edge, Firefox y la mayoría de lectores modernos, que piden la contraseña al abrirlo.</p>
+    <p data-i18n-html="b18"><strong>¿Cambia el contenido al desbloquearlo?</strong> No: se guarda una copia con las mismas páginas, solo sin cifrado.</p>
+    <p data-i18n-html="b19"><strong>¿Puedo volver a protegerlo después?</strong> Sí. Desbloquealo, hacé lo que necesites y protegelo de nuevo con la clave que quieras.</p>
+    <h2 data-i18n="b20">Resumen</h2>
+    <p data-i18n-html="b21">Para que solo lo abra quien debe, usá una contraseña para abrir, larga y generada, y envialá por otro canal. Las restricciones no sustituyen al cifrado. Guardá una copia sin protección en un lugar seguro: sin la clave, el archivo protegido no se puede recuperar.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/proteger-pdf.html" data-i18n="rel1">Proteger PDF con contraseña</a></li>
+      <li><a href="../herramientas/desbloquear-pdf.html" data-i18n="rel2">Desbloquear PDF</a></li>
+      <li><a href="../herramientas/generador-contrasenas.html" data-i18n="rel3">Generador de contraseñas</a></li>
+      <li><a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas" data-i18n="rel4">Administrador de contraseñas</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

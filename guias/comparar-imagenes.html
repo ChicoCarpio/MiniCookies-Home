@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo comparar dos imágenes y ver qué cambió — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Encontrá las diferencias entre dos imágenes píxel a píxel: tolerancia, porcentaje de cambio y usos como revisar diseños o capturas.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo comparar dos imágenes y ver qué cambió — Mini Cookies',
+    'meta-descripcion': 'Encontrá las diferencias entre dos imágenes píxel a píxel: tolerancia, porcentaje de cambio y usos como revisar diseños o capturas.',
+    'h1': 'Cómo comparar dos imágenes y ver qué cambió',
+    'b1': 'A simple vista, dos versiones de un diseño o dos capturas de una misma página pueden parecer idénticas. Encontrar el botón que se movió tres píxeles o el tono que cambió apenas es difícil y, además, cansador. <a href="../herramientas/comparar-imagenes.html">Comparar dos imágenes</a> hace ese trabajo: marca en rojo intenso los píxeles que difieren y deja el resto atenuado en gris, y te dice qué porcentaje cambió.',
+    'b2': 'Cuándo es útil',
+    'b3-1': '<strong>Antes y después de un retoque.</strong> Para ver exactamente qué zonas tocó el editor de fotos.',
+    'b3-2': '<strong>Revisión de diseños.</strong> Comparar la versión que entregó el diseñador con la que se publicó.',
+    'b3-3': '<strong>Capturas de pantalla.</strong> Detectar cambios en una página o una aplicación entre dos fechas.',
+    'b3-4': '<strong>Compresión.</strong> Ver cuánto se alteró una imagen al guardarla en otro formato o con menos calidad.',
+    'b4': 'Cómo se usa',
+    'b5-1': 'En <strong>Imagen A</strong> cargá la primera imagen (suele ser la original).',
+    'b5-2': 'En <strong>Imagen B</strong> cargá la segunda, la que querés contrastar.',
+    'b5-3': 'Ajustá la <strong>Tolerancia</strong> con el deslizador (de 5 a 120; viene en 30).',
+    'b5-4': 'Tocá <strong>Comparar</strong>.',
+    'b5-5': 'Mirá el resultado y el valor de <strong>Píxeles distintos</strong>. Si te sirve, descargá la imagen de diferencias con <strong>Descargar imagen de diferencias</strong>: sale como <code>comparacion.png</code>.',
+    'b6': 'Cómo leer el resultado',
+    'b7': 'La imagen resultante tiene dos tipos de zonas. Lo <strong>rojo intenso</strong> son los píxeles que la herramienta considera distintos; lo <strong>gris atenuado</strong> es el resto, que se muestra solo como referencia para que ubiques cada cambio en la imagen. Debajo aparece el porcentaje de píxeles distintos, con dos decimales, calculado sobre el total de píxeles de la imagen A.',
+    'b8': 'Interpretalo con criterio: un 0,5 % repartido en puntitos dispersos suele ser ruido de compresión; un 0,5 % concentrado en un bloque es un cambio real, como un texto distinto. La ubicación y la forma de lo rojo importan tanto como el número.',
+    'b9': 'La tolerancia, el control clave',
+    'b10': 'Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si esa suma supera la tolerancia, el píxel se marca como distinto.',
+    'b11-1': '<strong>Tolerancia más alta:</strong> ignora diferencias pequeñas. Subila cuando compares JPG o capturas con compresión, porque esas variaciones mínimas de color no son cambios reales.',
+    'b11-2': '<strong>Tolerancia más baja:</strong> detecta diferencias sutiles, como un leve cambio de tono.',
+    'b12': 'Un buen método: empezá con el valor por defecto y, si ves ruido por toda la imagen, subila hasta que quede solo lo importante.',
+    'b13': 'Consejos para comparar bien',
+    'b14-1': '<strong>Usá imágenes del mismo tamaño y proporción.</strong> Si difieren, la herramienta avisa que la B se estira al tamaño de la A antes de comparar, y esa deformación genera diferencias falsas. Si hace falta igualarlas antes, usá <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> o <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.',
+    'b14-2': '<strong>Alineá las imágenes.</strong> Si una captura está desplazada unos pocos píxeles, casi todo aparecerá como distinto. Recortá ambas desde el mismo punto.',
+    'b14-3': '<strong>Comparar JPG con PNG.</strong> Aunque el contenido sea el mismo, el JPG introduce pequeñas variaciones; compensalas con más tolerancia. Para cuantificar cuánto pierde una compresión, comparar el original con la versión de <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> es un buen ejercicio.',
+    'b14-4': '<strong>Guardá el resultado.</strong> La imagen de diferencias es un buen respaldo para mostrar a otra persona qué cambió.',
+    'b15': 'Límites',
+    'b16-1': 'La comparación usa solo los canales de color: la transparencia no se tiene en cuenta.',
+    'b16-2': 'Compara píxeles, no significado: un desplazamiento mínimo o un cambio de brillo general puede marcarse como «distinto» aunque el contenido sea el mismo.',
+    'b16-3': 'Acepta las imágenes que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.',
+    'b17': 'Preguntas frecuentes',
+    'b18': '<strong>¿El porcentaje es exacto?</strong> Es la proporción de píxeles marcados sobre el total de la imagen A, con dos decimales; depende de la tolerancia que elijas.',
+    'b19': '<strong>¿Por qué me aparece casi todo en rojo?</strong> Lo más probable es que las imágenes estén desalineadas, tengan tamaños distintos o que la tolerancia sea muy baja para formatos con compresión.',
+    'b20': '<strong>¿Qué formato tiene la imagen descargada?</strong> PNG.',
+    'b21': 'Resumen',
+    'b22': 'Cargá la imagen A y la B, ajustá la tolerancia (más alta para ignorar ruido de compresión, más baja para ver cambios sutiles) y tocá Comparar. Lo rojo son los cambios; el porcentaje de píxeles distintos te da una idea de cuánto cambió. Para resultados fiables, usá imágenes del mismo tamaño y bien alineadas.',
+    'rel1': 'Comparar dos imágenes',
+    'rel2': 'Redimensionar imagen',
+    'rel3': 'Recortar imagen',
+    'rel4': 'Comprimir imagen'
+  },
+  en: {
+    'titulo-pagina': 'How to compare two images and see what changed — Mini Cookies',
+    'meta-descripcion': 'Find the differences between two images pixel by pixel: tolerance, percentage of change and uses such as reviewing designs or screenshots.',
+    'h1': 'How to compare two images and see what changed',
+    'b1': 'At a glance, two versions of a design or two screenshots of the same page can look identical. Finding the button that moved three pixels or the shade that changed slightly is hard and tiring. <a href="../herramientas/comparar-imagenes.html">Compare two images</a> does that work for you: it marks the differing pixels in bright red, dims the rest in gray, and tells you what percentage changed.',
+    'b2': 'When it’s useful',
+    'b3-1': '<strong>Before and after a retouch.</strong> To see exactly which areas the photo editor touched.',
+    'b3-2': '<strong>Design review.</strong> Compare the version the designer delivered with the one that was published.',
+    'b3-3': '<strong>Screenshots.</strong> Detect changes in a page or an app between two dates.',
+    'b3-4': '<strong>Compression.</strong> See how much an image changed when saved in another format or at lower quality.',
+    'b4': 'How to use it',
+    'b5-1': 'In "Image A", load the first image (usually the original).',
+    'b5-2': 'In "Image B", load the second one, the one you want to check against it.',
+    'b5-3': 'Adjust the "Tolerance" with the slider (from 5 to 120; it starts at 30).',
+    'b5-4': 'Tap "Compare".',
+    'b5-5': 'Look at the result and the "Pixels that differ" value. If it’s useful, download the difference image with "Download the difference image": it comes out as <code>comparacion.png</code>.',
+    'b6': 'How to read the result',
+    'b7': 'The resulting image has two kinds of areas. The <strong>bright red</strong> is the pixels the tool considers different; the <strong>dimmed gray</strong> is everything else, shown only as a reference so you can locate each change in the image. Below it you’ll see the percentage of differing pixels, with two decimals, calculated over the total pixels of image A.',
+    'b8': 'Interpret it with judgment: 0.5% spread across scattered dots is usually compression noise; 0.5% concentrated in one block is a real change, such as different text. The location and shape of the red matter as much as the number.',
+    'b9': 'Tolerance, the key control',
+    'b10': 'For each pixel, the tool adds up the red, green and blue differences between A and B. If that sum exceeds the tolerance, the pixel is marked as different.',
+    'b11-1': '<strong>Higher tolerance:</strong> ignores small differences. Raise it when comparing JPGs or compressed screenshots, because those tiny color variations aren’t real changes.',
+    'b11-2': '<strong>Lower tolerance:</strong> detects subtle differences, such as a slight change of tone.',
+    'b12': 'A good method: start with the default value and, if you see noise all over the image, raise it until only what matters is left.',
+    'b13': 'Tips for comparing well',
+    'b14-1': '<strong>Use images of the same size and proportions.</strong> If they differ, the tool warns you that B is stretched to A’s size before comparing, and that distortion creates false differences. If you need to match them first, use <a href="../herramientas/redimensionar-imagen.html">Resize an image</a> or <a href="../herramientas/recortar-imagen.html">Crop an image</a>.',
+    'b14-2': '<strong>Align the images.</strong> If one screenshot is shifted by a few pixels, almost everything will show up as different. Crop both from the same point.',
+    'b14-3': '<strong>Comparing JPG with PNG.</strong> Even if the content is the same, the JPG introduces small variations; compensate with more tolerance. To measure how much a compression loses, comparing the original with the version from <a href="../herramientas/comprimir-imagen.html">Compress an image</a> is a good exercise.',
+    'b14-4': '<strong>Save the result.</strong> The difference image is a handy way to show someone else what changed.',
+    'b15': 'Limits',
+    'b16-1': 'The comparison uses only the color channels: transparency isn’t taken into account.',
+    'b16-2': 'It compares pixels, not meaning: a tiny shift or an overall change in brightness can be flagged as "different" even though the content is the same.',
+    'b16-3': 'It accepts any image your browser can open, such as JPG, PNG, WebP or GIF.',
+    'b17': 'Frequently asked questions',
+    'b18': '<strong>Is the percentage exact?</strong> It’s the proportion of marked pixels over the total of image A, with two decimals; it depends on the tolerance you choose.',
+    'b19': '<strong>Why does almost everything show up in red?</strong> Most likely the images are misaligned, have different sizes, or the tolerance is too low for compressed formats.',
+    'b20': '<strong>What format is the downloaded image?</strong> PNG.',
+    'b21': 'Summary',
+    'b22': 'Load image A and image B, adjust the tolerance (higher to ignore compression noise, lower to see subtle changes) and tap Compare. The red is the changes; the percentage of differing pixels gives you an idea of how much changed. For reliable results, use images of the same size that are well aligned.',
+    'rel1': 'Compare two images',
+    'rel2': 'Resize an image',
+    'rel3': 'Crop an image',
+    'rel4': 'Compress an image'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo comparar dos imágenes y ver qué cambió</h1>
+    <p data-i18n-html="b1">A simple vista, dos versiones de un diseño o dos capturas de una misma página pueden parecer idénticas. Encontrar el botón que se movió tres píxeles o el tono que cambió apenas es difícil y, además, cansador. <a href="../herramientas/comparar-imagenes.html">Comparar dos imágenes</a> hace ese trabajo: marca en rojo intenso los píxeles que difieren y deja el resto atenuado en gris, y te dice qué porcentaje cambió.</p>
+    <h2 data-i18n="b2">Cuándo es útil</h2>
+    <ul>
+      <li data-i18n-html="b3-1"><strong>Antes y después de un retoque.</strong> Para ver exactamente qué zonas tocó el editor de fotos.</li>
+      <li data-i18n-html="b3-2"><strong>Revisión de diseños.</strong> Comparar la versión que entregó el diseñador con la que se publicó.</li>
+      <li data-i18n-html="b3-3"><strong>Capturas de pantalla.</strong> Detectar cambios en una página o una aplicación entre dos fechas.</li>
+      <li data-i18n-html="b3-4"><strong>Compresión.</strong> Ver cuánto se alteró una imagen al guardarla en otro formato o con menos calidad.</li>
+    </ul>
+    <h2 data-i18n="b4">Cómo se usa</h2>
+    <ol>
+      <li data-i18n-html="b5-1">En <strong>Imagen A</strong> cargá la primera imagen (suele ser la original).</li>
+      <li data-i18n-html="b5-2">En <strong>Imagen B</strong> cargá la segunda, la que querés contrastar.</li>
+      <li data-i18n-html="b5-3">Ajustá la <strong>Tolerancia</strong> con el deslizador (de 5 a 120; viene en 30).</li>
+      <li data-i18n-html="b5-4">Tocá <strong>Comparar</strong>.</li>
+      <li data-i18n-html="b5-5">Mirá el resultado y el valor de <strong>Píxeles distintos</strong>. Si te sirve, descargá la imagen de diferencias con <strong>Descargar imagen de diferencias</strong>: sale como <code>comparacion.png</code>.</li>
+    </ol>
+    <h2 data-i18n="b6">Cómo leer el resultado</h2>
+    <p data-i18n-html="b7">La imagen resultante tiene dos tipos de zonas. Lo <strong>rojo intenso</strong> son los píxeles que la herramienta considera distintos; lo <strong>gris atenuado</strong> es el resto, que se muestra solo como referencia para que ubiques cada cambio en la imagen. Debajo aparece el porcentaje de píxeles distintos, con dos decimales, calculado sobre el total de píxeles de la imagen A.</p>
+    <p data-i18n-html="b8">Interpretalo con criterio: un 0,5 % repartido en puntitos dispersos suele ser ruido de compresión; un 0,5 % concentrado en un bloque es un cambio real, como un texto distinto. La ubicación y la forma de lo rojo importan tanto como el número.</p>
+    <h2 data-i18n="b9">La tolerancia, el control clave</h2>
+    <p data-i18n-html="b10">Para cada píxel, la herramienta suma las diferencias de rojo, verde y azul entre A y B. Si esa suma supera la tolerancia, el píxel se marca como distinto.</p>
+    <ul>
+      <li data-i18n-html="b11-1"><strong>Tolerancia más alta:</strong> ignora diferencias pequeñas. Subila cuando compares JPG o capturas con compresión, porque esas variaciones mínimas de color no son cambios reales.</li>
+      <li data-i18n-html="b11-2"><strong>Tolerancia más baja:</strong> detecta diferencias sutiles, como un leve cambio de tono.</li>
+    </ul>
+    <p data-i18n-html="b12">Un buen método: empezá con el valor por defecto y, si ves ruido por toda la imagen, subila hasta que quede solo lo importante.</p>
+    <h2 data-i18n="b13">Consejos para comparar bien</h2>
+    <ol>
+      <li data-i18n-html="b14-1"><strong>Usá imágenes del mismo tamaño y proporción.</strong> Si difieren, la herramienta avisa que la B se estira al tamaño de la A antes de comparar, y esa deformación genera diferencias falsas. Si hace falta igualarlas antes, usá <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a> o <a href="../herramientas/recortar-imagen.html">Recortar imagen</a>.</li>
+      <li data-i18n-html="b14-2"><strong>Alineá las imágenes.</strong> Si una captura está desplazada unos pocos píxeles, casi todo aparecerá como distinto. Recortá ambas desde el mismo punto.</li>
+      <li data-i18n-html="b14-3"><strong>Comparar JPG con PNG.</strong> Aunque el contenido sea el mismo, el JPG introduce pequeñas variaciones; compensalas con más tolerancia. Para cuantificar cuánto pierde una compresión, comparar el original con la versión de <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> es un buen ejercicio.</li>
+      <li data-i18n-html="b14-4"><strong>Guardá el resultado.</strong> La imagen de diferencias es un buen respaldo para mostrar a otra persona qué cambió.</li>
+    </ol>
+    <h2 data-i18n="b15">Límites</h2>
+    <ul>
+      <li data-i18n-html="b16-1">La comparación usa solo los canales de color: la transparencia no se tiene en cuenta.</li>
+      <li data-i18n-html="b16-2">Compara píxeles, no significado: un desplazamiento mínimo o un cambio de brillo general puede marcarse como «distinto» aunque el contenido sea el mismo.</li>
+      <li data-i18n-html="b16-3">Acepta las imágenes que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.</li>
+    </ul>
+    <h2 data-i18n="b17">Preguntas frecuentes</h2>
+    <p data-i18n-html="b18"><strong>¿El porcentaje es exacto?</strong> Es la proporción de píxeles marcados sobre el total de la imagen A, con dos decimales; depende de la tolerancia que elijas.</p>
+    <p data-i18n-html="b19"><strong>¿Por qué me aparece casi todo en rojo?</strong> Lo más probable es que las imágenes estén desalineadas, tengan tamaños distintos o que la tolerancia sea muy baja para formatos con compresión.</p>
+    <p data-i18n-html="b20"><strong>¿Qué formato tiene la imagen descargada?</strong> PNG.</p>
+    <h2 data-i18n="b21">Resumen</h2>
+    <p data-i18n-html="b22">Cargá la imagen A y la B, ajustá la tolerancia (más alta para ignorar ruido de compresión, más baja para ver cambios sutiles) y tocá Comparar. Lo rojo son los cambios; el porcentaje de píxeles distintos te da una idea de cuánto cambió. Para resultados fiables, usá imágenes del mismo tamaño y bien alineadas.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/comparar-imagenes.html" data-i18n="rel1">Comparar dos imágenes</a></li>
+      <li><a href="../herramientas/redimensionar-imagen.html" data-i18n="rel2">Redimensionar imagen</a></li>
+      <li><a href="../herramientas/recortar-imagen.html" data-i18n="rel3">Recortar imagen</a></li>
+      <li><a href="../herramientas/comprimir-imagen.html" data-i18n="rel4">Comprimir imagen</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

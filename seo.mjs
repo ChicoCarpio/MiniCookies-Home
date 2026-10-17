@@ -102,6 +102,9 @@ export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
     // El sitio seguro no tiene páginas de categoría.
     if (cat && !ES_SEGURO) migas.push({ name: CATEGORIAS[cat], item: `${SITIO}/${cat}.html` });
     migas.push({ name: titulo.split('—')[0].split('|')[0].trim(), item: url });
+  } else if (ruta.startsWith('guias/') && ruta !== 'guias/index.html') {
+    migas.push({ name: esIngles ? 'Guides' : 'Guías', item: urlDe((esIngles ? 'en/' : '') + 'guias/') });
+    migas.push({ name: titulo.split('—')[0].split('|')[0].trim(), item: url });
   } else if (ruta !== 'index.html') {
     migas.push({ name: titulo.split('—')[0].split('|')[0].trim(), item: url });
   }
@@ -133,6 +136,16 @@ export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
       url: SITIO + '/',
       description: desc,
       inLanguage: esIngles ? 'en' : 'es',
+      publisher: { '@type': 'Organization', name: 'Mini Cookies', url: SITIO + '/', logo: IMAGEN_SOCIAL },
+    });
+  } else if (ruta.startsWith('guias/')) {
+    const nombre = titulo.split('—')[0].split('|')[0].trim();
+    datos.push(ruta === 'guias/index.html' ? {
+      '@context': 'https://schema.org', '@type': 'CollectionPage', name: nombre, description: desc, url, inLanguage: esIngles ? 'en' : 'es',
+      isPartOf: { '@type': 'WebSite', name: 'Mini Cookies', url: SITIO + '/' },
+    } : {
+      '@context': 'https://schema.org', '@type': 'Article', headline: nombre, description: desc, url, inLanguage: esIngles ? 'en' : 'es',
+      mainEntityOfPage: url, isAccessibleForFree: true,
       publisher: { '@type': 'Organization', name: 'Mini Cookies', url: SITIO + '/', logo: IMAGEN_SOCIAL },
     });
   } else if (esCategoria) {

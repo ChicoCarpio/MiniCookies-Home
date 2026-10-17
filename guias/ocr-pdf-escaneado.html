@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo convertir un PDF escaneado en texto que se pueda copiar (OCR) — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué es el OCR y cómo usarlo para buscar y copiar texto en escaneos y fotos de documentos. Consejos para que la lectura salga bien.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo convertir un PDF escaneado en texto que se pueda copiar (OCR) — Mini Cookies',
+    'meta-descripcion': 'Qué es el OCR y cómo usarlo para buscar y copiar texto en escaneos y fotos de documentos. Consejos para que la lectura salga bien.',
+    'h1': 'Cómo convertir un PDF escaneado en texto que se pueda copiar (OCR)',
+    'b1': 'Un PDF escaneado se ve bien, pero si intentás buscar una palabra o copiar un párrafo, no pasa nada. No es un fallo del archivo: por dentro, un escaneo es una pila de fotos, una por hoja, y las fotos no contienen letras que un programa pueda seleccionar. El <strong>OCR</strong> (reconocimiento óptico de caracteres) lee esas fotos y recupera el texto.',
+    'b2': 'Cómo saber si tu PDF necesita OCR',
+    'b3': 'Abrí el PDF y probá seleccionar una frase con el cursor, o usá la búsqueda del lector. Si no se selecciona nada, o la búsqueda no encuentra palabras que sí ves en la página, es un escaneo. Lo mismo vale para las fotos de documentos tomadas con el celular.',
+    'b4': 'Cómo hacer OCR con OCR de PDF e imágenes escaneadas',
+    'b5': 'La herramienta <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a> te devuelve dos cosas: un <strong>PDF con el mismo aspecto que el original pero con una capa de texto invisible</strong>, donde ya podés buscar y copiar, y un archivo <strong>.txt</strong> con todo lo reconocido.',
+    'b6-1': '<strong>Elegí los idiomas</strong> de tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.',
+    'b6-2': '<strong>Enderezado.</strong> Dejá activado «Enderezar automáticamente páginas/fotos torcidas» si sacaste fotos con el celular; desactivalo si ya están derechas.',
+    'b6-3': '<strong>Preprocesamiento.</strong> «Contraste automático» funciona bien casi siempre. «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios, y «Ninguno» conviene si el escaneo ya es nítido y a color.',
+    'b6-4': '<strong>Cargá los archivos.</strong> Podés subir uno o varios PDF e imágenes, combinarlos y reordenar las miniaturas: el resultado respeta ese orden.',
+    'b6-5': '<strong>Reconocer.</strong> Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.',
+    'b7': 'Cómo conseguir una buena lectura',
+    'b8': 'La calidad del texto reconocido depende sobre todo de la calidad de la imagen.',
+    'b9-1': '<strong>Resolución:</strong> escaneá a 200–300 puntos por pulgada. Las fotos angostas (menos de 1800 píxeles de ancho) se agrandan antes de leerlas, pero conviene partir de una buena imagen.',
+    'b9-2': '<strong>Texto derecho y bien iluminado.</strong> Evitá sombras fuertes. Una foto con sombras suele leerse mejor con «Contraste automático» que con blanco y negro puro.',
+    'b9-3': '<strong>Documentos con varios idiomas:</strong> marcá todos los que aparecen. Se pueden usar a la vez, pero cuantos más elijas más lenta es la lectura, así que marcá solo los necesarios.',
+    'b9-4': '<strong>Probá otro preprocesamiento</strong> si la lectura sale con errores.',
+    'b10': 'Lo que el OCR no hace bien',
+    'b11': 'El motor está pensado para <strong>texto impreso</strong>. La letra manuscrita no se reconoce de forma confiable, y el texto muy borroso o las fotos con sombras fuertes pueden salir con errores o no reconocerse. Siempre revisá el resultado antes de usarlo, sobre todo si son cifras, nombres o fechas.',
+    'b12': 'Qué cambia en el PDF resultante',
+    'b13': 'Cada página del PDF nuevo se guarda como una imagen JPEG con el texto invisible encima. Por eso:',
+    'b14-1': 'el <strong>peso</strong> puede cambiar respecto al original (si hace falta, pasalo por <a href="../herramientas/optimizar-pdf.html">Comprimir / optimizar PDF</a>);',
+    'b14-2': 'lo que era vectorial en el original (gráficos hechos con líneas) deja de serlo.',
+    'b15': 'Por eso conviene <strong>guardar siempre el archivo original</strong>.',
+    'b16': 'Otras cosas útiles después del OCR',
+    'b17-1': 'Si solo querés el texto de un PDF que <strong>ya</strong> tiene texto (no es un escaneo), usá <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a>: es más rápido y exacto, porque no hace falta reconocer nada.',
+    'b17-2': 'Si alguna página quedó de costado, corregila con <a href="../herramientas/rotar-pdf.html">Rotar PDF</a>.',
+    'b18': 'Preguntas frecuentes',
+    'b19': '<strong>¿Cuánto tarda?</strong> Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.',
+    'b20': '<strong>¿Puedo hacer OCR a una foto en lugar de un PDF?</strong> Sí: la herramienta acepta imágenes y PDF, solos o combinados.',
+    'b21': 'Resumen',
+    'b22': 'Si no podés buscar ni copiar texto en un PDF, es un escaneo. Con el OCR recuperás el texto y obtenés un PDF buscable. Escaneá con buena resolución, elegí los idiomas justos, revisá el resultado y guardá el original.',
+    'rel1': 'OCR de PDF e imágenes escaneadas',
+    'rel2': 'PDF ↔ Texto',
+    'rel3': 'Rotar PDF',
+    'rel4': 'Comprimir / optimizar PDF'
+  },
+  en: {
+    'titulo-pagina': 'How to Turn a Scanned PDF into Copyable Text (OCR) — Mini Cookies',
+    'meta-descripcion': 'What OCR is and how to use it to search and copy text in scans and photos of documents. Tips to get a clean reading.',
+    'h1': 'How to Turn a Scanned PDF into Copyable Text (OCR)',
+    'b1': 'A scanned PDF looks fine, but if you try to search for a word or copy a paragraph, nothing happens. It’s not a fault in the file: on the inside, a scan is a stack of pictures, one per sheet, and pictures don’t contain letters that a program can select. <strong>OCR</strong> (optical character recognition) reads those pictures and recovers the text.',
+    'b2': 'How to tell if your PDF needs OCR',
+    'b3': 'Open the PDF and try selecting a sentence with the cursor, or use your viewer’s search. If nothing gets selected, or the search can’t find words you can clearly see on the page, it’s a scan. The same goes for photos of documents taken with your phone.',
+    'b4': 'How to run OCR with OCR for scanned PDFs and images',
+    'b5': 'The <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a> tool gives you back two things: a <strong>PDF that looks like the original but with an invisible text layer</strong>, where you can now search and copy, and a <strong>.txt</strong> file with everything it recognized.',
+    'b6-1': '<strong>Choose the languages</strong> of your document under "Languages to recognize". Spanish and English are ticked by default; add another only if you need it, because each language adds a download the first time.',
+    'b6-2': '<strong>Straightening.</strong> Leave "Automatically straighten tilted pages/photos" on if you took photos with your phone; turn it off if they’re already straight.',
+    'b6-3': '<strong>Preprocessing.</strong> "Automatic contrast" works well almost every time. "Pure black and white (Otsu)" helps with very clean scans, and "None" is best if the scan is already sharp and in color.',
+    'b6-4': '<strong>Load your files.</strong> You can upload one or several PDFs and images, mix them and reorder the thumbnails: the result follows that order.',
+    'b6-5': '<strong>Recognize.</strong> Press "Recognize text (OCR)", wait for the progress bar to finish and download the PDF with searchable text or the .txt.',
+    'b7': 'How to get a good reading',
+    'b8': 'The quality of the recognized text depends mostly on the quality of the image.',
+    'b9-1': '<strong>Resolution:</strong> scan at 200–300 dots per inch. Narrow photos (under 1800 pixels wide) are enlarged before being read, but it’s best to start from a good image.',
+    'b9-2': '<strong>Straight, well-lit text.</strong> Avoid strong shadows. A photo with shadows usually reads better with "Automatic contrast" than with pure black and white.',
+    'b9-3': '<strong>Documents in several languages:</strong> tick all the ones that appear. They can be used together, but the more you pick the slower the reading gets, so tick only the ones you need.',
+    'b9-4': '<strong>Try a different preprocessing</strong> if the reading comes out with mistakes.',
+    'b10': 'What OCR doesn’t do well',
+    'b11': 'The engine is designed for <strong>printed text</strong>. Handwriting isn’t recognized reliably, and very blurry text or photos with strong shadows may come out with errors or not be recognized at all. Always check the result before using it, especially if it contains figures, names or dates.',
+    'b12': 'What changes in the resulting PDF',
+    'b13': 'Each page of the new PDF is stored as a JPEG image with the invisible text on top. That’s why:',
+    'b14-1': 'the <strong>file size</strong> may change compared with the original (if needed, run it through <a href="../herramientas/optimizar-pdf.html">Compress / optimize PDF</a>);',
+    'b14-2': 'anything that was vector in the original (graphics made of lines) no longer is.',
+    'b15': 'That’s why it’s a good idea to <strong>always keep the original file</strong>.',
+    'b16': 'Other useful things to do after OCR',
+    'b17-1': 'If you only want the text of a PDF that <strong>already</strong> has text (it isn’t a scan), use <a href="../herramientas/pdf-texto.html">PDF ↔ Text</a>: it’s faster and more accurate, because there’s nothing to recognize.',
+    'b17-2': 'If a page ended up sideways, fix it with <a href="../herramientas/rotar-pdf.html">Rotate PDF</a>.',
+    'b18': 'Frequently asked questions',
+    'b19': '<strong>How long does it take?</strong> It depends on the number of pages and languages. Pages are recognized one at a time, and the first run takes longer because the engine and each language’s data have to load.',
+    'b20': '<strong>Can I run OCR on a photo instead of a PDF?</strong> Yes: the tool accepts images and PDFs, on their own or combined.',
+    'b21': 'Summary',
+    'b22': 'If you can’t search or copy text in a PDF, it’s a scan. With OCR you recover the text and get a searchable PDF. Scan at a good resolution, pick just the languages you need, check the result and keep the original.',
+    'rel1': 'OCR for scanned PDFs and images',
+    'rel2': 'PDF ↔ Text',
+    'rel3': 'Rotate PDF',
+    'rel4': 'Compress / optimize PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo convertir un PDF escaneado en texto que se pueda copiar (OCR)</h1>
+    <p data-i18n-html="b1">Un PDF escaneado se ve bien, pero si intentás buscar una palabra o copiar un párrafo, no pasa nada. No es un fallo del archivo: por dentro, un escaneo es una pila de fotos, una por hoja, y las fotos no contienen letras que un programa pueda seleccionar. El <strong>OCR</strong> (reconocimiento óptico de caracteres) lee esas fotos y recupera el texto.</p>
+    <h2 data-i18n="b2">Cómo saber si tu PDF necesita OCR</h2>
+    <p data-i18n-html="b3">Abrí el PDF y probá seleccionar una frase con el cursor, o usá la búsqueda del lector. Si no se selecciona nada, o la búsqueda no encuentra palabras que sí ves en la página, es un escaneo. Lo mismo vale para las fotos de documentos tomadas con el celular.</p>
+    <h2 data-i18n="b4">Cómo hacer OCR con OCR de PDF e imágenes escaneadas</h2>
+    <p data-i18n-html="b5">La herramienta <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a> te devuelve dos cosas: un <strong>PDF con el mismo aspecto que el original pero con una capa de texto invisible</strong>, donde ya podés buscar y copiar, y un archivo <strong>.txt</strong> con todo lo reconocido.</p>
+    <ol>
+      <li data-i18n-html="b6-1"><strong>Elegí los idiomas</strong> de tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.</li>
+      <li data-i18n-html="b6-2"><strong>Enderezado.</strong> Dejá activado «Enderezar automáticamente páginas/fotos torcidas» si sacaste fotos con el celular; desactivalo si ya están derechas.</li>
+      <li data-i18n-html="b6-3"><strong>Preprocesamiento.</strong> «Contraste automático» funciona bien casi siempre. «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios, y «Ninguno» conviene si el escaneo ya es nítido y a color.</li>
+      <li data-i18n-html="b6-4"><strong>Cargá los archivos.</strong> Podés subir uno o varios PDF e imágenes, combinarlos y reordenar las miniaturas: el resultado respeta ese orden.</li>
+      <li data-i18n-html="b6-5"><strong>Reconocer.</strong> Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.</li>
+    </ol>
+    <h2 data-i18n="b7">Cómo conseguir una buena lectura</h2>
+    <p data-i18n-html="b8">La calidad del texto reconocido depende sobre todo de la calidad de la imagen.</p>
+    <ul>
+      <li data-i18n-html="b9-1"><strong>Resolución:</strong> escaneá a 200–300 puntos por pulgada. Las fotos angostas (menos de 1800 píxeles de ancho) se agrandan antes de leerlas, pero conviene partir de una buena imagen.</li>
+      <li data-i18n-html="b9-2"><strong>Texto derecho y bien iluminado.</strong> Evitá sombras fuertes. Una foto con sombras suele leerse mejor con «Contraste automático» que con blanco y negro puro.</li>
+      <li data-i18n-html="b9-3"><strong>Documentos con varios idiomas:</strong> marcá todos los que aparecen. Se pueden usar a la vez, pero cuantos más elijas más lenta es la lectura, así que marcá solo los necesarios.</li>
+      <li data-i18n-html="b9-4"><strong>Probá otro preprocesamiento</strong> si la lectura sale con errores.</li>
+    </ul>
+    <h2 data-i18n="b10">Lo que el OCR no hace bien</h2>
+    <p data-i18n-html="b11">El motor está pensado para <strong>texto impreso</strong>. La letra manuscrita no se reconoce de forma confiable, y el texto muy borroso o las fotos con sombras fuertes pueden salir con errores o no reconocerse. Siempre revisá el resultado antes de usarlo, sobre todo si son cifras, nombres o fechas.</p>
+    <h2 data-i18n="b12">Qué cambia en el PDF resultante</h2>
+    <p data-i18n-html="b13">Cada página del PDF nuevo se guarda como una imagen JPEG con el texto invisible encima. Por eso:</p>
+    <ul>
+      <li data-i18n-html="b14-1">el <strong>peso</strong> puede cambiar respecto al original (si hace falta, pasalo por <a href="../herramientas/optimizar-pdf.html">Comprimir / optimizar PDF</a>);</li>
+      <li data-i18n-html="b14-2">lo que era vectorial en el original (gráficos hechos con líneas) deja de serlo.</li>
+    </ul>
+    <p data-i18n-html="b15">Por eso conviene <strong>guardar siempre el archivo original</strong>.</p>
+    <h2 data-i18n="b16">Otras cosas útiles después del OCR</h2>
+    <ul>
+      <li data-i18n-html="b17-1">Si solo querés el texto de un PDF que <strong>ya</strong> tiene texto (no es un escaneo), usá <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a>: es más rápido y exacto, porque no hace falta reconocer nada.</li>
+      <li data-i18n-html="b17-2">Si alguna página quedó de costado, corregila con <a href="../herramientas/rotar-pdf.html">Rotar PDF</a>.</li>
+    </ul>
+    <h2 data-i18n="b18">Preguntas frecuentes</h2>
+    <p data-i18n-html="b19"><strong>¿Cuánto tarda?</strong> Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.</p>
+    <p data-i18n-html="b20"><strong>¿Puedo hacer OCR a una foto en lugar de un PDF?</strong> Sí: la herramienta acepta imágenes y PDF, solos o combinados.</p>
+    <h2 data-i18n="b21">Resumen</h2>
+    <p data-i18n-html="b22">Si no podés buscar ni copiar texto en un PDF, es un escaneo. Con el OCR recuperás el texto y obtenés un PDF buscable. Escaneá con buena resolución, elegí los idiomas justos, revisá el resultado y guardá el original.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel1">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/pdf-texto.html" data-i18n="rel2">PDF ↔ Texto</a></li>
+      <li><a href="../herramientas/rotar-pdf.html" data-i18n="rel3">Rotar PDF</a></li>
+      <li><a href="../herramientas/optimizar-pdf.html" data-i18n="rel4">Comprimir / optimizar PDF</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

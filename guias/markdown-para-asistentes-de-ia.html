@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Markdown y asistentes de IA: cómo preparar tus documentos — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué es Markdown, por qué es un buen formato para dar documentos a un asistente de IA y cómo convertir PDF, Word y EPUB a Markdown paso a paso.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Markdown y asistentes de IA: cómo preparar tus documentos — Mini Cookies',
+    'meta-descripcion': 'Qué es Markdown, por qué es un buen formato para dar documentos a un asistente de IA y cómo convertir PDF, Word y EPUB a Markdown paso a paso.',
+    'h1': 'Markdown y asistentes de IA: cómo preparar tus documentos',
+    'b1': 'Cuando le pasás un documento a un asistente de IA, el formato en el que llega importa. Un PDF o un Word son archivos pensados para imprimir o editar, y el texto que contienen va mezclado con información de diseño. Markdown, en cambio, es texto simple con una estructura explícita. Esta guía explica qué es, por qué suele ser una buena opción para trabajar con asistentes y cómo convertir tus documentos con las herramientas del sitio.',
+    'b2': 'Qué es Markdown',
+    'b3': 'Markdown es una forma de escribir texto con estructura usando solo caracteres comunes. Lo creó John Gruber en 2004. Hoy existe una especificación que lo define con precisión (CommonMark) y una variante muy extendida, el Markdown de GitHub, que agrega elementos como las tablas. Los elementos más usados son:',
+    'b4': '<code># Título principal\n## Subtítulo\n- elemento de una lista\n1. paso numerado\n**negrita** y *cursiva*\n[texto del enlace](https://ejemplo.com)\n\n| Columna A | Columna B |\n| --- | --- |\n| dato | dato |</code>',
+    'b5': 'Y los bloques de código se encierran entre tres comillas invertidas. Un archivo Markdown es un archivo de texto (normalmente con extensión .md), así que se abre en cualquier editor.',
+    'b6': 'Por qué es un buen formato para un asistente de IA',
+    'b7': 'Estas son ventajas de uso habitual, no garantías: un asistente puede equivocarse con cualquier formato. Pero hay razones concretas para preferir Markdown.',
+    'b8-1': '<strong>Lo conoce de sobra.</strong> Los modelos de lenguaje se entrenan con grandes cantidades de texto que incluye documentación, repositorios y foros escritos en Markdown, y los asistentes suelen responder usando Markdown (títulos, listas, tablas y bloques de código). Es un formato con el que están muy familiarizados.',
+    'b8-2': '<strong>La estructura es explícita.</strong> Un título es una línea que empieza con <code>#</code>; una lista, líneas con guion; una tabla, filas separadas por barras. No hay que deducir por el tamaño de la letra qué es un título, como ocurre en un PDF.',
+    'b8-3': '<strong>Ocupa poco.</strong> El mismo contenido en HTML necesita etiquetas de apertura y cierre, y en un archivo Word el texto viaja dentro de un XML con muchas instrucciones de formato. En Markdown la marca es de uno o dos caracteres. Menos «ruido» significa que cabe más contenido útil en el espacio de entrada que admite el asistente.',
+    'b8-4': '<strong>Es fácil de dividir.</strong> Si el documento es largo, los encabezados marcan puntos naturales de corte. Podés mandar un capítulo por vez, o pedir un resumen de cada sección.',
+    'b8-5': '<strong>Se pega directo en un chat.</strong> Es texto plano: no pierde nada al copiarlo y pegarlo, y lo que ves es lo que recibe el asistente.',
+    'b8-6': '<strong>Es portable y versionable.</strong> Un .md se abre en cualquier sistema y se puede guardar en un repositorio para ver qué cambió entre versiones.',
+    'b9': 'Cómo convertir tus documentos',
+    'b10': 'Desde un PDF',
+    'b11': 'Con <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> elegí la dirección «PDF → Markdown», arrastrá uno o varios PDF y pulsá «Convertir a Markdown». Con un solo archivo ves el texto en pantalla y podés copiarlo o descargar el .md; con varios, descargás un .zip con un .md por PDF.',
+    'b12': 'Qué se conserva: se detectan <strong>títulos</strong> cuando la letra es más grande que la del texto normal, y también <strong>listas y tablas simples</strong>. Cada página se separa con una línea <code>---</code>. Un texto que se repite en muchas páginas, como un encabezado corrido o el número de página, no se toma como título.',
+    'b13': 'Qué <strong>no</strong> se conserva: <strong>no se mantienen negritas ni cursivas</strong>, no se extraen las imágenes, y los diseños complejos (columnas, tablas con celdas combinadas, textos en cuadros) pueden salir desordenados.',
+    'b14': 'Desde un PDF escaneado',
+    'b15': 'Un PDF escaneado es una imagen sin texto, y <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> avisa que no encontró texto. Primero pasalo por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>, que lo reconoce y te da un PDF con texto y un .txt. Luego convertí ese PDF a Markdown. El OCR está pensado para texto impreso; la letra manuscrita o las fotos borrosas pueden salir con errores.',
+    'b16': 'Desde un Word',
+    'b17': 'Con <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> elegí «Word → Markdown» y arrastrá tus .docx. Se conservan títulos, negritas, cursivas, listas y tablas, además de cuadros de texto y notas al pie (que van al final, numeradas). No pasan los encabezados y pies de página, los comentarios ni el texto de SmartArt y gráficos. Las imágenes se guardan en una carpeta junto al .md, por eso la descarga es un .zip. Markdown no tiene celdas combinadas, así que una tabla con ellas pierde esa estructura. Solo acepta .docx, no .doc antiguos.',
+    'b18': 'Desde un EPUB',
+    'b19': 'Con <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> podés pasar un libro sin DRM a Markdown. Cada capítulo queda separado por una línea <code>---</code> y las tablas pasan como tablas de Markdown. Las imágenes del libro no se incluyen como archivos aparte.',
+    'b20': 'Desde una página web',
+    'b21': '<a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a> convierte en las dos direcciones. Si pegás el HTML de una página completa, los menús o scripts también pasan a texto, así que conviene limpiar el resultado.',
+    'b22': 'Un flujo de trabajo en cuatro pasos',
+    'b23-1': '<strong>Convertir.</strong> Elegí la herramienta según el origen: PDF, Word o EPUB. Si el PDF es un escaneo, pasá antes por el OCR.',
+    'b23-2': '<strong>Revisar y limpiar.</strong> Abrí el .md en cualquier editor de texto. Buscá encabezados mal detectados, párrafos cortados a mitad de frase, tablas rotas y restos como números de página. Unos minutos acá evitan que el asistente trabaje sobre texto confuso. Si tenés una tabla, <a href="../herramientas/markdown-tabla-csv.html">Tabla Markdown ↔ CSV</a> la pasa a CSV y viceversa.',
+    'b23-3': '<strong>Dividir si es largo.</strong> Cada asistente admite una cantidad limitada de texto por conversación. Con <a href="../herramientas/dividir-markdown.html">Dividir Markdown</a> cortás el archivo en cada encabezado de primer o segundo nivel y descargás un .md por sección en un .zip. <a href="../herramientas/administrar-markdown.html">Administrar / reordenar secciones de Markdown</a> deja quitar las secciones que no hacen falta o reordenarlas. Con <a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> generás un índice del documento, útil para ubicar qué sección enviar. Los enlaces y las imágenes se copian tal cual, así que revisalos tras dividir.',
+    'b23-4': '<strong>Pegar con una instrucción clara.</strong> Indicá primero qué querés y después pegá el contenido. Por ejemplo: «A continuación te paso el capítulo 3 de un manual. Hacé un resumen de cinco puntos y listá las decisiones que requieren aprobación». Para varias partes, avisá cuántas son y mandalas de a una.',
+    'b24': 'Límites y precauciones',
+    'b25-1': 'La conversión es automática y puede cometer errores. <strong>Siempre revisá</strong> el resultado antes de apoyarte en él.',
+    'b25-2': 'Que el formato sea claro no garantiza que el asistente interprete bien el contenido: sigue pudiendo equivocarse o inventar, y sus respuestas hay que contrastarlas con el original.',
+    'b25-3': 'Si el documento contiene datos personales o confidenciales, pensá a qué asistente lo vas a pasar y qué condiciones de uso tiene, antes de pegarlo.',
+    'b25-4': 'Un archivo muy largo se puede cortar o ignorar en parte si supera el límite del asistente; dividirlo evita esa pérdida.',
+    'b26': 'Preguntas frecuentes',
+    'b27': '<strong>¿Se pierde el formato al pasar a Markdown?</strong> Se pierde lo que Markdown no puede expresar (colores, tipos de letra, columnas). Desde un PDF tampoco se mantienen negritas ni cursivas.',
+    'b28': '<strong>¿Puedo convertir varios archivos a la vez?</strong> Sí, <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> y <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> aceptan varios archivos y devuelven un .zip con un .md por archivo.',
+    'b29': '<strong>¿Y si necesito volver de Markdown a Word o PDF?</strong> Las mismas herramientas funcionan en ambas direcciones. El PDF generado desde Markdown es sencillo (títulos, listas y párrafos).',
+    'b30': 'Resumen',
+    'b31': 'Markdown es texto simple con estructura explícita, compacto y fácil de dividir, por eso suele ser un buen formato para dar documentos a un asistente de IA. Convertí tu PDF, Word o EPUB con las herramientas del sitio (con OCR previo si el PDF es un escaneo), revisá el resultado, dividilo por secciones si es largo y pegalo junto con una instrucción clara.',
+    'rel1': 'PDF ↔ Markdown',
+    'rel2': 'Markdown ↔ Word',
+    'rel3': 'EPUB ↔ Markdown',
+    'rel4': 'OCR de PDF e imágenes escaneadas',
+    'rel5': 'Dividir Markdown',
+    'rel6': 'Tabla de contenidos de Markdown'
+  },
+  en: {
+    'titulo-pagina': 'Markdown and AI Assistants: How to Prepare Your Documents — Mini Cookies',
+    'meta-descripcion': 'What Markdown is, why it is a good format for giving documents to an AI assistant, and how to convert PDF, Word and EPUB to Markdown step by step.',
+    'h1': 'Markdown and AI Assistants: How to Prepare Your Documents',
+    'b1': 'When you hand a document to an AI assistant, the format it arrives in matters. A PDF or a Word file is designed for printing or editing, and the text inside is mixed with layout information. Markdown, on the other hand, is plain text with an explicit structure. This guide explains what it is, why it is often a good choice for working with assistants, and how to convert your documents with the site’s tools.',
+    'b2': 'What Markdown is',
+    'b3': 'Markdown is a way of writing structured text using only ordinary characters. It was created by John Gruber in 2004. Today there is a specification that defines it precisely (CommonMark) and a very widespread variant, GitHub Flavored Markdown, which adds elements such as tables. The most commonly used elements are:',
+    'b4': '<code># Main title\n## Subtitle\n- list item\n1. numbered step\n**bold** and *italic*\n[link text](https://example.com)\n\n| Column A | Column B |\n| --- | --- |\n| data | data |</code>',
+    'b5': 'And code blocks are enclosed between three backticks. A Markdown file is a text file (usually with a .md extension), so it opens in any editor.',
+    'b6': 'Why it is a good format for an AI assistant',
+    'b7': 'These are advantages in typical use, not guarantees: an assistant can make mistakes with any format. But there are concrete reasons to prefer Markdown.',
+    'b8-1': '<strong>They know it very well.</strong> Language models are trained on huge amounts of text that includes documentation, repositories and forums written in Markdown, and assistants usually answer using Markdown (headings, lists, tables and code blocks). It is a format they are very familiar with.',
+    'b8-2': '<strong>The structure is explicit.</strong> A heading is a line that starts with <code>#</code>; a list is lines starting with a hyphen; a table is rows separated by bars. You don’t have to work out from the font size what a heading is, as you do in a PDF.',
+    'b8-3': '<strong>It takes up little space.</strong> The same content in HTML needs opening and closing tags, and in a Word file the text travels inside XML with lots of formatting instructions. In Markdown the marker is one or two characters. Less “noise” means more useful content fits in the input space the assistant accepts.',
+    'b8-4': '<strong>It is easy to split.</strong> If the document is long, the headings mark natural cut points. You can send one chapter at a time, or ask for a summary of each section.',
+    'b8-5': '<strong>It pastes straight into a chat.</strong> It is plain text: nothing is lost when you copy and paste it, and what you see is what the assistant receives.',
+    'b8-6': '<strong>It is portable and versionable.</strong> A .md file opens on any system and can be stored in a repository to see what changed between versions.',
+    'b9': 'How to convert your documents',
+    'b10': 'From a PDF',
+    'b11': 'With <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, choose the "PDF → Markdown" direction, drag in one or more PDFs and click "Convert to Markdown". With a single file you see the text on screen and can copy it or download the .md; with several, you download a .zip with one .md per PDF.',
+    'b12': 'What is kept: <strong>headings</strong> are detected when the type is larger than the normal text, and so are <strong>simple lists and tables</strong>. Each page is separated with a <code>---</code> line. Text that repeats on many pages, such as a running header or the page number, is not taken as a heading.',
+    'b13': 'What is <strong>not</strong> kept: <strong>bold and italics are not preserved</strong>, images are not extracted, and complex layouts (columns, tables with merged cells, text in boxes) can come out messy.',
+    'b14': 'From a scanned PDF',
+    'b15': 'A scanned PDF is an image with no text, and <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> tells you it found no text. First run it through <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>, which recognizes it and gives you a PDF with text and a .txt. Then convert that PDF to Markdown. OCR is designed for printed text; handwriting or blurry photos can come out with errors.',
+    'b16': 'From a Word document',
+    'b17': 'With <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, choose "Word → Markdown" and drag in your .docx files. Headings, bold, italics, lists and tables are kept, along with text boxes and footnotes (which go at the end, numbered). Headers and footers, comments, and the text in SmartArt and charts don’t come through. Images are saved in a folder next to the .md, which is why the download is a .zip. Markdown has no merged cells, so a table that has them loses that structure. It only accepts .docx, not old .doc files.',
+    'b18': 'From an EPUB',
+    'b19': 'With <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> you can convert a DRM-free book to Markdown. Each chapter is separated by a <code>---</code> line, and tables come through as Markdown tables. The book’s images are not included as separate files.',
+    'b20': 'From a web page',
+    'b21': '<a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a> converts in both directions. If you paste the HTML of a whole page, menus and scripts also turn into text, so it’s a good idea to clean up the result.',
+    'b22': 'A four-step workflow',
+    'b23-1': '<strong>Convert.</strong> Choose the tool according to the source: PDF, Word or EPUB. If the PDF is a scan, run OCR first.',
+    'b23-2': '<strong>Review and clean up.</strong> Open the .md in any text editor. Look for badly detected headings, paragraphs cut mid-sentence, broken tables and leftovers such as page numbers. A few minutes here keep the assistant from working on confusing text. If you have a table, <a href="../herramientas/markdown-tabla-csv.html">Markdown table ↔ CSV</a> converts it to CSV and back.',
+    'b23-3': '<strong>Split it if it’s long.</strong> Each assistant accepts a limited amount of text per conversation. With <a href="../herramientas/dividir-markdown.html">Split Markdown</a> you cut the file at every first- or second-level heading and download one .md per section in a .zip. <a href="../herramientas/administrar-markdown.html">Manage / reorder Markdown sections</a> lets you remove the sections you don’t need or reorder them. With <a href="../herramientas/tabla-contenidos-markdown.html">Markdown table of contents</a> you generate an index of the document, useful for deciding which section to send. Links and images are copied as they are, so check them after splitting.',
+    'b23-4': '<strong>Paste it with a clear instruction.</strong> Say what you want first, then paste the content. For example: “Below is chapter 3 of a manual. Write a five-point summary and list the decisions that need approval.” For several parts, say how many there are and send them one at a time.',
+    'b24': 'Limits and precautions',
+    'b25-1': 'The conversion is automatic and can make mistakes. <strong>Always check</strong> the result before relying on it.',
+    'b25-2': 'A clear format doesn’t guarantee the assistant will interpret the content correctly: it can still make mistakes or make things up, and its answers need to be checked against the original.',
+    'b25-3': 'If the document contains personal or confidential data, think about which assistant you are going to give it to, and what its terms of use are, before pasting it.',
+    'b25-4': 'A very long file can be cut off or partly ignored if it exceeds the assistant’s limit; splitting it avoids that loss.',
+    'b26': 'Frequently asked questions',
+    'b27': '<strong>Is formatting lost when converting to Markdown?</strong> What Markdown can’t express is lost (colors, fonts, columns). From a PDF, bold and italics are not kept either.',
+    'b28': '<strong>Can I convert several files at once?</strong> Yes, <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> and <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> accept several files and return a .zip with one .md per file.',
+    'b29': '<strong>What if I need to go back from Markdown to Word or PDF?</strong> The same tools work in both directions. The PDF generated from Markdown is simple (headings, lists and paragraphs).',
+    'b30': 'Summary',
+    'b31': 'Markdown is plain text with an explicit structure, compact and easy to split, which is why it is often a good format for giving documents to an AI assistant. Convert your PDF, Word or EPUB with the site’s tools (with OCR first if the PDF is a scan), check the result, split it by sections if it’s long, and paste it together with a clear instruction.',
+    'rel1': 'PDF ↔ Markdown',
+    'rel2': 'Markdown ↔ Word',
+    'rel3': 'EPUB ↔ Markdown',
+    'rel4': 'OCR for scanned PDFs and images',
+    'rel5': 'Split Markdown',
+    'rel6': 'Markdown table of contents'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Markdown y asistentes de IA: cómo preparar tus documentos</h1>
+    <p data-i18n-html="b1">Cuando le pasás un documento a un asistente de IA, el formato en el que llega importa. Un PDF o un Word son archivos pensados para imprimir o editar, y el texto que contienen va mezclado con información de diseño. Markdown, en cambio, es texto simple con una estructura explícita. Esta guía explica qué es, por qué suele ser una buena opción para trabajar con asistentes y cómo convertir tus documentos con las herramientas del sitio.</p>
+    <h2 data-i18n="b2">Qué es Markdown</h2>
+    <p data-i18n-html="b3">Markdown es una forma de escribir texto con estructura usando solo caracteres comunes. Lo creó John Gruber en 2004. Hoy existe una especificación que lo define con precisión (CommonMark) y una variante muy extendida, el Markdown de GitHub, que agrega elementos como las tablas. Los elementos más usados son:</p>
+    <pre data-i18n-html="b4"><code># Título principal
+## Subtítulo
+- elemento de una lista
+1. paso numerado
+**negrita** y *cursiva*
+[texto del enlace](https://ejemplo.com)
+
+| Columna A | Columna B |
+| --- | --- |
+| dato | dato |</code></pre>
+    <p data-i18n-html="b5">Y los bloques de código se encierran entre tres comillas invertidas. Un archivo Markdown es un archivo de texto (normalmente con extensión .md), así que se abre en cualquier editor.</p>
+    <h2 data-i18n="b6">Por qué es un buen formato para un asistente de IA</h2>
+    <p data-i18n-html="b7">Estas son ventajas de uso habitual, no garantías: un asistente puede equivocarse con cualquier formato. Pero hay razones concretas para preferir Markdown.</p>
+    <ol>
+      <li data-i18n-html="b8-1"><strong>Lo conoce de sobra.</strong> Los modelos de lenguaje se entrenan con grandes cantidades de texto que incluye documentación, repositorios y foros escritos en Markdown, y los asistentes suelen responder usando Markdown (títulos, listas, tablas y bloques de código). Es un formato con el que están muy familiarizados.</li>
+      <li data-i18n-html="b8-2"><strong>La estructura es explícita.</strong> Un título es una línea que empieza con <code>#</code>; una lista, líneas con guion; una tabla, filas separadas por barras. No hay que deducir por el tamaño de la letra qué es un título, como ocurre en un PDF.</li>
+      <li data-i18n-html="b8-3"><strong>Ocupa poco.</strong> El mismo contenido en HTML necesita etiquetas de apertura y cierre, y en un archivo Word el texto viaja dentro de un XML con muchas instrucciones de formato. En Markdown la marca es de uno o dos caracteres. Menos «ruido» significa que cabe más contenido útil en el espacio de entrada que admite el asistente.</li>
+      <li data-i18n-html="b8-4"><strong>Es fácil de dividir.</strong> Si el documento es largo, los encabezados marcan puntos naturales de corte. Podés mandar un capítulo por vez, o pedir un resumen de cada sección.</li>
+      <li data-i18n-html="b8-5"><strong>Se pega directo en un chat.</strong> Es texto plano: no pierde nada al copiarlo y pegarlo, y lo que ves es lo que recibe el asistente.</li>
+      <li data-i18n-html="b8-6"><strong>Es portable y versionable.</strong> Un .md se abre en cualquier sistema y se puede guardar en un repositorio para ver qué cambió entre versiones.</li>
+    </ol>
+    <h2 data-i18n="b9">Cómo convertir tus documentos</h2>
+    <h3 data-i18n="b10">Desde un PDF</h3>
+    <p data-i18n-html="b11">Con <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> elegí la dirección «PDF → Markdown», arrastrá uno o varios PDF y pulsá «Convertir a Markdown». Con un solo archivo ves el texto en pantalla y podés copiarlo o descargar el .md; con varios, descargás un .zip con un .md por PDF.</p>
+    <p data-i18n-html="b12">Qué se conserva: se detectan <strong>títulos</strong> cuando la letra es más grande que la del texto normal, y también <strong>listas y tablas simples</strong>. Cada página se separa con una línea <code>---</code>. Un texto que se repite en muchas páginas, como un encabezado corrido o el número de página, no se toma como título.</p>
+    <p data-i18n-html="b13">Qué <strong>no</strong> se conserva: <strong>no se mantienen negritas ni cursivas</strong>, no se extraen las imágenes, y los diseños complejos (columnas, tablas con celdas combinadas, textos en cuadros) pueden salir desordenados.</p>
+    <h3 data-i18n="b14">Desde un PDF escaneado</h3>
+    <p data-i18n-html="b15">Un PDF escaneado es una imagen sin texto, y <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> avisa que no encontró texto. Primero pasalo por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>, que lo reconoce y te da un PDF con texto y un .txt. Luego convertí ese PDF a Markdown. El OCR está pensado para texto impreso; la letra manuscrita o las fotos borrosas pueden salir con errores.</p>
+    <h3 data-i18n="b16">Desde un Word</h3>
+    <p data-i18n-html="b17">Con <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> elegí «Word → Markdown» y arrastrá tus .docx. Se conservan títulos, negritas, cursivas, listas y tablas, además de cuadros de texto y notas al pie (que van al final, numeradas). No pasan los encabezados y pies de página, los comentarios ni el texto de SmartArt y gráficos. Las imágenes se guardan en una carpeta junto al .md, por eso la descarga es un .zip. Markdown no tiene celdas combinadas, así que una tabla con ellas pierde esa estructura. Solo acepta .docx, no .doc antiguos.</p>
+    <h3 data-i18n="b18">Desde un EPUB</h3>
+    <p data-i18n-html="b19">Con <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> podés pasar un libro sin DRM a Markdown. Cada capítulo queda separado por una línea <code>---</code> y las tablas pasan como tablas de Markdown. Las imágenes del libro no se incluyen como archivos aparte.</p>
+    <h3 data-i18n="b20">Desde una página web</h3>
+    <p data-i18n-html="b21"><a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a> convierte en las dos direcciones. Si pegás el HTML de una página completa, los menús o scripts también pasan a texto, así que conviene limpiar el resultado.</p>
+    <h2 data-i18n="b22">Un flujo de trabajo en cuatro pasos</h2>
+    <ol>
+      <li data-i18n-html="b23-1"><strong>Convertir.</strong> Elegí la herramienta según el origen: PDF, Word o EPUB. Si el PDF es un escaneo, pasá antes por el OCR.</li>
+      <li data-i18n-html="b23-2"><strong>Revisar y limpiar.</strong> Abrí el .md en cualquier editor de texto. Buscá encabezados mal detectados, párrafos cortados a mitad de frase, tablas rotas y restos como números de página. Unos minutos acá evitan que el asistente trabaje sobre texto confuso. Si tenés una tabla, <a href="../herramientas/markdown-tabla-csv.html">Tabla Markdown ↔ CSV</a> la pasa a CSV y viceversa.</li>
+      <li data-i18n-html="b23-3"><strong>Dividir si es largo.</strong> Cada asistente admite una cantidad limitada de texto por conversación. Con <a href="../herramientas/dividir-markdown.html">Dividir Markdown</a> cortás el archivo en cada encabezado de primer o segundo nivel y descargás un .md por sección en un .zip. <a href="../herramientas/administrar-markdown.html">Administrar / reordenar secciones de Markdown</a> deja quitar las secciones que no hacen falta o reordenarlas. Con <a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> generás un índice del documento, útil para ubicar qué sección enviar. Los enlaces y las imágenes se copian tal cual, así que revisalos tras dividir.</li>
+      <li data-i18n-html="b23-4"><strong>Pegar con una instrucción clara.</strong> Indicá primero qué querés y después pegá el contenido. Por ejemplo: «A continuación te paso el capítulo 3 de un manual. Hacé un resumen de cinco puntos y listá las decisiones que requieren aprobación». Para varias partes, avisá cuántas son y mandalas de a una.</li>
+    </ol>
+    <h2 data-i18n="b24">Límites y precauciones</h2>
+    <ul>
+      <li data-i18n-html="b25-1">La conversión es automática y puede cometer errores. <strong>Siempre revisá</strong> el resultado antes de apoyarte en él.</li>
+      <li data-i18n-html="b25-2">Que el formato sea claro no garantiza que el asistente interprete bien el contenido: sigue pudiendo equivocarse o inventar, y sus respuestas hay que contrastarlas con el original.</li>
+      <li data-i18n-html="b25-3">Si el documento contiene datos personales o confidenciales, pensá a qué asistente lo vas a pasar y qué condiciones de uso tiene, antes de pegarlo.</li>
+      <li data-i18n-html="b25-4">Un archivo muy largo se puede cortar o ignorar en parte si supera el límite del asistente; dividirlo evita esa pérdida.</li>
+    </ul>
+    <h2 data-i18n="b26">Preguntas frecuentes</h2>
+    <p data-i18n-html="b27"><strong>¿Se pierde el formato al pasar a Markdown?</strong> Se pierde lo que Markdown no puede expresar (colores, tipos de letra, columnas). Desde un PDF tampoco se mantienen negritas ni cursivas.</p>
+    <p data-i18n-html="b28"><strong>¿Puedo convertir varios archivos a la vez?</strong> Sí, <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> y <a href="../herramientas/epub-markdown.html">EPUB ↔ Markdown</a> aceptan varios archivos y devuelven un .zip con un .md por archivo.</p>
+    <p data-i18n-html="b29"><strong>¿Y si necesito volver de Markdown a Word o PDF?</strong> Las mismas herramientas funcionan en ambas direcciones. El PDF generado desde Markdown es sencillo (títulos, listas y párrafos).</p>
+    <h2 data-i18n="b30">Resumen</h2>
+    <p data-i18n-html="b31">Markdown es texto simple con estructura explícita, compacto y fácil de dividir, por eso suele ser un buen formato para dar documentos a un asistente de IA. Convertí tu PDF, Word o EPUB con las herramientas del sitio (con OCR previo si el PDF es un escaneo), revisá el resultado, dividilo por secciones si es largo y pegalo junto con una instrucción clara.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/pdf-markdown.html" data-i18n="rel1">PDF ↔ Markdown</a></li>
+      <li><a href="../herramientas/markdown-word.html" data-i18n="rel2">Markdown ↔ Word</a></li>
+      <li><a href="../herramientas/epub-markdown.html" data-i18n="rel3">EPUB ↔ Markdown</a></li>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel4">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/dividir-markdown.html" data-i18n="rel5">Dividir Markdown</a></li>
+      <li><a href="../herramientas/tabla-contenidos-markdown.html" data-i18n="rel6">Tabla de contenidos de Markdown</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
