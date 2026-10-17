@@ -31,6 +31,13 @@ window.i18nPagina = {
     'logo-zona': '🖼️ Arrastrá una imagen acá o hacé clic para elegir el logo',
     'logo-actual': 'Logo: ',
     'logo-quitar': 'Quitar logo',
+    'logo-tam': 'Tamaño del logo',
+    'logo-tam-p': 'Pequeño',
+    'logo-tam-m': 'Mediano',
+    'logo-tam-g': 'Grande',
+    'logo-tam-x': 'Máximo (por omisión)',
+    'logo-tam-ayuda': 'Cuanto más grande el logo, más módulos tapa y más difícil es leer el QR. El máximo es el 22 % del ancho; si el tamaño elegido no entra en este código sin tapar sus partes de guía, se usa el más grande que sí entra.',
+    'nota-logo-ajustado': 'ℹ️ El logo quedó más chico que lo pedido: es el más grande que entra en este código sin tapar sus esquinas ni sus patrones de guía.',
     'logo-error-tipo': '❌ Ese archivo no es una imagen. Probá con un PNG, JPG, WebP, GIF o SVG.',
     'logo-error-ilegible': '❌ No se pudo leer esa imagen. Probá con otro archivo (PNG, JPG, WebP, GIF o SVG).',
     'logo-error-vacio': '❌ Esa imagen está vacía o es totalmente transparente.',
@@ -49,7 +56,6 @@ window.i18nPagina = {
     'mod-cuadrado': 'Cuadrados',
     'mod-redondeado': 'Cuadrados redondeados',
     'mod-puntos': 'Puntos',
-    'mod-liquido': 'Líquido (unidos y redondeados)',
     'estilo-ojo': 'Estilo de las esquinas',
     'ojo-cuadrado': 'Cuadrado',
     'ojo-redondeado': 'Redondeado',
@@ -98,6 +104,13 @@ window.i18nPagina = {
     'logo-zona': '🖼️ Drop an image here, or click to pick the logo',
     'logo-actual': 'Logo: ',
     'logo-quitar': 'Remove logo',
+    'logo-tam': 'Logo size',
+    'logo-tam-p': 'Small',
+    'logo-tam-m': 'Medium',
+    'logo-tam-g': 'Large',
+    'logo-tam-x': 'Maximum (default)',
+    'logo-tam-ayuda': 'The bigger the logo, the more modules it covers and the harder the QR is to read. The maximum is 22% of the width; if the chosen size does not fit this code without covering its guide parts, the largest one that does is used.',
+    'nota-logo-ajustado': 'ℹ️ The logo came out smaller than requested: it is the largest that fits this code without covering its corners or guide patterns.',
     'logo-error-tipo': '❌ That file is not an image. Try a PNG, JPG, WebP, GIF or SVG.',
     'logo-error-ilegible': '❌ That image could not be read. Try another file (PNG, JPG, WebP, GIF or SVG).',
     'logo-error-vacio': '❌ That image is empty or fully transparent.',
@@ -116,7 +129,6 @@ window.i18nPagina = {
     'mod-cuadrado': 'Squares',
     'mod-redondeado': 'Rounded squares',
     'mod-puntos': 'Dots',
-    'mod-liquido': 'Liquid (joined and rounded)',
     'estilo-ojo': 'Corner style',
     'ojo-cuadrado': 'Square',
     'ojo-redondeado': 'Rounded',
@@ -201,8 +213,23 @@ window.i18nPagina = {
         <div class="controles" id="filaLogo" hidden>
           <span><span data-i18n="logo-actual">Logo: </span><span id="nombreLogo"></span></span>
           <button type="button" class="boton secundario chico" id="botonQuitarLogo" data-i18n="logo-quitar">Quitar logo</button>
+          <label class="campo">
+            <span><span data-i18n="logo-tam">Tamaño del logo</span>
+              <span class="ayuda-tip">
+                <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                <span class="ayuda-burbuja" data-i18n="logo-tam-ayuda">Cuanto más grande el logo, más difícil es leer el QR.</span>
+              </span>
+            </span>
+            <select id="tamanoLogo">
+              <option value="0.10" data-i18n="logo-tam-p">Pequeño</option>
+              <option value="0.14" data-i18n="logo-tam-m">Mediano</option>
+              <option value="0.18" data-i18n="logo-tam-g">Grande</option>
+              <option value="0.22" selected data-i18n="logo-tam-x">Máximo (por omisión)</option>
+            </select>
+          </label>
         </div>
         <p class="nota-suave error" id="mensajeLogo" role="alert" hidden></p>
+        <p class="nota-suave" id="notaLogo" role="status" hidden></p>
 
         <p>
           <strong data-i18n="colores-titulo">Colores</strong>
@@ -233,7 +260,6 @@ window.i18nPagina = {
               <option value="cuadrado" data-i18n="mod-cuadrado">Cuadrados</option>
               <option value="redondeado" data-i18n="mod-redondeado">Cuadrados redondeados</option>
               <option value="puntos" data-i18n="mod-puntos">Puntos</option>
-              <option value="liquido" data-i18n="mod-liquido">Líquido (unidos y redondeados)</option>
             </select>
           </label>
           <label class="campo">
@@ -332,24 +358,32 @@ const filaLogo = document.getElementById('filaLogo');
 const nombreLogo = document.getElementById('nombreLogo');
 const mensajeLogo = document.getElementById('mensajeLogo');
 const notaColores = document.getElementById('notaColores');
+const notaLogo = document.getElementById('notaLogo');
+const tamanoLogo = document.getElementById('tamanoLogo');
 const colorOscuro = document.getElementById('colorOscuro');
 const colorClaro = document.getElementById('colorClaro');
 const botonColoresLogo = document.getElementById('botonColoresLogo');
 let logo = null;          // canvas con el logo, o null
 let claveNota = null;     // clave del aviso de colores que se está mostrando
 let claveErrorLogo = null;
+let claveNotaLogo = null;
 
 function mostrarNota(clave) {
   claveNota = clave;
   notaColores.hidden = !clave;
   notaColores.textContent = clave ? t(clave) : '';
 }
+function mostrarNotaLogo(clave) {
+  claveNotaLogo = clave;
+  notaLogo.hidden = !clave;
+  notaLogo.textContent = clave ? t(clave) : '';
+}
 function mostrarErrorLogo(clave) {
   claveErrorLogo = clave;
   mensajeLogo.hidden = !clave;
   mensajeLogo.textContent = clave ? t(clave) : '';
 }
-document.addEventListener('cambioIdioma', () => { mostrarNota(claveNota); mostrarErrorLogo(claveErrorLogo); });
+document.addEventListener('cambioIdioma', () => { mostrarNota(claveNota); mostrarErrorLogo(claveErrorLogo); mostrarNotaLogo(claveNotaLogo); });
 
 function generarQR() {
   const texto = entradaTexto.value.trim();
@@ -360,14 +394,17 @@ function generarQR() {
 
   const tamano = parseInt(document.getElementById('tamano').value, 10);
   let qr;
+  mostrarNotaLogo(null);
   try {
     // Con logo el QR va en nivel H y deja lugar en el centro; sin logo, como siempre.
-    qr = logo ? QREstilos.crearConLogo(texto) : QRPropio.crear(texto, { nivel: 'M' });
+    qr = logo ? QREstilos.crearConLogo(texto, parseFloat(tamanoLogo.value)) : QRPropio.crear(texto, { nivel: 'M' });
   } catch (error) {
     mensajeError.textContent = t(logo ? 'error-largo-logo' : 'error-largo');
     mensajeError.style.display = 'block';
     return;
   }
+  // Si el tamaño pedido no entró (hay que respetar las partes de guía), se avisa.
+  if (logo && parseFloat(tamanoLogo.value) < 0.22 && qr.placa.k / qr.placa.n < 0.8 * parseFloat(tamanoLogo.value)) mostrarNotaLogo('nota-logo-ajustado');
   const r = QREstilos.dibujar(vistaQR, qr, {
     lado: tamano,
     estiloModulo: document.getElementById('estiloModulo').value,
@@ -396,6 +433,7 @@ function opcionCambiada() { if (entradaTexto.value.trim()) generarQR(); }
 document.getElementById('tamano').addEventListener('change', opcionCambiada);
 document.getElementById('estiloModulo').addEventListener('change', opcionCambiada);
 document.getElementById('estiloOjo').addEventListener('change', opcionCambiada);
+tamanoLogo.addEventListener('change', opcionCambiada);
 [colorOscuro, colorClaro].forEach((c) => c.addEventListener('change', () => { mostrarNota(null); opcionCambiada(); }));
 
 document.getElementById('botonColoresBN').addEventListener('click', () => {

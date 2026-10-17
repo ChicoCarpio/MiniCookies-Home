@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Códigos QR con estilo: la parte opcional del generador de QR. Toma la matriz
-// que arma qr-propio.js y la dibuja con módulos redondeados, puntos o "líquidos",
+// que arma qr-propio.js y la dibuja con módulos redondeados o puntos,
 // ojos (los tres cuadros de las esquinas) redondeados, colores propios y un logo
 // en el centro. Sin red ni librerías: todo se dibuja en un canvas.
 //
@@ -30,7 +30,7 @@
 (function () {
   'use strict';
 
-  const ESTILOS_MODULO = ['cuadrado', 'redondeado', 'puntos', 'liquido'];
+  const ESTILOS_MODULO = ['cuadrado', 'redondeado', 'puntos'];
   const ESTILOS_OJO = ['cuadrado', 'redondeado', 'circulo'];
   const CONTRASTE_MIN = 4.5;      // relación de luminancia mínima entre código y fondo
   const FRACCION_LOGO = 0.22;     // ancho máximo de la placa respecto del QR
@@ -260,6 +260,7 @@
     const f = Math.min(fraccion || FRACCION_LOGO, FRACCION_LOGO);
     let k = Math.floor(f * n);
     if (k % 2 === 0) k--;
+    if (k < 3) k = 3; // un pedido muy chico en un QR chico: la placa más pequeña posible
     const minimo = Math.max(3, Math.ceil(0.55 * f * n));
     const m = reservado(v);
     for (; k >= minimo; k -= 2) {
@@ -385,7 +386,6 @@
         if (qr.esOscuro(f, c) && !esOjo(f, c) && !(limpios && limpios.limpio[f * n + c])) datos[f * n + c] = 1;
       }
     }
-    const hay = (f, c) => f >= 0 && c >= 0 && f < n && c < n && datos[f * n + c] === 1;
 
     cx.fillStyle = col.oscuro;
     cx.beginPath();
@@ -405,35 +405,6 @@
           cx.moveTo((x0 + x1) / 2 + r, (y0 + y1) / 2);
           cx.arc((x0 + x1) / 2, (y0 + y1) / 2, r, 0, Math.PI * 2);
           cx.closePath();
-        } else {
-          // Líquido: cada esquina se redondea solo si no tiene vecino de ninguno de sus dos lados.
-          const r = 0.5 * t;
-          const arr = hay(f - 1, c), aba = hay(f + 1, c), izq = hay(f, c - 1), der = hay(f, c + 1);
-          rectRedondo(cx, x0, y0, x1, y1, !arr && !izq ? r : 0, !arr && !der ? r : 0, !aba && !der ? r : 0, !aba && !izq ? r : 0);
-        }
-      }
-    }
-    if (estM === 'liquido') {
-      // Y las esquinas "hacia adentro" donde dos vecinos oscuros se encuentran, para que las uniones sean suaves.
-      for (let f = 0; f < n; f++) {
-        for (let c = 0; c < n; c++) {
-          if (datos[f * n + c] || esOjo(f, c) || (limpios && limpios.limpio[f * n + c])) continue;
-          const arr = hay(f - 1, c), aba = hay(f + 1, c), izq = hay(f, c - 1), der = hay(f, c + 1);
-          if (!(arr || aba) || !(izq || der)) continue;
-          const x0 = P(c), x1 = P(c + 1), y0 = P(f), y1 = P(f + 1);
-          const r = 0.5 * Math.min(x1 - x0, y1 - y0);
-          if (arr && izq) {
-            cx.moveTo(x0, y0); cx.lineTo(x0 + r, y0); cx.arc(x0 + r, y0 + r, r, -Math.PI / 2, Math.PI, true); cx.closePath();
-          }
-          if (arr && der) {
-            cx.moveTo(x1, y0); cx.lineTo(x1, y0 + r); cx.arc(x1 - r, y0 + r, r, 0, -Math.PI / 2, true); cx.closePath();
-          }
-          if (aba && der) {
-            cx.moveTo(x1, y1); cx.lineTo(x1 - r, y1); cx.arc(x1 - r, y1 - r, r, Math.PI / 2, 0, true); cx.closePath();
-          }
-          if (aba && izq) {
-            cx.moveTo(x0, y1); cx.lineTo(x0, y1 - r); cx.arc(x0 + r, y1 - r, r, Math.PI, Math.PI / 2, true); cx.closePath();
-          }
         }
       }
     }
