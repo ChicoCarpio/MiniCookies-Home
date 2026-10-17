@@ -24,6 +24,24 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar como SVG',
     'titulo-pagina': 'Generador de códigos de barras gratis — Mini Cookies',
     'meta-descripcion': 'Generá un código de barras (CODE128, EAN13 y más) a partir de un texto o número, gratis y sin enviar nada a ningún servidor.',
+    'guia-titulo': 'Cómo generar un código de barras',
+    'guia-intro': 'Sirve para crear rápido un código de barras a partir de un número o un texto: una etiqueta de inventario, un código para un producto o una prueba de lector. Escribís el contenido, elegís el formato y obtenés el dibujo al instante, que podés bajar como imagen vectorial SVG, nítida a cualquier tamaño.',
+    'guia-paso-1': 'Escribí el contenido en «Texto o número» (viene con un ejemplo cargado).',
+    'guia-paso-2': 'Elegí el «Formato»: CODE128, EAN-13, UPC o CODE39.',
+    'guia-paso-3': 'Tocá «Generar» (o apretá Enter) para ver el código.',
+    'guia-paso-4': 'Usá el enlace «Descargar como SVG» que aparece debajo; el archivo se llama codigo-de-barras.svg.',
+    'guia-consejo-1': 'CODE128 es el más flexible: acepta letras, números y símbolos, y es la mejor opción si no necesitás un estándar de comercio en particular.',
+    'guia-consejo-2': 'EAN-13 y UPC son para productos de venta y solo admiten dígitos con una cantidad exacta. Si el contenido no cumple, aparece un mensaje de error en rojo en lugar del código.',
+    'guia-consejo-3': 'CODE39 sirve para etiquetas internas simples con mayúsculas y números.',
+    'guia-consejo-4': 'Por ser SVG, lo podés insertar en Word, Illustrator o imprimir en grande sin que se pixele. Si necesitás PNG, abrilo y exportalo desde otro programa.',
+    'guia-p1': '¿Cuántos dígitos necesito para EAN-13 y UPC?',
+    'guia-r1': 'EAN-13 pide 13 dígitos (si escribís 12, se agrega el dígito de control) y UPC pide 12 (con 11 también se agrega). Si el dígito de control no coincide, el generador lo reporta como error.',
+    'guia-p2': '¿Puedo cambiar el color o el tamaño?',
+    'guia-r2': 'No; el código sale siempre en gris oscuro sobre fondo blanco, con el texto debajo.',
+    'guia-p3': '¿Genera códigos QR?',
+    'guia-r3': 'No, solo códigos de barras lineales. Para leer un QR existe el Lector de códigos QR y de barras.',
+    'guia-p4': '¿Sirve para comercializar productos?',
+    'guia-r4': 'El dibujo es válido, pero los números EAN y UPC oficiales los asigna GS1; acá no se registran.',
   },
   en: {
     'hero-titulo': 'Barcode generator',
@@ -38,6 +56,24 @@ window.i18nPagina = {
     'resultado-enlace': 'Download as SVG',
     'titulo-pagina': 'Free barcode generator — Mini Cookies',
     'meta-descripcion': 'Generate a barcode (CODE128, EAN13 and more) from a number or a piece of text — free, and nothing is sent to a server.',
+    'guia-titulo': 'How to generate a barcode',
+    'guia-intro': 'Use it to quickly create a barcode from a number or some text: an inventory label, a product code or a scanner test. You type the content, choose the format and get the drawing instantly, which you can download as an SVG vector image, sharp at any size.',
+    'guia-paso-1': 'Type the content in “Text or number” (an example comes preloaded).',
+    'guia-paso-2': 'Choose the “Format”: CODE128, EAN-13, UPC or CODE39.',
+    'guia-paso-3': 'Tap “Generate” (or press Enter) to see the code.',
+    'guia-paso-4': 'Use the “Download as SVG” link that appears below; the file is named codigo-de-barras.svg.',
+    'guia-consejo-1': 'CODE128 is the most flexible: it accepts letters, numbers and symbols, and it’s the best choice if you don’t need a particular retail standard.',
+    'guia-consejo-2': 'EAN-13 and UPC are for retail products and only accept digits in an exact amount. If the content doesn’t comply, a red error message appears instead of the code.',
+    'guia-consejo-3': 'CODE39 is good for simple internal labels with capital letters and numbers.',
+    'guia-consejo-4': 'Because it’s SVG, you can insert it into Word or Illustrator or print it large without it turning pixelated. If you need a PNG, open it and export it from another program.',
+    'guia-p1': 'How many digits do I need for EAN-13 and UPC?',
+    'guia-r1': 'EAN-13 takes 13 digits (if you type 12, the check digit is added) and UPC takes 12 (with 11 it is added too). If the check digit doesn’t match, the generator reports it as an error.',
+    'guia-p2': 'Can I change the color or the size?',
+    'guia-r2': 'No; the code always comes out in dark gray on a white background, with the text below.',
+    'guia-p3': 'Does it generate QR codes?',
+    'guia-r3': 'No, only linear barcodes. To read a QR there is the QR and barcode reader.',
+    'guia-p4': 'Can I use it to sell products?',
+    'guia-r4': 'The drawing is valid, but official EAN and UPC numbers are assigned by GS1; they are not registered here.',
   }
 };
 </script>
@@ -90,6 +126,41 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo generar un código de barras</h2>
+    <p data-i18n="guia-intro">Sirve para crear rápido un código de barras a partir de un número o un texto: una etiqueta de inventario, un código para un producto o una prueba de lector. Escribís el contenido, elegís el formato y obtenés el dibujo al instante, que podés bajar como imagen vectorial SVG, nítida a cualquier tamaño.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Escribí el contenido en «Texto o número» (viene con un ejemplo cargado).</li>
+      <li data-i18n="guia-paso-2">Elegí el «Formato»: CODE128, EAN-13, UPC o CODE39.</li>
+      <li data-i18n="guia-paso-3">Tocá «Generar» (o apretá Enter) para ver el código.</li>
+      <li data-i18n="guia-paso-4">Usá el enlace «Descargar como SVG» que aparece debajo; el archivo se llama codigo-de-barras.svg.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">CODE128 es el más flexible: acepta letras, números y símbolos, y es la mejor opción si no necesitás un estándar de comercio en particular.</li>
+      <li data-i18n="guia-consejo-2">EAN-13 y UPC son para productos de venta y solo admiten dígitos con una cantidad exacta. Si el contenido no cumple, aparece un mensaje de error en rojo en lugar del código.</li>
+      <li data-i18n="guia-consejo-3">CODE39 sirve para etiquetas internas simples con mayúsculas y números.</li>
+      <li data-i18n="guia-consejo-4">Por ser SVG, lo podés insertar en Word, Illustrator o imprimir en grande sin que se pixele. Si necesitás PNG, abrilo y exportalo desde otro programa.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuántos dígitos necesito para EAN-13 y UPC?</summary>
+      <p data-i18n="guia-r1">EAN-13 pide 13 dígitos (si escribís 12, se agrega el dígito de control) y UPC pide 12 (con 11 también se agrega). Si el dígito de control no coincide, el generador lo reporta como error.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo cambiar el color o el tamaño?</summary>
+      <p data-i18n="guia-r2">No; el código sale siempre en gris oscuro sobre fondo blanco, con el texto debajo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Genera códigos QR?</summary>
+      <p data-i18n="guia-r3">No, solo códigos de barras lineales. Para leer un QR existe el Lector de códigos QR y de barras.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Sirve para comercializar productos?</summary>
+      <p data-i18n="guia-r4">El dibujo es válido, pero los números EAN y UPC oficiales los asigna GS1; acá no se registran.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">

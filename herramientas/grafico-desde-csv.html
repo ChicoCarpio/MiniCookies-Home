@@ -26,7 +26,27 @@ window.i18nPagina = {
     'boton-graficar': 'Generar gráfico',
     'boton-descargar-png': 'Descargar como PNG',
     'error-sin-filas': 'No se encontraron filas de datos en este archivo.',
-    'error-grafico': 'No se pudo dibujar el gráfico'
+    'error-grafico': 'No se pudo dibujar el gráfico',
+    'guia-titulo': 'Cómo crear un gráfico desde Excel o CSV',
+    'guia-intro': 'Si tenés una tabla con datos en una hoja de cálculo y necesitás un gráfico rápido, esta herramienta lo arma sin abrir Excel. Cargás el archivo, elegís qué columna son las etiquetas y cuál los valores, y obtenés un gráfico de barras, líneas o torta que podés descargar como imagen PNG.',
+    'guia-paso-1': 'Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv).',
+    'guia-paso-2': 'En «Columna de etiquetas (eje X)» elegí la columna con los nombres (por ejemplo meses o productos).',
+    'guia-paso-3': 'En «Columna de valores» elegí la columna numérica.',
+    'guia-paso-4': 'Elegí el «Tipo de gráfico»: Barras, Líneas o Torta, y tocá «Generar gráfico».',
+    'guia-paso-5': 'Tocá «Descargar como PNG». El archivo se llama grafico.png.',
+    'guia-consejo-1': 'La primera fila del archivo se toma como los nombres de las columnas; los nombres repetidos reciben un sufijo (_2, _3).',
+    'guia-consejo-2': 'Se usa la primera hoja del libro. Si tus datos están en otra, movela al principio antes de cargar el archivo.',
+    'guia-consejo-3': 'El título del gráfico es el nombre de la columna de valores.',
+    'guia-consejo-4': 'Podés probar los tres tipos de gráfico sobre los mismos datos sin volver a cargar el archivo: cambiá el tipo y tocá «Generar gráfico» otra vez.',
+    'guia-consejo-5': 'Las filas completamente vacías se ignoran.',
+    'guia-p1': '¿Puedo graficar varias columnas a la vez?',
+    'guia-r1': 'No, el gráfico usa una sola serie de valores.',
+    'guia-p2': '¿Qué pasa con las celdas de texto en la columna de valores?',
+    'guia-r2': 'Se intentan leer como números (reconoce coma o punto decimal); si no se puede, cuentan como 0.',
+    'guia-p3': '¿El PNG tiene fondo transparente?',
+    'guia-r3': 'No, sale con fondo blanco.',
+    'guia-p4': '¿Se leen los gráficos o fórmulas del archivo?',
+    'guia-r4': 'Se leen los valores de las celdas; la herramienta dibuja un gráfico nuevo.',
   },
   en: {
     'titulo-pagina': 'Generate a Chart from Excel or CSV Free — Mini Cookies',
@@ -43,7 +63,27 @@ window.i18nPagina = {
     'boton-graficar': 'Generate chart',
     'boton-descargar-png': 'Download as PNG',
     'error-sin-filas': 'No data rows were found in this file.',
-    'error-grafico': 'Couldn’t draw the chart'
+    'error-grafico': 'Couldn’t draw the chart',
+    'guia-titulo': 'How to create a chart from Excel or CSV',
+    'guia-intro': 'If you have a table of data in a spreadsheet and need a quick chart, this tool builds it without opening Excel. You load the file, choose which column holds the labels and which the values, and get a bar, line or pie chart that you can download as a PNG image.',
+    'guia-paso-1': 'Drag your file to the upload area or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv).',
+    'guia-paso-2': 'In “Labels column (X axis)” choose the column with the names (for example months or products).',
+    'guia-paso-3': 'In “Values column” choose the numeric column.',
+    'guia-paso-4': 'Choose the “Chart type”: Bar, Line or Pie, and tap “Generate chart”.',
+    'guia-paso-5': 'Tap “Download as PNG”. The file is named grafico.png.',
+    'guia-consejo-1': 'The first row of the file is taken as the column names; repeated names get a suffix (_2, _3).',
+    'guia-consejo-2': 'The first sheet of the workbook is used. If your data is on another one, move it to the front before loading the file.',
+    'guia-consejo-3': 'The chart title is the name of the values column.',
+    'guia-consejo-4': 'You can try all three chart types on the same data without reloading the file: change the type and tap “Generate chart” again.',
+    'guia-consejo-5': 'Completely empty rows are ignored.',
+    'guia-p1': 'Can I chart several columns at once?',
+    'guia-r1': 'No, the chart uses a single series of values.',
+    'guia-p2': 'What happens with text cells in the values column?',
+    'guia-r2': 'They are read as numbers where possible (a comma or a period as the decimal separator is recognized); if that isn’t possible, they count as 0.',
+    'guia-p3': 'Does the PNG have a transparent background?',
+    'guia-r3': 'No, it comes out with a white background.',
+    'guia-p4': 'Are the charts or formulas in the file read?',
+    'guia-r4': 'The cell values are read; the tool draws a new chart.',
   }
 };
 </script>
@@ -101,6 +141,43 @@ window.i18nPagina = {
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo crear un gráfico desde Excel o CSV</h2>
+    <p data-i18n="guia-intro">Si tenés una tabla con datos en una hoja de cálculo y necesitás un gráfico rápido, esta herramienta lo arma sin abrir Excel. Cargás el archivo, elegís qué columna son las etiquetas y cuál los valores, y obtenés un gráfico de barras, líneas o torta que podés descargar como imagen PNG.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv).</li>
+      <li data-i18n="guia-paso-2">En «Columna de etiquetas (eje X)» elegí la columna con los nombres (por ejemplo meses o productos).</li>
+      <li data-i18n="guia-paso-3">En «Columna de valores» elegí la columna numérica.</li>
+      <li data-i18n="guia-paso-4">Elegí el «Tipo de gráfico»: Barras, Líneas o Torta, y tocá «Generar gráfico».</li>
+      <li data-i18n="guia-paso-5">Tocá «Descargar como PNG». El archivo se llama grafico.png.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La primera fila del archivo se toma como los nombres de las columnas; los nombres repetidos reciben un sufijo (_2, _3).</li>
+      <li data-i18n="guia-consejo-2">Se usa la primera hoja del libro. Si tus datos están en otra, movela al principio antes de cargar el archivo.</li>
+      <li data-i18n="guia-consejo-3">El título del gráfico es el nombre de la columna de valores.</li>
+      <li data-i18n="guia-consejo-4">Podés probar los tres tipos de gráfico sobre los mismos datos sin volver a cargar el archivo: cambiá el tipo y tocá «Generar gráfico» otra vez.</li>
+      <li data-i18n="guia-consejo-5">Las filas completamente vacías se ignoran.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo graficar varias columnas a la vez?</summary>
+      <p data-i18n="guia-r1">No, el gráfico usa una sola serie de valores.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa con las celdas de texto en la columna de valores?</summary>
+      <p data-i18n="guia-r2">Se intentan leer como números (reconoce coma o punto decimal); si no se puede, cuentan como 0.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿El PNG tiene fondo transparente?</summary>
+      <p data-i18n="guia-r3">No, sale con fondo blanco.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se leen los gráficos o fórmulas del archivo?</summary>
+      <p data-i18n="guia-r4">Se leen los valores de las celdas; la herramienta dibuja un gráfico nuevo.</p>
+    </details>
+  </section>
 </main>
 
 <footer class="sitio">
