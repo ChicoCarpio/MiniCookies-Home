@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <script>
 window.i18nPagina = {
@@ -22,7 +23,44 @@ window.i18nPagina = {
     'boton-generar': 'Generar QR',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar QR como imagen',
+    'resultado-px': ' (PNG de {0} × {0} px)',
     'error-largo': '❌ El texto es demasiado largo para un código QR. Probá acortarlo (por ejemplo, con un acortador de links).',
+    'error-largo-logo': '❌ Con un logo el texto tiene que ser más corto (el QR usa más corrección de errores). Acortalo o quitá el logo.',
+    'pers-titulo': 'Personalizar el QR (opcional)',
+    'logo-titulo': 'Logo en el centro',
+    'logo-ayuda': 'Con un logo, el QR se arma con el nivel más alto de corrección de errores (H), que tolera hasta un 30 % de daño. El logo tapa solo unos módulos del centro (menos del 5 % del código) y nunca las esquinas ni las líneas de guía. Por eso el QR queda más denso y entra menos texto.',
+    'logo-zona': '🖼️ Arrastrá una imagen acá o hacé clic para elegir el logo',
+    'logo-actual': 'Logo: ',
+    'logo-quitar': 'Quitar logo',
+    'logo-tam': 'Tamaño del logo',
+    'logo-tam-p': 'Pequeño',
+    'logo-tam-m': 'Mediano',
+    'logo-tam-g': 'Grande',
+    'logo-tam-x': 'Máximo (por omisión)',
+    'logo-tam-ayuda': 'Cuanto más grande el logo, más módulos tapa y más difícil es leer el QR. El máximo es el 22 % del ancho; si el tamaño elegido no entra en este código sin tapar sus partes de guía, se usa el más grande que sí entra.',
+    'nota-logo-ajustado': 'ℹ️ El logo quedó más chico que lo pedido: es el más grande que entra en este código sin tapar sus esquinas ni sus patrones de guía.',
+    'logo-error-tipo': '❌ Ese archivo no es una imagen. Probá con un PNG, JPG, WebP, GIF o SVG.',
+    'logo-error-ilegible': '❌ No se pudo leer esa imagen. Probá con otro archivo (PNG, JPG, WebP, GIF o SVG).',
+    'logo-error-vacio': '❌ Esa imagen está vacía o es totalmente transparente.',
+    'logo-error-grande': '❌ Esa imagen pesa demasiado (máximo 30 MB). Probá con una más liviana.',
+    'colores-titulo': 'Colores',
+    'colores-ayuda': 'Para que el QR se pueda escanear, el código tiene que ser más oscuro que el fondo, con un contraste de al menos 4,5 a 1. Si los colores no alcanzan, se oscurece el código o se aclara el fondo solos y se avisa acá. Muchas aplicaciones no leen los códigos claros sobre fondo oscuro.',
+    'color-codigo': 'Color del código',
+    'color-fondo': 'Color del fondo',
+    'colores-imagen': 'Colores de la imagen',
+    'colores-bn': 'Negro sobre blanco',
+    'nota-contraste': 'ℹ️ Los colores no tenían contraste suficiente para que el QR se lea bien: se oscureció el código y se aclaró el fondo lo justo.',
+    'nota-invertido': 'ℹ️ Muchas aplicaciones no leen un código más claro que su fondo: se intercambiaron los dos colores.',
+    'nota-sin-color': 'ℹ️ La imagen no tiene colores que aprovechar (es blanca, negra, gris o transparente): se usó negro sobre blanco.',
+    'estilo-titulo': 'Estilo',
+    'estilo-modulo': 'Estilo de los módulos',
+    'mod-cuadrado': 'Cuadrados',
+    'mod-redondeado': 'Cuadrados redondeados',
+    'mod-puntos': 'Puntos',
+    'estilo-ojo': 'Estilo de las esquinas',
+    'ojo-cuadrado': 'Cuadrado',
+    'ojo-redondeado': 'Redondeado',
+    'ojo-circulo': 'Círculo dentro de un cuadrado redondeado',
     'titulo-pagina': 'Generador de códigos QR gratis — Mini Cookies',
     'meta-descripcion': 'Generá un código QR a partir de un link o texto, gratis y sin enviar nada a ningún servidor.',
     'guia-titulo': 'Cómo crear un código QR a partir de un link o un texto',
@@ -31,16 +69,22 @@ window.i18nPagina = {
     'guia-paso-1': 'Escribí o pegá el link o el texto en el campo «Texto o URL». Para un sitio web conviene incluir la dirección completa, con https://.',
     'guia-paso-2': 'Elegí el «Tamaño»: Pequeño (200px), Mediano (300px) o Grande (500px).',
     'guia-paso-3': 'Pulsá «Generar QR» o la tecla Enter. El código aparece debajo, rodeado de un margen blanco.',
-    'guia-paso-4': 'Probalo con la cámara de tu celular y, si lee bien, usá «Descargar QR como imagen» para guardar el archivo codigo-qr.png.',
+    'guia-paso-4': 'Opcional: abrí «Personalizar el QR» para poner un logo en el centro, elegir colores o cambiar la forma de los módulos y de las tres esquinas.',
+    'guia-paso-5': 'Probalo con la cámara de tu celular y, si lee bien, usá «Descargar QR como imagen» para guardar el archivo codigo-qr.png.',
     'guia-consejo-1': 'Para imprimir, elegí el tamaño Grande: tiene más píxeles y se imprime más nítido. En un cartel, dejá el código lo bastante grande como para leerlo desde la distancia a la que se va a escanear.',
     'guia-consejo-2': 'Al diseñar el material, no recortes el margen blanco ni pongas el código sobre un fondo con dibujos: el lector necesita buen contraste y esa zona libre alrededor para encontrarlo.',
     'guia-consejo-3': 'Un texto más corto produce un QR más simple, con módulos más grandes y más fácil de leer. Si tu link es larguísimo, acortalo antes.',
+    'guia-consejo-4': 'Si personalizás el QR, probalo siempre con la cámara antes de imprimirlo. Elegí un logo simple, un código bien más oscuro que su fondo y, para los módulos, los cuadrados o los redondeados: son los que mejor se leen.',
     'guia-p1': '¿Por qué dice que el texto es demasiado largo?',
     'guia-r1': 'Un código QR tiene un límite de datos. Si lo superás, la herramienta muestra un aviso en vez de generar algo ilegible; acortá el texto o usá un acortador de links.',
     'guia-p2': '¿El QR vence o deja de funcionar?',
     'guia-r2': 'No. El código contiene el texto en sí, no depende de ningún servicio. Funciona mientras la dirección a la que apunta siga existiendo.',
     'guia-p3': '¿Puedo cambiar el contenido después de imprimirlo?',
     'guia-r3': 'No: el contenido está dentro del dibujo. Si necesitás poder cambiar el destino más adelante, generá el QR con un link que vos controles y que luego puedas redirigir.',
+    'guia-p4': '¿Por qué un QR con logo es más denso y admite menos texto?',
+    'guia-r4': 'El logo tapa unos módulos del centro y el código tiene que poder reconstruirlos. Para eso se usa el nivel más alto de corrección de errores, que agrega datos de respaldo y por eso necesita más módulos para el mismo texto. Si el texto no entra, acortalo o quitá el logo.',
+    'guia-p5': '¿Por qué cambiaron los colores que elegí?',
+    'guia-r5': 'Los lectores necesitan que el código sea bastante más oscuro que el fondo. Si el par que elegiste no llega al contraste mínimo, la herramienta oscurece el código o aclara el fondo lo justo y te avisa. Un código claro sobre un fondo oscuro se intercambia, porque muchas aplicaciones no lo leen.',
   },
   en: {
     'hero-titulo': 'QR code generator',
@@ -53,7 +97,44 @@ window.i18nPagina = {
     'boton-generar': 'Generate QR',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download the QR as an image',
+    'resultado-px': ' (PNG, {0} × {0} px)',
     'error-largo': '❌ That text is too long for a QR code. Try shortening it (with a link shortener, for example).',
+    'error-largo-logo': '❌ With a logo the text has to be shorter (the QR uses more error correction). Shorten it or remove the logo.',
+    'pers-titulo': 'Customize the QR (optional)',
+    'logo-titulo': 'Logo in the center',
+    'logo-ayuda': 'With a logo, the QR is built with the highest error-correction level (H), which tolerates up to 30% damage. The logo covers only a few modules in the middle (under 5% of the code) and never the corners or the guide lines. That is why the QR gets denser and holds less text.',
+    'logo-zona': '🖼️ Drop an image here, or click to pick the logo',
+    'logo-actual': 'Logo: ',
+    'logo-quitar': 'Remove logo',
+    'logo-tam': 'Logo size',
+    'logo-tam-p': 'Small',
+    'logo-tam-m': 'Medium',
+    'logo-tam-g': 'Large',
+    'logo-tam-x': 'Maximum (default)',
+    'logo-tam-ayuda': 'The bigger the logo, the more modules it covers and the harder the QR is to read. The maximum is 22% of the width; if the chosen size does not fit this code without covering its guide parts, the largest one that does is used.',
+    'nota-logo-ajustado': 'ℹ️ The logo came out smaller than requested: it is the largest that fits this code without covering its corners or guide patterns.',
+    'logo-error-tipo': '❌ That file is not an image. Try a PNG, JPG, WebP, GIF or SVG.',
+    'logo-error-ilegible': '❌ That image could not be read. Try another file (PNG, JPG, WebP, GIF or SVG).',
+    'logo-error-vacio': '❌ That image is empty or fully transparent.',
+    'logo-error-grande': '❌ That image is too large (30 MB maximum). Try a lighter one.',
+    'colores-titulo': 'Colors',
+    'colores-ayuda': 'For the QR to be scannable, the code has to be darker than the background, with a contrast of at least 4.5 to 1. If the colors fall short, the code is darkened or the background lightened automatically and you are told here. Many apps cannot read light codes on a dark background.',
+    'color-codigo': 'Code color',
+    'color-fondo': 'Background color',
+    'colores-imagen': 'Colors from the image',
+    'colores-bn': 'Black on white',
+    'nota-contraste': 'ℹ️ Those colors did not have enough contrast for the QR to scan well: the code was darkened and the background lightened just enough.',
+    'nota-invertido': 'ℹ️ Many apps cannot read a code lighter than its background: the two colors were swapped.',
+    'nota-sin-color': 'ℹ️ The image has no colors to use (it is white, black, gray or transparent): black on white was used.',
+    'estilo-titulo': 'Style',
+    'estilo-modulo': 'Module style',
+    'mod-cuadrado': 'Squares',
+    'mod-redondeado': 'Rounded squares',
+    'mod-puntos': 'Dots',
+    'estilo-ojo': 'Corner style',
+    'ojo-cuadrado': 'Square',
+    'ojo-redondeado': 'Rounded',
+    'ojo-circulo': 'Circle inside a rounded square',
     'titulo-pagina': 'Free QR code generator — Mini Cookies',
     'meta-descripcion': 'Generate a QR code from a link or a piece of text — free, and nothing is sent to a server.',
     'guia-titulo': 'How to create a QR code from a link or text',
@@ -62,16 +143,22 @@ window.i18nPagina = {
     'guia-paso-1': 'Type or paste the link or text into the “Text or URL” field. For a website, it’s best to include the full address, starting with https://.',
     'guia-paso-2': 'Choose the “Size”: Small (200px), Medium (300px) or Large (500px).',
     'guia-paso-3': 'Press “Generate QR” or the Enter key. The code appears below, surrounded by a white margin.',
-    'guia-paso-4': 'Try it with your phone’s camera and, if it reads fine, use “Download the QR as an image” to save the codigo-qr.png file.',
+    'guia-paso-4': 'Optional: open “Customize the QR” to put a logo in the center, pick colors or change the shape of the modules and the three corners.',
+    'guia-paso-5': 'Try it with your phone’s camera and, if it reads fine, use “Download the QR as an image” to save the codigo-qr.png file.',
     'guia-consejo-1': 'For printing, pick the Large size: it has more pixels and prints sharper. On a poster, make the code big enough to be read from the distance it will be scanned at.',
     'guia-consejo-2': 'When designing your material, don’t crop the white margin or place the code over a busy background: the reader needs good contrast and that clear area around it to find the code.',
     'guia-consejo-3': 'Shorter text produces a simpler QR with larger modules that is easier to read. If your link is very long, shorten it first.',
+    'guia-consejo-4': 'If you customize the QR, always test it with a camera before printing. Pick a simple logo, a code clearly darker than its background and, for the modules, squares or rounded squares: they read best.',
     'guia-p1': 'Why does it say the text is too long?',
     'guia-r1': 'A QR code has a data limit. If you go over it, the tool shows a warning instead of producing something unreadable; shorten the text or use a link shortener.',
     'guia-p2': 'Does the QR expire or stop working?',
     'guia-r2': 'No. The code contains the text itself and doesn’t depend on any service. It works as long as the address it points to still exists.',
     'guia-p3': 'Can I change the content after printing it?',
     'guia-r3': 'No: the content is inside the pattern. If you need to change the destination later, generate the QR with a link you control and can redirect afterwards.',
+    'guia-p4': 'Why is a QR with a logo denser and limited to less text?',
+    'guia-r4': 'The logo covers a few modules in the middle and the code has to be able to rebuild them. That uses the highest error-correction level, which adds backup data and so needs more modules for the same text. If the text does not fit, shorten it or remove the logo.',
+    'guia-p5': 'Why did the colors I picked change?',
+    'guia-r5': 'Scanners need the code to be clearly darker than the background. If your pair does not reach the minimum contrast, the tool darkens the code or lightens the background just enough and tells you. A light code on a dark background is swapped, because many apps cannot read it.',
   }
 };
 </script>
@@ -94,6 +181,8 @@ window.i18nPagina = {
   <p data-i18n="intro">Escribí un link o texto y generá un código QR al instante.</p>
 
   <div class="panel-herramienta">
+   <div class="columnas con-vista-fija">
+    <div class="columna-controles">
     <label class="campo">
       <span data-i18n="campo-texto">Texto o URL</span>
       <input type="text" id="entradaTexto" placeholder="https://ejemplo.com" style="padding:10px; border:1px solid var(--gris-borde); border-radius:6px; font-size:1rem;">
@@ -111,15 +200,94 @@ window.i18nPagina = {
       <button class="boton" id="botonGenerar" data-i18n="boton-generar">Generar QR</button>
     </div>
 
-    <p id="mensajeError" style="color:#dc2626; display:none;"></p>
-    <div style="margin-top:20px; display:flex; justify-content:center;">
-      <canvas id="vistaQR" style="display:none; max-width:100%; height:auto; border-radius:8px;"></canvas>
-    </div>
-    <div id="contenedorQR" hidden></div>
+    <details class="plegable" id="personalizar">
+      <summary data-i18n="pers-titulo">Personalizar el QR (opcional)</summary>
+      <div class="plegable-cuerpo">
+        <p>
+          <strong data-i18n="logo-titulo">Logo en el centro</strong>
+          <span class="ayuda-tip">
+            <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+            <span class="ayuda-burbuja" data-i18n="logo-ayuda">Con un logo, el QR se arma con el nivel más alto de corrección de errores (H).</span>
+          </span>
+        </p>
+        <div class="zona-arrastre" id="zonaLogo">
+          <span data-i18n="logo-zona">🖼️ Arrastrá una imagen acá o hacé clic para elegir el logo</span>
+          <input type="file" id="entradaLogo" accept="image/*" hidden>
+        </div>
+        <div class="controles" id="filaLogo" hidden>
+          <span><span data-i18n="logo-actual">Logo: </span><span id="nombreLogo"></span></span>
+          <button type="button" class="boton secundario chico" id="botonQuitarLogo" data-i18n="logo-quitar">Quitar logo</button>
+          <label class="campo">
+            <span><span data-i18n="logo-tam">Tamaño del logo</span>
+              <span class="ayuda-tip">
+                <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+                <span class="ayuda-burbuja" data-i18n="logo-tam-ayuda">Cuanto más grande el logo, más difícil es leer el QR.</span>
+              </span>
+            </span>
+            <select id="tamanoLogo">
+              <option value="0.10" data-i18n="logo-tam-p">Pequeño</option>
+              <option value="0.14" data-i18n="logo-tam-m">Mediano</option>
+              <option value="0.18" data-i18n="logo-tam-g">Grande</option>
+              <option value="0.22" selected data-i18n="logo-tam-x">Máximo (por omisión)</option>
+            </select>
+          </label>
+        </div>
+        <p class="nota-suave error" id="mensajeLogo" role="alert" hidden></p>
+        <p class="nota-suave" id="notaLogo" role="status" hidden></p>
 
-    <div class="resultado" id="resultado" style="text-align:center;">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a>
+        <p>
+          <strong data-i18n="colores-titulo">Colores</strong>
+          <span class="ayuda-tip">
+            <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+            <span class="ayuda-burbuja" data-i18n="colores-ayuda">El código tiene que ser más oscuro que el fondo, con un contraste de al menos 4,5 a 1.</span>
+          </span>
+        </p>
+        <div class="controles">
+          <label class="campo">
+            <span data-i18n="color-codigo">Color del código</span>
+            <input type="color" id="colorOscuro" value="#000000">
+          </label>
+          <label class="campo">
+            <span data-i18n="color-fondo">Color del fondo</span>
+            <input type="color" id="colorClaro" value="#ffffff">
+          </label>
+          <button type="button" class="boton secundario chico" id="botonColoresLogo" data-i18n="colores-imagen" disabled>Colores de la imagen</button>
+          <button type="button" class="boton secundario chico" id="botonColoresBN" data-i18n="colores-bn">Negro sobre blanco</button>
+        </div>
+        <p class="nota-suave" id="notaColores" role="status" hidden></p>
+
+        <p><strong data-i18n="estilo-titulo">Estilo</strong></p>
+        <div class="controles">
+          <label class="campo">
+            <span data-i18n="estilo-modulo">Estilo de los módulos</span>
+            <select id="estiloModulo">
+              <option value="cuadrado" data-i18n="mod-cuadrado">Cuadrados</option>
+              <option value="redondeado" data-i18n="mod-redondeado">Cuadrados redondeados</option>
+              <option value="puntos" data-i18n="mod-puntos">Puntos</option>
+            </select>
+          </label>
+          <label class="campo">
+            <span data-i18n="estilo-ojo">Estilo de las esquinas</span>
+            <select id="estiloOjo">
+              <option value="cuadrado" data-i18n="ojo-cuadrado">Cuadrado</option>
+              <option value="redondeado" data-i18n="ojo-redondeado">Redondeado</option>
+              <option value="circulo" data-i18n="ojo-circulo">Círculo dentro de un cuadrado redondeado</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <p id="mensajeError" style="color:#dc2626; display:none;"></p>
     </div>
+
+    <div class="vista-fija vacia" id="panelVista">
+      <canvas id="vistaQR" style="display:none;"></canvas>
+      <div class="resultado" id="resultado">
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a><span id="tamanoDescarga"></span>
+      </div>
+    </div>
+   </div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -132,13 +300,15 @@ window.i18nPagina = {
       <li data-i18n="guia-paso-1">Escribí o pegá el link o el texto en el campo «Texto o URL». Para un sitio web conviene incluir la dirección completa, con https://.</li>
       <li data-i18n="guia-paso-2">Elegí el «Tamaño»: Pequeño (200px), Mediano (300px) o Grande (500px).</li>
       <li data-i18n="guia-paso-3">Pulsá «Generar QR» o la tecla Enter. El código aparece debajo, rodeado de un margen blanco.</li>
-      <li data-i18n="guia-paso-4">Probalo con la cámara de tu celular y, si lee bien, usá «Descargar QR como imagen» para guardar el archivo codigo-qr.png.</li>
+      <li data-i18n="guia-paso-4">Opcional: abrí «Personalizar el QR» para poner un logo en el centro, elegir colores o cambiar la forma de los módulos y de las tres esquinas.</li>
+      <li data-i18n="guia-paso-5">Probalo con la cámara de tu celular y, si lee bien, usá «Descargar QR como imagen» para guardar el archivo codigo-qr.png.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Para imprimir, elegí el tamaño Grande: tiene más píxeles y se imprime más nítido. En un cartel, dejá el código lo bastante grande como para leerlo desde la distancia a la que se va a escanear.</li>
       <li data-i18n="guia-consejo-2">Al diseñar el material, no recortes el margen blanco ni pongas el código sobre un fondo con dibujos: el lector necesita buen contraste y esa zona libre alrededor para encontrarlo.</li>
       <li data-i18n="guia-consejo-3">Un texto más corto produce un QR más simple, con módulos más grandes y más fácil de leer. Si tu link es larguísimo, acortalo antes.</li>
+      <li data-i18n="guia-consejo-4">Si personalizás el QR, probalo siempre con la cámara antes de imprimirlo. Elegí un logo simple, un código bien más oscuro que su fondo y, para los módulos, los cuadrados o los redondeados: son los que mejor se leen.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
@@ -153,6 +323,14 @@ window.i18nPagina = {
       <summary data-i18n="guia-p3">¿Puedo cambiar el contenido después de imprimirlo?</summary>
       <p data-i18n="guia-r3">No: el contenido está dentro del dibujo. Si necesitás poder cambiar el destino más adelante, generá el QR con un link que vos controles y que luego puedas redirigir.</p>
     </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Por qué un QR con logo es más denso y admite menos texto?</summary>
+      <p data-i18n="guia-r4">El logo tapa unos módulos del centro y el código tiene que poder reconstruirlos. Para eso se usa el nivel más alto de corrección de errores, que agrega datos de respaldo y por eso necesita más módulos para el mismo texto. Si el texto no entra, acortalo o quitá el logo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p5">¿Por qué cambiaron los colores que elegí?</summary>
+      <p data-i18n="guia-r5">Los lectores necesitan que el código sea bastante más oscuro que el fondo. Si el par que elegiste no llega al contraste mínimo, la herramienta oscurece el código o aclara el fondo lo justo y te avisa. Un código claro sobre un fondo oscuro se intercambia, porque muchas aplicaciones no lo leen.</p>
+    </details>
       <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/crear-codigo-qr.html" data-i18n="guia-mas-link">Cómo crear un código QR: qué poner, tamaño e impresión</a></p>
   </section>
 </main>
@@ -162,64 +340,173 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../assets/js/qr-propio.js"></script>
+<script src="../assets/js/qr-estilos.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const entradaTexto = document.getElementById('entradaTexto');
 const botonGenerar = document.getElementById('botonGenerar');
-const contenedorQR = document.getElementById('contenedorQR');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
 
 const vistaQR = document.getElementById('vistaQR');
+const panelVista = document.getElementById('panelVista');
+const tamanoDescarga = document.getElementById('tamanoDescarga');
+let urlDescarga = null, generacion = 0;
 const mensajeError = document.getElementById('mensajeError');
 
-// La librería dibuja el QR pegado a los bordes, sin el margen blanco ("zona
-// de silencio") que los lectores necesitan para encontrarlo: sin él, el QR
-// puesto sobre un fondo oscuro (o en el modo oscuro del sitio) muchas veces
-// no se lee. Se arma un canvas final con 4 módulos de margen blanco, que es
-// el que se ve y el que se descarga.
+// El QR se dibuja con 4 módulos de margen blanco ("zona de silencio") que los
+// lectores necesitan para encontrarlo: sin él, el QR puesto sobre un fondo
+// oscuro (o en el modo oscuro del sitio) muchas veces no se lee. El canvas
+// final es el que se ve y el que se descarga.
+// Personalización (todo opcional): con las opciones por omisión, QREstilos.dibujar
+// llama a QRPropio.pintar y el QR es el de siempre.
+const entradaLogo = document.getElementById('entradaLogo');
+const zonaLogo = document.getElementById('zonaLogo');
+const filaLogo = document.getElementById('filaLogo');
+const nombreLogo = document.getElementById('nombreLogo');
+const mensajeLogo = document.getElementById('mensajeLogo');
+const notaColores = document.getElementById('notaColores');
+const notaLogo = document.getElementById('notaLogo');
+const tamanoLogo = document.getElementById('tamanoLogo');
+const colorOscuro = document.getElementById('colorOscuro');
+const colorClaro = document.getElementById('colorClaro');
+const botonColoresLogo = document.getElementById('botonColoresLogo');
+let logo = null;          // canvas con el logo, o null
+let claveNota = null;     // clave del aviso de colores que se está mostrando
+let claveErrorLogo = null;
+let claveNotaLogo = null;
+
+function mostrarNota(clave) {
+  claveNota = clave;
+  notaColores.hidden = !clave;
+  notaColores.textContent = clave ? t(clave) : '';
+}
+function mostrarNotaLogo(clave) {
+  claveNotaLogo = clave;
+  notaLogo.hidden = !clave;
+  notaLogo.textContent = clave ? t(clave) : '';
+}
+function mostrarErrorLogo(clave) {
+  claveErrorLogo = clave;
+  mensajeLogo.hidden = !clave;
+  mensajeLogo.textContent = clave ? t(clave) : '';
+}
+let pxDescarga = 0;
+function mostrarPx() { tamanoDescarga.textContent = pxDescarga ? t('resultado-px').replace(/\{0\}/g, pxDescarga) : ''; }
+document.addEventListener('cambioIdioma', () => { mostrarPx(); mostrarNota(claveNota); mostrarErrorLogo(claveErrorLogo); mostrarNotaLogo(claveNotaLogo); });
+
 function generarQR() {
   const texto = entradaTexto.value.trim();
-  contenedorQR.innerHTML = '';
   resultado.classList.remove('visible');
   mensajeError.style.display = 'none';
   vistaQR.style.display = 'none';
+  panelVista.classList.add('vacia');
   if (!texto) return;
 
   const tamano = parseInt(document.getElementById('tamano').value, 10);
   let qr;
+  mostrarNotaLogo(null);
   try {
-    qr = new QRCode(contenedorQR, {
-      text: texto,
-      width: tamano,
-      height: tamano,
-      correctLevel: QRCode.CorrectLevel.M,
-    });
+    // Con logo el QR va en nivel H y deja lugar en el centro; sin logo, como siempre.
+    qr = logo ? QREstilos.crearConLogo(texto, parseFloat(tamanoLogo.value)) : QRPropio.crear(texto, { nivel: 'M' });
   } catch (error) {
-    mensajeError.textContent = t('error-largo');
+    mensajeError.textContent = t(logo ? 'error-largo-logo' : 'error-largo');
     mensajeError.style.display = 'block';
     return;
   }
-  const canvasQR = contenedorQR.querySelector('canvas');
-  if (!canvasQR) return;
-
-  const modulos = (qr._oQRCode && qr._oQRCode.getModuleCount && qr._oQRCode.getModuleCount()) || 33;
-  const margen = Math.ceil(4 * tamano / modulos);
-  vistaQR.width = tamano + margen * 2;
-  vistaQR.height = tamano + margen * 2;
-  const ctx = vistaQR.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, vistaQR.width, vistaQR.height);
-  ctx.drawImage(canvasQR, margen, margen);
+  // Si el tamaño pedido no entró (hay que respetar las partes de guía), se avisa.
+  if (logo && parseFloat(tamanoLogo.value) < 0.22 && qr.placa.k / qr.placa.n < 0.8 * parseFloat(tamanoLogo.value)) mostrarNotaLogo('nota-logo-ajustado');
+  const r = QREstilos.dibujar(vistaQR, qr, {
+    lado: tamano,
+    estiloModulo: document.getElementById('estiloModulo').value,
+    estiloOjo: document.getElementById('estiloOjo').value,
+    oscuro: colorOscuro.value,
+    claro: colorClaro.value,
+    logo
+  });
+  // Si los colores no alcanzaban para escanear, se corrigieron: se muestran y se avisa.
+  if (r.colores.motivo) {
+    colorOscuro.value = r.colores.oscuro;
+    colorClaro.value = r.colores.claro;
+    mostrarNota('nota-' + r.colores.motivo);
+  }
   vistaQR.style.display = 'block';
+  panelVista.classList.remove('vacia');
 
-  enlaceDescarga.href = vistaQR.toDataURL('image/png');
+  // La imagen que se descarga se dibuja aparte, en alta resolución (módulos de píxeles enteros), y no
+  // depende del tamaño de la vista previa. Hasta que está lista el enlace no apunta a nada.
+  const mia = ++generacion;
+  enlaceDescarga.removeAttribute('href');
+  pxDescarga = 0; mostrarPx();
+  QREstilos.exportarPNG(qr, {
+    estiloModulo: document.getElementById('estiloModulo').value,
+    estiloOjo: document.getElementById('estiloOjo').value,
+    oscuro: colorOscuro.value,
+    claro: colorClaro.value,
+    logo
+  }).then((png) => {
+    if (mia !== generacion) return;
+    if (urlDescarga) URL.revokeObjectURL(urlDescarga);
+    urlDescarga = URL.createObjectURL(png.blob);
+    enlaceDescarga.href = urlDescarga;
+    pxDescarga = png.px; mostrarPx();
+  }).catch(() => {});
   resultado.classList.add('visible');
 }
 
 botonGenerar.addEventListener('click', generarQR);
 entradaTexto.addEventListener('keydown', (e) => { if (e.key === 'Enter') generarQR(); });
+
+// Vista previa en vivo: cualquier cambio de opción vuelve a dibujar si ya hay texto.
+function opcionCambiada() { if (entradaTexto.value.trim()) generarQR(); }
+document.getElementById('tamano').addEventListener('change', opcionCambiada);
+document.getElementById('estiloModulo').addEventListener('change', opcionCambiada);
+document.getElementById('estiloOjo').addEventListener('change', opcionCambiada);
+tamanoLogo.addEventListener('change', opcionCambiada);
+[colorOscuro, colorClaro].forEach((c) => c.addEventListener('change', () => { mostrarNota(null); opcionCambiada(); }));
+
+document.getElementById('botonColoresBN').addEventListener('click', () => {
+  colorOscuro.value = '#000000';
+  colorClaro.value = '#ffffff';
+  mostrarNota(null);
+  opcionCambiada();
+});
+botonColoresLogo.addEventListener('click', () => {
+  if (!logo) return;
+  const d = QREstilos.derivarColores(logo);
+  colorOscuro.value = d.oscuro;
+  colorClaro.value = d.claro;
+  mostrarNota(d.motivo ? 'nota-' + d.motivo : null);
+  opcionCambiada();
+});
+
+function quitarLogo() {
+  QREstilos.liberarLogo(logo);
+  logo = null;
+  filaLogo.hidden = true;
+  botonColoresLogo.disabled = true;
+  opcionCambiada();
+}
+document.getElementById('botonQuitarLogo').addEventListener('click', () => { mostrarErrorLogo(null); quitarLogo(); });
+conectarZonaArrastre(zonaLogo, entradaLogo, async (archivos) => {
+  mostrarErrorLogo(null);
+  try {
+    const nuevo = await QREstilos.cargarLogo(archivos[0]);
+    QREstilos.liberarLogo(logo);
+    logo = nuevo;
+  } catch (error) {
+    // Un archivo malo no cambia el logo que ya estaba puesto.
+    mostrarErrorLogo('logo-error-' + ((error && error.codigo) || 'ilegible'));
+    return;
+  }
+  nombreLogo.textContent = archivos[0].name;
+  filaLogo.hidden = false;
+  botonColoresLogo.disabled = false;
+  opcionCambiada();
+});
 </script>
+<script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/tema.js"></script>
 <script src="../assets/js/fondo-decorativo.js"></script>
 <script src="../assets/js/idioma.js"></script>

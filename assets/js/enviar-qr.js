@@ -105,7 +105,10 @@ const EnviarQR = (() => {
     if (!m) return null;
     try {
       const datos = await desempaquetar(m[0]);
-      return datos && (datos.t === 'o' || datos.t === 'r') && typeof datos.s === 'string' ? datos : null;
+      if (!datos || (datos.t !== 'o' && datos.t !== 'r') || typeof datos.s !== 'string') return null;
+      // Un par "ice-lite" (solo candidato de servidor) no es de esta herramienta: ningún navegador lo arma así.
+      if (/a=ice-lite/i.test(datos.s)) return null;
+      return datos;
     } catch (e) {
       return null;
     }

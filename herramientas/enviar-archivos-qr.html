@@ -76,6 +76,9 @@ window.i18nPagina = {
     'error-camara': '❌ No se pudo usar la cámara: ',
     'error-nuevo-intento': 'Empezar de nuevo',
     'conectando': 'Conectando…',
+    'oferta-detectada': 'Se leyó el QR de otro dispositivo. Para conectar, tocá el botón: solo hacelo si ese dispositivo es uno que tenés vos o que te está mostrando la otra persona en este momento.',
+    'conectar-oferta': 'Conectar con el dispositivo que muestra el QR',
+    'otro-codigo': 'Usar otro código',
     'error-espacio': '❌ No hay espacio suficiente para guardar el archivo en este dispositivo. Liberá espacio y volvé a intentar.',
     'poco-espacio': '⚠️ Parece que no hay espacio suficiente en este dispositivo para recibir todo.',
     'titulo-pagina': 'Enviar archivos con un QR gratis — Mini Cookies',
@@ -98,6 +101,8 @@ window.i18nPagina = {
     'guia-r2': 'Confirma que los dos dispositivos están conectados entre sí y no con un tercero. Si el código falla 3 veces, la conexión se cierra.',
     'guia-p3': '¿Puedo enviar varios archivos a la vez?',
     'guia-r3': 'Sí. Se envían de a una transferencia por vez: mientras uno de los dos está transfiriendo, el botón «Enviar» queda deshabilitado.',
+    'guia-p5': '¿Queda rastro del código en mi navegador?',
+    'guia-r5': 'Al abrir el QR con la cámara del celular, el código viaja en la dirección de la página. La página lo saca de la barra enseguida y el código solo sirve para una sesión (la oferta vence a los 2 minutos), pero el navegador puede conservar la dirección completa en su historial, y a veces sincronizarla con otros dispositivos. Si te preocupa, borrá esa entrada del historial o cerrá la sesión.',
     'guia-p4': 'No conecta, ¿qué hago?',
     'guia-r4': 'Revisá que ambos estén en la misma WiFi, que el QR no haya vencido y tocá «Empezar de nuevo».'
   },
@@ -165,6 +170,9 @@ window.i18nPagina = {
     'error-camara': '❌ Could not use the camera: ',
     'error-nuevo-intento': 'Start over',
     'conectando': 'Connecting…',
+    'oferta-detectada': 'The QR of another device was read. To connect, tap the button: only do it if that device is yours or the other person is showing it to you right now.',
+    'conectar-oferta': 'Connect to the device showing the QR',
+    'otro-codigo': 'Use another code',
     'error-espacio': '❌ There is not enough space to save the file on this device. Free some space and try again.',
     'poco-espacio': '⚠️ It looks like this device does not have enough space to receive everything.',
     'titulo-pagina': 'Send files with a QR code — Mini Cookies',
@@ -187,6 +195,8 @@ window.i18nPagina = {
     'guia-r2': 'It confirms that the two devices are connected to each other and not to a third party. If the code fails 3 times, the connection is closed.',
     'guia-p3': 'Can I send several files at once?',
     'guia-r3': 'Yes. They’re sent one transfer at a time: while either of the two is transferring, the “Send” button is disabled.',
+    'guia-p5': 'Does the code leave a trace in my browser?',
+    'guia-r5': 'When you open the QR with the phone camera, the code travels in the page address. The page removes it from the address bar right away and the code only works for one session (the offer expires after 2 minutes), but the browser may keep the full address in its history, and sometimes sync it to other devices. If that worries you, delete that history entry or sign out.',
     'guia-p4': 'It won’t connect, what do I do?',
     'guia-r4': 'Check that both are on the same WiFi, that the QR hasn’t expired, and tap “Start over”.'
   }
@@ -258,6 +268,13 @@ window.i18nPagina = {
 
     <!-- Enviar: lee el QR del que recibe y muestra su respuesta -->
     <div id="panelEnviar" hidden>
+      <div id="pasoConfirmarOferta" hidden>
+        <p data-i18n="oferta-detectada">Se leyó el QR de otro dispositivo.</p>
+        <div class="controles">
+          <button class="boton" id="botonConectarOferta" data-i18n="conectar-oferta">Conectar con el dispositivo que muestra el QR</button>
+          <button class="boton secundario" id="botonOtroCodigo" data-i18n="otro-codigo">Usar otro código</button>
+        </div>
+      </div>
       <div id="pasoLeerOferta">
         <p data-i18n="enviar-paso1">Escaneá el QR del dispositivo que va a recibir.</p>
         <div class="controles">
@@ -356,7 +373,6 @@ window.i18nPagina = {
     <div class="controles" id="pasoReintentar" hidden>
       <button class="boton" id="botonReintentar" data-i18n="error-nuevo-intento">Empezar de nuevo</button>
     </div>
-    <div id="contenedorQR" hidden></div>
   </div>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -393,6 +409,10 @@ window.i18nPagina = {
       <p data-i18n="guia-r3">Sí. Se envían de a una transferencia por vez: mientras uno de los dos está transfiriendo, el botón «Enviar» queda deshabilitado.</p>
     </details>
     <details>
+      <summary data-i18n="guia-p5">¿Queda rastro del código en mi navegador?</summary>
+      <p data-i18n="guia-r5">Al abrir el QR con la cámara del celular, el código viaja en la dirección de la página. La página lo saca de la barra enseguida y el código solo sirve para una sesión (la oferta vence a los 2 minutos), pero el navegador puede conservar la dirección completa en su historial, y a veces sincronizarla con otros dispositivos. Si te preocupa, borrá esa entrada del historial o cerrá la sesión.</p>
+    </details>
+    <details>
       <summary data-i18n="guia-p4">No conecta, ¿qué hago?</summary>
       <p data-i18n="guia-r4">Revisá que ambos estén en la misma WiFi, que el QR no haya vencido y tocá «Empezar de nuevo».</p>
     </details>
@@ -405,8 +425,8 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
+<script src="../assets/js/qr-propio.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/enviar-qr.js"></script>
 <script>
@@ -434,22 +454,18 @@ function pantalla(cual) {
 // El QR lleva 4 módulos de margen blanco (zona de silencio), igual que el
 // generador de QR del sitio: sin él, muchos lectores no lo encuentran.
 function dibujarQR(caja, texto) {
-  const oculto = $('contenedorQR');
-  oculto.replaceChildren();
   const lado = Math.min(360, Math.max(240, Math.floor(caja.clientWidth || 300)));
   let qr;
   try {
-    qr = new QRCode(oculto, { text: texto, width: lado, height: lado, correctLevel: QRCode.CorrectLevel.L });
+    qr = QRPropio.crear(texto, { nivel: 'L' });
   } catch (e) { mostrarMensaje(t('error-codigo')); return; }
-  const origen = oculto.querySelector('canvas');
-  const modulos = (qr._oQRCode && qr._oQRCode.getModuleCount && qr._oQRCode.getModuleCount()) || 41;
-  const margen = Math.ceil(4 * lado / modulos);
-  const c = document.createElement('canvas');
-  c.width = c.height = lado + margen * 2;
-  const cx = c.getContext('2d');
-  cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);
-  cx.drawImage(origen, margen, margen);
-  caja.replaceChildren(c);
+  // Píxeles de pantalla enteros por módulo: sin escalado fraccionario el QR nunca sale borroso.
+  const dpr = window.devicePixelRatio || 1;
+  const n = qr.tamano;
+  const ppm = Math.max(1, Math.floor(lado * dpr / (n + 8)));
+  const lienzo = QRPropio.pintar(document.createElement('canvas'), qr, n * ppm); // ancho (n + 8) × ppm: la zona de silencio queda en 4 módulos
+  lienzo.style.width = ((n + 8) * ppm / dpr) + 'px';
+  caja.replaceChildren(lienzo);
 }
 
 function copiar(texto, boton) {
@@ -539,6 +555,30 @@ function iniciarEnviar() {
   mostrarMensaje('');
 }
 let ofertaPendiente = '';
+// Una oferta que llega sola (en la dirección de la página o leída con la cámara de la página) NO se usa
+// hasta que la persona lo confirma con un toque: así un QR ajeno o un enlace colado no abre una conexión por su cuenta.
+let ofertaPorConfirmar = '';
+function proponerOferta(texto) {
+  if (conectando || invitado || ofertaPorConfirmar) return;
+  if (!/MC[12]\.[A-Za-z0-9_-]+/.test(String(texto || '').replace(/\s+/g, ''))) { mostrarMensaje(t('error-codigo')); return; }
+  ofertaPorConfirmar = texto;
+  detenerCamara();
+  mostrarMensaje('');
+  $('pasoLeerOferta').hidden = true;
+  $('pasoConfirmarOferta').hidden = false;
+}
+$('botonConectarOferta').onclick = () => {
+  const texto = ofertaPorConfirmar;
+  ofertaPorConfirmar = '';
+  $('pasoConfirmarOferta').hidden = true;
+  $('pasoLeerOferta').hidden = false; // si el código pide PIN, el campo está ahí
+  usarOferta(texto);
+};
+$('botonOtroCodigo').onclick = () => {
+  ofertaPorConfirmar = '';
+  $('pasoConfirmarOferta').hidden = true;
+  $('pasoLeerOferta').hidden = false;
+};
 async function usarOferta(texto, pin) {
   if (conectando || invitado) return;
   let datos;
@@ -736,7 +776,7 @@ $('botonRecibir').onclick = iniciarRecibir;
 $('botonEnviar').onclick = iniciarEnviar;
 $('botonEscanearRespuesta').onclick = () => iniciarCamara($('videoRespuesta'), usarRespuesta);
 $('botonConectarRespuesta').onclick = () => usarRespuesta($('pegarRespuesta').value);
-$('botonEscanearOferta').onclick = () => iniciarCamara($('videoOferta'), usarOferta);
+$('botonEscanearOferta').onclick = () => iniciarCamara($('videoOferta'), proponerOferta);
 $('botonUsarOferta').onclick = () => usarOferta($('pegarOferta').value);
 $('botonUsarPin').onclick = () => usarOferta(ofertaPendiente || $('pegarOferta').value, $('campoPin').value);
 $('botonConfirmarCodigo').onclick = confirmarCodigo;
@@ -745,15 +785,16 @@ $('campoCodigo').addEventListener('keydown', (e) => { if (e.key === 'Enter') con
 $('botonCerrar').onclick = $('botonReintentar').onclick = () => location.replace(location.href.split('#')[0]);
 
 // Abierta desde el QR con la cámara del celular: la oferta viene en la dirección.
-// Se saca de la barra enseguida para que la clave no quede en el historial.
+// Se saca de la barra enseguida (el navegador igual puede haber guardado la dirección completa en su
+// historial: el código solo sirve para una sesión). No se conecta sola: espera un toque de confirmación.
 // Se espera a que termine de cargar la página: idioma.js (que define t(), al final del body) tiene que haber
-// corrido antes de que usarOferta muestre sus mensajes. Antes dependía de quién ganaba la carrera.
+// corrido antes de que se muestren mensajes. Antes dependía de quién ganaba la carrera.
 document.addEventListener('DOMContentLoaded', () => {
   if (location.hash.indexOf('MC1.') !== -1 || location.hash.indexOf('MC2.') !== -1) {
     const direccion = location.hash;
     history.replaceState(null, '', location.pathname + location.search);
     iniciarEnviar();
-    usarOferta(direccion);
+    proponerOferta(direccion);
   }
 });
 </script>
