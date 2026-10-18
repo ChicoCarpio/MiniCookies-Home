@@ -406,7 +406,6 @@ window.i18nPagina = {
 
 <script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
 <script src="../assets/js/qr-propio.js"></script>
-<script src="../assets/js/qr-estilos.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/enviar-qr.js"></script>
 <script>
@@ -433,49 +432,13 @@ function pantalla(cual) {
 
 // El QR lleva 4 módulos de margen blanco (zona de silencio), igual que el
 // generador de QR del sitio: sin él, muchos lectores no lo encuentran.
-// La galleta de la marca va en el centro del QR cuando se puede hacerlo sin arriesgar la lectura:
-// QREstilos.crearConLogoSeguro elige el nivel de corrección más fuerte en que cabe el código y una
-// placa que daña, como mucho, el 40 % de lo que ese nivel aguanta; si no hay una placa así, el QR
-// se dibuja como siempre (nivel L, sin logo). La imagen es del mismo origen: no mancha el canvas.
-let galleta = null;           // canvas con la galleta, cuando ya cargó
-const qrDibujados = [];       // [caja, texto] para redibujar cuando llegue la galleta
-(function () {
-  const img = new Image();
-  img.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = img.naturalWidth; c.height = img.naturalHeight;
-    c.getContext('2d').drawImage(img, 0, 0);
-    galleta = c;
-    qrDibujados.forEach(([caja, texto]) => { if (caja.isConnected) dibujarQR(caja, texto); });
-  };
-  // La galleta es el mismo archivo del icono de la pestaña: su enlace ya sale bien resuelto también en /en/.
-  const icono = document.querySelector('link[rel="icon"]');
-  if (icono) img.src = icono.href;
-})();
-
 function dibujarQR(caja, texto) {
   const lado = Math.min(360, Math.max(240, Math.floor(caja.clientWidth || 300)));
-  if (!qrDibujados.some((x) => x[0] === caja)) qrDibujados.push([caja, texto]);
-  qrDibujados.forEach((x) => { if (x[0] === caja) x[1] = texto; });
-  let qr = null;
-  if (galleta) { try { qr = QREstilos.crearConLogoSeguro(texto); } catch (e) { qr = null; } }
-  const lienzo = document.createElement('canvas');
-  if (qr) {
-    // Con logo se dibuja con píxeles enteros por módulo (nítido) y se muestra al mismo tamaño de siempre.
-    const n = qr.tamano;
-    const ppm = Math.max(2, Math.ceil(3 * lado / (n + 8)));
-    QREstilos.dibujar(lienzo, qr, { lado: n * ppm, logo: galleta });
-    lienzo.style.width = (lado + 2 * Math.ceil(4 * lado / n)) + 'px';
-    caja.dataset.logo = '1';
-  } else {
-    try {
-      qr = QRPropio.crear(texto, { nivel: 'L' });
-    } catch (e) { mostrarMensaje(t('error-codigo')); return; }
-    QRPropio.pintar(lienzo, qr, lado);
-    caja.dataset.logo = '0';
-  }
-  caja.dataset.nivelQr = qr.nivel || 'L';
-  caja.replaceChildren(lienzo);
+  let qr;
+  try {
+    qr = QRPropio.crear(texto, { nivel: 'L' });
+  } catch (e) { mostrarMensaje(t('error-codigo')); return; }
+  caja.replaceChildren(QRPropio.pintar(document.createElement('canvas'), qr, lado));
 }
 
 function copiar(texto, boton) {

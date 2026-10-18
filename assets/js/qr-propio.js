@@ -21,7 +21,6 @@
 //      silencio (4 módulos) y deja el canvas de lado + 2 × margen.
 //      QRPropio.posicionesAlineacion(versión) da los centros de los patrones
 //      de alineación (los usa qr-estilos.js para no taparlos con un logo).
-//      QRPropio.estructura(versión, nivel) da { ec, nb, total, largos } (bloques).
 (function () {
   'use strict';
 
@@ -344,20 +343,5 @@
     return canvas;
   }
 
-  // Cómo reparte la norma las palabras de código de la versión v con el nivel dado: cuántas de
-  // corrección por bloque y el largo de datos de cada bloque (solo lectura; lo usa qr-estilos.js
-  // para saber cuánto daño aguanta cada bloque).
-  function estructura(v, nivel) {
-    const i = INDICE_NIVEL[nivel];
-    const ec = EC_POR_BLOQUE[i][v - 1];
-    const nb = NUM_BLOQUES[i][v - 1];
-    const total = Math.floor(modulosDeDatos(v) / 8);
-    const cortos = nb - (total % nb);
-    const largoCorto = Math.floor(total / nb) - ec;
-    const largos = [];
-    for (let b = 0; b < nb; b++) largos.push(largoCorto + (b < cortos ? 0 : 1));
-    return { ec, nb, total, largos };
-  }
-
-  globalThis.QRPropio = { crear, pintar, posicionesAlineacion, estructura };
+  globalThis.QRPropio = { crear, pintar, posicionesAlineacion };
 })();
