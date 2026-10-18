@@ -196,7 +196,7 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/jsdiff/9.0.0/diff.min.js"></script>
+<script src="../assets/js/diff-propio.js"></script>
 <script src="../assets/js/descargar.js"></script>
 <script>
 document.getElementById('botonComparar').addEventListener('click', () => {
@@ -204,7 +204,7 @@ document.getElementById('botonComparar').addEventListener('click', () => {
   const textoB = document.getElementById('textoB').value;
   const porPalabra = document.getElementById('porPalabra').checked;
 
-  const cambios = porPalabra ? Diff.diffWords(textoA, textoB) : Diff.diffLines(textoA, textoB);
+  const cambios = porPalabra ? DiffPropio.diffWords(textoA, textoB) : DiffPropio.diffLines(textoA, textoB);
   const contenedor = document.getElementById('resultadoDiff');
   contenedor.innerHTML = '';
 

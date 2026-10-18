@@ -222,7 +222,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
-<script src="../vendor/jsdiff/9.0.0/diff.min.js"></script>
+<script src="../assets/js/diff-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/descargar.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -265,8 +265,8 @@ botonComparar.addEventListener('click', async () => {
 
     const porPalabra = document.getElementById('porPalabra').checked;
     const cambios = porPalabra
-      ? Diff.diffWords(resultadoA.value, resultadoB.value)
-      : Diff.diffLines(resultadoA.value, resultadoB.value);
+      ? DiffPropio.diffWords(resultadoA.value, resultadoB.value)
+      : DiffPropio.diffLines(resultadoA.value, resultadoB.value);
 
     resultadoDiff.innerHTML = '';
     cambios.forEach((parte) => {
