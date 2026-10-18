@@ -36,6 +36,7 @@
   const FRACCION_LOGO = 0.22;     // ancho máximo de la placa respecto del QR
   const LADO_LOGO = 512;          // el logo se reduce a esto antes de usarse
   const LADO_PALETA = 64;         // y a esto para sacarle los colores
+  const MAX_VERSION_LOGO = 34;
   const MAX_ARCHIVO = 30 * 1024 * 1024;
   const LADO_EXPORTAR = 2048;     // el PNG que se descarga mide al menos esto (módulos de píxeles enteros)
   const MAX_EXPORTAR = 4096;      // y nunca más que esto
@@ -300,6 +301,90 @@
     throw new Error('Too long data');
   }
 
+  // ---- logo con presupuesto de corrección (para QR que no caben en el nivel H)
+
+  // Para cada módulo de datos de la versión v, en qué bloque de corrección cae (-1: no es de datos
+  // o es relleno). Repite el recorrido en zigzag y el intercalado de QRPropio.
+  const cacheBloques = {};
+  function bloquePorModulo(v, nivel) {
+    const clave = v + nivel;
+    if (cacheBloques[clave]) return cacheBloques[clave];
+    const n = 4 * v + 17, m = reservado(v), est = QRPropio.estructura(v, nivel);
+    const bloqueDe = [];
+    const maxLargo = Math.max(...est.largos);
+    for (let k = 0; k < maxLargo; k++) for (let b = 0; b < est.nb; b++) if (k < est.largos[b]) bloqueDe.push(b);
+    for (let k = 0; k < est.ec; k++) for (let b = 0; b < est.nb; b++) bloqueDe.push(b);
+    const salida = { bloque: new Int16Array(n * n).fill(-1), palabra: new Int32Array(n * n).fill(-1), est };
+    let bit = 0, dir = -1, f = n - 1;
+    for (let c = n - 1; c > 0; c -= 2) {
+      if (c === 6) c--;
+      for (;;) {
+        for (let k = 0; k < 2; k++) {
+          const idx = f * n + (c - k);
+          if (!m[idx]) {
+            const w = bit >> 3;
+            if (w < bloqueDe.length) { salida.bloque[idx] = bloqueDe[w]; salida.palabra[idx] = w; }
+            bit++;
+          }
+        }
+        f += dir;
+        if (f < 0 || f >= n) { f -= dir; dir = -dir; break; }
+      }
+    }
+    cacheBloques[clave] = salida;
+    return salida;
+  }
+
+  // Palabras dañadas por bloque si se limpian los módulos de la placa, y lo que aguanta cada bloque.
+  function dano(v, nivel, placa) {
+    const mapa = bloquePorModulo(v, nivel);
+    const { limpio } = modulosLimpios(placa);
+    const tocadas = new Set(), porBloque = new Array(mapa.est.nb).fill(0);
+    for (let i = 0; i < limpio.length; i++) {
+      if (!limpio[i] || mapa.palabra[i] < 0 || tocadas.has(mapa.palabra[i])) continue;
+      tocadas.add(mapa.palabra[i]);
+      porBloque[mapa.bloque[i]]++;
+    }
+    return { peor: Math.max(...porBloque), aguanta: Math.floor(mapa.est.ec / 2), tocadas: tocadas.size };
+  }
+
+  // QR con logo para textos que no caben en el nivel H: el nivel más fuerte (H, Q o M) en que cabe
+  // el texto con una placa segura, y la placa más grande (hasta FRACCION_LOGO del ancho) que daña, como mucho, "uso" de lo
+  // que aguanta el bloque más castigado (por omisión el 40 %), sin tocar la estructura. Si no hay una
+  // placa útil devuelve null y quien llama dibuja el QR sin logo. opciones: { uso, minimo, masVersiones }.
+  function crearConLogoSeguro(texto, opciones) {
+    const op = opciones || {};
+    const uso = op.uso || 0.4;
+    for (const nivel of ['H', 'Q', 'M']) {
+      let base;
+      try { base = QRPropio.crear(texto, { nivel }); } catch (e) { continue; }
+      // Un QR más denso que esto (ancho de módulos de la versión 34) se lee mal en una pantalla de 360 px.
+      const tope = Math.min(op.maxVersion || MAX_VERSION_LOGO, base.version + (op.masVersiones === undefined ? 2 : op.masVersiones));
+      for (let v = base.version; v <= tope; v++) {
+        const qr = v === base.version ? base : QRPropio.crear(texto, { nivel, version: v });
+        const n = qr.tamano;
+        let k = Math.floor(FRACCION_LOGO * n);
+        if (k % 2 === 0) k--;
+        const minimo = Math.max(5, Math.ceil((op.minimo || 0.09) * n));
+        const libre = reservado(qr.version);
+        for (; k >= minimo; k -= 2) {
+          const a = (n - k) / 2;
+          let ok = true;
+          for (let f = a; ok && f < a + k; f++) for (let c = a; c < a + k; c++) if (libre[f * n + c]) { ok = false; break; }
+          if (!ok) continue;
+          const placa = { k, a, n };
+          const d = dano(qr.version, nivel, placa);
+          if (d.peor <= Math.floor(uso * d.aguanta)) {
+            qr.nivel = nivel; qr.placa = placa; qr.dano = d;
+            return qr;
+          }
+        }
+      }
+      // Sin placa segura en este nivel: se prueba el siguiente, más flojo (que en cambio necesita menos versión).
+    }
+    return null;
+  }
+
   // Módulos que cubre la placa: los que tocan un cuadrado de esquinas redondeadas.
   function modulosLimpios(placa) {
     const { k, a, n } = placa;
@@ -371,8 +456,8 @@
     const estM = ESTILOS_MODULO.indexOf(op.estiloModulo) >= 0 ? op.estiloModulo : 'cuadrado';
     const estO = ESTILOS_OJO.indexOf(op.estiloOjo) >= 0 ? op.estiloOjo : 'cuadrado';
     const col = asegurarContraste(op.oscuro || '#000000', op.claro || '#ffffff');
-    // El logo solo va en un QR armado con crearConLogo (nivel H y placa libre).
-    const logo = op.logo && qr.placa && qr.nivel === 'H' ? op.logo : null;
+    // El logo solo va en un QR armado con crearConLogo o crearConLogoSeguro (con placa libre).
+    const logo = op.logo && qr.placa ? op.logo : null;
     const res = { colores: col, logo: !!logo, placa: logo ? qr.placa : null };
 
     if (estM === 'cuadrado' && estO === 'cuadrado' && !logo) {
@@ -469,6 +554,6 @@
   globalThis.QREstilos = {
     exportarPNG,
     ESTILOS_MODULO, ESTILOS_OJO, CONTRASTE_MIN,
-    crearConLogo, placaPara, dibujar, cargarLogo, paleta, derivarColores, asegurarContraste, contraste
+    crearConLogo, crearConLogoSeguro, placaPara, dibujar, cargarLogo, paleta, derivarColores, asegurarContraste, contraste
   };
 })();
