@@ -533,7 +533,10 @@
           while (n < 255 && anchoTexto(ctx, '#'.repeat(n + 1)) <= interior) n++;
           lineas = ['#'.repeat(n)];
         }
-        const asc = Math.round(px * 0.952), desc = DESCENSO[px] !== undefined ? DESCENSO[px] : px <= 16 ? 4 : Math.round(px * 0.269);
+        const asc = Math.round(px * 0.952);
+        let desc = DESCENSO[px] !== undefined ? DESCENSO[px] : px <= 16 ? 4 : Math.round(px * 0.269);
+        // Segoe UI baja más que Calibri por debajo de la línea base (medido contra el PDF de Excel, corpus 42-cursiva: 0 pt hasta 10 pt, 0,9 a 11, 1,0 a 14 y 2,6 a 20)
+        if (FINO && (fu.nombre || '') === 'Segoe UI') { const pt = fu.tam || 11; desc += (pt <= 10 ? 0 : pt <= 11 ? 0.9 : pt <= 14 ? 0.9 + (pt - 11) * 0.033 : Math.min(2.6, 1 + (pt - 14) * 0.27)) * px / pt; }
         const paso = Math.floor(g.altoTexto(fu.nombre || 'Calibri', fu.tam || 11, fu.negrita, fu.cursiva) * 4 / 3 + 1e-6);
         const altoTexto = (lineas.length - 1) * paso + asc + desc;
         const altoDisp = y1 - y0;
@@ -599,10 +602,20 @@
           }
           // medido contra Excel (corpus 42-cursiva, 5 fuentes × 5 tamaños): en cursiva Excel cuenta ≈ 0,18 × la letra de más al ancho del texto,
           // y al centrar suma además ≈ 0,075 × la letra a la derecha, sea cursiva o no
+          // Al imprimir (medido contra el PDF de Excel, corpus 42-cursiva, 5 fuentes × 5 tamaños): Excel no aplica kerning y su texto de 14 pt o más
+          // queda más ancho de lo que da el lienzo, además de más separado del borde; se corrige con el ancho letra por letra y un margen que crece con el tamaño
+          let wD = w, cor = 0, corIzq = 0;
+          if (FINO && !runs) {
+            const pt = fu.tam || 11, kpt = px / pt; // unidades de dibujo por punto de letra
+            wD = 0; for (const ch of l) wD += ctx.measureText(ch).width;
+            // medido hasta 20 pt; más arriba (36 pt, FilasAuto de 25-impresion-calibre) crece en línea recta
+            cor = (pt > 20 ? 1.22 + 0.15 * (pt - 20) : pt > 10 ? 0.0386 * Math.pow(pt - 10, 1.5) : pt < 10 ? -0.25 * (10 - pt) : 0) * kpt;
+            corIzq = (pt > 20 ? 1.41 + 0.12 * (pt - 20) : pt > 9 ? 0.05 * Math.pow(pt - 9, 1.4) : 0) * kpt;
+          }
           const sobreCursiva = fu.cursiva ? 0.18 * px : 0;
-          if (h === 'right') x = x1 - PAD_X - w - sangria - sobreCursiva;
-          else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - w - sobreCursiva) / 2 + (sangria ? sangria / 2 : 0) + 0.075 * px;
-          else x = x0 + 1 + PAD_X + sangria + Math.max(0, Math.round((px - 15) / 10));
+          if (h === 'right') { x = x1 - PAD_X - wD - sangria - sobreCursiva - cor; if (esNumero && FINO && x < x0 + 1) x = x0 + 1; } // un número que casi no cabe no se corre a la izquierda de su celda
+          else if (h === 'center' || h === 'centerContinuous') x = x0 + (x1 - x0 - wD - sobreCursiva - cor) / 2 + (sangria ? sangria / 2 : 0) + 0.075 * px;
+          else x = x0 + 1 + PAD_X + sangria + (FINO && !runs ? corIzq : Math.max(0, Math.round((px - 15) / 10)));
           if (runs) { tramos(ctx, libro, runs, fu, RD(x), y, color, true); ctx.font = base; ctx.fillStyle = color; continue; }
           escribir(ctx, l, RD(x), y);
           if (fu.subrayado && fu.subrayado !== 'none') {

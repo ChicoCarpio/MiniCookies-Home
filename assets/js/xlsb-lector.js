@@ -4,8 +4,11 @@
 // (errores) y xlsx-estilos.js (formatos de número integrados); no depende del navegador.
 //
 //   const libro = await XlsbLector.leer(bytes);
-//   libro = { hojas: [{ nombre, filas: [[valor…]…], anchos: [caracteres…], combinadas: ['A1:B2'…] }], fecha1904 }   (valor: ver OdsLector)
+//   libro = { hojas: [{ nombre, filas: [[valor…]…], anchos: [caracteres…], combinadas: ['A1:B2'…], altosFila: { fila: puntos } }], fecha1904 }   (valor: ver OdsLector)
 //
+// Estilos de celda: styles.bin (fuentes, tramas, bordes y xfs) y theme1.xml se leen y cada celda con estilo propio sale como { valor, formato?, estilo }
+// (estilo: ver XlsxEscritor.crearLibro), con UN objeto por xf compartido por todas sus celdas; una celda vacía con estilo, como { valor: null, estilo }.
+// Los colores se resuelven aquí (indexados, del tema con su tinte, RGB). El alto de una fila con alto propio (BrtRowHdr, fUnsynced) va en altosFila.
 // Las fórmulas no se leen (queda su último valor, que el archivo guarda). Las hojas de gráfico y de macros se omiten.
 (function () {
   const MAX_FILAS = 1048576, MAX_COLS = 16384, MAX_TEXTO = 32767;
@@ -96,16 +99,124 @@
       for (const r of registros(b)) if (r.id === 19) textos.push(cadena(b, r.p + 1, r.p + r.tam)[0].slice(0, MAX_TEXTO));   // BrtSSTItem
     }
     const codigos = new Map();    // id de formato personalizado → código
-    const xfFormato = [];         // índice de estilo de celda → id de formato
+    const xfs = [];               // cellXfs: { fmt, fuente, relleno, borde, trot, sangria, h, v, ajustar }
+    const fuentes = [], rellenos = [], bordes = [];
+    let paletaPropia = null;
+    const MAX_ESTILOS = 65536;    // Excel admite 64.000 xfs: de más no se leen, para que un archivo hostil no agrande la memoria
+    // Tema: theme="0" es lt1 y "1" es dk1 (y "2" lt2, "3" dk2): van cambiados respecto del orden del esquema
+    const ordenTema = ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'];
+    const porNombre = {};
+    const relTema = [...rels.values()].find((rel) => /\/theme$/.test(rel.tipo));
+    const entradaTema = zip.file(relTema ? relTema.destino : 'xl/theme/theme1.xml');
+    if (entradaTema) {
+      let actual = null, enExtra = false;
+      XmlLigero.recorrer(await entradaTema.async('string'), {
+        abrir(n, a) {
+          if (n === 'extraClrSchemeLst') enExtra = true;
+          if (enExtra) return;
+          if (ordenTema.includes(n)) actual = n;
+          else if (actual && n === 'srgbClr' && /^[0-9A-Fa-f]{6}$/.test(a.val || '')) porNombre[actual] = a.val.toUpperCase();
+          else if (actual && n === 'sysClr') porNombre[actual] = /^[0-9A-Fa-f]{6}$/.test(a.lastClr || '') ? a.lastClr.toUpperCase() : a.val === 'window' ? 'FFFFFF' : '000000';
+        },
+        cerrar(n) { if (n === 'extraClrSchemeLst') enExtra = false; if (ordenTema.includes(n)) actual = null; },
+      });
+    }
+    const tema = ordenTema.map((n, i) => porNombre[n] || XlsxEstilos.TEMA_POR_DEFECTO.colores[i]);
+    let paleta = XlsxEstilos.PALETA_INDEXADA;
+    // BrtColor (8 bytes): bandera y tipo (0 automático, 1 indexado, 2 RGB, 3 tema), índice, tinte (int16/32767), RGBA. Devuelve 'RRGGBB' o null (automático / del sistema).
+    const hex6 = (r, g, bl) => ((r << 16) | (g << 8) | bl).toString(16).toUpperCase().padStart(6, '0');
+    const color = (b, p) => {
+      const tipo = b[p] >> 1, idx = b[p + 1];
+      let rgb = null;
+      if (tipo === 1) rgb = idx < 64 ? paleta[idx] : idx === 65 ? 'FFFFFF' : null;
+      else if (tipo === 2) rgb = hex6(b[p + 4], b[p + 5], b[p + 6]);
+      else if (tipo === 3) rgb = idx < tema.length ? tema[idx] : null;
+      if (!rgb) return null;
+      const tint = ((b[p + 2] | (b[p + 3] << 8)) << 16) >> 16;
+      return tint ? XlsxEstilos.aplicarTint(rgb, tint / 32767) : rgb;
+    };
     if (zip.file(rutaEstilos)) {
       const b = new Uint8Array(await zip.file(rutaEstilos).async('uint8array'));
-      let enXfs = false;
+      let enXfs = false, enPaleta = false;
       for (const r of registros(b)) {
-        if (r.id === 44) codigos.set(leerU16(b, r.p), cadena(b, r.p + 2, r.p + r.tam)[0]);   // BrtFmt
-        else if (r.id === 617) enXfs = true;                                                 // BrtBeginCellXFs
+        const p = r.p;
+        if (r.id === 44) codigos.set(leerU16(b, p), cadena(b, p + 2, p + r.tam)[0]);          // BrtFmt
+        else if (r.id === 563) { enPaleta = true; paletaPropia = []; }                         // BrtBeginIndexedColors
+        else if (r.id === 565) { enPaleta = false; if (paletaPropia && paletaPropia.length) paleta = XlsxEstilos.PALETA_INDEXADA.map((c, i) => paletaPropia[i] || c); }
+        else if (r.id === 564) { if (enPaleta && r.tam >= 4 && paletaPropia.length < 64) paletaPropia.push(hex6(b[p], b[p + 1], b[p + 2])); }   // BrtIndexedColor: RGBA
+        else if (r.id === 43 && r.tam >= 21 && fuentes.length < MAX_ESTILOS) {                // BrtFont: alto (twips), banderas, peso, supra/subíndice, subrayado, …, color (en 12), esquema, nombre (en 21)
+          const graf = leerU16(b, p + 2), uls = b[p + 8];
+          fuentes.push({ tam: leerU16(b, p) / 20, negrita: leerU16(b, p + 4) >= 600 || (graf & 1) === 1, cursiva: (graf & 2) !== 0, tachado: (graf & 8) !== 0, subrayado: uls === 2 || uls === 34 ? 'double' : uls ? true : false, p, fin: p + r.tam, b });
+        } else if (r.id === 45 && r.tam >= 20 && rellenos.length < MAX_ESTILOS) rellenos.push({ fls: leerU32(b, p), p, b });   // BrtFill: trama, color de frente (en 4) y de fondo (en 12)
+        else if (r.id === 46 && r.tam >= 51 && bordes.length < MAX_ESTILOS) bordes.push({ p, b });                          // BrtBorder
+        else if (r.id === 617) enXfs = true;                                                   // BrtBeginCellXFs
         else if (r.id === 618) enXfs = false;
-        else if (r.id === 47 && enXfs) xfFormato.push(leerU16(b, r.p + 2));                  // BrtXF: ixfeParent, ifmt
+        else if (r.id === 47 && enXfs && r.tam >= 16 && xfs.length < MAX_ESTILOS) {           // BrtXF: padre, formato, fuente, trama, borde, rotación, sangría, banderas
+          const graf = leerU16(b, p + 12);
+          xfs.push({ fmt: leerU16(b, p + 2), fuente: leerU16(b, p + 4), relleno: leerU16(b, p + 6), borde: leerU16(b, p + 8), trot: b[p + 10], sangria: b[p + 11], h: graf & 7, v: (graf >> 3) & 7, ajustar: (graf & 0x40) !== 0 });
+        }
       }
+    }
+    const xfFormato = xfs.map((x) => x.fmt);
+    const H = [null, 'left', 'center', 'right', 'fill', 'justify', 'centerContinuous', 'distributed'];
+    const V = ['top', 'center', 'bottom', 'justify', 'distributed'];
+    const BORDES = [null, 'thin', 'medium', 'dashed', 'dotted', 'thick', 'double', 'hair', 'mediumDashed', 'dashDot', 'mediumDashDot', 'dashDotDot', 'mediumDashDotDot', 'slantDashDot'];
+    const PATRONES = [null, 'solid', 'mediumGray', 'darkGray', 'lightGray', 'darkHorizontal', 'darkVertical', 'darkDown', 'darkUp', 'darkGrid', 'darkTrellis', 'lightHorizontal', 'lightVertical', 'lightDown', 'lightUp', 'lightGrid', 'lightTrellis', 'gray125', 'gray0625'];
+    // El estilo de un xf: UN solo objeto que comparten todas sus celdas (crearLibro reparte los estilos por identidad). null si es el de fábrica (xf 0).
+    const estilos = new Map();
+    function estiloDe(xf) {
+      if (xf === 0) return null;
+      if (estilos.has(xf)) return estilos.get(xf);
+      const x = xfs[xf];
+      let e = null;
+      if (x) {
+        e = {};
+        const f = fuentes[x.fuente];
+        if (f) {
+          const o = {};
+          let nombre = '';
+          try { if (f.p + 25 <= f.fin) nombre = cadena(f.b, f.p + 21, f.fin)[0]; } catch (e) { /* nombre cortado: queda sin nombre */ }
+          if (nombre) o.nombre = nombre.slice(0, 31);
+          if (f.tam >= 1 && f.tam <= 409) o.tam = f.tam;
+          if (f.negrita) o.negrita = true;
+          if (f.cursiva) o.cursiva = true;
+          if (f.tachado) o.tachado = true;
+          if (f.subrayado) o.subrayado = f.subrayado;
+          const c = color(f.b, f.p + 12);
+          if (c) o.color = c;
+          e.fuente = o;
+        }
+        const rl = rellenos[x.relleno];
+        if (rl && rl.fls > 0 && rl.fls < PATRONES.length) {
+          const fg = color(rl.b, rl.p + 4), bg = color(rl.b, rl.p + 12);
+          if (rl.fls === 1) e.relleno = fg || '000000';   // color automático = negro, como lo pinta Excel
+          else if (fg || bg) e.relleno = { patron: PATRONES[rl.fls], ...(fg ? { fg } : {}), ...(bg ? { bg } : {}) };
+        }
+        const bd = bordes[x.borde];
+        if (bd) {
+          const o = {};
+          // arriba, abajo, izquierda, derecha y diagonal, en ese orden: cada uno son el estilo (2 bytes) y el color (8)
+          [['arr', 1], ['aba', 11], ['izq', 21], ['der', 31], ['diag', 41]].forEach(([lado, d]) => {
+            const dg = leerU16(bd.b, bd.p + d);
+            if (!BORDES[dg]) return;
+            const c = color(bd.b, bd.p + d + 2);
+            const linea = c ? { e: BORDES[dg], c } : { e: BORDES[dg] };
+            if (lado !== 'diag') o[lado] = linea;
+            else { if (bd.b[bd.p] & 1) o.diagA = linea; if (bd.b[bd.p] & 2) o.diagB = linea; }
+          });
+          if (Object.keys(o).length) e.bordes = o;
+        }
+        const a = {};
+        if (H[x.h]) a.h = H[x.h];
+        if (x.v !== 2 && V[x.v]) a.v = V[x.v];
+        if (x.ajustar) a.ajustar = true;
+        if (x.sangria > 0) a.sangria = x.sangria;
+        if ((x.trot > 0 && x.trot <= 180) || x.trot === 255) a.rotacion = x.trot;
+        if (Object.keys(a).length) e.alinea = a;
+        if (!Object.keys(e).length) e = null;
+      }
+      estilos.set(xf, e);
+      return e;
     }
     // un formato integrado sale como su número (crearLibro lo escribe tal cual y Excel lo muestra según el idioma de quien abre el libro)
     const codigoDe = (xf) => {
@@ -126,7 +237,7 @@
       if (!entrada) continue;
       partesLeidas.add(rel.destino);
       const b = new Uint8Array(await entrada.async('uint8array'));
-      const filas = [], anchos = [], combinadas = [], columnasOcultas = new Set(), filasOcultas = [];
+      const filas = [], anchos = [], combinadas = [], columnasOcultas = new Set(), filasOcultas = [], altosFila = {};
       let fila = 0;
       const poner = (c, valor) => {
         if (fila >= MAX_FILAS || c >= MAX_COLS) return;
@@ -134,7 +245,13 @@
         const f = filas[fila] || (filas[fila] = []);
         f[c] = valor;
       };
-      const numero = (c, xf, n) => { const cod = codigoDe(xf); poner(c, cod ? { valor: n, formato: cod } : n); };
+      // con estilo propio la celda es { valor, formato?, estilo }; sin él, el valor suelto (o con su formato de número)
+      const celda = (c, xf, v, esNumero) => {
+        const est = estiloDe(xf), cod = esNumero ? codigoDe(xf) : null;
+        if (est) poner(c, cod ? { valor: v, formato: cod, estilo: est } : { valor: v, estilo: est });
+        else poner(c, cod ? { valor: v, formato: cod } : v);
+      };
+      const numero = (c, xf, n) => celda(c, xf, n, true);
       // BrtColInfo: en un libro real los rangos no se pisan (entre todos, 16.384 columnas); uno hostil repetía "A:XFD" un millón de veces en 1 KB comprimido
       let presupuestoCols = 4 * MAX_COLS;
       let sigCol = 0;   // la columna que sigue a la última celda: la usan los registros "cortos" (BrtShort*), que no la traen
@@ -148,6 +265,11 @@
           case 1000:                                                            // BrtRowHdr: fila, estilo, alto, banderas (fDyZero, el bit 0x10 del byte 11, es "oculta")
             fila = leerU32(b, p); sigCol = 0;
             if (r.tam >= 12 && (b[p + 11] & 0x10) && fila < MAX_FILAS) filasOcultas.push(fila);
+            // alto propio: fUnsynced (bit 5 del byte 11), con miyRw en veinteavos de punto; las demás filas tienen el alto automático
+            if (r.tam >= 12 && (b[p + 11] & 0x20) && fila < MAX_FILAS && leerU16(b, p + 8) > 0) altosFila[fila] = leerU16(b, p + 8) / 20;
+            break;
+          case 1:                                                                // BrtCellBlank: solo cuenta si tiene estilo propio
+            if (estiloDe(xf)) poner(col, { valor: null, estilo: estiloDe(xf) });
             break;
           case 2: numero(col, xf, numeroRk(leerU32(b, v))); break;               // BrtCellRk
           case 5: case 9: {                                                     // BrtCellReal, BrtFmlaNum
@@ -156,14 +278,14 @@
             if (Number.isFinite(n)) numero(col, xf, n);
             break;
           }
-          case 3: case 11: poner(col, { error: ERRORES[b[v]] || '#VALUE!' }); break;   // BrtCellError, BrtFmlaError
-          case 4: case 10: poner(col, b[v] === 1); break;                        // BrtCellBool, BrtFmlaBool
+          case 3: case 11: celda(col, xf, { error: ERRORES[b[v]] || '#VALUE!' }, false); break;   // BrtCellError, BrtFmlaError
+          case 4: case 10: celda(col, xf, b[v] === 1, false); break;                        // BrtCellBool, BrtFmlaBool
           case 6: case 8: {                                                     // BrtCellSt, BrtFmlaString
             const t = cadena(b, v, p + r.tam)[0].slice(0, MAX_TEXTO);
-            if (t !== '') poner(col, t);
+            if (t !== '') celda(col, xf, t, false);
             break;
           }
-          case 7: { const t = textos[leerU32(b, v)]; if (t) poner(col, t); break; }   // BrtCellIsst
+          case 7: { const t = textos[leerU32(b, v)]; if (t) celda(col, xf, t, false); break; }   // BrtCellIsst
           case 1176: {                                                           // BrtMergeCell: filas y columnas, de la primera a la última
             const f0 = leerU32(b, p), f1 = leerU32(b, p + 4), c0 = leerU32(b, p + 8), c1 = leerU32(b, p + 12);
             if (f1 >= f0 && c1 >= c0 && f1 < MAX_FILAS && c1 < MAX_COLS && (f1 > f0 || c1 > c0) && combinadas.length < MAX_COMBINADAS) combinadas.push(LibroXlsx.numeroACol(c0) + (f0 + 1) + ':' + LibroXlsx.numeroACol(c1) + (f1 + 1));
@@ -180,7 +302,7 @@
       }
       let ancho = 0;
       for (let r = 0; r < filas.length; r++) { if (!filas[r]) filas[r] = []; if (filas[r].length > ancho) ancho = filas[r].length; }
-      hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: [...columnasOcultas].filter((c) => c < ancho).sort((a, b) => a - b), filasOcultas: filasOcultas.filter((r) => r < filas.length) });
+      hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: [...columnasOcultas].filter((c) => c < ancho).sort((a, b) => a - b), filasOcultas: filasOcultas.filter((r) => r < filas.length), altosFila });
     }
     if (!hojas.length) throw new LibroXlsx.ErrorXlsx('sinLibro', 'sin hojas');
     return { hojas, fecha1904 };

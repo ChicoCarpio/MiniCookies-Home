@@ -499,6 +499,7 @@ const LienzoPdf = (() => {
           c.fillStyle = this._real(rell, c); c.fillText(texto, x, y);
         };
         const cajaTexto = (extra) => this._cajaUsuario(x0 - h * 0.3, y - h * 1.4, w + h * 0.6, h * 2, extra);
+        if (this._fueraDeRecortes(x0 - h * 0.3, y - h * 1.4, w + h * 0.6, h * 2)) return; // todo el texto cae fuera de un recorte activo: no se ve, y tampoco debe poder seleccionarse ni copiarse
         if (this._conSombra()) {
           this._sombra(cajaTexto(e.shadowBlur * 1.5 + Math.hypot(e.shadowOffsetX, e.shadowOffsetY) + 4), pintarTexto);
           this._sinSombra(() => this.fillText(texto, x, y));
@@ -518,6 +519,20 @@ const LienzoPdf = (() => {
             `${num(px)} 0 0 ${num(-px)} ${num(x0)} ${num(y)} Tm`, `${fuente.encodeText(texto).toString()} Tj`, 'ET', 'Q'].filter(Boolean).join('\n');
         });
       } catch (error) { this._fallar(error); }
+    }
+
+    // ¿La caja (en coordenadas del usuario) queda toda fuera de alguno de los recortes activos? Compara con la caja de cada recorte (que contiene su trazado).
+    _fueraDeRecortes(x, y, w, h) {
+      const M = this.e.m;
+      const pts = [aplicar(M, x, y), aplicar(M, x + w, y), aplicar(M, x, y + h), aplicar(M, x + w, y + h)];
+      const bx0 = Math.min(...pts.map((p) => p[0])), bx1 = Math.max(...pts.map((p) => p[0])), by0 = Math.min(...pts.map((p) => p[1])), by1 = Math.max(...pts.map((p) => p[1]));
+      for (const cl of this.e.clips) {
+        const c = cl.ruta.caja();
+        if (!c) return true; // recorte sin trazado: todo queda afuera
+        const q = [aplicar(cl.m, c.x0, c.y0), aplicar(cl.m, c.x1, c.y0), aplicar(cl.m, c.x0, c.y1), aplicar(cl.m, c.x1, c.y1)];
+        if (bx1 < Math.min(...q.map((p) => p[0])) || bx0 > Math.max(...q.map((p) => p[0])) || by1 < Math.min(...q.map((p) => p[1])) || by0 > Math.max(...q.map((p) => p[1]))) return true;
+      }
+      return false;
     }
 
     // --- respaldo: ese trazo como imagen

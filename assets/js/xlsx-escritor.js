@@ -14,6 +14,9 @@
 //     estado?: 'visible' | 'oculta' | 'muyOculta', columnasOcultas?: [columna desde 0…], filasOcultas?: [fila desde 0…] }]; valor: número,
 //     texto, lógico, Date, null, { error } o { valor, formato } (valor: número o Date; formato: el código de formato de número de Excel, p. ej. '0.00%', 'dd/mm/yyyy', o el número de uno integrado, p. ej. 14 (fecha corta del idioma de quien abre el libro); hasta 200 distintos por libro). opciones: { negritaPrimeraFila: bool, ajustarTexto: bool, fechasUtc: bool }. Un Date se guarda con su hora local (fechasUtc: con la UTC). Los nombres de hoja se corrigen
 //     (XlsxEscritor.nombreHoja) para que Excel los acepte.
+//     Estilo de celda (lo que llevan los .xls, .xlsb y .ods al pasarlos a .xlsx): { valor, formato?, estilo } con estilo = { fuente?: { nombre, tam, negrita, cursiva, tachado, subrayado: true | 'double', color: 'RRGGBB' },
+//     relleno?: 'RRGGBB' | { patron: 'gray125' | 'lightGrid' | … (los de ECMA-376 18.18.55), fg?: 'RRGGBB', bg?: 'RRGGBB' }, bordes?: { izq, der, arr, aba, diagA, diagB: { e: 'thin' | 'medium' | …, c: 'RRGGBB' } }, alinea?: { h, v, ajustar, sangria, rotacion } }; una celda vacía con estilo (valor null) se escribe.
+//     Una hoja puede traer altosFila: { fila desde 0: puntos } (alto propio de cada fila).
 //     Fórmulas: un valor { formula: 'SUM(A1:A3)', valor?: …, formato? } escribe la fórmula (sin '=') con su último resultado guardado (valor: lo mismo que una celda
 //     normal, incluido { valor, formato }, o nada) y pide a Excel recalcular al abrir. Para pasar fórmulas de otro libro sin romperlas: XlsxEscritor.formulaConservable(formula,
 //     nombresDeHojas) dice si se puede llevar tal cual (sin nombres definidos, tablas ni libros externos, y solo con hojas que existen) y renombrarHojas(formula, mapa) cambia
@@ -274,15 +277,106 @@
   const ESTILOS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="22" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
 
   const MAX_FORMATOS = 200;
-  // Los estilos base más un cellXfs por cada formato de número pedido (ids de formato propios desde 164).
-  function estilosConFormatos(formatos) {
-    if (!formatos.size) return ESTILOS_XML;
-    const claves = [...formatos.keys()], cadenas = claves.filter((c) => typeof c === 'string');
-    const idDe = (c) => (typeof c === 'number' ? c : 164 + cadenas.indexOf(c));   // un número es un formato integrado de Excel (14, 22…): se usa su id
+  const MAX_XFS = 60000;       // Excel guarda hasta 64.000 formatos de celda
+  const MAX_ESTILOS_PIEZA = 20000;   // fuentes, rellenos o bordes distintos
+  const ESTILOS_BORDE = new Set(['thin', 'medium', 'thick', 'dashed', 'dotted', 'double', 'hair', 'mediumDashed', 'dashDot', 'mediumDashDot', 'dashDotDot', 'mediumDashDotDot', 'slantDashDot']);
+  const ALIN_H = new Set(['general', 'left', 'center', 'right', 'fill', 'justify', 'centerContinuous', 'distributed']);
+  const ALIN_V = new Set(['top', 'center', 'bottom', 'justify', 'distributed']);
+  const PATRONES = new Set(['solid', 'darkDown', 'darkGray', 'darkGrid', 'darkHorizontal', 'darkTrellis', 'darkUp', 'darkVertical', 'gray0625', 'gray125', 'lightDown', 'lightGray', 'lightGrid', 'lightHorizontal', 'lightTrellis', 'lightUp', 'lightVertical', 'mediumGray']);
+  const esColor = (c) => typeof c === 'string' && /^[0-9A-Fa-f]{6}$/.test(c);
+  // Deja un estilo pedido en su forma canónica (para repartir los iguales) y descarta lo que Excel no aceptaría; null si no queda nada.
+  // Los lectores comparten un objeto por estilo de celda: un millón de celdas no normaliza ni serializa un millón de veces.
+  const cacheNormal = new WeakMap(), clavesEstilo = new WeakMap();
+  const claveEstilo = (e) => { let k = clavesEstilo.get(e); if (k === undefined) { k = JSON.stringify(e); clavesEstilo.set(e, k); } return k; };
+  function normalizarEstilo(e) {
+    if (!e || typeof e !== 'object') return null;
+    if (cacheNormal.has(e)) return cacheNormal.get(e);
+    const r = normalizarEstiloSinCache(e);
+    cacheNormal.set(e, r);
+    return r;
+  }
+  function normalizarEstiloSinCache(e) {
+    const r = {};
+    const f = e.fuente;
+    if (f && typeof f === 'object') {
+      const o = {};
+      if (typeof f.nombre === 'string' && f.nombre && f.nombre.length <= 31 && !/[\u0000-\u001F]/.test(f.nombre)) o.nombre = f.nombre;
+      if (Number.isFinite(f.tam) && f.tam >= 1 && f.tam <= 409) o.tam = Math.round(f.tam * 100) / 100;
+      if (f.negrita === true) o.negrita = true;
+      if (f.cursiva === true) o.cursiva = true;
+      if (f.tachado === true) o.tachado = true;
+      if (f.subrayado === true || f.subrayado === 'double') o.subrayado = f.subrayado;
+      if (esColor(f.color)) o.color = f.color.toUpperCase();
+      if (Object.keys(o).length) r.fuente = o;
+    }
+    if (esColor(e.relleno)) r.relleno = e.relleno.toUpperCase();
+    else if (e.relleno && typeof e.relleno === 'object' && PATRONES.has(e.relleno.patron) && (esColor(e.relleno.fg) || esColor(e.relleno.bg))) {   // trama: { patron, fg, bg }
+      r.relleno = e.relleno.patron === 'solid' && esColor(e.relleno.fg) ? e.relleno.fg.toUpperCase()
+        : { patron: e.relleno.patron, ...(esColor(e.relleno.fg) ? { fg: e.relleno.fg.toUpperCase() } : {}), ...(esColor(e.relleno.bg) ? { bg: e.relleno.bg.toUpperCase() } : {}) };
+    }
+    if (e.bordes && typeof e.bordes === 'object') {
+      const o = {};
+      for (const lado of ['izq', 'der', 'arr', 'aba', 'diagA', 'diagB']) {
+        const b = e.bordes[lado];
+        if (b && typeof b === 'object' && ESTILOS_BORDE.has(b.e)) o[lado] = esColor(b.c) ? { e: b.e, c: b.c.toUpperCase() } : { e: b.e };
+      }
+      if (Object.keys(o).length) r.bordes = o;
+    }
+    const a = e.alinea;
+    if (a && typeof a === 'object') {
+      const o = {};
+      if (ALIN_H.has(a.h) && a.h !== 'general') o.h = a.h;
+      if (ALIN_V.has(a.v) && a.v !== 'bottom') o.v = a.v;
+      if (a.ajustar === true) o.ajustar = true;
+      if (Number.isInteger(a.sangria) && a.sangria > 0) o.sangria = Math.min(250, a.sangria);
+      if (Number.isInteger(a.rotacion) && ((a.rotacion > 0 && a.rotacion <= 180) || a.rotacion === 255)) o.rotacion = a.rotacion;
+      if (Object.keys(o).length) r.alinea = o;
+    }
+    return Object.keys(r).length ? r : null;
+  }
+  const colorXml = (c, etiqueta = 'color') => (c ? `<${etiqueta} rgb="FF${c}"/>` : `<${etiqueta} indexed="64"/>`);
+  // Los estilos base más un cellXfs por cada combinación de formato de número y estilo pedida (ids de formato propios desde 164).
+  // combos: [{ codigo, estilo }] en el orden de sus índices (el primero es el 6).
+  function estilosConFormatos(combos) {
+    if (!combos.length) return ESTILOS_XML;
+    const cadenas = [...new Set(combos.map((c) => c.codigo).filter((c) => typeof c === 'string'))];
+    const idDe = (c) => (c === undefined ? 0 : typeof c === 'number' ? c : 164 + cadenas.indexOf(c));   // un número es un formato integrado de Excel (14, 22…): se usa su id
     const numFmts = cadenas.length ? `<numFmts count="${cadenas.length}">${cadenas.map((c, k) => `<numFmt numFmtId="${164 + k}" formatCode="${X.escAttr(c)}"/>`).join('')}</numFmts>` : '';
-    const xfs = claves.map((c) => `<xf numFmtId="${idDe(c)}" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>`).join('');
+    const fuentes = ['<font><sz val="11"/><name val="Calibri"/><family val="2"/></font>', '<font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font>'];
+    const rellenos = ['<fill><patternFill patternType="none"/></fill>', '<fill><patternFill patternType="gray125"/></fill>'];
+    const bordes = ['<border><left/><right/><top/><bottom/><diagonal/></border>'];
+    // por un índice y no con indexOf: 60.000 xfs con 20.000 fuentes distintas eran 1.200 millones de comparaciones (35 s)
+    const indices = new Map([fuentes, rellenos, bordes].map((l) => [l, new Map(l.map((x, i) => [x, i]))]));
+    const idPieza = (lista, xml) => { const m = indices.get(lista); let i = m.get(xml); if (i === undefined) { if (lista.length >= MAX_ESTILOS_PIEZA) return 0; i = lista.push(xml) - 1; m.set(xml, i); } return i; };
+    const xfs = combos.map(({ codigo, estilo }) => {
+      let fontId = 0, fillId = 0, borderId = 0, alin = '';
+      const e = estilo || {};
+      if (e.fuente) {
+        const f = e.fuente;
+        fontId = idPieza(fuentes, '<font>' + (f.negrita ? '<b/>' : '') + (f.cursiva ? '<i/>' : '') + (f.tachado ? '<strike/>' : '') + (f.subrayado ? (f.subrayado === 'double' ? '<u val="double"/>' : '<u/>') : '')
+          + `<sz val="${f.tam || 11}"/>` + (f.color ? colorXml(f.color) : '') + `<name val="${X.escAttr(f.nombre || 'Calibri')}"/><family val="2"/></font>`);
+      }
+      if (e.relleno) {
+        const r = typeof e.relleno === 'string' ? { patron: 'solid', fg: e.relleno } : e.relleno;
+        fillId = idPieza(rellenos, `<fill><patternFill patternType="${r.patron}">` + (r.fg ? `<fgColor rgb="FF${r.fg}"/>` : '') + (r.bg ? `<bgColor rgb="FF${r.bg}"/>` : r.patron === 'solid' ? '<bgColor indexed="64"/>' : '') + '</patternFill></fill>');
+      }
+      if (e.bordes) {
+        const lado = (nombre, k) => { const b = e.bordes[k]; return b ? `<${nombre} style="${b.e}">${colorXml(b.c)}</${nombre}>` : `<${nombre}/>`; };
+        const diag = e.bordes.diagA || e.bordes.diagB;
+        borderId = idPieza(bordes, `<border${e.bordes.diagA ? ' diagonalDown="1"' : ''}${e.bordes.diagB ? ' diagonalUp="1"' : ''}>` + lado('left', 'izq') + lado('right', 'der') + lado('top', 'arr') + lado('bottom', 'aba')
+          + (diag ? `<diagonal style="${diag.e}">${colorXml(diag.c)}</diagonal>` : '<diagonal/>') + '</border>');
+      }
+      if (e.alinea) {
+        const a = e.alinea;
+        alin = '<alignment' + (a.h ? ` horizontal="${a.h}"` : '') + (a.v ? ` vertical="${a.v}"` : '') + (a.ajustar ? ' wrapText="1"' : '') + (a.sangria ? ` indent="${a.sangria}"` : '') + (a.rotacion ? ` textRotation="${a.rotacion}"` : '') + '/>';
+      }
+      const atr = `numFmtId="${idDe(codigo)}" fontId="${fontId}" fillId="${fillId}" borderId="${borderId}" xfId="0"` + (codigo !== undefined ? ' applyNumberFormat="1"' : '') + (fontId ? ' applyFont="1"' : '') + (fillId ? ' applyFill="1"' : '')
+        + (borderId ? ' applyBorder="1"' : '') + (alin ? ' applyAlignment="1"' : '');
+      return alin ? `<xf ${atr}>${alin}</xf>` : `<xf ${atr}/>`;
+    }).join('');
     // con funciones: un formato como "$"#,##0 lleva $& o $$, que replace con una cadena interpretaría
-    return ESTILOS_XML.replace('<fonts ', () => numFmts + '<fonts ').replace('<cellXfs count="6">', () => `<cellXfs count="${6 + claves.length}">`).replace('</cellXfs>', () => xfs + '</cellXfs>');
+    return ESTILOS_XML.replace(/<fonts [\s\S]*<\/borders>/, () => numFmts + `<fonts count="${fuentes.length}">${fuentes.join('')}</fonts><fills count="${rellenos.length}">${rellenos.join('')}</fills><borders count="${bordes.length}">${bordes.join('')}</borders>`)
+      .replace('<cellXfs count="6">', () => `<cellXfs count="${6 + combos.length}">`).replace('</cellXfs>', () => xfs + '</cellXfs>');
   }
 
   // Un Date de JavaScript es un instante; Excel guarda la hora "de pared". Por defecto se toma la del reloj local del Date (new Date(2024, 2, 15) → 15/3/2024
@@ -376,13 +470,20 @@
     const usados = new Set(), nombres = [];
     const textos = [], indiceTexto = new Map();
     let totalTextos = 0, hayFormulas = false;
-    const formatos = new Map();   // código de formato → índice de cellXfs (se añaden después de los de ESTILO)
-    const estiloDeFormato = (codigo) => {
-      if (typeof codigo === 'number') { if (!Number.isInteger(codigo) || codigo < 1 || codigo > 163) return 0; }
-      else if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) return 0;
-      if (!formatos.has(codigo)) { if (formatos.size >= MAX_FORMATOS) return 0; formatos.set(codigo, 6 + formatos.size); }
-      return formatos.get(codigo);
+    const combos = [], indiceCombo = new Map(), codigosUsados = new Set();   // combinaciones de formato de número y estilo → índice de cellXfs (se añaden después de los de ESTILO)
+    // codigo: formato de número (código de Excel o número integrado) o undefined; estilo: ya normalizado o null. Devuelve el índice de cellXfs (0 si no se puede).
+    const estiloDe = (codigo, estilo) => {
+      if (typeof codigo === 'number') { if (!Number.isInteger(codigo) || codigo < 1 || codigo > 163) codigo = undefined; }
+      else if (typeof codigo !== 'string' || !codigo || codigo.length > 255 || /[\u0000-\u001F]/.test(codigo)) codigo = undefined;
+      if (codigo === undefined && !estilo) return 0;
+      const clave = (codigo === undefined ? '' : typeof codigo === 'number' ? '#' + codigo : '"' + codigo) + '\u0001' + (estilo ? claveEstilo(estilo) : '');
+      if (indiceCombo.has(clave)) return indiceCombo.get(clave);
+      if (typeof codigo === 'string' && !codigosUsados.has(codigo)) { if (codigosUsados.size >= MAX_FORMATOS) codigo = undefined; else codigosUsados.add(codigo); }
+      if (combos.length >= MAX_XFS || (codigo === undefined && !estilo)) return 0;
+      combos.push({ codigo, estilo }); indiceCombo.set(clave, 5 + combos.length);
+      return 5 + combos.length;
     };
+    const estiloDeFormato = (codigo) => estiloDe(codigo, null);
     // hojas ocultas: Excel necesita al menos una visible (y la pestaña activa tiene que ser una visible)
     const estados = hojas.map((h) => (h && (h.estado === 'oculta' || h.estado === 'muyOculta') ? h.estado : 'visible'));
     const primeraVisible = Math.max(0, estados.indexOf('visible'));
@@ -396,6 +497,11 @@
       let maxCol = 0;
       const filasXml = [];   // [fila, xml]
       const filasOcultas = new Set((Array.isArray(h.filasOcultas) ? h.filasOcultas : []).filter((f) => Number.isInteger(f) && f >= 0 && f < MAX_FILA));
+      // alto propio de cada fila (puntos; Excel admite hasta 409,5)
+      const altosFila = new Map();
+      const altosPedidos = h.altosFila && typeof h.altosFila === 'object' ? h.altosFila : {};
+      for (const k of Object.keys(altosPedidos).slice(0, MAX_FILA)) { const fila = Number(k), pt = Number(altosPedidos[k]); if (Number.isInteger(fila) && fila >= 0 && fila < MAX_FILA && pt > 0) altosFila.set(fila, Math.min(409.5, Math.round(pt * 100) / 100)); }
+      const altoFila = (f) => (altosFila.has(f) ? ` ht="${altosFila.get(f)}" customHeight="1"` : '');
       filas.forEach((fila, f) => {
         if (!Array.isArray(fila) || !fila.length) return;
         if (fila.length > MAX_COL) throw new ErrorEscritor('demasiadas columnas');
@@ -411,10 +517,23 @@
             v = v.valor;   // fórmula que no se puede escribir (vacía, enorme o con caracteres de control): queda su valor
             if (v === null || v === undefined || v === '') return;
           }
-          if (v && typeof v === 'object' && !(v instanceof Date) && 'formato' in v && 'valor' in v) {
-            const est = estiloDeFormato(v.formato), x = v.valor;
-            if (x instanceof Date) { if (Number.isNaN(x.getTime())) return; celdas.push(celdaXml(ref, est, serialDeFecha(x, opciones.fechasUtc))); return; }
+          if (v && typeof v === 'object' && !(v instanceof Date) && 'valor' in v && ('formato' in v || 'estilo' in v)) {
+            const x = v.valor, norm = normalizarEstilo(v.estilo);
+            if (x instanceof Date) {
+              if (Number.isNaN(x.getTime())) return;
+              const n = serialDeFecha(x, opciones.fechasUtc);
+              celdas.push(celdaXml(ref, estiloDe(v.formato !== undefined && v.formato !== null ? v.formato : norm ? (Number.isInteger(n) ? 14 : 22) : undefined, norm), n));
+              return;
+            }
+            const est = estiloDe(v.formato, norm);
             if (typeof x === 'number') { celdas.push(celdaXml(ref, est, x)); return; }
+            if (norm && est) {   // un texto, un lógico, un error o una celda vacía con estilo
+              if (typeof x === 'string' && x !== '') {
+                if (x.length > MAX_TEXTO) throw new ErrorEscritor('texto de más de ' + MAX_TEXTO + ' caracteres en ' + ref);
+                celdas.push(`<c r="${ref}" s="${est}" t="s"><v>${idTexto(x)}</v></c>`);
+              } else celdas.push(celdaXml(ref, est, x === '' || x === undefined ? null : x));
+              return;
+            }
             v = x;   // un formato sobre un texto, un lógico o nada no cambia nada
             if (v === null || v === undefined || v === '') return;
           }
@@ -427,12 +546,12 @@
           }
           celdas.push(celdaXml(ref, cab ? ESTILO.negrita : 0, v));
         });
-        if (celdas.length) filasXml.push([f, `<row r="${f + 1}"${filasOcultas.has(f) ? ' hidden="1"' : ''}>${celdas.join('')}</row>`]);
+        if (celdas.length) filasXml.push([f, `<row r="${f + 1}"${altoFila(f)}${filasOcultas.has(f) ? ' hidden="1"' : ''}>${celdas.join('')}</row>`]);
       });
       // una fila oculta sin celdas también se escribe (si no, reaparecería): se inserta en su lugar
-      if (filasOcultas.size) {
+      if (filasOcultas.size || altosFila.size) {
         const hay = new Set(filasXml.map((x) => x[0]));
-        for (const f of filasOcultas) if (!hay.has(f)) filasXml.push([f, `<row r="${f + 1}" hidden="1"/>`]);
+        for (const f of new Set([...filasOcultas, ...altosFila.keys()])) if (!hay.has(f)) filasXml.push([f, `<row r="${f + 1}"${altoFila(f)}${filasOcultas.has(f) ? ' hidden="1"' : ''}/>`]);
         filasXml.sort((a, b) => a[0] - b[0]);
       }
       const colsOcultas = new Set((Array.isArray(h.columnasOcultas) ? h.columnasOcultas : []).filter((c) => Number.isInteger(c) && c >= 0 && c < MAX_COL));
@@ -481,7 +600,7 @@
     zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       + hojasXml.map((_, k) => `<Relationship Id="rId${k + 1}" Type="${R}/worksheet" Target="worksheets/sheet${k + 1}.xml"/>`).join('')
       + `<Relationship Id="rId${hojasXml.length + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${hojasXml.length + 2}" Type="${R}/sharedStrings" Target="sharedStrings.xml"/></Relationships>`);
-    zip.file('xl/styles.xml', estilosConFormatos(formatos));
+    zip.file('xl/styles.xml', estilosConFormatos(combos));
     zip.file('xl/sharedStrings.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${totalTextos}" uniqueCount="${textos.length}">`
       + textos.map((t) => `<si><t xml:space="preserve">${escTexto(t)}</t></si>`).join('') + '</sst>');
     hojasXml.forEach((x, k) => zip.file(`xl/worksheets/sheet${k + 1}.xml`, x));
