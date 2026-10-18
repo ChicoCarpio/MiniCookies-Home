@@ -448,7 +448,9 @@ const qrDibujados = [];       // [caja, texto] para redibujar cuando llegue la g
     galleta = c;
     qrDibujados.forEach(([caja, texto]) => { if (caja.isConnected) dibujarQR(caja, texto); });
   };
-  img.src = '../marca-logo/minicookies_galleta.png';
+  // La galleta es el mismo archivo del icono de la pestaña: su enlace ya sale bien resuelto también en /en/.
+  const icono = document.querySelector('link[rel="icon"]');
+  if (icono) img.src = icono.href;
 })();
 
 function dibujarQR(caja, texto) {
