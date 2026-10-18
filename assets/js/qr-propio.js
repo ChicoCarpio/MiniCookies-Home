@@ -296,7 +296,9 @@
   function crear(texto, opciones) {
     const op = opciones || {};
     const nivel = op.nivel || 'M';
-    if (!(nivel in BITS_NIVEL)) throw new Error('Nivel de corrección desconocido: ' + nivel);
+    // hasOwn y no "in": '__proto__' y 'constructor' están "en" cualquier objeto.
+    if (!Object.hasOwn(BITS_NIVEL, nivel)) throw new Error('Nivel de corrección desconocido: ' + nivel);
+    if (op.version !== undefined && !(Number.isInteger(op.version) && op.version >= 1)) throw new Error('Versión desconocida: ' + op.version);
     const bytes = aBytes(String(texto), op.bom !== false);
     // Versión más chica donde caben el encabezado y los bytes.
     let v = Math.max(1, op.version || 1);

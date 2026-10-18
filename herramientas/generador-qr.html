@@ -482,6 +482,7 @@ botonColoresLogo.addEventListener('click', () => {
 });
 
 function quitarLogo() {
+  QREstilos.liberarLogo(logo);
   logo = null;
   filaLogo.hidden = true;
   botonColoresLogo.disabled = true;
@@ -491,7 +492,9 @@ document.getElementById('botonQuitarLogo').addEventListener('click', () => { mos
 conectarZonaArrastre(zonaLogo, entradaLogo, async (archivos) => {
   mostrarErrorLogo(null);
   try {
-    logo = await QREstilos.cargarLogo(archivos[0]);
+    const nuevo = await QREstilos.cargarLogo(archivos[0]);
+    QREstilos.liberarLogo(logo);
+    logo = nuevo;
   } catch (error) {
     // Un archivo malo no cambia el logo que ya estaba puesto.
     mostrarErrorLogo('logo-error-' + ((error && error.codigo) || 'ilegible'));

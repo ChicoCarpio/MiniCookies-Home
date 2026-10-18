@@ -38,6 +38,7 @@
   const LADO_PALETA = 64;         // y a esto para sacarle los colores
   const MAX_VERSION_LOGO = 34;
   const MAX_ARCHIVO = 30 * 1024 * 1024;
+  const MAX_PIXELES = 100e6;      // una imagen que declara más píxeles que esto se rechaza sin decodificarla
   const LADO_EXPORTAR = 2048;     // el PNG que se descarga mide al menos esto (módulos de píxeles enteros)
   const MAX_EXPORTAR = 4096;      // y nunca más que esto
   const LADO_ORIGINAL = 4096;     // el logo original se conserva hasta este tamaño
@@ -185,6 +186,16 @@
     });
   }
 
+  // Tamaño en píxeles que declara la imagen, sin decodificarla entera (un <img> solo lee el encabezado
+  // hasta que se dibuja). null si no se puede leer.
+  function medirImagen(blob) {
+    const url = URL.createObjectURL(blob);
+    return imagenDesdeUrl(url).then(
+      (img) => ({ ancho: img.naturalWidth || 300, alto: img.naturalHeight || img.naturalWidth || 300 }),
+      () => null
+    ).finally(() => URL.revokeObjectURL(url));
+  }
+
   // Lee un archivo de imagen (PNG, JPG, WebP, GIF, SVG…) y lo deja en un canvas
   // de hasta LADO_LOGO de lado, con la orientación EXIF aplicada. No lanza otra
   // cosa que errores con .codigo: 'vacio' | 'grande' | 'tipo' | 'ilegible'.
@@ -192,13 +203,25 @@
     if (!archivo) throw fallo('vacio');
     if (archivo.size > MAX_ARCHIVO) throw fallo('grande');
     if (archivo.type && !/^image\//i.test(archivo.type)) throw fallo('tipo');
+    // Un SVG sin tipo MIME (el sistema a veces no lo da) se reconoce por el nombre.
+    const blob = (!archivo.type && /\.svg$/i.test(archivo.name || '')) ? new Blob([archivo], { type: 'image/svg+xml' }) : archivo;
+    // Se mide antes de decodificar: un PNG chico puede declarar 40000 x 40000 píxeles y pedir gigabytes.
+    const dim = await medirImagen(blob);
+    if (!dim) throw fallo('ilegible');
+    if (dim.ancho * dim.alto > MAX_PIXELES) throw fallo('grande');
     let fuente = null, ancho = 0, alto = 0, conservar = false;
     try {
-      fuente = await createImageBitmap(archivo, { imageOrientation: 'from-image' });
+      const opciones = { imageOrientation: 'from-image' };
+      if (Math.max(dim.ancho, dim.alto) > LADO_ORIGINAL) {
+        // Se decodifica ya reducido (conserva la proporción: solo se da un lado).
+        if (dim.ancho >= dim.alto) opciones.resizeWidth = LADO_ORIGINAL; else opciones.resizeHeight = LADO_ORIGINAL;
+        opciones.resizeQuality = 'high';
+      }
+      fuente = await createImageBitmap(blob, opciones);
       ancho = fuente.width; alto = fuente.height;
     } catch (e) {
       // SVG y algún formato raro no pasan por createImageBitmap: se prueba con <img>.
-      const url = URL.createObjectURL(archivo);
+      const url = URL.createObjectURL(blob);
       try {
         fuente = await imagenDesdeUrl(url);
         ancho = fuente.naturalWidth || 300;
@@ -238,6 +261,13 @@
     } finally {
       if (fuente && fuente.close && !conservar) fuente.close();
     }
+  }
+
+  // Libera lo que conserva un logo (el ImageBitmap original) cuando se cambia o se quita.
+  function liberarLogo(lienzo) {
+    const o = lienzo && lienzo.original;
+    if (o && o.fuente && typeof o.fuente.close === 'function') o.fuente.close();
+    if (lienzo) lienzo.original = null;
   }
 
   // ------------------------------------------------------- placa del logo
@@ -554,6 +584,6 @@
   globalThis.QREstilos = {
     exportarPNG,
     ESTILOS_MODULO, ESTILOS_OJO, CONTRASTE_MIN,
-    crearConLogo, crearConLogoSeguro, placaPara, dibujar, cargarLogo, paleta, derivarColores, asegurarContraste, contraste
+    liberarLogo, crearConLogo, crearConLogoSeguro, placaPara, dibujar, cargarLogo, paleta, derivarColores, asegurarContraste, contraste
   };
 })();
