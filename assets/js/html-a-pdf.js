@@ -21,6 +21,10 @@
 //    páginas; un EPUB es un solo rollo): se pagina buscando cortes que no
 //    partan ninguna línea ni imagen.
 //
+// Encabezados y pies (solo Word): dentro del elemento, nodos con data-repetido="encabezado|pie", data-cual="default|first|even"
+// y data-dist (pt desde el borde de la hoja); con `repetidos: true` en la hoja se dibujan en cada hoja del grupo, con los
+// <span data-campo="PAGE|NUMPAGES"> puestos al número. También `paginaPortada` (hay encabezado de primera página),
+// `parImpar` (encabezados distintos en pares) y `numeroInicial`.
 // Uso: const bytes = await HtmlAPdf.convertir([{ elemento, anchoPx, altoPx,
 //        margenArribaPx, margenAbajoPx }], { titulo, alAvanzar(hoja, total) });
 // Un break-before: page dentro del elemento fuerza una hoja nueva.
@@ -256,11 +260,64 @@
 
     const imagenesIncrustadas = new Map();
 
+    // Dibuja una lista de piezas en una hoja. aX/aY pasan de px a pt de la hoja; `recorte` (solo para el
+    // contenido) limita los fondos que ocupan varias hojas a la que se está dibujando.
+    async function pintar(hoja, lista, aX, aY, recorte) {
+      for (const p of lista) {
+        if (p.tipo === 'fondo') {
+          // Un fondo puede ocupar varias hojas: se recorta a esta. El relleno
+          // de la propia hoja (margen) no se recorta: es el papel.
+          let arriba = p.y, abajo = p.y + p.alto;
+          if (recorte) { arriba = Math.max(p.y, recorte.primera ? -recorte.margenArriba : recorte.desde); abajo = Math.min(p.y + p.alto, recorte.hasta); }
+          if (abajo <= arriba) continue;
+          hoja.drawRectangle({ x: aX(p.x), y: aY(abajo), width: p.ancho * PX_A_PT, height: (abajo - arriba) * PX_A_PT, color: p.color });
+          continue;
+        }
+        if (p.tipo === 'imagen') {
+          let incrustada = imagenesIncrustadas.get(p.img);
+          if (!incrustada) {
+            const datos = await bytesDeImagen(p.img);
+            incrustada = datos.png ? await pdf.embedPng(datos.bytes) : await pdf.embedJpg(datos.bytes);
+            imagenesIncrustadas.set(p.img, incrustada);
+          }
+          hoja.drawImage(incrustada, { x: aX(p.x), y: aY(p.y + p.alto), width: p.ancho * PX_A_PT, height: p.alto * PX_A_PT });
+          continue;
+        }
+        const tamano = p.tamano * PX_A_PT;
+        const base = aY(p.y + p.ascenso * p.alto);
+        let fuente = await fuenteEstandar(p.familia, p.negrita, p.cursiva);
+        let anchoNatural;
+        try {
+          anchoNatural = fuente.widthOfTextAtSize(p.texto, tamano);
+        } catch {
+          // Un carácter fuera de WinAnsi: la fuente estándar no lo puede escribir.
+          fuente = await fuenteNoto();
+          anchoNatural = fuente.widthOfTextAtSize(p.texto, tamano);
+        }
+        // Tz: la palabra ocupa en el PDF el mismo ancho que en pantalla.
+        const estiramiento = anchoNatural > 0 ? Math.min(200, Math.max(50, (100 * p.ancho * PX_A_PT) / anchoNatural)) : 100;
+        hoja.pushOperators(PDFLib.setCharacterSqueeze(estiramiento));
+        hoja.drawText(p.texto, { x: aX(p.x), y: base, size: tamano, font: fuente, color: p.color });
+        hoja.pushOperators(PDFLib.setCharacterSqueeze(100));
+        if (p.subrayado) {
+          hoja.drawLine({ start: { x: aX(p.x), y: base - tamano * 0.12 }, end: { x: aX(p.x + p.ancho), y: base - tamano * 0.12 }, thickness: Math.max(0.5, tamano * 0.06), color: p.color });
+        }
+      }
+    }
+
+    // Pasada 1: cortes de cada grupo (el total de hojas hace falta para NUMPAGES).
+    const grupos = [];
     for (const pagina of paginas) {
       const { elemento, anchoPx, altoPx } = pagina;
       const margenArriba = pagina.margenArribaPx || 0;
       const margenAbajo = pagina.margenAbajoPx || 0;
       const r = elemento.getBoundingClientRect();
+      // Encabezados y pies (data-repetido): se miden ahora y se esconden mientras se recoge el contenido.
+      const repetidos = pagina.repetidos ? [...elemento.querySelectorAll('[data-repetido]')].map((el) => {
+        const e = el.getBoundingClientRect();
+        return { el, tipo: el.dataset.repetido, cual: el.dataset.cual, dist: parseFloat(el.dataset.dist || '0') / PX_A_PT, x: e.left - r.left, ancho: e.width, alto: e.height };
+      }) : [];
+      for (const rep of repetidos) rep.el.style.display = 'none';
       const origen = { x: r.left, y: r.top + margenArriba };
       const { piezas, saltos } = recogerPiezas(elemento, origen);
       const fondos = piezas.filter((p) => p.tipo === 'fondo');
@@ -276,8 +333,18 @@
         while (hojaActual + 1 < cortes.length && p.y >= cortes[hojaActual + 1]) hojaActual++;
         porHoja[hojaActual].push(p);
       }
+      grupos.push({ pagina, margenArriba, fondos, cortes, porHoja, repetidos, r });
+    }
+    const totalHojas = grupos.reduce((a, g) => a + g.cortes.length, 0);
 
+    // Pasada 2: se dibuja.
+    let numeroHoja = 0;
+    for (const g of grupos) {
+      const { pagina, margenArriba, fondos, cortes, porHoja, repetidos } = g;
+      const { anchoPx, altoPx } = pagina;
+      if (pagina.numeroInicial !== undefined) numeroHoja = pagina.numeroInicial - 1;
       for (let i = 0; i < cortes.length; i++) {
+        numeroHoja++;
         if (opciones.alAvanzar) opciones.alAvanzar(i, cortes.length);
         // Respiro para la página cada tanto: un libro son cientos de hojas.
         if (i % 20 === 19) await new Promise((r) => setTimeout(r, 0));
@@ -288,46 +355,23 @@
         // px de contenido → pt de la hoja (pdf-lib mide desde abajo).
         const aX = (x) => x * PX_A_PT;
         const aY = (y) => altoHoja - (y - desde + margenArriba) * PX_A_PT;
+        await pintar(hoja, [...fondos, ...porHoja[i]], aX, aY, { desde, hasta, primera: i === 0, margenArriba });
 
-        for (const p of [...fondos, ...porHoja[i]]) {
-          if (p.tipo === 'fondo') {
-            // Un fondo puede ocupar varias hojas: se recorta a esta. El relleno
-            // de la propia hoja (margen) no se recorta: es el papel.
-            const arriba = Math.max(p.y, i === 0 ? -margenArriba : desde);
-            const abajo = Math.min(p.y + p.alto, hasta);
-            if (abajo <= arriba) continue;
-            hoja.drawRectangle({ x: aX(p.x), y: aY(abajo), width: p.ancho * PX_A_PT, height: (abajo - arriba) * PX_A_PT, color: p.color });
-            continue;
-          }
-          if (p.tipo === 'imagen') {
-            let incrustada = imagenesIncrustadas.get(p.img);
-            if (!incrustada) {
-              const datos = await bytesDeImagen(p.img);
-              incrustada = datos.png ? await pdf.embedPng(datos.bytes) : await pdf.embedJpg(datos.bytes);
-              imagenesIncrustadas.set(p.img, incrustada);
-            }
-            hoja.drawImage(incrustada, { x: aX(p.x), y: aY(p.y + p.alto), width: p.ancho * PX_A_PT, height: p.alto * PX_A_PT });
-            continue;
-          }
-          const tamano = p.tamano * PX_A_PT;
-          const base = aY(p.y + p.ascenso * p.alto);
-          let fuente = await fuenteEstandar(p.familia, p.negrita, p.cursiva);
-          let anchoNatural;
-          try {
-            anchoNatural = fuente.widthOfTextAtSize(p.texto, tamano);
-          } catch {
-            // Un carácter fuera de WinAnsi: la fuente estándar no lo puede escribir.
-            fuente = await fuenteNoto();
-            anchoNatural = fuente.widthOfTextAtSize(p.texto, tamano);
-          }
-          // Tz: la palabra ocupa en el PDF el mismo ancho que en pantalla.
-          const estiramiento = anchoNatural > 0 ? Math.min(200, Math.max(50, (100 * p.ancho * PX_A_PT) / anchoNatural)) : 100;
-          hoja.pushOperators(PDFLib.setCharacterSqueeze(estiramiento));
-          hoja.drawText(p.texto, { x: aX(p.x), y: base, size: tamano, font: fuente, color: p.color });
-          hoja.pushOperators(PDFLib.setCharacterSqueeze(100));
-          if (p.subrayado) {
-            hoja.drawLine({ start: { x: aX(p.x), y: base - tamano * 0.12 }, end: { x: aX(p.x + p.ancho), y: base - tamano * 0.12 }, thickness: Math.max(0.5, tamano * 0.06), color: p.color });
-          }
+        // Encabezado y pie de esta hoja: el de la primera página, el de las pares o el normal.
+        for (const tipo of ['encabezado', 'pie']) {
+          const candidatos = repetidos.filter((x) => x.tipo === tipo);
+          const par = numeroHoja % 2 === 0;
+          // Con página de portada, la primera hoja usa su propio encabezado o ninguno (no cae en el normal).
+          const rep = i === 0 && pagina.paginaPortada ? candidatos.find((x) => x.cual === 'first')
+            : (pagina.parImpar && par && candidatos.find((x) => x.cual === 'even')) || candidatos.find((x) => x.cual === 'default');
+          if (!rep) continue;
+          for (const c of rep.el.querySelectorAll('[data-campo]')) c.textContent = c.dataset.campo === 'NUMPAGES' ? String(totalHojas) : String(numeroHoja);
+          rep.el.style.display = '';
+          const e = rep.el.getBoundingClientRect();
+          const { piezas: pr } = recogerPiezas(rep.el, { x: e.left, y: e.top });
+          rep.el.style.display = 'none';
+          const arriba = tipo === 'encabezado' ? rep.dist : altoPx - rep.dist - e.height;
+          await pintar(hoja, pr.sort((a, b) => (a.tipo === 'fondo' ? 0 : 1) - (b.tipo === 'fondo' ? 0 : 1)), (x) => (rep.x + x) * PX_A_PT, (y) => altoHoja - (arriba + y) * PX_A_PT, null);
         }
       }
     }

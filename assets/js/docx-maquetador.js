@@ -76,6 +76,8 @@
       this.fuentes = new Map();
       this.imagenes = new Map();
       this.sinNombre = 0;
+      this.notas = [];          // notas al pie y finales citadas en el texto: { id, fin }
+      this.numeroNotaActual = 0;
       this.nParrafo = 0;  // párrafos leídos hasta ahora
       this.flotIzq = null; // último dibujo flotante a la izquierda: { borde (pt desde el margen), n (párrafo) }
       this.cfg = null; // geometría de la sección que se está leyendo (para los dibujos flotantes)
@@ -83,6 +85,14 @@
     usarFuente(nombre, negrita, cursiva) {
       const k = `${nombre}|${!!negrita}|${!!cursiva}`;
       if (!this.fuentes.has(k)) this.fuentes.set(k, { fuente: nombre, negrita: !!negrita, cursiva: !!cursiva });
+    }
+    // Registra una nota citada en el texto y devuelve su número (se numeran en orden de aparición).
+    notaNueva(id, fin) {
+      if (id === undefined || id === '-1' || id === '0') return 0;
+      const clave = (fin ? 'e' : 'f') + id;
+      let i = this.notas.findIndex((n) => n.clave === clave);
+      if (i < 0) { this.notas.push({ clave, id, fin }); i = this.notas.length - 1; }
+      return i + 1;
     }
     aviso(texto) { if (!this.mensajes.some((x) => x.message === texto)) this.mensajes.push({ type: 'warning', message: texto }); }
 
@@ -151,7 +161,12 @@
           if (href) for (let i = ini; i < salida.length; i++) salida[i].enlace = href;
           break;
         }
-        case 'fldSimple': await leerInline(d, e, baseR, salida, contexto); break;
+        case 'fldSimple': {
+          const nombre = /^\s*(PAGE|NUMPAGES)\b/i.exec(e.a.instr || '');
+          if (nombre) salida.push({ t: 'campo', nombre: nombre[1].toUpperCase(), r: d.formatoRun(baseR, hijo(hijo(e, 'r'), 'rPr')) });
+          else await leerInline(d, e, baseR, salida, contexto);
+          break;
+        }
         case 'smartTag': case 'sdt': case 'sdtContent': case 'ins': case 'customXml': case 'bdo': case 'dir':
           await leerInline(d, e, baseR, salida, contexto); break;
         case 'bookmarkStart': if (e.a.name && !/^_/.test(e.a.name)) salida.push({ t: 'ancla', nombre: e.a.name }); break;
@@ -179,10 +194,26 @@
         case 'noBreakHyphen': salida.push({ t: 'texto', s: '‑', r }); break;
         case 'softHyphen': salida.push({ t: 'texto', s: '­', r }); break;
         case 'fldChar':
-          if (e.a.fldCharType === 'begin') contexto.campos.push({ fase: 'instr' });
-          else if (e.a.fldCharType === 'separate') { const c = contexto.campos[contexto.campos.length - 1]; if (c) c.fase = 'resultado'; }
-          else if (e.a.fldCharType === 'end') contexto.campos.pop();
-          contexto.enInstruccion = contexto.campos.some((c) => c.fase === 'instr');
+          if (e.a.fldCharType === 'begin') contexto.campos.push({ fase: 'instr', instr: '' });
+          else if (e.a.fldCharType === 'separate') {
+            const c = contexto.campos[contexto.campos.length - 1];
+            if (c) {
+              c.fase = 'resultado';
+              // Número de página y total: se escriben al dibujar cada hoja (html-a-pdf.js); el resultado guardado no vale.
+              const nombre = /^\s*(PAGE|NUMPAGES)\b/i.exec(c.instr);
+              if (nombre) { c.campo = true; salida.push({ t: 'campo', nombre: nombre[1].toUpperCase(), r }); }
+            }
+          } else if (e.a.fldCharType === 'end') contexto.campos.pop();
+          contexto.enInstruccion = contexto.campos.some((c) => c.fase === 'instr' || c.campo);
+          break;
+        case 'instrText': { const c = contexto.campos[contexto.campos.length - 1]; if (c) c.instr += e.t; break; }
+        case 'footnoteReference': case 'endnoteReference': {
+          const n = d.notaNueva(e.a.id, e.n === 'endnoteReference');
+          if (n) salida.push({ t: 'texto', s: String(n), r: { ...r, alineacionVertical: 'superscript' } });
+          break;
+        }
+        case 'footnoteRef': case 'endnoteRef':
+          if (d.numeroNotaActual) salida.push({ t: 'texto', s: String(d.numeroNotaActual), r: { ...r, alineacionVertical: 'superscript' } });
           break;
         case 'drawing': case 'AlternateContent': {
           const img = await leerDibujo(d, e, r);
@@ -329,6 +360,7 @@
       if (it.t === 'texto') html += `<span style="${cssRun(d, it.r, esDefecto, bajar)}">${esc(it.s)}</span>`;
       else if (it.t === 'tab') html += `<span data-tab="1" style="${cssRun(d, it.r, false)};display:inline-block;white-space:pre">\t</span>`;
       else if (it.t === 'br') html += `<br${it.limpiar ? ` style="clear:${it.limpiar === 'all' ? 'both' : it.limpiar}"` : ''}>`;
+      else if (it.t === 'campo') html += `<span data-campo="${it.nombre}" style="${cssRun(d, it.r, false, bajar)}">1</span>`;
       else if (it.t === 'html') html += it.html;
       // 'flotante': los dibujos flotantes los pone parrafo() antes del <p>
     }
@@ -625,19 +657,60 @@
   function leerSeccion(m, sectPr) {
     const sz = sectPr && hijo(sectPr, 'pgSz');
     const mg = sectPr && hijo(sectPr, 'pgMar');
+    const cols = sectPr && hijo(sectPr, 'cols');
+    const num = sectPr && hijo(sectPr, 'pgNumType');
     const v = (x, defecto) => { const n = parseFloat(x); return Number.isFinite(n) ? n / 20 : defecto; };
     return {
       ancho: v(sz && sz.a.w, 612), alto: v(sz && sz.a.h, 792),
       arriba: v(mg && mg.a.top, 72), derecha: v(mg && mg.a.right, 72), abajo: v(mg && mg.a.bottom, 72), izquierda: v(mg && mg.a.left, 72),
+      encabezado: v(mg && mg.a.header, 36), pie: v(mg && mg.a.footer, 36),
       continua: !!(sectPr && hijo(sectPr, 'type') && hijo(sectPr, 'type').a.val === 'continuous'),
+      columnas: cols && parseInt(cols.a.num, 10) > 1 ? { n: parseInt(cols.a.num, 10), espacio: v(cols.a.space, 36), linea: cols.a.sep === '1' || cols.a.sep === 'true' } : null,
+      portada: !!(sectPr && hijo(sectPr, 'titlePg')),
+      inicioPaginas: num && num.a.start !== undefined ? parseInt(num.a.start, 10) : undefined,
+      referencias: sectPr ? lista(sectPr, 'headerReference').map((x) => ({ tipo: 'encabezado', cual: x.a.type || 'default', id: x.a.id }))
+        .concat(lista(sectPr, 'footerReference').map((x) => ({ tipo: 'pie', cual: x.a.type || 'default', id: x.a.id }))) : [],
     };
   }
 
-  function htmlSeccion(s, interior) {
-    return `<section class="docx" style="${css({
+  // Contenido de un encabezado o pie (word/headerN.xml, con sus propias relaciones para las imágenes).
+  async function leerEncabezado(d, id, ancho) {
+    const rel = d.rels.get(id);
+    const f = rel && d.zip.file(rel.destino);
+    if (!f) return '';
+    const raiz = DocxBase.arbol(await f.async('string'));
+    const relsPropias = await DocxBase.leerRels(d.zip, rel.destino);
+    const guardadas = d.rels;
+    d.rels = relsPropias;
+    try { return (await bloques(d, raiz, ancho)).html; } finally { d.rels = guardadas; }
+  }
+
+  // Los encabezados y pies de la sección: los propios; si no hay, los de la sección anterior.
+  async function repetidosDe(d, cfg) {
+    const previos = d.repetidosPrevios || {};
+    const actuales = { ...previos };
+    const ancho = cfg.ancho - cfg.izquierda - cfg.derecha;
+    for (const r of cfg.referencias) {
+      const html = await leerEncabezado(d, r.id, ancho);
+      actuales[`${r.tipo}:${r.cual}`] = html;
+    }
+    d.repetidosPrevios = actuales;
+    let html = '';
+    for (const clave of Object.keys(actuales)) {
+      const [tipo, cual] = clave.split(':');
+      if (cual === 'first' && !cfg.portada) continue;
+      html += `<div data-repetido="${tipo}" data-cual="${cual}" data-dist="${n3(tipo === 'encabezado' ? cfg.encabezado : cfg.pie)}" style="position:absolute;left:${pt(cfg.izquierda)};top:0;width:${pt(ancho)};line-height:normal">${actuales[clave]}</div>`;
+    }
+    return html;
+  }
+
+  function htmlSeccion(s, partes, repetidos, parImpar) {
+    // Con columnas, CSS reparte el texto en partes iguales (como Word al final de una sección continua).
+    const cuerpo = partes.map(({ columnas: c, html }) => (c ? `<div style="${css({ 'column-count': c.n, 'column-gap': pt(c.espacio), 'column-rule': c.linea ? '0.5pt solid #000000' : undefined })}">${html}</div>` : html)).join('');
+    return `<section class="docx" data-titulopg="${s.portada ? 1 : 0}" data-parimpar="${parImpar ? 1 : 0}"${s.inicioPaginas !== undefined ? ` data-pginicio="${s.inicioPaginas}"` : ''} style="${css({
       'box-sizing': 'border-box', display: 'block', position: 'relative', 'z-index': '0', width: pt(s.ancho), 'min-height': pt(s.alto),
       padding: `${pt(s.arriba)} ${pt(s.derecha)} ${pt(s.abajo)} ${pt(s.izquierda)}`, margin: '0', background: '#ffffff', color: '#000000',
-    })}">${interior}</section>`;
+    })}">${repetidos || ''}${cuerpo}</section>`;
   }
 
   // ───────── Tabulaciones (después de maquetar) ─────────
@@ -707,16 +780,42 @@
     const modelo = await DocxEstilos.cargar(paquete);
     const d = new Documento(paquete, modelo, mensajes);
     const lectura = await bloquesCuerpo(d, paquete.cuerpo);
-    if (typeof PptxTexto !== 'undefined' && PptxTexto.cargarFuentes) await PptxTexto.cargarFuentes([...d.fuentes.values()]);
     const secciones = [];
     for (const t of lectura) {
       const cfg = leerSeccion(modelo, t.sectPr);
+      d.cfg = cfg;
       const previa = secciones[secciones.length - 1];
-      if (previa && cfg.continua && previa.cfg.ancho === cfg.ancho && previa.cfg.alto === cfg.alto) previa.html += t.html;
-      else secciones.push({ cfg, html: t.html });
+      // Una sección continua (sin salto de página) comparte la hoja con la anterior; cada parte lleva sus columnas.
+      if (previa && cfg.continua && previa.cfg.ancho === cfg.ancho && previa.cfg.alto === cfg.alto && !cfg.referencias.length) previa.partes.push({ columnas: cfg.columnas, html: t.html });
+      else secciones.push({ cfg, partes: [{ columnas: cfg.columnas, html: t.html }], repetidos: await repetidosDe(d, cfg) });
     }
-    const html = await resolverTabulaciones(secciones.map((s) => htmlSeccion(s.cfg, s.html)).join(''), d);
+    // Notas al pie y finales: al final del documento (Word las pone al pie de cada página).
+    if (d.notas.length && secciones.length) {
+      const ultima = secciones[secciones.length - 1];
+      ultima.partes.push({ columnas: null, html: await htmlNotas(d, ultima.cfg.ancho - ultima.cfg.izquierda - ultima.cfg.derecha) });
+    }
+    if (typeof PptxTexto !== 'undefined' && PptxTexto.cargarFuentes) await PptxTexto.cargarFuentes([...d.fuentes.values()]);
+    const html = await resolverTabulaciones(secciones.map((x) => htmlSeccion(x.cfg, x.partes, x.repetidos, modelo.ajustes.parImpar)).join(''), d);
     return { html, mensajes };
+  }
+
+  async function htmlNotas(d, ancho) {
+    let html = '<div style="width:144pt;border-top:0.5pt solid #000000;margin-top:14pt;margin-bottom:6pt"></div>';
+    for (const tipo of [false, true]) {
+      const rel = [...d.rels.values()].find((r) => r.tipo.endsWith(tipo ? '/endnotes' : '/footnotes'));
+      const f = d.zip.file(rel ? rel.destino : tipo ? 'word/endnotes.xml' : 'word/footnotes.xml');
+      if (!f || !d.notas.some((n) => n.fin === tipo)) continue;
+      const raiz = DocxBase.arbol(await f.async('string'));
+      for (const [i, n] of d.notas.entries()) {
+        if (n.fin !== tipo) continue;
+        const nota = lista(raiz, tipo ? 'endnote' : 'footnote').find((x) => x.a.id === n.id);
+        if (!nota) continue;
+        d.numeroNotaActual = i + 1;
+        html += (await bloques(d, nota, ancho)).html;
+      }
+    }
+    d.numeroNotaActual = 0;
+    return html;
   }
 
   // Recorre el cuerpo y lo reparte en secciones: cada párrafo con sectPr cierra una; la última es la del cuerpo.

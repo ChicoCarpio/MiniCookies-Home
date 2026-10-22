@@ -50,6 +50,11 @@
           altoPx: parseFloat(e.minHeight) || seccion.getBoundingClientRect().height,
           margenArribaPx: parseFloat(e.paddingTop),
           margenAbajoPx: parseFloat(e.paddingBottom),
+          // Solo del maquetador propio: encabezados y pies repetidos en cada hoja, numeración.
+          repetidos: !!seccion.querySelector('[data-repetido]'),
+          paginaPortada: seccion.dataset.titulopg === '1',
+          parImpar: seccion.dataset.parimpar === '1',
+          numeroInicial: seccion.dataset.pginicio !== undefined ? parseInt(seccion.dataset.pginicio, 10) : undefined,
         };
       });
       return await HtmlAPdf.convertir(paginas, { titulo: documento.nombre, alAvanzar });
