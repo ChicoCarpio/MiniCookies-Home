@@ -76,6 +76,9 @@
       this.fuentes = new Map();
       this.imagenes = new Map();
       this.sinNombre = 0;
+      this.nParrafo = 0;  // párrafos leídos hasta ahora
+      this.flotIzq = null; // último dibujo flotante a la izquierda: { borde (pt desde el margen), n (párrafo) }
+      this.cfg = null; // geometría de la sección que se está leyendo (para los dibujos flotantes)
     }
     usarFuente(nombre, negrita, cursiva) {
       const k = `${nombre}|${!!negrita}|${!!cursiva}`;
@@ -192,21 +195,100 @@
   }
 
   const EMU_POR_PT = 12700;
-  // Fase 2: solo imágenes en línea. Las flotantes (wp:anchor) llegan en la fase 4.
+  const emuPt = (v) => (v === undefined || v === '' || Number.isNaN(parseFloat(v)) ? 0 : parseFloat(v) / EMU_POR_PT);
+
+  // Dibujos: imágenes y cuadros de texto, en línea (wp:inline) o flotantes (wp:anchor).
   async function leerDibujo(d, e, r) {
     const raiz = e.n === 'AlternateContent' ? (hijo(e, 'Choice') || hijo(e, 'Fallback')) : e;
     const dib = raiz && (hijo(raiz, 'drawing') || raiz);
     const inl = dib && hijo(dib, 'inline');
-    if (!inl) return null;
-    const ext = hijo(inl, 'extent');
-    const blip = buscarProf(inl, 'blip');
-    if (!ext || !blip || !blip.a.embed) return null;
-    const src = await d.imagenDe(blip.a.embed);
-    if (!src) return null;
-    const doc = hijo(inl, 'docPr');
-    const ancho = parseFloat(ext.a.cx) / EMU_POR_PT, alto = parseFloat(ext.a.cy) / EMU_POR_PT;
-    return { t: 'html', r, html: `<img src="${esc(src)}" alt="${esc(doc ? doc.a.descr || '' : '')}" style="${css({ width: pt(ancho), height: pt(alto), 'vertical-align': 'baseline', 'max-width': 'none' })}">` };
+    const anc = dib && hijo(dib, 'anchor');
+    const caja = inl || anc;
+    const ext = caja && hijo(caja, 'extent');
+    if (!ext) return null;
+    const ancho = emuPt(ext.a.cx), alto = emuPt(ext.a.cy);
+    const contenido = await contenidoDibujo(d, caja, ancho, alto, !!inl);
+    if (!contenido) return null;
+    if (inl) return { t: 'html', r, html: contenido };
+    // Va aparte (antes del párrafo): un <div> o un <p> dentro de un <p> cierra el párrafo al leer el HTML.
+    return { t: 'flotante', r, html: colocarAncla(d, anc, ancho, alto, contenido) };
   }
+
+  // La imagen o el cuadro de texto, sin posición.
+  async function contenidoDibujo(d, caja, ancho, alto, enLinea) {
+    const doc = hijo(caja, 'docPr');
+    const blip = buscarProf(caja, 'blip');
+    if (blip && blip.a.embed) {
+      const src = await d.imagenDe(blip.a.embed);
+      if (!src) return null;
+      return `<img src="${esc(src)}" alt="${esc(doc ? doc.a.descr || '' : '')}" style="${css({ width: pt(ancho), height: pt(alto), display: enLinea ? 'inline-block' : 'block', 'max-width': 'none', 'vertical-align': enLinea ? 'baseline' : undefined })}">`;
+    }
+    const wsp = buscarProf(caja, 'wsp');
+    const txbx = wsp && buscarProf(wsp, 'txbxContent');
+    if (txbx) {
+      const sp = hijo(wsp, 'spPr');
+      const bp = hijo(wsp, 'bodyPr');
+      const ins = (n, defecto) => (bp && bp.a[n] !== undefined ? emuPt(bp.a[n]) : defecto);
+      const ln = sp && hijo(sp, 'ln');
+      const colorDe = (e) => { const c = e && hijo(e, 'solidFill'); const x = c && c.h[0]; return x && x.a.val && /^[0-9a-fA-F]{6}$/.test(x.a.val) ? '#' + x.a.val.toLowerCase() : undefined; };
+      const relleno = colorDe(sp);
+      const colorLinea = ln && colorDe(ln);
+      const interior = await bloques(d, txbx, Math.max(ancho - ins('lIns', 7.2) - ins('rIns', 7.2), 10));
+      return `<div style="${css({
+        'box-sizing': 'border-box', width: pt(ancho), 'min-height': pt(alto), padding: `${pt(ins('tIns', 3.6))} ${pt(ins('rIns', 7.2))} ${pt(ins('bIns', 3.6))} ${pt(ins('lIns', 7.2))}`,
+        'background-color': relleno, border: colorLinea ? `${pt(ln.a.w ? emuPt(ln.a.w) : 0.75)} solid ${colorLinea}` : undefined,
+        'white-space': 'normal', 'text-indent': '0', 'text-align': 'left', 'line-height': 'normal', 'letter-spacing': 'normal', 'font-weight': 'normal', 'font-style': 'normal',
+        'text-decoration': 'none', 'text-transform': 'none', 'font-variant': 'normal',
+      })}">${interior.html}</div>`;
+    }
+    return null;
+  }
+
+  // Coloca un dibujo flotante. Con envoltura de texto y casi pegado a su párrafo es un float de CSS (el texto lo
+  // rodea, también el de los párrafos que siguen); en cualquier otro caso se posiciona en la hoja.
+  function colocarAncla(d, anc, w, h, contenido) {
+    const cfg = d.cfg || { ancho: 612, alto: 792, arriba: 72, derecha: 72, abajo: 72, izquierda: 72 };
+    const ph = hijo(anc, 'positionH'), pv = hijo(anc, 'positionV');
+    const desdeH = ph ? ph.a.relativeFrom : 'column', desdeV = pv ? pv.a.relativeFrom : 'paragraph';
+    const alinH = ph && hijo(ph, 'align') ? hijo(ph, 'align').t.trim() : null, alinV = pv && hijo(pv, 'align') ? hijo(pv, 'align').t.trim() : null;
+    const despH = ph && hijo(ph, 'posOffset') ? emuPt(hijo(ph, 'posOffset').t) : 0, despV = pv && hijo(pv, 'posOffset') ? emuPt(hijo(pv, 'posOffset').t) : 0;
+    const envoltura = ['wrapNone', 'wrapSquare', 'wrapTight', 'wrapThrough', 'wrapTopAndBottom'].find((n) => hijo(anc, n)) || 'wrapNone';
+    const lado = envoltura !== 'wrapNone' && hijo(anc, envoltura).a.wrapText;
+    const dist = { t: emuPt(anc.a.distT), b: emuPt(anc.a.distB), l: emuPt(anc.a.distL), r: emuPt(anc.a.distR) };
+    const detras = anc.a.behindDoc === '1' || anc.a.behindDoc === 'true';
+    const { ancho: W, alto: H, arriba: mt, derecha: mr, abajo: mb, izquierda: ml } = cfg;
+    const refsH = { page: [0, W], margin: [ml, W - mr], column: [ml, W - mr], character: [ml, W - mr], leftMargin: [0, ml], rightMargin: [W - mr, W], insideMargin: [ml, W - mr], outsideMargin: [ml, W - mr] };
+    const refsV = { page: [0, H], margin: [mt, H - mb], topMargin: [0, mt], bottomMargin: [H - mb, H], insideMargin: [mt, H - mb], outsideMargin: [mt, H - mb] };
+    const eje = (refs, desde, alin, desp, tam) => {
+      const [a0, a1] = refs[desde] || refs.margin || refs.page;
+      if (alin === 'right' || alin === 'bottom' || alin === 'outside') return a1 - tam;
+      if (alin === 'center') return (a0 + a1) / 2 - tam / 2;
+      return a0 + desp;
+    };
+    const x = eje(refsH, desdeH, alinH, despH, w);
+    const relativoAlParrafo = desdeV === 'paragraph' || desdeV === 'line';
+
+    const conEnvoltura = envoltura !== 'wrapNone' && relativoAlParrafo && Math.abs(despV) < 30;
+    if (conEnvoltura) {
+      if (envoltura === 'wrapTopAndBottom') {
+        const alinear = Math.abs(x + w / 2 - (ml + (W - mr)) / 2) < 8 ? 'center' : x + w / 2 > (ml + W - mr) / 2 ? 'right' : 'left';
+        return `<div style="${css({ float: 'left', clear: 'both', width: '100%', 'text-align': alinear, 'padding-top': pt(dist.t + Math.max(despV, 0)), 'padding-bottom': pt(dist.b), 'line-height': '0', 'text-indent': '0', 'box-sizing': 'content-box' })}">${contenido.replace('display:block', 'display:inline-block')}</div>`;
+      }
+      const centro = x + w / 2, mitad = (ml + W - mr) / 2;
+      const aLaDerecha = lado === 'left' ? true : lado === 'right' ? false : centro > mitad;
+      if (!aLaDerecha) d.flotIzq = { borde: x - ml + w + dist.r, n: d.nParrafo };
+      return `<div style="${css({
+        float: aLaDerecha ? 'right' : 'left', 'text-indent': '0', 'line-height': '0',
+        margin: `${pt(dist.t + Math.max(despV, 0))} ${pt(aLaDerecha ? Math.max(W - mr - (x + w), 0) : dist.r)} ${pt(dist.b)} ${pt(aLaDerecha ? dist.l : Math.max(x - ml, 0))}`,
+      })}">${contenido}</div>`;
+    }
+    // Posición en la hoja: la sección es el bloque contenedor (position:relative).
+    let vertical;
+    if (relativoAlParrafo) vertical = `top:auto;margin-top:${pt(despV)}`;
+    else vertical = `top:${pt(eje(refsV, desdeV, alinV, despV, h))}`;
+    return `<div style="position:absolute;left:${pt(x)};${vertical};z-index:${detras ? -1 : 1};text-indent:0;line-height:0;white-space:normal">${contenido}</div>`;
+  }
+
   function buscarProf(e, nombre) {
     for (const x of e.h) {
       if (x.n === nombre) return x;
@@ -248,6 +330,7 @@
       else if (it.t === 'tab') html += `<span data-tab="1" style="${cssRun(d, it.r, false)};display:inline-block;white-space:pre">\t</span>`;
       else if (it.t === 'br') html += `<br${it.limpiar ? ` style="clear:${it.limpiar === 'all' ? 'both' : it.limpiar}"` : ''}>`;
       else if (it.t === 'html') html += it.html;
+      // 'flotante': los dibujos flotantes los pone parrafo() antes del <p>
     }
     cerrarEnlace();
     return html;
@@ -260,6 +343,7 @@
   // Un párrafo de Word → uno o varios <p> (un salto de página parte el párrafo en dos).
   async function parrafo(d, p, medio) {
     const m = d.m;
+    d.nParrafo++;
     const pDirecto = m.leerPPr(hijo(p, 'pPr'));
     const est = m.estilos.parrafo(pDirecto.estilo, medio);
     const numeracionPedida = pDirecto.numeracion || est.p.numeracion;
@@ -324,8 +408,32 @@
     const margenIzq = izq - (bordes.left ? espacioLado('left') + bordes.left.ancho : 0);
     const margenDer = der - (bordes.right ? espacioLado('right') + bordes.right.ancho : 0);
 
+    const yDesde = (f) => (f.y ? parseFloat(f.y) / 20 : 0);
+    // Párrafo en un marco (w:framePr): flotante si va pegado a un lado, o colocado en la hoja.
+    let marco = null;
+    const fr = efectivo.marco;
+    if (fr && (fr.w || fr.x !== undefined || fr.xAlign)) {
+      const cfg = d.cfg || { ancho: 612, arriba: 72, izquierda: 72, derecha: 72 };
+      const ancho = fr.w ? parseFloat(fr.w) / 20 : undefined;
+      const alto = fr.h ? parseFloat(fr.h) / 20 : undefined;
+      const hs = fr.hSpace ? parseFloat(fr.hSpace) / 20 : 0, vs = fr.vSpace ? parseFloat(fr.vSpace) / 20 : 0;
+      const estiloAncho = { width: ancho ? pt(ancho) : undefined, height: alto && fr.hRule === 'exact' ? pt(alto) : undefined, 'min-height': alto && fr.hRule !== 'exact' ? pt(alto) : undefined, 'box-sizing': 'border-box' };
+      const alrededor = fr.wrap !== 'none' && fr.wrap !== 'notBeside' && fr.vAnchor !== 'page' && fr.vAnchor !== 'margin';
+      if (alrededor) {
+        // Junto a un dibujo flotante a la izquierda (la foto de un currículum) el marco empieza donde ese termina.
+        const previo = d.flotIzq && d.nParrafo - d.flotIzq.n <= 2 ? d.flotIzq.borde : 0;
+        const x0 = fr.xAlign ? 0 : Math.max(parseFloat(fr.x || 0) / 20 - previo, 0);
+        marco = { ...estiloAncho, float: fr.xAlign === 'right' ? 'right' : 'left', margin: `${pt(yDesde(fr))} ${pt(hs)} ${pt(vs)} ${pt(x0)}` };
+      } else {
+        const x0 = fr.hAnchor === 'page' ? 0 : cfg.izquierda;
+        const yDesp = fr.y ? parseFloat(fr.y) / 20 : 0;
+        const vertical = fr.vAnchor === 'page' ? { top: pt(yDesp) } : fr.vAnchor === 'margin' ? { top: pt(cfg.arriba + yDesp) } : { top: 'auto', 'margin-top': pt(yDesp) };
+        marco = { ...estiloAncho, position: 'absolute', left: pt(x0 + (fr.xAlign === 'center' ? ((cfg.ancho - cfg.izquierda - cfg.derecha) - (ancho || 0)) / 2 : parseFloat(fr.x || 0) / 20)), ...vertical, 'z-index': 1, margin: undefined };
+        if (vertical['margin-top']) marco['margin-top'] = vertical['margin-top'];
+      }
+    }
     const estilo = (extra) => css({
-      margin: `${pt(antes)} ${pt(Math.max(margenDer, 0))} ${pt(despues)} ${pt(Math.max(margenIzq, 0))}`,
+      margin: `0 ${pt(Math.max(margenDer, 0))} 0 ${pt(Math.max(margenIzq, 0))}`,
       'text-indent': primera ? pt(primera) : undefined,
       'text-align': ALINEACION[efectivo.jc] || 'left',
       'text-align-last': efectivo.jc === 'distribute' ? 'justify' : undefined,
@@ -347,11 +455,14 @@
     // Parte en trozos cada salto de página.
     const trozos = [[]];
     for (const it of items) { if (it.t === 'pagina') trozos.push([]); else trozos[trozos.length - 1].push(it); }
-    let html = '';
+    const espaciador = (h) => (h > 0 ? `<div style="height:${pt(h)};line-height:0;font-size:0"></div>` : '');
+    let html = marco ? '' : espaciador(antes);
+    html += items.filter((x) => x.t === 'flotante').map((x) => x.html).join('');
     trozos.forEach((trozo, i) => {
       const interior = htmlInline(d, trozo, false, bajar) || `<span style="${cssRun(d, marcaR, true)}"><br></span>`;
-      html += `<p ${atributos} style="${estilo(i > 0 ? { 'break-before': 'page', 'text-indent': undefined } : {})}">${interior}</p>`;
+      html += `<p ${atributos} style="${estilo({ ...(marco || {}), ...(i > 0 ? { 'break-before': 'page', 'text-indent': undefined } : {}) })}">${interior}</p>`;
     });
+    if (!marco) html += espaciador(despues);
     const sectPr = hijo(hijo(p, 'pPr'), 'sectPr');
     return { html, sectPr };
   }
@@ -453,7 +564,10 @@
     if (wTabla !== undefined && Math.abs(wTabla - total) > 0.5) { const f = wTabla / total; cols = cols.map((x) => x * f); total = wTabla; }
     else if (wTabla === undefined && total > disponible && disponible > 0) { const f = disponible / total; cols = cols.map((x) => x * f); total = disponible; }
 
-    const margenesT = { top: 0, bottom: 0, left: 5.4, right: 5.4, ...(tbl.margenes || {}) };
+    // Sin ancho en ninguna celda y con una rejilla de mentira (la escriben así algunas librerías): Word reparte las
+    // columnas según el contenido; CSS hace lo mismo con table-layout:auto.
+    const autoajuste = infos.every((f) => f.every((x) => !x.w || !(x.w.valor > 0))) && (sumaGrid / nCols) < 30 && tbl.disposicion !== 'fixed';
+    const margenesT = { top: 0, bottom: 0, left: 0, right: 0, ...(tbl.margenes || {}) }; // sin estilo de tabla (TableNormal) Word no pone margen de celda
     const bT = tbl.bordes || {};
     // Antes de Word 2013 (modo de compatibilidad < 15) el borde de la tabla sale al margen izquierdo de la celda
     // hacia afuera, para que el texto quede alineado con el del párrafo.
@@ -461,9 +575,9 @@
     const alineacion = tbl.jc === 'center' ? 'center' : tbl.jc === 'right' || tbl.jc === 'end' ? 'flex-end' : 'flex-start';
     let html = `<table style="${css({
       // Las hojas de estilo de la página ponen cosas a table/td (interlineado, relleno, bordes): aquí se fija todo.
-      'border-collapse': 'collapse', 'border-spacing': '0', 'table-layout': 'fixed', width: pt(total), margin: '0', 'align-self': alineacion, 'line-height': 'normal', 'text-align': 'left', background: 'none', border: 'none',
+      'border-collapse': 'collapse', 'border-spacing': '0', 'table-layout': autoajuste ? 'auto' : 'fixed', width: autoajuste && wTabla === undefined ? undefined : pt(total), 'max-width': autoajuste ? pt(disponible) : undefined, margin: '0', 'align-self': alineacion, 'line-height': 'normal', 'text-align': 'left', background: 'none', border: 'none',
       'margin-left': alineacion === 'flex-start' && sangria ? pt(sangria) : undefined,
-    })}"><colgroup>${cols.map((g) => `<col style="width:${pt(g)}">`).join('')}</colgroup>`;
+    })}">${autoajuste ? '' : `<colgroup>${cols.map((g) => `<col style="width:${pt(g)}">`).join('')}</colgroup>`}`;
     for (let i = 0; i < infos.length; i++) {
       const trPr = m.leerTrPr(hijo(filas[i], 'trPr'));
       html += `<tr style="${css({ height: trPr.alto ? pt(trPr.alto) : undefined, 'break-inside': trPr.noPartir ? 'avoid' : undefined, background: 'none' })}">`;
@@ -489,7 +603,7 @@
           'border-top': bt && bt.texto, 'border-bottom': bb && bb.texto, 'border-left': bl && bl.texto, 'border-right': br && br.texto,
           'background-color': sinRelleno(tc.sombreado) || sinRelleno(tbl.sombreado), 'overflow-wrap': 'break-word', 'line-height': 'normal', 'text-align': 'left',
           'font-weight': 'normal', 'font-size': '10pt', color: 'inherit',
-        })}"><div style="display:flex;flex-direction:column">${dentro.html}</div></td>`;
+        })}">${dentro.html}</td>`;
       }
       html += '</tr>';
     }
@@ -521,9 +635,9 @@
 
   function htmlSeccion(s, interior) {
     return `<section class="docx" style="${css({
-      'box-sizing': 'border-box', display: 'block', position: 'relative', width: pt(s.ancho), 'min-height': pt(s.alto),
+      'box-sizing': 'border-box', display: 'block', position: 'relative', 'z-index': '0', width: pt(s.ancho), 'min-height': pt(s.alto),
       padding: `${pt(s.arriba)} ${pt(s.derecha)} ${pt(s.abajo)} ${pt(s.izquierda)}`, margin: '0', background: '#ffffff', color: '#000000',
-    })}"><div style="display:flex;flex-direction:column">${interior}</div></section>`;
+    })}">${interior}</section>`;
   }
 
   // ───────── Tabulaciones (después de maquetar) ─────────
@@ -624,6 +738,7 @@
       if (e.n === 'sectPr') continue;
       const cfg = leerSeccion(d.m, seccionDe.get(e));
       const disponible = cfg.ancho - cfg.izquierda - cfg.derecha;
+      d.cfg = cfg;
       if (e.n === 'p') {
         const r = await parrafo(d, e);
         actual += r.html;
