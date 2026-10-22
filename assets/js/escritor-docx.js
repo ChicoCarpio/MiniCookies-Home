@@ -34,7 +34,8 @@
   const limpiar = (s) => String(s).replace(INVALIDOS, '');
   const esc = (s) => limpiar(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const escAttr = (s) => esc(s).replace(/"/g, '&quot;');
-  const entero = (n) => Math.round(Number(n) || 0);
+  // Entero de 32 bits: «Infinity», «NaN» o «1e+21» en un atributo hacen que Word rechace el archivo.
+  const entero = (n) => { const v = Math.round(Number(n)); return Number.isFinite(v) ? Math.max(-2147483647, Math.min(2147483647, v)) : 0; };
 
   // ---------- Partes fijas ----------
 
@@ -123,7 +124,7 @@
       const n = medios.length + 1;
       medios.push({ nombre: `image${n}.${tipo}`, bytes, tipo });
       const rid = `rIdImg${n}`;
-      const cx = entero(img.ancho * EMU_POR_PX), cy = entero(img.alto * EMU_POR_PX);
+      const cx = Math.max(0, entero(img.ancho * EMU_POR_PX)), cy = Math.max(0, entero(img.alto * EMU_POR_PX)); // negativo: Word no abre
       const id = ++idDibujo;
       const grafico = `<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">`
         + `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${id}" name="Imagen ${id}"/><pic:cNvPicPr/></pic:nvPicPr>`
@@ -176,7 +177,7 @@
         if (l.vineta) { usaViñetas = true; id = numId(0, 0); }
         else if (abstractDe.has(l.id)) id = numId(abstractDe.get(l.id), l.instancia);
         else throw new Error(`EscritorDocx: la lista «${l.id}» no está en numeraciones`);
-        ppr += `<w:numPr><w:ilvl w:val="${Math.min(8, entero(l.nivel))}"/><w:numId w:val="${id}"/></w:numPr>`;
+        ppr += `<w:numPr><w:ilvl w:val="${Math.min(8, Math.max(0, entero(l.nivel)))}"/><w:numId w:val="${id}"/></w:numPr>`;
       }
       if (p.bordeAbajo) { const b = p.bordeAbajo; ppr += `<w:pBdr><w:bottom w:val="single" w:sz="${entero(b.tam)}" w:space="${entero(b.espacio)}" w:color="${escAttr(b.color || '000000')}"/></w:pBdr>`; }
       if (p.tabs && p.tabs.length) ppr += `<w:tabs>${p.tabs.map((t) => `<w:tab w:val="${t.tipo === 'centro' ? 'center' : t.tipo === 'derecha' ? 'right' : 'left'}" w:pos="${entero(t.pos)}"/>`).join('')}</w:tabs>`;
@@ -205,7 +206,11 @@
     const anchoUtil = pagina.ancho - pagina.margen.izquierda - pagina.margen.derecha;
 
     function tabla(t) {
-      const columnas = Math.max(1, ...t.filas.map((f) => f.celdas.length));
+      // Una fila sin celdas (p. ej. la de un Word con todas sus celdas combinadas en vertical) hace que Word no abra el archivo.
+      const filasConCeldas = (t.filas || []).filter((f) => f.celdas && f.celdas.length);
+      if (!filasConCeldas.length) return '';
+      t = { ...t, filas: filasConCeldas };
+      const columnas = t.filas.reduce((max, f) => Math.max(max, f.celdas.length), 1); // sin «...»: con 100 000 filas desborda la pila
       const ancho = Math.floor(anchoUtil / columnas);
       const pct = entero((t.anchoPct == null ? 100 : t.anchoPct) * 50);
       const filas = t.filas.map((f) => `<w:tr>${f.celdas.map((c) => {
@@ -224,7 +229,10 @@
     const partes = []; // { ruta, tipo, xml, rid }
     const refs = [];
     const bloque = (lista, raiz, ruta, tipoRel, tipoContenido, etiqueta, rid) => {
-      partes.push({ ruta, tipo: tipoContenido, rid, tipoRel, xml: `${CABECERA}<${raiz} xmlns:w="${NS_W}" xmlns:r="${NS_R}" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">${lista.map(parrafo).join('')}</${raiz}>` });
+      const desde = medios.length;
+      const contenido = lista.map(parrafo).join('') || '<w:p/>'; // Word exige al menos un párrafo
+      const imagenes = medios.map((x, i) => [x, i + 1]).slice(desde); // sus imágenes van en las relaciones de la parte, no en las de document.xml
+      partes.push({ ruta, tipo: tipoContenido, rid, tipoRel, imagenes, xml: `${CABECERA}<${raiz} xmlns:w="${NS_W}" xmlns:r="${NS_R}" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">${contenido}</${raiz}>` });
       refs.push(`<w:${etiqueta}Reference w:type="default" r:id="${rid}"/>`);
     };
     if (doc.encabezado) bloque(doc.encabezado, 'w:hdr', 'word/header1.xml', 'header', 'application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml', 'header', 'rIdEnc');
@@ -239,10 +247,10 @@
     let numeracion = '';
     if (nums.length) {
       const VINETAS = [['', 'Symbol'], ['o', 'Courier New'], ['', 'Wingdings']];
-      const niveles = (defs) => defs.map((v, n) => {
+      const niveles = (defs) => defs.slice(0, 9).map((v, n) => { // Word admite 9 niveles (0–8); un décimo no abre
         const bullet = v.formato === 'bullet';
-        return `<w:lvl w:ilvl="${n}"><w:start w:val="1"/><w:numFmt w:val="${bullet ? 'bullet' : escAttr(v.formato)}"/><w:lvlText w:val="${esc(v.texto)}"/><w:lvlJc w:val="left"/>`
-          + `<w:pPr><w:ind w:left="${entero(v.izquierda)}" w:hanging="${entero(v.colgante)}"/></w:pPr>${v.fuente ? `<w:rPr><w:rFonts w:ascii="${v.fuente}" w:hAnsi="${v.fuente}" w:hint="default"/></w:rPr>` : ''}</w:lvl>`;
+        return `<w:lvl w:ilvl="${n}"><w:start w:val="1"/><w:numFmt w:val="${bullet ? 'bullet' : escAttr(v.formato)}"/><w:lvlText w:val="${escAttr(v.texto)}"/><w:lvlJc w:val="left"/>`
+          + `<w:pPr><w:ind w:left="${entero(v.izquierda)}" w:hanging="${entero(v.colgante)}"/></w:pPr>${v.fuente ? `<w:rPr><w:rFonts w:ascii="${escAttr(v.fuente)}" w:hAnsi="${escAttr(v.fuente)}" w:hint="default"/></w:rPr>` : ''}</w:lvl>`;
       }).join('');
       const abstractos = [
         { id: 0, defs: Array.from({ length: 9 }, (_, n) => ({ formato: 'bullet', texto: VINETAS[n % 3][0], fuente: VINETAS[n % 3][1], izquierda: 720 * (n + 1), colgante: 360 })) },
@@ -285,7 +293,13 @@
     zip.file('word/styles.xml', ESTILOS);
     zip.file('word/settings.xml', AJUSTES);
     if (numeracion) zip.file('word/numbering.xml', numeracion);
-    for (const p of partes) zip.file(p.ruta, p.xml);
+    for (const p of partes) {
+      zip.file(p.ruta, p.xml);
+      if (p.imagenes.length) {
+        zip.file(p.ruta.replace('word/', 'word/_rels/') + '.rels', `${CABECERA}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`
+          + p.imagenes.map(([x, n]) => `<Relationship Id="rIdImg${n}" Type="${REL}/image" Target="media/${x.nombre}"/>`).join('') + '</Relationships>');
+      }
+    }
     for (const x of medios) zip.file(`word/media/${x.nombre}`, x.bytes);
     zip.file('docProps/core.xml', core);
     return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
