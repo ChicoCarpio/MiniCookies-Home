@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Lector de libros de Excel 97-2003 (.xls) del motor propio de Excel (etapa 9). Un .xls es un contenedor CFB ("Compound File", el de Office antiguo)
-// con un flujo "Workbook" de registros BIFF8 ([MS-CFB], [MS-XLS]); también se leen los de Excel 5/95 (BIFF5, flujo "Book"). Requiere xlsx-modelo.js
-// (errores) y xlsx-estilos.js (formatos integrados); no depende del navegador.
+// con un flujo "Workbook" de registros BIFF8 ([MS-CFB], [MS-XLS]); también se leen los de Excel 5/95 (BIFF5, flujo "Book"). Requiere cfb-propio.js
+// (el contenedor), xlsx-modelo.js (errores) y xlsx-estilos.js (formatos integrados); no depende del navegador.
 //
 //   const libro = XlsLector.leer(bytes);
 //   libro = { hojas: [{ nombre, filas: [[valor…]…], anchos: [caracteres…], combinadas: ['A1:B2'…], altosFila }], fecha1904 }   (valor: ver OdsLector)
@@ -17,75 +17,9 @@
   const danado = (detalle) => new LibroXlsx.ErrorXlsx('danado', detalle);
   const u16 = (b, p) => b[p] | (b[p + 1] << 8);
   const u32 = (b, p) => (b[p] | (b[p + 1] << 8) | (b[p + 2] << 16) | (b[p + 3] << 24)) >>> 0;
-  const FIN = 0xFFFFFFFE, LIBRE = 0xFFFFFFFF;
 
-  // ---- contenedor CFB -----------------------------------------------------------------------------------------------
-  function leerCfb(b) {
-    if (b.length < 512) throw danado('contenedor muy corto');
-    const desp = u16(b, 0x1E), despMini = u16(b, 0x20);
-    if (desp < 7 || desp > 16 || despMini > desp) throw danado('tamaño de sector');
-    const tam = 1 << desp, tamMini = 1 << despMini;
-    const nSect = Math.floor((b.length - 512) / tam) + 1;
-    const sector = (id) => {
-      const ini = (id + 1) * tam;
-      if (id >= nSect + 1 || ini >= b.length) throw danado('sector fuera del archivo');
-      return b.subarray(ini, Math.min(ini + tam, b.length));
-    };
-    // tabla de asignación (FAT): sus sectores los dice el encabezado y, si son más de 109, la cadena DIFAT. No puede haber más sectores de FAT que
-    // sectores en el archivo: una DIFAT hostil que repite el mismo id armaba una FAT de gigas con un archivo de 10 MB.
-    const idsFat = [];
-    for (let k = 0; k < 109; k++) { const id = u32(b, 0x4C + k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
-    let dif = u32(b, 0x44), vueltas = 0;
-    while (dif < 0xFFFFFFFA && vueltas++ < nSect && idsFat.length <= nSect) {
-      const s = sector(dif);
-      for (let k = 0; k < tam / 4 - 1; k++) { const id = u32(s, k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
-      dif = u32(s, tam - 4);
-    }
-    if (idsFat.length > nSect) throw danado('FAT más grande que el archivo');
-    const fat = new Uint32Array(idsFat.length * (tam / 4));
-    idsFat.forEach((id, k) => { const s = sector(id); for (let j = 0; j < tam / 4; j++) fat[k * (tam / 4) + j] = u32(s, j * 4); });
-    // una cadena no pasa por más sectores que los que tiene el archivo (con un ciclo, la tabla entera: un flujo de cientos de megas)
-    const cadena = (inicio, tabla, max) => {
-      const ids = [];
-      let id = inicio;
-      while (id < 0xFFFFFFFA) {
-        if (ids.length >= max || id >= tabla.length) throw danado('cadena de sectores');
-        ids.push(id); id = tabla[id];
-      }
-      return ids;
-    };
-    const leerCadena = (inicio, tamano) => {
-      const ids = cadena(inicio, fat, nSect), r = new Uint8Array(ids.length * tam);
-      ids.forEach((id, k) => r.set(sector(id), k * tam));
-      return tamano === undefined ? r : r.subarray(0, tamano);
-    };
-    // directorio
-    const dir = leerCadena(u32(b, 0x30));
-    const entradas = [];
-    for (let p = 0; p + 128 <= dir.length; p += 128) {
-      const nc = u16(dir, p + 64);
-      if (!dir[p + 66]) continue;
-      entradas.push({ nombre: new TextDecoder('utf-16le').decode(dir.subarray(p, p + Math.max(0, nc - 2))), tipo: dir[p + 66], inicio: u32(dir, p + 116), tam: u32(dir, p + 120) });
-    }
-    const raiz = entradas.find((e) => e.tipo === 5);
-    const corte = u32(b, 0x38);
-    let miniFat = null, miniFlujo = null;
-    const flujo = (e) => {
-      if (e.tam < corte && raiz) {
-        if (!miniFat) {
-          const bytes = leerCadena(u32(b, 0x3C));
-          miniFat = new Uint32Array(bytes.length / 4);
-          for (let k = 0; k < miniFat.length; k++) miniFat[k] = u32(bytes, k * 4);
-          miniFlujo = leerCadena(raiz.inicio, raiz.tam);
-        }
-        const ids = cadena(e.inicio, miniFat, Math.ceil(miniFlujo.length / tamMini)), r = new Uint8Array(ids.length * tamMini);
-        ids.forEach((id, k) => { const ini = id * tamMini; if (ini + tamMini > miniFlujo.length + tamMini) throw danado('minisector'); r.set(miniFlujo.subarray(ini, ini + tamMini), k * tamMini); });
-        return r.subarray(0, e.tam);
-      }
-      return leerCadena(e.inicio, e.tam);
-    };
-    return { entradas, flujo };
-  }
+  // ---- contenedor CFB (cfb-propio.js, compartido con los lectores de .doc y .ppt) ----------------------------------------
+  const leerCfb = (b) => CfbPropio.leer(b, { danado });
 
   // ---- registros BIFF -----------------------------------------------------------------------------------------------
   // Un registro lleva hasta 8224 bytes; si hay más, siguen registros CONTINUE (0x3C). Devuelve { id, d (datos juntos), partes (cada pedazo) }.
