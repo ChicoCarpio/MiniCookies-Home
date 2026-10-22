@@ -49,7 +49,8 @@
       idiomas = n ? (n.languages && n.languages.length ? n.languages : [n.language]) : [];
     }
     const primero = [].concat(idiomas).filter(Boolean).map(String)[0] || '';
-    return { lang: /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(primero) ? primero : '', textos: /^es(-|$)/i.test(primero) ? TEXTOS.es : TEXTOS.en };
+    // Más de 85 caracteres en lang y PowerPoint no abre el archivo (medido: 84 abre, 86 no).
+    return { lang: primero.length <= 85 && /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(primero) ? primero : '', textos: /^es(-|$)/i.test(primero) ? TEXTOS.es : TEXTOS.en };
   }
 
   // ---------- Partes fijas ----------
@@ -122,15 +123,17 @@
   // ---------- Texto de las diapositivas ----------
 
   const tamanoNivel = (n) => TAMANO_NIVEL[Math.min(8, Math.max(0, n))];
+  // 0..8 entero; lo que no es un número (texto, NaN) es 0. Sin esto el estimador daba NaN y siempre la escala mínima.
+  const nivelDe = (p) => Math.min(8, Math.max(0, Math.round(Number(p.nivel) || 0)));
 
   // Estima la altura (pt) del texto del cuadro y devuelve el ajuste que PowerPoint guardaría (fontScale y lnSpcReduction).
   function ajusteAutomatico(parrafos, caja) {
     const ancho = caja.w / 12700 - 14.4, alto = caja.h / 12700 - 7.2; // pt, sin los márgenes internos
     const altura = (escala, reduccion) => parrafos.reduce((suma, p) => {
-      const nivel = Math.min(8, Math.max(0, p.nivel || 0));
+      const nivel = nivelDe(p);
       const sangria = (228600 + 457200 * nivel) / 12700;
       const sz = tamanoNivel(nivel) * escala;
-      const texto = (p.hijos || []).map((r) => (r.texto == null ? '' : String(r.texto))).join('');
+      const texto = (p.hijos || []).map((r) => limpiar(r.texto)).join('').replace(/\r\n?/g, '\n');
       const lineasDeTexto = texto.split('\n').reduce((n, linea) => n + Math.max(1, Math.ceil((linea.length * sz * 0.52) / Math.max(sz, ancho - sangria))), 0);
       return suma + lineasDeTexto * sz * 1.2 * (0.9 - reduccion) + ANTES_NIVEL[nivel] * escala;
     }, 0);
@@ -149,7 +152,7 @@
   }
 
   function parrafo(p, lang) {
-    const nivel = Math.min(8, Math.max(0, Math.round(Number(p.nivel) || 0)));
+    const nivel = nivelDe(p);
     let ppr;
     // La sangría de los números es la que pone PowerPoint (514350 EMU): con la de las viñetas el número queda pegado al texto.
     if (p.lista === 'numerada') ppr = `<a:pPr marL="${514350 + 457200 * nivel}" indent="-514350"${nivel ? ` lvl="${nivel}"` : ''}><a:buFont typeface="+mj-lt"/><a:buAutoNum type="arabicPeriod"/></a:pPr>`;
