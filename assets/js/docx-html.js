@@ -19,8 +19,7 @@ function leerFormatoDeAncestros(nodo, raiz) {
   return formato;
 }
 
-// El escritor acepta la imagen en base64 tal cual: alcanza con separar el tipo
-// de imagen y el contenido del data: URI.
+// Separa el tipo de imagen y el contenido (base64) del data: URI.
 function decodificarDataUriImagen(src) {
   const coincidencia = /^data:image\/(png|jpe?g|gif|bmp);base64,(.+)$/i.exec(src || '');
   if (!coincidencia) return null;
@@ -44,6 +43,8 @@ async function crearImageRunDesdeImg(imgEl) {
   const src = imgEl.getAttribute('src') || '';
   const decodificado = decodificarDataUriImagen(src);
   if (!decodificado) return null; // src externo o formato no soportado (ej. SVG) — se omite sin romper el resto
+  let bytes;
+  try { bytes = Uint8Array.from(atob(decodificado.base64), (c) => c.charCodeAt(0)); } catch (e) { return null; } // base64 roto: se omite la imagen, no todo el documento
 
   const medidas = await medirImagen(src);
   let ancho = medidas.width;
@@ -53,16 +54,19 @@ async function crearImageRunDesdeImg(imgEl) {
     ancho = ANCHO_MAXIMO_IMAGEN_DOCX;
   }
 
-  return { imagen: { datos: decodificado.base64, tipo: decodificado.tipo, ancho, alto } };
+  return { imagen: { datos: bytes, tipo: decodificado.tipo, ancho, alto } };
 }
 
-// El escritor entiende "\n" como salto de línea y "\t" como tabulación; en HTML el espacio en blanco
-// se colapsa (el texto de un archivo HTML trae saltos de línea de sangría). Solo dentro de <pre> se conserva.
-function textoComoHtml(nodo, raiz) {
+// El escritor entiende "\n" como salto de línea y "\t" como tabulación. El salto de línea de un archivo HTML
+// (y el sangrado que lo sigue) es solo formato del archivo: se vuelve un espacio, y al principio o al final
+// de un renglón no se ve. Los espacios y tabulaciones sin salto se conservan: los trae el texto de un Word
+// leído con docx-lector (espacios seguidos, tabulaciones) o de un .txt (sangría). Dentro de <pre>, todo tal cual.
+const SALTO_HTML = /[ \t]*[\r\n\f][ \t\r\n\f]*/g;
+function dentroDePre(nodo, raiz) {
   for (let actual = nodo.parentElement; actual && actual !== raiz; actual = actual.parentElement) {
-    if (actual.tagName === 'PRE') return nodo.textContent;
+    if (actual.tagName === 'PRE') return true;
   }
-  return raiz.tagName === 'PRE' ? nodo.textContent : nodo.textContent.replace(/[ \t\r\n\f]+/g, ' '); // sin tocar los espacios duros (U+00A0)
+  return raiz.tagName === 'PRE';
 }
 
 // omitirListas: en un <li>, las sublistas (<ul>/<ol> anidadas) se
@@ -70,16 +74,23 @@ function textoComoHtml(nodo, raiz) {
 // texto quedaba pegado al del ítem padre.
 async function extraerRuns(elementoBloque, omitirListas, nodos) {
   const runs = [];
+  const originales = new Map(); // run de texto fuera de <pre> → su texto antes de colapsar los saltos
+  const saltos = new Set(); // runs de un <br>
   async function recorrer(nodo) {
     if (nodo.nodeType === Node.TEXT_NODE) {
       if (nodo.textContent === '') return;
       const formato = leerFormatoDeAncestros(nodo, elementoBloque);
-      runs.push({ texto: textoComoHtml(nodo, elementoBloque), ...formato });
+      const pre = dentroDePre(nodo, elementoBloque);
+      const run = { texto: pre ? nodo.textContent : nodo.textContent.replace(SALTO_HTML, ' '), ...formato };
+      if (!pre) originales.set(run, nodo.textContent);
+      runs.push(run);
       return;
     }
     if (nodo.nodeType === Node.ELEMENT_NODE) {
       if (nodo.tagName === 'BR') {
-        runs.push({ texto: '\n' });
+        const run = { texto: '\n' };
+        saltos.add(run);
+        runs.push(run);
         return;
       }
       if (nodo.tagName === 'IMG') {
@@ -95,6 +106,20 @@ async function extraerRuns(elementoBloque, omitirListas, nodos) {
   }
   for (const hijo of nodos || elementoBloque.childNodes) {
     await recorrer(hijo);
+  }
+  // Como se ve el HTML: el salto de línea del archivo no se ve al principio de un renglón ni al final del bloque,
+  // y un <br> final no agrega renglón (el <div><br></div> de una línea vacía del editor daba dos).
+  if (saltos.has(runs[runs.length - 1])) runs.pop();
+  let inicioDeRenglon = true;
+  for (const run of runs) {
+    if (saltos.has(run)) { inicioDeRenglon = true; continue; }
+    if (!inicioDeRenglon) continue;
+    if (originales.has(run) && /^[ \t]*[\r\n\f]/.test(originales.get(run))) run.texto = run.texto.slice(1);
+    if (!originales.has(run) || run.texto) inicioDeRenglon = false;
+  }
+  for (let i = runs.length - 1; i >= 0 && originales.has(runs[i]); i--) {
+    if (/[\r\n\f][ \t]*$/.test(originales.get(runs[i])) && runs[i].texto.endsWith(' ')) runs[i].texto = runs[i].texto.slice(0, -1);
+    if (runs[i].texto) break;
   }
   if (runs.length === 0) runs.push({ texto: '' });
   return runs;
@@ -130,7 +155,7 @@ async function convertirListaAParrafos(listaEl, numerada, nivel) {
 
 async function convertirTablaADocx(tablaEl) {
   const filas = [];
-  for (const filaEl of [...tablaEl.querySelectorAll('tr')]) {
+  for (const filaEl of [...tablaEl.rows]) { // solo las filas de esta tabla: querySelectorAll('tr') repetía las de una tabla anidada
     const celdas = [];
     for (const celdaEl of [...filaEl.children]) {
       celdas.push({ hijos: [{ tipo: 'parrafo', hijos: await extraerRuns(celdaEl) }] });
