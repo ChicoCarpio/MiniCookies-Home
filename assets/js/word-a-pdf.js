@@ -2,30 +2,23 @@
 // Word (.docx) → PDF, compartido por "Word ↔ PDF" y "Unir PDF".
 //
 // Dos pasos, porque Word → PDF muestra el documento antes de descargarlo:
-//  - aHtml(archivo): docx-preview dibuja el documento con su diseño (páginas,
-//    tamaños, posiciones). Su CSS es de la propia librería; el contenido pasa
+//  - aHtml(archivo): el maquetador propio (docx-maquetador.js) arma el documento con
+//    su diseño (hojas, márgenes, encabezados, tablas, dibujos). El contenido pasa
 //    por el mismo sanitizador que el resto del sitio.
 //  - aPdf(documento): se vuelve a dibujar fuera de pantalla y html-a-pdf.js
 //    escribe el PDF, sin imprimir.
 //
-// Requiere: ZipPropio, docx-preview (como window.docxPreview: su nombre global,
-// "docx", choca con la librería docx), emf.js + imagenes-office.js,
+// Requiere: ZipPropio, XmlLigero, DocxBase, DocxEstilos, PptxTexto (las fuentes con
+// los anchos de Office), DocxMaquetador, emf.js + imagenes-office.js,
 // seguridad-html.js, pdf-lib y html-a-pdf.js.
 // Uso: const bytes = await WordAPdf.aPdf(await WordAPdf.aHtml(archivo));
 
 (function () {
   async function aHtml(archivo) {
-    const cuerpo = document.createElement('div');
-    const estilos = document.createElement('div');
-    // Las tablas pegadas de Excel (EMF) pasan antes a PNG: docx-preview no las dibuja.
+    // Las tablas pegadas de Excel (EMF) pasan antes a PNG: el navegador no las dibuja.
     const docx = await ImagenesOffice.docxConImagenesComunes(await archivo.arrayBuffer());
-    // useBase64URL: por defecto las imágenes salen como blob:, que el
-    // sanitizador descarta (y dejaba los recuadros vacíos); como data:image pasan.
-    await docxPreview.renderAsync(docx, cuerpo, estilos, { inWrapper: true, useBase64URL: true });
-    return {
-      nombre: archivo.name.replace(/\.docx$/i, ''),
-      html: `<section>${estilos.innerHTML}${sanitizarHtml(cuerpo.innerHTML)}</section>`,
-    };
+    const { html } = await DocxMaquetador.aHtml(docx);
+    return { nombre: archivo.name.replace(/\.docx$/i, ''), html: sanitizarHtml(html) };
   }
 
   // alAvanzar(hoja, total), como en HtmlAPdf.convertir.
@@ -35,7 +28,7 @@
       lienzo.innerHTML = documento.html;
       await Promise.all([...lienzo.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
       await document.fonts.ready;
-      // docx-preview arma un <section class="docx"> por sección del Word, con el
+      // El maquetador arma un <section class="docx"> por hoja de Word, con el
       // tamaño de hoja como ancho/alto mínimo y los márgenes como relleno.
       const paginas = [...lienzo.querySelectorAll('section.docx')].map((seccion) => {
         const e = getComputedStyle(seccion);
@@ -45,6 +38,12 @@
           altoPx: parseFloat(e.minHeight) || seccion.getBoundingClientRect().height,
           margenArribaPx: parseFloat(e.paddingTop),
           margenAbajoPx: parseFloat(e.paddingBottom),
+          // Encabezados y pies repetidos en cada hoja, y numeración de páginas.
+          medirContenido: true,
+          repetidos: !!seccion.querySelector('[data-repetido]'),
+          paginaPortada: seccion.dataset.titulopg === '1',
+          parImpar: seccion.dataset.parimpar === '1',
+          numeroInicial: seccion.dataset.pginicio !== undefined ? parseInt(seccion.dataset.pginicio, 10) : undefined,
         };
       });
       return await HtmlAPdf.convertir(paginas, { titulo: documento.nombre, alAvanzar });

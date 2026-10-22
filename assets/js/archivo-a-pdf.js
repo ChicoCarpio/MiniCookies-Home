@@ -65,16 +65,10 @@
     word: {
       extensiones: ['docx'],
       async preparar() {
-        await cargarEnOrden([JSZIP(), propio('seguridad-html.js'), propio('emf.js'), propio('imagenes-office.js'), propio('html-a-pdf.js')]);
-        if (!window.docxPreview) {
-          // docx-preview se publica como window.docx: se guarda aparte como
-          // docxPreview y window.docx se deja como estaba.
-          const anterior = window.docx;
-          window.JSZip = window.ZipPropio; // docx-preview pide un JSZip global
-          await cargarScript(rutaVendor('docx-preview/0.4.1/docx-preview.min.js'));
-          window.docxPreview = window.docx;
-          window.docx = anterior;
-        }
+        await cargarEnOrden([
+          JSZIP(), propio('xml-ligero.js'), propio('seguridad-html.js'), propio('emf.js'), propio('imagenes-office.js'), propio('html-a-pdf.js'),
+          propio('docx-base.js'), propio('docx-estilos.js'), propio('pptx-texto.js'), propio('docx-maquetador.js'),
+        ]);
         await cargarScript(propio('word-a-pdf.js'));
       },
       // Dibujar el Word es un solo paso sin avance: la mitad de la barra.
