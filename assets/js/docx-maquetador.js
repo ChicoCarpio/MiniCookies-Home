@@ -258,10 +258,10 @@
   const simboloEscribible = (s) => (/^[○◦□▫o]$/.test(s) ? 'o' : '•');
 
   // Un párrafo de Word → uno o varios <p> (un salto de página parte el párrafo en dos).
-  async function parrafo(d, p) {
+  async function parrafo(d, p, medio) {
     const m = d.m;
     const pDirecto = m.leerPPr(hijo(p, 'pPr'));
-    const est = m.estilos.parrafo(pDirecto.estilo);
+    const est = m.estilos.parrafo(pDirecto.estilo, medio);
     const numeracionPedida = pDirecto.numeracion || est.p.numeracion;
     let nivel = null;
     let etiqueta = null;
@@ -330,7 +330,7 @@
       'text-align': ALINEACION[efectivo.jc] || 'left',
       'text-align-last': efectivo.jc === 'distribute' ? 'justify' : undefined,
       'white-space': 'pre-wrap', 'overflow-wrap': 'break-word',
-      'font-family': famBase, 'font-size': pt(tamMax), 'line-height': lineHeight,
+      'font-family': famBase, 'font-size': pt(tamMax), 'line-height': lineHeight || 'normal',
       'padding-top': bordes.top ? pt(espacioLado('top')) : undefined, 'padding-bottom': bordes.bottom ? pt(espacioLado('bottom')) : undefined,
       'padding-left': bordes.left ? pt(espacioLado('left')) : undefined, 'padding-right': bordes.right ? pt(espacioLado('right')) : undefined,
       'border-top': bordes.top && bordes.top.texto, 'border-bottom': bordes.bottom && bordes.bottom.texto,
@@ -356,26 +356,73 @@
     return { html, sectPr };
   }
 
-  // ───────── Tablas (versión mínima; la fase 3 la completa) ─────────
-  async function tabla(d, t) {
+  // ───────── Tablas ─────────
+  const sinRelleno = (sh) => (sh && sh.relleno && sh.relleno !== 'auto' ? '#' + sh.relleno : undefined);
+
+  // Ancho de una tabla o celda en pt: dxa = veinteavos de punto; pct = 50avos de por ciento (o "100%").
+  function anchoPt(w, disponible) {
+    if (!w || w.valor === undefined || Number.isNaN(w.valor)) return undefined;
+    if (w.tipo === 'dxa') return w.valor / 20;
+    if (w.tipo === 'pct') return disponible * (w.porcentaje !== undefined ? w.porcentaje : w.valor / 50) / 100;
+    return undefined;
+  }
+  function leerAncho(e) { // como DocxEstilos, pero deja pasar "100%"
+    if (!e || e.a.w === undefined) return undefined;
+    const crudo = String(e.a.w);
+    return { tipo: e.a.type || 'dxa', valor: parseFloat(crudo), porcentaje: /%$/.test(crudo) ? parseFloat(crudo) : undefined };
+  }
+
+  // Formatos condicionales del estilo de tabla que valen para la celda (de menor a mayor prioridad).
+  function condicionalesDe(estiloT, aspecto, tblPr, i, j, nFilas, nCols) {
+    const sal = [];
+    const c = estiloT.condicionales || {};
+    const a = aspecto || { primeraFila: true, primeraColumna: true };
+    const bandaF = tblPr.bandasFila || 1, bandaC = tblPr.bandasColumna || 1;
+    const esPrimeraFila = a.primeraFila && i === 0, esUltimaFila = a.ultimaFila && i === nFilas - 1;
+    const esPrimeraCol = a.primeraColumna && j === 0, esUltimaCol = a.ultimaColumna && j === nCols - 1;
+    if (c.wholeTable) sal.push(c.wholeTable);
+    if (!a.sinBandasV && !esPrimeraCol && !esUltimaCol) {
+      const k = Math.floor((j - (a.primeraColumna ? 1 : 0)) / bandaC);
+      const banda = k % 2 === 0 ? c.band1Vert : c.band2Vert;
+      if (banda) sal.push(banda);
+    }
+    if (!a.sinBandasH && !esPrimeraFila && !esUltimaFila) {
+      const k = Math.floor((i - (a.primeraFila ? 1 : 0)) / bandaF);
+      const banda = k % 2 === 0 ? c.band1Horz : c.band2Horz;
+      if (banda) sal.push(banda);
+    }
+    if (esPrimeraCol && c.firstCol) sal.push(c.firstCol);
+    if (esUltimaCol && c.lastCol) sal.push(c.lastCol);
+    if (esPrimeraFila && c.firstRow) sal.push(c.firstRow);
+    if (esUltimaFila && c.lastRow) sal.push(c.lastRow);
+    if (esPrimeraFila && esPrimeraCol && c.nwCell) sal.push(c.nwCell);
+    if (esPrimeraFila && esUltimaCol && c.neCell) sal.push(c.neCell);
+    if (esUltimaFila && esPrimeraCol && c.swCell) sal.push(c.swCell);
+    if (esUltimaFila && esUltimaCol && c.seCell) sal.push(c.seCell);
+    return sal;
+  }
+
+  async function tabla(d, t, disponible) {
     const m = d.m;
-    const tblPr = m.leerTblPr(hijo(t, 'tblPr'));
+    const tblDirecto = m.leerTblPr(hijo(t, 'tblPr'));
+    const wDirecto = leerAncho(hijo(hijo(t, 'tblPr'), 'tblW'));
+    const estiloT = m.estilos.tabla(tblDirecto.estilo);
+    const tbl = m.mezclar(estiloT.tbl, tblDirecto);
     const grid = lista(hijo(t, 'tblGrid'), 'gridCol').map((c) => parseFloat(c.a.w) / 20);
     const filas = lista(t, 'tr');
-    const bordesT = tblPr.bordes || {};
-    const margenesT = tblPr.margenes || {};
-    const celdasFila = filas.map((f) => lista(f, 'tc'));
     // Posición de columna de cada celda y alto (rowspan) de las combinadas verticalmente.
-    const infos = celdasFila.map((celdas) => {
+    const infos = filas.map((f) => {
       let col = 0;
-      return celdas.map((c) => {
+      return lista(f, 'tc').map((c) => {
         const pr = m.leerTcPr(hijo(c, 'tcPr'));
         const span = pr.columnas || 1;
-        const info = { c, pr, col, span };
+        const info = { c, pr, col, span, w: leerAncho(hijo(hijo(c, 'tcPr'), 'tcW')) };
         col += span;
         return info;
       });
     });
+    const nCols = Math.max(grid.length, ...infos.map((f) => f.reduce((a, x) => a + x.span, 0)), 1);
+    while (grid.length < nCols) grid.push(0);
     infos.forEach((fila, i) => fila.forEach((info) => {
       info.filas = 1;
       if (info.pr.combinadaVertical === 'restart') {
@@ -385,22 +432,63 @@
         }
       }
     }));
-    let html = `<table style="${css({ 'border-collapse': 'collapse', 'table-layout': 'fixed', width: pt(grid.reduce((a, b) => a + b, 0)), margin: '0' })}"><colgroup>${grid.map((g) => `<col style="width:${pt(g)}">`).join('')}</colgroup>`;
-    for (const fila of infos) {
-      html += '<tr>';
-      for (const info of fila) {
+
+    // Anchos: la tabla ocupa lo que dice tblW (si lo dice) y las columnas se reparten en proporción a la rejilla.
+    const wTabla = anchoPt(wDirecto || (tbl.ancho && { tipo: tbl.ancho.tipo, valor: tbl.ancho.valor }), disponible);
+    let cols = grid.slice();
+    // Rejilla sin anchos reales (las tablas que la escriben en 100): se usan los de las celdas de la primera fila.
+    const sumaGrid = cols.reduce((a, b) => a + b, 0);
+    if (infos[0]) {
+      const preferidas = new Array(nCols).fill(0);
+      let completas = true;
+      for (const info of infos[0]) {
+        const w = anchoPt(info.w, wTabla || disponible);
+        if (w === undefined) { completas = false; continue; }
+        for (let k = 0; k < info.span; k++) preferidas[info.col + k] = w / info.span;
+      }
+      if (completas && preferidas.every((x) => x > 0) && (!wTabla || sumaGrid < 1 || Math.abs(sumaGrid - preferidas.reduce((a, b) => a + b, 0)) > 1)) cols = preferidas;
+    }
+    let total = cols.reduce((a, b) => a + b, 0);
+    if (total <= 0) { cols = new Array(nCols).fill((wTabla || disponible) / nCols); total = cols.reduce((a, b) => a + b, 0); }
+    if (wTabla !== undefined && Math.abs(wTabla - total) > 0.5) { const f = wTabla / total; cols = cols.map((x) => x * f); total = wTabla; }
+    else if (wTabla === undefined && total > disponible && disponible > 0) { const f = disponible / total; cols = cols.map((x) => x * f); total = disponible; }
+
+    const margenesT = { top: 0, bottom: 0, left: 5.4, right: 5.4, ...(tbl.margenes || {}) };
+    const bT = tbl.bordes || {};
+    // Antes de Word 2013 (modo de compatibilidad < 15) el borde de la tabla sale al margen izquierdo de la celda
+    // hacia afuera, para que el texto quede alineado con el del párrafo.
+    const sangria = (tbl.sangria && tbl.sangria.tipo !== 'pct' ? (tbl.sangria.valor || 0) / 20 : 0) - (m.ajustes.modoCompat < 15 ? margenesT.left : 0);
+    const alineacion = tbl.jc === 'center' ? 'center' : tbl.jc === 'right' || tbl.jc === 'end' ? 'flex-end' : 'flex-start';
+    let html = `<table style="${css({
+      // Las hojas de estilo de la página ponen cosas a table/td (interlineado, relleno, bordes): aquí se fija todo.
+      'border-collapse': 'collapse', 'border-spacing': '0', 'table-layout': 'fixed', width: pt(total), margin: '0', 'align-self': alineacion, 'line-height': 'normal', 'text-align': 'left', background: 'none', border: 'none',
+      'margin-left': alineacion === 'flex-start' && sangria ? pt(sangria) : undefined,
+    })}"><colgroup>${cols.map((g) => `<col style="width:${pt(g)}">`).join('')}</colgroup>`;
+    for (let i = 0; i < infos.length; i++) {
+      const trPr = m.leerTrPr(hijo(filas[i], 'trPr'));
+      html += `<tr style="${css({ height: trPr.alto ? pt(trPr.alto) : undefined, 'break-inside': trPr.noPartir ? 'avoid' : undefined, background: 'none' })}">`;
+      for (const info of infos[i]) {
         if (info.omitir) continue;
-        const bc = info.pr.bordes || {};
-        const lado = (nombre, interior) => cssBorde(d, bc[nombre] || bordesT[nombre] || bordesT[interior]);
-        const bt = lado('top', 'insideH'), bb = lado('bottom', 'insideH'), bl = lado('left', 'insideV'), br = lado('right', 'insideV');
-        const relleno = info.pr.sombreado && info.pr.sombreado.relleno && info.pr.sombreado.relleno !== 'auto' ? '#' + info.pr.sombreado.relleno : undefined;
-        const mc = { ...{ top: 0, bottom: 0, left: 5.4, right: 5.4 }, ...margenesT, ...(info.pr.margenes || {}) };
-        const dentro = await bloques(d, info.c);
+        const conds = condicionalesDe(estiloT, tbl.aspecto, tbl, i, info.col, infos.length, nCols);
+        let tc = {}, medioP = {}, medioR = {};
+        for (const c of conds) { tc = m.mezclar(tc, c.tc); medioP = m.mezclar(medioP, c.p); medioR = m.mezclar(medioR, c.r); }
+        tc = m.mezclar(m.mezclar(estiloT.tc, tc), info.pr);
+        const medio = { p: m.mezclar(estiloT.p, medioP), r: m.mezclar(estiloT.r, medioR) };
+        const ultimaCol = info.col + info.span >= nCols, ultimaFila = i + info.filas >= infos.length;
+        const bc = tc.bordes || {};
+        // Borde de cada lado: el de la celda; si no, el de la tabla (en el interior son insideH / insideV).
+        const lado = (nombre, interior, exterior) => cssBorde(d, bc[nombre] || (exterior ? bT[nombre] : bT[interior]));
+        const bt = lado('top', 'insideH', i === 0), bb = lado('bottom', 'insideH', ultimaFila);
+        const bl = lado('left', 'insideV', info.col === 0), br = lado('right', 'insideV', ultimaCol);
+        const mc = { ...margenesT, ...(tc.margenes || {}) };
+        const anchoCelda = cols.slice(info.col, info.col + info.span).reduce((a, b) => a + b, 0);
+        const dentro = await bloques(d, info.c, Math.max(anchoCelda - mc.left - mc.right, 20), medio);
         html += `<td${info.span > 1 ? ` colspan="${info.span}"` : ''}${info.filas > 1 ? ` rowspan="${info.filas}"` : ''} style="${css({
-          'vertical-align': info.pr.alineacionVertical === 'center' ? 'middle' : info.pr.alineacionVertical === 'bottom' ? 'bottom' : 'top',
+          'vertical-align': tc.alineacionVertical === 'center' ? 'middle' : tc.alineacionVertical === 'bottom' ? 'bottom' : 'top',
           padding: `${pt(mc.top)} ${pt(mc.right)} ${pt(mc.bottom)} ${pt(mc.left)}`,
           'border-top': bt && bt.texto, 'border-bottom': bb && bb.texto, 'border-left': bl && bl.texto, 'border-right': br && br.texto,
-          'background-color': relleno, 'overflow-wrap': 'break-word',
+          'background-color': sinRelleno(tc.sombreado) || sinRelleno(tbl.sombreado), 'overflow-wrap': 'break-word', 'line-height': 'normal', 'text-align': 'left',
+          'font-weight': 'normal', 'font-size': '10pt', color: 'inherit',
         })}"><div style="display:flex;flex-direction:column">${dentro.html}</div></td>`;
       }
       html += '</tr>';
@@ -409,13 +497,13 @@
   }
 
   // ───────── Bloques y secciones ─────────
-  // Bloques de una celda (o de cualquier contenedor sin secciones).
-  async function bloques(d, contenedor) {
+  // Bloques de una celda (o de cualquier contenedor sin secciones). `medio`: formato del estilo de tabla.
+  async function bloques(d, contenedor, disponible, medio) {
     let html = '';
     for (const e of contenedor.h) {
-      if (e.n === 'p') html += (await parrafo(d, e)).html;
-      else if (e.n === 'tbl') html += await tabla(d, e);
-      else if (e.n === 'sdt') { const c = hijo(e, 'sdtContent'); if (c) html += (await bloques(d, c)).html; }
+      if (e.n === 'p') html += (await parrafo(d, e, medio)).html;
+      else if (e.n === 'tbl') html += await tabla(d, e, disponible);
+      else if (e.n === 'sdt') { const c = hijo(e, 'sdtContent'); if (c) html += (await bloques(d, c, disponible, medio)).html; }
     }
     return { html };
   }
@@ -519,23 +607,33 @@
 
   // Recorre el cuerpo y lo reparte en secciones: cada párrafo con sectPr cierra una; la última es la del cuerpo.
   async function bloquesCuerpo(d, cuerpo) {
+    const sectFinal = lista(cuerpo, 'sectPr').pop() || null;
+    // Primero se ve a qué sección pertenece cada bloque (para saber el ancho disponible de las tablas).
+    const seccionDe = new Map();
+    let pendientes = [];
+    for (const e of cuerpo.h) {
+      if (e.n === 'sectPr') continue;
+      pendientes.push(e);
+      const sp = e.n === 'p' ? hijo(hijo(e, 'pPr'), 'sectPr') : null;
+      if (sp) { for (const x of pendientes) seccionDe.set(x, sp); pendientes = []; }
+    }
+    for (const x of pendientes) seccionDe.set(x, sectFinal);
     const sal = [];
     let actual = '';
-    const procesar = async (contenedor) => {
-      for (const e of contenedor.h) {
-        if (e.n === 'p') {
-          const r = await parrafo(d, e);
-          actual += r.html;
-          if (r.sectPr) { sal.push({ html: actual, sectPr: r.sectPr }); actual = ''; }
-        } else if (e.n === 'tbl') actual += await tabla(d, e);
-        else if (e.n === 'sdt') { const c = hijo(e, 'sdtContent'); if (c) await procesar(c); }
-        else if (e.n === 'customXml' || e.n === 'ins') await procesar(e);
-      }
-    };
-    await procesar(cuerpo);
-    sal.push({ html: actual, sectPr: lista(cuerpo, 'sectPr').pop() || null });
+    for (const e of cuerpo.h) {
+      if (e.n === 'sectPr') continue;
+      const cfg = leerSeccion(d.m, seccionDe.get(e));
+      const disponible = cfg.ancho - cfg.izquierda - cfg.derecha;
+      if (e.n === 'p') {
+        const r = await parrafo(d, e);
+        actual += r.html;
+        if (r.sectPr) { sal.push({ html: actual, sectPr: r.sectPr }); actual = ''; }
+      } else if (e.n === 'tbl') actual += await tabla(d, e, disponible);
+      else if (e.n === 'sdt') { const c = hijo(e, 'sdtContent'); if (c) actual += (await bloques(d, c, disponible)).html; }
+    }
+    sal.push({ html: actual, sectPr: sectFinal });
     // Si el cuerpo termina con un párrafo que ya cerró su sección y no queda nada más, esa última sección vacía sobra.
-    if (sal.length > 1 && !sal[sal.length - 1].html && !lista(cuerpo, 'sectPr').length) sal.pop();
+    if (sal.length > 1 && !sal[sal.length - 1].html && !sectFinal) sal.pop();
     return sal;
   }
 })();

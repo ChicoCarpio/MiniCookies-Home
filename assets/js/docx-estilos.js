@@ -11,7 +11,7 @@
 // Uso:
 //   const paquete = await DocxBase.abrirPaquete(datos);
 //   const m = await DocxEstilos.cargar(paquete);
-//   const { p, r } = m.estilos.parrafo(idEstilo);      // propiedades efectivas del estilo (con docDefaults)
+//   const { p, r } = m.estilos.parrafo(idEstilo, medio?);  // propiedades efectivas del estilo (con docDefaults y, si hay, el formato intermedio de una tabla)
 //   const r2 = m.mezclar(r, m.leerRPr(nodoRPr));       // el formato directo gana
 //   m.color(r2.color) → '#rrggbb' | null (automático)   m.fuente(r2.fuentes) → 'Calibri'
 //   const num = m.numeracion.numerador(); num.siguiente(numId, ilvl) → { texto, nivel }
@@ -334,9 +334,10 @@
       nombre: (id) => (estilos.has(id) ? estilos.get(id).nombre : ''),
       siguiente: (id) => (estilos.has(id) ? estilos.get(id).siguiente : null),
       // Propiedades efectivas de un párrafo con ese estilo (sin id: el estilo por defecto), con docDefaults.
-      parrafo(id) {
+      // `medio`: formato intermedio { p, r } (el del estilo de tabla), entre los valores por defecto y el estilo.
+      parrafo(id, medio) {
         const e = resolver(id && estilos.has(id) ? id : porDefecto.paragraph);
-        return { p: mezclar(def.p, e.p), r: mezclar(def.r, e.r) };
+        return { p: mezclar(mezclar(def.p, medio && medio.p), e.p), r: mezclar(mezclar(def.r, medio && medio.r), e.r) };
       },
       // Solo lo que el estilo de carácter agrega sobre el texto.
       caracter(id) { return id && estilos.has(id) ? resolver(id).r : {}; },
