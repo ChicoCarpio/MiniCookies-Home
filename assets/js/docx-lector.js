@@ -24,7 +24,7 @@
 (function () {
   'use strict';
 
-  const { arbol, hijo, lista, activo, buscar, porTipo, abrirPaquete } = DocxBase;
+  const { arbol, hijo, lista, activo, buscar, porTipo, base64, hrefSeguro, abrirPaquete } = DocxBase;
 
   // ───────── HTML ─────────
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -56,16 +56,10 @@
     } else nodo.h.push(contenido);
   }
 
-  function base64(bytes) {
-    let s = '';
-    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-    return btoa(s);
-  }
   const TIPOS_IMAGEN = {
     png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp',
     tif: 'image/tiff', tiff: 'image/tiff', svg: 'image/svg+xml', emf: 'image/x-emf', wmf: 'image/x-wmf', webp: 'image/webp',
   };
-  const hrefSeguro = (h) => (/^\s*(javascript|vbscript|data):/i.test(h) ? '' : h);
 
   function leerEstilos(raiz) {
     const estilos = new Map();

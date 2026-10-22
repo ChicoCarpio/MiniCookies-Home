@@ -166,6 +166,9 @@
   // o en un salto forzado. Las piezas van ordenadas por y: un libro tiene
   // cientos de miles de palabras y recorrerlas todas por cada corte no termina.
   function calcularCortes(ordenadas, altoContenido, altoTotal, saltos) {
+    // Márgenes más altos que la hoja (un archivo armado a propósito) dejaban el alto en 0 o negativo y el
+    // bucle de abajo no avanzaba nunca: cada hoja tiene al menos 1 px de contenido.
+    if (!(altoContenido >= 1)) altoContenido = Math.max(altoTotal, 1);
     const altoMaximo = ordenadas.reduce((m, p) => Math.max(m, p.alto), 0);
     const forzados = [...new Set(saltos)].sort((a, b) => a - b);
     const cortes = [0];

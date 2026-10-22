@@ -18,31 +18,34 @@
 
 (function () {
   'use strict';
-  const { hijo, lista, abrirPaquete } = DocxBase;
+  const { hijo, lista, buscar, base64, hrefSeguro, abrirPaquete } = DocxBase;
   const PX_POR_PT = 96 / 72;
+  // Tablas de consulta sin prototipo: un valor del archivo como "constructor" o "__proto__" no encuentra nada.
+  const sinProto = (o) => Object.assign(Object.create(null), o);
 
-  const RESALTADOS = {
+  const RESALTADOS = sinProto({
     yellow: '#ffff00', green: '#00ff00', cyan: '#00ffff', magenta: '#ff00ff', blue: '#0000ff', red: '#ff0000', darkBlue: '#000080',
     darkCyan: '#008080', darkGreen: '#008000', darkMagenta: '#800080', darkRed: '#800000', darkYellow: '#808000', darkGray: '#808080',
     lightGray: '#c0c0c0', black: '#000000', white: '#ffffff',
-  };
-  const TIPOS_IMAGEN = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp', svg: 'image/svg+xml', webp: 'image/webp' };
+  });
+  const TIPOS_IMAGEN = sinProto({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp', svg: 'image/svg+xml', webp: 'image/webp' });
   // Qué parte del espacio de más de una línea pone Word por encima del texto (CSS pone la mitad). Medido contra Word:
   // interlineado exacto 0,8; "al menos" 1 (todo arriba); múltiplo (sencillo, 1,5, doble) 0 (todo abajo).
-  const PARTE_ARRIBA = { exact: 0.8, atLeast: 1, auto: 0 };
-  const GUIAS = { dot: '.', hyphen: '-', underscore: '_', heavy: '_', middleDot: '·' };
+  const PARTE_ARRIBA = sinProto({ exact: 0.8, atLeast: 1, auto: 0 });
+  const GUIAS = sinProto({ dot: '.', hyphen: '-', underscore: '_', heavy: '_', middleDot: '·' });
 
-  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // Todo lo que viene del XML y va a un atributo pasa por esc (también la comilla simple: data-tabs va entre '…').
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const n3 = (x) => String(Math.round(x * 1000) / 1000);
-  const pt = (x) => n3(x) + 'pt';
+  // Toda medida del CSS sale de aquí: sin NaN ni Infinity, y sin pasar del doble de la hoja más grande
+  // (un espacio antes de 10^9 twips serían miles de hojas en blanco; Word no deja más de 1584 pt).
+  const pt = (x) => n3(Number.isFinite(x) ? Math.min(Math.max(x, -2 * MAX_PT), 2 * MAX_PT) : 0) + 'pt';
   const css = (o) => Object.keys(o).filter((k) => o[k] !== undefined && o[k] !== null && o[k] !== '').map((k) => `${k}:${o[k]}`).join(';');
-  const hrefSeguro = (h) => (/^\s*(javascript|vbscript|data):/i.test(h || '') ? '' : h || '');
-
-  function base64(bytes) {
-    let s = '';
-    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-    return btoa(s);
-  }
+  // Un relleno (w:shd w:fill) va a style="…": solo un hexadecimal de 6 cifras; "auto" u otra cosa, sin relleno.
+  const rellenoCss = (sh) => (sh && /^[0-9a-fA-F]{6}$/.test(sh.relleno || '') ? '#' + sh.relleno.toLowerCase() : undefined);
+  // Tope de medidas que vienen del archivo: 22 pulgadas, lo más grande que Word deja poner a una hoja o un dibujo.
+  const MAX_PT = 1584;
+  const acotar = (x, min, max) => (Number.isFinite(x) ? Math.min(Math.max(x, min), max) : min);
 
   // ───────── Fuentes ─────────
   const razones = new Map();
@@ -62,7 +65,8 @@
   const SERIF = /cambria|georgia|garamond|palatino|bookman|century|constantia|baskerville|times|book antiqua|rockwell/i;
   const MONO = /consolas|courier|lucida console|mono|cascadia/i;
   function familiaCss(nombre) {
-    const n = nombre || 'Times New Roman';
+    // El nombre viene del archivo y va dentro de font-family:'…': sin comillas, barras ni ";" que cierren la cadena.
+    const n = String(nombre || '').replace(/[^\p{L}\p{M}\p{N} ._&+-]/gu, '').trim() || 'Times New Roman';
     const base = typeof PptxTexto !== 'undefined' && PptxTexto.familia ? PptxTexto.familia(n) : `"${n}"`;
     // Comillas simples: la familia va dentro de un atributo style="…".
     return (base.replace(/, "Segoe UI", sans-serif$/, '') + (MONO.test(n) ? ', monospace' : SERIF.test(n) ? ', serif' : ', "Segoe UI", sans-serif')).replace(/"/g, "'");
@@ -128,8 +132,7 @@
     if (r.u && r.u !== 'none') deco.push('underline');
     if (r.tachado || r.tachadoDoble) deco.push('line-through');
     const estiloU = /double/.test(r.u || '') ? 'double' : /dotted|dotDash/.test(r.u || '') ? 'dotted' : /dash/i.test(r.u || '') ? 'dashed' : /wave/.test(r.u || '') ? 'wavy' : undefined;
-    const fondo = r.resaltado && RESALTADOS[r.resaltado] ? RESALTADOS[r.resaltado]
-      : r.sombreado && r.sombreado.relleno && r.sombreado.relleno !== 'auto' ? '#' + r.sombreado.relleno : undefined;
+    const fondo = r.resaltado && RESALTADOS[r.resaltado] ? RESALTADOS[r.resaltado] : rellenoCss(r.sombreado);
     return css({
       'font-family': sinFuente ? undefined : familiaCss(nombreFuente),
       'font-size': pt(sup || sub ? tam * 0.65 : tam),
@@ -237,7 +240,7 @@
     const caja = inl || anc;
     const ext = caja && hijo(caja, 'extent');
     if (!ext) return null;
-    const ancho = emuPt(ext.a.cx), alto = emuPt(ext.a.cy);
+    const ancho = acotar(emuPt(ext.a.cx), 0, MAX_PT), alto = acotar(emuPt(ext.a.cy), 0, MAX_PT);
     const contenido = await contenidoDibujo(d, caja, ancho, alto, !!inl);
     if (!contenido) return null;
     if (inl) return { t: 'html', r, html: contenido };
@@ -248,14 +251,14 @@
   // La imagen o el cuadro de texto, sin posición.
   async function contenidoDibujo(d, caja, ancho, alto, enLinea) {
     const doc = hijo(caja, 'docPr');
-    const blip = buscarProf(caja, 'blip');
+    const blip = buscar(caja, 'blip');
     if (blip && blip.a.embed) {
       const src = await d.imagenDe(blip.a.embed);
       if (!src) return null;
       return `<img src="${esc(src)}" alt="${esc(doc ? doc.a.descr || '' : '')}" style="${css({ width: pt(ancho), height: pt(alto), display: enLinea ? 'inline-block' : 'block', 'max-width': 'none', 'vertical-align': enLinea ? 'baseline' : undefined })}">`;
     }
-    const wsp = buscarProf(caja, 'wsp');
-    const txbx = wsp && buscarProf(wsp, 'txbxContent');
+    const wsp = buscar(caja, 'wsp');
+    const txbx = wsp && buscar(wsp, 'txbxContent');
     if (txbx) {
       const sp = hijo(wsp, 'spPr');
       const bp = hijo(wsp, 'bodyPr');
@@ -288,8 +291,8 @@
     const dist = { t: emuPt(anc.a.distT), b: emuPt(anc.a.distB), l: emuPt(anc.a.distL), r: emuPt(anc.a.distR) };
     const detras = anc.a.behindDoc === '1' || anc.a.behindDoc === 'true';
     const { ancho: W, alto: H, arriba: mt, derecha: mr, abajo: mb, izquierda: ml } = cfg;
-    const refsH = { page: [0, W], margin: [ml, W - mr], column: [ml, W - mr], character: [ml, W - mr], leftMargin: [0, ml], rightMargin: [W - mr, W], insideMargin: [ml, W - mr], outsideMargin: [ml, W - mr] };
-    const refsV = { page: [0, H], margin: [mt, H - mb], topMargin: [0, mt], bottomMargin: [H - mb, H], insideMargin: [mt, H - mb], outsideMargin: [mt, H - mb] };
+    const refsH = sinProto({ page: [0, W], margin: [ml, W - mr], column: [ml, W - mr], character: [ml, W - mr], leftMargin: [0, ml], rightMargin: [W - mr, W], insideMargin: [ml, W - mr], outsideMargin: [ml, W - mr] });
+    const refsV = sinProto({ page: [0, H], margin: [mt, H - mb], topMargin: [0, mt], bottomMargin: [H - mb, H], insideMargin: [mt, H - mb], outsideMargin: [mt, H - mb] });
     const eje = (refs, desde, alin, desp, tam) => {
       const [a0, a1] = refs[desde] || refs.margin || refs.page;
       if (alin === 'right' || alin === 'bottom' || alin === 'outside') return a1 - tam;
@@ -320,17 +323,8 @@
     return `<div style="position:absolute;left:${pt(x)};${vertical};z-index:${detras ? -1 : 1};text-indent:0;line-height:0;white-space:normal">${contenido}</div>`;
   }
 
-  function buscarProf(e, nombre) {
-    for (const x of e.h) {
-      if (x.n === nombre) return x;
-      const r = buscarProf(x, nombre);
-      if (r) return r;
-    }
-    return null;
-  }
-
   // ───────── Párrafos ─────────
-  const ALINEACION = { left: 'left', start: 'left', center: 'center', right: 'right', end: 'right', both: 'justify', distribute: 'justify', justify: 'justify' };
+  const ALINEACION = sinProto({ left: 'left', start: 'left', center: 'center', right: 'right', end: 'right', both: 'justify', distribute: 'justify', justify: 'justify' });
 
   function cssBorde(d, b) {
     if (!b || !b.tipo || b.tipo === 'nil' || b.tipo === 'none') return null;
@@ -359,7 +353,7 @@
       if (it.enlace !== anclaEnlace) { cerrarEnlace(); if (it.enlace) { html += `<a href="${esc(it.enlace)}" style="color:inherit">`; anclaEnlace = it.enlace; } }
       if (it.t === 'texto') html += `<span style="${cssRun(d, it.r, esDefecto, bajar)}">${esc(it.s)}</span>`;
       else if (it.t === 'tab') html += `<span data-tab="1" style="${cssRun(d, it.r, false)};display:inline-block;white-space:pre">\t</span>`;
-      else if (it.t === 'br') html += `<br${it.limpiar ? ` style="clear:${it.limpiar === 'all' ? 'both' : it.limpiar}"` : ''}>`;
+      else if (it.t === 'br') { const lado = { all: 'both', left: 'left', right: 'right' }[it.limpiar]; html += `<br${typeof lado === 'string' ? ` style="clear:${lado}"` : ''}>`; }
       else if (it.t === 'campo') html += `<span data-campo="${it.nombre}" style="${cssRun(d, it.r, false, bajar)}">1</span>`;
       else if (it.t === 'html') html += it.html;
       // 'flotante': los dibujos flotantes los pone parrafo() antes del <p>
@@ -435,7 +429,7 @@
     const b = efectivo.bordes || {};
     const bordes = {};
     for (const lado of ['top', 'right', 'bottom', 'left']) bordes[lado] = cssBorde(d, b[lado]);
-    const rellenoP = efectivo.sombreado && efectivo.sombreado.relleno && efectivo.sombreado.relleno !== 'auto' ? '#' + efectivo.sombreado.relleno : undefined;
+    const rellenoP = rellenoCss(efectivo.sombreado);
     const espacioLado = (lado) => (b[lado] && b[lado].espacio) || 0;
     const margenIzq = izq - (bordes.left ? espacioLado('left') + bordes.left.ancho : 0);
     const margenDer = der - (bordes.right ? espacioLado('right') + bordes.right.ancho : 0);
@@ -500,8 +494,6 @@
   }
 
   // ───────── Tablas ─────────
-  const sinRelleno = (sh) => (sh && sh.relleno && sh.relleno !== 'auto' ? '#' + sh.relleno : undefined);
-
   // Ancho de una tabla o celda en pt: dxa = veinteavos de punto; pct = 50avos de por ciento (o "100%").
   function anchoPt(w, disponible) {
     if (!w || w.valor === undefined || Number.isNaN(w.valor)) return undefined;
@@ -558,13 +550,14 @@
       let col = 0;
       return lista(f, 'tc').map((c) => {
         const pr = m.leerTcPr(hijo(c, 'tcPr'));
-        const span = pr.columnas || 1;
+        // gridSpan viene del archivo: entero, de 1 a lo que tenga la rejilla (Word no pasa de 63 columnas).
+        const span = Math.min(Math.max(Math.floor(pr.columnas) || 1, 1), Math.max(grid.length, 64));
         const info = { c, pr, col, span, w: leerAncho(hijo(hijo(c, 'tcPr'), 'tcW')) };
         col += span;
         return info;
       });
     });
-    const nCols = Math.max(grid.length, ...infos.map((f) => f.reduce((a, x) => a + x.span, 0)), 1);
+    const nCols = infos.reduce((mx, f) => Math.max(mx, f.reduce((a, x) => a + x.span, 0)), Math.max(grid.length, 1)); // sin "...": con 10^5 filas no caben como argumentos
     while (grid.length < nCols) grid.push(0);
     infos.forEach((fila, i) => fila.forEach((info) => {
       info.filas = 1;
@@ -633,7 +626,7 @@
           'vertical-align': tc.alineacionVertical === 'center' ? 'middle' : tc.alineacionVertical === 'bottom' ? 'bottom' : 'top',
           padding: `${pt(mc.top)} ${pt(mc.right)} ${pt(mc.bottom)} ${pt(mc.left)}`,
           'border-top': bt && bt.texto, 'border-bottom': bb && bb.texto, 'border-left': bl && bl.texto, 'border-right': br && br.texto,
-          'background-color': sinRelleno(tc.sombreado) || sinRelleno(tbl.sombreado), 'overflow-wrap': 'break-word', 'line-height': 'normal', 'text-align': 'left',
+          'background-color': rellenoCss(tc.sombreado) || rellenoCss(tbl.sombreado), 'overflow-wrap': 'break-word', 'line-height': 'normal', 'text-align': 'left',
           'font-weight': 'normal', 'font-size': '10pt', color: 'inherit',
         })}">${dentro.html}</td>`;
       }
@@ -660,14 +653,22 @@
     const cols = sectPr && hijo(sectPr, 'cols');
     const num = sectPr && hijo(sectPr, 'pgNumType');
     const v = (x, defecto) => { const n = parseFloat(x); return Number.isFinite(n) ? n / 20 : defecto; };
+    // Un archivo armado a propósito puede pedir una hoja de 0 o de kilómetros, o márgenes más altos que la hoja (y
+    // html-a-pdf.js no podría avanzar): la hoja va de 1 a 22 pulgadas y al cuerpo le queda al menos un cuarto de ella.
+    // Un margen negativo arriba o abajo en Word es el mismo margen "exacto": vale su valor absoluto.
+    const ancho = acotar(v(sz && sz.a.w, 612), 72, MAX_PT), alto = acotar(v(sz && sz.a.h, 792), 72, MAX_PT);
+    let arriba = Math.abs(v(mg && mg.a.top, 72)), abajo = Math.abs(v(mg && mg.a.bottom, 72));
+    let izquierda = Math.max(v(mg && mg.a.left, 72), 0), derecha = Math.max(v(mg && mg.a.right, 72), 0);
+    if (arriba + abajo > alto * 0.75) { const f = (alto * 0.75) / (arriba + abajo); arriba *= f; abajo *= f; }
+    if (izquierda + derecha > ancho * 0.75) { const f = (ancho * 0.75) / (izquierda + derecha); izquierda *= f; derecha *= f; }
+    const inicio = num ? parseInt(num.a.start, 10) : NaN;
     return {
-      ancho: v(sz && sz.a.w, 612), alto: v(sz && sz.a.h, 792),
-      arriba: v(mg && mg.a.top, 72), derecha: v(mg && mg.a.right, 72), abajo: v(mg && mg.a.bottom, 72), izquierda: v(mg && mg.a.left, 72),
+      ancho, alto, arriba, derecha, abajo, izquierda,
       encabezado: v(mg && mg.a.header, 36), pie: v(mg && mg.a.footer, 36),
       continua: !!(sectPr && hijo(sectPr, 'type') && hijo(sectPr, 'type').a.val === 'continuous'),
       columnas: cols && parseInt(cols.a.num, 10) > 1 ? { n: parseInt(cols.a.num, 10), espacio: v(cols.a.space, 36), linea: cols.a.sep === '1' || cols.a.sep === 'true' } : null,
       portada: !!(sectPr && hijo(sectPr, 'titlePg')),
-      inicioPaginas: num && num.a.start !== undefined ? parseInt(num.a.start, 10) : undefined,
+      inicioPaginas: Number.isFinite(inicio) ? acotar(inicio, 0, 1e6) : undefined,
       referencias: sectPr ? lista(sectPr, 'headerReference').map((x) => ({ tipo: 'encabezado', cual: x.a.type || 'default', id: x.a.id }))
         .concat(lista(sectPr, 'footerReference').map((x) => ({ tipo: 'pie', cual: x.a.type || 'default', id: x.a.id }))) : [],
     };
@@ -699,7 +700,7 @@
     for (const clave of Object.keys(actuales)) {
       const [tipo, cual] = clave.split(':');
       if (cual === 'first' && !cfg.portada) continue;
-      html += `<div data-repetido="${tipo}" data-cual="${cual}" data-dist="${n3(tipo === 'encabezado' ? cfg.encabezado : cfg.pie)}" style="position:absolute;left:${pt(cfg.izquierda)};top:0;width:${pt(ancho)};line-height:normal">${actuales[clave]}</div>`;
+      html += `<div data-repetido="${tipo}" data-cual="${esc(cual)}" data-dist="${n3(tipo === 'encabezado' ? cfg.encabezado : cfg.pie)}" style="position:absolute;left:${pt(cfg.izquierda)};top:0;width:${pt(ancho)};line-height:normal">${actuales[clave]}</div>`;
     }
     return html;
   }
@@ -715,55 +716,70 @@
 
   // ───────── Tabulaciones (después de maquetar) ─────────
   async function resolverTabulaciones(html, d) {
-    if (typeof document === 'undefined' || html.indexOf('data-tab') < 0) return html;
+    if (typeof document === 'undefined' || html.indexOf('data-tab="') < 0) return html;
     const lienzo = document.createElement('div');
     lienzo.style.cssText = 'position:absolute;left:-100000px;top:0;visibility:hidden';
-    lienzo.innerHTML = html;
+    // El HTML se mete en la página para medirlo: antes pasa por el sanitizador (como al final, en word-a-pdf.js),
+    // para que nada del archivo llegue a correr aunque algún valor se haya escapado mal.
+    lienzo.innerHTML = typeof sanitizarHtml === 'function' ? sanitizarHtml(html) : html;
     document.body.appendChild(lienzo);
     try {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
-      const tabDefecto = d.m.ajustes.tabPorDefecto;
+      const paso = d.m.ajustes.tabPorDefecto * PX_POR_PT;
+      const maxAncho = 2 * MAX_PT * PX_POR_PT;
       const ctx = document.createElement('canvas').getContext('2d');
+      const parrafos = [];
+      let maxTabs = 0;
       for (const p of lienzo.querySelectorAll('p[data-izq]')) {
         const tabs = p.querySelectorAll('[data-tab]');
         if (!tabs.length) continue;
         const izq = parseFloat(p.dataset.izq) * PX_POR_PT;
-        const e = getComputedStyle(p);
         let personalizadas = [];
         try { personalizadas = JSON.parse(p.dataset.tabs || '[]'); } catch (x) { personalizadas = []; }
-        const paradas = personalizadas.filter((t) => t.tipo !== 'clear' && t.pos !== undefined).map((t) => ({ ...t, px: t.pos * PX_POR_PT }));
+        const paradas = personalizadas.filter((t) => t.tipo !== 'clear' && Number.isFinite(t.pos)).map((t) => ({ ...t, px: t.pos * PX_POR_PT }));
         const sangria = parseFloat(p.style.textIndent) || 0;
         if (sangria < 0) paradas.push({ tipo: 'left', px: izq }); // la sangría francesa también es una parada
-        for (const tab of tabs) {
+        parrafos.push({ p, tabs, izq, e: getComputedStyle(p), paradas });
+        maxTabs = Math.max(maxTabs, tabs.length);
+      }
+      // Por rondas: la tabulación k de todos los párrafos a la vez (primero se escribe, después se mide, después se
+      // escribe el ancho). Medir después de cada cambio obligaba al navegador a rehacer el documento entero por cada
+      // tabulación: con 5000 elementos de lista (cada uno con su tabulación) eran 6,5 s.
+      for (let k = 0; k < maxTabs; k++) {
+        const ronda = parrafos.filter((x) => k < x.tabs.length);
+        for (const { tabs } of ronda) { tabs[k].style.width = '0px'; tabs[k].textContent = '​'; }
+        const medidas = ronda.map(({ p, tabs, izq, e }) => {
+          const tab = tabs[k];
           const rp = p.getBoundingClientRect();
           const origen = rp.left + parseFloat(e.borderLeftWidth) + parseFloat(e.paddingLeft) - izq;
-          tab.style.width = '0px'; tab.textContent = '​';
-          const x0 = tab.getBoundingClientRect().left - origen;
+          let siguiente = 0;
+          for (let n = tab.nextSibling; n; n = n.nextSibling) {
+            if (n.nodeType === 1 && n.hasAttribute('data-tab')) break;
+            if (n.nodeType === 1 && n.tagName === 'BR') break;
+            siguiente += n.nodeType === 1 ? n.getBoundingClientRect().width : 0;
+          }
+          return { x0: tab.getBoundingClientRect().left - origen, siguiente };
+        });
+        ronda.forEach(({ tabs, paradas }, i) => {
+          const tab = tabs[k];
+          const { x0, siguiente } = medidas[i];
           const parada = paradas.filter((s) => s.px > x0 + 0.5).sort((a, b) => a.px - b.px)[0];
-          const paso = tabDefecto * PX_POR_PT;
           const porDefecto = (Math.floor((x0 + 0.5) / paso) + 1) * paso;
           // Las paradas por defecto solo valen después de la última parada propia.
           const meta = parada || { tipo: 'left', px: porDefecto };
           let ancho = meta.px - x0;
-          if (meta.tipo === 'right' || meta.tipo === 'center' || meta.tipo === 'decimal') {
-            let siguiente = 0;
-            for (let n = tab.nextSibling; n; n = n.nextSibling) {
-              if (n.nodeType === 1 && n.hasAttribute('data-tab')) break;
-              if (n.nodeType === 1 && n.tagName === 'BR') break;
-              siguiente += n.nodeType === 1 ? n.getBoundingClientRect().width : 0;
-            }
-            ancho -= meta.tipo === 'center' ? siguiente / 2 : siguiente;
-          }
-          ancho = Math.max(ancho, 0);
+          if (meta.tipo === 'right' || meta.tipo === 'center' || meta.tipo === 'decimal') ancho -= meta.tipo === 'center' ? siguiente / 2 : siguiente;
+          // Una parada a 10^11 twips pedía mil millones de puntos de guía: el ancho no pasa del de dos hojas.
+          ancho = Math.min(Math.max(ancho, 0), maxAncho);
           const caracter = GUIAS[meta.guia];
           tab.style.width = n3(ancho) + 'px';
           if (caracter && ancho > 0) {
             const ec = getComputedStyle(tab);
             ctx.font = `${ec.fontStyle} ${ec.fontWeight} ${ec.fontSize} ${ec.fontFamily}`;
             const w = ctx.measureText(caracter).width || 1;
-            tab.textContent = caracter.repeat(Math.max(Math.floor(ancho / w) - 0, 0));
+            tab.textContent = caracter.repeat(Math.max(Math.floor(ancho / w), 0));
           }
-        }
+        });
       }
       return lienzo.innerHTML;
     } finally {

@@ -450,6 +450,9 @@
     return l.repeat(Math.floor((n - 1) / 26) + 1);
   }
   function formatear(n, fmt) {
+    // Letras y romanos crecen con el número (con 2·10^9 eran 77 millones de letras por párrafo y la página se
+    // colgaba): fuera de 1…32767 (el tope de Word) salen vacíos si no son positivos y en cifras si son enormes.
+    if (/Letter|Roman/.test(fmt || '') && !(n >= 1 && n <= 32767)) return n >= 1 ? String(n) : '';
     switch (fmt) {
       case 'lowerLetter': return letras(n);
       case 'upperLetter': return letras(n).toUpperCase();

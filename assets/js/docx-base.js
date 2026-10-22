@@ -6,7 +6,7 @@
 //
 // API (globalThis.DocxBase):
 //   arbol(xml) → { n, a, h, t } | null      hijo(e, n)   lista(e, n)   activo(e)   buscar(e, n)
-//   resolver(base, destino)  rutaRels(parte)  leerRels(zip, parte)  porTipo(rels, fin)
+//   resolver(base, destino)  rutaRels(parte)  leerRels(zip, parte)  porTipo(rels, fin)  base64(bytes)  hrefSeguro(url)
 //   abrirPaquete(datos) → { zip, principal, rels, cuerpo }   (datos: ArrayBuffer, Uint8Array o Blob)
 
 (function () {
@@ -69,6 +69,16 @@
     }
     return mapa;
   }
+  // Bytes → base64 (para las imágenes como data:), por trozos: apply con millones de argumentos no cabe.
+  function base64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+
+  // Un enlace del archivo no puede ser javascript:, vbscript: ni data: (el navegador ignora espacios y caracteres
+  // de control en el esquema: "java	script:" vale como "javascript:").
+  const hrefSeguro = (h) => (/^(javascript|vbscript|data):/i.test(String(h || '').replace(/[\x00-\x20]/g, '')) ? '' : h || '');
   const porTipo = (rels, fin) => { for (const r of rels.values()) if (r.tipo.endsWith(fin)) return r.destino; return null; };
 
   // Abre el .docx: busca la parte principal (por _rels/.rels), sus relaciones y el <w:body>.
@@ -90,5 +100,5 @@
     return { zip, principal, rels, cuerpo };
   }
 
-  globalThis.DocxBase = { arbol, hijo, lista, activo, buscar, resolver, rutaRels, leerRels, porTipo, abrirPaquete };
+  globalThis.DocxBase = { arbol, hijo, lista, activo, buscar, resolver, rutaRels, leerRels, porTipo, base64, hrefSeguro, abrirPaquete };
 })();
