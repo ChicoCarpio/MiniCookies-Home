@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Cómo numerar las páginas de un PDF — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá el número de página a un PDF: desde el número que quieras y en la posición que elijas. Qué esperar y qué hacer con la carátula.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Agregá el número de página a un PDF desde el número que elijas y en el lugar que quieras. Dónde queda, cómo tratar la carátula y qué hacer con un PDF protegido.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,32 +13,38 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Cómo numerar las páginas de un PDF — Mini Cookies',
-    'meta-descripcion': 'Agregá el número de página a un PDF: desde el número que quieras y en la posición que elijas. Qué esperar y qué hacer con la carátula.',
+    'meta-descripcion': 'Agregá el número de página a un PDF desde el número que elijas y en el lugar que quieras. Dónde queda, cómo tratar la carátula y qué hacer con un PDF protegido.',
     'h1': 'Cómo numerar las páginas de un PDF',
-    'b1': 'Un documento largo sin numerar es difícil de manejar: en una reunión nadie sabe a qué página ir, y al imprimirlo suelto es fácil perder el orden. Muchos trámites, además, piden la numeración. <a href="../herramientas/numerar-paginas.html">Numerar páginas de PDF</a> agrega el número a cada hoja, desde el número que quieras y en la posición que elijas, y devuelve el archivo ya numerado.',
+    'b1': 'Cuando alguien en una reunión dice «vamos a la página 23», sin números en las hojas hay que contar. Y si el documento se imprime suelto, es fácil que se desordene. <a href="../herramientas/numerar-paginas.html">Numerar páginas de PDF</a> agrega el número a cada hoja, desde el número que elijas y en el lugar que elijas, y descarga un PDF nuevo. El original no se modifica.',
     'b2': 'Paso a paso',
-    'b3-1': 'Arrastrá tu PDF a la zona de carga o hacé clic para elegirlo. Vas a ver una miniatura de la primera página con su nombre y la cantidad de páginas.',
-    'b3-2': 'En «Empezar en» escribí el número que debe llevar la primera página (por defecto, 1).',
-    'b3-3': 'En «Posición» elegí uno de los seis lugares: abajo o arriba, a la izquierda, al centro o a la derecha.',
-    'b3-4': 'Tocá «Numerar páginas» y, cuando aparezca el aviso, «Descargar PDF numerado». El archivo se llama «documento-numerado.pdf».',
-    'b4': 'Cómo elegir la posición',
-    'b5-1': '<strong>Abajo al centro</strong> es lo más habitual en documentos.',
-    'b5-2': '<strong>Abajo a la derecha</strong> funciona bien si el documento es de lectura continua o para presentar.',
-    'b5-3': '<strong>Arriba</strong> conviene cuando el pie de página ya tiene texto (firmas, notas, sellos) que no querés tapar.',
-    'b6': 'Como el número se coloca encima de la página, mirá el resultado antes de usarlo: si en algún lugar hay texto o una imagen, el número se superpone.',
-    'b7': 'Cómo se ve el número',
-    'b8': 'El número se escribe en Helvetica de 12 puntos, en gris oscuro, a unos 30 puntos del borde de la hoja. No hay opciones de tamaño, color ni formato como «Página 1 de 10», y solo se usan números arábigos (no romanos ni letras).',
-    'b9': 'Si el PDF trae páginas giradas, el número se coloca según cómo se ven las páginas, no según cómo están guardadas, para que quede en la esquina que elegiste.',
+    'b3-1': 'Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver una miniatura de la primera página, con el nombre y la cantidad de páginas.',
+    'b3-2': 'En «Empezar en» escribí el número que lleva la primera página. Por defecto es 1.',
+    'b3-3': 'En «Posición» elegí uno de los seis lugares.',
+    'b3-4': 'Tocá «Numerar páginas». Cuando aparezca «Listo», tocá «Descargar PDF numerado». El archivo se llama «documento-numerado.pdf».',
+    'b4': 'Dónde queda el número',
+    'b5': 'El número va en Helvetica de 12 puntos, en gris oscuro. Un punto tipográfico mide 1/72 de pulgada, unos 0,35 mm. La distancia se mide desde el borde de la hoja hasta la línea base del número:',
+    'b6-c1': 'Lugar',
+    'b6-c2': 'Distancia',
+    'b6-f1c1': 'Abajo (izquierda, centro o derecha)',
+    'b6-f1c2': '20 puntos',
+    'b6-f2c1': 'Arriba (izquierda, centro o derecha)',
+    'b6-f2c2': '30 puntos',
+    'b6-f3c1': 'Izquierda o derecha',
+    'b6-f3c2': '30 puntos',
+    'b7': 'Abajo al centro es la opción habitual en informes. Abajo a la derecha sirve para documentos que se leen en pantalla de corrido. Arriba conviene cuando el pie de página ya tiene firmas, notas o sellos.',
+    'b8': 'El número se dibuja encima de la página. Si hay texto o una imagen en ese lugar, se superpone, así que mirá el resultado antes de imprimir. Conviene revisar tres hojas: la primera, una girada si hay alguna, y una con imagen o texto cerca del borde, que es donde el número puede chocar.',
+    'b9': 'Cada hoja se calcula con su propio tamaño, así que un documento que mezcla A4 y carta queda bien en las dos. Si una página está girada, el número va en la esquina que elegiste tal como se ve la hoja, no como está guardada. Los números son arábigos (1, 2, 3). No hay romanos, ni «Página 1 de 10», ni tamaño o color para elegir.',
     'b10': 'Casos comunes',
-    'b11-1': '<strong>Que la carátula no cuente.</strong> Todas las páginas se numeran y no se puede saltar ninguna. Separá primero la carátula con <a href="../herramientas/dividir-pdf.html">Dividir PDF</a> y numerá el resto; con «Empezar en» elegís qué número lleva la primera página (el mínimo es 1).',
-    'b11-2': '<strong>Numerar un documento hecho de varias partes.</strong> Primero unilas con <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> y después numerá el resultado, así la numeración es continua.',
-    'b11-3': '<strong>PDF con contraseña.</strong> Es probable que falle: quitá primero la contraseña con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>.',
-    'b12': 'Preguntas frecuentes',
-    'b13': '<strong>¿Se modifica el texto original del PDF?</strong> No: el número se agrega encima de cada página y el contenido queda igual.',
-    'b14': '<strong>¿Puedo numerar solo algunas páginas?</strong> No: se numeran todas. Para un rango, separá esas páginas, numeralas y volvé a unir.',
-    'b15': '<strong>¿Puedo empezar en un número distinto de 1?</strong> Sí, con «Empezar en».',
-    'b16': 'Resumen',
-    'b17': 'Numerar un PDF es elegir desde qué número arrancar y en qué lugar de la hoja va. Todas las páginas se numeran con el mismo estilo (Helvetica 12, gris oscuro); si necesitás dejar algo afuera, dividí antes y uní después.',
+    'b11': 'Si la carátula no tiene que contar, quitala antes con <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a> y numerá el resto con «Empezar en» en 1. <a href="../herramientas/dividir-pdf.html">Dividir PDF</a> no sirve para esto: separa cada página en un archivo distinto.',
+    'b12': 'Un documento hecho de varias partes conviene unirlo primero con <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> y numerar el resultado. Así la numeración sale continua.',
+    'b13': 'Un PDF con contraseña o con restricciones de edición no se numera. El aviso es «No se pudo numerar el PDF: el PDF está protegido (tiene contraseña o restricciones de edición). Quitale la protección primero con la herramienta "Desbloquear PDF" y volvé a intentarlo.» Con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>, si el archivo pide contraseña para abrirse, hace falta escribirla. Si solo tiene restricciones, se deja el campo vacío.',
+    'b14': 'Preguntas frecuentes',
+    'b15': '<strong>¿Se modifica el texto original?</strong> No. El número se agrega encima de cada página y el contenido queda igual.',
+    'b16': '<strong>¿Puedo numerar solo algunas páginas?</strong> No: se numeran todas. Para un rango, sacá esas páginas con <a href="../herramientas/extraer-paginas.html">Extraer páginas</a>, numeralas y, si hace falta, volvé a unir.',
+    'b17': '<strong>¿Puedo empezar en un número distinto de 1?</strong> Sí, con «Empezar en». Si dejás 0 o el campo vacío, el primer número que sale es 1.',
+    'b18': '<strong>¿Puedo cambiar el tamaño, el color o la fuente del número?</strong> No. Es siempre Helvetica de 12 puntos en gris oscuro. Si necesitás otro formato, hay que ponerlo en el programa donde creaste el PDF.',
+    'b19': 'Resumen',
+    'b20': 'Numerar un PDF es elegir el primer número y el lugar de la hoja. Todas las páginas llevan el mismo estilo: Helvetica de 12 puntos en gris oscuro. Si necesitás dejar algo sin número, quitalo antes y numerá después.',
     'rel1': 'Numerar páginas de PDF',
     'rel2': 'Dividir PDF',
     'rel3': 'Unir PDF, imágenes y documentos',
@@ -46,32 +52,38 @@ window.i18nPagina = {
   },
   en: {
     'titulo-pagina': 'How to number the pages of a PDF — Mini Cookies',
-    'meta-descripcion': 'Add the page number to a PDF: starting at any number and in the position you choose. What to expect and what to do with the cover page.',
+    'meta-descripcion': 'Add page numbers to a PDF from any starting number and in the position you pick. Where they land, how to skip the cover and protected PDFs.',
     'h1': 'How to number the pages of a PDF',
-    'b1': 'A long document without page numbers is hard to handle: in a meeting nobody knows which page to turn to, and printed loose it’s easy to lose the order. Many formalities also require numbering. <a href="../herramientas/numerar-paginas.html">Number PDF pages</a> adds the number to each sheet, starting at any number and in the position you choose, and returns the file already numbered.',
+    'b1': 'When someone in a meeting says “let’s go to page 23”, you have to count if the sheets have no numbers. And if the document is printed loose, it’s easy for the order to get mixed up. <a href="../herramientas/numerar-paginas.html">Number PDF pages</a> adds a number to each sheet, starting at the number you choose and in the place you choose, and downloads a new PDF. The original isn’t modified.',
     'b2': 'Step by step',
-    'b3-1': 'Drag your PDF to the upload area or click to choose it. You’ll see a thumbnail of the first page with its name and the number of pages.',
-    'b3-2': 'In “Start at” type the number the first page should carry (1 by default).',
-    'b3-3': 'In “Position” choose one of the six places: bottom or top, left, center or right.',
-    'b3-4': 'Tap “Number pages” and, when the notice appears, “Download numbered PDF”. The file is named “documento-numerado.pdf”.',
-    'b4': 'Choosing the position',
-    'b5-1': '<strong>Bottom center</strong> is the most common in documents.',
-    'b5-2': '<strong>Bottom right</strong> works well if the document is for continuous reading or for presenting.',
-    'b5-3': '<strong>Top</strong> is better when the footer already has text (signatures, notes, stamps) that you don’t want to cover.',
-    'b6': 'Because the number is placed on top of the page, look at the result before using it: if there is text or an image in that spot, the number overlaps it.',
-    'b7': 'What the number looks like',
-    'b8': 'The number is written in 12-point Helvetica, dark gray, about 30 points from the edge of the page. There are no options for size, color or a format like “Page 1 of 10”, and only Arabic numerals are used (no Roman numerals or letters).',
-    'b9': 'If the PDF has rotated pages, the number is placed according to how the pages look, not how they are stored, so it ends up in the corner you chose.',
+    'b3-1': 'Drag the PDF to the upload area or click to choose it. You’ll see a thumbnail of the first page, with the name and the number of pages.',
+    'b3-2': 'In “Start at”, type the number the first page should carry. It’s 1 by default.',
+    'b3-3': 'In “Position”, choose one of the six places.',
+    'b3-4': 'Tap “Number pages”. When “Done” appears, tap “Download numbered PDF”. The file is named “documento-numerado.pdf”.',
+    'b4': 'Where the number goes',
+    'b5': 'The number is set in 12-point Helvetica, in dark gray. A typographic point is 1/72 of an inch, about 0.35 mm. The distance is measured from the edge of the sheet to the number’s baseline:',
+    'b6-c1': 'Place',
+    'b6-c2': 'Distance',
+    'b6-f1c1': 'Bottom (left, center or right)',
+    'b6-f1c2': '20 points',
+    'b6-f2c1': 'Top (left, center or right)',
+    'b6-f2c2': '30 points',
+    'b6-f3c1': 'Left or right',
+    'b6-f3c2': '30 points',
+    'b7': 'Bottom center is the usual choice for reports. Bottom right suits documents read on screen from start to finish. Top works better when the footer already has signatures, notes or stamps.',
+    'b8': 'The number is drawn on top of the page. If there is text or an image in that spot, it overlaps, so check the result before printing. It’s worth checking three sheets: the first one, a rotated one if there is any, and one with an image or text near the edge, where the number is most likely to hit something.',
+    'b9': 'Each sheet is measured with its own size, so a document that mixes A4 and letter pages gets the number right on both. If a page is rotated, the number goes in the corner you chose as you see the sheet, not as it is stored. The numbers are Arabic (1, 2, 3). There are no Roman numerals, no “Page 1 of 10”, and no size or color to choose.',
     'b10': 'Common cases',
-    'b11-1': '<strong>Making the cover page not count.</strong> All pages are numbered and none can be skipped. Split the cover off first with <a href="../herramientas/dividir-pdf.html">Split PDF</a> and number the rest; with “Start at” you choose which number the first page carries (the minimum is 1).',
-    'b11-2': '<strong>Numbering a document made of several parts.</strong> First join them with <a href="../herramientas/unir-pdf.html">Merge PDF, images and documents</a> and then number the result, so the numbering is continuous.',
-    'b11-3': '<strong>Password-protected PDF.</strong> It will probably fail: remove the password first with <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a>.',
-    'b12': 'Frequently asked questions',
-    'b13': '<strong>Is the original text of the PDF modified?</strong> No: the number is added on top of each page and the content stays the same.',
-    'b14': '<strong>Can I number only some pages?</strong> No: all of them are numbered. For a range, split those pages off, number them and merge again.',
-    'b15': '<strong>Can I start at a number other than 1?</strong> Yes, with “Start at”.',
-    'b16': 'Summary',
-    'b17': 'Numbering a PDF means choosing which number to start at and where on the sheet it goes. All pages are numbered with the same style (Helvetica 12, dark gray); if you need to leave something out, split first and merge afterwards.',
+    'b11': 'If the cover page shouldn’t count, remove it first with <a href="../herramientas/administrar-paginas.html">Manage PDF pages</a>, then number the rest with “Start at” set to 1. <a href="../herramientas/dividir-pdf.html">Split PDF</a> doesn’t do this: it turns every page into a separate file.',
+    'b12': 'A document made of several parts is best merged first with <a href="../herramientas/unir-pdf.html">Merge PDF, images and documents</a>, then numbered, so the numbers run on without a break.',
+    'b13': 'A PDF with a password or editing restrictions can’t be numbered. The message is “Couldn’t number the PDF: the PDF is protected (it has a password or editing restrictions). Remove the protection first with the "Unlock PDF" tool and try again.” With <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a>, if the file asks for a password to open, you have to type it. If it only has restrictions, leave the field empty.',
+    'b14': 'Frequently asked questions',
+    'b15': '<strong>Is the original text of the PDF changed?</strong> No. The number is added on top of each page and the content stays the same.',
+    'b16': '<strong>Can I number only some pages?</strong> No: all of them get a number. For a range, pull those pages out with <a href="../herramientas/extraer-paginas.html">Extract pages</a>, number them, and merge again if you need to.',
+    'b17': '<strong>Can I start at a number other than 1?</strong> Yes, with “Start at”. If you leave 0 or the field empty, the first number is 1.',
+    'b18': '<strong>Can I change the size, color or font of the number?</strong> No. It is always 12-point Helvetica in dark gray. For another format, add the numbers in the program where you created the PDF.',
+    'b19': 'Summary',
+    'b20': 'Numbering a PDF means choosing the first number and the place on the sheet. Every page uses the same style: 12-point Helvetica in dark gray. If you need to leave something unnumbered, remove it first and number afterwards.',
     'rel1': 'Number PDF pages',
     'rel2': 'Split PDF',
     'rel3': 'Merge PDF, images and documents',
@@ -99,36 +111,38 @@ window.i18nPagina = {
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
     <h1 data-i18n="h1">Cómo numerar las páginas de un PDF</h1>
-    <p data-i18n-html="b1">Un documento largo sin numerar es difícil de manejar: en una reunión nadie sabe a qué página ir, y al imprimirlo suelto es fácil perder el orden. Muchos trámites, además, piden la numeración. <a href="../herramientas/numerar-paginas.html">Numerar páginas de PDF</a> agrega el número a cada hoja, desde el número que quieras y en la posición que elijas, y devuelve el archivo ya numerado.</p>
+    <p data-i18n-html="b1">Cuando alguien en una reunión dice «vamos a la página 23», sin números en las hojas hay que contar. Y si el documento se imprime suelto, es fácil que se desordene. <a href="../herramientas/numerar-paginas.html">Numerar páginas de PDF</a> agrega el número a cada hoja, desde el número que elijas y en el lugar que elijas, y descarga un PDF nuevo. El original no se modifica.</p>
     <h2 data-i18n="b2">Paso a paso</h2>
     <ol>
-      <li data-i18n-html="b3-1">Arrastrá tu PDF a la zona de carga o hacé clic para elegirlo. Vas a ver una miniatura de la primera página con su nombre y la cantidad de páginas.</li>
-      <li data-i18n-html="b3-2">En «Empezar en» escribí el número que debe llevar la primera página (por defecto, 1).</li>
-      <li data-i18n-html="b3-3">En «Posición» elegí uno de los seis lugares: abajo o arriba, a la izquierda, al centro o a la derecha.</li>
-      <li data-i18n-html="b3-4">Tocá «Numerar páginas» y, cuando aparezca el aviso, «Descargar PDF numerado». El archivo se llama «documento-numerado.pdf».</li>
+      <li data-i18n-html="b3-1">Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver una miniatura de la primera página, con el nombre y la cantidad de páginas.</li>
+      <li data-i18n-html="b3-2">En «Empezar en» escribí el número que lleva la primera página. Por defecto es 1.</li>
+      <li data-i18n-html="b3-3">En «Posición» elegí uno de los seis lugares.</li>
+      <li data-i18n-html="b3-4">Tocá «Numerar páginas». Cuando aparezca «Listo», tocá «Descargar PDF numerado». El archivo se llama «documento-numerado.pdf».</li>
     </ol>
-    <h2 data-i18n="b4">Cómo elegir la posición</h2>
-    <ul>
-      <li data-i18n-html="b5-1"><strong>Abajo al centro</strong> es lo más habitual en documentos.</li>
-      <li data-i18n-html="b5-2"><strong>Abajo a la derecha</strong> funciona bien si el documento es de lectura continua o para presentar.</li>
-      <li data-i18n-html="b5-3"><strong>Arriba</strong> conviene cuando el pie de página ya tiene texto (firmas, notas, sellos) que no querés tapar.</li>
-    </ul>
-    <p data-i18n-html="b6">Como el número se coloca encima de la página, mirá el resultado antes de usarlo: si en algún lugar hay texto o una imagen, el número se superpone.</p>
-    <h2 data-i18n="b7">Cómo se ve el número</h2>
-    <p data-i18n-html="b8">El número se escribe en Helvetica de 12 puntos, en gris oscuro, a unos 30 puntos del borde de la hoja. No hay opciones de tamaño, color ni formato como «Página 1 de 10», y solo se usan números arábigos (no romanos ni letras).</p>
-    <p data-i18n-html="b9">Si el PDF trae páginas giradas, el número se coloca según cómo se ven las páginas, no según cómo están guardadas, para que quede en la esquina que elegiste.</p>
+    <h2 data-i18n="b4">Dónde queda el número</h2>
+    <p data-i18n-html="b5">El número va en Helvetica de 12 puntos, en gris oscuro. Un punto tipográfico mide 1/72 de pulgada, unos 0,35 mm. La distancia se mide desde el borde de la hoja hasta la línea base del número:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b6-c1">Lugar</th><th data-i18n-html="b6-c2">Distancia</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b6-f1c1">Abajo (izquierda, centro o derecha)</td><td data-i18n-html="b6-f1c2">20 puntos</td></tr>
+        <tr><td data-i18n-html="b6-f2c1">Arriba (izquierda, centro o derecha)</td><td data-i18n-html="b6-f2c2">30 puntos</td></tr>
+        <tr><td data-i18n-html="b6-f3c1">Izquierda o derecha</td><td data-i18n-html="b6-f3c2">30 puntos</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b7">Abajo al centro es la opción habitual en informes. Abajo a la derecha sirve para documentos que se leen en pantalla de corrido. Arriba conviene cuando el pie de página ya tiene firmas, notas o sellos.</p>
+    <p data-i18n-html="b8">El número se dibuja encima de la página. Si hay texto o una imagen en ese lugar, se superpone, así que mirá el resultado antes de imprimir. Conviene revisar tres hojas: la primera, una girada si hay alguna, y una con imagen o texto cerca del borde, que es donde el número puede chocar.</p>
+    <p data-i18n-html="b9">Cada hoja se calcula con su propio tamaño, así que un documento que mezcla A4 y carta queda bien en las dos. Si una página está girada, el número va en la esquina que elegiste tal como se ve la hoja, no como está guardada. Los números son arábigos (1, 2, 3). No hay romanos, ni «Página 1 de 10», ni tamaño o color para elegir.</p>
     <h2 data-i18n="b10">Casos comunes</h2>
-    <ul>
-      <li data-i18n-html="b11-1"><strong>Que la carátula no cuente.</strong> Todas las páginas se numeran y no se puede saltar ninguna. Separá primero la carátula con <a href="../herramientas/dividir-pdf.html">Dividir PDF</a> y numerá el resto; con «Empezar en» elegís qué número lleva la primera página (el mínimo es 1).</li>
-      <li data-i18n-html="b11-2"><strong>Numerar un documento hecho de varias partes.</strong> Primero unilas con <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> y después numerá el resultado, así la numeración es continua.</li>
-      <li data-i18n-html="b11-3"><strong>PDF con contraseña.</strong> Es probable que falle: quitá primero la contraseña con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>.</li>
-    </ul>
-    <h2 data-i18n="b12">Preguntas frecuentes</h2>
-    <p data-i18n-html="b13"><strong>¿Se modifica el texto original del PDF?</strong> No: el número se agrega encima de cada página y el contenido queda igual.</p>
-    <p data-i18n-html="b14"><strong>¿Puedo numerar solo algunas páginas?</strong> No: se numeran todas. Para un rango, separá esas páginas, numeralas y volvé a unir.</p>
-    <p data-i18n-html="b15"><strong>¿Puedo empezar en un número distinto de 1?</strong> Sí, con «Empezar en».</p>
-    <h2 data-i18n="b16">Resumen</h2>
-    <p data-i18n-html="b17">Numerar un PDF es elegir desde qué número arrancar y en qué lugar de la hoja va. Todas las páginas se numeran con el mismo estilo (Helvetica 12, gris oscuro); si necesitás dejar algo afuera, dividí antes y uní después.</p>
+    <p data-i18n-html="b11">Si la carátula no tiene que contar, quitala antes con <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a> y numerá el resto con «Empezar en» en 1. <a href="../herramientas/dividir-pdf.html">Dividir PDF</a> no sirve para esto: separa cada página en un archivo distinto.</p>
+    <p data-i18n-html="b12">Un documento hecho de varias partes conviene unirlo primero con <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> y numerar el resultado. Así la numeración sale continua.</p>
+    <p data-i18n-html="b13">Un PDF con contraseña o con restricciones de edición no se numera. El aviso es «No se pudo numerar el PDF: el PDF está protegido (tiene contraseña o restricciones de edición). Quitale la protección primero con la herramienta "Desbloquear PDF" y volvé a intentarlo.» Con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>, si el archivo pide contraseña para abrirse, hace falta escribirla. Si solo tiene restricciones, se deja el campo vacío.</p>
+    <h2 data-i18n="b14">Preguntas frecuentes</h2>
+    <p data-i18n-html="b15"><strong>¿Se modifica el texto original?</strong> No. El número se agrega encima de cada página y el contenido queda igual.</p>
+    <p data-i18n-html="b16"><strong>¿Puedo numerar solo algunas páginas?</strong> No: se numeran todas. Para un rango, sacá esas páginas con <a href="../herramientas/extraer-paginas.html">Extraer páginas</a>, numeralas y, si hace falta, volvé a unir.</p>
+    <p data-i18n-html="b17"><strong>¿Puedo empezar en un número distinto de 1?</strong> Sí, con «Empezar en». Si dejás 0 o el campo vacío, el primer número que sale es 1.</p>
+    <p data-i18n-html="b18"><strong>¿Puedo cambiar el tamaño, el color o la fuente del número?</strong> No. Es siempre Helvetica de 12 puntos en gris oscuro. Si necesitás otro formato, hay que ponerlo en el programa donde creaste el PDF.</p>
+    <h2 data-i18n="b19">Resumen</h2>
+    <p data-i18n-html="b20">Numerar un PDF es elegir el primer número y el lugar de la hoja. Todas las páginas llevan el mismo estilo: Helvetica de 12 puntos en gris oscuro. Si necesitás dejar algo sin número, quitalo antes y numerá después.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

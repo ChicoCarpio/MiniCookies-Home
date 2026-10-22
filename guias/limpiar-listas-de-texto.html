@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Limpiá listas de correos, palabras clave o códigos: quitá líneas repetidas y vacías, ordená A-Z o por número y comprobá el resultado.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías — Mini Cookies',
+    'meta-descripcion': 'Limpiá listas de correos, palabras clave o códigos: quitá líneas repetidas y vacías, ordená A-Z o por número y comprobá el resultado.',
+    'h1': 'Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías',
+    'b1': 'Copiaste correos de tres planillas y ahora la lista tiene repetidos, huecos y ningún orden. Podés arreglarla a mano, pero siempre se escapa alguno. Con dos herramientas del sitio tarda un par de minutos. Abajo está el orden que menos sorpresas da, y los casos en que una línea que parece repetida no se va.',
+    'b2': 'Antes de empezar',
+    'b3': 'Las dos herramientas leen un <code>.txt</code> con un elemento por línea. Si la lista está en una planilla, copiá la columna, pegala en el Bloc de notas y guardala como <code>.txt</code>. Ninguna cambia tu archivo: cada una baja uno nuevo y el original queda como estaba. Si soltás un Word, un Excel o un PDF en la zona de carga, aparece el mensaje «Ese archivo no es un .txt» y el archivo no se carga.',
+    'b4': 'Quitar líneas repetidas y vacías',
+    'b5': 'En <a href="../herramientas/quitar-duplicados-texto.html">Quitar líneas duplicadas o vacías</a> las dos casillas vienen marcadas: «Quitar líneas vacías» y «Quitar líneas duplicadas (se conserva la primera aparición)». Al tocar «Procesar y descargar» aparece un resumen como «De 120 líneas originales, quedaron 95 (se quitaron 18 duplicada(s))», y el enlace «Descargar .txt» baja <code>texto-limpio.txt</code>.',
+    'b6': 'La comparación es exacta, letra por letra. «Ana», «ana» y «Ana » (con un espacio al final) son tres líneas distintas, y se conservan las tres. Una línea con solo espacios sí cuenta como vacía. De cada repetida queda la primera aparición, en el lugar donde estaba.',
+    'b7': 'Ordenar las líneas',
+    'b8': '<a href="../herramientas/ordenar-lineas-texto.html">Ordenar líneas</a> recibe el mismo tipo de archivo. En «Orden» elegís «Alfabético (A→Z)», «Alfabético (Z→A)», «Numérico (menor a mayor)» o «Numérico (mayor a menor)», y «Ordenar y descargar» baja <code>texto-ordenado.txt</code>.',
+    'b9': 'El orden alfabético sigue las reglas del idioma de la página: «árbol» va antes que «arco» y «tema 2» antes que «tema 10». Viene con «Ignorar mayúsculas/minúsculas (orden alfabético)» marcada, así «Ana» y «ana» quedan juntas. Si la desmarcás, la mayúscula va antes que la minúscula de la misma letra.',
+    'b10': 'El orden numérico toma el número con el que empieza cada línea, después de espacios y de un signo opcional: «250 Tornillos» se ordena como 250 y «-3 grados» como -3. Una línea que no empieza con un número, como «Capítulo 3» o «Factura 2024-031», no se ordena por el número que tiene adentro: va al final. Si el número que querés usar no está al principio, escribilo ahí antes de ordenar.',
+    'b11': 'Los separadores se leen así. Un punto entre grupos de exactamente tres cifras es separador de miles: «1.200» vale 1200 y «1.200.300» vale 1200300. Si el punto no separa grupos de tres, es decimal: «3.5» vale 3,5. Una coma seguida de una o dos cifras es decimal («3,5»), y seguida de exactamente tres, separador de miles («1,200» vale 1200). Cuando hay punto y coma juntos, el último es el decimal: «1.234,50» y «1,234.50» valen lo mismo: 1234,5. Si los grupos no tienen tres cifras, como en «12.34.567», se toma solo el primer número (12).',
+    'b12': 'En el orden alfabético, las líneas vacías van primero (y últimas en Z→A). En el numérico, las vacías y las que no empiezan con un número van al final, en su orden original, en los dos sentidos.',
+    'b13': 'Tres ejemplos',
+    'b14': 'Una lista de correos',
+    'b15': 'Pegaste direcciones de varias hojas, y algunas están en mayúsculas («MARIA@EJEMPLO.COM»). Como la comparación distingue mayúsculas, primero pasá todo a minúsculas con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a>: pegá la lista, tocá «minúsculas» y bajá el <code>.txt</code> con «Descargar .txt». Después quitá los repetidos y las vacías, y ordená de la A a la Z. En correos, pasar a minúsculas casi nunca cambia a quién llega el mensaje.',
+    'b16': 'Si las direcciones están dentro de un texto largo, <a href="../herramientas/extractor-contacto.html">Extraer emails, teléfonos y links</a> las separa y quita los repetidos. Copiá el cuadro «Emails», no el <code>.txt</code> que descargás: ese archivo trae un título y un recuento por sección («Emails (3)»), que después tendrías que borrar a mano. Esa herramienta también distingue mayúsculas, así que «Maria@» y «maria@» aparecen las dos si están en el texto.',
+    'b17': 'Palabras clave',
+    'b18': 'Una lista de búsquedas copiada de varios informes suele tener líneas en blanco entre bloques y términos repetidos. Dejá marcadas las dos casillas y pasá el resultado por «Alfabético (A→Z)». Así cada término aparece una sola vez y las variantes con otra mayúscula quedan una al lado de la otra, para revisarlas.',
+    'b19': 'Códigos de inventario',
+    'b20': 'Con los códigos «SKU-10», «SKU-2» y «sku-1», el orden alfabético da «sku-1», «SKU-2», «SKU-10», porque los números dentro del texto se comparan como números. Un orden letra por letra pondría «SKU-10» antes que «SKU-2». Si cada línea empieza con una cantidad («250 Tornillos», «40 Tuercas»), elegí «Numérico (mayor a menor)» para ver primero las cantidades más altas.',
+    'b21': 'Comprobar antes de reemplazar',
+    'b22': 'Antes de sobrescribir la lista original, abrí <a href="../herramientas/comparador-texto.html">Comparar dos textos</a>, pegá la versión vieja en «Texto original» y la limpia en «Texto nuevo». Desmarcá «Comparar por palabra (si no, por línea)», que viene marcada, y tocá «Comparar». Lo quitado aparece en rojo y lo agregado en verde, línea por línea. Así ves enseguida si se fue algo que no debía irse.',
+    'b23': 'Cuando una línea repetida no se va',
+    'b24': 'Si dos líneas se ven iguales y la herramienta las conserva, casi siempre hay una mayúscula distinta o un espacio al final. Ninguna de las dos recorta espacios. Abrí el <code>.txt</code> en un editor que muestre los espacios del final de cada línea y borralos, o pasá todo a minúsculas antes de quitar los duplicados.',
+    'b25': 'Si la lista está en párrafos y no en líneas, es decir, cada elemento es un bloque separado por una línea en blanco, <a href="../herramientas/administrar-texto.html">Administrar / reordenar párrafos</a> te deja reordenarlos o quitar los que no querés. Si necesitás cada párrafo en su propio archivo, <a href="../herramientas/dividir-texto.html">Dividir texto plano</a> los entrega en un <code>.zip</code>.',
+    'b26': 'Estas herramientas solo leen <code>.txt</code>. Un PDF o un Word hay que pasarlo antes a texto con <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a> o <a href="../herramientas/word-texto.html">Word ↔ Texto</a>.',
+    'b27': 'Preguntas frecuentes',
+    'b28': '<strong>¿Se pierde el archivo original?</strong> No. Las herramientas bajan un archivo nuevo y no tocan el que subiste.',
+    'b29': '<strong>¿Puedo quitar duplicados sin distinguir mayúsculas?</strong> No. Pasá la lista a minúsculas antes con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a>, y tené en cuenta que el resultado ya no conserva las mayúsculas originales.',
+    'b30': '<strong>¿Hay un límite de líneas?</strong> La herramienta no fija ninguno. El límite real es la memoria del navegador: con un archivo muy grande puede aparecer el mensaje «No se pudo procesar el archivo».',
+    'b31': 'Resumen',
+    'b32': 'Guardá la lista como <code>.txt</code> con un elemento por línea, pasala a minúsculas si las mayúsculas no importan, quitá repetidos y vacías, ordená con el criterio que corresponda y comprobá el resultado. Los repetidos se buscan letra por letra, y el orden numérico toma el número con el que empieza cada línea, así que revisá que ese número esté al principio.',
+    'rel1': 'Quitar líneas duplicadas o vacías',
+    'rel2': 'Ordenar líneas',
+    'rel3': 'Convertir mayúsculas y minúsculas',
+    'rel4': 'Comparar dos textos',
+    'rel5': 'Extraer emails, teléfonos y links'
+  },
+  en: {
+    'titulo-pagina': 'How to clean a text list: remove duplicates, sort and delete empty lines — Mini Cookies',
+    'meta-descripcion': 'Clean up lists of emails, keywords or codes: remove repeated and empty lines, sort A-Z or by number, and check the result.',
+    'h1': 'How to clean a text list: remove duplicates, sort and delete empty lines',
+    'b1': 'You copied emails from three spreadsheets and now the list has repeats, gaps and no order. You can fix it by hand, but something always gets missed. With two tools on the site it takes a few minutes. Below is the order that causes the fewest surprises, and the cases where a line that looks repeated doesn\'t go away.',
+    'b2': 'Before you start',
+    'b3': 'Both tools read a <code>.txt</code> file with one item per line. If the list is in a spreadsheet, copy the column, paste it into Notepad and save it as <code>.txt</code>. Neither tool changes your file: each one downloads a new one and the original stays as it was. If you drop a Word, Excel or PDF file on the upload area, a message says “That file isn’t a .txt” and the file isn’t loaded.',
+    'b4': 'Remove repeated and empty lines',
+    'b5': 'In <a href="../herramientas/quitar-duplicados-texto.html">Remove duplicate or empty lines</a> both boxes come ticked: “Remove empty lines” and “Remove duplicate lines (the first occurrence is kept)”. When you tap “Process and download”, a summary appears like “Of 120 original lines, 95 remain (18 duplicate(s) removed)”, and the “Download .txt” link saves <code>texto-limpio.txt</code>.',
+    'b6': 'The comparison is exact, letter by letter. “Ana”, “ana” and “Ana ” (with a trailing space) are three different lines, and all three stay. A line with only spaces does count as empty. Of each repeated line, the first occurrence stays, in its original place.',
+    'b7': 'Sort the lines',
+    'b8': '<a href="../herramientas/ordenar-lineas-texto.html">Sort lines</a> takes the same kind of file. Under “Order” you choose “Alphabetical (A→Z)”, “Alphabetical (Z→A)”, “Numeric (smallest to largest)” or “Numeric (largest to smallest)”, and “Sort and download” saves <code>texto-ordenado.txt</code>.',
+    'b9': 'Alphabetical order follows the rules of the page\'s language: “árbol” comes before “arco”, and “item 2” before “item 10”. With “Ignore upper/lower case (alphabetical order)” ticked (it starts ticked), “Ana” and “ana” end up together. If you untick it, the capital letter goes before the lowercase one of the same letter.',
+    'b10': 'Numeric order takes the number each line starts with, after any spaces and an optional sign: “250 bolts” sorts as 250 and “-3 degrees” as -3. A line that doesn’t start with a number, such as “Chapter 3” or “Invoice 2024-031”, isn’t sorted by the number inside it: it goes to the end. If the number you want isn’t at the start, write it there before sorting.',
+    'b11': 'Separators are read like this. A dot between groups of exactly three digits is a thousands separator: “1.200” is 1200, and “1.200.300” is 1200300. If the dot doesn’t separate groups of three, it is a decimal point: “3.5” is 3.5. A comma followed by one or two digits is a decimal (“3,5”), and followed by exactly three, a thousands separator (“1,200” is 1200). When a dot and a comma both appear, the last one is the decimal: “1.234,50” and “1,234.50” are both 1234.5. If the groups don’t have three digits, as in “12.34.567”, only the first number counts (12).',
+    'b12': 'In alphabetical order, empty lines come first (and last in Z→A). In numeric order, empty lines and lines that don’t start with a number go to the end, in their original order, in both directions.',
+    'b13': 'Three examples',
+    'b14': 'A list of emails',
+    'b15': 'You pasted addresses from several sheets, and some are in capitals (“MARIA@EJEMPLO.COM”). Because the comparison is case-sensitive, first change everything to lowercase with <a href="../herramientas/convertidor-mayusculas.html">Change text case</a>: paste the list, tap “lowercase” and download the <code>.txt</code> with “Download .txt”. Then remove the repeats and the empty lines, and sort from A to Z. For email addresses, lowercasing almost never changes who receives the message.',
+    'b16': 'If the addresses are inside a long text, <a href="../herramientas/extractor-contacto.html">Extract emails, phone numbers and links</a> separates them and removes the repeats. Copy the “Emails” box, not the <code>.txt</code> you download: that file has a title and a count for each section (“Emails (3)”) that you would have to delete by hand. That tool is case-sensitive too, so “Maria@” and “maria@” both stay if both appear in the text.',
+    'b17': 'Keywords',
+    'b18': 'A list of searches copied from several reports usually has blank lines between blocks and repeated terms. Leave both boxes ticked and run the result through “Alphabetical (A→Z)”. Each term then appears once, and variants with a different capital letter sit next to each other, so you can review them.',
+    'b19': 'Inventory codes',
+    'b20': 'With the codes “SKU-10”, “SKU-2” and “sku-1”, alphabetical order gives “sku-1”, “SKU-2”, “SKU-10”, because the numbers inside the text are compared as numbers. A letter-by-letter order would put “SKU-10” before “SKU-2”. If each line starts with a quantity (“250 bolts”, “40 nuts”), choose “Numeric (largest to smallest)” to see the highest quantities first.',
+    'b21': 'Check before you replace',
+    'b22': 'Before you overwrite the original list, open <a href="../herramientas/comparador-texto.html">Compare two texts</a>, paste the old version in “Original text” and the cleaned one in “New text”. Untick “Compare word by word (otherwise line by line)”, which starts ticked, and tap “Compare”. What was removed appears in red and what was added in green, line by line. You can see at a glance whether something you meant to keep has gone.',
+    'b23': 'When a repeated line doesn\'t go away',
+    'b24': 'If two lines look identical and the tool keeps them, there is almost always a different capital letter or a trailing space. Neither tool trims spaces. Open the <code>.txt</code> in an editor that shows the spaces at the end of each line and delete them, or change everything to lowercase before removing duplicates.',
+    'b25': 'If the list is in paragraphs rather than lines, that is, each item is a block separated by a blank line, <a href="../herramientas/administrar-texto.html">Manage / reorder paragraphs</a> lets you reorder them or remove the ones you don\'t want. If you need each paragraph in its own file, <a href="../herramientas/dividir-texto.html">Split plain text</a> returns them in a <code>.zip</code>.',
+    'b26': 'These tools only read <code>.txt</code>. Convert a PDF or Word file to text first with <a href="../herramientas/pdf-texto.html">PDF ↔ Text</a> or <a href="../herramientas/word-texto.html">Word ↔ Text</a>.',
+    'b27': 'Frequently asked questions',
+    'b28': '<strong>Is the original file lost?</strong> No. The tools download a new file and don\'t touch the one you uploaded.',
+    'b29': '<strong>Can I remove duplicates without matching capitals?</strong> No. Change the list to lowercase first with <a href="../herramientas/convertidor-mayusculas.html">Change text case</a>, and bear in mind the result no longer keeps the original capitals.',
+    'b30': '<strong>Is there a line limit?</strong> The tool sets none. The real limit is your browser\'s memory: with a very large file you may get the error “Couldn’t process the file”.',
+    'b31': 'Summary',
+    'b32': 'Save the list as a <code>.txt</code> with one item per line, change it to lowercase if capitals don\'t matter, remove repeats and empty lines, sort with the right criterion and check the result. Repeats are matched letter by letter, and numeric order uses the number each line starts with, so check that it is at the start.',
+    'rel1': 'Remove duplicate or empty lines',
+    'rel2': 'Sort lines',
+    'rel3': 'Change text case',
+    'rel4': 'Compare two texts',
+    'rel5': 'Extract emails, phone numbers and links'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías</h1>
+    <p data-i18n-html="b1">Copiaste correos de tres planillas y ahora la lista tiene repetidos, huecos y ningún orden. Podés arreglarla a mano, pero siempre se escapa alguno. Con dos herramientas del sitio tarda un par de minutos. Abajo está el orden que menos sorpresas da, y los casos en que una línea que parece repetida no se va.</p>
+    <h2 data-i18n="b2">Antes de empezar</h2>
+    <p data-i18n-html="b3">Las dos herramientas leen un <code>.txt</code> con un elemento por línea. Si la lista está en una planilla, copiá la columna, pegala en el Bloc de notas y guardala como <code>.txt</code>. Ninguna cambia tu archivo: cada una baja uno nuevo y el original queda como estaba. Si soltás un Word, un Excel o un PDF en la zona de carga, aparece el mensaje «Ese archivo no es un .txt» y el archivo no se carga.</p>
+    <h2 data-i18n="b4">Quitar líneas repetidas y vacías</h2>
+    <p data-i18n-html="b5">En <a href="../herramientas/quitar-duplicados-texto.html">Quitar líneas duplicadas o vacías</a> las dos casillas vienen marcadas: «Quitar líneas vacías» y «Quitar líneas duplicadas (se conserva la primera aparición)». Al tocar «Procesar y descargar» aparece un resumen como «De 120 líneas originales, quedaron 95 (se quitaron 18 duplicada(s))», y el enlace «Descargar .txt» baja <code>texto-limpio.txt</code>.</p>
+    <p data-i18n-html="b6">La comparación es exacta, letra por letra. «Ana», «ana» y «Ana » (con un espacio al final) son tres líneas distintas, y se conservan las tres. Una línea con solo espacios sí cuenta como vacía. De cada repetida queda la primera aparición, en el lugar donde estaba.</p>
+    <h2 data-i18n="b7">Ordenar las líneas</h2>
+    <p data-i18n-html="b8"><a href="../herramientas/ordenar-lineas-texto.html">Ordenar líneas</a> recibe el mismo tipo de archivo. En «Orden» elegís «Alfabético (A→Z)», «Alfabético (Z→A)», «Numérico (menor a mayor)» o «Numérico (mayor a menor)», y «Ordenar y descargar» baja <code>texto-ordenado.txt</code>.</p>
+    <p data-i18n-html="b9">El orden alfabético sigue las reglas del idioma de la página: «árbol» va antes que «arco» y «tema 2» antes que «tema 10». Viene con «Ignorar mayúsculas/minúsculas (orden alfabético)» marcada, así «Ana» y «ana» quedan juntas. Si la desmarcás, la mayúscula va antes que la minúscula de la misma letra.</p>
+    <p data-i18n-html="b10">El orden numérico toma el número con el que empieza cada línea, después de espacios y de un signo opcional: «250 Tornillos» se ordena como 250 y «-3 grados» como -3. Una línea que no empieza con un número, como «Capítulo 3» o «Factura 2024-031», no se ordena por el número que tiene adentro: va al final. Si el número que querés usar no está al principio, escribilo ahí antes de ordenar.</p>
+    <p data-i18n-html="b11">Los separadores se leen así. Un punto entre grupos de exactamente tres cifras es separador de miles: «1.200» vale 1200 y «1.200.300» vale 1200300. Si el punto no separa grupos de tres, es decimal: «3.5» vale 3,5. Una coma seguida de una o dos cifras es decimal («3,5»), y seguida de exactamente tres, separador de miles («1,200» vale 1200). Cuando hay punto y coma juntos, el último es el decimal: «1.234,50» y «1,234.50» valen lo mismo: 1234,5. Si los grupos no tienen tres cifras, como en «12.34.567», se toma solo el primer número (12).</p>
+    <p data-i18n-html="b12">En el orden alfabético, las líneas vacías van primero (y últimas en Z→A). En el numérico, las vacías y las que no empiezan con un número van al final, en su orden original, en los dos sentidos.</p>
+    <h2 data-i18n="b13">Tres ejemplos</h2>
+    <h3 data-i18n="b14">Una lista de correos</h3>
+    <p data-i18n-html="b15">Pegaste direcciones de varias hojas, y algunas están en mayúsculas («MARIA@EJEMPLO.COM»). Como la comparación distingue mayúsculas, primero pasá todo a minúsculas con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a>: pegá la lista, tocá «minúsculas» y bajá el <code>.txt</code> con «Descargar .txt». Después quitá los repetidos y las vacías, y ordená de la A a la Z. En correos, pasar a minúsculas casi nunca cambia a quién llega el mensaje.</p>
+    <p data-i18n-html="b16">Si las direcciones están dentro de un texto largo, <a href="../herramientas/extractor-contacto.html">Extraer emails, teléfonos y links</a> las separa y quita los repetidos. Copiá el cuadro «Emails», no el <code>.txt</code> que descargás: ese archivo trae un título y un recuento por sección («Emails (3)»), que después tendrías que borrar a mano. Esa herramienta también distingue mayúsculas, así que «Maria@» y «maria@» aparecen las dos si están en el texto.</p>
+    <h3 data-i18n="b17">Palabras clave</h3>
+    <p data-i18n-html="b18">Una lista de búsquedas copiada de varios informes suele tener líneas en blanco entre bloques y términos repetidos. Dejá marcadas las dos casillas y pasá el resultado por «Alfabético (A→Z)». Así cada término aparece una sola vez y las variantes con otra mayúscula quedan una al lado de la otra, para revisarlas.</p>
+    <h3 data-i18n="b19">Códigos de inventario</h3>
+    <p data-i18n-html="b20">Con los códigos «SKU-10», «SKU-2» y «sku-1», el orden alfabético da «sku-1», «SKU-2», «SKU-10», porque los números dentro del texto se comparan como números. Un orden letra por letra pondría «SKU-10» antes que «SKU-2». Si cada línea empieza con una cantidad («250 Tornillos», «40 Tuercas»), elegí «Numérico (mayor a menor)» para ver primero las cantidades más altas.</p>
+    <h2 data-i18n="b21">Comprobar antes de reemplazar</h2>
+    <p data-i18n-html="b22">Antes de sobrescribir la lista original, abrí <a href="../herramientas/comparador-texto.html">Comparar dos textos</a>, pegá la versión vieja en «Texto original» y la limpia en «Texto nuevo». Desmarcá «Comparar por palabra (si no, por línea)», que viene marcada, y tocá «Comparar». Lo quitado aparece en rojo y lo agregado en verde, línea por línea. Así ves enseguida si se fue algo que no debía irse.</p>
+    <h2 data-i18n="b23">Cuando una línea repetida no se va</h2>
+    <p data-i18n-html="b24">Si dos líneas se ven iguales y la herramienta las conserva, casi siempre hay una mayúscula distinta o un espacio al final. Ninguna de las dos recorta espacios. Abrí el <code>.txt</code> en un editor que muestre los espacios del final de cada línea y borralos, o pasá todo a minúsculas antes de quitar los duplicados.</p>
+    <p data-i18n-html="b25">Si la lista está en párrafos y no en líneas, es decir, cada elemento es un bloque separado por una línea en blanco, <a href="../herramientas/administrar-texto.html">Administrar / reordenar párrafos</a> te deja reordenarlos o quitar los que no querés. Si necesitás cada párrafo en su propio archivo, <a href="../herramientas/dividir-texto.html">Dividir texto plano</a> los entrega en un <code>.zip</code>.</p>
+    <p data-i18n-html="b26">Estas herramientas solo leen <code>.txt</code>. Un PDF o un Word hay que pasarlo antes a texto con <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a> o <a href="../herramientas/word-texto.html">Word ↔ Texto</a>.</p>
+    <h2 data-i18n="b27">Preguntas frecuentes</h2>
+    <p data-i18n-html="b28"><strong>¿Se pierde el archivo original?</strong> No. Las herramientas bajan un archivo nuevo y no tocan el que subiste.</p>
+    <p data-i18n-html="b29"><strong>¿Puedo quitar duplicados sin distinguir mayúsculas?</strong> No. Pasá la lista a minúsculas antes con <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a>, y tené en cuenta que el resultado ya no conserva las mayúsculas originales.</p>
+    <p data-i18n-html="b30"><strong>¿Hay un límite de líneas?</strong> La herramienta no fija ninguno. El límite real es la memoria del navegador: con un archivo muy grande puede aparecer el mensaje «No se pudo procesar el archivo».</p>
+    <h2 data-i18n="b31">Resumen</h2>
+    <p data-i18n-html="b32">Guardá la lista como <code>.txt</code> con un elemento por línea, pasala a minúsculas si las mayúsculas no importan, quitá repetidos y vacías, ordená con el criterio que corresponda y comprobá el resultado. Los repetidos se buscan letra por letra, y el orden numérico toma el número con el que empieza cada línea, así que revisá que ese número esté al principio.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/quitar-duplicados-texto.html" data-i18n="rel1">Quitar líneas duplicadas o vacías</a></li>
+      <li><a href="../herramientas/ordenar-lineas-texto.html" data-i18n="rel2">Ordenar líneas</a></li>
+      <li><a href="../herramientas/convertidor-mayusculas.html" data-i18n="rel3">Convertir mayúsculas y minúsculas</a></li>
+      <li><a href="../herramientas/comparador-texto.html" data-i18n="rel4">Comparar dos textos</a></li>
+      <li><a href="../herramientas/extractor-contacto.html" data-i18n="rel5">Extraer emails, teléfonos y links</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

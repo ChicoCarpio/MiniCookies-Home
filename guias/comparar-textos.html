@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Cómo comparar dos versiones de un texto — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Descubrí qué se agregó y qué se quitó entre dos textos: comparación por palabra o por línea, informe descargable y usos prácticos.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Descubrí qué se agregó y qué se quitó entre dos textos. Comparación por palabra o por línea, qué hacer con espacios y saltos, e informe descargable.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,94 +13,74 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Cómo comparar dos versiones de un texto — Mini Cookies',
-    'meta-descripcion': 'Descubrí qué se agregó y qué se quitó entre dos textos: comparación por palabra o por línea, informe descargable y usos prácticos.',
+    'meta-descripcion': 'Descubrí qué se agregó y qué se quitó entre dos textos. Comparación por palabra o por línea, qué hacer con espacios y saltos, e informe descargable.',
     'h1': 'Cómo comparar dos versiones de un texto',
-    'b1': 'Te mandan el contrato «corregido» y no te dicen qué cambiaron. Editaste tu ensayo cinco veces y querés saber qué quedó de la primera versión. Releer los dos textos lado a lado es lento y fácil de equivocar. Para eso existe la comparación de textos, conocida en informática como *diff*: un programa que alinea las dos versiones y marca las diferencias.',
-    'b2': 'Qué es una comparación (diff)',
-    'b3': 'Un diff busca la parte en común entre dos textos y señala lo que sobra o falta. El resultado se lee como una sola versión «anotada»: lo que aparece solo en el texto nuevo se considera <strong>agregado</strong> y lo que aparece solo en el original se considera <strong>quitado</strong>.',
-    'b4': 'Cómo se usa Comparar dos textos',
-    'b5': 'Con <a href="../herramientas/comparador-texto.html">Comparar dos textos</a> trabajás pegando el contenido en pantalla:',
-    'b6-1': 'Pegá la versión anterior en <strong>Texto original</strong>.',
-    'b6-2': 'Pegá la versión modificada en <strong>Texto nuevo</strong>.',
-    'b6-3': 'Decidí si dejás tildada la opción <strong>Comparar por palabra (si no, por línea)</strong>.',
-    'b6-4': 'Tocá <strong>Comparar</strong>.',
-    'b6-5': 'Si querés conservar el resultado, tocá <strong>Descargar informe (.html)</strong>.',
-    'b7': 'El resultado es un único texto: lo agregado aparece en <strong>verde</strong> y lo quitado en <strong>rojo</strong>. Lo que no cambió queda sin resaltar.',
-    'b8': 'Por palabra o por línea',
-    'b9-1': '<strong>Por palabra</strong> es lo mejor para textos corridos: artículos, cartas, cláusulas. Un cambio mínimo dentro de una frase no marca el párrafo entero, solo las palabras tocadas.',
-    'b9-2': '<strong>Por línea</strong> conviene para listas, código o versos, donde cada renglón es una unidad. Si cambiás una sola palabra dentro de un renglón, se marca el renglón completo.',
-    'b10': 'Casos de uso',
-    'b11-1': '<strong>Versiones de un contrato o un reglamento.</strong> Ver con exactitud qué cláusulas se tocaron antes de firmar.',
-    'b11-2': '<strong>Edición de un artículo o un trabajo.</strong> Contrastar el borrador con la versión corregida por otra persona.',
-    'b11-3': '<strong>Código o configuración.</strong> Comparar dos versiones de un archivo de texto, línea por línea.',
-    'b11-4': '<strong>Listas.</strong> Encontrar qué elementos se agregaron o se eliminaron entre dos listados.',
-    'b12': 'El informe descargable',
-    'b13': 'Con <strong>Descargar informe (.html)</strong> obtenés una página independiente que se abre en cualquier navegador; desde ahí podés imprimirla o guardarla como PDF para compartirla. Incluye la fecha, la cantidad de cambios agregados y quitados y el tipo de comparación usado. El nombre del archivo empieza con «comparacion-textos» y lleva la fecha y la hora.',
-    'b14': 'Consejos para un resultado limpio',
-    'b15-1': '<strong>Cuidado con los espacios y los saltos de línea.</strong> Si copiás desde un documento o desde un correo, el modo elegido cambia lo que pasa. Por palabra, los espacios sobrantes, los tabuladores y los renglones partidos de otra forma no se marcan (se tratan como un espacio), aunque sí se marca si en un texto falta del todo un espacio que en el otro está. Por línea, un espacio al final o un salto de línea distinto marca el renglón entero, y no hay una opción para ignorarlo, así que conviene limpiar un poco los textos antes de pegarlos, por ejemplo igualando cómo están cortados los renglones.',
-    'b15-2': '<strong>Mayúsculas y minúsculas se distinguen.</strong> Un cambio de «Contrato» a «contrato» aparece como diferencia.',
-    'b15-3': '<strong>Elegí bien el modo.</strong> Si el resultado se ve como un bloque enorme en rojo y verde, probá con el otro modo.',
-    'b15-4': '<strong>Pegá el mismo contenido en el mismo orden.</strong> Si un texto tiene un párrafo movido de lugar, el diff lo muestra como quitado en un sitio y agregado en otro.',
-    'b16': 'Si lo que tenés son documentos, no texto pegado',
-    'b17-1': '<a href="../herramientas/comparar-word.html">Comparar dos documentos Word</a> lee directamente los archivos <code>.docx</code> y compara su texto, no el formato: un cambio de negrita o de tipografía sin cambiar palabras no se marca.',
-    'b17-2': '<a href="../herramientas/comparar-excel-csv.html">Comparar Excel / CSV</a> compara planillas: elegís una columna que identifique cada fila y clasifica cada fila como agregada, eliminada, modificada o sin cambios. Compara el texto que muestra cada celda, no las fórmulas ni los colores.',
-    'b18': 'Límites',
-    'b19-1': 'Compara texto, no significado: si una frase se reescribe con otras palabras, el diff la mostrará como quitada y agregada, aunque diga lo mismo.',
-    'b19-2': 'No hay un límite de tamaño impuesto, pero con textos muy largos la comparación puede tardar según tu equipo.',
-    'b19-3': 'No es una revisión legal: sirve para ubicar los cambios, pero leerlos y entenderlos sigue siendo tu trabajo.',
-    'b20': 'Preguntas frecuentes',
-    'b21': '<strong>¿Qué significa cada color?</strong> Verde: está en el texto nuevo y no estaba en el original. Rojo: estaba en el original y ya no está.',
-    'b22': '<strong>¿Puedo comparar archivos PDF aquí?</strong> Esta herramienta trabaja con texto pegado. Si tenés un PDF, copiá su texto y pegalo.',
-    'b23': '<strong>¿Funciona con otros idiomas y con acentos?</strong> Sí, compara cualquier texto que puedas pegar.',
-    'b24': 'Resumen',
-    'b25': 'Pegá el texto original y el nuevo, elegí comparar por palabra (textos corridos) o por línea (listas y código) y leé el resultado: verde es lo agregado y rojo lo quitado. Si comparás por línea, limpiá los espacios y saltos de línea sobrantes antes de comparar y usá el informe en HTML para guardarlo o compartirlo. Para archivos Word o planillas, hay herramientas específicas.',
+    'b1': 'Te mandan el contrato «corregido» y no dicen qué cambiaron. O llevás cinco versiones de un ensayo y ya no sabés qué quedó de la primera. Releer dos textos lado a lado es lento y fácil de equivocar. <a href="../herramientas/comparador-texto.html">Comparar dos textos</a> lo hace por vos: marca en verde lo agregado y en rojo lo quitado.',
+    'b2': 'Cómo funciona una comparación',
+    'b3': 'Una comparación (en informática se dice *diff*) busca lo que los dos textos tienen en común y marca lo que sobra o falta. El resultado es un solo texto. Lo que aparece solo en la versión nueva es agregado, lo que aparece solo en la original es quitado, y lo que no cambió queda sin marca.',
+    'b4': 'Paso a paso',
+    'b5-1': 'Pegá la versión anterior en «Texto original».',
+    'b5-2': 'Pegá la versión modificada en «Texto nuevo».',
+    'b5-3': 'Dejá tildada «Comparar por palabra (si no, por línea)» para textos corridos, o destildala para listas y código.',
+    'b5-4': 'Tocá «Comparar».',
+    'b5-5': 'Si querés guardar el resultado, tocá «Descargar informe (.html)».',
+    'b6': 'Por palabra o por línea',
+    'b7': 'Por palabra sirve para textos corridos, como cartas, cláusulas o artículos. Un cambio dentro de una frase marca solo las palabras tocadas, no el párrafo entero. Las diferencias de espacios, tabulaciones y saltos de línea entre palabras no cuentan, así que pegar desde un documento o un correo no ensucia el resultado. Lo que sí cuenta es una palabra pegada a otra: «holamundo» frente a «hola mundo» sale como cambio.',
+    'b8': 'Por línea sirve para listas, código y versos, donde cada renglón es una unidad. Compara cada renglón entero: si cambia una sola palabra, se marca el renglón completo. Acá los espacios sí importan. Un espacio al final de un renglón, o un salto de línea distinto, hace que el renglón salga como cambiado, y no hay opción para ignorarlo. Dos casos típicos: un texto que termina en salto de línea y el otro no (la última línea sale como quitada y agregada), y un texto con saltos de Windows (CRLF) frente a otro con saltos comunes (LF), que marca todo el bloque.',
+    'b9': 'Para qué sirve',
+    'b10': 'Sirve para ver qué cláusulas se tocaron antes de firmar, para contrastar tu borrador con la versión corregida por otra persona, o para comparar dos listas de precios o de tareas y ver qué entró y qué salió. Con código o una configuración, la comparación por línea muestra qué renglones cambiaron.',
+    'b11': 'Lo que la comparación no ve',
+    'b12-1': 'Compara texto, no significado. Una frase reescrita con otras palabras sale como quitada y agregada, aunque diga lo mismo.',
+    'b12-2': 'Distingue mayúsculas: «Contrato» y «contrato» son cambios, y no hay opción para ignorarlo.',
+    'b12-3': 'Un párrafo movido de lugar aparece quitado en un sitio y agregado en otro.',
+    'b12-4': 'Con textos muy distintos deja de buscar el cambio exacto. Cuando hacen falta unas 5.000 piezas quitadas o agregadas (palabras, signos o renglones), marca de un golpe todo el tramo del medio como quitado y todo el nuevo como agregado, sin avisar.',
+    'b12-5': 'No lee archivos: pegá el texto. Para un .docx, usá <a href="../herramientas/comparar-word.html">Comparar dos documentos Word</a>; para una planilla, <a href="../herramientas/comparar-excel-csv.html">Comparar Excel / CSV</a>. Un PDF escaneado no tiene texto que copiar.',
+    'b13': 'El informe descargable',
+    'b14': 'El informe es una página HTML sola, que se abre en cualquier navegador. Desde ahí podés imprimirla o guardarla como PDF. Trae la fecha, cuántos cambios se agregaron y se quitaron, y si la comparación fue por palabra o por línea. El archivo se llama <code>comparacion-textos</code>, con la fecha y la hora.',
+    'b15': 'Dos cosas para tener en cuenta. La cifra cuenta tramos, no palabras: varias palabras cambiadas seguidas cuentan como uno, pero cada palabra cambiada entre palabras iguales cuenta por separado. Y el informe sale del último resultado, no de lo que hay en los cuadros: si editás un texto después de comparar, volvé a tocar «Comparar» antes de descargar.',
+    'b16': 'Preguntas frecuentes',
+    'b17': '<strong>¿Qué significa cada color?</strong> Verde: está en el texto nuevo y no estaba en el original. Rojo: estaba en el original y ya no está.',
+    'b18': '<strong>¿Puedo comparar un PDF?</strong> La herramienta trabaja con texto pegado. Copiá el texto del PDF y pegalo. Si el PDF es una imagen escaneada, no tiene texto que copiar.',
+    'b19': '<strong>¿Hay un límite de tamaño?</strong> La página no limita la cantidad de caracteres. Los textos largos tardan más según tu equipo, y con textos muy distintos conviene leer el apartado de lo que no ve la comparación.',
+    'b20': 'Resumen',
+    'b21': 'Pegá el texto original y el nuevo, elegí por palabra para textos corridos o por línea para listas y código, y leé el resultado: verde es lo agregado, rojo lo quitado. Si comparás por línea, igualá antes los saltos de línea y los espacios del final. Para Word o planillas hay herramientas específicas.',
     'rel1': 'Comparar dos textos',
     'rel2': 'Comparar dos documentos Word',
     'rel3': 'Comparar Excel / CSV'
   },
   en: {
     'titulo-pagina': 'How to compare two versions of a text — Mini Cookies',
-    'meta-descripcion': 'Find out what was added and what was removed between two texts: word-by-word or line-by-line comparison, a downloadable report and practical uses.',
+    'meta-descripcion': 'Find what was added and removed between two texts: word-by-word or line-by-line comparison, spaces, line breaks and a downloadable report.',
     'h1': 'How to compare two versions of a text',
-    'b1': 'Someone sends you the "corrected" contract and doesn’t tell you what they changed. You edited your essay five times and want to know what’s left of the first version. Rereading both texts side by side is slow and easy to get wrong. That’s what text comparison is for, known in computing as a *diff*: a program that aligns the two versions and marks the differences.',
-    'b2': 'What a comparison (diff) is',
-    'b3': 'A diff finds what two texts have in common and points out what is extra or missing. The result reads as a single "annotated" version: what appears only in the new text counts as <strong>added</strong>, and what appears only in the original counts as <strong>removed</strong>.',
-    'b4': 'How to use Compare two texts',
-    'b5': 'With <a href="../herramientas/comparador-texto.html">Compare two texts</a> you work by pasting the content on screen:',
-    'b6-1': 'Paste the earlier version into "Original text".',
-    'b6-2': 'Paste the modified version into "New text".',
-    'b6-3': 'Decide whether to leave "Compare word by word (otherwise line by line)" ticked.',
-    'b6-4': 'Tap "Compare".',
-    'b6-5': 'If you want to keep the result, tap "Download report (.html)".',
-    'b7': 'The result is a single text: what was added appears in <strong>green</strong> and what was removed in <strong>red</strong>. Whatever didn’t change is left unhighlighted.',
-    'b8': 'By word or by line',
-    'b9-1': '<strong>By word</strong> is best for running text: articles, letters, clauses. A tiny change inside a sentence doesn’t flag the whole paragraph, only the words that were touched.',
-    'b9-2': '<strong>By line</strong> suits lists, code or verses, where each line is a unit. If you change a single word within a line, the whole line is flagged.',
-    'b10': 'Use cases',
-    'b11-1': '<strong>Versions of a contract or a set of rules.</strong> See exactly which clauses were touched before signing.',
-    'b11-2': '<strong>Editing an article or a paper.</strong> Compare your draft with the version corrected by someone else.',
-    'b11-3': '<strong>Code or configuration.</strong> Compare two versions of a text file, line by line.',
-    'b11-4': '<strong>Lists.</strong> Find which items were added or removed between two lists.',
-    'b12': 'The downloadable report',
-    'b13': 'With "Download report (.html)" you get a standalone page that opens in any browser; from there you can print it or save it as a PDF to share. It includes the date, the number of additions and removals, and the type of comparison used. The file name starts with "comparacion-textos" and includes the date and time.',
-    'b14': 'Tips for a clean result',
-    'b15-1': '<strong>Watch out for spaces and line breaks.</strong> If you copy from a document or an email, the mode you choose changes what happens. By word, extra spaces, tabs and lines broken in a different way are not flagged (they are treated as a single space), although it is flagged if a space that one text has is missing altogether in the other. By line, a trailing space or a different line break flags the whole line, and there is no option to ignore it, so it’s a good idea to clean the texts up a bit before pasting, for example by making the line breaks match.',
-    'b15-2': '<strong>Uppercase and lowercase are treated as different.</strong> A change from "Contract" to "contract" shows up as a difference.',
-    'b15-3': '<strong>Choose the right mode.</strong> If the result looks like one huge block of red and green, try the other mode.',
-    'b15-4': '<strong>Paste the same content in the same order.</strong> If a paragraph has been moved in one text, the diff shows it as removed in one place and added in another.',
-    'b16': 'If you have documents, not pasted text',
-    'b17-1': '<a href="../herramientas/comparar-word.html">Compare two Word documents</a> reads <code>.docx</code> files directly and compares their text, not their formatting: a change of bold or font without changing any words isn’t flagged.',
-    'b17-2': '<a href="../herramientas/comparar-excel-csv.html">Compare Excel / CSV</a> compares spreadsheets: you choose a column that identifies each row, and it classifies each row as added, removed, modified or unchanged. It compares the text each cell displays, not formulas or colors.',
-    'b18': 'Limits',
-    'b19-1': 'It compares text, not meaning: if a sentence is rewritten in other words, the diff will show it as removed and added, even if it says the same thing.',
-    'b19-2': 'There is no size limit imposed, but with very long texts the comparison can take a while depending on your computer.',
-    'b19-3': 'It isn’t a legal review: it helps you locate the changes, but reading and understanding them is still your job.',
-    'b20': 'Frequently asked questions',
-    'b21': '<strong>What does each color mean?</strong> Green: it’s in the new text and wasn’t in the original. Red: it was in the original and is no longer there.',
-    'b22': '<strong>Can I compare PDF files here?</strong> This tool works with pasted text. If you have a PDF, copy its text and paste it.',
-    'b23': '<strong>Does it work with other languages and with accents?</strong> Yes, it compares any text you can paste.',
-    'b24': 'Summary',
-    'b25': 'Paste the original and the new text, choose to compare by word (running text) or by line (lists and code) and read the result: green is what was added and red is what was removed. If you compare by line, clean up extra spaces and line breaks before comparing, and use the HTML report to save or share it. For Word files or spreadsheets, there are dedicated tools.',
+    'b1': 'They send you the “corrected” contract and don’t say what changed. Or you have five drafts of an essay and no longer remember what survived from the first. Reading two texts side by side is slow and easy to get wrong. The <a href="../herramientas/comparador-texto.html">Compare two texts</a> tool does it for you: it marks what was added in green and what was removed in red.',
+    'b2': 'How a comparison works',
+    'b3': 'A comparison (in computing it is called a *diff*) looks for what the two texts have in common and marks what is extra or missing. The result is a single text. What appears only in the new version is added, what appears only in the original is removed, and what did not change is left unmarked.',
+    'b4': 'Step by step',
+    'b5-1': 'Paste the earlier version into “Original text”.',
+    'b5-2': 'Paste the modified version into “New text”.',
+    'b5-3': 'Leave “Compare word by word (otherwise line by line)” ticked for running text, or untick it for lists and code.',
+    'b5-4': 'Tap “Compare”.',
+    'b5-5': 'If you want to keep the result, tap “Download report (.html)”.',
+    'b6': 'Word by word or line by line',
+    'b7': 'Word by word suits running text, such as letters, clauses or articles. A change inside a sentence marks only the words touched, not the whole paragraph. Differences in spaces, tabs and line breaks between words don’t count, so pasting from a document or an email doesn’t clutter the result. What does count is a word stuck to another: “helloworld” against “hello world” shows up as a change.',
+    'b8': 'Line by line suits lists, code and poems, where each line is a unit. It compares each whole line: if a single word changes, the whole line is marked. Here spaces matter. A space at the end of a line, or a different line break, makes the line show as changed, and there is no option to ignore it. Two typical cases: a text that ends with a line break and the other that doesn’t (the last line shows as removed and added), and a text with Windows line breaks (CRLF) against one with common ones (LF), which marks the whole block.',
+    'b9': 'What it is for',
+    'b10': 'It helps you see which clauses changed before you sign, check your draft against a corrected version someone else made, or compare two price or task lists to see what came in and what went out. With code or a configuration file, the line-by-line mode shows which lines changed.',
+    'b11': 'What the comparison does not see',
+    'b12-1': 'It compares text, not meaning. A sentence rewritten with other words shows as removed and added, even if it says the same thing.',
+    'b12-2': 'It is case-sensitive: “Contract” and “contract” are changes, and there is no option to ignore that.',
+    'b12-3': 'A paragraph moved to another place shows as removed in one spot and added in another.',
+    'b12-4': 'With very different texts it stops looking for the exact change. When about 5,000 removed or added pieces (words, punctuation marks or lines) are needed, it marks the whole middle section as removed and the whole new one as added in one go, with no warning.',
+    'b12-5': 'It doesn’t read files: paste the text. For a .docx, use <a href="../herramientas/comparar-word.html">Compare two Word documents</a>; for a spreadsheet, <a href="../herramientas/comparar-excel-csv.html">Compare Excel / CSV</a>. A scanned PDF has no text to copy.',
+    'b13': 'The downloadable report',
+    'b14': 'The report is a single HTML page that opens in any browser. From there you can print it or save it as a PDF. It includes the date, how many additions and removals there are, and whether the comparison was word by word or line by line. The file is called <code>comparacion-textos</code>, with the date and time.',
+    'b15': 'Two things to keep in mind. The count works in fragments, not words: several changed words in a row count as one, but each changed word between unchanged words counts on its own. And the report comes from the last result, not from what is in the boxes: if you edit a text after comparing, tap “Compare” again before downloading.',
+    'b16': 'Frequently asked questions',
+    'b17': '<strong>What does each color mean?</strong> Green: it is in the new text and was not in the original. Red: it was in the original and is no longer there.',
+    'b18': '<strong>Can I compare a PDF?</strong> The tool works with pasted text. Copy the text from the PDF and paste it. If the PDF is a scanned image, there is no text to copy.',
+    'b19': '<strong>Is there a size limit?</strong> The page doesn’t limit the number of characters. Long texts take longer depending on your computer, and with very different texts it is worth reading the section on what the comparison does not see.',
+    'b20': 'Summary',
+    'b21': 'Paste the original and the new text, choose word by word for running text or line by line for lists and code, and read the result: green is what was added, red what was removed. If you compare line by line, first match the line breaks and the spaces at the end of the lines. For Word files or spreadsheets there are specific tools.',
     'rel1': 'Compare two texts',
     'rel2': 'Compare two Word documents',
     'rel3': 'Compare Excel / CSV'
@@ -127,57 +107,39 @@ window.i18nPagina = {
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
     <h1 data-i18n="h1">Cómo comparar dos versiones de un texto</h1>
-    <p data-i18n-html="b1">Te mandan el contrato «corregido» y no te dicen qué cambiaron. Editaste tu ensayo cinco veces y querés saber qué quedó de la primera versión. Releer los dos textos lado a lado es lento y fácil de equivocar. Para eso existe la comparación de textos, conocida en informática como *diff*: un programa que alinea las dos versiones y marca las diferencias.</p>
-    <h2 data-i18n="b2">Qué es una comparación (diff)</h2>
-    <p data-i18n-html="b3">Un diff busca la parte en común entre dos textos y señala lo que sobra o falta. El resultado se lee como una sola versión «anotada»: lo que aparece solo en el texto nuevo se considera <strong>agregado</strong> y lo que aparece solo en el original se considera <strong>quitado</strong>.</p>
-    <h2 data-i18n="b4">Cómo se usa Comparar dos textos</h2>
-    <p data-i18n-html="b5">Con <a href="../herramientas/comparador-texto.html">Comparar dos textos</a> trabajás pegando el contenido en pantalla:</p>
+    <p data-i18n-html="b1">Te mandan el contrato «corregido» y no dicen qué cambiaron. O llevás cinco versiones de un ensayo y ya no sabés qué quedó de la primera. Releer dos textos lado a lado es lento y fácil de equivocar. <a href="../herramientas/comparador-texto.html">Comparar dos textos</a> lo hace por vos: marca en verde lo agregado y en rojo lo quitado.</p>
+    <h2 data-i18n="b2">Cómo funciona una comparación</h2>
+    <p data-i18n-html="b3">Una comparación (en informática se dice *diff*) busca lo que los dos textos tienen en común y marca lo que sobra o falta. El resultado es un solo texto. Lo que aparece solo en la versión nueva es agregado, lo que aparece solo en la original es quitado, y lo que no cambió queda sin marca.</p>
+    <h2 data-i18n="b4">Paso a paso</h2>
     <ol>
-      <li data-i18n-html="b6-1">Pegá la versión anterior en <strong>Texto original</strong>.</li>
-      <li data-i18n-html="b6-2">Pegá la versión modificada en <strong>Texto nuevo</strong>.</li>
-      <li data-i18n-html="b6-3">Decidí si dejás tildada la opción <strong>Comparar por palabra (si no, por línea)</strong>.</li>
-      <li data-i18n-html="b6-4">Tocá <strong>Comparar</strong>.</li>
-      <li data-i18n-html="b6-5">Si querés conservar el resultado, tocá <strong>Descargar informe (.html)</strong>.</li>
+      <li data-i18n-html="b5-1">Pegá la versión anterior en «Texto original».</li>
+      <li data-i18n-html="b5-2">Pegá la versión modificada en «Texto nuevo».</li>
+      <li data-i18n-html="b5-3">Dejá tildada «Comparar por palabra (si no, por línea)» para textos corridos, o destildala para listas y código.</li>
+      <li data-i18n-html="b5-4">Tocá «Comparar».</li>
+      <li data-i18n-html="b5-5">Si querés guardar el resultado, tocá «Descargar informe (.html)».</li>
     </ol>
-    <p data-i18n-html="b7">El resultado es un único texto: lo agregado aparece en <strong>verde</strong> y lo quitado en <strong>rojo</strong>. Lo que no cambió queda sin resaltar.</p>
-    <h3 data-i18n="b8">Por palabra o por línea</h3>
+    <h2 data-i18n="b6">Por palabra o por línea</h2>
+    <p data-i18n-html="b7">Por palabra sirve para textos corridos, como cartas, cláusulas o artículos. Un cambio dentro de una frase marca solo las palabras tocadas, no el párrafo entero. Las diferencias de espacios, tabulaciones y saltos de línea entre palabras no cuentan, así que pegar desde un documento o un correo no ensucia el resultado. Lo que sí cuenta es una palabra pegada a otra: «holamundo» frente a «hola mundo» sale como cambio.</p>
+    <p data-i18n-html="b8">Por línea sirve para listas, código y versos, donde cada renglón es una unidad. Compara cada renglón entero: si cambia una sola palabra, se marca el renglón completo. Acá los espacios sí importan. Un espacio al final de un renglón, o un salto de línea distinto, hace que el renglón salga como cambiado, y no hay opción para ignorarlo. Dos casos típicos: un texto que termina en salto de línea y el otro no (la última línea sale como quitada y agregada), y un texto con saltos de Windows (CRLF) frente a otro con saltos comunes (LF), que marca todo el bloque.</p>
+    <h2 data-i18n="b9">Para qué sirve</h2>
+    <p data-i18n-html="b10">Sirve para ver qué cláusulas se tocaron antes de firmar, para contrastar tu borrador con la versión corregida por otra persona, o para comparar dos listas de precios o de tareas y ver qué entró y qué salió. Con código o una configuración, la comparación por línea muestra qué renglones cambiaron.</p>
+    <h2 data-i18n="b11">Lo que la comparación no ve</h2>
     <ul>
-      <li data-i18n-html="b9-1"><strong>Por palabra</strong> es lo mejor para textos corridos: artículos, cartas, cláusulas. Un cambio mínimo dentro de una frase no marca el párrafo entero, solo las palabras tocadas.</li>
-      <li data-i18n-html="b9-2"><strong>Por línea</strong> conviene para listas, código o versos, donde cada renglón es una unidad. Si cambiás una sola palabra dentro de un renglón, se marca el renglón completo.</li>
+      <li data-i18n-html="b12-1">Compara texto, no significado. Una frase reescrita con otras palabras sale como quitada y agregada, aunque diga lo mismo.</li>
+      <li data-i18n-html="b12-2">Distingue mayúsculas: «Contrato» y «contrato» son cambios, y no hay opción para ignorarlo.</li>
+      <li data-i18n-html="b12-3">Un párrafo movido de lugar aparece quitado en un sitio y agregado en otro.</li>
+      <li data-i18n-html="b12-4">Con textos muy distintos deja de buscar el cambio exacto. Cuando hacen falta unas 5.000 piezas quitadas o agregadas (palabras, signos o renglones), marca de un golpe todo el tramo del medio como quitado y todo el nuevo como agregado, sin avisar.</li>
+      <li data-i18n-html="b12-5">No lee archivos: pegá el texto. Para un .docx, usá <a href="../herramientas/comparar-word.html">Comparar dos documentos Word</a>; para una planilla, <a href="../herramientas/comparar-excel-csv.html">Comparar Excel / CSV</a>. Un PDF escaneado no tiene texto que copiar.</li>
     </ul>
-    <h2 data-i18n="b10">Casos de uso</h2>
-    <ul>
-      <li data-i18n-html="b11-1"><strong>Versiones de un contrato o un reglamento.</strong> Ver con exactitud qué cláusulas se tocaron antes de firmar.</li>
-      <li data-i18n-html="b11-2"><strong>Edición de un artículo o un trabajo.</strong> Contrastar el borrador con la versión corregida por otra persona.</li>
-      <li data-i18n-html="b11-3"><strong>Código o configuración.</strong> Comparar dos versiones de un archivo de texto, línea por línea.</li>
-      <li data-i18n-html="b11-4"><strong>Listas.</strong> Encontrar qué elementos se agregaron o se eliminaron entre dos listados.</li>
-    </ul>
-    <h2 data-i18n="b12">El informe descargable</h2>
-    <p data-i18n-html="b13">Con <strong>Descargar informe (.html)</strong> obtenés una página independiente que se abre en cualquier navegador; desde ahí podés imprimirla o guardarla como PDF para compartirla. Incluye la fecha, la cantidad de cambios agregados y quitados y el tipo de comparación usado. El nombre del archivo empieza con «comparacion-textos» y lleva la fecha y la hora.</p>
-    <h2 data-i18n="b14">Consejos para un resultado limpio</h2>
-    <ol>
-      <li data-i18n-html="b15-1"><strong>Cuidado con los espacios y los saltos de línea.</strong> Si copiás desde un documento o desde un correo, el modo elegido cambia lo que pasa. Por palabra, los espacios sobrantes, los tabuladores y los renglones partidos de otra forma no se marcan (se tratan como un espacio), aunque sí se marca si en un texto falta del todo un espacio que en el otro está. Por línea, un espacio al final o un salto de línea distinto marca el renglón entero, y no hay una opción para ignorarlo, así que conviene limpiar un poco los textos antes de pegarlos, por ejemplo igualando cómo están cortados los renglones.</li>
-      <li data-i18n-html="b15-2"><strong>Mayúsculas y minúsculas se distinguen.</strong> Un cambio de «Contrato» a «contrato» aparece como diferencia.</li>
-      <li data-i18n-html="b15-3"><strong>Elegí bien el modo.</strong> Si el resultado se ve como un bloque enorme en rojo y verde, probá con el otro modo.</li>
-      <li data-i18n-html="b15-4"><strong>Pegá el mismo contenido en el mismo orden.</strong> Si un texto tiene un párrafo movido de lugar, el diff lo muestra como quitado en un sitio y agregado en otro.</li>
-    </ol>
-    <h2 data-i18n="b16">Si lo que tenés son documentos, no texto pegado</h2>
-    <ul>
-      <li data-i18n-html="b17-1"><a href="../herramientas/comparar-word.html">Comparar dos documentos Word</a> lee directamente los archivos <code>.docx</code> y compara su texto, no el formato: un cambio de negrita o de tipografía sin cambiar palabras no se marca.</li>
-      <li data-i18n-html="b17-2"><a href="../herramientas/comparar-excel-csv.html">Comparar Excel / CSV</a> compara planillas: elegís una columna que identifique cada fila y clasifica cada fila como agregada, eliminada, modificada o sin cambios. Compara el texto que muestra cada celda, no las fórmulas ni los colores.</li>
-    </ul>
-    <h2 data-i18n="b18">Límites</h2>
-    <ul>
-      <li data-i18n-html="b19-1">Compara texto, no significado: si una frase se reescribe con otras palabras, el diff la mostrará como quitada y agregada, aunque diga lo mismo.</li>
-      <li data-i18n-html="b19-2">No hay un límite de tamaño impuesto, pero con textos muy largos la comparación puede tardar según tu equipo.</li>
-      <li data-i18n-html="b19-3">No es una revisión legal: sirve para ubicar los cambios, pero leerlos y entenderlos sigue siendo tu trabajo.</li>
-    </ul>
-    <h2 data-i18n="b20">Preguntas frecuentes</h2>
-    <p data-i18n-html="b21"><strong>¿Qué significa cada color?</strong> Verde: está en el texto nuevo y no estaba en el original. Rojo: estaba en el original y ya no está.</p>
-    <p data-i18n-html="b22"><strong>¿Puedo comparar archivos PDF aquí?</strong> Esta herramienta trabaja con texto pegado. Si tenés un PDF, copiá su texto y pegalo.</p>
-    <p data-i18n-html="b23"><strong>¿Funciona con otros idiomas y con acentos?</strong> Sí, compara cualquier texto que puedas pegar.</p>
-    <h2 data-i18n="b24">Resumen</h2>
-    <p data-i18n-html="b25">Pegá el texto original y el nuevo, elegí comparar por palabra (textos corridos) o por línea (listas y código) y leé el resultado: verde es lo agregado y rojo lo quitado. Si comparás por línea, limpiá los espacios y saltos de línea sobrantes antes de comparar y usá el informe en HTML para guardarlo o compartirlo. Para archivos Word o planillas, hay herramientas específicas.</p>
+    <h2 data-i18n="b13">El informe descargable</h2>
+    <p data-i18n-html="b14">El informe es una página HTML sola, que se abre en cualquier navegador. Desde ahí podés imprimirla o guardarla como PDF. Trae la fecha, cuántos cambios se agregaron y se quitaron, y si la comparación fue por palabra o por línea. El archivo se llama <code>comparacion-textos</code>, con la fecha y la hora.</p>
+    <p data-i18n-html="b15">Dos cosas para tener en cuenta. La cifra cuenta tramos, no palabras: varias palabras cambiadas seguidas cuentan como uno, pero cada palabra cambiada entre palabras iguales cuenta por separado. Y el informe sale del último resultado, no de lo que hay en los cuadros: si editás un texto después de comparar, volvé a tocar «Comparar» antes de descargar.</p>
+    <h2 data-i18n="b16">Preguntas frecuentes</h2>
+    <p data-i18n-html="b17"><strong>¿Qué significa cada color?</strong> Verde: está en el texto nuevo y no estaba en el original. Rojo: estaba en el original y ya no está.</p>
+    <p data-i18n-html="b18"><strong>¿Puedo comparar un PDF?</strong> La herramienta trabaja con texto pegado. Copiá el texto del PDF y pegalo. Si el PDF es una imagen escaneada, no tiene texto que copiar.</p>
+    <p data-i18n-html="b19"><strong>¿Hay un límite de tamaño?</strong> La página no limita la cantidad de caracteres. Los textos largos tardan más según tu equipo, y con textos muy distintos conviene leer el apartado de lo que no ve la comparación.</p>
+    <h2 data-i18n="b20">Resumen</h2>
+    <p data-i18n-html="b21">Pegá el texto original y el nuevo, elegí por palabra para textos corridos o por línea para listas y código, y leé el resultado: verde es lo agregado, rojo lo quitado. Si comparás por línea, igualá antes los saltos de línea y los espacios del final. Para Word o planillas hay herramientas específicas.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

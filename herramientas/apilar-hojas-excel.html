@@ -29,14 +29,15 @@ window.i18nPagina = {
     'titulo-pagina': 'Combinar hojas de Excel en una tabla gratis — Mini Cookies',
     'meta-descripcion': 'Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Combinar hojas en una tabla',
-    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.',
+    'intro': 'Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls, .xml u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.',
     'nota-diferencia-antes': 'Distinto de "Unir Excel / CSV": esa herramienta junta ',
     'nota-diferencia-enfasis1': 'archivos',
     'nota-diferencia-medio': ' separados, uno por hoja. Esta combina hojas que ',
     'nota-diferencia-enfasis2': 'ya están dentro de un mismo archivo',
     'nota-diferencia-final': ' en una única tabla.',
     'zona-arrastre': '📊 Arrastrá tu archivo acá o hacé clic para elegirlo',
-    'campo-encabezado': 'Cada hoja tiene fila de encabezado (se usa la de la primera hoja, se descarta el resto)',
+    'campo-encabezado': 'Cada hoja tiene fila de encabezado (se usa la de la primera hoja; en las demás se descarta solo si es igual)',
+    'aviso-encabezado-distinto': 'La primera fila de estas hojas no es igual al encabezado de la primera, así que se conservó como datos: {hojas}.',
     'boton-combinar': 'Combinar en una tabla',
     'resultado-listo': '✅ Listo. ',
     'resultado-enlace': 'Descargar Excel',
@@ -45,14 +46,15 @@ window.i18nPagina = {
     'nombre-hoja-combinado': 'Combinado',
     'error-combinar': 'No se pudo combinar las hojas',
     'guia-titulo': 'Cómo combinar varias hojas de Excel en una sola tabla',
+    'guia-mas-link': 'Cómo unir varios archivos de Excel en uno solo',
     'guia-intro': 'Toma un archivo de Excel con varias hojas que comparten las mismas columnas (por ejemplo, ventas de enero, febrero y marzo, una hoja por mes) y las apila en una sola tabla. Entra un libro de Excel y sale un .xlsx con una única hoja llamada «Combinado» que contiene todas las filas, una debajo de otra. No sirve para juntar archivos distintos: para eso existe la herramienta Unir Excel / CSV.',
     'guia-paso-1': 'Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo. Acepta .xlsx, .xlsm, .xlsb, .xls, .xml y .ods.',
     'guia-paso-2': 'Se listan todas las hojas con una casilla y una pequeña vista previa de sus primeras filas y columnas. Todas vienen tildadas; destildá las que no querés incluir. Hacen falta al menos dos hojas.',
-    'guia-paso-3': 'Dejá marcada «Cada hoja tiene fila de encabezado» (la casilla habla de la «primera hoja») si la primera fila de cada hoja es un título de columna: se conserva la del primer bloque y se descartan las de las demás hojas.',
+    'guia-paso-3': 'Dejá tildada «Cada hoja tiene fila de encabezado» si la primera fila de cada hoja es un título de columnas. Se usa la de la primera hoja, y las de las demás se descartan solo si son iguales (sin contar espacios en los bordes de cada celda). Si una es distinta, se conserva como datos y aparece un aviso.',
     'guia-paso-4': 'Tocá «Combinar en una tabla» y luego «Descargar Excel». El archivo se llama «tabla-combinada.xlsx».',
     'guia-consejo-1': 'Las hojas se apilan en el orden en que aparecen en el libro, no en el orden en que las tildaste.',
     'guia-consejo-2': 'Se copian los valores (números y fechas siguen siendo números) con su formato de número, pero no colores, bordes ni fórmulas: la tabla resultante contiene valores.',
-    'guia-consejo-3': 'La herramienta no compara los títulos de las columnas entre hojas: si una hoja tiene las columnas en otro orden, quedarán desalineadas. Revisá que todas tengan la misma estructura.',
+    'guia-consejo-3': 'La herramienta no reordena columnas: si una hoja tiene las mismas columnas en otro orden, sus filas quedan desalineadas. Revisá que todas tengan la misma estructura.',
     'guia-consejo-4': 'Si desmarcás la casilla de encabezado, se copian todas las filas de todas las hojas, incluidos los títulos.',
     'guia-p1': '¿Cuál es la diferencia con Unir Excel / CSV?',
     'guia-r1': 'Aquella junta archivos separados; esta combina hojas que ya están dentro de un mismo archivo.',
@@ -67,14 +69,15 @@ window.i18nPagina = {
     'titulo-pagina': 'Combine Excel Sheets into One Table Free — Mini Cookies',
     'meta-descripcion': 'Combine several sheets from the same Excel file (.xlsx) into one table, stacking their rows, free and without uploading your file anywhere.',
     'h1': 'Combine sheets into one table',
-    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls or .ods) with several sheets that share the same columns (e.g. January, February, March sales) and we’ll stack them into one table.',
+    'intro': 'Pick an Excel file (.xlsx, .xlsm, .xlsb, .xls, .xml or .ods) with several sheets that share the same columns (e.g. January, February, March sales) and we’ll stack them into one table.',
     'nota-diferencia-antes': 'Different from "Merge Excel / CSV": that tool combines separate ',
     'nota-diferencia-enfasis1': 'files',
     'nota-diferencia-medio': ', one per sheet. This one combines sheets that are ',
     'nota-diferencia-enfasis2': 'already inside the same file',
     'nota-diferencia-final': ' into a single table.',
     'zona-arrastre': '📊 Drag your file here or click to choose it',
-    'campo-encabezado': 'Each sheet has a header row (the first sheet’s is used, the rest are discarded)',
+    'campo-encabezado': 'Each sheet has a header row (the first sheet’s is used; in the others it’s dropped only if it’s identical)',
+    'aviso-encabezado-distinto': 'The first row of these sheets is not the same as the first sheet’s header, so it was kept as data: {hojas}.',
     'boton-combinar': 'Combine into one table',
     'resultado-listo': '✅ Done. ',
     'resultado-enlace': 'Download Excel',
@@ -83,14 +86,15 @@ window.i18nPagina = {
     'nombre-hoja-combinado': 'Combined',
     'error-combinar': 'Couldn’t combine the sheets',
     'guia-titulo': 'How to combine several Excel sheets into one table',
+    'guia-mas-link': 'How to merge several Excel files into one',
     'guia-intro': 'It takes an Excel file with several sheets that share the same columns (for example, January, February and March sales, one sheet per month) and stacks them into a single table. An Excel workbook goes in and an .xlsx comes out with a single sheet called “Combined” that holds all the rows, one below the other. It isn’t for joining different files: for that there’s the Merge Excel / CSV tool.',
     'guia-paso-1': 'Drag your file onto the upload area or click to choose it. It accepts .xlsx, .xlsm, .xlsb, .xls, .xml and .ods.',
     'guia-paso-2': 'All the sheets are listed with a checkbox and a small preview of their first rows and columns. All of them come ticked; untick the ones you don’t want to include. At least two sheets are needed.',
-    'guia-paso-3': 'Leave “Each sheet has a header row” ticked (the checkbox mentions the “first sheet”) if the first row of each sheet is a column title: the one from the first block is kept and those from the other sheets are discarded.',
+    'guia-paso-3': 'Leave “Each sheet has a header row” ticked if the first row of each sheet is a column title. The first sheet’s row is used, and the others are dropped only if they are identical (ignoring spaces at the edges of each cell). If one differs, it is kept as data and a notice appears.',
     'guia-paso-4': 'Tap “Combine into one table” and then “Download Excel”. The file is named “tabla-combinada.xlsx”.',
     'guia-consejo-1': 'Sheets are stacked in the order they appear in the workbook, not in the order you ticked them.',
     'guia-consejo-2': 'Values are copied (numbers and dates stay numbers) with their number format, but not colors, borders or formulas: the resulting table contains values.',
-    'guia-consejo-3': 'The tool doesn’t compare column titles between sheets: if a sheet has its columns in a different order, they will end up misaligned. Check that they all have the same structure.',
+    'guia-consejo-3': 'The tool doesn’t reorder columns: if a sheet has the same columns in a different order, its rows end up misaligned. Check that they all have the same structure.',
     'guia-consejo-4': 'If you untick the header checkbox, all the rows of all the sheets are copied, titles included.',
     'guia-p1': 'What’s the difference with Merge Excel / CSV?',
     'guia-r1': 'That one joins separate files; this one combines sheets that are already inside a single file.',
@@ -117,7 +121,7 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="h1">Combinar hojas en una tabla</h1>
-  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.</p>
+  <p data-i18n="intro">Elegí un archivo de Excel (.xlsx, .xlsm, .xlsb, .xls, .xml u .ods) con varias hojas que comparten las mismas columnas (ej. ventas de enero, febrero, marzo) y las apilamos en una sola tabla.</p>
   <p style="color:var(--texto-suave); font-size:0.9rem;">
     <span data-i18n="nota-diferencia-antes">Distinto de "Unir Excel / CSV": esa herramienta junta </span><em data-i18n="nota-diferencia-enfasis1">archivos</em><span data-i18n="nota-diferencia-medio"> separados, uno por hoja. Esta combina hojas que </span><em data-i18n="nota-diferencia-enfasis2">ya están dentro de un mismo archivo</em><span data-i18n="nota-diferencia-final"> en una única tabla.</span>
   </p>
@@ -133,10 +137,12 @@ window.i18nPagina = {
     <div class="controles">
       <label class="campo" style="flex-direction:row; align-items:center; gap:8px;">
         <input type="checkbox" id="tieneEncabezado" checked>
-        <span data-i18n="campo-encabezado">Cada hoja tiene fila de encabezado (se usa la de la primera hoja, se descarta el resto)</span>
+        <span data-i18n="campo-encabezado">Cada hoja tiene fila de encabezado (se usa la de la primera hoja; en las demás se descarta solo si es igual)</span>
       </label>
       <button class="boton" id="botonCombinar" disabled data-i18n="boton-combinar">Combinar en una tabla</button>
     </div>
+
+    <p class="nota-suave" id="avisoEncabezado" hidden></p>
 
     <div class="resultado" id="resultado">
       <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="tabla-combinada.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
@@ -152,14 +158,14 @@ window.i18nPagina = {
     <ol>
       <li data-i18n="guia-paso-1">Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo. Acepta .xlsx, .xlsm, .xlsb, .xls, .xml y .ods.</li>
       <li data-i18n="guia-paso-2">Se listan todas las hojas con una casilla y una pequeña vista previa de sus primeras filas y columnas. Todas vienen tildadas; destildá las que no querés incluir. Hacen falta al menos dos hojas.</li>
-      <li data-i18n="guia-paso-3">Dejá marcada «Cada hoja tiene fila de encabezado» (la casilla habla de la «primera hoja») si la primera fila de cada hoja es un título de columna: se conserva la del primer bloque y se descartan las de las demás hojas.</li>
+      <li data-i18n="guia-paso-3">Dejá tildada «Cada hoja tiene fila de encabezado» si la primera fila de cada hoja es un título de columnas. Se usa la de la primera hoja, y las de las demás se descartan solo si son iguales (sin contar espacios en los bordes de cada celda). Si una es distinta, se conserva como datos y aparece un aviso.</li>
       <li data-i18n="guia-paso-4">Tocá «Combinar en una tabla» y luego «Descargar Excel». El archivo se llama «tabla-combinada.xlsx».</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Las hojas se apilan en el orden en que aparecen en el libro, no en el orden en que las tildaste.</li>
       <li data-i18n="guia-consejo-2">Se copian los valores (números y fechas siguen siendo números) con su formato de número, pero no colores, bordes ni fórmulas: la tabla resultante contiene valores.</li>
-      <li data-i18n="guia-consejo-3">La herramienta no compara los títulos de las columnas entre hojas: si una hoja tiene las columnas en otro orden, quedarán desalineadas. Revisá que todas tengan la misma estructura.</li>
+      <li data-i18n="guia-consejo-3">La herramienta no reordena columnas: si una hoja tiene las mismas columnas en otro orden, sus filas quedan desalineadas. Revisá que todas tengan la misma estructura.</li>
       <li data-i18n="guia-consejo-4">Si desmarcás la casilla de encabezado, se copian todas las filas de todas las hojas, incluidos los títulos.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
@@ -179,6 +185,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Se conservan las fórmulas?</summary>
       <p data-i18n="guia-r4">No, se copian los valores calculados.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/unir-archivos-excel.html" data-i18n="guia-mas-link">Cómo unir varios archivos de Excel en uno solo</a></p>
   </section>
 </main>
 
@@ -206,6 +213,7 @@ const listaHojas = document.getElementById('listaHojas');
 const botonCombinar = document.getElementById('botonCombinar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
+const avisoEncabezado = document.getElementById('avisoEncabezado');
 
 let libroActual = null;   // LectorHojas (assets/js/lector-hojas.js)
 let hojasCargadas = [];   // una por hoja de libroActual.hojas, ya leída
@@ -289,6 +297,14 @@ async function cargarLibro(archivo) {
   renderizarLista();
   botonCombinar.disabled = hojasSeleccionadas.size < 2;
   resultado.classList.remove('visible');
+  avisoEncabezado.hidden = true;
+}
+
+// La primera fila de la hoja como un solo texto (celdas sin espacios de los bordes, sin las vacías del final), para compararla con la de la primera hoja.
+function textoEncabezado(hoja) {
+  const celdas = hoja.fila(0).map((x) => String(x ?? '').trim());
+  while (celdas.length && celdas[celdas.length - 1] === '') celdas.pop();
+  return celdas.join('\u0001');
 }
 
 botonCombinar.addEventListener('click', async () => {
@@ -300,15 +316,18 @@ botonCombinar.addEventListener('click', async () => {
     // Se copian los valores (números y fechas siguen siendo números) con su formato de número, no el texto formateado.
     const filas = [];
     let anchos = null;
-    let encabezadoPuesto = false;
+    let encabezadoPrimero = null;   // texto de la primera fila de la primera hoja con datos
+    const distintas = [];           // hojas cuya primera fila no es igual a ese encabezado: se conserva
 
     elegidas.forEach((k) => {
       const hoja = hojasCargadas[k];
       if (hoja.nfilas === 0) return;
       let inicio = 0;
       if (tieneEncabezado) {
-        if (encabezadoPuesto) inicio++;
-        encabezadoPuesto = true;
+        const mia = textoEncabezado(hoja);
+        if (encabezadoPrimero === null) encabezadoPrimero = mia;
+        else if (mia === encabezadoPrimero) inicio++;
+        else distintas.push(libroActual.hojas[k].nombre);
       }
       for (let r = inicio; r < hoja.nfilas; r++) {
         const fila = new Array(hoja.ncols);
@@ -320,6 +339,8 @@ botonCombinar.addEventListener('click', async () => {
     const bytesFinales = await XlsxEscritor.crearLibro([{ nombre: t('nombre-hoja-combinado'), filas, anchos: anchos || [] }]);
     const blob = new Blob([bytesFinales], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
+    avisoEncabezado.textContent = distintas.length ? t('aviso-encabezado-distinto').replace('{hojas}', distintas.join(', ')) : '';
+    avisoEncabezado.hidden = distintas.length === 0;
     resultado.classList.add('visible');
   } catch (error) {
     alert(t('error-combinar') + ': ' + error.message);

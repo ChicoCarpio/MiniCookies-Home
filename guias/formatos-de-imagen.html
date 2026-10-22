@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">JPG, PNG o WebP: qué formato de imagen usar y cómo pasar de uno a otro — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cuál conviene para fotos, logos o imágenes con transparencia, qué se pierde al convertir y cómo cambiar el formato paso a paso, sin subir la imagen.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'JPG, PNG o WebP: qué formato de imagen usar y cómo pasar de uno a otro — Mini Cookies',
+    'meta-descripcion': 'Cuál conviene para fotos, logos o imágenes con transparencia, qué se pierde al convertir y cómo cambiar el formato paso a paso, sin subir la imagen.',
+    'h1': 'JPG, PNG o WebP: qué formato de imagen usar y cómo pasar de uno a otro',
+    'b1': 'Subiste el logo a tu web y se ve con un recuadro blanco alrededor. O la foto del celular pesa más de lo que acepta el formulario. Muchas veces la causa es el formato en que está guardada la imagen. Esta guía dice qué formato conviene en cada caso y cómo convertir con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a>, con lo que la herramienta hace y lo que no.',
+    'b2': 'Qué hace cada formato',
+    'b3-c1': 'Formato',
+    'b3-c2': 'Compresión',
+    'b3-c3': 'Transparencia',
+    'b3-c4': 'Sirve para',
+    'b3-f1c1': 'JPG',
+    'b3-f1c2': 'Con pérdida',
+    'b3-f1c3': 'No',
+    'b3-f1c4': 'Fotos',
+    'b3-f2c1': 'PNG',
+    'b3-f2c2': 'Sin pérdida',
+    'b3-f2c3': 'Sí',
+    'b3-f2c4': 'Logos, capturas y gráficos con texto',
+    'b3-f3c1': 'WebP',
+    'b3-f3c2': 'Con o sin pérdida',
+    'b3-f3c3': 'Sí',
+    'b3-f3c4': 'Imágenes para páginas web',
+    'b4': 'Con pérdida quiere decir que el archivo se aligera descartando detalle que el ojo casi no nota. Sin pérdida, todo se guarda, por eso un PNG de una foto suele pesar bastante más que un JPG de la misma foto.',
+    'b5': 'WebP puede guardar animaciones, pero la herramienta de conversión trabaja con una imagen fija. Y en esa herramienta el WebP sale siempre con pérdida: lo controla el deslizador de «Calidad».',
+    'b6': 'Cuál elegir',
+    'b7-1': 'Una foto que vas a mandar o publicar: JPG, o WebP si necesitás que pese todavía menos. Con una calidad entre 75 y 90 suele verse igual que el original, con mucho menos peso.',
+    'b7-2': 'Un logo, una captura o un gráfico con texto: PNG. Con JPG aparecen manchas alrededor de las letras y de los bordes nítidos.',
+    'b7-3': 'Una imagen con fondo transparente: PNG o WebP. JPG no tiene transparencia y rellena el fondo de blanco.',
+    'b7-4': 'Un archivo que cualquier programa tiene que abrir, incluso uno viejo: JPG o PNG. Los navegadores modernos abren WebP, pero algunos programas antiguos no.',
+    'b8': 'Cómo convertir',
+    'b9': '<a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> toma una imagen PNG, JPG o WebP y la guarda en el formato que elijas. No cambia las medidas y trabaja con una imagen por vez.',
+    'b10-1': 'Arrastrá la imagen a la zona de carga o hacé clic para elegirla. Aparece una vista previa.',
+    'b10-2': 'En «Formato de salida» tocá PNG, JPG o WebP.',
+    'b10-3': 'Si elegiste JPG o WebP, ajustá la «Calidad» entre 10 y 100. Viene en 85. Un valor más alto conserva más detalle y pesa más. PNG no tiene calidad porque no descarta detalle.',
+    'b10-4': 'Tocá «Convertir imagen» y descargá el resultado. Se llama imagen-convertida, con la extensión del formato que produjo el navegador. Si no sabe generar el que elegiste (WebP, por ejemplo), sale PNG y aparece el aviso «Tu navegador no puede generar ese formato, así que la imagen se guardó como PNG».',
+    'b11': 'Si elegís JPG, aparece el aviso «JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco». Tenelo en cuenta antes de convertir, porque el blanco no se puede quitar después.',
+    'b12': 'Qué se pierde al convertir',
+    'b13': 'Pasar de JPG o WebP a PNG no recupera nada. El detalle que se descartó ya no está. El PNG tiene la misma calidad que el original, y pesa más.',
+    'b14': 'Pasar una imagen con transparencia a JPG borra la transparencia: las zonas transparentes quedan blancas. Si todavía necesitás el fondo transparente, conservá el PNG original.',
+    'b15': 'Guardar un JPG una y otra vez lo degrada, porque cada guardado con pérdida descarta un poco más. Convertí siempre desde el original y no desde una copia ya convertida.',
+    'b16': 'Una imagen animada sale como una sola imagen fija, porque la herramienta dibuja un solo cuadro.',
+    'b17': 'Peso, datos ocultos e incrustado',
+    'b18': 'Cambiar de formato no siempre baja el peso. <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> la vuelve a guardar como JPG o WebP, con una «Calidad» entre 10 y 95 (viene en 70), y muestra el peso original, el comprimido y la reducción. No sale en PNG y no cambia las medidas: para achicarla, usá antes Redimensionar imagen.',
+    'b19': 'Las fotos de celular guardan datos ocultos: el modelo de la cámara, la fecha y, a veces, la ubicación GPS. <a href="../herramientas/quitar-metadatos-imagen.html">Quitar metadatos EXIF de una foto</a> muestra lo que tiene y descarga una copia sin ellos. Un JPG con orientación normal se queda igual, píxel por píxel, salvo que la copia directa falle: entonces también se redibuja. Un JPG que depende de la orientación guardada (lo típico en celulares) se redibuja y se guarda con calidad 0,95. Un PNG se redibuja sin pérdida, y un WebP se guarda con calidad 0,95, así que vuelve a perder un poco de detalle.',
+    'b20': 'Si necesitás meter una imagen chica dentro de un HTML o un CSS, <a href="../herramientas/imagen-a-base64.html">Convertir imagen a Base64</a> la pasa a texto sin tocarla. El texto pesa cerca de un tercio más que la imagen: sirve para íconos, no para fotos grandes.',
+    'b21': 'Preguntas frecuentes',
+    'b22': '<strong>¿Puedo convertir varias imágenes a la vez?</strong> No. La herramienta convierte una por vez.',
+    'b23': '<strong>¿Por qué PNG no tiene calidad?</strong> Porque no descarta detalle. Su peso depende de lo que hay en la imagen: una foto pesa mucho más que un logo.',
+    'b24': '<strong>¿Qué formatos acepta?</strong> El selector ofrece PNG, JPG y WebP. Si arrastrás otro tipo de imagen, como GIF o BMP, la vista previa puede cargarla, pero no hay garantía de que la conversión salga bien. Guardala antes como PNG o JPG.',
+    'b25': 'Resumen',
+    'b26': 'JPG para fotos, PNG para logos, capturas y todo lo que tiene texto o transparencia, y WebP cuando buscás el menor peso en una página web. Convertir de JPG o WebP a PNG no devuelve el detalle perdido, y pasar a JPG borra la transparencia. Conservá siempre el original.',
+    'rel1': 'Convertir formato de imagen',
+    'rel2': 'Comprimir imagen',
+    'rel3': 'Quitar metadatos EXIF de una foto',
+    'rel4': 'Convertir imagen a Base64'
+  },
+  en: {
+    'titulo-pagina': 'JPG, PNG or WebP: which image format to use and how to convert between them — Mini Cookies',
+    'meta-descripcion': 'Which one suits photos, logos or transparent images, what is lost when converting, and how to change the format step by step, without uploading it.',
+    'h1': 'JPG, PNG or WebP: which image format to use and how to convert between them',
+    'b1': 'You uploaded the logo to your website and it shows a white box around it. Or the phone photo is heavier than the form accepts. The cause is often the format the image is saved in. This guide says which format suits each case and how to convert with <a href="../herramientas/convertir-formato-imagen.html">Convert image format</a>, including what the tool does and what it doesn’t.',
+    'b2': 'What each format does',
+    'b3-c1': 'Format',
+    'b3-c2': 'Compression',
+    'b3-c3': 'Transparency',
+    'b3-c4': 'Good for',
+    'b3-f1c1': 'JPG',
+    'b3-f1c2': 'Lossy',
+    'b3-f1c3': 'No',
+    'b3-f1c4': 'Photos',
+    'b3-f2c1': 'PNG',
+    'b3-f2c2': 'Lossless',
+    'b3-f2c3': 'Yes',
+    'b3-f2c4': 'Logos, screenshots and graphics with text',
+    'b3-f3c1': 'WebP',
+    'b3-f3c2': 'Lossy or lossless',
+    'b3-f3c3': 'Yes',
+    'b3-f3c4': 'Images for web pages',
+    'b4': 'Lossy means the file gets lighter by discarding detail the eye barely notices. Lossless keeps everything, which is why a PNG of a photo is usually much heavier than a JPG of the same photo.',
+    'b5': 'WebP can store animations, but the conversion tool works with a still image. In that tool WebP always comes out lossy: the “Quality” slider controls it.',
+    'b6': 'Which one to choose',
+    'b7-1': 'A photo you will send or publish: JPG, or WebP if you need it to weigh even less. At a quality between 75 and 90 it usually looks the same as the original, at a much lower weight.',
+    'b7-2': 'A logo, a screenshot or a graphic with text: PNG. JPG leaves blotches around letters and sharp edges.',
+    'b7-3': 'An image with a transparent background: PNG or WebP. JPG has no transparency and fills the background with white.',
+    'b7-4': 'A file that any program has to open, even an old one: JPG or PNG. Modern browsers open WebP, but some older programs don’t.',
+    'b8': 'How to convert',
+    'b9': '<a href="../herramientas/convertir-formato-imagen.html">Convert image format</a> takes a PNG, JPG or WebP image and saves it in the format you choose. It doesn’t change the dimensions, and it converts one image at a time.',
+    'b10-1': 'Drag the image to the upload area or click to choose it. A preview appears.',
+    'b10-2': 'Under “Output format” tap PNG, JPG or WebP.',
+    'b10-3': 'If you chose JPG or WebP, set the “Quality” between 10 and 100. It starts at 85. A higher value keeps more detail and makes a heavier file. PNG has no quality setting because it doesn’t discard detail.',
+    'b10-4': 'Tap “Convert image” and download the result. It is named imagen-convertida, with the extension of the format the browser produced. If the browser can’t produce the one you chose (WebP, for example), the file comes out as PNG and a notice says “Your browser cannot produce that format, so the image was saved as PNG.”',
+    'b11': 'If you choose JPG, a notice appears: “JPG has no transparency — a transparent background will be filled with white.” Keep that in mind before converting, because the white can’t be removed afterwards.',
+    'b12': 'What is lost when converting',
+    'b13': 'Going from JPG or WebP to PNG recovers nothing. The detail that was discarded is gone. The PNG has the same quality as the original, and it weighs more.',
+    'b14': 'Turning an image with transparency into JPG removes the transparency: the transparent areas come out white. If you still need the transparent background, keep the original PNG.',
+    'b15': 'Saving a JPG again and again degrades it, because each lossy save discards a little more. Always convert from the original, not from a copy that was already converted.',
+    'b16': 'An animated image comes out as a single still image, because the tool draws one frame.',
+    'b17': 'Weight, hidden data and embedding',
+    'b18': 'Changing the format doesn’t always make the file lighter. <a href="../herramientas/comprimir-imagen.html">Compress an image</a> saves it again as JPG or WebP, with a “Quality” between 10 and 95 (it starts at 70), and shows the original size, the compressed size and the saving. It doesn’t output PNG and doesn’t change the dimensions: to make it smaller, use Resize an image first.',
+    'b19': 'Phone photos store hidden data: the camera model, the date and, sometimes, the GPS location. <a href="../herramientas/quitar-metadatos-imagen.html">Remove EXIF metadata from a photo</a> shows what the photo carries and downloads a copy without it. A JPG with normal orientation stays exactly the same, pixel by pixel, unless the direct copy fails, and then it is redrawn too. A JPG that depends on the stored orientation (typical of phones) is redrawn and saved at quality 0.95. A PNG is redrawn without loss, and a WebP is saved at quality 0.95, so it loses a little detail again.',
+    'b20': 'If you need to put a small image inside an HTML or CSS file, <a href="../herramientas/imagen-a-base64.html">Convert an image to Base64</a> turns it into text without touching it. The text is about a third larger than the image, so it suits icons, not large photos.',
+    'b21': 'Frequently asked questions',
+    'b22': '<strong>Can I convert several images at once?</strong> No. The tool converts one at a time.',
+    'b23': '<strong>Why does PNG have no quality setting?</strong> Because it doesn’t discard detail. Its weight depends on what is in the image: a photo weighs much more than a logo.',
+    'b24': '<strong>Which formats does it accept?</strong> The file picker offers PNG, JPG and WebP. If you drag in another image type, such as GIF or BMP, the preview may load it, but there is no guarantee the conversion will work. Save it as PNG or JPG first.',
+    'b25': 'Summary',
+    'b26': 'JPG for photos, PNG for logos, screenshots and anything with text or transparency, and WebP when you want the smallest weight on a web page. Converting from JPG or WebP to PNG doesn’t bring back lost detail, and going to JPG removes transparency. Always keep the original.',
+    'rel1': 'Convert image format',
+    'rel2': 'Compress an image',
+    'rel3': 'Remove EXIF metadata from a photo',
+    'rel4': 'Convert an image to Base64'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">JPG, PNG o WebP: qué formato de imagen usar y cómo pasar de uno a otro</h1>
+    <p data-i18n-html="b1">Subiste el logo a tu web y se ve con un recuadro blanco alrededor. O la foto del celular pesa más de lo que acepta el formulario. Muchas veces la causa es el formato en que está guardada la imagen. Esta guía dice qué formato conviene en cada caso y cómo convertir con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a>, con lo que la herramienta hace y lo que no.</p>
+    <h2 data-i18n="b2">Qué hace cada formato</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b3-c1">Formato</th><th data-i18n-html="b3-c2">Compresión</th><th data-i18n-html="b3-c3">Transparencia</th><th data-i18n-html="b3-c4">Sirve para</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b3-f1c1">JPG</td><td data-i18n-html="b3-f1c2">Con pérdida</td><td data-i18n-html="b3-f1c3">No</td><td data-i18n-html="b3-f1c4">Fotos</td></tr>
+        <tr><td data-i18n-html="b3-f2c1">PNG</td><td data-i18n-html="b3-f2c2">Sin pérdida</td><td data-i18n-html="b3-f2c3">Sí</td><td data-i18n-html="b3-f2c4">Logos, capturas y gráficos con texto</td></tr>
+        <tr><td data-i18n-html="b3-f3c1">WebP</td><td data-i18n-html="b3-f3c2">Con o sin pérdida</td><td data-i18n-html="b3-f3c3">Sí</td><td data-i18n-html="b3-f3c4">Imágenes para páginas web</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b4">Con pérdida quiere decir que el archivo se aligera descartando detalle que el ojo casi no nota. Sin pérdida, todo se guarda, por eso un PNG de una foto suele pesar bastante más que un JPG de la misma foto.</p>
+    <p data-i18n-html="b5">WebP puede guardar animaciones, pero la herramienta de conversión trabaja con una imagen fija. Y en esa herramienta el WebP sale siempre con pérdida: lo controla el deslizador de «Calidad».</p>
+    <h2 data-i18n="b6">Cuál elegir</h2>
+    <ul>
+      <li data-i18n-html="b7-1">Una foto que vas a mandar o publicar: JPG, o WebP si necesitás que pese todavía menos. Con una calidad entre 75 y 90 suele verse igual que el original, con mucho menos peso.</li>
+      <li data-i18n-html="b7-2">Un logo, una captura o un gráfico con texto: PNG. Con JPG aparecen manchas alrededor de las letras y de los bordes nítidos.</li>
+      <li data-i18n-html="b7-3">Una imagen con fondo transparente: PNG o WebP. JPG no tiene transparencia y rellena el fondo de blanco.</li>
+      <li data-i18n-html="b7-4">Un archivo que cualquier programa tiene que abrir, incluso uno viejo: JPG o PNG. Los navegadores modernos abren WebP, pero algunos programas antiguos no.</li>
+    </ul>
+    <h2 data-i18n="b8">Cómo convertir</h2>
+    <p data-i18n-html="b9"><a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> toma una imagen PNG, JPG o WebP y la guarda en el formato que elijas. No cambia las medidas y trabaja con una imagen por vez.</p>
+    <ol>
+      <li data-i18n-html="b10-1">Arrastrá la imagen a la zona de carga o hacé clic para elegirla. Aparece una vista previa.</li>
+      <li data-i18n-html="b10-2">En «Formato de salida» tocá PNG, JPG o WebP.</li>
+      <li data-i18n-html="b10-3">Si elegiste JPG o WebP, ajustá la «Calidad» entre 10 y 100. Viene en 85. Un valor más alto conserva más detalle y pesa más. PNG no tiene calidad porque no descarta detalle.</li>
+      <li data-i18n-html="b10-4">Tocá «Convertir imagen» y descargá el resultado. Se llama imagen-convertida, con la extensión del formato que produjo el navegador. Si no sabe generar el que elegiste (WebP, por ejemplo), sale PNG y aparece el aviso «Tu navegador no puede generar ese formato, así que la imagen se guardó como PNG».</li>
+    </ol>
+    <p data-i18n-html="b11">Si elegís JPG, aparece el aviso «JPG no soporta transparencia — el fondo transparente se va a rellenar de blanco». Tenelo en cuenta antes de convertir, porque el blanco no se puede quitar después.</p>
+    <h2 data-i18n="b12">Qué se pierde al convertir</h2>
+    <p data-i18n-html="b13">Pasar de JPG o WebP a PNG no recupera nada. El detalle que se descartó ya no está. El PNG tiene la misma calidad que el original, y pesa más.</p>
+    <p data-i18n-html="b14">Pasar una imagen con transparencia a JPG borra la transparencia: las zonas transparentes quedan blancas. Si todavía necesitás el fondo transparente, conservá el PNG original.</p>
+    <p data-i18n-html="b15">Guardar un JPG una y otra vez lo degrada, porque cada guardado con pérdida descarta un poco más. Convertí siempre desde el original y no desde una copia ya convertida.</p>
+    <p data-i18n-html="b16">Una imagen animada sale como una sola imagen fija, porque la herramienta dibuja un solo cuadro.</p>
+    <h2 data-i18n="b17">Peso, datos ocultos e incrustado</h2>
+    <p data-i18n-html="b18">Cambiar de formato no siempre baja el peso. <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> la vuelve a guardar como JPG o WebP, con una «Calidad» entre 10 y 95 (viene en 70), y muestra el peso original, el comprimido y la reducción. No sale en PNG y no cambia las medidas: para achicarla, usá antes Redimensionar imagen.</p>
+    <p data-i18n-html="b19">Las fotos de celular guardan datos ocultos: el modelo de la cámara, la fecha y, a veces, la ubicación GPS. <a href="../herramientas/quitar-metadatos-imagen.html">Quitar metadatos EXIF de una foto</a> muestra lo que tiene y descarga una copia sin ellos. Un JPG con orientación normal se queda igual, píxel por píxel, salvo que la copia directa falle: entonces también se redibuja. Un JPG que depende de la orientación guardada (lo típico en celulares) se redibuja y se guarda con calidad 0,95. Un PNG se redibuja sin pérdida, y un WebP se guarda con calidad 0,95, así que vuelve a perder un poco de detalle.</p>
+    <p data-i18n-html="b20">Si necesitás meter una imagen chica dentro de un HTML o un CSS, <a href="../herramientas/imagen-a-base64.html">Convertir imagen a Base64</a> la pasa a texto sin tocarla. El texto pesa cerca de un tercio más que la imagen: sirve para íconos, no para fotos grandes.</p>
+    <h2 data-i18n="b21">Preguntas frecuentes</h2>
+    <p data-i18n-html="b22"><strong>¿Puedo convertir varias imágenes a la vez?</strong> No. La herramienta convierte una por vez.</p>
+    <p data-i18n-html="b23"><strong>¿Por qué PNG no tiene calidad?</strong> Porque no descarta detalle. Su peso depende de lo que hay en la imagen: una foto pesa mucho más que un logo.</p>
+    <p data-i18n-html="b24"><strong>¿Qué formatos acepta?</strong> El selector ofrece PNG, JPG y WebP. Si arrastrás otro tipo de imagen, como GIF o BMP, la vista previa puede cargarla, pero no hay garantía de que la conversión salga bien. Guardala antes como PNG o JPG.</p>
+    <h2 data-i18n="b25">Resumen</h2>
+    <p data-i18n-html="b26">JPG para fotos, PNG para logos, capturas y todo lo que tiene texto o transparencia, y WebP cuando buscás el menor peso en una página web. Convertir de JPG o WebP a PNG no devuelve el detalle perdido, y pasar a JPG borra la transparencia. Conservá siempre el original.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/convertir-formato-imagen.html" data-i18n="rel1">Convertir formato de imagen</a></li>
+      <li><a href="../herramientas/comprimir-imagen.html" data-i18n="rel2">Comprimir imagen</a></li>
+      <li><a href="../herramientas/quitar-metadatos-imagen.html" data-i18n="rel3">Quitar metadatos EXIF de una foto</a></li>
+      <li><a href="../herramientas/imagen-a-base64.html" data-i18n="rel4">Convertir imagen a Base64</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

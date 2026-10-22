@@ -36,11 +36,11 @@ window.i18nPagina = {
     'guia-consejo-3': 'Con archivos .xls, .xlsb u .ods, la herramienta avisa que cada hoja se copia solo con sus datos: se pierden colores, bordes, anchos de columna y formato de celdas. Para conservar todo, guardá antes el libro como .xlsx.',
     'guia-consejo-4': 'Los archivos .xlsm conservan su extensión; los demás se entregan como .xlsx.',
     'guia-p1': '¿Las fórmulas que apuntan a otras hojas siguen funcionando?',
-    'guia-r1': 'No se ajustan: si una fórmula depende de otra hoja que ya no está en ese archivo, el resultado puede dejar de ser válido.',
+    'guia-r1': 'Las que miraban una hoja quitada dejan de ser fórmulas: la celda conserva el último valor calculado, como dato fijo. Las que solo miran hojas que siguen en el archivo no cambian.',
     'guia-p2': '¿El zip tiene un nombre fijo?',
     'guia-r2': 'Sí, se descarga como «hojas-separadas.zip».',
     'guia-p3': '¿Puedo elegir cuáles hojas dividir?',
-    'guia-r3': 'No, se generan archivos de todas.'
+    'guia-r3': 'No: se genera un archivo por cada hoja del libro.'
   },
   en: {
     'titulo-pagina': 'Split Excel Sheets Free — Mini Cookies',
@@ -67,11 +67,11 @@ window.i18nPagina = {
     'guia-consejo-3': 'With .xls, .xlsb or .ods files, the tool warns that each sheet is copied with its data only: colors, borders, column widths and cell formatting are lost. To keep everything, save the workbook as .xlsx first.',
     'guia-consejo-4': '.xlsm files keep their extension; the rest are delivered as .xlsx.',
     'guia-p1': 'Do formulas that point to other sheets keep working?',
-    'guia-r1': 'They aren’t adjusted: if a formula depends on another sheet that is no longer in that file, the result may stop being valid.',
+    'guia-r1': 'A formula that pointed to a removed sheet stops being a formula: the cell keeps its last calculated value as a fixed value. Formulas that only look at sheets still in the file don’t change.',
     'guia-p2': 'Does the zip have a fixed name?',
     'guia-r2': 'Yes, it downloads as “hojas-separadas.zip”.',
     'guia-p3': 'Can I choose which sheets to split?',
-    'guia-r3': 'No, files are generated for all of them.'
+    'guia-r3': 'No. A file is generated for every sheet in the workbook.'
   }
 };
 </script>
@@ -132,7 +132,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Las fórmulas que apuntan a otras hojas siguen funcionando?</summary>
-      <p data-i18n="guia-r1">No se ajustan: si una fórmula depende de otra hoja que ya no está en ese archivo, el resultado puede dejar de ser válido.</p>
+      <p data-i18n="guia-r1">Las que miraban una hoja quitada dejan de ser fórmulas: la celda conserva el último valor calculado, como dato fijo. Las que solo miran hojas que siguen en el archivo no cambian.</p>
     </details>
     <details>
       <summary data-i18n="guia-p2">¿El zip tiene un nombre fijo?</summary>
@@ -140,7 +140,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p3">¿Puedo elegir cuáles hojas dividir?</summary>
-      <p data-i18n="guia-r3">No, se generan archivos de todas.</p>
+      <p data-i18n="guia-r3">No: se genera un archivo por cada hoja del libro.</p>
     </details>
   </section>
 </main>

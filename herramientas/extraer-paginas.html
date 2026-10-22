@@ -57,6 +57,7 @@ window.i18nPagina = {
     'error-rango': 'Página fuera de rango en "{trozo}" (el PDF tiene {max} páginas).',
     'error-extraer': 'No se pudo extraer las páginas',
     'guia-titulo': 'Cómo extraer páginas de un PDF',
+    'guia-mas-link': 'Cómo dividir un PDF: por páginas, por rangos o una página por archivo',
     'guia-intro': 'Saca solo las páginas que te interesan de un PDF y las guarda en un archivo nuevo, sin tocar el original. Sirve para mandar únicamente un capítulo, separar una factura de un lote o quedarte con las páginas firmadas de un contrato. Podés elegir las páginas con clics sobre las miniaturas o escribiendo un rango. Entra un PDF; sale un PDF nuevo.',
     'guia-paso-1': 'Arrastrá tu PDF o hacé clic para elegirlo. Se generan las miniaturas de todas las páginas.',
     'guia-paso-2': 'Hacé clic en las miniaturas que querés conservar (se marcan con un borde) o escribí en «Páginas a extraer» un rango como 1-3,5,8-9. Las dos formas se sincronizan solas.',
@@ -64,7 +65,7 @@ window.i18nPagina = {
     'guia-paso-4': 'Tocá «Extraer páginas» y después «Descargar PDF extraído» (se guarda como «paginas-extraidas.pdf»).',
     'guia-consejo-1': 'El orden en que escribís las páginas es el orden del PDF nuevo: 5,1 pone la página 5 antes que la 1, y un rango al revés como 5-2 las deja en orden descendente.',
     'guia-consejo-2': 'Se pueden repetir páginas (por ejemplo 1,1,2) si necesitás duplicarlas.',
-    'guia-consejo-3': 'Si una página está fuera de rango o el texto no se entiende, la herramienta dice cuál trozo falló y cuántas páginas tiene el PDF.',
+    'guia-consejo-3': 'Si una página está fuera de rango, la herramienta dice cuál trozo falló y cuántas páginas tiene el PDF; si el texto no se entiende, solo dice cuál trozo no entendió.',
     'guia-consejo-4': 'Para PDF muy largos, las miniaturas tardan unos segundos en generarse.',
     'guia-p1': '¿Se modifica mi PDF original?',
     'guia-r1': 'No, se crea uno nuevo.',
@@ -94,6 +95,7 @@ window.i18nPagina = {
     'error-rango': 'Page out of range in "{trozo}" (the PDF has {max} pages).',
     'error-extraer': 'Couldn’t extract the pages',
     'guia-titulo': 'How to extract pages from a PDF',
+    'guia-mas-link': 'How to split a PDF: by pages, by ranges or one page per file',
     'guia-intro': 'It pulls out just the pages you care about from a PDF and saves them in a new file, without touching the original. It’s handy for sending only one chapter, separating an invoice from a batch or keeping the signed pages of a contract. You can choose the pages by clicking the thumbnails or by typing a range. A PDF goes in; a new PDF comes out.',
     'guia-paso-1': 'Drag your PDF or click to choose it. Thumbnails of all the pages are generated.',
     'guia-paso-2': 'Click the thumbnails you want to keep (they’re marked with a border) or type a range such as 1-3,5,8-9 in “Pages to extract”. The two ways stay in sync automatically.',
@@ -101,7 +103,7 @@ window.i18nPagina = {
     'guia-paso-4': 'Tap “Extract pages” and then “Download extracted PDF” (it’s saved as “paginas-extraidas.pdf”).',
     'guia-consejo-1': 'The order in which you type the pages is the order of the new PDF: 5,1 puts page 5 before page 1, and a reversed range like 5-2 leaves them in descending order.',
     'guia-consejo-2': 'Pages can be repeated (for example 1,1,2) if you need to duplicate them.',
-    'guia-consejo-3': 'If a page is out of range or the text isn’t understood, the tool tells you which part failed and how many pages the PDF has.',
+    'guia-consejo-3': 'If a page is out of range, the tool tells you which part failed and how many pages the PDF has; if the text isn’t understood, it only says which part it could not read.',
     'guia-consejo-4': 'For very long PDFs, the thumbnails take a few seconds to generate.',
     'guia-p1': 'Is my original PDF modified?',
     'guia-r1': 'No, a new one is created.',
@@ -167,7 +169,7 @@ window.i18nPagina = {
     <ul>
       <li data-i18n="guia-consejo-1">El orden en que escribís las páginas es el orden del PDF nuevo: 5,1 pone la página 5 antes que la 1, y un rango al revés como 5-2 las deja en orden descendente.</li>
       <li data-i18n="guia-consejo-2">Se pueden repetir páginas (por ejemplo 1,1,2) si necesitás duplicarlas.</li>
-      <li data-i18n="guia-consejo-3">Si una página está fuera de rango o el texto no se entiende, la herramienta dice cuál trozo falló y cuántas páginas tiene el PDF.</li>
+      <li data-i18n="guia-consejo-3">Si una página está fuera de rango, la herramienta dice cuál trozo falló y cuántas páginas tiene el PDF; si el texto no se entiende, solo dice cuál trozo no entendió.</li>
       <li data-i18n="guia-consejo-4">Para PDF muy largos, las miniaturas tardan unos segundos en generarse.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
@@ -183,6 +185,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p3">¿Se conservan los enlaces, formularios y marcadores?</summary>
       <p data-i18n="guia-r3">La herramienta copia las páginas con PDF-lib, y algunos elementos pueden no conservarse.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/dividir-pdf.html" data-i18n="guia-mas-link">Cómo dividir un PDF: por páginas, por rangos o una página por archivo</a></p>
   </section>
 </main>
 
@@ -236,9 +239,11 @@ async function abrirVistaAmpliada(numeroPagina) {
 cerrarModal.addEventListener('click', () => modalVistaPrevia.classList.remove('visible'));
 modalVistaPrevia.addEventListener('click', (e) => { if (e.target === modalVistaPrevia) modalVistaPrevia.classList.remove('visible'); });
 
-// Convierte un conjunto de índices 0-based en el texto compacto "1-3,5,8-9".
+// Convierte una lista de índices 0-based en el texto compacto "1-3,5,8-9".
+// Respeta el orden y los repetidos de la lista: solo junta en un rango las
+// páginas seguidas en ascenso (1,2,3 -> 1-3).
 function compactarRango(indices) {
-  const paginas = [...indices].sort((a, b) => a - b).map(i => i + 1);
+  const paginas = [...indices].map(i => i + 1);
   if (paginas.length === 0) return '';
   const partes = [];
   let inicio = paginas[0];
@@ -260,9 +265,19 @@ function actualizarClasesSeleccion() {
 }
 
 function alternarSeleccion(indice) {
-  if (paginasSeleccionadas.has(indice)) paginasSeleccionadas.delete(indice);
-  else paginasSeleccionadas.add(indice);
-  rangoPaginas.value = compactarRango(paginasSeleccionadas);
+  // Se parte de lo que está escrito (con su orden y repetidos); si no se
+  // entiende, de las páginas marcadas en orden ascendente.
+  let lista;
+  try { lista = analizarRangoPaginas(rangoPaginas.value, totalPaginas); }
+  catch (error) { lista = [...paginasSeleccionadas].sort((x, y) => x - y); }
+  if (paginasSeleccionadas.has(indice)) {
+    paginasSeleccionadas.delete(indice);
+    lista = lista.filter(i => i !== indice);
+  } else {
+    paginasSeleccionadas.add(indice);
+    lista.push(indice);
+  }
+  rangoPaginas.value = compactarRango(lista);
   actualizarClasesSeleccion();
   botonExtraer.disabled = paginasSeleccionadas.size === 0;
 }

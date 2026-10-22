@@ -192,13 +192,13 @@ window.i18nPagina = {
     'error-generar': 'No se pudo generar el PDF',
     'error-vista': 'No se pudo mostrar la vista previa',
     'guia-titulo': 'Cómo convertir una hoja de Excel o un CSV a PDF',
-    'guia-intro': 'Convierte una hoja de Excel o un CSV en un PDF con las mismas páginas que imprimiría Excel: respeta saltos de página, área de impresión, títulos que se repiten, encabezado y pie, bordes, colores, formatos, gráficos e imágenes. A la izquierda ajustás cómo se imprime y a la derecha ves cada página al instante antes de generar el archivo. Acepta .xlsx, .xlsm, .xlsb, .xls, .ods y .csv.',
+    'guia-intro': 'Convierte una hoja de Excel o un CSV en un PDF con las mismas páginas que imprimiría Excel: respeta saltos de página, área de impresión, títulos que se repiten, encabezado y pie, bordes, colores, formatos, gráficos e imágenes. A la izquierda ajustás cómo se imprime y a la derecha ves cada página al instante antes de generar el archivo. Acepta .xlsx, .xlsm, .xlsb, .xls, .xml (de Excel 2003), .ods y .csv.',
     'guia-paso-1': 'Arrastrá el archivo o hacé clic para elegirlo. Aparece la vista previa de la primera página.',
     'guia-paso-2': 'En «Qué imprimir», elegí la «Hoja» (o «Todas las hojas») y si querés imprimir «Toda la hoja» o «Solo celdas seleccionadas». Con esta última opción se habilita la pestaña «Elegir celdas a imprimir»: marcá celdas o escribí un rango como A1:D8 y tocá «Agregar rango».',
     'guia-paso-3': 'En «Página», cambiá la «Orientación», el «Tamaño de página» (A4, Carta, Legal y muchos más, o «Personalizado») y los «Márgenes».',
     'guia-paso-4': 'En «Escala», usá «Ajustar a» (1, 2 o 3 páginas de ancho, toda la hoja en una página, un porcentaje o un número de páginas de ancho y alto) y «Centrar en la página».',
     'guia-paso-5': 'En «Otras opciones» elegí «Cuadrícula» y «Encabezado y pie». Revisá las páginas con las flechas, el zoom o las miniaturas, y tocá «Generar PDF» y después «Descargar PDF».',
-    'guia-consejo-1': 'La mayoría de las listas traen la opción «Lo que dice el archivo»: déjala así si querés el mismo resultado que Excel.',
+    'guia-consejo-1': 'La mayoría de las listas traen la opción «Lo que dice el archivo»: dejála así si querés el mismo resultado que Excel.',
     'guia-consejo-2': 'Un CSV sale con cuadrícula y a una página de ancho; si tiene muchas columnas, probá un papel más grande u orientación horizontal.',
     'guia-consejo-3': 'Los .xls, .xlsb y .ods se convierten antes de imprimir y pueden perder colores, bordes o gráficos (la herramienta lo avisa).',
     'guia-consejo-4': 'La escala personalizada va de 10 a 400 %, y el tamaño personalizado de papel de 25 a 2000 mm por lado. Los márgenes van de 0 a 20 cm.',
@@ -209,7 +209,7 @@ window.i18nPagina = {
     'guia-p3': '¿Se imprimen las columnas ocultas?',
     'guia-r3': 'No, salvo que actives «Imprimir columnas y filas ocultas».',
     'guia-p4': '¿Hay límite de páginas?',
-    'guia-r4': 'La vista previa cuenta un máximo de páginas y avisa si el archivo lo supera; por eso los archivos muy grandes conviene dividirlos.'
+    'guia-r4': 'El PDF tiene un tope de 20.000 páginas. Si el libro pasa de ahí, el PDF trae solo las primeras y la vista previa avisa. Para un libro así, imprimí solo lo que necesitás con «Solo celdas seleccionadas».'
   },
   en: {
     'titulo-pagina': 'Convert Excel or CSV to PDF Free — Mini Cookies',
@@ -337,7 +337,7 @@ window.i18nPagina = {
     'error-generar': 'Couldn’t generate the PDF',
     'error-vista': 'Couldn’t show the preview',
     'guia-titulo': 'How to convert an Excel sheet or a CSV to PDF',
-    'guia-intro': 'It converts an Excel sheet or a CSV into a PDF with the same pages Excel would print: it respects page breaks, print area, repeated titles, header and footer, borders, colors, formats, charts and images. On the left you adjust how it prints and on the right you see each page instantly before generating the file. It accepts .xlsx, .xlsm, .xlsb, .xls, .ods and .csv.',
+    'guia-intro': 'It converts an Excel sheet or a CSV into a PDF with the same pages Excel would print: it respects page breaks, print area, repeated titles, header and footer, borders, colors, formats, charts and images. On the left you adjust how it prints and on the right you see each page instantly before generating the file. It accepts .xlsx, .xlsm, .xlsb, .xls, .xml (Excel 2003), .ods and .csv.',
     'guia-paso-1': 'Drag the file or click to choose it. The preview of the first page appears.',
     'guia-paso-2': 'Under “What to print”, choose the “Sheet” (or “All sheets”) and whether you want to print the “Entire sheet” or “Selected cells only”. With the latter option the “Choose cells to print” tab is enabled: mark cells or type a range like A1:D8 and tap “Add range”.',
     'guia-paso-3': 'Under “Page”, change the “Orientation”, the “Page size” (A4, Letter, Legal and many more, or “Custom”) and the “Margins”.',
@@ -354,7 +354,7 @@ window.i18nPagina = {
     'guia-p3': 'Are hidden columns printed?',
     'guia-r3': 'No, unless you turn on “Print hidden columns and rows”.',
     'guia-p4': 'Is there a page limit?',
-    'guia-r4': 'The preview counts up to a maximum number of pages and warns you if the file exceeds it; that’s why very large files are best split.'
+    'guia-r4': 'The PDF stops at 20,000 pages. If the book goes past that, the PDF has only the first ones and the preview warns you. For a book that size, print only what you need with “Selected cells only”.'
   }
 };
 </script>
@@ -579,7 +579,7 @@ window.i18nPagina = {
 
   <section class="guia-uso">
     <h2 data-i18n="guia-titulo">Cómo convertir una hoja de Excel o un CSV a PDF</h2>
-    <p data-i18n="guia-intro">Convierte una hoja de Excel o un CSV en un PDF con las mismas páginas que imprimiría Excel: respeta saltos de página, área de impresión, títulos que se repiten, encabezado y pie, bordes, colores, formatos, gráficos e imágenes. A la izquierda ajustás cómo se imprime y a la derecha ves cada página al instante antes de generar el archivo. Acepta .xlsx, .xlsm, .xlsb, .xls, .ods y .csv.</p>
+    <p data-i18n="guia-intro">Convierte una hoja de Excel o un CSV en un PDF con las mismas páginas que imprimiría Excel: respeta saltos de página, área de impresión, títulos que se repiten, encabezado y pie, bordes, colores, formatos, gráficos e imágenes. A la izquierda ajustás cómo se imprime y a la derecha ves cada página al instante antes de generar el archivo. Acepta .xlsx, .xlsm, .xlsb, .xls, .xml (de Excel 2003), .ods y .csv.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
       <li data-i18n="guia-paso-1">Arrastrá el archivo o hacé clic para elegirlo. Aparece la vista previa de la primera página.</li>
@@ -590,7 +590,7 @@ window.i18nPagina = {
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">La mayoría de las listas traen la opción «Lo que dice el archivo»: déjala así si querés el mismo resultado que Excel.</li>
+      <li data-i18n="guia-consejo-1">La mayoría de las listas traen la opción «Lo que dice el archivo»: dejála así si querés el mismo resultado que Excel.</li>
       <li data-i18n="guia-consejo-2">Un CSV sale con cuadrícula y a una página de ancho; si tiene muchas columnas, probá un papel más grande u orientación horizontal.</li>
       <li data-i18n="guia-consejo-3">Los .xls, .xlsb y .ods se convierten antes de imprimir y pueden perder colores, bordes o gráficos (la herramienta lo avisa).</li>
       <li data-i18n="guia-consejo-4">La escala personalizada va de 10 a 400 %, y el tamaño personalizado de papel de 25 a 2000 mm por lado. Los márgenes van de 0 a 20 cm.</li>
@@ -610,7 +610,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Hay límite de páginas?</summary>
-      <p data-i18n="guia-r4">La vista previa cuenta un máximo de páginas y avisa si el archivo lo supera; por eso los archivos muy grandes conviene dividirlos.</p>
+      <p data-i18n="guia-r4">El PDF tiene un tope de 20.000 páginas. Si el libro pasa de ahí, el PDF trae solo las primeras y la vista previa avisa. Para un libro así, imprimí solo lo que necesitás con «Solo celdas seleccionadas».</p>
     </details>
   </section>
 </main>

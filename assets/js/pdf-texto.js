@@ -72,9 +72,11 @@ async function generarPdfDeTexto(texto) {
 }
 
 // Markdown sencillo → PDF. Títulos (#, ## y ###) en negrita y más grandes,
-// listas con viñeta y párrafos. El formato en línea (negrita, cursiva, código,
-// enlaces e imágenes) se quita y queda el texto. No es un renderizado completo
-// de Markdown: las tablas y los bloques de código salen como texto plano.
+// listas con viñeta o numeradas, bloques de código cercados (``` o ~~~) en
+// monoespaciada y párrafos. Una barra invertida escapa el signo que sigue. El
+// formato en línea (negrita, cursiva, código, enlaces e imágenes) se quita y
+// queda el texto. No es un renderizado completo de Markdown: las tablas salen
+// como texto plano.
 function envolverTexto(texto, fuente, tamano, ancho) {
   const lineas = [];
   let actual = '';
@@ -91,13 +93,18 @@ function envolverTexto(texto, fuente, tamano, ancho) {
   return lineas;
 }
 
+// Un signo escapado con barra invertida (\*) se guarda como un carácter privado
+// (U+E000 + su código) mientras se quita el formato, para que no cuente como
+// marca, y se restaura al final (CommonMark: la barra solo escapa signos ASCII).
 function quitarFormatoMarkdown(linea) {
   return linea
+    .replace(/\\([!-\/:-@[-`{-~])/g, (_, c) => String.fromCharCode(0xE000 + c.charCodeAt(0)))
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
     .replace(/(\*\*|__)(.+?)\1/g, '$2')
     .replace(/(\*|_)(.+?)\1/g, '$2')
-    .replace(/`([^`]+)`/g, '$1');
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/[-]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xE000));
 }
 
 async function generarPdfDeMarkdown(markdown) {
@@ -105,6 +112,7 @@ async function generarPdfDeMarkdown(markdown) {
   const pdf = await PDFDocument.create();
   const normal = await pdf.embedFont(StandardFonts.Helvetica);
   const negrita = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const monoespaciada = await pdf.embedFont(StandardFonts.Courier);
   const margen = 50;
   const anchoPagina = 595, altoPagina = 842; // A4
   const anchoUtil = anchoPagina - margen * 2;
@@ -129,11 +137,31 @@ async function generarPdfDeMarkdown(markdown) {
     if (parrafo.length) escribir(parrafo.join(' '));
     parrafo = [];
   };
+  let cerca = null; // abierta una cerca de código (``` o ~~~): { c, largo }
   markdown.replace(/\r\n?/g, '\n').split('\n').forEach((crudo) => {
     const linea = crudo.trim();
+    if (cerca) {
+      const cierre = /^(`{3,}|~{3,})$/.exec(linea);
+      if (cierre && cierre[1][0] === cerca.c && cierre[1].length >= cerca.largo) { cerca = null; y -= 4; return; }
+      escribir(crudo.replace(/\s+$/, '') || ' ', { fuente: monoespaciada, tamano: 10, sangria: 8 });
+      return;
+    }
+    const abre = /^(`{3,}(?!.*`)|~{3,})/.exec(linea);
+    if (abre) {
+      cerrarParrafo();
+      cerca = { c: abre[1][0], largo: abre[1].length };
+      y -= 4;
+      return;
+    }
     const titulo = linea.match(/^(#{1,3})\s+(.*)$/);
     const item = linea.match(/^[-*+]\s+(.*)$/);
+    const numerado = linea.match(/^(\d{1,9})[.)]\s+(.*)$/);
     if (!linea) { cerrarParrafo(); return; }
+    if (numerado) {
+      cerrarParrafo();
+      escribir(numerado[1] + '. ' + quitarFormatoMarkdown(numerado[2]), { sangria: 14 });
+      return;
+    }
     if (titulo) {
       cerrarParrafo();
       const tamano = { 1: 20, 2: 16, 3: 13 }[titulo[1].length];

@@ -26,16 +26,18 @@ window.i18nPagina = {
     'campo-mayusculas': 'Ignorar mayúsculas/minúsculas (orden alfabético)',
     'boton-ordenar': 'Ordenar y descargar',
     'resultado-enlace': 'Descargar .txt',
-    'nota': 'El orden numérico toma el primer número que encuentra al principio de cada línea — las líneas que no empiezan con un número quedan al final, en el orden en que aparecían.',
+    'nota': 'El orden numérico usa el número con el que empieza cada línea (admite espacios y signo delante) — las líneas que no empiezan con un número quedan juntas al final, en el orden en que aparecían.',
     'error-ordenar': 'No se pudo ordenar el archivo',
+    'error-no-txt': '❌ Ese archivo no es un .txt. Elegí un archivo de texto plano (.txt).',
     'guia-titulo': 'Cómo ordenar las líneas de un archivo de texto',
+    'guia-mas-link': 'Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías',
     'guia-intro': 'Toma un archivo de texto plano (.txt) y ordena sus líneas, sea alfabéticamente o por números. Sirve para listas de nombres, de códigos, de tareas, de correos o cualquier archivo donde cada línea es un elemento. Subís el .txt, elegís el criterio y bajás un .txt nuevo con las líneas ordenadas.',
     'guia-paso-1': 'Arrastrá tu archivo .txt a la zona de carga o hacé clic para elegirlo.',
     'guia-paso-2': 'En «Orden» elegí una de las cuatro opciones: «Alfabético (A→Z)», «Alfabético (Z→A)», «Numérico (menor a mayor)» o «Numérico (mayor a menor)».',
     'guia-paso-3': 'Si usás orden alfabético, decidí si dejás marcada la casilla «Ignorar mayúsculas/minúsculas (orden alfabético)», que viene activada.',
     'guia-paso-4': 'Tocá «Ordenar y descargar» y después «Descargar .txt».',
     'guia-consejo-1': 'El orden alfabético sigue el diccionario del idioma de la página: las tildes y la ñ quedan en su lugar («árbol» junto a «arco») y los números dentro del texto se ordenan como números («tema 2» va antes que «tema 10»).',
-    'guia-consejo-2': 'El orden numérico toma el primer número que encuentra al principio de cada línea; entiende coma o punto decimal y separadores de miles (por ejemplo 1.234,50). Las líneas que no empiezan con un número quedan al final, en su orden original.',
+    'guia-consejo-2': 'El orden numérico usa el número con el que empieza cada línea (puede haber espacios y un signo delante). Un punto entre grupos de exactamente tres cifras es separador de miles («1.200» es 1200); si no, es decimal («3.5»). Una coma seguida de una o dos cifras es decimal («3,5») y de exactamente tres es separador de miles («1,200»). Si hay punto y coma, el último es el decimal («1.234,50»). Las líneas que no empiezan con un número quedan juntas al final, en su orden original.',
     'guia-consejo-3': 'Si desmarcás «Ignorar mayúsculas/minúsculas», las mayúsculas se ordenan antes que las minúsculas de la misma letra.',
     'guia-consejo-4': 'Se conservan el tipo de salto de línea del archivo original y el salto final, si lo había.',
     'guia-p1': '¿Puedo ordenar un archivo de Word o de Excel?',
@@ -45,7 +47,7 @@ window.i18nPagina = {
     'guia-p3': '¿Las líneas vacías dónde quedan?',
     'guia-r3': 'En el orden alfabético, las vacías se ordenan primero (o últimas en descendente); en el numérico, van al final porque no tienen número.',
     'guia-p4': '¿Qué pasa con una línea como «Capítulo 3»?',
-    'guia-r4': 'En orden numérico no cuenta, porque el número tiene que estar al principio de la línea.'
+    'guia-r4': 'No se le encuentra número, porque tiene que estar al principio de la línea: en orden numérico va al final, junto con las demás líneas sin número y en su orden original.'
   },
   en: {
     'titulo-pagina': 'Sort Text Lines Free — Mini Cookies',
@@ -62,16 +64,18 @@ window.i18nPagina = {
     'campo-mayusculas': 'Ignore upper/lower case (alphabetical order)',
     'boton-ordenar': 'Sort and download',
     'resultado-enlace': 'Download .txt',
-    'nota': 'Numeric order uses the first number found at the start of each line — lines that don’t start with a number go at the end, in the order they appeared.',
+    'nota': 'Numeric order uses the number each line starts with (spaces and a sign before it are allowed) — lines that don’t start with a number go together at the end, in the order they appeared.',
     'error-ordenar': 'Couldn’t sort the file',
+    'error-no-txt': '❌ That file isn’t a .txt. Choose a plain text file (.txt).',
     'guia-titulo': 'How to sort the lines of a text file',
+    'guia-mas-link': 'How to clean a text list: remove duplicates, sort and delete empty lines',
     'guia-intro': 'It takes a plain text file (.txt) and sorts its lines, either alphabetically or by numbers. It works for lists of names, codes, tasks, emails or any file where each line is an item. You upload the .txt, choose the criterion and download a new .txt with the lines sorted.',
     'guia-paso-1': 'Drag your .txt file to the upload area or click to choose it.',
     'guia-paso-2': 'In “Order” choose one of the four options: “Alphabetical (A→Z)”, “Alphabetical (Z→A)”, “Numeric (smallest to largest)” or “Numeric (largest to smallest)”.',
     'guia-paso-3': 'If you use alphabetical order, decide whether to leave the “Ignore upper/lower case (alphabetical order)” box checked; it comes enabled.',
     'guia-paso-4': 'Tap “Sort and download” and then “Download .txt”.',
     'guia-consejo-1': 'Alphabetical order follows the dictionary of the page’s language: accents and the ñ fall into their proper place (“árbol” next to “arco”) and numbers inside the text are sorted as numbers (“tema 2” comes before “tema 10”).',
-    'guia-consejo-2': 'Numeric order takes the first number it finds at the start of each line; it understands a decimal comma or point and thousands separators (for example 1.234,50). Lines that don’t start with a number go at the end, in their original order.',
+    'guia-consejo-2': 'Numeric order uses the number each line starts with (spaces and a sign before it are allowed). A dot between groups of exactly three digits is a thousands separator (“1.200” is 1200); otherwise it is a decimal point (“3.5”). A comma followed by one or two digits is a decimal (“3,5”) and by exactly three digits is a thousands separator (“1,200”). If both a dot and a comma appear, the last one is the decimal (“1.234,50”). Lines that don’t start with a number go together at the end, in their original order.',
     'guia-consejo-3': 'If you uncheck “Ignore upper/lower case”, uppercase letters are sorted before lowercase ones of the same letter.',
     'guia-consejo-4': 'The original file’s line-break type and the final line break, if there was one, are preserved.',
     'guia-p1': 'Can I sort a Word or Excel file?',
@@ -81,7 +85,7 @@ window.i18nPagina = {
     'guia-p3': 'Where do empty lines end up?',
     'guia-r3': 'In alphabetical order, empty lines are sorted first (or last in descending order); in numeric order they go to the end because they have no number.',
     'guia-p4': 'What happens with a line like “Capítulo 3”?',
-    'guia-r4': 'In numeric order it doesn’t count, because the number has to be at the start of the line.'
+    'guia-r4': 'No number is found, because it has to be at the start of the line: in numeric order it goes to the end, with the other lines without a number and in their original order.'
   }
 };
 </script>
@@ -108,6 +112,7 @@ window.i18nPagina = {
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
+    <p id="mensajeRechazo" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="controles">
       <label class="campo">
@@ -134,7 +139,7 @@ window.i18nPagina = {
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
 
   <div class="panel-herramienta">
-    <p style="color:var(--texto-suave);" data-i18n="nota">El orden numérico toma el primer número que encuentra al principio de cada línea — las líneas que no empiezan con un número quedan al final, en el orden en que aparecían.</p>
+    <p style="color:var(--texto-suave);" data-i18n="nota">El orden numérico usa el número con el que empieza cada línea (admite espacios y signo delante) — las líneas que no empiezan con un número quedan juntas al final, en el orden en que aparecían.</p>
   </div>
   <section class="guia-uso">
     <h2 data-i18n="guia-titulo">Cómo ordenar las líneas de un archivo de texto</h2>
@@ -149,7 +154,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">El orden alfabético sigue el diccionario del idioma de la página: las tildes y la ñ quedan en su lugar («árbol» junto a «arco») y los números dentro del texto se ordenan como números («tema 2» va antes que «tema 10»).</li>
-      <li data-i18n="guia-consejo-2">El orden numérico toma el primer número que encuentra al principio de cada línea; entiende coma o punto decimal y separadores de miles (por ejemplo 1.234,50). Las líneas que no empiezan con un número quedan al final, en su orden original.</li>
+      <li data-i18n="guia-consejo-2">El orden numérico usa el número con el que empieza cada línea (puede haber espacios y un signo delante). Un punto entre grupos de exactamente tres cifras es separador de miles («1.200» es 1200); si no, es decimal («3.5»). Una coma seguida de una o dos cifras es decimal («3,5») y de exactamente tres es separador de miles («1,200»). Si hay punto y coma, el último es el decimal («1.234,50»). Las líneas que no empiezan con un número quedan juntas al final, en su orden original.</li>
       <li data-i18n="guia-consejo-3">Si desmarcás «Ignorar mayúsculas/minúsculas», las mayúsculas se ordenan antes que las minúsculas de la misma letra.</li>
       <li data-i18n="guia-consejo-4">Se conservan el tipo de salto de línea del archivo original y el salto final, si lo había.</li>
     </ul>
@@ -168,8 +173,9 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Qué pasa con una línea como «Capítulo 3»?</summary>
-      <p data-i18n="guia-r4">En orden numérico no cuenta, porque el número tiene que estar al principio de la línea.</p>
+      <p data-i18n="guia-r4">No se le encuentra número, porque tiene que estar al principio de la línea: en orden numérico va al final, junto con las demás líneas sin número y en su orden original.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/limpiar-listas-de-texto.html" data-i18n="guia-mas-link">Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías</a></p>
   </section>
 </main>
 
@@ -188,6 +194,7 @@ const listaArchivo = document.getElementById('listaArchivo');
 const botonOrdenar = document.getElementById('botonOrdenar');
 const resultado = document.getElementById('resultado');
 const enlaceDescarga = document.getElementById('enlaceDescarga');
+const mensajeRechazo = document.getElementById('mensajeRechazo');
 
 let archivoActual = null;
 
@@ -196,32 +203,38 @@ function mostrarArchivo(archivo) {
   listaArchivo.innerHTML = `<li><span>${escaparHtml(archivo.name)}</span></li>`;
   botonOrdenar.disabled = false;
   resultado.classList.remove('visible');
+  mensajeRechazo.style.display = 'none';
 }
 
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
   if (archivo) mostrarArchivo(archivo);
+  else {
+    mensajeRechazo.textContent = t('error-no-txt');
+    mensajeRechazo.style.display = 'block';
+  }
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Primer número de la línea, con coma o punto decimal y separador de miles:
-// "3,5" → 3.5, "1.234,50" → 1234.5, "1,234.50" → 1234.5, "1.000.000" → 1000000.
-// Antes solo se entendía el punto decimal ("3,5" se ordenaba como 3).
+// Número con el que EMPIEZA la línea (admite espacios y signo delante); si no
+// empieza con uno, null. Un punto o coma entre grupos de exactamente 3 cifras es
+// separador de miles ("1.200" → 1200); si no, es decimal ("3,5" → 3.5). Con
+// punto y coma a la vez, el último es el decimal ("1.234,50" → 1234.5).
 function numeroDeLinea(linea) {
-  const m = linea.match(/-?\d[\d.,]*/);
+  const m = linea.match(/^\s*([+-]?\d+(?:[.,]\d+)*)/);
   if (!m) return null;
-  let s = m[0].replace(/[.,]+$/, '');
-  const punto = s.lastIndexOf('.'), coma = s.lastIndexOf(',');
-  if (punto >= 0 && coma >= 0) {
-    // Hay de los dos: el último es el decimal.
-    s = punto > coma ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.');
-  } else if (coma >= 0) {
-    // Solo comas: una sola y sin 3 cifras detrás es decimal ("3,5"); si no, son miles ("1,234").
-    const partes = s.split(',');
-    s = partes.length === 2 && partes[1].length !== 3 ? partes.join('.') : partes.join('');
-  } else if (punto >= 0 && s.split('.').length > 2) {
-    s = s.replace(/\./g, ''); // varios puntos: separador de miles
+  let s = m[1];
+  const tienePunto = s.includes('.'), tieneComa = s.includes(',');
+  if (tienePunto && tieneComa) {
+    const decimal = s.lastIndexOf('.') > s.lastIndexOf(',') ? '.' : ',';
+    const miles = decimal === '.' ? ',' : '.';
+    s = s.split(miles).join('').replace(decimal, '.');
+  } else if (tienePunto || tieneComa) {
+    const partes = s.split(tienePunto ? '.' : ',');
+    if (partes.slice(1).every(p => p.length === 3)) s = partes.join('');
+    else if (partes.length === 2) s = partes.join('.');
+    else s = partes[0]; // "1.2.3": no es un número válido, se toma el primer grupo
   }
   const numero = parseFloat(s);
   return Number.isFinite(numero) ? numero : null;

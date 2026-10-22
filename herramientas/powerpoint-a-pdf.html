@@ -23,7 +23,7 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar PDF',
     'resultado-enlace-imagenes': 'Descargar imágenes (.zip)',
     'limitaciones-titulo': 'Limitaciones',
-    'item1': 'Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes) y armar el PDF con eso — también se pueden descargar esas imágenes sueltas en un .zip.',
+    'item1': 'Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes). En el PDF, el texto y las formas se escriben como vectores (las imágenes se usan solo como respaldo si una página no se puede escribir así); además se pueden descargar las diapositivas como imágenes en un .zip. Las diapositivas ocultas también se convierten.',
     'item2-antes': 'Si el archivo no se puede renderizar bien, se genera igual un PDF con el ',
     'item2-enfasis': 'texto de cada diapositiva',
     'item2-medio': ' en vez de fallar (se avisa cuál de los dos resultó). Si solo te interesa el texto, también está ',
@@ -37,9 +37,10 @@ window.i18nPagina = {
     'mensaje-omitido': '⚠️ Listo, pero {n} elemento(s) de las diapositivas no se pudieron dibujar y quedaron fuera del PDF (un SmartArt sin su dibujo, un objeto incrustado o un gráfico que no se pudo leer).',
     'error-generar': 'No se pudo generar el PDF',
     'guia-titulo': 'Cómo convertir una presentación de PowerPoint a PDF',
+    'guia-mas-link': 'Cómo convertir una presentación de PowerPoint a PDF o a imágenes',
     'guia-intro': 'Un PDF se ve igual en cualquier computadora o celular, no depende de que el destinatario tenga PowerPoint ni de que tenga instaladas las mismas fuentes. Es el formato más cómodo para enviar una presentación por correo, entregarla como tarea o imprimirla. Esta herramienta recibe un archivo .pptx, dibuja cada diapositiva y arma un PDF con una página por diapositiva. Además te ofrece las diapositivas como imágenes PNG en un .zip.',
     'guia-paso-1': 'Arrastrá tu archivo .pptx a la zona de carga o hacé clic para elegirlo. Solo se acepta ese formato.',
-    'guia-paso-2': 'Pulsá «Convertir a PDF». Mientras trabaja ves el mensaje de progreso y, al terminar, una vista previa de las diapositivas.',
+    'guia-paso-2': 'Pulsá «Convertir a PDF». Mientras trabaja ves el mensaje de progreso y, al terminar, una vista previa de las diapositivas (si solo se pudo guardar el texto, no hay vista previa).',
     'guia-paso-3': 'Leé el mensaje de resultado: te dice si el PDF se generó con las diapositivas reales, si algún elemento no se pudo dibujar o si solo se pudo guardar el texto.',
     'guia-paso-4': 'Descargá el PDF, que conserva el nombre de tu presentación con la extensión .pdf, o las imágenes en el .zip si las querés por separado.',
     'guia-consejo-1': 'Revisá la vista previa antes de enviar el PDF: los diseños complejos, las animaciones y algunos elementos poco comunes pueden verse distintos de como aparecen en PowerPoint.',
@@ -64,7 +65,7 @@ window.i18nPagina = {
     'resultado-enlace': 'Download PDF',
     'resultado-enlace-imagenes': 'Download images (.zip)',
     'limitaciones-titulo': 'Limitations',
-    'item1': 'We first try to render the real slides (text, shapes, images) and build the PDF from that — those images can also be downloaded separately as a .zip.',
+    'item1': 'We first try to render the real slides (text, shapes, images). In the PDF, text and shapes are written as vectors (images are only a fallback if a page cannot be written that way); the slides can also be downloaded as images in a .zip. Hidden slides are converted too.',
     'item2-antes': 'If the file can’t be rendered well, a PDF is generated anyway with the ',
     'item2-enfasis': 'text of each slide',
     'item2-medio': ' instead of failing (you’ll be told which of the two happened). If you’re only after the text, there’s also ',
@@ -78,9 +79,10 @@ window.i18nPagina = {
     'mensaje-omitido': '⚠️ Done, but {n} slide element(s) couldn’t be drawn and were left out of the PDF (a SmartArt without its drawing, an embedded object or a chart that couldn’t be read).',
     'error-generar': 'Couldn’t generate the PDF',
     'guia-titulo': 'How to convert a PowerPoint presentation to PDF',
+    'guia-mas-link': 'How to convert a PowerPoint presentation to PDF or to images',
     'guia-intro': 'A PDF looks the same on any computer or phone; it doesn’t depend on the recipient having PowerPoint or the same fonts installed. It is the most convenient format for emailing a presentation, handing it in as homework or printing it. This tool takes a .pptx file, draws each slide and builds a PDF with one page per slide. It also offers the slides as PNG images in a .zip.',
     'guia-paso-1': 'Drag your .pptx file onto the upload area or click to choose it. Only that format is accepted.',
-    'guia-paso-2': 'Press “Convert to PDF”. While it works you see a progress message and, when it finishes, a preview of the slides.',
+    'guia-paso-2': 'Press “Convert to PDF”. While it works you see a progress message and, when it finishes, a preview of the slides (if only the text could be saved, there is no preview).',
     'guia-paso-3': 'Read the result message: it tells you whether the PDF was generated with the real slides, whether some element couldn’t be drawn, or whether only the text could be saved.',
     'guia-paso-4': 'Download the PDF, which keeps your presentation’s name with a .pdf extension, or the images in the .zip if you want them separately.',
     'guia-consejo-1': 'Check the preview before sending the PDF: complex designs, animations and some unusual elements may look different from how they appear in PowerPoint.',
@@ -139,7 +141,7 @@ window.i18nPagina = {
   <div class="panel-herramienta">
     <h3 style="margin-top:0;" data-i18n="limitaciones-titulo">Limitaciones</h3>
     <ul style="color:var(--texto-suave);">
-      <li data-i18n="item1">Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes) y armar el PDF con eso — también se pueden descargar esas imágenes sueltas en un .zip.</li>
+      <li data-i18n="item1">Primero se intenta renderizar las diapositivas reales (texto, formas, imágenes). En el PDF, el texto y las formas se escriben como vectores (las imágenes se usan solo como respaldo si una página no se puede escribir así); además se pueden descargar las diapositivas como imágenes en un .zip. Las diapositivas ocultas también se convierten.</li>
       <li><span data-i18n="item2-antes">Si el archivo no se puede renderizar bien, se genera igual un PDF con el </span><strong data-i18n="item2-enfasis">texto de cada diapositiva</strong><span data-i18n="item2-medio"> en vez de fallar (se avisa cuál de los dos resultó). Si solo te interesa el texto, también está </span><a href="extraer-texto-powerpoint.html" data-i18n="item2-enlace">Extraer texto de PowerPoint</a><span data-i18n="item2-final">.</span></li>
       <li><em data-i18n="item3">Nota: como esto corre 100% en tu navegador (no en un servicio especializado en un servidor, como PowerPoint o LibreOffice reales), el resultado puede no ser 100% fiel al original — diapositivas con diseños complejos, animaciones o elementos poco comunes pueden verse distinto.</em></li>
     </ul>
@@ -151,7 +153,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
       <li data-i18n="guia-paso-1">Arrastrá tu archivo .pptx a la zona de carga o hacé clic para elegirlo. Solo se acepta ese formato.</li>
-      <li data-i18n="guia-paso-2">Pulsá «Convertir a PDF». Mientras trabaja ves el mensaje de progreso y, al terminar, una vista previa de las diapositivas.</li>
+      <li data-i18n="guia-paso-2">Pulsá «Convertir a PDF». Mientras trabaja ves el mensaje de progreso y, al terminar, una vista previa de las diapositivas (si solo se pudo guardar el texto, no hay vista previa).</li>
       <li data-i18n="guia-paso-3">Leé el mensaje de resultado: te dice si el PDF se generó con las diapositivas reales, si algún elemento no se pudo dibujar o si solo se pudo guardar el texto.</li>
       <li data-i18n="guia-paso-4">Descargá el PDF, que conserva el nombre de tu presentación con la extensión .pdf, o las imágenes en el .zip si las querés por separado.</li>
     </ol>
@@ -174,6 +176,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p3">¿El resultado es idéntico a lo que muestra PowerPoint?</summary>
       <p data-i18n="guia-r3">No siempre. La conversión se hace dentro del navegador, sin el programa original, así que conviene comparar el PDF con tu presentación antes de entregarlo.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/powerpoint-a-pdf-e-imagenes.html" data-i18n="guia-mas-link">Cómo convertir una presentación de PowerPoint a PDF o a imágenes</a></p>
   </section>
 </main>
 

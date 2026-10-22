@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo unir varios archivos de Excel en uno solo — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Juntar archivos de Excel en un libro, con una hoja por archivo, o apilar sus filas en una tabla. Qué hacer con columnas distintas y con filas repetidas.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo unir varios archivos de Excel en uno solo — Mini Cookies',
+    'meta-descripcion': 'Juntar archivos de Excel en un libro, con una hoja por archivo, o apilar sus filas en una tabla. Qué hacer con columnas distintas y con filas repetidas.',
+    'h1': 'Cómo unir varios archivos de Excel en uno solo',
+    'b1': 'Doce archivos, uno por mes, y el informe pide una sola planilla. «Unir» puede significar dos cosas: tener todos los archivos en un mismo libro, cada uno en su hoja, o apilar todas sus filas en una sola tabla. Cada cosa la hace una herramienta distinta, y elegir mal obliga a rehacer el trabajo.',
+    'b2': 'Antes, decidí qué querés',
+    'b3-c1': 'Querés',
+    'b3-c2': 'Herramienta',
+    'b3-c3': 'Qué obtenés',
+    'b3-f1c1': 'Un libro con una hoja por archivo',
+    'b3-f1c2': '<a href="../herramientas/unir-excel.html">Unir Excel / CSV</a>',
+    'b3-f1c3': 'archivos-unidos.xlsx',
+    'b3-f2c1': 'Apilar las filas de las hojas de un mismo libro',
+    'b3-f2c2': '<a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a>',
+    'b3-f2c3': 'tabla-combinada.xlsx',
+    'b3-f3c1': 'Apilar las filas de varios archivos',
+    'b3-f3c2': 'Las dos, una después de la otra',
+    'b3-f3c3': 'Una hoja con todas las filas',
+    'b3-f4c1': 'Quitar encabezados repetidos o filas duplicadas',
+    'b3-f4c2': '<a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a>',
+    'b3-f4c3': 'El archivo con esas filas menos',
+    'b4': 'Un libro con una hoja por archivo',
+    'b5': '<a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> acepta .xlsx, .xlsm, .xlsb, .xls, .ods, «Excel 2003 .xml» y .csv, y devuelve un .xlsx. Podés mezclar un Excel con un CSV.',
+    'b6-1': 'Arrastrá los archivos a la zona de carga o elegilos con el selector múltiple. Quedan numerados en una lista, y la ✕ quita los que sobran.',
+    'b6-2': 'Con al menos dos archivos se habilita «Unir en un Excel». Tocalo.',
+    'b6-3': 'Esperá a que termine «Uniendo...».',
+    'b6-4': 'Descargá el resultado con «Descargar Excel combinado».',
+    'b7': 'Cada hoja de cada archivo pasa a ser una hoja del libro nuevo. Si un archivo tiene varias hojas, se llaman «archivo - hoja»; si tiene una sola, lleva el nombre del archivo. Excel no admite más de 31 caracteres, así que los nombres se acortan, y si se repiten se agrega _2, _3. Las hojas siguen el orden de la lista. Para cambiarlo, quitá los archivos y volvé a agregarlos.',
+    'b8': 'Se conservan los valores, los formatos de número, los anchos de columna, las celdas combinadas y las fórmulas que siguen valiendo. Las que dependen de algo que no vino al libro quedan como valor. Se pierden los colores y la negrita de las celdas, y las imágenes y los gráficos incrustados.',
+    'b9': 'Apilar las filas de un mismo libro',
+    'b10': '<a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a> sirve cuando un solo archivo tiene varias hojas con las mismas columnas, por ejemplo una hoja por mes. Hacen falta al menos dos hojas tildadas.',
+    'b11-1': 'Arrastrá el archivo (.xlsx, .xlsm, .xlsb, .xls, .xml u .ods). Aparecen sus hojas, cada una con una mini vista previa de las primeras filas y columnas.',
+    'b11-2': 'Destildá las hojas que no querés incluir. Vienen todas tildadas.',
+    'b11-3': 'Dejá tildada «Cada hoja tiene fila de encabezado (se usa la de la primera hoja; en las demás se descarta solo si es igual)» si la primera fila de cada hoja tiene los títulos de columna.',
+    'b11-4': 'Tocá «Combinar en una tabla» y después «Descargar Excel». El archivo tiene una única hoja, llamada «Combinado».',
+    'b12': 'Las hojas se apilan en el orden en que están en el libro, no en el orden en que las tildaste. Se copian los valores con su formato de número, pero no los colores, los bordes ni las fórmulas. Las hojas vacías se omiten.',
+    'b13': 'Con la casilla tildada, la primera fila de cada hoja posterior a la primera se descarta solo si es igual al encabezado de la primera hoja, letra por letra y sin contar espacios en los bordes de cada celda. Si no es igual, se conserva como un dato y el aviso lista esas hojas. Si ninguna hoja tiene títulos, destildala. Si lo hacés, los títulos de cada hoja quedan como filas, y los podés quitar después con <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a>.',
+    'b14': 'Varios archivos en una sola tabla',
+    'b15': 'Ninguna de las dos herramientas apila archivos distintos de una vez, pero juntas lo resuelven, si cada archivo tiene una sola hoja y las mismas columnas en el mismo orden:',
+    'b16-1': 'Con <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> armá un libro con cada archivo en su hoja.',
+    'b16-2': 'Subí ese libro a <a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a>, dejá tildadas las hojas y combinalas.',
+    'b16-3': 'Revisá la hoja «Combinado». Si la necesitás en CSV, <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a> pasa una hoja por vez.',
+    'b17': 'Cuando las columnas no coinciden',
+    'b18': '<a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a> compara la primera fila de cada hoja solo para decidir si la descarta. No revisa el orden de las columnas: apila las filas por posición, así que si una hoja tiene las columnas en otro orden, cada dato cae debajo de la columna que no le corresponde, y una fecha puede terminar en la columna de importes. Antes de combinar, compará los títulos de las primeras columnas de cada hoja en las mini vistas previas. El sitio no tiene una herramienta para reordenar columnas, así que si hace falta, movelas en Excel en cada archivo. Después, revisá las primeras filas de cada bloque: si algo quedó corrido, se nota enseguida.',
+    'b19': 'Duplicados y encabezados repetidos',
+    'b20': 'Al apilar es común que el título de las columnas aparezca a mitad de los datos, o que una fila esté en dos archivos. <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a> las saca de una hoja:',
+    'b21-1': 'Elegí la hoja en «Hoja a limpiar» e indicá en «La tabla empieza en la fila» dónde arranca la tabla. Dejá tildado «Esa fila es el encabezado de columnas (no es un dato)» si esa fila tiene los títulos.',
+    'b21-2': 'En la vista previa, tildá las columnas que identifican una fila repetida. Arrancan todas sin tildar, y hace falta al menos una.',
+    'b21-3': 'Tocá «Quitar duplicados». El mensaje dice cuántas filas quitó.',
+    'b21-4': 'Descargá con «Descargar Excel». El archivo lleva el nombre original y «-sin-duplicados».',
+    'b22': 'Para encabezados repetidos suele bastar con una o dos columnas. Las filas se comparan por el texto que se ve en la celda: «Ana» y «ana» son distintas, y también cuenta un espacio de más. Si dos filas legítimas coinciden en todas las columnas tildadas, como dos ventas idénticas el mismo día, la segunda también se quita.',
+    'b23': 'En un .xlsx o .xlsm las filas se quitan dentro del mismo archivo, como «Eliminar filas» de Excel, así que los colores, las fórmulas, las tablas y los gráficos se conservan. Si el archivo tiene tablas dinámicas o controles que no se pueden mover así, la herramienta arma un libro nuevo con los valores y el formato básico, y lo avisa.',
+    'b24': 'Ordenar o quitar hojas',
+    'b25': 'Si necesitás otro orden de pestañas o quitar algunas hojas, <a href="../herramientas/administrar-hojas-excel.html">Administrar / reordenar hojas de Excel</a> lo hace con .xlsx y .xlsm. Arrastrás las hojas, tocás la ✕ para quitarlas y descargás el archivo con «-reordenado» en el nombre. No renombra hojas. Si una fórmula de una hoja que queda apunta a una que quitaste, puede mostrar error al abrirla en Excel, así que revisalo antes.',
+    'b26': 'Preguntas frecuentes',
+    'b27': '<strong>¿Se modifican mis archivos originales?</strong> No. Lo que descargás es siempre un archivo nuevo.',
+    'b28': '<strong>¿Qué pasa con los CSV?</strong> En <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> cada CSV pasa a ser una hoja con sus valores. Revisá después que los números y las fechas se hayan leído como esperabas.',
+    'b29': '<strong>¿Puedo unir archivos con distinto número de hojas?</strong> Sí. <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> agrega todas las hojas de cada archivo. En <a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a> elegís cuáles apilar.',
+    'b30': 'Resumen',
+    'b31': 'Para tener todo en un libro, usá <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a>. Para una sola tabla, combiná las hojas con <a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a>, y pasá antes por la primera si los datos vienen en archivos separados. Verificá que las columnas estén en el mismo orden y quitá las repeticiones con <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a>.',
+    'rel1': 'Unir Excel / CSV',
+    'rel2': 'Combinar hojas en una tabla',
+    'rel3': 'Quitar encabezados duplicados',
+    'rel4': 'Administrar / reordenar hojas de Excel',
+    'rel5': 'Convertir Excel ↔ CSV'
+  },
+  en: {
+    'titulo-pagina': 'How to merge several Excel files into one — Mini Cookies',
+    'meta-descripcion': 'Put Excel files into one workbook, with a sheet per file, or stack their rows into one table. What to do about mismatched columns and repeated rows.',
+    'h1': 'How to merge several Excel files into one',
+    'b1': 'Twelve files, one per month, and the report needs a single spreadsheet. “Merge” can mean two things: having all the files in one workbook, each on its own sheet, or stacking all their rows into one table. A different tool does each job, and choosing the wrong one means doing the work again.',
+    'b2': 'First, decide what you want',
+    'b3-c1': 'You want',
+    'b3-c2': 'Tool',
+    'b3-c3': 'What you get',
+    'b3-f1c1': 'A workbook with one sheet per file',
+    'b3-f1c2': '<a href="../herramientas/unir-excel.html">Merge Excel / CSV</a>',
+    'b3-f1c3': 'archivos-unidos.xlsx',
+    'b3-f2c1': 'To stack the rows of the sheets in one workbook',
+    'b3-f2c2': '<a href="../herramientas/apilar-hojas-excel.html">Combine sheets into one table</a>',
+    'b3-f2c3': 'tabla-combinada.xlsx',
+    'b3-f3c1': 'To stack the rows of several files',
+    'b3-f3c2': 'Both, one after the other',
+    'b3-f3c3': 'One sheet with all the rows',
+    'b3-f4c1': 'Repeated headers or duplicate rows removed',
+    'b3-f4c2': '<a href="../herramientas/quitar-encabezados-duplicados-excel.html">Remove duplicate headers</a>',
+    'b3-f4c3': 'The file without those rows',
+    'b4': 'A workbook with one sheet per file',
+    'b5': '<a href="../herramientas/unir-excel.html">Merge Excel / CSV</a> accepts .xlsx, .xlsm, .xlsb, .xls, .ods, “Excel 2003 .xml” and .csv, and returns an .xlsx. You can mix an Excel file with a CSV.',
+    'b6-1': 'Drag the files to the upload area or pick them with the multiple selector. They are numbered in a list, and the ✕ removes the extras.',
+    'b6-2': 'With at least two files, “Merge into an Excel file” is enabled. Tap it.',
+    'b6-3': 'Wait for “Merging...” to finish.',
+    'b6-4': 'Download the result with “Download combined Excel file”.',
+    'b7': 'Each sheet of each file becomes a sheet in the new workbook. If a file has several sheets, they are called “file - sheet”; if it has one, the sheet takes the file’s name. Excel doesn’t allow more than 31 characters, so names are shortened, and if they repeat, _2 or _3 is added. Sheets follow the order of the list. To change it, remove the files and add them again.',
+    'b8': 'Values, number formats, column widths, merged cells and the formulas that still work are kept. Formulas that depend on something that didn’t come into the new workbook become values. Cell colours and bold are lost, and so are embedded images and charts.',
+    'b9': 'Stacking the rows of one workbook',
+    'b10': '<a href="../herramientas/apilar-hojas-excel.html">Combine sheets into one table</a> is for when one file has several sheets with the same columns, for example one sheet per month. At least two sheets must be ticked.',
+    'b11-1': 'Drag the file in (.xlsx, .xlsm, .xlsb, .xls, .xml or .ods). Its sheets appear, each with a small preview of its first rows and columns.',
+    'b11-2': 'Untick the sheets you don’t want. They all start ticked.',
+    'b11-3': 'Leave “Each sheet has a header row (the first sheet’s is used; in the others it’s dropped only if it’s identical)” ticked if the first row of each sheet holds the column titles.',
+    'b11-4': 'Tap “Combine into one table”, then “Download Excel”. The file has a single sheet, named “Combined”.',
+    'b12': 'The sheets are stacked in the order they appear in the workbook, not the order you ticked them. Values are copied with their number format, but not colours, borders or formulas. Empty sheets are skipped.',
+    'b13': 'With the box ticked, the first row of each sheet after the first is dropped only if it is the same as the first sheet’s header, letter by letter, ignoring spaces at the edges of each cell. If it isn’t, it is kept as data, and the notice lists those sheets. If no sheet has titles, untick the box. If you do, the titles of each sheet stay as rows, and you can remove them afterwards with <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Remove duplicate headers</a>.',
+    'b14': 'Several files in one table',
+    'b15': 'Neither tool stacks different files in one go, but together they manage it, provided each file has a single sheet and the same columns in the same order:',
+    'b16-1': 'With <a href="../herramientas/unir-excel.html">Merge Excel / CSV</a>, build a workbook with each file on its own sheet.',
+    'b16-2': 'Upload that workbook to <a href="../herramientas/apilar-hojas-excel.html">Combine sheets into one table</a>, leave the sheets ticked and combine them.',
+    'b16-3': 'Check the “Combined” sheet. If you need it as CSV, <a href="../herramientas/convertir-excel-csv.html">Convert Excel ↔ CSV</a> converts one sheet at a time.',
+    'b17': 'When the columns don’t match',
+    'b18': '<a href="../herramientas/apilar-hojas-excel.html">Combine sheets into one table</a> compares a sheet’s first row with the first sheet’s only to decide whether to drop it. It doesn’t check the column order: it stacks rows by position, so if a sheet has its columns in another order, each value lands under the wrong column, and a date can end up in the amount column. Before combining, compare the titles of the first columns of each sheet in the mini previews. The site has no tool for reordering columns, so if needed, move them in Excel in each file. Afterwards, check the first rows of each block: if something shifted, you’ll see it straight away.',
+    'b19': 'Duplicates and repeated headers',
+    'b20': 'When you stack files, column titles often end up in the middle of the data, or a row appears in two files. <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Remove duplicate headers</a> takes them out of a sheet:',
+    'b21-1': 'Pick the sheet in “Sheet to clean” and set where the table starts in “The table starts at row”. Keep “That row is the column header (not data)” ticked if that row holds the titles.',
+    'b21-2': 'In the preview, tick the columns that identify a repeated row. They all start unticked, and at least one is needed.',
+    'b21-3': 'Tap “Remove duplicates”. The message says how many rows were removed.',
+    'b21-4': 'Download with “Download Excel”. The file keeps the original name and adds “-sin-duplicados”.',
+    'b22': 'For repeated headers, one or two columns are usually enough. Rows are compared by the text you see in the cell: “Ana” and “ana” are different, and an extra space counts too. If two genuine rows match in every ticked column, such as two identical sales on the same day, the second one is removed as well.',
+    'b23': 'In a .xlsx or .xlsm the rows are removed inside the same file, like “Delete rows” in Excel, so colours, formulas, tables and charts are kept. If the file has pivot tables or controls that can’t be moved that way, the tool builds a new workbook with the values and basic formatting, and it tells you so.',
+    'b24': 'Reordering or removing sheets',
+    'b25': 'If you need a different tab order or want to remove some sheets, <a href="../herramientas/administrar-hojas-excel.html">Manage / reorder Excel sheets</a> does it for .xlsx and .xlsm. Drag the sheets, tap the ✕ to remove them, and download the file with “-reordenado” in its name. It doesn’t rename sheets. If a formula in a sheet you keep points to one you removed, it may show an error in Excel, so check it first.',
+    'b26': 'Frequently asked questions',
+    'b27': '<strong>Are my original files modified?</strong> No. What you download is always a new file.',
+    'b28': '<strong>What happens with CSV files?</strong> In <a href="../herramientas/unir-excel.html">Merge Excel / CSV</a> each CSV becomes a sheet with its values. Afterwards, check that numbers and dates were read the way you expected.',
+    'b29': '<strong>Can I merge files with a different number of sheets?</strong> Yes. <a href="../herramientas/unir-excel.html">Merge Excel / CSV</a> adds every sheet of each file. In <a href="../herramientas/apilar-hojas-excel.html">Combine sheets into one table</a> you choose which ones to stack.',
+    'b30': 'Summary',
+    'b31': 'To keep everything in one workbook, use <a href="../herramientas/unir-excel.html">Merge Excel / CSV</a>. For a single table, combine the sheets with <a href="../herramientas/apilar-hojas-excel.html">Combine sheets into one table</a>, going through the first tool beforehand if the data is in separate files. Check that the columns are in the same order, and remove repetitions with <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Remove duplicate headers</a>.',
+    'rel1': 'Merge Excel / CSV',
+    'rel2': 'Combine sheets into one table',
+    'rel3': 'Remove duplicate headers',
+    'rel4': 'Manage / reorder Excel sheets',
+    'rel5': 'Convert Excel ↔ CSV'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo unir varios archivos de Excel en uno solo</h1>
+    <p data-i18n-html="b1">Doce archivos, uno por mes, y el informe pide una sola planilla. «Unir» puede significar dos cosas: tener todos los archivos en un mismo libro, cada uno en su hoja, o apilar todas sus filas en una sola tabla. Cada cosa la hace una herramienta distinta, y elegir mal obliga a rehacer el trabajo.</p>
+    <h2 data-i18n="b2">Antes, decidí qué querés</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b3-c1">Querés</th><th data-i18n-html="b3-c2">Herramienta</th><th data-i18n-html="b3-c3">Qué obtenés</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b3-f1c1">Un libro con una hoja por archivo</td><td data-i18n-html="b3-f1c2"><a href="../herramientas/unir-excel.html">Unir Excel / CSV</a></td><td data-i18n-html="b3-f1c3">archivos-unidos.xlsx</td></tr>
+        <tr><td data-i18n-html="b3-f2c1">Apilar las filas de las hojas de un mismo libro</td><td data-i18n-html="b3-f2c2"><a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a></td><td data-i18n-html="b3-f2c3">tabla-combinada.xlsx</td></tr>
+        <tr><td data-i18n-html="b3-f3c1">Apilar las filas de varios archivos</td><td data-i18n-html="b3-f3c2">Las dos, una después de la otra</td><td data-i18n-html="b3-f3c3">Una hoja con todas las filas</td></tr>
+        <tr><td data-i18n-html="b3-f4c1">Quitar encabezados repetidos o filas duplicadas</td><td data-i18n-html="b3-f4c2"><a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a></td><td data-i18n-html="b3-f4c3">El archivo con esas filas menos</td></tr>
+      </tbody>
+    </table></div>
+    <h2 data-i18n="b4">Un libro con una hoja por archivo</h2>
+    <p data-i18n-html="b5"><a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> acepta .xlsx, .xlsm, .xlsb, .xls, .ods, «Excel 2003 .xml» y .csv, y devuelve un .xlsx. Podés mezclar un Excel con un CSV.</p>
+    <ol>
+      <li data-i18n-html="b6-1">Arrastrá los archivos a la zona de carga o elegilos con el selector múltiple. Quedan numerados en una lista, y la ✕ quita los que sobran.</li>
+      <li data-i18n-html="b6-2">Con al menos dos archivos se habilita «Unir en un Excel». Tocalo.</li>
+      <li data-i18n-html="b6-3">Esperá a que termine «Uniendo...».</li>
+      <li data-i18n-html="b6-4">Descargá el resultado con «Descargar Excel combinado».</li>
+    </ol>
+    <p data-i18n-html="b7">Cada hoja de cada archivo pasa a ser una hoja del libro nuevo. Si un archivo tiene varias hojas, se llaman «archivo - hoja»; si tiene una sola, lleva el nombre del archivo. Excel no admite más de 31 caracteres, así que los nombres se acortan, y si se repiten se agrega _2, _3. Las hojas siguen el orden de la lista. Para cambiarlo, quitá los archivos y volvé a agregarlos.</p>
+    <p data-i18n-html="b8">Se conservan los valores, los formatos de número, los anchos de columna, las celdas combinadas y las fórmulas que siguen valiendo. Las que dependen de algo que no vino al libro quedan como valor. Se pierden los colores y la negrita de las celdas, y las imágenes y los gráficos incrustados.</p>
+    <h2 data-i18n="b9">Apilar las filas de un mismo libro</h2>
+    <p data-i18n-html="b10"><a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a> sirve cuando un solo archivo tiene varias hojas con las mismas columnas, por ejemplo una hoja por mes. Hacen falta al menos dos hojas tildadas.</p>
+    <ol>
+      <li data-i18n-html="b11-1">Arrastrá el archivo (.xlsx, .xlsm, .xlsb, .xls, .xml u .ods). Aparecen sus hojas, cada una con una mini vista previa de las primeras filas y columnas.</li>
+      <li data-i18n-html="b11-2">Destildá las hojas que no querés incluir. Vienen todas tildadas.</li>
+      <li data-i18n-html="b11-3">Dejá tildada «Cada hoja tiene fila de encabezado (se usa la de la primera hoja; en las demás se descarta solo si es igual)» si la primera fila de cada hoja tiene los títulos de columna.</li>
+      <li data-i18n-html="b11-4">Tocá «Combinar en una tabla» y después «Descargar Excel». El archivo tiene una única hoja, llamada «Combinado».</li>
+    </ol>
+    <p data-i18n-html="b12">Las hojas se apilan en el orden en que están en el libro, no en el orden en que las tildaste. Se copian los valores con su formato de número, pero no los colores, los bordes ni las fórmulas. Las hojas vacías se omiten.</p>
+    <p data-i18n-html="b13">Con la casilla tildada, la primera fila de cada hoja posterior a la primera se descarta solo si es igual al encabezado de la primera hoja, letra por letra y sin contar espacios en los bordes de cada celda. Si no es igual, se conserva como un dato y el aviso lista esas hojas. Si ninguna hoja tiene títulos, destildala. Si lo hacés, los títulos de cada hoja quedan como filas, y los podés quitar después con <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a>.</p>
+    <h2 data-i18n="b14">Varios archivos en una sola tabla</h2>
+    <p data-i18n-html="b15">Ninguna de las dos herramientas apila archivos distintos de una vez, pero juntas lo resuelven, si cada archivo tiene una sola hoja y las mismas columnas en el mismo orden:</p>
+    <ol>
+      <li data-i18n-html="b16-1">Con <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> armá un libro con cada archivo en su hoja.</li>
+      <li data-i18n-html="b16-2">Subí ese libro a <a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a>, dejá tildadas las hojas y combinalas.</li>
+      <li data-i18n-html="b16-3">Revisá la hoja «Combinado». Si la necesitás en CSV, <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a> pasa una hoja por vez.</li>
+    </ol>
+    <h2 data-i18n="b17">Cuando las columnas no coinciden</h2>
+    <p data-i18n-html="b18"><a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a> compara la primera fila de cada hoja solo para decidir si la descarta. No revisa el orden de las columnas: apila las filas por posición, así que si una hoja tiene las columnas en otro orden, cada dato cae debajo de la columna que no le corresponde, y una fecha puede terminar en la columna de importes. Antes de combinar, compará los títulos de las primeras columnas de cada hoja en las mini vistas previas. El sitio no tiene una herramienta para reordenar columnas, así que si hace falta, movelas en Excel en cada archivo. Después, revisá las primeras filas de cada bloque: si algo quedó corrido, se nota enseguida.</p>
+    <h2 data-i18n="b19">Duplicados y encabezados repetidos</h2>
+    <p data-i18n-html="b20">Al apilar es común que el título de las columnas aparezca a mitad de los datos, o que una fila esté en dos archivos. <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a> las saca de una hoja:</p>
+    <ol>
+      <li data-i18n-html="b21-1">Elegí la hoja en «Hoja a limpiar» e indicá en «La tabla empieza en la fila» dónde arranca la tabla. Dejá tildado «Esa fila es el encabezado de columnas (no es un dato)» si esa fila tiene los títulos.</li>
+      <li data-i18n-html="b21-2">En la vista previa, tildá las columnas que identifican una fila repetida. Arrancan todas sin tildar, y hace falta al menos una.</li>
+      <li data-i18n-html="b21-3">Tocá «Quitar duplicados». El mensaje dice cuántas filas quitó.</li>
+      <li data-i18n-html="b21-4">Descargá con «Descargar Excel». El archivo lleva el nombre original y «-sin-duplicados».</li>
+    </ol>
+    <p data-i18n-html="b22">Para encabezados repetidos suele bastar con una o dos columnas. Las filas se comparan por el texto que se ve en la celda: «Ana» y «ana» son distintas, y también cuenta un espacio de más. Si dos filas legítimas coinciden en todas las columnas tildadas, como dos ventas idénticas el mismo día, la segunda también se quita.</p>
+    <p data-i18n-html="b23">En un .xlsx o .xlsm las filas se quitan dentro del mismo archivo, como «Eliminar filas» de Excel, así que los colores, las fórmulas, las tablas y los gráficos se conservan. Si el archivo tiene tablas dinámicas o controles que no se pueden mover así, la herramienta arma un libro nuevo con los valores y el formato básico, y lo avisa.</p>
+    <h2 data-i18n="b24">Ordenar o quitar hojas</h2>
+    <p data-i18n-html="b25">Si necesitás otro orden de pestañas o quitar algunas hojas, <a href="../herramientas/administrar-hojas-excel.html">Administrar / reordenar hojas de Excel</a> lo hace con .xlsx y .xlsm. Arrastrás las hojas, tocás la ✕ para quitarlas y descargás el archivo con «-reordenado» en el nombre. No renombra hojas. Si una fórmula de una hoja que queda apunta a una que quitaste, puede mostrar error al abrirla en Excel, así que revisalo antes.</p>
+    <h2 data-i18n="b26">Preguntas frecuentes</h2>
+    <p data-i18n-html="b27"><strong>¿Se modifican mis archivos originales?</strong> No. Lo que descargás es siempre un archivo nuevo.</p>
+    <p data-i18n-html="b28"><strong>¿Qué pasa con los CSV?</strong> En <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> cada CSV pasa a ser una hoja con sus valores. Revisá después que los números y las fechas se hayan leído como esperabas.</p>
+    <p data-i18n-html="b29"><strong>¿Puedo unir archivos con distinto número de hojas?</strong> Sí. <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a> agrega todas las hojas de cada archivo. En <a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a> elegís cuáles apilar.</p>
+    <h2 data-i18n="b30">Resumen</h2>
+    <p data-i18n-html="b31">Para tener todo en un libro, usá <a href="../herramientas/unir-excel.html">Unir Excel / CSV</a>. Para una sola tabla, combiná las hojas con <a href="../herramientas/apilar-hojas-excel.html">Combinar hojas en una tabla</a>, y pasá antes por la primera si los datos vienen en archivos separados. Verificá que las columnas estén en el mismo orden y quitá las repeticiones con <a href="../herramientas/quitar-encabezados-duplicados-excel.html">Quitar encabezados duplicados</a>.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/unir-excel.html" data-i18n="rel1">Unir Excel / CSV</a></li>
+      <li><a href="../herramientas/apilar-hojas-excel.html" data-i18n="rel2">Combinar hojas en una tabla</a></li>
+      <li><a href="../herramientas/quitar-encabezados-duplicados-excel.html" data-i18n="rel3">Quitar encabezados duplicados</a></li>
+      <li><a href="../herramientas/administrar-hojas-excel.html" data-i18n="rel4">Administrar / reordenar hojas de Excel</a></li>
+      <li><a href="../herramientas/convertir-excel-csv.html" data-i18n="rel5">Convertir Excel ↔ CSV</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

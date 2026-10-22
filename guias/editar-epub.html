@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Cómo editar un EPUB: título, autor, idioma y capítulos — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Corregí el título, el autor y el idioma de un EPUB, o reordená y quitá capítulos, sin tocar el contenido del libro. Guía paso a paso.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Corregí el título, el autor y el idioma de un EPUB, o reordená y quitá capítulos, sin tocar el texto del libro. Guía paso a paso.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,43 +13,39 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Cómo editar un EPUB: título, autor, idioma y capítulos — Mini Cookies',
-    'meta-descripcion': 'Corregí el título, el autor y el idioma de un EPUB, o reordená y quitá capítulos, sin tocar el contenido del libro. Guía paso a paso.',
+    'meta-descripcion': 'Corregí el título, el autor y el idioma de un EPUB, o reordená y quitá capítulos, sin tocar el texto del libro. Guía paso a paso.',
     'h1': 'Cómo editar un EPUB: título, autor, idioma y capítulos',
-    'b1': '«Editar un EPUB» puede querer decir dos cosas distintas. Una es <strong>corregir los datos del libro</strong> (título, autor, idioma), que es lo que ordena tu biblioteca en el lector. La otra es <strong>cambiar su estructura</strong>: pasar un capítulo al principio o quitar un prólogo que no querés. Cada una tiene su herramienta, y ninguna toca el texto de los capítulos.',
-    'b2': 'Corregir el título, el autor y el idioma',
-    'b3': 'Los libros bajados de distintas fuentes suelen traer títulos mal escritos, autores en blanco o el idioma equivocado, y eso desordena la biblioteca. Con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>:',
+    'b1': 'Un libro con el título mal escrito, sin autor o con el idioma equivocado se ve mal en la biblioteca del lector. Y a veces el problema es el orden: un prólogo que no querés, o un capítulo que tiene que ir al principio. «Editar un EPUB» puede significar las dos cosas, y cada una tiene su herramienta. Ninguna cambia el texto de los capítulos.',
+    'b2': 'Corregir título, autor e idioma',
+    'b3': 'Con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>, al cargar el libro aparecen los campos «Título», «Autor» e «Idioma (código, ej. "es", "en")» con los valores actuales.',
     'b4-1': 'Arrastrá tu archivo .epub o hacé clic para elegirlo.',
-    'b4-2': 'Revisá los valores actuales y editá «Título», «Autor» e «Idioma (código, ej. "es", "en")».',
+    'b4-2': 'Corregí los campos que necesites.',
     'b4-3': 'Tocá «Guardar y descargar».',
     'b4-4': 'Cuando aparezca «Listo», tocá «Descargar EPUB».',
-    'b5': 'Los capítulos, la portada, las imágenes, los estilos, el índice y datos como el ISBN quedan exactamente iguales.',
-    'b6': '<strong>Detalles que conviene saber</strong>',
-    'b7-1': 'El idioma se escribe con su <strong>código corto</strong>: «es» para español, «en» para inglés, «fr» para francés, «pt» para portugués.',
-    'b7-2': 'Si dejás el <strong>autor</strong> vacío, se quita ese dato del libro. El título y el idioma son obligatorios: si los dejás vacíos se usa «Documento» y «es».',
-    'b7-3': 'Además del dato principal, la herramienta actualiza el nombre para ordenar por autor (en libros EPUB 3), la fecha de última modificación y el título del índice antiguo, que algunos lectores muestran.',
-    'b7-4': 'El archivo descargado toma como nombre el título nuevo.',
-    'b7-5': 'Con varios autores, el campo edita el primero registrado. No se pueden cambiar la portada ni la descripción.',
-    'b8': 'Reordenar o quitar capítulos',
-    'b9': 'Con <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a> cambiás el orden de lectura o eliminás capítulos:',
-    'b10-1': 'Arrastrá el archivo .epub a la zona de carga o hacé clic para elegirlo.',
-    'b10-2': 'Aparece la lista de capítulos con sus títulos, en el orden de lectura del libro.',
-    'b10-3': 'Arrastrá cada capítulo hasta la posición que quieras. Para quitar uno, tocá la ✕ de su fila.',
-    'b10-4': 'Tocá «Descargar reordenado» y después «Descargar EPUB». El archivo se llama «libro-reordenado.epub».',
-    'b11': '<strong>Detalles que conviene saber</strong>',
-    'b12-1': 'Al guardar solo cambian el orden de lectura y el índice: se conservan estilos, fuentes, portada y metadatos.',
-    'b12-2': 'Cuando quitás capítulos, también se eliminan las imágenes que quedaron sin uso.',
-    'b12-3': 'No hay botón de deshacer: si te equivocás, volvé a cargar el archivo.',
-    'b12-4': 'No se puede dejar el libro sin capítulos.',
-    'b12-5': 'La herramienta trabaja con los capítulos tal como los define el libro. Si el EPUB tiene todo el texto en un único archivo interno, aparece como un solo capítulo.',
-    'b13': 'Qué no se puede hacer aquí',
-    'b14-1': '<strong>Cambiar el texto de los capítulos.</strong> Estas herramientas no editan el contenido.',
-    'b14-2': '<strong>Libros con DRM</strong> (protección anticopia): el contenido cifrado no se modifica.',
-    'b14-3': 'Si el archivo no es un EPUB válido, aparece un aviso con el motivo (por ejemplo, que falta el archivo contenedor o el .opf).',
-    'b15': 'Otras cosas que se pueden hacer con un EPUB',
-    'b16-1': 'Juntar varios libros en uno: <a href="../herramientas/unir-epub.html">Unir varios EPUB</a>.',
-    'b16-2': 'Partir un libro por capítulos: <a href="../herramientas/dividir-epub.html">Dividir EPUB</a>.',
-    'b17': 'Resumen',
-    'b18': 'Para ordenar tu biblioteca, corregí título, autor e idioma con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>; para cambiar qué capítulos tiene un libro y en qué orden, usá <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>. En ambos casos el contenido de los capítulos queda igual; guardá el original por si querés volver atrás.',
+    'b5': 'Los capítulos, la portada, las imágenes, los estilos, el índice y el ISBN quedan como estaban. Si el libro ya tiene el nombre para ordenar del autor o la fecha de última modificación, también se actualizan. Si no los tiene, no se agregan.',
+    'b6': 'Escribí el idioma con su código corto: «es» para español, «en» para inglés, «fr» para francés, «pt» para portugués. La herramienta no comprueba el código y guarda lo que escribas. Si dejás el idioma vacío, pone «es». Si dejás el título vacío, pone «Documento».',
+    'b7': 'El campo «Autor» muestra y edita el primero de los autores. Si lo dejás vacío, se quitan todos los autores del libro, no solo el primero.',
+    'b8': 'El archivo descargado toma el título nuevo como nombre. El original no se toca: la herramienta genera una copia.',
+    'b9': 'Reordenar o quitar capítulos',
+    'b10': 'Con <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>:',
+    'b11-1': 'Arrastrá el archivo .epub a la zona de carga o hacé clic para elegirlo.',
+    'b11-2': 'Aparece la lista de capítulos con sus títulos, en el orden de lectura del libro.',
+    'b11-3': 'Arrastrá cada capítulo a su posición. En el celular, mantené apretado el capítulo un momento y mové el dedo. Para quitar uno, tocá la ✕ de su fila.',
+    'b11-4': 'Tocá «Descargar reordenado» y después «Descargar EPUB». El archivo se llama «libro-reordenado.epub».',
+    'b12': 'Al guardar cambian solo el orden de lectura y el índice. Los estilos, las fuentes, la portada y los metadatos quedan como estaban, salvo la fecha de última modificación. Si quitás capítulos, también se borran las imágenes que ya ningún capítulo usa.',
+    'b13': 'Los títulos de la lista salen del índice del libro. Si un capítulo aparece con el nombre de su archivo, como «chapter07», el libro no lo titula en el índice ni tiene un encabezado en el texto.',
+    'b14': 'No hay botón de deshacer. Si te equivocás, cargá el archivo otra vez: el original sigue igual. Tampoco se puede dejar el libro sin capítulos, porque el botón se deshabilita.',
+    'b15': 'Qué no se puede hacer aquí',
+    'b16-1': 'Cambiar el texto de los capítulos. Estas herramientas no editan el contenido.',
+    'b16-2': 'Abrir un libro con DRM en <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>. Aparece «No se pudo leer el EPUB: Este EPUB está protegido con DRM (cifrado) — no se puede leer su contenido en el navegador.»',
+    'b16-3': 'Cambiar la portada o la descripción en <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>.',
+    'b16-4': 'Si el archivo no es un EPUB válido, el aviso dice el motivo. Por ejemplo, «No se pudo leer el EPUB: falta META-INF/container.xml» o «No se pudo leer el EPUB: no se encontró el archivo .opf».',
+    'b17': 'Para unir libros o partir uno, están <a href="../herramientas/unir-epub.html">Unir varios EPUB</a> y <a href="../herramientas/dividir-epub.html">Dividir EPUB</a>.',
+    'b18': 'Preguntas frecuentes',
+    'b19': '<strong>¿Puedo cambiar la portada o la descripción?</strong> No. El editor de metadatos cambia solo título, autor e idioma.',
+    'b20': '<strong>¿Y si el libro tiene dos autores y quiero cambiar solo el segundo?</strong> Con esta herramienta no. El campo edita el primero, y no hay forma de elegir otro.',
+    'b21': 'Resumen',
+    'b22': 'Para ordenar tu biblioteca, corregí título, autor e idioma con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>. Para cambiar qué capítulos tiene el libro y en qué orden, usá <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>. Ninguna de las dos cambia el texto de los capítulos, y el archivo original queda igual.',
     'rel1': 'Editar metadatos de un EPUB',
     'rel2': 'Administrar / reordenar capítulos',
     'rel3': 'Unir varios EPUB',
@@ -57,43 +53,39 @@ window.i18nPagina = {
   },
   en: {
     'titulo-pagina': 'How to edit an EPUB: title, author, language and chapters — Mini Cookies',
-    'meta-descripcion': 'Fix the title, author and language of an EPUB, or reorder and remove chapters, without touching the book’s content. Step-by-step guide.',
+    'meta-descripcion': 'Fix the title, author and language of an EPUB, or reorder and remove chapters, without touching the book’s text. Step-by-step guide.',
     'h1': 'How to edit an EPUB: title, author, language and chapters',
-    'b1': '“Editing an EPUB” can mean two different things. One is <strong>fixing the book’s data</strong> (title, author, language), which is what organizes your library in the reader. The other is <strong>changing its structure</strong>: moving a chapter to the front or removing a preface you don’t want. Each has its own tool, and neither touches the text of the chapters.',
+    'b1': 'A book with a misspelled title, no author or the wrong language looks bad in your reader’s library. Sometimes the problem is the order instead: a preface you don’t want, or a chapter that should come first. “Editing an EPUB” can mean either, and each has its own tool. Neither changes the text of the chapters.',
     'b2': 'Fixing the title, author and language',
-    'b3': 'Books downloaded from different sources often come with misspelled titles, blank authors or the wrong language, and that messes up the library. With <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a>:',
+    'b3': 'With <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a>, once the book is loaded the fields “Title”, “Author” and “Language (code, e.g. "en", "es")” appear with the current values.',
     'b4-1': 'Drag your .epub file or click to choose it.',
-    'b4-2': 'Check the current values and edit “Title”, “Author” and “Language (code, e.g. "en", "es")”.',
+    'b4-2': 'Correct the fields you need.',
     'b4-3': 'Tap “Save and download”.',
     'b4-4': 'When “Done” appears, tap “Download EPUB”.',
-    'b5': 'The chapters, cover, images, styles, table of contents and data such as the ISBN stay exactly the same.',
-    'b6': '<strong>Details worth knowing</strong>',
-    'b7-1': 'The language is written with its <strong>short code</strong>: “es” for Spanish, “en” for English, “fr” for French, “pt” for Portuguese.',
-    'b7-2': 'If you leave the <strong>author</strong> empty, that data is removed from the book. The title and language are required: if you leave them empty, “Document” and “es” are used.',
-    'b7-3': 'Besides the main field, the tool updates the author sort name (in EPUB 3 books), the last-modified date and the old table-of-contents title, which some readers display.',
-    'b7-4': 'The downloaded file takes the new title as its name.',
-    'b7-5': 'With several authors, the field edits the first one registered. The cover and the description can’t be changed.',
-    'b8': 'Reordering or removing chapters',
-    'b9': 'With <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a> you change the reading order or delete chapters:',
-    'b10-1': 'Drag the .epub file to the upload area or click to choose it.',
-    'b10-2': 'The list of chapters appears with their titles, in the book’s reading order.',
-    'b10-3': 'Drag each chapter to the position you want. To remove one, tap the ✕ on its row.',
-    'b10-4': 'Tap “Download reordered” and then “Download EPUB”. The file is named “libro-reordenado.epub”.',
-    'b11': '<strong>Details worth knowing</strong>',
-    'b12-1': 'On saving, only the reading order and the table of contents change: styles, fonts, cover and metadata are kept.',
-    'b12-2': 'When you remove chapters, the images left unused are removed too.',
-    'b12-3': 'There’s no undo button: if you make a mistake, load the file again.',
-    'b12-4': 'You can’t leave the book with no chapters.',
-    'b12-5': 'The tool works with chapters as the book defines them. If the EPUB has all its text in a single internal file, it shows up as one chapter.',
-    'b13': 'What can’t be done here',
-    'b14-1': '<strong>Changing the text of the chapters.</strong> These tools don’t edit the content.',
-    'b14-2': '<strong>DRM-protected books</strong> (copy protection): encrypted content isn’t modified.',
-    'b14-3': 'If the file isn’t a valid EPUB, a notice appears with the reason (for example, that the container file or the .opf is missing).',
-    'b15': 'Other things you can do with an EPUB',
-    'b16-1': 'Join several books into one: <a href="../herramientas/unir-epub.html">Merge EPUB books</a>.',
-    'b16-2': 'Cut a book by chapter: <a href="../herramientas/dividir-epub.html">Split EPUB</a>.',
-    'b17': 'Summary',
-    'b18': 'To tidy your library, fix the title, author and language with <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a>; to change which chapters a book has and in what order, use <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a>. In both cases the content of the chapters stays the same; keep the original in case you want to go back.',
+    'b5': 'The chapters, cover, images, styles, table of contents and ISBN stay as they were. If the book already has the author’s sort name or the last-modified date, those are updated too. If it doesn’t have them, they aren’t added.',
+    'b6': 'Write the language with its short code: “es” for Spanish, “en” for English, “fr” for French, “pt” for Portuguese. The tool doesn’t check the code and saves whatever you type. If you leave the language empty, it uses “es”. If you leave the title empty, it uses “Document”.',
+    'b7': 'The “Author” field shows and edits the first author. If you leave it empty, all the book’s authors are removed, not only the first one.',
+    'b8': 'The downloaded file takes the new title as its name. The original isn’t touched: the tool makes a copy.',
+    'b9': 'Reordering or removing chapters',
+    'b10': 'With <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a>:',
+    'b11-1': 'Drag the .epub file to the upload area or click to choose it.',
+    'b11-2': 'The list of chapters appears with their titles, in the book’s reading order.',
+    'b11-3': 'Drag each chapter to its new place. On a phone, press and hold the chapter for a moment, then move your finger. To remove one, tap the ✕ on its row.',
+    'b11-4': 'Tap “Download reordered”, then “Download EPUB”. The file is named “libro-reordenado.epub”.',
+    'b12': 'When you save, only the reading order and the table of contents change. The styles, fonts, cover and metadata stay as they were, except the last-modified date. If you remove chapters, the images that no chapter uses any more are removed too.',
+    'b13': 'The titles in the list come from the book’s table of contents. If a chapter shows up with its file name, such as “chapter07”, the book doesn’t title it in the table of contents and the text has no heading for it.',
+    'b14': 'There’s no undo button. If you make a mistake, load the file again: the original is unchanged. You can’t leave the book with no chapters either, because the button is disabled.',
+    'b15': 'What you can’t do here',
+    'b16-1': 'Change the text of the chapters. These tools don’t edit content.',
+    'b16-2': 'Open a DRM-protected book in <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a>. You get “Couldn’t read the EPUB: This EPUB is DRM-protected (encrypted) — its content can’t be read in the browser.”',
+    'b16-3': 'Change the cover or the description in <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a>.',
+    'b16-4': 'If the file isn’t a valid EPUB, the notice gives the reason, for example “Couldn’t read the EPUB: META-INF/container.xml is missing” or “Couldn’t read the EPUB: the .opf file wasn’t found”.',
+    'b17': 'To join books or split one, there are <a href="../herramientas/unir-epub.html">Merge EPUB books</a> and <a href="../herramientas/dividir-epub.html">Split EPUB</a>.',
+    'b18': 'Frequently asked questions',
+    'b19': '<strong>Can I change the cover or the description?</strong> No. The metadata editor only changes the title, author and language.',
+    'b20': '<strong>What if the book has two authors and I only want to change the second?</strong> Not with this tool. The field edits the first author, and there’s no way to pick another one.',
+    'b21': 'Summary',
+    'b22': 'To tidy your library, correct the title, author and language with <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a>. To change which chapters a book has and in what order, use <a href="../herramientas/administrar-epub.html">Manage / reorder chapters</a>. Neither changes the text of the chapters, and the original file stays the same.',
     'rel1': 'Edit EPUB metadata',
     'rel2': 'Manage / reorder chapters',
     'rel3': 'Merge EPUB books',
@@ -121,53 +113,43 @@ window.i18nPagina = {
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
     <h1 data-i18n="h1">Cómo editar un EPUB: título, autor, idioma y capítulos</h1>
-    <p data-i18n-html="b1">«Editar un EPUB» puede querer decir dos cosas distintas. Una es <strong>corregir los datos del libro</strong> (título, autor, idioma), que es lo que ordena tu biblioteca en el lector. La otra es <strong>cambiar su estructura</strong>: pasar un capítulo al principio o quitar un prólogo que no querés. Cada una tiene su herramienta, y ninguna toca el texto de los capítulos.</p>
-    <h2 data-i18n="b2">Corregir el título, el autor y el idioma</h2>
-    <p data-i18n-html="b3">Los libros bajados de distintas fuentes suelen traer títulos mal escritos, autores en blanco o el idioma equivocado, y eso desordena la biblioteca. Con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>:</p>
+    <p data-i18n-html="b1">Un libro con el título mal escrito, sin autor o con el idioma equivocado se ve mal en la biblioteca del lector. Y a veces el problema es el orden: un prólogo que no querés, o un capítulo que tiene que ir al principio. «Editar un EPUB» puede significar las dos cosas, y cada una tiene su herramienta. Ninguna cambia el texto de los capítulos.</p>
+    <h2 data-i18n="b2">Corregir título, autor e idioma</h2>
+    <p data-i18n-html="b3">Con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>, al cargar el libro aparecen los campos «Título», «Autor» e «Idioma (código, ej. "es", "en")» con los valores actuales.</p>
     <ol>
       <li data-i18n-html="b4-1">Arrastrá tu archivo .epub o hacé clic para elegirlo.</li>
-      <li data-i18n-html="b4-2">Revisá los valores actuales y editá «Título», «Autor» e «Idioma (código, ej. "es", "en")».</li>
+      <li data-i18n-html="b4-2">Corregí los campos que necesites.</li>
       <li data-i18n-html="b4-3">Tocá «Guardar y descargar».</li>
       <li data-i18n-html="b4-4">Cuando aparezca «Listo», tocá «Descargar EPUB».</li>
     </ol>
-    <p data-i18n-html="b5">Los capítulos, la portada, las imágenes, los estilos, el índice y datos como el ISBN quedan exactamente iguales.</p>
-    <p data-i18n-html="b6"><strong>Detalles que conviene saber</strong></p>
-    <ul>
-      <li data-i18n-html="b7-1">El idioma se escribe con su <strong>código corto</strong>: «es» para español, «en» para inglés, «fr» para francés, «pt» para portugués.</li>
-      <li data-i18n-html="b7-2">Si dejás el <strong>autor</strong> vacío, se quita ese dato del libro. El título y el idioma son obligatorios: si los dejás vacíos se usa «Documento» y «es».</li>
-      <li data-i18n-html="b7-3">Además del dato principal, la herramienta actualiza el nombre para ordenar por autor (en libros EPUB 3), la fecha de última modificación y el título del índice antiguo, que algunos lectores muestran.</li>
-      <li data-i18n-html="b7-4">El archivo descargado toma como nombre el título nuevo.</li>
-      <li data-i18n-html="b7-5">Con varios autores, el campo edita el primero registrado. No se pueden cambiar la portada ni la descripción.</li>
-    </ul>
-    <h2 data-i18n="b8">Reordenar o quitar capítulos</h2>
-    <p data-i18n-html="b9">Con <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a> cambiás el orden de lectura o eliminás capítulos:</p>
+    <p data-i18n-html="b5">Los capítulos, la portada, las imágenes, los estilos, el índice y el ISBN quedan como estaban. Si el libro ya tiene el nombre para ordenar del autor o la fecha de última modificación, también se actualizan. Si no los tiene, no se agregan.</p>
+    <p data-i18n-html="b6">Escribí el idioma con su código corto: «es» para español, «en» para inglés, «fr» para francés, «pt» para portugués. La herramienta no comprueba el código y guarda lo que escribas. Si dejás el idioma vacío, pone «es». Si dejás el título vacío, pone «Documento».</p>
+    <p data-i18n-html="b7">El campo «Autor» muestra y edita el primero de los autores. Si lo dejás vacío, se quitan todos los autores del libro, no solo el primero.</p>
+    <p data-i18n-html="b8">El archivo descargado toma el título nuevo como nombre. El original no se toca: la herramienta genera una copia.</p>
+    <h2 data-i18n="b9">Reordenar o quitar capítulos</h2>
+    <p data-i18n-html="b10">Con <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>:</p>
     <ol>
-      <li data-i18n-html="b10-1">Arrastrá el archivo .epub a la zona de carga o hacé clic para elegirlo.</li>
-      <li data-i18n-html="b10-2">Aparece la lista de capítulos con sus títulos, en el orden de lectura del libro.</li>
-      <li data-i18n-html="b10-3">Arrastrá cada capítulo hasta la posición que quieras. Para quitar uno, tocá la ✕ de su fila.</li>
-      <li data-i18n-html="b10-4">Tocá «Descargar reordenado» y después «Descargar EPUB». El archivo se llama «libro-reordenado.epub».</li>
+      <li data-i18n-html="b11-1">Arrastrá el archivo .epub a la zona de carga o hacé clic para elegirlo.</li>
+      <li data-i18n-html="b11-2">Aparece la lista de capítulos con sus títulos, en el orden de lectura del libro.</li>
+      <li data-i18n-html="b11-3">Arrastrá cada capítulo a su posición. En el celular, mantené apretado el capítulo un momento y mové el dedo. Para quitar uno, tocá la ✕ de su fila.</li>
+      <li data-i18n-html="b11-4">Tocá «Descargar reordenado» y después «Descargar EPUB». El archivo se llama «libro-reordenado.epub».</li>
     </ol>
-    <p data-i18n-html="b11"><strong>Detalles que conviene saber</strong></p>
+    <p data-i18n-html="b12">Al guardar cambian solo el orden de lectura y el índice. Los estilos, las fuentes, la portada y los metadatos quedan como estaban, salvo la fecha de última modificación. Si quitás capítulos, también se borran las imágenes que ya ningún capítulo usa.</p>
+    <p data-i18n-html="b13">Los títulos de la lista salen del índice del libro. Si un capítulo aparece con el nombre de su archivo, como «chapter07», el libro no lo titula en el índice ni tiene un encabezado en el texto.</p>
+    <p data-i18n-html="b14">No hay botón de deshacer. Si te equivocás, cargá el archivo otra vez: el original sigue igual. Tampoco se puede dejar el libro sin capítulos, porque el botón se deshabilita.</p>
+    <h2 data-i18n="b15">Qué no se puede hacer aquí</h2>
     <ul>
-      <li data-i18n-html="b12-1">Al guardar solo cambian el orden de lectura y el índice: se conservan estilos, fuentes, portada y metadatos.</li>
-      <li data-i18n-html="b12-2">Cuando quitás capítulos, también se eliminan las imágenes que quedaron sin uso.</li>
-      <li data-i18n-html="b12-3">No hay botón de deshacer: si te equivocás, volvé a cargar el archivo.</li>
-      <li data-i18n-html="b12-4">No se puede dejar el libro sin capítulos.</li>
-      <li data-i18n-html="b12-5">La herramienta trabaja con los capítulos tal como los define el libro. Si el EPUB tiene todo el texto en un único archivo interno, aparece como un solo capítulo.</li>
+      <li data-i18n-html="b16-1">Cambiar el texto de los capítulos. Estas herramientas no editan el contenido.</li>
+      <li data-i18n-html="b16-2">Abrir un libro con DRM en <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>. Aparece «No se pudo leer el EPUB: Este EPUB está protegido con DRM (cifrado) — no se puede leer su contenido en el navegador.»</li>
+      <li data-i18n-html="b16-3">Cambiar la portada o la descripción en <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>.</li>
+      <li data-i18n-html="b16-4">Si el archivo no es un EPUB válido, el aviso dice el motivo. Por ejemplo, «No se pudo leer el EPUB: falta META-INF/container.xml» o «No se pudo leer el EPUB: no se encontró el archivo .opf».</li>
     </ul>
-    <h2 data-i18n="b13">Qué no se puede hacer aquí</h2>
-    <ul>
-      <li data-i18n-html="b14-1"><strong>Cambiar el texto de los capítulos.</strong> Estas herramientas no editan el contenido.</li>
-      <li data-i18n-html="b14-2"><strong>Libros con DRM</strong> (protección anticopia): el contenido cifrado no se modifica.</li>
-      <li data-i18n-html="b14-3">Si el archivo no es un EPUB válido, aparece un aviso con el motivo (por ejemplo, que falta el archivo contenedor o el .opf).</li>
-    </ul>
-    <h2 data-i18n="b15">Otras cosas que se pueden hacer con un EPUB</h2>
-    <ul>
-      <li data-i18n-html="b16-1">Juntar varios libros en uno: <a href="../herramientas/unir-epub.html">Unir varios EPUB</a>.</li>
-      <li data-i18n-html="b16-2">Partir un libro por capítulos: <a href="../herramientas/dividir-epub.html">Dividir EPUB</a>.</li>
-    </ul>
-    <h2 data-i18n="b17">Resumen</h2>
-    <p data-i18n-html="b18">Para ordenar tu biblioteca, corregí título, autor e idioma con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>; para cambiar qué capítulos tiene un libro y en qué orden, usá <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>. En ambos casos el contenido de los capítulos queda igual; guardá el original por si querés volver atrás.</p>
+    <p data-i18n-html="b17">Para unir libros o partir uno, están <a href="../herramientas/unir-epub.html">Unir varios EPUB</a> y <a href="../herramientas/dividir-epub.html">Dividir EPUB</a>.</p>
+    <h2 data-i18n="b18">Preguntas frecuentes</h2>
+    <p data-i18n-html="b19"><strong>¿Puedo cambiar la portada o la descripción?</strong> No. El editor de metadatos cambia solo título, autor e idioma.</p>
+    <p data-i18n-html="b20"><strong>¿Y si el libro tiene dos autores y quiero cambiar solo el segundo?</strong> Con esta herramienta no. El campo edita el primero, y no hay forma de elegir otro.</p>
+    <h2 data-i18n="b21">Resumen</h2>
+    <p data-i18n-html="b22">Para ordenar tu biblioteca, corregí título, autor e idioma con <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a>. Para cambiar qué capítulos tiene el libro y en qué orden, usá <a href="../herramientas/administrar-epub.html">Administrar / reordenar capítulos</a>. Ninguna de las dos cambia el texto de los capítulos, y el archivo original queda igual.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

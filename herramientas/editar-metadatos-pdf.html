@@ -28,6 +28,7 @@ window.i18nPagina = {
     'error-leer': 'No se pudo leer el PDF',
     'error-guardar': 'No se pudo guardar el PDF',
     'guia-titulo': 'Cómo editar el título, el autor y las palabras clave de un PDF',
+    'guia-mas-link': 'Cómo quitar los datos ocultos de tus fotos y archivos',
     'guia-intro': 'Los PDF llevan datos ocultos que aparecen en «Propiedades del documento»: título, autor, asunto y palabras clave. Esos datos sirven para que los buscadores y los administradores de documentos identifiquen el archivo, y a veces conviene corregirlos o completarlos (por ejemplo, un PDF que dice «Documento1» como título). Esta herramienta te deja editarlos sin cambiar nada de lo que se ve en las páginas.',
     'guia-paso-1': 'Arrastrá tu PDF o hacé clic para elegirlo.',
     'guia-paso-2': 'Cuando aparezcan los campos, revisá los valores actuales y editá «Título», «Autor», «Asunto» y «Palabras clave (separadas por coma)».',
@@ -63,6 +64,7 @@ window.i18nPagina = {
     'error-leer': 'Couldn’t read the PDF',
     'error-guardar': 'Couldn’t save the PDF',
     'guia-titulo': 'How to edit the title, author and keywords of a PDF',
+    'guia-mas-link': 'How to remove hidden data from your photos and files',
     'guia-intro': 'PDFs carry hidden data that appears in “Document properties”: title, author, subject and keywords. This data helps search engines and document managers identify the file, and sometimes it’s worth correcting or completing it (for example, a PDF whose title says “Document1”). This tool lets you edit it without changing anything you see on the pages.',
     'guia-paso-1': 'Drag your PDF or click to choose it.',
     'guia-paso-2': 'When the fields appear, check the current values and edit “Title”, “Author”, “Subject” and “Keywords (comma-separated)”.',
@@ -168,6 +170,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Dónde veo los cambios?</summary>
       <p data-i18n="guia-r4">En las propiedades del documento de tu lector de PDF (en muchos programas, Archivo, Propiedades).</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/quitar-datos-ocultos.html" data-i18n="guia-mas-link">Cómo quitar los datos ocultos de tus fotos y archivos</a></p>
   </section>
 </main>
 
@@ -226,7 +229,9 @@ botonGuardar.addEventListener('click', async () => {
     pdfActual.setTitle(document.getElementById('campoTitulo').value);
     pdfActual.setAuthor(document.getElementById('campoAutor').value);
     pdfActual.setSubject(document.getElementById('campoAsunto').value);
-    pdfActual.setKeywords(document.getElementById('campoPalabrasClave').value.split(',').map(p => p.trim()).filter(Boolean));
+    // Un solo elemento: setKeywords une la lista con espacios y se perderían las comas.
+    const palabrasClave = document.getElementById('campoPalabrasClave').value.trim();
+    pdfActual.setKeywords(palabrasClave ? [palabrasClave] : []);
 
     pdfActual.setModificationDate(new Date());
     const bytesFinales = await pdfActual.save();

@@ -33,7 +33,7 @@ window.i18nPagina = {
     'guia-paso-3': 'Tocá «Generar» (o apretá Enter) para ver el código.',
     'guia-paso-4': 'Usá el enlace «Descargar como SVG» que aparece debajo; el archivo se llama codigo-de-barras.svg.',
     'guia-consejo-1': 'CODE128 es el más flexible: acepta letras, números y símbolos, y es la mejor opción si no necesitás un estándar de comercio en particular.',
-    'guia-consejo-2': 'EAN-13 y UPC son para productos de venta y solo admiten dígitos con una cantidad exacta. Si el contenido no cumple, aparece un mensaje de error en rojo en lugar del código.',
+    'guia-consejo-2': 'EAN-13 y UPC son para productos de venta y solo admiten dígitos: 12 o 13 en EAN-13, 11 o 12 en UPC. Si el largo o el dígito de control no sirven, aparece un mensaje de error en rojo en lugar del código.',
     'guia-consejo-3': 'CODE39 sirve para etiquetas internas simples con mayúsculas y números.',
     'guia-consejo-4': 'Por ser SVG, lo podés insertar en Word, Illustrator o imprimir en grande sin que se pixele. Si necesitás PNG, abrilo y exportalo desde otro programa.',
     'guia-p1': '¿Cuántos dígitos necesito para EAN-13 y UPC?',
@@ -43,7 +43,7 @@ window.i18nPagina = {
     'guia-p3': '¿Genera códigos QR?',
     'guia-r3': 'No, solo códigos de barras lineales. Para leer un QR existe el Lector de códigos QR y de barras.',
     'guia-p4': '¿Sirve para comercializar productos?',
-    'guia-r4': 'El dibujo es válido, pero los números EAN y UPC oficiales los asigna GS1; acá no se registran.',
+    'guia-r4': 'Sirve para etiquetas internas. Para venderlo en comercios, el número EAN o UPC tiene que venir de GS1, la organización que asigna los prefijos de empresa. Acá no se registra nada, y un número inventado puede coincidir con el de otro producto.',
   },
   en: {
     'hero-titulo': 'Barcode generator',
@@ -67,7 +67,7 @@ window.i18nPagina = {
     'guia-paso-3': 'Tap “Generate” (or press Enter) to see the code.',
     'guia-paso-4': 'Use the “Download as SVG” link that appears below; the file is named codigo-de-barras.svg.',
     'guia-consejo-1': 'CODE128 is the most flexible: it accepts letters, numbers and symbols, and it’s the best choice if you don’t need a particular retail standard.',
-    'guia-consejo-2': 'EAN-13 and UPC are for retail products and only accept digits in an exact amount. If the content doesn’t comply, a red error message appears instead of the code.',
+    'guia-consejo-2': 'EAN-13 and UPC are for retail products and only accept digits: 12 or 13 for EAN-13, 11 or 12 for UPC. If the length or the check digit is wrong, a red error message appears instead of the code.',
     'guia-consejo-3': 'CODE39 is good for simple internal labels with capital letters and numbers.',
     'guia-consejo-4': 'Because it’s SVG, you can insert it into Word or Illustrator or print it large without it turning pixelated. If you need a PNG, open it and export it from another program.',
     'guia-p1': 'How many digits do I need for EAN-13 and UPC?',
@@ -77,7 +77,7 @@ window.i18nPagina = {
     'guia-p3': 'Does it generate QR codes?',
     'guia-r3': 'No, only linear barcodes. To read a QR there is the QR and barcode reader.',
     'guia-p4': 'Can I use it to sell products?',
-    'guia-r4': 'The drawing is valid, but official EAN and UPC numbers are assigned by GS1; they are not registered here.',
+    'guia-r4': 'It works for internal labels. To sell in shops, the EAN or UPC number has to come from GS1, the organization that assigns company prefixes. Nothing is registered here, and an invented number can match another product’s.',
   }
 };
 </script>
@@ -143,7 +143,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">CODE128 es el más flexible: acepta letras, números y símbolos, y es la mejor opción si no necesitás un estándar de comercio en particular.</li>
-      <li data-i18n="guia-consejo-2">EAN-13 y UPC son para productos de venta y solo admiten dígitos con una cantidad exacta. Si el contenido no cumple, aparece un mensaje de error en rojo en lugar del código.</li>
+      <li data-i18n="guia-consejo-2">EAN-13 y UPC son para productos de venta y solo admiten dígitos: 12 o 13 en EAN-13, 11 o 12 en UPC. Si el largo o el dígito de control no sirven, aparece un mensaje de error en rojo en lugar del código.</li>
       <li data-i18n="guia-consejo-3">CODE39 sirve para etiquetas internas simples con mayúsculas y números.</li>
       <li data-i18n="guia-consejo-4">Por ser SVG, lo podés insertar en Word, Illustrator o imprimir en grande sin que se pixele. Si necesitás PNG, abrilo y exportalo desde otro programa.</li>
     </ul>
@@ -162,7 +162,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Sirve para comercializar productos?</summary>
-      <p data-i18n="guia-r4">El dibujo es válido, pero los números EAN y UPC oficiales los asigna GS1; acá no se registran.</p>
+      <p data-i18n="guia-r4">Sirve para etiquetas internas. Para venderlo en comercios, el número EAN o UPC tiene que venir de GS1, la organización que asigna los prefijos de empresa. Acá no se registra nada, y un número inventado puede coincidir con el de otro producto.</p>
     </details>
       <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/codigos-de-barras-formatos.html" data-i18n="guia-mas-link">Códigos de barras: formatos, dígitos y cómo imprimirlos</a></p>
   </section>

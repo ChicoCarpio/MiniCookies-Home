@@ -37,16 +37,16 @@ window.i18nPagina = {
     'guia-paso-3': 'Tocá «Dividir».',
     'guia-paso-4': 'Cuando aparezca «Listo», tocá «Descargar .zip con las secciones».',
     'guia-consejo-1': 'Cada sección empieza en su encabezado e incluye todo hasta el siguiente del mismo nivel. Con segundo nivel, los subtítulos de nivel 3 y más profundo se quedan dentro de su sección.',
-    'guia-consejo-2': 'Lo que está antes del primer encabezado del nivel elegido (por ejemplo, el front matter YAML o el título general #) queda en el primer archivo.',
+    'guia-consejo-2': 'Si hay texto antes del primer encabezado del nivel elegido (por ejemplo, el front matter YAML o un título general #), ese texto sale en un archivo propio, «01-introduccion.md»; las secciones siguen desde el 02.',
     'guia-consejo-3': 'Los # dentro de bloques de código (``` o ~~~) no cortan el documento.',
     'guia-consejo-4': 'Los enlaces y las imágenes se copian tal cual: un enlace a otra sección o a otro .md apuntará a un archivo que ya no está en el mismo lugar, y las imágenes con ruta relativa no viajan en el zip. Revisalos después.',
     'guia-consejo-5': 'Los archivos se numeran con ceros a la izquierda y llevan el título de la sección, por ejemplo «01-Instalación.md».',
     'guia-p1': '¿Qué pasa si hay menos de dos encabezados del nivel elegido?',
-    'guia-r1': 'La herramienta avisa que no hay nada que dividir.',
+    'guia-r1': 'Si el archivo tiene menos de dos encabezados de ese nivel, avisa que no hay nada que dividir. Pero el texto que va antes del primer encabezado cuenta como una parte: con un solo encabezado y un texto previo, genera dos archivos sin avisar.',
     'guia-p2': '¿Se conserva el formato de fin de línea del archivo?',
     'guia-r2': 'Sí: si el original usaba saltos de estilo Windows, los archivos de salida también.',
     'guia-p3': '¿Qué pasa si una línea con # está dentro del front matter?',
-    'guia-r3': 'También corta el documento; es una limitación que la propia página explica en la burbuja de ayuda.',
+    'guia-r3': 'Sí, también corta. La herramienta no reconoce el front matter: una línea que empieza con «# » dentro de él se toma como encabezado y abre una sección nueva.',
     'guia-p4': '¿Cómo se llama el zip?',
     'guia-r4': '«secciones-markdown.zip».'
   },
@@ -75,16 +75,16 @@ window.i18nPagina = {
     'guia-paso-3': 'Tap “Split”.',
     'guia-paso-4': 'When “Done” appears, tap “Download .zip with the sections”.',
     'guia-consejo-1': 'Each section starts at its heading and includes everything up to the next one of the same level. With second level, level 3 and deeper subheadings stay inside their section.',
-    'guia-consejo-2': 'Whatever comes before the first heading of the chosen level (for example, the YAML front matter or the general # title) stays in the first file.',
+    'guia-consejo-2': 'If there is text before the first heading of the chosen level (for example, the YAML front matter or a general # title), that text goes into its own file, “01-introduccion.md”; the sections continue from 02.',
     'guia-consejo-3': 'A # inside code blocks (``` or ~~~) does not split the document.',
     'guia-consejo-4': 'Links and images are copied as they are: a link to another section or to another .md will point to a file that is no longer in the same place, and images with a relative path don’t travel in the zip. Check them afterwards.',
     'guia-consejo-5': 'Files are numbered with leading zeros and carry the section title, for example “01-Instalación.md”.',
     'guia-p1': 'What happens if there are fewer than two headings of the chosen level?',
-    'guia-r1': 'The tool says there’s nothing to split.',
+    'guia-r1': 'If the file has fewer than two headings of that level, it says there’s nothing to split. But text before the first heading counts as a part: with one heading and some text before it, it makes two files without warning.',
     'guia-p2': 'Is the file’s line-ending format kept?',
     'guia-r2': 'Yes: if the original used Windows-style line breaks, the output files do too.',
     'guia-p3': 'What happens if a line with # is inside the front matter?',
-    'guia-r3': 'It also splits the document; it’s a limitation that the page itself explains in the help bubble.',
+    'guia-r3': 'Yes, it splits there too. The tool doesn’t recognize front matter: a line starting with “# ” inside it is taken as a heading and opens a new section.',
     'guia-p4': 'What is the zip called?',
     'guia-r4': '“secciones-markdown.zip”.'
   }
@@ -150,7 +150,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Cada sección empieza en su encabezado e incluye todo hasta el siguiente del mismo nivel. Con segundo nivel, los subtítulos de nivel 3 y más profundo se quedan dentro de su sección.</li>
-      <li data-i18n="guia-consejo-2">Lo que está antes del primer encabezado del nivel elegido (por ejemplo, el front matter YAML o el título general #) queda en el primer archivo.</li>
+      <li data-i18n="guia-consejo-2">Si hay texto antes del primer encabezado del nivel elegido (por ejemplo, el front matter YAML o un título general #), ese texto sale en un archivo propio, «01-introduccion.md»; las secciones siguen desde el 02.</li>
       <li data-i18n="guia-consejo-3">Los # dentro de bloques de código (``` o ~~~) no cortan el documento.</li>
       <li data-i18n="guia-consejo-4">Los enlaces y las imágenes se copian tal cual: un enlace a otra sección o a otro .md apuntará a un archivo que ya no está en el mismo lugar, y las imágenes con ruta relativa no viajan en el zip. Revisalos después.</li>
       <li data-i18n="guia-consejo-5">Los archivos se numeran con ceros a la izquierda y llevan el título de la sección, por ejemplo «01-Instalación.md».</li>
@@ -158,7 +158,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Qué pasa si hay menos de dos encabezados del nivel elegido?</summary>
-      <p data-i18n="guia-r1">La herramienta avisa que no hay nada que dividir.</p>
+      <p data-i18n="guia-r1">Si el archivo tiene menos de dos encabezados de ese nivel, avisa que no hay nada que dividir. Pero el texto que va antes del primer encabezado cuenta como una parte: con un solo encabezado y un texto previo, genera dos archivos sin avisar.</p>
     </details>
     <details>
       <summary data-i18n="guia-p2">¿Se conserva el formato de fin de línea del archivo?</summary>
@@ -166,7 +166,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p3">¿Qué pasa si una línea con # está dentro del front matter?</summary>
-      <p data-i18n="guia-r3">También corta el documento; es una limitación que la propia página explica en la burbuja de ayuda.</p>
+      <p data-i18n="guia-r3">Sí, también corta. La herramienta no reconoce el front matter: una línea que empieza con «# » dentro de él se toma como encabezado y abre una sección nueva.</p>
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Cómo se llama el zip?</summary>

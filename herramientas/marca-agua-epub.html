@@ -35,9 +35,9 @@ window.i18nPagina = {
     'guia-paso-3': 'En «Posición» elegí «Al principio de cada capítulo» o «Al final de cada capítulo».',
     'guia-paso-4': 'Tocá «Aplicar y descargar» y después «Descargar EPUB». El archivo se llama «libro-con-texto.epub».',
     'guia-consejo-1': 'El texto se agrega como un párrafo en cursiva, de color gris y letra un poco más chica que el resto, para que se note sin molestar la lectura.',
-    'guia-consejo-2': 'Se pone una vez por capítulo; si querés solo un aviso en la portada o al final del libro, conviene revisar el resultado en tu lector.',
+    'guia-consejo-2': 'El texto va en cada archivo del orden de lectura: si el libro tiene portada o páginas de créditos ahí, también lo llevan. La herramienta no permite elegir qué páginas reciben el texto; para eso hace falta un editor de EPUB.',
     'guia-consejo-3': 'Es útil para repartir una muestra gratuita con el aviso en todos los capítulos, o para anotar la versión de un borrador.',
-    'guia-consejo-4': 'Si dejás el texto vacío, aparece el aviso «Escribí el texto que querés agregar».',
+    'guia-consejo-4': 'Si dejás el texto vacío, aparece una ventana con «No se pudo generar el EPUB: Escribí el texto que querés agregar».',
     'guia-p1': '¿Modifica mi archivo original?',
     'guia-r1': 'No, genera una copia nueva; el original queda intacto.',
     'guia-p2': '¿Sirve como protección contra la copia?',
@@ -45,7 +45,7 @@ window.i18nPagina = {
     'guia-p3': '¿Puedo cambiar el color o el tamaño del texto?',
     'guia-r3': 'No, el estilo es fijo.',
     'guia-p4': '¿Qué es un capítulo para la herramienta?',
-    'guia-r4': 'Cada archivo de contenido del libro.'
+    'guia-r4': 'Cada archivo XHTML que el EPUB tiene en su orden de lectura (el spine). Puede incluir la portada o las páginas de créditos.'
   },
   en: {
     'titulo-pagina': 'Add Text to Every EPUB Chapter Free — Mini Cookies',
@@ -71,9 +71,9 @@ window.i18nPagina = {
     'guia-paso-3': 'Under “Position” choose “At the start of each chapter” or “At the end of each chapter”.',
     'guia-paso-4': 'Tap “Apply and download” and then “Download EPUB”. The file is named “libro-con-texto.epub”.',
     'guia-consejo-1': 'The text is added as an italic paragraph, in gray and a little smaller than the rest, so it stands out without getting in the way of reading.',
-    'guia-consejo-2': 'It’s placed once per chapter; if you only want a notice on the cover or at the end of the book, it’s worth checking the result in your reader.',
+    'guia-consejo-2': 'The text goes into every file in the reading order: if the book has a cover or credits pages there, they get it too. The tool can’t choose which pages receive the text; for that you need an EPUB editor.',
     'guia-consejo-3': 'It’s useful for handing out a free sample with the notice in every chapter, or for noting the version of a draft.',
-    'guia-consejo-4': 'If you leave the text empty, the message “Type the text you want to add.” appears.',
+    'guia-consejo-4': 'If you leave the text empty, a pop-up says “Couldn’t generate the EPUB: Type the text you want to add”.',
     'guia-p1': 'Does it modify my original file?',
     'guia-r1': 'No, it generates a new copy; the original stays untouched.',
     'guia-p2': 'Does it work as copy protection?',
@@ -81,7 +81,7 @@ window.i18nPagina = {
     'guia-p3': 'Can I change the color or size of the text?',
     'guia-r3': 'No, the style is fixed.',
     'guia-p4': 'What counts as a chapter for the tool?',
-    'guia-r4': 'Each content file of the book.'
+    'guia-r4': 'Each XHTML file the EPUB lists in its reading order (the spine). It can include the cover or credits pages.'
   }
 };
 </script>
@@ -144,9 +144,9 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">El texto se agrega como un párrafo en cursiva, de color gris y letra un poco más chica que el resto, para que se note sin molestar la lectura.</li>
-      <li data-i18n="guia-consejo-2">Se pone una vez por capítulo; si querés solo un aviso en la portada o al final del libro, conviene revisar el resultado en tu lector.</li>
+      <li data-i18n="guia-consejo-2">El texto va en cada archivo del orden de lectura: si el libro tiene portada o páginas de créditos ahí, también lo llevan. La herramienta no permite elegir qué páginas reciben el texto; para eso hace falta un editor de EPUB.</li>
       <li data-i18n="guia-consejo-3">Es útil para repartir una muestra gratuita con el aviso en todos los capítulos, o para anotar la versión de un borrador.</li>
-      <li data-i18n="guia-consejo-4">Si dejás el texto vacío, aparece el aviso «Escribí el texto que querés agregar».</li>
+      <li data-i18n="guia-consejo-4">Si dejás el texto vacío, aparece una ventana con «No se pudo generar el EPUB: Escribí el texto que querés agregar».</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
@@ -163,7 +163,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Qué es un capítulo para la herramienta?</summary>
-      <p data-i18n="guia-r4">Cada archivo de contenido del libro.</p>
+      <p data-i18n="guia-r4">Cada archivo XHTML que el EPUB tiene en su orden de lectura (el spine). Puede incluir la portada o las páginas de créditos.</p>
     </details>
   </section>
 </main>

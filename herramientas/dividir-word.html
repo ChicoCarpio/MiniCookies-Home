@@ -36,11 +36,11 @@ window.i18nPagina = {
     'guia-paso-3': 'Seguí el avance: «Generando documento X de Y».',
     'guia-paso-4': 'Cuando aparezca «Listo», tocá «Descargar .zip con los documentos».',
     'guia-consejo-1': 'El documento debe usar el estilo Título 1 de Word en los encabezados principales. Un texto que solo parece título (negrita y más grande) pero no tiene el estilo aplicado no se reconoce.',
-    'guia-consejo-2': 'Si hay texto antes del primer Título 1, queda en un primer archivo llamado «Documento». Cada archivo siguiente empieza en su Título 1.',
+    'guia-consejo-2': 'Si hay texto antes del primer Título 1, ese texto sale en un primer archivo, «01-Documento.docx». Cada archivo siguiente empieza en su Título 1.',
     'guia-consejo-3': 'Los archivos se numeran con ceros a la izquierda y llevan el texto del título, sin los caracteres no permitidos en nombres de archivo y recortado a 50 caracteres, por ejemplo «02-Resultados.docx».',
     'guia-consejo-4': 'Los documentos de salida se reconstruyen a partir del contenido (texto, listas, tablas, imágenes), por lo que el diseño puede no ser idéntico al original. Revisalos antes de usarlos como versión final.',
     'guia-p1': '¿Qué pasa si no hay Títulos 1?',
-    'guia-r1': 'Aparece un aviso: no hay nada que dividir. No se genera un zip con una copia idéntica.',
+    'guia-r1': 'Si el documento tiene un solo Título 1 y nada antes de él, o ninguno, aparece un aviso de que no hay nada que dividir, y no se genera un zip con una copia idéntica. Pero el texto que va antes del primer Título 1 cuenta como una parte: con un solo Título 1 y texto previo, salen dos archivos sin aviso.',
     'guia-p2': '¿Se pueden dividir por Título 2?',
     'guia-r2': 'No, solo por Título 1.',
     'guia-p3': '¿Funciona con archivos .doc?',
@@ -73,11 +73,11 @@ window.i18nPagina = {
     'guia-paso-3': 'Follow the progress: “Generating document X of Y”.',
     'guia-paso-4': 'When “Done” appears, tap “Download .zip with the documents”.',
     'guia-consejo-1': 'The document must use Word’s Heading 1 style on the main headings. Text that only looks like a heading (bold and larger) but doesn’t have the style applied isn’t recognized.',
-    'guia-consejo-2': 'If there is text before the first Heading 1, it goes into a first file called “Document”. Each following file starts at its Heading 1.',
+    'guia-consejo-2': 'If there is text before the first Heading 1, it goes into a first file, “01-Document.docx”. Each following file starts at its Heading 1.',
     'guia-consejo-3': 'Files are numbered with leading zeros and carry the heading text, without characters that aren’t allowed in file names and trimmed to 50 characters, for example “02-Resultados.docx”.',
     'guia-consejo-4': 'The output documents are rebuilt from the content (text, lists, tables, images), so the layout may not be identical to the original. Check them before using them as the final version.',
     'guia-p1': 'What happens if there are no Heading 1s?',
-    'guia-r1': 'A notice appears: there’s nothing to split. A zip with an identical copy isn’t generated.',
+    'guia-r1': 'If the document has one Heading 1 with nothing before it, or none, a notice says there’s nothing to split, and no zip with an identical copy is made. But text before the first Heading 1 counts as a part: with one Heading 1 and text before it, two files come out without a notice.',
     'guia-p2': 'Can it split by Heading 2?',
     'guia-r2': 'No, only by Heading 1.',
     'guia-p3': 'Does it work with .doc files?',
@@ -145,14 +145,14 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">El documento debe usar el estilo Título 1 de Word en los encabezados principales. Un texto que solo parece título (negrita y más grande) pero no tiene el estilo aplicado no se reconoce.</li>
-      <li data-i18n="guia-consejo-2">Si hay texto antes del primer Título 1, queda en un primer archivo llamado «Documento». Cada archivo siguiente empieza en su Título 1.</li>
+      <li data-i18n="guia-consejo-2">Si hay texto antes del primer Título 1, ese texto sale en un primer archivo, «01-Documento.docx». Cada archivo siguiente empieza en su Título 1.</li>
       <li data-i18n="guia-consejo-3">Los archivos se numeran con ceros a la izquierda y llevan el texto del título, sin los caracteres no permitidos en nombres de archivo y recortado a 50 caracteres, por ejemplo «02-Resultados.docx».</li>
       <li data-i18n="guia-consejo-4">Los documentos de salida se reconstruyen a partir del contenido (texto, listas, tablas, imágenes), por lo que el diseño puede no ser idéntico al original. Revisalos antes de usarlos como versión final.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Qué pasa si no hay Títulos 1?</summary>
-      <p data-i18n="guia-r1">Aparece un aviso: no hay nada que dividir. No se genera un zip con una copia idéntica.</p>
+      <p data-i18n="guia-r1">Si el documento tiene un solo Título 1 y nada antes de él, o ninguno, aparece un aviso de que no hay nada que dividir, y no se genera un zip con una copia idéntica. Pero el texto que va antes del primer Título 1 cuenta como una parte: con un solo Título 1 y texto previo, salen dos archivos sin aviso.</p>
     </details>
     <details>
       <summary data-i18n="guia-p2">¿Se pueden dividir por Título 2?</summary>

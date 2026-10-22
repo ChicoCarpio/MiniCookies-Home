@@ -26,7 +26,9 @@ window.i18nPagina = {
     'mensaje-resultado': 'De {total} líneas originales, quedaron {quedan}',
     'mensaje-duplicadas': ' (se quitaron {n} duplicada(s))',
     'error-procesar': 'No se pudo procesar el archivo',
+    'error-no-txt': '❌ Ese archivo no es un .txt. Elegí un archivo de texto plano (.txt).',
     'guia-titulo': 'Cómo quitar líneas duplicadas o vacías de un texto',
+    'guia-mas-link': 'Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías',
     'guia-intro': 'Limpia un archivo de texto plano (.txt) eliminando líneas repetidas, líneas vacías o ambas. Es útil para depurar listas de correos, nombres o códigos copiadas de varias fuentes, o para sacar los huecos que dejan algunos exportadores de texto. Elegís el archivo, marcás qué querés quitar y descargás el resultado.',
     'guia-paso-1': 'Arrastrá tu archivo .txt a la zona de carga o hacé clic para elegirlo.',
     'guia-paso-2': 'Marcá las opciones que quieras: «Quitar líneas vacías» y/o «Quitar líneas duplicadas (se conserva la primera aparición)». Las dos vienen marcadas.',
@@ -43,7 +45,7 @@ window.i18nPagina = {
     'guia-p3': '¿Puedo quitar duplicados ignorando mayúsculas?',
     'guia-r3': 'No, la comparación distingue mayúsculas y minúsculas.',
     'guia-p4': '¿Conserva los acentos y la codificación?',
-    'guia-r4': 'Sí, el archivo se lee y se guarda como texto, respetando el tipo de salto de línea del original.'
+    'guia-r4': 'Sí. La herramienta detecta la codificación del original (UTF-8, Windows-1252 o UTF-16) y guarda el resultado en UTF-8, con el mismo tipo de salto de línea.'
   },
   en: {
     'titulo-pagina': 'Remove Duplicate or Empty Lines Free — Mini Cookies',
@@ -60,7 +62,9 @@ window.i18nPagina = {
     'mensaje-resultado': 'Of {total} original lines, {quedan} remain',
     'mensaje-duplicadas': ' ({n} duplicate(s) removed)',
     'error-procesar': 'Couldn’t process the file',
+    'error-no-txt': '❌ That file isn’t a .txt. Choose a plain text file (.txt).',
     'guia-titulo': 'How to remove duplicate or empty lines from a text',
+    'guia-mas-link': 'How to clean a text list: remove duplicates, sort and delete empty lines',
     'guia-intro': 'It cleans up a plain text file (.txt) by removing repeated lines, empty lines or both. It’s useful for tidying lists of emails, names or codes copied from several sources, or for removing the gaps some text exporters leave. You choose the file, tick what you want removed and download the result.',
     'guia-paso-1': 'Drag your .txt file to the upload area or click to choose it.',
     'guia-paso-2': 'Tick the options you want: “Remove empty lines” and/or “Remove duplicate lines (the first occurrence is kept)”. Both are ticked by default.',
@@ -77,7 +81,7 @@ window.i18nPagina = {
     'guia-p3': 'Can I remove duplicates ignoring upper and lower case?',
     'guia-r3': 'No, the comparison is case-sensitive.',
     'guia-p4': 'Does it keep accents and the encoding?',
-    'guia-r4': 'Yes, the file is read and saved as text, respecting the original’s line-break type.'
+    'guia-r4': 'Yes. The tool detects the original’s encoding (UTF-8, Windows-1252 or UTF-16) and saves the result as UTF-8, with the same line-break type.'
   }
 };
 </script>
@@ -158,8 +162,9 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Conserva los acentos y la codificación?</summary>
-      <p data-i18n="guia-r4">Sí, el archivo se lee y se guarda como texto, respetando el tipo de salto de línea del original.</p>
+      <p data-i18n="guia-r4">Sí. La herramienta detecta la codificación del original (UTF-8, Windows-1252 o UTF-16) y guarda el resultado en UTF-8, con el mismo tipo de salto de línea.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/limpiar-listas-de-texto.html" data-i18n="guia-mas-link">Cómo limpiar una lista de texto: quitar duplicados, ordenar y borrar líneas vacías</a></p>
   </section>
 </main>
 
@@ -193,6 +198,10 @@ function mostrarArchivo(archivo) {
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.txt'));
   if (archivo) mostrarArchivo(archivo);
+  else {
+    mensaje.textContent = t('error-no-txt');
+    mensaje.style.display = 'block';
+  }
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);

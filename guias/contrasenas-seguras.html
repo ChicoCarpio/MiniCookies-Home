@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo generar contraseñas seguras y guardarlas bien — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Largo y azar antes que símbolos, una contraseña por cuenta y una caja fuerte que las guarde. Cómo usar el generador y el administrador del sitio.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo generar contraseñas seguras y guardarlas bien — Mini Cookies',
+    'meta-descripcion': 'Largo y azar antes que símbolos, una contraseña por cuenta y una caja fuerte que las guarde. Cómo usar el generador y el administrador del sitio.',
+    'h1': 'Cómo generar contraseñas seguras y guardarlas bien',
+    'b1': 'Si usás la misma contraseña en el correo y en un foro donde te registraste hace años, una filtración del foro puede abrirte el correo. Esta guía explica cómo sacar una contraseña difícil de adivinar con el <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a>, y cómo guardar una distinta para cada cuenta en el <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a>, sin recordarlas todas.',
+    'b2': 'Qué hace difícil de adivinar una contraseña',
+    'b3': 'Quien prueba contraseñas una tras otra recorre combinaciones, así que importa cuántas hay. Cada carácter que agregás multiplica ese número. Una contraseña de 16 caracteres sorteados al azar es mucho mejor que una de 8 con mayúscula, número y símbolo.',
+    'b4': 'El azar pesa más que la mezcla. «Contraseña2024!» tiene de todo, pero es lo que escribe mucha gente, así que se prueba entre las primeras. Los nombres, las fechas y los equipos de fútbol caen rápido, aunque les cambies una letra por un número.',
+    'b5': 'Una frase de contraseña son varias palabras sin relación entre sí: es larga y todavía se puede recordar. Sirve para la contraseña que vas a escribir de memoria, como la de tu computadora. Las palabras tienen que sortearse con dados, usando una lista pensada para eso, como la de la EFF. Una frase que inventa una persona («yo quiero mucho a mi perro») sigue patrones que los atacantes conocen. El generador del sitio no hace frases, solo caracteres.',
+    'b6': 'Qué hace el generador del sitio',
+    'b7': 'El <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a> sortea con <code>crypto.getRandomValues</code>, el generador aleatorio del navegador, no con <code>Math.random</code>. Estos son sus controles y cómo arranca la página:',
+    'b8-c1': 'Control',
+    'b8-c2': 'Qué hace',
+    'b8-c3': 'Al abrir la página',
+    'b8-f1c1': '«Longitud»',
+    'b8-f1c2': 'Deslizador de 8 a 64 caracteres',
+    'b8-f1c3': '16',
+    'b8-f2c1': '«Mayúsculas (A-Z)»',
+    'b8-f2c2': 'Incluye letras mayúsculas',
+    'b8-f2c3': 'Marcada',
+    'b8-f3c1': '«Minúsculas (a-z)»',
+    'b8-f3c2': 'Incluye letras minúsculas',
+    'b8-f3c3': 'Marcada',
+    'b8-f4c1': '«Números (0-9)»',
+    'b8-f4c2': 'Incluye cifras',
+    'b8-f4c3': 'Marcada',
+    'b8-f5c1': '«Símbolos (!@#$%...)»',
+    'b8-f5c2': 'Incluye ! @ # $ % ^ &amp; * ( ) - _ = + [ ] { } ?',
+    'b8-f5c3': 'Marcada',
+    'b9': 'Cada contraseña tiene al menos un carácter de cada tipo marcado. Además, descarta las que tienen tres caracteres iguales seguidos (aaa), tres en orden (abc, 321) o una palabra común como password, admin o qwerty. Son filtros sencillos: la longitud sigue siendo lo que más protege. Si desmarcás todas las casillas, no genera nada.',
+    'b10': 'Cada vez que movés el deslizador o una casilla sale una contraseña nueva. «Generar nueva contraseña» sortea otra con las mismas opciones, y «Copiar» la pone en el portapapeles. La página no guarda nada: al cerrarla, la contraseña se pierde. Si el sitio donde la vas a usar no acepta ciertos símbolos, desmarcá «Símbolos (!@#$%...)» y subí el largo.',
+    'b11': 'Una contraseña por cuenta, y dónde guardarlas',
+    'b12': 'Reutilizar una contraseña es el error más caro. Cuando un servicio sufre una filtración, quien consiguió el correo y la contraseña los prueba en otros sitios. Usá una distinta para cada cuenta y empezá por el correo y el banco, porque el correo suele servir para recuperar las demás.',
+    'b13': 'Nadie recuerda decenas de contraseñas largas y distintas. Si intentás recordarlas, terminás con claves cortas y repetidas. El papel se pierde, o lo lee cualquiera que lo encuentre. Un administrador guarda todas cifradas y te deja recordar una sola, la maestra, que conviene que sea una frase larga.',
+    'b14': 'Cuando la contraseña protege un archivo y no una cuenta, <a href="../herramientas/proteger-pdf.html">Proteger PDF con contraseña</a> cifra el PDF con AES-256 y pide la «Contraseña para abrir el PDF», que es obligatoria. Guardala en la caja antes de enviar el archivo, porque sin ella no se abre, y mandala por otro medio que el del PDF.',
+    'b15': 'Cómo protege sus datos el administrador',
+    'b16': 'El <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a> es una caja fuerte que se abre con una contraseña maestra de al menos 12 caracteres. Vive en seguro.minicookies.net, un sitio aparte sin anuncios ni código de terceros, y la página no puede conectarse a otros servidores. La maestra no se guarda en ningún lado. A partir de ella, PBKDF2-SHA256 con 2.000.000 de vueltas saca la clave de cifrado: cada intento de adivinarla tiene que repetir ese cálculo entero, y así se vuelve lento. El contenido se cifra con AES-256-GCM. Si alguien altera el archivo, la caja no se abre en vez de abrirse con datos cambiados.',
+    'b17': 'Al crear la caja también podés marcar «Agregar una clave secreta (más seguridad)». Es una clave aleatoria de 26 letras y números que se suma a la maestra y no viaja en el respaldo: si alguien roba el archivo, no puede ni empezar a probar la maestra. El costo es que la clave secreta no se guarda en el navegador, así que hay que escribirla cada vez que abrís la caja.',
+    'b18': 'Crear la caja fuerte',
+    'b19-1': 'Escribí un nombre para la caja. Se ve sin la contraseña, así que no pongas datos sensibles.',
+    'b19-2': 'Escribí la «Contraseña maestra» y repetila en «Repetí la contraseña maestra». Tiene que tener al menos 12 caracteres.',
+    'b19-3': 'Tocá «Crear caja fuerte». Si marcaste la clave secreta, aparece en pantalla: descargala o anotala, marcá «Ya la guardé en un lugar seguro» y tocá «Continuar».',
+    'b20': '<strong>Si cerrás o recargás la página antes de tocar «Continuar», la caja no se guarda en ningún lado y tenés que crearla de nuevo.</strong> Al tocar «Continuar», la caja queda guardada en el navegador, y desde ese momento no se puede abrir sin la clave secreta. «Ver la clave secreta», en «Más opciones», pide la maestra otra vez y solo funciona con la caja abierta.',
+    'b21': 'Usarla día a día',
+    'b22': 'Con la caja abierta, «Nueva entrada» pide «Sitio o nombre», «Usuario o correo», «Contraseña», «Dirección del sitio» y «Notas». Cada entrada se guarda en el navegador al tocar «Guardar». «Generar» llena el campo con una contraseña nueva: el «Largo» empieza en 20 (de 8 a 64) y «Símbolos» viene marcada. Aquí siempre se usan mayúsculas, minúsculas y números.',
+    'b23': 'En la lista, el icono de llave copia la contraseña y el de persona, el usuario. «Mostrar» la despliega y la oculta sola a los 15 segundos. Las contraseñas repetidas llevan la marca «Reutilizada», y «Revisar contraseñas», en «Más opciones», cuenta las repetidas y las débiles. La etiqueta «Fortaleza» mira solo el largo y los tipos de carácter, no si la contraseña fue sorteada: tomala como alerta, no como garantía.',
+    'b24': 'La caja se bloquea sola tras 1, 5, 15 o 30 minutos sin uso (5 por defecto, en «Más opciones») y también cuando cerrás la página o salís de ella. Al copiar una contraseña, el sitio la borra del portapapeles a los 30 segundos, si la página tiene el foco; si no, lo intenta al volver. Eso no cubre el historial del portapapeles de Windows (Win+V), que puede guardar lo copiado.',
+    'b25': 'Tres intentos fallidos con la maestra hacen esperar 5 segundos; después, 10, 20 y así hasta 5 minutos. La misma caja tampoco se abre en dos pestañas: hay que bloquearla en la primera.',
+    'b26': 'Respaldos y la contraseña maestra',
+    'b27': 'La caja vive en el navegador donde la creaste: si limpiás los datos del navegador, se borra. Si el navegador no deja guardar (por ejemplo, en una ventana privada), el sitio lo avisa y hay que exportar antes de cerrar. «Exportar caja fuerte», en «Más opciones», descarga un archivo .json que empieza con «caja-fuerte-». Está cifrado, pero deja ver el nombre de la caja, la fecha de la última modificación y si tiene clave secreta. Para abrirlo en otro equipo, usá «Abrir una caja exportada» en la pantalla de inicio. Pide la maestra y, si corresponde, la clave secreta.',
+    'b28': 'El aviso «Esta caja solo existe en este navegador y tiene cambios que no están en un respaldo» aparece también al volver a abrir la caja, si cambiaste algo en una sesión anterior y no exportaste después. Se borra al exportar la caja. Exportá después de cada cambio que no quieras perder.',
+    'b29': '«Exportar a CSV» es otra cosa: pide la maestra otra vez y deja todas las contraseñas en texto plano, sin cifrar, para llevarlas a otro gestor. Borralo apenas lo uses y no lo abras con Excel, que puede alterarlo. En sentido contrario, «Importar contraseñas» lee el CSV de Chrome, Edge o Firefox (hasta 20.000 filas), omite las que ya están iguales y pregunta qué hacer cuando un mismo sitio y usuario tienen otra contraseña.',
+    'b30': '<strong>No hay forma de recuperar la maestra ni lo guardado.</strong> El sitio tampoco puede verla, y lo mismo vale para la clave secreta. Anotá la maestra en un lugar seguro. «Cambiar la contraseña maestra», en «Más opciones», pide la actual y la nueva; los respaldos anteriores siguen con la maestra vieja, así que después del cambio exportá uno nuevo.',
+    'b31': 'Preguntas frecuentes',
+    'b32': '<strong>¿Puedo usar la caja en el celular y en la computadora?</strong> Sí, pero no se sincroniza sola: cada equipo tiene su copia. Exportá el respaldo en uno y abrilo en el otro con «Abrir una caja exportada».',
+    'b33': '<strong>¿Puedo quitar o agregar la clave secreta después?</strong> No. La opción se elige al crear la caja.',
+    'b34': 'Resumen',
+    'b35': 'Una contraseña larga y al azar para cada cuenta, guardadas en un administrador cuya maestra sea una frase que recuerdes. Generalas con el generador, exportá un respaldo y guardá la clave secreta, si la usás, lejos de ese archivo. Si perdés la maestra, no hay forma de recuperar lo guardado.',
+    'rel1': 'Generador de contraseñas',
+    'rel2': 'Administrador de contraseñas',
+    'rel3': 'Proteger PDF con contraseña'
+  },
+  en: {
+    'titulo-pagina': 'How to generate strong passwords and store them properly — Mini Cookies',
+    'meta-descripcion': 'Length and randomness before symbols, one password per account, and a vault to keep them. How to use the site’s generator and password manager.',
+    'h1': 'How to generate strong passwords and store them properly',
+    'b1': 'If you use the same password for your email and for a forum you joined years ago, a leak from the forum can open your email. This guide explains how to get a password that is hard to guess with the <a href="../herramientas/generador-contrasenas.html">Password generator</a>, and how to keep a different one for each account in the <a href="https://seguro.minicookies.net/en/herramientas/administrador-contrasenas">Password manager</a>, without remembering them all.',
+    'b2': 'What makes a password hard to guess',
+    'b3': 'Someone who tries passwords one after another works through combinations, so what matters is how many there are. Every extra character multiplies that number. A password of 16 randomly drawn characters is far better than one of 8 with an uppercase letter, a number and a symbol.',
+    'b4': 'Randomness counts for more than mixing. “Password2024!” has a bit of everything, but it is what many people write, so it gets tried early. Names, dates and football teams fall fast too, even if you swap a letter for a number.',
+    'b5': 'A passphrase is several unrelated words: it is long and still easy to remember. It suits the password you will type from memory, such as your computer’s. The words have to be picked with dice, from a list made for that purpose, such as the EFF’s. A phrase a person invents (“I really love my dog”) follows patterns that attackers know. The site’s generator makes no passphrases, only characters.',
+    'b6': 'What the site’s generator does',
+    'b7': 'The <a href="../herramientas/generador-contrasenas.html">Password generator</a> draws with <code>crypto.getRandomValues</code>, the browser’s random generator, not with <code>Math.random</code>. These are its controls and how the page starts:',
+    'b8-c1': 'Control',
+    'b8-c2': 'What it does',
+    'b8-c3': 'On opening the page',
+    'b8-f1c1': '“Length”',
+    'b8-f1c2': 'Slider from 8 to 64 characters',
+    'b8-f1c3': '16',
+    'b8-f2c1': '“Uppercase (A-Z)”',
+    'b8-f2c2': 'Includes capital letters',
+    'b8-f2c3': 'Ticked',
+    'b8-f3c1': '“Lowercase (a-z)”',
+    'b8-f3c2': 'Includes lowercase letters',
+    'b8-f3c3': 'Ticked',
+    'b8-f4c1': '“Numbers (0-9)”',
+    'b8-f4c2': 'Includes digits',
+    'b8-f4c3': 'Ticked',
+    'b8-f5c1': '“Symbols (!@#$%...)”',
+    'b8-f5c2': 'Includes ! @ # $ % ^ &amp; * ( ) - _ = + [ ] { } ?',
+    'b8-f5c3': 'Ticked',
+    'b9': 'Every password has at least one character of each ticked type. The generator also discards any with three identical characters in a row (aaa), three in order (abc, 321) or a common word such as password, admin or qwerty. These are simple filters: length is still what protects most. If you untick all the boxes, nothing is generated.',
+    'b10': 'Every time you move the slider or a box, a new password appears. “Generate a new password” draws another with the same options, and “Copy” puts it on the clipboard. The page keeps nothing: when you close it, the password is gone. If the site you’re using doesn’t accept certain symbols, untick “Symbols (!@#$%...)” and raise the length.',
+    'b11': 'One password per account, and a place to keep them',
+    'b12': 'Reusing a password is the costliest mistake. When a service is leaked, whoever gets the email and password tries them on other sites. Use a different one for each account, and start with email and bank, because email is often the way back into the others.',
+    'b13': 'Nobody remembers dozens of long, different passwords. If you try, you end up with short, repeated ones. Paper gets lost, or read by whoever finds it. A password manager keeps them all encrypted and lets you remember just one, the master password, which works best as a long phrase you can recall.',
+    'b14': 'When the password protects a file rather than an account, <a href="../herramientas/proteger-pdf.html">Password-protect a PDF</a> encrypts the PDF with AES-256 and asks for a “Password to open the PDF”, which is required. Save it in your vault before sending the file, because without it the PDF won’t open, and send the password through another channel than the PDF.',
+    'b15': 'How the password manager protects your data',
+    'b16': 'The <a href="https://seguro.minicookies.net/en/herramientas/administrador-contrasenas">Password manager</a> is a vault opened with a master password of at least 12 characters. It lives at seguro.minicookies.net, a separate site with no ads or third-party code, and the page cannot connect to other servers. The master password is not stored anywhere. PBKDF2-SHA256 with 2,000,000 rounds turns it into the encryption key, so each guess has to repeat that work in full, which makes guessing slow. The contents are encrypted with AES-256-GCM. If someone alters the file, the vault won’t open instead of opening with changed data.',
+    'b17': 'When you create the vault you can also tick “Add a secret key (more security)”. It is a random key of 26 letters and digits that is added to the master password and is not included in the backup, so if someone steals the file, they can’t even start trying the master password. The cost: the secret key is not kept in the browser, so you have to type it each time you open the vault.',
+    'b18': 'Create the vault',
+    'b19-1': 'Type a name for the vault. It is shown without the password, so don’t put sensitive data in it.',
+    'b19-2': 'Type the “Master password” (at least 12 characters) and repeat it in “Repeat the master password”.',
+    'b19-3': 'Tap “Create vault”. If you ticked the secret key, it appears on screen: download it or write it down, tick “I saved it in a safe place” and tap “Continue”.',
+    'b20': '<strong>If you close or reload the page before tapping “Continue”, the vault is not saved anywhere, and you have to create it again.</strong> When you tap “Continue”, the vault is saved in the browser, and from then on it can’t be opened without the secret key. “View the secret key”, under “More options”, asks for the master password again and only works with the vault open.',
+    'b21': 'Using it day to day',
+    'b22': 'With the vault open, “New entry” asks for “Site or name”, “Username or email”, “Password”, “Site address” and “Notes”. Each entry is saved in the browser when you tap “Save”. “Generate” fills the password field with a new password: “Length” starts at 20 (8 to 64) and “Symbols” is ticked. Here the password always uses uppercase, lowercase and digits; you can only leave out the symbols.',
+    'b23': 'In the list, the key icon copies the password and the person icon copies the username. “Show” reveals the password and hides it again after 15 seconds. Reused passwords get the “Reused” mark. “Check passwords”, under “More options”, counts the reused and weak ones. The “Strength” label only looks at length and character types, not at whether the password was random, so treat it as a warning, not a guarantee.',
+    'b24': 'The vault locks itself after 1, 5, 15 or 30 minutes without use (5 by default, under “More options”), and also when you close the page or leave it. When you copy a password, the site clears the clipboard 30 seconds later, if the page has focus; if not, it tries again when you come back. This does not cover the Windows clipboard history (Win+V), which may keep what you copied.',
+    'b25': 'Three failed attempts with the master password make the site wait 5 seconds, then 10, 20 and so on, up to 5 minutes. The same vault cannot be open in two tabs: lock it in the first one.',
+    'b26': 'Backups and the master password',
+    'b27': 'The vault lives in the browser where you created it: if you clear that browser’s data, it is deleted. If the browser doesn’t allow saving (in a private window, for example), the site warns you, and you have to export before closing. “Export vault”, under “More options”, downloads a .json file whose name starts with “caja-fuerte-”. It is encrypted, but it shows the vault name, the date of the last change and whether it has a secret key. To open it on another computer, use “Open an exported vault” on the start screen. It asks for the master password and, if needed, the secret key.',
+    'b28': 'The notice “This vault only exists in this browser and has changes that are not in a backup” also appears when you reopen the vault, if you changed something in an earlier session and didn’t export afterwards. Exporting the vault clears it. Export after every change you don’t want to lose.',
+    'b29': '“Export to CSV” is different: it asks for the master password again and writes every password as plain text, without encryption, to move them to another manager. Delete it as soon as you’ve used it, and don’t open it in Excel, which can alter it. In the other direction, “Import passwords” reads a CSV from Chrome, Edge or Firefox (up to 20,000 rows), skips the ones that are already the same, and asks what to do when the same site and username have a different password.',
+    'b30': '<strong>There is no way to recover the master password or what is saved.</strong> The site cannot see it, and the same goes for the secret key. Write the master password down somewhere safe. “Change the master password”, under “More options”, asks for the current one and the new one; older backups still use the old password, so export a new backup after changing it.',
+    'b31': 'Frequently asked questions',
+    'b32': '<strong>Can I use the vault on my phone and my computer?</strong> Yes, but they don’t sync by themselves: each device has its own copy. Export the backup on one and open it on the other with “Open an exported vault”.',
+    'b33': '<strong>Can I remove or add the secret key later?</strong> No. The option is chosen when you create the vault.',
+    'b34': 'Summary',
+    'b35': 'A long, random password for each account, kept in a manager whose master password is a phrase you can remember. Generate them with the generator, export a backup and keep the secret key, if you use one, away from that file. If you lose the master password, there is no way to recover what is saved.',
+    'rel1': 'Password generator',
+    'rel2': 'Password manager',
+    'rel3': 'Password-protect a PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo generar contraseñas seguras y guardarlas bien</h1>
+    <p data-i18n-html="b1">Si usás la misma contraseña en el correo y en un foro donde te registraste hace años, una filtración del foro puede abrirte el correo. Esta guía explica cómo sacar una contraseña difícil de adivinar con el <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a>, y cómo guardar una distinta para cada cuenta en el <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a>, sin recordarlas todas.</p>
+    <h2 data-i18n="b2">Qué hace difícil de adivinar una contraseña</h2>
+    <p data-i18n-html="b3">Quien prueba contraseñas una tras otra recorre combinaciones, así que importa cuántas hay. Cada carácter que agregás multiplica ese número. Una contraseña de 16 caracteres sorteados al azar es mucho mejor que una de 8 con mayúscula, número y símbolo.</p>
+    <p data-i18n-html="b4">El azar pesa más que la mezcla. «Contraseña2024!» tiene de todo, pero es lo que escribe mucha gente, así que se prueba entre las primeras. Los nombres, las fechas y los equipos de fútbol caen rápido, aunque les cambies una letra por un número.</p>
+    <p data-i18n-html="b5">Una frase de contraseña son varias palabras sin relación entre sí: es larga y todavía se puede recordar. Sirve para la contraseña que vas a escribir de memoria, como la de tu computadora. Las palabras tienen que sortearse con dados, usando una lista pensada para eso, como la de la EFF. Una frase que inventa una persona («yo quiero mucho a mi perro») sigue patrones que los atacantes conocen. El generador del sitio no hace frases, solo caracteres.</p>
+    <h2 data-i18n="b6">Qué hace el generador del sitio</h2>
+    <p data-i18n-html="b7">El <a href="../herramientas/generador-contrasenas.html">Generador de contraseñas</a> sortea con <code>crypto.getRandomValues</code>, el generador aleatorio del navegador, no con <code>Math.random</code>. Estos son sus controles y cómo arranca la página:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b8-c1">Control</th><th data-i18n-html="b8-c2">Qué hace</th><th data-i18n-html="b8-c3">Al abrir la página</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b8-f1c1">«Longitud»</td><td data-i18n-html="b8-f1c2">Deslizador de 8 a 64 caracteres</td><td data-i18n-html="b8-f1c3">16</td></tr>
+        <tr><td data-i18n-html="b8-f2c1">«Mayúsculas (A-Z)»</td><td data-i18n-html="b8-f2c2">Incluye letras mayúsculas</td><td data-i18n-html="b8-f2c3">Marcada</td></tr>
+        <tr><td data-i18n-html="b8-f3c1">«Minúsculas (a-z)»</td><td data-i18n-html="b8-f3c2">Incluye letras minúsculas</td><td data-i18n-html="b8-f3c3">Marcada</td></tr>
+        <tr><td data-i18n-html="b8-f4c1">«Números (0-9)»</td><td data-i18n-html="b8-f4c2">Incluye cifras</td><td data-i18n-html="b8-f4c3">Marcada</td></tr>
+        <tr><td data-i18n-html="b8-f5c1">«Símbolos (!@#$%...)»</td><td data-i18n-html="b8-f5c2">Incluye ! @ # $ % ^ &amp; * ( ) - _ = + [ ] { } ?</td><td data-i18n-html="b8-f5c3">Marcada</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b9">Cada contraseña tiene al menos un carácter de cada tipo marcado. Además, descarta las que tienen tres caracteres iguales seguidos (aaa), tres en orden (abc, 321) o una palabra común como password, admin o qwerty. Son filtros sencillos: la longitud sigue siendo lo que más protege. Si desmarcás todas las casillas, no genera nada.</p>
+    <p data-i18n-html="b10">Cada vez que movés el deslizador o una casilla sale una contraseña nueva. «Generar nueva contraseña» sortea otra con las mismas opciones, y «Copiar» la pone en el portapapeles. La página no guarda nada: al cerrarla, la contraseña se pierde. Si el sitio donde la vas a usar no acepta ciertos símbolos, desmarcá «Símbolos (!@#$%...)» y subí el largo.</p>
+    <h2 data-i18n="b11">Una contraseña por cuenta, y dónde guardarlas</h2>
+    <p data-i18n-html="b12">Reutilizar una contraseña es el error más caro. Cuando un servicio sufre una filtración, quien consiguió el correo y la contraseña los prueba en otros sitios. Usá una distinta para cada cuenta y empezá por el correo y el banco, porque el correo suele servir para recuperar las demás.</p>
+    <p data-i18n-html="b13">Nadie recuerda decenas de contraseñas largas y distintas. Si intentás recordarlas, terminás con claves cortas y repetidas. El papel se pierde, o lo lee cualquiera que lo encuentre. Un administrador guarda todas cifradas y te deja recordar una sola, la maestra, que conviene que sea una frase larga.</p>
+    <p data-i18n-html="b14">Cuando la contraseña protege un archivo y no una cuenta, <a href="../herramientas/proteger-pdf.html">Proteger PDF con contraseña</a> cifra el PDF con AES-256 y pide la «Contraseña para abrir el PDF», que es obligatoria. Guardala en la caja antes de enviar el archivo, porque sin ella no se abre, y mandala por otro medio que el del PDF.</p>
+    <h2 data-i18n="b15">Cómo protege sus datos el administrador</h2>
+    <p data-i18n-html="b16">El <a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas">Administrador de contraseñas</a> es una caja fuerte que se abre con una contraseña maestra de al menos 12 caracteres. Vive en seguro.minicookies.net, un sitio aparte sin anuncios ni código de terceros, y la página no puede conectarse a otros servidores. La maestra no se guarda en ningún lado. A partir de ella, PBKDF2-SHA256 con 2.000.000 de vueltas saca la clave de cifrado: cada intento de adivinarla tiene que repetir ese cálculo entero, y así se vuelve lento. El contenido se cifra con AES-256-GCM. Si alguien altera el archivo, la caja no se abre en vez de abrirse con datos cambiados.</p>
+    <p data-i18n-html="b17">Al crear la caja también podés marcar «Agregar una clave secreta (más seguridad)». Es una clave aleatoria de 26 letras y números que se suma a la maestra y no viaja en el respaldo: si alguien roba el archivo, no puede ni empezar a probar la maestra. El costo es que la clave secreta no se guarda en el navegador, así que hay que escribirla cada vez que abrís la caja.</p>
+    <h2 data-i18n="b18">Crear la caja fuerte</h2>
+    <ol>
+      <li data-i18n-html="b19-1">Escribí un nombre para la caja. Se ve sin la contraseña, así que no pongas datos sensibles.</li>
+      <li data-i18n-html="b19-2">Escribí la «Contraseña maestra» y repetila en «Repetí la contraseña maestra». Tiene que tener al menos 12 caracteres.</li>
+      <li data-i18n-html="b19-3">Tocá «Crear caja fuerte». Si marcaste la clave secreta, aparece en pantalla: descargala o anotala, marcá «Ya la guardé en un lugar seguro» y tocá «Continuar».</li>
+    </ol>
+    <p data-i18n-html="b20"><strong>Si cerrás o recargás la página antes de tocar «Continuar», la caja no se guarda en ningún lado y tenés que crearla de nuevo.</strong> Al tocar «Continuar», la caja queda guardada en el navegador, y desde ese momento no se puede abrir sin la clave secreta. «Ver la clave secreta», en «Más opciones», pide la maestra otra vez y solo funciona con la caja abierta.</p>
+    <h2 data-i18n="b21">Usarla día a día</h2>
+    <p data-i18n-html="b22">Con la caja abierta, «Nueva entrada» pide «Sitio o nombre», «Usuario o correo», «Contraseña», «Dirección del sitio» y «Notas». Cada entrada se guarda en el navegador al tocar «Guardar». «Generar» llena el campo con una contraseña nueva: el «Largo» empieza en 20 (de 8 a 64) y «Símbolos» viene marcada. Aquí siempre se usan mayúsculas, minúsculas y números.</p>
+    <p data-i18n-html="b23">En la lista, el icono de llave copia la contraseña y el de persona, el usuario. «Mostrar» la despliega y la oculta sola a los 15 segundos. Las contraseñas repetidas llevan la marca «Reutilizada», y «Revisar contraseñas», en «Más opciones», cuenta las repetidas y las débiles. La etiqueta «Fortaleza» mira solo el largo y los tipos de carácter, no si la contraseña fue sorteada: tomala como alerta, no como garantía.</p>
+    <p data-i18n-html="b24">La caja se bloquea sola tras 1, 5, 15 o 30 minutos sin uso (5 por defecto, en «Más opciones») y también cuando cerrás la página o salís de ella. Al copiar una contraseña, el sitio la borra del portapapeles a los 30 segundos, si la página tiene el foco; si no, lo intenta al volver. Eso no cubre el historial del portapapeles de Windows (Win+V), que puede guardar lo copiado.</p>
+    <p data-i18n-html="b25">Tres intentos fallidos con la maestra hacen esperar 5 segundos; después, 10, 20 y así hasta 5 minutos. La misma caja tampoco se abre en dos pestañas: hay que bloquearla en la primera.</p>
+    <h2 data-i18n="b26">Respaldos y la contraseña maestra</h2>
+    <p data-i18n-html="b27">La caja vive en el navegador donde la creaste: si limpiás los datos del navegador, se borra. Si el navegador no deja guardar (por ejemplo, en una ventana privada), el sitio lo avisa y hay que exportar antes de cerrar. «Exportar caja fuerte», en «Más opciones», descarga un archivo .json que empieza con «caja-fuerte-». Está cifrado, pero deja ver el nombre de la caja, la fecha de la última modificación y si tiene clave secreta. Para abrirlo en otro equipo, usá «Abrir una caja exportada» en la pantalla de inicio. Pide la maestra y, si corresponde, la clave secreta.</p>
+    <p data-i18n-html="b28">El aviso «Esta caja solo existe en este navegador y tiene cambios que no están en un respaldo» aparece también al volver a abrir la caja, si cambiaste algo en una sesión anterior y no exportaste después. Se borra al exportar la caja. Exportá después de cada cambio que no quieras perder.</p>
+    <p data-i18n-html="b29">«Exportar a CSV» es otra cosa: pide la maestra otra vez y deja todas las contraseñas en texto plano, sin cifrar, para llevarlas a otro gestor. Borralo apenas lo uses y no lo abras con Excel, que puede alterarlo. En sentido contrario, «Importar contraseñas» lee el CSV de Chrome, Edge o Firefox (hasta 20.000 filas), omite las que ya están iguales y pregunta qué hacer cuando un mismo sitio y usuario tienen otra contraseña.</p>
+    <p data-i18n-html="b30"><strong>No hay forma de recuperar la maestra ni lo guardado.</strong> El sitio tampoco puede verla, y lo mismo vale para la clave secreta. Anotá la maestra en un lugar seguro. «Cambiar la contraseña maestra», en «Más opciones», pide la actual y la nueva; los respaldos anteriores siguen con la maestra vieja, así que después del cambio exportá uno nuevo.</p>
+    <h2 data-i18n="b31">Preguntas frecuentes</h2>
+    <p data-i18n-html="b32"><strong>¿Puedo usar la caja en el celular y en la computadora?</strong> Sí, pero no se sincroniza sola: cada equipo tiene su copia. Exportá el respaldo en uno y abrilo en el otro con «Abrir una caja exportada».</p>
+    <p data-i18n-html="b33"><strong>¿Puedo quitar o agregar la clave secreta después?</strong> No. La opción se elige al crear la caja.</p>
+    <h2 data-i18n="b34">Resumen</h2>
+    <p data-i18n-html="b35">Una contraseña larga y al azar para cada cuenta, guardadas en un administrador cuya maestra sea una frase que recuerdes. Generalas con el generador, exportá un respaldo y guardá la clave secreta, si la usás, lejos de ese archivo. Si perdés la maestra, no hay forma de recuperar lo guardado.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/generador-contrasenas.html" data-i18n="rel1">Generador de contraseñas</a></li>
+      <li><a href="https://seguro.minicookies.net/herramientas/administrador-contrasenas" data-i18n="rel2">Administrador de contraseñas</a></li>
+      <li><a href="../herramientas/proteger-pdf.html" data-i18n="rel3">Proteger PDF con contraseña</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

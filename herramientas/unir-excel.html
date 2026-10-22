@@ -26,6 +26,7 @@ window.i18nPagina = {
     'nombre-hoja-defecto': 'Hoja',
     'error-unir': 'No se pudo unir los archivos',
     'guia-titulo': 'Cómo unir varios archivos Excel o CSV en un solo libro',
+    'guia-mas-link': 'Cómo unir varios archivos de Excel en uno solo',
     'guia-intro': 'Cuando tenés varias planillas sueltas (un archivo por mes, por sucursal o por responsable) y querés tenerlas juntas, esta herramienta las combina en un solo libro de Excel. Cada hoja de cada archivo pasa a ser una hoja del libro nuevo. Acepta .xlsx, .xlsm, .xlsb, .xls, .ods, .csv y «Excel 2003 .xml», y devuelve un .xlsx.',
     'guia-paso-1': 'Arrastrá los archivos a la zona «Arrastrá tus archivos acá o hacé clic para elegirlos», o elegilos con el selector múltiple. Se numeran en una lista y podés quitar los que sobren con la cruz.',
     'guia-paso-2': 'Con al menos dos archivos, el botón «Unir en un Excel» se habilita; hacé clic.',
@@ -41,8 +42,8 @@ window.i18nPagina = {
     'guia-r2': 'Se agregan en el orden de la lista de archivos; para cambiarlo, quitá y volvé a agregar.',
     'guia-p3': '¿Se modifican mis archivos originales?',
     'guia-r3': 'No, se crea un libro nuevo.',
-    'guia-p4': '¿Puedo unir dos archivos con una sola hoja y de modo que queden en una única tabla?',
-    'guia-r4': 'No: cada hoja queda separada. Para apilar las filas de varios archivos en una sola hoja hace falta otra herramienta o hacerlo en Excel.'
+    'guia-p4': '¿Puedo apilar las filas de varios archivos en una sola hoja?',
+    'guia-r4': 'No, cada archivo queda en sus propias hojas. Para apilarlas después, usá «Combinar hojas en una tabla» sobre el libro que sale de esta herramienta, si las hojas tienen las mismas columnas.'
   },
   en: {
     'titulo-pagina': 'Merge Several Excel or CSV Files Free — Mini Cookies',
@@ -59,6 +60,7 @@ window.i18nPagina = {
     'nombre-hoja-defecto': 'Sheet',
     'error-unir': 'Couldn’t merge the files',
     'guia-titulo': 'How to merge several Excel or CSV files into one workbook',
+    'guia-mas-link': 'How to merge several Excel files into one',
     'guia-intro': 'When you have several loose spreadsheets (one file per month, per branch or per person in charge) and want them together, this tool combines them into a single Excel workbook. Each sheet of each file becomes a sheet of the new workbook. It accepts .xlsx, .xlsm, .xlsb, .xls, .ods, .csv and “Excel 2003 .xml”, and returns an .xlsx.',
     'guia-paso-1': 'Drag the files onto the “Drag your files here or click to choose them” area, or pick them with the multiple selector. They’re numbered in a list and you can remove any extras with the cross.',
     'guia-paso-2': 'With at least two files, the “Merge into an Excel file” button is enabled; click it.',
@@ -74,8 +76,8 @@ window.i18nPagina = {
     'guia-r2': 'They’re added in the order of the file list; to change it, remove and add again.',
     'guia-p3': 'Are my original files modified?',
     'guia-r3': 'No, a new workbook is created.',
-    'guia-p4': 'Can I merge two single-sheet files so they end up in one table?',
-    'guia-r4': 'No: each sheet stays separate. To stack the rows of several files into one sheet you need another tool or to do it in Excel.'
+    'guia-p4': 'Can I stack the rows of several files into one sheet?',
+    'guia-r4': 'No, each file stays in its own sheets. To stack them afterwards, use “Combine sheets into one table” on the workbook this tool produces, if the sheets have the same columns.'
   }
 };
 </script>
@@ -145,9 +147,10 @@ window.i18nPagina = {
       <p data-i18n="guia-r3">No, se crea un libro nuevo.</p>
     </details>
     <details>
-      <summary data-i18n="guia-p4">¿Puedo unir dos archivos con una sola hoja y de modo que queden en una única tabla?</summary>
-      <p data-i18n="guia-r4">No: cada hoja queda separada. Para apilar las filas de varios archivos en una sola hoja hace falta otra herramienta o hacerlo en Excel.</p>
+      <summary data-i18n="guia-p4">¿Puedo apilar las filas de varios archivos en una sola hoja?</summary>
+      <p data-i18n="guia-r4">No, cada archivo queda en sus propias hojas. Para apilarlas después, usá «Combinar hojas en una tabla» sobre el libro que sale de esta herramienta, si las hojas tienen las mismas columnas.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/unir-archivos-excel.html" data-i18n="guia-mas-link">Cómo unir varios archivos de Excel en uno solo</a></p>
   </section>
 </main>
 

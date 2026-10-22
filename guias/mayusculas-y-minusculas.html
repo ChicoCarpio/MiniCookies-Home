@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Mayúsculas y minúsculas: cuándo usar cada formato — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo pasar un texto a mayúsculas, minúsculas, formato de título u oración, qué pasa con tildes y la ñ, y qué límites tiene el formato de título en español.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo pasar un texto a mayúsculas, minúsculas, formato de título u oración, qué pasa con tildes y la ñ, y dónde falla el formato de título en español.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,65 +13,57 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Mayúsculas y minúsculas: cuándo usar cada formato — Mini Cookies',
-    'meta-descripcion': 'Cómo pasar un texto a mayúsculas, minúsculas, formato de título u oración, qué pasa con tildes y la ñ, y qué límites tiene el formato de título en español.',
+    'meta-descripcion': 'Cómo pasar un texto a mayúsculas, minúsculas, formato de título u oración, qué pasa con tildes y la ñ, y dónde falla el formato de título en español.',
     'h1': 'Mayúsculas y minúsculas: cuándo usar cada formato y cómo cambiarlos',
-    'b1': 'Todos escribimos alguna vez un párrafo entero con el bloqueo de mayúsculas activado, o recibimos una lista de nombres en MAYÚSCULAS que hay que dejar presentable. Volver a tipear es lo de menos; lo que conviene saber es qué formato corresponde a cada caso y qué puede (y qué no puede) resolver un conversor automático.',
-    'b2': 'Los cinco formatos de la herramienta',
-    'b3': 'La herramienta <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> tiene un cuadro de texto y cinco botones. Al tocar uno, el resultado reemplaza el contenido del cuadro.',
+    'b1': 'Recibiste una lista de socios escrita toda en MAYÚSCULAS, o terminaste un párrafo sin darte cuenta de que el bloqueo de mayúsculas estaba activado. Arreglarlo a mano lleva minutos y un conversor lo hace en un clic. Lo que conviene saber es qué formato corresponde a cada caso y en qué puntos el conversor se equivoca.',
+    'b2': 'Los cinco formatos',
+    'b3': 'La herramienta <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> tiene un cuadro de texto y cinco botones. Cada botón reemplaza el contenido del cuadro por el resultado, así que copiá el original antes si lo necesitás.',
     'b4-c1': 'Botón',
     'b4-c2': 'Qué hace',
     'b4-c3': 'Ejemplo',
-    'b4-f1c1': '<strong>MAYÚSCULAS</strong>',
+    'b4-f1c1': '«MAYÚSCULAS»',
     'b4-f1c2': 'Todas las letras en mayúscula',
     'b4-f1c3': '«hola mundo» pasa a «HOLA MUNDO»',
-    'b4-f2c1': '<strong>minúsculas</strong>',
+    'b4-f2c1': '«minúsculas»',
     'b4-f2c2': 'Todas las letras en minúscula',
     'b4-f2c3': '«HOLA MUNDO» pasa a «hola mundo»',
-    'b4-f3c1': '<strong>Cada Palabra En Mayúscula</strong>',
-    'b4-f3c2': 'Pasa todo a minúsculas y pone mayúscula inicial a cada palabra',
+    'b4-f3c1': '«Cada Palabra En Mayúscula»',
+    'b4-f3c2': 'Todo a minúsculas y mayúscula inicial en cada palabra',
     'b4-f3c3': '«juan PÉREZ de la o» pasa a «Juan Pérez De La O»',
-    'b4-f4c1': '<strong>Solo la primera letra</strong>',
-    'b4-f4c2': 'Mayúscula inicial en cada oración, el resto en minúscula',
+    'b4-f4c1': '«Solo la primera letra»',
+    'b4-f4c2': 'Mayúscula al inicio de cada oración y el resto en minúscula',
     'b4-f4c3': '«HOLA. ¿CÓMO ESTÁS?» pasa a «Hola. ¿Cómo estás?»',
-    'b4-f5c1': '<strong>AltErNaDo</strong>',
-    'b4-f5c2': 'Alterna minúscula y mayúscula según la posición de cada carácter (los espacios también cuentan)',
-    'b4-f5c3': 'Efecto puramente decorativo',
-    'b5': 'Después de convertir, <strong>Copiar</strong> lleva el resultado al portapapeles y <strong>Descargar .txt</strong> lo guarda como archivo de texto con la fecha y la hora en el nombre.',
-    'b6': 'Cuándo conviene cada uno',
-    'b7': 'MAYÚSCULAS',
-    'b8': 'Sirven para siglas, para destacar una palabra suelta, para formularios que piden los datos en mayúsculas o para códigos. No son buena idea para párrafos: un texto largo en mayúsculas cuesta más de leer, porque se pierde la silueta de las palabras que ayuda al ojo.',
-    'b9': 'minúsculas',
-    'b10': 'Es el formato de partida más útil. Si recibís una lista en mayúsculas y la querés ordenar, comparar o limpiar, pasarla primero a minúsculas evita que «ANA» y «Ana» se traten como cosas distintas. Es también el primer paso para arreglar un texto escrito con el bloqueo de mayúsculas.',
-    'b11': 'Cada Palabra En Mayúscula (nombres, títulos de listas)',
-    'b12': 'Va bien para listas de nombres propios, encabezados cortos y etiquetas. Con una lista de nombres escritos en minúsculas o en mayúsculas sostenidas, un solo clic deja cada uno con su inicial.',
-    'b13': 'Solo la primera letra (texto corrido)',
-    'b14': 'Es el que repara el clásico texto escrito con el bloqueo de mayúsculas. Pone mayúscula después de un punto, de un signo de cierre de exclamación o de interrogación, y al empezar cada renglón. También reconoce los signos de apertura «¿» y «¡»: «¿hola?» queda como «¿Hola?» y no como «¿hola?».',
-    'b15': 'Cómo se comportan las tildes, la ñ y los caracteres especiales',
-    'b16': 'Las conversiones usan las reglas del propio navegador, así que respetan las letras acentuadas y la ñ: «canción» pasa a «CANCIÓN» y «NIÑO» pasa a «niño». Esto es lo correcto en español, donde las mayúsculas <strong>sí</strong> llevan tilde.',
-    'b17': 'Algunos detalles que conviene tener presentes:',
-    'b18-1': '<strong>Los números, los signos y los emojis no cambian</strong>, porque no tienen versión en mayúscula.',
-    'b18-2': '<strong>Otros alfabetos</strong> (cirílico, griego) también se convierten.',
-    'b18-3': '<strong>Algunas letras cambian de longitud al pasar a mayúscula.</strong> Un ejemplo es la «ß» alemana, que en mayúsculas se escribe «SS». No es un error de la herramienta, es la regla del idioma.',
-    'b18-4': '<strong>«Cada Palabra En Mayúscula» solo reconoce el inicio después de un espacio o un salto de línea.</strong> Una palabra que va después de un guion, una barra, un paréntesis o unas comillas no recibe mayúscula: «(hola)» queda igual y «ana-maría» queda como «Ana-maría», con la segunda parte todavía en minúscula. Revisá esos casos a mano.',
-    'b19': 'Los límites del formato de título en español',
-    'b20': 'Conviene ser claro con lo que un conversor automático <strong>no</strong> sabe hacer.',
-    'b21-1': '<strong>No distingue artículos y preposiciones.</strong> En español, un título como «El señor de los anillos» suele escribirse solo con la primera palabra en mayúscula (y los nombres propios). El botón «Cada Palabra En Mayúscula» devolverá «El Señor De Los Anillos». Es el estilo del inglés (Title Case), no la norma habitual del español.',
-    'b21-2': '<strong>Pasa todo a minúsculas antes de poner las iniciales.</strong> Las siglas y los nombres con mayúsculas internas se pierden: «ONU» queda como «Onu», «McDonald» queda como «Mcdonald».',
-    'b21-3': '<strong>«Solo la primera letra» también baja todo lo demás.</strong> Un nombre propio en medio de una oración, como «madrid», deja de tener mayúscula; un punto de una abreviatura (como «Sr.» o «etc.») hace que la palabra siguiente reciba mayúscula aunque la oración continúe.',
-    'b22': 'La conclusión práctica: usá los botones como un primer paso rápido y dedicá un minuto a revisar siglas, nombres propios y abreviaturas. Para títulos en español, a menudo es más rápido usar «Solo la primera letra» sobre el título (mayúscula solo en la primera palabra) y corregir a mano los nombres propios.',
-    'b23': 'Un flujo de trabajo para limpiar una lista',
-    'b24': 'Si tenés una lista larga de nombres o códigos, estas herramientas se combinan bien:',
-    'b25-1': 'Pegá la lista en <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> y pasala a «minúsculas» (o a «Cada Palabra En Mayúscula»). Descargala como .txt.',
-    'b25-2': 'Con el .txt, usá <a href="../herramientas/quitar-duplicados-texto.html">Quitar líneas duplicadas o vacías</a>. Compara las líneas tal cual están, así que unificar antes las mayúsculas es lo que permite detectar repeticiones como «Ana» y «ana».',
-    'b25-3': 'Terminá con <a href="../herramientas/ordenar-lineas-texto.html">Ordenar líneas</a>, que ordena alfabéticamente respetando tildes y la ñ.',
-    'b25-4': 'Si el texto se ve con símbolos raros en lugar de tildes, probá <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a>.',
-    'b25-5': 'Si te hace falta saber cuánto mide el resultado (por ejemplo, para un límite de palabras), <a href="../herramientas/contador-palabras.html">Contador de palabras</a> muestra palabras, caracteres y tiempo de lectura.',
-    'b26': 'Preguntas frecuentes',
-    'b27': '<strong>¿Puedo deshacer una conversión?</strong> La página no tiene un botón de deshacer, y el atajo del teclado (Ctrl+Z) no recupera el texto anterior: al convertir, el resultado reemplaza el contenido del cuadro y el navegador descarta su historial de deshacer (lo comprobamos en Edge; en otros navegadores no cuentes con ello). Por eso, si querés conservar el original, copialo antes de convertir.',
-    'b28': '<strong>¿Cambia las tildes al pasar a minúsculas?</strong> No. Solo cambia entre mayúscula y minúscula; las tildes y la diéresis se mantienen.',
-    'b29': '<strong>¿Hay un límite de longitud?</strong> La herramienta no impone ninguno; con textos enormes depende de la memoria del navegador.',
-    'b30': 'Resumen',
-    'b31': 'Hay cinco formatos: mayúsculas, minúsculas, cada palabra con inicial, solo la primera letra de cada oración y alternado. Las tildes y la ñ se respetan, pero el formato de título no distingue artículos ni preposiciones y baja las siglas a minúsculas. Usá la herramienta como primer paso, revisá siglas y nombres propios, y combinala con las herramientas de texto del sitio para limpiar listas completas.',
+    'b4-f5c1': '«AltErNaDo»',
+    'b4-f5c2': 'Alterna minúscula y mayúscula según la posición de cada carácter, espacios incluidos',
+    'b4-f5c3': '«hola mundo» pasa a «hOlA MuNdO»',
+    'b5': 'Después de convertir, «Copiar» pone el resultado en el portapapeles y «Descargar .txt» baja un archivo con la fecha y la hora en el nombre, por ejemplo texto-2026-10-22-1530.txt.',
+    'b6': 'Cuándo conviene cada formato',
+    'b7': '«MAYÚSCULAS» sirve para siglas, para una palabra que tiene que destacarse y para formularios o códigos que la piden. En párrafos no conviene: un texto largo en mayúsculas se lee peor, porque las palabras pierden la forma que el ojo usa para reconocerlas.',
+    'b8': '«minúsculas» es el punto de partida más útil. «Quitar líneas duplicadas» compara letra por letra, así que «ANA» y «Ana» no se detectan como repetidas. Pasá la lista a minúsculas antes y la comparación funciona. También es el primer paso para arreglar un texto escrito con el bloqueo activado.',
+    'b9': '«Cada Palabra En Mayúscula» sirve para listas de nombres propios, encabezados cortos y etiquetas. Una lista de nombres en minúsculas o en mayúsculas sostenidas queda con una inicial por nombre en un solo clic.',
+    'b10': '«Solo la primera letra» es el que repara el texto escrito con el bloqueo activado. Pone mayúscula al empezar, después de «.», «!», «?» o «…», y al empezar cada renglón. También reconoce los signos de apertura: «¿hola?» queda como «¿Hola?», y lo mismo pasa con una comilla o un paréntesis al inicio de la oración.',
+    'b11': 'Tildes, la ñ y otros caracteres',
+    'b12': 'Las conversiones usan las reglas de mayúsculas del navegador, así que respetan las letras acentuadas y la ñ: «canción» pasa a «CANCIÓN» y «NIÑO» pasa a «niño». Así se escribe en español, donde las mayúsculas también llevan tilde. Los números, los signos y los emojis no cambian porque no tienen versión en mayúscula. El cirílico y el griego también se convierten. La «ß» alemana pasa a «SS» al ponerla en mayúscula: es la regla de ese idioma, no un error.',
+    'b13': 'Dónde falla el formato de título en español',
+    'b14': '«Cada Palabra En Mayúscula» sigue el estilo del inglés, y el español escribe distinto. Estos son los casos que hay que corregir a mano:',
+    'b15-1': 'Artículos y preposiciones. «El señor de los anillos» pasa a «El Señor De Los Anillos». En español suele llevar mayúscula solo la primera palabra y los nombres propios.',
+    'b15-2': 'Siglas y nombres con mayúsculas internas. El texto pasa a minúsculas antes de poner las iniciales, así que «ONU» queda «Onu» y «McDonald» queda «Mcdonald».',
+    'b15-3': 'Palabras después de un guion, una barra o un paréntesis. Con «Cada Palabra En Mayúscula», «ana-maría» queda «Ana-maría» y «(hola)» no cambia.',
+    'b15-4': 'Nombres propios en medio de una oración. Con «Solo la primera letra», «Vivo en Madrid» pasa a «Vivo en madrid».',
+    'b15-5': 'Abreviaturas. Con «Solo la primera letra», un punto seguido de espacio hace mayúscula la palabra siguiente aunque la oración continúe: «Compré pan, leche, etc. y volví» queda «Compré pan, leche, etc. Y volví».',
+    'b16': 'Para un título en español, suele ser más rápido aplicar «Solo la primera letra» (queda solo la primera palabra con mayúscula) y corregir a mano los nombres propios. Revisá siglas, nombres y abreviaturas antes de usar el texto.',
+    'b17': 'Un flujo para limpiar una lista',
+    'b18': 'Si tenés una lista larga de nombres o códigos, estas herramientas se encadenan bien:',
+    'b19-1': 'Pegá la lista en <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a>, tocá «minúsculas» (o «Cada Palabra En Mayúscula», si son nombres) y descargala como .txt.',
+    'b19-2': 'Con ese .txt, usá <a href="../herramientas/quitar-duplicados-texto.html">Quitar líneas duplicadas o vacías</a>. Tiene que ir después del paso 1, porque compara las líneas tal cual están.',
+    'b19-3': 'Terminá con <a href="../herramientas/ordenar-lineas-texto.html">Ordenar líneas</a>. Ordena según el idioma de la página, respeta las tildes y la ñ, y la casilla «Ignorar mayúsculas/minúsculas (orden alfabético)» viene marcada.',
+    'b19-4': 'Si aparecen símbolos raros en lugar de tildes, pasá el archivo por <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a>. Si tenés un tope de palabras, medilo con <a href="../herramientas/contador-palabras.html">Contador de palabras</a>, que calcula el tiempo de lectura a 200 palabras por minuto.',
+    'b20': 'Preguntas frecuentes',
+    'b21': '<strong>¿Puedo deshacer una conversión?</strong> No hay botón de deshacer, y Ctrl+Z puede no devolver el texto anterior: la herramienta cambia el contenido del cuadro por código y el navegador no siempre guarda ese cambio en su historial. Copiá el original antes de convertir.',
+    'b22': '<strong>¿Cambia las tildes al pasar a minúsculas?</strong> No. Solo cambia entre mayúscula y minúscula: «ÉTICA» pasa a «ética», con su tilde.',
+    'b23': '<strong>¿Hay un límite de longitud?</strong> La herramienta no pone ninguno. Con textos muy largos, lo que decide es la memoria del navegador.',
+    'b24': 'Resumen',
+    'b25': 'Hay cinco formatos: mayúsculas, minúsculas, cada palabra con inicial, solo la primera letra de cada oración y alternado. Para el texto corrido escrito con el bloqueo activado sirve «Solo la primera letra». Para títulos y nombres en español, usala como primer paso y revisá a mano siglas, nombres propios y abreviaturas.',
     'rel1': 'Convertir mayúsculas y minúsculas',
     'rel2': 'Contador de palabras',
     'rel3': 'Ordenar líneas',
@@ -79,65 +71,57 @@ window.i18nPagina = {
   },
   en: {
     'titulo-pagina': 'Uppercase and Lowercase: When to Use Each Format — Mini Cookies',
-    'meta-descripcion': 'How to change text to uppercase, lowercase, title case or sentence case, what happens to accents and the ñ, and where automatic title case falls short.',
-    'h1': 'Uppercase and Lowercase: When to Use Each Format and How to Change Them',
-    'b1': 'We have all typed an entire paragraph with caps lock on, or received a list of names in CAPITAL LETTERS that needs to look presentable. Retyping is the least of it; what really helps is knowing which format fits each case and what an automatic converter can (and can’t) do for you.',
-    'b2': 'The five formats in the tool',
-    'b3': 'The <a href="../herramientas/convertidor-mayusculas.html">Change text case</a> tool has one text box and five buttons. When you click one, the result replaces the contents of the box.',
+    'meta-descripcion': 'How to change text to uppercase, lowercase, title case or sentence case, what happens to accents and the ñ, and where title case falls short in Spanish.',
+    'h1': 'Uppercase and lowercase: when to use each format and how to change them',
+    'b1': 'You got a list of members typed entirely in capitals, or you finished a paragraph without noticing that caps lock was on. Fixing it by hand takes minutes, and a converter does it in one click. What matters is which format fits each case and where the converter gets it wrong.',
+    'b2': 'The five formats',
+    'b3': 'The <a href="../herramientas/convertidor-mayusculas.html">Change text case</a> tool has one text box and five buttons. Each button replaces the contents of the box with the result, so copy the original first if you need it.',
     'b4-c1': 'Button',
     'b4-c2': 'What it does',
     'b4-c3': 'Example',
-    'b4-f1c1': '<strong>UPPERCASE</strong>',
-    'b4-f1c2': 'Turns every letter into a capital',
+    'b4-f1c1': '“UPPERCASE”',
+    'b4-f1c2': 'Every letter in capitals',
     'b4-f1c3': '“hola mundo” becomes “HOLA MUNDO”',
-    'b4-f2c1': '<strong>lowercase</strong>',
-    'b4-f2c2': 'Turns every letter into a lowercase letter',
+    'b4-f2c1': '“lowercase”',
+    'b4-f2c2': 'Every letter in lowercase',
     'b4-f2c3': '“HOLA MUNDO” becomes “hola mundo”',
-    'b4-f3c1': '<strong>Capitalize Each Word</strong>',
-    'b4-f3c2': 'Lowercases everything, then capitalizes the first letter of each word',
+    'b4-f3c1': '“Capitalize Each Word”',
+    'b4-f3c2': 'Everything in lowercase, then a capital at the start of each word',
     'b4-f3c3': '“juan PÉREZ de la o” becomes “Juan Pérez De La O”',
-    'b4-f4c1': '<strong>Sentence case</strong>',
-    'b4-f4c2': 'Capitalizes the first letter of each sentence and lowercases the rest',
+    'b4-f4c1': '“Sentence case”',
+    'b4-f4c2': 'A capital at the start of each sentence and the rest in lowercase',
     'b4-f4c3': '“HOLA. ¿CÓMO ESTÁS?” becomes “Hola. ¿Cómo estás?”',
-    'b4-f5c1': '<strong>AlTeRnAtInG</strong>',
-    'b4-f5c2': 'Alternates lowercase and uppercase by the position of each character (spaces count too)',
-    'b4-f5c3': 'A purely decorative effect',
-    'b5': 'After converting, <strong>Copy</strong> puts the result on the clipboard and <strong>Download .txt</strong> saves it as a text file with the date and time in its name.',
-    'b6': 'When to use each one',
-    'b7': 'UPPERCASE',
-    'b8': 'Use it for acronyms, to emphasize a single word, for forms that ask for your details in capitals, or for codes. It is a poor choice for paragraphs: a long text in capitals is harder to read, because it loses the word shapes that help the eye.',
-    'b9': 'lowercase',
-    'b10': 'This is the most useful starting point. If you receive a list in capitals and want to sort it, compare it or clean it up, converting it to lowercase first keeps “ANA” and “Ana” from being treated as different things. It is also the first step in fixing a text typed with caps lock on.',
-    'b11': 'Capitalize Each Word (names, list titles)',
-    'b12': 'It works well for lists of proper names, short headings and labels. With a list of names typed in lowercase or in all capitals, one click gives each name its initial capital.',
-    'b13': 'Sentence case (running text)',
-    'b14': 'This is the one that fixes the classic text typed with caps lock on. It capitalizes after a period, after a closing exclamation or question mark, and at the start of every line. It also recognizes the opening marks “¿” and “¡”: “¿hola?” becomes “¿Hola?” rather than staying “¿hola?”.',
-    'b15': 'How accents, the ñ and special characters behave',
-    'b16': 'The conversions use the browser’s own rules, so they respect accented letters and the ñ: “canción” becomes “CANCIÓN” and “NIÑO” becomes “niño”. This is correct in Spanish, where capital letters <strong>do</strong> carry accents.',
-    'b17': 'A few details worth keeping in mind:',
-    'b18-1': '<strong>Numbers, punctuation and emojis don’t change</strong>, because they have no uppercase version.',
-    'b18-2': '<strong>Other alphabets</strong> (Cyrillic, Greek) are converted too.',
-    'b18-3': '<strong>Some letters change length when they become uppercase.</strong> One example is the German “ß”, which is written “SS” in capitals. That is not a bug in the tool; it is the rule of the language.',
-    'b18-4': '<strong>“Capitalize Each Word” only recognizes the start of a word after a space or a line break.</strong> A word that follows a hyphen, a slash, a parenthesis or a quotation mark doesn’t get a capital: “(hola)” stays as it is and “ana-maría” becomes “Ana-maría”, with the second part still in lowercase. Check those cases by hand.',
-    'b19': 'The limits of title case',
-    'b20': 'It’s worth being clear about what an automatic converter <strong>can’t</strong> do.',
-    'b21-1': '<strong>It doesn’t tell articles and prepositions apart.</strong> In Spanish, a title such as “El señor de los anillos” is normally written with a capital only on the first word (plus proper names). The "Capitalize Each Word" button will return “El Señor De Los Anillos”. That is English-style Title Case, not the usual Spanish convention.',
-    'b21-2': '<strong>It lowercases everything before adding the initials.</strong> Acronyms and names with internal capitals are lost: “ONU” becomes “Onu” and “McDonald” becomes “Mcdonald”.',
-    'b21-3': '<strong>"Sentence case" also lowers everything else.</strong> A proper name in the middle of a sentence, such as “madrid”, loses its capital; and a period in an abbreviation (such as “Sr.” or “etc.”) makes the next word get a capital even if the sentence continues.',
-    'b22': 'The practical takeaway: use the buttons as a quick first step, and spend a minute checking acronyms, proper names and abbreviations. For Spanish titles, it is often faster to apply "Sentence case" to the title (capital only on the first word) and fix the proper names by hand.',
-    'b23': 'A workflow for cleaning up a list',
-    'b24': 'If you have a long list of names or codes, these tools work well together:',
-    'b25-1': 'Paste the list into <a href="../herramientas/convertidor-mayusculas.html">Change text case</a> and convert it to "lowercase" (or to "Capitalize Each Word"). Download it as a .txt.',
-    'b25-2': 'With the .txt, use <a href="../herramientas/quitar-duplicados-texto.html">Remove duplicate or empty lines</a>. It compares lines exactly as they are, so unifying the case first is what lets it catch repeats such as “Ana” and “ana”.',
-    'b25-3': 'Finish with <a href="../herramientas/ordenar-lineas-texto.html">Sort lines</a>, which sorts alphabetically while respecting accents and the ñ.',
-    'b25-4': 'If the text shows strange symbols instead of accents, try <a href="../herramientas/arreglar-codificacion-texto.html">Fix a text file’s encoding</a>.',
-    'b25-5': 'If you need to know how long the result is (for example, for a word limit), <a href="../herramientas/contador-palabras.html">Word counter</a> shows words, characters and reading time.',
-    'b26': 'Frequently asked questions',
-    'b27': '<strong>Can I undo a conversion?</strong> The page has no undo button, and the keyboard shortcut (Ctrl+Z) does not bring back the previous text: when you convert, the result replaces the contents of the box and the browser discards its undo history (we checked this in Edge; don’t count on it in other browsers). So if you want to keep the original, copy it before converting.',
-    'b28': '<strong>Does it change accents when converting to lowercase?</strong> No. It only switches between uppercase and lowercase; accents and diaereses are kept.',
-    'b29': '<strong>Is there a length limit?</strong> The tool doesn’t impose one; with enormous texts it depends on the browser’s memory.',
-    'b30': 'Summary',
-    'b31': 'There are five formats: uppercase, lowercase, each word capitalized, only the first letter of each sentence, and alternating. Accents and the ñ are respected, but title case doesn’t tell articles and prepositions apart and lowers acronyms to lowercase. Use the tool as a first step, check acronyms and proper names, and combine it with the site’s other text tools to clean up whole lists.',
+    'b4-f5c1': '“AlTeRnAtInG”',
+    'b4-f5c2': 'Alternates lowercase and uppercase by the position of each character, spaces included',
+    'b4-f5c3': '“hola mundo” becomes “hOlA MuNdO”',
+    'b5': 'After converting, “Copy” puts the result on the clipboard, and “Download .txt” saves a file with the date and time in its name, for example texto-2026-10-22-1530.txt.',
+    'b6': 'When each format fits',
+    'b7': 'UPPERCASE works for acronyms, for a single word that has to stand out, and for forms or codes that ask for it. It is a poor choice for paragraphs: a long text in capitals is harder to read, because the words lose the outline the eye uses to recognize them.',
+    'b8': 'lowercase is the most useful starting point. “Remove duplicate or empty lines” compares letter by letter, so “ANA” and “Ana” are not detected as repeats. Convert the list to lowercase first and the comparison works. It is also the first step in fixing a text typed with caps lock on.',
+    'b9': 'Capitalize Each Word suits lists of proper names, short headings and labels. A list of names in lowercase or in sustained capitals gets one initial per name in a single click.',
+    'b10': 'Sentence case is the one that repairs text typed with caps lock on. It capitalizes the start, the letter after a period, an exclamation mark, a question mark or an ellipsis, and the start of each line. It also recognizes opening marks: “¿hola?” becomes “¿Hola?”, and a quotation mark or a parenthesis at the start of a sentence works the same way.',
+    'b11': 'Accents, the ñ and other characters',
+    'b12': 'The conversions use the browser’s uppercase and lowercase rules, so they respect accented letters and the ñ: “canción” becomes “CANCIÓN” and “NIÑO” becomes “niño”. That is how Spanish is written, where capitals carry accents too. Numbers, punctuation and emojis don’t change, because they have no capital version. Cyrillic and Greek are converted as well. The German “ß” becomes “SS” in capitals: that is the rule of the language, not a bug.',
+    'b13': 'Where title case falls short in Spanish',
+    'b14': 'Capitalize Each Word follows English title style, and Spanish is written differently. These are the cases you have to correct by hand:',
+    'b15-1': 'Articles and prepositions. “El señor de los anillos” becomes “El Señor De Los Anillos”. In Spanish the capital usually goes only on the first word and on proper names.',
+    'b15-2': 'Acronyms and names with inner capitals. The text is lowercased before the initials are added, so “ONU” becomes “Onu” and “McDonald” becomes “Mcdonald”.',
+    'b15-3': 'Words after a hyphen, a slash or a parenthesis. With Capitalize Each Word, “ana-maría” becomes “Ana-maría” and “(hola)” doesn’t change.',
+    'b15-4': 'Proper names in the middle of a sentence. With Sentence case, “Vivo en Madrid” becomes “Vivo en madrid”.',
+    'b15-5': 'Abbreviations. With Sentence case, a period followed by a space capitalizes the next word even when the sentence goes on: “Compré pan, leche, etc. y volví” becomes “Compré pan, leche, etc. Y volví”.',
+    'b16': 'For a Spanish title, it is often faster to apply Sentence case (only the first word keeps a capital) and fix the proper names by hand. Check acronyms, names and abbreviations before you use the text.',
+    'b17': 'A workflow for cleaning up a list',
+    'b18': 'If you have a long list of names or codes, these tools work well one after another:',
+    'b19-1': 'Paste the list into <a href="../herramientas/convertidor-mayusculas.html">Change text case</a>, tap “lowercase” (or “Capitalize Each Word”, if they are names) and download it as a .txt.',
+    'b19-2': 'Take that .txt to <a href="../herramientas/quitar-duplicados-texto.html">Remove duplicate or empty lines</a>. It has to come after step 1, because it compares the lines exactly as they are.',
+    'b19-3': 'Finish with <a href="../herramientas/ordenar-lineas-texto.html">Sort lines</a>. It sorts by the language of the page, respects accents and the ñ, and the “Ignore upper/lower case (alphabetical order)” box is ticked by default.',
+    'b19-4': 'If strange symbols appear instead of accents, run the file through <a href="../herramientas/arreglar-codificacion-texto.html">Fix a text file’s encoding</a>. If you have a word limit, measure it with <a href="../herramientas/contador-palabras.html">Word counter</a>, which works out reading time at 200 words per minute.',
+    'b20': 'Frequently asked questions',
+    'b21': '<strong>Can I undo a conversion?</strong> There is no undo button, and Ctrl+Z may not bring the previous text back: the tool changes the box contents in code, and the browser doesn’t always record that change in its history. Copy the original before converting.',
+    'b22': '<strong>Does it change accents when converting to lowercase?</strong> No. It only switches between uppercase and lowercase: “ÉTICA” becomes “ética”, with its accent.',
+    'b23': '<strong>Is there a length limit?</strong> The tool doesn’t set one. With very long texts, the browser’s memory is the limit.',
+    'b24': 'Summary',
+    'b25': 'There are five formats: uppercase, lowercase, each word capitalized, sentence case and alternating. For running text typed with caps lock on, Sentence case is the right one. For Spanish titles and names, use it as a first step and check acronyms, proper names and abbreviations by hand.',
     'rel1': 'Change text case',
     'rel2': 'Word counter',
     'rel3': 'Sort lines',
@@ -165,61 +149,51 @@ window.i18nPagina = {
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
     <h1 data-i18n="h1">Mayúsculas y minúsculas: cuándo usar cada formato y cómo cambiarlos</h1>
-    <p data-i18n-html="b1">Todos escribimos alguna vez un párrafo entero con el bloqueo de mayúsculas activado, o recibimos una lista de nombres en MAYÚSCULAS que hay que dejar presentable. Volver a tipear es lo de menos; lo que conviene saber es qué formato corresponde a cada caso y qué puede (y qué no puede) resolver un conversor automático.</p>
-    <h2 data-i18n="b2">Los cinco formatos de la herramienta</h2>
-    <p data-i18n-html="b3">La herramienta <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> tiene un cuadro de texto y cinco botones. Al tocar uno, el resultado reemplaza el contenido del cuadro.</p>
+    <p data-i18n-html="b1">Recibiste una lista de socios escrita toda en MAYÚSCULAS, o terminaste un párrafo sin darte cuenta de que el bloqueo de mayúsculas estaba activado. Arreglarlo a mano lleva minutos y un conversor lo hace en un clic. Lo que conviene saber es qué formato corresponde a cada caso y en qué puntos el conversor se equivoca.</p>
+    <h2 data-i18n="b2">Los cinco formatos</h2>
+    <p data-i18n-html="b3">La herramienta <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> tiene un cuadro de texto y cinco botones. Cada botón reemplaza el contenido del cuadro por el resultado, así que copiá el original antes si lo necesitás.</p>
     <div class="tabla-ancha"><table>
       <thead><tr><th data-i18n-html="b4-c1">Botón</th><th data-i18n-html="b4-c2">Qué hace</th><th data-i18n-html="b4-c3">Ejemplo</th></tr></thead>
       <tbody>
-        <tr><td data-i18n-html="b4-f1c1"><strong>MAYÚSCULAS</strong></td><td data-i18n-html="b4-f1c2">Todas las letras en mayúscula</td><td data-i18n-html="b4-f1c3">«hola mundo» pasa a «HOLA MUNDO»</td></tr>
-        <tr><td data-i18n-html="b4-f2c1"><strong>minúsculas</strong></td><td data-i18n-html="b4-f2c2">Todas las letras en minúscula</td><td data-i18n-html="b4-f2c3">«HOLA MUNDO» pasa a «hola mundo»</td></tr>
-        <tr><td data-i18n-html="b4-f3c1"><strong>Cada Palabra En Mayúscula</strong></td><td data-i18n-html="b4-f3c2">Pasa todo a minúsculas y pone mayúscula inicial a cada palabra</td><td data-i18n-html="b4-f3c3">«juan PÉREZ de la o» pasa a «Juan Pérez De La O»</td></tr>
-        <tr><td data-i18n-html="b4-f4c1"><strong>Solo la primera letra</strong></td><td data-i18n-html="b4-f4c2">Mayúscula inicial en cada oración, el resto en minúscula</td><td data-i18n-html="b4-f4c3">«HOLA. ¿CÓMO ESTÁS?» pasa a «Hola. ¿Cómo estás?»</td></tr>
-        <tr><td data-i18n-html="b4-f5c1"><strong>AltErNaDo</strong></td><td data-i18n-html="b4-f5c2">Alterna minúscula y mayúscula según la posición de cada carácter (los espacios también cuentan)</td><td data-i18n-html="b4-f5c3">Efecto puramente decorativo</td></tr>
+        <tr><td data-i18n-html="b4-f1c1">«MAYÚSCULAS»</td><td data-i18n-html="b4-f1c2">Todas las letras en mayúscula</td><td data-i18n-html="b4-f1c3">«hola mundo» pasa a «HOLA MUNDO»</td></tr>
+        <tr><td data-i18n-html="b4-f2c1">«minúsculas»</td><td data-i18n-html="b4-f2c2">Todas las letras en minúscula</td><td data-i18n-html="b4-f2c3">«HOLA MUNDO» pasa a «hola mundo»</td></tr>
+        <tr><td data-i18n-html="b4-f3c1">«Cada Palabra En Mayúscula»</td><td data-i18n-html="b4-f3c2">Todo a minúsculas y mayúscula inicial en cada palabra</td><td data-i18n-html="b4-f3c3">«juan PÉREZ de la o» pasa a «Juan Pérez De La O»</td></tr>
+        <tr><td data-i18n-html="b4-f4c1">«Solo la primera letra»</td><td data-i18n-html="b4-f4c2">Mayúscula al inicio de cada oración y el resto en minúscula</td><td data-i18n-html="b4-f4c3">«HOLA. ¿CÓMO ESTÁS?» pasa a «Hola. ¿Cómo estás?»</td></tr>
+        <tr><td data-i18n-html="b4-f5c1">«AltErNaDo»</td><td data-i18n-html="b4-f5c2">Alterna minúscula y mayúscula según la posición de cada carácter, espacios incluidos</td><td data-i18n-html="b4-f5c3">«hola mundo» pasa a «hOlA MuNdO»</td></tr>
       </tbody>
     </table></div>
-    <p data-i18n-html="b5">Después de convertir, <strong>Copiar</strong> lleva el resultado al portapapeles y <strong>Descargar .txt</strong> lo guarda como archivo de texto con la fecha y la hora en el nombre.</p>
-    <h2 data-i18n="b6">Cuándo conviene cada uno</h2>
-    <h3 data-i18n="b7">MAYÚSCULAS</h3>
-    <p data-i18n-html="b8">Sirven para siglas, para destacar una palabra suelta, para formularios que piden los datos en mayúsculas o para códigos. No son buena idea para párrafos: un texto largo en mayúsculas cuesta más de leer, porque se pierde la silueta de las palabras que ayuda al ojo.</p>
-    <h3 data-i18n="b9">minúsculas</h3>
-    <p data-i18n-html="b10">Es el formato de partida más útil. Si recibís una lista en mayúsculas y la querés ordenar, comparar o limpiar, pasarla primero a minúsculas evita que «ANA» y «Ana» se traten como cosas distintas. Es también el primer paso para arreglar un texto escrito con el bloqueo de mayúsculas.</p>
-    <h3 data-i18n="b11">Cada Palabra En Mayúscula (nombres, títulos de listas)</h3>
-    <p data-i18n-html="b12">Va bien para listas de nombres propios, encabezados cortos y etiquetas. Con una lista de nombres escritos en minúsculas o en mayúsculas sostenidas, un solo clic deja cada uno con su inicial.</p>
-    <h3 data-i18n="b13">Solo la primera letra (texto corrido)</h3>
-    <p data-i18n-html="b14">Es el que repara el clásico texto escrito con el bloqueo de mayúsculas. Pone mayúscula después de un punto, de un signo de cierre de exclamación o de interrogación, y al empezar cada renglón. También reconoce los signos de apertura «¿» y «¡»: «¿hola?» queda como «¿Hola?» y no como «¿hola?».</p>
-    <h2 data-i18n="b15">Cómo se comportan las tildes, la ñ y los caracteres especiales</h2>
-    <p data-i18n-html="b16">Las conversiones usan las reglas del propio navegador, así que respetan las letras acentuadas y la ñ: «canción» pasa a «CANCIÓN» y «NIÑO» pasa a «niño». Esto es lo correcto en español, donde las mayúsculas <strong>sí</strong> llevan tilde.</p>
-    <p data-i18n-html="b17">Algunos detalles que conviene tener presentes:</p>
-    <ul>
-      <li data-i18n-html="b18-1"><strong>Los números, los signos y los emojis no cambian</strong>, porque no tienen versión en mayúscula.</li>
-      <li data-i18n-html="b18-2"><strong>Otros alfabetos</strong> (cirílico, griego) también se convierten.</li>
-      <li data-i18n-html="b18-3"><strong>Algunas letras cambian de longitud al pasar a mayúscula.</strong> Un ejemplo es la «ß» alemana, que en mayúsculas se escribe «SS». No es un error de la herramienta, es la regla del idioma.</li>
-      <li data-i18n-html="b18-4"><strong>«Cada Palabra En Mayúscula» solo reconoce el inicio después de un espacio o un salto de línea.</strong> Una palabra que va después de un guion, una barra, un paréntesis o unas comillas no recibe mayúscula: «(hola)» queda igual y «ana-maría» queda como «Ana-maría», con la segunda parte todavía en minúscula. Revisá esos casos a mano.</li>
-    </ul>
-    <h2 data-i18n="b19">Los límites del formato de título en español</h2>
-    <p data-i18n-html="b20">Conviene ser claro con lo que un conversor automático <strong>no</strong> sabe hacer.</p>
+    <p data-i18n-html="b5">Después de convertir, «Copiar» pone el resultado en el portapapeles y «Descargar .txt» baja un archivo con la fecha y la hora en el nombre, por ejemplo texto-2026-10-22-1530.txt.</p>
+    <h2 data-i18n="b6">Cuándo conviene cada formato</h2>
+    <p data-i18n-html="b7">«MAYÚSCULAS» sirve para siglas, para una palabra que tiene que destacarse y para formularios o códigos que la piden. En párrafos no conviene: un texto largo en mayúsculas se lee peor, porque las palabras pierden la forma que el ojo usa para reconocerlas.</p>
+    <p data-i18n-html="b8">«minúsculas» es el punto de partida más útil. «Quitar líneas duplicadas» compara letra por letra, así que «ANA» y «Ana» no se detectan como repetidas. Pasá la lista a minúsculas antes y la comparación funciona. También es el primer paso para arreglar un texto escrito con el bloqueo activado.</p>
+    <p data-i18n-html="b9">«Cada Palabra En Mayúscula» sirve para listas de nombres propios, encabezados cortos y etiquetas. Una lista de nombres en minúsculas o en mayúsculas sostenidas queda con una inicial por nombre en un solo clic.</p>
+    <p data-i18n-html="b10">«Solo la primera letra» es el que repara el texto escrito con el bloqueo activado. Pone mayúscula al empezar, después de «.», «!», «?» o «…», y al empezar cada renglón. También reconoce los signos de apertura: «¿hola?» queda como «¿Hola?», y lo mismo pasa con una comilla o un paréntesis al inicio de la oración.</p>
+    <h2 data-i18n="b11">Tildes, la ñ y otros caracteres</h2>
+    <p data-i18n-html="b12">Las conversiones usan las reglas de mayúsculas del navegador, así que respetan las letras acentuadas y la ñ: «canción» pasa a «CANCIÓN» y «NIÑO» pasa a «niño». Así se escribe en español, donde las mayúsculas también llevan tilde. Los números, los signos y los emojis no cambian porque no tienen versión en mayúscula. El cirílico y el griego también se convierten. La «ß» alemana pasa a «SS» al ponerla en mayúscula: es la regla de ese idioma, no un error.</p>
+    <h2 data-i18n="b13">Dónde falla el formato de título en español</h2>
+    <p data-i18n-html="b14">«Cada Palabra En Mayúscula» sigue el estilo del inglés, y el español escribe distinto. Estos son los casos que hay que corregir a mano:</p>
     <ol>
-      <li data-i18n-html="b21-1"><strong>No distingue artículos y preposiciones.</strong> En español, un título como «El señor de los anillos» suele escribirse solo con la primera palabra en mayúscula (y los nombres propios). El botón «Cada Palabra En Mayúscula» devolverá «El Señor De Los Anillos». Es el estilo del inglés (Title Case), no la norma habitual del español.</li>
-      <li data-i18n-html="b21-2"><strong>Pasa todo a minúsculas antes de poner las iniciales.</strong> Las siglas y los nombres con mayúsculas internas se pierden: «ONU» queda como «Onu», «McDonald» queda como «Mcdonald».</li>
-      <li data-i18n-html="b21-3"><strong>«Solo la primera letra» también baja todo lo demás.</strong> Un nombre propio en medio de una oración, como «madrid», deja de tener mayúscula; un punto de una abreviatura (como «Sr.» o «etc.») hace que la palabra siguiente reciba mayúscula aunque la oración continúe.</li>
+      <li data-i18n-html="b15-1">Artículos y preposiciones. «El señor de los anillos» pasa a «El Señor De Los Anillos». En español suele llevar mayúscula solo la primera palabra y los nombres propios.</li>
+      <li data-i18n-html="b15-2">Siglas y nombres con mayúsculas internas. El texto pasa a minúsculas antes de poner las iniciales, así que «ONU» queda «Onu» y «McDonald» queda «Mcdonald».</li>
+      <li data-i18n-html="b15-3">Palabras después de un guion, una barra o un paréntesis. Con «Cada Palabra En Mayúscula», «ana-maría» queda «Ana-maría» y «(hola)» no cambia.</li>
+      <li data-i18n-html="b15-4">Nombres propios en medio de una oración. Con «Solo la primera letra», «Vivo en Madrid» pasa a «Vivo en madrid».</li>
+      <li data-i18n-html="b15-5">Abreviaturas. Con «Solo la primera letra», un punto seguido de espacio hace mayúscula la palabra siguiente aunque la oración continúe: «Compré pan, leche, etc. y volví» queda «Compré pan, leche, etc. Y volví».</li>
     </ol>
-    <p data-i18n-html="b22">La conclusión práctica: usá los botones como un primer paso rápido y dedicá un minuto a revisar siglas, nombres propios y abreviaturas. Para títulos en español, a menudo es más rápido usar «Solo la primera letra» sobre el título (mayúscula solo en la primera palabra) y corregir a mano los nombres propios.</p>
-    <h2 data-i18n="b23">Un flujo de trabajo para limpiar una lista</h2>
-    <p data-i18n-html="b24">Si tenés una lista larga de nombres o códigos, estas herramientas se combinan bien:</p>
+    <p data-i18n-html="b16">Para un título en español, suele ser más rápido aplicar «Solo la primera letra» (queda solo la primera palabra con mayúscula) y corregir a mano los nombres propios. Revisá siglas, nombres y abreviaturas antes de usar el texto.</p>
+    <h2 data-i18n="b17">Un flujo para limpiar una lista</h2>
+    <p data-i18n-html="b18">Si tenés una lista larga de nombres o códigos, estas herramientas se encadenan bien:</p>
     <ol>
-      <li data-i18n-html="b25-1">Pegá la lista en <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a> y pasala a «minúsculas» (o a «Cada Palabra En Mayúscula»). Descargala como .txt.</li>
-      <li data-i18n-html="b25-2">Con el .txt, usá <a href="../herramientas/quitar-duplicados-texto.html">Quitar líneas duplicadas o vacías</a>. Compara las líneas tal cual están, así que unificar antes las mayúsculas es lo que permite detectar repeticiones como «Ana» y «ana».</li>
-      <li data-i18n-html="b25-3">Terminá con <a href="../herramientas/ordenar-lineas-texto.html">Ordenar líneas</a>, que ordena alfabéticamente respetando tildes y la ñ.</li>
-      <li data-i18n-html="b25-4">Si el texto se ve con símbolos raros en lugar de tildes, probá <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a>.</li>
-      <li data-i18n-html="b25-5">Si te hace falta saber cuánto mide el resultado (por ejemplo, para un límite de palabras), <a href="../herramientas/contador-palabras.html">Contador de palabras</a> muestra palabras, caracteres y tiempo de lectura.</li>
+      <li data-i18n-html="b19-1">Pegá la lista en <a href="../herramientas/convertidor-mayusculas.html">Convertir mayúsculas y minúsculas</a>, tocá «minúsculas» (o «Cada Palabra En Mayúscula», si son nombres) y descargala como .txt.</li>
+      <li data-i18n-html="b19-2">Con ese .txt, usá <a href="../herramientas/quitar-duplicados-texto.html">Quitar líneas duplicadas o vacías</a>. Tiene que ir después del paso 1, porque compara las líneas tal cual están.</li>
+      <li data-i18n-html="b19-3">Terminá con <a href="../herramientas/ordenar-lineas-texto.html">Ordenar líneas</a>. Ordena según el idioma de la página, respeta las tildes y la ñ, y la casilla «Ignorar mayúsculas/minúsculas (orden alfabético)» viene marcada.</li>
+      <li data-i18n-html="b19-4">Si aparecen símbolos raros en lugar de tildes, pasá el archivo por <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a>. Si tenés un tope de palabras, medilo con <a href="../herramientas/contador-palabras.html">Contador de palabras</a>, que calcula el tiempo de lectura a 200 palabras por minuto.</li>
     </ol>
-    <h2 data-i18n="b26">Preguntas frecuentes</h2>
-    <p data-i18n-html="b27"><strong>¿Puedo deshacer una conversión?</strong> La página no tiene un botón de deshacer, y el atajo del teclado (Ctrl+Z) no recupera el texto anterior: al convertir, el resultado reemplaza el contenido del cuadro y el navegador descarta su historial de deshacer (lo comprobamos en Edge; en otros navegadores no cuentes con ello). Por eso, si querés conservar el original, copialo antes de convertir.</p>
-    <p data-i18n-html="b28"><strong>¿Cambia las tildes al pasar a minúsculas?</strong> No. Solo cambia entre mayúscula y minúscula; las tildes y la diéresis se mantienen.</p>
-    <p data-i18n-html="b29"><strong>¿Hay un límite de longitud?</strong> La herramienta no impone ninguno; con textos enormes depende de la memoria del navegador.</p>
-    <h2 data-i18n="b30">Resumen</h2>
-    <p data-i18n-html="b31">Hay cinco formatos: mayúsculas, minúsculas, cada palabra con inicial, solo la primera letra de cada oración y alternado. Las tildes y la ñ se respetan, pero el formato de título no distingue artículos ni preposiciones y baja las siglas a minúsculas. Usá la herramienta como primer paso, revisá siglas y nombres propios, y combinala con las herramientas de texto del sitio para limpiar listas completas.</p>
+    <h2 data-i18n="b20">Preguntas frecuentes</h2>
+    <p data-i18n-html="b21"><strong>¿Puedo deshacer una conversión?</strong> No hay botón de deshacer, y Ctrl+Z puede no devolver el texto anterior: la herramienta cambia el contenido del cuadro por código y el navegador no siempre guarda ese cambio en su historial. Copiá el original antes de convertir.</p>
+    <p data-i18n-html="b22"><strong>¿Cambia las tildes al pasar a minúsculas?</strong> No. Solo cambia entre mayúscula y minúscula: «ÉTICA» pasa a «ética», con su tilde.</p>
+    <p data-i18n-html="b23"><strong>¿Hay un límite de longitud?</strong> La herramienta no pone ninguno. Con textos muy largos, lo que decide es la memoria del navegador.</p>
+    <h2 data-i18n="b24">Resumen</h2>
+    <p data-i18n-html="b25">Hay cinco formatos: mayúsculas, minúsculas, cada palabra con inicial, solo la primera letra de cada oración y alternado. Para el texto corrido escrito con el bloqueo activado sirve «Solo la primera letra». Para títulos y nombres en español, usala como primer paso y revisá a mano siglas, nombres propios y abreviaturas.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

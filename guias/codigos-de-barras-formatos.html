@@ -15,104 +15,116 @@ window.i18nPagina = {
     'titulo-pagina': 'Códigos de barras: formatos, dígitos y cómo imprimirlos — Mini Cookies',
     'meta-descripcion': 'Cuándo usar CODE128, EAN-13, UPC o CODE39, cuántos dígitos pide cada uno, cómo se calcula el dígito de control y cómo evitar errores.',
     'h1': 'Códigos de barras: formatos, dígitos y cómo imprimirlos',
-    'b1': 'Un código de barras es una forma de escribir un número o un texto con líneas de distintos grosores, de modo que un lector láser o una cámara lo convierta otra vez en datos. Hay muchos formatos, cada uno con sus reglas, y elegir el equivocado es la causa más común de errores al crear etiquetas. Esta guía explica los cuatro que ofrece <a href="../herramientas/generador-codigo-barras.html">Generador de códigos de barras</a> y cuándo conviene cada uno.',
-    'b2': 'Los cuatro formatos',
-    'b3': 'CODE128: el comodín',
-    'b4': 'Acepta letras mayúsculas y minúsculas, números y símbolos, y es compacto cuando el contenido son muchos dígitos seguidos. Es la mejor opción para etiquetas de inventario, números de pedido, guías de envío o cualquier uso interno donde no te imponga un formato un tercero.',
-    'b5': 'EAN-13: productos de venta',
-    'b6': 'Es el código que ves en casi cualquier producto de supermercado fuera de Estados Unidos y Canadá. Siempre lleva 13 dígitos: 12 de datos más uno final de control. Solo admite números.',
-    'b7': 'UPC: productos en Estados Unidos y Canadá',
-    'b8': 'La versión norteamericana, de 12 dígitos: 11 de datos más uno de control. También solo números. En la práctica, un UPC es un EAN-13 con un cero delante.',
-    'b9': 'CODE39: etiquetas simples',
-    'b10': 'Admite mayúsculas, números y unos pocos símbolos (guion, punto, espacio, <code>$</code>, <code>/</code>, <code>+</code> y <code>%</code>). Es un formato antiguo y poco compacto, pero muy extendido en etiquetas industriales y credenciales. Si escribís letras minúsculas, el generador las pasa a mayúsculas.',
-    'b11': 'Paso a paso con el generador',
-    'b12-1': 'Escribí el contenido en <strong>Texto o número</strong>. Viene un ejemplo cargado.',
-    'b12-2': 'Elegí el <strong>Formato</strong>.',
-    'b12-3': 'Tocá <strong>Generar</strong> (o apretá Enter).',
-    'b12-4': 'Si querés guardarlo, usá <strong>Descargar como SVG</strong>. El archivo se llama <code>codigo-de-barras.svg</code>.',
-    'b13': 'Si el contenido no cumple las reglas del formato, en lugar del código aparece un mensaje de error en rojo.',
-    'b14': 'El dígito de control',
-    'b15': 'EAN-13 y UPC terminan con un dígito que se calcula a partir de los demás. Sirve para que el lector detecte una lectura errónea. Para un EAN-13, el cálculo es:',
-    'b16-1': 'Tomá los 12 primeros dígitos y multiplicá los de las posiciones impares (1.º, 3.º, 5.º...) por 1 y los de las pares por 3.',
-    'b16-2': 'Sumá todo.',
-    'b16-3': 'El dígito de control es lo que falta para llegar al siguiente múltiplo de 10 (si la suma ya es múltiplo de 10, es 0).',
-    'b17': 'Ejemplo con <code>123456789012</code>: la suma da 92, faltan 8 para 100, entonces el código completo es <code>1234567890128</code>. En UPC se hace igual con 11 dígitos, pero los de las posiciones impares se multiplican por 3 y los pares por 1.',
-    'b18': 'Con el generador tenés dos caminos: escribir los 12 dígitos de un EAN-13 (o los 11 de un UPC) y dejar que el dígito de control se agregue solo, o escribir los 13 (o 12) y que el generador compruebe que el último es el correcto. Si no coincide, lo informa como error.',
-    'b19': 'Errores comunes',
-    'b20-1': '<strong>Letras en EAN-13 o UPC.</strong> Esos formatos solo aceptan dígitos. Si necesitás letras, usá CODE128.',
-    'b20-2': '<strong>Cantidad de dígitos equivocada.</strong> EAN-13 pide 12 o 13; UPC pide 11 o 12. Cualquier otra cantidad da error.',
-    'b20-3': '<strong>Dígito de control mal calculado.</strong> Si escribís la cantidad completa pero el último dígito no corresponde, el generador lo rechaza. Dejale calcularlo escribiendo un dígito menos.',
-    'b20-4': '<strong>Mensajes de error en otro idioma.</strong> El texto del error viene de la librería que dibuja el código y puede aparecer en inglés.',
-    'b20-5': '<strong>Un código "válido" que no es tuyo.</strong> Que el dibujo se lea no significa que el número esté registrado. Los números EAN y UPC oficiales para vender productos los asigna GS1; esta herramienta dibuja el código, no lo registra. Para etiquetas internas no importa; para vender en tiendas, sí.',
-    'b21': 'Impresión y SVG',
-    'b22': 'El archivo SVG es una imagen vectorial: se puede ampliar sin pixelarse, se inserta en Word o en programas de diseño y se imprime nítido a cualquier tamaño. Si necesitás un PNG, abrí el SVG en un editor y exportalo desde ahí.',
-    'b23': 'El código sale siempre en gris oscuro sobre fondo blanco, con el texto de los dígitos debajo; no se puede cambiar el color ni las medidas desde la herramienta. Al imprimirlo:',
-    'b24-1': '<strong>Mantené el contraste y el espacio vacío a ambos lados.</strong> Los lectores necesitan un margen en blanco antes de la primera barra y después de la última.',
-    'b24-2': '<strong>Escalalo proporcionalmente.</strong> Estirarlo solo a lo ancho o a lo alto cambia el grosor relativo de las barras y puede impedir la lectura.',
-    'b24-3': '<strong>No lo hagas demasiado chico.</strong> Si las barras más finas quedan por debajo de lo que resuelve tu impresora, no se leerá.',
-    'b24-4': '<strong>Imprimí y probá.</strong> Leelo con el lector o la cámara que se va a usar de verdad. <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a> te sirve para comprobar el contenido.',
-    'b25': 'Preguntas frecuentes',
-    'b26': '¿Puedo usar CODE128 para un producto de supermercado?',
-    'b27': 'Para uso propio, sí. Pero un comercio que cobra con un lector de caja espera un EAN-13 o un UPC. Para la venta al público conviene el formato que usa el comercio y un número asignado por GS1.',
-    'b28': '¿Qué diferencia hay entre un código de barras y un QR?',
-    'b29': 'El de barras es lineal y guarda poco contenido, en una sola dirección. Un QR es bidimensional y guarda más. Para un QR, <a href="../herramientas/generador-qr.html">Generador de códigos QR</a>.',
-    'b30': '¿Se puede cambiar el color?',
-    'b31': 'No. La herramienta genera siempre el código en gris oscuro sobre blanco.',
-    'b32': 'Resumen',
-    'b33': 'Usá CODE128 para etiquetas propias con letras y números, EAN-13 o UPC solo para productos con numeración oficial, y CODE39 para etiquetas simples en mayúsculas. EAN-13 admite 12 o 13 dígitos y UPC 11 o 12: el dígito de control se agrega o se verifica. Descargá el SVG, imprimilo sin deformarlo y probá la lectura antes de imprimir en cantidad.',
+    'b1': 'Tenés que imprimir etiquetas para el depósito, o un código para un producto, y el generador ofrece cuatro formatos. Un formato que el lector no entiende no se nota en la pantalla: el dibujo sale bien y el problema aparece al escanear. Esta guía explica cuál conviene con el <a href="../herramientas/generador-codigo-barras.html">Generador de códigos de barras</a>, cuántos dígitos pide cada uno y cómo imprimirlo para que se lea.',
+    'b2': 'Cuál elegir',
+    'b3-c1': 'Formato',
+    'b3-c2': 'Qué admite',
+    'b3-c3': 'Para qué sirve',
+    'b3-f1c1': 'CODE128',
+    'b3-f1c2': 'Letras, números y símbolos',
+    'b3-f1c3': 'Etiquetas internas, números de pedido, guías de envío',
+    'b3-f2c1': 'EAN-13',
+    'b3-f2c2': '12 o 13 dígitos',
+    'b3-f2c3': 'Productos de venta fuera de Estados Unidos y Canadá',
+    'b3-f3c1': 'UPC',
+    'b3-f3c2': '11 o 12 dígitos',
+    'b3-f3c3': 'Productos de venta en Estados Unidos y Canadá',
+    'b3-f4c1': 'CODE39',
+    'b3-f4c2': 'Mayúsculas, números y algunos símbolos',
+    'b3-f4c3': 'Etiquetas industriales y credenciales',
+    'b4': 'Si un comercio no te exige un formato, CODE128 es la opción práctica. Es el más flexible y, con cifras seguidas, el más corto: mete dos dígitos por símbolo. En el generador, 123456789012 ocupa 101 módulos (las barras y los huecos de ancho mínimo), y doce letras ocupan 167.',
+    'b5': 'EAN-13 y UPC son los códigos de la caja del supermercado. Si vas a vender en tiendas, el comercio suele pedir uno de los dos, y los números oficiales los asigna GS1, la organización que administra los códigos de producto.',
+    'b6': 'CODE39 es más antiguo y ocupa más espacio, pero sigue en etiquetas industriales. Solo admite mayúsculas, números, espacio, guion, punto, <code>$</code>, <code>/</code>, <code>+</code> y <code>%</code>. Si escribís en minúsculas, el generador las pasa a mayúsculas: «pedido-42» sale como PEDIDO-42.',
+    'b7': 'Paso a paso con el generador',
+    'b8-1': 'Escribí el contenido en «Texto o número». Viene cargado un ejemplo, 123456789012.',
+    'b8-2': 'Elegí el «Formato».',
+    'b8-3': 'Tocá «Generar» o apretá Enter.',
+    'b8-4': 'Usá «Descargar como SVG». El archivo se llama codigo-de-barras.svg.',
+    'b9': 'Si el contenido no cumple las reglas del formato, no aparece el código: sale un aviso en rojo que dice que revises el largo, los caracteres y el dígito de control. El generador ignora los espacios al principio y al final del texto.',
+    'b10': 'El dígito de control',
+    'b11': 'EAN-13 y UPC terminan con un dígito calculado a partir de los demás. Sirve para que el lector detecte una lectura equivocada. En EAN-13, sumá los doce primeros dígitos: los de las posiciones impares (1.º, 3.º, 5.º…) valen lo que son, y los de las pares se multiplican por 3. El control es lo que le falta a esa suma para llegar al siguiente múltiplo de 10 (si ya es múltiplo de 10, es 0).',
+    'b12': 'Con 123456789012, la suma da 92 y faltan 8 para 100: el código completo es 1234567890128. En UPC el reparto se invierte: las posiciones impares se multiplican por 3 y las pares valen lo que son, y el cálculo usa 11 dígitos.',
+    'b13': 'No hace falta calcularlo a mano. Escribí los 12 dígitos de un EAN-13 (o los 11 de un UPC) y el generador agrega el control. Si escribís el número completo y el último no coincide, da error, así que también sirve para verificar una etiqueta ya hecha. Aunque la opción diga «UPC (12 dígitos, productos EE.UU.)», con 11 también genera.',
+    'b14': 'Errores comunes',
+    'b15-1': 'Letras en EAN-13 o UPC. Esos formatos solo aceptan dígitos. Si necesitás letras, usá CODE128.',
+    'b15-2': 'Cantidad de dígitos. EAN-13 acepta 12 o 13, UPC acepta 11 o 12. Cualquier otra cantidad da error.',
+    'b15-3': 'Acentos en CODE128. La ñ y las tildes hacen que se rechace el texto: «Peña» da error. Pero no todas las letras acentuadas fallan así. Con «ÉXITO», el código sale sin la É y el número de abajo dice «XITO». Escribí sin tildes o mirá el número impreso antes de imprimir.',
+    'b16': 'Que el código se lea no quiere decir que el número esté registrado: el generador dibuja el código, pero no lo registra. Para vender, el número tiene que ser uno oficial.',
+    'b17': 'Impresión y SVG',
+    'b18': 'El SVG es un dibujo vectorial: se amplía sin pixelarse y se inserta en Word o en un programa de diseño. Sale siempre en gris oscuro sobre blanco, con los números debajo, y la herramienta no permite cambiar el color ni las medidas. Los números son texto en la fuente monoespaciada del sistema: en un programa que no la tenga pueden verse distintos, pero las barras no cambian.',
+    'b19': 'Para que se lea al imprimir:',
+    'b20-1': 'Dejá espacio blanco a los dos lados. El lector necesita margen libre antes de la primera barra y después de la última.',
+    'b20-2': 'Escalalo proporcionalmente. Estirarlo a lo ancho o a lo alto cambia el grosor relativo de las barras.',
+    'b20-3': 'No lo achiques demasiado. Cada módulo del dibujo mide 2 píxeles, unos 0,53 mm a 100 % en el navegador. Si las barras finas quedan por debajo de lo que resuelve tu impresora, no se leen. Para venta, la medida la fija la norma del comercio, y esta herramienta no la controla.',
+    'b20-4': 'Imprimí una etiqueta de prueba y escaneala con el lector o la cámara que vas a usar de verdad. <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a> lee un código por página o imagen, así que comprobá de a uno.',
+    'b21': 'Preguntas frecuentes',
+    'b22': '¿Puedo usar CODE128 para un producto de supermercado?',
+    'b23': 'Para uso propio, sí. Un comercio que cobra con lector de caja suele esperar EAN-13 o UPC. Para venta al público, conviene el formato que pide el comercio y un número asignado por GS1.',
+    'b24': '¿Cuál es la diferencia entre un código de barras y un QR?',
+    'b25': 'El de barras es lineal y guarda poco contenido. El QR es cuadrado y guarda más texto. Para un QR, usá el <a href="../herramientas/generador-qr.html">Generador de códigos QR</a>.',
+    'b26': '¿Se puede cambiar el color?',
+    'b27': 'No desde la herramienta. El código sale siempre en gris oscuro sobre blanco. Si lo abrís en otro programa, podés escalarlo, siempre de forma proporcional.',
+    'b28': 'Resumen',
+    'b29': 'CODE128 para etiquetas propias con letras y números, EAN-13 o UPC solo para productos con número oficial de GS1, CODE39 para etiquetas simples en mayúsculas. EAN-13 admite 12 o 13 dígitos y UPC 11 o 12; el dígito de control se agrega o se verifica. Descargá el SVG, imprimilo sin deformarlo y probá la lectura antes de imprimir en cantidad.',
     'rel1': 'Generador de códigos de barras',
     'rel2': 'Lector de códigos QR y de barras',
     'rel3': 'Generador de códigos QR'
   },
   en: {
-    'titulo-pagina': 'Barcode formats, digits and how to print them — Mini Cookies',
+    'titulo-pagina': 'Barcodes: formats, digits and how to print them — Mini Cookies',
     'meta-descripcion': 'When to use CODE128, EAN-13, UPC or CODE39, how many digits each one takes, how the check digit is calculated and how to avoid mistakes.',
-    'h1': 'Barcode formats, digits and how to print them',
-    'b1': 'A barcode is a way of writing a number or some text as lines of different thicknesses, so that a laser scanner or a camera can turn it back into data. There are many formats, each with its own rules, and choosing the wrong one is the most common cause of mistakes when making labels. This guide explains the four formats offered by the <a href="../herramientas/generador-codigo-barras.html">Barcode generator</a> and when each one makes sense.',
-    'b2': 'The four formats',
-    'b3': 'CODE128: the all-rounder',
-    'b4': 'It accepts uppercase and lowercase letters, numbers and symbols, and it is compact when the content is a long run of digits. It is the best choice for inventory labels, order numbers, shipping labels or any internal use where a third party doesn’t impose a format on you.',
-    'b5': 'EAN-13: retail products',
-    'b6': 'This is the code you see on almost any supermarket product outside the United States and Canada. It always has 13 digits: 12 data digits plus a final check digit. It only accepts numbers.',
-    'b7': 'UPC: products in the United States and Canada',
-    'b8': 'The North American version, with 12 digits: 11 data digits plus one check digit. It also accepts numbers only. In practice, a UPC is an EAN-13 with a zero in front.',
-    'b9': 'CODE39: simple labels',
-    'b10': 'It accepts uppercase letters, numbers and a few symbols (hyphen, period, space, <code>$</code>, <code>/</code>, <code>+</code> and <code>%</code>). It is an older, less compact format, but very common on industrial labels and ID badges. If you type lowercase letters, the generator converts them to uppercase.',
-    'b11': 'Step by step with the generator',
-    'b12-1': 'Type the content in <strong>Text or number</strong>. An example comes preloaded.',
-    'b12-2': 'Choose the <strong>Format</strong>.',
-    'b12-3': 'Tap <strong>Generate</strong> (or press Enter).',
-    'b12-4': 'If you want to save it, use <strong>Download as SVG</strong>. The file is named <code>codigo-de-barras.svg</code>.',
-    'b13': 'If the content doesn’t meet the format’s rules, a red error message appears instead of the code.',
-    'b14': 'The check digit',
-    'b15': 'EAN-13 and UPC end with a digit calculated from the others. It lets the scanner detect a misread. For an EAN-13, the calculation is:',
-    'b16-1': 'Take the first 12 digits and multiply the ones in odd positions (1st, 3rd, 5th...) by 1 and the ones in even positions by 3.',
-    'b16-2': 'Add everything up.',
-    'b16-3': 'The check digit is whatever is needed to reach the next multiple of 10 (if the sum is already a multiple of 10, it is 0).',
-    'b17': 'Example with <code>123456789012</code>: the sum is 92, you need 8 more to reach 100, so the full code is <code>1234567890128</code>. For UPC it works the same way with 11 digits, but the digits in odd positions are multiplied by 3 and the even ones by 1.',
-    'b18': 'With the generator you have two options: type the 12 digits of an EAN-13 (or the 11 of a UPC) and let the check digit be added automatically, or type all 13 (or 12) and have the generator verify that the last one is correct. If it doesn’t match, it reports an error.',
-    'b19': 'Common mistakes',
-    'b20-1': '<strong>Letters in EAN-13 or UPC.</strong> Those formats only accept digits. If you need letters, use CODE128.',
-    'b20-2': '<strong>Wrong number of digits.</strong> EAN-13 takes 12 or 13; UPC takes 11 or 12. Any other number gives an error.',
-    'b20-3': '<strong>Incorrectly calculated check digit.</strong> If you type the full number of digits but the last one is wrong, the generator rejects it. Let it calculate the digit by typing one digit fewer.',
-    'b20-4': '<strong>Error messages in another language.</strong> The error text comes from the library that draws the code and may appear in English.',
-    'b20-5': '<strong>A "valid" code that isn’t yours.</strong> Just because the drawing scans doesn’t mean the number is registered. Official EAN and UPC numbers for selling products are assigned by GS1; this tool draws the code, it doesn’t register it. For internal labels it doesn’t matter; for selling in stores, it does.',
-    'b21': 'Printing and SVG',
-    'b22': 'The SVG file is a vector image: it can be enlarged without turning pixelated, it can be inserted into Word or design programs, and it prints sharply at any size. If you need a PNG, open the SVG in an editor and export it from there.',
-    'b23': 'The code always comes out in dark gray on a white background, with the digits printed below; you can’t change the color or the dimensions from the tool. When printing it:',
-    'b24-1': '<strong>Keep the contrast and the empty space on both sides.</strong> Scanners need a blank margin before the first bar and after the last one.',
-    'b24-2': '<strong>Scale it proportionally.</strong> Stretching it only in width or only in height changes the relative thickness of the bars and can make it unreadable.',
-    'b24-3': '<strong>Don’t make it too small.</strong> If the thinnest bars end up below what your printer can resolve, it won’t scan.',
-    'b24-4': '<strong>Print it and test it.</strong> Read it with the scanner or camera that will actually be used. The <a href="../herramientas/lector-codigos.html">QR and barcode reader</a> is useful for checking the content.',
-    'b25': 'Frequently asked questions',
-    'b26': 'Can I use CODE128 for a supermarket product?',
-    'b27': 'For your own use, yes. But a store that checks out with a register scanner expects an EAN-13 or a UPC. For selling to the public, use the format the store uses and a number assigned by GS1.',
-    'b28': 'What is the difference between a barcode and a QR code?',
-    'b29': 'A barcode is linear and holds little content, in a single direction. A QR code is two-dimensional and holds more. For a QR code, use the <a href="../herramientas/generador-qr.html">QR code generator</a>.',
-    'b30': 'Can I change the color?',
-    'b31': 'No. The tool always generates the code in dark gray on white.',
-    'b32': 'Summary',
-    'b33': 'Use CODE128 for your own labels with letters and numbers, EAN-13 or UPC only for products with official numbering, and CODE39 for simple labels in capital letters. EAN-13 takes 12 or 13 digits and UPC 11 or 12: the check digit is added or verified. Download the SVG, print it without distorting it and test that it scans before printing in bulk.',
+    'h1': 'Barcodes: formats, digits and how to print them',
+    'b1': 'You need to print labels for the warehouse, or a code for a product, and the generator offers four formats. A format the scanner doesn’t understand doesn’t show on screen: the drawing looks fine, and the problem appears when someone scans it. This guide explains which one to use with the <a href="../herramientas/generador-codigo-barras.html">Barcode generator</a>, how many digits each one takes and how to print it so it can be read.',
+    'b2': 'Which one to choose',
+    'b3-c1': 'Format',
+    'b3-c2': 'What it accepts',
+    'b3-c3': 'What it is for',
+    'b3-f1c1': 'CODE128',
+    'b3-f1c2': 'Letters, numbers and symbols',
+    'b3-f1c3': 'Internal labels, order numbers, shipping labels',
+    'b3-f2c1': 'EAN-13',
+    'b3-f2c2': '12 or 13 digits',
+    'b3-f2c3': 'Retail products outside the United States and Canada',
+    'b3-f3c1': 'UPC',
+    'b3-f3c2': '11 or 12 digits',
+    'b3-f3c3': 'Retail products in the United States and Canada',
+    'b3-f4c1': 'CODE39',
+    'b3-f4c2': 'Capital letters, numbers and some symbols',
+    'b3-f4c3': 'Industrial labels and ID badges',
+    'b4': 'If a retailer doesn’t require a format, CODE128 is the practical choice. It is the most flexible and, with runs of digits, the shortest: it packs two digits into each symbol. In the generator, 123456789012 takes 101 modules (the bars and the gaps of minimum width), and twelve letters take 167.',
+    'b5': 'EAN-13 and UPC are the codes on supermarket products. If you sell in shops, the retailer usually asks for one of the two, and GS1, the organization that manages product codes, assigns the official numbers.',
+    'b6': 'CODE39 is older and takes more space, but it is still used on industrial labels. It only accepts capital letters, numbers, space, hyphen, full stop, <code>$</code>, <code>/</code>, <code>+</code> and <code>%</code>. If you type lowercase, the generator changes it to capitals: “order-42” comes out as ORDER-42.',
+    'b7': 'Step by step with the generator',
+    'b8-1': 'Type the content in “Text or number”. An example, 123456789012, is already loaded.',
+    'b8-2': 'Choose the “Format”.',
+    'b8-3': 'Tap “Generate” or press Enter.',
+    'b8-4': 'Use “Download as SVG”. The file is named codigo-de-barras.svg.',
+    'b9': 'If the content doesn’t meet the rules of the format, no code appears. A red message tells you to check the length, the characters and the check digit. The generator ignores spaces at the start and end of the text.',
+    'b10': 'The check digit',
+    'b11': 'EAN-13 and UPC end with a digit calculated from the others. It lets the scanner detect a misread. In EAN-13, add up the first twelve digits: the ones in odd positions (1st, 3rd, 5th…) count as they are, and the ones in even positions are multiplied by 3. The check digit is what that sum needs to reach the next multiple of 10 (if it is already a multiple of 10, the check digit is 0).',
+    'b12': 'With 123456789012, the sum is 92 and 8 more gets to 100: the full code is 1234567890128. In UPC the weights swap: odd positions are multiplied by 3 and even positions count as they are, and the calculation uses 11 digits.',
+    'b13': 'You don’t need to work it out by hand. Type the 12 digits of an EAN-13 (or the 11 of a UPC) and the generator adds the check digit. If you type the full number and the last digit doesn’t match, it gives an error, so it also works to verify an existing label. Although the menu says “UPC (12 digits, US products)”, 11 digits also generate.',
+    'b14': 'Common mistakes',
+    'b15-1': 'Letters in EAN-13 or UPC. Those formats only accept digits. If you need letters, use CODE128.',
+    'b15-2': 'Wrong number of digits. EAN-13 accepts 12 or 13, UPC accepts 11 or 12. Any other count gives an error.',
+    'b15-3': 'Accents in CODE128. The ñ and accented letters make the generator reject the text: “Peña” gives an error. Not every accented letter fails that way, though. With “ÉXITO”, the code comes out without the É and the number underneath reads “XITO”. Write without accents, or check the printed number before printing.',
+    'b16': 'That a code scans doesn’t mean the number is registered: the generator draws the code, but it doesn’t register it. To sell, the number has to be an official one.',
+    'b17': 'Printing and SVG',
+    'b18': 'The SVG is a vector drawing: it enlarges without pixelating and you can insert it into Word or a design program. It always comes out dark gray on white, with the digits below, and the tool doesn’t let you change the color or the size. The digits are text in the system’s monospaced font: in a program that doesn’t have that font they may look different, but the bars don’t change.',
+    'b19': 'To make it scan when printed:',
+    'b20-1': 'Leave white space on both sides. The scanner needs a clear margin before the first bar and after the last one.',
+    'b20-2': 'Scale it proportionally. Stretching it wider or taller changes the relative thickness of the bars.',
+    'b20-3': 'Don’t make it too small. Each module in the drawing is 2 pixels, about 0.53 mm at 100 % in the browser. If the thin bars fall below what your printer can resolve, they won’t scan. For retail, the measurement is set by the retailer’s standard, not by this tool.',
+    'b20-4': 'Print a test label and scan it with the scanner or camera you will really use. <a href="../herramientas/lector-codigos.html">QR and barcode reader</a> reads one code per page or image, so check them one at a time.',
+    'b21': 'Frequently asked questions',
+    'b22': 'Can I use CODE128 for a supermarket product?',
+    'b23': 'For your own use, yes. A shop that charges at a till usually expects EAN-13 or UPC. For sales to the public, use the format the shop asks for and a number assigned by GS1.',
+    'b24': 'What is the difference between a barcode and a QR code?',
+    'b25': 'A barcode is linear and holds little content. A QR code is square and holds more text. For a QR code, use the <a href="../herramientas/generador-qr.html">QR code generator</a>.',
+    'b26': 'Can I change the color?',
+    'b27': 'Not in the tool. The code always comes out dark gray on white. If you open it in another program, you can scale it, always proportionally.',
+    'b28': 'Summary',
+    'b29': 'CODE128 for your own labels with letters and numbers, EAN-13 or UPC only for products with an official GS1 number, CODE39 for simple labels in capitals. EAN-13 takes 12 or 13 digits and UPC 11 or 12; the check digit is added or verified. Download the SVG, print it without distorting it and test the scan before printing in quantity.',
     'rel1': 'Barcode generator',
     'rel2': 'QR and barcode reader',
     'rel3': 'QR code generator'
@@ -139,59 +151,57 @@ window.i18nPagina = {
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
     <h1 data-i18n="h1">Códigos de barras: formatos, dígitos y cómo imprimirlos</h1>
-    <p data-i18n-html="b1">Un código de barras es una forma de escribir un número o un texto con líneas de distintos grosores, de modo que un lector láser o una cámara lo convierta otra vez en datos. Hay muchos formatos, cada uno con sus reglas, y elegir el equivocado es la causa más común de errores al crear etiquetas. Esta guía explica los cuatro que ofrece <a href="../herramientas/generador-codigo-barras.html">Generador de códigos de barras</a> y cuándo conviene cada uno.</p>
-    <h2 data-i18n="b2">Los cuatro formatos</h2>
-    <h3 data-i18n="b3">CODE128: el comodín</h3>
-    <p data-i18n-html="b4">Acepta letras mayúsculas y minúsculas, números y símbolos, y es compacto cuando el contenido son muchos dígitos seguidos. Es la mejor opción para etiquetas de inventario, números de pedido, guías de envío o cualquier uso interno donde no te imponga un formato un tercero.</p>
-    <h3 data-i18n="b5">EAN-13: productos de venta</h3>
-    <p data-i18n-html="b6">Es el código que ves en casi cualquier producto de supermercado fuera de Estados Unidos y Canadá. Siempre lleva 13 dígitos: 12 de datos más uno final de control. Solo admite números.</p>
-    <h3 data-i18n="b7">UPC: productos en Estados Unidos y Canadá</h3>
-    <p data-i18n-html="b8">La versión norteamericana, de 12 dígitos: 11 de datos más uno de control. También solo números. En la práctica, un UPC es un EAN-13 con un cero delante.</p>
-    <h3 data-i18n="b9">CODE39: etiquetas simples</h3>
-    <p data-i18n-html="b10">Admite mayúsculas, números y unos pocos símbolos (guion, punto, espacio, <code>$</code>, <code>/</code>, <code>+</code> y <code>%</code>). Es un formato antiguo y poco compacto, pero muy extendido en etiquetas industriales y credenciales. Si escribís letras minúsculas, el generador las pasa a mayúsculas.</p>
-    <h2 data-i18n="b11">Paso a paso con el generador</h2>
+    <p data-i18n-html="b1">Tenés que imprimir etiquetas para el depósito, o un código para un producto, y el generador ofrece cuatro formatos. Un formato que el lector no entiende no se nota en la pantalla: el dibujo sale bien y el problema aparece al escanear. Esta guía explica cuál conviene con el <a href="../herramientas/generador-codigo-barras.html">Generador de códigos de barras</a>, cuántos dígitos pide cada uno y cómo imprimirlo para que se lea.</p>
+    <h2 data-i18n="b2">Cuál elegir</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b3-c1">Formato</th><th data-i18n-html="b3-c2">Qué admite</th><th data-i18n-html="b3-c3">Para qué sirve</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b3-f1c1">CODE128</td><td data-i18n-html="b3-f1c2">Letras, números y símbolos</td><td data-i18n-html="b3-f1c3">Etiquetas internas, números de pedido, guías de envío</td></tr>
+        <tr><td data-i18n-html="b3-f2c1">EAN-13</td><td data-i18n-html="b3-f2c2">12 o 13 dígitos</td><td data-i18n-html="b3-f2c3">Productos de venta fuera de Estados Unidos y Canadá</td></tr>
+        <tr><td data-i18n-html="b3-f3c1">UPC</td><td data-i18n-html="b3-f3c2">11 o 12 dígitos</td><td data-i18n-html="b3-f3c3">Productos de venta en Estados Unidos y Canadá</td></tr>
+        <tr><td data-i18n-html="b3-f4c1">CODE39</td><td data-i18n-html="b3-f4c2">Mayúsculas, números y algunos símbolos</td><td data-i18n-html="b3-f4c3">Etiquetas industriales y credenciales</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b4">Si un comercio no te exige un formato, CODE128 es la opción práctica. Es el más flexible y, con cifras seguidas, el más corto: mete dos dígitos por símbolo. En el generador, 123456789012 ocupa 101 módulos (las barras y los huecos de ancho mínimo), y doce letras ocupan 167.</p>
+    <p data-i18n-html="b5">EAN-13 y UPC son los códigos de la caja del supermercado. Si vas a vender en tiendas, el comercio suele pedir uno de los dos, y los números oficiales los asigna GS1, la organización que administra los códigos de producto.</p>
+    <p data-i18n-html="b6">CODE39 es más antiguo y ocupa más espacio, pero sigue en etiquetas industriales. Solo admite mayúsculas, números, espacio, guion, punto, <code>$</code>, <code>/</code>, <code>+</code> y <code>%</code>. Si escribís en minúsculas, el generador las pasa a mayúsculas: «pedido-42» sale como PEDIDO-42.</p>
+    <h2 data-i18n="b7">Paso a paso con el generador</h2>
     <ol>
-      <li data-i18n-html="b12-1">Escribí el contenido en <strong>Texto o número</strong>. Viene un ejemplo cargado.</li>
-      <li data-i18n-html="b12-2">Elegí el <strong>Formato</strong>.</li>
-      <li data-i18n-html="b12-3">Tocá <strong>Generar</strong> (o apretá Enter).</li>
-      <li data-i18n-html="b12-4">Si querés guardarlo, usá <strong>Descargar como SVG</strong>. El archivo se llama <code>codigo-de-barras.svg</code>.</li>
+      <li data-i18n-html="b8-1">Escribí el contenido en «Texto o número». Viene cargado un ejemplo, 123456789012.</li>
+      <li data-i18n-html="b8-2">Elegí el «Formato».</li>
+      <li data-i18n-html="b8-3">Tocá «Generar» o apretá Enter.</li>
+      <li data-i18n-html="b8-4">Usá «Descargar como SVG». El archivo se llama codigo-de-barras.svg.</li>
     </ol>
-    <p data-i18n-html="b13">Si el contenido no cumple las reglas del formato, en lugar del código aparece un mensaje de error en rojo.</p>
-    <h2 data-i18n="b14">El dígito de control</h2>
-    <p data-i18n-html="b15">EAN-13 y UPC terminan con un dígito que se calcula a partir de los demás. Sirve para que el lector detecte una lectura errónea. Para un EAN-13, el cálculo es:</p>
-    <ol>
-      <li data-i18n-html="b16-1">Tomá los 12 primeros dígitos y multiplicá los de las posiciones impares (1.º, 3.º, 5.º...) por 1 y los de las pares por 3.</li>
-      <li data-i18n-html="b16-2">Sumá todo.</li>
-      <li data-i18n-html="b16-3">El dígito de control es lo que falta para llegar al siguiente múltiplo de 10 (si la suma ya es múltiplo de 10, es 0).</li>
-    </ol>
-    <p data-i18n-html="b17">Ejemplo con <code>123456789012</code>: la suma da 92, faltan 8 para 100, entonces el código completo es <code>1234567890128</code>. En UPC se hace igual con 11 dígitos, pero los de las posiciones impares se multiplican por 3 y los pares por 1.</p>
-    <p data-i18n-html="b18">Con el generador tenés dos caminos: escribir los 12 dígitos de un EAN-13 (o los 11 de un UPC) y dejar que el dígito de control se agregue solo, o escribir los 13 (o 12) y que el generador compruebe que el último es el correcto. Si no coincide, lo informa como error.</p>
-    <h2 data-i18n="b19">Errores comunes</h2>
+    <p data-i18n-html="b9">Si el contenido no cumple las reglas del formato, no aparece el código: sale un aviso en rojo que dice que revises el largo, los caracteres y el dígito de control. El generador ignora los espacios al principio y al final del texto.</p>
+    <h2 data-i18n="b10">El dígito de control</h2>
+    <p data-i18n-html="b11">EAN-13 y UPC terminan con un dígito calculado a partir de los demás. Sirve para que el lector detecte una lectura equivocada. En EAN-13, sumá los doce primeros dígitos: los de las posiciones impares (1.º, 3.º, 5.º…) valen lo que son, y los de las pares se multiplican por 3. El control es lo que le falta a esa suma para llegar al siguiente múltiplo de 10 (si ya es múltiplo de 10, es 0).</p>
+    <p data-i18n-html="b12">Con 123456789012, la suma da 92 y faltan 8 para 100: el código completo es 1234567890128. En UPC el reparto se invierte: las posiciones impares se multiplican por 3 y las pares valen lo que son, y el cálculo usa 11 dígitos.</p>
+    <p data-i18n-html="b13">No hace falta calcularlo a mano. Escribí los 12 dígitos de un EAN-13 (o los 11 de un UPC) y el generador agrega el control. Si escribís el número completo y el último no coincide, da error, así que también sirve para verificar una etiqueta ya hecha. Aunque la opción diga «UPC (12 dígitos, productos EE.UU.)», con 11 también genera.</p>
+    <h2 data-i18n="b14">Errores comunes</h2>
     <ul>
-      <li data-i18n-html="b20-1"><strong>Letras en EAN-13 o UPC.</strong> Esos formatos solo aceptan dígitos. Si necesitás letras, usá CODE128.</li>
-      <li data-i18n-html="b20-2"><strong>Cantidad de dígitos equivocada.</strong> EAN-13 pide 12 o 13; UPC pide 11 o 12. Cualquier otra cantidad da error.</li>
-      <li data-i18n-html="b20-3"><strong>Dígito de control mal calculado.</strong> Si escribís la cantidad completa pero el último dígito no corresponde, el generador lo rechaza. Dejale calcularlo escribiendo un dígito menos.</li>
-      <li data-i18n-html="b20-4"><strong>Mensajes de error en otro idioma.</strong> El texto del error viene de la librería que dibuja el código y puede aparecer en inglés.</li>
-      <li data-i18n-html="b20-5"><strong>Un código "válido" que no es tuyo.</strong> Que el dibujo se lea no significa que el número esté registrado. Los números EAN y UPC oficiales para vender productos los asigna GS1; esta herramienta dibuja el código, no lo registra. Para etiquetas internas no importa; para vender en tiendas, sí.</li>
+      <li data-i18n-html="b15-1">Letras en EAN-13 o UPC. Esos formatos solo aceptan dígitos. Si necesitás letras, usá CODE128.</li>
+      <li data-i18n-html="b15-2">Cantidad de dígitos. EAN-13 acepta 12 o 13, UPC acepta 11 o 12. Cualquier otra cantidad da error.</li>
+      <li data-i18n-html="b15-3">Acentos en CODE128. La ñ y las tildes hacen que se rechace el texto: «Peña» da error. Pero no todas las letras acentuadas fallan así. Con «ÉXITO», el código sale sin la É y el número de abajo dice «XITO». Escribí sin tildes o mirá el número impreso antes de imprimir.</li>
     </ul>
-    <h2 data-i18n="b21">Impresión y SVG</h2>
-    <p data-i18n-html="b22">El archivo SVG es una imagen vectorial: se puede ampliar sin pixelarse, se inserta en Word o en programas de diseño y se imprime nítido a cualquier tamaño. Si necesitás un PNG, abrí el SVG en un editor y exportalo desde ahí.</p>
-    <p data-i18n-html="b23">El código sale siempre en gris oscuro sobre fondo blanco, con el texto de los dígitos debajo; no se puede cambiar el color ni las medidas desde la herramienta. Al imprimirlo:</p>
+    <p data-i18n-html="b16">Que el código se lea no quiere decir que el número esté registrado: el generador dibuja el código, pero no lo registra. Para vender, el número tiene que ser uno oficial.</p>
+    <h2 data-i18n="b17">Impresión y SVG</h2>
+    <p data-i18n-html="b18">El SVG es un dibujo vectorial: se amplía sin pixelarse y se inserta en Word o en un programa de diseño. Sale siempre en gris oscuro sobre blanco, con los números debajo, y la herramienta no permite cambiar el color ni las medidas. Los números son texto en la fuente monoespaciada del sistema: en un programa que no la tenga pueden verse distintos, pero las barras no cambian.</p>
+    <p data-i18n-html="b19">Para que se lea al imprimir:</p>
     <ul>
-      <li data-i18n-html="b24-1"><strong>Mantené el contraste y el espacio vacío a ambos lados.</strong> Los lectores necesitan un margen en blanco antes de la primera barra y después de la última.</li>
-      <li data-i18n-html="b24-2"><strong>Escalalo proporcionalmente.</strong> Estirarlo solo a lo ancho o a lo alto cambia el grosor relativo de las barras y puede impedir la lectura.</li>
-      <li data-i18n-html="b24-3"><strong>No lo hagas demasiado chico.</strong> Si las barras más finas quedan por debajo de lo que resuelve tu impresora, no se leerá.</li>
-      <li data-i18n-html="b24-4"><strong>Imprimí y probá.</strong> Leelo con el lector o la cámara que se va a usar de verdad. <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a> te sirve para comprobar el contenido.</li>
+      <li data-i18n-html="b20-1">Dejá espacio blanco a los dos lados. El lector necesita margen libre antes de la primera barra y después de la última.</li>
+      <li data-i18n-html="b20-2">Escalalo proporcionalmente. Estirarlo a lo ancho o a lo alto cambia el grosor relativo de las barras.</li>
+      <li data-i18n-html="b20-3">No lo achiques demasiado. Cada módulo del dibujo mide 2 píxeles, unos 0,53 mm a 100 % en el navegador. Si las barras finas quedan por debajo de lo que resuelve tu impresora, no se leen. Para venta, la medida la fija la norma del comercio, y esta herramienta no la controla.</li>
+      <li data-i18n-html="b20-4">Imprimí una etiqueta de prueba y escaneala con el lector o la cámara que vas a usar de verdad. <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a> lee un código por página o imagen, así que comprobá de a uno.</li>
     </ul>
-    <h2 data-i18n="b25">Preguntas frecuentes</h2>
-    <h3 data-i18n="b26">¿Puedo usar CODE128 para un producto de supermercado?</h3>
-    <p data-i18n-html="b27">Para uso propio, sí. Pero un comercio que cobra con un lector de caja espera un EAN-13 o un UPC. Para la venta al público conviene el formato que usa el comercio y un número asignado por GS1.</p>
-    <h3 data-i18n="b28">¿Qué diferencia hay entre un código de barras y un QR?</h3>
-    <p data-i18n-html="b29">El de barras es lineal y guarda poco contenido, en una sola dirección. Un QR es bidimensional y guarda más. Para un QR, <a href="../herramientas/generador-qr.html">Generador de códigos QR</a>.</p>
-    <h3 data-i18n="b30">¿Se puede cambiar el color?</h3>
-    <p data-i18n-html="b31">No. La herramienta genera siempre el código en gris oscuro sobre blanco.</p>
-    <h2 data-i18n="b32">Resumen</h2>
-    <p data-i18n-html="b33">Usá CODE128 para etiquetas propias con letras y números, EAN-13 o UPC solo para productos con numeración oficial, y CODE39 para etiquetas simples en mayúsculas. EAN-13 admite 12 o 13 dígitos y UPC 11 o 12: el dígito de control se agrega o se verifica. Descargá el SVG, imprimilo sin deformarlo y probá la lectura antes de imprimir en cantidad.</p>
+    <h2 data-i18n="b21">Preguntas frecuentes</h2>
+    <h3 data-i18n="b22">¿Puedo usar CODE128 para un producto de supermercado?</h3>
+    <p data-i18n-html="b23">Para uso propio, sí. Un comercio que cobra con lector de caja suele esperar EAN-13 o UPC. Para venta al público, conviene el formato que pide el comercio y un número asignado por GS1.</p>
+    <h3 data-i18n="b24">¿Cuál es la diferencia entre un código de barras y un QR?</h3>
+    <p data-i18n-html="b25">El de barras es lineal y guarda poco contenido. El QR es cuadrado y guarda más texto. Para un QR, usá el <a href="../herramientas/generador-qr.html">Generador de códigos QR</a>.</p>
+    <h3 data-i18n="b26">¿Se puede cambiar el color?</h3>
+    <p data-i18n-html="b27">No desde la herramienta. El código sale siempre en gris oscuro sobre blanco. Si lo abrís en otro programa, podés escalarlo, siempre de forma proporcional.</p>
+    <h2 data-i18n="b28">Resumen</h2>
+    <p data-i18n-html="b29">CODE128 para etiquetas propias con letras y números, EAN-13 o UPC solo para productos con número oficial de GS1, CODE39 para etiquetas simples en mayúsculas. EAN-13 admite 12 o 13 dígitos y UPC 11 o 12; el dígito de control se agrega o se verifica. Descargá el SVG, imprimilo sin deformarlo y probá la lectura antes de imprimir en cantidad.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

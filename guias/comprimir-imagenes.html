@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo comprimir una imagen para la web o el correo sin que se vea mal — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo bajar el peso de una foto: achicar primero las medidas y comprimir después, qué calidad usar y cuándo conviene JPG o WebP.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo comprimir una imagen para la web o el correo sin que se vea mal — Mini Cookies',
+    'meta-descripcion': 'Cómo bajar el peso de una foto: achicar primero las medidas y comprimir después, qué calidad usar y cuándo conviene JPG o WebP.',
+    'h1': 'Cómo comprimir una imagen para la web o el correo sin que se vea mal',
+    'b1': 'Una foto de celular pesa varios megas. Ese peso no entra en un correo con límite, en un formulario que pide un máximo ni en una página que tiene que cargar rápido. Bajarlo es fácil. Lo difícil es que la imagen no quede borrosa o llena de manchas, y para eso conviene saber qué la hace pesar.',
+    'b2': 'De qué depende el peso de una imagen',
+    'b3': 'Son dos cosas que se pueden tocar por separado:',
+    'b4-1': 'Las medidas en píxeles. Una foto de 4000 píxeles de ancho tiene muchos más datos que una de 1200. En una pantalla o en un correo, esos píxeles de más no se aprecian: solo pesan.',
+    'b4-2': 'La compresión y el formato. JPG y WebP descartan detalle que el ojo casi no nota. Cuanto más descartan, menos pesa el archivo y más se ve la pérdida. PNG no descarta nada, por eso una foto en PNG suele pesar bastante más.',
+    'b5': 'Primero las medidas, después la compresión',
+    'b6': 'Achicar las medidas baja el peso mucho más que subir la compresión, y casi sin costo visible si la imagen se va a ver en pantalla.',
+    'b7-1': 'Abrí <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>, arrastrá la foto y escribí el «Ancho (px)» que necesitás. «Mantener proporción» viene marcada, así que el alto se calcula solo.',
+    'b7-2': 'Dejá «Calidad de reescalado» en «Suave (recomendado)», que es la opción por defecto, y pulsá «Redimensionar». Bajá el resultado.',
+    'b7-3': 'Abrí <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> y cargá la imagen ya achicada. Dejá «Calidad» en 70 y elegí el «Formato de salida».',
+    'b7-4': 'Pulsá «Comprimir imagen», mirá «Peso original», «Peso comprimido» y «Reducción», y bajá el archivo.',
+    'b8': 'Si comprimís primero, la herramienta trabaja sobre más píxeles de los que hacen falta. Un matiz: al redimensionar, un JPG o un WebP se vuelve a guardar con calidad fija de 92 %, así que ya pasó por una compresión. Un PNG sigue siendo PNG, sin pérdida, y la única compresión con pérdida queda para el paso siguiente.',
+    'b9': 'Qué medidas elegir',
+    'b10': 'Depende de dónde se va a ver. Estas cifras son aproximadas, no reglas: mirá el resultado antes de fijarte en ellas.',
+    'b11-c1': 'Para qué',
+    'b11-c2': 'Ancho aproximado',
+    'b11-f1c1': 'Adjuntar a un correo o a un mensaje',
+    'b11-f1c2': '1000 a 1600 px',
+    'b11-f2c1': 'Foto principal de una página web',
+    'b11-f2c2': '1200 a 1920 px',
+    'b11-f3c1': 'Miniaturas o imágenes chicas de una página',
+    'b11-f3c2': '400 a 800 px',
+    'b12': 'Para imprimir no conviene achicar mucho: una imagen impresa necesita muchos más píxeles que una que se ve en pantalla. En ese caso, comprimí con calidad alta o quedate con el original.',
+    'b13': 'JPG, PNG o WebP',
+    'b14': '<a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> lee JPG, PNG y WebP, pero solo entrega JPG o WebP. Eso decide qué elegir.',
+    'b15-1': 'JPG sirve para fotos que tienen que abrirse en cualquier lado. No admite transparencia: un fondo transparente sale blanco.',
+    'b15-2': 'WebP pesa menos a igual calidad y conserva la transparencia. Los navegadores modernos lo abren; un programa o un correo antiguo tal vez no, y entonces conviene JPG.',
+    'b15-3': 'PNG sirve para logos, capturas con texto y gráficos de bordes nítidos. Comprimir no lo entrega. Si tu imagen es así, achicala con <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>, que la guarda otra vez como PNG, o cambiala de formato con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a>, que sí ofrece PNG.',
+    'b16': 'Cómo elegir la calidad',
+    'b17': 'El deslizador «Calidad» va de 10 a 95 y viene en 70. No hay un valor mágico. Probá 70, mirá el resultado ampliado y, si aparecen manchas alrededor de letras o bordes, subí. Si el archivo sigue pesado y no notás diferencia, bajá. Cada intento muestra el peso, así que en pocas pasadas encontrás el punto. La guía de <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> sugiere entre 75 y 90 para fotos que vas a enviar o publicar: si 70 no alcanza, probá ahí.',
+    'b18': 'Si la comprimida pesa más, el original ya venía muy comprimido. La herramienta lo marca con «+N% más pesado» y un aviso: bajá la calidad, probá WebP o quedate con el original.',
+    'b19': 'Una captura o un logo se degrada antes que una foto, porque los bordes nítidos y las letras muestran la pérdida. Con ese tipo de imagen no bajes mucho la calidad.',
+    'b20': 'Preguntas frecuentes',
+    'b21': '<strong>¿Comprimir cambia las medidas?</strong> No. Las medidas se mantienen y solo cambia la compresión. Para cambiarlas está <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>.',
+    'b22': '<strong>¿Se borran los datos de la foto, como la ubicación?</strong> La herramienta vuelve a dibujar la imagen y la guarda de nuevo, así que el archivo nuevo no trae los datos del original, como la fecha, el modelo de la cámara o la ubicación. Eso pasa al guardar la imagen en el navegador, no por un paso que la herramienta anuncie. Si querés quitarlos a propósito, usá <a href="../herramientas/quitar-metadatos-imagen.html">Quitar metadatos EXIF de una foto</a>.',
+    'b23': '<strong>¿Puedo comprimir varias juntas?</strong> No. Se procesa una imagen por vez. Si soltás varias en la zona de carga, la herramienta toma la primera y muestra el aviso «Elegiste varias imágenes: solo se usa la primera».',
+    'b24': '<strong>¿Se puede volver atrás?</strong> No sobre el archivo nuevo, porque la compresión descarta detalle. El original no se toca, así que guardalo.',
+    'b25': 'Resumen',
+    'b26': 'Para bajar el peso sin que se note: primero achicá las medidas al tamaño en que se va a ver la imagen, después comprimí con una calidad cercana a 70 y revisá el resultado. JPG para fotos de uso general, WebP si buscás el menor peso o la transparencia, y PNG para logos y capturas, que la compresión no entrega.',
+    'rel1': 'Comprimir imagen',
+    'rel2': 'Redimensionar imagen',
+    'rel3': 'Convertir formato de imagen'
+  },
+  en: {
+    'titulo-pagina': 'How to compress an image for the web or email without it looking bad — Mini Cookies',
+    'meta-descripcion': 'How to cut a photo’s file size: shrink the dimensions first and compress after, what quality to use and when JPG or WebP makes sense.',
+    'h1': 'How to compress an image for the web or email without it looking bad',
+    'b1': 'A phone photo weighs several megabytes. That is too much for an email with a size limit, a form with a maximum, or a page that has to load fast. Making it lighter is easy. The hard part is keeping the image from going blurry or blotchy, and for that it helps to know what makes it heavy.',
+    'b2': 'What an image’s weight depends on',
+    'b3': 'These are two things you can adjust separately:',
+    'b4-1': 'The dimensions in pixels. A photo 4000 pixels wide has far more data than one 1200 wide. On a screen or in an email, those extra pixels can’t be seen: they just add weight.',
+    'b4-2': 'Compression and format. JPG and WebP discard detail the eye barely notices. The more they discard, the lighter the file and the more the loss shows. PNG discards nothing, which is why a photo saved as PNG is usually much heavier.',
+    'b5': 'Dimensions first, compression after',
+    'b6': 'Shrinking the dimensions cuts the weight far more than raising the compression, and with almost no visible cost if the image will be viewed on a screen.',
+    'b7-1': 'Open <a href="../herramientas/redimensionar-imagen.html">Resize an image</a>, drag the photo in and type the “Width (px)” you need. “Keep aspect ratio” is ticked, so the height is calculated for you.',
+    'b7-2': 'Leave “Rescaling quality” on “Smooth (recommended)”, which is the default, and tap “Resize”. Download the result.',
+    'b7-3': 'Open <a href="../herramientas/comprimir-imagen.html">Compress an image</a> and load the image you already shrank. Leave “Quality” at 70 and choose the “Output format”.',
+    'b7-4': 'Tap “Compress image”, look at “Original size”, “Compressed size” and “Saved”, and download the file.',
+    'b8': 'If you compress first, the tool works on more pixels than it needs. One caveat: when resizing, a JPG or a WebP is saved again at a fixed 92%, so it has already been through one compression. A PNG stays a PNG, without loss, and the only lossy compression is left for the next step.',
+    'b9': 'Which dimensions to choose',
+    'b10': 'It depends on where the image will be seen. These figures are approximate, not rules: check the result before you rely on them.',
+    'b11-c1': 'What for',
+    'b11-c2': 'Approximate width',
+    'b11-f1c1': 'Attaching to an email or a message',
+    'b11-f1c2': '1000 to 1600 px',
+    'b11-f2c1': 'Main photo on a web page',
+    'b11-f2c2': '1200 to 1920 px',
+    'b11-f3c1': 'Thumbnails or small images on a page',
+    'b11-f3c2': '400 to 800 px',
+    'b12': 'For printing, don’t shrink too much: a printed image needs far more pixels than one viewed on a screen. In that case, compress with high quality or keep the original.',
+    'b13': 'JPG, PNG or WebP',
+    'b14': '<a href="../herramientas/comprimir-imagen.html">Compress an image</a> accepts JPG, PNG and WebP, but it only outputs JPG or WebP. That decides what to choose.',
+    'b15-1': 'JPG is for photos that have to open anywhere. It doesn’t support transparency: a transparent background comes out white.',
+    'b15-2': 'WebP is lighter at the same quality and keeps transparency. Modern browsers open it; an older program or email app may not, and then JPG is the safer choice.',
+    'b15-3': 'PNG is for logos, screenshots with text and graphics with sharp edges. Compressing doesn’t output it. If your image is like that, shrink it with <a href="../herramientas/redimensionar-imagen.html">Resize an image</a>, which saves it as PNG again, or change its format with <a href="../herramientas/convertir-formato-imagen.html">Convert image format</a>, which does offer PNG.',
+    'b16': 'Choosing the quality',
+    'b17': 'The “Quality” slider goes from 10 to 95 and starts at 70. There is no magic value. Try 70, zoom in on the result and, if you see blotches around letters or edges, go up. If the file is still heavy and you see no difference, go down. Each try shows the weight, so a few attempts are enough. The guide for <a href="../herramientas/convertir-formato-imagen.html">Convert image format</a> suggests 75 to 90 for photos you are going to send or publish: if 70 isn’t enough, try that range.',
+    'b18': 'If the compressed file is heavier, the original was already very compressed. The tool flags it with “+N% heavier” and a warning: lower the quality, try WebP or keep the original.',
+    'b19': 'A screenshot or a logo degrades before a photo does, because sharp edges and letters show the loss. With that kind of image, don’t lower the quality much.',
+    'b20': 'Frequently asked questions',
+    'b21': '<strong>Does compressing change the dimensions?</strong> No. The dimensions stay the same and only the compression changes. To change them, use <a href="../herramientas/redimensionar-imagen.html">Resize an image</a>.',
+    'b22': '<strong>Are the photo’s details removed, such as the location?</strong> The tool draws the image again and saves it, so the new file doesn’t carry the original’s data, such as the date, the camera model or the location. That happens when the browser saves the image, not through a step the tool announces. To remove that data on purpose, use <a href="../herramientas/quitar-metadatos-imagen.html">Remove EXIF metadata from a photo</a>.',
+    'b23': '<strong>Can I compress several at once?</strong> No. One image at a time. If you drop several into the upload area, the tool takes the first and shows the notice “You chose several images: only the first one is used”.',
+    'b24': '<strong>Can I go back?</strong> Not on the new file, because compression discards detail. The original isn’t touched, so keep it.',
+    'b25': 'Summary',
+    'b26': 'To cut the weight without it showing: first shrink the dimensions to the size at which the image will be viewed, then compress at a quality near 70 and check the result. JPG for general-purpose photos, WebP if you want the smallest weight or transparency, and PNG for logos and screenshots, which compression doesn’t output.',
+    'rel1': 'Compress an image',
+    'rel2': 'Resize an image',
+    'rel3': 'Convert image format'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo comprimir una imagen para la web o el correo sin que se vea mal</h1>
+    <p data-i18n-html="b1">Una foto de celular pesa varios megas. Ese peso no entra en un correo con límite, en un formulario que pide un máximo ni en una página que tiene que cargar rápido. Bajarlo es fácil. Lo difícil es que la imagen no quede borrosa o llena de manchas, y para eso conviene saber qué la hace pesar.</p>
+    <h2 data-i18n="b2">De qué depende el peso de una imagen</h2>
+    <p data-i18n-html="b3">Son dos cosas que se pueden tocar por separado:</p>
+    <ul>
+      <li data-i18n-html="b4-1">Las medidas en píxeles. Una foto de 4000 píxeles de ancho tiene muchos más datos que una de 1200. En una pantalla o en un correo, esos píxeles de más no se aprecian: solo pesan.</li>
+      <li data-i18n-html="b4-2">La compresión y el formato. JPG y WebP descartan detalle que el ojo casi no nota. Cuanto más descartan, menos pesa el archivo y más se ve la pérdida. PNG no descarta nada, por eso una foto en PNG suele pesar bastante más.</li>
+    </ul>
+    <h2 data-i18n="b5">Primero las medidas, después la compresión</h2>
+    <p data-i18n-html="b6">Achicar las medidas baja el peso mucho más que subir la compresión, y casi sin costo visible si la imagen se va a ver en pantalla.</p>
+    <ol>
+      <li data-i18n-html="b7-1">Abrí <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>, arrastrá la foto y escribí el «Ancho (px)» que necesitás. «Mantener proporción» viene marcada, así que el alto se calcula solo.</li>
+      <li data-i18n-html="b7-2">Dejá «Calidad de reescalado» en «Suave (recomendado)», que es la opción por defecto, y pulsá «Redimensionar». Bajá el resultado.</li>
+      <li data-i18n-html="b7-3">Abrí <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> y cargá la imagen ya achicada. Dejá «Calidad» en 70 y elegí el «Formato de salida».</li>
+      <li data-i18n-html="b7-4">Pulsá «Comprimir imagen», mirá «Peso original», «Peso comprimido» y «Reducción», y bajá el archivo.</li>
+    </ol>
+    <p data-i18n-html="b8">Si comprimís primero, la herramienta trabaja sobre más píxeles de los que hacen falta. Un matiz: al redimensionar, un JPG o un WebP se vuelve a guardar con calidad fija de 92 %, así que ya pasó por una compresión. Un PNG sigue siendo PNG, sin pérdida, y la única compresión con pérdida queda para el paso siguiente.</p>
+    <h2 data-i18n="b9">Qué medidas elegir</h2>
+    <p data-i18n-html="b10">Depende de dónde se va a ver. Estas cifras son aproximadas, no reglas: mirá el resultado antes de fijarte en ellas.</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b11-c1">Para qué</th><th data-i18n-html="b11-c2">Ancho aproximado</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b11-f1c1">Adjuntar a un correo o a un mensaje</td><td data-i18n-html="b11-f1c2">1000 a 1600 px</td></tr>
+        <tr><td data-i18n-html="b11-f2c1">Foto principal de una página web</td><td data-i18n-html="b11-f2c2">1200 a 1920 px</td></tr>
+        <tr><td data-i18n-html="b11-f3c1">Miniaturas o imágenes chicas de una página</td><td data-i18n-html="b11-f3c2">400 a 800 px</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b12">Para imprimir no conviene achicar mucho: una imagen impresa necesita muchos más píxeles que una que se ve en pantalla. En ese caso, comprimí con calidad alta o quedate con el original.</p>
+    <h2 data-i18n="b13">JPG, PNG o WebP</h2>
+    <p data-i18n-html="b14"><a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> lee JPG, PNG y WebP, pero solo entrega JPG o WebP. Eso decide qué elegir.</p>
+    <ul>
+      <li data-i18n-html="b15-1">JPG sirve para fotos que tienen que abrirse en cualquier lado. No admite transparencia: un fondo transparente sale blanco.</li>
+      <li data-i18n-html="b15-2">WebP pesa menos a igual calidad y conserva la transparencia. Los navegadores modernos lo abren; un programa o un correo antiguo tal vez no, y entonces conviene JPG.</li>
+      <li data-i18n-html="b15-3">PNG sirve para logos, capturas con texto y gráficos de bordes nítidos. Comprimir no lo entrega. Si tu imagen es así, achicala con <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>, que la guarda otra vez como PNG, o cambiala de formato con <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a>, que sí ofrece PNG.</li>
+    </ul>
+    <h2 data-i18n="b16">Cómo elegir la calidad</h2>
+    <p data-i18n-html="b17">El deslizador «Calidad» va de 10 a 95 y viene en 70. No hay un valor mágico. Probá 70, mirá el resultado ampliado y, si aparecen manchas alrededor de letras o bordes, subí. Si el archivo sigue pesado y no notás diferencia, bajá. Cada intento muestra el peso, así que en pocas pasadas encontrás el punto. La guía de <a href="../herramientas/convertir-formato-imagen.html">Convertir formato de imagen</a> sugiere entre 75 y 90 para fotos que vas a enviar o publicar: si 70 no alcanza, probá ahí.</p>
+    <p data-i18n-html="b18">Si la comprimida pesa más, el original ya venía muy comprimido. La herramienta lo marca con «+N% más pesado» y un aviso: bajá la calidad, probá WebP o quedate con el original.</p>
+    <p data-i18n-html="b19">Una captura o un logo se degrada antes que una foto, porque los bordes nítidos y las letras muestran la pérdida. Con ese tipo de imagen no bajes mucho la calidad.</p>
+    <h2 data-i18n="b20">Preguntas frecuentes</h2>
+    <p data-i18n-html="b21"><strong>¿Comprimir cambia las medidas?</strong> No. Las medidas se mantienen y solo cambia la compresión. Para cambiarlas está <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>.</p>
+    <p data-i18n-html="b22"><strong>¿Se borran los datos de la foto, como la ubicación?</strong> La herramienta vuelve a dibujar la imagen y la guarda de nuevo, así que el archivo nuevo no trae los datos del original, como la fecha, el modelo de la cámara o la ubicación. Eso pasa al guardar la imagen en el navegador, no por un paso que la herramienta anuncie. Si querés quitarlos a propósito, usá <a href="../herramientas/quitar-metadatos-imagen.html">Quitar metadatos EXIF de una foto</a>.</p>
+    <p data-i18n-html="b23"><strong>¿Puedo comprimir varias juntas?</strong> No. Se procesa una imagen por vez. Si soltás varias en la zona de carga, la herramienta toma la primera y muestra el aviso «Elegiste varias imágenes: solo se usa la primera».</p>
+    <p data-i18n-html="b24"><strong>¿Se puede volver atrás?</strong> No sobre el archivo nuevo, porque la compresión descarta detalle. El original no se toca, así que guardalo.</p>
+    <h2 data-i18n="b25">Resumen</h2>
+    <p data-i18n-html="b26">Para bajar el peso sin que se note: primero achicá las medidas al tamaño en que se va a ver la imagen, después comprimí con una calidad cercana a 70 y revisá el resultado. JPG para fotos de uso general, WebP si buscás el menor peso o la transparencia, y PNG para logos y capturas, que la compresión no entrega.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/comprimir-imagen.html" data-i18n="rel1">Comprimir imagen</a></li>
+      <li><a href="../herramientas/redimensionar-imagen.html" data-i18n="rel2">Redimensionar imagen</a></li>
+      <li><a href="../herramientas/convertir-formato-imagen.html" data-i18n="rel3">Convertir formato de imagen</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

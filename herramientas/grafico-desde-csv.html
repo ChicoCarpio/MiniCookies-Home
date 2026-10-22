@@ -29,7 +29,7 @@ window.i18nPagina = {
     'error-grafico': 'No se pudo dibujar el gráfico',
     'guia-titulo': 'Cómo crear un gráfico desde Excel o CSV',
     'guia-intro': 'Si tenés una tabla con datos en una hoja de cálculo y necesitás un gráfico rápido, esta herramienta lo arma sin abrir Excel. Cargás el archivo, elegís qué columna son las etiquetas y cuál los valores, y obtenés un gráfico de barras, líneas o torta que podés descargar como imagen PNG.',
-    'guia-paso-1': 'Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv).',
+    'guia-paso-1': 'Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .xml, .ods o .csv).',
     'guia-paso-2': 'En «Columna de etiquetas (eje X)» elegí la columna con los nombres (por ejemplo meses o productos).',
     'guia-paso-3': 'En «Columna de valores» elegí la columna numérica.',
     'guia-paso-4': 'Elegí el «Tipo de gráfico»: Barras, Líneas o Torta, y tocá «Generar gráfico».',
@@ -46,7 +46,7 @@ window.i18nPagina = {
     'guia-p3': '¿El PNG tiene fondo transparente?',
     'guia-r3': 'No, sale con fondo blanco.',
     'guia-p4': '¿Se leen los gráficos o fórmulas del archivo?',
-    'guia-r4': 'Se leen los valores de las celdas; la herramienta dibuja un gráfico nuevo.',
+    'guia-r4': 'No. Los gráficos que ya tenga el archivo no se leen: la herramienta toma el valor de cada celda y dibuja uno nuevo.',
   },
   en: {
     'titulo-pagina': 'Generate a Chart from Excel or CSV Free — Mini Cookies',
@@ -66,7 +66,7 @@ window.i18nPagina = {
     'error-grafico': 'Couldn’t draw the chart',
     'guia-titulo': 'How to create a chart from Excel or CSV',
     'guia-intro': 'If you have a table of data in a spreadsheet and need a quick chart, this tool builds it without opening Excel. You load the file, choose which column holds the labels and which the values, and get a bar, line or pie chart that you can download as a PNG image.',
-    'guia-paso-1': 'Drag your file to the upload area or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .ods or .csv).',
+    'guia-paso-1': 'Drag your file to the upload area or click to choose it (.xlsx, .xlsm, .xlsb, .xls, .xml, .ods or .csv).',
     'guia-paso-2': 'In “Labels column (X axis)” choose the column with the names (for example months or products).',
     'guia-paso-3': 'In “Values column” choose the numeric column.',
     'guia-paso-4': 'Choose the “Chart type”: Bar, Line or Pie, and tap “Generate chart”.',
@@ -83,7 +83,7 @@ window.i18nPagina = {
     'guia-p3': 'Does the PNG have a transparent background?',
     'guia-r3': 'No, it comes out with a white background.',
     'guia-p4': 'Are the charts or formulas in the file read?',
-    'guia-r4': 'The cell values are read; the tool draws a new chart.',
+    'guia-r4': 'No. Charts already in the file are not read: the tool takes the value of each cell and draws a new one.',
   }
 };
 </script>
@@ -146,7 +146,7 @@ window.i18nPagina = {
     <p data-i18n="guia-intro">Si tenés una tabla con datos en una hoja de cálculo y necesitás un gráfico rápido, esta herramienta lo arma sin abrir Excel. Cargás el archivo, elegís qué columna son las etiquetas y cuál los valores, y obtenés un gráfico de barras, líneas o torta que podés descargar como imagen PNG.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
-      <li data-i18n="guia-paso-1">Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .ods o .csv).</li>
+      <li data-i18n="guia-paso-1">Arrastrá tu archivo a la zona de carga o hacé clic para elegirlo (.xlsx, .xlsm, .xlsb, .xls, .xml, .ods o .csv).</li>
       <li data-i18n="guia-paso-2">En «Columna de etiquetas (eje X)» elegí la columna con los nombres (por ejemplo meses o productos).</li>
       <li data-i18n="guia-paso-3">En «Columna de valores» elegí la columna numérica.</li>
       <li data-i18n="guia-paso-4">Elegí el «Tipo de gráfico»: Barras, Líneas o Torta, y tocá «Generar gráfico».</li>
@@ -175,7 +175,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Se leen los gráficos o fórmulas del archivo?</summary>
-      <p data-i18n="guia-r4">Se leen los valores de las celdas; la herramienta dibuja un gráfico nuevo.</p>
+      <p data-i18n="guia-r4">No. Los gráficos que ya tenga el archivo no se leen: la herramienta toma el valor de cada celda y dibuja uno nuevo.</p>
     </details>
   </section>
 </main>

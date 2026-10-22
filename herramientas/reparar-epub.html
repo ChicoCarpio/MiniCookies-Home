@@ -39,16 +39,16 @@ window.i18nPagina = {
     'guia-intro': 'Cuando un libro electrónico (.epub) no abre, se queda en blanco o tu lector se queja de que está dañado, esta herramienta intenta recuperarlo. Prueba tres niveles, del más suave al más invasivo: primero arregla la estructura del libro sin tocar su contenido; si no alcanza, lo rearma a partir de su texto e imágenes; y como último recurso busca directamente los capítulos dentro del archivo.',
     'guia-paso-1': 'Arrastrá tu archivo .epub a la zona de carga o hacé clic para elegirlo.',
     'guia-paso-2': 'Tocá «Reparar». Mientras trabaja el botón dice «Reparando...».',
-    'guia-paso-3': 'Leé el mensaje que aparece: indica con qué nivel se logró y qué se arregló.',
+    'guia-paso-3': 'Leé el mensaje que aparece: dice si la estructura estaba bien, si se reparó (y qué se arregló) o si el libro se rearmó a partir de su contenido.',
     'guia-paso-4': 'Tocá «Descargar EPUB reparado» para guardar libro-reparado.epub.',
     'guia-consejo-1': 'Si el mensaje dice que la estructura estaba bien, el libro se guarda de nuevo en el formato correcto sin cambiar contenido ni diseño; en ese caso el problema puede estar en tu lector y no en el archivo.',
-    'guia-consejo-2': 'Cuando la reparación es de estructura (nivel 1), el libro conserva su diseño, fuentes y portada. En los otros niveles se conservan el texto y las imágenes, pero se pierden los estilos, las fuentes y la portada.',
+    'guia-consejo-2': 'Cuando la reparación es de estructura (nivel 1), el libro conserva su diseño, fuentes y portada. En los otros niveles se conservan el texto y las imágenes, pero se pierden los estilos y las fuentes del libro original.',
     'guia-consejo-3': 'En un rescate pesado puede perderse la tabla de contenidos o el orden exacto de algún capítulo; revisalo en tu lector.',
     'guia-consejo-4': 'No funciona con libros con DRM (candado editorial).',
     'guia-p1': '¿Qué arreglos hace en el primer nivel?',
-    'guia-r1': 'Corrige la ruta al índice del paquete, quita archivos listados que no existen y capítulos del orden de lectura que faltan, y repara un índice ilegible.',
+    'guia-r1': 'Corrige la ruta al índice del paquete, quita de la lista los archivos y capítulos que faltan, y saca del índice de contenidos las entradas que apuntan a archivos que no están.',
     'guia-p2': '¿Y si no se puede reparar?',
-    'guia-r2': 'Aparece un aviso: por ejemplo, que no se encontró ningún capítulo legible o que los archivos no tenían texto.',
+    'guia-r2': 'Aparece el aviso «No se pudo reparar el EPUB» con el motivo: por ejemplo, que no se encontró ningún capítulo legible o que los archivos no tenían texto.',
     'guia-p3': '¿Se modifica mi archivo original?',
     'guia-r3': 'No, se descarga uno nuevo.',
     'guia-p4': '¿Sirve para convertir otros formatos?',
@@ -82,16 +82,16 @@ window.i18nPagina = {
     'guia-intro': 'When an e-book (.epub) won’t open, stays blank or your reader complains that it is damaged, this tool tries to recover it. It tries three levels, from the gentlest to the most invasive: first it fixes the book’s structure without touching its content; if that isn’t enough, it rebuilds it from its text and images; and as a last resort it looks for the chapters directly inside the file.',
     'guia-paso-1': 'Drag your .epub file to the upload area or click to choose it.',
     'guia-paso-2': 'Tap “Repair”. While it works the button says “Repairing...”.',
-    'guia-paso-3': 'Read the message that appears: it says which level succeeded and what was fixed.',
+    'guia-paso-3': 'Read the message that appears: it says whether the structure was fine, whether it was repaired (and what was fixed), or whether the book was rebuilt from its content.',
     'guia-paso-4': 'Tap “Download repaired EPUB” to save libro-reparado.epub.',
     'guia-consejo-1': 'If the message says the structure was fine, the book is saved again in the correct format without changing its content or design; in that case the problem may be in your reader and not in the file.',
-    'guia-consejo-2': 'When the repair is a structure fix (level 1), the book keeps its design, fonts and cover. At the other levels the text and images are kept, but the styles, fonts and cover are lost.',
+    'guia-consejo-2': 'When the repair is a structure fix (level 1), the book keeps its design, fonts and cover. At the other levels the text and images are kept, but the styles and fonts of the original book are lost.',
     'guia-consejo-3': 'In a heavy rescue, the table of contents or the exact order of some chapter may be lost; check it in your reader.',
     'guia-consejo-4': 'It doesn’t work with DRM-protected books (publisher lock).',
     'guia-p1': 'What fixes does it make at the first level?',
-    'guia-r1': 'It corrects the path to the package index, removes listed files that don’t exist and reading-order chapters that are missing, and repairs an unreadable index.',
+    'guia-r1': 'It corrects the path to the package index, removes from the list the files and chapters that are missing, and takes out of the table of contents the entries that point to files that are not there.',
     'guia-p2': 'What if it can’t be repaired?',
-    'guia-r2': 'A notice appears: for example, that no readable chapter was found or that the files had no text.',
+    'guia-r2': 'The alert “Couldn’t repair the EPUB” appears with the reason, for example that no readable chapter was found or that the files had no text.',
     'guia-p3': 'Is my original file modified?',
     'guia-r3': 'No, a new one is downloaded.',
     'guia-p4': 'Can it convert other formats?',
@@ -151,24 +151,24 @@ window.i18nPagina = {
     <ol>
       <li data-i18n="guia-paso-1">Arrastrá tu archivo .epub a la zona de carga o hacé clic para elegirlo.</li>
       <li data-i18n="guia-paso-2">Tocá «Reparar». Mientras trabaja el botón dice «Reparando...».</li>
-      <li data-i18n="guia-paso-3">Leé el mensaje que aparece: indica con qué nivel se logró y qué se arregló.</li>
+      <li data-i18n="guia-paso-3">Leé el mensaje que aparece: dice si la estructura estaba bien, si se reparó (y qué se arregló) o si el libro se rearmó a partir de su contenido.</li>
       <li data-i18n="guia-paso-4">Tocá «Descargar EPUB reparado» para guardar libro-reparado.epub.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Si el mensaje dice que la estructura estaba bien, el libro se guarda de nuevo en el formato correcto sin cambiar contenido ni diseño; en ese caso el problema puede estar en tu lector y no en el archivo.</li>
-      <li data-i18n="guia-consejo-2">Cuando la reparación es de estructura (nivel 1), el libro conserva su diseño, fuentes y portada. En los otros niveles se conservan el texto y las imágenes, pero se pierden los estilos, las fuentes y la portada.</li>
+      <li data-i18n="guia-consejo-2">Cuando la reparación es de estructura (nivel 1), el libro conserva su diseño, fuentes y portada. En los otros niveles se conservan el texto y las imágenes, pero se pierden los estilos y las fuentes del libro original.</li>
       <li data-i18n="guia-consejo-3">En un rescate pesado puede perderse la tabla de contenidos o el orden exacto de algún capítulo; revisalo en tu lector.</li>
       <li data-i18n="guia-consejo-4">No funciona con libros con DRM (candado editorial).</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Qué arreglos hace en el primer nivel?</summary>
-      <p data-i18n="guia-r1">Corrige la ruta al índice del paquete, quita archivos listados que no existen y capítulos del orden de lectura que faltan, y repara un índice ilegible.</p>
+      <p data-i18n="guia-r1">Corrige la ruta al índice del paquete, quita de la lista los archivos y capítulos que faltan, y saca del índice de contenidos las entradas que apuntan a archivos que no están.</p>
     </details>
     <details>
       <summary data-i18n="guia-p2">¿Y si no se puede reparar?</summary>
-      <p data-i18n="guia-r2">Aparece un aviso: por ejemplo, que no se encontró ningún capítulo legible o que los archivos no tenían texto.</p>
+      <p data-i18n="guia-r2">Aparece el aviso «No se pudo reparar el EPUB» con el motivo: por ejemplo, que no se encontró ningún capítulo legible o que los archivos no tenían texto.</p>
     </details>
     <details>
       <summary data-i18n="guia-p3">¿Se modifica mi archivo original?</summary>
