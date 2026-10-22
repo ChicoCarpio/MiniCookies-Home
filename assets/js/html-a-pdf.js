@@ -17,7 +17,7 @@
 //  - Lo que esas fuentes no tienen (griego, cirílico...) va con Noto Sans
 //    completa. No con subset: fontkit no sabe recortar una fuente variable y
 //    las letras salían como cuadrados vacíos.
-//  - El contenido puede ser más alto que una página (docx-preview no corta
+//  - El contenido puede ser más alto que una página (el maquetador de Word no corta
 //    páginas; un EPUB es un solo rollo): se pagina buscando cortes que no
 //    partan ninguna línea ni imagen.
 //

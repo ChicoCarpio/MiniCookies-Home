@@ -66,7 +66,7 @@
   // Un .docx con sus imágenes en formato común: cada EMF (u otro que el
   // navegador no muestra) de word/media/ pasa a PNG, y se actualizan las
   // relaciones (*.rels) y [Content_Types].xml. Lo que se dibuje después
-  // (docx-preview, docx-lector) ve un Word normal. Requiere ZipPropio.
+  // (docx-maquetador, docx-lector) ve un Word normal. Requiere ZipPropio.
   async function docxConImagenesComunes(entrada) {
     const zip = await ZipPropio.loadAsync(entrada);
     const cambios = new Map(); // 'media/image1.emf' → 'media/image1.png'
