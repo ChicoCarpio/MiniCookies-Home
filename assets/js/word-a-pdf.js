@@ -19,6 +19,11 @@
     const estilos = document.createElement('div');
     // Las tablas pegadas de Excel (EMF) pasan antes a PNG: docx-preview no las dibuja.
     const docx = await ImagenesOffice.docxConImagenesComunes(await archivo.arrayBuffer());
+    // Con el maquetador propio cargado (docx-maquetador.js) se usa ese; si no, docx-preview.
+    if (window.DocxMaquetador) {
+      const { html } = await DocxMaquetador.aHtml(docx);
+      return { nombre: archivo.name.replace(/\.docx$/i, ''), html: sanitizarHtml(html) };
+    }
     // useBase64URL: por defecto las imágenes salen como blob:, que el
     // sanitizador descarta (y dejaba los recuadros vacíos); como data:image pasan.
     await docxPreview.renderAsync(docx, cuerpo, estilos, { inWrapper: true, useBase64URL: true });

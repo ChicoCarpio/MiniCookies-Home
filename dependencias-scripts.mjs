@@ -6,6 +6,7 @@ import { join } from 'node:path';
 const NECESITA = {
   'docx-base.js': ['zip-propio.js', 'xml-ligero.js'],
   'docx-estilos.js': ['docx-base.js', 'zip-propio.js', 'xml-ligero.js'],
+  'docx-maquetador.js': ['docx-base.js', 'docx-estilos.js', 'zip-propio.js', 'xml-ligero.js'],
   'docx-lector.js': ['docx-base.js', 'zip-propio.js', 'xml-ligero.js'],
   'xlsx-paquete.js': ['zip-propio.js', 'xml-ligero.js', 'xml-editar.js'],
   'xlsx-modelo.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js'],
