@@ -60,11 +60,12 @@
     };
     // directorio
     const dir = leerCadena(u32(b, 0x30));
-    const entradas = [];
+    // el nombre ocupa a lo sumo los 64 bytes de su campo: un largo mayor (archivo hostil o mal escrito) leía los campos siguientes como texto
+    const entradas = [], utf16 = new TextDecoder('utf-16le');
     for (let p = 0; p + 128 <= dir.length; p += 128) {
-      const nc = u16(dir, p + 64);
+      const nc = Math.min(u16(dir, p + 64), 64);
       if (!dir[p + 66]) continue;
-      entradas.push({ id: p / 128, nombre: new TextDecoder('utf-16le').decode(dir.subarray(p, p + Math.max(0, nc - 2))), tipo: dir[p + 66], inicio: u32(dir, p + 116), tam: u32(dir, p + 120),
+      entradas.push({ id: p / 128, nombre: utf16.decode(dir.subarray(p, p + Math.max(0, nc - 2))).split('\0')[0], tipo: dir[p + 66], inicio: u32(dir, p + 116), tam: u32(dir, p + 120),
         izq: u32(dir, p + 68), der: u32(dir, p + 72), hijo: u32(dir, p + 76) });
     }
     const raiz = entradas.find((e) => e.tipo === 5);
@@ -94,9 +95,12 @@
   const NOMBRE_PROHIBIDO = /[\/\\:!]/;
 
   // Orden de los hermanos en el directorio ([MS-CFB] 2.6.4): primero el nombre más corto; a igual largo, carácter por carácter en mayúsculas.
+  // La norma pasa a mayúsculas cada unidad UTF-16 por separado (conversión simple) y no toca los sustitutos: toUpperCase() sobre el texto entero
+  // no sirve, porque 'ß' pasa a 'SS' (cambia el largo y el orden) y un par sustituto sí cambia. Si la mayúscula de una unidad no es una sola, queda igual.
+  const mayusculas = (s) => { let r = ''; for (let i = 0; i < s.length; i++) { const c = s[i], m = c.toUpperCase(); r += m.length === 1 ? m : c; } return r; };
   function compararNombres(a, b) {
     if (a.length !== b.length) return a.length - b.length;
-    const A = a.toUpperCase(), B = b.toUpperCase();
+    const A = mayusculas(a), B = mayusculas(b);
     return A < B ? -1 : A > B ? 1 : 0;
   }
 
@@ -108,7 +112,7 @@
       const vistos = new Set();
       for (const it of items) {
         if (!it || typeof it.nombre !== 'string' || !it.nombre || it.nombre.length > 31 || NOMBRE_PROHIBIDO.test(it.nombre)) throw new Error('CFB: nombre de entrada no válido: ' + (it && it.nombre));
-        const clave = it.nombre.toUpperCase();
+        const clave = mayusculas(it.nombre);
         if (vistos.has(clave)) throw new Error('CFB: nombre repetido: ' + it.nombre);
         vistos.add(clave);
         const n = it.hijos ? { nombre: it.nombre, tipo: 1, hijos: [] } : { nombre: it.nombre, tipo: 2, bytes: it.bytes instanceof Uint8Array ? it.bytes : new Uint8Array(it.bytes || 0) };
