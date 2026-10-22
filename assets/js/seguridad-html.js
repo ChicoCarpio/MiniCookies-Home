@@ -1,6 +1,6 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Limpieza de HTML que viene de un archivo del usuario (capítulos de un EPUB,
-// Markdown convertido con marked, HTML de mammoth) antes de meterlo en la
+// Markdown convertido con markdown-propio.js, HTML de mammoth) antes de meterlo en la
 // página con innerHTML. Sin esto, un archivo armado a propósito podía ejecutar
 // JavaScript en el sitio: un <script> insertado con innerHTML no corre, pero
 // un <img src=x onerror="..."> sí, incluso en un <div> que nunca se agrega a

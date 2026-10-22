@@ -267,9 +267,8 @@ Este es un ejemplo de **Markdown** con:
 </footer>
 
 <script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
-<script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
-<script src="../vendor/turndown/7.2.0/turndown.min.js"></script>
-<script src="../assets/js/turndown-tablas.js"></script>
+<script src="../assets/js/markdown-propio.js"></script>
+<script src="../assets/js/html-a-markdown.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -288,7 +287,7 @@ const entradaMarkdown = document.getElementById('entradaMarkdown');
 const vistaPreviaMd = document.getElementById('vistaPreviaMd');
 
 function actualizarVistaPreviaMd() {
-  vistaPreviaMd.innerHTML = sanitizarHtml(marked.parse(entradaMarkdown.value));
+  vistaPreviaMd.innerHTML = sanitizarHtml(MarkdownPropio.aHtml(entradaMarkdown.value));
 }
 entradaMarkdown.addEventListener('input', actualizarVistaPreviaMd);
 actualizarVistaPreviaMd();
@@ -296,7 +295,7 @@ actualizarVistaPreviaMd();
 // Un texto Markdown → un .docx. Lo usan el cuadro de archivos y el de escribir a mano.
 async function markdownAWord(textoMd, mensajeVacio) {
   const contenedor = document.createElement('div');
-  contenedor.innerHTML = sanitizarHtml(marked.parse(textoMd));
+  contenedor.innerHTML = sanitizarHtml(MarkdownPropio.aHtml(textoMd));
   const parrafos = await contenidoAParrafos(contenedor);
   if (parrafos.length === 0) throw new Error(mensajeVacio);
   const documento = new docx.Document({
@@ -400,7 +399,6 @@ const markdownResultado = document.getElementById('markdownResultado');
 const botonCopiarMd = document.getElementById('botonCopiarMd');
 const enlaceDescargaMd = document.getElementById('enlaceDescargaMd');
 
-const turndownService = agregarTablasMarkdown(new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' }));
 
 let docxsActuales = [];
 const resumenLote = document.getElementById('resumenLote');
@@ -445,7 +443,7 @@ async function convertirWordAMarkdown(archivo) {
   });
   return {
     nombre: base + '.md',
-    markdown: turndownService.turndown(resultadoMammoth.value),
+    markdown: HtmlAMarkdown.convertir(resultadoMammoth.value),
     imagenes,
     mensajes: resultadoMammoth.messages.length,
   };
