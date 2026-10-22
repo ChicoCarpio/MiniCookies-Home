@@ -177,7 +177,7 @@ window.i18nPagina = {
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/docx-lector.js"></script>
-<script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/escritor-docx.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
@@ -229,11 +229,8 @@ botonDividir.addEventListener('click', async () => {
       contenedor.innerHTML = capitulos[i].html;
       const parrafos = await contenidoAParrafos(contenedor);
 
-      const documento = new docx.Document({
-        numbering: NUMERACION_DOCX_CONFIG,
-        sections: [{ children: parrafos }],
-      });
-      const blob = await docx.Packer.toBlob(documento);
+      const documento = { numeraciones: NUMERACIONES_DOCX, hijos: parrafos };
+      const blob = await EscritorDocx.aBlob(documento);
 
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
       const nombreLimpio = capitulos[i].titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || t('nombre-seccion-defecto');

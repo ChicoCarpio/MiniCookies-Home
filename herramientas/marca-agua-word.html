@@ -190,7 +190,7 @@ window.i18nPagina = {
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/docx-lector.js"></script>
-<script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/escritor-docx.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -236,31 +236,22 @@ botonAplicar.addEventListener('click', async () => {
     contenedor.innerHTML = resultadoDocx.value;
     const parrafos = await contenidoAParrafos(contenedor);
 
-    const opciones = { numbering: NUMERACION_DOCX_CONFIG, sections: [{ children: parrafos }] };
+    const documento = { numeraciones: NUMERACIONES_DOCX, hijos: parrafos };
 
     if (textoEncabezado) {
-      opciones.sections[0].headers = {
-        default: new docx.Header({
-          children: [new docx.Paragraph({ alignment: docx.AlignmentType.CENTER, children: [new docx.TextRun(textoEncabezado)] })],
-        }),
-      };
+      documento.encabezado = [{ tipo: 'parrafo', alineacion: 'centro', hijos: [{ texto: textoEncabezado }] }];
     }
 
     if (textoPie || incluirNumeracion) {
       const runsPie = [];
-      if (textoPie) runsPie.push(new docx.TextRun(textoPie + (incluirNumeracion ? ' — ' : '')));
+      if (textoPie) runsPie.push({ texto: textoPie + (incluirNumeracion ? ' — ' : '') });
       if (incluirNumeracion) {
-        runsPie.push(new docx.TextRun({ children: [t('texto-pagina'), docx.PageNumber.CURRENT, t('texto-de'), docx.PageNumber.TOTAL_PAGES] }));
+        runsPie.push({ texto: t('texto-pagina') }, { campo: 'pagina' }, { texto: t('texto-de') }, { campo: 'paginas' });
       }
-      opciones.sections[0].footers = {
-        default: new docx.Footer({
-          children: [new docx.Paragraph({ alignment: docx.AlignmentType.CENTER, children: runsPie })],
-        }),
-      };
+      documento.pie = [{ tipo: 'parrafo', alineacion: 'centro', hijos: runsPie }];
     }
 
-    const documento = new docx.Document(opciones);
-    const blob = await docx.Packer.toBlob(documento);
+    const blob = await EscritorDocx.aBlob(documento);
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {
