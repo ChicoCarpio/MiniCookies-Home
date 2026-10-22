@@ -62,13 +62,13 @@ function textoComoHtml(nodo, raiz) {
   for (let actual = nodo.parentElement; actual && actual !== raiz; actual = actual.parentElement) {
     if (actual.tagName === 'PRE') return nodo.textContent;
   }
-  return raiz.tagName === 'PRE' ? nodo.textContent : nodo.textContent.replace(/[\t\r\n]+/g, ' ');
+  return raiz.tagName === 'PRE' ? nodo.textContent : nodo.textContent.replace(/[ \t\r\n\f]+/g, ' '); // sin tocar los espacios duros (U+00A0)
 }
 
 // omitirListas: en un <li>, las sublistas (<ul>/<ol> anidadas) se
 // convierten aparte, como párrafos de nivel siguiente; si no se omiten, su
 // texto quedaba pegado al del ítem padre.
-async function extraerRuns(elementoBloque, omitirListas) {
+async function extraerRuns(elementoBloque, omitirListas, nodos) {
   const runs = [];
   async function recorrer(nodo) {
     if (nodo.nodeType === Node.TEXT_NODE) {
@@ -93,7 +93,7 @@ async function extraerRuns(elementoBloque, omitirListas) {
       }
     }
   }
-  for (const hijo of elementoBloque.childNodes) {
+  for (const hijo of nodos || elementoBloque.childNodes) {
     await recorrer(hijo);
   }
   if (runs.length === 0) runs.push({ texto: '' });
@@ -141,27 +141,45 @@ async function convertirTablaADocx(tablaEl) {
   return { tipo: 'tabla', anchoPct: 100, filas };
 }
 
-// Recorre los hijos directos de "contenedor" (un <div contenteditable> o el <body>
-// de un HTML parseado) y devuelve un array de párrafos y tablas para EscritorDocx.
+// Un <div>, <p>, <section>, <blockquote>… que contiene listas, tablas, títulos u otros bloques no es un párrafo: se baja por él.
+// (El navegador envuelve así las listas de un <div contenteditable>: <div><ul>…</ul><div><ol>…</ol></div></div>.)
+// Solo se tiene por texto en línea lo que se sabe que lo es; cualquier otra etiqueta es un bloque.
+const EN_LINEA_DOCX = new Set(['A', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'SPAN', 'BR', 'IMG', 'CODE', 'SMALL', 'SUB', 'SUP', 'MARK', 'FONT', 'ABBR', 'CITE', 'Q', 'TT', 'DEL', 'INS', 'KBD', 'VAR', 'WBR']);
+const tieneBloques = (el) => [...el.children].some((h) => !EN_LINEA_DOCX.has(h.tagName));
+
+// Recorre los hijos de "contenedor" (un <div contenteditable> o el <body> de un HTML parseado)
+// y devuelve un array de párrafos y tablas para EscritorDocx. El texto suelto entre bloques
+// (la primera línea de un editor, sin envoltorio) forma un párrafo.
 async function contenidoAParrafos(contenedor) {
   const bloques = [];
-  for (const elemento of [...contenedor.children]) {
-    if (elemento.tagName === 'UL') {
+  let suelto = [];
+  const cerrarSuelto = async () => {
+    const hayContenido = suelto.some((n) => (n.nodeType === Node.TEXT_NODE ? n.textContent.trim() !== '' : n.tagName === 'BR' || n.tagName === 'IMG' || n.textContent.trim() !== ''));
+    if (hayContenido) bloques.push({ tipo: 'parrafo', hijos: await extraerRuns(contenedor, false, suelto) });
+    suelto = [];
+  };
+  for (const nodo of [...contenedor.childNodes]) {
+    if (nodo.nodeType !== Node.ELEMENT_NODE) { suelto.push(nodo); continue; }
+    const elemento = nodo;
+    const etiqueta = elemento.tagName;
+    if (EN_LINEA_DOCX.has(etiqueta)) { suelto.push(elemento); continue; } // texto en línea (<b>, <span>, <br>…): se agrupa
+    await cerrarSuelto();
+    if (etiqueta === 'UL') {
       bloques.push(...await convertirListaAParrafos(elemento, false));
-    } else if (elemento.tagName === 'OL') {
+    } else if (etiqueta === 'OL') {
       bloques.push(...await convertirListaAParrafos(elemento, true));
-    } else if (elemento.tagName === 'TABLE') {
+    } else if (etiqueta === 'TABLE') {
       const tabla = await convertirTablaADocx(elemento);
       if (tabla) bloques.push(tabla);
-    } else if (NIVELES_TITULO_DOCX[elemento.tagName]) {
-      bloques.push({ tipo: 'parrafo', titulo: NIVELES_TITULO_DOCX[elemento.tagName], hijos: await extraerRuns(elemento) });
-    } else if (elemento.tagName === 'IMG') {
-      const imageRun = await crearImageRunDesdeImg(elemento);
-      if (imageRun) bloques.push({ tipo: 'parrafo', hijos: [imageRun] });
+    } else if (NIVELES_TITULO_DOCX[etiqueta]) {
+      bloques.push({ tipo: 'parrafo', titulo: NIVELES_TITULO_DOCX[etiqueta], hijos: await extraerRuns(elemento) });
+    } else if (etiqueta !== 'PRE' && tieneBloques(elemento)) {
+      bloques.push(...await contenidoAParrafos(elemento));
     } else {
       bloques.push({ tipo: 'parrafo', hijos: await extraerRuns(elemento) });
     }
   }
+  await cerrarSuelto();
   return bloques;
 }
 
