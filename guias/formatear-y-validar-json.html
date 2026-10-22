@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo formatear y validar un JSON (y arreglar los errores típicos) — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo ordenar un JSON ilegible y encontrar qué falla: comas sobrantes, comillas simples, claves sin comillas y comentarios, con ejemplos.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo formatear y validar un JSON (y arreglar los errores típicos) — Mini Cookies',
+    'meta-descripcion': 'Cómo ordenar un JSON ilegible y encontrar qué falla: comas sobrantes, comillas simples, claves sin comillas y comentarios, con ejemplos.',
+    'h1': 'Cómo formatear y validar un JSON (y arreglar los errores típicos)',
+    'b1': 'Una API te responde con todo en una sola línea, o un archivo de configuración no carga y el programa solo dice que hay un error de sintaxis en algún lugar. Leer un JSON así a ojo no sirve. Con <a href="../herramientas/formateador-json.html">Formatear y validar JSON</a> lo ordenás en un clic, y el analizador te señala el lugar donde se rompió.',
+    'b2': 'Formatear o validar, paso a paso',
+    'b3-1': 'Pegá el JSON en la caja de arriba.',
+    'b3-2': 'Tocá «Formatear (indentado)» para verlo con sangría de 2 espacios, o «Minificar» para dejarlo en una sola línea, sin espacios ni saltos.',
+    'b3-3': 'Si es válido, aparece «JSON válido» y el resultado se muestra en la caja de abajo. Si no lo es, aparece el motivo del error.',
+    'b3-4': 'Para llevarlo a otro lado, usá «Copiar resultado» o «Descargar .json». El archivo se llama json-formateado, seguido de la fecha y la hora.',
+    'b4': 'Qué hace y qué no hace',
+    'b5': 'La sangría es siempre de 2 espacios, y no hay opción para cambiarla. El orden de las claves se conserva: lo único que cambia es el espaciado. La herramienta no arregla nada. Valida y te señala el problema, y la corrección la hacés vos en la caja de entrada. Solo acepta JSON estándar, así que los comentarios y las comillas simples se reportan como error, aunque algunos programas los toleren.',
+    'b6': 'La caja de abajo no se actualiza sola. Si cambiás el texto de la caja de entrada después de formatear, sigue mostrando la versión anterior hasta que tocás un botón de formato. Pero «Copiar resultado» y «Descargar .json» no usan esa versión: vuelven a formatear el texto actual con el último modo que usaste, indentado o minificado. Si el texto ya no es JSON válido, muestran otra vez el error y no copian ni descargan nada.',
+    'b7': 'Lo que el formateador cambia sin que lo notes, porque aplica las reglas de JavaScript al volver a escribir el JSON:',
+    'b8-1': 'Los enteros mayores que 9.007.199.254.740.991 pierden cifras al final: 12345678901234567890 vuelve como 12345678901234567000. Si el número es un identificador, conviene guardarlo como texto, entre comillas, si la aplicación lo acepta.',
+    'b8-2': 'Los números se escriben en su forma más corta: 1.0 sale como 1, y 1e3 sale como 1000.',
+    'b8-3': 'Los escapes como <code>é</code> se convierten en la letra: sale é.',
+    'b8-4': 'Si una clave aparece dos veces en el mismo objeto, queda solo el último valor.',
+    'b9': 'Cómo se ve un error',
+    'b10': 'Si el JSON no es válido, la caja de entrada se pone roja y debajo aparece el motivo. Cuando el navegador informa en qué posición falló, la herramienta agrega la línea y la columna, con el texto «marcado arriba, en el cuadro de texto», y deja seleccionado el carácter problemático en la caja de entrada. Corregís ahí y volvés a tocar el botón.',
+    'b11': 'El texto del motivo lo escribe el navegador, no Mini Cookies, así que puede venir en inglés y cambia de un navegador a otro. El carácter que se marca es donde el analizador notó el problema, y eso puede quedar un poco después del error real. Si lo marcado parece correcto, mirá justo antes.',
+    'b12': 'Los errores más comunes',
+    'b13': 'Estos cuatro son los que más aparecen cuando se escribe o se copia un JSON a mano.',
+    'b14': 'Una coma de más al final',
+    'b15': 'Es el número uno, sobre todo cuando copiás una lista, borrás su último elemento y dejás la coma.',
+    'b16': '<code>{\n  "name": "Ana",\n  "age": 30,\n}</code>',
+    'b17': 'JSON no admite una coma después del último elemento de un objeto o de una lista. El error suele señalar la llave de cierre, no la coma: con una versión reciente de Chrome o Edge, el mensaje dice algo como «Expected double-quoted property name in JSON at position 32 (line 4 column 1)». Basta con borrar la coma sobrante.',
+    'b18': 'Comillas simples en lugar de dobles',
+    'b19': 'JavaScript y Python aceptan comillas simples para el texto. JSON no: <code>{\'name\': \'Ana\'}</code> falla, y el texto y las claves van entre comillas dobles, como en <code>{"name": "Ana"}</code>.',
+    'b20': 'Claves sin comillas',
+    'b21': 'Es lo que queda al copiar un objeto desde código JavaScript. <code>{name: "Ana"}</code> falla, porque en JSON las claves también son texto y van entre comillas dobles.',
+    'b22': 'Comentarios',
+    'b23': 'JSON no tiene comentarios, ni <code>//</code> ni <code>/* */</code>. Aparecen en archivos de configuración de algunos editores y herramientas, que usan variantes más permisivas.',
+    'b24': '<code>{\n  // usuario principal\n  "name": "Ana"\n}</code>',
+    'b25': 'El validador los rechaza, así que hay que borrarlos. Si necesitás dejar una nota, guardala en una clave propia, como <code>"nota": "usuario principal"</code>, siempre que el programa que lee el archivo la acepte.',
+    'b26': 'Otros errores frecuentes',
+    'b27-1': 'Falta una coma entre dos elementos. El error aparece en el elemento que sigue.',
+    'b27-2': 'Una llave o un corchete sin cerrar, o cerrado con el signo que no corresponde. Contá las aperturas y los cierres.',
+    'b27-3': 'Valores que JSON no tiene: <code>undefined</code> y <code>NaN</code> no existen, y <code>True</code> o <code>False</code> con mayúscula tampoco. Solo valen <code>true</code>, <code>false</code> y <code>null</code>, en minúscula.',
+    'b27-4': 'Comillas dentro de un texto sin escapar, como <code>"dijo "hola""</code>. Dentro de un texto, la comilla se escribe <code>\\"</code>.',
+    'b27-5': 'Números con ceros a la izquierda, como <code>007</code>.',
+    'b28': 'Preguntas frecuentes',
+    'b29': '<strong>¿Cómo comparo dos versiones de un JSON?</strong> Formateá las dos con «Formatear (indentado)» y pegalas en <a href="../herramientas/comparador-texto.html">Comparar dos textos</a>. Así los cambios caen en sus propias líneas, y el comparador marca lo agregado en verde y lo quitado en rojo.',
+    'b30': '<strong>¿Cómo meto una imagen dentro de un JSON?</strong> Convertila con <a href="../herramientas/imagen-a-base64.html">Convertir imagen a Base64</a>: te devuelve el texto de la imagen con el prefijo data:, listo para pegar como valor entre comillas. Es un texto largo, así que conviene usar imágenes chicas.',
+    'b31': '<strong>¿Por qué el mensaje de error está en inglés?</strong> Porque lo genera el navegador al leer el texto. La línea y la columna sí aparecen en el idioma de la página.',
+    'b32': 'Resumen',
+    'b33': 'Para ordenar un JSON, pegalo y tocá «Formatear (indentado)»; para compactarlo, «Minificar». Si falla, mirá el carácter marcado o el anterior y buscá los errores de siempre: coma sobrante, comillas simples, claves sin comillas y comentarios. Si el JSON tiene números muy grandes, revisalos después de formatear, porque el formateador los cambia.',
+    'rel1': 'Formatear y validar JSON',
+    'rel2': 'Comparar dos textos',
+    'rel3': 'Convertir imagen a Base64'
+  },
+  en: {
+    'titulo-pagina': 'How to format and validate JSON (and fix the common errors) — Mini Cookies',
+    'meta-descripcion': 'How to tidy an unreadable JSON and find what is wrong: extra commas, single quotes, unquoted keys and comments, with examples.',
+    'h1': 'How to format and validate JSON (and fix the common errors)',
+    'b1': 'An API sends back everything on one line, or a config file won’t load and the program only says there is a syntax error somewhere. Reading JSON like that by eye doesn’t work. With <a href="../herramientas/formateador-json.html">Format and validate JSON</a> you tidy it in one click, and the parser points to where it broke.',
+    'b2': 'Format or validate, step by step',
+    'b3-1': 'Paste the JSON into the box at the top.',
+    'b3-2': 'Tap “Format (indented)” to see it with 2-space indentation, or “Minify” to keep it on one line, without spaces or line breaks.',
+    'b3-3': 'If it is valid, “Valid JSON” appears and the result shows in the box below. If it isn’t, the reason for the error appears.',
+    'b3-4': 'To take it somewhere else, use “Copy result” or “Download .json”. The file is called json-formateado, followed by the date and time.',
+    'b4': 'What it does and doesn’t do',
+    'b5': 'Indentation is always 2 spaces, and there is no option to change it. Key order is kept: only the spacing changes. The tool doesn’t fix anything. It validates and points to the problem, and you make the correction in the input box. It only accepts standard JSON, so comments and single quotes are reported as errors, even though some programs tolerate them.',
+    'b6': 'The box below doesn’t update by itself. If you change the text in the input box after formatting, it keeps showing the previous version until you tap a format button. “Copy result” and “Download .json” don’t use that old version, though: they format the current text again, with the last mode you used, indented or minified. If the text is no longer valid JSON, they show the error again and copy or download nothing.',
+    'b7': 'The formatter also changes some data without telling you, because it writes the JSON back out using JavaScript’s rules:',
+    'b8-1': 'Integers above 9,007,199,254,740,991 lose digits at the end: 12345678901234567890 comes back as 12345678901234567000. If the number is an identifier, it is better kept as text, in quotes, if the application accepts that.',
+    'b8-2': 'Numbers are written in their shortest form: 1.0 becomes 1, and 1e3 becomes 1000.',
+    'b8-3': 'Escapes such as <code>é</code> turn into the letter itself: é.',
+    'b8-4': 'If a key appears twice in the same object, only the last value is kept.',
+    'b9': 'What an error looks like',
+    'b10': 'When the JSON isn’t valid, the input box turns red and the reason appears below it. When the browser reports where the failure is, the tool adds the line and column (“marked above, in the input box”) and selects the problem character in the input box. Fix it there and tap the button again.',
+    'b11': 'The reason text comes from the browser, not from Mini Cookies, so it may be in another language and it changes from one browser to another. The marked character is where the parser noticed the problem, which can be a little after the real error. If the marked character looks right, check just before it.',
+    'b12': 'The most common errors',
+    'b13': 'These four are the ones that come up most when JSON is typed or copied by hand.',
+    'b14': 'A trailing comma',
+    'b15': 'It is the most common one, especially when you copy a list, delete its last item and leave the comma behind.',
+    'b16': '<code>{\n  "name": "Ana",\n  "age": 30,\n}</code>',
+    'b17': 'JSON doesn’t allow a comma after the last item of an object or a list. The error usually points at the closing brace, not the comma: in a recent version of Chrome or Edge, the message looks something like “Expected double-quoted property name in JSON at position 32 (line 4 column 1)”. Deleting the extra comma is enough.',
+    'b18': 'Single quotes instead of double quotes',
+    'b19': 'JavaScript and Python accept single quotes for text. JSON doesn’t: <code>{\'name\': \'Ana\'}</code> fails, and text and keys go between double quotes, as in <code>{"name": "Ana"}</code>.',
+    'b20': 'Unquoted keys',
+    'b21': 'This is what you get when you copy an object from JavaScript code. <code>{name: "Ana"}</code> fails, because in JSON keys are text too, so they go between double quotes.',
+    'b22': 'Comments',
+    'b23': 'JSON has no comments, not <code>//</code> and not <code>/* */</code>. You see them in configuration files from some editors and tools, which use more permissive variants.',
+    'b24': '<code>{\n  // main user\n  "name": "Ana"\n}</code>',
+    'b25': 'The validator rejects them, so delete them. If you need a note, keep it in a key of its own, such as <code>"note": "main user"</code>, as long as the program that reads the file accepts it.',
+    'b26': 'Other common mistakes',
+    'b27-1': 'A comma is missing between two items. The error appears at the item that follows.',
+    'b27-2': 'A brace or bracket isn’t closed, or is closed with the wrong sign. Count the openings and the closings.',
+    'b27-3': 'Values JSON doesn’t have: <code>undefined</code> and <code>NaN</code> don’t exist, and neither do <code>True</code> and <code>False</code> with a capital letter. Only <code>true</code>, <code>false</code> and <code>null</code> in lowercase are valid.',
+    'b27-4': 'Quotes inside a text without escaping, such as <code>"he said "hi""</code>. Inside a text, write the quote as <code>\\"</code>.',
+    'b27-5': 'Numbers with leading zeros, such as <code>007</code>.',
+    'b28': 'Frequently asked questions',
+    'b29': '<strong>How do I compare two versions of a JSON?</strong> Format both with “Format (indented)”, then paste them into <a href="../herramientas/comparador-texto.html">Compare two texts</a>. The changes then fall on their own lines, and the comparison marks what was added in green and what was removed in red.',
+    'b30': '<strong>How do I put an image inside a JSON?</strong> Convert it with <a href="../herramientas/imagen-a-base64.html">Convert an image to Base64</a>. You get the image as text with the data: prefix, ready to paste as a value between quotes. The text is long, so use small images.',
+    'b31': '<strong>Why is the error message in English?</strong> Because the browser generates it when it reads the text. The line and column do appear in the language of the page.',
+    'b32': 'Summary',
+    'b33': 'To tidy a JSON, paste it and tap “Format (indented)”; to make it compact, tap “Minify”. If it fails, look at the marked character or the one before it, and check for the usual suspects: an extra comma, single quotes, unquoted keys and comments. If the JSON has very large numbers, check them after formatting, because the formatter changes them.',
+    'rel1': 'Format and validate JSON',
+    'rel2': 'Compare two texts',
+    'rel3': 'Convert an image to Base64'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo formatear y validar un JSON (y arreglar los errores típicos)</h1>
+    <p data-i18n-html="b1">Una API te responde con todo en una sola línea, o un archivo de configuración no carga y el programa solo dice que hay un error de sintaxis en algún lugar. Leer un JSON así a ojo no sirve. Con <a href="../herramientas/formateador-json.html">Formatear y validar JSON</a> lo ordenás en un clic, y el analizador te señala el lugar donde se rompió.</p>
+    <h2 data-i18n="b2">Formatear o validar, paso a paso</h2>
+    <ol>
+      <li data-i18n-html="b3-1">Pegá el JSON en la caja de arriba.</li>
+      <li data-i18n-html="b3-2">Tocá «Formatear (indentado)» para verlo con sangría de 2 espacios, o «Minificar» para dejarlo en una sola línea, sin espacios ni saltos.</li>
+      <li data-i18n-html="b3-3">Si es válido, aparece «JSON válido» y el resultado se muestra en la caja de abajo. Si no lo es, aparece el motivo del error.</li>
+      <li data-i18n-html="b3-4">Para llevarlo a otro lado, usá «Copiar resultado» o «Descargar .json». El archivo se llama json-formateado, seguido de la fecha y la hora.</li>
+    </ol>
+    <h2 data-i18n="b4">Qué hace y qué no hace</h2>
+    <p data-i18n-html="b5">La sangría es siempre de 2 espacios, y no hay opción para cambiarla. El orden de las claves se conserva: lo único que cambia es el espaciado. La herramienta no arregla nada. Valida y te señala el problema, y la corrección la hacés vos en la caja de entrada. Solo acepta JSON estándar, así que los comentarios y las comillas simples se reportan como error, aunque algunos programas los toleren.</p>
+    <p data-i18n-html="b6">La caja de abajo no se actualiza sola. Si cambiás el texto de la caja de entrada después de formatear, sigue mostrando la versión anterior hasta que tocás un botón de formato. Pero «Copiar resultado» y «Descargar .json» no usan esa versión: vuelven a formatear el texto actual con el último modo que usaste, indentado o minificado. Si el texto ya no es JSON válido, muestran otra vez el error y no copian ni descargan nada.</p>
+    <p data-i18n-html="b7">Lo que el formateador cambia sin que lo notes, porque aplica las reglas de JavaScript al volver a escribir el JSON:</p>
+    <ul>
+      <li data-i18n-html="b8-1">Los enteros mayores que 9.007.199.254.740.991 pierden cifras al final: 12345678901234567890 vuelve como 12345678901234567000. Si el número es un identificador, conviene guardarlo como texto, entre comillas, si la aplicación lo acepta.</li>
+      <li data-i18n-html="b8-2">Los números se escriben en su forma más corta: 1.0 sale como 1, y 1e3 sale como 1000.</li>
+      <li data-i18n-html="b8-3">Los escapes como <code>é</code> se convierten en la letra: sale é.</li>
+      <li data-i18n-html="b8-4">Si una clave aparece dos veces en el mismo objeto, queda solo el último valor.</li>
+    </ul>
+    <h2 data-i18n="b9">Cómo se ve un error</h2>
+    <p data-i18n-html="b10">Si el JSON no es válido, la caja de entrada se pone roja y debajo aparece el motivo. Cuando el navegador informa en qué posición falló, la herramienta agrega la línea y la columna, con el texto «marcado arriba, en el cuadro de texto», y deja seleccionado el carácter problemático en la caja de entrada. Corregís ahí y volvés a tocar el botón.</p>
+    <p data-i18n-html="b11">El texto del motivo lo escribe el navegador, no Mini Cookies, así que puede venir en inglés y cambia de un navegador a otro. El carácter que se marca es donde el analizador notó el problema, y eso puede quedar un poco después del error real. Si lo marcado parece correcto, mirá justo antes.</p>
+    <h2 data-i18n="b12">Los errores más comunes</h2>
+    <p data-i18n-html="b13">Estos cuatro son los que más aparecen cuando se escribe o se copia un JSON a mano.</p>
+    <h3 data-i18n="b14">Una coma de más al final</h3>
+    <p data-i18n-html="b15">Es el número uno, sobre todo cuando copiás una lista, borrás su último elemento y dejás la coma.</p>
+    <pre data-i18n-html="b16"><code>{
+  "name": "Ana",
+  "age": 30,
+}</code></pre>
+    <p data-i18n-html="b17">JSON no admite una coma después del último elemento de un objeto o de una lista. El error suele señalar la llave de cierre, no la coma: con una versión reciente de Chrome o Edge, el mensaje dice algo como «Expected double-quoted property name in JSON at position 32 (line 4 column 1)». Basta con borrar la coma sobrante.</p>
+    <h3 data-i18n="b18">Comillas simples en lugar de dobles</h3>
+    <p data-i18n-html="b19">JavaScript y Python aceptan comillas simples para el texto. JSON no: <code>{'name': 'Ana'}</code> falla, y el texto y las claves van entre comillas dobles, como en <code>{"name": "Ana"}</code>.</p>
+    <h3 data-i18n="b20">Claves sin comillas</h3>
+    <p data-i18n-html="b21">Es lo que queda al copiar un objeto desde código JavaScript. <code>{name: "Ana"}</code> falla, porque en JSON las claves también son texto y van entre comillas dobles.</p>
+    <h3 data-i18n="b22">Comentarios</h3>
+    <p data-i18n-html="b23">JSON no tiene comentarios, ni <code>//</code> ni <code>/* */</code>. Aparecen en archivos de configuración de algunos editores y herramientas, que usan variantes más permisivas.</p>
+    <pre data-i18n-html="b24"><code>{
+  // usuario principal
+  "name": "Ana"
+}</code></pre>
+    <p data-i18n-html="b25">El validador los rechaza, así que hay que borrarlos. Si necesitás dejar una nota, guardala en una clave propia, como <code>"nota": "usuario principal"</code>, siempre que el programa que lee el archivo la acepte.</p>
+    <h3 data-i18n="b26">Otros errores frecuentes</h3>
+    <ul>
+      <li data-i18n-html="b27-1">Falta una coma entre dos elementos. El error aparece en el elemento que sigue.</li>
+      <li data-i18n-html="b27-2">Una llave o un corchete sin cerrar, o cerrado con el signo que no corresponde. Contá las aperturas y los cierres.</li>
+      <li data-i18n-html="b27-3">Valores que JSON no tiene: <code>undefined</code> y <code>NaN</code> no existen, y <code>True</code> o <code>False</code> con mayúscula tampoco. Solo valen <code>true</code>, <code>false</code> y <code>null</code>, en minúscula.</li>
+      <li data-i18n-html="b27-4">Comillas dentro de un texto sin escapar, como <code>"dijo "hola""</code>. Dentro de un texto, la comilla se escribe <code>\"</code>.</li>
+      <li data-i18n-html="b27-5">Números con ceros a la izquierda, como <code>007</code>.</li>
+    </ul>
+    <h2 data-i18n="b28">Preguntas frecuentes</h2>
+    <p data-i18n-html="b29"><strong>¿Cómo comparo dos versiones de un JSON?</strong> Formateá las dos con «Formatear (indentado)» y pegalas en <a href="../herramientas/comparador-texto.html">Comparar dos textos</a>. Así los cambios caen en sus propias líneas, y el comparador marca lo agregado en verde y lo quitado en rojo.</p>
+    <p data-i18n-html="b30"><strong>¿Cómo meto una imagen dentro de un JSON?</strong> Convertila con <a href="../herramientas/imagen-a-base64.html">Convertir imagen a Base64</a>: te devuelve el texto de la imagen con el prefijo data:, listo para pegar como valor entre comillas. Es un texto largo, así que conviene usar imágenes chicas.</p>
+    <p data-i18n-html="b31"><strong>¿Por qué el mensaje de error está en inglés?</strong> Porque lo genera el navegador al leer el texto. La línea y la columna sí aparecen en el idioma de la página.</p>
+    <h2 data-i18n="b32">Resumen</h2>
+    <p data-i18n-html="b33">Para ordenar un JSON, pegalo y tocá «Formatear (indentado)»; para compactarlo, «Minificar». Si falla, mirá el carácter marcado o el anterior y buscá los errores de siempre: coma sobrante, comillas simples, claves sin comillas y comentarios. Si el JSON tiene números muy grandes, revisalos después de formatear, porque el formateador los cambia.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/formateador-json.html" data-i18n="rel1">Formatear y validar JSON</a></li>
+      <li><a href="../herramientas/comparador-texto.html" data-i18n="rel2">Comparar dos textos</a></li>
+      <li><a href="../herramientas/imagen-a-base64.html" data-i18n="rel3">Convertir imagen a Base64</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

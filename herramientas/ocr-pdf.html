@@ -56,12 +56,12 @@ window.i18nPagina = {
     'guia-mas-link': 'Cómo convertir un PDF escaneado en texto que se pueda copiar (OCR)',
     'guia-intro': 'Un PDF escaneado es, en el fondo, una pila de fotos: se ve bien, pero no podés buscar una palabra, copiar un párrafo ni pegar su contenido en otro documento. El OCR (reconocimiento óptico de caracteres) lee esas imágenes y recupera el texto. Esta herramienta te devuelve un PDF con el mismo aspecto que el original pero con una capa de texto invisible, y además un archivo .txt con todo lo reconocido. Sirve para contratos escaneados, apuntes fotografiados o facturas en papel.',
     'guia-paso-1': 'Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.',
-    'guia-paso-2': 'Dejá activado «Enderezar automáticamente páginas/fotos torcidas» si sacaste fotos con el celular; desactivalo si ya están derechas.',
-    'guia-paso-3': 'Elegí el preprocesamiento: «Contraste automático» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y «Ninguno» conviene si el escaneo ya es nítido y a color.',
+    'guia-paso-2': 'Dejá activado «Enderezar automáticamente páginas/fotos torcidas (recomendado)» si sacaste fotos con el celular; desactivalo si ya están derechas.',
+    'guia-paso-3': 'Elegí el preprocesamiento: «Contraste automático (recomendado)» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y parejos, y «Ninguno (usar la imagen tal cual)» conviene si el escaneo ya es nítido y a color.',
     'guia-paso-4': 'Arrastrá uno o varios PDF e imágenes a la zona de carga. Podés combinarlos y reordenar las miniaturas: el resultado respeta ese orden.',
     'guia-paso-5': 'Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.',
-    'guia-consejo-1': 'Escaneá a 200–300 ppp y con el texto derecho. Las fotos angostas (menos de 1800 px de ancho) se agrandan antes de leerlas.',
-    'guia-consejo-2': 'Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático» que con blanco y negro puro.',
+    'guia-consejo-1': 'Escaneá a 200–300 ppp y con el texto derecho. Las imágenes sueltas de menos de 1800 px de ancho se agrandan antes de leerlas; las páginas de un PDF no.',
+    'guia-consejo-2': 'Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático (recomendado)» que con blanco y negro puro.',
     'guia-consejo-3': 'Cada página del PDF resultante se guarda como imagen JPEG con el texto encima, así que el peso puede cambiar y lo que era vectorial en el original deja de serlo. Conservá siempre el archivo original.',
     'guia-p1': '¿Cuánto tarda?',
     'guia-r1': 'Depende de la cantidad de páginas y de idiomas. Las páginas se reconocen de a una, y la primera vez tarda más porque hay que cargar el motor y los datos de cada idioma.',
@@ -109,12 +109,12 @@ window.i18nPagina = {
     'guia-mas-link': 'How to Turn a Scanned PDF into Copyable Text (OCR)',
     'guia-intro': 'A scanned PDF is really a stack of pictures: it looks fine, but you can’t search for a word, copy a paragraph or paste its content into another document. OCR (optical character recognition) reads those images and recovers the text. This tool gives you back a PDF that looks like the original but carries an invisible text layer, plus a .txt file with everything it recognized. It works for scanned contracts, photographed notes or paper invoices.',
     'guia-paso-1': 'Tick the languages that appear in your document under “Languages to recognize”. Spanish and English are ticked by default; add another only if you need it, because each language adds a download the first time.',
-    'guia-paso-2': 'Leave “Automatically straighten tilted pages/photos” on if you took photos with your phone; turn it off if they’re already straight.',
-    'guia-paso-3': 'Choose the preprocessing: “Automatic contrast” works well almost every time, “Pure black and white (Otsu)” helps with very clean scans, and “None” is best when the scan is already sharp and in color.',
+    'guia-paso-2': 'Leave “Automatically straighten tilted pages/photos (recommended)” on if you took photos with your phone; turn it off if they’re already straight.',
+    'guia-paso-3': 'Choose the preprocessing: “Automatic contrast (recommended)” works well almost every time, “Pure black and white (Otsu)” helps with very clean, even scans, and “None (use the image as is)” is best when the scan is already sharp and in color.',
     'guia-paso-4': 'Drag one or more PDFs and images onto the upload area. You can mix them and reorder the thumbnails: the result follows that order.',
     'guia-paso-5': 'Press “Recognize text (OCR)”, wait for the progress bar to finish and download the PDF with searchable text or the .txt.',
-    'guia-consejo-1': 'Scan at 200–300 dpi with the text upright. Narrow photos (under 1800 px wide) are enlarged before being read.',
-    'guia-consejo-2': 'If the reading has mistakes, try a different preprocessing: a photo with shadows usually reads better with “Automatic contrast” than with pure black and white.',
+    'guia-consejo-1': 'Scan at 200–300 dpi with the text upright. Standalone images under 1800 px wide are enlarged before being read; PDF pages are not.',
+    'guia-consejo-2': 'If the reading has mistakes, try a different preprocessing: a photo with shadows usually reads better with “Automatic contrast (recommended)” than with pure black and white.',
     'guia-consejo-3': 'Each page of the resulting PDF is stored as a JPEG image with the text on top, so the file size may change and anything that was vector in the original no longer is. Always keep the original file.',
     'guia-p1': 'How long does it take?',
     'guia-r1': 'It depends on the number of pages and languages. Pages are recognized one at a time, and the first run takes longer because the engine and each language’s data have to load.',
@@ -207,15 +207,15 @@ window.i18nPagina = {
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
       <li data-i18n="guia-paso-1">Marcá los idiomas que aparecen en tu documento en «Idiomas a reconocer». Vienen marcados español e inglés; sumá otro solo si hace falta, porque cada idioma agrega una descarga la primera vez.</li>
-      <li data-i18n="guia-paso-2">Dejá activado «Enderezar automáticamente páginas/fotos torcidas» si sacaste fotos con el celular; desactivalo si ya están derechas.</li>
-      <li data-i18n="guia-paso-3">Elegí el preprocesamiento: «Contraste automático» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y «Ninguno» conviene si el escaneo ya es nítido y a color.</li>
+      <li data-i18n="guia-paso-2">Dejá activado «Enderezar automáticamente páginas/fotos torcidas (recomendado)» si sacaste fotos con el celular; desactivalo si ya están derechas.</li>
+      <li data-i18n="guia-paso-3">Elegí el preprocesamiento: «Contraste automático (recomendado)» funciona bien casi siempre, «Blanco y negro puro (Otsu)» ayuda con escaneos muy limpios y parejos, y «Ninguno (usar la imagen tal cual)» conviene si el escaneo ya es nítido y a color.</li>
       <li data-i18n="guia-paso-4">Arrastrá uno o varios PDF e imágenes a la zona de carga. Podés combinarlos y reordenar las miniaturas: el resultado respeta ese orden.</li>
       <li data-i18n="guia-paso-5">Pulsá «Reconocer texto (OCR)», esperá a que termine la barra de progreso y descargá el PDF con texto buscable o el .txt.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">Escaneá a 200–300 ppp y con el texto derecho. Las fotos angostas (menos de 1800 px de ancho) se agrandan antes de leerlas.</li>
-      <li data-i18n="guia-consejo-2">Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático» que con blanco y negro puro.</li>
+      <li data-i18n="guia-consejo-1">Escaneá a 200–300 ppp y con el texto derecho. Las imágenes sueltas de menos de 1800 px de ancho se agrandan antes de leerlas; las páginas de un PDF no.</li>
+      <li data-i18n="guia-consejo-2">Si la lectura sale con errores, probá otro preprocesamiento: una foto con sombras suele leerse mejor con «Contraste automático (recomendado)» que con blanco y negro puro.</li>
       <li data-i18n="guia-consejo-3">Cada página del PDF resultante se guarda como imagen JPEG con el texto encima, así que el peso puede cambiar y lo que era vectorial en el original deja de serlo. Conservá siempre el archivo original.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>

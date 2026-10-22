@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title data-i18n="titulo-pagina">Cómo crear un código QR: qué poner, tamaño e impresión — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué guardar en un QR, qué tamaño elegir y cómo imprimirlo para que se lea bien. Incluye la diferencia entre QR estático y dinámico.">
+<title data-i18n="titulo-pagina">Cómo crear un código QR: qué poner, colores e impresión — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Qué guardar en un QR, cuánto texto cabe, cuándo ponerle un logo y cómo imprimirlo para que se lea. Incluye la diferencia entre QR estático y dinámico.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -12,90 +12,116 @@
 <script>
 window.i18nPagina = {
   es: {
-    'titulo-pagina': 'Cómo crear un código QR: qué poner, tamaño e impresión — Mini Cookies',
-    'meta-descripcion': 'Qué guardar en un QR, qué tamaño elegir y cómo imprimirlo para que se lea bien. Incluye la diferencia entre QR estático y dinámico.',
-    'h1': 'Cómo crear un código QR: qué poner, tamaño e impresión',
-    'b1': 'Un código QR es un dibujo de cuadritos blancos y negros que guarda un texto. Al apuntarle la cámara del celular, el teléfono lo lee y, si es una dirección web, te ofrece abrirla. Se usa en carteles, tarjetas de presentación, menús, etiquetas y presentaciones, y se puede crear en un minuto. Esta guía explica qué conviene guardar adentro y cómo evitar los problemas típicos al imprimirlo.',
-    'b2': 'Qué es lo que guarda un QR',
-    'b3': 'Un QR es solo una forma de escribir texto en una imagen. El teléfono decide qué hacer con ese texto según su aspecto:',
-    'b4-1': '<strong>Una dirección web</strong> (<code>https://...</code>): el teléfono ofrece abrir la página. Es el uso más común. Escribila completa, con <code>https://</code>.',
-    'b4-2': '<strong>Texto libre</strong>: una frase, un número de pedido, un código de referencia.',
-    'b4-3': '<strong>Datos con formato conocido</strong>: los teléfonos reconocen algunos formatos estándar, como <code>tel:+50688881234</code> para llamar o <code>mailto:alguien@ejemplo.com</code> para escribir un correo. La herramienta no tiene formularios para estos casos: vos escribís el texto completo y ella lo convierte en el QR.',
-    'b4-4': '<strong>Datos de una red WiFi</strong>: existe un formato que las cámaras de muchos teléfonos reconocen, <code>WIFI:T:WPA;S:nombre-de-la-red;P:la-clave;;</code>. <a href="../herramientas/generador-qr.html">Generador de códigos QR</a> no tiene un formulario específico para WiFi, pero como solo guarda el texto que escribís, podés pegar ese texto y generar el código. Probalo siempre con tu propio teléfono antes de repartirlo, y si el nombre o la clave tienen caracteres especiales (`<code>, </code>;<code>, </code>,<code>, </code>"<code> o </code>:`), el formato pide escribirlos con una barra invertida delante.',
-    'b5': 'Paso a paso con el generador',
-    'b6-1': 'Escribí o pegá el texto en el campo <strong>Texto o URL</strong>.',
-    'b6-2': 'Elegí el <strong>Tamaño</strong>: Pequeño (200 px), Mediano (300 px) o Grande (500 px).',
-    'b6-3': 'Tocá <strong>Generar QR</strong> o apretá Enter. El código aparece debajo.',
-    'b6-4': 'Escaneá la pantalla con la cámara de tu celular. Si lee bien, tocá <strong>Descargar QR como imagen</strong> y guardá el archivo <code>codigo-qr.png</code>.',
-    'b7': 'El código sale en negro sobre blanco, con un margen blanco alrededor ya incluido en la imagen.',
-    'b8': 'Cuánto texto cabe: cuanto menos, mejor',
-    'b9': 'Un QR guarda más datos cuanto más cuadritos tiene, y más cuadritos significa cuadritos más chicos, que son más difíciles de leer a distancia o de imprimir pequeño. Por eso conviene que el contenido sea corto. Si tu dirección es larguísima, acortala antes con un acortador de links o apuntá a una página tuya con una dirección más simple. Si el texto es demasiado largo para un QR, la herramienta te avisa con un mensaje en vez de generar algo ilegible.',
-    'b10': 'Nivel de corrección de errores',
-    'b11': 'Los QR pueden seguir leyéndose aunque una parte esté sucia, rayada o tapada, porque el estándar incluye datos de reserva. Hay cuatro niveles: L (recupera alrededor del 7 % del código), M (15 %), Q (25 %) y H (30 %). Más corrección significa más cuadritos para el mismo texto. <a href="../herramientas/generador-qr.html">Generador de códigos QR</a> usa el nivel M, un equilibrio razonable para casi todo. No tiene un selector de nivel, así que no se pone un logo encima del código: el nivel M no está pensado para tolerar un logo grande en el centro.',
-    'b12': 'Cómo imprimirlo para que se lea',
-    'b13-1': '<strong>Dejá el margen blanco.</strong> Es la "zona de silencio": los lectores necesitan ese espacio vacío alrededor para encontrar el código. La imagen descargada ya lo trae; no la recortes ni la pegues sobre un fondo con dibujos.',
-    'b13-2': '<strong>Mantené el contraste.</strong> Negro sobre blanco es lo más seguro. No lo inviertas (blanco sobre negro) ni uses colores claros: algunos lectores no leen códigos invertidos.',
-    'b13-3': '<strong>Tamaño suficiente.</strong> Como regla práctica, la distancia de lectura debería ser unas diez veces el lado del código: un QR de 3 cm se lee cómodo a unos 30 cm; para un cartel que se mira desde 2 metros hace falta uno de unos 20 cm. Para papel, no bajes de más o menos 2 cm de lado.',
-    'b13-4': '<strong>Usá el tamaño Grande para imprimir.</strong> Tiene más píxeles y los bordes salen más nítidos.',
-    'b13-5': '<strong>No lo estires.</strong> Escalalo siempre proporcionalmente.',
-    'b13-6': '<strong>Probalo antes de imprimir en cantidad.</strong> Imprimí una copia, leela con más de un teléfono, desde la distancia real. Es la comprobación más confiable.',
-    'b14': 'QR estático y QR dinámico',
-    'b15': 'Un <strong>QR estático</strong> guarda el contenido dentro del propio dibujo. Es lo que hace esta herramienta: el código no depende de ningún servicio, no vence y no se puede "desactivar". Funciona mientras exista la dirección a la que apunta. La contrapartida es que no se puede cambiar: si imprimís mil tarjetas y la dirección cambia, ese QR sigue llevando a la dirección vieja.',
-    'b16': 'Un <strong>QR dinámico</strong> guarda una dirección intermedia de un servicio que después redirige al destino real. Eso permite cambiar el destino y contar visitas, pero depende de que ese servicio siga funcionando (y suele ser de pago). Si necesitás flexibilidad con un QR estático, hacé que el código apunte a una dirección tuya que luego puedas redirigir.',
-    'b17': 'Preguntas frecuentes',
-    'b18': '¿Por qué me dice que el texto es demasiado largo?',
-    'b19': 'Porque supera lo que un QR puede guardar. Acortalo o usá una dirección más corta.',
-    'b20': '¿El código vence?',
-    'b21': 'No. Esta herramienta genera códigos estáticos que contienen el texto en sí.',
-    'b22': '¿Cómo compruebo que lo que generé es correcto?',
-    'b23': 'Con la cámara del celular, o con <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a>, que muestra el texto que contiene el código.',
-    'b24': 'Resumen',
-    'b25': 'Un QR es texto convertido en dibujo. Mantené el contenido corto, escribí las direcciones completas, imprimilo en negro sobre blanco con su margen, en un tamaño acorde a la distancia de lectura, y probalo con tu propio teléfono antes de repartirlo. Los códigos de esta herramienta son estáticos: no vencen, pero tampoco se pueden cambiar después de impresos.',
+    'titulo-pagina': 'Cómo crear un código QR: qué poner, colores e impresión — Mini Cookies',
+    'meta-descripcion': 'Qué guardar en un QR, cuánto texto cabe, cuándo ponerle un logo y cómo imprimirlo para que se lea. Incluye la diferencia entre QR estático y dinámico.',
+    'h1': 'Cómo crear un código QR: qué poner, colores e impresión',
+    'b1': 'Hiciste el cartel con el link de tu tienda y ningún teléfono lo lee. O el código salió tan denso que la cámara no lo toma desde dos metros. Suele pasar por tres cosas: el texto es demasiado largo para el dibujo, los colores son muy parecidos o el código no tiene espacio blanco alrededor. Esta guía explica qué hace <a href="../herramientas/generador-qr.html">Generador de códigos QR</a> con lo que escribís y qué revisar antes de imprimir.',
+    'b2': 'Qué guarda un QR',
+    'b3': 'Un QR guarda texto, y el teléfono decide qué hacer según cómo esté escrito. Si empieza con <code>https://</code>, ofrece abrir la página. Con <code>tel:+50688881234</code> ofrece llamar, y con <code>mailto:</code> ofrece escribir un correo. El generador no tiene formularios para esos casos: escribís el texto completo y lo convierte. Escribí las direcciones con <code>https://</code> para que el teléfono las reconozca como enlace.',
+    'b4': 'Para un código de barras lineal, como el de un producto, usá <a href="../herramientas/generador-codigo-barras.html">Generador de códigos de barras</a>. El QR sirve para texto y enlaces.',
+    'b5': 'Muchas cámaras también reconocen el formato <code>WIFI:T:WPA;S:nombre;P:clave;;</code>, que conecta a una red WiFi. El generador no tiene un formulario para eso, pero convierte el texto tal cual (solo le quita los espacios de los extremos): pegalo y reemplazá el nombre y la clave. Si el nombre o la clave tienen punto y coma, dos puntos, coma, comillas o barra invertida, cada uno de esos caracteres lleva una barra invertida delante. Lo exige el formato, no la herramienta, que no lo revisa. Probalo con tu teléfono antes de repartirlo.',
+    'b6': 'Cuánto texto cabe',
+    'b7': 'El generador guarda el texto como bytes UTF-8, así que una letra con tilde o una eñe ocupa más de un byte. Si el texto tiene algún carácter fuera del ASCII, además agrega 3 bytes al principio (la marca que indica UTF-8), y el límite baja en esos 3 bytes. Cuanto más largo es el texto, más cuadritos tiene el código, y más chicos se vuelven. Si tu dirección es larguísima, acortala con un acortador de links o apuntá a una página tuya con una dirección corta. Si no entra, la herramienta muestra «El texto es demasiado largo para un código QR» y no genera nada.',
+    'b8': 'Tampoco usa el modo numérico del estándar. Un código de solo números admite lo mismo que uno de letras: 2.331 bytes en nivel M. El modo numérico guarda más números en el mismo espacio, pero esta herramienta no lo usa.',
+    'b9': 'Nivel de corrección y logo',
+    'b10': 'Un QR se puede leer aunque una parte esté tapada o sucia, porque guarda datos de respaldo. Hay cuatro niveles. Cada uno agrega respaldo, y por eso ocupa más cuadritos para el mismo texto. La tabla muestra los límites del generador y del envío de archivos.',
+    'b11-c1': 'Nivel',
+    'b11-c2': 'Recupera (aprox.)',
+    'b11-c3': 'Máximo de bytes',
+    'b11-c4': 'Dónde se usa',
+    'b11-f1c1': 'L',
+    'b11-f1c2': '7 %',
+    'b11-f1c3': '2.953',
+    'b11-f1c4': 'Enviar archivos con un QR',
+    'b11-f2c1': 'M',
+    'b11-f2c2': '15 %',
+    'b11-f2c3': '2.331',
+    'b11-f2c4': 'Generador, sin logo',
+    'b11-f3c1': 'Q',
+    'b11-f3c2': '25 %',
+    'b11-f3c3': '1.663',
+    'b11-f3c4': 'Ninguno',
+    'b11-f4c1': 'H',
+    'b11-f4c2': '30 %',
+    'b11-f4c3': '1.273',
+    'b11-f4c4': 'Generador, con logo',
+    'b12': 'Con logo, el generador pasa a nivel H, porque el logo tapa parte del centro. El logo va en un hueco que no toca los cuadrados de las esquinas ni las líneas de guía. Acepta PNG, JPG, WebP, GIF o SVG de hasta 30 MB. Elegís el tamaño entre Pequeño, Mediano, Grande y Máximo (por omisión), que equivalen al 10, 14, 18 y 22 % del ancho del código. Si el código no tiene lugar para el tamaño elegido, el logo se achica y aparece «El logo quedó más chico que lo pedido» (con Pequeño, Mediano o Grande).',
+    'b13': 'Con logo, el texto también tiene menos lugar, porque el nivel H reserva más cuadritos para la corrección y cabe menos texto. Si no entra, la herramienta dice «Con un logo el texto tiene que ser más corto». Un logo simple, sin mucho detalle, es lo que recomienda la propia ayuda de la herramienta.',
+    'b14': 'Colores y estilo',
+    'b15': 'El código tiene que ser bastante más oscuro que el fondo. Para que se lea, la herramienta pide un contraste mínimo de 4,5 a 1. Si tus colores no llegan, la herramienta oscurece el código o aclara el fondo lo justo, y avisa con «Los colores no tenían contraste suficiente para que el QR se lea bien». Si elegís un código más claro que el fondo, la herramienta intercambia los dos colores y lo avisa, porque muchas aplicaciones no leen un código así.',
+    'b16': '«Estilo de los módulos» ofrece Cuadrados, Cuadrados redondeados y Puntos. «Estilo de las esquinas» ofrece Cuadrado, Redondeado y Círculo dentro de un cuadrado redondeado. Los estilos cambian solo el dibujo, no el texto que guarda el código. La ayuda de la herramienta recomienda cuadrados o redondeados, y si usás puntos, probalo con tu teléfono antes de imprimir.',
+    'b17': 'Cómo imprimirlo para que se lea',
+    'b18': 'El código sale con un margen blanco de cuatro cuadritos alrededor, y el lector necesita ese espacio para encontrarlo. No lo recortes ni lo pongas sobre un dibujo, y no lo inviertas.',
+    'b19': 'El tamaño depende de la distancia de lectura. Como regla práctica aproximada, esa distancia ronda diez veces el lado del código: un QR de 3 cm se lee cómodo a unos 30 cm, y uno para un cartel que se mira desde dos metros necesita unos 20 cm. Para papel de mano, no bajes de unos 2 cm.',
+    'b20': 'El tamaño que elegís en el generador no cambia el archivo que se descarga. El «Tamaño» (200, 300 o 500 px) solo cambia la vista previa: el PNG que se baja, <code>codigo-qr.png</code>, mide al menos 2.048 píxeles de lado, así que alcanza para imprimir. Si lo ajustás en tu programa de diseño, escalalo siempre con las proporciones.',
+    'b21': 'Antes de imprimir en cantidad, imprimí una copia y leela con dos teléfonos, desde la distancia real. Si la cámara no lo toma, el <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a> muestra el texto que guarda el código. Si es un enlace que empieza con <code>http://</code> o <code>https://</code>, también aparece el botón «Abrir enlace».',
+    'b22': 'QR estático y dinámico',
+    'b23': 'Este generador hace QR estáticos: el texto está dentro del dibujo. No vencen, no dependen de ningún servicio y no se pueden cambiar después de impresos. Si mañana cambia la dirección, los carteles siguen apuntando a la vieja.',
+    'b24': 'Un QR dinámico apunta a una dirección intermedia de un servicio, que la redirige al destino. Así podés cambiar el destino y contar visitas, a cambio de depender de ese servicio, que muchas veces cobra. Si no querés pagar, hacé que el código apunte a una dirección tuya y cambiá a dónde lleva desde tu propio sitio.',
+    'b25': 'Preguntas frecuentes',
+    'b26': '<strong>¿Por qué dice que el texto es demasiado largo?</strong> Porque supera lo que cabe en el nivel que usa la herramienta. Acortalo. Si tiene logo, el límite es más bajo: quitá el logo o acortá el texto.',
+    'b27': '<strong>¿El código vence?</strong> No. Un QR estático contiene el texto, y mientras la dirección exista, sigue llevando a ella.',
+    'b28': '<strong>¿Cómo compruebo que lo que generé es correcto?</strong> Con la cámara del celular, o con <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a>, que muestra el texto que contiene el código.',
+    'b29': 'Resumen',
+    'b30': 'Un QR es texto convertido en dibujo. Mantené el contenido corto, escribí las direcciones completas, imprimilo en negro sobre blanco con su margen, a un tamaño acorde a la distancia de lectura, y probalo con tu teléfono antes de repartirlo. Los códigos de esta herramienta son estáticos: no vencen, pero tampoco se cambian después de impresos.',
     'rel1': 'Generador de códigos QR',
     'rel2': 'Lector de códigos QR y de barras',
     'rel3': 'Generador de códigos de barras',
     'rel4': 'Enviar archivos con un QR'
   },
   en: {
-    'titulo-pagina': 'How to Create a QR Code: What to Put In, Size and Printing — Mini Cookies',
-    'meta-descripcion': 'What to store in a QR code, what size to choose and how to print it so it scans well. Includes the difference between static and dynamic QR codes.',
-    'h1': 'How to Create a QR Code: What to Put In, Size and Printing',
-    'b1': 'A QR code is a pattern of little black and white squares that stores a piece of text. When you point your phone’s camera at it, the phone reads it and, if it’s a web address, offers to open it. It’s used on posters, business cards, menus, labels and presentations, and you can create one in a minute. This guide explains what’s worth storing inside and how to avoid the typical problems when printing it.',
+    'titulo-pagina': 'How to Create a QR Code: What to Put In, Colors and Printing — Mini Cookies',
+    'meta-descripcion': 'What to store in a QR code, how much text fits, when to add a logo and how to print it so it scans. Covers static and dynamic codes.',
+    'h1': 'How to create a QR code: what to put in, colors and printing',
+    'b1': 'You made the poster with your shop’s link and no phone can read it. Or the code came out so dense that the camera can’t pick it up from two meters away. This usually comes down to three things: the text is too long for the pattern, the colors are too similar, or the code has no white space around it. This guide explains what the <a href="../herramientas/generador-qr.html">QR code generator</a> does with what you type, and what to check before you print.',
     'b2': 'What a QR code stores',
-    'b3': 'A QR code is just a way of writing text into an image. The phone decides what to do with that text based on how it looks:',
-    'b4-1': '<strong>A web address</strong> (<code>https://...</code>): the phone offers to open the page. This is the most common use. Write it in full, with <code>https://</code>.',
-    'b4-2': '<strong>Free text</strong>: a phrase, an order number, a reference code.',
-    'b4-3': '<strong>Data in a known format</strong>: phones recognize some standard formats, such as <code>tel:+50688881234</code> to place a call or <code>mailto:someone@example.com</code> to write an email. The tool has no forms for these cases: you type the complete text and it turns it into the QR.',
-    'b4-4': '<strong>WiFi network details</strong>: there is a format that the cameras of many phones recognize, <code>WIFI:T:WPA;S:network-name;P:the-password;;</code>. The <a href="../herramientas/generador-qr.html">QR code generator</a> has no dedicated WiFi form, but since it just stores the text you type, you can paste that text and generate the code. Always test it with your own phone before handing it out, and if the name or password contain special characters (`<code>, </code>;<code>, </code>,<code>, </code>"<code> or </code>:`), the format requires escaping them with a backslash in front.',
-    'b5': 'Step by step with the generator',
-    'b6-1': 'Type or paste the text into the <strong>Text or URL</strong> field.',
-    'b6-2': 'Choose the <strong>Size</strong>: Small (200px), Medium (300px) or Large (500px).',
-    'b6-3': 'Tap <strong>Generate QR</strong> or press Enter. The code appears below.',
-    'b6-4': 'Scan the screen with your phone’s camera. If it reads fine, tap <strong>Download the QR as an image</strong> and save the <code>codigo-qr.png</code> file.',
-    'b7': 'The code comes out black on white, with a white margin around it already included in the image.',
-    'b8': 'How much text fits: the less, the better',
-    'b9': 'A QR code stores more data the more squares it has, and more squares means smaller squares, which are harder to read from a distance or to print small. That’s why it’s best to keep the content short. If your address is very long, shorten it first with a link shortener or point to a page of yours with a simpler address. If the text is too long for a QR code, the tool tells you with a message instead of generating something unreadable.',
-    'b10': 'Error correction level',
-    'b11': 'QR codes can still be read even if part of them is dirty, scratched or covered, because the standard includes backup data. There are four levels: L (recovers about 7% of the code), M (15%), Q (25%) and H (30%). More correction means more squares for the same text. The <a href="../herramientas/generador-qr.html">QR code generator</a> uses level M, a reasonable balance for almost everything. It has no level selector, so don’t put a logo on top of the code: level M isn’t meant to tolerate a large logo in the center.',
-    'b12': 'How to print it so it scans',
-    'b13-1': '<strong>Keep the white margin.</strong> This is the "quiet zone": readers need that empty space around the code to find it. The downloaded image already includes it; don’t crop it or paste it onto a busy background.',
-    'b13-2': '<strong>Keep the contrast.</strong> Black on white is the safest. Don’t invert it (white on black) or use light colors: some readers can’t read inverted codes.',
-    'b13-3': '<strong>Enough size.</strong> As a rule of thumb, the reading distance should be about ten times the side of the code: a 3 cm QR reads comfortably from about 30 cm; for a poster viewed from 2 meters you need one around 20 cm. For paper, don’t go below roughly 2 cm per side.',
-    'b13-4': '<strong>Use the Large size for printing.</strong> It has more pixels and the edges come out sharper.',
-    'b13-5': '<strong>Don’t stretch it.</strong> Always scale it proportionally.',
-    'b13-6': '<strong>Test it before printing in bulk.</strong> Print one copy and read it with more than one phone, from the real distance. It’s the most reliable check.',
-    'b14': 'Static and dynamic QR codes',
-    'b15': 'A <strong>static QR code</strong> stores the content inside the pattern itself. That’s what this tool makes: the code doesn’t depend on any service, doesn’t expire and can’t be "deactivated". It works as long as the address it points to exists. The trade-off is that it can’t be changed: if you print a thousand cards and the address changes, that QR keeps leading to the old address.',
-    'b16': 'A <strong>dynamic QR code</strong> stores an intermediate address from a service that then redirects to the real destination. That lets you change the destination and count visits, but it depends on that service staying up (and it’s usually paid). If you need flexibility with a static QR, make the code point to an address of your own that you can redirect later.',
-    'b17': 'Frequently asked questions',
-    'b18': 'Why does it say the text is too long?',
-    'b19': 'Because it exceeds what a QR code can store. Shorten it or use a shorter address.',
-    'b20': 'Does the code expire?',
-    'b21': 'No. This tool generates static codes that contain the text itself.',
-    'b22': 'How do I check that what I generated is correct?',
-    'b23': 'With your phone’s camera, or with the <a href="../herramientas/lector-codigos.html">QR and barcode reader</a>, which shows the text the code contains.',
-    'b24': 'Summary',
-    'b25': 'A QR code is text turned into a picture. Keep the content short, write addresses in full, print it black on white with its margin, at a size that fits the reading distance, and test it with your own phone before handing it out. The codes from this tool are static: they don’t expire, but they can’t be changed after they’re printed either.',
+    'b3': 'A QR code stores text, and the phone decides what to do with it based on how it is written. If it starts with <code>https://</code>, the phone offers to open the page. With <code>tel:+50688881234</code> it offers to call, and with <code>mailto:</code> it offers to write an email. The generator has no forms for those cases: you type the full text and it turns it into the code. Write web addresses with <code>https://</code> so the phone recognizes them as links.',
+    'b4': 'For a linear barcode, like the one on a product, use the <a href="../herramientas/generador-codigo-barras.html">Barcode generator</a>. The QR code is for text and links.',
+    'b5': 'Many cameras also recognize the <code>WIFI:T:WPA;S:name;P:password;;</code> format, which connects to a WiFi network. The generator has no form for it, but it converts the text as it is (it only trims spaces at the ends): paste it and replace the name and the password. If the name or the password contains a semicolon, a colon, a comma, quotation marks or a backslash, each of those characters needs a backslash in front. The format requires it, not the tool, which doesn’t check it. Test it with your phone before you hand it out.',
+    'b6': 'How much text fits',
+    'b7': 'The generator stores the text as UTF-8 bytes, so a letter with an accent or an ñ takes more than one byte. If the text has any character outside basic ASCII, it also adds 3 bytes at the start (the mark that identifies UTF-8), and the limit drops by those 3 bytes. The longer the text, the more squares the code has, and the smaller each square becomes. If your address is very long, shorten it with a link shortener or point to a page of yours with a shorter address. If it doesn’t fit, the tool shows “That text is too long for a QR code” and generates nothing.',
+    'b8': 'It doesn’t use the standard’s numeric mode either. A code made only of digits holds the same as one made of letters: 2,331 bytes at level M. The numeric mode fits more numbers in the same space, but this tool doesn’t use it.',
+    'b9': 'Error correction level and logo',
+    'b10': 'A QR code can still be read if part of it is covered or dirty, because it stores backup data. There are four levels. Each one adds more backup, so it takes more squares for the same text. The table shows the limits of the generator and of file sending.',
+    'b11-c1': 'Level',
+    'b11-c2': 'Recovers (approx.)',
+    'b11-c3': 'Maximum bytes',
+    'b11-c4': 'Where it’s used',
+    'b11-f1c1': 'L',
+    'b11-f1c2': '7%',
+    'b11-f1c3': '2,953',
+    'b11-f1c4': 'Send files with a QR code',
+    'b11-f2c1': 'M',
+    'b11-f2c2': '15%',
+    'b11-f2c3': '2,331',
+    'b11-f2c4': 'Generator, without a logo',
+    'b11-f3c1': 'Q',
+    'b11-f3c2': '25%',
+    'b11-f3c3': '1,663',
+    'b11-f3c4': 'Nowhere',
+    'b11-f4c1': 'H',
+    'b11-f4c2': '30%',
+    'b11-f4c3': '1,273',
+    'b11-f4c4': 'Generator, with a logo',
+    'b12': 'With a logo, the generator switches to level H, because the logo covers part of the center. The logo sits in a gap that doesn’t touch the corner squares or the guide lines. It accepts PNG, JPG, WebP, GIF or SVG files up to 30 MB. You choose the size from Small, Medium, Large and Maximum (default), which are 10, 14, 18 and 22% of the code’s width. If the code has no room for the size you picked, the logo gets smaller and the notice “The logo came out smaller than requested” appears (for Small, Medium or Large).',
+    'b13': 'With a logo, the text also has less room, because level H reserves more squares for correction and fits less text. If it doesn’t fit, the tool says “With a logo the text has to be shorter”. A simple logo, without much detail, is what the tool’s own help recommends.',
+    'b14': 'Colors and style',
+    'b15': 'The code has to be much darker than the background. For it to scan, the tool asks for a minimum contrast of 4.5 to 1. If your colors don’t reach that, the tool darkens the code or lightens the background just enough, and tells you with “Those colors did not have enough contrast for the QR to scan well”. If you pick a code lighter than the background, the tool swaps the two colors and tells you, because many apps can’t read a code like that.',
+    'b16': '“Module style” offers Squares, Rounded squares and Dots. “Corner style” offers Square, Rounded and Circle inside a rounded square. The styles only change the drawing, not the text the code stores. The tool’s help recommends squares or rounded squares, and if you use dots, test it with your phone before printing.',
+    'b17': 'How to print it so it scans',
+    'b18': 'The code comes out with a white margin four squares wide, and the reader needs that space to find it. Don’t crop it, don’t put it on a busy design, and don’t invert it.',
+    'b19': 'Size depends on the reading distance. As a rough rule of thumb, that distance is about ten times the side of the code: a 3 cm QR code scans comfortably from about 30 cm, and a poster read from two meters needs one about 20 cm. For a handheld card, don’t go below about 2 cm.',
+    'b20': 'The size you pick in the generator doesn’t change the file you download. “Size” (200, 300 or 500 px) only changes the preview: the PNG you save, <code>codigo-qr.png</code>, is at least 2,048 pixels per side, which is enough to print. If you resize it in your design program, always keep the proportions.',
+    'b21': 'Before printing a batch, print one copy and scan it with two phones, from the real distance. If the camera doesn’t pick it up, the <a href="../herramientas/lector-codigos.html">QR and barcode reader</a> shows the text the code contains. If it’s a link that starts with <code>http://</code> or <code>https://</code>, an “Open link” button also appears.',
+    'b22': 'Static and dynamic QR codes',
+    'b23': 'This generator makes static QR codes: the text is inside the pattern. They don’t expire, don’t depend on any service and can’t be changed once printed. If the address changes tomorrow, the posters still point to the old one.',
+    'b24': 'A dynamic QR code points to an intermediate address on a service, which redirects to the destination. That lets you change the destination and count visits, but you depend on that service, which often charges. If you don’t want to pay, make the code point to an address of your own and change where it leads from your own site.',
+    'b25': 'Frequently asked questions',
+    'b26': '<strong>Why does it say the text is too long?</strong> Because it goes beyond what fits at the level the tool uses. Shorten it. If there’s a logo, the limit is lower: remove the logo or shorten the text.',
+    'b27': '<strong>Does the code expire?</strong> No. A static QR code holds the text itself, and as long as the address exists, it keeps leading there.',
+    'b28': '<strong>How do I check that what I generated is right?</strong> With your phone’s camera, or with the <a href="../herramientas/lector-codigos.html">QR and barcode reader</a>, which shows the text the code contains.',
+    'b29': 'Summary',
+    'b30': 'A QR code is text turned into a drawing. Keep the content short, write addresses in full, print it black on white with its margin, at a size that suits the reading distance, and test it with your phone before you hand it out. The codes from this tool are static: they don’t expire, but they can’t be changed after printing either.',
     'rel1': 'QR code generator',
     'rel2': 'QR and barcode reader',
     'rel3': 'Barcode generator',
@@ -122,49 +148,45 @@ window.i18nPagina = {
 <main>
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
-    <h1 data-i18n="h1">Cómo crear un código QR: qué poner, tamaño e impresión</h1>
-    <p data-i18n-html="b1">Un código QR es un dibujo de cuadritos blancos y negros que guarda un texto. Al apuntarle la cámara del celular, el teléfono lo lee y, si es una dirección web, te ofrece abrirla. Se usa en carteles, tarjetas de presentación, menús, etiquetas y presentaciones, y se puede crear en un minuto. Esta guía explica qué conviene guardar adentro y cómo evitar los problemas típicos al imprimirlo.</p>
-    <h2 data-i18n="b2">Qué es lo que guarda un QR</h2>
-    <p data-i18n-html="b3">Un QR es solo una forma de escribir texto en una imagen. El teléfono decide qué hacer con ese texto según su aspecto:</p>
-    <ul>
-      <li data-i18n-html="b4-1"><strong>Una dirección web</strong> (<code>https://...</code>): el teléfono ofrece abrir la página. Es el uso más común. Escribila completa, con <code>https://</code>.</li>
-      <li data-i18n-html="b4-2"><strong>Texto libre</strong>: una frase, un número de pedido, un código de referencia.</li>
-      <li data-i18n-html="b4-3"><strong>Datos con formato conocido</strong>: los teléfonos reconocen algunos formatos estándar, como <code>tel:+50688881234</code> para llamar o <code>mailto:alguien@ejemplo.com</code> para escribir un correo. La herramienta no tiene formularios para estos casos: vos escribís el texto completo y ella lo convierte en el QR.</li>
-      <li data-i18n-html="b4-4"><strong>Datos de una red WiFi</strong>: existe un formato que las cámaras de muchos teléfonos reconocen, <code>WIFI:T:WPA;S:nombre-de-la-red;P:la-clave;;</code>. <a href="../herramientas/generador-qr.html">Generador de códigos QR</a> no tiene un formulario específico para WiFi, pero como solo guarda el texto que escribís, podés pegar ese texto y generar el código. Probalo siempre con tu propio teléfono antes de repartirlo, y si el nombre o la clave tienen caracteres especiales (`<code>, </code>;<code>, </code>,<code>, </code>"<code> o </code>:`), el formato pide escribirlos con una barra invertida delante.</li>
-    </ul>
-    <h2 data-i18n="b5">Paso a paso con el generador</h2>
-    <ol>
-      <li data-i18n-html="b6-1">Escribí o pegá el texto en el campo <strong>Texto o URL</strong>.</li>
-      <li data-i18n-html="b6-2">Elegí el <strong>Tamaño</strong>: Pequeño (200 px), Mediano (300 px) o Grande (500 px).</li>
-      <li data-i18n-html="b6-3">Tocá <strong>Generar QR</strong> o apretá Enter. El código aparece debajo.</li>
-      <li data-i18n-html="b6-4">Escaneá la pantalla con la cámara de tu celular. Si lee bien, tocá <strong>Descargar QR como imagen</strong> y guardá el archivo <code>codigo-qr.png</code>.</li>
-    </ol>
-    <p data-i18n-html="b7">El código sale en negro sobre blanco, con un margen blanco alrededor ya incluido en la imagen.</p>
-    <h2 data-i18n="b8">Cuánto texto cabe: cuanto menos, mejor</h2>
-    <p data-i18n-html="b9">Un QR guarda más datos cuanto más cuadritos tiene, y más cuadritos significa cuadritos más chicos, que son más difíciles de leer a distancia o de imprimir pequeño. Por eso conviene que el contenido sea corto. Si tu dirección es larguísima, acortala antes con un acortador de links o apuntá a una página tuya con una dirección más simple. Si el texto es demasiado largo para un QR, la herramienta te avisa con un mensaje en vez de generar algo ilegible.</p>
-    <h2 data-i18n="b10">Nivel de corrección de errores</h2>
-    <p data-i18n-html="b11">Los QR pueden seguir leyéndose aunque una parte esté sucia, rayada o tapada, porque el estándar incluye datos de reserva. Hay cuatro niveles: L (recupera alrededor del 7 % del código), M (15 %), Q (25 %) y H (30 %). Más corrección significa más cuadritos para el mismo texto. <a href="../herramientas/generador-qr.html">Generador de códigos QR</a> usa el nivel M, un equilibrio razonable para casi todo. No tiene un selector de nivel, así que no se pone un logo encima del código: el nivel M no está pensado para tolerar un logo grande en el centro.</p>
-    <h2 data-i18n="b12">Cómo imprimirlo para que se lea</h2>
-    <ul>
-      <li data-i18n-html="b13-1"><strong>Dejá el margen blanco.</strong> Es la "zona de silencio": los lectores necesitan ese espacio vacío alrededor para encontrar el código. La imagen descargada ya lo trae; no la recortes ni la pegues sobre un fondo con dibujos.</li>
-      <li data-i18n-html="b13-2"><strong>Mantené el contraste.</strong> Negro sobre blanco es lo más seguro. No lo inviertas (blanco sobre negro) ni uses colores claros: algunos lectores no leen códigos invertidos.</li>
-      <li data-i18n-html="b13-3"><strong>Tamaño suficiente.</strong> Como regla práctica, la distancia de lectura debería ser unas diez veces el lado del código: un QR de 3 cm se lee cómodo a unos 30 cm; para un cartel que se mira desde 2 metros hace falta uno de unos 20 cm. Para papel, no bajes de más o menos 2 cm de lado.</li>
-      <li data-i18n-html="b13-4"><strong>Usá el tamaño Grande para imprimir.</strong> Tiene más píxeles y los bordes salen más nítidos.</li>
-      <li data-i18n-html="b13-5"><strong>No lo estires.</strong> Escalalo siempre proporcionalmente.</li>
-      <li data-i18n-html="b13-6"><strong>Probalo antes de imprimir en cantidad.</strong> Imprimí una copia, leela con más de un teléfono, desde la distancia real. Es la comprobación más confiable.</li>
-    </ul>
-    <h2 data-i18n="b14">QR estático y QR dinámico</h2>
-    <p data-i18n-html="b15">Un <strong>QR estático</strong> guarda el contenido dentro del propio dibujo. Es lo que hace esta herramienta: el código no depende de ningún servicio, no vence y no se puede "desactivar". Funciona mientras exista la dirección a la que apunta. La contrapartida es que no se puede cambiar: si imprimís mil tarjetas y la dirección cambia, ese QR sigue llevando a la dirección vieja.</p>
-    <p data-i18n-html="b16">Un <strong>QR dinámico</strong> guarda una dirección intermedia de un servicio que después redirige al destino real. Eso permite cambiar el destino y contar visitas, pero depende de que ese servicio siga funcionando (y suele ser de pago). Si necesitás flexibilidad con un QR estático, hacé que el código apunte a una dirección tuya que luego puedas redirigir.</p>
-    <h2 data-i18n="b17">Preguntas frecuentes</h2>
-    <h3 data-i18n="b18">¿Por qué me dice que el texto es demasiado largo?</h3>
-    <p data-i18n-html="b19">Porque supera lo que un QR puede guardar. Acortalo o usá una dirección más corta.</p>
-    <h3 data-i18n="b20">¿El código vence?</h3>
-    <p data-i18n-html="b21">No. Esta herramienta genera códigos estáticos que contienen el texto en sí.</p>
-    <h3 data-i18n="b22">¿Cómo compruebo que lo que generé es correcto?</h3>
-    <p data-i18n-html="b23">Con la cámara del celular, o con <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a>, que muestra el texto que contiene el código.</p>
-    <h2 data-i18n="b24">Resumen</h2>
-    <p data-i18n-html="b25">Un QR es texto convertido en dibujo. Mantené el contenido corto, escribí las direcciones completas, imprimilo en negro sobre blanco con su margen, en un tamaño acorde a la distancia de lectura, y probalo con tu propio teléfono antes de repartirlo. Los códigos de esta herramienta son estáticos: no vencen, pero tampoco se pueden cambiar después de impresos.</p>
+    <h1 data-i18n="h1">Cómo crear un código QR: qué poner, colores e impresión</h1>
+    <p data-i18n-html="b1">Hiciste el cartel con el link de tu tienda y ningún teléfono lo lee. O el código salió tan denso que la cámara no lo toma desde dos metros. Suele pasar por tres cosas: el texto es demasiado largo para el dibujo, los colores son muy parecidos o el código no tiene espacio blanco alrededor. Esta guía explica qué hace <a href="../herramientas/generador-qr.html">Generador de códigos QR</a> con lo que escribís y qué revisar antes de imprimir.</p>
+    <h2 data-i18n="b2">Qué guarda un QR</h2>
+    <p data-i18n-html="b3">Un QR guarda texto, y el teléfono decide qué hacer según cómo esté escrito. Si empieza con <code>https://</code>, ofrece abrir la página. Con <code>tel:+50688881234</code> ofrece llamar, y con <code>mailto:</code> ofrece escribir un correo. El generador no tiene formularios para esos casos: escribís el texto completo y lo convierte. Escribí las direcciones con <code>https://</code> para que el teléfono las reconozca como enlace.</p>
+    <p data-i18n-html="b4">Para un código de barras lineal, como el de un producto, usá <a href="../herramientas/generador-codigo-barras.html">Generador de códigos de barras</a>. El QR sirve para texto y enlaces.</p>
+    <p data-i18n-html="b5">Muchas cámaras también reconocen el formato <code>WIFI:T:WPA;S:nombre;P:clave;;</code>, que conecta a una red WiFi. El generador no tiene un formulario para eso, pero convierte el texto tal cual (solo le quita los espacios de los extremos): pegalo y reemplazá el nombre y la clave. Si el nombre o la clave tienen punto y coma, dos puntos, coma, comillas o barra invertida, cada uno de esos caracteres lleva una barra invertida delante. Lo exige el formato, no la herramienta, que no lo revisa. Probalo con tu teléfono antes de repartirlo.</p>
+    <h2 data-i18n="b6">Cuánto texto cabe</h2>
+    <p data-i18n-html="b7">El generador guarda el texto como bytes UTF-8, así que una letra con tilde o una eñe ocupa más de un byte. Si el texto tiene algún carácter fuera del ASCII, además agrega 3 bytes al principio (la marca que indica UTF-8), y el límite baja en esos 3 bytes. Cuanto más largo es el texto, más cuadritos tiene el código, y más chicos se vuelven. Si tu dirección es larguísima, acortala con un acortador de links o apuntá a una página tuya con una dirección corta. Si no entra, la herramienta muestra «El texto es demasiado largo para un código QR» y no genera nada.</p>
+    <p data-i18n-html="b8">Tampoco usa el modo numérico del estándar. Un código de solo números admite lo mismo que uno de letras: 2.331 bytes en nivel M. El modo numérico guarda más números en el mismo espacio, pero esta herramienta no lo usa.</p>
+    <h2 data-i18n="b9">Nivel de corrección y logo</h2>
+    <p data-i18n-html="b10">Un QR se puede leer aunque una parte esté tapada o sucia, porque guarda datos de respaldo. Hay cuatro niveles. Cada uno agrega respaldo, y por eso ocupa más cuadritos para el mismo texto. La tabla muestra los límites del generador y del envío de archivos.</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b11-c1">Nivel</th><th data-i18n-html="b11-c2">Recupera (aprox.)</th><th data-i18n-html="b11-c3">Máximo de bytes</th><th data-i18n-html="b11-c4">Dónde se usa</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b11-f1c1">L</td><td data-i18n-html="b11-f1c2">7 %</td><td data-i18n-html="b11-f1c3">2.953</td><td data-i18n-html="b11-f1c4">Enviar archivos con un QR</td></tr>
+        <tr><td data-i18n-html="b11-f2c1">M</td><td data-i18n-html="b11-f2c2">15 %</td><td data-i18n-html="b11-f2c3">2.331</td><td data-i18n-html="b11-f2c4">Generador, sin logo</td></tr>
+        <tr><td data-i18n-html="b11-f3c1">Q</td><td data-i18n-html="b11-f3c2">25 %</td><td data-i18n-html="b11-f3c3">1.663</td><td data-i18n-html="b11-f3c4">Ninguno</td></tr>
+        <tr><td data-i18n-html="b11-f4c1">H</td><td data-i18n-html="b11-f4c2">30 %</td><td data-i18n-html="b11-f4c3">1.273</td><td data-i18n-html="b11-f4c4">Generador, con logo</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b12">Con logo, el generador pasa a nivel H, porque el logo tapa parte del centro. El logo va en un hueco que no toca los cuadrados de las esquinas ni las líneas de guía. Acepta PNG, JPG, WebP, GIF o SVG de hasta 30 MB. Elegís el tamaño entre Pequeño, Mediano, Grande y Máximo (por omisión), que equivalen al 10, 14, 18 y 22 % del ancho del código. Si el código no tiene lugar para el tamaño elegido, el logo se achica y aparece «El logo quedó más chico que lo pedido» (con Pequeño, Mediano o Grande).</p>
+    <p data-i18n-html="b13">Con logo, el texto también tiene menos lugar, porque el nivel H reserva más cuadritos para la corrección y cabe menos texto. Si no entra, la herramienta dice «Con un logo el texto tiene que ser más corto». Un logo simple, sin mucho detalle, es lo que recomienda la propia ayuda de la herramienta.</p>
+    <h2 data-i18n="b14">Colores y estilo</h2>
+    <p data-i18n-html="b15">El código tiene que ser bastante más oscuro que el fondo. Para que se lea, la herramienta pide un contraste mínimo de 4,5 a 1. Si tus colores no llegan, la herramienta oscurece el código o aclara el fondo lo justo, y avisa con «Los colores no tenían contraste suficiente para que el QR se lea bien». Si elegís un código más claro que el fondo, la herramienta intercambia los dos colores y lo avisa, porque muchas aplicaciones no leen un código así.</p>
+    <p data-i18n-html="b16">«Estilo de los módulos» ofrece Cuadrados, Cuadrados redondeados y Puntos. «Estilo de las esquinas» ofrece Cuadrado, Redondeado y Círculo dentro de un cuadrado redondeado. Los estilos cambian solo el dibujo, no el texto que guarda el código. La ayuda de la herramienta recomienda cuadrados o redondeados, y si usás puntos, probalo con tu teléfono antes de imprimir.</p>
+    <h2 data-i18n="b17">Cómo imprimirlo para que se lea</h2>
+    <p data-i18n-html="b18">El código sale con un margen blanco de cuatro cuadritos alrededor, y el lector necesita ese espacio para encontrarlo. No lo recortes ni lo pongas sobre un dibujo, y no lo inviertas.</p>
+    <p data-i18n-html="b19">El tamaño depende de la distancia de lectura. Como regla práctica aproximada, esa distancia ronda diez veces el lado del código: un QR de 3 cm se lee cómodo a unos 30 cm, y uno para un cartel que se mira desde dos metros necesita unos 20 cm. Para papel de mano, no bajes de unos 2 cm.</p>
+    <p data-i18n-html="b20">El tamaño que elegís en el generador no cambia el archivo que se descarga. El «Tamaño» (200, 300 o 500 px) solo cambia la vista previa: el PNG que se baja, <code>codigo-qr.png</code>, mide al menos 2.048 píxeles de lado, así que alcanza para imprimir. Si lo ajustás en tu programa de diseño, escalalo siempre con las proporciones.</p>
+    <p data-i18n-html="b21">Antes de imprimir en cantidad, imprimí una copia y leela con dos teléfonos, desde la distancia real. Si la cámara no lo toma, el <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a> muestra el texto que guarda el código. Si es un enlace que empieza con <code>http://</code> o <code>https://</code>, también aparece el botón «Abrir enlace».</p>
+    <h2 data-i18n="b22">QR estático y dinámico</h2>
+    <p data-i18n-html="b23">Este generador hace QR estáticos: el texto está dentro del dibujo. No vencen, no dependen de ningún servicio y no se pueden cambiar después de impresos. Si mañana cambia la dirección, los carteles siguen apuntando a la vieja.</p>
+    <p data-i18n-html="b24">Un QR dinámico apunta a una dirección intermedia de un servicio, que la redirige al destino. Así podés cambiar el destino y contar visitas, a cambio de depender de ese servicio, que muchas veces cobra. Si no querés pagar, hacé que el código apunte a una dirección tuya y cambiá a dónde lleva desde tu propio sitio.</p>
+    <h2 data-i18n="b25">Preguntas frecuentes</h2>
+    <p data-i18n-html="b26"><strong>¿Por qué dice que el texto es demasiado largo?</strong> Porque supera lo que cabe en el nivel que usa la herramienta. Acortalo. Si tiene logo, el límite es más bajo: quitá el logo o acortá el texto.</p>
+    <p data-i18n-html="b27"><strong>¿El código vence?</strong> No. Un QR estático contiene el texto, y mientras la dirección exista, sigue llevando a ella.</p>
+    <p data-i18n-html="b28"><strong>¿Cómo compruebo que lo que generé es correcto?</strong> Con la cámara del celular, o con <a href="../herramientas/lector-codigos.html">Lector de códigos QR y de barras</a>, que muestra el texto que contiene el código.</p>
+    <h2 data-i18n="b29">Resumen</h2>
+    <p data-i18n-html="b30">Un QR es texto convertido en dibujo. Mantené el contenido corto, escribí las direcciones completas, imprimilo en negro sobre blanco con su margen, a un tamaño acorde a la distancia de lectura, y probalo con tu teléfono antes de repartirlo. Los códigos de esta herramienta son estáticos: no vencen, pero tampoco se cambian después de impresos.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,7 @@
      no deja que ningún script envíe datos a otro lado. El build la reconoce por sin-terceros y no le
      pone AdSense. -->
 <meta name="sin-terceros" content="1">
+<meta name="google" content="notranslate">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'">
 <title data-i18n="titulo-pagina">Administrador de contraseñas gratis — Mini Cookies</title>
 <meta name="description" data-i18n-attr="content:meta-descripcion" content="Guardá tus contraseñas en una caja fuerte cifrada con una contraseña maestra, gratis y sin registro. Importá y exportá desde Chrome, Edge y Firefox, y llevá un respaldo cifrado.">
@@ -22,7 +23,7 @@ window.i18nPagina = {
     'meta-descripcion': 'Guardá tus contraseñas en una caja fuerte cifrada con una contraseña maestra, gratis y sin registro. Importá y exportá desde Chrome, Edge y Firefox, y llevá un respaldo cifrado.',
     'hero-titulo': 'Administrador de contraseñas',
     'intro': 'Guardá tus contraseñas en una caja fuerte protegida por una contraseña maestra. Genera contraseñas nuevas, importa las de tu navegador y se bloquea sola.',
-    'ayuda-como': 'La contraseña maestra se convierte en una clave con PBKDF2-SHA256 (2.000.000 vueltas) y todo el contenido se cifra con AES-256-GCM; el tamaño del archivo solo da una idea aproximada de cuántas contraseñas hay. La contraseña maestra no se guarda en ningún lado, por eso no se puede recuperar. La caja cifrada se guarda en este navegador (IndexedDB) y podés descargar un respaldo cifrado para llevarla a otro equipo. Esta página no carga anuncios ni nada de terceros y el navegador le bloquea las conexiones a otros servidores. Aun así comparte sitio con las demás herramientas: por eso conviene la clave secreta. Ojo: el historial del portapapeles de Windows (Win+V) puede guardar lo que copies.',
+    'ayuda-como': 'La contraseña maestra se convierte en una clave con PBKDF2-SHA256 (2.000.000 vueltas) y todo el contenido se cifra con AES-256-GCM; el tamaño del archivo solo da una idea aproximada de cuántas contraseñas hay. La contraseña maestra no se guarda en ningún lado, por eso no se puede recuperar. La caja cifrada se guarda en este navegador (IndexedDB) y podés descargar un respaldo cifrado para llevarla a otro equipo. Esta página no carga anuncios ni nada de terceros y el navegador le bloquea las conexiones a otros servidores. Aun así comparte el mismo sitio (seguro.minicookies.net) con otras dos herramientas, Enviar archivos con un QR y Tachar texto de un PDF: por eso conviene la clave secreta. Ojo: el historial del portapapeles de Windows (Win+V) puede guardar lo que copies.',
     'cajas-titulo': 'Tus cajas fuertes en este navegador',
     'cajas-vacio': 'Todavía no hay ninguna caja fuerte en este navegador. Creá una o abrí una caja exportada.',
     'abrir-caja': 'Abrir',
@@ -127,21 +128,25 @@ window.i18nPagina = {
     'error-clave-secreta': '❌ La clave secreta no es válida. Tiene 26 letras y números (por ejemplo ABCD-EFGH-…).',
     'error-abierta-otra': '⚠️ Esa caja ya está abierta en otra pestaña o ventana. Cerrala (bloqueala) allá primero, así no se pisan los cambios.',
     'error-demasiado': '❌ El archivo es demasiado grande o tiene demasiadas contraseñas (el máximo es 20.000).',
+    'error-intentos': 'No se pudo generar una contraseña segura tras varios intentos, probá otras opciones.',
     'error-espera': '⏳ Demasiados intentos. Esperá {s} segundos antes de volver a probar.',
     'crear-secreta': 'Agregar una clave secreta (más seguridad)',
-    'crear-secreta-txt': 'Una clave aleatoria que se suma a la contraseña maestra: aunque alguien robe tu respaldo, sin ella no puede ni empezar a adivinar la maestra. Te la mostramos una sola vez y la vas a necesitar para abrir la caja.',
+    'crear-secreta-txt': 'Una clave aleatoria que se suma a la contraseña maestra: aunque alguien robe tu respaldo, sin ella no puede ni empezar a adivinar la maestra. Te la mostramos al crear la caja y la vas a necesitar cada vez que la abras. Después solo podés volver a verla con la caja abierta, así que guardala antes de continuar.',
     'campo-clave-secreta': 'Clave secreta',
     'secreta-titulo': '🔑 Guardá tu clave secreta',
     'secreta-txt': 'Sin esta clave no se puede abrir la caja, ni siquiera con la contraseña maestra. Descargala o anotala y guardala lejos del respaldo (no en el mismo lugar).',
     'secreta-descargar': 'Descargar como archivo de texto',
+    'secreta-aviso': '⚠️ La caja todavía no se guardó en este navegador. Si cerrás o recargás la página antes de continuar, tenés que crearla de nuevo. Una vez que continúes, sin esta clave no vas a poder abrirla. La pantalla se bloquea por inactividad y, si eso pasa antes de continuar, la caja no se crea.',
+    'secreta-descartada': '⚠️ La caja no llegó a crearse: pasó el tiempo de bloqueo antes de tocar «Continuar». Si descargaste o anotaste su clave secreta, descartala: no abre ninguna caja.',
     'secreta-ya': 'Ya la guardé en un lugar seguro',
     'secreta-seguir': 'Continuar',
     'aj-ver-secreta': 'Ver la clave secreta',
     'boton-ver-secreta': 'Mostrar clave secreta',
-    'secreta-archivo-linea': 'Clave secreta de la caja «{n}»: {c}',
+    'secreta-archivo-linea': 'Clave secreta de la caja «{n}» ({f}): {c}',
     'guia-titulo': 'Cómo guardar y organizar tus contraseñas en una caja fuerte',
+    'guia-mas-link': 'Cómo generar contraseñas seguras y guardarlas bien',
     'guia-intro': 'Es una caja fuerte para guardar usuarios y contraseñas protegida por una contraseña maestra. Sirve para tener tus credenciales en un solo lugar, generar contraseñas nuevas, importar las que ya tenés guardadas en Chrome, Edge o Firefox y llevar un respaldo cifrado a otro equipo. Entra una contraseña maestra (y, si querés, una clave secreta) y devuelve una lista de entradas que podés buscar, copiar y editar. Podés tener varias cajas en el mismo navegador.',
-    'guia-paso-1': 'En «Crear una caja fuerte nueva» escribí un nombre, la «Contraseña maestra» (mínimo 12 caracteres) y repetila. Opcionalmente marcá «Agregar una clave secreta (más seguridad)»: se muestra una sola vez y tenés que guardarla; hasta que marques «Ya la guardé en un lugar seguro» no podés continuar.',
+    'guia-paso-1': 'En «Crear una caja fuerte nueva» escribí un nombre, la «Contraseña maestra» (mínimo 12 caracteres) y repetila. Opcionalmente marcá «Agregar una clave secreta (más seguridad)»: se muestra al crear la caja y tenés que guardarla antes de continuar; hasta que marques «Ya la guardé en un lugar seguro» no podés continuar.',
     'guia-paso-2': 'Tocá «Crear caja fuerte». Para volver a entrar más tarde, elegí la caja en la lista y tocá «Abrir», después «Desbloquear». Si tenés una caja exportada de otro equipo, usá «Abrir una caja exportada».',
     'guia-paso-3': 'Con la caja abierta, usá «Nueva entrada» y completá «Sitio o nombre», «Usuario o correo», «Contraseña», «Dirección del sitio» y «Notas». El botón «Generar» crea una contraseña aleatoria con el «Largo» (8 a 64) y la opción «Símbolos» que elijas. Guardá con «Guardar».',
     'guia-paso-4': 'En la lista podés buscar por sitio, usuario o dirección, copiar el usuario o la contraseña, mostrarla u ocultarla, y editarla. Las entradas con contraseña repetida o débil se marcan.',
@@ -164,7 +169,7 @@ window.i18nPagina = {
     'meta-descripcion': 'Keep your passwords in a vault encrypted with a master password, free and with no sign-up. Import and export from Chrome, Edge and Firefox, and keep an encrypted backup.',
     'hero-titulo': 'Password manager',
     'intro': 'Keep your passwords in a vault protected by a master password. It generates new passwords, imports the ones from your browser and locks itself.',
-    'ayuda-como': 'The master password is turned into a key with PBKDF2-SHA256 (2,000,000 rounds) and everything is encrypted with AES-256-GCM; the file size only gives a rough idea of how many passwords there are. The master password is not stored anywhere, which is why it cannot be recovered. The encrypted vault is kept in this browser (IndexedDB) and you can download an encrypted backup to take it to another computer. This page loads no ads or anything from third parties and the browser blocks its connections to other servers. It still shares a site with the other tools, which is why the secret key is worth using. Note: the Windows clipboard history (Win+V) may keep what you copy.',
+    'ayuda-como': 'The master password is turned into a key with PBKDF2-SHA256 (2,000,000 rounds) and everything is encrypted with AES-256-GCM; the file size only gives a rough idea of how many passwords there are. The master password is not stored anywhere, which is why it cannot be recovered. The encrypted vault is kept in this browser (IndexedDB) and you can download an encrypted backup to take it to another computer. This page loads no ads or anything from third parties and the browser blocks its connections to other servers. It still shares the same site (seguro.minicookies.net) with two other tools, Send files with a QR code and Redact text in a PDF, which is why the secret key is worth using. Note: the Windows clipboard history (Win+V) may keep what you copy.',
     'cajas-titulo': 'Your vaults in this browser',
     'cajas-vacio': 'There is no vault in this browser yet. Create one or open an exported vault.',
     'abrir-caja': 'Open',
@@ -269,21 +274,25 @@ window.i18nPagina = {
     'error-clave-secreta': '❌ The secret key is not valid. It has 26 letters and numbers (for example ABCD-EFGH-…).',
     'error-abierta-otra': '⚠️ That vault is already open in another tab or window. Lock it there first so changes don’t overwrite each other.',
     'error-demasiado': '❌ The file is too large or has too many passwords (the maximum is 20,000).',
+    'error-intentos': 'Couldn’t generate a secure password after several attempts. Try other options.',
     'error-espera': '⏳ Too many attempts. Wait {s} seconds before trying again.',
     'crear-secreta': 'Add a secret key (more security)',
-    'crear-secreta-txt': 'A random key added to the master password: even if someone steals your backup, without it they can’t even start guessing the master password. We show it only once and you will need it to open the vault.',
+    'crear-secreta-txt': 'A random key added to the master password: even if someone steals your backup, without it they can’t even start guessing the master password. We show it when the vault is created and you will need it every time you open it. Afterwards you can only see it again with the vault open, so save it before continuing.',
     'campo-clave-secreta': 'Secret key',
     'secreta-titulo': '🔑 Save your secret key',
     'secreta-txt': 'Without this key the vault can’t be opened, not even with the master password. Download it or write it down and keep it away from the backup (not in the same place).',
     'secreta-descargar': 'Download as a text file',
+    'secreta-aviso': '⚠️ The vault has not been saved in this browser yet. If you close or reload the page before continuing, you will have to create it again. Once you continue, you will not be able to open it without this key. The screen locks after a period of inactivity, and if that happens before you continue, the vault is not created.',
+    'secreta-descartada': '⚠️ The vault was never created: the lock timeout passed before you pressed “Continue”. If you downloaded or wrote down its secret key, discard it: it does not open any vault.',
     'secreta-ya': 'I saved it in a safe place',
     'secreta-seguir': 'Continue',
     'aj-ver-secreta': 'View the secret key',
     'boton-ver-secreta': 'Show secret key',
-    'secreta-archivo-linea': 'Secret key of the vault “{n}”: {c}',
+    'secreta-archivo-linea': 'Secret key of the vault “{n}” ({f}): {c}',
     'guia-titulo': 'How to store and organize your passwords in a vault',
+    'guia-mas-link': 'How to generate strong passwords and store them properly',
     'guia-intro': 'It is a vault for keeping usernames and passwords, protected by a master password. It lets you keep your credentials in one place, generate new passwords, import the ones you already have saved in Chrome, Edge or Firefox, and take an encrypted backup to another computer. You enter a master password (and, if you want, a secret key) and get back a list of entries you can search, copy and edit. You can have several vaults in the same browser.',
-    'guia-paso-1': 'Under “Create a new vault”, type a name and the “Master password” (at least 12 characters), and repeat it. Optionally tick “Add a secret key (more security)”: it is shown only once and you have to save it; you can’t continue until you tick “I saved it in a safe place”.',
+    'guia-paso-1': 'Under “Create a new vault”, type a name and the “Master password” (at least 12 characters), and repeat it. Optionally tick “Add a secret key (more security)”: it is shown when the vault is created and you have to save it before continuing; you can’t continue until you tick “I saved it in a safe place”.',
     'guia-paso-2': 'Tap “Create vault”. To get back in later, pick the vault from the list and tap “Open”, then “Unlock”. If you have a vault exported from another computer, use “Open an exported vault”.',
     'guia-paso-3': 'With the vault open, use “New entry” and fill in “Site or name”, “Username or email”, “Password”, “Site address” and “Notes”. The “Generate” button creates a random password with the “Length” (8 to 64) and the “Symbols” option you choose. Save with “Save”.',
     'guia-paso-4': 'In the list you can search by site, username or address, copy the username or the password, show or hide it, and edit it. Entries with a reused or weak password are flagged.',
@@ -405,6 +414,7 @@ window.i18nPagina = {
     <section id="vistaSecreta" class="vista" hidden>
       <h2 data-i18n="secreta-titulo">🔑 Guardá tu clave secreta</h2>
       <p data-i18n="secreta-txt"></p>
+      <div class="mensaje" role="alert" data-i18n="secreta-aviso"></div>
       <div id="secretaTexto" class="resultado visible" style="font-family:Consolas,monospace;font-size:1.2rem;overflow-wrap:anywhere;user-select:all"></div>
       <div><button class="boton secundario" type="button" id="secretaDescargar" data-i18n="secreta-descargar">Descargar como archivo de texto</button></div>
       <label class="fila"><input type="checkbox" id="secretaYa"><span data-i18n="secreta-ya">Ya la guardé en un lugar seguro</span></label>
@@ -565,7 +575,7 @@ window.i18nPagina = {
     <p data-i18n="guia-intro">Es una caja fuerte para guardar usuarios y contraseñas protegida por una contraseña maestra. Sirve para tener tus credenciales en un solo lugar, generar contraseñas nuevas, importar las que ya tenés guardadas en Chrome, Edge o Firefox y llevar un respaldo cifrado a otro equipo. Entra una contraseña maestra (y, si querés, una clave secreta) y devuelve una lista de entradas que podés buscar, copiar y editar. Podés tener varias cajas en el mismo navegador.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
-      <li data-i18n="guia-paso-1">En «Crear una caja fuerte nueva» escribí un nombre, la «Contraseña maestra» (mínimo 12 caracteres) y repetila. Opcionalmente marcá «Agregar una clave secreta (más seguridad)»: se muestra una sola vez y tenés que guardarla; hasta que marques «Ya la guardé en un lugar seguro» no podés continuar.</li>
+      <li data-i18n="guia-paso-1">En «Crear una caja fuerte nueva» escribí un nombre, la «Contraseña maestra» (mínimo 12 caracteres) y repetila. Opcionalmente marcá «Agregar una clave secreta (más seguridad)»: se muestra al crear la caja y tenés que guardarla antes de continuar; hasta que marques «Ya la guardé en un lugar seguro» no podés continuar.</li>
       <li data-i18n="guia-paso-2">Tocá «Crear caja fuerte». Para volver a entrar más tarde, elegí la caja en la lista y tocá «Abrir», después «Desbloquear». Si tenés una caja exportada de otro equipo, usá «Abrir una caja exportada».</li>
       <li data-i18n="guia-paso-3">Con la caja abierta, usá «Nueva entrada» y completá «Sitio o nombre», «Usuario o correo», «Contraseña», «Dirección del sitio» y «Notas». El botón «Generar» crea una contraseña aleatoria con el «Largo» (8 a 64) y la opción «Símbolos» que elijas. Guardá con «Guardar».</li>
       <li data-i18n="guia-paso-4">En la lista podés buscar por sitio, usuario o dirección, copiar el usuario o la contraseña, mostrarla u ocultarla, y editarla. Las entradas con contraseña repetida o débil se marcan.</li>
@@ -595,6 +605,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Qué pasa si abro la misma caja en dos pestañas?</summary>
       <p data-i18n="guia-r4">No se permite: hay que bloquearla primero en la otra.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/contrasenas-seguras.html" data-i18n="guia-mas-link">Cómo generar contraseñas seguras y guardarlas bien</a></p>
   </section>
 </main>
 
@@ -624,6 +635,7 @@ window.i18nPagina = {
   let sinAlmacen = false;
   let importacion = null;   // { nuevas, conflictos }
   let vistaActual = 'vistaInicio';
+  let ocupado = false;      // creando o desbloqueando una caja (evita enviar dos veces)
   let ultimaActividad = 0;
   let vigilante = null;
   let liberarCandado = null; // suelta el candado de la caja abierta (una sola pestaña a la vez)
@@ -711,7 +723,11 @@ window.i18nPagina = {
   // congelada (atrás/adelante del navegador), al volver se bloquea en el acto.
   function revisarInactividad() {
     if (!sesion) { clearInterval(vigilante); vigilante = null; return; }
-    if (Date.now() - ultimaActividad >= minutosBloqueo() * 60000) bloquear(true);
+    if (Date.now() - ultimaActividad >= minutosBloqueo() * 60000) {
+      const sinGuardar = vistaActual === 'vistaSecreta'; // la caja nueva aún no se guardó
+      bloquear(true);
+      if (sinGuardar) mensaje($('mensajeGlobal'), 'secreta-descartada', null, 'error');
+    }
   }
 
   function reiniciarBloqueo() {
@@ -817,6 +833,7 @@ window.i18nPagina = {
   }
 
   async function pedirMaestra(destino, nombre) {
+    if (ocupado || sesion) return;
     pendiente = destino;
     let requiereSecreto = false;
     try {
@@ -838,12 +855,14 @@ window.i18nPagina = {
 
   $('formCrear').addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    if (ocupado || sesion) return;
     const error = $('crearError');
     const maestra = $('crearMaestra').value;
     if (maestra.length < B.MAESTRA_MIN) return mostrar(error, fmt('error-maestra-corta', { n: B.MAESTRA_MIN }));
     if (maestra !== $('crearMaestra2').value) return mostrar(error, fmt('error-maestra-distinta'));
     mostrar(error, '');
     const boton = ev.submitter; if (boton) boton.disabled = true;
+    ocupado = true;
     try {
       const conSecreta = $('crearConSecreta').checked;
       sesion = await B.crear(maestra, $('crearNombre').value, { claveSecreta: conSecreta });
@@ -851,8 +870,11 @@ window.i18nPagina = {
       await tomarCandado(idCaja);
       revisionRespaldo = -1; // una caja nueva todavía no tiene respaldo
       try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
-      await guardarLocal();
       const secreta = sesion.claveSecreta;
+      // Con clave secreta la caja se guarda recién al confirmar que se anotó la clave (botón
+      // «Continuar»): si se cierra la página antes, no queda en el navegador una caja que nadie
+      // puede abrir. Sin clave secreta no hay nada que confirmar y se guarda ya.
+      if (!secreta) await guardarLocal();
       limpiarPantalla();
       if (secreta) {
         $('secretaTexto').textContent = secreta;
@@ -860,7 +882,7 @@ window.i18nPagina = {
         reiniciarBloqueo();
         ir('vistaSecreta');
       } else abrirCaja();
-    } catch (e) { mostrar(error, textoError(e)); } finally { if (boton) boton.disabled = false; }
+    } catch (e) { mostrar(error, textoError(e)); } finally { ocupado = false; if (boton) boton.disabled = false; }
   });
 
   conectarZonaArrastre($('zonaRespaldo'), $('entradaRespaldo'), async (archivos) => {
@@ -879,6 +901,7 @@ window.i18nPagina = {
 
   $('vistaDesbloquear').addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    if (ocupado || sesion) return;
     const error = $('desbloquearError');
     const maestra = $('desbloquearMaestra').value;
     if (!pendiente || !maestra) return;
@@ -888,6 +911,7 @@ window.i18nPagina = {
     if (espera) return mostrar(error, fmt('error-espera', { s: espera }));
     const boton = $('botonDesbloquear'); boton.disabled = true;
     let candadoTomado = false;
+    ocupado = true;
     try {
       let archivo, id, esArchivo = false;
       if (pendiente.id) { archivo = await B.Almacen.leer(pendiente.id); id = pendiente.id; } else { archivo = pendiente.archivo; id = B.Almacen.nuevoId(); esArchivo = true; }
@@ -897,7 +921,8 @@ window.i18nPagina = {
       sesion = await B.abrir(archivo, maestra, $('desbloquearSecreto').value);
       limpiarFallos(claveFallos);
       idCaja = id;
-      revisionRespaldo = sesion.revision; // el aviso aparece cuando hay cambios nuevos
+      // El aviso aparece con cambios nuevos o con cambios de una sesión anterior que nunca se exportaron.
+      revisionRespaldo = !esArchivo && leerSinRespaldo()[id] ? -1 : sesion.revision;
       if (esArchivo) await guardarLocal();
       pendiente = null;
       limpiarPantalla();
@@ -909,23 +934,51 @@ window.i18nPagina = {
         const w = segundosDeEspera(claveFallos);
         mostrar(error, (!$('desbloquearSecretoCampo').hidden ? fmt('error-maestra-o-secreta') : textoError(e)) + (w ? ' ' + fmt('error-espera', { s: w }) : ''));
       } else mostrar(error, textoError(e));
-    } finally { boton.disabled = false; }
+    } finally { ocupado = false; boton.disabled = false; }
   });
 
   $('secretaYa').addEventListener('change', () => { $('secretaSeguir').disabled = !$('secretaYa').checked; });
-  $('secretaSeguir').addEventListener('click', () => { $('secretaTexto').textContent = ''; abrirCaja(); });
+  $('secretaSeguir').addEventListener('click', async () => {
+    if (!sesion || !$('secretaYa').checked) return;
+    $('secretaSeguir').disabled = true;
+    const s = sesion;
+    await guardarLocal();
+    if (sesion !== s) return; // se bloqueó mientras se guardaba
+    $('secretaTexto').textContent = '';
+    abrirCaja();
+    if (sinAlmacen) mensaje($('mensajeGlobal'), 'error-guardar', null, 'error'); // abrirCaja borra el aviso
+  });
+  // Mientras la clave secreta espera confirmación, la caja todavía no está guardada.
+  window.addEventListener('beforeunload', (ev) => {
+    if (sesion && vistaActual === 'vistaSecreta') { ev.preventDefault(); ev.returnValue = ''; }
+  });
   $('secretaDescargar').addEventListener('click', () => {
     if (!sesion) return;
-    descargarTexto(fmt('secreta-archivo-linea', { n: sesion.nombre, c: $('secretaTexto').textContent }) + '\r\n', nombreConFecha('clave-secreta', 'txt'));
+    descargarTexto(fmt('secreta-archivo-linea', { n: sesion.nombre, c: $('secretaTexto').textContent, f: new Date().toLocaleString(document.documentElement.lang === 'en' ? 'en-US' : 'es') }) + '\r\n', nombreConFecha('clave-secreta', 'txt'));
   });
+
+  // Marca (solo un sí por caja, sin datos secretos) de que la copia guardada en este navegador
+  // tiene cambios que no están en ningún respaldo: así el aviso también aparece si esos cambios
+  // se hicieron en una sesión anterior.
+  function leerSinRespaldo() { try { return JSON.parse(localStorage.getItem('boveda-sin-respaldo')) || {}; } catch (e) { return {}; } }
+  function marcarSinRespaldo(id, pendiente) {
+    try {
+      const todos = leerSinRespaldo();
+      if (pendiente) todos[id] = 1; else delete todos[id];
+      localStorage.setItem('boveda-sin-respaldo', JSON.stringify(todos));
+    } catch (e) {}
+  }
 
   // ─── Caja abierta ───
   async function guardarLocal() {
     if (!sesion) return;
+    const s = sesion, id = idCaja;
     try {
-      await B.Almacen.guardar(idCaja, await sesion.cifrar());
+      await B.Almacen.guardar(id, await s.cifrar());
       sinAlmacen = false;
+      if (s.revision > revisionRespaldo) marcarSinRespaldo(id, true);
     } catch (e) {
+      if (sesion !== s) return;
       sinAlmacen = true;
       mensaje($('mensajeGlobal'), 'error-guardar', null, 'error');
     }
@@ -1019,7 +1072,7 @@ window.i18nPagina = {
       $('eContrasena').value = GeneradorContrasenas.generar(largo, { mayusculas: true, minusculas: true, numeros: true, simbolos: $('genSimbolos').checked });
       ponerOculto($('eContrasena'), false); $('eVer').textContent = fmt('ocultar');
       $('eFuerza').textContent = etiquetaFuerza($('eContrasena').value);
-    } catch (e) { mostrar($('entradaError'), e.message); }
+    } catch (e) { mostrar($('entradaError'), e && e.codigo === 'intentos' ? fmt('error-intentos') : e.message); }
   });
 
   $('eCancelar').addEventListener('click', () => { limpiarFormEntrada(); abrirCaja(); });
@@ -1073,6 +1126,7 @@ window.i18nPagina = {
     const base = 'caja-fuerte-' + (sesion.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mini-cookies');
     descargarTexto(JSON.stringify(archivo, null, 1), nombreConFecha(base, 'json'), 'application/json');
     revisionRespaldo = sesion.revision;
+    marcarSinRespaldo(idCaja, false);
     actualizarAvisoRespaldo();
   }
   $('ajRespaldo').addEventListener('click', descargarRespaldo);
@@ -1189,6 +1243,7 @@ window.i18nPagina = {
   $('ajBorrarCaja').addEventListener('click', async () => {
     if (!confirm(fmt('confirmar-borrar-caja', { n: sesion.nombre }))) return;
     try { await B.Almacen.borrar(idCaja); } catch (e) {}
+    marcarSinRespaldo(idCaja, false);
     bloquear(false);
   });
 

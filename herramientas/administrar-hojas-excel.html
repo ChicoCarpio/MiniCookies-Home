@@ -48,8 +48,8 @@ window.i18nPagina = {
     'guia-paso-3': 'Arrastrá las hojas para reordenarlas o tocá la ✕ para quitar las que no querés. La barra de deshacer y rehacer permite revertir cambios.',
     'guia-paso-4': 'Tocá «Descargar reordenado» y luego «Descargar Excel». El archivo se llama como el original más «-reordenado» (por ejemplo, «ventas-reordenado.xlsx»).',
     'guia-consejo-1': 'Las macros de un .xlsm se conservan. El archivo mantiene su extensión original para que Excel lo abra bien.',
-    'guia-consejo-2': 'Al quitar una hoja se elimina también su contenido interno y se ajustan los nombres definidos y la pestaña activa.',
-    'guia-consejo-3': 'Si una fórmula de una hoja que queda apunta a otra hoja que quitaste, esa fórmula puede quedar con error al abrirla en Excel. Revisalo antes de quitar hojas de las que dependen otras.',
+    'guia-consejo-2': 'Al quitar una hoja se borra también su contenido y los nombres definidos que solo servían en ella. Si otro nombre apuntaba a la hoja, queda en #REF!, y si era la pestaña activa, se activa una hoja que queda.',
+    'guia-consejo-3': 'Si una hoja que queda tiene fórmulas que usan una hoja quitada, esas celdas pasan a tener el último valor que Excel guardó en el archivo y dejan de recalcularse. Las tablas dinámicas que dependían de la hoja quitada también se eliminan. Revisá el libro antes de descargarlo.',
     'guia-consejo-4': 'Siempre se parte del archivo original: podés probar varias versiones sin acumular cambios.',
     'guia-p1': '¿Se pierde el formato de las celdas?',
     'guia-r1': 'No, la herramienta no reescribe las hojas: reordena y elimina partes del propio archivo.',
@@ -83,11 +83,11 @@ window.i18nPagina = {
     'guia-paso-3': 'Drag the sheets to reorder them or tap the ✕ to remove the ones you don’t want. The undo and redo bar lets you revert changes.',
     'guia-paso-4': 'Tap “Download reordered” and then “Download Excel”. The file is named like the original plus “-reordenado” (for example, “ventas-reordenado.xlsx”).',
     'guia-consejo-1': 'The macros in an .xlsm are kept. The file keeps its original extension so that Excel opens it properly.',
-    'guia-consejo-2': 'When a sheet is removed, its internal content is deleted too, and the defined names and the active tab are adjusted.',
-    'guia-consejo-3': 'If a formula in a sheet that remains points to a sheet you removed, that formula may show an error when opened in Excel. Check this before removing sheets that others depend on.',
+    'guia-consejo-2': 'When you remove a sheet, its contents and the defined names that only applied to it are deleted too. Any other name that pointed to it is left as #REF!, and if it was the active tab, another sheet that remains becomes active.',
+    'guia-consejo-3': 'If a sheet that remains has formulas that use a removed sheet, those cells keep the last value Excel saved in the file and stop recalculating. Pivot tables that depended on the removed sheet are deleted too. Check the workbook before you download it.',
     'guia-consejo-4': 'It always starts from the original file: you can try several versions without piling up changes.',
     'guia-p1': 'Is the cell formatting lost?',
-    'guia-r1': 'No, the tool doesn’t rewrite the sheets: it reorders and deletes parts of the file itself.',
+    'guia-r1': 'No. Cell styles and formatting are kept. Only the formulas that used a removed sheet change.',
     'guia-p2': 'Can I rename a sheet?',
     'guia-r2': 'No, only reorder and remove.',
     'guia-p3': 'What happens if I remove all the sheets?',
@@ -147,14 +147,14 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Las macros de un .xlsm se conservan. El archivo mantiene su extensión original para que Excel lo abra bien.</li>
-      <li data-i18n="guia-consejo-2">Al quitar una hoja se elimina también su contenido interno y se ajustan los nombres definidos y la pestaña activa.</li>
-      <li data-i18n="guia-consejo-3">Si una fórmula de una hoja que queda apunta a otra hoja que quitaste, esa fórmula puede quedar con error al abrirla en Excel. Revisalo antes de quitar hojas de las que dependen otras.</li>
+      <li data-i18n="guia-consejo-2">Al quitar una hoja se borra también su contenido y los nombres definidos que solo servían en ella. Si otro nombre apuntaba a la hoja, queda en #REF!, y si era la pestaña activa, se activa una hoja que queda.</li>
+      <li data-i18n="guia-consejo-3">Si una hoja que queda tiene fórmulas que usan una hoja quitada, esas celdas pasan a tener el último valor que Excel guardó en el archivo y dejan de recalcularse. Las tablas dinámicas que dependían de la hoja quitada también se eliminan. Revisá el libro antes de descargarlo.</li>
       <li data-i18n="guia-consejo-4">Siempre se parte del archivo original: podés probar varias versiones sin acumular cambios.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Se pierde el formato de las celdas?</summary>
-      <p data-i18n="guia-r1">No, la herramienta no reescribe las hojas: reordena y elimina partes del propio archivo.</p>
+      <p data-i18n="guia-r1">No. Los estilos y el formato de las celdas se mantienen. Solo cambian las fórmulas que usaban una hoja quitada.</p>
     </details>
     <details>
       <summary data-i18n="guia-p2">¿Puedo renombrar una hoja?</summary>

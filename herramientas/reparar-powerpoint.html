@@ -32,8 +32,10 @@ window.i18nPagina = {
     'error-todas-danadas': 'Ninguna diapositiva se pudo leer — el archivo está demasiado dañado.',
     'mensaje-todo-ok': '✅ Se pudo leer la presentación completa, no se descartó ninguna diapositiva.',
     'mensaje-parcial': '⚠️ Se descartaron {n} de {total} diapositivas por estar dañadas — el resto se conservó.',
+    'error-tipo-archivo': 'Ese archivo no es una presentación de PowerPoint (.pptx). Elegí un archivo .pptx.',
     'error-reparar': 'No se pudo reparar la presentación',
     'guia-titulo': 'Cómo reparar una presentación de PowerPoint dañada',
+    'guia-mas-link': 'Cómo recuperar un archivo de Word, Excel, PowerPoint o PDF dañado',
     'guia-intro': 'Cuando una presentación .pptx no abre o PowerPoint ofrece «repararla» y falla, muchas veces el problema está en una o dos diapositivas con el XML interno dañado. Esta herramienta revisa una por una las diapositivas, descarta solo las que no se pueden interpretar y conserva el resto tal cual. Recibe un archivo .pptx y devuelve otro .pptx con las diapositivas sanas, sin tocar sus animaciones ni transiciones.',
     'guia-paso-1': 'Arrastrá tu archivo a la zona «Arrastrá tu archivo .pptx acá o hacé clic para elegirlo».',
     'guia-paso-2': 'Hacé clic en «Reparar». El botón pasa a «Reparando...» mientras se revisan las diapositivas.',
@@ -72,8 +74,10 @@ window.i18nPagina = {
     'error-todas-danadas': 'No slide could be read — the file is too damaged.',
     'mensaje-todo-ok': '✅ The full presentation could be read, no slide was discarded.',
     'mensaje-parcial': '⚠️ {n} of {total} slides were discarded for being damaged — the rest were kept.',
+    'error-tipo-archivo': 'That file is not a PowerPoint presentation (.pptx). Pick a .pptx file.',
     'error-reparar': 'Couldn’t repair the presentation',
     'guia-titulo': 'How to repair a damaged PowerPoint presentation',
+    'guia-mas-link': 'How to recover a damaged Word, Excel, PowerPoint or PDF file',
     'guia-intro': 'When a .pptx presentation won’t open or PowerPoint offers to “repair” it and fails, the problem is often in one or two slides with damaged internal XML. This tool checks the slides one by one, discards only the ones that can’t be parsed and keeps the rest as they are. It takes a .pptx file and returns another .pptx with the healthy slides, without touching their animations or transitions.',
     'guia-paso-1': 'Drag your file to the “Drag your .pptx file here or click to choose it” area.',
     'guia-paso-2': 'Click “Repair”. The button changes to “Repairing...” while the slides are checked.',
@@ -126,7 +130,7 @@ window.i18nPagina = {
       </span>
     </div>
 
-    <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
+    <p id="mensajeNivel" style="display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
       <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="presentacion-reparada.pptx" data-i18n="resultado-enlace">Descargar PowerPoint reparado</a>
@@ -176,6 +180,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Funciona con .ppt viejos?</summary>
       <p data-i18n="guia-r4">No, solo acepta archivos .pptx.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/reparar-documentos-danados.html" data-i18n="guia-mas-link">Cómo recuperar un archivo de Word, Excel, PowerPoint o PDF dañado</a></p>
   </section>
 </main>
 
@@ -211,6 +216,7 @@ function mostrarArchivo(archivo) {
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
   if (archivo) mostrarArchivo(archivo);
+  else alert(t('error-tipo-archivo'));
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
@@ -291,6 +297,8 @@ botonReparar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
 
+    // Verde si no se descartó nada; el color de aviso (el mismo de reparar-word y reparar-excel) si se perdieron diapositivas.
+    mensajeNivel.style.color = descartadas === 0 ? '#166534' : '#b45309';
     mensajeNivel.textContent = descartadas === 0
       ? t('mensaje-todo-ok')
       : t('mensaje-parcial').replace('{n}', descartadas).replace('{total}', totalOriginal);

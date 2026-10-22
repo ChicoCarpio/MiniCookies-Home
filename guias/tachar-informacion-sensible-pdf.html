@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo tachar de verdad información sensible en un PDF — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Un rectángulo negro sobre el texto no lo borra: se puede copiar y buscar. Cómo tachar un PDF de verdad, qué se pierde y cómo comprobar el resultado.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo tachar de verdad información sensible en un PDF — Mini Cookies',
+    'meta-descripcion': 'Un rectángulo negro sobre el texto no lo borra: se puede copiar y buscar. Cómo tachar un PDF de verdad, qué se pierde y cómo comprobar el resultado.',
+    'h1': 'Cómo tachar de verdad información sensible en un PDF',
+    'b1': 'Antes de mandar un contrato con el número de documento de alguien, lo normal es dibujar una caja negra encima del dato. En muchos PDF eso no borra nada: la caja tapa el texto, pero el texto sigue debajo y se puede copiar. En pantalla se ven igual, y solo una de las dos cosas oculta el dato.',
+    'b2': 'Por qué la caja negra no alcanza',
+    'b3': 'Un PDF con texto guarda las letras como texto. La caja que dibuja un editor o una herramienta de anotaciones es otro objeto, puesto por encima. Nada la une al texto ni lo reemplaza.',
+    'b4': 'Para comprobarlo en tu archivo, probalo como lo haría otra persona:',
+    'b5-1': 'Seleccioná con el cursor la zona tapada, copiala y pegala en un bloc de notas. Si aparece el dato, sigue ahí.',
+    'b5-2': 'Buscá la palabra con la función de buscar de tu lector. Si la encuentra, también está.',
+    'b5-3': 'Si el lector no deja seleccionar nada en toda la página, puede ser un escaneo, una foto de la hoja. Ahí el dato es parte de la imagen: no se copia, pero se ve.',
+    'b6': 'Si alguna de las pruebas encuentra el dato, no está oculto.',
+    'b7': 'Cómo tachar de verdad',
+    'b8': '<a href="https://seguro.minicookies.net/herramientas/tachar-pdf">Tachar texto de un PDF</a> no pone una caja encima. Busca el texto, dibuja cada página con coincidencias y pinta cajas negras sobre lo encontrado. Después guarda esa página como imagen dentro de un PDF nuevo. Como la página ya no tiene texto, el dato original deja de existir en ella.',
+    'b9-1': 'Arrastrá el PDF a la zona de carga o tocá para elegirlo.',
+    'b9-2': 'En «Qué tachar (uno por línea)» escribí cada palabra o frase en su línea. Si hace falta, marcá «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular». Con esta última, un patrón como <code>\\d{3}-\\d{4}</code> encuentra los teléfonos con ese formato.',
+    'b9-3': 'Tocá «Buscar en el PDF». Aparecen las coincidencias, con su página y una vista previa en la que lo que se va a tachar queda marcado en rojo. Destildá las que no quieras tachar.',
+    'b9-4': 'Elegí la «Calidad de las páginas tachadas» (viene «Buena (200 ppp)») y, si querés máxima seguridad, tildá «Convertir todas las páginas en imagen (máxima seguridad)».',
+    'b9-5': 'Tocá «Tachar y descargar» y después «Descargar PDF tachado». El archivo se llama como el original con el sufijo «-tachado».',
+    'b10': 'Destildar tiene un efecto que conviene conocer. Una coincidencia destildada se queda en el archivo solo si su página no se convierte. Si en esa misma página hay otra marcada, la página entera se convierte y el dato desaparece igual.',
+    'b11': 'Hay límites: hasta 200 líneas de hasta 500 caracteres cada una, y si la búsqueda da más de 2000 coincidencias, la herramienta pide afinarla.',
+    'b12': 'Qué cambia en el archivo',
+    'b13': 'Las páginas convertidas pierden el texto seleccionable: no se puede copiar ni buscar nada en ellas, tampoco lo que no tachaste. Si lo necesitás de nuevo, pasá el resultado por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>. El archivo además suele pesar más, porque esas páginas son imágenes. Bajar la calidad a 150 ppp lo reduce.',
+    'b14': 'Del archivo final salen también los comentarios, enlaces, formularios, marcadores, adjuntos y los datos del documento, como autor y título. La herramienta arma un PDF nuevo, así que esos datos no se copian.',
+    'b15': 'Antes de entregarlo, la herramienta vuelve a leer el PDF y busca de nuevo lo que tachaste. Si queda algo que debía desaparecer, no lo entrega y te pide convertir todas las páginas. El mensaje «Se comprobó que el texto tachado ya no se encuentra en el archivo» dice eso y nada más: no revisa datos que no escribiste.',
+    'b16': 'Lo que la herramienta no puede encontrar',
+    'b17': 'Solo encuentra texto real. El resto pasa de largo, y la propia herramienta lo avisa:',
+    'b18-1': 'Escaneos y capturas: una página sin texto buscable se cuenta aparte. Pasala primero por el OCR.',
+    'b18-2': 'Texto dentro de imágenes o logos: la herramienta avisa cuántas páginas tienen imágenes, pero no lee lo que hay en ellas. Esa parte no se tacha.',
+    'b18-3': 'Letras convertidas en curvas: lo que parece texto es un dibujo, y tampoco se encuentra.',
+    'b19': 'Por eso, después de tachar, repetí las pruebas de antes con el PDF descargado y mirá cada página.',
+    'b20': 'Fotos y capturas',
+    'b21': 'Si el dato está en una foto, una captura o un papel fotografiado, usá <a href="../herramientas/censurar-imagen.html">Pixelar o difuminar una zona</a>. No pone una caja negra: pixela la zona, la reemplaza por puntos o ruido, o la desenfoca. Con una intensidad baja todavía puede intuirse lo que había debajo, así que para datos sensibles conviene una intensidad alta y revisar el resultado a tamaño completo. No tiene botón de deshacer: guardá la imagen original aparte.',
+    'b22': 'Preguntas frecuentes',
+    'b23': '<strong>¿Se puede recuperar el texto tachado?</strong> No de las páginas convertidas: pasaron a ser imágenes. Las que no se convirtieron conservan su texto, así que conviene revisarlas.',
+    'b24': '<strong>¿Qué pasa si el PDF tiene contraseña?</strong> La herramienta no tiene un campo para la contraseña. Si el archivo está protegido, aparece «No se pudo leer el PDF: el PDF tiene contraseña», con el pedido de quitarla con «Desbloquear PDF». Si la conocés, quitala con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> y después tachá.',
+    'b25': '<strong>¿Y si no aparece ninguna coincidencia?</strong> Aparece «No se encontró ninguna coincidencia». Revisá cómo escribiste el dato (mayúsculas, tildes, espacios) y si el PDF es un escaneo.',
+    'b26': 'Resumen',
+    'b27': 'Una caja negra dibujada encima no borra el texto: se copia, se busca y a veces se quita. Para ocultarlo de verdad hay que reemplazar la página por una imagen, que es lo que hace la herramienta de tachado. Así se pierde el texto seleccionable de esas páginas. Lo que está dentro de imágenes o escaneos se pasa por OCR o se difumina aparte, y el PDF final se revisa siempre: seleccioná, buscá y mirá cada página.',
+    'rel1': 'Tachar texto de un PDF',
+    'rel2': 'OCR de PDF e imágenes escaneadas',
+    'rel3': 'Pixelar o difuminar una zona',
+    'rel4': 'Desbloquear PDF'
+  },
+  en: {
+    'titulo-pagina': 'How to really redact sensitive information in a PDF — Mini Cookies',
+    'meta-descripcion': 'A black box over the text doesn’t delete it: it can still be copied and searched. How to redact a PDF for real, what gets lost and how to check the result.',
+    'h1': 'How to really redact sensitive information in a PDF',
+    'b1': 'Before you send a contract with someone’s ID number on it, the usual move is to draw a black box over the detail. In many PDFs that deletes nothing: the box covers the text, but the text is still underneath and can be copied. On screen both look the same, and only one of them hides the data.',
+    'b2': 'Why a black box is not enough',
+    'b3': 'A PDF with text stores the letters as text. The box an editor or an annotation tool draws is a separate object placed on top. Nothing ties it to the text or replaces it.',
+    'b4': 'To check this in your own file, test it the way someone else would:',
+    'b5-1': 'Select the covered area with the cursor, copy it and paste it into a text editor. If the data appears, it is still there.',
+    'b5-2': 'Search for the word with your reader’s find function. If it finds it, it is there too.',
+    'b5-3': 'If the reader won’t select anything on the whole page, it may be a scan, a photo of the sheet. Then the data is part of the image: it can’t be copied, but it is visible.',
+    'b6': 'If any of these tests finds the data, it is not hidden.',
+    'b7': 'How to redact for real',
+    'b8': '<a href="https://seguro.minicookies.net/en/herramientas/tachar-pdf">Redact text in a PDF</a> doesn’t put a box on top. It searches for the text, draws each page that has matches and paints black boxes over what it found. Then it saves that page as an image inside a new PDF. Since the page no longer has text, the original data stops existing there.',
+    'b9-1': 'Drag the PDF to the upload area or tap to choose it.',
+    'b9-2': 'Under “What to redact (one per line)”, write each word or phrase on its own line. If needed, tick “Match case”, “Whole words only” or “Use regular expression”. With the last one, a pattern like <code>\\d{3}-\\d{4}</code> finds phone numbers written that way.',
+    'b9-3': 'Tap “Search the PDF”. The matches appear, with their page and a preview where what will be redacted is marked in red. Untick the ones you don’t want to redact.',
+    'b9-4': 'Choose the “Quality of the redacted pages” (it starts at “Good (200 dpi)”) and, if you want maximum security, tick “Turn every page into an image (maximum security)”.',
+    'b9-5': 'Tap “Redact and download”, then “Download redacted PDF”. The file is named after the original with the suffix “-tachado”.',
+    'b10': 'Unticking has an effect worth knowing. An unticked match stays in the file only if its page is not converted. If another match on that same page is ticked, the whole page is converted and the data disappears anyway.',
+    'b11': 'There are limits: up to 200 lines of 500 characters each, and if the search finds more than 2,000 matches, the tool asks you to narrow it down.',
+    'b12': 'What changes in the file',
+    'b13': 'Converted pages lose their selectable text: nothing on them can be copied or searched, including what you didn’t redact. If you need that text again, run the result through <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a>. The file also tends to be larger, because those pages are now images. Lowering the quality to 150 dpi makes it smaller.',
+    'b14': 'The final file also drops comments, links, forms, bookmarks, attachments and the document data, such as author and title. The tool builds a new PDF, so none of that is copied.',
+    'b15': 'Before handing the file over, the tool reads the PDF again and searches for what you redacted. If something that should be gone is still there, it doesn’t deliver the file and asks you to convert every page. The message “We checked that the redacted text can no longer be found in the file” says only that. It doesn’t check data you didn’t type in.',
+    'b16': 'What the tool cannot find',
+    'b17': 'It only finds real text. Everything else goes unnoticed, and the tool says so:',
+    'b18-1': 'Scans and screenshots: a page with no searchable text is reported separately. Run it through OCR first.',
+    'b18-2': 'Text inside images or logos: the tool warns how many pages have images, but it doesn’t read what is inside them. That part is not redacted.',
+    'b18-3': 'Letters converted to outlines: what looks like text is a drawing, and it can’t be found either.',
+    'b19': 'That is why, after redacting, you should repeat the tests above on the downloaded PDF and look at every page.',
+    'b20': 'Photos and screenshots',
+    'b21': 'If the data is in a photo, a screenshot or a photographed sheet, use <a href="../herramientas/censurar-imagen.html">Pixelate or blur an area</a>. It doesn’t draw a black box: it pixelates the area, replaces it with dots or noise, or blurs it. At a low strength, you can still guess what was under it, so for sensitive data use a high strength and check the result at full size. There is no undo button, so keep the original image aside.',
+    'b22': 'Frequently asked questions',
+    'b23': '<strong>Can the redacted text be recovered?</strong> Not from the converted pages: they are now images. Pages that were not converted keep their text, so check them.',
+    'b24': '<strong>What if the PDF has a password?</strong> The tool has no field for a password. If the file is protected, the message reads “Couldn’t read the PDF: the PDF has a password”, followed by a request to remove it with the “Unlock PDF” tool. If you know it, remove it with <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a> first and then redact.',
+    'b25': '<strong>What if no matches are found?</strong> You get “No matches were found.” Check how you typed the data (capitals, accents, spaces) and whether the PDF is a scan.',
+    'b26': 'Summary',
+    'b27': 'A black box drawn on top does not delete the text: it can be copied, searched and sometimes removed. To hide it for real, the page has to be replaced by an image, which is what the redaction tool does. That removes the selectable text from those pages. Text inside images or scans needs OCR or a separate blur, and the final PDF should always be checked: select, search and look at every page.',
+    'rel1': 'Redact text in a PDF',
+    'rel2': 'OCR for scanned PDFs and images',
+    'rel3': 'Pixelate or blur an area',
+    'rel4': 'Unlock PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo tachar de verdad información sensible en un PDF</h1>
+    <p data-i18n-html="b1">Antes de mandar un contrato con el número de documento de alguien, lo normal es dibujar una caja negra encima del dato. En muchos PDF eso no borra nada: la caja tapa el texto, pero el texto sigue debajo y se puede copiar. En pantalla se ven igual, y solo una de las dos cosas oculta el dato.</p>
+    <h2 data-i18n="b2">Por qué la caja negra no alcanza</h2>
+    <p data-i18n-html="b3">Un PDF con texto guarda las letras como texto. La caja que dibuja un editor o una herramienta de anotaciones es otro objeto, puesto por encima. Nada la une al texto ni lo reemplaza.</p>
+    <p data-i18n-html="b4">Para comprobarlo en tu archivo, probalo como lo haría otra persona:</p>
+    <ol>
+      <li data-i18n-html="b5-1">Seleccioná con el cursor la zona tapada, copiala y pegala en un bloc de notas. Si aparece el dato, sigue ahí.</li>
+      <li data-i18n-html="b5-2">Buscá la palabra con la función de buscar de tu lector. Si la encuentra, también está.</li>
+      <li data-i18n-html="b5-3">Si el lector no deja seleccionar nada en toda la página, puede ser un escaneo, una foto de la hoja. Ahí el dato es parte de la imagen: no se copia, pero se ve.</li>
+    </ol>
+    <p data-i18n-html="b6">Si alguna de las pruebas encuentra el dato, no está oculto.</p>
+    <h2 data-i18n="b7">Cómo tachar de verdad</h2>
+    <p data-i18n-html="b8"><a href="https://seguro.minicookies.net/herramientas/tachar-pdf">Tachar texto de un PDF</a> no pone una caja encima. Busca el texto, dibuja cada página con coincidencias y pinta cajas negras sobre lo encontrado. Después guarda esa página como imagen dentro de un PDF nuevo. Como la página ya no tiene texto, el dato original deja de existir en ella.</p>
+    <ol>
+      <li data-i18n-html="b9-1">Arrastrá el PDF a la zona de carga o tocá para elegirlo.</li>
+      <li data-i18n-html="b9-2">En «Qué tachar (uno por línea)» escribí cada palabra o frase en su línea. Si hace falta, marcá «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular». Con esta última, un patrón como <code>\d{3}-\d{4}</code> encuentra los teléfonos con ese formato.</li>
+      <li data-i18n-html="b9-3">Tocá «Buscar en el PDF». Aparecen las coincidencias, con su página y una vista previa en la que lo que se va a tachar queda marcado en rojo. Destildá las que no quieras tachar.</li>
+      <li data-i18n-html="b9-4">Elegí la «Calidad de las páginas tachadas» (viene «Buena (200 ppp)») y, si querés máxima seguridad, tildá «Convertir todas las páginas en imagen (máxima seguridad)».</li>
+      <li data-i18n-html="b9-5">Tocá «Tachar y descargar» y después «Descargar PDF tachado». El archivo se llama como el original con el sufijo «-tachado».</li>
+    </ol>
+    <p data-i18n-html="b10">Destildar tiene un efecto que conviene conocer. Una coincidencia destildada se queda en el archivo solo si su página no se convierte. Si en esa misma página hay otra marcada, la página entera se convierte y el dato desaparece igual.</p>
+    <p data-i18n-html="b11">Hay límites: hasta 200 líneas de hasta 500 caracteres cada una, y si la búsqueda da más de 2000 coincidencias, la herramienta pide afinarla.</p>
+    <h2 data-i18n="b12">Qué cambia en el archivo</h2>
+    <p data-i18n-html="b13">Las páginas convertidas pierden el texto seleccionable: no se puede copiar ni buscar nada en ellas, tampoco lo que no tachaste. Si lo necesitás de nuevo, pasá el resultado por <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a>. El archivo además suele pesar más, porque esas páginas son imágenes. Bajar la calidad a 150 ppp lo reduce.</p>
+    <p data-i18n-html="b14">Del archivo final salen también los comentarios, enlaces, formularios, marcadores, adjuntos y los datos del documento, como autor y título. La herramienta arma un PDF nuevo, así que esos datos no se copian.</p>
+    <p data-i18n-html="b15">Antes de entregarlo, la herramienta vuelve a leer el PDF y busca de nuevo lo que tachaste. Si queda algo que debía desaparecer, no lo entrega y te pide convertir todas las páginas. El mensaje «Se comprobó que el texto tachado ya no se encuentra en el archivo» dice eso y nada más: no revisa datos que no escribiste.</p>
+    <h2 data-i18n="b16">Lo que la herramienta no puede encontrar</h2>
+    <p data-i18n-html="b17">Solo encuentra texto real. El resto pasa de largo, y la propia herramienta lo avisa:</p>
+    <ul>
+      <li data-i18n-html="b18-1">Escaneos y capturas: una página sin texto buscable se cuenta aparte. Pasala primero por el OCR.</li>
+      <li data-i18n-html="b18-2">Texto dentro de imágenes o logos: la herramienta avisa cuántas páginas tienen imágenes, pero no lee lo que hay en ellas. Esa parte no se tacha.</li>
+      <li data-i18n-html="b18-3">Letras convertidas en curvas: lo que parece texto es un dibujo, y tampoco se encuentra.</li>
+    </ul>
+    <p data-i18n-html="b19">Por eso, después de tachar, repetí las pruebas de antes con el PDF descargado y mirá cada página.</p>
+    <h2 data-i18n="b20">Fotos y capturas</h2>
+    <p data-i18n-html="b21">Si el dato está en una foto, una captura o un papel fotografiado, usá <a href="../herramientas/censurar-imagen.html">Pixelar o difuminar una zona</a>. No pone una caja negra: pixela la zona, la reemplaza por puntos o ruido, o la desenfoca. Con una intensidad baja todavía puede intuirse lo que había debajo, así que para datos sensibles conviene una intensidad alta y revisar el resultado a tamaño completo. No tiene botón de deshacer: guardá la imagen original aparte.</p>
+    <h2 data-i18n="b22">Preguntas frecuentes</h2>
+    <p data-i18n-html="b23"><strong>¿Se puede recuperar el texto tachado?</strong> No de las páginas convertidas: pasaron a ser imágenes. Las que no se convirtieron conservan su texto, así que conviene revisarlas.</p>
+    <p data-i18n-html="b24"><strong>¿Qué pasa si el PDF tiene contraseña?</strong> La herramienta no tiene un campo para la contraseña. Si el archivo está protegido, aparece «No se pudo leer el PDF: el PDF tiene contraseña», con el pedido de quitarla con «Desbloquear PDF». Si la conocés, quitala con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> y después tachá.</p>
+    <p data-i18n-html="b25"><strong>¿Y si no aparece ninguna coincidencia?</strong> Aparece «No se encontró ninguna coincidencia». Revisá cómo escribiste el dato (mayúsculas, tildes, espacios) y si el PDF es un escaneo.</p>
+    <h2 data-i18n="b26">Resumen</h2>
+    <p data-i18n-html="b27">Una caja negra dibujada encima no borra el texto: se copia, se busca y a veces se quita. Para ocultarlo de verdad hay que reemplazar la página por una imagen, que es lo que hace la herramienta de tachado. Así se pierde el texto seleccionable de esas páginas. Lo que está dentro de imágenes o escaneos se pasa por OCR o se difumina aparte, y el PDF final se revisa siempre: seleccioná, buscá y mirá cada página.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="https://seguro.minicookies.net/herramientas/tachar-pdf" data-i18n="rel1">Tachar texto de un PDF</a></li>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel2">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/censurar-imagen.html" data-i18n="rel3">Pixelar o difuminar una zona</a></li>
+      <li><a href="../herramientas/desbloquear-pdf.html" data-i18n="rel4">Desbloquear PDF</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

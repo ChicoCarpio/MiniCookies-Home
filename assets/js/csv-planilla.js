@@ -11,6 +11,7 @@
 //   lo que más aparezca en los datos.
 // - Solo son número los textos "limpios" (1234, 1.234,50, -3,5); "00123" (códigos, cédulas) y las fechas quedan como texto.
 //   Para los números se conserva el texto original (hoja.celdas.textoOriginal) y así se ve "1.234,50" como venía.
+//   Un entero de más de 15 dígitos también queda como texto (un número de Excel perdería los últimos dígitos).
 //
 // Uso: const libro = CsvPlanilla.leer(bytesOTexto, 'Hoja1');   // mismo modelo que LibroXlsx.abrir()
 //      CsvPlanilla.decodificar(bytes) / .detectarSeparador(texto) / .detectarComaDecimal(texto, sep) / .interpretarNumero(texto, comaDecimal)
@@ -133,7 +134,9 @@
     const C = hoja.celdas;
     C.textoOriginal = new Map();
     const resumen = recorrerCsv(texto, separador, (f, c, campo) => {
-      const numero = interpretarNumero(campo, comaDecimal);
+      let numero = interpretarNumero(campo, comaDecimal);
+      // Más de 15 dígitos seguidos (tarjetas, IDs, IBAN numéricos): un número perdería los últimos dígitos, así que queda como texto.
+      if (numero !== null && /^[-+]?\d{16,}$/.test(String(campo).trim())) numero = null;
       if (numero !== null) { const i = C.agregar(f, c, LibroXlsx.TIPO.numero, numero, 0); C.textoOriginal.set(i, campo); } else C.agregar(f, c, LibroXlsx.TIPO.texto, campo, 0);
     });
     hoja.dimension = { f0: 0, c0: 0, f1: Math.max(0, resumen.filas - 1), c1: Math.min(MAX_COLUMNAS, Math.max(1, resumen.columnas)) - 1 };

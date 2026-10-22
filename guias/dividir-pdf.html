@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo dividir un PDF: por páginas, por rangos o una página por archivo — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo dividir un PDF en páginas sueltas, sacar un rango como 1-3,5,8-9 o cortarlo en partes. Qué hace cada herramienta y cómo se llaman los archivos.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo dividir un PDF: por páginas, por rangos o una página por archivo — Mini Cookies',
+    'meta-descripcion': 'Cómo dividir un PDF en páginas sueltas, sacar un rango como 1-3,5,8-9 o cortarlo en partes. Qué hace cada herramienta y cómo se llaman los archivos.',
+    'h1': 'Cómo dividir un PDF: por páginas, por rangos o una página por archivo',
+    'b1': 'Necesitás la factura que está en medio de un lote de cien hojas, o solo el capítulo 3. «Dividir» un PDF puede significar cosas distintas, y cada herramienta del sitio hace una. Esta guía dice cuál usar, cómo se llaman los archivos que entrega y qué hacer con lo que ninguna hace sola.',
+    'b2': 'Qué herramienta usar según lo que necesitás',
+    'b3-c1': 'Lo que querés',
+    'b3-c2': 'Herramienta',
+    'b3-c3': 'Resultado',
+    'b3-f1c1': 'Cada página en su propio archivo',
+    'b3-f1c2': 'Dividir PDF',
+    'b3-f1c3': 'Un .zip con un PDF por página',
+    'b3-f2c1': 'Un rango o páginas sueltas, como 1-3,5',
+    'b3-f2c2': 'Extraer páginas',
+    'b3-f2c3': 'Un PDF nuevo con esas páginas',
+    'b3-f3c1': 'Quitar algunas páginas o cambiar el orden',
+    'b3-f3c2': 'Administrar páginas de PDF',
+    'b3-f3c3': 'Un PDF con las páginas que quedaron',
+    'b3-f4c1': 'Cortar en partes, como 1-10 y 11-20',
+    'b3-f4c2': 'Extraer páginas, una vez por parte',
+    'b3-f4c3': 'Un PDF por cada parte',
+    'b4': 'En ningún caso se modifica el PDF original: cada herramienta crea un archivo nuevo.',
+    'b5': 'Una página por archivo con Dividir PDF',
+    'b6': '<a href="../herramientas/dividir-pdf.html">Dividir PDF</a> separa cada página en su propio PDF y te entrega todos juntos en un .zip.',
+    'b7-1': 'Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver la miniatura y la cantidad de páginas.',
+    'b7-2': 'Pulsá «Dividir PDF». El botón dice «Dividiendo...» mientras separa las hojas una por una.',
+    'b7-3': 'Cuando aparezca «Listo», bajá el .zip con «Descargar .zip con las páginas». Se guarda como «paginas-divididas.zip».',
+    'b8': 'Adentro, los archivos se llaman pagina-1.pdf, pagina-2.pdf y así. Si el total lo pide, se agregan ceros: con 12 páginas van de pagina-01.pdf a pagina-12.pdf, y con 120, de pagina-001.pdf a pagina-120.pdf. Así quedan en orden al listarlos.',
+    'b9': 'No hay rangos ni cortes en un punto: siempre separa página por página. Las páginas se copian sin recomprimir, pero cada archivo lleva sus propias fuentes e imágenes, así que la suma puede pesar más que el original.',
+    'b10': 'Un rango o páginas sueltas con Extraer páginas',
+    'b11': '<a href="../herramientas/extraer-paginas.html">Extraer páginas</a> arma un solo PDF con las páginas que elijas. Podés hacer clic en las miniaturas o escribir un rango en «Páginas a extraer», y las dos formas se sincronizan.',
+    'b12-1': 'Arrastrá el PDF a la zona de carga. Aparecen las miniaturas de todas las páginas; en un PDF muy largo tardan unos segundos.',
+    'b12-2': 'Hacé clic en las miniaturas que querés, o escribí un rango como 1-3,5,8-9 en «Páginas a extraer».',
+    'b12-3': 'Si necesitás ver una página mejor, tocá la lupa de su miniatura.',
+    'b12-4': 'Pulsá «Extraer páginas» y después «Descargar PDF extraído». Se guarda como «paginas-extraidas.pdf».',
+    'b13': 'El orden que escribís es el orden del PDF nuevo: 5,1 pone la página 5 antes que la 1, y 5-2 da 5, 4, 3 y 2. También se pueden repetir: 1,1,2 da la primera página dos veces. Si un trozo no se entiende, la herramienta dice cuál es. Si una página no existe, dice cuál trozo es y cuántas páginas tiene el PDF.',
+    'b14': 'Si después de escribir un rango hacés clic en una miniatura, la página se agrega al final de lo que ya escribiste, y el orden y los repetidos se mantienen. Si hacés clic en una que ya está marcada, se quitan todas sus apariciones. Si lo escrito todavía no se entiende, el clic parte de las miniaturas marcadas, en orden creciente.',
+    'b15': 'Cortar en dos o más partes',
+    'b16': 'Dividir PDF no corta por rangos, pero Extraer páginas sí, con una pasada por parte. Con el PDF cargado, escribí 1-10 y bajá el resultado; después escribí 11-20 y bajá otra vez. Todas las descargas se llaman paginas-extraidas.pdf, así que renombralas al bajarlas. Si no, el navegador agrega un número y no sabés cuál es cuál.',
+    'b17': 'Quitar algunas páginas o reordenar',
+    'b18': 'Cuando sobran unas pocas (una portada, una hoja en blanco), es más rápido quitarlas que elegir todas las demás. En <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a> tocás la ✕ de las miniaturas que sobran y arrastrás las que querés mover. Si te equivocás, hay botones de deshacer y rehacer, y «Restaurar orden original». Después tocás «Guardar PDF modificado» y bajás el archivo, que se llama «documento-modificado.pdf». Si quitaste todas las páginas, la herramienta no guarda nada y avisa «No quedan páginas para guardar.»',
+    'b19': 'Casos habituales',
+    'b20-1': 'Un PDF demasiado pesado para enviar. Ninguna de estas herramientas corta por peso. <a href="../herramientas/optimizar-pdf.html">Comprimir / optimizar PDF</a> recomprime las fotos del archivo, así que en un PDF de solo texto casi no baja. Si sigue grande, dividilo con Extraer páginas.',
+    'b20-2': 'Un PDF con contraseña. Ninguna de las tres tiene campo para la contraseña, y un PDF protegido probablemente no se abre. Si conocés la contraseña, quitala con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> y dividí la copia que te da. Si el PDF solo tiene restricciones (no deja copiar ni imprimir), dejá el campo vacío.',
+    'b20-3': 'Volver a juntar las páginas. <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> une los archivos del .zip. Al ordenarlos por nombre entiende los números, así que pagina-10 va después de pagina-9 aunque no tenga ceros.',
+    'b20-4': 'Marcadores e índices. Las páginas se copian a un documento nuevo, y los marcadores o enlaces internos pueden no conservarse. Revisá el resultado si los necesitás.',
+    'b21': 'Preguntas frecuentes',
+    'b22': '<strong>¿Se pierde calidad al dividir?</strong> No. Las páginas se copian tal cual, sin recomprimir. Lo que puede cambiar es el peso total, como se explicó más arriba.',
+    'b23': '<strong>¿Hay un máximo de páginas o de tamaño?</strong> Las herramientas no ponen un tope propio. Todo se procesa en tu navegador, así que con un PDF muy grande el tiempo y la memoria dependen de tu equipo.',
+    'b24': '<strong>¿Puedo dividir por capítulos?</strong> No hay una opción que reconozca capítulos. Buscá en qué página empieza y en cuál termina cada uno, y usá esos números como rango en Extraer páginas.',
+    'b25': 'Resumen',
+    'b26': 'Una página por archivo, con Dividir PDF. Un rango o páginas sueltas, con Extraer páginas. Quitar unas pocas y reordenar, con Administrar páginas de PDF. Si necesitás varias partes, repetí Extraer páginas con cada rango.',
+    'rel1': 'Dividir PDF',
+    'rel2': 'Extraer páginas',
+    'rel3': 'Administrar páginas de PDF',
+    'rel4': 'Unir PDF, imágenes y documentos',
+    'rel5': 'Desbloquear PDF'
+  },
+  en: {
+    'titulo-pagina': 'How to split a PDF: by pages, by ranges or one page per file — Mini Cookies',
+    'meta-descripcion': 'How to split a PDF into single pages, pull out a range like 1-3,5,8-9 or cut it into parts. What each tool does and how the files are named.',
+    'h1': 'How to split a PDF: by pages, by ranges or one page per file',
+    'b1': 'You need the invoice in the middle of a batch of a hundred sheets, or only chapter 3. “Splitting” a PDF can mean different things, and each tool on the site does one of them. This guide tells you which one to use, what the files it delivers are called and what to do with what none of them does alone.',
+    'b2': 'Which tool to use depending on what you need',
+    'b3-c1': 'What you want',
+    'b3-c2': 'Tool',
+    'b3-c3': 'Result',
+    'b3-f1c1': 'Each page in its own file',
+    'b3-f1c2': 'Split PDF',
+    'b3-f1c3': 'A .zip with one PDF per page',
+    'b3-f2c1': 'A range or loose pages, like 1-3,5',
+    'b3-f2c2': 'Extract pages',
+    'b3-f2c3': 'A new PDF with those pages',
+    'b3-f3c1': 'Remove some pages or change the order',
+    'b3-f3c2': 'Manage PDF pages',
+    'b3-f3c3': 'A PDF with the pages that remain',
+    'b3-f4c1': 'Cut into parts, like 1-10 and 11-20',
+    'b3-f4c2': 'Extract pages, once per part',
+    'b3-f4c3': 'One PDF per part',
+    'b4': 'In no case is the original PDF changed: each tool creates a new file.',
+    'b5': 'One page per file with Split PDF',
+    'b6': '<a href="../herramientas/dividir-pdf.html">Split PDF</a> separates each page into its own PDF and gives you all of them together in a .zip.',
+    'b7-1': 'Drag the PDF to the upload area or click to choose it. You’ll see the thumbnail and the number of pages.',
+    'b7-2': 'Tap “Split PDF”. The button shows “Splitting...” while it separates the sheets one by one.',
+    'b7-3': 'When “Done” appears, download the .zip with “Download .zip with the pages”. It is saved as “paginas-divididas.zip”.',
+    'b8': 'Inside, the files are called pagina-1.pdf, pagina-2.pdf and so on. If the total calls for it, zeros are added: with 12 pages they run from pagina-01.pdf to pagina-12.pdf, and with 120, from pagina-001.pdf to pagina-120.pdf. That keeps them in order when you list them.',
+    'b9': 'There are no ranges and no cuts at a given point: it always separates page by page. The pages are copied without recompressing, but each file carries its own fonts and images, so the total can weigh more than the original.',
+    'b10': 'A range or loose pages with Extract pages',
+    'b11': '<a href="../herramientas/extraer-paginas.html">Extract pages</a> builds a single PDF with the pages you pick. You can click the thumbnails or type a range in “Pages to extract”, and the two stay in sync.',
+    'b12-1': 'Drag the PDF to the upload area. Thumbnails of all the pages appear; for a very long PDF they take a few seconds.',
+    'b12-2': 'Click the thumbnails you want, or type a range such as 1-3,5,8-9 in “Pages to extract”.',
+    'b12-3': 'If you need a better look at a page, tap the magnifier on its thumbnail.',
+    'b12-4': 'Tap “Extract pages” and then “Download extracted PDF”. It is saved as “paginas-extraidas.pdf”.',
+    'b13': 'The order you type is the order of the new PDF: 5,1 puts page 5 before page 1, and 5-2 gives 5, 4, 3 and 2. Pages can also repeat: 1,1,2 gives you the first page twice. If a part isn’t understood, the tool says which one. If a page doesn’t exist, it says which part it was and how many pages the PDF has.',
+    'b14': 'If you click a thumbnail after typing a range, the page is added to the end of what you typed, and the order and repeats are kept. Clicking one that is already marked removes all its occurrences. If what you typed doesn’t make sense yet, the click starts from the marked thumbnails, in ascending order.',
+    'b15': 'Cutting into two or more parts',
+    'b16': 'Split PDF doesn’t cut by ranges, but Extract pages does, with one pass per part. With the PDF loaded, type 1-10 and download the result; then type 11-20 and download again. Every download is called paginas-extraidas.pdf, so rename them as you save. Otherwise the browser adds a number and you won’t know which is which.',
+    'b17': 'Removing some pages or reordering',
+    'b18': 'When only a few are left over (a cover, a blank sheet), it’s quicker to remove them than to choose all the others. In <a href="../herramientas/administrar-paginas.html">Manage PDF pages</a> you tap the ✕ on the thumbnails you don’t need and drag the ones you want to move. If you make a mistake, there are undo and redo buttons, and “Restore original order”. Then tap “Save modified PDF” and download the file, which is called “documento-modificado.pdf”. If you removed every page, the tool saves nothing and warns “No pages left to save.”',
+    'b19': 'Common cases',
+    'b20-1': 'A PDF too heavy to send. None of these tools cuts by size. <a href="../herramientas/optimizar-pdf.html">Compress / optimize PDF</a> recompresses the photos inside the file, so in a text-only PDF it barely shrinks. If it is still large, split it with Extract pages.',
+    'b20-2': 'A PDF with a password. None of the three has a field for the password, and a protected PDF probably won’t open. If you know the password, remove it with <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a> and split the copy it gives you. If the PDF only has restrictions (it doesn’t let you copy or print), leave the field empty.',
+    'b20-3': 'Putting the pages back together. <a href="../herramientas/unir-pdf.html">Merge PDF, images and documents</a> joins the files from the .zip. Sorting them by name understands numbers, so pagina-10 comes after pagina-9 even without zeros.',
+    'b20-4': 'Bookmarks and indexes. The pages are copied into a new document, and bookmarks or internal links may not be kept. Check the result if you need them.',
+    'b21': 'Frequently asked questions',
+    'b22': '<strong>Is quality lost when splitting?</strong> No. The pages are copied as they are, without recompressing. What can change is the total weight, as explained above.',
+    'b23': '<strong>Is there a maximum number of pages or size?</strong> The tools don’t set a limit of their own. Everything is processed in your browser, so with a very large PDF the time and memory depend on your computer.',
+    'b24': '<strong>Can I split by chapters?</strong> There is no option that recognizes chapters. Find the page where each one starts and ends, and use those numbers as a range in Extract pages.',
+    'b25': 'Summary',
+    'b26': 'One page per file, with Split PDF. A range or loose pages, with Extract pages. Removing a few and reordering, with Manage PDF pages. If you need several parts, repeat Extract pages with each range.',
+    'rel1': 'Split PDF',
+    'rel2': 'Extract pages',
+    'rel3': 'Manage PDF pages',
+    'rel4': 'Merge PDF, images and documents',
+    'rel5': 'Unlock PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo dividir un PDF: por páginas, por rangos o una página por archivo</h1>
+    <p data-i18n-html="b1">Necesitás la factura que está en medio de un lote de cien hojas, o solo el capítulo 3. «Dividir» un PDF puede significar cosas distintas, y cada herramienta del sitio hace una. Esta guía dice cuál usar, cómo se llaman los archivos que entrega y qué hacer con lo que ninguna hace sola.</p>
+    <h2 data-i18n="b2">Qué herramienta usar según lo que necesitás</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b3-c1">Lo que querés</th><th data-i18n-html="b3-c2">Herramienta</th><th data-i18n-html="b3-c3">Resultado</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b3-f1c1">Cada página en su propio archivo</td><td data-i18n-html="b3-f1c2">Dividir PDF</td><td data-i18n-html="b3-f1c3">Un .zip con un PDF por página</td></tr>
+        <tr><td data-i18n-html="b3-f2c1">Un rango o páginas sueltas, como 1-3,5</td><td data-i18n-html="b3-f2c2">Extraer páginas</td><td data-i18n-html="b3-f2c3">Un PDF nuevo con esas páginas</td></tr>
+        <tr><td data-i18n-html="b3-f3c1">Quitar algunas páginas o cambiar el orden</td><td data-i18n-html="b3-f3c2">Administrar páginas de PDF</td><td data-i18n-html="b3-f3c3">Un PDF con las páginas que quedaron</td></tr>
+        <tr><td data-i18n-html="b3-f4c1">Cortar en partes, como 1-10 y 11-20</td><td data-i18n-html="b3-f4c2">Extraer páginas, una vez por parte</td><td data-i18n-html="b3-f4c3">Un PDF por cada parte</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b4">En ningún caso se modifica el PDF original: cada herramienta crea un archivo nuevo.</p>
+    <h2 data-i18n="b5">Una página por archivo con Dividir PDF</h2>
+    <p data-i18n-html="b6"><a href="../herramientas/dividir-pdf.html">Dividir PDF</a> separa cada página en su propio PDF y te entrega todos juntos en un .zip.</p>
+    <ol>
+      <li data-i18n-html="b7-1">Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver la miniatura y la cantidad de páginas.</li>
+      <li data-i18n-html="b7-2">Pulsá «Dividir PDF». El botón dice «Dividiendo...» mientras separa las hojas una por una.</li>
+      <li data-i18n-html="b7-3">Cuando aparezca «Listo», bajá el .zip con «Descargar .zip con las páginas». Se guarda como «paginas-divididas.zip».</li>
+    </ol>
+    <p data-i18n-html="b8">Adentro, los archivos se llaman pagina-1.pdf, pagina-2.pdf y así. Si el total lo pide, se agregan ceros: con 12 páginas van de pagina-01.pdf a pagina-12.pdf, y con 120, de pagina-001.pdf a pagina-120.pdf. Así quedan en orden al listarlos.</p>
+    <p data-i18n-html="b9">No hay rangos ni cortes en un punto: siempre separa página por página. Las páginas se copian sin recomprimir, pero cada archivo lleva sus propias fuentes e imágenes, así que la suma puede pesar más que el original.</p>
+    <h2 data-i18n="b10">Un rango o páginas sueltas con Extraer páginas</h2>
+    <p data-i18n-html="b11"><a href="../herramientas/extraer-paginas.html">Extraer páginas</a> arma un solo PDF con las páginas que elijas. Podés hacer clic en las miniaturas o escribir un rango en «Páginas a extraer», y las dos formas se sincronizan.</p>
+    <ol>
+      <li data-i18n-html="b12-1">Arrastrá el PDF a la zona de carga. Aparecen las miniaturas de todas las páginas; en un PDF muy largo tardan unos segundos.</li>
+      <li data-i18n-html="b12-2">Hacé clic en las miniaturas que querés, o escribí un rango como 1-3,5,8-9 en «Páginas a extraer».</li>
+      <li data-i18n-html="b12-3">Si necesitás ver una página mejor, tocá la lupa de su miniatura.</li>
+      <li data-i18n-html="b12-4">Pulsá «Extraer páginas» y después «Descargar PDF extraído». Se guarda como «paginas-extraidas.pdf».</li>
+    </ol>
+    <p data-i18n-html="b13">El orden que escribís es el orden del PDF nuevo: 5,1 pone la página 5 antes que la 1, y 5-2 da 5, 4, 3 y 2. También se pueden repetir: 1,1,2 da la primera página dos veces. Si un trozo no se entiende, la herramienta dice cuál es. Si una página no existe, dice cuál trozo es y cuántas páginas tiene el PDF.</p>
+    <p data-i18n-html="b14">Si después de escribir un rango hacés clic en una miniatura, la página se agrega al final de lo que ya escribiste, y el orden y los repetidos se mantienen. Si hacés clic en una que ya está marcada, se quitan todas sus apariciones. Si lo escrito todavía no se entiende, el clic parte de las miniaturas marcadas, en orden creciente.</p>
+    <h3 data-i18n="b15">Cortar en dos o más partes</h3>
+    <p data-i18n-html="b16">Dividir PDF no corta por rangos, pero Extraer páginas sí, con una pasada por parte. Con el PDF cargado, escribí 1-10 y bajá el resultado; después escribí 11-20 y bajá otra vez. Todas las descargas se llaman paginas-extraidas.pdf, así que renombralas al bajarlas. Si no, el navegador agrega un número y no sabés cuál es cuál.</p>
+    <h2 data-i18n="b17">Quitar algunas páginas o reordenar</h2>
+    <p data-i18n-html="b18">Cuando sobran unas pocas (una portada, una hoja en blanco), es más rápido quitarlas que elegir todas las demás. En <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a> tocás la ✕ de las miniaturas que sobran y arrastrás las que querés mover. Si te equivocás, hay botones de deshacer y rehacer, y «Restaurar orden original». Después tocás «Guardar PDF modificado» y bajás el archivo, que se llama «documento-modificado.pdf». Si quitaste todas las páginas, la herramienta no guarda nada y avisa «No quedan páginas para guardar.»</p>
+    <h2 data-i18n="b19">Casos habituales</h2>
+    <ul>
+      <li data-i18n-html="b20-1">Un PDF demasiado pesado para enviar. Ninguna de estas herramientas corta por peso. <a href="../herramientas/optimizar-pdf.html">Comprimir / optimizar PDF</a> recomprime las fotos del archivo, así que en un PDF de solo texto casi no baja. Si sigue grande, dividilo con Extraer páginas.</li>
+      <li data-i18n-html="b20-2">Un PDF con contraseña. Ninguna de las tres tiene campo para la contraseña, y un PDF protegido probablemente no se abre. Si conocés la contraseña, quitala con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> y dividí la copia que te da. Si el PDF solo tiene restricciones (no deja copiar ni imprimir), dejá el campo vacío.</li>
+      <li data-i18n-html="b20-3">Volver a juntar las páginas. <a href="../herramientas/unir-pdf.html">Unir PDF, imágenes y documentos</a> une los archivos del .zip. Al ordenarlos por nombre entiende los números, así que pagina-10 va después de pagina-9 aunque no tenga ceros.</li>
+      <li data-i18n-html="b20-4">Marcadores e índices. Las páginas se copian a un documento nuevo, y los marcadores o enlaces internos pueden no conservarse. Revisá el resultado si los necesitás.</li>
+    </ul>
+    <h2 data-i18n="b21">Preguntas frecuentes</h2>
+    <p data-i18n-html="b22"><strong>¿Se pierde calidad al dividir?</strong> No. Las páginas se copian tal cual, sin recomprimir. Lo que puede cambiar es el peso total, como se explicó más arriba.</p>
+    <p data-i18n-html="b23"><strong>¿Hay un máximo de páginas o de tamaño?</strong> Las herramientas no ponen un tope propio. Todo se procesa en tu navegador, así que con un PDF muy grande el tiempo y la memoria dependen de tu equipo.</p>
+    <p data-i18n-html="b24"><strong>¿Puedo dividir por capítulos?</strong> No hay una opción que reconozca capítulos. Buscá en qué página empieza y en cuál termina cada uno, y usá esos números como rango en Extraer páginas.</p>
+    <h2 data-i18n="b25">Resumen</h2>
+    <p data-i18n-html="b26">Una página por archivo, con Dividir PDF. Un rango o páginas sueltas, con Extraer páginas. Quitar unas pocas y reordenar, con Administrar páginas de PDF. Si necesitás varias partes, repetí Extraer páginas con cada rango.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/dividir-pdf.html" data-i18n="rel1">Dividir PDF</a></li>
+      <li><a href="../herramientas/extraer-paginas.html" data-i18n="rel2">Extraer páginas</a></li>
+      <li><a href="../herramientas/administrar-paginas.html" data-i18n="rel3">Administrar páginas de PDF</a></li>
+      <li><a href="../herramientas/unir-pdf.html" data-i18n="rel4">Unir PDF, imágenes y documentos</a></li>
+      <li><a href="../herramientas/desbloquear-pdf.html" data-i18n="rel5">Desbloquear PDF</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

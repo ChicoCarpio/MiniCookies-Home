@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Tachar texto de un PDF gratis — Mini Cookies</title>
 <meta name="description" data-i18n-attr="content:meta-descripcion" content="Tachá nombres, números o cualquier texto de un PDF de verdad: el texto original se borra del archivo, no solo se tapa. Gratis y sin subir tu archivo a ningún servidor.">
@@ -64,6 +65,7 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar PDF tachado',
     'nota-quita': 'Del PDF final también se quitan los comentarios, enlaces, formularios, marcadores, archivos adjuntos y los datos del documento (autor, título…), porque pueden contener lo que querés ocultar.',
     'error-leer': 'No se pudo leer el PDF',
+    'error-contrasena': 'el PDF tiene contraseña. Quitásela primero con la herramienta «Desbloquear PDF» y volvé a intentarlo.',
     'error-sin-terminos': 'Escribí al menos una palabra o frase a tachar.',
     'error-patron': 'La expresión regular de la línea {n} no es válida',
     'error-patron-largo': 'La línea {n} es demasiado larga (máximo 500 caracteres).',
@@ -72,15 +74,16 @@ window.i18nPagina = {
     'error-quedan': 'No se pudo garantizar que el texto desapareciera ({n} coincidencias siguen en el archivo), así que no se entrega. Probá con "Convertir todas las páginas en imagen".',
     'error-generar': 'No se pudo tachar el PDF',
     'guia-titulo': 'Cómo tachar texto de un PDF de verdad',
+    'guia-mas-link': 'Cómo tachar de verdad información sensible en un PDF',
     'guia-intro': 'Ocultar un dato dibujando un rectángulo negro encima no lo borra: el texto sigue debajo y se puede copiar. Esta herramienta busca las palabras, frases o patrones que indiques, muestra dónde aparecen y convierte las páginas afectadas en imágenes con cajas negras sobre lo encontrado. Así el texto original deja de existir en esas páginas. Es útil para nombres, números de documento, teléfonos o direcciones antes de compartir un PDF.',
     'guia-paso-1': 'Arrastrá el PDF a la zona o hacé clic para elegirlo.',
     'guia-paso-2': 'En «Qué tachar (uno por línea)» escribí cada palabra o frase en una línea. Si hace falta, marcá «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular».',
     'guia-paso-3': 'Hacé clic en «Buscar en el PDF». Aparece una lista de coincidencias con su página y una vista de la página donde lo que se tachará queda marcado en rojo. Podés destildar las que no quieras tachar y navegar con los botones de página anterior y siguiente.',
-    'guia-paso-4': 'Elegí la «Calidad de las páginas tachadas» (Normal 150 ppp, Buena 200 ppp o Alta 300 ppp) y, si querés máxima seguridad, tildá «Convertir todas las páginas en imagen».',
-    'guia-paso-5': 'Hacé clic en «Tachar y descargar» y bajá el resultado con «Descargar PDF tachado» ([nombre]-tachado.pdf).',
-    'guia-consejo-1': 'Solo se encuentra el texto real del PDF. Si el documento es un escaneo, una captura o el dato está dentro de una imagen o un logo, no se detecta: pasalo antes por la herramienta de OCR y revisá siempre el resultado.',
+    'guia-paso-4': 'Elegí la «Calidad de las páginas tachadas» (Normal 150 ppp, Buena 200 ppp o Alta 300 ppp) y, si querés máxima seguridad, tildá «Convertir todas las páginas en imagen (máxima seguridad)».',
+    'guia-paso-5': 'Hacé clic en «Tachar y descargar» y bajá el resultado con «Descargar PDF tachado». Si el original se llama contrato.pdf, el resultado es contrato-tachado.pdf.',
+    'guia-consejo-1': 'Solo se encuentra el texto real del PDF. Si el documento es un escaneo, una captura o el dato está dentro de una imagen o un logo, no se detecta: pasalo antes por «OCR de PDF e imágenes escaneadas» y revisá siempre el resultado.',
     'guia-consejo-2': 'Con expresiones regulares podés ocultar patrones, por ejemplo \\d{3}-\\d{4} para teléfonos. Se admiten hasta 200 líneas de hasta 500 caracteres cada una.',
-    'guia-consejo-3': 'Las páginas sin coincidencias quedan igual, con su texto. Tildar «Convertir todas las páginas en imagen» es más seguro si el PDF puede tener texto escondido; si el PDF tiene capas opcionales, se convierte entero de todos modos.',
+    'guia-consejo-3': 'Las páginas sin coincidencias quedan igual, con su texto. Tildar «Convertir todas las páginas en imagen (máxima seguridad)» es más seguro si el PDF puede tener texto escondido; si el PDF tiene capas opcionales, se convierte entero de todos modos.',
     'guia-consejo-4': 'Del archivo final también se quitan comentarios, enlaces, formularios, marcadores, adjuntos y los datos del documento (autor, título), porque podrían contener lo que querés ocultar.',
     'guia-p1': '¿El texto tachado se puede recuperar?',
     'guia-r1': 'No: la página pasa a ser una imagen. Además, antes de entregar el archivo la herramienta comprueba que el texto ya no se encuentre; si no puede garantizarlo, no lo entrega.',
@@ -128,6 +131,7 @@ window.i18nPagina = {
     'resultado-enlace': 'Download redacted PDF',
     'nota-quita': 'The final PDF also drops comments, links, forms, bookmarks, attachments and the document data (author, title…), because they may contain what you want to hide.',
     'error-leer': 'Couldn’t read the PDF',
+    'error-contrasena': 'the PDF has a password. Remove it first with the “Unlock PDF” tool and try again.',
     'error-sin-terminos': 'Type at least one word or phrase to redact.',
     'error-patron': 'The regular expression on line {n} is not valid',
     'error-patron-largo': 'Line {n} is too long (500 characters at most).',
@@ -136,15 +140,16 @@ window.i18nPagina = {
     'error-quedan': 'We couldn’t guarantee that the text was gone ({n} matches are still in the file), so it isn’t delivered. Try "Turn every page into an image".',
     'error-generar': 'Couldn’t redact the PDF',
     'guia-titulo': 'How to redact text in a PDF for real',
+    'guia-mas-link': 'How to really redact sensitive information in a PDF',
     'guia-intro': 'Hiding a piece of data by drawing a black rectangle over it doesn’t delete it: the text is still underneath and can be copied. This tool looks for the words, phrases or patterns you specify, shows where they appear and turns the affected pages into images with black boxes over what was found. That way the original text no longer exists on those pages. It’s useful for names, ID numbers, phone numbers or addresses before sharing a PDF.',
     'guia-paso-1': 'Drag the PDF onto the area or click to choose it.',
     'guia-paso-2': 'In “What to redact (one per line)” type each word or phrase on its own line. If needed, tick “Match case”, “Whole words only” or “Use regular expression”.',
     'guia-paso-3': 'Click “Search the PDF”. A list of matches appears with their page, and a view of the page where what will be redacted is marked in red. You can uncheck the ones you don’t want to redact and move around with the previous and next page buttons.',
-    'guia-paso-4': 'Choose the “Quality of the redacted pages” (Normal 150 dpi, Good 200 dpi or High 300 dpi) and, if you want maximum security, tick “Turn every page into an image”.',
-    'guia-paso-5': 'Click “Redact and download” and get the result with “Download redacted PDF” ([name]-tachado.pdf).',
-    'guia-consejo-1': 'Only the real text of the PDF is found. If the document is a scan, a screenshot, or the data is inside an image or a logo, it isn’t detected: run it through the OCR tool first and always check the result.',
+    'guia-paso-4': 'Choose the “Quality of the redacted pages” (Normal 150 dpi, Good 200 dpi or High 300 dpi) and, if you want maximum security, tick “Turn every page into an image (maximum security)”.',
+    'guia-paso-5': 'Click “Redact and download” and get the result with “Download redacted PDF”. If the original is called contrato.pdf, the result is contrato-tachado.pdf.',
+    'guia-consejo-1': 'Only the real text of the PDF is found. If the document is a scan, a screenshot, or the data is inside an image or a logo, it isn’t detected: run it through “OCR for scanned PDFs and images” first and always check the result.',
     'guia-consejo-2': 'With regular expressions you can hide patterns, for example \\d{3}-\\d{4} for phone numbers. Up to 200 lines of up to 500 characters each are accepted.',
-    'guia-consejo-3': 'Pages without matches stay as they are, with their text. Ticking “Turn every page into an image” is safer if the PDF may contain hidden text; if the PDF has optional layers, it’s converted entirely anyway.',
+    'guia-consejo-3': 'Pages without matches stay as they are, with their text. Ticking “Turn every page into an image (maximum security)” is safer if the PDF may contain hidden text; if the PDF has optional layers, it’s converted entirely anyway.',
     'guia-consejo-4': 'Comments, links, forms, bookmarks, attachments and the document data (author, title) are also removed from the final file, because they could contain what you want to hide.',
     'guia-p1': 'Can the redacted text be recovered?',
     'guia-r1': 'No: the page becomes an image. Also, before handing over the file the tool checks that the text can no longer be found; if it can’t guarantee that, it doesn’t deliver it.',
@@ -266,14 +271,14 @@ window.i18nPagina = {
       <li data-i18n="guia-paso-1">Arrastrá el PDF a la zona o hacé clic para elegirlo.</li>
       <li data-i18n="guia-paso-2">En «Qué tachar (uno por línea)» escribí cada palabra o frase en una línea. Si hace falta, marcá «Coincidir mayúsculas/minúsculas», «Solo palabras completas» o «Usar expresión regular».</li>
       <li data-i18n="guia-paso-3">Hacé clic en «Buscar en el PDF». Aparece una lista de coincidencias con su página y una vista de la página donde lo que se tachará queda marcado en rojo. Podés destildar las que no quieras tachar y navegar con los botones de página anterior y siguiente.</li>
-      <li data-i18n="guia-paso-4">Elegí la «Calidad de las páginas tachadas» (Normal 150 ppp, Buena 200 ppp o Alta 300 ppp) y, si querés máxima seguridad, tildá «Convertir todas las páginas en imagen».</li>
-      <li data-i18n="guia-paso-5">Hacé clic en «Tachar y descargar» y bajá el resultado con «Descargar PDF tachado» ([nombre]-tachado.pdf).</li>
+      <li data-i18n="guia-paso-4">Elegí la «Calidad de las páginas tachadas» (Normal 150 ppp, Buena 200 ppp o Alta 300 ppp) y, si querés máxima seguridad, tildá «Convertir todas las páginas en imagen (máxima seguridad)».</li>
+      <li data-i18n="guia-paso-5">Hacé clic en «Tachar y descargar» y bajá el resultado con «Descargar PDF tachado». Si el original se llama contrato.pdf, el resultado es contrato-tachado.pdf.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">Solo se encuentra el texto real del PDF. Si el documento es un escaneo, una captura o el dato está dentro de una imagen o un logo, no se detecta: pasalo antes por la herramienta de OCR y revisá siempre el resultado.</li>
+      <li data-i18n="guia-consejo-1">Solo se encuentra el texto real del PDF. Si el documento es un escaneo, una captura o el dato está dentro de una imagen o un logo, no se detecta: pasalo antes por «OCR de PDF e imágenes escaneadas» y revisá siempre el resultado.</li>
       <li data-i18n="guia-consejo-2">Con expresiones regulares podés ocultar patrones, por ejemplo \d{3}-\d{4} para teléfonos. Se admiten hasta 200 líneas de hasta 500 caracteres cada una.</li>
-      <li data-i18n="guia-consejo-3">Las páginas sin coincidencias quedan igual, con su texto. Tildar «Convertir todas las páginas en imagen» es más seguro si el PDF puede tener texto escondido; si el PDF tiene capas opcionales, se convierte entero de todos modos.</li>
+      <li data-i18n="guia-consejo-3">Las páginas sin coincidencias quedan igual, con su texto. Tildar «Convertir todas las páginas en imagen (máxima seguridad)» es más seguro si el PDF puede tener texto escondido; si el PDF tiene capas opcionales, se convierte entero de todos modos.</li>
       <li data-i18n="guia-consejo-4">Del archivo final también se quitan comentarios, enlaces, formularios, marcadores, adjuntos y los datos del documento (autor, título), porque podrían contener lo que querés ocultar.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
@@ -293,6 +298,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Cómo sé qué páginas no se pudieron revisar?</summary>
       <p data-i18n="guia-r4">La herramienta avisa cuántas páginas no tienen texto buscable y cuántas tienen imágenes.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/tachar-informacion-sensible-pdf.html" data-i18n="guia-mas-link">Cómo tachar de verdad información sensible en un PDF</a></p>
   </section>
 </main>
 
@@ -368,8 +374,15 @@ async function cargarPdf(archivo) {
     mostrarError(errorBuscar, ''); mostrarError(errorTachar, '');
     document.getElementById('avisoCapas').hidden = true;
   } catch (error) {
-    alert(t('error-leer') + ': ' + detalleError(error));
+    alert(t('error-leer') + ': ' + detalleErrorPdf(error));
   }
+}
+
+// pdf.js avisa con «No password given» (o «Incorrect Password») cuando el PDF tiene contraseña.
+function detalleErrorPdf(error) {
+  const mensaje = (error && error.message) || String(error);
+  if (/password/i.test(mensaje) || (error && error.name === 'PasswordException')) return t('error-contrasena');
+  return detalleError(error);
 }
 
 // Las líneas del cuadro de texto a RegExp (PatronBusqueda, el mismo de Buscar y reemplazar). Devuelve { reglas } o { error }.
@@ -408,7 +421,7 @@ botonBuscar.addEventListener('click', async () => {
     elegidos = new Set(aciertos.map((a) => a.id));
     mostrarResultados(paginasSinTexto, paginasConImagenes);
   } catch (fallo) {
-    mostrarError(errorBuscar, fallo.codigo === 'demasiados' ? t('error-demasiados').replace('{n}', fallo.maximo) : t('error-generar') + ': ' + detalleError(fallo));
+    mostrarError(errorBuscar, fallo.codigo === 'demasiados' ? t('error-demasiados').replace('{n}', fallo.maximo) : t('error-generar') + ': ' + detalleErrorPdf(fallo));
   } finally {
     ocupado = false;
     botonBuscar.disabled = false;
@@ -528,7 +541,7 @@ botonTachar.addEventListener('click', async () => {
     enlaceDescarga.download = `${nombreBase}-tachado.pdf`;
     resultado.classList.add('visible');
   } catch (fallo) {
-    mostrarError(errorTachar, fallo.codigo === 'quedan' ? t('error-quedan').replace('{n}', fallo.quedan) : t('error-generar') + ': ' + detalleError(fallo));
+    mostrarError(errorTachar, fallo.codigo === 'quedan' ? t('error-quedan').replace('{n}', fallo.quedan) : t('error-generar') + ': ' + detalleErrorPdf(fallo));
   } finally {
     ocupado = false;
     botonTachar.disabled = false;

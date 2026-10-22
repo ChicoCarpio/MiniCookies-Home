@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo quitar los datos ocultos de tus fotos y archivos — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Ubicación GPS, cámara, autor y fechas que van dentro de una foto o un PDF. Cómo quitarlos antes de compartir y qué sigue ahí aunque los borres.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo quitar los datos ocultos de tus fotos y archivos — Mini Cookies',
+    'meta-descripcion': 'Ubicación GPS, cámara, autor y fechas que van dentro de una foto o un PDF. Cómo quitarlos antes de compartir y qué sigue ahí aunque los borres.',
+    'h1': 'Cómo quitar los datos ocultos de tus fotos y archivos',
+    'b1': 'Vendés una bicicleta, subís la foto a un grupo de compraventa y, sin darte cuenta, mostrás el lugar donde la sacaste. Muchas fotos de celular guardan la ubicación exacta dentro del archivo, y eso no se ve en la imagen. Un PDF puede pasar algo parecido con el nombre de su autor o con un título como «borrador-final-v7». Los dos casos se resuelven distinto.',
+    'b2': 'Qué guarda una foto',
+    'b3': 'Las fotos de celular y de cámara suelen traer un bloque llamado EXIF. Puede tener el modelo del equipo, la fecha y hora de la toma y, si la ubicación estaba activada para la cámara, las coordenadas GPS. También hay una miniatura interna y, según el programa que la editó, bloques XMP o IPTC que repiten datos o agregan otros, como el nombre del autor.',
+    'b4': 'Algunas aplicaciones de mensajes y de publicación quitan parte de eso al subir una imagen, pero no todas ni siempre.',
+    'b5': 'Cómo quitarlos de una foto',
+    'b6': 'La herramienta <a href="../herramientas/quitar-metadatos-imagen.html">Quitar metadatos EXIF de una foto</a> muestra un resumen y descarga una copia limpia.',
+    'b7-1': 'Arrastrá la foto a la zona de carga o tocá para elegirla. Aparece una vista previa.',
+    'b7-2': 'Mirá el resumen: «Cámara», «Fecha» y «Ubicación GPS», esta última en rojo, con las coordenadas.',
+    'b7-3': 'Tocá «Descargar sin metadatos» y después «Descargar imagen». El archivo se llama «imagen-sin-metadatos».',
+    'b8': 'El resumen muestra solo esos tres datos y no es un inventario. Busca el bloque EXIF entre todos los segmentos que van antes de los datos de la imagen, así que sirve para ver la ubicación, pero no revisa lo que algunos celulares agregan después del final de la imagen. Si no aparece nada, la copia igual sale limpia: la limpieza quita todos los bloques, incluidos XMP, IPTC, comentarios y esos datos finales.',
+    'b9': 'La copia depende del formato. Un JPEG con orientación normal se limpia sin volver a comprimirlo: sus píxeles quedan iguales y conserva el perfil de color. Si esa copia directa falla, por ejemplo con un archivo cuya estructura no reconoce, el JPEG también se vuelve a dibujar con calidad 0,95. Un JPEG que depende de la etiqueta de orientación para verse derecho, lo típico de un celular, se vuelve a dibujar y a exportar con calidad 0,95. Un PNG se redibuja sin pérdida; un WebP, con calidad 0,95, así que pierde un poco de detalle. GIF, BMP y SVG salen como PNG.',
+    'b10': 'Si la foto es HEIC, el formato por defecto de muchos iPhone, el navegador suele no abrirla y la herramienta lo avisa. En el iPhone, Ajustes, Cámara, Formatos, «Más compatible» hace que las fotos nuevas salgan en JPG (según la versión de iOS).',
+    'b11': 'Los datos de un PDF',
+    'b12': 'Un PDF tiene sus propiedades, las que aparecen en «Propiedades del documento» de tu lector: título, autor, asunto, palabras clave, el programa con que se creó y las fechas. Con <a href="../herramientas/editar-metadatos-pdf.html">Editar metadatos de un PDF</a> podés cambiar cuatro de ellas. Dejá un campo vacío para quitar su dato. «Creador» y «Productor» no se tocan, y la fecha de modificación se actualiza al guardar.',
+    'b13': 'La herramienta cambia solo ese bloque de propiedades. Si el PDF trae también un bloque XMP, que escriben muchos programas de oficina, lo deja como estaba, y algunos lectores muestran esos datos en vez de los otros. Después de guardar, abrí el archivo en tu lector y mirá sus propiedades.',
+    'b14': 'EPUB, Word y Excel',
+    'b15': 'En un EPUB, <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a> cambia el título, el autor y el idioma. Los capítulos, la portada, las imágenes, los estilos, el índice y datos como el ISBN quedan igual. Si dejás vacío el autor, se quita. Si dejás vacío el título, queda «Documento», y si dejás vacío el idioma, «es». Con varios autores, el campo cambia solo el primero, y si lo borrás, se quitan todos.',
+    'b16': 'Mini Cookies no tiene una herramienta que limpie las propiedades de Word o de Excel. Office tiene una para eso: «Inspeccionar documento», en Archivo, dentro de «Información» (según la versión). Revisa autor, comentarios y otros datos antes de compartir.',
+    'b17': 'Lo que la limpieza no borra',
+    'b18': 'Quitar los metadatos no vuelve anónimo un archivo. Siguen igual:',
+    'b19-1': 'Lo que se ve en la imagen: una cara, una matrícula, un cartel con el nombre de la calle. Para eso sirve <a href="../herramientas/censurar-imagen.html">Pixelar o difuminar una zona</a>, que pixela o difumina la zona que marcás. No tiene botón para deshacer, así que guardá el original aparte.',
+    'b19-2': 'El nombre del archivo. La copia sale con un nombre nuevo, pero el original sigue con el suyo en tu carpeta.',
+    'b19-3': 'El texto del documento. Un nombre escrito en el cuerpo de un PDF no es un metadato; eso se tacha con <a href="https://seguro.minicookies.net/herramientas/tachar-pdf">Tachar texto de un PDF</a>.',
+    'b19-4': 'Las copias que ya circulan. Limpiar la copia nueva no borra la que mandaste antes.',
+    'b20-c1': 'Archivo',
+    'b20-c2': 'Qué se puede quitar',
+    'b20-c3': 'Herramienta',
+    'b20-f1c1': 'Foto (JPEG, PNG, WebP)',
+    'b20-f1c2': 'Ubicación, cámara, fecha y demás bloques',
+    'b20-f1c3': 'Quitar metadatos EXIF de una foto',
+    'b20-f2c1': 'PDF',
+    'b20-f2c2': 'Título, autor, asunto y palabras clave',
+    'b20-f2c3': 'Editar metadatos de un PDF',
+    'b20-f3c1': 'EPUB',
+    'b20-f3c2': 'Título, autor e idioma',
+    'b20-f3c3': 'Editar metadatos de un EPUB',
+    'b21': 'Preguntas frecuentes',
+    'b22': '<strong>¿Se pierde calidad?</strong> En un JPEG con orientación normal, no: los píxeles quedan idénticos. Los JPEG y WebP que se vuelven a dibujar pasan por una nueva compresión, a calidad 0,95, con una diferencia pequeña.',
+    'b23': '<strong>¿Puedo limpiar varias fotos a la vez?</strong> No. La herramienta trabaja con una foto por vez, y solo con imágenes, no con videos.',
+    'b24': '<strong>¿Cómo sé si una foto tiene ubicación antes de limpiarla?</strong> Al elegirla, la herramienta muestra «Ubicación GPS» en rojo si la encuentra. Solo lee ese dato en JPEG: en PNG o WebP dice que no hay metadatos, aunque la copia que descargues sale sin ninguno.',
+    'b25': 'Resumen',
+    'b26': 'Una foto puede guardar ubicación, cámara y fecha; un PDF, autor, título y palabras clave. Quitalos antes de compartir: con la herramienta de fotos para las imágenes y con la de PDF para los datos del documento. Después recordá lo que los metadatos no cubren: lo que se ve en la imagen, el nombre del archivo y el texto del documento.',
+    'rel1': 'Quitar metadatos EXIF de una foto',
+    'rel2': 'Editar metadatos de un PDF',
+    'rel3': 'Editar metadatos de un EPUB',
+    'rel4': 'Pixelar o difuminar una zona',
+    'rel5': 'Tachar texto de un PDF'
+  },
+  en: {
+    'titulo-pagina': 'How to remove hidden data from your photos and files — Mini Cookies',
+    'meta-descripcion': 'GPS location, camera, author and dates inside a photo or a PDF. How to remove them before you share, and what stays there even after you delete it.',
+    'h1': 'How to remove hidden data from your photos and files',
+    'b1': 'You sell a bicycle, post the photo in a local group and, without noticing, show where you took it. Many phone photos store the exact location inside the file, and none of that shows in the picture. A PDF can do something similar with its author’s name or with a title like “borrador-final-v7”. The two cases are fixed in different ways.',
+    'b2': 'What a photo stores',
+    'b3': 'Phone and camera photos usually carry a block called EXIF. It can hold the device model, the date and time the picture was taken and, if location was on for the camera, GPS coordinates. There is also an internal thumbnail and, depending on the program that edited the photo, XMP or IPTC blocks that repeat data or add more, such as the author’s name.',
+    'b4': 'Some messaging and publishing apps strip part of this when you upload an image, but not all of them, and not always.',
+    'b5': 'How to remove it from a photo',
+    'b6': 'The <a href="../herramientas/quitar-metadatos-imagen.html">Remove EXIF metadata from a photo</a> tool shows a summary and downloads a clean copy.',
+    'b7-1': 'Drag the photo to the upload area or tap to choose it. A preview appears.',
+    'b7-2': 'Look at the summary: “Camera”, “Date” and “GPS location”, the last one in red, with the coordinates.',
+    'b7-3': 'Tap “Download without metadata” and then “Download image”. The file is called “imagen-sin-metadatos”.',
+    'b8': 'The summary shows only those three items and is not an inventory. It searches for the EXIF block among all the segments that come before the image data, so it is useful for checking the location, but it doesn’t look at what some phones append after the end of the image. If nothing appears, the copy still comes out clean: the cleaning removes every block, including XMP, IPTC, comments and that trailing data.',
+    'b9': 'The copy depends on the format. A JPEG with normal orientation is cleaned without being recompressed, so its pixels stay the same and it keeps its colour profile. If that direct copy fails, for example with a file whose structure it doesn’t recognise, the JPEG is redrawn at quality 0.95 too. A JPEG that relies on the orientation tag to look upright, typical of phones, is redrawn and exported again at quality 0.95. A PNG is redrawn without loss; a WebP is redrawn at quality 0.95, so it loses a little detail. GIF, BMP and SVG come out as PNG.',
+    'b10': 'If the photo is HEIC, the default format on many iPhones, the browser usually can’t open it and the tool says so. On an iPhone, go to Settings, Camera, Formats and choose “Most Compatible”: new photos are then saved as JPEG (depending on your iOS version).',
+    'b11': 'PDF data',
+    'b12': 'A PDF has its own properties, the ones you see under “Document properties” in your reader: title, author, subject, keywords, the program that made it and the dates. With <a href="../herramientas/editar-metadatos-pdf.html">Edit PDF metadata</a> you can change four of them. Leave a field empty to remove its data. “Creator” and “Producer” are not touched, and the modification date is updated when you save.',
+    'b13': 'The tool changes only that property block. If the PDF also has an XMP block, which many office programs write, it leaves it as it was, and some readers show those values instead. After saving, open the file in your reader and check its properties.',
+    'b14': 'EPUB, Word and Excel',
+    'b15': 'In an EPUB, <a href="../herramientas/editar-metadatos-epub.html">Edit EPUB metadata</a> changes the title, the author and the language. The chapters, cover, images, styles, table of contents and data such as the ISBN stay the same. Leave the author empty to remove it. If you leave the title empty, it becomes “Document”, and an empty language becomes “es”. With several authors, the field changes only the first one, and if you clear it, all of them are removed.',
+    'b16': 'Mini Cookies has no tool that cleans the properties of Word or Excel files. Office has one for that: “Inspect Document”, under File, in “Info” (the menu path depends on the version). It checks the author, comments and other data before you share the file.',
+    'b17': 'What cleaning does not remove',
+    'b18': 'Removing metadata does not make a file anonymous. These stay as they are:',
+    'b19-1': 'What the picture shows: a face, a number plate, a street sign. <a href="../herramientas/censurar-imagen.html">Pixelate or blur an area</a> is for that. It pixelates or blurs the area you mark, and it has no undo button, so keep the original aside.',
+    'b19-2': 'The file name. The copy gets a new name, but the original keeps its name in your folder.',
+    'b19-3': 'The text of a document. A name written in the body of a PDF is not metadata; that is what <a href="https://seguro.minicookies.net/en/herramientas/tachar-pdf">Redact text in a PDF</a> is for.',
+    'b19-4': 'Copies already in circulation. Cleaning the new copy does not delete the one you sent before.',
+    'b20-c1': 'File',
+    'b20-c2': 'What you can remove',
+    'b20-c3': 'Tool',
+    'b20-f1c1': 'Photo (JPEG, PNG, WebP)',
+    'b20-f1c2': 'Location, camera, date and other blocks',
+    'b20-f1c3': 'Remove EXIF metadata from a photo',
+    'b20-f2c1': 'PDF',
+    'b20-f2c2': 'Title, author, subject and keywords',
+    'b20-f2c3': 'Edit PDF metadata',
+    'b20-f3c1': 'EPUB',
+    'b20-f3c2': 'Title, author and language',
+    'b20-f3c3': 'Edit EPUB metadata',
+    'b21': 'Frequently asked questions',
+    'b22': '<strong>Is quality lost?</strong> In a JPEG with normal orientation, no: the pixels stay identical. JPEG and WebP photos that are redrawn go through a new compression at quality 0.95, with a small difference.',
+    'b23': '<strong>Can I clean several photos at once?</strong> No. The tool works with one photo at a time, and only with images, not videos.',
+    'b24': '<strong>How do I know if a photo has a location before I clean it?</strong> When you choose it, the tool shows “GPS location” in red if it finds one. It only reads that data from JPEG files. For PNG or WebP it says no metadata was found, but the copy you download comes out without any.',
+    'b25': 'Summary',
+    'b26': 'A photo can store location, camera and date; a PDF, author, title and keywords. Remove them before you share: use the photo tool for images and the PDF tool for the document’s data. Then remember what metadata does not cover: what the picture shows, the file name and the text of the document.',
+    'rel1': 'Remove EXIF metadata from a photo',
+    'rel2': 'Edit PDF metadata',
+    'rel3': 'Edit EPUB metadata',
+    'rel4': 'Pixelate or blur an area',
+    'rel5': 'Redact text in a PDF'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo quitar los datos ocultos de tus fotos y archivos</h1>
+    <p data-i18n-html="b1">Vendés una bicicleta, subís la foto a un grupo de compraventa y, sin darte cuenta, mostrás el lugar donde la sacaste. Muchas fotos de celular guardan la ubicación exacta dentro del archivo, y eso no se ve en la imagen. Un PDF puede pasar algo parecido con el nombre de su autor o con un título como «borrador-final-v7». Los dos casos se resuelven distinto.</p>
+    <h2 data-i18n="b2">Qué guarda una foto</h2>
+    <p data-i18n-html="b3">Las fotos de celular y de cámara suelen traer un bloque llamado EXIF. Puede tener el modelo del equipo, la fecha y hora de la toma y, si la ubicación estaba activada para la cámara, las coordenadas GPS. También hay una miniatura interna y, según el programa que la editó, bloques XMP o IPTC que repiten datos o agregan otros, como el nombre del autor.</p>
+    <p data-i18n-html="b4">Algunas aplicaciones de mensajes y de publicación quitan parte de eso al subir una imagen, pero no todas ni siempre.</p>
+    <h2 data-i18n="b5">Cómo quitarlos de una foto</h2>
+    <p data-i18n-html="b6">La herramienta <a href="../herramientas/quitar-metadatos-imagen.html">Quitar metadatos EXIF de una foto</a> muestra un resumen y descarga una copia limpia.</p>
+    <ol>
+      <li data-i18n-html="b7-1">Arrastrá la foto a la zona de carga o tocá para elegirla. Aparece una vista previa.</li>
+      <li data-i18n-html="b7-2">Mirá el resumen: «Cámara», «Fecha» y «Ubicación GPS», esta última en rojo, con las coordenadas.</li>
+      <li data-i18n-html="b7-3">Tocá «Descargar sin metadatos» y después «Descargar imagen». El archivo se llama «imagen-sin-metadatos».</li>
+    </ol>
+    <p data-i18n-html="b8">El resumen muestra solo esos tres datos y no es un inventario. Busca el bloque EXIF entre todos los segmentos que van antes de los datos de la imagen, así que sirve para ver la ubicación, pero no revisa lo que algunos celulares agregan después del final de la imagen. Si no aparece nada, la copia igual sale limpia: la limpieza quita todos los bloques, incluidos XMP, IPTC, comentarios y esos datos finales.</p>
+    <p data-i18n-html="b9">La copia depende del formato. Un JPEG con orientación normal se limpia sin volver a comprimirlo: sus píxeles quedan iguales y conserva el perfil de color. Si esa copia directa falla, por ejemplo con un archivo cuya estructura no reconoce, el JPEG también se vuelve a dibujar con calidad 0,95. Un JPEG que depende de la etiqueta de orientación para verse derecho, lo típico de un celular, se vuelve a dibujar y a exportar con calidad 0,95. Un PNG se redibuja sin pérdida; un WebP, con calidad 0,95, así que pierde un poco de detalle. GIF, BMP y SVG salen como PNG.</p>
+    <p data-i18n-html="b10">Si la foto es HEIC, el formato por defecto de muchos iPhone, el navegador suele no abrirla y la herramienta lo avisa. En el iPhone, Ajustes, Cámara, Formatos, «Más compatible» hace que las fotos nuevas salgan en JPG (según la versión de iOS).</p>
+    <h2 data-i18n="b11">Los datos de un PDF</h2>
+    <p data-i18n-html="b12">Un PDF tiene sus propiedades, las que aparecen en «Propiedades del documento» de tu lector: título, autor, asunto, palabras clave, el programa con que se creó y las fechas. Con <a href="../herramientas/editar-metadatos-pdf.html">Editar metadatos de un PDF</a> podés cambiar cuatro de ellas. Dejá un campo vacío para quitar su dato. «Creador» y «Productor» no se tocan, y la fecha de modificación se actualiza al guardar.</p>
+    <p data-i18n-html="b13">La herramienta cambia solo ese bloque de propiedades. Si el PDF trae también un bloque XMP, que escriben muchos programas de oficina, lo deja como estaba, y algunos lectores muestran esos datos en vez de los otros. Después de guardar, abrí el archivo en tu lector y mirá sus propiedades.</p>
+    <h2 data-i18n="b14">EPUB, Word y Excel</h2>
+    <p data-i18n-html="b15">En un EPUB, <a href="../herramientas/editar-metadatos-epub.html">Editar metadatos de un EPUB</a> cambia el título, el autor y el idioma. Los capítulos, la portada, las imágenes, los estilos, el índice y datos como el ISBN quedan igual. Si dejás vacío el autor, se quita. Si dejás vacío el título, queda «Documento», y si dejás vacío el idioma, «es». Con varios autores, el campo cambia solo el primero, y si lo borrás, se quitan todos.</p>
+    <p data-i18n-html="b16">Mini Cookies no tiene una herramienta que limpie las propiedades de Word o de Excel. Office tiene una para eso: «Inspeccionar documento», en Archivo, dentro de «Información» (según la versión). Revisa autor, comentarios y otros datos antes de compartir.</p>
+    <h2 data-i18n="b17">Lo que la limpieza no borra</h2>
+    <p data-i18n-html="b18">Quitar los metadatos no vuelve anónimo un archivo. Siguen igual:</p>
+    <ul>
+      <li data-i18n-html="b19-1">Lo que se ve en la imagen: una cara, una matrícula, un cartel con el nombre de la calle. Para eso sirve <a href="../herramientas/censurar-imagen.html">Pixelar o difuminar una zona</a>, que pixela o difumina la zona que marcás. No tiene botón para deshacer, así que guardá el original aparte.</li>
+      <li data-i18n-html="b19-2">El nombre del archivo. La copia sale con un nombre nuevo, pero el original sigue con el suyo en tu carpeta.</li>
+      <li data-i18n-html="b19-3">El texto del documento. Un nombre escrito en el cuerpo de un PDF no es un metadato; eso se tacha con <a href="https://seguro.minicookies.net/herramientas/tachar-pdf">Tachar texto de un PDF</a>.</li>
+      <li data-i18n-html="b19-4">Las copias que ya circulan. Limpiar la copia nueva no borra la que mandaste antes.</li>
+    </ul>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b20-c1">Archivo</th><th data-i18n-html="b20-c2">Qué se puede quitar</th><th data-i18n-html="b20-c3">Herramienta</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b20-f1c1">Foto (JPEG, PNG, WebP)</td><td data-i18n-html="b20-f1c2">Ubicación, cámara, fecha y demás bloques</td><td data-i18n-html="b20-f1c3">Quitar metadatos EXIF de una foto</td></tr>
+        <tr><td data-i18n-html="b20-f2c1">PDF</td><td data-i18n-html="b20-f2c2">Título, autor, asunto y palabras clave</td><td data-i18n-html="b20-f2c3">Editar metadatos de un PDF</td></tr>
+        <tr><td data-i18n-html="b20-f3c1">EPUB</td><td data-i18n-html="b20-f3c2">Título, autor e idioma</td><td data-i18n-html="b20-f3c3">Editar metadatos de un EPUB</td></tr>
+      </tbody>
+    </table></div>
+    <h2 data-i18n="b21">Preguntas frecuentes</h2>
+    <p data-i18n-html="b22"><strong>¿Se pierde calidad?</strong> En un JPEG con orientación normal, no: los píxeles quedan idénticos. Los JPEG y WebP que se vuelven a dibujar pasan por una nueva compresión, a calidad 0,95, con una diferencia pequeña.</p>
+    <p data-i18n-html="b23"><strong>¿Puedo limpiar varias fotos a la vez?</strong> No. La herramienta trabaja con una foto por vez, y solo con imágenes, no con videos.</p>
+    <p data-i18n-html="b24"><strong>¿Cómo sé si una foto tiene ubicación antes de limpiarla?</strong> Al elegirla, la herramienta muestra «Ubicación GPS» en rojo si la encuentra. Solo lee ese dato en JPEG: en PNG o WebP dice que no hay metadatos, aunque la copia que descargues sale sin ninguno.</p>
+    <h2 data-i18n="b25">Resumen</h2>
+    <p data-i18n-html="b26">Una foto puede guardar ubicación, cámara y fecha; un PDF, autor, título y palabras clave. Quitalos antes de compartir: con la herramienta de fotos para las imágenes y con la de PDF para los datos del documento. Después recordá lo que los metadatos no cubren: lo que se ve en la imagen, el nombre del archivo y el texto del documento.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/quitar-metadatos-imagen.html" data-i18n="rel1">Quitar metadatos EXIF de una foto</a></li>
+      <li><a href="../herramientas/editar-metadatos-pdf.html" data-i18n="rel2">Editar metadatos de un PDF</a></li>
+      <li><a href="../herramientas/editar-metadatos-epub.html" data-i18n="rel3">Editar metadatos de un EPUB</a></li>
+      <li><a href="../herramientas/censurar-imagen.html" data-i18n="rel4">Pixelar o difuminar una zona</a></li>
+      <li><a href="https://seguro.minicookies.net/herramientas/tachar-pdf" data-i18n="rel5">Tachar texto de un PDF</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

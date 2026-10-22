@@ -30,8 +30,10 @@ window.i18nPagina = {
     'error-sin-estructura': 'El archivo no tiene la estructura mínima de un .docx — no se puede reparar.',
     'error-sin-texto': 'No se pudo rescatar texto legible de este archivo.',
     'mensaje-nivel2-ok': '⚠️ El documento estaba dañado — se recuperó solo el texto plano, sin el formato original.',
+    'error-tipo-archivo': 'Ese archivo no es un documento de Word (.docx). Elegí un archivo .docx.',
     'error-reparar': 'No se pudo reparar el documento',
     'guia-titulo': 'Cómo reparar un documento de Word dañado',
+    'guia-mas-link': 'Cómo recuperar un archivo de Word, Excel, PowerPoint o PDF dañado',
     'guia-intro': 'Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado.',
     'guia-paso-1': 'Arrastrá el documento a la zona «Arrastrá tu documento .docx acá o hacé clic para elegirlo».',
     'guia-paso-2': 'Hacé clic en «Reparar» y esperá a que el botón deje de decir «Reparando...».',
@@ -41,7 +43,7 @@ window.i18nPagina = {
     'guia-consejo-2': 'Si el aviso indica texto plano, copiá el contenido a una plantilla propia y volvé a aplicar el formato.',
     'guia-consejo-3': 'Conservá siempre el archivo original: la herramienta nunca lo modifica, pero el reparado puede perder detalles.',
     'guia-consejo-4': 'Limitación importante: el primer nivel reconstruye el documento (lo lee, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.',
-    'guia-consejo-5': 'Sirve también para documentos que Word marca como dañados tras una descarga interrumpida, siempre que el interior del archivo siga siendo un .docx legible.',
+    'guia-consejo-5': 'Sirve también para documentos que Word marca como dañados, siempre que el archivo siga siendo un ZIP completo. Si la descarga se cortó, al final le falta el índice del ZIP y la herramienta no lo puede abrir.',
     'guia-p1': '¿Qué pierdo en el modo de texto plano?',
     'guia-r1': 'Negrita, tablas, imágenes y cualquier formato; se recupera solo el contenido escrito.',
     'guia-p2': '¿Qué hago si da error?',
@@ -70,8 +72,10 @@ window.i18nPagina = {
     'error-sin-estructura': 'The file doesn’t have the minimum structure of a .docx — it can’t be repaired.',
     'error-sin-texto': 'No readable text could be rescued from this file.',
     'mensaje-nivel2-ok': '⚠️ The document was damaged — only the plain text was recovered, without the original formatting.',
+    'error-tipo-archivo': 'That file is not a Word document (.docx). Pick a .docx file.',
     'error-reparar': 'Couldn’t repair the document',
     'guia-titulo': 'How to repair a damaged Word document',
+    'guia-mas-link': 'How to recover a damaged Word, Excel, PowerPoint or PDF file',
     'guia-intro': 'If a .docx document won’t open in Word or the unreadable-content message appears, this tool tries to rebuild it. First it reads it with a forgiving reader and builds a new document from scratch; if that fails, as a last resort it rescues the raw text of the file. It takes a .docx and returns a new .docx that will probably open without problems but with simplified formatting.',
     'guia-paso-1': 'Drag the document to the “Drag your .docx document here or click to choose it” area.',
     'guia-paso-2': 'Click “Repair” and wait until the button stops saying “Repairing...”.',
@@ -81,7 +85,7 @@ window.i18nPagina = {
     'guia-consejo-2': 'If the notice says plain text, copy the content into your own template and apply the formatting again.',
     'guia-consejo-3': 'Always keep the original file: the tool never modifies it, but the repaired one may lose details.',
     'guia-consejo-4': 'Important limitation: the first level rebuilds the document (it reads it, turns it into HTML and writes it back as a .docx), so headers, footers and styles may be lost.',
-    'guia-consejo-5': 'It also works for documents that Word flags as damaged after an interrupted download, as long as the inside of the file is still a readable .docx.',
+    'guia-consejo-5': 'It also works for documents that Word flags as damaged, as long as the file is still a complete ZIP. If the download was cut off, the end of the ZIP is missing and the tool can’t open it.',
     'guia-p1': 'What do I lose in plain-text mode?',
     'guia-r1': 'Bold, tables, images and any formatting; only the written content is recovered.',
     'guia-p2': 'What do I do if it gives an error?',
@@ -154,7 +158,7 @@ window.i18nPagina = {
       <li data-i18n="guia-consejo-2">Si el aviso indica texto plano, copiá el contenido a una plantilla propia y volvé a aplicar el formato.</li>
       <li data-i18n="guia-consejo-3">Conservá siempre el archivo original: la herramienta nunca lo modifica, pero el reparado puede perder detalles.</li>
       <li data-i18n="guia-consejo-4">Limitación importante: el primer nivel reconstruye el documento (lo lee, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.</li>
-      <li data-i18n="guia-consejo-5">Sirve también para documentos que Word marca como dañados tras una descarga interrumpida, siempre que el interior del archivo siga siendo un .docx legible.</li>
+      <li data-i18n="guia-consejo-5">Sirve también para documentos que Word marca como dañados, siempre que el archivo siga siendo un ZIP completo. Si la descarga se cortó, al final le falta el índice del ZIP y la herramienta no lo puede abrir.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
@@ -173,6 +177,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Puedo reparar varios a la vez?</summary>
       <p data-i18n="guia-r4">No, se trabaja con un documento por vez.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/reparar-documentos-danados.html" data-i18n="guia-mas-link">Cómo recuperar un archivo de Word, Excel, PowerPoint o PDF dañado</a></p>
   </section>
 </main>
 
@@ -211,6 +216,7 @@ function mostrarArchivo(archivo) {
 function elegirArchivo(listaFileList) {
   const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
   if (archivo) mostrarArchivo(archivo);
+  else alert(t('error-tipo-archivo'));
 }
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
@@ -220,6 +226,30 @@ function textoAHtml(texto) {
     const escapado = parrafo.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
     return `<p>${escapado.replace(/\n/g, '<br>')}</p>`;
   }).join('');
+}
+
+// Entidades XML (las cinco con nombre y las numéricas): un &amp; del documento no puede aparecer literal en el texto rescatado.
+function decodificarEntidades(texto) {
+  return texto.replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi, (m, e) => {
+    const nombre = e.toLowerCase();
+    if (nombre[0] === '#') {
+      const codigo = nombre[1] === 'x' ? parseInt(nombre.slice(2), 16) : parseInt(nombre.slice(1), 10);
+      return codigo > 0 && codigo <= 0x10FFFF && !(codigo >= 0xD800 && codigo <= 0xDFFF) ? String.fromCodePoint(codigo) : m;
+    }
+    return { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }[nombre];
+  });
+}
+
+// Texto crudo de word/document.xml sin exigir un XML válido: un párrafo por cada <w:p> (los w:t de un mismo párrafo se pegan, porque Word parte las
+// palabras en varios), separados por una línea en blanco, que es lo que textoAHtml corta en párrafos.
+function textoDeParrafos(xmlTexto) {
+  const parrafos = [];
+  for (const trozo of xmlTexto.split(/<w:p[\s>]/)) {
+    const partes = [...trozo.matchAll(/<w:t(?:\s[^>\/]*)?>([^<]*)<\/w:t>/g)].map(m => decodificarEntidades(m[1]));
+    const linea = partes.join('').replace(/\s*\n\s*/g, ' ').trim();
+    if (linea) parrafos.push(linea);
+  }
+  return parrafos.join('\n\n');
 }
 
 async function guardarComoDocx(parrafos) {
@@ -255,8 +285,7 @@ botonReparar.addEventListener('click', async () => {
       if (!documentoXml) throw new Error(t('error-sin-estructura'));
 
       const xmlTexto = await documentoXml.async('string');
-      const coincidencias = [...xmlTexto.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)];
-      const texto = coincidencias.map(m => m[1]).join(' ').trim();
+      const texto = textoDeParrafos(xmlTexto);
       if (!texto) throw new Error(t('error-sin-texto'));
 
       const contenedor = document.createElement('div');

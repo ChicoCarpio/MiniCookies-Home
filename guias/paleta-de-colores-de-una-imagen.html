@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo sacar la paleta de colores de una imagen (HEX y RGB) y usarla en tu diseño — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Extraé los colores dominantes de una foto o un logo, copiá su código HEX y armá esquemas de color. Con consejos de contraste y sus límites.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo sacar la paleta de colores de una imagen (HEX y RGB) y usarla en tu diseño — Mini Cookies',
+    'meta-descripcion': 'Extraé los colores dominantes de una foto o un logo, copiá su código HEX y armá esquemas de color. Con consejos de contraste y sus límites.',
+    'h1': 'Cómo sacar la paleta de colores de una imagen (HEX y RGB) y usarla en tu diseño',
+    'b1': 'Querés que la presentación o la web usen los colores de una foto o de un logo. A ojo sale parecido, pero nunca igual. Conviene copiar el código exacto de cada color y trabajar con esos valores. Acá vas a ver cómo sacar la paleta, cómo armar combinaciones a partir de un color y qué comprobar para que el texto se lea.',
+    'b2': 'Cómo se escribe un color',
+    'b3': 'El HEX es un código de seis cifras con <code>#</code> delante, como <code>#1e90ff</code>. Es el formato que piden la mayoría de los editores, los sitios web y las plantillas. El RGB da tres números de 0 a 255, uno por el rojo, otro por el verde y otro por el azul: <code>rgb(30, 144, 255)</code>.',
+    'b4': 'Son el mismo color escrito de dos maneras. En el HEX, cada par de cifras es un número en base 16: <code>1e</code> vale 30, <code>90</code> vale 144 y <code>ff</code> vale 255.',
+    'b5': 'Sacar la paleta',
+    'b6-1': 'Abrí <a href="../herramientas/paleta-colores-imagen.html">Extraer paleta de colores</a> y arrastrá tu imagen o hacé clic para elegirla. Aparecen la vista previa y los colores dominantes.',
+    'b6-2': 'Con «Cantidad de colores» elegí entre 4 y 16. Empieza en 8, y al moverlo la paleta se vuelve a calcular.',
+    'b6-3': 'Tocá un color para copiar su código HEX. Ese color pasa a ser el «Color base» de los esquemas. Si buscás un punto concreto, tocá la imagen con el cuentagotas.',
+    'b6-4': 'Descargá el resultado con «Descargar paleta (.png)», una tarjeta por color, o con «Descargar códigos (.txt)».',
+    'b7': 'El <code>.txt</code> trae cada color con su HEX en mayúsculas, su RGB y su porcentaje. Debajo agrega el esquema calculado a partir del color base. La tarjeta <code>.png</code> muestra el HEX y el porcentaje de cada color.',
+    'b8': 'Cómo elige los colores',
+    'b9': 'La herramienta agrupa los píxeles de colores parecidos y muestra el promedio de cada grupo. Después ordena los grupos por la superficie que ocupan y se queda con los que pediste. Los píxeles transparentes no cuentan.',
+    'b10': 'Como el criterio es la superficie, el fondo suele quedar primero: en un logo sobre blanco, lo más probable es que el blanco sea el primer color de la lista. Si no te interesa, recortá antes con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> y dejá solo la parte que querés analizar. Dos tonos muy parecidos pueden caer en grupos distintos, y un color que ocupa muy poco puede quedar afuera.',
+    'b11': 'Esquemas de color',
+    'b12': 'Con un color base elegido, «Esquema» arma combinaciones. Cada una gira el tono del color en el círculo cromático y conserva su saturación y su luminosidad.',
+    'b13-c1': 'Esquema',
+    'b13-c2': 'Cómo se arma',
+    'b13-f1c1': 'Complementario',
+    'b13-f1c2': 'El color opuesto, a 180°',
+    'b13-f2c1': 'Análogos',
+    'b13-f2c2': 'El color base y sus dos vecinos, a 30° a cada lado',
+    'b13-f3c1': 'Triádico',
+    'b13-f3c2': 'Tres colores separados 120°',
+    'b13-f4c1': 'Complementario dividido',
+    'b13-f4c2': 'Los dos vecinos del opuesto, a 150° y 210°',
+    'b13-f5c1': 'Tetrádico',
+    'b13-f5c2': 'Cuatro colores separados 90°',
+    'b14': 'Los análogos dan combinaciones tranquilas. El complementario y el triádico dan más contraste. El giro se hace sobre el tono en HSL, y en ese modelo la luminosidad no coincide con lo que el ojo percibe: un amarillo y un azul con la misma luminosidad en HSL no se ven igual de claros. Mirá el esquema antes de usarlo.',
+    'b15': 'Usar la paleta en un diseño',
+    'b16': 'Una pauta común reparte el diseño en aproximadamente un 60 % para un color base, un 30 % para uno secundario y un 10 % para un acento. Es una guía de proporción, no una regla.',
+    'b17': 'El texto tiene que contrastar con el fondo. Las pautas de accesibilidad web (WCAG) piden al menos 4,5:1 para texto normal y 3:1 para texto grande. Dos colores de la misma paleta suelen no llegar a eso entre sí, así que conviene un texto oscuro sobre fondo claro, o al revés. Esta herramienta no calcula esa relación; para medirla, usá un verificador de contraste.',
+    'b18': 'Una prueba rápida es la escala de grises. Hacé una captura de tu diseño, cargala en <a href="../herramientas/Editor-de-color-de-imagen.html">Editor de color</a>, abrí «Blanco y negro» y marcá «Convertir a blanco y negro». Si el texto y el fondo quedan casi iguales en gris, el contraste es bajo, aunque los colores se vean distintos. Es una comprobación visual, no un número.',
+    'b19': 'Si la paleta sale de un logo, <a href="../herramientas/generar-favicon.html">Generar favicon</a> arma el ícono en los tamaños que usa la web, incluido <code>favicon.ico</code>. Funciona mejor con una imagen cuadrada y simple: si no lo es, la recorta desde el centro.',
+    'b20': 'Límites que conviene conocer',
+    'b21': 'Una foto no tiene un solo color. La luz, la hora, la cámara y la compresión JPG cambian los tonos, así que el rojo de una remera puede salir distinto en dos fotos del mismo objeto. La paleta es una aproximación de esa foto.',
+    'b22': 'El cuentagotas lee un solo píxel, que en una foto puede ser un punto con ruido. Para un tono representativo, conviene tocar un color de la paleta, que es un promedio.',
+    'b23': 'La herramienta muestra HEX en pantalla y RGB en el <code>.txt</code>. No da HSL ni nombres de colores.',
+    'b24': 'Preguntas frecuentes',
+    'b25': '<strong>¿Qué formatos de imagen acepta?</strong> Cualquiera que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.',
+    'b26': '<strong>¿Cómo se llaman los archivos descargados?</strong> Con el nombre de tu imagen y «-paleta»: por ejemplo, <code>logo-paleta.png</code> y <code>logo-paleta.txt</code>.',
+    'b27': '<strong>¿Los porcentajes suman 100?</strong> No. Se calculan sobre todos los píxeles que no son transparentes, y solo se muestran los colores que pediste. Los que quedan afuera también ocupan parte de la imagen.',
+    'b28': 'Resumen',
+    'b29': 'Para trabajar con los colores de una imagen: sacá la paleta, copiá los códigos HEX, probá un esquema desde un color base y revisá que el texto contraste con el fondo (al menos 4,5:1 para texto normal). Los colores de una foto dependen de la luz y de la compresión, así que tomá la paleta como una buena aproximación, no como un valor exacto.',
+    'rel1': 'Extraer paleta de colores',
+    'rel2': 'Recortar imagen',
+    'rel3': 'Editor de color',
+    'rel4': 'Generar favicon'
+  },
+  en: {
+    'titulo-pagina': 'How to get the color palette of an image (HEX and RGB) and use it in your design — Mini Cookies',
+    'meta-descripcion': 'Extract the dominant colors of a photo or logo, copy their HEX code and build color schemes. With contrast tips and their limits.',
+    'h1': 'How to get the color palette of an image (HEX and RGB) and use it in your design',
+    'b1': 'You want a presentation or a website to use the colors of a photo or a logo. By eye the result looks similar, never identical. It is better to copy the exact code of each color and work with those values. Here you\'ll see how to pull out the palette, how to build combinations from one color, and what to check so the text stays readable.',
+    'b2': 'How a color is written',
+    'b3': 'HEX is a six-digit code with a <code>#</code> in front, such as <code>#1e90ff</code>. Most editors, websites and templates ask for this format. RGB gives three numbers from 0 to 255, one each for red, green and blue: <code>rgb(30, 144, 255)</code>.',
+    'b4': 'They are the same color written two ways. In HEX, each pair of digits is a base-16 number: <code>1e</code> is 30, <code>90</code> is 144 and <code>ff</code> is 255.',
+    'b5': 'Pull out the palette',
+    'b6-1': 'Open <a href="../herramientas/paleta-colores-imagen.html">Extract a color palette</a> and drag your image in or click to choose it. The preview and the dominant colors appear.',
+    'b6-2': 'Use “Number of colors” to choose between 4 and 16. It starts at 8, and moving it recalculates the palette.',
+    'b6-3': 'Tap a color to copy its HEX code. That color becomes the “Base color” for the schemes. To pick a specific point, tap the image with the eyedropper.',
+    'b6-4': 'Download the result with “Download palette (.png)”, one card per color, or with “Download codes (.txt)”.',
+    'b7': 'The <code>.txt</code> file lists each color with its HEX in capitals, its RGB value and its percentage. Below that it adds the scheme worked out from the base color. The <code>.png</code> card shows the HEX and the percentage of each color.',
+    'b8': 'How the colors are chosen',
+    'b9': 'The tool groups pixels of similar colors and shows the average of each group. Then it sorts the groups by how much area they cover and keeps as many as you asked for. Transparent pixels don\'t count.',
+    'b10': 'Because the ranking is by area, the background usually comes first: on a logo over white, white is most likely the first color in the list. If you don\'t want that, crop first with <a href="../herramientas/recortar-imagen.html">Crop an image</a> and keep only the part you want to analyze. Two very similar tones can land in different groups, and a color that covers very little may be left out.',
+    'b11': 'Color schemes',
+    'b12': 'With a base color chosen, “Scheme” builds combinations. Each one rotates the hue of the color around the color wheel and keeps its saturation and lightness.',
+    'b13-c1': 'Scheme',
+    'b13-c2': 'How it is built',
+    'b13-f1c1': 'Complementary',
+    'b13-f1c2': 'The opposite color, at 180°',
+    'b13-f2c1': 'Analogous',
+    'b13-f2c2': 'The base color and its two neighbors, 30° on each side',
+    'b13-f3c1': 'Triadic',
+    'b13-f3c2': 'Three colors 120° apart',
+    'b13-f4c1': 'Split complementary',
+    'b13-f4c2': 'The two neighbors of the opposite color, at 150° and 210°',
+    'b13-f5c1': 'Tetradic',
+    'b13-f5c2': 'Four colors 90° apart',
+    'b14': 'Analogous schemes give calm combinations. Complementary and triadic ones give more contrast. The rotation is done on the hue in HSL, and in that model lightness doesn\'t match what the eye perceives: a yellow and a blue with the same HSL lightness don\'t look equally light. Look at the scheme before you use it.',
+    'b15': 'Use the palette in a design',
+    'b16': 'A common guideline splits a design into roughly 60% for a base color, 30% for a secondary one and 10% for an accent. It is a proportion guide, not a rule.',
+    'b17': 'Text has to contrast with its background. The Web Content Accessibility Guidelines (WCAG) ask for at least 4.5:1 for normal text and 3:1 for large text. Two colors from the same palette often don\'t reach that against each other, so dark text on a light background, or the reverse, is usually the way. This tool doesn\'t calculate that ratio; to measure it, use a contrast checker.',
+    'b18': 'A quick test is the grayscale view. Make a screenshot of your design, load it in <a href="../herramientas/Editor-de-color-de-imagen.html">Color editor</a>, open “Black and white” and tick “Convert to black and white”. If the text and the background look almost the same in gray, the contrast is low, even if the colors look different. It is a visual check, not a number.',
+    'b19': 'If the palette comes from a logo, <a href="../herramientas/generar-favicon.html">Generate a favicon</a> builds the icon in the sizes the web uses, including <code>favicon.ico</code>. It works best with a simple square image: if the image isn\'t square, it is cropped from the center.',
+    'b20': 'Limits to know',
+    'b21': 'A photo doesn\'t have one single color. Light, time of day, camera and JPG compression all shift the tones, so a red shirt may come out different in two photos of the same object. The palette is an approximation of that photo.',
+    'b22': 'The eyedropper reads a single pixel, which in a photo can be a noisy dot. For a representative tone, tap a color in the palette instead, since that is an average.',
+    'b23': 'The tool shows HEX on screen and RGB in the <code>.txt</code>. It doesn\'t give HSL or color names.',
+    'b24': 'Frequently asked questions',
+    'b25': '<strong>Which image formats does it accept?</strong> Any format your browser can open, such as JPG, PNG, WebP or GIF.',
+    'b26': '<strong>What are the downloaded files called?</strong> The image name plus “-paleta”: for example, <code>logo-paleta.png</code> and <code>logo-paleta.txt</code>.',
+    'b27': '<strong>Do the percentages add up to 100?</strong> No. They are calculated over all the pixels that aren\'t transparent, and only the colors you asked for are shown. The ones left out also take up part of the image.',
+    'b28': 'Summary',
+    'b29': 'To work with the colors of an image: pull out the palette, copy the HEX codes, try a scheme from a base color and check that the text contrasts with the background (at least 4.5:1 for normal text). Photo colors depend on light and compression, so treat the palette as a good approximation, not an exact value.',
+    'rel1': 'Extract a color palette',
+    'rel2': 'Crop an image',
+    'rel3': 'Color editor',
+    'rel4': 'Generate a favicon'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo sacar la paleta de colores de una imagen (HEX y RGB) y usarla en tu diseño</h1>
+    <p data-i18n-html="b1">Querés que la presentación o la web usen los colores de una foto o de un logo. A ojo sale parecido, pero nunca igual. Conviene copiar el código exacto de cada color y trabajar con esos valores. Acá vas a ver cómo sacar la paleta, cómo armar combinaciones a partir de un color y qué comprobar para que el texto se lea.</p>
+    <h2 data-i18n="b2">Cómo se escribe un color</h2>
+    <p data-i18n-html="b3">El HEX es un código de seis cifras con <code>#</code> delante, como <code>#1e90ff</code>. Es el formato que piden la mayoría de los editores, los sitios web y las plantillas. El RGB da tres números de 0 a 255, uno por el rojo, otro por el verde y otro por el azul: <code>rgb(30, 144, 255)</code>.</p>
+    <p data-i18n-html="b4">Son el mismo color escrito de dos maneras. En el HEX, cada par de cifras es un número en base 16: <code>1e</code> vale 30, <code>90</code> vale 144 y <code>ff</code> vale 255.</p>
+    <h2 data-i18n="b5">Sacar la paleta</h2>
+    <ol>
+      <li data-i18n-html="b6-1">Abrí <a href="../herramientas/paleta-colores-imagen.html">Extraer paleta de colores</a> y arrastrá tu imagen o hacé clic para elegirla. Aparecen la vista previa y los colores dominantes.</li>
+      <li data-i18n-html="b6-2">Con «Cantidad de colores» elegí entre 4 y 16. Empieza en 8, y al moverlo la paleta se vuelve a calcular.</li>
+      <li data-i18n-html="b6-3">Tocá un color para copiar su código HEX. Ese color pasa a ser el «Color base» de los esquemas. Si buscás un punto concreto, tocá la imagen con el cuentagotas.</li>
+      <li data-i18n-html="b6-4">Descargá el resultado con «Descargar paleta (.png)», una tarjeta por color, o con «Descargar códigos (.txt)».</li>
+    </ol>
+    <p data-i18n-html="b7">El <code>.txt</code> trae cada color con su HEX en mayúsculas, su RGB y su porcentaje. Debajo agrega el esquema calculado a partir del color base. La tarjeta <code>.png</code> muestra el HEX y el porcentaje de cada color.</p>
+    <h2 data-i18n="b8">Cómo elige los colores</h2>
+    <p data-i18n-html="b9">La herramienta agrupa los píxeles de colores parecidos y muestra el promedio de cada grupo. Después ordena los grupos por la superficie que ocupan y se queda con los que pediste. Los píxeles transparentes no cuentan.</p>
+    <p data-i18n-html="b10">Como el criterio es la superficie, el fondo suele quedar primero: en un logo sobre blanco, lo más probable es que el blanco sea el primer color de la lista. Si no te interesa, recortá antes con <a href="../herramientas/recortar-imagen.html">Recortar imagen</a> y dejá solo la parte que querés analizar. Dos tonos muy parecidos pueden caer en grupos distintos, y un color que ocupa muy poco puede quedar afuera.</p>
+    <h2 data-i18n="b11">Esquemas de color</h2>
+    <p data-i18n-html="b12">Con un color base elegido, «Esquema» arma combinaciones. Cada una gira el tono del color en el círculo cromático y conserva su saturación y su luminosidad.</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b13-c1">Esquema</th><th data-i18n-html="b13-c2">Cómo se arma</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b13-f1c1">Complementario</td><td data-i18n-html="b13-f1c2">El color opuesto, a 180°</td></tr>
+        <tr><td data-i18n-html="b13-f2c1">Análogos</td><td data-i18n-html="b13-f2c2">El color base y sus dos vecinos, a 30° a cada lado</td></tr>
+        <tr><td data-i18n-html="b13-f3c1">Triádico</td><td data-i18n-html="b13-f3c2">Tres colores separados 120°</td></tr>
+        <tr><td data-i18n-html="b13-f4c1">Complementario dividido</td><td data-i18n-html="b13-f4c2">Los dos vecinos del opuesto, a 150° y 210°</td></tr>
+        <tr><td data-i18n-html="b13-f5c1">Tetrádico</td><td data-i18n-html="b13-f5c2">Cuatro colores separados 90°</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b14">Los análogos dan combinaciones tranquilas. El complementario y el triádico dan más contraste. El giro se hace sobre el tono en HSL, y en ese modelo la luminosidad no coincide con lo que el ojo percibe: un amarillo y un azul con la misma luminosidad en HSL no se ven igual de claros. Mirá el esquema antes de usarlo.</p>
+    <h2 data-i18n="b15">Usar la paleta en un diseño</h2>
+    <p data-i18n-html="b16">Una pauta común reparte el diseño en aproximadamente un 60 % para un color base, un 30 % para uno secundario y un 10 % para un acento. Es una guía de proporción, no una regla.</p>
+    <p data-i18n-html="b17">El texto tiene que contrastar con el fondo. Las pautas de accesibilidad web (WCAG) piden al menos 4,5:1 para texto normal y 3:1 para texto grande. Dos colores de la misma paleta suelen no llegar a eso entre sí, así que conviene un texto oscuro sobre fondo claro, o al revés. Esta herramienta no calcula esa relación; para medirla, usá un verificador de contraste.</p>
+    <p data-i18n-html="b18">Una prueba rápida es la escala de grises. Hacé una captura de tu diseño, cargala en <a href="../herramientas/Editor-de-color-de-imagen.html">Editor de color</a>, abrí «Blanco y negro» y marcá «Convertir a blanco y negro». Si el texto y el fondo quedan casi iguales en gris, el contraste es bajo, aunque los colores se vean distintos. Es una comprobación visual, no un número.</p>
+    <p data-i18n-html="b19">Si la paleta sale de un logo, <a href="../herramientas/generar-favicon.html">Generar favicon</a> arma el ícono en los tamaños que usa la web, incluido <code>favicon.ico</code>. Funciona mejor con una imagen cuadrada y simple: si no lo es, la recorta desde el centro.</p>
+    <h2 data-i18n="b20">Límites que conviene conocer</h2>
+    <p data-i18n-html="b21">Una foto no tiene un solo color. La luz, la hora, la cámara y la compresión JPG cambian los tonos, así que el rojo de una remera puede salir distinto en dos fotos del mismo objeto. La paleta es una aproximación de esa foto.</p>
+    <p data-i18n-html="b22">El cuentagotas lee un solo píxel, que en una foto puede ser un punto con ruido. Para un tono representativo, conviene tocar un color de la paleta, que es un promedio.</p>
+    <p data-i18n-html="b23">La herramienta muestra HEX en pantalla y RGB en el <code>.txt</code>. No da HSL ni nombres de colores.</p>
+    <h2 data-i18n="b24">Preguntas frecuentes</h2>
+    <p data-i18n-html="b25"><strong>¿Qué formatos de imagen acepta?</strong> Cualquiera que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.</p>
+    <p data-i18n-html="b26"><strong>¿Cómo se llaman los archivos descargados?</strong> Con el nombre de tu imagen y «-paleta»: por ejemplo, <code>logo-paleta.png</code> y <code>logo-paleta.txt</code>.</p>
+    <p data-i18n-html="b27"><strong>¿Los porcentajes suman 100?</strong> No. Se calculan sobre todos los píxeles que no son transparentes, y solo se muestran los colores que pediste. Los que quedan afuera también ocupan parte de la imagen.</p>
+    <h2 data-i18n="b28">Resumen</h2>
+    <p data-i18n-html="b29">Para trabajar con los colores de una imagen: sacá la paleta, copiá los códigos HEX, probá un esquema desde un color base y revisá que el texto contraste con el fondo (al menos 4,5:1 para texto normal). Los colores de una foto dependen de la luz y de la compresión, así que tomá la paleta como una buena aproximación, no como un valor exacto.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/paleta-colores-imagen.html" data-i18n="rel1">Extraer paleta de colores</a></li>
+      <li><a href="../herramientas/recortar-imagen.html" data-i18n="rel2">Recortar imagen</a></li>
+      <li><a href="../herramientas/Editor-de-color-de-imagen.html" data-i18n="rel3">Editor de color</a></li>
+      <li><a href="../herramientas/generar-favicon.html" data-i18n="rel4">Generar favicon</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

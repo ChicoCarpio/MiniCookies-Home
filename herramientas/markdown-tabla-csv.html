@@ -35,7 +35,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Pegá o escribí tu contenido en el cuadro de la izquierda. Al cambiar de dirección aparece un ejemplo que podés reemplazar.',
     'guia-paso-3': 'Tocá «Convertir». El resultado aparece en el cuadro de la derecha.',
     'guia-paso-4': 'Usá «Copiar resultado» para llevarlo al portapapeles, o «Descargar» para bajar tabla.csv o tabla.md según la dirección.',
-    'guia-consejo-1': 'Una tabla Markdown válida necesita la fila de encabezado y la línea separadora (| --- | --- |). Si falta, la herramienta avisa que no encontró una tabla válida.',
+    'guia-consejo-1': 'En Markdown, la línea separadora (| --- | --- |) va debajo de la fila de encabezado. Si hay menos de dos líneas que empiecen con |, la herramienta avisa que no encontró una tabla válida. Si solo falta la línea separadora, convierte igual y el CSV sale con las mismas filas.',
     'guia-consejo-2': 'En CSV → Markdown, el separador se detecta solo entre coma, punto y coma (el habitual de Excel en español) y tabulación, mirando la primera línea.',
     'guia-consejo-3': 'Las celdas con comillas, comas o saltos de línea se manejan bien: en el CSV se encierran entre comillas, y en Markdown un salto de línea dentro de una celda se escribe como <br>.',
     'guia-consejo-4': 'Si alguna fila tiene menos celdas que otras, se completa con celdas vacías para que todas queden con el mismo número de columnas.',
@@ -46,7 +46,7 @@ window.i18nPagina = {
     'guia-p3': '¿Y si una celda tiene una barra vertical?',
     'guia-r3': 'En Markdown se escribe como \\|; la herramienta la entiende al leer y la escribe así al generar la tabla.',
     'guia-p4': '¿Se pueden convertir varias tablas juntas?',
-    'guia-r4': 'El resultado es una sola tabla; si pegás dos tablas seguidas se leen como una.'
+    'guia-r4': 'El resultado es una sola tabla. Si pegás dos tablas seguidas, se leen como una: el encabezado y la línea separadora de la segunda quedan como filas más.'
   },
   en: {
     'titulo-pagina': 'Convert Markdown Tables and CSV Free — Mini Cookies',
@@ -69,7 +69,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Paste or type your content in the box on the left. When you switch direction an example appears that you can replace.',
     'guia-paso-3': 'Tap “Convert”. The result appears in the box on the right.',
     'guia-paso-4': 'Use “Copy result” to put it on the clipboard, or “Download” to save tabla.csv or tabla.md depending on the direction.',
-    'guia-consejo-1': 'A valid Markdown table needs the header row and the separator line (| --- | --- |). If it’s missing, the tool tells you it didn’t find a valid table.',
+    'guia-consejo-1': 'In Markdown the separator line (| --- | --- |) goes under the header row. If there are fewer than two lines starting with |, the tool says it didn’t find a valid table. If only the separator line is missing, it converts anyway and the CSV has the same rows.',
     'guia-consejo-2': 'In CSV → Markdown, the separator is detected automatically among comma, semicolon (the usual one in Spanish-language Excel) and tab, by looking at the first line.',
     'guia-consejo-3': 'Cells with quotes, commas or line breaks are handled properly: in the CSV they are wrapped in quotes, and in Markdown a line break inside a cell is written as <br>.',
     'guia-consejo-4': 'If a row has fewer cells than the others, it is padded with empty cells so that every row has the same number of columns.',
@@ -80,7 +80,7 @@ window.i18nPagina = {
     'guia-p3': 'What if a cell contains a vertical bar?',
     'guia-r3': 'In Markdown it is written as \\|; the tool understands it when reading and writes it that way when generating the table.',
     'guia-p4': 'Can several tables be converted together?',
-    'guia-r4': 'The result is a single table; if you paste two tables one after the other they are read as one.'
+    'guia-r4': 'The result is a single table. If you paste two tables one after the other, they are read as one: the second table’s header and separator line become extra rows.'
   }
 };
 </script>
@@ -137,7 +137,7 @@ window.i18nPagina = {
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">Una tabla Markdown válida necesita la fila de encabezado y la línea separadora (| --- | --- |). Si falta, la herramienta avisa que no encontró una tabla válida.</li>
+      <li data-i18n="guia-consejo-1">En Markdown, la línea separadora (| --- | --- |) va debajo de la fila de encabezado. Si hay menos de dos líneas que empiecen con |, la herramienta avisa que no encontró una tabla válida. Si solo falta la línea separadora, convierte igual y el CSV sale con las mismas filas.</li>
       <li data-i18n="guia-consejo-2">En CSV → Markdown, el separador se detecta solo entre coma, punto y coma (el habitual de Excel en español) y tabulación, mirando la primera línea.</li>
       <li data-i18n="guia-consejo-3">Las celdas con comillas, comas o saltos de línea se manejan bien: en el CSV se encierran entre comillas, y en Markdown un salto de línea dentro de una celda se escribe como &lt;br&gt;.</li>
       <li data-i18n="guia-consejo-4">Si alguna fila tiene menos celdas que otras, se completa con celdas vacías para que todas queden con el mismo número de columnas.</li>
@@ -157,7 +157,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Se pueden convertir varias tablas juntas?</summary>
-      <p data-i18n="guia-r4">El resultado es una sola tabla; si pegás dos tablas seguidas se leen como una.</p>
+      <p data-i18n="guia-r4">El resultado es una sola tabla. Si pegás dos tablas seguidas, se leen como una: el encabezado y la línea separadora de la segunda quedan como filas más.</p>
     </details>
       <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/markdown-para-asistentes-de-ia.html" data-i18n="guia-mas-link">Markdown y asistentes de IA: cómo preparar tus documentos</a></p>
   </section>

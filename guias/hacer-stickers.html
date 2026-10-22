@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Cómo hacer stickers a partir de tus fotos — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí una foto en sticker PNG con fondo transparente y borde de color: recorte automático, marcas manuales y consejos para un buen resultado.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Recortá el sujeto de una foto y descargá un PNG con fondo transparente y borde de color. Cuándo alcanza el automático y cuándo conviene marcar objetos a mano.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,49 +13,59 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Cómo hacer stickers a partir de tus fotos — Mini Cookies',
-    'meta-descripcion': 'Convertí una foto en sticker PNG con fondo transparente y borde de color: recorte automático, marcas manuales y consejos para un buen resultado.',
+    'meta-descripcion': 'Recortá el sujeto de una foto y descargá un PNG con fondo transparente y borde de color. Cuándo alcanza el automático y cuándo conviene marcar objetos a mano.',
     'h1': 'Cómo hacer stickers a partir de tus fotos',
-    'b1': 'Un sticker es una imagen recortada alrededor de su sujeto, con un borde de color que la separa del fondo, como las pegatinas impresas. Hacerlo a mano en un editor exige recortar con paciencia píxel por píxel. El <a href="../herramientas/generador-stickers.html">Generador de stickers</a> automatiza esa parte: una inteligencia artificial recorta el sujeto y vos solo ajustás el borde.',
+    'b1': 'Tenés una foto de tu perro en el parque y querés solo al perro, con un borde blanco, para mandarlo por un chat. Recortarlo a mano, píxel por píxel, lleva un buen rato. El <a href="../herramientas/generador-stickers.html">Generador de stickers</a> hace ese recorte con un modelo de inteligencia artificial que corre en tu navegador. Vos elegís qué conservar, ajustás el borde y descargás un PNG con fondo transparente.',
     'b2': 'Qué te entrega',
-    'b3': 'El resultado es un <strong>PNG con fondo transparente</strong>: el sujeto, su borde y nada más. Es un formato que admiten la mayoría de las aplicaciones de diseño y edición para superponer una imagen sobre otra sin un recuadro de fondo.',
+    'b3': 'El archivo se llama <code>sticker.png</code>. Tiene el sujeto, su borde y nada más: el resto es transparente, así que el sticker va sobre cualquier fondo sin recuadro blanco. Eso es lo que necesitan las presentaciones, los diseños y las etiquetas.',
     'b4': 'Paso a paso',
-    'b5-1': 'Arrastrá una foto a la zona de carga o hacé clic para elegirla.',
-    'b5-2': 'En <strong>Qué recortar</strong> elegí cómo se detecta el sujeto (más abajo se explican las dos opciones).',
-    'b5-3': 'Ajustá el <strong>Grosor del borde</strong> (de 0 a 40 px), la <strong>Suavidad del contorno</strong> (de 0 a 30) y el <strong>Color del borde</strong>.',
-    'b5-4': 'Si querés, probá los <strong>Filtros</strong> y las <strong>Texturas</strong>, cada uno con su control de intensidad o de tamaño.',
-    'b5-5': 'Tocá <strong>Descargar sticker (PNG)</strong>.',
-    'b6': 'La primera vez tarda un poco',
-    'b7': 'El recorte lo hace un modelo de inteligencia artificial que se descarga la primera vez que lo usás (unos 42 MB) y queda guardado en el navegador, de modo que las siguientes veces abre más rápido. Si tu conexión es lenta, esa primera espera es normal.',
-    'b8': 'Dos formas de recortar',
-    'b9-1': '<strong>El primer plano (automático).</strong> La herramienta detecta el sujeto principal y lo separa del fondo. Es lo más rápido y funciona muy bien cuando el sujeto es claro y se distingue del entorno.',
-    'b9-2': '<strong>Los objetos que marco.</strong> Tocás la foto sobre cada objeto que querés conservar y después usás <strong>Recortar los objetos marcados</strong>. Con <strong>Borrar las marcas</strong> empezás de nuevo. Es la salida cuando el automático se equivoca o cuando hay varios elementos y querés elegir cuáles. Este modo descarga un segundo modelo, más chico (unos 14 MB).',
-    'b10': 'Cómo ajustar el borde',
-    'b11-1': '<strong>Grosor.</strong> En 0 no hay borde; hacia 40 el contorno se vuelve grueso, al estilo de una pegatina. Un borde blanco y generoso es el clásico para chats y mensajes.',
-    'b11-2': '<strong>Suavidad.</strong> Con la suavidad en 0, el borde sigue cada detalle del recorte (mechones de pelo, dedos, hojas). Con más suavidad se rellenan las entradas angostas y el contorno queda redondeado, más limpio y más parecido a una pegatina real.',
-    'b11-3': '<strong>Color.</strong> Elegí uno que contraste con el lugar donde vas a usar el sticker: blanco para fondos oscuros, oscuro para fondos claros.',
-    'b12': 'Los <strong>filtros</strong> y las <strong>texturas</strong> son opcionales: sirven para darle un aire distinto al sticker. Probalos con poca intensidad primero y ajustá mirando la vista central.',
-    'b13': 'Consejos para un buen recorte',
-    'b14-1': '<strong>Elegí fotos donde el sujeto se distinga del fondo.</strong> Un objeto sobre una pared lisa se recorta mejor que uno entre mucha vegetación.',
-    'b14-2': '<strong>Buena luz y buen foco.</strong> Los bordes borrosos o en sombra son los más difíciles de recortar.',
-    'b14-3': '<strong>Si el automático falla, marcá a mano.</strong> Tocar directamente sobre lo que querés conservar suele resolver lo que el modo automático no entiende.',
-    'b14-4': '<strong>Cuidado con las marcas.</strong> Si el recorte termina ocupando casi toda la foto, la herramienta avisa que una marca puede haber caído sobre el fondo: borralas y volvé a marcar.',
-    'b14-5': '<strong>Probá la suavidad.</strong> Para sujetos con muchos detalles finos, subir la suavidad evita un contorno dentado.',
-    'b15': 'Dónde usar tus stickers',
-    'b16-1': '<strong>Chats y redes.</strong> Algunas aplicaciones de mensajería permiten crear paquetes de stickers a partir de tus propias imágenes; los requisitos de formato y tamaño cambian de una a otra, así que revisalos en cada una (puede hacer falta convertir o redimensionar el PNG antes).',
-    'b16-2': '<strong>Etiquetas y packaging casero.</strong> Un sticker con borde se imprime y se corta fácilmente.',
-    'b16-3': '<strong>Presentaciones y documentos.</strong> Un PNG transparente se coloca sobre cualquier fondo de diapositiva sin recuadro blanco.',
-    'b16-4': '<strong>Diseños y collages.</strong> Podés combinarlos con <a href="../herramientas/collage-imagenes.html">Crear collage de imágenes</a>.',
-    'b17': 'Límites',
-    'b18-1': 'Funciona mejor con un sujeto claro y separado del fondo; las escenas confusas piden marcas manuales.',
-    'b18-2': 'Si la imagen es muy grande, se reduce para no superar unos 16 millones de píxeles (4096 x 4096).',
-    'b18-3': 'Si el navegador se queda sin memoria verás un mensaje de error; probá con una imagen más chica. Podés achicar antes la foto con <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>.',
-    'b18-4': 'Si el PNG final te queda muy pesado para el uso que le vas a dar, <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> puede ayudar.',
-    'b19': 'Preguntas frecuentes',
-    'b20': '<strong>¿Qué formato tiene el archivo?</strong> PNG con transparencia, llamado <code>sticker.png</code>.',
-    'b21': '<strong>¿Puedo cambiar de foto sin recargar la página?</strong> Sí, con <strong>Cambiar imagen</strong>.',
-    'b22': '<strong>¿Por qué tarda más la primera vez?</strong> Porque descarga el modelo de recorte; después queda guardado en el navegador.',
-    'b23': 'Resumen',
-    'b24': 'Subí una foto con un sujeto claro, dejá que el recorte automático haga el trabajo y, si falla, marcá a mano los objetos. Ajustá el borde (grosor, suavidad y color) según dónde lo vayas a usar y descargá el PNG transparente. La primera vez se descarga un modelo de unos 42 MB; después es mucho más rápido.',
+    'b5-1': 'Arrastrá la foto a la zona de carga o hacé clic para elegirla. Un archivo que el navegador no reconoce como imagen se ignora, sin ningún aviso.',
+    'b5-2': 'En «Qué recortar» elegí «El primer plano (automático)» o «Los objetos que marco».',
+    'b5-3': 'Ajustá «Grosor del borde», «Suavidad del contorno» y «Color del borde».',
+    'b5-4': 'Si querés, probá los «Filtros» y las «Texturas».',
+    'b5-5': 'Tocá «Descargar sticker (PNG)».',
+    'b6': 'Dos formas de recortar',
+    'b7': '«El primer plano (automático)» busca el sujeto principal y lo separa del fondo. Es lo más rápido, y funciona bien cuando el sujeto se distingue del entorno: un perro sobre el pasto, sí; un perro entre otros cuatro perros, ya no tanto.',
+    'b8': '«Los objetos que marco» sirve cuando el automático se equivoca o cuando hay varios elementos y querés elegir cuáles. Tocás la foto sobre cada objeto que querés conservar. Cada toque deja un número, y «Recortar los objetos marcados» junta esos objetos en un solo recorte. Tocar una marca la quita, y «Borrar las marcas» empieza de nuevo. Tocá en el centro de cada objeto, no en su borde. Este modo usa un segundo modelo, más chico, de unos 14 MB.',
+    'b9': 'La primera vez tarda',
+    'b10': 'La primera vez que recortás, el sitio baja el modelo (unos 42 MB) desde huggingface.co, y el motor que lo ejecuta desde cdn.jsdelivr.net. Eso necesita conexión. El modelo queda guardado en la caché del navegador, así que la próxima vez no hay que bajarlo de nuevo, salvo que borres los datos del navegador. La foto no sale de tu equipo: lo que viaja es la descarga del modelo.',
+    'b11': 'Ajustes y valores de inicio',
+    'b12-c1': 'Control',
+    'b12-c2': 'Rango',
+    'b12-c3': 'Al abrir la página',
+    'b12-f1c1': '«Grosor del borde»',
+    'b12-f1c2': '0 a 40 px',
+    'b12-f1c3': '14 px',
+    'b12-f2c1': '«Suavidad del contorno»',
+    'b12-f2c2': '0 a 30',
+    'b12-f2c3': '3',
+    'b12-f3c1': '«Color del borde»',
+    'b12-f3c2': 'Cualquier color',
+    'b12-f3c3': 'Blanco',
+    'b12-f4c1': '«Intensidad del filtro»',
+    'b12-f4c2': '0 a 200 %',
+    'b12-f4c3': '100 %',
+    'b12-f5c1': '«Tamaño» de la textura',
+    'b12-f5c2': '2 a 50',
+    'b12-f5c3': '14',
+    'b13': 'Los valores de grosor y suavidad se piensan para un sticker de 512 píxeles de lado y se escalan al tamaño real. Por eso 14 px se ve igual, en proporción, en una foto chica y en una de 4000 píxeles.',
+    'b14': 'La suavidad cambia cómo sigue el borde al recorte. En 0 copia cada detalle, como mechones o dedos. Subila si el contorno se ve con picos o huecos: rellena las entradas angostas y redondea los rincones. Con el grosor en 0 no hay borde y queda solo el recorte. Elegí el color según el fondo donde lo vas a usar: blanco para fondos oscuros, oscuro para fondos claros. Los filtros y las texturas son opcionales; empezá con poca intensidad, porque un filtro fuerte puede tapar los colores del sujeto.',
+    'b15': 'Cuándo el recorte sale mal',
+    'b16': 'Una foto con el sujeto bien separado del fondo sale mejor. Un objeto sobre una pared lisa se recorta mejor que uno entre hojas, y las fotos borrosas o en sombra son las más difíciles, porque el borde del sujeto no se distingue. Si el automático falla, no conviene buscar otra foto: pasá a «Los objetos que marco» y tocá lo que querés conservar.',
+    'b17': 'En el modo de marcas, si el recorte ocupa casi toda la foto, la herramienta avisa que una marca puede haber caído sobre el fondo. Ese aviso no deshace el recorte. Si el resultado no sirve, usá «Borrar las marcas» y volvé a marcar.',
+    'b18': 'Límites',
+    'b19-1': 'El modelo elige mal en escenas confusas, como una multitud o un fondo del mismo color que el sujeto. Ahí las marcas son la salida.',
+    'b19-2': 'El recorte guarda su lado mayor hasta 4096 px, y el PNG final, con el borde, no pasa de unos 16 millones de píxeles (4096 × 4096). Si el navegador se queda sin memoria al armar la descarga, baja a 2048 px y, si hace falta, a 1024 px, sin avisar.',
+    'b19-3': 'Si el navegador se queda sin memoria al correr el modelo, aparece «Tu navegador se quedó sin memoria para correr este modelo.» Probá con una imagen más chica; podés achicarla antes con <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>.',
+    'b19-4': 'Si el PNG pesa demasiado, <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> puede achicarlo. Elegí WebP en «Formato de salida»: con JPG el fondo se vuelve blanco y perdés la transparencia.',
+    'b20': 'Dónde usar el sticker',
+    'b21': 'Para una presentación o un diseño, el PNG transparente encaja sobre cualquier fondo. Si lo querés imprimir y cortar, el borde te marca la línea de corte. Para un chat o una app que arma paquetes de stickers, las reglas de formato y tamaño cambian según la app y su versión: revisalas antes de subir el archivo, porque puede hacer falta redimensionarlo o comprimirlo.',
+    'b22': 'Preguntas frecuentes',
+    'b23': '<strong>¿Qué pasa con mi foto?</strong> Se procesa en tu navegador y no se guarda en el sitio. Al cargar otra foto o cerrar la página, la anterior desaparece.',
+    'b24': '<strong>¿Puedo cambiar de foto sin recargar la página?</strong> Sí, con «Cambiar imagen». El grosor, la suavidad y el color del borde se mantienen, pero los filtros y las texturas vuelven a «ninguno».',
+    'b25': '<strong>¿Puedo tener el sticker sin borde?</strong> Sí. Poné el «Grosor del borde» en 0 y descargás solo el recorte, con transparencia.',
+    'b26': 'Resumen',
+    'b27': 'Subí una foto con un sujeto claro y dejá que el recorte automático trabaje. Si se equivoca, marcá los objetos a mano. Ajustá el grosor, la suavidad y el color del borde, y descargá el PNG transparente. La primera vez se baja un modelo de unos 42 MB; después queda guardado en el navegador.',
     'rel1': 'Generador de stickers',
     'rel2': 'Recortar imagen',
     'rel3': 'Redimensionar imagen',
@@ -63,49 +73,59 @@ window.i18nPagina = {
   },
   en: {
     'titulo-pagina': 'How to make stickers from your photos — Mini Cookies',
-    'meta-descripcion': 'Turn a photo into a PNG sticker with a transparent background and a colored border: automatic cutout, manual marks and tips for a good result.',
+    'meta-descripcion': 'Cut the subject out of a photo and download a transparent PNG with a colored border. When the automatic cutout is enough and when to mark objects by hand.',
     'h1': 'How to make stickers from your photos',
-    'b1': 'A sticker is an image cut out around its subject, with a colored border that separates it from the background, like printed stickers. Doing it by hand in an editor means patiently tracing the outline pixel by pixel. The <a href="../herramientas/generador-stickers.html">Sticker generator</a> automates that part: an AI cuts out the subject and all you do is adjust the border.',
+    'b1': 'You have a photo of your dog in the park and you want only the dog, with a white border, to send in a chat. Cutting it out by hand, pixel by pixel, takes a good while. The <a href="../herramientas/generador-stickers.html">Sticker generator</a> does that cutout with an AI model that runs in your browser. You choose what to keep, adjust the border and download a PNG with a transparent background.',
     'b2': 'What you get',
-    'b3': 'The result is a <strong>PNG with a transparent background</strong>: the subject, its border and nothing else. Most design and editing apps support that format for placing one image over another without a box around it.',
+    'b3': 'The file is called <code>sticker.png</code>. It holds the subject, its border and nothing else: the rest is transparent, so the sticker goes over any background without a white box. That is what slides, designs and labels need.',
     'b4': 'Step by step',
-    'b5-1': 'Drag a photo to the upload area or click to choose one.',
-    'b5-2': 'Under "What to cut out", choose how the subject is detected (the two options are explained below).',
-    'b5-3': 'Adjust the "Border thickness" (0 to 40 px), the "Outline smoothness" (0 to 30) and the "Border color".',
-    'b5-4': 'If you like, try the "Filters" and the "Textures", each with its own intensity or size control.',
-    'b5-5': 'Tap "Download sticker (PNG)".',
-    'b6': 'The first time takes a little longer',
-    'b7': 'The cutout is done by an AI model that downloads the first time you use it (about 42 MB) and is kept in your browser, so it opens faster on later visits. If your connection is slow, that first wait is normal.',
-    'b8': 'Two ways to cut out',
-    'b9-1': '<strong>The foreground (automatic).</strong> The tool detects the main subject and separates it from the background. It’s the fastest option and works very well when the subject is clear and stands out from its surroundings.',
-    'b9-2': '<strong>The objects I mark.</strong> You tap the photo on each object you want to keep and then use "Cut out the marked objects". With "Clear the marks" you start over. It’s the way out when the automatic mode gets it wrong or when there are several elements and you want to choose which ones to keep. This mode downloads a second, smaller model (about 14 MB).',
-    'b10': 'How to adjust the border',
-    'b11-1': '<strong>Thickness.</strong> At 0 there is no border; toward 40 the outline gets thick, sticker-style. A generous white border is the classic look for chats and messages.',
-    'b11-2': '<strong>Smoothness.</strong> With smoothness at 0, the border follows every detail of the cutout (strands of hair, fingers, leaves). With more smoothness, narrow gaps are filled in and the outline ends up rounded, cleaner and closer to a real sticker.',
-    'b11-3': '<strong>Color.</strong> Pick one that contrasts with where you’ll use the sticker: white for dark backgrounds, dark for light ones.',
-    'b12': 'The <strong>filters</strong> and <strong>textures</strong> are optional: they give the sticker a different look. Try them at low intensity first and adjust while watching the central view.',
-    'b13': 'Tips for a good cutout',
-    'b14-1': '<strong>Choose photos where the subject stands out from the background.</strong> An object against a plain wall is easier to cut out than one in the middle of dense vegetation.',
-    'b14-2': '<strong>Good light and good focus.</strong> Blurry or shadowed edges are the hardest to cut out.',
-    'b14-3': '<strong>If the automatic mode fails, mark by hand.</strong> Tapping directly on what you want to keep usually solves what the automatic mode doesn’t understand.',
-    'b14-4': '<strong>Be careful with marks.</strong> If the cutout ends up covering almost the whole photo, the tool warns you that a mark may have landed on the background: clear the marks and mark again.',
-    'b14-5': '<strong>Try the smoothness.</strong> For subjects with lots of fine detail, raising the smoothness avoids a jagged outline.',
-    'b15': 'Where to use your stickers',
-    'b16-1': '<strong>Chats and social media.</strong> Some messaging apps let you create sticker packs from your own images; format and size requirements differ from one app to another, so check them in each one (you may need to convert or resize the PNG first).',
-    'b16-2': '<strong>Labels and homemade packaging.</strong> A sticker with a border is easy to print and cut out.',
-    'b16-3': '<strong>Presentations and documents.</strong> A transparent PNG can be placed over any slide background without a white box.',
-    'b16-4': '<strong>Designs and collages.</strong> You can combine them with <a href="../herramientas/collage-imagenes.html">Make a photo collage</a>.',
-    'b17': 'Limits',
-    'b18-1': 'It works best with a clear subject that is separated from the background; busy scenes call for manual marks.',
-    'b18-2': 'If the image is very large, it’s scaled down so as not to exceed about 16 million pixels (4096 x 4096).',
-    'b18-3': 'If the browser runs out of memory you’ll see an error message; try a smaller image. You can shrink the photo beforehand with <a href="../herramientas/redimensionar-imagen.html">Resize an image</a>.',
-    'b18-4': 'If the final PNG is too heavy for what you want to use it for, <a href="../herramientas/comprimir-imagen.html">Compress an image</a> can help.',
-    'b19': 'Frequently asked questions',
-    'b20': '<strong>What format is the file?</strong> PNG with transparency, named <code>sticker.png</code>.',
-    'b21': '<strong>Can I switch photos without reloading the page?</strong> Yes, with "Change image".',
-    'b22': '<strong>Why does it take longer the first time?</strong> Because it downloads the cutout model; after that it’s kept in the browser.',
-    'b23': 'Summary',
-    'b24': 'Upload a photo with a clear subject, let the automatic cutout do the work and, if it fails, mark the objects by hand. Adjust the border (thickness, smoothness and color) for where you’ll use it and download the transparent PNG. The first time, a model of about 42 MB is downloaded; after that it’s much faster.',
+    'b5-1': 'Drag the photo onto the upload area or click to choose it. A file the browser does not recognize as an image is ignored, with no message.',
+    'b5-2': 'Under “What to cut out”, choose “The foreground (automatic)” or “The objects I mark”.',
+    'b5-3': 'Adjust “Border thickness”, “Outline smoothness” and “Border color”.',
+    'b5-4': 'If you want, try the “Filters” and the “Textures”.',
+    'b5-5': 'Tap “Download sticker (PNG)”.',
+    'b6': 'Two ways to cut out',
+    'b7': '“The foreground (automatic)” looks for the main subject and separates it from the background. It is the fastest, and it works well when the subject stands out from its surroundings: a dog on grass, yes; a dog among four other dogs, not so much.',
+    'b8': '“The objects I mark” is for when the automatic mode gets it wrong, or when there are several elements and you want to pick which ones stay. You tap the photo on each object you want to keep. Each tap leaves a number, and “Cut out the marked objects” joins those objects into one cutout. Tapping a mark removes it, and “Clear the marks” starts over. Tap the middle of each object, not its edge. This mode uses a second, smaller model of about 14 MB.',
+    'b9': 'The first time takes longer',
+    'b10': 'The first time you cut something out, the site downloads the model (about 42 MB) from huggingface.co, and the engine that runs it from cdn.jsdelivr.net. That needs a connection. The model is kept in the browser’s cache, so next time there is nothing to download again, unless you clear the browser’s data. Your photo does not leave your computer: what travels is the model download, not your image.',
+    'b11': 'Settings and starting values',
+    'b12-c1': 'Control',
+    'b12-c2': 'Range',
+    'b12-c3': 'When the page opens',
+    'b12-f1c1': '“Border thickness”',
+    'b12-f1c2': '0 to 40 px',
+    'b12-f1c3': '14 px',
+    'b12-f2c1': '“Outline smoothness”',
+    'b12-f2c2': '0 to 30',
+    'b12-f2c3': '3',
+    'b12-f3c1': '“Border color”',
+    'b12-f3c2': 'Any color',
+    'b12-f3c3': 'White',
+    'b12-f4c1': '“Filter intensity”',
+    'b12-f4c2': '0 to 200%',
+    'b12-f4c3': '100%',
+    'b12-f5c1': '“Size” of the texture',
+    'b12-f5c2': '2 to 50',
+    'b12-f5c3': '14',
+    'b13': 'The thickness and smoothness values are set for a sticker 512 pixels on its longest side and scaled to the real size. That is why 14 px looks the same, in proportion, on a small photo and on one of 4000 pixels.',
+    'b14': 'Smoothness changes how the border follows the cutout. At 0 it copies every detail, such as strands of hair or fingers. Raise it if the outline shows spikes or gaps: it fills narrow gaps and rounds the corners. With the thickness at 0 there is no border, only the cutout. Pick the color for the background where you will use the sticker: white for dark backgrounds, dark for light ones. Filters and textures are optional. Start with low intensity, because a strong filter can hide the subject’s colors.',
+    'b15': 'When the cutout goes wrong',
+    'b16': 'A photo where the subject is well separated from the background comes out better. An object on a plain wall is cut more cleanly than one among leaves, and blurry or shadowed photos are the hardest, because the subject’s edge is hard to see. If the automatic mode fails, don’t look for another photo: switch to “The objects I mark” and tap what you want to keep.',
+    'b17': 'In the marks mode, if the cutout covers almost the whole photo, the tool warns that a mark may have landed on the background. The warning doesn’t undo the cutout. If the result is no good, use “Clear the marks” and mark again.',
+    'b18': 'Limits',
+    'b19-1': 'The model gets confused in busy scenes, such as a crowd or a background in the same color as the subject. Marks are the way out there.',
+    'b19-2': 'The cutout keeps its longest side up to 4096 px, and the final PNG, border included, does not go over about 16 million pixels (4096 × 4096). If the browser runs out of memory while building the download, it falls back to 2048 px and, if needed, to 1024 px, without a warning.',
+    'b19-3': 'If the browser runs out of memory while running the model, you see “Your browser ran out of memory running this model.” Try a smaller image; you can shrink it first with <a href="../herramientas/redimensionar-imagen.html">Resize an image</a>.',
+    'b19-4': 'If the PNG is too heavy, <a href="../herramientas/comprimir-imagen.html">Compress an image</a> can make it smaller. Choose WebP under “Output format”: with JPG the background turns white and the transparency is lost.',
+    'b20': 'Where to use the sticker',
+    'b21': 'For a slide or a design, the transparent PNG fits over any background. If you want to print and cut it out, the border shows you where to cut. For a chat or an app that builds sticker packs, the format and size rules change from one app and version to the next: check them before you upload, because the file may need resizing or compressing.',
+    'b22': 'Frequently asked questions',
+    'b23': '<strong>What happens to my photo?</strong> It is processed in your browser and is not saved on the site. When you load another photo or close the page, the previous one is gone.',
+    'b24': '<strong>Can I change the photo without reloading the page?</strong> Yes, with “Change image”. The border thickness, smoothness and color stay, but filters and textures go back to “none”.',
+    'b25': '<strong>Can I have the sticker without a border?</strong> Yes. Set “Border thickness” to 0 and download just the cutout, with transparency.',
+    'b26': 'Summary',
+    'b27': 'Upload a photo with a clear subject and let the automatic cutout work. If it gets it wrong, mark the objects by hand. Adjust the border thickness, smoothness and color, and download the transparent PNG. The first time, a model of about 42 MB is downloaded; after that it stays in the browser.',
     'rel1': 'Sticker generator',
     'rel2': 'Crop an image',
     'rel3': 'Resize an image',
@@ -133,59 +153,53 @@ window.i18nPagina = {
   <article class="guia-uso articulo">
     <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
     <h1 data-i18n="h1">Cómo hacer stickers a partir de tus fotos</h1>
-    <p data-i18n-html="b1">Un sticker es una imagen recortada alrededor de su sujeto, con un borde de color que la separa del fondo, como las pegatinas impresas. Hacerlo a mano en un editor exige recortar con paciencia píxel por píxel. El <a href="../herramientas/generador-stickers.html">Generador de stickers</a> automatiza esa parte: una inteligencia artificial recorta el sujeto y vos solo ajustás el borde.</p>
+    <p data-i18n-html="b1">Tenés una foto de tu perro en el parque y querés solo al perro, con un borde blanco, para mandarlo por un chat. Recortarlo a mano, píxel por píxel, lleva un buen rato. El <a href="../herramientas/generador-stickers.html">Generador de stickers</a> hace ese recorte con un modelo de inteligencia artificial que corre en tu navegador. Vos elegís qué conservar, ajustás el borde y descargás un PNG con fondo transparente.</p>
     <h2 data-i18n="b2">Qué te entrega</h2>
-    <p data-i18n-html="b3">El resultado es un <strong>PNG con fondo transparente</strong>: el sujeto, su borde y nada más. Es un formato que admiten la mayoría de las aplicaciones de diseño y edición para superponer una imagen sobre otra sin un recuadro de fondo.</p>
+    <p data-i18n-html="b3">El archivo se llama <code>sticker.png</code>. Tiene el sujeto, su borde y nada más: el resto es transparente, así que el sticker va sobre cualquier fondo sin recuadro blanco. Eso es lo que necesitan las presentaciones, los diseños y las etiquetas.</p>
     <h2 data-i18n="b4">Paso a paso</h2>
     <ol>
-      <li data-i18n-html="b5-1">Arrastrá una foto a la zona de carga o hacé clic para elegirla.</li>
-      <li data-i18n-html="b5-2">En <strong>Qué recortar</strong> elegí cómo se detecta el sujeto (más abajo se explican las dos opciones).</li>
-      <li data-i18n-html="b5-3">Ajustá el <strong>Grosor del borde</strong> (de 0 a 40 px), la <strong>Suavidad del contorno</strong> (de 0 a 30) y el <strong>Color del borde</strong>.</li>
-      <li data-i18n-html="b5-4">Si querés, probá los <strong>Filtros</strong> y las <strong>Texturas</strong>, cada uno con su control de intensidad o de tamaño.</li>
-      <li data-i18n-html="b5-5">Tocá <strong>Descargar sticker (PNG)</strong>.</li>
+      <li data-i18n-html="b5-1">Arrastrá la foto a la zona de carga o hacé clic para elegirla. Un archivo que el navegador no reconoce como imagen se ignora, sin ningún aviso.</li>
+      <li data-i18n-html="b5-2">En «Qué recortar» elegí «El primer plano (automático)» o «Los objetos que marco».</li>
+      <li data-i18n-html="b5-3">Ajustá «Grosor del borde», «Suavidad del contorno» y «Color del borde».</li>
+      <li data-i18n-html="b5-4">Si querés, probá los «Filtros» y las «Texturas».</li>
+      <li data-i18n-html="b5-5">Tocá «Descargar sticker (PNG)».</li>
     </ol>
-    <h3 data-i18n="b6">La primera vez tarda un poco</h3>
-    <p data-i18n-html="b7">El recorte lo hace un modelo de inteligencia artificial que se descarga la primera vez que lo usás (unos 42 MB) y queda guardado en el navegador, de modo que las siguientes veces abre más rápido. Si tu conexión es lenta, esa primera espera es normal.</p>
-    <h2 data-i18n="b8">Dos formas de recortar</h2>
+    <h2 data-i18n="b6">Dos formas de recortar</h2>
+    <p data-i18n-html="b7">«El primer plano (automático)» busca el sujeto principal y lo separa del fondo. Es lo más rápido, y funciona bien cuando el sujeto se distingue del entorno: un perro sobre el pasto, sí; un perro entre otros cuatro perros, ya no tanto.</p>
+    <p data-i18n-html="b8">«Los objetos que marco» sirve cuando el automático se equivoca o cuando hay varios elementos y querés elegir cuáles. Tocás la foto sobre cada objeto que querés conservar. Cada toque deja un número, y «Recortar los objetos marcados» junta esos objetos en un solo recorte. Tocar una marca la quita, y «Borrar las marcas» empieza de nuevo. Tocá en el centro de cada objeto, no en su borde. Este modo usa un segundo modelo, más chico, de unos 14 MB.</p>
+    <h2 data-i18n="b9">La primera vez tarda</h2>
+    <p data-i18n-html="b10">La primera vez que recortás, el sitio baja el modelo (unos 42 MB) desde huggingface.co, y el motor que lo ejecuta desde cdn.jsdelivr.net. Eso necesita conexión. El modelo queda guardado en la caché del navegador, así que la próxima vez no hay que bajarlo de nuevo, salvo que borres los datos del navegador. La foto no sale de tu equipo: lo que viaja es la descarga del modelo.</p>
+    <h2 data-i18n="b11">Ajustes y valores de inicio</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b12-c1">Control</th><th data-i18n-html="b12-c2">Rango</th><th data-i18n-html="b12-c3">Al abrir la página</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b12-f1c1">«Grosor del borde»</td><td data-i18n-html="b12-f1c2">0 a 40 px</td><td data-i18n-html="b12-f1c3">14 px</td></tr>
+        <tr><td data-i18n-html="b12-f2c1">«Suavidad del contorno»</td><td data-i18n-html="b12-f2c2">0 a 30</td><td data-i18n-html="b12-f2c3">3</td></tr>
+        <tr><td data-i18n-html="b12-f3c1">«Color del borde»</td><td data-i18n-html="b12-f3c2">Cualquier color</td><td data-i18n-html="b12-f3c3">Blanco</td></tr>
+        <tr><td data-i18n-html="b12-f4c1">«Intensidad del filtro»</td><td data-i18n-html="b12-f4c2">0 a 200 %</td><td data-i18n-html="b12-f4c3">100 %</td></tr>
+        <tr><td data-i18n-html="b12-f5c1">«Tamaño» de la textura</td><td data-i18n-html="b12-f5c2">2 a 50</td><td data-i18n-html="b12-f5c3">14</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b13">Los valores de grosor y suavidad se piensan para un sticker de 512 píxeles de lado y se escalan al tamaño real. Por eso 14 px se ve igual, en proporción, en una foto chica y en una de 4000 píxeles.</p>
+    <p data-i18n-html="b14">La suavidad cambia cómo sigue el borde al recorte. En 0 copia cada detalle, como mechones o dedos. Subila si el contorno se ve con picos o huecos: rellena las entradas angostas y redondea los rincones. Con el grosor en 0 no hay borde y queda solo el recorte. Elegí el color según el fondo donde lo vas a usar: blanco para fondos oscuros, oscuro para fondos claros. Los filtros y las texturas son opcionales; empezá con poca intensidad, porque un filtro fuerte puede tapar los colores del sujeto.</p>
+    <h2 data-i18n="b15">Cuándo el recorte sale mal</h2>
+    <p data-i18n-html="b16">Una foto con el sujeto bien separado del fondo sale mejor. Un objeto sobre una pared lisa se recorta mejor que uno entre hojas, y las fotos borrosas o en sombra son las más difíciles, porque el borde del sujeto no se distingue. Si el automático falla, no conviene buscar otra foto: pasá a «Los objetos que marco» y tocá lo que querés conservar.</p>
+    <p data-i18n-html="b17">En el modo de marcas, si el recorte ocupa casi toda la foto, la herramienta avisa que una marca puede haber caído sobre el fondo. Ese aviso no deshace el recorte. Si el resultado no sirve, usá «Borrar las marcas» y volvé a marcar.</p>
+    <h2 data-i18n="b18">Límites</h2>
     <ul>
-      <li data-i18n-html="b9-1"><strong>El primer plano (automático).</strong> La herramienta detecta el sujeto principal y lo separa del fondo. Es lo más rápido y funciona muy bien cuando el sujeto es claro y se distingue del entorno.</li>
-      <li data-i18n-html="b9-2"><strong>Los objetos que marco.</strong> Tocás la foto sobre cada objeto que querés conservar y después usás <strong>Recortar los objetos marcados</strong>. Con <strong>Borrar las marcas</strong> empezás de nuevo. Es la salida cuando el automático se equivoca o cuando hay varios elementos y querés elegir cuáles. Este modo descarga un segundo modelo, más chico (unos 14 MB).</li>
+      <li data-i18n-html="b19-1">El modelo elige mal en escenas confusas, como una multitud o un fondo del mismo color que el sujeto. Ahí las marcas son la salida.</li>
+      <li data-i18n-html="b19-2">El recorte guarda su lado mayor hasta 4096 px, y el PNG final, con el borde, no pasa de unos 16 millones de píxeles (4096 × 4096). Si el navegador se queda sin memoria al armar la descarga, baja a 2048 px y, si hace falta, a 1024 px, sin avisar.</li>
+      <li data-i18n-html="b19-3">Si el navegador se queda sin memoria al correr el modelo, aparece «Tu navegador se quedó sin memoria para correr este modelo.» Probá con una imagen más chica; podés achicarla antes con <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>.</li>
+      <li data-i18n-html="b19-4">Si el PNG pesa demasiado, <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> puede achicarlo. Elegí WebP en «Formato de salida»: con JPG el fondo se vuelve blanco y perdés la transparencia.</li>
     </ul>
-    <h2 data-i18n="b10">Cómo ajustar el borde</h2>
-    <ul>
-      <li data-i18n-html="b11-1"><strong>Grosor.</strong> En 0 no hay borde; hacia 40 el contorno se vuelve grueso, al estilo de una pegatina. Un borde blanco y generoso es el clásico para chats y mensajes.</li>
-      <li data-i18n-html="b11-2"><strong>Suavidad.</strong> Con la suavidad en 0, el borde sigue cada detalle del recorte (mechones de pelo, dedos, hojas). Con más suavidad se rellenan las entradas angostas y el contorno queda redondeado, más limpio y más parecido a una pegatina real.</li>
-      <li data-i18n-html="b11-3"><strong>Color.</strong> Elegí uno que contraste con el lugar donde vas a usar el sticker: blanco para fondos oscuros, oscuro para fondos claros.</li>
-    </ul>
-    <p data-i18n-html="b12">Los <strong>filtros</strong> y las <strong>texturas</strong> son opcionales: sirven para darle un aire distinto al sticker. Probalos con poca intensidad primero y ajustá mirando la vista central.</p>
-    <h2 data-i18n="b13">Consejos para un buen recorte</h2>
-    <ol>
-      <li data-i18n-html="b14-1"><strong>Elegí fotos donde el sujeto se distinga del fondo.</strong> Un objeto sobre una pared lisa se recorta mejor que uno entre mucha vegetación.</li>
-      <li data-i18n-html="b14-2"><strong>Buena luz y buen foco.</strong> Los bordes borrosos o en sombra son los más difíciles de recortar.</li>
-      <li data-i18n-html="b14-3"><strong>Si el automático falla, marcá a mano.</strong> Tocar directamente sobre lo que querés conservar suele resolver lo que el modo automático no entiende.</li>
-      <li data-i18n-html="b14-4"><strong>Cuidado con las marcas.</strong> Si el recorte termina ocupando casi toda la foto, la herramienta avisa que una marca puede haber caído sobre el fondo: borralas y volvé a marcar.</li>
-      <li data-i18n-html="b14-5"><strong>Probá la suavidad.</strong> Para sujetos con muchos detalles finos, subir la suavidad evita un contorno dentado.</li>
-    </ol>
-    <h2 data-i18n="b15">Dónde usar tus stickers</h2>
-    <ul>
-      <li data-i18n-html="b16-1"><strong>Chats y redes.</strong> Algunas aplicaciones de mensajería permiten crear paquetes de stickers a partir de tus propias imágenes; los requisitos de formato y tamaño cambian de una a otra, así que revisalos en cada una (puede hacer falta convertir o redimensionar el PNG antes).</li>
-      <li data-i18n-html="b16-2"><strong>Etiquetas y packaging casero.</strong> Un sticker con borde se imprime y se corta fácilmente.</li>
-      <li data-i18n-html="b16-3"><strong>Presentaciones y documentos.</strong> Un PNG transparente se coloca sobre cualquier fondo de diapositiva sin recuadro blanco.</li>
-      <li data-i18n-html="b16-4"><strong>Diseños y collages.</strong> Podés combinarlos con <a href="../herramientas/collage-imagenes.html">Crear collage de imágenes</a>.</li>
-    </ul>
-    <h2 data-i18n="b17">Límites</h2>
-    <ul>
-      <li data-i18n-html="b18-1">Funciona mejor con un sujeto claro y separado del fondo; las escenas confusas piden marcas manuales.</li>
-      <li data-i18n-html="b18-2">Si la imagen es muy grande, se reduce para no superar unos 16 millones de píxeles (4096 x 4096).</li>
-      <li data-i18n-html="b18-3">Si el navegador se queda sin memoria verás un mensaje de error; probá con una imagen más chica. Podés achicar antes la foto con <a href="../herramientas/redimensionar-imagen.html">Redimensionar imagen</a>.</li>
-      <li data-i18n-html="b18-4">Si el PNG final te queda muy pesado para el uso que le vas a dar, <a href="../herramientas/comprimir-imagen.html">Comprimir imagen</a> puede ayudar.</li>
-    </ul>
-    <h2 data-i18n="b19">Preguntas frecuentes</h2>
-    <p data-i18n-html="b20"><strong>¿Qué formato tiene el archivo?</strong> PNG con transparencia, llamado <code>sticker.png</code>.</p>
-    <p data-i18n-html="b21"><strong>¿Puedo cambiar de foto sin recargar la página?</strong> Sí, con <strong>Cambiar imagen</strong>.</p>
-    <p data-i18n-html="b22"><strong>¿Por qué tarda más la primera vez?</strong> Porque descarga el modelo de recorte; después queda guardado en el navegador.</p>
-    <h2 data-i18n="b23">Resumen</h2>
-    <p data-i18n-html="b24">Subí una foto con un sujeto claro, dejá que el recorte automático haga el trabajo y, si falla, marcá a mano los objetos. Ajustá el borde (grosor, suavidad y color) según dónde lo vayas a usar y descargá el PNG transparente. La primera vez se descarga un modelo de unos 42 MB; después es mucho más rápido.</p>
+    <h2 data-i18n="b20">Dónde usar el sticker</h2>
+    <p data-i18n-html="b21">Para una presentación o un diseño, el PNG transparente encaja sobre cualquier fondo. Si lo querés imprimir y cortar, el borde te marca la línea de corte. Para un chat o una app que arma paquetes de stickers, las reglas de formato y tamaño cambian según la app y su versión: revisalas antes de subir el archivo, porque puede hacer falta redimensionarlo o comprimirlo.</p>
+    <h2 data-i18n="b22">Preguntas frecuentes</h2>
+    <p data-i18n-html="b23"><strong>¿Qué pasa con mi foto?</strong> Se procesa en tu navegador y no se guarda en el sitio. Al cargar otra foto o cerrar la página, la anterior desaparece.</p>
+    <p data-i18n-html="b24"><strong>¿Puedo cambiar de foto sin recargar la página?</strong> Sí, con «Cambiar imagen». El grosor, la suavidad y el color del borde se mantienen, pero los filtros y las texturas vuelven a «ninguno».</p>
+    <p data-i18n-html="b25"><strong>¿Puedo tener el sticker sin borde?</strong> Sí. Poné el «Grosor del borde» en 0 y descargás solo el recorte, con transparencia.</p>
+    <h2 data-i18n="b26">Resumen</h2>
+    <p data-i18n-html="b27">Subí una foto con un sujeto claro y dejá que el recorte automático trabaje. Si se equivoca, marcá los objetos a mano. Ajustá el grosor, la suavidad y el color del borde, y descargá el PNG transparente. La primera vez se baja un modelo de unos 42 MB; después queda guardado en el navegador.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>

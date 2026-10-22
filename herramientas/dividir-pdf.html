@@ -23,19 +23,20 @@ window.i18nPagina = {
     'resultado-enlace': 'Descargar .zip con las páginas',
     'error-dividir': 'No se pudo dividir el PDF',
     'guia-titulo': 'Cómo dividir un PDF en páginas sueltas',
+    'guia-mas-link': 'Cómo dividir un PDF: por páginas, por rangos o una página por archivo',
     'guia-intro': 'A veces de un PDF largo hace falta una sola hoja: la factura entre cien páginas, un capítulo para compartir o cada diapositiva por separado. Esta herramienta convierte cada página del PDF en su propio archivo PDF y te entrega todos juntos en un único .zip.',
     'guia-paso-1': 'Arrastrá el PDF a la zona de carga o hacé clic para elegirlo. Vas a ver su miniatura y la cantidad de páginas.',
     'guia-paso-2': 'Pulsá «Dividir PDF». El botón muestra «Dividiendo...» mientras se separan las páginas una por una.',
     'guia-paso-3': 'Cuando aparezca «Listo», descargá el .zip con las páginas, descomprimilo y usá los archivos que necesites.',
     'guia-consejo-1': 'Los archivos se llaman pagina-1.pdf, pagina-2.pdf… con ceros a la izquierda cuando el total lo pide (pagina-01 a pagina-12, por ejemplo), así se ordenan bien en cualquier carpeta.',
-    'guia-consejo-2': 'Si solo querés algunas páginas, dividí y quedate con las que te sirven; para armar otro documento con ellas, usá después «Unir PDF» y elegí el orden.',
+    'guia-consejo-2': 'Si solo querés algunas páginas, dividí y quedate con las que te sirven; para armar otro documento con ellas, usá después «Unir PDF, imágenes y documentos» y elegí el orden.',
     'guia-consejo-3': 'La herramienta separa siempre página por página: no permite indicar rangos ni cortar en un punto concreto.',
     'guia-p1': '¿Se pierde calidad al dividir?',
     'guia-r1': 'No. Las páginas se copian tal cual, sin recomprimir texto ni imágenes. Eso sí, cada archivo lleva sus propias fuentes e imágenes, así que la suma de los archivos puede pesar más que el PDF original.',
     'guia-p2': '¿Puedo elegir qué páginas extraer?',
     'guia-r2': 'No: se genera un archivo por cada página del documento. Para quedarte con algunas, descartá del .zip las que no necesitás.',
     'guia-p3': '¿Funciona con un PDF protegido con contraseña?',
-    'guia-r3': 'Primero tenés que quitarle la protección con «Desbloquear PDF»; después se divide con normalidad.'
+    'guia-r3': 'No directamente. Primero tenés que quitarle la protección con «Desbloquear PDF»; después se divide con normalidad. Si lo intentás directo, aparece «No se pudo dividir el PDF» con el detalle del error.'
   },
   en: {
     'titulo-pagina': 'Split PDF Free and Securely — Mini Cookies',
@@ -49,19 +50,20 @@ window.i18nPagina = {
     'resultado-enlace': 'Download .zip with the pages',
     'error-dividir': 'Couldn’t split the PDF',
     'guia-titulo': 'How to split a PDF into single pages',
+    'guia-mas-link': 'How to split a PDF: by pages, by ranges or one page per file',
     'guia-intro': 'Sometimes you only need one sheet from a long PDF: the invoice among a hundred pages, a chapter to share, or each slide on its own. This tool turns every page of the PDF into its own PDF file and hands them all to you together in a single .zip.',
     'guia-paso-1': 'Drag the PDF onto the upload area or click to choose it. You’ll see its thumbnail and the number of pages.',
     'guia-paso-2': 'Press “Split PDF”. The button shows “Splitting...” while the pages are separated one by one.',
     'guia-paso-3': 'When “Done” appears, download the .zip with the pages, unzip it and use the files you need.',
     'guia-consejo-1': 'The files are named pagina-1.pdf, pagina-2.pdf… with leading zeros when the total calls for it (pagina-01 to pagina-12, for example), so they sort correctly in any folder.',
-    'guia-consejo-2': 'If you only want some pages, split and keep the ones you need; to build another document from them, use “Merge PDF” afterwards and choose the order.',
+    'guia-consejo-2': 'If you only want some pages, split and keep the ones you need; to build another document from them, use “Merge PDF, Images and Documents” afterwards and choose the order.',
     'guia-consejo-3': 'The tool always separates page by page: it doesn’t let you enter ranges or cut at a specific point.',
     'guia-p1': 'Is quality lost when splitting?',
     'guia-r1': 'No. Pages are copied as they are, without recompressing text or images. Keep in mind that each file carries its own fonts and images, so the files added together can weigh more than the original PDF.',
     'guia-p2': 'Can I choose which pages to extract?',
     'guia-r2': 'No: one file is generated for every page of the document. To keep only some, discard the ones you don’t need from the .zip.',
     'guia-p3': 'Does it work with a password-protected PDF?',
-    'guia-r3': 'First remove the protection with “Unlock PDF”; then it splits normally.'
+    'guia-r3': 'Not directly. First remove the protection with “Unlock PDF”; then it splits normally. If you try it directly, “Couldn’t split the PDF” appears with the error details.'
   }
 };
 </script>
@@ -112,7 +114,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Los archivos se llaman pagina-1.pdf, pagina-2.pdf… con ceros a la izquierda cuando el total lo pide (pagina-01 a pagina-12, por ejemplo), así se ordenan bien en cualquier carpeta.</li>
-      <li data-i18n="guia-consejo-2">Si solo querés algunas páginas, dividí y quedate con las que te sirven; para armar otro documento con ellas, usá después «Unir PDF» y elegí el orden.</li>
+      <li data-i18n="guia-consejo-2">Si solo querés algunas páginas, dividí y quedate con las que te sirven; para armar otro documento con ellas, usá después «Unir PDF, imágenes y documentos» y elegí el orden.</li>
       <li data-i18n="guia-consejo-3">La herramienta separa siempre página por página: no permite indicar rangos ni cortar en un punto concreto.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
@@ -126,8 +128,9 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p3">¿Funciona con un PDF protegido con contraseña?</summary>
-      <p data-i18n="guia-r3">Primero tenés que quitarle la protección con «Desbloquear PDF»; después se divide con normalidad.</p>
+      <p data-i18n="guia-r3">No directamente. Primero tenés que quitarle la protección con «Desbloquear PDF»; después se divide con normalidad. Si lo intentás directo, aparece «No se pudo dividir el PDF» con el detalle del error.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/dividir-pdf.html" data-i18n="guia-mas-link">Cómo dividir un PDF: por páginas, por rangos o una página por archivo</a></p>
   </section>
 </main>
 

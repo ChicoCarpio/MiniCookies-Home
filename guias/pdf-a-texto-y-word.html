@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo pasar un PDF a Word y por qué a veces sale desordenado — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Cómo convertir un PDF a Word, por qué salen cortes de renglón y tablas rotas, y qué hacer si el PDF es un escaneo. Paso a paso.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo pasar un PDF a Word y por qué a veces sale desordenado — Mini Cookies',
+    'meta-descripcion': 'Cómo convertir un PDF a Word, por qué salen cortes de renglón y tablas rotas, y qué hacer si el PDF es un escaneo. Paso a paso.',
+    'h1': 'Cómo pasar un PDF a Word y por qué a veces sale desordenado',
+    'b1': 'Te llegó un PDF y necesitás cambiar un párrafo o reutilizar una tabla. Lo pasás a Word y sale con renglones cortados, columnas corridas o una imagen donde debería haber texto. No es una falla de una herramienta en particular: viene de cómo está hecho el PDF. Entender eso te dice qué camino deja menos trabajo de limpieza.',
+    'b2': 'Por qué un PDF no se convierte limpio',
+    'b3': 'Un PDF guarda dónde dibujar cada letra de la hoja. No guarda qué es un párrafo, una lista o una tabla. El conversor tiene que adivinarlo a partir de las posiciones, y ahí aparecen tres problemas.',
+    'b4-1': 'Los párrafos no existen. El PDF tiene renglones sueltos y el conversor los junta por cercanía y tamaño de letra. A veces une dos párrafos o parte uno por la mitad.',
+    'b4-2': 'Las tablas no existen. Lo que se ve como tabla son textos en columnas y, a veces, líneas dibujadas. Suelen volver como texto con espacios o tabulaciones, no como celdas.',
+    'b4-3': 'Un escaneo no tiene texto. Cada página es una foto de la hoja, y hasta reconocer las letras con OCR no hay nada que convertir.',
+    'b5': 'Las columnas merecen una aclaración. El conversor agrupa las letras por altura y no detecta columnas: en una hoja de dos columnas, los renglones de la izquierda y de la derecha a la misma altura suelen quedar en una sola línea. Esas páginas son las que más retoques piden.',
+    'b6': 'Cómo pasar un PDF a Word',
+    'b7': 'Con <a href="../herramientas/word-pdf.html">Word ↔ PDF</a> elegí «PDF → Word». El resultado conserva estilos de letra, párrafos, imágenes, márgenes y tamaño de hoja, y pone un salto de página por cada página del PDF.',
+    'b8-1': 'Abrí la herramienta y elegí «PDF → Word» en el selector de arriba.',
+    'b8-2': 'Arrastrá el PDF a la zona de carga. Con un solo archivo ves su miniatura y la cantidad de páginas.',
+    'b8-3': 'Si querés, cambiá el «Nombre del archivo»: con un solo PDF se propone el nombre del original.',
+    'b8-4': 'Pulsá «Convertir a Word» y bajá el resultado con «Descargar Word».',
+    'b9': 'Con varios PDF, cada uno da su propio .docx y la descarga es un .zip con todos. Los encabezados y pies que se repiten, como el número de página, quedan como texto en cada hoja del Word: borralos a mano.',
+    'b10': 'Qué esperar según el tipo de PDF',
+    'b11-c1': 'Tipo de PDF',
+    'b11-c2': 'Qué pasa',
+    'b11-c3': 'Qué hacer',
+    'b11-f1c1': 'Texto corrido, como un informe o una carta',
+    'b11-f1c2': 'Sale bien: párrafos, estilos e imágenes',
+    'b11-f1c3': 'Revisar los cortes de página y los títulos',
+    'b11-f2c1': 'Con tablas',
+    'b11-f2c2': 'Salen como texto con tabulaciones, no como celdas',
+    'b11-f2c3': 'Rehacer la tabla en Word, o probar la vía Markdown',
+    'b11-f3c1': 'Escaneado o fotografiado',
+    'b11-f3c2': 'Cada página entra como imagen: se ve igual, pero no se edita',
+    'b11-f3c3': 'Reconocer el texto con OCR antes',
+    'b11-f4c1': 'Varias columnas, folletos o revistas',
+    'b11-f4c2': 'Los renglones de las columnas se mezclan',
+    'b11-f4c3': 'Si solo necesitás el contenido, sacar el texto',
+    'b12': 'Si el resultado sale desordenado',
+    'b13': 'Cuando importa el contenido y no el aspecto, suele rendir más sacar el texto solo y armar el documento después. Ninguno de estos caminos conserva imágenes ni diseño.',
+    'b14': 'Si solo te interesa el texto, usá <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a> en el sentido «PDF → Texto», pulsá «Extraer texto» y bajá el «Descargar .txt». Las tablas salen como columnas alineadas con espacios, así que se leen sin rehacerlas. Después, con <a href="../herramientas/word-texto.html">Word ↔ Texto</a> en «Texto → Word», una línea en blanco separa los párrafos. Entre una página y otra queda la línea «--- Página siguiente ---», que podés borrar.',
+    'b15': 'Si necesitás títulos, listas y tablas sencillas, usá <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>. Detecta los títulos cuando la letra es más grande que la normal, y también las listas y las tablas simples, pero pierde las negritas y las cursivas. Después, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> en «Markdown → Word» arma el documento con esos títulos, listas y tablas. Con diseños complejos la detección puede fallar, así que revisá el resultado.',
+    'b16': 'Si el PDF es un escaneo',
+    'b17': 'Un escaneo no deja seleccionar el texto con el cursor, y <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a> avisa que no encontró texto. En ese caso:',
+    'b18-1': 'Abrí <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a> y revisá «Idiomas a reconocer». Vienen marcados español e inglés; cada idioma que sumes agrega una descarga la primera vez.',
+    'b18-2': 'Dejá marcada «Enderezar automáticamente páginas/fotos torcidas (recomendado)» si son fotos del celular, y arrastrá el PDF.',
+    'b18-3': 'Pulsá «Reconocer texto (OCR)» y bajá el texto con «Descargar .txt». Si necesitás el aspecto del original, bajá también el «Descargar PDF con texto buscable».',
+    'b18-4': 'Pasá el texto a Word con <a href="../herramientas/word-texto.html">Word ↔ Texto</a>, como en el camino anterior.',
+    'b19': 'El enderezado corrige inclinaciones chicas, de hasta unos 9°, según la ayuda de la herramienta. El OCR funciona mejor con escaneos nítidos de texto impreso. La letra a mano o una foto borrosa pueden salir con errores, así que repasá el texto antes de usarlo.',
+    'b20': 'Preguntas frecuentes',
+    'b21': '<strong>¿Por qué hay un renglón cortado a mitad de frase?</strong> Porque el PDF guarda renglones, no párrafos, y el conversor no siempre adivina dónde termina uno. Se arregla uniendo los renglones a mano en Word.',
+    'b22': '<strong>¿Acepta un PDF protegido con contraseña?</strong> La herramienta no tiene campo para la contraseña. Si la conocés, quitala antes con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>.',
+    'b23': '<strong>¿El Word queda igual que el PDF?</strong> No se puede garantizar. El PDF fija la posición de cada letra y Word acomoda el texto por su cuenta. Mirá el resultado antes de usarlo.',
+    'b24': 'Resumen',
+    'b25': 'Un PDF guarda letras en posiciones, no párrafos ni tablas, así que pasarlo a Word es reconstruir. Probá PDF → Word primero. Si fallan las tablas o el orden y solo te importa el texto, sacalo con PDF ↔ Texto o pasalo por Markdown. Si es un escaneo, reconocé el texto con OCR antes de convertir.',
+    'rel1': 'Word ↔ PDF',
+    'rel2': 'PDF ↔ Texto',
+    'rel3': 'OCR de PDF e imágenes escaneadas',
+    'rel4': 'Word ↔ Texto',
+    'rel5': 'PDF ↔ Markdown'
+  },
+  en: {
+    'titulo-pagina': 'How to turn a PDF into Word, and why it sometimes comes out messy — Mini Cookies',
+    'meta-descripcion': 'How to convert a PDF to Word, why lines break and tables fall apart, and what to do if the PDF is a scan. Step by step.',
+    'h1': 'How to turn a PDF into Word, and why it sometimes comes out messy',
+    'b1': 'You received a PDF and need to change a paragraph or reuse a table. You convert it to Word and it comes out with broken lines, shifted columns or an image where the text should be. This isn’t a fault of one particular tool: it comes from how the PDF is built. Knowing that tells you which route leaves the least cleanup.',
+    'b2': 'Why a PDF doesn’t convert cleanly',
+    'b3': 'A PDF stores where to draw each letter on the sheet. It doesn’t store what a paragraph, a list or a table is. The converter has to guess that from the positions, and three problems come out of it.',
+    'b4-1': 'There are no paragraphs. The PDF has loose lines, and the converter joins them by proximity and font size. Sometimes it joins two paragraphs or splits one in half.',
+    'b4-2': 'There are no tables. What looks like a table is text placed in columns and, sometimes, drawn lines. It usually comes back as text with spaces or tabs, not as cells.',
+    'b4-3': 'A scan has no text. Each page is a photo of the sheet, and until OCR recognizes the letters there is nothing to convert.',
+    'b5': 'Columns need a note. The converter groups letters by height and doesn’t detect columns: on a two-column page, lines from the left and the right at the same height often end up on one line. Those pages need the most fixing.',
+    'b6': 'How to turn a PDF into Word',
+    'b7': 'With <a href="../herramientas/word-pdf.html">Word ↔ PDF</a>, choose “PDF → Word”. The result keeps text styles, paragraphs, images, margins and page size, and puts a page break at the start of each page of the PDF.',
+    'b8-1': 'Open the tool and choose “PDF → Word” in the selector at the top.',
+    'b8-2': 'Drag the PDF to the upload area. With a single file you see its thumbnail and the number of pages.',
+    'b8-3': 'If you like, change the “File name”: with a single PDF the original’s name is suggested.',
+    'b8-4': 'Tap “Convert to Word” and download the result with “Download Word”.',
+    'b9': 'With several PDFs, each one becomes its own .docx and the download is a .zip with all of them. Headers and footers that repeat, such as the page number, stay as text on every page of the Word file: delete them by hand.',
+    'b10': 'What to expect depending on the type of PDF',
+    'b11-c1': 'Type of PDF',
+    'b11-c2': 'What happens',
+    'b11-c3': 'What to do',
+    'b11-f1c1': 'Running text, such as a report or a letter',
+    'b11-f1c2': 'It comes out well: paragraphs, text styles and images',
+    'b11-f1c3': 'Check the page breaks and the headings',
+    'b11-f2c1': 'With tables',
+    'b11-f2c2': 'They come out as tab-separated text, not as cells',
+    'b11-f2c3': 'Rebuild the table in Word, or try the Markdown route',
+    'b11-f3c1': 'Scanned or photographed',
+    'b11-f3c2': 'Each page comes in as an image: it looks the same but can’t be edited',
+    'b11-f3c3': 'Recognize the text with OCR first',
+    'b11-f4c1': 'Several columns, brochures or magazines',
+    'b11-f4c2': 'Lines from the columns get mixed',
+    'b11-f4c3': 'If you only need the content, pull out the text',
+    'b12': 'If the result comes out messy',
+    'b13': 'When the content matters more than the look, it usually pays to take out the text alone and build the document afterwards. Neither of these routes keeps images or layout.',
+    'b14': 'If you only care about the text, use <a href="../herramientas/pdf-texto.html">PDF ↔ Text</a> with “PDF → Text”, tap “Extract text” and download the .txt. Tables come out as columns aligned with spaces, so you can read them without rebuilding. Then, with <a href="../herramientas/word-texto.html">Word ↔ Text</a> and “Text → Word”, a blank line separates the paragraphs. Between one page and the next there is a “--- Next page ---” line, which you can delete.',
+    'b15': 'If you need headings, lists and simple tables, use <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>. It detects headings when the font is larger than the normal text, and simple lists and tables too, but it loses bold and italics. Then <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, with “Markdown → Word”, builds the document with those headings, lists and tables. With complex layouts the detection can fail, so check the result.',
+    'b16': 'If the PDF is a scan',
+    'b17': 'A scan doesn’t let you select the text with the cursor, and <a href="../herramientas/pdf-texto.html">PDF ↔ Text</a> warns that it found no text. In that case:',
+    'b18-1': 'Open <a href="../herramientas/ocr-pdf.html">OCR for scanned PDFs and images</a> and check “Languages to recognize”. Spanish and English come ticked; each language you add gives one more download the first time.',
+    'b18-2': 'Leave “Automatically straighten tilted pages/photos (recommended)” ticked if they are phone photos, and drag the PDF in.',
+    'b18-3': 'Tap “Recognize text (OCR)” and download the text with “Download .txt”. If you need the look of the original, also download the “Download PDF with searchable text”.',
+    'b18-4': 'Turn that text into Word with <a href="../herramientas/word-texto.html">Word ↔ Text</a>, as in the previous route.',
+    'b19': 'Straightening corrects small tilts, up to about 9°, according to the tool’s own help. OCR works best on sharp scans of printed text. Handwriting or blurry photos can come out with errors, so proofread the text before using it.',
+    'b20': 'Frequently asked questions',
+    'b21': '<strong>Why is there a line cut in the middle of a sentence?</strong> Because the PDF stores lines, not paragraphs, and the converter can’t always tell where one ends. Join the lines by hand in Word to fix it.',
+    'b22': '<strong>Does it accept a password-protected PDF?</strong> The tool has no password field. If you know the password, remove the protection first with <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a>.',
+    'b23': '<strong>Will the Word file look exactly like the PDF?</strong> It can’t be guaranteed. The PDF fixes the position of every letter, and Word lays out the text on its own. Look at the result before you use it.',
+    'b24': 'Summary',
+    'b25': 'A PDF stores letters at positions, not paragraphs or tables, so turning it into Word means rebuilding it. Try PDF → Word first. If the tables or the order fail and you only need the text, pull out the text with PDF ↔ Text or go through Markdown. If it’s a scan, recognize the text with OCR before converting.',
+    'rel1': 'Word ↔ PDF',
+    'rel2': 'PDF ↔ Text',
+    'rel3': 'OCR for scanned PDFs and images',
+    'rel4': 'Word ↔ Text',
+    'rel5': 'PDF ↔ Markdown'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo pasar un PDF a Word y por qué a veces sale desordenado</h1>
+    <p data-i18n-html="b1">Te llegó un PDF y necesitás cambiar un párrafo o reutilizar una tabla. Lo pasás a Word y sale con renglones cortados, columnas corridas o una imagen donde debería haber texto. No es una falla de una herramienta en particular: viene de cómo está hecho el PDF. Entender eso te dice qué camino deja menos trabajo de limpieza.</p>
+    <h2 data-i18n="b2">Por qué un PDF no se convierte limpio</h2>
+    <p data-i18n-html="b3">Un PDF guarda dónde dibujar cada letra de la hoja. No guarda qué es un párrafo, una lista o una tabla. El conversor tiene que adivinarlo a partir de las posiciones, y ahí aparecen tres problemas.</p>
+    <ul>
+      <li data-i18n-html="b4-1">Los párrafos no existen. El PDF tiene renglones sueltos y el conversor los junta por cercanía y tamaño de letra. A veces une dos párrafos o parte uno por la mitad.</li>
+      <li data-i18n-html="b4-2">Las tablas no existen. Lo que se ve como tabla son textos en columnas y, a veces, líneas dibujadas. Suelen volver como texto con espacios o tabulaciones, no como celdas.</li>
+      <li data-i18n-html="b4-3">Un escaneo no tiene texto. Cada página es una foto de la hoja, y hasta reconocer las letras con OCR no hay nada que convertir.</li>
+    </ul>
+    <p data-i18n-html="b5">Las columnas merecen una aclaración. El conversor agrupa las letras por altura y no detecta columnas: en una hoja de dos columnas, los renglones de la izquierda y de la derecha a la misma altura suelen quedar en una sola línea. Esas páginas son las que más retoques piden.</p>
+    <h2 data-i18n="b6">Cómo pasar un PDF a Word</h2>
+    <p data-i18n-html="b7">Con <a href="../herramientas/word-pdf.html">Word ↔ PDF</a> elegí «PDF → Word». El resultado conserva estilos de letra, párrafos, imágenes, márgenes y tamaño de hoja, y pone un salto de página por cada página del PDF.</p>
+    <ol>
+      <li data-i18n-html="b8-1">Abrí la herramienta y elegí «PDF → Word» en el selector de arriba.</li>
+      <li data-i18n-html="b8-2">Arrastrá el PDF a la zona de carga. Con un solo archivo ves su miniatura y la cantidad de páginas.</li>
+      <li data-i18n-html="b8-3">Si querés, cambiá el «Nombre del archivo»: con un solo PDF se propone el nombre del original.</li>
+      <li data-i18n-html="b8-4">Pulsá «Convertir a Word» y bajá el resultado con «Descargar Word».</li>
+    </ol>
+    <p data-i18n-html="b9">Con varios PDF, cada uno da su propio .docx y la descarga es un .zip con todos. Los encabezados y pies que se repiten, como el número de página, quedan como texto en cada hoja del Word: borralos a mano.</p>
+    <h2 data-i18n="b10">Qué esperar según el tipo de PDF</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b11-c1">Tipo de PDF</th><th data-i18n-html="b11-c2">Qué pasa</th><th data-i18n-html="b11-c3">Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b11-f1c1">Texto corrido, como un informe o una carta</td><td data-i18n-html="b11-f1c2">Sale bien: párrafos, estilos e imágenes</td><td data-i18n-html="b11-f1c3">Revisar los cortes de página y los títulos</td></tr>
+        <tr><td data-i18n-html="b11-f2c1">Con tablas</td><td data-i18n-html="b11-f2c2">Salen como texto con tabulaciones, no como celdas</td><td data-i18n-html="b11-f2c3">Rehacer la tabla en Word, o probar la vía Markdown</td></tr>
+        <tr><td data-i18n-html="b11-f3c1">Escaneado o fotografiado</td><td data-i18n-html="b11-f3c2">Cada página entra como imagen: se ve igual, pero no se edita</td><td data-i18n-html="b11-f3c3">Reconocer el texto con OCR antes</td></tr>
+        <tr><td data-i18n-html="b11-f4c1">Varias columnas, folletos o revistas</td><td data-i18n-html="b11-f4c2">Los renglones de las columnas se mezclan</td><td data-i18n-html="b11-f4c3">Si solo necesitás el contenido, sacar el texto</td></tr>
+      </tbody>
+    </table></div>
+    <h2 data-i18n="b12">Si el resultado sale desordenado</h2>
+    <p data-i18n-html="b13">Cuando importa el contenido y no el aspecto, suele rendir más sacar el texto solo y armar el documento después. Ninguno de estos caminos conserva imágenes ni diseño.</p>
+    <p data-i18n-html="b14">Si solo te interesa el texto, usá <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a> en el sentido «PDF → Texto», pulsá «Extraer texto» y bajá el «Descargar .txt». Las tablas salen como columnas alineadas con espacios, así que se leen sin rehacerlas. Después, con <a href="../herramientas/word-texto.html">Word ↔ Texto</a> en «Texto → Word», una línea en blanco separa los párrafos. Entre una página y otra queda la línea «--- Página siguiente ---», que podés borrar.</p>
+    <p data-i18n-html="b15">Si necesitás títulos, listas y tablas sencillas, usá <a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a>. Detecta los títulos cuando la letra es más grande que la normal, y también las listas y las tablas simples, pero pierde las negritas y las cursivas. Después, <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> en «Markdown → Word» arma el documento con esos títulos, listas y tablas. Con diseños complejos la detección puede fallar, así que revisá el resultado.</p>
+    <h2 data-i18n="b16">Si el PDF es un escaneo</h2>
+    <p data-i18n-html="b17">Un escaneo no deja seleccionar el texto con el cursor, y <a href="../herramientas/pdf-texto.html">PDF ↔ Texto</a> avisa que no encontró texto. En ese caso:</p>
+    <ol>
+      <li data-i18n-html="b18-1">Abrí <a href="../herramientas/ocr-pdf.html">OCR de PDF e imágenes escaneadas</a> y revisá «Idiomas a reconocer». Vienen marcados español e inglés; cada idioma que sumes agrega una descarga la primera vez.</li>
+      <li data-i18n-html="b18-2">Dejá marcada «Enderezar automáticamente páginas/fotos torcidas (recomendado)» si son fotos del celular, y arrastrá el PDF.</li>
+      <li data-i18n-html="b18-3">Pulsá «Reconocer texto (OCR)» y bajá el texto con «Descargar .txt». Si necesitás el aspecto del original, bajá también el «Descargar PDF con texto buscable».</li>
+      <li data-i18n-html="b18-4">Pasá el texto a Word con <a href="../herramientas/word-texto.html">Word ↔ Texto</a>, como en el camino anterior.</li>
+    </ol>
+    <p data-i18n-html="b19">El enderezado corrige inclinaciones chicas, de hasta unos 9°, según la ayuda de la herramienta. El OCR funciona mejor con escaneos nítidos de texto impreso. La letra a mano o una foto borrosa pueden salir con errores, así que repasá el texto antes de usarlo.</p>
+    <h2 data-i18n="b20">Preguntas frecuentes</h2>
+    <p data-i18n-html="b21"><strong>¿Por qué hay un renglón cortado a mitad de frase?</strong> Porque el PDF guarda renglones, no párrafos, y el conversor no siempre adivina dónde termina uno. Se arregla uniendo los renglones a mano en Word.</p>
+    <p data-i18n-html="b22"><strong>¿Acepta un PDF protegido con contraseña?</strong> La herramienta no tiene campo para la contraseña. Si la conocés, quitala antes con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a>.</p>
+    <p data-i18n-html="b23"><strong>¿El Word queda igual que el PDF?</strong> No se puede garantizar. El PDF fija la posición de cada letra y Word acomoda el texto por su cuenta. Mirá el resultado antes de usarlo.</p>
+    <h2 data-i18n="b24">Resumen</h2>
+    <p data-i18n-html="b25">Un PDF guarda letras en posiciones, no párrafos ni tablas, así que pasarlo a Word es reconstruir. Probá PDF → Word primero. Si fallan las tablas o el orden y solo te importa el texto, sacalo con PDF ↔ Texto o pasalo por Markdown. Si es un escaneo, reconocé el texto con OCR antes de convertir.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/word-pdf.html" data-i18n="rel1">Word ↔ PDF</a></li>
+      <li><a href="../herramientas/pdf-texto.html" data-i18n="rel2">PDF ↔ Texto</a></li>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel3">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/word-texto.html" data-i18n="rel4">Word ↔ Texto</a></li>
+      <li><a href="../herramientas/pdf-markdown.html" data-i18n="rel5">PDF ↔ Markdown</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

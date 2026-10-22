@@ -33,16 +33,17 @@ window.i18nPagina = {
     'meta-camara': 'Cámara',
     'meta-fecha': 'Fecha',
     'meta-gps': 'Ubicación GPS',
-    'ayuda-metadatos': 'Se quitan todos los bloques de metadatos, no solo los que se muestran arriba: EXIF (cámara, fecha, GPS y la miniatura que guardan los celulares), XMP, IPTC, comentarios y los datos que algunos celulares agregan después de la imagen. En JPEG sin rotar, la imagen no se vuelve a comprimir: sus píxeles quedan iguales. Se conservan el perfil de color (ICC) y la orientación de píxeles. PNG y WebP se redibujan y se exportan de nuevo, así que tampoco conservan ningún metadato.',
+    'ayuda-metadatos': 'Se quitan todos los bloques de metadatos, no solo los que se muestran arriba: EXIF (cámara, fecha, GPS y la miniatura que guardan los celulares), XMP, IPTC, comentarios y los datos que algunos celulares agregan después de la imagen. En JPEG sin rotar, la imagen no se vuelve a comprimir: sus píxeles quedan iguales. Se conservan el perfil de color (ICC) y la orientación de píxeles. PNG y WebP se redibujan y se exportan de nuevo, así que tampoco conservan ningún metadato. El WebP se vuelve a comprimir con pérdida (calidad 0,95), y un JPEG sin rotar también se redibuja con esa calidad si no se pudo copiar sin recomprimir.',
     'titulo-pagina': 'Quitar metadatos EXIF de una foto gratis — Mini Cookies',
     'meta-descripcion': 'Sacá los metadatos EXIF (cámara, fecha, ubicación GPS) de una foto antes de compartirla, gratis y sin subirla a ningún servidor.',
     'guia-titulo': 'Cómo quitar los metadatos EXIF de una foto',
+    'guia-mas-link': 'Cómo quitar los datos ocultos de tus fotos y archivos',
     'guia-intro': 'Las fotos, sobre todo las de celular, guardan datos ocultos: modelo de cámara, fecha y hora y, a veces, la ubicación GPS exacta. Esta herramienta te muestra qué metadatos tiene la foto y te deja descargarla sin ellos antes de compartirla en un foro, un anuncio de venta o un chat. Elegís la imagen, mirás el resumen y bajás la copia limpia.',
     'guia-paso-1': 'Arrastrá tu foto o hacé clic para elegirla. Se muestra una vista previa.',
     'guia-paso-2': 'Mirá la lista de metadatos detectados: «Cámara», «Fecha» y «Ubicación GPS» (esta última en rojo, para que no pase inadvertida). Si no hay, aparece un aviso indicándolo.',
     'guia-paso-3': 'Tocá «Descargar sin metadatos» y luego «Descargar imagen».',
     'guia-consejo-1': 'Aunque solo se muestren cámara, fecha y GPS, se quitan todos los bloques de metadatos: EXIF, XMP, IPTC, comentarios, la miniatura interna que guardan los celulares y datos que algunos teléfonos agregan después de la imagen. El botón «?» lo explica.',
-    'guia-consejo-2': 'En un JPEG sin rotar, la imagen no se vuelve a comprimir, así que no pierde calidad. Se conservan el perfil de color (ICC) y la orientación de píxeles.',
+    'guia-consejo-2': 'En un JPEG sin rotar, los píxeles se copian tal cual, no pierden calidad y el perfil de color (ICC) se conserva. Solo si esa copia directa no es posible, la imagen se redibuja con calidad 0,95, y entonces el perfil ICC puede perderse.',
     'guia-consejo-3': 'Si la foto depende de la etiqueta de orientación para verse derecha (típico de celulares), se redibuja y se exporta de nuevo, para que no quede girada.',
     'guia-consejo-4': 'PNG y WebP también se redibujan y salen sin metadatos. Otros formatos (GIF, BMP, SVG) se descargan como PNG.',
     'guia-p1': '¿Cómo se llama el archivo descargado?',
@@ -66,16 +67,17 @@ window.i18nPagina = {
     'meta-camara': 'Camera',
     'meta-fecha': 'Date',
     'meta-gps': 'GPS location',
-    'ayuda-metadatos': 'Every metadata block is removed, not only the ones listed above: EXIF (camera, date, GPS and the thumbnail phones store), XMP, IPTC, comments and any data some phones append after the image. For a JPEG that isn’t rotated, the image is not recompressed: its pixels stay exactly the same. The colour profile (ICC) and the pixel orientation are kept. PNG and WebP are redrawn and exported again, so they carry no metadata either.',
+    'ayuda-metadatos': 'Every metadata block is removed, not only the ones listed above: EXIF (camera, date, GPS and the thumbnail phones store), XMP, IPTC, comments and any data some phones append after the image. For a JPEG that isn’t rotated, the image is not recompressed: its pixels stay exactly the same. The colour profile (ICC) and the pixel orientation are kept. PNG and WebP are redrawn and exported again, so they carry no metadata either. WebP is recompressed with loss (quality 0.95), and a JPEG that isn’t rotated is also redrawn at that quality if it could not be copied without recompression.',
     'titulo-pagina': 'Remove EXIF metadata from a photo, free — Mini Cookies',
     'meta-descripcion': 'Strip the EXIF metadata (camera, date, GPS location) from a photo before you share it — free, and nothing is uploaded to a server.',
     'guia-titulo': 'How to remove EXIF metadata from a photo',
+    'guia-mas-link': 'How to remove hidden data from your photos and files',
     'guia-intro': 'Photos, especially phone photos, store hidden data: camera model, date and time and, sometimes, the exact GPS location. This tool shows you what metadata the photo carries and lets you download it without any of it before you share it on a forum, a sales listing or a chat. You choose the image, look at the summary and download the clean copy.',
     'guia-paso-1': 'Drag your photo or click to choose it. A preview is shown.',
     'guia-paso-2': 'Look at the list of detected metadata: “Camera”, “Date” and “GPS location” (the last one in red, so it doesn’t go unnoticed). If there is none, a notice says so.',
     'guia-paso-3': 'Tap “Download without metadata” and then “Download image”.',
     'guia-consejo-1': 'Even though only camera, date and GPS are shown, every metadata block is removed: EXIF, XMP, IPTC, comments, the internal thumbnail phones store and data some phones append after the image. The “?” button explains it.',
-    'guia-consejo-2': 'In a JPEG that isn’t rotated, the image is not recompressed, so it loses no quality. The color profile (ICC) and the pixel orientation are kept.',
+    'guia-consejo-2': 'In a JPEG that isn’t rotated, the pixels are copied as they are, lose no quality and the color profile (ICC) is kept. Only if that direct copy isn’t possible is the image redrawn at quality 0.95, and then the ICC profile may be lost.',
     'guia-consejo-3': 'If the photo relies on the orientation tag to look upright (typical of phones), it is redrawn and exported again, so it doesn’t end up rotated.',
     'guia-consejo-4': 'PNG and WebP are also redrawn and come out without metadata. Other formats (GIF, BMP, SVG) are downloaded as PNG.',
     'guia-p1': 'What is the downloaded file called?',
@@ -144,7 +146,7 @@ window.i18nPagina = {
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
       <li data-i18n="guia-consejo-1">Aunque solo se muestren cámara, fecha y GPS, se quitan todos los bloques de metadatos: EXIF, XMP, IPTC, comentarios, la miniatura interna que guardan los celulares y datos que algunos teléfonos agregan después de la imagen. El botón «?» lo explica.</li>
-      <li data-i18n="guia-consejo-2">En un JPEG sin rotar, la imagen no se vuelve a comprimir, así que no pierde calidad. Se conservan el perfil de color (ICC) y la orientación de píxeles.</li>
+      <li data-i18n="guia-consejo-2">En un JPEG sin rotar, los píxeles se copian tal cual, no pierden calidad y el perfil de color (ICC) se conserva. Solo si esa copia directa no es posible, la imagen se redibuja con calidad 0,95, y entonces el perfil ICC puede perderse.</li>
       <li data-i18n="guia-consejo-3">Si la foto depende de la etiqueta de orientación para verse derecha (típico de celulares), se redibuja y se exporta de nuevo, para que no quede girada.</li>
       <li data-i18n="guia-consejo-4">PNG y WebP también se redibujan y salen sin metadatos. Otros formatos (GIF, BMP, SVG) se descargan como PNG.</li>
     </ul>
@@ -165,6 +167,7 @@ window.i18nPagina = {
       <summary data-i18n="guia-p4">¿Puedo procesar varias fotos a la vez?</summary>
       <p data-i18n="guia-r4">No, una por vez.</p>
     </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/quitar-datos-ocultos.html" data-i18n="guia-mas-link">Cómo quitar los datos ocultos de tus fotos y archivos</a></p>
   </section>
 </main>
 
@@ -259,10 +262,9 @@ async function leerExif(archivo) {
   let offset = 2;
   while (offset < vista.byteLength - 4) {
     const marcador = vista.getUint16(offset);
-    if (marcador === 0xFFE1) {
+    // Puede haber varios APP1 (p. ej. XMP antes del EXIF): se revisan todos.
+    if (marcador === 0xFFE1 && vista.getUint32(offset + 4) === 0x45786966) { // "Exif"
       const inicioApp1 = offset + 4;
-      const esExif = vista.getUint32(inicioApp1) === 0x45786966; // "Exif"
-      if (!esExif) return null;
       const inicioTiff = inicioApp1 + 6;
       const esLittleEndian = vista.getUint16(inicioTiff) === 0x4949;
       const inicioIfd0 = inicioTiff + vista.getUint32(inicioTiff + 4, esLittleEndian);

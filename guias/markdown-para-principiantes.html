@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Markdown para principiantes: qué es y cómo pasarlo a Word, HTML o PDF — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Sintaxis básica de Markdown (títulos, listas, enlaces, tablas), por qué no se ve el formato y cómo pasarlo a Word, HTML o PDF.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Markdown para principiantes: qué es y cómo pasarlo a Word, HTML o PDF — Mini Cookies',
+    'meta-descripcion': 'Sintaxis básica de Markdown (títulos, listas, enlaces, tablas), por qué no se ve el formato y cómo pasarlo a Word, HTML o PDF.',
+    'h1': 'Markdown para principiantes: qué es y cómo pasarlo a Word, HTML o PDF',
+    'b1': 'Escribiste unas notas con almohadillas y asteriscos, y al pegarlas en un correo aparecen tal cual, con los <code>#</code> y los <code>**</code> a la vista. No hay nada roto: Markdown es texto plano con marcas, y el formato aparece solo cuando un programa las interpreta. Esta guía enseña las marcas básicas y cómo llevar el texto a Word, HTML o PDF con las herramientas del sitio.',
+    'b2': 'Qué es Markdown',
+    'b3': 'Un archivo de Markdown suele terminar en .md y se abre en cualquier editor de texto. Las marcas son caracteres que ya tenés en el teclado, y el programa que lo muestra las convierte en títulos, negritas o listas. Lo vas a encontrar en notas, en los README de proyectos de software y en la documentación técnica.',
+    'b4': 'La sintaxis básica',
+    'b5': 'Estas son las marcas que más vas a usar:',
+    'b6': '<code># Título grande\n## Subtítulo\n**negrita**, *cursiva* y ~~tachado~~\n- un elemento de lista\n1. un paso numerado\n[texto del enlace](https://ejemplo.com)</code>',
+    'b7': 'Un título empieza con almohadillas y un espacio: una almohadilla es el nivel más alto, y se puede llegar hasta seis. Entre dos asteriscos va la negrita, entre uno la cursiva, y entre dos virgulillas el tachado. Una lista usa guion o número, y un enlace es el texto entre corchetes seguido, pegado, de la dirección entre paréntesis.',
+    'b8': 'Una tabla usa barras verticales, y una línea de guiones debajo del encabezado la marca como tabla. Un bloque de código va entre dos líneas de tres comillas invertidas.',
+    'b9': 'Los errores que dejan el texto sin formato',
+    'b10': 'Cuando el formato no aparece, suele ser por uno de estos detalles:',
+    'b11-1': '<code>#Título</code> sin espacio no es un título: sale como párrafo. Escribilo como <code># Título</code>.',
+    'b11-2': 'Una tabla sin la línea de guiones debajo del encabezado sale como texto, con sus barras.',
+    'b11-3': 'Un asterisco con espacios, como <code>* así *</code>, no hace cursiva. Pegado al texto, sí.',
+    'b11-4': 'Un guion bajo dentro de una palabra no hace cursiva: <code>nombre_de_archivo</code> se ve tal cual.',
+    'b11-5': 'Una lista numerada que empieza en 2 o más, pegada al párrafo de arriba, se queda como texto. Dejá una línea en blanco antes de cualquier lista.',
+    'b12': 'Un solo Enter no separa párrafos: en la vista previa, las líneas seguidas se muestran juntas. Para empezar un párrafo nuevo, dejá una línea en blanco. Para un salto dentro del mismo párrafo, terminá la línea con dos espacios.',
+    'b13': 'Si necesitás un asterisco o una almohadilla como texto, escribilo con una barra invertida delante (<code>\\*</code>, <code>\\#</code>). La vista previa, Word y el PDF lo muestran sin convertirlo en formato.',
+    'b14': 'Ver cómo queda mientras escribís',
+    'b15': 'En <a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a>, con «Markdown → HTML» elegido, escribí o pegá el texto a la izquierda. A la derecha, la «Vista previa» se actualiza mientras escribís. Las tablas, el tachado, las listas de tareas (con <code>- [ ]</code> y <code>- [x]</code>) y los enlaces escritos sueltos, como una dirección web, se ven como en GitHub, que es el estilo que sigue el conversor.',
+    'b16': 'Pasar Markdown a Word',
+    'b17': 'Con <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> elegí «Markdown → Word». Si tenés archivos .md (también acepta .markdown y .txt), arrastralos y tocá «Convertir a Word». Con uno baja un .docx con el mismo nombre; con varios, un .zip con un .docx por archivo. Si preferís escribir, usá «O escribilo a mano»: ahí tenés el texto con su vista previa, el campo «Nombre del archivo» y el botón «Descargar .docx».',
+    'b18': 'Se conservan títulos, negritas, cursivas, listas y tablas. No hay opciones de estilo, así que el documento sale con el formato por defecto. Si necesitás otra letra o colores, los cambiás después en Word.',
+    'b19': 'Pasar Markdown a HTML',
+    'b20': 'En <a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a>, «Ver código HTML» despliega el código, y otro clic en ese mismo botón lo oculta. Mientras el código está a la vista aparece «Copiar código HTML», que lo lleva al portapapeles para pegarlo en una web o un blog. «Descargar .html» baja una página completa, con su título tomado del primer encabezado, que se abre directo en el navegador.',
+    'b21': 'Pasar Markdown a PDF',
+    'b22': '<a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> tiene la dirección «Markdown → PDF». Con «Convertir a PDF» sale un PDF sencillo: hoja A4, letra Helvetica, títulos en negrita, listas con viñeta para las líneas que empiezan con guion o asterisco, y listas numeradas que conservan su número. El formato dentro de cada línea se quita, así que negritas, cursivas y enlaces quedan como texto. Las líneas seguidas se juntan en un párrafo, y las tablas salen como texto corrido. El código va en Courier, línea por línea, tal como está escrito. Los caracteres que Helvetica no tiene, como emojis o alfabetos no latinos, salen como «?», salvo algunas flechas y símbolos comunes, que se cambian por equivalentes como «-&gt;».',
+    'b23': 'Si necesitás que el PDF se parezca a la vista previa, escribí el texto en «O escribilo a mano» y tocá «Guardar como PDF / Imprimir». Eso abre la impresión del navegador, donde elegís la opción de guardar como PDF.',
+    'b24': 'Tablas y documentos con muchos títulos',
+    'b25': 'Si el documento tiene muchos títulos, <a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> agrega al principio un índice con enlaces a cada uno. Para las tablas, <a href="../herramientas/markdown-tabla-csv.html">Tabla Markdown ↔ CSV</a> pasa una tabla de Markdown a CSV, listo para abrir en Excel, y también al revés, sin escribir las barras a mano.',
+    'b26': 'Preguntas frecuentes',
+    'b27': '<strong>¿Markdown se ve igual en todos lados?</strong> Casi. Los títulos, las listas y los enlaces se ven parecido en casi cualquier programa, pero las tablas y el tachado dependen de quien lo muestre.',
+    'b28': '<strong>¿Qué pierdo al pasar Markdown a Word o a PDF?</strong> Markdown no tiene colores, tipos de letra ni celdas combinadas, así que esos detalles no llegan a Word. En el PDF, además, se pierden las negritas y cursivas dentro de las líneas, y las tablas salen como texto corrido.',
+    'b29': '<strong>¿Por qué las tablas salen en el PDF como texto corrido?</strong> El conversor a PDF no dibuja tablas: junta sus filas en un párrafo. Si necesitás la tabla con sus columnas, escribila en «O escribilo a mano» y usá «Guardar como PDF / Imprimir», que imprime la vista previa tal como se ve.',
+    'b30': 'Resumen',
+    'b31': 'Markdown es texto simple con unas pocas marcas: almohadillas para los títulos, asteriscos para el énfasis, guiones o números para las listas. Escribilo mirando la vista previa de Markdown ↔ HTML, y convertilo a Word, HTML o PDF cuando lo necesites. Si tu documento tiene tablas y necesitás un PDF fiel, imprimí la vista previa en lugar de usar el conversor.',
+    'rel1': 'Markdown ↔ Word',
+    'rel2': 'Markdown ↔ HTML',
+    'rel3': 'PDF ↔ Markdown',
+    'rel4': 'Tabla Markdown ↔ CSV',
+    'rel5': 'Tabla de contenidos de Markdown'
+  },
+  en: {
+    'titulo-pagina': 'Markdown for beginners: what it is and how to turn it into Word, HTML or PDF — Mini Cookies',
+    'meta-descripcion': 'Basic Markdown syntax (headings, lists, links, tables), why your formatting doesn’t show, and how to convert it to Word, HTML or PDF.',
+    'h1': 'Markdown for beginners: what it is and how to turn it into Word, HTML or PDF',
+    'b1': 'You wrote some notes with hash signs and asterisks, and when you paste them into an email they show up exactly as typed, with the <code>#</code> and the <code>**</code> in plain view. Nothing is broken. Markdown is plain text with marks in it, and the formatting only appears when a program reads those marks. This guide covers the basic marks and how to take your text into Word, HTML or PDF with the tools on the site.',
+    'b2': 'What Markdown is',
+    'b3': 'A Markdown file usually ends in .md and opens in any text editor. The marks are characters you already have on your keyboard, and the program that displays the file turns them into headings, bold text or lists. You will find it in notes, in the README files of software projects and in technical documentation.',
+    'b4': 'The basic syntax',
+    'b5': 'These are the marks you will use most:',
+    'b6': '<code># Big heading\n## Subheading\n**bold**, *italic* and ~~strikethrough~~\n- a list item\n1. a numbered step\n[link text](https://example.com)</code>',
+    'b7': 'A heading starts with hash signs and a space: one hash is the top level, and you can go down to six. Two asterisks on each side make bold, one makes italic, and two tildes make strikethrough. A list uses a dash or a number, and a link is the text in square brackets, followed right after by the address in parentheses.',
+    'b8': 'A table uses vertical bars, and a row of dashes under the header line marks it as a table. A code block goes between two lines of three backticks.',
+    'b9': 'Mistakes that leave the text unformatted',
+    'b10': 'When the formatting doesn’t appear, it is usually one of these details:',
+    'b11-1': '<code>#Title</code> without a space isn’t a heading: it comes out as a paragraph. Write it as <code># Title</code>.',
+    'b11-2': 'A table without the row of dashes under the header comes out as text, bars and all.',
+    'b11-3': 'An asterisk with spaces around it, like <code>* this *</code>, doesn’t make italics. Attached to the text, it does.',
+    'b11-4': 'An underscore inside a word doesn’t make italics: <code>file_name_final</code> appears as typed.',
+    'b11-5': 'A numbered list that starts at 2 or higher, placed right after a paragraph, stays as text. Leave a blank line before any list.',
+    'b12': 'A single Enter doesn’t start a new paragraph: lines that follow each other show together in the preview. For a new paragraph, leave a blank line. For a line break inside the same paragraph, end the line with two spaces.',
+    'b13': 'If you need an asterisk or a hash sign as plain text, put a backslash in front of it (<code>\\*</code>, <code>\\#</code>). The preview, Word and the PDF show it without turning it into formatting.',
+    'b14': 'See how it looks as you write',
+    'b15': 'In <a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a>, with “Markdown → HTML” selected, type or paste the text on the left. The “Preview” on the right updates as you type. Tables, strikethrough, task lists (written as <code>- [ ]</code> and <code>- [x]</code>) and bare links, such as a web address, follow GitHub’s style, which is the one the converter uses.',
+    'b16': 'Turning Markdown into Word',
+    'b17': 'With <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a>, choose “Markdown → Word”. If you have .md files (it also accepts .markdown and .txt), drag them in and tap “Convert to Word”. With one file you get a .docx with the same name; with several, a .zip with one .docx per file. If you prefer to write, use “Or type it in”: there you have the text with its preview, the “File name” field and the “Download .docx” button.',
+    'b18': 'Titles, bold, italics, lists and tables are kept. There are no style options, so the document comes out with the default formatting. If you need a different font or colors, change them afterwards in Word.',
+    'b19': 'Turning Markdown into HTML',
+    'b20': 'In <a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a>, “View HTML code” shows the code, and another click on that same button hides it. While the code is on screen, “Copy HTML code” appears; it puts the code on the clipboard, so you can paste it into a website or a blog. “Download .html” saves a complete page, with its title taken from the first heading, that opens straight in the browser.',
+    'b21': 'Turning Markdown into PDF',
+    'b22': '<a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> has the direction “Markdown → PDF”. “Convert to PDF” makes a simple PDF: A4 pages, Helvetica type, headings in bold, bullet lists for the lines that start with a dash or an asterisk, and numbered lists that keep their numbers. The formatting inside each line is removed, so bold, italics and links become plain text. Consecutive lines are joined into one paragraph, and tables come out as running text. Code goes in Courier, line by line, as written. Characters that Helvetica doesn’t have, such as emoji or non-Latin alphabets, come out as “?”, except some arrows and common symbols, which are replaced by equivalents such as “-&gt;”.',
+    'b23': 'If you need the PDF to look like the preview, write the text under “Or write it by hand” and tap “Save as PDF / Print”. That opens the browser’s print dialog, where you choose the option to save as PDF.',
+    'b24': 'Tables and long documents',
+    'b25': 'If the document has many headings, <a href="../herramientas/tabla-contenidos-markdown.html">Markdown table of contents</a> adds an index with links to each one at the top. For tables, <a href="../herramientas/markdown-tabla-csv.html">Markdown table ↔ CSV</a> turns a Markdown table into CSV, ready to open in Excel, and back again, so you don’t have to type the bars by hand.',
+    'b26': 'Frequently asked questions',
+    'b27': '<strong>Does Markdown look the same everywhere?</strong> Almost. Headings, lists and links look alike in nearly any program, but tables and strikethrough depend on the program that shows them.',
+    'b28': '<strong>What do I lose when I move Markdown to Word or PDF?</strong> Markdown has no colors, typefaces or merged cells, so those details don’t make it into Word. In the PDF, bold and italics inside lines are lost too, and tables come out as running text.',
+    'b29': '<strong>Why do tables come out as running text in the PDF?</strong> The PDF converter doesn’t draw tables: it joins their rows into one paragraph. If you need the table with its columns, write it under “Or write it by hand” and use “Save as PDF / Print”, which prints the preview as it looks.',
+    'b30': 'Summary',
+    'b31': 'Markdown is plain text with a few marks: hash signs for headings, asterisks for emphasis, dashes or numbers for lists. Write it while watching the preview in Markdown ↔ HTML, and convert it to Word, HTML or PDF when you need to. If your document has tables and you need a faithful PDF, print the preview instead of using the converter.',
+    'rel1': 'Markdown ↔ Word',
+    'rel2': 'Markdown ↔ HTML',
+    'rel3': 'PDF ↔ Markdown',
+    'rel4': 'Markdown table ↔ CSV',
+    'rel5': 'Markdown table of contents'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Markdown para principiantes: qué es y cómo pasarlo a Word, HTML o PDF</h1>
+    <p data-i18n-html="b1">Escribiste unas notas con almohadillas y asteriscos, y al pegarlas en un correo aparecen tal cual, con los <code>#</code> y los <code>**</code> a la vista. No hay nada roto: Markdown es texto plano con marcas, y el formato aparece solo cuando un programa las interpreta. Esta guía enseña las marcas básicas y cómo llevar el texto a Word, HTML o PDF con las herramientas del sitio.</p>
+    <h2 data-i18n="b2">Qué es Markdown</h2>
+    <p data-i18n-html="b3">Un archivo de Markdown suele terminar en .md y se abre en cualquier editor de texto. Las marcas son caracteres que ya tenés en el teclado, y el programa que lo muestra las convierte en títulos, negritas o listas. Lo vas a encontrar en notas, en los README de proyectos de software y en la documentación técnica.</p>
+    <h2 data-i18n="b4">La sintaxis básica</h2>
+    <p data-i18n-html="b5">Estas son las marcas que más vas a usar:</p>
+    <pre data-i18n-html="b6"><code># Título grande
+## Subtítulo
+**negrita**, *cursiva* y ~~tachado~~
+- un elemento de lista
+1. un paso numerado
+[texto del enlace](https://ejemplo.com)</code></pre>
+    <p data-i18n-html="b7">Un título empieza con almohadillas y un espacio: una almohadilla es el nivel más alto, y se puede llegar hasta seis. Entre dos asteriscos va la negrita, entre uno la cursiva, y entre dos virgulillas el tachado. Una lista usa guion o número, y un enlace es el texto entre corchetes seguido, pegado, de la dirección entre paréntesis.</p>
+    <p data-i18n-html="b8">Una tabla usa barras verticales, y una línea de guiones debajo del encabezado la marca como tabla. Un bloque de código va entre dos líneas de tres comillas invertidas.</p>
+    <h2 data-i18n="b9">Los errores que dejan el texto sin formato</h2>
+    <p data-i18n-html="b10">Cuando el formato no aparece, suele ser por uno de estos detalles:</p>
+    <ul>
+      <li data-i18n-html="b11-1"><code>#Título</code> sin espacio no es un título: sale como párrafo. Escribilo como <code># Título</code>.</li>
+      <li data-i18n-html="b11-2">Una tabla sin la línea de guiones debajo del encabezado sale como texto, con sus barras.</li>
+      <li data-i18n-html="b11-3">Un asterisco con espacios, como <code>* así *</code>, no hace cursiva. Pegado al texto, sí.</li>
+      <li data-i18n-html="b11-4">Un guion bajo dentro de una palabra no hace cursiva: <code>nombre_de_archivo</code> se ve tal cual.</li>
+      <li data-i18n-html="b11-5">Una lista numerada que empieza en 2 o más, pegada al párrafo de arriba, se queda como texto. Dejá una línea en blanco antes de cualquier lista.</li>
+    </ul>
+    <p data-i18n-html="b12">Un solo Enter no separa párrafos: en la vista previa, las líneas seguidas se muestran juntas. Para empezar un párrafo nuevo, dejá una línea en blanco. Para un salto dentro del mismo párrafo, terminá la línea con dos espacios.</p>
+    <p data-i18n-html="b13">Si necesitás un asterisco o una almohadilla como texto, escribilo con una barra invertida delante (<code>\*</code>, <code>\#</code>). La vista previa, Word y el PDF lo muestran sin convertirlo en formato.</p>
+    <h2 data-i18n="b14">Ver cómo queda mientras escribís</h2>
+    <p data-i18n-html="b15">En <a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a>, con «Markdown → HTML» elegido, escribí o pegá el texto a la izquierda. A la derecha, la «Vista previa» se actualiza mientras escribís. Las tablas, el tachado, las listas de tareas (con <code>- [ ]</code> y <code>- [x]</code>) y los enlaces escritos sueltos, como una dirección web, se ven como en GitHub, que es el estilo que sigue el conversor.</p>
+    <h2 data-i18n="b16">Pasar Markdown a Word</h2>
+    <p data-i18n-html="b17">Con <a href="../herramientas/markdown-word.html">Markdown ↔ Word</a> elegí «Markdown → Word». Si tenés archivos .md (también acepta .markdown y .txt), arrastralos y tocá «Convertir a Word». Con uno baja un .docx con el mismo nombre; con varios, un .zip con un .docx por archivo. Si preferís escribir, usá «O escribilo a mano»: ahí tenés el texto con su vista previa, el campo «Nombre del archivo» y el botón «Descargar .docx».</p>
+    <p data-i18n-html="b18">Se conservan títulos, negritas, cursivas, listas y tablas. No hay opciones de estilo, así que el documento sale con el formato por defecto. Si necesitás otra letra o colores, los cambiás después en Word.</p>
+    <h2 data-i18n="b19">Pasar Markdown a HTML</h2>
+    <p data-i18n-html="b20">En <a href="../herramientas/markdown-html.html">Markdown ↔ HTML</a>, «Ver código HTML» despliega el código, y otro clic en ese mismo botón lo oculta. Mientras el código está a la vista aparece «Copiar código HTML», que lo lleva al portapapeles para pegarlo en una web o un blog. «Descargar .html» baja una página completa, con su título tomado del primer encabezado, que se abre directo en el navegador.</p>
+    <h2 data-i18n="b21">Pasar Markdown a PDF</h2>
+    <p data-i18n-html="b22"><a href="../herramientas/pdf-markdown.html">PDF ↔ Markdown</a> tiene la dirección «Markdown → PDF». Con «Convertir a PDF» sale un PDF sencillo: hoja A4, letra Helvetica, títulos en negrita, listas con viñeta para las líneas que empiezan con guion o asterisco, y listas numeradas que conservan su número. El formato dentro de cada línea se quita, así que negritas, cursivas y enlaces quedan como texto. Las líneas seguidas se juntan en un párrafo, y las tablas salen como texto corrido. El código va en Courier, línea por línea, tal como está escrito. Los caracteres que Helvetica no tiene, como emojis o alfabetos no latinos, salen como «?», salvo algunas flechas y símbolos comunes, que se cambian por equivalentes como «-&gt;».</p>
+    <p data-i18n-html="b23">Si necesitás que el PDF se parezca a la vista previa, escribí el texto en «O escribilo a mano» y tocá «Guardar como PDF / Imprimir». Eso abre la impresión del navegador, donde elegís la opción de guardar como PDF.</p>
+    <h2 data-i18n="b24">Tablas y documentos con muchos títulos</h2>
+    <p data-i18n-html="b25">Si el documento tiene muchos títulos, <a href="../herramientas/tabla-contenidos-markdown.html">Tabla de contenidos de Markdown</a> agrega al principio un índice con enlaces a cada uno. Para las tablas, <a href="../herramientas/markdown-tabla-csv.html">Tabla Markdown ↔ CSV</a> pasa una tabla de Markdown a CSV, listo para abrir en Excel, y también al revés, sin escribir las barras a mano.</p>
+    <h2 data-i18n="b26">Preguntas frecuentes</h2>
+    <p data-i18n-html="b27"><strong>¿Markdown se ve igual en todos lados?</strong> Casi. Los títulos, las listas y los enlaces se ven parecido en casi cualquier programa, pero las tablas y el tachado dependen de quien lo muestre.</p>
+    <p data-i18n-html="b28"><strong>¿Qué pierdo al pasar Markdown a Word o a PDF?</strong> Markdown no tiene colores, tipos de letra ni celdas combinadas, así que esos detalles no llegan a Word. En el PDF, además, se pierden las negritas y cursivas dentro de las líneas, y las tablas salen como texto corrido.</p>
+    <p data-i18n-html="b29"><strong>¿Por qué las tablas salen en el PDF como texto corrido?</strong> El conversor a PDF no dibuja tablas: junta sus filas en un párrafo. Si necesitás la tabla con sus columnas, escribila en «O escribilo a mano» y usá «Guardar como PDF / Imprimir», que imprime la vista previa tal como se ve.</p>
+    <h2 data-i18n="b30">Resumen</h2>
+    <p data-i18n-html="b31">Markdown es texto simple con unas pocas marcas: almohadillas para los títulos, asteriscos para el énfasis, guiones o números para las listas. Escribilo mirando la vista previa de Markdown ↔ HTML, y convertilo a Word, HTML o PDF cuando lo necesites. Si tu documento tiene tablas y necesitás un PDF fiel, imprimí la vista previa en lugar de usar el conversor.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/markdown-word.html" data-i18n="rel1">Markdown ↔ Word</a></li>
+      <li><a href="../herramientas/markdown-html.html" data-i18n="rel2">Markdown ↔ HTML</a></li>
+      <li><a href="../herramientas/pdf-markdown.html" data-i18n="rel3">PDF ↔ Markdown</a></li>
+      <li><a href="../herramientas/markdown-tabla-csv.html" data-i18n="rel4">Tabla Markdown ↔ CSV</a></li>
+      <li><a href="../herramientas/tabla-contenidos-markdown.html" data-i18n="rel5">Tabla de contenidos de Markdown</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
