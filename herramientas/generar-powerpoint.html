@@ -339,6 +339,7 @@ document.addEventListener('cambioIdioma', () => {
 function cuerpoAParrafosPptx(bloques) {
   const aRuns = (hijos) => hijos.filter((r) => r.texto !== undefined).map((r) => ({ texto: r.texto, negrita: r.negrita, cursiva: r.cursiva, subrayado: r.subrayado }));
   const resultado = [];
+  const instanciasVistas = new Set();
   bloques.forEach((b) => {
     if (b.tipo === 'tabla') {
       b.filas.forEach((fila) => {
@@ -349,7 +350,16 @@ function cuerpoAParrafosPptx(bloques) {
     }
     const runs = aRuns(b.hijos);
     if (b.titulo) runs.forEach((r) => { r.negrita = true; });
-    resultado.push({ hijos: runs, lista: b.lista ? (b.lista.vineta ? 'vineta' : 'numerada') : undefined, nivel: b.lista ? b.lista.nivel : 0 });
+    const numerada = !!(b.lista && !b.lista.vineta);
+    // Una lista numerada nueva (otra instancia que no se vio antes) al mismo nivel o más arriba que el párrafo anterior empieza en 1;
+    // una sublista (más hondo) o volver a un ítem de una lista ya vista no la reinicia.
+    let reinicio;
+    if (numerada) {
+      const anterior = resultado[resultado.length - 1];
+      reinicio = !instanciasVistas.has(b.lista.instancia) && !!anterior && anterior.lista === 'numerada' && b.lista.nivel <= anterior.nivel;
+      instanciasVistas.add(b.lista.instancia);
+    }
+    resultado.push({ hijos: runs, lista: b.lista ? (b.lista.vineta ? 'vineta' : 'numerada') : undefined, nivel: b.lista ? b.lista.nivel : 0, reinicio: reinicio || undefined });
   });
   return resultado;
 }

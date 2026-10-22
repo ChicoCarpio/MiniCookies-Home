@@ -7,7 +7,8 @@
 //   const blob  = await EscritorPptx.aBlob(pres);
 //
 //   pres = { titulo?, idiomas?: ['es-CR'], diapositivas: [{ titulo?, cuerpo?: [parrafo] }] }
-//   parrafo = { hijos: [{ texto, negrita?, cursiva?, subrayado? }], lista?: 'vineta'|'numerada', nivel?: 0..8 }
+//   parrafo = { hijos: [{ texto, negrita?, cursiva?, subrayado? }], lista?: 'vineta'|'numerada', nivel?: 0..8, reinicio?: true }
+//     reinicio: primer párrafo de una lista numerada que sigue a otra; la cuenta vuelve a empezar en 1.
 //     sin `lista` el párrafo va sin viñeta. '\n' dentro del texto es un salto de línea.
 // Si el texto no cabe en el cuadro, se guarda el ajuste automático (normAutofit) que PowerPoint aplicaría.
 // Los valores de hoja, patrón, diseños y tema se midieron en un PowerPoint 16 real; están escritos a mano.
@@ -162,6 +163,15 @@
     return `<a:p>${ppr}${(p.hijos || []).map((r) => corrida(r, lang)).join('')}${fin}</a:p>`;
   }
 
+  // Dos listas numeradas seguidas son, para PowerPoint, una sola (el mismo esquema continúa la cuenta, también con startAt):
+  // lo que las separa es un párrafo sin número entre las dos. Se escribe uno vacío y chico, que se ve como el espacio normal entre listas.
+  const separadorDeListas = (lang) => `<a:p><a:pPr marL="0" indent="0"><a:buNone/></a:pPr><a:endParaRPr${lang ? ` lang="${escAttr(lang)}"` : ''} sz="800" dirty="0"/></a:p>`;
+
+  // Los párrafos del cuerpo; `reinicio: true` en el primero de una lista numerada que sigue a otra la separa de la anterior.
+  function parrafosDelCuerpo(cuerpo, lang) {
+    return cuerpo.map((p, i) => (p.reinicio && p.lista === 'numerada' && i > 0 && cuerpo[i - 1].lista === 'numerada' ? separadorDeListas(lang) : '') + parrafo(p, lang)).join('');
+  }
+
   function diapositiva(d, lang, t) {
     const l = lang ? ` lang="${escAttr(lang)}"` : '';
     const titulo = limpiar(d.titulo).replace(/[\r\n]+/g, ' ').trim();
@@ -172,7 +182,7 @@
     if (hayCuerpo) {
       const ajuste = ajusteAutomatico(cuerpo, CUADRO_CUERPO);
       const auto = ajuste ? `<a:bodyPr><a:normAutofit fontScale="${ajuste.escala}" lnSpcReduction="${ajuste.reduccion}"/></a:bodyPr>` : '<a:bodyPr><a:normAutofit/></a:bodyPr>';
-      formas.push(sp(3, t.nContenido, ' idx="1"', '', `<p:txBody>${auto}<a:lstStyle/>${cuerpo.map((p) => parrafo(p, lang)).join('')}</p:txBody>`));
+      formas.push(sp(3, t.nContenido, ' idx="1"', '', `<p:txBody>${auto}<a:lstStyle/>${parrafosDelCuerpo(cuerpo, lang)}</p:txBody>`));
     }
     const diseno = hayCuerpo ? 1 : titulo ? 2 : 3;
     return { diseno, xml: `${CABECERA}<p:sld ${NS}><p:cSld><p:spTree>${GRUPO}${formas.join('')}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>` };
