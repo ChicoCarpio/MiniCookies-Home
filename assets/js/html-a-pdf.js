@@ -327,8 +327,13 @@
       const { piezas, saltos } = recogerPiezas(elemento, origen);
       const fondos = piezas.filter((p) => p.tipo === 'fondo');
       const ordenadas = piezas.filter((p) => p.tipo !== 'fondo').sort((a, b) => a.y - b.y);
-      const altoContenido = altoPx - margenArriba - margenAbajo;
-      const altoTotal = Math.max(r.height - margenArriba - margenAbajo, 1);
+      // Un encabezado o pie más alto que su margen empuja el texto (como en Word): el contenido de cada hoja empieza
+      // después del encabezado y termina antes del pie.
+      const margenSuperior = Math.max(margenArriba, ...repetidos.filter((x) => x.tipo === 'encabezado').map((x) => x.dist + x.alto));
+      const margenInferior = Math.max(margenAbajo, ...repetidos.filter((x) => x.tipo === 'pie').map((x) => x.dist + x.alto));
+      const altoContenido = Math.max(altoPx - margenSuperior - margenInferior, altoPx * 0.25);
+      // Hoja con contenido más corto que ella: lo que sobra es el relleno mínimo, no contenido.
+      const altoTotal = r.height > altoPx + 1 ? Math.max(r.height - margenArriba - margenAbajo, 1) : altoContenido;
       const cortes = calcularCortes(ordenadas, altoContenido, altoTotal, saltos.filter((y) => y > 0));
       // Cada pieza a su hoja una sola vez (lo de antes del primer corte, como un
       // encabezado, va a la primera).
@@ -338,14 +343,14 @@
         while (hojaActual + 1 < cortes.length && p.y >= cortes[hojaActual + 1]) hojaActual++;
         porHoja[hojaActual].push(p);
       }
-      grupos.push({ pagina, margenArriba, fondos, cortes, porHoja, repetidos, r });
+      grupos.push({ pagina, margenArriba: margenSuperior, margenOriginal: margenArriba, fondos, cortes, porHoja, repetidos, r });
     }
     const totalHojas = grupos.reduce((a, g) => a + g.cortes.length, 0);
 
     // Pasada 2: se dibuja.
     let numeroHoja = 0;
     for (const g of grupos) {
-      const { pagina, margenArriba, fondos, cortes, porHoja, repetidos } = g;
+      const { pagina, margenArriba, margenOriginal, fondos, cortes, porHoja, repetidos } = g;
       const { anchoPx, altoPx } = pagina;
       if (pagina.numeroInicial !== undefined) numeroHoja = pagina.numeroInicial - 1;
       for (let i = 0; i < cortes.length; i++) {
@@ -360,7 +365,7 @@
         // px de contenido → pt de la hoja (pdf-lib mide desde abajo).
         const aX = (x) => x * PX_A_PT;
         const aY = (y) => altoHoja - (y - desde + margenArriba) * PX_A_PT;
-        await pintar(hoja, [...fondos, ...porHoja[i]], aX, aY, { desde, hasta, primera: i === 0, margenArriba });
+        await pintar(hoja, [...fondos, ...porHoja[i]], aX, aY, { desde, hasta, primera: i === 0, margenArriba: margenOriginal });
 
         // Encabezado y pie de esta hoja: el de la primera página, el de las pares o el normal.
         for (const tipo of ['encabezado', 'pie']) {
