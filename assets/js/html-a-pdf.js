@@ -166,7 +166,9 @@
     const forzados = [...new Set(saltos)].sort((a, b) => a - b);
     const cortes = [0];
     let inicio = 0;
-    while (inicio + altoContenido < altoTotal || forzados.some((f) => f > inicio + 1)) {
+    // 1 px de tolerancia: el alto calculado de una hoja A4 (1122,53) y el medido
+    // (1122,53125) difieren en milésimas y agregaban una hoja en blanco.
+    while (inicio + altoContenido < altoTotal - 1 || forzados.some((f) => f > inicio + 1)) {
       const limite = inicio + altoContenido;
       const forzado = forzados.find((f) => f > inicio + 1 && f <= limite);
       let corte = forzado ?? limite;
@@ -185,7 +187,7 @@
         // como la hoja), se corta en el lugar normal.
         if (corte - inicio < altoContenido * 0.15) corte = limite;
       }
-      if (corte >= altoTotal && forzado === undefined) break;
+      if (corte >= altoTotal - 1 && forzado === undefined) break;
       // Un salto forzado sobre una hoja que todavía no tiene nada (un capítulo
       // vacío seguido de otro) no deja una hoja en blanco: la hoja empieza ahí.
       const ultima = indiceAntesDe(ordenadas, corte);
