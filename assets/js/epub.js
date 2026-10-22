@@ -42,7 +42,7 @@ function extraerImagenesDataUriEpub(html, prefijo) {
 }
 
 // Un EPUB exige XHTML estricto: el HTML que sale de innerHTML, marked o
-// mammoth trae <br>, <img>, <hr> sin cerrar y entidades como &nbsp;, que un
+// El lector de Word (docx-lector.js) trae <br>, <img>, <hr> sin cerrar y entidades como &nbsp;, que un
 // lector estricto (Apple Books, epubcheck) rechaza o muestra roto. Se
 // reserializa con XMLSerializer, que cierra todo y convierte las entidades.
 function htmlAXhtmlEpub(html) {
@@ -140,7 +140,7 @@ table td, table th { border: 1px solid #999; padding: 4px 8px; }`);
   return zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
 }
 
-// Corta un HTML (de mammoth o marked) en capítulos, uno por cada <h1> que
+// Corta un HTML (del lector de Word o de marked) en capítulos, uno por cada <h1> que
 // encuentra — si no hay ningún <h1>, todo el contenido queda como un único
 // capítulo. El contenido antes del primer <h1> (si lo hay) se agrega como un
 // capítulo inicial sin título propio. El <h1> queda también al principio del

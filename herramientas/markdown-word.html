@@ -266,14 +266,15 @@ Este es un ejemplo de **Markdown** con:
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/docx-lector.js"></script>
 <script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
 <script src="../vendor/turndown/7.2.0/turndown.min.js"></script>
 <script src="../assets/js/turndown-tablas.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
-<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/emf.js"></script>
 <script src="../assets/js/imagenes-office.js"></script>
@@ -434,20 +435,19 @@ async function convertirWordAMarkdown(archivo) {
   const base = archivo.name.replace(/\.docx$/i, '');
   const carpeta = `${base}-imagenes`;
   const imagenes = [];
-  const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer }, {
-    convertImage: mammoth.images.imgElement(async (imagen) => {
-      const original = Uint8Array.from(atob(await imagen.read('base64')), (c) => c.charCodeAt(0));
-      const { bytes, extension } = await ImagenesOffice.aFormatoComun(original, imagen.contentType);
+  const resultadoDocx = await DocxLector.convertirAHtml(arrayBuffer, {
+    imagen: async (imagen) => {
+      const { bytes, extension } = await ImagenesOffice.aFormatoComun(imagen.bytes, imagen.tipo);
       const nombre = `${carpeta}/imagen-${imagenes.length + 1}.${extension}`;
       imagenes.push({ nombre, datos: bytes });
       return { src: encodeURI(nombre) };
-    }),
+    },
   });
   return {
     nombre: base + '.md',
-    markdown: turndownService.turndown(resultadoMammoth.value),
+    markdown: turndownService.turndown(resultadoDocx.value),
     imagenes,
-    mensajes: resultadoMammoth.messages.length,
+    mensajes: resultadoDocx.messages.length,
   };
 }
 

@@ -232,7 +232,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
-<script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/docx-lector.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
@@ -381,8 +382,8 @@ conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
 async function convertirWordAEpub(archivo, titulo, autor) {
   // Las tablas pegadas de Excel (EMF) pasan antes a PNG: un lector de EPUB no las muestra.
   const arrayBuffer = await ImagenesOffice.docxConImagenesComunes(await archivo.arrayBuffer());
-  const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
-  const capitulos = dividirHtmlEnCapitulosEpub(resultadoMammoth.value, titulo);
+  const resultadoDocx = await DocxLector.convertirAHtml(arrayBuffer);
+  const capitulos = dividirHtmlEnCapitulosEpub(resultadoDocx.value, titulo);
   return construirEpub({ titulo, autor, capitulos });
 }
 
