@@ -234,7 +234,7 @@ window.i18nPagina = {
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/docx-lector.js"></script>
-<script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/escritor-docx.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/epub.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
@@ -292,15 +292,12 @@ async function convertirEpubAWord(archivo, alProgresar) {
     if (alProgresar) alProgresar(i, capitulos.length);
     const contenedor = document.createElement('div');
     contenedor.innerHTML = capitulos[i].html;
-    if (i > 0) bloquesFinales.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
+    if (i > 0) bloquesFinales.push(SALTO_DE_PAGINA_DOCX());
     bloquesFinales.push(...await contenidoAParrafos(contenedor));
   }
   if (bloquesFinales.length === 0) throw new Error(t('error-sin-contenido'));
-  const documento = new docx.Document({
-    numbering: NUMERACION_DOCX_CONFIG,
-    sections: [{ children: bloquesFinales }],
-  });
-  return docx.Packer.toBlob(documento);
+  const documento = { numeraciones: NUMERACIONES_DOCX, hijos: bloquesFinales };
+  return EscritorDocx.aBlob(documento);
 }
 
 botonAWord.addEventListener('click', async () => {

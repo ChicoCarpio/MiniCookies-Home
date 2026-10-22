@@ -7,7 +7,7 @@
 // tabulaciones, imágenes flotantes en su posición exacta (delante del texto,
 // sin apartarlo) y un salto por cada página del PDF.
 //
-// Requiere: pdfjs.js, pdf-estructura.js y la librería docx (window.docx).
+// Requiere: pdfjs.js, pdf-estructura.js y escritor-docx.js (EscritorDocx).
 // Uso: const blob = await PdfADocx.convertir(arrayBuffer);
 
 (function () {
@@ -15,22 +15,22 @@
   const PT_A_EMU = 12700;
   const PT_A_PX = 96 / 72;
 
+  // Los valores por defecto de un documento de Word (interlineado 1,16 y 8 pt después) cambiarían la
+  // distribución del PDF: cada párrafo lleva su espaciado explícito, con interlineado simple si el PDF no mide otro.
+  const INTERLINEADO_SIMPLE = { linea: 240, regla: 'auto' };
+
   async function convertir(bytes) {
-    const D = window.docx;
     const { paginas, columna, nivelTitulo: nivelDe, margenArriba, margenAbajo, ancho0, alto0 } = await PdfEstructura.analizar(bytes);
-    const nivelTitulo = (tamano) => [D.HeadingLevel.HEADING_1, D.HeadingLevel.HEADING_2, D.HeadingLevel.HEADING_3][nivelDe(tamano)] || null;
+    const nivelTitulo = (tamano) => [1, 2, 3][nivelDe(tamano)] || null;
 
     // Imagen en su posición exacta de la hoja, delante del texto y sin apartarlo:
     // la posición ya es la del PDF.
-    const imagenFlotante = (img) => new D.ImageRun({
-      data: img.bytes,
-      transformation: { width: Math.round(img.ancho * PT_A_PX), height: Math.round(img.alto * PT_A_PX) },
-      floating: {
-        horizontalPosition: { relative: D.HorizontalPositionRelativeFrom.PAGE, offset: Math.round(img.x * PT_A_EMU) },
-        verticalPosition: { relative: D.VerticalPositionRelativeFrom.PAGE, offset: Math.round(img.y * PT_A_EMU) },
-        wrap: { type: D.TextWrappingType.NONE },
-        allowOverlap: true,
-        behindDocument: false,
+    const imagenFlotante = (img) => ({
+      imagen: {
+        datos: img.bytes,
+        ancho: Math.round(img.ancho * PT_A_PX),
+        alto: Math.round(img.alto * PT_A_PX),
+        flotante: { x: Math.round(img.x * PT_A_EMU), y: Math.round(img.y * PT_A_EMU) },
       },
     });
 
@@ -39,7 +39,7 @@
       // Página sin texto (un escaneo, una portada): sus imágenes van tal cual
       // estaban en la hoja, ancladas a un párrafo vacío.
       if (pagina.sinTexto) {
-        hijos.push(new D.Paragraph({ pageBreakBefore: numero > 0, children: pagina.imagenes.map(imagenFlotante) }));
+        hijos.push({ tipo: 'parrafo', saltoAntes: numero > 0, espaciado: { antes: 0, despues: 0, ...INTERLINEADO_SIMPLE }, hijos: pagina.imagenes.map(imagenFlotante) });
         return;
       }
       const { bloques } = pagina;
@@ -54,72 +54,61 @@
           const escala = Math.min(1, (columna.x1 - columna.x0) / img.ancho, (alto0 - margenArriba - margenAbajo) / img.alto);
           const centro = img.x + img.ancho / 2;
           const anchoCol = columna.x1 - columna.x0;
-          const alinea = Math.abs(centro - (columna.x0 + columna.x1) / 2) < anchoCol * 0.1 ? D.AlignmentType.CENTER
-            : img.x > columna.x0 + anchoCol * 0.4 ? D.AlignmentType.RIGHT : D.AlignmentType.LEFT;
-          hijos.push(new D.Paragraph({
-            pageBreakBefore: saltoPagina,
-            alignment: alinea,
-            spacing: { before: Math.round((b.pagCompleta ? 0 : antes) * PT_A_TWIP), after: 0 },
-            children: [new D.ImageRun({ data: img.bytes, transformation: { width: Math.round(img.ancho * escala * PT_A_PX), height: Math.round(img.alto * escala * PT_A_PX) } })],
-          }));
+          const alinea = Math.abs(centro - (columna.x0 + columna.x1) / 2) < anchoCol * 0.1 ? 'centro'
+            : img.x > columna.x0 + anchoCol * 0.4 ? 'derecha' : 'izquierda';
+          hijos.push({
+            tipo: 'parrafo',
+            saltoAntes: saltoPagina,
+            alineacion: alinea,
+            espaciado: { antes: Math.round((b.pagCompleta ? 0 : antes) * PT_A_TWIP), despues: 0, ...INTERLINEADO_SIMPLE },
+            hijos: [{ imagen: { datos: img.bytes, ancho: Math.round(img.ancho * escala * PT_A_PX), alto: Math.round(img.alto * escala * PT_A_PX) } }],
+          });
           abajoAnterior = img.y + img.alto;
           return;
         }
         const p = b.p;
         const nivel = nivelTitulo(p.tamano);
-        const corridas = p.corridas.map((c) => {
-          // Los \t se escriben como tabulaciones reales de Word.
-          const partes = c.texto.split('\t');
-          const contenido = partes.length > 1
-            ? { children: partes.flatMap((parte, k) => (k ? [new D.Tab(), parte] : [parte])) }
-            : { text: c.texto };
-          return new D.TextRun({
-            ...contenido,
-            bold: c.negrita,
-            italics: c.cursiva,
-            size: Math.round(c.tamano * 2),
-            font: c.familia || undefined,
-            color: '000000',
-          });
-        });
-        for (const img of p.flotantes || []) corridas.unshift(imagenFlotante(img));
-        const alineacion = { centro: D.AlignmentType.CENTER, derecha: D.AlignmentType.RIGHT, justificado: D.AlignmentType.JUSTIFIED }[p.alineacion] || D.AlignmentType.LEFT;
-        hijos.push(new D.Paragraph({
-          pageBreakBefore: saltoPagina,
-          heading: nivel || undefined,
-          alignment: alineacion,
-          indent: { left: Math.round(p.izquierda * PT_A_TWIP), firstLine: p.primeraLinea > 1 ? Math.round(p.primeraLinea * PT_A_TWIP) : undefined, hanging: p.primeraLinea < -1 ? Math.round(-p.primeraLinea * PT_A_TWIP) : undefined },
-          spacing: {
-            before: Math.round(antes * PT_A_TWIP),
-            after: 0,
-            line: p.interlineado ? Math.round(p.interlineado * PT_A_TWIP) : undefined,
-            lineRule: p.interlineado ? D.LineRuleType.AT_LEAST : undefined,
-          },
-          tabStops: p.tabs.length ? p.tabs.map((x) => ({ type: D.TabStopType.LEFT, position: Math.round(x * PT_A_TWIP) })) : undefined,
-          border: p.bordeAbajo ? { bottom: { style: D.BorderStyle.SINGLE, size: 8, color: '000000', space: 1 } } : undefined,
-          children: corridas,
+        // Los \t van tal cual: el escritor los escribe como tabulaciones reales de Word.
+        const corridas = p.corridas.map((c) => ({
+          texto: c.texto,
+          negrita: c.negrita,
+          cursiva: c.cursiva,
+          tamano: Math.max(2, Math.round(c.tamano * 2)), // 1 pt, el mínimo de Word: un 0 dejaba el texto en 12 pt
+          fuente: c.familia || undefined,
+          color: '000000',
         }));
+        for (const img of p.flotantes || []) corridas.unshift(imagenFlotante(img));
+        const alineacion = { centro: 'centro', derecha: 'derecha', justificado: 'justificado' }[p.alineacion] || 'izquierda';
+        hijos.push({
+          tipo: 'parrafo',
+          saltoAntes: saltoPagina,
+          titulo: nivel || undefined,
+          alineacion,
+          sangria: { izquierda: Math.round(p.izquierda * PT_A_TWIP), primeraLinea: p.primeraLinea > 1 ? Math.round(p.primeraLinea * PT_A_TWIP) : undefined, colgante: p.primeraLinea < -1 ? Math.round(-p.primeraLinea * PT_A_TWIP) : undefined },
+          espaciado: p.interlineado
+            ? { antes: Math.round(antes * PT_A_TWIP), despues: 0, linea: Math.round(p.interlineado * PT_A_TWIP), regla: 'minimo' }
+            : { antes: Math.round(antes * PT_A_TWIP), despues: 0, ...INTERLINEADO_SIMPLE },
+          tabs: p.tabs.length ? p.tabs.map((x) => ({ tipo: 'izquierda', pos: Math.round(x * PT_A_TWIP) })) : undefined,
+          bordeAbajo: p.bordeAbajo ? { tam: 8, color: '000000', espacio: 1 } : undefined,
+          hijos: corridas,
+        });
         abajoAnterior = p.abajo;
       });
     });
 
-    const documento = new D.Document({
-      sections: [{
-        properties: {
-          page: {
-            size: { width: Math.round(ancho0 * PT_A_TWIP), height: Math.round(alto0 * PT_A_TWIP) },
-            margin: {
-              top: Math.round(margenArriba * PT_A_TWIP),
-              bottom: Math.round(margenAbajo * PT_A_TWIP),
-              left: Math.round(columna.x0 * PT_A_TWIP),
-              right: Math.round((ancho0 - columna.x1) * PT_A_TWIP),
-            },
-          },
+    return EscritorDocx.aBlob({
+      pagina: {
+        ancho: Math.round(ancho0 * PT_A_TWIP),
+        alto: Math.round(alto0 * PT_A_TWIP),
+        margen: {
+          arriba: Math.round(margenArriba * PT_A_TWIP),
+          abajo: Math.round(margenAbajo * PT_A_TWIP),
+          izquierda: Math.round(columna.x0 * PT_A_TWIP),
+          derecha: Math.round((ancho0 - columna.x1) * PT_A_TWIP),
         },
-        children: hijos.length ? hijos : [new D.Paragraph({ children: [] })],
-      }],
+      },
+      hijos: hijos.length ? hijos : [{ tipo: 'parrafo', hijos: [] }],
     });
-    return D.Packer.toBlob(documento);
   }
 
   window.PdfADocx = { convertir };

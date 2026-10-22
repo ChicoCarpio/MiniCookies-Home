@@ -271,7 +271,7 @@ Este es un ejemplo de **Markdown** con:
 <script src="../assets/js/docx-lector.js"></script>
 <script src="../assets/js/markdown-propio.js"></script>
 <script src="../assets/js/html-a-markdown.js"></script>
-<script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
+<script src="../assets/js/escritor-docx.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
@@ -299,11 +299,8 @@ async function markdownAWord(textoMd, mensajeVacio) {
   contenedor.innerHTML = sanitizarHtml(MarkdownPropio.aHtml(textoMd));
   const parrafos = await contenidoAParrafos(contenedor);
   if (parrafos.length === 0) throw new Error(mensajeVacio);
-  const documento = new docx.Document({
-    numbering: NUMERACION_DOCX_CONFIG,
-    sections: [{ children: parrafos }],
-  });
-  return docx.Packer.toBlob(documento);
+  const documento = { numeraciones: NUMERACIONES_DOCX, hijos: parrafos };
+  return EscritorDocx.aBlob(documento);
 }
 
 // Archivos .md: uno → .docx; varios → .zip con un .docx por archivo.
