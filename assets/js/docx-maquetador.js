@@ -351,6 +351,17 @@
     return sal;
   }
 
+  // ☐ ☒ ☑ (casillas de formulario) no están en las fuentes del PDF: se dibujan como un cuadrito con borde (y una X dentro).
+  const CASILLA = /[☐☑☒]/;
+  function conCasillas(texto) {
+    if (!CASILLA.test(texto)) return esc(texto);
+    return texto.split(/([☐☑☒])/).map((t) => {
+      if (!CASILLA.test(t)) return esc(t);
+      const marcada = t !== '☐';
+      return `<span style="display:inline-block;box-sizing:border-box;width:0.8em;height:0.8em;border:0.08em solid #000000;margin:0 0.1em;vertical-align:-0.05em;line-height:0.62em;font-size:0.8em;text-align:center;font-family:Arial,sans-serif;font-weight:bold">${marcada ? 'X' : ''}</span>`;
+    }).join('');
+  }
+
   function htmlInline(d, items, esDefecto, bajar) {
     let html = '';
     let anclaEnlace = null;
@@ -358,7 +369,7 @@
     for (const it of agruparRuns(items)) {
       if (it.t === 'ancla') { html += `<a id="${esc(it.nombre)}"></a>`; continue; }
       if (it.enlace !== anclaEnlace) { cerrarEnlace(); if (it.enlace) { html += `<a href="${esc(it.enlace)}" style="color:inherit">`; anclaEnlace = it.enlace; } }
-      if (it.t === 'texto') html += `<span style="${cssRun(d, it.r, esDefecto, bajar)}">${esc(it.s)}</span>`;
+      if (it.t === 'texto') html += `<span style="${cssRun(d, it.r, esDefecto, bajar)}">${conCasillas(it.s)}</span>`;
       else if (it.t === 'tab') html += `<span data-tab="1" style="${cssRun(d, it.r, false)};display:inline-block;white-space:pre">\t</span>`;
       else if (it.t === 'br') { const lado = { all: 'both', left: 'left', right: 'right' }[it.limpiar]; html += `<br${typeof lado === 'string' ? ` style="clear:${lado}"` : ''}>`; }
       else if (it.t === 'campo') html += `<span data-campo="${it.nombre}" style="${cssRun(d, it.r, false, bajar)}">1</span>`;
@@ -553,6 +564,16 @@
     return sal;
   }
 
+  // Hijos con ese nombre, también los que están dentro de un control de contenido (sdt > sdtContent).
+  function desenvolver(e, nombre, prof = 0) {
+    const sal = [];
+    for (const x of e.h) {
+      if (x.n === nombre) sal.push(x);
+      else if (x.n === 'sdt' && prof < 8) { const c = hijo(x, 'sdtContent'); if (c) sal.push(...desenvolver(c, nombre, prof + 1)); }
+    }
+    return sal;
+  }
+
   async function tabla(d, t, disponible) {
     const m = d.m;
     const tblDirecto = m.leerTblPr(hijo(t, 'tblPr'));
@@ -560,11 +581,12 @@
     const estiloT = m.estilos.tabla(tblDirecto.estilo);
     const tbl = m.mezclar(estiloT.tbl, tblDirecto);
     const grid = lista(hijo(t, 'tblGrid'), 'gridCol').map((c) => parseFloat(c.a.w) / 20);
-    const filas = lista(t, 'tr');
+    // Los controles de contenido (w:sdt) de un formulario pueden envolver filas o celdas enteras.
+    const filas = desenvolver(t, 'tr');
     // Posición de columna de cada celda y alto (rowspan) de las combinadas verticalmente.
     const infos = filas.map((f) => {
       let col = 0;
-      return lista(f, 'tc').map((c) => {
+      return desenvolver(f, 'tc').map((c) => {
         const pr = m.leerTcPr(hijo(c, 'tcPr'));
         // gridSpan viene del archivo: entero, de 1 a lo que tenga la rejilla (Word no pasa de 63 columnas).
         const span = Math.min(Math.max(Math.floor(pr.columnas) || 1, 1), Math.max(grid.length, 64));
