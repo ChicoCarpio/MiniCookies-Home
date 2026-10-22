@@ -243,7 +243,8 @@
     const ancho = acotar(emuPt(ext.a.cx), 0, MAX_PT), alto = acotar(emuPt(ext.a.cy), 0, MAX_PT);
     const contenido = await contenidoDibujo(d, caja, ancho, alto, !!inl);
     if (!contenido) return null;
-    if (inl) return { t: 'html', r, html: contenido };
+    // Un cuadro de texto en línea lleva <p> adentro: no cabe en un <p>, parrafo() lo deja entre dos trozos.
+    if (inl) return contenido.startsWith('<div') ? { t: 'bloque', r, html: contenido } : { t: 'html', r, html: contenido };
     // Va aparte (antes del párrafo): un <div> o un <p> dentro de un <p> cierra el párrafo al leer el HTML.
     return { t: 'flotante', r, html: colocarAncla(d, anc, ancho, alto, contenido) };
   }
@@ -268,12 +269,18 @@
       const relleno = colorDe(sp);
       const colorLinea = ln && colorDe(ln);
       const interior = await bloques(d, txbx, Math.max(ancho - ins('lIns', 7.2) - ins('rIns', 7.2), 10));
-      return `<div style="${css({
+      // En línea (wp:inline) el cuadro va dentro del <p>: ahí no puede haber <p> ni <div> (cerrarían el párrafo al leer
+      // el HTML), así que se escribe con <span> en bloque. Con una tabla adentro no se puede: queda entre dos trozos.
+      const dentroDeP = enLinea && !/<table/.test(interior.html);
+      const etiqueta = dentroDeP ? 'span' : 'div';
+      const cuerpo = dentroDeP ? interior.html.replace(/<(p|div)\s([^>]*?)style="/g, '<span $2style="display:block;').replace(/<(p|div)>/g, '<span style="display:block">').replace(/<\/(p|div)>/g, '</span>') : interior.html;
+      return `<${etiqueta} style="${css({
+        display: dentroDeP ? 'inline-block' : undefined, 'vertical-align': dentroDeP ? 'bottom' : undefined,
         'box-sizing': 'border-box', width: pt(ancho), 'min-height': pt(alto), padding: `${pt(ins('tIns', 3.6))} ${pt(ins('rIns', 7.2))} ${pt(ins('bIns', 3.6))} ${pt(ins('lIns', 7.2))}`,
         'background-color': relleno, border: colorLinea ? `${pt(ln.a.w ? emuPt(ln.a.w) : 0.75)} solid ${colorLinea}` : undefined,
         'white-space': 'normal', 'text-indent': '0', 'text-align': 'left', 'line-height': 'normal', 'letter-spacing': 'normal', 'font-weight': 'normal', 'font-style': 'normal',
         'text-decoration': 'none', 'text-transform': 'none', 'font-variant': 'normal',
-      })}">${interior.html}</div>`;
+      })}">${cuerpo}</${etiqueta}>`;
     }
     return null;
   }
@@ -478,15 +485,24 @@
     const atributos = `data-izq="${n3(izq)}" data-der="${n3(der)}" data-tabs='${esc(JSON.stringify(efectivo.tabs || []))}'`;
     d.usarFuente(fuenteBase || 'Times New Roman', rBase.b, rBase.i);
 
-    // Parte en trozos cada salto de página.
-    const trozos = [[]];
-    for (const it of items) { if (it.t === 'pagina') trozos.push([]); else trozos[trozos.length - 1].push(it); }
+    // Parte el párrafo en trozos: un salto de página empieza una hoja nueva; un cuadro de texto en línea (que lleva
+    // párrafos adentro y no cabe en un <p>) queda entre dos trozos, en su propia línea.
+    const trozos = [{ items: [], pagina: false }];
+    for (const it of items) {
+      if (it.t === 'pagina') trozos.push({ items: [], pagina: true });
+      else if (it.t === 'bloque') { trozos.push({ bloque: it.html }); trozos.push({ items: [], pagina: false, tras: true }); }
+      else trozos[trozos.length - 1].items.push(it);
+    }
     const espaciador = (h) => (h > 0 ? `<div style="height:${pt(h)};line-height:0;font-size:0"></div>` : '');
     let html = marco ? '' : espaciador(antes);
     html += items.filter((x) => x.t === 'flotante').map((x) => x.html).join('');
+    const hayBloques = trozos.some((x) => x.bloque !== undefined);
     trozos.forEach((trozo, i) => {
-      const interior = htmlInline(d, trozo, false, bajar) || `<span style="${cssRun(d, marcaR, true)}"><br></span>`;
-      html += `<p ${atributos} style="${estilo({ ...(marco || {}), ...(i > 0 ? { 'break-before': 'page', 'text-indent': undefined } : {}) })}">${interior}</p>`;
+      if (trozo.bloque !== undefined) { html += trozo.bloque; return; }
+      const vacio = !trozo.items.some((x) => x.t !== 'ancla');
+      if (hayBloques && vacio && !trozo.pagina) return; // lo que queda antes o después de un cuadro de texto, si no tiene nada
+      const interior = htmlInline(d, trozo.items, false, bajar) || `<span style="${cssRun(d, marcaR, true)}"><br></span>`;
+      html += `<p ${atributos} style="${estilo({ ...(marco || {}), ...(trozo.pagina ? { 'break-before': 'page' } : {}), ...(i > 0 ? { 'text-indent': undefined } : {}) })}">${interior}</p>`;
     });
     if (!marco) html += espaciador(despues);
     const sectPr = hijo(hijo(p, 'pPr'), 'sectPr');

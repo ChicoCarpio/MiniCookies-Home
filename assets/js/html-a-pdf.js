@@ -155,7 +155,8 @@
         // Una palabra partida en dos renglones (guion, salto forzado): se usa el primero.
         const r = rects[0];
         if (!r.width) continue;
-        piezas.push({ tipo: 'texto', ...relativo(r), texto: m[0], ...estilo });
+        // `e`: el estilo del texto, compartido por todas las palabras del mismo nodo (con millones de palabras, copiarlo en cada una gasta cientos de MB).
+        piezas.push({ tipo: 'texto', x: r.left - origen.x, y: r.top - origen.y, ancho: r.width, alto: r.height, texto: m[0], e: estilo });
       }
     }
     return { piezas, saltos };
@@ -286,9 +287,10 @@
           hoja.drawImage(incrustada, { x: aX(p.x), y: aY(p.y + p.alto), width: p.ancho * PX_A_PT, height: p.alto * PX_A_PT });
           continue;
         }
-        const tamano = p.tamano * PX_A_PT;
-        const base = aY(p.y + p.ascenso * p.alto);
-        let fuente = await fuenteEstandar(p.familia, p.negrita, p.cursiva);
+        const e = p.e;
+        const tamano = e.tamano * PX_A_PT;
+        const base = aY(p.y + e.ascenso * p.alto);
+        let fuente = await fuenteEstandar(e.familia, e.negrita, e.cursiva);
         let anchoNatural;
         try {
           anchoNatural = fuente.widthOfTextAtSize(p.texto, tamano);
@@ -300,10 +302,10 @@
         // Tz: la palabra ocupa en el PDF el mismo ancho que en pantalla.
         const estiramiento = anchoNatural > 0 ? Math.min(200, Math.max(50, (100 * p.ancho * PX_A_PT) / anchoNatural)) : 100;
         hoja.pushOperators(PDFLib.setCharacterSqueeze(estiramiento));
-        hoja.drawText(p.texto, { x: aX(p.x), y: base, size: tamano, font: fuente, color: p.color });
+        hoja.drawText(p.texto, { x: aX(p.x), y: base, size: tamano, font: fuente, color: e.color });
         hoja.pushOperators(PDFLib.setCharacterSqueeze(100));
-        if (p.subrayado) {
-          hoja.drawLine({ start: { x: aX(p.x), y: base - tamano * 0.12 }, end: { x: aX(p.x + p.ancho), y: base - tamano * 0.12 }, thickness: Math.max(0.5, tamano * 0.06), color: p.color });
+        if (e.subrayado) {
+          hoja.drawLine({ start: { x: aX(p.x), y: base - tamano * 0.12 }, end: { x: aX(p.x + p.ancho), y: base - tamano * 0.12 }, thickness: Math.max(0.5, tamano * 0.06), color: e.color });
         }
       }
     }
