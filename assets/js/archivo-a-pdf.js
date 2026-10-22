@@ -67,8 +67,8 @@
       async preparar() {
         await cargarEnOrden([JSZIP(), propio('seguridad-html.js'), propio('emf.js'), propio('imagenes-office.js'), propio('html-a-pdf.js')]);
         if (!window.docxPreview) {
-          // docx-preview se publica como window.docx, el mismo nombre que la
-          // librería docx: se guarda aparte y se devuelve lo que hubiera.
+          // docx-preview se publica como window.docx: se guarda aparte como
+          // docxPreview y window.docx se deja como estaba.
           const anterior = window.docx;
           window.JSZip = window.ZipPropio; // docx-preview pide un JSZip global
           await cargarScript(rutaVendor('docx-preview/0.4.1/docx-preview.min.js'));
