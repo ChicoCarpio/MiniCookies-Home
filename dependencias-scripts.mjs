@@ -4,7 +4,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const NECESITA = {
-  'docx-lector.js': ['zip-propio.js', 'xml-ligero.js'],
+  'docx-base.js': ['zip-propio.js', 'xml-ligero.js'],
+  'docx-estilos.js': ['docx-base.js', 'zip-propio.js', 'xml-ligero.js'],
+  'docx-lector.js': ['docx-base.js', 'zip-propio.js', 'xml-ligero.js'],
   'xlsx-paquete.js': ['zip-propio.js', 'xml-ligero.js', 'xml-editar.js'],
   'xlsx-modelo.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js'],
   'lector-hojas.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-modelo.js', 'csv-planilla.js'],

@@ -3,7 +3,7 @@
 // HTML simple (párrafos, títulos, listas, tablas, enlaces, imágenes, notas al
 // pie) o como texto plano. Es lo que usan las herramientas de Word para leer.
 //
-// Requiere ZipPropio y XmlLigero. No depende del navegador: corre igual en Node.
+// Requiere DocxBase (docx-base.js), ZipPropio y XmlLigero. No depende del navegador: corre igual en Node.
 //
 // API (la forma de mammoth, para migrar una página sin rehacerla):
 //   const { value, messages } = await DocxLector.convertirAHtml(datos, {
@@ -24,37 +24,7 @@
 (function () {
   'use strict';
 
-  // ───────── XML → árbol ─────────
-  function arbol(xml) {
-    const raiz = { n: '#', a: {}, h: [], t: '' };
-    const pila = [raiz];
-    XmlLigero.recorrer(xml, {
-      abrir(n, a) {
-        const e = { n, a, h: [], t: '' };
-        pila[pila.length - 1].h.push(e);
-        pila.push(e);
-      },
-      cerrar() { if (pila.length > 1) pila.pop(); },
-      texto(t) { pila[pila.length - 1].t += t; },
-    });
-    return raiz.h[0] || null;
-  }
-  const hijo = (e, n) => (e ? e.h.find((x) => x.n === n) || null : null);
-  const lista = (e, n) => (e ? e.h.filter((x) => x.n === n) : []);
-  const activo = (e) => {
-    if (!e) return false;
-    const v = e.a.val;
-    return !(v === '0' || v === 'false' || v === 'off' || v === 'none');
-  };
-  function buscar(e, n) { // primer descendiente con ese nombre
-    if (!e) return null;
-    for (const x of e.h) {
-      if (x.n === n) return x;
-      const r = buscar(x, n);
-      if (r) return r;
-    }
-    return null;
-  }
+  const { arbol, hijo, lista, activo, buscar, porTipo, abrirPaquete } = DocxBase;
 
   // ───────── HTML ─────────
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -96,33 +66,6 @@
     tif: 'image/tiff', tiff: 'image/tiff', svg: 'image/svg+xml', emf: 'image/x-emf', wmf: 'image/x-wmf', webp: 'image/webp',
   };
   const hrefSeguro = (h) => (/^\s*(javascript|vbscript|data):/i.test(h) ? '' : h);
-
-  // ───────── Paquete ─────────
-  function resolver(base, destino) {
-    if (destino.startsWith('/')) return destino.slice(1);
-    const partes = base.split('/').slice(0, -1);
-    for (const p of destino.split('/')) {
-      if (p === '..') partes.pop();
-      else if (p !== '.' && p !== '') partes.push(p);
-    }
-    return partes.join('/');
-  }
-  function rutaRels(parte) {
-    const i = parte.lastIndexOf('/');
-    return parte.slice(0, i + 1) + '_rels/' + parte.slice(i + 1) + '.rels';
-  }
-  async function leerRels(zip, parte) {
-    const f = zip.file(rutaRels(parte));
-    const mapa = new Map();
-    if (!f) return mapa;
-    const raiz = arbol(await f.async('string'));
-    for (const r of lista(raiz, 'Relationship')) {
-      const externo = (r.a.TargetMode || '').toLowerCase() === 'external';
-      mapa.set(r.a.Id, { tipo: r.a.Type || '', destino: externo ? r.a.Target : resolver(parte, r.a.Target || ''), externo });
-    }
-    return mapa;
-  }
-  const porTipo = (rels, fin) => { for (const r of rels.values()) if (r.tipo.endsWith(fin)) return r.destino; return null; };
 
   function leerEstilos(raiz) {
     const estilos = new Map();
@@ -566,21 +509,7 @@
 
   // ───────── Entrada ─────────
   async function abrir(datos, opciones) {
-    if (typeof Blob !== 'undefined' && datos instanceof Blob) datos = await datos.arrayBuffer();
-    const zip = await ZipPropio.loadAsync(datos);
-    let principal = 'word/document.xml';
-    const f = zip.file('_rels/.rels');
-    if (f) {
-      const raiz = arbol(await f.async('string'));
-      const r = lista(raiz, 'Relationship').find((x) => /\/officeDocument$/.test(x.a.Type || ''));
-      if (r && r.a.Target) principal = resolver('x', r.a.Target);
-    }
-    const docFile = zip.file(principal);
-    if (!docFile) throw new Error('No es un documento de Word válido (falta word/document.xml).');
-    const rels = await leerRels(zip, principal);
-    const cuerpoXml = arbol(await docFile.async('string'));
-    const cuerpo = hijo(cuerpoXml, 'body');
-    if (!cuerpo) throw new Error('El documento no tiene cuerpo.');
+    const { zip, rels, cuerpo } = await abrirPaquete(datos);
     const parte = async (tipo, defecto) => {
       const ruta = porTipo(rels, tipo) || defecto;
       const g = zip.file(ruta);
