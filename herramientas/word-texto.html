@@ -213,13 +213,14 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/docx-lector.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/tablas-texto.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
-<script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -266,10 +267,10 @@ conectarZonaArrastre(zonaArrastreWord, entradaWord, elegirArchivosWord);
 
 async function convertirWordATexto(archivo) {
   const arrayBuffer = await archivo.arrayBuffer();
-  // Por el HTML y no por extractRawText: el texto plano de mammoth deja cada celda
+  // Por el HTML y no por extractRawText: el texto plano deja cada celda
   // como un párrafo suelto y la tabla se pierde; así sale con sus columnas.
-  const resultado = await mammoth.convertToHtml({ arrayBuffer }, {
-    convertImage: mammoth.images.imgElement(() => Promise.resolve({ src: '' })),
+  const resultado = await DocxLector.convertirAHtml(arrayBuffer, {
+    imagen: async () => ({ src: '' }),
   });
   const doc = new DOMParser().parseFromString(resultado.value, 'text/html');
   return { value: TablasTexto.htmlATexto(doc.body), messages: resultado.messages };

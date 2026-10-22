@@ -25,7 +25,7 @@ window.i18nPagina = {
     'limite1': 'Si el archivo está muy dañado, a veces solo se puede rescatar el texto sin formato (se pierde negrita, tablas, imágenes, etc., pero se recupera el contenido).',
     'limite-reconstruye': 'Incluso cuando se lee con normalidad, el documento se reconstruye desde cero: se conserva el contenido principal, pero pueden perderse encabezados y pies de página, estilos y otros detalles de formato.',
     'limite2': 'Si ni así se puede leer, el archivo está demasiado dañado para esta herramienta.',
-    'error-mammoth-vacio': 'mammoth no encontró contenido.',
+    'error-lector-vacio': 'No se encontró contenido en el documento.',
     'mensaje-nivel1-ok': '✅ Se pudo leer el documento normalmente y se reconstruyó desde cero.',
     'error-sin-estructura': 'El archivo no tiene la estructura mínima de un .docx — no se puede reparar.',
     'error-sin-texto': 'No se pudo rescatar texto legible de este archivo.',
@@ -40,7 +40,7 @@ window.i18nPagina = {
     'guia-consejo-1': 'El archivo reparado es una reconstrucción, no una copia exacta: revisá títulos, listas, tablas e imágenes antes de reemplazar el original.',
     'guia-consejo-2': 'Si el aviso indica texto plano, copiá el contenido a una plantilla propia y volvé a aplicar el formato.',
     'guia-consejo-3': 'Conservá siempre el archivo original: la herramienta nunca lo modifica, pero el reparado puede perder detalles.',
-    'guia-consejo-4': 'Limitación importante: el primer nivel reconstruye el documento (lo lee con mammoth, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.',
+    'guia-consejo-4': 'Limitación importante: el primer nivel reconstruye el documento (lo lee, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.',
     'guia-consejo-5': 'Sirve también para documentos que Word marca como dañados tras una descarga interrumpida, siempre que el interior del archivo siga siendo un .docx legible.',
     'guia-p1': '¿Qué pierdo en el modo de texto plano?',
     'guia-r1': 'Negrita, tablas, imágenes y cualquier formato; se recupera solo el contenido escrito.',
@@ -65,7 +65,7 @@ window.i18nPagina = {
     'limite1': 'If the file is badly damaged, sometimes only the plain text can be rescued (bold, tables, images, etc. are lost, but the content is recovered).',
     'limite-reconstruye': 'Even when it reads normally, the document is rebuilt from scratch: the main content is kept, but headers and footers, styles and other formatting details may be lost.',
     'limite2': 'If it still can’t be read, the file is too damaged for this tool.',
-    'error-mammoth-vacio': 'mammoth found no content.',
+    'error-lector-vacio': 'No content was found in the document.',
     'mensaje-nivel1-ok': '✅ The document could be read normally and was rebuilt from scratch.',
     'error-sin-estructura': 'The file doesn’t have the minimum structure of a .docx — it can’t be repaired.',
     'error-sin-texto': 'No readable text could be rescued from this file.',
@@ -80,7 +80,7 @@ window.i18nPagina = {
     'guia-consejo-1': 'The repaired file is a reconstruction, not an exact copy: check headings, lists, tables and images before replacing the original.',
     'guia-consejo-2': 'If the notice says plain text, copy the content into your own template and apply the formatting again.',
     'guia-consejo-3': 'Always keep the original file: the tool never modifies it, but the repaired one may lose details.',
-    'guia-consejo-4': 'Important limitation: the first level rebuilds the document (it reads it with mammoth, turns it into HTML and writes it back as a .docx), so headers, footers and styles may be lost.',
+    'guia-consejo-4': 'Important limitation: the first level rebuilds the document (it reads it, turns it into HTML and writes it back as a .docx), so headers, footers and styles may be lost.',
     'guia-consejo-5': 'It also works for documents that Word flags as damaged after an interrupted download, as long as the inside of the file is still a readable .docx.',
     'guia-p1': 'What do I lose in plain-text mode?',
     'guia-r1': 'Bold, tables, images and any formatting; only the written content is recovered.',
@@ -153,7 +153,7 @@ window.i18nPagina = {
       <li data-i18n="guia-consejo-1">El archivo reparado es una reconstrucción, no una copia exacta: revisá títulos, listas, tablas e imágenes antes de reemplazar el original.</li>
       <li data-i18n="guia-consejo-2">Si el aviso indica texto plano, copiá el contenido a una plantilla propia y volvé a aplicar el formato.</li>
       <li data-i18n="guia-consejo-3">Conservá siempre el archivo original: la herramienta nunca lo modifica, pero el reparado puede perder detalles.</li>
-      <li data-i18n="guia-consejo-4">Limitación importante: el primer nivel reconstruye el documento (lo lee con mammoth, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.</li>
+      <li data-i18n="guia-consejo-4">Limitación importante: el primer nivel reconstruye el documento (lo lee, lo pasa a HTML y lo vuelve a escribir como .docx), así que se pueden perder encabezados, pies de página y estilos.</li>
       <li data-i18n="guia-consejo-5">Sirve también para documentos que Word marca como dañados tras una descarga interrumpida, siempre que el interior del archivo siga siendo un .docx legible.</li>
     </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
@@ -181,8 +181,9 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/mammoth/1.12.2/mammoth.browser.min.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/docx-lector.js"></script>
 <script src="../vendor/docx/8.5.0/build/index.umd.min.js"></script>
 <script src="../assets/js/docx-html.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -238,12 +239,12 @@ botonReparar.addEventListener('click', async () => {
     const arrayBuffer = await archivoActual.arrayBuffer();
 
     try {
-      // Nivel 1: mammoth suele tolerar bastantes problemas menores.
-      const resultadoMammoth = await mammoth.convertToHtml({ arrayBuffer });
+      // Nivel 1: el lector tolera bastantes problemas menores.
+      const resultadoDocx = await DocxLector.convertirAHtml(arrayBuffer);
       const contenedor = document.createElement('div');
-      contenedor.innerHTML = resultadoMammoth.value;
+      contenedor.innerHTML = resultadoDocx.value;
       const parrafos = await contenidoAParrafos(contenedor);
-      if (parrafos.length === 0) throw new Error(t('error-mammoth-vacio'));
+      if (parrafos.length === 0) throw new Error(t('error-lector-vacio'));
 
       await guardarComoDocx(parrafos);
       mensajeNivel.textContent = t('mensaje-nivel1-ok');
