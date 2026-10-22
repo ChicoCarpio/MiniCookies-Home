@@ -241,10 +241,10 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<!-- pptxgen.min.js pide un JSZip global; se le da el zip propio (misma API). -->
 <script src="../assets/js/zip-propio.js"></script>
-<script>window.JSZip = window.ZipPropio;</script>
-<script src="../vendor/pptxgenjs/3.12.0/dist/pptxgen.min.js?v=2"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/docx-html.js"></script>
+<script src="../assets/js/escritor-pptx.js"></script>
 <script src="../assets/js/idioma.js"></script>
 <script>
 const listaDiapositivas = document.getElementById('listaDiapositivas');
@@ -332,63 +332,29 @@ document.addEventListener('cambioIdioma', () => {
   renumerarDiapositivas();
 });
 
-// --- Convertir el cuerpo (HTML del contenteditable) a los "runs" que espera PptxGenJS ---
+// --- Convertir el cuerpo (HTML del contenteditable) a los párrafos de EscritorPptx ---
+// contenidoAParrafos (docx-html.js) ya entiende los <div>/<p> que envuelven las listas y el texto suelto; acá solo se
+// pasa su resultado a la forma de EscritorPptx: viñetas, números y niveles. Las imágenes se omiten y una tabla pasa a un párrafo por fila.
 
-function leerFormatoDeAncestros(nodo, raiz) {
-  const formato = { bold: false, italic: false };
-  let actual = nodo.parentElement;
-  while (actual && actual !== raiz) {
-    const etiqueta = actual.tagName;
-    if (etiqueta === 'B' || etiqueta === 'STRONG') formato.bold = true;
-    if (etiqueta === 'I' || etiqueta === 'EM') formato.italic = true;
-    actual = actual.parentElement;
-  }
-  return formato;
-}
-
-function extraerRunsDeLinea(elementoLinea) {
-  const runs = [];
-  function recorrer(nodo) {
-    if (nodo.nodeType === Node.TEXT_NODE) {
-      if (nodo.textContent === '') return;
-      runs.push({ text: nodo.textContent, ...leerFormatoDeAncestros(nodo, elementoLinea) });
+function cuerpoAParrafosPptx(bloques) {
+  const aRuns = (hijos) => hijos.filter((r) => r.texto !== undefined).map((r) => ({ texto: r.texto, negrita: r.negrita, cursiva: r.cursiva, subrayado: r.subrayado }));
+  const resultado = [];
+  bloques.forEach((b) => {
+    if (b.tipo === 'tabla') {
+      b.filas.forEach((fila) => {
+        const celdas = fila.celdas.map((c) => c.hijos.map((p) => aRuns(p.hijos).map((r) => r.texto).join('')).join(' '));
+        resultado.push({ hijos: [{ texto: celdas.join(' | ') }] });
+      });
       return;
     }
-    if (nodo.nodeType === Node.ELEMENT_NODE && nodo.tagName !== 'BR') {
-      nodo.childNodes.forEach(recorrer);
-    }
-  }
-  elementoLinea.childNodes.forEach(recorrer);
-  if (runs.length === 0) runs.push({ text: elementoLinea.textContent || '' });
-  return runs;
-}
-
-function cuerpoAPptxRuns(contenedor) {
-  const resultado = [];
-  const bloques = contenedor.children.length > 0 ? [...contenedor.children] : [contenedor];
-
-  bloques.forEach((bloque) => {
-    let lineas = [bloque];
-    let esVineta = false;
-    if (bloque.tagName === 'UL' || bloque.tagName === 'OL') {
-      lineas = [...bloque.children].filter(li => li.tagName === 'LI');
-      esVineta = true;
-    }
-    lineas.forEach((linea) => {
-      const runs = extraerRunsDeLinea(linea);
-      runs.forEach((run, indice) => {
-        resultado.push({
-          text: run.text,
-          options: { bold: !!run.bold, italic: !!run.italic, bullet: esVineta, breakLine: indice === runs.length - 1 },
-        });
-      });
-    });
+    const runs = aRuns(b.hijos);
+    if (b.titulo) runs.forEach((r) => { r.negrita = true; });
+    resultado.push({ hijos: runs, lista: b.lista ? (b.lista.vineta ? 'vineta' : 'numerada') : undefined, nivel: b.lista ? b.lista.nivel : 0 });
   });
-
   return resultado;
 }
 
-document.getElementById('botonGenerar').addEventListener('click', () => {
+document.getElementById('botonGenerar').addEventListener('click', async () => {
   const boton = document.getElementById('botonGenerar');
   boton.disabled = true;
   boton.textContent = t('boton-generar-procesando');
@@ -396,26 +362,16 @@ document.getElementById('botonGenerar').addEventListener('click', () => {
     const tarjetas = [...listaDiapositivas.children];
     if (tarjetas.length === 0) throw new Error(t('error-sin-diapositivas'));
 
-    const pptx = new PptxGenJS();
-
-    tarjetas.forEach((tarjeta) => {
-      const slide = pptx.addSlide();
+    const diapositivas = [];
+    for (const tarjeta of tarjetas) {
       const titulo = tarjeta.querySelector('.titulo-diapositiva').value.trim();
       const cuerpo = tarjeta.querySelector('.cuerpo-diapositiva');
+      diapositivas.push({ titulo, cuerpo: cuerpoAParrafosPptx(await contenidoAParrafos(cuerpo)) });
+    }
 
-      if (titulo) {
-        slide.addText(titulo, { x: 0.5, y: 0.3, w: 9, h: 1, fontSize: 28, bold: true, color: '1E293B' });
-      }
-
-      const runs = cuerpoAPptxRuns(cuerpo);
-      const tieneContenido = runs.some(r => r.text.trim() !== '');
-      if (tieneContenido) {
-        slide.addText(runs, { x: 0.5, y: 1.5, w: 9, h: 4.8, fontSize: 18, color: '1E293B', valign: 'top' });
-      }
-    });
-
+    const blob = await EscritorPptx.aBlob({ diapositivas });
     const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
-    pptx.writeFile({ fileName: `${nombreArchivo}.pptx` });
+    descargarBlob(blob, `${nombreArchivo}.pptx`);
   } catch (error) {
     alert(t('error-generar') + ': ' + error.message);
   } finally {
