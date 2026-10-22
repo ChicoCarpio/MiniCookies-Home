@@ -39,6 +39,7 @@
           margenArribaPx: parseFloat(e.paddingTop),
           margenAbajoPx: parseFloat(e.paddingBottom),
           // Encabezados y pies repetidos en cada hoja, y numeración de páginas.
+          medirContenido: true,
           repetidos: !!seccion.querySelector('[data-repetido]'),
           paginaPortada: seccion.dataset.titulopg === '1',
           parImpar: seccion.dataset.parimpar === '1',

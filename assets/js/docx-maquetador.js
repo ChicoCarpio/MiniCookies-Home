@@ -629,7 +629,9 @@
 
     // Sin ancho en ninguna celda y con una rejilla de mentira (la escriben así algunas librerías): Word reparte las
     // columnas según el contenido; CSS hace lo mismo con table-layout:auto.
-    const autoajuste = infos.every((f) => f.every((x) => !x.w || !(x.w.valor > 0))) && (sumaGrid / nCols) < 30 && tbl.disposicion !== 'fixed';
+    const rejillaFalsa = infos.every((f) => f.every((x) => !x.w || !(x.w.valor > 0))) && (sumaGrid / nCols) < 30;
+    // Word ajusta las columnas al contenido salvo que la tabla sea de ancho fijo: una palabra que no cabe ensancha su columna.
+    const autoajuste = tbl.disposicion !== 'fixed';
     const margenesT = { top: 0, bottom: 0, left: 0, right: 0, ...(tbl.margenes || {}) }; // sin estilo de tabla (TableNormal) Word no pone margen de celda
     const bT = tbl.bordes || {};
     // Antes de Word 2013 (modo de compatibilidad < 15) el borde de la tabla sale al margen izquierdo de la celda
@@ -638,9 +640,9 @@
     const alineacion = tbl.jc === 'center' ? 'center' : tbl.jc === 'right' || tbl.jc === 'end' ? 'flex-end' : 'flex-start';
     let html = `<table style="${css({
       // Las hojas de estilo de la página ponen cosas a table/td (interlineado, relleno, bordes): aquí se fija todo.
-      'border-collapse': 'collapse', 'border-spacing': '0', 'table-layout': autoajuste ? 'auto' : 'fixed', width: autoajuste && wTabla === undefined ? undefined : pt(total), 'max-width': autoajuste ? pt(disponible) : undefined, margin: '0', 'align-self': alineacion, 'line-height': 'normal', 'text-align': 'left', background: 'none', border: 'none',
+      'border-collapse': 'collapse', 'border-spacing': '0', 'table-layout': autoajuste ? 'auto' : 'fixed', width: rejillaFalsa && wTabla === undefined ? undefined : pt(total), 'max-width': rejillaFalsa ? pt(disponible) : undefined, margin: '0', 'align-self': alineacion, 'line-height': 'normal', 'text-align': 'left', background: 'none', border: 'none',
       'margin-left': alineacion === 'flex-start' && sangria ? pt(sangria) : undefined,
-    })}">${autoajuste ? '' : `<colgroup>${cols.map((g) => `<col style="width:${pt(g)}">`).join('')}</colgroup>`}`;
+    })}">${rejillaFalsa ? '' : `<colgroup>${cols.map((g) => `<col style="width:${pt(g)}">`).join('')}</colgroup>`}`;
     for (let i = 0; i < infos.length; i++) {
       const trPr = m.leerTrPr(hijo(filas[i], 'trPr'));
       html += `<tr style="${css({ height: trPr.alto ? pt(trPr.alto) : undefined, 'break-inside': trPr.noPartir ? 'avoid' : undefined, background: 'none' })}">`;

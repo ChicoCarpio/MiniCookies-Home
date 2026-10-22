@@ -152,7 +152,25 @@
         rango.setEnd(nodo, m.index + m[0].length);
         const rects = rango.getClientRects();
         if (!rects.length) continue;
-        // Una palabra partida en dos renglones (guion, salto forzado): se usa el primero.
+        if (rects.length > 1) {
+          // Una palabra partida en dos o más renglones (después de un guion, o cortada a la fuerza): cada trozo se
+          // escribe en su renglón, midiendo letra por letra. Antes se usaba solo el primer rectángulo y toda la
+          // palabra quedaba apretada en el primer renglón.
+          let trozo = null;
+          const cerrar = () => { if (trozo && trozo.ancho > 0) piezas.push({ tipo: 'texto', x: trozo.x, y: trozo.y, ancho: trozo.ancho, alto: trozo.alto, texto: trozo.texto, e: estilo }); trozo = null; };
+          for (let k = 0; k < m[0].length; k++) {
+            rango.setStart(nodo, m.index + k);
+            rango.setEnd(nodo, m.index + k + 1);
+            const c = rango.getClientRects()[0];
+            if (!c || !c.width) { if (trozo) trozo.texto += m[0][k]; continue; }
+            if (trozo && Math.abs(c.top - trozo.arriba) > c.height * 0.5) cerrar();
+            if (!trozo) trozo = { x: c.left - origen.x, y: c.top - origen.y, arriba: c.top, alto: c.height, ancho: 0, texto: '' };
+            trozo.texto += m[0][k];
+            trozo.ancho = c.right - origen.x - trozo.x;
+          }
+          cerrar();
+          continue;
+        }
         const r = rects[0];
         if (!r.width) continue;
         // `e`: el estilo del texto, compartido por todas las palabras del mismo nodo (con millones de palabras, copiarlo en cada una gasta cientos de MB).
@@ -333,7 +351,16 @@
       const margenInferior = Math.max(margenAbajo, ...repetidos.filter((x) => x.tipo === 'pie').map((x) => x.dist + x.alto));
       const altoContenido = Math.max(altoPx - margenSuperior - margenInferior, altoPx * 0.25);
       // Hoja con contenido más corto que ella: lo que sobra es el relleno mínimo, no contenido.
-      const altoTotal = r.height > altoPx + 1 ? Math.max(r.height - margenArriba - margenAbajo, 1) : altoContenido;
+      let altoTotal = r.height > altoPx + 1 ? Math.max(r.height - margenArriba - margenAbajo, 1) : altoContenido;
+      if (pagina.medirContenido) {
+        // Word: hasta dónde llega de verdad el contenido (un párrafo vacío al final también cuenta y puede llevar a una hoja más).
+        let fondo = 0;
+        for (const hijo of elemento.children) {
+          if (hijo.dataset.repetido || getComputedStyle(hijo).position === 'absolute') continue;
+          fondo = Math.max(fondo, hijo.getBoundingClientRect().bottom - (r.top + margenArriba));
+        }
+        altoTotal = Math.max(fondo, 1);
+      }
       const cortes = calcularCortes(ordenadas, altoContenido, altoTotal, saltos.filter((y) => y > 0));
       // Cada pieza a su hoja una sola vez (lo de antes del primer corte, como un
       // encabezado, va a la primera).
