@@ -6,7 +6,8 @@
 //   const blob  = await EscritorDocx.aBlob(doc);
 //
 //   doc = { numeraciones?: [{ id, niveles: [{ formato: 'decimal'|'lowerLetter'|'lowerRoman'|'bullet', texto, izquierda, colgante }] }],
-//           pagina?: { ancho, alto, margen: { arriba, abajo, izquierda, derecha } },      // twips
+//           pagina?: { ancho, alto, margen: { arriba, abajo, izquierda, derecha } },      // twips; sin ella: Carta o A4 según el idioma del navegador
+//           idiomas?: ['es-CR'],   // para fijar la región en vez de leerla del navegador (pruebas)
 //           encabezado?: [parrafo], pie?: [parrafo], hijos: [parrafo | tabla] }
 //   parrafo = { tipo: 'parrafo', titulo?: 1..6, alineacion?, sangria?: { izquierda, primeraLinea, colgante },
 //               espaciado?: { antes, despues, linea, regla: 'minimo'|'exacto'|'auto' }, tabs?: [{ tipo, pos }],
@@ -26,8 +27,22 @@
   const CABECERA = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
   const EMU_POR_PX = 9525;
 
-  // Página y márgenes como los crea Word (medidos con Word 16 real).
-  const PAGINA = { ancho: 12240, alto: 15840, margen: { arriba: 1417, abajo: 1417, izquierda: 1701, derecha: 1701 } };
+  // Hoja y márgenes por defecto: los que crea Word según la configuración regional (medidos con Word 16 real, es-CR).
+  // Carta en los países que la usan; A4 en el resto del mundo. Márgenes de 2,5 cm arriba y abajo y 3 cm a los lados con
+  // el idioma español (así los deja Word en español); 2,54 cm con cualquier otro. Se decide por el idioma del navegador.
+  const REGIONES_CARTA = new Set(['US', 'CA', 'MX', 'GT', 'SV', 'HN', 'NI', 'CR', 'PA', 'CO', 'VE', 'CL', 'DO', 'PR', 'CU', 'BO', 'PH', 'BZ']);
+  function paginaPorIdioma(idiomas) {
+    if (!idiomas) {
+      const n = typeof navigator !== 'undefined' ? navigator : null;
+      idiomas = n ? (n.languages && n.languages.length ? n.languages : [n.language]) : [];
+    }
+    const etiquetas = [].concat(idiomas).filter(Boolean).map(String);
+    const region = (/^[A-Za-z]{2,3}(?:-[A-Za-z]{4})?-([A-Za-z]{2})(?:-|$)/.exec(etiquetas[0] || '') || [])[1];
+    const carta = !!region && REGIONES_CARTA.has(region.toUpperCase());
+    const espanol = /^es(?:-|$)/i.test(etiquetas[0] || '');
+    const lado = espanol ? 1701 : 1440, vertical = espanol ? 1417 : 1440;
+    return { ancho: carta ? 12240 : 11906, alto: carta ? 15840 : 16838, margen: { arriba: vertical, abajo: vertical, izquierda: lado, derecha: lado } };
+  }
 
   // Los caracteres que XML 1.0 no admite (controles, sustitutos sueltos) hacen que Word rechace el archivo: se quitan.
   const INVALIDOS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
@@ -201,8 +216,9 @@
       return `<w:p>${ppr ? `<w:pPr>${ppr}</w:pPr>` : ''}${(p.hijos || []).map(run).join('')}</w:p>`;
     }
 
-    const pagina = { ...PAGINA, ...(doc.pagina || {}) };
-    pagina.margen = { ...PAGINA.margen, ...((doc.pagina && doc.pagina.margen) || {}) };
+    const base = paginaPorIdioma(doc.idiomas);
+    const pagina = { ...base, ...(doc.pagina || {}) };
+    pagina.margen = { ...base.margen, ...((doc.pagina && doc.pagina.margen) || {}) };
     const anchoUtil = pagina.ancho - pagina.margen.izquierda - pagina.margen.derecha;
 
     function tabla(t) {
@@ -309,5 +325,5 @@
     return new Blob([await generar(doc)], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
   }
 
-  globalThis.EscritorDocx = { generar, aBlob };
+  globalThis.EscritorDocx = { generar, aBlob, paginaPorIdioma };
 })();
