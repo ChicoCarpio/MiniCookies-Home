@@ -111,7 +111,7 @@ window.i18nPagina = {
     'guia-paso-2': 'En «Contenido de la diapositiva...» escribí el cuerpo. Seleccioná texto y usá los botones N (Negrita), C (Cursiva) o la lista con viñetas.',
     'guia-paso-3': 'Tocá «+ Agregar diapositiva» para sumar más. Con las flechas de la cabecera podés subir o bajar una diapositiva, y con la cruz eliminarla.',
     'guia-paso-4': 'Escribí el «Nombre del archivo» y tocá «Descargar .pptx».',
-    'guia-consejo-1': 'Cada diapositiva lleva un título arriba (letra grande y en negrita) y un cuadro de texto debajo. El diseño es el mismo para todas, sobre fondo blanco.',
+    'guia-consejo-1': 'Cada diapositiva lleva un título arriba (letra grande) y un cuadro de texto debajo. El diseño es el mismo para todas, sobre fondo blanco.',
     'guia-consejo-2': 'Dejá el título vacío si no lo necesitás: simplemente no se agrega.',
     'guia-consejo-3': 'Una diapositiva sin título ni contenido sale en blanco.',
     'guia-consejo-4': 'Para presentaciones con imágenes o diseño más cuidado, conviene generar la base acá y completarla en PowerPoint.',
@@ -151,7 +151,7 @@ window.i18nPagina = {
     'guia-paso-2': 'In “Slide content...” write the body. Select text and use the N (Bold) and C (Italic) buttons or the bulleted list.',
     'guia-paso-3': 'Tap “+ Add slide” to add more. With the arrows in the header you can move a slide up or down, and with the cross delete it.',
     'guia-paso-4': 'Write the “File name” and tap “Download .pptx”.',
-    'guia-consejo-1': 'Each slide has a title at the top (large and bold) and a text box below. The layout is the same for all of them, on a white background.',
+    'guia-consejo-1': 'Each slide has a title at the top (in large type) and a text box below. The layout is the same for all of them, on a white background.',
     'guia-consejo-2': 'Leave the title empty if you don’t need it: it simply isn’t added.',
     'guia-consejo-3': 'A slide with no title or content comes out blank.',
     'guia-consejo-4': 'For presentations with images or a more careful design, it’s best to generate the base here and finish it in PowerPoint.',
@@ -211,7 +211,7 @@ window.i18nPagina = {
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">Cada diapositiva lleva un título arriba (letra grande y en negrita) y un cuadro de texto debajo. El diseño es el mismo para todas, sobre fondo blanco.</li>
+      <li data-i18n="guia-consejo-1">Cada diapositiva lleva un título arriba (letra grande) y un cuadro de texto debajo. El diseño es el mismo para todas, sobre fondo blanco.</li>
       <li data-i18n="guia-consejo-2">Dejá el título vacío si no lo necesitás: simplemente no se agrega.</li>
       <li data-i18n="guia-consejo-3">Una diapositiva sin título ni contenido sale en blanco.</li>
       <li data-i18n="guia-consejo-4">Para presentaciones con imágenes o diseño más cuidado, conviene generar la base acá y completarla en PowerPoint.</li>
@@ -339,6 +339,7 @@ document.addEventListener('cambioIdioma', () => {
 function cuerpoAParrafosPptx(bloques) {
   const aRuns = (hijos) => hijos.filter((r) => r.texto !== undefined).map((r) => ({ texto: r.texto, negrita: r.negrita, cursiva: r.cursiva, subrayado: r.subrayado }));
   const resultado = [];
+  const instanciasVistas = new Set();
   bloques.forEach((b) => {
     if (b.tipo === 'tabla') {
       b.filas.forEach((fila) => {
@@ -349,7 +350,16 @@ function cuerpoAParrafosPptx(bloques) {
     }
     const runs = aRuns(b.hijos);
     if (b.titulo) runs.forEach((r) => { r.negrita = true; });
-    resultado.push({ hijos: runs, lista: b.lista ? (b.lista.vineta ? 'vineta' : 'numerada') : undefined, nivel: b.lista ? b.lista.nivel : 0 });
+    const numerada = !!(b.lista && !b.lista.vineta);
+    // Una lista numerada nueva (otra instancia que no se vio antes) al mismo nivel o más arriba que el párrafo anterior empieza en 1;
+    // una sublista (más hondo) o volver a un ítem de una lista ya vista no la reinicia.
+    let reinicio;
+    if (numerada) {
+      const anterior = resultado[resultado.length - 1];
+      reinicio = !instanciasVistas.has(b.lista.instancia) && !!anterior && anterior.lista === 'numerada' && b.lista.nivel <= anterior.nivel;
+      instanciasVistas.add(b.lista.instancia);
+    }
+    resultado.push({ hijos: runs, lista: b.lista ? (b.lista.vineta ? 'vineta' : 'numerada') : undefined, nivel: b.lista ? b.lista.nivel : 0, reinicio: reinicio || undefined });
   });
   return resultado;
 }
@@ -370,7 +380,8 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
     }
 
     const blob = await EscritorPptx.aBlob({ diapositivas });
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
+    // Sin los caracteres que Windows no admite en un nombre ni el .pptx que ya haya escrito; vacío o solo espacios → el nombre por defecto.
+    const nombreArchivo = document.getElementById('nombreArchivo').value.replace(/[\\/:*?"<>|]/g, '').replace(/\.pptx$/i, '').trim().replace(/^\.+/, '') || t('nombre-defecto');
     descargarBlob(blob, `${nombreArchivo}.pptx`);
   } catch (error) {
     alert(t('error-generar') + ': ' + error.message);

@@ -372,7 +372,7 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
   boton.textContent = t('boton-generar-procesando');
   try {
     const blob = await markdownAWord(entradaMarkdown.value, t('error-md-vacio'));
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || 'documento').trim();
+    const nombreArchivo = document.getElementById('nombreArchivo').value.replace(/[\\/:*?"<>|]/g, '').replace(/\.docx$/i, '').trim().replace(/^\.+/, '') || 'documento';
 
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);

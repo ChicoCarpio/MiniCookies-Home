@@ -295,7 +295,7 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
     const documento = { numeraciones: NUMERACIONES_DOCX, hijos: parrafos };
 
     const blob = await EscritorDocx.aBlob(documento);
-    const nombreArchivo = (document.getElementById('nombreArchivo').value || t('nombre-defecto')).trim();
+    const nombreArchivo = document.getElementById('nombreArchivo').value.replace(/[\\/:*?"<>|]/g, '').replace(/\.docx$/i, '').trim().replace(/^\.+/, '') || t('nombre-defecto');
 
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);
