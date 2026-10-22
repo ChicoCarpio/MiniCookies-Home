@@ -73,7 +73,7 @@
           texto: c.texto,
           negrita: c.negrita,
           cursiva: c.cursiva,
-          tamano: Math.round(c.tamano * 2),
+          tamano: Math.max(2, Math.round(c.tamano * 2)), // 1 pt, el mínimo de Word: un 0 dejaba el texto en 12 pt
           fuente: c.familia || undefined,
           color: '000000',
         }));
