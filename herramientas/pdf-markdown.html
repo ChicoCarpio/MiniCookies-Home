@@ -265,7 +265,7 @@ Este es un ejemplo de **Markdown** con:
 
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
-<script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="../assets/js/markdown-propio.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
@@ -459,7 +459,7 @@ const vistaPreviaMd = document.getElementById('vistaPreviaMd');
 const areaImprimir = document.getElementById('areaImprimir');
 
 function actualizarVistaPreviaMd() {
-  const html = sanitizarHtml(marked.parse(entradaMarkdown.value));
+  const html = sanitizarHtml(MarkdownPropio.aHtml(entradaMarkdown.value));
   vistaPreviaMd.innerHTML = html;
   areaImprimir.innerHTML = html;
 }

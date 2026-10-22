@@ -193,9 +193,8 @@ window.i18nPagina = {
   <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
 </footer>
 
-<script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
-<script src="../vendor/turndown/7.2.0/turndown.min.js"></script>
-<script src="../assets/js/turndown-tablas.js"></script>
+<script src="../assets/js/markdown-propio.js"></script>
+<script src="../assets/js/html-a-markdown.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/descargar.js"></script>
@@ -216,7 +215,6 @@ const botonAbrir = document.getElementById('botonAbrir');
 // Nombre base de los archivos descargados: el del archivo abierto, si se abrió uno.
 let nombreBase = null;
 
-const turndownService = agregarTablasMarkdown(new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' }));
 
 // Textos de ejemplo en cada idioma. Si el usuario no los tocó, cambian
 // al cambiar el idioma de la página.
@@ -271,14 +269,14 @@ function direccionActual() {
 
 function actualizar() {
   if (direccionActual() === 'md-a-html') {
-    const html = marked.parse(entrada.value);
+    const html = MarkdownPropio.aHtml(entrada.value);
     // La vista previa se limpia (un .md puede traer HTML crudo con código
-    // malicioso); el código que se copia queda tal cual lo generó marked.
+    // malicioso); el código que se copia queda tal cual lo generó el conversor.
     vistaPrevia.innerHTML = sanitizarHtml(html);
     salidaHtml.value = html;
   } else {
     try {
-      salidaMarkdown.value = turndownService.turndown(entrada.value);
+      salidaMarkdown.value = HtmlAMarkdown.convertir(entrada.value);
     } catch (error) {
       salidaMarkdown.value = t('error-convertir') + ': ' + error.message;
     }
@@ -361,7 +359,7 @@ function tituloDelDocumento() {
 }
 
 // Página HTML completa (se abre directo en el navegador), con el HTML tal
-// cual lo generó marked, igual que el código que se copia.
+// cual lo generó el conversor, igual que el código que se copia.
 botonDescargarHtml.addEventListener('click', () => {
   actualizar();
   const titulo = escaparHtml(tituloDelDocumento());

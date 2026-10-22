@@ -235,9 +235,8 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
-<script src="../vendor/turndown/7.2.0/turndown.min.js"></script>
-<script src="../assets/js/turndown-tablas.js"></script>
-<script src="../vendor/marked/18.0.13/lib/marked.umd.min.js"></script>
+<script src="../assets/js/html-a-markdown.js"></script>
+<script src="../assets/js/markdown-propio.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
 <script src="../assets/js/lote-archivos.js"></script>
@@ -248,7 +247,6 @@ const panelEpubAMd = document.getElementById('panelEpubAMd');
 const panelMdAEpub = document.getElementById('panelMdAEpub');
 const progreso = document.getElementById('progreso');
 
-const turndownService = agregarTablasMarkdown(new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' }));
 
 
 // --- EPUB → Markdown ---
@@ -287,7 +285,7 @@ conectarZonaArrastre(zonaArrastreEpub, entradaEpub, elegirArchivosEpub);
 // Un EPUB da un Markdown: sus capítulos separados por una línea horizontal.
 async function convertirEpubAMarkdown(archivo) {
   const { capitulos } = await leerEpub(archivo);
-  return capitulos.map(capitulo => turndownService.turndown(capitulo.html)).join('\n\n---\n\n');
+  return capitulos.map(capitulo => HtmlAMarkdown.convertir(capitulo.html)).join('\n\n---\n\n');
 }
 
 botonAMd.addEventListener('click', async () => {
@@ -372,7 +370,7 @@ botonAEpub.addEventListener('click', async () => {
 
     progreso.textContent = t('progreso-leyendo');
     const { texto } = await leerTextoArchivo(archivoMdActual);
-    const capitulos = dividirHtmlEnCapitulosEpub(sanitizarHtml(marked.parse(texto)), titulo);
+    const capitulos = dividirHtmlEnCapitulosEpub(sanitizarHtml(MarkdownPropio.aHtml(texto)), titulo);
 
     progreso.textContent = t('progreso-armando');
     const blob = await construirEpub({ titulo, autor, capitulos });
