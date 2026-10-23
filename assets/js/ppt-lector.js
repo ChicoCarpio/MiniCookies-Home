@@ -16,9 +16,10 @@
 (function () {
   'use strict';
   const MAX_REGISTROS = 4 * 1024 * 1024;     // registros que se recorren en total
-  const MAX_DIAPOSITIVAS = 20000;
-  const MAX_FORMAS = 400000;                 // formas de todo el archivo
+  const MAX_DIAPOSITIVAS = 10000;
+  const MAX_FORMAS = 150000;                 // formas de todo el archivo
   const MAX_PROFUNDIDAD = 24;
+  const MAX_UNIDADES = 3000000;              // párrafos, tramos de texto y órdenes de trazo que produce el lector en total
   const MAX_TEXTO = 64 * 1024 * 1024;        // caracteres de todo el archivo
   const MAX_EDICIONES = 10000;               // guardados acumulados (cadena de UserEditAtom)
   const MAX_IMAGENES_BYTES = 256 * 1024 * 1024;
@@ -101,6 +102,7 @@
       this.textoTotal = 0;
       this.bytesImagenes = 0;
       this.imagenesLeidas = 0;
+      this.unidades = 0;
       let cfb;
       try { cfb = CfbPropio.leer(bytes, { danado: (d) => new Danado('El archivo está dañado y no se puede leer (' + d + ').') }); } catch (e) { throw e.codigo ? e : new Danado('El archivo está dañado y no se puede leer.'); }
       this.cfb = cfb;
@@ -115,6 +117,7 @@
       if (!this.usuario) throw new Danado('Esta presentación es de una versión de PowerPoint anterior a la 97 y no se puede leer.', 'antiguo');
     }
     aviso(c) { this.mensajes.add(c); }
+    contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw new Danado('La presentación es demasiado grande y no se puede leer.'); }
     contarRegistro() { if (++this.registros > MAX_REGISTROS) throw new Danado('La presentación es demasiado grande o está dañada y no se puede leer.'); }
 
     // Registro en la posición p: { ver, inst, tipo, ini, fin } (fin recortado al flujo)
@@ -147,6 +150,7 @@
       let edicion = u32(cu, 16);
       const persist = new Map();
       const vistos = new Set();
+      const dirsVistos = new Set();
       let docRef = 0;
       let n = 0;
       while (edicion && edicion + 8 <= b.length && !vistos.has(edicion) && n++ < MAX_EDICIONES) {
@@ -157,7 +161,9 @@
         if (!docRef) docRef = u32(b, r.ini + 16);
         if (r.fin - r.ini >= 32 && u32(b, r.ini + 28)) throw new Danado('La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.', 'cifrado');
         const d = this.reg(dir);
-        if (d && d.tipo === RT.PersistDirectoryAtom) {
+        if (d && d.tipo === RT.PersistDirectoryAtom && !dirsVistos.has(dir)) {
+          dirsVistos.add(dir);
+          this.registros += (d.fin - d.ini) >> 2;
           let p = d.ini;
           while (p + 4 <= d.fin) {
             const cab = u32(b, p); p += 4;
@@ -346,7 +352,11 @@
       let fuente, pos;
       if (foDelay !== 0xFFFFFFFF && this.imagenes && foDelay < this.imagenes.length) { fuente = this.imagenes; pos = foDelay; }
       else { fuente = b; pos = f.ini + 36 + cbNombre; }
-      resultado = this.leerBlip(fuente, pos);
+      // varias entradas que señalan los mismos datos comparten una sola imagen
+      const clave = (fuente === this.imagenes ? 'P' : 'D') + pos;
+      this.porPosicion = this.porPosicion || new Map();
+      if (this.porPosicion.has(clave)) resultado = this.porPosicion.get(clave);
+      else { resultado = this.leerBlip(fuente, pos); this.porPosicion.set(clave, resultado); }
       this.cacheImagenes.set(indice, resultado);
       return resultado;
     },
@@ -405,7 +415,7 @@
           if (i === 0) info = sp; else if (sp) lista.push(sp);
         } else if (h.tipo === RT.SpgrContainer) {
           const g = this.leerGrupo(h, prof + 1);
-          if (g.info) { g.info.hijos = g.hijos; g.info.esGrupo = true; lista.push(g.info); } else lista.push(...g.hijos);
+          if (g.info) { g.info.hijos = g.hijos; g.info.esGrupo = true; lista.push(g.info); } else for (const x of g.hijos) lista.push(x);
         }
       });
       return { info, hijos: lista };
@@ -458,7 +468,7 @@
       for (const a of this.hijos(h)) {
         if (a.tipo !== RT.InteractiveInfoAtom) continue;
         const id = u32(b, a.ini + 4), accion = u8(b, a.ini + 8), salto = u8(b, a.ini + 10), tipo = u8(b, a.ini + 12);
-        if (tipo === 8 || tipo === 0) { const d = this.exEnlaces.get(id); if (d && /^(https?:|mailto:)/i.test(d)) return d; if (d && /^[^:\\/]+@[^:\\/]+$/.test(d)) return 'mailto:' + d; }
+        if (tipo === 8 || tipo === 0) { const d = this.exEnlaces.get(id); if (d && /^(https?:|mailto:)/i.test(d)) return d; if (d && d.length < 320 && /^[^:\\/@]+@[^:\\/@]+$/.test(d)) return 'mailto:' + d; }
         if (accion === 3 && tipo === 7) { const d = this.exEnlaces.get(id); const m = d && /^(\d+),(\d+)/.exec(d); if (m) return { slideId: +m[1] }; }
         if (accion === 1 && salto === 1) return { relativa: 'siguiente' };
         if (accion === 1 && salto === 2) return { relativa: 'anterior' };
@@ -558,7 +568,17 @@
     },
     fijo(v) { return (v | 0) / 65536; },
 
-    relleno(mapas, ctx, implicito) {
+    // fillShadeColors (0x197): lista de colores con su posición (fija 16.16) → paradas del degradado
+    paradasComplejas(sp, ctx) {
+      const d = sp && sp.comp && sp.comp.get(0x197);
+      if (!d || d.length < 6) return null;
+      const n = Math.min(u16(d, 0), 64), cb = u16(d, 4);
+      if (cb !== 8 || 6 + n * 8 > d.length || n < 2) return null;
+      const out = [];
+      for (let i = 0; i < n; i++) out.push({ pos: acotar(((i32(d, 6 + i * 8 + 4)) / 65536) * 100, 0, 100), color: this.colorOA(u32(d, 6 + i * 8), ctx) || 'FFFFFF' });
+      return out.sort((a, b) => a.pos - b.pos);
+    },
+    relleno(mapas, ctx, implicito, sp) {
       const lleno = this.booleano(mapas, 0x1BF, 4);
       if (lleno === false || (lleno === undefined && !implicito)) return null;
       const tipo = this.prop(mapas, 0x180) || 0;
@@ -575,6 +595,8 @@
         const fondo = this.colorOA(this.prop(mapas, 0x183), ctx) || 'FFFFFF';
         const angulo = this.fijo(this.prop(mapas, 0x18B) || 0);
         const foco = this.prop(mapas, 0x18C);
+        const varias = this.paradasComplejas(sp, ctx);
+        if (varias) return { degradado: { angulo: ((90 - angulo) % 360 + 360) % 360, radial: tipo === 5 || tipo === 6 ? true : undefined, paradas: varias } };
         const alReves = (foco === undefined ? 0 : foco | 0) < 50;      // con el foco en 0 el degradado empieza por el color de fondo
         const paradas = alReves ? [{ pos: 0, color: fondo, alfa }, { pos: 100, color, alfa }] : [{ pos: 0, color, alfa }, { pos: 100, color: fondo, alfa }];
         return { degradado: { angulo: ((90 - angulo) % 360 + 360) % 360, radial: tipo === 5 || tipo === 6 ? true : undefined, paradas } };
@@ -585,7 +607,10 @@
       const hay = this.booleano(mapas, 0x1FF, 3);
       if (!hay) return null;
       const l = { color: this.colorOA(this.prop(mapas, 0x1C0), ctx) || '000000', ancho: this.prop(mapas, 0x1CB) === undefined ? 9525 : this.prop(mapas, 0x1CB) };
-      const guion = GUION[this.prop(mapas, 0x1CE) || 0]; if (guion) l.guion = guion;
+      let guion = GUION[this.prop(mapas, 0x1CE) || 0];
+      if (this.prop(mapas, 0x1CE) === 5 && this.prop(mapas, 0x1D7) === 0) guion = 'sysDot';     // punto redondo (con remate redondo); con remate cuadrado es el punto cuadrado
+      if (guion) l.guion = guion;
+      const cap = this.prop(mapas, 0x1D7); if (cap === 0) l.cap = 'rnd'; else if (cap === 1) l.cap = 'sq'; else if (cap === 2) l.cap = 'flat';
       const ini = PUNTA[this.prop(mapas, 0x1D0) || 0], fin = PUNTA[this.prop(mapas, 0x1D1) || 0];
       if (ini) l.inicio = ini; if (fin) l.fin = fin;
       const unir = this.prop(mapas, 0x1D6); if (unir === 0) l.union = 'bevel'; else if (unir === 2) l.union = 'round';
@@ -671,6 +696,8 @@
       const parrafos = [];
       let ip = 0, ic = 0;
       const enlaces = t.enlaces.slice().sort((a, c) => a.ini - c.ini);
+      const posCampos = [...t.campos.keys()].sort((x, y) => x - y);
+      let ie = 0, ipc = 0;
       let ini = 0;
       let numPf = -1;
       while (ini <= texto.length) {
@@ -678,6 +705,9 @@
         const ultimo = fin < 0;
         if (ultimo) fin = texto.length;
         while (ip < pfs.length - 1 && pfs[ip].fin <= ini) ip++;
+        while (ic < cfs.length - 1 && cfs[ic].fin <= ini) ic++;
+        while (ie < enlaces.length && enlaces[ie].fin <= ini) ie++;
+        while (ipc < posCampos.length && posCampos[ipc] < ini) ipc++;
         const runPf = pfs[ip] && pfs[ip].ini <= ini ? pfs[ip] : null;
         if (runPf) numPf = ip;
         const nivel = runPf ? runPf.nivel : 0;
@@ -694,8 +724,8 @@
         // segmentos del párrafo
         const cortes = new Set([ini, fin]);
         for (let k = ic; k < cfs.length; k++) { if (cfs[k].fin <= ini) continue; if (cfs[k].ini >= fin) break; cortes.add(Math.max(cfs[k].ini, ini)); cortes.add(Math.min(cfs[k].fin, fin)); }
-        for (const e of enlaces) { if (e.fin <= ini || e.ini >= fin) continue; cortes.add(Math.max(e.ini, ini)); cortes.add(Math.min(e.fin, fin)); }
-        for (const [pos] of t.campos) if (pos >= ini && pos < fin) { cortes.add(pos); cortes.add(pos + 1); }
+        for (let q = ie; q < enlaces.length && enlaces[q].ini < fin; q++) { const e = enlaces[q]; if (e.fin <= ini) continue; cortes.add(Math.max(e.ini, ini)); cortes.add(Math.min(e.fin, fin)); }
+        for (let q = ipc; q < posCampos.length && posCampos[q] < fin; q++) { cortes.add(posCampos[q]); cortes.add(posCampos[q] + 1); }
         for (let k = ini; k < fin; k++) if (texto.charCodeAt(k) === 0x0B) { cortes.add(k); cortes.add(k + 1); }
         const puntos = [...cortes].sort((x, y) => x - y);
         let primerRun = null;
@@ -719,17 +749,19 @@
           else if (trozo === '\u000B') { hijo.salto = true; }
           else hijo.texto = trozo.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
           if (Object.keys(r).length) hijo.r = r;
-          const en = enlaces.find((e) => e.ini <= a && e.fin >= z);
+          let en = null;
+          for (let q = ie; q < enlaces.length && enlaces[q].ini <= a; q++) if (enlaces[q].fin >= z) { en = enlaces[q]; break; }
           if (en && hijo.texto) { const d = this.destinoEnlace(en.destino, ctx); if (d) hijo.enlace = d; }
           if (hijo.texto === '' && !hijo.campo && !hijo.salto) continue;
           parrafo.hijos.push(hijo);
         }
         const v = this.vinetaDe(pf, primerRun ? primerRun.cf : base.cf, ctx);
-        const num = pp9 && numPf >= 0 && pp9[numPf] && pp9[numPf].auto ? pp9[numPf] : null;
+        const num = pp9 && numPf >= 0 && pp9[numPf] && pp9[numPf].auto !== 0 && pp9[numPf].esquema !== undefined ? pp9[numPf] : null;
         if (num && num.esquema !== undefined) parrafo.vineta = { num: NUMERACION[num.esquema] || 'arabicPeriod', inicio: num.inicio > 1 ? num.inicio : undefined };
         else if (v) parrafo.vineta = v;
         if (primerRun && primerRun.r.tamano) parrafo.r = { tamano: primerRun.r.tamano };
         parrafos.push(parrafo);
+        this.contarUnidad(1 + parrafo.hijos.length);
         if (ultimo || parrafos.length > 1000000) break;
         ini = fin + 1;
       }
@@ -776,7 +808,7 @@
       }
       const tipoSp = sp.tipoSp;
       const bid = this.prop(mapas, 0x104);
-      const esImagen = bid && (tipoSp === 75 || tipoSp === 1 || tipoSp === 0) && !(this.booleano(mapas, 0x1BF, 4));
+      const esImagen = bid && (tipoSp === 75 || tipoSp === 1 || tipoSp === 0) && !(this.booleano(mapas, 0x1BF, 4)) && !sp.texto && !sp.comp.has(0xC0);
       const linea = this.linea(mapas, ctx);
       // enlace de la forma
       if (sp.enlace) { const d = this.destinoEnlace(sp.enlace, ctx); if (d) f.enlace = d; }
@@ -801,7 +833,7 @@
       if (tipoSp === 0 && sp.comp.has(0x145)) { const libre = this.formaLibre(sp, mapas); if (libre) f.geom = libre; else this.aviso('formas'); }
       const aj = this.ajustes(sp, mapas, f.geom);
       if (aj) f.ajustes = aj;
-      f.relleno = this.relleno(mapas, ctx);
+      f.relleno = this.relleno(mapas, ctx, false, sp);
       f.linea = linea;
       const sm = this.sombra(mapas, ctx); if (sm) f.sombra = sm;
       // texto
@@ -810,6 +842,24 @@
         const e = ctx.textosDiap[sp.refTexto];
         tx = { tipoTexto: e.tipoTexto, texto: e.texto || '', estilo: e.estilo || null, regla: null, campos: new Map(), enlaces: [] };
       }
+      // WordArt: el texto va en la propiedad gtextUNICODE y la forma lo dibuja con su relleno; se lleva como texto normal con el color del relleno
+      let base = null;
+      if (!tx && sp.comp.has(0xC0)) {
+        const d = sp.comp.get(0xC0);
+        const s = textoUtf16(d, 0, d.length).replace(/\u0000[\s\S]*$/, '');
+        if (s.trim() !== '') {
+          const lineas = Math.max(1, s.split('\r').length);
+          const nombre = sp.comp.has(0xC5) ? textoUtf16(sp.comp.get(0xC5), 0, sp.comp.get(0xC5).length).replace(/\u0000[\s\S]*$/, '') : '';
+          const cf = { tamano: acotar(Math.round(f.h / 12700 * 0.7 / lineas), 8, 200) };
+          const col = f.relleno && f.relleno.color; if (col) cf.color = { rgb: col };
+          if (nombre) { let i = this.fuentes.indexOf(nombre); if (i < 0 && this.fuentes.length < 4096) { this.fuentes.push(nombre); i = this.fuentes.length - 1; } if (i >= 0) cf.fuente = i; }
+          tx = { tipoTexto: 4, texto: s, estilo: null, regla: null, campos: new Map(), enlaces: [] };
+          base = { pf: { alin: 1 }, cf };
+          f.relleno = null; f.linea = null;
+          this.aviso('wordart');
+        }
+      }
+      if (tx && base) tx.base = base;
       if (tx && tx.texto && tx.texto.replace(/[\r\u000B\s]/g, '') !== '') {
         const t = this.convertirTexto(tx, ctx, sp.pf9);
         const margen = (id, def) => { const v = this.prop(mapas, id); return v === undefined ? def : v; };
@@ -827,11 +877,11 @@
     formaLibre(sp, mapas) {
       const v = sp.comp.get(0x145), s = sp.comp.get(0x146);
       if (!v || !s || v.length < 6 || s.length < 6) return null;
-      const nv = Math.min(u16(v, 0), 100000), cb = u16(v, 4);
+      const nv = Math.min(u16(v, 0), 20000), cb = u16(v, 4);
       const tam = cb === 0xFFF0 ? 4 : 8;
       if (nv * tam + 6 > v.length) return null;
       const pt = (k) => (tam === 4 ? [i16(v, 6 + k * 4), i16(v, 8 + k * 4)] : [i32(v, 6 + k * 8), i32(v, 10 + k * 8)]);
-      const ns = Math.min(u16(s, 0), 100000);
+      const ns = Math.min(u16(s, 0), 20000);
       if (ns * 2 + 6 > s.length) return null;
       const izq = this.prop(mapas, 0x140) | 0, arr = this.prop(mapas, 0x141) | 0;
       const der = this.prop(mapas, 0x142) === undefined ? 21600 : this.prop(mapas, 0x142) | 0, aba = this.prop(mapas, 0x143) === undefined ? 21600 : this.prop(mapas, 0x143) | 0;
@@ -851,6 +901,7 @@
           else return null;     // escapes (arcos, rellenos especiales): no se llevan
         }
       } catch (e) { return null; }
+      this.contarUnidad(cmds.length);
       return cmds.length ? { rutas: [{ w, h, cmds }] } : null;
     },
     // Los ajustes de OfficeArt (adjustValue) a los de ECMA para las formas más comunes
@@ -987,9 +1038,18 @@
       this.leerDocumento();
       if (!this.listaDiap.length) throw new Danado('La presentación no tiene diapositivas.');
       if (this.listaDiap.length > MAX_DIAPOSITIVAS) throw new Danado('La presentación tiene demasiadas diapositivas y no se puede leer.');
-      const maestros = this.maestras.map((e) => this.leerMaestro(e));
+      // lo que varias entradas comparten (un mismo contenedor señalado muchas veces) se lee una sola vez
+      const cacheM = new Map();
+      const maestros = this.maestras.map((e) => { if (!cacheM.has(e.persist)) cacheM.set(e.persist, this.leerMaestro(e)); return cacheM.get(e.persist); });
+      const cacheD = new Map();
       const usados = new Set();
-      const diapositivas = this.listaDiap.map((e, i) => { const r = this.leerDiapositiva(e, i, maestros); r.d.maestro = r.maestro; usados.add(r.maestro); return r.d; });
+      const diapositivas = this.listaDiap.map((e, i) => {
+        const clave = e.textos.length ? null : e.persist;
+        let r = clave !== null ? cacheD.get(clave) : null;
+        if (!r) { r = this.leerDiapositiva(e, i, maestros); if (clave !== null) cacheD.set(clave, r); }
+        usados.add(r.maestro);
+        return Object.assign({}, r.d, { maestro: r.maestro });
+      });
       // solo se escriben los patrones que alguna diapositiva usa
       const orden = [...usados].sort((x, y) => x - y);
       const nuevo = new Map(orden.map((m, k) => [m, k]));

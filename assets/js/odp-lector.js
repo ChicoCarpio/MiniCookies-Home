@@ -15,12 +15,13 @@
 (function () {
   'use strict';
   const MAX_PROFUNDIDAD = 64;
-  const MAX_ELEMENTOS = 3000000;
+  const MAX_ELEMENTOS = 1500000;
+  const MAX_UNIDADES = 3000000;          // párrafos y tramos de texto que produce el lector en total
   const MAX_TEXTO_XML = 256 * 1024 * 1024;
-  const MAX_IMAGENES_BYTES = 256 * 1024 * 1024;
+  const MAX_IMAGENES_BYTES = 128 * 1024 * 1024;
   const MAX_IMAGENES = 20000;
-  const MAX_FORMAS = 400000;
-  const MAX_DIAPOSITIVAS = 20000;
+  const MAX_FORMAS = 150000;
+  const MAX_DIAPOSITIVAS = 10000;
   const MAX_CARACTERES = 64 * 1024 * 1024;
   const MAX_CELDAS = 200000;
   const MAX_PUNTOS = 4000000;
@@ -38,6 +39,7 @@
   const EMU = { cm: 360000, mm: 36000, in: 914400, pt: 12700, px: 9525, pc: 152400 };
   // "2.5cm", "1in", "12pt", "50%" (de base) → EMU (null si no es una medida)
   function emu(t, base) {
+    if (typeof t === 'string' && t.length > 48) return null;
     const m = /^\s*(-?[\d.]+(?:e-?\d+)?)\s*(cm|mm|in|pt|px|pc|%)?\s*$/i.exec(t || '');
     if (!m) return null;
     const n = parseFloat(m[1]);
@@ -46,12 +48,12 @@
     if (u === '%') return base == null ? null : Math.round(base * n / 100);
     return Math.round(n * EMU[u]);
   }
-  const puntos = (t, base) => { const m = /^\s*(-?[\d.]+)\s*(pt|%|cm|mm|in|px)?\s*$/i.exec(t || ''); if (!m) return null; const n = parseFloat(m[1]); if (!Number.isFinite(n)) return null; const u = (m[2] || 'pt').toLowerCase(); return u === '%' ? (base == null ? null : base * n / 100) : u === 'pt' ? n : n * EMU[u] / 12700; };
+  const puntos = (t, base) => { if (typeof t === 'string' && t.length > 48) return null; const m = /^\s*(-?[\d.]+)\s*(pt|%|cm|mm|in|px)?\s*$/i.exec(t || ''); if (!m) return null; const n = parseFloat(m[1]); if (!Number.isFinite(n)) return null; const u = (m[2] || 'pt').toLowerCase(); return u === '%' ? (base == null ? null : base * n / 100) : u === 'pt' ? n : n * EMU[u] / 12700; };
   const color = (c) => (/^#[0-9a-fA-F]{6}$/.test(c || '') ? c.slice(1).toUpperCase() : null);
-  const porcentaje = (t, def) => { const m = /^\s*(-?[\d.]+)\s*%?\s*$/.exec(t || ''); return m ? parseFloat(m[1]) : def; };
+  const porcentaje = (t, def) => { if (typeof t === 'string' && t.length > 48) return def; const m = /^\s*(-?[\d.]+)\s*%?\s*$/.exec(t || ''); return m ? parseFloat(m[1]) : def; };
 
   // ───────── Estilos ─────────
-  const GRUPOS = { 'style:graphic-properties': 'g', 'loext:graphic-properties': 'g', 'style:text-properties': 't', 'style:paragraph-properties': 'p', 'style:drawing-page-properties': 'dp', 'style:table-cell-properties': 'c', 'style:table-column-properties': 'col', 'style:table-row-properties': 'fila', 'style:table-properties': 'tabla', 'style:chart-properties': 'ch' };
+  const GRUPOS = Object.assign(Object.create(null), { 'style:graphic-properties': 'g', 'loext:graphic-properties': 'g', 'style:text-properties': 't', 'style:paragraph-properties': 'p', 'style:drawing-page-properties': 'dp', 'style:table-cell-properties': 'c', 'style:table-column-properties': 'col', 'style:table-row-properties': 'fila', 'style:table-properties': 'tabla', 'style:chart-properties': 'ch' });
   const nuevoEstilo = () => ({ g: {}, t: {}, p: {}, dp: {}, c: {}, col: {}, fila: {}, tabla: {} });
   const unir = (a, b) => {
     const r = {};
@@ -253,7 +255,7 @@
   // rotate: radianes, en sentido contrario al reloj; translate: medidas con unidad
   function transformacion(t) {
     const ops = [];
-    if (!t) return ops;
+    if (!t || t.length > 2000) return ops;
     const re = /(rotate|translate|scale|skewX|skewY|matrix)\s*\(([^)]*)\)/g;
     let m;
     while ((m = re.exec(t)) && ops.length < 16) {
@@ -299,8 +301,11 @@
       this.puntos = 0;
       this.pie = new Map();          // presentation:footer-decl / date-time-decl
       this.contenido = contenidoRaiz;
+      this.celdasDoc = 0;
+      this.unidades = 0;
     }
     aviso(c) { this.mensajes.add(c); }
+    contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw new Error('La presentación es demasiado grande y no se puede leer.'); }
     contar() { if (++this.formas > MAX_FORMAS) throw new Error('La presentación tiene demasiadas formas y no se puede leer.'); }
 
     // ───── propiedades de texto y párrafo ─────
@@ -320,9 +325,8 @@
     // número de la lista: nivel de un text:list-style
     nivelLista(lista, nivel) {
       if (!lista) return null;
-      const n = String(nivel);
-      for (const l of hijos(lista)) if (atr(l, 'text:level') === n) return l;
-      return null;
+      if (!lista._niveles) { lista._niveles = new Map(); for (const l of hijos(lista)) { const k = atr(l, 'text:level'); if (k !== undefined && !lista._niveles.has(k)) lista._niveles.set(k, l); } }
+      return lista._niveles.get(String(nivel)) || null;
     }
     vinetaDe(nivelEl, ctxT) {
       if (!nivelEl) return undefined;
@@ -406,7 +410,7 @@
       // contenido
       const salida = p.hijos;
       this.contenidoParrafo(el, ctx, ambito, t0, salida, null);
-      const primero = salida.find((x) => x.r && x.r.tamano);
+      this.contarUnidad(1 + salida.length);
       return p;
     }
     contenidoParrafo(el, ctx, ambito, t, salida, enlace) {
@@ -506,6 +510,7 @@
         l.guion = d && puntos1 > 0 && (!long1 || /^\s*[\d.]+\s*%/.test(long1)) && parseFloat(long1) < 150 ? (atr(d, 'draw:dots2') ? 'dashDot' : 'sysDot') : 'dash';
       }
       const op = g['svg:stroke-opacity']; if (op !== undefined) { const a = porcentaje(op, 100) / 100; if (a < 1) l.alfa = acotar(a, 0, 1); }
+      const cp = g['svg:stroke-linecap']; if (cp === 'round') l.cap = 'rnd'; else if (cp === 'square') l.cap = 'sq';
       const j = g['draw:stroke-linejoin']; if (j === 'round') l.union = 'round'; else if (j === 'bevel') l.union = 'bevel';
       const ms = g['draw:marker-start'], me = g['draw:marker-end'];
       const flecha = (m) => (m ? (/oval|circle/i.test(m) ? 'oval' : /diamond/i.test(m) ? 'diamond' : /square/i.test(m) ? 'diamond' : /arrow|triangle|line/i.test(m) ? 'triangle' : 'triangle') : null);
@@ -696,7 +701,7 @@
         if (!im) return null;
         f = Object.assign({ tipo: 'imagen', imagen: im }, caja);
         const l = this.linea(est.g, ambito); if (l) f.linea = l;
-        const rc = this.recorte(est.g['fo:clip'], im); if (rc) f.recorte = rc;
+        const rc = this.recorte(est.g['fo:clip'], im); if (rc) f._recorte = rc;
         const hl = this.enlaceDe(el); if (hl) f.enlace = hl;
       } else if (hijo(el, 'draw:object') || hijo(el, 'draw:object-ole') || hijo(el, 'draw:plugin')) {
         if (imagen) { const im = this.imagen(atr(imagen, 'xlink:href')); if (im) { f = Object.assign({ tipo: 'imagen', imagen: im }, caja); this.aviso('objetos'); } else return null; }
@@ -711,10 +716,17 @@
         else if (!f.relleno && !f.linea) return null;
         const hl = this.enlaceDe(el); if (hl) f.enlace = hl;
       } else return null;
-      return this.decorar(f, el, ambito, est, ctx);
+      return f ? this.decorar(f, el, ambito, est, ctx) : null;
     }
     // fo:clip="rect(arriba, derecha, abajo, izquierda)": distancias desde el borde de la imagen original
-    recorte(clip, im) { return null; }
+    recorte(clip, im) {
+      if (typeof clip === 'string' && clip.length > 200) return null;
+      const m = /rect\(\s*([^,)\s]+)[\s,]+([^,)\s]+)[\s,]+([^,)\s]+)[\s,]+([^,)\s]+)\s*\)/.exec(clip || '');
+      if (!m) return null;
+      const v = m.slice(1, 5).map((x) => emu(x) || 0);
+      if (!v.some((x) => x)) return null;
+      return { arr: v[0], der: v[1], aba: v[2], izq: v[3] };       // en EMU; se pasa a fracciones cuando se conoce el tamaño original de la imagen
+    }
     marcoPie(el, ambito, ctx, clase) {
       // se escribe una copia del marcador del patrón con el texto de la diapositiva
       const tipo = CLASES_PIE[clase];
@@ -756,6 +768,7 @@
         const alto = emu(estF.fila['style:row-height'] || estF.fila['style:min-row-height']) || 365760;
         const celdas = [];
         const rep = acotar(parseInt(atr(fe, 'table:number-rows-repeated'), 10) || 1, 1, 1000);
+        if ((this.celdasDoc += rep * columnas.length) > MAX_CELDAS) throw new Error('Las tablas de la presentación tienen demasiadas celdas y no se puede leer.');
         for (const ce of hijos(fe)) {
           if (ce.n !== 'table:table-cell' && ce.n !== 'table:covered-table-cell') continue;
           const nRep = acotar(parseInt(atr(ce, 'table:number-columns-repeated'), 10) || 1, 1, 63);
@@ -771,7 +784,7 @@
               const bg = est.c['fo:background-color'] || est.g['fo:background-color'];
               if (color(bg)) c.relleno = { color: color(bg) };
               const bordes = {};
-              const borde = (v) => { if (v === undefined) return undefined; if (v === 'none' || v === 'hidden') return null; const m = /^\s*([\d.]+\w*)\s+(\w+)\s+(#[0-9a-fA-F]{6})/.exec(v); return m ? { color: color(m[3]), ancho: emu(m[1]) || 6350 } : undefined; };
+              const borde = (v) => { if (v === undefined || v.length > 120) return undefined; if (v === 'none' || v === 'hidden') return null; const m = /^\s*([\d.]+\w*)\s+(\w+)\s+(#[0-9a-fA-F]{6})/.exec(v); return m ? { color: color(m[3]), ancho: emu(m[1]) || 6350 } : undefined; };
               const todos = borde(est.c['fo:border']);
               for (const [k2, a2] of [['izquierda', 'fo:border-left'], ['derecha', 'fo:border-right'], ['arriba', 'fo:border-top'], ['abajo', 'fo:border-bottom']]) { const b = borde(est.c[a2]); const v = b !== undefined ? b : todos; if (v !== undefined) bordes[k2] = v; }
               if (Object.keys(bordes).length) c.bordes = bordes;
@@ -811,6 +824,38 @@
       const ancho = columnas.reduce((a, b) => a + b, 0);
       return { tipo: 'tabla', x: caja.x, y: caja.y, w: ancho, h: filas.reduce((a, f) => a + f.alto, 0), columnas, filas };
     }
+  }
+
+  // Tamaño en píxeles y resolución de un PNG, JPEG, GIF o BMP (96 ppp si el archivo no dice otra cosa)
+  function dimensionesImagen(b) {
+    if (!b || b.length < 24) return null;
+    const be32 = (p) => ((b[p] << 24) | (b[p + 1] << 16) | (b[p + 2] << 8) | b[p + 3]) >>> 0;
+    const le32 = (p) => (b[p] | (b[p + 1] << 8) | (b[p + 2] << 16) | (b[p + 3] << 24)) >>> 0;
+    if (b[0] === 0x89 && b[1] === 0x50) {
+      let dpiX = 96, dpiY = 96;
+      let p = 8;
+      for (let i = 0; i < 64 && p + 12 <= b.length; i++) {
+        const len = be32(p), tipo = String.fromCharCode(b[p + 4], b[p + 5], b[p + 6], b[p + 7]);
+        if (tipo === 'pHYs' && b[p + 16] === 1) { dpiX = be32(p + 8) * 0.0254 || 96; dpiY = be32(p + 12) * 0.0254 || 96; break; }
+        if (tipo === 'IDAT') break;
+        p += 12 + len;
+      }
+      return { ancho: be32(16), alto: be32(20), dpiX, dpiY };
+    }
+    if (b[0] === 0xFF && b[1] === 0xD8) {
+      let p = 2, dpiX = 96, dpiY = 96;
+      for (let i = 0; i < 256 && p + 9 < b.length; i++) {
+        if (b[p] !== 0xFF) { p++; continue; }
+        const m = b[p + 1], len = (b[p + 2] << 8) | b[p + 3];
+        if (m === 0xE0 && b[p + 4] === 0x4A && b[p + 5] === 0x46) { const u = b[p + 11], x = (b[p + 12] << 8) | b[p + 13], y = (b[p + 14] << 8) | b[p + 15]; if (u === 1 && x && y) { dpiX = x; dpiY = y; } else if (u === 2 && x && y) { dpiX = x * 2.54; dpiY = y * 2.54; } }
+        if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) return { alto: (b[p + 5] << 8) | b[p + 6], ancho: (b[p + 7] << 8) | b[p + 8], dpiX, dpiY };
+        p += 2 + len;
+      }
+      return null;
+    }
+    if (b[0] === 0x47 && b[1] === 0x49) return { ancho: b[6] | (b[7] << 8), alto: b[8] | (b[9] << 8), dpiX: 96, dpiY: 96 };
+    if (b[0] === 0x42 && b[1] === 0x4D) return { ancho: le32(18), alto: Math.abs(le32(22) | 0), dpiX: 96, dpiY: 96 };
+    return null;
   }
 
   // ───────── Documento ─────────
@@ -885,8 +930,10 @@
     // páginas maestras usadas
     const indiceMaestra = new Map();
     const maestros = [];
+    const primeraMaestra = est.maestras.size ? est.maestras.keys().next().value : undefined;
+    const piesDe = new Map();      // marcos de fecha, pie y número de cada página maestra, una sola vez
     const maestraDe = (nombre) => {
-      const clave = est.maestras.has(nombre) ? nombre : [...est.maestras.keys()][0];
+      const clave = est.maestras.has(nombre) ? nombre : primeraMaestra;
       if (indiceMaestra.has(clave)) return indiceMaestra.get(clave);
       const mp = est.maestras.get(clave);
       const m = { fondo: null, formas: [] };
@@ -924,7 +971,8 @@
       const ctx = { pie: { pie: decl.pie.get(atr(pg, 'presentation:use-footer-name')) || '', encabezado: '' }, master: false, visibles };
       if (mp && (visibles.pie || visibles.fecha || visibles.numero)) {
         const ctxM = { pie: ctx.pie, master: true, visibles };
-        for (const h of hijos(mp, 'draw:frame')) { if (CLASES_PIE[atr(h, 'presentation:class')]) { const f = conv.convertir(h, 'm', ctxM, 0); if (f) d.formas.push(f); } }
+        if (!piesDe.has(mp)) piesDe.set(mp, hijos(mp, 'draw:frame').filter((h) => CLASES_PIE[atr(h, 'presentation:class')]));
+        for (const h of piesDe.get(mp)) { if (CLASES_PIE[atr(h, 'presentation:class')]) { const f = conv.convertir(h, 'm', ctxM, 0); if (f) d.formas.push(f); } }
       }
       let notas = null;
       for (const h of hijos(pg)) {
@@ -954,6 +1002,22 @@
       if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes de la presentación ocupan demasiado y no se puede leer.');
       delete im._entrada; delete im._ruta;
     }
+    // recortes: de distancias a fracciones del tamaño original de la imagen
+    const recortar = (formas) => {
+      for (const x of formas) {
+        if (x.hijos) recortar(x.hijos);
+        if (x._recorte) {
+          const d = dimensionesImagen(x.imagen && x.imagen.datos);
+          if (d && d.ancho > 0 && d.alto > 0) {
+            const w = d.ancho / d.dpiX * 914400, h = d.alto / d.dpiY * 914400, r = x._recorte;
+            x.recorte = { izq: acotar(r.izq / w, -1, 1), der: acotar(r.der / w, -1, 1), arr: acotar(r.arr / h, -1, 1), aba: acotar(r.aba / h, -1, 1) };
+          }
+          delete x._recorte;
+        }
+      }
+    };
+    for (const d of diapositivas) recortar(d.formas);
+    for (const m of maestros) recortar(m.formas);
     const meta = await texto('meta.xml');
     if (meta) {
       const m = arbol(meta);

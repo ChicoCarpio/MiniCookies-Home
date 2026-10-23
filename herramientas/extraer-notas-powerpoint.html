@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Extraer notas del orador de PowerPoint gratis — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Sacá las notas del orador de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Sacá las notas del orador de una presentación PowerPoint (.pptx, .ppt u .odp) a texto plano, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,10 +13,10 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Extraer notas del orador de PowerPoint gratis — Mini Cookies',
-    'meta-descripcion': 'Sacá las notas del orador de una presentación PowerPoint (.pptx) a texto plano, gratis y sin subir tu archivo a ningún servidor.',
+    'meta-descripcion': 'Sacá las notas del orador de una presentación PowerPoint (.pptx, .ppt u .odp) a texto plano, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Extraer notas del orador',
-    'intro': 'Elegí un archivo .pptx y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").',
-    'zona-arrastre': '📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo',
+    'intro': 'Elegí un archivo de PowerPoint (.pptx, .ppt u .odp) y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").',
+    'zona-arrastre': '📽️ Arrastrá tu archivo de PowerPoint (.pptx, .ppt u .odp) acá o hacé clic para elegirlo',
     'boton-extraer': 'Extraer notas',
     'boton-extraer-procesando': 'Extrayendo...',
     'boton-copiar': 'Copiar texto',
@@ -27,8 +27,8 @@ window.i18nPagina = {
     'sin-notas': '(sin notas)',
     'error-extraer': 'No se pudo extraer las notas',
     'guia-titulo': 'Cómo extraer las notas del orador de una presentación',
-    'guia-intro': 'Saca el texto de las notas del orador de una presentación .pptx, una por diapositiva, y las junta en un solo texto plano. Es útil para pasar el guion de una charla a un documento, para imprimirlo o para revisarlo sin abrir PowerPoint. No saca el contenido visible de las diapositivas: para eso está Extraer texto de PowerPoint. Entra un .pptx; sale texto que podés copiar o descargar como .txt.',
-    'guia-paso-1': 'Arrastrá el archivo .pptx o hacé clic para elegirlo.',
+    'guia-intro': 'Saca el texto de las notas del orador de una presentación de PowerPoint (.pptx, .ppt u .odp), una por diapositiva, y las junta en un solo texto plano. Es útil para pasar el guion de una charla a un documento, para imprimirlo o para revisarlo sin abrir PowerPoint. No saca el contenido visible de las diapositivas: para eso está Extraer texto de PowerPoint. Entra un archivo de PowerPoint; sale texto que podés copiar o descargar como .txt.',
+    'guia-paso-1': 'Arrastrá el archivo de PowerPoint (.pptx, .ppt u .odp) o hacé clic para elegirlo.',
     'guia-paso-2': 'Tocá «Extraer notas».',
     'guia-paso-3': 'Las notas aparecen en un cuadro de texto, cada bloque encabezado por «--- Notas diapositiva N ---».',
     'guia-paso-4': 'Usá «Copiar texto» para llevarlas al portapapeles o «Descargar .txt» para guardarlas como «notas-orador.txt».',
@@ -41,16 +41,16 @@ window.i18nPagina = {
     'guia-p2': '¿Se mantiene el formato (negrita, listas)?',
     'guia-r2': 'No, el resultado es texto plano.',
     'guia-p3': '¿Funciona con archivos .ppt?',
-    'guia-r3': 'No, solo .pptx.',
+    'guia-r3': 'Sí, acepta .ppt y .odp además de .pptx. Se convierten primero a .pptx y de ahí se sacan las notas.',
     'guia-p4': '¿Puedo cargar varias presentaciones?',
     'guia-r4': 'No, una por vez.'
   },
   en: {
     'titulo-pagina': 'Extract PowerPoint Speaker Notes Free — Mini Cookies',
-    'meta-descripcion': 'Get the speaker notes from a PowerPoint presentation (.pptx) as plain text, free and without uploading your file anywhere.',
+    'meta-descripcion': 'Get the speaker notes from a PowerPoint presentation (.pptx, .ppt or .odp) as plain text, free and without uploading your file anywhere.',
     'h1': 'Extract speaker notes',
-    'intro': 'Pick a .pptx file and get the speaker notes text from each slide (not the visible slide content — for that use "Extract text from PowerPoint").',
-    'zona-arrastre': '📽️ Drag your .pptx file here or click to choose it',
+    'intro': 'Pick a PowerPoint file (.pptx, .ppt or .odp) and get the speaker notes text from each slide (not the visible slide content — for that use "Extract text from PowerPoint").',
+    'zona-arrastre': '📽️ Drag your PowerPoint file (.pptx, .ppt or .odp) here or click to choose it',
     'boton-extraer': 'Extract notes',
     'boton-extraer-procesando': 'Extracting...',
     'boton-copiar': 'Copy text',
@@ -61,8 +61,8 @@ window.i18nPagina = {
     'sin-notas': '(no notes)',
     'error-extraer': 'Couldn’t extract the notes',
     'guia-titulo': 'How to extract the speaker notes from a presentation',
-    'guia-intro': 'It pulls out the text of the speaker notes from a .pptx presentation, one per slide, and joins them into a single plain text. It’s useful for moving the script of a talk into a document, for printing it or for reviewing it without opening PowerPoint. It doesn’t extract the visible content of the slides: for that there’s Extract text from PowerPoint. A .pptx goes in; text you can copy or download as .txt comes out.',
-    'guia-paso-1': 'Drag the .pptx file or click to choose it.',
+    'guia-intro': 'It pulls out the text of the speaker notes from a PowerPoint presentation (.pptx, .ppt or .odp), one per slide, and joins them into a single plain text. It’s useful for moving the script of a talk into a document, for printing it or for reviewing it without opening PowerPoint. It doesn’t extract the visible content of the slides: for that there’s Extract text from PowerPoint. A PowerPoint file goes in; text you can copy or download as .txt comes out.',
+    'guia-paso-1': 'Drag the PowerPoint file (.pptx, .ppt or .odp) or click to choose it.',
     'guia-paso-2': 'Tap “Extract notes”.',
     'guia-paso-3': 'The notes appear in a text box, each block headed by “--- Notes for slide N ---”.',
     'guia-paso-4': 'Use “Copy text” to put them on the clipboard or “Download .txt” to save them as “notas-orador.txt”.',
@@ -75,7 +75,7 @@ window.i18nPagina = {
     'guia-p2': 'Is the formatting (bold, lists) kept?',
     'guia-r2': 'No, the result is plain text.',
     'guia-p3': 'Does it work with .ppt files?',
-    'guia-r3': 'No, only .pptx.',
+    'guia-r3': 'Yes, it accepts .ppt and .odp as well as .pptx. They are first converted to .pptx and the notes are taken from there.',
     'guia-p4': 'Can I load several presentations?',
     'guia-r4': 'No, one at a time.'
   }
@@ -95,12 +95,12 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="h1">Extraer notas del orador</h1>
-  <p data-i18n="intro">Elegí un archivo .pptx y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").</p>
+  <p data-i18n="intro">Elegí un archivo de PowerPoint (.pptx, .ppt u .odp) y sacá el texto de las notas del orador de cada diapositiva (no el contenido visible de las diapositivas — para eso está "Extraer texto de PowerPoint").</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo .pptx acá o hacé clic para elegirlo</span>
-      <input type="file" id="entradaArchivo" accept=".pptx" hidden>
+      <span data-i18n="zona-arrastre">📽️ Arrastrá tu archivo de PowerPoint (.pptx, .ppt u .odp) acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".pptx,.ppt,.odp" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
@@ -122,10 +122,10 @@ window.i18nPagina = {
 
   <section class="guia-uso">
     <h2 data-i18n="guia-titulo">Cómo extraer las notas del orador de una presentación</h2>
-    <p data-i18n="guia-intro">Saca el texto de las notas del orador de una presentación .pptx, una por diapositiva, y las junta en un solo texto plano. Es útil para pasar el guion de una charla a un documento, para imprimirlo o para revisarlo sin abrir PowerPoint. No saca el contenido visible de las diapositivas: para eso está Extraer texto de PowerPoint. Entra un .pptx; sale texto que podés copiar o descargar como .txt.</p>
+    <p data-i18n="guia-intro">Saca el texto de las notas del orador de una presentación de PowerPoint (.pptx, .ppt u .odp), una por diapositiva, y las junta en un solo texto plano. Es útil para pasar el guion de una charla a un documento, para imprimirlo o para revisarlo sin abrir PowerPoint. No saca el contenido visible de las diapositivas: para eso está Extraer texto de PowerPoint. Entra un archivo de PowerPoint; sale texto que podés copiar o descargar como .txt.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
-      <li data-i18n="guia-paso-1">Arrastrá el archivo .pptx o hacé clic para elegirlo.</li>
+      <li data-i18n="guia-paso-1">Arrastrá el archivo de PowerPoint (.pptx, .ppt u .odp) o hacé clic para elegirlo.</li>
       <li data-i18n="guia-paso-2">Tocá «Extraer notas».</li>
       <li data-i18n="guia-paso-3">Las notas aparecen en un cuadro de texto, cada bloque encabezado por «--- Notas diapositiva N ---».</li>
       <li data-i18n="guia-paso-4">Usá «Copiar texto» para llevarlas al portapapeles o «Descargar .txt» para guardarlas como «notas-orador.txt».</li>
@@ -148,7 +148,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p3">¿Funciona con archivos .ppt?</summary>
-      <p data-i18n="guia-r3">No, solo .pptx.</p>
+      <p data-i18n="guia-r3">Sí, acepta .ppt y .odp además de .pptx. Se convierten primero a .pptx y de ahí se sacan las notas.</p>
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Puedo cargar varias presentaciones?</summary>
@@ -163,6 +163,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/formatos-powerpoint.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -185,7 +186,7 @@ function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.pptx'));
+  const archivo = [...listaFileList].find(f => FormatosPowerpoint.esPresentacion(f.name));
   if (archivo) mostrarArchivo(archivo);
 }
 
@@ -195,7 +196,8 @@ botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   botonExtraer.textContent = t('boton-extraer-procesando');
   try {
-    const zip = await ZipPropio.loadAsync(archivoActual);
+    const buffer = await FormatosPowerpoint.comoPptx(await archivoActual.arrayBuffer());
+    const zip = await ZipPropio.loadAsync(buffer);
     const nombresNotas = Object.keys(zip.files)
       .filter(nombre => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(nombre))
       .sort((a, b) => parseInt(a.match(/notesSlide(\d+)/)[1], 10) - parseInt(b.match(/notesSlide(\d+)/)[1], 10));

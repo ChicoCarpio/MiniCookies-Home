@@ -227,6 +227,8 @@ const PptxModelo = (() => {
   }
 
   async function abrir(archivo) {
+    // un .ppt o un .odp se pasa a .pptx antes (si formatos-powerpoint.js está en la página); un .pptx no se toca
+    if (typeof FormatosPowerpoint !== 'undefined') archivo = await FormatosPowerpoint.comoPptx(archivo);
     const zip = await ZipPropio.loadAsync(archivo);
     const { parte, imagen } = paquete(zip);
 

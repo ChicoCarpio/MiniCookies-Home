@@ -20,7 +20,7 @@
 //   celda  = { texto?, relleno?, bordes?: { arriba|abajo|izquierda|derecha: linea|null }, columnas?: n, filas?: n, fusionada?: true, ancla?, margenes? }   // fusionada: la cubre otra celda
 //   relleno = null (sin relleno) | { color: 'RRGGBB', alfa?: 0..1 } | { degradado } | { imagen }
 //   degradado = { angulo?: grados (0 = de izquierda a derecha, 90 = de arriba abajo), radial?: true, paradas: [{ pos: 0..100, color, alfa? }] }
-//   linea  = null | { color: 'RRGGBB', alfa?, ancho (EMU), guion?: 'solid'|'dash'|'dot'|'dashDot'|'lgDash'|'sysDash'|'sysDot', inicio?: 'triangle'|'arrow'|'stealth'|'diamond'|'oval', fin?, union?: 'round'|'bevel'|'miter' }
+//   linea  = null | { color: 'RRGGBB', alfa?, ancho (EMU), guion?: 'solid'|'dash'|'dot'|'dashDot'|'lgDash'|'sysDash'|'sysDot', inicio?: 'triangle'|'arrow'|'stealth'|'diamond'|'oval', fin?, union?: 'round'|'bevel'|'miter', cap?: 'rnd'|'sq'|'flat' }
 //   sombra = { color, alfa?, x, y (EMU, desplazamiento), desenfoque? (EMU) }
 //   imagen = { datos: Uint8Array, tipo?: 'png'|'jpeg'|'gif'|'bmp' }                      // el mismo arreglo (por identidad) se guarda una sola vez
 //   texto  = { parrafos: [parrafo], ancla?: 't'|'ctr'|'b', margenes?: { i, s, d, a } (EMU), ajuste?: false (sin partir líneas), autoajuste?: 'forma'|'texto', vertical?: true, escala?: 0..1 (texto reducido) }
@@ -45,12 +45,13 @@
   const entero = (n, min = -2147483647, max = 2147483647) => { const v = Math.round(Number(n)); return Number.isFinite(v) ? Math.max(min, Math.min(max, v)) : 0; };
   const hex6 = (c) => (/^[0-9a-fA-F]{6}$/.test(c || '') ? c.toUpperCase() : null);
   const sinProto = (o) => Object.assign(Object.create(null), o);
-  const MAX_DIAPOSITIVAS = 20000;
-  const MAX_FORMAS = 400000;          // formas de toda la presentación (cada grupo, celda de tabla y hoja de cálculo cuenta)
+  const MAX_DIAPOSITIVAS = 10000;
+  const MAX_FORMAS = 150000;          // formas de toda la presentación (cada grupo, celda de tabla y hoja de cálculo cuenta)
   const MAX_PROFUNDIDAD = 16;
   const MAX_TEXTO = 64 * 1024 * 1024;
   const MAX_CELDAS = 200000;
-  const MAX_PUNTOS = 4000000;         // órdenes de trazo de todas las formas libres
+  const MAX_UNIDADES = 3000000;       // párrafos y tramos de texto de toda la presentación
+  const MAX_PUNTOS = 1000000;         // órdenes de trazo de todas las formas libres
 
   const GEOMETRIAS = new Set(['rect', 'roundRect', 'ellipse', 'triangle', 'rtTriangle', 'diamond', 'parallelogram', 'trapezoid', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'decagon', 'dodecagon', 'star4', 'star5', 'star6', 'star7', 'star8', 'star10', 'star12', 'star16', 'star24', 'star32',
     'rightArrow', 'leftArrow', 'upArrow', 'downArrow', 'leftRightArrow', 'upDownArrow', 'quadArrow', 'leftRightUpArrow', 'bentArrow', 'uturnArrow', 'leftUpArrow', 'bentUpArrow', 'curvedRightArrow', 'curvedLeftArrow', 'curvedUpArrow', 'curvedDownArrow', 'stripedRightArrow', 'notchedRightArrow', 'homePlate', 'chevron',
@@ -83,6 +84,7 @@
       this.mensajes = new Set();
       this.formas = 0;
       this.puntos = 0;
+      this.unidades = 0;
       this.texto = 0;
       this.medios = [];                       // { nombre, bytes, tipo }
       this.mediosPorDatos = new Map();
@@ -141,7 +143,8 @@
     const guion = GUIONES.has(l.guion) && l.guion !== 'solid' ? `<a:prstDash val="${l.guion}"/>` : '';
     const union = l.union === 'round' || l.union === 'bevel' ? `<a:${l.union}/>` : l.union === 'miter' ? '<a:miter lim="800000"/>' : '';
     const punta = (n, v) => (FLECHAS.has(v) ? `<a:${n} type="${v}"/>` : '');
-    return `<${etiqueta} w="${ancho}"><a:solidFill>${color(l.color, l.alfa)}</a:solidFill>${guion}${union}${punta('headEnd', l.inicio)}${punta('tailEnd', l.fin)}</${etiqueta}>`;
+    const cap = l.cap === 'rnd' || l.cap === 'sq' || l.cap === 'flat' ? ` cap="${l.cap}"` : '';
+    return `<${etiqueta} w="${ancho}"${cap}><a:solidFill>${color(l.color, l.alfa)}</a:solidFill>${guion}${union}${punta('headEnd', l.inicio)}${punta('tailEnd', l.fin)}</${etiqueta}>`;
   }
   function sombra(s) {
     if (!s || typeof s !== 'object') return '';
@@ -203,6 +206,7 @@
       hijos += `<a:buFont typeface="${escAttr((v.fuente || 'Arial').slice(0, 64))}"/><a:buChar char="${escAttr(Array.from(v.car)[0])}"/>`;
     }
     const salida = [];
+    if ((ctx.unidades += 1 + (p.hijos || []).length) > MAX_UNIDADES) throw new Error('La presentación tiene demasiado texto y no se puede escribir.');
     for (const run of p.hijos || []) {
       if (!run || typeof run !== 'object') continue;
       if (run.salto) { salida.push(`<a:br>${propsR(run.r, rels, ctx, lang)}</a:br>`); continue; }
