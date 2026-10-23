@@ -13,6 +13,8 @@
   'use strict';
   const MAX_TEXTO = 64 * 1024 * 1024;
   const MAX_ESTILOS = 4000;
+  const MAX_SECCIONES = 4096;
+  const MAX_FUENTES = 30000;            // Word abre un .doc con 31.000 fuentes y no con 31.500 (medido el 2026-10-23)
   const MAX_PROFUNDIDAD_TABLAS = 8;
   const FC_TEXTO = 0x800;                 // dónde empieza el texto en el flujo WordDocument (detrás del FIB)
   const sinProto = (o) => Object.assign(Object.create(null), o);
@@ -123,7 +125,7 @@
     const fuentes = [], fuenteIdx = new Map();
     const ftc = (nombre) => {
       const n = String(nombre || 'Times New Roman').slice(0, 31);
-      if (!fuenteIdx.has(n)) { fuenteIdx.set(n, fuentes.length); fuentes.push(n); }
+      if (!fuenteIdx.has(n)) { if (fuentes.length >= MAX_FUENTES) return 0; fuenteIdx.set(n, fuentes.length); fuentes.push(n); }   // las de más quedan con la predeterminada
       return fuenteIdx.get(n);
     };
     const pd = contrato.predeterminado || {};
@@ -393,15 +395,19 @@
     }
 
     // ───────── Tablas ─────────
+    // Word no pasa de 63 celdas por fila: las de más se juntan en la última (con su texto y su ancho); si no, sus marcas de celda quedan sueltas dentro de la celda 63
+    function juntarCeldas(celdas) {
+      const resto = celdas.slice(62);
+      const span = Math.min(63, resto.reduce((s, c) => s + Math.max(1, Math.min(63, c.fusionH || 1)), 0));
+      return celdas.slice(0, 62).concat([Object.assign({}, resto[0], { fusionH: span, hijos: resto.flatMap((c) => (c.hijos && c.hijos.length ? c.hijos : [])) })]);
+    }
     function tabla(t, itap) {
-      const filas = (t.filas || []).filter((f) => f.celdas && f.celdas.length);
+      const filas = (t.filas || []).filter((f) => f.celdas && f.celdas.length).map((f) => (f.celdas.length > 63 ? Object.assign({}, f, { celdas: juntarCeldas(f.celdas) }) : f));
       if (!filas.length || itap > MAX_PROFUNDIDAD_TABLAS) return false;
       const posiciones = filas.map((f) => { let c = 0; return f.celdas.map((celda) => { const x = c; c += Math.max(1, Math.min(63, celda.fusionH || 1)); return x; }); });
       const nCols = posiciones.reduce((m, ps, i) => Math.max(m, ps.length ? ps[ps.length - 1] + Math.max(1, filas[i].celdas[ps.length - 1].fusionH || 1) : 0), Math.max(t.anchos ? t.anchos.length : 0, 1));
-      const anchos = Array.from({ length: Math.min(nCols, 63) }, (_, i) => entero(t.anchos && t.anchos[i], 0, 31680, 1440));
+      const anchos = Array.from({ length: Math.min(nCols, 126) }, (_, i) => entero(t.anchos && t.anchos[i], 0, 31680, 1440));
       const izq = entero(t.sangria || 0, -31680, 31680);
-      const limites = [izq];
-      for (const w of anchos) limites.push(limites[limites.length - 1] + w);
       const bordeTabla = t.bordes === false ? null : { tam: (t.bordes && t.bordes.tam) || 4, color: t.bordes && t.bordes.color };
       for (let fi = 0; fi < filas.length; fi++) {
         const f = filas[fi];
@@ -476,7 +482,7 @@
     }
 
     // ───────── Secciones ─────────
-    const secciones = (contrato.secciones && contrato.secciones.length ? contrato.secciones : [{ hijos: [] }]).slice(0, 4096);
+    const secciones = seccionesHasta(contrato.secciones, MAX_SECCIONES);
     const cpsSeccion = [0];
     secciones.forEach((s, i) => {
       const hijos = s.hijos && s.hijos.length ? s.hijos : [{ tipo: 'parrafo', hijos: [] }];
@@ -704,7 +710,9 @@
 
     // Marcadores
     if (D.marcadores.length) {
-      const ms = D.marcadores.filter((m) => m.cp < ccpText).slice(0, 4000).sort((a, b) => a.cp - b.cp);
+      // sin nombre vacío ni repetido (Word no los admite; vale el primero)
+      const vistos = new Set();
+      const ms = D.marcadores.filter((m) => m.cp < ccpText && m.nombre && !vistos.has(m.nombre) && vistos.add(m.nombre)).slice(0, 4000).sort((a, b) => a.cp - b.cp);
       if (ms.length) {
         poner(21, () => { tb.u16(0xFFFF).u16(ms.length).u16(0); ms.forEach((m) => { tb.u16(m.nombre.length); for (let k = 0; k < m.nombre.length; k++) tb.u16(m.nombre.charCodeAt(k)); }); });
         poner(22, () => { ms.forEach((m) => tb.u32(m.cp)); tb.u32(totalCp + 2); ms.forEach((m, k) => { tb.u16(k); tb.u16(0); }); });
@@ -803,6 +811,14 @@
     const flujos = [{ nombre: 'WordDocument', bytes: salidaWd }, { nombre: '1Table', bytes: relleno4096(tablaBytes) }];
     if (data.n) flujos.push({ nombre: 'Data', bytes: relleno4096(data.salida()) });
     return { bytes: CfbPropio.escribir(flujos), mensajes };
+  }
+
+  // Más de max secciones (solo un archivo raro): el contenido de las de más pasa a la última, para no perder texto
+  function seccionesHasta(lista, max) {
+    const s = lista && lista.length ? lista : [{ hijos: [] }];
+    if (s.length <= max) return s;
+    const ultima = Object.assign({}, s[max - 1], { hijos: s.slice(max - 1).flatMap((x) => x.hijos || []) });
+    return s.slice(0, max - 1).concat([ultima]);
   }
 
   function relleno4096(b) {

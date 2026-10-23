@@ -17,8 +17,10 @@
 
   async function convertir(bytes, destino) {
     if (!DESTINOS.includes(destino)) throw new Error('formato de destino desconocido: ' + destino);
+    const mismo = () => { const e = new Error('el documento ya está en ese formato'); e.codigo = 'mismo-formato'; return e; };
+    if ((await detectar(bytes)) === destino) throw mismo();   // antes de leer todo el documento
     const { contrato, origen, mensajes } = await FormatosWord.aContrato(bytes);
-    if (origen === destino) { const e = new Error('el documento ya está en ese formato'); e.codigo = 'mismo-formato'; throw e; }
+    if (origen === destino) throw mismo();
     const r = await FormatosWord.escribir(contrato, destino);
     const tipos = [...new Set([...mensajes, ...r.mensajes])];
     return { bytes: r.bytes, origen, avisos: tipos.map((tipo) => ({ tipo, cantidad: 1 })) };

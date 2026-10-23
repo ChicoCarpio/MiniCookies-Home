@@ -11,6 +11,7 @@
 (function () {
   'use strict';
   const MAX_PROFUNDIDAD_TABLAS = 8;
+  const MAX_SECCIONES = 4096;
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const entero = (v, min, max, def = 0) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
   const rgb = (hex) => (/^[0-9a-fA-F]{6}$/.test(hex || '') ? [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)] : null);
@@ -48,6 +49,8 @@
     }
     return x;
   }
+  // Nombre de marcador (y ancla de enlace, que tiene que coincidir): cortado a 40 como Word, sin lo que rompe la instrucción del campo, y con lo que no es ASCII como \uN
+  const nombreMarca = (n) => textoRtf(String(n).slice(0, 40).replace(/[\\"{}]/g, ''));
   const hexa = (bytes) => {
     let s = '';
     for (let i = 0; i < bytes.length; i += 64) {
@@ -157,14 +160,14 @@
       let x = '';
       for (const r of lista || []) {
         if (r.salto) { x += r.salto === 'pagina' ? '\\page ' : r.salto === 'columna' ? '\\column ' : '\\line '; continue; }
-        if (r.marcador != null) { const n = String(r.marcador).replace(/[^\w.-]/g, '_').slice(0, 40); x += `{\\*\\bkmkstart ${n}}{\\*\\bkmkend ${n}}`; continue; }
+        if (r.marcador != null) { const n = nombreMarca(r.marcador); x += `{\\*\\bkmkstart ${n}}{\\*\\bkmkend ${n}}`; continue; }
         if (r.imagen) { x += imagen(r.imagen); continue; }
         if (r.enlace) {
           if (prof > 3) continue;
           const interior = runs(r.hijos, prof + 1);
           let instr = null;
-          if (r.enlace.ancla) instr = `HYPERLINK \\\\l "${String(r.enlace.ancla).slice(0, 40).replace(/[\\"{}]/g, '')}"`;
-          else if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) instr = `HYPERLINK "${String(r.enlace.url).replace(/[\\"{}]/g, '')}"`;
+          if (r.enlace.ancla) instr = `HYPERLINK \\\\l "${nombreMarca(r.enlace.ancla)}"`;
+          else if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) instr = `HYPERLINK "${textoRtf(String(r.enlace.url).replace(/[\\"{}]/g, ''))}"`;
           if (!instr) { aviso('enlace-descartado'); x += interior; continue; }
           x += `{\\field{\\*\\fldinst ${instr}}{\\fldrslt ${interior}}}`;
           continue;
@@ -179,7 +182,7 @@
         const t = textoRtf(String(r.texto == null ? '' : r.texto).replace(/\r\n?/g, '\n'));
         if (!t) continue;
         const fm = fmDe(r);
-        x += fm ? `{${fm} ${t}}` : t.replace(/^ /, '\\~');
+        x += fm ? `{${fm} ${t}}` : t;
       }
       return x;
     }
@@ -272,7 +275,9 @@
     }
 
     // ───────── Secciones ─────────
-    const secciones = (contrato.secciones && contrato.secciones.length ? contrato.secciones : [{ hijos: [] }]).slice(0, 4096);
+    let secciones = contrato.secciones && contrato.secciones.length ? contrato.secciones : [{ hijos: [] }];
+    // Más de MAX_SECCIONES (solo un archivo raro): el contenido de las de más pasa a la última, para no perder texto
+    if (secciones.length > MAX_SECCIONES) secciones = secciones.slice(0, MAX_SECCIONES - 1).concat([Object.assign({}, secciones[MAX_SECCIONES - 1], { hijos: secciones.slice(MAX_SECCIONES - 1).flatMap((x) => x.hijos || []) })]);
     let cuerpo = '';
     secciones.forEach((s, i) => {
       const pg = s.pagina || {}, m = s.margenes || {};

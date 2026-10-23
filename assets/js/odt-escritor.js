@@ -316,6 +316,7 @@
       for (const w of anchos) x += `<table:table-column table:style-name="${automatico('Col', 'table-column', `<style:table-column-properties style:column-width="${pulgadas(w)}"/>`)}"/>`;
       const bordeTabla = t.bordes === false ? null : { tam: (t.bordes && t.bordes.tam) || 4, color: t.bordes && t.bordes.color };
       let abiertaCabecera = false;
+      const cubiertas = new Set();   // 'fila,columna' de las celdas que tapa una combinación vertical
       filas.forEach((f, fi) => {
         if (f.encabezado && !abiertaCabecera && fi === 0) { x += '<table:table-header-rows>'; abiertaCabecera = true; }
         if (abiertaCabecera && !f.encabezado) { x += '</table:table-header-rows>'; abiertaCabecera = false; }
@@ -325,12 +326,13 @@
         f.celdas.forEach((c, ci) => {
           const col = posiciones[fi][ci], span = Math.max(1, c.fusionH || 1);
           usadas = col + span;
-          if (c.fusionV === 'continua') { x += '<table:covered-table-cell/>'.repeat(span); return; }
+          // solo se tapa la que queda debajo de una «inicio»; una «continua» suelta (sin nada que la cubra) se escribe como celda normal, para no perder su texto
+          if (c.fusionV === 'continua' && cubiertas.has(fi + ',' + col)) { x += '<table:covered-table-cell/>'.repeat(span); return; }
           let filasSpan = 1;
           if (c.fusionV === 'inicio') {
             for (let k = fi + 1; k < filas.length; k++) {
               const idx = posiciones[k].indexOf(col);
-              if (idx >= 0 && filas[k].celdas[idx].fusionV === 'continua') filasSpan++; else break;
+              if (idx >= 0 && filas[k].celdas[idx].fusionV === 'continua') { filasSpan++; cubiertas.add(k + ',' + col); } else break;
             }
           }
           const lados = { arriba: null, abajo: null, izquierda: null, derecha: null };
