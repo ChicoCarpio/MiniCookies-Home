@@ -6,6 +6,8 @@
 //   FormatosWord.sinExtension(nombre)          → el nombre sin .docx, .doc ni .odt
 //   await FormatosWord.detectar(bytes)         → 'docx' | 'doc' | 'odt' | null    (por el contenido, no por la extensión)
 //   await FormatosWord.aDocx(bytes)            → { bytes: Uint8Array, origen, mensajes: [clave…] }    (un .docx se devuelve tal cual)
+//   await FormatosWord.aContrato(bytes)        → { contrato, origen, mensajes }    el «contrato de documento» (ver docx-desde-contrato.js) de un .docx, .doc u .odt: lo que reciben los escritores
+//   await FormatosWord.escribir(contrato, destino) → { bytes, mensajes }       destino: 'docx' | 'doc' | 'odt' | 'rtf' (los escritores se piden la primera vez que hacen falta)
 //   await FormatosWord.leerArchivo(archivo)    → { buffer: ArrayBuffer con un .docx, bytes, origen, mensajes }   (archivo: File o Blob)
 //   await FormatosWord.comoDocx(datos)         → datos (ArrayBuffer, Uint8Array o Blob) listos para leer como .docx; DocxBase.abrirPaquete lo llama solo, así que
 //                                                DocxLector, DocxMaquetador y todo lo que pasa por ellos acepta .doc y .odt sin más. Un .docx no se toca (ni se examina).
@@ -73,6 +75,31 @@
     return null;
   }
 
+  async function prepararDocx() {
+    await cargar('ZipPropio', 'zip-propio.js');
+    await cargar('XmlLigero', 'xml-ligero.js');
+    await cargar('DocxAContrato', 'docx-a-contrato.js');
+  }
+  async function aContrato(bytes) {
+    const origen = await detectar(bytes);
+    if (origen === 'docx') { await prepararDocx(); const r = await DocxAContrato.leer(bytes); return { contrato: r.contrato, origen, mensajes: r.mensajes }; }
+    if (origen === 'doc') { const r = await DocLector.leer(bytes); return { contrato: r.contrato, origen, mensajes: r.mensajes }; }
+    if (origen === 'odt') { const r = await OdtLector.leer(bytes); return { contrato: r.contrato, origen, mensajes: r.mensajes }; }
+    if (esCfb(bytes)) await DocLector.aDocx(bytes);   // otro contenedor de Office (un .docx con contraseña, un .xls renombrado): el lector dice el motivo
+    throw new Error('el archivo no es un documento de Word que se pueda leer (.docx, .doc u .odt)');
+  }
+
+  const ESCRITORES = { docx: ['DocxDesdeContrato', 'docx-desde-contrato.js'], doc: ['DocEscritor', 'doc-escritor.js'], odt: ['OdtEscritor', 'odt-escritor.js'], rtf: ['RtfEscritor', 'rtf-escritor.js'] };
+  async function escribir(contrato, destino) {
+    const e = Object.prototype.hasOwnProperty.call(ESCRITORES, destino) ? ESCRITORES[destino] : null;
+    if (!e) throw new Error('formato de destino desconocido: ' + destino);
+    await cargar('ZipPropio', 'zip-propio.js');
+    if (destino === 'doc') await cargar('CfbPropio', 'cfb-propio.js');
+    await cargar(e[0], e[1]);
+    const r = await globalThis[e[0]].generar(contrato);
+    return { bytes: r.bytes, mensajes: r.mensajes || [] };
+  }
+
   async function aDocx(bytes) {
     const origen = await detectar(bytes);
     if (origen === 'docx') return { bytes, origen, mensajes: [] };
@@ -98,5 +125,5 @@
     return { buffer, bytes: r.bytes, origen: r.origen, mensajes: r.mensajes };
   }
 
-  globalThis.FormatosWord = { esDocumento, sinExtension, detectar, aDocx, comoDocx, leerArchivo };
+  globalThis.FormatosWord = { esDocumento, sinExtension, detectar, aDocx, comoDocx, leerArchivo, aContrato, escribir };
 })();
