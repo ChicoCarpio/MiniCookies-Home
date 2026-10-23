@@ -391,19 +391,37 @@
   // ---- fórmulas ---------------------------------------------------------------------------------------------------
   const MAX_FORMULA = 8192;
   // <c> de una celda con fórmula y su último resultado; null si la fórmula no se puede escribir.
-  function formulaXml(ref, v, estiloDeFormato) {
+  function formulaXml(ref, v, estiloDe) {
     const f = v.formula.replace(/^=/, '');
     if (!f || f.length > MAX_FORMULA || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(f)) return null;
-    let x = v.valor, est = 0;
-    if (x && typeof x === 'object' && !(x instanceof Date) && 'formato' in x && 'valor' in x) { est = estiloDeFormato(x.formato); x = x.valor; }
+    // el resultado puede traer su formato (y estilo) dentro (valor: { valor, formato }) o la celda al lado de la fórmula ({ formula, valor, formato, estilo })
+    let x = v.valor, formato = v.formato, estilo = v.estilo;
+    if (x && typeof x === 'object' && !(x instanceof Date) && 'formato' in x && 'valor' in x) { if (formato === undefined) formato = x.formato; if (estilo === undefined) estilo = x.estilo; x = x.valor; }
+    const est = formato !== undefined || estilo ? estiloDe(formato, normalizarEstilo(estilo)) : 0;
     const s = est ? ` s="${est}"` : '';
-    const ft = `<f>${X.esc(f)}</f>`;
+    // fórmula de matriz (CSE): el rango va en la primera celda; las demás guardan solo su valor
+    const ft = typeof v.matriz === 'string' && /^[A-Za-z]{1,3}\d+(:[A-Za-z]{1,3}\d+)?$/.test(v.matriz) ? `<f t="array" ref="${v.matriz.toUpperCase()}">${X.esc(f)}</f>` : `<f>${X.esc(f)}</f>`;
     if (x instanceof Date) { if (Number.isNaN(x.getTime())) x = null; else { x = serialDeFecha(x, false); if (!est) return `<c r="${ref}" s="${Number.isInteger(x) ? ESTILO.fecha : ESTILO.fechaHora}">${ft}<v>${x}</v></c>`; } }
     if (typeof x === 'number') return Number.isFinite(x) ? `<c r="${ref}"${s}>${ft}<v>${String(x)}</v></c>` : `<c r="${ref}"${s}>${ft}</c>`;
     if (typeof x === 'boolean') return `<c r="${ref}"${s} t="b">${ft}<v>${x ? 1 : 0}</v></c>`;
     if (x && typeof x === 'object' && typeof x.error === 'string' && ERRORES.has(x.error)) return `<c r="${ref}"${s} t="e">${ft}<v>${x.error}</v></c>`;
     if (typeof x === 'string' && x.length <= MAX_TEXTO) return `<c r="${ref}"${s} t="str">${ft}<v>${escTexto(x)}</v></c>`;
     return `<c r="${ref}"${s}>${ft}</c>`;
+  }
+
+  // Nombres definidos: [{ nombre, formula, hoja? }] (hoja: índice de la hoja si el nombre es de una sola hoja). Los de nombre o fórmula raros se omiten.
+  function nombresDefinidos(lista, cantidadHojas) {
+    if (!Array.isArray(lista) || !lista.length) return '';
+    let xml = '';
+    for (const n of lista.slice(0, 5000)) {
+      if (!n || typeof n.nombre !== 'string' || typeof n.formula !== 'string') continue;
+      if (!/^[A-Za-z_À-￿][A-Za-z0-9_.À-￿]*$/.test(n.nombre) || n.nombre.length > 255 || /^[A-Za-z]{1,3}\d+$/.test(n.nombre) || /^[Rr]\d*[Cc]\d*$/.test(n.nombre)) continue;
+      const f = n.formula.replace(/^=/, '');
+      if (!f || f.length > MAX_FORMULA || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(f)) continue;
+      const local = Number.isInteger(n.hoja) && n.hoja >= 0 && n.hoja < cantidadHojas ? ` localSheetId="${n.hoja}"` : '';
+      xml += `<definedName name="${X.escAttr(n.nombre)}"${local}>${X.esc(f)}</definedName>`;
+    }
+    return xml ? `<definedNames>${xml}</definedNames>` : '';
   }
 
   // ¿Se puede llevar esta fórmula a otro libro sin que cambie de sentido? Solo si cita hojas que existen en el libro nuevo (`nombresHojas`: Set en minúsculas) y no usa
@@ -512,7 +530,7 @@
           const ref = numeroACol(c) + (f + 1);
           const cab = f === 0 && opciones.negritaPrimeraFila;
           if (v && typeof v === 'object' && !(v instanceof Date) && typeof v.formula === 'string') {
-            const x = formulaXml(ref, v, estiloDeFormato);
+            const x = formulaXml(ref, v, estiloDe);
             if (x) { celdas.push(x); hayFormulas = true; return; }
             v = v.valor;   // fórmula que no se puede escribir (vacía, enorme o con caracteres de control): queda su valor
             if (v === null || v === undefined || v === '') return;
@@ -596,7 +614,7 @@
       + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>');
     zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
     zip.file('xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView${primeraVisible ? ` activeTab="${primeraVisible}"` : ''}/></bookViews><sheets>`
-      + nombres.map((n, k) => `<sheet name="${X.escAttr(n)}" sheetId="${k + 1}"${estados[k] === 'oculta' ? ' state="hidden"' : estados[k] === 'muyOculta' ? ' state="veryHidden"' : ''} r:id="rId${k + 1}"/>`).join('') + '</sheets>' + (hayFormulas ? '<calcPr fullCalcOnLoad="1"/>' : '') + '</workbook>');
+      + nombres.map((n, k) => `<sheet name="${X.escAttr(n)}" sheetId="${k + 1}"${estados[k] === 'oculta' ? ' state="hidden"' : estados[k] === 'muyOculta' ? ' state="veryHidden"' : ''} r:id="rId${k + 1}"/>`).join('') + '</sheets>' + nombresDefinidos(opciones.nombres, hojas.length) + (hayFormulas ? '<calcPr fullCalcOnLoad="1"/>' : '') + '</workbook>');
     zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       + hojasXml.map((_, k) => `<Relationship Id="rId${k + 1}" Type="${R}/worksheet" Target="worksheets/sheet${k + 1}.xml"/>`).join('')
       + `<Relationship Id="rId${hojasXml.length + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${hojasXml.length + 2}" Type="${R}/sharedStrings" Target="sharedStrings.xml"/></Relationships>`);

@@ -309,7 +309,8 @@
     return codigo;
   }
 
-  async function leer(bytes) {
+  async function leer(bytes, opciones) {
+    const conFormulas = !!(opciones && opciones.formulas) && typeof OdsFormulas !== 'undefined';
     let zip;
     try { zip = await ZipPropio.loadAsync(bytes); } catch (e) { throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument'); }
     const contenido = zip.file('content.xml');
@@ -414,6 +415,18 @@
       }
       if (propio) { const v = hacer(propio); for (let x = col; x < fin; x++) filaActual.celdas[x] = v; }
       else trozos(hoja.tramos, col, fin, (x, y, t) => { const v = hacer(t && t.tiene ? t : filaActual.defecto); for (let j = x; j < y; j++) filaActual.celdas[j] = v; });
+      // la fórmula (OpenFormula → texto de Excel) va en la primera celda; el valor guardado queda como último resultado
+      if (conFormulas && c.a.formula && col < MAX_COLS && c.a.formula.startsWith('of:=')) {
+        const texto = OdsFormulas.aExcel(c.a.formula);
+        if (texto && texto.length < 8000) {
+          const v = filaActual.celdas[col];
+          const o = v && typeof v === 'object' && !('error' in v) ? { ...v } : { valor: v === undefined ? null : v };
+          o.formula = texto;
+          const mc = entero(c.a['number-matrix-columns-spanned'], 0), mf = entero(c.a['number-matrix-rows-spanned'], 0);
+          if (mc && mf) o.matriz = LibroXlsx.numeroACol(col) + (fila + 1) + (mc > 1 || mf > 1 ? ':' + LibroXlsx.numeroACol(Math.min(col + mc - 1, MAX_COLS - 1)) + (fila + mf) : '');
+          filaActual.celdas[col] = o;
+        }
+      }
       if (fin > col) { filaActual.llenas += fin - col; if (fin > filaActual.largo) filaActual.largo = fin; }
       if (c.fs > 1 || c.cs > 1) filaActual.combinadas.push({ c: col, f: fila, nc: c.cs, nf: c.fs });
       col += rep;
@@ -502,6 +515,12 @@
             break;
           case 'covered-table-cell': {
             if (!filaActual) return;
+            // una celda cubierta con valor es parte del resultado de una fórmula de matriz (las cubiertas por una combinada no traen valor): se lee como cualquier celda
+            if (a['value-type'] && !hoja.fusiones.some((m) => m.f0 <= fila && fila <= m.f1 && m.c0 <= col && col <= m.c1)) {
+              celda = { tipo: a['value-type'], a, estilo: a['style-name'] || null, rep: Math.min(entero(a['number-columns-repeated'], 1), MAX_COLS), cs: 1, fs: 1, cubierta: true };
+              enCelda = true; parrafoActual = null;
+              break;
+            }
             const rep = Math.min(entero(a['number-columns-repeated'], 1), MAX_COLS);
             for (const m of hoja.fusiones) if (m.f0 <= fila && fila <= m.f1) ponerVacias(Math.max(col, m.c0), Math.min(col + rep, m.c1 + 1), m.est);
             col += rep;
@@ -524,7 +543,7 @@
         if (nombre === 'annotation') { enNota--; return; }
         if (enNota) return;
         if (nombre === 'p' && enCelda && parrafoActual !== null) { parrafos.push(parrafoActual); parrafoActual = null; }
-        else if (nombre === 'table-cell' && celda) cierraCelda();
+        else if ((nombre === 'table-cell' || (nombre === 'covered-table-cell' && celda)) && celda) cierraCelda();
         else if (nombre === 'table-row' && filaActual) cierraFila();
       },
       texto(t) { if (parrafoActual !== null) parrafoActual += t; },
