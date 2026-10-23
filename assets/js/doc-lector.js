@@ -119,12 +119,12 @@
         case 0x2A48: r.sup = v === 1; r.sub = v === 2; break;
         case 0x4A4F: extra.ftc = u16(b, p); break;
         case 0x4A50: extra.ftcFE = u16(b, p); break;
-        case 0x4A51: extra.ftcCs = u16(b, p); break;
+        case 0x4A5E: extra.ftcCs = u16(b, p); break;   // sprmCFtcBi: fuente de escritura compleja (0x4A51 es la de «otros caracteres» y se ignora)
         case 0x2A0C: { const h = RESALTADO[v]; r.resaltado = h || null; break; }
         case 0x0855: extra.spec = v === 1; break;
         case 0x6A03: extra.imagen = u32(b, p); break;
         case 0x4A30: extra.estilo = u16(b, p); break;
-        case 0x0800: extra.borrado = v === 1; break;
+        case 0x0800: extra.borrado = v === 1 || v === 0x81; break;   // Word escribe 0x81 («al revés del estilo»)
         case 0x6A09: if (n >= 4) extra.simbolo = { ftc: u16(b, p), c: u16(b, p + 2) }; break;
         default: break;
       }
@@ -514,7 +514,9 @@
       this.contrato.estilos = out;
       const normal = d.estilos[0];
       const rn = normal && normal.chpx ? leerChp(normal.chpx, null) : { r: {}, extra: {} };
-      this.contrato.predeterminado = { r: { fuente: d.fuente(d.stshi.ftcAsci) || 'Times New Roman', fuenteAsia: d.fuente(d.stshi.ftcFE) || undefined, fuenteCs: d.fuente(d.stshi.ftcBi) || undefined, tamano: 10 }, p: {} };
+      // La fuente asiática o compleja que es la misma que la latina no se escribe: es el valor de relleno de Word, y sin ella Word elige la que corresponde al idioma
+      const distinta = (i) => (i !== d.stshi.ftcAsci ? d.fuente(i) || undefined : undefined);
+      this.contrato.predeterminado = { r: { fuente: d.fuente(d.stshi.ftcAsci) || 'Times New Roman', fuenteAsia: distinta(d.stshi.ftcFE), fuenteCs: distinta(d.stshi.ftcBi), tamano: 10 }, p: {} };
       void rn;
     }
 
