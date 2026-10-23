@@ -14,8 +14,12 @@
   'use strict';
   const MAX_TEXTO_XML = 96 * 1024 * 1024;
   const MAX_IMAGENES = 5000;
+  const MAX_IMAGENES_BYTES = 200 * 1024 * 1024;   // como DocLector y OdtLector: unos KB de zip pueden pedir GB de imágenes
+  const tamanoDe = (entrada) => (entrada && entrada._origen && entrada._origen.real) || 0;
   const MAX_BLOQUES = 4000000;
   const MAX_PROFUNDIDAD_TABLAS = 8;
+  const MAX_LISTAS = 20000;            // como OdtLector: pasadas estas (solo un archivo hostil) se sigue con la última
+  const MAX_CAMPOS_ANIDADOS = 64;      // campos abiertos a la vez; los de más se ignoran (sin esto, cada párrafo recorre la pila entera)
 
   const hijos = (e, n) => (e ? e.h.filter((x) => typeof x !== 'string' && (n === undefined || x.n === n)) : []);
   const hijo = (e, n) => (e ? e.h.find((x) => typeof x !== 'string' && x.n === n) || null : null);
@@ -36,8 +40,8 @@
 
   // ───────── Propiedades ─────────
   function Lector(zip, mensajes) {
-    this.zip = zip; this.mensajes = mensajes; this.tema = {}; this.estiloLista = new Map(); this.estilosTabla = new Map(); this.estilosParrafo = new Map(); this.estiloPredeterminado = 'Normal'; this.numeracion = null;
-    this.imagenes = new Map(); this.totalImagenes = 0; this.bloques = 0;
+    this.zip = zip; this.mensajes = mensajes; this.tema = {}; this.estiloLista = new Map(); this.estilosTabla = new Map(); this.estilosParrafo = new Map(); this.numDeEstiloLista = new Map(); this.estiloPredeterminado = 'Normal'; this.numeracion = null;
+    this.imagenes = new Map(); this.totalImagenes = 0; this.bytesImagenes = 0; this.bloques = 0; this.camposDeMas = 0;
   }
   const P = Lector.prototype;
 
@@ -118,8 +122,11 @@
   P.texto = async function (ruta) {
     const f = this.zip.file(ruta);
     if (!f) return null;
+    if (tamanoDe(f) > 3 * MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');   // antes de descomprimir (bytes UTF-8)
     const t = await f.async('string');
-    if (t.length > MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');
+    // tope por parte y para todas juntas (cientos de encabezados de varios MB que se comprimen a pocos KB colgaban la página minutos)
+    this.textoLeido = (this.textoLeido || 0) + t.length;
+    if (t.length > MAX_TEXTO_XML || this.textoLeido > 2 * MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');
     return t;
   };
   P.arbol = async function (ruta) {
@@ -168,9 +175,16 @@
       if (!vacio(r) || !vacio(p)) salida.predeterminado = { r, p };
     }
     const todos = hijos(raiz, 'style');
+    const vistos = new Set();   // un styleId repetido (solo un archivo raro): vale el primero, como en el escritor de .doc
     for (const s of todos.slice(0, 4096)) {
       const id = s.a.styleId;
-      if (!id) continue;
+      if (!id || vistos.has(id)) continue;
+      vistos.add(id);
+      if (s.a.type === 'numbering') {   // estilo de lista: su numId da los niveles de las listas que lo nombran (numStyleLink)
+        const ni = hijo(hijo(hijo(s, 'pPr'), 'numPr'), 'numId');
+        if (ni && ni.a.val) this.numDeEstiloLista.set(id, ni.a.val);
+        continue;
+      }
       const tipo = s.a.type === 'character' ? 'caracter' : s.a.type === 'table' ? 'tabla' : s.a.type === 'paragraph' ? 'parrafo' : null;
       if (!tipo) continue;
       const nombre = hijo(s, 'name'), basado = hijo(s, 'basedOn'), sig = hijo(s, 'next');
@@ -198,7 +212,7 @@
       for (const l of hijos(a, 'lvl')) { const ps = hijo(l, 'pStyle'); if (ps && ps.a.val && !this.nivelPorEstilo.has(ps.a.val)) this.nivelPorEstilo.set(ps.a.val, entero(l.a.ilvl) || 0); }
     }
     for (const n of hijos(raiz, 'num')) nums.set(n.a.numId, n);
-    this.numeracion = { abstractos, nums, listas: [], hechas: new Map() };
+    this.numeracion = { abstractos, nums, listas: [], ids: new Set(), hechas: new Map() };
   };
 
   P.nivelLista = function (lvl, inicioForzado) {
@@ -227,13 +241,19 @@
     const clave = String(numId);
     if (N.hechas.has(clave)) return N.hechas.get(clave);
     const n = N.nums.get(clave);
-    const abs = n ? N.abstractos.get((hijo(n, 'abstractNumId') || { a: {} }).a.val) : null;
+    const absDe = (x) => (x ? N.abstractos.get((hijo(x, 'abstractNumId') || { a: {} }).a.val) : null);
+    let abs = absDe(n);
+    // una lista hecha con un estilo de lista (numStyleLink, sin niveles propios) usa los del abstractNum de ese estilo, y numera junto con él
+    const vinculo = hijo(abs, 'numStyleLink');
+    if (vinculo && !hijo(abs, 'lvl')) abs = absDe(N.nums.get(this.numDeEstiloLista.get(vinculo.a.val))) || abs;
     if (!abs) { N.hechas.set(clave, null); return null; }
     const sobres = new Map();
     for (const o of hijos(n, 'lvlOverride')) sobres.set(o.a.ilvl, o);
-    const id = sobres.size ? 'n' + clave : 'a' + abs.a.abstractNumId;
+    let id = sobres.size ? 'n' + clave : 'a' + abs.a.abstractNumId;
+    if (!N.ids.has(id) && N.listas.length >= MAX_LISTAS) id = N.listas[N.listas.length - 1].id;
     N.hechas.set(clave, id);
-    if (!N.listas.some((l) => l.id === id)) {
+    if (!N.ids.has(id)) {
+      N.ids.add(id);
       const base = new Map();
       for (const l of hijos(abs, 'lvl')) base.set(l.a.ilvl, l);
       const niveles = [];
@@ -285,7 +305,10 @@
     let datos = this.imagenes.get(rel.destino);
     if (!datos) {
       if (++this.totalImagenes > MAX_IMAGENES) throw new Error('El documento tiene demasiadas imágenes para abrirlo aquí.');
+      if (this.bytesImagenes + tamanoDe(f) > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');   // antes de descomprimir
       datos = await f.async('uint8array');
+      this.bytesImagenes += datos.length;
+      if (this.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');
       this.imagenes.set(rel.destino, datos);
     }
     const ext = this.buscar(dib, 'extent');
@@ -402,7 +425,7 @@
       if (typeof c === 'string') continue;
       switch (c.n) {
         case 't': buffer += textoDe(c); break;
-        case 'tab': buffer += '\t'; break;
+        case 'tab': case 'ptab': buffer += '\t'; break;   // ptab: la tabulación de los encabezados de tres columnas de Word
         case 'cr': buffer += '\n'; break;
         case 'noBreakHyphen': buffer += '‑'; break;
         case 'softHyphen': buffer += '­'; break;
@@ -413,7 +436,8 @@
         case 'fldChar': {
           volcar();
           const t = c.a.fldCharType;
-          if (t === 'begin') pila.push({ instr: '', fase: 'instr', coleccion: null, padre: null });
+          if (t === 'begin') { if (pila.length >= MAX_CAMPOS_ANIDADOS) this.camposDeMas++; else pila.push({ instr: '', fase: 'instr', coleccion: null, padre: null }); }
+          else if (this.camposDeMas) { if (t === 'end') this.camposDeMas--; }
           else if (t === 'separate' && pila.length) { const f = pila[pila.length - 1]; f.fase = 'res'; f.coleccion = []; }
           else if (t === 'end' && pila.length) { const f = pila.pop(); f.fase = 'fin'; if (f.coleccion) this.volcarCampo(f, emitir); }
           break;
@@ -510,13 +534,15 @@
         const b = await this.parrafo(c, ctx, pila);
         salida.push(b);
         const sp = hijo(hijo(c, 'pPr'), 'sectPr');
-        if (sp && onSectPr) onSectPr(sp, salida);
+        if (sp && onSectPr) onSectPr(sp, salida.length);
       } else if (c.n === 'tbl') {
         const t = await this.tabla(c, ctx, pila, prof);
         if (t) salida.push(t);
       } else if (c.n === 'sdt' || c.n === 'ins' || c.n === 'moveTo' || c.n === 'customXml') {
         const dentro = c.n === 'sdt' ? hijo(c, 'sdtContent') : c;
-        if (dentro) for (const x of await this.bloquesDe(dentro, ctx, pila, prof, onSectPr)) salida.push(x);
+        // un fin de sección dentro de un sdt (una portada) se anota con su posición en la lista de afuera, donde terminan sus bloques
+        const base = salida.length;
+        if (dentro) for (const x of await this.bloquesDe(dentro, ctx, pila, prof, onSectPr && ((sp, i) => onSectPr(sp, base + i)))) salida.push(x);
       }
     }
     return salida;
@@ -569,7 +595,7 @@
     };
     // los párrafos con sectPr cierran una sección; como las llamadas son asíncronas se recogen y se resuelven en orden
     const cierres = [];
-    const bloques = await this.bloquesDe(cuerpo, ctx, pila, 0, (sp, salida) => cierres.push({ sp, hasta: salida.length }));
+    const bloques = await this.bloquesDe(cuerpo, ctx, pila, 0, (sp, hasta) => cierres.push({ sp, hasta }));
     let desde = 0;
     for (const c of cierres) { actual = bloques.slice(desde, c.hasta); desde = c.hasta; await cerrar(c.sp); }
     actual = bloques.slice(desde);
