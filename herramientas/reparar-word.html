@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="titulo-pagina">Reparar Word gratis — Mini Cookies</title>
-<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un documento Word (.docx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Intentá recuperar un documento Word (.docx, .doc u .odt) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.">
 <link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
 <link rel="stylesheet" href="../assets/css/estilos.css">
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
@@ -13,10 +13,10 @@
 window.i18nPagina = {
   es: {
     'titulo-pagina': 'Reparar Word gratis — Mini Cookies',
-    'meta-descripcion': 'Intentá recuperar un documento Word (.docx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
+    'meta-descripcion': 'Intentá recuperar un documento Word (.docx, .doc u .odt) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Reparar Word',
-    'intro': 'Elegí un documento .docx que no abre bien y probamos reconstruirlo.',
-    'zona-arrastre': '📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo',
+    'intro': 'Elegí un documento Word (.docx, .doc u .odt) que no abre bien y probamos reconstruirlo.',
+    'zona-arrastre': '📝 Arrastrá tu documento Word (.docx, .doc u .odt) acá o hacé clic para elegirlo',
     'boton-reparar': 'Reparar',
     'boton-reparar-procesando': 'Reparando...',
     'resultado-listo': '✅ Listo. ',
@@ -30,12 +30,12 @@ window.i18nPagina = {
     'error-sin-estructura': 'El archivo no tiene la estructura mínima de un .docx — no se puede reparar.',
     'error-sin-texto': 'No se pudo rescatar texto legible de este archivo.',
     'mensaje-nivel2-ok': '⚠️ El documento estaba dañado — se recuperó solo el texto plano, sin el formato original.',
-    'error-tipo-archivo': 'Ese archivo no es un documento de Word (.docx). Elegí un archivo .docx.',
+    'error-tipo-archivo': 'Ese archivo no es un documento de Word (.docx, .doc u .odt). Elegí uno de esos formatos.',
     'error-reparar': 'No se pudo reparar el documento',
     'guia-titulo': 'Cómo reparar un documento de Word dañado',
     'guia-mas-link': 'Cómo recuperar un archivo de Word, Excel, PowerPoint o PDF dañado',
-    'guia-intro': 'Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado.',
-    'guia-paso-1': 'Arrastrá el documento a la zona «Arrastrá tu documento .docx acá o hacé clic para elegirlo».',
+    'guia-intro': 'Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado. Si subís un .doc o un .odt, se acepta pero el resultado se guarda como .docx.',
+    'guia-paso-1': 'Arrastrá el documento a la zona «Arrastrá tu documento Word (.docx, .doc u .odt) acá o hacé clic para elegirlo».',
     'guia-paso-2': 'Hacé clic en «Reparar» y esperá a que el botón deje de decir «Reparando...».',
     'guia-paso-3': 'Leé el aviso de color: en verde, el documento se pudo leer y se reconstruyó; en naranja, solo se recuperó el texto plano.',
     'guia-paso-4': 'Descargá el archivo con «Descargar Word reparado» (documento-reparado.docx).',
@@ -49,16 +49,16 @@ window.i18nPagina = {
     'guia-p2': '¿Qué hago si da error?',
     'guia-r2': 'El mensaje puede decir que falta la estructura mínima de un .docx o que no se encontró texto legible. En ese caso el archivo está demasiado dañado para esta herramienta.',
     'guia-p3': '¿Acepta archivos .doc antiguos?',
-    'guia-r3': 'No, solo .docx.',
+    'guia-r3': 'Sí, acepta .doc y .odt además de .docx. El resultado se guarda siempre como .docx.',
     'guia-p4': '¿Puedo reparar varios a la vez?',
     'guia-r4': 'No, se trabaja con un documento por vez.',
   },
   en: {
     'titulo-pagina': 'Repair Word Free — Mini Cookies',
-    'meta-descripcion': 'Try to recover a damaged Word document (.docx) that won’t open properly, free and without uploading your file anywhere.',
+    'meta-descripcion': 'Try to recover a damaged Word document (.docx, .doc or .odt) that won’t open properly, free and without uploading your file anywhere.',
     'h1': 'Repair Word',
-    'intro': 'Pick a .docx document that doesn’t open properly and we’ll try to rebuild it.',
-    'zona-arrastre': '📝 Drag your .docx document here or click to choose it',
+    'intro': 'Pick a Word document (.docx, .doc or .odt) that doesn’t open properly and we’ll try to rebuild it.',
+    'zona-arrastre': '📝 Drag your Word document (.docx, .doc or .odt) here or click to choose it',
     'boton-reparar': 'Repair',
     'boton-reparar-procesando': 'Repairing...',
     'resultado-listo': '✅ Done. ',
@@ -72,12 +72,12 @@ window.i18nPagina = {
     'error-sin-estructura': 'The file doesn’t have the minimum structure of a .docx — it can’t be repaired.',
     'error-sin-texto': 'No readable text could be rescued from this file.',
     'mensaje-nivel2-ok': '⚠️ The document was damaged — only the plain text was recovered, without the original formatting.',
-    'error-tipo-archivo': 'That file is not a Word document (.docx). Pick a .docx file.',
+    'error-tipo-archivo': 'That file is not a Word document (.docx, .doc or .odt). Pick one of those formats.',
     'error-reparar': 'Couldn’t repair the document',
     'guia-titulo': 'How to repair a damaged Word document',
     'guia-mas-link': 'How to recover a damaged Word, Excel, PowerPoint or PDF file',
-    'guia-intro': 'If a .docx document won’t open in Word or the unreadable-content message appears, this tool tries to rebuild it. First it reads it with a forgiving reader and builds a new document from scratch; if that fails, as a last resort it rescues the raw text of the file. It takes a .docx and returns a new .docx that will probably open without problems but with simplified formatting.',
-    'guia-paso-1': 'Drag the document to the “Drag your .docx document here or click to choose it” area.',
+    'guia-intro': 'If a .docx document won’t open in Word or the unreadable-content message appears, this tool tries to rebuild it. First it reads it with a forgiving reader and builds a new document from scratch; if that fails, as a last resort it rescues the raw text of the file. It takes a .docx and returns a new .docx that will probably open without problems but with simplified formatting. A .doc or .odt is accepted, but the result is saved as .docx.',
+    'guia-paso-1': 'Drag the document to the “Drag your Word document (.docx, .doc or .odt) here or click to choose it” area.',
     'guia-paso-2': 'Click “Repair” and wait until the button stops saying “Repairing...”.',
     'guia-paso-3': 'Read the colored notice: in green, the document could be read and was rebuilt; in orange, only the plain text was recovered.',
     'guia-paso-4': 'Download the file with “Download repaired Word” (documento-reparado.docx).',
@@ -91,7 +91,7 @@ window.i18nPagina = {
     'guia-p2': 'What do I do if it gives an error?',
     'guia-r2': 'The message may say the minimum structure of a .docx is missing or that no readable text was found. In that case the file is too damaged for this tool.',
     'guia-p3': 'Does it accept old .doc files?',
-    'guia-r3': 'No, only .docx.',
+    'guia-r3': 'Yes, it accepts .doc and .odt as well as .docx. The result is always saved as .docx.',
     'guia-p4': 'Can I repair several at once?',
     'guia-r4': 'No, it works with one document at a time.'
   }
@@ -111,12 +111,12 @@ window.i18nPagina = {
 
 <main>
   <h1 data-i18n="h1">Reparar Word</h1>
-  <p data-i18n="intro">Elegí un documento .docx que no abre bien y probamos reconstruirlo.</p>
+  <p data-i18n="intro">Elegí un documento Word (.docx, .doc u .odt) que no abre bien y probamos reconstruirlo.</p>
 
   <div class="panel-herramienta">
     <div class="zona-arrastre" id="zonaArrastre">
-      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento .docx acá o hacé clic para elegirlo</span>
-      <input type="file" id="entradaArchivo" accept=".docx" hidden>
+      <span data-i18n="zona-arrastre">📝 Arrastrá tu documento Word (.docx, .doc u .odt) acá o hacé clic para elegirlo</span>
+      <input type="file" id="entradaArchivo" accept=".docx,.doc,.odt" hidden>
     </div>
 
     <ul class="lista-archivos" id="listaArchivo"></ul>
@@ -144,10 +144,10 @@ window.i18nPagina = {
   </div>
   <section class="guia-uso">
     <h2 data-i18n="guia-titulo">Cómo reparar un documento de Word dañado</h2>
-    <p data-i18n="guia-intro">Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado.</p>
+    <p data-i18n="guia-intro">Si un documento .docx no abre en Word o aparece el mensaje de contenido ilegible, esta herramienta intenta reconstruirlo. Primero lo lee con un lector tolerante y arma un documento nuevo desde cero; si eso falla, rescata como último recurso el texto crudo del archivo. Recibe un .docx y devuelve otro .docx nuevo, que probablemente abra sin problemas pero con el formato simplificado. Si subís un .doc o un .odt, se acepta pero el resultado se guarda como .docx.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
-      <li data-i18n="guia-paso-1">Arrastrá el documento a la zona «Arrastrá tu documento .docx acá o hacé clic para elegirlo».</li>
+      <li data-i18n="guia-paso-1">Arrastrá el documento a la zona «Arrastrá tu documento Word (.docx, .doc u .odt) acá o hacé clic para elegirlo».</li>
       <li data-i18n="guia-paso-2">Hacé clic en «Reparar» y esperá a que el botón deje de decir «Reparando...».</li>
       <li data-i18n="guia-paso-3">Leé el aviso de color: en verde, el documento se pudo leer y se reconstruyó; en naranja, solo se recuperó el texto plano.</li>
       <li data-i18n="guia-paso-4">Descargá el archivo con «Descargar Word reparado» (documento-reparado.docx).</li>
@@ -171,7 +171,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p3">¿Acepta archivos .doc antiguos?</summary>
-      <p data-i18n="guia-r3">No, solo .docx.</p>
+      <p data-i18n="guia-r3">Sí, acepta .doc y .odt además de .docx. El resultado se guarda siempre como .docx.</p>
     </details>
     <details>
       <summary data-i18n="guia-p4">¿Puedo reparar varios a la vez?</summary>
@@ -188,6 +188,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/formatos-word.js"></script>
 <script src="../assets/js/docx-base.js"></script>
 <script src="../assets/js/docx-lector.js"></script>
 <script src="../assets/js/escritor-docx.js"></script>
@@ -214,7 +215,7 @@ function mostrarArchivo(archivo) {
 }
 
 function elegirArchivo(listaFileList) {
-  const archivo = [...listaFileList].find(f => f.name.toLowerCase().endsWith('.docx'));
+  const archivo = [...listaFileList].find(f => FormatosWord.esDocumento(f.name));
   if (archivo) mostrarArchivo(archivo);
   else alert(t('error-tipo-archivo'));
 }

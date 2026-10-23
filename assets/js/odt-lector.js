@@ -159,6 +159,9 @@
         if (a['vertical-align'] !== undefined) c.alineacionV = { top: 'arriba', middle: 'centro', bottom: 'abajo' }[a['vertical-align']];
       } else if (prop.n === 'table-column-properties') {
         if (a['column-width'] !== undefined) est.ancho = a['column-width'];
+      } else if (prop.n === 'section-properties') {
+        const c = hijo(prop, 'columns');
+        if (c) est.columnas = { n: acotar(parseInt(c.a['column-count'], 10) || 1, 1, 45), espacio: twips(c.a['column-gap']) == null ? 720 : twips(c.a['column-gap']) };
       } else if (prop.n === 'table-properties') {
         if (a.width !== undefined) est.anchoTabla = a.width;
         if (a['margin-left'] !== undefined) est.sangriaTabla = a['margin-left'];
@@ -546,10 +549,26 @@
       if (prof > MAX_PROFUNDIDAD) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
       if (++this.bloquesLeidos > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos y no se puede leer.');
       switch (nodo.n) {
-        case 'p': case 'h': { const b = this.parrafo(nodo, null); this.hayContenido = true; salida.push(b); break; }
+        case 'p': case 'h': {
+          const b = this.parrafo(nodo, null);   // un párrafo con otra hoja (master-page-name) abre una sección: va en la nueva, no en la que estaba
+          this.hayContenido = true;
+          (prof === 0 && !this.enCabecera ? this.sec.hijos : salida).push(b);
+          break;
+        }
         case 'list': this.lista(nodo, 0, salida, null, prof + 1); break;
         case 'table': this.tabla(nodo, salida, prof + 1); this.hayContenido = true; break;
-        case 'section': case 'index': case 'table-of-content': case 'illustration-index': case 'alphabetical-index': case 'bibliography': case 'index-body': case 'text-box':
+        case 'section': {
+          const est = this.est.buscar('section', nodo.a['style-name'] || '');
+          const cols = est && est.columnas && est.columnas.n > 1 ? est.columnas : null;
+          if (cols && prof === 0 && !this.enCabecera) {
+            // una sección con columnas es un tramo continuo de la misma hoja con ese número de columnas
+            this.abrirSeccion({ tipo: 'continua', columnas: cols });
+            for (const h of hijos(nodo)) this.bloque(h, this.sec.hijos, 0);
+            this.abrirSeccion({ tipo: 'continua', columnas: null });
+          } else for (const h of hijos(nodo)) this.bloque(h, salida, prof + 1);
+          break;
+        }
+        case 'index': case 'table-of-content': case 'illustration-index': case 'alphabetical-index': case 'bibliography': case 'index-body': case 'text-box':
           for (const h of hijos(nodo)) { if (h.n === 'index-title' || h.n === 'index-body') { for (const g of hijos(h)) this.bloque(g, salida, prof + 1); } else this.bloque(h, salida, prof + 1); }
           break;
         default: break;
@@ -557,8 +576,14 @@
     }
 
     // ───────── Hojas ─────────
+    abrirSeccion(extra) {
+      if (this.sec && !this.sec.hijos.length) { Object.assign(this.sec, extra); return; }
+      this.sec = Object.assign({ maestra: this.maestraActual, hijos: [] }, extra);
+      this.secs.push(this.sec);
+    }
+
     nuevaSeccion(maestra) {
-      if (this.sec && !this.hayContenido) { this.sec.maestra = maestra; this.maestraActual = maestra; return; }
+      if (this.sec && !this.sec.hijos.length) { this.sec.maestra = maestra; this.maestraActual = maestra; return; }
       this.maestraActual = maestra;
       this.sec = { maestra, hijos: [] };
       this.secs.push(this.sec);
@@ -571,7 +596,8 @@
       const ancho = twips(a['page-width']) || 11906, alto = twips(a['page-height']) || 16838;
       const margenes = { arriba: twips(a['margin-top']), abajo: twips(a['margin-bottom']), izquierda: twips(a['margin-left']), derecha: twips(a['margin-right']) };
       for (const k of Object.keys(margenes)) if (margenes[k] == null) margenes[k] = 1134;
-      const out = { pagina: { ancho: acotar(ancho, 720, 31680), alto: acotar(alto, 720, 31680), horizontal: a['print-orientation'] === 'landscape' || ancho > alto }, margenes, tipo: 'siguiente', hijos: s.hijos };
+      const out = { pagina: { ancho: acotar(ancho, 720, 31680), alto: acotar(alto, 720, 31680), horizontal: a['print-orientation'] === 'landscape' || ancho > alto }, margenes, tipo: s.tipo || 'siguiente', hijos: s.hijos };
+      if (s.columnas) out.columnas = s.columnas;
       const cuerpoDe = (nodo) => { const l = []; this.enCabecera = true; if (nodo) for (const h of hijos(nodo)) this.bloque(h, l, 0); this.enCabecera = false; return l; };
       if (m && m.encabezado) {
         const l = cuerpoDe(m.encabezado);
