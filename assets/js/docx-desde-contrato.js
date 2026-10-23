@@ -41,6 +41,8 @@
   const entero = (n, min = -2147483647, max = 2147483647) => { const v = Math.round(Number(n)); return Number.isFinite(v) ? Math.max(min, Math.min(max, v)) : 0; };
   const hex6 = (c) => (/^[0-9a-fA-F]{6}$/.test(c || '') ? c.toUpperCase() : null);
   const sinProto = (o) => Object.assign(Object.create(null), o);
+  // Word corta los nombres de marcador a 40 caracteres: el ancla de un enlace se corta igual para que siga apuntando al marcador
+  const nombreMarcador = (n) => String(n).slice(0, 40);
 
   const ALINEACION = sinProto({ izquierda: 'left', centro: 'center', derecha: 'right', justificado: 'both' });
   const REGLA = sinProto({ minimo: 'atLeast', exacto: 'exact', auto: 'auto' });
@@ -52,6 +54,7 @@
   const TIPOS_IMAGEN = sinProto({ png: 'png', jpeg: 'jpeg', jpg: 'jpeg', gif: 'gif', bmp: 'bmp' });
   const MIME_IMAGEN = sinProto({ png: 'image/png', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp' });
   const MAX_PT = 1584;
+  const MAX_SECCIONES = 10000;
 
   function tipoDeImagen(b, indicado) {
     if (b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return 'png';
@@ -137,7 +140,19 @@
     const numeraciones = [];      // en el orden de numId
     let idMarcador = 0, idDibujo = 0;
     const idsEstilo = new Map();  // id del contrato → id válido para XML
-    const idDe = (id) => { if (!idsEstilo.has(id)) idsEstilo.set(id, String(id).replace(/[^A-Za-z0-9_-]/g, '') || 'E' + (idsEstilo.size + 1)); return idsEstilo.get(id); };
+    // Solo letras ASCII, cifras, _ y -; dos ids que quedan iguales (p. ej. «Título_20_á» y «Título_20_é» de un .odt, o dos nombres en cirílico) reciben uno distinto cada uno
+    const idsUsados = new Set(['Normal', 'DefaultParagraphFont', 'TableNormal']);
+    idsEstilo.set('Normal', 'Normal');
+    const idDe = (id) => {
+      if (!idsEstilo.has(id)) {
+        const base = String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 200) || 'E';
+        let v = base;
+        for (let k = 2; idsUsados.has(v); k++) v = base + '_' + k;
+        idsUsados.add(v);
+        idsEstilo.set(id, v);
+      }
+      return idsEstilo.get(id);
+    };
 
     // Las listas del contrato reciben su numId (1, 2, 3…) antes de armar los párrafos
     (contrato.listas || []).forEach((l, i) => { listas.set(l.id, { abstractId: i, numId: i + 1 }); numeraciones.push(l); });
@@ -175,11 +190,11 @@
     function run(r, ctx, prof) {
       if (r.salto) return `<w:r>${r.salto === 'pagina' ? '<w:br w:type="page"/>' : r.salto === 'columna' ? '<w:br w:type="column"/>' : '<w:br/>'}</w:r>`;
       if (r.imagen) return dibujo(r.imagen, ctx);
-      if (r.marcador != null) { const id = ++idMarcador; return `<w:bookmarkStart w:id="${id}" w:name="${escAttr(String(r.marcador).slice(0, 40))}"/><w:bookmarkEnd w:id="${id}"/>`; }
+      if (r.marcador != null) { const id = ++idMarcador; return `<w:bookmarkStart w:id="${id}" w:name="${escAttr(nombreMarcador(r.marcador))}"/><w:bookmarkEnd w:id="${id}"/>`; }
       if (r.enlace) {
         if (prof > 3) return '';
         const hijos = (r.hijos || []).map((h) => run(h, ctx, prof + 1)).join('');
-        if (r.enlace.ancla) return `<w:hyperlink w:anchor="${escAttr(r.enlace.ancla)}">${hijos}</w:hyperlink>`;
+        if (r.enlace.ancla) return `<w:hyperlink w:anchor="${escAttr(nombreMarcador(r.enlace.ancla))}">${hijos}</w:hyperlink>`;
         if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) return `<w:hyperlink r:id="${relacion(ctx, 'hyperlink', r.enlace.url, true)}">${hijos}</w:hyperlink>`;
         return hijos;   // un destino que no es una dirección web (javascript:, file:…) no se lleva
       }
@@ -240,13 +255,21 @@
 
     // ───────── Secciones, encabezados y pies ─────────
     const partes = [];   // { ruta, tipo, rid, tipoRel, xml, ctx }
-    const secciones = (contrato.secciones && contrato.secciones.length ? contrato.secciones : [{ hijos: [] }]).slice(0, 256);
+    // Más de MAX_SECCIONES (solo un archivo raro): el contenido de las de más pasa a la última, para no perder texto
+    let secciones = contrato.secciones && contrato.secciones.length ? contrato.secciones : [{ hijos: [] }];
+    if (secciones.length > MAX_SECCIONES) {
+      const ultima = Object.assign({}, secciones[MAX_SECCIONES - 1], { hijos: [] });
+      for (const s of secciones.slice(MAX_SECCIONES - 1)) for (const b of s.hijos || []) ultima.hijos.push(b);
+      secciones = secciones.slice(0, MAX_SECCIONES - 1).concat([ultima]);
+    }
     const ctxDoc = nuevoContexto();
+    const partesPorLista = new Map();   // un mismo encabezado o pie (el mismo arreglo) que repiten varias secciones se escribe una sola vez
     let cuerpo = '';
     secciones.forEach((s, i) => {
       const refs = [];
       for (const [lista, raiz, etiqueta, nombre, tipoCt] of [[s.encabezado, 'w:hdr', 'header', 'header', 'header'], [s.pie, 'w:ftr', 'footer', 'footer', 'footer']]) {
         if (!lista || !lista.length) continue;
+        if (partesPorLista.has(lista)) { refs.push(`<w:${etiqueta}Reference w:type="default" r:id="${partesPorLista.get(lista)}"/>`); continue; }
         const ctx = nuevoContexto();
         const n = partes.length + 1;
         const ruta = `word/${nombre}${n}.xml`;
@@ -255,6 +278,7 @@
         const xml = `${CABECERA}<${raiz} xmlns:w="${NS_W}" xmlns:r="${NS_R}" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">${/<\/w:p>$/.test(contenido) ? contenido : contenido + '<w:p/>'}</${raiz}>`;
         partes.push({ ruta, tipo: `application/vnd.openxmlformats-officedocument.wordprocessingml.${tipoCt}+xml`, ctx, xml });
         refs.push(`<w:${etiqueta}Reference w:type="default" r:id="${rid}"/>`);
+        partesPorLista.set(lista, rid);
       }
       const pg = s.pagina || {}, m = s.margenes || {};
       const ancho = entero(pg.ancho || 12240, 720, 31680), alto = entero(pg.alto || 15840, 720, 31680);
