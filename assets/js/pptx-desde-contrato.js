@@ -8,7 +8,7 @@
 //   contrato = { propiedades?: { titulo, autor }, ancho, alto,                          // tamaño de la diapositiva en EMU (1 pulgada = 914400)
 //                fuente?: 'Arial', tamano?: 18,                                          // fuente y tamaño (pt) de lo que no dice otra cosa
 //                maestros?: [{ fondo?, formas: [forma] }],                               // el patrón: lo que se dibuja detrás de las diapositivas que lo usan
-//                diapositivas: [{ maestro?: índice, oculta?, fondo?, formas: [forma], notas?: [parrafo] }] }
+//                diapositivas: [{ maestro?: índice, oculta?, ocultarPatron? (no dibuja las formas del patrón), fondo?, formas: [forma], notas?: [parrafo] }] }
 //   fondo  = { color: 'RRGGBB' } | { degradado } | { imagen }
 //   forma  = { tipo: 'forma', geom?: 'rect'|… (nombre de forma predefinida de ECMA-376) | { rutas: [{ w, h, cmds: [['M',x,y]|['L',x,y]|['C',x1,y1,x2,y2,x,y]|['Q',x1,y1,x,y]|['Z']], sinRelleno?, sinTrazo? }] } (forma libre), ajustes?: [enteros de ECMA], relleno?, linea?, sombra?, texto?, ...caja }
 //          | { tipo: 'imagen', imagen, recorte?: { izq, arr, der, aba } (fracciones 0..1), linea?, geom?, ...caja }
@@ -161,7 +161,8 @@
       return `<${etiqueta} r:id="${rels.agregar(`${REL}/hyperlink`, limpiar(e), true)}"/>`;
     }
     if (typeof e === 'object' && Number.isInteger(e.diapositiva) && e.diapositiva >= 1 && e.diapositiva <= (ctx.contrato.diapositivas || []).length) {
-      return `<${etiqueta} r:id="${rels.agregar(`${REL}/slide`, `slide${e.diapositiva}.xml`)}" action="ppaction://hlinksldjump"/>`;
+      // ruta desde la carpeta de la parte (slides, slideMasters o notesSlides): «slideN.xml» solo sirve desde slides
+      return `<${etiqueta} r:id="${rels.agregar(`${REL}/slide`, `../slides/slide${e.diapositiva}.xml`)}" action="ppaction://hlinksldjump"/>`;
     }
     return '';
   }

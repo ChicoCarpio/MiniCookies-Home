@@ -11,7 +11,7 @@
 //                                                       PowerPoint → PDF, → imágenes y lo que pasa por el motor acepta .ppt y .odp sin más. Un .pptx no se toca (ni se examina).
 //
 // Lanza Error (con .codigo = 'cifrado' si la presentación tiene contraseña) con un mensaje listo para mostrar.
-// mensajes: claves de lo que no se pudo llevar al .pptx: 'formas', 'objetos', 'imagen-formato', 'imagen-falta', 'imagen-externa', 'enlace-descartado', 'grupos-anidados'.
+// mensajes: claves de lo que no se pudo llevar al .pptx: 'formas', 'objetos', 'wordart', 'imagen-formato', 'imagen-falta', 'imagen-externa', 'enlace-descartado', 'grupos-anidados'.
 //
 // Los lectores de .ppt y .odp (cfb-propio.js, ppt-lector.js, odp-lector.js, pptx-desde-contrato.js, escritor-pptx.js, xml-ligero.js) se piden la primera vez que llega un
 // archivo que no es .pptx: una página que solo recibe .pptx no los baja. Se buscan al lado de este archivo, en assets/js/. En Node (las pruebas) se cargan antes con vm

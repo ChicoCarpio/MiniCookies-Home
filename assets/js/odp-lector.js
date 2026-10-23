@@ -7,10 +7,10 @@
 //   await OdpLector.aPptx(bytes)             → { bytes, mensajes }
 //
 // Lanza Error (con .codigo = 'cifrado' si el .odp tiene contraseña) con un mensaje listo para mostrar.
-// Se llevan: diapositivas con su página maestra (fondo y formas), marcos de texto y marcadores de posición, formas (rectángulo, elipse, línea, polígono, trazados, formas predefinidas),
-// relleno (color, degradado, imagen), línea, sombra, giro, grupos, texto con su formato (fuente, tamaño, color, negrita, cursiva, subrayado, tachado, superíndice, subíndice,
+// Se llevan: diapositivas con su página maestra (fondo y formas), marcos de texto y marcadores de posición, formas (rectángulo, elipse, línea, polígono, trazados, formas predefinidas;
+// las demás, como las que escribe PowerPoint, se dibujan como forma libre evaluando su trazado con ecuaciones), relleno (color, degradado, imagen), línea, sombra, giro, grupos, texto con su formato (fuente, tamaño, color, negrita, cursiva, subrayado, tachado, superíndice, subíndice,
 // alineación, sangrías, espaciado, interlineado, viñetas y numeración, enlaces), imágenes, tablas, notas del orador, diapositivas ocultas, encabezado/pie/número/fecha.
-// No se llevan: animaciones y transiciones, sonido y vídeo, objetos incrustados (gráficos, fórmulas), conectores con quiebres, formas con ecuaciones.
+// No se llevan: animaciones y transiciones, sonido y vídeo, objetos incrustados (gráficos, fórmulas), conectores con quiebres, estilos de tabla (table:template-name).
 // Requiere zip-propio.js y xml-ligero.js (y pptx-desde-contrato.js para aPptx).
 (function () {
   'use strict';
@@ -25,6 +25,7 @@
   const MAX_CARACTERES = 64 * 1024 * 1024;
   const MAX_CELDAS = 200000;
   const MAX_PUNTOS = 4000000;
+  const MAX_PASOS_GEOMETRIA = 20000000;    // pasos de evaluación de las ecuaciones de las formas, en todo el documento; agotados, las demás salen como rectángulo
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const acotar = (x, min, max) => Math.min(Math.max(x, min), max);
 
@@ -251,6 +252,218 @@
     return out;
   }
 
+  // ───────── Geometría con ecuaciones (draw:enhanced-geometry) ─────────
+  // PowerPoint escribe todas sus formas en .odp como draw:type="non-primitive": un trazado (draw:enhanced-path) cuyas cifras son constantes, ?fN (el resultado de la
+  // ecuación N, draw:equation) o $N (el ajuste N, draw:modifiers). Se evalúa a una forma libre del contrato. Con topes: largo de cada fórmula, cantidad de ecuaciones,
+  // anidamiento de referencias y pasos de evaluación (los de todo el documento los cuenta quien llama).
+  const MAX_ECUACIONES = 2000;
+  const MAX_FORMULA = 4000;
+  const MAX_ANIDADO = 24;           // ?fN que citan a otra todavía sin calcular
+  const MAX_PARENTESIS = 64;        // paréntesis, signos y funciones anidados dentro de una fórmula
+  const FUNCIONES = sinProto({ abs: Math.abs, sqrt: (x) => Math.sqrt(Math.max(0, x)), sin: Math.sin, cos: Math.cos, tan: Math.tan, atan: Math.atan, atan2: Math.atan2, min: Math.min, max: Math.max, if: (c, a, b) => (c > 0 ? a : b) });
+  class Ecuaciones {
+    // geo: el elemento draw:enhanced-geometry; caja: { w, h } en EMU (para logwidth y logheight); presupuesto: { pasos } compartido
+    constructor(geo, vb, caja, razon, presupuesto) {
+      this.formulas = new Map();
+      for (const e of hijos(geo, 'draw:equation')) {
+        if (this.formulas.size >= MAX_ECUACIONES) break;
+        const n = atr(e, 'draw:name'), f = atr(e, 'draw:formula');
+        if (n && typeof f === 'string' && f.length <= MAX_FORMULA && !this.formulas.has(n)) this.formulas.set(n, f);
+      }
+      this.ajustes = String(atr(geo, 'draw:modifiers') || '').trim().split(/[\s,]+/).slice(0, 64).map((x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : 0; });
+      // la caja en centésimas de milímetro (logwidth, logheight)
+      this.nombres = sinProto({ pi: Math.PI, left: vb[0], top: vb[1], right: (vb[0] + vb[2]) * razon[0], bottom: (vb[1] + vb[3]) * razon[1], width: vb[2] * razon[0], height: vb[3] * razon[1], logwidth: caja.w / 360, logheight: caja.h / 360,
+        xstretch: parseFloat(atr(geo, 'draw:path-stretchpoint-x')) || 0, ystretch: parseFloat(atr(geo, 'draw:path-stretchpoint-y')) || 0, hasstroke: 1, hasfill: 1 });
+      this.valores = new Map();
+      this.enCurso = new Set();
+      this.presupuesto = presupuesto;
+      // en el orden escrito: cada ecuación suele citar a las anteriores, así la cadena de referencias no se anida
+      for (const n of this.formulas.keys()) this.ecuacion(n, 0);
+    }
+    paso() { if (--this.presupuesto.pasos < 0) throw new Error('sin presupuesto'); }
+    // ?nombre → el valor de la ecuación (0 si no existe o se cita a sí misma)
+    ecuacion(nombre, prof) {
+      if (this.valores.has(nombre)) return this.valores.get(nombre);
+      const f = this.formulas.get(nombre);
+      if (f === undefined || this.enCurso.has(nombre) || prof > MAX_ANIDADO) return 0;
+      this.enCurso.add(nombre);
+      let v = this.evaluar(f, prof + 1);
+      this.enCurso.delete(nombre);
+      if (!Number.isFinite(v)) v = 0;
+      this.valores.set(nombre, v);
+      return v;
+    }
+    // Una fórmula: números, ?ecuación, $ajuste, nombres (left, width, pi…), + - * /, paréntesis y funciones
+    evaluar(texto, prof) {
+      const t = texto.match(/\?[\w]+|\$\d+|\d*\.?\d+(?:[eE][-+]?\d+)?|[A-Za-z]\w*|[-+*/(),]/g) || [];
+      let i = 0, hondo = 0;
+      const dentro = (fn) => { if (++hondo > MAX_PARENTESIS) throw new Error('fórmula demasiado anidada'); const v = fn(); hondo--; return v; };
+      const primario = () => {
+        this.paso();
+        const x = t[i++];
+        if (x === undefined) return 0;
+        if (x === '(') return dentro(() => { const v = suma(); if (t[i] === ')') i++; return v; });
+        if (x === '-') return dentro(() => -primario());
+        if (x === '+') return dentro(primario);
+        if (x[0] === '?') return this.ecuacion(x.slice(1), prof);
+        if (x[0] === '$') return this.ajustes[+x.slice(1)] || 0;
+        if (/^[\d.]/.test(x)) return parseFloat(x) || 0;
+        const fn = FUNCIONES[x.toLowerCase()];
+        if (fn && t[i] === '(') {
+          i++;
+          return dentro(() => {
+            const args = [];
+            while (i < t.length && t[i] !== ')' && args.length < 8) { args.push(suma()); if (t[i] === ',') i++; else break; }
+            if (t[i] === ')') i++;
+            return fn(args[0] || 0, args[1] || 0, args[2] || 0);
+          });
+        }
+        const v = this.nombres[x.toLowerCase()];
+        return v === undefined ? 0 : v;
+      };
+      const producto = () => { let v = primario(); while (t[i] === '*' || t[i] === '/') { const op = t[i++]; const w = primario(); v = op === '*' ? v * w : (w ? v / w : 0); } return v; };
+      const suma = () => { let v = producto(); while (t[i] === '+' || t[i] === '-') { const op = t[i++]; const w = producto(); v = op === '+' ? v + w : v - w; } return v; };
+      const v = suma();
+      return Number.isFinite(v) ? v : 0;
+    }
+    valor(x) {
+      if (x === undefined) return 0;
+      if (x[0] === '?') return this.ecuacion(x.slice(1), 0);
+      if (x[0] === '$') return this.ajustes[+x.slice(1)] || 0;
+      const v = parseFloat(x);
+      return Number.isFinite(v) ? v : 0;
+    }
+  }
+  // Arco de la elipse inscrita en (x1,y1)-(x2,y2), del rayo que pasa por (xa,ya) al que pasa por (xb,yb), en sentido horario (en pantalla) o antihorario → { inicio, curvas }
+  function arcoEnCaja(x1, y1, x2, y2, xa, ya, xb, yb, horario) {
+    const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, rx = Math.abs(x2 - x1) / 2, ry = Math.abs(y2 - y1) / 2;
+    if (!rx || !ry) return { inicio: [xa, ya], curvas: [] };      // elipse de tamaño cero (PowerPoint la usa para «no dibujar este arco»)
+    const t0 = Math.atan2((ya - cy) / ry, (xa - cx) / rx), t1 = Math.atan2((yb - cy) / ry, (xb - cx) / rx);
+    let barrido = t1 - t0;
+    if (Math.abs(barrido) < 1e-9) barrido = horario ? 2 * Math.PI : -2 * Math.PI;
+    else if (horario && barrido < 0) barrido += 2 * Math.PI;
+    else if (!horario && barrido > 0) barrido -= 2 * Math.PI;
+    return { inicio: [cx + rx * Math.cos(t0), cy + ry * Math.sin(t0)], curvas: arcoParametrico(cx, cy, rx, ry, t0, barrido) };
+  }
+  // Arco paramétrico (x = cx + rx·cos t, y = cy + ry·sin t) de t0 a t0 + barrido, en curvas de Bézier de hasta 90°
+  function arcoParametrico(cx, cy, rx, ry, t0, barrido) {
+    const n = Math.max(1, Math.ceil(Math.abs(barrido) / (Math.PI / 2) - 1e-9));
+    const paso = barrido / n, k = 4 / 3 * Math.tan(paso / 4);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const a = t0 + i * paso, b = a + paso;
+      const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+      out.push(['C', cx + rx * (ca - k * sa), cy + ry * (sa + k * ca), cx + rx * (cb + k * sb), cy + ry * (sb - k * cb), cx + rx * cb, cy + ry * sb]);
+    }
+    return out;
+  }
+  // draw:enhanced-path → rutas del contrato ({ w, h, cmds, sinRelleno?, sinTrazo? }), en el sistema de svg:viewBox; null si no hay trazado
+  function trazadoMejorado(geo, caja, presupuesto) {
+    const d = atr(geo, 'draw:enhanced-path');
+    if (!d || d.length > 400000) return null;
+    const vb = String(atr(geo, 'svg:viewBox') || '0 0 21600 21600').trim().split(/[\s,]+/).map(parseFloat);
+    if (vb.length !== 4 || !vb.every(Number.isFinite) || vb[2] <= 0 || vb[3] <= 0) return null;
+    // draw:path-stretchpoint-x/y (así lo hace LibreOffice): en una forma más ancha que alta, el ancho del sistema se estira por la razón ancho/alto (la cifra
+    // igual al ancho de viewBox, right y width) y lo demás se escala como el alto; así las esquinas redondeadas quedan redondas. Igual en vertical.
+    const razon = [1, 1];
+    if (atr(geo, 'draw:path-stretchpoint-x') !== undefined && caja.h > 0 && caja.w > caja.h) razon[0] = caja.w / caja.h;
+    if (atr(geo, 'draw:path-stretchpoint-y') !== undefined && caja.w > 0 && caja.h > caja.w) razon[1] = caja.h / caja.w;
+    const ec = new Ecuaciones(geo, vb, caja, razon, presupuesto);
+    const t = d.match(/\?[\w]+|\$\d+|-?\d*\.?\d+(?:[eE][-+]?\d+)?|[A-Za-z]/g) || [];
+    const rutas = [];
+    let cmds = [], sinRelleno = false, sinTrazo = false;
+    let x = 0, y = 0, ix = 0, iy = 0, hay = false;
+    const cerrarRuta = () => { if (cmds.length) rutas.push({ w: vb[2] * razon[0], h: vb[3] * razon[1], cmds, sinRelleno: sinRelleno || undefined, sinTrazo: sinTrazo || undefined }); cmds = []; sinRelleno = false; sinTrazo = false; hay = false; };
+    const P = (px, py) => [px - vb[0], py - vb[1]];
+    const ir = (op, px, py) => { const p = P(px, py); cmds.push([op, p[0], p[1]]); x = px; y = py; if (op === 'M') { ix = px; iy = py; hay = true; } };
+    const curvas = (lista) => { for (const c of lista) { const a = P(c[1], c[2]), b = P(c[3], c[4]), e = P(c[5], c[6]); cmds.push(['C', a[0], a[1], b[0], b[1], e[0], e[1]]); x = c[5]; y = c[6]; } };
+    let i = 0, par = 0;
+    const hayNumero = () => i < t.length && !/^[A-Za-z]$/.test(t[i]);
+    // las cifras van de a pares (x, y); a un grupo incompleto le faltan ceros, no se come la orden siguiente
+    const num = () => {
+      const eje = par++ & 1;
+      if (!hayNumero()) return 0;
+      const tok = t[i++];
+      const v = ec.valor(tok);
+      if (tok[0] !== '?' && tok[0] !== '$' && v === vb[2 + eje]) return v * razon[eje];
+      return v;
+    };
+    while (i < t.length) {
+      const c = t[i++];
+      if (!/^[A-Za-z]$/.test(c)) continue;
+      ec.paso();
+      par = 0;
+      switch (c) {
+        case 'M': { let primero = true; while (hayNumero()) { const a = num(), b = num(); ir(primero ? 'M' : 'L', a, b); primero = false; } break; }
+        case 'L': while (hayNumero()) { const a = num(), b = num(); ir(hay ? 'L' : 'M', a, b); } break;
+        case 'C': while (hayNumero()) { const v = [num(), num(), num(), num(), num(), num()]; if (!hay) ir('M', x, y); curvas([['C', ...v]]); } break;
+        case 'Q': while (hayNumero()) { const v = [num(), num(), num(), num()]; if (!hay) ir('M', x, y); const a = P(v[0], v[1]), e = P(v[2], v[3]); cmds.push(['Q', a[0], a[1], e[0], e[1]]); x = v[2]; y = v[3]; } break;
+        case 'Z': if (cmds.length) { cmds.push(['Z']); x = ix; y = iy; } break;
+        case 'N': cerrarRuta(); break;
+        case 'F': sinRelleno = true; break;
+        case 'S': sinTrazo = true; break;
+        // arcos dentro de un rectángulo: A y W unen con una recta desde el punto actual; B y V empiezan un trazo nuevo; W y V van en sentido horario
+        case 'A': case 'B': case 'W': case 'V':
+          while (hayNumero()) {
+            const v = [num(), num(), num(), num(), num(), num(), num(), num()];
+            const arco = arcoEnCaja(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], c === 'W' || c === 'V');
+            if (c === 'B' || c === 'V' || !hay) ir('M', arco.inicio[0], arco.inicio[1]); else ir('L', arco.inicio[0], arco.inicio[1]);
+            curvas(arco.curvas);
+          }
+          break;
+        // elipse por ángulos: centro, radios, ángulo inicial y final en grados (antihorario); U empieza un trazo nuevo
+        case 'T': case 'U':
+          while (hayNumero()) {
+            const v = [num(), num(), num(), num(), num(), num()];
+            const a0 = -v[4] * Math.PI / 180;
+            let barrido = -(v[5] - v[4]) * Math.PI / 180;
+            if (Math.abs(barrido) > 2 * Math.PI) barrido = Math.sign(barrido) * 2 * Math.PI;
+            const ini = [v[0] + v[2] * Math.cos(a0), v[1] + v[3] * Math.sin(a0)];
+            if (c === 'U' || !hay) ir('M', ini[0], ini[1]); else ir('L', ini[0], ini[1]);
+            curvas(arcoParametrico(v[0], v[1], v[2], v[3], a0, barrido || -2 * Math.PI));
+          }
+          break;
+        // cuarto de elipse desde el punto actual; X empieza en horizontal, Y en vertical, y se alternan
+        case 'X': case 'Y': {
+          let horizontal = c === 'X';
+          while (hayNumero()) {
+            const px = num(), py = num();
+            if (!hay) ir('M', x, y);
+            const k = 0.5522847498;
+            curvas([horizontal ? ['C', x + k * (px - x), y, px, py - k * (py - y), px, py] : ['C', x, y + k * (py - y), px - k * (px - x), py, px, py]]);
+            horizontal = !horizontal;
+          }
+          break;
+        }
+        // arco al estilo de OOXML (radios, ángulo inicial y barrido en grados), extensión de LibreOffice
+        case 'G':
+          while (hayNumero()) {
+            const wr = num(), hr = num(), st = num() * Math.PI / 180, sw = num() * Math.PI / 180;
+            if (!hay) ir('M', x, y);
+            const cx = x - wr * Math.cos(st), cy = y - hr * Math.sin(st);
+            curvas(arcoParametrico(cx, cy, wr, hr, st, acotar(sw, -2 * Math.PI, 2 * Math.PI)));
+          }
+          break;
+        default: while (hayNumero()) i++;      // sombreados (H, I, J, K) y lo desconocido: sin cifras que dibujar
+      }
+    }
+    cerrarRuta();
+    let puntos = 0;
+    for (const r of rutas) { for (const c of r.cmds) for (let k = 1; k < c.length; k++) if (!Number.isFinite(c[k])) c[k] = 0; puntos += r.cmds.length; }
+    return rutas.length ? { rutas, puntos } : null;
+  }
+
+  // Una sola ruta que recorre las cuatro esquinas del sistema (en cualquier sentido, desde cualquiera de ellas), con relleno y trazo
+  function esRectangulo(rutas) {
+    if (rutas.length !== 1 || rutas[0].sinRelleno || rutas[0].sinTrazo) return false;
+    const { w, h, cmds } = rutas[0];
+    const c = cmds[cmds.length - 1] && cmds[cmds.length - 1][0] === 'Z' ? cmds.slice(0, -1) : null;
+    if (!c || c.length !== 4 || c[0][0] !== 'M' || c.slice(1).some((x) => x[0] !== 'L')) return false;
+    const esquina = (x) => (Math.abs(x[1]) < 1e-6 || Math.abs(x[1] - w) < 1e-6) && (Math.abs(x[2]) < 1e-6 || Math.abs(x[2] - h) < 1e-6);
+    return c.every(esquina) && new Set(c.map((x) => Math.round(x[1]) + ',' + Math.round(x[2]))).size === 4
+      && c.every((x, k) => { const y = c[(k + 1) % 4]; return Math.abs(x[1] - y[1]) < 1e-6 || Math.abs(x[2] - y[2]) < 1e-6; });
+  }
+
   // draw:transform ("rotate (0.5) translate (1cm 2cm)" …) → lista de operaciones que se aplican en el orden escrito (la primera opera sobre la forma sin mover)
   // rotate: radianes, en sentido contrario al reloj; translate: medidas con unidad
   function transformacion(t) {
@@ -303,6 +516,7 @@
       this.contenido = contenidoRaiz;
       this.celdasDoc = 0;
       this.unidades = 0;
+      this.presupuestoGeom = { pasos: MAX_PASOS_GEOMETRIA };     // pasos de evaluación de las ecuaciones de todas las formas
     }
     aviso(c) { this.mensajes.add(c); }
     contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw new Error('La presentación es demasiado grande y no se puede leer.'); }
@@ -664,12 +878,22 @@
       const geo = hijo(el, 'draw:enhanced-geometry');
       const tipo = geo ? atr(geo, 'draw:type') || '' : '';
       let geom = 'rect';
-      if (/^ooxml-/.test(tipo)) geom = ECMA_VALIDAS.has(tipo.slice(6)) ? tipo.slice(6) : 'rect';
+      if (/^ooxml-/.test(tipo) && ECMA_VALIDAS.has(tipo.slice(6))) geom = tipo.slice(6);
       else if (FORMAS[tipo]) geom = FORMAS[tipo];
-      else if (tipo && tipo !== 'non-primitive') this.aviso('formas');
-      else if (tipo === 'non-primitive') this.aviso('formas');
+      else if (geo) {
+        // las demás (las de PowerPoint son todas «non-primitive»): el trazado con sus ecuaciones, como forma libre
+        let libre = null;
+        try { libre = trazadoMejorado(geo, caja, this.presupuestoGeom); } catch (e) { libre = null; }
+        if (libre && (this.puntos += libre.puntos) > MAX_PUNTOS) throw new Error('La presentación tiene demasiados trazos y no se puede leer.');
+        if (libre && esRectangulo(libre.rutas)) geom = 'rect';      // el rectángulo sigue siendo un rectángulo (se puede editar como tal en PowerPoint)
+        else if (libre) geom = { rutas: libre.rutas }; else this.aviso('formas');
+      }
       const f = Object.assign({ tipo: 'forma', geom }, caja);
-      if (geo) { if (atr(geo, 'draw:mirror-horizontal') === 'true') f.volteoH = !f.volteoH; if (atr(geo, 'draw:mirror-vertical') === 'true') f.volteoV = !f.volteoV; }
+      if (geo) {
+        const h = atr(geo, 'draw:mirror-horizontal') === 'true', v = atr(geo, 'draw:mirror-vertical') === 'true';
+        if (h) f.volteoH = !f.volteoH; if (v) f.volteoV = !f.volteoV;
+        if (h !== v && f.rot) f.rot = (360 - f.rot) % 360;      // con un solo espejo, el giro va en el otro sentido (medido con PowerPoint, corpus 19-giros)
+      }
       if (geom === 'roundRect') { const m = parseFloat((atr(geo, 'draw:modifiers') || '').split(/\s+/)[0]); if (Number.isFinite(m)) f.ajustes = [Math.round(acotar(m / 21600 * 100000, 0, 50000))]; }
       this.aplicar(f, est, el, ambito, ctx, el);
       return this.decorar(f, el, ambito, est, ctx);
@@ -679,7 +903,8 @@
       for (const h of hijos(el)) { const f = this.convertir(h, ambito, ctx, prof + 1); if (f) hijosF.push(f); }
       if (!hijosF.length) return null;
       // los hijos de un grupo de OpenDocument tienen coordenadas absolutas: la caja del grupo es la que los envuelve
-      const cajaDe = (f) => { const rad = (f.rot || 0) * Math.PI / 180; const cw = Math.abs(f.w * Math.cos(rad)) + Math.abs(f.h * Math.sin(rad)), ch = Math.abs(f.w * Math.sin(rad)) + Math.abs(f.h * Math.cos(rad)); const cx = f.x + f.w / 2, cy = f.y + f.h / 2; return [cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2]; };
+      // como PowerPoint: la caja de cada hijo sin girar, o con ancho y alto cambiados si el giro está entre 45° y 135° o entre 225° y 315° (corpus 19-giros)
+      const cajaDe = (f) => { const g = f.rot || 0, cambia = (g >= 45 && g < 135) || (g >= 225 && g < 315); const cw = cambia ? f.h : f.w, ch = cambia ? f.w : f.h; const cx = f.x + f.w / 2, cy = f.y + f.h / 2; return [cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2]; };
       let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
       for (const f of hijosF) { const b = cajaDe(f); x1 = Math.min(x1, b[0]); y1 = Math.min(y1, b[1]); x2 = Math.max(x2, b[2]); y2 = Math.max(y2, b[3]); }
       const f = { tipo: 'grupo', x: Math.round(x1), y: Math.round(y1), w: Math.round(x2 - x1), h: Math.round(y2 - y1), hijos: hijosF };
@@ -747,6 +972,7 @@
     // ───── tablas ─────
     tabla(el, caja, ambito, ctx, estMarco) {
       const columnas = [];
+      const estilosColumna = [];           // estilo de celda por defecto de cada columna
       const filas = [];
       const llenarColumnas = (c) => {
         for (const x of hijos(c)) {
@@ -754,7 +980,7 @@
             const est = this.e.resolver('table-column', atr(x, 'table:style-name'), ambito);
             const w = emu(est.col['style:column-width']) || 914400;
             const n = acotar(parseInt(atr(x, 'table:number-columns-repeated'), 10) || 1, 1, 63);
-            for (let i = 0; i < n && columnas.length < 63; i++) columnas.push(w);
+            for (let i = 0; i < n && columnas.length < 63; i++) { columnas.push(w); estilosColumna.push(atr(x, 'table:default-cell-style-name')); }
           } else if (x.n === 'table:table-column-group' || x.n === 'table:table-columns' || x.n === 'table:table-header-columns') llenarColumnas(x);
         }
       };
@@ -778,18 +1004,22 @@
             const c = {};
             if (cubierta) c.fusionada = true;
             else {
-              const est = this.e.resolver('table-cell', atr(ce, 'table:style-name'), ambito);
+              // el estilo de la celda; si no trae, el de la fila (table:default-cell-style-name) o el de la columna
+              const est = this.e.resolver('table-cell', atr(ce, 'table:style-name') || atr(fe, 'table:default-cell-style-name') || estilosColumna[celdas.length], ambito);
               const cs = parseInt(atr(ce, 'table:number-columns-spanned'), 10) || 1, rs = parseInt(atr(ce, 'table:number-rows-spanned'), 10) || 1;
               if (cs > 1) c.columnas = Math.min(cs, 63); if (rs > 1) c.filas = Math.min(rs, 5000);
+              // LibreOffice escribe el relleno y los márgenes de la celda en loext:graphic-properties y los bordes en paragraph-properties
               const bg = est.c['fo:background-color'] || est.g['fo:background-color'];
-              if (color(bg)) c.relleno = { color: color(bg) };
+              const rg = est.g['draw:fill'] === 'solid' ? color(est.g['draw:fill-color']) : null;
+              if (color(bg)) c.relleno = { color: color(bg) }; else if (rg) c.relleno = { color: rg };
+              const de = (a2) => (est.c[a2] !== undefined ? est.c[a2] : est.p[a2] !== undefined ? est.p[a2] : est.g[a2]);
               const bordes = {};
               const borde = (v) => { if (v === undefined || v.length > 120) return undefined; if (v === 'none' || v === 'hidden') return null; const m = /^\s*([\d.]+\w*)\s+(\w+)\s+(#[0-9a-fA-F]{6})/.exec(v); return m ? { color: color(m[3]), ancho: emu(m[1]) || 6350 } : undefined; };
-              const todos = borde(est.c['fo:border']);
-              for (const [k2, a2] of [['izquierda', 'fo:border-left'], ['derecha', 'fo:border-right'], ['arriba', 'fo:border-top'], ['abajo', 'fo:border-bottom']]) { const b = borde(est.c[a2]); const v = b !== undefined ? b : todos; if (v !== undefined) bordes[k2] = v; }
+              const todos = borde(de('fo:border'));
+              for (const [k2, a2] of [['izquierda', 'fo:border-left'], ['derecha', 'fo:border-right'], ['arriba', 'fo:border-top'], ['abajo', 'fo:border-bottom']]) { const b = borde(de(a2)); const v = b !== undefined ? b : todos; if (v !== undefined) bordes[k2] = v; }
               if (Object.keys(bordes).length) c.bordes = bordes;
-              const va = est.c['style:vertical-align']; if (va === 'middle') c.ancla = 'ctr'; else if (va === 'bottom') c.ancla = 'b';
-              const pad = emu(est.c['fo:padding']); const lado = (a2) => emu(est.c[a2]);
+              const va = est.c['style:vertical-align'] || est.g['draw:textarea-vertical-align']; if (va === 'middle') c.ancla = 'ctr'; else if (va === 'bottom') c.ancla = 'b';
+              const pad = emu(de('fo:padding')); const lado = (a2) => emu(de(a2));
               c.margenes = { i: lado('fo:padding-left') != null ? lado('fo:padding-left') : pad, d: lado('fo:padding-right') != null ? lado('fo:padding-right') : pad, s: lado('fo:padding-top') != null ? lado('fo:padding-top') : pad, a: lado('fo:padding-bottom') != null ? lado('fo:padding-bottom') : pad };
               for (const kk of Object.keys(c.margenes)) if (c.margenes[kk] == null) delete c.margenes[kk];
               const base = { t: {}, p: {}, lista: null };
@@ -810,14 +1040,19 @@
       };
       recorrerFilas(el);
       if (!filas.length) return null;
-      // las celdas cubiertas por una combinación vertical: marca 'v'
+      // las celdas cubiertas por una combinación vertical: marca 'v'. La combinación se recorta a la tabla y una celda ya cubierta no combina otras
+      // (si no, N celdas que dicen cubrir 5000 × 63 recorren eso cada una)
       for (let y = 0; y < filas.length; y++) for (let x = 0; x < columnas.length; x++) {
         const c = filas[y].celdas[x];
+        if (c.fusionada) { delete c.filas; delete c.columnas; continue; }
         if (c.filas > 1 || c.columnas > 1) {
-          for (let dy = 0; dy < (c.filas || 1); dy++) for (let dx = 0; dx < (c.columnas || 1); dx++) {
+          const alto = Math.min(c.filas || 1, filas.length - y), ancho = Math.min(c.columnas || 1, columnas.length - x);
+          if (c.filas > 1) { if (alto > 1) c.filas = alto; else delete c.filas; }
+          if (c.columnas > 1) { if (ancho > 1) c.columnas = ancho; else delete c.columnas; }
+          for (let dy = 0; dy < alto; dy++) for (let dx = 0; dx < ancho; dx++) {
             if (!dy && !dx) continue;
-            const d = filas[y + dy] && filas[y + dy].celdas[x + dx];
-            if (d) d.fusionada = dy > 0 ? (dx > 0 ? true : 'v') : 'h';
+            const d = filas[y + dy].celdas[x + dx];
+            if (d.fusionada === undefined || d.fusionada === true) d.fusionada = dy > 0 ? (dx > 0 ? true : 'v') : 'h';
           }
         }
       }
@@ -962,7 +1197,7 @@
       const dpE = est.resolver('drawing-page', atr(pg, 'draw:style-name'), 'c');
       const dp = dpE.dp;
       const d = { maestro: mi, formas: [] };
-      if (atr(pg, 'presentation:visibility') === 'hidden') d.oculta = true;
+      if (dp['presentation:visibility'] === 'hidden' || atr(pg, 'presentation:visibility') === 'hidden') d.oculta = true;     // va en el estilo de la página (LibreOffice y PowerPoint)
       if (dp['presentation:background-objects-visible'] === 'false') d.ocultarPatron = true;
       const rf = conv.relleno(dp, 'c', {});
       if (rf) d.fondo = rf.degradado ? { degradado: rf.degradado } : rf.imagen ? { imagen: rf.imagen } : rf.color ? { color: rf.color } : undefined;

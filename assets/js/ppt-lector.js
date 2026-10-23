@@ -11,7 +11,9 @@
 // color, negrita, cursiva, subrayado, viñetas y numeración, sangrías, espacios, alineación), cuadros de texto y marcadores de posición (también el texto que viene del patrón),
 // imágenes (PNG, JPEG; las DIB, EMF y WMF se llevan sin tocar, o se avisa si no se pueden), recorte de imágenes, grupos, líneas con flechas, fondos (color, degradado, imagen),
 // diapositivas ocultas, enlaces, campos de número de diapositiva y fecha, notas del orador. Las tablas de .ppt son grupos de cuadros de texto y así se llevan.
-// No se llevan: animaciones y transiciones, sonidos y vídeo, objetos OLE (gráficos, ecuaciones), WordArt, SmartArt, formas libres complejas.
+// El texto de los marcadores puede estar en la forma (PowerPoint 2007 y posteriores) o en SlideListWithText (97-2003, con OutlineTextRefAtom en la forma).
+// No se llevan: animaciones y transiciones, sonidos y vídeo, objetos OLE (gráficos, ecuaciones), el efecto del WordArt (su texto va como texto normal), SmartArt,
+// formas libres con arcos.
 // Requiere cfb-propio.js (y pptx-desde-contrato.js para aPptx). No depende del navegador.
 (function () {
   'use strict';
@@ -196,6 +198,7 @@
       this.exEnlaces = new Map();
       this.fopt0 = null;
       this.blips = [];
+      const listas = [];
       for (const h of this.hijos(doc)) {
         if (h.tipo === RT.DocumentAtom) {
           this.ancho = emu(u32(b, h.ini)); this.alto = emu(u32(b, h.ini + 4));
@@ -207,32 +210,40 @@
         } else if (h.tipo === RT.PPDrawingGroup) {
           this.leerGrupoDibujo(h);
         } else if (h.tipo === RT.SlideListWithText) {
-          this.leerListaTextos(h);
+          listas.push(h);
         } else if (h.tipo === RT.ExObjList || h.tipo === 0x07D0) {
           this.leerEnlaces(h);
         }
       }
+      for (const h of listas) this.leerListaTextos(h);     // después de los enlaces: el texto de la lista puede traer los suyos
       if (!this.ancho || !this.alto || this.ancho > 51206400 || this.alto > 51206400) throw new Danado('El archivo está dañado y no se puede leer (tamaño de la diapositiva).');
     }
+    // El texto de los marcadores que guardaban PowerPoint 97-2003: en SlideListWithText, después del SlidePersistAtom de cada hoja, un TextHeaderAtom
+    // (con el número del texto en su instancia) y sus registros; la forma lo señala con un OutlineTextRefAtom en su ClientTextbox
     leerListaTextos(h) {
       const b = this.pd;
-      let actual = null;
+      let actual = null, grupo = null;
+      const cerrar = () => { if (grupo) { const t = this.leerCuadroTexto(grupo.registros); t.num = grupo.inst; actual.textos.push(t); grupo = null; } };
       for (const r of this.hijos(h)) {
         if (r.tipo === RT.SlidePersistAtom) {
+          if (actual) cerrar();
           const entrada = { persist: u32(b, r.ini), slideId: u32(b, r.ini + 12), textos: [] };
           actual = entrada;
           if (h.inst === 0) this.listaDiap.push(entrada);
           else if (h.inst === 1) this.maestras.push(entrada);
           else if (h.inst === 2) this.listaNotas.set(entrada.slideId, entrada);
         } else if (actual && r.tipo === RT.TextHeaderAtom) {
-          actual.textos.push({ tipoTexto: u32(b, r.ini) });
-        } else if (actual && actual.textos.length) {
-          const t = actual.textos[actual.textos.length - 1];
-          if (r.tipo === RT.TextCharsAtom) t.texto = textoUtf16(b, r.ini, r.fin);
-          else if (r.tipo === RT.TextBytesAtom) t.texto = textoAnsi(b, r.ini, r.fin);
-          else if (r.tipo === RT.StyleTextPropAtom) t.estilo = r;
-        }
+          cerrar();
+          grupo = { inst: r.inst, registros: [r] };
+        } else if (grupo) grupo.registros.push(r);
       }
+      if (actual) cerrar();
+    }
+    // El texto n.º `ref` de una hoja de SlideListWithText: el TextHeaderAtom con esa instancia (como lo buscan PowerPoint y LibreOffice) o, si no hay, el de esa posición
+    textoDeLista(entrada, ref) {
+      if (!entrada || ref == null) return null;
+      if (!entrada.porNum) { entrada.porNum = new Map(); for (const t of entrada.textos) if (!entrada.porNum.has(t.num)) entrada.porNum.set(t.num, t); }
+      return entrada.porNum.get(ref) || entrada.textos[ref] || null;
     }
     leerEnlaces(h) {
       const b = this.pd;
@@ -447,7 +458,12 @@
             else if (h.fin - h.ini >= 8) sp.ancla = { arr: i16(b, h.ini), izq: i16(b, h.ini + 2), der: i16(b, h.ini + 4), aba: i16(b, h.ini + 6) };
             break;
           case RT.ClientData: this.leerDatosCliente(h, sp); break;
-          case RT.ClientTextbox: sp.texto = this.leerCuadroTexto(h); break;
+          case RT.ClientTextbox: {
+            const t = this.leerCuadroTexto(h);
+            // un OutlineTextRefAtom sin texto propio: el texto está en SlideListWithText
+            if (t.ref !== null && !t.texto) { sp.refTexto = t.ref; sp.reglaRef = t.regla; } else sp.texto = t;
+            break;
+          }
           default: break;
         }
       }
@@ -457,7 +473,6 @@
       const b = this.pd;
       for (const h of this.hijos(c)) {
         if (h.tipo === RT.OEPlaceholderAtom) sp.colocador = { posicion: i32(b, h.ini), id: u8(b, h.ini + 4), tam: u8(b, h.ini + 5) };
-        else if (h.tipo === RT.OutlineTextRefAtom) sp.refTexto = u32(b, h.ini);
         else if (h.tipo === RT.InteractiveInfo && h.inst === 0) sp.enlace = this.enlaceDe(h) || sp.enlace;     // al hacer clic (inst 1 = al pasar el ratón)
         else if (h.tipo === 0x1388) sp.pf9 = this.leerPP9(h) || sp.pf9;
       }
@@ -505,12 +520,14 @@
       }
       return null;
     },
+    // c: el ClientTextbox, o la lista de registros de un texto de SlideListWithText
     leerCuadroTexto(c) {
       const b = this.pd;
-      const t = { tipoTexto: 4, texto: '', estilo: null, regla: null, campos: new Map(), enlaces: [] };
+      const t = { tipoTexto: 4, texto: '', estilo: null, regla: null, campos: new Map(), enlaces: [], ref: null };
       let enlacePendiente = null;
-      for (const h of this.hijos(c)) {
+      for (const h of Array.isArray(c) ? c : this.hijos(c)) {
         switch (h.tipo) {
+          case RT.OutlineTextRefAtom: t.ref = u32(b, h.ini); break;
           case RT.TextHeaderAtom: t.tipoTexto = u32(b, h.ini); break;
           case RT.TextCharsAtom: t.texto = textoUtf16(b, h.ini, h.fin); break;
           case RT.TextBytesAtom: t.texto = textoAnsi(b, h.ini, h.fin); break;
@@ -775,12 +792,15 @@
     },
 
     // ───── Formas ─────
-    cajaDe(sp, base, u) {
+    // giro: el guardado (grados). Con el giro entre 45° y 135° o entre 225° y 315° (sin incluir el final) el ancla es la caja ya girada: ancho y alto
+    // cambiados alrededor del mismo centro (medido con PowerPoint, corpus 19-giros)
+    cajaDe(sp, base, u, giro) {
       const a = sp.ancla || (base && base.ancla);
       if (!a) return null;
-      const w = a.der - a.izq, h = a.aba - a.arr;
+      let x = a.izq, y = a.arr, w = Math.max(0, a.der - a.izq), h = Math.max(0, a.aba - a.arr);
+      if ((giro >= 45 && giro < 135) || (giro >= 225 && giro < 315)) { x += (w - h) / 2; y += (h - w) / 2; [w, h] = [h, w]; }
       const e = (v) => Math.round(v * u);
-      return { x: e(a.izq), y: e(a.arr), w: e(Math.max(0, w)), h: e(Math.max(0, h)) };
+      return { x: e(x), y: e(y), w: e(w), h: e(h) };
     },
     // u: EMU por unidad de las coordenadas de la forma (las maestras fuera de un grupo; dentro de un grupo se dejan tal cual: chOff y chExt las escalan)
     convertirForma(sp, ctx, u = EMU_POR_MAESTRA) {
@@ -789,13 +809,15 @@
       const baseId = ph && COLOCADOR_PATRON[ph.id] !== undefined ? COLOCADOR_PATRON[ph.id] : ph && ph.id >= 1 && ph.id <= 10 ? ph.id : null;
       const baseSp = baseId !== null && ctx.colocadores ? ctx.colocadores.get(baseId) : null;
       const mapas = [baseSp && baseSp.props, sp.props];
-      const caja = this.cajaDe(sp, baseSp, u);
+      const rot = this.fijo(this.prop(mapas, 0x04) || 0);
+      const giro = ((rot % 360) + 360) % 360;
+      const caja = this.cajaDe(sp, baseSp, u, giro);
       const noOcultar = this.booleano(mapas, 0x3BF, 1);
       if (noOcultar === true) return null;
       if (!caja) return null;
       const f = Object.assign({}, caja);
-      const rot = this.fijo(this.prop(mapas, 0x04) || 0);
-      if (rot) f.rot = ((rot % 360) + 360) % 360;
+      // con un solo volteo, el giro guardado va en el otro sentido
+      if (giro) f.rot = !(sp.flags & 0x40) !== !(sp.flags & 0x80) ? (360 - giro) % 360 : giro;
       if (sp.flags & 0x40) f.volteoH = true;
       if (sp.flags & 0x80) f.volteoV = true;
 
@@ -838,9 +860,9 @@
       const sm = this.sombra(mapas, ctx); if (sm) f.sombra = sm;
       // texto
       let tx = sp.texto;
-      if (!tx && sp.refTexto != null && ctx.textosDiap && ctx.textosDiap[sp.refTexto]) {
-        const e = ctx.textosDiap[sp.refTexto];
-        tx = { tipoTexto: e.tipoTexto, texto: e.texto || '', estilo: e.estilo || null, regla: null, campos: new Map(), enlaces: [] };
+      if (!tx && sp.refTexto != null) {
+        const e = this.textoDeLista(ctx.entrada, sp.refTexto);
+        if (e) tx = Object.assign({}, e, { regla: sp.reglaRef || e.regla });
       }
       // WordArt: el texto va en la propiedad gtextUNICODE y la forma lo dibuja con su relleno; se lleva como texto normal con el color del relleno
       let base = null;
@@ -942,10 +964,11 @@
         else if (h.tipo === RT.TextMasterStyleAtom) m.estilos[h.inst] = this.leerEstiloMaestro(h);
         else if (h.tipo === RT.PPDrawing) dibujo = this.leerDibujo(h);
       }
-      const ctx = { esquema: m.esquema, estilos: m.estilos, colocadores: null };
+      const ctx = { esquema: m.esquema, estilos: m.estilos, colocadores: null, entrada };
       if (dibujo) {
         m.fondo = this.fondoDe(dibujo.fondo, ctx);
         for (const sp of dibujo.formas) {
+          if (!sp.texto && sp.refTexto != null) sp.texto = this.textoDeLista(entrada, sp.refTexto);     // los pies del patrón usan su texto
           if (sp.colocador) { m.colocadores.set(sp.colocador.id, sp); continue; }
           const f = this.convertirForma(sp, ctx);
           if (f) m.formas.push(f);
@@ -969,7 +992,7 @@
       let im = this.maestras.findIndex((x) => x.slideId === idMaestro);
       if (im < 0) im = 0;
       const m = maestros[im] || { esquema: SIN_ESQUEMA.slice(), estilos: {}, colocadores: new Map() };
-      const ctx = { esquema: esquemaPropio && !(flags & 2) ? esquemaPropio : m.esquema, estilos: m.estilos, colocadores: m.colocadores, textosDiap: entrada.textos, numeroDiapositiva: indice + 1 };
+      const ctx = { esquema: esquemaPropio && !(flags & 2) ? esquemaPropio : m.esquema, estilos: m.estilos, colocadores: m.colocadores, entrada, numeroDiapositiva: indice + 1 };
       if (!(flags & 1)) d.ocultarPatron = true;
       if (dibujo) {
         const fondo = flags & 4 ? null : this.fondoDe(dibujo.fondo, ctx);     // con el bit 2 puesto el fondo es el del patrón, aunque la diapositiva traiga uno
@@ -1019,7 +1042,7 @@
       const buscar = (lista) => {
         for (const sp of lista) {
           let tx = sp.texto;
-          if (!tx && sp.refTexto != null && entrada.textos[sp.refTexto]) { const e = entrada.textos[sp.refTexto]; tx = { tipoTexto: e.tipoTexto, texto: e.texto || '' }; }
+          if (!tx && sp.refTexto != null) tx = this.textoDeLista(entrada, sp.refTexto);
           if (tx && tx.tipoTexto === 2 && tx.texto) return tx.texto;
           if (sp.hijos) { const r = buscar(sp.hijos); if (r) return r; }
         }
