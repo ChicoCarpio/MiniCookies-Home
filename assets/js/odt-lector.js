@@ -20,6 +20,8 @@
   const MAX_IMAGENES_BYTES = 200 * 1024 * 1024;
   const MAX_BLOQUES = 2000000;
   const MAX_FILAS_TABLA = 100000;
+  const MAX_LISTAS = 20000;
+  const MAX_CARACTERES = 64 * 1024 * 1024;   // texto de todo el documento (<text:s text:c> y las filas y celdas repetidas lo multiplican)
   const sinProto = (o) => Object.assign(Object.create(null), o);
 
   // ───────── XML → árbol con el texto en su lugar ─────────
@@ -207,6 +209,7 @@
       this.estilosUsados = new Set();
       this.bytesImagenes = 0;
       this.bloquesLeidos = 0;
+      this.caracteres = 0;
       this.marcas = 0;
       this.maestraActual = null;
       this.sec = null;
@@ -310,6 +313,7 @@
 
     agregarTexto(salida, texto, estilo, r) {
       if (!texto) return;
+      if ((this.caracteres += texto.length) > MAX_CARACTERES) throw new Error('El documento es demasiado grande para abrirlo aquí.');
       const u = salida[salida.length - 1];
       if (u && u.texto !== undefined && u.estilo === estilo && JSON.stringify(u.r || {}) === JSON.stringify(r || {})) { u.texto += texto; return; }
       const run = { texto };
@@ -341,6 +345,7 @@
             const href = a.href || '';
             const destino = href[0] === '#' ? { ancla: href.slice(1) } : { url: href };
             const f = a['style-name'] ? this.resolverR('text', a['style-name']) : null;
+            if (f && f.estilo) this.estilosUsados.add('text|' + f.estilo);
             const hijosRun = [];
             this.inline(h, f ? { estilo: f.estilo || fmt.estilo, r: Object.assign({}, fmt.r, f.r) } : fmt, hijosRun, st, prof + 1);
             if (hijosRun.length) salida.push({ enlace: destino, hijos: hijosRun });
@@ -406,18 +411,30 @@
     lista(nodo, nivel, salida, idLista, prof) {
       if (prof > MAX_PROFUNDIDAD) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
       const nombre = nodo.a['style-name'] || nodo.a['list-style-name'] || '';
+      let nueva = false;
       if (idLista === null) {
         const previa = (nodo.a['continue-list'] && this.idsListas.get(nodo.a['continue-list'])) || (nodo.a['continue-numbering'] === 'true' && this.ultimaLista.get(nombre));
         if (previa) idLista = previa;
         else {
-          idLista = 'L' + (++this.contadorListas);
-          this.contrato.listas.push({ id: idLista, niveles: this.nivelesDeLista(nombre) });
-          this.ultimaLista.set(nombre, idLista);
+          idLista = this.nuevaLista(nombre);
+          nueva = true;
         }
         if (nodo.a.id) this.idsListas.set(nodo.a.id, idLista);
       }
+      let primero = true;
       for (const item of hijos(nodo)) {
         if (item.n !== 'list-item' && item.n !== 'list-header') continue;
+        // text:start-value en un elemento: la numeración sigue desde ese número (una lista nueva en el contrato, salvo que sea el primero de una lista recién creada)
+        const inicio = parseInt(item.a['start-value'], 10);
+        if (Number.isFinite(inicio) && inicio >= 0) {
+          const valor = Math.min(inicio, 32767);
+          if (!(nueva && primero)) {
+            idLista = this.nuevaLista(nombre);
+            if (nodo.a.id) this.idsListas.set(nodo.a.id, idLista);
+          }
+          if (this.contadorListas < MAX_LISTAS || (nueva && primero)) this.contrato.listas[this.contrato.listas.length - 1].niveles[Math.min(nivel, 8)].inicio = valor;
+        }
+        primero = false;
         for (const h of hijos(item)) {
           if (h.n === 'p' || h.n === 'h') {
             const b = this.parrafoDeLista(h, idLista, nivel);
@@ -426,6 +443,14 @@
           else this.bloque(h, salida, prof + 1);
         }
       }
+    }
+    // Una lista nueva en el contrato (con sus 9 niveles). Pasadas MAX_LISTAS (solo un archivo hostil) se sigue con la última: la numeración no reinicia.
+    nuevaLista(nombre) {
+      if (this.contadorListas >= MAX_LISTAS) return this.contrato.listas[this.contrato.listas.length - 1].id;
+      const id = 'L' + (++this.contadorListas);
+      this.contrato.listas.push({ id, niveles: this.nivelesDeLista(nombre) });
+      this.ultimaLista.set(nombre, id);
+      return id;
     }
     parrafoDeLista(nodo, id, nivel) {
       const b = this.parrafo(nodo, { id, nivel: Math.min(nivel, 8) });
@@ -495,6 +520,7 @@
             const repC = acotar(parseInt(c.a['number-columns-repeated'], 10) || 1, 1, 1024);
             for (let k = 0; k < repC; k++) {
               if (col >= 1024) break;
+              if (++this.bloquesLeidos > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos y no se puede leer.');
               if (saltarH > 0) { saltarH--; col++; continue; }
               const p = pendiente[col];
               if (c.n === 'covered-table-cell' || (p && p.resto > 0)) {
@@ -603,7 +629,7 @@
         const l = cuerpoDe(m.encabezado);
         if (l.length) {
           out.encabezado = l;
-          const alt = pag.cabecera && (twips(pag.cabecera['min-height']) || 0) + (twips(pag.cabecera['margin-bottom']) || 0);
+          const alt = pag && pag.cabecera && (twips(pag.cabecera['min-height']) || 0) + (twips(pag.cabecera['margin-bottom']) || 0);
           out.margenes.encabezado = margenes.arriba;
           out.margenes.arriba = margenes.arriba + (alt || 567);
         }
@@ -612,7 +638,7 @@
         const l = cuerpoDe(m.pie);
         if (l.length) {
           out.pie = l;
-          const alt = pag.pie && (twips(pag.pie['min-height']) || 0) + (twips(pag.pie['margin-top']) || 0);
+          const alt = pag && pag.pie && (twips(pag.pie['min-height']) || 0) + (twips(pag.pie['margin-top']) || 0);
           out.margenes.pie = margenes.abajo;
           out.margenes.abajo = margenes.abajo + (alt || 567);
         }
