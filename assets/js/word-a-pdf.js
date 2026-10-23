@@ -16,9 +16,11 @@
 (function () {
   async function aHtml(archivo) {
     // Las tablas pegadas de Excel (EMF) pasan antes a PNG: el navegador no las dibuja.
-    const docx = await ImagenesOffice.docxConImagenesComunes(await archivo.arrayBuffer());
+    // Un .doc o un .odt (con formatos-word.js en la página) se pasa a .docx primero
+    const datos = typeof FormatosWord !== 'undefined' ? await FormatosWord.comoDocx(await archivo.arrayBuffer()) : await archivo.arrayBuffer();
+    const docx = await ImagenesOffice.docxConImagenesComunes(datos);
     const { html } = await DocxMaquetador.aHtml(docx);
-    return { nombre: archivo.name.replace(/\.docx$/i, ''), html: sanitizarHtml(html) };
+    return { nombre: archivo.name.replace(/\.(docx|doc|odt)$/i, ''), html: sanitizarHtml(html) };
   }
 
   // alAvanzar(hoja, total), como en HtmlAPdf.convertir.

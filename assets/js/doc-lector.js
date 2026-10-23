@@ -214,9 +214,9 @@
       const wd = this.wd;
       if (wd.length < 0x9A || u16(wd, 0) !== 0xA5EC) throw new Danado('El archivo no es un documento de Word 97-2003 válido.');
       const nFib = u16(wd, 2);
-      if (nFib < 0xC0) throw new Danado('Este documento es de una versión de Word anterior a Word 97 y no se puede leer. Ábrelo en Word y guárdalo como .docx.', 'antiguo');
+      if (nFib < 0xC0) throw new Danado('Este documento es de una versión de Word anterior a Word 97 y no se puede leer. Abrilo en Word y guardalo como .docx.', 'antiguo');
       const flags = u16(wd, 0x0A);
-      if (flags & 0x100) throw new Danado('El documento tiene una contraseña. Quítasela en Word y vuelve a intentarlo.', 'cifrado');
+      if (flags & 0x100) throw new Danado('El documento está protegido con contraseña. Sacale la contraseña en Word y volvé a intentarlo.', 'cifrado');
       const eTabla = entrada((flags & 0x200) ? '1Table' : '0Table');
       if (!eTabla) throw new Danado('El documento está dañado: falta la tabla de estructura.');
       this.tabla = cfb.flujo(eTabla);

@@ -63,11 +63,11 @@
 
   const FORMATOS = {
     word: {
-      extensiones: ['docx'],
+      extensiones: ['docx', 'doc', 'odt'],
       async preparar() {
         await cargarEnOrden([
           JSZIP(), propio('xml-ligero.js'), propio('seguridad-html.js'), propio('emf.js'), propio('imagenes-office.js'), propio('html-a-pdf.js'),
-          propio('docx-base.js'), propio('docx-estilos.js'), propio('pptx-texto.js'), propio('docx-maquetador.js'),
+          propio('formatos-word.js'), propio('docx-base.js'), propio('docx-estilos.js'), propio('pptx-texto.js'), propio('docx-maquetador.js'),
         ]);
         await cargarScript(propio('word-a-pdf.js'));
       },

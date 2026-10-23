@@ -613,7 +613,7 @@
     let zip;
     try { zip = await ZipPropio.loadAsync(datos); } catch (e) { throw new Error('El archivo no es un .odt válido (no se puede abrir como un paquete).'); }
     if (zip.file('encrypted-package') || (zip.file('META-INF/manifest.xml') && /encryption-data/.test(await zip.file('META-INF/manifest.xml').async('string')))) {
-      const err = new Error('El documento tiene una contraseña. Quítasela en LibreOffice y vuelve a intentarlo.');
+      const err = new Error('El documento está protegido con contraseña. Sacale la contraseña en LibreOffice y volvé a intentarlo.');
       err.codigo = 'cifrado';
       throw err;
     }
