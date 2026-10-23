@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cambiar la versión de un Word: .docx, .doc, .odt y .rtf gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Pasá un documento de Word 2007+ (.docx) a Word 97-2003 (.doc), a LibreOffice (.odt) o a RTF, o al revés, conservando estilos, tablas, imágenes y listas — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cambiar la versión de un Word: .docx, .doc, .odt y .rtf gratis — Mini Cookies',
+    'meta-descripcion': 'Pasá un documento de Word 2007+ (.docx) a Word 97-2003 (.doc), a LibreOffice (.odt) o a RTF, o al revés, conservando estilos, tablas, imágenes y listas — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Cambio de versión de Word',
+    'intro': 'Pasá un documento de un formato a otro: Word 2007 o más nuevo (.docx), Word 97-2003 (.doc), LibreOffice (.odt) o texto con formato (.rtf). Se conservan los estilos, las listas, las tablas, las imágenes, los enlaces, los encabezados y pies, y las secciones. Podés cargar varios archivos a la vez.',
+    'zona-arrastre': '📝 Arrastrá tus documentos acá o hacé clic para elegirlos (.docx, .doc, .odt)',
+    'destino-titulo': 'Convertir a',
+    'destino-docx': '.docx — Word 2007 o más nuevo (también lo abre Google Documentos)',
+    'destino-doc': '.doc — Word 97-2003',
+    'destino-odt': '.odt — LibreOffice (también lo abre Google Documentos)',
+    'destino-rtf': '.rtf — texto con formato (lo abre casi cualquier programa)',
+    'boton-convertir': 'Convertir',
+    'boton-procesando': 'Convirtiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar',
+    'resultado-enlace-zip': 'Descargar .zip',
+    'error-convertir': 'No se pudo convertir',
+    'error-mismo-formato': 'ya está en ese formato',
+    'avisos-titulo': 'Lo que el formato de destino no pudo llevar',
+    'aviso-notas': 'Hay notas al pie o notas finales: no se llevan y su texto no aparece en el resultado.',
+    'aviso-dibujos': 'Hay cuadros de texto, formas o dibujos que no se llevan.',
+    'aviso-imagen-formato': 'Hay imágenes en un formato que el destino no admite (solo se llevan PNG y JPEG en .doc y .rtf): no se guardaron.',
+    'aviso-imagen-falta': 'Hay imágenes que el documento nombra pero no trae: no se guardaron.',
+    'aviso-imagen-externa': 'Hay imágenes vinculadas a un archivo de la computadora de origen: no se guardaron.',
+    'aviso-enlace-descartado': 'Hay enlaces que no apuntan a una dirección web (por ejemplo a un archivo local): quedaron como texto sin enlace.',
+    'limites-titulo': 'Límites conocidos',
+    'item1': 'Se llevan el texto, la fuente, el tamaño, el color, el resaltado, los estilos con nombre, la alineación, las sangrías, el espaciado, las tabulaciones, las listas con viñetas y numeradas, las tablas (anidadas y con celdas combinadas), las imágenes PNG y JPEG, los enlaces, los marcadores, los números de página, los saltos y las secciones con su encabezado y pie. No se llevan las notas al pie, los comentarios, los cuadros de texto, las formas ni las ecuaciones.',
+    'item2': 'Lo que ya tenía control de cambios se guarda con los cambios aceptados: el texto borrado no se lleva.',
+    'item3': 'Un archivo con contraseña no se puede abrir: quitale la contraseña en Word y volvé a intentarlo.',
+    'guia-titulo': 'Cómo pasar un documento de .docx a .doc, a .odt, a .rtf o al revés',
+    'guia-intro': 'Hay programas, oficinas y organismos que todavía piden el documento en Word 97-2003 (.doc), otros que lo quieren en LibreOffice (.odt) y otros en texto con formato (.rtf). Esta herramienta pasa el archivo de un formato a otro conservando el formato, las tablas y las imágenes, y avisa de lo que el formato de destino no puede guardar.',
+    'guia-pasos': 'Paso a paso',
+    'guia-paso-1': 'Cargá uno o varios documentos (.docx, .doc u .odt).',
+    'guia-paso-2': 'Elegí el formato de destino: .docx, .doc, .odt o .rtf.',
+    'guia-paso-3': 'Tocá «Convertir». Con un archivo se baja el documento convertido; con varios, un .zip con un documento por archivo.',
+    'guia-paso-4': 'Leé los avisos que aparecen debajo: dicen qué cosas el formato de destino no pudo guardar.',
+    'guia-consejos': 'Consejos',
+    'guia-consejo-1': 'Para entregar un archivo que cualquiera pueda abrir, elegí .docx: lo leen Word, LibreOffice y Google Documentos.',
+    'guia-consejo-2': 'Si el programa que lo va a abrir es muy viejo, usá .doc; si no sabés cuál usa quien lo recibe, .rtf es el más compatible, aunque lleva menos cosas.',
+    'guia-consejo-3': 'Un documento .doc o .odt que otra herramienta de este sitio no abría se puede pasar primero a .docx con esta.',
+    'guia-faq': 'Preguntas frecuentes',
+    'guia-p1': '¿Puedo pasar un .doc a .odt?',
+    'guia-r1': 'Sí, entre los tres formatos de Word (.docx, .doc y .odt) se puede ir en cualquier dirección. El .rtf es solo de salida.',
+    'guia-p2': '¿Se pierden las notas al pie y los cuadros de texto?',
+    'guia-r2': 'Sí, esta herramienta lleva el cuerpo del documento, no los objetos flotantes ni las notas. Si algo no se pudo llevar, se avisa al terminar.',
+    'guia-p3': '¿Por qué una imagen no aparece en el .doc?',
+    'guia-r3': 'Un .doc y un .rtf llevan imágenes PNG y JPEG. Un GIF o un BMP no se guarda en esos dos formatos y se avisa.',
+    'guia-p4': '¿Un .doc hecho acá se abre en Word?',
+    'guia-r4': 'Sí. Se probó con Word y con LibreOffice, y se abre sin pedir reparación.'
+  },
+  en: {
+    'titulo-pagina': 'Change the version of a Word file: .docx, .doc, .odt and .rtf free — Mini Cookies',
+    'meta-descripcion': 'Convert a document from Word 2007+ (.docx) to Word 97-2003 (.doc), LibreOffice (.odt) or RTF, or the other way round, keeping styles, tables, images and lists — free and without uploading your file to any server.',
+    'h1': 'Word version change',
+    'intro': 'Convert a document from one format to another: Word 2007 or newer (.docx), Word 97-2003 (.doc), LibreOffice (.odt) or rich text (.rtf). Styles, lists, tables, images, links, headers and footers, and sections are kept. You can load several files at once.',
+    'zona-arrastre': '📝 Drag your documents here or click to choose them (.docx, .doc, .odt)',
+    'destino-titulo': 'Convert to',
+    'destino-docx': '.docx — Word 2007 or newer (Google Docs opens it too)',
+    'destino-doc': '.doc — Word 97-2003',
+    'destino-odt': '.odt — LibreOffice (Google Docs opens it too)',
+    'destino-rtf': '.rtf — rich text (almost any program opens it)',
+    'boton-convertir': 'Convert',
+    'boton-procesando': 'Converting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download',
+    'resultado-enlace-zip': 'Download .zip',
+    'error-convertir': 'Could not convert',
+    'error-mismo-formato': 'is already in that format',
+    'avisos-titulo': 'What the target format could not hold',
+    'aviso-notas': 'There are footnotes or endnotes: they are not carried over and their text does not appear in the result.',
+    'aviso-dibujos': 'There are text boxes, shapes or drawings that are not carried over.',
+    'aviso-imagen-formato': 'There are images in a format the target does not support (only PNG and JPEG are carried in .doc and .rtf): they were not saved.',
+    'aviso-imagen-falta': 'There are images the document names but does not contain: they were not saved.',
+    'aviso-imagen-externa': 'There are images linked to a file on the source computer: they were not saved.',
+    'aviso-enlace-descartado': 'There are links that do not point to a web address (for example to a local file): they were left as plain text.',
+    'limites-titulo': 'Known limits',
+    'item1': 'Text, font, size, color, highlight, named styles, alignment, indents, spacing, tab stops, bulleted and numbered lists, tables (nested and with merged cells), PNG and JPEG images, links, bookmarks, page numbers, breaks, and sections with their headers and footers are kept. Footnotes, comments, text boxes, shapes and equations are not.',
+    'item2': 'Anything that had tracked changes is saved with the changes accepted: deleted text is not carried over.',
+    'item3': 'A password-protected file cannot be opened: remove the password in Word and try again.',
+    'guia-titulo': 'How to convert a document from .docx to .doc, .odt, .rtf or back',
+    'guia-intro': 'Some programs, offices and agencies still ask for the document in Word 97-2003 (.doc), others want it in LibreOffice (.odt) and others in rich text (.rtf). This tool converts the file from one format to another, keeping formatting, tables and images, and tells you what the target format cannot store.',
+    'guia-pasos': 'Step by step',
+    'guia-paso-1': 'Load one or more documents (.docx, .doc or .odt).',
+    'guia-paso-2': 'Choose the target format: .docx, .doc, .odt or .rtf.',
+    'guia-paso-3': 'Press «Convert». With one file you get the converted document; with several, a .zip with one document per file.',
+    'guia-paso-4': 'Read the notices below: they say what the target format could not store.',
+    'guia-consejos': 'Tips',
+    'guia-consejo-1': 'To hand over a file anyone can open, choose .docx: Word, LibreOffice and Google Docs all read it.',
+    'guia-consejo-2': 'If the program that will open it is very old, use .doc; if you do not know what the recipient uses, .rtf is the most compatible, although it carries less.',
+    'guia-consejo-3': 'A .doc or .odt that another tool on this site could not open can first be converted to .docx with this one.',
+    'guia-faq': 'Frequently asked questions',
+    'guia-p1': 'Can I convert a .doc to .odt?',
+    'guia-r1': 'Yes, you can go in any direction between the three Word formats (.docx, .doc and .odt). .rtf is output only.',
+    'guia-p2': 'Are footnotes and text boxes lost?',
+    'guia-r2': 'Yes, this tool carries the body of the document, not floating objects or notes. If something could not be carried over, you are told when it finishes.',
+    'guia-p3': 'Why does an image not appear in the .doc?',
+    'guia-r3': 'A .doc and an .rtf carry PNG and JPEG images. A GIF or BMP is not saved in those two formats and you are told.',
+    'guia-p4': 'Does a .doc made here open in Word?',
+    'guia-r4': 'Yes. It was tested with Word and with LibreOffice, and it opens without asking for repair.'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Cambio de versión de Word</h1>
+  <p data-i18n="intro">Pasá un documento de un formato a otro: Word 2007 o más nuevo (.docx), Word 97-2003 (.doc), LibreOffice (.odt) o texto con formato (.rtf). Se conservan los estilos, las listas, las tablas, las imágenes, los enlaces, los encabezados y pies, y las secciones. Podés cargar varios archivos a la vez.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📝 Arrastrá tus documentos acá o hacé clic para elegirlos (.docx, .doc, .odt)</span>
+      <input type="file" id="entradaArchivos" accept=".docx,.doc,.odt" multiple hidden>
+    </div>
+    <ul class="lista-archivos" id="listaArchivos"></ul>
+
+    <h3 style="margin-bottom:6px;" data-i18n="destino-titulo">Convertir a</h3>
+    <div class="selector-direccion" id="selectorDestino">
+      <label><input type="radio" name="destino" value="docx" checked> <span data-i18n="destino-docx">.docx — Word 2007 o más nuevo (también lo abre Google Documentos)</span></label>
+      <label><input type="radio" name="destino" value="doc"> <span data-i18n="destino-doc">.doc — Word 97-2003</span></label>
+      <label><input type="radio" name="destino" value="odt"> <span data-i18n="destino-odt">.odt — LibreOffice (también lo abre Google Documentos)</span></label>
+      <label><input type="radio" name="destino" value="rtf"> <span data-i18n="destino-rtf">.rtf — texto con formato (lo abre casi cualquier programa)</span></label>
+    </div>
+
+    <div class="controles">
+      <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n="resultado-enlace">Descargar</a>
+    </div>
+    <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
+    <div id="bloqueAvisos" class="resultado" style="display:none; margin-top:20px;">
+      <p><strong data-i18n="avisos-titulo">Lo que el formato de destino no pudo llevar</strong></p>
+      <ul id="listaAvisos"></ul>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limites-titulo">Límites conocidos</h3>
+    <ul style="color:var(--texto-suave);">
+      <li data-i18n="item1">Se llevan el texto, la fuente, el tamaño, el color, el resaltado, los estilos con nombre, la alineación, las sangrías, el espaciado, las tabulaciones, las listas con viñetas y numeradas, las tablas (anidadas y con celdas combinadas), las imágenes PNG y JPEG, los enlaces, los marcadores, los números de página, los saltos y las secciones con su encabezado y pie. No se llevan las notas al pie, los comentarios, los cuadros de texto, las formas ni las ecuaciones.</li>
+      <li data-i18n="item2">Lo que ya tenía control de cambios se guarda con los cambios aceptados: el texto borrado no se lleva.</li>
+      <li data-i18n="item3">Un archivo con contraseña no se puede abrir: quitale la contraseña en Word y volvé a intentarlo.</li>
+    </ul>
+  </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo pasar un documento de .docx a .doc, a .odt, a .rtf o al revés</h2>
+    <p data-i18n="guia-intro">Hay programas, oficinas y organismos que todavía piden el documento en Word 97-2003 (.doc), otros que lo quieren en LibreOffice (.odt) y otros en texto con formato (.rtf). Esta herramienta pasa el archivo de un formato a otro conservando el formato, las tablas y las imágenes, y avisa de lo que el formato de destino no puede guardar.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Cargá uno o varios documentos (.docx, .doc u .odt).</li>
+      <li data-i18n="guia-paso-2">Elegí el formato de destino: .docx, .doc, .odt o .rtf.</li>
+      <li data-i18n="guia-paso-3">Tocá «Convertir». Con un archivo se baja el documento convertido; con varios, un .zip con un documento por archivo.</li>
+      <li data-i18n="guia-paso-4">Leé los avisos que aparecen debajo: dicen qué cosas el formato de destino no pudo guardar.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para entregar un archivo que cualquiera pueda abrir, elegí .docx: lo leen Word, LibreOffice y Google Documentos.</li>
+      <li data-i18n="guia-consejo-2">Si el programa que lo va a abrir es muy viejo, usá .doc; si no sabés cuál usa quien lo recibe, .rtf es el más compatible, aunque lleva menos cosas.</li>
+      <li data-i18n="guia-consejo-3">Un documento .doc o .odt que otra herramienta de este sitio no abría se puede pasar primero a .docx con esta.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Puedo pasar un .doc a .odt?</summary>
+      <p data-i18n="guia-r1">Sí, entre los tres formatos de Word (.docx, .doc y .odt) se puede ir en cualquier dirección. El .rtf es solo de salida.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Se pierden las notas al pie y los cuadros de texto?</summary>
+      <p data-i18n="guia-r2">Sí, esta herramienta lleva el cuerpo del documento, no los objetos flotantes ni las notas. Si algo no se pudo llevar, se avisa al terminar.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Por qué una imagen no aparece en el .doc?</summary>
+      <p data-i18n="guia-r3">Un .doc y un .rtf llevan imágenes PNG y JPEG. Un GIF o un BMP no se guarda en esos dos formatos y se avisa.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Un .doc hecho acá se abre en Word?</summary>
+      <p data-i18n="guia-r4">Sí. Se probó con Word y con LibreOffice, y se abre sin pedir reparación.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/formatos-word.js"></script>
+<script src="../assets/js/cambio-version-word.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script>
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const listaArchivos = document.getElementById('listaArchivos');
+const botonConvertir = document.getElementById('botonConvertir');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const resumenLote = document.getElementById('resumenLote');
+const bloqueAvisos = document.getElementById('bloqueAvisos');
+const listaAvisos = document.getElementById('listaAvisos');
+
+let archivosActuales = [];
+let urlResultado = null;
+
+function formatoTamano(bytes) {
+  return bytes < 1024 * 1024 ? Math.max(1, Math.round(bytes / 1024)) + ' KB' : (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function limpiarResultado() {
+  resultado.style.display = 'none';
+  resumenLote.style.display = 'none';
+  bloqueAvisos.style.display = 'none';
+  if (urlResultado) { URL.revokeObjectURL(urlResultado); urlResultado = null; }
+}
+
+function mostrarArchivos(archivos) {
+  archivosActuales = archivos;
+  listaArchivos.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name + ' (' + formatoTamano(archivo.size) + ')';
+    listaArchivos.appendChild(li);
+  });
+  botonConvertir.disabled = archivos.length === 0;
+  limpiarResultado();
+}
+
+conectarZonaArrastre(zonaArrastre, entradaArchivos, (lista) => {
+  const archivos = lista.filter((f) => FormatosWord.esDocumento(f.name));
+  if (archivos.length) mostrarArchivos(archivos);
+});
+
+const destinoElegido = () => document.querySelector('input[name="destino"]:checked').value;
+const MIME = {
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  doc: 'application/msword',
+  odt: 'application/vnd.oasis.opendocument.text',
+  rtf: 'application/rtf',
+};
+
+// Los avisos de todos los archivos, sin repetir: una línea por tipo
+function pintarAvisos(tipos) {
+  listaAvisos.innerHTML = '';
+  for (const tipo of tipos) {
+    const clave = 'aviso-' + tipo;
+    const texto = t(clave);
+    if (!texto || texto === clave) continue;
+    const li = document.createElement('li');
+    li.textContent = texto;
+    listaAvisos.appendChild(li);
+  }
+  bloqueAvisos.style.display = listaAvisos.children.length ? 'block' : 'none';
+}
+
+botonConvertir.addEventListener('click', async () => {
+  const destino = destinoElegido();
+  botonConvertir.disabled = true;
+  botonConvertir.textContent = t('boton-procesando');
+  limpiarResultado();
+  const avisos = new Set();
+  try {
+    const resultados = await LoteArchivos.convertirLote(archivosActuales, async (archivo) => {
+      const bytes = new Uint8Array(await archivo.arrayBuffer());
+      let r;
+      try { r = await CambioVersionWord.convertir(bytes, destino); }
+      catch (e) { throw e.codigo === 'mismo-formato' ? new Error(t('error-mismo-formato')) : e; }
+      for (const a of r.avisos) avisos.add(a.tipo);
+      return { nombre: FormatosWord.sinExtension(archivo.name) + '.' + destino, blob: new Blob([r.bytes], { type: MIME[destino] }) };
+    }, (i, total) => {
+      if (total > 1) botonConvertir.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+    });
+    const buenos = resultados.filter((r) => r.ok);
+    if (buenos.length === 1 && resultados.length === 1) {
+      urlResultado = URL.createObjectURL(buenos[0].blob);
+      enlaceDescarga.href = urlResultado;
+      enlaceDescarga.download = buenos[0].nombre;
+      enlaceDescarga.textContent = t('resultado-enlace') + ' ' + buenos[0].nombre;
+      resultado.style.display = 'block';
+    } else if (buenos.length) {
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      urlResultado = URL.createObjectURL(zip);
+      enlaceDescarga.href = urlResultado;
+      enlaceDescarga.download = 'documentos-convertidos.zip';
+      enlaceDescarga.textContent = t('resultado-enlace-zip');
+      resultado.style.display = 'block';
+    }
+    if (resultados.length > 1 || !buenos.length) LoteArchivos.pintarResumen(resumenLote, resultados, t);
+    else if (resultados[0] && !resultados[0].ok) LoteArchivos.pintarResumen(resumenLote, resultados, t);
+    pintarAvisos(avisos);
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  } finally {
+    botonConvertir.disabled = archivosActuales.length === 0;
+    botonConvertir.textContent = t('boton-convertir');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

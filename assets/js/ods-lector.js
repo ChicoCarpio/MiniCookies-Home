@@ -8,8 +8,8 @@
 //   con relleno o bordes es { valor: null, estilo })
 //
 // Qué lee: valores (número, porcentaje, moneda, fecha, hora, lógico, texto, error), el formato de número de cada celda (traducido a un código de Excel),
-// combinadas, anchos de columna y el idioma-neutro de los textos con espacios y saltos. Las fórmulas no se leen: queda el último valor, que es lo que
-// el archivo guarda (el sintaxis de fórmulas de ODF — "of:=[.A1]+1" — no es la de Excel). También lleva el estilo de cada celda (fuente, color, relleno,
+// combinadas, anchos de columna y el idioma-neutro de los textos con espacios y saltos. Las fórmulas solo se leen con leer(bytes, { formulas: true }), traducidas
+// por ods-formulas.js (la sintaxis de ODF — "of:=[.A1]+1" — no es la de Excel); si no, queda el último valor, que es lo que el archivo guarda. También lleva el estilo de cada celda (fuente, color, relleno,
 // bordes y alineación, con la herencia de style:parent-style-name y el estilo por defecto de columna o fila) y el alto propio de las filas
 // (style:row-height cuando no es "óptimo"). Hay un objeto de estilo por cada combinación distinta: las celdas que la comparten apuntan al mismo, que es lo
 // que espera crearLibro. Lo que Excel no tiene (reducir hasta ajustar, los colores de un formato de número) no se lleva.
@@ -20,6 +20,11 @@
   const MAX_ESTILOS = 100000;     // estilos de celda, de fila y de columna que se guardan (un archivo hostil puede declarar millones)
   const MAX_VACIAS = 1000000;     // celdas vacías con relleno o bordes en todo el libro (una fila de relleno repetida un millón de veces no se materializa)
   const MAX_ALTOS = 100000;       // filas con alto propio por hoja
+  // Lugares de fila que se arman en todo el libro detrás de la última celda con contenido (lo que mide cada fila, con sus huecos, por las veces que se repite):
+  // una fila de 16.384 con una vacía con relleno al final, repetida, armaba cien millones con 550 bytes. Lo que pasa del tope pierde las vacías con estilo.
+  const MAX_RANURAS = MAX_CELDAS;
+  const MAX_HOJAS = 4096, MAX_FORMULA = 32768;   // tablas que se leen; largo de una fórmula de OpenFormula que se traduce (la de Excel no pasa de 8.192)
+  const MAX_DIGITOS = 30;         // cifras de un formato de número (decimales, enteros mínimos): Excel no muestra más de 30 decimales
   const SIN_ESTILO = { est: null, cod: null };
   const MAX_FUSIONES = 500;   // combinadas con estilo que se siguen a la vez (las que aún cubren la fila de abajo)
   const seVe = (e) => !!e && !!(e.relleno || e.bordes);
@@ -27,6 +32,7 @@
 
   const ent = (a, k) => (a[k] === undefined ? null : a[k]);
   const entero = (s, defecto) => { const n = parseInt(s, 10); return n > 0 ? n : defecto; };
+  const cifras = (s, defecto) => Math.min(entero(s, defecto), MAX_DIGITOS);
   const comillas = (t) => '"' + t.replace(/"/g, '""') + '"';
 
   // ---- fechas y horas de ODF → número de serie de Excel (base 1900) -----------------------------------------------
@@ -80,23 +86,23 @@
         case 'text-content': s += '@'; break;
         case 'fill-character': s += p.t ? '*' + p.t.charAt(0) : ''; break;
         case 'number': {
-          const dp = a['decimal-places'] === undefined ? null : entero(a['decimal-places'], 0);
-          const minDec = a['min-decimal-places'] === undefined ? dp : entero(a['min-decimal-places'], 0);
-          const minInt = Math.max(1, entero(a['min-integer-digits'], 1));
+          const dp = a['decimal-places'] === undefined ? null : cifras(a['decimal-places'], 0);
+          const minDec = a['min-decimal-places'] === undefined ? dp : cifras(a['min-decimal-places'], 0);
+          const minInt = Math.max(1, cifras(a['min-integer-digits'], 1));
           if (dp === null && a.grouping !== 'true' && minInt === 1) { s += 'General'; break; }
           s += a.grouping === 'true' ? '#,' + '#'.repeat(Math.max(0, 3 - minInt)) + '0'.repeat(minInt) : '0'.repeat(minInt);
           if (dp) s += '.' + '0'.repeat(minDec || 0) + '#'.repeat(Math.max(0, dp - (minDec || 0)));
           break;
         }
         case 'scientific-number': {
-          const dp = entero(a['decimal-places'], 0), minDec = a['min-decimal-places'] === undefined ? dp : entero(a['min-decimal-places'], 0);
-          s += '0' + (dp ? '.' + '0'.repeat(minDec) + '#'.repeat(Math.max(0, dp - minDec)) : '') + 'E' + (a['forced-exponent-sign'] === 'true' ? '+' : '-') + '0'.repeat(entero(a['min-exponent-digits'], 1));
+          const dp = cifras(a['decimal-places'], 0), minDec = a['min-decimal-places'] === undefined ? dp : cifras(a['min-decimal-places'], 0);
+          s += '0' + (dp ? '.' + '0'.repeat(minDec) + '#'.repeat(Math.max(0, dp - minDec)) : '') + 'E' + (a['forced-exponent-sign'] === 'true' ? '+' : '-') + '0'.repeat(cifras(a['min-exponent-digits'], 1));
           break;
         }
         case 'fraction': {
-          const fijo = a['denominator-value'], max = entero(a['max-denominator-value'], 0);
-          const dig = fijo ? 0 : Math.max(entero(a['min-denominator-digits'], 1), String(max || 9).length);
-          s += (entero(a['min-integer-digits'], 0) > 0 ? '0 ' : '# ') + '?'.repeat(Math.max(1, entero(a['min-numerator-digits'], 1))) + '/' + (fijo ? fijo : '?'.repeat(dig));
+          const fijo = /^\d{1,9}$/.test(a['denominator-value'] || '') ? a['denominator-value'] : null, max = entero(a['max-denominator-value'], 0);
+          const dig = fijo ? 0 : Math.min(MAX_DIGITOS, Math.max(cifras(a['min-denominator-digits'], 1), String(max || 9).length));
+          s += (entero(a['min-integer-digits'], 0) > 0 ? '0 ' : '# ') + '?'.repeat(Math.max(1, cifras(a['min-numerator-digits'], 1))) + '/' + (fijo ? fijo : '?'.repeat(dig));
           break;
         }
         case 'day': s += a.style === 'long' ? 'dd' : 'd'; break;
@@ -106,7 +112,7 @@
         case 'quarter': s += a.style === 'long' ? '"Q"0' : '"Q"0'; break;
         case 'hours': s += e.a['truncate-on-overflow'] === 'false' ? '[h]' : (a.style === 'long' ? 'hh' : 'h'); break;
         case 'minutes': s += e.a['truncate-on-overflow'] === 'false' && !e.partes.some((q) => q.k === 'hours') ? '[mm]' : (a.style === 'long' ? 'mm' : 'm'); break;
-        case 'seconds': s += (e.a['truncate-on-overflow'] === 'false' && !e.partes.some((q) => q.k === 'hours' || q.k === 'minutes') ? '[ss]' : (a.style === 'long' ? 'ss' : 's')) + (entero(a['decimal-places'], 0) ? '.' + '0'.repeat(entero(a['decimal-places'], 0)) : ''); break;
+        case 'seconds': s += (e.a['truncate-on-overflow'] === 'false' && !e.partes.some((q) => q.k === 'hours' || q.k === 'minutes') ? '[ss]' : (a.style === 'long' ? 'ss' : 's')) + (cifras(a['decimal-places'], 0) ? '.' + '0'.repeat(cifras(a['decimal-places'], 0)) : ''); break;
         case 'am-pm': s += 'AM/PM'; break;
         default: break;
       }
@@ -309,7 +315,8 @@
     return codigo;
   }
 
-  async function leer(bytes) {
+  async function leer(bytes, opciones) {
+    const conFormulas = !!(opciones && opciones.formulas) && typeof OdsFormulas !== 'undefined';
     let zip;
     try { zip = await ZipPropio.loadAsync(bytes); } catch (e) { throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument'); }
     const contenido = zip.file('content.xml');
@@ -328,7 +335,7 @@
     const hojas = [];
     const memo = new Map(), memoEstilo = new Map();
     let hoja = null, fila = 0, col = 0, repFila = 1, filaActual = null, celda = null;
-    let enCelda = false, parrafos = [], parrafoActual = null, profundidadTabla = 0, enNota = 0, celdas = 0, vacias = 0;
+    let enCelda = false, parrafos = [], parrafoActual = null, profundidadTabla = 0, enNota = 0, celdas = 0, vacias = 0, ranuras = 0;
 
     // El estilo y el formato de número por defecto de una columna: la hoja guarda tramos de columnas seguidas con lo mismo ({ ini, tiene, est, cod }),
     // así una fila de 16.000 celdas vacías repetidas se mira por tramos y no por columnas.
@@ -378,7 +385,7 @@
         case 'time': { const h = serieDeHora(c.a['time-value'] || ''); if (h !== null) { base = h; def = 'hh:mm:ss'; } break; }
         case 'boolean': base = c.a['boolean-value'] === 'true'; break;
         case 'error': { const e = c.a['string-value'] || parrafos.join(''); base = { error: ERRORES.has(e) ? e : '#VALUE!' }; break; }
-        case 'string': { const t = cadena(); if (t !== '') base = t; break; }
+        case 'string': { const t = cadena(); if (t !== '' || (conFormulas && c.a.formula)) base = t; break; }   // una fórmula que da "" sigue siendo fórmula
         default: break;
       }
       parrafos = [];
@@ -414,6 +421,18 @@
       }
       if (propio) { const v = hacer(propio); for (let x = col; x < fin; x++) filaActual.celdas[x] = v; }
       else trozos(hoja.tramos, col, fin, (x, y, t) => { const v = hacer(t && t.tiene ? t : filaActual.defecto); for (let j = x; j < y; j++) filaActual.celdas[j] = v; });
+      // la fórmula (OpenFormula → texto de Excel) va en la primera celda; el valor guardado queda como último resultado
+      if (conFormulas && c.a.formula && col < MAX_COLS && c.a.formula.length <= MAX_FORMULA && c.a.formula.startsWith('of:=') && !/^of:=#[A-Za-z\/0!?]+$/.test(c.a.formula)) {   // un error suelto (of:=#N/A) es como LibreOffice guarda una celda de error, no una fórmula
+        const texto = OdsFormulas.aExcel(c.a.formula);
+        if (texto && texto.length < 8000) {
+          const v = filaActual.celdas[col];
+          const o = v && typeof v === 'object' && !('error' in v) ? { ...v } : { valor: v === undefined ? null : v };
+          o.formula = texto;
+          const mc = entero(c.a['number-matrix-columns-spanned'], 0), mf = entero(c.a['number-matrix-rows-spanned'], 0);
+          if (mc && mf) o.matriz = LibroXlsx.numeroACol(col) + (fila + 1) + (mc > 1 || mf > 1 ? ':' + LibroXlsx.numeroACol(Math.min(col + mc - 1, MAX_COLS - 1)) + Math.min(fila + mf, MAX_FILAS) : '');
+          filaActual.celdas[col] = o;
+        }
+      }
       if (fin > col) { filaActual.llenas += fin - col; if (fin > filaActual.largo) filaActual.largo = fin; }
       if (c.fs > 1 || c.cs > 1) filaActual.combinadas.push({ c: col, f: fila, nc: c.cs, nf: c.fs });
       col += rep;
@@ -439,8 +458,12 @@
           n = Math.max(1, Math.min(n, 1 + Math.floor((MAX_VACIAS - vacias) / f.vacias), Math.floor(5e6 / f.celdas.length)));   // una sola vacía en XFD repetida 1 M de veces: 1 M de filas de 16.384
           vacias += (n - 1) * f.vacias;
         }
+        // el tope de lugares después de la última celda con contenido (los arman las vacías con estilo): si no cabe, la fila pierde esas vacías
+        // (y si no le queda nada, no se arma); hasta f.largo ya lo topa MAX_CELDAS
+        if (f.celdas.length > f.largo && ranuras + n * (f.celdas.length - f.largo) > MAX_RANURAS) f.celdas.length = f.largo;
+        ranuras += n * (f.celdas.length - f.largo);
         // una fila repetida con contenido se copia (el contenido es el mismo)
-        for (let k = 0; k < n; k++) hoja.filas[fila + k] = k === 0 ? f.celdas : f.celdas.slice();
+        if (f.celdas.length) for (let k = 0; k < n; k++) hoja.filas[fila + k] = k === 0 ? f.celdas : f.celdas.slice();
       }
       if (f.oculta) for (let k = 0; k < Math.min(repFila, 100000) && fila + k < MAX_FILAS; k++) hoja.filasOcultas.push(fila + k);
       if (f.alto) for (let k = 0; k < repFila && fila + k < MAX_FILAS && hoja.nAltos < MAX_ALTOS; k++, hoja.nAltos++) hoja.altosFila[fila + k] = f.alto;
@@ -453,6 +476,7 @@
         void vacio;
         if (nombre === 'table' ) {
           if (profundidadTabla++ > 0) return;   // una tabla dentro de otra (objeto incrustado): no es una hoja
+          if (hojas.length >= MAX_HOJAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_HOJAS + ' hojas');
           hoja = { nombre: a.name || ('Hoja' + (hojas.length + 1)), filas: [], anchos: [], combinadasBrutas: [], tramos: [], tramosEst: [], fusiones: [], altosFila: {}, nAltos: 0, columnasOcultas: [], filasOcultas: [], oculta: estilos.hojasOcultas.has(a['style-name']) };
           hojas.push(hoja); fila = 0; col = 0; return;
         }
@@ -502,6 +526,12 @@
             break;
           case 'covered-table-cell': {
             if (!filaActual) return;
+            // una celda cubierta con valor es parte del resultado de una fórmula de matriz (las cubiertas por una combinada no traen valor): se lee como cualquier celda
+            if (a['value-type'] && !hoja.fusiones.some((m) => m.f0 <= fila && fila <= m.f1 && m.c0 <= col && col <= m.c1)) {
+              celda = { tipo: a['value-type'], a, estilo: a['style-name'] || null, rep: Math.min(entero(a['number-columns-repeated'], 1), MAX_COLS), cs: 1, fs: 1, cubierta: true };
+              enCelda = true; parrafoActual = null;
+              break;
+            }
             const rep = Math.min(entero(a['number-columns-repeated'], 1), MAX_COLS);
             for (const m of hoja.fusiones) if (m.f0 <= fila && fila <= m.f1) ponerVacias(Math.max(col, m.c0), Math.min(col + rep, m.c1 + 1), m.est);
             col += rep;
@@ -524,7 +554,7 @@
         if (nombre === 'annotation') { enNota--; return; }
         if (enNota) return;
         if (nombre === 'p' && enCelda && parrafoActual !== null) { parrafos.push(parrafoActual); parrafoActual = null; }
-        else if (nombre === 'table-cell' && celda) cierraCelda();
+        else if ((nombre === 'table-cell' || (nombre === 'covered-table-cell' && celda)) && celda) cierraCelda();
         else if (nombre === 'table-row' && filaActual) cierraFila();
       },
       texto(t) { if (parrafoActual !== null) parrafoActual += t; },

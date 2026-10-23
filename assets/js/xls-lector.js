@@ -1,7 +1,7 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Lector de libros de Excel 97-2003 (.xls) del motor propio de Excel (etapa 9). Un .xls es un contenedor CFB ("Compound File", el de Office antiguo)
-// con un flujo "Workbook" de registros BIFF8 ([MS-CFB], [MS-XLS]); también se leen los de Excel 5/95 (BIFF5, flujo "Book"). Requiere xlsx-modelo.js
-// (errores) y xlsx-estilos.js (formatos integrados); no depende del navegador.
+// con un flujo "Workbook" de registros BIFF8 ([MS-CFB], [MS-XLS]); también se leen los de Excel 5/95 (BIFF5, flujo "Book"). Requiere cfb-propio.js
+// (el contenedor), xlsx-modelo.js (errores) y xlsx-estilos.js (formatos integrados); no depende del navegador.
 //
 //   const libro = XlsLector.leer(bytes);
 //   libro = { hojas: [{ nombre, filas: [[valor…]…], anchos: [caracteres…], combinadas: ['A1:B2'…], altosFila }], fecha1904 }   (valor: ver OdsLector)
@@ -9,7 +9,9 @@
 // Estilos de celda (solo BIFF8): fuente, color, relleno, bordes y alineación salen como { valor, formato?, estilo } (el contrato de XlsxEscritor.crearLibro;
 // un objeto de estilo por XF, compartido por todas sus celdas), una celda vacía con relleno, borde o alineación como { valor: null, estilo }, y el alto de
 // las filas con alto propio en altosFila ({ fila desde 0: puntos }). BIFF5 queda solo con valores.
-// Las fórmulas no se leen (queda su último valor, que el archivo guarda). Con contraseña (FILEPASS) se rechaza. Se omiten las hojas de gráfico y de macros.
+// Las fórmulas solo se leen con leer(bytes, { formulas: true }) (si no, queda su último valor, que el archivo guarda); entonces libro.nombres trae los nombres definidos y,
+// si un libro hostil pasa los topes de fórmulas (MAX_RGCE_LIBRO), libro.formulasOmitidas cuenta las que quedaron en su valor.
+// Con contraseña (FILEPASS) se rechaza. Se omiten las hojas de gráfico y de macros.
 (function () {
   const MAX_FILAS = 65536, MAX_COLS = 256, MAX_TEXTO = 32767;   // los límites de un .xls
   const MAX_CELDAS = 10000000;   // en todo el libro: crearLibro no arma un .xlsx de más de ~8 M celdas, y antes de llegar ahí la memoria ya se fue
@@ -17,75 +19,10 @@
   const danado = (detalle) => new LibroXlsx.ErrorXlsx('danado', detalle);
   const u16 = (b, p) => b[p] | (b[p + 1] << 8);
   const u32 = (b, p) => (b[p] | (b[p + 1] << 8) | (b[p + 2] << 16) | (b[p + 3] << 24)) >>> 0;
-  const FIN = 0xFFFFFFFE, LIBRE = 0xFFFFFFFF;
+  const i16 = (b, p) => (u16(b, p) << 16) >> 16;
 
-  // ---- contenedor CFB -----------------------------------------------------------------------------------------------
-  function leerCfb(b) {
-    if (b.length < 512) throw danado('contenedor muy corto');
-    const desp = u16(b, 0x1E), despMini = u16(b, 0x20);
-    if (desp < 7 || desp > 16 || despMini > desp) throw danado('tamaño de sector');
-    const tam = 1 << desp, tamMini = 1 << despMini;
-    const nSect = Math.floor((b.length - 512) / tam) + 1;
-    const sector = (id) => {
-      const ini = (id + 1) * tam;
-      if (id >= nSect + 1 || ini >= b.length) throw danado('sector fuera del archivo');
-      return b.subarray(ini, Math.min(ini + tam, b.length));
-    };
-    // tabla de asignación (FAT): sus sectores los dice el encabezado y, si son más de 109, la cadena DIFAT. No puede haber más sectores de FAT que
-    // sectores en el archivo: una DIFAT hostil que repite el mismo id armaba una FAT de gigas con un archivo de 10 MB.
-    const idsFat = [];
-    for (let k = 0; k < 109; k++) { const id = u32(b, 0x4C + k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
-    let dif = u32(b, 0x44), vueltas = 0;
-    while (dif < 0xFFFFFFFA && vueltas++ < nSect && idsFat.length <= nSect) {
-      const s = sector(dif);
-      for (let k = 0; k < tam / 4 - 1; k++) { const id = u32(s, k * 4); if (id < 0xFFFFFFFA) idsFat.push(id); }
-      dif = u32(s, tam - 4);
-    }
-    if (idsFat.length > nSect) throw danado('FAT más grande que el archivo');
-    const fat = new Uint32Array(idsFat.length * (tam / 4));
-    idsFat.forEach((id, k) => { const s = sector(id); for (let j = 0; j < tam / 4; j++) fat[k * (tam / 4) + j] = u32(s, j * 4); });
-    // una cadena no pasa por más sectores que los que tiene el archivo (con un ciclo, la tabla entera: un flujo de cientos de megas)
-    const cadena = (inicio, tabla, max) => {
-      const ids = [];
-      let id = inicio;
-      while (id < 0xFFFFFFFA) {
-        if (ids.length >= max || id >= tabla.length) throw danado('cadena de sectores');
-        ids.push(id); id = tabla[id];
-      }
-      return ids;
-    };
-    const leerCadena = (inicio, tamano) => {
-      const ids = cadena(inicio, fat, nSect), r = new Uint8Array(ids.length * tam);
-      ids.forEach((id, k) => r.set(sector(id), k * tam));
-      return tamano === undefined ? r : r.subarray(0, tamano);
-    };
-    // directorio
-    const dir = leerCadena(u32(b, 0x30));
-    const entradas = [];
-    for (let p = 0; p + 128 <= dir.length; p += 128) {
-      const nc = u16(dir, p + 64);
-      if (!dir[p + 66]) continue;
-      entradas.push({ nombre: new TextDecoder('utf-16le').decode(dir.subarray(p, p + Math.max(0, nc - 2))), tipo: dir[p + 66], inicio: u32(dir, p + 116), tam: u32(dir, p + 120) });
-    }
-    const raiz = entradas.find((e) => e.tipo === 5);
-    const corte = u32(b, 0x38);
-    let miniFat = null, miniFlujo = null;
-    const flujo = (e) => {
-      if (e.tam < corte && raiz) {
-        if (!miniFat) {
-          const bytes = leerCadena(u32(b, 0x3C));
-          miniFat = new Uint32Array(bytes.length / 4);
-          for (let k = 0; k < miniFat.length; k++) miniFat[k] = u32(bytes, k * 4);
-          miniFlujo = leerCadena(raiz.inicio, raiz.tam);
-        }
-        const ids = cadena(e.inicio, miniFat, Math.ceil(miniFlujo.length / tamMini)), r = new Uint8Array(ids.length * tamMini);
-        ids.forEach((id, k) => { const ini = id * tamMini; if (ini + tamMini > miniFlujo.length + tamMini) throw danado('minisector'); r.set(miniFlujo.subarray(ini, ini + tamMini), k * tamMini); });
-        return r.subarray(0, e.tam);
-      }
-      return leerCadena(e.inicio, e.tam);
-    };
-    return { entradas, flujo };
-  }
+  // ---- contenedor CFB (cfb-propio.js, compartido con los lectores de .doc y .ppt) ----------------------------------------
+  const leerCfb = (b) => CfbPropio.leer(b, { danado });
 
   // ---- registros BIFF -----------------------------------------------------------------------------------------------
   // Un registro lleva hasta 8224 bytes; si hay más, siguen registros CONTINUE (0x3C). Devuelve { id, d (datos juntos), partes (cada pedazo) }.
@@ -144,7 +81,8 @@
     let ci = 0, d = partes[0], p = 8;   // 8: cstTotal y cstUnique
     const total = u32(d, 4);
     const textos = [];
-    const siguiente = () => { ci++; d = partes[ci]; p = 0; return d !== undefined; };
+    // sin más pedazos, `d` queda en el último (una SST cortada a mitad de un texto se lee hasta donde llega, sin leer fuera)
+    const siguiente = () => { if (ci + 1 >= partes.length) return false; ci++; d = partes[ci]; p = 0; return true; };
     const byte = () => { if (p >= d.length && !siguiente()) throw danado('SST cortada'); return d[p++]; };
     const salta = (n) => { while (n > 0) { if (p >= d.length && !siguiente()) return; const t = Math.min(n, d.length - p); p += t; n -= t; } };
     while (textos.length < total && (p < d.length || ci + 1 < partes.length)) {
@@ -193,7 +131,41 @@
       cArr: col & 127, cAba: (col >> 7) & 127, cDiag: (col >> 14) & 127, eDiag: (col >> 21) & 15, trama: (col >>> 26) & 63, fg: u16(d, 18) & 127, bg: (u16(d, 18) >> 7) & 127 };
   }
 
-  function leer(bytes) {
+  // ---- fórmulas (opcionales: leer(bytes, { formulas: true })) ---------------------------------------------------------------
+  const MAX_NOMBRES = 65536;
+  // Una fórmula compartida se decodifica una vez por cada celda que la usa (un registro de 31 bytes), y un nombre de 255 caracteres cabe en 5 bytes de fórmula:
+  // 100 KB armaban mil millones de caracteres. Topes: el largo de una fórmula de Excel, y en todo el libro los bytes de fórmula que se decodifican y el texto que sale.
+  // Lo que pasa del tope queda con su valor (libro.formulasOmitidas cuenta esas celdas).
+  const MAX_FORMULA = 8192, MAX_RGCE_LIBRO = 64 * 1024 * 1024, MAX_TEXTO_FORMULAS = 32 * 1024 * 1024;
+  const MAX_HOJAS = 4096;   // hojas que se leen (cada una recorre su subflujo; Excel no pasa de unas centenas en la práctica)
+  // SUPBOOK: libro interno (0x0401), de complemento (0x3A01, las funciones del Analysis ToolPak) o externo
+  const leerSupbook = (d) => ({ tipo: d.length === 4 && u16(d, 2) === 0x0401 ? 'interno' : u16(d, 2) === 0x3A01 ? 'complemento' : 'externo', nombres: [] });
+  // EXTERNNAME de un complemento o libro externo: banderas (2), reservado (4), nombre (cch, bandera, caracteres)
+  const leerNombreExterno = (d) => {
+    if (d.length < 8) return '';
+    const alto = d[7] & 1, n = d[6];
+    return d.length >= 8 + n * (alto + 1) ? (alto ? utf16.decode(d.subarray(8, 8 + n * 2)) : latin1(d.subarray(8, 8 + n))) : '';
+  };
+  // NAME: banderas, largos, ámbito (hoja, desde 1; 0 = todo el libro), nombre y fórmula
+  function leerNombre(d) {
+    if (d.length < 15) return { nombre: '', integrado: true };
+    const grbit = u16(d, 0), cch = d[3], cce = u16(d, 4), alto = d[14] & 1;
+    const fin = 15 + cch * (alto + 1);
+    return { nombre: d.length >= fin ? (alto ? utf16.decode(d.subarray(15, fin)) : latin1(d.subarray(15, fin))) : '', integrado: (grbit & 0x20) !== 0, oculto: (grbit & 1) !== 0, hoja: u16(d, 8), rgce: d.subarray(fin, fin + cce), rgcb: d.subarray(fin + cce) };
+  }
+  // Una celda ya leída (valor suelto, { valor, formato?, estilo? } o nada) pasa a { formula, valor, estilo? } (+ matriz: 'B3:B5' en la primera celda de una fórmula de matriz)
+  function conFormula(celda, formula, matriz) {
+    let valor = celda, estilo;
+    if (celda && typeof celda === 'object' && 'valor' in celda) { valor = celda.formato !== undefined ? { valor: celda.valor, formato: celda.formato } : celda.valor; estilo = celda.estilo; }
+    else if (celda === undefined) valor = null;
+    const r = { formula, valor };
+    if (estilo) r.estilo = estilo;
+    if (matriz) r.matriz = matriz;
+    return r;
+  }
+
+  function leer(bytes, opciones) {
+    const conFormulas = !!(opciones && opciones.formulas), depurar = !!(opciones && opciones.depurar);
     const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     const cfb = leerCfb(b);
     const entrada = cfb.entradas.find((e) => e.tipo === 2 && (e.nombre === 'Workbook' || e.nombre === 'Book')) || cfb.entradas.find((e) => e.tipo === 2 && /^(Workbook|Book)$/i.test(e.nombre));
@@ -205,6 +177,7 @@
     // ---- globales ----
     let version = 0x0600, fecha1904 = false, fin = false;
     const hojasDef = [], textos = [], formatos = new Map(), xfFormato = [], xfs = [], fuentes = [], paletaPropia = [], extensiones = new Map();
+    const libros = [], xti = [], nombresDef = [];   // solo con fórmulas: SUPBOOK, EXTERNSHEET y NAME
     let primero = true, profundidad = 0, pagina = decodificador(1252);
     const texto5 = (crudo) => pagina.decode(crudo);   // un texto de BIFF5
     for (const r of registros(wb)) {
@@ -219,6 +192,7 @@
       else if (r.id === 0x0042) pagina = decodificador(u16(d, 0));                              // CODEPAGE
       else if (r.id === 0x0085) {                                                              // BOUNDSHEET: posición, estado, tipo, nombre
         const nombre = version >= 0x0600 ? cadenaBiff8(d, 6, 1).texto : texto5(d.subarray(7, 7 + d[6]));
+        if (hojasDef.length >= MAX_HOJAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_HOJAS + ' hojas');
         hojasDef.push({ pos: u32(d, 0), tipo: d[5], nombre, estado: d[4] === 1 ? 'oculta' : d[4] === 2 ? 'muyOculta' : 'visible' });
       } else if (r.id === 0x00FC) { for (const t of leerSst(r.partes)) textos.push(t); }       // SST
       else if (r.id === 0x041E) {                                                              // FORMAT: id y código
@@ -245,6 +219,13 @@
       else if (r.id === 0x0092 && version >= 0x0600) {                                         // PALETTE: reemplaza los colores 8..63
         const hex = (n) => ('0' + n.toString(16)).slice(-2);
         for (let k = 0, q = 2; k < Math.min(u16(d, 0), 56) && q + 4 <= d.length; k++, q += 4) paletaPropia[k] = hex(d[q]) + hex(d[q + 1]) + hex(d[q + 2]);
+      }
+      else if (conFormulas && version >= 0x0600) {
+        if (r.id === 0x01AE) { if (libros.length < MAX_NOMBRES) libros.push(leerSupbook(d)); }                                   // SUPBOOK
+        else if (r.id === 0x0023) { const l = libros[libros.length - 1]; if (l && l.tipo !== 'interno' && l.nombres.length < MAX_NOMBRES) l.nombres.push(leerNombreExterno(d)); }   // EXTERNNAME
+        else if (r.id === 0x0017) {                                                                                              // EXTERNSHEET
+          for (let k = 0, q = 2; k < u16(d, 0) && q + 6 <= d.length && xti.length < MAX_NOMBRES; k++, q += 6) xti.push({ libro: u16(d, q), primera: i16(d, q + 2), ultima: i16(d, q + 4) });
+        } else if (r.id === 0x0018) { if (nombresDef.length < MAX_NOMBRES) nombresDef.push(leerNombre(d)); }                       // NAME
       }
     }
     if (!fin && !hojasDef.length) throw danado('libro sin hojas');
@@ -313,11 +294,27 @@
     // Los subflujos de las hojas no se pisan: entre todas no recorren más que el flujo entero. Un libro hostil con cientos de hojas que apuntan al mismo
     // subflujo (o a uno sin EOF) lo leería una vez por hoja: 400 KB armaban gigas. Se deja margen para un EOF que falte en un libro real.
     let presupuesto = 4 * wb.length + 65536, celdas = 0;
+    // fórmulas: la tabla de hojas es la misma para todas, y los topes son de todo el libro (ver MAX_RGCE_LIBRO)
+    const ctx = { f: 0, c: 0, hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
+    let restanRgce = MAX_RGCE_LIBRO, restanTexto = MAX_TEXTO_FORMULAS, omitidas = 0;
+    const decod = (rgce, rgcb, f, c) => {
+      if ((restanRgce -= rgce.length + 1) < 0 || restanTexto < 0) { omitidas++; return null; }
+      ctx.f = f; ctx.c = c;
+      let t;
+      try { t = XlsFormulas.decodificar(rgce, rgcb, ctx); } catch (e) { if (depurar) throw e; return null; }
+      if (!t || t.length > MAX_FORMULA) return null;
+      restanTexto -= t.length;
+      return t;
+    };
     for (const def of hojasDef) {
       if (def.tipo !== 0) continue;   // 0: hoja de cálculo; 2: gráfico; 1 y 6: macros
       const filas = [], anchos = [], combinadas = [], columnasOcultas = new Set(), filasOcultas = [], altosFila = {};
       let vacias = 0;
       let profund = 0, ultimaFormula = null;
+      // fórmulas: las que se leen, las que apuntan a una compartida o de matriz (PtgExp) y esas compartidas o de matriz, por la celda donde están
+      // (una celda con varios registros FORMULA se queda con el último: se guardan por celda)
+      const formulasHoja = new Map(), apuntan = new Map(), maestras = new Map();
+      let ultimaPos = null;
       const poner = (f, c, v) => {
         if (f >= MAX_FILAS || c >= MAX_COLS) return;
         if (++celdas > MAX_CELDAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_CELDAS + ' celdas');
@@ -378,8 +375,20 @@
               else if (d[6] === 1) poner(f, c, con(xf, d[8] === 1));
               else if (d[6] === 2) poner(f, c, con(xf, { error: ERRORES[d[8]] || '#VALUE!' }));
             } else numero(f, c, u16(d, 4), doble(d, 6));
+            if (conFormulas && version >= 0x0600 && d.length >= 22) {
+              const cce = u16(d, 20), rgce = d.subarray(22, 22 + cce);
+              ultimaPos = f + ',' + c;
+              if (cce === 5 && rgce[0] === 0x01) { formulasHoja.delete(ultimaPos); apuntan.set(ultimaPos, { f, c, clave: u16(rgce, 1) + ',' + u16(rgce, 3) }); }   // PtgExp: la fórmula está en otra celda
+              else { apuntan.delete(ultimaPos); formulasHoja.set(ultimaPos, { f, c, rgce, rgcb: d.subarray(22 + cce) }); }
+            }
             break;
           }
+          case 0x04BC:                                                                                 // SHRFMLA: fórmula compartida de la celda de arriba
+            if (conFormulas && ultimaPos && d.length >= 10) maestras.set(ultimaPos, { compartida: true, rgce: d.subarray(10, 10 + u16(d, 8)), rgcb: d.subarray(10 + u16(d, 8)) });
+            break;
+          case 0x0221:                                                                                 // ARRAY: fórmula de matriz de la celda de arriba (rango en los primeros 6 bytes)
+            if (conFormulas && ultimaPos && d.length >= 14) maestras.set(ultimaPos, { compartida: false, ref: LibroXlsx.numeroACol(d[4]) + (u16(d, 0) + 1) + ':' + LibroXlsx.numeroACol(d[5]) + (u16(d, 2) + 1), rgce: d.subarray(14, 14 + u16(d, 12)), rgcb: d.subarray(14 + u16(d, 12)) });
+            break;
           case 0x0207:                                                                                 // STRING (resultado de una fórmula)
             if (ultimaFormula) {
               const t = version >= 0x0600 ? cadenaBiff8(d, 0, 2).texto : texto5(d.subarray(2, 2 + u16(d, 0)));
@@ -403,12 +412,33 @@
           default: break;
         }
       }
+      if (conFormulas) {
+        const poner2 = (f, c, texto, matriz) => { if (texto && f < MAX_FILAS && c < MAX_COLS) { if (!filas[f]) filas[f] = []; filas[f][c] = conFormula(filas[f][c], texto, matriz); } };
+        for (const x of formulasHoja.values()) poner2(x.f, x.c, decod(x.rgce, x.rgcb, x.f, x.c));
+        for (const x of apuntan.values()) {
+          const m = maestras.get(x.clave);
+          if (!m) continue;
+          if (m.compartida) poner2(x.f, x.c, decod(m.rgce, m.rgcb, x.f, x.c));
+          else if (x.clave === x.f + ',' + x.c) poner2(x.f, x.c, decod(m.rgce, m.rgcb, x.f, x.c), m.ref);   // solo la primera celda de la matriz lleva la fórmula
+        }
+      }
       let ancho = 0;
       for (let f = 0; f < filas.length; f++) { if (!filas[f]) filas[f] = []; if (filas[f].length > ancho) ancho = filas[f].length; }
       hojas.push({ nombre: def.nombre, filas, anchos: Array.from(anchos.slice(0, ancho), (w) => w || 0), combinadas, estado: def.estado, columnasOcultas: [...columnasOcultas].filter((c) => c < ancho).sort((a, b) => a - b), filasOcultas: filasOcultas.filter((r) => r < filas.length), altosFila });
     }
     if (!hojas.length) throw new LibroXlsx.ErrorXlsx('sinLibro', 'sin hojas');
-    return { hojas, fecha1904 };
+    const libro = { hojas, fecha1904 };
+    if (depurar) libro._tablas = { hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
+    if (conFormulas) {   // los nombres definidos del libro (no los integrados ni los ocultos que hacen de funciones nuevas: `_xlfn.…`)
+      libro.nombres = [];
+      for (const n of nombresDef) {
+        if (n.integrado || !n.nombre || /^_xl(?:fn|pm|ws)\./.test(n.nombre) || libro.nombres.length >= MAX_NOMBRES) continue;
+        const formula = decod(n.rgce, n.rgcb, 0, 0);
+        libro.nombres.push({ nombre: n.nombre, hoja: n.hoja && hojasDef[n.hoja - 1] ? hojasDef[n.hoja - 1].nombre : null, formula });
+      }
+      if (omitidas) libro.formulasOmitidas = omitidas;
+    }
+    return libro;
   }
 
   globalThis.XlsLector = { leer, _leerCfb: leerCfb, _registros: registros, _leerSst: leerSst };

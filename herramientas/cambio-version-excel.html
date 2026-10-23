@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cambiar la versión de un Excel: .xlsx, .xls y .ods gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Pasá una planilla de Excel 2007+ (.xlsx) a Excel 97-2003 (.xls) o a LibreOffice (.ods), o al revés, conservando fórmulas, formatos y estilos — gratis y sin subir tu archivo a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cambiar la versión de un Excel: .xlsx, .xls y .ods gratis — Mini Cookies',
+    'meta-descripcion': 'Pasá una planilla de Excel 2007+ (.xlsx) a Excel 97-2003 (.xls) o a LibreOffice (.ods), o al revés, conservando fórmulas, formatos y estilos — gratis y sin subir tu archivo a ningún servidor.',
+    'h1': 'Cambio de versión de Excel',
+    'intro': 'Pasá una planilla de un formato a otro: Excel 2007 o más nuevo (.xlsx), Excel 97-2003 (.xls) o LibreOffice (.ods). Se conservan las fórmulas, los formatos de número, los colores y los bordes. Podés cargar varios archivos a la vez.',
+    'zona-arrastre': '📊 Arrastrá tus planillas acá o hacé clic para elegirlas (.xlsx, .xlsm, .xls, .ods, .xlsb)',
+    'destino-titulo': 'Convertir a',
+    'destino-xlsx': '.xlsx — Excel 2007 o más nuevo (también lo abre Google Sheets)',
+    'destino-xls': '.xls — Excel 97-2003',
+    'destino-ods': '.ods — LibreOffice (también lo abre Google Sheets)',
+    'opcion-formulas': 'Conservar las fórmulas',
+    'opcion-formulas-ayuda': 'Con la casilla apagada, las celdas con fórmula quedan con el último valor que mostraban, sin la fórmula. Sirve para entregar números fijos o cuando la fórmula usa algo que el formato de destino no entiende.',
+    'boton-convertir': 'Convertir',
+    'boton-procesando': 'Convirtiendo...',
+    'resultado-listo': '✅ Listo. ',
+    'resultado-enlace': 'Descargar',
+    'resultado-enlace-zip': 'Descargar .zip',
+    'error-convertir': 'No se pudo convertir',
+    'error-mismo-formato': 'ya está en ese formato',
+    'avisos-titulo': 'Lo que el formato de destino no puede llevar',
+    'aviso-fuera': '{n} celdas quedaron fuera del tamaño máximo de un .xls (65.536 filas × 256 columnas) y no se guardaron.',
+    'aviso-formula-sin-llevar': 'Fórmulas que no se pudieron llevar: {n}. Quedó su último valor (por ejemplo, la celda {ej}).',
+    'aviso-futura': '{n} fórmulas usan funciones posteriores a Excel 2003 (por ejemplo {ej}). Un Excel 97-2003 sin actualizar las muestra como #¿NOMBRE?; uno más nuevo las calcula bien.',
+    'aviso-anidado': '{n} fórmulas anidan más de 7 funciones: Excel 97-2003 no deja editarlas, aunque las calcula.',
+    'aviso-estilos': 'Hay más de 4.000 estilos de celda distintos: los que sobran quedaron con el estilo por defecto.',
+    'aviso-texto-largo': '{n} textos pasaban de 32.767 caracteres y se cortaron.',
+    'aviso-hojas': 'Un .xls admite hasta 255 hojas: las demás no se guardaron.',
+    'aviso-formato': '{n} formatos de número tienen más secciones de las que admite el destino y se simplificaron (por ejemplo {ej}).',
+    'aviso-combinadas': '{n} celdas combinadas abarcaban demasiadas filas y quedaron separadas (por ejemplo {ej}).',
+    'limites-titulo': 'Límites conocidos',
+    'item1': 'Se llevan los valores, las fórmulas, los formatos de número, la fuente, el color de relleno, los bordes, la alineación, las celdas combinadas, los anchos y altos, las filas y columnas ocultas, las hojas ocultas y los nombres definidos. No se llevan los gráficos, las imágenes, las tablas, el formato condicional, los comentarios ni las macros.',
+    'item2': 'Un .xls tiene como máximo 65.536 filas × 256 columnas y no admite fórmulas con más de 30 argumentos ni textos de más de 255 caracteres dentro de una fórmula; lo que no cabe se avisa al terminar.',
+    'item3': 'Un archivo con contraseña no se puede abrir: quitale la contraseña en Excel y volvé a intentarlo.',
+    'guia-titulo': 'Cómo pasar una planilla de .xlsx a .xls, a .ods o al revés',
+    'guia-intro': 'Hay programas y organismos que todavía piden la planilla en Excel 97-2003 (.xls), y otros que la quieren en LibreOffice (.ods). Esta herramienta pasa el archivo de un formato a otro conservando las fórmulas, los formatos de número, los colores y los bordes, y avisa de lo que el formato de destino no puede guardar.',
+    'guia-pasos': 'Paso a paso',
+    'guia-paso-1': 'Cargá una o varias planillas (.xlsx, .xlsm, .xls, .ods o .xlsb).',
+    'guia-paso-2': 'Elegí el formato de destino: .xlsx, .xls o .ods.',
+    'guia-paso-3': 'Dejá marcada «Conservar las fórmulas», o desmarcala si querés solo los valores.',
+    'guia-paso-4': 'Tocá «Convertir». Con un archivo se baja la planilla convertida; con varios, un .zip con una planilla por archivo.',
+    'guia-paso-5': 'Leé los avisos que aparecen debajo: dicen qué cosas el formato de destino no pudo guardar.',
+    'guia-consejos': 'Consejos',
+    'guia-consejo-1': 'Para entregar un archivo que cualquiera pueda abrir, elegí .xlsx: lo leen Excel, LibreOffice y Google Sheets.',
+    'guia-consejo-2': 'Si el programa que lo va a abrir es muy viejo, usá .xls y revisá los avisos: las funciones nuevas (como XLOOKUP o IFS) no existen en Excel 2003.',
+    'guia-consejo-3': 'Los archivos con la base de fechas de 1904 (planillas viejas de Mac) se pasan a la base normal sin cambiar ninguna fecha.',
+    'guia-faq': 'Preguntas frecuentes',
+    'guia-p1': '¿Qué pasa con las fórmulas?',
+    'guia-r1': 'Se traducen al formato de destino y se guarda también el último valor de cada una. En .xls y .ods las fórmulas con funciones muy nuevas pueden no existir; en ese caso queda el valor y se avisa.',
+    'guia-p2': '¿Puedo pasar un .xls a .ods?',
+    'guia-r2': 'Sí, entre los tres formatos se puede ir en cualquier dirección. También se leen planillas .xlsb y XML 2003, que se guardan en el formato que elijas.',
+    'guia-p3': '¿Se pierden los gráficos y las imágenes?',
+    'guia-r3': 'Sí, esta herramienta lleva las celdas, no los objetos dibujados. Si necesitás las imágenes de una planilla, usá Extraer imágenes de Excel.',
+    'guia-p4': '¿Por qué un color sale un poco distinto en el .xls?',
+    'guia-r4': 'Un .xls solo guarda 56 colores por libro. Si la planilla usa más, los que sobran se reemplazan por el más cercano.'
+  },
+  en: {
+    'titulo-pagina': 'Change the version of an Excel file: .xlsx, .xls and .ods free — Mini Cookies',
+    'meta-descripcion': 'Convert a spreadsheet from Excel 2007+ (.xlsx) to Excel 97-2003 (.xls) or LibreOffice (.ods), or the other way round, keeping formulas, formats and styles — free and without uploading your file to any server.',
+    'h1': 'Excel version change',
+    'intro': 'Convert a spreadsheet from one format to another: Excel 2007 or newer (.xlsx), Excel 97-2003 (.xls) or LibreOffice (.ods). Formulas, number formats, colors and borders are kept. You can load several files at once.',
+    'zona-arrastre': '📊 Drag your spreadsheets here or click to choose them (.xlsx, .xlsm, .xls, .ods, .xlsb)',
+    'destino-titulo': 'Convert to',
+    'destino-xlsx': '.xlsx — Excel 2007 or newer (Google Sheets opens it too)',
+    'destino-xls': '.xls — Excel 97-2003',
+    'destino-ods': '.ods — LibreOffice (Google Sheets opens it too)',
+    'opcion-formulas': 'Keep the formulas',
+    'opcion-formulas-ayuda': 'With the box off, cells with a formula keep the last value they showed, without the formula. Useful for handing over fixed numbers or when a formula uses something the target format does not understand.',
+    'boton-convertir': 'Convert',
+    'boton-procesando': 'Converting...',
+    'resultado-listo': '✅ Done. ',
+    'resultado-enlace': 'Download',
+    'resultado-enlace-zip': 'Download .zip',
+    'error-convertir': 'Could not convert',
+    'error-mismo-formato': 'is already in that format',
+    'avisos-titulo': 'What the target format cannot hold',
+    'aviso-fuera': '{n} cells were outside the maximum size of an .xls (65,536 rows × 256 columns) and were not saved.',
+    'aviso-formula-sin-llevar': 'Formulas that could not be carried over: {n}. They kept their last value (for example, cell {ej}).',
+    'aviso-futura': '{n} formulas use functions newer than Excel 2003 (for example {ej}). An Excel 97-2003 that has not been updated shows them as #NAME?; a newer one calculates them fine.',
+    'aviso-anidado': '{n} formulas nest more than 7 functions: Excel 97-2003 will not let you edit them, although it calculates them.',
+    'aviso-estilos': 'There are more than 4,000 different cell styles: the extra ones got the default style.',
+    'aviso-texto-largo': '{n} texts were over 32,767 characters and were cut.',
+    'aviso-hojas': 'An .xls holds up to 255 sheets: the rest were not saved.',
+    'aviso-formato': '{n} number formats have more sections than the target supports and were simplified (for example {ej}).',
+    'aviso-combinadas': '{n} merged cells spanned too many rows and were left unmerged (for example {ej}).',
+    'limites-titulo': 'Known limits',
+    'item1': 'Values, formulas, number formats, font, fill color, borders, alignment, merged cells, widths and heights, hidden rows, columns and sheets, and defined names are kept. Charts, images, tables, conditional formatting, comments and macros are not.',
+    'item2': 'An .xls has at most 65,536 rows × 256 columns and does not allow formulas with more than 30 arguments or texts longer than 255 characters inside a formula; what does not fit is reported when it finishes.',
+    'item3': 'A password-protected file cannot be opened: remove the password in Excel and try again.',
+    'guia-titulo': 'How to convert a spreadsheet from .xlsx to .xls, to .ods or back',
+    'guia-intro': 'Some programs and offices still ask for the spreadsheet in Excel 97-2003 (.xls), and others want it in LibreOffice (.ods). This tool converts the file from one format to another, keeping formulas, number formats, colors and borders, and tells you what the target format cannot store.',
+    'guia-pasos': 'Step by step',
+    'guia-paso-1': 'Load one or more spreadsheets (.xlsx, .xlsm, .xls, .ods or .xlsb).',
+    'guia-paso-2': 'Choose the target format: .xlsx, .xls or .ods.',
+    'guia-paso-3': 'Leave «Keep the formulas» checked, or uncheck it if you only want the values.',
+    'guia-paso-4': 'Press «Convert». With one file you get the converted spreadsheet; with several, a .zip with one spreadsheet per file.',
+    'guia-paso-5': 'Read the notices below: they say what the target format could not store.',
+    'guia-consejos': 'Tips',
+    'guia-consejo-1': 'To hand over a file anyone can open, choose .xlsx: Excel, LibreOffice and Google Sheets all read it.',
+    'guia-consejo-2': 'If the program that will open it is very old, use .xls and check the notices: new functions (like XLOOKUP or IFS) do not exist in Excel 2003.',
+    'guia-consejo-3': 'Files using the 1904 date system (old Mac spreadsheets) are moved to the normal system without changing any date.',
+    'guia-faq': 'Frequently asked questions',
+    'guia-p1': 'What happens to the formulas?',
+    'guia-r1': 'They are translated to the target format and each one also keeps its last value. In .xls and .ods, formulas with very new functions may not exist; then the value is kept and you are told.',
+    'guia-p2': 'Can I convert an .xls to .ods?',
+    'guia-r2': 'Yes, you can go in any direction between the three formats. .xlsb and XML 2003 spreadsheets are also read and saved in the format you choose.',
+    'guia-p3': 'Are charts and images lost?',
+    'guia-r3': 'Yes, this tool carries cells, not drawn objects. If you need the images of a spreadsheet, use Extract images from Excel.',
+    'guia-p4': 'Why does a color look slightly different in the .xls?',
+    'guia-r4': 'An .xls stores only 56 colors per workbook. If the spreadsheet uses more, the extra ones are replaced by the closest one.'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio"><a href="../excel-csv.html" data-i18n="nav-cat-excel">Herramientas de Excel / CSV</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+  <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Cambio de versión de Excel</h1>
+  <p data-i18n="intro">Pasá una planilla de un formato a otro: Excel 2007 o más nuevo (.xlsx), Excel 97-2003 (.xls) o LibreOffice (.ods). Se conservan las fórmulas, los formatos de número, los colores y los bordes. Podés cargar varios archivos a la vez.</p>
+
+  <div class="panel-herramienta">
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📊 Arrastrá tus planillas acá o hacé clic para elegirlas (.xlsx, .xlsm, .xls, .ods, .xlsb)</span>
+      <input type="file" id="entradaArchivos" accept=".xlsx,.xlsm,.xls,.ods,.xlsb,.xml" multiple hidden>
+    </div>
+    <ul class="lista-archivos" id="listaArchivos"></ul>
+
+    <h3 style="margin-bottom:6px;" data-i18n="destino-titulo">Convertir a</h3>
+    <div class="selector-direccion" id="selectorDestino">
+      <label><input type="radio" name="destino" value="xlsx" checked> <span data-i18n="destino-xlsx">.xlsx — Excel 2007 o más nuevo (también lo abre Google Sheets)</span></label>
+      <label><input type="radio" name="destino" value="xls"> <span data-i18n="destino-xls">.xls — Excel 97-2003</span></label>
+      <label><input type="radio" name="destino" value="ods"> <span data-i18n="destino-ods">.ods — LibreOffice (también lo abre Google Sheets)</span></label>
+    </div>
+
+    <div class="controles">
+      <label class="campo-casilla">
+        <input type="checkbox" id="opcionFormulas" checked>
+        <span data-i18n="opcion-formulas">Conservar las fórmulas</span>
+        <span class="ayuda-tip">
+          <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+          <span class="ayuda-burbuja" data-i18n="opcion-formulas-ayuda">Con la casilla apagada, las celdas con fórmula quedan con el último valor que mostraban, sin la fórmula.</span>
+        </span>
+      </label>
+      <button class="boton" id="botonConvertir" disabled data-i18n="boton-convertir">Convertir</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n="resultado-enlace">Descargar</a>
+    </div>
+    <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
+    <div id="bloqueAvisos" class="resultado" style="display:none; margin-top:20px;">
+      <p><strong data-i18n="avisos-titulo">Lo que el formato de destino no puede llevar</strong></p>
+      <ul id="listaAvisos"></ul>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <div class="panel-herramienta">
+    <h3 style="margin-top:0;" data-i18n="limites-titulo">Límites conocidos</h3>
+    <ul style="color:var(--texto-suave);">
+      <li data-i18n="item1">Se llevan los valores, las fórmulas, los formatos de número, la fuente, el color de relleno, los bordes, la alineación, las celdas combinadas, los anchos y altos, las filas y columnas ocultas, las hojas ocultas y los nombres definidos. No se llevan los gráficos, las imágenes, las tablas, el formato condicional, los comentarios ni las macros.</li>
+      <li data-i18n="item2">Un .xls tiene como máximo 65.536 filas × 256 columnas y no admite fórmulas con más de 30 argumentos ni textos de más de 255 caracteres dentro de una fórmula; lo que no cabe se avisa al terminar.</li>
+      <li data-i18n="item3">Un archivo con contraseña no se puede abrir: quitale la contraseña en Excel y volvé a intentarlo.</li>
+    </ul>
+  </div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo pasar una planilla de .xlsx a .xls, a .ods o al revés</h2>
+    <p data-i18n="guia-intro">Hay programas y organismos que todavía piden la planilla en Excel 97-2003 (.xls), y otros que la quieren en LibreOffice (.ods). Esta herramienta pasa el archivo de un formato a otro conservando las fórmulas, los formatos de número, los colores y los bordes, y avisa de lo que el formato de destino no puede guardar.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Cargá una o varias planillas (.xlsx, .xlsm, .xls, .ods o .xlsb).</li>
+      <li data-i18n="guia-paso-2">Elegí el formato de destino: .xlsx, .xls o .ods.</li>
+      <li data-i18n="guia-paso-3">Dejá marcada «Conservar las fórmulas», o desmarcala si querés solo los valores.</li>
+      <li data-i18n="guia-paso-4">Tocá «Convertir». Con un archivo se baja la planilla convertida; con varios, un .zip con una planilla por archivo.</li>
+      <li data-i18n="guia-paso-5">Leé los avisos que aparecen debajo: dicen qué cosas el formato de destino no pudo guardar.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Para entregar un archivo que cualquiera pueda abrir, elegí .xlsx: lo leen Excel, LibreOffice y Google Sheets.</li>
+      <li data-i18n="guia-consejo-2">Si el programa que lo va a abrir es muy viejo, usá .xls y revisá los avisos: las funciones nuevas (como XLOOKUP o IFS) no existen en Excel 2003.</li>
+      <li data-i18n="guia-consejo-3">Los archivos con la base de fechas de 1904 (planillas viejas de Mac) se pasan a la base normal sin cambiar ninguna fecha.</li>    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa con las fórmulas?</summary>
+      <p data-i18n="guia-r1">Se traducen al formato de destino y se guarda también el último valor de cada una. En .xls y .ods las fórmulas con funciones muy nuevas pueden no existir; en ese caso queda el valor y se avisa.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Puedo pasar un .xls a .ods?</summary>
+      <p data-i18n="guia-r2">Sí, entre los tres formatos se puede ir en cualquier dirección. También se leen planillas .xlsb y XML 2003, que se guardan en el formato que elijas.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se pierden los gráficos y las imágenes?</summary>
+      <p data-i18n="guia-r3">Sí, esta herramienta lleva las celdas, no los objetos dibujados. Si necesitás las imágenes de una planilla, usá Extraer imágenes de Excel.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Por qué un color sale un poco distinto en el .xls?</summary>
+      <p data-i18n="guia-r4">Un .xls solo guarda 56 colores por libro. Si la planilla usa más, los que sobran se reemplazan por el más cercano.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xlsx-escritor.js"></script>
+<script src="../assets/js/xlsx-contrato.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/cfb-propio.js"></script>
+<script src="../assets/js/xls-formulas.js"></script>
+<script src="../assets/js/xls-lector.js"></script>
+<script src="../assets/js/xls-escritor.js"></script>
+<script src="../assets/js/ods-formulas.js"></script>
+<script src="../assets/js/ods-lector.js"></script>
+<script src="../assets/js/ods-escritor.js"></script>
+<script src="../assets/js/xlsb-lector.js"></script>
+<script src="../assets/js/xml2003-lector.js"></script>
+<script src="../assets/js/html-tabla-lector.js"></script>
+<script src="../assets/js/formatos-antiguos.js"></script>
+<script src="../assets/js/cambio-version.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script>
+const EXTENSIONES = ['.xlsx', '.xlsm', '.xls', '.ods', '.xlsb', '.xml'];
+const zonaArrastre = document.getElementById('zonaArrastre');
+const entradaArchivos = document.getElementById('entradaArchivos');
+const listaArchivos = document.getElementById('listaArchivos');
+const botonConvertir = document.getElementById('botonConvertir');
+const opcionFormulas = document.getElementById('opcionFormulas');
+const resultado = document.getElementById('resultado');
+const enlaceDescarga = document.getElementById('enlaceDescarga');
+const resumenLote = document.getElementById('resumenLote');
+const bloqueAvisos = document.getElementById('bloqueAvisos');
+const listaAvisos = document.getElementById('listaAvisos');
+
+let archivosActuales = [];
+let urlResultado = null;
+
+function formatoTamano(bytes) {
+  return bytes < 1024 * 1024 ? Math.max(1, Math.round(bytes / 1024)) + ' KB' : (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function limpiarResultado() {
+  resultado.style.display = 'none';
+  resumenLote.style.display = 'none';
+  bloqueAvisos.style.display = 'none';
+  if (urlResultado) { URL.revokeObjectURL(urlResultado); urlResultado = null; }
+}
+
+function mostrarArchivos(archivos) {
+  archivosActuales = archivos;
+  listaArchivos.innerHTML = '';
+  archivos.forEach((archivo) => {
+    const li = document.createElement('li');
+    li.textContent = archivo.name + ' (' + formatoTamano(archivo.size) + ')';
+    listaArchivos.appendChild(li);
+  });
+  botonConvertir.disabled = archivos.length === 0;
+  limpiarResultado();
+}
+
+conectarZonaArrastre(zonaArrastre, entradaArchivos, (lista) => {
+  const archivos = lista.filter((f) => EXTENSIONES.some((e) => f.name.toLowerCase().endsWith(e)));
+  if (archivos.length) mostrarArchivos(archivos);
+});
+
+const destinoElegido = () => document.querySelector('input[name="destino"]:checked').value;
+const MIME = {
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  xls: 'application/vnd.ms-excel',
+  ods: 'application/vnd.oasis.opendocument.spreadsheet',
+};
+
+// Suma los avisos de todos los archivos: { tipo → { cantidad, ejemplo } }
+function sumarAvisos(total, avisos) {
+  for (const a of avisos) {
+    const x = total.get(a.tipo);
+    if (x) x.cantidad += a.cantidad;
+    else total.set(a.tipo, { cantidad: a.cantidad, ejemplo: a.ejemplo || '' });
+  }
+}
+
+// Se arma con DOM y no con HTML: el ejemplo sale de una fórmula del propio archivo.
+function pintarAvisos(total) {
+  listaAvisos.innerHTML = '';
+  for (const [tipo, x] of total) {
+    const clave = 'aviso-' + tipo;
+    const plantilla = t(clave);
+    if (!plantilla || plantilla === clave) continue;
+    const ejemplo = tipo === 'formula-sin-llevar' ? ((/^[A-Z]+\d+/.exec(x.ejemplo || '') || [''])[0]) : (x.ejemplo || '');
+    const li = document.createElement('li');
+    // sin ejemplo, se quita el paréntesis que lo nombra
+    li.textContent = (ejemplo ? plantilla : plantilla.replace(/\s*\([^()]*\{ej\}[^()]*\)/, '')).replace('{n}', x.cantidad.toLocaleString()).replace('{ej}', ejemplo);
+    listaAvisos.appendChild(li);
+  }
+  bloqueAvisos.style.display = listaAvisos.children.length ? 'block' : 'none';
+}
+
+botonConvertir.addEventListener('click', async () => {
+  const destino = destinoElegido();
+  const conFormulas = opcionFormulas.checked;
+  botonConvertir.disabled = true;
+  botonConvertir.textContent = t('boton-procesando');
+  limpiarResultado();
+  const avisos = new Map();
+  try {
+    const resultados = await LoteArchivos.convertirLote(archivosActuales, async (archivo) => {
+      const bytes = new Uint8Array(await archivo.arrayBuffer());
+      let r;
+      try { r = await CambioVersion.convertir(bytes, destino, { formulas: conFormulas }); }
+      catch (e) { throw e.codigo === 'mismo-formato' ? new Error(t('error-mismo-formato')) : e; }
+      sumarAvisos(avisos, r.avisos);
+      return { nombre: archivo.name.replace(/\.[^.]+$/, '') + '.' + destino, blob: new Blob([r.bytes], { type: MIME[destino] }) };
+    }, (i, total) => {
+      if (total > 1) botonConvertir.textContent = t('lote-progreso').replace('{n}', i + 1).replace('{total}', total);
+    });
+    const buenos = resultados.filter((r) => r.ok);
+    if (buenos.length === 1 && resultados.length === 1) {
+      urlResultado = URL.createObjectURL(buenos[0].blob);
+      enlaceDescarga.href = urlResultado;
+      enlaceDescarga.download = buenos[0].nombre;
+      enlaceDescarga.textContent = t('resultado-enlace') + ' ' + buenos[0].nombre;
+      resultado.style.display = 'block';
+    } else if (buenos.length) {
+      const zip = await LoteArchivos.zipDeResultados(resultados);
+      urlResultado = URL.createObjectURL(zip);
+      enlaceDescarga.href = urlResultado;
+      enlaceDescarga.download = 'planillas-convertidas.zip';
+      enlaceDescarga.textContent = t('resultado-enlace-zip');
+      resultado.style.display = 'block';
+    }
+    if (resultados.length > 1 || !buenos.length) LoteArchivos.pintarResumen(resumenLote, resultados, t);
+    else if (resultados[0] && !resultados[0].ok) LoteArchivos.pintarResumen(resumenLote, resultados, t);
+    pintarAvisos(avisos);
+  } catch (error) {
+    alert(t('error-convertir') + ': ' + error.message);
+  } finally {
+    botonConvertir.disabled = archivosActuales.length === 0;
+    botonConvertir.textContent = t('boton-convertir');
+  }
+});
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

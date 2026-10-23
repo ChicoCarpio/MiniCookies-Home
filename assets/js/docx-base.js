@@ -84,6 +84,8 @@
   // Abre el .docx: busca la parte principal (por _rels/.rels), sus relaciones y el <w:body>.
   async function abrirPaquete(datos) {
     if (typeof Blob !== 'undefined' && datos instanceof Blob) datos = await datos.arrayBuffer();
+    // Con formatos-word.js en la página, un .doc o un .odt se pasa a .docx antes de leerlo; un .docx pasa sin tocarse
+    if (typeof FormatosWord !== 'undefined') datos = await FormatosWord.comoDocx(datos);
     const zip = await ZipPropio.loadAsync(datos);
     let principal = 'word/document.xml';
     const f = zip.file('_rels/.rels');
