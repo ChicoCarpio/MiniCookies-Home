@@ -134,5 +134,25 @@
     }
   }
 
-  globalThis.XmlLigero = { recorrer, decodificar, sinEscapes };
+  // Árbol pequeño { n: nombre local, a: atributos, h: hijos (elementos o cadenas) } para las partes que se recorren varias veces (Word, OpenDocument).
+  // Falla con un Error claro si el XML pasa los límites (elementos o niveles), para que un archivo hostil no agote la memoria.
+  function arbol(texto, maxElementos = 3000000, maxProfundidad = 256) {
+    const raiz = { n: '#', a: {}, h: [] };
+    const pila = [raiz];
+    let cuenta = 0;
+    recorrer(texto, {
+      abrir(n, a) {
+        if (++cuenta > maxElementos) throw new Error('El documento tiene demasiados elementos y no se puede leer.');
+        if (pila.length > maxProfundidad) throw new Error('El documento tiene demasiados niveles anidados y no se puede leer.');
+        const e = { n, a, h: [] };
+        pila[pila.length - 1].h.push(e);
+        pila.push(e);
+      },
+      cerrar() { if (pila.length > 1) pila.pop(); },
+      texto(t) { pila[pila.length - 1].h.push(t); },
+    });
+    return raiz.h.find((x) => typeof x !== 'string') || null;
+  }
+
+  globalThis.XmlLigero = { recorrer, decodificar, sinEscapes, arbol };
 })();
