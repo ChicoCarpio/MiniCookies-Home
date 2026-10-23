@@ -246,5 +246,13 @@
     return new Blob([await generar(pres)], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
   }
 
-  globalThis.EscritorPptx = { generar, aBlob };
+  // El tema de Office con otros colores o fuentes (los usa pptx-desde-contrato.js): colores y fuentes son el XML de <a:clrScheme> y <a:fontScheme>.
+  function temaCon(nombre, colores, fuentes) {
+    let x = tema({ tema: nombre });
+    if (colores) x = x.replace(/<a:clrScheme [\s\S]*?<\/a:clrScheme>/, () => colores);
+    if (fuentes) x = x.replace(/<a:fontScheme [\s\S]*?<\/a:fontScheme>/, () => fuentes);
+    return x;
+  }
+
+  globalThis.EscritorPptx = { generar, aBlob, tema: temaCon };
 })();

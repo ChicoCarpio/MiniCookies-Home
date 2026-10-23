@@ -87,9 +87,9 @@
       convertir: (archivo, alAvanzar) => ExcelAPdfMotor.libroAPdf(archivo, alAvanzar),
     },
     powerpoint: {
-      extensiones: ['pptx'],
+      extensiones: ['pptx', 'ppt', 'odp'],
       async preparar() {
-        await cargarEnOrden([JSZIP()]);
+        await cargarEnOrden([JSZIP(), propio('formatos-powerpoint.js')]);
         // El motor propio, con la lista única de pptx-visual.js.
         await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-visual.js')]);
         await cargarEnOrden(SCRIPTS_MOTOR_PPTX.map((x) => (x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : propio(x))));
