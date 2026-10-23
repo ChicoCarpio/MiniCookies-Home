@@ -573,6 +573,9 @@
       const f = this.d.lfo[ilfo - 1];
       const base = f && this.d.lstf.get(f.lsid);
       if (!f || !base) { this.listasUsadas.set(ilfo, null); return null; }
+      // Varios LFO de la misma lista (LST) sin cambios de nivel comparten el contador: la numeración sigue donde iba. Con cambios (empezar en…) cada uno cuenta aparte.
+      const clave = f.niveles.size === 0 ? 'lsid' + f.lsid : null;
+      if (clave && this.listasUsadas.has(clave)) { const previa = this.listasUsadas.get(clave); this.listasUsadas.set(ilfo, previa); return previa; }
       const niveles = [];
       for (let n = 0; n < 9; n++) {
         const o = f.niveles.get(n);
@@ -583,6 +586,7 @@
       const id = 'F' + ilfo;
       this.contrato.listas.push({ id, niveles });
       this.listasUsadas.set(ilfo, id);
+      if (clave) this.listasUsadas.set(clave, id);
       return id;
     }
 
