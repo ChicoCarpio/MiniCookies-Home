@@ -9,7 +9,7 @@
 // Lanza Error (con .codigo = 'cifrado' si tiene contraseña, 'antiguo' si es de Word 95 o anterior, 'danado' si está roto) con un mensaje listo para mostrar.
 // Se llevan: texto (también con guardado rápido: tabla de piezas), estilos con nombre, formato de carácter (negrita, cursiva, subrayado, tachado, superíndice, subíndice,
 // versalitas, mayúsculas, fuente, tamaño, color, resaltado), formato de párrafo (alineación, sangrías, espaciado, interlineado, tabulaciones, salto antes), listas con
-// viñetas y numeradas, tablas (celdas combinadas, relleno, bordes, anidadas), imágenes en línea (PNG, JPEG y las demás de mapa de bits), enlaces, números de página,
+// viñetas y numeradas, tablas (celdas combinadas, relleno, bordes, anidadas), imágenes en línea (PNG y JPEG; las DIB, EMF y WMF se omiten con un aviso), enlaces y marcadores, números de página,
 // secciones con su hoja, encabezado y pie. No se llevan: notas, comentarios, cuadros de texto, formas flotantes, ecuaciones, texto borrado con control de cambios.
 // Requiere cfb-propio.js (y docx-desde-contrato.js para aDocx). No depende del navegador.
 (function () {
@@ -17,6 +17,9 @@
   const MAX_TEXTO = 64 * 1024 * 1024;     // caracteres de todo el documento
   const MAX_ENTRADAS = 4 * 1024 * 1024;   // elementos de las tablas internas (piezas, formatos, estilos…)
   const MAX_PROFUNDIDAD_TABLAS = 8;
+  const MAX_CAMPOS = 64;                  // campos anidados
+  const MAX_MARCADORES = 100000;
+  const MAX_PARRAFOS = 2000000;           // párrafos y celdas de todo el documento (la tabla de piezas puede repetir un mismo trozo de texto)
   const MAX_IMAGENES_BYTES = 200 * 1024 * 1024;
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const acotar = (x, min, max) => Math.min(Math.max(x, min), max);
@@ -123,6 +126,7 @@
         case 0x2A0C: { const h = RESALTADO[v]; r.resaltado = h || null; break; }
         case 0x0855: extra.spec = v === 1; break;
         case 0x6A03: extra.imagen = u32(b, p); break;
+        case 0x0806: extra.datosCampo = v === 1; break;   // sprmCFData: el  guarda datos de un campo (formulario, PAGEREF), no una imagen
         case 0x4A30: extra.estilo = u16(b, p); break;
         case 0x0800: extra.borrado = v === 1 || v === 0x81; break;   // Word escribe 0x81 («al revés del estilo»)
         case 0x6A09: if (n >= 4) extra.simbolo = { ftc: u16(b, p), c: u16(b, p + 2) }; break;
@@ -180,8 +184,8 @@
         case 0xD612: extra.tap.shd1 = { b, q, n }; break;
         case 0xD613: extra.tap.bordes = { b, q, n, ancho: 8 }; break;     // sprmTTableBorders: seis BRC de 8 bytes
         case 0xD605: if (!extra.tap.bordes) extra.tap.bordes = { b, q, n, ancho: 4 }; break;   // sprmTTableBorders80: seis BRC de 4 bytes
-        case 0xD614: extra.tap.shd3 = { b, q, n }; break;
-        case 0xD670: extra.tap.shdRaw = { b, q, n }; break;
+        case 0xD616: extra.tap.shd2 = { b, q, n }; break;   // sprmTDefTableShd2nd: celdas 22 a 43
+        case 0xD60C: extra.tap.shd3 = { b, q, n }; break;   // sprmTDefTableShd3rd: celdas 44 a 62
         case 0x9407: extra.tap.alto = i16(b, q); break;
         case 0x3404: extra.tap.encabezado = (v & 1) === 1; break;
         case 0x9601: extra.tap.izq = i16(b, q); break;
@@ -209,6 +213,8 @@
       }
       const entrada = (n) => cfb.entradas.find((e) => e.tipo === 2 && e.nombre === n);
       const eWd = entrada('WordDocument');
+      // Un .docx con contraseña también es un contenedor CFB (con EncryptedPackage en vez de WordDocument)
+      if (!eWd && entrada('EncryptedPackage')) throw new Danado('El documento está protegido con contraseña. Sacale la contraseña en Word y volvé a intentarlo.', 'cifrado');
       if (!eWd) throw new Danado('El archivo no es un documento de Word (.doc).');
       this.wd = cfb.flujo(eWd);
       const wd = this.wd;
@@ -229,6 +235,7 @@
       this.leerFuentes();
       this.leerEstilos();
       this.leerListas();
+      this.leerMarcadores();
     }
 
     // (fc, lcb) del índice i del bloque FibRgFcLcb97
@@ -317,6 +324,7 @@
                 if (cb === 0) { cb = fkp[o + 1]; ini2 = o + 2; tam = cb * 2; } else tam = cb * 2 - 1;
                 if (tam >= 2) { istd = u16(fkp, ini2); g = fkp.subarray(ini2 + 2, ini2 + tam); }
               }
+              if (g) g = this.papGrande(g);
               lista.push({ fc0, fc1, istd, g });
             }
             if (lista.length > MAX_ENTRADAS) throw new Danado('El documento está dañado: demasiados formatos.');
@@ -327,6 +335,17 @@
       };
       this.chp = leerPlc(12, 'chp');
       this.pap = leerPlc(13, 'pap');
+    }
+    // sprmPHugePapx (0x6646): las propiedades que no caben en la página de formatos (p. ej. una fila de tabla con muchas columnas) están en el flujo Data
+    // (PrcData: cbGrpprl de 2 bytes y la lista de sprms). La norma dice que ese sprm va solo en el FKP: se usa la lista del flujo Data (una vista, sin copiar).
+    papGrande(g) {
+      let desp = -1;
+      sprms(g, (op, b, p) => { if (op === 0x6646) desp = u32(b, p); });
+      if (desp < 0) return g;
+      const dt = this.datos;
+      const cb = u16(dt, desp);
+      if (desp + 2 >= dt.length || cb === 0 || cb > 0x3FA2) return g;
+      return dt.subarray(desp + 2, Math.min(dt.length, desp + 2 + cb));
     }
     buscar(lista, fc) {
       let lo = 0, hi = lista.length - 1;
@@ -416,6 +435,29 @@
       return cad;
     }
 
+    // ───────── Marcadores ─────────
+    // Marcadores (SttbfBkmk con los nombres y PlcfBkf con el CP donde empieza cada uno): para que los enlaces internos (\l, el índice) tengan destino
+    leerMarcadores() {
+      this.marcadores = new Map();   // cp → [nombre…]
+      const [fn, ln] = this.par(21), [fi, li] = this.par(22);
+      const nombres = this.enTabla(fn, ln), inicios = this.enTabla(fi, li);
+      if (nombres.length < 6 || inicios.length < 8) return;
+      const extendido = u16(nombres, 0) === 0xFFFF;
+      const cuantos = u16(nombres, extendido ? 2 : 0);
+      let p = extendido ? 6 : 4;
+      const n = Math.min(cuantos, Math.floor((inicios.length - 4) / 8), MAX_MARCADORES);
+      for (let i = 0; i < n && p + 2 <= nombres.length; i++) {
+        const cch = u16(nombres, p);
+        let nombre = '';
+        for (let k = 0; k < cch && k < 255; k++) nombre += String.fromCharCode(u16(nombres, p + 2 + 2 * k));
+        p += 2 + 2 * cch;
+        const cp = u32(inicios, 4 * i);
+        if (!nombre) continue;
+        if (!this.marcadores.has(cp)) this.marcadores.set(cp, []);
+        this.marcadores.get(cp).push(nombre);
+      }
+    }
+
     // ───────── Listas ─────────
     leerListas() {
       this.lstf = new Map();   // lsid → niveles
@@ -442,7 +484,9 @@
       if (n > 0 && n < 100000) {
         let p = 4;
         for (let i = 0; i < n && p + 16 <= l.length; i++, p += 16) this.lfo.push({ lsid: i32(l, p), clfolvl: l[p + 12], niveles: new Map() });
+        // rgLfoData: cada LFO tiene un LFOData (cp de 4 bytes y luego sus clfolvl cambios de nivel), también los que no cambian nada
         for (const f of this.lfo) {
+          p += 4;
           for (let k = 0; k < f.clfolvl && p + 8 <= l.length; k++) {
             const inicio = i32(l, p), fl = u32(l, p + 4);
             p += 8;
@@ -484,6 +528,9 @@
       this.bytesImagenes = 0;
       this.listasUsadas = new Map();   // ilfo → id de lista del contrato
       this.campos = [];                // pila de campos abiertos (pueden cruzar párrafos)
+      this.camposDeMas = 0;
+      this.parrafosLeidos = 0;
+      this._deEstilo = new Map();      // istd → lo que el estilo de párrafo aporta (lista, nivel, tabla)
     }
 
     idEstilo(i) {
@@ -560,14 +607,16 @@
         const fc = d.fcDe(cp);
         const pap = fc >= 0 ? d.buscar(d.pap, fc) : null;
         lista.push({ cp0: ini, cp1: cp, marca: c, pap });
+        if (++this.parrafosLeidos > MAX_PARRAFOS) throw new Danado('El documento tiene demasiados párrafos y no se puede leer.');
         ini = cp + 1;
       }
       if (ini < fin) lista.push({ cp0: ini, cp1: fin, marca: 13, pap: null });
       return lista;
     }
     estiloEnTabla(istd) {
-      for (const e of this.d.cadenaPap(istd)) if (e.papx && leerPap(e.papx, null).extra.enTabla) return true;
-      return false;
+      this._enTabla = this._enTabla || new Map();
+      if (!this._enTabla.has(istd)) this._enTabla.set(istd, this.d.cadenaPap(istd).some((e) => e.papx && leerPap(e.papx, null).extra.enTabla));
+      return this._enTabla.get(istd);
     }
 
     // Propiedades de un párrafo: las del estilo para saber la lista y los interruptores, y las directas
@@ -575,8 +624,12 @@
       const d = this.d;
       const istd = rec.pap ? rec.pap.istd : 0;
       const dir = rec.pap && rec.pap.g ? leerPap(rec.pap.g, null) : { p: {}, extra: { tap: {} } };
-      const deEstilo = { p: {}, extra: {} };
-      for (const e of d.cadenaPap(istd)) if (e.papx) { const r = leerPap(e.papx, null); Object.assign(deEstilo.p, r.p); Object.assign(deEstilo.extra, { ilfo: r.extra.ilfo != null ? r.extra.ilfo : deEstilo.extra.ilfo, ilvl: r.extra.ilvl != null ? r.extra.ilvl : deEstilo.extra.ilvl, enTabla: r.extra.enTabla || deEstilo.extra.enTabla }); }
+      let deEstilo = this._deEstilo.get(istd);
+      if (!deEstilo) {
+        deEstilo = { p: {}, extra: {} };
+        for (const e of d.cadenaPap(istd)) if (e.papx) { const r = leerPap(e.papx, null); Object.assign(deEstilo.p, r.p); Object.assign(deEstilo.extra, { ilfo: r.extra.ilfo != null ? r.extra.ilfo : deEstilo.extra.ilfo, ilvl: r.extra.ilvl != null ? r.extra.ilvl : deEstilo.extra.ilvl, enTabla: r.extra.enTabla || deEstilo.extra.enTabla }); }
+        this._deEstilo.set(istd, deEstilo);
+      }
       const ex = dir.extra;
       const ilfo = ex.ilfo != null ? ex.ilfo : deEstilo.extra.ilfo;
       const ilvl = ex.ilvl != null ? ex.ilvl : deEstilo.extra.ilvl;
@@ -635,16 +688,39 @@
       salida.push(run);
     }
 
+    // Adónde va el texto que está dentro de los primeros k campos abiertos: al párrafo, al resultado de un enlace o de un campo que se reemplaza, o a ninguna parte
+    // (instrucción de un campo). El resultado de los demás campos (TOC, PAGEREF, REF…) se lleva tal cual, aunque ocupe varios párrafos.
+    destinoEn(k) {
+      for (let i = k - 1; i >= 0; i--) {
+        const c = this.campos[i];
+        if (c.fase !== 'res') return null;
+        if (c.tipo !== 'pasar') return c.salida;
+      }
+      return this._raiz;
+    }
+    tipoCampoNombre(c) { const palabra = (/^\s*([A-Za-z]+)/.exec(c.instr) || [])[1]; return palabra ? palabra.toUpperCase() : ''; }
+    tipoCampo(c) {
+      const nombre = this.tipoCampoNombre(c);
+      return nombre === 'HYPERLINK' ? 'enlace' : nombre === 'PAGE' || nombre === 'NUMPAGES' ? 'campo' : 'pasar';
+    }
+    enlaceDe(c, salida) {
+      const instr = c.instr.trim();
+      const m = /HYPERLINK\s+(?:\\l\s+)?(?:"([^"]*)"|(\S+))/i.exec(instr);
+      const ancla = /\\l\s+"([^"]*)"/i.exec(instr);
+      const url = m && (m[1] || m[2]);
+      const hijos = salida.map((x) => { const y = Object.assign({}, x); delete y._k; return y; });
+      if (ancla) return [{ enlace: { ancla: ancla[1] }, hijos }];
+      if (url) return [{ enlace: { url }, hijos }];
+      return hijos;
+    }
+
     // Convierte el texto de un párrafo [cp0, cp1) en runs
     runsDe(cp0, cp1, istd) {
       const d = this.d, T = d.T;
       const raiz = [];
       this._raiz = raiz;
-      const destino = () => {
-        const c = this.campos[this.campos.length - 1];
-        if (!c) return raiz;
-        return c.fase === 'res' ? c.salida : null;
-      };
+      const destino = () => this.destinoEn(this.campos.length);
+      const marcas = d.marcadores;
       for (const tz of this.trozos(cp0, cp1)) {
         const f = this.formatoCaracter(tz.g, istd);
         if (f.extra.borrado) continue;   // texto borrado con control de cambios
@@ -653,21 +729,33 @@
         const vaciar = () => { if (acumulado) { const dst = destino(); if (dst) this.agregarTexto(dst, acumulado, f.estilo, f.r); acumulado = ''; } };
         for (let i = 0; i < textoBruto.length; i++) {
           const ch = textoBruto.charCodeAt(i);
+          if (marcas.size && marcas.has(tz.cp0 + i)) { vaciar(); const dst = destino(); if (dst) for (const m of marcas.get(tz.cp0 + i)) dst.push({ marcador: m }); }
           switch (ch) {
             case 9: acumulado += '\t'; break;
             case 11: case 10: acumulado += '\n'; break;
             case 30: acumulado += '‑'; break;
             case 31: acumulado += '­'; break;
             case 12: { vaciar(); const dst = destino(); if (dst) dst.push({ salto: 'pagina' }); break; }
-            case 19: { vaciar(); this.campos.push({ instr: '', fase: 'instr', salida: [], f }); break; }
-            case 20: { vaciar(); const c = this.campos[this.campos.length - 1]; if (c) c.fase = 'res'; break; }
-            case 21: { vaciar(); this.cerrarCampo(destino); break; }
+            case 19: {
+              vaciar();
+              // más de MAX_CAMPOS campos anidados (solo en un archivo hostil): los de más se cuentan y se ignoran, para no llenar la memoria
+              if (this.campos.length >= MAX_CAMPOS) this.camposDeMas++;
+              else this.campos.push({ instr: '', fase: 'instr', salida: [], f, tipo: null });
+              break;
+            }
+            case 20: {
+              vaciar();
+              const c = this.campos[this.campos.length - 1];
+              if (this.camposDeMas === 0 && c && c.fase === 'instr') { c.fase = 'res'; c.tipo = this.tipoCampo(c); }
+              break;
+            }
+            case 21: { vaciar(); if (this.camposDeMas > 0) this.camposDeMas--; else this.cerrarCampo(); break; }
             case 1: {
               vaciar();
-              if (f.extra.spec && f.extra.imagen != null) {
+              const dst = destino();
+              if (dst && f.extra.spec && f.extra.imagen != null && !f.extra.datosCampo) {
                 const im = this.imagen(f.extra.imagen);
-                const dst = destino();
-                if (im && dst) dst.push({ imagen: im });
+                if (im) dst.push({ imagen: im });
               }
               break;
             }
@@ -681,32 +769,30 @@
           }
           // El texto de la instrucción de un campo se guarda aparte
           const c = this.campos[this.campos.length - 1];
-          if (c && c.fase === 'instr' && acumulado) { c.instr += acumulado; acumulado = ''; }
+          if (c && c.fase === 'instr' && acumulado) { if (c.instr.length < 4096) c.instr += acumulado; acumulado = ''; }
         }
         vaciar();
+      }
+      // Un enlace que sigue en el párrafo siguiente: lo que tiene hasta aquí queda en este párrafo (como enlace al mismo destino)
+      for (let i = this.campos.length - 1; i >= 0; i--) {
+        const c = this.campos[i];
+        if (c.fase !== 'res' || c.tipo !== 'enlace' || !c.salida.length) continue;
+        const dst = this.destinoEn(i);
+        if (dst) for (const x of this.enlaceDe(c, c.salida)) dst.push(x);
+        c.salida = [];
       }
       return raiz;
     }
 
-    cerrarCampo(destino) {
+    cerrarCampo() {
       const c = this.campos.pop();
       if (!c) return;
-      const instr = c.instr.trim();
-      const palabra = (/^\s*([A-Za-z]+)/.exec(instr) || [])[1];
-      const nombre = palabra ? palabra.toUpperCase() : '';
-      const padre = this.campos.length ? (this.campos[this.campos.length - 1].fase === 'res' ? this.campos[this.campos.length - 1].salida : null) : this._raiz;
-      void destino;
+      const tipo = c.tipo || this.tipoCampo(c);
+      const padre = this.destinoEn(this.campos.length);
       if (!padre) return;
-      if (nombre === 'HYPERLINK') {
-        const m = /HYPERLINK\s+(?:\\l\s+)?(?:"([^"]*)"|(\S+))/i.exec(instr);
-        const ancla = /\\l\s+"([^"]*)"/i.exec(instr);
-        const url = m && (m[1] || m[2]);
-        const hijos = c.salida.map((x) => { const y = Object.assign({}, x); delete y._k; return y; });
-        if (ancla) padre.push({ enlace: { ancla: ancla[1] }, hijos });
-        else if (url) padre.push({ enlace: { url }, hijos });
-        else padre.push(...c.salida);
-      } else if (nombre === 'PAGE' || nombre === 'NUMPAGES') padre.push({ campo: nombre, resultado: '1', r: c.f.r, estilo: c.f.estilo });
-      else padre.push(...c.salida);
+      if (tipo === 'enlace') { for (const x of this.enlaceDe(c, c.salida)) padre.push(x); }
+      else if (tipo === 'campo') padre.push({ campo: this.tipoCampoNombre(c), resultado: '1', r: c.f.r, estilo: c.f.estilo });
+      // los demás campos ya dejaron su resultado en el párrafo
     }
 
     // ───────── Imágenes en línea ─────────
@@ -718,7 +804,7 @@
       const dxaGoal = i16(dt, desp + 28), dyaGoal = i16(dt, desp + 30), mx = u16(dt, desp + 32), my = u16(dt, desp + 34);
       let p = desp + cbHeader;
       const fin = Math.min(dt.length, desp + lcb);
-      // mm 0x64 = imagen vinculada a un archivo (viene un nombre antes de los datos)
+      // mm 0x66 (MM_SHAPEFILE) = imagen vinculada a un archivo (viene un nombre antes de los datos)
       if (u16(dt, desp + 6) === 0x66) p += 1 + u8(dt, p);
       let intentos = 0;
       while (p + 8 <= fin && intentos++ < 64) {
@@ -777,7 +863,9 @@
       const cerrar = (hasta) => {
         while (pila.length > hasta) {
           const t = pila.pop();
-          if (t.celdas.length || t.bloques.length) { /* fila sin marca de fin: se descarta lo pendiente salvo que haya celdas */ }
+          // una fila sin marca de fin (archivo raro o dañado): sus celdas se llevan igual, como una fila más, para no perder el texto
+          if (t.bloques.length) t.celdas.push({ hijos: t.bloques });
+          if (t.celdas.length) t.filas.push({ celdas: t.celdas, tap: {}, bytes: null });
           const tabla = this.tablaFinal(t);
           const padre = pila.length ? pila[pila.length - 1].bloques : raiz;
           if (tabla) padre.push(tabla);
@@ -841,7 +929,7 @@
             rellenos[desde + k] = ipat === 1 ? cvFore : (cvBack || (ipat > 1 ? cvFore : null));
           }
         };
-        shd(tap.shd1, 0); shd(tap.shd3, 22);
+        shd(tap.shd1, 0); shd(tap.shd2, 22); shd(tap.shd3, 44);
         if (tap.shd80 && !tap.shd1) {
           // sombreado de Word 97: dos bytes por celda (color de primer plano y de fondo en el índice de 16 colores, y la trama)
           for (let k = 0; k * 2 + 2 <= tap.shd80.n && k < 64; k++) {
@@ -867,11 +955,13 @@
               const prev = celdas[celdas.length - 1];
               prev.fusionH = (prev.fusionH || 1) + 1;
               prev.ancho += ancho;
+              prev._fin = def.centros[k + 1];
               continue;
             }
             if (!f.celdas[col]) break;
-            const celda = { hijos: f.celdas[col].hijos, ancho };
-            if (tc && tc.vert === 2) celda.fusionV = 'inicio'; else if (tc && tc.vert === 1) celda.fusionV = 'continua';
+            const celda = { hijos: f.celdas[col].hijos, ancho, _ini: def.centros[k], _fin: def.centros[k + 1] };
+            // vertMerge (2 bits): 3 = primera de las combinadas (fVertMerge y fVertRestart), 1 = sigue a la de arriba
+            if (tc && (tc.vert === 3 || tc.vert === 2)) celda.fusionV = 'inicio'; else if (tc && tc.vert === 1) celda.fusionV = 'continua';
             if (rellenos[k]) celda.relleno = rellenos[k];
             celda._k = k;
             if (tc) {
@@ -896,12 +986,32 @@
         filas.push(fila);
       }
       if (!filas.length) return null;
+      // Filas con distintos límites de celda (una celda dividida, otra más ancha): la rejilla es la unión de todos los límites y cada celda abarca las columnas
+      // que cubre, como hace Word al guardar .docx. Si las filas no empiezan en el mismo sitio, tienen huecos o pasan de 63 columnas, queda la de la primera fila.
+      const limites = new Set();
+      let rejillaValida = true;
+      for (const fila of filas) {
+        let fin = null;
+        for (const c of fila.celdas) {
+          if (c._ini == null || c._fin <= c._ini || (fin != null && c._ini !== fin)) { rejillaValida = false; break; }
+          limites.add(c._ini); limites.add(c._fin); fin = c._fin;
+        }
+        if (!rejillaValida || limites.size > 64) { rejillaValida = false; break; }
+      }
+      if (rejillaValida && limites.size >= 2) {
+        const rejilla = [...limites].sort((a, b) => a - b);
+        if (filas.every((fila) => fila.celdas[0]._ini === rejilla[0])) {
+          const indice = new Map(rejilla.map((x, i) => [x, i]));
+          for (const fila of filas) for (const c of fila.celdas) { const n = indice.get(c._fin) - indice.get(c._ini); if (n > 1) c.fusionH = n; else delete c.fusionH; }
+          anchos = rejilla.slice(1).map((x, k) => x - rejilla[k]);
+        }
+      }
       // Los bordes de la tabla (arriba, izquierda, abajo, derecha, y los de dentro) pasan a cada celda que no trae los suyos
       filas.forEach((fila, i) => {
         const bt = fila._bt;
         delete fila._bt;
         fila.celdas.forEach((c, j) => {
-          delete c._k;
+          delete c._k; delete c._ini; delete c._fin;
           if (!bt) return;
           const propio = c.bordes || {};
           const bd = {
@@ -977,8 +1087,12 @@
         sec.hijos = this.bloquesDe(cp0, Math.min(cp1, fin), fines);
         const base = 6 + 6 * i;
         const he = historia(base + 1), hp = historia(base + 3);
+        // los campos abiertos del texto principal no siguen en el encabezado ni en el pie (ni al revés)
+        const abiertos = this.campos, deMas = this.camposDeMas;
+        this.campos = []; this.camposDeMas = 0;
         if (he) ultimoEnc = this.bloquesDe(he[0], he[1], null);
-        if (hp) ultimoPie = this.bloquesDe(hp[0], hp[1], null);
+        if (hp) { this.campos = []; this.camposDeMas = 0; ultimoPie = this.bloquesDe(hp[0], hp[1], null); }
+        this.campos = abiertos; this.camposDeMas = deMas;
         if (ultimoEnc && ultimoEnc.length) sec.encabezado = ultimoEnc;
         if (ultimoPie && ultimoPie.length) sec.pie = ultimoPie;
         secs.push(sec);
