@@ -411,6 +411,7 @@
     }
     if (!hojas.length) throw new LibroXlsx.ErrorXlsx('sinLibro', 'sin hojas');
     const libro = { hojas, fecha1904 };
+    if (depurar) libro._tablas = { hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
     if (conFormulas) {   // los nombres definidos del libro (no los integrados ni los ocultos que hacen de funciones nuevas: `_xlfn.…`)
       const ctx = { f: 0, c: 0, hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
       libro.nombres = [];

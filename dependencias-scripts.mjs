@@ -13,7 +13,8 @@ const NECESITA = {
   'lector-hojas.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-modelo.js', 'csv-planilla.js'],
   'ods-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-modelo.js'],
   'xlsb-lector.js': ['zip-propio.js', 'xml-ligero.js', 'xlsx-estilos.js', 'xlsx-modelo.js'],
-  'xls-lector.js': ['cfb-propio.js', 'xlsx-estilos.js', 'xlsx-modelo.js'],
+  'xls-lector.js': ['cfb-propio.js', 'xlsx-estilos.js', 'xlsx-modelo.js'],   // con { formulas: true } también hace falta xls-formulas.js (aún no lo pide ninguna herramienta)
+  'xls-formulas.js': [],
   'motor-hojas.js': ['vendor.js'],
   'rejilla-hoja.js': ['vendor.js', 'lector-hojas.js', 'motor-hojas.js', 'rejilla-orden-filtro.js'],
   'excel-a-pdf-motor.js': ['vendor.js', 'motor-hojas.js', 'lector-hojas.js'],
