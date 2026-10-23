@@ -10,7 +10,7 @@
 //                maestros?: [{ fondo?, formas: [forma] }],                               // el patrón: lo que se dibuja detrás de las diapositivas que lo usan
 //                diapositivas: [{ maestro?: índice, oculta?, fondo?, formas: [forma], notas?: [parrafo] }] }
 //   fondo  = { color: 'RRGGBB' } | { degradado } | { imagen }
-//   forma  = { tipo: 'forma', geom?: 'rect'|… (nombre de forma predefinida de ECMA-376), ajustes?: [enteros de ECMA], relleno?, linea?, sombra?, texto?, ...caja }
+//   forma  = { tipo: 'forma', geom?: 'rect'|… (nombre de forma predefinida de ECMA-376) | { rutas: [{ w, h, cmds: [['M',x,y]|['L',x,y]|['C',x1,y1,x2,y2,x,y]|['Q',x1,y1,x,y]|['Z']], sinRelleno?, sinTrazo? }] } (forma libre), ajustes?: [enteros de ECMA], relleno?, linea?, sombra?, texto?, ...caja }
 //          | { tipo: 'imagen', imagen, recorte?: { izq, arr, der, aba } (fracciones 0..1), linea?, geom?, ...caja }
 //          | { tipo: 'linea', linea?, ...caja }                                         // de la esquina superior izquierda a la inferior derecha de la caja (con volteo, la otra diagonal)
 //          | { tipo: 'tabla', columnas: [ancho EMU], filas: [{ alto, celdas: [celda] }], ...caja }
@@ -50,6 +50,7 @@
   const MAX_PROFUNDIDAD = 16;
   const MAX_TEXTO = 64 * 1024 * 1024;
   const MAX_CELDAS = 200000;
+  const MAX_PUNTOS = 4000000;         // órdenes de trazo de todas las formas libres
 
   const GEOMETRIAS = new Set(['rect', 'roundRect', 'ellipse', 'triangle', 'rtTriangle', 'diamond', 'parallelogram', 'trapezoid', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'decagon', 'dodecagon', 'star4', 'star5', 'star6', 'star7', 'star8', 'star10', 'star12', 'star16', 'star24', 'star32',
     'rightArrow', 'leftArrow', 'upArrow', 'downArrow', 'leftRightArrow', 'upDownArrow', 'quadArrow', 'leftRightUpArrow', 'bentArrow', 'uturnArrow', 'leftUpArrow', 'bentUpArrow', 'curvedRightArrow', 'curvedLeftArrow', 'curvedUpArrow', 'curvedDownArrow', 'stripedRightArrow', 'notchedRightArrow', 'homePlate', 'chevron',
@@ -81,6 +82,7 @@
       this.contrato = contrato;
       this.mensajes = new Set();
       this.formas = 0;
+      this.puntos = 0;
       this.texto = 0;
       this.medios = [];                       // { nombre, bytes, tipo }
       this.mediosPorDatos = new Map();
@@ -239,11 +241,34 @@
     const rot = Number.isFinite(f.rot) && f.rot ? ` rot="${entero(((f.rot % 360) + 360) % 360 * 60000, 0, 21599999)}"` : '';
     return `<a:xfrm${rot}${f.volteoH ? ' flipH="1"' : ''}${f.volteoV ? ' flipV="1"' : ''}><a:off x="${entero(f.x, -51206400, 51206400)}" y="${entero(f.y, -51206400, 51206400)}"/><a:ext cx="${w}" cy="${h}"/></a:xfrm>`;
   };
-  const geometria = (g, ajustes) => {
+  const geometria = (g, ajustes, ctx) => {
+    if (g && typeof g === 'object' && Array.isArray(g.rutas)) return geometriaLibre(g, ctx);
     const prst = GEOMETRIAS.has(g) ? g : 'rect';
     const av = Array.isArray(ajustes) ? ajustes.slice(0, 8).map((v, i) => (Number.isFinite(v) ? `<a:gd name="adj${ajustes.length === 1 ? '' : i + 1}" fmla="val ${entero(v, -2147483647, 2147483647)}"/>` : '')).join('') : '';
     return `<a:prstGeom prst="${prst}"><a:avLst>${av}</a:avLst></a:prstGeom>`;
   };
+  // Forma libre: rutas de trazos en su propio sistema de coordenadas (w × h), que se estira a la caja de la forma
+  function geometriaLibre(g, ctx) {
+    const rutas = [];
+    for (const r of g.rutas.slice(0, 64)) {
+      if (!r || !Array.isArray(r.cmds)) continue;
+      const w = entero(r.w, 1, 2147483647), h = entero(r.h, 1, 2147483647);
+      const xy = (x, y) => `<a:pt x="${entero(x, -2147483647, 2147483647)}" y="${entero(y, -2147483647, 2147483647)}"/>`;
+      const cmds = [];
+      for (const c of r.cmds) {
+        if ((ctx.puntos += 1) > MAX_PUNTOS) throw new Error('La presentación tiene demasiados trazos y no se puede escribir.');
+        if (!Array.isArray(c)) continue;
+        if (c[0] === 'M') cmds.push(`<a:moveTo>${xy(c[1], c[2])}</a:moveTo>`);
+        else if (c[0] === 'L') cmds.push(`<a:lnTo>${xy(c[1], c[2])}</a:lnTo>`);
+        else if (c[0] === 'C') cmds.push(`<a:cubicBezTo>${xy(c[1], c[2])}${xy(c[3], c[4])}${xy(c[5], c[6])}</a:cubicBezTo>`);
+        else if (c[0] === 'Q') cmds.push(`<a:quadBezTo>${xy(c[1], c[2])}${xy(c[3], c[4])}</a:quadBezTo>`);
+        else if (c[0] === 'Z') cmds.push('<a:close/>');
+      }
+      if (cmds.length) rutas.push(`<a:path w="${w}" h="${h}"${r.sinRelleno ? ' fill="none"' : ''}${r.sinTrazo ? ' stroke="0"' : ''}>${cmds.join('')}</a:path>`);
+    }
+    if (!rutas.length) return '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
+    return `<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst>${rutas.join('')}</a:pathLst></a:custGeom>`;
+  }
   const nombreDe = (f, ctx, base) => escAttr(String(f.nombre || base).slice(0, 80));
   function cNvPr(f, id, base, rels, ctx) {
     const desc = f.descripcion ? ` descr="${escAttr(String(f.descripcion).slice(0, 500))}"` : '';
@@ -258,7 +283,7 @@
     switch (f.tipo) {
       case 'forma': {
         const efecto = sombra(f.sombra);
-        const sp = `<p:spPr>${caja(f)}${geometria(f.geom, f.ajustes)}${relleno(f.relleno, rels)}${linea(f.linea)}${efecto}</p:spPr>`;
+        const sp = `<p:spPr>${caja(f)}${geometria(f.geom, f.ajustes, ctx)}${relleno(f.relleno, rels)}${linea(f.linea)}${efecto}</p:spPr>`;
         const tx = f.texto ? cuerpo(f.texto, rels, ctx, lang) : '';
         return `<p:sp><p:nvSpPr>${cNvPr(f, id, f.texto ? 'Cuadro de texto' : 'Forma', rels, ctx)}<p:cNvSpPr${f.texto && f.geom === 'rect' && f.relleno === undefined && f.linea === undefined ? ' txBox="1"' : ''}/><p:nvPr/></p:nvSpPr>${sp}${tx}</p:sp>`;
       }
@@ -267,7 +292,7 @@
         if (!rid) return '';
         const c = f.recorte || {};
         const src = ['izq', 'arr', 'der', 'aba'].map((k, i) => (Number(c[k]) ? ` ${'ltrb'[i]}="${entero(c[k] * 100000, -100000, 100000)}"` : '')).join('');
-        return `<p:pic><p:nvPicPr>${cNvPr(f, id, 'Imagen', rels, ctx)}<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rid}"/><a:srcRect${src}/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>${caja(f)}${geometria(f.geom || 'rect', f.ajustes)}${linea(f.linea)}</p:spPr></p:pic>`;
+        return `<p:pic><p:nvPicPr>${cNvPr(f, id, 'Imagen', rels, ctx)}<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rid}"/><a:srcRect${src}/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>${caja(f)}${geometria(f.geom || 'rect', f.ajustes, ctx)}${linea(f.linea)}</p:spPr></p:pic>`;
       }
       case 'linea':
         return `<p:cxnSp><p:nvCxnSpPr>${cNvPr(f, id, 'Línea', rels, ctx)}<p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr>${caja(f)}<a:prstGeom prst="line"><a:avLst/></a:prstGeom>${linea(f.linea) || '<a:ln w="12700"><a:solidFill><a:srgbClr val="000000"/></a:solidFill></a:ln>'}${sombra(f.sombra)}</p:spPr></p:cxnSp>`;
@@ -303,9 +328,9 @@
         if (cel.fusionada === 'h') atr += ' hMerge="1"'; else if (cel.fusionada === 'v') atr += ' vMerge="1"'; else if (cel.fusionada) atr += ' hMerge="1"';
         const b = cel.bordes || {};
         const bordes = [['izquierda', 'a:lnL'], ['derecha', 'a:lnR'], ['arriba', 'a:lnT'], ['abajo', 'a:lnB']].map(([k, e]) => (k in b ? linea(b[k], e) : '')).join('');
-        const lado = (v, def) => (Number.isFinite(v) ? ` ${def[0]}="${entero(v, 0, 51206400)}"` : '');
+        const lado = (v, nombre) => (Number.isFinite(v) ? ` ${nombre}="${entero(v, 0, 51206400)}"` : '');
         const tcPr = `<a:tcPr${lado(m.i, 'marL')}${lado(m.d, 'marR')}${lado(m.s, 'marT')}${lado(m.a, 'marB')}${ANCLAS[cel.ancla] ? ` anchor="${ANCLAS[cel.ancla]}"` : ''}>${bordes}${relleno(cel.relleno, rels)}</a:tcPr>`;
-        tcs.push(`<a:tc${atr}>${cuerpo(cel.texto, rels, ctx, lang, 'a:txBody')}${tcPr}</a:tc>`);
+        tcs.push(`<a:tc${atr}>${cuerpo(cel.texto, rels, ctx, lang, 'a:txBody', true)}${tcPr}</a:tc>`);
       }
       return `<a:tr h="${entero(fi && fi.alto, 0, 51206400)}">${tcs.join('')}</a:tr>`;
     }).join('');

@@ -40,14 +40,16 @@
     return s.replace(/_x([0-9a-fA-F]{4})_/g, (todo, h) => String.fromCharCode(parseInt(h, 16)));
   }
 
-  function local(nombre) {
+  function nombreLocal(nombre) {
     const dos = nombre.indexOf(':');
     return dos < 0 ? nombre : nombre.slice(dos + 1);
   }
 
   const esEsp = (k) => k === 32 || k === 10 || k === 13 || k === 9;
 
-  function recorrer(texto, h) {
+  function recorrer(texto, h, completo) {
+    // completo: deja los nombres con su prefijo (draw:style-name y presentation:style-name son atributos distintos en OpenDocument)
+    const local = completo ? (nombre) => nombre : nombreLocal;
     const n = texto.length;
     const pila = [];
     let i = 0;
@@ -137,7 +139,7 @@
 
   // Árbol pequeño { n: nombre local, a: atributos, h: hijos (elementos o cadenas) } para las partes que se recorren varias veces (Word, OpenDocument).
   // Falla con un Error claro si el XML pasa los límites (elementos o niveles), para que un archivo hostil no agote la memoria.
-  function arbol(texto, maxElementos = 3000000, maxProfundidad = 256) {
+  function arbol(texto, maxElementos = 3000000, maxProfundidad = 256, completo = false) {
     const raiz = { n: '#', a: {}, h: [] };
     const pila = [raiz];
     let cuenta = 0;
@@ -151,7 +153,7 @@
       },
       cerrar() { if (pila.length > 1) pila.pop(); },
       texto(t) { pila[pila.length - 1].h.push(t); },
-    });
+    }, completo);
     return raiz.h.find((x) => typeof x !== 'string') || null;
   }
 

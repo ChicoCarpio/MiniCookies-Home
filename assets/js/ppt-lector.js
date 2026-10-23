@@ -202,7 +202,7 @@
           this.leerGrupoDibujo(h);
         } else if (h.tipo === RT.SlideListWithText) {
           this.leerListaTextos(h);
-        } else if (h.tipo === RT.ExObjList) {
+        } else if (h.tipo === RT.ExObjList || h.tipo === 0x07D0) {
           this.leerEnlaces(h);
         }
       }
@@ -448,7 +448,7 @@
       for (const h of this.hijos(c)) {
         if (h.tipo === RT.OEPlaceholderAtom) sp.colocador = { posicion: i32(b, h.ini), id: u8(b, h.ini + 4), tam: u8(b, h.ini + 5) };
         else if (h.tipo === RT.OutlineTextRefAtom) sp.refTexto = u32(b, h.ini);
-        else if (h.tipo === RT.InteractiveInfo) sp.enlace = this.enlaceDe(h);
+        else if (h.tipo === RT.InteractiveInfo && h.inst === 0) sp.enlace = this.enlaceDe(h) || sp.enlace;     // al hacer clic (inst 1 = al pasar el ratón)
         else if (h.tipo === 0x1388) sp.pf9 = this.leerPP9(h) || sp.pf9;
       }
     },
@@ -457,7 +457,7 @@
       const b = this.pd;
       for (const a of this.hijos(h)) {
         if (a.tipo !== RT.InteractiveInfoAtom) continue;
-        const id = u32(b, a.ini + 4), accion = u8(b, a.ini + 8), salto = u8(b, a.ini + 10), tipo = u8(b, a.ini + 13);
+        const id = u32(b, a.ini + 4), accion = u8(b, a.ini + 8), salto = u8(b, a.ini + 10), tipo = u8(b, a.ini + 12);
         if (tipo === 8 || tipo === 0) { const d = this.exEnlaces.get(id); if (d && /^(https?:|mailto:)/i.test(d)) return d; if (d && /^[^:\\/]+@[^:\\/]+$/.test(d)) return 'mailto:' + d; }
         if (accion === 3 && tipo === 7) { const d = this.exEnlaces.get(id); const m = d && /^(\d+),(\d+)/.exec(d); if (m) return { slideId: +m[1] }; }
         if (accion === 1 && salto === 1) return { relativa: 'siguiente' };
@@ -558,9 +558,9 @@
     },
     fijo(v) { return (v | 0) / 65536; },
 
-    relleno(mapas, ctx) {
+    relleno(mapas, ctx, implicito) {
       const lleno = this.booleano(mapas, 0x1BF, 4);
-      if (!lleno) return null;
+      if (lleno === false || (lleno === undefined && !implicito)) return null;
       const tipo = this.prop(mapas, 0x180) || 0;
       const opac = this.prop(mapas, 0x182);
       const alfa = opac === undefined ? undefined : acotar(opac / 65536, 0, 1);
@@ -575,7 +575,8 @@
         const fondo = this.colorOA(this.prop(mapas, 0x183), ctx) || 'FFFFFF';
         const angulo = this.fijo(this.prop(mapas, 0x18B) || 0);
         const foco = this.prop(mapas, 0x18C);
-        const paradas = [{ pos: 0, color, alfa }, { pos: 100, color: fondo, alfa: alfa === undefined ? undefined : alfa }];
+        const alReves = (foco === undefined ? 0 : foco | 0) < 50;      // con el foco en 0 el degradado empieza por el color de fondo
+        const paradas = alReves ? [{ pos: 0, color: fondo, alfa }, { pos: 100, color, alfa }] : [{ pos: 0, color, alfa }, { pos: 100, color: fondo, alfa }];
         return { degradado: { angulo: ((90 - angulo) % 360 + 360) % 360, radial: tipo === 5 || tipo === 6 ? true : undefined, paradas } };
       }
       return alfa !== undefined && alfa < 1 ? { color, alfa } : { color };
@@ -681,7 +682,7 @@
         if (runPf) numPf = ip;
         const nivel = runPf ? runPf.nivel : 0;
         const base = this.estiloDe(ctx, t.tipoTexto, nivel);
-        const pf = Object.assign({}, base.pf, runPf ? runPf.pf : {});
+        const pf = Object.assign({}, base.pf, t.base ? t.base.pf : {}, runPf ? runPf.pf : {});
         const parrafo = { hijos: [] };
         parrafo.alin = ALIN[pf.alin || 0] || 'l';
         if (nivel) parrafo.nivel = nivel;
@@ -703,7 +704,7 @@
           if (a >= z) continue;
           while (ic < cfs.length - 1 && cfs[ic].fin <= a) ic++;
           const cfRun = cfs[ic] && cfs[ic].ini <= a && cfs[ic].fin > a ? cfs[ic].cf : {};
-          const cf = Object.assign({}, base.cf, cfRun);
+          const cf = Object.assign({}, base.cf, t.base ? t.base.cf : {}, cfRun);
           const r = {};
           const fuente = this.nombreFuente(cf.fuente !== undefined ? cf.fuente : cf.fuenteAnsi);
           if (fuente) r.fuente = fuente;
@@ -753,7 +754,7 @@
     convertirForma(sp, ctx, u = EMU_POR_MAESTRA) {
       if (sp.flags & 0x4 || sp.flags & 0x8 || sp.flags & 0x400) return null;       // patriarca, borrada, fondo
       const ph = sp.colocador;
-      const baseId = ph && COLOCADOR_PATRON[ph.id] !== undefined ? COLOCADOR_PATRON[ph.id] : ph && ph.id >= 1 && ph.id <= 12 ? ph.id : null;
+      const baseId = ph && COLOCADOR_PATRON[ph.id] !== undefined ? COLOCADOR_PATRON[ph.id] : ph && ph.id >= 1 && ph.id <= 10 ? ph.id : null;
       const baseSp = baseId !== null && ctx.colocadores ? ctx.colocadores.get(baseId) : null;
       const mapas = [baseSp && baseSp.props, sp.props];
       const caja = this.cajaDe(sp, baseSp, u);
@@ -797,7 +798,7 @@
       f.tipo = 'forma';
       f.geom = MSOSPT[tipoSp] || 'rect';
       if (tipoSp !== 0 && !MSOSPT[tipoSp]) this.aviso('formas');
-      if (tipoSp === 0 && sp.comp.has(0x145)) this.aviso('formas');
+      if (tipoSp === 0 && sp.comp.has(0x145)) { const libre = this.formaLibre(sp, mapas); if (libre) f.geom = libre; else this.aviso('formas'); }
       const aj = this.ajustes(sp, mapas, f.geom);
       if (aj) f.ajustes = aj;
       f.relleno = this.relleno(mapas, ctx);
@@ -822,6 +823,36 @@
       } else if (!f.relleno && !f.linea) return null;   // marcador de posición o cuadro de texto vacío, sin relleno ni línea
       return f;
     },
+    // Forma libre: vértices (pVertices) y tipo de cada trazo (pSegmentInfo) → rutas del contrato
+    formaLibre(sp, mapas) {
+      const v = sp.comp.get(0x145), s = sp.comp.get(0x146);
+      if (!v || !s || v.length < 6 || s.length < 6) return null;
+      const nv = Math.min(u16(v, 0), 100000), cb = u16(v, 4);
+      const tam = cb === 0xFFF0 ? 4 : 8;
+      if (nv * tam + 6 > v.length) return null;
+      const pt = (k) => (tam === 4 ? [i16(v, 6 + k * 4), i16(v, 8 + k * 4)] : [i32(v, 6 + k * 8), i32(v, 10 + k * 8)]);
+      const ns = Math.min(u16(s, 0), 100000);
+      if (ns * 2 + 6 > s.length) return null;
+      const izq = this.prop(mapas, 0x140) | 0, arr = this.prop(mapas, 0x141) | 0;
+      const der = this.prop(mapas, 0x142) === undefined ? 21600 : this.prop(mapas, 0x142) | 0, aba = this.prop(mapas, 0x143) === undefined ? 21600 : this.prop(mapas, 0x143) | 0;
+      const w = der - izq, h = aba - arr;
+      if (w <= 0 || h <= 0) return null;
+      const cmds = [];
+      let k = 0;
+      const p = () => { if (k >= nv) throw new Error('fin'); const q = pt(k++); return [q[0] - izq, q[1] - arr]; };
+      try {
+        for (let i = 0; i < ns; i++) {
+          const x = u16(s, 6 + i * 2), tipo = x >> 13, cuenta = x & 0x1FFF;
+          if (tipo === 2) { const a = p(); cmds.push(['M', a[0], a[1]]); }
+          else if (tipo === 0) { for (let j = 0; j < cuenta; j++) { const a = p(); cmds.push(['L', a[0], a[1]]); } }
+          else if (tipo === 1) { for (let j = 0; j < cuenta; j++) { const a = p(), b = p(), c = p(); cmds.push(['C', a[0], a[1], b[0], b[1], c[0], c[1]]); } }
+          else if (tipo === 3) cmds.push(['Z']);
+          else if (tipo === 4) break;
+          else return null;     // escapes (arcos, rellenos especiales): no se llevan
+        }
+      } catch (e) { return null; }
+      return cmds.length ? { rutas: [{ w, h, cmds }] } : null;
+    },
     // Los ajustes de OfficeArt (adjustValue) a los de ECMA para las formas más comunes
     ajustes(sp, mapas, geom) {
       const a1 = this.prop(mapas, 0x147);
@@ -843,7 +874,7 @@
     },
     fondoDe(sp, ctx) {
       if (!sp) return null;
-      const r = this.relleno([sp.props], ctx);
+      const r = this.relleno([sp.props], ctx, true);
       if (!r) return null;
       if (r.degradado) return { degradado: r.degradado };
       if (r.imagen) return { imagen: r.imagen };
@@ -876,12 +907,13 @@
       const d = { formas: [] };
       if (!rec || rec.tipo !== RT.Slide) return { d, maestro: 0 };
       const b = this.pd;
-      let dibujo = null, esquemaPropio = null, flags = 7, idMaestro = 0, idNotas = 0;
+      let dibujo = null, esquemaPropio = null, flags = 7, idMaestro = 0, idNotas = 0, pies = null;
       for (const h of this.hijos(rec)) {
         if (h.tipo === RT.SlideAtom) { idMaestro = u32(b, h.ini + 12); idNotas = u32(b, h.ini + 16); flags = u16(b, h.ini + 20); }
         else if (h.tipo === RT.ColorSchemeAtom && h.inst === 1) esquemaPropio = this.leerEsquema(h);
         else if (h.tipo === RT.PPDrawing) dibujo = this.leerDibujo(h);
         else if (h.tipo === RT.SlideShowSlideInfoAtom && h.fin - h.ini >= 12 && (u16(b, h.ini + 10) & 4)) d.oculta = true;
+        else if (h.tipo === 0x0FD9) pies = this.leerPies(h);
       }
       let im = this.maestras.findIndex((x) => x.slideId === idMaestro);
       if (im < 0) im = 0;
@@ -889,13 +921,41 @@
       const ctx = { esquema: esquemaPropio && !(flags & 2) ? esquemaPropio : m.esquema, estilos: m.estilos, colocadores: m.colocadores, textosDiap: entrada.textos, numeroDiapositiva: indice + 1 };
       if (!(flags & 1)) d.ocultarPatron = true;
       if (dibujo) {
-        const fondo = this.fondoDe(dibujo.fondo, ctx);
+        const fondo = flags & 4 ? null : this.fondoDe(dibujo.fondo, ctx);     // con el bit 2 puesto el fondo es el del patrón, aunque la diapositiva traiga uno
         if (fondo) d.fondo = fondo;
         for (const sp of dibujo.formas) { const f = this.convertirForma(sp, ctx); if (f) d.formas.push(f); }
+        if (pies) this.agregarPies(pies, d, ctx, dibujo.formas);
       }
       const notas = idNotas ? this.leerNotas(idNotas) : null;
       if (notas) d.notas = notas;
       return { d, maestro: im };
+    },
+    // Encabezados y pies de la diapositiva (HeadersFooters): lo que PowerPoint dibuja con los marcadores de fecha, número y pie del patrón
+    leerPies(h) {
+      const b = this.pd;
+      const p = { flags: 0, fecha: '', encabezado: '', pie: '' };
+      for (const x of this.hijos(h)) {
+        if (x.tipo === 0x0FDA) p.flags = u16(b, x.ini + 2);
+        else if (x.tipo === RT.CString) { const s = textoUtf16(b, x.ini, x.fin).replace(/\u0000.*$/s, ''); if (x.inst === 0) p.fecha = s; else if (x.inst === 1) p.encabezado = s; else if (x.inst === 2) p.pie = s; }
+      }
+      return p;
+    },
+    agregarPies(p, d, ctx, formasSlide) {
+      const hay = new Set(formasSlide.filter((s) => s.colocador).map((s) => s.colocador.id));
+      const base = (tx) => { if (!tx || !tx.estilo) return null; const e = this.leerEstiloTexto(tx.estilo, (tx.texto || '').length); return { pf: e.pfs[0] ? e.pfs[0].pf : {}, cf: e.cfs[0] ? e.cfs[0].cf : {} }; };
+      const poner = (id, activo, texto) => {
+        const m = ctx.colocadores.get(id);
+        if (!activo || !m || hay.has(id) || !m.texto) return;
+        const sp = Object.assign({}, m, { colocador: null, pf9: null, refTexto: null, flags: m.flags & ~0x20 });
+        sp.texto = texto === null ? m.texto : { tipoTexto: m.texto.tipoTexto, texto, estilo: null, regla: null, campos: new Map(), enlaces: [], base: base(m.texto) };
+        const f = this.convertirForma(sp, ctx);
+        if (f) d.formas.splice(nuevos++, 0, f);     // PowerPoint los pone primero (debajo del resto)
+      };
+      let nuevos = 0;
+      poner(7, (p.flags & 0x7) && (p.flags & 0x2 || p.fecha), p.flags & 0x2 || !p.fecha ? null : p.fecha);
+      poner(9, (p.flags & 0x20) && p.pie, p.pie);
+      poner(8, p.flags & 0x8, null);
+      poner(10, (p.flags & 0x10) && p.encabezado, p.encabezado);
     },
     leerNotas(idNotas) {
       const entrada = this.listaNotas.get(idNotas);
