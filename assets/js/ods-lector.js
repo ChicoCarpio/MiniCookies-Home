@@ -416,7 +416,7 @@
       if (propio) { const v = hacer(propio); for (let x = col; x < fin; x++) filaActual.celdas[x] = v; }
       else trozos(hoja.tramos, col, fin, (x, y, t) => { const v = hacer(t && t.tiene ? t : filaActual.defecto); for (let j = x; j < y; j++) filaActual.celdas[j] = v; });
       // la fórmula (OpenFormula → texto de Excel) va en la primera celda; el valor guardado queda como último resultado
-      if (conFormulas && c.a.formula && col < MAX_COLS && c.a.formula.startsWith('of:=')) {
+      if (conFormulas && c.a.formula && col < MAX_COLS && c.a.formula.startsWith('of:=') && !/^of:=#[A-Z\/0!?]+$/.test(c.a.formula)) {   // un error suelto (of:=#N/A) es como LibreOffice guarda una celda de error, no una fórmula
         const texto = OdsFormulas.aExcel(c.a.formula);
         if (texto && texto.length < 8000) {
           const v = filaActual.celdas[col];

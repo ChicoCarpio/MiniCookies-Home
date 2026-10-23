@@ -69,7 +69,8 @@
     const origen = await detectar(bytes);
     if (!origen) throw new Error('el archivo no es una hoja de cálculo que se pueda leer');
     if (destino !== 'xlsx' && destino !== 'xls' && destino !== 'ods') throw new Error('formato de destino desconocido: ' + destino);
-    const libro = await leerContrato(bytes, origen, conFormulas);
+    const libro = await leerContrato(bytes, origen, conFormulas);   // antes que la comprobación de formato: un archivo con contraseña tiene que decir eso
+    if (origen === destino) { const e = new Error('el archivo ya está en ese formato'); e.codigo = 'mismo-formato'; throw e; }
     if (!conFormulas) sinFormulas(libro.hojas);
     // los nombres locales llegan con el nombre de su hoja (xls) o ya con el índice: se dejan con el índice, que entienden los tres escritores
     const nombres = (libro.nombres || []).filter((n) => !n.integrado && n.formula).map((n) => {
