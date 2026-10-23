@@ -282,7 +282,7 @@ function elegirArchivosWord(listaFileList) {
   const todos = [...listaFileList];
   const archivos = todos.filter(f => FormatosWord.esDocumento(f.name));
   if (archivos.length) mostrarArchivosWord(archivos);
-  // Lo que no es .docx (un .doc antiguo, por ejemplo) no se agrega: se avisa cuáles quedaron afuera.
+  // Lo que no es .docx, .doc ni .odt no se agrega: se avisa cuáles quedaron afuera.
   const omitidos = todos.filter(f => !archivos.includes(f)).map(f => f.name);
   if (omitidos.length) {
     advertencias.textContent = t('no-agregados') + ' ' + omitidos.join(', ');

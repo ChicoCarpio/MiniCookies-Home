@@ -280,6 +280,9 @@ botonReparar.addEventListener('click', async () => {
       mensajeNivel.style.color = '#166534';
       mensajeNivel.style.display = 'block';
     } catch (errorNivel1) {
+      // Con contraseña, de Word 95, o un .doc que su lector no pudo abrir (no es un zip, no tiene word/document.xml): se muestra el motivo que dio el lector.
+      const inicio = new Uint8Array(arrayBuffer, 0, Math.min(2, arrayBuffer.byteLength));
+      if (errorNivel1 && (errorNivel1.codigo === 'cifrado' || errorNivel1.codigo === 'antiguo' || !(inicio[0] === 0x50 && inicio[1] === 0x4B))) throw errorNivel1;
       // Nivel 2: rescatar texto crudo de word/document.xml sin depender de un XML válido.
       const zip = await ZipPropio.loadAsync(arrayBuffer);
       const documentoXml = zip.file('word/document.xml');

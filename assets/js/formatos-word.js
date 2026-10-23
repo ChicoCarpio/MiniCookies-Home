@@ -78,6 +78,7 @@
     if (origen === 'docx') return { bytes, origen, mensajes: [] };
     if (origen === 'doc') { const r = await DocLector.aDocx(bytes); return { bytes: r.bytes, origen, mensajes: r.mensajes }; }
     if (origen === 'odt') { const r = await OdtLector.aDocx(bytes); return { bytes: r.bytes, origen, mensajes: r.mensajes }; }
+    if (esCfb(bytes)) await DocLector.aDocx(bytes);   // otro contenedor de Office (un .docx con contraseña, un .xls renombrado): el lector dice el motivo
     throw new Error('el archivo no es un documento de Word que se pueda leer (.docx, .doc u .odt)');
   }
 
