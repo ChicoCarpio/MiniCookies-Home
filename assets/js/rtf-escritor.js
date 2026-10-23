@@ -12,6 +12,10 @@
   'use strict';
   const MAX_PROFUNDIDAD_TABLAS = 8;
   const MAX_SECCIONES = 4096;
+  const MAX_BLOQUES = 4000000;          // párrafos que se escriben en total: un encabezado grande repetido por miles de secciones no tiene que multiplicarse sin freno
+  const MAX_SALIDA = 500000000;         // caracteres del .rtf (cerca del tope de una cadena de V8); una imagen citada muchas veces o un documento enorme dan un Error claro
+  const CAMPOS = new Set(['PAGE', 'NUMPAGES', 'SECTIONPAGES', 'DATE', 'TIME', 'SAVEDATE', 'PRINTDATE', 'CREATEDATE', 'FILENAME', 'TITLE', 'AUTHOR', 'NUMWORDS', 'NUMCHARS']);   // los campos que se escriben como campo; lo demás queda como su texto
+  const ERROR_GRANDE = 'El documento es demasiado grande para guardarlo como .rtf.';
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const entero = (v, min, max, def = 0) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
   const rgb = (hex) => (/^[0-9a-fA-F]{6}$/.test(hex || '') ? [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)] : null);
@@ -51,19 +55,26 @@
   }
   // Nombre de marcador (y ancla de enlace, que tiene que coincidir): cortado a 40 como Word, sin lo que rompe la instrucción del campo, y con lo que no es ASCII como \uN
   const nombreMarca = (n) => textoRtf(String(n).slice(0, 40).replace(/[\\"{}]/g, ''));
+  // Imagen → hexadecimal en líneas de 64 bytes: se arma una vez en un búfer ASCII (sin una cadena por línea) y se pasa a texto de un solo golpe
+  const DIGITOS = Uint8Array.from('0123456789abcdef', (c) => c.charCodeAt(0));
   const hexa = (bytes) => {
-    let s = '';
-    for (let i = 0; i < bytes.length; i += 64) {
-      let linea = '';
-      for (let k = i; k < Math.min(bytes.length, i + 64); k++) linea += (bytes[k] < 16 ? '0' : '') + bytes[k].toString(16);
-      s += linea + '\n';
+    const lineas = Math.ceil(bytes.length / 64);
+    if (bytes.length * 2 + lineas > MAX_SALIDA) throw new Error(ERROR_GRANDE);
+    const salida = new Uint8Array(bytes.length * 2 + lineas);
+    let o = 0;
+    for (let i = 0; i < bytes.length; i++) {
+      const b = bytes[i];
+      salida[o++] = DIGITOS[b >> 4]; salida[o++] = DIGITOS[b & 15];
+      if ((i & 63) === 63 || i === bytes.length - 1) salida[o++] = 10;
     }
-    return s;
+    return new TextDecoder('latin1').decode(salida);
   };
 
   async function generar(contrato) {
     const mensajes = [];
     const aviso = (m) => { if (!mensajes.includes(m)) mensajes.push(m); };
+    let bloquesEscritos = 0, hexaTotal = 0;
+    const hexaDe = new Map();      // los mismos bytes (la misma imagen citada muchas veces) se pasan a hexadecimal una sola vez
 
     // ───────── Fuentes y colores ─────────
     const fuentes = [], fuenteIdx = new Map();
@@ -163,8 +174,8 @@
         if (r.marcador != null) { const n = nombreMarca(r.marcador); x += `{\\*\\bkmkstart ${n}}{\\*\\bkmkend ${n}}`; continue; }
         if (r.imagen) { x += imagen(r.imagen); continue; }
         if (r.enlace) {
-          if (prof > 3) continue;
           const interior = runs(r.hijos, prof + 1);
+          if (prof > 3) { x += interior; continue; }   // más de 3 enlaces anidados: se escribe su contenido sin el enlace
           let instr = null;
           if (r.enlace.ancla) instr = `HYPERLINK \\\\l "${nombreMarca(r.enlace.ancla)}"`;
           else if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) instr = `HYPERLINK "${textoRtf(String(r.enlace.url).replace(/[\\"{}]/g, ''))}"`;
@@ -175,7 +186,7 @@
         if (r.campo) {
           const nombre = String(r.campo).trim().split(/\s+/)[0].toUpperCase();
           const fm = fmDe(r);
-          if (!/^[A-Z]+$/.test(nombre)) { x += `{${fm} ${textoRtf(String(r.resultado == null ? '' : r.resultado))}}`; continue; }
+          if (!CAMPOS.has(nombre)) { x += `{${fm} ${textoRtf(String(r.resultado == null ? '' : r.resultado))}}`; continue; }
           x += `{\\field{\\*\\fldinst ${nombre}}{\\fldrslt {${fm ? fm + ' ' : ''}${textoRtf(String(r.resultado == null ? '1' : r.resultado))}}}}`;
           continue;
         }
@@ -192,11 +203,16 @@
       const tipo = tipoDeImagen(bytes);
       if (!tipo) { aviso('imagen-formato'); return ''; }
       imagenes++;
+      let hex = hexaDe.get(bytes);
+      if (hex === undefined) { hex = hexa(bytes); hexaDe.set(bytes, hex); }
+      hexaTotal += hex.length;
+      if (hexaTotal > MAX_SALIDA) throw new Error(ERROR_GRANDE);
       const wTw = entero((Number(img.ancho) || 72) * 20, 20, 31680, 1440), hTw = entero((Number(img.alto) || 72) * 20, 20, 31680, 1440);
-      return `{\\pict\\${tipo === 'png' ? 'pngblip' : 'jpegblip'}\\picw${Math.max(1, Math.round(wTw / 15))}\\pich${Math.max(1, Math.round(hTw / 15))}\\picwgoal${wTw}\\pichgoal${hTw}\n${hexa(bytes)}}`;
+      return `{\\pict\\${tipo === 'png' ? 'pngblip' : 'jpegblip'}\\picw${Math.max(1, Math.round(wTw / 15))}\\pich${Math.max(1, Math.round(hTw / 15))}\\picwgoal${wTw}\\pichgoal${hTw}\n${hex}}`;
     }
 
     function parrafo(b, ctx) {
+      if (++bloquesEscritos > MAX_BLOQUES) throw new Error(ERROR_GRANDE);
       const e = b.estilo != null && idEstilo.has(b.estilo) ? idEstilo.get(b.estilo) : 0;
       let nivel = null, lista = '';
       if (b.p && b.p.lista && b.p.lista.id != null && numLista.has(b.p.lista.id)) {
@@ -269,6 +285,7 @@
       (lista || []).forEach((b, k) => {
         if (b.tipo === 'tabla') { x += tabla(b, 1); ultimoEsTabla = true; }
         else { x += parrafo(b, null) + (sinFinal && k === n - 1 ? '\n' : '\\par\n'); ultimoEsTabla = false; }
+        if (x.length > MAX_SALIDA) throw new Error(ERROR_GRANDE);
       });
       if (ultimoEsTabla) x += '\\pard\\par\n';
       return x;
@@ -279,7 +296,9 @@
     // Más de MAX_SECCIONES (solo un archivo raro): el contenido de las de más pasa a la última, para no perder texto
     if (secciones.length > MAX_SECCIONES) secciones = secciones.slice(0, MAX_SECCIONES - 1).concat([Object.assign({}, secciones[MAX_SECCIONES - 1], { hijos: secciones.slice(MAX_SECCIONES - 1).flatMap((x) => x.hijos || []) })]);
     let cuerpo = '';
+    let encAnterior = null, pieAnterior = null;   // RTF hereda el encabezado y el pie de la sección anterior: solo se escriben cuando cambian (la misma lista, por identidad, no se repite)
     secciones.forEach((s, i) => {
+      if (cuerpo.length > MAX_SALIDA) throw new Error(ERROR_GRANDE);
       const pg = s.pagina || {}, m = s.margenes || {};
       cuerpo += i > 0 ? '\\sect' : '';
       cuerpo += `\\sectd${i > 0 && s.tipo === 'continua' ? '\\sbknone' : '\\sbkpage'}\\pgwsxn${entero(pg.ancho || 12240, 720, 31680)}\\pghsxn${entero(pg.alto || 15840, 720, 31680)}${pg.horizontal ? '\\lndscpsxn' : ''}`
@@ -287,8 +306,8 @@
         + `\\headery${entero(m.encabezado == null ? 708 : m.encabezado, 0, 31680)}\\footery${entero(m.pie == null ? 708 : m.pie, 0, 31680)}`;
       if (s.columnas && s.columnas.n > 1) cuerpo += `\\cols${entero(s.columnas.n, 2, 45, 2)}\\colsx${entero(s.columnas.espacio == null ? 720 : s.columnas.espacio, 0, 31680)}`;
       cuerpo += '\n';
-      if (s.encabezado && s.encabezado.length) cuerpo += `{\\header ${bloques(s.encabezado)}}\n`;
-      if (s.pie && s.pie.length) cuerpo += `{\\footer ${bloques(s.pie)}}\n`;
+      if (s.encabezado && s.encabezado.length && s.encabezado !== encAnterior) { cuerpo += `{\\header ${bloques(s.encabezado)}}\n`; encAnterior = s.encabezado; }
+      if (s.pie && s.pie.length && s.pie !== pieAnterior) { cuerpo += `{\\footer ${bloques(s.pie)}}\n`; pieAnterior = s.pie; }
       const hijos = s.hijos && s.hijos.length ? s.hijos : [{ tipo: 'parrafo', hijos: [] }];
       cuerpo += bloques(hijos, i < secciones.length - 1);
     });
@@ -345,6 +364,7 @@
       + `{\\info${pr.titulo ? `{\\title ${textoRtf(pr.titulo)}}` : ''}${pr.autor ? `{\\author ${textoRtf(pr.autor)}}` : ''}}\n`;
     // la cabecera se arma al final porque las fuentes y los colores se descubren al recorrer el contenido
     const texto = cab.replace(/^/, '') + cuerpo + '}';
+    if (texto.length > MAX_SALIDA) throw new Error(ERROR_GRANDE);
     return { bytes: new TextEncoder().encode(texto), mensajes };
   }
 

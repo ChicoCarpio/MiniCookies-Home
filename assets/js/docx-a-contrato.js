@@ -19,6 +19,8 @@
   const MAX_BLOQUES = 4000000;
   const MAX_PROFUNDIDAD_TABLAS = 8;
   const MAX_LISTAS = 20000;            // como OdtLector: pasadas estas (solo un archivo hostil) se sigue con la última
+  const MAX_COLUMNAS = 63;             // gridSpan y columnas de la rejilla: Word no pasa de 63 en una fila (y un gridSpan de millones pedía millones de celdas cubiertas a los escritores)
+  const MAX_CELDAS_FILA = 1000;        // celdas que se leen por fila; las de más se ignoran
   const MAX_CAMPOS_ANIDADOS = 64;      // campos abiertos a la vez; los de más se ignoran (sin esto, cada párrafo recorre la pila entera)
 
   const hijos = (e, n) => (e ? e.h.filter((x) => typeof x !== 'string' && (n === undefined || x.n === n)) : []);
@@ -31,10 +33,11 @@
   const definir = (o, k, v) => { if (v !== undefined && v !== null) o[k] = v; };
   const vacio = (o) => Object.keys(o).length === 0;
 
-  const ALINEACION = { left: 'izquierda', start: 'izquierda', center: 'centro', right: 'derecha', end: 'derecha', both: 'justificado', distribute: 'justificado', justify: 'justificado' };
-  const TAB = { left: 'izquierda', start: 'izquierda', center: 'centro', right: 'derecha', end: 'derecha', decimal: 'decimal' };
-  const RELLENO_TAB = { dot: 'punto', middleDot: 'punto', hyphen: 'guion', underscore: 'linea', heavy: 'linea' };
-  const BORDE = { single: 'simple', thick: 'simple', double: 'doble', dotted: 'punteado', dashed: 'guiones', dashSmallGap: 'guiones', nil: 'ninguno', none: 'ninguno' };
+  const sinProto = (o) => Object.assign(Object.create(null), o);   // sin «constructor», «__proto__» ni «toString» heredados: un valor así del archivo no es una clave de la tabla
+  const ALINEACION = sinProto({ left: 'izquierda', start: 'izquierda', center: 'centro', right: 'derecha', end: 'derecha', both: 'justificado', distribute: 'justificado', justify: 'justificado' });
+  const TAB = sinProto({ left: 'izquierda', start: 'izquierda', center: 'centro', right: 'derecha', end: 'derecha', decimal: 'decimal' });
+  const RELLENO_TAB = sinProto({ dot: 'punto', middleDot: 'punto', hyphen: 'guion', underscore: 'linea', heavy: 'linea' });
+  const BORDE = sinProto({ single: 'simple', thick: 'simple', double: 'doble', dotted: 'punteado', dashed: 'guiones', dashSmallGap: 'guiones', nil: 'ninguno', none: 'ninguno' });
   const FORMATOS_LISTA = new Set(['decimal', 'bullet', 'lowerLetter', 'upperLetter', 'lowerRoman', 'upperRoman', 'ordinal', 'cardinalText', 'ordinalText', 'decimalZero', 'none']);
   const CAMPOS = new Set(['PAGE', 'NUMPAGES', 'SECTIONPAGES', 'DATE', 'TIME', 'SAVEDATE', 'PRINTDATE', 'CREATEDATE', 'FILENAME', 'TITLE', 'AUTHOR', 'NUMWORDS', 'NUMCHARS']);
 
@@ -212,7 +215,7 @@
       for (const l of hijos(a, 'lvl')) { const ps = hijo(l, 'pStyle'); if (ps && ps.a.val && !this.nivelPorEstilo.has(ps.a.val)) this.nivelPorEstilo.set(ps.a.val, entero(l.a.ilvl) || 0); }
     }
     for (const n of hijos(raiz, 'num')) nums.set(n.a.numId, n);
-    this.numeracion = { abstractos, nums, listas: [], ids: new Set(), hechas: new Map() };
+    this.numeracion = { abstractos, nums, listas: [], ids: new Set(), hechas: new Map(), infoAbs: new Map() };
   };
 
   P.nivelLista = function (lvl, inicioForzado) {
@@ -234,6 +237,22 @@
     return v;
   };
 
+  // Los niveles 0..8 de un abstractNum, y si trae niveles y un vínculo a un estilo de lista, una sola vez por abstractNum (cada numId con «empezar en» los volvía a recorrer: N × niveles)
+  P.infoAbstracto = function (abs) {
+    const N = this.numeracion;
+    let info = N.infoAbs.get(abs);
+    if (!info) {
+      info = { niveles: new Map(), hayLvl: false, vinculo: null };
+      for (const x of abs.h) {
+        if (typeof x === 'string') continue;
+        if (x.n === 'lvl') { info.hayLvl = true; if (/^[0-8]$/.test(x.a.ilvl || '') && !info.niveles.has(x.a.ilvl)) info.niveles.set(x.a.ilvl, x); }
+        else if (x.n === 'numStyleLink' && !info.vinculo) info.vinculo = x;
+      }
+      N.infoAbs.set(abs, info);
+    }
+    return info;
+  };
+
   // numId del documento → id de lista del contrato. Los numId sin cambios de nivel comparten lista con los de su mismo abstractNum (la numeración sigue); con «empezar en» van aparte.
   P.listaDe = function (numId) {
     const N = this.numeracion;
@@ -244,8 +263,8 @@
     const absDe = (x) => (x ? N.abstractos.get((hijo(x, 'abstractNumId') || { a: {} }).a.val) : null);
     let abs = absDe(n);
     // una lista hecha con un estilo de lista (numStyleLink, sin niveles propios) usa los del abstractNum de ese estilo, y numera junto con él
-    const vinculo = hijo(abs, 'numStyleLink');
-    if (vinculo && !hijo(abs, 'lvl')) abs = absDe(N.nums.get(this.numDeEstiloLista.get(vinculo.a.val))) || abs;
+    const vinculo = abs && this.infoAbstracto(abs).vinculo;
+    if (vinculo && !this.infoAbstracto(abs).hayLvl) abs = absDe(N.nums.get(this.numDeEstiloLista.get(vinculo.a.val))) || abs;
     if (!abs) { N.hechas.set(clave, null); return null; }
     const sobres = new Map();
     for (const o of hijos(n, 'lvlOverride')) sobres.set(o.a.ilvl, o);
@@ -254,8 +273,7 @@
     N.hechas.set(clave, id);
     if (!N.ids.has(id)) {
       N.ids.add(id);
-      const base = new Map();
-      for (const l of hijos(abs, 'lvl')) base.set(l.a.ilvl, l);
+      const base = this.infoAbstracto(abs).niveles;
       const niveles = [];
       for (let k = 0; k < 9; k++) {
         const o = sobres.get(String(k));
@@ -491,7 +509,7 @@
   P.tabla = async function (t, ctx, pila, prof) {
     if (prof > MAX_PROFUNDIDAD_TABLAS) return null;
     const tblPr = hijo(t, 'tblPr');
-    const anchos = hijos(hijo(t, 'tblGrid'), 'gridCol').map((g) => num(g.a.w) || 0);
+    const anchos = hijos(hijo(t, 'tblGrid'), 'gridCol').slice(0, MAX_COLUMNAS).map((g) => num(g.a.w) || 0);   // las columnas de más de la rejilla se ignoran
     const salida = { tipo: 'tabla', anchos, bordes: this.bordesTabla(tblPr), filas: [] };
     const est = hijo(tblPr, 'tblStyle');
     if (est && est.a.val && this.estilosTabla.has(est.a.val)) salida.estilo = est.a.val;
@@ -504,9 +522,10 @@
       const th = hijo(trPr, 'trHeight'); if (th && num(th.a.val)) fila.alto = num(th.a.val);
       if (activo(hijo(trPr, 'tblHeader'))) fila.encabezado = true;
       let col = 0;
-      for (const tc of hijos(tr, 'tc')) {
+      for (const tc of hijos(tr, 'tc').slice(0, MAX_CELDAS_FILA)) {
+        if (++this.bloques > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos para abrirlo aquí.');   // una celda vacía también cuenta: millones de filas de celdas vacías no tienen párrafos que contar
         const tcPr = hijo(tc, 'tcPr');
-        const span = Math.max(1, entero((hijo(tcPr, 'gridSpan') || { a: {} }).a.val) || 1);
+        const span = Math.max(1, Math.min(MAX_COLUMNAS, entero((hijo(tcPr, 'gridSpan') || { a: {} }).a.val) || 1));
         const celda = { hijos: [] };
         if (span > 1) celda.fusionH = span;
         const vm = hijo(tcPr, 'vMerge'); if (vm) celda.fusionV = vm.a.val === 'restart' ? 'inicio' : 'continua';

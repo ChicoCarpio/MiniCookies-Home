@@ -19,6 +19,7 @@
 //   XmlLigero.sinEscapes(cadena)  → resuelve los "_x000D_" que Excel usa para caracteres de control
 
 (function () {
+  const MAX_ATRIBUTOS = 256;   // por elemento; los de más se leen (para avanzar) pero no se guardan: un solo elemento con millones de atributos no llena la memoria
   const ENTIDADES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 
   function decodificar(s) {
@@ -97,7 +98,7 @@
       }
       const nombre = local(texto.slice(lt + 1, p));
       const atributos = {};
-      let vacio = false;
+      let vacio = false, natr = 0;
       for (;;) {
         while (p < n && esEsp(texto.charCodeAt(p))) p++;
         if (p >= n) break;
@@ -112,20 +113,20 @@
         }
         const clave = texto.slice(ini, p);
         while (p < n && esEsp(texto.charCodeAt(p))) p++;
-        if (texto.charCodeAt(p) !== 61) { atributos[local(clave)] = ''; continue; } // atributo sin valor
+        if (texto.charCodeAt(p) !== 61) { if (natr < MAX_ATRIBUTOS) { atributos[local(clave)] = ''; natr++; } continue; } // atributo sin valor
         p++;
         while (p < n && esEsp(texto.charCodeAt(p))) p++;
         const comilla = texto[p];
         if (comilla !== '"' && comilla !== "'") { // valor sin comillas: hasta el espacio o el cierre
           const ini2 = p;
           while (p < n && texto.charCodeAt(p) !== 62 && !esEsp(texto.charCodeAt(p))) p++;
-          atributos[local(clave)] = texto.slice(ini2, p);
+          if (natr < MAX_ATRIBUTOS) { atributos[local(clave)] = texto.slice(ini2, p); natr++; }
           continue;
         }
         const fin = texto.indexOf(comilla, p + 1);
         if (fin < 0) { p = n; break; }
         const valor = texto.slice(p + 1, fin);
-        if (clave !== 'xmlns' && !clave.startsWith('xmlns:')) atributos[local(clave)] = valor.indexOf('&') < 0 ? valor : decodificar(valor);
+        if (natr < MAX_ATRIBUTOS && clave !== 'xmlns' && !clave.startsWith('xmlns:')) { atributos[local(clave)] = valor.indexOf('&') < 0 ? valor : decodificar(valor); natr++; }
         p = fin + 1;
       }
       if (h.abrir) h.abrir(nombre, atributos, vacio);

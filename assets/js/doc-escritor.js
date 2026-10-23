@@ -12,6 +12,9 @@
 (function () {
   'use strict';
   const MAX_TEXTO = 64 * 1024 * 1024;
+  const MAX_BLOQUES = 4000000;          // párrafos (y marcas de fila) que se escriben en total: Word guarda las historias de cada sección, así que un encabezado repetido se escribe cada vez
+  const MAX_DATA = 256 * 1024 * 1024;   // bytes del flujo Data (imágenes)
+  const ERROR_GRANDE = 'El documento es demasiado grande para guardarlo como .doc.';
   const MAX_ESTILOS = 4000;
   const MAX_SECCIONES = 4096;
   const MAX_FUENTES = 30000;            // Word abre un .doc con 31.000 fuentes y no con 31.500 (medido el 2026-10-23)
@@ -120,6 +123,9 @@
     const aviso = (m) => { if (!mensajes.includes(m)) mensajes.push(m); };
     const D = new Documento();
     const data = new Bytes(1024);          // flujo Data: imágenes y propiedades de párrafo que no caben en la página de formatos
+    let bloquesEscritos = 0;
+    // El texto de un enlace o de un campo va dentro de la instrucción o del resultado, entre las marcas de campo: sin caracteres de control (una marca de campo, de párrafo, de celda o de sección falsa lo rompería)
+    const limpio = (s) => String(s).replace(/[\u0000-\u0008\u000A-\u001F\u007F]/g, '');
 
     // ───────── Fuentes ─────────
     const fuentes = [], fuenteIdx = new Map();
@@ -251,6 +257,8 @@
       let porImagen = imagenesEscritas.get(bytes);
       if (!porImagen) { porImagen = new Map(); imagenesEscritas.set(bytes, porImagen); }
       if (porImagen.has(clave)) return porImagen.get(clave);
+      // Word guarda la imagen dentro de cada dibujo en línea, así que cada tamaño distinto de la misma imagen la lleva otra vez: el flujo Data tiene tope
+      if (data.n + bytes.length + 1024 > MAX_DATA) throw new Error(ERROR_GRANDE);
       hayImagenes = true;
       data.alinear(4);
       const pos = data.n;
@@ -261,11 +269,11 @@
       for (let i = 0; i < bytes.length; i++) { sumaA = (Math.imul(sumaA, 31) + bytes[i]) | 0; sumaB = (sumaB ^ (bytes[i] << ((i & 3) * 8))) | 0; }
       for (let i = 0; i < 4; i++) { uid[i] = (sumaA >>> (8 * i)) & 255; uid[4 + i] = (sumaB >>> (8 * i)) & 255; uid[8 + i] = (numero >>> (8 * i)) & 255; uid[12 + i] = (bytes.length >>> (8 * i)) & 255; }
       // OfficeArtInlineSpContainer: contenedor de la forma (FSP + FOPT con la propiedad pib) y el FBSE con la imagen
-      const blip = new Bytes(bytes.length + 64);
-      blip.bytes(uid);
-      blip.u8(0xFF).bytes(bytes);
-      const blipRec = new Bytes(blip.n + 8);
-      blipRec.u16((tipo === 'png' ? 0x06E0 : 0x046A) << 4).u16(tipo === 'png' ? 0xF01E : 0xF01D).u32(blip.n).bytes(blip.salida());
+      // la imagen se copia una sola vez, directamente a Data (antes pasaba por ocho copias intermedias): aquí solo se arman las cabeceras, que son chicas
+      const largoBlip = 16 + 1 + bytes.length;       // uid, marca 0xFF e imagen
+      const largoBlipRec = 8 + largoBlip;
+      const cabBlipRec = new Bytes(8);
+      cabBlipRec.u16((tipo === 'png' ? 0x06E0 : 0x046A) << 4).u16(tipo === 'png' ? 0xF01E : 0xF01D).u32(largoBlip);
       // la forma, con los mismos registros que escribe Word para una imagen en línea
       const fsp = new Bytes(16); fsp.u16(0x0002 | (75 << 4)).u16(0xF00A).u32(8).u32(0x0400 + numero).u32(0x0A00);
       const nombre = utf16('Picture ' + numero);
@@ -279,17 +287,16 @@
       const contenedor = new Bytes(interior + 8);
       contenedor.u16(0x000F).u16(0xF004).u32(interior).bytes(fsp.salida()).bytes(fopt.salida()).bytes(fopt2.salida()).bytes(ancla.salida());
       const inicioArte = pos + 68;
-      const fbse = new Bytes(blipRec.n + 44);
-      fbse.u16(0x0002 | ((tipo === 'png' ? 6 : 5) << 4)).u16(0xF007).u32(36 + blipRec.n);
-      fbse.u8(tipo === 'png' ? 6 : 5).u8(tipo === 'png' ? 6 : 5).bytes(uid).u16(0xFF).u32(blipRec.n).u32(1).u32(inicioArte).u8(0).u8(0).u8(0).u8(0);
-      fbse.bytes(blipRec.salida());
-      const cuerpo = new Bytes(contenedor.n + fbse.n);
-      cuerpo.bytes(contenedor.salida()).bytes(fbse.salida());
+      const cabFbse = new Bytes(44);
+      cabFbse.u16(0x0002 | ((tipo === 'png' ? 6 : 5) << 4)).u16(0xF007).u32(36 + largoBlipRec);
+      cabFbse.u8(tipo === 'png' ? 6 : 5).u8(tipo === 'png' ? 6 : 5).bytes(uid).u16(0xFF).u32(largoBlipRec).u32(1).u32(inicioArte).u8(0).u8(0).u8(0).u8(0);
+      const largoCuerpo = contenedor.n + cabFbse.n + largoBlipRec;
       const picf = new Bytes(68);
-      picf.u32(68 + cuerpo.n).u16(68).u16(0x64).u16(0).u16(0).u16(0).u8(0x08).ceros(13);
+      picf.u32(68 + largoCuerpo).u16(68).u16(0x64).u16(0).u16(0).u16(0).u8(0x08).ceros(13);
       picf.u16(ancho).u16(alto).u16(1000).u16(1000);   // dxaGoal, dyaGoal, mx, my
       picf.ceros(68 - picf.n);
-      data.bytes(picf.salida()).bytes(cuerpo.salida());
+      data.asegura(68 + largoCuerpo);
+      data.bytes(picf.salida()).bytes(contenedor.salida()).bytes(cabFbse.salida()).bytes(cabBlipRec.salida()).bytes(uid).u8(0xFF).bytes(bytes);
       porImagen.set(clave, pos);
       return pos;
     }
@@ -327,10 +334,10 @@
           continue;
         }
         if (r.enlace) {
-          if (prof > 3) continue;
+          if (prof > 3) { runs(r.hijos, ctx, prof + 1); continue; }   // más de 3 enlaces anidados: se escribe su contenido sin el enlace
           let instr = null;
-          if (r.enlace.ancla) instr = ` HYPERLINK \\l "${String(r.enlace.ancla).slice(0, 40).replace(/"/g, '')}" `;
-          else if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) instr = ` HYPERLINK "${String(r.enlace.url).replace(/"/g, '%22')}" `;
+          if (r.enlace.ancla) instr = ` HYPERLINK \\l "${limpio(String(r.enlace.ancla).slice(0, 40)).replace(/"/g, '')}" `;
+          else if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) instr = ` HYPERLINK "${limpio(r.enlace.url).replace(/"/g, '%22')}" `;
           if (!instr) { aviso('enlace-descartado'); runs(r.hijos, ctx, prof + 1); continue; }
           campo(0x58, instr, () => runs(r.hijos, ctx, prof + 1), null);
           continue;
@@ -338,9 +345,11 @@
         if (r.campo) {
           const nombre = String(r.campo).trim().split(/\s+/)[0].toUpperCase();
           const tipo = { PAGE: 0x21, NUMPAGES: 0x1A, DATE: 0x1F, TIME: 0x20, FILENAME: 0x1D, AUTHOR: 0x11, TITLE: 0x0F, SECTIONPAGES: 0x1B, SAVEDATE: 0x16, PRINTDATE: 0x17, NUMWORDS: 0x1C, NUMCHARS: 0x1E }[nombre];
-          if (tipo == null) { const f = formato(r.r, r.estilo); D.texto(String(r.resultado == null ? '' : r.resultado), f.g, f.clave); continue; }
+          if (tipo == null) { const f = formato(r.r, r.estilo); D.texto(limpio(r.resultado == null ? '' : r.resultado), f.g, f.clave); continue; }
           const f = formato(r.r, r.estilo);
-          campo(tipo, ` ${String(r.campo).trim()} `, () => D.texto(String(r.resultado == null ? '1' : r.resultado), f.g, f.clave), f);
+          // la instrucción es el nombre del campo y, como mucho, unos pocos modificadores de formato (\@ fecha, \* mayúsculas, \# número) con su texto corto entre comillas
+          const mods = (String(r.campo).trim().slice(nombre.length).match(/\\[@*#]\s*(?:"[^"\\\u0000-\u001F\u007F]{0,60}"|[^\s"\\\u0000-\u001F\u007F]{1,30})/g) || []).slice(0, 4);
+          campo(tipo, ` ${nombre}${mods.length ? ' ' + mods.join(' ') : ''} `, () => D.texto(limpio(r.resultado == null ? '1' : r.resultado), f.g, f.clave), f);
           continue;
         }
         const f = formato(r.r, r.estilo);
@@ -351,7 +360,7 @@
           const c = t.charCodeAt(i);
           if (c === 10) { volcar(); D.car(11); D.tramo(1, f.g, f.clave); }
           else if (c === 9) acumulado += '\t';
-          else if (c < 32) continue;            // los demás caracteres de control no son texto
+          else if (c < 32 || c === 127) continue;   // los demás caracteres de control no son texto
           else if (c === 0x2011) { volcar(); D.car(30); D.tramo(1, f.g, f.clave); }
           else if (c === 0x00AD) { volcar(); D.car(31); D.tramo(1, f.g, f.clave); }
           else acumulado += t[i];
@@ -374,9 +383,18 @@
     }
 
     // Termina un párrafo: la marca, su estilo y sus propiedades
+    // Las propiedades iguales comparten un solo arreglo de bytes (hasta cierto número de distintas: con claves todas diferentes la caché no sirve de nada); no se guarda la lista de sprms
+    const cachePars = new Map();
     function finParrafo(marca, istd, sprms) {
+      if (++bloquesEscritos > MAX_BLOQUES) throw new Error(ERROR_GRANDE);
       D.car(marca); D.tramo(1, null, '');
-      D.pars.push({ fin: D.n, istd, g: sprms && !sprms.vacio() ? sprms.bytes() : null, sprms });
+      let g = null;
+      if (sprms && !sprms.vacio()) {
+        const clave = claveR(sprms);
+        g = cachePars.get(clave);
+        if (!g) { g = sprms.bytes(); if (cachePars.size < 50000) cachePars.set(clave, g); }
+      }
+      D.pars.push({ fin: D.n, istd, g });
     }
 
     function parrafo(b, tabla, marcaFinal) {

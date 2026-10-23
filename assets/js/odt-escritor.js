@@ -26,6 +26,10 @@
   const puntos = (pt) => `${num(pt, 0, 1584, 1).toFixed(2)}pt`;
   const MAX_SECCIONES_MAESTRAS = 2000;
   const MAX_PROFUNDIDAD_TABLAS = 8;
+  const MAX_TRABAJO = 4000000;         // bloques y celdas que se serializan en total (un encabezado grande no se multiplica sin freno por las páginas maestras)
+  const MAX_XML_CABECERAS = 200000000; // caracteres de encabezados y pies en styles.xml, contando cada página maestra (las cadenas repetidas pesan igual que las distintas)
+  const MAX_COLUMNAS = 63, MAX_COLUMNAS_TABLA = 1000;   // una combinación horizontal de millones de columnas pedía millones de celdas cubiertas
+  const ERROR_GRANDE = 'El documento es demasiado grande para guardarlo como .odt.';
 
   const RESALTADO = sinProto({ yellow: 'FFFF00', green: '00FF00', cyan: '00FFFF', magenta: 'FF00FF', blue: '0000FF', red: 'FF0000', darkBlue: '000080', darkCyan: '008080', darkGreen: '008000', darkMagenta: '800080', darkRed: '800000', darkYellow: '808000', darkGray: '808080', lightGray: 'C0C0C0', black: '000000', white: 'FFFFFF' });
   const ALINEACION = sinProto({ izquierda: 'start', centro: 'center', derecha: 'end', justificado: 'justify' });
@@ -54,7 +58,8 @@
     const estilosAuto = [], estilosAutoCabeceras = [];   // XML de los estilos automáticos de content.xml y de styles.xml (encabezados y pies viven en styles.xml)
     let destinoAuto = { lista: estilosAuto, mapa: new Map() };
     const mapaCabeceras = new Map();
-    let contador = 0;
+    let contador = 0, trabajo = 0;
+    const gastar = () => { if (++trabajo > MAX_TRABAJO) throw new Error(ERROR_GRANDE); };
     const nombreEstilo = (id) => (id === 'Normal' ? 'Standard' : String(id));
     const estilosPorId = new Map((contrato.estilos || []).map((e) => [e.id, e]));
 
@@ -232,8 +237,8 @@
         if (r.imagen) { x += dibujo(r.imagen, estado); continue; }
         if (r.marcador != null) { x += `<text:bookmark text:name="${escAttr(String(r.marcador).slice(0, 255))}"/>`; continue; }
         if (r.enlace) {
-          if (prof > 3) continue;
           const interior = runs(r.hijos, estado, prof + 1);
+          if (prof > 3) { x += interior; continue; }   // más de 3 enlaces anidados: se escribe su contenido sin el enlace
           if (r.enlace.ancla) x += `<text:a xlink:type="simple" xlink:href="#${escAttr(r.enlace.ancla)}">${interior}</text:a>`;
           else if (/^(https?:|mailto:|tel:|ftp:)/i.test(r.enlace.url || '')) x += `<text:a xlink:type="simple" xlink:href="${escAttr(r.enlace.url)}">${interior}</text:a>`;
           else { aviso('enlace-descartado'); x += interior; }
@@ -303,11 +308,25 @@
 
     // ───────── Tablas ─────────
     function tabla(t, prof) {
-      const filas = (t.filas || []).filter((f) => f.celdas && f.celdas.length);
+      // cada fila con sus combinaciones horizontales de 1 a 63 columnas y sin pasar de 1000 columnas en total (lo de más se ignora)
+      const acotar = (f) => {
+        let col = 0;
+        const celdas = [];
+        for (const c of f.celdas) {
+          if (col >= MAX_COLUMNAS_TABLA) break;
+          const span = Math.max(1, Math.min(MAX_COLUMNAS, MAX_COLUMNAS_TABLA - col, Math.floor(Number(c.fusionH)) || 1));
+          celdas.push(c.fusionH === undefined && span === 1 || c.fusionH === span ? c : Object.assign({}, c, { fusionH: span }));
+          col += span;
+        }
+        return celdas.length === f.celdas.length && celdas.every((c, i) => c === f.celdas[i]) ? f : Object.assign({}, f, { celdas });
+      };
+      const filas = (t.filas || []).filter((f) => f.celdas && f.celdas.length).map(acotar);
       if (!filas.length || prof > MAX_PROFUNDIDAD_TABLAS) return '';
       // posición de cada celda en la rejilla de columnas
       const posiciones = filas.map((f) => { let c = 0; return f.celdas.map((celda) => { const x = c; c += Math.max(1, celda.fusionH || 1); return x; }); });
-      const nCols = posiciones.reduce((m, ps, i) => Math.max(m, ps.length ? ps[ps.length - 1] + Math.max(1, filas[i].celdas[ps.length - 1].fusionH || 1) : 0), Math.max(t.anchos ? t.anchos.length : 0, 1));
+      const columnaACelda = new Array(filas.length);   // por fila (a pedido): columna → índice de la celda que empieza ahí
+      const celdaEn = (k, col) => { if (!columnaACelda[k]) columnaACelda[k] = new Map(posiciones[k].map((p, i) => [p, i])); return columnaACelda[k].get(col); };
+      const nCols = Math.min(MAX_COLUMNAS_TABLA, posiciones.reduce((m, ps, i) => Math.max(m, ps.length ? ps[ps.length - 1] + Math.max(1, filas[i].celdas[ps.length - 1].fusionH || 1) : 0), Math.max(t.anchos ? t.anchos.length : 0, 1)));
       const anchos = Array.from({ length: nCols }, (_, i) => num(t.anchos && t.anchos[i], 0, 31680, 1440));
       const total = anchos.reduce((s, x) => s + x, 0);
       const maestra = maestraPendiente; maestraPendiente = null;
@@ -324,6 +343,7 @@
         x += `<table:table-row${estiloFila ? ` table:style-name="${estiloFila}"` : ''}>`;
         let usadas = 0;
         f.celdas.forEach((c, ci) => {
+          gastar();
           const col = posiciones[fi][ci], span = Math.max(1, c.fusionH || 1);
           usadas = col + span;
           // solo se tapa la que queda debajo de una «inicio»; una «continua» suelta (sin nada que la cubra) se escribe como celda normal, para no perder su texto
@@ -331,8 +351,8 @@
           let filasSpan = 1;
           if (c.fusionV === 'inicio') {
             for (let k = fi + 1; k < filas.length; k++) {
-              const idx = posiciones[k].indexOf(col);
-              if (idx >= 0 && filas[k].celdas[idx].fusionV === 'continua') { filasSpan++; cubiertas.add(k + ',' + col); } else break;
+              const idx = celdaEn(k, col);
+              if (idx !== undefined && filas[k].celdas[idx].fusionV === 'continua') { filasSpan++; cubiertas.add(k + ',' + col); } else break;
             }
           }
           const lados = { arriba: null, abajo: null, izquierda: null, derecha: null };
@@ -362,6 +382,7 @@
       let abierta = null;   // { id, profundidad (niveles abiertos) }
       const cerrarLista = () => { if (abierta) { x += '</text:list-item></text:list>'.repeat(abierta.profundidad); abierta = null; } };
       for (const b of lista || []) {
+        gastar();
         if (b.tipo === 'tabla') { cerrarLista(); x += tabla(b, prof); continue; }
         const l = b.p && b.p.lista && b.p.lista.id != null && listas.has(b.p.lista.id) ? b.p.lista : null;
         if (!l) { cerrarLista(); x += parrafos(b); continue; }
@@ -462,12 +483,22 @@
 
     // Encabezados y pies: se escriben después del cuerpo porque dependen de estilos automáticos
     destinoAuto = { lista: estilosAutoCabeceras, mapa: mapaCabeceras };
-    const maestrasXml = maestras.map((m) => {
-      let h = '';
-      const hf = (etiqueta, lista) => (lista ? `<style:${etiqueta}>${bloques(lista, 0) || '<text:p/>'}</style:${etiqueta}>` : '');
-      h += hf('header', m.encabezado) + hf('footer', m.pie);
-      return `<style:master-page style:name="${m.nombre}" style:page-layout-name="${m.layout}">${h}</style:master-page>`;
-    }).join('');
+    // un encabezado (o pie) que sirve a muchas páginas maestras (secciones con otra hoja que heredan el mismo) se serializa una vez por lista y se reutiliza la cadena;
+    // solo si lleva nombres que tienen que ser únicos (listas, tablas, dibujos) se vuelve a serializar, y entonces el tope de trabajo lo vigila
+    const cabecerasHechas = { header: new Map(), footer: new Map() };
+    let xmlCabeceras = 0;
+    const hf = (etiqueta, lista) => {
+      if (!lista) return '';
+      let s = cabecerasHechas[etiqueta].get(lista);
+      if (s === undefined) {
+        s = `<style:${etiqueta}>${bloques(lista, 0) || '<text:p/>'}</style:${etiqueta}>`;
+        if (!/xml:id=|table:name=|draw:name=/.test(s)) cabecerasHechas[etiqueta].set(lista, s);
+      }
+      xmlCabeceras += s.length;
+      if (xmlCabeceras > MAX_XML_CABECERAS) throw new Error(ERROR_GRANDE);
+      return s;
+    };
+    const maestrasXml = maestras.map((m) => `<style:master-page style:name="${m.nombre}" style:page-layout-name="${m.layout}">${hf('header', m.encabezado)}${hf('footer', m.pie)}</style:master-page>`).join('');
     if (!maestras.length) { layouts.push('<style:page-layout style:name="pm1"><style:page-layout-properties fo:page-width="8.5in" fo:page-height="11in" fo:margin-top="1in" fo:margin-bottom="1in" fo:margin-left="1in" fo:margin-right="1in"/></style:page-layout>'); }
 
     const fontFaces = '<office:font-face-decls>' + [...fuentes].map((f) => `<style:font-face style:name="${escAttr(f)}" svg:font-family="'${escAttr(f).replace(/'/g, '')}'" style:font-pitch="variable"/>`).join('') + '</office:font-face-decls>';
