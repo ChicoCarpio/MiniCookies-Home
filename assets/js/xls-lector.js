@@ -9,7 +9,9 @@
 // Estilos de celda (solo BIFF8): fuente, color, relleno, bordes y alineación salen como { valor, formato?, estilo } (el contrato de XlsxEscritor.crearLibro;
 // un objeto de estilo por XF, compartido por todas sus celdas), una celda vacía con relleno, borde o alineación como { valor: null, estilo }, y el alto de
 // las filas con alto propio en altosFila ({ fila desde 0: puntos }). BIFF5 queda solo con valores.
-// Las fórmulas no se leen (queda su último valor, que el archivo guarda). Con contraseña (FILEPASS) se rechaza. Se omiten las hojas de gráfico y de macros.
+// Las fórmulas solo se leen con leer(bytes, { formulas: true }) (si no, queda su último valor, que el archivo guarda); entonces libro.nombres trae los nombres definidos y,
+// si un libro hostil pasa los topes de fórmulas (MAX_RGCE_LIBRO), libro.formulasOmitidas cuenta las que quedaron en su valor.
+// Con contraseña (FILEPASS) se rechaza. Se omiten las hojas de gráfico y de macros.
 (function () {
   const MAX_FILAS = 65536, MAX_COLS = 256, MAX_TEXTO = 32767;   // los límites de un .xls
   const MAX_CELDAS = 10000000;   // en todo el libro: crearLibro no arma un .xlsx de más de ~8 M celdas, y antes de llegar ahí la memoria ya se fue
@@ -79,7 +81,8 @@
     let ci = 0, d = partes[0], p = 8;   // 8: cstTotal y cstUnique
     const total = u32(d, 4);
     const textos = [];
-    const siguiente = () => { ci++; d = partes[ci]; p = 0; return d !== undefined; };
+    // sin más pedazos, `d` queda en el último (una SST cortada a mitad de un texto se lee hasta donde llega, sin leer fuera)
+    const siguiente = () => { if (ci + 1 >= partes.length) return false; ci++; d = partes[ci]; p = 0; return true; };
     const byte = () => { if (p >= d.length && !siguiente()) throw danado('SST cortada'); return d[p++]; };
     const salta = (n) => { while (n > 0) { if (p >= d.length && !siguiente()) return; const t = Math.min(n, d.length - p); p += t; n -= t; } };
     while (textos.length < total && (p < d.length || ci + 1 < partes.length)) {
@@ -130,6 +133,11 @@
 
   // ---- fórmulas (opcionales: leer(bytes, { formulas: true })) ---------------------------------------------------------------
   const MAX_NOMBRES = 65536;
+  // Una fórmula compartida se decodifica una vez por cada celda que la usa (un registro de 31 bytes), y un nombre de 255 caracteres cabe en 5 bytes de fórmula:
+  // 100 KB armaban mil millones de caracteres. Topes: el largo de una fórmula de Excel, y en todo el libro los bytes de fórmula que se decodifican y el texto que sale.
+  // Lo que pasa del tope queda con su valor (libro.formulasOmitidas cuenta esas celdas).
+  const MAX_FORMULA = 8192, MAX_RGCE_LIBRO = 64 * 1024 * 1024, MAX_TEXTO_FORMULAS = 32 * 1024 * 1024;
+  const MAX_HOJAS = 4096;   // hojas que se leen (cada una recorre su subflujo; Excel no pasa de unas centenas en la práctica)
   // SUPBOOK: libro interno (0x0401), de complemento (0x3A01, las funciones del Analysis ToolPak) o externo
   const leerSupbook = (d) => ({ tipo: d.length === 4 && u16(d, 2) === 0x0401 ? 'interno' : u16(d, 2) === 0x3A01 ? 'complemento' : 'externo', nombres: [] });
   // EXTERNNAME de un complemento o libro externo: banderas (2), reservado (4), nombre (cch, bandera, caracteres)
@@ -184,6 +192,7 @@
       else if (r.id === 0x0042) pagina = decodificador(u16(d, 0));                              // CODEPAGE
       else if (r.id === 0x0085) {                                                              // BOUNDSHEET: posición, estado, tipo, nombre
         const nombre = version >= 0x0600 ? cadenaBiff8(d, 6, 1).texto : texto5(d.subarray(7, 7 + d[6]));
+        if (hojasDef.length >= MAX_HOJAS) throw new LibroXlsx.ErrorXlsx('grande', 'más de ' + MAX_HOJAS + ' hojas');
         hojasDef.push({ pos: u32(d, 0), tipo: d[5], nombre, estado: d[4] === 1 ? 'oculta' : d[4] === 2 ? 'muyOculta' : 'visible' });
       } else if (r.id === 0x00FC) { for (const t of leerSst(r.partes)) textos.push(t); }       // SST
       else if (r.id === 0x041E) {                                                              // FORMAT: id y código
@@ -285,13 +294,26 @@
     // Los subflujos de las hojas no se pisan: entre todas no recorren más que el flujo entero. Un libro hostil con cientos de hojas que apuntan al mismo
     // subflujo (o a uno sin EOF) lo leería una vez por hoja: 400 KB armaban gigas. Se deja margen para un EOF que falte en un libro real.
     let presupuesto = 4 * wb.length + 65536, celdas = 0;
+    // fórmulas: la tabla de hojas es la misma para todas, y los topes son de todo el libro (ver MAX_RGCE_LIBRO)
+    const ctx = { f: 0, c: 0, hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
+    let restanRgce = MAX_RGCE_LIBRO, restanTexto = MAX_TEXTO_FORMULAS, omitidas = 0;
+    const decod = (rgce, rgcb, f, c) => {
+      if ((restanRgce -= rgce.length + 1) < 0 || restanTexto < 0) { omitidas++; return null; }
+      ctx.f = f; ctx.c = c;
+      let t;
+      try { t = XlsFormulas.decodificar(rgce, rgcb, ctx); } catch (e) { if (depurar) throw e; return null; }
+      if (!t || t.length > MAX_FORMULA) return null;
+      restanTexto -= t.length;
+      return t;
+    };
     for (const def of hojasDef) {
       if (def.tipo !== 0) continue;   // 0: hoja de cálculo; 2: gráfico; 1 y 6: macros
       const filas = [], anchos = [], combinadas = [], columnasOcultas = new Set(), filasOcultas = [], altosFila = {};
       let vacias = 0;
       let profund = 0, ultimaFormula = null;
       // fórmulas: las que se leen, las que apuntan a una compartida o de matriz (PtgExp) y esas compartidas o de matriz, por la celda donde están
-      const formulasHoja = [], apuntan = [], maestras = new Map();
+      // (una celda con varios registros FORMULA se queda con el último: se guardan por celda)
+      const formulasHoja = new Map(), apuntan = new Map(), maestras = new Map();
       let ultimaPos = null;
       const poner = (f, c, v) => {
         if (f >= MAX_FILAS || c >= MAX_COLS) return;
@@ -356,8 +378,8 @@
             if (conFormulas && version >= 0x0600 && d.length >= 22) {
               const cce = u16(d, 20), rgce = d.subarray(22, 22 + cce);
               ultimaPos = f + ',' + c;
-              if (cce === 5 && rgce[0] === 0x01) apuntan.push({ f, c, clave: u16(rgce, 1) + ',' + u16(rgce, 3) });   // PtgExp: la fórmula está en otra celda
-              else formulasHoja.push({ f, c, rgce, rgcb: d.subarray(22 + cce) });
+              if (cce === 5 && rgce[0] === 0x01) { formulasHoja.delete(ultimaPos); apuntan.set(ultimaPos, { f, c, clave: u16(rgce, 1) + ',' + u16(rgce, 3) }); }   // PtgExp: la fórmula está en otra celda
+              else { apuntan.delete(ultimaPos); formulasHoja.set(ultimaPos, { f, c, rgce, rgcb: d.subarray(22 + cce) }); }
             }
             break;
           }
@@ -391,14 +413,9 @@
         }
       }
       if (conFormulas) {
-        const ctx = { f: 0, c: 0, hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
-        const decod = (rgce, rgcb, f, c) => {
-          ctx.f = f; ctx.c = c;
-          try { return XlsFormulas.decodificar(rgce, rgcb, ctx); } catch (e) { if (depurar) throw e; return null; }
-        };
         const poner2 = (f, c, texto, matriz) => { if (texto && f < MAX_FILAS && c < MAX_COLS) { if (!filas[f]) filas[f] = []; filas[f][c] = conFormula(filas[f][c], texto, matriz); } };
-        for (const x of formulasHoja) poner2(x.f, x.c, decod(x.rgce, x.rgcb, x.f, x.c));
-        for (const x of apuntan) {
+        for (const x of formulasHoja.values()) poner2(x.f, x.c, decod(x.rgce, x.rgcb, x.f, x.c));
+        for (const x of apuntan.values()) {
           const m = maestras.get(x.clave);
           if (!m) continue;
           if (m.compartida) poner2(x.f, x.c, decod(m.rgce, m.rgcb, x.f, x.c));
@@ -413,14 +430,13 @@
     const libro = { hojas, fecha1904 };
     if (depurar) libro._tablas = { hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
     if (conFormulas) {   // los nombres definidos del libro (no los integrados ni los ocultos que hacen de funciones nuevas: `_xlfn.…`)
-      const ctx = { f: 0, c: 0, hojas: hojasDef.map((h) => h.nombre), xti, libros, nombres: nombresDef };
       libro.nombres = [];
       for (const n of nombresDef) {
         if (n.integrado || !n.nombre || /^_xl(?:fn|pm|ws)\./.test(n.nombre) || libro.nombres.length >= MAX_NOMBRES) continue;
-        let formula = null;
-        try { formula = XlsFormulas.decodificar(n.rgce, n.rgcb, ctx); } catch (e) { if (depurar) throw e; }
+        const formula = decod(n.rgce, n.rgcb, 0, 0);
         libro.nombres.push({ nombre: n.nombre, hoja: n.hoja && hojasDef[n.hoja - 1] ? hojasDef[n.hoja - 1].nombre : null, formula });
       }
+      if (omitidas) libro.formulasOmitidas = omitidas;
     }
     return libro;
   }

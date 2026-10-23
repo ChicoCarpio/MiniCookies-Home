@@ -49,9 +49,10 @@
       if (!fila) continue;
       for (let c = 0; c < fila.length; c++) {
         const x = fila[c];
-        if (!esCelda(x) || !x.formato) continue;
-        if (typeof x.valor === 'number') fila[c] = { ...x, valor: mueve(x.valor, x.formato) };
-        else if (esCelda(x.valor) && typeof x.valor.valor === 'number' && x.valor.formato) fila[c] = { ...x, valor: { ...x.valor, valor: mueve(x.valor.valor, x.valor.formato) } };
+        if (!esCelda(x)) continue;
+        // el formato va al lado del valor, o dentro del resultado de una fórmula ({ formula, valor: { valor, formato } }, como la deja XlsLector)
+        if (typeof x.valor === 'number' && x.formato) fila[c] = { ...x, valor: mueve(x.valor, x.formato) };
+        else if (esCelda(x.valor) && typeof x.valor.valor === 'number' && (x.valor.formato || x.formato)) fila[c] = { ...x, valor: { ...x.valor, valor: mueve(x.valor.valor, x.valor.formato || x.formato) } };
       }
     }
   }
@@ -89,6 +90,11 @@
     } else {
       const r = await OdsEscritor.crearLibro(libro.hojas, { formulas: conFormulas, fecha1904: !!libro.fecha1904, nombres: conFormulas ? nombres : [] });
       salida = r.bytes; avisos.push(...r.avisos);
+    }
+    // las fórmulas que el lector dejó en su valor por los topes contra archivos hostiles (XlsLector)
+    if (conFormulas && libro.formulasOmitidas) {
+      const a = avisos.find((x) => x.tipo === 'formula-sin-llevar');
+      if (a) a.cantidad += libro.formulasOmitidas; else avisos.push({ tipo: 'formula-sin-llevar', cantidad: libro.formulasOmitidas });
     }
     return { bytes: salida, origen, avisos };
   }

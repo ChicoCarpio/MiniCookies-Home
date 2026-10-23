@@ -67,6 +67,14 @@
     usados.add(t.toLowerCase());
     return t;
   }
+  // Las columnas que tienen algo en una fila, en orden. Una fila ancha y rala (una celda en XFD) es un arreglo disperso: se recorren sus índices, no sus 16.384 lugares.
+  function presentes(fila) {
+    const r = [];
+    if (fila.length <= 1024) { for (let c = 0; c < fila.length; c++) if (fila[c] !== undefined) r.push(c); return r; }
+    for (const k in fila) { const c = +k; if (Number.isInteger(c) && c >= 0 && fila[c] !== undefined) r.push(c); }
+    return r;
+  }
+  const MAX_EXPS = 1000000;   // celdas de fórmulas de matriz (cada una lleva su registro): una matriz A1:IV65536 son 16 millones
   const hexRgb = (h) => [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
   const colorValido = (c) => typeof c === 'string' && /^[0-9A-Fa-f]{6}$/.test(c) ? c.toUpperCase() : null;
 
@@ -243,6 +251,7 @@
     const mapaNombres = new Map();
     for (const n of opciones.nombres || []) {
       if (!n || typeof n.nombre !== 'string' || !n.nombre || typeof n.formula !== 'string' || !n.formula) continue;   // sin fórmula no se puede llevar: lo que lo use queda en solo valor
+      if (n.nombre.length > 255) continue;   // el NAME guarda el largo en un byte (y Excel no admite más): las fórmulas que lo usan quedan en su valor, con su aviso
       // hoja: el índice (desde 0) o el nombre de la hoja de un nombre local; sin ella, el nombre es del libro
       const ih = typeof n.hoja === 'string' ? (indiceHoja.has(n.hoja.toLowerCase()) ? indiceHoja.get(n.hoja.toLowerCase()) : -2) : Number.isInteger(n.hoja) && n.hoja >= 0 && n.hoja < hojas.length ? n.hoja : -1;
       if (ih === -2) continue;
@@ -292,16 +301,19 @@
       const out = new Buf();
       let filas = Array.isArray(h.filas) ? h.filas : [];
       // Una fórmula de matriz de varias celdas: cada celda del rango (menos la primera) lleva su propio registro FORMULA con un PtgExp que apunta a la primera.
-      const exps = new Map();
+      // Una matriz que no entra en el .xls (o en el tope de MAX_EXPS) queda en su valor: va en sinMatriz, por su celda de origen.
+      const exps = new Map(), sinMatriz = new Set();
       if (conFormulas) {
-        for (let f = 0; f < filas.length; f++) {
+        for (let f = 0; f < filas.length && f < MAX_FILAS; f++) {
           const fila = filas[f];
           if (!fila) continue;
-          for (let c = 0; c < fila.length; c++) {
+          for (const c of presentes(fila)) {
+            if (c >= MAX_COLS) break;
             const x = fila[c];
             if (!x || typeof x !== 'object' || !x.formula || !x.matriz) continue;
             const m = parseRango(x.matriz);
-            if (!m || (m.f1 === m.f0 && m.c1 === m.c0) || m.f0 !== f || m.c0 !== c || m.f1 >= MAX_FILAS || m.c1 >= MAX_COLS) continue;
+            if (!m || (m.f1 === m.f0 && m.c1 === m.c0) || m.f0 !== f || m.c0 !== c) continue;
+            if (m.f1 >= MAX_FILAS || m.c1 >= MAX_COLS || exps.size + (m.f1 - m.f0 + 1) * (m.c1 - m.c0 + 1) > MAX_EXPS) { sinMatriz.add(f * MAX_COLS + c); continue; }
             if (filas === h.filas) filas = filas.slice();
             for (let r = m.f0; r <= m.f1; r++) {
               if (!filas[r] || filas[r] === h.filas[r]) filas[r] = Array.from(filas[r] || []);
@@ -334,7 +346,8 @@
       const resultado = (val) => {
         if (typeof val === 'number' && Number.isFinite(val)) return { b: null, num: val };
         if (typeof val === 'boolean') return { b: [1, 0, val ? 1 : 0, 0, 0, 0, 0xFF, 0xFF] };
-        if (typeof val === 'string') return { b: [0, 0, 0, 0, 0, 0, 0xFF, 0xFF], texto: val.slice(0, MAX_TEXTO) };
+        // el texto va en un solo registro STRING (8.224 bytes: 8.221 caracteres de 1 byte o 4.110 de 2); es el último resultado, que Excel vuelve a calcular al abrir
+        if (typeof val === 'string') { let ancho = false; for (let i = 0; i < val.length && !ancho; i++) if (val.charCodeAt(i) > 0xFF) ancho = true; return { b: [0, 0, 0, 0, 0, 0, 0xFF, 0xFF], texto: val.slice(0, ancho ? (MAX_REGISTRO - 3) >> 1 : MAX_REGISTRO - 3) }; }
         if (val && typeof val === 'object' && typeof val.error === 'string') return { b: [2, 0, CODIGOS_ERROR[val.error] === undefined ? 0x0F : CODIGOS_ERROR[val.error], 0, 0, 0, 0xFF, 0xFF] };
         return { b: null, num: 0, vacio: true };
       };
@@ -342,12 +355,12 @@
       for (let f = 0; f < filas.length; f++) {
         const fila = filas[f];
         if (!Array.isArray(fila) && !(fila && fila.length >= 0)) continue;
-        if (f >= MAX_FILAS) { if (fila.some((x) => x !== undefined && x !== null)) avisar('fuera'); continue; }
+        if (f >= MAX_FILAS) { if (presentes(fila).some((c) => fila[c] !== null)) avisar('fuera'); continue; }
         let c0 = -1, c1 = -1;
-        for (let c = 0; c < fila.length; c++) {
+        if (fila.length > MAX_COLS) for (const c of presentes(fila)) if (c >= MAX_COLS) { const n = normal(fila[c]); if (n.valor !== null || n.formula) avisar('fuera'); }
+        for (let c = 0; c < fila.length && c < MAX_COLS; c++) {
           const n = normal(fila[c]);
           const origen = exps.get(f * MAX_COLS + c);
-          if (c >= MAX_COLS) { if (n.valor !== null || n.formula) avisar('fuera'); continue; }
           const tieneEstilo = n.estilo !== undefined && n.estilo !== null || (n.formato !== undefined && n.formato !== null && n.formato !== 'General' && n.formato !== 0);
           const xf = tieneEstilo ? estilos.xfDe(n.formato, n.estilo) : 15;
           const v = n.valor;
@@ -364,6 +377,7 @@
           } else {
             let formulaHecha = false;
             if (n.formula && /^#(NULL!|DIV[/]0!|VALUE!|REF!|NAME[?]|NUM!|N[/]A)$/.test(n.formula)) avisar('formula-sin-llevar', nombreCelda(f, c) + ': fórmula que da error en Excel 97-2003');
+            else if (n.formula && conFormulas && sinMatriz.has(f * MAX_COLS + c)) avisar('formula-sin-llevar', nombreCelda(f, c) + ': fórmula de matriz demasiado grande para un .xls');
             else if (n.formula && conFormulas) {
               const matriz = n.matriz ? parseRango(n.matriz) : null;
               const r = codificarFormula(n.formula, f, c, matriz ? 'A' : 'V');
@@ -383,7 +397,11 @@
                 }
                 if (res.texto !== undefined) { const s = new Buf(); cadena(s, res.texto, 2); registro(cuerpoCeldas, 0x0207, s.fin()); }   // el STRING va después del ARRAY
                 formulaHecha = true;
-              } else { avisar('formula-sin-llevar', nombreCelda(f, c) + (ultimoMotivo ? ': ' + ultimoMotivo : '')); for (const [k, o] of [...exps]) if (o.f === f && o.c === c) exps.delete(k); }
+              } else {
+                avisar('formula-sin-llevar', nombreCelda(f, c) + (ultimoMotivo ? ': ' + ultimoMotivo : ''));
+                // las celdas de su matriz quedan con su valor (solo se mira el rango de esta fórmula, no todas las matrices)
+                if (matriz && matriz.f0 === f && matriz.c0 === c) for (let r = matriz.f0; r <= matriz.f1 && r < MAX_FILAS; r++) for (let k = matriz.c0; k <= matriz.c1 && k < MAX_COLS; k++) { const o = exps.get(r * MAX_COLS + k); if (o && o.f === f && o.c === c) exps.delete(r * MAX_COLS + k); }
+              }
             } else if (n.formula) avisar('formula-sin-llevar', nombreCelda(f, c) + (ultimoMotivo ? ': ' + ultimoMotivo : ''));
             if (!formulaHecha) {
               if (typeof v === 'number') {
@@ -459,7 +477,7 @@
       if (n.funcion || !n.formula || !conFormulas) continue;
       hojaActual = n.hoja - 1;
       const r = codificarFormula(n.formula, 0, 0, 'R');
-      if (r) cuerposNombre.set(i, r);
+      if (r && 15 + n.nombre.length * 2 + r.rgce.length + r.rgcb.length <= MAX_REGISTRO) cuerposNombre.set(i, r);   // más largo no cabe en el NAME: queda #REF!
     }
 
     // ---- el flujo global ----
@@ -515,9 +533,14 @@
         registro(g, 0x01AE, new Buf().u16(1).u16(0x3A01).fin());
         for (const nom of complemento.nombres) { const b = new Buf().u16(0).u32(0); cadena(b, nom, 1); b.u16(2).u8(0x1C).u8(0x17); registro(g, 0x0023, b.fin()); }
       }
+      // más de 1.370 entradas no caben en un registro: siguen en CONTINUE, cortadas entre entradas de 6 bytes (como LibreOffice)
       const e = new Buf().u16(xtis.length);
-      for (const x of xtis) e.u16(x.libro).u16(x.primera & 0xFFFF).u16(x.ultima & 0xFFFF);
-      registro(g, 0x0017, e.fin());
+      let id = 0x0017, lleno = 2;
+      for (const x of xtis) {
+        if (lleno + 6 > MAX_REGISTRO) { registro(g, id, e.fin()); e.n = 0; id = 0x003C; lleno = 0; }
+        e.u16(x.libro).u16(x.primera & 0xFFFF).u16(x.ultima & 0xFFFF); lleno += 6;
+      }
+      registro(g, id, e.fin());
     }
     nombresDef.forEach((n, i) => {
       const cuerpo = n.funcion ? { rgce: Uint8Array.from([0x1C, 0x1D]), rgcb: new Uint8Array(0) } : cuerposNombre.get(i) || { rgce: Uint8Array.from([0x1C, 0x17]), rgcb: new Uint8Array(0) };

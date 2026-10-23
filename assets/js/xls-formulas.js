@@ -265,7 +265,8 @@
   const ERROR_A_CODIGO = { '#NULL!': 0x00, '#DIV/0!': 0x07, '#VALUE!': 0x0F, '#REF!': 0x17, '#NAME?': 0x1D, '#NUM!': 0x24, '#N/A': 0x2A, '#GETTING_DATA': 0x2B };
   const CLASE = { R: 0x20, V: 0x40, A: 0x60 };
   const MAX_RGCE = 8000, MAX_TEXTO_LIT = 255, MAX_PROFUNDIDAD = 400;   // la profundidad del árbol: una suma de 400 términos ya es más de lo que cabe en una fórmula de 97
-  const PREFIJO_HOJA = "(?:(?:'((?:[^']|'')+)'|([A-Za-z_\\u00C0-\\uFFFF][A-Za-z0-9_.\\u00C0-\\uFFFF]*))!)?";
+  // (sin comillas también va el rango de hojas, Hoja1:Hoja3!A1, como lo escriben un .xlsx y el decodificador)
+  const PREFIJO_HOJA = "(?:(?:'((?:[^']|'')+)'|([A-Za-z_\\u00C0-\\uFFFF][A-Za-z0-9_.\\u00C0-\\uFFFF]*(?::[A-Za-z_\\u00C0-\\uFFFF][A-Za-z0-9_.\\u00C0-\\uFFFF]*)?))!)?";
   const CELDA = '(\\$?)([A-Za-z]{1,3})(\\$?)(\\d{1,7})';
   const RE_REF = new RegExp('^' + PREFIJO_HOJA + '(?:' + CELDA + '(?::' + CELDA + ')?|(\\$?)([A-Za-z]{1,3}):(\\$?)([A-Za-z]{1,3})|(\\$?)(\\d{1,7}):(\\$?)(\\d{1,7})|(#REF!))(?![A-Za-z0-9_.(\\u00C0-\\uFFFF])');
   const RE_NUM = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/;

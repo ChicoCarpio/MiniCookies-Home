@@ -24,6 +24,9 @@
   COM.add('LET'); XLFN.add('LET');   // LET no está en la tabla de funciones de .xls (no existe en Excel 97-2003) pero sí en los .xlsx y en LibreOffice
   const SIN_ZONA = new Set(['FILTER', 'SORT']);
 
+  // Largo de lo que se traduce: el de una fórmula de Excel (8.192), y cuatro veces eso en OpenFormula (lleva corchetes, puntos y $). Lo que pasa da null (queda el valor).
+  const MAX_FORMULA_EXCEL = 8192, MAX_LARGO = 4 * 8192;
+  const RE_ERROR = /^#(?:NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|GETTING_DATA)/i;
   const ID = /[A-Za-z0-9_.À-￿]/;
   const NOMBRE_SIMPLE = /^[A-Za-zÀ-￿_][A-Za-z0-9_.À-￿]*$/;
   const CELDA = '\\$?[A-Za-z]{1,3}\\$?\\d+';
@@ -40,6 +43,7 @@
   // ---- Excel → OpenFormula ------------------------------------------------------------------------------------------------
   function aOpenFormula(texto) {
     let s = String(texto).replace(/^=/, ''), i = 0, out = '';
+    if (s.length > MAX_FORMULA_EXCEL) return null;   // más largo de lo que admite Excel: no viene de un libro real
     const pila = [];   // 'f' llamada a función, 'g' paréntesis de agrupar
     let ultimo = '';   // el último token significativo: 'ref', ')', 'otro'
     const n = s.length;
@@ -134,21 +138,28 @@
 
   function aExcel(texto) {
     const s = String(texto).replace(/^of:=/, '').replace(/^=/, '');
-    let i = 0, out = '';
+    if (s.length > MAX_LARGO) return null;
+    let i = 0;
     const n = s.length;
-    const pila = [];   // { tipo: 'f' | 'g', inicioArg: posición en `out` donde empieza el argumento, union: bool }
-    const cerrarArg = (p) => { if (p.union) { out = out.slice(0, p.inicioArg) + '(' + out.slice(p.inicioArg) + ')'; p.union = false; } };
+    // la salida va en pedazos: un argumento que resulta ser una unión se envuelve entre paréntesis poniendo "(" en el pedazo vacío donde empezó (rearmar el texto en cada
+    // unión hacía cuadrática una fórmula con muchas)
+    const partes = [];
+    let ult = '';   // el último carácter escrito
+    const poner = (t) => { if (t) { partes.push(t); ult = t[t.length - 1]; } };
+    const marca = () => partes.push('') - 1;
+    const pila = [];   // { tipo: 'f' | 'g', inicioArg: el pedazo vacío donde empieza el argumento, union: bool }
+    const cerrarArg = (p) => { if (p.union) { partes[p.inicioArg] = '('; poner(')'); p.union = false; } };
     while (i < n) {
       const ch = s[i];
       if (ch === '"') {
         let j = i + 1;
         while (j < n) { if (s[j] === '"') { if (s[j + 1] === '"') j += 2; else break; } else j++; }
-        out += s.slice(i, j + 1); i = j + 1; continue;
+        poner(s.slice(i, j + 1)); i = j + 1; continue;
       }
       if (ch === '[') {
         const j = s.indexOf(']', i); if (j < 0) return null;
         const r = referenciaAExcel(s.slice(i + 1, j)); if (r === null) return null;
-        out += r; i = j + 1; continue;
+        poner(r); i = j + 1; continue;
       }
       if (ch === '{') {
         let j = i + 1, t = '{';
@@ -156,30 +167,35 @@
           if (s[j] === '"') { let k = j + 1; while (k < n) { if (s[k] === '"') { if (s[k + 1] === '"') k += 2; else break; } else k++; } t += s.slice(j, k + 1); j = k + 1; continue; }
           t += s[j] === ';' ? ',' : s[j] === '|' ? ';' : s[j]; j++;
         }
-        out += t + '}'; i = j + 1; continue;
+        poner(t + '}'); i = j + 1; continue;
+      }
+      if (ch === '#') {   // un error escrito en la fórmula (#DIV/0!, #N/A…): su "!" no es la intersección
+        const m = RE_ERROR.exec(s.slice(i, i + 16));
+        if (m) { poner(m[0].toUpperCase()); i += m[0].length; continue; }
       }
       if (ch === '(') {
-        const prev = out[out.length - 1];
-        pila.push({ tipo: prev !== undefined && (ID.test(prev) || prev === ')') ? 'f' : 'g', inicioArg: out.length + 1, union: false }); out += '('; i++; continue;
+        const prev = ult;
+        poner('(');
+        pila.push({ tipo: prev !== '' && (ID.test(prev) || prev === ')') ? 'f' : 'g', inicioArg: marca(), union: false }); i++; continue;
       }
-      if (ch === ')') { const p = pila.pop(); if (p) cerrarArg(p); out += ')'; i++; continue; }
-      if (ch === ';') { const p = pila[pila.length - 1]; if (p) { cerrarArg(p); } out += ','; if (p) p.inicioArg = out.length; i++; continue; }
-      if (ch === '~') { const p = pila[pila.length - 1]; out += ','; if (p && p.tipo === 'f') p.union = true; i++; continue; }
-      if (ch === '!') { out += ' '; i++; continue; }
-      if (!ID.test(ch)) { out += ch; i++; continue; }
+      if (ch === ')') { const p = pila.pop(); if (p) cerrarArg(p); poner(')'); i++; continue; }
+      if (ch === ';') { const p = pila[pila.length - 1]; if (p) { cerrarArg(p); } poner(','); if (p) p.inicioArg = marca(); i++; continue; }
+      if (ch === '~') { const p = pila[pila.length - 1]; poner(','); if (p && p.tipo === 'f') p.union = true; i++; continue; }
+      if (ch === '!') { poner(' '); i++; continue; }
+      if (!ID.test(ch)) { poner(ch); i++; continue; }
       let j = i; while (j < n && ID.test(s[j])) j++;
       let palabra = s.slice(i, j);
       if (s[j] === '(') {
-        if (/^(TRUE|FALSE)$/i.test(palabra) && s[j + 1] === ')') { out += palabra.toUpperCase(); i = j + 2; continue; }   // TRUE() → TRUE
+        if (/^(TRUE|FALSE)$/i.test(palabra) && s[j + 1] === ')') { poner(palabra.toUpperCase()); i = j + 2; continue; }   // TRUE() → TRUE
         let u = palabra.toUpperCase();
         if (DIST_INV.has(u)) { palabra = DIST_INV.get(u); u = palabra.toUpperCase(); }
         if (/^(ORG\.(OPENOFFICE|LIBREOFFICE)\.|_xlfn\.lambda$)/i.test(palabra)) return null;
         if (u.startsWith('COM.MICROSOFT.')) { const base = palabra.slice(14); const b = base.toUpperCase(); palabra = XLFN.has(b) || !XLFN.size ? (SIN_ZONA.has(b) ? '_xlfn._xlws.' : '_xlfn.') + base : base; }
         else if (XLFN.has(u)) palabra = (SIN_ZONA.has(u) ? '_xlfn._xlws.' : '_xlfn.') + palabra;
       }
-      out += palabra; i = j;
+      poner(palabra); i = j;
     }
-    return out;
+    return partes.join('');
   }
 
   globalThis.OdsFormulas = { aOpenFormula, aExcel };

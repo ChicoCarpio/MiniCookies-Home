@@ -40,12 +40,13 @@ window.i18nPagina = {
     'aviso-texto-largo': '{n} textos pasaban de 32.767 caracteres y se cortaron.',
     'aviso-hojas': 'Un .xls admite hasta 255 hojas: las demás no se guardaron.',
     'aviso-formato': '{n} formatos de número tienen más secciones de las que admite el destino y se simplificaron (por ejemplo {ej}).',
+    'aviso-combinadas': '{n} celdas combinadas abarcaban demasiadas filas y quedaron separadas (por ejemplo {ej}).',
     'limites-titulo': 'Límites conocidos',
     'item1': 'Se llevan los valores, las fórmulas, los formatos de número, la fuente, el color de relleno, los bordes, la alineación, las celdas combinadas, los anchos y altos, las filas y columnas ocultas, las hojas ocultas y los nombres definidos. No se llevan los gráficos, las imágenes, las tablas, el formato condicional, los comentarios ni las macros.',
     'item2': 'Un .xls tiene como máximo 65.536 filas × 256 columnas y no admite fórmulas con más de 30 argumentos ni textos de más de 255 caracteres dentro de una fórmula; lo que no cabe se avisa al terminar.',
     'item3': 'Un archivo con contraseña no se puede abrir: quitale la contraseña en Excel y volvé a intentarlo.',
     'guia-titulo': 'Cómo pasar una planilla de .xlsx a .xls, a .ods o al revés',
-    'guia-intro': 'Hay programas y organismos que todavía piden la planilla en Excel 97-2003 (.xls), y otros que la quieren en LibreOffice (.ods). Esta herramienta pasa el archivo de un formato a otro sin salir de tu navegador, conservando las fórmulas, los formatos de número, los colores y los bordes, y avisa de lo que el formato de destino no puede guardar.',
+    'guia-intro': 'Hay programas y organismos que todavía piden la planilla en Excel 97-2003 (.xls), y otros que la quieren en LibreOffice (.ods). Esta herramienta pasa el archivo de un formato a otro conservando las fórmulas, los formatos de número, los colores y los bordes, y avisa de lo que el formato de destino no puede guardar.',
     'guia-pasos': 'Paso a paso',
     'guia-paso-1': 'Cargá una o varias planillas (.xlsx, .xlsm, .xls, .ods o .xlsb).',
     'guia-paso-2': 'Elegí el formato de destino: .xlsx, .xls o .ods.',
@@ -56,7 +57,6 @@ window.i18nPagina = {
     'guia-consejo-1': 'Para entregar un archivo que cualquiera pueda abrir, elegí .xlsx: lo leen Excel, LibreOffice y Google Sheets.',
     'guia-consejo-2': 'Si el programa que lo va a abrir es muy viejo, usá .xls y revisá los avisos: las funciones nuevas (como XLOOKUP o IFS) no existen en Excel 2003.',
     'guia-consejo-3': 'Los archivos con la base de fechas de 1904 (planillas viejas de Mac) se pasan a la base normal sin cambiar ninguna fecha.',
-    'guia-consejo-4': 'Los archivos no salen de tu computadora: la conversión se hace en el navegador.',
     'guia-faq': 'Preguntas frecuentes',
     'guia-p1': '¿Qué pasa con las fórmulas?',
     'guia-r1': 'Se traducen al formato de destino y se guarda también el último valor de cada una. En .xls y .ods las fórmulas con funciones muy nuevas pueden no existir; en ese caso queda el valor y se avisa.',
@@ -95,12 +95,13 @@ window.i18nPagina = {
     'aviso-texto-largo': '{n} texts were over 32,767 characters and were cut.',
     'aviso-hojas': 'An .xls holds up to 255 sheets: the rest were not saved.',
     'aviso-formato': '{n} number formats have more sections than the target supports and were simplified (for example {ej}).',
+    'aviso-combinadas': '{n} merged cells spanned too many rows and were left unmerged (for example {ej}).',
     'limites-titulo': 'Known limits',
     'item1': 'Values, formulas, number formats, font, fill color, borders, alignment, merged cells, widths and heights, hidden rows, columns and sheets, and defined names are kept. Charts, images, tables, conditional formatting, comments and macros are not.',
     'item2': 'An .xls has at most 65,536 rows × 256 columns and does not allow formulas with more than 30 arguments or texts longer than 255 characters inside a formula; what does not fit is reported when it finishes.',
     'item3': 'A password-protected file cannot be opened: remove the password in Excel and try again.',
     'guia-titulo': 'How to convert a spreadsheet from .xlsx to .xls, to .ods or back',
-    'guia-intro': 'Some programs and offices still ask for the spreadsheet in Excel 97-2003 (.xls), and others want it in LibreOffice (.ods). This tool converts the file from one format to another without leaving your browser, keeping formulas, number formats, colors and borders, and tells you what the target format cannot store.',
+    'guia-intro': 'Some programs and offices still ask for the spreadsheet in Excel 97-2003 (.xls), and others want it in LibreOffice (.ods). This tool converts the file from one format to another, keeping formulas, number formats, colors and borders, and tells you what the target format cannot store.',
     'guia-pasos': 'Step by step',
     'guia-paso-1': 'Load one or more spreadsheets (.xlsx, .xlsm, .xls, .ods or .xlsb).',
     'guia-paso-2': 'Choose the target format: .xlsx, .xls or .ods.',
@@ -111,7 +112,6 @@ window.i18nPagina = {
     'guia-consejo-1': 'To hand over a file anyone can open, choose .xlsx: Excel, LibreOffice and Google Sheets all read it.',
     'guia-consejo-2': 'If the program that will open it is very old, use .xls and check the notices: new functions (like XLOOKUP or IFS) do not exist in Excel 2003.',
     'guia-consejo-3': 'Files using the 1904 date system (old Mac spreadsheets) are moved to the normal system without changing any date.',
-    'guia-consejo-4': 'Your files never leave your computer: the conversion happens in the browser.',
     'guia-faq': 'Frequently asked questions',
     'guia-p1': 'What happens to the formulas?',
     'guia-r1': 'They are translated to the target format and each one also keeps its last value. In .xls and .ods, formulas with very new functions may not exist; then the value is kept and you are told.',
@@ -189,7 +189,7 @@ window.i18nPagina = {
 
   <section class="guia-uso">
     <h2 data-i18n="guia-titulo">Cómo pasar una planilla de .xlsx a .xls, a .ods o al revés</h2>
-    <p data-i18n="guia-intro">Hay programas y organismos que todavía piden la planilla en Excel 97-2003 (.xls), y otros que la quieren en LibreOffice (.ods). Esta herramienta pasa el archivo de un formato a otro sin salir de tu navegador, conservando las fórmulas, los formatos de número, los colores y los bordes, y avisa de lo que el formato de destino no puede guardar.</p>
+    <p data-i18n="guia-intro">Hay programas y organismos que todavía piden la planilla en Excel 97-2003 (.xls), y otros que la quieren en LibreOffice (.ods). Esta herramienta pasa el archivo de un formato a otro conservando las fórmulas, los formatos de número, los colores y los bordes, y avisa de lo que el formato de destino no puede guardar.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
       <li data-i18n="guia-paso-1">Cargá una o varias planillas (.xlsx, .xlsm, .xls, .ods o .xlsb).</li>
@@ -202,9 +202,7 @@ window.i18nPagina = {
     <ul>
       <li data-i18n="guia-consejo-1">Para entregar un archivo que cualquiera pueda abrir, elegí .xlsx: lo leen Excel, LibreOffice y Google Sheets.</li>
       <li data-i18n="guia-consejo-2">Si el programa que lo va a abrir es muy viejo, usá .xls y revisá los avisos: las funciones nuevas (como XLOOKUP o IFS) no existen en Excel 2003.</li>
-      <li data-i18n="guia-consejo-3">Los archivos con la base de fechas de 1904 (planillas viejas de Mac) se pasan a la base normal sin cambiar ninguna fecha.</li>
-      <li data-i18n="guia-consejo-4">Los archivos no salen de tu computadora: la conversión se hace en el navegador.</li>
-    </ul>
+      <li data-i18n="guia-consejo-3">Los archivos con la base de fechas de 1904 (planillas viejas de Mac) se pasan a la base normal sin cambiar ninguna fecha.</li>    </ul>
     <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
     <details>
       <summary data-i18n="guia-p1">¿Qué pasa con las fórmulas?</summary>
@@ -325,7 +323,8 @@ function pintarAvisos(total) {
     if (!plantilla || plantilla === clave) continue;
     const ejemplo = tipo === 'formula-sin-llevar' ? ((/^[A-Z]+\d+/.exec(x.ejemplo || '') || [''])[0]) : (x.ejemplo || '');
     const li = document.createElement('li');
-    li.textContent = plantilla.replace('{n}', x.cantidad.toLocaleString()).replace('{ej}', ejemplo);
+    // sin ejemplo, se quita el paréntesis que lo nombra
+    li.textContent = (ejemplo ? plantilla : plantilla.replace(/\s*\([^()]*\{ej\}[^()]*\)/, '')).replace('{n}', x.cantidad.toLocaleString()).replace('{ej}', ejemplo);
     listaAvisos.appendChild(li);
   }
   bloqueAvisos.style.display = listaAvisos.children.length ? 'block' : 'none';

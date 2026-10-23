@@ -5,14 +5,17 @@
 //   const { bytes, avisos } = await OdsEscritor.crearLibro(hojas, opciones);
 //
 // `hojas` y `opciones` son los de XlsEscritor (ver xls-escritor.js): el contrato de celdas que devuelven los lectores. opciones: { formulas: true, fecha1904: bool, nombres: [{ nombre, hoja?,
-// formula }] }. avisos: [{ tipo, cantidad, ejemplo? }] con 'formula-sin-llevar' (quedó el valor), 'formato' (un formato de número que ODF no expresa igual) y 'texto-largo'.
+// formula }] }. avisos: [{ tipo, cantidad, ejemplo? }] con 'formula-sin-llevar' (quedó el valor), 'formato' (un formato de número que ODF no expresa igual), 'texto-largo'
+// y 'combinadas' (combinadas que pasan del tope de MAX_FILAS_AREAS: quedan separadas).
 // Un .ods lleva el mimetype primero y sin comprimir, content.xml (hojas, estilos de celda, columnas y filas), styles.xml y META-INF/manifest.xml.
 (function () {
-  const MAX_TEXTO = 32767;
+  const MAX_TEXTO = 32767, MAX_FILAS = 1048576, MAX_COLS = 16384;
+  const MAX_FILAS_AREAS = 8000000;   // suma de las filas que abarcan las combinadas y matrices de todo el libro (cada fila de un área se mira al escribir esa fila)
   const ERRORES = new Set(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA']);
   const BORDES = { thin: ['0.74pt', 'solid'], medium: ['1.76pt', 'solid'], thick: ['2.49pt', 'solid'], hair: ['0.05pt', 'solid'], double: ['1.76pt', 'double'], dashed: ['0.74pt', 'dashed'], dotted: ['0.74pt', 'dotted'],
     mediumDashed: ['1.76pt', 'dashed'], dashDot: ['0.74pt', 'dashed'], mediumDashDot: ['1.76pt', 'dashed'], dashDotDot: ['0.74pt', 'dotted'], mediumDashDotDot: ['1.76pt', 'dotted'], slantDashDot: ['1.76pt', 'dashed'] };
-  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // (los caracteres de control que XML 1.0 no admite se quitan: con uno solo, LibreOffice no abre el archivo)
+  const esc = (t) => String(t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const colANumero = (s) => { let n = 0; for (const ch of s.toUpperCase()) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
   const numeroACol = (n) => { let s = ''; for (n++; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + ((n - 1) % 26)) + s; return s; };
   function parseRango(t) {
@@ -20,6 +23,14 @@
     if (!m) return null;
     const c0 = colANumero(m[1]), f0 = +m[2] - 1, c1 = m[3] ? colANumero(m[3]) : c0, f1 = m[4] ? +m[4] - 1 : f0;
     return f0 < 0 || f1 < f0 || c1 < c0 ? null : { f0, c0, f1, c1 };
+  }
+  // Las columnas de una fila que tienen algo (ni undefined ni null), en orden. Una fila ancha y rala (una celda en XFD) es un arreglo disperso: se recorren sus índices,
+  // no sus 16.384 lugares.
+  function presentes(fila) {
+    const r = [];
+    if (fila.length <= 1024) { for (let c = 0; c < fila.length; c++) if (fila[c] !== undefined && fila[c] !== null) r.push(c); return r; }
+    for (const k in fila) { const c = +k; if (Number.isInteger(c) && c >= 0 && fila[c] !== undefined && fila[c] !== null) r.push(c); }
+    return r;
   }
   const NOMBRE_HOJA_SIMPLE = /^[A-Za-zÀ-￿_][A-Za-z0-9_.À-￿]*$/;
   const citarHoja = (n) => (NOMBRE_HOJA_SIMPLE.test(n) ? n : "'" + n.replace(/'/g, "''") + "'");
@@ -35,12 +46,12 @@
 
   // ---- fechas: número de serie de Excel → ISO ----------------------------------------------------------------------------------
   function isoDeSerie(serie, fecha1904) {
-    const dias = Math.floor(serie + 1e-9), resto = serie - dias;
+    let dias = Math.floor(serie + 1e-9), seg = Math.round((serie - dias) * 86400);
+    if (seg >= 86400) { dias++; seg -= 86400; }   // 23:59:59.6 se redondea al día siguiente, no a las 00:00:00 del mismo
     let base = fecha1904 ? Date.UTC(1904, 0, 1) : Date.UTC(1899, 11, 30);
     let d = dias;
     if (!fecha1904 && dias < 61) d = dias + 1;   // antes del 1900-03-01 Excel cuenta un día de menos (y el 29 de febrero de 1900 no existió)
     const t = new Date(base + d * 86400000);
-    const seg = Math.round(resto * 86400);
     const p = (n, l = 2) => String(n).padStart(l, '0');
     const y = t.getUTCFullYear();
     return { fecha: `${p(y, 4)}-${p(t.getUTCMonth() + 1)}-${p(t.getUTCDate())}`, hora: `${p(Math.floor(seg / 3600) % 24)}:${p(Math.floor(seg / 60) % 60)}:${p(seg % 60)}`, seg };
@@ -166,10 +177,11 @@
     const avisar = (tipo, ejemplo) => { const a = avisosMapa.get(tipo); if (a) a.cantidad++; else avisosMapa.set(tipo, { tipo, cantidad: 1, ...(ejemplo ? { ejemplo } : {}) }); };
     if (!Array.isArray(hojasEntrada) || !hojasEntrada.length) throw new Error('el libro necesita al menos una hoja');
 
-    const usados = new Set();
+    const usados = new Set(), sufijo = new Map();   // sufijo: el próximo número que se prueba para cada nombre repetido (miles de hojas iguales no vuelven a probar desde 2)
     const nombreUnico = (n, k) => {
-      let t = String(n == null ? '' : n).replace(/[\[\]:*?\/\\]/g, '_').replace(/^'+|'+$/g, '').slice(0, 31) || 'Hoja' + (k + 1), b = t, i = 2;
+      let t = String(n == null ? '' : n).replace(/[\[\]:*?\/\\]/g, '_').replace(/^'+|'+$/g, '').slice(0, 31) || 'Hoja' + (k + 1), b = t, i = sufijo.get(b.toLowerCase()) || 2;
       while (usados.has(t.toLowerCase())) { const suf = '(' + i++ + ')'; t = b.slice(0, 31 - suf.length) + suf; }
+      sufijo.set(b.toLowerCase(), i);
       usados.add(t.toLowerCase()); return t;
     };
     const hojas = hojasEntrada.map((h, k) => ({ ...h, nombre: nombreUnico(h.nombre, k) }));
@@ -231,39 +243,103 @@
     const indiceHoja = new Map(); hojas.forEach((h, k) => indiceHoja.set(h.nombre.toLowerCase(), k));
 
     // ---- cada hoja ----
-    let cuerpo = '';
+    let cuerpo = '', filasAreas = 0;
     hojas.forEach((h, ih) => {
       const filas = Array.isArray(h.filas) ? h.filas : [];
       const ocultasC = new Set(h.columnasOcultas || []), ocultasF = new Set(h.filasOcultas || []), altos = h.altosFila || {}, anchos = Array.isArray(h.anchos) ? h.anchos : [];
-      const combinadas = (h.combinadas || []).map(parseRango).filter((r) => r && (r.f1 > r.f0 || r.c1 > r.c0));
-      const origen = new Map(), cubiertas = new Set();
-      for (const r of combinadas) { origen.set(r.f0 * 16384 + r.c0, r); for (let f = r.f0; f <= r.f1; f++) for (let c = r.c0; c <= r.c1; c++) if (f !== r.f0 || c !== r.c0) cubiertas.add(f * 16384 + c); }
+      // combinadas y matrices de varias celdas: áreas que cubren todas sus celdas menos la de origen. Se recorren por fila (las que siguen abiertas), sin armar la
+      // lista de celdas cubiertas: una combinada A1:XFD1048576 son 17.000 millones. El tope es la suma de las filas que abarcan, en todo el libro.
+      const recortar = (r) => (r && r.f0 < MAX_FILAS && r.c0 < MAX_COLS ? { ...r, f1: Math.min(r.f1, MAX_FILAS - 1), c1: Math.min(r.c1, MAX_COLS - 1) } : null);
+      const areas = [], origen = new Map(), matrices = new Map();
+      const agregar = (r) => { const k = r.f1 - r.f0 + 1; if (filasAreas + k > MAX_FILAS_AREAS) return false; filasAreas += k; areas.push(r); return true; };
+      const combinadas = [];
+      for (const t of h.combinadas || []) {
+        const r = recortar(parseRango(t));
+        if (!r || (r.f1 === r.f0 && r.c1 === r.c0)) continue;
+        if (agregar(r)) { combinadas.push(r); origen.set(r.f0 * 16384 + r.c0, r); } else avisar('combinadas', t);
+      }
       // matrices: celda de origen → rango; el resto del rango son celdas cubiertas
-      const matrices = new Map();
-      if (conFormulas) filas.forEach((fila, f) => (fila || []).forEach((x, c) => { if (x && typeof x === 'object' && x.formula && x.matriz) { const m = parseRango(x.matriz); if (m) { matrices.set(f * 16384 + c, m); for (let ff = m.f0; ff <= m.f1; ff++) for (let cc = m.c0; cc <= m.c1; cc++) if (ff !== f || cc !== c) cubiertas.add(ff * 16384 + cc); } } }));
-      let maxC = 0; for (const fila of filas) if (fila) maxC = Math.max(maxC, fila.length);
-      for (const r of combinadas) maxC = Math.max(maxC, r.c1 + 1);
+      if (conFormulas) for (let f = 0; f < filas.length; f++) {
+        const fila = filas[f];
+        if (!fila) continue;
+        for (const c of presentes(fila)) {
+          const x = fila[c];
+          if (!x || typeof x !== 'object' || !x.formula || !x.matriz) continue;
+          const m = recortar(parseRango(x.matriz));
+          if (!m || m.f0 !== f || m.c0 !== c) continue;
+          if (m.f1 === m.f0 && m.c1 === m.c0) matrices.set(f * 16384 + c, m);
+          else if (agregar(m)) matrices.set(f * 16384 + c, m);
+          else matrices.set(f * 16384 + c, null);   // no cabe: queda el valor (celdaXml)
+        }
+      }
+      areas.sort((a, b) => a.f0 - b.f0);
+      let maxC = 0; for (const fila of filas) if (fila && fila.length > maxC) maxC = fila.length;
+      for (const r of combinadas) if (r.c1 + 1 > maxC) maxC = r.c1 + 1;
       let xml = `<table:table table:name="${esc(h.nombre)}" table:style-name="${h.estado === 'oculta' || h.estado === 'muyOculta' ? 'taH' : 'ta1'}">`;
       // columnas (en tramos iguales)
       const colDe = (c) => estiloColumna(anchos[c]) + (ocultasC.has(c) ? '|h' : '');
       for (let c = 0; c < maxC;) { const k = colDe(c); let d = c; while (d + 1 < maxC && colDe(d + 1) === k) d++; const [est, h2] = k.split('|'); xml += `<table:table-column table:style-name="${est}"${d > c ? ` table:number-columns-repeated="${d - c + 1}"` : ''}${h2 ? ' table:visibility="collapse"' : ''} table:default-cell-style-name="Default"/>`; c = d + 1; }
       if (!maxC) xml += '<table:table-column table:style-name="co0" table:default-cell-style-name="Default"/>';
-      const total = Math.max(filas.length, ...Object.keys(altos).map((k) => +k + 1), ...[...ocultasF].map((k) => k + 1), ...combinadas.map((r) => r.f1 + 1), 0);
+      // las filas que se escriben aunque no tengan nada: con alto propio u ocultas
+      const marcadas = [];
+      for (const k of Object.keys(altos)) { const f = +k; if (Number.isInteger(f) && f >= 0 && f < MAX_FILAS) marcadas.push(f); }
+      for (const f of ocultasF) if (Number.isInteger(f) && f >= 0 && f < MAX_FILAS && altos[f] === undefined) marcadas.push(f);
+      marcadas.sort((a, b) => a - b);
+      let total = Math.min(filas.length, MAX_FILAS);
+      if (marcadas.length && marcadas[marcadas.length - 1] + 1 > total) total = marcadas[marcadas.length - 1] + 1;
+      for (const r of combinadas) if (r.f1 + 1 > total) total = r.f1 + 1;
+      const conValores = (fila) => !!fila && presentes(fila).length > 0;
+      const marcada = (f) => altos[f] !== undefined || ocultasF.has(f);
+      // las filas iguales sin valores (cubiertas por una combinada alta, por ejemplo) se juntan en una repetida
+      let previa = null, repPrevia = 0;
+      const soltar = () => { if (previa) xml += previa.abre + (repPrevia > 1 ? ` table:number-rows-repeated="${repPrevia}"` : '') + '>' + previa.celdas + '</table:table-row>'; previa = null; repPrevia = 0; };
+      let activas = [], ia = 0, im = 0;
       for (let f = 0; f < total;) {
+        while (ia < areas.length && areas[ia].f0 <= f) activas.push(areas[ia++]);
+        if (activas.length) activas = activas.filter((a) => a.f1 >= f);
         const fila = filas[f] || [];
-        const vacia = !fila.some((x) => x !== undefined && x !== null) && altos[f] === undefined && !ocultasF.has(f) && ![...origen.keys()].some((k) => Math.floor(k / 16384) === f) && ![...cubiertas].some((k) => Math.floor(k / 16384) === f);
-        if (vacia) { let g = f; while (g + 1 < total && !(filas[g + 1] || []).some((x) => x !== undefined && x !== null) && altos[g + 1] === undefined && !ocultasF.has(g + 1) && ![...origen.keys()].some((k) => Math.floor(k / 16384) === g + 1) && ![...cubiertas].some((k) => Math.floor(k / 16384) === g + 1)) g++; xml += `<table:table-row table:style-name="ro0"${g > f ? ` table:number-rows-repeated="${g - f + 1}"` : ''}><table:table-cell table:number-columns-repeated="${Math.max(1, maxC)}"/></table:table-row>`; f = g + 1; continue; }
-        xml += `<table:table-row table:style-name="${estiloFila(altos[f])}"${ocultasF.has(f) ? ' table:visibility="collapse"' : ''}>`;
-        let c = 0;
-        while (c < maxC) {
-          const clave = f * 16384 + c;
-          const x = fila[c];
-          const celda = celdaXml(x, f, c, origen.get(clave), matrices.get(clave), cubiertas.has(clave), ih);
-          if (celda === null) { let d = c; while (d + 1 < maxC && fila[d + 1] === undefined && !cubiertas.has(f * 16384 + d + 1) && !origen.has(f * 16384 + d + 1)) d++; xml += `<table:table-cell${d > c ? ` table:number-columns-repeated="${d - c + 1}"` : ''}/>`; c = d + 1; }
-          else { xml += celda; c++; }
+        if (!activas.length && !marcada(f) && !conValores(fila)) {
+          // un tramo de filas vacías, hasta la próxima con valores, marcada o con un área
+          const tope = ia < areas.length ? Math.min(total, areas[ia].f0) : total;
+          let g = f + 1;
+          while (g < tope && g < filas.length && !marcada(g) && !conValores(filas[g])) g++;
+          if (g >= filas.length && g < tope && !marcada(g)) { while (im < marcadas.length && marcadas[im] < g) im++; g = im < marcadas.length ? Math.min(tope, marcadas[im]) : tope; }
+          soltar();
+          xml += `<table:table-row table:style-name="ro0"${g - f > 1 ? ` table:number-rows-repeated="${g - f}"` : ''}><table:table-cell table:number-columns-repeated="${Math.max(1, maxC)}"/></table:table-row>`;
+          f = g; continue;
         }
-        xml += '</table:table-row>'; f++;
+        // las columnas cubiertas de esta fila (tramos ordenados y juntos) y dónde empiezan las áreas que nacen en ella
+        const tramos = [], inicios = [];
+        for (const a of activas) { const d = a.f0 === f ? a.c0 + 1 : a.c0; if (a.f0 === f) inicios.push(a.c0); if (d <= a.c1) tramos.push([d, a.c1]); }
+        tramos.sort((a, b) => a[0] - b[0]); inicios.sort((a, b) => a - b);
+        const cub = [];
+        for (const t of tramos) { const u = cub[cub.length - 1]; if (u && t[0] <= u[1] + 1) { if (t[1] > u[1]) u[1] = t[1]; } else cub.push(t); }
+        // hasta dónde llega un tramo de columnas vacías que empieza en c (sin pasar de tope): hasta la próxima celda con algo, que se busca en la lista de la fila
+        const pres = presentes(fila);
+        let ip = 0;
+        const finVacias = (c, tope) => { while (ip < pres.length && pres[ip] <= c) ip++; return ip < pres.length ? Math.min(tope, pres[ip] - 1) : tope; };
+        let celdas = '', fija = inicios.length > 0, c = 0, ic = 0, io = 0;
+        while (c < maxC) {
+          while (ic < cub.length && cub[ic][1] < c) ic++;
+          const x = fila[c];
+          if (ic < cub.length && cub[ic][0] <= c) {
+            if (x === undefined || x === null) { const d = finVacias(c, Math.min(cub[ic][1], maxC - 1)); celdas += `<table:covered-table-cell${d > c ? ` table:number-columns-repeated="${d - c + 1}"` : ''}/>`; c = d + 1; continue; }
+            celdas += celdaXml(x, f, c, null, null, true, ih); fija = true; c++; continue;
+          }
+          const clave = f * 16384 + c;
+          const celda = celdaXml(x, f, c, origen.get(clave), matrices.get(clave), false, ih);
+          if (celda === null) {
+            while (io < inicios.length && inicios[io] <= c) io++;
+            const d = finVacias(c, Math.min(maxC, ic < cub.length ? cub[ic][0] : maxC, io < inicios.length ? inicios[io] : maxC) - 1);
+            celdas += `<table:table-cell${d > c ? ` table:number-columns-repeated="${d - c + 1}"` : ''}/>`; c = d + 1;
+          } else { celdas += celda; if (x !== undefined && x !== null) fija = true; c++; }
+        }
+        const abre = `<table:table-row table:style-name="${estiloFila(altos[f])}"${ocultasF.has(f) ? ' table:visibility="collapse"' : ''}`;
+        if (!fija && previa && previa.abre === abre && previa.celdas === celdas) repPrevia++;
+        else { soltar(); if (fija) xml += abre + '>' + celdas + '</table:table-row>'; else { previa = { abre, celdas }; repPrevia = 1; } }
+        f++;
       }
+      soltar();
       cuerpo += xml + '</table:table>';
     });
 
@@ -280,7 +356,7 @@
       }
       const n = norm(x);
       let formula = '';
-      if (n.formula && conFormulas) {
+      if (n.formula && conFormulas && matriz !== null) {   // null: una matriz que no cupo en el tope de áreas
         const o = OdsFormulas.aOpenFormula(n.formula);
         if (o) formula = ` table:formula="of:=${esc(o)}"`; else avisar('formula-sin-llevar', numeroACol(c) + (f + 1));
       } else if (n.formula) avisar('formula-sin-llevar', numeroACol(c) + (f + 1));
