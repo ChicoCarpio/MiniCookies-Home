@@ -377,7 +377,7 @@
       D.pars.push({ fin: D.n, istd, g: sprms && !sprms.vacio() ? sprms.bytes() : null, sprms });
     }
 
-    function parrafo(b, tabla) {
+    function parrafo(b, tabla, marcaFinal) {
       const estilo = b.estilo != null ? deEstilo(b.estilo) : null;
       const istd = estilo == null ? 0 : estilo;
       const s = sprmsPap(b.p, { ilfoDe });
@@ -389,7 +389,7 @@
         s.sv(0xC66C, [0x0B, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);   // sprmPTableProps: propiedades de tabla del párrafo (ancho automático)
       }
       runs(b.hijos, null, 0);
-      finParrafo(tabla && tabla.finCelda && tabla.itap === 1 ? 7 : 13, istd, s);
+      finParrafo(marcaFinal || (tabla && tabla.finCelda && tabla.itap === 1 ? 7 : 13), istd, s);
     }
 
     // ───────── Tablas ─────────
@@ -481,11 +481,12 @@
     secciones.forEach((s, i) => {
       const hijos = s.hijos && s.hijos.length ? s.hijos : [{ tipo: 'parrafo', hijos: [] }];
       const ultimo = hijos[hijos.length - 1];
-      const marcaPropia = i < secciones.length - 1 && ultimo && ultimo.tipo !== 'tabla' && !(ultimo.hijos || []).some((r) => r.texto || r.imagen || r.salto || r.campo || r.enlace);
-      // el párrafo vacío que cierra una sección (como en un .docx) es la marca de sección: no se escribe dos veces
-      const terminaEnTabla = bloques(marcaPropia ? hijos.slice(0, -1) : hijos);
+      // la marca de sección (0x0C) cierra el último párrafo de la sección, como en Word; si la sección termina en tabla, va en un párrafo propio
+      const cierraParrafo = i < secciones.length - 1 && ultimo && ultimo.tipo !== 'tabla';
+      const terminaEnTabla = bloques(cierraParrafo ? hijos.slice(0, -1) : hijos);
       if (terminaEnTabla) parrafo({ tipo: 'parrafo', hijos: [] }, null);
-      if (i < secciones.length - 1) finParrafo(12, 0, null);
+      if (cierraParrafo) parrafo(ultimo, null, 12);
+      else if (i < secciones.length - 1) finParrafo(12, 0, null);
       cpsSeccion.push(D.n);
     });
     const ccpText = D.n;

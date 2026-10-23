@@ -258,14 +258,16 @@
       }
       return x;
     }
-    function bloques(lista) {
+    // sinFinal: el último párrafo no lleva par porque lo termina el sect de la sección (así Word no suma un párrafo vacío)
+    function bloques(lista, sinFinal) {
       let x = '';
       let ultimoEsTabla = false;
-      for (const b of lista || []) {
+      const n = (lista || []).length;
+      (lista || []).forEach((b, k) => {
         if (b.tipo === 'tabla') { x += tabla(b, 1); ultimoEsTabla = true; }
-        else { x += parrafo(b, null) + '\\par\n'; ultimoEsTabla = false; }
-      }
-      if (ultimoEsTabla) x += '\\pard\\plain\\par\n';
+        else { x += parrafo(b, null) + (sinFinal && k === n - 1 ? '\n' : '\\par\n'); ultimoEsTabla = false; }
+      });
+      if (ultimoEsTabla) x += '\\pard\\par\n';
       return x;
     }
 
@@ -282,11 +284,8 @@
       cuerpo += '\n';
       if (s.encabezado && s.encabezado.length) cuerpo += `{\\header ${bloques(s.encabezado)}}\n`;
       if (s.pie && s.pie.length) cuerpo += `{\\footer ${bloques(s.pie)}}\n`;
-      let hijos = s.hijos && s.hijos.length ? s.hijos : [{ tipo: 'parrafo', hijos: [] }];
-      const ultimo = hijos[hijos.length - 1];
-      // el párrafo vacío que cierra una sección (como en un .docx) es la marca de sección: el \sect ya la escribe
-      if (i < secciones.length - 1 && hijos.length > 1 && ultimo.tipo !== 'tabla' && !(ultimo.hijos || []).some((r) => r.texto || r.imagen || r.salto || r.campo || r.enlace)) hijos = hijos.slice(0, -1);
-      cuerpo += bloques(hijos);
+      const hijos = s.hijos && s.hijos.length ? s.hijos : [{ tipo: 'parrafo', hijos: [] }];
+      cuerpo += bloques(hijos, i < secciones.length - 1);
     });
 
     // ───────── Cabecera: fuentes, colores, estilos, listas ─────────
