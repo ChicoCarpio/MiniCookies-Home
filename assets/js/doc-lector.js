@@ -21,6 +21,8 @@
   const MAX_MARCADORES = 100000;
   const MAX_PARRAFOS = 2000000;           // párrafos y celdas de todo el documento (la tabla de piezas puede repetir un mismo trozo de texto)
   const MAX_IMAGENES_BYTES = 200 * 1024 * 1024;
+  const MAX_IMAGENES = 5000;              // referencias a imágenes (cada una es un elemento del .docx aunque apunte a los mismos datos)
+  const MAX_SECCIONES = 4096;
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const acotar = (x, min, max) => Math.min(Math.max(x, min), max);
 
@@ -530,6 +532,10 @@
       this.campos = [];                // pila de campos abiertos (pueden cruzar párrafos)
       this.camposDeMas = 0;
       this.parrafosLeidos = 0;
+      this.caracteresLeidos = 0;       // texto recorrido en total (cuerpo, encabezados y pies, contando cada pasada)
+      this.imagenesUsadas = 0;
+      this._imagenes = new Map();      // posición en Data → imagen ya leída (las referencias repetidas comparten los datos)
+      this._pap = new WeakMap();       // grpprl → leerPap(g, null); varios párrafos comparten el mismo
       this._deEstilo = new Map();      // istd → lo que el estilo de párrafo aporta (lista, nivel, tabla)
     }
 
@@ -597,6 +603,8 @@
       const lista = [];
       let ini = cp0;
       const fin = Math.min(cp1, T.length);
+      // tope sobre lo que se recorre en total: secciones superpuestas o encabezados repetidos no pueden volver a leer el texto sin límite
+      if ((this.caracteresLeidos += Math.max(0, fin - cp0)) > MAX_TEXTO) throw new Danado('El documento es demasiado grande para abrirlo aquí.');
       for (let cp = cp0; cp < fin; cp++) {
         const c = T.charCodeAt(cp);
         let termina = false;
@@ -604,7 +612,7 @@
         else if (c === 7 || c === 12) {
           const fc = d.fcDe(cp);
           const pap = fc >= 0 ? d.buscar(d.pap, fc) : null;
-          if (c === 7) { const g = pap && pap.g ? leerPap(pap.g, null).extra : {}; termina = !!(g.enTabla || g.ttp || (pap && this.estiloEnTabla(pap.istd))); }
+          if (c === 7) { const g = pap && pap.g ? this.papDe(pap.g).extra : {}; termina = !!(g.enTabla || g.ttp || (pap && this.estiloEnTabla(pap.istd))); }
           else termina = finSecciones && finSecciones.has(cp);
         }
         if (!termina) continue;
@@ -614,8 +622,16 @@
         if (++this.parrafosLeidos > MAX_PARRAFOS) throw new Danado('El documento tiene demasiados párrafos y no se puede leer.');
         ini = cp + 1;
       }
-      if (ini < fin) lista.push({ cp0: ini, cp1: fin, marca: 13, pap: null });
+      if (ini < fin) {
+        lista.push({ cp0: ini, cp1: fin, marca: 13, pap: null });
+        if (++this.parrafosLeidos > MAX_PARRAFOS) throw new Danado('El documento tiene demasiados párrafos y no se puede leer.');
+      }
       return lista;
+    }
+    papDe(g) {
+      let r = this._pap.get(g);
+      if (!r) { r = leerPap(g, null); this._pap.set(g, r); }
+      return r;
     }
     estiloEnTabla(istd) {
       this._enTabla = this._enTabla || new Map();
@@ -627,7 +643,7 @@
     propiedadesParrafo(rec) {
       const d = this.d;
       const istd = rec.pap ? rec.pap.istd : 0;
-      const dir = rec.pap && rec.pap.g ? leerPap(rec.pap.g, null) : { p: {}, extra: { tap: {} } };
+      const dir = rec.pap && rec.pap.g ? this.papDe(rec.pap.g) : { p: {}, extra: { tap: {} } };
       let deEstilo = this._deEstilo.get(istd);
       if (!deEstilo) {
         deEstilo = { p: {}, extra: {} };
@@ -800,7 +816,18 @@
     }
 
     // ───────── Imágenes en línea ─────────
+    // Una imagen se lee una vez por posición en Data: las referencias repetidas comparten el mismo arreglo (el escritor lo guarda una sola vez)
     imagen(desp) {
+      let im = this._imagenes.get(desp);
+      if (im === undefined) {
+        im = this.leerImagen(desp);
+        if (im) this._imagenes.set(desp, im);
+      }
+      if (!im) return null;
+      if (++this.imagenesUsadas > MAX_IMAGENES) throw new Danado('El documento tiene demasiadas imágenes y no se puede leer.');
+      return Object.assign({}, im);
+    }
+    leerImagen(desp) {
       const dt = this.d.datos;
       if (desp + 68 > dt.length) { this.d.aviso('imagen-falta'); return null; }
       const lcb = u32(dt, desp), cbHeader = u16(dt, desp + 4);
@@ -1038,7 +1065,7 @@
       const t = d.enTabla(fc, lcb);
       const n = Math.floor((t.length - 4) / 16);
       const cps = [], sepx = [];
-      for (let i = 0; i < n && i < 4096; i++) { cps.push(u32(t, 4 * i)); sepx.push(i32(t, 4 * (n + 1) + 12 * i + 2)); }
+      for (let i = 0; i < n && i < MAX_SECCIONES; i++) { cps.push(u32(t, 4 * i)); sepx.push(i32(t, 4 * (n + 1) + 12 * i + 2)); }
       cps.push(n > 0 ? u32(t, 4 * n) : 0);
       const fines = new Set();
       for (let i = 1; i < cps.length; i++) if (cps[i] - 1 >= 0) fines.add(cps[i] - 1);
@@ -1055,9 +1082,19 @@
         if (b <= a + 1) return null;
         return [baseHdd + a, baseHdd + b];
       };
+      // Cada sección ocupa [cps[i], cps[i+1]) del texto: los límites tienen que ir creciendo y caer dentro del texto; la que retrocede o se solapa (archivo dañado u hostil) se descarta
+      let tramos = [];
+      let cubierto = 0;
+      for (let i = 0; i < cps.length - 1; i++) {
+        const cp0 = Math.min(cps[i], fin), cp1 = Math.min(i === cps.length - 2 ? fin : cps[i + 1], fin);
+        if (cp0 < cubierto || cp1 < cp0) continue;
+        tramos.push({ i, cp0, cp1 });
+        cubierto = cp1;
+      }
+      if (!tramos.length) tramos = [{ i: 0, cp0: 0, cp1: fin }];
       const secs = [];
       let ultimoEnc = null, ultimoPie = null;
-      for (let i = 0; i < cps.length - 1; i++) {
+      for (const { i, cp0, cp1 } of tramos) {
         const sep = { ancho: 12240, alto: 15840, izq: 1800, der: 1800, arriba: 1440, abajo: 1440, enc: 720, pie: 720, tipo: 2, horizontal: false, cols: 1, colEsp: 720 };
         if (sepx[i] >= 0 && sepx[i] + 2 <= d.wd.length) {
           const cb = u16(d.wd, sepx[i]);
@@ -1087,8 +1124,7 @@
           hijos: [],
         };
         if (sep.cols > 1) sec.columnas = { n: Math.min(sep.cols, 45), espacio: sep.colEsp };
-        const cp0 = cps[i], cp1 = i === cps.length - 2 ? fin : cps[i + 1];
-        sec.hijos = this.bloquesDe(cp0, Math.min(cp1, fin), fines);
+        sec.hijos = this.bloquesDe(cp0, cp1, fines);
         const base = 6 + 6 * i;
         const he = historia(base + 1), hp = historia(base + 3);
         // los campos abiertos del texto principal no siguen en el encabezado ni en el pie (ni al revés)

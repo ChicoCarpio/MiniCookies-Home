@@ -21,6 +21,7 @@
   const MAX_BLOQUES = 2000000;
   const MAX_FILAS_TABLA = 100000;
   const MAX_LISTAS = 20000;
+  const MAX_IMAGENES = 5000;                 // referencias a imágenes (cada una es un elemento del .docx aunque apunte al mismo archivo)
   const MAX_CARACTERES = 64 * 1024 * 1024;   // texto de todo el documento (<text:s text:c> y las filas y celdas repetidas lo multiplican)
   const sinProto = (o) => Object.assign(Object.create(null), o);
 
@@ -103,7 +104,14 @@
           for (const prop of hijos(e)) this.propiedades(est, prop);
           this.predeterminado[e.a.family || 'paragraph'] = est;
         } else if (e.n === 'list-style' && e.a.name) {
-          this.listas.set(e.a.name, hijos(e).filter((x) => /^list-level-style-/.test(x.n)).map((nivel) => ({ tipo: nivel.n.slice('list-level-style-'.length), a: nivel.a, props: hijo(nivel, 'list-level-properties'), texto: hijo(nivel, 'text-properties') })));
+          // por nivel (1 a 9; se queda el primero de cada uno): así nivelesDeLista no recorre los hijos una vez por nivel y por lista
+          const niveles = [];
+          for (const x of hijos(e)) {
+            if (!/^list-level-style-/.test(x.n)) continue;
+            const n = parseInt(x.a.level, 10);
+            if (n >= 1 && n <= 9 && !niveles[n - 1]) niveles[n - 1] = { tipo: x.n.slice('list-level-style-'.length), a: x.a, props: hijo(x, 'list-level-properties'), texto: hijo(x, 'text-properties') };
+          }
+          this.listas.set(e.a.name, niveles);
         }
       }
     }
@@ -208,6 +216,7 @@
       this.contrato = { propiedades: {}, predeterminado: {}, estilos: [], listas: [], secciones: [] };
       this.estilosUsados = new Set();
       this.bytesImagenes = 0;
+      this.imagenes = 0;
       this.bloquesLeidos = 0;
       this.caracteres = 0;
       this.marcas = 0;
@@ -377,6 +386,7 @@
       ruta = ruta.replace(/^\.\//, '');
       const entrada = this.zip.file(ruta);
       if (!entrada) { this.aviso('imagen-falta'); return null; }
+      if (++this.imagenes > MAX_IMAGENES) throw new Error('El documento tiene demasiadas imágenes y no se puede leer.');
       return { ruta, ancho: puntos(frame.a.width) || 72, alto: puntos(frame.a.height) || 72, texto: (hijo(frame, 'desc') && hijo(frame, 'desc').h.filter((x) => typeof x === 'string').join('')) || undefined, entrada };
     }
 
@@ -459,10 +469,10 @@
     }
 
     nivelesDeLista(nombre) {
-      const def = this.est.listas.get(nombre) || [];
+      const def = this.est.listas.get(nombre) || [];   // por nivel: def[0] es el nivel 1
       const niveles = [];
       for (let n = 0; n < 9; n++) {
-        const d = def.find((x) => parseInt(x.a.level, 10) === n + 1);
+        const d = def[n];
         if (!d) { niveles.push({ formato: 'decimal', texto: '%' + (n + 1) + '.', izquierda: 720 * (n + 1), colgante: 360 }); continue; }
         const al = d.props ? hijo(d.props, 'list-level-label-alignment') : null;
         let izq, col;
@@ -508,8 +518,11 @@
       const pendiente = [];   // por columna: { resto, span, ancho }
       let totalFilas = 0;
       const procesarFila = (fila, encabezado) => {
-        if (++totalFilas > MAX_FILAS_TABLA) throw new Error('La tabla tiene demasiadas filas y no se puede leer.');
         const rep = acotar(parseInt(fila.a['number-rows-repeated'], 10) || 1, 1, 1000);
+        // cuentan las filas ya repetidas: una fila vacía con number-rows-repeated="1000" son 1000 filas del contrato
+        totalFilas += rep;
+        if (totalFilas > MAX_FILAS_TABLA) throw new Error('La tabla tiene demasiadas filas y no se puede leer.');
+        if ((this.bloquesLeidos += rep) > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos y no se puede leer.');
         const estFila = this.est.buscar('table-row', fila.a['style-name'] || '');
         for (let r = 0; r < rep; r++) {
           const celdas = [];
@@ -660,6 +673,9 @@
     }
   }
 
+  // Tamaño que declara el zip para una entrada ya descomprimida (ZipPropio lo verifica al inflar: si el real es mayor, falla); 0 si no se sabe
+  const tamanoDe = (entrada) => (entrada && entrada._origen && entrada._origen.real) || 0;
+
   async function abrir(bytes) {
     const datos = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     let zip;
@@ -689,6 +705,7 @@
     const texto = async (ruta) => {
       const f = zip.file(ruta);
       if (!f) return null;
+      if (tamanoDe(f) > MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');   // antes de descomprimir
       const t = await f.async('string');
       if (t.length > MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');
       return t;
@@ -720,12 +737,19 @@
       }
     };
     for (const s of contrato.secciones) { recorrer(s.hijos); if (s.encabezado) recorrer(s.encabezado); if (s.pie) recorrer(s.pie); }
+    // Una imagen que se repite se descomprime una vez y todas sus referencias comparten el mismo arreglo (el escritor también la guarda una sola vez)
+    const leidas = new Map();   // ruta en el zip → datos
     for (const r of pendientes) {
       const e = r.imagen.entrada;
       delete r.imagen.entrada;
-      const datos = await e.async('uint8array');
-      conv.bytesImagenes += datos.length;
-      if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');
+      let datos = leidas.get(r.imagen.ruta);
+      if (!datos) {
+        if (conv.bytesImagenes + tamanoDe(e) > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');   // antes de descomprimir
+        datos = await e.async('uint8array');
+        conv.bytesImagenes += datos.length;
+        if (conv.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');
+        leidas.set(r.imagen.ruta, datos);
+      }
       r.imagen.datos = datos;
     }
     const meta = await texto('meta.xml');

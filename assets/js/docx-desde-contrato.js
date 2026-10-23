@@ -136,6 +136,7 @@
     const mensajes = [];
     const aviso = (m) => { if (!mensajes.includes(m)) mensajes.push(m); };
     const medios = [];            // { nombre, bytes, tipo }
+    const mediosPorDatos = new Map();   // Uint8Array → medio: la misma imagen repetida (mismo arreglo) se guarda una sola vez
     const listas = new Map();     // id de contrato → { abstractId, numId }
     const numeraciones = [];      // en el orden de numId
     let idMarcador = 0, idDibujo = 0;
@@ -159,16 +160,22 @@
     const numIdDe = (id) => (listas.has(id) ? listas.get(id).numId : 0);
 
     // Se usa un solo conjunto de partes de relación por parte del paquete: document.xml, y uno por encabezado/pie
-    function nuevoContexto() { return { rels: [], contador: 0 }; }
+    function nuevoContexto() { return { rels: [], contador: 0, imagenes: new Map() }; }
     function relacion(ctx, tipo, destino, externo) { const id = `rIdX${++ctx.contador}`; ctx.rels.push({ id, tipo, destino, externo }); return id; }
 
     function dibujo(img, ctx) {
       const bytes = img.datos instanceof Uint8Array ? img.datos : new Uint8Array(img.datos || 0);
       const tipo = tipoDeImagen(bytes, img.tipo);
       if (!tipo) { aviso('imagen-formato'); return ''; }
-      const n = medios.length + 1;
-      medios.push({ nombre: `image${n}.${tipo === 'jpeg' ? 'jpg' : tipo}`, bytes, tipo });
-      const rid = relacion(ctx, 'image', `media/${medios[n - 1].nombre}`);
+      let medio = mediosPorDatos.get(bytes);
+      if (!medio) {
+        medio = { nombre: `image${medios.length + 1}.${tipo === 'jpeg' ? 'jpg' : tipo}`, bytes, tipo };
+        medios.push(medio);
+        mediosPorDatos.set(bytes, medio);
+      }
+      // una sola relación por imagen en cada parte (document.xml, cada encabezado y pie)
+      let rid = ctx.imagenes.get(bytes);
+      if (!rid) { rid = relacion(ctx, 'image', `media/${medio.nombre}`); ctx.imagenes.set(bytes, rid); }
       const cx = entero(Math.min(Math.max(Number(img.ancho) || 0, 1), MAX_PT) * EMU_POR_PT), cy = entero(Math.min(Math.max(Number(img.alto) || 0, 1), MAX_PT) * EMU_POR_PT);
       const id = ++idDibujo;
       const alt = img.texto ? ` descr="${escAttr(img.texto)}"` : '';
