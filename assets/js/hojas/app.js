@@ -6,8 +6,8 @@
   // ---- textos ----------------------------------------------------------------------------------------------------
   const ES = {
     'titulo-pagina': 'Editar Excel y .ods en el navegador — Mini Cookies', 'meta-descripcion': 'Edita libros de Excel (.xlsx) y hojas de LibreOffice (.ods) en el navegador: fórmulas, formato, gráficos y deshacer, sin instalar nada y sin subir tu archivo. Gratis y sin registro.',
-    'h1': 'Mini Cookies Hojas', 'intro': 'Abre un libro de Excel y edítalo como en una hoja de cálculo: valores, fórmulas, formato, deshacer. Al guardar, lo que no tocaste queda exactamente como estaba.',
-    'zona-arrastre': '📊 Arrastra tu archivo aquí o haz clic para elegirlo (.xlsx, .xlsm, .csv, .ods, .xls)', 'boton-nuevo': 'Libro en blanco', 'cargando': 'Abriendo el libro…',
+    'h1': 'Editar Excel (Hojas)', 'intro': 'Abre un libro de Excel y edítalo como en una hoja de cálculo: valores, fórmulas, formato, deshacer. Al guardar, lo que no tocaste queda exactamente como estaba.',
+    'zona-arrastre': '📊 Arrastra tu archivo aquí o haz clic para elegirlo (.xlsx, .xlsm, .ods, .csv, .tsv, .txt, .xls, .xlsb)', 'boton-nuevo': 'Libro en blanco', 'cargando': 'Abriendo el libro…',
     'borradores': 'Trabajo sin terminar en este navegador', 'recuperar': 'Recuperar', 'descartar': 'Descartar', 'nombre-app': 'Hojas', 'volver-inicio': 'Volver al inicio',
     'nombre-archivo': 'Nombre del archivo', 'mas-opciones': 'Más opciones', 'cinta': 'Cinta', 'cuadro-nombre': 'Cuadro de nombre', 'contenido-celda': 'Contenido de la celda', 'inspector': 'Propiedades',
     'tab-inicio': 'Inicio', 'tab-insertar': 'Insertar', 'tab-datos': 'Datos', 'tab-vista': 'Vista',
@@ -24,7 +24,7 @@
     'aviso-no-soportadas': '{0} fórmulas usan funciones que aún no se calculan aquí: conservan su valor y Excel las recalcula al abrir', 'aviso-circular': 'Hay una referencia circular: la fórmula da 0',
     'aviso-pegado-grande': 'Lo pegado es demasiado grande (más de {0} celdas)', 'aviso-copiado': 'Copiado', 'aviso-portapapeles': 'El navegador no deja leer el portapapeles: usa Ctrl+V',
     'honesta-conserva': 'Se conserva al guardar, sin editar aquí: {0}.', 'honesta-convertido': 'Este archivo venía en otro formato: se guarda como .xlsx.', 'honesta-todo': 'Todo el contenido del archivo se puede editar aquí.',
-    'x-graficos': 'gráficos o dibujos', 'x-macros': 'macros', 'x-notas': 'notas', 'x-tablas': 'encabezados de tablas', 'x-dinamicas': 'tablas dinámicas', 'x-condicional': 'reglas de formato de Excel 2010', 'x-validacion': 'validación de datos', 'x-minigraficos': 'minigráficos', 'x-imagenes': 'imágenes en celdas', 'x-matriciales': 'fórmulas matriciales de Ctrl+Mayús+Intro',
+    'x-graficos': 'imágenes, formas o gráficos que no se editan', 'x-macros': 'macros', 'x-notas': 'notas', 'x-tablas': 'encabezados de tablas', 'x-dinamicas': 'tablas dinámicas', 'x-condicional': 'reglas de formato de Excel 2010', 'x-validacion': 'validación de datos', 'x-minigraficos': 'minigráficos', 'x-imagenes': 'imágenes en celdas', 'x-matriciales': 'fórmulas matriciales de Ctrl+Mayús+Intro',
     'i-celda': 'Celda', 'i-tipo': 'Tipo', 'i-valor': 'Valor', 'i-formula': 'Fórmula', 'i-formato': 'Formato', 'i-fuente': 'Fuente', 'i-archivo': 'El archivo', 'i-hojas': 'Hojas', 'i-formulas': 'Fórmulas',
     't-numero': 'Número', 't-texto': 'Texto', 't-logico': 'Lógico', 't-error': 'Error', 't-vacio': 'Vacía', 'error-abrir': 'No se pudo abrir el archivo', 'salir-sin-descargar': 'Hay cambios sin descargar.',
     'funcion-pregunta': 'Escribe el nombre de la función (por ejemplo SUMA, PROMEDIO, BUSCARV):',
@@ -39,8 +39,8 @@
   };
   const EN = {
     'titulo-pagina': 'Edit Excel and .ods files in your browser — Mini Cookies', 'meta-descripcion': 'Edit Excel workbooks (.xlsx) and LibreOffice spreadsheets (.ods) in your browser: formulas, formatting, charts and undo, without installing anything or uploading your file. Free, no sign-up.',
-    'h1': 'Mini Cookies Sheets', 'intro': 'Open an Excel workbook and edit it like a spreadsheet: values, formulas, formatting, undo. When you save, everything you didn’t touch stays exactly as it was.',
-    'zona-arrastre': '📊 Drop your file here or click to choose it (.xlsx, .xlsm, .csv, .ods, .xls)', 'boton-nuevo': 'Blank workbook', 'cargando': 'Opening the workbook…',
+    'h1': 'Edit Excel (Sheets)', 'intro': 'Open an Excel workbook and edit it like a spreadsheet: values, formulas, formatting, undo. When you save, everything you didn’t touch stays exactly as it was.',
+    'zona-arrastre': '📊 Drop your file here or click to choose it (.xlsx, .xlsm, .ods, .csv, .tsv, .txt, .xls, .xlsb)', 'boton-nuevo': 'Blank workbook', 'cargando': 'Opening the workbook…',
     'borradores': 'Unfinished work in this browser', 'recuperar': 'Recover', 'descartar': 'Discard', 'nombre-app': 'Sheets', 'volver-inicio': 'Back to start',
     'nombre-archivo': 'File name', 'mas-opciones': 'More options', 'cinta': 'Ribbon', 'cuadro-nombre': 'Name box', 'contenido-celda': 'Cell contents', 'inspector': 'Properties',
     'tab-inicio': 'Home', 'tab-insertar': 'Insert', 'tab-datos': 'Data', 'tab-vista': 'View',
@@ -57,7 +57,7 @@
     'aviso-no-soportadas': '{0} formulas use functions not calculated here yet: they keep their value and Excel recalculates them on open', 'aviso-circular': 'There is a circular reference: the formula returns 0',
     'aviso-pegado-grande': 'What you pasted is too large (more than {0} cells)', 'aviso-copiado': 'Copied', 'aviso-portapapeles': 'The browser won’t let us read the clipboard: use Ctrl+V',
     'honesta-conserva': 'Kept as is when saving, not editable here: {0}.', 'honesta-convertido': 'This file came in another format: it is saved as .xlsx.', 'honesta-todo': 'Everything in this file can be edited here.',
-    'x-graficos': 'charts or drawings', 'x-macros': 'macros', 'x-notas': 'notes', 'x-tablas': 'table headers', 'x-dinamicas': 'pivot tables', 'x-condicional': 'Excel 2010 formatting rules', 'x-validacion': 'data validation', 'x-minigraficos': 'sparklines', 'x-imagenes': 'images in cells', 'x-matriciales': 'Ctrl+Shift+Enter array formulas',
+    'x-graficos': 'images, shapes or charts that can’t be edited', 'x-macros': 'macros', 'x-notas': 'notes', 'x-tablas': 'table headers', 'x-dinamicas': 'pivot tables', 'x-condicional': 'Excel 2010 formatting rules', 'x-validacion': 'data validation', 'x-minigraficos': 'sparklines', 'x-imagenes': 'images in cells', 'x-matriciales': 'Ctrl+Shift+Enter array formulas',
     'i-celda': 'Cell', 'i-tipo': 'Type', 'i-valor': 'Value', 'i-formula': 'Formula', 'i-formato': 'Format', 'i-fuente': 'Font', 'i-archivo': 'The file', 'i-hojas': 'Sheets', 'i-formulas': 'Formulas',
     't-numero': 'Number', 't-texto': 'Text', 't-logico': 'Logical', 't-error': 'Error', 't-vacio': 'Empty', 'error-abrir': 'The file could not be opened', 'salir-sin-descargar': 'There are changes not downloaded.',
     'funcion-pregunta': 'Type the function name (for example SUM, AVERAGE, VLOOKUP):',
@@ -85,7 +85,7 @@
   // esqueleto del editor (arquetipo G, núcleo): lo propio de Hojas es la barra de fórmulas y la rejilla en el lienzo
   const crearEl = Oficina.crearEl;
   const interfaz = Oficina.montar($('app'), {
-    nombre: 'nombre-app', inicio: './',
+    nombre: 'nombre-app', inicio: '../',
     extra: crearEl('div', { class: 'hc-formula' }, [
       crearEl('input', { class: 'hc-nombre', id: 'cajaNombre', 'aria-label': tx('cuadro-nombre'), 'data-i18n-attr': 'aria-label:cuadro-nombre', spellcheck: 'false', autocomplete: 'off' }),
       crearEl('span', { class: 'hc-fx', 'aria-hidden': 'true' }, ['fx']),
@@ -203,9 +203,10 @@
   // ---- la línea honesta: lo que el archivo tiene y aquí no se edita ---------------------------------------------------
   function lineaHonesta() {
     const cosas = new Set();
+    let anclasXlsx = 0;   // objetos de dibujo de un .xlsx: si hay más que gráficos (partes xl/charts), el resto son imágenes o formas que no se editan
     for (const hoja of ed.hojas) {
       if (!hoja || hoja.sinCeldas) continue;
-      if (ed.formato !== 'ods' && hoja.anclas && hoja.anclas.length) cosas.add('x-graficos');
+      if (ed.formato !== 'ods' && hoja.anclas) anclasXlsx += hoja.anclas.length;
       if (hoja.comentarios && hoja.comentarios.length) cosas.add('x-notas');
       if (hoja.tablas && hoja.tablas.length) cosas.add('x-tablas');
       // formato condicional y validación se editan (fase 3.2); las reglas de Excel 2010 que no, las marca el administrador de reglas
@@ -215,6 +216,7 @@
       for (const fx of hoja.celdas.formulas.values()) if (fx.tipo === 'array' && !fx.dinamica) { cosas.add('x-matriciales'); break; }
     }
     if (cosasOds) for (const k of cosasOds) cosas.add(k);
+    if (anclasXlsx && anclasXlsx > ed.paquete.rutas().filter((r) => /^xl\/charts\/chart\d+\.xml$/.test(r)).length) cosas.add('x-graficos');
     if (ed.libro.tieneMacros) cosas.add('x-macros');
     if (ed.paquete.rutas().some((r) => /pivotTable/i.test(r))) cosas.add('x-dinamicas');
     const partes = [];

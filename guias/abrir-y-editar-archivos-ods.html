@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo abrir y editar un .ods de LibreOffice Calc sin instalar LibreOffice — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Abrí un .ods y editalo sin convertirlo: qué se guarda igual, qué gráficos se dibujan y qué partes del archivo no se pueden cambiar aquí.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo abrir y editar un .ods de LibreOffice Calc sin instalar LibreOffice — Mini Cookies',
+    'meta-descripcion': 'Abrí un .ods y editalo sin convertirlo: qué se guarda igual, qué gráficos se dibujan y qué partes del archivo no se pueden cambiar aquí.',
+    'h1': 'Cómo abrir y editar un .ods de LibreOffice Calc sin instalar LibreOffice',
+    'b1': 'Te mandaron una planilla .ods, de LibreOffice Calc, y en la computadora no hay LibreOffice ni Excel. <a href="../herramientas/hojas.html">Editar Excel (Hojas)</a> abre el archivo tal como viene, sin convertirlo, y al descargarlo sale como .ods. Eso tiene un límite: algunas partes se editan y otras solo se conservan. Conviene saber cuáles antes de tocar nada.',
+    'b2': 'Lo que se guarda igual',
+    'b3': 'El .ods no pasa a .xlsx al abrirlo. Al guardar, el editor reescribe solo lo que cambiaste: el contenido de las hojas, para celdas, filas, columnas, validación, filtros y nombres; el estilo de página, si configurás la página; la configuración de hojas, si inmovilizás paneles o renombrás hojas; y la carpeta de un gráfico, si cambiás sus series. Los estilos que ya tenía el archivo se conservan, y los nuevos se agregan al final. Las imágenes, la miniatura y los metadatos se copian sin cambios.',
+    'b4': 'Editar celdas, fórmulas y estructura',
+    'b5': 'Escribís valores y fórmulas como en cualquier planilla. La barra de fórmulas muestra cada fórmula en la forma de Excel. Al guardar, las fórmulas que cambiaste se escriben de nuevo en el formato de LibreOffice. Las que no se pueden traducir conservan su último valor, y la línea de estado lo indica con «fórmulas que aquí solo se ven como valor».',
+    'b6': 'Insertar y quitar filas, columnas y hojas, renombrar y mover hojas, combinar celdas, inmovilizar paneles y cambiar anchos o altos están disponibles. Hay una excepción: si el archivo tiene objetos OLE incrustados o dibujos anclados a una celda, insertar o quitar filas y columnas, y renombrar o quitar hojas, se rechaza con un aviso que dice por qué. El archivo queda igual.',
+    'b7': 'Si al guardar alguna fórmula no se puede escribir, el aviso dice cuántas quedaron solo como valor: «fórmulas no se pudieron escribir en .ods: quedó solo su valor».',
+    'b8': 'Gráficos, formato y validación',
+    'b9': 'Se dibujan columnas (agrupadas, apiladas y al 100 %), barras, líneas, áreas, circular, anillo, dispersión y la combinación de columnas con líneas. Los demás tipos, como cotizaciones, burbujas, radar o 3D, se conservan en el archivo sin dibujarse ni editarse. Podés insertar gráficos de columnas, barras, líneas y circular.',
+    'b10': 'Al editar un gráfico, la vista previa que LibreOffice guarda dentro del archivo queda vieja hasta que lo abras y guardes en LibreOffice.',
+    'b11': 'La validación, el formato condicional, los nombres, los filtros automáticos y la configuración de página se editan con los mismos diálogos que en .xlsx. «Dar formato como tabla» no existe en .ods y aparece apagado. Un filtro con condiciones que Excel no tiene, como expresiones regulares o colores, se conserva, pero no se edita. Si el archivo usa «ajustar a N páginas en total», el editor lo muestra como escala del 100 %: para imprimir con ese ajuste, revisalo en LibreOffice.',
+    'b12': 'Lo que el editor no puede cambiar',
+    'b13': 'La línea de estado indica lo que el archivo trae y no se edita aquí. La tabla resume qué pasa con cada caso:',
+    'b14-c1': 'Qué trae el archivo',
+    'b14-c2': 'Qué pasa al abrir y guardar',
+    'b14-f1c1': 'Notas (anotaciones)',
+    'b14-f1c2': 'Se conservan y no se editan aquí.',
+    'b14-f2c1': 'Macros (Basic o Scripts)',
+    'b14-f2c2': 'Se conservan; no se ejecutan ni se editan.',
+    'b14-f3c1': 'Gráficos de tipo no dibujado (cotizaciones, burbujas, radar, 3D)',
+    'b14-f3c2': 'Se conservan; no se muestran ni se editan.',
+    'b14-f4c1': 'Objetos OLE o dibujos anclados a una celda',
+    'b14-f4c2': 'Se conservan; insertar o quitar filas y columnas, o renombrar o quitar hojas, se rechaza.',
+    'b14-f5c1': 'Formas y dibujos (rectángulos, elipses, líneas)',
+    'b14-f5c2': 'Se conservan; no se editan aquí.',
+    'b14-f6c1': 'Fórmulas que no se traducen a la forma de Excel',
+    'b14-f6c2': 'Se ve su último valor, y la línea de estado lo indica.',
+    'b14-f7c1': 'Filtros con condiciones que Excel no tiene',
+    'b14-f7c2': 'Se conservan; no se editan.',
+    'b14-f8c1': 'Matriz de varias celdas',
+    'b14-f8c2': 'Se trata como dinámica: se recalcula al cambiar sus datos.',
+    'b15': 'Si necesitás el libro en .xlsx, el editor no lo convierte: abrilo en LibreOffice y guardalo en formato de Excel. Si solo hacen falta los valores, <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a> pasa una hoja por vez a CSV, sin fórmulas, formatos ni gráficos.',
+    'b16': 'Preguntas frecuentes',
+    'b17': '<strong>¿Puedo guardar el archivo como .xlsx?</strong> No desde este editor: el archivo sale como .ods. Para tener un .xlsx, abrilo en LibreOffice y guardalo en formato de Excel.',
+    'b18': '<strong>¿Por qué no me deja insertar una fila?</strong> Porque el archivo tiene un objeto OLE o un dibujo anclado a una celda, y el editor todavía no sabe moverlo. El aviso nombra cuál de los dos es.',
+    'b19': '<strong>¿Y si el archivo tiene contraseña?</strong> No se abre. Quitale la contraseña en LibreOffice y volvé a intentarlo.',
+    'b20': 'Resumen',
+    'b21': 'Un .ods se abre y se edita sin convertirlo, y lo que no tocás queda como estaba. Se dibujan los gráficos más comunes, y se editan la validación, el formato condicional, los filtros y la página. Lo que el editor no puede cambiar se conserva y aparece en la línea de estado. Para sacar solo los valores de una hoja, <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a> la pasa a CSV.',
+    'rel1': 'Editar Excel (Hojas)',
+    'rel2': 'Convertir Excel ↔ CSV',
+    'rel3': 'Excel / CSV a PDF',
+    'rel4': 'Reparar Excel'
+  },
+  en: {
+    'titulo-pagina': 'How to open and edit a LibreOffice Calc .ods file without installing LibreOffice — Mini Cookies',
+    'meta-descripcion': 'Open an .ods and edit it without converting it: what is kept as it was, which charts are drawn, and which parts of the file can’t be changed here.',
+    'h1': 'How to open and edit a LibreOffice Calc .ods file without installing LibreOffice',
+    'b1': 'Someone sent you a .ods spreadsheet from LibreOffice Calc, and there is no LibreOffice or Excel on your computer. <a href="../herramientas/hojas.html">Edit Excel (Sheets)</a> opens the file as it is, without converting it, and when you download it, it comes out as .ods. That has a limit: some parts can be edited and others are only kept. It helps to know which ones before you change anything.',
+    'b2': 'What stays the same',
+    'b3': 'The .ods is not turned into .xlsx when it opens. When you save, the editor rewrites only what you changed: the content of the sheets, for cells, rows, columns, validation, filters and names; the page style, if you set up the page; the sheet settings, if you freeze panes or rename sheets; and a chart’s folder, if you change its series. Styles the file already had are kept, and new ones are added at the end. Images, the thumbnail and the metadata are copied without changes.',
+    'b4': 'Edit cells, formulas and structure',
+    'b5': 'You type values and formulas as in any spreadsheet. The formula bar shows each formula in the Excel form. When you save, the formulas you changed are written again in the LibreOffice format. Formulas that can’t be translated keep their last value, and the status line says so with “formulas shown here only as values”.',
+    'b6': 'Inserting and deleting rows, columns and sheets, renaming and moving sheets, merging cells, freezing panes and changing column widths or row heights are available. There is one exception: if the file has embedded OLE objects or drawings anchored to a cell, inserting or deleting rows and columns, and renaming or deleting sheets, is refused with a message that says why. The file stays as it was.',
+    'b7': 'If a formula can’t be written when you save, the message says how many were kept only as values: “formulas couldn’t be written to .ods: only their value was kept”.',
+    'b8': 'Charts, formatting and validation',
+    'b9': 'Columns (grouped, stacked and 100 %), bars, lines, areas, pie, doughnut, scatter and the combination of columns with lines are drawn. Other types, such as stock charts, bubble, radar or 3D charts, are kept in the file without being drawn or edited. You can insert column, bar, line and pie charts.',
+    'b10': 'When you edit a chart, the preview that LibreOffice stores inside the file stays out of date until you open and save it in LibreOffice.',
+    'b11': 'Data validation, conditional formatting, names, autofilters and page setup are edited with the same dialogs as in .xlsx. “Format as table” doesn’t exist in .ods and appears greyed out. A filter with conditions that Excel doesn’t have, such as regular expressions or colors, is kept but not edited. If the file uses “fit to N pages total”, the editor shows it as a 100 % scale: to print with that setting, check it in LibreOffice.',
+    'b12': 'What the editor can’t change',
+    'b13': 'The status line says what the file contains and can’t be edited here. The table sums up what happens with each case:',
+    'b14-c1': 'What the file contains',
+    'b14-c2': 'What happens when you open and save',
+    'b14-f1c1': 'Notes (annotations)',
+    'b14-f1c2': 'Kept, not edited here.',
+    'b14-f2c1': 'Macros (Basic or Scripts)',
+    'b14-f2c2': 'Kept; not run or edited.',
+    'b14-f3c1': 'Charts of a type that isn’t drawn (stock, bubble, radar, 3D)',
+    'b14-f3c2': 'Kept; not shown or edited.',
+    'b14-f4c1': 'OLE objects or drawings anchored to a cell',
+    'b14-f4c2': 'Kept; inserting or deleting rows and columns, or renaming or deleting sheets, is refused.',
+    'b14-f5c1': 'Shapes and drawings (rectangles, ellipses, lines)',
+    'b14-f5c2': 'Kept; not edited here.',
+    'b14-f6c1': 'Formulas that don’t translate to the Excel form',
+    'b14-f6c2': 'Their last value is shown, and the status line says so.',
+    'b14-f7c1': 'Filters with conditions that Excel doesn’t have',
+    'b14-f7c2': 'Kept; not edited.',
+    'b14-f8c1': 'Multi-cell array',
+    'b14-f8c2': 'Treated as dynamic: it recalculates when its data changes.',
+    'b15': 'If you need the workbook as .xlsx, the editor doesn’t convert it: open it in LibreOffice and save it in Excel format. If you only need the values, <a href="../herramientas/convertir-excel-csv.html">Convert Excel ↔ CSV</a> converts one sheet at a time to CSV, without formulas, formatting or charts.',
+    'b16': 'Frequently asked questions',
+    'b17': '<strong>Can I save the file as .xlsx?</strong> Not from this editor: the file comes out as .ods. To get an .xlsx, open it in LibreOffice and save it in Excel format.',
+    'b18': '<strong>Why won’t it let me insert a row?</strong> Because the file has an OLE object or a drawing anchored to a cell, and the editor doesn’t know how to move it yet. The message names which one it is.',
+    'b19': '<strong>What if the file has a password?</strong> It won’t open. Remove the password in LibreOffice and try again.',
+    'b20': 'Summary',
+    'b21': 'A .ods opens and edits without being converted, and what you don’t change stays as it was. The most common charts are drawn, and validation, conditional formatting, filters and page setup can be edited. What the editor can’t change is kept and shown in the status line. To take only the values of a sheet out, <a href="../herramientas/convertir-excel-csv.html">Convert Excel ↔ CSV</a> turns it into CSV.',
+    'rel1': 'Edit Excel (Sheets)',
+    'rel2': 'Convert Excel ↔ CSV',
+    'rel3': 'Excel / CSV to PDF',
+    'rel4': 'Repair Excel'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo abrir y editar un .ods de LibreOffice Calc sin instalar LibreOffice</h1>
+    <p data-i18n-html="b1">Te mandaron una planilla .ods, de LibreOffice Calc, y en la computadora no hay LibreOffice ni Excel. <a href="../herramientas/hojas.html">Editar Excel (Hojas)</a> abre el archivo tal como viene, sin convertirlo, y al descargarlo sale como .ods. Eso tiene un límite: algunas partes se editan y otras solo se conservan. Conviene saber cuáles antes de tocar nada.</p>
+    <h2 data-i18n="b2">Lo que se guarda igual</h2>
+    <p data-i18n-html="b3">El .ods no pasa a .xlsx al abrirlo. Al guardar, el editor reescribe solo lo que cambiaste: el contenido de las hojas, para celdas, filas, columnas, validación, filtros y nombres; el estilo de página, si configurás la página; la configuración de hojas, si inmovilizás paneles o renombrás hojas; y la carpeta de un gráfico, si cambiás sus series. Los estilos que ya tenía el archivo se conservan, y los nuevos se agregan al final. Las imágenes, la miniatura y los metadatos se copian sin cambios.</p>
+    <h2 data-i18n="b4">Editar celdas, fórmulas y estructura</h2>
+    <p data-i18n-html="b5">Escribís valores y fórmulas como en cualquier planilla. La barra de fórmulas muestra cada fórmula en la forma de Excel. Al guardar, las fórmulas que cambiaste se escriben de nuevo en el formato de LibreOffice. Las que no se pueden traducir conservan su último valor, y la línea de estado lo indica con «fórmulas que aquí solo se ven como valor».</p>
+    <p data-i18n-html="b6">Insertar y quitar filas, columnas y hojas, renombrar y mover hojas, combinar celdas, inmovilizar paneles y cambiar anchos o altos están disponibles. Hay una excepción: si el archivo tiene objetos OLE incrustados o dibujos anclados a una celda, insertar o quitar filas y columnas, y renombrar o quitar hojas, se rechaza con un aviso que dice por qué. El archivo queda igual.</p>
+    <p data-i18n-html="b7">Si al guardar alguna fórmula no se puede escribir, el aviso dice cuántas quedaron solo como valor: «fórmulas no se pudieron escribir en .ods: quedó solo su valor».</p>
+    <h2 data-i18n="b8">Gráficos, formato y validación</h2>
+    <p data-i18n-html="b9">Se dibujan columnas (agrupadas, apiladas y al 100 %), barras, líneas, áreas, circular, anillo, dispersión y la combinación de columnas con líneas. Los demás tipos, como cotizaciones, burbujas, radar o 3D, se conservan en el archivo sin dibujarse ni editarse. Podés insertar gráficos de columnas, barras, líneas y circular.</p>
+    <p data-i18n-html="b10">Al editar un gráfico, la vista previa que LibreOffice guarda dentro del archivo queda vieja hasta que lo abras y guardes en LibreOffice.</p>
+    <p data-i18n-html="b11">La validación, el formato condicional, los nombres, los filtros automáticos y la configuración de página se editan con los mismos diálogos que en .xlsx. «Dar formato como tabla» no existe en .ods y aparece apagado. Un filtro con condiciones que Excel no tiene, como expresiones regulares o colores, se conserva, pero no se edita. Si el archivo usa «ajustar a N páginas en total», el editor lo muestra como escala del 100 %: para imprimir con ese ajuste, revisalo en LibreOffice.</p>
+    <h2 data-i18n="b12">Lo que el editor no puede cambiar</h2>
+    <p data-i18n-html="b13">La línea de estado indica lo que el archivo trae y no se edita aquí. La tabla resume qué pasa con cada caso:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b14-c1">Qué trae el archivo</th><th data-i18n-html="b14-c2">Qué pasa al abrir y guardar</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b14-f1c1">Notas (anotaciones)</td><td data-i18n-html="b14-f1c2">Se conservan y no se editan aquí.</td></tr>
+        <tr><td data-i18n-html="b14-f2c1">Macros (Basic o Scripts)</td><td data-i18n-html="b14-f2c2">Se conservan; no se ejecutan ni se editan.</td></tr>
+        <tr><td data-i18n-html="b14-f3c1">Gráficos de tipo no dibujado (cotizaciones, burbujas, radar, 3D)</td><td data-i18n-html="b14-f3c2">Se conservan; no se muestran ni se editan.</td></tr>
+        <tr><td data-i18n-html="b14-f4c1">Objetos OLE o dibujos anclados a una celda</td><td data-i18n-html="b14-f4c2">Se conservan; insertar o quitar filas y columnas, o renombrar o quitar hojas, se rechaza.</td></tr>
+        <tr><td data-i18n-html="b14-f5c1">Formas y dibujos (rectángulos, elipses, líneas)</td><td data-i18n-html="b14-f5c2">Se conservan; no se editan aquí.</td></tr>
+        <tr><td data-i18n-html="b14-f6c1">Fórmulas que no se traducen a la forma de Excel</td><td data-i18n-html="b14-f6c2">Se ve su último valor, y la línea de estado lo indica.</td></tr>
+        <tr><td data-i18n-html="b14-f7c1">Filtros con condiciones que Excel no tiene</td><td data-i18n-html="b14-f7c2">Se conservan; no se editan.</td></tr>
+        <tr><td data-i18n-html="b14-f8c1">Matriz de varias celdas</td><td data-i18n-html="b14-f8c2">Se trata como dinámica: se recalcula al cambiar sus datos.</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b15">Si necesitás el libro en .xlsx, el editor no lo convierte: abrilo en LibreOffice y guardalo en formato de Excel. Si solo hacen falta los valores, <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a> pasa una hoja por vez a CSV, sin fórmulas, formatos ni gráficos.</p>
+    <h2 data-i18n="b16">Preguntas frecuentes</h2>
+    <p data-i18n-html="b17"><strong>¿Puedo guardar el archivo como .xlsx?</strong> No desde este editor: el archivo sale como .ods. Para tener un .xlsx, abrilo en LibreOffice y guardalo en formato de Excel.</p>
+    <p data-i18n-html="b18"><strong>¿Por qué no me deja insertar una fila?</strong> Porque el archivo tiene un objeto OLE o un dibujo anclado a una celda, y el editor todavía no sabe moverlo. El aviso nombra cuál de los dos es.</p>
+    <p data-i18n-html="b19"><strong>¿Y si el archivo tiene contraseña?</strong> No se abre. Quitale la contraseña en LibreOffice y volvé a intentarlo.</p>
+    <h2 data-i18n="b20">Resumen</h2>
+    <p data-i18n-html="b21">Un .ods se abre y se edita sin convertirlo, y lo que no tocás queda como estaba. Se dibujan los gráficos más comunes, y se editan la validación, el formato condicional, los filtros y la página. Lo que el editor no puede cambiar se conserva y aparece en la línea de estado. Para sacar solo los valores de una hoja, <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a> la pasa a CSV.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/hojas.html" data-i18n="rel1">Editar Excel (Hojas)</a></li>
+      <li><a href="../herramientas/convertir-excel-csv.html" data-i18n="rel2">Convertir Excel ↔ CSV</a></li>
+      <li><a href="../herramientas/excel-csv-a-pdf.html" data-i18n="rel3">Excel / CSV a PDF</a></li>
+      <li><a href="../herramientas/reparar-excel.html" data-i18n="rel4">Reparar Excel</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Fórmulas en la hoja de cálculo: nombres en español e inglés y matrices dinámicas — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Separadores según el idioma, matrices que se derraman (ORDENAR, FILTRAR), #SPILL!, A1# y los errores #¿NOMBRE? y #¡REF! con su causa.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Fórmulas en la hoja de cálculo: nombres en español e inglés y matrices dinámicas — Mini Cookies',
+    'meta-descripcion': 'Separadores según el idioma, matrices que se derraman (ORDENAR, FILTRAR), #SPILL!, A1# y los errores #¿NOMBRE? y #¡REF! con su causa.',
+    'h1': 'Fórmulas en la hoja de cálculo: nombres en español e inglés y matrices dinámicas',
+    'b1': 'La celda muestra #¿NOMBRE? donde debería haber un número, o el editor no acepta una fórmula y se queja de los separadores. Casi siempre el problema es el idioma de la página o un separador. <a href="../herramientas/hojas.html">Editar Excel (Hojas)</a> tiene más de 400 funciones y acepta sus nombres en español y en inglés. Estas secciones explican cómo escribirlas, qué hacen las matrices que llenan varias celdas y qué significan los errores más comunes.',
+    'b2': 'Separadores y nombres según el idioma',
+    'b3': 'En la página en español, los argumentos van separados por punto y coma, y la coma es el decimal: <code>=SUMA(A1:A9;2,5)</code> suma el rango y 2,5. Si escribís <code>=SUMA(A1,2,5)</code> sin punto y coma, la coma separa argumentos y la barra lo muestra como <code>=SUMA(A1;2;5)</code>: el resultado es la suma de tres números. En la página en inglés, el mismo cálculo es <code>=SUM(A1:A9,2.5)</code>, y un punto y coma no se acepta.',
+    'b4': 'Los nombres de función funcionan en los dos idiomas. <code>=SUMA(A1,B1)</code> también anda en la página en inglés, donde la barra la muestra como <code>SUM(A1,B1)</code>. El archivo guarda los nombres en inglés, como Excel, así que una planilla hecha en español se abre igual en una Excel en inglés. Tres funciones de expresiones regulares, REGEXTEST, REGEXEXTRACT y REGEXREPLACE, no tienen nombre en español: se escriben en inglés en las dos páginas.',
+    'b5': 'Matrices dinámicas: una fórmula que llena celdas',
+    'b6': 'Una fórmula como <code>=ORDENAR(A2:A20)</code> o <code>=FILTRAR(A2:C20;C2:C20&gt;100)</code> puede devolver muchos valores. La escribís en una sola celda, que es el ancla, y el resultado se derrama hacia las celdas vacías de abajo y de la derecha. Esas celdas muestran su valor, y al tocar una de ellas la barra muestra la fórmula del ancla, apagada.',
+    'b7': 'Las funciones que devuelven matrices incluyen ORDENAR (SORT), FILTRAR (FILTER), UNICOS (UNIQUE), SECUENCIA (SEQUENCE), ORDENARPOR (SORTBY), APILARV y APILARH (VSTACK y HSTACK), y TOMAR y EXCLUIR (TAKE y DROP).',
+    'b8': 'Si alguna celda del derrame ya tiene contenido, el ancla da #SPILL! y no escribe nada. Vaciá esas celdas y la matriz aparece sola. Lo mismo pasa si escribís algo dentro del derrame: el ancla da #SPILL! hasta que lo borres. Este error se muestra igual en la página en español.',
+    'b9': 'Para usar toda la matriz en otra fórmula, escribí el ancla seguida de #: <code>=SUMA(C1#)</code> suma todo el derrame de C1. Excel guarda esa referencia como ANCHORARRAY(C1), y el editor la muestra como <code>C1#</code>. Las fórmulas matriciales antiguas, las que se cierran con Ctrl+Mayús+Intro, no se editan aquí: la línea de estado las nombra.',
+    'b10': 'LET, nombres y tablas',
+    'b11': 'LET pone nombres a valores dentro de la fórmula: <code>=LET(x;2;x*x)</code> da 4. Recibe pares de nombre y valor, y al final el cálculo. Si la cantidad de argumentos no cuadra, el resultado es #¡VALOR!.',
+    'b12': 'Las referencias a tablas usan el nombre de la tabla. <code>Tabla1[Importe]</code> toma toda la columna Importe, y <code>[@Importe]</code> toma la celda de la misma fila. En la página en español, los elementos especiales son #Datos, #Encabezados, #Totales, #Todo y #Esta fila. Si la tabla no tiene fila de totales, <code>Tabla1[#Totales]</code> da #¡REF!. Las tablas se crean con Ctrl+T.',
+    'b13': 'Los nombres definidos se administran con Ctrl+F3. Si escribís en el cuadro de nombre un nombre válido que todavía no existe, el editor lo crea para la selección.',
+    'b14': 'Recalcular y leer la barra',
+    'b15': 'Al cambiar una celda, el editor recalcula solo las fórmulas que dependen de ella. Las que cambian solas, como HOY, AHORA, ALEATORIO, DESREF o INDIRECTO, se recalculan con cada cambio. Al abrir un archivo, las fórmulas muestran el valor que guardó el archivo. Solo las que no traen valor se calculan para verlas, sin cambiar el archivo.',
+    'b16': 'Una referencia circular da 0, y el editor avisa: «Hay una referencia circular: la fórmula da 0».',
+    'b17': 'La barra muestra la fórmula con su signo <code>=</code> y en el idioma de la página. Si la celda tiene un texto, muestra el texto. El botón ⌄ la expande para las fórmulas largas.',
+    'b18-c1': 'Error',
+    'b18-c2': 'Causa habitual',
+    'b18-c3': 'Qué revisar',
+    'b18-f1c1': '#¿NOMBRE? (en inglés, #NAME?)',
+    'b18-f1c2': 'Un nombre de función mal escrito o un nombre definido que no existe',
+    'b18-f1c3': 'Revisá la ortografía.',
+    'b18-f2c1': '#¡REF! (en inglés, #REF!)',
+    'b18-f2c2': 'Una celda referenciada se borró, o se quitó una fila de la referencia',
+    'b18-f2c3': 'Corregí la referencia.',
+    'b18-f3c1': '#¡VALOR! (en inglés, #VALUE!)',
+    'b18-f3c2': 'Un argumento del tipo equivocado, o LET con una cantidad de argumentos incorrecta',
+    'b18-f3c3': 'Revisá cada argumento.',
+    'b18-f4c1': '#¡DIV/0! (en inglés, #DIV/0!)',
+    'b18-f4c2': 'Una división por cero o por una celda vacía',
+    'b18-f4c3': 'Revisá el denominador.',
+    'b18-f5c1': '#SPILL!',
+    'b18-f5c2': 'El derrame choca con una celda que tiene contenido',
+    'b18-f5c3': 'Vaciá el espacio debajo y a la derecha del ancla.',
+    'b19': 'Preguntas frecuentes',
+    'b20': '<strong>¿Por qué una función de Excel no da resultado?</strong> Hay 117 nombres que el editor reconoce pero no calcula, como LINEST, TREND, BYROW, MAP o REDUCE. Sus celdas conservan el valor que tenían, y el editor avisa cuántas son con el mensaje «fórmulas usan funciones que aún no se calculan aquí». Excel las recalcula al abrir el archivo.',
+    'b21': '<strong>¿Cómo evito que una matriz choque con otra?</strong> Dejá libres las celdas debajo y a la derecha del ancla, y no escribas dentro del derrame. Si los datos de origen crecen y ya no entran, el ancla da #SPILL!.',
+    'b22': 'Resumen',
+    'b23': 'Escribí cada función en el idioma de la página: punto y coma para separar argumentos en español, coma en inglés. Las matrices dinámicas necesitan espacio libre debajo y a la derecha del ancla. Ante un error, mirá primero el nombre de la función y los separadores, que suelen ser la causa.',
+    'rel1': 'Editar Excel (Hojas)',
+    'rel2': 'Formatear fórmulas anidadas de Excel',
+    'rel3': 'Comparar Excel / CSV',
+    'rel4': 'Convertir Excel ↔ CSV'
+  },
+  en: {
+    'titulo-pagina': 'Formulas in the spreadsheet: names in Spanish and English, and dynamic arrays — Mini Cookies',
+    'meta-descripcion': 'Separators by language, arrays that spill (SORT, FILTER), #SPILL!, A1# and the #NAME? and #REF! errors, with their causes.',
+    'h1': 'Formulas in the spreadsheet: names in Spanish and English, and dynamic arrays',
+    'b1': 'The cell shows #NAME? where there should be a number, or the editor won’t accept a formula and complains about separators. Most of the time the problem is the page language or a separator. <a href="../herramientas/hojas.html">Edit Excel (Sheets)</a> has more than 400 functions and accepts their names in Spanish and in English. These sections explain how to write them, what the arrays that fill several cells do, and what the most common errors mean.',
+    'b2': 'Separators and names by language',
+    'b3': 'On the Spanish page, arguments are separated by semicolons and the comma is the decimal mark: <code>=SUMA(A1:A9;2,5)</code> adds the range and 2.5. If you write <code>=SUMA(A1,2,5)</code> without a semicolon, the commas separate arguments and the bar shows it as <code>=SUMA(A1;2;5)</code>: the result is the sum of three numbers. On the English page, the same calculation is <code>=SUM(A1:A9,2.5)</code>, and a semicolon is not accepted.',
+    'b4': 'Function names work in both languages. <code>=SUMA(A1,B1)</code> also works on the English page, where the bar shows it as <code>SUM(A1,B1)</code>. The file stores names in English, as Excel does, so a spreadsheet made in Spanish opens the same way in English Excel. Three regular-expression functions, REGEXTEST, REGEXEXTRACT and REGEXREPLACE, have no Spanish name: they are written in English on both pages.',
+    'b5': 'Dynamic arrays: one formula that fills cells',
+    'b6': 'A formula such as <code>=SORT(A2:A20)</code> or <code>=FILTER(A2:C20,C2:C20&gt;100)</code> can return many values. You write it in one cell, the anchor, and the result spills into the empty cells below and to the right. Those cells show their value, and when you tap one of them, the bar shows the anchor’s formula, dimmed.',
+    'b7': 'The array functions include SORT, FILTER, UNIQUE, SEQUENCE, SORTBY, VSTACK and HSTACK, and TAKE and DROP. On the Spanish page they are called ORDENAR, FILTRAR, UNICOS, SECUENCIA, ORDENARPOR, APILARV, APILARH, TOMAR and EXCLUIR.',
+    'b8': 'If any cell in the spill range already has content, the anchor shows #SPILL! and writes nothing. Clear those cells and the array appears on its own. The same happens if you type something inside the spill range: the anchor shows #SPILL! until you delete it. This error looks the same on the Spanish page.',
+    'b9': 'To use the whole array in another formula, write the anchor followed by #: <code>=SUM(C1#)</code> adds the whole spill range of C1. Excel stores that reference as ANCHORARRAY(C1), and the editor shows it as <code>C1#</code>. Old array formulas, the ones closed with Ctrl+Shift+Enter, can’t be edited here: the status line names them.',
+    'b10': 'LET, names and tables',
+    'b11': 'LET gives names to values inside a formula: <code>=LET(x,2,x*x)</code> returns 4. It takes pairs of name and value, and the calculation at the end. If the number of arguments doesn’t add up, the result is #VALUE!.',
+    'b12': 'Table references use the table’s name. <code>Table1[Amount]</code> takes the whole Amount column, and <code>[@Amount]</code> takes the cell in the same row. The special items are #Data, #Headers, #Totals, #All and #This Row; on the Spanish page, they are #Datos, #Encabezados, #Totales, #Todo and #Esta fila. If the table has no totals row, <code>Table1[#Totals]</code> returns #REF!. Tables are created with Ctrl+T.',
+    'b13': 'Defined names are managed with Ctrl+F3. If you type a valid name that doesn’t exist yet in the name box, the editor creates it for the selection.',
+    'b14': 'Recalculation and the formula bar',
+    'b15': 'When you change a cell, the editor recalculates only the formulas that depend on it. Those that change on their own, such as TODAY, NOW, RAND, OFFSET or INDIRECT, are recalculated with every change. When you open a file, formulas show the value the file saved. Only formulas with no saved value are calculated so you can see them, without changing the file.',
+    'b16': 'A circular reference returns 0, and the editor warns: “There is a circular reference: the formula returns 0”.',
+    'b17': 'The bar shows the formula with its <code>=</code> sign and in the page’s language. If the cell has text, it shows the text. The ⌄ button expands the bar for long formulas.',
+    'b18-c1': 'Error',
+    'b18-c2': 'Usual cause',
+    'b18-c3': 'What to check',
+    'b18-f1c1': '#NAME? (in Spanish, #¿NOMBRE?)',
+    'b18-f1c2': 'A misspelled function name or a defined name that doesn’t exist',
+    'b18-f1c3': 'Check the spelling.',
+    'b18-f2c1': '#REF! (in Spanish, #¡REF!)',
+    'b18-f2c2': 'A referenced cell was deleted, or a row was removed from the reference',
+    'b18-f2c3': 'Correct the reference.',
+    'b18-f3c1': '#VALUE! (in Spanish, #¡VALOR!)',
+    'b18-f3c2': 'An argument of the wrong type, or LET with the wrong number of arguments',
+    'b18-f3c3': 'Check each argument.',
+    'b18-f4c1': '#DIV/0! (in Spanish, #¡DIV/0!)',
+    'b18-f4c2': 'A division by zero or by an empty cell',
+    'b18-f4c3': 'Check the divisor.',
+    'b18-f5c1': '#SPILL! (the same in Spanish)',
+    'b18-f5c2': 'The spill range runs into a cell that has content',
+    'b18-f5c3': 'Clear the space below and to the right of the anchor.',
+    'b19': 'Frequently asked questions',
+    'b20': '<strong>Why doesn’t an Excel function return a result?</strong> There are 117 names that the editor recognises but doesn’t calculate, such as LINEST, TREND, BYROW, MAP or REDUCE. Their cells keep the value they had, and the editor says how many there are with the message “formulas use functions not calculated here yet”. Excel recalculates them when the file opens.',
+    'b21': '<strong>How do I keep one array from running into another?</strong> Leave the cells below and to the right of the anchor free, and don’t type inside the spill range. If the source data grows and no longer fits, the anchor shows #SPILL!.',
+    'b22': 'Summary',
+    'b23': 'Write each function in the language of the page: semicolons between arguments on the Spanish page, commas on the English page. Dynamic arrays need free space below and to the right of the anchor. When you get an error, check the function name and the separators first; they are usually the cause.',
+    'rel1': 'Edit Excel (Sheets)',
+    'rel2': 'Format nested Excel formulas',
+    'rel3': 'Compare Excel / CSV',
+    'rel4': 'Convert Excel ↔ CSV'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Fórmulas en la hoja de cálculo: nombres en español e inglés y matrices dinámicas</h1>
+    <p data-i18n-html="b1">La celda muestra #¿NOMBRE? donde debería haber un número, o el editor no acepta una fórmula y se queja de los separadores. Casi siempre el problema es el idioma de la página o un separador. <a href="../herramientas/hojas.html">Editar Excel (Hojas)</a> tiene más de 400 funciones y acepta sus nombres en español y en inglés. Estas secciones explican cómo escribirlas, qué hacen las matrices que llenan varias celdas y qué significan los errores más comunes.</p>
+    <h2 data-i18n="b2">Separadores y nombres según el idioma</h2>
+    <p data-i18n-html="b3">En la página en español, los argumentos van separados por punto y coma, y la coma es el decimal: <code>=SUMA(A1:A9;2,5)</code> suma el rango y 2,5. Si escribís <code>=SUMA(A1,2,5)</code> sin punto y coma, la coma separa argumentos y la barra lo muestra como <code>=SUMA(A1;2;5)</code>: el resultado es la suma de tres números. En la página en inglés, el mismo cálculo es <code>=SUM(A1:A9,2.5)</code>, y un punto y coma no se acepta.</p>
+    <p data-i18n-html="b4">Los nombres de función funcionan en los dos idiomas. <code>=SUMA(A1,B1)</code> también anda en la página en inglés, donde la barra la muestra como <code>SUM(A1,B1)</code>. El archivo guarda los nombres en inglés, como Excel, así que una planilla hecha en español se abre igual en una Excel en inglés. Tres funciones de expresiones regulares, REGEXTEST, REGEXEXTRACT y REGEXREPLACE, no tienen nombre en español: se escriben en inglés en las dos páginas.</p>
+    <h2 data-i18n="b5">Matrices dinámicas: una fórmula que llena celdas</h2>
+    <p data-i18n-html="b6">Una fórmula como <code>=ORDENAR(A2:A20)</code> o <code>=FILTRAR(A2:C20;C2:C20&gt;100)</code> puede devolver muchos valores. La escribís en una sola celda, que es el ancla, y el resultado se derrama hacia las celdas vacías de abajo y de la derecha. Esas celdas muestran su valor, y al tocar una de ellas la barra muestra la fórmula del ancla, apagada.</p>
+    <p data-i18n-html="b7">Las funciones que devuelven matrices incluyen ORDENAR (SORT), FILTRAR (FILTER), UNICOS (UNIQUE), SECUENCIA (SEQUENCE), ORDENARPOR (SORTBY), APILARV y APILARH (VSTACK y HSTACK), y TOMAR y EXCLUIR (TAKE y DROP).</p>
+    <p data-i18n-html="b8">Si alguna celda del derrame ya tiene contenido, el ancla da #SPILL! y no escribe nada. Vaciá esas celdas y la matriz aparece sola. Lo mismo pasa si escribís algo dentro del derrame: el ancla da #SPILL! hasta que lo borres. Este error se muestra igual en la página en español.</p>
+    <p data-i18n-html="b9">Para usar toda la matriz en otra fórmula, escribí el ancla seguida de #: <code>=SUMA(C1#)</code> suma todo el derrame de C1. Excel guarda esa referencia como ANCHORARRAY(C1), y el editor la muestra como <code>C1#</code>. Las fórmulas matriciales antiguas, las que se cierran con Ctrl+Mayús+Intro, no se editan aquí: la línea de estado las nombra.</p>
+    <h2 data-i18n="b10">LET, nombres y tablas</h2>
+    <p data-i18n-html="b11">LET pone nombres a valores dentro de la fórmula: <code>=LET(x;2;x*x)</code> da 4. Recibe pares de nombre y valor, y al final el cálculo. Si la cantidad de argumentos no cuadra, el resultado es #¡VALOR!.</p>
+    <p data-i18n-html="b12">Las referencias a tablas usan el nombre de la tabla. <code>Tabla1[Importe]</code> toma toda la columna Importe, y <code>[@Importe]</code> toma la celda de la misma fila. En la página en español, los elementos especiales son #Datos, #Encabezados, #Totales, #Todo y #Esta fila. Si la tabla no tiene fila de totales, <code>Tabla1[#Totales]</code> da #¡REF!. Las tablas se crean con Ctrl+T.</p>
+    <p data-i18n-html="b13">Los nombres definidos se administran con Ctrl+F3. Si escribís en el cuadro de nombre un nombre válido que todavía no existe, el editor lo crea para la selección.</p>
+    <h2 data-i18n="b14">Recalcular y leer la barra</h2>
+    <p data-i18n-html="b15">Al cambiar una celda, el editor recalcula solo las fórmulas que dependen de ella. Las que cambian solas, como HOY, AHORA, ALEATORIO, DESREF o INDIRECTO, se recalculan con cada cambio. Al abrir un archivo, las fórmulas muestran el valor que guardó el archivo. Solo las que no traen valor se calculan para verlas, sin cambiar el archivo.</p>
+    <p data-i18n-html="b16">Una referencia circular da 0, y el editor avisa: «Hay una referencia circular: la fórmula da 0».</p>
+    <p data-i18n-html="b17">La barra muestra la fórmula con su signo <code>=</code> y en el idioma de la página. Si la celda tiene un texto, muestra el texto. El botón ⌄ la expande para las fórmulas largas.</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b18-c1">Error</th><th data-i18n-html="b18-c2">Causa habitual</th><th data-i18n-html="b18-c3">Qué revisar</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b18-f1c1">#¿NOMBRE? (en inglés, #NAME?)</td><td data-i18n-html="b18-f1c2">Un nombre de función mal escrito o un nombre definido que no existe</td><td data-i18n-html="b18-f1c3">Revisá la ortografía.</td></tr>
+        <tr><td data-i18n-html="b18-f2c1">#¡REF! (en inglés, #REF!)</td><td data-i18n-html="b18-f2c2">Una celda referenciada se borró, o se quitó una fila de la referencia</td><td data-i18n-html="b18-f2c3">Corregí la referencia.</td></tr>
+        <tr><td data-i18n-html="b18-f3c1">#¡VALOR! (en inglés, #VALUE!)</td><td data-i18n-html="b18-f3c2">Un argumento del tipo equivocado, o LET con una cantidad de argumentos incorrecta</td><td data-i18n-html="b18-f3c3">Revisá cada argumento.</td></tr>
+        <tr><td data-i18n-html="b18-f4c1">#¡DIV/0! (en inglés, #DIV/0!)</td><td data-i18n-html="b18-f4c2">Una división por cero o por una celda vacía</td><td data-i18n-html="b18-f4c3">Revisá el denominador.</td></tr>
+        <tr><td data-i18n-html="b18-f5c1">#SPILL!</td><td data-i18n-html="b18-f5c2">El derrame choca con una celda que tiene contenido</td><td data-i18n-html="b18-f5c3">Vaciá el espacio debajo y a la derecha del ancla.</td></tr>
+      </tbody>
+    </table></div>
+    <h2 data-i18n="b19">Preguntas frecuentes</h2>
+    <p data-i18n-html="b20"><strong>¿Por qué una función de Excel no da resultado?</strong> Hay 117 nombres que el editor reconoce pero no calcula, como LINEST, TREND, BYROW, MAP o REDUCE. Sus celdas conservan el valor que tenían, y el editor avisa cuántas son con el mensaje «fórmulas usan funciones que aún no se calculan aquí». Excel las recalcula al abrir el archivo.</p>
+    <p data-i18n-html="b21"><strong>¿Cómo evito que una matriz choque con otra?</strong> Dejá libres las celdas debajo y a la derecha del ancla, y no escribas dentro del derrame. Si los datos de origen crecen y ya no entran, el ancla da #SPILL!.</p>
+    <h2 data-i18n="b22">Resumen</h2>
+    <p data-i18n-html="b23">Escribí cada función en el idioma de la página: punto y coma para separar argumentos en español, coma en inglés. Las matrices dinámicas necesitan espacio libre debajo y a la derecha del ancla. Ante un error, mirá primero el nombre de la función y los separadores, que suelen ser la causa.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/hojas.html" data-i18n="rel1">Editar Excel (Hojas)</a></li>
+      <li><a href="../herramientas/formateador-formulas-excel.html" data-i18n="rel2">Formatear fórmulas anidadas de Excel</a></li>
+      <li><a href="../herramientas/comparar-excel-csv.html" data-i18n="rel3">Comparar Excel / CSV</a></li>
+      <li><a href="../herramientas/convertir-excel-csv.html" data-i18n="rel4">Convertir Excel ↔ CSV</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
