@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="titulo-pagina">Editar Excel y .ods en el navegador — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Edita libros de Excel (.xlsx) y hojas de LibreOffice (.ods) en el navegador: fórmulas, formato, gráficos y deshacer, sin instalar nada y sin subir tu archivo. Gratis y sin registro.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<link rel="stylesheet" href="../assets/css/rejilla-hoja.css">
+<link rel="stylesheet" href="../assets/css/oficina.css">
+<link rel="stylesheet" href="../assets/css/hojas.css">
+<script>
+window.i18nPagina = {
+  "es": {
+    "titulo-pagina": "Editar Excel y .ods en el navegador — Mini Cookies",
+    "meta-descripcion": "Edita libros de Excel (.xlsx) y hojas de LibreOffice (.ods) en el navegador: fórmulas, formato, gráficos y deshacer, sin instalar nada y sin subir tu archivo. Gratis y sin registro.",
+    "h1": "Mini Cookies Hojas",
+    "intro": "Abre un libro de Excel y edítalo como en una hoja de cálculo: valores, fórmulas, formato, deshacer. Al guardar, lo que no tocaste queda exactamente como estaba.",
+    "zona-arrastre": "📊 Arrastra tu archivo aquí o haz clic para elegirlo (.xlsx, .xlsm, .csv, .ods, .xls)",
+    "boton-nuevo": "Libro en blanco",
+    "cargando": "Abriendo el libro…",
+    "borradores": "Trabajo sin terminar en este navegador"
+  },
+  "en": {
+    "titulo-pagina": "Edit Excel and .ods files in your browser — Mini Cookies",
+    "meta-descripcion": "Edit Excel workbooks (.xlsx) and LibreOffice spreadsheets (.ods) in your browser: formulas, formatting, charts and undo, without installing anything or uploading your file. Free, no sign-up.",
+    "h1": "Mini Cookies Sheets",
+    "intro": "Open an Excel workbook and edit it like a spreadsheet: values, formulas, formatting, undo. When you save, everything you didn’t touch stays exactly as it was.",
+    "zona-arrastre": "📊 Drop your file here or click to choose it (.xlsx, .xlsm, .csv, .ods, .xls)",
+    "boton-nuevo": "Blank workbook",
+    "cargando": "Opening the workbook…",
+    "borradores": "Unfinished work in this browser"
+  }
+};
+</script>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<!-- Inicio: abrir o crear (aquí van los anuncios; el editor abierto no los lleva) -->
+<div class="of-inicio" id="inicio">
+  <header class="sitio">
+    <div class="marca"><a href="../index.html"><div class="texto-marca">Mini<span>Cookies</span></div></a></div>
+    <nav class="sitio">
+      <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+      <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+    </nav>
+  </header>
+  <main>
+    <h1 data-i18n="h1">Mini Cookies Hojas</h1>
+    <p data-i18n="intro">Abre un libro de Excel y edítalo como en una hoja de cálculo: valores, fórmulas, formato, deshacer. Al guardar, lo que no tocaste queda exactamente como estaba.</p>
+    <div class="panel-herramienta">
+      <div class="zona-arrastre" id="zonaArrastre">
+        <span data-i18n="zona-arrastre">📊 Arrastra tu archivo aquí o haz clic para elegirlo (.xlsx, .xlsm, .csv, .ods, .xls)</span>
+        <input type="file" id="entradaArchivo" accept=".xlsx,.xlsm,.csv,.tsv,.txt,.ods,.xls,.xlsb" hidden>
+      </div>
+      <div class="of-botones-inicio">
+        <button class="boton" id="botonNuevo" type="button" data-i18n="boton-nuevo">Libro en blanco</button>
+      </div>
+      <p class="cargando-visor" id="cargando" role="status" hidden data-i18n="cargando">Abriendo el libro…</p>
+      <p class="mensaje-error" id="errorInicio" role="alert" hidden></p>
+      <section id="seccionBorradores" hidden>
+        <h2 data-i18n="borradores">Trabajo sin terminar en este navegador</h2>
+        <ul class="of-borradores" id="listaBorradores"></ul>
+      </section>
+    </div>
+    <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+  </main>
+</div>
+
+<!-- El editor (arquetipo G): lo arma Oficina.montar (suite/nucleo/oficina.js) al cargar app.js -->
+<div id="app" hidden></div>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/xlsx-formato.js"></script>
+<script src="../assets/js/xlsx-estilos.js"></script>
+<script src="../assets/js/xlsx-modelo.js"></script>
+<script src="../assets/js/xlsx-paquete.js"></script>
+<script src="../assets/js/xls-formulas.js"></script>
+<script src="../assets/js/csv-planilla.js"></script>
+<script src="../assets/js/hojas/xlsx-escritor.js"></script>
+<script src="../assets/js/hojas/xlsx-filas.js"></script>
+<script src="../assets/js/hojas/xlsx-columnas.js"></script>
+<script src="../assets/js/lector-hojas.js"></script>
+<script src="../assets/js/motor-hojas.js"></script>
+<script src="../assets/js/excel-a-pdf-motor.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/rejilla-orden-filtro.js"></script>
+<script src="../assets/js/hojas/rejilla-hoja.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/hojas/paquete-editable.js"></script>
+<script src="../assets/js/hojas/historial-doc.js"></script>
+<script src="../assets/js/hojas/comandos.js"></script>
+<script src="../assets/js/hojas/autoguardado.js"></script>
+<script src="../assets/js/hojas/oficina.js"></script>
+<script src="../assets/js/hojas/dialogo.js"></script>
+<script src="../assets/js/hojas/calculo.js"></script>
+<script src="../assets/js/hojas/calculo-funciones.js"></script>
+<script src="../assets/js/hojas/estilos-libro.js"></script>
+<script src="../assets/js/hojas/entrada.js"></script>
+<script src="../assets/js/hojas/xlsx-backend.js"></script>
+<script src="../assets/js/ods-formulas.js"></script>
+<script src="../assets/js/hojas/ods-estilos.js"></script>
+<script src="../assets/js/hojas/ods-estilos-escritura.js"></script>
+<script src="../assets/js/hojas/ods-validacion.js"></script>
+<script src="../assets/js/hojas/ods-condicional.js"></script>
+<script src="../assets/js/hojas/ods-modelo.js"></script>
+<script src="../assets/js/hojas/ods-escritor-celdas.js"></script>
+<script src="../assets/js/hojas/ods-estructura.js"></script>
+<script src="../assets/js/hojas/ods-datos.js"></script>
+<script src="../assets/js/hojas/ods-pagina.js"></script>
+<script src="../assets/js/hojas/ods-graficos.js"></script>
+<script src="../assets/js/hojas/ods-filtros.js"></script>
+<script src="../assets/js/hojas/ods-backend.js"></script>
+<script src="../assets/js/hojas/libro-editable.js"></script>
+<script src="../assets/js/hojas/estructura.js"></script>
+<script src="../assets/js/hojas/datos-libro.js"></script>
+<script src="../assets/js/hojas/filtros-libro.js"></script>
+<script src="../assets/js/hojas/graficos-libro.js"></script>
+<script src="../assets/js/hojas/pagina-libro.js"></script>
+<script src="../assets/js/hojas/app-datos.js"></script>
+<script src="../assets/js/hojas/app-hoja.js"></script>
+<script src="../assets/js/hojas/app.js"></script>
+</body>
+</html>

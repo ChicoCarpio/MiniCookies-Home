@@ -30,7 +30,7 @@ window.i18nPagina = {
     'b11-3': 'Las fechas: «3-5» o «1/2» se convierten en fecha, y el texto original no vuelve.',
     'b12': 'Para evitarlo, no lo abras con doble clic. Usá la opción de importar texto o CSV de la pestaña Datos (el nombre cambia según la versión), elegí la codificación y el separador, y marcá como texto las columnas de códigos antes de cargarlas.',
     'b13': 'Ver el contenido sin tocarlo',
-    'b14': '<a href="../herramientas/visor-excel-csv.html">Ver Excel o CSV</a> muestra el archivo como una hoja y no lo modifica. Sirve para mirarlo tal como viene antes de decidir qué hacer. No tiene selector de codificación ni de separador: prueba UTF-8 y, si el archivo no es UTF-8 válido, Windows-1252. Un UTF-16 sin marca BOM se ve con símbolos raros; para ese caso está la herramienta de codificación de la sección siguiente. El separador lo elige la herramienta entre coma, punto y coma, tabulador y barra vertical, mirando las primeras líneas. Si la primera línea dice <code>sep=;</code>, la usa y no la muestra como dato.',
+    'b14': '<a href="../herramientas/hojas.html">Mini Cookies Hojas</a> abre el archivo como una hoja y no lo modifica hasta que lo editás y lo descargás. Sirve para mirarlo tal como viene antes de decidir qué hacer. No tiene selector de codificación ni de separador: prueba UTF-8 y, si el archivo no es UTF-8 válido, Windows-1252. Un UTF-16 sin marca BOM se ve con símbolos raros; para ese caso está la herramienta de codificación de la sección siguiente. El separador lo elige la herramienta entre coma, punto y coma, tabulador y barra vertical, mirando las primeras líneas. Si la primera línea dice <code>sep=;</code>, la usa y no la muestra como dato.',
     'b15': 'Un número con coma decimal o punto de miles se ve como venía en el archivo, «1.234,50», y los códigos y las fechas quedan como texto.',
     'b16-1': 'Arrastrá el .csv a la zona de carga y esperá «Preparando la hoja…».',
     'b16-2': 'Mirá si los acentos y las columnas se ven bien. Si es así, el archivo está sano y el problema era la forma de abrirlo.',
@@ -51,8 +51,8 @@ window.i18nPagina = {
     'b27': '<strong>¿Por qué las fechas aparecen como texto?</strong> En un CSV una fecha es solo texto, y «3/4» puede ser el 3 de abril o el 4 de marzo según el país. Las herramientas del sitio la dejan tal como viene. Después podés darle formato de fecha en Excel.',
     'b28': '<strong>¿Y si el archivo está en ruso o en griego?</strong> La herramienta de codificación no reconoce esas codificaciones, y el resultado puede seguir con símbolos raros. Probá abrirlo en un editor de texto que deje elegir la codificación al abrir el archivo.',
     'b29': 'Resumen',
-    'b30': 'Un CSV roto casi siempre tiene un problema de codificación (los acentos), de separador (las columnas) o de interpretación (ceros, números largos y fechas). Mirá el contenido con <a href="../herramientas/visor-excel-csv.html">Ver Excel o CSV</a>, arreglá la codificación con <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a> y, si hace falta, pasalo a Excel con <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a>.',
-    'rel1': 'Ver Excel o CSV',
+    'b30': 'Un CSV roto casi siempre tiene un problema de codificación (los acentos), de separador (las columnas) o de interpretación (ceros, números largos y fechas). Mirá el contenido con <a href="../herramientas/hojas.html">Mini Cookies Hojas</a>, arreglá la codificación con <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a> y, si hace falta, pasalo a Excel con <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a>.',
+    'rel1': 'Mini Cookies Hojas',
     'rel2': 'Arreglar codificación de un texto',
     'rel3': 'Convertir Excel ↔ CSV'
   },
@@ -75,7 +75,7 @@ window.i18nPagina = {
     'b11-3': 'Dates: “3-5” or “1/2” turn into dates, and the original text does not come back.',
     'b12': 'To avoid this, don’t double-click the file. Use the option to import text or CSV from the Data tab (the name changes between versions), pick the encoding and the separator, and format the code columns as text before loading them.',
     'b13': 'See the content without changing it',
-    'b14': '<a href="../herramientas/visor-excel-csv.html">View Excel or CSV</a> shows the file as a sheet and doesn’t modify it. Use it to look at the file as it is before you decide what to do. It has no encoding or separator picker: it tries UTF-8 and, if the file is not valid UTF-8, Windows-1252. A UTF-16 file without the BOM shows strange symbols; the encoding tool in the next section does detect it. The viewer chooses the separator among comma, semicolon, tab and pipe by looking at the first lines. If the first line says <code>sep=;</code>, it uses it and doesn’t show it as data.',
+    'b14': '<a href="../herramientas/hojas.html">Mini Cookies Sheets</a> opens the file as a sheet and doesn’t change it until you edit it and download it. Use it to look at the file as it is before you decide what to do. It has no encoding or separator picker: it tries UTF-8 and, if the file is not valid UTF-8, Windows-1252. A UTF-16 file without the BOM shows strange symbols; the encoding tool in the next section does detect it. The tool chooses the separator among comma, semicolon, tab and pipe by looking at the first lines. If the first line says <code>sep=;</code>, it uses it and doesn’t show it as data.',
     'b15': 'A number with a decimal comma or thousands dots appears as it was written, “1.234,50”, and codes and dates stay as text.',
     'b16-1': 'Drag the .csv to the upload area and wait for “Preparing the sheet…”.',
     'b16-2': 'Check whether the accents and columns look right. If they do, the file is fine and the problem was how it was opened.',
@@ -96,8 +96,8 @@ window.i18nPagina = {
     'b27': '<strong>Why do dates show up as text?</strong> In a CSV a date is just text, and “3/4” can mean 3 April or 4 March depending on the country. The site’s tools leave it as it came. You can format it as a date in Excel afterwards.',
     'b28': '<strong>What if the file is in Russian or Greek?</strong> The encoding tool doesn’t recognise those encodings, and the result may still show strange symbols. Try opening the file in a text editor that lets you choose the encoding when you open it.',
     'b29': 'Summary',
-    'b30': 'A broken CSV almost always has an encoding problem (the accents), a separator problem (the columns) or an interpretation problem (zeros, long numbers and dates). Look at the content with <a href="../herramientas/visor-excel-csv.html">View Excel or CSV</a>, fix the encoding with <a href="../herramientas/arreglar-codificacion-texto.html">Fix a text file’s encoding</a> and, if needed, convert it to Excel with <a href="../herramientas/convertir-excel-csv.html">Convert Excel ↔ CSV</a>.',
-    'rel1': 'View Excel or CSV',
+    'b30': 'A broken CSV almost always has an encoding problem (the accents), a separator problem (the columns) or an interpretation problem (zeros, long numbers and dates). Look at the content with <a href="../herramientas/hojas.html">Mini Cookies Sheets</a>, fix the encoding with <a href="../herramientas/arreglar-codificacion-texto.html">Fix a text file’s encoding</a> and, if needed, convert it to Excel with <a href="../herramientas/convertir-excel-csv.html">Convert Excel ↔ CSV</a>.',
+    'rel1': 'Mini Cookies Sheets',
     'rel2': 'Fix a text file’s encoding',
     'rel3': 'Convert Excel ↔ CSV'
   }
@@ -140,7 +140,7 @@ window.i18nPagina = {
     </ul>
     <p data-i18n-html="b12">Para evitarlo, no lo abras con doble clic. Usá la opción de importar texto o CSV de la pestaña Datos (el nombre cambia según la versión), elegí la codificación y el separador, y marcá como texto las columnas de códigos antes de cargarlas.</p>
     <h2 data-i18n="b13">Ver el contenido sin tocarlo</h2>
-    <p data-i18n-html="b14"><a href="../herramientas/visor-excel-csv.html">Ver Excel o CSV</a> muestra el archivo como una hoja y no lo modifica. Sirve para mirarlo tal como viene antes de decidir qué hacer. No tiene selector de codificación ni de separador: prueba UTF-8 y, si el archivo no es UTF-8 válido, Windows-1252. Un UTF-16 sin marca BOM se ve con símbolos raros; para ese caso está la herramienta de codificación de la sección siguiente. El separador lo elige la herramienta entre coma, punto y coma, tabulador y barra vertical, mirando las primeras líneas. Si la primera línea dice <code>sep=;</code>, la usa y no la muestra como dato.</p>
+    <p data-i18n-html="b14"><a href="../herramientas/hojas.html">Mini Cookies Hojas</a> abre el archivo como una hoja y no lo modifica hasta que lo editás y lo descargás. Sirve para mirarlo tal como viene antes de decidir qué hacer. No tiene selector de codificación ni de separador: prueba UTF-8 y, si el archivo no es UTF-8 válido, Windows-1252. Un UTF-16 sin marca BOM se ve con símbolos raros; para ese caso está la herramienta de codificación de la sección siguiente. El separador lo elige la herramienta entre coma, punto y coma, tabulador y barra vertical, mirando las primeras líneas. Si la primera línea dice <code>sep=;</code>, la usa y no la muestra como dato.</p>
     <p data-i18n-html="b15">Un número con coma decimal o punto de miles se ve como venía en el archivo, «1.234,50», y los códigos y las fechas quedan como texto.</p>
     <ol>
       <li data-i18n-html="b16-1">Arrastrá el .csv a la zona de carga y esperá «Preparando la hoja…».</li>
@@ -165,7 +165,7 @@ window.i18nPagina = {
     <p data-i18n-html="b27"><strong>¿Por qué las fechas aparecen como texto?</strong> En un CSV una fecha es solo texto, y «3/4» puede ser el 3 de abril o el 4 de marzo según el país. Las herramientas del sitio la dejan tal como viene. Después podés darle formato de fecha en Excel.</p>
     <p data-i18n-html="b28"><strong>¿Y si el archivo está en ruso o en griego?</strong> La herramienta de codificación no reconoce esas codificaciones, y el resultado puede seguir con símbolos raros. Probá abrirlo en un editor de texto que deje elegir la codificación al abrir el archivo.</p>
     <h2 data-i18n="b29">Resumen</h2>
-    <p data-i18n-html="b30">Un CSV roto casi siempre tiene un problema de codificación (los acentos), de separador (las columnas) o de interpretación (ceros, números largos y fechas). Mirá el contenido con <a href="../herramientas/visor-excel-csv.html">Ver Excel o CSV</a>, arreglá la codificación con <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a> y, si hace falta, pasalo a Excel con <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a>.</p>
+    <p data-i18n-html="b30">Un CSV roto casi siempre tiene un problema de codificación (los acentos), de separador (las columnas) o de interpretación (ceros, números largos y fechas). Mirá el contenido con <a href="../herramientas/hojas.html">Mini Cookies Hojas</a>, arreglá la codificación con <a href="../herramientas/arreglar-codificacion-texto.html">Arreglar codificación de un texto</a> y, si hace falta, pasalo a Excel con <a href="../herramientas/convertir-excel-csv.html">Convertir Excel ↔ CSV</a>.</p>
   </article>
 
   <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
@@ -173,7 +173,7 @@ window.i18nPagina = {
   <section class="guia-uso articulo-relacionadas">
     <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
     <ul>
-      <li><a href="../herramientas/visor-excel-csv.html" data-i18n="rel1">Ver Excel o CSV</a></li>
+      <li><a href="../herramientas/hojas.html" data-i18n="rel1">Mini Cookies Hojas</a></li>
       <li><a href="../herramientas/arreglar-codificacion-texto.html" data-i18n="rel2">Arreglar codificación de un texto</a></li>
       <li><a href="../herramientas/convertir-excel-csv.html" data-i18n="rel3">Convertir Excel ↔ CSV</a></li>
     </ul>
