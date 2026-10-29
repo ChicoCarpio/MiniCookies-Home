@@ -17,7 +17,7 @@
     'cmd-formato': 'Formato de número', 'cmd-mas-decimales': 'Aumentar decimales', 'cmd-menos-decimales': 'Disminuir decimales', 'cmd-bordes': 'Todos los bordes', 'cmd-sin-bordes': 'Sin bordes',
     'cmd-borrar': 'Borrar contenido', 'cmd-borrar-formato': 'Borrar formato', 'cmd-autosuma': 'Autosuma', 'cmd-buscar': 'Buscar', 'cmd-descargar': 'Descargar el libro', 'cmd-descargar-corto': 'Descargar', 'cmd-csv': 'Exportar la hoja como .csv',
     'cmd-nuevo': 'Libro nuevo', 'cmd-abrir': 'Abrir otro archivo', 'cmd-paleta': 'Buscar un comando', 'cmd-zoom-mas': 'Acercar', 'cmd-zoom-menos': 'Alejar', 'cmd-completa': 'Pantalla completa', 'cmd-editar-celda': 'Editar la celda',
-    'cmd-modo-editar': 'Editar', 'cmd-modo-leer': 'Leer', 'cmd-inspector': 'Panel de propiedades', 'cmd-hoy': 'Fecha de hoy', 'cmd-funcion': 'Insertar función…',
+    'cmd-modo-editar': 'Editar', 'cmd-modo-leer': 'Leer', 'cmd-inspector': 'Panel de propiedades', 'cmd-expandir-barra': 'Expandir la barra de fórmulas', 'cmd-hoy': 'Fecha de hoy', 'cmd-funcion': 'Insertar función…',
     'fmt-general': 'General', 'fmt-numero': 'Número', 'fmt-moneda': 'Moneda', 'fmt-porcentaje': 'Porcentaje', 'fmt-fecha': 'Fecha corta', 'fmt-hora': 'Hora', 'fmt-texto': 'Texto', 'fmt-miles': 'Miles',
     'guardado-local': 'Guardado en este navegador a las {0}', 'sin-cambios': 'Sin cambios', 'cambios-sin-descargar': 'Cambios sin descargar', 'descargado': 'Descargado',
     'aviso-protegida': 'Esa celda es parte de una tabla o de una fórmula matricial: se edita en Excel', 'aviso-formula': 'La fórmula tiene un error: revísala (paréntesis, comillas, separadores)',
@@ -50,7 +50,7 @@
     'cmd-formato': 'Number format', 'cmd-mas-decimales': 'Increase decimals', 'cmd-menos-decimales': 'Decrease decimals', 'cmd-bordes': 'All borders', 'cmd-sin-bordes': 'No borders',
     'cmd-borrar': 'Clear contents', 'cmd-borrar-formato': 'Clear formats', 'cmd-autosuma': 'AutoSum', 'cmd-buscar': 'Find', 'cmd-descargar': 'Download the workbook', 'cmd-descargar-corto': 'Download', 'cmd-csv': 'Export sheet as .csv',
     'cmd-nuevo': 'New workbook', 'cmd-abrir': 'Open another file', 'cmd-paleta': 'Search for a command', 'cmd-zoom-mas': 'Zoom in', 'cmd-zoom-menos': 'Zoom out', 'cmd-completa': 'Full screen', 'cmd-editar-celda': 'Edit cell',
-    'cmd-modo-editar': 'Edit', 'cmd-modo-leer': 'Read', 'cmd-inspector': 'Properties panel', 'cmd-hoy': 'Today’s date', 'cmd-funcion': 'Insert function…',
+    'cmd-modo-editar': 'Edit', 'cmd-modo-leer': 'Read', 'cmd-inspector': 'Properties panel', 'cmd-expandir-barra': 'Expand the formula bar', 'cmd-hoy': 'Today’s date', 'cmd-funcion': 'Insert function…',
     'fmt-general': 'General', 'fmt-numero': 'Number', 'fmt-moneda': 'Currency', 'fmt-porcentaje': 'Percent', 'fmt-fecha': 'Short date', 'fmt-hora': 'Time', 'fmt-texto': 'Text', 'fmt-miles': 'Thousands',
     'guardado-local': 'Saved in this browser at {0}', 'sin-cambios': 'No changes', 'cambios-sin-descargar': 'Changes not downloaded', 'descargado': 'Downloaded',
     'aviso-protegida': 'That cell belongs to a table or an array formula: edit it in Excel', 'aviso-formula': 'The formula has an error: check parentheses, quotes and separators',
@@ -90,6 +90,7 @@
       crearEl('input', { class: 'hc-nombre', id: 'cajaNombre', 'aria-label': tx('cuadro-nombre'), 'data-i18n-attr': 'aria-label:cuadro-nombre', spellcheck: 'false', autocomplete: 'off' }),
       crearEl('span', { class: 'hc-fx', 'aria-hidden': 'true' }, ['fx']),
       crearEl('textarea', { class: 'hc-contenido', id: 'barraContenido', rows: '1', 'aria-label': tx('contenido-celda'), 'data-i18n-attr': 'aria-label:contenido-celda', spellcheck: 'false', autocomplete: 'off' }),
+      crearEl('button', { class: 'hc-expandir', type: 'button', 'data-comando': 'expandirBarra', 'aria-expanded': 'false', 'aria-label': tx('cmd-expandir-barra'), 'data-i18n-attr': 'aria-label:cmd-expandir-barra;title:cmd-expandir-barra', title: tx('cmd-expandir-barra') }, ['⌄']),
     ]),
   });
   interfaz.lienzo.append(crearEl('div', { class: 'hc-rejilla', id: 'rejilla' }));
@@ -733,6 +734,16 @@
   reg({ id: 'zoomMas', texto: 'cmd-zoom-mas', ejecutar: () => rejilla.zoom(rejilla.zoom() + 10), habilitado: hayLibro });
   reg({ id: 'zoomMenos', texto: 'cmd-zoom-menos', ejecutar: () => rejilla.zoom(rejilla.zoom() - 10), habilitado: hayLibro });
   reg({ id: 'completa', texto: 'cmd-completa', ejecutar: () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }, habilitado: hayLibro });
+  // vista ampliada de la barra de fórmulas (como Excel: Ctrl+Mayús+U); se recuerda en este navegador
+  const barraFormulas = document.querySelector('.hc-formula');
+  const barraExpandida = () => barraFormulas.classList.contains('expandida');
+  function ponerBarraExpandida(si) {
+    barraFormulas.classList.toggle('expandida', si);
+    const b = barraFormulas.querySelector('.hc-expandir'); if (b) b.setAttribute('aria-expanded', si ? 'true' : 'false');
+    try { localStorage.setItem('hojas-barra-expandida', si ? '1' : '0'); } catch (e) { /* sin almacenamiento: no se recuerda */ }
+  }
+  try { if (localStorage.getItem('hojas-barra-expandida') === '1') ponerBarraExpandida(true); } catch (e) { /* ... */ }
+  reg({ id: 'expandirBarra', texto: 'cmd-expandir-barra', atajo: 'mod+shift+u', enTexto: true, ejecutar: () => ponerBarraExpandida(!barraExpandida()), activo: barraExpandida, habilitado: hayLibro });
   reg({ id: 'inspector', texto: 'cmd-inspector', ejecutar: () => insp.alternar(), activo: () => insp.visible(), habilitado: hayLibro });
   reg({ id: 'modoEdicion', texto: 'cmd-modo-editar', ejecutar: () => { lectura = !lectura; aplicarModo(); comandos.refrescar(); }, habilitado: hayLibro });
 
@@ -801,12 +812,13 @@
     { id: 'vista', texto: 'tab-vista', grupos: [
       { texto: 'g-zoom', items: [{ comando: 'zoomMenos', icono: '−' }, { comando: 'zoomMas', icono: '+' }] },
       { texto: 'g-paneles', items: [{ comando: 'inmovilizar', icono: '❄', conTexto: true }, { comando: 'movilizar', icono: '☀', conTexto: true }] },
-      { texto: 'g-ventana', items: [{ comando: 'completa', icono: '⛶', conTexto: true }, { comando: 'inspector', icono: '☰', conTexto: true }, { comando: 'paleta', icono: '⌘', conTexto: true }] },
+      { texto: 'g-ventana', items: [{ comando: 'completa', icono: '⛶', conTexto: true }, { comando: 'inspector', icono: '☰', conTexto: true }, { comando: 'expandirBarra', icono: '⌄', conTexto: true }, { comando: 'paleta', icono: '⌘', conTexto: true }] },
     ] },
   ];
   for (const [tab, grupo] of extension.cinta) { const t = CINTA.find((x) => x.id === tab); if (t) t.grupos.push(grupo); }
   Oficina.cinta($('pestanas'), $('cinta'), CINTA, comandos);
   comandos.conectarBotones(document.querySelector('.of-acciones'));
+  comandos.conectarBotones(barraFormulas);
   Oficina.menu($('botonMas'), [{ comando: 'nuevo' }, { comando: 'abrir' }, '-', { comando: 'descargar' }, { comando: 'csv' }, { comando: 'pdf' }, { comando: 'pdfLibro' }, ...extension.menu, '-', { comando: 'reemplazar' }, { comando: 'paleta' }, { comando: 'completa' }, { comando: 'inspector' }], comandos);
   comandos.conectarTeclado(document);
 
