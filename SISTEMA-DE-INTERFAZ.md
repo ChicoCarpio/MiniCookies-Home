@@ -491,13 +491,26 @@ sin estilos: antes cada celda llevaba su `style="padding…"`) y
 
 ---
 
+### G — Aplicación de oficina (2026-10-29)
+
+Una aplicación que **edita** un documento de oficina y lo guarda como el archivo de origen. Hoy: Mini Cookies Hojas (`herramientas/hojas.html`); después, Presentaciones y Documentos. Borrador completo y su historia: `Investigaciones\investigacion-suite-ofimatica\docs\arquetipo-g.md`.
+
+- **Código compartido** (`assets/js/hojas/` y `assets/css/oficina.css`): `oficina.js` (esqueleto, cinta, menú, paleta, riel, inspector), `comandos.js` (registro único), `dialogo.js` (formularios), `historial-doc.js`, `autoguardado.js`. Una aplicación nueva se arma con `Oficina.montar(div, { nombre })` y registra sus comandos; no escribe CSS de estructura (sí el de su lienzo, como `hojas.css`).
+- **Dos pantallas.** La **entrada** es un arquetipo B (zona de arrastre, «nuevo» y trabajo sin terminar) y lleva su `.anuncio`. El **editor abierto** (`<div id="app" hidden>`) ocupa toda la pantalla (`position: fixed`) y **no lleva espacio publicitario** (decisión D5, del usuario): es la excepción a la regla de Publicidad de abajo.
+- **Escritorio** (> 900 px): barra (marca, nombre del archivo, estado de guardado, deshacer, rehacer, descargar, «⋯»), cinta con pestañas por tema, barra propia de la aplicación (en Hojas: cuadro de nombre y fórmula), riel de herramientas opcional, lienzo, inspector en columna y línea de estado.
+- **Celular** (≤ 900 px): se abre en **modo lectura** con el botón «Editar»; la cinta es una tira que se desplaza; el riel pasa a tira bajo el lienzo (≥ 48 px de alto); el inspector es una hoja que sube desde abajo (≤ 55 % de la pantalla, ✕ de 44 × 44 px, Escape). Ningún gesto es la única forma de hacer algo.
+- **Todo es un comando** (`Comandos.registrar`: id, texto i18n, atajo, `habilitado`, `ejecutar`); los botones solo llevan `data-comando`. Ctrl+K abre la paleta. Los atajos son los de Office.
+- **Sin `innerHTML` con datos del usuario** (el inspector y los diálogos usan `textContent`); todo texto visible con clave i18n; el diccionario estático de la página va en un `window.i18nPagina` multilínea (si no, el build no publica `/en/`).
+- **Verificado** a 1366 y 390 px con las pruebas de navegador de la suite y con `npm run revisar`. Pendiente: barra sobre el teclado del celular, inspector con controles, pantalla de inicio compartida y capa accesible del lienzo.
+
 ## 5. Reglas transversales
 
 ### Publicidad
 
 Mostrar publicidad es un objetivo del proyecto (ver `../CLAUDE.md`,
 "Monetización"), así que **toda página lleva su `.anuncio`, visible en
-escritorio y en celular**.
+escritorio y en celular**. Única excepción: el **editor abierto** del arquetipo G
+(su página de entrada sí lleva anuncio).
 
 - **Nunca ocupa el lugar del encabezado.** Es literalmente lo que pasaba: la capa
   de pantalla completa era `position: fixed; inset: 0`, tapaba el encabezado, y

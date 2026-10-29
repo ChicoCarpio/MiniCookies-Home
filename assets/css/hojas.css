@@ -1,0 +1,72 @@
+/* Mini Cookies Hojas: lo propio de la hoja de cálculo encima de la interfaz G (suite/nucleo/oficina.css). */
+.hc-formula { display: flex; align-items: stretch; background: var(--superficie); border-bottom: 1px solid var(--gris-borde); min-height: 32px; }
+.hc-nombre { width: 110px; flex: none; font: inherit; font-weight: 600; font-variant-numeric: tabular-nums; border: none; border-right: 1px solid var(--gris-borde); background: transparent; color: var(--texto); padding: 0 10px; }
+.hc-fx { flex: none; display: grid; place-items: center; padding: 0 10px; border-right: 1px solid var(--gris-borde); color: var(--texto-suave); font: italic 0.95rem Georgia, serif; }
+.hc-formula { flex: none; }
+.hc-contenido { flex: 1; width: auto; min-width: 0; min-height: 0; height: 32px; max-height: 32px; box-sizing: border-box; font: inherit; border: none; border-radius: 0; background: transparent; color: var(--texto); padding: 6px 10px; resize: none; line-height: 20px; overflow: hidden; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hc-contenido:focus { max-height: 30vh; height: auto; white-space: pre-wrap; overflow: auto; }
+.hc-nombre:focus, .hc-contenido:focus { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.hc-contenido.es-formula { font-family: ui-monospace, Consolas, monospace; color: var(--azul-oscuro); }
+.hc-contenido.es-derrame { opacity: .55; }
+.hc-boton-editar { flex: none; }
+
+/* la rejilla llena el lienzo; su barra propia (nombre y contenido) la reemplaza la barra de fórmulas editable */
+.hc-rejilla { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.hc-rejilla .rh { border-radius: 0; border: none; }
+.hc-rejilla .rh-barra { display: none; }
+
+/* el editor de celda: un cuadro de texto encima de la celda activa (con el tamaño de la celda, crece con lo que se escribe) */
+.hc-editor {
+  min-height: 0; width: auto; border-radius: 0;
+  position: absolute; z-index: 5; margin: 0; box-sizing: border-box; padding: 1px 3px; resize: none; overflow: hidden;
+  border: 2px solid #c9853a; background: #fff; color: #000; font: 15px Calibri, Carlito, "Liberation Sans", Arial, sans-serif; line-height: 1.25;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2); white-space: pre; outline: none;
+}
+.hc-editor[hidden] { display: none; }
+
+/* inicio: abrir o crear */
+.hc-inicio-zona { margin-top: 8px; }
+
+/* buscar y reemplazar */
+.hc-reemplazar { display: grid; gap: 10px; padding: 18px; }
+.hc-reemplazar h2 { margin: 0; font-size: 1.05rem; }
+.hc-reemplazar label { display: grid; gap: 4px; }
+.hc-reemplazar label.hc-check { display: flex; gap: 8px; align-items: center; }
+.hc-reemplazar input:not([type]) { font: inherit; padding: 8px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--superficie); color: var(--texto); }
+.hc-botones { display: flex; gap: 8px; justify-content: flex-end; }
+.hc-resultado { margin: 0; min-height: 1.2em; color: var(--texto-suave); }
+/* validación de datos (fase 3.2): la flecha de la lista, el menú y el mensaje de entrada */
+.hc-flecha-lista { position: fixed; z-index: 2000; width: 20px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 3px; background: var(--superficie); color: var(--texto); font-size: 12px; line-height: 1; cursor: pointer; }
+.hc-menu-lista { position: fixed; z-index: 2001; display: grid; max-height: 240px; overflow: auto; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.hc-menu-lista button { text-align: left; font: inherit; padding: 6px 10px; border: 0; background: none; color: var(--texto); cursor: pointer; }
+.hc-menu-lista button:hover, .hc-menu-lista button:focus { background: var(--azul-claro, #e8f0fe); outline: none; }
+.hc-nota-entrada { position: fixed; z-index: 1999; max-width: 260px; display: grid; gap: 2px; padding: 6px 8px; border: 1px solid #e0c060; border-radius: 4px; background: #fff8d6; color: #333; font-size: .85rem; box-shadow: 0 4px 12px rgba(0,0,0,.12); pointer-events: none; }
+/* filtros, gráficos (fase 3.3) */
+.hc-capa-filtros { position: fixed; inset: 0; pointer-events: none; z-index: 1998; }
+.hc-boton-filtro { position: fixed; pointer-events: auto; padding: 0; border: 0; background: transparent; cursor: pointer; border-radius: 2px; }
+.hc-boton-filtro:focus-visible { outline: 2px solid var(--azul, #1a73e8); outline-offset: 1px; }
+.hc-menu-filtro { position: fixed; z-index: 2002; display: grid; gap: 4px; padding: 8px; max-height: min(520px, calc(100vh - 16px)); overflow: auto; border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--superficie); color: var(--texto); box-shadow: 0 12px 32px rgba(0,0,0,.2); }
+.hc-menu-filtro hr { width: 100%; border: 0; border-top: 1px solid var(--gris-borde); margin: 2px 0; }
+/* un display propio gana al [hidden] del navegador: sin esto el menú vacío se veía como un punto blanco en la esquina */
+.hc-menu-filtro[hidden], .hc-menu-lista[hidden], .hc-nota-entrada[hidden], .hc-flecha-lista[hidden], .hc-marco-objeto[hidden], .hc-editor[hidden] { display: none; }
+.hc-mf-item { text-align: left; font: inherit; padding: 6px 8px; border: 0; border-radius: 6px; background: none; color: var(--texto); cursor: pointer; }
+.hc-mf-item:hover, .hc-mf-item:focus { background: var(--azul-claro, #e8f0fe); outline: none; }
+.hc-mf-buscar { font: inherit; padding: 6px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); }
+.hc-mf-lista { display: grid; gap: 2px; max-height: 220px; overflow: auto; border: 1px solid var(--gris-borde); border-radius: 6px; padding: 6px; }
+.hc-mf-lista label { display: flex; gap: 6px; align-items: center; overflow-wrap: anywhere; }
+.hc-mf-lista label[hidden] { display: none; }
+.hc-mf-pie { display: flex; gap: 8px; justify-content: flex-end; }
+.hc-marco-objeto { position: fixed; z-index: 1997; border: 2px solid var(--azul, #1a73e8); box-sizing: border-box; cursor: move; touch-action: none; }
+.hc-marco-objeto:focus { outline: none; box-shadow: 0 0 0 2px rgba(26,115,232,.3); }
+.hc-asa-objeto { position: absolute; width: 10px; height: 10px; background: var(--superficie, #fff); border: 2px solid var(--azul, #1a73e8); border-radius: 50%; }
+.hc-asa-nw { left: -7px; top: -7px; cursor: nwse-resize; } .hc-asa-ne { right: -7px; top: -7px; cursor: nesw-resize; }
+.hc-asa-sw { left: -7px; bottom: -7px; cursor: nesw-resize; } .hc-asa-se { right: -7px; bottom: -7px; cursor: nwse-resize; }
+
+/* Vista ampliada de la barra de fórmulas (opcional, comando expandirBarra) */
+.hc-expandir { flex: none; width: 32px; align-self: flex-start; height: 32px; padding: 0; border: none; border-left: 1px solid var(--gris-borde); background: transparent; color: var(--texto-suave); font-size: 1rem; line-height: 1; cursor: pointer; }
+.hc-expandir:hover { background: var(--gris-fondo); color: var(--texto); }
+.hc-expandir:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: -2px; }
+.hc-expandir[aria-expanded="true"] { transform: scaleY(-1); }
+.hc-formula.expandida .hc-contenido, .hc-formula.expandida .hc-contenido:focus { height: 120px; max-height: 40vh; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; resize: vertical; }
+.hc-formula.expandida .hc-nombre, .hc-formula.expandida .hc-fx { align-self: flex-start; height: 32px; }
+@media (max-width: 900px) { .hc-expandir { width: 44px; height: 44px; } .hc-formula.expandida .hc-contenido, .hc-formula.expandida .hc-contenido:focus { height: 96px; } }
