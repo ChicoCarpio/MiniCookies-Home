@@ -10,8 +10,9 @@
 //   await EstructuraOds.combinar(bytes, hoja, rango) · separar(bytes, hoja, rango) · inmovilizar(bytes, hoja, filas, columnas)
 //   await EstructuraOds.anchoColumnas(bytes, hoja, c0, c1, ancho)  (en caracteres, como Excel)  · altoFilas(bytes, hoja, f0, f1, alto)  (en puntos; null = automático)
 //
-// Se rechazan (ErrorEscritor, sin tocar nada) los cambios que dejarían mal algo que aún no se sabe mover: formato condicional, validación de datos, rangos de bases de datos
-// (autofiltro), gráficos y dibujos anclados (etapa 6), y las filas o columnas que parten una combinada o una fórmula matricial.
+// Formato condicional, validación de datos, autofiltro, áreas de impresión y gráficos (con sus rangos en `Object N/`) se acomodan con el cambio. Se rechazan (ErrorEscritor, sin
+// tocar nada) los cambios que dejarían mal algo que no se sabe mover: objetos OLE, formas y dibujos anclados a celdas (`table:end-cell-address`), insertar o quitar columnas
+// dentro de un filtro con criterios, y las filas o columnas que parten una combinada o una fórmula matricial.
 // Requiere zip-propio, xml-editar, paquete-editable, ods-formulas, motores/xlsx-escritor (ErrorEscritor), xlsx-filas, xlsx-columnas y ods-escritor-celdas.
 (function () {
   const X = () => globalThis.XmlEditar;

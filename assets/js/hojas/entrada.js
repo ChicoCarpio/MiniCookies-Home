@@ -78,6 +78,12 @@
   const RE_FUNCION = /(^|[^A-Za-z0-9_.À-￿$])([A-Za-zÀ-￿][A-Za-z0-9_.À-￿]*)(\s*)(?=\()/g;
   const traducirNombres = (codigo, dic) => codigo.replace(RE_FUNCION, (m, antes, nombre, paren) => { const u = nombre.toUpperCase(); return antes + (dic[u] || nombre) + paren; });
 
+  // VERDADERO y FALSO sin paréntesis (como los escribe Excel en español) ↔ TRUE y FALSE; un nombre seguido de «(» ya lo traduce traducirNombres
+  const RE_LOGICO = (a, b) => new RegExp('(^|[^A-Za-z0-9_.!$À-￿\'\\]])(' + a + '|' + b + ')(?![A-Za-z0-9_.(!\\[À-￿])', 'gi');
+  const RE_LOGICO_ES = RE_LOGICO('VERDADERO', 'FALSO'), RE_LOGICO_EN = RE_LOGICO('TRUE', 'FALSE');
+  const logicosEn = (c) => c.replace(RE_LOGICO_ES, (m, antes, n) => antes + (n.toUpperCase() === 'FALSO' ? 'FALSE' : 'TRUE'));
+  const logicosEs = (c) => c.replace(RE_LOGICO_EN, (m, antes, n) => antes + (n.toUpperCase() === 'FALSE' ? 'FALSO' : 'VERDADERO'));
+
   // Las funciones posteriores a Excel 2007 se guardan con prefijo (_xlfn.XLOOKUP): sin él, Excel no las reconoce al abrir el archivo
   let futuras = null;
   const SIN_ZONA = new Set(['FILTER', 'SORT']);   // estas llevan _xlfn._xlws.
@@ -151,7 +157,7 @@
     const usaPuntoYComa = idioma !== 'en' && fueraDeTextos(f, (c) => (c.includes(';') ? '\u0001' : '')).includes('\u0001');
     const estado = { nivel: 0 };
     f = fueraDeTextos(f, (c) => {
-      let x = traducirNombres(idioma === 'en' ? c : especialesEn(c), ES);
+      let x = traducirNombres(idioma === 'en' ? c : logicosEn(especialesEn(c)), ES);
       if (usaPuntoYComa) x = marcarMatrices(x, estado, '\\').replace(/(\d),(\d)/g, '$1.$2').replace(/;/g, ',').replace(/\u0002/g, ',').replace(/\u0003/g, ';');   // en español: coma decimal y punto y coma entre argumentos
       return conPrefijo(conAncla(x));
     });
@@ -162,7 +168,7 @@
     const f = String(formula).replace(/^=/, '');
     if (idioma !== 'es') return fueraDeTextos(f, sinPrefijo);
     const estado = { nivel: 0 };
-    return fueraDeTextos(f, (c) => marcarMatrices(especialesEs(traducirNombres(sinPrefijo(c), EN)), estado, ',').replace(/,/g, ';').replace(/(\d)\.(\d)/g, '$1,$2').replace(/\u0002/g, '\\').replace(/\u0003/g, ';'));
+    return fueraDeTextos(f, (c) => marcarMatrices(logicosEs(especialesEs(traducirNombres(sinPrefijo(c), EN))), estado, ',').replace(/,/g, ';').replace(/(\d)\.(\d)/g, '$1,$2').replace(/\u0002/g, '\\').replace(/\u0003/g, ';'));
   }
 
   const ERRORES = ['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#¡NULO!', '#¡DIV/0!', '#¡VALOR!', '#¡REF!', '#¿NOMBRE?', '#¡NUM!', '#N/D'];

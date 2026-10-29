@@ -14,6 +14,13 @@
 //
 // Requiere zip-propio, xml-ligero, xlsx-estilos, xlsx-modelo, ods-formulas (del sitio) y motores/ods-estilos. Sin DOM.
 (function () {
+  // un .ods cifrado: el mensaje habla de LibreOffice (el de LibroXlsx dice «en Excel»)
+  function errorCifrado() {
+    const e = new LibroXlsx.ErrorXlsx('cifrado');
+    const en = typeof globalThis.idiomaActual === 'function' && globalThis.idiomaActual() === 'en';
+    e.message = en ? 'the spreadsheet is password-protected; remove the password in LibreOffice and try again' : 'la hoja de cálculo está protegida con contraseña; quítale la contraseña en LibreOffice y vuelve a intentarlo';
+    return e;
+  }
   const MAX_FILAS = 1048576, MAX_COLS = 16384, MAX_TEXTO = 32767;
   const MAX_CELDAS = 10000000;    // en todo el libro
   const MAX_VACIAS = 1000000;     // celdas vacías con estilo propio en todo el libro
@@ -66,11 +73,11 @@
     try { zip = await ZipPropio.loadAsync(bytes); } catch (e) { throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument'); }
     const contenido = zip.file('content.xml');
     // LibreOffice 26 (ODF 1.4) cifra el paquete entero: un solo archivo «encrypted-package»
-    if (!contenido && zip.file('encrypted-package')) throw new LibroXlsx.ErrorXlsx('cifrado');
+    if (!contenido && zip.file('encrypted-package')) throw errorCifrado();
     if (!contenido) throw new LibroXlsx.ErrorXlsx('noZip', 'no es OpenDocument');
     if (zip.file('META-INF/manifest.xml')) {
       const man = await zip.file('META-INF/manifest.xml').async('string');
-      if (/<(?:[\w.-]+:)?encryption-data\b/.test(man)) throw new LibroXlsx.ErrorXlsx('cifrado');
+      if (/<(?:[\w.-]+:)?encryption-data\b/.test(man)) throw errorCifrado();
     }
     const texto = await contenido.async('string');
     const estilos = OdsEstilos.crear();

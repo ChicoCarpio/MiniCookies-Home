@@ -1,7 +1,8 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Backend de .ods del libro editable (F3.4a). Misma forma que XlsxBackend (ver hojas/xlsx-backend.js): reconoce el archivo, lo abre en un modelo con la forma de
 // LibroXlsx (ods-modelo.js), dice qué celdas no se pueden editar, crea estilos nuevos y guarda SOLO las celdas editadas en content.xml (ods-escritor-celdas.js);
-// el resto del paquete (styles.xml, settings.xml, meta.xml, manifest, imágenes, objetos incrustados) no se toca.
+// el resto del paquete (meta.xml, imágenes, objetos incrustados) no se toca; styles.xml, settings.xml, el manifiesto y `Object N/` solo los cambian los cambios de estructura, de
+// página y de gráficos (ods-estructura.js, ods-pagina.js, ods-graficos.js).
 // Requiere zip-propio, paquete-editable, xlsx-estilos, motores/ods-modelo, ods-estilos, ods-estilos-escritura, ods-escritor-celdas y, para las celdas protegidas,
 // motores/xlsx-escritor (celdasProtegidas lee solo el modelo de la hoja).
 (function () {
