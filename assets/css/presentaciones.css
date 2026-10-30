@@ -85,3 +85,7 @@
 .pr-gal-forma:hover, .pr-gal-forma:focus-visible { background: var(--activo-fondo); border-color: var(--azul); outline: none; }
 .pr-gal-vacio { padding: 16px; color: var(--texto-suave); text-align: center; margin: 0; }
 .pr-gal-vacio[hidden] { display: none; }
+
+/* avisos «Haz clic para agregar…» de los marcadores vacíos (solo al editar) */
+.pr-hints { position: absolute; inset: 0; pointer-events: none; }
+.pr-hint { position: absolute; box-sizing: border-box; border: 1px dashed var(--texto-suave); color: var(--texto-suave); display: grid; place-items: center; text-align: center; padding: 4px; overflow: hidden; line-height: 1.2; transform-origin: 50% 50%; opacity: 0.85; }

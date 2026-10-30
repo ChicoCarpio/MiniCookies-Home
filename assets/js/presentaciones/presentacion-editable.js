@@ -241,6 +241,46 @@
       const pPr = X().hijo(pv, 'pPr'), resto = pv.hijos.filter((h) => h !== pPr && !['r', 'br', 'fld'].includes(h.local));
       return abre + (pPr ? nodoTexto(xml, pPr) : '') + piezas.join('') + resto.map((h) => nodoTexto(xml, h)).join('') + '</' + pv.nombre + '>';
     }
+    // Párrafos desde..hasta (posiciones desde 0): f = { vineta: 'punto' | 'numero' | 'ninguna', nivel: +1 | -1 }.
+    // Escribe en <a:pPr> como PowerPoint: viñeta (buFont + buChar), numeración (buAutoNum arabicPeriod) o buNone con margen 0, y el nivel (lvl) con su sangría.
+    const ORDEN_PPR = ['lnSpc', 'spcBef', 'spcAft', 'buClrTx', 'buClr', 'buSzTx', 'buSzPct', 'buSzPts', 'buFontTx', 'buFont', 'buNone', 'buAutoNum', 'buChar', 'buBlip', 'tabLst', 'defRPr', 'extLst'];
+    const BU = ['buFontTx', 'buFont', 'buNone', 'buAutoNum', 'buChar', 'buBlip'];
+    function opFormatoParrafo(i, camino, desde, hasta, f) {
+      return editarForma(i, camino, (xml, raiz, nodo, pref) => {
+        const cuerpo = X().hijo(nodo, 'txBody');
+        if (!cuerpo) return xml;
+        const a = pref.a, ed = [];
+        X().hijos(cuerpo, 'p').forEach((pv, k) => {
+          if (k < desde || k > hasta) return;
+          const pp = X().hijo(pv, 'pPr');
+          let ap = pp ? xml.slice(pp.ini, pp.finApertura) : `<${a}:pPr/>`;
+          const atributo = (n) => { const m = new RegExp('\\s' + n + '="(-?\\d+)"').exec(ap); return m ? +m[1] : null; };
+          const lvl0 = atributo('lvl') || 0, marL0 = atributo('marL');
+          const lvl = f.nivel ? Math.max(0, Math.min(8, lvl0 + f.nivel)) : lvl0;
+          if (f.nivel) {
+            ap = X().ponerAtributo(ap, 'lvl', lvl ? String(lvl) : null);
+            if (marL0 !== null && lvl !== lvl0) ap = X().ponerAtributo(ap, 'marL', String(Math.max(0, marL0 + (lvl - lvl0) * 457200)));
+          }
+          let hijos = (pp ? pp.hijos : []).map((h) => ({ local: h.local, texto: nodoTexto(xml, h) }));
+          if (f.vineta) {
+            hijos = hijos.filter((h) => !BU.includes(h.local));
+            if (f.vineta === 'ninguna') { hijos.push({ local: 'buNone', texto: `<${a}:buNone/>` }); ap = X().ponerAtributo(X().ponerAtributo(ap, 'marL', String(lvl ? 457200 * lvl : 0)), 'indent', '0'); }
+            else {
+              hijos.push({ local: 'buFont', texto: f.vineta === 'numero' ? `<${a}:buFont typeface="+mj-lt"/>` : `<${a}:buFont typeface="Arial"/>` });
+              hijos.push({ local: f.vineta === 'numero' ? 'buAutoNum' : 'buChar', texto: f.vineta === 'numero' ? `<${a}:buAutoNum type="arabicPeriod"/>` : `<${a}:buChar char="•"/>` });
+              ap = X().ponerAtributo(X().ponerAtributo(ap, 'marL', String(342900 + 457200 * lvl)), 'indent', '-342900');
+            }
+          }
+          const orden = (h) => { const n = ORDEN_PPR.indexOf(h.local); return n < 0 ? ORDEN_PPR.length : n; };
+          hijos = hijos.map((h, n) => ({ h, n })).sort((x, y) => orden(x.h) - orden(y.h) || x.n - y.n).map((x) => x.h);
+          const nueva = hijos.length ? ap.replace(/\s*\/>$/, '>') + hijos.map((h) => h.texto).join('') + '</' + (pp ? pp.nombre : `${a}:pPr`) + '>' : ap;
+          if (pp) ed.push({ ini: pp.ini, fin: pp.fin, texto: nueva });
+          else if (pv.iniCierre < 0) ed.push({ ini: pv.ini, fin: pv.fin, texto: `<${pv.nombre}>${nueva}</${pv.nombre}>` });
+          else ed.push({ ini: pv.finApertura, fin: pv.finApertura, texto: nueva });
+        });
+        return ed.length ? X().aplicar(xml, ed) : xml;
+      });
+    }
     // devuelve la función que cambia un <a:rPr> (o <a:endParaRPr>) según f: { negrita, cursiva, subrayado, tamano, color }
     const crearAjuste = (f, a) => {
         const ajustar = (etiqueta, xmlEl) => {
@@ -505,7 +545,15 @@
       const rels = await paquete.relaciones(ruta);
       const layout = rels.find((r) => /slideLayout$/.test(r.tipo));
       if (!layout) throw new ErrorPresentacion('la diapositiva no tiene diseño');
-      const xl = (await leer(layout.destino)) || '';
+      let destinoLayout = layout.destino, xl = (await leer(layout.destino)) || '';
+      if (/<[\w.-]+:sldLayout\b[^>]*\btype="title"/.test(xl)) {   // la nueva después de una diapositiva de título lleva título y contenido (el diseño de tipo «obj» del mismo patrón)
+        const patron = (await paquete.relaciones(layout.destino)).find((r) => /slideMaster$/.test(r.tipo));
+        for (const nombre of Object.keys(zip.files).filter((n) => /^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(n)).sort()) {
+          const otro = (await leer(nombre)) || '';
+          const mismo = patron && (await paquete.relaciones(nombre)).some((r) => /slideMaster$/.test(r.tipo) && r.destino === patron.destino);
+          if (mismo && /<[\w.-]+:sldLayout\b[^>]*\btype="obj"/.test(otro)) { destinoLayout = nombre; xl = otro; break; }
+        }
+      }
       const pA = prefijo(xl, NS_A, 'a'), pP = prefijo(xl, NS_P, 'p');
       // los marcadores del diseño (título, cuerpo…) sin su texto de ejemplo; fecha, pie y número no
       let id = 1, formas = '';
@@ -518,7 +566,7 @@
       }
       void pA; void pP;
       const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${formas}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
-      const destino = layout.destino.replace(/^ppt\//, '../');
+      const destino = destinoLayout.replace(/^ppt\//, '../');
       const relsNuevo = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${REL_LAYOUT}" Target="${destino}"/></Relationships>`;
       return opAgregarDiapositiva(i, xml, relsNuevo);
     }
@@ -623,7 +671,7 @@
 
     return {
       zip, paquete, rutas, textoDe, textoEditable, editable,
-      opMover, opTexto, opFormatoTexto, opFormatoRango, opRelleno, opLinea, opBorrar, opOrden, opCuadroTexto, opForma, opImagen,
+      opMover, opTexto, opFormatoTexto, opFormatoRango, opFormatoParrafo, opRelleno, opLinea, opBorrar, opOrden, opCuadroTexto, opForma, opImagen,
       opDuplicarDiapositiva, opNuevaDiapositiva, opBorrarDiapositiva, opMoverDiapositiva,
       aplicar, generar: () => paquete.generar(),
     };
@@ -631,7 +679,9 @@
 
   // Presentación nueva en blanco (16:9): un patrón, un diseño «Diapositiva de título», un tema de Office y una diapositiva vacía.
   // Es el mínimo que PowerPoint abre sin reparar; se abre con abrir() como cualquier otra.
-  async function nueva() {
+  // nueva({ marcadores: false }) deja la diapositiva sin marcadores (para armar casos de prueba a mano)
+  async function nueva(opciones) {
+    const conMarcadores = !(opciones && opciones.marcadores === false);
     const D = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
     const A = 'http://schemas.openxmlformats.org/drawingml/2006/main', P = 'http://schemas.openxmlformats.org/presentationml/2006/main';
     const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships', PK = 'http://schemas.openxmlformats.org/package/2006/relationships';
@@ -650,19 +700,26 @@
       + `<a:fontScheme name="Office"><a:majorFont>${fuente('Aptos Display')}</a:majorFont><a:minorFont>${fuente('Aptos')}</a:minorFont></a:fontScheme>`
       + `<a:fmtScheme name="Office"><a:fillStyleLst>${relleno.repeat(3)}</a:fillStyleLst><a:lnStyleLst>${linea.repeat(3)}</a:lnStyleLst>`
       + `<a:effectStyleLst>${'<a:effectStyle><a:effectLst/></a:effectStyle>'.repeat(3)}</a:effectStyleLst><a:bgFillStyleLst>${relleno.repeat(3)}</a:bgFillStyleLst></a:fmtScheme></a:themeElements></a:theme>`;
-    const marcador = (id, nombre, tipo, x, y, cx, cy, tam) => `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${nombre}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="${tipo}"/></p:nvPr></p:nvSpPr>`
-      + `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="es-CR" sz="${tam}"/></a:p></p:txBody></p:sp>`;
+    const ph = (tipo, idx) => `<p:ph${tipo ? ` type="${tipo}"` : ''}${idx ? ` idx="${idx}"` : ''}/>`;
+    const marcador = (id, nombre, tipo, x, y, cx, cy, tam, idx, lst, anclaje) => `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${nombre}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr>${ph(tipo, idx)}</p:nvPr></p:nvSpPr>`
+      + `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr${anclaje ? ` anchor="${anclaje}"` : ''}/>${lst ? `<a:lstStyle>${lst}</a:lstStyle>` : '<a:lstStyle/>'}<a:p><a:endParaRPr lang="es-CR" sz="${tam}"/></a:p></p:txBody></p:sp>`;
     const nivel = (tam) => `<a:lvl1pPr><a:defRPr sz="${tam}"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/></a:defRPr></a:lvl1pPr>`;
-    const patron = D + `<p:sldMaster ${ns}>` + arbol(marcador(2, 'Título 1', 'title', 838200, 365125, 10515600, 1325563, 4400)) + mapa
-      + `<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle>${nivel(4400)}</p:titleStyle><p:bodyStyle>${nivel(2800)}</p:bodyStyle><p:otherStyle>${nivel(1800)}</p:otherStyle></p:txStyles></p:sldMaster>`;
+    const nivelCuerpo = (n, margen, tam) => `<a:lvl${n}pPr marL="${margen}" indent="-228600" algn="l"><a:buFont typeface="Arial"/><a:buChar char="•"/><a:defRPr sz="${tam}"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/></a:defRPr></a:lvl${n}pPr>`;
+    const estiloCuerpo = [[1, 228600, 2800], [2, 685800, 2400], [3, 1143000, 2000], [4, 1600200, 1800], [5, 2057400, 1800]].map(([n, m, s]) => nivelCuerpo(n, m, s)).join('');
+    const patron = D + `<p:sldMaster ${ns}>` + arbol(marcador(2, 'Título 1', 'title', 838200, 365125, 10515600, 1325563, 4400) + marcador(3, 'Marcador de texto 2', 'body', 838200, 1825625, 10515600, 4351338, 2800, 1)) + mapa
+      + `<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/><p:sldLayoutId id="2147483650" r:id="rId3"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle>${nivel(4400)}</p:titleStyle><p:bodyStyle>${estiloCuerpo}</p:bodyStyle><p:otherStyle>${nivel(1800)}</p:otherStyle></p:txStyles></p:sldMaster>`;
     const diseno = D + `<p:sldLayout ${ns} type="title" preserve="1"><p:cSld name="Diapositiva de título"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>`
-      + marcador(2, 'Título 1', 'ctrTitle', 1524000, 1122363, 9144000, 2387600, 6000) + `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
-    const diapositiva = D + `<p:sld ${ns}>` + arbol() + `<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+      + marcador(2, 'Título 1', 'ctrTitle', 1524000, 1122363, 9144000, 2387600, 6000, undefined, '<a:lvl1pPr algn="ctr"><a:defRPr sz="6000"/></a:lvl1pPr>', 'b') + marcador(3, 'Subtítulo 2', 'subTitle', 1524000, 3602038, 9144000, 1655762, 2400, 1, '<a:lvl1pPr marL="0" indent="0" algn="ctr"><a:buNone/><a:defRPr sz="2400"/></a:lvl1pPr>') + `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
+    const diseno2 = D + `<p:sldLayout ${ns} type="obj" preserve="1"><p:cSld name="Título y objetos"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>`
+      + marcador(2, 'Título 1', 'title', 838200, 365125, 10515600, 1325563, 4400) + marcador(3, 'Marcador de contenido 2', null, 838200, 1825625, 10515600, 4351338, 2800, 1) + `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
+    // marcadores de la diapositiva: sin posición propia (la toman del diseño) y sin texto, como en PowerPoint
+    const marcadorDiap = (id, nombre, tipo, idx) => `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${nombre}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr>${ph(tipo, idx)}</p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="es-ES" dirty="0"/></a:p></p:txBody></p:sp>`;
+    const diapositiva = D + `<p:sld ${ns}>` + arbol(conMarcadores ? marcadorDiap(2, 'Título 1', 'ctrTitle') + marcadorDiap(3, 'Subtítulo 2', 'subTitle', 1) : '') + `<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
     const presentacion = D + `<p:presentation ${ns} saveSubsetFonts="1"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>`
       + `<p:sldIdLst><p:sldId id="256" r:id="rId2"/></p:sldIdLst><p:sldSz cx="12192000" cy="6858000"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`;
     const ct = 'application/vnd.openxmlformats-officedocument.';
     const tipos = D + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'
-      + [['/ppt/presentation.xml', 'presentationml.presentation.main+xml'], ['/ppt/slideMasters/slideMaster1.xml', 'presentationml.slideMaster+xml'], ['/ppt/slideLayouts/slideLayout1.xml', 'presentationml.slideLayout+xml'],
+      + [['/ppt/presentation.xml', 'presentationml.presentation.main+xml'], ['/ppt/slideMasters/slideMaster1.xml', 'presentationml.slideMaster+xml'], ['/ppt/slideLayouts/slideLayout1.xml', 'presentationml.slideLayout+xml'], ['/ppt/slideLayouts/slideLayout2.xml', 'presentationml.slideLayout+xml'],
         ['/ppt/slides/slide1.xml', 'presentationml.slide+xml'], ['/ppt/theme/theme1.xml', 'theme+xml']].map(([r, t]) => `<Override PartName="${r}" ContentType="${ct}${t}"/>`).join('') + '</Types>';
     const zip = new ZipPropio();
     const partes = {
@@ -671,9 +728,11 @@
       'ppt/presentation.xml': presentacion,
       'ppt/_rels/presentation.xml.rels': rels(rel('rId1', 'slideMaster', 'slideMasters/slideMaster1.xml'), rel('rId2', 'slide', 'slides/slide1.xml'), rel('rId3', 'theme', 'theme/theme1.xml')),
       'ppt/slideMasters/slideMaster1.xml': patron,
-      'ppt/slideMasters/_rels/slideMaster1.xml.rels': rels(rel('rId1', 'slideLayout', '../slideLayouts/slideLayout1.xml'), rel('rId2', 'theme', '../theme/theme1.xml')),
+      'ppt/slideMasters/_rels/slideMaster1.xml.rels': rels(rel('rId1', 'slideLayout', '../slideLayouts/slideLayout1.xml'), rel('rId2', 'theme', '../theme/theme1.xml'), rel('rId3', 'slideLayout', '../slideLayouts/slideLayout2.xml')),
       'ppt/slideLayouts/slideLayout1.xml': diseno,
       'ppt/slideLayouts/_rels/slideLayout1.xml.rels': rels(rel('rId1', 'slideMaster', '../slideMasters/slideMaster1.xml')),
+      'ppt/slideLayouts/slideLayout2.xml': diseno2,
+      'ppt/slideLayouts/_rels/slideLayout2.xml.rels': rels(rel('rId1', 'slideMaster', '../slideMasters/slideMaster1.xml')),
       'ppt/slides/slide1.xml': diapositiva,
       'ppt/slides/_rels/slide1.xml.rels': rels(rel('rId1', 'slideLayout', '../slideLayouts/slideLayout1.xml')),
       'ppt/theme/theme1.xml': tema,

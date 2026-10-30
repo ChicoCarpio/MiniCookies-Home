@@ -24,7 +24,7 @@
     'honesta-edita': 'Aquí se editan los objetos (posición, tamaño, giro, relleno, línea), el texto de las formas y las diapositivas.', 'honesta-conserva': 'Se conserva al guardar, sin editar aquí: {0}.', 'honesta-motivos': 'En la diapositiva {0} hay cosas que se dibujan de forma aproximada: {1}.',
     'x-notas': 'notas del orador', 'x-comentarios': 'comentarios', 'x-animaciones': 'animaciones', 'x-transiciones': 'transiciones', 'x-graficos': 'gráficos', 'x-smartart': 'diagramas SmartArt', 'x-incrustados': 'objetos incrustados', 'x-multimedia': 'audio y video', 'x-macros': 'macros', 'x-tablas': 'el texto de tablas y grupos',
     'cmd-editar-texto': 'Editar el texto', 'cmd-negrita': 'Negrita', 'cmd-cursiva': 'Cursiva', 'cmd-subrayado': 'Subrayado', 'cmd-tamano-mas': 'Aumentar el tamaño del texto', 'cmd-tamano-menos': 'Disminuir el tamaño del texto', 'cmd-color-texto': 'Color del texto',
-    'cmd-insertar-texto': 'Cuadro de texto', 'cmd-insertar-forma': 'Formas', 'cmd-insertar-imagen': 'Imagen', 'cmd-pdf': 'Descargar en PDF', 'g-texto': 'Texto', 'g-insertar': 'Insertar', 'aviso-pdf': 'Preparando el PDF…', 'aviso-pdf-listo': 'PDF listo: {0} diapositivas', 'aviso-imagen': 'Elige una imagen PNG, JPEG o GIF', 'texto-nuevo': 'Texto',
+    'cmd-insertar-texto': 'Cuadro de texto', 'cmd-insertar-forma': 'Formas', 'cmd-insertar-imagen': 'Imagen', 'cmd-pdf': 'Descargar en PDF', 'g-texto': 'Texto', 'g-insertar': 'Insertar', 'aviso-pdf': 'Preparando el PDF…', 'aviso-pdf-listo': 'PDF listo: {0} diapositivas', 'aviso-imagen': 'Elige una imagen PNG, JPEG o GIF', 'texto-nuevo': 'Texto', 'g-parrafo': 'Párrafo', 'cmd-vinetas': 'Viñetas', 'cmd-numeracion': 'Numeración', 'cmd-nivel-mas': 'Aumentar el nivel de la lista', 'cmd-nivel-menos': 'Disminuir el nivel de la lista', 'hint-titulo': 'Haz clic para agregar título', 'hint-subtitulo': 'Haz clic para agregar subtítulo', 'hint-texto': 'Haz clic para agregar texto',
     'i-diapositiva': 'Diapositiva', 'i-numero': 'Número', 'i-tamano': 'Tamaño', 'i-formas': 'Formas', 'i-archivo': 'El archivo', 'i-diapositivas': 'Diapositivas', 'i-oculta': 'Oculta',
     'i-objeto': 'Objeto', 'i-nombre': 'Nombre', 'i-tipo': 'Tipo', 'i-x': 'Izquierda (cm)', 'i-y': 'Arriba (cm)', 'i-ancho': 'Ancho (cm)', 'i-alto': 'Alto (cm)', 'i-giro': 'Giro (°)', 'i-relleno': 'Relleno', 'i-linea': 'Línea', 'i-quitar': 'Quitar',
     'obj-forma': 'Forma', 'obj-imagen': 'Imagen', 'obj-grupo': 'Grupo', 'obj-tabla': 'Tabla', 'obj-grafico': 'Gráfico', 'obj-otro': 'Objeto',
@@ -49,7 +49,7 @@
     'honesta-edita': 'Here you edit objects (position, size, rotation, fill, line), the text of shapes and the slides.', 'honesta-conserva': 'Kept as is when saving, not editable here: {0}.', 'honesta-motivos': 'Slide {0} has things that are drawn approximately: {1}.',
     'x-notas': 'speaker notes', 'x-comentarios': 'comments', 'x-animaciones': 'animations', 'x-transiciones': 'transitions', 'x-graficos': 'charts', 'x-smartart': 'SmartArt diagrams', 'x-incrustados': 'embedded objects', 'x-multimedia': 'audio and video', 'x-macros': 'macros', 'x-tablas': 'the text of tables and groups',
     'cmd-editar-texto': 'Edit the text', 'cmd-negrita': 'Bold', 'cmd-cursiva': 'Italic', 'cmd-subrayado': 'Underline', 'cmd-tamano-mas': 'Increase text size', 'cmd-tamano-menos': 'Decrease text size', 'cmd-color-texto': 'Text color',
-    'cmd-insertar-texto': 'Text box', 'cmd-insertar-forma': 'Shapes', 'cmd-insertar-imagen': 'Picture', 'cmd-pdf': 'Download as PDF', 'g-texto': 'Text', 'g-insertar': 'Insert', 'aviso-pdf': 'Preparing the PDF…', 'aviso-pdf-listo': 'PDF ready: {0} slides', 'aviso-imagen': 'Choose a PNG, JPEG or GIF picture', 'texto-nuevo': 'Text',
+    'cmd-insertar-texto': 'Text box', 'cmd-insertar-forma': 'Shapes', 'cmd-insertar-imagen': 'Picture', 'cmd-pdf': 'Download as PDF', 'g-texto': 'Text', 'g-insertar': 'Insert', 'aviso-pdf': 'Preparing the PDF…', 'aviso-pdf-listo': 'PDF ready: {0} slides', 'aviso-imagen': 'Choose a PNG, JPEG or GIF picture', 'texto-nuevo': 'Text', 'g-parrafo': 'Paragraph', 'cmd-vinetas': 'Bullets', 'cmd-numeracion': 'Numbering', 'cmd-nivel-mas': 'Increase list level', 'cmd-nivel-menos': 'Decrease list level', 'hint-titulo': 'Click to add title', 'hint-subtitulo': 'Click to add subtitle', 'hint-texto': 'Click to add text',
     'i-diapositiva': 'Slide', 'i-numero': 'Number', 'i-tamano': 'Size', 'i-formas': 'Shapes', 'i-archivo': 'The file', 'i-diapositivas': 'Slides', 'i-oculta': 'Hidden',
     'i-objeto': 'Object', 'i-nombre': 'Name', 'i-tipo': 'Type', 'i-x': 'Left (cm)', 'i-y': 'Top (cm)', 'i-ancho': 'Width (cm)', 'i-alto': 'Height (cm)', 'i-giro': 'Rotation (°)', 'i-relleno': 'Fill', 'i-linea': 'Line', 'i-quitar': 'None',
     'obj-forma': 'Shape', 'obj-imagen': 'Picture', 'obj-grupo': 'Group', 'obj-tabla': 'Table', 'obj-grafico': 'Chart', 'obj-otro': 'Object',
@@ -81,7 +81,8 @@
     ...ASAS.map(([n]) => crearEl('span', { class: 'pr-asa pr-asa-' + n, dataset: { asa: n } })),
     crearEl('span', { class: 'pr-asa pr-asa-giro', dataset: { asa: 'giro' } }),
   ]);
-  const sobre = crearEl('div', { class: 'pr-sobre', id: 'sobreDiapositiva', tabindex: '0' }, [caja]);
+  const hints = crearEl('div', { class: 'pr-hints', 'aria-hidden': 'true' });
+  const sobre = crearEl('div', { class: 'pr-sobre', id: 'sobreDiapositiva', tabindex: '0' }, [hints, caja]);
   const marco = crearEl('div', { class: 'pr-diapositiva', id: 'diapositiva' }, [lienzoPrincipal, sobre]);
   const escenario = crearEl('div', { class: 'pr-escenario', id: 'escenario' }, [marco]);
   const interfaz = Oficina.montar($('app'), { nombre: 'nombre-app', inicio: '../', riel: false });
@@ -268,7 +269,20 @@
   const seleccionables = () => (diapActual ? diapActual.elementos.filter((e) => e.origen && e.origen.capa === 'diapositiva' && e.origen.camino.length === 1 && e.xfrm) : []);
   const elementoSel = () => (sel ? seleccionables().find((e) => claveDe(e) === sel.clave) || null : null);
   function tipoDe(e) { return { forma: 'obj-forma', imagen: 'obj-imagen', grupo: 'obj-grupo', tabla: 'obj-tabla', grafico: 'obj-grafico' }[e.tipo] || 'obj-otro'; }
-  function reponerSeleccion() { if (sel && !elementoSel()) sel = null; pintarCaja(); }
+  function reponerSeleccion() { if (sel && !elementoSel()) sel = null; pintarCaja(); pintarMarcadores(); }
+  // Como PowerPoint: un marcador (título, subtítulo, contenido) sin texto muestra «Haz clic para agregar…» al editar; no sale en la presentación ni en el PDF
+  function pintarMarcadores() {
+    hints.textContent = '';
+    if (lectura || !modelo || !diapActual) return;
+    const s = escala(), pt = marco.clientWidth / (modelo.ancho / 12700);
+    for (const e of seleccionables()) {
+      if (!e.origen.marcador || !e.origen.texto || e.texto || (editor && editor.camino.join('/') === e.origen.camino.join('/'))) continue;
+      const clave = { title: 'hint-titulo', ctrTitle: 'hint-titulo', subTitle: 'hint-subtitulo' }[e.origen.marcadorTipo] || 'hint-texto', r = e.xfrm;
+      const d = crearEl('div', { class: 'pr-hint' }, [tx(clave)]);
+      Object.assign(d.style, { left: r.x * s + 'px', top: r.y * s + 'px', width: r.w * s + 'px', height: r.h * s + 'px', transform: 'rotate(' + (r.rot || 0) + 'deg)', fontSize: Math.max(10, 18 * pt * 0.6) + 'px' });
+      hints.append(d);
+    }
+  }
   function pintarCaja(forzada) {
     const e = elementoSel();
     if (!e || lectura) { caja.hidden = true; return; }
@@ -339,7 +353,12 @@
   const terminarGesto = async (cancelar) => {
     const g = gesto; gesto = null; quitarGuias();
     if (!g) return;
-    if (cancelar || !g.movido) { pintarCaja(); return; }
+    if (cancelar || !g.movido) {
+      pintarCaja();
+      const e = elementoSel();
+      if (!cancelar && g.modo === 'mover' && e && e.origen.marcador && e.origen.texto && !e.texto && haySel()) editarTexto();
+      return;
+    }
     await aplicarCaja(g.r, g.modo === 'giro' ? 'Girar' : g.modo === 'tam' ? 'Tamaño' : 'Mover');
   };
   sobre.addEventListener('pointerup', () => terminarGesto(false));
@@ -413,11 +432,13 @@
     area.value = inicial.join('\n');
     Object.assign(area.style, { left: r.x * s + 'px', top: r.y * s + 'px', width: Math.max(60, r.w * s) + 'px', height: Math.max(30, r.h * s) + 'px', transform: 'rotate(' + (r.rot || 0) + 'deg)', fontSize: Math.max(8, (t.tamano || 18) * pt) + 'px', fontFamily: (t.fuente ? '"' + t.fuente + '", ' : '') + 'Carlito, Calibri, "Liberation Sans", Arial, sans-serif', fontWeight: t.negrita ? '700' : '400', fontStyle: t.cursiva ? 'italic' : 'normal' });
     editor = { area, camino: sel.camino.slice(), diap: actual, inicial };
+    pintarMarcadores();
     marco.append(area);
     area.addEventListener('keydown', (ev) => {
       const atajo = (ev.ctrlKey || ev.metaKey) && !ev.altKey && { b: 'negrita', i: 'cursiva', u: 'subrayado' }[ev.key.toLowerCase()];
       if (ev.key === 'Escape') { ev.preventDefault(); cerrarEditor(false); } else if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); cerrarEditor(true); }
       else if (atajo) { ev.preventDefault(); comandos.ejecutar(atajo); }
+      else if (ev.key === 'Tab' && !ev.ctrlKey && !ev.altKey) { ev.preventDefault(); comandos.ejecutar(ev.shiftKey ? 'nivelMenos' : 'nivelMas'); }
       ev.stopPropagation();
     });
     area.addEventListener('blur', () => cerrarEditor(true, true));
@@ -457,6 +478,7 @@
     const s = seleccionDe(ed.area);
     rango = guardar && porPerderFoco && s.fin > s.ini ? { diap: ed.diap, camino: ed.camino, ini: s.ini, fin: s.fin, hasta: Date.now() + 15000 } : null;   // solo si se cerró al perder el foco (p. ej. el selector de color) y por poco tiempo
     editor = null;
+    pintarMarcadores();
     const nuevo = ed.area.value.split('\n');
     ed.area.remove();
     if (guardar && nuevo.join('\n') !== ed.inicial.join('\n')) await hacer('Texto', () => pe.opTexto(ed.diap, ed.camino, nuevo), { fusionar: 'texto:' + ed.camino.join('/') });
@@ -481,6 +503,24 @@
       return;
     }
     return enSel('Formato', (i, c) => pe.opFormatoTexto(i, c, f));
+  }
+
+  // Viñetas, numeración y nivel: por párrafo. Con el cuadro de texto abierto, los párrafos que toca la selección; si no, todos los del objeto.
+  const parrafoActual = () => {
+    const e = elementoSel();
+    if (!e || !e.texto) return null;
+    const k = editor ? editor.area.value.slice(0, editor.area.selectionStart).split('\n').length - 1 : 0;
+    return e.texto.parrafos[Math.min(k, e.texto.parrafos.length - 1)] || null;
+  };
+  const tipoVineta = () => { const p = parrafoActual(); return p && p.vineta ? p.vineta.tipo : null; };
+  async function formatearParrafos(f) {
+    if (!haySel()) return;
+    const a = editor && editor.area, v = a ? a.value : '';
+    const desde = a ? v.slice(0, a.selectionStart).split('\n').length - 1 : 0, hasta = a ? v.slice(0, a.selectionEnd).split('\n').length - 1 : 1e6;
+    const camino = sel.camino.slice(), diap = actual, ini = a && a.selectionStart, fin = a && a.selectionEnd, estaba = !!editor;
+    if (estaba) await cerrarEditor(true);
+    await hacer('Párrafo', () => pe.opFormatoParrafo(diap, camino, desde, hasta, f));
+    if (estaba) { await cadena; await editarTexto(); if (editor) { editor.area.setSelectionRange(ini, fin); leerFormatoRango(); } }
   }
 
   // ---- insertar: cuadro de texto e imagen ---------------------------------------------------------------------------------------------------------------------
@@ -776,6 +816,7 @@
     for (const b of panel.children) b.draggable = !lectura;
     if (lectura && sel) sel = null;
     pintarCaja();
+    pintarMarcadores();
     actualizarInspector();
   }
 
@@ -804,6 +845,10 @@
   reg({ id: 'negrita', texto: 'cmd-negrita', atajo: 'mod+b', ejecutar: () => formatear({ negrita: !formatoActual().negrita }), habilitado: conTexto, activo: () => !!formatoActual().negrita });
   reg({ id: 'cursiva', texto: 'cmd-cursiva', atajo: 'mod+i', ejecutar: () => formatear({ cursiva: !formatoActual().cursiva }), habilitado: conTexto, activo: () => !!formatoActual().cursiva });
   reg({ id: 'subrayado', texto: 'cmd-subrayado', atajo: 'mod+u', ejecutar: () => formatear({ subrayado: !formatoActual().subrayado }), habilitado: conTexto, activo: () => !!formatoActual().subrayado });
+  reg({ id: 'vinetas', texto: 'cmd-vinetas', ejecutar: () => formatearParrafos({ vineta: tipoVineta() === 'caracter' ? 'ninguna' : 'punto' }), habilitado: conTexto, activo: () => tipoVineta() === 'caracter' });
+  reg({ id: 'numeracion', texto: 'cmd-numeracion', ejecutar: () => formatearParrafos({ vineta: tipoVineta() === 'numero' ? 'ninguna' : 'numero' }), habilitado: conTexto, activo: () => tipoVineta() === 'numero' });
+  reg({ id: 'nivelMas', texto: 'cmd-nivel-mas', ejecutar: () => formatearParrafos({ nivel: 1 }), habilitado: conTexto });
+  reg({ id: 'nivelMenos', texto: 'cmd-nivel-menos', ejecutar: () => formatearParrafos({ nivel: -1 }), habilitado: conTexto });
   reg({ id: 'tamanoMas', texto: 'cmd-tamano-mas', ejecutar: () => formatear({ tamano: Math.min(400, (formatoActual().tamano || 18) + 2) }), habilitado: conTexto });
   reg({ id: 'tamanoMenos', texto: 'cmd-tamano-menos', ejecutar: () => formatear({ tamano: Math.max(6, (formatoActual().tamano || 18) - 2) }), habilitado: conTexto });
   reg({ id: 'colorTexto', texto: 'cmd-color-texto', ejecutar: (hex) => hex && formatear({ color: String(hex).replace('#', '') }), habilitado: conTexto });
@@ -829,6 +874,7 @@
     { id: 'inicio', texto: 'tab-inicio', grupos: [
       { texto: 'g-diapositivas', items: [{ comando: 'nuevaDiap', icono: '＋', conTexto: true }, { comando: 'duplicarDiap', icono: '⧉' }, { comando: 'borrarDiap', icono: '🗑' }, { comando: 'subirDiap', icono: '▲' }, { comando: 'bajarDiap', icono: '▼' }] },
       { texto: 'g-texto', items: [{ comando: 'negrita', icono: 'B' }, { comando: 'cursiva', icono: 'I' }, { comando: 'subrayado', icono: 'U' }, { comando: 'tamanoMenos', icono: 'A−' }, { comando: 'tamanoMas', icono: 'A+' }, { comando: 'colorTexto', tipo: 'color', icono: 'A', porDefecto: '#000000' }, { comando: 'editarTexto', icono: '✎' }] },
+      { texto: 'g-parrafo', items: [{ comando: 'vinetas', icono: '•≡' }, { comando: 'numeracion', icono: '1.' }, { comando: 'nivelMenos', icono: '⇤' }, { comando: 'nivelMas', icono: '⇥' }] },
       { texto: 'g-insertar', items: [{ comando: 'insertarTexto', icono: '𝐓', conTexto: true }, { comando: 'insertarForma', icono: '◇', conTexto: true }, { comando: 'insertarImagen', icono: '🖼', conTexto: true }] },
       { texto: 'g-orden', items: [{ comando: 'frente', icono: '⤒' }, { comando: 'fondo', icono: '⤓' }, { comando: 'eliminarForma', icono: '✕' }] },
       { texto: 'g-presentar', items: [{ comando: 'presentar', icono: '▶', conTexto: true }, { comando: 'presentarAqui', icono: '⏵' }] },

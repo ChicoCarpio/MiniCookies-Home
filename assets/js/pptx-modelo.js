@@ -3,7 +3,7 @@
 //  - abrir(archivo, { zip, imagenes }): puede abrir un ZipPropio ya cargado y compartir la caché de imágenes decodificadas entre aperturas
 //    (después de cada edición se vuelve a leer la diapositiva sin volver a decodificar sus fotos);
 //  - cada elemento lleva `origen` = { capa: 'diapositiva'|'diseno'|'patron', id (cNvPr), ruta de la parte, camino de ids si está en un grupo }:
-//    así el editor sabe qué forma del XML es y si se puede editar (solo las de la diapositiva, como en PowerPoint).
+//    así el editor sabe qué forma del XML es y si se puede editar (solo las de la diapositiva, como en PowerPoint); en un marcador, `marcadorTipo` es su tipo (title, ctrTitle, subTitle, body, obj…).
 // Modelo resuelto de un .pptx: lee el paquete y devuelve, por diapositiva, la
 // lista de lo que hay que dibujar con TODA la herencia ya aplicada (tema →
 // patrón → diseño → marcador → forma), los colores con sus modificadores ya
@@ -418,7 +418,7 @@ const PptxModelo = (() => {
       if (elemento) {
         elemento.nombre = nombre;
         const id = cNvPr ? cNvPr.getAttribute('id') : null;
-        if (ctx.capaOrigen) elemento.origen = { capa: ctx.capaOrigen, id, ruta: ctx.parteActual && ctx.parteActual.ruta, camino: (ctx.caminoOrigen || []).concat(id), marcador: !!datosMarcador(el), texto: el.localName === 'sp' };
+        if (ctx.capaOrigen) elemento.origen = { capa: ctx.capaOrigen, id, ruta: ctx.parteActual && ctx.parteActual.ruta, camino: (ctx.caminoOrigen || []).concat(id), marcador: !!datosMarcador(el), marcadorTipo: (datosMarcador(el) || {}).tipo || null, texto: el.localName === 'sp' };
         salida.push(elemento);
       }
     }
