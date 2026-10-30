@@ -84,7 +84,7 @@
   const sobre = crearEl('div', { class: 'pr-sobre', id: 'sobreDiapositiva', tabindex: '0' }, [caja]);
   const marco = crearEl('div', { class: 'pr-diapositiva', id: 'diapositiva' }, [lienzoPrincipal, sobre]);
   const escenario = crearEl('div', { class: 'pr-escenario', id: 'escenario' }, [marco]);
-  const interfaz = Oficina.montar($('app'), { nombre: 'nombre-app', inicio: './', riel: false });
+  const interfaz = Oficina.montar($('app'), { nombre: 'nombre-app', inicio: '../', riel: false });
   interfaz.lienzo.append(crearEl('div', { class: 'pr-cuerpo' }, [panel, escenario]));
   const insp = Oficina.inspector(interfaz.inspector);
 
