@@ -271,7 +271,16 @@ const PptxTexto = (() => {
           let resto = pz.texto;
           while (resto) {
             let n = resto.length;
-            while (n > 1 && actual.ancho + medir(pz.t, resto.slice(0, n), pz.px) > actual.limite) n--;
+            // el mayor n que entra, por búsqueda binaria: una palabra larga (una dirección pegada)
+            // no mide miles de prefijos en cada maquetado
+            const entra = (k) => actual.ancho + medir(pz.t, resto.slice(0, k), pz.px) <= actual.limite;
+            if (n > 1 && !entra(n)) {
+              let lo = 1, hi = n - 1;
+              while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (entra(mid)) lo = mid; else hi = mid - 1; }
+              n = lo;
+            }
+            // no partir un par sustituto (emoji y otros fuera del plano básico)
+            if (n < resto.length && /[\uD800-\uDBFF]/.test(resto[n - 1])) n = n > 1 ? n - 1 : 2;
             const trozo = resto.slice(0, n);
             const w = medir(pz.t, trozo, pz.px);
             actual.piezas.push({ ...pz, texto: trozo, ancho: w }); actual.ancho += w;
