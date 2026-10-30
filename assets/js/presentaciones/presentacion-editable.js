@@ -681,6 +681,9 @@
   // Es el mínimo que PowerPoint abre sin reparar; se abre con abrir() como cualquier otra.
   // nueva({ marcadores: false }) deja la diapositiva sin marcadores (para armar casos de prueba a mano)
   async function nueva(opciones) {
+    // PowerPoint nombra los diseños según el idioma de la aplicación
+    const enIngles = !!(opciones && opciones.idioma === 'en');
+    const nomDiseno1 = enIngles ? 'Title Slide' : 'Diapositiva de título', nomDiseno2 = enIngles ? 'Title and Content' : 'Título y objetos';
     const conMarcadores = !(opciones && opciones.marcadores === false);
     const D = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
     const A = 'http://schemas.openxmlformats.org/drawingml/2006/main', P = 'http://schemas.openxmlformats.org/presentationml/2006/main';
@@ -708,9 +711,9 @@
     const estiloCuerpo = [[1, 228600, 2800], [2, 685800, 2400], [3, 1143000, 2000], [4, 1600200, 1800], [5, 2057400, 1800]].map(([n, m, s]) => nivelCuerpo(n, m, s)).join('');
     const patron = D + `<p:sldMaster ${ns}>` + arbol(marcador(2, 'Título 1', 'title', 838200, 365125, 10515600, 1325563, 4400) + marcador(3, 'Marcador de texto 2', 'body', 838200, 1825625, 10515600, 4351338, 2800, 1)) + mapa
       + `<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/><p:sldLayoutId id="2147483650" r:id="rId3"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle>${nivel(4400)}</p:titleStyle><p:bodyStyle>${estiloCuerpo}</p:bodyStyle><p:otherStyle>${nivel(1800)}</p:otherStyle></p:txStyles></p:sldMaster>`;
-    const diseno = D + `<p:sldLayout ${ns} type="title" preserve="1"><p:cSld name="Diapositiva de título"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>`
+    const diseno = D + `<p:sldLayout ${ns} type="title" preserve="1"><p:cSld name="${nomDiseno1}"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>`
       + marcador(2, 'Título 1', 'ctrTitle', 1524000, 1122363, 9144000, 2387600, 6000, undefined, '<a:lvl1pPr algn="ctr"><a:defRPr sz="6000"/></a:lvl1pPr>', 'b') + marcador(3, 'Subtítulo 2', 'subTitle', 1524000, 3602038, 9144000, 1655762, 2400, 1, '<a:lvl1pPr marL="0" indent="0" algn="ctr"><a:buNone/><a:defRPr sz="2400"/></a:lvl1pPr>') + `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
-    const diseno2 = D + `<p:sldLayout ${ns} type="obj" preserve="1"><p:cSld name="Título y objetos"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>`
+    const diseno2 = D + `<p:sldLayout ${ns} type="obj" preserve="1"><p:cSld name="${nomDiseno2}"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>`
       + marcador(2, 'Título 1', 'title', 838200, 365125, 10515600, 1325563, 4400) + marcador(3, 'Marcador de contenido 2', null, 838200, 1825625, 10515600, 4351338, 2800, 1) + `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
     // marcadores de la diapositiva: sin posición propia (la toman del diseño) y sin texto, como en PowerPoint
     const marcadorDiap = (id, nombre, tipo, idx) => `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${nombre}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr>${ph(tipo, idx)}</p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="es-ES" dirty="0"/></a:p></p:txBody></p:sp>`;

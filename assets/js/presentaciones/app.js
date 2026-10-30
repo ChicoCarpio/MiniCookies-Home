@@ -9,8 +9,8 @@
   'use strict';
   // ---- textos ----------------------------------------------------------------------------------------------------
   const ES = {
-    'titulo-pagina': 'Presentaciones de PowerPoint en el navegador — Mini Cookies', 'meta-descripcion': 'Abre y edita presentaciones de PowerPoint (.pptx) en el navegador: mueve objetos, ordena diapositivas y presenta, sin instalar nada y sin subir tu archivo. Gratis y sin registro.',
-    'h1': 'Presentaciones', 'intro': 'Abre una presentación de PowerPoint, mueve sus objetos, ordena las diapositivas y preséntala. Al guardar, lo que no tocaste queda exactamente como estaba.',
+    'titulo-pagina': 'Editar PowerPoint (.pptx) en el navegador — Mini Cookies', 'meta-descripcion': 'Abre y edita presentaciones de PowerPoint (.pptx) en el navegador: mueve objetos, ordena diapositivas y presenta, sin instalar nada y sin subir tu archivo. Gratis y sin registro.',
+    'h1': 'Editar PowerPoint (Presentaciones)', 'intro': 'Abre una presentación de PowerPoint, mueve sus objetos, ordena las diapositivas y preséntala. Al guardar, lo que no tocaste queda exactamente como estaba.',
     'zona-arrastre': '🎞️ Arrastra tu archivo aquí o haz clic para elegirlo (.pptx)', 'boton-nuevo': 'Presentación en blanco', 'cargando': 'Abriendo la presentación…',
     'borradores': 'Trabajo sin terminar en este navegador', 'recuperar': 'Recuperar', 'descartar': 'Descartar', 'nombre-app': 'Presentaciones', 'volver-inicio': 'Volver al inicio',
     'nombre-archivo': 'Nombre del archivo', 'mas-opciones': 'Más opciones', 'cinta': 'Cinta', 'inspector': 'Propiedades', 'of-herramientas': 'Herramientas',
@@ -34,7 +34,7 @@
     'error-abrir': 'No se pudo abrir el archivo', 'salir-sin-descargar': 'Hay cambios sin descargar.',
   };
   const EN = {
-    'titulo-pagina': 'PowerPoint presentations in your browser — Mini Cookies', 'meta-descripcion': 'Open and edit PowerPoint presentations (.pptx) in your browser: move objects, reorder slides and present, without installing anything or uploading your file. Free, no sign-up.',
+    'titulo-pagina': 'Edit PowerPoint (.pptx) files in your browser — Mini Cookies', 'meta-descripcion': 'Open and edit PowerPoint presentations (.pptx) in your browser: move objects, reorder slides and present, without installing anything or uploading your file. Free, no sign-up.',
     'h1': 'Presentations', 'intro': 'Open a PowerPoint presentation, move its objects, reorder the slides and present it. When you save, everything you didn’t touch stays exactly as it was.',
     'zona-arrastre': '🎞️ Drop your file here or click to choose it (.pptx)', 'boton-nuevo': 'Blank presentation', 'cargando': 'Opening the presentation…',
     'borradores': 'Unfinished work in this browser', 'recuperar': 'Recover', 'descartar': 'Discard', 'nombre-app': 'Presentations', 'volver-inicio': 'Back to start',
@@ -115,7 +115,7 @@
   }
   async function presentacionNueva() {
     mostrarCargando(true);
-    try { const p = await PresentacionEditable.nueva(); await abrirBytes(await p.generar(), idioma() === 'en' ? 'Presentation1' : 'Presentacion1', { nuevo: true }); } catch (e) { mostrarError(e); }
+    try { const p = await PresentacionEditable.nueva({ idioma: idioma() }); await abrirBytes(await p.generar(), idioma() === 'en' ? 'Presentation1' : 'Presentacion1', { nuevo: true }); } catch (e) { mostrarError(e); }
     mostrarCargando(false);
   }
   function mostrarCargando(si) { $('cargando').hidden = !si; if (si) $('errorInicio').hidden = true; }
@@ -436,7 +436,7 @@
     marco.append(area);
     area.addEventListener('keydown', (ev) => {
       const atajo = (ev.ctrlKey || ev.metaKey) && !ev.altKey && { b: 'negrita', i: 'cursiva', u: 'subrayado' }[ev.key.toLowerCase()];
-      if (ev.key === 'Escape') { ev.preventDefault(); cerrarEditor(false); } else if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); cerrarEditor(true); }
+      if (ev.key === 'Escape') { ev.preventDefault(); cerrarEditor(true); } else if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); cerrarEditor(true); }
       else if (atajo) { ev.preventDefault(); comandos.ejecutar(atajo); }
       else if (ev.key === 'Tab' && !ev.ctrlKey && !ev.altKey) { ev.preventDefault(); comandos.ejecutar(ev.shiftKey ? 'nivelMenos' : 'nivelMas'); }
       ev.stopPropagation();
@@ -550,7 +550,7 @@
     try {
       const bytes = new Uint8Array(await archivo.arrayBuffer());
       const bmp = await createImageBitmap(archivo);
-      const maxW = modelo.ancho * 0.6, maxH = modelo.alto * 0.6, k = Math.min(maxW / bmp.width, maxH / bmp.height);
+      const maxW = modelo.ancho * 0.6, maxH = modelo.alto * 0.6, k = Math.min(9525, maxW / bmp.width, maxH / bmp.height);
       const cx = Math.round(bmp.width * k), cy = Math.round(bmp.height * k);
       const i = actual, caja_ = { x: Math.round((modelo.ancho - cx) / 2), y: Math.round((modelo.alto - cy) / 2), cx, cy };
       const r = await hacer('Imagen', () => pe.opImagen(i, bytes, tipo, caja_));
@@ -664,7 +664,7 @@
   // Lo que el archivo trae y aquí no se edita (se mira una vez, al abrir): se conserva tal cual al guardar.
   let cosas = new Set();
   async function cosasDelArchivo() {
-    const c = new Set(['x-tablas']);
+    const c = new Set();
     const nombres = Object.keys(pe.zip.files);
     const hay = (re) => nombres.some((n) => re.test(n));
     if (hay(/^ppt\/notesSlides\//)) c.add('x-notas');
@@ -678,12 +678,13 @@
       const xml = (await pe.paquete.leer(r)) || '';
       if (/<(?:[\w.-]+:)?timing\b/.test(xml)) c.add('x-animaciones');
       if (/<(?:[\w.-]+:)?transition\b/.test(xml)) c.add('x-transiciones');
-      if (c.has('x-animaciones') && c.has('x-transiciones')) break;
+      if (/<(?:[\w.-]+:)?(?:tbl|grpSp)\b/.test(xml)) c.add('x-tablas');
     }
     return c;
   }
   function lineaHonesta(diap) {
-    const partes = [tx('honesta-edita'), tx('honesta-conserva', [...cosas].map((k) => tx(k)).join(', '))];
+    const partes = [tx('honesta-edita')];
+    if (cosas.size) partes.push(tx('honesta-conserva', [...cosas].map((k) => tx(k)).join(', ')));
     const motivos = diap && diap.motivos ? diap.motivos.map((m) => (typeof m === 'string' ? m : m && (m.motivo || m.mensaje || m.tipo)) || '').filter(Boolean) : [];
     if (motivos.length) partes.push(tx('honesta-motivos', actual + 1, [...new Set(motivos)].slice(0, 4).join(', ')));
     $('lineaHonesta').textContent = partes.join(' ');
