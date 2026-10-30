@@ -722,7 +722,8 @@
   function avisar(texto) { Oficina.aviso($('avisoEstado'), texto, 5000); }
   async function descargar() {
     const bytes = await pe.generar();
-    descargarBlob(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' }), nombreDoc + '.pptx');
+    const conMacros = !!pe.zip.file('ppt/vbaProject.bin'); // como PowerPoint: una presentación con macros se guarda como .pptm
+    descargarBlob(new Blob([bytes], { type: conMacros ? 'application/vnd.ms-powerpoint.presentation.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation' }), nombreDoc + (conMacros ? '.pptm' : '.pptx'));
     hist.marcarGuardado();
     actualizarGuardado();
     avisar(tx('descargado'));
