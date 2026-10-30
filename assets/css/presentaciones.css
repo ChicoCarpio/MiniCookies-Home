@@ -1,0 +1,87 @@
+/* Mini Cookies Presentaciones: lo propio de las diapositivas encima de la interfaz G (suite/nucleo/oficina.css). */
+.pr-cuerpo { flex: 1; min-height: 0; display: flex; }
+
+/* panel de diapositivas: columna de miniaturas a la izquierda */
+.pr-panel { width: 176px; flex: none; overflow-y: auto; background: var(--superficie-alt); border-right: 1px solid var(--gris-borde); padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.pr-mini { position: relative; display: flex; gap: 6px; align-items: flex-start; border: 2px solid transparent; border-radius: 6px; padding: 3px; background: none; font: inherit; color: var(--texto); cursor: pointer; text-align: left; }
+.pr-mini:hover { background: var(--superficie); }
+.pr-mini:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: 1px; }
+.pr-mini[aria-current="true"] { border-color: var(--azul); background: var(--activo-fondo); }
+.pr-mini-n { font-size: 0.72rem; color: var(--texto-suave); min-width: 1.2em; padding-top: 2px; font-variant-numeric: tabular-nums; }
+.pr-mini canvas { display: block; width: 130px; height: auto; background: #fff; border: 1px solid var(--gris-borde); border-radius: 2px; flex: none; }
+
+/* escenario: la diapositiva centrada y a escala */
+.pr-escenario { flex: 1; min-width: 0; min-height: 0; display: grid; place-items: center; overflow: auto; background: var(--gris-fondo); padding: 16px; }
+.pr-diapositiva { position: relative; box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25); background: #fff; line-height: 0; }
+.pr-diapositiva canvas { display: block; width: 100%; height: 100%; }
+.pr-diapositiva.cargando { opacity: 0.6; }
+
+/* celular: las miniaturas pasan a una tira horizontal debajo del escenario */
+@media (max-width: 900px) {
+  .pr-cuerpo { flex-direction: column-reverse; }
+  .pr-panel { width: auto; flex-direction: row; overflow-x: auto; overflow-y: hidden; border-right: none; border-top: 1px solid var(--gris-borde); padding: 6px; gap: 6px; }
+  .pr-mini { flex-direction: column; align-items: center; gap: 2px; flex: none; min-width: 44px; min-height: 44px; }
+  .pr-mini canvas { width: 96px; }
+  .pr-escenario { padding: 8px; }
+}
+
+/* etapa 2: la capa de interacción encima del lienzo (caja de selección y tiradores en el DOM) */
+.pr-panel[hidden] { display: none; }
+.pr-sobre { position: absolute; inset: 0; touch-action: none; outline: none; cursor: default; }
+.pr-sobre:focus-visible { outline: 2px solid var(--azul-oscuro); outline-offset: 2px; }
+.of-lectura .pr-sobre { pointer-events: none; }
+.pr-caja { position: absolute; box-sizing: border-box; border: 2px solid var(--azul); pointer-events: none; transform-origin: 50% 50%; cursor: move; }
+.pr-caja[hidden] { display: none; }
+.pr-caja.bloqueada { border-style: dashed; border-color: var(--texto-suave); }
+.pr-caja.bloqueada .pr-asa { display: none; }
+.pr-asa { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; box-sizing: border-box; background: #fff; border: 2px solid var(--azul); border-radius: 2px; pointer-events: auto; touch-action: none; }
+.pr-asa::after { content: ""; position: absolute; inset: -16px; }   /* área táctil de 44 px sin agrandar el dibujo */
+.pr-asa-nw { left: 0; top: 0; cursor: nwse-resize; } .pr-asa-n { left: 50%; top: 0; cursor: ns-resize; } .pr-asa-ne { left: 100%; top: 0; cursor: nesw-resize; }
+.pr-asa-e { left: 100%; top: 50%; cursor: ew-resize; } .pr-asa-se { left: 100%; top: 100%; cursor: nwse-resize; } .pr-asa-s { left: 50%; top: 100%; cursor: ns-resize; }
+.pr-asa-sw { left: 0; top: 100%; cursor: nesw-resize; } .pr-asa-w { left: 0; top: 50%; cursor: ew-resize; }
+.pr-asa-giro { left: 50%; top: -28px; border-radius: 50%; cursor: grab; }
+.pr-asa-giro::before { content: ""; position: absolute; left: 50%; top: 100%; width: 2px; height: 16px; margin-left: -1px; background: var(--azul); }
+
+/* controles del inspector */
+.pr-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.pr-campo { display: flex; flex-direction: column; gap: 2px; font-size: 0.8rem; color: var(--texto-suave); }
+.pr-campo input[type="number"] { width: 100%; box-sizing: border-box; font: inherit; padding: 4px 6px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); }
+.pr-color { flex-direction: row; align-items: center; gap: 6px; margin-top: 6px; }
+.pr-color span { flex: 1; }
+.pr-color input[type="color"] { width: 40px; height: 30px; padding: 0; border: 1px solid var(--gris-borde); border-radius: 6px; background: none; }
+.pr-color .boton { padding: 4px 8px; font-size: 0.8rem; min-height: 30px; }
+
+/* etapa 3: arrastrar miniaturas y presentar */
+.pr-mini.arrastrando { opacity: 0.5; }
+.pr-presentacion { position: fixed; inset: 0; z-index: 1000; background: #000; display: grid; place-items: center; cursor: pointer; }
+.pr-pres-lienzo { display: block; background: #fff; }
+.pr-pres-contador { position: absolute; left: 12px; bottom: 10px; color: #fff; opacity: 0.6; font-size: 0.85rem; font-variant-numeric: tabular-nums; pointer-events: none; }
+.pr-pres-cerrar { position: absolute; right: 10px; top: 10px; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 1.2rem; cursor: pointer; opacity: 0.5; }
+.pr-pres-cerrar:hover, .pr-pres-cerrar:focus-visible { opacity: 1; }
+@media (max-width: 900px) { .pr-asa { width: 16px; height: 16px; margin: -8px 0 0 -8px; } .pr-asa::after { inset: -14px; } .pr-asa-giro { top: -34px; } }
+
+/* etapa 4: editor de texto sobre el objeto, guías de alineación */
+.pr-editor-texto { position: absolute; z-index: 5; box-sizing: border-box; margin: 0; padding: 4px 6px; resize: none; border: 2px solid var(--azul); background: rgba(255, 255, 255, 0.96); color: #000; line-height: 1.2; outline: none; transform-origin: 50% 50%; border-radius: 0; overflow: auto; }
+.pr-guia { position: absolute; background: #e5007d; pointer-events: none; }
+.pr-guia[hidden] { display: none; }
+.pr-guia-v { top: 0; bottom: 0; width: 1px; }
+.pr-guia-h { left: 0; right: 0; height: 1px; }
+
+/* galería de formas (Insertar → Formas) */
+.pr-galeria { width: min(760px, calc(100vw - 24px)); max-height: min(80vh, 640px); display: flex; flex-direction: column; overflow: hidden; }
+.pr-galeria:not([open]) { display: none; }
+.pr-gal-cabecera { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--gris-borde); }
+.pr-gal-cabecera h2 { margin: 0; font-size: 1.05rem; flex: none; }
+.pr-gal-buscar { flex: 1; min-width: 0; font: inherit; padding: 6px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; background: var(--superficie); color: var(--texto); }
+.pr-gal-cerrar { flex: none; width: 44px; height: 44px; border: none; background: none; color: var(--texto); font-size: 1.1rem; border-radius: 8px; cursor: pointer; }
+.pr-gal-cerrar:hover, .pr-gal-cerrar:focus-visible { background: var(--superficie-alt); }
+.pr-gal-cuerpo { overflow: auto; padding: 4px 12px 12px; }
+.pr-gal-seccion[hidden] { display: none; }
+.pr-gal-seccion h3 { font-size: 0.82rem; color: var(--texto-suave); margin: 12px 0 6px; font-weight: 600; }
+.pr-gal-rejilla { display: flex; flex-wrap: wrap; gap: 4px; }
+.pr-gal-forma { width: 48px; height: 48px; padding: 4px; border: 1px solid transparent; border-radius: 8px; background: none; cursor: pointer; display: grid; place-items: center; }
+.pr-gal-forma[hidden] { display: none; }
+.pr-gal-forma canvas { width: 40px; height: 40px; display: block; pointer-events: none; }
+.pr-gal-forma:hover, .pr-gal-forma:focus-visible { background: var(--activo-fondo); border-color: var(--azul); outline: none; }
+.pr-gal-vacio { padding: 16px; color: var(--texto-suave); text-align: center; margin: 0; }
+.pr-gal-vacio[hidden] { display: none; }

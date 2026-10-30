@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="titulo-pagina">Editar PowerPoint (.pptx) en el navegador — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Edita presentaciones de PowerPoint (.pptx) en el navegador: mueve objetos, escribe en las formas, inserta formas, ordena diapositivas y presenta, sin instalar nada y sin subir tu archivo. Gratis y sin registro.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<link rel="stylesheet" href="../assets/css/oficina.css">
+<link rel="stylesheet" href="../assets/css/presentaciones.css">
+<script>
+window.i18nPagina = {
+  "es": {
+    "titulo-pagina": "Editar PowerPoint (.pptx) en el navegador — Mini Cookies",
+    "meta-descripcion": "Edita presentaciones de PowerPoint (.pptx) en el navegador: mueve objetos, escribe en las formas, inserta formas, ordena diapositivas y presenta, sin instalar nada y sin subir tu archivo. Gratis y sin registro.",
+    "h1": "Editar PowerPoint (Presentaciones)",
+    "intro": "Abre una presentación de PowerPoint, mueve sus objetos, escribe en las formas, ordena las diapositivas y preséntala. Al guardar, lo que no tocaste queda exactamente como estaba.",
+    "zona-arrastre": "🎞️ Arrastra tu archivo aquí o haz clic para elegirlo (.pptx)",
+    "boton-nuevo": "Presentación en blanco",
+    "cargando": "Abriendo la presentación…",
+    "borradores": "Trabajo sin terminar en este navegador",
+    "guia-titulo": "Cómo editar una presentación de PowerPoint (.pptx) en el navegador",
+    "guia-intro": "Presentaciones abre una presentación de PowerPoint, te deja mover sus objetos, escribir en las formas, insertar formas, ordenar las diapositivas y presentarla, y la guarda en su mismo formato. Lo que no tocás queda exactamente como estaba en el archivo.",
+    "guia-paso-1": "Arrastrá tu archivo .pptx o hacé clic para elegirlo. Si solo querés probar, tocá «Presentación en blanco».",
+    "guia-paso-2": "Tocá un objeto para seleccionarlo: arrastralo para moverlo, usá los cuadritos de los bordes para cambiar el tamaño y el círculo de arriba para girarlo. Con doble clic o F2 escribís dentro de una forma.",
+    "guia-paso-3": "En la pestaña Inicio están el formato del texto, los cuadros de texto, las imágenes, las formas y el orden de los objetos. En el panel de miniaturas (abajo en el celular) agregás, duplicás, borrás y reordenás las diapositivas.",
+    "guia-paso-4": "Con F5 presentás desde la primera diapositiva; flechas, espacio o toques para avanzar y Esc para salir.",
+    "guia-paso-5": "Cuando termines, tocá «Descargar»: el archivo sale en formato .pptx.",
+    "guia-consejo-1": "En el celular la presentación se abre para leer; tocá «Editar» para modificarla.",
+    "guia-consejo-2": "Deshacer es Ctrl+Z y rehacer es Ctrl+Y. Ctrl+K abre la lista de todos los comandos, también los que no están a la vista.",
+    "guia-consejo-3": "El formato del texto (negrita, cursiva, tamaño, color) va a lo que tengas seleccionado dentro de la forma, o a la palabra donde está el cursor.",
+    "guia-consejo-4": "Al mover un objeto aparecen guías de alineación con los bordes y centros de la diapositiva y de los demás objetos.",
+    "guia-consejo-5": "El trabajo sin terminar queda como borrador en este navegador y aparece en esta pantalla la próxima vez que entres.",
+    "guia-consejo-6": "Si el archivo trae algo que Presentaciones no edita (animaciones, transiciones, notas, comentarios, gráficos…), una línea debajo de la diapositiva lo avisa y se conserva al guardar.",
+    "guia-p1": "¿Se pierde algo del archivo al guardar?",
+    "guia-r1": "Lo que no editaste se escribe tal como estaba. Si el archivo trae algo que Presentaciones no sabe editar, se conserva y la línea de estado te lo avisa.",
+    "guia-p2": "¿PowerPoint abre el archivo que sale de aquí?",
+    "guia-r2": "Sí: se guarda como un .pptx estándar y en nuestras pruebas PowerPoint lo abre sin pedir reparación.",
+    "guia-p3": "¿Puedo sacar un PDF?",
+    "guia-r3": "Sí, con el comando «Descargar en PDF» (está en el menú ⋯ y en la lista de comandos, Ctrl+K). Las diapositivas ocultas no se incluyen, igual que en PowerPoint.",
+    "guia-p4": "¿Qué pasa con las animaciones y las transiciones?",
+    "guia-r4": "Se conservan tal como estaban al guardar, pero no se reproducen ni se editan aquí."
+  },
+  "en": {
+    "titulo-pagina": "Edit PowerPoint (.pptx) files in your browser — Mini Cookies",
+    "meta-descripcion": "Edit PowerPoint presentations (.pptx) in your browser: move objects, type in shapes, insert shapes, reorder slides and present, without installing anything or uploading your file. Free, no sign-up.",
+    "h1": "Edit PowerPoint (Presentations)",
+    "intro": "Open a PowerPoint presentation, move its objects, type in shapes, reorder the slides and present it. When you save, everything you didn’t touch stays exactly as it was.",
+    "zona-arrastre": "🎞️ Drop your file here or click to choose it (.pptx)",
+    "boton-nuevo": "Blank presentation",
+    "cargando": "Opening the presentation…",
+    "borradores": "Unfinished work in this browser",
+    "guia-titulo": "How to edit a PowerPoint (.pptx) presentation in your browser",
+    "guia-intro": "Presentations opens a PowerPoint presentation, lets you move its objects, type in shapes, insert shapes, reorder the slides and present it, and saves it in its own format. Whatever you don’t touch stays exactly as it was in the file.",
+    "guia-paso-1": "Drop your .pptx file or click to choose it. If you just want to try it, click “Blank presentation”.",
+    "guia-paso-2": "Click an object to select it: drag it to move it, use the squares on its edges to resize it and the circle on top to rotate it. Double-click or press F2 to type inside a shape.",
+    "guia-paso-3": "The Home tab has text formatting, text boxes, pictures, shapes and object order. In the thumbnail panel (at the bottom on a phone) you add, duplicate, delete and reorder slides.",
+    "guia-paso-4": "Press F5 to present from the first slide; arrows, space or taps to advance and Esc to exit.",
+    "guia-paso-5": "When you’re done, click “Download”: the file comes out as a .pptx.",
+    "guia-consejo-1": "On a phone the presentation opens in read mode; tap “Edit” to change it.",
+    "guia-consejo-2": "Undo is Ctrl+Z and redo is Ctrl+Y. Ctrl+K opens the list of every command, including the ones not on screen.",
+    "guia-consejo-3": "Text formatting (bold, italic, size, color) goes to whatever you have selected inside the shape, or to the word where the cursor is.",
+    "guia-consejo-4": "When you move an object, alignment guides appear against the edges and centers of the slide and of the other objects.",
+    "guia-consejo-5": "Unfinished work is kept as a draft in this browser and shows up on this screen the next time you come back.",
+    "guia-consejo-6": "If the file has something Presentations doesn’t edit (animations, transitions, notes, comments, charts…), a line under the slide says so and it is kept when you save.",
+    "guia-p1": "Is anything in the file lost when saving?",
+    "guia-r1": "Whatever you didn’t edit is written back as it was. If the file has something Presentations can’t edit, it is kept and the status line tells you.",
+    "guia-p2": "Does PowerPoint open the file that comes out of here?",
+    "guia-r2": "Yes: it is saved as a standard .pptx and in our tests PowerPoint opens it without asking for repair.",
+    "guia-p3": "Can I get a PDF?",
+    "guia-r3": "Yes, with the “Download as PDF” command (in the ⋯ menu and in the command list, Ctrl+K). Hidden slides are left out, just like in PowerPoint.",
+    "guia-p4": "What happens to animations and transitions?",
+    "guia-r4": "They are kept as they were when you save, but they are not played or edited here."
+  }
+};
+</script>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<!-- Inicio: abrir o crear (aquí van los anuncios; el editor abierto no los lleva) -->
+<div class="of-inicio" id="inicio">
+  <div id="fondoDecorativo"></div>
+
+  <header class="sitio">
+    <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+    <nav class="sitio"><a href="../powerpoint.html" data-i18n="nav-cat-powerpoint">Herramientas de PowerPoint</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+      <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+    </nav>
+  </header>
+  <main>
+    <h1 data-i18n="h1">Editar PowerPoint (Presentaciones)</h1>
+    <p data-i18n="intro">Abre una presentación de PowerPoint, mueve sus objetos, escribe en las formas, ordena las diapositivas y preséntala. Al guardar, lo que no tocaste queda exactamente como estaba.</p>
+    <div class="panel-herramienta">
+      <div class="zona-arrastre" id="zonaArrastre">
+        <span data-i18n="zona-arrastre">🎞️ Arrastra tu archivo aquí o haz clic para elegirlo (.pptx)</span>
+        <input type="file" id="entradaArchivo" accept=".pptx,.pptm" hidden>
+      </div>
+      <div class="of-botones-inicio">
+        <button class="boton" id="botonNuevo" type="button" data-i18n="boton-nuevo">Presentación en blanco</button>
+      </div>
+      <p class="cargando-visor" id="cargando" role="status" hidden data-i18n="cargando">Abriendo la presentación…</p>
+      <p class="mensaje-error" id="errorInicio" role="alert" hidden></p>
+      <section id="seccionBorradores" hidden>
+        <h2 data-i18n="borradores">Trabajo sin terminar en este navegador</h2>
+        <ul class="of-borradores" id="listaBorradores"></ul>
+      </section>
+    </div>
+    <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+      <section class="guia-uso">
+      <h2 data-i18n="guia-titulo">Cómo editar una presentación de PowerPoint (.pptx) en el navegador</h2>
+      <p data-i18n="guia-intro">Presentaciones abre una presentación de PowerPoint, te deja mover sus objetos, escribir en las formas, insertar formas, ordenar las diapositivas y presentarla, y la guarda en su mismo formato. Lo que no tocás queda exactamente como estaba en el archivo.</p>
+      <h3 data-i18n="guia-pasos">Paso a paso</h3>
+      <ol>
+        <li data-i18n="guia-paso-1">Arrastrá tu archivo .pptx o hacé clic para elegirlo. Si solo querés probar, tocá «Presentación en blanco».</li>
+        <li data-i18n="guia-paso-2">Tocá un objeto para seleccionarlo: arrastralo para moverlo, usá los cuadritos de los bordes para cambiar el tamaño y el círculo de arriba para girarlo. Con doble clic o F2 escribís dentro de una forma.</li>
+        <li data-i18n="guia-paso-3">En la pestaña Inicio están el formato del texto, los cuadros de texto, las imágenes, las formas y el orden de los objetos. En el panel de miniaturas (abajo en el celular) agregás, duplicás, borrás y reordenás las diapositivas.</li>
+        <li data-i18n="guia-paso-4">Con F5 presentás desde la primera diapositiva; flechas, espacio o toques para avanzar y Esc para salir.</li>
+        <li data-i18n="guia-paso-5">Cuando termines, tocá «Descargar»: el archivo sale en formato .pptx.</li>
+      </ol>
+      <h3 data-i18n="guia-consejos">Consejos</h3>
+      <ul>
+        <li data-i18n="guia-consejo-1">En el celular la presentación se abre para leer; tocá «Editar» para modificarla.</li>
+        <li data-i18n="guia-consejo-2">Deshacer es Ctrl+Z y rehacer es Ctrl+Y. Ctrl+K abre la lista de todos los comandos, también los que no están a la vista.</li>
+        <li data-i18n="guia-consejo-3">El formato del texto (negrita, cursiva, tamaño, color) va a lo que tengas seleccionado dentro de la forma, o a la palabra donde está el cursor.</li>
+        <li data-i18n="guia-consejo-4">Al mover un objeto aparecen guías de alineación con los bordes y centros de la diapositiva y de los demás objetos.</li>
+        <li data-i18n="guia-consejo-5">El trabajo sin terminar queda como borrador en este navegador y aparece en esta pantalla la próxima vez que entres.</li>
+        <li data-i18n="guia-consejo-6">Si el archivo trae algo que Presentaciones no edita (animaciones, transiciones, notas, comentarios, gráficos…), una línea debajo de la diapositiva lo avisa y se conserva al guardar.</li>
+      </ul>
+      <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+      <details>
+        <summary data-i18n="guia-p1">¿Se pierde algo del archivo al guardar?</summary>
+        <p data-i18n="guia-r1">Lo que no editaste se escribe tal como estaba. Si el archivo trae algo que Presentaciones no sabe editar, se conserva y la línea de estado te lo avisa.</p>
+      </details>
+      <details>
+        <summary data-i18n="guia-p2">¿PowerPoint abre el archivo que sale de aquí?</summary>
+        <p data-i18n="guia-r2">Sí: se guarda como un .pptx estándar y en nuestras pruebas PowerPoint lo abre sin pedir reparación.</p>
+      </details>
+      <details>
+        <summary data-i18n="guia-p3">¿Puedo sacar un PDF?</summary>
+        <p data-i18n="guia-r3">Sí, con el comando «Descargar en PDF» (está en el menú ⋯ y en la lista de comandos, Ctrl+K). Las diapositivas ocultas no se incluyen, igual que en PowerPoint.</p>
+      </details>
+      <details>
+        <summary data-i18n="guia-p4">¿Qué pasa con las animaciones y las transiciones?</summary>
+        <p data-i18n="guia-r4">Se conservan tal como estaban al guardar, pero no se reproducen ni se editan aquí.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="sitio">
+    <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+    <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  </footer>
+</div>
+
+<!-- El editor (arquetipo G): lo arma Oficina.montar (assets/js/oficina/oficina.js) al cargar app.js -->
+<div id="app" hidden></div>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/pptx-xml.js"></script>
+<script src="../vendor/ecma-376-geometrias/5ed-2016/geometrias.js"></script>
+<script src="../assets/js/emf.js"></script>
+<script src="../assets/js/pptx-geometria.js"></script>
+<script src="../assets/js/pptx-estilos-tabla.js"></script>
+<script src="../assets/js/pptx-modelo.js"></script>
+<script src="../assets/js/pptx-texto.js"></script>
+<script src="../assets/js/pptx-grafico-3d.js"></script>
+<script src="../assets/js/pptx-grafico-superficie.js"></script>
+<script src="../assets/js/pptx-grafico.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/pdf-lienzo.js"></script>
+<script src="../assets/js/pptx-dibujo.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/oficina/paquete-editable.js"></script>
+<script src="../assets/js/oficina/historial-doc.js"></script>
+<script src="../assets/js/oficina/comandos.js"></script>
+<script src="../assets/js/oficina/autoguardado.js"></script>
+<script src="../assets/js/oficina/oficina.js"></script>
+<script src="../assets/js/oficina/dialogo.js"></script>
+<script src="../assets/js/presentaciones/presentacion-editable.js"></script>
+<script src="../assets/js/presentaciones/galeria-formas.js"></script>
+<script src="../assets/js/presentaciones/app.js"></script>
+</body>
+</html>
