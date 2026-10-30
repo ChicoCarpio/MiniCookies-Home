@@ -1,4 +1,9 @@
 /*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+// Ampliado el 2026-10-29 para el editor de Presentaciones (herramientas/presentaciones.html); las herramientas de siempre lo usan igual:
+//  - abrir(archivo, { zip, imagenes }): puede abrir un ZipPropio ya cargado y compartir la caché de imágenes decodificadas entre aperturas
+//    (después de cada edición se vuelve a leer la diapositiva sin volver a decodificar sus fotos);
+//  - cada elemento lleva `origen` = { capa: 'diapositiva'|'diseno'|'patron', id (cNvPr), ruta de la parte, camino de ids si está en un grupo }:
+//    así el editor sabe qué forma del XML es y si se puede editar (solo las de la diapositiva, como en PowerPoint); en un marcador, `marcadorTipo` es su tipo (title, ctrTitle, subTitle, body, obj…).
 // Modelo resuelto de un .pptx: lee el paquete y devuelve, por diapositiva, la
 // lista de lo que hay que dibujar con TODA la herencia ya aplicada (tema →
 // patrón → diseño → marcador → forma), los colores con sus modificadores ya
@@ -195,7 +200,7 @@ const PptxModelo = (() => {
   // --- Paquete --------------------------------------------------------------------
   // Las partes XML de un paquete OOXML (con sus relaciones) y sus imágenes, ya
   // leídas una sola vez. Sirve igual para un .pptx que para un .xlsx.
-  function paquete(zip) {
+  function paquete(zip, imagenesCompartidas) {
     const cache = new Map();
     async function leerRels(parte) {
       const a = zip.file(rutaRels(parte));
@@ -218,7 +223,7 @@ const PptxModelo = (() => {
       }
       return cache.get(rutaParte);
     }
-    const imagenes = new Map();
+    const imagenes = imagenesCompartidas || new Map();
     function imagen(rutaImagen) {
       if (!imagenes.has(rutaImagen)) imagenes.set(rutaImagen, cargarImagen(zip, rutaImagen).catch(() => null));
       return imagenes.get(rutaImagen);
@@ -226,11 +231,15 @@ const PptxModelo = (() => {
     return { parte, imagen };
   }
 
-  async function abrir(archivo) {
-    // un .ppt o un .odp se pasa a .pptx antes (si formatos-powerpoint.js está en la página); un .pptx no se toca
-    if (typeof FormatosPowerpoint !== 'undefined') archivo = await FormatosPowerpoint.comoPptx(archivo);
-    const zip = await ZipPropio.loadAsync(archivo);
-    const { parte, imagen } = paquete(zip);
+  async function abrir(archivo, opciones) {
+    const o = opciones || {};
+    let zip = o.zip;
+    if (!zip) {
+      // un .ppt o un .odp se pasa a .pptx antes (si formatos-powerpoint.js está en la página); un .pptx no se toca
+      if (typeof FormatosPowerpoint !== 'undefined') archivo = await FormatosPowerpoint.comoPptx(archivo);
+      zip = await ZipPropio.loadAsync(archivo);
+    }
+    const { parte, imagen } = paquete(zip, o.imagenes);
 
     const pres = await parte('ppt/presentation.xml');
     if (!pres) throw new Error('No se pudo leer ppt/presentation.xml');
@@ -271,13 +280,15 @@ const PptxModelo = (() => {
       for (const capa of capas) {
         const arbol = ruta(capa.p.raiz, 'cSld', 'spTree');
         const esDiapositiva = capa.p === sld;
-        salida.elementos.push(...await leerArbol(arbol, { ...ctx, parteActual: capa.p, cadena: capa.cadena, esDiapositiva }, salida.motivos));
+        const nombreCapa = esDiapositiva ? 'diapositiva' : capa.p === layout ? 'diseno' : 'patron';
+        salida.elementos.push(...await leerArbol(arbol, { ...ctx, parteActual: capa.p, cadena: capa.cadena, esDiapositiva, capaOrigen: nombreCapa, caminoOrigen: [] }, salida.motivos));
       }
+      salida.ruta = diapositivas[i];
       salida.soportada = salida.motivos.length === 0;
       return salida;
     }
 
-    return { ancho, alto, cantidad: diapositivas.length, diapositiva, imagen };
+    return { ancho, alto, cantidad: diapositivas.length, rutas: diapositivas.slice(), diapositiva, imagen };
   }
 
   // --- Contexto de una diapositiva: tema, mapa de colores, fuentes -------------------
@@ -404,7 +415,12 @@ const PptxModelo = (() => {
         case 'grpSp': elemento = await grupo(el, ctx, motivos); break;
         case 'graphicFrame': elemento = await marco(el, ctx, motivos); break;
       }
-      if (elemento) { elemento.nombre = nombre; salida.push(elemento); }
+      if (elemento) {
+        elemento.nombre = nombre;
+        const id = cNvPr ? cNvPr.getAttribute('id') : null;
+        if (ctx.capaOrigen) elemento.origen = { capa: ctx.capaOrigen, id, ruta: ctx.parteActual && ctx.parteActual.ruta, camino: (ctx.caminoOrigen || []).concat(id), marcador: !!datosMarcador(el), marcadorTipo: (datosMarcador(el) || {}).tipo || null, texto: el.localName === 'sp' };
+        salida.push(elemento);
+      }
     }
     return salida;
   }
@@ -413,7 +429,8 @@ const PptxModelo = (() => {
     const grpSpPr = hijo(el, 'grpSpPr');
     const xfrm = leerXfrm(hijo(grpSpPr, 'xfrm'));
     if (!xfrm) return null;
-    const hijosGrupo = await leerArbol(el, ctx, motivos);
+    const idGrupo = ruta(primero(el, ['nvGrpSpPr']), 'cNvPr');
+    const hijosGrupo = await leerArbol(el, { ...ctx, caminoOrigen: (ctx.caminoOrigen || []).concat(idGrupo ? idGrupo.getAttribute('id') : null) }, motivos);
     return { tipo: 'grupo', xfrm, hijos: hijosGrupo.filter((h) => !['nvGrpSpPr', 'grpSpPr'].includes(h.tipo)),
       relleno: relleno(primero(grpSpPr, RELLENOS), ctx.cc, ctx.parteActual) };
   }
