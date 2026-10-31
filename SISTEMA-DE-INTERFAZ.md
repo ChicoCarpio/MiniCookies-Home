@@ -517,7 +517,10 @@ Escáner. Piezas: `assets/css/camara.css` + `assets/js/camara.js` (sección 3).
   los dos temas, como cualquier app de cámara: colores fijos, salvo el acento.
 - **Tres estados** en `data-estado`: `inicio` (sin cámara todavía, sin permiso o sin cámara:
   mensaje, «Activar la cámara» y una `.zona-arrastre` para fotos), `camara` (en vivo) y
-  `revision` (la foto recién sacada **reemplaza** al visor, como en una cámara de verdad).
+  `revision` (la foto recién sacada **reemplaza** al visor, como en una cámara de verdad) y
+  `pagina` (lo ya guardado, abierto desde la `.camara-miniatura` o desde la lista: ✕ · ◀ «Página 2 de 5» ▶
+  en una `.camara-navegacion` · 🗑; al cerrar se vuelve a la cámara). En la barra, lo que no es la
+  acción principal va en botones redondos con nombre accesible: a 390 px no entran tres textos.
 - **Escenario** (`.camara-escenario`): video o `.camara-imagen` con `object-fit: contain`, la
   `.camara-capa` para dibujar encima, `.camara-arriba` (botones redondos, solo en vivo: encima de
   una foto que se edita taparían las esquinas) y `.camara-aviso` (texto corto sobre la imagen; `.error` en rojo).
