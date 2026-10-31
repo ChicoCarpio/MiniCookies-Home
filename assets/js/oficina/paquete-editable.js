@@ -44,8 +44,12 @@
     const leerBytes = async (ruta) => { const e = zip.file(ruta); return e ? e.async('uint8array') : null; };
     function escribir(ruta, datos) { zip.file(ruta, datos); cambiadas.add(ruta); }
     function quitar(ruta) { zip.remove(ruta); cambiadas.add(ruta); }
+    // asegurarTipo y agregarRelacion leen, cambian y escriben una parte con esperas en medio: van de a una, o dos pedidas a la vez se pisarían
+    // (la segunda escribiría sobre la primera y las dos darían el mismo rId)
+    let cola = Promise.resolve();
+    const enCola = (fn) => (...a) => { const r = cola.then(() => fn(...a)); cola = r.catch(() => {}); return r; };
 
-    async function asegurarTipo(parte, tipo) {
+    const asegurarTipo = enCola(async (parte, tipo) => {
       const nombre = '/' + parte.replace(/^\//, '');
       let xml = await leer('[Content_Types].xml');
       if (xml === null) throw new Error('el paquete no tiene [Content_Types].xml');
@@ -56,7 +60,7 @@
       xml = X().aplicar(xml, [{ ini: raiz.iniCierre, fin: raiz.iniCierre, texto: `<Override PartName="${X().escAttr(nombre)}" ContentType="${X().escAttr(tipo)}"/>` }]);
       escribir('[Content_Types].xml', xml);
       return true;
-    }
+    });
 
     async function relaciones(parte) {
       const xml = await leer(rutaRels(parte));
@@ -66,7 +70,7 @@
         id: h.attrs.Id, tipo: h.attrs.Type || '', destino: h.attrs.TargetMode === 'External' ? h.attrs.Target : resolver(parte, h.attrs.Target || ''), externa: h.attrs.TargetMode === 'External',
       }));
     }
-    async function agregarRelacion(parte, tipo, destino) {
+    const agregarRelacion = enCola(async (parte, tipo, destino) => {
       const ruta = rutaRels(parte);
       let xml = await leer(ruta);
       if (xml === null) xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="${RELS_NS}"></Relationships>`;
@@ -80,7 +84,7 @@
       else xml = X().aplicar(xml, [{ ini: raiz.iniCierre, fin: raiz.iniCierre, texto: nodo }]);
       escribir(ruta, xml);
       return id;
-    }
+    });
 
     return {
       zip, leer, leerBytes, escribir, quitar, asegurarTipo, relaciones, agregarRelacion,

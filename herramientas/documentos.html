@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="titulo-pagina">Editar Word (.docx) y OpenDocument (.odt) en el navegador — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Edita documentos de Word (.docx) y de LibreOffice (.odt) en el navegador: escribe, da formato, inserta tablas e imágenes, revisa la ortografía y descarga un PDF, sin instalar nada y sin subir tu archivo. Gratis y sin registro.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<link rel="stylesheet" href="../assets/css/oficina.css">
+<link rel="stylesheet" href="../assets/css/documentos.css">
+<script>
+window.i18nPagina = {
+  "es": {
+    "titulo-pagina": "Editar Word (.docx) y OpenDocument (.odt) en el navegador — Mini Cookies",
+    "meta-descripcion": "Edita documentos de Word (.docx) y de LibreOffice (.odt) en el navegador: escribe, da formato, inserta tablas e imágenes, revisa la ortografía y descarga un PDF, sin instalar nada y sin subir tu archivo. Gratis y sin registro.",
+    "h1": "Editar Word (Documentos)",
+    "intro": "Abre un documento de Word o de LibreOffice, léelo y edítalo. Al guardar, lo que no tocaste queda exactamente como estaba.",
+    "zona-arrastre": "📄 Arrastra tu archivo aquí o haz clic para elegirlo (.docx, .odt)",
+    "boton-nuevo": "Documento en blanco",
+    "cargando": "Abriendo el documento…",
+    "borradores": "Trabajo sin terminar en este navegador",
+    "guia-titulo": "Cómo editar un documento de Word (.docx) o de LibreOffice (.odt) en el navegador",
+    "guia-intro": "Documentos abre un documento de Word o de LibreOffice, te deja escribir, dar formato, insertar tablas e imágenes, revisar la ortografía y sacar un PDF, y lo guarda en su mismo formato. Lo que no tocas queda exactamente como estaba en el archivo.",
+    "guia-paso-1": "Arrastra tu archivo .docx o .odt, o haz clic para elegirlo. Si solo quieres probar, pulsa «Documento en blanco».",
+    "guia-paso-2": "Haz clic donde quieras escribir. La cinta de arriba trae el estilo del párrafo, la fuente, el tamaño, la negrita, la cursiva, el color, la alineación, las viñetas y la numeración.",
+    "guia-paso-3": "En la pestaña Insertar están las tablas, las imágenes, los saltos de página y de sección, los números de página y los encabezados y pies. Con Ctrl+F buscas y reemplazas texto.",
+    "guia-paso-4": "El corrector subraya las palabras que no reconoce (español o inglés); con un clic derecho ves las sugerencias.",
+    "guia-paso-5": "Cuando termines, pulsa «Descargar»: el archivo sale en el mismo formato en que lo abriste. Para un PDF o para pasar el documento de Word a LibreOffice y al revés, usa el menú ⋯.",
+    "guia-consejo-1": "En el celular el documento se abre para leer; pulsa «Editar» para modificarlo.",
+    "guia-consejo-2": "Deshacer es Ctrl+Z y rehacer es Ctrl+Y. Ctrl+K abre la lista de todos los comandos, también los que no están a la vista.",
+    "guia-consejo-3": "El trabajo sin terminar queda como borrador en este navegador y aparece en esta pantalla la próxima vez que entres.",
+    "guia-consejo-4": "Si el archivo trae algo que Documentos no edita (comentarios, cambios controlados, ecuaciones, gráficos…), una línea debajo del documento lo avisa y se conserva al guardar.",
+    "guia-p1": "¿Se pierde algo del archivo al guardar?",
+    "guia-r1": "Lo que no editaste se escribe tal como estaba. Si el archivo trae algo que Documentos no sabe editar, se conserva y la línea de estado te lo avisa.",
+    "guia-p2": "¿Word abre el archivo que sale de aquí?",
+    "guia-r2": "Se guarda como un .docx estándar y lo que no tocaste no cambia. En nuestras pruebas, LibreOffice y python-docx lo leen sin errores; con un .odt, LibreOffice lo abre sin problemas.",
+    "guia-p3": "¿Puedo sacar un PDF?",
+    "guia-r3": "Sí, con el comando «Descargar PDF» (está en el menú ⋯ y en la lista de comandos, Ctrl+K). El texto en idiomas con otros alfabetos (árabe, chino, emoji) sale como imagen dentro del PDF.",
+    "guia-p4": "¿Qué pasa si paso un documento entre Word y LibreOffice?",
+    "guia-r4": "Las órdenes «Descargar como .odt» y «Descargar como .docx» hacen una conversión: baja una copia y el documento abierto sigue igual. Puede perderse algún detalle fino (estilos, notas, campos), por eso se avisa."
+  },
+  "en": {
+    "titulo-pagina": "Edit Word (.docx) and OpenDocument (.odt) files in your browser — Mini Cookies",
+    "meta-descripcion": "Edit Word (.docx) and LibreOffice (.odt) documents in your browser: type, format, insert tables and pictures, check spelling and download a PDF, without installing anything or uploading your file. Free, no sign-up.",
+    "h1": "Edit Word (Documents)",
+    "intro": "Open a Word or LibreOffice document, read it and edit it. When you save, everything you didn’t touch stays exactly as it was.",
+    "zona-arrastre": "📄 Drop your file here or click to choose it (.docx, .odt)",
+    "boton-nuevo": "Blank document",
+    "cargando": "Opening the document…",
+    "borradores": "Unfinished work in this browser",
+    "guia-titulo": "How to edit a Word (.docx) or LibreOffice (.odt) document in your browser",
+    "guia-intro": "Documents opens a Word or LibreOffice document, lets you type, format, insert tables and pictures, check spelling and get a PDF, and saves it in its own format. Whatever you don’t touch stays exactly as it was in the file.",
+    "guia-paso-1": "Drop your .docx or .odt file or click to choose it. If you just want to try it, click “Blank document”.",
+    "guia-paso-2": "Click where you want to type. The ribbon on top has paragraph style, font, size, bold, italic, color, alignment, bullets and numbering.",
+    "guia-paso-3": "The Insert tab has tables, pictures, page and section breaks, page numbers, and headers and footers. Press Ctrl+F to find and replace text.",
+    "guia-paso-4": "The spell checker underlines words it doesn’t recognize (Spanish or English); right-click to see suggestions.",
+    "guia-paso-5": "When you’re done, click “Download”: the file comes out in the same format you opened. For a PDF, or to convert a document between Word and LibreOffice, use the ⋯ menu.",
+    "guia-consejo-1": "On a phone the document opens in read mode; tap “Edit” to change it.",
+    "guia-consejo-2": "Undo is Ctrl+Z and redo is Ctrl+Y. Ctrl+K opens the list of every command, including the ones not on screen.",
+    "guia-consejo-3": "Unfinished work is kept as a draft in this browser and shows up on this screen the next time you come back.",
+    "guia-consejo-4": "If the file has something Documents doesn’t edit (comments, tracked changes, equations, charts…), a line under the document says so and it is kept when you save.",
+    "guia-p1": "Is anything in the file lost when saving?",
+    "guia-r1": "Whatever you didn’t edit is written back as it was. If the file has something Documents can’t edit, it is kept and the status line tells you.",
+    "guia-p2": "Does Word open the file that comes out of here?",
+    "guia-r2": "It is saved as a standard .docx and whatever you didn’t touch doesn’t change. In our tests, LibreOffice and python-docx read it without errors; an .odt opens in LibreOffice without problems.",
+    "guia-p3": "Can I get a PDF?",
+    "guia-r3": "Yes, with the “Download PDF” command (in the ⋯ menu and in the command list, Ctrl+K). Text in other alphabets (Arabic, Chinese, emoji) goes into the PDF as an image.",
+    "guia-p4": "What happens when I move a document between Word and LibreOffice?",
+    "guia-r4": "The “Download as .odt” and “Download as .docx” commands do a conversion: they download a copy and the open document stays as it was. Some fine details (styles, notes, fields) may be lost, so you are warned."
+  }
+};
+</script>
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+<!-- Inicio: abrir o crear (aquí van los anuncios; el editor abierto no los lleva) -->
+<div class="of-inicio" id="inicio">
+  <div id="fondoDecorativo"></div>
+
+  <header class="sitio">
+    <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+    <nav class="sitio"><a href="../word.html" data-i18n="nav-cat-word">Herramientas de Word</a>  <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+      <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+    </nav>
+  </header>
+  <main>
+    <h1 data-i18n="h1">Editar Word (Documentos)</h1>
+    <p data-i18n="intro">Abre un documento de Word o de LibreOffice, léelo y edítalo. Al guardar, lo que no tocaste queda exactamente como estaba.</p>
+    <div class="panel-herramienta">
+      <div class="zona-arrastre" id="zonaArrastre">
+        <span data-i18n="zona-arrastre">📄 Arrastra tu archivo aquí o haz clic para elegirlo (.docx, .odt)</span>
+        <input type="file" id="entradaArchivo" accept=".docx,.docm,.odt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text" hidden>
+      </div>
+      <div class="of-botones-inicio">
+        <button class="boton" id="botonNuevo" type="button" data-i18n="boton-nuevo">Documento en blanco</button>
+      </div>
+      <p class="cargando-visor" id="cargando" role="status" hidden data-i18n="cargando">Abriendo el documento…</p>
+      <p class="mensaje-error" id="errorInicio" role="alert" hidden></p>
+      <section id="seccionBorradores" hidden>
+        <h2 data-i18n="borradores">Trabajo sin terminar en este navegador</h2>
+        <ul class="of-borradores" id="listaBorradores"></ul>
+      </section>
+    </div>
+    <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+    <section class="guia-uso">
+      <h2 data-i18n="guia-titulo">Cómo editar un documento de Word (.docx) o de LibreOffice (.odt) en el navegador</h2>
+      <p data-i18n="guia-intro">Documentos abre un documento de Word o de LibreOffice, te deja escribir, dar formato, insertar tablas e imágenes, revisar la ortografía y sacar un PDF, y lo guarda en su mismo formato. Lo que no tocas queda exactamente como estaba en el archivo.</p>
+      <h3 data-i18n="guia-pasos">Paso a paso</h3>
+      <ol>
+        <li data-i18n="guia-paso-1">Arrastra tu archivo .docx o .odt, o haz clic para elegirlo. Si solo quieres probar, pulsa «Documento en blanco».</li>
+        <li data-i18n="guia-paso-2">Haz clic donde quieras escribir. La cinta de arriba trae el estilo del párrafo, la fuente, el tamaño, la negrita, la cursiva, el color, la alineación, las viñetas y la numeración.</li>
+        <li data-i18n="guia-paso-3">En la pestaña Insertar están las tablas, las imágenes, los saltos de página y de sección, los números de página y los encabezados y pies. Con Ctrl+F buscas y reemplazas texto.</li>
+        <li data-i18n="guia-paso-4">El corrector subraya las palabras que no reconoce (español o inglés); con un clic derecho ves las sugerencias.</li>
+        <li data-i18n="guia-paso-5">Cuando termines, pulsa «Descargar»: el archivo sale en el mismo formato en que lo abriste. Para un PDF o para pasar el documento de Word a LibreOffice y al revés, usa el menú ⋯.</li>
+      </ol>
+      <h3 data-i18n="guia-consejos">Consejos</h3>
+      <ul>
+        <li data-i18n="guia-consejo-1">En el celular el documento se abre para leer; pulsa «Editar» para modificarlo.</li>
+        <li data-i18n="guia-consejo-2">Deshacer es Ctrl+Z y rehacer es Ctrl+Y. Ctrl+K abre la lista de todos los comandos, también los que no están a la vista.</li>
+        <li data-i18n="guia-consejo-3">El trabajo sin terminar queda como borrador en este navegador y aparece en esta pantalla la próxima vez que entres.</li>
+        <li data-i18n="guia-consejo-4">Si el archivo trae algo que Documentos no edita (comentarios, cambios controlados, ecuaciones, gráficos…), una línea debajo del documento lo avisa y se conserva al guardar.</li>
+      </ul>
+      <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+      <details>
+        <summary data-i18n="guia-p1">¿Se pierde algo del archivo al guardar?</summary>
+        <p data-i18n="guia-r1">Lo que no editaste se escribe tal como estaba. Si el archivo trae algo que Documentos no sabe editar, se conserva y la línea de estado te lo avisa.</p>
+      </details>
+      <details>
+        <summary data-i18n="guia-p2">¿Word abre el archivo que sale de aquí?</summary>
+        <p data-i18n="guia-r2">Se guarda como un .docx estándar y lo que no tocaste no cambia. En nuestras pruebas, LibreOffice y python-docx lo leen sin errores; con un .odt, LibreOffice lo abre sin problemas.</p>
+      </details>
+      <details>
+        <summary data-i18n="guia-p3">¿Puedo sacar un PDF?</summary>
+        <p data-i18n="guia-r3">Sí, con el comando «Descargar PDF» (está en el menú ⋯ y en la lista de comandos, Ctrl+K). El texto en idiomas con otros alfabetos (árabe, chino, emoji) sale como imagen dentro del PDF.</p>
+      </details>
+      <details>
+        <summary data-i18n="guia-p4">¿Qué pasa si paso un documento entre Word y LibreOffice?</summary>
+        <p data-i18n="guia-r4">Las órdenes «Descargar como .odt» y «Descargar como .docx» hacen una conversión: baja una copia y el documento abierto sigue igual. Puede perderse algún detalle fino (estilos, notas, campos), por eso se avisa.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="sitio">
+    <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+    <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+  </footer>
+</div>
+
+<!-- El editor (arquetipo G): lo arma Oficina.montar (assets/js/oficina/oficina.js) al cargar app.js -->
+<div id="app" hidden></div>
+<div class="dc-menu-orto" id="menuOrto" role="menu" hidden></div>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/xml-ligero.js"></script>
+<script src="../assets/js/xml-editar.js"></script>
+<script src="../assets/js/docx-base.js"></script>
+<script src="../assets/js/docx-estilos.js"></script>
+<script src="../assets/js/docx-a-contrato.js"></script>
+<script src="../assets/js/docx-desde-contrato.js"></script>
+<script src="../assets/js/odt-lector.js"></script>
+<script src="../assets/js/odt-escritor.js"></script>
+<script src="../assets/js/pptx-texto.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/pdf-lienzo.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/oficina/paquete-editable.js"></script>
+<script src="../assets/js/oficina/historial-doc.js"></script>
+<script src="../assets/js/oficina/comandos.js"></script>
+<script src="../assets/js/oficina/autoguardado.js"></script>
+<script src="../assets/js/oficina/oficina.js"></script>
+<script src="../assets/js/oficina/dialogo.js"></script>
+<script src="../assets/js/documentos/docx-modelo.js"></script>
+<script src="../assets/js/documentos/documento-nuevo.js"></script>
+<script src="../assets/js/documentos/formato-doc.js"></script>
+<script src="../assets/js/documentos/tabla-doc.js"></script>
+<script src="../assets/js/documentos/busqueda-doc.js"></script>
+<script src="../assets/js/documentos/html-doc.js"></script>
+<script src="../vendor/nspell/2.1.5/nspell.js"></script>
+<script src="../assets/js/documentos/corrector-doc.js"></script>
+<script src="../assets/js/documentos/odt-estilos.js"></script>
+<script src="../assets/js/documentos/odt-modelo.js"></script>
+<script src="../assets/js/documentos/odt-formato.js"></script>
+<script src="../assets/js/documentos/odt-listas.js"></script>
+<script src="../assets/js/documentos/odt-tabla.js"></script>
+<script src="../assets/js/documentos/odt-parrafo.js"></script>
+<script src="../assets/js/documentos/edicion-doc.js"></script>
+<script src="../assets/js/documentos/encabezado-doc.js"></script>
+<script src="../assets/js/documentos/bidi.js"></script>
+<script src="../assets/js/documentos/motor-parrafo.js"></script>
+<script src="../assets/js/documentos/maquetador-doc.js"></script>
+<script src="../assets/js/documentos/pintor-doc.js"></script>
+<script src="../assets/js/documentos/capa-accesible.js"></script>
+<script src="../assets/js/documentos/visor-doc.js"></script>
+<script src="../assets/js/documentos/editor-doc.js"></script>
+<script src="../assets/js/documentos/app.js"></script>
+</body>
+</html>
