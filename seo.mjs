@@ -32,7 +32,7 @@ const IMAGEN_SOCIAL = SITIO + '/marca-logo/minicookies_expandido.png';
 const CATEGORIAS = {
   pdf: 'PDF', word: 'Word', 'excel-csv': 'Excel / CSV', powerpoint: 'PowerPoint',
   epub: 'EPUB', markdown: 'Markdown', texto: 'Texto plano', imagenes: 'Imágenes',
-  generales: 'Generales',
+  generales: 'Generales', escaner: 'Escáner',
 };
 
 const escXml = (s) => String(s)
