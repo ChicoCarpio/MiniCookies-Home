@@ -365,6 +365,7 @@ let siguienteId = 0;
 let temporizadorDeteccion = 0;
 let deteccionPrevia = null; // esquinas del cuadro anterior, para mostrar solo lo que se repite
 let toqueCamara = null;     // punto tocado en el visor, en fracción (0..1) del cuadro de video
+let enfoqueSeguido = null;  // { x, y, cuando }: a dónde apunta el enfoque que sigue a la hoja
 let esperandoVista = false;
 let pdfListo = null;         // el PDF ya armado, hasta que cambie el documento (compartir puede pedir un segundo toque)
 
@@ -474,6 +475,7 @@ function buclearDeteccion() {
   const estable = resultado.encontrado && deteccionPrevia
     && resultado.esquinas.every((p, i) => Math.hypot(p.x - deteccionPrevia[i].x, p.y - deteccionPrevia[i].y) < 0.06 * diagonal);
   deteccionPrevia = resultado.encontrado ? resultado.esquinas : null;
+  if (estable) seguirHoja(resultado.esquinas);
   if (estable) {
     c.beginPath();
     resultado.esquinas.forEach((p, i) => (i ? c.lineTo(dx + p.x * k, dy + p.y * k) : c.moveTo(dx + p.x * k, dy + p.y * k)));
@@ -495,13 +497,30 @@ function buclearDeteccion() {
   temporizadorDeteccion = setTimeout(buclearDeteccion, 400);
 }
 
+// El enfoque sigue a la hoja detectada: apunta a su centro y se actualiza cuando la hoja se mueve
+// en el cuadro (más de un 6 %), como mucho cada 1,5 s para que la cámara no esté reenfocando todo el
+// tiempo. Si la persona tocó una hoja, el punto tocado también la sigue: así la elección no se
+// pierde al mover el celular.
+function seguirHoja(esq) {
+  const cx = esq.reduce((s, p) => s + p.x, 0) / 4 / cuadroAnalisis.width;
+  const cy = esq.reduce((s, p) => s + p.y, 0) / 4 / cuadroAnalisis.height;
+  if (toqueCamara) toqueCamara = { x: cx, y: cy, cuando: toqueCamara.cuando };
+  const ahora = performance.now();
+  if (toqueCamara && ahora - toqueCamara.cuando < 2500) return; // está terminando el enfoque del toque
+  const antes = enfoqueSeguido;
+  if (antes && (ahora - antes.cuando < 1500 || Math.hypot(cx - antes.x, cy - antes.y) < 0.06)) return;
+  enfoqueSeguido = { x: cx, y: cy, cuando: ahora };
+  cam.seguir(cx, cy);
+}
+
 // Tocar el visor enfoca ese punto y elige la hoja que está ahí.
 video.addEventListener('click', (e) => {
   if (!cam) return;
   const p = cam.puntoEnVideo(e);
   if (!p) return;
-  toqueCamara = p;
+  toqueCamara = { x: p.x, y: p.y, cuando: performance.now() };
   deteccionPrevia = null;
+  enfoqueSeguido = null;
   cam.enfocarEn(p.x, p.y);
   buclearDeteccion();
 });

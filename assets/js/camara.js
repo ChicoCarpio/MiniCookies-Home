@@ -4,6 +4,7 @@
 //
 //   const cam = await Camara.abrir(video);        // trasera si hay; lanza error si no se puede
 //   cam.enfocarEn(x, y);                          // x, y en fracción (0..1) del cuadro de video
+//   cam.seguir(x, y);                             // enfoque continuo apuntado a un objetivo que se mueve
 //   const p = cam.puntoEnVideo(evento);           // dónde se tocó, en fracción, o null (franja negra)
 //   const lienzo = cam.capturar(4096);            // cuadro actual en un canvas (lado mayor ≤ 4096)
 //   await cam.cambiar();                          // pasa a la siguiente cámara (delantera/trasera…)
@@ -77,6 +78,16 @@ window.Camara = (function () {
         } catch { /* la cámara no acepta enfocar un punto */ }
         clearTimeout(temporizador);
         temporizador = setTimeout(continuo, 2500);
+      },
+      // Seguir un objetivo: el enfoque sigue siendo continuo, pero en esa zona del cuadro.
+      // Pensado para llamarse cada tanto mientras el objetivo se mueve (no después de enfocarEn,
+      // que espera su propio enfoque).
+      async seguir(x, y) {
+        const p = pista();
+        if (!p) return;
+        try {
+          await p.applyConstraints({ advanced: [{ pointsOfInterest: [{ x, y }], ...(modosDeEnfoque(p).includes('continuous') ? { focusMode: 'continuous' } : {}) }] });
+        } catch { /* la cámara no acepta puntos de interés */ }
       },
       puntoEnVideo(evento) {
         if (!video.videoWidth) return null;
