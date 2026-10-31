@@ -1,0 +1,230 @@
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/* Arquetipo H — Cámara (SISTEMA-DE-INTERFAZ.md). Un panel oscuro con forma de app de cámara: el
+   escenario arriba (video en vivo o la foto recién sacada) y la barra del obturador abajo. Va
+   con assets/js/camara.js.
+
+   Es oscuro en los dos temas a propósito, como cualquier app de cámara: los colores van fijos y no
+   con tokens (salvo el acento). No es una capa fija sobre la página: es un bloque alto dentro de
+   ella, así el anuncio sigue en su lugar (regla de Publicidad).
+
+   Marcado:
+   <div class="camara-app" data-estado="inicio|camara|revision">
+     <div class="camara-cabecera"> .camara-pestanas </div>                opcional
+     <div class="camara-escenario"> video / canvas.camara-imagen / canvas.camara-capa
+       <div class="camara-arriba"> botones .camara-boton-redondo (solo en vivo) </div>
+       <p class="camara-aviso"> texto corto sobre la imagen </p>
+     </div>
+     <div class="camara-chips"> .camara-chip (aria-pressed) </div>      opcional
+     <div class="camara-barra"> izquierda · .camara-obturador o acción · derecha </div>
+   </div>
+   Qué se ve en cada estado lo decide la página con hidden; esta hoja solo da la forma. */
+
+.camara-app {
+  --camara-fondo: #0b0b0c;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: min(82vh, 860px);
+  height: min(82svh, 860px);
+  min-height: 420px;
+  background: var(--camara-fondo);
+  color: #f2f2f2;
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+.camara-app [hidden] { display: none !important; }
+
+.camara-escenario {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+.camara-escenario > video,
+.camara-escenario > .camara-imagen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.camara-escenario > video { cursor: crosshair; }
+.camara-imagen.arrastrable { touch-action: none; cursor: crosshair; }
+.camara-capa { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.camara-arriba {
+  position: absolute;
+  top: 10px; left: 10px; right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+.camara-arriba > * { pointer-events: auto; }
+
+.camara-boton-redondo {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.camara-boton-redondo:focus-visible, .camara-chip:focus-visible, .camara-obturador:focus-visible,
+.camara-accion:focus-visible, .camara-miniatura:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+
+/* Franja de arriba, fuera del escenario: lo que va acá nunca tapa la imagen (ni las esquinas
+   que se arrastran). */
+.camara-cabecera { flex: 0 0 auto; display: flex; justify-content: center; padding: 10px 12px 0; }
+
+/* Dos o tres vistas del mismo escenario (p. ej. Recorte | Resultado). */
+.camara-pestanas { display: inline-flex; background: rgba(0, 0, 0, 0.55); border-radius: 999px; padding: 3px; }
+.camara-pestanas button {
+  border: 0; background: transparent; color: #eee;
+  padding: 8px 14px; border-radius: 999px; font: inherit; font-size: 0.9rem; cursor: pointer;
+}
+.camara-pestanas button[aria-pressed="true"] { background: #fff; color: #111; font-weight: 600; }
+
+.camara-aviso {
+  position: absolute;
+  left: 10px; right: 10px; bottom: 10px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #f2f2f2;
+  font-size: 0.85rem;
+  text-align: center;
+  pointer-events: none;
+}
+.camara-aviso.error { background: rgba(153, 27, 27, 0.85); }
+
+/* Fila de opciones que se desplaza de costado. */
+.camara-chips {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 12px 0;
+  scrollbar-width: none;
+}
+.camara-chips::-webkit-scrollbar { display: none; }
+.camara-chip {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #4b4b4b;
+  background: transparent;
+  color: #eee;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.camara-chip[aria-pressed="true"] { background: #fff; color: #111; border-color: #fff; font-weight: 600; }
+.camara-chip:disabled { opacity: 0.45; cursor: default; }
+.camara-separador { flex: 0 0 1px; background: #3a3a3a; margin: 4px 2px; }
+
+/* Ajustes finos (deslizadores) que se abren desde un chip. */
+.camara-ajustes { display: flex; gap: 16px; padding: 10px 16px 0; flex-wrap: wrap; }
+.camara-ajustes label { flex: 1 1 140px; display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: #cfcfcf; }
+.camara-ajustes input[type="range"] { width: 100%; padding: 0; accent-color: var(--azul); }
+
+.camara-barra {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+.camara-barra > :first-child { justify-self: start; }
+.camara-barra > :last-child { justify-self: end; }
+
+.camara-obturador {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: #fff;
+  box-shadow: inset 0 0 0 4px var(--camara-fondo);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.camara-obturador:active { transform: scale(0.92); }
+.camara-obturador:disabled { opacity: 0.4; cursor: default; }
+
+.camara-accion {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 24px;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.camara-accion.secundaria { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.camara-accion.principal { background: var(--azul); color: #1a1a1a; }
+
+/* Anterior · «Página 2 de 5» · siguiente, en el centro de una barra (visor de lo guardado). */
+.camara-navegacion { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; white-space: nowrap; }
+.camara-boton-redondo:disabled { opacity: 0.35; cursor: default; }
+.contenedor-miniaturas .miniatura-pagina { cursor: pointer; }
+
+/* Miniatura de lo último que se guardó, con su contador; lleva a la lista. */
+.camara-miniatura {
+  position: relative;
+  width: 52px; height: 52px;
+  border-radius: 10px;
+  border: 2px solid #fff;
+  background: #222 center / cover no-repeat;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+}
+.camara-miniatura:disabled { opacity: 0.35; cursor: default; border-color: #777; }
+.camara-contador {
+  position: absolute;
+  top: -8px; right: -8px;
+  min-width: 22px; height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--azul);
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+/* Sin cámara todavía (o sin permiso): mensaje y otra forma de entrar. */
+.camara-vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 460px;
+}
+.camara-vacia .zona-arrastre { background: transparent; color: #ddd; border-color: #5a5a5a; width: 100%; }
+
+@media (max-width: 700px) {
+  /* En el celular ocupa la pantalla (menos el encabezado compacto). */
+  .camara-app { height: calc(100vh - 64px); height: calc(100svh - 64px); min-height: 380px; }
+  .camara-obturador { width: 66px; height: 66px; }
+  .camara-accion { padding: 0 14px; }
+}

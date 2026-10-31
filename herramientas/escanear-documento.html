@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Escáner de documentos con la cámara: fotos a PDF, gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Escaneá documentos con la cámara del celular o la computadora: detecta la hoja, corrige la perspectiva, quita sombras y arma un PDF de varias páginas. Gratis, sin registro y sin enviar nada a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/camara.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+  .contenedor-miniaturas .miniatura-pagina canvas { background: #fff; }
+</style>
+<script>
+window.i18nPagina = {
+  es: {
+    'inicio-texto': 'Para escanear, permití el acceso a la cámara o elegí fotos que ya tengas.',
+    'boton-activar': '📷 Activar la cámara',
+    'cambiar-camara': 'Cambiar de cámara',
+    'boton-galeria': 'Elegir fotos',
+    'ver-documento': 'Ver la última página',
+    'pestana-recorte': 'Recorte',
+    'pestana-resultado': 'Resultado',
+    'boton-repetir': '✕ Repetir',
+    'boton-usar': '✓ Usar',
+    'boton-cerrar': 'Cerrar',
+    'boton-quitar-pagina': 'Quitar esta página',
+    'pagina-de': 'Página {n} de {total}',
+    'pagina-anterior': 'Página anterior',
+    'pagina-siguiente': 'Página siguiente',
+    'ver-todas': 'Ver todas las páginas',
+    'pagina-aria': 'Página aprobada',
+    'pagina-n': 'Página {n}',
+    'boton-ajustes': '☀ Ajustes',
+    'titulo-pagina': 'Escáner de documentos con la cámara: fotos a PDF, gratis — Mini Cookies',
+    'meta-descripcion': 'Escaneá documentos con la cámara del celular o la computadora: detecta la hoja, corrige la perspectiva, quita sombras y arma un PDF de varias páginas. Gratis, sin registro y sin enviar nada a ningún servidor.',
+    'h1': 'Escáner de documentos',
+    'intro': 'Sacale una foto a una hoja con la cámara (o elegí fotos que ya tengas): se detecta el papel, se endereza, se le quitan las sombras y se arma un PDF con todas las páginas.',
+    'boton-capturar': 'Capturar página',
+    'ayuda-camara': 'Apuntá a la hoja sobre una superficie que contraste. Si hay más de una, tocá la que querés. Cuando el marco verde la rodea, capturá.',
+    'zona-arrastre': '🖼️ Arrastrá tus fotos acá o hacé clic para elegirlas',
+    'camara-numerada': 'Cámara {n}',
+    'camara-iniciando': 'Iniciando la cámara…',
+    'error-camara': 'No se pudo usar la cámara (revisá el permiso del navegador y que ninguna otra aplicación la esté usando): ',
+    'error-sin-camara': 'Este navegador no permite usar la cámara en esta página.',
+    'error-imagen': 'No se pudo leer esa imagen: ',
+    'lienzo-esquinas-aria': 'Foto con las esquinas de la hoja',
+    'ayuda-esquinas': 'Arrastrá las esquinas hasta los vértices del papel, o tocá la hoja que querés.',
+    'boton-detectar': 'Detectar de nuevo',
+    'boton-cuadro': 'Usar toda la foto',
+    'boton-otra': 'Probar otra hoja ({n}/{total})',
+    'boton-girar-izq': '↺ Girar',
+    'boton-girar-der': '↻ Girar',
+    'aviso-no-detectada': 'No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.',
+    'campo-mejora': 'Mejora',
+    'mejora-original': 'Original',
+    'mejora-color': 'Color',
+    'mejora-gris': 'Grises',
+    'mejora-bn': 'Blanco y negro',
+    'campo-brillo': 'Brillo',
+    'campo-contraste': 'Contraste',
+    'boton-descartar': '✕ Descartar',
+    'paginas-titulo': 'Páginas del documento',
+    'paginas-vacio': 'Todavía no hay páginas. Capturá o elegí una foto para empezar.',
+    'paginas-contador-uno': '1 página',
+    'paginas-contador-varias': '{n} páginas',
+    'campo-tamano': 'Tamaño de página del PDF',
+    'tamano-ajustar-a4': 'Ancho A4, alto según la hoja (recomendado)',
+    'tamano-ajustar-carta': 'Ancho Carta, alto según la hoja',
+    'tamano-a4': 'A4 exacto, con márgenes blancos',
+    'tamano-carta': 'Carta exacto, con márgenes blancos',
+    'boton-pdf': '⬇️ Descargar PDF',
+    'boton-pdf-procesando': 'Armando el PDF…',
+    'error-pdf': 'No se pudo armar el PDF',
+    'boton-compartir': '📤 Compartir',
+    'compartir-titulo': 'Documento escaneado',
+    'error-compartir': 'No se pudo compartir',
+    'compartir-reintentar': 'El PDF ya está listo: tocá «Compartir» otra vez.',
+    'resultado-listo': '✅ PDF descargado.',
+    'orden-titulo': 'Ordenar:',
+    'guia-titulo': 'Cómo escanear un documento con la cámara',
+    'guia-intro': 'Convierte la foto de una hoja en una página limpia: encuentra los bordes del papel, corrige la perspectiva para que quede recta, quita las sombras y deja el fondo blanco. Podés sumar varias páginas y descargarlas juntas en un solo PDF. Funciona con la cámara del celular o de la computadora y también con fotos que ya tengas guardadas.',
+    'guia-pasos': 'Paso a paso',
+    'guia-paso-1': 'Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.',
+    'guia-paso-2': 'Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.',
+    'guia-paso-3': 'Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.',
+    'guia-paso-4': 'Tocá «Usar» y seguí con la próxima hoja. Para volver a ver una página aprobada, tocá la miniatura de la derecha o cualquier página de la lista. Debajo de la cámara podés ordenarlas y elegir el tamaño; después descargá el PDF o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.',
+    'guia-consejos': 'Consejos',
+    'guia-consejo-1': 'La luz pareja ayuda más que cualquier ajuste: evitá que tu propia sombra caiga sobre la hoja.',
+    'guia-consejo-2': '«Blanco y negro» da el archivo más liviano y es el mejor para texto; «Color» sirve si hay sellos, firmas o fotos.',
+    'guia-consejo-3': 'Una superficie que contraste con el papel (una hoja blanca sobre una mesa oscura) hace que la detección sea más precisa.',
+    'guia-consejo-4': 'Con «Brillo» en blanco y negro se decide cuánto del trazo suave (lápiz, tinta clara) se conserva.',
+    'guia-faq': 'Preguntas frecuentes',
+    'guia-p1': '¿Las fotos se suben a algún servidor?',
+    'guia-r1': 'No. La imagen de la cámara se procesa en el propio navegador, y el PDF se arma en tu dispositivo.',
+    'guia-p2': '¿Por qué no detecta mi hoja?',
+    'guia-r2': 'Pasa cuando el papel y la superficie son casi del mismo color, cuando una sombra deja un borde sin contraste o cuando la hoja está pegada a otro objeto parecido. Arrastrá las esquinas a mano. Si la hoja no entra entera en la foto, el marco llega hasta el borde de la imagen.',
+    'guia-p3': '¿La cámara no arranca, qué hago?',
+    'guia-r3': 'Revisá el permiso del navegador para este sitio y que ninguna otra aplicación esté usando la cámara. Si no hay cámara, elegí fotos con el botón 🖼️ o arrastralas.',
+    'guia-p4': '¿Se puede reconocer el texto?',
+    'guia-r4': 'Esta herramienta arma el PDF con las páginas como imagen. Para sacarle el texto, pasá el PDF por «OCR de PDF».'
+  },
+  en: {
+    'inicio-texto': 'To scan, allow camera access or pick photos you already have.',
+    'boton-activar': '📷 Turn on the camera',
+    'cambiar-camara': 'Switch camera',
+    'boton-galeria': 'Pick photos',
+    'ver-documento': 'See the last page',
+    'pestana-recorte': 'Crop',
+    'pestana-resultado': 'Result',
+    'boton-repetir': '✕ Retake',
+    'boton-usar': '✓ Use',
+    'boton-cerrar': 'Close',
+    'boton-quitar-pagina': 'Remove this page',
+    'pagina-de': 'Page {n} of {total}',
+    'pagina-anterior': 'Previous page',
+    'pagina-siguiente': 'Next page',
+    'ver-todas': 'See all pages',
+    'pagina-aria': 'Approved page',
+    'pagina-n': 'Page {n}',
+    'boton-ajustes': '☀ Adjust',
+    'titulo-pagina': 'Document scanner with your camera: photos to PDF, free — Mini Cookies',
+    'meta-descripcion': 'Scan documents with your phone or computer camera: it finds the page, fixes the perspective, removes shadows and builds a multi-page PDF. Free, no sign-up, nothing sent to any server.',
+    'h1': 'Document scanner',
+    'intro': 'Take a photo of a page with your camera (or pick photos you already have): the paper is detected, straightened, cleaned of shadows and put into a PDF with all your pages.',
+    'boton-capturar': 'Capture page',
+    'ayuda-camara': 'Point at the page on a surface that contrasts with it. If there is more than one, tap the one you want. When the green frame surrounds it, capture.',
+    'zona-arrastre': '🖼️ Drop your photos here or click to choose them',
+    'camara-numerada': 'Camera {n}',
+    'camara-iniciando': 'Starting the camera…',
+    'error-camara': 'The camera could not be used (check the browser permission and that no other app is using it): ',
+    'error-sin-camara': 'This browser does not allow using the camera on this page.',
+    'error-imagen': 'That image could not be read: ',
+    'lienzo-esquinas-aria': 'Photo with the corners of the page',
+    'ayuda-esquinas': 'Drag the corners to the corners of the paper, or tap the page you want.',
+    'boton-detectar': 'Detect again',
+    'boton-cuadro': 'Use the whole photo',
+    'boton-otra': 'Try another page ({n}/{total})',
+    'boton-girar-izq': '↺ Rotate',
+    'boton-girar-der': '↻ Rotate',
+    'aviso-no-detectada': 'The edge of the page was not found: the whole photo is used. Drag the corners if needed.',
+    'campo-mejora': 'Enhancement',
+    'mejora-original': 'Original',
+    'mejora-color': 'Color',
+    'mejora-gris': 'Grayscale',
+    'mejora-bn': 'Black and white',
+    'campo-brillo': 'Brightness',
+    'campo-contraste': 'Contrast',
+    'boton-descartar': '✕ Discard',
+    'paginas-titulo': 'Document pages',
+    'paginas-vacio': 'No pages yet. Capture or pick a photo to start.',
+    'paginas-contador-uno': '1 page',
+    'paginas-contador-varias': '{n} pages',
+    'campo-tamano': 'PDF page size',
+    'tamano-ajustar-a4': 'A4 width, height from the page (recommended)',
+    'tamano-ajustar-carta': 'Letter width, height from the page',
+    'tamano-a4': 'Exact A4, with white margins',
+    'tamano-carta': 'Exact Letter, with white margins',
+    'boton-pdf': '⬇️ Download PDF',
+    'boton-pdf-procesando': 'Building the PDF…',
+    'error-pdf': 'The PDF could not be built',
+    'boton-compartir': '📤 Share',
+    'compartir-titulo': 'Scanned document',
+    'error-compartir': 'Could not share',
+    'compartir-reintentar': 'The PDF is ready: tap “Share” again.',
+    'resultado-listo': '✅ PDF downloaded.',
+    'orden-titulo': 'Sort:',
+    'guia-titulo': 'How to scan a document with your camera',
+    'guia-intro': 'It turns the photo of a page into a clean page: it finds the edges of the paper, fixes the perspective so it is straight, removes shadows and leaves a white background. You can add several pages and download them together in a single PDF. It works with a phone or computer camera and with photos you already have.',
+    'guia-pasos': 'Step by step',
+    'guia-paso-1': 'Allow camera access when the browser asks. If you would rather use photos you already have, tap 🖼️ next to the shutter; on a computer you can also drag them in.',
+    'guia-paso-2': 'Put the page on a surface of a different color and point at it. If there is more than one page, tap the one you want: the camera focuses there. When the green frame surrounds it, tap the shutter.',
+    'guia-paso-3': 'The photo appears with the crop. If the corners do not match, drag them or tap the right page; if the photo came out badly, tap “Retake”. In “Result” choose the enhancement (Color, Grayscale or Black and white) and rotate the page if needed.',
+    'guia-paso-4': 'Tap “Use” and go on with the next page. To look at an approved page again, tap the thumbnail on the right or any page in the list. Below the camera you can sort them and choose the size; then download the PDF or tap “Share” to send it by WhatsApp, email or another app.',
+    'guia-consejos': 'Tips',
+    'guia-consejo-1': 'Even light helps more than any adjustment: keep your own shadow off the page.',
+    'guia-consejo-2': '“Black and white” gives the lightest file and is best for text; “Color” is for stamps, signatures or photos.',
+    'guia-consejo-3': 'A surface that contrasts with the paper (a white page on a dark table) makes detection more precise.',
+    'guia-consejo-4': 'With “Brightness” in black and white you decide how much of a soft stroke (pencil, light ink) is kept.',
+    'guia-faq': 'Frequently asked questions',
+    'guia-p1': 'Are the photos uploaded to a server?',
+    'guia-r1': 'No. The camera image is processed in the browser itself, and the PDF is built on your device.',
+    'guia-p2': 'Why does it not detect my page?',
+    'guia-r2': 'It happens when the paper and the surface are almost the same color, when a shadow leaves an edge without contrast, or when the page touches another similar object. Drag the corners by hand. If the page does not fit whole in the photo, the frame reaches the edge of the image.',
+    'guia-p3': 'The camera will not start, what do I do?',
+    'guia-r3': 'Check the browser permission for this site and that no other app is using the camera. If there is no camera, pick photos with the 🖼️ button or drag them in.',
+    'guia-p4': 'Can the text be recognized?',
+    'guia-r4': 'This tool builds the PDF with the pages as images. To get the text out, run the PDF through “PDF OCR”.'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../escaner.html" data-i18n="nav-cat-escaner">Herramientas de escáner</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">Escáner de documentos</h1>
+  <p data-i18n="intro">Sacale una foto a una hoja con la cámara (o elegí fotos que ya tengas): se detecta el papel, se endereza, se le quitan las sombras y se arma un PDF con todas las páginas.</p>
+
+  <div class="camara-app" id="app" data-estado="inicio">
+    <!-- Pestañas de la revisión: en su propia franja, para no tapar las esquinas de la foto -->
+    <div class="camara-cabecera" id="pestanas" hidden>
+      <div class="camara-pestanas">
+        <button type="button" id="pestanaRecorte" aria-pressed="true" data-i18n="pestana-recorte">Recorte</button>
+        <button type="button" id="pestanaResultado" aria-pressed="false" data-i18n="pestana-resultado">Resultado</button>
+      </div>
+    </div>
+    <div class="camara-escenario">
+      <!-- Sin cámara todavía (o sin permiso) -->
+      <div class="camara-vacia" id="vistaInicio">
+        <p data-i18n="inicio-texto">Para escanear, permití el acceso a la cámara o elegí fotos que ya tengas.</p>
+        <button class="camara-accion principal" id="botonActivar" type="button" data-i18n="boton-activar">📷 Activar la cámara</button>
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="zona-arrastre">🖼️ Arrastrá tus fotos acá o hacé clic para elegirlas</span>
+          <input type="file" id="entradaArchivos" accept="image/*" multiple hidden>
+        </div>
+      </div>
+      <!-- En vivo -->
+      <video id="video" muted playsinline hidden></video>
+      <canvas id="capaDeteccion" class="camara-capa" hidden></canvas>
+      <!-- Revisión de la foto recién sacada -->
+      <canvas id="lienzoEsquinas" class="camara-imagen arrastrable" role="img" aria-label="Foto con las esquinas de la hoja" data-i18n-attr="aria-label:lienzo-esquinas-aria" hidden></canvas>
+      <canvas id="lienzoVista" class="camara-imagen" hidden></canvas>
+      <!-- Una página ya aprobada -->
+      <img id="vistaPagina" class="camara-imagen" alt="Página aprobada" data-i18n-attr="alt:pagina-aria" hidden>
+      <div class="camara-arriba">
+        <span></span>
+        <button class="camara-boton-redondo" id="botonCambiarCamara" type="button" hidden title="Cambiar de cámara" aria-label="Cambiar de cámara" data-i18n-attr="title:cambiar-camara;aria-label:cambiar-camara">🔄</button>
+      </div>
+      <p class="camara-aviso" id="aviso" role="status" hidden></p>
+    </div>
+
+    <!-- Herramientas de la revisión: unas para el recorte, otras para el resultado -->
+    <div class="camara-chips" id="chipsRecorte" hidden>
+      <button class="camara-chip" id="botonDetectar" type="button" data-i18n="boton-detectar">Detectar de nuevo</button>
+      <button class="camara-chip" id="botonCuadro" type="button" data-i18n="boton-cuadro">Usar toda la foto</button>
+      <button class="camara-chip" id="botonOtra" type="button" hidden></button>
+    </div>
+    <div class="camara-chips" id="chipsMejora" role="group" aria-label="Mejora" data-i18n-attr="aria-label:campo-mejora" hidden>
+      <button class="camara-chip" type="button" data-mejora="original" aria-pressed="false" data-i18n="mejora-original">Original</button>
+      <button class="camara-chip" type="button" data-mejora="color" aria-pressed="true" data-i18n="mejora-color">Color</button>
+      <button class="camara-chip" type="button" data-mejora="gris" aria-pressed="false" data-i18n="mejora-gris">Grises</button>
+      <button class="camara-chip" type="button" data-mejora="bn" aria-pressed="false" data-i18n="mejora-bn">Blanco y negro</button>
+      <span class="camara-separador"></span>
+      <button class="camara-chip" id="botonGirarIzq" type="button" data-i18n="boton-girar-izq">↺ Girar</button>
+      <button class="camara-chip" id="botonGirarDer" type="button" data-i18n="boton-girar-der">↻ Girar</button>
+      <button class="camara-chip" id="botonAjustes" type="button" aria-pressed="false" data-i18n="boton-ajustes">☀ Ajustes</button>
+    </div>
+    <div class="camara-ajustes" id="ajustes" hidden>
+      <label><span data-i18n="campo-brillo">Brillo</span><input type="range" id="deslizadorBrillo" min="-60" max="60" value="0"></label>
+      <label><span data-i18n="campo-contraste">Contraste</span><input type="range" id="deslizadorContraste" min="-50" max="80" value="0"></label>
+    </div>
+
+    <!-- Barra de la cámara -->
+    <div class="camara-barra" id="barraCamara">
+      <button class="camara-boton-redondo" id="botonGaleria" type="button" title="Elegir fotos" aria-label="Elegir fotos" data-i18n-attr="title:boton-galeria;aria-label:boton-galeria">🖼️</button>
+      <button class="camara-obturador" id="botonCapturar" type="button" disabled title="Capturar página" aria-label="Capturar página" data-i18n-attr="title:boton-capturar;aria-label:boton-capturar"></button>
+      <button class="camara-miniatura" id="botonDocumento" type="button" disabled title="Ver la última página" aria-label="Ver la última página" data-i18n-attr="title:ver-documento;aria-label:ver-documento"><span class="camara-contador" id="contadorMini" hidden>0</span></button>
+    </div>
+    <!-- Visor de las páginas aprobadas -->
+    <div class="camara-chips" id="chipsPagina" hidden>
+      <button class="camara-chip" id="botonVerTodas" type="button" data-i18n="ver-todas">Ver todas las páginas</button>
+    </div>
+    <div class="camara-barra" id="barraPagina" hidden>
+      <button class="camara-boton-redondo" id="botonCerrarPagina" type="button" title="Cerrar" aria-label="Cerrar" data-i18n-attr="title:boton-cerrar;aria-label:boton-cerrar">✕</button>
+      <div class="camara-navegacion">
+        <button class="camara-boton-redondo" id="paginaAnterior" type="button" title="Página anterior" aria-label="Página anterior" data-i18n-attr="title:pagina-anterior;aria-label:pagina-anterior">◀</button>
+        <span id="numeroPagina"></span>
+        <button class="camara-boton-redondo" id="paginaSiguiente" type="button" title="Página siguiente" aria-label="Página siguiente" data-i18n-attr="title:pagina-siguiente;aria-label:pagina-siguiente">▶</button>
+      </div>
+      <button class="camara-boton-redondo" id="botonQuitarPagina" type="button" title="Quitar esta página" aria-label="Quitar esta página" data-i18n-attr="title:boton-quitar-pagina;aria-label:boton-quitar-pagina">🗑</button>
+    </div>
+    <!-- Barra de la revisión -->
+    <div class="camara-barra" id="barraRevision" hidden>
+      <button class="camara-accion secundaria" id="botonDescartar" type="button" data-i18n="boton-repetir">✕ Repetir</button>
+      <span id="infoPagina"></span>
+      <button class="camara-accion principal" id="botonAgregar" type="button" data-i18n="boton-usar">✓ Usar</button>
+    </div>
+  </div>
+
+  <!-- Documento -->
+  <div class="panel-herramienta" id="documento" style="margin-top:20px;">
+    <h2 style="margin:0 0 4px;"><span data-i18n="paginas-titulo">Páginas del documento</span> <small id="contadorPaginas" style="font-weight:400; color:var(--texto-suave);"></small></h2>
+    <p id="paginasVacio" class="nota-suave" data-i18n="paginas-vacio">Todavía no hay páginas. Capturá o elegí una foto para empezar.</p>
+    <p id="mensajeError" class="nota-suave error" hidden></p>
+    <div id="envoltorioBarraOrden"></div>
+    <div class="contenedor-miniaturas" id="gridPaginas"></div>
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-tamano">Tamaño de página del PDF</span>
+        <select id="tamanoPagina">
+          <option value="ajustar-a4" selected data-i18n="tamano-ajustar-a4">Ancho A4, alto según la hoja (recomendado)</option>
+          <option value="ajustar-carta" data-i18n="tamano-ajustar-carta">Ancho Carta, alto según la hoja</option>
+          <option value="a4" data-i18n="tamano-a4">A4 exacto, con márgenes blancos</option>
+          <option value="carta" data-i18n="tamano-carta">Carta exacto, con márgenes blancos</option>
+        </select>
+      </label>
+      <button class="boton" id="botonPdf" type="button" disabled data-i18n="boton-pdf">⬇️ Descargar PDF</button>
+      <button class="boton secundario" id="botonCompartir" type="button" disabled hidden data-i18n="boton-compartir">📤 Compartir</button>
+    </div>
+    <div class="resultado" id="resultadoPdf"><span data-i18n="resultado-listo">✅ PDF descargado.</span></div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo escanear un documento con la cámara</h2>
+    <p data-i18n="guia-intro">Convierte la foto de una hoja en una página limpia: encuentra los bordes del papel, corrige la perspectiva para que quede recta, quita las sombras y deja el fondo blanco. Podés sumar varias páginas y descargarlas juntas en un solo PDF. Funciona con la cámara del celular o de la computadora y también con fotos que ya tengas guardadas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.</li>
+      <li data-i18n="guia-paso-2">Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.</li>
+      <li data-i18n="guia-paso-3">Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.</li>
+      <li data-i18n="guia-paso-4">Tocá «Usar» y seguí con la próxima hoja. Para volver a ver una página aprobada, tocá la miniatura de la derecha o cualquier página de la lista. Debajo de la cámara podés ordenarlas y elegir el tamaño; después descargá el PDF o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">La luz pareja ayuda más que cualquier ajuste: evitá que tu propia sombra caiga sobre la hoja.</li>
+      <li data-i18n="guia-consejo-2">«Blanco y negro» da el archivo más liviano y es el mejor para texto; «Color» sirve si hay sellos, firmas o fotos.</li>
+      <li data-i18n="guia-consejo-3">Una superficie que contraste con el papel (una hoja blanca sobre una mesa oscura) hace que la detección sea más precisa.</li>
+      <li data-i18n="guia-consejo-4">Con «Brillo» en blanco y negro se decide cuánto del trazo suave (lápiz, tinta clara) se conserva.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Las fotos se suben a algún servidor?</summary>
+      <p data-i18n="guia-r1">No. La imagen de la cámara se procesa en el propio navegador, y el PDF se arma en tu dispositivo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Por qué no detecta mi hoja?</summary>
+      <p data-i18n="guia-r2">Pasa cuando el papel y la superficie son casi del mismo color, cuando una sombra deja un borde sin contraste o cuando la hoja está pegada a otro objeto parecido. Arrastrá las esquinas a mano. Si la hoja no entra entera en la foto, el marco llega hasta el borde de la imagen.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿La cámara no arranca, qué hago?</summary>
+      <p data-i18n="guia-r3">Revisá el permiso del navegador para este sitio y que ninguna otra aplicación esté usando la cámara. Si no hay cámara, elegí fotos con el botón 🖼️ o arrastralas.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p4">¿Se puede reconocer el texto?</summary>
+      <p data-i18n="guia-r4">Esta herramienta arma el PDF con las páginas como imagen. Para sacarle el texto, pasá el PDF por «OCR de PDF».</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+<script src="../assets/js/vendor.js"></script>
+<script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/reordenar-tactil.js"></script>
+<script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/camara.js"></script>
+<script src="../assets/js/escaner-documento.js"></script>
+<script>
+const E = EscanerDocumento;
+const LADO_MAX_FUENTE = 4096;   // las fotos más grandes se reducen: ahorra memoria y no mejora el PDF
+const LADO_VISTA = 1200;        // tamaño de los lienzos de la revisión
+const LADO_PAGINA = 2400;       // tamaño de la página que se guarda (A4 a ~290 ppp)
+
+const $ = (id) => document.getElementById(id);
+const app = $('app'), video = $('video'), capa = $('capaDeteccion');
+const lienzoEsquinas = $('lienzoEsquinas'), lienzoVista = $('lienzoVista');
+const gridPaginas = $('gridPaginas');
+
+// --- Estado ---
+let cam = null;            // la cámara abierta (assets/js/camara.js)
+let fuente = null;         // { canvas, datos } de la foto que se está revisando
+let esquinas = null;       // 4 puntos {x, y} en píxeles de la fuente
+let giro = 0;              // cuartos de vuelta de la página
+let modoMejora = 'color';
+let vista = 'recorte';     // pestaña de la revisión: 'recorte' | 'resultado'
+let opciones = [];         // otras hojas posibles de la misma foto (un ticket sobre un formulario son dos)
+let opcionActual = 0;
+let cola = [];             // fotos elegidas que esperan su turno
+const paginas = new Map(); // id -> { blob, ancho, alto }
+let siguienteId = 0;
+let temporizadorDeteccion = 0;
+let deteccionPrevia = null; // esquinas del cuadro anterior, para mostrar solo lo que se repite
+let toqueCamara = null;     // punto tocado en el visor, en fracción (0..1) del cuadro de video
+let enfoqueSeguido = null;  // { x, y, cuando }: a dónde apunta el enfoque que sigue a la hoja
+let esperandoVista = false;
+let pdfListo = null;         // el PDF ya armado, hasta que cambie el documento (compartir puede pedir un segundo toque)
+
+let temporizadorAviso = 0;
+function aviso(texto, error) {
+  const a = $('aviso');
+  a.textContent = texto || '';
+  a.hidden = !texto;
+  a.classList.toggle('error', !!error);
+  // En la revisión el aviso queda sobre la foto y taparía las esquinas de abajo: se va solo.
+  clearTimeout(temporizadorAviso);
+  if (texto && !error && app.dataset.estado === 'revision') temporizadorAviso = setTimeout(() => { a.hidden = true; }, 4000);
+}
+function mostrarError(texto) {
+  const p = $('mensajeError');
+  p.textContent = texto || '';
+  p.hidden = !texto;
+}
+
+// ===================== Estados de la app =====================
+// inicio: sin cámara (aún no, sin permiso o sin cámara) · camara: en vivo · revision: la foto recién sacada
+// pagina: una página ya aprobada, a pantalla de la app (al cerrar se vuelve a la cámara)
+
+function estado(nuevo) {
+  app.dataset.estado = nuevo;
+  const enVivo = nuevo === 'camara', revision = nuevo === 'revision', viendo = nuevo === 'pagina';
+  $('vistaInicio').hidden = nuevo !== 'inicio';
+  video.hidden = !enVivo;
+  capa.hidden = !enVivo;
+  $('botonCambiarCamara').hidden = !enVivo || !cam || cam.cuantas < 2;
+  $('barraCamara').hidden = revision || viendo;
+  $('barraPagina').hidden = !viendo;
+  $('chipsPagina').hidden = !viendo;
+  $('vistaPagina').hidden = !viendo;
+  $('botonCapturar').disabled = !enVivo;
+  $('barraRevision').hidden = !revision;
+  $('pestanas').hidden = !revision;
+  mostrarVista(revision ? vista : null);
+  if (enVivo) aviso(t('ayuda-camara'));
+  else if (!revision) aviso('');
+}
+
+function mostrarVista(v) {
+  lienzoEsquinas.hidden = v !== 'recorte';
+  lienzoVista.hidden = v !== 'resultado';
+  $('chipsRecorte').hidden = v !== 'recorte';
+  $('chipsMejora').hidden = v !== 'resultado';
+  if (v !== 'resultado') { $('ajustes').hidden = true; $('botonAjustes').setAttribute('aria-pressed', 'false'); }
+  $('pestanaRecorte').setAttribute('aria-pressed', String(v === 'recorte'));
+  $('pestanaResultado').setAttribute('aria-pressed', String(v === 'resultado'));
+  if (!v) return;
+  if (v === 'resultado') aviso(''); // el aviso habla del recorte
+  vista = v;
+  if (v === 'recorte') dibujarEsquinas(); else actualizarVista();
+}
+
+// ===================== Cámara =====================
+
+async function iniciarCamara() {
+  aviso(t('camara-iniciando'));
+  try {
+    cam = await Camara.abrir(video);
+    estado('camara');
+    // En el celular, la app de cámara ocupa la pantalla: se la trae a la vista.
+    if (window.matchMedia('(max-width: 700px)').matches) app.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    buclearDeteccion();
+  } catch (error) {
+    cam = null;
+    estado('inicio');
+    aviso(error.name === 'SinCamara' ? t('error-sin-camara') : t('error-camara') + (error.message || error.name), true);
+  }
+}
+
+function apagarCamara() {
+  clearTimeout(temporizadorDeteccion);
+  if (cam) cam.apagar();
+  cam = null;
+  toqueCamara = null;
+}
+
+// Cada ~400 ms se busca la hoja en un cuadro reducido y se dibuja su contorno.
+const cuadroAnalisis = document.createElement('canvas');
+function buclearDeteccion() {
+  clearTimeout(temporizadorDeteccion);
+  if (!cam) return;
+  if (!video.videoWidth || fuente || app.dataset.estado !== 'camara') { // en pausa mientras se revisa o se mira una foto
+    temporizadorDeteccion = setTimeout(buclearDeteccion, 400);
+    return;
+  }
+  const escala = 320 / Math.max(video.videoWidth, video.videoHeight);
+  cuadroAnalisis.width = Math.round(video.videoWidth * escala);
+  cuadroAnalisis.height = Math.round(video.videoHeight * escala);
+  const ctx = cuadroAnalisis.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(video, 0, 0, cuadroAnalisis.width, cuadroAnalisis.height);
+  const resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height), {
+    previa: deteccionPrevia,
+    punto: toqueCamara && { x: toqueCamara.x * cuadroAnalisis.width, y: toqueCamara.y * cuadroAnalisis.height },
+  });
+
+  // La capa mide lo que mide el video en pantalla; el video usa object-fit: contain.
+  const caja = video.getBoundingClientRect();
+  capa.width = Math.round(caja.width);
+  capa.height = Math.round(caja.height);
+  const c = capa.getContext('2d');
+  c.clearRect(0, 0, capa.width, capa.height);
+  const k = Math.min(caja.width / cuadroAnalisis.width, caja.height / cuadroAnalisis.height);
+  const dx = (caja.width - cuadroAnalisis.width * k) / 2, dy = (caja.height - cuadroAnalisis.height * k) / 2;
+  // Un marco que aparece en un solo cuadro es casi siempre un error: se dibuja cuando dos
+  // cuadros seguidos coinciden (cada esquina a menos de un 6 % de la diagonal).
+  const diagonal = Math.hypot(cuadroAnalisis.width, cuadroAnalisis.height);
+  const estable = resultado.encontrado && deteccionPrevia
+    && resultado.esquinas.every((p, i) => Math.hypot(p.x - deteccionPrevia[i].x, p.y - deteccionPrevia[i].y) < 0.06 * diagonal);
+  deteccionPrevia = resultado.encontrado ? resultado.esquinas : null;
+  if (estable) seguirHoja(resultado.esquinas);
+  if (estable) {
+    c.beginPath();
+    resultado.esquinas.forEach((p, i) => (i ? c.lineTo(dx + p.x * k, dy + p.y * k) : c.moveTo(dx + p.x * k, dy + p.y * k)));
+    c.closePath();
+    c.fillStyle = 'rgba(34, 197, 94, 0.18)';
+    c.fill();
+    c.lineWidth = 3;
+    c.strokeStyle = '#22c55e';
+    c.stroke();
+  }
+  if (toqueCamara) {
+    // Dónde tocó la persona: la hoja elegida es la que contiene ese punto.
+    c.beginPath();
+    c.arc(dx + toqueCamara.x * cuadroAnalisis.width * k, dy + toqueCamara.y * cuadroAnalisis.height * k, 10, 0, Math.PI * 2);
+    c.lineWidth = 3;
+    c.strokeStyle = '#fff';
+    c.stroke();
+  }
+  temporizadorDeteccion = setTimeout(buclearDeteccion, 400);
+}
+
+// El enfoque sigue a la hoja detectada: apunta a su centro y se actualiza cuando la hoja se mueve
+// en el cuadro (más de un 6 %), como mucho cada 1,5 s para que la cámara no esté reenfocando todo el
+// tiempo. Si la persona tocó una hoja, el punto tocado también la sigue: así la elección no se
+// pierde al mover el celular.
+function seguirHoja(esq) {
+  const cx = esq.reduce((s, p) => s + p.x, 0) / 4 / cuadroAnalisis.width;
+  const cy = esq.reduce((s, p) => s + p.y, 0) / 4 / cuadroAnalisis.height;
+  if (toqueCamara) toqueCamara = { x: cx, y: cy, cuando: toqueCamara.cuando };
+  const ahora = performance.now();
+  if (toqueCamara && ahora - toqueCamara.cuando < 2500) return; // está terminando el enfoque del toque
+  const antes = enfoqueSeguido;
+  if (antes && (ahora - antes.cuando < 1500 || Math.hypot(cx - antes.x, cy - antes.y) < 0.06)) return;
+  enfoqueSeguido = { x: cx, y: cy, cuando: ahora };
+  cam.seguir(cx, cy);
+}
+
+// Tocar el visor enfoca ese punto y elige la hoja que está ahí.
+video.addEventListener('click', (e) => {
+  if (!cam) return;
+  const p = cam.puntoEnVideo(e);
+  if (!p) return;
+  toqueCamara = { x: p.x, y: p.y, cuando: performance.now() };
+  deteccionPrevia = null;
+  enfoqueSeguido = null;
+  cam.enfocarEn(p.x, p.y);
+  buclearDeteccion();
+});
+
+function capturar() {
+  if (!cam || !video.videoWidth) return;
+  const lienzo = cam.capturar(LADO_MAX_FUENTE);
+  capa.getContext('2d').clearRect(0, 0, capa.width, capa.height);
+  const toque = toqueCamara;
+  toqueCamara = null; // la próxima página suele ser otra hoja
+  abrirRevision(lienzo, toque && { x: toque.x * lienzo.width, y: toque.y * lienzo.height }, 'camara');
+}
+
+// ===================== Fotos elegidas =====================
+
+async function lienzoDeArchivo(archivo) {
+  // createImageBitmap aplica la orientación EXIF de las fotos de celular.
+  const mapa = await createImageBitmap(archivo);
+  const escala = Math.min(1, LADO_MAX_FUENTE / Math.max(mapa.width, mapa.height));
+  const lienzo = document.createElement('canvas');
+  lienzo.width = Math.round(mapa.width * escala);
+  lienzo.height = Math.round(mapa.height * escala);
+  lienzo.getContext('2d').drawImage(mapa, 0, 0, lienzo.width, lienzo.height);
+  mapa.close();
+  return lienzo;
+}
+
+async function siguienteDeLaCola() {
+  if (fuente || !cola.length) return;
+  const archivo = cola.shift();
+  try {
+    abrirRevision(await lienzoDeArchivo(archivo), null, 'archivo');
+  } catch (error) {
+    aviso(t('error-imagen') + archivo.name, true);
+    siguienteDeLaCola();
+  }
+}
+
+conectarZonaArrastre($('zonaArrastre'), $('entradaArchivos'), (archivos) => {
+  cola.push(...archivos.filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(f.name)));
+  siguienteDeLaCola();
+});
+$('botonGaleria').addEventListener('click', () => $('entradaArchivos').click());
+
+// ===================== Revisión de una foto =====================
+
+function abrirRevision(lienzo, punto, origen) {
+  fuente = { canvas: lienzo, datos: lienzo.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, lienzo.width, lienzo.height) };
+  giro = 0;
+  esquinas = null;
+  $('deslizadorBrillo').value = 0;
+  $('deslizadorContraste').value = 0;
+  // De la cámara se repite la foto; una foto elegida se descarta.
+  const clave = origen === 'camara' ? 'boton-repetir' : 'boton-descartar';
+  $('botonDescartar').setAttribute('data-i18n', clave);
+  $('botonDescartar').textContent = t(clave);
+  textoInfoPagina();
+  vista = 'recorte';
+  estado('revision');
+  detectar(punto);
+}
+
+function cerrarRevision() {
+  fuente = null;
+  esquinas = null;
+  if (cola.length) { siguienteDeLaCola(); return; }
+  if (cam) { estado('camara'); buclearDeteccion(); } else estado('inicio');
+}
+
+function textoInfoPagina() {
+  $('infoPagina').textContent = t('pagina-n').replace('{n}', paginas.size + 1);
+}
+
+// punto: {x, y} en píxeles de la foto que la persona tocó (opcional).
+function detectar(punto) {
+  const r = E.detectarEsquinas(fuente.datos, punto ? { punto } : {});
+  esquinas = r.esquinas;
+  opciones = r.encontrado && r.alternativas && r.alternativas.length > 1 ? r.alternativas : [];
+  opcionActual = 0;
+  textoBotonOtra();
+  aviso(r.encontrado ? t('ayuda-esquinas') : t('aviso-no-detectada'));
+  dibujarEsquinas();
+  if (vista === 'resultado') actualizarVista();
+}
+
+function textoBotonOtra() {
+  const b = $('botonOtra');
+  b.hidden = opciones.length < 2;
+  b.textContent = t('boton-otra').replace('{n}', opcionActual + 1).replace('{total}', opciones.length);
+}
+
+function probarOtra() {
+  opcionActual = (opcionActual + 1) % opciones.length;
+  esquinas = opciones[opcionActual].map((p) => ({ x: p.x, y: p.y }));
+  textoBotonOtra();
+  dibujarEsquinas();
+}
+
+function usarTodaLaFoto() {
+  const w = fuente.canvas.width, h = fuente.canvas.height;
+  esquinas = [{ x: 0, y: 0 }, { x: w - 1, y: 0 }, { x: w - 1, y: h - 1 }, { x: 0, y: h - 1 }];
+  aviso('');
+  opciones = [];
+  textoBotonOtra();
+  dibujarEsquinas();
+}
+
+// --- Lienzo del recorte (la foto con las esquinas) ---
+function escalaLienzoEsquinas() {
+  return Math.min(1, LADO_VISTA / Math.max(fuente.canvas.width, fuente.canvas.height));
+}
+
+// El lienzo se muestra con object-fit: contain: lo dibujado ocupa solo una parte de su caja.
+function zonaDibujada() {
+  const caja = lienzoEsquinas.getBoundingClientRect();
+  const k = Math.min(caja.width / lienzoEsquinas.width, caja.height / lienzoEsquinas.height) || 1;
+  return { caja, k, dx: (caja.width - lienzoEsquinas.width * k) / 2, dy: (caja.height - lienzoEsquinas.height * k) / 2 };
+}
+
+function dibujarEsquinas() {
+  if (!fuente || !esquinas || lienzoEsquinas.hidden) return;
+  const k = escalaLienzoEsquinas();
+  const w = Math.round(fuente.canvas.width * k), h = Math.round(fuente.canvas.height * k);
+  if (lienzoEsquinas.width !== w || lienzoEsquinas.height !== h) { lienzoEsquinas.width = w; lienzoEsquinas.height = h; }
+  const c = lienzoEsquinas.getContext('2d');
+  c.drawImage(fuente.canvas, 0, 0, w, h);
+  // Los marcadores miden lo mismo en pantalla sea cual sea el tamaño del lienzo.
+  const px = 1 / zonaDibujada().k;
+  c.beginPath();
+  esquinas.forEach((p, i) => (i ? c.lineTo(p.x * k, p.y * k) : c.moveTo(p.x * k, p.y * k)));
+  c.closePath();
+  c.fillStyle = 'rgba(34, 197, 94, 0.15)';
+  c.fill();
+  c.lineWidth = 2.5 * px;
+  c.strokeStyle = '#22c55e';
+  c.stroke();
+  for (const p of esquinas) {
+    c.beginPath();
+    c.arc(p.x * k, p.y * k, 12 * px, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    c.fill();
+    c.lineWidth = 3 * px;
+    c.strokeStyle = '#16a34a';
+    c.stroke();
+  }
+}
+
+let esquinaArrastrada = -1;
+let toqueEditor = null;
+function puntoEnFuente(evento) {
+  const { caja, k, dx, dy } = zonaDibujada();
+  const kf = escalaLienzoEsquinas();
+  return {
+    x: (evento.clientX - caja.left - dx) / k / kf,
+    y: (evento.clientY - caja.top - dy) / k / kf,
+    pxPorPantalla: 1 / k / kf,
+  };
+}
+lienzoEsquinas.addEventListener('pointerdown', (e) => {
+  if (!fuente) return;
+  const p = puntoEnFuente(e);
+  let mejor = -1, distMin = 36 * p.pxPorPantalla; // radio de toque cómodo con el dedo
+  esquinas.forEach((q, i) => { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < distMin) { distMin = d; mejor = i; } });
+  if (mejor < 0) {
+    // Lejos de las esquinas: un toque (sin arrastrar) elige la hoja que está debajo del dedo.
+    toqueEditor = { x: e.clientX, y: e.clientY, punto: { x: p.x, y: p.y } };
+    return;
+  }
+  esquinaArrastrada = mejor;
+  lienzoEsquinas.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+lienzoEsquinas.addEventListener('pointermove', (e) => {
+  if (esquinaArrastrada < 0) return;
+  const p = puntoEnFuente(e);
+  esquinas[esquinaArrastrada] = {
+    x: Math.min(fuente.canvas.width - 1, Math.max(0, p.x)),
+    y: Math.min(fuente.canvas.height - 1, Math.max(0, p.y)),
+  };
+  aviso('');
+  dibujarEsquinas();
+});
+const soltarEsquina = (e) => {
+  if (toqueEditor) {
+    const fueToque = e.type === 'pointerup' && Math.hypot(e.clientX - toqueEditor.x, e.clientY - toqueEditor.y) < 10;
+    const punto = toqueEditor.punto;
+    toqueEditor = null;
+    if (fueToque) detectar(punto);
+    return;
+  }
+  esquinaArrastrada = -1;
+};
+lienzoEsquinas.addEventListener('pointerup', soltarEsquina);
+lienzoEsquinas.addEventListener('pointercancel', soltarEsquina);
+window.addEventListener('resize', () => { if (fuente) dibujarEsquinas(); });
+
+// --- Resultado (la página ya enderezada y mejorada) ---
+function calcularPagina(ladoMax) {
+  const { ancho, alto } = E.tamanoSalida(esquinas, ladoMax);
+  const recta = E.enderezar(fuente.datos, esquinas, ancho, alto);
+  E.mejorar(recta, modoMejora, {
+    brillo: Number($('deslizadorBrillo').value),
+    contraste: Number($('deslizadorContraste').value),
+  });
+  return E.girar(recta, giro);
+}
+
+function actualizarVista() {
+  if (esperandoVista || vista !== 'resultado') return;
+  esperandoVista = true;
+  requestAnimationFrame(() => {
+    esperandoVista = false;
+    if (!fuente) return;
+    const img = calcularPagina(LADO_VISTA);
+    lienzoVista.width = img.width;
+    lienzoVista.height = img.height;
+    lienzoVista.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0);
+  });
+}
+
+$('pestanaRecorte').addEventListener('click', () => mostrarVista('recorte'));
+$('pestanaResultado').addEventListener('click', () => mostrarVista('resultado'));
+$('botonDetectar').addEventListener('click', () => detectar());
+$('botonCuadro').addEventListener('click', usarTodaLaFoto);
+$('botonOtra').addEventListener('click', probarOtra);
+$('botonGirarIzq').addEventListener('click', () => { giro = (giro + 3) % 4; actualizarVista(); });
+$('botonGirarDer').addEventListener('click', () => { giro = (giro + 1) % 4; actualizarVista(); });
+$('botonAjustes').addEventListener('click', () => {
+  const abrir = $('ajustes').hidden;
+  $('ajustes').hidden = !abrir;
+  $('botonAjustes').setAttribute('aria-pressed', String(abrir));
+});
+document.querySelectorAll('[data-mejora]').forEach((b) => b.addEventListener('click', () => {
+  modoMejora = b.dataset.mejora;
+  document.querySelectorAll('[data-mejora]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  actualizarVista();
+}));
+$('deslizadorBrillo').addEventListener('input', actualizarVista);
+$('deslizadorContraste').addEventListener('input', actualizarVista);
+$('botonDescartar').addEventListener('click', cerrarRevision);
+
+// ===================== Documento =====================
+
+function lienzoAJpeg(lienzo, calidad) {
+  return new Promise((resolver, rechazar) => lienzo.toBlob((b) => (b ? resolver(b) : rechazar(new Error('toBlob'))), 'image/jpeg', calidad));
+}
+
+$('botonAgregar').addEventListener('click', async () => {
+  const boton = $('botonAgregar');
+  boton.disabled = true;
+  try {
+    const img = calcularPagina(LADO_PAGINA);
+    const lienzo = document.createElement('canvas');
+    lienzo.width = img.width;
+    lienzo.height = img.height;
+    lienzo.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0);
+    // Se guarda el JPEG, no los píxeles: 30 páginas sin comprimir pesarían medio gigabyte.
+    const blob = await lienzoAJpeg(lienzo, 0.88);
+    const miniatura = document.createElement('canvas');
+    const k = 220 / Math.max(img.width, img.height);
+    miniatura.width = Math.max(1, Math.round(img.width * k));
+    miniatura.height = Math.max(1, Math.round(img.height * k));
+    miniatura.getContext('2d').drawImage(lienzo, 0, 0, miniatura.width, miniatura.height);
+
+    const id = siguienteId++;
+    paginas.set(id, { blob, ancho: img.width, alto: img.height });
+    const tarjeta = crearTarjetaMiniatura({
+      elementoVisual: miniatura,
+      etiqueta: '',
+      conQuitar: true,
+      alQuitar: () => { paginas.delete(id); tarjeta.remove(); actualizarDocumento(); },
+      arrastrable: true,
+      conMover: true,
+      indiceOrden: id,
+      nombre: String(id).padStart(5, '0'),
+    });
+    tarjeta.querySelector('.numero-pagina').remove(); // el número lo pone la barra de orden
+    gridPaginas.appendChild(tarjeta);
+    actualizarDocumento();
+    cerrarRevision();
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+function actualizarDocumento() {
+  const n = paginas.size;
+  $('botonPdf').disabled = n < 1;
+  $('botonCompartir').disabled = n < 1;
+  pdfListo = null; // cambió el documento: hay que volver a armarlo
+  $('paginasVacio').hidden = n > 0;
+  $('contadorPaginas').textContent = n === 0 ? '' : n === 1 ? '· ' + t('paginas-contador-uno') : '· ' + t('paginas-contador-varias').replace('{n}', n);
+  $('resultadoPdf').classList.remove('visible');
+  // La miniatura de la barra muestra la última página y cuántas van.
+  const ultima = gridPaginas.lastElementChild && gridPaginas.lastElementChild.querySelector('canvas');
+  $('botonDocumento').disabled = n < 1;
+  $('botonDocumento').style.backgroundImage = ultima ? `url(${ultima.toDataURL('image/jpeg', 0.7)})` : '';
+  $('contadorMini').hidden = n < 1;
+  $('contadorMini').textContent = n;
+}
+document.addEventListener('cambioIdioma', () => {
+  actualizarDocumento();
+  textoBotonOtra();
+  textoInfoPagina();
+  if (app.dataset.estado === 'camara') aviso(t('ayuda-camara'));
+  if (app.dataset.estado === 'pagina') verPagina(paginaVista);
+});
+// --- Visor de las páginas aprobadas ---
+let paginaVista = -1, urlVista = null;
+const ordenDePaginas = () => [...gridPaginas.children].map((c) => parseInt(c.dataset.indiceOrden, 10)).filter((id) => paginas.has(id));
+
+function verPagina(indice) {
+  const orden = ordenDePaginas();
+  if (!orden.length) { cerrarVisor(); return; }
+  paginaVista = Math.max(0, Math.min(orden.length - 1, indice));
+  if (urlVista) URL.revokeObjectURL(urlVista);
+  urlVista = URL.createObjectURL(paginas.get(orden[paginaVista]).blob);
+  $('vistaPagina').src = urlVista;
+  $('numeroPagina').textContent = t('pagina-de').replace('{n}', paginaVista + 1).replace('{total}', orden.length);
+  $('paginaAnterior').disabled = paginaVista === 0;
+  $('paginaSiguiente').disabled = paginaVista === orden.length - 1;
+  if (app.dataset.estado !== 'pagina') {
+    aviso('');
+    estado('pagina');
+    app.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+}
+
+function cerrarVisor() {
+  paginaVista = -1;
+  if (urlVista) { URL.revokeObjectURL(urlVista); urlVista = null; }
+  $('vistaPagina').removeAttribute('src');
+  if (cam) { estado('camara'); buclearDeteccion(); } else estado('inicio');
+}
+
+function quitarPaginaVista() {
+  const id = ordenDePaginas()[paginaVista];
+  const tarjeta = [...gridPaginas.children].find((c) => parseInt(c.dataset.indiceOrden, 10) === id);
+  paginas.delete(id);
+  if (tarjeta) tarjeta.remove();
+  actualizarDocumento();
+  if (paginas.size) verPagina(paginaVista); else cerrarVisor();
+}
+
+// La miniatura de la barra abre la última página, como en la app de cámara del teléfono.
+$('botonDocumento').addEventListener('click', () => verPagina(ordenDePaginas().length - 1));
+$('botonCerrarPagina').addEventListener('click', cerrarVisor);
+$('paginaAnterior').addEventListener('click', () => verPagina(paginaVista - 1));
+$('paginaSiguiente').addEventListener('click', () => verPagina(paginaVista + 1));
+$('botonQuitarPagina').addEventListener('click', quitarPaginaVista);
+$('botonVerTodas').addEventListener('click', () => { cerrarVisor(); $('documento').scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+// Tocar una página de la lista (no sus botones) la abre en el visor.
+gridPaginas.addEventListener('click', (e) => {
+  if (e.target.closest('button')) return;
+  const tarjeta = e.target.closest('.miniatura-pagina');
+  if (!tarjeta || app.dataset.estado === 'revision') return;
+  verPagina([...gridPaginas.children].indexOf(tarjeta));
+});
+
+habilitarArrastreReordenable(gridPaginas, actualizarDocumento);
+$('envoltorioBarraOrden').appendChild(crearBarraOrden(gridPaginas, actualizarDocumento));
+actualizarDocumento();
+
+async function armarPdf() {
+  if (pdfListo) return pdfListo;
+  const pdf = await PDFLib.PDFDocument.create();
+  const tamano = $('tamanoPagina').value;
+  for (const tarjeta of gridPaginas.children) {
+    const pagina = paginas.get(parseInt(tarjeta.dataset.indiceOrden, 10));
+    if (!pagina) continue;
+    const imagen = await pdf.embedJpg(new Uint8Array(await pagina.blob.arrayBuffer()));
+    agregarPaginaConImagen(pdf, imagen, tamano);
+  }
+  pdf.setProducer('Mini Cookies');
+  pdfListo = new File([await pdf.save()], nombreConFecha('escaneo', 'pdf'), { type: 'application/pdf' });
+  return pdfListo;
+}
+$('tamanoPagina').addEventListener('change', () => { pdfListo = null; });
+
+async function conBotonOcupado(boton, tarea) {
+  boton.disabled = true;
+  const textoOriginal = boton.textContent;
+  boton.textContent = t('boton-pdf-procesando');
+  try {
+    mostrarError('');
+    await tarea();
+  } finally {
+    boton.disabled = paginas.size < 1;
+    boton.textContent = textoOriginal;
+  }
+}
+
+$('botonPdf').addEventListener('click', () => conBotonOcupado($('botonPdf'), async () => {
+  try {
+    const archivo = await armarPdf();
+    descargarBlob(archivo, archivo.name);
+    $('resultadoPdf').classList.add('visible');
+  } catch (error) {
+    mostrarError(t('error-pdf') + ': ' + detalleError(error));
+  }
+}));
+
+// Compartir abre el menú del sistema (WhatsApp, correo, Drive…), solo donde el navegador sabe
+// compartir archivos (sobre todo en celulares). El PDF va directo del dispositivo a la app elegida.
+const puedeCompartirPdf = (() => {
+  try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['%PDF'], 'x.pdf', { type: 'application/pdf' })] })); } catch { return false; }
+})();
+$('botonCompartir').hidden = !puedeCompartirPdf;
+$('botonCompartir').addEventListener('click', () => conBotonOcupado($('botonCompartir'), async () => {
+  let archivo;
+  try { archivo = await armarPdf(); } catch (error) { mostrarError(t('error-pdf') + ': ' + detalleError(error)); return; }
+  try {
+    await navigator.share({ files: [archivo], title: t('compartir-titulo') });
+  } catch (error) {
+    if (error.name === 'AbortError') return; // la persona cerró el menú
+    // Si armar el PDF tardó, el navegador ya no deja abrir el menú sin un toque nuevo.
+    mostrarError(error.name === 'NotAllowedError' ? t('compartir-reintentar') : t('error-compartir') + ': ' + (error.message || error.name));
+  }
+}));
+
+// ===================== Arranque =====================
+
+$('botonCapturar').addEventListener('click', capturar);
+$('botonActivar').addEventListener('click', iniciarCamara);
+$('botonCambiarCamara').addEventListener('click', async () => {
+  if (!cam) return;
+  deteccionPrevia = null;
+  toqueCamara = null;
+  try { await cam.cambiar(); } catch (error) { aviso(t('error-camara') + (error.message || error.name), true); }
+});
+window.addEventListener('pagehide', apagarCamara);
+estado('inicio');
+iniciarCamara();
+</script>
+</body>
+</html>

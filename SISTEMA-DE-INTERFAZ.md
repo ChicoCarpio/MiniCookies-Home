@@ -18,8 +18,8 @@ a reimplementar.
 
 ## 1. Por dónde empezar
 
-Antes de escribir una línea, decidí **qué arquetipo** es la página. Son cinco y
-cubren las 120 páginas del sitio. Cada uno tiene su esqueleto en la sección 4.
+Antes de escribir una línea, decidí **qué arquetipo** es la página. Los de la tabla
+cubren todas las páginas del sitio (F, G y H tienen su sección más abajo). Cada uno tiene su esqueleto en la sección 4.
 
 | Si la página… | Es el arquetipo |
 |---|---|
@@ -28,6 +28,7 @@ cubren las 120 páginas del sitio. Cada uno tiene su esqueleto en la sección 4.
 | deja manipular un contenido con varios grupos de ajustes | **C — Edición a pantalla completa** |
 | muestra páginas/hojas/diapositivas para seleccionar | **D — Vista previa de documento** |
 | es solo texto para leer | **E — Página de texto** |
+| usa la cámara en vivo para sacar fotos y revisarlas (escáner) | **H — Cámara** |
 
 La gran mayoría (unas 100) son **B**. Solo cuatro son **C**:
 `herramientas/collage-imagenes.html`, `herramientas/Editor-de-color-de-imagen.html`,
@@ -178,6 +179,7 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | Zona de arrastre | `assets/js/zona-arrastre.js` | `conectarZonaArrastre` y acceso con teclado (sección 3, Entrada) |
 | Selector de dirección | `assets/js/selector-direccion.js` | panel según la dirección elegida (`data-panel-direccion`) |
 | Deshacer y rehacer | `assets/js/historial.js` + `.botones-historial` (en `estilos.css`) + `title-deshacer`/`title-rehacer` (en `i18nComun`) | los tres editores de imagen (2026-10-07). La página escribe los dos botones `#botonDeshacer` y `#botonRehacer` dentro de un `<div class="botones-historial">`, debajo de la imagen. Después llama a `Historial.conectar({ capturar, restaurar, deshacer, rehacer, lienzo, activo })`: `capturar()` devuelve el estado con una `firma` (texto que lo resume) y `restaurar(paso)` vuelve a él. Con eso el módulo arma los pasos solo: después de cada clic, cambio, toque o tecla compara la firma. Un deslizador cuenta como un paso al soltarlo. Habilita los botones y conecta Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y (fuera de los campos de texto) y el toque con dos dedos sobre `lienzo`. Los lienzos que cambian se copian con `Historial.crearCopiador()` solo cuando cambia su versión. Hay un tope de memoria (192 MB en celular, 512 MB en PC) y, pasado ese tope, se olvidan los pasos más viejos. Un cambio que llega tarde (fotos agregadas, un proyecto abierto) llama a `comprobar()` o a `reiniciar()` **(2026-10-16)** `Historial.conectarLista({ donde, capturar, restaurar, activo })` es la versión para listas que se reordenan y se recortan: el estado es el orden de los identificadores que quedan; pone los botones ↶ ↷ (`title-deshacer-lista`) y conecta Ctrl+Z. La usan Administrar páginas de PDF, diapositivas y hojas de Excel; `reiniciar()` al cargar un archivo. |
+| Cámara (arquetipo H) | `assets/css/camara.css` + `assets/js/camara.js` | escáner de documentos (2026-10-31). `Camara.abrir(video)` abre la cámara trasera (o lanza error con `name` `SinCamara` o el del navegador) y devuelve `{ cuantas, cambiar(), enfocarEn(x, y), seguir(x, y), puntoEnVideo(evento), capturar(ladoMax), apagar() }`. Pide el enfoque continuo si la cámara lo permite; `enfocarEn` enfoca un punto (fracción 0..1 del cuadro) y a los 2,5 s vuelve al continuo; `seguir(x, y)` mantiene el continuo apuntado a un objetivo que se mueve (el escáner lo llama con el centro de la hoja detectada, como mucho cada 1,5 s); donde el navegador no deja controlar el enfoque no pasa nada. `puntoEnVideo` descuenta las franjas de `object-fit: contain`. El CSS da la forma (ver sección 4, H); qué se ve en cada estado lo decide la página con `hidden` |
 | Pantalla completa | `assets/js/pantalla-completa.js` + `.pantalla-completa-activa` / `.franja-anuncio-completa` (en `editor-imagen.css`) + `title-pantalla-completa` (en `i18nComun`) | los tres editores de imagen (2026-10-07). La página pone `#botonPantallaCompleta` (con `hidden`) en la fila de `.botones-historial` y llama a `PantallaCompleta.conectar({ contenedor, boton, activo })`. El contenedor es el mismo que usa app-movil: `[data-app-movil]` o el layout. Con eso el botón y la tecla F entran y salen, y Esc sale. Donde el navegador no lo permite (iPhone), el botón queda oculto. En pantalla completa solo se ve lo que está adentro del contenedor. Por eso, en PC, el anuncio pasa a una franja propia de 90 px debajo del editor y vuelve a su lugar al salir; se mueve con `AppMovil.moverSinRecargar` (la función de `app-movil.js`, para no recargar el anuncio). En celular ya está en la tira de app-movil. Todo lo que se abra por encima va en `PantallaCompleta.capa()` (`document.fullscreenElement` o `<body>`); `ayuda-tip.js` ya lo hace. El reparto de adentro es de cada página (el collage pone su propio alto de lienzo) |
 | Atajos de teclado | `assets/js/atajos.js` | `Atajos.conectar({ 'ctrl+0': fn, ' ': { abajo, arriba } }, activo)`: una sola regla para todos los atajos, también los de deshacer. Nunca mientras se escribe en un campo de texto, y la barra espaciadora nunca sobre un botón o un enlace. Un par `{ abajo, arriba }` es para lo que se mantiene apretado (ver el original, mover la vista) y se suelta solo si la ventana pierde el foco |
 | Galería de texturas | `assets/js/efectos-textura.js` | `EfectosTextura.crearGaleria(galeria)` llena `#modosTextura` con un botón por textura (`.miniatura-textura`, `data-textura`): "Ninguna", las de siempre (pixelado, puntos, ruido…) y, si la página cargó `efectos-mosaico.js`, los mosaicos y el cómic. Trae los nombres en es/en. Llamarla **antes** de conectar los clics de la galería. La usan los dos editores y el generador de stickers; antes los botones estaban escritos a mano en cada página |
@@ -502,6 +504,38 @@ Una aplicación que **edita** un documento de oficina y lo guarda como el archiv
 - **Todo es un comando** (`Comandos.registrar`: id, texto i18n, atajo, `habilitado`, `ejecutar`); los botones solo llevan `data-comando`. Ctrl+K abre la paleta. Los atajos son los de Office.
 - **Sin `innerHTML` con datos del usuario** (el inspector y los diálogos usan `textContent`); todo texto visible con clave i18n; el diccionario estático de la página va en un `window.i18nPagina` multilínea (si no, el build no publica `/en/`).
 - **Verificado** a 1366 y 390 px con las pruebas de navegador de la suite y con `npm run revisar`. Pendiente: barra sobre el teclado del celular, inspector con controles, pantalla de inicio compartida y capa accesible del lienzo.
+
+### H — Cámara (2026-10-31)
+
+Una herramienta que saca fotos con la cámara en vivo y las revisa antes de usarlas, con forma de
+app de cámara. Hoy: `herramientas/escanear-documento.html`; después, las demás de la categoría
+Escáner. Piezas: `assets/css/camara.css` + `assets/js/camara.js` (sección 3).
+
+- **Un panel oscuro, no una capa fija.** `.camara-app` es un bloque alto dentro de la página
+  (82 % de la pantalla en PC; casi toda en celular, que se trae a la vista al abrir la cámara). El
+  anuncio queda debajo, en su lugar: la regla de Publicidad se cumple sin excepciones. Es oscuro en
+  los dos temas, como cualquier app de cámara: colores fijos, salvo el acento.
+- **Tres estados** en `data-estado`: `inicio` (sin cámara todavía, sin permiso o sin cámara:
+  mensaje, «Activar la cámara» y una `.zona-arrastre` para fotos), `camara` (en vivo) y
+  `revision` (la foto recién sacada **reemplaza** al visor, como en una cámara de verdad) y
+  `pagina` (lo ya guardado, abierto desde la `.camara-miniatura` o desde la lista: ✕ · ◀ «Página 2 de 5» ▶
+  en una `.camara-navegacion` · 🗑; al cerrar se vuelve a la cámara). En la barra, lo que no es la
+  acción principal va en botones redondos con nombre accesible: a 390 px no entran tres textos.
+- **Escenario** (`.camara-escenario`): video o `.camara-imagen` con `object-fit: contain`, la
+  `.camara-capa` para dibujar encima, `.camara-arriba` (botones redondos, solo en vivo: encima de
+  una foto que se edita taparían las esquinas) y `.camara-aviso` (texto corto sobre la imagen; `.error` en rojo).
+- **Cabecera** (`.camara-cabecera`, fuera del escenario): las `.camara-pestanas` de la revisión
+  (Recorte | Resultado). Antes flotaban sobre la foto y tapaban la esquina de arriba (2026-10-31).
+- **Barra** (`.camara-barra`, tres columnas): en vivo, galería · `.camara-obturador` ·
+  `.camara-miniatura` (lo último guardado, con `.camara-contador`; lleva a la lista). En la
+  revisión, `.camara-accion.secundaria` (Repetir o Descartar) · estado · `.camara-accion.principal`
+  (Usar). Encima, filas de `.camara-chip` (`aria-pressed`) que se desplazan de costado, y
+  `.camara-ajustes` para deslizadores.
+- **Tocar el visor** enfoca ese punto (`enfocarEn`) y la herramienta puede usar el punto (el
+  escáner elige la hoja que lo contiene).
+- **Lo que se acumula** (las páginas del documento) va en un `.panel-herramienta` común debajo de
+  la app, con las piezas de siempre (miniaturas, barra de orden).
+- Verificado a 1280 y 390 px con la cámara de prueba de Edge, sin permiso y con fotos elegidas.
 
 ## 5. Reglas transversales
 
