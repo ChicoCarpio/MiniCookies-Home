@@ -1,0 +1,29 @@
+/* Mini Cookies Documentos: lo propio del documento encima de la interfaz G (suite/nucleo/oficina.css). */
+.dc-visor { flex: 1; min-height: 0; position: relative; overflow: auto; outline: none; background: var(--gris-fondo); -webkit-overflow-scrolling: touch; }
+.dc-visor-parte { flex: none; max-height: 34vh; min-height: 60px; }
+
+/* buscar y reemplazar */
+.dc-buscar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; background: var(--superficie); border-bottom: 1px solid var(--gris-borde); font-size: 0.85rem; }
+.dc-buscar[hidden] { display: none; }
+.dc-buscar input[type="search"], .dc-buscar input[type="text"] { min-height: 34px; width: 11em; max-width: 42vw; box-sizing: border-box; font: inherit; padding: 4px 8px; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); }
+.dc-buscar label { display: inline-flex; align-items: center; gap: 4px; }
+.dc-buscar button { min-height: 34px; min-width: 34px; font: inherit; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie-alt); color: var(--texto); cursor: pointer; }
+
+/* encabezado y pie */
+.dc-parte { background: var(--activo-fondo); border-bottom: 2px solid var(--azul); }
+.dc-parte[hidden] { display: none; }
+.dc-parte-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; font-size: 0.85rem; }
+.dc-parte-barra button { min-height: 34px; font: inherit; border: 1px solid var(--gris-borde); border-radius: 6px; background: var(--superficie); color: var(--texto); cursor: pointer; padding: 0 10px; }
+
+/* menú de ortografía (clic derecho) */
+.dc-menu-orto { position: fixed; z-index: 1100; min-width: 180px; background: var(--superficie); color: var(--texto); border: 1px solid var(--gris-borde); border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); padding: 4px; }
+.dc-menu-orto[hidden] { display: none; }
+.dc-menu-orto button { display: block; width: 100%; min-height: 36px; text-align: left; border: 0; background: none; padding: 4px 10px; font: inherit; color: inherit; cursor: pointer; border-radius: 4px; }
+.dc-menu-orto button:hover, .dc-menu-orto button:focus { background: var(--activo-fondo); }
+.dc-menu-orto hr { border: 0; border-top: 1px solid var(--gris-borde); margin: 4px 0; }
+
+/* modo lectura: el documento se mueve y se selecciona, no se escribe */
+.of-lectura .dc-buscar input[name="reemplazo"], .of-lectura #bReemplazar, .of-lectura #bTodo { display: none; }
+@media (max-width: 900px) {
+  .dc-visor { touch-action: pan-x pan-y pinch-zoom; }
+}

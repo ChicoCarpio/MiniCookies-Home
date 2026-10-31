@@ -95,7 +95,7 @@
       });
       for (const b of raiz.querySelectorAll('[data-comando]')) {
         const c = porId.get(b.dataset.comando);
-        if (c && c.atajo && !b.title) b.title = traducir(c.texto) + ' (' + textoAtajo([].concat(c.atajo)[0]) + ')';
+        if (c && c.atajo && !b.title) { b.title = traducir(c.texto) + ' (' + textoAtajo([].concat(c.atajo)[0]) + ')'; if (!b.dataset.etq) b.dataset.etq = c.texto; }
       }
       refrescar();
     }
@@ -112,8 +112,23 @@
       }
       for (const fn of alRefrescar) fn();
     }
+    // Al cambiar de idioma sin recargar, las etiquetas que Oficina escribió con t() quedan en el idioma viejo: cada control trae su clave en data-etq
+    function reetiquetar() {
+      raices = raices.filter((r) => r.isConnected !== false);
+      for (const raiz of raices) {
+        for (const b of raiz.querySelectorAll('[data-etq]')) {
+          const c = porId.get(b.dataset.comando), etq = traducir(b.dataset.etq);
+          const conAtajo = c && c.atajo ? etq + ' (' + textoAtajo([].concat(c.atajo)[0]) + ')' : etq;
+          if (b.hasAttribute('aria-label')) b.setAttribute('aria-label', etq);
+          if (b.hasAttribute('title')) b.title = conAtajo;
+          const caja = b.closest('label.of-color');
+          if (caja && caja.hasAttribute('title')) caja.title = etq;
+        }
+      }
+    }
+    if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('cambioIdioma', reetiquetar);
     return {
-      registrar, ejecutar, conectarTeclado, conectarBotones, refrescar,
+      registrar, ejecutar, conectarTeclado, conectarBotones, refrescar, reetiquetar,
       alRefrescar: (fn) => alRefrescar.push(fn),
       obtener: (id) => porId.get(id) || null,
       lista: () => [...porId.values()].filter((c) => !c.oculto),

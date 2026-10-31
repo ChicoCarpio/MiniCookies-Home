@@ -38,7 +38,7 @@
       for (const g of p.grupos) {
         const items = crearEl('div', { class: 'of-grupo-items' });
         for (const it of g.items) items.append(item(it, comandos));
-        const grupo = crearEl('div', { class: 'of-grupo' + (g.solo === 'pc' ? ' of-solo-pc' : ''), role: 'group', 'aria-label': tx(g.texto) }, [items, crearEl('div', { class: 'of-grupo-titulo', 'data-i18n': g.texto }, [tx(g.texto)])]);
+        const grupo = crearEl('div', { class: 'of-grupo' + (g.solo === 'pc' ? ' of-solo-pc' : ''), role: 'group', 'aria-label': tx(g.texto), 'data-i18n-attr': 'aria-label:' + g.texto }, [items, crearEl('div', { class: 'of-grupo-titulo', 'data-i18n': g.texto }, [tx(g.texto)])]);
         panel.append(grupo);
       }
       cintaEl.append(panel);
@@ -61,21 +61,22 @@
 
   function item(it, comandos) {
     const c = comandos.obtener(it.comando);
-    const etiqueta = tx(it.texto || (c && c.texto) || it.comando);
+    const clave = it.texto || (c && c.texto) || it.comando;   // se anota en el elemento: al cambiar de idioma Comandos vuelve a escribir la etiqueta
+    const etiqueta = tx(clave);
     if (it.tipo === 'select') {
-      const s = crearEl('select', { 'data-comando': it.comando, 'aria-label': etiqueta, title: etiqueta, class: it.solo === 'pc' ? 'of-solo-pc' : '' });
+      const s = crearEl('select', { 'data-comando': it.comando, 'data-etq': clave, 'aria-label': etiqueta, title: etiqueta, class: it.solo === 'pc' ? 'of-solo-pc' : '' });
       for (const [v, t] of it.opciones) s.append(crearEl('option', { value: v, 'data-i18n': t }, [tx(t)]));
       return s;
     }
     if (it.tipo === 'color') {
       const muestra = crearEl('span', { class: 'of-muestra' });
       muestra.style.background = it.porDefecto || '#000000';
-      const entrada = crearEl('input', { type: 'color', value: it.porDefecto || '#000000', 'aria-label': etiqueta, 'data-comando': it.comando });
+      const entrada = crearEl('input', { type: 'color', value: it.porDefecto || '#000000', 'aria-label': etiqueta, 'data-comando': it.comando, 'data-etq': clave });
       entrada.addEventListener('input', () => { muestra.style.background = entrada.value; });
       const caja = crearEl('label', { class: 'of-color', title: etiqueta }, [crearEl('span', { class: 'of-color-boton' }, [crearEl('span', { class: 'of-icono', 'aria-hidden': 'true' }, [it.icono || '■']), muestra]), entrada]);
       return caja;
     }
-    const b = crearEl('button', { type: 'button', 'data-comando': it.comando, 'aria-label': etiqueta, class: it.solo === 'pc' ? 'of-solo-pc' : '' });
+    const b = crearEl('button', { type: 'button', 'data-comando': it.comando, 'data-etq': clave, 'aria-label': etiqueta, class: it.solo === 'pc' ? 'of-solo-pc' : '' });
     if (it.valor !== undefined) b.dataset.valor = it.valor;
     b.append(crearEl('span', { class: 'of-icono', 'aria-hidden': 'true' }, [it.icono || '•']));
     if (it.conTexto) b.append(crearEl('span', { 'data-i18n': it.texto || (c && c.texto) }, [etiqueta]));
@@ -204,8 +205,8 @@
     el.textContent = '';
     for (const h of herramientas) {
       const c = comandos.obtener(h.comando);
-      const etiqueta = tx(h.texto || (c && c.texto) || h.comando);
-      el.append(crearEl('button', { type: 'button', class: 'of-herramienta', 'data-comando': h.comando, 'aria-label': etiqueta, title: etiqueta }, [crearEl('span', { class: 'of-icono', 'aria-hidden': 'true' }, [h.icono || '•']), crearEl('span', { class: 'of-herramienta-texto', 'data-i18n': h.texto || (c && c.texto) || h.comando }, [etiqueta])]));
+      const clave = h.texto || (c && c.texto) || h.comando, etiqueta = tx(clave);
+      el.append(crearEl('button', { type: 'button', class: 'of-herramienta', 'data-comando': h.comando, 'data-etq': clave, 'aria-label': etiqueta, title: etiqueta }, [crearEl('span', { class: 'of-icono', 'aria-hidden': 'true' }, [h.icono || '•']), crearEl('span', { class: 'of-herramienta-texto', 'data-i18n': h.texto || (c && c.texto) || h.comando }, [etiqueta])]));
     }
     el.addEventListener('keydown', (e) => {
       const lista = [...el.querySelectorAll('button:not(:disabled)')], k = lista.indexOf(document.activeElement);

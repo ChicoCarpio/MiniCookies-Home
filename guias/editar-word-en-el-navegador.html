@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo editar un .docx en el navegador: qué se conserva al guardar — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Corrige un texto, inserta una tabla o saca un PDF de un .docx o un .odt sin Word. Qué se guarda igual y qué no se edita aquí.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo editar un .docx en el navegador: qué se conserva al guardar — Mini Cookies',
+    'meta-descripcion': 'Corrige un texto, inserta una tabla o saca un PDF de un .docx o un .odt sin Word. Qué se guarda igual y qué no se edita aquí.',
+    'h1': 'Cómo editar un documento de Word (.docx) en el navegador: qué se conserva al guardar',
+    'b1': 'Te mandan un .docx para corregir un par de frases y en esta computadora no hay Word. <a href="../herramientas/documentos.html">Editar Word (Documentos)</a> abre el .docx (y también un .odt de LibreOffice), deja escribir, dar formato, insertar tablas e imágenes, revisar la ortografía y sacar un PDF, y lo guarda en su mismo formato. Lo que no tocas queda como estaba.',
+    'b2': 'Abrir el archivo o empezar en blanco',
+    'b3': 'Arrastra el .docx u .odt a la zona de carga o pulsa la zona para elegirlo. Si solo quieres probar, «Documento en blanco» arma una hoja Carta vacía. Un .docm también se elige: si trae macros, se conservan sin tocar y la descarga sale como .docm.',
+    'b4': 'Un documento con contraseña no se puede abrir aquí: el mensaje te dice que lo abras en Word o en LibreOffice, le quites la contraseña y vuelvas. Una hoja de cálculo o una presentación de OpenDocument tampoco: el mensaje te manda a Hojas o a Presentaciones.',
+    'b5': 'Mientras editas, el trabajo se guarda como borrador en este navegador unos segundos después de cada cambio. Si cierras la pestaña sin descargar, al volver aparece en «Trabajo sin terminar en este navegador», con «Recuperar» y «Descartar». En el celular el archivo se abre para leer; pulsa «Editar» para cambiarlo.',
+    'b6': 'Escribir y dar formato',
+    'b7': 'Haz clic donde quieras escribir. En la pestaña Inicio están el estilo del párrafo (Título 1, Título 2, Texto…), la fuente y el tamaño, la negrita, la cursiva, el subrayado, el tachado, el color del texto y el resaltado, el superíndice y el subíndice, la alineación, el interlineado, las viñetas, la numeración y la sangría. Ctrl+B, Ctrl+I y Ctrl+U funcionan como en Word.',
+    'b8': 'Dentro de una lista, Tab baja un nivel y Mayús+Tab lo sube. Pegar desde Word, Google Docs o una página web conserva el formato (negrita, títulos, listas, alineación); pegar texto sin formato no hereda la negrita de donde cae.',
+    'b9': 'Ctrl+F busca y reemplaza, con opción de mayúsculas y de palabra completa. Ctrl+Z deshace y Ctrl+Y rehace, también lo que hiciste en un encabezado.',
+    'b10': 'Tablas, imágenes, saltos, encabezados y pies',
+    'b11': 'La pestaña Insertar trae la tabla (con filas y columnas que se agregan y se quitan), la imagen en línea (hasta 20 MB), el salto de página, el número de página y el total de páginas. «Encabezado» y «Pie» abren su propio cuadro encima de la hoja; el número de página se inserta ahí como un campo.',
+    'b12': 'En un .docx también hay saltos de sección (siguiente página y continuo). En un .odt los saltos de sección no están disponibles; los encabezados y pies se pueden crear y editar, pero no borrar.',
+    'b13': 'Revisar la ortografía',
+    'b14': 'En la pestaña Revisar, «Corrector ortográfico» subraya en rojo las palabras que no reconoce. Un clic derecho sobre una palabra subrayada ofrece sugerencias y «Agregar al diccionario». El idioma del corrector (español o inglés) se elige aparte; los diccionarios se descargan del propio sitio, nunca de otro servidor.',
+    'b15': 'Descargar, PDF y pasar entre Word y LibreOffice',
+    'b16': '«Descargar» (Ctrl+S) baja el archivo en el mismo formato en que lo abriste, con el nombre del campo de arriba. «Descargar PDF» (menú ⋯ o Ctrl+K) hace una página por hoja, con el encabezado y el pie. El texto en alfabetos que las fuentes incluidas no tienen (árabe, chino, emoji) va al PDF como imagen: se ve bien pero no se puede seleccionar ni buscar.',
+    'b17': '«Descargar como .odt» y «Descargar como .docx» (menú ⋯) hacen una conversión: bajan una copia en el otro formato y el documento abierto sigue como estaba. Puede perderse algún detalle fino (estilos, notas, campos), por eso la página te lo avisa.',
+    'b18': 'Qué se conserva y qué no se edita aquí',
+    'b19': 'Al abrir el archivo, el editor revisa qué trae y lo dice en la línea de estado, con la frase «Se conserva al guardar, sin editar aquí». Lo más común:',
+    'tb-c1': 'Qué trae el archivo',
+    'tb-c2': 'Qué pasa al abrir y guardar',
+    'tb-f1c1': 'Comentarios y cambios controlados',
+    'tb-f1c2': 'Se conservan. No se editan aquí.',
+    'tb-f2c1': 'Notas al pie y notas finales',
+    'tb-f2c2': 'Se conservan. No se editan aquí.',
+    'tb-f3c1': 'Cuadros de texto, formas y dibujos',
+    'tb-f3c2': 'Se conservan. No se editan aquí.',
+    'tb-f4c1': 'Ecuaciones, gráficos e índices',
+    'tb-f4c2': 'Se conservan. No se editan aquí.',
+    'tb-f5c1': 'Imágenes flotantes (delante o detrás del texto)',
+    'tb-f5c2': 'Se conservan. Las imágenes en línea sí se insertan y se mueven con el texto.',
+    'tb-f6c1': 'Macros (.docm)',
+    'tb-f6c2': 'Se conservan sin ejecutarse ni editarse; la descarga sale como .docm.',
+    'tb-f7c1': 'En un .odt: tablas con celdas combinadas y listas que continúan otra',
+    'tb-f7c2': 'Se leen y se dibujan, pero no se editan; el resto del documento sí.',
+    'b20': 'Si algo se dibuja solo de forma aproximada, la línea de estado también lo dice. Dos límites del PDF y de la hoja: una celda de tabla combinada hacia abajo que es más alta que una hoja entera se sale de ella, y la hoja se dibuja con fuentes parecidas a las de Word (Liberation y Carlito), así que los cortes de línea pueden no coincidir al 100 % con los de Word.',
+    'b21': 'Preguntas frecuentes',
+    'b22': '<strong>¿Se pierde algo de lo que no toqué?</strong> No. Cada parte del archivo que no cambiaste se guarda con el mismo contenido. Lo que desaparece es lo que borras a propósito.',
+    'b23': '<strong>¿Mi archivo sale de mi computadora?</strong> No. El documento se abre, se edita y se guarda en el navegador; los borradores quedan en este navegador y nada se sube a ningún servidor.',
+    'b24': '<strong>¿Puedo trabajar con un documento muy largo?</strong> Sí; en nuestras pruebas, un documento de 50 páginas responde a cada tecla en pocos milisegundos. Más de 5.000 hojas no se abren.',
+    'b25': 'Resumen',
+    'b26': 'Un .docx o un .odt se abre y se edita en <a href="../herramientas/documentos.html">Editar Word (Documentos)</a>: texto, formato, tablas, imágenes, encabezados, ortografía y PDF. Lo que no tocas se guarda igual, y la línea de estado dice qué trae el archivo y no se edita aquí.',
+    'rel1': 'Editar Word (Documentos)',
+    'rel2': 'Word ↔ PDF',
+    'rel3': 'Cambio de versión de Word',
+    'rel4': 'Reparar Word',
+    'rel5': 'Buscar y reemplazar'
+  },
+  en: {
+    'titulo-pagina': 'How to edit a .docx in your browser: what is kept when you save — Mini Cookies',
+    'meta-descripcion': 'Fix a sentence, insert a table or get a PDF from a .docx or .odt without Word. What is saved unchanged and what can’t be edited here.',
+    'h1': 'How to edit a Word document (.docx) in your browser: what is kept when you save',
+    'b1': 'Someone sends you a .docx to fix a couple of sentences and this computer has no Word. <a href="../herramientas/documentos.html">Edit Word (Documents)</a> opens the .docx (and also a LibreOffice .odt), lets you type, format, insert tables and pictures, check spelling and get a PDF, and saves it in its own format. Whatever you don’t touch stays as it was.',
+    'b2': 'Open the file or start blank',
+    'b3': 'Drop the .docx or .odt on the upload area or click the area to choose it. If you just want to try it, “Blank document” gives you an empty Letter page. A .docm can also be chosen: if it has macros, they are kept untouched and the download comes out as .docm.',
+    'b4': 'A password-protected document can’t be opened here: the message tells you to open it in Word or LibreOffice, remove the password and come back. An OpenDocument spreadsheet or presentation can’t be either: the message sends you to Sheets or Presentations.',
+    'b5': 'While you edit, your work is saved as a draft in this browser a few seconds after each change. If you close the tab without downloading, it shows up in “Unfinished work in this browser” when you come back, with “Recover” and “Discard”. On a phone the file opens in read mode; tap “Edit” to change it.',
+    'b6': 'Type and format',
+    'b7': 'Click where you want to type. The Home tab has paragraph style (Heading 1, Heading 2, Normal…), font and size, bold, italic, underline, strikethrough, text color and highlight, superscript and subscript, alignment, line spacing, bullets, numbering and indentation. Ctrl+B, Ctrl+I and Ctrl+U work as in Word.',
+    'b8': 'Inside a list, Tab goes one level down and Shift+Tab one level up. Pasting from Word, Google Docs or a web page keeps the formatting (bold, headings, lists, alignment); pasting plain text doesn’t inherit the bold of where it lands.',
+    'b9': 'Ctrl+F finds and replaces, with match-case and whole-word options. Ctrl+Z undoes and Ctrl+Y redoes, including what you did in a header.',
+    'b10': 'Tables, pictures, breaks, headers and footers',
+    'b11': 'The Insert tab has the table (rows and columns can be added and removed), the inline picture (up to 20 MB), the page break, the page number and the total page count. “Header” and “Footer” open their own box over the page; the page number goes in there as a field.',
+    'b12': 'In a .docx there are also section breaks (next page and continuous). In an .odt section breaks aren’t available; headers and footers can be created and edited, but not deleted.',
+    'b13': 'Check spelling',
+    'b14': 'On the Review tab, “Spell checker” underlines in red the words it doesn’t recognize. Right-clicking an underlined word offers suggestions and “Add to dictionary”. The checker language (Spanish or English) is chosen separately; the dictionaries come from this site itself, never from another server.',
+    'b15': 'Download, PDF and moving between Word and LibreOffice',
+    'b16': '“Download” (Ctrl+S) saves the file in the same format you opened, with the name in the box at the top. “Download PDF” (⋯ menu or Ctrl+K) makes one page per sheet, with the header and footer. Text in alphabets the included fonts don’t have (Arabic, Chinese, emoji) goes into the PDF as an image: it looks right but can’t be selected or searched.',
+    'b17': '“Download as .odt” and “Download as .docx” (⋯ menu) do a conversion: they download a copy in the other format and the open document stays as it was. Some fine details (styles, notes, fields) may be lost, so the page warns you.',
+    'b18': 'What is kept and what can’t be edited here',
+    'b19': 'When you open the file, the editor checks what it contains and says so in the status line, with the phrase “Kept as is when saving, not editable here”. The most common cases:',
+    'tb-c1': 'What the file has',
+    'tb-c2': 'What happens when you open and save',
+    'tb-f1c1': 'Comments and tracked changes',
+    'tb-f1c2': 'Kept. Not edited here.',
+    'tb-f2c1': 'Footnotes and endnotes',
+    'tb-f2c2': 'Kept. Not edited here.',
+    'tb-f3c1': 'Text boxes, shapes and drawings',
+    'tb-f3c2': 'Kept. Not edited here.',
+    'tb-f4c1': 'Equations, charts and indexes',
+    'tb-f4c2': 'Kept. Not edited here.',
+    'tb-f5c1': 'Floating pictures (in front of or behind text)',
+    'tb-f5c2': 'Kept. Inline pictures can be inserted and move with the text.',
+    'tb-f6c1': 'Macros (.docm)',
+    'tb-f6c2': 'Kept, never run or edited; the download comes out as .docm.',
+    'tb-f7c1': 'In an .odt: tables with merged cells and lists that continue another',
+    'tb-f7c2': 'Read and drawn, but not edited; the rest of the document is.',
+    'b20': 'If something is drawn only approximately, the status line says so too. Two limits of the PDF and the page: a table cell merged downward that is taller than a whole page runs off it, and the page is drawn with fonts similar to Word’s (Liberation and Carlito), so line breaks may not match Word’s exactly.',
+    'b21': 'Frequently asked questions',
+    'b22': '<strong>Is anything lost that I didn’t touch?</strong> No. Every part of the file you didn’t change is written with the same content. What disappears is what you delete on purpose.',
+    'b23': '<strong>Does my file leave my computer?</strong> No. The document is opened, edited and saved in the browser; drafts stay in this browser and nothing is uploaded to any server.',
+    'b24': '<strong>Can I work with a very long document?</strong> Yes; in our tests, a 50-page document answers each keystroke in a few milliseconds. More than 5,000 pages won’t open.',
+    'b25': 'Summary',
+    'b26': 'A .docx or .odt opens and is edited in <a href="../herramientas/documentos.html">Edit Word (Documents)</a>: text, formatting, tables, pictures, headers, spelling and PDF. Whatever you don’t touch is saved the same way, and the status line says what the file contains that can’t be edited here.',
+    'rel1': 'Edit Word (Documents)',
+    'rel2': 'Word ↔ PDF',
+    'rel3': 'Word version change',
+    'rel4': 'Repair Word',
+    'rel5': 'Find and replace'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo editar un documento de Word (.docx) en el navegador: qué se conserva al guardar</h1>
+    <p data-i18n-html="b1">Te mandan un .docx para corregir un par de frases y en esta computadora no hay Word. <a href="../herramientas/documentos.html">Editar Word (Documentos)</a> abre el .docx (y también un .odt de LibreOffice), deja escribir, dar formato, insertar tablas e imágenes, revisar la ortografía y sacar un PDF, y lo guarda en su mismo formato. Lo que no tocas queda como estaba.</p>
+    <h2 data-i18n="b2">Abrir el archivo o empezar en blanco</h2>
+    <p data-i18n-html="b3">Arrastra el .docx u .odt a la zona de carga o pulsa la zona para elegirlo. Si solo quieres probar, «Documento en blanco» arma una hoja Carta vacía. Un .docm también se elige: si trae macros, se conservan sin tocar y la descarga sale como .docm.</p>
+    <p data-i18n-html="b4">Un documento con contraseña no se puede abrir aquí: el mensaje te dice que lo abras en Word o en LibreOffice, le quites la contraseña y vuelvas. Una hoja de cálculo o una presentación de OpenDocument tampoco: el mensaje te manda a Hojas o a Presentaciones.</p>
+    <p data-i18n-html="b5">Mientras editas, el trabajo se guarda como borrador en este navegador unos segundos después de cada cambio. Si cierras la pestaña sin descargar, al volver aparece en «Trabajo sin terminar en este navegador», con «Recuperar» y «Descartar». En el celular el archivo se abre para leer; pulsa «Editar» para cambiarlo.</p>
+    <h2 data-i18n="b6">Escribir y dar formato</h2>
+    <p data-i18n-html="b7">Haz clic donde quieras escribir. En la pestaña Inicio están el estilo del párrafo (Título 1, Título 2, Texto…), la fuente y el tamaño, la negrita, la cursiva, el subrayado, el tachado, el color del texto y el resaltado, el superíndice y el subíndice, la alineación, el interlineado, las viñetas, la numeración y la sangría. Ctrl+B, Ctrl+I y Ctrl+U funcionan como en Word.</p>
+    <p data-i18n-html="b8">Dentro de una lista, Tab baja un nivel y Mayús+Tab lo sube. Pegar desde Word, Google Docs o una página web conserva el formato (negrita, títulos, listas, alineación); pegar texto sin formato no hereda la negrita de donde cae.</p>
+    <p data-i18n-html="b9">Ctrl+F busca y reemplaza, con opción de mayúsculas y de palabra completa. Ctrl+Z deshace y Ctrl+Y rehace, también lo que hiciste en un encabezado.</p>
+    <h2 data-i18n="b10">Tablas, imágenes, saltos, encabezados y pies</h2>
+    <p data-i18n-html="b11">La pestaña Insertar trae la tabla (con filas y columnas que se agregan y se quitan), la imagen en línea (hasta 20 MB), el salto de página, el número de página y el total de páginas. «Encabezado» y «Pie» abren su propio cuadro encima de la hoja; el número de página se inserta ahí como un campo.</p>
+    <p data-i18n-html="b12">En un .docx también hay saltos de sección (siguiente página y continuo). En un .odt los saltos de sección no están disponibles; los encabezados y pies se pueden crear y editar, pero no borrar.</p>
+    <h2 data-i18n="b13">Revisar la ortografía</h2>
+    <p data-i18n-html="b14">En la pestaña Revisar, «Corrector ortográfico» subraya en rojo las palabras que no reconoce. Un clic derecho sobre una palabra subrayada ofrece sugerencias y «Agregar al diccionario». El idioma del corrector (español o inglés) se elige aparte; los diccionarios se descargan del propio sitio, nunca de otro servidor.</p>
+    <h2 data-i18n="b15">Descargar, PDF y pasar entre Word y LibreOffice</h2>
+    <p data-i18n-html="b16">«Descargar» (Ctrl+S) baja el archivo en el mismo formato en que lo abriste, con el nombre del campo de arriba. «Descargar PDF» (menú ⋯ o Ctrl+K) hace una página por hoja, con el encabezado y el pie. El texto en alfabetos que las fuentes incluidas no tienen (árabe, chino, emoji) va al PDF como imagen: se ve bien pero no se puede seleccionar ni buscar.</p>
+    <p data-i18n-html="b17">«Descargar como .odt» y «Descargar como .docx» (menú ⋯) hacen una conversión: bajan una copia en el otro formato y el documento abierto sigue como estaba. Puede perderse algún detalle fino (estilos, notas, campos), por eso la página te lo avisa.</p>
+    <h2 data-i18n="b18">Qué se conserva y qué no se edita aquí</h2>
+    <p data-i18n-html="b19">Al abrir el archivo, el editor revisa qué trae y lo dice en la línea de estado, con la frase «Se conserva al guardar, sin editar aquí». Lo más común:</p>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="tb-c1">Qué trae el archivo</th><th data-i18n-html="tb-c2">Qué pasa al abrir y guardar</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="tb-f1c1">Comentarios y cambios controlados</td><td data-i18n-html="tb-f1c2">Se conservan. No se editan aquí.</td></tr>
+        <tr><td data-i18n-html="tb-f2c1">Notas al pie y notas finales</td><td data-i18n-html="tb-f2c2">Se conservan. No se editan aquí.</td></tr>
+        <tr><td data-i18n-html="tb-f3c1">Cuadros de texto, formas y dibujos</td><td data-i18n-html="tb-f3c2">Se conservan. No se editan aquí.</td></tr>
+        <tr><td data-i18n-html="tb-f4c1">Ecuaciones, gráficos e índices</td><td data-i18n-html="tb-f4c2">Se conservan. No se editan aquí.</td></tr>
+        <tr><td data-i18n-html="tb-f5c1">Imágenes flotantes (delante o detrás del texto)</td><td data-i18n-html="tb-f5c2">Se conservan. Las imágenes en línea sí se insertan y se mueven con el texto.</td></tr>
+        <tr><td data-i18n-html="tb-f6c1">Macros (.docm)</td><td data-i18n-html="tb-f6c2">Se conservan sin ejecutarse ni editarse; la descarga sale como .docm.</td></tr>
+        <tr><td data-i18n-html="tb-f7c1">En un .odt: tablas con celdas combinadas y listas que continúan otra</td><td data-i18n-html="tb-f7c2">Se leen y se dibujan, pero no se editan; el resto del documento sí.</td></tr>
+      </tbody>
+    </table></div>
+    <p data-i18n-html="b20">Si algo se dibuja solo de forma aproximada, la línea de estado también lo dice. Dos límites del PDF y de la hoja: una celda de tabla combinada hacia abajo que es más alta que una hoja entera se sale de ella, y la hoja se dibuja con fuentes parecidas a las de Word (Liberation y Carlito), así que los cortes de línea pueden no coincidir al 100 % con los de Word.</p>
+    <h2 data-i18n="b21">Preguntas frecuentes</h2>
+    <p data-i18n-html="b22"><strong>¿Se pierde algo de lo que no toqué?</strong> No. Cada parte del archivo que no cambiaste se guarda con el mismo contenido. Lo que desaparece es lo que borras a propósito.</p>
+    <p data-i18n-html="b23"><strong>¿Mi archivo sale de mi computadora?</strong> No. El documento se abre, se edita y se guarda en el navegador; los borradores quedan en este navegador y nada se sube a ningún servidor.</p>
+    <p data-i18n-html="b24"><strong>¿Puedo trabajar con un documento muy largo?</strong> Sí; en nuestras pruebas, un documento de 50 páginas responde a cada tecla en pocos milisegundos. Más de 5.000 hojas no se abren.</p>
+    <h2 data-i18n="b25">Resumen</h2>
+    <p data-i18n-html="b26">Un .docx o un .odt se abre y se edita en <a href="../herramientas/documentos.html">Editar Word (Documentos)</a>: texto, formato, tablas, imágenes, encabezados, ortografía y PDF. Lo que no tocas se guarda igual, y la línea de estado dice qué trae el archivo y no se edita aquí.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/documentos.html" data-i18n="rel1">Editar Word (Documentos)</a></li>
+      <li><a href="../herramientas/word-pdf.html" data-i18n="rel2">Word ↔ PDF</a></li>
+      <li><a href="../herramientas/cambio-version-word.html" data-i18n="rel3">Cambio de versión de Word</a></li>
+      <li><a href="../herramientas/reparar-word.html" data-i18n="rel4">Reparar Word</a></li>
+      <li><a href="../herramientas/buscar-reemplazar-word.html" data-i18n="rel5">Buscar y reemplazar</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
