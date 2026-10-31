@@ -227,7 +227,7 @@ del final, la página parpadearía en claro antes de pasar a oscuro.
 
 ### A — Menú
 
-`index.html`, `todas.html` y las 9 categorías.
+`index.html`, `todas.html` y las 10 categorías.
 
 ```html
 <main>
