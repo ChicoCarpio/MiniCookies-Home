@@ -519,8 +519,10 @@ Escáner. Piezas: `assets/css/camara.css` + `assets/js/camara.js` (sección 3).
   mensaje, «Activar la cámara» y una `.zona-arrastre` para fotos), `camara` (en vivo) y
   `revision` (la foto recién sacada **reemplaza** al visor, como en una cámara de verdad).
 - **Escenario** (`.camara-escenario`): video o `.camara-imagen` con `object-fit: contain`, la
-  `.camara-capa` para dibujar encima, `.camara-arriba` (botones redondos y `.camara-pestanas`,
-  p. ej. Recorte | Resultado) y `.camara-aviso` (texto corto sobre la imagen; `.error` en rojo).
+  `.camara-capa` para dibujar encima, `.camara-arriba` (botones redondos, solo en vivo: encima de
+  una foto que se edita taparían las esquinas) y `.camara-aviso` (texto corto sobre la imagen; `.error` en rojo).
+- **Cabecera** (`.camara-cabecera`, fuera del escenario): las `.camara-pestanas` de la revisión
+  (Recorte | Resultado). Antes flotaban sobre la foto y tapaban la esquina de arriba (2026-10-31).
 - **Barra** (`.camara-barra`, tres columnas): en vivo, galería · `.camara-obturador` ·
   `.camara-miniatura` (lo último guardado, con `.camara-contador`; lleva a la lista). En la
   revisión, `.camara-accion.secundaria` (Repetir o Descartar) · estado · `.camara-accion.principal`

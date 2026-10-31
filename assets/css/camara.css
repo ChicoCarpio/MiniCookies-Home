@@ -9,8 +9,9 @@
 
    Marcado:
    <div class="camara-app" data-estado="inicio|camara|revision">
+     <div class="camara-cabecera"> .camara-pestanas </div>                opcional
      <div class="camara-escenario"> video / canvas.camara-imagen / canvas.camara-capa
-       <div class="camara-arriba"> botones .camara-boton-redondo o .camara-pestanas </div>
+       <div class="camara-arriba"> botones .camara-boton-redondo (solo en vivo) </div>
        <p class="camara-aviso"> texto corto sobre la imagen </p>
      </div>
      <div class="camara-chips"> .camara-chip (aria-pressed) </div>      opcional
@@ -81,6 +82,10 @@
 }
 .camara-boton-redondo:focus-visible, .camara-chip:focus-visible, .camara-obturador:focus-visible,
 .camara-accion:focus-visible, .camara-miniatura:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+
+/* Franja de arriba, fuera del escenario: lo que va acá nunca tapa la imagen (ni las esquinas
+   que se arrastran). */
+.camara-cabecera { flex: 0 0 auto; display: flex; justify-content: center; padding: 10px 12px 0; }
 
 /* Dos o tres vistas del mismo escenario (p. ej. Recorte | Resultado). */
 .camara-pestanas { display: inline-flex; background: rgba(0, 0, 0, 0.55); border-radius: 999px; padding: 3px; }

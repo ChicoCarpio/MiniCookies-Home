@@ -196,6 +196,13 @@ window.i18nPagina = {
   <p data-i18n="intro">Sacale una foto a una hoja con la cámara (o elegí fotos que ya tengas): se detecta el papel, se endereza, se le quitan las sombras y se arma un PDF con todas las páginas.</p>
 
   <div class="camara-app" id="app" data-estado="inicio">
+    <!-- Pestañas de la revisión: en su propia franja, para no tapar las esquinas de la foto -->
+    <div class="camara-cabecera" id="pestanas" hidden>
+      <div class="camara-pestanas">
+        <button type="button" id="pestanaRecorte" aria-pressed="true" data-i18n="pestana-recorte">Recorte</button>
+        <button type="button" id="pestanaResultado" aria-pressed="false" data-i18n="pestana-resultado">Resultado</button>
+      </div>
+    </div>
     <div class="camara-escenario">
       <!-- Sin cámara todavía (o sin permiso) -->
       <div class="camara-vacia" id="vistaInicio">
@@ -213,10 +220,6 @@ window.i18nPagina = {
       <canvas id="lienzoEsquinas" class="camara-imagen arrastrable" role="img" aria-label="Foto con las esquinas de la hoja" data-i18n-attr="aria-label:lienzo-esquinas-aria" hidden></canvas>
       <canvas id="lienzoVista" class="camara-imagen" hidden></canvas>
       <div class="camara-arriba">
-        <div class="camara-pestanas" id="pestanas" hidden>
-          <button type="button" id="pestanaRecorte" aria-pressed="true" data-i18n="pestana-recorte">Recorte</button>
-          <button type="button" id="pestanaResultado" aria-pressed="false" data-i18n="pestana-resultado">Resultado</button>
-        </div>
         <span></span>
         <button class="camara-boton-redondo" id="botonCambiarCamara" type="button" hidden title="Cambiar de cámara" aria-label="Cambiar de cámara" data-i18n-attr="title:cambiar-camara;aria-label:cambiar-camara">🔄</button>
       </div>
@@ -365,11 +368,15 @@ let toqueCamara = null;     // punto tocado en el visor, en fracción (0..1) del
 let esperandoVista = false;
 let pdfListo = null;         // el PDF ya armado, hasta que cambie el documento (compartir puede pedir un segundo toque)
 
+let temporizadorAviso = 0;
 function aviso(texto, error) {
   const a = $('aviso');
   a.textContent = texto || '';
   a.hidden = !texto;
   a.classList.toggle('error', !!error);
+  // En la revisión el aviso queda sobre la foto y taparía las esquinas de abajo: se va solo.
+  clearTimeout(temporizadorAviso);
+  if (texto && !error && app.dataset.estado === 'revision') temporizadorAviso = setTimeout(() => { a.hidden = true; }, 4000);
 }
 function mostrarError(texto) {
   const p = $('mensajeError');
