@@ -270,15 +270,10 @@ const EscanerDocumento = (() => {
     return [0, 1, 2, 3].map((k) => porAngulo[(inicio + k) % 4]);
   }
 
-  // ---------- Detección por rectas (Hough) ----------
+  // ---------- Bordes y respaldo de un cuadrilátero ----------
 
-  /**
-   * Segunda opción cuando las manchas de color no alcanzan (una lámina con
-   * dibujo oscuro y claro, un fondo parecido): busca las rectas largas de la
-   * imagen y arma el rectángulo cuyos cuatro lados tienen más borde detrás.
-   * `gris` ya viene suavizado y a ~320 px.
-   */
-  function detectarPorLineas(gris, w, h) {
+  /** Magnitud y dirección del gradiente (Sobel) de un canal suavizado, y el umbral de "borde". */
+  function calcularBordes(gris, w, h) {
     const n = w * h;
     const mag = new Float32Array(n), ang = new Float32Array(n);
     for (let y = 1; y < h - 1; y++) {
@@ -294,6 +289,51 @@ const EscanerDocumento = (() => {
     // Bajo a propósito: el borde de un papel blanco contra una pared clara es mucho
     // más flojo que los trazos de lo que haya impreso, y no puede quedar fuera.
     const umbral = Math.max(8, muestra[Math.floor(n * 0.82)]);
+    return { mag, ang, umbral, w, h };
+  }
+
+  /** Fracción (0..1) del segmento a-b que tiene un borde real, alineado con él, a ±2 px. */
+  function apoyoDeLado(bordes, a, b) {
+    const { mag, ang, umbral, w, h } = bordes;
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const largo = Math.hypot(dx, dy);
+    if (largo < 4) return 0;
+    const nx = dy / largo, ny = -dx / largo;
+    const fi = Math.atan2(ny, nx);
+    const pasos = Math.max(12, Math.round(largo / 2));
+    let bien = 0;
+    for (let k = 0; k < pasos; k++) {
+      const f = 0.04 + 0.92 * (k / (pasos - 1));
+      const px = a[0] + dx * f, py = a[1] + dy * f;
+      let ok = false;
+      for (let d = -2; d <= 2 && !ok; d++) {
+        const x = Math.round(px + nx * d), y = Math.round(py + ny * d);
+        if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) continue;
+        const i = y * w + x;
+        if (mag[i] >= umbral * 0.6 && Math.abs(Math.cos(ang[i] - fi)) >= 0.8) ok = true;
+      }
+      if (ok) bien++;
+    }
+    return bien / pasos;
+  }
+
+  /** Respaldo de los cuatro lados: { media, minimo } (un lado sin borde detrás es mala señal). */
+  function respaldoDeCuadrilatero(bordes, q) {
+    const lados = [0, 1, 2, 3].map((k) => apoyoDeLado(bordes, q[k], q[(k + 1) % 4]));
+    return { media: (lados[0] + lados[1] + lados[2] + lados[3]) / 4, minimo: Math.min(...lados) };
+  }
+
+  // ---------- Detección por rectas (Hough) ----------
+
+  /**
+   * Segunda opción cuando las manchas de color no alcanzan (una lámina con
+   * dibujo oscuro y claro, un fondo parecido): busca las rectas largas de la
+   * imagen y arma el rectángulo cuyos cuatro lados tienen más borde detrás.
+   * `gris` ya viene suavizado y a ~320 px.
+   */
+  function detectarPorLineas(gris, w, h, bordes) {
+    const n = w * h;
+    const { mag, ang, umbral } = bordes;
 
     const NT = 180, diag = Math.ceil(Math.hypot(w, h)), NR = 2 * diag + 1;
     const cosT = new Float32Array(NT), sinT = new Float32Array(NT);
@@ -327,25 +367,6 @@ const EscanerDocumento = (() => {
       if (!repetida) lineas.push({ t, rho, c: cosT[t], s: sinT[t], votos: v });
     }
 
-    // Cuánto del segmento a-b tiene un borde de verdad, alineado con él, a ±2 px.
-    const apoyo = (a, b, linea) => {
-      const largo = Math.hypot(b[0] - a[0], b[1] - a[1]);
-      const pasos = Math.max(12, Math.round(largo / 2));
-      let bien = 0;
-      for (let k = 0; k < pasos; k++) {
-        const f = 0.04 + 0.92 * (k / (pasos - 1));
-        const px = a[0] + (b[0] - a[0]) * f, py = a[1] + (b[1] - a[1]) * f;
-        let ok = false;
-        for (let d = -2; d <= 2 && !ok; d++) {
-          const x = Math.round(px + linea.c * d), y = Math.round(py + linea.s * d);
-          if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) continue;
-          const i = y * w + x;
-          if (mag[i] >= umbral * 0.6 && Math.abs(Math.cos(ang[i] - (linea.t * Math.PI) / 180)) >= 0.8) ok = true;
-        }
-        if (ok) bien++;
-      }
-      return bien / pasos;
-    };
     const cruce = (l1, l2) => {
       const det = l1.c * l2.s - l1.s * l2.c;
       if (Math.abs(det) < 0.2) return null;
@@ -371,8 +392,7 @@ const EscanerDocumento = (() => {
         let cvx = 0;
         for (let k = 0; k < 4; k++) if (cruz(q[k], q[(k + 1) % 4], q[(k + 2) % 4]) > 0) cvx++;
         if (cvx !== 4 && cvx !== 0) continue;
-        const lados = [apoyo(tl, tr, T), apoyo(tr, br, R), apoyo(bl, br, B), apoyo(tl, bl, L)];
-        const media = (lados[0] + lados[1] + lados[2] + lados[3]) / 4, minimo = Math.min(...lados);
+        const { media, minimo } = respaldoDeCuadrilatero(bordes, q);
         const puntaje = (0.5 * media + 0.5 * minimo) * (0.7 + 0.3 * Math.sqrt(fraccion));
         if (!mejor || puntaje > mejor.puntaje) mejor = { cuad: q, puntaje };
       }
@@ -536,26 +556,41 @@ const EscanerDocumento = (() => {
       const cand = candidatosDeMascara(Uint8Array.from(m), w, h);
       if (cand && (!mejor || cand.puntaje > mejor.puntaje)) mejor = cand;
     }
-    // Sin ninguna mancha creíble (fondo parecido, dibujo muy contrastado): se prueban las rectas.
-    if (!mejor || mejor.puntaje < 0.3) {
-      const porLineas = detectarPorLineas(gris, w, h);
-      if (porLineas && porLineas.puntaje >= 0.55) mejor = porLineas;
+    // Cada candidato se juzga por el borde real que tiene detrás de sus cuatro lados:
+    // una mancha con una protuberancia (un halo de luz, una sombra) da un cuadrilátero
+    // con un lado en el aire. Primero la mancha, ya afinada; si no convence, las rectas.
+    const bordes = calcularBordes(gris, w, h);
+    const evaluar = (cand) => {
+      if (!cand) return null;
+      const afinadas = cand.puntaje >= 0.3 ? refinarLados(gris, w, h, cand.cuad) : null;
+      const cuad = afinadas ? ordenarEsquinas(afinadas) : cand.cuad;
+      return { cuad, puntaje: cand.puntaje, respaldo: respaldoDeCuadrilatero(bordes, cuad) };
+    };
+    const buena = (c) => c && c.respaldo.minimo >= 0.35 && c.respaldo.media >= 0.55;
+    const deMancha = evaluar(mejor);
+    let elegido = null;
+    // Una mancha muy convincente (llena su cuadrilátero y no toca los bordes) se acepta aunque un
+    // lado tenga un borde flojo, como el de una hoja sombreada del color de la mesa.
+    if (deMancha && (deMancha.puntaje >= 0.9 || (buena(deMancha) && (deMancha.puntaje >= 0.55 || deMancha.respaldo.media >= 0.7)))) {
+      elegido = deMancha;
+    } else {
+      const porLineas = detectarPorLineas(gris, w, h, bordes);
+      if (porLineas && porLineas.puntaje >= 0.55) elegido = { cuad: porLineas.cuad, puntaje: porLineas.puntaje, respaldo: respaldoDeCuadrilatero(bordes, porLineas.cuad) };
+      else if (buena(deMancha)) elegido = deMancha;
     }
-    // Una mancha dudosa (0,3 a 0,55) vale si después un borde real la confirma al afinar los lados.
-    const afinadas = mejor && mejor.puntaje >= 0.3 ? refinarLados(gris, w, h, mejor.cuad) : null;
-    if (!mejor || (mejor.puntaje < 0.55 && !afinadas)) {
+    if (!elegido) {
       const mx = imagen.width * 0.04, my = imagen.height * 0.04;
       return {
         esquinas: [
           { x: mx, y: my }, { x: imagen.width - mx, y: my },
           { x: imagen.width - mx, y: imagen.height - my }, { x: mx, y: imagen.height - my },
         ],
-        confianza: mejor ? mejor.puntaje : 0,
+        confianza: deMancha ? deMancha.puntaje : 0,
         encontrado: false,
       };
     }
+    mejor = elegido;
     const f = pequena.factor;
-    if (afinadas) mejor.cuad = ordenarEsquinas(afinadas);
     return {
       // +0.5: el centro de un píxel reducido cae a medio píxel del origen.
       esquinas: mejor.cuad.map(([x, y]) => ({
