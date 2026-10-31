@@ -723,6 +723,7 @@ const EscanerDocumento = (() => {
     const previa = opciones.previa && opciones.previa.map((p) => [p.x / fx - 0.5, p.y / fy - 0.5]);
     const cerca = 0.05 * Math.hypot(w, h);
     let mejor = null;
+    const puntuados = [];
     for (const { cuad: q } of candidatos) {
       let puntaje = puntuar(q, w, h, (i, desde, hasta) => {
         const p0 = q[i], p1 = q[(i + 1) % 4];
@@ -730,8 +731,19 @@ const EscanerDocumento = (() => {
         return respaldoSegmento(mapa, en(desde), en(hasta));
       });
       if (puntaje > 0 && previa && q.every((p, i) => Math.hypot(p[0] - previa[i][0], p[1] - previa[i][1]) < cerca)) puntaje += 0.05;
+      if (puntaje > 0) puntuados.push({ cuad: q, puntaje });
       if (!mejor || puntaje > mejor.puntaje) mejor = { cuad: q, puntaje };
     }
+    // Otras hojas posibles (un ticket sobre un formulario son dos): las mejores que no se parezcan
+    // a una ya elegida. La pantalla las ofrece con «Probar otra hoja».
+    puntuados.sort((a, b) => b.puntaje - a.puntaje);
+    const distintas = [];
+    for (const c of puntuados) {
+      if (distintas.length >= 4 || c.puntaje < PUNTAJE_MINIMO) break;
+      if (distintas.every((d) => d.cuad.some((p, i) => Math.hypot(p[0] - c.cuad[i][0], p[1] - c.cuad[i][1]) > 0.08 * Math.hypot(w, h)))) distintas.push(c);
+    }
+    const aImagen = (v, n, f, tope) => (v <= 0.6 ? 0 : v >= n - 1.6 ? tope : limitar((v + 0.5) * f, 0, tope));
+    const aPuntos = (q) => q.map(([x, y]) => ({ x: aImagen(x, w, fx, imagen.width - 1), y: aImagen(y, h, fy, imagen.height - 1) }));
 
     const W = imagen.width - 1, H = imagen.height - 1;
     if (!mejor || mejor.puntaje < PUNTAJE_MINIMO) {
@@ -743,11 +755,11 @@ const EscanerDocumento = (() => {
     }
     // +0.5: el centro de un píxel reducido cae a medio píxel del origen. Lo que está sobre el
     // borde de la foto va exactamente al borde.
-    const aImagen = (v, n, f, tope) => (v <= 0.6 ? 0 : v >= n - 1.6 ? tope : limitar((v + 0.5) * f, 0, tope));
     return {
-      esquinas: mejor.cuad.map(([x, y]) => ({ x: aImagen(x, w, fx, W), y: aImagen(y, h, fy, H) })),
+      esquinas: aPuntos(mejor.cuad),
       confianza: mejor.puntaje,
       encontrado: true,
+      alternativas: distintas.map((c) => aPuntos(c.cuad)),
     };
   }
 

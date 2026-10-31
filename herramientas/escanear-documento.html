@@ -44,6 +44,7 @@ window.i18nPagina = {
     'ayuda-esquinas': 'Arrastrá las cuatro esquinas hasta los vértices del papel.',
     'boton-detectar': 'Detectar de nuevo',
     'boton-cuadro': 'Usar toda la foto',
+    'boton-otra': 'Probar otra hoja ({n}/{total})',
     'boton-girar-izq': '↺ Girar',
     'boton-girar-der': '↻ Girar',
     'aviso-no-detectada': 'No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.',
@@ -115,6 +116,7 @@ window.i18nPagina = {
     'ayuda-esquinas': 'Drag the four corners to the corners of the paper.',
     'boton-detectar': 'Detect again',
     'boton-cuadro': 'Use the whole photo',
+    'boton-otra': 'Try another page ({n}/{total})',
     'boton-girar-izq': '↺ Rotate',
     'boton-girar-der': '↻ Rotate',
     'aviso-no-detectada': 'The edge of the page was not found: the whole photo is used. Drag the corners if needed.',
@@ -233,6 +235,7 @@ window.i18nPagina = {
           <div class="controles">
             <button class="boton secundario chico" id="botonDetectar" type="button" data-i18n="boton-detectar">Detectar de nuevo</button>
             <button class="boton secundario chico" id="botonCuadro" type="button" data-i18n="boton-cuadro">Usar toda la foto</button>
+            <button class="boton secundario chico" id="botonOtra" type="button" hidden></button>
           </div>
         </div>
         <div>
@@ -354,6 +357,8 @@ const gridPaginas = $('gridPaginas');
 // --- Estado ---
 let fuente = null;        // { canvas, datos } de la foto que se está ajustando
 let esquinas = null;      // 4 puntos {x, y} en píxeles de la fuente
+let opciones = [];        // otras hojas posibles de la misma foto (un ticket sobre un formulario son dos)
+let opcionActual = 0;
 let giro = 0;             // cuartos de vuelta de la página
 let modoMejora = 'color';
 let cola = [];            // fotos subidas que esperan su turno
@@ -538,7 +543,24 @@ function cerrarEditor() {
 function detectar() {
   const r = E.detectarEsquinas(fuente.datos);
   esquinas = r.esquinas;
+  opciones = r.encontrado && r.alternativas && r.alternativas.length > 1 ? r.alternativas : [];
+  opcionActual = 0;
+  textoBotonOtra();
   $('avisoNoDetectada').hidden = r.encontrado;
+  dibujarEsquinas();
+  actualizarVista();
+}
+
+function textoBotonOtra() {
+  const b = $('botonOtra');
+  b.hidden = opciones.length < 2;
+  b.textContent = t('boton-otra').replace('{n}', opcionActual + 1).replace('{total}', opciones.length);
+}
+
+function probarOtra() {
+  opcionActual = (opcionActual + 1) % opciones.length;
+  esquinas = opciones[opcionActual].map((p) => ({ x: p.x, y: p.y }));
+  textoBotonOtra();
   dibujarEsquinas();
   actualizarVista();
 }
@@ -547,6 +569,8 @@ function usarTodaLaFoto() {
   const w = fuente.canvas.width, h = fuente.canvas.height;
   esquinas = [{ x: 0, y: 0 }, { x: w - 1, y: 0 }, { x: w - 1, y: h - 1 }, { x: 0, y: h - 1 }];
   $('avisoNoDetectada').hidden = true;
+  opciones = [];
+  textoBotonOtra();
   dibujarEsquinas();
   actualizarVista();
 }
@@ -650,6 +674,8 @@ function actualizarVista() {
 
 $('botonDetectar').addEventListener('click', detectar);
 $('botonCuadro').addEventListener('click', usarTodaLaFoto);
+$('botonOtra').addEventListener('click', probarOtra);
+document.addEventListener('cambioIdioma', textoBotonOtra);
 $('botonGirarIzq').addEventListener('click', () => { giro = (giro + 3) % 4; actualizarVista(); });
 $('botonGirarDer').addEventListener('click', () => { giro = (giro + 1) % 4; actualizarVista(); });
 document.querySelectorAll('input[name="mejora"]').forEach((r) => r.addEventListener('change', () => {
