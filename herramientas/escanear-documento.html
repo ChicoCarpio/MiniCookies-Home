@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
 <script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <style>
-  .visor-camara { position: relative; display: flex; justify-content: center; background: #000; border-radius: var(--radio); overflow: hidden; }
+  .visor-camara { cursor: crosshair; touch-action: manipulation; position: relative; display: flex; justify-content: center; background: #000; border-radius: var(--radio); overflow: hidden; }
   .visor-camara video { display: block; width: 100%; max-height: 70vh; object-fit: contain; }
   .visor-camara canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .lienzo-esquinas { display: block; width: 100%; height: auto; max-height: 75vh; object-fit: contain; touch-action: none; cursor: crosshair; background: var(--gris-fondo); border-radius: var(--radio); }
@@ -32,7 +32,7 @@ window.i18nPagina = {
     'campo-camara': 'Cámara',
     'boton-capturar': '📸 Capturar página',
     'boton-detener-camara': 'Apagar la cámara',
-    'ayuda-camara': 'Apuntá a la hoja sobre una superficie que contraste. Cuando el marco verde la rodea, capturá.',
+    'ayuda-camara': 'Apuntá a la hoja sobre una superficie que contraste. Si hay más de una, tocá la que querés. Cuando el marco verde la rodea, capturá.',
     'zona-arrastre': '🖼️ Arrastrá tus fotos acá o hacé clic para elegirlas',
     'camara-numerada': 'Cámara {n}',
     'camara-iniciando': 'Iniciando la cámara…',
@@ -41,7 +41,7 @@ window.i18nPagina = {
     'error-imagen': 'No se pudo leer esa imagen: ',
     'editor-titulo': 'Ajustá la hoja',
     'lienzo-esquinas-aria': 'Foto con las esquinas de la hoja',
-    'ayuda-esquinas': 'Arrastrá las cuatro esquinas hasta los vértices del papel.',
+    'ayuda-esquinas': 'Arrastrá las esquinas hasta los vértices del papel, o tocá la hoja que querés.',
     'boton-detectar': 'Detectar de nuevo',
     'boton-cuadro': 'Usar toda la foto',
     'boton-otra': 'Probar otra hoja ({n}/{total})',
@@ -104,7 +104,7 @@ window.i18nPagina = {
     'campo-camara': 'Camera',
     'boton-capturar': '📸 Capture page',
     'boton-detener-camara': 'Turn the camera off',
-    'ayuda-camara': 'Point at the page on a surface that contrasts with it. When the green frame surrounds it, capture.',
+    'ayuda-camara': 'Point at the page on a surface that contrasts with it. If there is more than one, tap the one you want. When the green frame surrounds it, capture.',
     'zona-arrastre': '🖼️ Drop your photos here or click to choose them',
     'camara-numerada': 'Camera {n}',
     'camara-iniciando': 'Starting the camera…',
@@ -113,7 +113,7 @@ window.i18nPagina = {
     'error-imagen': 'That image could not be read: ',
     'editor-titulo': 'Adjust the page',
     'lienzo-esquinas-aria': 'Photo with the corners of the page',
-    'ayuda-esquinas': 'Drag the four corners to the corners of the paper.',
+    'ayuda-esquinas': 'Drag the corners to the corners of the paper, or tap the page you want.',
     'boton-detectar': 'Detect again',
     'boton-cuadro': 'Use the whole photo',
     'boton-otra': 'Try another page ({n}/{total})',
@@ -205,7 +205,7 @@ window.i18nPagina = {
           <video id="video" muted playsinline></video>
           <canvas id="capaDeteccion"></canvas>
         </div>
-        <p class="nota-suave" data-i18n="ayuda-camara">Apuntá a la hoja sobre una superficie que contraste. Cuando el marco verde la rodea, capturá.</p>
+        <p class="nota-suave" data-i18n="ayuda-camara">Apuntá a la hoja sobre una superficie que contraste. Si hay más de una, tocá la que querés. Cuando el marco verde la rodea, capturá.</p>
         <div class="controles">
           <button class="boton" id="botonCapturar" type="button" data-i18n="boton-capturar">📸 Capturar página</button>
           <button class="boton secundario" id="botonDetenerCamara" type="button" data-i18n="boton-detener-camara">Apagar la cámara</button>
@@ -229,7 +229,7 @@ window.i18nPagina = {
       <h2 data-i18n="editor-titulo" style="margin-top:0;">Ajustá la hoja</h2>
       <div class="columnas">
         <div>
-          <p class="nota-suave" style="margin-top:0;" data-i18n="ayuda-esquinas">Arrastrá las cuatro esquinas hasta los vértices del papel.</p>
+          <p class="nota-suave" style="margin-top:0;" data-i18n="ayuda-esquinas">Arrastrá las esquinas hasta los vértices del papel, o tocá la hoja que querés.</p>
           <canvas id="lienzoEsquinas" class="lienzo-esquinas" role="img" aria-label="Foto con las esquinas de la hoja" data-i18n-attr="aria-label:lienzo-esquinas-aria"></canvas>
           <p id="avisoNoDetectada" class="nota-suave error" hidden data-i18n="aviso-no-detectada">No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.</p>
           <div class="controles">
@@ -366,6 +366,7 @@ let paginas = new Map();  // id -> { blob, ancho, alto }
 let siguienteId = 0;
 let flujo = null;         // MediaStream de la cámara
 let temporizadorDeteccion = 0;
+let toqueCamara = null;     // punto tocado en el visor, en fracción (0..1) del cuadro de video
 let deteccionPrevia = null; // esquinas del cuadro anterior, para mostrar solo lo que se repite
 let esperandoVista = false;
 
@@ -398,6 +399,7 @@ async function iniciarCamara(idDispositivo) {
     flujo = await navigator.mediaDevices.getUserMedia({ video: video_, audio: false });
     video.srcObject = flujo;
     await video.play();
+    activarAutoenfoque();
     $('envoltorioCamara').hidden = false;
     mostrarEstado('');
     // Los nombres de las cámaras solo se conocen después de dar el permiso.
@@ -419,8 +421,36 @@ async function iniciarCamara(idDispositivo) {
   }
 }
 
+// Enfoque automático continuo, si la cámara lo permite (celulares con Chrome o Edge). En las demás
+// no hace nada: applyConstraints ignora o rechaza lo que no conoce y se sigue igual.
+function pistaDeVideo() {
+  return flujo && flujo.getVideoTracks()[0];
+}
+function modosDeEnfoque(pista) {
+  try { return (pista.getCapabilities && pista.getCapabilities().focusMode) || []; } catch { return []; }
+}
+async function activarAutoenfoque() {
+  const pista = pistaDeVideo();
+  if (!pista || !modosDeEnfoque(pista).includes('continuous')) return;
+  try { await pista.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch { /* sin enfoque controlable */ }
+}
+// Tocar el visor enfoca ese punto (si la cámara acepta puntos de interés) y vuelve al continuo.
+let temporizadorEnfoque = 0;
+async function enfocarEn(x, y) {
+  const pista = pistaDeVideo();
+  if (!pista) return;
+  const modos = modosDeEnfoque(pista);
+  try {
+    await pista.applyConstraints({ advanced: [{ pointsOfInterest: [{ x, y }], ...(modos.includes('single-shot') ? { focusMode: 'single-shot' } : {}) }] });
+  } catch { /* la cámara no acepta enfocar un punto */ }
+  clearTimeout(temporizadorEnfoque);
+  temporizadorEnfoque = setTimeout(activarAutoenfoque, 2500);
+}
+
 function apagarCamara() {
   clearTimeout(temporizadorDeteccion);
+  clearTimeout(temporizadorEnfoque);
+  toqueCamara = null;
   if (flujo) flujo.getTracks().forEach((pista) => pista.stop());
   flujo = null;
   video.srcObject = null;
@@ -445,7 +475,10 @@ function buclearDeteccion() {
   cuadroAnalisis.height = Math.round(video.videoHeight * escala);
   const ctx = cuadroAnalisis.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(video, 0, 0, cuadroAnalisis.width, cuadroAnalisis.height);
-  const resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height), { previa: deteccionPrevia });
+  const resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height), {
+    previa: deteccionPrevia,
+    punto: toqueCamara && { x: toqueCamara.x * cuadroAnalisis.width, y: toqueCamara.y * cuadroAnalisis.height },
+  });
 
   // La capa mide lo que mide el video en pantalla; el video usa object-fit: contain.
   const caja = video.getBoundingClientRect();
@@ -471,8 +504,32 @@ function buclearDeteccion() {
     c.strokeStyle = '#22c55e';
     c.stroke();
   }
+  if (toqueCamara) {
+    // Dónde tocó la persona: la hoja elegida es la que contiene ese punto.
+    const k = Math.min(caja.width / cuadroAnalisis.width, caja.height / cuadroAnalisis.height);
+    const dx = (caja.width - cuadroAnalisis.width * k) / 2, dy = (caja.height - cuadroAnalisis.height * k) / 2;
+    c.beginPath();
+    c.arc(dx + toqueCamara.x * cuadroAnalisis.width * k, dy + toqueCamara.y * cuadroAnalisis.height * k, 10, 0, Math.PI * 2);
+    c.lineWidth = 3;
+    c.strokeStyle = '#fff';
+    c.stroke();
+  }
   temporizadorDeteccion = setTimeout(buclearDeteccion, 400);
 }
+
+document.querySelector('.visor-camara').addEventListener('click', (e) => {
+  if (!video.videoWidth) return;
+  // El video usa object-fit: contain: puede haber franjas negras a los costados.
+  const caja = video.getBoundingClientRect();
+  const k = Math.min(caja.width / video.videoWidth, caja.height / video.videoHeight);
+  const x = (e.clientX - caja.left - (caja.width - video.videoWidth * k) / 2) / (video.videoWidth * k);
+  const y = (e.clientY - caja.top - (caja.height - video.videoHeight * k) / 2) / (video.videoHeight * k);
+  if (x < 0 || x > 1 || y < 0 || y > 1) return;
+  toqueCamara = { x, y };
+  deteccionPrevia = null;
+  enfocarEn(x, y);
+  buclearDeteccion();
+});
 
 function capturar() {
   if (!flujo || !video.videoWidth) return;
@@ -482,7 +539,9 @@ function capturar() {
   lienzo.height = Math.round(video.videoHeight * escala);
   lienzo.getContext('2d').drawImage(video, 0, 0, lienzo.width, lienzo.height);
   limpiarCapa();
-  abrirEditor(lienzo);
+  const toque = toqueCamara;
+  toqueCamara = null; // la próxima página suele ser otra hoja
+  abrirEditor(lienzo, toque && { x: toque.x * lienzo.width, y: toque.y * lienzo.height });
 }
 
 // ===================== Fotos subidas =====================
@@ -518,12 +577,12 @@ conectarZonaArrastre($('zonaArrastre'), $('entradaArchivos'), (archivos) => {
 
 // ===================== Editor de una página =====================
 
-function abrirEditor(lienzo) {
+function abrirEditor(lienzo, punto) {
   fuente = { canvas: lienzo, datos: lienzo.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, lienzo.width, lienzo.height) };
   giro = 0;
   $('deslizadorBrillo').value = 0;
   $('deslizadorContraste').value = 0;
-  detectar();
+  detectar(punto);
   $('editor').hidden = false;
   if (flujo) $('envoltorioCamara').hidden = true;
   $('editor').scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -540,8 +599,9 @@ function cerrarEditor() {
   siguienteDeLaCola();
 }
 
-function detectar() {
-  const r = E.detectarEsquinas(fuente.datos);
+// punto: {x, y} en píxeles de la foto que la persona tocó (opcional).
+function detectar(punto) {
+  const r = E.detectarEsquinas(fuente.datos, punto ? { punto } : {});
   esquinas = r.esquinas;
   opciones = r.encontrado && r.alternativas && r.alternativas.length > 1 ? r.alternativas : [];
   opcionActual = 0;
@@ -610,6 +670,7 @@ function dibujarEsquinas() {
 }
 
 let esquinaArrastrada = -1;
+let toqueEditor = null;
 function puntoEnFuente(evento) {
   const caja = lienzoEsquinas.getBoundingClientRect();
   const k = escalaLienzoEsquinas();
@@ -624,7 +685,11 @@ lienzoEsquinas.addEventListener('pointerdown', (e) => {
   const p = puntoEnFuente(e);
   let mejor = -1, distMin = 36 * p.pxPorPantalla; // radio de toque cómodo con el dedo
   esquinas.forEach((q, i) => { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < distMin) { distMin = d; mejor = i; } });
-  if (mejor < 0) return;
+  if (mejor < 0) {
+    // Lejos de las esquinas: un toque (sin arrastrar) elige la hoja que está debajo del dedo.
+    toqueEditor = { x: e.clientX, y: e.clientY, punto: { x: p.x, y: p.y } };
+    return;
+  }
   esquinaArrastrada = mejor;
   lienzoEsquinas.setPointerCapture(e.pointerId);
   e.preventDefault();
@@ -639,7 +704,14 @@ lienzoEsquinas.addEventListener('pointermove', (e) => {
   $('avisoNoDetectada').hidden = true;
   dibujarEsquinas();
 });
-const soltarEsquina = () => {
+const soltarEsquina = (e) => {
+  if (toqueEditor) {
+    const fueToque = e.type === 'pointerup' && Math.hypot(e.clientX - toqueEditor.x, e.clientY - toqueEditor.y) < 10;
+    const punto = toqueEditor.punto;
+    toqueEditor = null;
+    if (fueToque) detectar(punto);
+    return;
+  }
   if (esquinaArrastrada < 0) return;
   esquinaArrastrada = -1;
   actualizarVista();
@@ -672,7 +744,7 @@ function actualizarVista() {
   });
 }
 
-$('botonDetectar').addEventListener('click', detectar);
+$('botonDetectar').addEventListener('click', () => detectar());
 $('botonCuadro').addEventListener('click', usarTodaLaFoto);
 $('botonOtra').addEventListener('click', probarOtra);
 document.addEventListener('cambioIdioma', textoBotonOtra);

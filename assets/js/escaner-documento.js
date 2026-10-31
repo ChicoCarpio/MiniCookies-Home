@@ -700,6 +700,7 @@ const EscanerDocumento = (() => {
   /**
    * opciones.previa: las esquinas detectadas en el cuadro anterior de la cámara; un candidato
    * parecido recibe un pequeño premio, así el marco no salta entre dos parecidos.
+   * opciones.punto: {x, y} en píxeles de la imagen que la persona tocó; se elige la hoja que lo contiene.
    */
   function detectarEsquinas(imagen, opciones = {}) {
     const pequena = reducir(imagen, LADO_ANALISIS);
@@ -737,6 +738,19 @@ const EscanerDocumento = (() => {
     // Otras hojas posibles (un ticket sobre un formulario son dos): las mejores que no se parezcan
     // a una ya elegida. La pantalla las ofrece con «Probar otra hoja».
     puntuados.sort((a, b) => b.puntaje - a.puntaje);
+    // La persona tocó la hoja que quiere: gana la hoja más chica que contiene ese punto, entre
+    // las que tienen un puntaje razonable (un ticket sobre un formulario: tocar el ticket da el ticket).
+    if (opciones.punto) {
+      const p = [opciones.punto.x / fx - 0.5, opciones.punto.y / fy - 0.5];
+      const contiene = (q) => [0, 1, 2, 3].every((i) => cruz(q[i], q[(i + 1) % 4], p) >= 0);
+      const conPunto = puntuados.filter((c) => c.puntaje >= PUNTAJE_MINIMO * 0.75 && contiene(c.cuad));
+      if (conPunto.length) {
+        const tope = conPunto[0].puntaje * 0.5;
+        mejor = conPunto.filter((c) => c.puntaje >= tope)
+          .reduce((a, b) => (areaPoligono(b.cuad) < areaPoligono(a.cuad) ? b : a));
+        mejor = { cuad: mejor.cuad, puntaje: Math.max(mejor.puntaje, PUNTAJE_MINIMO) };
+      }
+    }
     const distintas = [];
     for (const c of puntuados) {
       if (distintas.length >= 4 || c.puntaje < PUNTAJE_MINIMO) break;
