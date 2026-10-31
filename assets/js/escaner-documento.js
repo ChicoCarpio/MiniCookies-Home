@@ -270,6 +270,23 @@ const EscanerDocumento = (() => {
     return [0, 1, 2, 3].map((k) => porAngulo[(inicio + k) % 4]);
   }
 
+  /** Una hoja fotografiada no tiene ángulos de 40° ni de 150°: eso es un cuadrilátero torcido por una protuberancia. */
+  function angulosRazonables(q) {
+    for (let k = 0; k < 4; k++) {
+      const p = q[k], a = q[(k + 3) % 4], c = q[(k + 1) % 4];
+      const v1x = a[0] - p[0], v1y = a[1] - p[1], v2x = c[0] - p[0], v2y = c[1] - p[1];
+      const coseno = (v1x * v2x + v1y * v2y) / (Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y) || 1);
+      const grados = (Math.acos(Math.max(-1, Math.min(1, coseno))) * 180) / Math.PI;
+      if (grados < 55 || grados > 125) return false;
+    }
+    // Los lados opuestos de una hoja fotografiada de frente son casi paralelos; uno inclinado 25° y su
+    // opuesto recto es una mancha cortada en diagonal, no una hoja.
+    const rumbo = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]);
+    const difer = (r1, r2) => { let d = Math.abs(r1 - r2) % Math.PI; if (d > Math.PI / 2) d = Math.PI - d; return (d * 180) / Math.PI; };
+    if (difer(rumbo(q[0], q[1]), rumbo(q[3], q[2])) > 18 || difer(rumbo(q[0], q[3]), rumbo(q[1], q[2])) > 18) return false;
+    return true;
+  }
+
   // ---------- Bordes y respaldo de un cuadrilátero ----------
 
   /** Magnitud y dirección del gradiente (Sobel) de un canal suavizado, y el umbral de "borde". */
@@ -566,17 +583,22 @@ const EscanerDocumento = (() => {
       const cuad = afinadas ? ordenarEsquinas(afinadas) : cand.cuad;
       return { cuad, puntaje: cand.puntaje, respaldo: respaldoDeCuadrilatero(bordes, cuad) };
     };
-    const buena = (c) => c && c.respaldo.minimo >= 0.35 && c.respaldo.media >= 0.55;
+    const buena = (c) => c && angulosRazonables(c.cuad) && c.respaldo.minimo >= 0.35 && c.respaldo.media >= 0.55;
     const deMancha = evaluar(mejor);
     let elegido = null;
-    // Una mancha muy convincente (llena su cuadrilátero y no toca los bordes) se acepta aunque un
-    // lado tenga un borde flojo, como el de una hoja sombreada del color de la mesa.
-    if (deMancha && (deMancha.puntaje >= 0.9 || (buena(deMancha) && (deMancha.puntaje >= 0.55 || deMancha.respaldo.media >= 0.7)))) {
+    if (buena(deMancha) && (deMancha.puntaje >= 0.55 || deMancha.respaldo.media >= 0.7)) {
       elegido = deMancha;
     } else {
+      // Un lado sin borde detrás: se prueban las rectas antes de fiarse de la mancha.
       const porLineas = detectarPorLineas(gris, w, h, bordes);
-      if (porLineas && porLineas.puntaje >= 0.55) elegido = { cuad: porLineas.cuad, puntaje: porLineas.puntaje, respaldo: respaldoDeCuadrilatero(bordes, porLineas.cuad) };
-      else if (buena(deMancha)) elegido = deMancha;
+      if (porLineas && porLineas.puntaje >= 0.55 && angulosRazonables(porLineas.cuad)) {
+        elegido = { cuad: porLineas.cuad, puntaje: porLineas.puntaje, respaldo: respaldoDeCuadrilatero(bordes, porLineas.cuad) };
+      } else if (buena(deMancha)) {
+        elegido = deMancha;
+      } else if (deMancha && deMancha.puntaje >= 0.9 && angulosRazonables(deMancha.cuad)) {
+        // Mancha muy convincente sin borde en un lado: una hoja sombreada del color de la mesa.
+        elegido = deMancha;
+      }
     }
     if (!elegido) {
       const mx = imagen.width * 0.04, my = imagen.height * 0.04;

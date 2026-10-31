@@ -361,6 +361,7 @@ let paginas = new Map();  // id -> { blob, ancho, alto }
 let siguienteId = 0;
 let flujo = null;         // MediaStream de la cámara
 let temporizadorDeteccion = 0;
+let deteccionPrevia = null; // esquinas del cuadro anterior, para mostrar solo lo que se repite
 let esperandoVista = false;
 
 function mostrarError(texto) {
@@ -447,7 +448,13 @@ function buclearDeteccion() {
   capaDeteccion.height = Math.round(caja.height);
   const c = capaDeteccion.getContext('2d');
   c.clearRect(0, 0, capaDeteccion.width, capaDeteccion.height);
-  if (resultado.encontrado) {
+  // Un marco que aparece en un solo cuadro es casi siempre un error: se dibuja cuando dos
+  // cuadros seguidos coinciden (cada esquina a menos de un 6 % de la diagonal).
+  const diagonal = Math.hypot(cuadroAnalisis.width, cuadroAnalisis.height);
+  const estable = resultado.encontrado && deteccionPrevia
+    && resultado.esquinas.every((p, i) => Math.hypot(p.x - deteccionPrevia[i].x, p.y - deteccionPrevia[i].y) < 0.06 * diagonal);
+  deteccionPrevia = resultado.encontrado ? resultado.esquinas : null;
+  if (estable) {
     const k = Math.min(caja.width / cuadroAnalisis.width, caja.height / cuadroAnalisis.height);
     const dx = (caja.width - cuadroAnalisis.width * k) / 2, dy = (caja.height - cuadroAnalisis.height * k) / 2;
     c.beginPath();
