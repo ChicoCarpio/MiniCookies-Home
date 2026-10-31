@@ -272,6 +272,12 @@ const EscanerDocumento = (() => {
 
   /** Una hoja fotografiada no tiene ángulos de 40° ni de 150°: eso es un cuadrilátero torcido por una protuberancia. */
   function angulosRazonables(q) {
+    let signo = 0;
+    for (let k = 0; k < 4; k++) {
+      const c = cruz(q[k], q[(k + 1) % 4], q[(k + 2) % 4]);
+      if (!c || (signo && Math.sign(c) !== signo)) return false; // no convexo o cruzado
+      signo = Math.sign(c);
+    }
     for (let k = 0; k < 4; k++) {
       const p = q[k], a = q[(k + 3) % 4], c = q[(k + 1) % 4];
       const v1x = a[0] - p[0], v1y = a[1] - p[1], v2x = c[0] - p[0], v2y = c[1] - p[1];
@@ -287,134 +293,256 @@ const EscanerDocumento = (() => {
     return true;
   }
 
-  // ---------- Bordes y respaldo de un cuadrilátero ----------
-
-  /** Magnitud y dirección del gradiente (Sobel) de un canal suavizado, y el umbral de "borde". */
-  function calcularBordes(gris, w, h) {
-    const n = w * h;
-    const mag = new Float32Array(n), ang = new Float32Array(n);
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const i = y * w + x;
-        const gx = (gris[i - w + 1] + 2 * gris[i + 1] + gris[i + w + 1]) - (gris[i - w - 1] + 2 * gris[i - 1] + gris[i + w - 1]);
-        const gy = (gris[i + w - 1] + 2 * gris[i + w] + gris[i + w + 1]) - (gris[i - w - 1] + 2 * gris[i - w] + gris[i - w + 1]);
-        mag[i] = Math.hypot(gx, gy);
-        ang[i] = Math.atan2(gy, gx);
-      }
-    }
-    const muestra = Float32Array.from(mag).sort();
-    // Bajo a propósito: el borde de un papel blanco contra una pared clara es mucho
-    // más flojo que los trazos de lo que haya impreso, y no puede quedar fuera.
-    const umbral = Math.max(8, muestra[Math.floor(n * 0.82)]);
-    return { mag, ang, umbral, w, h };
-  }
-
-  /** Fracción (0..1) del segmento a-b que tiene un borde real, alineado con él, a ±2 px. */
-  function apoyoDeLado(bordes, a, b) {
-    const { mag, ang, umbral, w, h } = bordes;
-    const dx = b[0] - a[0], dy = b[1] - a[1];
-    const largo = Math.hypot(dx, dy);
-    if (largo < 4) return 0;
-    const nx = dy / largo, ny = -dx / largo;
-    const fi = Math.atan2(ny, nx);
-    const pasos = Math.max(12, Math.round(largo / 2));
-    let bien = 0;
-    for (let k = 0; k < pasos; k++) {
-      const f = 0.04 + 0.92 * (k / (pasos - 1));
-      const px = a[0] + dx * f, py = a[1] + dy * f;
-      let ok = false;
-      for (let d = -2; d <= 2 && !ok; d++) {
-        const x = Math.round(px + nx * d), y = Math.round(py + ny * d);
-        if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) continue;
-        const i = y * w + x;
-        if (mag[i] >= umbral * 0.6 && Math.abs(Math.cos(ang[i] - fi)) >= 0.8) ok = true;
-      }
-      if (ok) bien++;
-    }
-    return bien / pasos;
-  }
-
-  /** Respaldo de los cuatro lados: { media, minimo } (un lado sin borde detrás es mala señal). */
-  function respaldoDeCuadrilatero(bordes, q) {
-    const lados = [0, 1, 2, 3].map((k) => apoyoDeLado(bordes, q[k], q[(k + 1) % 4]));
-    return { media: (lados[0] + lados[1] + lados[2] + lados[3]) / 4, minimo: Math.min(...lados) };
-  }
-
-  // ---------- Detección por rectas (Hough) ----------
+  // ---------- Mapa de bordes ----------
 
   /**
-   * Segunda opción cuando las manchas de color no alcanzan (una lámina con
-   * dibujo oscuro y claro, un fondo parecido): busca las rectas largas de la
-   * imagen y arma el rectángulo cuyos cuatro lados tienen más borde detrás.
-   * `gris` ya viene suavizado y a ~320 px.
+   * Bordes finos en color: gradiente de Sobel en el canal (R, G o B) donde el cambio es mayor
+   * —un papel amarillo y una mesa gris pueden tener la misma luminosidad—, adelgazado a un píxel
+   * como en Canny. `prob` es la fuerza del borde de 0 a 1 (1 = de los más marcados de la foto).
    */
-  function detectarPorLineas(gris, w, h, bordes) {
+  function mapaDeBordes(pequena, w, h) {
     const n = w * h;
-    const { mag, ang, umbral } = bordes;
-
-    const NT = 180, diag = Math.ceil(Math.hypot(w, h)), NR = 2 * diag + 1;
-    const cosT = new Float32Array(NT), sinT = new Float32Array(NT);
-    for (let t = 0; t < NT; t++) { cosT[t] = Math.cos((t * Math.PI) / 180); sinT[t] = Math.sin((t * Math.PI) / 180); }
-    const acc = new Float32Array(NT * NR);
+    const canales = [0, 1, 2].map((c) => {
+      const ch = new Float32Array(n);
+      for (let p = 0; p < n; p++) ch[p] = pequena.data[p * 4 + c];
+      return desenfocar(ch, w, h, 2);
+    });
+    const gx = new Float32Array(n), gy = new Float32Array(n), mag = new Float32Array(n);
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         const i = y * w + x;
-        if (mag[i] < umbral) continue;
-        const t0 = Math.round((ang[i] * 180) / Math.PI);
-        for (let d = -5; d <= 5; d++) {
-          const t = (((t0 + d) % NT) + NT) % NT;
-          acc[t * NR + Math.round(x * cosT[t] + y * sinT[t]) + diag]++;
+        let mejor = -1;
+        for (const g of canales) {
+          const ax = (g[i - w + 1] + 2 * g[i + 1] + g[i + w + 1]) - (g[i - w - 1] + 2 * g[i - 1] + g[i + w - 1]);
+          const ay = (g[i + w - 1] + 2 * g[i + w] + g[i + w + 1]) - (g[i - w - 1] + 2 * g[i - w] + g[i - w + 1]);
+          const m = ax * ax + ay * ay;
+          if (m > mejor) { mejor = m; gx[i] = ax; gy[i] = ay; }
+        }
+        mag[i] = Math.sqrt(mejor);
+      }
+    }
+    // Supresión de no máximos: queda solo la cresta de cada borde, de un píxel de ancho.
+    const prob = new Float32Array(n);
+    const valores = [];
+    for (let y = 2; y < h - 2; y++) {
+      for (let x = 2; x < w - 2; x++) {
+        const i = y * w + x, m = mag[i];
+        if (m < 6) continue;
+        const ax = Math.abs(gx[i]), ay = Math.abs(gy[i]);
+        const d = ay <= ax * 0.4142 ? 1 : ax <= ay * 0.4142 ? w : (gx[i] > 0) === (gy[i] > 0) ? w + 1 : w - 1;
+        if (m >= mag[i - d] && m >= mag[i + d]) { prob[i] = m; valores.push(m); }
+      }
+    }
+    valores.sort((a, b) => a - b);
+    const tope = Math.max(16, valores.length ? valores[Math.floor(valores.length * 0.7)] : 16);
+    for (let i = 0; i < n; i++) if (prob[i]) prob[i] = Math.min(1, prob[i] / tope);
+    return { gx, gy, prob, canales, w, h };
+  }
+
+  // ---------- Rectas (Hough) ----------
+
+  const COS = new Float32Array(180), SEN = new Float32Array(180);
+  for (let t = 0; t < 180; t++) { COS[t] = Math.cos((t * Math.PI) / 180); SEN[t] = Math.sin((t * Math.PI) / 180); }
+
+  /** Recta x·cos t + y·sen t = rho. `virtual` marca un borde de la foto ('arriba', 'abajo', 'izq', 'der'). */
+  const nuevaRecta = (t, rho, votos, virtual) => ({ t, rho, c: COS[t], s: SEN[t], votos, virtual });
+
+  /** Las rectas más votadas de los bordes finos; cada píxel vota solo cerca de la dirección de su borde. */
+  function rectasDeHough(mapa) {
+    const { gx, gy, prob, w, h } = mapa;
+    const diag = Math.ceil(Math.hypot(w, h)), NR = 2 * diag + 1;
+    const acc = new Float32Array(180 * NR);
+    for (let y = 2; y < h - 2; y++) {
+      for (let x = 2; x < w - 2; x++) {
+        const i = y * w + x, p = prob[i];
+        if (p < 0.2) continue;
+        const t0 = Math.round((Math.atan2(gy[i], gx[i]) * 180) / Math.PI);
+        for (let d = -3; d <= 3; d++) {
+          const t = (((t0 + d) % 180) + 180) % 180;
+          acc[t * NR + Math.round(x * COS[t] + y * SEN[t]) + diag] += p;
         }
       }
     }
-
-    // Picos: los más votados que no tengan otro mejor al lado.
-    const minVotos = 0.3 * Math.min(w, h);
-    const cand = [];
-    for (let t = 0; t < NT; t++) for (let r = 0; r < NR; r++) { const v = acc[t * NR + r]; if (v >= minVotos) cand.push([v, t, r - diag]); }
-    cand.sort((a, b) => b[0] - a[0]);
+    const minimo = 0.12 * Math.min(w, h);
+    const indices = [];
+    for (let k = 0; k < acc.length; k++) if (acc[k] >= minimo) indices.push(k);
+    indices.sort((a, b) => acc[b] - acc[a]);
     const lineas = [];
-    for (const [v, t, rho] of cand) {
-      if (lineas.length >= 26) break;
+    for (const k of indices) {
+      if (lineas.length >= 40) break;
+      const t = Math.floor(k / NR), rho = (k % NR) - diag;
       const repetida = lineas.some((l) => {
         let dt = Math.abs(l.t - t), dr = Math.abs(l.rho - rho);
-        if (dt > NT / 2) { dt = NT - dt; dr = Math.abs(l.rho + rho); } // t y t+180 son la misma recta con rho invertido
-        return dt <= 5 && dr <= 3;
+        if (dt > 90) { dt = 180 - dt; dr = Math.abs(l.rho + rho); } // t y t+180 son la misma recta con rho invertido
+        return dt <= 3 && dr <= 4;
       });
-      if (!repetida) lineas.push({ t, rho, c: cosT[t], s: sinT[t], votos: v });
+      if (!repetida) lineas.push(nuevaRecta(t, rho, acc[k]));
     }
+    return lineas;
+  }
 
+  // ---------- Respaldo de un lado ----------
+
+  /**
+   * Cuánto escalón de color hay en (px, py) a través de la normal: el promedio de 3 a 6 px de un
+   * lado contra el del otro, en el canal donde más cambia (0..1, 1 = 12 niveles o más). El borde
+   * de un papel es un escalón (papel de un lado, fondo del otro); un renglón, una línea impresa o
+   * un trazo de texto es una línea fina con lo mismo a los dos lados, y da casi 0.
+   */
+  function escalon(mapa, px, py, nx, ny) {
+    const { canales, w, h } = mapa;
+    let mayor = 0;
+    for (const g of canales) {
+      let afuera = 0, adentro = 0, na = 0, nd = 0;
+      for (let k = 3; k <= 6; k++) {
+        const xa = Math.round(px + nx * k), ya = Math.round(py + ny * k);
+        const xd = Math.round(px - nx * k), yd = Math.round(py - ny * k);
+        if (xa >= 0 && ya >= 0 && xa < w && ya < h) { afuera += g[ya * w + xa]; na++; }
+        if (xd >= 0 && yd >= 0 && xd < w && yd < h) { adentro += g[yd * w + xd]; nd++; }
+      }
+      if (na && nd) mayor = Math.max(mayor, Math.abs(afuera / na - adentro / nd));
+    }
+    return Math.min(1, mayor / 12);
+  }
+
+  /** Mejor borde alineado con la normal (nx, ny) a ±1,5 px de (px, py), separado por sentido y pesado por el escalón. */
+  function bordeCerca(mapa, px, py, nx, ny) {
+    const { gx, gy, prob, w, h } = mapa;
+    let mp = 0, mn = 0;
+    for (let o = -1.5; o <= 1.5; o += 0.75) {
+      const x = Math.round(px + nx * o), y = Math.round(py + ny * o);
+      if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) continue;
+      const i = y * w + x, p = prob[i];
+      if (!p) continue;
+      const coseno = (gx[i] * nx + gy[i] * ny) / Math.hypot(gx[i], gy[i]);
+      if (coseno >= 0.9) { if (p > mp) mp = p; } else if (coseno <= -0.9 && p > mn) mn = p;
+    }
+    if (!mp && !mn) return [0, 0];
+    const e = escalon(mapa, px, py, nx, ny);
+    return [mp * e, mn * e];
+  }
+
+  /**
+   * Respaldo (0..1) del segmento a-b: qué parte tiene un borde fino detrás, alineado con él y
+   * siempre con el mismo sentido (claro→oscuro, o al revés). El sentido constante es lo que separa
+   * el borde de un papel de los trazos del texto o del dibujo, que van y vuelven.
+   */
+  function respaldoSegmento(mapa, a, b) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], largo = Math.hypot(dx, dy);
+    if (largo < 3) return 0;
+    const nx = dy / largo, ny = -dx / largo;
+    const pasos = Math.max(8, Math.round(largo));
+    let pos = 0, neg = 0;
+    for (let k = 0; k < pasos; k++) {
+      const f = 0.03 + 0.94 * (k / (pasos - 1));
+      const [mp, mn] = bordeCerca(mapa, a[0] + dx * f, a[1] + dy * f, nx, ny);
+      pos += mp; neg += mn;
+    }
+    return Math.max(pos, neg) / pasos;
+  }
+
+  /** Lo mismo que respaldoSegmento, pero precalculado a lo largo de una recta (sumas acumuladas). */
+  function perfilDeRecta(mapa, l) {
+    const diag = Math.ceil(Math.hypot(mapa.w, mapa.h)), n = 2 * diag + 1;
+    const pos = new Float32Array(n + 1), neg = new Float32Array(n + 1);
+    const x0 = l.rho * l.c, y0 = l.rho * l.s;
+    for (let k = 0; k < n; k++) {
+      const t = k - diag;
+      const [mp, mn] = bordeCerca(mapa, x0 - l.s * t, y0 + l.c * t, l.c, l.s);
+      pos[k + 1] = pos[k] + mp; neg[k + 1] = neg[k] + mn;
+    }
+    l.perfil = { pos, neg, diag, n };
+  }
+  const paramEn = (l, p) => -p[0] * l.s + p[1] * l.c;
+  function respaldoEnRecta(l, pa, pb) {
+    let ta = paramEn(l, pa), tb = paramEn(l, pb);
+    if (ta > tb) [ta, tb] = [tb, ta];
+    const recorte = (tb - ta) * 0.03, { pos, neg, diag, n } = l.perfil;
+    const a = limitar(Math.round(ta + recorte) + diag, 0, n), b = limitar(Math.round(tb - recorte) + diag, 0, n);
+    return b > a ? Math.max(pos[b] - pos[a], neg[b] - neg[a]) / (b - a) : 0;
+  }
+
+  // ---------- Puntaje de un cuadrilátero ----------
+
+  /** ¿De qué borde de la foto es el lado a-b, si está pegado a uno? */
+  function ladoDeMarco(a, b, w, h) {
+    const e = 1.2;
+    if (a[1] <= e && b[1] <= e) return 'arriba';
+    if (a[1] >= h - 1 - e && b[1] >= h - 1 - e) return 'abajo';
+    if (a[0] <= e && b[0] <= e) return 'izq';
+    if (a[0] >= w - 1 - e && b[0] >= w - 1 - e) return 'der';
+    return null;
+  }
+
+  const alcanceDeVecinos = (alcances) => alcances.reduce((x, y) => x + y, 0) / alcances.length;
+
+  /**
+   * Un solo puntaje para todos los candidatos, vengan de rectas o de manchas: respaldo de los
+   * cuatro lados (el promedio y el peor), un poco de premio al tamaño y un poco de castigo por
+   * cada lado que va sobre el borde de la foto. Ese lado (la hoja sigue fuera del encuadre) vale
+   * solo si los lados vecinos llegan de verdad hasta el borde: si no, cualquier rectángulo del
+   * tamaño de la foto ganaría.
+   * `respaldo(i, desde, hasta)` da el respaldo del lado i entre dos fracciones de su largo.
+   */
+  function puntuar(q, w, h, respaldo) {
+    if (!angulosRazonables(q)) return -1;
+    const area = areaPoligono(q) / (w * h);
+    if (area < 0.06) return -1;
+    const marco = [0, 1, 2, 3].map((i) => ladoDeMarco(q[i], q[(i + 1) % 4], w, h));
+    const virtuales = marco.filter(Boolean).length;
+    if (virtuales === 4) return -1;
+    const lados = [0, 1, 2, 3].map((i) => (marco[i] ? null : respaldo(i, 0, 1)));
+    for (let i = 0; i < 4; i++) {
+      if (!marco[i]) continue;
+      // Vecinos: el lado anterior termina en la esquina i; el siguiente empieza en la esquina i+1.
+      const anterior = (i + 3) % 4, siguiente = (i + 1) % 4;
+      const alcances = [];
+      if (!marco[anterior]) alcances.push(respaldo(anterior, 0.8, 1));
+      if (!marco[siguiente]) alcances.push(respaldo(siguiente, 0, 0.2));
+      // Basta con que lleguen en promedio: el borde de una hoja contra una pared de color parecido
+      // puede borrarse justo en una esquina.
+      lados[i] = alcances.length && alcanceDeVecinos(alcances) >= 0.4 ? 0.8 : 0;
+    }
+    const media = (lados[0] + lados[1] + lados[2] + lados[3]) / 4, minimo = Math.min(...lados);
+    return (0.6 * media + 0.4 * minimo) * (0.75 + 0.25 * Math.sqrt(area)) - 0.03 * virtuales;
+  }
+
+  /** Todos los cuadriláteros que se arman con dos rectas casi horizontales y dos casi verticales. */
+  function candidatosDeRectas(mapa, lineas) {
+    const { w, h } = mapa;
+    const pos = (l) => (Math.abs(l.s) > 0.7 ? (l.rho - (w / 2) * l.c) / l.s : (l.rho - (h / 2) * l.s) / l.c);
+    const horiz = lineas.filter((l) => Math.abs(l.s) > 0.7).slice(0, 12);
+    const vert = lineas.filter((l) => Math.abs(l.s) <= 0.7).slice(0, 12);
+    // Los bordes de la foto, para la hoja que se sale del encuadre.
+    horiz.push(nuevaRecta(90, 0, 0, 'arriba'), nuevaRecta(90, h - 1, 0, 'abajo'));
+    vert.push(nuevaRecta(0, 0, 0, 'izq'), nuevaRecta(0, w - 1, 0, 'der'));
+    for (const l of horiz.concat(vert)) { l.pos = pos(l); perfilDeRecta(mapa, l); }
+    horiz.sort((a, b) => a.pos - b.pos);
+    vert.sort((a, b) => a.pos - b.pos);
     const cruce = (l1, l2) => {
       const det = l1.c * l2.s - l1.s * l2.c;
       if (Math.abs(det) < 0.2) return null;
       return [(l1.rho * l2.s - l1.s * l2.rho) / det, (l1.c * l2.rho - l1.rho * l2.c) / det];
     };
-
-    // Casi horizontales (normal casi vertical) y casi verticales.
-    const horiz = lineas.filter((l) => Math.abs(l.s) > 0.7).map((l) => ({ ...l, pos: (l.rho - (w / 2) * l.c) / l.s }));
-    const vert = lineas.filter((l) => Math.abs(l.s) <= 0.7).map((l) => ({ ...l, pos: (l.rho - (h / 2) * l.s) / l.c }));
-    horiz.sort((a, b) => a.pos - b.pos);
-    vert.sort((a, b) => a.pos - b.pos);
-    const margen = 0.03;
-    let mejor = null;
+    const mx = 0.02 * w, my = 0.02 * h;
+    const fuera = (p) => p[0] < -mx || p[0] > w - 1 + mx || p[1] < -my || p[1] > h - 1 + my;
+    const resultado = [];
     for (let a = 0; a < horiz.length; a++) for (let b = a + 1; b < horiz.length; b++) {
       for (let c = 0; c < vert.length; c++) for (let d = c + 1; d < vert.length; d++) {
         const T = horiz[a], B = horiz[b], L = vert[c], R = vert[d];
-        const tl = cruce(T, L), tr = cruce(T, R), br = cruce(B, R), bl = cruce(B, L);
-        if (!tl || !tr || !br || !bl) continue;
-        const q = [tl, tr, br, bl];
-        if (q.some((p) => p[0] < -margen * w || p[0] > (1 + margen) * w || p[1] < -margen * h || p[1] > (1 + margen) * h)) continue;
-        const fraccion = areaPoligono(q) / (w * h);
-        if (fraccion < 0.12 || fraccion > 0.98) continue;
-        let cvx = 0;
-        for (let k = 0; k < 4; k++) if (cruz(q[k], q[(k + 1) % 4], q[(k + 2) % 4]) > 0) cvx++;
-        if (cvx !== 4 && cvx !== 0) continue;
-        const { media, minimo } = respaldoDeCuadrilatero(bordes, q);
-        const puntaje = (0.5 * media + 0.5 * minimo) * (0.7 + 0.3 * Math.sqrt(fraccion));
-        if (!mejor || puntaje > mejor.puntaje) mejor = { cuad: q, puntaje };
+        const q = [cruce(T, L), cruce(T, R), cruce(B, R), cruce(B, L)];
+        if (q.some((p) => !p || fuera(p))) continue;
+        const rectas = [T, R, B, L];
+        const puntaje = puntuar(q, w, h, (i, desde, hasta) => {
+          const p0 = q[i], p1 = q[(i + 1) % 4];
+          const en = (f) => [p0[0] + (p1[0] - p0[0]) * f, p0[1] + (p1[1] - p0[1]) * f];
+          return respaldoEnRecta(rectas[i], en(desde), en(hasta));
+        });
+        if (puntaje > 0) resultado.push({ cuad: q, puntaje });
       }
     }
-    return mejor ? { cuad: ordenarEsquinas(mejor.cuad), puntaje: mejor.puntaje } : null;
+    resultado.sort((x, y) => y.puntaje - x.puntaje);
+    return resultado.slice(0, 20);
   }
 
   // ---------- Refinamiento por bordes ----------
@@ -536,12 +664,9 @@ const EscanerDocumento = (() => {
     return { cuad: ordenarEsquinas(cuad), puntaje };
   }
 
-  function detectarEsquinas(imagen) {
-    const pequena = reducir(imagen, LADO_ANALISIS);
-    const { width: w, height: h } = pequena;
-    const gris = desenfocar(aGris(pequena), w, h, 2);
+  /** Tres separaciones posibles del papel: más claro que el resto, más oscuro, o distinto del color del borde. */
+  function mascarasDeColor(pequena, gris, w, h) {
     const t = otsu(gris);
-
     // Color típico del borde de la foto: casi siempre es fondo.
     const borde = [[], [], []];
     const grosor = Math.max(2, Math.round(Math.min(w, h) * 0.03));
@@ -562,63 +687,65 @@ const EscanerDocumento = (() => {
     }
     const distanciaSuave = desenfocar(distancia, w, h, 2);
     const td = otsu(distanciaSuave);
-
-    const mascaras = [
-      gris.map((v) => (v > t ? 1 : 0)),
-      gris.map((v) => (v <= t ? 1 : 0)),
-      distanciaSuave.map((v) => (v > td ? 1 : 0)),
+    return [
+      Uint8Array.from(gris, (v) => (v > t ? 1 : 0)),
+      Uint8Array.from(gris, (v) => (v <= t ? 1 : 0)),
+      Uint8Array.from(distanciaSuave, (v) => (v > td ? 1 : 0)),
     ];
+  }
+
+  // Por debajo de este puntaje no hay hoja creíble: se devuelve la foto entera (no se recorta nada).
+  const PUNTAJE_MINIMO = 0.4;
+
+  /**
+   * opciones.previa: las esquinas detectadas en el cuadro anterior de la cámara; un candidato
+   * parecido recibe un pequeño premio, así el marco no salta entre dos parecidos.
+   */
+  function detectarEsquinas(imagen, opciones = {}) {
+    const pequena = reducir(imagen, LADO_ANALISIS);
+    const { width: w, height: h } = pequena;
+    const fx = imagen.width / w, fy = imagen.height / h;
+    const gris = desenfocar(aGris(pequena), w, h, 2);
+    const mapa = mapaDeBordes(pequena, w, h);
+
+    // Candidatos de rectas (con los bordes de la foto incluidos)…
+    const candidatos = candidatosDeRectas(mapa, rectasDeHough(mapa));
+    // …y de manchas de color, tal cual y con los lados afinados contra el borde real.
+    for (const m of mascarasDeColor(pequena, gris, w, h)) {
+      const c = candidatosDeMascara(m, w, h);
+      if (!c) continue;
+      candidatos.push({ cuad: c.cuad });
+      const afinadas = refinarLados(gris, w, h, c.cuad);
+      if (afinadas) candidatos.push({ cuad: ordenarEsquinas(afinadas) });
+    }
+
+    // El mismo juez para todos, midiendo ahora directo sobre el mapa de bordes.
+    const previa = opciones.previa && opciones.previa.map((p) => [p.x / fx - 0.5, p.y / fy - 0.5]);
+    const cerca = 0.05 * Math.hypot(w, h);
     let mejor = null;
-    for (const m of mascaras) {
-      const cand = candidatosDeMascara(Uint8Array.from(m), w, h);
-      if (cand && (!mejor || cand.puntaje > mejor.puntaje)) mejor = cand;
+    for (const { cuad: q } of candidatos) {
+      let puntaje = puntuar(q, w, h, (i, desde, hasta) => {
+        const p0 = q[i], p1 = q[(i + 1) % 4];
+        const en = (f) => [p0[0] + (p1[0] - p0[0]) * f, p0[1] + (p1[1] - p0[1]) * f];
+        return respaldoSegmento(mapa, en(desde), en(hasta));
+      });
+      if (puntaje > 0 && previa && q.every((p, i) => Math.hypot(p[0] - previa[i][0], p[1] - previa[i][1]) < cerca)) puntaje += 0.05;
+      if (!mejor || puntaje > mejor.puntaje) mejor = { cuad: q, puntaje };
     }
-    // Cada candidato se juzga por el borde real que tiene detrás de sus cuatro lados:
-    // una mancha con una protuberancia (un halo de luz, una sombra) da un cuadrilátero
-    // con un lado en el aire. Primero la mancha, ya afinada; si no convence, las rectas.
-    const bordes = calcularBordes(gris, w, h);
-    const evaluar = (cand) => {
-      if (!cand) return null;
-      const afinadas = cand.puntaje >= 0.3 ? refinarLados(gris, w, h, cand.cuad) : null;
-      const cuad = afinadas ? ordenarEsquinas(afinadas) : cand.cuad;
-      return { cuad, puntaje: cand.puntaje, respaldo: respaldoDeCuadrilatero(bordes, cuad) };
-    };
-    const buena = (c) => c && angulosRazonables(c.cuad) && c.respaldo.minimo >= 0.35 && c.respaldo.media >= 0.55;
-    const deMancha = evaluar(mejor);
-    let elegido = null;
-    if (buena(deMancha) && (deMancha.puntaje >= 0.55 || deMancha.respaldo.media >= 0.7)) {
-      elegido = deMancha;
-    } else {
-      // Un lado sin borde detrás: se prueban las rectas antes de fiarse de la mancha.
-      const porLineas = detectarPorLineas(gris, w, h, bordes);
-      if (porLineas && porLineas.puntaje >= 0.55 && angulosRazonables(porLineas.cuad)) {
-        elegido = { cuad: porLineas.cuad, puntaje: porLineas.puntaje, respaldo: respaldoDeCuadrilatero(bordes, porLineas.cuad) };
-      } else if (buena(deMancha)) {
-        elegido = deMancha;
-      } else if (deMancha && deMancha.puntaje >= 0.9 && angulosRazonables(deMancha.cuad)) {
-        // Mancha muy convincente sin borde en un lado: una hoja sombreada del color de la mesa.
-        elegido = deMancha;
-      }
-    }
-    if (!elegido) {
-      const mx = imagen.width * 0.04, my = imagen.height * 0.04;
+
+    const W = imagen.width - 1, H = imagen.height - 1;
+    if (!mejor || mejor.puntaje < PUNTAJE_MINIMO) {
       return {
-        esquinas: [
-          { x: mx, y: my }, { x: imagen.width - mx, y: my },
-          { x: imagen.width - mx, y: imagen.height - my }, { x: mx, y: imagen.height - my },
-        ],
-        confianza: deMancha ? deMancha.puntaje : 0,
+        esquinas: [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }],
+        confianza: mejor ? Math.max(0, mejor.puntaje) : 0,
         encontrado: false,
       };
     }
-    mejor = elegido;
-    const f = pequena.factor;
+    // +0.5: el centro de un píxel reducido cae a medio píxel del origen. Lo que está sobre el
+    // borde de la foto va exactamente al borde.
+    const aImagen = (v, n, f, tope) => (v <= 0.6 ? 0 : v >= n - 1.6 ? tope : limitar((v + 0.5) * f, 0, tope));
     return {
-      // +0.5: el centro de un píxel reducido cae a medio píxel del origen.
-      esquinas: mejor.cuad.map(([x, y]) => ({
-        x: limitar((x + 0.5) * f, 0, imagen.width - 1),
-        y: limitar((y + 0.5) * (imagen.height / h), 0, imagen.height - 1),
-      })),
+      esquinas: mejor.cuad.map(([x, y]) => ({ x: aImagen(x, w, fx, W), y: aImagen(y, h, fy, H) })),
       confianza: mejor.puntaje,
       encontrado: true,
     };

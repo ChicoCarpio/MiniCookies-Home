@@ -46,7 +46,7 @@ window.i18nPagina = {
     'boton-cuadro': 'Usar toda la foto',
     'boton-girar-izq': '↺ Girar',
     'boton-girar-der': '↻ Girar',
-    'aviso-no-detectada': 'No se encontró bien la hoja: ajustá las esquinas a mano.',
+    'aviso-no-detectada': 'No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.',
     'resultado-titulo': 'Así queda la página',
     'campo-mejora': 'Mejora',
     'mejora-original': 'Original',
@@ -87,7 +87,7 @@ window.i18nPagina = {
     'guia-p1': '¿Las fotos se suben a algún servidor?',
     'guia-r1': 'No. La imagen de la cámara se procesa en el propio navegador, y el PDF se arma en tu dispositivo.',
     'guia-p2': '¿Por qué no detecta mi hoja?',
-    'guia-r2': 'Pasa cuando el papel y la superficie son casi del mismo color, o cuando una sombra deja un borde sin contraste. Arrastrá las esquinas a mano: es lo normal en esos casos.',
+    'guia-r2': 'Pasa cuando el papel y la superficie son casi del mismo color, cuando una sombra deja un borde sin contraste o cuando la hoja está pegada a otro objeto parecido. Arrastrá las esquinas a mano. Si la hoja no entra entera en la foto, el marco llega hasta el borde de la imagen.',
     'guia-p3': '¿La cámara no arranca, qué hago?',
     'guia-r3': 'Revisá el permiso del navegador para este sitio y que ninguna otra aplicación esté usando la cámara. Si no hay cámara, usá «Subir fotos».',
     'guia-p4': '¿Se puede reconocer el texto?',
@@ -117,7 +117,7 @@ window.i18nPagina = {
     'boton-cuadro': 'Use the whole photo',
     'boton-girar-izq': '↺ Rotate',
     'boton-girar-der': '↻ Rotate',
-    'aviso-no-detectada': 'The page was not found reliably: adjust the corners by hand.',
+    'aviso-no-detectada': 'The edge of the page was not found: the whole photo is used. Drag the corners if needed.',
     'resultado-titulo': 'How the page will look',
     'campo-mejora': 'Enhancement',
     'mejora-original': 'Original',
@@ -158,7 +158,7 @@ window.i18nPagina = {
     'guia-p1': 'Are the photos uploaded to a server?',
     'guia-r1': 'No. The camera image is processed in the browser itself, and the PDF is built on your device.',
     'guia-p2': 'Why does it not detect my page?',
-    'guia-r2': 'It happens when the paper and the surface are almost the same color, or when a shadow leaves an edge without contrast. Drag the corners by hand: that is normal in those cases.',
+    'guia-r2': 'It happens when the paper and the surface are almost the same color, when a shadow leaves an edge without contrast, or when the page touches another similar object. Drag the corners by hand. If the page does not fit whole in the photo, the frame reaches the edge of the image.',
     'guia-p3': 'The camera will not start, what do I do?',
     'guia-r3': 'Check the browser permission for this site and that no other app is using the camera. If there is no camera, use “Upload photos”.',
     'guia-p4': 'Can the text be recognized?',
@@ -229,7 +229,7 @@ window.i18nPagina = {
         <div>
           <p class="nota-suave" style="margin-top:0;" data-i18n="ayuda-esquinas">Arrastrá las cuatro esquinas hasta los vértices del papel.</p>
           <canvas id="lienzoEsquinas" class="lienzo-esquinas" role="img" aria-label="Foto con las esquinas de la hoja" data-i18n-attr="aria-label:lienzo-esquinas-aria"></canvas>
-          <p id="avisoNoDetectada" class="nota-suave error" hidden data-i18n="aviso-no-detectada">No se encontró bien la hoja: ajustá las esquinas a mano.</p>
+          <p id="avisoNoDetectada" class="nota-suave error" hidden data-i18n="aviso-no-detectada">No se encontró el borde de la hoja: se usa la foto entera. Si hace falta, arrastrá las esquinas.</p>
           <div class="controles">
             <button class="boton secundario chico" id="botonDetectar" type="button" data-i18n="boton-detectar">Detectar de nuevo</button>
             <button class="boton secundario chico" id="botonCuadro" type="button" data-i18n="boton-cuadro">Usar toda la foto</button>
@@ -311,7 +311,7 @@ window.i18nPagina = {
     </details>
     <details>
       <summary data-i18n="guia-p2">¿Por qué no detecta mi hoja?</summary>
-      <p data-i18n="guia-r2">Pasa cuando el papel y la superficie son casi del mismo color, o cuando una sombra deja un borde sin contraste. Arrastrá las esquinas a mano: es lo normal en esos casos.</p>
+      <p data-i18n="guia-r2">Pasa cuando el papel y la superficie son casi del mismo color, cuando una sombra deja un borde sin contraste o cuando la hoja está pegada a otro objeto parecido. Arrastrá las esquinas a mano. Si la hoja no entra entera en la foto, el marco llega hasta el borde de la imagen.</p>
     </details>
     <details>
       <summary data-i18n="guia-p3">¿La cámara no arranca, qué hago?</summary>
@@ -440,7 +440,7 @@ function buclearDeteccion() {
   cuadroAnalisis.height = Math.round(video.videoHeight * escala);
   const ctx = cuadroAnalisis.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(video, 0, 0, cuadroAnalisis.width, cuadroAnalisis.height);
-  const resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height));
+  const resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height), { previa: deteccionPrevia });
 
   // La capa mide lo que mide el video en pantalla; el video usa object-fit: contain.
   const caja = video.getBoundingClientRect();
