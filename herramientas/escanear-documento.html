@@ -67,6 +67,10 @@ window.i18nPagina = {
     'boton-pdf': '⬇️ Descargar PDF',
     'boton-pdf-procesando': 'Armando el PDF…',
     'error-pdf': 'No se pudo armar el PDF',
+    'boton-compartir': '📤 Compartir',
+    'compartir-titulo': 'Documento escaneado',
+    'error-compartir': 'No se pudo compartir',
+    'compartir-reintentar': 'El PDF ya está listo: tocá «Compartir» otra vez.',
     'resultado-listo': '✅ PDF descargado.',
     'orden-titulo': 'Ordenar:',
     'guia-titulo': 'Cómo escanear un documento con la cámara',
@@ -75,7 +79,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.',
     'guia-paso-2': 'Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.',
     'guia-paso-3': 'Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.',
-    'guia-paso-4': 'Tocá «Usar» y seguí con la próxima hoja. Al terminar, tocá la miniatura de la derecha para ver las páginas, ordenarlas, elegir el tamaño y descargar el PDF.',
+    'guia-paso-4': 'Tocá «Usar» y seguí con la próxima hoja. Al terminar, tocá la miniatura de la derecha para ver las páginas, ordenarlas y elegir el tamaño. Después descargá el PDF o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.',
     'guia-consejos': 'Consejos',
     'guia-consejo-1': 'La luz pareja ayuda más que cualquier ajuste: evitá que tu propia sombra caiga sobre la hoja.',
     'guia-consejo-2': '«Blanco y negro» da el archivo más liviano y es el mejor para texto; «Color» sirve si hay sellos, firmas o fotos.',
@@ -143,6 +147,10 @@ window.i18nPagina = {
     'boton-pdf': '⬇️ Download PDF',
     'boton-pdf-procesando': 'Building the PDF…',
     'error-pdf': 'The PDF could not be built',
+    'boton-compartir': '📤 Share',
+    'compartir-titulo': 'Scanned document',
+    'error-compartir': 'Could not share',
+    'compartir-reintentar': 'The PDF is ready: tap “Share” again.',
     'resultado-listo': '✅ PDF downloaded.',
     'orden-titulo': 'Sort:',
     'guia-titulo': 'How to scan a document with your camera',
@@ -151,7 +159,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Allow camera access when the browser asks. If you would rather use photos you already have, tap 🖼️ next to the shutter; on a computer you can also drag them in.',
     'guia-paso-2': 'Put the page on a surface of a different color and point at it. If there is more than one page, tap the one you want: the camera focuses there. When the green frame surrounds it, tap the shutter.',
     'guia-paso-3': 'The photo appears with the crop. If the corners do not match, drag them or tap the right page; if the photo came out badly, tap “Retake”. In “Result” choose the enhancement (Color, Grayscale or Black and white) and rotate the page if needed.',
-    'guia-paso-4': 'Tap “Use” and go on with the next page. When you are done, tap the thumbnail on the right to see the pages, sort them, choose the size and download the PDF.',
+    'guia-paso-4': 'Tap “Use” and go on with the next page. When you are done, tap the thumbnail on the right to see the pages, sort them and choose the size. Then download the PDF or tap “Share” to send it by WhatsApp, email or another app.',
     'guia-consejos': 'Tips',
     'guia-consejo-1': 'Even light helps more than any adjustment: keep your own shadow off the page.',
     'guia-consejo-2': '“Black and white” gives the lightest file and is best for text; “Color” is for stamps, signatures or photos.',
@@ -268,6 +276,7 @@ window.i18nPagina = {
         </select>
       </label>
       <button class="boton" id="botonPdf" type="button" disabled data-i18n="boton-pdf">⬇️ Descargar PDF</button>
+      <button class="boton secundario" id="botonCompartir" type="button" disabled hidden data-i18n="boton-compartir">📤 Compartir</button>
     </div>
     <div class="resultado" id="resultadoPdf"><span data-i18n="resultado-listo">✅ PDF descargado.</span></div>
   </div>
@@ -282,7 +291,7 @@ window.i18nPagina = {
       <li data-i18n="guia-paso-1">Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.</li>
       <li data-i18n="guia-paso-2">Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.</li>
       <li data-i18n="guia-paso-3">Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.</li>
-      <li data-i18n="guia-paso-4">Tocá «Usar» y seguí con la próxima hoja. Al terminar, tocá la miniatura de la derecha para ver las páginas, ordenarlas, elegir el tamaño y descargar el PDF.</li>
+      <li data-i18n="guia-paso-4">Tocá «Usar» y seguí con la próxima hoja. Al terminar, tocá la miniatura de la derecha para ver las páginas, ordenarlas y elegir el tamaño. Después descargá el PDF o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
@@ -354,6 +363,7 @@ let temporizadorDeteccion = 0;
 let deteccionPrevia = null; // esquinas del cuadro anterior, para mostrar solo lo que se repite
 let toqueCamara = null;     // punto tocado en el visor, en fracción (0..1) del cuadro de video
 let esperandoVista = false;
+let pdfListo = null;         // el PDF ya armado, hasta que cambie el documento (compartir puede pedir un segundo toque)
 
 function aviso(texto, error) {
   const a = $('aviso');
@@ -773,6 +783,8 @@ $('botonAgregar').addEventListener('click', async () => {
 function actualizarDocumento() {
   const n = paginas.size;
   $('botonPdf').disabled = n < 1;
+  $('botonCompartir').disabled = n < 1;
+  pdfListo = null; // cambió el documento: hay que volver a armarlo
   $('paginasVacio').hidden = n > 0;
   $('contadorPaginas').textContent = n === 0 ? '' : n === 1 ? '· ' + t('paginas-contador-uno') : '· ' + t('paginas-contador-varias').replace('{n}', n);
   $('resultadoPdf').classList.remove('visible');
@@ -795,32 +807,62 @@ habilitarArrastreReordenable(gridPaginas, actualizarDocumento);
 $('envoltorioBarraOrden').appendChild(crearBarraOrden(gridPaginas, actualizarDocumento));
 actualizarDocumento();
 
-$('botonPdf').addEventListener('click', async () => {
-  const boton = $('botonPdf');
+async function armarPdf() {
+  if (pdfListo) return pdfListo;
+  const pdf = await PDFLib.PDFDocument.create();
+  const tamano = $('tamanoPagina').value;
+  for (const tarjeta of gridPaginas.children) {
+    const pagina = paginas.get(parseInt(tarjeta.dataset.indiceOrden, 10));
+    if (!pagina) continue;
+    const imagen = await pdf.embedJpg(new Uint8Array(await pagina.blob.arrayBuffer()));
+    agregarPaginaConImagen(pdf, imagen, tamano);
+  }
+  pdf.setProducer('Mini Cookies');
+  pdfListo = new File([await pdf.save()], nombreConFecha('escaneo', 'pdf'), { type: 'application/pdf' });
+  return pdfListo;
+}
+$('tamanoPagina').addEventListener('change', () => { pdfListo = null; });
+
+async function conBotonOcupado(boton, tarea) {
   boton.disabled = true;
   const textoOriginal = boton.textContent;
   boton.textContent = t('boton-pdf-procesando');
   try {
     mostrarError('');
-    const pdf = await PDFLib.PDFDocument.create();
-    const tamano = $('tamanoPagina').value;
-    for (const tarjeta of gridPaginas.children) {
-      const pagina = paginas.get(parseInt(tarjeta.dataset.indiceOrden, 10));
-      if (!pagina) continue;
-      const imagen = await pdf.embedJpg(new Uint8Array(await pagina.blob.arrayBuffer()));
-      agregarPaginaConImagen(pdf, imagen, tamano);
-    }
-    pdf.setProducer('Mini Cookies');
-    const bytes = await pdf.save();
-    descargarBlob(new Blob([bytes], { type: 'application/pdf' }), nombreConFecha('escaneo', 'pdf'));
-    $('resultadoPdf').classList.add('visible');
-  } catch (error) {
-    mostrarError(t('error-pdf') + ': ' + detalleError(error));
+    await tarea();
   } finally {
     boton.disabled = paginas.size < 1;
     boton.textContent = textoOriginal;
   }
-});
+}
+
+$('botonPdf').addEventListener('click', () => conBotonOcupado($('botonPdf'), async () => {
+  try {
+    const archivo = await armarPdf();
+    descargarBlob(archivo, archivo.name);
+    $('resultadoPdf').classList.add('visible');
+  } catch (error) {
+    mostrarError(t('error-pdf') + ': ' + detalleError(error));
+  }
+}));
+
+// Compartir abre el menú del sistema (WhatsApp, correo, Drive…), solo donde el navegador sabe
+// compartir archivos (sobre todo en celulares). El PDF va directo del dispositivo a la app elegida.
+const puedeCompartirPdf = (() => {
+  try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['%PDF'], 'x.pdf', { type: 'application/pdf' })] })); } catch { return false; }
+})();
+$('botonCompartir').hidden = !puedeCompartirPdf;
+$('botonCompartir').addEventListener('click', () => conBotonOcupado($('botonCompartir'), async () => {
+  let archivo;
+  try { archivo = await armarPdf(); } catch (error) { mostrarError(t('error-pdf') + ': ' + detalleError(error)); return; }
+  try {
+    await navigator.share({ files: [archivo], title: t('compartir-titulo') });
+  } catch (error) {
+    if (error.name === 'AbortError') return; // la persona cerró el menú
+    // Si armar el PDF tardó, el navegador ya no deja abrir el menú sin un toque nuevo.
+    mostrarError(error.name === 'NotAllowedError' ? t('compartir-reintentar') : t('error-compartir') + ': ' + (error.message || error.name));
+  }
+}));
 
 // ===================== Arranque =====================
 
