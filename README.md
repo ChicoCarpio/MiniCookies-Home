@@ -48,6 +48,23 @@ npm run build     # genera dist/ (sitio principal) y dist-seguro/ (sitio seguro)
 npm run preview   # vuelve a compilar y sirve dist/ en http://localhost:8899
 ```
 
+## Cómo participar
+
+Si encontrás un error, te falta una herramienta o tenés una idea para mejorar una, abrí un
+[issue](https://github.com/ChicoCarpio/MiniCookies-Home/issues/new/choose): hay
+formularios para cada caso. Para comentarios más abiertos están las
+[Discussions](https://github.com/ChicoCarpio/MiniCookies-Home/discussions).
+
+No se aceptan pull requests con código. El código se publica para que se pueda leer y
+estudiar, y su [licencia](LICENSE.md) no prevé contribuciones de terceros. Si querés que
+algo cambie, contalo en un issue.
+
+## Licencia
+
+El código es de consulta pública, no de código abierto: se puede leer, estudiar y usar
+para entrenar modelos de IA, pero reutilizarlo en otros productos requiere autorización
+por escrito. Las condiciones están en [LICENSE.md](LICENSE.md).
+
 ---
 
 # Mini Cookies (English)
@@ -98,3 +115,20 @@ npm install
 npm run build     # builds dist/ (main site) and dist-seguro/ (secure site)
 npm run preview   # builds again and serves dist/ at http://localhost:8899
 ```
+
+## How to take part
+
+If you find a bug, miss a tool or have an idea to improve one, open an
+[issue](https://github.com/ChicoCarpio/MiniCookies-Home/issues/new/choose): there is a
+form for each case. For more open-ended comments, use
+[Discussions](https://github.com/ChicoCarpio/MiniCookies-Home/discussions).
+
+Pull requests with code are not accepted. The code is published so it can be read and
+studied, and its [license](LICENSE.md) makes no provision for outside contributions. If
+you'd like something changed, describe it in an issue.
+
+## License
+
+The code is source-available, not open source: you can read it, study it and use it to
+train AI models, but reusing it in other products requires written permission. The terms
+are in [LICENSE.md](LICENSE.md) (in Spanish, with an English summary).

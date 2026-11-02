@@ -1,0 +1,23 @@
+name: Pedir una herramienta / Request a tool
+description: Una herramienta nueva que te serviría. / A new tool you'd find useful.
+title: "[Herramienta] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: que-haria
+    attributes:
+      label: Qué haría / What it would do
+      description: Describí la herramienta en una o dos frases. / Describe the tool in one or two sentences.
+      placeholder: Convertir un archivo .odt a PDF / Convert an .odt file to PDF
+    validations:
+      required: true
+  - type: textarea
+    id: para-que
+    attributes:
+      label: Para qué la usarías / What you'd use it for
+      description: Tu caso concreto ayuda a decidir cómo hacerla. / Your actual use case helps decide how to build it.
+  - type: input
+    id: formatos
+    attributes:
+      label: Formatos de entrada y salida / Input and output formats
+      placeholder: .odt → .pdf

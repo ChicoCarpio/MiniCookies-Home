@@ -1,0 +1,39 @@
+name: Reportar un error / Report a bug
+description: Una herramienta no funciona o da un resultado incorrecto. / A tool doesn't work or gives a wrong result.
+title: "[Error] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Los issues son públicos. **No adjuntes archivos con datos personales**: si el error pasa con un archivo concreto, describilo o armá uno de prueba sin información privada.
+
+        Issues are public. **Don't attach files with personal data**: if the bug happens with a specific file, describe it or make a test file with nothing private in it.
+  - type: input
+    id: herramienta
+    attributes:
+      label: Herramienta / Tool
+      description: El nombre o la dirección de la herramienta. / The tool's name or address.
+      placeholder: https://www.minicookies.net/herramientas/unir-pdf
+    validations:
+      required: true
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: Qué pasó / What happened
+      description: Qué esperabas y qué obtuviste. Si hubo un mensaje de error, copialo. / What you expected and what you got. If there was an error message, copy it.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para repetirlo / Steps to reproduce
+      placeholder: |
+        1. Abrí la herramienta / Open the tool
+        2. Cargué un PDF de 3 páginas / Loaded a 3-page PDF
+        3. ...
+  - type: input
+    id: equipo
+    attributes:
+      label: Navegador y equipo / Browser and device
+      placeholder: Chrome 131 en Windows 11 / Safari en iPhone
