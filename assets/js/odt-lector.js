@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de .odt propio (OpenDocument Text: LibreOffice, OpenOffice, Google Documentos, Word al guardar como OpenDocument). Lo entrega como el «contrato de documento»
 // (ver docx-desde-contrato.js) y, con aDocx, como un .docx, que es lo que ya saben leer, mostrar e imprimir las herramientas de Word.
 //

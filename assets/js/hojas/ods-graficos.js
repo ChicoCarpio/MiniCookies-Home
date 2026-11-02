@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Gráficos de un libro OpenDocument (.ods) para Mini Cookies Hojas (F3.4b, etapa 6), con la interfaz de `GraficosLibro` (hojas/graficos-libro.js).
 // En ODF un gráfico es un objeto incrustado: en la celda donde está anclado (o en `table:shapes`) hay un `draw:frame` con un `draw:object` que apunta a una carpeta
 // «Object N/» del paquete, y su `content.xml` guarda el gráfico (`chart:chart`: clase, título, leyenda, ejes, series con los rangos de celdas) más una tabla local con

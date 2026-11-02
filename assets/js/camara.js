@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // La cámara de las herramientas del arquetipo H (SISTEMA-DE-INTERFAZ.md): abrirla, enfocar,
 // cambiar de cámara y sacar un cuadro. Va junto con assets/css/camara.css.
 //

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Geometría de una hoja de Excel en píxeles de pantalla (96 dpi, zoom 100 %): ancho de cada columna, alto de cada
 // fila y la posición de cada una. Reglas medidas en Excel real (Investigaciones\investigacion-motor-excel\03-mediciones.md):
 //  - ancho guardado `w` (en caracteres, con el relleno incluido) → px = trunc((256·w + trunc(128/MDW)) / 256 · MDW),

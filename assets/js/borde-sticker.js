@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Borde de los stickers como figura matemática, no como píxeles (2026-10-08,
 // idea del usuario: sacar el contorno del recorte como líneas, agrandarlo,
 // unir los tramos con curvas y rellenar).

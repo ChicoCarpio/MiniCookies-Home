@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de CSV del motor propio de Excel: texto (o bytes) → el mismo modelo
 // que LibroXlsx (una hoja, sus celdas y el estilo por defecto), para que las
 // herramientas traten igual un .csv que un .xlsx. Requiere xlsx-estilos.js y

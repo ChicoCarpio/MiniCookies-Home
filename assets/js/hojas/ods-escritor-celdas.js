@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Guardado SIN PÉRDIDA de celdas editadas en content.xml de un .ods (F3.4a, etapa 3). Lo que no se edita sale byte a byte como vino: solo se reemplazan los elementos
 // de las celdas tocadas, partiendo las repeticiones de ODF (`number-rows-repeated`, `number-columns-repeated`) en tres trozos —los de antes, la celda editada y los de
 // después— que copian los demás atributos. La celda editada conserva lo que no maneja el editor (combinación, validación, protección, anotaciones y dibujos).

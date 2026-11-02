@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Corrector ortográfico de Documentos (Fase 6, etapa 6.8). Sin DOM: corre igual en Node. Usa nspell (MIT) con diccionarios Hunspell: español (elegido
 // bajo MPL 1.1) e inglés (MIT y BSD), todo local; nada sale del equipo.
 //

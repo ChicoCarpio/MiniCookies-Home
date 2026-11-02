@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Botones del autofiltro de Excel (hoja con autoFilter y tablas con filtro) del motor propio (etapa 6). Solo se ven en pantalla: Excel no los imprime
 // (comprobado en el PDF del corpus 41-autofiltro). Cada celda de encabezado lleva un botón cuadrado pegado a su esquina de abajo a la derecha con una
 // flecha hacia abajo; si la columna tiene un filtro aplicado la flecha lleva un embudo. El tamaño y los colores del botón NO están medidos contra

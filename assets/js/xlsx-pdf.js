@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Hojas de Excel a PDF vectorial con las mismas páginas que imprime Excel (etapa 5 del motor de Excel): el corte lo calcula
 // xlsx-paginas.js y cada página se dibuja con xlsx-dibujo.js sobre el lienzo de PDF (pdf-lienzo.js), así que el texto sigue siendo
 // texto y las celdas, trazos.

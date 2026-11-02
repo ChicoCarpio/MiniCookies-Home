@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Texto de derecha a izquierda (Fase 6, etapa 6.4b). Sin DOM: corre igual en Node.
 //
 // Una versión práctica del algoritmo bidireccional de Unicode (UAX #9) para un párrafo de Word: hebreo, árabe, números dentro de ellos y signos.

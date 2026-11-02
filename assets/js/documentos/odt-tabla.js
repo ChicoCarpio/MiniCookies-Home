@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Tablas de un .odt para EdicionDoc (Fase 6b, etapa 6b.5): crear una tabla y cambiar su estructura (filas y columnas) sobre el XML de un <table:table>. Sin DOM.
 // La misma interfaz que TablaDoc (tabla-doc.js, Word): nueva, insertarFila, eliminarFila, insertarColumna, eliminarColumna. Solo entiende tablas «planas»:
 // columnas y filas directas, celdas sin combinar ni repetidas (`number-*-repeated`, `*-spanned`, celdas cubiertas). Con otra estructura devuelve null y el editor

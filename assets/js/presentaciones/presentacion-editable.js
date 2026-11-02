@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Presentación editable de Mini Cookies Presentaciones (fase 5 del PLAN). Cada edición es un parche del XML de las partes que toca (xml-editar):
 // mover o cambiar el tamaño de una forma cambia su <a:off>/<a:ext>, editar el texto cambia solo los párrafos que cambiaron, agregar una
 // diapositiva agrega su parte y su relación. Todo lo demás del paquete sale byte a byte como vino.

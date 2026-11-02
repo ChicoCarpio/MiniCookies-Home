@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Minigráficos de Excel 2010 (sparklines, extensión x14) del motor propio (etapa 6): línea, columnas y ganancia/pérdida dentro de una celda.
 // hoja.minigraficos (xlsx-modelo.js) trae los grupos con sus colores y opciones y, por minigráfico, el rango de datos y la celda donde va.
 // Medido en el PDF de Excel (36-x14): el minigráfico ocupa la celda con 5 u a los lados y 3 u arriba y abajo (u = un píxel de la impresora,

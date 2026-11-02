@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Libro editable de Mini Cookies Hojas (fase 2 del PLAN): el libro que lee el motor de Excel del sitio (LibroXlsx) más lo que hace falta para
 // editarlo en vivo: operaciones que se deshacen, recálculo de fórmulas y guardado SIN PÉRDIDA (solo cambian las celdas editadas; el resto del
 // archivo sale byte a byte como vino). Sin DOM: se prueba en Node.

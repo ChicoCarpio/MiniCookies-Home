@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Helper compartido para mostrar miniaturas reales de PDFs/imágenes en vez de solo el
 // nombre del archivo, en una grilla de tarjetas (mismo estilo visual que "Administrar
 // páginas"). Para PDFs requiere assets/js/pdfjs.js (abrirPdf).

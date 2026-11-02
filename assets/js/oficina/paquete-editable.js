@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Paquete editable de Office (OOXML) para los editores de la suite (núcleo, fase 1 del PLAN). Sin DOM: corre igual en Node.
 //
 // La regla de la suite es la IDA Y VUELTA SIN PÉRDIDA: lo que el editor no toca se guarda byte a byte como vino (zip-propio copia las

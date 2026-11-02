@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Galería de formas de Mini Cookies Presentaciones (Insertar → Formas): un diálogo con las formas predefinidas de la norma, agrupadas como en PowerPoint.
 //
 // ECMA-376: las definiciones de las formas (vendor/ecma-376-geometrias/5ed-2016/geometrias.js, window.GeometriasEcma) están bajo el aviso de

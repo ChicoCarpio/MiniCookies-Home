@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Formato condicional de ODF (las extensiones `calcext:` de LibreOffice) ↔ las reglas del modelo y del diálogo de Mini Cookies Hojas (las mismas de Excel). Sin DOM.
 // La condición va en `calcext:value`: `>5`, `between(1,10)`, `formula-is(expr)`, `contains-text("x")`, `duplicate`, `above-average`, `top-elements(3)`…; las escalas de color,
 // barras y conjuntos de iconos son elementos aparte (`calcext:color-scale`, `data-bar`, `icon-set`). Requiere ods-formulas.

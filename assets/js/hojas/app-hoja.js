@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Mini Cookies Hojas, fase 3.3 del PLAN: la interfaz de filtrar, ordenar, los gráficos y la página. Autofiltro con el menú de cada columna
 // (ordenar, valores con casillas, condiciones, superiores), ordenar por varios niveles, elegir un gráfico (o imagen) de la hoja para moverlo o
 // cambiarle el tamaño, editar el rango de sus series, insertar un gráfico desde la selección, configurar la página e imprimir. Extensión de

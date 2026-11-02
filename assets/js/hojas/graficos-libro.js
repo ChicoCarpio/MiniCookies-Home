@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Gráficos de Mini Cookies Hojas (fase 3.3 del PLAN): leer los gráficos de una hoja (sus series y rangos), cambiar el rango de las series,
 // mover o cambiar el tamaño del ancla, insertar un gráfico nuevo (columnas, barras, líneas, circular) y poner al día los valores que el
 // gráfico guarda (c:numCache / c:strCache) con lo que tienen ahora las celdas. El gráfico lo dibuja el motor del sitio (XlsxObjetos con el

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Piezas de interfaz de las aplicaciones de oficina (arquetipo G, núcleo de la suite): la cinta con pestañas armada desde una descripción,
 // el menú "⋯", la paleta de comandos (Ctrl+K) y la línea de estado honesta. Los botones solo llevan data-comando: lo que hacen, si están
 // habilitados y si están apretados lo dice el registro de comandos (comandos.js).

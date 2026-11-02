@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Maquetado del texto de una forma de PowerPoint: corta las líneas, aplica
 // interlineado, espacio entre párrafos, sangrías, viñetas y numeración,
 // alineación (también justificado) y anclaje vertical, y devuelve cada trozo

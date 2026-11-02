@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lo que se escribe en una celda de Mini Cookies Hojas → el valor que se guarda (fase 2 del PLAN). Es lo contrario de xlsx-formato.js:
 // "1.234,5" (es) o "1,234.5" (en) → 1234.5; "25/10/2026" → la fecha como número de serie con formato de fecha; "15%" → 0,15 con formato
 // de porcentaje; "=SUMA(A1;A2)" → la fórmula como la guarda Excel ("SUM(A1,A2)"); "'007" → el texto "007". Sin DOM.

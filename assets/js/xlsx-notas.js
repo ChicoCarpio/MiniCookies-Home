@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Notas de celda de Excel (comentarios clásicos) del motor propio (etapa 6): el triángulo rojo de la celda, el cuadro de las notas que se muestran
 // siempre (en pantalla y al imprimir "como se muestran en la hoja") con su flecha, y la lista de "al final de la hoja".
 // hoja.comentarios lo lee xlsx-modelo.js (comments + VML). Medido en el PDF de Excel (38-comentarios): el cuadro lleva el relleno de la nota

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Modelo de un libro OpenDocument (.ods) con la MISMA FORMA que `LibroXlsx` (F3.4a, etapa 2): la rejilla, el motor de cálculo, el PDF y la cinta lo leen
 // sin saber que el archivo es ODF. Se lee content.xml una vez (más styles.xml para los estilos con nombre) y cada hoja sale con su almacén de celdas
 // (`CeldasHoja`), sus filas y columnas, sus combinadas y sus fórmulas traducidas a la sintaxis de Excel (`ods-formulas.js`).

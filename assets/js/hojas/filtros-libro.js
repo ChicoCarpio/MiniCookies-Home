@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Autofiltro de verdad de Mini Cookies Hojas (fase 3.3 del PLAN): poner y quitar el autofiltro de la hoja (o usar el de una tabla) y filtrar
 // sus columnas como Excel: el criterio queda en <filterColumn> y las filas que no cumplen quedan ocultas en el archivo (hidden="1"), así
 // SUBTOTALES y AGREGAR las saltan y Excel abre el libro igual. Como DatosLibro, toma bytes y devuelve bytes editando solo lo que cambia. Sin DOM.

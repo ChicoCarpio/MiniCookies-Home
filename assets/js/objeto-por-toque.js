@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Encontrar el objeto que se tocó en una foto, sea el sujeto principal o
 // cualquier otra cosa (una flor del fondo, una persona entre varias, aunque
 // se toquen), con SlimSAM: una versión chica de Segment Anything (Apache-2.0,

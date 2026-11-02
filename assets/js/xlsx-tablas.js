@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Estilos de tabla de Excel del motor propio (etapa 6): qué relleno, letra y bordes le da a cada celda el estilo de la tabla que la contiene.
 // Los estilos integrados (60) vienen de xlsx-tablas-estilos.js (medidos en Excel real); los propios del libro, de styles.xml (tableStyles + dxfs).
 // Cada estilo define elementos (toda la tabla, encabezado, totales, primera/última columna, filas y columnas en bandas, celdas de las esquinas

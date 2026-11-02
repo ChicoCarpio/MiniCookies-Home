@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Estilos de tabla integrados de Excel (60: TableStyleLight1-21, Medium1-28, Dark1-11) para el motor propio (etapa 6). DATOS medidos en Excel real por COM
 // (TableStyle.TableStyleElements; Investigaciones/investigacion-motor-excel/arnes-xlsx/volcar-estilos-tabla.ps1) y convertidos con generar-estilos-tabla-js.mjs.
 // Para cada estilo, los elementos que define (índice de ECMA-376 18.8.39 en el orden de Excel):

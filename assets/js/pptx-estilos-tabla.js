@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Los 74 estilos de tabla integrados de PowerPoint, escritos como reglas
 // propias: 11 familias, cada una una receta con el color de énfasis como
 // parámetro. Hacen falta porque PowerPoint muchas veces guarda en el .pptx

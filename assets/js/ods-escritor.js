@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Escritor de hojas de cálculo OpenDocument (.ods, el formato de LibreOffice y de Google Sheets) del motor propio de formatos antiguos (fase 3). Requiere zip-propio.js y, para
 // llevar fórmulas, ods-formulas.js. No depende del navegador.
 //

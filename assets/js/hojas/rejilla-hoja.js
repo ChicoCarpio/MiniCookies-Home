@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // COPIA ADAPTADA para la suite (Office-Temporal, 2026-10-25) de codigo/MiniCookies-Home/assets/js/rejilla-hoja.js: con opciones.editable la rejilla
 // avisa cuándo empezar a editar (tecla, F2, doble clic o toque doble), cuándo borrar, copiar, cortar y pegar, y expone refrescar() para volver a pintar
 // después de un cambio del modelo. La edición misma (el cuadro de texto encima de la celda) la hace la aplicación. Ver docs/motores-adaptados.md.

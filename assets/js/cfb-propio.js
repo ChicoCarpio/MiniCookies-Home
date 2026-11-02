@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Contenedor CFB propio ("Compound File Binary", [MS-CFB]): el sistema de archivos dentro de los .xls, .doc y .ppt de Office 97-2003.
 // Un archivo CFB es una lista de sectores; una tabla (FAT) dice qué sector sigue a cuál, y un directorio da nombre a cada flujo.
 // Los flujos de menos de 4096 bytes van en el "miniflujo" (sectores de 64 bytes, con su propia tabla, la MiniFAT). No depende del navegador.

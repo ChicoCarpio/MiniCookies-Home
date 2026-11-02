@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Cambio de versión de documentos de Word: pasa un documento de cualquier formato que el sitio sabe leer (.docx, .doc de Word 97-2003, .odt de LibreOffice) a .docx, .doc, .odt o .rtf,
 // conservando el texto, los estilos, las listas, las tablas, las imágenes, los enlaces, los encabezados y pies y las secciones. Es el gemelo de CambioVersion (Excel): los tres lectores
 // entregan el mismo «contrato de documento» y los cuatro escritores lo reciben, así que cualquier origen sirve a cualquier destino.

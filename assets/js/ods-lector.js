@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de hojas de cálculo OpenDocument (.ods, de LibreOffice, Google Sheets y Excel) del motor propio de Excel (etapa 9). Un .ods es un zip con
 // content.xml (las hojas) y styles.xml (los estilos con nombre). Requiere zip-propio.js, xml-ligero.js y xlsx-modelo.js (para los errores); no depende del navegador.
 //

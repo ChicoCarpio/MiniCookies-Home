@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Edición quirúrgica de XML para el escritor de libros de Excel (etapa 7). Complementa a xml-ligero.js: aquel solo lee por eventos y descarta dónde
 // está cada cosa; este conserva la POSICIÓN de cada elemento en el texto, de modo que se puede insertar, reemplazar o borrar un fragmento y dejar
 // todo lo demás exactamente como estaba (prefijos, espacios de nombres, mc:AlternateContent, extLst, comentarios, orden y espacios).

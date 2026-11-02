@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Diálogos de las aplicaciones de oficina (arquetipo G, núcleo de la suite): un formulario armado desde una descripción de campos y una lista
 // con acciones por fila. Un solo <dialog class="of-dialogo"> por llamada; se cierra con Escape o con los botones y devuelve una promesa.
 // Los textos llegan ya traducidos (quien llama usa su función de i18n).

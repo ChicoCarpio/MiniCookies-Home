@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de libros de Excel binarios (.xlsb) del motor propio de Excel (etapa 9). Un .xlsb es un zip como el .xlsx, pero sus partes (workbook.bin,
 // sheetN.bin, sharedStrings.bin, styles.bin) son listas de registros binarios ([MS-XLSB]). Requiere zip-propio.js, xml-ligero.js, xlsx-modelo.js
 // (errores) y xlsx-estilos.js (formatos de número integrados); no depende del navegador.

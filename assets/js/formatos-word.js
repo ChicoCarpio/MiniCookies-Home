@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Los formatos de documento de Word que el sitio lee: .docx, .doc (Word 97-2003) y .odt (LibreOffice / OpenOffice). Es el gemelo de formatos-antiguos.js (hojas de cálculo):
 // las herramientas de Word saben leer .docx, así que lo que no es .docx se pasa a .docx antes y el resto de la herramienta no cambia.
 //

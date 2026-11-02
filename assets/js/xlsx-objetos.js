@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Objetos de una hoja de Excel (etapa 6): imágenes, formas, líneas, cuadros de texto, grupos y gráficos del dibujo de la hoja
 // (xl/drawings/drawingN.xml). Su contenido es DrawingML igual que el de una diapositiva, así que se resuelve y se dibuja con el motor de PowerPoint
 // (pptx-modelo.js: PptxModelo.dibujoExcel, y pptx-dibujo.js: PptxDibujo.dibujarElementos); este módulo solo pone cada objeto en su sitio según el

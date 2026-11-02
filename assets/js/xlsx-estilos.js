@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Estilos de un libro de Excel (.xlsx/.xlsm): styles.xml y theme1.xml resueltos
 // a objetos simples que el dibujo y el formato de número pueden usar sin saber
 // nada de OOXML. Requiere xml-ligero.js. No depende del navegador.

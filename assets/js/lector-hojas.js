@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lectura de hojas para las herramientas de Excel/CSV (fase C del motor de Excel): un solo punto de entrada que lee .xlsx y .xlsm (LibroXlsx), .csv, .tsv y .txt
 // (CsvPlanilla) y, desde la etapa 9, .xls, .xlsb y .ods (formatos-antiguos.js los pasa a un .xlsx en memoria, sin fórmulas ni estilos de celda). Las filas
 // se arman bajo demanda: un libro grande no genera una matriz entera de textos.

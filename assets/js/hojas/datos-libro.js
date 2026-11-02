@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Datos del libro de Mini Cookies Hojas (fase 3.2 del PLAN): nombres definidos, dar formato como tabla, validación de datos y reglas de
 // formato condicional. Como EstructuraLibro, cada operación toma los bytes de un .xlsx y devuelve los nuevos editando solo lo que cambia
 // (xml-editar): el resto del paquete sale byte a byte. El editor las deshace volviendo al libro anterior. Sin DOM.

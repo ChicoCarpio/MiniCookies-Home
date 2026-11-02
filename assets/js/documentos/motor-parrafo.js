@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Cortador de párrafos de Word (Fase 6, etapa 6.2). Toma un párrafo del modelo (docx-modelo.js) y lo corta en líneas con las reglas
 // de Word que el maquetador del sitio midió contra Word (docx-maquetador.js): sangrías, sangría francesa, etiqueta de lista, tabulaciones
 // (paradas propias y por defecto; izquierda, centro, derecha y decimal), alto de línea por fuente, interlineado (múltiplo, «al menos» y

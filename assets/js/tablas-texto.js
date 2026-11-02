@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Tablas en texto plano y en Markdown, para las herramientas que sacan el texto
 // de un documento (PDF, Word, EPUB, PowerPoint → TXT o Markdown). Antes cada
 // celda salía como un renglón suelto o pegada a la de al lado y la tabla se

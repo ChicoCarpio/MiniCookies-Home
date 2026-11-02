@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Un documento de Word en blanco (Fase 6, etapa 6.9): lo mínimo que Word abre sin reparar y a lo que el editor le puede agregar estilos, listas,
 // encabezados y pies cuando se usan. Hoja Carta con márgenes de 2,54 cm, Calibri 11, espacio de 8 pt después de cada párrafo y interlineado de 1,08
 // (los valores del documento nuevo de Word).

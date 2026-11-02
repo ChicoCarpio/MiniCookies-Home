@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Más funciones para el motor de Mini Cookies Hojas (fase 3.1 del PLAN): trigonometría hiperbólica, combinatoria, bases numéricas y bits,
 // estadística (correlación, regresión, asimetría…), distribuciones (normal, t, chi², F, gamma, beta, binomial, Poisson…), finanzas (TASA,
 // TIR, VNA.NO.PER, PAGOINT, amortizaciones…), texto (MONEDA, DIVIDIRTEXTO, REGEX…), referencias (INDIRECTO, DIRECCION, AREAS, HOJA) y

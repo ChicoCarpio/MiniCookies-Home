@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Formato de número de Excel (los "códigos de formato" de la celda: 0.00, #,##0, 0%, d/m/yyyy, [h]:mm,
 // # ?/?, 0.00E+00, "texto"@, secciones, condiciones y colores) del motor propio. Valor + código →
 // el texto que muestra Excel. Se probó contra 1.996 casos medidos en Excel real

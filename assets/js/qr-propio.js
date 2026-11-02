@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Codificador de códigos QR propio (reemplaza a qrcode.js). Lo usan el
 // generador de QR y Enviar archivos con un QR (que muestra un QR con una
 // clave), así que no hay red ni dependencias: texto → matriz de módulos.

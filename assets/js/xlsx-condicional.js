@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Formato condicional de Excel del motor propio (etapa 6): qué formato efectivo le toca a cada celda según las reglas de su hoja.
 // Reglas medidas contra Excel real (Range.DisplayFormat; Investigaciones\investigacion-motor-excel\03-mediciones.md, etapa 6):
 // comparaciones, texto, vacías y errores, superiores/inferiores, sobre/bajo el promedio, duplicados y únicos, expresiones, escalas de

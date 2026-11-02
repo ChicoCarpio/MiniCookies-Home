@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Tipos de grupo del Editor avanzado (plan del rediseño, hallazgos/editores-rediseno.md, 3.3). Un grupo
 // no es genérico: tiene un tipo que dice qué puede ir adentro y cómo se
 // compone con lo de abajo. Cada tipo se define UNA vez en TIPOS; uno nuevo

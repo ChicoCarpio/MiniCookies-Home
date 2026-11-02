@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Zoom "anclado": el punto de la imagen que está bajo el puntero (o el centro
 // de lo que se ve, si se usa un deslizador) queda en el mismo lugar de la
 // pantalla después de acercar o alejar — como en cualquier visor de fotos.

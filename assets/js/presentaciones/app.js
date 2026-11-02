@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Mini Cookies Presentaciones (fase 5 del PLAN, etapas 1 a 5): la aplicación. Une la presentación editable (presentacion-editable.js), el modelo y el
 // dibujo del motor de PowerPoint (pptx-modelo.js, pptx-dibujo.js), el historial, los comandos y la interfaz G (nucleo/oficina.js).
 //   Etapa 1: abrir, crear en blanco, panel de miniaturas, escenario a escala, descarga y autoguardado.

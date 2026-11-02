@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Un "lienzo" que se usa como el contexto 2D de un <canvas> pero, en vez de
 // pintar píxeles, escribe los operadores de una página de PDF: trazados,
 // rellenos, líneas, recortes, degradados (Shading), imágenes y texto con la

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Motor de cálculo de Mini Cookies Hojas (fase 2 del PLAN): evalúa fórmulas de Excel, lleva el grafo de dependencias y recalcula solo lo que
 // depende de lo que cambió, en orden (Kahn). Sin DOM: corre igual en Node y en un Worker.
 //

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Mini Cookies Hojas, fase 3.2 del PLAN: la interfaz de los datos del libro. Administrar nombres (y crearlos desde el cuadro de nombre), dar
 // formato como tabla, validación de datos (el diálogo, la comprobación al escribir y la flecha con la lista) y el administrador de reglas de
 // formato condicional. Se engancha a app.js como extensión (window.HojasExtensiones): usa sus comandos, su historial y sus avisos; lo que

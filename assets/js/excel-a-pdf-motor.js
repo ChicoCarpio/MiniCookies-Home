@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Excel / CSV → PDF con el motor propio (fase C del motor de Excel): imprime como Excel (mismas páginas, saltos, área de impresión,
 // títulos, encabezado y pie, bordes, formato condicional, objetos y gráficos) con xlsx-paginas.js + xlsx-pdf.js, y deja que la
 // pantalla cambie encima lo que el archivo dice: papel, orientación, "ajustar a N páginas de ancho", cuadrícula, rangos a imprimir

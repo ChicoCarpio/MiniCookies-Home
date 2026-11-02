@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Estilos de celda de una hoja OpenDocument (.ods) para el libro editable de la suite (F3.4a, etapa 2).
 // ORIGEN: adaptado de `ods-lector.js` del sitio (copia del 2026-10-28): `leerEstilos`, `traducirEstilo` (formato de número de ODF → código de Excel),
 // `capturarPropiedades`, `bordeDe`. Diferencias, para devolverlo al madre (decisión D8) en `docs/motores-adaptados.md`:

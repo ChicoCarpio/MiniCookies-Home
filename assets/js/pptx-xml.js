@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lo mínimo para recorrer el XML de un .pptx (DrawingML, PresentationML y
 // gráficos), compartido por el motor de PowerPoint: pptx-geometria.js,
 // pptx-modelo.js y pptx-grafico.js tenían cada uno su copia. Por nombre local, sin mirar el espacio de nombres (a:, p:, c:…).

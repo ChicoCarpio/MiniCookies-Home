@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de .docx propio (reemplaza a mammoth). Lee un Word y lo entrega como
 // HTML simple (párrafos, títulos, listas, tablas, enlaces, imágenes, notas al
 // pie) o como texto plano. Es lo que usan las herramientas de Word para leer.

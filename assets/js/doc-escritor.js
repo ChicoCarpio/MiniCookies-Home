@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Escritor de .doc propio (Word 97-2003, formato binario [MS-DOC]) desde el «contrato de documento» que describe docx-desde-contrato.js. Es el gemelo de DocLector: lo que ese
 // lector entiende, este lo escribe, así que cualquier lector (DocxAContrato, DocLector, OdtLector) → .doc sin un conversor por pareja.
 //

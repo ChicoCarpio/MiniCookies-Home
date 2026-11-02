@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Backend de .ods del libro editable (F3.4a). Misma forma que XlsxBackend (ver hojas/xlsx-backend.js): reconoce el archivo, lo abre en un modelo con la forma de
 // LibroXlsx (ods-modelo.js), dice qué celdas no se pueden editar, crea estilos nuevos y guarda SOLO las celdas editadas en content.xml (ods-escritor-celdas.js);
 // el resto del paquete (meta.xml, imágenes, objetos incrustados) no se toca; styles.xml, settings.xml, el manifiesto y `Object N/` solo los cambian los cambios de estructura, de

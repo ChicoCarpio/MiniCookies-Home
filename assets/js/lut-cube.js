@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // LUT de color en formato .cube (Adobe/Resolve): una tabla que dice a qué color se cambia cada color. Lee el archivo de texto y lo aplica a un
 // canvas. Los editores de imagen lo usan como un paso más del pipeline (ProcesarFiltros.renderizarFiltro, ajustes.lut).
 //
