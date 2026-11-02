@@ -99,7 +99,8 @@ El titular conserva sobre su obra los derechos morales que reconocen los artícu
 de la Ley N.º 6683, que son irrenunciables. En consecuencia, nadie puede:
 
 - Presentar el código original de Mini Cookies como creación propia.
-- Eliminar o modificar los avisos de copyright o de licencia.
+- Eliminar o modificar los avisos de copyright o de licencia (Ley N.º 8039,
+  artículo 63).
 - Registrar o reclamar como propio el código de Mini Cookies.
 - Redistribuir el código como si tuviera una licencia que permitiera reutilizarlo.
 - Usar el nombre, el logotipo o la identidad de Mini Cookies para aparentar una
@@ -117,7 +118,9 @@ Solo el titular puede conceder autorizaciones para reutilizar el código. Pueden
 - Exclusivas o no exclusivas.
 - Temporales o indefinidas.
 
-Cada autorización constará en un documento escrito y firmado por el titular. Cuando
+Cada autorización constará en un documento escrito y firmado por el titular, porque la
+autorización del titular de un derecho de propiedad intelectual es siempre expresa y por
+escrito (Ley N.º 8039, artículo 1). Cuando
 implique una cesión total o parcial de derechos patrimoniales, se hará en instrumento
 público o privado ante dos testigos, como exige el artículo 89 de la Ley N.º 6683.
 
@@ -146,11 +149,18 @@ sí. Esta licencia no pretende reclamar derechos exclusivos sobre ellos.
 Cualquier uso fuera de lo que permite esta licencia termina automáticamente los permisos
 de la sección 4 para quien lo cometa.
 
-Ese uso, además, infringe los derechos del titular. Puede dar lugar a las medidas
-cautelares, la indemnización de daños y perjuicios y las sanciones penales que prevé la
-Ley N.º 8039 de Procedimientos de Observancia de los Derechos de Propiedad Intelectual, y
-a las medidas cautelares que puede dictar el Registro Nacional de Derechos de Autor y
-Derechos Conexos según el artículo 95 de la Ley N.º 6683.
+Ese uso, además, infringe los derechos del titular y da lugar a las acciones
+administrativas ante el Registro Nacional de Derechos de Autor y Derechos Conexos y a las
+acciones judiciales que prevé la Ley N.º 8039 de Procedimientos de Observancia de los
+Derechos de Propiedad Intelectual (artículo 1). Entre ellas están:
+
+- Las medidas cautelares, la indemnización de daños y perjuicios y el pago de costas
+  (artículos 38 bis, 40 y 40 bis de la Ley N.º 8039), además de las medidas cautelares
+  que puede dictar el Registro según el artículo 95 de la Ley N.º 6683.
+- En los casos que define el artículo 70 de la Ley N.º 8039, las sanciones penales por
+  reproducir, modificar, distribuir o poner a disposición del público la obra sin
+  autorización, o por suprimir o alterar los avisos de derechos (artículos 51, 54, 58,
+  59 y 63).
 
 ## 10. Sin garantías
 
