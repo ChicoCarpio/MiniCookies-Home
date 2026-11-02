@@ -1,4 +1,4 @@
-# Licencia de Código Fuente de Mini Cookies (MSCL)
+# Licencia de Código Fuente de Mini Cookies (LCFM)
 
 Versión 1.0, 2026
 
@@ -200,4 +200,4 @@ https://www.minicookies.net/contacto
 
 ---
 
-Fin de la Licencia de Código Fuente de Mini Cookies (MSCL) 1.0
+Fin de la Licencia de Código Fuente de Mini Cookies (LCFM) 1.0
