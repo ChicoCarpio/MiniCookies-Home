@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Gráficos que no viven en una diapositiva, dibujados con el mismo motor que
 // los de PowerPoint (pptx-grafico.js): el de una hoja de Excel (la parte
 // xl/charts/chartN.xml de un .xlsx, que es el mismo formato) y el que arma

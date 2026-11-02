@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Mini Cookies Hojas (fase 2 del PLAN): la aplicación. Une el libro editable (libro-editable.js), la rejilla (motores/rejilla-hoja.js),
 // el historial, los comandos y la interfaz G. Aquí viven el editor de celda, la barra de fórmulas, la cinta, el portapapeles y el autoguardado.
 (function () {

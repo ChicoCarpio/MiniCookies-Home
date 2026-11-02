@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Formatos de hoja de cálculo que no son .xlsx (etapa 9 del motor de Excel, reemplaza a SheetJS): .ods, .xlsb y .xls. Cada uno tiene su lector
 // (ods-lector.js, xlsb-lector.js, xls-lector.js, html-tabla-lector.js) y los tres devuelven lo mismo; este módulo elige el lector por el contenido del archivo (no por la
 // extensión) y lo pasa a un .xlsx con XlsxEscritor.crearLibro, que es lo que el resto del motor ya sabe leer, mostrar e imprimir.

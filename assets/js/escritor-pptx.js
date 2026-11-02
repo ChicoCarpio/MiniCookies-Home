@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Escritor de .pptx propio (reemplaza a PptxGenJS). Escribe una presentación como la de un PowerPoint nuevo:
 // hoja 16:9 de 13,33 × 7,5 pulgadas, tema de Office (Aptos), título de 44 pt y texto de 28 pt con viñetas, y el título y el
 // contenido de cada diapositiva son marcadores de posición de verdad (se pueden restablecer, cambiar de diseño, etc.).

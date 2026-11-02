@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Paginación de una hoja de Excel al imprimir: en qué páginas cae cada fila y cada columna, igual que Excel (etapa 5 del
 // motor de Excel). Reglas medidas contra Excel real (Investigaciones\investigacion-motor-excel\03-mediciones.md, etapa 5):
 //  - se cuenta en píxeles de la impresora (600 dpi, "Microsoft Print to PDF"): una columna mide round(px de pantalla · MDWimp / MDW)

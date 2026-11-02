@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Medidas de impresión de las fuentes más comunes de Excel para el motor propio (etapa 6): por fuente y tamaño (pt), el alto de una fila automática
 // (f) y el ancho del dígito "0" (m), en píxeles de la impresora a 600 dpi. DATOS medidos en Excel real exportando a PDF
 // (Investigaciones/investigacion-motor-excel/arnes-xlsx/medir-mdw-impresora.ps1, con la fuente como estilo Normal) y convertidos con

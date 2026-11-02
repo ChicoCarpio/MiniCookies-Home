@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Maquetador de Word propio (reemplaza a docx-preview). Convierte un .docx en HTML
 // con estilos en línea: un <section class="docx"> por sección de Word, con el
 // tamaño de la hoja como ancho y alto mínimo (border-box) y los márgenes como

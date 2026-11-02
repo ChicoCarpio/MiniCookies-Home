@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Fórmulas de Excel 97-2003 (BIFF8, [MS-XLS] 2.5.198): pasa las fórmulas de un .xls de su forma binaria (una lista de "tokens" Ptg en notación polaca inversa, el rgce) a
 // texto como lo escribe un .xlsx (sin "=", funciones en inglés, hojas entre comillas simples si hace falta), y al revés. No depende del navegador.
 //

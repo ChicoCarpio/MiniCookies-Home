@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Cambio de versión de hojas de cálculo: pasa un libro de cualquier formato que el sitio sabe leer (.xlsx/.xlsm, .xls, .ods, .xlsb, XML 2003) a .xlsx, .xls o .ods, conservando
 // fórmulas, formatos de número, estilos, combinadas, anchos, altos, ocultos y nombres definidos. Todos los lectores devuelven el mismo contrato de celdas y todos los escritores lo
 // reciben (ver XlsEscritor), así que cualquier origen sirve a cualquier destino.

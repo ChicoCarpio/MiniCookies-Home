@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Escritura de estilos y valores de celda de ODF para el libro editable de la suite (F3.4a, etapa 3).
 // ORIGEN: copiado de `ods-escritor.js` del sitio (copia del 2026-10-28): `parrafos`, `isoDeSerie`, `traducirSeccion`, `xmlSeccion` y `estiloNumero` (código de formato de Excel →
 // estilo de número de ODF), sin cambios; `esc` es el mismo. Lo nuevo (al final): `estiloCeldaXml`, que escribe un estilo de celda a partir de las propiedades mezcladas de

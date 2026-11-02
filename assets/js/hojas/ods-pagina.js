@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Página e impresión de un libro OpenDocument (.ods) para Mini Cookies Hojas (F3.4b, etapa 6): papel, orientación, márgenes, escala o ajuste a páginas, área de impresión, filas que se
 // repiten, encabezado y pie, cuadrícula y centrado, con la misma interfaz que `PaginaLibro` (hojas/pagina-libro.js). En ODF la página es un estilo de página (`style:page-layout`, en styles.xml)
 // al que apunta una página maestra (`style:master-page`, con el encabezado y el pie) que la tabla elige por su estilo (`style:master-page-name`); el área de impresión es el atributo

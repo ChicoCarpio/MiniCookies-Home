@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Maquetador paginado de Word (Fase 6, etapa 6.2). Reparte los bloques de un documento (docx-modelo.js) en páginas: corta cada párrafo en
 // líneas (motor-parrafo.js), decide dónde cae cada salto de página (control de viudas y huérfanas, «conservar con el siguiente»,
 // «conservar líneas juntas», «salto de página antes», saltos de página escritos, secciones), calcula las tablas (anchos de columna, alto de

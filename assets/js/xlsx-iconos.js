@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Iconos de los conjuntos de iconos del formato condicional de Excel (etapa 6), dibujados como vectores propios sobre una cuadrícula
 // de 24 × 24 que se escala al tamaño pedido (16 px en pantalla, 12 pt impreso). Las formas son geometría simple (flechas, círculos, rombo,
 // triángulo, símbolos, bandera, escalones, cuartos) hechas aquí; de Excel solo se tomaron medidas: qué forma lleva cada posición de cada

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Una presentación descrita con el «contrato de presentación» (el que entregan PptLector y OdpLector, y el que recibirán los escritores de .ppt y .odp) escrita como .pptx.
 // Es el gemelo de DocxDesdeContrato para PowerPoint: cualquier lector → cualquier escritor, sin un conversor por pareja, y todas las herramientas de PowerPoint
 // (que leen .pptx) aceptan los formatos viejos sin cambios.

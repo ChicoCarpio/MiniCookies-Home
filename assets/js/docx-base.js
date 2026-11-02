@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Base común de los módulos de Word propios (docx-lector.js y docx-maquetador.js):
 // árbol del XML, ayudas para recorrerlo y lectura del paquete (.docx = zip con
 // partes y relaciones). No depende del navegador: corre igual en Node.

@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Fórmulas de OpenDocument (OpenFormula, la sintaxis de `table:formula="of:=SUM([.A1:.B2])"`) ↔ fórmulas como las escribe un .xlsx (`SUM(A1:B2)`). No depende del navegador.
 //
 //   OdsFormulas.aOpenFormula("SUM(Datos!A1:A3)")        → "SUM([$Datos.A1:.A3])"            (sin el "of:=")

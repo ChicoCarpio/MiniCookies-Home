@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Backend de .xlsx / .xlsm del libro editable (F3.4a, etapa 1 del plan de ODS). Es lo que LibroEditable necesita del formato: abrir el archivo en un
 // modelo (LibroXlsx), decir qué celdas no se pueden editar, crear los estilos nuevos y escribir SOLO las celdas editadas sin perder nada. Lo neutro
 // (celdas, operaciones, deshacer, motor de cálculo) se queda en libro-editable.js; un .ods tendrá su propio backend con la misma forma.

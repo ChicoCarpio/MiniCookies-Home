@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Documentos (Fase 6, etapa 6.9): la aplicación completa en el esqueleto del arquetipo G (suite/nucleo/oficina.js). Abre un .docx o uno en blanco, lo muestra
 // hoja a hoja en Canvas y deja escribirlo, darle formato, insertar tablas, imágenes, saltos, encabezados y pies, buscar y reemplazar, pegar con formato,
 // revisar la ortografía y descargarlo como .docx o PDF. El trabajo se guarda solo en este navegador (borradores) y en el celular se abre para leer.

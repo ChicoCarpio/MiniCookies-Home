@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Edición del paquete de un libro de Excel (.xlsx, .xlsm) con ZipPropio, sin DOM: quitar y reordenar hojas dejando el libro que Excel abre sin reparar
 // (etapa 7). Reemplaza a reordenarHojasExcel de ooxml-paquete.js, que no trataba las tablas dinámicas, las segmentaciones ni las escalas de tiempo de
 // las hojas quitadas (Excel pedía reparar el archivo). Lo que no se toca queda byte a byte igual: las entradas intactas del zip se copian comprimidas.

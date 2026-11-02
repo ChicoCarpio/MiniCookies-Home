@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de libros de Excel 97-2003 (.xls) del motor propio de Excel (etapa 9). Un .xls es un contenedor CFB ("Compound File", el de Office antiguo)
 // con un flujo "Workbook" de registros BIFF8 ([MS-CFB], [MS-XLS]); también se leen los de Excel 5/95 (BIFF5, flujo "Book"). Requiere cfb-propio.js
 // (el contenedor), xlsx-modelo.js (errores) y xlsx-estilos.js (formatos integrados); no depende del navegador.

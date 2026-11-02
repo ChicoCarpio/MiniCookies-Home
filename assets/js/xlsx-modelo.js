@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de libros de Excel (.xlsx y .xlsm) del motor propio: el paquete OOXML
 // (zip propio + relaciones) → un modelo resuelto que el dibujo, el formato de
 // número y las herramientas usan sin saber de XML.

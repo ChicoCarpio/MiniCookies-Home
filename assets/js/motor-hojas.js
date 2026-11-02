@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Carga bajo demanda de los módulos pesados del motor de Excel (interfaz de hojas): el visor solo necesita DIBUJAR la hoja (sin pdf-lib, que es lo más
 // grande), y Excel / CSV → PDF necesita además el PDF. Antes la lista vivía en excel-a-pdf-motor.js; aquí se comparte.
 //

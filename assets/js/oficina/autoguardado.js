@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Autoguardado local de los editores de oficina (núcleo de la suite, fase 1 del PLAN). El documento se guarda en el navegador (IndexedDB) para
 // no perder trabajo si se cierra la pestaña: nunca sale de la computadora. Lo que se guarda es el archivo completo ya escrito por el editor
 // (los mismos bytes que se descargarían), así recuperar es abrirlo otra vez.

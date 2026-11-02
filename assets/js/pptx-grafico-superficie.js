@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Gráficos de superficie de PowerPoint (superficie 3D, de alambre, contorno y
 // contorno de alambre): la malla de datos hecha triángulos, cortada por las
 // bandas del eje de valores, con su sombreado, y las líneas del alambre. Lo

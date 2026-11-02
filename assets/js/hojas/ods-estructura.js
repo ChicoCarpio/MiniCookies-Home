@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Cambios de estructura de un libro OpenDocument (.ods) para Mini Cookies Hojas (F3.4a, etapa 4). Misma interfaz que `EstructuraLibro` (hojas/estructura.js): cada uno toma
 // los bytes de un .ods y devuelve los bytes nuevos, editando content.xml (y settings.xml) en el lugar con xml-editar; lo que no tiene que ver con el cambio sale tal cual.
 // Las referencias de TODAS las fórmulas del libro se acomodan con los mismos reescritores que usa el .xlsx (se traduce la fórmula a la sintaxis de Excel, se acomoda y se

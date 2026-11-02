@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Estilos nuevos de celda para Mini Cookies Hojas (fase 2 del PLAN). Poner negrita, un color o un formato de número a una celda es darle
 // otro índice de cellXfs: este módulo arma ese xf a partir del que la celda ya tenía, lo agrega al final de styles.xml (con su fuente,
 // relleno, borde o formato de número nuevos si hacen falta) y deja todo lo demás del archivo como estaba. Los xf que se crean no se borran

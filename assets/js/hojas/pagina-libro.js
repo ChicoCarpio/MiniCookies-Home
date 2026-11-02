@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Configurar página de Mini Cookies Hojas (fase 3.3 del PLAN): orientación, tamaño del papel, márgenes, ajustar a N páginas o escala, área de
 // impresión, filas que se repiten, encabezado y pie, líneas de la cuadrícula y centrar. Queda en <pageSetup>, <pageMargins>, <printOptions>,
 // <headerFooter>, <sheetPr><pageSetUpPr fitToPage> y los nombres _xlnm.Print_Area / _xlnm.Print_Titles, como los guarda Excel; el PDF del sitio

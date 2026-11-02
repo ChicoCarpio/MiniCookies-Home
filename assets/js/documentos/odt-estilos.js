@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Estilos de un .odt para el editor de Documentos (Fase 6b, etapa 6b.1). Sin DOM: corre igual en Node.
 //
 // Lee los estilos de content.xml y styles.xml (nombrados, automáticos, predeterminados, de lista, de página y maestras) y los entrega con el MISMO

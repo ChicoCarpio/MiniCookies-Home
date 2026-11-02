@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Formato de Documentos (Fase 6, etapa 6.5): cambios de formato de caracteres y de párrafo sobre el XML de un párrafo. Sin DOM: corre igual en Node.
 //
 // Igual que edicion-doc.js, no reescribe nada desde el modelo: cambia solo el elemento tocado dentro del XML del párrafo (<w:rPr> de una

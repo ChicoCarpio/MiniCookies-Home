@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Autofiltro de un libro OpenDocument (.ods) para Mini Cookies Hojas (F3.4b, etapa 6), con la misma interfaz que `FiltrosLibro` (hojas/filtros-libro.js).
 // ODF guarda el autofiltro como un rango de base de datos (`table:database-range` con `table:display-filter-buttons="true"`) cuyo `table:filter` lleva las
 // condiciones de todas las columnas (`table:field-number` es relativo al rango), y las filas que no pasan llevan `table:visibility="filter"`. Cada operación toma

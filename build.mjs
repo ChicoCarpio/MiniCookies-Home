@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Build de publicación: copia el sitio a dist/ con el JavaScript y el CSS
 // minificados (también los <script> y <style> dentro de cada HTML) y sin
 // comentarios HTML. El código fuente legible queda solo en el repo privado;

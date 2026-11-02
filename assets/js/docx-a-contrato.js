@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Un .docx leído como «contrato de documento» (el que describe docx-desde-contrato.js): es el tercer lector de Word, junto a DocLector y OdtLector, y lo que permite que los
 // escritores de .doc y .odt reciban cualquier origen (.docx → .doc, .docx → .odt) sin un conversor por pareja.
 //

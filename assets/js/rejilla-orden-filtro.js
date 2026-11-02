@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Ordenar y filtrar «solo para mirar» (fase A completa del plan 06): a partir de la hoja que se leyó arma una VISTA de esa hoja con las filas de un rango
 // reordenadas y/o ocultas, sin tocar la hoja ni el archivo. La vista es un objeto que hereda de la hoja (Object.create) con otro almacén de celdas y otro
 // mapa de filas, así que el motor de dibujo (XlsxDibujo.dibujarVista), la búsqueda y las estadísticas de la rejilla la usan como cualquier hoja.

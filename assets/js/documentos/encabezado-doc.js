@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Encabezados y pies de página de Documentos (Fase 6, etapa 6.7): buscar el de una sección (heredado de las anteriores, como en Word), crear uno que no
 // existe y abrirlo como un documento aparte que se edita con EdicionDoc y se muestra con MaquetadorDoc.
 //

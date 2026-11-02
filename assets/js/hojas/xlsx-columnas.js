@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Insertar y quitar COLUMNAS de una hoja en el lugar (suite, fase 2 del PLAN), como "Insertar / Eliminar columnas" de Excel: las columnas de la
 // derecha se corren y todo lo que apunta a la hoja se acomoda: celdas y sus fórmulas, fórmulas de las otras hojas, nombres definidos, gráficos,
 // anchos de columna, combinadas, formato condicional, validación de datos, hipervínculos, autofiltro, selección y paneles, notas y anclas de

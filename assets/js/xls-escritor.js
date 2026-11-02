@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Escritor de libros de Excel 97-2003 (.xls) del motor propio de formatos antiguos (fase 3). Arma el flujo "Workbook" de registros BIFF8 ([MS-XLS]) y lo mete en un
 // contenedor CFB ([MS-CFB]). Requiere cfb-propio.js, xlsx-estilos.js (formatos integrados y paleta) y, para llevar fórmulas, xls-formulas.js. No depende del navegador.
 //

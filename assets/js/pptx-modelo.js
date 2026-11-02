@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Ampliado el 2026-10-29 para el editor de Presentaciones (herramientas/presentaciones.html); las herramientas de siempre lo usan igual:
 //  - abrir(archivo, { zip, imagenes }): puede abrir un ZipPropio ya cargado y compartir la caché de imágenes decodificadas entre aperturas
 //    (después de cada edición se vuelve a leer la diapositiva sin volver a decodificar sus fotos);

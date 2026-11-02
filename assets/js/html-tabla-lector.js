@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector de tablas HTML que se guardan con extensión de Excel (etapa 9 del motor de Excel): muchos sistemas "exportan a Excel" una página HTML con un
 // <table> y la llaman .xls (o .xlsx). Cada <table> es una hoja. Usa DOMParser, así que solo corre en el navegador. Requiere csv-planilla.js (decodificar).
 //

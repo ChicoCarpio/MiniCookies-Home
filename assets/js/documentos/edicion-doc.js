@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Edición de texto de Documentos (Fase 6, etapa 6.4). Sin DOM: corre igual en Node.
 //
 // Escribir, borrar, partir y unir párrafos sobre el modelo de docx-modelo.js, y devolver un .docx donde SOLO cambian los párrafos editados.

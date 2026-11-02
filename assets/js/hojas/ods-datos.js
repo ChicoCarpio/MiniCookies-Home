@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Datos de un libro OpenDocument (.ods) para Mini Cookies Hojas (F3.4b, etapa 6): nombres definidos, validación de datos y reglas de formato condicional, con la misma interfaz
 // que `DatosLibro` (hojas/datos-libro.js). Cada operación toma los bytes de un .ods y devuelve los nuevos editando solo lo que cambia (content.xml, con xml-editar).
 // Lo que se lee del modelo (validacionEn, listaDe, comprobarEntrada…) no depende del formato y se reusa de DatosLibro.

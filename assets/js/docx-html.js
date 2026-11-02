@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Convierte HTML "de verdad" (de un <div contenteditable> o del lector de Word)
 // a los objetos de párrafo, tabla y texto de escritor-docx.js (EscritorDocx). Se usa con
 // EscritorDocx.generar({ numeraciones: NUMERACIONES_DOCX, hijos: await contenidoAParrafos(contenedor) }).

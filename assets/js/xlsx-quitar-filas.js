@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Quitar filas de una hoja EN EL LUGAR (fase C del motor de Excel), como "Eliminar filas" de Excel: las filas de abajo suben, y todo lo que apunta a
 // la hoja se acomoda: fórmulas de todas las hojas (una referencia a una fila quitada pasa a #REF!, un rango se achica), celdas combinadas, formato
 // condicional, validación de datos, hipervínculos, autofiltro, tablas, nombres definidos, gráficos, saltos de página y anclas de los dibujos.

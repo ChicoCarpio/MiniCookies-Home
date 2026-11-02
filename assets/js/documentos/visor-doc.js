@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Visor de hojas de Documentos (Fase 6, etapa 6.3): apila las hojas del diseño de MaquetadorDoc en un contenedor con desplazamiento, con zoom,
 // y solo dibuja (en Canvas, con la densidad de la pantalla) las hojas que se ven más una pantalla de margen: las demás son un recuadro blanco
 // del tamaño de la hoja, sin canvas, así que un documento de cientos de hojas gasta la memoria de unas pocas.

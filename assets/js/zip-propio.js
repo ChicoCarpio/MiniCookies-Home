@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Lector y escritor de ZIP propio (reemplaza a JSZip). Un .docx, .xlsx, .pptx
 // o .epub es un zip por dentro; todas las herramientas que los abren o los
 // guardan pasan por acá.

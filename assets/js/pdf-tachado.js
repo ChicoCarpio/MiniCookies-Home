@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Tachado de texto en un PDF (herramienta "Tachar texto de un PDF"). Tapar con un rectángulo negro NO borra nada: el texto sigue debajo y se
 // puede copiar. Por eso, cada página con coincidencias se dibuja con PDF.js, se pintan las cajas negras sobre lo encontrado y la página
 // entera se reemplaza por esa imagen: el texto original deja de existir en el archivo. Las páginas sin coincidencias se copian tal cual, y de

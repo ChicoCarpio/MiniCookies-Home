@@ -1,4 +1,4 @@
-/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
+/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
 // Dibuja en un canvas una diapositiva ya resuelta por pptx-modelo.js: fondo,
 // formas (geometría de pptx-geometria.js), rellenos, líneas con guiones y
 // puntas de flecha, imágenes (recorte, mosaico, efectos), grupos con su
