@@ -9,10 +9,11 @@ Sitio web: https://www.minicookies.net
 
 > **English summary (not legally binding; the Spanish text below prevails).**
 > This is a source-available license, not an open-source one. You may read, download and
-> study this code to learn how Mini Cookies works. You may not copy substantial parts of it,
-> modify it, redistribute it, use it in other products or services (free or paid, public or
-> internal), or use it to train AI models, without written permission from the copyright
-> holder. Using the tools on https://www.minicookies.net is free for everyone, including
+> study this code to learn how Mini Cookies works, change your own copy privately to
+> understand it, and use it to train or evaluate AI models. You may not copy substantial
+> parts of it, redistribute it, build modified versions for other products, or use it in
+> other products or services (free or paid, public or internal), without written permission
+> from the copyright holder. Using the tools on https://www.minicookies.net is free for everyone, including
 > commercial use. To ask for a reuse license, use https://www.minicookies.net/contacto.
 
 ---
@@ -62,12 +63,19 @@ Cualquier persona puede:
 - Descargar o clonar copias exclusivamente para inspección y estudio personal.
 - Analizar sus técnicas de programación y su arquitectura.
 - Aprender de los conceptos y conocimientos técnicos que contiene.
+- Hacer cambios en su propia copia para probar o entender cómo funciona el código, solo
+  para uso personal y sin distribuirlos (lo que coincide con el artículo 10 del
+  Reglamento a la Ley N.º 6683, Decreto Ejecutivo N.º 24611-J).
+- Usar el código para entrenar, ajustar o evaluar modelos de inteligencia artificial, e
+  incluirlo con ese fin en conjuntos de datos de entrenamiento. Este permiso no se
+  extiende a los componentes de terceros (sección 8), que se rigen por sus propias
+  licencias.
 - Citar fragmentos breves en análisis, críticas, artículos o material educativo,
   indicando la fuente y el autor, en la medida que permite el artículo 70 de la
   Ley N.º 6683.
 
-Estos permisos se conceden de forma expresa porque la excepción de copia privada de la
-ley no se aplica a los programas de cómputo (Ley N.º 6683, artículo 74). No autorizan a
+Estos permisos se conceden de forma expresa porque la ley no permite reproducir programas
+de cómputo para uso personal sin autorización (Ley N.º 6683, artículo 74). No autorizan a
 reutilizar el código en otros productos o servicios.
 
 ## 5. Usos que requieren autorización
@@ -83,8 +91,6 @@ Hace falta una licencia expresa y por escrito del titular para:
   completas o parciales.
 - Comercializar software que incorpore código de Mini Cookies.
 - Ofrecer servicios propios basados en la reutilización del código.
-- Usar el código para entrenar, ajustar o evaluar modelos de inteligencia artificial, o
-  incluirlo en conjuntos de datos con ese fin.
 
 La obligación de pedir autorización se aplica sin importar que el proyecto receptor sea
 gratuito, educativo, privado, empresarial o comercial.
@@ -99,12 +105,13 @@ El titular conserva sobre su obra los derechos morales que reconocen los artícu
 de la Ley N.º 6683, que son irrenunciables. En consecuencia, nadie puede:
 
 - Presentar el código original de Mini Cookies como creación propia.
-- Eliminar o modificar los avisos de copyright o de licencia (Ley N.º 8039,
-  artículo 63).
+- Eliminar o modificar los avisos de copyright o de licencia, que son información sobre
+  la gestión de derechos (Ley N.º 8039, artículos 2 bis, inciso b, y 63).
 - Registrar o reclamar como propio el código de Mini Cookies.
 - Redistribuir el código como si tuviera una licencia que permitiera reutilizarlo.
-- Usar el nombre, el logotipo o la identidad de Mini Cookies para aparentar una
-  afiliación o autorización que no existe.
+
+Tampoco se permite usar el nombre, el logotipo o la identidad de Mini Cookies para
+aparentar una afiliación o autorización que no existe.
 
 ## 7. Licencias de reutilización
 
@@ -120,25 +127,31 @@ Solo el titular puede conceder autorizaciones para reutilizar el código. Pueden
 
 Cada autorización constará en un documento escrito y firmado por el titular, porque la
 autorización del titular de un derecho de propiedad intelectual es siempre expresa y por
-escrito (Ley N.º 8039, artículo 1). Cuando
-implique una cesión total o parcial de derechos patrimoniales, se hará en instrumento
-público o privado ante dos testigos, como exige el artículo 89 de la Ley N.º 6683.
+escrito (Ley N.º 8039, artículo 1). Cuando implique una enajenación (cesión) total o
+parcial de derechos patrimoniales, se hará en instrumento público o privado ante dos
+testigos, como exige el artículo 89 de la Ley N.º 6683.
 
 Que el código sea públicamente accesible no implica ninguna autorización. Conforme al
 artículo 16 de la Ley N.º 6683, los contratos sobre derechos de autor se interpretan de
 forma restrictiva: no se entiende concedido ningún derecho que no esté escrito de forma
-expresa.
+expresa, salvo los que resulten necesariamente de la naturaleza de sus términos.
 
 ## 8. Componentes de terceros e ideas no protegidas
 
-Las librerías, fuentes, modelos y demás componentes de terceros incluidos en el
-repositorio (en especial la carpeta `vendor/`) conservan sus propias licencias, que se
-indican junto a cada uno y en `creditos.html`. Esta licencia no modifica ni limita los
-derechos que esas licencias conceden.
+Esta licencia cubre solo la obra original del titular. No se aplica a los componentes de
+terceros que el repositorio incluye o que el sitio descarga al usarse, entre ellos:
 
-Las definiciones de formas de la norma ECMA-376 (`vendor/ecma-376-geometrias/`) se
-distribuyen bajo el aviso de copyright de Ecma International que las acompaña
-(`AVISO-ECMA.txt`), no bajo esta licencia.
+- Las librerías, motores, tipografías, diccionarios y datos de entrenamiento copiados en
+  la carpeta `vendor/`.
+- Los modelos de inteligencia artificial que algunas herramientas descargan al usarse.
+- Las definiciones de formas de la norma ECMA-376 (`vendor/ecma-376-geometrias/`).
+
+Cada uno se rige por su propia licencia o aviso de copyright: licencias abiertas como MIT,
+Apache-2.0, BSD, SIL Open Font License, MPL-1.1, CC0 o Unlicense, y en el caso de
+ECMA-376, el aviso de copyright de Ecma International. El texto de cada licencia está
+junto al componente, y la lista completa, con versión y enlace a la licencia, está en
+`creditos.html`. Esta licencia no modifica ni limita los derechos que esas licencias
+conceden, y quien reutilice uno de esos componentes debe cumplir su licencia, no esta.
 
 Como establece el artículo 1 de la Ley N.º 6683, la protección cubre la expresión del
 código y no las ideas, procedimientos, métodos de operación ni conceptos matemáticos en
@@ -157,10 +170,11 @@ Derechos de Propiedad Intelectual (artículo 1). Entre ellas están:
 - Las medidas cautelares, la indemnización de daños y perjuicios y el pago de costas
   (artículos 38 bis, 40 y 40 bis de la Ley N.º 8039), además de las medidas cautelares
   que puede dictar el Registro según el artículo 95 de la Ley N.º 6683.
-- En los casos que define el artículo 70 de la Ley N.º 8039, las sanciones penales por
-  reproducir, modificar, distribuir o poner a disposición del público la obra sin
-  autorización, o por suprimir o alterar los avisos de derechos (artículos 51, 54, 58,
-  59 y 63).
+- Las sanciones penales por reproducir, modificar, distribuir o poner a disposición del
+  público la obra sin autorización, o por suprimir o alterar los avisos de derechos
+  (artículos 51, 54, 58, 59 y 63 de la Ley N.º 8039), cuando se cumplan los requisitos
+  de esos artículos, incluidos el perjuicio y la escala comercial que exige su
+  artículo 70.
 
 ## 10. Sin garantías
 
