@@ -437,6 +437,7 @@
     area.addEventListener('keydown', (ev) => {
       const atajo = (ev.ctrlKey || ev.metaKey) && !ev.altKey && { b: 'negrita', i: 'cursiva', u: 'subrayado' }[ev.key.toLowerCase()];
       if (ev.key === 'Escape') { ev.preventDefault(); cerrarEditor(true); } else if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); cerrarEditor(true); }
+      else if (ev.key === 'Enter' && ev.shiftKey && editor && editor.entrada) { ev.preventDefault(); area.setRangeText('\u2028', area.selectionStart, area.selectionEnd, 'end'); area.dispatchEvent(new Event('input', { bubbles: true })); }   // como PowerPoint: salto de línea dentro del párrafo (<a:br>); el cuadro nativo lo mostraría como un espacio, así que ahí sigue dando otra línea
       else if (atajo) { ev.preventDefault(); comandos.ejecutar(atajo); }
       else if (ev.key === 'Tab' && !ev.ctrlKey && !ev.altKey) { ev.preventDefault(); comandos.ejecutar(ev.shiftKey ? 'nivelMenos' : 'nivelMas'); }
       ev.stopPropagation();
@@ -446,6 +447,8 @@
     rango = null; fmtRango = null;
     area.focus();
     area.setSelectionRange(area.value.length, area.value.length);
+    // con el motor de texto el cuadro nativo no se ve: el texto se dibuja con su formato y su corte reales (texto vertical, girado o espejado sigue con el cuadro nativo)
+    if (EntradaTexto.admite(e)) { try { editor.entrada = EntradaTexto.crear({ marco, area, elemento: e, escala: s }); } catch (err) { console.warn(err); } }
     leerFormatoRango();
   }
   // La selección dentro del cuadro de texto, como en PowerPoint: con texto seleccionado, el formato va a lo seleccionado; con el cursor dentro de una
@@ -467,7 +470,9 @@
     const { ini, fin } = seleccionDe(ed.area);
     const tramos = [];
     let pos = 0;
-    for (const p of e.texto.parrafos) { for (const z of p.trozos) { const n = (z.texto || '').length; if (n && pos < fin && pos + n > ini) tramos.push(z); pos += n; } pos += 1; }
+    // con el motor de texto, el modelo vivo (lo que se ve): el del archivo todavía no tiene lo escrito; un salto suave cuenta 1 y no da formato
+    const parrafos = ed.entrada ? ed.entrada.modelo() : e.texto.parrafos;
+    for (const p of parrafos) { for (const z of p.trozos) { const n = z.salto ? 1 : (z.texto || '').length; if (n && !z.salto && pos < fin && pos + n > ini) tramos.push(z); pos += n; } pos += 1; }
     if (fin <= ini || !tramos.length) { fmtRango = null; comandos.refrescar(); return; }
     fmtRango = { negrita: tramos.every((z) => z.negrita), cursiva: tramos.every((z) => z.cursiva), subrayado: tramos.every((z) => z.subrayado), tamano: tramos[0].tamano };
     comandos.refrescar();
@@ -480,6 +485,7 @@
     editor = null;
     pintarMarcadores();
     const nuevo = ed.area.value.split('\n');
+    if (ed.entrada) ed.entrada.destruir();
     ed.area.remove();
     if (guardar && nuevo.join('\n') !== ed.inicial.join('\n')) await hacer('Texto', () => pe.opTexto(ed.diap, ed.camino, nuevo), { fusionar: 'texto:' + ed.camino.join('/') });
     sobre.focus({ preventScroll: true });
@@ -510,7 +516,8 @@
     const e = elementoSel();
     if (!e || !e.texto) return null;
     const k = editor ? editor.area.value.slice(0, editor.area.selectionStart).split('\n').length - 1 : 0;
-    return e.texto.parrafos[Math.min(k, e.texto.parrafos.length - 1)] || null;
+    const ps = editor && editor.entrada ? editor.entrada.modelo() : e.texto.parrafos;   // con el motor, el modelo vivo: tiene los párrafos recién escritos
+    return ps[Math.min(k, ps.length - 1)] || null;
   };
   const tipoVineta = () => { const p = parrafoActual(); return p && p.vineta ? p.vineta.tipo : null; };
   async function formatearParrafos(f) {
@@ -919,6 +926,15 @@
     }
   }
   mostrarBorradores();
+  // El idioma se cambia sin recargar la página (botón del inicio): lo que se escribió con tx() al abrir se vuelve a escribir
+  document.addEventListener('cambioIdioma', () => {
+    mostrarBorradores();
+    if (!modelo) return;
+    aplicarModo(); actualizarGuardado(); actualizarInspector(); pintarMarcadores();
+    lineaHonesta(diapActual);
+    lienzoPrincipal.setAttribute('aria-label', tx('diapositiva-de', actual + 1, cantidad));
+    for (const b of panel.querySelectorAll('.pr-mini')) b.setAttribute('aria-label', tx('diapositiva-n', +b.dataset.indice + 1));
+  });
   window.addEventListener('beforeunload', (e) => { if (hist && hist.sucio()) { e.preventDefault(); e.returnValue = ''; } });
 
   // para las pruebas de navegador
