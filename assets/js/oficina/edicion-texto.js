@@ -18,6 +18,8 @@
 //   - Un párrafo nuevo parte del párrafo que ya estaba en ese lugar (o del anterior).
 //
 // Uso: const nuevos = EdicionTexto.aplicar(parrafos, nuevoPlano)
+//      EdicionTexto.formatearRango(parrafos, ini, fin, cambios)   el mismo formato en una parte del texto: las corridas que el rango corta se parten (cambios: objeto, o función del trozo)
+//      EdicionTexto.rangosMarcados(parrafos, 'marca')             [{ ini, fin, valor }] de los trozos con esa propiedad (lo escrito hereda las propiedades del trozo)
 
 const EdicionTexto = (() => {
   const SALTO = ' ';
@@ -99,5 +101,44 @@ const EdicionTexto = (() => {
     });
   }
 
-  return { aplicar, plano, textoParrafo };
+  function formatearRango(parrafos, ini, fin, cambios) {
+    const de = (t) => (typeof cambios === 'function' ? cambios(t) : cambios);
+    let base = 0;
+    return parrafos.map((p) => {
+      const largo = textoParrafo(p).length, lo = Math.max(ini, base) - base, hi = Math.min(fin, base + largo) - base;
+      base += largo + 1;
+      if (hi <= lo) return p;
+      const trozos = [];
+      let pos = 0;
+      for (const t of p.trozos) {
+        const texto = textoTrozo(t), s = pos, e = pos + texto.length; pos = e;
+        if (e <= lo || s >= hi || t.salto) { trozos.push(t); continue; }
+        if (t.campo) { trozos.push({ ...t, ...de(t) }); continue; }   // un campo es una sola pieza: si el rango lo toca, se formatea entero
+        const a = texto.slice(0, Math.max(0, lo - s)), m = texto.slice(Math.max(0, lo - s), hi - s), d = texto.slice(Math.min(texto.length, hi - s));
+        if (a) trozos.push({ ...t, texto: a });
+        trozos.push({ ...t, ...de(t), texto: m });
+        if (d) trozos.push({ ...t, texto: d });
+      }
+      return { ...p, trozos };
+    });
+  }
+  function rangosMarcados(parrafos, marca) {
+    const salida = [];
+    let base = 0;
+    for (const p of parrafos) {
+      let pos = base;
+      for (const t of p.trozos) {
+        const n = textoTrozo(t).length, v = t[marca];
+        if (v && !t.salto) {
+          const u = salida[salida.length - 1];
+          if (u && u.fin === pos && u.valor === v) u.fin += n; else salida.push({ ini: pos, fin: pos + n, valor: v });
+        }
+        pos += n;
+      }
+      base += textoParrafo(p).length + 1;
+    }
+    return salida;
+  }
+
+  return { aplicar, plano, textoParrafo, formatearRango, rangosMarcados };
 })();
