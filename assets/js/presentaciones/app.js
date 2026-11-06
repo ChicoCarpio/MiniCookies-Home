@@ -447,8 +447,10 @@
     rango = null; fmtRango = null;
     area.focus();
     area.setSelectionRange(area.value.length, area.value.length);
-    // con el motor de texto el cuadro nativo no se ve: el texto se dibuja con su formato y su corte reales (texto vertical, girado o espejado sigue con el cuadro nativo)
-    if (EntradaTexto.admite(e)) { try { editor.entrada = EntradaTexto.crear({ marco, area, elemento: e, escala: s }); } catch (err) { console.warn(err); } }
+    // con el motor de texto el cuadro nativo no se ve: el texto se dibuja con su formato y su corte reales (texto vertical, girado o espejado sigue con el cuadro nativo);
+    // una forma sin texto usa el formato que tendrá lo que se escriba
+    const conModelo = e.texto || !e.textoVacio ? e : { ...e, texto: e.textoVacio };
+    if (EntradaTexto.admite(conModelo)) { try { editor.entrada = EntradaTexto.crear({ marco, area, elemento: conModelo, escala: s }); } catch (err) { console.warn(err); } }
     leerFormatoRango();
   }
   // La selección dentro del cuadro de texto, como en PowerPoint: con texto seleccionado, el formato va a lo seleccionado; con el cursor dentro de una
@@ -466,7 +468,7 @@
   // El formato efectivo de lo seleccionado sale del modelo (ya trae lo heredado del diseño y del patrón): los tramos de texto con su posición.
   function leerFormatoRango() {
     const ed = editor, e = elementoSel();
-    if (!ed || !e || !e.texto) return;
+    if (!ed || !e || (!e.texto && !ed.entrada)) return;
     const { ini, fin } = seleccionDe(ed.area);
     const tramos = [];
     let pos = 0;
@@ -514,7 +516,7 @@
   // Viñetas, numeración y nivel: por párrafo. Con el cuadro de texto abierto, los párrafos que toca la selección; si no, todos los del objeto.
   const parrafoActual = () => {
     const e = elementoSel();
-    if (!e || !e.texto) return null;
+    if (!e || (!e.texto && !(editor && editor.entrada))) return null;
     const k = editor ? editor.area.value.slice(0, editor.area.selectionStart).split('\n').length - 1 : 0;
     const ps = editor && editor.entrada ? editor.entrada.modelo() : e.texto.parrafos;   // con el motor, el modelo vivo: tiene los párrafos recién escritos
     return ps[Math.min(k, ps.length - 1)] || null;
