@@ -1,4 +1,4 @@
-/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Motor de cálculo de Mini Cookies Hojas (fase 2 del PLAN): evalúa fórmulas de Excel, lleva el grafo de dependencias y recalcula solo lo que
 // depende de lo que cambió, en orden (Kahn). Sin DOM: corre igual en Node y en un Worker.
 //
@@ -28,6 +28,8 @@
 // en noSoportadas; Excel la recalcula al abrir el archivo (el escritor marca fullCalcOnLoad).
 (function () {
   const MAX_FILAS = 1048576, MAX_COLS = 16384;
+  const MAX_EXPANSIONES = 5000000;   // nombres definidos evaluados por fórmula: más que esto es un archivo hecho para colgar la página
+  const FORMA_ENTERA = 65536;   // celdas de un rango: hasta aquí una matriz conserva su forma aunque pase de lo usado; más grande, se corta en lo usado
   const ERRORES = ['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA', '#SPILL!', '#CALC!'];
   class ErrorCalc { constructor(codigo) { this.codigo = codigo; } toString() { return this.codigo; } }
   const ERR = {}; for (const e of ERRORES) ERR[e] = new ErrorCalc(e);
@@ -97,6 +99,67 @@
     if (!(d instanceof Date)) return d;
     return { a: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate(), ds: d.getUTCDay() };
   }
+
+  // ---- qué argumentos se aplican a cada elemento, medido en Excel 365 (pruebas/oraculo/excel-medir-matrices.ps1) ------------------
+  //   s  rango o matriz: se aplica a cada elemento
+  //   x  matriz: a cada elemento; rango de varias celdas: #VALUE! (las del antiguo complemento de análisis)
+  //   f  matriz: a cada elemento; rango: la función lo recibe entero (N y T toman su primera celda)
+  //   v  rama: si otro argumento es matriz, se toma el elemento de la misma posición; si no, se devuelve entero
+  //   e  como s, pero si la función devuelve una matriz o una referencia, ese elemento da #VALUE!
+  //   a  la función lo recibe entero
+  //   z  la función lo recibe entero, pero con un rango Excel la guarda con cm
+  // Patrón: una letra por posición; lo que sigue a «|» se repite para el resto. Lo que no está en la tabla recibe todo entero.
+  const ELEVA = new Map();
+  const elevan = (patron, nombres) => { for (const n of nombres.split(' ')) ELEVA.set(n, patron); };
+  elevan('|s', 'ABS ACOS ACOSH ACOT ACOTH ADDRESS ARABIC ASIN ASINH ATAN ATAN2 ATANH BASE BETA.DIST BETA.INV BETADIST BETAINV BINOM.DIST BINOM.INV BINOMDIST BITAND BITLSHIFT BITOR BITRSHIFT BITXOR CEILING CEILING.MATH CEILING.PRECISE CHAR CHIDIST CHIINV CHISQ.DIST CHISQ.DIST.RT CHISQ.INV CHISQ.INV.RT CLEAN CODE COMBIN COMBINA CONCATENATE CONFIDENCE CONFIDENCE.NORM CONFIDENCE.T COS COSH COT COTH CRITBINOM CSC CSCH DATE DATEDIF DATEVALUE DAY DAYS DAYS360 DB DDB DECIMAL DEGREES DOLLAR ERROR.TYPE EVEN EXACT EXP EXPON.DIST EXPONDIST F.DIST F.DIST.RT F.INV F.INV.RT FACT FDIST FIND FINV FISHER FISHERINV FIXED FLOOR FLOOR.MATH FLOOR.PRECISE FV GAMMA GAMMA.DIST GAMMA.INV GAMMADIST GAMMAINV GAMMALN GAMMALN.PRECISE GAUSS HOUR HYPERLINK HYPGEOM.DIST HYPGEOMDIST INT IPMT ISBLANK ISERR ISERROR ISLOGICAL ISNA ISNONTEXT ISNUMBER ISO.CEILING ISOWEEKNUM ISPMT ISTEXT LEFT LEFTB LEN LENB LN LOG LOG10 LOGINV LOGNORM.DIST LOGNORM.INV LOGNORMDIST LOWER MID MIDB MINUTE MOD MONTH NEGBINOM.DIST NEGBINOMDIST NORM.DIST NORM.INV NORM.S.DIST NORM.S.INV NORMDIST NORMINV NORMSDIST NORMSINV NOT NPER NUMBERVALUE ODD PDURATION PERMUT PERMUTATIONA PHI PMT POISSON POISSON.DIST POWER PPMT PROPER PV RADIANS RANDBETWEEN RATE REGEXREPLACE REGEXTEST REPLACE REPT RIGHT RIGHTB ROMAN ROUND ROUNDDOWN ROUNDUP RRI SEARCH SEC SECH SECOND SIGN SIN SINH SLN SQRT SQRTPI STANDARDIZE SUBSTITUTE SYD T.DIST T.DIST.2T T.DIST.RT T.INV T.INV.2T TAN TANH TDIST TEXT TIME TIMEVALUE TINV TRIM TRUNC UNICHAR UNICODE UPPER VALUE VALUETOTEXT WEEKDAY WEIBULL WEIBULL.DIST YEAR');
+  elevan('|x', 'BIN2DEC BIN2HEX BIN2OCT CONVERT CUMIPMT CUMPRINC DEC2BIN DEC2HEX DEC2OCT DELTA DOLLARDE DOLLARFR EDATE EFFECT EOMONTH ERF ERF.PRECISE ERFC ERFC.PRECISE FACTDOUBLE GESTEP HEX2BIN HEX2DEC HEX2OCT ISEVEN ISODD MROUND NOMINAL OCT2BIN OCT2DEC OCT2HEX QUOTIENT WEEKNUM YEARFRAC');
+  elevan('xxxa', 'SERIESSUM');
+  elevan('xa', 'FVSCHEDULE XNPV');
+  elevan('xxa', 'NETWORKDAYS WORKDAY');
+  elevan('xxsa', 'NETWORKDAYS.INTL WORKDAY.INTL');
+  elevan('ax', 'DAVERAGE DCOUNT DCOUNTA DGET DMAX DMIN DPRODUCT DSTDEV DSTDEVP DSUM DVAR DVARP');
+  elevan('f', 'N T');
+  elevan('as', 'IRR LARGE PERCENTILE PERCENTILE.EXC PERCENTILE.INC QUARTILE QUARTILE.EXC QUARTILE.INC SMALL TRIMMEAN COUNTIF');
+  elevan('asa', 'AVERAGEIF SUMIF');
+  elevan('ass', 'MIRR PERCENTRANK PERCENTRANK.EXC PERCENTRANK.INC Z.TEST ZTEST');
+  elevan('|as', 'COUNTIFS');
+  elevan('a|as', 'AVERAGEIFS MAXIFS MINIFS SUMIFS');
+  elevan('aass', 'T.TEST TTEST');
+  elevan('saa', 'FORECAST FORECAST.LINEAR LOOKUP');
+  elevan('sas', 'RANK RANK.AVG RANK.EQ');
+  elevan('sax', 'MATCH');
+  elevan('sass', 'HLOOKUP VLOOKUP XMATCH');
+  elevan('saazss', 'XLOOKUP');
+  elevan('asss', 'INDEX');
+  elevan('ssax', 'AGGREGATE');
+  elevan('sa', 'SUBTOTAL');
+  elevan('saaa', 'NPV');
+  elevan('as', 'TEXTJOIN');
+  elevan('szssss', 'TEXTAFTER TEXTBEFORE');
+  // las que devuelven una matriz, con una matriz en un argumento de valor suelto: unas dan el primer valor de cada resultado (s) y otras #VALUE! (e)
+  elevan('|s', 'MUNIT REGEXEXTRACT SEQUENCE');
+  elevan('ass', 'TOCOL TOROW UNIQUE WRAPCOLS WRAPROWS');
+  elevan('assa', 'EXPAND');
+  elevan('aaas', 'SORT');
+  elevan('aee', 'DROP TAKE');
+  elevan('|e', 'INDIRECT');
+  elevan('a|e', 'OFFSET');
+  elevan('z', 'COLUMN ROW TYPE');
+  elevan('svv', 'IF');
+  elevan('sv', 'IFERROR IFNA');
+  elevan('s|v', 'CHOOSE');
+  elevan('|sv', 'IFS');
+  elevan('s|sv', 'SWITCH');
+  const cacheCiclo = new Map();
+  function posicionDe(patron, k) {
+    let p = cacheCiclo.get(patron);
+    if (!p) { const [fijo, ciclo] = patron.split('|'); p = { fijo, ciclo: ciclo || '' }; cacheCiclo.set(patron, p); }
+    if (k < p.fijo.length) return p.fijo[k];
+    return p.ciclo ? p.ciclo[(k - p.fijo.length) % p.ciclo.length] : 'a';
+  }
+  const DEVUELVEN_MATRIZ = new Set('CHOOSECOLS CHOOSEROWS DROP EXPAND FILTER FREQUENCY GROWTH HSTACK LINEST LOGEST MODE.MULT RANDARRAY REGEXEXTRACT SEQUENCE SORT SORTBY TAKE TEXTSPLIT TOCOL TOROW TRANSPOSE TREND UNIQUE VSTACK WRAPCOLS WRAPROWS'.split(' '));
+  const SIEMPRE_DINAMICA = new Set(['IFS', 'SWITCH']);   // Excel las guarda con cm aunque todos sus argumentos sean valores sueltos
+  const DENTRO_SIN_CM = new Set(['ANCHORARRAY', 'MINVERSE', 'MMULT', 'MUNIT']);   // solas llevan cm; recibidas enteras por otra función (INDEX(MMULT(…);1;1), SUM(A1#)) no
 
   // ---- el motor -----------------------------------------------------------------------------------------------------
   function crear(fuente) {
@@ -223,7 +286,8 @@
         case 'fn': {
           const n = nombreFuncion(ast.nombre);
           if (VOLATILES.has(n)) salida.volatil = true;
-          for (const a of ast.args) recolectar(a, h, salida, profundidad + 1);
+          // FILA(A1) en A1 no es circular: estas miran dónde está la referencia, no lo que tiene
+          for (const a of ast.args) if (!(SOLO_POSICION.has(n) && a && a.t === 'ref')) recolectar(a, h, salida, profundidad + 1);
           return;
         }
         case 'bin': recolectar(ast.a, h, salida, profundidad + 1); recolectar(ast.b, h, salida, profundidad + 1); return;
@@ -384,9 +448,11 @@
     }
 
     let ctxRecalculo = null;
+    let expansiones = 0;   // nombres definidos evaluados en esta fórmula
     function calcularFormula(k, noSoportadas, soloVista) {
       const fx = formulas.get(k);
       if (!fx) return;
+      expansiones = 0;
       if (fx.mala) { noSoportadas.push({ h: fx.h, f: fx.f, c: fx.c, motivo: fx.ast.motivo }); return; }
       try {
         let v = evaluarNodo(fx.ast, { h: fx.h, f: fx.f, c: fx.c, prof: 0, matriz: fx.dinamica });
@@ -471,15 +537,21 @@
       const lim = fuente.limite ? fuente.limite(r.h) : { filas: MAX_FILAS, cols: MAX_COLS };
       return { f1: Math.min(r.f1, lim.filas - 1), c1: Math.min(r.c1, lim.cols - 1) };
     };
-    // matriz de valores de un rango (lo usado, para A:A)
+    // matriz de valores de un rango: con la forma escrita (=LARGO(A1:A5) da 5 filas aunque lo usado llegue a la 3); uno enorme (A:A), solo hasta lo usado
     function matrizDe(v) {
       if (esMat(v)) return v.filas;
       if (esRef(v)) {
         const { f1, c1 } = recortar(v);
+        const entero = (v.f1 - v.f0 + 1) * (v.c1 - v.c0 + 1) <= FORMA_ENTERA;
+        const fFin = entero ? v.f1 : f1, cFin = entero ? v.c1 : c1;
+        if (fFin < v.f0 || cFin < v.c0) return [[null]];
+        if ((fFin - v.f0 + 1) * (cFin - v.c0 + 1) > 5000000) throw new NoSoportada('rango demasiado grande');
         const filas = [];
-        if ((f1 - v.f0 + 1) * (c1 - v.c0 + 1) > 5000000) throw new NoSoportada('rango demasiado grande');
-        for (let f = v.f0; f <= f1; f++) { const fila = []; for (let c = v.c0; c <= c1; c++) fila.push(valorCelda(v.h, f, c)); filas.push(fila); }
-        if (!filas.length) filas.push([null]);
+        for (let f = v.f0; f <= fFin; f++) {
+          const fila = [];
+          for (let c = v.c0; c <= cFin; c++) fila.push(f <= f1 && c <= c1 ? valorCelda(v.h, f, c) : null);
+          filas.push(fila);
+        }
         return filas;
       }
       if (esUnion(v)) throw new Lanzado(E.valor);
@@ -552,6 +624,7 @@
       if ((mx || my) && (ctx.matriz || esMat(x) || esMat(y))) {
         const A = mx || [[escalar(x, ctx)]], B = my || [[escalar(y, ctx)]];
         const nf = Math.max(A.length, B.length), nc = Math.max(A[0].length, B[0].length), filas = [];
+        if (nf * nc > 5000000) return E.valor;   // una columna por una fila enormes (FILA(A1:A999999)*COLUMNA(1:1)) agotarían la memoria
         for (let i = 0; i < nf; i++) {
           const fila = [];
           for (let j = 0; j < nc; j++) {
@@ -608,6 +681,7 @@
       try {
         switch (n.t) {
           case 'num': return n.v;
+          case 'valor': return n.v;
           case 'str': return n.v;
           case 'bool': return n.v;
           case 'err': return error(n.v);
@@ -624,14 +698,14 @@
             if (ctx.ambito && ctx.ambito.has(local)) return ctx.ambito.get(local);
             const def = fuente.nombre ? fuente.nombre(n.nombre, ctx.h) : null;
             if (!def) return E.nombre;
+            if (++expansiones > MAX_EXPANSIONES) throw new RangeError('nombres');   // N1=N2+N2, N2=N3+N3…: 34 nombres son 2^33 pasos
             return evaluarNodo(analizar(def.replace(/^=/, ''), ctx.h, ctx.f, ctx.c), ctx);
           }
           case 'un': {
             const v = evaluarNodo(n.a, ctx);
             if (n.op === '%') return binaria('/', v, 100, ctx);
             if (n.op === '-') return binaria('*', v, -1, ctx);
-            const e = escalar(v, ctx);
-            return e;
+            return ctx.matriz ? v : escalar(v, ctx);
           }
           case 'bin': {
             if (n.op === ':') {   // A1:B2 armado con dos referencias (o INDEX(...):B5)
@@ -679,6 +753,8 @@
         return E.nombre;
       }
       try {
+        const patron = ELEVA.get(nombre);
+        if (patron !== undefined && puedeSerMatriz(n)) return elevar(fn, n, ctx, patron);
         return fn(n.args, ctx, API);
       } catch (e) {
         if (e instanceof Lanzado) return e.e;
@@ -687,17 +763,125 @@
       }
     }
 
+    // ¿alguno de los argumentos puede dar más de un valor? Lo de todos los días (A1, 2, "x") no paga la evaluación por adelantado. Se guarda en el nodo.
+    function puedeSerMatriz(n) {
+      if (n.quizaMatriz === undefined) n.quizaMatriz = n.args.some((a) => a && !(a.t === 'num' || a.t === 'str' || a.t === 'bool' || (a.t === 'ref' && a.modo === 'celda')));
+      return n.quizaMatriz;
+    }
+    const varias = (v) => esRef(v) && !(v.f0 === v.f1 && v.c0 === v.c1);
+    // Una función de valores sueltos que recibe una matriz: se aplica a cada elemento (Excel 365). Lo que se puede aplicar por posición está en ELEVA.
+    // Sin matrices dinámicas (ctx.matriz falso) un rango se reduce a un valor, como en las fórmulas de archivos sin cm; una matriz constante se aplica igual.
+    function elevar(fn, n, ctx, patron) {
+      const args = n.args.slice(), matrices = [];
+      for (let k = 0; k < args.length; k++) {
+        const tipo = posicionDe(patron, k);
+        if (tipo === 'a' || tipo === 'z' || tipo === 'v' || !args[k]) continue;
+        const v = evaluarNodo(args[k], ctx);
+        if (tipo === 'x' && ctx.matriz && varias(v)) return E.valor;
+        args[k] = { t: 'valor', v };
+        if (esMat(v) || ((tipo === 's' || tipo === 'e') && ctx.matriz && varias(v))) matrices.push({ k, M: matrizDe(v), e: tipo === 'e' });
+      }
+      if (!matrices.length) return fn(args, ctx, API);   // como la función la espera: IF(TRUE;A1:A3) devuelve el rango entero
+      for (let k = 0; k < args.length; k++) {
+        const nodo = args[k];
+        if (!nodo || nodo.t === 'valor') continue;
+        const tipo = posicionDe(patron, k);
+        // las ramas de IF y compañía: se toma el elemento de la misma posición
+        if (tipo === 'v') {
+          const v = evaluarNodo(nodo, ctx);
+          if (esMat(v) || varias(v)) matrices.push({ k, M: matrizDe(v) });   // también sin matrices dinámicas: VLOOKUP(1;IF({1\0};A1:A9;B1:B9);2;FALSE)
+          args[k] = { t: 'valor', v };
+        } else if (nodo.t === 'fn' || nodo.t === 'bin' || nodo.t === 'un' || nodo.t === 'paren') args[k] = { t: 'valor', v: evaluarNodo(nodo, ctx) };   // no se recalcula por cada elemento
+      }
+      let nf = 1, nc = 1;
+      for (const { M } of matrices) { nf = Math.max(nf, M.length); nc = Math.max(nc, M[0].length); }
+      if (nf * nc > 1000000) return E.valor;
+      const hayE = matrices.some((m) => m.e), conRamas = patron.indexOf('v') >= 0, filas = [];
+      for (let i = 0; i < nf; i++) {
+        const fila = [];
+        for (let j = 0; j < nc; j++) {
+          let falta = false;
+          for (const { k, M } of matrices) {
+            const x = (M[M.length === 1 ? 0 : i] || [])[M[0].length === 1 ? 0 : j];
+            if (x === undefined) { falta = true; break; }
+            args[k] = { t: 'valor', v: x };
+          }
+          if (falta) { fila.push(E.na); continue; }
+          let r;
+          try { r = fn(args, ctx, API); } catch (e) { if (e instanceof Lanzado) r = e.e; else throw e; }
+          r = hayE && (esMat(r) || esRef(r)) ? E.valor : esMat(r) ? r.filas[0][0] : escalar(r, ctx);
+          fila.push(r === null && conRamas ? 0 : r);   // medido: en una matriz, la celda vacía que elige IF ya no es vacía (MIN da 0, COUNT la cuenta, LEN da 1)
+        }
+        filas.push(fila);
+      }
+      return { tipo: 'mat', filas };
+    }
+    // ¿Excel guarda esta fórmula como matriz dinámica (cm)? Sí si en algún punto se usa un rango o una matriz donde va un valor suelto, o si llama a una función que
+    // devuelve matrices. Es por lo escrito, no por lo que dé: LEN(A1:A1) y SEQUENCE(1) dan un solo valor y también se guardan así. Si no se marcara, al abrirla sería otra fórmula.
+    function necesitaMatriz(ast, h) {
+      const nombres = new Map(), vistos = new Map();
+      // cada definición, una vez por tipo: un nombre que se usa a sí mismo (LET(x;x+x;x)) o una cadena N1=N2+N2… serían exponenciales. Si una ya dio sí, no se llega a repetirla
+      const unaVez = (nodo, tipo, prof) => {
+        let t = vistos.get(nodo);
+        if (!t) vistos.set(nodo, t = new Set());
+        if (t.has(tipo)) return false;
+        t.add(tipo);
+        return visitar(nodo, tipo, prof + 1);
+      };
+      const visitar = (n, tipo, prof) => {
+        if (!n || prof > 200) return false;
+        switch (n.t) {
+          case 'ref': return n.modo !== 'celda' && tipo !== 'a' && tipo !== 'x' && tipo !== 'f';
+          case 'arr': return tipo !== 'a' && tipo !== 'z';
+          case 'paren': return visitar(n.a, tipo, prof + 1);
+          case 'un': return visitar(n.a, 's', prof + 1);
+          case 'bin':
+            if (n.op === ':' || n.op === ' ' || n.op === ',') return tipo === 'r' || tipo === 's';
+            return visitar(n.a, 's', prof + 1) || visitar(n.b, 's', prof + 1);
+          case 'nombre': {
+            const local = String(n.nombre).toUpperCase().replace(/^_XLPM\./, '');
+            if (nombres.has(local)) return unaVez(nombres.get(local), tipo, prof);
+            const def = fuente.nombre ? fuente.nombre(n.nombre, h) : null;
+            return def ? unaVez(analizar(def.replace(/^=/, '')), tipo, prof) : false;
+          }
+          case 'fn': {
+            const nombre = nombreFuncion(n.nombre);
+            if (DEVUELVEN_MATRIZ.has(nombre) || SIEMPRE_DINAMICA.has(nombre)) return true;
+            if (DENTRO_SIN_CM.has(nombre) && (tipo === 'r' || tipo === 's')) return true;
+            if ((nombre === 'INDIRECT' && (tipo === 'r' || tipo === 's' || tipo === 'z')) || (nombre === 'OFFSET' && tipo === 's')) return true;
+            if (nombre === 'LET') {
+              for (let k = 0; k + 1 < n.args.length; k += 2) {
+                if (visitar(n.args[k + 1], 'a', prof + 1)) return true;
+                if (n.args[k] && n.args[k].t === 'nombre') nombres.set(String(n.args[k].nombre).toUpperCase().replace(/^_XLPM\./, ''), n.args[k + 1]);
+              }
+              return visitar(n.args[n.args.length - 1], tipo, prof + 1);
+            }
+            const patron = ELEVA.get(nombre);
+            return n.args.some((a, k) => {
+              const p = patron === undefined ? 'a' : posicionDe(patron, k);
+              return visitar(a, p === 'v' ? tipo : p, prof + 1);   // una rama vale lo que valga la fórmula: IF(A1;B1;C1) no, IF(A1;B1:B3) sí
+            });
+          }
+          default: return false;
+        }
+      };
+      return visitar(ast, 'r', 0);
+    }
+
     const API = { num, txt, log, val, opcional, evaluarNodo, escalar, matrizDe, recorrer, recorrerValor, aNumero, aTexto, aLogico, comparar, valorCelda, esRef, esMat, esUnion, recortar,
       hoy, fuente, E, error, lanzar, NoSoportada, interseccion, serialDe, partes, formatoGeneral, textoANumero, analizar, rangoDe, indiceHoja,
-      derrame: (h, f, c) => derrames.get(clave(h, f, c)) };
+      derrame: (h, f, c) => derrames.get(clave(h, f, c)),
+      esMatrizDeUnValor: (h, f, c) => { const fx = formulas.get(clave(h, f, c)); return !!fx && !!fx.dinamica && !fx.mala && necesitaMatriz(fx.ast, h); } };
 
     function evaluar(texto, ctx) {
       const x = Object.assign({ h: 0, f: 0, c: 0 }, ctx);
       const ast = analizar(String(texto).replace(/^=/, ''), x.h, x.f, x.c);
       if (ast.t === 'mala') return E.nombre;
+      expansiones = 0;
       try { return resultadoDeCelda(evaluarNodo(ast, Object.assign({ h: 0, f: 0, c: 0, prof: 0 }, ctx)), ctx || { f: 0, c: 0 }); } catch (e) {
         if (e instanceof Lanzado) return e.e;
         if (e instanceof NoSoportada) return null;
+        if (e instanceof RangeError) return E.num;   // anidado demasiado hondo (un nombre que se usa a sí mismo), igual que en una celda
         throw e;
       }
     }
@@ -706,13 +890,14 @@
     const conSuFecha = (fn) => function () { fecha1904 = !!fuente.fecha1904; return fn.apply(this, arguments); };
     // todas las fórmulas, como si todo hubiera cambiado (después de insertar o quitar filas, los valores guardados en el archivo ya no valen)
     const recalcularTodo = () => recalcular([...formulas.values()].map((fx) => ({ h: fx.h, f: fx.f, c: fx.c })));
-    return { construir: conSuFecha(construir), ponerFormula: conSuFecha(ponerFormula), recalcular: conSuFecha(recalcular), recalcularTodo: conSuFecha(recalcularTodo), evaluar: conSuFecha(evaluar), get cantidad() { return formulas.size; }, tieneFormula: (h, f, c) => formulas.has(clave(h, f, c)),
+    return { necesitaMatriz: (h, f, c) => { const fx = formulas.get(clave(h, f, c)); return !!fx && !fx.mala && necesitaMatriz(fx.ast, h); }, construir: conSuFecha(construir), ponerFormula: conSuFecha(ponerFormula), recalcular: conSuFecha(recalcular), recalcularTodo: conSuFecha(recalcularTodo), evaluar: conSuFecha(evaluar), get cantidad() { return formulas.size; }, tieneFormula: (h, f, c) => formulas.has(clave(h, f, c)),
       derrame: (h, f, c) => derrames.get(clave(h, f, c)), get derrames() { return derrames; } };
   }
 
   // ---- funciones ----------------------------------------------------------------------------------------------------
   const nombreFuncion = (s) => String(s).toUpperCase().replace(/^_XLFN\._XLWS\.|^_XLFN\.|^_XLWS\./, '');
   const VOLATILES = new Set(['NOW', 'TODAY', 'RAND', 'RANDBETWEEN', 'RANDARRAY', 'OFFSET', 'INDIRECT', 'CELL', 'INFO']);
+  const SOLO_POSICION = new Set(['ROW', 'COLUMN', 'ROWS', 'COLUMNS']);
   const CONOCIDAS = new Set((typeof XlsFormulas !== 'undefined' ? XlsFormulas.FUNCIONES : []).map((f) => String(f.nombre).toUpperCase().replace(/^_XLFN\./, '')));
 
   const redondear = (x, d) => { const p = Math.pow(10, d); const y = Math.abs(x) * p; const r = Math.round(Number(y.toPrecision(15))); return Math.sign(x) * r / p; };
@@ -859,11 +1044,13 @@
   }
   function buscarAprox(lista, x, A, descendente) {   // la última posición <= x (lista ascendente), como MATCH tipo 1
     let lo = 0, hi = lista.length - 1, mejor = -1;
+    while (hi >= 0 && lista[hi] === null) hi--;   // las vacías del final no cuentan: MATCH(9E+307;A1:A99) da la última con datos
     while (lo <= hi) {
       const m = (lo + hi) >> 1, v = lista[m];
       const c = v === null ? -1 : A.comparar(v, x);
       if (descendente ? c >= 0 : c <= 0) { mejor = m; lo = m + 1; } else hi = m - 1;
     }
+    while (mejor >= 0 && lista[mejor] === null) mejor--;
     return mejor;
   }
   function coincide(lista, x, tipo, A) {
@@ -931,7 +1118,16 @@
     MAX: (a, c, A) => { const l = numeros(a, c, A); return l.length ? Math.max(...l) : 0; },
     COUNT: (a, c, A) => { let n = 0; A.recorrer(a, c, (v, r) => { if (typeof v === 'number') n++; else if (!r && (typeof v === 'boolean' || (typeof v === 'string' && A.textoANumero(v) !== null))) n++; }); return n; },
     COUNTA: (a, c, A) => { let n = 0; A.recorrer(a, c, (v) => { if (v !== null) n++; }); return n; },
-    COUNTBLANK: (a, c, A) => { let n = 0; A.recorrer(a, c, (v) => { if (v === null || v === '') n++; }); return n; },
+    COUNTBLANK: (a, c, A) => {
+      let n = 0;
+      for (const x of a) {
+        const v = x === null ? null : A.evaluarNodo(x, c);
+        // lo que pasa de lo usado también está vacío (recorrerValor no llega ahí)
+        if (A.esRef(v)) { const { f1, c1 } = A.recortar(v); n += (v.f1 - v.f0 + 1) * (v.c1 - v.c0 + 1) - Math.max(0, f1 - v.f0 + 1) * Math.max(0, c1 - v.c0 + 1); }
+        A.recorrerValor(v, (y) => { if (y === null || y === '') n++; });
+      }
+      return n;
+    },
     ABS: (a, c, A) => Math.abs(A.num(a[0], c)),
     INT: (a, c, A) => Math.floor(A.num(a[0], c)),
     TRUNC: (a, c, A) => truncar(A.num(a[0], c), A.opcional(a[1], c, 0, A.num)),
@@ -1054,8 +1250,8 @@
     ISREF: (a, c, A) => A.esRef(A.evaluarNodo(a[0], c)),
     ISFORMULA: (a, c, A) => { const r = A.evaluarNodo(a[0], c); if (!A.esRef(r)) return A.E.valor; return !!(A.fuente.esFormula && A.fuente.esFormula(r.h, r.f0, r.c0)); },
     NA: (a, c, A) => A.E.na,
-    N: (a, c, A) => { const v = A.escalar(A.evaluarNodo(a[0], c), c); return typeof v === 'number' ? v : typeof v === 'boolean' ? (v ? 1 : 0) : esError(v) ? v : 0; },
-    T: (a, c, A) => { const v = A.escalar(A.evaluarNodo(a[0], c), c); return typeof v === 'string' ? v : esError(v) ? v : ''; },
+    N: (a, c, A) => { let v = A.evaluarNodo(a[0], c); v = A.esRef(v) ? A.valorCelda(v.h, v.f0, v.c0) : A.escalar(v, c); return typeof v === 'number' ? v : typeof v === 'boolean' ? (v ? 1 : 0) : esError(v) ? v : 0; },
+    T: (a, c, A) => { let v = A.evaluarNodo(a[0], c); v = A.esRef(v) ? A.valorCelda(v.h, v.f0, v.c0) : A.escalar(v, c); return typeof v === 'string' ? v : esError(v) ? v : ''; },
     TYPE: (a, c, A) => { const v = A.evaluarNodo(a[0], c); if (A.esMat(v) || (A.esRef(v) && (v.f0 !== v.f1 || v.c0 !== v.c1))) return 64; const e = A.escalar(v, c); return typeof e === 'number' || e === null ? 1 : typeof e === 'string' ? 2 : typeof e === 'boolean' ? 4 : 16; },
     'ERROR.TYPE': (a, c, A) => { const v = A.escalar(A.evaluarNodo(a[0], c), c); const k = ['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA'].indexOf(esError(v) ? v.codigo : ''); return k < 0 ? A.E.na : k + 1; },
     // condicionales
@@ -1125,6 +1321,7 @@
     },
     INDEX: (a, c, A) => {
       const v = A.evaluarNodo(a[0], c);
+      if (esError(v)) return v;
       const r = A.opcional(a[1], c, 0, A.num), k = A.opcional(a[2], c, 0, A.num);
       const fila = Math.trunc(r), col = Math.trunc(k);
       if (A.esRef(v)) {
@@ -1141,8 +1338,23 @@
       return M[ff - 1] && M[ff - 1][cc - 1] !== undefined ? M[ff - 1][cc - 1] : A.E.ref;
     },
     CHOOSE: (a, c, A) => { const k = Math.trunc(A.num(a[0], c)); if (k < 1 || k >= a.length) return A.E.valor; return A.evaluarNodo(a[k], c); },
-    ROW: (a, c, A) => { if (!a.length || a[0] === null) return c.f + 1; const v = A.evaluarNodo(a[0], c); return A.esRef(v) ? v.f0 + 1 : A.E.valor; },
-    COLUMN: (a, c, A) => { if (!a.length || a[0] === null) return c.c + 1; const v = A.evaluarNodo(a[0], c); return A.esRef(v) ? v.c0 + 1 : A.E.valor; },
+    ROW: (a, c, A) => {
+      if (!a.length || a[0] === null) return c.f + 1;
+      const v = A.evaluarNodo(a[0], c);
+      if (!A.esRef(v)) return A.E.valor;
+      if (!c.matriz || v.f0 === v.f1) return v.f0 + 1;
+      const fin = v.f1 - v.f0 < 1000000 ? v.f1 : Math.max(v.f0, A.recortar(v).f1);   // no lee celdas: la forma escrita, salvo la columna entera
+      const filas = []; for (let f = v.f0; f <= fin; f++) filas.push([f + 1]);
+      return { tipo: 'mat', filas };
+    },
+    COLUMN: (a, c, A) => {
+      if (!a.length || a[0] === null) return c.c + 1;
+      const v = A.evaluarNodo(a[0], c);
+      if (!A.esRef(v)) return A.E.valor;
+      if (!c.matriz || v.c0 === v.c1) return v.c0 + 1;
+      const fila = []; for (let k = v.c0; k <= v.c1; k++) fila.push(k + 1);
+      return { tipo: 'mat', filas: [fila] };
+    },
     ROWS: (a, c, A) => { const v = A.evaluarNodo(a[0], c); if (A.esRef(v)) return v.f1 - v.f0 + 1; return A.matrizDe(v).length; },
     COLUMNS: (a, c, A) => { const v = A.evaluarNodo(a[0], c); if (A.esRef(v)) return v.c1 - v.c0 + 1; return A.matrizDe(v)[0].length; },
     OFFSET: (a, c, A) => {
@@ -1170,7 +1382,12 @@
     // TEXTBEFORE/TEXTAFTER(texto; delimitador; [instancia]; [mayúsculas: 0 sí, 1 no]; [final cuenta como delimitador]; [si no se encuentra])
     TEXTBEFORE: (a, c, A) => textoAntesDespues(a, c, A, true),
     TEXTAFTER: (a, c, A) => textoAntesDespues(a, c, A, false),
-    TEXTJOIN: (a, c, A) => { const sep = A.txt(a[0], c), saltar = A.log(a[1], c); const partes = []; A.recorrer(a.slice(2), c, (v) => { const t = A.aTexto(v); if (!(saltar && t === '')) partes.push(t); }); return partes.join(sep); },
+    TEXTJOIN: (a, c, A) => {
+      const seps = []; A.recorrerValor(A.evaluarNodo(a[0], c), (v) => seps.push(A.aTexto(v)));
+      const saltar = A.log(a[1], c); const partes = [];
+      A.recorrer(a.slice(2), c, (v) => { const t = A.aTexto(v); if (!(saltar && t === '')) partes.push(t); });
+      return partes.reduce((s, t, k) => (k ? s + seps[(k - 1) % seps.length] + t : t), '');
+    },
     REPT: (a, c, A) => { const n = Math.trunc(A.num(a[1], c)); if (n < 0) return A.E.valor; const t = A.txt(a[0], c); if (t.length * n > 32767) return A.E.valor; return t.repeat(n); },
     SUBSTITUTE: (a, c, A) => {
       const t = A.txt(a[0], c), viejo = A.txt(a[1], c), nuevo = A.txt(a[2], c);
@@ -1204,7 +1421,7 @@
     },
     NUMBERVALUE: (a, c, A) => { const t = A.txt(a[0], c), dec = A.opcional(a[1], c, '.', A.txt), mil = A.opcional(a[2], c, ',', A.txt); const n = A.textoANumero(t.split(mil).join('').split(dec).join('.')); return n === null ? A.E.valor : n; },
     TEXT: (a, c, A) => { const v = A.val(a[0], c), f = A.txt(a[1], c); const n = typeof v === 'number' ? v : typeof v === 'string' ? A.textoANumero(v) : null; return textoFormato(n === null ? v : n, f, A); },
-    FIXED: (a, c, A) => { const d = Math.trunc(A.opcional(a[1], c, 2, A.num)), sin = A.opcional(a[2], c, false, A.log); const x = redondear(A.num(a[0], c), d); return x.toLocaleString('en-US', { minimumFractionDigits: Math.max(0, d), maximumFractionDigits: Math.max(0, d), useGrouping: !sin }); },
+    FIXED: (a, c, A) => { const d = Math.trunc(A.opcional(a[1], c, 2, A.num)), sin = A.opcional(a[2], c, false, A.log); const x = redondear(A.num(a[0], c), d), t = x.toLocaleString('en-US', { minimumFractionDigits: Math.max(0, d), maximumFractionDigits: Math.max(0, d), useGrouping: !sin }); return A.fuente.idioma === 'es' ? t.replace(/[.,]/g, (m) => (m === '.' ? ',' : ' ')) : t; },
     CHAR: (a, c, A) => { const n = Math.trunc(A.num(a[0], c)); if (n < 1 || n > 255) return A.E.valor; return String.fromCharCode(n); },
     UNICHAR: (a, c, A) => { const n = Math.trunc(A.num(a[0], c)); if (n < 1 || n > 0x10FFFF) return A.E.valor; return String.fromCodePoint(n); },
     CODE: (a, c, A) => { const t = A.txt(a[0], c); return t ? t.charCodeAt(0) : A.E.valor; },
@@ -1340,6 +1557,7 @@
       const r = A.evaluarNodo(a[0], c);
       if (!A.esRef(r)) return A.E.ref;
       const d = A.derrame(r.h, r.f0, r.c0);
+      if (!d && A.esMatrizDeUnValor(r.h, r.f0, r.c0)) return r;   // medido: A1# de SEQUENCE(1) es A1
       if (!d || !d.ok) return A.E.ref;
       return { tipo: 'ref', h: d.h, f0: d.f0, c0: d.c0, f1: d.f1, c1: d.c1 };
     },
