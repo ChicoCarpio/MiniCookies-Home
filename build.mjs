@@ -452,4 +452,12 @@ const rutasVendor = revisarReferenciasVendor(SALIDA, RAIZ);
 // Las páginas con el motor de PowerPoint en <script> lo traen completo (motor-pptx.mjs).
 if (!ES_SEGURO) revisarMotorPptx(RAIZ);
 if (!ES_SEGURO) revisarDependenciasScripts(RAIZ);
+// Todo módulo propio empieza con el aviso de copyright. Copiar un archivo desde una investigación lo reemplazó sin que nada avisara (2026-11-06).
+(function revisarAvisos(dir) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const ruta = join(dir, e.name);
+    if (e.isDirectory()) revisarAvisos(ruta);
+    else if (e.name.endsWith('.js') && !readFileSync(ruta, 'utf8').replace(/^﻿/, '').startsWith(AVISO)) throw new Error('Falta el aviso de copyright de package.json al principio de ' + relative(RAIZ, ruta));
+  }
+})(join(RAIZ, 'assets', 'js'));
 console.log(`Build ${DESTINO} listo en ${CARPETA_SALIDA}/ — ${conteo.total} herramientas en el catálogo, ${paginas.length} páginas + ${paginasEn.length} en inglés bajo /en/, sitemap.xml y robots.txt generados; servidores externos declarados: ${[...terceros.keys()].sort().join(', ') || 'ninguno'}; ${rutasVendor} rutas de vendor/ comprobadas`);
