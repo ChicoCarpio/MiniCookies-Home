@@ -880,12 +880,25 @@
   // TEXT lee el código de formato con la configuración regional del equipo, como Excel: el separador decimal regional es el decimal, el de
   // miles regional agrupa y un '.' o ',' que no es ninguno de los dos queda como carácter literal (en es-CR, que agrupa con espacio, el
   // '.' de "0.00" es literal: TEXT(4;"0.00") da "0.04"). Se traduce a la forma canónica (punto decimal, coma de miles) para formatear.
+  // Si se agrupa con espacio, un espacio sin escapar después de un dígito es esa coma: "# ###" agrupa y "0 " divide entre mil. Con una fracción en cualquier
+  // sección da #VALUE! (salvo justo antes de la barra, donde no cuenta). Medido en Excel: pruebas/unidad/hojas-excel-medido.prueba.mjs. Devuelve null si Excel lo rechaza.
   const SEPARADORES = { es: { decimal: ',', miles: '\u00a0' }, en: { decimal: '.', miles: ',' } };
   function codigoCanonico(codigo, sep) {
-    if (sep.decimal === '.' && sep.miles === ',') return codigo;
-    let r = '';
+    if (sep.decimal === '.' && sep.miles === ',') return { canon: codigo };
+    const agrupaConEspacio = sep.miles === '\u00a0' || sep.miles === ' ';
+    const esFraccion = (s) => { const v = s.replace(/"[^"]*"|\\.|_.|\*.|\[[^\]]*\]/g, ''); return v.includes('/') && !XlsxFormato.esFecha(s); };
+    let r = '', inicio = 0, hayDigito = false, espacioEnSeccion = false, espacio = false;
+    const cerrarSeccion = () => { const mala = espacioEnSeccion && esFraccion(r.slice(inicio)); inicio = r.length; hayDigito = false; espacioEnSeccion = false; return mala; };
     for (let i = 0; i < codigo.length; i++) {
       const ch = codigo[i];
+      if (ch === ';' && cerrarSeccion()) return null;
+      if (ch === '0' || ch === '#' || ch === '?') hayDigito = true;
+      if (ch === ' ' && agrupaConEspacio && hayDigito) {
+        if (codigo[i + 1] === '/') continue;
+        r += ','; espacio = true; espacioEnSeccion = true;
+        continue;
+      }
+      if (ch === ';') { r += ch; inicio = r.length; continue; }
       if (ch === '"') { const k = codigo.indexOf('"', i + 1); const fin = k < 0 ? codigo.length : k + 1; r += codigo.slice(i, fin); i = fin - 1; }
       else if (ch === '\\' || ch === '_' || ch === '*') { r += codigo.slice(i, i + 2); i++; }
       else if (ch === '[') { const k = codigo.indexOf(']', i); const fin = k < 0 ? codigo.length : k + 1; r += codigo.slice(i, fin); i = fin - 1; }
@@ -894,15 +907,18 @@
       else if (ch === '.' || ch === ',') r += '"' + ch + '"';
       else r += ch;
     }
-    return r;
+    if (cerrarSeccion()) return null;
+    return { canon: r, espacio };
   }
   const textoFormato = (v, codigo, A) => {
     if (typeof XlsxFormato === 'undefined') throw new A.NoSoportada('TEXT');
     const idioma = A.fuente.idioma === 'en' ? 'en' : 'es';
     const sep = A.fuente.separadores || SEPARADORES[idioma];
-    const canon = codigoCanonico(codigo, sep);
+    const traducido = codigoCanonico(codigo, sep);
+    if (!traducido) return A.E.valor;
+    const canon = traducido.canon;
     if (typeof v === 'number' && v < 0 && XlsxFormato.esFecha(canon)) return A.E.valor;   // Excel no tiene fechas negativas: TEXT da #¡VALOR!
-    return XlsxFormato.formatear(v, canon, { idioma, decimal: sep.decimal, miles: sep.miles, fecha1904 }).texto;
+    return XlsxFormato.formatear(v, canon, { idioma, decimal: sep.decimal, miles: traducido.espacio ? ' ' : sep.miles, fecha1904 }).texto;
   };
 
   const FUNCIONES = {
