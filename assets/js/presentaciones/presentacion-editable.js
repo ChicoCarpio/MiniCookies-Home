@@ -166,7 +166,7 @@
         }
         const viejos = X().hijos(cuerpo, 'p');
         const textosViejos = viejos.map((p) => textoParrafo(xml, p, '\u2028'));
-        const corridas = (rPr, l) => l.split('\u2028').map((s) => (s ? `<${a}:r>${rPr}<${a}:t>${esc(s)}</${a}:t></${a}:r>` : '')).join(`<${a}:br/>`);
+        const corridas = (rPr, l) => l.split('\u2028').map((s) => (s ? `<${a}:r>${rPr}<${a}:t>${esc(s)}</${a}:t></${a}:r>` : '')).join(rPr ? `<${a}:br>${rPr}</${a}:br>` : `<${a}:br/>`);   // como PowerPoint: el salto lleva el formato del texto que se escribe (cuenta en la altura de su línea)
         // los párrafos iguales del principio y del final quedan tal cual, con todo su formato (corridas, campos, saltos): así agregar o quitar
         // un párrafo no rehace los demás. Un párrafo que cambió se escribe de nuevo con el formato de su primera corrida
         // Como PowerPoint: al editar un párrafo solo cambia lo que cambió. Se comparan el texto viejo y el nuevo (lo igual del principio y del final),
@@ -503,7 +503,10 @@
     }
     // en <p14:sectionLst>, el id nuevo justo después del de referencia (las secciones de PowerPoint 2010 listan los ids de sus diapositivas)
     function agregarASeccion(pres, idRef, idNuevo) {
-      return pres.replace(new RegExp('(<([\\w.-]+:)sldId id="' + idRef + '"\\s*/>)(?![\\s\\S]*<([\\w.-]+:)?sldIdLst>)', 'g'), (m, et, pfx) => (/^<p\d*:|^<p14:/.test(et) && pfx !== 'p:' ? et + `<${pfx}sldId id="${idNuevo}"/>` : m));
+      const lista = /<([\w.-]+:)sectionLst\b[^>]*>[\s\S]*?<\/\1sectionLst>/.exec(pres);
+      if (!lista) return pres;
+      const pf = lista[1], bloque = lista[0].replace(new RegExp('<' + pf + 'sldId id="' + idRef + '"\\s*/>'), (m) => m + `<${pf}sldId id="${idNuevo}"/>`);
+      return pres.slice(0, lista.index) + bloque + pres.slice(lista.index + lista[0].length);
     }
     async function opDuplicarDiapositiva(i) {
       const ruta = await rutaDe(i);

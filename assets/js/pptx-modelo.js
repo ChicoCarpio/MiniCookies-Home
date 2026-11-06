@@ -892,10 +892,11 @@ const PptxModelo = (() => {
       if (h.localName === 'r' || h.localName === 'fld') {
         let t = (hijo(h, 't') || { textContent: '' }).textContent;
         if (h.localName === 'fld' && (h.getAttribute('type') || '') === 'slidenum') t = String(ctx.numero);
-        runs.push({ rPr: hijo(h, 'rPr'), texto: t });
+        runs.push({ rPr: hijo(h, 'rPr'), texto: t, campo: h.localName === 'fld' });
       } else if (h.localName === 'br') runs.push({ rPr: hijo(h, 'rPr'), texto: '\n', salto: true });
     }
-    resultado.trozos = runs.map((r) => ({ ...letra(r.rPr, listas, fontRef, nivel, ctx), texto: r.texto, salto: !!r.salto }));
+    // campo: el trozo es un <a:fld> (número de diapositiva, fecha); EdicionTexto lo necesita para dar a lo escrito el formato que le da opTexto
+    resultado.trozos = runs.map((r) => ({ ...letra(r.rPr, listas, fontRef, nivel, ctx), texto: r.texto, salto: !!r.salto, ...(r.campo ? { campo: true } : {}) }));
     resultado.fin = letra(hijo(p, 'endParaRPr'), listas, fontRef, nivel, ctx);
     if (vineta && vineta.localName !== 'buNone') {
       const base = resultado.trozos.find((t) => !t.salto) || resultado.fin;
