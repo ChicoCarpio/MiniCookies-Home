@@ -311,10 +311,10 @@
     // ---- referencias ---------------------------------------------------------------------------------------------------
     const citarHoja = (n) => (/^[A-Za-z_][A-Za-z0-9_.]*$/.test(n) && !/^[A-Za-z]{1,3}\d+$/.test(n) && !/^R\d*C\d*$/i.test(n) ? n : "'" + n.replace(/'/g, "''") + "'");
     const letras = (c) => { let s = ''; c++; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = (c - 1 - m) / 26; } return s; };
-    // R1C1 (o F1C1 en español) → A1, relativo a la celda de la fórmula
-    function r1c1aA1(t, ctx) {
+    // R1C1 (F1C1 en español, como Excel: ahí R2C1 da #REF!) → A1, relativo a la celda de la fórmula
+    function r1c1aA1(t, ctx, letraFila) {
       const parte = (s) => {
-        const m = /^[RF](\[-?\d+\]|\d+)?C(\[-?\d+\]|\d+)?$/i.exec(s);
+        const m = new RegExp('^' + letraFila + '(\\[-?\\d+\\]|\\d+)?C(\\[-?\\d+\\]|\\d+)?$', 'i').exec(s);
         if (!m) return null;
         const eje = (x, base) => (x === undefined ? base : x[0] === '[' ? base + parseInt(x.slice(1), 10) : parseInt(x, 10) - 1);
         const f = eje(m[1], ctx.f), c = eje(m[2], ctx.c);
@@ -642,8 +642,8 @@
         const ancho = Math.max(...filas.map((f) => f.length));
         return mat(filas.map((f) => f.concat(new Array(ancho - f.length).fill(relleno))));
       },
-      // así guarda Excel los textos de más de 255 caracteres: _xlfn._LONGTEXT(texto, …) vale su primer argumento
-      _LONGTEXT: (a, c, A) => A.txt(a[0], c),
+      // así guarda Excel los textos de más de 255 caracteres: los parte en trozos, _xlfn._LONGTEXT(trozo, trozo, …)
+      _LONGTEXT: (a, c, A) => a.map((x) => A.txt(x, c)).join(''),
       VALUETOTEXT: (a, c, A) => { const v = A.escalar(A.evaluarNodo(a[0], c), c); const f = Math.trunc(opc(a[1], c, A, 0)); if (f !== 0 && f !== 1) return A.E.valor; return textoDeValor(v, f === 1, A); },
       FORMULATEXT: (a, c, A) => {
         const r = A.evaluarNodo(a[0], c);
@@ -700,7 +700,7 @@
       INDIRECT: (a, c, A) => {
         let t = A.txt(a[0], c).trim();
         const a1 = A.opcional(a[1], c, true, A.log);
-        if (!a1) { t = r1c1aA1(t, c); if (!t) return A.E.ref; }
+        if (!a1) { t = r1c1aA1(t, c, A.fuente.idioma === 'es' ? 'F' : 'R'); if (!t) return A.E.ref; }
         if (!t) return A.E.ref;
         const ast = A.analizar(t, c.h, c.f, c.c);
         if (!ast || !(ast.t === 'ref' || ast.t === 'nombre' || (ast.t === 'bin' && ast.op === ':'))) return A.E.ref;
