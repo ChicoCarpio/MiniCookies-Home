@@ -522,7 +522,7 @@ const PptxModelo = (() => {
     const f = { tipo: 'forma', ...props };
     // Una forma rellena de imagen en un marcador de imagen vacío, etc.: igual.
     const txBody = hijo(el, 'txBody');
-    if (txBody) f.texto = texto(txBody, el, herencia, ctx);
+    if (txBody) f.texto = texto(txBody, el, herencia, ctx, (vacio) => { f.textoVacio = vacio; });   // textoVacio: el formato que tendrá lo que se escriba (el editor; nadie lo dibuja)
     // Texto en un rectángulo propio (SmartArt: dsp:txXfrm).
     const txXfrm = leerXfrm(hijo(el, 'txXfrm'));
     if (txXfrm && f.texto) f.cajaTexto = txXfrm;
@@ -851,13 +851,14 @@ const PptxModelo = (() => {
     };
   }
 
-  function texto(txBody, el, herencia, ctx) {
+  function texto(txBody, el, herencia, ctx, siVacio) {
     const listas = listasDeTexto(txBody, el, herencia, ctx);
     const fontRef = ruta(el, 'style', 'fontRef');
     const cuerpoTexto = cuerpo(txBody, herencia);
     const parrafos = hijos(txBody, 'p').map((p) => parrafo(p, listas, fontRef, ctx));
     if (!parrafos.some((p) => p.trozos.some((t) => t.texto))) {
       // Sin texto: nada que dibujar (un marcador vacío no muestra su aviso).
+      if (siVacio && parrafos.length) siVacio({ cuerpo: cuerpoTexto, parrafos });
       return null;
     }
     return { cuerpo: cuerpoTexto, parrafos };

@@ -260,7 +260,8 @@ const MotorTexto = (() => {
     }
 
     // texto: { cuerpo, parrafos } de pptx-modelo.js; ancho/alto: área de texto sin márgenes.
-    function maquetar(texto, ancho, alto, pxPorEmu) {
+    // opciones.vinetaEn: el párrafo con el cursor; si está vacío, igual lleva su viñeta (lo que hace PowerPoint mientras se edita; lo guardado no la dibuja).
+    function maquetar(texto, ancho, alto, pxPorEmu, opciones = {}) {
       const { cuerpo, parrafos } = texto;
       const ptPx = EMU_POR_PT * pxPorEmu;
       const auto = cuerpo.autoajuste.tipo === 'reducir' ? cuerpo.autoajuste : { escala: 1, reduccion: 0 };
@@ -279,7 +280,7 @@ const MotorTexto = (() => {
         const vacio = !p.trozos.some((t) => !t.salto && t.texto);
         contadores.length = Math.min(contadores.length, p.nivel + 1);
         let textoVineta = null;
-        if (p.vineta && !vacio) {
+        if (p.vineta && (!vacio || ip === opciones.vinetaEn)) {
           if (p.vineta.tipo === 'numero') {
             const c = contadores[p.nivel];
             const n = c && c.esquema === p.vineta.esquema ? c.n + 1 : p.vineta.inicio;

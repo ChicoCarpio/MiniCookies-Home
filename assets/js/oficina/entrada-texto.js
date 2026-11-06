@@ -90,7 +90,7 @@ const EntradaTexto = (() => {
 
     function pintar() {
       if (!vivo) return;
-      m = motor.maquetar({ cuerpo, parrafos: vivos }, areaTexto.w, areaTexto.h, s);
+      m = motor.maquetar({ cuerpo, parrafos: vivos }, areaTexto.w, areaTexto.h, s, { vinetaEn: aParrafo(area.selectionStart).ip });
       const alto = Math.max(h, areaTexto.y + m.alto + mg.b * s);
       altoLienzo = alto;
       y0 = areaTexto.y;
@@ -285,6 +285,8 @@ const EntradaTexto = (() => {
       const o = centroEnPantalla(), q = girar(areaTexto.x + pt.x, y0 + pt.arriba + pt.alto / 2, angulo);
       return { x: o.x + q.x, y: o.y + q.y, linea: pt.linea };
     }
+    // Una diapositiva sin texto no cargó todavía la fuente de la forma; no se la espera para abrir (en el celular, el foco tiene que darse dentro del toque para que suba el teclado): al llegar se corta de nuevo
+    PptxTexto.cargarFuentes(vivos.flatMap((p) => [...p.trozos, p.fin]).filter(Boolean)).then(() => { if (vivo) { motor.invalidar(); repintar(); } });
     return { pintar: repintar, destruir, motor, modelo: () => vivos, maquetado: () => m, punto, lienzo, composicion: () => composicion && { ...composicion } };
   }
 
