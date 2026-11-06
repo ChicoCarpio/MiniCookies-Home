@@ -330,6 +330,165 @@
 
     // ---- matrices dinámicas -------------------------------------------------------------------------------------------
     const matrizArg = (nodo, c, A) => A.matrizDe(A.evaluarNodo(nodo, Object.assign({}, c, { matriz: true })));
+    // ---- regresión (ESTIMACION.LINEAL y compañía), medida en Excel: pruebas/oraculo/regresion-casos.mjs -----------------------------------------
+    // y en columna: cada columna de x es una variable; y en fila: cada fila; y de dos dimensiones: se aplana por filas y hay una sola variable.
+    // Sin x, 1, 2, 3… Un tamaño que no coincide da #REF!; una celda vacía, un texto o un error, #VALUE!.
+    function datosRegresion(a, c, A, logaritmo) {
+      const Y0 = matrizArg(a[0], c, A), fY = Y0.length, cY = Y0[0].length, n = fY * cY;
+      const plana = fY > 1 && cY > 1, enFilas = fY === 1 && cY > 1;
+      let xs, k = 1;
+      if (a[1] === undefined || a[1] === null) xs = Array.from({ length: n }, (_, i) => [i + 1]);
+      else {
+        const X0 = matrizArg(a[1], c, A);
+        if (plana) {
+          if (X0.length !== fY || X0[0].length !== cY) return A.E.ref;
+          xs = X0.flat().map((x) => [x]);
+        } else if (enFilas) {
+          if (X0[0].length !== n) return A.E.ref;
+          k = X0.length;
+          xs = Array.from({ length: n }, (_, i) => X0.map((f) => f[i]));
+        } else {
+          if (X0.length !== n) return A.E.ref;
+          k = X0[0].length;
+          xs = X0;
+        }
+      }
+      const y = Y0.flat();
+      if (!y.every(esNum) || !xs.every((f) => f.every(esNum))) return A.E.valor;
+      if (logaritmo && y.some((v) => v <= 0)) return A.E.num;
+      return { y: logaritmo ? y.map(Math.log) : y, xs, k, n, enFilas, plana, forma: [fY, cY] };
+    }
+    // Mínimos cuadrados por QR con pivoteo: cada paso toma la columna de mayor norma que queda, y la que ya no aporta (colineal) vale 0, como en Excel.
+    function ajustar(y, xs, k, conConstante) {
+      const n = y.length;
+      const media = (v) => v.reduce((s, x) => s + x, 0) / n;
+      const my = conConstante ? media(y) : 0;
+      const mx = Array.from({ length: k }, (_, j) => (conConstante ? media(xs.map((f) => f[j])) : 0));
+      const Y = conConstante && y.every((v) => v === y[0]) ? y.map(() => 0) : y.map((v) => v - my);   // y constante: el redondeo de la media no cuenta como variación
+      const cols = mx.map((m, j) => xs.map((f) => f[j] - m));
+      const norma = (v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+      const puntoCon = (u, v) => { let s = 0; for (let i = 0; i < n; i++) s += u[i] * v[i]; return s; };
+      const original = cols.map(norma);
+      const quedan = cols.map((_, j) => j), orden = [], Q = [], Rq = [];
+      const maxRango = n - (conConstante ? 1 : 0);
+      while (quedan.length && orden.length < maxRango) {
+        let mejor = -1, valor = 0;
+        for (const j of quedan) { const v = norma(cols[j]); if (v > valor && v > 1e-11 * original[j]) { valor = v; mejor = j; } }
+        if (mejor < 0) break;
+        quedan.splice(quedan.indexOf(mejor), 1);
+        const q = cols[mejor].map((x) => x / valor), fila = new Map([[mejor, valor]]);
+        for (const j of quedan) { const r = puntoCon(q, cols[j]); fila.set(j, r); for (let i = 0; i < n; i++) cols[j][i] -= r * q[i]; }
+        Q.push(q); Rq.push(fila); orden.push(mejor);
+      }
+      const r = orden.length, qy = Q.map((q) => puntoCon(q, Y));
+      // de R a los coeficientes, y su inversa para los errores
+      const coefOrden = new Array(r).fill(0), Rinv = Array.from({ length: r }, () => new Array(r).fill(0));
+      for (let s = r - 1; s >= 0; s--) {
+        let v = qy[s];
+        for (let t = s + 1; t < r; t++) v -= Rq[s].get(orden[t]) * coefOrden[t];
+        coefOrden[s] = v / Rq[s].get(orden[s]);
+        Rinv[s][s] = 1 / Rq[s].get(orden[s]);
+        for (let t = s + 1; t < r; t++) { let w = 0; for (let u = s + 1; u <= t; u++) w += Rq[s].get(orden[u]) * Rinv[u][t]; Rinv[s][t] = -w / Rq[s].get(orden[s]); }
+      }
+      const coef = new Array(k).fill(0), se = new Array(k).fill(0);
+      orden.forEach((j, s) => { coef[j] = coefOrden[s]; });
+      const sst = Y.reduce((s, v) => s + v * v, 0), ssreg = sst === 0 ? 0 : qy.reduce((s, v) => s + v * v, 0);
+      let ssres = 0;
+      if (sst !== 0) for (let i = 0; i < n; i++) { let e = Y[i]; for (let s = 0; s < r; s++) e -= qy[s] * Q[s][i]; ssres += e * e; }
+      const df = n - r - (conConstante ? 1 : 0), s2 = df > 0 ? ssres / df : 0;
+      const cov = (s, t) => { let w = 0; for (let u = Math.max(s, t); u < r; u++) w += Rinv[s][u] * Rinv[t][u]; return w; };
+      orden.forEach((j, s) => { se[j] = Math.sqrt(s2 * cov(s, s)); });
+      let varB = s2 / n;
+      for (let s = 0; s < r; s++) for (let t = 0; t < r; t++) varB += s2 * mx[orden[s]] * mx[orden[t]] * cov(s, t);
+      const b = conConstante ? my - coef.reduce((s, m, j) => s + m * mx[j], 0) : 0;
+      return { coef, b, se, seB: Math.sqrt(varB), r2: ssreg + ssres === 0 ? 1 : ssreg / (ssreg + ssres), sey: Math.sqrt(s2), df, ssreg, ssres, F: df > 0 && ssres > 0 && r > 0 ? (ssreg / r) / (ssres / df) : null };
+    }
+    function estimacion(a, c, A, logaritmo) {
+      const conConstante = A.opcional(a[2], c, true, A.log), conEstadisticas = A.opcional(a[3], c, false, A.log);
+      const d = datosRegresion(a, c, A, logaritmo);
+      if (!d.y) return d;
+      const f = ajustar(d.y, d.xs, d.k, conConstante);
+      const salida = (v) => (logaritmo ? Math.exp(v) : v);
+      const filas = [[...f.coef.map(salida).reverse(), salida(f.b)]];
+      if (conEstadisticas) {
+        const relleno = new Array(d.k - 1).fill(A.E.na);
+        filas.push([...[...f.se].reverse(), conConstante ? f.seB : A.E.na]);
+        filas.push([f.r2, f.sey, ...relleno], [f.F === null ? A.E.num : f.F, f.df, ...relleno], [f.ssreg, f.ssres, ...relleno]);
+      }
+      return mat(filas);
+    }
+    // TENDENCIA y CRECIMIENTO: sin x nuevas, las de x con la forma de y. Con una variable, cada celda de x nuevas da un valor; con varias, cada fila (o cada columna, si y está en fila).
+    function prediccion(a, c, A, logaritmo) {
+      const conConstante = A.opcional(a[3], c, true, A.log);
+      const d = datosRegresion(a, c, A, logaritmo);
+      if (!d.y) return d;
+      const f = ajustar(d.y, d.xs, d.k, conConstante);
+      const valor = (x) => { const v = x.reduce((s, xi, j) => s + f.coef[j] * xi, f.b); return logaritmo ? Math.exp(v) : v; };
+      if (a[2] === undefined || a[2] === null) {
+        const v = d.xs.map(valor);
+        if (d.enFilas) return mat([v]);
+        return mat(d.plana ? Array.from({ length: d.forma[0] }, (_, i) => v.slice(i * d.forma[1], (i + 1) * d.forma[1])) : v.map((x) => [x]));
+      }
+      const N = matrizArg(a[2], c, A);
+      if (!N.every((l) => l.every(esNum))) return A.E.valor;
+      if (d.k === 1) return mat(N.map((l) => l.map((x) => valor([x]))));
+      if (d.enFilas) { if (N.length !== d.k) return A.E.ref; return mat([N[0].map((_, j) => valor(N.map((l) => l[j])))]); }
+      if (N[0].length !== d.k) return A.E.ref;
+      return mat(N.map((l) => [valor(l)]));
+    }
+
+    // ---- CONVERTIR: los factores son los que da Excel, respecto de la primera unidad de referencia de cada grupo -----------------------------------
+    const UNIDADES_CONVERT = [
+      { g: 1, sg: 14593.902937206363, lbm: 453.59237, u: 1.660538782e-24, ozm: 28.349523125, grain: 0.06479891, cwt: 45359.237, shweight: 45359.237, uk_cwt: 50802.34544, lcwt: 50802.34544, hweight: 50802.34544, stone: 6350.29318, ton: 907184.74, uk_ton: 1016046.9088, LTON: 1016046.9088, brton: 1016046.9088 },
+      { m: 1, mi: 1609.344, Nmi: 1852, in: 0.0254, ft: 0.3048, yd: 0.9144, ang: 1e-10, ell: 1.143, ly: 9460730472580800, parsec: 30856775812815532, pc: 30856775812815532, Picapt: 0.0003527777777777778, Pica: 0.0003527777777777778, pica: 0.004233333333333334, survey_mi: 1609.3472186944373 },
+      { yr: 31557600, day: 86400, d: 86400, hr: 3600, mn: 60, min: 60, sec: 1, s: 1 },
+      { Pa: 1, p: 1, atm: 101325, at: 101325, mmHg: 133.322, psi: 6894.757293168362, Torr: 133.32236842105263 },
+      { N: 1, dyn: 0.00001, dy: 0.00001, lbf: 4.4482216152605005, pond: 0.00980665 },
+      { J: 1, e: 1e-7, c: 4.184, cal: 4.1868, eV: 1.602176487e-19, ev: 1.602176487e-19, HPh: 2684519.537696173, hh: 2684519.537696173, Wh: 3600, wh: 3600, flb: 1.3558179483314003, BTU: 1055.05585262, btu: 1055.05585262 },
+      { HP: 745.6998715822702, h: 745.6998715822702, PS: 735.49875, W: 1, w: 1 },
+      { T: 1, ga: 0.0001 },
+      { tsp: 0.00492892159375, tspm: 0.005, tbs: 0.01478676478125, oz: 0.0295735295625, cup: 0.2365882365, pt: 0.473176473, us_pt: 0.473176473, uk_pt: 0.56826125, qt: 0.946352946, uk_qt: 1.1365225, gal: 3.785411784, uk_gal: 4.54609, l: 1, L: 1, lt: 1, ang3: 1e-27, 'ang^3': 1e-27, barrel: 158.987294928, bushel: 35.23907016688, ft3: 28.316846592, 'ft^3': 28.316846592, in3: 0.016387064, 'in^3': 0.016387064, ly3: 8.467866646237152e+50, 'ly^3': 8.467866646237152e+50, m3: 1000, 'm^3': 1000, mi3: 4168181825440.5796, 'mi^3': 4168181825440.5796, yd3: 764.554857984, 'yd^3': 764.554857984, Nmi3: 6352182208000, 'Nmi^3': 6352182208000, Picapt3: 4.39039566186557e-8, 'Picapt^3': 4.39039566186557e-8, Pica3: 4.39039566186557e-8, 'Pica^3': 4.39039566186557e-8, GRT: 2831.6846592, regton: 2831.6846592, MTON: 1132.67386368 },
+      { uk_acre: 4046.8564224, us_acre: 4046.8726098742522, ang2: 1e-20, 'ang^2': 1e-20, ar: 100, ft2: 0.09290304, 'ft^2': 0.09290304, ha: 10000, in2: 0.00064516, 'in^2': 0.00064516, ly2: 8.95054210748189e+31, 'ly^2': 8.95054210748189e+31, m2: 1, 'm^2': 1, Morgen: 2500, mi2: 2589988.110336, 'mi^2': 2589988.110336, Nmi2: 3429904, 'Nmi^2': 3429904, Picapt2: 1.2445216049382715e-7, Pica2: 1.2445216049382715e-7, 'Pica^2': 1.2445216049382715e-7, 'Picapt^2': 1.2445216049382715e-7, yd2: 0.83612736, 'yd^2': 0.83612736 },
+      { bit: 1, byte: 8 },
+      { admkn: 0.5147733333333333, kn: 0.5144444444444445, 'm/h': 0.0002777777777777778, 'm/hr': 0.0002777777777777778, 'm/s': 1, 'm/sec': 1, mph: 0.44704 },
+    ];
+    // las que admiten prefijo, y la potencia a la que se eleva: km2 son 1000² m²
+    const PREFIJABLES = new Map([..."g u m ang ly parsec pc sec s Pa p atm at mmHg N dyn dy pond J e c cal eV ev Wh wh W w T ga uk_pt l L lt ar bit byte m/h m/hr m/s m/sec mph".split(' ').map((u) => [u, 1]), ..."ang2 ang^2 m2 m^2".split(' ').map((u) => [u, 2]), ..."ang3 ang^3 m3 m^3".split(' ').map((u) => [u, 3])]);
+    const PREFIJOS_SI = { Y: 1e24, Z: 1e21, E: 1e18, P: 1e15, T: 1e12, G: 1e9, M: 1e6, k: 1e3, h: 100, da: 10, e: 10, d: 0.1, c: 0.01, m: 1e-3, u: 1e-6, n: 1e-9, p: 1e-12, f: 1e-15, a: 1e-18, z: 1e-21, y: 1e-24 };
+    const PREFIJOS_BIN = { Yi: 2 ** 80, Zi: 2 ** 70, Ei: 2 ** 60, Pi: 2 ** 50, Ti: 2 ** 40, Gi: 2 ** 30, Mi: 2 ** 20, ki: 2 ** 10 };
+    const A_KELVIN = { C: (x) => x + 273.15, cel: (x) => x + 273.15, F: (x) => (x - 32) * 5 / 9 + 273.15, fah: (x) => (x - 32) * 5 / 9 + 273.15, K: (x) => x, kel: (x) => x, Rank: (x) => x * 5 / 9, Reau: (x) => x * 1.25 + 273.15 };
+    const DE_KELVIN = { C: (x) => x - 273.15, cel: (x) => x - 273.15, F: (x) => (x - 273.15) * 9 / 5 + 32, fah: (x) => (x - 273.15) * 9 / 5 + 32, K: (x) => x, kel: (x) => x, Rank: (x) => x * 9 / 5, Reau: (x) => (x - 273.15) / 1.25 };
+    const propia = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+    // Las lecturas de un nombre de unidad: { grupo, factor }, la exacta primero. La temperatura es el grupo -1: nombre y factor del prefijo (mK).
+    // Puede haber más de una: «pc» es un pársec y también una picocaloría (Excel elige la que corresponde a la otra unidad).
+    function lecturasConvert(t) {
+      const directa = (u, p) => {
+        if (propia(A_KELVIN, u)) return p === 1 || u === 'K' || u === 'kel' ? { grupo: -1, nombre: u, factor: p } : null;
+        const g = UNIDADES_CONVERT.findIndex((x) => propia(x, u));
+        return g < 0 ? null : { grupo: g, factor: UNIDADES_CONVERT[g][u] * p };
+      };
+      const salida = [directa(t, 1)];
+      for (const n of [2, 1]) {
+        const p = t.slice(0, n), u = t.slice(n);
+        if (!u) continue;
+        if (propia(PREFIJOS_BIN, p) && (u === 'bit' || u === 'byte')) salida.push(directa(u, PREFIJOS_BIN[p]));
+        if (!propia(PREFIJOS_SI, p)) continue;
+        if (u === 'K' || u === 'kel') salida.push(directa(u, PREFIJOS_SI[p]));
+        else if (PREFIJABLES.has(u)) salida.push(directa(u, PREFIJOS_SI[p] ** PREFIJABLES.get(u)));
+      }
+      return salida.filter(Boolean);
+    }
+    function convertir(a, c, A) {
+      const v = A.escalar(A.evaluarNodo(a[0], c), c);
+      if (typeof v === 'boolean') return A.E.valor;
+      const x = A.aNumero(v), desde = lecturasConvert(A.txt(a[1], c)), hasta = lecturasConvert(A.txt(a[2], c));
+      const de = desde.find((d) => hasta.some((h) => h.grupo === d.grupo));
+      if (!de) return A.E.na;
+      const a2 = hasta.find((h) => h.grupo === de.grupo);
+      if (de.grupo === -1) return DE_KELVIN[a2.nombre](A_KELVIN[de.nombre](x * de.factor)) / a2.factor;
+      return x * de.factor / a2.factor;
+    }
+
     const formaDe = (M) => [M.length, M[0].length];
     const vacioA0 = (x) => (x === null || x === undefined ? 0 : x);
     const conCalc = (filas, A) => (filas.length && filas[0].length ? mat(filas) : A.error('#CALC!'));
@@ -415,6 +574,11 @@
       MDETERM: (a, c, A) => { const M = numerica(a[0], c, A); if (M.length !== M[0].length) return A.E.valor; return determinante(M); },
       MINVERSE: (a, c, A) => { const M = numerica(a[0], c, A); if (M.length !== M[0].length) return A.E.valor; const R = inversaMatriz(M); return R ? mat(R) : A.E.num; },
       MUNIT: (a, c, A) => { const n = ent(a[0], c, A); if (n < 1) return A.E.valor; return mat(Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)))); },
+      LINEST: (a, c, A) => estimacion(a, c, A, false),
+      LOGEST: (a, c, A) => estimacion(a, c, A, true),
+      TREND: (a, c, A) => prediccion(a, c, A, false),
+      GROWTH: (a, c, A) => prediccion(a, c, A, true),
+      CONVERT: convertir,
       TRANSPOSE: (a, c, A) => { let v = A.evaluarNodo(a[0], c); if (!c.matriz && A.esRef(v)) { v = A.escalar(v, c); if (esError(v)) return v; } const M = A.matrizDe(v); return mat(M[0].map((_, j) => M.map((f) => (f[j] === null ? 0 : f[j])))); },
 
       // estadística

@@ -157,9 +157,10 @@
     if (k < p.fijo.length) return p.fijo[k];
     return p.ciclo ? p.ciclo[(k - p.fijo.length) % p.ciclo.length] : 'a';
   }
-  const DEVUELVEN_MATRIZ = new Set('CHOOSECOLS CHOOSEROWS DROP EXPAND FILTER FREQUENCY GROWTH HSTACK LINEST LOGEST MODE.MULT RANDARRAY REGEXEXTRACT SEQUENCE SORT SORTBY TAKE TEXTSPLIT TOCOL TOROW TRANSPOSE TREND UNIQUE VSTACK WRAPCOLS WRAPROWS'.split(' '));
+  const DEVUELVEN_MATRIZ = new Set('CHOOSECOLS CHOOSEROWS DROP EXPAND FILTER HSTACK MODE.MULT RANDARRAY REGEXEXTRACT SEQUENCE SORT SORTBY TAKE TEXTSPLIT TOCOL TOROW TRANSPOSE UNIQUE VSTACK WRAPCOLS WRAPROWS'.split(' '));
   const SIEMPRE_DINAMICA = new Set(['IFS', 'SWITCH']);   // Excel las guarda con cm aunque todos sus argumentos sean valores sueltos
-  const DENTRO_SIN_CM = new Set(['ANCHORARRAY', 'MINVERSE', 'MMULT', 'MUNIT']);   // solas llevan cm; recibidas enteras por otra función (INDEX(MMULT(…);1;1), SUM(A1#)) no
+  const DENTRO_SIN_CM = new Set(['ANCHORARRAY', 'FREQUENCY', 'GROWTH', 'LINEST', 'LOGEST', 'MINVERSE', 'MMULT', 'MUNIT', 'TREND']);   // solas llevan cm; recibidas enteras por otra función (INDEX(MMULT(…);1;1), SUM(A1#)) no
+  const CON_CM_EN_INDEX = new Set(['FREQUENCY', 'GROWTH', 'TREND']);   // medido: estas sí dentro de INDEX, aunque en SUM no
 
   // ---- el motor -----------------------------------------------------------------------------------------------------
   function crear(fuente) {
@@ -856,6 +857,7 @@
               }
               return visitar(n.args[n.args.length - 1], tipo, prof + 1);
             }
+            if (nombre === 'INDEX' && n.args[0] && n.args[0].t === 'fn' && CON_CM_EN_INDEX.has(nombreFuncion(n.args[0].nombre))) return true;
             const patron = ELEVA.get(nombre);
             return n.args.some((a, k) => {
               const p = patron === undefined ? 'a' : posicionDe(patron, k);
