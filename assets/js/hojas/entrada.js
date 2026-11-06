@@ -1,4 +1,4 @@
-/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Lo que se escribe en una celda de Mini Cookies Hojas → el valor que se guarda (fase 2 del PLAN). Es lo contrario de xlsx-formato.js:
 // "1.234,5" (es) o "1,234.5" (en) → 1234.5; "25/10/2026" → la fecha como número de serie con formato de fecha; "15%" → 0,15 con formato
 // de porcentaje; "=SUMA(A1;A2)" → la fórmula como la guarda Excel ("SUM(A1,A2)"); "'007" → el texto "007". Sin DOM.
@@ -16,7 +16,7 @@
     REDONDEAR: 'ROUND', 'REDONDEAR.MAS': 'ROUNDUP', 'REDONDEAR.MENOS': 'ROUNDDOWN', 'REDOND.MULT': 'MROUND', ENTERO: 'INT', TRUNCAR: 'TRUNC', ABS: 'ABS', RESIDUO: 'MOD', POTENCIA: 'POWER', RAIZ: 'SQRT',
     EXP: 'EXP', LN: 'LN', LOG: 'LOG', LOG10: 'LOG10', PI: 'PI', SIGNO: 'SIGN', 'MULTIPLO.SUPERIOR': 'CEILING', 'MULTIPLO.INFERIOR': 'FLOOR', 'MULTIPLO.SUPERIOR.MAT': 'CEILING.MATH', 'MULTIPLO.INFERIOR.MAT': 'FLOOR.MATH',
     ALEATORIO: 'RAND', 'ALEATORIO.ENTRE': 'RANDBETWEEN', FACT: 'FACT', COCIENTE: 'QUOTIENT', 'M.C.D': 'GCD', 'M.C.M': 'LCM', 'SUMA.CUADRADOS': 'SUMSQ', SUMAPRODUCTO: 'SUMPRODUCT', SUBTOTALES: 'SUBTOTAL',
-    PAR: 'EVEN', IMPAR: 'ODD', SENO: 'SIN', COS: 'COS', TAN: 'TAN', GRADOS: 'DEGREES', RADIANES: 'RADIANS',
+    'REDONDEA.PAR': 'EVEN', 'REDONDEA.IMPAR': 'ODD', PAR: 'EVEN', IMPAR: 'ODD', SENO: 'SIN', COS: 'COS', TAN: 'TAN', GRADOS: 'DEGREES', RADIANES: 'RADIANS',
     MEDIANA: 'MEDIAN', MODA: 'MODE', DESVEST: 'STDEV', 'DESVEST.M': 'STDEV.S', DESVESTP: 'STDEVP', 'DESVEST.P': 'STDEV.P', VAR: 'VAR', 'VAR.S': 'VAR.S', VARP: 'VARP', 'VAR.P': 'VAR.P',
     'K.ESIMO.MAYOR': 'LARGE', 'K.ESIMO.MENOR': 'SMALL', JERARQUIA: 'RANK', 'JERARQUIA.EQV': 'RANK.EQ',
     SI: 'IF', 'SI.CONJUNTO': 'IFS', 'SI.ERROR': 'IFERROR', 'SI.ND': 'IFNA', Y: 'AND', O: 'OR', XO: 'XOR', NO: 'NOT', VERDADERO: 'TRUE', FALSO: 'FALSE', CAMBIAR: 'SWITCH',
@@ -24,7 +24,7 @@
     'CONTAR.SI': 'COUNTIF', 'CONTAR.SI.CONJUNTO': 'COUNTIFS', 'SUMAR.SI': 'SUMIF', 'SUMAR.SI.CONJUNTO': 'SUMIFS', 'PROMEDIO.SI': 'AVERAGEIF', 'PROMEDIO.SI.CONJUNTO': 'AVERAGEIFS', 'MAX.SI.CONJUNTO': 'MAXIFS', 'MIN.SI.CONJUNTO': 'MINIFS',
     BUSCARV: 'VLOOKUP', BUSCARH: 'HLOOKUP', BUSCAR: 'LOOKUP', COINCIDIR: 'MATCH', 'COINCIDIRX': 'XMATCH', BUSCARX: 'XLOOKUP', INDICE: 'INDEX', ELEGIR: 'CHOOSE', FILA: 'ROW', COLUMNA: 'COLUMN', FILAS: 'ROWS', COLUMNAS: 'COLUMNS', DESREF: 'OFFSET', INDIRECTO: 'INDIRECT',
     LARGO: 'LEN', IZQUIERDA: 'LEFT', DERECHA: 'RIGHT', EXTRAE: 'MID', MAYUSC: 'UPPER', MINUSC: 'LOWER', NOMPROPIO: 'PROPER', ESPACIOS: 'TRIM', LIMPIAR: 'CLEAN', CONCATENAR: 'CONCATENATE', CONCAT: 'CONCAT', UNIRCADENAS: 'TEXTJOIN',
-    REPETIR: 'REPT', SUSTITUIR: 'SUBSTITUTE', REEMPLAZAR: 'REPLACE', ENCONTRAR: 'FIND', HALLAR: 'SEARCH', IGUAL: 'EXACT', VALOR: 'VALUE', 'VALOR.NUMERO': 'NUMBERVALUE', TEXTO: 'TEXT', 'DECIMAL.FIJO': 'FIXED', CARACTER: 'CHAR', UNICAR: 'UNICHAR', CODIGO: 'CODE', UNICODE: 'UNICODE',
+    REPETIR: 'REPT', SUSTITUIR: 'SUBSTITUTE', REEMPLAZAR: 'REPLACE', ENCONTRAR: 'FIND', HALLAR: 'SEARCH', IGUAL: 'EXACT', VALOR: 'VALUE', 'VALOR.NUMERO': 'NUMBERVALUE', TEXTO: 'TEXT', DECIMAL: 'FIXED', 'DECIMAL.FIJO': 'FIXED', CARACTER: 'CHAR', UNICAR: 'UNICHAR', CODIGO: 'CODE', UNICODE: 'UNICODE',
     FECHA: 'DATE', NSHORA: 'TIME', 'AÑO': 'YEAR', ANO: 'YEAR', MES: 'MONTH', DIA: 'DAY', HORA: 'HOUR', MINUTO: 'MINUTE', SEGUNDO: 'SECOND', DIASEM: 'WEEKDAY', HOY: 'TODAY', AHORA: 'NOW', 'FECHA.MES': 'EDATE', 'FIN.MES': 'EOMONTH', DIAS: 'DAYS', SIFECHA: 'DATEDIF',
     'DIAS.LAB': 'NETWORKDAYS', 'DIA.LAB': 'WORKDAY', 'DIAS.LAB.INTL': 'NETWORKDAYS.INTL', 'DIA.LAB.INTL': 'WORKDAY.INTL', 'NUM.DE.SEMANA': 'WEEKNUM', 'FRAC.AÑO': 'YEARFRAC', 'FRAC.ANO': 'YEARFRAC', FECHANUMERO: 'DATEVALUE',
     PAGO: 'PMT', VF: 'FV', VA: 'PV', VNA: 'NPV', AGREGAR: 'AGGREGATE', HIPERVINCULO: 'HYPERLINK', TEXTOANTES: 'TEXTBEFORE', TEXTODESPUES: 'TEXTAFTER', LET: 'LET',
@@ -52,9 +52,14 @@
     FILTRAR: 'FILTER', ORDENAR: 'SORT', ORDENARPOR: 'SORTBY', UNICOS: 'UNIQUE', SECUENCIA: 'SEQUENCE', MATRIZALEAT: 'RANDARRAY', APILARV: 'VSTACK', APILARH: 'HSTACK', TOMAR: 'TAKE', EXCLUIR: 'DROP',
     ELEGIRCOLS: 'CHOOSECOLS', ELEGIRFILAS: 'CHOOSEROWS', ENCOL: 'TOCOL', ENFILA: 'TOROW', AJUSTARFILAS: 'WRAPROWS', AJUSTARCOLS: 'WRAPCOLS', EXPANDIR: 'EXPAND',
     BDSUMA: 'DSUM', BDCONTAR: 'DCOUNT', BDCONTARA: 'DCOUNTA', BDPROMEDIO: 'DAVERAGE', BDMAX: 'DMAX', BDMIN: 'DMIN', BDPRODUCTO: 'DPRODUCT', BDEXTRAER: 'DGET', BDDESVEST: 'DSTDEV', BDDESVESTP: 'DSTDEVP', BDVAR: 'DVAR', BDVARP: 'DVARP',
+    // medidos en Excel en español (2026-11-06); las de la primera línea, el motor no las calcula: se muestran con su nombre y conservan su valor
+    CONVERTIR: 'CONVERT', CRECIMIENTO: 'GROWTH', 'ESTIMACION.LINEAL': 'LINEST', 'ESTIMACION.LOGARITMICA': 'LOGEST', TENDENCIA: 'TREND',
+    REGEXEXTRACCION: 'REGEXEXTRACT', REGEXREEMPLAZAR: 'REGEXREPLACE', REGEXPRUEBA: 'REGEXTEST',
     PERCENTIL: 'PERCENTILE', 'PERCENTIL.INC': 'PERCENTILE.INC', 'PERCENTIL.EXC': 'PERCENTILE.EXC', CUARTIL: 'QUARTILE', 'CUARTIL.INC': 'QUARTILE.INC', 'CUARTIL.EXC': 'QUARTILE.EXC',
   };
   const EN = {}; for (const k in ES) if (!(ES[k] in EN)) EN[ES[k]] = k;   // el primero de cada una (AÑO antes que ANO)
+  // En inglés también se aceptan los nombres en español, salvo el que en inglés es otra función: DECIMAL (en español, FIXED)
+  const ES_EN = Object.assign({}, ES); for (const k in ES) if (k in EN && ES[k] !== k) delete ES_EN[k];
 
   // recorre la fórmula fuera de los textos "…" y de los nombres de hoja '…': cb(trozo de código) → reemplazo
   function fueraDeTextos(t, cb) {
@@ -150,22 +155,81 @@
   const ESPECIALES = [['#Todo', '#All'], ['#Datos', '#Data'], ['#Encabezados', '#Headers'], ['#Totales', '#Totals'], ['#Esta fila', '#This Row']];
   const especialesEn = (c) => (c.indexOf('#') < 0 ? c : ESPECIALES.reduce((x, [es, en]) => x.replace(new RegExp(es.replace(' ', '\\s'), 'gi'), en), c));
   const especialesEs = (c) => (c.indexOf('#') < 0 ? c : ESPECIALES.reduce((x, [es, en]) => x.replace(new RegExp(en.replace(' ', '\\s'), 'gi'), es), c));
+  // dónde termina el operando de @: un nombre o referencia (A1:A3, A:A, 1:1, Hoja!A1, T1[Col]) y, si sigue un paréntesis, hasta cerrarlo
+  function finOperando(f, ini) {
+    let j = ini;
+    const m = /^(?:'(?:[^']|'')+'!|[A-Za-z_À-￿][\w.À-￿]*!)?(?:\$?\d+:\$?\d+|[$A-Za-z_À-￿][$\w.À-￿]*(?::\$?[A-Za-z]+\$?\d*)?)/.exec(f.slice(j));
+    if (m) j += m[0].length;
+    if (f[j] === '[') {
+      let nivel = 0;
+      for (; j < f.length; j++) {
+        if (f[j] === "'") { j++; continue; }
+        if (f[j] === '[') nivel++;
+        else if (f[j] === ']' && --nivel === 0) { j++; break; }
+      }
+    } else if (f[j] === '(') {
+      let nivel = 0;
+      for (; j < f.length; j++) {
+        if (f[j] === '"') { j++; while (j < f.length && !(f[j] === '"' && f[j + 1] !== '"')) j += f[j] === '"' ? 2 : 1; continue; }
+        if (f[j] === '(') nivel++;
+        else if (f[j] === ')' && --nivel === 0) { j++; break; }
+      }
+    }
+    return j;
+  }
+  // _xlfn.SINGLE(…) → @…, también con paréntesis o comillas dentro; si lo de adentro no es un solo operando (SINGLE(A1+1)) queda como función
+  function sinInterseccion(f) {
+    const PRE = '_xlfn.single(';
+    if (f.length > 8192 || f.toLowerCase().indexOf(PRE) < 0) return f;   // más larga que el límite de Excel: viene de un archivo raro y no se recorre
+    let salida = '', i = 0;
+    while (i < f.length) {
+      const ch = f[i];
+      if (ch === '"' || ch === "'") { let j = i + 1; while (j < f.length && !(f[j] === ch && f[j + 1] !== ch)) j += f[j] === ch ? 2 : 1; salida += f.slice(i, j + 1); i = j + 1; continue; }
+      if (f.slice(i, i + PRE.length).toLowerCase() !== PRE) { salida += ch; i++; continue; }
+      const fin = finOperando(f, i + PRE.length - 1);   // desde el paréntesis: hasta el que lo cierra
+      if (f[fin - 1] !== ')') { salida += f.slice(i); break; }   // sin cerrar: fórmula mala, se muestra como está
+      const dentro = f.slice(i + PRE.length, fin - 1);
+      if (dentro && finOperando(dentro, 0) === dentro.length) salida += '@' + sinInterseccion(dentro);
+      else salida += f.slice(i, i + PRE.length) + sinInterseccion(dentro) + ')';
+      i = fin;
+    }
+    return salida;
+  }
+  // @A1:A3 o @F(x) (intersección implícita) se guarda como _xlfn.SINGLE(…), como Excel. La @ de una referencia a tabla ([@Col]) no se toca.
+  function conInterseccion(f) {
+    if (f.indexOf('@') < 0) return f;
+    let salida = '', i = 0, corchetes = 0;
+    while (i < f.length) {
+      const ch = f[i];
+      if (ch === '"' || ch === "'") { let j = i + 1; while (j < f.length && !(f[j] === ch && f[j + 1] !== ch)) j += f[j] === ch ? 2 : 1; salida += f.slice(i, j + 1); i = j + 1; continue; }
+      if (ch === '[') corchetes++; else if (ch === ']') corchetes--;
+      if (ch !== '@' || corchetes > 0) { salida += ch; i++; continue; }
+      const j = finOperando(f, i + 1);
+      if (j === i + 1) { salida += ch; i++; continue; }
+      salida += '_xlfn.SINGLE(' + conInterseccion(f.slice(i + 1, j)) + ')';
+      i = j;
+    }
+    return salida;
+  }
+  // En español la coma entre cifras es decimal, también sin ningún «;» (=A1*1,13): lo demás con comas (SUM(1,2,3), ROUND(A1,2), {1,2}) es la forma inglesa
+  const decimalesEs = (c) => c.replace(/\{[^{}]*\}|(^|[^A-Za-z0-9_.$,!:])(\d+),(\d+)(?![\d,A-Za-z_.(:!])/g, (m, antes, a, b) => (a === undefined ? m : antes + a + '.' + b));
   // forma que escribe quien usa el editor → forma de Excel en el archivo
   function formulaAlmacenada(texto, idioma) {
-    let f = String(texto).replace(/^=/, '');
-    // con la página en inglés se escribe como en Excel en inglés; en español se aceptan las dos formas (con «;» es la española)
-    const usaPuntoYComa = idioma !== 'en' && fueraDeTextos(f, (c) => (c.includes(';') ? '\u0001' : '')).includes('\u0001');
+    let f = conInterseccion(String(texto).replace(/^=/, ''));
+    // con la página en inglés se escribe como en Excel en inglés; en español se aceptan las dos formas (con «;» o «\» es la española)
+    const usaPuntoYComa = idioma !== 'en' && fueraDeTextos(f, (c) => (/[;\\]/.test(c) ? '\u0001' : '')).includes('\u0001');
     const estado = { nivel: 0 };
     f = fueraDeTextos(f, (c) => {
-      let x = traducirNombres(idioma === 'en' ? c : logicosEn(especialesEn(c)), ES);
+      let x = idioma === 'en' ? traducirNombres(c, ES_EN) : traducirNombres(logicosEn(especialesEn(c)), ES);
       if (usaPuntoYComa) x = marcarMatrices(x, estado, '\\').replace(/(\d),(\d)/g, '$1.$2').replace(/;/g, ',').replace(/\u0002/g, ',').replace(/\u0003/g, ';');   // en español: coma decimal y punto y coma entre argumentos
+      else if (idioma !== 'en') x = decimalesEs(x);
       return conPrefijo(conAncla(x));
     });
     return /LET\(/i.test(f) ? conParametros(f) : f;
   }
   // forma del archivo → forma para mostrar y editar en el idioma de la página
   function formulaVisible(formula, idioma) {
-    const f = String(formula).replace(/^=/, '');
+    const f = sinInterseccion(String(formula).replace(/^=/, ''));
     if (idioma !== 'es') return fueraDeTextos(f, sinPrefijo);
     const estado = { nivel: 0 };
     return fueraDeTextos(f, (c) => marcarMatrices(logicosEs(especialesEs(traducirNombres(sinPrefijo(c), EN))), estado, ',').replace(/,/g, ';').replace(/(\d)\.(\d)/g, '$1,$2').replace(/\u0002/g, '\\').replace(/\u0003/g, ';'));

@@ -1,4 +1,4 @@
-/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Más funciones para el motor de Mini Cookies Hojas (fase 3.1 del PLAN): trigonometría hiperbólica, combinatoria, bases numéricas y bits,
 // estadística (correlación, regresión, asimetría…), distribuciones (normal, t, chi², F, gamma, beta, binomial, Poisson…), finanzas (TASA,
 // TIR, VNA.NO.PER, PAGOINT, amortizaciones…), texto (MONEDA, DIVIDIRTEXTO, REGEX…), referencias (INDIRECTO, DIRECCION, AREAS, HOJA) y
@@ -415,7 +415,7 @@
       MDETERM: (a, c, A) => { const M = numerica(a[0], c, A); if (M.length !== M[0].length) return A.E.valor; return determinante(M); },
       MINVERSE: (a, c, A) => { const M = numerica(a[0], c, A); if (M.length !== M[0].length) return A.E.valor; const R = inversaMatriz(M); return R ? mat(R) : A.E.num; },
       MUNIT: (a, c, A) => { const n = ent(a[0], c, A); if (n < 1) return A.E.valor; return mat(Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)))); },
-      TRANSPOSE: (a, c, A) => { const M = A.matrizDe(A.evaluarNodo(a[0], c)); return mat(M[0].map((_, j) => M.map((f) => (f[j] === null ? 0 : f[j])))); },
+      TRANSPOSE: (a, c, A) => { let v = A.evaluarNodo(a[0], c); if (!c.matriz && A.esRef(v)) { v = A.escalar(v, c); if (esError(v)) return v; } const M = A.matrizDe(v); return mat(M[0].map((_, j) => M.map((f) => (f[j] === null ? 0 : f[j])))); },
 
       // estadística
       MAXA: (a, c, A) => { const l = numeros(a, c, A, { conTodo: true }); return l.length ? Math.max(...l) : 0; },

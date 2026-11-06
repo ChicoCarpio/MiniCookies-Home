@@ -1,4 +1,4 @@
-/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Modelo de un libro OpenDocument (.ods) con la MISMA FORMA que `LibroXlsx` (F3.4a, etapa 2): la rejilla, el motor de cálculo, el PDF y la cinta lo leen
 // sin saber que el archivo es ODF. Se lee content.xml una vez (más styles.xml para los estilos con nombre) y cada hoja sale con su almacén de celdas
 // (`CeldasHoja`), sus filas y columnas, sus combinadas y sus fórmulas traducidas a la sintaxis de Excel (`ods-formulas.js`).
@@ -211,8 +211,9 @@
           for (const x of f.celdas) {
             const i = C.agregar(fila + k, x.c, x.tipo, x.valor, x.xf);
             if (x.formula) {
-              // una matriz de varias celdas se lee como dinámica (LibreOffice las recalcula): al cambiar sus datos se vuelve a calcular y desborda, y sus celdas no quedan protegidas
-              const dinamica = !!(x.matriz && k === 0 && x.matriz.indexOf(':') > 0);
+              // una matriz se lee como dinámica (LibreOffice las recalcula): al cambiar sus datos se vuelve a calcular y desborda, y sus celdas no quedan protegidas.
+              // También la de una celda, que es como se guarda =SUMA(LARGO(A1:A3)): si no, al reabrir quedaría congelada
+              const dinamica = !!(x.matriz && k === 0);
               C.formulas.set(i, { texto: x.formula, tipo: x.matriz ? 'array' : 'normal', ref: k === 0 ? x.matriz : null, si: null, dinamica });
               if (dinamica) {
                 const g = LibroXlsx.decodificarRango(x.matriz);

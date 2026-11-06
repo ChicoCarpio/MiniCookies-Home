@@ -1,4 +1,4 @@
-/*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
+/*! © 2026 Mini Cookies. Código propio, todos los derechos reservados. Uso sujeto a los términos: https://minicookies.net/terminos.html */
 // Libro editable de Mini Cookies Hojas (fase 2 del PLAN): el libro que lee el motor de Excel del sitio (LibroXlsx) más lo que hace falta para
 // editarlo en vivo: operaciones que se deshacen, recálculo de fórmulas y guardado SIN PÉRDIDA (solo cambian las celdas editadas; el resto del
 // archivo sale byte a byte como vino). Sin DOM: se prueba en Node.
@@ -53,9 +53,9 @@
     // el rango que desborda un ancla, como texto ("B2:D9"; solo el ancla si da #SPILL!)
     function rangoDerrame(h, f, c) {
       const d = construido ? motor.derrame(h, f, c) : null;
-      if (!d) {   // sin desborde: las que Excel 365 guardó como matriz de una celda (cm, ref de sí misma) siguen así
+      if (!d) {   // un solo valor: las que Excel 365 guardó como matriz de una celda (cm, ref de sí misma) siguen así, y las que Excel guardaría así (SUM(LEN(A1:A3)))
         const C = hojas[h].celdas, i = C.indiceDe(f, c), fx = i >= 0 && C.formulas.get(i);
-        return fx && fx.tipo === 'array' ? LibroXlsx.numeroACol(c) + (f + 1) : null;
+        return fx && (fx.tipo === 'array' || (construido && motor.necesitaMatriz(h, f, c))) ? LibroXlsx.numeroACol(c) + (f + 1) : null;
       }
       return d.ok ? LibroXlsx.numeroACol(d.c0) + (d.f0 + 1) + ':' + LibroXlsx.numeroACol(d.c1) + (d.f1 + 1) : LibroXlsx.numeroACol(c) + (f + 1);
     }
@@ -65,6 +65,7 @@
       const e = { tipo: x.tipo, valor: x.valor, formula: x.formula, estilo: x.estilo };
       if (x.derrame) e.derrame = true;
       if (x.dinamica) { const m = rangoDerrame(h, f, c); if (m) e.matriz = m; }
+      else if (x.formula && x.formulaTipo !== 'array' && x.formulaTipo !== 'dataTable') e.legado = true;   // del archivo sin cm: deshacer, pegar u ordenar no la vuelven dinámica
       return e;
     };
     const igualEstado = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -89,7 +90,7 @@
       const tenia = C.formulas.get(i);
       // las fórmulas que se escriben en el editor son de Excel 365 (dinámicas: si dan una matriz, desbordan)
       if (v && v.formula) {
-        if (!tenia || C.formulaDe(i) !== v.formula) C.formulas.set(i, { texto: v.formula, tipo: 'normal', ref: null, si: null, dinamica: true });
+        if (!tenia || C.formulaDe(i) !== v.formula || (v.legado && tenia.dinamica)) C.formulas.set(i, { texto: v.formula, tipo: 'normal', ref: null, si: null, dinamica: !v.legado });
       } else if (tenia) C.formulas.delete(i);
       if (v && v.derrame) { if (!hoja.derramadas) hoja.derramadas = new Set(); hoja.derramadas.add(clave(f, c)); }
       else if (hoja.derramadas) hoja.derramadas.delete(clave(f, c));
@@ -231,7 +232,8 @@
       // 3) el motor se entera al final, con el almacén ya ordenado
       for (const { x, antes, despues } of cambiosOp) {
         const f2 = despues && despues.formula ? despues.formula : null;
-        if ((antes && antes.formula) !== f2 && construido) motor.ponerFormula(op.h, x.f, x.c, f2, { dinamica: true });
+        const legado = !!(despues && despues.legado);
+        if (((antes && antes.formula) !== f2 || (legado && !antes.legado)) && construido) motor.ponerFormula(op.h, x.f, x.c, f2, { dinamica: !legado });
         pendientesCalculo.push({ h: op.h, f: x.f, c: x.c });
         inversa.celdas.push({ f: x.f, c: x.c, v: antes });
       }
