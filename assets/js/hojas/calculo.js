@@ -161,6 +161,10 @@
   const SIEMPRE_DINAMICA = new Set(['IFS', 'SWITCH']);   // Excel las guarda con cm aunque todos sus argumentos sean valores sueltos
   const DENTRO_SIN_CM = new Set(['ANCHORARRAY', 'FREQUENCY', 'GROWTH', 'LINEST', 'LOGEST', 'MINVERSE', 'MMULT', 'MUNIT', 'TREND']);   // solas llevan cm; recibidas enteras por otra función (INDEX(MMULT(…);1;1), SUM(A1#)) no
   const CON_CM_EN_INDEX = new Set(['FREQUENCY', 'GROWTH', 'TREND']);   // medido: estas sí dentro de INDEX, aunque en SUM no
+  // las que pueden dar más de una celda sea como sea que se las llame; las demás, según sus argumentos (conArrobas)
+  const DAN_VARIAS = new Set(['ANCHORARRAY', 'FREQUENCY', 'GROWTH', 'IFS', 'INDIRECT', 'LINEST', 'LOGEST', 'MINVERSE', 'MMULT', 'MUNIT', 'SWITCH', 'TREND', ...DEVUELVEN_MATRIZ]);
+  const ARG_MATRICIAL = { AGGREGATE: [2], FILTER: [0, 1], FREQUENCY: [0, 1], GROWTH: [0, 1, 2], INDEX: [0], IRR: [0], LINEST: [0, 1], LOGEST: [0, 1], LOOKUP: [1, 2], MIRR: [0], TREND: [0, 1, 2], XLOOKUP: [1, 2], XMATCH: [1] };   // sus argumentos se calculan como matriz aunque la tabla de clases diga otra cosa
+  const MATRIZ_SIN_ARROBA = { CHOOSECOLS: [1], CHOOSEROWS: [1], EXPAND: [3], FILTER: [2], HYPERLINK: [1], TEXTSPLIT: [1, 2, 5] };
 
   // ---- el motor -----------------------------------------------------------------------------------------------------
   function crear(fuente) {
@@ -870,8 +874,112 @@
       return visitar(ast, 'r', 0);
     }
 
+    // La fórmula de un archivo sin cm, con el @ donde Excel lo muestra (LEN(A1:A3) → LEN(@A1:A3)): donde se usa un rango y va un valor. Sigue las clases de operando de cada
+    // argumento (R referencia, V valor, A matriz: la tabla medida de xls-formulas.js) y, sobre ellas, lo medido en 5.872 fórmulas (pruebas/oraculo/excel-medir-arrobas.ps1).
+    function conArrobas(texto, h) {
+      const columnas = new Map();   // Tabla[Col] no lo entiende el analizador: se tapa con un nombre del mismo largo, para que no se muevan las posiciones
+      const tapado = String(texto).replace(/"(?:[^"]|"")*"|((?:[A-Za-z_\\À-￿][A-Za-z0-9_.\\À-￿]*)?\[(?:[^\[\]']|'.|\[(?:[^\]']|'.)*\])*\])/g, (m, ref, i) => { if (!ref) return m; columnas.set(i, ref); return '_'.repeat(ref.length); });
+      let ast;
+      try { ast = XlsFormulas._analizar(XlsFormulas._tokenizar(tapado)); } catch (e) { return texto; }
+      const local = (n) => String(n.nombre).toUpperCase().replace(/^_XLPM\./, '');
+      const unaFila = (ref) => /\[@|#This Row/i.test(ref);
+      const nombreVarias = (n, nombres) => {
+        if (columnas.has(n.i)) return !unaFila(columnas.get(n.i));
+        if (nombres.has(local(n))) return nombres.get(local(n));
+        const def = fuente.nombre ? fuente.nombre(n.nombre, h) : null;
+        if (!def) return true;
+        const a = analizar(String(def).replace(/^=/, ''));
+        return !((a.t === 'ref' && a.modo === 'celda') || a.t === 'num' || a.t === 'str' || a.t === 'bool');
+      };
+      const calculado = (n) => (n.t === 'paren' ? calculado(n.a) : n.t === 'fn' || n.t === 'bin' || n.t === 'un');   // una matriz que sale de una cuenta, no un rango escrito
+      // ¿puede dar más de una celda?
+      const varias = (n, nombres) => {
+        if (!n) return false;
+        if (n.t === 'ref') return n.modo !== 'celda';
+        if (n.t === 'arr') return true;
+        if (n.t === 'paren') return varias(n.a, nombres);
+        if (n.t === 'nombre') return nombreVarias(n, nombres);
+        if (n.t === 'bin') return n.op === ':' || n.op === ' ' || n.op === ',';
+        if (n.t !== 'fn') return false;
+        const u = nombreFuncion(n.nombre), a = n.args;
+        if (DAN_VARIAS.has(u)) return true;
+        const hay = (l) => l.some((x) => varias(x, nombres));
+        switch (u) {
+          case 'IF': return (!!a[0] && a[0].t === 'arr') || hay(a.slice(1, 3));
+          case 'IFERROR': case 'IFNA': return varias(a[1], nombres);
+          case 'CHOOSE': return (!!a[0] && a[0].t === 'arr') || hay(a.slice(1));
+          case 'ROW': case 'COLUMN': case 'ISFORMULA': return varias(a[0], nombres);
+          case 'HYPERLINK': return !!a[1] && a[1].t === 'arr';
+          case 'XLOOKUP': return varias(a[3], nombres) || (!!a[1] && calculado(a[1])) || (!!a[2] && calculado(a[2]));
+          case 'CELL': return varias(a[1], nombres);
+          case 'OFFSET': return a.slice(3).some((x) => x && (varias(x, nombres) || (x.t === 'num' && x.v !== 1)));
+          case 'INDEX': return (a.length === 2 && !!a[0] && calculado(a[0])) || a.slice(1, 3).some((x) => !x || varias(x, nombres) || (x.t === 'num' && x.v === 0));
+          case 'LET': { const m = new Map(nombres); for (let k = 0; k + 1 < a.length; k += 2) if (a[k] && a[k].t === 'nombre') m.set(local(a[k]), varias(a[k + 1], m)); return varias(a[a.length - 1], m); }
+          default: return false;
+        }
+      };
+      const posiciones = new Set();
+      const inicio = (n) => (n.t === 'bin' ? inicio(n.a) : n.i);
+      const marcar = (n) => { const i = inicio(n); if (i !== undefined) posiciones.add(i); };
+      // dentro: hay por encima un argumento que acepta rangos, y ahí una matriz constante ya no lleva @
+      const ver = (n, cls, nombres, dentro) => {
+        if (!n) return;
+        switch (n.t) {
+          case 'ref': if (cls === 'V' && n.modo !== 'celda') marcar(n); return;
+          case 'arr': if (cls === 'V' && !dentro) marcar(n); return;
+          case 'nombre': if (cls === 'V' && nombreVarias(n, nombres)) marcar(n); return;
+          case 'paren': ver(n.a, cls, nombres, dentro); return;
+          case 'un': ver(n.a, cls === 'A' ? 'A' : 'V', nombres, dentro); return;
+          case 'bin': {
+            if (n.op === ':' || n.op === ' ' || n.op === ',') { if (cls === 'V') marcar(n); ver(n.a, 'R', nombres, dentro); ver(n.b, 'R', nombres, dentro); return; }
+            const c = cls === 'A' ? 'A' : 'V';
+            ver(n.a, c, nombres, dentro); ver(n.b, c, nombres, dentro);
+            return;
+          }
+          case 'fn': {
+            const u = nombreFuncion(n.nombre), a = n.args, d = XlsFormulas._buscarFuncion(n.nombre).def;
+            if (u === 'LET') {
+              const m = new Map(nombres);
+              for (let k = 0; k + 1 < a.length; k += 2) { ver(a[k + 1], 'R', m, dentro); if (a[k] && a[k].t === 'nombre') m.set(local(a[k]), varias(a[k + 1], m)); }
+              const fin = a[a.length - 1];
+              if (cls === 'V' && fin && fin.t === 'nombre' && varias(fin, m)) marcar(n); else ver(fin, cls, m, dentro);
+              return;
+            }
+            const multiple = varias(n, nombres), patron = ELEVA.get(u);
+            if (multiple && (cls === 'V' || ((u === 'ROW' || u === 'COLUMN') && cls === 'R'))) marcar(n);
+            a.forEach((x, i) => {
+              if (!x) return;
+              const p = patron === undefined ? null : posicionDe(patron, i);
+              const matriz = x.t === 'arr';
+              let c = XlsFormulas._claseDeArg(d, i);
+              if (ARG_MATRICIAL[u] && ARG_MATRICIAL[u].includes(i)) c = 'A';
+              else if (u === 'SWITCH' && i > 0 && (i === a.length - 1 ? i % 2 === 1 : i % 2 === 0)) c = 'R';   // sus resultados y el de por defecto
+              else if (p === 's' || p === 'e') c = 'V';
+              if (matriz) {
+                if (p === 'z' || u === 'IFS' || u === 'SWITCH' || (MATRIZ_SIN_ARROBA[u] && MATRIZ_SIN_ARROBA[u].includes(i))) return;
+                // en la condición de IF o CHOOSE el @ sube a la función, salvo que sus ramas sean rangos; en IFERROR, solo sube
+                if (i === 0 && multiple && (u === 'IF' || u === 'CHOOSE' || u === 'IFERROR' || u === 'IFNA')) { if (!dentro && u !== 'IFERROR' && u !== 'IFNA' && a.slice(1).some((y) => y && y.t === 'ref' && y.modo !== 'celda')) marcar(x); return; }
+                if (cls !== 'A' && (p === 'e' || p === 'f' || (p === 'x' && !dentro))) { marcar(x); return; }
+              }
+              ver(x, cls === 'A' && (c === 'R' || (c === 'V' && d && d.lift)) ? 'A' : c, nombres, dentro || c === 'R');   // dentro de una matriz (SUMPRODUCT), también lo que acepta rangos; IF y TRANSPOSE no
+            });
+            return;
+          }
+          default:
+        }
+      };
+      ver(ast, 'V', new Map(), false);
+      let salida = String(texto);
+      for (const i of [...posiciones].sort((p, q) => q - p)) {
+        const ref = columnas.get(i);
+        // Tabla[Col] es la fila actual de la tabla, y así lo escribe Excel: Tabla[@Col]
+        salida = ref && !/^[^[]*\[\[/.test(ref) && !unaFila(ref) ? salida.slice(0, i + ref.indexOf('[') + 1) + '@' + salida.slice(i + ref.indexOf('[') + 1) : salida.slice(0, i) + '@' + salida.slice(i);
+      }
+      return salida;
+    }
+
     const API = { num, txt, log, val, opcional, evaluarNodo, escalar, matrizDe, recorrer, recorrerValor, aNumero, aTexto, aLogico, comparar, valorCelda, esRef, esMat, esUnion, recortar,
-      hoy, fuente, E, error, lanzar, NoSoportada, interseccion, serialDe, partes, formatoGeneral, textoANumero, analizar, rangoDe, indiceHoja,
+      hoy, fuente, E, error, lanzar, NoSoportada, conArrobas, interseccion, serialDe, partes, formatoGeneral, textoANumero, analizar, rangoDe, indiceHoja,
       derrame: (h, f, c) => derrames.get(clave(h, f, c)),
       esMatrizDeUnValor: (h, f, c) => { const fx = formulas.get(clave(h, f, c)); return !!fx && !!fx.dinamica && !fx.mala && necesitaMatriz(fx.ast, h); } };
 
@@ -892,7 +1000,7 @@
     const conSuFecha = (fn) => function () { fecha1904 = !!fuente.fecha1904; return fn.apply(this, arguments); };
     // todas las fórmulas, como si todo hubiera cambiado (después de insertar o quitar filas, los valores guardados en el archivo ya no valen)
     const recalcularTodo = () => recalcular([...formulas.values()].map((fx) => ({ h: fx.h, f: fx.f, c: fx.c })));
-    return { necesitaMatriz: (h, f, c) => { const fx = formulas.get(clave(h, f, c)); return !!fx && !fx.mala && necesitaMatriz(fx.ast, h); }, construir: conSuFecha(construir), ponerFormula: conSuFecha(ponerFormula), recalcular: conSuFecha(recalcular), recalcularTodo: conSuFecha(recalcularTodo), evaluar: conSuFecha(evaluar), get cantidad() { return formulas.size; }, tieneFormula: (h, f, c) => formulas.has(clave(h, f, c)),
+    return { conArrobas, necesitaMatriz: (h, f, c) => { const fx = formulas.get(clave(h, f, c)); return !!fx && !fx.mala && necesitaMatriz(fx.ast, h); }, construir: conSuFecha(construir), ponerFormula: conSuFecha(ponerFormula), recalcular: conSuFecha(recalcular), recalcularTodo: conSuFecha(recalcularTodo), evaluar: conSuFecha(evaluar), get cantidad() { return formulas.size; }, tieneFormula: (h, f, c) => formulas.has(clave(h, f, c)),
       derrame: (h, f, c) => derrames.get(clave(h, f, c)), get derrames() { return derrames; } };
   }
 

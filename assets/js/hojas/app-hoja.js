@@ -82,6 +82,7 @@
       const f0 = encabezado ? r.f0 + 1 : r.f0;
       if (r.f1 <= f0 - 1) return;
       if ((ed().hojas[h].combinadas || []).some((m) => !(m.f1 < r.f0 || m.f0 > r.f1 || m.c1 < r.c0 || m.c0 > r.c1))) { A.avisar(tx('aviso-ordenar-combinadas')); return; }
+      if (ed().hayDesborde(h, r)) { A.avisar(tx('aviso-ordenar-matriz')); return; }
       const cmp = new Intl.Collator(A.idioma() === 'en' ? 'en-US' : 'es-CR', { numeric: true, sensitivity: mayus ? 'variant' : 'base', caseFirst: mayus ? 'lower' : 'false' }).compare;
       const clase = (x) => (!x || x.tipo === 'vacio' || x.valor === null || x.valor === '' ? 4 : x.tipo === 'numero' ? 0 : x.tipo === 'texto' ? 1 : x.tipo === 'logico' ? 2 : 3);
       const filas = [];

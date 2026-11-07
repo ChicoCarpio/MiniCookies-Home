@@ -35,7 +35,7 @@
     'cmd-alto-fila': 'Alto de fila', 'pregunta-alto': 'Alto de la fila (en puntos, de 0 a 409; vacío = automático):',
     'cmd-reemplazar': 'Buscar y reemplazar', 'cmd-ordenar-asc': 'Ordenar de A a Z', 'cmd-ordenar-desc': 'Ordenar de Z a A', 'cmd-pdf': 'Descargar la hoja en PDF', 'cmd-pdf-libro': 'Descargar el libro en PDF', 'g-ordenar': 'Ordenar',
     'r-buscar': 'Buscar', 'r-reemplazar': 'Reemplazar con', 'r-mayus': 'Distinguir mayúsculas', 'r-entera': 'Celda completa', 'r-libro': 'En todo el libro', 'r-todo': 'Reemplazar todo', 'cerrar': 'Cerrar', 'r-hechos': '{0} celdas cambiadas',
-    'aviso-pdf': 'Preparando el PDF…', 'aviso-pdf-listo': 'PDF listo: {0} páginas', 'aviso-ordenar-combinadas': 'No se puede ordenar: hay celdas combinadas en el rango',
+    'aviso-pdf': 'Preparando el PDF…', 'aviso-pdf-listo': 'PDF listo: {0} páginas', 'aviso-ordenar-combinadas': 'No se puede ordenar: hay celdas combinadas en el rango', 'aviso-ordenar-matriz': 'No se puede ordenar: el rango incluye una matriz dinámica',
   };
   const EN = {
     'titulo-pagina': 'Edit Excel and .ods files in your browser — Mini Cookies', 'meta-descripcion': 'Edit Excel workbooks (.xlsx) and LibreOffice spreadsheets (.ods) in your browser: formulas, formatting, charts and undo, without installing anything or uploading your file. Free, no sign-up.',
@@ -68,7 +68,7 @@
     'cmd-alto-fila': 'Row height', 'pregunta-alto': 'Row height (in points, 0 to 409; empty = automatic):',
     'cmd-reemplazar': 'Find and replace', 'cmd-ordenar-asc': 'Sort A to Z', 'cmd-ordenar-desc': 'Sort Z to A', 'cmd-pdf': 'Download sheet as PDF', 'cmd-pdf-libro': 'Download workbook as PDF', 'g-ordenar': 'Sort',
     'r-buscar': 'Find', 'r-reemplazar': 'Replace with', 'r-mayus': 'Match case', 'r-entera': 'Match entire cell', 'r-libro': 'Whole workbook', 'r-todo': 'Replace all', 'cerrar': 'Close', 'r-hechos': '{0} cells changed',
-    'aviso-pdf': 'Preparing the PDF…', 'aviso-pdf-listo': 'PDF ready: {0} pages', 'aviso-ordenar-combinadas': 'Can’t sort: there are merged cells in the range',
+    'aviso-pdf': 'Preparing the PDF…', 'aviso-pdf-listo': 'PDF ready: {0} pages', 'aviso-ordenar-combinadas': 'Can’t sort: there are merged cells in the range', 'aviso-ordenar-matriz': 'Can’t sort: the range includes a dynamic array',
   };
   const pagina = window.i18nPagina || (window.i18nPagina = {});
   pagina.es = Object.assign(pagina.es || {}, ES);
@@ -263,7 +263,7 @@
     if (!x) return '';
     const xf = ed.libro.estilos.xf(x.estilo);
     const formato = xf.formato || 'General';
-    return EntradaCelda.textoParaEditar(x, {
+    return EntradaCelda.textoParaEditar(x.formula ? Object.assign({}, x, { formula: ed.formulaVista(h, f, c) }) : x, {
       idioma: idioma(), esFecha: typeof x.valor === 'number' && XlsxFormato.esFecha(formato), esPorcentaje: /%/.test(formato.replace(/"[^"]*"/g, '')),
       textoFecha: (v) => XlsxFormato.formatear(v, /[hs]/i.test(formato.replace(/"[^"]*"/g, '')) ? (idioma() === 'en' ? 'm/d/yyyy h:mm' : 'dd/mm/yyyy h:mm') : (idioma() === 'en' ? 'm/d/yyyy' : 'dd/mm/yyyy'), { idioma: idioma(), fecha1904: ed.libro.fecha1904 }).texto,
     });
@@ -504,6 +504,9 @@
       P.celdas.forEach((fila, i) => fila.forEach((x, j) => {
         const f = s.f0 + i, c = s.c0 + j;
         let v = x ? Object.assign({}, x) : null;
+        // como Excel: del desborde se pega solo la fórmula del ancla (vuelve a desbordar); sus otras celdas quedan vacías, con su formato
+        if (v && v.derrame) v = v.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: v.estilo } : null;
+        if (v) delete v.matriz;
         if (v && v.formula) v.formula = LibroXlsx.desplazarFormula(v.formula, df, dc);
         if (v && P.h !== h && v.estilo && v.estilo >= ed.libro.estilos.cantidadXfs) v.estilo = 0;
         celdas.push({ f, c, v });
@@ -580,6 +583,7 @@
     r = { f0: r.f0, c0: r.c0, f1: Math.min(r.f1, lim.filas - 1), c1: Math.min(r.c1, lim.cols - 1) };
     if (r.f1 <= r.f0) return;
     if ((ed.hojas[h].combinadas || []).some((m) => !(m.f1 < r.f0 || m.f0 > r.f1 || m.c1 < r.c0 || m.c0 > r.c1))) { avisar(tx('aviso-ordenar-combinadas')); return; }
+    if (ed.hayDesborde(h, r)) { avisar(tx('aviso-ordenar-matriz')); return; }
     const tipoDe = (f, c) => { const x = ed.celda(h, f, c); return x ? x.tipo : 'vacio'; };
     const encabezado = tipoDe(r.f0, a.c) === 'texto' && tipoDe(r.f0 + 1, a.c) !== 'texto' && tipoDe(r.f0 + 1, a.c) !== 'vacio';
     const f0 = encabezado ? r.f0 + 1 : r.f0;
@@ -642,9 +646,9 @@
       const C = ed.hojas[h].celdas, celdas = [];
       C.paraCada((f, c) => {
         const x = ed.estadoDe(h, f, c);
-        if (!x || ed.protegida(h, f, c)) return;
+        if (!x || x.derrame || ed.protegida(h, f, c)) return;   // lo que desborda no se escribe: es de la fórmula del ancla
         if (x.formula) {
-          const vis = EntradaCelda.formulaVisible(x.formula, idioma());
+          const vis = EntradaCelda.formulaVisible(ed.formulaVista(h, f, c), idioma());
           re.lastIndex = 0;
           if (!re.test(vis)) return;
           const op = ed.opEscribir(h, f, c, '=' + vis.replace(re, () => nuevo));
@@ -670,7 +674,7 @@
     const tipo = x ? tx('t-' + x.tipo) : tx('t-vacio');
     insp.mostrar([
       { titulo: tx('i-celda') + ' ' + aA1(a.f, a.c), filas: [
-        ['i-tipo', tipo], ['i-valor', x && x.valor !== null ? String(x.valor) : '—'], ['i-formula', x && x.formula ? '=' + EntradaCelda.formulaVisible(x.formula, idioma()) : '—'],
+        ['i-tipo', tipo], ['i-valor', x && x.valor !== null ? String(x.valor) : '—'], ['i-formula', x && x.formula ? '=' + EntradaCelda.formulaVisible(ed.formulaVista(h, a.f, a.c) || x.formula, idioma()) : '—'],
         ['i-formato', p.formato || 'General'], ['i-fuente', (p.fuente || '') + ' ' + (p.tamano || '') + (p.negrita ? ' · B' : '') + (p.cursiva ? ' · I' : '')],
       ] },
       { titulo: tx('i-archivo'), filas: [

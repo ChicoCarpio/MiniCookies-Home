@@ -211,20 +211,32 @@
     }
     return salida;
   }
-  // En español la coma entre cifras es decimal, también sin ningún «;» (=A1*1,13): lo demás con comas (SUM(1,2,3), ROUND(A1,2), {1,2}) es la forma inglesa
-  const decimalesEs = (c) => c.replace(/\{[^{}]*\}|(^|[^A-Za-z0-9_.$,!:])(\d+),(\d+)(?![\d,A-Za-z_.(:!])/g, (m, antes, a, b) => (a === undefined ? m : antes + a + '.' + b));
+  // Dentro de un par de corchetes sin otros adentro (T[1,5]) va el nombre de una columna: no se traduce ni cambian sus comas
+  const fueraDeColumnas = (c, cb) => c.split(/(\[[^\[\]]*\])/).map((x, i) => (i % 2 ? x : cb(x))).join('');
+  // En español la coma entre cifras es decimal, también sin ningún «;» (=A1*1,13; {1,5}; 1,5E+3; ,5 y 5, como Excel). No lo es la que sigue a un
+  // nombre o referencia (A1,2), a un exponente (1E+5,2) ni la que toca otra coma (1,2,3): esa es la forma inglesa, o un error si hay «;». Medido en Excel.
+  const RE_DECIMAL = /(^|[^A-Za-z0-9_.$,!:À-￿])(\d*),(\d*)([eE][-+]?\d+)?(?![\dA-Za-z_.,(:!À-￿])/g;
+  const decimalesEs = (c) => c.replace(RE_DECIMAL, (m, antes, a, b, exp, i, todo) => {
+    if (!a && !b) return m;
+    if (!a && !/[(\{;+\-*/^&=<>\u0002\u0003]/.test(antes)) return m;
+    if (!b && !/[)};\u0002\u0003]/.test(todo[i + m.length] || '')) return m;
+    if (/\d[eE][-+]$/.test(todo.slice(0, i + antes.length))) return m;
+    return antes + (a || '0') + (b ? '.' + b : '') + (exp || '');
+  });
   // forma que escribe quien usa el editor → forma de Excel en el archivo
   function formulaAlmacenada(texto, idioma) {
     let f = conInterseccion(String(texto).replace(/^=/, ''));
+    if (idioma !== 'en') f = f.replace(/^,(?=\d)/, '0,');   // =,5+1
     // con la página en inglés se escribe como en Excel en inglés; en español se aceptan las dos formas (con «;» o «\» es la española)
-    const usaPuntoYComa = idioma !== 'en' && fueraDeTextos(f, (c) => (/[;\\]/.test(c) ? '\u0001' : '')).includes('\u0001');
+    const usaPuntoYComa = idioma !== 'en' && fueraDeTextos(f, (c) => fueraDeColumnas(c, (x) => (/[;\\]/.test(x) ? '\u0001' : ''))).includes('\u0001');
     const estado = { nivel: 0 };
-    f = fueraDeTextos(f, (c) => {
-      let x = idioma === 'en' ? traducirNombres(c, ES_EN) : traducirNombres(logicosEn(especialesEn(c)), ES);
-      if (usaPuntoYComa) x = marcarMatrices(x, estado, '\\').replace(/(\d),(\d)/g, '$1.$2').replace(/;/g, ',').replace(/\u0002/g, ',').replace(/\u0003/g, ';');   // en español: coma decimal y punto y coma entre argumentos
+    f = fueraDeTextos(f, (c) => fueraDeColumnas(idioma === 'en' ? c : especialesEn(c), (trozo) => {
+      let x = idioma === 'en' ? traducirNombres(trozo, ES_EN) : traducirNombres(logicosEn(trozo), ES);
+      // en español: coma decimal y punto y coma entre argumentos; otra coma mezclada con «;» no es nada y la fórmula no se acepta (\u0004), como en Excel
+      if (usaPuntoYComa) x = decimalesEs(marcarMatrices(x, estado, '\\')).replace(/,/g, '\u0004').replace(/;/g, ',').replace(/\u0002/g, ',').replace(/\u0003/g, ';');
       else if (idioma !== 'en') x = decimalesEs(x);
       return conPrefijo(conAncla(x));
-    });
+    }));
     return /LET\(/i.test(f) ? conParametros(f) : f;
   }
   // forma del archivo → forma para mostrar y editar en el idioma de la página
@@ -232,7 +244,7 @@
     const f = sinInterseccion(String(formula).replace(/^=/, ''));
     if (idioma !== 'es') return fueraDeTextos(f, sinPrefijo);
     const estado = { nivel: 0 };
-    return fueraDeTextos(f, (c) => marcarMatrices(logicosEs(especialesEs(traducirNombres(sinPrefijo(c), EN))), estado, ',').replace(/,/g, ';').replace(/(\d)\.(\d)/g, '$1,$2').replace(/\u0002/g, '\\').replace(/\u0003/g, ';'));
+    return fueraDeTextos(f, (c) => fueraDeColumnas(especialesEs(c), (x) => marcarMatrices(logicosEs(traducirNombres(sinPrefijo(x), EN)), estado, ',').replace(/,/g, ';').replace(/(^|[^A-Za-z0-9_.$À-￿])(\d+)\.(\d)/g, '$1$2,$3').replace(/\u0002/g, '\\').replace(/\u0003/g, ';')));
   }
 
   const ERRORES = ['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#¡NULO!', '#¡DIV/0!', '#¡VALOR!', '#¡REF!', '#¿NOMBRE?', '#¡NUM!', '#N/D'];

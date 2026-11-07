@@ -274,7 +274,7 @@
   const RE_ERR = /^#(?:NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|GETTING_DATA)/i;
   const colANum = (s) => { let n = 0; for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) & 31); return n - 1; };
 
-  // El texto a tokens. Cada uno lleva `esp`: ¿había un espacio antes? (entre dos referencias, un espacio es el operador de intersección).
+  // El texto a tokens. Cada uno lleva `esp`: ¿había un espacio antes? (entre dos referencias, un espacio es el operador de intersección); e `i`: dónde empieza.
   function tokenizar(t) {
     const out = [];
     let i = 0, esp = false;
@@ -284,7 +284,7 @@
       if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') { esp = true; i++; continue; }
       const resto = t.slice(i, i + 400);
       let m;
-      const poner = (tok, largo) => { tok.esp = esp; esp = false; out.push(tok); i += largo; };
+      const poner = (tok, largo) => { tok.esp = esp; tok.i = i; esp = false; out.push(tok); i += largo; };
       if (ch === '"') {
         let j = i + 1, s = '';
         for (;;) { if (j >= t.length) no('texto sin cerrar'); if (t[j] === '"') { if (t[j + 1] === '"') { s += '"'; j += 2; continue; } break; } s += t[j++]; }
@@ -374,7 +374,7 @@
         while (op(',')) { p++; a = { t: 'bin', op: ',', a, b: cmp() }; }   // una lista entre paréntesis es la unión de referencias
         pedir(')');
         r = { t: 'paren', a };
-      } else if (t.k === 'op' && t.v === '{') r = matriz();
+      } else if (t.k === 'op' && t.v === '{') { r = matriz(); r.i = t.i; }
       else if (t.k === 'id' && t.fn) {
         pedir('(');
         const args = [];
@@ -387,10 +387,10 @@
         }
         pedir(')');
         if (args.length > 255) no('demasiados argumentos');
-        r = { t: 'fn', nombre: t.v, args };
+        r = { t: 'fn', nombre: t.v, args, i: t.i };
       } else if (t.k === 'id') {
         const u = t.v.toUpperCase();
-        r = u === 'TRUE' || u === 'FALSE' ? { t: 'bool', v: u === 'TRUE' } : { t: 'nombre', nombre: t.v };
+        r = u === 'TRUE' || u === 'FALSE' ? { t: 'bool', v: u === 'TRUE' } : { t: 'nombre', nombre: t.v, i: t.i };
       } else no('token ' + t.v);
       profundidad--;
       return r;
@@ -598,5 +598,5 @@
     return [...nombre, ...args, 0x02 | CLASE[clase], argc + 1, 0xFF, 0x00];
   }
 
-  globalThis.XlsFormulas = { decodificar, codificar, FUNCIONES, _numeroATexto: numeroATexto, _citarHoja: citarHoja, _tokenizar: tokenizar, _analizar: analizar };
+  globalThis.XlsFormulas = { decodificar, codificar, FUNCIONES, _claseDeArg: claseDeArg, _buscarFuncion: buscarFuncion, _numeroATexto: numeroATexto, _citarHoja: citarHoja, _tokenizar: tokenizar, _analizar: analizar };
 })();

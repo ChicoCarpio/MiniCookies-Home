@@ -781,7 +781,7 @@
         const en = A.fuente.idioma === 'en';
         // la moneda de la configuración regional (en: dólar con paréntesis; es-CR: colón con signo menos), como Excel
         const codigo = en ? '"$"#,##0' + dec + '_);("$"#,##0' + dec + ')' : '"₡"#,##0' + dec + ';-"₡"#,##0' + dec;
-        return textoFormato(n, en ? codigo : codigo.replace(/\./g, A.fuente.separadores ? A.fuente.separadores.decimal : ',').replace(/#,##/g, '#' + (A.fuente.separadores ? A.fuente.separadores.miles : ' ') + '##'), A);
+        return textoFormato(n, en ? codigo : codigo.replace(/\./g, A.fuente.separadores ? A.fuente.separadores.decimal : ',').replace(/#,##/g, '#' + (A.fuente.separadores ? A.fuente.separadores.miles : ' ') + '##'), A);
       },
       TIMEVALUE: (a, c, A) => horaDeTexto(A.txt(a[0], c), A),
       // las «B» cuentan bytes solo con un idioma de doble byte (japonés, chino, coreano) como predeterminado; si no, son las mismas
@@ -812,8 +812,9 @@
       FORMULATEXT: (a, c, A) => {
         const r = A.evaluarNodo(a[0], c);
         if (!A.esRef(r)) return A.E.na;
-        const f = A.fuente.formulaDe ? A.fuente.formulaDe(r.h, r.f0, r.c0) : null;
+        let f = A.fuente.formulaDe ? A.fuente.formulaDe(r.h, r.f0, r.c0) : null;
         if (!f) return A.E.na;
+        if (A.fuente.esLegada && A.fuente.esLegada(r.h, r.f0, r.c0)) f = A.conArrobas(f, r.h);   // como en la barra de fórmulas
         const visible = typeof EntradaCelda !== 'undefined' && A.fuente.idioma === 'es' ? EntradaCelda.formulaVisible(f, 'es') : f.replace(/_xlfn\.(?:_xlws\.)?|_xlpm\./gi, '');
         return '=' + visible;
       },
