@@ -138,9 +138,9 @@
       meta.existe = true; metaDinamica.cm = 1;
     }
     async function guardarCeldas(porHoja) {
-      const conMatriz = porHoja.some(([, lista]) => lista.some((x) => x.valor && x.valor.matriz));
+      const conMatriz = porHoja.some(([, lista]) => lista.some((x) => x.valor && x.valor.matriz && !x.valor.fija));
       if (conMatriz) await asegurarMetadata();
-      for (const [, lista] of porHoja) for (const x of lista) if (x.valor && x.valor.matriz) x.valor.cm = metaDinamica.cm;
+      for (const [, lista] of porHoja) for (const x of lista) if (x.valor && x.valor.matriz && !x.valor.fija) x.valor.cm = metaDinamica.cm;
       for (const [h, lista] of porHoja) {
         const hoja = hojas[h];
         await XlsxEscritor.editarCeldas(libro, h, lista);

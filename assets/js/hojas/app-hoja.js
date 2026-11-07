@@ -102,7 +102,7 @@
         const destino = f0 + k;
         x.fila.forEach((v, j) => {
           const nv = v ? Object.assign({}, v) : null;
-          if (nv) { delete nv.derrame; delete nv.matriz; }
+          if (nv) { delete nv.derrame; delete nv.matriz; delete nv.fija; }
           if (nv && nv.formula && destino !== x.f) nv.formula = LibroXlsx.desplazarFormula(nv.formula, destino - x.f, 0);
           celdas.push({ f: destino, c: r.c0 + j, v: nv });
         });

@@ -269,5 +269,5 @@
     });
   }
 
-  globalThis.EstructuraLibro = { insertarFilas, quitarFilas, insertarColumnas, quitarColumnas, agregarHoja, renombrarHoja, quitarHoja, moverHoja, combinar, separar, inmovilizar, anchoColumnas, altoFilas, nombreValido };
+  globalThis.EstructuraLibro = { _ponerEnHoja: ponerEnHoja, insertarFilas, quitarFilas, insertarColumnas, quitarColumnas, agregarHoja, renombrarHoja, quitarHoja, moverHoja, combinar, separar, inmovilizar, anchoColumnas, altoFilas, nombreValido };
 })();

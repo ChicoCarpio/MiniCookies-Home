@@ -143,6 +143,14 @@
         const ref = /\bref\s*=\s*["']([^"']+)["']/.exec(m[1]);
         const r = ref && LibroXlsx.decodificarRango(ref[1]);
         if (!r) continue;
+        // mover una matricial: se escribe entera, o solo cambia el texto de su maestra (lo que apunta a celdas que se movieron)
+        if (/\bt\s*=\s*["']array["']/.test(m[1])) {
+          const maestra = mapa.get(r.f0) && mapa.get(r.f0).get(r.c0);
+          if (maestra && maestra.valor && maestra.valor.fija) continue;
+          let entera = (r.f1 - r.f0 + 1) * (r.c1 - r.c0 + 1) <= 100000;
+          for (let f = r.f0; entera && f <= r.f1; f++) for (let c = r.c0; entera && c <= r.c1; c++) entera = !!(mapa.get(f) && mapa.get(f).has(c));
+          if (entera) continue;
+        }
         for (const f of filasCambiadas) {
           if (f < r.f0 || f > r.f1) continue;
           for (const c of mapa.get(f).keys()) if (c >= r.c0 && c <= r.c1) throw new ErrorEscritor('la celda ' + numeroACol(c) + (f + 1) + ' está dentro de una fórmula matricial o de una tabla de datos (' + ref[1] + ')');
@@ -168,7 +176,7 @@
           if (!cm.has(col)) continue;
           const f = X.hijo(celda, 'f');
           if (!f) continue;
-          if ((f.attrs.t === 'array' && !celda.attrs.cm) || f.attrs.t === 'dataTable') throw new ErrorEscritor('la celda ' + numeroACol(col) + n + ' es de una fórmula matricial o de una tabla de datos');
+          if ((f.attrs.t === 'array' && !celda.attrs.cm && !f.attrs.ref) || f.attrs.t === 'dataTable') throw new ErrorEscritor('la celda ' + numeroACol(col) + n + ' es de una fórmula matricial o de una tabla de datos');
           // si va dentro de una expresión regular y de un atributo: solo dígitos (un libro hostil podría traer cualquier cosa)
           if (f.attrs.t === 'shared' && f.attrs.ref && f.fin > f.finApertura && /^\d+$/.test(f.attrs.si || '')) promociones.push({ si: f.attrs.si, ref: f.attrs.ref, formula: X.decodificar(X.interior(texFila, f)), f: n - 1, c: col, desde: fila.ini });
         }

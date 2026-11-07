@@ -12,7 +12,7 @@
     'nombre-archivo': 'Nombre del archivo', 'mas-opciones': 'Más opciones', 'cinta': 'Cinta', 'cuadro-nombre': 'Cuadro de nombre', 'contenido-celda': 'Contenido de la celda', 'inspector': 'Propiedades',
     'tab-inicio': 'Inicio', 'tab-insertar': 'Insertar', 'tab-datos': 'Datos', 'tab-vista': 'Vista',
     'g-historial': 'Deshacer', 'g-portapapeles': 'Portapapeles', 'g-fuente': 'Fuente', 'g-alineacion': 'Alineación', 'g-numero': 'Número', 'g-celdas': 'Celdas', 'g-edicion': 'Edición', 'g-funciones': 'Funciones', 'g-archivo': 'Archivo', 'g-zoom': 'Zoom', 'g-ventana': 'Ventana', 'g-buscar': 'Buscar',
-    'cmd-deshacer': 'Deshacer', 'cmd-rehacer': 'Rehacer', 'cmd-cortar': 'Cortar', 'cmd-copiar': 'Copiar', 'cmd-pegar': 'Pegar', 'cmd-negrita': 'Negrita', 'cmd-cursiva': 'Cursiva', 'cmd-subrayado': 'Subrayado', 'cmd-tachado': 'Tachado',
+    'cmd-deshacer': 'Deshacer', 'cmd-rehacer': 'Rehacer', 'cmd-cortar': 'Cortar', 'cmd-copiar': 'Copiar', 'cmd-pegar': 'Pegar', 'cmd-pegar-valores': 'Pegar valores', 'cmd-negrita': 'Negrita', 'cmd-cursiva': 'Cursiva', 'cmd-subrayado': 'Subrayado', 'cmd-tachado': 'Tachado',
     'cmd-color': 'Color de fuente', 'cmd-relleno': 'Color de relleno', 'cmd-sin-relleno': 'Sin relleno', 'cmd-izquierda': 'Alinear a la izquierda', 'cmd-centro': 'Centrar', 'cmd-derecha': 'Alinear a la derecha', 'cmd-ajustar': 'Ajustar texto',
     'cmd-formato': 'Formato de número', 'cmd-mas-decimales': 'Aumentar decimales', 'cmd-menos-decimales': 'Disminuir decimales', 'cmd-bordes': 'Todos los bordes', 'cmd-sin-bordes': 'Sin bordes',
     'cmd-borrar': 'Borrar contenido', 'cmd-borrar-formato': 'Borrar formato', 'cmd-autosuma': 'Autosuma', 'cmd-buscar': 'Buscar', 'cmd-descargar': 'Descargar el libro', 'cmd-descargar-corto': 'Descargar', 'cmd-csv': 'Exportar la hoja como .csv',
@@ -22,7 +22,7 @@
     'guardado-local': 'Guardado en este navegador a las {0}', 'sin-cambios': 'Sin cambios', 'cambios-sin-descargar': 'Cambios sin descargar', 'descargado': 'Descargado',
     'aviso-protegida': 'Esa celda es parte de una tabla o de una fórmula matricial: se edita en Excel', 'aviso-formula': 'La fórmula tiene un error: revísala (paréntesis, comillas, separadores)',
     'aviso-no-soportadas': '{0} fórmulas usan funciones que aún no se calculan aquí: conservan su valor y Excel las recalcula al abrir', 'aviso-circular': 'Hay una referencia circular: la fórmula da 0',
-    'aviso-pegado-grande': 'Lo pegado es demasiado grande (más de {0} celdas)', 'aviso-copiado': 'Copiado', 'aviso-portapapeles': 'El navegador no deja leer el portapapeles: usa Ctrl+V',
+    'aviso-pegado-grande': 'Lo pegado es demasiado grande (más de {0} celdas)', 'aviso-copiado': 'Copiado', 'aviso-cortado': 'Cortado: se mueve al pegar. Esc cancela', 'aviso-mover-combinada': 'No se puede mover una parte de una celda combinada', 'aviso-mover-matriz': 'No se puede cambiar una parte de una matriz', 'aviso-mover-limite': 'No se puede mover: se saldría de la hoja', 'aviso-valores-cortado': 'Pegar valores no se puede usar con lo cortado', 'aviso-portapapeles': 'El navegador no deja leer el portapapeles: usa Ctrl+V',
     'honesta-conserva': 'Se conserva al guardar, sin editar aquí: {0}.', 'honesta-convertido': 'Este archivo venía en otro formato: se guarda como .xlsx.', 'honesta-todo': 'Todo el contenido del archivo se puede editar aquí.',
     'x-graficos': 'imágenes, formas o gráficos que no se editan', 'x-macros': 'macros', 'x-notas': 'notas', 'x-tablas': 'encabezados de tablas', 'x-dinamicas': 'tablas dinámicas', 'x-condicional': 'reglas de formato de Excel 2010', 'x-validacion': 'validación de datos', 'x-minigraficos': 'minigráficos', 'x-imagenes': 'imágenes en celdas', 'x-matriciales': 'fórmulas matriciales de Ctrl+Mayús+Intro',
     'i-celda': 'Celda', 'i-tipo': 'Tipo', 'i-valor': 'Valor', 'i-formula': 'Fórmula', 'i-formato': 'Formato', 'i-fuente': 'Fuente', 'i-archivo': 'El archivo', 'i-hojas': 'Hojas', 'i-formulas': 'Fórmulas',
@@ -45,7 +45,7 @@
     'nombre-archivo': 'File name', 'mas-opciones': 'More options', 'cinta': 'Ribbon', 'cuadro-nombre': 'Name box', 'contenido-celda': 'Cell contents', 'inspector': 'Properties',
     'tab-inicio': 'Home', 'tab-insertar': 'Insert', 'tab-datos': 'Data', 'tab-vista': 'View',
     'g-historial': 'Undo', 'g-portapapeles': 'Clipboard', 'g-fuente': 'Font', 'g-alineacion': 'Alignment', 'g-numero': 'Number', 'g-celdas': 'Cells', 'g-edicion': 'Editing', 'g-funciones': 'Functions', 'g-archivo': 'File', 'g-zoom': 'Zoom', 'g-ventana': 'Window', 'g-buscar': 'Find',
-    'cmd-deshacer': 'Undo', 'cmd-rehacer': 'Redo', 'cmd-cortar': 'Cut', 'cmd-copiar': 'Copy', 'cmd-pegar': 'Paste', 'cmd-negrita': 'Bold', 'cmd-cursiva': 'Italic', 'cmd-subrayado': 'Underline', 'cmd-tachado': 'Strikethrough',
+    'cmd-deshacer': 'Undo', 'cmd-rehacer': 'Redo', 'cmd-cortar': 'Cut', 'cmd-copiar': 'Copy', 'cmd-pegar': 'Paste', 'cmd-pegar-valores': 'Paste values', 'cmd-negrita': 'Bold', 'cmd-cursiva': 'Italic', 'cmd-subrayado': 'Underline', 'cmd-tachado': 'Strikethrough',
     'cmd-color': 'Font color', 'cmd-relleno': 'Fill color', 'cmd-sin-relleno': 'No fill', 'cmd-izquierda': 'Align left', 'cmd-centro': 'Center', 'cmd-derecha': 'Align right', 'cmd-ajustar': 'Wrap text',
     'cmd-formato': 'Number format', 'cmd-mas-decimales': 'Increase decimals', 'cmd-menos-decimales': 'Decrease decimals', 'cmd-bordes': 'All borders', 'cmd-sin-bordes': 'No borders',
     'cmd-borrar': 'Clear contents', 'cmd-borrar-formato': 'Clear formats', 'cmd-autosuma': 'AutoSum', 'cmd-buscar': 'Find', 'cmd-descargar': 'Download the workbook', 'cmd-descargar-corto': 'Download', 'cmd-csv': 'Export sheet as .csv',
@@ -55,7 +55,7 @@
     'guardado-local': 'Saved in this browser at {0}', 'sin-cambios': 'No changes', 'cambios-sin-descargar': 'Changes not downloaded', 'descargado': 'Downloaded',
     'aviso-protegida': 'That cell belongs to a table or an array formula: edit it in Excel', 'aviso-formula': 'The formula has an error: check parentheses, quotes and separators',
     'aviso-no-soportadas': '{0} formulas use functions not calculated here yet: they keep their value and Excel recalculates them on open', 'aviso-circular': 'There is a circular reference: the formula returns 0',
-    'aviso-pegado-grande': 'What you pasted is too large (more than {0} cells)', 'aviso-copiado': 'Copied', 'aviso-portapapeles': 'The browser won’t let us read the clipboard: use Ctrl+V',
+    'aviso-pegado-grande': 'What you pasted is too large (more than {0} cells)', 'aviso-copiado': 'Copied', 'aviso-cortado': 'Cut: it moves when you paste. Esc cancels', 'aviso-mover-combinada': 'Can’t move part of a merged cell', 'aviso-mover-matriz': 'You can’t change part of an array', 'aviso-mover-limite': 'Can’t move: it would go off the sheet', 'aviso-valores-cortado': 'Paste values can’t be used with what you cut', 'aviso-portapapeles': 'The browser won’t let us read the clipboard: use Ctrl+V',
     'honesta-conserva': 'Kept as is when saving, not editable here: {0}.', 'honesta-convertido': 'This file came in another format: it is saved as .xlsx.', 'honesta-todo': 'Everything in this file can be edited here.',
     'x-graficos': 'images, shapes or charts that can’t be edited', 'x-macros': 'macros', 'x-notas': 'notes', 'x-tablas': 'table headers', 'x-dinamicas': 'pivot tables', 'x-condicional': 'Excel 2010 formatting rules', 'x-validacion': 'data validation', 'x-minigraficos': 'sparklines', 'x-imagenes': 'images in cells', 'x-matriciales': 'Ctrl+Shift+Enter array formulas',
     'i-celda': 'Cell', 'i-tipo': 'Type', 'i-valor': 'Value', 'i-formula': 'Formula', 'i-formato': 'Format', 'i-fuente': 'Font', 'i-archivo': 'The file', 'i-hojas': 'Sheets', 'i-formulas': 'Formulas',
@@ -95,7 +95,11 @@
   });
   interfaz.lienzo.append(crearEl('div', { class: 'hc-rejilla', id: 'rejilla' }));
   const insp = Oficina.inspector(interfaz.inspector);
-  let portapapeles = null;   // lo último copiado aquí: { texto, h, r, celdas } (para pegar fórmulas y formato sin pérdida)
+  let portapapeles = null;   // lo último copiado aquí: { texto, h, r, celdas, ed, cortado } (para pegar fórmulas y formato sin pérdida)
+  let pegadoDeCorte = null;  // el texto de lo cortado que ya se pegó
+  let teclaValores = false;  // Ctrl+Mayús+V: el evento de pegar que sigue es de valores
+  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'v') teclaValores = true; }, true);
+  document.addEventListener('keyup', (e) => { if (e.key.toLowerCase() === 'v') setTimeout(() => { teclaValores = false; }, 0); }, true);
 
   // ---- abrir ----------------------------------------------------------------------------------------------------
   const esXlsx = (n) => /\.(xlsx|xlsm|ods)$/i.test(n);   // los que se abren y se guardan en su propio formato (.ods con el backend de ODS)
@@ -155,7 +159,7 @@
     const lector = { libroMotor: ed.libro, hojas: ed.nombres().filter((x) => x.tipo === 'hoja').map((x) => ({ nombre: x.nombre, indice: x.indice, estado: x.estado })), opciones: { idioma: idioma(), decimal: idioma() === 'en' ? '.' : ',', miles: idioma() === 'en' ? ',' : '.' } };
     rejilla = await RejillaHoja.crear($('rejilla'), {
       libro: lector, editable: true,
-      alEditar: (x) => abrirEditor(x), alBorrar: (r) => borrar(r), alCopiar: (e, cortar) => copiar(e, cortar), alPegar: (e) => pegar(e.clipboardData),
+      alEditar: (x) => abrirEditor(x), alBorrar: (r) => borrar(r), alCopiar: (e, cortar) => copiar(e, cortar), alPegar: (e) => { const valores = teclaValores; teclaValores = false; pegar(e.clipboardData, { valores }); }, alEscape: () => soltarCorte(),
       alTecla: () => false,
     });
     rejilla.alCambiar(() => { cerrarEditorSiOtraCelda(); actualizarBarra(); actualizarInspector(); comandos.refrescar(); for (const g of ganchos.alSeleccionar) g(); });
@@ -228,6 +232,7 @@
 
   // ---- historial → recálculo, pintado, autoguardado ---------------------------------------------------------------------
   function alCambiarHistorial() {
+    soltarCorte();
     const r = ed.terminar();
     if (vistaPendiente) { const v = vistaPendiente; vistaPendiente = null; rejillaLista = crearRejilla(v).then(() => { lineaHonesta(); actualizarBarra(); actualizarInspector(); comandos.refrescar(); rejilla.enfocar(); }).catch((e) => console.warn(e)); }
     else if (rejilla) rejilla.refrescar();
@@ -288,6 +293,7 @@
   let editando = null;   // { h, f, c, modo: 'tecla'|'f2'|'doble'|'barra' }
   function abrirEditor(x) {
     if (lectura || !ed) return;
+    soltarCorte();
     const h = hojaActiva();
     if (ed.protegida(h, x.f, x.c)) { avisar(tx('aviso-protegida')); return; }
     editando = { h, f: x.f, c: x.c, modo: x.modo };
@@ -448,7 +454,7 @@
       filasTexto.push(t.join('\t')); filasHtml.push('<tr>' + hh.join('') + '</tr>'); celdas.push(fila);
     }
     const texto = filasTexto.join('\r\n');
-    return { texto, html: '<table>' + filasHtml.join('') + '</table>', interno: { texto, h, r: { f0: r.f0, c0: r.c0 }, celdas } };
+    return { texto, html: '<table>' + filasHtml.join('') + '</table>', interno: { texto, h, r: { f0: r.f0, c0: r.c0, f1, c1 }, celdas, ed } };
   }
   function copiar(e, cortar) {
     if (!ed) return false;
@@ -459,10 +465,29 @@
       try { navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([c.texto], { type: 'text/plain' }), 'text/html': new Blob([c.html], { type: 'text/html' }) })]); }
       catch (x) { navigator.clipboard && navigator.clipboard.writeText(c.texto); }
     }
+    soltarCorte();
+    pegadoDeCorte = null;
     portapapeles = c.interno;
-    if (cortar && !lectura) borrar(seleccion());
-    avisar(tx('aviso-copiado'));
+    // cortar no vacía nada: lo marca, y se mueve al pegar (como Excel). Hasta entonces, Esc o cualquier cambio lo cancelan
+    if (cortar && !lectura) { portapapeles.cortado = true; rejilla.marcarCorte(Object.assign({ h: portapapeles.h }, portapapeles.r)); avisar(tx('aviso-cortado')); }
+    else avisar(tx('aviso-copiado'));
     return true;
+  }
+  function soltarCorte() {
+    if (!portapapeles || !portapapeles.cortado) return;
+    pegadoDeCorte = portapapeles.texto;   // lo cancelado ya no se pega: el portapapeles del sistema todavía lo tiene y no se puede vaciar sin permiso
+    portapapeles = null;
+    if (rejilla) rejilla.marcarCorte(null);
+  }
+  function pegarCorte(P, h, s) {
+    const m = ed.opMover(P.h, P.r, h, s.f0, s.c0);
+    if (m.error) { avisar(tx(m.error === 'protegida' ? 'aviso-protegida' : m.error === 'combinada' ? 'aviso-mover-combinada' : m.error === 'matriz' ? 'aviso-mover-matriz' : 'aviso-mover-limite')); return; }
+    soltarCorte();   // se pega una sola vez
+    const destino = { f0: s.f0, c0: s.c0, f1: s.f0 + P.r.f1 - P.r.f0, c1: s.c0 + P.r.c1 - P.r.c0 };
+    // lo que no es una celda (nombres, reglas, gráficos, combinadas) se reescribe en el archivo, como un cambio de estructura
+    if (m.objetos) return estructural('Mover', (b) => MoverObjetos.aplicar(b, P.h, P.r, h, s.f0, s.c0, { idioma: idioma() }), { hoja: h, sel: destino });
+    if (!m.ops.length || !hist.hacer('Mover', m.ops)) return;
+    rejilla.seleccionar(destino.f0, destino.c0, destino.f1, destino.c1);
   }
   // matriz de textos desde lo pegado: tabla HTML (Excel, Google, la web) o texto separado por tabuladores
   function matrizDe(html, texto) {
@@ -483,7 +508,9 @@
     const lineas = texto.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n');
     return lineas.map((l) => l.split('\t'));
   }
-  async function pegarDesdeBoton() {
+  async function pegarDesdeBoton(opciones) {
+    const o = opciones || {};
+    if (o.valores && portapapeles && portapapeles.cortado) { avisar(tx('aviso-valores-cortado')); return; }
     try {
       const items = await navigator.clipboard.read();
       let html = '', texto = '';
@@ -491,23 +518,44 @@
         if (it.types.includes('text/html')) html = await (await it.getType('text/html')).text();
         if (it.types.includes('text/plain')) texto = await (await it.getType('text/plain')).text();
       }
-      pegar({ getData: (t) => (t === 'text/html' ? html : t === 'text/plain' ? texto : '') });
-    } catch (e) { avisar(tx('aviso-portapapeles')); }
+      pegar({ getData: (t) => (t === 'text/html' ? html : t === 'text/plain' ? texto : '') }, o);
+    } catch (e) {
+      // sin permiso para leer el portapapeles: lo copiado aquí mismo sigue a mano
+      if (portapapeles) { const P = portapapeles; pegar({ getData: (t) => (t === 'text/plain' ? P.texto : '') }, o); }
+      else avisar(tx('aviso-portapapeles'));
+    }
   }
-  function pegar(datos) {
+  function pegar(datos, opciones) {
     if (lectura || !ed || !datos) return;
+    const o = opciones || {};
     const texto = datos.getData('text/plain') || '', html = datos.getData('text/html') || '';
     const h = hojaActiva(), s = seleccion(), celdas = [];
-    if (portapapeles && texto.replace(/\r\n?/g, '\n') === portapapeles.texto.replace(/\r\n?/g, '\n')) {
-      // pegado desde esta misma app: valores, fórmulas (con las referencias relativas corridas) y formato
-      const P = portapapeles, df = s.f0 - P.r.f0, dc = s.c0 - P.r.c0;
-      P.celdas.forEach((fila, i) => fila.forEach((x, j) => {
-        const f = s.f0 + i, c = s.c0 + j;
+    const igual = (a, b) => a.replace(/\r\n?/g, '\n') === b.replace(/\r\n?/g, '\n');
+    if (pegadoDeCorte !== null && igual(texto, pegadoDeCorte)) return;
+    if (portapapeles && igual(texto, portapapeles.texto)) {
+      const P = portapapeles;
+      if (P.cortado && P.ed === ed) {
+        if (o.valores) avisar(tx('aviso-valores-cortado')); else pegarCorte(P, h, s);
+        return;
+      }
+      // pegado desde esta misma app: valores, fórmulas (con las referencias relativas corridas) y formato; si la selección es un múltiplo de lo copiado, se repite
+      const alto = P.celdas.length, ancho = P.celdas[0].length, sa = s.f1 - s.f0 + 1, sb = s.c1 - s.c0 + 1;
+      const rf = sa % alto === 0 && sb % ancho === 0 ? sa / alto : 1, rc = sa % alto === 0 && sb % ancho === 0 ? sb / ancho : 1;
+      if (rf * rc * alto * ancho > MAX_PEGAR) { avisar(tx('aviso-pegado-grande', MAX_PEGAR)); return; }
+      for (let a = 0; a < rf; a++) for (let b = 0; b < rc; b++) P.celdas.forEach((fila, i) => fila.forEach((x, j) => {
+        const f = s.f0 + a * alto + i, c = s.c0 + b * ancho + j;
         let v = x ? Object.assign({}, x) : null;
+        if (o.valores) {
+          // el valor que se ve, con el formato que ya tiene el destino; lo vacío también se pega
+          const d = ed.estadoDe(h, f, c), est = d ? d.estilo : ed.hojas[h].estiloDe ? ed.hojas[h].estiloDe(f, c) : 0;
+          v = v && v.tipo !== 'vacio' ? { tipo: v.tipo, valor: v.valor, formula: null, estilo: est } : est ? { tipo: 'vacio', valor: null, formula: null, estilo: est } : null;
+          celdas.push({ f, c, v });
+          return;
+        }
         // como Excel: del desborde se pega solo la fórmula del ancla (vuelve a desbordar); sus otras celdas quedan vacías, con su formato
         if (v && v.derrame) v = v.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: v.estilo } : null;
-        if (v) delete v.matriz;
-        if (v && v.formula) v.formula = LibroXlsx.desplazarFormula(v.formula, df, dc);
+        if (v) { delete v.matriz; delete v.fija; }
+        if (v && v.formula) v.formula = LibroXlsx.desplazarFormula(v.formula, f - P.r.f0 - i, c - P.r.c0 - j);
         if (v && P.h !== h && v.estilo && v.estilo >= ed.libro.estilos.cantidadXfs) v.estilo = 0;
         celdas.push({ f, c, v });
       }));
@@ -603,6 +651,7 @@
       const destino = f0 + k;
       x.fila.forEach((v, j) => {
         let nv = v ? Object.assign({}, v) : null;
+        if (nv) delete nv.fija;
         if (nv && nv.formula && destino !== x.f) nv.formula = LibroXlsx.desplazarFormula(nv.formula, destino - x.f, 0);
         celdas.push({ f: destino, c: r.c0 + j, v: nv });
       });
@@ -703,7 +752,8 @@
   reg({ id: 'rehacer', texto: 'cmd-rehacer', atajo: ['mod+y', 'mod+shift+z'], ejecutar: () => hist.rehacer(), habilitado: () => editable() && hist.puedeRehacer() });
   reg({ id: 'cortar', texto: 'cmd-cortar', ejecutar: () => copiar(null, true) });
   reg({ id: 'copiar', texto: 'cmd-copiar', ejecutar: () => copiar(null, false), habilitado: hayLibro });
-  reg({ id: 'pegar', texto: 'cmd-pegar', ejecutar: pegarDesdeBoton });
+  reg({ id: 'pegar', texto: 'cmd-pegar', ejecutar: () => pegarDesdeBoton() });
+  reg({ id: 'pegarValores', texto: 'cmd-pegar-valores', ejecutar: () => pegarDesdeBoton({ valores: true }) });
   reg({ id: 'negrita', texto: 'cmd-negrita', atajo: 'mod+b', ejecutar: alternar('negrita', 'Negrita'), activo: () => !!propsActivas().negrita });
   reg({ id: 'cursiva', texto: 'cmd-cursiva', atajo: 'mod+i', ejecutar: alternar('cursiva', 'Cursiva'), activo: () => !!propsActivas().cursiva });
   reg({ id: 'subrayado', texto: 'cmd-subrayado', atajo: 'mod+u', ejecutar: alternar('subrayado', 'Subrayado'), activo: () => !!propsActivas().subrayado });
@@ -798,7 +848,7 @@
   for (const ext of window.HojasExtensiones || []) ext(extension);
   const CINTA = [
     { id: 'inicio', texto: 'tab-inicio', grupos: [
-      { texto: 'g-portapapeles', items: [{ comando: 'pegar', icono: '📋' }, { comando: 'cortar', icono: '✂' }, { comando: 'copiar', icono: '⧉' }] },
+      { texto: 'g-portapapeles', items: [{ comando: 'pegar', icono: '📋' }, { comando: 'pegarValores', icono: '123' }, { comando: 'cortar', icono: '✂' }, { comando: 'copiar', icono: '⧉' }] },
       { texto: 'g-fuente', items: [{ comando: 'negrita', icono: 'B' }, { comando: 'cursiva', icono: 'I' }, { comando: 'subrayado', icono: 'U' }, { comando: 'tachado', icono: 'S̶', solo: 'pc' }, { comando: 'colorFuente', tipo: 'color', icono: 'A', porDefecto: '#C00000' }, { comando: 'relleno', tipo: 'color', icono: '◧', porDefecto: '#FFFF00' }, { comando: 'sinRelleno', icono: '⊘', solo: 'pc' }] },
       { texto: 'g-alineacion', items: [{ comando: 'izquierda', icono: '⇤' }, { comando: 'centro', icono: '↔' }, { comando: 'derecha', icono: '⇥' }, { comando: 'ajustar', icono: '↵', solo: 'pc' }] },
       { texto: 'g-numero', items: [{ comando: 'formato', tipo: 'select', opciones: [['', 'cmd-formato'], ['general', 'fmt-general'], ['numero', 'fmt-numero'], ['miles', 'fmt-miles'], ['moneda', 'fmt-moneda'], ['porcentaje', 'fmt-porcentaje'], ['fecha', 'fmt-fecha'], ['hora', 'fmt-hora'], ['texto', 'fmt-texto']] }, { comando: 'menosDecimales', icono: '.0←', solo: 'pc' }, { comando: 'masDecimales', icono: '.00→', solo: 'pc' }] },

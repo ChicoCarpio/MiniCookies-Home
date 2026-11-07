@@ -274,7 +274,7 @@
   const RE_ERR = /^#(?:NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|GETTING_DATA)/i;
   const colANum = (s) => { let n = 0; for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) & 31); return n - 1; };
 
-  // El texto a tokens. Cada uno lleva `esp`: ¿había un espacio antes? (entre dos referencias, un espacio es el operador de intersección); e `i`: dónde empieza.
+  // El texto a tokens. Cada uno lleva `esp`: ¿había un espacio antes? (entre dos referencias, un espacio es el operador de intersección); e `i` y `l`: dónde empieza y cuánto mide.
   function tokenizar(t) {
     const out = [];
     let i = 0, esp = false;
@@ -284,7 +284,7 @@
       if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') { esp = true; i++; continue; }
       const resto = t.slice(i, i + 400);
       let m;
-      const poner = (tok, largo) => { tok.esp = esp; tok.i = i; esp = false; out.push(tok); i += largo; };
+      const poner = (tok, largo) => { tok.esp = esp; tok.i = i; tok.l = largo; esp = false; out.push(tok); i += largo; };
       if (ch === '"') {
         let j = i + 1, s = '';
         for (;;) { if (j >= t.length) no('texto sin cerrar'); if (t[j] === '"') { if (t[j + 1] === '"') { s += '"'; j += 2; continue; } break; } s += t[j++]; }
