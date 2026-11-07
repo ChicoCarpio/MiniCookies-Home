@@ -22,7 +22,7 @@
     'guardado-local': 'Guardado en este navegador a las {0}', 'sin-cambios': 'Sin cambios', 'cambios-sin-descargar': 'Cambios sin descargar', 'descargado': 'Descargado',
     'aviso-protegida': 'Esa celda es parte de una tabla o de una fórmula matricial: se edita en Excel', 'aviso-formula': 'La fórmula tiene un error: revísala (paréntesis, comillas, separadores)',
     'aviso-no-soportadas': '{0} fórmulas usan funciones que aún no se calculan aquí: conservan su valor y Excel las recalcula al abrir', 'aviso-circular': 'Hay una referencia circular: la fórmula da 0',
-    'aviso-pegado-grande': 'Lo pegado es demasiado grande (más de {0} celdas)', 'aviso-copiado': 'Copiado', 'aviso-cortado': 'Cortado: se mueve al pegar. Esc cancela', 'aviso-mover-combinadas': 'No se puede mover: hay celdas combinadas', 'aviso-mover-limite': 'No se puede mover: se saldría de la hoja', 'aviso-valores-cortado': 'Pegar valores no se puede usar con lo cortado', 'aviso-mover-nombres': 'Se movió, pero estos nombres siguen apuntando al lugar anterior: {0}', 'aviso-portapapeles': 'El navegador no deja leer el portapapeles: usa Ctrl+V',
+    'aviso-pegado-grande': 'Lo pegado es demasiado grande (más de {0} celdas)', 'aviso-copiado': 'Copiado', 'aviso-cortado': 'Cortado: se mueve al pegar. Esc cancela', 'aviso-mover-combinada': 'No se puede mover una parte de una celda combinada', 'aviso-mover-matriz': 'No se puede cambiar una parte de una matriz', 'aviso-mover-limite': 'No se puede mover: se saldría de la hoja', 'aviso-valores-cortado': 'Pegar valores no se puede usar con lo cortado', 'aviso-portapapeles': 'El navegador no deja leer el portapapeles: usa Ctrl+V',
     'honesta-conserva': 'Se conserva al guardar, sin editar aquí: {0}.', 'honesta-convertido': 'Este archivo venía en otro formato: se guarda como .xlsx.', 'honesta-todo': 'Todo el contenido del archivo se puede editar aquí.',
     'x-graficos': 'imágenes, formas o gráficos que no se editan', 'x-macros': 'macros', 'x-notas': 'notas', 'x-tablas': 'encabezados de tablas', 'x-dinamicas': 'tablas dinámicas', 'x-condicional': 'reglas de formato de Excel 2010', 'x-validacion': 'validación de datos', 'x-minigraficos': 'minigráficos', 'x-imagenes': 'imágenes en celdas', 'x-matriciales': 'fórmulas matriciales de Ctrl+Mayús+Intro',
     'i-celda': 'Celda', 'i-tipo': 'Tipo', 'i-valor': 'Valor', 'i-formula': 'Fórmula', 'i-formato': 'Formato', 'i-fuente': 'Fuente', 'i-archivo': 'El archivo', 'i-hojas': 'Hojas', 'i-formulas': 'Fórmulas',
@@ -55,7 +55,7 @@
     'guardado-local': 'Saved in this browser at {0}', 'sin-cambios': 'No changes', 'cambios-sin-descargar': 'Changes not downloaded', 'descargado': 'Downloaded',
     'aviso-protegida': 'That cell belongs to a table or an array formula: edit it in Excel', 'aviso-formula': 'The formula has an error: check parentheses, quotes and separators',
     'aviso-no-soportadas': '{0} formulas use functions not calculated here yet: they keep their value and Excel recalculates them on open', 'aviso-circular': 'There is a circular reference: the formula returns 0',
-    'aviso-pegado-grande': 'What you pasted is too large (more than {0} cells)', 'aviso-copiado': 'Copied', 'aviso-cortado': 'Cut: it moves when you paste. Esc cancels', 'aviso-mover-combinadas': 'Can’t move: there are merged cells', 'aviso-mover-limite': 'Can’t move: it would go off the sheet', 'aviso-valores-cortado': 'Paste values can’t be used with what you cut', 'aviso-mover-nombres': 'Moved, but these names still point to the old place: {0}', 'aviso-portapapeles': 'The browser won’t let us read the clipboard: use Ctrl+V',
+    'aviso-pegado-grande': 'What you pasted is too large (more than {0} cells)', 'aviso-copiado': 'Copied', 'aviso-cortado': 'Cut: it moves when you paste. Esc cancels', 'aviso-mover-combinada': 'Can’t move part of a merged cell', 'aviso-mover-matriz': 'You can’t change part of an array', 'aviso-mover-limite': 'Can’t move: it would go off the sheet', 'aviso-valores-cortado': 'Paste values can’t be used with what you cut', 'aviso-portapapeles': 'The browser won’t let us read the clipboard: use Ctrl+V',
     'honesta-conserva': 'Kept as is when saving, not editable here: {0}.', 'honesta-convertido': 'This file came in another format: it is saved as .xlsx.', 'honesta-todo': 'Everything in this file can be edited here.',
     'x-graficos': 'images, shapes or charts that can’t be edited', 'x-macros': 'macros', 'x-notas': 'notes', 'x-tablas': 'table headers', 'x-dinamicas': 'pivot tables', 'x-condicional': 'Excel 2010 formatting rules', 'x-validacion': 'data validation', 'x-minigraficos': 'sparklines', 'x-imagenes': 'images in cells', 'x-matriciales': 'Ctrl+Shift+Enter array formulas',
     'i-celda': 'Cell', 'i-tipo': 'Type', 'i-valor': 'Value', 'i-formula': 'Formula', 'i-formato': 'Format', 'i-fuente': 'Font', 'i-archivo': 'The file', 'i-hojas': 'Sheets', 'i-formulas': 'Formulas',
@@ -481,11 +481,13 @@
   }
   function pegarCorte(P, h, s) {
     const m = ed.opMover(P.h, P.r, h, s.f0, s.c0);
-    if (m.error) { avisar(tx(m.error === 'protegida' ? 'aviso-protegida' : m.error === 'combinadas' ? 'aviso-mover-combinadas' : 'aviso-mover-limite')); return; }
+    if (m.error) { avisar(tx(m.error === 'protegida' ? 'aviso-protegida' : m.error === 'combinada' ? 'aviso-mover-combinada' : m.error === 'matriz' ? 'aviso-mover-matriz' : 'aviso-mover-limite')); return; }
     soltarCorte();   // se pega una sola vez
+    const destino = { f0: s.f0, c0: s.c0, f1: s.f0 + P.r.f1 - P.r.f0, c1: s.c0 + P.r.c1 - P.r.c0 };
+    // lo que no es una celda (nombres, reglas, gráficos, combinadas) se reescribe en el archivo, como un cambio de estructura
+    if (m.objetos) return estructural('Mover', (b) => MoverObjetos.aplicar(b, P.h, P.r, h, s.f0, s.c0, { idioma: idioma() }), { hoja: h, sel: destino });
     if (!m.ops.length || !hist.hacer('Mover', m.ops)) return;
-    rejilla.seleccionar(s.f0, s.c0, s.f0 + P.r.f1 - P.r.f0, s.c0 + P.r.c1 - P.r.c0);
-    if (m.nombresSinMover.length) avisar(tx('aviso-mover-nombres', m.nombresSinMover.join(', ')));
+    rejilla.seleccionar(destino.f0, destino.c0, destino.f1, destino.c1);
   }
   // matriz de textos desde lo pegado: tabla HTML (Excel, Google, la web) o texto separado por tabuladores
   function matrizDe(html, texto) {
@@ -552,7 +554,7 @@
         }
         // como Excel: del desborde se pega solo la fórmula del ancla (vuelve a desbordar); sus otras celdas quedan vacías, con su formato
         if (v && v.derrame) v = v.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: v.estilo } : null;
-        if (v) delete v.matriz;
+        if (v) { delete v.matriz; delete v.fija; }
         if (v && v.formula) v.formula = LibroXlsx.desplazarFormula(v.formula, f - P.r.f0 - i, c - P.r.c0 - j);
         if (v && P.h !== h && v.estilo && v.estilo >= ed.libro.estilos.cantidadXfs) v.estilo = 0;
         celdas.push({ f, c, v });
@@ -649,6 +651,7 @@
       const destino = f0 + k;
       x.fila.forEach((v, j) => {
         let nv = v ? Object.assign({}, v) : null;
+        if (nv) delete nv.fija;
         if (nv && nv.formula && destino !== x.f) nv.formula = LibroXlsx.desplazarFormula(nv.formula, destino - x.f, 0);
         celdas.push({ f: destino, c: r.c0 + j, v: nv });
       });

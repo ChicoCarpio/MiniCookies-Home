@@ -111,7 +111,7 @@
     if (ab === null || ab === undefined) throw Err('una fórmula no se puede escribir de nuevo: ' + nuevo.slice(0, 80));
     return 'of:=' + ab;
   }
-  function reescribirTodo(texto, h, rw) {
+  function reescribirTodo(texto, h, rw, soloObjetos) {
     const d = documento(texto);
     const rangos = d.tablas.map((t) => [t.ini, t.fin]);
     const dueno = (pos) => { for (let k = 0; k < rangos.length; k++) if (pos >= rangos[k][0] && pos < rangos[k][1]) return k; return -1; };
@@ -119,7 +119,7 @@
     // table:formula="of:=…" de cada celda
     const reF = /(\stable:formula=")([^"]*)(")/g;
     let m;
-    while ((m = reF.exec(texto))) {
+    while (!soloObjetos && (m = reF.exec(texto))) {
       const of = X().decodificar(m[2]);
       if (!of.startsWith('of:=')) { if (/\[/.test(of)) throw Err('una fórmula no está en OpenFormula: ' + of.slice(0, 60)); continue; }
       const nuevo = rehacer(of, dueno(m.index) === h, rw);
@@ -291,6 +291,13 @@
     }
     if (manifiesto !== null) p.escribir('META-INF/manifest.xml', manifiesto);
   }
+
+  // lo que apunta a celdas sin ser una celda (nombres, validación, formato condicional, gráficos): lo usa mover celdas (hojas/mover-objetos.js)
+  const reescribirReferencias = (bytes, h, rw) => conPaquete(bytes, async (p) => {
+    const texto = await p.leer('content.xml');
+    p.escribir('content.xml', reescribirTodo(texto, h, rw, true));
+    await reescribirObjetos(p, rw);
+  });
 
   // ======================================================== filas ========================================================
   async function insertarFilas(bytes, h, fila, n) {
@@ -718,6 +725,6 @@
     });
   }
 
-  globalThis.EstructuraOds = { insertarFilas, quitarFilas, insertarColumnas, quitarColumnas, agregarHoja, renombrarHoja, quitarHoja, moverHoja, combinar, separar, inmovilizar, anchoColumnas, altoFilas,
+  globalThis.EstructuraOds = { reescribirReferencias, insertarFilas, quitarFilas, insertarColumnas, quitarColumnas, agregarHoja, renombrarHoja, quitarHoja, moverHoja, combinar, separar, inmovilizar, anchoColumnas, altoFilas,
     _interno: { conPaquete, documento, tablaDe, nombreDe, direccionAExcel, direccionAOds, rehacer, reescribirTodo, citar, comprobarReferencias, nombresUsados, agregarEstilos, bloques, Err } };
 })();
