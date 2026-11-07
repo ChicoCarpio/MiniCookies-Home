@@ -26,6 +26,8 @@
     const hojas = [];
     for (let i = 0; i < libro.hojas.length; i++) hojas[i] = await libro.cargarHoja(i);
     const protegidas = hojas.map((h) => XlsxEscritor.celdasProtegidas(h));
+    // mover celdas: una nota o un enlace viven dentro de la celda
+    libro.extrasDeCelda = /<office:annotation\b|<text:a\b/.test((await paquete.leer('content.xml')) || '');
     // los gráficos (objetos incrustados): el motor los ve como los de Excel, en una vista del paquete; lo que se guarda es `paquete`
     if (globalThis.OdsGraficos) await OdsGraficos.preparar(libro, hojas, paquete);
     const tabla = libro._tablaXf;

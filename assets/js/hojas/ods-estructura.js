@@ -111,7 +111,8 @@
     if (ab === null || ab === undefined) throw Err('una fórmula no se puede escribir de nuevo: ' + nuevo.slice(0, 80));
     return 'of:=' + ab;
   }
-  function reescribirTodo(texto, h, rw, soloObjetos) {
+  // soloObjetos (mover celdas): las fórmulas de las celdas ya están, las reglas y validaciones las hace MoverOds y un rango de base de datos solo sigue si se mueve entero (rwBase)
+  function reescribirTodo(texto, h, rw, soloObjetos, rwBase) {
     const d = documento(texto);
     const rangos = d.tablas.map((t) => [t.ini, t.fin]);
     const dueno = (pos) => { for (let k = 0; k < rangos.length; k++) if (pos >= rangos[k][0] && pos < rangos[k][1]) return k; return -1; };
@@ -149,7 +150,7 @@
       if (!mt) continue;
       const xl = direccionAExcel(X().decodificar(mt[2]));
       if (xl === null) continue;
-      const nuevoXl = rw(xl, false);
+      const nuevoXl = (rwBase || rw)(xl, false);
       if (nuevoXl === xl) continue;
       if (/#REF!/.test(nuevoXl)) {   // el rango desapareció: se va el elemento entero
         const cierre = etiqueta.endsWith('/>') ? -1 : texto.indexOf('</table:database-range>', ini);
@@ -169,6 +170,7 @@
       else eds.push({ ini: m.index, fin: m.index + m[0].length, texto: '' });
     }
     // validación de datos: la condición (con referencias entre corchetes) y la celda base, que dice a qué hoja pertenecen las referencias sin hoja
+    if (soloObjetos) return eds.length ? X().aplicar(texto, eds) : texto;
     const reV = /<table:content-validation\b[^>]*>/g;
     const nombreObjetivo = h >= 0 && d.tablas[h] ? nombreDe(d.tablas[h]) : null;
     while ((m = reV.exec(texto))) {
@@ -293,9 +295,9 @@
   }
 
   // lo que apunta a celdas sin ser una celda (nombres, validación, formato condicional, gráficos): lo usa mover celdas (hojas/mover-objetos.js)
-  const reescribirReferencias = (bytes, h, rw) => conPaquete(bytes, async (p) => {
+  const reescribirReferencias = (bytes, h, rw, rwBase) => conPaquete(bytes, async (p) => {
     const texto = await p.leer('content.xml');
-    p.escribir('content.xml', reescribirTodo(texto, h, rw, true));
+    p.escribir('content.xml', reescribirTodo(texto, h, rw, true, rwBase));
     await reescribirObjetos(p, rw);
   });
 
@@ -726,5 +728,5 @@
   }
 
   globalThis.EstructuraOds = { reescribirReferencias, insertarFilas, quitarFilas, insertarColumnas, quitarColumnas, agregarHoja, renombrarHoja, quitarHoja, moverHoja, combinar, separar, inmovilizar, anchoColumnas, altoFilas,
-    _interno: { conPaquete, documento, tablaDe, nombreDe, direccionAExcel, direccionAOds, rehacer, reescribirTodo, citar, comprobarReferencias, nombresUsados, agregarEstilos, bloques, Err } };
+    _interno: { direccionAExcel, direccionAOds, RE_DIRECCIONES, conPaquete, documento, tablaDe, nombreDe, direccionAExcel, direccionAOds, rehacer, reescribirTodo, citar, comprobarReferencias, nombresUsados, agregarEstilos, bloques, Err } };
 })();

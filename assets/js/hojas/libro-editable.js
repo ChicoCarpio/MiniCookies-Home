@@ -29,16 +29,43 @@
   function rangoTrasMover(r, hr, M) {
     if (hr === M.h0 && r.f0 >= M.f0 && r.f1 <= M.f1 && r.c0 >= M.c0 && r.c1 <= M.c1) return { h: M.h1, f0: r.f0 + M.df, c0: r.c0 + M.dc, f1: r.f1 + M.df, c1: r.c1 + M.dc };
     if (hr === M.h1 && r.f0 >= M.f0 + M.df && r.f1 <= M.f1 + M.df && r.c0 >= M.c0 + M.dc && r.c1 <= M.c1 + M.dc) return 'error';
-    if (hr !== M.h0 || M.h0 !== M.h1) return null;
-    // la fila o columna del borde de un rango, movida de frente: el rango se estira o se encoge (SUM(A1:A3) con A3 → A5 da SUM(A1:A5)), si no pasa del otro extremo
-    if (M.dc === 0 && M.c0 === r.c0 && M.c1 === r.c1) {
-      if (M.f1 === r.f1 && M.f0 > r.f0 && M.f0 + M.df > r.f0) return { h: hr, f0: r.f0, c0: r.c0, f1: r.f1 + M.df, c1: r.c1 };
-      if (M.f0 === r.f0 && M.f1 < r.f1 && M.f1 + M.df < r.f1) return { h: hr, f0: r.f0 + M.df, c0: r.c0, f1: r.f1, c1: r.c1 };
+    const D = { f0: M.f0 + M.df, c0: M.c0 + M.dc, f1: M.f1 + M.df, c1: M.c1 + M.dc };
+    // el borde de un rango, movido de frente y de todo su ancho, lo estira o lo encoge (datos-rango-mover-2026-11-06: 2.000 movimientos al azar)
+    if (hr === M.h0 && M.h0 === M.h1) {
+      if (M.dc === 0 && M.c0 <= r.c0 && M.c1 >= r.c1 && M.f0 <= r.f1 && M.f1 >= r.f0) { const e = bordeTrasMover(r.f0, r.f1, M.f0, M.f1, M.df); if (e) return { h: hr, f0: e[0], c0: r.c0, f1: e[1], c1: r.c1 }; }
+      if (M.df === 0 && M.f0 <= r.f0 && M.f1 >= r.f1 && M.c0 <= r.c1 && M.c1 >= r.c0) { const e = bordeTrasMover(r.c0, r.c1, M.c0, M.c1, M.dc); if (e) return { h: hr, f0: r.f0, c0: e[0], f1: r.f1, c1: e[1] }; }
     }
-    if (M.df === 0 && M.f0 === r.f0 && M.f1 === r.f1) {
-      if (M.c1 === r.c1 && M.c0 > r.c0 && M.c0 + M.dc > r.c0) return { h: hr, f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1 + M.dc };
-      if (M.c0 === r.c0 && M.c1 < r.c1 && M.c1 + M.dc < r.c1) return { h: hr, f0: r.f0, c0: r.c0 + M.dc, f1: r.f1, c1: r.c1 };
+    // a otra hoja, el borde se va y el rango se achica
+    if (hr === M.h0 && M.h0 !== M.h1) {
+      const sin = (a0, a1, m0, m1) => (m0 <= a0 && a0 <= m1 ? [m1 + 1, a1] : m0 <= a1 && a1 <= m1 ? [a0, m0 - 1] : null);
+      if (M.c0 <= r.c0 && M.c1 >= r.c1) { const e = sin(r.f0, r.f1, M.f0, M.f1); if (e) return { h: hr, f0: e[0], c0: r.c0, f1: e[1], c1: r.c1 }; }
+      if (M.f0 <= r.f0 && M.f1 >= r.f1) { const e = sin(r.c0, r.c1, M.c0, M.c1); if (e) return { h: hr, f0: r.f0, c0: e[0], f1: r.f1, c1: e[1] }; }
     }
+    // lo pegado tapa un borde desde afuera: el rango se recorta
+    if (hr === M.h1 && !(M.h0 === M.h1 && M.f0 <= r.f1 && M.f1 >= r.f0 && M.c0 <= r.c1 && M.c1 >= r.c0)) {
+      if (D.c0 <= r.c0 && D.c1 >= r.c1) { const e = bordeTapado(r.f0, r.f1, D.f0, D.f1); if (e) return { h: hr, f0: e[0], c0: r.c0, f1: e[1], c1: r.c1 }; }
+      if (D.f0 <= r.f0 && D.f1 >= r.f1) { const e = bordeTapado(r.c0, r.c1, D.c0, D.c1); if (e) return { h: hr, f0: r.f0, c0: e[0], f1: r.f1, c1: e[1] }; }
+    }
+    return null;
+  }
+  // en un eje: [a0, a1] es el rango y [m0, m1] lo que se mueve d filas o columnas → los extremos nuevos, o null si no cambia
+  function bordeTrasMover(a0, a1, m0, m1, d) {
+    const t0 = m0 + d, t1 = m1 + d;
+    if (m0 <= a0 && a0 <= m1) {   // se mueve el extremo de arriba
+      if (d < 0) return [a0 + d, a1];
+      if (t0 > a1) return null;
+      return [Math.min(a0 + d, m1 + 1), Math.max(a1, t1)];
+    }
+    if (m0 <= a1 && a1 <= m1) {   // se mueve el de abajo
+      if (d > 0 || (m1 > a1 && t0 > a0)) return [a0, a1 + d];
+      if (t1 < a0) return null;
+      return [Math.min(a0, t0), Math.max(a1 + d, m0 - 1)];
+    }
+    return null;
+  }
+  function bordeTapado(a0, a1, t0, t1) {
+    if (t0 < a0 && a0 <= t1 && t1 < a1) return [t1 + 1, a1];
+    if (a0 < t0 && t0 <= a1 && a1 < t1) return [a0, t0 - 1];
     return null;
   }
   // La fórmula después de mover M: hF es la hoja donde está, hNueva donde queda. Lo que no es una referencia no se toca; los corchetes de una tabla, tampoco.
@@ -384,7 +411,10 @@
       const fijas0 = fijas(h0), fijas1 = h1 === h0 ? fijas0 : fijas(h1);
       if (fijas0.some((g) => toca(g, r) && !dentro(g, r)) || fijas1.some((g) => toca(g, D) && !dentro(g, D) && !(h0 === h1 && dentro(g, r)))) return { error: 'matriz' };
       const esFija = (l, i, j) => l.some((g) => i >= g.f0 && i <= g.f1 && j >= g.c0 && j <= g.c1);
-      for (let i = r.f0; i <= r.f1; i++) for (let j = r.c0; j <= r.c1; j++) if ((protegida(h0, i, j) && !esFija(fijas0, i, j)) || (protegida(h1, i + M.df, j + M.dc) && !esFija(fijas1, i + M.df, j + M.dc))) return { error: 'protegida' };
+      // los encabezados y totales de una tabla sí se mueven: los cuida MoverTablas
+      const deTabla = (h, i, j) => (hojas[h].tablas || []).some((t) => j >= t.ref.c0 && j <= t.ref.c1 && ((t.encabezados && i === t.ref.f0) || (t.totales && i === t.ref.f1)));
+      const fijaOTabla = (h, l, i, j) => esFija(l, i, j) || deTabla(h, i, j);
+      for (let i = r.f0; i <= r.f1; i++) for (let j = r.c0; j <= r.c1; j++) if ((protegida(h0, i, j) && !fijaOTabla(h0, fijas0, i, j)) || (protegida(h1, i + M.df, j + M.dc) && !fijaOTabla(h1, fijas1, i + M.df, j + M.dc))) return { error: 'protegida' };
       const nombresHoja = libro.hojas.map((m) => m.nombre);
       const enOrigen = (h, i, j) => h === h0 && i >= r.f0 && i <= r.f1 && j >= r.c0 && j <= r.c1;
       const enDestino = (h, i, j) => h === h1 && i >= D.f0 && i <= D.f1 && j >= D.c0 && j <= D.c1;
@@ -410,7 +440,7 @@
           const i = C.fila[k], j = C.col[k];
           if (enOrigen(h, i, j) || enDestino(h, i, j)) continue;
           const x = estadoDe(h, i, j);
-          if (!x || !x.formula || (protegida(h, i, j) && !x.fija)) continue;
+          if (!x || !x.formula || (protegida(h, i, j) && !x.fija && !deTabla(h, i, j))) continue;
           const nueva = formulaTrasMover(x.formula, h, h, M, nombresHoja);
           if (nueva === x.formula) continue;
           if (x.fija) hayFijaQueCambia = true;
@@ -422,7 +452,8 @@
       // lo que no es una celda: los nombres que apuntan ahí, y cualquier regla, validación o gráfico del libro
       const objetos = hayFijaQueCambia || mover.length > 0 || separarDestino.length > 0 || fijas0.some((g) => dentro(g, r)) || fijas1.some((g) => dentro(g, D))
         || libro.nombres.some((n) => n.ref && formulaTrasMover(n.ref, -1, -1, M, nombresHoja) !== n.ref)
-        || hojas.some((x) => x && !x.sinCeldas && ((x.formatosCondicionales || []).length || (x.validaciones || []).length || (x.anclas || []).length || (x.minigraficos || []).length));
+        || libro.extrasDeCelda
+        || hojas.some((x) => x && !x.sinCeldas && ((x.formatosCondicionales || []).length || (x.validaciones || []).length || (x.anclas || []).length || (x.minigraficos || []).length || (x.comentarios || []).length || (x.hipervinculos || []).length || (x.tablas || []).length));
       return { ops: [...porHoja].map(([h, celdas]) => ({ t: 'celdas', h, celdas })), M, combinadas: { mover, separarDestino }, objetos };
     }
     function hayDesborde(h, r) {
