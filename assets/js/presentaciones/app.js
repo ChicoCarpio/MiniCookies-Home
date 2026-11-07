@@ -442,7 +442,7 @@
       else if (ev.key === 'Tab' && !ev.ctrlKey && !ev.altKey) { ev.preventDefault(); comandos.ejecutar(ev.shiftKey ? 'nivelMenos' : 'nivelMas'); }
       ev.stopPropagation();
     });
-    area.addEventListener('blur', () => cerrarEditor(true, true));
+    area.addEventListener('blur', (ev) => cerrarEditor(true, true, ev.relatedTarget));
     for (const nombre of ['select', 'keyup', 'mouseup', 'input']) area.addEventListener(nombre, leerFormatoRango);
     rango = null; fmtRango = null;
     area.focus();
@@ -451,15 +451,18 @@
     // una forma sin texto usa el formato que tendrá lo que se escriba
     const conModelo = e.texto || !e.textoVacio ? e : { ...e, texto: e.textoVacio };
     if (EntradaTexto.admite(conModelo)) { try { editor.entrada = EntradaTexto.crear({ marco, area, elemento: conModelo, escala: s }); } catch (err) { console.warn(err); } }
+    // después de EntradaTexto: su modelo vivo ya tiene lo escrito. En el IME, al terminar de componer
+    for (const nombre of ['input', 'compositionend']) area.addEventListener(nombre, aplicarEspera);
     leerFormatoRango();
   }
   // La selección dentro del cuadro de texto, como en PowerPoint: con texto seleccionado, el formato va a lo seleccionado; con el cursor dentro de una
-  // palabra, a la palabra; los números son posiciones en el texto de la forma (párrafos unidos con \n y saltos de línea como U+2028).
+  // palabra, a la palabra; en cualquier otro lugar, queda a la espera de lo que se escriba (armarEspera); los números son posiciones en el texto de la forma (párrafos unidos con \n y saltos de línea como U+2028).
   let rango = null, fmtRango = null;   // rango: la última selección del cuadro ya cerrado, para el formato que llega después (selector de color)
   function seleccionDe(area) {
     let ini = area.selectionStart, fin = area.selectionEnd;
     if (ini === fin) {
       const v = area.value, esLetra = (c) => /[\p{L}\p{N}_]/u.test(c);
+      if (ini === 0 || ini >= v.length || !esLetra(v[ini - 1]) || !esLetra(v[ini])) return { ini, fin };   // medido en PowerPoint: en el borde de una palabra no es la palabra, es lo que se escriba
       while (ini > 0 && esLetra(v[ini - 1])) ini--;
       while (fin < v.length && esLetra(v[fin])) fin++;
     }
@@ -468,6 +471,7 @@
   // El formato efectivo de lo seleccionado sale del modelo (ya trae lo heredado del diseño y del patrón): los tramos de texto con su posición.
   function leerFormatoRango() {
     const ed = editor, e = elementoSel();
+    if (ed && ed.espera && ed.area.value === ed.espera.valor && (ed.area.selectionStart !== ed.espera.pos || ed.area.selectionEnd !== ed.espera.pos)) ed.espera = null;   // mover el cursor la cancela
     if (!ed || !e || (!e.texto && !ed.entrada)) return;
     const { ini, fin } = seleccionDe(ed.area);
     const tramos = [];
@@ -479,29 +483,75 @@
     fmtRango = { negrita: tramos.every((z) => z.negrita), cursiva: tramos.every((z) => z.cursiva), subrayado: tramos.every((z) => z.subrayado), tamano: tramos[0].tamano };
     comandos.refrescar();
   }
-  async function cerrarEditor(guardar, porPerderFoco) {
+  // Formato a la espera, como PowerPoint: con el cursor fuera de una palabra, Ctrl+B y compañía se aplican a lo próximo que se escriba. Mover el cursor lo cancela.
+  // Lo escrito se marca en el modelo vivo con la propiedad `espera`, que el texto siguiente hereda como el resto del formato; al cerrar, lo marcado se escribe en el archivo.
+  const colorDeHex = (h) => ({ r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), a: 1 });
+  const paraModelo = (f) => { const { color, ...resto } = f; return color ? { ...resto, relleno: { tipo: 'solido', color: colorDeHex(color) } } : resto; };
+  function armarEspera(f) {
+    const ed = editor, a = ed.area;
+    const antes = ed.espera && ed.espera.pos === a.selectionStart && ed.espera.valor === a.value ? ed.espera.f : null;
+    ed.espera = { pos: a.selectionStart, valor: a.value, f: { ...antes, ...f } };
+    comandos.refrescar();
+  }
+  function aplicarEspera() {
+    const ed = editor, es = ed && ed.espera;
+    if (!es || !ed.entrada || ed.entrada.composicion() || ed.area.value === es.valor) return;
+    ed.espera = null;
+    const fin = ed.area.selectionStart;
+    if (fin > es.pos && ed.area.value.length > es.valor.length) {
+      ed.entrada.formatear(es.pos, fin, (t) => ({ ...paraModelo(es.f), espera: { ...t.espera, ...es.f } }));
+      leerFormatoRango();
+    }
+  }
+  // Lo que vale el texto junto al cursor en el modelo vivo: el carácter anterior o, si no hay, lo que escribiría el párrafo
+  function formatoEnCursor() {
+    const ed = editor;
+    if (!ed || !ed.entrada) return null;
+    const antes = ed.area.value.slice(0, ed.area.selectionStart), ps = ed.entrada.modelo();
+    const p = ps[antes.split('\n').length - 1];
+    if (!p) return null;
+    const d = antes.length - (antes.lastIndexOf('\n') + 1);
+    let pos = 0, base = null;
+    for (const z of p.trozos) { const n = z.salto ? 1 : (z.texto || '').length; if (!z.salto && pos < d && pos + n >= d) base = z; pos += n; }
+    return base || p.trozos.find((z) => !z.salto) || p.fin || null;
+  }
+  async function cerrarEditor(guardar, porPerderFoco, destino) {
     const ed = editor;
     if (!ed) return;
     const s = seleccionDe(ed.area);
-    rango = guardar && porPerderFoco && s.fin > s.ini ? { diap: ed.diap, camino: ed.camino, ini: s.ini, fin: s.fin, hasta: Date.now() + 15000 } : null;   // solo si se cerró al perder el foco (p. ej. el selector de color) y por poco tiempo
+    const haciaColor = !!(destino && destino.matches && destino.matches('input[type="color"]'));   // el selector de color sí quita el foco: lo que elija va a la espera
+    rango = guardar && porPerderFoco && (s.fin > s.ini || (haciaColor && ed.entrada)) ? { diap: ed.diap, camino: ed.camino, ini: s.ini, fin: s.fin, hasta: Date.now() + 15000 } : null;   // solo si se cerró al perder el foco (p. ej. el selector de color) y por poco tiempo
     editor = null;
     pintarMarcadores();
     const nuevo = ed.area.value.split('\n');
+    const marcados = ed.entrada ? EdicionTexto.rangosMarcados(ed.entrada.modelo(), 'espera') : [];
     if (ed.entrada) ed.entrada.destruir();
     ed.area.remove();
-    if (guardar && nuevo.join('\n') !== ed.inicial.join('\n')) await hacer('Texto', () => pe.opTexto(ed.diap, ed.camino, nuevo), { fusionar: 'texto:' + ed.camino.join('/') });
+    if (guardar && nuevo.join('\n') !== ed.inicial.join('\n')) {
+      const clave = 'texto:' + ed.camino.join('/');   // lo escrito y su formato se deshacen juntos
+      await hacer('Texto', () => pe.opTexto(ed.diap, ed.camino, nuevo), { fusionar: clave });
+      for (const m of marcados) await hacer('Texto', () => pe.opFormatoRango(ed.diap, ed.camino, m.ini, m.fin, m.valor), { fusionar: clave });
+    }
     sobre.focus({ preventScroll: true });
   }
   // formato del texto de todo el objeto seleccionado
   const formatoSel = () => trozoDe(elementoSel()) || {};
   const conTexto = () => haySel() && !!elementoSel() && !!elementoSel().origen.texto;
   const enSel = (nombre, fn) => { const i = actual, c = sel.camino; return hacer(nombre, () => fn(i, c)); };   // un cambio del objeto seleccionado ahora
-  const formatoActual = () => (editor && fmtRango) || formatoSel();
+  const formatoActual = () => {
+    if (!editor) return formatoSel();
+    const base = fmtRango || formatoEnCursor() || formatoSel();
+    return editor.espera ? { ...base, ...paraModelo(editor.espera.f) } : base;
+  };
   // El formato va a lo seleccionado en el cuadro de texto (o a la palabra bajo el cursor); sin cuadro de texto, a todo el texto del objeto.
   async function formatear(f) {
     const r = editor ? Object.assign({ diap: editor.diap, camino: editor.camino }, seleccionDe(editor.area)) : (rango && rango.hasta > Date.now() ? rango : null);
     if (r && sel && r.diap === actual && r.camino.join('/') === sel.camino.join('/')) {
-      if (r.fin <= r.ini) return;   // el cursor no está en una palabra: no hay a qué darle formato
+      if (r.fin <= r.ini) {   // el cursor no está dentro de una palabra: a lo que se escriba (el cuadro nativo no puede mostrarlo mientras se escribe: texto vertical, de derecha a izquierda…)
+        if (!editor) { rango = null; await cadena; await editarTexto(); if (editor) { editor.area.setSelectionRange(r.ini, r.ini); leerFormatoRango(); } }
+        if (editor && editor.entrada) armarEspera(f);
+        return;
+      }
       if (editor) await cerrarEditor(true);   // primero se guarda el texto escrito: las posiciones siguen valiendo
       rango = null;
       await hacer('Formato', () => pe.opFormatoRango(r.diap, r.camino, r.ini, r.fin, f));

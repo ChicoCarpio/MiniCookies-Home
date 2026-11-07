@@ -506,10 +506,25 @@
     }
     const rango = () => ed.ordenar(ancla, foco);
     const avisarFormato = () => { if (opc.alSeleccionar) opc.alSeleccionar(ancla, foco); };
-    // Formato de caracteres: con selección se aplica ya; con el cursor solo, queda pendiente para lo que se escriba
+    // Medido en Word: con el cursor estrictamente dentro de una palabra, el formato va a la palabra y el cursor queda donde estaba
+    const LETRA = /[\p{L}\p{N}_]/u;
+    function aLaPalabra(hacerlo) {
+      const b = foco.b, t = b.texto || '', o = foco.o;
+      if (o <= 0 || o >= t.length || !LETRA.test(t[o - 1]) || !LETRA.test(t[o])) return null;
+      let i = o, n = o;
+      while (i > 0 && LETRA.test(t[i - 1])) i--;
+      while (n < t.length && LETRA.test(t[n])) n++;
+      const r = hacerlo({ b, o: i }, { b, o: n });
+      if (!r) return false;
+      pendiente = null;
+      return aplicar({ desde: { b: r.desde.b, o }, hasta: { b: r.desde.b, o } });
+    }
+    // Formato de caracteres: con selección se aplica ya; con el cursor dentro de una palabra, a la palabra; si no, queda pendiente para lo que se escriba
     function formato(cambios) {
       if (!ancla) return false;
       if (haySeleccion()) { const [a, f] = rango(); return aplicar(ed.formatoCaracter(a, f, cambios)); }
+      const enPalabra = aLaPalabra((a, f) => ed.formatoCaracter(a, f, cambios));
+      if (enPalabra !== null) return enPalabra;
       pendiente = Object.assign({}, pendiente, cambios);
       avisarFormato();
       return true;
@@ -517,6 +532,8 @@
     function alternar(prop) {
       if (!ancla) return false;
       if (haySeleccion()) { const [a, f] = rango(); return aplicar(ed.alternarCaracter(a, f, prop)); }
+      const enPalabra = aLaPalabra((a, f) => ed.alternarCaracter(a, f, prop));
+      if (enPalabra !== null) return enPalabra;
       const poner = estado()[prop] !== true;
       return formato({ [prop]: prop === 'u' ? (poner ? 'single' : 'none') : poner });
     }

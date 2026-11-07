@@ -287,7 +287,13 @@ const EntradaTexto = (() => {
     }
     // Una diapositiva sin texto no cargó todavía la fuente de la forma; no se la espera para abrir (en el celular, el foco tiene que darse dentro del toque para que suba el teclado): al llegar se corta de nuevo
     PptxTexto.cargarFuentes(vivos.flatMap((p) => [...p.trozos, p.fin]).filter(Boolean)).then(() => { if (vivo) { motor.invalidar(); repintar(); } });
-    return { pintar: repintar, destruir, motor, modelo: () => vivos, maquetado: () => m, punto, lienzo, composicion: () => composicion && { ...composicion } };
+    // el formato de una parte del texto, solo en lo que se ve: el archivo lo escribe quien lo pide al cerrar
+    function formatear(ini, fin, cambios) {
+      vivos = EdicionTexto.formatearRango(vivos, ini, fin, cambios);
+      repintar();
+      PptxTexto.cargarFuentes(vivos.flatMap((p) => p.trozos)).then(() => { if (vivo) { motor.invalidar(); repintar(); } });
+    }
+    return { pintar: repintar, destruir, formatear, motor, modelo: () => vivos, maquetado: () => m, punto, lienzo, composicion: () => composicion && { ...composicion } };
   }
 
   return { crear, admite };
