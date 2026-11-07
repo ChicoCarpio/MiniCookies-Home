@@ -781,7 +781,7 @@
         const en = A.fuente.idioma === 'en';
         // la moneda de la configuración regional (en: dólar con paréntesis; es-CR: colón con signo menos), como Excel
         const codigo = en ? '"$"#,##0' + dec + '_);("$"#,##0' + dec + ')' : '"₡"#,##0' + dec + ';-"₡"#,##0' + dec;
-        return textoFormato(n, en ? codigo : codigo.replace(/\./g, A.fuente.separadores ? A.fuente.separadores.decimal : ',').replace(/#,##/g, '#' + (A.fuente.separadores ? A.fuente.separadores.miles : ' ') + '##'), A);
+        return textoFormato(n, en ? codigo : codigo.replace(/\./g, A.fuente.separadores ? A.fuente.separadores.decimal : ',').replace(/#,##/g, '#' + (A.fuente.separadores ? A.fuente.separadores.miles : ' ') + '##'), A);
       },
       TIMEVALUE: (a, c, A) => horaDeTexto(A.txt(a[0], c), A),
       // las «B» cuentan bytes solo con un idioma de doble byte (japonés, chino, coreano) como predeterminado; si no, son las mismas

@@ -307,6 +307,14 @@
       return ok;
     }
 
+    // ¿el rango toca un desborde? Excel no deja cambiar una parte de una matriz: ni ordenarla
+    function hayDesborde(h, r) {
+      asegurarMotor();
+      const hoja = hojas[h];
+      if (hoja.derramadas) for (const k of hoja.derramadas) { const f = Math.floor(k / MAX_COLS), c = k % MAX_COLS; if (f >= r.f0 && f <= r.f1 && c >= r.c0 && c <= r.c1) return true; }
+      for (const d of motor.derrames.values()) if (d.ok && d.h === h && d.f0 >= r.f0 && d.f0 <= r.f1 && d.c0 >= r.c0 && d.c0 <= r.c1) return true;
+      return false;
+    }
     function opEstado(h, celdas) { return { t: 'celdas', h, celdas: celdas.filter((x) => !protegida(h, x.f, x.c)) }; }
 
     // para cada celda del rango (las que existen, o todas si el rango es chico) un estilo derivado del suyo
@@ -362,7 +370,7 @@
     return {
       libro, paquete, hojas, estilos, motor, backend, formato: backend.formato, destino: () => modelo.destino(),
       nombres: () => libro.hojas.map((m, i) => ({ indice: i, nombre: m.nombre, estado: m.estado, tipo: m.tipo })),
-      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, guardar, pendientes,
+      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, hayDesborde, guardar, pendientes,
       asegurarMotor, limite: (h) => limites[h], opciones: opcionesEntrada,
       // la celda ancla de la matriz dinámica que desbordó en (h, f, c), o null
       anclaDe: (h, f, c) => {
