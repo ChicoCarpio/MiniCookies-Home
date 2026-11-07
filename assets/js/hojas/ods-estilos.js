@@ -345,7 +345,8 @@
       if ('formato' in c) codigo = c.formato || 'General';
       if (c.bordes === 'todos') for (const k of ['bi', 'bd', 'ba', 'bb']) r[k] = BORDE_ODF.thin;
       if (c.bordes === 'ninguno') for (const k of ['bi', 'bd', 'ba', 'bb']) r[k] = 'none';
-      if (c.borde) { const m = { izq: 'bi', der: 'bd', arr: 'ba', aba: 'bb' }; for (const k in c.borde) if (m[k]) r[m[k]] = c.borde[k] ? (BORDE_ODF[c.borde[k]] || BORDE_ODF.thin) : 'none'; }
+      if (c.borde) { const m = { izq: 'bi', der: 'bd', arr: 'ba', aba: 'bb' }; for (const k in c.borde) if (m[k]) { const v = c.borde[k], e = v && v.estilo ? v.estilo : v; r[m[k]] = !e ? 'none' : (BORDE_ODF[e] || BORDE_ODF.thin).replace('#000000', v && v.color ? '#' + String(v.color).toLowerCase() : '#000000'); } }
+      if ('bordeDe' in c) { const o = (defs[c.bordeDe] || defs[0]).r; for (const k of ['bi', 'bd', 'ba', 'bb']) { if (o[k] === undefined) delete r[k]; else r[k] = o[k]; } }   // los bordes de otro
       const antes = xfs.length, i = definir(r, codigo, null, true);
       if (i >= antes) defs[i].auto = null;   // el nombre del estilo automático lo pone quien guarda (conoce los que ya existen en el archivo)
       return i;

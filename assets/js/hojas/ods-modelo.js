@@ -28,6 +28,7 @@
   const MAX_HOJAS = 4096, MAX_FORMULA = 32768;
   const MAX_COMBINADAS = 500000;
   const ERRORES = new Set(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA']);
+  const ERRORES_ES = { '#¡NULO!': '#NULL!', '#¡DIV/0!': '#DIV/0!', '#¡VALOR!': '#VALUE!', '#¡REF!': '#REF!', '#¿NOMBRE?': '#NAME?', '#¡NUM!': '#NUM!', '#N/D': '#N/A' };   // un LibreOffice en español los guarda así
   const T = () => LibroXlsx.TIPO;
 
   const entero = (s, defecto) => { const n = parseInt(s, 10); return n > 0 ? n : defecto; };
@@ -159,7 +160,7 @@
         case 'date': { const d = serieDeFecha(a['date-value'] || '', libro.fecha1904); if (d) { tipo = T().numero; valor = d.serie; def = d.conHora ? 'yyyy-mm-dd hh:mm:ss' : 'yyyy-mm-dd'; hayValor = true; } break; }
         case 'time': { const h = serieDeHora(a['time-value'] || ''); if (h !== null) { tipo = T().numero; valor = h; def = 'hh:mm:ss'; hayValor = true; } break; }
         case 'boolean': tipo = T().logico; valor = a['boolean-value'] === 'true'; hayValor = true; break;
-        case 'error': { const e = a['string-value'] || parrafos.join(''); tipo = T().error; valor = ERRORES.has(e) ? e : '#VALUE!'; hayValor = true; break; }
+        case 'error': { const e = a['string-value'] || parrafos.join(''); tipo = T().error; valor = ERRORES.has(e) ? e : ERRORES_ES[e] || '#VALUE!'; hayValor = true; break; }
         case 'string': { const t = cadena(); if (t !== '' || a.formula) { tipo = T().texto; valor = t; hayValor = true; } break; }
         default: break;
       }

@@ -664,7 +664,9 @@
         if (a > b) continue;
         const piezas = [];
         if (a > el.f0) piezas.push(U().copiaConRepeticion(texto, el.nodo, 'table:number-rows-repeated', a - el.f0));
-        piezas.push(X().ponerAtributo(U().copiaConRepeticion(texto, el.nodo, 'table:number-rows-repeated', b - a + 1), 'table:style-name', nombre));
+        // el estilo es de la fila: solo en su etiqueta, o una fila sin estilo se lo pondría a su primera celda
+        const copia = U().copiaConRepeticion(texto, el.nodo, 'table:number-rows-repeated', b - a + 1), finEtiqueta = copia.indexOf('>') + 1;
+        piezas.push(X().ponerAtributo(copia.slice(0, finEtiqueta), 'table:style-name', nombre) + copia.slice(finEtiqueta));
         if (b < el.f0 + el.n - 1) piezas.push(U().copiaConRepeticion(texto, el.nodo, 'table:number-rows-repeated', el.f0 + el.n - 1 - b));
         eds.push({ ini: el.nodo.ini, fin: el.nodo.fin, texto: piezas.join('') });
       }

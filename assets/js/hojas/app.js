@@ -95,7 +95,10 @@
   });
   interfaz.lienzo.append(crearEl('div', { class: 'hc-rejilla', id: 'rejilla' }));
   const insp = Oficina.inspector(interfaz.inspector);
-  let portapapeles = null;   // lo último copiado aquí: { texto, h, r, celdas, ed, cortado } (para pegar fórmulas y formato sin pérdida)
+  let portapapeles = null;   // lo último copiado aquí: PegadoEspecial.capturar + { texto, cortado, familia } (para pegar fórmulas y formato sin pérdida)
+  let familia = 0;           // el documento abierto: al deshacer o cambiar la estructura sigue siendo el mismo
+  let ultimoPegado = null;   // para cambiar lo pegado con el botón que aparece al lado: { h, s, datos }
+  let repegando = false;
   let pegadoDeCorte = null;  // el texto de lo cortado que ya se pegó
   let teclaValores = false;  // Ctrl+Mayús+V: el evento de pegar que sigue es de valores
   document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'v') teclaValores = true; }, true);
@@ -134,7 +137,8 @@
     for (const hoja of ed.hojas) for (const fx of hoja.celdas.formulas.values()) if (fx.tipo === 'array' && !fx.dinamica) { c.add('x-matriciales'); break; }
     return c;
   }
-  async function abrirBytes(bytes, nombre, opciones) {
+  async function abrirBytes(...args) { familia++; return abrirBytesDe(...args); }
+  async function abrirBytesDe(bytes, nombre, opciones) {
     const o = opciones || {};
     await MotorHojas.cargarDibujo();
     const nuevo = await LibroEditable.abrir(bytes, { idioma: idioma() });
@@ -159,7 +163,7 @@
     const lector = { libroMotor: ed.libro, hojas: ed.nombres().filter((x) => x.tipo === 'hoja').map((x) => ({ nombre: x.nombre, indice: x.indice, estado: x.estado })), opciones: { idioma: idioma(), decimal: idioma() === 'en' ? '.' : ',', miles: idioma() === 'en' ? ',' : '.' } };
     rejilla = await RejillaHoja.crear($('rejilla'), {
       libro: lector, editable: true,
-      alEditar: (x) => abrirEditor(x), alBorrar: (r) => borrar(r), alCopiar: (e, cortar) => copiar(e, cortar), alPegar: (e) => { const valores = teclaValores; teclaValores = false; pegar(e.clipboardData, { valores }); }, alEscape: () => soltarCorte(),
+      alEditar: (x) => abrirEditor(x), alBorrar: (r) => borrar(r), alCopiar: (e, cortar) => copiar(e, cortar), alPegar: (e) => { const valores = teclaValores; teclaValores = false; pegar(e.clipboardData, { valores }); }, alEscape: () => { soltarCorte(); for (const g of ganchos.alEscape) g(); }, alSoltar: () => { for (const g of ganchos.alSoltar) g(); },
       alTecla: () => false,
     });
     rejilla.alCambiar(() => { cerrarEditorSiOtraCelda(); actualizarBarra(); actualizarInspector(); comandos.refrescar(); for (const g of ganchos.alSeleccionar) g(); });
@@ -251,7 +255,7 @@
     el.textContent = ultimoAutoguardado ? tx('guardado-local', new Date(ultimoAutoguardado).toLocaleTimeString(idioma() === 'en' ? 'en-US' : 'es-CR', { hour: '2-digit', minute: '2-digit' })) : tx('cambios-sin-descargar');
   }
   function avisar(texto) { Oficina.aviso($('avisoEstado'), texto, 5000); }
-  const ganchos = { antesDeEscribir: [], despuesDeEscribir: [], alSeleccionar: [], cuadroNombre: [], alCambiar: [] };
+  const ganchos = { antesDeEscribir: [], despuesDeEscribir: [], alSeleccionar: [], cuadroNombre: [], alCambiar: [], alPegar: [], alEscape: [], alSoltar: [] };
   function hacer(nombre, op, extra) {
     if (!op) return false;
     if (op.error) { avisar(tx(op.error === 'protegida' ? 'aviso-protegida' : 'aviso-formula')); return false; }
@@ -438,23 +442,22 @@
     const h = hojaActiva(), lim = ed.limite(h);
     const f1 = Math.min(r.f1, Math.max(r.f0, lim.filas - 1)), c1 = Math.min(r.c1, Math.max(r.c0, lim.cols - 1));
     if ((f1 - r.f0 + 1) * (c1 - r.c0 + 1) > MAX_PEGAR) return null;
-    const hoja = ed.hojas[h], C = hoja.celdas, filasTexto = [], filasHtml = [], celdas = [];
-    for (let f = r.f0; f <= f1; f++) {
-      const t = [], hh = [], fila = [];
-      for (let c = r.c0; c <= c1; c++) {
+    const hoja = ed.hojas[h], C = hoja.celdas, filasTexto = [], filasHtml = [], capt = PegadoEspecial.capturar(ed, h, r);
+    for (const f of capt.filas) {
+      const t = [], hh = [];
+      for (let c = r.c0; c <= capt.r.c1; c++) {
         const i = C.indiceDe(f, c);
         const texto = i < 0 ? '' : LibroXlsx.textoCelda(ed.libro, hoja, i, { idioma: idioma(), decimal: idioma() === 'en' ? '.' : ',', miles: idioma() === 'en' ? ',' : '.' }).texto;
         t.push(texto.replace(/[\t\r\n]+/g, ' '));
         const x = ed.estadoDe(h, f, c);
-        fila.push(x);
         const p = ed.estilos.propiedades(x ? x.estilo : hoja.estiloDe(f, c));
-        const css = [p.negrita ? 'font-weight:bold' : '', p.cursiva ? 'font-style:italic' : '', p.subrayado ? 'text-decoration:underline' : '', p.colorFuente ? 'color:#' + p.colorFuente : '', p.relleno ? 'background:#' + p.relleno : '', p.h !== 'general' ? 'text-align:' + p.h : ''].filter(Boolean).join(';');
-        hh.push('<td' + (css ? ' style="' + css + '"' : '') + '>' + escHtml(texto) + '</td>');
+        const css = [p.negrita ? 'font-weight:bold' : '', p.cursiva ? 'font-style:italic' : '', p.subrayado ? 'text-decoration:underline' : '', p.tachado ? 'text-decoration:line-through' : '', p.colorFuente ? 'color:#' + p.colorFuente : '', p.relleno ? 'background:#' + p.relleno : '', p.h !== 'general' ? 'text-align:' + p.h : '', p.tamano && p.tamano !== 11 ? 'font-size:' + p.tamano + 'pt' : '', p.formato && p.formato !== 'General' ? 'mso-number-format:\'' + String(p.formato).replace(/'/g, '') + '\'' : ''].filter(Boolean).join(';');
+        hh.push('<td' + (css ? ' style="' + escHtml(css) + '"' : '') + '>' + escHtml(texto) + '</td>');
       }
-      filasTexto.push(t.join('\t')); filasHtml.push('<tr>' + hh.join('') + '</tr>'); celdas.push(fila);
+      filasTexto.push(t.join('\t')); filasHtml.push('<tr>' + hh.join('') + '</tr>');
     }
     const texto = filasTexto.join('\r\n');
-    return { texto, html: '<table>' + filasHtml.join('') + '</table>', interno: { texto, h, r: { f0: r.f0, c0: r.c0, f1, c1 }, celdas, ed } };
+    return { texto, html: '<table>' + filasHtml.join('') + '</table>', interno: Object.assign(capt, { texto, familia }) };
   }
   function copiar(e, cortar) {
     if (!ed) return false;
@@ -509,8 +512,8 @@
     return lineas.map((l) => l.split('\t'));
   }
   async function pegarDesdeBoton(opciones) {
-    const o = opciones || {};
-    if (o.valores && portapapeles && portapapeles.cortado) { avisar(tx('aviso-valores-cortado')); return; }
+    const o = opcionesDePegado(opciones);
+    if (o.tipo !== 'todo' && portapapeles && portapapeles.cortado) { avisar(tx('aviso-valores-cortado')); return; }
     try {
       const items = await navigator.clipboard.read();
       let html = '', texto = '';
@@ -525,9 +528,47 @@
       else avisar(tx('aviso-portapapeles'));
     }
   }
+  function opcionesDePegado(opciones) { const o = Object.assign({}, opciones || {}); if (o.valores) o.tipo = 'valores'; if (!o.tipo) o.tipo = 'todo'; return o; }
+  const AVISOS_PEGAR = { limite: 'aviso-pegar-limite', solape: 'aviso-pegar-solape', combinada: 'aviso-pegar-combinada', matriz: 'aviso-pegar-matriz', vinculo: 'aviso-pegar-matriz', protegida: 'aviso-protegida' };
+  function despuesDePegar(h, s, datos, destino) {
+    ultimoPegado = datos ? { h, s, datos } : null;
+    if (datos) for (const g of ganchos.alPegar) g(destino);
+  }
+  function aplicarPlan(plan, h, s, datos, P) {
+    if (plan.error) { if (plan.error === 'grande') avisar(tx('aviso-pegado-grande', MAX_PEGAR)); else avisar(tx(AVISOS_PEGAR[plan.error] || 'aviso-estructura')); return; }
+    if (plan.objetos) {
+      const opc = { idioma: idioma() };
+      // lo que no es una celda se escribe en el archivo, como un cambio de estructura
+      return estructural('Pegar', async (b) => PegadoEspecial.ejecutar(await LibroEditable.abrir(b, opc), plan, opc), { hoja: h, sel: plan.destino })
+        .then(() => rejillaLista).then(() => { if (P && P.familia === familia) P.ed = ed; despuesDePegar(h, s, datos, plan.destino); });
+    }
+    if (!plan.celdas.length) { rejilla.seleccionar(plan.destino.f0, plan.destino.c0, plan.destino.f1, plan.destino.c1); return; }
+    if (hacer('Pegar', ed.opEstado(h, plan.celdas))) {
+      rejilla.seleccionar(plan.destino.f0, plan.destino.c0, plan.destino.f1, plan.destino.c1);
+      despuesDePegar(h, s, datos, plan.destino);
+    }
+  }
+  function pegarInterno(P, opciones, datos) {
+    if (lectura || !ed) return;
+    if (P.familia === familia) P.ed = ed;
+    return aplicarPlan(PegadoEspecial.planear(ed, P, hojaActiva(), seleccion(), opcionesDePegado(opciones)), hojaActiva(), seleccion(), datos, P);
+  }
+  // cambiar lo que se acaba de pegar: se deshace y se pega de la otra forma
+  async function repegar(opciones) {
+    const u = ultimoPegado;
+    if (!u) return pegarDesdeBoton(opciones);
+    repegando = true;
+    try {
+      hist.deshacer();
+      await rejillaLista;
+      if (hojaActiva() !== u.h) await rejilla.mostrarHoja(u.h);
+      rejilla.seleccionar(u.s.f0, u.s.c0, u.s.f1, u.s.c1);
+      await pegar(u.datos, opciones);
+    } finally { repegando = false; }
+  }
   function pegar(datos, opciones) {
     if (lectura || !ed || !datos) return;
-    const o = opciones || {};
+    const o = opcionesDePegado(opciones);
     const texto = datos.getData('text/plain') || '', html = datos.getData('text/html') || '';
     const h = hojaActiva(), s = seleccion(), celdas = [];
     const igual = (a, b) => a.replace(/\r\n?/g, '\n') === b.replace(/\r\n?/g, '\n');
@@ -535,32 +576,19 @@
     if (portapapeles && igual(texto, portapapeles.texto)) {
       const P = portapapeles;
       if (P.cortado && P.ed === ed) {
-        if (o.valores) avisar(tx('aviso-valores-cortado')); else pegarCorte(P, h, s);
+        if (o.tipo !== 'todo') avisar(tx('aviso-valores-cortado')); else pegarCorte(P, h, s);
         return;
       }
-      // pegado desde esta misma app: valores, fórmulas (con las referencias relativas corridas) y formato; si la selección es un múltiplo de lo copiado, se repite
-      const alto = P.celdas.length, ancho = P.celdas[0].length, sa = s.f1 - s.f0 + 1, sb = s.c1 - s.c0 + 1;
-      const rf = sa % alto === 0 && sb % ancho === 0 ? sa / alto : 1, rc = sa % alto === 0 && sb % ancho === 0 ? sb / ancho : 1;
-      if (rf * rc * alto * ancho > MAX_PEGAR) { avisar(tx('aviso-pegado-grande', MAX_PEGAR)); return; }
-      for (let a = 0; a < rf; a++) for (let b = 0; b < rc; b++) P.celdas.forEach((fila, i) => fila.forEach((x, j) => {
-        const f = s.f0 + a * alto + i, c = s.c0 + b * ancho + j;
-        let v = x ? Object.assign({}, x) : null;
-        if (o.valores) {
-          // el valor que se ve, con el formato que ya tiene el destino; lo vacío también se pega
-          const d = ed.estadoDe(h, f, c), est = d ? d.estilo : ed.hojas[h].estiloDe ? ed.hojas[h].estiloDe(f, c) : 0;
-          v = v && v.tipo !== 'vacio' ? { tipo: v.tipo, valor: v.valor, formula: null, estilo: est } : est ? { tipo: 'vacio', valor: null, formula: null, estilo: est } : null;
-          celdas.push({ f, c, v });
-          return;
-        }
-        // como Excel: del desborde se pega solo la fórmula del ancla (vuelve a desbordar); sus otras celdas quedan vacías, con su formato
-        if (v && v.derrame) v = v.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: v.estilo } : null;
-        if (v) { delete v.matriz; delete v.fija; }
-        if (v && v.formula) v.formula = LibroXlsx.desplazarFormula(v.formula, f - P.r.f0 - i, c - P.r.c0 - j);
-        if (v && P.h !== h && v.estilo && v.estilo >= ed.libro.estilos.cantidadXfs) v.estilo = 0;
-        celdas.push({ f, c, v });
-      }));
-    } else {
-      const M = matrizDe(html, texto);
+      if (!o.soloTexto) return pegarInterno(P, o, { getData: (k) => (k === 'text/plain' ? texto : k === 'text/html' ? html : '') });
+    }
+    if (o.op || o.trans || o.vinculo || o.blancos || (o.tipo !== 'todo' && o.tipo !== 'valores')) { avisar(tx('aviso-pegar-externo')); return; }
+    const copiaDatos = { getData: (k) => (k === 'text/plain' ? texto : k === 'text/html' ? html : '') };
+    if (o.tipo === 'todo' && html && !o.soloTexto) {
+      const plan = PegadoHtml.planear(ed, h, s, html, { idioma: idioma() });
+      if (plan) return aplicarPlan(plan, h, s, copiaDatos);
+    }
+    {
+      const M = matrizDe(o.soloTexto ? '' : html, texto);
       if (!M.length) return;
       const n = M.reduce((a, f) => a + f.length, 0);
       if (n > MAX_PEGAR) { avisar(tx('aviso-pegado-grande', MAX_PEGAR)); return; }
@@ -576,6 +604,7 @@
     if (hacer('Pegar', ed.opEstado(h, celdas))) {
       const alto = Math.max(...celdas.map((x) => x.f)), ancho = Math.max(...celdas.map((x) => x.c));
       rejilla.seleccionar(s.f0, s.c0, Math.max(s.f0, alto), Math.max(s.c0, ancho));
+      despuesDePegar(h, s, copiaDatos, { f0: s.f0, c0: s.c0, f1: Math.max(s.f0, alto), c1: Math.max(s.c0, ancho) });
     }
   }
 
@@ -753,7 +782,7 @@
   reg({ id: 'cortar', texto: 'cmd-cortar', ejecutar: () => copiar(null, true) });
   reg({ id: 'copiar', texto: 'cmd-copiar', ejecutar: () => copiar(null, false), habilitado: hayLibro });
   reg({ id: 'pegar', texto: 'cmd-pegar', ejecutar: () => pegarDesdeBoton() });
-  reg({ id: 'pegarValores', texto: 'cmd-pegar-valores', ejecutar: () => pegarDesdeBoton({ valores: true }) });
+  reg({ id: 'pegarValores', texto: 'cmd-pegar-valores', ejecutar: () => pegarDesdeBoton({ tipo: 'valores' }) });
   reg({ id: 'negrita', texto: 'cmd-negrita', atajo: 'mod+b', ejecutar: alternar('negrita', 'Negrita'), activo: () => !!propsActivas().negrita });
   reg({ id: 'cursiva', texto: 'cmd-cursiva', atajo: 'mod+i', ejecutar: alternar('cursiva', 'Cursiva'), activo: () => !!propsActivas().cursiva });
   reg({ id: 'subrayado', texto: 'cmd-subrayado', atajo: 'mod+u', ejecutar: alternar('subrayado', 'Subrayado'), activo: () => !!propsActivas().subrayado });
@@ -844,11 +873,13 @@
     // el PDF de la hoja activa (o de todas las visibles), como «Descargar en PDF»
     pdf: async (todas) => { await ExcelAPdfMotor.cargarMotor(); const hojas = todas ? ed.nombres().filter((x) => x.tipo === 'hoja' && x.estado === 'visible').map((x) => x.indice) : [hojaActiva()]; return ExcelAPdfMotor.generar(ed.libro, { hojas, idioma: idioma(), nombreArchivo: nombreDoc }); },
     confirmarEdicion: () => { if (editando) confirmar(editando.modo === 'barra' ? barra.value : editor.value, 0, 0); },
+    pegarDesdeBoton, pegarInterno, repegar, hayCopiaInterna: () => !!(portapapeles && !portapapeles.cortado), pegando: () => repegando, despuesDeCinta: [],
+    capturarSeleccion: () => { const c = contenidoCopia(seleccion()); return c ? c.interno : (avisar(tx('aviso-pegado-grande', MAX_PEGAR)), null); },
   };
   for (const ext of window.HojasExtensiones || []) ext(extension);
   const CINTA = [
     { id: 'inicio', texto: 'tab-inicio', grupos: [
-      { texto: 'g-portapapeles', items: [{ comando: 'pegar', icono: '📋' }, { comando: 'pegarValores', icono: '123' }, { comando: 'cortar', icono: '✂' }, { comando: 'copiar', icono: '⧉' }] },
+      { texto: 'g-portapapeles', items: [{ comando: 'pegar', icono: '📋' }, { comando: 'pegarMenu', icono: '▾' }, { comando: 'pegarValores', icono: '123' }, { comando: 'cortar', icono: '✂' }, { comando: 'copiar', icono: '⧉' }, { comando: 'copiarFormato', icono: '🖌' }] },
       { texto: 'g-fuente', items: [{ comando: 'negrita', icono: 'B' }, { comando: 'cursiva', icono: 'I' }, { comando: 'subrayado', icono: 'U' }, { comando: 'tachado', icono: 'S̶', solo: 'pc' }, { comando: 'colorFuente', tipo: 'color', icono: 'A', porDefecto: '#C00000' }, { comando: 'relleno', tipo: 'color', icono: '◧', porDefecto: '#FFFF00' }, { comando: 'sinRelleno', icono: '⊘', solo: 'pc' }] },
       { texto: 'g-alineacion', items: [{ comando: 'izquierda', icono: '⇤' }, { comando: 'centro', icono: '↔' }, { comando: 'derecha', icono: '⇥' }, { comando: 'ajustar', icono: '↵', solo: 'pc' }] },
       { texto: 'g-numero', items: [{ comando: 'formato', tipo: 'select', opciones: [['', 'cmd-formato'], ['general', 'fmt-general'], ['numero', 'fmt-numero'], ['miles', 'fmt-miles'], ['moneda', 'fmt-moneda'], ['porcentaje', 'fmt-porcentaje'], ['fecha', 'fmt-fecha'], ['hora', 'fmt-hora'], ['texto', 'fmt-texto']] }, { comando: 'menosDecimales', icono: '.0←', solo: 'pc' }, { comando: 'masDecimales', icono: '.00→', solo: 'pc' }] },
@@ -873,6 +904,7 @@
   ];
   for (const [tab, grupo] of extension.cinta) { const t = CINTA.find((x) => x.id === tab); if (t) t.grupos.push(grupo); }
   Oficina.cinta($('pestanas'), $('cinta'), CINTA, comandos);
+  for (const f of extension.despuesDeCinta) f();
   comandos.conectarBotones(document.querySelector('.of-acciones'));
   comandos.conectarBotones(barraFormulas);
   Oficina.menu($('botonMas'), [{ comando: 'nuevo' }, { comando: 'abrir' }, '-', { comando: 'descargar' }, { comando: 'csv' }, { comando: 'pdf' }, { comando: 'pdfLibro' }, ...extension.menu, '-', { comando: 'reemplazar' }, { comando: 'paleta' }, { comando: 'completa' }, { comando: 'inspector' }], comandos);

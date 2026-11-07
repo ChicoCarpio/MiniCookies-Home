@@ -91,7 +91,7 @@
       const lados = { left: null, right: null, top: null, bottom: null, diagonal: null };
       const raiz = X().analizar(base || '<border/>', { profundidad: 2 });
       for (const h of raiz.hijos) if (h.local in lados) lados[h.local] = (base || '').slice(h.ini, h.fin);
-      const lado = (estilo) => (estilo ? `<${'$'} style="${estilo}"><color indexed="64"/></${'$'}>` : '<$/>');
+      const lado = (e) => { const estilo = e && e.estilo ? e.estilo : e, col = e && e.color; return estilo ? `<${'$'} style="${estilo}">${col ? `<color rgb="FF${col}"/>` : '<color indexed="64"/>'}</${'$'}>` : '<$/>'; };
       const poner = (k, estilo) => { lados[k] = lado(estilo).replace(/\$/g, k); };
       if (c.bordes === 'todos') ['left', 'right', 'top', 'bottom'].forEach((k) => poner(k, 'thin'));
       if (c.bordes === 'ninguno') ['left', 'right', 'top', 'bottom'].forEach((k) => poner(k, null));
@@ -137,6 +137,7 @@
         const id = nuevo === null ? 0 : buscarOAgregar('borders', 'border', nuevo);
         apertura = X().ponerAtributo(X().ponerAtributo(apertura, 'borderId', String(id)), 'applyBorder', '1');
       }
+      if ('bordeDe' in cambios) { const b = atributo(xfs[cambios.bordeDe] || xfs[0], 'borderId') || '0'; apertura = X().ponerAtributo(X().ponerAtributo(apertura, 'borderId', b), 'applyBorder', '1'); }   // los bordes de otro xf
       if ('formato' in cambios) apertura = X().ponerAtributo(X().ponerAtributo(apertura, 'numFmtId', String(idFormato(cambios.formato || 'General'))), 'applyNumberFormat', '1');
       if ('h' in cambios || 'v' in cambios || 'ajustar' in cambios) {
         let al = hijos.find((h) => h.local === 'alignment');

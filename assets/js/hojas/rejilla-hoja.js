@@ -892,10 +892,12 @@
       }
     };
     escuchar(vista, 'pointerup', (e) => {
+      const seleccionaba = arrastre && e.pointerId === arrastre.id;
       soltar(e);
+      if (seleccionaba && opciones.alSoltar) opciones.alSoltar();
       if (toque && e.pointerId === toque.id) {
         const t = toque; toque = null;
-        if (Math.abs(e.clientX - t.x) < 8 && Math.abs(e.clientY - t.y) < 8 && Date.now() - t.t < 600 && est) { modoTactil = true; aplicarPunto(t.h, false); }
+        if (Math.abs(e.clientX - t.x) < 8 && Math.abs(e.clientY - t.y) < 8 && Date.now() - t.t < 600 && est) { modoTactil = true; aplicarPunto(t.h, false); if (opciones.alSoltar) opciones.alSoltar(); }
       }
     });
     escuchar(vista, 'pointercancel', (e) => { soltar(e); toque = null; });
