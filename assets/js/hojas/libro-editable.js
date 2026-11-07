@@ -24,6 +24,52 @@
   const MAX_FILAS = 1048576, MAX_COLS = 16384;
   const clave = (f, c) => f * MAX_COLS + c;
 
+  // ---- mover celdas (cortar y pegar): qué le pasa a una referencia. Medido en Excel: pruebas/oraculo/excel-medir-cortar.ps1 --------------------------
+  // M = { h0, f0, c0, f1, c1, h1, df, dc }: el bloque que se mueve y a dónde. Devuelve el rango nuevo, 'error' (quedó debajo de lo movido) o null (no cambia).
+  function rangoTrasMover(r, hr, M) {
+    if (hr === M.h0 && r.f0 >= M.f0 && r.f1 <= M.f1 && r.c0 >= M.c0 && r.c1 <= M.c1) return { h: M.h1, f0: r.f0 + M.df, c0: r.c0 + M.dc, f1: r.f1 + M.df, c1: r.c1 + M.dc };
+    if (hr === M.h1 && r.f0 >= M.f0 + M.df && r.f1 <= M.f1 + M.df && r.c0 >= M.c0 + M.dc && r.c1 <= M.c1 + M.dc) return 'error';
+    if (hr !== M.h0 || M.h0 !== M.h1) return null;
+    // la fila o columna del borde de un rango, movida de frente: el rango se estira o se encoge (SUM(A1:A3) con A3 → A5 da SUM(A1:A5)), si no pasa del otro extremo
+    if (M.dc === 0 && M.c0 === r.c0 && M.c1 === r.c1) {
+      if (M.f1 === r.f1 && M.f0 > r.f0 && M.f0 + M.df > r.f0) return { h: hr, f0: r.f0, c0: r.c0, f1: r.f1 + M.df, c1: r.c1 };
+      if (M.f0 === r.f0 && M.f1 < r.f1 && M.f1 + M.df < r.f1) return { h: hr, f0: r.f0 + M.df, c0: r.c0, f1: r.f1, c1: r.c1 };
+    }
+    if (M.df === 0 && M.f0 === r.f0 && M.f1 === r.f1) {
+      if (M.c1 === r.c1 && M.c0 > r.c0 && M.c0 + M.dc > r.c0) return { h: hr, f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1 + M.dc };
+      if (M.c0 === r.c0 && M.c1 < r.c1 && M.c1 + M.dc < r.c1) return { h: hr, f0: r.f0, c0: r.c0 + M.dc, f1: r.f1, c1: r.c1 };
+    }
+    return null;
+  }
+  // La fórmula después de mover M: hF es la hoja donde está, hNueva donde queda. Lo que no es una referencia no se toca; los corchetes de una tabla, tampoco.
+  function formulaTrasMover(texto, hF, hNueva, M, nombresHoja) {
+    const tapado = String(texto).replace(/"(?:[^"]|"")*"|((?:[A-Za-z_\\À-￿][A-Za-z0-9_.\\À-￿]*)?\[(?:[^\[\]']|'.|\[(?:[^\]']|'.)*\])*\])/g, (m, ref) => (ref ? '_'.repeat(ref.length) : m));
+    let toks;
+    try { toks = XlsFormulas._tokenizar(tapado); } catch (e) { return texto; }
+    const hojaDe = (n) => nombresHoja.findIndex((x) => x.toLowerCase() === String(n).toLowerCase());
+    const col = (c, abs) => (abs ? '$' : '') + LibroXlsx.numeroACol(c), fila = (f, abs) => (abs ? '$' : '') + (f + 1);
+    let salida = String(texto);
+    for (let k = toks.length - 1; k >= 0; k--) {
+      const t = toks[k];
+      if (t.k !== 'ref' || (t.modo !== 'celda' && t.modo !== 'area') || (t.hoja && t.hoja.a !== t.hoja.b)) continue;
+      const hr = t.hoja ? hojaDe(t.hoja.a) : hF;
+      if (hr < 0) continue;
+      const area = t.modo === 'area', r = { f0: t.f0, c0: t.c0, f1: area ? t.f1 : t.f0, c1: area ? t.c1 : t.c0 };
+      if (r.f0 > r.f1 || r.c0 > r.c1) continue;
+      const nuevo = rangoTrasMover(r, hr, M);
+      let txt;
+      if (nuevo === 'error') txt = '#REF!';
+      else {
+        if (!nuevo && (t.hoja || hNueva === hF)) continue;   // no cambia: salvo la que deja de estar en su hoja, que ahora necesita decir cuál
+        const n = nuevo || Object.assign({ h: hr }, r);
+        const previo = t.hoja || n.h !== hNueva ? XlsFormulas._citarHoja(nombresHoja[n.h]) + '!' : '';
+        txt = previo + col(n.c0, t.ca0) + fila(n.f0, t.fa0) + (area ? ':' + col(n.c1, t.ca1) + fila(n.f1, t.fa1) : '');
+      }
+      salida = salida.slice(0, t.i) + txt + salida.slice(t.i + t.l);
+    }
+    return salida;
+  }
+
   // Los backends, del más específico al más general: el primero que reconoce los bytes abre el archivo (.ods si OdsBackend está cargado; si no, solo .xlsx/.xlsm)
   const backends = [globalThis.OdsBackend, XlsxBackend].filter(Boolean);
 
@@ -314,6 +360,48 @@
     // ¿el rango toca un desborde? Excel no deja cambiar una parte de una matriz: ni ordenarla
     // la fórmula como se ve: la de un archivo sin cm, con el @ donde lo muestra Excel
     const formulaVista = (h, f, c) => { const x = estadoDe(h, f, c); return !x || !x.formula ? null : x.legado ? motor.conArrobas(x.formula, h) : x.formula; };
+    // Mover un bloque (cortar y pegar): la fórmula no corre sus referencias y lo que apunta a las celdas movidas las sigue, en todo el libro.
+    //   → { ops, nombresSinMover } | { error: 'protegida' | 'combinadas' | 'limite' }. Lo que desborda no se mueve: lo que queda en su lugar es la celda vacía, y su ancla sí se mueve.
+    function opMover(h0, r, h1, f, c) {
+      const M = { h0, f0: r.f0, c0: r.c0, f1: r.f1, c1: r.c1, h1, df: f - r.f0, dc: c - r.c0 };
+      const D = { f0: f, c0: c, f1: r.f1 + M.df, c1: r.c1 + M.dc };
+      if (D.f1 >= MAX_FILAS || D.c1 >= MAX_COLS) return { error: 'limite' };
+      if (!M.df && !M.dc && h0 === h1) return { ops: [] };
+      const toca = (m, a) => !(m.f1 < a.f0 || m.f0 > a.f1 || m.c1 < a.c0 || m.c0 > a.c1);
+      if ((hojas[h0].combinadas || []).some((m) => toca(m, r)) || (hojas[h1].combinadas || []).some((m) => toca(m, D))) return { error: 'combinadas' };
+      for (let i = r.f0; i <= r.f1; i++) for (let j = r.c0; j <= r.c1; j++) if (protegida(h0, i, j) || protegida(h1, i + M.df, j + M.dc)) return { error: 'protegida' };
+      const nombresHoja = libro.hojas.map((m) => m.nombre);
+      const enOrigen = (h, i, j) => h === h0 && i >= r.f0 && i <= r.f1 && j >= r.c0 && j <= r.c1;
+      const enDestino = (h, i, j) => h === h1 && i >= D.f0 && i <= D.f1 && j >= D.c0 && j <= D.c1;
+      const porHoja = new Map();
+      const poner = (h, i, j, v) => { if (!porHoja.has(h)) porHoja.set(h, []); porHoja.get(h).push({ f: i, c: j, v }); };
+      for (let i = r.f0; i <= r.f1; i++) for (let j = r.c0; j <= r.c1; j++) {
+        const x = estadoDe(h0, i, j), hija = !!(x && x.derrame);
+        let v = null;
+        if (x && (hija || x.tipo === 'vacio') && !x.formula) v = x.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: x.estilo } : null;
+        else if (x) { v = Object.assign({}, x); delete v.matriz; if (v.formula) v.formula = formulaTrasMover(v.formula, h0, h1, M, nombresHoja); }
+        poner(h1, i + M.df, j + M.dc, v);
+        if (x && !hija && !enDestino(h0, i, j)) poner(h0, i, j, null);
+      }
+      hojas.forEach((hoja, h) => {
+        if (!hoja || hoja.sinCeldas) return;
+        const C = hoja.celdas;
+        for (const [k] of C.formulas) {
+          const i = C.fila[k], j = C.col[k];
+          if (enOrigen(h, i, j) || enDestino(h, i, j) || protegida(h, i, j)) continue;
+          const x = estadoDe(h, i, j);
+          if (!x || !x.formula) continue;
+          const nueva = formulaTrasMover(x.formula, h, h, M, nombresHoja);
+          if (nueva === x.formula) continue;
+          const v = Object.assign({}, x, { formula: nueva });
+          delete v.matriz;
+          poner(h, i, j, v);
+        }
+      });
+      // Excel también corre los nombres definidos; aquí no se pueden cambiar con una operación de celdas: se avisa
+      const nombresSinMover = libro.nombres.filter((n) => { const hn = n.hojaLocal === null || n.hojaLocal === undefined ? 0 : n.hojaLocal; return n.ref && formulaTrasMover(n.ref, hn, hn, M, nombresHoja) !== n.ref; }).map((n) => n.nombre);
+      return { ops: [...porHoja].map(([h, celdas]) => ({ t: 'celdas', h, celdas })), nombresSinMover };
+    }
     function hayDesborde(h, r) {
       asegurarMotor();
       const hoja = hojas[h];
@@ -376,7 +464,7 @@
     return {
       libro, paquete, hojas, estilos, motor, backend, formato: backend.formato, destino: () => modelo.destino(),
       nombres: () => libro.hojas.map((m, i) => ({ indice: i, nombre: m.nombre, estado: m.estado, tipo: m.tipo })),
-      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, hayDesborde, formulaVista, guardar, pendientes,
+      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, opMover, hayDesborde, formulaVista, guardar, pendientes,
       asegurarMotor, limite: (h) => limites[h], opciones: opcionesEntrada,
       // la celda ancla de la matriz dinámica que desbordó en (h, f, c), o null
       anclaDe: (h, f, c) => {

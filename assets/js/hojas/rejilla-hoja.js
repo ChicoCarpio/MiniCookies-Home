@@ -4,7 +4,7 @@
 // después de un cambio del modelo. La edición misma (el cuadro de texto encima de la celda) la hace la aplicación. Ver docs/motores-adaptados.md.
 //   opciones.editable, opciones.alEditar({ f, c, inicial, modo }), opciones.alBorrar(rango), opciones.alCopiar(evento, cortar) → true si lo atendió,
 //   opciones.alPegar(evento), opciones.alTecla(evento) → true si la aplicación la usó (Ctrl+Z, Ctrl+B…)
-//   rejilla.refrescar() · rejilla.irA(f, c) · rejilla.seleccionar(f0, c0, f1, c1) · rejilla.hojaActual() · rejilla.cuerpo
+//   rejilla.refrescar() · rejilla.irA(f, c) · rejilla.seleccionar(f0, c0, f1, c1) · rejilla.marcarCorte({ h, f0, c0, f1, c1 } | null) · rejilla.hojaActual() · rejilla.cuerpo
 // Rejilla de hoja de cálculo (interfaz de hojas, fase A del plan 06): muestra una hoja de Excel, de un CSV o de un formato antiguo como se ve al abrirla
 // en Excel o en Google Sheets: letras y números en los bordes, celda activa, selección de rango, cuadro de nombre, barra con el contenido de la celda,
 // pestañas de hojas, barra de estado (Recuento, Suma, Promedio) y zoom. La hoja la dibuja el motor (XlsxDibujo.dibujarVista) en un Canvas del tamaño de la
@@ -125,7 +125,8 @@
         });
       };
     }
-    const ponerBusqueda = crearPiezas('rh-coinc'), ponerEncCol = crearPiezas('rh-enc-col'), ponerEncFila = crearPiezas('rh-enc-fila'), ponerRango = crearPiezas('rh-rango'), ponerActiva = crearPiezas('rh-activa');
+    const ponerBusqueda = crearPiezas('rh-coinc'), ponerEncCol = crearPiezas('rh-enc-col'), ponerEncFila = crearPiezas('rh-enc-fila'), ponerRango = crearPiezas('rh-rango'), ponerActiva = crearPiezas('rh-activa'), ponerCorte = crearPiezas('rh-corte');
+    let corte = null;   // { h, f0, c0, f1, c1 }: lo cortado que espera dónde pegarse
     const espaciador = q('.rh-espaciador'), pestanas = q('.rh-pestanas'), info = q('.rh-info'), anuncio = q('.rh-anuncio');
     const controlZoom = q('.rh-control-zoom'), valorZoom = q('.rh-valor-zoom');
     const ctx = lienzo.getContext('2d');
@@ -286,6 +287,7 @@
       const mismo = (r.f0 === r.f1 && r.c0 === r.c1) || (m && r.f0 === m.f0 && r.c0 === m.c0 && r.f1 === m.f1 && r.c1 === m.c1);
       ponerRango(mismo ? [] : piezasDe(r));
       ponerBusqueda(piezasBusqueda(piezasDe));
+      ponerCorte(corte && corte.h === est.indice ? piezasDe(corte) : []);
       posicionarBotonesOF();
       // asas en las esquinas del rango (solo con el tacto y cuando la selección es de celdas, no de columnas o filas enteras)
       const celdas = r.f1 < MAX_FILAS - 1 && r.c1 < MAX_COLS - 1;
@@ -745,7 +747,7 @@
         case 'Home': if (ctrl) { ponerSeleccion(0, 0, 0, 0); mostrarCelda(0, 0); } else { const f = ext ? s.f2 : s.f; ext ? ponerSeleccion(s.f, s.c, f, 0) : ponerSeleccion(f, 0, f, 0); mostrarCelda(f, 0); } pedirPintado(); break;
         case 'End': if (ctrl) { const f = Math.max(0, est.fm), c = Math.max(0, est.cm); ponerSeleccion(f, c, f, c); mostrarCelda(f, c); pedirPintado(); } else hecho = false; break;
         case 'a': case 'A': if (ctrl) { ponerSeleccion(0, 0, MAX_FILAS - 1, MAX_COLS - 1); } else hecho = false; break;
-        case 'Escape': ponerSeleccion(s.f, s.c, s.f, s.c); break;
+        case 'Escape': if (opciones.alEscape) opciones.alEscape(); ponerSeleccion(s.f, s.c, s.f, s.c); break;
         default: hecho = false;
       }
       if (hecho) e.preventDefault();
@@ -1077,6 +1079,7 @@
       refrescar,
       irA(f, c) { ponerSeleccion(f, c, f, c); mostrarCelda(f, c); pedirPintado(); },
       seleccionar(f0, c0, f1, c1) { ponerSeleccion(f0, c0, f1, c1); mostrarCelda(f1, c1); pedirPintado(); },
+      marcarCorte(r) { corte = r; pedirPintado(); },
       hojaActual: () => (est ? est.indice : -1),
       activa: () => (est ? { f: est.sel.f, c: est.sel.c } : null),
       cuerpo,
