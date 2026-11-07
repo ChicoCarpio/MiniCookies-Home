@@ -812,8 +812,9 @@
       FORMULATEXT: (a, c, A) => {
         const r = A.evaluarNodo(a[0], c);
         if (!A.esRef(r)) return A.E.na;
-        const f = A.fuente.formulaDe ? A.fuente.formulaDe(r.h, r.f0, r.c0) : null;
+        let f = A.fuente.formulaDe ? A.fuente.formulaDe(r.h, r.f0, r.c0) : null;
         if (!f) return A.E.na;
+        if (A.fuente.esLegada && A.fuente.esLegada(r.h, r.f0, r.c0)) f = A.conArrobas(f, r.h);   // como en la barra de fórmulas
         const visible = typeof EntradaCelda !== 'undefined' && A.fuente.idioma === 'es' ? EntradaCelda.formulaVisible(f, 'es') : f.replace(/_xlfn\.(?:_xlws\.)?|_xlpm\./gi, '');
         return '=' + visible;
       },

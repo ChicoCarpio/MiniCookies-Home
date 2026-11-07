@@ -263,7 +263,7 @@
     if (!x) return '';
     const xf = ed.libro.estilos.xf(x.estilo);
     const formato = xf.formato || 'General';
-    return EntradaCelda.textoParaEditar(x, {
+    return EntradaCelda.textoParaEditar(x.formula ? Object.assign({}, x, { formula: ed.formulaVista(h, f, c) }) : x, {
       idioma: idioma(), esFecha: typeof x.valor === 'number' && XlsxFormato.esFecha(formato), esPorcentaje: /%/.test(formato.replace(/"[^"]*"/g, '')),
       textoFecha: (v) => XlsxFormato.formatear(v, /[hs]/i.test(formato.replace(/"[^"]*"/g, '')) ? (idioma() === 'en' ? 'm/d/yyyy h:mm' : 'dd/mm/yyyy h:mm') : (idioma() === 'en' ? 'm/d/yyyy' : 'dd/mm/yyyy'), { idioma: idioma(), fecha1904: ed.libro.fecha1904 }).texto,
     });
@@ -648,7 +648,7 @@
         const x = ed.estadoDe(h, f, c);
         if (!x || x.derrame || ed.protegida(h, f, c)) return;   // lo que desborda no se escribe: es de la fórmula del ancla
         if (x.formula) {
-          const vis = EntradaCelda.formulaVisible(x.formula, idioma());
+          const vis = EntradaCelda.formulaVisible(ed.formulaVista(h, f, c), idioma());
           re.lastIndex = 0;
           if (!re.test(vis)) return;
           const op = ed.opEscribir(h, f, c, '=' + vis.replace(re, () => nuevo));
@@ -674,7 +674,7 @@
     const tipo = x ? tx('t-' + x.tipo) : tx('t-vacio');
     insp.mostrar([
       { titulo: tx('i-celda') + ' ' + aA1(a.f, a.c), filas: [
-        ['i-tipo', tipo], ['i-valor', x && x.valor !== null ? String(x.valor) : '—'], ['i-formula', x && x.formula ? '=' + EntradaCelda.formulaVisible(x.formula, idioma()) : '—'],
+        ['i-tipo', tipo], ['i-valor', x && x.valor !== null ? String(x.valor) : '—'], ['i-formula', x && x.formula ? '=' + EntradaCelda.formulaVisible(ed.formulaVista(h, a.f, a.c) || x.formula, idioma()) : '—'],
         ['i-formato', p.formato || 'General'], ['i-fuente', (p.fuente || '') + ' ' + (p.tamano || '') + (p.negrita ? ' · B' : '') + (p.cursiva ? ' · I' : '')],
       ] },
       { titulo: tx('i-archivo'), filas: [

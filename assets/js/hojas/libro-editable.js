@@ -90,7 +90,7 @@
       const tenia = C.formulas.get(i);
       // las fórmulas que se escriben en el editor son de Excel 365 (dinámicas: si dan una matriz, desbordan)
       if (v && v.formula) {
-        if (!tenia || C.formulaDe(i) !== v.formula || (v.legado && tenia.dinamica)) C.formulas.set(i, { texto: v.formula, tipo: 'normal', ref: null, si: null, dinamica: !v.legado });
+        if (!tenia || C.formulaDe(i) !== v.formula || v.reescrita || (v.legado && tenia.dinamica)) C.formulas.set(i, { texto: v.formula, tipo: 'normal', ref: null, si: null, dinamica: !v.legado });
       } else if (tenia) C.formulas.delete(i);
       if (v && v.derrame) { if (!hoja.derramadas) hoja.derramadas = new Set(); hoja.derramadas.add(clave(f, c)); }
       else if (hoja.derramadas) hoja.derramadas.delete(clave(f, c));
@@ -164,6 +164,7 @@
       },
       esFormula: (h, f, c) => { const x = celda(h, f, c); return !!(x && x.formula); },
       formulaDe: (h, f, c) => { const x = hojas[h] && !hojas[h].sinCeldas ? celda(h, f, c) : null; return x ? x.formula : null; },
+      esLegada: (h, f, c) => { const x = hojas[h] && !hojas[h].sinCeldas ? estadoDe(h, f, c) : null; return !!(x && x.legado); },
       filaOculta: (h, f) => { const x = hojas[h] && hojas[h].filas && hojas[h].filas.get(f); return !!(x && x.oculta); },
       // las tablas del libro (para Tabla[Columna]); los nombres de columna son los encabezados de la tabla
       tablas: () => {
@@ -233,7 +234,7 @@
       for (const { x, antes, despues } of cambiosOp) {
         const f2 = despues && despues.formula ? despues.formula : null;
         const legado = !!(despues && despues.legado);
-        if (((antes && antes.formula) !== f2 || (legado && !antes.legado)) && construido) motor.ponerFormula(op.h, x.f, x.c, f2, { dinamica: !legado });
+        if (((antes && antes.formula) !== f2 || (legado && !antes.legado) || (despues && despues.reescrita)) && construido) motor.ponerFormula(op.h, x.f, x.c, f2, { dinamica: !legado });
         pendientesCalculo.push({ h: op.h, f: x.f, c: x.c });
         inversa.celdas.push({ f: x.f, c: x.c, v: antes });
       }
@@ -271,7 +272,10 @@
         case 'vacio': v = estilo ? { tipo: 'vacio', valor: null, formula: null, estilo } : null; break;
         case 'formula': {
           if (!XlsFormulasValida(x.formula)) return { error: 'formula' };
+          // la fórmula sin cm se ve con su @ (formulaVista). Confirmarla tal cual la deja como está; escribirla sin el @ es otra fórmula, ya dinámica, aunque el archivo la guardara igual
+          if (antes && antes.legado && x.formula === EntradaCelda.formulaAlmacenada('=' + motor.conArrobas(antes.formula, h), opcionesEntrada.idioma)) return { t: 'celdas', h, celdas: [] };
           v = { tipo: 'numero', valor: 0, formula: x.formula, estilo };   // el valor lo pone el recálculo
+          if (antes && antes.legado && x.formula === antes.formula) v.reescrita = true;
           break;
         }
         case 'error': v = { tipo: 'error', valor: x.valor, formula: null, estilo }; break;
@@ -308,6 +312,8 @@
     }
 
     // ¿el rango toca un desborde? Excel no deja cambiar una parte de una matriz: ni ordenarla
+    // la fórmula como se ve: la de un archivo sin cm, con el @ donde lo muestra Excel
+    const formulaVista = (h, f, c) => { const x = estadoDe(h, f, c); return !x || !x.formula ? null : x.legado ? motor.conArrobas(x.formula, h) : x.formula; };
     function hayDesborde(h, r) {
       asegurarMotor();
       const hoja = hojas[h];
@@ -370,7 +376,7 @@
     return {
       libro, paquete, hojas, estilos, motor, backend, formato: backend.formato, destino: () => modelo.destino(),
       nombres: () => libro.hojas.map((m, i) => ({ indice: i, nombre: m.nombre, estado: m.estado, tipo: m.tipo })),
-      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, hayDesborde, guardar, pendientes,
+      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, hayDesborde, formulaVista, guardar, pendientes,
       asegurarMotor, limite: (h) => limites[h], opciones: opcionesEntrada,
       // la celda ancla de la matriz dinámica que desbordó en (h, f, c), o null
       anclaDe: (h, f, c) => {
