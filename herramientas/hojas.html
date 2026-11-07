@@ -36,6 +36,7 @@ window.i18nPagina = {
     "guia-consejo-4": "El trabajo sin terminar queda como borrador en este navegador y aparece en esta pantalla la próxima vez que entres.",
     "guia-consejo-5": "Si el archivo trae algo que Hojas no edita (macros, tablas dinámicas…), una línea debajo de la hoja lo avisa y se conserva al guardar.",
     "guia-consejo-6": "Un .csv, un .xls o un .xlsb se guardan como .xlsx; un .xlsx y un .ods se guardan en su propio formato.",
+    "guia-consejo-7": "Al copiar y pegar, el botón que aparece junto a lo pegado cambia lo que llegó: solo valores, solo formatos, transponer y más. Ctrl+Alt+V abre Pegado especial, con sumar, restar y omitir blancos.",
     "guia-p1": "¿Se pierde algo del archivo al guardar?",
     "guia-r1": "Lo que no editaste se escribe tal como estaba. Si el archivo trae algo que Hojas no sabe editar, se conserva y la línea de estado te lo avisa.",
     "guia-p2": "¿Funciona con archivos de LibreOffice?",
@@ -68,6 +69,7 @@ window.i18nPagina = {
     "guia-consejo-4": "Unfinished work is kept as a draft in this browser and shows up on this screen the next time you come back.",
     "guia-consejo-5": "If the file has something Sheets doesn’t edit (macros, pivot tables…), a line under the sheet says so and it is kept when you save.",
     "guia-consejo-6": "A .csv, a .xls or a .xlsb is saved as .xlsx; an .xlsx and an .ods are saved in their own format.",
+    "guia-consejo-7": "After you paste, the button next to what you pasted changes what arrived: values only, formatting only, transpose and more. Ctrl+Alt+V opens Paste special, with add, subtract and skip blanks.",
     "guia-p1": "Is anything in the file lost when saving?",
     "guia-r1": "Whatever you didn’t edit is written back as it was. If the file has something Sheets can’t edit, it is kept and the status line tells you.",
     "guia-p2": "Does it work with LibreOffice files?",
@@ -132,6 +134,7 @@ window.i18nPagina = {
         <li data-i18n="guia-consejo-4">El trabajo sin terminar queda como borrador en este navegador y aparece en esta pantalla la próxima vez que entres.</li>
         <li data-i18n="guia-consejo-5">Si el archivo trae algo que Hojas no edita (macros, tablas dinámicas…), una línea debajo de la hoja lo avisa y se conserva al guardar.</li>
         <li data-i18n="guia-consejo-6">Un .csv, un .xls o un .xlsb se guardan como .xlsx; un .xlsx y un .ods se guardan en su propio formato.</li>
+        <li data-i18n="guia-consejo-7">Al copiar y pegar, el botón que aparece junto a lo pegado cambia lo que llegó: solo valores, solo formatos, transponer y más. Ctrl+Alt+V abre Pegado especial, con sumar, restar y omitir blancos.</li>
       </ul>
       <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
       <details>
@@ -217,12 +220,19 @@ window.i18nPagina = {
 <script src="../assets/js/hojas/mover-notas.js"></script>
 <script src="../assets/js/hojas/mover-tablas.js"></script>
 <script src="../assets/js/hojas/mover-ods.js"></script>
+<script src="../assets/js/xlsx-tablas-estilos.js"></script>
+<script src="../assets/js/xlsx-tablas.js"></script>
+<script src="../assets/js/hojas/pegado-especial.js"></script>
+<script src="../assets/js/hojas/pegado-objetos.js"></script>
+<script src="../assets/js/hojas/pegado-ods.js"></script>
+<script src="../assets/js/hojas/pegado-html.js"></script>
 <script src="../assets/js/hojas/datos-libro.js"></script>
 <script src="../assets/js/hojas/filtros-libro.js"></script>
 <script src="../assets/js/hojas/graficos-libro.js"></script>
 <script src="../assets/js/hojas/pagina-libro.js"></script>
 <script src="../assets/js/hojas/app-datos.js"></script>
 <script src="../assets/js/hojas/app-hoja.js"></script>
+<script src="../assets/js/hojas/app-pegado.js"></script>
 <script src="../assets/js/hojas/app.js"></script>
 </body>
 </html>

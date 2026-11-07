@@ -3,7 +3,7 @@
 // con acciones por fila. Un solo <dialog class="of-dialogo"> por llamada; se cierra con Escape o con los botones y devuelve una promesa.
 // Los textos llegan ya traducidos (quien llama usa su función de i18n).
 //
-//   await Dialogo.formulario({ titulo, campos, aceptar: 'Aceptar', cancelar: 'Cancelar' }) → { nombre: valor, … } | null
+//   await Dialogo.formulario({ titulo, campos, aceptar: 'Aceptar', cancelar: 'Cancelar', extras: [{ valor, texto }] }) → { nombre: valor, …, _boton } | null   (_boton: el extra que se pulsó)
 //     campo = { nombre, etiqueta, tipo: 'texto'|'numero'|'select'|'color'|'check'|'area', valor, opciones: [[valor, texto]],
 //               visible: (valores) => bool, ayuda, requerido }
 //   await Dialogo.lista({ titulo, vacio, filas: [{ texto, detalle, acciones: [{ valor, texto }] }], botones: [{ valor, texto }], cerrar })
@@ -57,7 +57,8 @@
     form.append(error);
     const aceptar = crear('button', { type: 'submit', class: 'boton', value: 'aceptar', texto: o.aceptar || 'OK' });
     const cancelar = crear('button', { type: 'button', class: 'boton boton-secundario', value: 'cancelar', texto: o.cancelar || 'Cancel' });
-    form.append(crear('div', { class: 'of-formulario-botones' }, [aceptar, cancelar]));
+    const extras = (o.extras || []).map((x) => { const b = crear('button', { type: 'button', class: 'boton boton-secundario', texto: x.texto }); b.addEventListener('click', () => dlg._fin(Object.assign(valores(), { _boton: x.valor }))); return b; });
+    form.append(crear('div', { class: 'of-formulario-botones' }, [aceptar, cancelar, ...extras]));
     cancelar.addEventListener('click', () => dlg._fin(null));
     form.addEventListener('submit', (e) => {
       e.preventDefault();

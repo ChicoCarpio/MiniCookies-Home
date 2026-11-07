@@ -235,7 +235,7 @@
       // el estilo: el de su xf; si coincide con el que ya le da su columna o fila, no hace falta; el estilo «Default» de LibreOffice si el xf es el de siempre
       const xf = e.estilo || 0, xfDef = xfPorDefecto(h, e.f, e.c);
       const estilo = xf === xfDef ? null : (nombreEstilo(xf) || 'Default');
-      if (estilo) etiqueta = X().ponerAtributo(etiqueta, 'table:style-name', estilo);
+      etiqueta = X().ponerAtributo(etiqueta, 'table:style-name', estilo);   // sin estilo propio: el que tenía se va
       const codigo = tabla.def(xf).codigo;
       const infoValor = v === null || v === undefined ? null : valorODF(v, codigo);
       if (conFormula) {

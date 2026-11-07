@@ -224,5 +224,21 @@
     });
   }
 
-  globalThis.MoverOds = { aplicar, leerExtras };
+  function extrasDe(texto, h, M) {
+    const d = EO().documento(texto), mapa = new Map();
+    recorrer(texto, EO().tablaDe(d, h), M.f0, M.f1, (f, c, nodo, t, rep, n) => {
+      for (let i = Math.max(f, M.f0); i <= Math.min(f + n - 1, M.f1); i++) for (let j = Math.max(c, M.c0); j <= Math.min(c + rep - 1, M.c1); j++) {
+        const e = extraDe(nodo, t);
+        if (e.nota || e.parrafos) mapa.set(i + ',' + j, e);
+      }
+    });
+    return mapa;
+  }
+  // el texto que se ve en una celda
+  function textoDe(texto, h, f, c) {
+    let s = null;
+    recorrer(texto, EO().tablaDe(EO().documento(texto), h), f, f, (fi, ci, nodo, t, rep) => { if (s === null && c >= ci && c < ci + rep) s = (t.slice(nodo.ini, nodo.fin).replace(NOTA, '').match(/<text:p\b[\s\S]*?<\/text:p>/g) || []).join('\n').replace(/<[^>]+>/g, ''); });
+    return s || '';
+  }
+  globalThis.MoverOds = { aplicar, leerExtras, _interno: { baseA1, baseTexto, formulasDe, conFormulas, validacionesDeHoja, escribirCeldas, extrasDe, textoDe } };
 })();

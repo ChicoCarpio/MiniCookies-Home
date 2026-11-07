@@ -70,3 +70,9 @@
 .hc-formula.expandida .hc-contenido, .hc-formula.expandida .hc-contenido:focus { height: 120px; max-height: 40vh; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; resize: vertical; }
 .hc-formula.expandida .hc-nombre, .hc-formula.expandida .hc-fx { align-self: flex-start; height: 32px; }
 @media (max-width: 900px) { .hc-expandir { width: 44px; height: 44px; } .hc-formula.expandida .hc-contenido, .hc-formula.expandida .hc-contenido:focus { height: 96px; } }
+
+/* el botón «Opciones de pegado» junto a lo pegado y el cursor de «Copiar formato» */
+.hc-opciones-pegado { position: fixed; z-index: 70; min-height: 28px; min-width: 40px; padding: 0 6px; background: var(--superficie); border: 1px solid var(--gris-borde); border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); font-size: 0.8rem; }
+.hc-opciones-pegado[hidden] { display: none; }
+@media (pointer: coarse) { .hc-opciones-pegado { min-height: 44px; min-width: 52px; } }
+.hc-brocha .hc-rejilla .rh-vista { cursor: copy; }

@@ -328,6 +328,8 @@
       }
       salida += ch; i++;
     }
+    // un rango con una punta fuera de la hoja es todo #REF!, como en Excel
+    if (salida.includes('#REF!') && !texto.includes('#REF!')) salida = salida.replace(/(?:\$?[A-Za-z]{1,3}\$?\d+|#REF!):#REF!|#REF!:\$?[A-Za-z]{1,3}\$?\d+/g, '#REF!');
     return salida;
   }
 

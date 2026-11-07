@@ -29,6 +29,7 @@
   const MAX_FUSIONES = 500;   // combinadas con estilo que se siguen a la vez (las que aún cubren la fila de abajo)
   const seVe = (e) => !!e && !!(e.relleno || e.bordes);
   const ERRORES = new Set(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA']);
+  const ERRORES_ES = { '#¡NULO!': '#NULL!', '#¡DIV/0!': '#DIV/0!', '#¡VALOR!': '#VALUE!', '#¡REF!': '#REF!', '#¿NOMBRE?': '#NAME?', '#¡NUM!': '#NUM!', '#N/D': '#N/A' };   // un LibreOffice en español los guarda así
 
   const ent = (a, k) => (a[k] === undefined ? null : a[k]);
   const entero = (s, defecto) => { const n = parseInt(s, 10); return n > 0 ? n : defecto; };
@@ -384,7 +385,7 @@
         case 'date': { const d = serieDeFecha(c.a['date-value'] || ''); if (d) { base = d.serie; def = d.conHora ? 'yyyy-mm-dd hh:mm:ss' : 'yyyy-mm-dd'; } break; }
         case 'time': { const h = serieDeHora(c.a['time-value'] || ''); if (h !== null) { base = h; def = 'hh:mm:ss'; } break; }
         case 'boolean': base = c.a['boolean-value'] === 'true'; break;
-        case 'error': { const e = c.a['string-value'] || parrafos.join(''); base = { error: ERRORES.has(e) ? e : '#VALUE!' }; break; }
+        case 'error': { const e = c.a['string-value'] || parrafos.join(''); base = { error: ERRORES.has(e) ? e : ERRORES_ES[e] || '#VALUE!' }; break; }
         case 'string': { const t = cadena(); if (t !== '' || (conFormulas && c.a.formula)) base = t; break; }   // una fórmula que da "" sigue siendo fórmula
         default: break;
       }

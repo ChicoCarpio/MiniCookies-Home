@@ -80,8 +80,9 @@
   function conNotas(destino, notas, origen) {
     const autoresDe = (t) => { const m = /<authors>([\s\S]*?)<\/authors>/.exec(t); return m ? m[1].match(/<author\b[^>]*?(?:\/>|>[\s\S]*?<\/author>)/g) || [] : []; };
     const de = autoresDe(origen), a = autoresDe(destino);
-    const movidas = notas.map((e) => e.replace(/(\bauthorId\s*=\s*")(\d+)(")/, (x, p, i, c) => {
-      const au = de[+i];
+    const movidas = notas.map((e) => e.replace(/\s+data-autor="[^"]*"/, '').replace(/(\bauthorId\s*=\s*")(\d+)(")/, (x, p, i, c) => {
+      const propio = /\sdata-autor="([^"]*)"/.exec(e);
+      const au = propio ? '<author>' + propio[1] + '</author>' : de[+i];
       if (au === undefined) return x;
       let k = a.indexOf(au);
       if (k < 0) { a.push(au); k = a.length - 1; }
@@ -123,6 +124,12 @@
     if (q1.tCom !== null) q1.tCom = q1.tCom.replace(RE_NOTA, fuera);
     if (q1.tHil !== null) q1.tHil = q1.tHil.replace(RE_HILO, fuera);
     if (q1.tVml !== null) q1.tVml = q1.tVml.replace(RE_FORMA, (s) => (dentro(celdaForma(s), D) ? '' : s));
+    await agregar(P, q0, q1, r1, llevar);
+    await guardar(P, r0, q0);
+    await guardar(P, r1, q1);
+  }
+
+  async function agregar(P, q0, q1, r1, llevar) {
     if (llevar.com.length) {
       const origen = q0.tCom;
       if (q1.tCom !== null) q1.tCom = conNotas(q1.tCom, llevar.com, origen);
@@ -164,8 +171,6 @@
         q1.hil = { destino: ruta, id: await P.agregarRelacion(r1, REL_HILOS, relativa(ruta)) };
       }
     }
-    await guardar(P, r0, q0);
-    await guardar(P, r1, q1);
   }
 
   async function hipervinculos(P, libro, M) {
@@ -210,11 +215,99 @@
     P.escribir(r1, x1);
   }
 
+  // ---- copiar (no mover): la nota, el hilo o el enlace de cada celda de origen llega a su destino, con lo de abajo cortado. O.pares: { sf, sc, df, dc }; con «omitir blancos» solo se pisa donde llega uno
+  async function copiar(libro, O) {
+    const P = PaqueteEditable.desdeZip(libro.zip), r0 = libro.hojas[O.h0].ruta, r1 = libro.hojas[O.h1].ruta;
+    if (O.notas) await copiarNotas(P, O, r0, r1);
+    if (O.enlaces) await copiarEnlaces(P, O, r0, r1);
+  }
+  async function copiarNotas(P, O, r0, r1) {
+    const q0 = await partesDe(P, r0), q1 = O.h0 === O.h1 ? q0 : await partesDe(P, r1);
+    if (!q0.com && !q0.hil && !q1.com && !q1.hil) return;
+    const destinos = new Map();
+    for (const p of O.pares) { const k = p.sf + ',' + p.sc; if (!destinos.has(k)) destinos.set(k, []); destinos.get(k).push(p); }
+    const llevar = { com: [], hil: [], vml: [] }, quita = new Set(), idsHilo = new Map();
+    const de = (p) => (p ? destinos.get(p.f + ',' + p.c) || [] : []);
+    if (q0.tHil !== null) for (const m of q0.tHil.matchAll(RE_HILO)) {
+      const p = celdaDe(m[1]);
+      for (const d of de(p)) {
+        quita.add(d.df + ',' + d.dc);
+        const k = p.f + ',' + p.c + '>' + d.df + ',' + d.dc;
+        const id = /\bid\s*=\s*"\{([0-9A-Fa-f-]{36})\}"/.exec(m[1]);
+        const nuevo = id ? MoverObjetos._interno.idNuevo(id[1]) : null;
+        if (id) idsHilo.set(k + '|' + id[1].toUpperCase(), nuevo);
+        let e = conRef(m[0], { f: d.df, c: d.dc });
+        if (id) e = e.replace(id[0], id[0].replace(id[1], nuevo));
+        const padre = /\bparentId\s*=\s*"\{([0-9A-Fa-f-]{36})\}"/.exec(m[1]);
+        if (padre && idsHilo.has(k + '|' + padre[1].toUpperCase())) e = e.replace(padre[0], padre[0].replace(padre[1], idsHilo.get(k + '|' + padre[1].toUpperCase())));
+        llevar.hil.push(e);
+      }
+    }
+    if (q0.tCom !== null) for (const m of q0.tCom.matchAll(RE_NOTA)) {
+      const p = celdaDe(m[1]);
+      for (const d of de(p)) {
+        quita.add(d.df + ',' + d.dc);
+        let e = conRef(m[0], { f: d.df, c: d.dc }).replace(/\bxr:uid\s*=\s*"\{([0-9A-Fa-f-]{36})\}"/, (x, u) => 'xr:uid="{' + MoverObjetos._interno.idNuevo(u) + '}"');
+        // la nota que acompaña a un hilo se llama tc={id del hilo}: la copia, con el id de la suya
+        const k = p.f + ',' + p.c + '>' + d.df + ',' + d.dc + '|';
+        for (const [kk, n] of idsHilo) if (kk.startsWith(k)) { e = e.replace(/^<((?:\w+:)?)comment\b/, (x) => x + ' data-autor="tc={' + n + '}"'); break; }
+        llevar.com.push(e);
+      }
+    }
+    if (q0.tVml !== null) for (const s of q0.tVml.match(RE_FORMA) || []) {
+      const p = celdaForma(s);
+      for (const d of de(p)) llevar.vml.push(formaMovida(s, { f: d.df, c: d.dc }, d.df - p.f, d.dc - p.c));
+    }
+    const origenCom = q0.tCom, moldeVml = q0.vml;
+    const fuera = (p) => p && (O.blancos ? quita.has(p.f + ',' + p.c) : dentro(p, O.D));
+    if (q1.tCom !== null) q1.tCom = q1.tCom.replace(RE_NOTA, (e, attrs) => (fuera(celdaDe(attrs)) ? '' : e));
+    if (q1.tHil !== null) q1.tHil = q1.tHil.replace(RE_HILO, (e, attrs) => (fuera(celdaDe(attrs)) ? '' : e));
+    if (q1.tVml !== null) q1.tVml = q1.tVml.replace(RE_FORMA, (s) => (fuera(celdaForma(s)) ? '' : s));
+    void origenCom; void moldeVml;
+    await agregar(P, O.h0 === O.h1 ? Object.assign({}, q0) : q0, q1, r1, llevar);
+    await guardar(P, r1, q1);
+  }
+  async function copiarEnlaces(P, O, r0, r1) {
+    const RE = /<hyperlink\b[^>]*?\/>/g;
+    const rangoDe = (e) => { const m = /\bref\s*=\s*"([^"]*)"/.exec(e); return m ? LibroXlsx.decodificarRango(m[1]) : null; };
+    const x0 = await P.leer(r0);
+    const llegan = [], tocadas = [];
+    for (const m of x0.match(RE) || []) {
+      const r = rangoDe(m);
+      if (!r) continue;
+      const l = O.pares.filter((p) => p.sf >= r.f0 && p.sf <= r.f1 && p.sc >= r.c0 && p.sc <= r.c1);
+      if (!l.length) continue;
+      for (const g of MoverObjetos._interno.unir(l.map((p) => ({ f0: p.df, c0: p.dc, f1: p.df, c1: p.dc })))) { llegan.push({ e: m, g }); tocadas.push(g); }
+    }
+    let x1 = O.h0 === O.h1 ? x0 : await P.leer(r1);
+    const adentro = (r, a) => r && r.f0 >= a.f0 && r.f1 <= a.f1 && r.c0 >= a.c0 && r.c1 <= a.c1;
+    const fuera = (e) => { const r = rangoDe(e); return O.blancos ? tocadas.some((g) => adentro(r, g)) : adentro(r, O.D); };
+    x1 = x1.replace(RE, (e) => (fuera(e) ? '' : e)).replace(/<hyperlinks\b[^>]*>\s*<\/hyperlinks>/, '');
+    if (llegan.length) {
+      const rels = await P.relaciones(r0), piezas = [], conR = conPrefijoR(x1);
+      x1 = conR.xml;
+      for (const { e, g } of llegan) {
+        let u = e.replace(/(\bref\s*=\s*")[^"]*(")/, (x, a, c) => a + MoverObjetos._textoRango(g) + c).replace(/\s+xr:uid\s*=\s*"[^"]*"/, '');
+        const m = /\b(\w+):id\s*=\s*"([^"]*)"/.exec(u), rel = m && rels.find((q) => q.id === m[2]);
+        if (rel && O.h0 !== O.h1) {
+          const id = await P.agregarRelacion(r1, REL_HIPER, rel.destino);
+          const k = r1.lastIndexOf('/'), rr = r1.slice(0, k + 1) + '_rels/' + r1.slice(k + 1) + '.rels', t = await P.leer(rr);
+          P.escribir(rr, t.replace(new RegExp('(<Relationship\\b[^>]*?\\bId="' + id + '"[^>]*?)/>'), rel.externa ? '$1 TargetMode="External"/>' : '$1/>'));
+          u = u.replace(m[0], conR.p + ':id="' + id + '"');
+        }
+        piezas.push(u);
+      }
+      if (/<hyperlinks\b/.test(x1)) x1 = x1.replace('</hyperlinks>', () => piezas.join('') + '</hyperlinks>');
+      else x1 = EstructuraLibro._ponerEnHoja(x1, 'hyperlinks', '<hyperlinks>' + piezas.join('') + '</hyperlinks>');
+    }
+    P.escribir(r1, x1);
+  }
+
   async function aplicar(libro, M) {
     const P = PaqueteEditable.desdeZip(libro.zip);
     await notas(P, libro, M);
     await hipervinculos(P, libro, M);
   }
 
-  globalThis.MoverNotas = { aplicar, _quitarPartes: quitarPartes, _quitarRelaciones: quitarRelaciones, _conPrefijoR: conPrefijoR };
+  globalThis.MoverNotas = { aplicar, copiar, _quitarPartes: quitarPartes, _quitarRelaciones: quitarRelaciones, _conPrefijoR: conPrefijoR };
 })();

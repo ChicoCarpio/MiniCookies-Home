@@ -367,5 +367,6 @@
     return ed.libro.zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   }
 
-  globalThis.MoverObjetos = { aplicar, _planRegla: planRegla, _pisadasDe: pisadasDe, _textoRango: textoRango, _esquina: esquina };
+  globalThis.MoverObjetos = { aplicar, _planRegla: planRegla, _pisadasDe: pisadasDe, _textoRango: textoRango, _esquina: esquina,
+    _interno: { leerRangos, restar, esquina, unir, textoRango, sinHojaPropia, RE_FORMULA, RE_XMF, RE_XMSQ, conFormulas, conXm, renumerar, idNuevo, recibir } };
 })();
