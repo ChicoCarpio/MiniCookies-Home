@@ -163,7 +163,7 @@
   const CON_CM_EN_INDEX = new Set(['FREQUENCY', 'GROWTH', 'TREND']);   // medido: estas sí dentro de INDEX, aunque en SUM no
   // las que pueden dar más de una celda sea como sea que se las llame; las demás, según sus argumentos (conArrobas)
   const DAN_VARIAS = new Set(['ANCHORARRAY', 'FREQUENCY', 'GROWTH', 'IFS', 'INDIRECT', 'LINEST', 'LOGEST', 'MINVERSE', 'MMULT', 'MUNIT', 'SWITCH', 'TREND', ...DEVUELVEN_MATRIZ]);
-  const ARG_MATRICIAL = { AGGREGATE: [2], FILTER: [0, 1] };   // sus argumentos se calculan como matriz aunque la tabla de clases diga otra cosa
+  const ARG_MATRICIAL = { AGGREGATE: [2], FILTER: [0, 1], FREQUENCY: [0, 1], GROWTH: [0, 1, 2], INDEX: [0], IRR: [0], LINEST: [0, 1], LOGEST: [0, 1], LOOKUP: [1, 2], MIRR: [0], TREND: [0, 1, 2], XLOOKUP: [1, 2], XMATCH: [1] };   // sus argumentos se calculan como matriz aunque la tabla de clases diga otra cosa
   const MATRIZ_SIN_ARROBA = { CHOOSECOLS: [1], CHOOSEROWS: [1], EXPAND: [3], FILTER: [2], HYPERLINK: [1], TEXTSPLIT: [1, 2, 5] };
 
   // ---- el motor -----------------------------------------------------------------------------------------------------
@@ -891,6 +891,7 @@
         const a = analizar(String(def).replace(/^=/, ''));
         return !((a.t === 'ref' && a.modo === 'celda') || a.t === 'num' || a.t === 'str' || a.t === 'bool');
       };
+      const calculado = (n) => (n.t === 'paren' ? calculado(n.a) : n.t === 'fn' || n.t === 'bin' || n.t === 'un');   // una matriz que sale de una cuenta, no un rango escrito
       // ¿puede dar más de una celda?
       const varias = (n, nombres) => {
         if (!n) return false;
@@ -909,9 +910,10 @@
           case 'CHOOSE': return (!!a[0] && a[0].t === 'arr') || hay(a.slice(1));
           case 'ROW': case 'COLUMN': case 'ISFORMULA': return varias(a[0], nombres);
           case 'HYPERLINK': return !!a[1] && a[1].t === 'arr';
-          case 'XLOOKUP': return varias(a[3], nombres);
+          case 'XLOOKUP': return varias(a[3], nombres) || (!!a[1] && calculado(a[1])) || (!!a[2] && calculado(a[2]));
+          case 'CELL': return varias(a[1], nombres);
           case 'OFFSET': return a.slice(3).some((x) => x && (varias(x, nombres) || (x.t === 'num' && x.v !== 1)));
-          case 'INDEX': return (!!a[0] && a[0].t === 'fn' && (XlsFormulas._buscarFuncion(a[0].nombre).tipo === 'futura' || CON_CM_EN_INDEX.has(nombreFuncion(a[0].nombre)))) || a.slice(1, 3).some((x) => !x || varias(x, nombres) || (x.t === 'num' && x.v === 0));
+          case 'INDEX': return (a.length === 2 && !!a[0] && calculado(a[0])) || a.slice(1, 3).some((x) => !x || varias(x, nombres) || (x.t === 'num' && x.v === 0));
           case 'LET': { const m = new Map(nombres); for (let k = 0; k + 1 < a.length; k += 2) if (a[k] && a[k].t === 'nombre') m.set(local(a[k]), varias(a[k + 1], m)); return varias(a[a.length - 1], m); }
           default: return false;
         }
@@ -956,10 +958,10 @@
               if (matriz) {
                 if (p === 'z' || u === 'IFS' || u === 'SWITCH' || (MATRIZ_SIN_ARROBA[u] && MATRIZ_SIN_ARROBA[u].includes(i))) return;
                 // en la condición de IF o CHOOSE el @ sube a la función, salvo que sus ramas sean rangos; en IFERROR, solo sube
-                if (i === 0 && multiple && (u === 'IF' || u === 'CHOOSE' || u === 'IFERROR' || u === 'IFNA')) { if (u !== 'IFERROR' && u !== 'IFNA' && a.slice(1).some((y) => y && y.t === 'ref' && y.modo !== 'celda')) marcar(x); return; }
+                if (i === 0 && multiple && (u === 'IF' || u === 'CHOOSE' || u === 'IFERROR' || u === 'IFNA')) { if (!dentro && u !== 'IFERROR' && u !== 'IFNA' && a.slice(1).some((y) => y && y.t === 'ref' && y.modo !== 'celda')) marcar(x); return; }
                 if (cls !== 'A' && (p === 'e' || p === 'f' || (p === 'x' && !dentro))) { marcar(x); return; }
               }
-              ver(x, cls === 'A' && c === 'V' && d && d.lift ? 'A' : c, nombres, dentro || c === 'R');
+              ver(x, cls === 'A' && (c === 'R' || (c === 'V' && d && d.lift)) ? 'A' : c, nombres, dentro || c === 'R');   // dentro de una matriz (SUMPRODUCT), también lo que acepta rangos; IF y TRANSPOSE no
             });
             return;
           }
