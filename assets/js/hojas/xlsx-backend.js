@@ -98,6 +98,8 @@
         t.nombreVisible = raiz.attrs.displayName || t.nombre;
         const cols = XmlEditar.hijo(raiz, 'tableColumns');
         if (cols) t.nombresColumnas = XmlEditar.hijos(cols, 'tableColumn').map((x) => XmlEditar.decodificar(x.attrs.name || ''));
+        t.calculadas = new Map();
+        (xml.match(/<tableColumn\b[^>]*?(?:\/>|>[\s\S]*?<\/tableColumn>)/g) || []).forEach((e, k) => { const q = /<calculatedColumnFormula\b[^>]*>([\s\S]*?)<\/calculatedColumnFormula>/.exec(e); if (q) t.calculadas.set(k, XmlEditar.decodificar(q[1])); });
       }
     }
     const externos = await leerVinculosExternos(paquete);
