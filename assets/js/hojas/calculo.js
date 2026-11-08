@@ -1182,9 +1182,9 @@
   const SEPARADORES = { es: { decimal: ',', miles: '\u00a0' }, en: { decimal: '.', miles: ',' } };
   function codigoCanonico(codigo, sep) {
     if (sep.decimal === '.' && sep.miles === ',') return { canon: codigo };
-    const agrupaConEspacio = sep.miles === '\u00a0' || sep.miles === ' ';
+    const agrupaConEspacio = sep.miles === '\u00a0' || sep.miles === ' ' || sep.miles === '\u202f';   // el espacio angosto de fr-FR también (excel-medir-text-regional.ps1)
     const esFraccion = (s) => { const v = s.replace(/"[^"]*"|\\.|_.|\*.|\[[^\]]*\]/g, ''); return v.includes('/') && !XlsxFormato.esFecha(s); };
-    let r = '', inicio = 0, hayDigito = false, espacioEnSeccion = false, espacio = false;
+    let r = '', inicio = 0, hayDigito = false, espacioEnSeccion = false, espacio = false, conDecimal = false;
     const cerrarSeccion = () => { const mala = espacioEnSeccion && esFraccion(r.slice(inicio)); inicio = r.length; hayDigito = false; espacioEnSeccion = false; return mala; };
     for (let i = 0; i < codigo.length; i++) {
       const ch = codigo[i];
@@ -1195,11 +1195,11 @@
         r += ','; espacio = true; espacioEnSeccion = true;
         continue;
       }
-      if (ch === ';') { r += ch; inicio = r.length; continue; }
+      if (ch === ';') { r += ch; inicio = r.length; conDecimal = false; continue; }
       if (ch === '"') { const k = codigo.indexOf('"', i + 1); const fin = k < 0 ? codigo.length : k + 1; r += codigo.slice(i, fin); i = fin - 1; }
       else if (ch === '\\' || ch === '_' || ch === '*') { r += codigo.slice(i, i + 2); i++; }
       else if (ch === '[') { const k = codigo.indexOf(']', i); const fin = k < 0 ? codigo.length : k + 1; r += codigo.slice(i, fin); i = fin - 1; }
-      else if (ch === sep.decimal) r += '.';
+      else if (ch === sep.decimal) { r += conDecimal ? '"' + ch + '"' : '.'; conDecimal = true; }   // un segundo decimal en la sección se ve tal cual (medido)
       else if (ch === sep.miles) r += ',';
       else if (ch === '.' || ch === ',') r += '"' + ch + '"';
       else r += ch;

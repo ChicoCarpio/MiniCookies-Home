@@ -13,7 +13,7 @@
     'aviso-pegar-limite': 'No se puede pegar aquí: el área copiada y el área de pegado no tienen el mismo tamaño y forma',
     'aviso-pegar-solape': 'Al transponer, el área copiada y el área de pegado no pueden superponerse',
     'aviso-pegar-combinada': 'No se puede pegar aquí: se partiría una celda combinada',
-    'aviso-pegar-matriz': 'No se puede cambiar una parte de una matriz',
+    'aviso-pegar-matriz': 'No se puede cambiar una parte de una matriz', 'cmd-pegar-imagen': 'Imagen', 'aviso-imagen-sin-copia': 'Para pegar como imagen, copia antes celdas de este libro',
     'aviso-pegar-sin-copia': 'Primero copia algo',
     'aviso-brocha': 'Elige las celdas a las que quieres dar ese formato. Esc cancela',
     'aviso-brocha-fija': 'Copiar formato queda activo hasta que pulses Esc o el botón otra vez',
@@ -28,7 +28,7 @@
     'aviso-pegar-limite': 'You can’t paste here: the copy area and the paste area aren’t the same size and shape',
     'aviso-pegar-solape': 'When transposing, the copy area and the paste area can’t overlap',
     'aviso-pegar-combinada': 'You can’t paste here: a merged cell would be split',
-    'aviso-pegar-matriz': 'You can’t change part of an array',
+    'aviso-pegar-matriz': 'You can’t change part of an array', 'cmd-pegar-imagen': 'Picture', 'aviso-imagen-sin-copia': 'To paste as a picture, first copy cells from this workbook',
     'aviso-pegar-sin-copia': 'Copy something first',
     'aviso-brocha': 'Pick the cells that should get this formatting. Esc cancels',
     'aviso-brocha-fija': 'Format painter stays on until you press Esc or the button again',
@@ -56,8 +56,9 @@
     reg({ id: 'pegarTranspuesto', texto: 'cmd-pegar-transponer', ejecutar: () => pegarCon({ tipo: 'todo', trans: true }) });
     reg({ id: 'pegarVinculo', texto: 'cmd-pegar-vinculo', ejecutar: () => pegarCon({ tipo: 'todo', vinculo: true }) });
     reg({ id: 'pegarSoloTexto', texto: 'cmd-pegar-texto', ejecutar: () => pegarCon({ tipo: 'valores', soloTexto: true }) });
+    reg({ id: 'pegarImagen', texto: 'cmd-pegar-imagen', ejecutar: () => A.pegarImagen() });
     reg({ id: 'pegarMenu', texto: 'cmd-pegar-menu', ejecutar: () => {} });
-    const OPCIONES = [{ comando: 'pegarTodo' }, { comando: 'pegarFormulas' }, { comando: 'pegarFormulasNum' }, { comando: 'pegarSinBordes' }, { comando: 'pegarTranspuesto' }, { comando: 'pegarAnchos' }, '-', { comando: 'pegarSoloValores' }, { comando: 'pegarValoresNum' }, { comando: 'pegarSoloTexto' }, '-', { comando: 'pegarFormatos' }, { comando: 'pegarVinculo' }, { comando: 'pegarNotas' }, { comando: 'pegarValidacion' }, { comando: 'pegarFusion' }, '-', { comando: 'pegarEspecial' }];
+    const OPCIONES = [{ comando: 'pegarTodo' }, { comando: 'pegarFormulas' }, { comando: 'pegarFormulasNum' }, { comando: 'pegarSinBordes' }, { comando: 'pegarTranspuesto' }, { comando: 'pegarAnchos' }, '-', { comando: 'pegarSoloValores' }, { comando: 'pegarValoresNum' }, { comando: 'pegarSoloTexto' }, '-', { comando: 'pegarFormatos' }, { comando: 'pegarVinculo' }, { comando: 'pegarImagen' }, { comando: 'pegarNotas' }, { comando: 'pegarValidacion' }, { comando: 'pegarFusion' }, '-', { comando: 'pegarEspecial' }];
 
     // ---- la ventana ------------------------------------------------------------------------------------------------------
     const CON_OPERACION = new Set(['todo', 'formulas', 'valores', 'formulasNum', 'valoresNum']);

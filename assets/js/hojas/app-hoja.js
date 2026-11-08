@@ -440,7 +440,7 @@
         if (ventana) { ventana.location.href = url; setTimeout(() => { try { ventana.focus(); ventana.print(); } catch (e) { /* el visor de PDF del navegador imprime con su botón */ } }, 800); }
         else { A.avisar(tx('p-bloqueada')); const a = crear('a', { href: url, download: 'hoja.pdf' }); a.click(); }
         setTimeout(() => URL.revokeObjectURL(url), 60000);
-      } catch (e) { if (ventana) ventana.close(); A.avisar(tx('aviso-estructura') + ': ' + (e && e.message ? e.message : e)); }
+      } catch (e) { if (ventana) ventana.close(); A.avisar(tx('aviso-estructura') + ': ' + (globalThis.MensajesHojas ? MensajesHojas.traducir(String(e && e.message ? e.message : e), A.idioma()) : (e && e.message ? e.message : e))); }
     }
 
     A.reg({ id: 'filtro', texto: 'cmd-filtro', atajo: 'mod+shift+l', ejecutar: alternarFiltro, activo: () => !!(ed() && ed().hojas[A.hojaActiva()] && ed().hojas[A.hojaActiva()].filtroAuto) });

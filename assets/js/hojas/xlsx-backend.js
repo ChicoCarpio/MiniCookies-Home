@@ -129,10 +129,39 @@
     const protegidas = hojas.map((h) => (h.sinCeldas ? () => false : XlsxEscritor.celdasProtegidas(h)));
 
     // la primera vez que se guarda una matriz dinámica en un libro sin metadata.xml, se crea (como Excel); si el libro ya trae una
-    // metadata sin XLDAPR, la matriz se guarda como las de Ctrl+Mayús+Intro (sin cm), que Excel abre igual pero con rango fijo
+    // metadata sin XLDAPR (una imagen en una celda, por ejemplo), se le agrega: su tipo, su bloque y una celda de metadata que lo usa
+    // (Excel lo abre sin reparar y la fórmula sigue siendo dinámica: excel-metadata-sin-xldapr.ps1)
     const metaDinamica = { cm: meta.cm };
+    async function agregarXldapr() {
+      let xml = await paquete.leer(meta.ruta);
+      if (!xml || !/<metadata\b/.test(xml)) return false;
+      const NS = 'http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray';
+      let px = 'xda';
+      const ya = new RegExp('\\sxmlns:([A-Za-z_][\\w.-]*)="' + NS.replace(/[.]/g, '\\.') + '"').exec(xml);
+      if (ya) px = ya[1];
+      else { while (new RegExp('\\sxmlns:' + px + '=').test(xml)) px += 'x'; xml = xml.replace(/<metadata\b/, '<metadata xmlns:' + px + '="' + NS + '"'); }
+      const tipo = '<metadataType name="XLDAPR" minSupportedVersion="120000" copy="1" pasteAll="1" pasteValues="1" merge="1" splitFirst="1" rowColShift="1" clearFormats="1" clearComments="1" assign="1" coerce="1" cellMeta="1"/>';
+      let nTipo;
+      if (/<metadataTypes\b[^>]*\/>/.test(xml)) { xml = xml.replace(/<metadataTypes\b[^>]*\/>/, '<metadataTypes count="1">' + tipo + '</metadataTypes>'); nTipo = 1; }
+      else if (/<metadataTypes\b/.test(xml)) { nTipo = (xml.match(/<metadataType\b/g) || []).length + 1; xml = xml.replace('</metadataTypes>', () => tipo + '</metadataTypes>').replace(/(<metadataTypes\b[^>]*?\bcount=")\d+(")/, (m, a, b) => a + nTipo + b); }
+      else { xml = xml.replace(/(<metadata\b[^>]*>)/, (m) => m + '<metadataTypes count="1">' + tipo + '</metadataTypes>'); nTipo = 1; }
+      // futureMetadata va después de metadataStrings y mdxMetadata y antes de cellMetadata, valueMetadata y extLst
+      const futuro = '<futureMetadata name="XLDAPR" count="1"><bk><extLst><ext uri="{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}"><' + px + ':dynamicArrayProperties fDynamic="1" fCollapsed="0"/></ext></extLst></bk></futureMetadata>';
+      const antes = /<(?:cellMetadata|valueMetadata|extLst)\b/.exec(xml.slice(xml.indexOf('</metadataTypes>')));
+      const corte = antes ? xml.indexOf('</metadataTypes>') + antes.index : xml.lastIndexOf('</metadata>');
+      xml = xml.slice(0, corte) + futuro + xml.slice(corte);
+      const bk = '<bk><rc t="' + nTipo + '" v="0"/></bk>';
+      let cm;
+      if (/<cellMetadata\b[^>]*\/>/.test(xml)) { xml = xml.replace(/<cellMetadata\b[^>]*\/>/, '<cellMetadata count="1">' + bk + '</cellMetadata>'); cm = 1; }
+      else if (/<cellMetadata\b/.test(xml)) { const t = xml.slice(xml.search(/<cellMetadata\b/), xml.indexOf('</cellMetadata>')); cm = (t.match(/<bk\b/g) || []).length + 1; xml = xml.replace('</cellMetadata>', () => bk + '</cellMetadata>').replace(/(<cellMetadata\b[^>]*?\bcount=")\d+(")/, (m, a, b) => a + cm + b); }
+      else { const k = xml.indexOf(futuro) + futuro.length; xml = xml.slice(0, k) + '<cellMetadata count="1">' + bk + '</cellMetadata>' + xml.slice(k); cm = 1; }
+      paquete.escribir(meta.ruta, xml);
+      metaDinamica.cm = cm;
+      return true;
+    }
     async function asegurarMetadata() {
-      if (metaDinamica.cm !== null || meta.existe || !meta.rutaLibro) return;
+      if (metaDinamica.cm !== null || !meta.rutaLibro) return;
+      if (meta.existe) { await agregarXldapr(); return; }
       const dir = meta.rutaLibro.replace(/[^/]*$/, '');
       paquete.escribir(dir + 'metadata.xml', METADATA_DINAMICA);
       await paquete.asegurarTipo('/' + dir + 'metadata.xml', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheetMetadata+xml');

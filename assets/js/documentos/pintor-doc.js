@@ -176,8 +176,9 @@
         const x1 = t.x + c.x, x2 = x1 + c.ancho, y1 = t.y + f.y, y2 = y1 + c.alto;
         const iF = f.idx === undefined ? 0 : f.idx;
         const ultimaFila = iF + (c.filas || 1) >= nFilas, ultimaCol = c.col + c.span >= nCols;
-        trazoBorde(ctx, bc.top || (iF === 0 ? bT.top : bT.insideH), x1, y1, x2, y1);
-        trazoBorde(ctx, bc.bottom || (ultimaFila ? bT.bottom : bT.insideH), x1, y2, x2, y2);
+        // los trozos de una celda combinada repartida que quedan uno debajo del otro en la misma hoja no llevan borde entre ellos
+        if (!c.sinArriba) trazoBorde(ctx, bc.top || (iF === 0 ? bT.top : bT.insideH), x1, y1, x2, y1);
+        if (!c.sinAbajo) trazoBorde(ctx, bc.bottom || (ultimaFila ? bT.bottom : bT.insideH), x1, y2, x2, y2);
         trazoBorde(ctx, bc.left || (c.col === 0 ? bT.left : bT.insideV), x1, y1, x1, y2);
         trazoBorde(ctx, bc.right || (ultimaCol ? bT.right : bT.insideV), x2, y1, x2, y2);
       }

@@ -288,9 +288,9 @@
     if (pct) valor = Number((valor * Math.pow(100, pct)).toPrecision(15));
     if (escala) valor = Number((valor / Math.pow(1000, escala)).toPrecision(15));
     if (!Number.isFinite(valor) || valor >= 1e300) return { texto: '#', desborde: true };
-    // las comas entre marcas (no las finales de escala) agrupan miles
+    // las comas entre marcas (no las finales de escala) agrupan miles; después del punto decimal no agrupan ni se ven (medido: «0.0,0» da «1234.57»)
     const primeraDig = tokens.findIndex((t) => t.t === 'dig');
-    const miles = tokens.some((t, i) => t.t === 'coma' && i > primeraDig && i < ult + 1 && tokens.slice(0, i).some((x) => x.t === 'dig') && tokens.slice(i + 1, ult + 1).some((x) => x.t === 'dig'));
+    const miles = tokens.some((t, i) => t.t === 'coma' && i > primeraDig && i < ult + 1 && (iPunto < 0 || i < iPunto) && tokens.slice(0, i).some((x) => x.t === 'dig') && tokens.slice(i + 1, ult + 1).some((x) => x.t === 'dig'));
     const sinEscala = tokens.filter((t, i) => !(t.t === 'coma' && (i > ult || i < primeraDig)));
     const sinComas = sinEscala.filter((t) => t.t !== 'coma');
     iPunto = sinComas.findIndex((t) => t.t === 'pto');

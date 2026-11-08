@@ -137,7 +137,7 @@
   }
 
   // ---- el plan -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  const arrayDe = (hoja) => { const l = []; for (const fx of hoja.celdas.formulas.values()) if (fx.tipo === 'array' && !fx.dinamica && fx.ref) { const g = LibroXlsx.decodificarRango(fx.ref); if (g) l.push(g); } return l; };
+  const arrayDe = (hoja) => { const l = []; for (const fx of hoja.celdas.formulas.values()) if (fx.tipo === 'array' && (!fx.dinamica || fx.matrizOds) && fx.ref) { const g = LibroXlsx.decodificarRango(fx.ref); if (g) l.push(g); } return l; };
   function geometria(P, s, o, T) {
     const alto = P.celdas.length, ancho = P.celdas[0].length;
     const A = o.trans ? ancho : alto, B = o.trans ? alto : ancho;
@@ -202,11 +202,14 @@
     // una matricial no se parte
     const fijas = arrayDe(hoja);
     if (conContenido && fijas.some((g) => toca(g, D) && !dentro(g, D) && !(o.vinculo && false))) return { error: o.vinculo ? 'vinculo' : 'matriz' };
-    // los encabezados y totales de una tabla no se escriben aquí (tampoco al teclear); salvo los de una tabla que queda entera debajo de otra que llega
-    if (conContenido && mismoLibro && !(T.tabla && (ed.hojas[P.h].tablas || []).some((t) => dentro(t.ref, P.r)))) for (const t of hoja.tablas || []) {
+    // los encabezados y totales de una tabla, y lo que queda a su lado (donde crece), los pone al día MoverTablas al guardar; salvo una tabla que queda entera debajo de otra que llega.
+    // Pegar un vínculo ahí no se hace
+    const tablaEntera = mismoLibro && T.tabla && (ed.hojas[P.h].tablas || []).some((t) => dentro(t.ref, P.r));
+    if (o.vinculo) for (const t of hoja.tablas || []) {
       if (t.ref.c0 > D.c1 || t.ref.c1 < D.c0) continue;
       if ((t.encabezados && t.ref.f0 >= D.f0 && t.ref.f0 <= D.f1) || (t.totales && t.ref.f1 >= D.f0 && t.ref.f1 <= D.f1)) return { error: 'protegida' };
     }
+    const conTablas = conContenido && !o.vinculo && !tablaEntera && MoverTablas.toca(ed, h, D, unaCelda && T.contenido === 'formula' && !!(P.celdas[0][0] && P.celdas[0][0].formula));
     if (conContenido && prot) for (let f = D.f0; f <= Math.min(D.f1, D.f0 + 2000); f++) for (let c = D.c0; c <= Math.min(D.c1, D.c0 + 200); c++) if (bloqueada(f, c)) return { error: 'protegida' };
     const G2 = Object.assign({}, G, { D });
     const pares = o.vinculo ? [] : paresDe(P, G2, o);
@@ -295,7 +298,7 @@
     }
 
     const objetos = mismoLibro && !prot ? PegadoObjetos.planear(ed, P, h, D, T, o, paresObj, G2, tabla) : null;
-    return { h, celdas, destino: D, objetos, tipo: o };
+    return { h, celdas, destino: D, objetos, tipo: o, tablas: conTablas };
   }
 
   // Pegar el formato de una celda de una tabla trae lo que se ve: lo que le da el estilo de la tabla pasa a ser formato propio (medido)
@@ -351,7 +354,7 @@
     ed.terminar();
     if (plan.objetos && plan.objetos.tapadas && plan.objetos.tapadas.length) ed.hojas[plan.h].tablas = (ed.hojas[plan.h].tablas || []).filter((t) => !plan.objetos.tapadas.some((m) => m.ref.f0 === t.ref.f0 && m.ref.c0 === t.ref.c0));
     if (plan.objetos && plan.objetos.formato === 'ods' && ed.libro.extrasDeCelda) plan.objetos.enlacesPrevios = [...MoverOds._interno.extrasDe(await ed.paquete.leer('content.xml'), plan.h, plan.objetos.D)];
-    const b = await ed.guardar();
+    const b = plan.tablas ? await MoverTablas.guardar(ed, plan.h, plan.destino, 'pegar', opciones && opciones.idioma) : await ed.guardar();
     return plan.objetos ? PegadoObjetos.aplicar(b, plan.objetos, opciones) : b;
   }
 

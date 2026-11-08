@@ -215,7 +215,8 @@
               // una matriz se lee como dinámica (LibreOffice las recalcula): al cambiar sus datos se vuelve a calcular y desborda, y sus celdas no quedan protegidas.
               // También la de una celda, que es como se guarda =SUMA(LARGO(A1:A3)): si no, al reabrir quedaría congelada
               const dinamica = !!(x.matriz && k === 0);
-              C.formulas.set(i, { texto: x.formula, tipo: x.matriz ? 'array' : 'normal', ref: k === 0 ? x.matriz : null, si: null, dinamica });
+              // matrizOds: LibreOffice no deja cambiar una parte (pegar encima de una parte se rechaza; de toda, no: lo-medir-pegado.py)
+              C.formulas.set(i, { texto: x.formula, tipo: x.matriz ? 'array' : 'normal', ref: k === 0 ? x.matriz : null, si: null, dinamica, matrizOds: !!x.matriz });
               if (dinamica) {
                 const g = LibroXlsx.decodificarRango(x.matriz);
                 if (g) {

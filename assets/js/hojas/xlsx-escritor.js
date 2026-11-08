@@ -490,11 +490,17 @@
   }
 
   // Cambia los nombres de hoja que cita una fórmula. mapa: Map (nombre en minúsculas → nombre nuevo).
+  // también las dos puntas de una referencia 3D: Hoja1:Hoja3!B1 y 'Hoja 1:Hoja 3'!B1
   function renombrarHojas(formula, mapa) {
-    return formula.replace(/"(?:[^"]|"")*"|#REF!|('(?:[^']|'')*'|[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*)!/g, (m, p) => {
+    const nuevo = (n) => { const k = n.toLowerCase(); return mapa.has(k) ? mapa.get(k) : null; };
+    const cita = (n) => "'" + n.replace(/'/g, "''") + "'!";
+    return formula.replace(/"(?:[^"]|"")*"|#REF!|('(?:[^']|'')*'|[A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*)(?::([A-Za-z_\u00C0-\uFFFF][A-Za-z0-9_.\u00C0-\uFFFF]*))?!/g, (m, p, q) => {
       if (!p) return m;
-      const nombre = (p[0] === "'" ? p.slice(1, -1).replace(/''/g, "'") : p).toLowerCase();
-      return mapa.has(nombre) ? "'" + mapa.get(nombre).replace(/'/g, "''") + "'!" : m;
+      let a = p[0] === "'" ? p.slice(1, -1).replace(/''/g, "'") : p, b = q || null;
+      if (b === null && p[0] === "'" && a.indexOf(':') > 0) { b = a.slice(a.indexOf(':') + 1); a = a.slice(0, a.indexOf(':')); }   // un nombre de hoja no lleva «:»
+      if (b === null) { const n = nuevo(a); return n === null ? m : cita(n); }
+      const na = nuevo(a), nb = nuevo(b);
+      return na === null && nb === null ? m : cita((na === null ? a : na) + ':' + (nb === null ? b : nb));
     });
   }
 

@@ -302,6 +302,27 @@
   });
 
   // ======================================================== filas ========================================================
+  // Lo insertado lleva el formato de al lado, sin contenido, como en LibreOffice (pruebas/oraculo/ods-estructura-lo.mjs): la fila nueva, el alto y el formato de las celdas
+  // de la de arriba (en la primera, nada); la columna nueva, el formato de las celdas de la de la izquierda, y el ancho de las columnas que estaban en esas posiciones.
+  function filaComoArriba(texto, filas, fila, n) {
+    const rep = n > 1 ? ' table:number-rows-repeated="' + n + '"' : '';
+    const arriba = fila > 0 ? filas.find((x) => x.f0 <= fila - 1 && fila - 1 < x.f0 + x.n) : null;
+    // en la primera fila no hay de dónde copiar: sin formato, tampoco el que las columnas dan por omisión (LibreOffice escribe el estilo Default)
+    const conDefault = /\btable:default-cell-style-name="Default"/.test(texto) && /\btable:default-cell-style-name="(?!Default")[^"]+"/.test(texto);
+    if (!arriba) return '<table:table-row' + rep + '>' + (conDefault ? celdaConEstilo('Default', MAX_COLS) : U().celdaVacia(MAX_COLS)) + '</table:table-row>';
+    const r = X().analizar(parte(texto, arriba.nodo), { profundidad: 2 });
+    const a = (k) => (r.attrs[k] !== undefined ? ' ' + k + '="' + r.attrs[k] + '"' : '');
+    let celdas = '', total = 0;
+    for (const x of r.hijos) {
+      if (x.local !== 'table-cell' && x.local !== 'covered-table-cell') continue;
+      const k = U().repeticiones(x, 'table:number-columns-repeated');
+      total += k;
+      celdas += celdaConEstilo(x.attrs['table:style-name'], k);
+    }
+    if (total < MAX_COLS) celdas += U().celdaVacia(MAX_COLS - total);
+    return '<table:table-row' + a('table:style-name') + a('table:default-cell-style-name') + rep + '>' + celdas + '</table:table-row>';
+  }
+  const celdaConEstilo = (estilo, n) => (estilo === undefined ? U().celdaVacia(n) : '<table:table-cell table:style-name="' + estilo + '"' + (n > 1 ? ' table:number-columns-repeated="' + n + '"' : '') + '/>');
   async function insertarFilas(bytes, h, fila, n) {
     if (!(n >= 1)) throw Err('cuántas filas');
     return conPaquete(bytes, async (p) => {
@@ -315,7 +336,7 @@
       if (fila < total) {
         if (total + n > MAX_FILAS) { texto = recortarColaFilas(texto, tabla, total + n - MAX_FILAS); d = documento(texto); tabla = tablaDe(d, h); filas = U().enumerarFilas(texto, tabla); }
         const el = filas.find((x) => x.f0 <= fila && fila < x.f0 + x.n);
-        const vacia = '<table:table-row' + (n > 1 ? ' table:number-rows-repeated="' + n + '"' : '') + '><table:table-cell table:number-columns-repeated="' + MAX_COLS + '"/></table:table-row>';
+        const vacia = filaComoArriba(texto, filas, fila, n);
         const titulos = X().hijos(tabla, 'table-header-rows')[0];
         if (el && titulos && fila === el.f0 && el.nodo.ini === titulos.finApertura) {   // delante de las filas que se repiten al imprimir: las filas nuevas quedan fuera del grupo (los títulos se corren, como en Excel)
           texto = X().aplicar(texto, [{ ini: titulos.ini, fin: titulos.ini, texto: vacia }]);
@@ -326,6 +347,10 @@
           piezas.push(U().copiaConRepeticion(texto, el.nodo, 'table:number-rows-repeated', el.f0 + el.n - fila));
           texto = X().aplicar(texto, [{ ini: el.nodo.ini, fin: el.nodo.fin, texto: piezas.join('') }]);
         }
+      }
+      else if (fila === total && fila > 0 && fila < MAX_FILAS) {   // justo debajo de la última fila escrita: también copia la de arriba
+        const u = filas[filas.length - 1];
+        texto = X().aplicar(texto, [{ ini: u.nodo.fin, fin: u.nodo.fin, texto: filaComoArriba(texto, filas, fila, Math.min(n, MAX_FILAS - fila)) }]);
       }
       p.escribir('content.xml', reescribirTodo(texto, h, rwFilas(mapaInsercion(fila, n), nombre)));
       await reescribirObjetos(p, rwFilas(mapaInsercion(fila, n), nombre));
@@ -402,6 +427,13 @@
       const defs = U().enumerarColumnas(texto, tabla);
       const totalDefs = defs.length ? defs[defs.length - 1].f0 + defs[defs.length - 1].n : 0;
       let eds = [];
+      const izqDef = c > 0 ? defs.find((x) => x.f0 <= c - 1 && c - 1 < x.f0 + x.n) : null;
+      const porDefecto = (izqDef && izqDef.nodo.attrs['table:default-cell-style-name']) || 'Default';
+      const conDefecto = (xml) => (/\btable:default-cell-style-name="[^"]*"/.test(xml) ? xml.replace(/\btable:default-cell-style-name="[^"]*"/, 'table:default-cell-style-name="' + porDefecto + '"') : xml.replace(/^<table:table-column\b/, '<table:table-column table:default-cell-style-name="' + porDefecto + '"'));
+      if (c >= totalDefs && izqDef && c === totalDefs && c < MAX_COLS) {   // justo a la derecha de la última columna escrita
+        const u = defs[defs.length - 1], nn = Math.min(n, MAX_COLS - c);
+        eds.push({ ini: u.nodo.fin, fin: u.nodo.fin, texto: conDefecto('<table:table-column' + (nn > 1 ? ' table:number-columns-repeated="' + nn + '"' : '') + '/>') });
+      }
       if (c < totalDefs) {
         const exceso = totalDefs + n - MAX_COLS;
         const ultima = defs[defs.length - 1];
@@ -414,7 +446,13 @@
           const piezas = [];
           if (cubre) {
             if (izquierda > 0) piezas.push(U().copiaConRepeticion(texto, def.nodo, 'table:number-columns-repeated', izquierda));
-            piezas.push(U().copiaConRepeticion(texto, def.nodo, 'table:number-columns-repeated', n));
+            // las nuevas: las definiciones de las columnas que estaban en c … c + n - 1
+            for (let q = c; q < c + n;) {
+              const dq = defs.find((x) => x.f0 <= q && q < x.f0 + x.n) || ultima;
+              const k = Math.min(c + n, dq === ultima && q >= dq.f0 + dq.n ? c + n : dq.f0 + dq.n) - q;
+              piezas.push(conDefecto(U().copiaConRepeticion(texto, dq.nodo, 'table:number-columns-repeated', k)));
+              q += k;
+            }
             if (esUltima && exceso > 0) derecha -= exceso;
             if (derecha > 0) piezas.push(U().copiaConRepeticion(texto, def.nodo, 'table:number-columns-repeated', derecha));
           } else piezas.push(U().copiaConRepeticion(texto, def.nodo, 'table:number-columns-repeated', def.n - exceso));
@@ -424,11 +462,13 @@
       // 2) las celdas de cada fila
       for (const el of filasDeTabla(texto, tabla)) {
         const t = parte(texto, el.nodo);
+        let anterior;   // el estilo de la celda de la izquierda
         let nueva = filaPorCeldas(t, (col, hijo, rep, tt) => {
-          if (c < col || c >= col + rep) return null;
+          const estilo = hijo.attrs['table:style-name'];
+          if (c < col || c >= col + rep) { anterior = estilo; return null; }
           const izq = c - col, der = col + rep - c;
-          return (izq > 0 ? U().copiaConRepeticion(tt, hijo, 'table:number-columns-repeated', izq) : '') + U().celdaVacia(n) + U().copiaConRepeticion(tt, hijo, 'table:number-columns-repeated', der);
-        });
+          return (izq > 0 ? U().copiaConRepeticion(tt, hijo, 'table:number-columns-repeated', izq) : '') + celdaConEstilo(izq > 0 ? estilo : c > 0 ? anterior : undefined, n) + U().copiaConRepeticion(tt, hijo, 'table:number-columns-repeated', der);
+        }, (col) => (col === c && c > 0 ? celdaConEstilo(anterior, n) : ''));   // justo a la derecha de la última celda escrita
         if (nueva !== t) {
           const ancho = anchoDeFila(nueva);
           if (ancho > MAX_COLS) {
@@ -503,7 +543,7 @@
     return xl.split(/("(?:[^"]|"")*")/).map((trozo, k) => (k % 2 ? trozo : fn(trozo))).join('');
   }
   const RE_PREFIJO = (nombre) => new RegExp("(^|[^A-Za-z0-9_.'À-￿$])(?:'" + nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/'/g, "''") + "'|" + nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")!", 'gi');
-  const renombrarEn = (viejo, nuevo) => (xl) => fueraDeCadenas(xl, (t) => t.replace(RE_PREFIJO(viejo), (m, previo) => previo + citar(nuevo) + '!'));
+  const renombrarEn = (viejo, nuevo) => (xl) => XlsxEscritor.renombrarHojas(xl, new Map([[viejo.toLowerCase(), nuevo]]));   // también las puntas de una referencia 3D
   const quitarEn = (viejo) => (xl) => fueraDeCadenas(xl, (t) => t.replace(new RegExp(RE_PREFIJO(viejo).source + '(\\$?[A-Za-z]{1,3}\\$?\\d+(?::\\$?[A-Za-z]{1,3}\\$?\\d+)?|\\$?\\d+:\\$?\\d+|\\$?[A-Za-z]{1,3}:\\$?[A-Za-z]{1,3})', 'gi'), (m, previo) => previo + '#REF!'));
 
   const TABLA_VACIA = (nombre) => '<table:table table:name="' + X().escAttr(nombre) + '"><table:table-column table:number-columns-repeated="' + MAX_COLS + '"/><table:table-row table:number-rows-repeated="' + MAX_FILAS
