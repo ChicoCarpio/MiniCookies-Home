@@ -177,22 +177,38 @@
       for (const fila of filas) { fila.y = y; y += fila.alto; }
       const altoTotal = y;
 
-      // Salida plana: las filas con sus celdas y las líneas de texto de cada celda, en coordenadas de la tabla
-      function itemsPlanos(dx, dy, desde = 0, hasta = filas.length, yBase = 0) {
+      // Salida plana: las filas con sus celdas y las líneas de texto de cada celda, en coordenadas de la tabla. Una celda combinada en vertical que no entra entera
+      // en [desde, hasta) se reparte (estado: las líneas que ya se pusieron en hojas anteriores), como en Word
+      function itemsPlanos(dx, dy, desde = 0, hasta = filas.length, yBase = 0, estado = null) {
         const sal = [];
         const rf = [];
+        const repartida = (c, i) => estado && c.filas > 1 && (i < desde || i + c.filas > hasta) && c.contenido && c.contenido.items.every((it) => it.t === 'linea');
         for (let i = desde; i < hasta; i++) {
           const fila = filas[i];
           rf.push({ idx: i, y: fila.y - yBase, alto: fila.alto, tr: fila.f.tr, celdas: fila.celdas.filter((c) => !c.omitir).map((c) => {
-            let alto = fila.alto; for (let k = 1; k < c.filas && i + k < filas.length; k++) alto += filas[i + k].alto;
-            return { x: c.x, ancho: c.ancho, alto, tc: c.tc, mg: c.mg, col: c.col, span: c.span, filas: c.filas };
+            const tope = repartida(c, i) ? hasta : filas.length;
+            let alto = fila.alto; for (let k = 1; k < c.filas && i + k < tope; k++) alto += filas[i + k].alto;
+            return { x: c.x, ancho: c.ancho, alto, tc: c.tc, mg: c.mg, col: c.col, span: c.span, filas: c.filas, fin: i + c.filas - 1 };
           }) });
         }
-        sal.push({ t: 'tabla', b, x: x + dx, y: dy, ancho: total, alto: (hasta > desde ? filas[hasta - 1].y + filas[hasta - 1].alto - filas[desde].y : 0), filas: rf, cols });
+        // la que empezó en una hoja anterior sigue arriba de esta
+        if (estado && hasta > desde) for (let j = 0; j < desde; j++) for (const c of filas[j].celdas) {
+          if (c.omitir || j + c.filas <= desde || !repartida(c, j)) continue;
+          let alto = 0; for (let q = desde; q < Math.min(j + c.filas, hasta); q++) alto += filas[q].alto;
+          rf[0].celdas.push({ x: c.x, ancho: c.ancho, alto, tc: c.tc, mg: c.mg, col: c.col, span: c.span, filas: Math.min(j + c.filas, hasta) - desde, fin: j + c.filas - 1 });
+          const z = trozoCombinada(c, j, desde, Math.min(j + c.filas, hasta), estado);
+          sal.push(...desplazar(z.sel, x + dx + c.x + c.mg.left, dy + filas[desde].y - yBase - z.base));
+        }
+        sal.unshift({ t: 'tabla', b, x: x + dx, y: dy, ancho: total, alto: (hasta > desde ? filas[hasta - 1].y + filas[hasta - 1].alto - filas[desde].y : 0), filas: rf, cols });
         for (let i = desde; i < hasta; i++) {
           const fila = filas[i];
           for (const c of fila.celdas) {
             if (c.omitir || !c.contenido) continue;
+            if (repartida(c, i)) {
+              const z = trozoCombinada(c, i, i, Math.min(i + c.filas, hasta), estado);
+              sal.push(...desplazar(z.sel, x + dx + c.x + c.mg.left, dy + fila.y - yBase + c.mg.top - z.base));
+              continue;
+            }
             let alto = fila.alto; for (let k = 1; k < c.filas && i + k < filas.length; k++) alto += filas[i + k].alto;
             const libre = alto - c.alto;
             const va = c.tc.alineacionVertical;
@@ -202,26 +218,53 @@
         }
         return sal;
       }
-      return { alto: altoTotal, ancho: total, x, filas, cols, itemsPlanos };
+      // las líneas de una celda combinada (que empieza en la fila i) que caben en el trozo de sus filas [a, b); las demás siguen en el trozo siguiente.
+      // El último trozo se lleva lo que queda. → { sel, base } (base: arriba de la primera línea del trozo, en las coordenadas de la celda entera)
+      function trozoCombinada(c, i, a, b, estado) {
+        const clave = i + ',' + c.col, lineas = c.ordenadas || (c.ordenadas = c.contenido.items.slice().sort((p, q) => p.y - q.y));
+        let k = estado.get(clave) || 0;
+        const ultimo = b >= i + c.filas;
+        let alto = 0; for (let q = a; q < b; q++) alto += filas[q].alto;
+        const lim = alto - (a === i ? c.mg.top : 0) - (ultimo ? c.mg.bottom : 0);
+        const base = a === i || k >= lineas.length ? 0 : lineas[k].y;
+        const sel = [];
+        while (k < lineas.length) { const it = lineas[k]; if (!ultimo && it.y + it.l.alto - base > lim + TOL) break; sel.push(it); k++; }
+        estado.set(clave, k);
+        return { sel, base };
+      }
+      return { alto: altoTotal, ancho: total, x, filas, cols, itemsPlanos, trozoCombinada };
     }
 
     // Una fila más alta que la hoja se parte por líneas de texto, como hace Word: cada celda reparte sus líneas en trozos de a lo más `H` pt (cada celda corta donde le toca,
     // no tienen que coincidir). Solo filas simples: sin celdas combinadas ni cubiertas, sin tablas anidadas dentro de las celdas y sin altura exacta; si no, devuelve null.
+    //   La última fila de una celda combinada en vertical también: sus celdas cubiertas siguen con las líneas que le quedan a la combinada (repartidas: el estado
+    //   de itemsPlanos). H0: lo que queda en la hoja actual para el primer trozo (por omisión, H).
     //   → [{ alto, itemsPlanos(dx, dy) }] con un trozo por hoja, o null
-    function partirFila(t, b, i, H) {
+    function partirFila(t, b, i, H, repartidas, H0) {
       const fila = t.filas[i];
-      if (fila.celdas.some((c) => c.omitir) || fila.f.tr.regla === 'exact') return null;
-      const estado = fila.celdas.map((c) => ({ c, lineas: c.contenido ? c.contenido.items.slice().sort((p, q) => p.y - q.y) : [], k: 0 }));
-      if (estado.some((e) => e.c.filas > 1 || e.lineas.some((it) => it.t !== 'linea'))) return null;
+      if (fila.f.tr.regla === 'exact') return null;
+      const estado = [];
+      for (const c of fila.celdas) {
+        if (!c.omitir) { estado.push({ c, lineas: c.contenido ? c.contenido.items.slice().sort((p, q) => p.y - q.y) : [], k: 0, primeraVez: true }); continue; }
+        // cubierta: la combinada de arriba tiene que terminar en esta fila
+        let dueño = null, j0 = -1;
+        for (let j = i - 1; j >= 0 && !dueño; j--) for (const d of t.filas[j].celdas) if (!d.omitir && d.col === c.col && j + d.filas - 1 >= i) { dueño = d; j0 = j; break; }
+        if (!dueño) continue;
+        if (j0 + dueño.filas - 1 !== i || !repartidas || !dueño.contenido || !dueño.contenido.items.every((it) => it.t === 'linea')) return null;
+        const lineas = dueño.ordenadas || (dueño.ordenadas = dueño.contenido.items.slice().sort((p, q) => p.y - q.y));
+        const k = repartidas.get(j0 + ',' + dueño.col) || 0;
+        estado.push({ c: dueño, lineas, k, primeraVez: false, clave: j0 + ',' + dueño.col });
+      }
+      if (estado.some((e) => e.c.filas > 1 && e.primeraVez) || estado.some((e) => e.lineas.some((it) => it.t !== 'linea'))) return null;
       const partes = [];
       for (let guardia = 0; guardia < 5000; guardia++) {
-        const primera = partes.length === 0;
+        const primera = partes.length === 0, Hp = primera && H0 !== undefined ? H0 : H;
         const trozos = [];
         let alto = 1;
         for (const e of estado) {
-          const { c } = e, arriba = primera ? c.mg.top : 0;
-          const base = primera || e.k >= e.lineas.length ? 0 : e.lineas[e.k].y;   // arriba de la primera línea que queda (en las coordenadas de la celda entera)
-          const lim = H - arriba - c.mg.bottom;
+          const { c } = e, arriba = primera && e.primeraVez ? c.mg.top : 0;
+          const base = (primera && e.primeraVez) || e.k >= e.lineas.length ? 0 : e.lineas[e.k].y;   // arriba de la primera línea que queda (en las coordenadas de la celda entera)
+          const lim = Hp - arriba - c.mg.bottom;
           const sel = [];
           while (e.k < e.lineas.length) {
             const it = e.lineas[e.k];
@@ -231,12 +274,13 @@
           const contenido = sel.length ? sel[sel.length - 1].y + sel[sel.length - 1].l.alto - base : 0;
           const h = arriba + contenido + (e.k >= e.lineas.length ? c.mg.bottom : 0);
           alto = Math.max(alto, h);
-          trozos.push({ c, sel, base, arriba });
+          trozos.push({ c, sel, base, arriba, sigue: !e.primeraVez && primera && H0 !== undefined });
+          if (e.clave && repartidas) repartidas.set(e.clave, e.k);
         }
         partes.push({
           alto,
           itemsPlanos(dx, dy) {
-            const celdas = trozos.map((z) => ({ x: z.c.x, ancho: z.c.ancho, alto, tc: z.c.tc, mg: z.c.mg, col: z.c.col, span: z.c.span, filas: 1 }));
+            const celdas = trozos.map((z) => ({ x: z.c.x, ancho: z.c.ancho, alto, tc: z.c.tc, mg: z.c.mg, col: z.c.col, span: z.c.span, filas: 1, sinArriba: z.sigue || undefined }));
             const sal = [{ t: 'tabla', b, x: t.x + dx, y: dy, ancho: t.ancho, alto, filas: [{ idx: i, y: 0, alto, tr: fila.f.tr, celdas }], cols: t.cols }];
             for (const z of trozos) sal.push(...desplazar(z.sel, t.x + dx + z.c.x + z.c.mg.left, dy + z.arriba - z.base));
             return sal;
@@ -245,6 +289,14 @@
         if (estado.every((e) => e.k >= e.lineas.length)) return partes;
       }
       return null;
+    }
+
+    // ¿algún párrafo de la tabla (también en las tablas de adentro) tiene el campo?
+    function usaCampo(b, nombre) {
+      for (const f of b.filas) for (const c of f.celdas) for (const x of c.bloques) {
+        if (x.tipo === 'p' ? (x.piezas || []).some((z) => z.t === 'campo' && z.nombre === nombre) : x.filas && usaCampo(x, nombre)) return true;
+      }
+      return false;
     }
 
     // ───────── Encabezados y pies ─────────
@@ -466,7 +518,10 @@
               if (k < n) { if (salto) hojaNueva(false); else if (saltoCol) { if (nCol > 1) { desbordar(); blando = false; } else hojaNueva(false); } else desbordar(); }
             }
           } else {
-            const t = medirTabla(b, ancho, { pagina: numero, paginas: totalBase });
+            let t = medirTabla(b, ancho, { pagina: numero, paginas: totalBase });
+            // con PAGE en alguna celda, la tabla se vuelve a medir en cada hoja: el campo vale la hoja donde queda su fila, como en Word (word-medir-tablas-hojas.ps1)
+            const conPagina = usaCampo(b, 'PAGE');
+            const pasarDeHoja = () => { desbordar(); if (conPagina) t = medirTabla(b, ancho, { pagina: numero, paginas: totalBase }); };
             // filas de encabezado repetidas al principio de la hoja que sigue
             const repetirEncabezados = (tabla, desde) => {
               let h = 0;
@@ -480,19 +535,25 @@
             let i0 = 0;
             const sep = rPrev ? rPrev.despues : 0;
             y += sep;
+            const repartidas = new Map();   // las celdas combinadas más altas que una hoja: cuántas de sus líneas ya se pusieron
+            const altoDeFilas = (j, n) => { let s = 0; for (let q = j; q < j + n && q < t.filas.length; q++) s += t.filas[q].alto; return s; };
+            const muyAlta = (j, c) => c.filas > 1 && altoDeFilas(j, c.filas) > pag.base - pag.tope + TOL;
+            // ¿la fila i cierra una combinada más alta que la hoja? Entonces se parte desde donde está, como en Word
+            const cierraMuyAlta = (i) => t.filas[i].celdas.some((c) => c.omitir) && t.filas.slice(0, i).some((f, j) => f.celdas.some((c) => !c.omitir && j + c.filas - 1 === i && muyAlta(j, c)));
             while (i0 < t.filas.length) {
               let i1 = i0, altura = 0;
               while (i1 < t.filas.length && altura + t.filas[i1].alto <= disponible() + TOL) { altura += t.filas[i1].alto; i1++; }
-              // una celda combinada en vertical no se corta: si el corte cae dentro de una, se sube hasta la fila donde empieza (si empieza en esta misma hoja)
+              // una celda combinada en vertical no se corta: si el corte cae dentro de una, se sube hasta la fila donde empieza (si empieza en esta misma hoja).
+              // La que es más alta que una hoja no cabe en ninguna: se reparte entre hojas, como en Word (word-medir-tablas-hojas.ps1)
               if (i1 > i0 && i1 < t.filas.length) {
                 let corte = i1;
-                for (let j = i0; j < i1; j++) for (const c of t.filas[j].celdas) if (!c.omitir && j + c.filas > i1) corte = Math.min(corte, j);
+                for (let j = i0; j < i1; j++) for (const c of t.filas[j].celdas) if (!c.omitir && j + c.filas > i1 && !muyAlta(j, c)) corte = Math.min(corte, j);
                 if (corte > i0) i1 = corte;
               }
               if (i1 === i0) {
-                if (!pag.vacia) { desbordar(); continue; }
+                if (!pag.vacia) { pasarDeHoja(); continue; }
                 // una fila más alta que la hoja: se parte por líneas; si no se puede (celdas combinadas, tablas dentro), se coloca entera aunque se salga
-                const partes = partirFila(t, b, i0, disponible());
+                const partes = partirFila(t, b, i0, disponible(), repartidas);
                 if (partes && partes.length > 1) {
                   for (let k = 0; k < partes.length; k++) {
                     pag.items.push(...partes[k].itemsPlanos(cfg.izquierda + col * (anchoCol + huecoCol), y));
@@ -500,19 +561,41 @@
                     if (k < partes.length - 1) desbordar();
                   }
                   i0++;
-                  if (i0 < t.filas.length) { desbordar(); repetirEncabezados(t, i0); }
+                  if (i0 < t.filas.length) { pasarDeHoja(); repetirEncabezados(t, i0); }
                   continue;
                 }
                 i1 = i0 + 1;
               }
               const yBase = t.filas[i0].y;
-              const items = t.itemsPlanos(cfg.izquierda + col * (anchoCol + huecoCol), y, i0, i1, yBase);
+              const items = t.itemsPlanos(cfg.izquierda + col * (anchoCol + huecoCol), y, i0, i1, yBase, repartidas);
               pag.items.push(...items);
               y += t.filas[i1 - 1].y + t.filas[i1 - 1].alto - yBase;
               pag.vacia = false;
               i0 = i1;
+              // la fila que sigue cierra una combinada más alta que la hoja: empieza aquí mismo y se parte
+              if (i0 < t.filas.length && cierraMuyAlta(i0)) {
+                const antes = new Map(repartidas);
+                let partes = partirFila(t, b, i0, pag.base - pag.tope, repartidas, disponible()), juntas = true;
+                // si en lo que queda de la hoja no cabe ni una línea, la fila empieza en la hoja que sigue
+                if (partes && partes[0].alto > disponible() + TOL) {
+                  repartidas.clear(); for (const [k, v] of antes) repartidas.set(k, v);
+                  pasarDeHoja(); repetirEncabezados(t, i0); juntas = false;
+                  partes = partirFila(t, b, i0, pag.base - pag.tope, repartidas);
+                }
+                if (partes) {
+                  // lo de arriba de la combinada y su primer trozo quedan juntos en esta hoja: sin borde entre ellos
+                  if (juntas) for (const f of items[0].filas) for (const c of f.celdas) if (c.fin === i0 && c.filas > 0 && f.idx < i0) c.sinAbajo = true;
+                  for (let k = 0; k < partes.length; k++) {
+                    pag.items.push(...partes[k].itemsPlanos(cfg.izquierda + col * (anchoCol + huecoCol), y));
+                    y += partes[k].alto; pag.vacia = false;
+                    if (k < partes.length - 1) desbordar();
+                  }
+                  i0++;
+                  continue;   // lo que sigue de la tabla, en esta misma hoja si cabe
+                }
+              }
               if (i0 < t.filas.length) {
-                desbordar();
+                pasarDeHoja();
                 repetirEncabezados(t, i0);
               }
             }

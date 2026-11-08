@@ -130,8 +130,8 @@
     if (!celdaOk.test(a.celda) || (b && !celdaOk.test(b.celda))) return null;
     if (!b) return (a.hoja ? citarExcel(a.hoja) + '!' : '') + a.celda;
     if (b.hoja && a.hoja && b.hoja !== a.hoja) {
-      if (a.celda !== b.celda) return null;   // un rango entre hojas distintas con celdas distintas no existe en Excel
-      return (/^[A-Za-zÀ-￿_][A-Za-z0-9_.À-￿]*$/.test(a.hoja) && /^[A-Za-zÀ-￿_][A-Za-z0-9_.À-￿]*$/.test(b.hoja) ? a.hoja + ':' + b.hoja : "'" + (a.hoja + ':' + b.hoja).replace(/'/g, "''") + "'") + '!' + a.celda;
+      // una referencia 3D: la misma celda o el mismo rango en varias hojas («Hoja1:Hoja3!B1:B2» en Excel)
+      return (/^[A-Za-zÀ-￿_][A-Za-z0-9_.À-￿]*$/.test(a.hoja) && /^[A-Za-zÀ-￿_][A-Za-z0-9_.À-￿]*$/.test(b.hoja) ? a.hoja + ':' + b.hoja : "'" + (a.hoja + ':' + b.hoja).replace(/'/g, "''") + "'") + '!' + a.celda + (a.celda !== b.celda ? ':' + b.celda : '');
     }
     return (a.hoja ? citarExcel(a.hoja) + '!' : '') + a.celda + ':' + b.celda;
   }

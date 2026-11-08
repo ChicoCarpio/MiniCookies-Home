@@ -322,7 +322,7 @@
     const vistas = new Set();
     for (const x of L.celdas) {
       const f = s.f0 + x.f, c = s.c0 + x.c;
-      if (ed.protegida(h, f, c)) return { error: 'protegida' };
+      if (ed.protegida(h, f, c) && !ed.deTabla(h, f, c)) return { error: 'protegida' };
       const k = f * 16384 + c;
       if (vistas.has(k)) continue;
       vistas.add(k);
@@ -350,7 +350,7 @@
     const objetos = poner.length || quitar.length || enlaces.length || hayEnlacesAbajo
       ? { h0: h, h1: h, D, S: D, pares: [], cf: null, dv: false, notas: false, enlaces: false, blancos: false, comb: { quitar, poner }, anchos: [], altos: [], tablas: [], tapadas: [], formato: ed.formato, trans: false, externos: enlaces, limpiarEnlaces: hayEnlacesAbajo }
       : null;
-    return { h, celdas, destino: D, objetos };
+    return { h, celdas, destino: D, objetos, tablas: MoverTablas.toca(ed, h, D) };
   }
 
   globalThis.PegadoHtml = { leer, planear, _color: color, _borde: borde, _formatoMso: formatoMso };

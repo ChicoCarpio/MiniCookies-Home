@@ -20,11 +20,11 @@
     'cmd-modo-editar': 'Editar', 'cmd-modo-leer': 'Leer', 'cmd-inspector': 'Panel de propiedades', 'cmd-expandir-barra': 'Expandir la barra de fórmulas', 'cmd-hoy': 'Fecha de hoy', 'cmd-funcion': 'Insertar función…',
     'fmt-general': 'General', 'fmt-numero': 'Número', 'fmt-moneda': 'Moneda', 'fmt-porcentaje': 'Porcentaje', 'fmt-fecha': 'Fecha corta', 'fmt-hora': 'Hora', 'fmt-texto': 'Texto', 'fmt-miles': 'Miles',
     'guardado-local': 'Guardado en este navegador a las {0}', 'sin-cambios': 'Sin cambios', 'cambios-sin-descargar': 'Cambios sin descargar', 'descargado': 'Descargado',
-    'aviso-protegida': 'Esa celda es parte de una tabla o de una fórmula matricial: se edita en Excel', 'aviso-formula': 'La fórmula tiene un error: revísala (paréntesis, comillas, separadores)',
+    'aviso-protegida': 'Esa celda es parte de una fórmula matricial o de una hoja protegida: se edita en Excel', 'aviso-formula': 'La fórmula tiene un error: revísala (paréntesis, comillas, separadores)',
     'aviso-no-soportadas': '{0} fórmulas usan funciones que aún no se calculan aquí: conservan su valor y Excel las recalcula al abrir', 'aviso-circular': 'Hay una referencia circular: la fórmula da 0',
     'aviso-pegado-grande': 'Lo pegado es demasiado grande (más de {0} celdas)', 'aviso-copiado': 'Copiado', 'aviso-cortado': 'Cortado: se mueve al pegar. Esc cancela', 'aviso-mover-combinada': 'No se puede mover una parte de una celda combinada', 'aviso-mover-matriz': 'No se puede cambiar una parte de una matriz', 'aviso-mover-limite': 'No se puede mover: se saldría de la hoja', 'aviso-valores-cortado': 'Pegar valores no se puede usar con lo cortado', 'aviso-portapapeles': 'El navegador no deja leer el portapapeles: usa Ctrl+V',
     'honesta-conserva': 'Se conserva al guardar, sin editar aquí: {0}.', 'honesta-convertido': 'Este archivo venía en otro formato: se guarda como .xlsx.', 'honesta-todo': 'Todo el contenido del archivo se puede editar aquí.',
-    'x-graficos': 'imágenes, formas o gráficos que no se editan', 'x-macros': 'macros', 'x-notas': 'notas', 'x-tablas': 'encabezados de tablas', 'x-dinamicas': 'tablas dinámicas', 'x-condicional': 'reglas de formato de Excel 2010', 'x-validacion': 'validación de datos', 'x-minigraficos': 'minigráficos', 'x-imagenes': 'imágenes en celdas', 'x-matriciales': 'fórmulas matriciales de Ctrl+Mayús+Intro',
+    'x-graficos': 'imágenes, formas o gráficos que no se editan', 'x-macros': 'macros', 'x-notas': 'notas', 'x-dinamicas': 'tablas dinámicas', 'x-condicional': 'reglas de formato de Excel 2010', 'x-validacion': 'validación de datos', 'x-minigraficos': 'minigráficos', 'x-imagenes': 'imágenes en celdas', 'x-matriciales': 'fórmulas matriciales de Ctrl+Mayús+Intro',
     'i-celda': 'Celda', 'i-tipo': 'Tipo', 'i-valor': 'Valor', 'i-formula': 'Fórmula', 'i-formato': 'Formato', 'i-fuente': 'Fuente', 'i-archivo': 'El archivo', 'i-hojas': 'Hojas', 'i-formulas': 'Fórmulas',
     't-numero': 'Número', 't-texto': 'Texto', 't-logico': 'Lógico', 't-error': 'Error', 't-vacio': 'Vacía', 'error-abrir': 'No se pudo abrir el archivo', 'salir-sin-descargar': 'Hay cambios sin descargar.',
     'funcion-pregunta': 'Escribe el nombre de la función (por ejemplo SUMA, PROMEDIO, BUSCARV):',
@@ -53,11 +53,11 @@
     'cmd-modo-editar': 'Edit', 'cmd-modo-leer': 'Read', 'cmd-inspector': 'Properties panel', 'cmd-expandir-barra': 'Expand the formula bar', 'cmd-hoy': 'Today’s date', 'cmd-funcion': 'Insert function…',
     'fmt-general': 'General', 'fmt-numero': 'Number', 'fmt-moneda': 'Currency', 'fmt-porcentaje': 'Percent', 'fmt-fecha': 'Short date', 'fmt-hora': 'Time', 'fmt-texto': 'Text', 'fmt-miles': 'Thousands',
     'guardado-local': 'Saved in this browser at {0}', 'sin-cambios': 'No changes', 'cambios-sin-descargar': 'Changes not downloaded', 'descargado': 'Downloaded',
-    'aviso-protegida': 'That cell belongs to a table or an array formula: edit it in Excel', 'aviso-formula': 'The formula has an error: check parentheses, quotes and separators',
+    'aviso-protegida': 'That cell belongs to an array formula or a protected sheet: edit it in Excel', 'aviso-formula': 'The formula has an error: check parentheses, quotes and separators',
     'aviso-no-soportadas': '{0} formulas use functions not calculated here yet: they keep their value and Excel recalculates them on open', 'aviso-circular': 'There is a circular reference: the formula returns 0',
     'aviso-pegado-grande': 'What you pasted is too large (more than {0} cells)', 'aviso-copiado': 'Copied', 'aviso-cortado': 'Cut: it moves when you paste. Esc cancels', 'aviso-mover-combinada': 'Can’t move part of a merged cell', 'aviso-mover-matriz': 'You can’t change part of an array', 'aviso-mover-limite': 'Can’t move: it would go off the sheet', 'aviso-valores-cortado': 'Paste values can’t be used with what you cut', 'aviso-portapapeles': 'The browser won’t let us read the clipboard: use Ctrl+V',
     'honesta-conserva': 'Kept as is when saving, not editable here: {0}.', 'honesta-convertido': 'This file came in another format: it is saved as .xlsx.', 'honesta-todo': 'Everything in this file can be edited here.',
-    'x-graficos': 'images, shapes or charts that can’t be edited', 'x-macros': 'macros', 'x-notas': 'notes', 'x-tablas': 'table headers', 'x-dinamicas': 'pivot tables', 'x-condicional': 'Excel 2010 formatting rules', 'x-validacion': 'data validation', 'x-minigraficos': 'sparklines', 'x-imagenes': 'images in cells', 'x-matriciales': 'Ctrl+Shift+Enter array formulas',
+    'x-graficos': 'images, shapes or charts that can’t be edited', 'x-macros': 'macros', 'x-notas': 'notes', 'x-dinamicas': 'pivot tables', 'x-condicional': 'Excel 2010 formatting rules', 'x-validacion': 'data validation', 'x-minigraficos': 'sparklines', 'x-imagenes': 'images in cells', 'x-matriciales': 'Ctrl+Shift+Enter array formulas',
     'i-celda': 'Cell', 'i-tipo': 'Type', 'i-valor': 'Value', 'i-formula': 'Formula', 'i-formato': 'Format', 'i-fuente': 'Font', 'i-archivo': 'The file', 'i-hojas': 'Sheets', 'i-formulas': 'Formulas',
     't-numero': 'Number', 't-texto': 'Text', 't-logico': 'Logical', 't-error': 'Error', 't-vacio': 'Empty', 'error-abrir': 'The file could not be opened', 'salir-sin-descargar': 'There are changes not downloaded.',
     'funcion-pregunta': 'Type the function name (for example SUM, AVERAGE, VLOOKUP):',
@@ -75,6 +75,18 @@
   pagina.en = Object.assign(pagina.en || {}, EN);
   const tx = (k, ...a) => { let s = typeof window.t === 'function' ? window.t(k) : (ES[k] || k); a.forEach((x, i) => { s = s.replace('{' + i + '}', x); }); return s; };
   const idioma = () => (typeof window.idiomaActual === 'function' && window.idiomaActual() === 'en' ? 'en' : 'es');
+  // TEXT y las funciones que leen o escriben números con los separadores regionales usan los de la región del navegador, como Excel los del equipo
+  // (es-ES: «1.234,57»; es-MX: «1,234.57»; medido en pruebas/oraculo/excel-medir-text-regional.ps1). Solo si el navegador está en el idioma de la
+  // página y dice su región; si no, los de la página (es-CR, en-US).
+  globalThis.SeparadoresRegion = (idiomaLibro) => {
+    try {
+      const l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+      if (!/^[a-z]{2,3}-/i.test(l) || l.slice(0, 2).toLowerCase() !== (idiomaLibro === 'en' ? 'en' : 'es')) return null;
+      const partes = new Intl.NumberFormat(l, { useGrouping: true }).formatToParts(1234567.5);
+      const decimal = (partes.find((p) => p.type === 'decimal') || {}).value, miles = (partes.find((p) => p.type === 'group') || {}).value;
+      return decimal && miles && decimal !== miles ? { decimal, miles } : null;
+    } catch (e) { return null; }
+  };
 
   // ---- estado ------------------------------------------------------------------------------------------------------
   const $ = (id) => document.getElementById(id);
@@ -174,7 +186,7 @@
     }
   }
   // ---- cambios de estructura: se transforma una copia del paquete y el historial cambia de un libro al otro --------------------
-  let ocupado = false, vistaPendiente = null;
+  let ocupado = false, vistaPendiente = null, cola = Promise.resolve(), enCurso = 0;
   // mientras la rejilla se vuelve a crear (después de un cambio de estructura) no hay rejilla: la hoja y la selección son las de antes
   let rejillaLista = Promise.resolve(), ultimaVista = { hoja: 0, sel: { f0: 0, c0: 0, f1: 0, c1: 0, hoja: 0, nombre: 'A1' } };
   function aplicarApp(op) {
@@ -186,19 +198,35 @@
     }
     return ed.aplicar(op);
   }
-  async function estructural(nombre, transformar, vista) {
+  // encolar: lo escrito en una tabla espera a la operación en curso, en vez de perderse (las demás se descartan si hay una en curso)
+  async function estructural(nombre, transformar, vista, encolar) {
     await rejillaLista;
-    if (lectura || ocupado || !ed) return;
+    if (lectura || !ed || (ocupado && !encolar)) return;
     if (editando) confirmar(editando.modo === 'barra' ? barra.value : editor.value, 0, 0);
-    ocupado = true;
+    const previa = cola;
+    let libre;
+    cola = new Promise((r) => { libre = r; });
+    enCurso++; ocupado = true;
+    await previa;
     try {
       const bytes = await ed.guardar();
       const r = await transformar(bytes);
       const nuevo = await LibroEditable.abrir(r.bytes || r, { idioma: idioma() });
       nuevo.recalcularTodo();   // los valores del archivo transformado son los de antes del cambio
       hist.hacer(nombre, [{ t: 'libro', ed: nuevo, vista: Object.assign({ hoja: hojaActiva(), sel: seleccion() }, vista || {}, r.indice !== undefined ? { hoja: r.indice } : {}) }]);
-    } catch (e) { console.warn(e); avisar(tx('aviso-estructura') + ': ' + (e && e.message ? e.message : e)); }
-    ocupado = false;
+    } catch (e) { console.warn(e); avisar(tx('aviso-estructura') + ': ' + (globalThis.MensajesHojas ? MensajesHojas.traducir(String(e && e.message ? e.message : e), idioma()) : (e && e.message ? e.message : e))); }
+    enCurso--; if (!enCurso) ocupado = false;
+    libre();
+  }
+  // escribir, borrar o pegar en el encabezado o los totales de una tabla, o a su lado: va sobre el archivo, con las tablas al día (MoverTablas)
+  function editarTabla(nombre, h, r, cambio, modo, sel) {
+    return estructural(nombre, async (b) => {
+      const e = await LibroEditable.abrir(b, { idioma: idioma() });
+      const op = cambio(e);
+      if (op && op.error) throw new Error(tx(op.error === 'protegida' ? 'aviso-protegida' : 'aviso-formula'));
+      if (op && op.celdas.length) e.aplicar(op);
+      return MoverTablas.guardar(e, h, r, modo, idioma());
+    }, { hoja: h, sel: sel || r }, true);
   }
   async function libroNuevo() {
     mostrarCargando(true);
@@ -206,7 +234,7 @@
     mostrarCargando(false);
   }
   function mostrarCargando(si) { $('cargando').hidden = !si; if (si) $('errorInicio').hidden = true; }
-  function mostrarError(e) { console.error(e); const el = $('errorInicio'); el.textContent = tx('error-abrir') + ': ' + (e && e.message ? e.message : e); el.hidden = false; $('inicio').hidden = false; $('app').hidden = true; document.documentElement.classList.remove('of-abierta'); }
+  function mostrarError(e) { console.error(e); const el = $('errorInicio'); el.textContent = tx('error-abrir') + ': ' + (globalThis.MensajesHojas ? MensajesHojas.traducir(String(e && e.message ? e.message : e), idioma()) : (e && e.message ? e.message : e)); el.hidden = false; $('inicio').hidden = false; $('app').hidden = true; document.documentElement.classList.remove('of-abierta'); }
 
   // ---- la línea honesta: lo que el archivo tiene y aquí no se edita ---------------------------------------------------
   function lineaHonesta() {
@@ -216,7 +244,6 @@
       if (!hoja || hoja.sinCeldas) continue;
       if (ed.formato !== 'ods' && hoja.anclas) anclasXlsx += hoja.anclas.length;
       if (hoja.comentarios && hoja.comentarios.length) cosas.add('x-notas');
-      if (hoja.tablas && hoja.tablas.length) cosas.add('x-tablas');
       // formato condicional y validación se editan (fase 3.2); las reglas de Excel 2010 que no, las marca el administrador de reglas
       if ((hoja.formatosCondicionales || []).some((cf) => cf.reglas.some((r) => r.dxfXml !== undefined || (r.barras && r.barras.x14 && !r.barras.cfvo)))) cosas.add('x-condicional');
       if (hoja.minigraficos && hoja.minigraficos.length) cosas.add('x-minigraficos');
@@ -246,7 +273,9 @@
     autoguardado.programar(datosAutoguardado, 2500, (fecha) => { if (fecha) actualizarGuardado(fecha); });
     for (const g of ganchos.alCambiar) g(r);
   }
-  async function datosAutoguardado() { if (!ed || !hist.sucio()) return null; return { id: docId, nombre: nombreDoc, bytes: await ed.guardar() }; }
+  // el borrador lleva la extensión de lo que se descargaría (.xlsx, .xlsm u .ods), como la recuperación de Excel: dos libros con el mismo nombre se distinguen
+  async function datosAutoguardado() { if (!ed || !hist.sucio()) return null; return { id: docId, nombre: nombreDoc + '.' + ed.destino().extension, bytes: await ed.guardar() }; }
+  const sinExtension = (n) => String(n || '').replace(/\.(xlsx|xlsm|ods)$/i, '');
   let ultimoAutoguardado = null;
   function actualizarGuardado(fecha) {
     if (fecha) ultimoAutoguardado = fecha;
@@ -299,7 +328,7 @@
     if (lectura || !ed) return;
     soltarCorte();
     const h = hojaActiva();
-    if (ed.protegida(h, x.f, x.c)) { avisar(tx('aviso-protegida')); return; }
+    if (ed.protegida(h, x.f, x.c) && !ed.deTabla(h, x.f, x.c)) { avisar(tx('aviso-protegida')); return; }
     editando = { h, f: x.f, c: x.c, modo: x.modo };
     const raiz = $('rejilla').querySelector('.rh'), vista = raiz.querySelector('.rh-vista');
     if (editor.parentNode !== raiz) raiz.append(editor);
@@ -336,9 +365,15 @@
     if (!editando) return true;
     const { h, f, c } = editando;
     if (!ganchos.antesDeEscribir.every((g) => g(h, f, c, texto))) return false;   // validación de datos (app-datos.js)
-    const op = ed.opEscribir(h, f, c, texto);
+    const op = ed.opEscribir(h, f, c, texto, { tabla: true });
     if (op.error) { avisar(tx(op.error === 'protegida' ? 'aviso-protegida' : 'aviso-formula')); return false; }
     cerrarEditor();
+    const r = { f0: f, c0: c, f1: f, c1: c };
+    if (op.celdas.length && (ocupado || MoverTablas.toca(ed, h, r, !!(op.celdas[0].v && op.celdas[0].v.formula)))) {
+      const sig = { f0: Math.max(0, f + df), c0: Math.max(0, c + dc), f1: Math.max(0, f + df), c1: Math.max(0, c + dc) };
+      editarTabla('Escribir', h, r, (e) => e.opEscribir(h, f, c, texto, { tabla: true }), 'escribir', sig).then(() => { for (const g of ganchos.despuesDeEscribir) g(h, f, c); });
+      return true;
+    }
     hacer('Escribir', op);
     for (const g of ganchos.despuesDeEscribir) g(h, f, c);
     if (df || dc) rejilla.irA(Math.max(0, f + df), Math.max(0, c + dc));
@@ -365,7 +400,7 @@
   barra.addEventListener('focus', () => {
     if (lectura || !ed || editando) { if (editando && editando.modo !== 'barra') { editando.modo = 'barra'; } return; }
     const a = rejilla.activa(), h = hojaActiva();
-    if (ed.protegida(h, a.f, a.c)) { avisar(tx('aviso-protegida')); barra.blur(); return; }
+    if (ed.protegida(h, a.f, a.c) && !ed.deTabla(h, a.f, a.c)) { avisar(tx('aviso-protegida')); barra.blur(); return; }
     editando = { h, f: a.f, c: a.c, modo: 'barra' };
   });
   barra.addEventListener('input', () => { if (editando && !editor.hidden) { editor.value = barra.value; ajustarEditor(); } barra.classList.toggle('es-formula', barra.value.charAt(0) === '='); });
@@ -390,17 +425,18 @@
   });
 
   // ---- borrar, formato ----------------------------------------------------------------------------------------------------
-  function celdasDe(r, fn) {
-    const h = hojaActiva(), C = ed.hojas[h].celdas;
-    const f1 = Math.min(r.f1, ed.limite(h).filas - 1), c1 = Math.min(r.c1, ed.limite(h).cols - 1);
+  function celdasDe(r, fn, e) {
+    const E = e || ed, h = hojaActiva(), C = E.hojas[h].celdas;
+    const f1 = Math.min(r.f1, E.limite(h).filas - 1), c1 = Math.min(r.c1, E.limite(h).cols - 1);
     if ((f1 - r.f0 + 1) * (c1 - r.c0 + 1) <= 50000) { for (let f = r.f0; f <= f1; f++) for (let c = r.c0; c <= c1; c++) fn(f, c); }
     else C.paraCada((f, c) => { if (f >= r.f0 && f <= f1 && c >= r.c0 && c <= c1) fn(f, c); });
   }
   function borrar(r) {
     if (lectura) return;
-    const h = hojaActiva(), celdas = [];
-    celdasDe(r || seleccion(), (f, c) => { const x = ed.estadoDe(h, f, c); if (x && (x.tipo !== 'vacio' || x.formula)) celdas.push({ f, c, v: x.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: x.estilo } : null }); });
-    hacer('Borrar', ed.opEstado(h, celdas));
+    const h = hojaActiva(), s = r || seleccion();
+    const vaciar = (e) => { const celdas = []; celdasDe(s, (f, c) => { const x = e.estadoDe(h, f, c); if (x && (x.tipo !== 'vacio' || x.formula)) celdas.push({ f, c, v: x.estilo ? { tipo: 'vacio', valor: null, formula: null, estilo: x.estilo } : null }); }, e); return celdas; };
+    if (MoverTablas.toca(ed, h, s)) { if (vaciar(ed).length) editarTabla('Borrar', h, s, (e) => e.opEstado(h, vaciar(e), { tabla: true }), 'borrar', s); return; }
+    hacer('Borrar', ed.opEstado(h, vaciar(ed)));
   }
   function borrarFormato() {
     const h = hojaActiva(), celdas = [];
@@ -536,7 +572,7 @@
   }
   function aplicarPlan(plan, h, s, datos, P) {
     if (plan.error) { if (plan.error === 'grande') avisar(tx('aviso-pegado-grande', MAX_PEGAR)); else avisar(tx(AVISOS_PEGAR[plan.error] || 'aviso-estructura')); return; }
-    if (plan.objetos) {
+    if (plan.objetos || plan.tablas) {
       const opc = { idioma: idioma() };
       // lo que no es una celda se escribe en el archivo, como un cambio de estructura
       return estructural('Pegar', async (b) => PegadoEspecial.ejecutar(await LibroEditable.abrir(b, opc), plan, opc), { hoja: h, sel: plan.destino })
@@ -547,6 +583,17 @@
       rejilla.seleccionar(plan.destino.f0, plan.destino.c0, plan.destino.f1, plan.destino.c1);
       despuesDePegar(h, s, datos, plan.destino);
     }
+  }
+  // pegar como imagen: lo copiado en este libro se dibuja como se ve y queda como imagen en la celda activa (PegadoImagen)
+  async function pegarImagen() {
+    if (lectura || !ed) return;
+    const P = portapapeles;
+    if (!P || P.cortado) { avisar(tx('aviso-imagen-sin-copia')); return; }
+    if (P.familia === familia) P.ed = ed;
+    const h = hojaActiva(), s = seleccion();
+    let imagen;
+    try { imagen = await PegadoImagen.dibujar(P, idioma()); } catch (e) { avisar(tx(e && e.message === 'grande' ? 'aviso-pegado-grande' : 'aviso-estructura', MAX_PEGAR)); return; }
+    return estructural(tx('cmd-pegar-imagen'), (b) => PegadoImagen.agregar(b, ed.formato, h, s.f0, s.c0, imagen), { hoja: h, sel: { f0: s.f0, c0: s.c0, f1: s.f0, c1: s.c0 } });
   }
   function pegarInterno(P, opciones, datos) {
     if (lectura || !ed) return;
@@ -595,10 +642,11 @@
       const uno = M.length === 1 && M[0].length === 1;
       const alto = uno ? s.f1 - s.f0 + 1 : M.length, ancho = uno ? s.c1 - s.c0 + 1 : Math.max(...M.map((f) => f.length));
       if (alto * ancho > MAX_PEGAR) { avisar(tx('aviso-pegado-grande', MAX_PEGAR)); return; }
-      for (let i = 0; i < alto; i++) for (let j = 0; j < ancho; j++) {
-        const t = uno ? M[0][0] : (M[i][j] === undefined ? '' : M[i][j]);
-        const op = ed.opEscribir(h, s.f0 + i, s.c0 + j, t);
-        if (!op.error) celdas.push(...op.celdas);
+      const escribir = (e) => { const l = []; for (let i = 0; i < alto; i++) for (let j = 0; j < ancho; j++) { const t = uno ? M[0][0] : (M[i][j] === undefined ? '' : M[i][j]); const op = e.opEscribir(h, s.f0 + i, s.c0 + j, t, { tabla: true }); if (!op.error) l.push(...op.celdas); } return l; };
+      celdas.push(...escribir(ed));
+      const D = { f0: s.f0, c0: s.c0, f1: s.f0 + alto - 1, c1: s.c0 + ancho - 1 };
+      if (celdas.length && MoverTablas.toca(ed, h, D, alto * ancho === 1 && !!(celdas[0].v && celdas[0].v.formula))) {
+        return editarTabla('Pegar', h, D, (e) => ({ t: 'celdas', h, celdas: escribir(e) }), 'pegar', D).then(() => despuesDePegar(h, s, copiaDatos, D));
       }
     }
     if (hacer('Pegar', ed.opEstado(h, celdas))) {
@@ -645,7 +693,7 @@
       const r = await ExcelAPdfMotor.generar(ed.libro, { hojas, idioma: idioma(), nombreArchivo: nombreDoc });
       descargarBlob(new Blob([r.bytes], { type: 'application/pdf' }), nombreDoc + '.pdf');
       avisar(tx('aviso-pdf-listo', r.paginas));
-    } catch (e) { console.warn(e); avisar(tx('aviso-estructura') + ': ' + (e && e.message ? e.message : e)); }
+    } catch (e) { console.warn(e); avisar(tx('aviso-estructura') + ': ' + (globalThis.MensajesHojas ? MensajesHojas.traducir(String(e && e.message ? e.message : e), idioma()) : (e && e.message ? e.message : e))); }
   }
 
   // ---- ordenar (de verdad, en el archivo) ----------------------------------------------------------------------------------
@@ -873,7 +921,7 @@
     // el PDF de la hoja activa (o de todas las visibles), como «Descargar en PDF»
     pdf: async (todas) => { await ExcelAPdfMotor.cargarMotor(); const hojas = todas ? ed.nombres().filter((x) => x.tipo === 'hoja' && x.estado === 'visible').map((x) => x.indice) : [hojaActiva()]; return ExcelAPdfMotor.generar(ed.libro, { hojas, idioma: idioma(), nombreArchivo: nombreDoc }); },
     confirmarEdicion: () => { if (editando) confirmar(editando.modo === 'barra' ? barra.value : editor.value, 0, 0); },
-    pegarDesdeBoton, pegarInterno, repegar, hayCopiaInterna: () => !!(portapapeles && !portapapeles.cortado), pegando: () => repegando, despuesDeCinta: [],
+    pegarDesdeBoton, pegarInterno, repegar, pegarImagen, hayCopiaInterna: () => !!(portapapeles && !portapapeles.cortado), pegando: () => repegando, despuesDeCinta: [],
     capturarSeleccion: () => { const c = contenidoCopia(seleccion()); return c ? c.interno : (avisar(tx('aviso-pegado-grande', MAX_PEGAR)), null); },
   };
   for (const ext of window.HojasExtensiones || []) ext(extension);
@@ -929,7 +977,7 @@
       info.querySelector('b').textContent = b.nombre;
       info.querySelector('small').textContent = new Date(b.fecha).toLocaleString(idioma() === 'en' ? 'en-US' : 'es-CR');
       const rec = Oficina.crearEl('button', { type: 'button', class: 'boton' }, [tx('recuperar')]);
-      rec.addEventListener('click', async () => { const r = await autoguardado.leer(b.id); if (r) { mostrarCargando(true); try { await abrirBytes(new Uint8Array(r.bytes), r.nombre, { id: r.id, recuperado: true }); } catch (e) { mostrarError(e); } mostrarCargando(false); } });
+      rec.addEventListener('click', async () => { const r = await autoguardado.leer(b.id); if (r) { mostrarCargando(true); try { await abrirBytes(new Uint8Array(r.bytes), sinExtension(r.nombre), { id: r.id, recuperado: true }); } catch (e) { mostrarError(e); } mostrarCargando(false); } });
       const des = Oficina.crearEl('button', { type: 'button', class: 'boton boton-secundario' }, [tx('descartar')]);
       des.addEventListener('click', async () => { await autoguardado.borrar(b.id); mostrarBorradores(); });
       const acciones = document.createElement('span'); acciones.append(rec, ' ', des);
@@ -939,6 +987,12 @@
   }
   mostrarBorradores();
   window.addEventListener('beforeunload', (e) => { if (hist && hist.sucio()) { e.preventDefault(); e.returnValue = ''; } });
+  // El idioma se cambia sin recargar la página (botón del inicio): lo que se escribió con tx() al abrir se vuelve a escribir
+  document.addEventListener('cambioIdioma', () => {
+    mostrarBorradores();
+    if (!ed) return;
+    aplicarModo(); lineaHonesta(); actualizarGuardado(); actualizarInspector();
+  });
 
   // para las pruebas de navegador
   window.HojasApp = { ordenar, reemplazarTodo, abrirBytes, get ed() { return ed; }, get hist() { return hist; }, get rejilla() { return rejilla; }, comandos, pegar, copiar, descargar: () => ed.guardar() };

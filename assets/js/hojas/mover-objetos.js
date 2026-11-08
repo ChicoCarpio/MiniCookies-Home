@@ -267,7 +267,19 @@
       });
       u = u.replace(/<ext\b[^>]*>\s*<\/ext>/g, '').replace(/<extLst>\s*<\/extLst>/g, '');
     }
+    if (h === M.h0 && M.h0 === M.h1) u = filtroMovido(u, M);
     return partida ? renumerar(u) : u;
+  }
+  // el autofiltro de la hoja, movido entero dentro de la misma hoja: va con lo movido, sin criterios, y se ven las filas que ocultaba (medido en Excel)
+  function filtroMovido(xml, M) {
+    const m = /<autoFilter\b[^>]*?\bref\s*=\s*"([^"]*)"[^>]*?(?:\/>|>[\s\S]*?<\/autoFilter>)/.exec(xml), r = m && LibroXlsx.decodificarRango(m[1]);
+    if (!r || r.f0 < M.f0 || r.f1 > M.f1 || r.c0 < M.c0 || r.c1 > M.c1) return xml;
+    const ref = textoRango({ f0: r.f0 + M.df, c0: r.c0 + M.dc, f1: r.f1 + M.df, c1: r.c1 + M.dc });
+    const apertura = /^<autoFilter\b[^>]*?(?=\s*\/?>)/.exec(m[0])[0];
+    const nuevo = apertura.replace(/(\bref\s*=\s*")[^"]*(")/, (x, p, c) => p + ref + c) + '/>';
+    const filas = new Map();
+    for (let f = r.f0 + 1; f <= r.f1; f++) filas.set(f, false);
+    return FiltrosLibro._interno.ponerOcultas(xml.replace(m[0], () => nuevo), filas);
   }
   // lo que llega de otra hoja: al final de su lista, o donde corresponde si la hoja no tiene ninguna
   function recibir(xml, llevar) {
@@ -317,15 +329,7 @@
     await MoverNotas.aplicar(libro, M);
     if (planTablas) await MoverTablas.escribir(libro, planTablas, M, ft);
     const fin = planTablas ? (t) => planTablas.formula(t, -1) : (t) => t;
-    const rutas = [];
-    zip.forEach((n) => { if (/^xl\/workbook\.xml$|^xl\/charts\/chart[^/]*\.xml$|^xl\/charts\/chartEx[^/]*\.xml$/i.test(n)) rutas.push(n); });
-    for (const ruta of rutas) {
-      const t = await leer(ruta);
-      const u = /workbook\.xml$/i.test(ruta)
-        ? t.replace(/(<definedName\b[^>]*>)([\s\S]*?)(<\/definedName>)/g, (x, a, f, c) => a + X().esc(fin(ft(X().decodificar(f), -1, -1))) + c)
-        : t.replace(/(<(?:c|cx):f\b[^>]*>)([\s\S]*?)(<\/(?:c|cx):f>)/g, (x, a, f, c) => a + X().esc(fin(ft(X().decodificar(f), -1, -1))) + c);
-      if (u !== t) zip.file(ruta, u);
-    }
+    await MoverTablas.nombresYGraficos(zip, (t) => fin(ft(t, -1, -1)));
     return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   }
 

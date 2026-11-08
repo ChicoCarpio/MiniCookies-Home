@@ -15,6 +15,7 @@
 //   ed.aplicar(op) → inversa                              (para HistorialDoc)
 //   ed.terminar() → { calculadas, noSoportadas, circulares, tocadas }   (recalcula lo que cambió desde la última vez)
 //   ed.protegida(h, f, c) → motivo | null                 (encabezado de tabla, fórmula matricial: se rechaza la edición)
+//   ed.deTabla(h, f, c) → bool                             (encabezado o totales de una tabla: se escriben con { tabla: true } y MoverTablas.guardar)
 //   await ed.guardar() → Uint8Array del .xlsx
 //   ed.recalcularTodo() → { calculadas, noSoportadas, circulares }   (después de transformar la estructura con EstructuraLibro)
 //   ed.pendientes() → cantidad de celdas cambiadas sin guardar en el paquete
@@ -269,7 +270,7 @@
       },
       fecha1904: libro.fecha1904,
       idioma: o.idioma === 'en' ? 'en' : 'es',
-      separadores: o.separadores || null,
+      separadores: o.separadores || (typeof globalThis.SeparadoresRegion === 'function' ? globalThis.SeparadoresRegion(o.idioma) : null) || null,   // la región del navegador (app.js)
     });
     let construido = false;
     function asegurarMotor() { if (!construido) { construido = true; motor.construir(); } }
@@ -285,6 +286,8 @@
       if (modelo.protegida(h, f, c)) return 'protegida';
       return null;
     }
+    const deTabla = (h, i, j) => !!hojas[h] && !hojas[h].sinCeldas && (hojas[h].tablas || []).some((t) => j >= t.ref.c0 && j <= t.ref.c1 && ((t.encabezados && i === t.ref.f0) || (t.totales && i === t.ref.f1)));
+    const libre = (h, f, c, o) => !protegida(h, f, c) || (o && o.tabla && deTabla(h, f, c));
     function aplicar(op) {
       if (op.t !== 'celdas') throw new Error('operación desconocida ' + op.t);
       const inversa = { t: 'celdas', h: op.h, celdas: [] };
@@ -339,8 +342,8 @@
     }
 
     const opcionesEntrada = { idioma: o.idioma === "en" ? "en" : "es", fecha1904: libro.fecha1904 };
-    function opEscribir(h, f, c, texto) {
-      if (protegida(h, f, c)) return { error: 'protegida' };
+    function opEscribir(h, f, c, texto, opciones) {
+      if (!libre(h, f, c, opciones)) return { error: 'protegida' };
       const x = EntradaCelda.interpretar(texto, opcionesEntrada);
       const antes = estadoDe(h, f, c);
       const estilo = antes ? antes.estilo : (hojas[h].estiloDe ? hojas[h].estiloDe(f, c) : 0);
@@ -412,7 +415,6 @@
       if (fijas0.some((g) => toca(g, r) && !dentro(g, r)) || fijas1.some((g) => toca(g, D) && !dentro(g, D) && !(h0 === h1 && dentro(g, r)))) return { error: 'matriz' };
       const esFija = (l, i, j) => l.some((g) => i >= g.f0 && i <= g.f1 && j >= g.c0 && j <= g.c1);
       // los encabezados y totales de una tabla sí se mueven: los cuida MoverTablas
-      const deTabla = (h, i, j) => (hojas[h].tablas || []).some((t) => j >= t.ref.c0 && j <= t.ref.c1 && ((t.encabezados && i === t.ref.f0) || (t.totales && i === t.ref.f1)));
       const fijaOTabla = (h, l, i, j) => esFija(l, i, j) || deTabla(h, i, j);
       for (let i = r.f0; i <= r.f1; i++) for (let j = r.c0; j <= r.c1; j++) if ((protegida(h0, i, j) && !fijaOTabla(h0, fijas0, i, j)) || (protegida(h1, i + M.df, j + M.dc) && !fijaOTabla(h1, fijas1, i + M.df, j + M.dc))) return { error: 'protegida' };
       const nombresHoja = libro.hojas.map((m) => m.nombre);
@@ -463,7 +465,7 @@
       for (const d of motor.derrames.values()) if (d.ok && d.h === h && d.f0 >= r.f0 && d.f0 <= r.f1 && d.c0 >= r.c0 && d.c0 <= r.c1) return true;
       return false;
     }
-    function opEstado(h, celdas) { return { t: 'celdas', h, celdas: celdas.filter((x) => !protegida(h, x.f, x.c)) }; }
+    function opEstado(h, celdas, opciones) { return { t: 'celdas', h, celdas: celdas.filter((x) => libre(h, x.f, x.c, opciones)) }; }
 
     // para cada celda del rango (las que existen, o todas si el rango es chico) un estilo derivado del suyo
     function opEstilo(h, r, cambiosEstilo) {
@@ -519,7 +521,7 @@
     return {
       libro, paquete, hojas, estilos, motor, backend, formato: backend.formato, destino: () => modelo.destino(),
       nombres: () => libro.hojas.map((m, i) => ({ indice: i, nombre: m.nombre, estado: m.estado, tipo: m.tipo })),
-      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, opEscribir, opEstado, opEstilo, opMover, hayDesborde, formulaVista, guardar, pendientes,
+      celda, estadoDe, aplicar, terminar, recalcularTodo, protegida, deTabla, opEscribir, opEstado, opEstilo, opMover, hayDesborde, formulaVista, guardar, pendientes,
       asegurarMotor, limite: (h) => limites[h], opciones: opcionesEntrada,
       // la celda ancla de la matriz dinámica que desbordó en (h, f, c), o null
       anclaDe: (h, f, c) => {
