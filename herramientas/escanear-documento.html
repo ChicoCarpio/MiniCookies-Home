@@ -479,7 +479,9 @@ function apagarCamara() {
 
 // Cada ~400 ms se busca la hoja en un cuadro reducido y se dibuja su contorno.
 // Con Custos listo lo busca Custos (~50 ms en un celular de gama media); si la persona tocó una hoja,
-// el motor clásico, que es el que sabe elegir la hoja que contiene un punto.
+// el motor clásico, que es el que sabe elegir la hoja que contiene un punto. Si Custos duda (no ve
+// una hoja), también busca el motor clásico: en pizarras, proyecciones y cuadros acierta más
+// (banco de objetos, 2026-11-08).
 const cuadroAnalisis = document.createElement('canvas');
 let detectandoEnVivo = false;
 async function buclearDeteccion() {
@@ -498,6 +500,7 @@ async function buclearDeteccion() {
   if (Custos.listo() && !toqueCamara) {
     detectandoEnVivo = true;
     try { resultado = await Custos.detectar(cuadroAnalisis, cuadroAnalisis.width, cuadroAnalisis.height); } catch { resultado = null; }
+    if (resultado && !resultado.encontrado) resultado = null;   // Custos duda: decide el motor clásico
     detectandoEnVivo = false;
     // Mientras corría, la persona pudo sacar la foto, tocar una hoja o cerrar la cámara.
     if (!cam || fuente || app.dataset.estado !== 'camara' || toqueCamara) { temporizadorDeteccion = setTimeout(buclearDeteccion, 400); return; }
