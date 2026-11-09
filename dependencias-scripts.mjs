@@ -21,6 +21,7 @@ const NECESITA = {
   'xlsx-contrato.js': ['xlsx-estilos.js', 'xlsx-modelo.js'],
   'cambio-version.js': ['zip-propio.js', 'xlsx-formato.js', 'xlsx-estilos.js', 'xlsx-modelo.js', 'xlsx-escritor.js', 'xlsx-contrato.js', 'cfb-propio.js', 'xls-formulas.js', 'xls-lector.js', 'xls-escritor.js', 'ods-formulas.js', 'ods-lector.js', 'ods-escritor.js', 'formatos-antiguos.js'],
   'motor-hojas.js': ['vendor.js'],
+  'custos.js': ['vendor.js'],
   'rejilla-hoja.js': ['vendor.js', 'lector-hojas.js', 'motor-hojas.js', 'rejilla-orden-filtro.js'],
   'excel-a-pdf-motor.js': ['vendor.js', 'motor-hojas.js', 'lector-hojas.js'],
   'xml2003-lector.js': ['xml-ligero.js', 'xlsx-modelo.js', 'xlsx-formato.js'],
