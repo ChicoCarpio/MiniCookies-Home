@@ -368,6 +368,7 @@ window.i18nPagina = {
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/camara.js"></script>
 <script src="../assets/js/escaner-documento.js"></script>
+<script src="../assets/js/custos.js"></script>
 <script>
 const E = EscanerDocumento;
 const LADO_MAX_FUENTE = 4096;   // las fotos más grandes se reducen: ahorra memoria y no mejora el PDF
@@ -457,6 +458,7 @@ async function iniciarCamara() {
   aviso(t('camara-iniciando'));
   try {
     cam = await Camara.abrir(video);
+    Custos.cargar();   // en segundo plano: mientras no esté, busca el motor clásico
     estado('camara');
     // En el celular, la app de cámara ocupa la pantalla: se la trae a la vista.
     if (window.matchMedia('(max-width: 700px)').matches) app.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -476,10 +478,13 @@ function apagarCamara() {
 }
 
 // Cada ~400 ms se busca la hoja en un cuadro reducido y se dibuja su contorno.
+// Con Custos listo lo busca Custos (~50 ms en un celular de gama media); si la persona tocó una hoja,
+// el motor clásico, que es el que sabe elegir la hoja que contiene un punto.
 const cuadroAnalisis = document.createElement('canvas');
-function buclearDeteccion() {
+let detectandoEnVivo = false;
+async function buclearDeteccion() {
   clearTimeout(temporizadorDeteccion);
-  if (!cam) return;
+  if (!cam || detectandoEnVivo) return;   // si hay una búsqueda en curso, ella misma programa la siguiente
   if (!video.videoWidth || fuente || app.dataset.estado !== 'camara') { // en pausa mientras se revisa o se mira una foto
     temporizadorDeteccion = setTimeout(buclearDeteccion, 400);
     return;
@@ -489,7 +494,15 @@ function buclearDeteccion() {
   cuadroAnalisis.height = Math.round(video.videoHeight * escala);
   const ctx = cuadroAnalisis.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(video, 0, 0, cuadroAnalisis.width, cuadroAnalisis.height);
-  const resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height), {
+  let resultado = null;
+  if (Custos.listo() && !toqueCamara) {
+    detectandoEnVivo = true;
+    try { resultado = await Custos.detectar(cuadroAnalisis, cuadroAnalisis.width, cuadroAnalisis.height); } catch { resultado = null; }
+    detectandoEnVivo = false;
+    // Mientras corría, la persona pudo sacar la foto, tocar una hoja o cerrar la cámara.
+    if (!cam || fuente || app.dataset.estado !== 'camara' || toqueCamara) { temporizadorDeteccion = setTimeout(buclearDeteccion, 400); return; }
+  }
+  if (!resultado) resultado = E.detectarEsquinas(ctx.getImageData(0, 0, cuadroAnalisis.width, cuadroAnalisis.height), {
     previa: deteccionPrevia,
     punto: toqueCamara && { x: toqueCamara.x * cuadroAnalisis.width, y: toqueCamara.y * cuadroAnalisis.height },
   });
@@ -593,6 +606,7 @@ async function siguienteDeLaCola() {
 }
 
 conectarZonaArrastre($('zonaArrastre'), $('entradaArchivos'), (archivos) => {
+  Custos.cargar();
   cola.push(...archivos.filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(f.name)));
   siguienteDeLaCola();
 });
@@ -628,13 +642,31 @@ function textoInfoPagina() {
 }
 
 // punto: {x, y} en píxeles de la foto que la persona tocó (opcional).
-function detectar(punto) {
+// Primero el motor clásico (al instante); después, si Custos está o llega a estar listo en poco tiempo,
+// se combinan los dos (assets/js/custos.js) y se reemplaza la propuesta, salvo que la persona ya la haya
+// cambiado. Con un punto tocado manda el motor clásico: es el que elige la hoja que contiene ese punto.
+async function detectar(punto) {
+  const actual = fuente;
   const r = E.detectarEsquinas(fuente.datos, punto ? { punto } : {});
-  esquinas = r.esquinas;
-  opciones = r.encontrado && r.alternativas && r.alternativas.length > 1 ? r.alternativas : [];
+  mostrarDeteccion(r.encontrado, r.esquinas, r.encontrado && r.alternativas && r.alternativas.length > 1 ? r.alternativas : []);
+  const firma = JSON.stringify(esquinas);   // si cambia mientras se espera, la persona movió una esquina
+  if (punto || !(await Custos.esperar(3000)) || fuente !== actual) return;
+  let c;
+  try { c = await Custos.detectar(fuente.canvas, fuente.canvas.width, fuente.canvas.height); } catch { return; }
+  if (fuente !== actual || JSON.stringify(esquinas) !== firma) return;
+  const f = Custos.combinar(c, r);
+  if (!f.encontrado || f.origen === 'clasico') return;   // nada nuevo: queda lo del motor clásico
+  // «Probar otra hoja» sigue ofreciendo las del motor clásico que no se parecen a la elegida.
+  const otras = (r.alternativas || []).filter((q) => Custos.iou(q.map((p) => [p.x, p.y]), f.esquinas.map((p) => [p.x, p.y])) < 0.8);
+  mostrarDeteccion(true, f.esquinas, otras.length ? [f.esquinas, ...otras] : []);
+}
+
+function mostrarDeteccion(encontrado, esq, alternativas) {
+  esquinas = esq.map((p) => ({ x: p.x, y: p.y }));
+  opciones = alternativas;
   opcionActual = 0;
   textoBotonOtra();
-  aviso(r.encontrado ? t('ayuda-esquinas') : t('aviso-no-detectada'));
+  aviso(encontrado ? t('ayuda-esquinas') : t('aviso-no-detectada'));
   dibujarEsquinas();
   if (vista === 'resultado') actualizarVista();
 }
