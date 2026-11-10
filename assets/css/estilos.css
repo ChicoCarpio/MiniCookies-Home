@@ -400,6 +400,16 @@ a.boton { text-decoration: none; display: inline-block; }
   font-size: 1rem;
 }
 
+/* Lista de pasos (Flujos, 2026-11-10): variante de .lista-archivos donde cada fila es una tarjeta con
+   cabecera (título + botones ▲ ▼ ✕), descripción y sus controles debajo. .con-error marca el paso que no
+   recibe lo que entrega el anterior (además del texto que lo dice: no se indica solo con color). */
+.lista-archivos.lista-pasos li { display: block; padding: 10px 12px; }
+.lista-pasos .paso-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lista-pasos .paso-botones { display: flex; gap: 4px; }
+.lista-pasos li > .nota-suave { margin: 4px 0 0; }
+.lista-pasos li > .controles { margin-top: 8px; }
+.lista-pasos li.con-error { outline: 2px solid #dc2626; }
+
 /* Selector de dirección de las herramientas bidireccionales (A → B / B → A).
    El cambio de panel lo hace assets/js/selector-direccion.js. Estaba copiado
    en el <style> de 13 herramientas. */

@@ -151,6 +151,7 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | `.grid-miniaturas`, `.miniatura-pagina` | grilla de páginas/hojas seleccionables |
 | `.contenedor-miniaturas`, `.selector-vista` | lista o grilla conmutable |
 | `.lista-archivos` | lista de archivos cargados |
+| `.lista-archivos.lista-pasos` | lista de pasos de Flujos (2026-11-10): cada `li` es una tarjeta con `.paso-cabecera` (título + `.paso-botones` ▲ ▼ ✕ con `.boton.secundario.chico`), una `.nota-suave` y sus `.controles`; `li.con-error` marca el paso que no encaja (siempre junto con un texto que lo dice) |
 | `.tabla-ancha` | envoltorio para una tabla que no entra: se desplaza sola sin arrastrar la página |
 | `.contenedor-tabla` + `table.tabla-datos` | tabla de datos de una planilla, con encabezado fijo y desplazamiento propio; `tr.fila-par` y `tr.fila-espaciadora` para filas alternadas y virtualización. La página solo ajusta lo suyo (altura, resaltados) |
 

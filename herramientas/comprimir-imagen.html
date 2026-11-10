@@ -189,6 +189,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/comprimir-imagen.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -233,37 +234,14 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 // Los nombres de archivo van dentro de innerHTML: se escapan para que un
 // nombre con "<" o "&" se muestre tal cual en vez de interpretarse como HTML.
 
-function cargarImagen(archivo) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = URL.createObjectURL(archivo);
-  });
-}
-
 botonComprimir.addEventListener('click', async () => {
   botonComprimir.disabled = true;
   botonComprimir.textContent = t('estado-comprimiendo');
   try {
-    const img = await cargarImagen(archivoActual);
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const contexto = canvas.getContext('2d');
     const formato = document.getElementById('formato').value;
-    // JPG no tiene canal alfa: sin este relleno, la transparencia de un PNG
-    // quedaba pintada de negro.
-    if (formato === 'image/jpeg') {
-      contexto.fillStyle = '#ffffff';
-      contexto.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    contexto.drawImage(img, 0, 0);
-
     const calidad = parseInt(elCalidad.value, 10) / 100;
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, calidad));
-    if (!blob) throw new Error(t('error-sin-imagen'));
+    // La compresión vive en comprimir-imagen.js.
+    const blob = await ComprimirImagen.comprimir(archivoActual, { calidad, formato });
 
     // Si el navegador no sabe generar WebP (Safari viejo), devuelve PNG: la
     // extensión sale del tipo real del resultado, no del elegido.

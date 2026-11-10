@@ -221,6 +221,7 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/@zxing/library/0.23.0/umd/index.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
+<script src="../assets/js/leer-codigos.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/extraer-medios-zip.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -241,6 +242,7 @@ const tituloResultado = document.getElementById('tituloResultado');
 const listaCodigos = document.getElementById('listaCodigos');
 const progreso = document.getElementById('progreso');
 
+// Lector propio de la cámara; la lectura de archivos usa LeerCodigos.
 const lector = new ZXing.BrowserMultiFormatReader();
 let camaraActiva = false;
 let deviceIdActivo = null;
@@ -326,7 +328,7 @@ function mostrarCodigos(codigos, resumenOrigen) {
 function mostrarResultado(resultadoZXing) {
   mostrarCodigos([{
     texto: resultadoZXing.getText(),
-    formato: nombreFormato(resultadoZXing.getBarcodeFormat()),
+    formato: LeerCodigos.nombreFormato(resultadoZXing.getBarcodeFormat()),
     origen: '',
   }], t('origen-camara'));
 }
@@ -350,72 +352,17 @@ function avisar(texto) {
   progreso.style.display = texto ? 'block' : 'none';
 }
 
-// Un intento de lectura sobre un lienzo. Devuelve el código o null.
-// ZXing no sabe leer un <canvas> directamente (esta versión no trae
-// decodeFromCanvas), así que se le pasa el lienzo como imagen.
-async function leerLienzo(lienzo) {
-  const blob = await new Promise((resolve) => lienzo.toBlob(resolve, 'image/png'));
-  if (!blob) return null;
-  const url = URL.createObjectURL(blob);
-  try {
-    return await lector.decodeFromImageUrl(url);
-  } catch (error) {
-    return null; // en ese lienzo no había ningún código
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-// getBarcodeFormat() devuelve el número del enum; sin traducirlo, la página
-// mostraba "11" en vez de "QR CODE".
-function nombreFormato(valor) {
-  const nombre = ZXing.BarcodeFormat[valor];
-  return nombre ? String(nombre).replace(/_/g, ' ') : String(valor);
-}
-
-// Los códigos chicos (un QR de 2 cm en una página A4) no se reconocen al
-// tamaño natural de la página: se prueba con más resolución antes de darla
-// por perdida. Se empieza por la escala barata.
-const ESCALAS_PDF = [2, 3.5];
-
+// La lectura (imagen y PDF) está en assets/js/leer-codigos.js.
 async function codigosDePdf(archivo) {
-  const bytes = new Uint8Array(await archivo.arrayBuffer());
-  const pdf = await abrirPdf(bytes);
-  const encontrados = [];
-
-  for (let n = 1; n <= pdf.numPages; n++) {
-    avisar(t('progreso-pagina').replace('{n}', n).replace('{total}', pdf.numPages));
-    const pagina = await pdf.getPage(n);
-    for (const escala of ESCALAS_PDF) {
-      const viewport = pagina.getViewport({ scale: escala });
-      const lienzo = document.createElement('canvas');
-      lienzo.width = viewport.width;
-      lienzo.height = viewport.height;
-      await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport }).promise;
-      const hallado = await leerLienzo(lienzo);
-      if (hallado) {
-        encontrados.push({
-          texto: hallado.getText(),
-          formato: nombreFormato(hallado.getBarcodeFormat()),
-          origen: t('origen-pagina').replace('{n}', n),
-        });
-        break; // ya está: no hace falta probar más resolución en esta página
-      }
-    }
-  }
-  return encontrados;
+  return LeerCodigos.dePdf(
+    archivo,
+    (n, total) => avisar(t('progreso-pagina').replace('{n}', n).replace('{total}', total)),
+    (n) => t('origen-pagina').replace('{n}', n)
+  );
 }
 
-async function codigosDeImagen(archivo, origen) {
-  const url = URL.createObjectURL(archivo);
-  try {
-    const hallado = await lector.decodeFromImageUrl(url);
-    return [{ texto: hallado.getText(), formato: nombreFormato(hallado.getBarcodeFormat()), origen: origen || '' }];
-  } catch (error) {
-    return [];
-  } finally {
-    URL.revokeObjectURL(url);
-  }
+function codigosDeImagen(archivo, origen) {
+  return LeerCodigos.deImagen(archivo, origen);
 }
 
 async function codigosDeDocumento(archivo, carpeta) {

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Flujos: encadenar herramientas gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Encadená herramientas y procesá muchos archivos de una vez: leer QR, recortar documentos, comprimir, girar y pasar a PDF. Gratis y sin subir nada a ningún servidor.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<link rel="stylesheet" href="../assets/css/ayuda-tip.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Flujos: encadenar herramientas gratis — Mini Cookies',
+    'meta-descripcion': 'Encadená herramientas y procesá muchos archivos de una vez: leer QR, recortar documentos, comprimir, girar y pasar a PDF. Gratis y sin subir nada a ningún servidor.',
+    'hero-titulo': 'Flujos: encadená herramientas',
+    'intro': 'Armá una cadena de pasos y aplicala a muchos archivos de una vez: lo que sale de un paso entra al siguiente.',
+    'titulo-pasos': 'Pasos del flujo',
+    'sin-pasos': 'Todavía no hay pasos. Elegí uno abajo o cargá el ejemplo.',
+    'campo-agregar': 'Agregar un paso',
+    'boton-agregar': 'Agregar',
+    'boton-ejemplo': 'Cargar el ejemplo (QR → recorte → PDF)',
+    'boton-limpiar': 'Vaciar',
+    'sin-compatibles': 'Ningún paso recibe lo que sale del último.',
+    'resumen-entra': 'Recibe: {entra}. Entrega: {sale}.',
+    'tipo-imagen': 'imágenes',
+    'tipo-pdf': 'PDF',
+    'tipo-imagen-pdf': 'imágenes o PDF',
+    'forma-juntar': 'junta todo en uno',
+    'subir': 'Subir el paso',
+    'bajar': 'Bajar el paso',
+    'quitar': 'Quitar el paso',
+    'paso-n': 'Paso {n}',
+    'ayuda-flujo': 'Cada archivo recorre los pasos por su cuenta, así que de 10 fotos salen 10 resultados. Un paso que «junta todo en uno» (como Unir en un solo PDF) espera a que lleguen todos. Lo que lee un paso, como el texto de un QR, viaja con el archivo hasta el final: por eso el paso Imagen a PDF puede escribirlo al pie.',
+    'titulo-guardados': 'Mis flujos',
+    'campo-guardados': 'Flujos guardados',
+    'ninguno-guardado': 'Ninguno todavía',
+    'boton-abrir': 'Abrir',
+    'boton-borrar': 'Borrar',
+    'campo-nombre': 'Nombre para guardar este flujo',
+    'boton-guardar': 'Guardar en este navegador',
+    'boton-exportar': 'Descargar como archivo',
+    'boton-importar': 'Abrir un archivo de flujo',
+    'guardado-ok': 'Guardado: «{nombre}».',
+    'guardado-mal': 'No se pudo guardar (el navegador no deja guardar datos).',
+    'falta-nombre': 'Escribí un nombre para el flujo.',
+    'importado-ok': 'Flujo abierto: {n} pasos.',
+    'importado-omitidos': ' Se omitieron {n} pasos que esta versión no conoce.',
+    'importar-mal': 'Ese archivo no es un flujo de Mini Cookies.',
+    'zona-arrastre': '📂 Arrastrá tus archivos acá o hacé clic para elegirlos',
+    'archivos-n': '{n} archivos listos.',
+    'archivos-ignorados': ' {n} no sirven para el primer paso y se van a saltar.',
+    'boton-ejecutar': 'Ejecutar el flujo',
+    'procesando': 'Procesando {archivo} (paso {paso})…',
+    'preparando': 'Preparando los pasos…',
+    'falta-pasos': 'Agregá al menos un paso.',
+    'falta-archivos': 'Elegí los archivos.',
+    'cadena-rota': 'El paso {n} no recibe lo que entrega el anterior: cambiá el orden o quitalo.',
+    'resultado-n': '✅ Listo: {ok} resultados.',
+    'resultado-cero': 'No salió ningún resultado.',
+    'boton-descargar': 'Descargar',
+    'boton-descargar-zip': 'Descargar todo (.zip)',
+    'fallos-titulo': 'Lo que no pasó:',
+    'fallo-tipo': 'no es un tipo de archivo que reciba el primer paso',
+    'fallo-quitado': 'quitado en el paso {n}',
+    'fallo-paso': 'paso {n}: {error}',
+    'titulo-codigos': 'Códigos encontrados',
+    'sin-codigos': 'sin código',
+    'guia-titulo': 'Cómo usar los flujos',
+    'guia-intro': 'Un flujo es una receta: una lista de herramientas que se aplican una detrás de otra a cada archivo. Sirve cuando tenés muchos archivos que necesitan el mismo tratamiento. Por ejemplo, fotos de facturas que querés recortar, pasar a PDF y, de paso, saber qué dice el QR de cada una. En lugar de abrir tres herramientas y repetir el trabajo con cada foto, armás la cadena una vez y la aplicás a todas.',
+    'guia-paso-1': 'Elegí el primer paso en «Agregar un paso». Ese paso decide qué archivos recibe el flujo: imágenes, PDF o los dos.',
+    'guia-paso-2': 'Agregá los pasos siguientes. La lista solo muestra los que reciben lo que entrega el último, así no se arma una cadena imposible. Ajustá las opciones de cada uno.',
+    'guia-paso-3': 'Arrastrá tus archivos y pulsá «Ejecutar el flujo». Cada archivo recorre los pasos por su cuenta.',
+    'guia-paso-4': 'Descargá el resultado: un archivo si salió uno solo, o un .zip con todos.',
+    'guia-consejo-1': 'El paso «Leer códigos QR y de barras» no cambia el archivo: anota lo que dice el código. Si después hay un paso «Imagen a PDF», ese texto se escribe al pie de la página.',
+    'guia-consejo-2': 'Guardá en «Mis flujos» las cadenas que usás seguido. «Descargar como archivo» te deja llevarlas a otra computadora.',
+    'guia-consejo-3': 'Si una foto no tiene una hoja que recortar, el recorte la deja como está, salvo que elijas quitarla.',
+    'guia-p1': '¿Sale un PDF por imagen o uno con todas?',
+    'guia-r1': 'Uno por imagen. Si querés uno solo, agregá al final el paso «Unir en un solo PDF».',
+    'guia-p2': '¿Qué pasa si un archivo falla?',
+    'guia-r2': 'Los demás siguen. Al terminar, la página dice cuáles no pasaron y en qué paso.',
+    'guia-p3': '¿Dónde quedan guardados mis flujos?',
+    'guia-r3': 'En este navegador: solo los pasos y sus opciones, nunca tus archivos.',
+  },
+  en: {
+    'titulo-pagina': 'Flows: chain tools together for free — Mini Cookies',
+    'meta-descripcion': 'Chain tools and process many files at once: read QR codes, crop documents, compress, rotate and turn into PDF. Free, and nothing is uploaded to a server.',
+    'hero-titulo': 'Flows: chain tools together',
+    'intro': 'Build a chain of steps and apply it to many files at once: what comes out of one step goes into the next.',
+    'titulo-pasos': 'Steps of the flow',
+    'sin-pasos': 'No steps yet. Pick one below or load the example.',
+    'campo-agregar': 'Add a step',
+    'boton-agregar': 'Add',
+    'boton-ejemplo': 'Load the example (QR → crop → PDF)',
+    'boton-limpiar': 'Clear',
+    'sin-compatibles': 'No step takes what the last one produces.',
+    'resumen-entra': 'Takes: {entra}. Produces: {sale}.',
+    'tipo-imagen': 'images',
+    'tipo-pdf': 'PDF',
+    'tipo-imagen-pdf': 'images or PDF',
+    'forma-juntar': 'joins everything into one',
+    'subir': 'Move the step up',
+    'bajar': 'Move the step down',
+    'quitar': 'Remove the step',
+    'paso-n': 'Step {n}',
+    'ayuda-flujo': 'Each file goes through the steps on its own, so 10 photos give 10 results. A step that “joins everything into one” (like Merge into one PDF) waits for all of them. What a step reads, like the text of a QR code, travels with the file to the end: that is why the Image to PDF step can write it at the foot of the page.',
+    'titulo-guardados': 'My flows',
+    'campo-guardados': 'Saved flows',
+    'ninguno-guardado': 'None yet',
+    'boton-abrir': 'Open',
+    'boton-borrar': 'Delete',
+    'campo-nombre': 'Name to save this flow',
+    'boton-guardar': 'Save in this browser',
+    'boton-exportar': 'Download as a file',
+    'boton-importar': 'Open a flow file',
+    'guardado-ok': 'Saved: “{nombre}”.',
+    'guardado-mal': 'Could not save (the browser does not allow storing data).',
+    'falta-nombre': 'Type a name for the flow.',
+    'importado-ok': 'Flow opened: {n} steps.',
+    'importado-omitidos': ' {n} steps this version does not know were skipped.',
+    'importar-mal': 'That file is not a Mini Cookies flow.',
+    'zona-arrastre': '📂 Drag your files here or click to choose them',
+    'archivos-n': '{n} files ready.',
+    'archivos-ignorados': ' {n} do not fit the first step and will be skipped.',
+    'boton-ejecutar': 'Run the flow',
+    'procesando': 'Processing {archivo} (step {paso})…',
+    'preparando': 'Getting the steps ready…',
+    'falta-pasos': 'Add at least one step.',
+    'falta-archivos': 'Choose the files.',
+    'cadena-rota': 'Step {n} does not take what the previous one produces: change the order or remove it.',
+    'resultado-n': '✅ Done: {ok} results.',
+    'resultado-cero': 'No result came out.',
+    'boton-descargar': 'Download',
+    'boton-descargar-zip': 'Download all (.zip)',
+    'fallos-titulo': 'What did not go through:',
+    'fallo-tipo': 'is not a file type the first step takes',
+    'fallo-quitado': 'removed at step {n}',
+    'fallo-paso': 'step {n}: {error}',
+    'titulo-codigos': 'Codes found',
+    'sin-codigos': 'no code',
+    'guia-titulo': 'How to use flows',
+    'guia-intro': 'A flow is a recipe: a list of tools applied one after another to each file. It helps when you have many files that need the same treatment. For example, photos of invoices that you want to crop, turn into PDF and, while you are at it, find out what the QR code on each one says. Instead of opening three tools and repeating the work for every photo, you build the chain once and apply it to all of them.',
+    'guia-paso-1': 'Pick the first step in “Add a step”. That step decides which files the flow takes: images, PDF or both.',
+    'guia-paso-2': 'Add the next steps. The list only shows the ones that take what the last step produces, so you cannot build an impossible chain. Adjust the options of each one.',
+    'guia-paso-3': 'Drag your files in and press “Run the flow”. Each file goes through the steps on its own.',
+    'guia-paso-4': 'Download the result: one file if only one came out, or a .zip with all of them.',
+    'guia-consejo-1': 'The “Read QR and barcodes” step does not change the file: it notes what the code says. If an “Image to PDF” step comes later, that text is written at the foot of the page.',
+    'guia-consejo-2': 'Save the chains you use often in “My flows”. “Download as a file” lets you take them to another computer.',
+    'guia-consejo-3': 'If a photo has no sheet to crop, cropping leaves it as it is, unless you choose to drop it.',
+    'guia-p1': 'Is it one PDF per image or one with all of them?',
+    'guia-r1': 'One per image. If you want a single one, add the “Merge into one PDF” step at the end.',
+    'guia-p2': 'What happens if a file fails?',
+    'guia-r2': 'The others carry on. At the end, the page says which ones did not go through and at which step.',
+    'guia-p3': 'Where are my flows saved?',
+    'guia-r3': 'In this browser: only the steps and their options, never your files.',
+  },
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../generales.html" data-i18n="nav-cat-generales">Herramientas generales</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">Flujos: encadená herramientas</h1>
+  <p data-i18n="intro">Armá una cadena de pasos y aplicala a muchos archivos de una vez: lo que sale de un paso entra al siguiente.</p>
+
+  <div class="panel-herramienta">
+    <h2>
+      <span data-i18n="titulo-pasos">Pasos del flujo</span>
+      <span class="ayuda-tip">
+        <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
+        <span class="ayuda-burbuja" data-i18n="ayuda-flujo">Cada archivo recorre los pasos por su cuenta, así que de 10 fotos salen 10 resultados. Un paso que «junta todo en uno» (como Unir en un solo PDF) espera a que lleguen todos. Lo que lee un paso, como el texto de un QR, viaja con el archivo hasta el final: por eso el paso Imagen a PDF puede escribirlo al pie.</span>
+      </span>
+    </h2>
+    <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
+    <p class="nota-suave" id="sinPasos" data-i18n="sin-pasos">Todavía no hay pasos. Elegí uno abajo o cargá el ejemplo.</p>
+    <p class="nota-suave" id="resumenCadena" hidden></p>
+
+    <div class="controles">
+      <label class="campo">
+        <span data-i18n="campo-agregar">Agregar un paso</span>
+        <select id="selectorModulo"></select>
+      </label>
+      <button type="button" class="boton" id="botonAgregar" data-i18n="boton-agregar">Agregar</button>
+      <button type="button" class="boton secundario" id="botonEjemplo" data-i18n="boton-ejemplo">Cargar el ejemplo (QR → recorte → PDF)</button>
+      <button type="button" class="boton secundario" id="botonLimpiar" data-i18n="boton-limpiar">Vaciar</button>
+    </div>
+    <p class="nota-suave" id="sinCompatibles" data-i18n="sin-compatibles" hidden>Ningún paso recibe lo que sale del último.</p>
+
+    <details class="plegable">
+      <summary data-i18n="titulo-guardados">Mis flujos</summary>
+      <div class="plegable-cuerpo">
+        <div class="controles">
+          <label class="campo">
+            <span data-i18n="campo-guardados">Flujos guardados</span>
+            <select id="selectorGuardados"></select>
+          </label>
+          <button type="button" class="boton secundario" id="botonAbrirGuardado" data-i18n="boton-abrir">Abrir</button>
+          <button type="button" class="boton peligro" id="botonBorrarGuardado" data-i18n="boton-borrar">Borrar</button>
+        </div>
+        <div class="controles">
+          <label class="campo">
+            <span data-i18n="campo-nombre">Nombre para guardar este flujo</span>
+            <input type="text" id="nombreFlujo" maxlength="60">
+          </label>
+          <button type="button" class="boton secundario" id="botonGuardar" data-i18n="boton-guardar">Guardar en este navegador</button>
+        </div>
+        <div class="controles">
+          <button type="button" class="boton secundario" id="botonExportar" data-i18n="boton-exportar">Descargar como archivo</button>
+          <button type="button" class="boton secundario" id="botonImportar" data-i18n="boton-importar">Abrir un archivo de flujo</button>
+          <input type="file" id="entradaFlujo" accept=".json,application/json" hidden>
+        </div>
+        <p class="nota-suave" id="avisoGuardados" hidden></p>
+      </div>
+    </details>
+
+    <div class="zona-arrastre" id="zonaArrastre">
+      <span data-i18n="zona-arrastre">📂 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
+      <input type="file" id="entradaArchivos" multiple hidden>
+    </div>
+    <p class="nota-suave" id="avisoArchivos" hidden></p>
+
+    <div class="controles">
+      <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+    </div>
+    <p class="nota-suave" id="estado" role="status" hidden></p>
+    <progress id="avance" max="1" value="0" hidden></progress>
+
+    <div class="resultado" id="resultado">
+      <p id="resultadoTexto"></p>
+      <div class="controles" id="descargas"></div>
+      <div id="codigos"></div>
+      <div id="fallos"></div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo usar los flujos</h2>
+    <p data-i18n="guia-intro">Un flujo es una receta: una lista de herramientas que se aplican una detrás de otra a cada archivo. Sirve cuando tenés muchos archivos que necesitan el mismo tratamiento. Por ejemplo, fotos de facturas que querés recortar, pasar a PDF y, de paso, saber qué dice el QR de cada una. En lugar de abrir tres herramientas y repetir el trabajo con cada foto, armás la cadena una vez y la aplicás a todas.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Elegí el primer paso en «Agregar un paso». Ese paso decide qué archivos recibe el flujo: imágenes, PDF o los dos.</li>
+      <li data-i18n="guia-paso-2">Agregá los pasos siguientes. La lista solo muestra los que reciben lo que entrega el último, así no se arma una cadena imposible. Ajustá las opciones de cada uno.</li>
+      <li data-i18n="guia-paso-3">Arrastrá tus archivos y pulsá «Ejecutar el flujo». Cada archivo recorre los pasos por su cuenta.</li>
+      <li data-i18n="guia-paso-4">Descargá el resultado: un archivo si salió uno solo, o un .zip con todos.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El paso «Leer códigos QR y de barras» no cambia el archivo: anota lo que dice el código. Si después hay un paso «Imagen a PDF», ese texto se escribe al pie de la página.</li>
+      <li data-i18n="guia-consejo-2">Guardá en «Mis flujos» las cadenas que usás seguido. «Descargar como archivo» te deja llevarlas a otra computadora.</li>
+      <li data-i18n="guia-consejo-3">Si una foto no tiene una hoja que recortar, el recorte la deja como está, salvo que elijas quitarla.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Sale un PDF por imagen o uno con todas?</summary>
+      <p data-i18n="guia-r1">Uno por imagen. Si querés uno solo, agregá al final el paso «Unir en un solo PDF».</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa si un archivo falla?</summary>
+      <p data-i18n="guia-r2">Los demás siguen. Al terminar, la página dice cuáles no pasaron y en qué paso.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Dónde quedan guardados mis flujos?</summary>
+      <p data-i18n="guia-r3">En este navegador: solo los pasos y sus opciones, nunca tus archivos.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/flujos.js"></script>
+<script src="../assets/js/flujos-modulos.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const F = Flujos;
+const CLAVE_ACTUAL = 'flujos-actual';
+const EJEMPLO = [{ id: 'leer-codigos' }, { id: 'recortar-documento' }, { id: 'imagen-a-pdf' }];
+let cadena = [];
+let archivos = [];
+let ocupado = false;
+let urlsDescarga = [];
+
+const idioma = () => idiomaActual();
+const texto = (obj) => obj[idioma()] || obj.es;
+const rellenar = (clave, valores) => Object.entries(valores).reduce((s, [k, v]) => s.split('{' + k + '}').join(v), t(clave));
+
+// ---------- la cadena actual se recuerda en este navegador ----------
+function recordar() { try { localStorage.setItem(CLAVE_ACTUAL, JSON.stringify(cadena)); } catch (e) { /* sin almacenamiento */ } }
+function recuperar() { try { return F.normalizar(JSON.parse(localStorage.getItem(CLAVE_ACTUAL) || '[]')); } catch (e) { return []; } }
+
+// ---------- pasos ----------
+function nombreTipos(tipos) {
+  if (tipos.includes('imagen') && tipos.includes('pdf')) return t('tipo-imagen-pdf');
+  return t(tipos[0] === 'pdf' ? 'tipo-pdf' : 'tipo-imagen');
+}
+
+function campoOpcion(paso, op) {
+  const label = document.createElement('label');
+  label.className = 'campo';
+  const etiqueta = document.createElement('span');
+  etiqueta.textContent = texto(op.etiqueta);
+  let control;
+  if (op.tipo === 'select') {
+    control = document.createElement('select');
+    op.valores.forEach((v) => {
+      const o = document.createElement('option');
+      o.value = v.valor; o.textContent = texto(v);
+      control.appendChild(o);
+    });
+    control.value = paso.opciones[op.id];
+    control.addEventListener('change', () => { paso.opciones[op.id] = control.value; recordar(); });
+  } else if (op.tipo === 'numero') {
+    control = document.createElement('input');
+    control.type = 'number';
+    Object.assign(control, { min: op.min, max: op.max, step: op.paso || 1, value: paso.opciones[op.id] });
+    control.addEventListener('change', () => { paso.opciones = F.normalizar([{ id: paso.id, opciones: { ...paso.opciones, [op.id]: control.value } }])[0].opciones; control.value = paso.opciones[op.id]; recordar(); });
+  } else {
+    control = document.createElement('input');
+    control.type = 'checkbox';
+    control.checked = !!paso.opciones[op.id];
+    control.addEventListener('change', () => { paso.opciones[op.id] = control.checked; recordar(); });
+    // Mismo marcado que las casillas de Rotar imagen: <label class="campo"><span><input> <span>texto</span></span></label>
+    const fila = document.createElement('span');
+    fila.append(control, ' ', etiqueta);
+    label.appendChild(fila);
+    return label;
+  }
+  label.append(etiqueta, control);
+  return label;
+}
+
+function botonPaso(clave, simbolo, accion, desactivado) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'boton secundario chico';
+  b.textContent = simbolo;
+  b.setAttribute('aria-label', t(clave));
+  b.title = t(clave);
+  b.disabled = desactivado || ocupado;
+  b.addEventListener('click', accion);
+  return b;
+}
+
+function pintarPasos() {
+  const lista = $('listaPasos');
+  lista.innerHTML = '';
+  const error = cadena.length ? F.validar(cadena) : null;
+  cadena.forEach((paso, i) => {
+    const m = F.modulo(paso.id);
+    const li = document.createElement('li');
+    li.className = 'paso-flujo' + (error && error.paso === i ? ' con-error' : '');
+    const cabecera = document.createElement('div');
+    cabecera.className = 'paso-cabecera';
+    const titulo = document.createElement('strong');
+    titulo.textContent = `${rellenar('paso-n', { n: i + 1 })} · ${m.icono} ${texto(m.nombre)}` + (m.forma === 'juntar' ? ` (${t('forma-juntar')})` : '');
+    const botones = document.createElement('span');
+    botones.className = 'paso-botones';
+    botones.append(
+      botonPaso('subir', '▲', () => mover(i, -1), i === 0),
+      botonPaso('bajar', '▼', () => mover(i, 1), i === cadena.length - 1),
+      botonPaso('quitar', '✕', () => { cadena.splice(i, 1); cambio(); }),
+    );
+    cabecera.append(titulo, botones);
+    const desc = document.createElement('p');
+    desc.className = 'nota-suave';
+    desc.textContent = texto(m.descripcion);
+    li.append(cabecera, desc);
+    if ((m.opciones || []).length) {
+      const controles = document.createElement('div');
+      controles.className = 'controles';
+      m.opciones.forEach((op) => controles.appendChild(campoOpcion(paso, op)));
+      li.appendChild(controles);
+    }
+    lista.appendChild(li);
+  });
+  $('sinPasos').hidden = cadena.length > 0;
+
+  // Resumen y error de la cadena
+  const resumen = $('resumenCadena');
+  if (error && error.motivo === 'tipo') {
+    resumen.textContent = rellenar('cadena-rota', { n: error.paso + 1 });
+    resumen.classList.add('error'); resumen.hidden = false;
+  } else if (cadena.length) {
+    const sale = F.salidaDe(cadena);
+    resumen.textContent = rellenar('resumen-entra', { entra: nombreTipos(F.entradas(cadena)), sale: nombreTipos([sale]) });
+    resumen.classList.remove('error'); resumen.hidden = false;
+  } else resumen.hidden = true;
+
+  // Solo se ofrecen los módulos que reciben lo que entrega el último paso
+  const selector = $('selectorModulo');
+  const sale = cadena.length && !error ? F.salidaDe(cadena) : null;
+  const opciones = F.compatibles(cadena.length ? sale || '-' : null);
+  selector.innerHTML = '';
+  opciones.forEach((m) => {
+    const o = document.createElement('option');
+    o.value = m.id; o.textContent = `${m.icono} ${texto(m.nombre)}`;
+    selector.appendChild(o);
+  });
+  $('sinCompatibles').hidden = opciones.length > 0 || !cadena.length;
+  selector.disabled = $('botonAgregar').disabled = !opciones.length || ocupado;
+  actualizarArchivos();
+}
+
+function mover(i, d) { const [p] = cadena.splice(i, 1); cadena.splice(i + d, 0, p); cambio(); }
+function cambio() { recordar(); pintarPasos(); limpiarResultado(); }
+function ponerCadena(nueva) { cadena = F.normalizar(nueva); cambio(); }
+
+$('botonAgregar').addEventListener('click', () => {
+  const id = $('selectorModulo').value;
+  if (!id) return;
+  cadena.push(F.normalizar([{ id }])[0]);
+  cambio();
+});
+$('botonEjemplo').addEventListener('click', () => ponerCadena(EJEMPLO));
+$('botonLimpiar').addEventListener('click', () => ponerCadena([]));
+
+// ---------- mis flujos ----------
+function avisoGuardados(msg, error) {
+  const p = $('avisoGuardados');
+  p.textContent = msg; p.hidden = !msg;
+  p.classList.toggle('error', !!error);
+}
+function pintarGuardados() {
+  const s = $('selectorGuardados');
+  const lista = F.guardadas();
+  s.innerHTML = '';
+  if (!lista.length) {
+    const o = document.createElement('option');
+    o.value = ''; o.textContent = t('ninguno-guardado');
+    s.appendChild(o);
+  }
+  lista.forEach((g) => { const o = document.createElement('option'); o.value = g.nombre; o.textContent = g.nombre; s.appendChild(o); });
+  $('botonAbrirGuardado').disabled = $('botonBorrarGuardado').disabled = !lista.length;
+}
+$('botonGuardar').addEventListener('click', () => {
+  const nombre = $('nombreFlujo').value.trim();
+  if (!nombre) { avisoGuardados(t('falta-nombre'), true); return; }
+  if (F.guardar(nombre, cadena)) { avisoGuardados(rellenar('guardado-ok', { nombre })); pintarGuardados(); $('selectorGuardados').value = nombre; }
+  else avisoGuardados(t('guardado-mal'), true);
+});
+$('botonAbrirGuardado').addEventListener('click', () => {
+  const g = F.guardadas().find((x) => x.nombre === $('selectorGuardados').value);
+  if (g) { ponerCadena(g.cadena); $('nombreFlujo').value = g.nombre; avisoGuardados(''); }
+});
+$('botonBorrarGuardado').addEventListener('click', () => { F.borrar($('selectorGuardados').value); pintarGuardados(); avisoGuardados(''); });
+$('botonExportar').addEventListener('click', () => {
+  const nombre = $('nombreFlujo').value.trim() || 'flujo';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(F.exportar(nombre, cadena));
+  a.download = nombre.replace(/[\\/:*?"<>|]+/g, '-') + '.flujo.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+});
+$('botonImportar').addEventListener('click', () => $('entradaFlujo').click());
+$('entradaFlujo').addEventListener('change', async () => {
+  const f = $('entradaFlujo').files[0];
+  $('entradaFlujo').value = '';
+  if (!f || f.size > 100000) { if (f) avisoGuardados(t('importar-mal'), true); return; }
+  try {
+    const r = F.importar(await f.text());
+    ponerCadena(r.cadena);
+    $('nombreFlujo').value = r.nombre;
+    avisoGuardados(rellenar('importado-ok', { n: r.cadena.length }) + (r.omitidos ? rellenar('importado-omitidos', { n: r.omitidos }) : ''));
+  } catch (e) { avisoGuardados(t('importar-mal'), true); }
+});
+
+// ---------- archivos ----------
+function actualizarArchivos() {
+  const aviso = $('avisoArchivos');
+  const entra = cadena.length && !F.validar(cadena) ? F.entradas(cadena) : null;
+  const sirven = entra ? archivos.filter((a) => entra.includes(F.tipoDeArchivo(a))).length : archivos.length;
+  aviso.hidden = !archivos.length;
+  aviso.textContent = archivos.length ? rellenar('archivos-n', { n: archivos.length }) + (archivos.length - sirven ? rellenar('archivos-ignorados', { n: archivos.length - sirven }) : '') : '';
+  $('entradaArchivos').accept = entra ? entra.map((x) => (x === 'pdf' ? '.pdf,application/pdf' : 'image/*')).join(',') : 'image/*,.pdf,application/pdf';
+  $('botonEjecutar').disabled = ocupado || !cadena.length || !archivos.length || !!F.validar(cadena);
+}
+conectarZonaArrastre($('zonaArrastre'), $('entradaArchivos'), (lista) => {
+  if (ocupado) return;
+  archivos = lista;
+  limpiarResultado();
+  actualizarArchivos();
+});
+
+// ---------- ejecutar ----------
+function limpiarResultado() {
+  urlsDescarga.forEach((u) => URL.revokeObjectURL(u));
+  urlsDescarga = [];
+  $('resultado').classList.remove('visible');
+}
+
+function enlaceDescarga(blob, nombre, clave) {
+  const a = document.createElement('a');
+  a.className = 'boton';
+  a.href = URL.createObjectURL(blob);
+  urlsDescarga.push(a.href);
+  a.download = nombre;
+  a.textContent = clave === 'boton-descargar' ? `${t(clave)}: ${nombre}` : t(clave);
+  return a;
+}
+
+function textoFallo(f) {
+  if (f.codigo === 'tipo') return t('fallo-tipo');
+  if (f.codigo === 'quitado') return rellenar('fallo-quitado', { n: f.paso + 1 });
+  return rellenar('fallo-paso', { n: f.paso + 1, error: f.error });
+}
+
+function ocupar(si) {
+  ocupado = si;
+  document.querySelectorAll('.panel-herramienta button, .panel-herramienta select, .panel-herramienta input').forEach((c) => {
+    if (c.id !== 'entradaArchivos') c.disabled = si;
+  });
+  if (!si) { pintarPasos(); pintarGuardados(); }
+}
+
+$('botonEjecutar').addEventListener('click', async () => {
+  if (!cadena.length) { mostrarEstado(t('falta-pasos')); return; }
+  if (!archivos.length) { mostrarEstado(t('falta-archivos')); return; }
+  limpiarResultado();
+  ocupar(true);
+  const avance = $('avance');
+  avance.hidden = false; avance.removeAttribute('value');
+  mostrarEstado(t('preparando'));
+  try {
+    const { resultados, fallos } = await F.ejecutar(cadena, archivos, {
+      alAvanzar: ({ hechos, total, archivo, paso }) => {
+        if (total) { avance.max = total; avance.value = hechos; }
+        mostrarEstado(rellenar('procesando', { archivo: archivo || '…', paso: paso + 1 }));
+      },
+    });
+    pintarResultado(resultados, fallos);
+    mostrarEstado('');
+  } catch (e) {
+    mostrarEstado(e.codigo === 'tipo' ? rellenar('cadena-rota', { n: e.paso + 1 }) : detalleError(e), true);
+  } finally {
+    avance.hidden = true;
+    ocupar(false);
+  }
+});
+
+function mostrarEstado(msg, error) {
+  const p = $('estado');
+  p.textContent = msg; p.hidden = !msg;
+  p.classList.toggle('error', !!error);
+}
+
+async function pintarResultado(resultados, fallos) {
+  $('resultadoTexto').textContent = resultados.length ? rellenar('resultado-n', { ok: resultados.length }) : t('resultado-cero');
+  const descargas = $('descargas');
+  descargas.innerHTML = '';
+  if (resultados.length === 1) descargas.appendChild(enlaceDescarga(resultados[0].blob, resultados[0].nombre, 'boton-descargar'));
+  else if (resultados.length > 1) {
+    const zip = await LoteArchivos.zipDeResultados(resultados.map((r) => ({ ok: true, nombre: r.nombre, blob: r.blob })));
+    descargas.appendChild(enlaceDescarga(zip, nombreConFecha('flujo', 'zip'), 'boton-descargar-zip'));
+  }
+
+  // Lo que leyó el paso de códigos, archivo por archivo (texto de afuera: siempre con textContent)
+  const codigos = $('codigos');
+  codigos.innerHTML = '';
+  if (cadena.some((p) => p.id === 'leer-codigos') && resultados.length) {
+    const h = document.createElement('h3');
+    h.textContent = t('titulo-codigos');
+    const ul = document.createElement('ul');
+    resultados.forEach((r) => {
+      const li = document.createElement('li');
+      const lista = (r.datos.codigos || []).map((c) => c.texto);
+      li.textContent = `${r.nombre}: ${lista.length ? lista.join(' · ') : t('sin-codigos')}`;
+      ul.appendChild(li);
+    });
+    codigos.append(h, ul);
+  }
+
+  const zonaFallos = $('fallos');
+  zonaFallos.innerHTML = '';
+  if (fallos.length) {
+    const p = document.createElement('p');
+    p.textContent = t('fallos-titulo');
+    const ul = document.createElement('ul');
+    fallos.forEach((f) => { const li = document.createElement('li'); li.textContent = `${f.nombre}: ${textoFallo(f)}`; ul.appendChild(li); });
+    zonaFallos.append(p, ul);
+  }
+  $('resultado').classList.add('visible');
+}
+
+// ---------- arranque ----------
+// idioma.js se carga después de este script: t() existe recién cuando terminó de cargar la página.
+document.addEventListener('DOMContentLoaded', () => {
+  cadena = recuperar();
+  pintarPasos();
+  pintarGuardados();
+});
+document.addEventListener('cambioIdioma', () => { pintarPasos(); pintarGuardados(); });
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
