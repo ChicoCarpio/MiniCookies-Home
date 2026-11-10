@@ -33,7 +33,7 @@ window.i18nPagina = {
     'bajar': 'Bajar el paso',
     'quitar': 'Quitar el paso',
     'paso-n': 'Paso {n}',
-    'ayuda-flujo': 'Cada archivo recorre los pasos por su cuenta, así que de 10 fotos salen 10 resultados. Un paso que «junta todo en uno» (como Unir en un solo PDF) espera a que lleguen todos. Lo que lee un paso, como el texto de un QR, viaja con el archivo hasta el final: por eso el paso Imagen a PDF puede escribirlo al pie.',
+    'ayuda-flujo': 'Cada archivo recorre los pasos por su cuenta, así que de 10 fotos salen 10 resultados. Un paso que «junta todo en uno» (como Unir en un solo PDF) espera a que lleguen todos. Lo que lee un paso, como el texto de un QR, viaja con el archivo hasta el final: por eso el paso Imagen a PDF puede mostrarlo en un cuadro debajo de la imagen.',
     'titulo-guardados': 'Mis flujos',
     'campo-guardados': 'Flujos guardados',
     'ninguno-guardado': 'Ninguno todavía',
@@ -74,7 +74,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Agregá los pasos siguientes. La lista solo muestra los que reciben lo que entrega el último, así no se arma una cadena imposible. Ajustá las opciones de cada uno.',
     'guia-paso-3': 'Arrastrá tus archivos y pulsá «Ejecutar el flujo». Cada archivo recorre los pasos por su cuenta.',
     'guia-paso-4': 'Descargá el resultado: un archivo si salió uno solo, o un .zip con todos.',
-    'guia-consejo-1': 'El paso «Leer códigos QR y de barras» no cambia el archivo: anota lo que dice el código. Si después hay un paso «Imagen a PDF», ese texto se escribe al pie de la página.',
+    'guia-consejo-1': 'El paso «Leer códigos QR y de barras» no cambia el archivo: anota lo que dice el código. Si después hay un paso «Imagen a PDF», ese texto aparece en un cuadro debajo de la imagen.',
     'guia-consejo-2': 'Guardá en «Mis flujos» las cadenas que usás seguido. «Descargar como archivo» te deja llevarlas a otra computadora.',
     'guia-consejo-3': 'Si una foto no tiene una hoja que recortar, el recorte la deja como está, salvo que elijas quitarla.',
     'guia-p1': '¿Sale un PDF por imagen o uno con todas?',
@@ -105,7 +105,7 @@ window.i18nPagina = {
     'bajar': 'Move the step down',
     'quitar': 'Remove the step',
     'paso-n': 'Step {n}',
-    'ayuda-flujo': 'Each file goes through the steps on its own, so 10 photos give 10 results. A step that “joins everything into one” (like Merge into one PDF) waits for all of them. What a step reads, like the text of a QR code, travels with the file to the end: that is why the Image to PDF step can write it at the foot of the page.',
+    'ayuda-flujo': 'Each file goes through the steps on its own, so 10 photos give 10 results. A step that “joins everything into one” (like Merge into one PDF) waits for all of them. What a step reads, like the text of a QR code, travels with the file to the end: that is why the Image to PDF step can show it in a box below the image.',
     'titulo-guardados': 'My flows',
     'campo-guardados': 'Saved flows',
     'ninguno-guardado': 'None yet',
@@ -146,7 +146,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Add the next steps. The list only shows the ones that take what the last step produces, so you cannot build an impossible chain. Adjust the options of each one.',
     'guia-paso-3': 'Drag your files in and press “Run the flow”. Each file goes through the steps on its own.',
     'guia-paso-4': 'Download the result: one file if only one came out, or a .zip with all of them.',
-    'guia-consejo-1': 'The “Read QR and barcodes” step does not change the file: it notes what the code says. If an “Image to PDF” step comes later, that text is written at the foot of the page.',
+    'guia-consejo-1': 'The “Read QR and barcodes” step does not change the file: it notes what the code says. If an “Image to PDF” step comes later, that text appears in a box below the image.',
     'guia-consejo-2': 'Save the chains you use often in “My flows”. “Download as a file” lets you take them to another computer.',
     'guia-consejo-3': 'If a photo has no sheet to crop, cropping leaves it as it is, unless you choose to drop it.',
     'guia-p1': 'Is it one PDF per image or one with all of them?',
@@ -181,7 +181,7 @@ window.i18nPagina = {
       <span data-i18n="titulo-pasos">Pasos del flujo</span>
       <span class="ayuda-tip">
         <button type="button" class="ayuda-boton" data-i18n-attr="aria-label:ayuda-etiqueta">?</button>
-        <span class="ayuda-burbuja" data-i18n="ayuda-flujo">Cada archivo recorre los pasos por su cuenta, así que de 10 fotos salen 10 resultados. Un paso que «junta todo en uno» (como Unir en un solo PDF) espera a que lleguen todos. Lo que lee un paso, como el texto de un QR, viaja con el archivo hasta el final: por eso el paso Imagen a PDF puede escribirlo al pie.</span>
+        <span class="ayuda-burbuja" data-i18n="ayuda-flujo">Cada archivo recorre los pasos por su cuenta, así que de 10 fotos salen 10 resultados. Un paso que «junta todo en uno» (como Unir en un solo PDF) espera a que lleguen todos. Lo que lee un paso, como el texto de un QR, viaja con el archivo hasta el final: por eso el paso Imagen a PDF puede mostrarlo en un cuadro debajo de la imagen.</span>
       </span>
     </h2>
     <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
@@ -260,7 +260,7 @@ window.i18nPagina = {
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
-      <li data-i18n="guia-consejo-1">El paso «Leer códigos QR y de barras» no cambia el archivo: anota lo que dice el código. Si después hay un paso «Imagen a PDF», ese texto se escribe al pie de la página.</li>
+      <li data-i18n="guia-consejo-1">El paso «Leer códigos QR y de barras» no cambia el archivo: anota lo que dice el código. Si después hay un paso «Imagen a PDF», ese texto aparece en un cuadro debajo de la imagen.</li>
       <li data-i18n="guia-consejo-2">Guardá en «Mis flujos» las cadenas que usás seguido. «Descargar como archivo» te deja llevarlas a otra computadora.</li>
       <li data-i18n="guia-consejo-3">Si una foto no tiene una hoja que recortar, el recorte la deja como está, salvo que elijas quitarla.</li>
     </ul>
