@@ -182,6 +182,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -226,14 +227,12 @@ botonGuardar.addEventListener('click', async () => {
   botonGuardar.disabled = true;
   botonGuardar.textContent = t('boton-guardar-procesando');
   try {
-    pdfActual.setTitle(document.getElementById('campoTitulo').value);
-    pdfActual.setAuthor(document.getElementById('campoAutor').value);
-    pdfActual.setSubject(document.getElementById('campoAsunto').value);
-    // Un solo elemento: setKeywords une la lista con espacios y se perderían las comas.
-    const palabrasClave = document.getElementById('campoPalabrasClave').value.trim();
-    pdfActual.setKeywords(palabrasClave ? [palabrasClave] : []);
-
-    pdfActual.setModificationDate(new Date());
+    PdfRetoques.ponerMetadatos(pdfActual, {
+      titulo: document.getElementById('campoTitulo').value,
+      autor: document.getElementById('campoAutor').value,
+      asunto: document.getElementById('campoAsunto').value,
+      palabras: document.getElementById('campoPalabrasClave').value,
+    });
     const bytesFinales = await pdfActual.save();
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
     enlaceDescarga.href = URL.createObjectURL(blob);

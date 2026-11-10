@@ -11,6 +11,7 @@
 // Uso: ArchivoAPdf.formatoDe(archivo) → 'word' | 'excel' | … | null
 //      const bytes = await ArchivoAPdf.convertir(archivo, alAvanzar); // alAvanzar(fracción 0–1)
 //      ArchivoAPdf.EXTENSIONES → '.docx,.xlsx,…' (para el accept del selector)
+//      await ArchivoAPdf.preparar('powerpoint') → carga ese motor sin convertir
 
 (function () {
   const TEXTOS = {
@@ -145,5 +146,9 @@
 
   const EXTENSIONES = Object.values(FORMATOS).flatMap((f) => f.extensiones.map((e) => '.' + e)).join(',');
 
-  window.ArchivoAPdf = { formatoDe, convertir, EXTENSIONES };
+  // preparar(formato): carga el motor de ese formato sin convertir nada (Flujos lo usa para dibujar las
+  // diapositivas como imágenes con el mismo motor y la misma lista de scripts).
+  const preparar = (formato) => FORMATOS[formato].preparar();
+
+  window.ArchivoAPdf = { formatoDe, convertir, preparar, EXTENSIONES };
 })();

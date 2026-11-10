@@ -145,6 +145,7 @@ window.i18nPagina = {
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -181,21 +182,11 @@ botonDividir.addEventListener('click', async () => {
   botonDividir.disabled = true;
   botonDividir.textContent = t('boton-dividir-procesando');
   try {
-    const { PDFDocument } = PDFLib;
-    const bytes = await archivoActual.arrayBuffer();
-    const pdfOrigen = await PDFDocument.load(bytes);
-    const totalPaginas = pdfOrigen.getPageCount();
+    const pdfOrigen = await PDFLib.PDFDocument.load(await archivoActual.arrayBuffer());
+    const partes = await PdfRetoques.dividir(pdfOrigen);
     const zip = new ZipPropio();
-    const cantidadDigitos = String(totalPaginas).length;
-
-    for (let i = 0; i < totalPaginas; i++) {
-      const pdfPagina = await PDFDocument.create();
-      const [pagina] = await pdfPagina.copyPages(pdfOrigen, [i]);
-      pdfPagina.addPage(pagina);
-      const bytesPagina = await pdfPagina.save();
-      const numero = String(i + 1).padStart(cantidadDigitos, '0');
-      zip.file(`pagina-${numero}.pdf`, bytesPagina);
-    }
+    const cantidadDigitos = String(partes.length).length;
+    partes.forEach((bytesPagina, i) => zip.file(`pagina-${String(i + 1).padStart(cantidadDigitos, '0')}.pdf`, bytesPagina));
 
     const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobZip);

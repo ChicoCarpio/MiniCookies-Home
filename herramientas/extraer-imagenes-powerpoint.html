@@ -193,9 +193,7 @@ botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   botonExtraer.textContent = t('boton-extraer-procesando');
   try {
-    const buffer = await FormatosPowerpoint.comoPptx(await archivoActual.arrayBuffer());
-    const comoPptx = new File([buffer], FormatosPowerpoint.sinExtension(archivoActual.name) + '.pptx');
-    const imagenes = await extraerArchivosDeZip(comoPptx, (ruta) => ruta.startsWith('ppt/media/') && esRutaDeImagen(ruta));
+    const imagenes = await imagenesDePowerPoint(archivoActual);   // assets/js/extraer-medios-zip.js
     if (imagenes.length === 0) throw new Error(t('error-sin-imagenes'));
 
     const blobZip = await construirZipDeArchivos(imagenes);

@@ -185,9 +185,7 @@ botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   botonExtraer.textContent = t('boton-extraer-procesando');
   try {
-    const { buffer } = await FormatosWord.leerArchivo(archivoActual);
-    const comoDocx = new File([buffer], FormatosWord.sinExtension(archivoActual.name) + '.docx');
-    const imagenes = await extraerArchivosDeZip(comoDocx, (ruta) => ruta.startsWith('word/media/') && esRutaDeImagen(ruta));
+    const imagenes = await imagenesDeWord(archivoActual);   // assets/js/extraer-medios-zip.js
     if (imagenes.length === 0) throw new Error(t('error-sin-imagenes'));
 
     const blobZip = await construirZipDeArchivos(imagenes);

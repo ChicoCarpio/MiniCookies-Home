@@ -16,6 +16,12 @@
 //   pdf-a-texto         textoDePdf de pdf-texto.js (pdf-texto.html)  pdf -> texto
 //   redimensionar-imagen, convertir-imagen, quitar-metadatos   ImagenBasica (sus 3 páginas)   imagen -> imagen
 //   rotar-pdf, comprimir-pdf, numerar-pdf, marca-agua-pdf      PdfRetoques (sus 4 páginas)    pdf -> pdf
+// Etapa 3 (2026-11-10):
+//   pdf-a-pdfa          pdfa.js (pdf-a-pdfa.html)                     pdf -> pdf
+//   extraer-paginas, dividir-pdf, metadatos-pdf   PdfRetoques (sus páginas)   pdf -> pdf (dividir abre: uno por página)
+//   powerpoint-a-imagenes  motor propio de PowerPoint vía ArchivoAPdf.preparar   documento -> imágenes (abre)
+//   extraer-imagenes-documento  imagenesDeDocumento (extraer-medios-zip.js)    documento -> imágenes (abre)
+//   marca-agua-imagen   MarcaAguaImagen; borde-imagen, redondear-esquinas   ImagenBasica   imagen -> imagen
 //
 // Un módulo que junta (forma 'juntar', como unir-pdf) es el que se usa para unir varias entradas, pero el tramo
 // común acepta cualquier módulo que reciba lo que llega de todas: unir PDF es solo el primero de ese tipo.
@@ -642,6 +648,213 @@
       const pdf = await abrirPdfLib(f);
       await PdfRetoques.marcaDeAgua(pdf, { texto: o.texto, tamanoMaximo: o.tamano, opacidad: o.opacidad / 100, repeticiones: o.repeticiones });
       return fichaPdf(f, await pdf.save());
+    },
+  });
+
+  // ================= Etapa 3 =================
+  const enIdioma = (textos) => textos[(window.idiomaActual && idiomaActual()) === 'en' ? 'en' : 'es'];
+  const fallo = (textos) => new Error(enIdioma(textos));
+  const abrirPdfLibSinMetadatos = async (f) => PDFLib.PDFDocument.load(await f.blob.arrayBuffer(), { updateMetadata: false });
+
+  // ---------- 20. PDF ↔ PDF/A ----------
+  F.registrar({
+    id: 'pdf-a-pdfa',
+    icono: '🗄️',
+    nombre: { es: 'PDF a PDF/A (archivo)', en: 'PDF to PDF/A (archiving)' },
+    descripcion: { es: 'Marca el PDF como PDF/A para guardarlo a largo plazo, o le quita esa marca.', en: 'Marks the PDF as PDF/A for long-term storage, or removes that mark.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [
+      { id: 'accion', tipo: 'select', defecto: 'agregar', etiqueta: { es: 'Qué hacer', en: 'What to do' },
+        valores: [{ valor: 'agregar', es: 'Pasar a PDF/A', en: 'Turn into PDF/A' }, { valor: 'quitar', es: 'Quitar la marca PDF/A', en: 'Remove the PDF/A mark' }] },
+      { id: 'parte', tipo: 'select', defecto: '2', etiqueta: { es: 'Versión', en: 'Version' },
+        valores: [{ valor: '1', es: 'PDF/A-1 (la más estricta)', en: 'PDF/A-1 (strictest)' }, { valor: '2', es: 'PDF/A-2 (recomendada)', en: 'PDF/A-2 (recommended)' },
+          { valor: '3', es: 'PDF/A-3 (permite adjuntos)', en: 'PDF/A-3 (allows attachments)' }] },
+    ],
+    async preparar() { await PDF_LIB(); await js('pdfa.js'); },
+    async ejecutar(f, o) {
+      const pdf = await abrirPdfLibSinMetadatos(f);
+      if (o.accion === 'agregar') await agregarConformidadPdfA(pdf, { parte: o.parte, nivel: 'B' });
+      else quitarConformidadPdfA(pdf);
+      return fichaPdf(f, await pdf.save());
+    },
+  });
+
+  // ---------- 21 a 23. Extraer páginas, dividir, metadatos ----------
+  F.registrar({
+    id: 'extraer-paginas',
+    icono: '✂️',
+    nombre: { es: 'Extraer páginas de PDF', en: 'Extract PDF pages' },
+    descripcion: { es: 'Deja solo las páginas indicadas, en ese orden (por ejemplo 1-3, 5).', en: 'Keeps only the pages given, in that order (for example 1-3, 5).' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [{ id: 'rango', tipo: 'texto', defecto: '1', max: 200, etiqueta: { es: 'Páginas', en: 'Pages' } }],
+    preparar: prepararRetoques,
+    async ejecutar(f, o) {
+      const pdf = await abrirPdfLib(f);
+      let indices;
+      try {
+        indices = PdfRetoques.indicesDeRango(o.rango, pdf.getPageCount());
+      } catch (e) {
+        if (e.codigo === 'rango') throw fallo({ es: `«${e.trozo}» no existe: el PDF tiene ${e.max} páginas`, en: `“${e.trozo}” does not exist: the PDF has ${e.max} pages` });
+        if (e.codigo) throw fallo({ es: `no entiendo las páginas «${o.rango}» (ejemplo: 1-3, 5)`, en: `cannot read the pages “${o.rango}” (example: 1-3, 5)` });
+        throw e;
+      }
+      return fichaPdf(f, await (await PdfRetoques.extraerPaginas(pdf, indices)).save());
+    },
+  });
+
+  F.registrar({
+    id: 'dividir-pdf',
+    icono: '📄',
+    nombre: { es: 'Dividir PDF (un PDF por página)', en: 'Split PDF (one PDF per page)' },
+    descripcion: { es: 'Separa cada página en su propio PDF; cada una sigue el flujo por su cuenta.', en: 'Puts each page in its own PDF; each one goes on through the flow on its own.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'abrir',
+    opciones: [],
+    preparar: prepararRetoques,
+    async ejecutar(f) {
+      const partes = await PdfRetoques.dividir(await abrirPdfLib(f));
+      const ancho = String(partes.length).length;
+      return partes.map((bytes, i) => ({ ...fichaPdf(f, bytes), datos: { ...f.datos }, nombre: `${F.base(f.nombre)}-pagina-${String(i + 1).padStart(ancho, '0')}.pdf` }));
+    },
+  });
+
+  F.registrar({
+    id: 'metadatos-pdf',
+    icono: '🏷️',
+    nombre: { es: 'Metadatos del PDF', en: 'PDF metadata' },
+    descripcion: { es: 'Pone título, autor, asunto o palabras clave. Un campo vacío deja lo que el PDF ya tenía.', en: 'Sets title, author, subject or keywords. An empty field keeps what the PDF already had.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [
+      { id: 'titulo', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Título', en: 'Title' } },
+      { id: 'autor', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Autor', en: 'Author' } },
+      { id: 'asunto', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Asunto', en: 'Subject' } },
+      { id: 'palabras', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Palabras clave', en: 'Keywords' } },
+    ],
+    preparar: prepararRetoques,
+    async ejecutar(f, o) {
+      const pdf = await abrirPdfLibSinMetadatos(f);
+      const campos = {};
+      for (const k of ['titulo', 'autor', 'asunto', 'palabras']) if (o[k].trim()) campos[k] = o[k].trim();
+      PdfRetoques.ponerMetadatos(pdf, campos);
+      return fichaPdf(f, await pdf.save());
+    },
+  });
+
+  // ---------- 24. PowerPoint a imágenes ----------
+  F.registrar({
+    id: 'powerpoint-a-imagenes',
+    icono: '🖼️',
+    nombre: { es: 'PowerPoint a imágenes', en: 'PowerPoint to images' },
+    descripcion: { es: 'Dibuja cada diapositiva como imagen PNG; cada una sigue el flujo por su cuenta.', en: 'Draws each slide as a PNG image; each one goes on through the flow on its own.' },
+    entra: ['documento'], sale: 'imagen', forma: 'abrir',
+    opciones: [],
+    async preparar() { await PDF_LIB(); await ArchivoAPdf.preparar('powerpoint'); },
+    async ejecutar(f) {
+      const archivo = comoArchivo(f);
+      if (ArchivoAPdf.formatoDe(archivo) !== 'powerpoint') throw fallo({ es: 'no es una presentación (.pptx, .ppt u .odp)', en: 'not a presentation (.pptx, .ppt or .odp)' });
+      const imagenes = await renderizarDiapositivasComoImagenes(archivo, document.createElement('canvas'), null, { conImagenes: true });
+      const ancho = String(imagenes.length).length;
+      return imagenes.map((img, i) => {
+        if (img.url) URL.revokeObjectURL(img.url);
+        return { ...f, datos: { ...f.datos }, blob: img.png, tipo: 'imagen', nombre: `${F.base(f.nombre)}-diapositiva-${String(i + 1).padStart(ancho, '0')}.png` };
+      });
+    },
+  });
+
+  // ---------- 25. Extraer las imágenes de un documento ----------
+  // Solo las que el navegador sabe abrir: EMF, WMF, TIFF o SVG no podrían seguir por los pasos de imagen.
+  const TIPO_POR_EXTENSION = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', jfif: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp', webp: 'image/webp' };
+  F.registrar({
+    id: 'extraer-imagenes-documento',
+    icono: '🧩',
+    nombre: { es: 'Extraer imágenes de documentos', en: 'Extract images from documents' },
+    descripcion: { es: 'Saca las fotos que llevan adentro un Word, Excel, PowerPoint o EPUB; cada una sigue el flujo por su cuenta.', en: 'Takes out the pictures inside a Word, Excel, PowerPoint or EPUB file; each one goes on through the flow on its own.' },
+    entra: ['documento'], sale: 'imagen', forma: 'abrir',
+    opciones: [],
+    async preparar() { await js('zip-propio.js'); await js('formatos-word.js'); await js('formatos-powerpoint.js'); await js('extraer-medios-zip.js'); },
+    async ejecutar(f) {
+      let imagenes;
+      try {
+        imagenes = await imagenesDeDocumento(comoArchivo(f));
+      } catch (e) {
+        if (e.codigo === 'formato') throw fallo({ es: 'no es un Word, Excel, PowerPoint ni EPUB', en: 'not a Word, Excel, PowerPoint or EPUB file' });
+        throw e;
+      }
+      return imagenes
+        .map((i) => ({ i, tipo: TIPO_POR_EXTENSION[((/\.([^.]+)$/.exec(i.nombre) || [])[1] || '').toLowerCase()] }))
+        .filter((x) => x.tipo)
+        .map(({ i, tipo }) => ({ ...f, datos: { ...f.datos }, blob: new Blob([i.blob], { type: tipo }), tipo: 'imagen', nombre: `${F.base(f.nombre)}-${i.nombre}` }));
+    },
+  });
+
+  // ---------- 26 a 28. Marca de agua, borde y esquinas de imagen ----------
+  const POSICIONES = [
+    { valor: 'repartida', es: 'Repartida por toda la imagen', en: 'Spread over the whole image' },
+    { valor: 'arriba-izquierda', es: 'Arriba a la izquierda', en: 'Top left' }, { valor: 'arriba-centro', es: 'Arriba al centro', en: 'Top center' },
+    { valor: 'arriba-derecha', es: 'Arriba a la derecha', en: 'Top right' }, { valor: 'centro-izquierda', es: 'Al centro a la izquierda', en: 'Middle left' },
+    { valor: 'centro-centro', es: 'En el centro', en: 'Center' }, { valor: 'centro-derecha', es: 'Al centro a la derecha', en: 'Middle right' },
+    { valor: 'abajo-izquierda', es: 'Abajo a la izquierda', en: 'Bottom left' }, { valor: 'abajo-centro', es: 'Abajo al centro', en: 'Bottom center' },
+    { valor: 'abajo-derecha', es: 'Abajo a la derecha', en: 'Bottom right' },
+  ];
+  // Dibuja en un lienzo nuevo con `dibujar(lienzo, mapa)` y guarda en el formato de la imagen (o el pedido).
+  async function retocarImagen(f, dibujar, tipoFijo) {
+    const mapa = await createImageBitmap(f.blob);   // aplica la orientación EXIF de las fotos de celular
+    try {
+      const lienzo = document.createElement('canvas');
+      dibujar(lienzo, mapa);
+      const tipo = tipoFijo || ImagenBasica.formatoDeSalida(f.blob.type);
+      return { ...f, blob: await aBlob(lienzo, tipo, 0.92), nombre: conExtension(f.nombre, tipo) };
+    } finally { mapa.close(); }
+  }
+
+  F.registrar({
+    id: 'marca-agua-imagen',
+    icono: '💧',
+    nombre: { es: 'Marca de agua en imagen', en: 'Watermark on image' },
+    descripcion: { es: 'Escribe un texto semitransparente sobre la imagen, en una posición o repartido.', en: 'Writes a semi-transparent text over the image, in one place or spread out.' },
+    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    opciones: [
+      { id: 'texto', tipo: 'texto', defecto: 'CONFIDENCIAL', max: 80, etiqueta: { es: 'Texto', en: 'Text' } },
+      { id: 'posicion', tipo: 'select', defecto: 'centro-centro', etiqueta: { es: 'Posición', en: 'Position' }, valores: POSICIONES },
+      { id: 'repeticiones', tipo: 'numero', defecto: 6, min: 1, max: 20, etiqueta: { es: 'Repeticiones (si va repartida)', en: 'Copies (when spread out)' } },
+      { id: 'tamano', tipo: 'numero', defecto: 60, min: 20, max: 150, etiqueta: { es: 'Tamaño de letra', en: 'Font size' } },
+      { id: 'opacidad', tipo: 'numero', defecto: 30, min: 5, max: 100, etiqueta: { es: 'Opacidad (%)', en: 'Opacity (%)' } },
+      { id: 'angulo', tipo: 'numero', defecto: -45, min: -90, max: 90, etiqueta: { es: 'Ángulo (°)', en: 'Angle (°)' } },
+    ],
+    async preparar() { await js('imagen-basica.js'); await js('marca-agua-imagen.js'); },
+    ejecutar(f, o) {
+      return retocarImagen(f, (lienzo, mapa) => MarcaAguaImagen.dibujar(lienzo, mapa, {
+        tipo: 'texto', texto: o.texto, tamano: o.tamano, opacidad: o.opacidad / 100, angulo: o.angulo, posicion: o.posicion, repeticiones: o.repeticiones,
+      }));
+    },
+  });
+
+  F.registrar({
+    id: 'borde-imagen',
+    icono: '🖼️',
+    nombre: { es: 'Agregar borde a la imagen', en: 'Add a border to the image' },
+    descripcion: { es: 'Rodea la imagen con un borde del color y grosor elegidos.', en: 'Surrounds the image with a border of the chosen color and width.' },
+    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    opciones: [
+      { id: 'grosor', tipo: 'numero', defecto: 20, min: 1, max: 200, etiqueta: { es: 'Grosor (px)', en: 'Width (px)' } },
+      { id: 'color', tipo: 'color', defecto: '#ffffff', etiqueta: { es: 'Color', en: 'Color' } },
+    ],
+    async preparar() { await js('imagen-basica.js'); },
+    ejecutar(f, o) {
+      const g = { arriba: o.grosor, derecha: o.grosor, abajo: o.grosor, izquierda: o.grosor };
+      return retocarImagen(f, (lienzo, mapa) => ImagenBasica.dibujarConBorde(lienzo, mapa, g, o.color));
+    },
+  });
+
+  F.registrar({
+    id: 'redondear-esquinas',
+    icono: '⬭',
+    nombre: { es: 'Redondear esquinas', en: 'Round corners' },
+    descripcion: { es: 'Redondea las esquinas (100 % = óvalo o círculo). Sale en PNG para que lo de afuera quede transparente.', en: 'Rounds the corners (100% = oval or circle). Comes out as PNG so the outside stays transparent.' },
+    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    opciones: [{ id: 'radio', tipo: 'numero', defecto: 20, min: 0, max: 100, etiqueta: { es: 'Redondeo (%)', en: 'Rounding (%)' } }],
+    async preparar() { await js('imagen-basica.js'); },
+    ejecutar(f, o) {
+      return retocarImagen(f, (lienzo, mapa) => ImagenBasica.dibujarRedondeada(lienzo, mapa, o.radio), 'image/png');
     },
   });
 })();

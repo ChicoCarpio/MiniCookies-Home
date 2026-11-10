@@ -411,10 +411,10 @@ function campoOpcion(paso, op) {
     op.valores.forEach((v) => { const o = el('option', '', texto(v)); o.value = v.valor; control.appendChild(o); });
     control.value = paso.opciones[op.id];
     control.addEventListener('change', () => { paso.opciones[op.id] = control.value; recordar(); });
-  } else if (op.tipo === 'texto') {
+  } else if (op.tipo === 'texto' || op.tipo === 'color') {
     control = document.createElement('input');
-    control.type = 'text';
-    control.maxLength = op.max || 200;
+    control.type = op.tipo === 'color' ? 'color' : 'text';
+    if (op.tipo === 'texto') control.maxLength = op.max || 200;
     control.value = paso.opciones[op.id];
     control.addEventListener('change', () => {
       paso.opciones = F.normalizar([{ id: paso.id, opciones: { ...paso.opciones, [op.id]: control.value } }]).entradas[0][0].opciones;
