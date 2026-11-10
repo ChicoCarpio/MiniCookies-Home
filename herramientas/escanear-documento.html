@@ -16,11 +16,14 @@
 <script>
 window.i18nPagina = {
   es: {
-    'inicio-texto': 'Para escanear, permití el acceso a la cámara o elegí fotos que ya tengas.',
-    'boton-activar': '📷 Activar la cámara',
+    'inicio-texto': 'Elegí fotos que ya tengas o abrí la cámara para escanear.',
+    'boton-activar': '📷 Abrir la cámara',
     'cambiar-camara': 'Cambiar de cámara',
     'boton-galeria': 'Elegir fotos',
-    'ver-documento': 'Ver la última página',
+    'ver-documento': 'Ver las páginas',
+    'boton-imprimir': '🖨️ Imprimir',
+    'boton-volver': 'Volver a la cámara',
+    'error-imprimir': 'No se pudo imprimir',
     'pestana-recorte': 'Recorte',
     'pestana-resultado': 'Resultado',
     'boton-repetir': '✕ Repetir',
@@ -86,7 +89,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.',
     'guia-paso-2': 'Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.',
     'guia-paso-3': 'Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.',
-    'guia-paso-4': 'Tocá «Usar» y seguí con la próxima hoja. Para volver a ver una página aprobada, tocá la miniatura de la derecha o cualquier página de la lista. Debajo de la cámara podés ordenarlas y elegir el tamaño; después descargá el PDF o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.',
+    'guia-paso-4': 'Tocá «Usar» y seguí con la próxima hoja. Para ver lo que llevás, tocá la miniatura de la derecha: aparecen todas las páginas en mosaico. Arrastralas (o usá ◀ ▶) para ordenarlas, tocá una para verla en grande, elegí el tamaño y descargá el PDF, imprimilo o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.',
     'guia-consejos': 'Consejos',
     'guia-consejo-1': 'La luz pareja ayuda más que cualquier ajuste: evitá que tu propia sombra caiga sobre la hoja.',
     'guia-consejo-2': '«Blanco y negro» da el archivo más liviano y es el mejor para texto; «Color» sirve si hay sellos, firmas o fotos.',
@@ -103,11 +106,14 @@ window.i18nPagina = {
     'guia-r4': 'Esta herramienta arma el PDF con las páginas como imagen. Para sacarle el texto, pasá el PDF por «OCR de PDF».'
   },
   en: {
-    'inicio-texto': 'To scan, allow camera access or pick photos you already have.',
-    'boton-activar': '📷 Turn on the camera',
+    'inicio-texto': 'Pick photos you already have or open the camera to scan.',
+    'boton-activar': '📷 Open the camera',
     'cambiar-camara': 'Switch camera',
     'boton-galeria': 'Pick photos',
-    'ver-documento': 'See the last page',
+    'ver-documento': 'See the pages',
+    'boton-imprimir': '🖨️ Print',
+    'boton-volver': 'Back to the camera',
+    'error-imprimir': 'Could not print',
     'pestana-recorte': 'Crop',
     'pestana-resultado': 'Result',
     'boton-repetir': '✕ Retake',
@@ -173,7 +179,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Allow camera access when the browser asks. If you would rather use photos you already have, tap 🖼️ next to the shutter; on a computer you can also drag them in.',
     'guia-paso-2': 'Put the page on a surface of a different color and point at it. If there is more than one page, tap the one you want: the camera focuses there. When the green frame surrounds it, tap the shutter.',
     'guia-paso-3': 'The photo appears with the crop. If the corners do not match, drag them or tap the right page; if the photo came out badly, tap “Retake”. In “Result” choose the enhancement (Color, Grayscale or Black and white) and rotate the page if needed.',
-    'guia-paso-4': 'Tap “Use” and go on with the next page. To look at an approved page again, tap the thumbnail on the right or any page in the list. Below the camera you can sort them and choose the size; then download the PDF or tap “Share” to send it by WhatsApp, email or another app.',
+    'guia-paso-4': 'Tap “Use” and go on with the next page. To see what you have so far, tap the thumbnail on the right: all the pages appear as tiles. Drag them (or use ◀ ▶) to sort them, tap one to see it large, choose the size and download the PDF, print it or tap “Share” to send it by WhatsApp, email or another app.',
     'guia-consejos': 'Tips',
     'guia-consejo-1': 'Even light helps more than any adjustment: keep your own shadow off the page.',
     'guia-consejo-2': '“Black and white” gives the lightest file and is best for text; “Color” is for stamps, signatures or photos.',
@@ -221,11 +227,11 @@ window.i18nPagina = {
       <!-- Sin cámara todavía (o sin permiso) -->
       <div class="camara-vacia" id="vistaInicio">
         <p data-i18n="inicio-texto">Para escanear, permití el acceso a la cámara o elegí fotos que ya tengas.</p>
-        <button class="camara-accion principal" id="botonActivar" type="button" data-i18n="boton-activar">📷 Activar la cámara</button>
         <div class="zona-arrastre" id="zonaArrastre">
           <span data-i18n="zona-arrastre">🖼️ Arrastrá tus fotos acá o hacé clic para elegirlas</span>
           <input type="file" id="entradaArchivos" accept="image/*" multiple hidden>
         </div>
+        <button class="camara-accion principal" id="botonActivar" type="button" data-i18n="boton-activar">📷 Abrir la cámara</button>
       </div>
       <!-- En vivo -->
       <video id="video" muted playsinline hidden></video>
@@ -236,7 +242,7 @@ window.i18nPagina = {
       <!-- Una página ya aprobada -->
       <img id="vistaPagina" class="camara-imagen" alt="Página aprobada" data-i18n-attr="alt:pagina-aria" hidden>
       <div class="camara-arriba">
-        <span></span>
+        <button class="camara-boton-redondo" id="botonCerrarCamara" type="button" title="Cerrar" aria-label="Cerrar" data-i18n-attr="title:boton-cerrar;aria-label:boton-cerrar">✕</button>
         <button class="camara-boton-redondo" id="botonCambiarCamara" type="button" hidden title="Cambiar de cámara" aria-label="Cambiar de cámara" data-i18n-attr="title:cambiar-camara;aria-label:cambiar-camara">🔄</button>
       </div>
       <p class="camara-aviso" id="aviso" role="status" hidden></p>
@@ -292,11 +298,12 @@ window.i18nPagina = {
 
   <!-- Documento -->
   <div class="panel-herramienta" id="documento" style="margin-top:20px;">
+    <button type="button" class="boton secundario" id="botonCerrarMosaico" hidden data-i18n="boton-volver" style="margin-bottom:12px;">Volver a la cámara</button>
     <h2 style="margin:0 0 4px;"><span data-i18n="paginas-titulo">Páginas del documento</span> <small id="contadorPaginas" style="font-weight:400; color:var(--texto-suave);"></small></h2>
     <p id="paginasVacio" class="nota-suave" data-i18n="paginas-vacio">Todavía no hay páginas. Capturá o elegí una foto para empezar.</p>
     <p id="mensajeError" class="nota-suave error" hidden></p>
     <div id="envoltorioBarraOrden"></div>
-    <div class="contenedor-miniaturas" id="gridPaginas"></div>
+    <div class="contenedor-miniaturas vista-grid" id="gridPaginas"></div>
     <div class="controles">
       <label class="campo">
         <span data-i18n="campo-tamano">Tamaño de página del PDF</span>
@@ -308,6 +315,7 @@ window.i18nPagina = {
         </select>
       </label>
       <button class="boton" id="botonPdf" type="button" disabled data-i18n="boton-pdf">⬇️ Descargar PDF</button>
+      <button class="boton secundario" id="botonImprimir" type="button" disabled data-i18n="boton-imprimir">🖨️ Imprimir</button>
       <button class="boton secundario" id="botonCompartir" type="button" disabled hidden data-i18n="boton-compartir">📤 Compartir</button>
     </div>
     <div class="resultado" id="resultadoPdf"><span data-i18n="resultado-listo">✅ PDF descargado.</span></div>
@@ -323,7 +331,7 @@ window.i18nPagina = {
       <li data-i18n="guia-paso-1">Permití el acceso a la cámara cuando el navegador lo pida. Si preferís usar fotos que ya tenés, tocá 🖼️ al lado del obturador; en la computadora también podés arrastrarlas.</li>
       <li data-i18n="guia-paso-2">Poné la hoja sobre una superficie de otro color y apuntá. Si hay más de una hoja, tocá la que querés: la cámara enfoca ahí. Cuando el marco verde la rodea, tocá el obturador.</li>
       <li data-i18n="guia-paso-3">Aparece la foto con el recorte. Si las esquinas no coinciden, arrastralas o tocá la hoja correcta; si la foto salió mal, tocá «Repetir». En «Resultado» elegí la mejora (Color, Grises o Blanco y negro) y, si hace falta, girá la página.</li>
-      <li data-i18n="guia-paso-4">Tocá «Usar» y seguí con la próxima hoja. Para volver a ver una página aprobada, tocá la miniatura de la derecha o cualquier página de la lista. Debajo de la cámara podés ordenarlas y elegir el tamaño; después descargá el PDF o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.</li>
+      <li data-i18n="guia-paso-4">Tocá «Usar» y seguí con la próxima hoja. Para ver lo que llevás, tocá la miniatura de la derecha: aparecen todas las páginas en mosaico. Arrastralas (o usá ◀ ▶) para ordenarlas, tocá una para verla en grande, elegí el tamaño y descargá el PDF, imprimilo o tocá «Compartir» para mandarlo por WhatsApp, correo u otra aplicación.</li>
     </ol>
     <h3 data-i18n="guia-consejos">Consejos</h3>
     <ul>
@@ -419,14 +427,31 @@ function mostrarError(texto) {
 // inicio: sin cámara (aún no, sin permiso o sin cámara) · camara: en vivo · revision: la foto recién sacada
 // pagina: una página ya aprobada, a pantalla de la app (al cerrar se vuelve a la cámara)
 
+// El panel de páginas (mosaico, orden, tamaño, PDF, compartir, imprimir) es uno solo: dentro de la página normalmente y,
+// en el estado «mosaico», dentro de la app a pantalla completa. Así el orden y el PDF salen siempre de la misma lista.
+const huecoDocumento = document.createComment('documento');
+$('documento').before(huecoDocumento);
+function ponerDocumentoEn(mosaico) {
+  const doc = $('documento');
+  $('botonCerrarMosaico').hidden = !mosaico;
+  doc.classList.toggle('camara-panel-paginas', mosaico);
+  if (mosaico && doc.parentNode !== app) app.appendChild(doc);
+  else if (!mosaico && doc.parentNode === app) huecoDocumento.after(doc);
+}
+
 function estado(nuevo) {
   app.dataset.estado = nuevo;
+  document.documentElement.classList.toggle('camara-completa', nuevo !== 'inicio');   // la app ocupa toda la pantalla; la página de atrás no se desplaza
   const enVivo = nuevo === 'camara', revision = nuevo === 'revision', viendo = nuevo === 'pagina';
+  const mosaico = nuevo === 'mosaico';
+  document.querySelector('.camara-escenario').hidden = mosaico;
   $('vistaInicio').hidden = nuevo !== 'inicio';
+  ponerDocumentoEn(mosaico);
   video.hidden = !enVivo;
   capa.hidden = !enVivo;
   $('botonCambiarCamara').hidden = !enVivo || !cam || cam.cuantas < 2;
-  $('barraCamara').hidden = revision || viendo;
+  $('barraCamara').hidden = !enVivo;
+  $('botonCerrarCamara').hidden = !enVivo;
   $('barraPagina').hidden = !viendo;
   $('chipsPagina').hidden = !viendo;
   $('vistaPagina').hidden = !viendo;
@@ -460,8 +485,6 @@ async function iniciarCamara() {
     cam = await Camara.abrir(video);
     Custos.cargar();   // en segundo plano: mientras no esté, busca el motor clásico
     estado('camara');
-    // En el celular, la app de cámara ocupa la pantalla: se la trae a la vista.
-    if (window.matchMedia('(max-width: 700px)').matches) app.scrollIntoView({ block: 'start', behavior: 'smooth' });
     buclearDeteccion();
   } catch (error) {
     cam = null;
@@ -611,6 +634,19 @@ async function siguienteDeLaCola() {
 conectarZonaArrastre($('zonaArrastre'), $('entradaArchivos'), (archivos) => {
   Custos.cargar();
   cola.push(...archivos.filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(f.name)));
+  siguienteDeLaCola();
+});
+
+// Con la cámara abierta la zona de arrastre está oculta: se puede soltar fotos sobre toda la aplicación.
+function esArchivoDeImagen(f) { return f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(f.name); }
+$('app').addEventListener('dragover', (e) => {
+  if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) e.preventDefault();
+});
+$('app').addEventListener('drop', (e) => {
+  if ($('zonaArrastre').contains(e.target) || !e.dataTransfer || !e.dataTransfer.files.length) return;
+  e.preventDefault();
+  Custos.cargar();
+  cola.push(...Array.from(e.dataTransfer.files).filter(esArchivoDeImagen));
   siguienteDeLaCola();
 });
 $('botonGaleria').addEventListener('click', () => $('entradaArchivos').click());
@@ -878,6 +914,8 @@ function actualizarDocumento() {
   const n = paginas.size;
   $('botonPdf').disabled = n < 1;
   $('botonCompartir').disabled = n < 1;
+  $('botonImprimir').disabled = n < 1;
+  if (n < 1 && app.dataset.estado === 'mosaico') cerrarMosaico();
   pdfListo = null; // cambió el documento: hay que volver a armarlo
   $('paginasVacio').hidden = n > 0;
   $('contadorPaginas').textContent = n === 0 ? '' : n === 1 ? '· ' + t('paginas-contador-uno') : '· ' + t('paginas-contador-varias').replace('{n}', n);
@@ -897,7 +935,7 @@ document.addEventListener('cambioIdioma', () => {
   if (app.dataset.estado === 'pagina') verPagina(paginaVista);
 });
 // --- Visor de las páginas aprobadas ---
-let paginaVista = -1, urlVista = null;
+let paginaVista = -1, urlVista = null, volverAMosaico = false;
 const ordenDePaginas = () => [...gridPaginas.children].map((c) => parseInt(c.dataset.indiceOrden, 10)).filter((id) => paginas.has(id));
 
 function verPagina(indice) {
@@ -911,6 +949,7 @@ function verPagina(indice) {
   $('paginaAnterior').disabled = paginaVista === 0;
   $('paginaSiguiente').disabled = paginaVista === orden.length - 1;
   if (app.dataset.estado !== 'pagina') {
+    volverAMosaico = app.dataset.estado === 'mosaico';
     aviso('');
     estado('pagina');
     app.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -921,6 +960,8 @@ function cerrarVisor() {
   paginaVista = -1;
   if (urlVista) { URL.revokeObjectURL(urlVista); urlVista = null; }
   $('vistaPagina').removeAttribute('src');
+  if (volverAMosaico && paginas.size) { volverAMosaico = false; estado('mosaico'); return; }
+  volverAMosaico = false;
   if (cam) { estado('camara'); buclearDeteccion(); } else estado('inicio');
 }
 
@@ -934,12 +975,14 @@ function quitarPaginaVista() {
 }
 
 // La miniatura de la barra abre la última página, como en la app de cámara del teléfono.
-$('botonDocumento').addEventListener('click', () => verPagina(ordenDePaginas().length - 1));
+$('botonDocumento').addEventListener('click', () => estado('mosaico'));
 $('botonCerrarPagina').addEventListener('click', cerrarVisor);
 $('paginaAnterior').addEventListener('click', () => verPagina(paginaVista - 1));
 $('paginaSiguiente').addEventListener('click', () => verPagina(paginaVista + 1));
 $('botonQuitarPagina').addEventListener('click', quitarPaginaVista);
-$('botonVerTodas').addEventListener('click', () => { cerrarVisor(); $('documento').scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+$('botonVerTodas').addEventListener('click', () => { volverAMosaico = false; if (urlVista) { URL.revokeObjectURL(urlVista); urlVista = null; } estado('mosaico'); });
+function cerrarMosaico() { if (cam) { estado('camara'); buclearDeteccion(); } else estado('inicio'); }
+$('botonCerrarMosaico').addEventListener('click', cerrarMosaico);
 // Tocar una página de la lista (no sus botones) la abre en el visor.
 gridPaginas.addEventListener('click', (e) => {
   if (e.target.closest('button')) return;
@@ -991,6 +1034,40 @@ $('botonPdf').addEventListener('click', () => conBotonOcupado($('botonPdf'), asy
   }
 }));
 
+// Imprimir: se arma una página oculta con las imágenes, en el orden de la lista, y se abre el diálogo de impresión del
+// navegador (en el celular, el del sistema). No depende de que el navegador sepa mostrar PDF dentro de la página.
+$('botonImprimir').addEventListener('click', async () => {
+  const orden = ordenDePaginas();
+  if (!orden.length) return;
+  mostrarError('');
+  const urls = orden.map((id) => URL.createObjectURL(paginas.get(id).blob));
+  const carta = $('tamanoPagina').value.includes('carta');
+  const [ancho, alto] = carta ? ['215.9mm', '279.4mm'] : ['210mm', '297mm'];
+  const margen = /^(a4|carta)$/.test($('tamanoPagina').value) ? '10mm' : '0';
+  const marco = document.createElement('iframe');
+  marco.setAttribute('aria-hidden', 'true');
+  marco.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  document.body.appendChild(marco);
+  const limpiar = () => { marco.remove(); urls.forEach((u) => URL.revokeObjectURL(u)); };
+  try {
+    const d = marco.contentDocument;
+    d.open();
+    d.write('<!doctype html><meta charset="utf-8"><title>' + t('compartir-titulo') + '</title><style>@page{size:' + (carta ? 'Letter' : 'A4') + ';margin:0}'
+      + 'html,body{margin:0}.p{box-sizing:border-box;width:' + ancho + ';height:' + alto + ';padding:' + margen + ';display:flex;align-items:center;justify-content:center;break-after:page;page-break-after:always;overflow:hidden}'
+      + '.p:last-child{break-after:auto;page-break-after:auto}img{max-width:100%;max-height:100%;object-fit:contain}</style>'
+      + urls.map((u) => '<div class="p"><img src="' + u + '"></div>').join(''));
+    d.close();
+    await Promise.all([...d.images].map((i) => i.decode().catch(() => {})));
+    marco.contentWindow.addEventListener('afterprint', limpiar);
+    marco.contentWindow.focus();
+    marco.contentWindow.print();
+    setTimeout(limpiar, 120000);   // por si el navegador no avisa al terminar
+  } catch (error) {
+    limpiar();
+    mostrarError(t('error-imprimir') + ': ' + (error.message || error.name));
+  }
+});
+
 // Compartir abre el menú del sistema (WhatsApp, correo, Drive…), solo donde el navegador sabe
 // compartir archivos (sobre todo en celulares). El PDF va directo del dispositivo a la app elegida.
 const puedeCompartirPdf = (() => {
@@ -1013,6 +1090,13 @@ $('botonCompartir').addEventListener('click', () => conBotonOcupado($('botonComp
 
 $('botonCapturar').addEventListener('click', capturar);
 $('botonActivar').addEventListener('click', iniciarCamara);
+function cerrarCamara() { apagarCamara(); estado('inicio'); }
+$('botonCerrarCamara').addEventListener('click', cerrarCamara);
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const actual = app.dataset.estado;
+  if (actual === 'camara') cerrarCamara(); else if (actual === 'mosaico') cerrarMosaico(); else if (actual === 'pagina') cerrarVisor();
+});
 $('botonCambiarCamara').addEventListener('click', async () => {
   if (!cam) return;
   deteccionPrevia = null;
@@ -1021,7 +1105,6 @@ $('botonCambiarCamara').addEventListener('click', async () => {
 });
 window.addEventListener('pagehide', apagarCamara);
 estado('inicio');
-iniciarCamara();
 </script>
 </body>
 </html>

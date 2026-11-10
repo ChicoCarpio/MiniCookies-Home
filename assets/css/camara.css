@@ -4,11 +4,12 @@
    con assets/js/camara.js.
 
    Es oscuro en los dos temas a propósito, como cualquier app de cámara: los colores van fijos y no
-   con tokens (salvo el acento). No es una capa fija sobre la página: es un bloque alto dentro de
-   ella, así el anuncio sigue en su lugar (regla de Publicidad).
+   con tokens (salvo el acento). En el estado inicio es un bloque compacto dentro de la página; en
+   los demás estados (cámara, revisión, página) es una capa fija a pantalla completa. La página
+   agrega la clase camara-completa a <html> en esos estados para que el fondo no se desplace.
 
    Marcado:
-   <div class="camara-app" data-estado="inicio|camara|revision">
+   <div class="camara-app" data-estado="inicio|camara|revision|pagina|mosaico">
      <div class="camara-cabecera"> .camara-pestanas </div>                opcional
      <div class="camara-escenario"> video / canvas.camara-imagen / canvas.camara-capa
        <div class="camara-arriba"> botones .camara-boton-redondo (solo en vivo) </div>
@@ -227,4 +228,39 @@
   .camara-app { height: calc(100vh - 64px); height: calc(100svh - 64px); min-height: 380px; }
   .camara-obturador { width: 66px; height: 66px; }
   .camara-accion { padding: 0 14px; }
+}
+
+/* Sin cámara ni foto abierta (estado inicio): un panel compacto con la zona de arrastre y el botón de la cámara.
+   En cualquier otro estado la app ocupa toda la pantalla, como una app de cámara. */
+.camara-app[data-estado="inicio"] { height: auto; min-height: 0; }
+.camara-app:not([data-estado="inicio"]) {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  height: 100vh; height: 100dvh;
+  min-height: 0;
+  border-radius: 0;
+}
+html.camara-completa, html.camara-completa body { overflow: hidden; }
+
+/* Estado mosaico: el panel de páginas de la herramienta (miniaturas, orden, tamaño y acciones) dentro de la app a pantalla
+   completa. Usa los colores del sitio (claro u oscuro) y las acciones quedan siempre a la vista al pie. */
+.camara-app > .camara-panel-paginas {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  margin: 0 !important;
+  border: 0;
+  border-radius: 0;
+  padding: 16px;
+  color: var(--texto);
+  -webkit-overflow-scrolling: touch;
+}
+.camara-app > .camara-panel-paginas .controles {
+  position: sticky;
+  bottom: -16px;
+  margin: 16px -16px -16px;
+  padding: 12px 16px;
+  background: var(--superficie);
+  border-top: 1px solid var(--gris-borde);
 }

@@ -511,12 +511,14 @@ Una herramienta que saca fotos con la cámara en vivo y las revisa antes de usar
 app de cámara. Hoy: `herramientas/escanear-documento.html`; después, las demás de la categoría
 Escáner. Piezas: `assets/css/camara.css` + `assets/js/camara.js` (sección 3).
 
-- **Un panel oscuro, no una capa fija.** `.camara-app` es un bloque alto dentro de la página
-  (82 % de la pantalla en PC; casi toda en celular, que se trae a la vista al abrir la cámara). El
-  anuncio queda debajo, en su lugar: la regla de Publicidad se cumple sin excepciones. Es oscuro en
-  los dos temas, como cualquier app de cámara: colores fijos, salvo el acento.
+- **Un panel oscuro; a pantalla completa fuera del inicio (2026-11-09).** En `inicio` `.camara-app` es un
+  bloque compacto dentro de la página (el anuncio queda debajo, en su lugar). En `camara`, `revision` y
+  `pagina` es una capa fija que ocupa toda la pantalla (`position: fixed; inset: 0`); la página agrega la
+  clase `camara-completa` a `<html>` para que el fondo no se desplace. La cámara **no arranca sola**: se
+  abre con el botón y se cierra con ✕ (o Escape). Es oscuro en los dos temas, como cualquier app de
+  cámara: colores fijos, salvo el acento.
 - **Tres estados** en `data-estado`: `inicio` (sin cámara todavía, sin permiso o sin cámara:
-  mensaje, «Activar la cámara» y una `.zona-arrastre` para fotos), `camara` (en vivo) y
+  mensaje, una `.zona-arrastre` para fotos y debajo «Abrir la cámara»), `camara` (en vivo) y
   `revision` (la foto recién sacada **reemplaza** al visor, como en una cámara de verdad) y
   `pagina` (lo ya guardado, abierto desde la `.camara-miniatura` o desde la lista: ✕ · ◀ «Página 2 de 5» ▶
   en una `.camara-navegacion` · 🗑; al cerrar se vuelve a la cámara). En la barra, lo que no es la
