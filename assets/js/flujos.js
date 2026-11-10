@@ -35,7 +35,7 @@
 // `datos` se conserva de paso en paso: así el QR que se leyó en el paso 1 llega al PDF del paso 3.
 //
 // Un módulo: { id, icono, nombre:{es,en}, descripcion:{es,en}, entra:[tipos], sale:tipo|'igual',
-//   forma:'uno'|'abrir'|'juntar', opciones:[{ id, tipo:'select'|'numero'|'casilla'|'texto', etiqueta:{es,en},
+//   forma:'uno'|'abrir'|'juntar', opciones:[{ id, tipo:'select'|'numero'|'casilla'|'texto'|'color', etiqueta:{es,en},
 //   valores:[{ valor, es, en }], defecto, min, max, paso }], preparar() -> Promise (carga lo que necesita),
 //   ejecutar(ficha | fichas, opciones, contexto) -> Promise<ficha | fichas | null>,
 //   terminar() -> Promise (opcional: libera lo que preparar o ejecutar dejaron abierto, p. ej. el motor de OCR) }.
@@ -181,6 +181,7 @@
       let v = dadas && Object.prototype.hasOwnProperty.call(dadas, op.id) ? dadas[op.id] : op.defecto;
       if (op.tipo === 'select' && !op.valores.some((x) => x.valor === v)) v = op.defecto;
       if (op.tipo === 'casilla') v = v === true || v === 'true';
+      if (op.tipo === 'color' && !/^#[0-9a-f]{6}$/i.test(String(v))) v = op.defecto;
       if (op.tipo === 'texto') {
         v = typeof v === 'string' ? v.slice(0, op.max || 200) : op.defecto;
         if (!v.trim()) v = op.defecto;   // vacío: vuelve al texto por defecto

@@ -6,7 +6,9 @@
 //   await ImagenBasica.convertir(fuente, formato, calidad) -> Blob                   convertir-formato-imagen.html
 //   await ImagenBasica.leerExif(archivo) -> { marca, modelo, fecha, orientacion, gps } | null   quitar-metadatos-imagen.html
 //   await ImagenBasica.quitarMetadatos(archivo, fuente, orientacion?) -> Blob        (ídem)
-//   ImagenBasica.formatoDeSalida(tipoMime), ImagenBasica.EXTENSION_FORMATO
+//   ImagenBasica.dibujarConBorde(lienzo, fuente, { arriba, derecha, abajo, izquierda }, color)   agregar-borde.html
+//   ImagenBasica.dibujarRedondeada(lienzo, fuente, porcentaje)                         redondear-esquinas.html
+//   ImagenBasica.formatoDeSalida(tipoMime), ImagenBasica.EXTENSION_FORMATO              (también marca-agua-imagen.html)
 // `fuente` es algo que se puede dibujar en un canvas (img, canvas, ImageBitmap) con su tamaño natural.
 (function () {
   const LIMITE_DIMENSION_PX = 8000;
@@ -255,7 +257,46 @@
     return aBlob(canvas, formatoDeSalida(archivo.type), 0.95);
   }
 
+  // ---------- Borde (agregar-borde.html) ----------
+  // Deja en `lienzo` la imagen con un borde de color; g = { arriba, derecha, abajo, izquierda } en px.
+  function dibujarConBorde(lienzo, fuente, g, color) {
+    lienzo.width = anchoDe(fuente) + g.izquierda + g.derecha;
+    lienzo.height = altoDe(fuente) + g.arriba + g.abajo;
+    const ctx = lienzo.getContext('2d');
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+    ctx.drawImage(fuente, g.izquierda, g.arriba);
+  }
+
+  // ---------- Esquinas redondeadas (redondear-esquinas.html) ----------
+  function trazarRectanguloRedondeado(ctx, x, y, ancho, alto, radio) {
+    ctx.beginPath();
+    ctx.moveTo(x + radio, y);
+    ctx.arcTo(x + ancho, y, x + ancho, y + alto, radio);
+    ctx.arcTo(x + ancho, y + alto, x, y + alto, radio);
+    ctx.arcTo(x, y + alto, x, y, radio);
+    ctx.arcTo(x, y, x + ancho, y, radio);
+    ctx.closePath();
+  }
+
+  // Deja en `lienzo` la imagen con las esquinas recortadas (transparentes): porcentaje 0–100 del radio máximo
+  // (100 = medio lado más corto: óvalo o círculo). El resultado tiene que guardarse en PNG para conservar la transparencia.
+  function dibujarRedondeada(lienzo, fuente, porcentaje) {
+    const ancho = anchoDe(fuente), alto = altoDe(fuente);
+    lienzo.width = ancho;
+    lienzo.height = alto;
+    const ctx = lienzo.getContext('2d');
+    ctx.clearRect(0, 0, ancho, alto);
+    const radio = porcentaje / 100 * Math.min(ancho, alto) / 2;
+    ctx.save();
+    trazarRectanguloRedondeado(ctx, 0, 0, ancho, alto, radio);
+    ctx.clip();
+    ctx.drawImage(fuente, 0, 0);
+    ctx.restore();
+  }
+
   window.ImagenBasica = {
-    escalar, convertir, leerExif, quitarMetadatos, formatoDeSalida, EXTENSION_FORMATO, LIMITE_DIMENSION_PX, LIMITE_MEGAPIXELES,
+    escalar, convertir, leerExif, quitarMetadatos, dibujarConBorde, dibujarRedondeada,
+    formatoDeSalida, EXTENSION_FORMATO, LIMITE_DIMENSION_PX, LIMITE_MEGAPIXELES,
   };
 })();

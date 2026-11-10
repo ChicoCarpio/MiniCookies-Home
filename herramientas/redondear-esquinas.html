@@ -157,6 +157,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/imagen-basica.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -181,32 +182,9 @@ function cargarImagen(archivo) {
   });
 }
 
-function trazarRectanguloRedondeado(ctx, x, y, ancho, alto, radio) {
-  ctx.beginPath();
-  ctx.moveTo(x + radio, y);
-  ctx.arcTo(x + ancho, y, x + ancho, y + alto, radio);
-  ctx.arcTo(x + ancho, y + alto, x, y + alto, radio);
-  ctx.arcTo(x, y + alto, x, y, radio);
-  ctx.arcTo(x, y, x + ancho, y, radio);
-  ctx.closePath();
-}
-
 function actualizarVistaPrevia() {
   if (!imagenActual) return;
-  const ancho = imagenActual.naturalWidth;
-  const alto = imagenActual.naturalHeight;
-  vistaPrevia.width = ancho;
-  vistaPrevia.height = alto;
-  contexto.clearRect(0, 0, ancho, alto);
-
-  const porcentaje = parseInt(elRadio.value, 10) / 100;
-  const radio = porcentaje * Math.min(ancho, alto) / 2;
-
-  contexto.save();
-  trazarRectanguloRedondeado(contexto, 0, 0, ancho, alto, radio);
-  contexto.clip();
-  contexto.drawImage(imagenActual, 0, 0);
-  contexto.restore();
+  ImagenBasica.dibujarRedondeada(vistaPrevia, imagenActual, parseInt(elRadio.value, 10));
   resultado.classList.remove('visible');
 }
 

@@ -185,6 +185,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/imagen-basica.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -200,14 +201,9 @@ const enlaceDescarga = document.getElementById('enlaceDescarga');
 let archivoActual = null;
 let imagenActual = null;
 
-// Formato de la imagen descargada: se respetan PNG y WebP (guardan
-// transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
-// sale como PNG: antes todo lo que no era PNG salía como JPG, y la
-// transparencia de un WebP/GIF quedaba pintada de negro.
-const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
-function formatoDeSalida(archivo) {
-  return EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
-}
+// Formato de la imagen descargada y extensiones: en assets/js/imagen-basica.js (PNG, JPG y WebP se respetan).
+const { EXTENSION_FORMATO } = ImagenBasica;
+const formatoDeSalida = (archivo) => ImagenBasica.formatoDeSalida(archivo.type);
 
 
 function cargarImagen(archivo) {
@@ -232,15 +228,7 @@ function gruesos() {
 
 function actualizarVistaPrevia() {
   if (!imagenActual) return;
-  const g = gruesos();
-  const ancho = imagenActual.naturalWidth;
-  const alto = imagenActual.naturalHeight;
-  vistaPrevia.width = ancho + g.izquierda + g.derecha;
-  vistaPrevia.height = alto + g.arriba + g.abajo;
-
-  contexto.fillStyle = elColor.value;
-  contexto.fillRect(0, 0, vistaPrevia.width, vistaPrevia.height);
-  contexto.drawImage(imagenActual, g.izquierda, g.arriba);
+  ImagenBasica.dibujarConBorde(vistaPrevia, imagenActual, gruesos(), elColor.value);
   resultado.classList.remove('visible');
 }
 

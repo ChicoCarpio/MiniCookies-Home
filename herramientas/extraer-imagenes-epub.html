@@ -186,7 +186,7 @@ botonExtraer.addEventListener('click', async () => {
   try {
     // El EPUB no tiene una carpeta fija de imágenes (no está tan estandarizado
     // como .docx/.xlsx/.pptx) — filtramos por extensión en vez de por ruta.
-    const imagenes = await extraerArchivosDeZip(archivoActual, (ruta) => /\.(png|jpe?g|gif|svg|webp|bmp)$/i.test(ruta));
+    const imagenes = await imagenesDeEpub(archivoActual);   // assets/js/extraer-medios-zip.js
     if (imagenes.length === 0) throw new Error(t('error-sin-imagenes'));
 
     const blobZip = await construirZipDeArchivos(imagenes);

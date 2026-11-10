@@ -8,6 +8,9 @@
 //   await PdfRetoques.optimizar(bytes, { calidad, ladoMaximo }, alAvanzar, alGuardar)   optimizar-pdf.html
 //        -> { bytes, procesadas, sinMejora }  (sinMejora: devuelve los bytes originales)
 //   PdfRetoques.calcularFilasColumnas(cantidad) -> { filas, columnas }   cuadrícula de la marca de agua
+//   PdfRetoques.indicesDeRango("1-3, 5", max) -> [0,1,2,4]; await extraerPaginas(pdf, indices) -> PDFDocument   extraer-paginas.html
+//   await PdfRetoques.dividir(pdf) -> [bytes por página]                     dividir-pdf.html
+//   PdfRetoques.ponerMetadatos(pdf, { titulo, autor, asunto, palabras })     editar-metadatos-pdf.html
 // `pdf` es un PDFDocument de pdf-lib ya abierto; quien llama lo abre y lo guarda.
 (function () {
   // ---------- Rotar ----------
@@ -184,6 +187,59 @@
     return { bytes: sinMejora ? new Uint8Array(bytesOriginales) : bytes, procesadas, sinMejora };
   }
 
+  // ---------- Extraer páginas (extraer-paginas.html) ----------
+  // "1-3, 5, 9-7" → índices desde 0, en ese orden (un rango al revés va al revés). Lanza un Error con
+  // `codigo` 'vacio' | 'formato' | 'rango' (y `trozo`, `max`) para que quien llama lo diga en su idioma.
+  function indicesDeRango(texto, maxPagina) {
+    const falla = (codigo, trozo) => Object.assign(new Error(codigo), { codigo, trozo, max: maxPagina });
+    const indices = [];
+    const trozos = String(texto).split(',').map((x) => x.trim()).filter((x) => x !== '');
+    if (trozos.length === 0) throw falla('vacio');
+    for (const trozo of trozos) {
+      const coincidencia = trozo.match(/^(\d+)(?:-(\d+))?$/);
+      if (!coincidencia) throw falla('formato', trozo);
+      const inicio = parseInt(coincidencia[1], 10);
+      const fin = coincidencia[2] ? parseInt(coincidencia[2], 10) : inicio;
+      if (inicio < 1 || fin < 1 || inicio > maxPagina || fin > maxPagina) throw falla('rango', trozo);
+      if (inicio <= fin) {
+        for (let p = inicio; p <= fin; p++) indices.push(p - 1);
+      } else {
+        for (let p = inicio; p >= fin; p--) indices.push(p - 1);
+      }
+    }
+    return indices;
+  }
+
+  // Un PDF nuevo con esas páginas (índices desde 0) de pdfOrigen.
+  async function extraerPaginas(pdfOrigen, indices) {
+    const pdfNuevo = await PDFLib.PDFDocument.create();
+    const paginas = await pdfNuevo.copyPages(pdfOrigen, indices);
+    paginas.forEach((pagina) => pdfNuevo.addPage(pagina));
+    return pdfNuevo;
+  }
+
+  // ---------- Dividir (dividir-pdf.html) ----------
+  // Los bytes de un PDF por página, en orden.
+  async function dividir(pdfOrigen) {
+    const partes = [];
+    for (let i = 0; i < pdfOrigen.getPageCount(); i++) partes.push(await (await extraerPaginas(pdfOrigen, [i])).save());
+    return partes;
+  }
+
+  // ---------- Metadatos (editar-metadatos-pdf.html) ----------
+  // Solo cambia los campos que vienen (un campo ausente queda como estaba). `pdf` se abre con
+  // { updateMetadata: false }: si no, pdf-lib reemplaza Creador y Productor por "pdf-lib".
+  function ponerMetadatos(pdf, { titulo, autor, asunto, palabras } = {}) {
+    if (titulo !== undefined) pdf.setTitle(titulo);
+    if (autor !== undefined) pdf.setAuthor(autor);
+    if (asunto !== undefined) pdf.setSubject(asunto);
+    // Un solo elemento: setKeywords une la lista con espacios y se perderían las comas.
+    if (palabras !== undefined) pdf.setKeywords(palabras.trim() ? [palabras.trim()] : []);
+    pdf.setModificationDate(new Date());
+  }
+
   // calcularFilasColumnas: también la usa la vista previa de marca-de-agua.html (misma cuadrícula que el PDF).
-  window.PdfRetoques = { rotar, numerar, marcaDeAgua, optimizar, calcularFilasColumnas };
+  window.PdfRetoques = {
+    rotar, numerar, marcaDeAgua, optimizar, calcularFilasColumnas, indicesDeRango, extraerPaginas, dividir, ponerMetadatos,
+  };
 })();

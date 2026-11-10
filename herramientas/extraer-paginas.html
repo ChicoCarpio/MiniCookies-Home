@@ -206,6 +206,7 @@ window.i18nPagina = {
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -346,26 +347,16 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
+// La lectura del rango está en assets/js/pdf-retoques.js; acá solo se dice el error en el idioma de la página.
 function analizarRangoPaginas(texto, maxPagina) {
-  const indices = [];
-  const trozos = texto.split(',').map(t => t.trim()).filter(t => t !== '');
-  if (trozos.length === 0) throw new Error(t('error-vacio'));
-
-  for (const trozo of trozos) {
-    const coincidencia = trozo.match(/^(\d+)(?:-(\d+))?$/);
-    if (!coincidencia) throw new Error(t('error-formato').replace('{trozo}', trozo));
-    const inicio = parseInt(coincidencia[1], 10);
-    const fin = coincidencia[2] ? parseInt(coincidencia[2], 10) : inicio;
-    if (inicio < 1 || fin < 1 || inicio > maxPagina || fin > maxPagina) {
-      throw new Error(t('error-rango').replace('{trozo}', trozo).replace('{max}', maxPagina));
-    }
-    if (inicio <= fin) {
-      for (let p = inicio; p <= fin; p++) indices.push(p - 1);
-    } else {
-      for (let p = inicio; p >= fin; p--) indices.push(p - 1);
-    }
+  try {
+    return PdfRetoques.indicesDeRango(texto, maxPagina);
+  } catch (e) {
+    if (e.codigo === 'vacio') throw new Error(t('error-vacio'));
+    if (e.codigo === 'formato') throw new Error(t('error-formato').replace('{trozo}', e.trozo));
+    if (e.codigo === 'rango') throw new Error(t('error-rango').replace('{trozo}', e.trozo).replace('{max}', maxPagina));
+    throw e;
   }
-  return indices;
 }
 
 botonExtraer.addEventListener('click', async () => {
@@ -374,12 +365,8 @@ botonExtraer.addEventListener('click', async () => {
   try {
     const indices = analizarRangoPaginas(rangoPaginas.value, totalPaginas);
 
-    const { PDFDocument } = PDFLib;
-    const bytes = await archivoActual.arrayBuffer();
-    const pdfOrigen = await PDFDocument.load(bytes);
-    const pdfNuevo = await PDFDocument.create();
-    const paginas = await pdfNuevo.copyPages(pdfOrigen, indices);
-    paginas.forEach((pagina) => pdfNuevo.addPage(pagina));
+    const pdfOrigen = await PDFLib.PDFDocument.load(await archivoActual.arrayBuffer());
+    const pdfNuevo = await PdfRetoques.extraerPaginas(pdfOrigen, indices);
 
     const bytesFinales = await pdfNuevo.save();
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
