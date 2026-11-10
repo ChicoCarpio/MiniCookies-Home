@@ -233,6 +233,7 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
+<script src="../assets/js/pdf-a-imagenes.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
@@ -360,26 +361,18 @@ botonAImagenes.addEventListener('click', async () => {
   botonAImagenes.disabled = true;
   progreso.style.display = 'block';
   try {
-    const bytes = await archivoPdfActual.arrayBuffer();
-    const pdf = await abrirPdf(bytes);
     const formato = document.getElementById('formato').value;
     const extension = formato === 'image/png' ? 'png' : 'jpg';
     const escala = parseFloat(document.getElementById('escala').value);
     const zip = new ZipPropio();
-    const cantidadDigitos = String(pdf.numPages).length;
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      progreso.textContent = t('progreso-pagina').replace('{actual}', i).replace('{total}', pdf.numPages);
-      const pagina = await pdf.getPage(i);
-      const viewport = pagina.getViewport({ scale: escala });
-      const canvas = document.createElement('canvas');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
-      const numero = String(i).padStart(cantidadDigitos, '0');
-      zip.file(`pagina-${numero}.${extension}`, blob);
+    const imagenes = await PdfAImagenes.renderizar(archivoPdfActual, { escala, formato, calidad: 0.92 }, (hecha, total) => {
+      progreso.textContent = t('progreso-pagina').replace('{actual}', Math.min(hecha + 1, total)).replace('{total}', total);
+    });
+    const cantidadDigitos = String(imagenes.length).length;
+    for (const imagen of imagenes) {
+      const numero = String(imagen.pagina).padStart(cantidadDigitos, '0');
+      zip.file(`pagina-${numero}.${extension}`, imagen.blob);
     }
 
     progreso.textContent = t('progreso-zip');

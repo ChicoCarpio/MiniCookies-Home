@@ -192,6 +192,7 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
+<script src="../assets/js/pdf-unir.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
@@ -380,9 +381,7 @@ botonUnir.addEventListener('click', async () => {
         agregarPaginaConImagen(pdfFinal, imagenEmbebida, tamanoElegido);
       } else {
         const bytes = await (tipo === 'convertido' ? pdf : archivo).arrayBuffer();
-        const pdfOrigen = await PDFDocument.load(bytes);
-        const paginas = await pdfFinal.copyPages(pdfOrigen, pdfOrigen.getPageIndices());
-        paginas.forEach((pagina) => pdfFinal.addPage(pagina));
+        await PdfUnir.agregarPdf(pdfFinal, bytes);
       }
     }
 

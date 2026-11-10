@@ -207,6 +207,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/ayuda-tip.js"></script>
+<script src="../assets/js/girar-imagen.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -229,19 +230,17 @@ let imagenActual = null;
 // Los giros de 90° y los volteos se hacen sobre esta copia (no pierden
 // calidad); el ángulo libre se aplica después, siempre desde ella, así que
 // moverlo muchas veces no degrada la imagen.
-const lienzoBase = document.createElement('canvas');
-const contextoBase = lienzoBase.getContext('2d');
+let lienzoBase = document.createElement('canvas');
 let anguloLibre = 0;
 
 // Formato de la imagen descargada: se respetan PNG y WebP (guardan
 // transparencia) y JPG. Cualquier otro formato de entrada (GIF, BMP, SVG...)
 // sale como PNG: antes todo lo que no era PNG salía como JPG, y la
 // transparencia de un WebP/GIF quedaba pintada de negro.
+// La regla del formato vive en girar-imagen.js.
 const EXTENSION_FORMATO = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
 function formatoDeSalida(archivo) {
-  const formato = EXTENSION_FORMATO[archivo.type] ? archivo.type : 'image/png';
-  // Un JPG no tiene transparencia: con esquinas transparentes sale en PNG.
-  return formato === 'image/jpeg' && quedanEsquinasTransparentes() ? 'image/png' : formato;
+  return GirarImagen.formatoDeSalida(archivo.type, quedanEsquinasTransparentes());
 }
 
 function quedanEsquinasTransparentes() {
@@ -257,40 +256,14 @@ function cargarImagen(archivo) {
   });
 }
 
-// El rectángulo más grande, con los lados derechos, que entra en una imagen
-// de ancho × alto girada `radianes` (para recortar las esquinas vacías).
-function rectanguloSinEsquinas(ancho, alto, radianes) {
-  const seno = Math.abs(Math.sin(radianes)), coseno = Math.abs(Math.cos(radianes));
-  const largo = Math.max(ancho, alto), corto = Math.min(ancho, alto);
-  if (corto <= 2 * seno * coseno * largo || Math.abs(seno - coseno) < 1e-10) {
-    // Toca los dos lados largos: medio lado corto en cada dirección.
-    const medio = corto / 2;
-    return ancho >= alto ? [medio / seno, medio / coseno] : [medio / coseno, medio / seno];
-  }
-  const coseno2 = coseno * coseno - seno * seno;
-  return [(ancho * coseno - alto * seno) / coseno2, (alto * coseno - ancho * seno) / coseno2];
-}
-
 function dibujar() {
-  const ancho = lienzoBase.width, alto = lienzoBase.height;
-  const radianes = anguloLibre * Math.PI / 180;
-  const seno = Math.abs(Math.sin(radianes)), coseno = Math.abs(Math.cos(radianes));
-  let anchoFinal = Math.round(ancho * coseno + alto * seno);
-  let altoFinal = Math.round(ancho * seno + alto * coseno);
-  if (recortarEsquinas.checked && anguloLibre % 90 !== 0) {
-    [anchoFinal, altoFinal] = rectanguloSinEsquinas(ancho, alto, radianes).map((v) => Math.max(1, Math.floor(v)));
-  }
-  vistaPrevia.width = anchoFinal;
-  vistaPrevia.height = altoFinal;
-  if (!esquinasTransparentes.checked) {
-    contexto.fillStyle = colorEsquinas.value;
-    contexto.fillRect(0, 0, anchoFinal, altoFinal);
-  }
-  contexto.save();
-  contexto.translate(anchoFinal / 2, altoFinal / 2);
-  contexto.rotate(radianes);
-  contexto.drawImage(lienzoBase, -ancho / 2, -alto / 2);
-  contexto.restore();
+  // El dibujo lo hace girar-imagen.js; la vista previa solo muestra su resultado.
+  const color = esquinasTransparentes.checked ? undefined : colorEsquinas.value;
+  const esquinas = recortarEsquinas.checked ? 'recortar' : (color ? 'color' : 'transparente');
+  const girado = GirarImagen.anguloLibre(lienzoBase, anguloLibre, { esquinas, color });
+  vistaPrevia.width = girado.width;
+  vistaPrevia.height = girado.height;
+  contexto.drawImage(girado, 0, 0);
   notaPng.hidden = !(archivoActual && archivoActual.type === 'image/jpeg' && quedanEsquinasTransparentes());
   colorEsquinas.disabled = !imagenActual || esquinasTransparentes.checked;
   resultado.classList.remove('visible');
@@ -311,9 +284,10 @@ async function mostrarArchivo(archivo) {
     return;
   }
   imagenActual = await cargarImagen(archivo);
+  lienzoBase = document.createElement('canvas');
   lienzoBase.width = imagenActual.naturalWidth;
   lienzoBase.height = imagenActual.naturalHeight;
-  contextoBase.drawImage(imagenActual, 0, 0);
+  lienzoBase.getContext('2d').drawImage(imagenActual, 0, 0);
   ponerAngulo(0);
   vistaPrevia.style.display = 'block';
   botones.forEach(b => b.disabled = false);
@@ -327,34 +301,15 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Copia la base, le da el tamaño nuevo y la redibuja con la transformación.
-function transformarBase(anchoNuevo, altoNuevo, transformar) {
-  const temporal = document.createElement('canvas');
-  temporal.width = lienzoBase.width;
-  temporal.height = lienzoBase.height;
-  temporal.getContext('2d').drawImage(lienzoBase, 0, 0);
-  lienzoBase.width = anchoNuevo;
-  lienzoBase.height = altoNuevo;
-  contextoBase.save();
-  transformar(contextoBase, temporal);
-  contextoBase.drawImage(temporal, 0, 0);
-  contextoBase.restore();
+// La lógica de giro vive en girar-imagen.js; aquí solo se reemplaza la base.
+function rotar(grados) {
+  lienzoBase = GirarImagen.rotar(lienzoBase, grados);
   dibujar();
 }
 
-function rotar(grados) {
-  transformarBase(lienzoBase.height, lienzoBase.width, (cx, temporal) => {
-    cx.translate(lienzoBase.width / 2, lienzoBase.height / 2);
-    cx.rotate(grados * Math.PI / 180);
-    cx.translate(-temporal.width / 2, -temporal.height / 2);
-  });
-}
-
 function voltear(horizontal) {
-  transformarBase(lienzoBase.width, lienzoBase.height, (cx) => {
-    if (horizontal) { cx.translate(lienzoBase.width, 0); cx.scale(-1, 1); }
-    else { cx.translate(0, lienzoBase.height); cx.scale(1, -1); }
-  });
+  lienzoBase = GirarImagen.voltear(lienzoBase, horizontal);
+  dibujar();
 }
 
 function ponerAngulo(valor) {
