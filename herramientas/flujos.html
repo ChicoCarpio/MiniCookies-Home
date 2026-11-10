@@ -45,7 +45,9 @@ window.i18nPagina = {
     'resumen-entra': 'Entrega: {sale}.',
     'tipo-imagen': 'imágenes',
     'tipo-pdf': 'PDF',
-    'tipo-imagen-pdf': 'imágenes o PDF',
+    'tipo-documento': 'documentos',
+    'tipo-texto': 'texto',
+    'tipo-o': ' o ',
     'tipo-nada': 'nada',
     'forma-juntar': 'junta todo en uno',
     'forma-abrir': 'abre cada archivo en varios',
@@ -96,7 +98,7 @@ window.i18nPagina = {
     'sin-codigos': 'sin código',
     'guia-titulo': 'Cómo usar los flujos',
     'guia-intro': 'Un flujo es una receta: una lista de herramientas que se aplican una detrás de otra a cada archivo. Sirve cuando tenés muchos archivos que necesitan el mismo tratamiento. Por ejemplo, fotos de facturas que querés recortar, pasar a PDF y, de paso, saber qué dice el QR de cada una. Si además tenés facturas que llegaron en PDF, agregás una segunda entrada que pase sus páginas a imágenes, y al final las dos se juntan en un solo PDF.',
-    'guia-paso-1': 'Elegí el primer paso de la «Entrada 1». Ese paso decide qué archivos recibe: imágenes, PDF o los dos.',
+    'guia-paso-1': 'Elegí el primer paso de la «Entrada 1». Ese paso decide qué archivos recibe: imágenes, PDF, documentos (Word, Excel, PowerPoint, EPUB o Markdown) o texto.',
     'guia-paso-2': 'Agregá los pasos siguientes. La lista solo muestra los que reciben lo que entrega el último, así no se arma una cadena imposible. Ajustá las opciones de cada uno.',
     'guia-paso-3': 'Si tenés otra clase de archivos, tocá «Agregar otra entrada» y armale sus pasos. Lo que salga de todas pasa por «Después de juntar las entradas», donde podés unirlo, por ejemplo, en un solo PDF.',
     'guia-paso-4': 'Arrastrá todos tus archivos a la zona (cada entrada toma los de su tipo), pulsá «Ejecutar el flujo» y descargá el resultado: un archivo si salió uno solo, o un .zip con todos.',
@@ -143,7 +145,9 @@ window.i18nPagina = {
     'resumen-entra': 'Produces: {sale}.',
     'tipo-imagen': 'images',
     'tipo-pdf': 'PDF',
-    'tipo-imagen-pdf': 'images or PDF',
+    'tipo-documento': 'documents',
+    'tipo-texto': 'text',
+    'tipo-o': ' or ',
     'tipo-nada': 'nothing',
     'forma-juntar': 'joins everything into one',
     'forma-abrir': 'opens each file into several',
@@ -194,7 +198,7 @@ window.i18nPagina = {
     'sin-codigos': 'no code',
     'guia-titulo': 'How to use flows',
     'guia-intro': 'A flow is a recipe: a list of tools applied one after another to each file. It helps when you have many files that need the same treatment. For example, photos of invoices that you want to crop, turn into PDF and, while you are at it, find out what the QR code on each one says. If you also have invoices that arrived as PDF, you add a second input that turns their pages into images, and at the end both join into a single PDF.',
-    'guia-paso-1': 'Pick the first step of “Input 1”. That step decides which files it takes: images, PDF or both.',
+    'guia-paso-1': 'Pick the first step of “Input 1”. That step decides which files it takes: images, PDF, documents (Word, Excel, PowerPoint, EPUB or Markdown) or text.',
     'guia-paso-2': 'Add the next steps. The list only shows the ones that take what the last step produces, so you cannot build an impossible chain. Adjust the options of each one.',
     'guia-paso-3': 'If you have another kind of file, press “Add another input” and give it its steps. What comes out of all inputs goes through “After the inputs join”, where you can merge it, for example, into one PDF.',
     'guia-paso-4': 'Drag all your files onto the area (each input takes the ones of its type), press “Run the flow” and download the result: one file if only one came out, or a .zip with all of them.',
@@ -317,7 +321,7 @@ window.i18nPagina = {
     <p data-i18n="guia-intro">Un flujo es una receta: una lista de herramientas que se aplican una detrás de otra a cada archivo.</p>
     <h3 data-i18n="guia-pasos">Paso a paso</h3>
     <ol>
-      <li data-i18n="guia-paso-1">Elegí el primer paso de la «Entrada 1». Ese paso decide qué archivos recibe: imágenes, PDF o los dos.</li>
+      <li data-i18n="guia-paso-1">Elegí el primer paso de la «Entrada 1». Ese paso decide qué archivos recibe: imágenes, PDF, documentos (Word, Excel, PowerPoint, EPUB o Markdown) o texto.</li>
       <li data-i18n="guia-paso-2">Agregá los pasos siguientes. La lista solo muestra los que reciben lo que entrega el último, así no se arma una cadena imposible. Ajustá las opciones de cada uno.</li>
       <li data-i18n="guia-paso-3">Si tenés otra clase de archivos, tocá «Agregar otra entrada» y armale sus pasos. Lo que salga de todas pasa por «Después de juntar las entradas», donde podés unirlo, por ejemplo, en un solo PDF.</li>
       <li data-i18n="guia-paso-4">Arrastrá todos tus archivos a la zona (cada entrada toma los de su tipo), pulsá «Ejecutar el flujo» y descargá el resultado: un archivo si salió uno solo, o un .zip con todos.</li>
@@ -350,6 +354,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/archivo-a-pdf.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/ayuda-tip.js"></script>
 <script src="../assets/js/descargar.js"></script>
@@ -384,11 +389,15 @@ const el = (etiqueta, clase, contenido) => { const e = document.createElement(et
 function recordar() { try { localStorage.setItem(CLAVE_ACTUAL, JSON.stringify(flujo)); } catch (e) { /* sin almacenamiento */ } }
 function recuperar() { try { return F.normalizar(JSON.parse(localStorage.getItem(CLAVE_ACTUAL) || '[]')); } catch (e) { return F.normalizar([]); } }
 
+// «imágenes», «imágenes o PDF», «imágenes, PDF o documentos»… en un orden fijo.
+const ORDEN_TIPOS = ['imagen', 'pdf', 'documento', 'texto'];
 function nombreTipos(tipos) {
   if (!tipos || !tipos.length) return t('tipo-nada');
-  if (tipos.includes('imagen') && tipos.includes('pdf')) return t('tipo-imagen-pdf');
-  return t(tipos[0] === 'pdf' ? 'tipo-pdf' : 'tipo-imagen');
+  const nombres = ORDEN_TIPOS.filter((x) => tipos.includes(x)).map((x) => t('tipo-' + x));
+  return nombres.length === 1 ? nombres[0] : nombres.slice(0, -1).join(', ') + t('tipo-o') + nombres[nombres.length - 1];
 }
+// La zona acepta también los documentos que sabe pasar a PDF (lista única en archivo-a-pdf.js).
+$('entradaArchivos').accept += ',' + ArchivoAPdf.EXTENSIONES;
 const varias = () => flujo.entradas.length > 1;
 const errorActual = () => F.validar(flujo);
 
@@ -402,6 +411,15 @@ function campoOpcion(paso, op) {
     op.valores.forEach((v) => { const o = el('option', '', texto(v)); o.value = v.valor; control.appendChild(o); });
     control.value = paso.opciones[op.id];
     control.addEventListener('change', () => { paso.opciones[op.id] = control.value; recordar(); });
+  } else if (op.tipo === 'texto') {
+    control = document.createElement('input');
+    control.type = 'text';
+    control.maxLength = op.max || 200;
+    control.value = paso.opciones[op.id];
+    control.addEventListener('change', () => {
+      paso.opciones = F.normalizar([{ id: paso.id, opciones: { ...paso.opciones, [op.id]: control.value } }]).entradas[0][0].opciones;
+      control.value = paso.opciones[op.id]; recordar();
+    });
   } else if (op.tipo === 'numero') {
     control = document.createElement('input');
     control.type = 'number';

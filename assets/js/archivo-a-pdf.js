@@ -38,8 +38,9 @@
   const cargas = new Map(); // src → promesa: cada script se pide una sola vez
   function cargarScript(src) {
     if (!cargas.has(src)) {
-      // Ya lo puso otro cargador (grafico-suelto.js trae parte del motor de PowerPoint): no repetirlo.
-      if (document.querySelector('script[src="' + src + '"]')) cargas.set(src, Promise.resolve());
+      // Ya lo puso la página u otro cargador (grafico-suelto.js trae parte del motor de PowerPoint; Flujos, sus
+      // módulos): no repetirlo. Se compara la dirección completa (.src), porque la página la escribe relativa.
+      if ([...document.scripts].some((s) => s.src === src)) cargas.set(src, Promise.resolve());
     }
     if (!cargas.has(src)) {
       cargas.set(src, new Promise((resolver, rechazar) => {

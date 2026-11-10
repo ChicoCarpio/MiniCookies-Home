@@ -462,6 +462,18 @@ async function extraerTextoPaginaPdf(pagina) {
   }).join('');
 }
 
+// El texto de todo un PDF (Blob o File), con `separador` entre páginas. Lo usan PDF ↔ Texto y Flujos.
+// Necesita pdfjs.js (abrirPdf). sinTexto: ninguna página trae texto (un escaneo: hace falta OCR).
+async function textoDePdf(archivo, separador) {
+  const pdf = await abrirPdf(await archivo.arrayBuffer());
+  const paginasDeTexto = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const pagina = await pdf.getPage(i);
+    paginasDeTexto.push(await extraerTextoPaginaPdf(pagina));
+  }
+  return { texto: paginasDeTexto.join(separador), sinTexto: paginasDeTexto.every((texto) => !texto.trim()) };
+}
+
 // Párrafos de una página con su tamaño de letra (el mayor de sus renglones):
 // [{ texto, alto }] con el texto de cada párrafo en una sola línea, y las
 // tablas como { tabla: filas, alto }. Un renglón que empieza con viñeta o con

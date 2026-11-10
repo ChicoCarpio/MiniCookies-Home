@@ -257,16 +257,8 @@ function elegirArchivosPdf(listaFileList) {
 
 conectarZonaArrastre(zonaArrastrePdf, entradaPdf, elegirArchivosPdf);
 
-// Un PDF da su texto con una línea separadora entre páginas.
-async function convertirPdfATexto(archivo) {
-  const pdf = await abrirPdf(await archivo.arrayBuffer());
-  const paginasDeTexto = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const pagina = await pdf.getPage(i);
-    paginasDeTexto.push(await extraerTextoPaginaPdf(pagina));
-  }
-  return { texto: paginasDeTexto.join(t('separador-pagina')), sinTexto: paginasDeTexto.every((texto) => !texto.trim()) };
-}
+// Un PDF da su texto con una línea separadora entre páginas (textoDePdf, en pdf-texto.js).
+const convertirPdfATexto = (archivo) => textoDePdf(archivo, t('separador-pagina'));
 
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;

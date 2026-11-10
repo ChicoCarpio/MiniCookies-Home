@@ -187,6 +187,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -220,46 +221,14 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-function calcularX(posicion, width, anchoTexto, margen) {
-  if (posicion.endsWith('-left')) return margen;
-  if (posicion.endsWith('-center')) return width / 2 - anchoTexto / 2;
-  return width - anchoTexto - margen;
-}
-
-function calcularY(posicion, height, margenInferior, margenSuperior) {
-  return posicion.startsWith('top-') ? height - margenSuperior : margenInferior;
-}
-
 botonNumerar.addEventListener('click', async () => {
   botonNumerar.disabled = true;
   botonNumerar.textContent = t('boton-numerar-procesando');
   try {
-    const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
-    const bytes = await archivoActual.arrayBuffer();
-    const pdf = await PDFDocument.load(bytes);
-    const fuente = await pdf.embedFont(StandardFonts.Helvetica);
-    const numeroInicial = parseInt(document.getElementById('numeroInicial').value, 10) || 1;
-    const posicion = document.getElementById('posicion').value;
-    const tamanoFuente = 12;
-    const margen = 30;
-
-    pdf.getPages().forEach((pagina, indice) => {
-      // Posición calculada sobre la página tal como se ve (con /Rotate).
-      const marco = marcoVisualPagina(pagina);
-      const texto = String(numeroInicial + indice);
-      const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
-      const { x, y } = marco.aPagina(
-        calcularX(posicion, marco.ancho, anchoTexto, margen),
-        calcularY(posicion, marco.alto, 20, margen)
-      );
-      pagina.drawText(texto, {
-        x,
-        y,
-        rotate: degrees(marco.rotacion),
-        size: tamanoFuente,
-        font: fuente,
-        color: rgb(0.2, 0.2, 0.2),
-      });
+    const pdf = await PDFLib.PDFDocument.load(await archivoActual.arrayBuffer());
+    await PdfRetoques.numerar(pdf, {
+      inicio: parseInt(document.getElementById('numeroInicial').value, 10) || 1,
+      posicion: document.getElementById('posicion').value,
     });
 
     const bytesFinales = await pdf.save();

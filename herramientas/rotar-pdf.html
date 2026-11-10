@@ -171,6 +171,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -215,15 +216,8 @@ botonRotar.addEventListener('click', async () => {
   botonRotar.disabled = true;
   botonRotar.textContent = t('boton-rotar-procesando');
   try {
-    const { PDFDocument, degrees } = PDFLib;
-    const bytes = await archivoActual.arrayBuffer();
-    const pdf = await PDFDocument.load(bytes);
-    const grados = parseInt(document.getElementById('grados').value, 10);
-
-    pdf.getPages().forEach((pagina) => {
-      const rotacionActual = pagina.getRotation().angle;
-      pagina.setRotation(degrees(rotacionActual + grados));
-    });
+    const pdf = await PDFLib.PDFDocument.load(await archivoActual.arrayBuffer());
+    PdfRetoques.rotar(pdf, parseInt(elGrados.value, 10));
 
     const bytesFinales = await pdf.save();
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
