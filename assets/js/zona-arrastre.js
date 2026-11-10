@@ -18,6 +18,8 @@
 // conectan sus eventos a mano: Enter dispara su propio clic.
 
 function conectarZonaArrastre(zona, entrada, alElegir) {
+  // Una zona creada después de cargar la página (Flujos arma una por entrada) no la vio el recorrido de abajo.
+  if (window.hacerZonaAccesible) window.hacerZonaAccesible(zona);
   zona.addEventListener('click', () => entrada.click());
   entrada.addEventListener('change', () => {
     // Se copia antes de limpiar: vaciar el selector vacía también su lista.
@@ -49,6 +51,7 @@ function conectarZonaArrastre(zona, entrada, alElegir) {
       zona.click();
     });
   }
+  window.hacerZonaAccesible = hacerAccesible;
   function todas() { document.querySelectorAll('.zona-arrastre').forEach(hacerAccesible); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', todas);
   else todas();

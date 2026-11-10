@@ -152,6 +152,7 @@ window.i18nPagina = {
 <script src="../assets/js/vendor.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/pdf-extraer-imagenes.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
@@ -188,113 +189,18 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-function imagenPdfACanvas(imagenPdf) {
-  const { width, height, data, kind, bitmap } = imagenPdf;
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const contexto = canvas.getContext('2d');
-  // PDF.js entrega casi todas las imágenes ya decodificadas como
-  // ImageBitmap (sin "data"): alcanza con dibujarlas.
-  if (bitmap) {
-    contexto.drawImage(bitmap, 0, 0);
-    return canvas;
-  }
-  if (!data) return null;
-  const imageData = contexto.createImageData(width, height);
-  const salida = imageData.data;
-
-  if (kind === pdfjsLib.ImageKind.RGBA_32BPP) {
-    salida.set(data);
-  } else if (kind === pdfjsLib.ImageKind.RGB_24BPP) {
-    for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
-      salida[j] = data[i];
-      salida[j + 1] = data[i + 1];
-      salida[j + 2] = data[i + 2];
-      salida[j + 3] = 255;
-    }
-  } else if (kind === pdfjsLib.ImageKind.GRAYSCALE_1BPP) {
-    const bytesPorFila = Math.ceil(width / 8);
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const byte = data[y * bytesPorFila + (x >> 3)];
-        const bit = (byte >> (7 - (x % 8))) & 1;
-        const valor = bit ? 255 : 0;
-        const j = (y * width + x) * 4;
-        salida[j] = salida[j + 1] = salida[j + 2] = valor;
-        salida[j + 3] = 255;
-      }
-    }
-  } else {
-    return null;
-  }
-
-  contexto.putImageData(imageData, 0, 0);
-  return canvas;
-}
-
 botonExtraer.addEventListener('click', async () => {
   botonExtraer.disabled = true;
   progreso.style.display = 'block';
   sinImagenes.style.display = 'none';
   resultado.classList.remove('visible');
   try {
-    const bytes = await archivoActual.arrayBuffer();
-    const pdf = await abrirPdf(bytes);
+    const imagenes = await PdfExtraerImagenes.extraer(archivoActual, {}, (actual, total) => {
+      progreso.textContent = t('progreso-pagina').replace('{actual}', actual).replace('{total}', total);
+    });
     const zip = new ZipPropio();
-    let contadorImagenes = 0;
-    const imagenesComunesVistas = new Set();
-    const huellasVistas = new Set();
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      progreso.textContent = t('progreso-pagina').replace('{actual}', i).replace('{total}', pdf.numPages);
-      const pagina = await pdf.getPage(i);
-      const listaOperadores = await pagina.getOperatorList();
-      const nombresImagenes = new Set();
-
-      listaOperadores.fnArray.forEach((funcion, indice) => {
-        // Una imagen repetida en mosaico llega como paintImageXObjectRepeat,
-        // también con el nombre del objeto como primer argumento.
-        if (funcion === pdfjsLib.OPS.paintImageXObject || funcion === pdfjsLib.OPS.paintImageXObjectRepeat) {
-          const nombre = listaOperadores.argsArray[indice][0];
-          nombresImagenes.add(nombre);
-        }
-      });
-
-      for (const nombre of nombresImagenes) {
-        // Las imágenes que se repiten en varias páginas (un logo, un fondo)
-        // PDF.js las guarda una sola vez en commonObjs con nombre "g_...":
-        // se extraen una sola vez.
-        const esComun = nombre.startsWith('g_');
-        if (esComun && imagenesComunesVistas.has(nombre)) continue;
-        try {
-          const imagenPdf = await new Promise((resolve, reject) => {
-            const temporizador = setTimeout(() => reject(new Error('tiempo agotado')), 5000);
-            (esComun ? pagina.commonObjs : pagina.objs).get(nombre, (objeto) => {
-              clearTimeout(temporizador);
-              resolve(objeto);
-            });
-          });
-          if (esComun) imagenesComunesVistas.add(nombre);
-          if (!imagenPdf || (!imagenPdf.data && !imagenPdf.bitmap)) continue;
-
-          const canvas = imagenPdfACanvas(imagenPdf);
-          if (!canvas) continue;
-
-          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-          // La misma imagen usada en otra página (antes de que PDF.js la pase
-          // a commonObjs) llega con otro nombre: se descarta por contenido.
-          const huella = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))).join(',');
-          if (huellasVistas.has(huella)) continue;
-          huellasVistas.add(huella);
-          contadorImagenes++;
-          zip.file(`pagina-${i}-imagen-${contadorImagenes}.png`, blob);
-        } catch (errorImagen) {
-          // Se ignora una imagen puntual que no se pudo leer y se sigue con las demás.
-          console.warn('No se pudo extraer una imagen:', errorImagen);
-        }
-      }
-    }
+    for (const imagen of imagenes) zip.file(imagen.nombre, imagen.blob);
+    const contadorImagenes = imagenes.length;
 
     if (contadorImagenes === 0) {
       sinImagenes.style.display = 'block';

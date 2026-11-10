@@ -7,7 +7,12 @@
 //   girar-imagen        GirarImagen (rotar-imagen.html)              imagen -> imagen
 //   comprimir-imagen    ComprimirImagen (comprimir-imagen.html)      imagen -> imagen
 //   imagen-a-pdf        miniaturas.js + pdf-lib (pdf-imagenes.html)  imagen -> pdf (un PDF por imagen; códigos en una tabla debajo)
+//   pdf-a-imagenes      PdfAImagenes (pdf-imagenes.html)             pdf -> imágenes (abre: una por página)
+//   extraer-imagenes-pdf PdfExtraerImagenes (extraer-imagenes.html)  pdf -> imágenes (abre: las incrustadas)
 //   unir-pdf            PdfUnir (unir-pdf.html)                      todos los pdf -> un pdf
+//
+// Un módulo que junta (forma 'juntar', como unir-pdf) es el que se usa para unir varias entradas, pero el tramo
+// común acepta cualquier módulo que reciba lo que llega de todas: unir PDF es solo el primero de ese tipo.
 //
 // Cada módulo carga lo que necesita la primera vez que se usa (preparar). Necesita assets/js/vendor.js antes.
 // Agregar una herramienta: separar su lógica en una pieza compartida de assets/js, usarla en su página y
@@ -293,7 +298,52 @@
     },
   });
 
-  // ---------- 6. Unir PDF ----------
+  // ---------- 6. PDF a imágenes (una por página) ----------
+  const fichaDeImagen = (f, img, nombre) => ({ ...f, datos: { ...f.datos }, blob: img.blob, tipo: 'imagen', nombre });
+  F.registrar({
+    id: 'pdf-a-imagenes',
+    icono: '🖼️',
+    nombre: { es: 'PDF a imágenes (cada página)', en: 'PDF to images (each page)' },
+    descripcion: { es: 'Convierte cada página del PDF en una imagen; cada una sigue el flujo por su cuenta.', en: 'Turns each page of the PDF into an image; each one goes on through the flow on its own.' },
+    entra: ['pdf'], sale: 'imagen', forma: 'abrir',
+    opciones: [
+      { id: 'escala', tipo: 'select', defecto: '2', etiqueta: { es: 'Resolución', en: 'Resolution' },
+        valores: [{ valor: '1.5', es: 'Normal', en: 'Normal' }, { valor: '2', es: 'Alta', en: 'High' }, { valor: '3', es: 'Muy alta', en: 'Very high' }] },
+      { id: 'formato', tipo: 'select', defecto: 'image/png', etiqueta: { es: 'Formato', en: 'Format' },
+        valores: [{ valor: 'image/png', es: 'PNG', en: 'PNG' }, { valor: 'image/jpeg', es: 'JPG', en: 'JPG' }] },
+    ],
+    async preparar() { await js('pdfjs.js'); await js('pdf-a-imagenes.js'); },
+    async ejecutar(f, o) {
+      const paginas = await PdfAImagenes.renderizar(f.blob, { escala: Number(o.escala), formato: o.formato, calidad: 0.92 });
+      const ext = o.formato === 'image/jpeg' ? '.jpg' : '.png', ancho = String(paginas.length).length;
+      return paginas.map((p) => fichaDeImagen(f, p, `${F.base(f.nombre)}-pagina-${String(p.pagina).padStart(ancho, '0')}${ext}`));
+    },
+  });
+
+  // ---------- 7. Extraer las imágenes incrustadas de un PDF ----------
+  F.registrar({
+    id: 'extraer-imagenes-pdf',
+    icono: '🧩',
+    nombre: { es: 'Extraer imágenes de PDF (incrustadas)', en: 'Extract images from PDF (embedded)' },
+    descripcion: { es: 'Saca las imágenes que el PDF lleva adentro, sin el texto; cada una sigue el flujo por su cuenta.', en: 'Takes out the images the PDF carries inside, without the text; each one goes on through the flow on its own.' },
+    entra: ['pdf'], sale: 'imagen', forma: 'abrir',
+    opciones: [
+      { id: 'sinImagenes', tipo: 'select', defecto: 'avisar', etiqueta: { es: 'Si el PDF no trae imágenes', en: 'If the PDF has no images' },
+        valores: [{ valor: 'avisar', es: 'Avisar en el resumen', en: 'Report it in the summary' }, { valor: 'pagina', es: 'Usar cada página como imagen', en: 'Use each page as an image' }] },
+    ],
+    async preparar() { await js('pdfjs.js'); await js('pdf-extraer-imagenes.js'); await js('pdf-a-imagenes.js'); },
+    async ejecutar(f, o) {
+      const imagenes = await PdfExtraerImagenes.extraer(f.blob, {});
+      if (imagenes.length) return imagenes.map((i) => fichaDeImagen(f, i, `${F.base(f.nombre)}-${i.nombre}`));
+      if (o.sinImagenes === 'pagina') {
+        const paginas = await PdfAImagenes.renderizar(f.blob, { escala: 2, formato: 'image/png', calidad: 0.92 });
+        return paginas.map((p) => fichaDeImagen(f, p, `${F.base(f.nombre)}-pagina-${p.pagina}.png`));
+      }
+      return [];   // queda en «lo que no pasó» como quitado en este paso
+    },
+  });
+
+  // ---------- 8. Unir PDF ----------
   F.registrar({
     id: 'unir-pdf',
     icono: '📎',

@@ -129,6 +129,8 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, (archivos) => { … });
 ```
 
 `archivos` es siempre un `Array` de `File`, venga del selector o de lo soltado.
+Una zona creada por JavaScript después de cargar la página también queda accesible con teclado:
+`conectarZonaArrastre` la pasa por `hacerZonaAccesible` (2026-11-10, Flujos arma una zona por entrada).
 El módulo limpia el selector después de cada elección (si no, volver a elegir
 el mismo archivo no hace nada) y hace **toda** `.zona-arrastre` de la página
 usable con teclado: foco con Tab, Enter/Espacio para elegir, contorno visible.
@@ -151,6 +153,10 @@ archivo, se filtra en la función que se le pasa, no reescribiendo el módulo.
 | `.grid-miniaturas`, `.miniatura-pagina` | grilla de páginas/hojas seleccionables |
 | `.contenedor-miniaturas`, `.selector-vista` | lista o grilla conmutable |
 | `.lista-archivos` | lista de archivos cargados |
+| `.columnas.con-vista-fija.vista-a-la-izquierda` | la misma vista fija, pero a la IZQUIERDA en escritorio (2026-11-10, Flujos: el diagrama); en celular queda arriba como la original |
+| `.diagrama-flujo` (+ `.mini`) | diagrama de cajas y flechas, solo para mirar (2026-11-10, Flujos): `.diagrama-entradas` con una `ul.diagrama-rama` por columna, `li.diagrama-nodo` (`.punta` para inicio/fin, `.con-error` + «⚠️» en el texto para el paso que no encaja), `li.diagrama-flecha` (`aria-hidden`) y `.diagrama-union` (la llave que junta las columnas). HTML, no SVG: toma los tokens y se lee como lista. `.mini` lo achica (70vh; 28vh en celular) |
+| `dialog.dialogo-ampliado` | ver algo en grande (2026-11-10, Flujos): `<dialog>` abierto con `showModal()` (Esc cierra, el foco queda adentro); el primer hijo es el botón `.cerrar-dialogo`; clic en el fondo también cierra (lo conecta la página) |
+| `.bloque-flujo` | caja de una entrada de Flujos: cabecera `.paso-cabecera` (título + ✕), sus pasos y su selector; los archivos van a una sola `.zona-arrastre` de la página, encima de las entradas |
 | `.lista-archivos.lista-pasos` | lista de pasos de Flujos (2026-11-10): cada `li` es una tarjeta con `.paso-cabecera` (título + `.paso-botones` ▲ ▼ ✕ con `.boton.secundario.chico`), una `.nota-suave` y sus `.controles`; `li.con-error` marca el paso que no encaja (siempre junto con un texto que lo dice) |
 | `.tabla-ancha` | envoltorio para una tabla que no entra: se desplaza sola sin arrastrar la página |
 | `.contenedor-tabla` + `table.tabla-datos` | tabla de datos de una planilla, con encabezado fijo y desplazamiento propio; `tr.fila-par` y `tr.fila-espaciadora` para filas alternadas y virtualización. La página solo ajusta lo suyo (altura, resaltados) |

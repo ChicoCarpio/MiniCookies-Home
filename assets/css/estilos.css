@@ -410,6 +410,42 @@ a.boton { text-decoration: none; display: inline-block; }
 .lista-pasos li > .controles { margin-top: 8px; }
 .lista-pasos li.con-error { outline: 2px solid #dc2626; }
 
+/* Bloque de una entrada de Flujos (2026-11-10): su cabecera, sus pasos y su selector, en una caja. Los archivos van
+   a una sola zona de la página y cada entrada toma los de su tipo (Flujos.repartir). */
+.bloque-flujo { border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 12px; margin-bottom: 16px; background: var(--superficie); }
+.bloque-flujo > .paso-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.bloque-flujo > .paso-cabecera .paso-botones { display: flex; gap: 4px; }
+.bloque-flujo > .paso-cabecera h3 { margin: 0; font-size: 1.05rem; width: auto; flex: 1 1 auto; min-width: 0; }
+
+/* Diagrama de un flujo (2026-11-10, Flujos): cajas y flechas en columnas, una por entrada, que se juntan en el
+   tramo común. Solo para mirar. HTML y no SVG: usa los tokens (tema claro/oscuro) y el lector de pantalla lo lee
+   como lista. .mini lo achica para la vista fija; ampliado va dentro de un .dialogo-ampliado. */
+.diagrama-flujo { font-size: 0.9rem; text-align: center; }
+.diagrama-flujo.mini { font-size: 0.72rem; max-height: 70vh; overflow: auto; }
+.diagrama-entradas { display: flex; gap: 10px; justify-content: center; align-items: flex-start; }
+.diagrama-rama { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; flex: 1 1 0; min-width: 0; }
+.diagrama-nodo { border: 1px solid var(--gris-borde); background: var(--superficie-alt); border-radius: 8px; padding: 0.45em 0.6em; max-width: 100%; overflow-wrap: anywhere; color: var(--texto); }
+.diagrama-nodo.punta { background: var(--activo-fondo); font-weight: 600; }
+.diagrama-nodo.con-error { outline: 2px solid #dc2626; }
+.diagrama-flecha { color: var(--texto-suave); line-height: 1.4; }
+.diagrama-flecha::before { content: '↓'; }
+.diagrama-union { border: 2px solid var(--texto-suave); border-top: 0; height: 0.8em; margin: 0 12% 0; border-radius: 0 0 8px 8px; opacity: 0.6; }
+.diagrama-titulo { font-size: 1rem; margin: 0 0 8px; }
+.diagrama-ampliar { margin-top: 8px; }
+@media (max-width: 899px) { .diagrama-flujo.mini { max-height: 28vh; } .diagrama-titulo { display: none; } }
+
+/* Vista fija a la IZQUIERDA (2026-11-10, Flujos): variante de .columnas.con-vista-fija; en celular queda arriba
+   como la original. */
+.columnas.con-vista-fija.vista-a-la-izquierda { grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); }
+.columnas.con-vista-fija.vista-a-la-izquierda > .vista-fija { order: -1; }
+@media (max-width: 899px) { .columnas.con-vista-fija.vista-a-la-izquierda { grid-template-columns: minmax(0, 1fr); } }
+
+/* Ventana ampliada (2026-11-10, Flujos): un <dialog> que muestra en grande algo de la página. showModal() da
+   Esc para cerrar y el foco atrapado; el botón .cerrar-dialogo va primero. */
+.dialogo-ampliado { width: min(1100px, 96vw); max-height: 92vh; border: 1px solid var(--gris-borde); border-radius: var(--radio); background: var(--gris-fondo); color: var(--texto); padding: 16px; }
+.dialogo-ampliado::backdrop { background: rgba(0, 0, 0, 0.55); }
+.dialogo-ampliado .cerrar-dialogo { float: right; }
+
 /* Selector de dirección de las herramientas bidireccionales (A → B / B → A).
    El cambio de panel lo hace assets/js/selector-direccion.js. Estaba copiado
    en el <style> de 13 herramientas. */
