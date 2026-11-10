@@ -370,7 +370,6 @@ window.i18nPagina = {
 <script src="../assets/js/idioma.js"></script>
 <script src="../assets/js/vendor.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="../assets/js/sello-mini-cookies.js"></script>
 <script src="../assets/js/descargar.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
@@ -1006,7 +1005,6 @@ async function armarPdf() {
     const imagen = await pdf.embedJpg(new Uint8Array(await pagina.blob.arrayBuffer()));
     agregarPaginaConImagen(pdf, imagen, tamano);
   }
-  await SelloMiniCookies.quizasSellar(pdf);   // al azar; queda fijo en pdfListo, así descargar y compartir dan el mismo archivo
   pdf.setProducer('Mini Cookies');
   pdfListo = new File([await pdf.save()], nombreConFecha('escaneo', 'pdf'), { type: 'application/pdf' });
   return pdfListo;
