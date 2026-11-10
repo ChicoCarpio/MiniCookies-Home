@@ -1,5 +1,7 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// Custos Phone V1: red neuronal propia que encuentra las 4 esquinas de un documento en una foto.
+// Custos Phone V2 (experimento E8, 2026-11-10; reemplaza a V1 = E3): red neuronal propia que encuentra las 4 esquinas
+// de un documento en una foto. También el área de objetos rectangulares: pizarras, pantallas, cuadros (el lienzo sin el
+// marco), pósters, rótulos, proyecciones, portadas y hojas de libros y cuadernos.
 //
 //   Custos.cargar()                        -> Promise<boolean>  (descarga el modelo y onnxruntime-web una vez)
 //   Custos.listo()                         -> boolean
@@ -13,22 +15,27 @@
 //
 // Cómo funciona: la foto se pone sobre un margen gris del 25 % por lado (así una esquina cortada por el
 // borde cae dentro del cuadro), se reduce a 224x224 y la red (MobileNetV3-Small entrenada desde cero con
-// fotos reales marcadas a mano, ~1 millón de parámetros) devuelve un mapa de calor por esquina; la
+// 7.371 fotos reales de documentos y 1.840 de objetos marcadas, más sintéticas; ~1 millón de parámetros) devuelve
+// un mapa de calor por esquina; la
 // esquina es el promedio del mapa y su dispersión es la «duda». Con duda alta no hay hoja a la vista.
 // Corre con onnxruntime-web (WebAssembly, un hilo) dentro del navegador: la foto no sale del equipo.
 // Si algo falla al cargar, listo() queda en false y la página sigue con el motor clásico.
 //
-// Combinación con el motor clásico (medida en 196 fotos de prueba, IoU 0,901 -> 0,904): si los dos
-// cuadriláteros coinciden (IoU >= 0,9) se promedian; si no, manda Custos.
+// Combinación con el motor clásico: si los dos cuadriláteros coinciden (IoU >= 0,9) se promedian; si no, manda Custos.
+// V2 contra V1 (mismas fotos nunca usadas para entrenar): 196 de documentos IoU 0,908 / 81 % bien (V1 0,901 / 74 %);
+// banco de 186 objetos, como el sitio, 0,855 / 69 % (V1 0,762 / 39 %); banco de 17: 13 bien (V1 11). Igual de rápida
+// (~9 ms en PC, ~62 ms con la CPU frenada x6) y del mismo peso (3,9 MB).
 // Investigación y mediciones: Investigaciones\investigacion-escaner\05-estado-y-como-retomar.md
 // Necesita assets/js/vendor.js antes.
 
 const Custos = (() => {
   const S = 224, MARGEN = 0.25;
-  const DUDA_MAX = 0.006;   // por encima: «no hay hoja» (95 % de los fondos sin papel; pierde el 4 % de las fotos con documento)
+  // Por encima: «no hay hoja». V2 con 0,0045: detecta el 96,8 % de los fondos sin papel y pierde el 3,5 % de las fotos
+  // con documento, que salían mal de todos modos (IoU medio 0,67). V1 usaba 0,006 (95,5 % / 2,0 %).
+  const DUDA_MAX = 0.0045;
   const ACUERDO = 0.9;
   const MEDIA = [0.485, 0.456, 0.406], DESV = [0.229, 0.224, 0.225];
-  const MODELO = new URL('../modelos/custos-phone-v1.onnx', document.currentScript.src).href;
+  const MODELO = new URL('../modelos/custos-phone-v2.onnx', document.currentScript.src).href;
 
   let sesion = null, promesa = null, cola = Promise.resolve();
   let lienzo = null, ctx = null;
