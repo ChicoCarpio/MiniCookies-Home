@@ -215,6 +215,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -259,97 +260,20 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-function esEspacioRgb(pdf, espacioColor) {
-  const { PDFName, PDFArray } = PDFLib;
-  if (!espacioColor) return false;
-  const valor = pdf.context.lookup(espacioColor);
-  if (valor && valor.toString() === '/DeviceRGB') return true;
-  if (valor instanceof PDFArray && valor.size() === 2 && valor.get(0).toString() === '/ICCBased') {
-    const perfil = pdf.context.lookup(valor.get(1));
-    const canales = perfil && perfil.dict ? perfil.dict.get(PDFName.of('N')) : null;
-    return Boolean(canales) && canales.toString() === '3';
-  }
-  return false;
-}
-
-function decodificarImagenJpeg(bytes) {
-  return new Promise((resolve, reject) => {
-    const blob = new Blob([bytes], { type: 'image/jpeg' });
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('JPEG inválido')); };
-    img.src = url;
-  });
-}
-
 botonComprimir.addEventListener('click', async () => {
   botonComprimir.disabled = true;
   progreso.style.display = 'block';
   progreso.textContent = t('progreso-analizando');
   try {
-    const { PDFDocument, PDFName, PDFNumber, PDFRawStream, PDFArray } = PDFLib;
     const ladoMaximo = parseInt(document.getElementById('resolucionMaxima').value, 10) || 0;
     const bytesOriginales = await archivoActual.arrayBuffer();
     const pesoOriginal = bytesOriginales.byteLength;
-
-    const pdf = await PDFDocument.load(bytesOriginales, { updateMetadata: false });
-    const calidad = parseInt(elCalidad.value, 10) / 100;
-    const objetos = pdf.context.enumerateIndirectObjects();
-    let contadorProcesadas = 0;
-
-    for (let i = 0; i < objetos.length; i++) {
-      const [ref, objeto] = objetos[i];
-      if (!(objeto instanceof PDFRawStream)) continue;
-
-      const dict = objeto.dict;
-      const subtipo = dict.get(PDFName.of('Subtype'));
-      if (!subtipo || subtipo.toString() !== '/Image') continue;
-
-      const filtro = dict.get(PDFName.of('Filter'));
-      const esSoloJpeg = filtro && filtro.toString() === '/DCTDecode';
-      if (!esSoloJpeg) continue;
-
-      // Color RGB: /DeviceRGB o un perfil ICC de 3 canales (muy común en
-      // fotos de cámaras y escáneres). Gris, CMYK e indexadas se dejan igual:
-      // el canvas siempre devuelve RGB y cambiarían de color.
-      if (!esEspacioRgb(pdf, dict.get(PDFName.of('ColorSpace')))) continue;
-      // Un /Decode no estándar invierte o reescala los colores al dibujar.
-      if (dict.get(PDFName.of('Decode'))) continue;
-
-      try {
-        progreso.textContent = t('progreso-optimizando').replace('{n}', contadorProcesadas + 1);
-        const bytesOriginalesImagen = objeto.getContents();
-        const img = await decodificarImagenJpeg(bytesOriginalesImagen);
-
-        // Reducción opcional: el lado más largo queda en "ladoMaximo" px.
-        // La foto ocupa el mismo lugar en la página (el tamaño en la página
-        // lo define el contenido, no los píxeles), solo con menos detalle.
-        const escala = ladoMaximo > 0 ? Math.min(1, ladoMaximo / Math.max(img.naturalWidth, img.naturalHeight)) : 1;
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.naturalWidth * escala));
-        canvas.height = Math.max(1, Math.round(img.naturalHeight * escala));
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        const blobNuevo = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', calidad));
-        const bytesNuevos = new Uint8Array(await blobNuevo.arrayBuffer());
-        if (bytesNuevos.length < bytesOriginalesImagen.length) {
-          dict.set(PDFName.of('Width'), PDFNumber.of(canvas.width));
-          dict.set(PDFName.of('Height'), PDFNumber.of(canvas.height));
-          dict.set(PDFName.of('BitsPerComponent'), PDFNumber.of(8));
-          pdf.context.assign(ref, PDFRawStream.of(dict, bytesNuevos));
-          contadorProcesadas++;
-        }
-      } catch (errorImagen) {
-        console.warn('Se omitió una imagen que no se pudo optimizar:', errorImagen);
-      }
-    }
-
-    progreso.textContent = t('progreso-guardando');
-    let bytesFinales = await pdf.save();
-    // Si no se ganó nada (PDF ya optimizado, o sin fotos para recomprimir),
-    // se ofrece el original: guardar con pdf-lib a veces pesa un poco más.
-    const sinMejora = bytesFinales.length >= pesoOriginal;
-    if (sinMejora) bytesFinales = new Uint8Array(bytesOriginales);
+    const { bytes: bytesFinales, procesadas: contadorProcesadas, sinMejora } = await PdfRetoques.optimizar(
+      bytesOriginales,
+      { calidad: parseInt(elCalidad.value, 10) / 100, ladoMaximo },
+      (n) => { progreso.textContent = t('progreso-optimizando').replace('{n}', n); },
+      () => { progreso.textContent = t('progreso-guardando'); },
+    );
     document.getElementById('avisoSinMejora').style.display = sinMejora ? 'block' : 'none';
     const blob = new Blob([bytesFinales], { type: 'application/pdf' });
     enlaceDescarga.href = URL.createObjectURL(blob);

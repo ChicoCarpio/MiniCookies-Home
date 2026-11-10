@@ -193,6 +193,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/seguridad-html.js"></script>
+<script src="../assets/js/imagen-basica.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
 const entradaArchivo = document.getElementById('entradaArchivo');
@@ -212,7 +213,7 @@ let archivoActual = null;
 let imagenActual = null;
 let formatoElegido = 'image/png';
 
-const EXTENSIONES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+const EXTENSIONES = ImagenBasica.EXTENSION_FORMATO;
 
 function actualizarControlesFormato() {
   campoCalidad.style.display = formatoElegido === 'image/png' ? 'none' : 'flex';
@@ -272,20 +273,8 @@ botonConvertir.addEventListener('click', async () => {
   botonConvertir.disabled = true;
   botonConvertir.textContent = t('estado-convirtiendo');
   try {
-    const canvas = document.createElement('canvas');
-    canvas.width = imagenActual.naturalWidth;
-    canvas.height = imagenActual.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    // JPG no tiene canal alfa — sin este relleno, el navegador pinta la
-    // transparencia de negro en vez de dejarla blanca.
-    if (formatoElegido === 'image/jpeg') {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    ctx.drawImage(imagenActual, 0, 0);
-
-    const calidad = formatoElegido === 'image/png' ? undefined : parseInt(elCalidad.value, 10) / 100;
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, formatoElegido, calidad));
+    const calidad = parseInt(elCalidad.value, 10) / 100;
+    const blob = await ImagenBasica.convertir(imagenActual, formatoElegido, calidad);
     if (!blob) throw new Error(t('error-sin-formato'));
 
     // Si el navegador no sabe codificar el formato pedido (p. ej. WebP), toBlob

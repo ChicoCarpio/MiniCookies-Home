@@ -11,7 +11,7 @@
 //
 //   Flujos.registrar(modulo)                 da de alta un módulo (ver flujos-modulos.js)
 //   Flujos.modulos() / Flujos.modulo(id)     los módulos registrados
-//   Flujos.compatibles(tipos)                módulos que reciben TODOS esos tipos ('imagen', 'pdf'); sin tipos: todos
+//   Flujos.compatibles(tipos)                módulos que reciben TODOS esos tipos; sin tipos: todos
 //   Flujos.tiposDeEntrada(flujo, i)          tipos de archivo que pueden recorrer la entrada i (y el tramo común)
 //   Flujos.tiposAlFinal(pasos, tipos)        tipos que salen de una lista de pasos si le entran esos tipos
 //   Flujos.tiposTrasPasos(pasos)             tipos que siguen al final de los pasos de una entrada (para ofrecer el siguiente)
@@ -22,20 +22,23 @@
 //                                            de una entrada de un flujo con varias: tiene que ir en el tramo común)
 //   Flujos.repartir(flujo, archivos)         { porEntrada, sinEntrada }: cada archivo va a las entradas que reciben su tipo
 //   Flujos.ejecutar(flujo, archivos, { alAvanzar }) -> Promise<{ resultados, fallos }>   (los reparte con repartir)
-//   Flujos.tipoDeArchivo(archivo)            'imagen' | 'pdf' | null
+//   Flujos.tipoDeArchivo(archivo)            'imagen' | 'pdf' | 'documento' | 'texto' | null
+//                                            documento: Word, Excel/CSV, PowerPoint, EPUB o Markdown (los formatos de
+//                                            ArchivoAPdf, que la página carga); texto: .txt
 //   Flujos.normalizar(flujo)                 flujo limpio; acepta también la forma vieja (una lista de pasos)
 //   Flujos.guardadas() / guardar(nombre, flujo) / borrar(nombre)       en este navegador (localStorage)
 //   Flujos.exportar(nombre, flujo) -> Blob   archivo .json para guardar o pasar a otro equipo
 //   Flujos.importar(texto) -> { nombre, flujo, omitidos }   lanza un Error con `codigo` si el archivo no sirve
 //
 // Lo que viaja de un paso al siguiente es una ficha de archivo:
-//   { nombre, blob, tipo: 'imagen'|'pdf', datos: { codigos: [...], ... }, origen }
+//   { nombre, blob, tipo: 'imagen'|'pdf'|'documento'|'texto', datos: { codigos: [...], ... }, origen }
 // `datos` se conserva de paso en paso: así el QR que se leyó en el paso 1 llega al PDF del paso 3.
 //
-// Un módulo: { id, icono, nombre:{es,en}, descripcion:{es,en}, entra:[tipos], sale:'imagen'|'pdf'|'igual',
-//   forma:'uno'|'abrir'|'juntar', opciones:[{ id, tipo:'select'|'numero'|'casilla', etiqueta:{es,en},
+// Un módulo: { id, icono, nombre:{es,en}, descripcion:{es,en}, entra:[tipos], sale:tipo|'igual',
+//   forma:'uno'|'abrir'|'juntar', opciones:[{ id, tipo:'select'|'numero'|'casilla'|'texto', etiqueta:{es,en},
 //   valores:[{ valor, es, en }], defecto, min, max, paso }], preparar() -> Promise (carga lo que necesita),
-//   ejecutar(ficha | fichas, opciones, contexto) -> Promise<ficha | fichas | null> }.
+//   ejecutar(ficha | fichas, opciones, contexto) -> Promise<ficha | fichas | null>,
+//   terminar() -> Promise (opcional: libera lo que preparar o ejecutar dejaron abierto, p. ej. el motor de OCR) }.
 //   'uno' recibe una ficha y devuelve una (o null para quitarla); 'abrir' recibe una y devuelve varias (un PDF ->
 //   sus páginas); 'juntar' recibe todas las que llegan y devuelve una.
 // Todo corre en este navegador, archivo por archivo (un lote grande no ocupa la memoria de todos juntos).
@@ -43,7 +46,7 @@
   const registro = new Map();
   const CLAVE = 'flujos-guardados';
   const FORMATO = 'minicookies-flujo';
-  const TIPOS = ['imagen', 'pdf'];
+  const TIPOS = ['imagen', 'pdf', 'documento', 'texto'];
   const MAX_ENTRADAS = 4, MAX_PASOS = 20;
 
   function registrar(m) {
@@ -57,6 +60,8 @@
     const tipo = (archivo.type || '').toLowerCase(), nombre = (archivo.name || '').toLowerCase();
     if (tipo === 'application/pdf' || nombre.endsWith('.pdf')) return 'pdf';
     if (tipo.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp)$/.test(nombre)) return 'imagen';
+    const formato = window.ArchivoAPdf && archivo.name ? ArchivoAPdf.formatoDe(archivo) : null;
+    if (formato) return formato === 'texto' ? 'texto' : 'documento';
     return null;
   }
 
@@ -176,6 +181,10 @@
       let v = dadas && Object.prototype.hasOwnProperty.call(dadas, op.id) ? dadas[op.id] : op.defecto;
       if (op.tipo === 'select' && !op.valores.some((x) => x.valor === v)) v = op.defecto;
       if (op.tipo === 'casilla') v = v === true || v === 'true';
+      if (op.tipo === 'texto') {
+        v = typeof v === 'string' ? v.slice(0, op.max || 200) : op.defecto;
+        if (!v.trim()) v = op.defecto;   // vacío: vuelve al texto por defecto
+      }
       if (op.tipo === 'numero') {
         v = Number(v);
         if (!Number.isFinite(v)) v = op.defecto;
@@ -230,8 +239,16 @@
       archivosPorEntrada = r.porEntrada;
       r.sinEntrada.forEach((a) => fallos.push({ nombre: a.name, entrada: null, codigo: 'tipo' }));
     }
-    const todos = [...flujo.entradas.flat(), ...flujo.comun];
-    for (const p of todos) { const m = modulo(p.id); if (m.preparar) await m.preparar(); }
+    const usados = [...new Set([...flujo.entradas.flat(), ...flujo.comun].map((p) => modulo(p.id)))];
+    try {
+      for (const m of usados) if (m.preparar) await m.preparar();
+      return await correrTodo(flujo, archivosPorEntrada, fallos, alAvanzar);
+    } finally {
+      for (const m of usados) if (m.terminar) { try { await m.terminar(); } catch (e) { /* ya terminó */ } }
+    }
+  }
+
+  async function correrTodo(flujo, archivosPorEntrada, fallos, alAvanzar) {
 
     const porEntrada = flujo.entradas.map((pasos, i) => {
       const aceptados = tiposDeEntrada(flujo, i);
@@ -304,10 +321,10 @@
     for (let i = 0; i < flujo.entradas.length; i++) fichas.push(...await correr(flujo.entradas[i], porEntrada[i], i));
     if (flujo.comun.length) fichas = await correr(flujo.comun, fichas, 'comun');
 
-    const usados = new Set();
+    const nombres = new Set();
     const resultados = fichas.map((f) => {
-      const nombre = f.tipo === 'pdf' ? base(f.nombre) + '.pdf' : f.nombre;
-      return { nombre: nombreUnico(nombre, usados), blob: f.blob, tipo: f.tipo, datos: f.datos, origen: f.origen };
+      const nombre = f.tipo === 'pdf' ? base(f.nombre) + '.pdf' : f.tipo === 'texto' ? base(f.nombre) + '.txt' : f.nombre;
+      return { nombre: nombreUnico(nombre, nombres), blob: f.blob, tipo: f.tipo, datos: f.datos, origen: f.origen };
     });
     return { resultados, fallos };
   }
@@ -358,6 +375,9 @@
   // ---------- utilidades para los módulos ----------
   const cargados = new Map();
   function cargarScript(src) {
+    // Ya lo puso la página u otro cargador (archivo-a-pdf.js trae pdf-texto.js, zip-propio.js…): no repetirlo, que
+    // un script cargado dos veces falla al volver a declarar sus constantes. Se compara la dirección completa.
+    if (!cargados.has(src) && [...document.scripts].some((s) => s.src === src)) cargados.set(src, Promise.resolve());
     if (!cargados.has(src)) cargados.set(src, new Promise((ok, mal) => {
       const s = document.createElement('script');
       s.src = src; s.onload = ok;

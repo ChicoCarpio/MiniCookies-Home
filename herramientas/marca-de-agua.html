@@ -202,6 +202,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -228,14 +229,6 @@ elTamano.addEventListener('input', () => etiquetaTamano.textContent = elTamano.v
 elOpacidad.addEventListener('input', () => etiquetaOpacidad.textContent = elOpacidad.value);
 elRepeticiones.addEventListener('input', () => etiquetaRepeticiones.textContent = elRepeticiones.value);
 
-// Reparte "cantidad" copias en una cuadrícula lo más cuadrada posible
-// (ej. 4 -> 2x2, 6 -> 3x2, 1 -> 1x1) para distribuirlas parejo por la página.
-function calcularFilasColumnas(cantidad) {
-  const columnas = Math.ceil(Math.sqrt(cantidad));
-  const filas = Math.ceil(cantidad / columnas);
-  return { filas, columnas };
-}
-
 // Mismo criterio que calcularTamanoAjustado (para el PDF real) pero usando el
 // contexto 2D del canvas de la miniatura, para que la vista previa coincida.
 function calcularTamanoAjustadoCanvas(contexto, texto, anchoDisponible, altoDisponible, tamanoMaximo) {
@@ -258,7 +251,7 @@ function actualizarVistaPreviaMarca() {
   const opacidad = parseInt(elOpacidad.value, 10) / 100;
   const tamanoMaximoPx = parseInt(elTamano.value, 10) * ESCALA_MINIATURA;
   const cantidad = parseInt(elRepeticiones.value, 10);
-  const { filas, columnas } = calcularFilasColumnas(cantidad);
+  const { filas, columnas } = PdfRetoques.calcularFilasColumnas(cantidad);
 
   const canvas = document.createElement('canvas');
   canvas.width = canvasBase.width;
@@ -324,73 +317,16 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Encuentra el tamaño de letra más grande (hasta tamanoMaximo) tal que el
-// texto, ya rotado 45°, quepa dentro de la página — para que un mensaje largo
-// se achique en vez de salirse de los bordes.
-function calcularTamanoAjustado(fuente, texto, anchoPagina, altoPagina, tamanoMaximo) {
-  const margen = 0.9; // deja un 10% de aire
-  let tamano = tamanoMaximo;
-  while (tamano > 6) {
-    const anchoTexto = fuente.widthOfTextAtSize(texto, tamano);
-    const anchoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
-    const altoRotado = anchoTexto * Math.SQRT1_2 + tamano * Math.SQRT1_2;
-    if (anchoRotado <= anchoPagina * margen && altoRotado <= altoPagina * margen) return tamano;
-    tamano -= 2;
-  }
-  return tamano;
-}
-
 botonAplicar.addEventListener('click', async () => {
   botonAplicar.disabled = true;
   botonAplicar.textContent = t('boton-aplicar-procesando');
   try {
-    const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
-    const bytes = await archivoActual.arrayBuffer();
-    const pdf = await PDFDocument.load(bytes);
-    const fuente = await pdf.embedFont(StandardFonts.HelveticaBold);
-    const texto = elTexto.value || t('texto-defecto');
-    const opacidad = parseInt(elOpacidad.value, 10) / 100;
-    const tamanoMaximo = parseInt(elTamano.value, 10);
-    const cantidad = parseInt(elRepeticiones.value, 10);
-    const { filas, columnas } = calcularFilasColumnas(cantidad);
-
-    const angulo = 45 * Math.PI / 180;
-    pdf.getPages().forEach((pagina) => {
-      // Se trabaja sobre la página tal como se ve (con /Rotate): si no, en
-      // un PDF escaneado o rotado la marca quedaba girada y descentrada.
-      const marco = marcoVisualPagina(pagina);
-      const width = marco.ancho;
-      const height = marco.alto;
-      const anchoCelda = width / columnas;
-      const altoCelda = height / filas;
-      const tamanoFuente = calcularTamanoAjustado(fuente, texto, anchoCelda, altoCelda, tamanoMaximo);
-      const anchoTexto = fuente.widthOfTextAtSize(texto, tamanoFuente);
-
-      let contador = 0;
-      for (let f = 0; f < filas && contador < cantidad; f++) {
-        for (let c = 0; c < columnas && contador < cantidad; c++) {
-          const centroX = anchoCelda * c + anchoCelda / 2;
-          const centroY = altoCelda * f + altoCelda / 2;
-          // drawText gira desde el inicio de la línea de base: se retrocede
-          // medio ancho a lo largo del texto y media altura de mayúscula
-          // perpendicular a él, para que el texto quede centrado en la celda.
-          const altoLetra = fuente.heightAtSize(tamanoFuente, { descender: false }) * 0.7;
-          const origen = marco.aPagina(
-            centroX - (anchoTexto / 2) * Math.cos(angulo) + (altoLetra / 2) * Math.sin(angulo),
-            centroY - (anchoTexto / 2) * Math.sin(angulo) - (altoLetra / 2) * Math.cos(angulo)
-          );
-          pagina.drawText(texto, {
-            x: origen.x,
-            y: origen.y,
-            size: tamanoFuente,
-            font: fuente,
-            color: rgb(0.5, 0.5, 0.5),
-            opacity: opacidad,
-            rotate: degrees(45 + marco.rotacion),
-          });
-          contador++;
-        }
-      }
+    const pdf = await PDFLib.PDFDocument.load(await archivoActual.arrayBuffer());
+    await PdfRetoques.marcaDeAgua(pdf, {
+      texto: elTexto.value || t('texto-defecto'),
+      tamanoMaximo: parseInt(elTamano.value, 10),
+      opacidad: parseInt(elOpacidad.value, 10) / 100,
+      repeticiones: parseInt(elRepeticiones.value, 10),
     });
 
     const bytesFinales = await pdf.save();

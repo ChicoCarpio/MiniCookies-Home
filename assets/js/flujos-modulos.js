@@ -10,6 +10,12 @@
 //   pdf-a-imagenes      PdfAImagenes (pdf-imagenes.html)             pdf -> imágenes (abre: una por página)
 //   extraer-imagenes-pdf PdfExtraerImagenes (extraer-imagenes.html)  pdf -> imágenes (abre: las incrustadas)
 //   unir-pdf            PdfUnir (unir-pdf.html)                      todos los pdf -> un pdf
+// Etapa 2 (2026-11-10):
+//   documento-a-pdf     ArchivoAPdf (unir-pdf.html)                  documento|texto -> pdf
+//   ocr-pdf, ocr-texto  Ocr (ocr-pdf.html)                           imagen|pdf -> pdf buscable | texto
+//   pdf-a-texto         textoDePdf de pdf-texto.js (pdf-texto.html)  pdf -> texto
+//   redimensionar-imagen, convertir-imagen, quitar-metadatos   ImagenBasica (sus 3 páginas)   imagen -> imagen
+//   rotar-pdf, comprimir-pdf, numerar-pdf, marca-agua-pdf      PdfRetoques (sus 4 páginas)    pdf -> pdf
 //
 // Un módulo que junta (forma 'juntar', como unir-pdf) es el que se usa para unir varias entradas, pero el tramo
 // común acepta cualquier módulo que reciba lo que llega de todas: unir PDF es solo el primero de ese tipo.
@@ -359,6 +365,283 @@
       const bytes = await PdfUnir.unir(fichas.map((f) => f.blob));
       const codigos = fichas.flatMap((f) => f.datos.codigos || []);
       return { nombre: 'unido.pdf', blob: new Blob([bytes], { type: 'application/pdf' }), tipo: 'pdf', datos: codigos.length ? { codigos } : {}, origen: 'unido.pdf' };
+    },
+  });
+
+  // ================= Etapa 2 =================
+  const PDF_LIB = () => F.cargarScript(rutaVendor('pdf-lib/1.17.1/pdf-lib.min.js'));
+  // Las piezas que miran archivo.name o archivo.type reciben un File con el nombre y el tipo de la ficha.
+  const comoArchivo = (f, tipo) => new File([f.blob], f.nombre, { type: tipo || f.blob.type || '' });
+  const fichaPdf = (f, bytes) => ({ ...f, blob: new Blob([bytes], { type: 'application/pdf' }), nombre: F.base(f.nombre) + '.pdf', tipo: 'pdf' });
+  const fichaTexto = (f, texto) => ({ ...f, blob: new Blob([texto], { type: 'text/plain;charset=utf-8' }), nombre: F.base(f.nombre) + '.txt', tipo: 'texto' });
+  const SEPARADOR_PAGINA = { es: '\n\n--- Página siguiente ---\n\n', en: '\n\n--- Next page ---\n\n' };   // como en ocr-pdf y pdf-texto
+  const separador = () => SEPARADOR_PAGINA[(window.idiomaActual && idiomaActual()) === 'en' ? 'en' : 'es'];
+
+  // ---------- 9. Documento a PDF ----------
+  F.registrar({
+    id: 'documento-a-pdf',
+    icono: '📑',
+    nombre: { es: 'Documento a PDF', en: 'Document to PDF' },
+    descripcion: { es: 'Pasa Word, Excel, CSV, PowerPoint, EPUB, Markdown o texto a PDF, con los mismos motores que Unir PDF.', en: 'Turns Word, Excel, CSV, PowerPoint, EPUB, Markdown or text into PDF, with the same engines as Merge PDF.' },
+    entra: ['documento', 'texto'], sale: 'pdf', forma: 'uno',
+    opciones: [],
+    async preparar() { await PDF_LIB(); },   // archivo-a-pdf.js ya está en la página; cada formato trae su motor al usarse
+    async ejecutar(f) {
+      return fichaPdf(f, await ArchivoAPdf.convertir(comoArchivo(f)));
+    },
+  });
+
+  // ---------- 10 y 11. OCR (PDF buscable o texto) ----------
+  const IDIOMAS_OCR = [
+    { valor: 'spa+eng', es: 'Español e inglés', en: 'Spanish and English' },
+    { valor: 'spa', es: 'Español', en: 'Spanish' },
+    { valor: 'eng', es: 'Inglés', en: 'English' },
+    { valor: 'por', es: 'Portugués', en: 'Portuguese' },
+    { valor: 'fra', es: 'Francés', en: 'French' },
+    { valor: 'deu', es: 'Alemán', en: 'German' },
+    { valor: 'ita', es: 'Italiano', en: 'Italian' },
+    { valor: 'chi_sim', es: 'Chino simplificado', en: 'Simplified Chinese' },
+    { valor: 'jpn', es: 'Japonés', en: 'Japanese' },
+  ];
+  const OPCIONES_OCR = [
+    { id: 'idiomas', tipo: 'select', defecto: 'spa+eng', etiqueta: { es: 'Idioma del texto', en: 'Text language' }, valores: IDIOMAS_OCR },
+    { id: 'enderezar', tipo: 'casilla', defecto: true, etiqueta: { es: 'Enderezar páginas torcidas', en: 'Straighten tilted pages' } },
+    { id: 'preproceso', tipo: 'select', defecto: 'contraste', etiqueta: { es: 'Preparar la imagen', en: 'Prepare the image' },
+      valores: [{ valor: 'contraste', es: 'Contraste automático', en: 'Automatic contrast' }, { valor: 'otsu', es: 'Blanco y negro puro', en: 'Pure black and white' },
+        { valor: 'ninguno', es: 'Tal cual', en: 'As is' }] },
+  ];
+  // Un motor de Tesseract por combinación de idiomas, compartido por los dos módulos y por todos los archivos de una
+  // ejecución (crearlo tarda); terminar() los cierra al final.
+  const motoresOcr = new Map();
+  const motorOcr = (idiomas) => {
+    if (!motoresOcr.has(idiomas)) motoresOcr.set(idiomas, Ocr.crearWorker(idiomas.split('+')));
+    return motoresOcr.get(idiomas);
+  };
+  async function cerrarMotoresOcr() {
+    const lista = [...motoresOcr.values()];
+    motoresOcr.clear();
+    for (const p of lista) { try { await (await p).terminate(); } catch (e) { /* ya cerrado */ } }
+  }
+  async function reconocer(f, o) {
+    const worker = await motorOcr(o.idiomas);
+    const pdf = await PDFLib.PDFDocument.create();
+    const textos = [];
+    for (const pagina of await Ocr.paginasDeArchivo(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar)) {
+      textos.push(await Ocr.agregarPagina(pdf, worker, pagina, o.preproceso));
+    }
+    return { pdf, texto: textos.join(separador()) };
+  }
+  const prepararOcr = async () => {
+    await PDF_LIB();
+    await js('pdfjs.js');
+    await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
+    await js('ocr.js');
+  };
+  F.registrar({
+    id: 'ocr-pdf',
+    icono: '🔤',
+    nombre: { es: 'OCR: PDF con texto buscable', en: 'OCR: searchable PDF' },
+    descripcion: { es: 'Reconoce el texto de fotos y escaneos y entrega un PDF igual al original donde se puede buscar y copiar.', en: 'Recognizes the text in photos and scans and gives back a PDF that looks the same but can be searched and copied.' },
+    entra: ['imagen', 'pdf'], sale: 'pdf', forma: 'uno',
+    opciones: OPCIONES_OCR,
+    preparar: prepararOcr,
+    terminar: cerrarMotoresOcr,
+    async ejecutar(f, o) {
+      const { pdf } = await reconocer(f, o);
+      return fichaPdf(f, await pdf.save());
+    },
+  });
+  F.registrar({
+    id: 'ocr-texto',
+    icono: '🔤',
+    nombre: { es: 'OCR: sacar el texto (.txt)', en: 'OCR: get the text (.txt)' },
+    descripcion: { es: 'Reconoce el texto de fotos y escaneos y lo guarda en un archivo de texto.', en: 'Recognizes the text in photos and scans and saves it as a text file.' },
+    entra: ['imagen', 'pdf'], sale: 'texto', forma: 'uno',
+    opciones: OPCIONES_OCR,
+    preparar: prepararOcr,
+    terminar: cerrarMotoresOcr,
+    async ejecutar(f, o) {
+      const { texto } = await reconocer(f, o);
+      return fichaTexto(f, texto);
+    },
+  });
+
+  // ---------- 12. PDF a texto ----------
+  F.registrar({
+    id: 'pdf-a-texto',
+    icono: '📝',
+    nombre: { es: 'PDF a texto (.txt)', en: 'PDF to text (.txt)' },
+    descripcion: { es: 'Saca el texto que el PDF ya trae, con sus párrafos y tablas. Para escaneos, usá el OCR.', en: 'Takes out the text the PDF already has, with its paragraphs and tables. For scans, use OCR.' },
+    entra: ['pdf'], sale: 'texto', forma: 'uno',
+    opciones: [
+      { id: 'sinTexto', tipo: 'select', defecto: 'dejar', etiqueta: { es: 'Si el PDF no tiene texto (escaneo)', en: 'If the PDF has no text (scan)' },
+        valores: [{ valor: 'dejar', es: 'Dejar el .txt vacío', en: 'Keep the empty .txt' }, { valor: 'quitar', es: 'Quitarlo del flujo', en: 'Drop it from the flow' }] },
+    ],
+    async preparar() { await PDF_LIB(); await js('pdfjs.js'); await js('tablas-texto.js'); await js('pdf-texto.js'); },
+    async ejecutar(f, o) {
+      const { texto, sinTexto } = await textoDePdf(f.blob, separador());
+      if (sinTexto && o.sinTexto === 'quitar') return null;
+      return fichaTexto(f, texto);
+    },
+  });
+
+  // ---------- 13. Redimensionar imagen ----------
+  F.registrar({
+    id: 'redimensionar-imagen',
+    icono: '📐',
+    nombre: { es: 'Redimensionar imagen', en: 'Resize image' },
+    descripcion: { es: 'Cambia el tamaño manteniendo la proporción: por el lado más largo, por el ancho o en porcentaje.', en: 'Changes the size keeping the proportions: by the longest side, by the width or by a percentage.' },
+    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    opciones: [
+      { id: 'medida', tipo: 'select', defecto: 'lado', etiqueta: { es: 'Medida', en: 'Measure' },
+        valores: [{ valor: 'lado', es: 'Lado más largo (px)', en: 'Longest side (px)' }, { valor: 'ancho', es: 'Ancho (px)', en: 'Width (px)' },
+          { valor: 'porcentaje', es: 'Porcentaje (%)', en: 'Percentage (%)' }] },
+      { id: 'valor', tipo: 'numero', defecto: 1600, min: 1, max: 8000, etiqueta: { es: 'Valor', en: 'Value' } },
+      { id: 'agrandar', tipo: 'casilla', defecto: false, etiqueta: { es: 'Agrandar también las imágenes más chicas', en: 'Also enlarge smaller images' } },
+      { id: 'suavizado', tipo: 'select', defecto: 'suave', etiqueta: { es: 'Calidad', en: 'Quality' },
+        valores: [{ valor: 'suave', es: 'Suave (recomendado)', en: 'Smooth (recommended)' }, { valor: 'nitido', es: 'Nítido (pixel art)', en: 'Sharp (pixel art)' }] },
+    ],
+    async preparar() { await js('imagen-basica.js'); },
+    async ejecutar(f, o) {
+      const mapa = await createImageBitmap(f.blob);   // aplica la orientación EXIF de las fotos de celular
+      try {
+        const w = mapa.width, h = mapa.height;
+        let escala = o.medida === 'porcentaje' ? o.valor / 100 : o.medida === 'ancho' ? o.valor / w : o.valor / Math.max(w, h);
+        if (!o.agrandar) escala = Math.min(1, escala);
+        const ancho = Math.max(1, Math.round(w * escala)), alto = Math.max(1, Math.round(h * escala));
+        if (ancho === w && alto === h) return f;
+        if (ancho > ImagenBasica.LIMITE_DIMENSION_PX || alto > ImagenBasica.LIMITE_DIMENSION_PX || ancho * alto > ImagenBasica.LIMITE_MEGAPIXELES * 1e6) {
+          throw new Error(`${ancho}×${alto} px`);
+        }
+        const lienzo = ImagenBasica.escalar(mapa, w, h, ancho, alto, o.suavizado);
+        const tipo = ImagenBasica.formatoDeSalida(f.blob.type);
+        return { ...f, blob: await aBlob(lienzo, tipo, 0.92), nombre: conExtension(f.nombre, tipo) };
+      } finally { mapa.close(); }
+    },
+  });
+
+  // ---------- 14. Convertir formato de imagen ----------
+  F.registrar({
+    id: 'convertir-imagen',
+    icono: '🔁',
+    nombre: { es: 'Convertir formato de imagen', en: 'Convert image format' },
+    descripcion: { es: 'Guarda la imagen como PNG, JPG o WebP. En JPG lo transparente queda blanco.', en: 'Saves the image as PNG, JPG or WebP. In JPG, transparent areas turn white.' },
+    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    opciones: [
+      { id: 'formato', tipo: 'select', defecto: 'image/jpeg', etiqueta: { es: 'Formato', en: 'Format' },
+        valores: [{ valor: 'image/png', es: 'PNG', en: 'PNG' }, { valor: 'image/jpeg', es: 'JPG', en: 'JPG' }, { valor: 'image/webp', es: 'WebP', en: 'WebP' }] },
+      { id: 'calidad', tipo: 'numero', defecto: 85, min: 10, max: 100, paso: 5, etiqueta: { es: 'Calidad JPG/WebP (%)', en: 'JPG/WebP quality (%)' } },
+    ],
+    async preparar() { await js('imagen-basica.js'); },
+    async ejecutar(f, o) {
+      const mapa = await createImageBitmap(f.blob);
+      try {
+        const blob = await ImagenBasica.convertir(mapa, o.formato, o.calidad / 100);
+        if (!blob) throw new Error('toBlob');
+        return { ...f, blob, nombre: conExtension(f.nombre, blob.type) };   // si el navegador no sabe WebP, sale PNG
+      } finally { mapa.close(); }
+    },
+  });
+
+  // ---------- 15. Quitar metadatos (EXIF) ----------
+  F.registrar({
+    id: 'quitar-metadatos',
+    icono: '🧹',
+    nombre: { es: 'Quitar metadatos EXIF', en: 'Remove EXIF metadata' },
+    descripcion: { es: 'Saca cámara, fecha y ubicación GPS. Un JPG derecho queda idéntico, sin recomprimir.', en: 'Removes camera, date and GPS location. An upright JPG stays identical, without recompressing.' },
+    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    opciones: [],
+    async preparar() { await js('imagen-basica.js'); },
+    async ejecutar(f) {
+      const archivo = comoArchivo(f);
+      const mapa = await createImageBitmap(f.blob);   // con la orientación ya aplicada, por si hay que redibujar
+      try {
+        const blob = await ImagenBasica.quitarMetadatos(archivo, mapa);
+        return { ...f, blob, nombre: conExtension(f.nombre, blob.type) };
+      } finally { mapa.close(); }
+    },
+  });
+
+  // ---------- 16 a 19. Retoques de PDF ----------
+  const abrirPdfLib = async (f) => PDFLib.PDFDocument.load(await f.blob.arrayBuffer());
+  const prepararRetoques = async () => { await PDF_LIB(); await js('miniaturas.js'); await js('pdf-retoques.js'); };
+
+  F.registrar({
+    id: 'rotar-pdf',
+    icono: '↻',
+    nombre: { es: 'Rotar PDF', en: 'Rotate PDF' },
+    descripcion: { es: 'Gira todas las páginas.', en: 'Rotates every page.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [
+      { id: 'grados', tipo: 'select', defecto: '90', etiqueta: { es: 'Girar', en: 'Rotate' },
+        valores: [{ valor: '90', es: '90° a la derecha', en: '90° right' }, { valor: '180', es: '180°', en: '180°' }, { valor: '270', es: '90° a la izquierda', en: '90° left' }] },
+    ],
+    preparar: prepararRetoques,
+    async ejecutar(f, o) {
+      const pdf = await abrirPdfLib(f);
+      PdfRetoques.rotar(pdf, Number(o.grados));
+      return fichaPdf(f, await pdf.save());
+    },
+  });
+
+  F.registrar({
+    id: 'comprimir-pdf',
+    icono: '🗜️',
+    nombre: { es: 'Comprimir PDF', en: 'Compress PDF' },
+    descripcion: { es: 'Recomprime las fotos a color del PDF; el texto no cambia. Si no baja de peso, queda el original.', en: 'Recompresses the color photos in the PDF; the text does not change. If it does not get lighter, the original stays.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [
+      { id: 'calidad', tipo: 'numero', defecto: 65, min: 20, max: 90, paso: 5, etiqueta: { es: 'Calidad de las fotos (%)', en: 'Photo quality (%)' } },
+      { id: 'ladoMaximo', tipo: 'select', defecto: '1600', etiqueta: { es: 'Tamaño de las fotos', en: 'Photo size' },
+        valores: [{ valor: '0', es: 'Sin reducir', en: 'Do not reduce' }, { valor: '2500', es: 'Hasta 2500 px (impresión)', en: 'Up to 2500 px (print)' },
+          { valor: '1600', es: 'Hasta 1600 px (pantalla)', en: 'Up to 1600 px (screen)' }, { valor: '1000', es: 'Hasta 1000 px (lo más liviano)', en: 'Up to 1000 px (lightest)' }] },
+    ],
+    preparar: prepararRetoques,
+    async ejecutar(f, o) {
+      const { bytes } = await PdfRetoques.optimizar(await f.blob.arrayBuffer(), { calidad: o.calidad / 100, ladoMaximo: Number(o.ladoMaximo) });
+      return fichaPdf(f, bytes);
+    },
+  });
+
+  F.registrar({
+    id: 'numerar-pdf',
+    icono: '#️⃣',
+    nombre: { es: 'Numerar páginas', en: 'Number pages' },
+    descripcion: { es: 'Agrega el número de página en la esquina elegida.', en: 'Adds the page number in the chosen corner.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [
+      { id: 'posicion', tipo: 'select', defecto: 'bottom-center', etiqueta: { es: 'Posición', en: 'Position' },
+        valores: [
+          { valor: 'bottom-right', es: 'Abajo a la derecha', en: 'Bottom right' }, { valor: 'bottom-center', es: 'Abajo al centro', en: 'Bottom center' },
+          { valor: 'bottom-left', es: 'Abajo a la izquierda', en: 'Bottom left' }, { valor: 'top-right', es: 'Arriba a la derecha', en: 'Top right' },
+          { valor: 'top-center', es: 'Arriba al centro', en: 'Top center' }, { valor: 'top-left', es: 'Arriba a la izquierda', en: 'Top left' }] },
+      { id: 'inicio', tipo: 'numero', defecto: 1, min: 1, max: 99999, etiqueta: { es: 'Empezar en', en: 'Start at' } },
+    ],
+    preparar: prepararRetoques,
+    async ejecutar(f, o) {
+      const pdf = await abrirPdfLib(f);
+      await PdfRetoques.numerar(pdf, { inicio: o.inicio, posicion: o.posicion });
+      return fichaPdf(f, await pdf.save());
+    },
+  });
+
+  F.registrar({
+    id: 'marca-agua-pdf',
+    icono: '💧',
+    nombre: { es: 'Marca de agua en PDF', en: 'Watermark on PDF' },
+    descripcion: { es: 'Escribe un texto en diagonal y semitransparente sobre cada página.', en: 'Writes a diagonal, semi-transparent text over every page.' },
+    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    opciones: [
+      { id: 'texto', tipo: 'texto', defecto: 'CONFIDENCIAL', max: 80, etiqueta: { es: 'Texto', en: 'Text' } },
+      { id: 'tamano', tipo: 'numero', defecto: 60, min: 20, max: 150, etiqueta: { es: 'Tamaño máximo de letra', en: 'Maximum font size' } },
+      { id: 'opacidad', tipo: 'numero', defecto: 15, min: 5, max: 50, etiqueta: { es: 'Opacidad (%)', en: 'Opacity (%)' } },
+      { id: 'repeticiones', tipo: 'numero', defecto: 1, min: 1, max: 20, etiqueta: { es: 'Repeticiones por página', en: 'Copies per page' } },
+    ],
+    preparar: prepararRetoques,
+    async ejecutar(f, o) {
+      const pdf = await abrirPdfLib(f);
+      await PdfRetoques.marcaDeAgua(pdf, { texto: o.texto, tamanoMaximo: o.tamano, opacidad: o.opacidad / 100, repeticiones: o.repeticiones });
+      return fichaPdf(f, await pdf.save());
     },
   });
 })();
