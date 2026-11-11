@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Fotos listas para la web: sin GPS, más chicas y en WebP — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Prepará muchas fotos de una vez para una página web o una tienda: quita la ubicación GPS y los datos de la cámara, las achica a 1600 px y las pasa a WebP. Gratis y en tu navegador.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+// Flujo listo (2026-11-10): los pasos están en FLUJO, abajo; la interfaz y sus textos comunes los pone
+// assets/js/flujos-pagina.js (montarListo). Acá van solo los textos de esta página.
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Fotos listas para la web: sin GPS, más chicas y en WebP — Mini Cookies',
+    'meta-descripcion': 'Prepará muchas fotos de una vez para una página web o una tienda: quita la ubicación GPS y los datos de la cámara, las achica a 1600 px y las pasa a WebP. Gratis y en tu navegador.',
+    'hero-titulo': '🌐 Fotos listas para la web',
+    'intro': 'Prepará muchas fotos de una vez para subirlas a una página, una tienda o un blog: se les quita la ubicación y los datos de la cámara, se achican y se guardan en WebP, que pesa mucho menos.',
+    'guia-titulo': 'Cómo preparar fotos para subirlas a la web',
+    'guia-mas-link': 'Cómo procesar muchos archivos de una vez con Flujos, paso a paso',
+    'guia-intro': 'Una foto de celular suele medir 4000 píxeles de lado, pesa varios megas y guarda en sus metadatos dónde y cuándo se sacó. Para una página web eso es lento y, a veces, más información de la que querés publicar. Este flujo resuelve las tres cosas en una pasada.',
+    'guia-paso-1': 'Arrastrá las fotos a la zona.',
+    'guia-paso-2': 'Ajustá el tamaño en «Redimensionar imagen»: 1600 píxeles en el lado más largo alcanza para casi cualquier página; para miniaturas, 800 basta.',
+    'guia-paso-3': 'Elegí la calidad en «Convertir formato de imagen» (85 % es un buen punto de partida) y pulsá «Ejecutar el flujo».',
+    'guia-paso-4': 'Descargá las fotos: una sola o un .zip con todas, con el mismo nombre y la extensión .webp.',
+    'guia-consejo-1': 'Una foto más chica que el tamaño elegido no se agranda: queda con sus medidas, salvo que actives «Agrandar también las imágenes más chicas».',
+    'guia-consejo-2': 'Si tu sitio no acepta WebP, cambiá el formato a JPG en el último paso; la ubicación GPS se quita igual.',
+    'guia-consejo-3': 'Las fotos de celular salen derechas: la orientación se aplica antes de achicarlas, así que ninguna queda acostada.',
+    'guia-p1': '¿Cuánto bajan de peso?',
+    'guia-r1': 'Depende de la foto, pero pasar de 4000 a 1600 píxeles y a WebP suele dejar una foto de varios megas en unos pocos cientos de kilobytes.',
+    'guia-p2': '¿Qué datos se quitan?',
+    'guia-r2': 'Todo el bloque EXIF: modelo de cámara, fecha y hora, ajustes de la toma y la ubicación GPS. Las fotos nuevas salen sin metadatos.',
+    'guia-p3': '¿Se pierde calidad?',
+    'guia-r3': 'Un poco, como en toda compresión, pero a 85 % no se nota en pantalla. Si la foto se va a imprimir, conservá el original.',
+  },
+  en: {
+    'titulo-pagina': 'Photos ready for the web: no GPS, smaller and in WebP — Mini Cookies',
+    'meta-descripcion': 'Prepare many photos at once for a website or an online store: it removes the GPS location and camera data, resizes them to 1600 px and converts them to WebP. Free and in your browser.',
+    'hero-titulo': '🌐 Photos ready for the web',
+    'intro': 'Prepare many photos at once to upload to a website, a store or a blog: their location and camera data are removed, they are resized and saved as WebP, which weighs much less.',
+    'guia-titulo': 'How to prepare photos for the web',
+    'guia-mas-link': 'How to process many files at once with Flows, step by step',
+    'guia-intro': 'A phone photo is usually 4000 pixels wide, weighs several megabytes and stores in its metadata where and when it was taken. For a website that is slow and sometimes more information than you want to publish. This flow solves all three in one pass.',
+    'guia-paso-1': 'Drag the photos onto the drop zone.',
+    'guia-paso-2': 'Set the size in “Resize image”: 1600 pixels on the longest side is enough for almost any page; for thumbnails, 800 will do.',
+    'guia-paso-3': 'Choose the quality in “Convert image format” (85% is a good starting point) and press “Run the flow”.',
+    'guia-paso-4': 'Download the photos: a single one or a .zip with all of them, with the same name and the .webp extension.',
+    'guia-consejo-1': 'A photo smaller than the chosen size is not enlarged: it keeps its size unless you turn on “Also enlarge smaller images”.',
+    'guia-consejo-2': 'If your site does not accept WebP, change the format to JPG in the last step; the GPS location is removed anyway.',
+    'guia-consejo-3': 'Phone photos come out upright: the orientation is applied before resizing, so none of them ends up lying on its side.',
+    'guia-p1': 'How much lighter do they get?',
+    'guia-r1': 'It depends on the photo, but going from 4000 to 1600 pixels and to WebP usually turns a photo of several megabytes into a few hundred kilobytes.',
+    'guia-p2': 'Which data is removed?',
+    'guia-r2': 'The whole EXIF block: camera model, date and time, shot settings and GPS location. The new photos come out without metadata.',
+    'guia-p3': 'Is quality lost?',
+    'guia-r3': 'A little, as with any compression, but at 85% it does not show on screen. If the photo will be printed, keep the original.',
+  },
+};
+</script>
+</head>
+<body>
+<div id="fondoDecorativo"></div>
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../flujos.html" data-i18n="nav-cat-flujos">Flujos</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">🌐 Fotos listas para la web</h1>
+  <p data-i18n="intro">Prepará muchas fotos de una vez para subirlas a una página, una tienda o un blog: se les quita la ubicación y los datos de la cámara, se achican y se guardan en WebP, que pesa mucho menos.</p>
+
+  <div class="panel-herramienta">
+    <div class="columnas con-vista-fija vista-a-la-izquierda">
+      <aside class="vista-fija" aria-labelledby="tituloDiagrama">
+        <h2 class="diagrama-titulo" id="tituloDiagrama" data-i18n="titulo-diagrama">Así va tu flujo</h2>
+        <div class="diagrama-flujo mini" id="diagramaMini"></div>
+      </aside>
+
+      <div>
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="listo-zona">📂 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
+          <input type="file" id="entradaArchivos" multiple hidden>
+        </div>
+        <p class="nota-suave" id="recibe"></p>
+        <p class="nota-suave" id="avisoArchivos" hidden></p>
+        <h2 data-i18n="listo-titulo-pasos">Los pasos de este flujo</h2>
+        <p class="nota-suave" data-i18n="listo-nota-opciones">Podés cambiar las opciones de cada paso antes de ejecutar.</p>
+        <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
+
+        <div class="controles">
+          <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+          <button type="button" class="boton secundario" id="botonPersonalizar" data-i18n="boton-personalizar">✏️ Personalizar este flujo</button>
+        </div>
+        <p class="nota-suave" id="estado" role="status" hidden></p>
+        <progress id="avance" max="1" value="0" hidden></progress>
+
+        <div class="resultado" id="resultado">
+          <p id="resultadoTexto"></p>
+          <div class="controles" id="descargas"></div>
+          <div id="codigos"></div>
+          <div id="fallos"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo preparar fotos para subirlas a la web</h2>
+    <p data-i18n="guia-intro">Una foto de celular suele medir 4000 píxeles de lado, pesa varios megas y guarda en sus metadatos dónde y cuándo se sacó. Para una página web eso es lento y, a veces, más información de la que querés publicar. Este flujo resuelve las tres cosas en una pasada.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá las fotos a la zona.</li>
+      <li data-i18n="guia-paso-2">Ajustá el tamaño en «Redimensionar imagen»: 1600 píxeles en el lado más largo alcanza para casi cualquier página; para miniaturas, 800 basta.</li>
+      <li data-i18n="guia-paso-3">Elegí la calidad en «Convertir formato de imagen» (85 % es un buen punto de partida) y pulsá «Ejecutar el flujo».</li>
+      <li data-i18n="guia-paso-4">Descargá las fotos: una sola o un .zip con todas, con el mismo nombre y la extensión .webp.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Una foto más chica que el tamaño elegido no se agranda: queda con sus medidas, salvo que actives «Agrandar también las imágenes más chicas».</li>
+      <li data-i18n="guia-consejo-2">Si tu sitio no acepta WebP, cambiá el formato a JPG en el último paso; la ubicación GPS se quita igual.</li>
+      <li data-i18n="guia-consejo-3">Las fotos de celular salen derechas: la orientación se aplica antes de achicarlas, así que ninguna queda acostada.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuánto bajan de peso?</summary>
+      <p data-i18n="guia-r1">Depende de la foto, pero pasar de 4000 a 1600 píxeles y a WebP suele dejar una foto de varios megas en unos pocos cientos de kilobytes.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué datos se quitan?</summary>
+      <p data-i18n="guia-r2">Todo el bloque EXIF: modelo de cámara, fecha y hora, ajustes de la toma y la ubicación GPS. Las fotos nuevas salen sin metadatos.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Se pierde calidad?</summary>
+      <p data-i18n="guia-r3">Un poco, como en toda compresión, pero a 85 % no se nota en pantalla. Si la foto se va a imprimir, conservá el original.</p>
+    </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/encadenar-herramientas-con-flujos.html" data-i18n="guia-mas-link">Cómo procesar muchos archivos de una vez con Flujos, paso a paso</a></p>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/flujos.js"></script>
+<script src="../assets/js/flujos-modulos.js"></script>
+<script src="../assets/js/flujos-pagina.js"></script>
+<script>
+const FLUJO = {"entradas": [[{"id": "quitar-metadatos"}, {"id": "redimensionar-imagen", "opciones": {"medida": "lado", "valor": 1600}}, {"id": "convertir-imagen", "opciones": {"formato": "image/webp", "calidad": 85}}]], "comun": []};
+// idioma.js se carga después de este script: t() existe recién cuando terminó de cargar la página.
+document.addEventListener('DOMContentLoaded', () => FlujosPagina.montarListo(FLUJO));
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-codigo-de-barras-svg': 'codigo-de-barras.svg',
     'hero-titulo': 'Generador de códigos de barras',
     'intro': 'Escribí un texto o número y generá un código de barras al instante.',
     'campo-texto': 'Texto o número',
@@ -46,6 +47,7 @@ window.i18nPagina = {
     'guia-r4': 'Sirve para etiquetas internas. Para venderlo en comercios, el número EAN o UPC tiene que venir de GS1, la organización que asigna los prefijos de empresa. Acá no se registra nada, y un número inventado puede coincidir con el de otro producto.',
   },
   en: {
+    'archivo-codigo-de-barras-svg': 'barcode.svg',
     'hero-titulo': 'Barcode generator',
     'intro': 'Type a number or some text and get a barcode instantly.',
     'campo-texto': 'Text or number',
@@ -65,7 +67,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Type the content in “Text or number” (an example comes preloaded).',
     'guia-paso-2': 'Choose the “Format”: CODE128, EAN-13, UPC or CODE39.',
     'guia-paso-3': 'Tap “Generate” (or press Enter) to see the code.',
-    'guia-paso-4': 'Use the “Download as SVG” link that appears below; the file is named codigo-de-barras.svg.',
+    'guia-paso-4': 'Use the “Download as SVG” link that appears below; the file is named barcode.svg.',
     'guia-consejo-1': 'CODE128 is the most flexible: it accepts letters, numbers and symbols, and it’s the best choice if you don’t need a particular retail standard.',
     'guia-consejo-2': 'EAN-13 and UPC are for retail products and only accept digits: 12 or 13 for EAN-13, 11 or 12 for UPC. If the length or the check digit is wrong, a red error message appears instead of the code.',
     'guia-consejo-3': 'CODE39 is good for simple internal labels with capital letters and numbers.',
@@ -125,7 +127,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado" style="text-align:center;">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-de-barras.svg" data-i18n="resultado-enlace">Descargar como SVG</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-codigo-de-barras-svg" download="codigo-de-barras.svg" data-i18n="resultado-enlace">Descargar como SVG</a>
     </div>
   </div>
 

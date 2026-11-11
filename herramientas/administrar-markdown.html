@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-reordenado-md': 'documento-reordenado.md',
     'titulo-pagina': 'Reordenar secciones de Markdown gratis — Mini Cookies',
     'meta-descripcion': 'Reordená o eliminá secciones de un archivo Markdown (.md), gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo',
@@ -47,6 +48,7 @@ window.i18nPagina = {
     'guia-r4': 'Solo .md y .markdown.'
   },
   en: {
+    'archivo-documento-reordenado-md': 'reordered-document.md',
     'titulo-pagina': 'Reorder Markdown Sections Free — Mini Cookies',
     'meta-descripcion': 'Reorder or remove the sections of a Markdown file (.md), free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .md file here or click to choose it',
@@ -67,7 +69,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the .md file onto the upload area or click to choose it.',
     'guia-paso-2': 'One row appears per section, with the title text. If the file has content before the first heading, an “Introduction (before the first heading)” row appears.',
     'guia-paso-3': 'Drag the rows to reorder them or tap the ✕ to remove a whole section.',
-    'guia-paso-4': 'Tap “Download reordered” and then the “Download .md” link. The file is named “documento-reordenado.md”.',
+    'guia-paso-4': 'Tap “Download reordered” and then the “Download .md” link. The file is named “reordered-document.md”.',
     'guia-consejo-1': 'Sections are only split at top-level headings. Subheadings (“##”, “###”) travel with the section they belong to.',
     'guia-consejo-2': 'Inside a code block (between ``` or ~~~), a line that starts with # is not taken as a title, so Python or Bash comments don’t break the document.',
     'guia-consejo-3': 'If the file uses Windows line breaks, the result keeps that style.',
@@ -113,7 +115,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reordenado.md" data-i18n="resultado-enlace">Descargar .md</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-reordenado-md" download="documento-reordenado.md" data-i18n="resultado-enlace">Descargar .md</a>
     </div>
   </div>
 

@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-libro-con-texto-epub': 'libro-con-texto.epub',
     'titulo-pagina': 'Agregar texto a cada capítulo de un EPUB gratis — Mini Cookies',
     'meta-descripcion': 'Agregá una línea de texto (marca de agua, aviso o pie) al principio o final de cada capítulo de un libro EPUB, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
@@ -48,6 +49,7 @@ window.i18nPagina = {
     'guia-r4': 'Cada archivo XHTML que el EPUB tiene en su orden de lectura (el spine). Puede incluir la portada o las páginas de créditos.'
   },
   en: {
+    'archivo-libro-con-texto-epub': 'book-with-text.epub',
     'titulo-pagina': 'Add Text to Every EPUB Chapter Free — Mini Cookies',
     'meta-descripcion': 'Add a line of text (copyright, "free sample"...) at the start or end of every chapter of an EPUB, free and without uploading your file anywhere.',
     'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
@@ -69,7 +71,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your .epub file to the upload area or click to choose it.',
     'guia-paso-2': 'Type the “Text to add” (for example “© 2026 My name — free sample”).',
     'guia-paso-3': 'Under “Position” choose “At the start of each chapter” or “At the end of each chapter”.',
-    'guia-paso-4': 'Tap “Apply and download” and then “Download EPUB”. The file is named “libro-con-texto.epub”.',
+    'guia-paso-4': 'Tap “Apply and download” and then “Download EPUB”. The file is named “book-with-text.epub”.',
     'guia-consejo-1': 'The text is added as an italic paragraph, in gray and a little smaller than the rest, so it stands out without getting in the way of reading.',
     'guia-consejo-2': 'The text goes into every file in the reading order: if the book has a cover or credits pages there, they get it too. The tool can’t choose which pages receive the text; for that you need an EPUB editor.',
     'guia-consejo-3': 'It’s useful for handing out a free sample with the notice in every chapter, or for noting the version of a draft.',
@@ -125,7 +127,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libro-con-texto.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-libro-con-texto-epub" download="libro-con-texto.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
     </div>
   </div>
 

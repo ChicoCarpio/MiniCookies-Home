@@ -13,6 +13,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-reparado-pdf': 'documento-reparado.pdf',
     'titulo-pagina': 'Reparar PDF dañado gratis — Mini Cookies',
     'meta-descripcion': 'Intentá recuperar un PDF dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Reparar PDF',
@@ -56,6 +57,7 @@ window.i18nPagina = {
     'guia-r4': 'No, trabaja con un PDF por vez.',
   },
   en: {
+    'archivo-documento-reparado-pdf': 'repaired-document.pdf',
     'titulo-pagina': 'Repair a Damaged PDF Free — Mini Cookies',
     'meta-descripcion': 'Try to recover a damaged PDF or one that won’t open properly, free and without uploading your file anywhere.',
     'h1': 'Repair PDF',
@@ -84,7 +86,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the damaged PDF to the “Drag your damaged PDF here or click to choose it” area, or click to browse for it. If it can’t be previewed, it appears flagged with a warning, but you can still continue.',
     'guia-paso-2': 'Click “Try to repair”. You’ll see the progress: “Trying level 1” and, if needed, “Rebuilding page X of Y”.',
     'guia-paso-3': 'Read the result message: it says whether it was repaired with level 1 or only with level 2, and how many pages out of the total were recovered.',
-    'guia-paso-4': 'Download the file with “Download repaired PDF” (it’s named documento-reparado.pdf).',
+    'guia-paso-4': 'Download the file with “Download repaired PDF” (it’s named repaired-document.pdf).',
     'guia-consejo-1': 'If the message says level 2 was used, the result is images of each page: you won’t be able to select or copy text any more, and links, forms, bookmarks and attachments are lost. If you need the text back, run it afterwards through “OCR for scanned PDFs and images”.',
     'guia-consejo-2': 'Always compare “Pages recovered: X of Y” with what you expected. A file cut in half may return only part of the document.',
     'guia-consejo-3': 'Password-protected PDFs aren’t damaged, but this tool won’t repair them: it shows a notice asking you to unlock them first with “Unlock PDF”.',
@@ -132,7 +134,7 @@ window.i18nPagina = {
 
     <div class="resultado" id="resultado">
       <p id="mensajeResultado" style="margin-top:0;"></p>
-      <a id="enlaceDescarga" download="documento-reparado.pdf" data-i18n="resultado-enlace">Descargar PDF reparado</a>
+      <a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-reparado-pdf" download="documento-reparado.pdf" data-i18n="resultado-enlace">Descargar PDF reparado</a>
     </div>
   </div>
 

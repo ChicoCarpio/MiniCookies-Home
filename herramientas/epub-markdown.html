@@ -15,6 +15,9 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-markdown-desde-epub-zip': 'markdown-desde-epub.zip',
+    'archivo-libro-md': 'libro.md',
+    'archivo-libro-epub': 'libro.epub',
     'titulo-pagina': 'Convertir EPUB y Markdown gratis — Mini Cookies',
     'meta-descripcion': 'Convertí un libro EPUB a Markdown, o Markdown a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'EPUB ↔ Markdown',
@@ -63,6 +66,9 @@ window.i18nPagina = {
     'guia-r4': 'Solo si no tiene DRM.'
   },
   en: {
+    'archivo-markdown-desde-epub-zip': 'markdown-from-epub.zip',
+    'archivo-libro-md': 'book.md',
+    'archivo-libro-epub': 'book.epub',
     'titulo-pagina': 'Convert EPUB and Markdown Free — Mini Cookies',
     'meta-descripcion': 'Convert an EPUB book to Markdown or Markdown to EPUB, free and without uploading your file anywhere.',
     'h1': 'EPUB ↔ Markdown',
@@ -94,7 +100,7 @@ window.i18nPagina = {
     'guia-intro': 'It converts an unprotected EPUB book into a Markdown (.md) file, or a Markdown file into an EPUB book. It’s useful for taking a book into a note editor such as Obsidian, for editing its text in a lightweight format, or for publishing a text written in Markdown as an e-book. An .epub or an .md/.markdown goes in, and an .md or an .epub comes out.',
     'guia-paso-1': 'At the top, choose the direction: “EPUB → Markdown” or “Markdown → EPUB”.',
     'guia-paso-2': 'In EPUB → Markdown, drag one or several .epub files (or click to choose them) and tap “Convert to Markdown”.',
-    'guia-paso-3': 'With a single book the resulting text is shown: you can use “Copy Markdown” or “Download .md” (saved as libro.md). With several books a .zip named markdown-desde-epub.zip is downloaded, with one .md per book.',
+    'guia-paso-3': 'With a single book the resulting text is shown: you can use “Copy Markdown” or “Download .md” (saved as book.md). With several books a .zip named markdown-from-epub.zip is downloaded, with one .md per book.',
     'guia-paso-4': 'In Markdown → EPUB, load the .md file; the “Book title” field is filled in with the file name and you can change it. If you want, type the “Author (optional)”.',
     'guia-paso-5': 'Tap “Convert to EPUB” and then “Download EPUB”. The file is named after the title you entered.',
     'guia-consejo-1': 'When going from EPUB to Markdown, each chapter is separated by a horizontal rule (---); tables become Markdown tables.',
@@ -148,7 +154,7 @@ window.i18nPagina = {
         <textarea id="markdownResultado" readonly></textarea>
         <div class="controles">
           <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
-          <a class="boton" id="enlaceDescargaMd" download="libro.md" data-i18n="enlace-descargar-md">Descargar .md</a>
+          <a class="boton" id="enlaceDescargaMd" data-i18n-attr="download:archivo-libro-md" download="libro.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
@@ -173,7 +179,7 @@ window.i18nPagina = {
         <button class="boton" id="botonAEpub" disabled data-i18n="boton-a-epub">Convertir a EPUB</button>
       </div>
       <div class="resultado" id="resultadoEpub">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace-epub">Descargar EPUB</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" data-i18n-attr="download:archivo-libro-epub" download="libro.epub" data-i18n="resultado-enlace-epub">Descargar EPUB</a>
       </div>
     </div>
 
@@ -300,7 +306,7 @@ botonAMd.addEventListener('click', async () => {
       botonCopiarMd.style.display = '';
       const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
       enlaceDescargaMd.href = URL.createObjectURL(blob);
-      enlaceDescargaMd.download = 'libro.md';
+      enlaceDescargaMd.download = t('archivo-libro-md');
       enlaceDescargaMd.textContent = t('enlace-descargar-md');
       bloqueResultadoMd.style.display = 'block';
     } else {
@@ -314,7 +320,7 @@ botonAMd.addEventListener('click', async () => {
       markdownResultado.style.display = 'none';
       botonCopiarMd.style.display = 'none';
       enlaceDescargaMd.href = URL.createObjectURL(zip);
-      enlaceDescargaMd.download = 'markdown-desde-epub.zip';
+      enlaceDescargaMd.download = t('archivo-markdown-desde-epub-zip');
       enlaceDescargaMd.textContent = t('lote-enlace-zip');
       bloqueResultadoMd.style.display = 'block';
       LoteArchivos.pintarResumen(resumenLote, resultados, t);

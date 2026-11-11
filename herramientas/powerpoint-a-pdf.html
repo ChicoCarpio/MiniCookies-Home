@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-presentacion-pdf': 'presentacion.pdf',
+    'archivo-diapositivas-zip': 'diapositivas.zip',
     'titulo-pagina': 'Convertir PowerPoint a PDF gratis — Mini Cookies',
     'meta-descripcion': 'Convertí una presentación PowerPoint (.pptx, .ppt u .odp) a PDF, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'PowerPoint a PDF',
@@ -54,6 +56,8 @@ window.i18nPagina = {
     'guia-r3': 'No siempre. La conversión se hace dentro del navegador, sin el programa original, así que conviene comparar el PDF con tu presentación antes de entregarlo.',
   },
   en: {
+    'archivo-presentacion-pdf': 'presentation.pdf',
+    'archivo-diapositivas-zip': 'slides.zip',
     'titulo-pagina': 'Convert PowerPoint to PDF Free — Mini Cookies',
     'meta-descripcion': 'Convert a PowerPoint presentation (.pptx, .ppt or .odp) to PDF, free and without uploading your file anywhere.',
     'h1': 'PowerPoint to PDF',
@@ -87,7 +91,7 @@ window.i18nPagina = {
     'guia-paso-4': 'Download the PDF, which keeps your presentation’s name with a .pdf extension, or the images in the .zip if you want them separately.',
     'guia-consejo-1': 'Check the preview before sending the PDF: complex designs, animations and some unusual elements may look different from how they appear in PowerPoint.',
     'guia-consejo-2': 'Old .ppt (PowerPoint 97-2003) and .odp files are first converted to .pptx inside the browser; if something looks different, open the file in PowerPoint and save it as .pptx before using this tool.',
-    'guia-consejo-3': 'The .zip contains one PNG per slide (diapositiva-01.png, diapositiva-02.png, and so on), handy for pasting into a document, an email or a post.',
+    'guia-consejo-3': 'The .zip contains one PNG per slide (slide-01.png, slide-02.png, and so on), handy for pasting into a document, an email or a post.',
     'guia-p1': 'Why does my PDF only have text?',
     'guia-r1': 'When a presentation can’t be drawn, the tool doesn’t fail: it still generates a PDF with the text of each slide and tells you with a message. If all you need is the text, there is also the Extract text from PowerPoint tool.',
     'guia-p2': 'What does it mean that some elements “couldn’t be drawn”?',
@@ -130,9 +134,9 @@ window.i18nPagina = {
 
     <div class="resultado" id="resultado">
       <span id="mensajeResultado" data-i18n="mensaje-listo">✅ Listo.</span>
-      <a id="enlaceDescarga" download="presentacion.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+      <a id="enlaceDescarga" data-i18n-attr="download:archivo-presentacion-pdf" download="presentacion.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
       <span id="separadorDescargas" style="display:none;"> · </span>
-      <a id="enlaceDescargaImagenes" download="diapositivas.zip" style="display:none;" data-i18n="resultado-enlace-imagenes">Descargar imágenes (.zip)</a>
+      <a id="enlaceDescargaImagenes" data-i18n-attr="download:archivo-diapositivas-zip" download="diapositivas.zip" style="display:none;" data-i18n="resultado-enlace-imagenes">Descargar imágenes (.zip)</a>
     </div>
   </div>
 

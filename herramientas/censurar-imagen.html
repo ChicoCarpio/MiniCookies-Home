@@ -86,6 +86,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-censurada': 'imagen-censurada',
     'hero-titulo': 'Pixelar o difuminar una zona',
     'intro': 'Elegí una imagen, marcá la zona a tapar (una cara, una matrícula, un dato sensible) por área rectangular o pintándola a mano libre, y aplicale pixelado, puntos, ruido, o distintos tipos de desenfoque.',
     'alt-censurar': 'Imagen a censurar',
@@ -133,6 +134,7 @@ window.i18nPagina = {
     'guia-r4': 'No, el resultado tiene las mismas dimensiones que el original.',
   },
   en: {
+    'archivo-imagen-censurada': 'censored-image',
     'hero-titulo': 'Pixelate or blur an area',
     'intro': 'Pick an image, mark the area to cover (a face, a license plate, a sensitive detail) either as a rectangle or by painting it freehand, and apply pixelation, dots, noise, or one of several blurs.',
     'alt-censurar': 'Image to redact',
@@ -165,7 +167,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Under “Selection” choose “Area” (a rectangle you move by dragging and resize with the corner handle) or “Freehand (brush)” (you paint over what you want to cover). In freehand mode “Brush size”, “Zoom” for painting more precisely, and “Clear what you painted” appear.',
     'guia-paso-3': 'Under “Effect” choose Pixelate, Dots, Noise, Blur, Motion or Frosted, and set the “Strength” (4 to 40). The image updates live.',
     'guia-paso-4': 'Tap “Apply” to generate the result. If there are more areas to cover, tap “Cover another area”: what’s already covered stays fixed and you keep marking on top.',
-    'guia-paso-5': 'Tap “Download image” and then the link. The file is named “imagen-censurada” with a PNG, JPG or WebP extension.',
+    'guia-paso-5': 'Tap “Download image” and then the link. The file is named “censored-image” with a PNG, JPG or WebP extension.',
     'guia-consejo-1': 'For truly sensitive data, use a high strength and check the result at full size: with a low strength you can still make out what was underneath.',
     'guia-consejo-2': 'Freehand mode is better for irregular outlines, such as a face or a signature. Area mode is quicker for text in a straight line.',
     'guia-consejo-3': 'The strength is calculated on the real size of the image, so what you see in the preview is proportional to the final result.',
@@ -262,7 +264,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-censurada" data-i18n="resultado-enlace">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-censurada" download="imagen-censurada" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -773,7 +775,7 @@ botonDescargar.addEventListener('click', async () => {
   const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaResultado.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-censurada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+  enlaceDescarga.download = `${t('archivo-imagen-censurada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

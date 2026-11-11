@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'prefijo-hoja': 'hoja',
+    'archivo-hojas-separadas-zip': 'hojas-separadas.zip',
     'titulo-pagina': 'Dividir hojas de Excel gratis — Mini Cookies',
     'meta-descripcion': 'Separá cada hoja de un Excel en su propio archivo, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Dividir hojas de Excel',
@@ -43,6 +45,8 @@ window.i18nPagina = {
     'guia-r3': 'No: se genera un archivo por cada hoja del libro.'
   },
   en: {
+    'prefijo-hoja': 'sheet',
+    'archivo-hojas-separadas-zip': 'split-sheets.zip',
     'titulo-pagina': 'Split Excel Sheets Free — Mini Cookies',
     'meta-descripcion': 'Split each sheet of an Excel file into its own file, free and without uploading your file anywhere.',
     'h1': 'Split Excel sheets',
@@ -69,7 +73,7 @@ window.i18nPagina = {
     'guia-p1': 'Do formulas that point to other sheets keep working?',
     'guia-r1': 'A formula that pointed to a removed sheet stops being a formula: the cell keeps its last calculated value as a fixed value. Formulas that only look at sheets still in the file don’t change.',
     'guia-p2': 'Does the zip have a fixed name?',
-    'guia-r2': 'Yes, it downloads as “hojas-separadas.zip”.',
+    'guia-r2': 'Yes, it downloads as “split-sheets.zip”.',
     'guia-p3': 'Can I choose which sheets to split?',
     'guia-r3': 'No. A file is generated for every sheet in the workbook.'
   }
@@ -106,7 +110,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="hojas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las hojas</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-hojas-separadas-zip" download="hojas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las hojas</a>
     </div>
   </div>
 
@@ -214,7 +218,7 @@ botonDividir.addEventListener('click', async () => {
     const zip = new ZipPropio();
     const usados = new Set();
     const nombreUnico = (nombreHoja) => {
-      const base = nombreHoja.replace(/[\/\\?*\[\]:"<>|]/g, '-').trim() || 'hoja';
+      const base = nombreHoja.replace(/[\/\\?*\[\]:"<>|]/g, '-').trim() || t('prefijo-hoja');
       let nombre = base;
       for (let n = 2; usados.has(nombre.toLowerCase()); n++) nombre = `${base} (${n})`;
       usados.add(nombre.toLowerCase());

@@ -95,6 +95,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-editada': 'imagen-editada',
     'hero-titulo': 'Editor de color',
     'intro': 'Elegí una imagen y ajustá luz, color, blanco y negro y efectos como en un editor de fotos.',
     'movil-filtros': '☰ Filtros',
@@ -164,6 +165,7 @@ window.i18nPagina = {
     'sl-tamano': 'Tamaño',
     'sl-angulo': 'Ángulo',
     'titulo-pagina': 'Editor de color gratis — Mini Cookies',
+    'boton-procesando': 'Procesando...',
     'meta-descripcion': 'Editá exposición, contraste, sombras, reflejos, saturación, intensidad de color, blanco y negro, claridad y grano de una imagen, gratis y sin subirla a ningún servidor.',
     'guia-titulo': 'Cómo retocar la luz y el color de una foto',
     'guia-intro': 'Para corregir una foto oscura o con dominante de color no hace falta instalar nada: cargala y trabajá con dos paneles. A la izquierda, los filtros (con la opción de cargar un LUT .cube); a la derecha, los ajustes finos agrupados en acordeones: Luz, Color, Luz por color, Blanco y negro, Efectos, Resplandor y Dispersión de luz. Lo que ajustás se ve en vivo sobre la imagen y se descarga al terminar.',
@@ -187,6 +189,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, con los paneles que se abren desde los botones superiores.',
   },
   en: {
+    'archivo-imagen-editada': 'edited-image',
     'hero-titulo': 'Color editor',
     'intro': 'Pick an image and adjust light, color, black and white and effects the way a photo editor does.',
     'movil-filtros': '☰ Filters',
@@ -256,6 +259,7 @@ window.i18nPagina = {
     'sl-tamano': 'Size',
     'sl-angulo': 'Angle',
     'titulo-pagina': 'Free color editor — Mini Cookies',
+    'boton-procesando': 'Processing...',
     'meta-descripcion': 'Adjust exposure, contrast, shadows, highlights, saturation, vibrance, black and white, clarity and grain on an image — free, and nothing is uploaded to a server.',
     'guia-titulo': 'How to adjust the light and color of a photo',
     'guia-intro': 'To fix a dark photo or one with a color cast, you don’t need to install anything: load the image and work with two panels. On the left, the filters (with the option to load a .cube LUT); on the right, the fine adjustments grouped in accordions: Light, Color, Light by color, Black and white, Effects, Glow and Light dispersion. What you adjust shows live on the image and is downloaded when you’re done.',
@@ -267,7 +271,7 @@ window.i18nPagina = {
     'guia-consejo-1': 'You can undo and redo with the buttons in the bar above the image or with Ctrl+Z and Ctrl+Shift+Z. On a phone, tapping the image with two fingers undoes.',
     'guia-consejo-2': '“Light by color” brightens or darkens just one color: for example, lowering the blues darkens the sky and raising the oranges brightens skin.',
     'guia-consejo-3': 'On a phone, the panels open with the “Filters” and “Adjustments” buttons.',
-    'guia-consejo-4': 'The file is saved as “imagen-editada” with a PNG, JPG or WebP extension depending on the original image’s format; any other input format comes out as PNG.',
+    'guia-consejo-4': 'The file is saved as “edited-image” with a PNG, JPG or WebP extension depending on the original image’s format; any other input format comes out as PNG.',
     'guia-consejo-5': 'If you need to edit only part of the image or work with layers, the page links to the Advanced editor.',
     'guia-p1': 'What is a LUT?',
     'guia-r1': 'It’s a table that swaps every color for another one, so a single .cube file applies a complete look. It’s applied after the filter and its strength is independent. The file can’t be larger than 40 MB.',
@@ -379,7 +383,7 @@ window.i18nPagina = {
                 <button type="button" id="botonCambiarImagen" class="boton-secundario-editor" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
               </div>
               <div class="resultado" id="resultado">
-                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-editada" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
               </div>
             </div>
           </fieldset>
@@ -1259,7 +1263,7 @@ botonCambiarImagen.addEventListener('click', () => entradaArchivo.click());
 
 botonDescargar.addEventListener('click', async () => {
   botonDescargar.disabled = true;
-  botonDescargar.textContent = 'Procesando...';
+  botonDescargar.textContent = t('boton-procesando');
   try {
     const canvasFinal = crearCanvasConImagen(imagenActual, imagenActual.naturalWidth, imagenActual.naturalHeight);
     renderizarFiltro(canvasFinal, leerAjustes(), capasFiltroActivo, texturaActual(), 1);
@@ -1267,11 +1271,11 @@ botonDescargar.addEventListener('click', async () => {
     const formato = formatoDeSalida(archivoActual);
     const blob = await new Promise((resolve) => canvasFinal.toBlob(resolve, formato, 0.92));
     enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+    enlaceDescarga.download = `${t('archivo-imagen-editada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } finally {
     botonDescargar.disabled = false;
-    botonDescargar.textContent = 'Descargar imagen';
+    botonDescargar.textContent = t('boton-descargar');
   }
 });
 

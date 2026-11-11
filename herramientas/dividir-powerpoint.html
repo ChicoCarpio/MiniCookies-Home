@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'prefijo-diapositiva': 'diapositiva',
+    'archivo-diapositivas-separadas-zip': 'diapositivas-separadas.zip',
     'titulo-pagina': 'Dividir PowerPoint gratis — Mini Cookies',
     'meta-descripcion': 'Separá una presentación PowerPoint (.pptx, .ppt u .odp) en un archivo por diapositiva, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Dividir PowerPoint',
@@ -48,6 +50,8 @@ window.i18nPagina = {
     'guia-r4': '«diapositivas-separadas.zip».'
   },
   en: {
+    'prefijo-diapositiva': 'slide',
+    'archivo-diapositivas-separadas-zip': 'split-slides.zip',
     'titulo-pagina': 'Split PowerPoint Free — Mini Cookies',
     'meta-descripcion': 'Split a PowerPoint presentation (.pptx, .ppt or .odp) into one file per slide, free and without uploading your file anywhere.',
     'h1': 'Split PowerPoint',
@@ -70,7 +74,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Tap “Split”.',
     'guia-paso-3': 'Follow the progress on screen: “Generating slide X of Y”.',
     'guia-paso-4': 'When “Done” appears, tap “Download .zip with the slides”.',
-    'guia-consejo-1': 'The files are named “diapositiva-01.pptx”, “diapositiva-02.pptx”, and so on, with leading zeros so they sort properly.',
+    'guia-consejo-1': 'The files are named “slide-01.pptx”, “slide-02.pptx”, and so on, with leading zeros so they sort properly.',
     'guia-consejo-2': 'Each file contains only its own slide and usually weighs less than the original; it shares the theme and layouts with it. The other slides are removed from the package, and so is the original’s cover thumbnail. File properties, such as the author, are still there.',
     'guia-consejo-3': 'If the presentation has only one slide, a notice appears because there’s nothing to split.',
     'guia-consejo-4': 'Open one of the pieces in PowerPoint or LibreOffice to check the result is what you expect before distributing them.',
@@ -81,7 +85,7 @@ window.i18nPagina = {
     'guia-p3': 'Can I choose which slides to extract?',
     'guia-r3': 'No, one file is always generated for each slide.',
     'guia-p4': 'What is the zip called?',
-    'guia-r4': '“diapositivas-separadas.zip”.'
+    'guia-r4': '“split-slides.zip”.'
   }
 };
 </script>
@@ -116,7 +120,7 @@ window.i18nPagina = {
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="diapositivas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las diapositivas</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-diapositivas-separadas-zip" download="diapositivas-separadas.zip" data-i18n="resultado-enlace">Descargar .zip con las diapositivas</a>
     </div>
   </div>
 
@@ -230,7 +234,7 @@ botonDividir.addEventListener('click', async () => {
       await conservarDiapositivas(miniZip, [nodosSldId[i].getAttribute('r:id')]);
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
       const blobMini = await miniZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-      zipSalida.file(`diapositiva-${numero}.pptx`, blobMini);
+      zipSalida.file(`${t('prefijo-diapositiva')}-${numero}.pptx`, blobMini);
     }
 
     progreso.textContent = t('progreso-zip');

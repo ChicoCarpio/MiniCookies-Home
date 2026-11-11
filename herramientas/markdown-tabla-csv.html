@@ -15,6 +15,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-tabla-csv': 'tabla.csv',
+    'archivo-tabla-md': 'tabla.md',
     'titulo-pagina': 'Convertir tabla Markdown y CSV gratis — Mini Cookies',
     'meta-descripcion': 'Convertí una tabla Markdown a CSV, o un CSV a tabla Markdown, en los dos sentidos — gratis y sin enviar nada a ningún servidor.',
     'h1': 'Tabla Markdown ↔ CSV',
@@ -49,6 +51,8 @@ window.i18nPagina = {
     'guia-r4': 'El resultado es una sola tabla. Si pegás dos tablas seguidas, se leen como una: el encabezado y la línea separadora de la segunda quedan como filas más.'
   },
   en: {
+    'archivo-tabla-csv': 'table.csv',
+    'archivo-tabla-md': 'table.md',
     'titulo-pagina': 'Convert Markdown Tables and CSV Free — Mini Cookies',
     'meta-descripcion': 'Convert a Markdown table to CSV or a CSV to a Markdown table, free and without uploading anything anywhere.',
     'h1': 'Markdown table ↔ CSV',
@@ -68,7 +72,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Choose “Markdown → CSV” or “CSV → Markdown”.',
     'guia-paso-2': 'Paste or type your content in the box on the left. When you switch direction an example appears that you can replace.',
     'guia-paso-3': 'Tap “Convert”. The result appears in the box on the right.',
-    'guia-paso-4': 'Use “Copy result” to put it on the clipboard, or “Download” to save tabla.csv or tabla.md depending on the direction.',
+    'guia-paso-4': 'Use “Copy result” to put it on the clipboard, or “Download” to save table.csv or table.md depending on the direction.',
     'guia-consejo-1': 'In Markdown the separator line (| --- | --- |) goes under the header row. If there are fewer than two lines starting with |, the tool says it didn’t find a valid table. If only the separator line is missing, it converts anyway and the CSV has the same rows.',
     'guia-consejo-2': 'In CSV → Markdown, the separator is detected automatically among comma, semicolon (the usual one in Spanish-language Excel) and tab, by looking at the first line.',
     'guia-consejo-3': 'Cells with quotes, commas or line breaks are handled properly: in the CSV they are wrapped in quotes, and in Markdown a line break inside a cell is written as <br>.',
@@ -313,13 +317,13 @@ botonConvertir.addEventListener('click', () => {
       salida.value = filasACsv(filas);
       const blob = new Blob([salida.value], { type: 'text/csv;charset=utf-8' });
       enlaceDescarga.href = URL.createObjectURL(blob);
-      enlaceDescarga.download = 'tabla.csv';
+      enlaceDescarga.download = t('archivo-tabla-csv');
     } else {
       const filas = parsearCsv(entrada.value);
       salida.value = filasATablaMarkdown(filas);
       const blob = new Blob([salida.value], { type: 'text/markdown;charset=utf-8' });
       enlaceDescarga.href = URL.createObjectURL(blob);
-      enlaceDescarga.download = 'tabla.md';
+      enlaceDescarga.download = t('archivo-tabla-md');
     }
     enlaceDescarga.style.display = 'inline-block';
   } catch (error) {

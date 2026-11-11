@@ -13,6 +13,9 @@
 <script>
 window.i18nPagina = {
   es: {
+    'nombre-introduccion': 'introduccion',
+    'prefijo-seccion': 'seccion',
+    'archivo-secciones-markdown-zip': 'secciones-markdown.zip',
     'titulo-pagina': 'Dividir Markdown gratis — Mini Cookies',
     'meta-descripcion': 'Separá un archivo Markdown (.md) en varios archivos, uno por cada encabezado de primer nivel, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .md acá o hacé clic para elegirlo',
@@ -51,6 +54,9 @@ window.i18nPagina = {
     'guia-r4': '«secciones-markdown.zip».'
   },
   en: {
+    'nombre-introduccion': 'introduction',
+    'prefijo-seccion': 'section',
+    'archivo-secciones-markdown-zip': 'markdown-sections.zip',
     'titulo-pagina': 'Split Markdown Free — Mini Cookies',
     'meta-descripcion': 'Split a Markdown file (.md) into several files, one per top-level heading, free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .md file here or click to choose it',
@@ -75,7 +81,7 @@ window.i18nPagina = {
     'guia-paso-3': 'Tap “Split”.',
     'guia-paso-4': 'When “Done” appears, tap “Download .zip with the sections”.',
     'guia-consejo-1': 'Each section starts at its heading and includes everything up to the next one of the same level. With second level, level 3 and deeper subheadings stay inside their section.',
-    'guia-consejo-2': 'If there is text before the first heading of the chosen level (for example, the YAML front matter or a general # title), that text goes into its own file, “01-introduccion.md”; the sections continue from 02.',
+    'guia-consejo-2': 'If there is text before the first heading of the chosen level (for example, the YAML front matter or a general # title), that text goes into its own file, “01-introduction.md”; the sections continue from 02.',
     'guia-consejo-3': 'A # inside code blocks (``` or ~~~) does not split the document.',
     'guia-consejo-4': 'Links and images are copied as they are: a link to another section or to another .md will point to a file that is no longer in the same place, and images with a relative path don’t travel in the zip. Check them afterwards.',
     'guia-consejo-5': 'Files are numbered with leading zeros and carry the section title, for example “01-Instalación.md”.',
@@ -86,7 +92,7 @@ window.i18nPagina = {
     'guia-p3': 'What happens if a line with # is inside the front matter?',
     'guia-r3': 'Yes, it splits there too. The tool doesn’t recognize front matter: a line starting with “# ” inside it is taken as a heading and opens a new section.',
     'guia-p4': 'What is the zip called?',
-    'guia-r4': '“secciones-markdown.zip”.'
+    'guia-r4': '“markdown-sections.zip”.'
   }
 };
 </script>
@@ -131,7 +137,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="secciones-markdown.zip" data-i18n="resultado-enlace">Descargar .zip con las secciones</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-secciones-markdown-zip" download="secciones-markdown.zip" data-i18n="resultado-enlace">Descargar .zip con las secciones</a>
     </div>
   </div>
 
@@ -217,7 +223,7 @@ function dividirMarkdownEnSecciones(texto, nivel) {
     } else if (actual) {
       actual.lineas.push(linea);
     } else {
-      actual = { titulo: 'introduccion', lineas: [linea] };
+      actual = { titulo: t('nombre-introduccion'), lineas: [linea] };
       bloques.push(actual);
     }
   });
@@ -256,7 +262,7 @@ botonDividir.addEventListener('click', async () => {
     const cantidadDigitos = String(secciones.length).length;
     secciones.forEach((seccion, i) => {
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
-      const nombreLimpio = seccion.titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || 'seccion';
+      const nombreLimpio = seccion.titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || t('prefijo-seccion');
       zip.file(`${numero}-${nombreLimpio}.md`, conFinDeLinea(seccion.texto, finDeLinea));
     });
 

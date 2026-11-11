@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-libro-reparado-epub': 'libro-reparado.epub',
     'titulo-pagina': 'Reparar EPUB gratis — Mini Cookies',
     'meta-descripcion': 'Intentá recuperar un libro EPUB dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
@@ -55,6 +56,7 @@ window.i18nPagina = {
     'guia-r4': 'No, es solo para .epub; para pasar libros a otros formatos hay otras herramientas en la categoría de EPUB.'
   },
   en: {
+    'archivo-libro-reparado-epub': 'repaired-book.epub',
     'titulo-pagina': 'Repair EPUB Free — Mini Cookies',
     'meta-descripcion': 'Try to rebuild a damaged EPUB book that won’t open, free and without uploading your file anywhere.',
     'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
@@ -83,7 +85,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your .epub file to the upload area or click to choose it.',
     'guia-paso-2': 'Tap “Repair”. While it works the button says “Repairing...”.',
     'guia-paso-3': 'Read the message that appears: it says whether the structure was fine, whether it was repaired (and what was fixed), or whether the book was rebuilt from its content.',
-    'guia-paso-4': 'Tap “Download repaired EPUB” to save libro-reparado.epub.',
+    'guia-paso-4': 'Tap “Download repaired EPUB” to save repaired-book.epub.',
     'guia-consejo-1': 'If the message says the structure was fine, the book is saved again in the correct format without changing its content or design; in that case the problem may be in your reader and not in the file.',
     'guia-consejo-2': 'When the repair is a structure fix (level 1), the book keeps its design, fonts and cover. At the other levels the text and images are kept, but the styles and fonts of the original book are lost.',
     'guia-consejo-3': 'In a heavy rescue, the table of contents or the exact order of some chapter may be lost; check it in your reader.',
@@ -130,7 +132,7 @@ window.i18nPagina = {
     <p id="mensajeNivel" style="color:#166534; display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="libro-reparado.epub" data-i18n="resultado-enlace">Descargar EPUB reparado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-libro-reparado-epub" download="libro-reparado.epub" data-i18n="resultado-enlace">Descargar EPUB reparado</a>
     </div>
   </div>
 

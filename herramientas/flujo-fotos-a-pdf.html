@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Fotos de documentos a un solo PDF, gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí fotos de hojas, recibos o contratos en un solo PDF: cada foto se endereza, se recorta el fondo y se une en orden. Gratis, en tu navegador y sin subir nada.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+// Flujo listo (2026-11-10): los pasos están en FLUJO, abajo; la interfaz y sus textos comunes los pone
+// assets/js/flujos-pagina.js (montarListo). Acá van solo los textos de esta página.
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Fotos de documentos a un solo PDF, gratis — Mini Cookies',
+    'meta-descripcion': 'Convertí fotos de hojas, recibos o contratos en un solo PDF: cada foto se endereza, se recorta el fondo y se une en orden. Gratis, en tu navegador y sin subir nada.',
+    'hero-titulo': '📄 Fotos de documentos a un solo PDF',
+    'intro': 'Sacá fotos de hojas, recibos o contratos con el celular y convertilas en un PDF prolijo: cada foto se endereza, se le recorta el fondo y todas se unen en un solo archivo.',
+    'guia-titulo': 'Cómo pasar fotos de documentos a un PDF',
+    'guia-mas-link': 'Cómo procesar muchos archivos de una vez con Flujos, paso a paso',
+    'guia-intro': 'Una foto de un papel casi nunca sale derecha: queda la mesa alrededor, la hoja torcida y algo de sombra. Este flujo hace con cada foto lo mismo que el escáner del sitio y después arma un único PDF, una página por foto.',
+    'guia-paso-1': 'Arrastrá todas las fotos a la zona (JPG, PNG o WebP, del celular o de la computadora).',
+    'guia-paso-2': 'Revisá las opciones: «Mejora» deja el color realzado, la foto original, escala de grises o blanco y negro; «Tamaño de página» decide si cada página mide lo que la foto o una hoja A4 o Carta.',
+    'guia-paso-3': 'Pulsá «Ejecutar el flujo». El escáner con IA busca las cuatro esquinas de cada hoja, la endereza y recorta lo que sobra.',
+    'guia-paso-4': 'Descargá «unido.pdf»: una página por foto, en el orden de los archivos.',
+    'guia-consejo-1': 'Fotografiá la hoja sobre un fondo que contraste, como papel blanco sobre una mesa oscura: así el escáner encuentra los bordes con más seguridad.',
+    'guia-consejo-2': 'Si una foto no muestra ninguna hoja, la opción «Si no encuentra la hoja» decide si entra tal cual al PDF o se deja afuera.',
+    'guia-consejo-3': '¿Querés leer también los códigos QR o comprimir el resultado? «Personalizar este flujo» abre el editor de flujos con estos mismos pasos para que agregues otros.',
+    'guia-p1': '¿Cuántas fotos puedo poner a la vez?',
+    'guia-r1': 'No hay un número fijo. El flujo procesa varias fotos al mismo tiempo, una por núcleo del procesador, así que en una computadora cientos de fotos andan bien. En el celular conviene ir de a tandas más chicas.',
+    'guia-p2': '¿Qué pasa con una foto que ya está recortada?',
+    'guia-r2': 'Si la hoja ocupa casi toda la foto, se deja como está: recortar un borde mínimo no aporta nada.',
+    'guia-p3': '¿Puedo cambiar el orden de las páginas?',
+    'guia-r3': 'Las páginas siguen el orden de los archivos. Si necesitás otro, cambiá los nombres de las fotos (por ejemplo 01, 02, 03) o reordená el PDF después con «Administrar / reordenar páginas».',
+  },
+  en: {
+    'titulo-pagina': 'Photos of documents to one PDF, free — Mini Cookies',
+    'meta-descripcion': 'Turn photos of pages, receipts or contracts into one PDF: each photo is straightened, the background is cropped and they are merged in order. Free, in your browser, nothing uploaded.',
+    'hero-titulo': '📄 Photos of documents to one PDF',
+    'intro': 'Take photos of pages, receipts or contracts with your phone and turn them into a tidy PDF: each photo is straightened, its background cropped, and all of them merged into a single file.',
+    'guia-titulo': 'How to turn photos of documents into a PDF',
+    'guia-mas-link': 'How to process many files at once with Flows, step by step',
+    'guia-intro': 'A photo of a sheet of paper is almost never straight: the table shows around it, the page is tilted and there is some shadow. This flow does to each photo what the site’s scanner does and then builds one PDF, one page per photo.',
+    'guia-paso-1': 'Drag all the photos onto the drop zone (JPG, PNG or WebP, from your phone or your computer).',
+    'guia-paso-2': 'Check the options: “Enhancement” gives enhanced color, the original photo, grayscale or black and white; “Page size” decides whether each page is the size of the photo or an A4 or Letter sheet.',
+    'guia-paso-3': 'Press “Run the flow”. The AI scanner finds the four corners of each page, straightens it and crops what is left over.',
+    'guia-paso-4': 'Download “merged.pdf”: one page per photo, in the order of the files.',
+    'guia-consejo-1': 'Photograph the page on a background that contrasts with it, such as white paper on a dark table: the scanner then finds the edges more reliably.',
+    'guia-consejo-2': 'If a photo shows no page at all, the option “If no sheet is found” decides whether it goes into the PDF as it is or is left out.',
+    'guia-consejo-3': 'Want to read QR codes too, or compress the result? “Customize this flow” opens the flow editor with these same steps so you can add others.',
+    'guia-p1': 'How many photos can I add at once?',
+    'guia-r1': 'There is no fixed number. The flow processes several photos at the same time, one per processor core, so hundreds of photos work fine on a computer. On a phone, smaller batches are better.',
+    'guia-p2': 'What happens to a photo that is already cropped?',
+    'guia-r2': 'If the page fills almost the whole photo, it is left as it is: cropping a tiny border adds nothing.',
+    'guia-p3': 'Can I change the order of the pages?',
+    'guia-r3': 'The pages follow the order of the files. If you need another order, rename the photos (for example 01, 02, 03) or reorder the PDF afterwards with “Manage / reorder pages”.',
+  },
+};
+</script>
+</head>
+<body>
+<div id="fondoDecorativo"></div>
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../flujos.html" data-i18n="nav-cat-flujos">Flujos</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">📄 Fotos de documentos a un solo PDF</h1>
+  <p data-i18n="intro">Sacá fotos de hojas, recibos o contratos con el celular y convertilas en un PDF prolijo: cada foto se endereza, se le recorta el fondo y todas se unen en un solo archivo.</p>
+
+  <div class="panel-herramienta">
+    <div class="columnas con-vista-fija vista-a-la-izquierda">
+      <aside class="vista-fija" aria-labelledby="tituloDiagrama">
+        <h2 class="diagrama-titulo" id="tituloDiagrama" data-i18n="titulo-diagrama">Así va tu flujo</h2>
+        <div class="diagrama-flujo mini" id="diagramaMini"></div>
+      </aside>
+
+      <div>
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="listo-zona">📂 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
+          <input type="file" id="entradaArchivos" multiple hidden>
+        </div>
+        <p class="nota-suave" id="recibe"></p>
+        <p class="nota-suave" id="avisoArchivos" hidden></p>
+        <h2 data-i18n="listo-titulo-pasos">Los pasos de este flujo</h2>
+        <p class="nota-suave" data-i18n="listo-nota-opciones">Podés cambiar las opciones de cada paso antes de ejecutar.</p>
+        <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
+
+        <div class="controles">
+          <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+          <button type="button" class="boton secundario" id="botonPersonalizar" data-i18n="boton-personalizar">✏️ Personalizar este flujo</button>
+        </div>
+        <p class="nota-suave" id="estado" role="status" hidden></p>
+        <progress id="avance" max="1" value="0" hidden></progress>
+
+        <div class="resultado" id="resultado">
+          <p id="resultadoTexto"></p>
+          <div class="controles" id="descargas"></div>
+          <div id="codigos"></div>
+          <div id="fallos"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo pasar fotos de documentos a un PDF</h2>
+    <p data-i18n="guia-intro">Una foto de un papel casi nunca sale derecha: queda la mesa alrededor, la hoja torcida y algo de sombra. Este flujo hace con cada foto lo mismo que el escáner del sitio y después arma un único PDF, una página por foto.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá todas las fotos a la zona (JPG, PNG o WebP, del celular o de la computadora).</li>
+      <li data-i18n="guia-paso-2">Revisá las opciones: «Mejora» deja el color realzado, la foto original, escala de grises o blanco y negro; «Tamaño de página» decide si cada página mide lo que la foto o una hoja A4 o Carta.</li>
+      <li data-i18n="guia-paso-3">Pulsá «Ejecutar el flujo». El escáner con IA busca las cuatro esquinas de cada hoja, la endereza y recorta lo que sobra.</li>
+      <li data-i18n="guia-paso-4">Descargá «unido.pdf»: una página por foto, en el orden de los archivos.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Fotografiá la hoja sobre un fondo que contraste, como papel blanco sobre una mesa oscura: así el escáner encuentra los bordes con más seguridad.</li>
+      <li data-i18n="guia-consejo-2">Si una foto no muestra ninguna hoja, la opción «Si no encuentra la hoja» decide si entra tal cual al PDF o se deja afuera.</li>
+      <li data-i18n="guia-consejo-3">¿Querés leer también los códigos QR o comprimir el resultado? «Personalizar este flujo» abre el editor de flujos con estos mismos pasos para que agregues otros.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Cuántas fotos puedo poner a la vez?</summary>
+      <p data-i18n="guia-r1">No hay un número fijo. El flujo procesa varias fotos al mismo tiempo, una por núcleo del procesador, así que en una computadora cientos de fotos andan bien. En el celular conviene ir de a tandas más chicas.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Qué pasa con una foto que ya está recortada?</summary>
+      <p data-i18n="guia-r2">Si la hoja ocupa casi toda la foto, se deja como está: recortar un borde mínimo no aporta nada.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo cambiar el orden de las páginas?</summary>
+      <p data-i18n="guia-r3">Las páginas siguen el orden de los archivos. Si necesitás otro, cambiá los nombres de las fotos (por ejemplo 01, 02, 03) o reordená el PDF después con «Administrar / reordenar páginas».</p>
+    </details>
+      <p class="guia-mas"><span data-i18n="guia-mas">Guía completa:</span> <a href="../guias/encadenar-herramientas-con-flujos.html" data-i18n="guia-mas-link">Cómo procesar muchos archivos de una vez con Flujos, paso a paso</a></p>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/flujos.js"></script>
+<script src="../assets/js/flujos-modulos.js"></script>
+<script src="../assets/js/flujos-pagina.js"></script>
+<script>
+const FLUJO = {"entradas": [[{"id": "recortar-documento"}, {"id": "imagen-a-pdf"}, {"id": "unir-pdf"}]], "comun": []};
+// idioma.js se carga después de este script: t() existe recién cuando terminó de cargar la página.
+document.addEventListener('DOMContentLoaded', () => FlujosPagina.montarListo(FLUJO));
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

@@ -12,6 +12,9 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto-desde-pdf-zip': 'texto-desde-pdf.zip',
+    'archivo-texto-extraido-txt': 'texto-extraido.txt',
+    'archivo-documento-pdf': 'documento.pdf',
     'titulo-pagina': 'Convertir PDF y texto plano gratis — Mini Cookies',
     'meta-descripcion': 'Extraé el texto de un PDF a .txt, o convertí un .txt a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'PDF ↔ Texto',
@@ -53,6 +56,9 @@ window.i18nPagina = {
     'guia-r3': 'Es la línea «--- Página siguiente ---», que marca dónde terminaba cada página del PDF. Si no la querés, borrala con buscar y reemplazar.'
   },
   en: {
+    'archivo-texto-desde-pdf-zip': 'text-from-pdf.zip',
+    'archivo-texto-extraido-txt': 'extracted-text.txt',
+    'archivo-documento-pdf': 'document.pdf',
     'titulo-pagina': 'Convert PDF and Plain Text Free — Mini Cookies',
     'meta-descripcion': 'Extract text from a PDF to .txt, or convert a .txt to PDF, in either direction — free and without uploading your file anywhere.',
     'h1': 'PDF ↔ Text',
@@ -132,7 +138,7 @@ window.i18nPagina = {
         <textarea id="textoExtraido" readonly></textarea>
         <div class="controles">
           <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
-          <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" data-i18n="enlace-descargar-txt">Descargar .txt</a>
+          <a class="boton" id="enlaceDescargaTxt" data-i18n-attr="download:archivo-texto-extraido-txt" download="texto-extraido.txt" data-i18n="enlace-descargar-txt">Descargar .txt</a>
         </div>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
@@ -149,7 +155,7 @@ window.i18nPagina = {
         <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
       </div>
       <div class="resultado" id="resultadoPdf">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="documento.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" data-i18n-attr="download:archivo-documento-pdf" download="documento.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
       </div>
     </div>
   </div>
@@ -273,7 +279,7 @@ botonExtraer.addEventListener('click', async () => {
       textoExtraido.style.display = '';
       botonCopiar.style.display = '';
       enlaceDescargaTxt.href = URL.createObjectURL(new Blob([texto], { type: 'text/plain;charset=utf-8' }));
-      enlaceDescargaTxt.download = 'texto-extraido.txt';
+      enlaceDescargaTxt.download = t('archivo-texto-extraido-txt');
       enlaceDescargaTxt.textContent = t('enlace-descargar-txt');
       bloqueResultadoTexto.style.display = 'block';
     } else {
@@ -290,7 +296,7 @@ botonExtraer.addEventListener('click', async () => {
       textoExtraido.style.display = 'none';
       botonCopiar.style.display = 'none';
       enlaceDescargaTxt.href = URL.createObjectURL(zip);
-      enlaceDescargaTxt.download = 'texto-desde-pdf.zip';
+      enlaceDescargaTxt.download = t('archivo-texto-desde-pdf-zip');
       enlaceDescargaTxt.textContent = t('lote-enlace-zip');
       bloqueResultadoTexto.style.display = 'block';
       LoteArchivos.pintarResumen(resumenLote, resultados, t);

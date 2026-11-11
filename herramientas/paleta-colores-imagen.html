@@ -29,6 +29,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'sufijo-paleta': '-paleta',
     'hero-titulo': 'Extraer paleta de colores',
     'intro': 'Elegí una imagen y obtené sus colores dominantes con el código hexadecimal, listo para copiar.',
     'campo-cantidad-a': 'Cantidad de colores: ',
@@ -71,6 +72,7 @@ window.i18nPagina = {
     'guia-r4': 'Cualquiera que tu navegador pueda abrir, como JPG, PNG, WebP o GIF.'
   },
   en: {
+    'sufijo-paleta': '-palette',
     'hero-titulo': 'Extract a color palette',
     'intro': 'Pick an image and get its dominant colors with their hex codes, ready to copy.',
     'campo-cantidad-a': 'Number of colors: ',
@@ -108,7 +110,7 @@ window.i18nPagina = {
     'guia-p2': 'Can I use the color of an exact point?',
     'guia-r2': 'Yes, by tapping the image with the eyedropper; it appears as the base color.',
     'guia-p3': 'What are the downloaded files called?',
-    'guia-r3': '<image-name>-paleta.png and <image-name>-paleta.txt.',
+    'guia-r3': '<image-name>-palette.png and <image-name>-palette.txt.',
     'guia-p4': 'Which image formats does it accept?',
     'guia-r4': 'Any your browser can open, such as JPG, PNG, WebP or GIF.'
   }
@@ -469,7 +471,7 @@ document.getElementById('botonDescargarPng').addEventListener('click', () => {
     ctx.font = '14px system-ui, sans-serif';
     ctx.fillText(`${c.porcentaje.toFixed(1)}%`, x + 10, y + ALTO_MUESTRA + 46);
   });
-  canvas.toBlob((blob) => descargarBlob(blob, `${nombreImagen}-paleta.png`), 'image/png');
+  canvas.toBlob((blob) => descargarBlob(blob, `${nombreImagen}${t('sufijo-paleta')}.png`), 'image/png');
 });
 
 // TXT: un color por línea (código HEX, RGB y porcentaje), y el esquema elegido.
@@ -481,7 +483,7 @@ document.getElementById('botonDescargarTxt').addEventListener('click', () => {
     const nombreEsquema = tipoEsquema.options[tipoEsquema.selectedIndex].textContent;
     texto += `\n${t('txt-esquema').replace('{esquema}', () => nombreEsquema).replace('{hex}', () => hexDe(colorBase).toUpperCase())}\n\n${coloresEsquema.map(linea).join('\n')}\n`;
   }
-  descargarTexto(texto, `${nombreImagen}-paleta.txt`);
+  descargarTexto(texto, `${nombreImagen}${t('sufijo-paleta')}.txt`);
 });
 </script>
 <script src="../assets/js/tema.js"></script>

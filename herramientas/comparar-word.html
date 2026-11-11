@@ -29,6 +29,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-comparacion-word': 'comparacion-word',
     'titulo-pagina': 'Comparar dos documentos Word gratis — Mini Cookies',
     'meta-descripcion': 'Compará el texto de dos versiones de un documento Word (.docx, .doc u .odt) y mirá exactamente qué cambió, gratis y sin subir tus archivos a ningún servidor.',
     'h1': 'Comparar dos documentos Word',
@@ -73,6 +74,7 @@ window.i18nPagina = {
     'guia-r4': 'Empieza con «comparacion-word» y lleva la fecha y la hora.',
   },
   en: {
+    'archivo-comparacion-word': 'word-comparison',
     'titulo-pagina': 'Compare Two Word Documents Free — Mini Cookies',
     'meta-descripcion': 'Compare the text of two versions of a Word document (.docx, .doc or .odt) and see exactly what changed, free and without uploading your files anywhere.',
     'h1': 'Compare two Word documents',
@@ -114,7 +116,7 @@ window.i18nPagina = {
     'guia-p3': 'Why does an error appear when comparing?',
     'guia-r3': 'It may be a damaged file or a document that the tool can’t read. An alert box shows “Couldn’t compare the documents” followed by the error details.',
     'guia-p4': 'What is the report called?',
-    'guia-r4': 'It starts with “comparacion-word” and has the date and time.',
+    'guia-r4': 'It starts with “word-comparison” and has the date and time.',
   }
 };
 </script>
@@ -310,7 +312,7 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
 ${new Date().toLocaleString(idiomaActual())} · ${agregados} <ins>${t('informe-agregados')}</ins> · ${quitados} <del>${t('informe-quitados')}</del></p>
 <div class="texto">${resultadoDiff.innerHTML}</div>
 </body></html>`;
-  descargarTexto(html, nombreConFecha('comparacion-word', 'html'), 'text/html');
+  descargarTexto(html, nombreConFecha(t('archivo-comparacion-word'), 'html'), 'text/html');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

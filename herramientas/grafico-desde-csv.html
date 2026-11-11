@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-grafico-png': 'grafico.png',
     'titulo-pagina': 'Generar gráfico desde Excel o CSV gratis — Mini Cookies',
     'meta-descripcion': 'Generá un gráfico de barras, líneas o torta a partir de un Excel o CSV, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Gráfico desde Excel / CSV',
@@ -49,6 +50,7 @@ window.i18nPagina = {
     'guia-r4': 'No. Los gráficos que ya tenga el archivo no se leen: la herramienta toma el valor de cada celda y dibuja uno nuevo.',
   },
   en: {
+    'archivo-grafico-png': 'chart.png',
     'titulo-pagina': 'Generate a Chart from Excel or CSV Free — Mini Cookies',
     'meta-descripcion': 'Generate a bar, line or pie chart from an Excel or CSV file, free and without uploading your file anywhere.',
     'h1': 'Chart from Excel / CSV',
@@ -70,7 +72,7 @@ window.i18nPagina = {
     'guia-paso-2': 'In “Labels column (X axis)” choose the column with the names (for example months or products).',
     'guia-paso-3': 'In “Values column” choose the numeric column.',
     'guia-paso-4': 'Choose the “Chart type”: Bar, Line or Pie, and tap “Generate chart”.',
-    'guia-paso-5': 'Tap “Download as PNG”. The file is named grafico.png.',
+    'guia-paso-5': 'Tap “Download as PNG”. The file is named chart.png.',
     'guia-consejo-1': 'The first row of the file is taken as the column names; repeated names get a suffix (_2, _3).',
     'guia-consejo-2': 'The first sheet of the workbook is used. If your data is on another one, move it to the front before loading the file.',
     'guia-consejo-3': 'The chart title is the name of the values column.',
@@ -307,7 +309,7 @@ document.getElementById('botonDescargarPng').addEventListener('click', () => {
   if (!hayGrafico) return;
   // El motor pinta el fondo blanco del gráfico, así que el PNG sale opaco.
   const enlace = document.createElement('a');
-  enlace.download = 'grafico.png';
+  enlace.download = t('archivo-grafico-png');
   enlace.href = document.getElementById('canvasGrafico').toDataURL('image/png');
   enlace.click();
 });

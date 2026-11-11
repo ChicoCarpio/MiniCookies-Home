@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Cómo procesar muchos archivos de una vez con Flujos, paso a paso — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Armá un flujo que lee códigos QR, recorta fotos de documentos, las pasa a PDF y las une. Tres ejemplos, el orden que importa y los límites.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+window.i18nPagina = {
+  es: {
+    'titulo-pagina': 'Cómo procesar muchos archivos de una vez con Flujos, paso a paso — Mini Cookies',
+    'meta-descripcion': 'Armá un flujo que lee códigos QR, recorta fotos de documentos, las pasa a PDF y las une. Tres ejemplos, el orden que importa y los límites.',
+    'h1': 'Cómo procesar muchos archivos de una vez con Flujos, paso a paso',
+    'b1': 'Imaginá sesenta fotos de recibos, cada una con un código QR que hay que anotar, y un solo PDF al final. Hecho foto por foto, son los mismos clics sesenta veces. Con <a href="../herramientas/flujos.html">Flujos: encadená herramientas</a> armás la cadena de pasos una vez y la aplicás a todas juntas. Si tu caso ya tiene un flujo listo en la categoría Flujos, lo abrís, cambiás sus opciones si hace falta y lo ejecutás.',
+    'b2': 'Una entrada o varias',
+    'b3': 'Cada archivo recorre la lista de pasos por su cuenta, así que sesenta fotos dan sesenta resultados. Hay dos excepciones. Un paso que «abre cada archivo en varios», como «PDF a imágenes (cada página)», convierte un PDF de doce páginas en doce resultados. Un paso que «junta todo en uno», como «Unir en un solo PDF», espera a que lleguen todos y devuelve uno.',
+    'b4': 'Con dos clases de archivo, por ejemplo fotos y documentos de Word, armás una entrada para cada una. Lo que sale de todas se junta en «Después de juntar las entradas», donde van los pasos que reciben todo lo que llega.',
+    'b5': 'Armar la cadena',
+    'b6-1': 'Elegí el primer paso de la «Entrada 1». Ese paso decide qué recibe la entrada: el encabezado dice, por ejemplo, «Entrada 1 · recibe imágenes».',
+    'b6-2': 'Agregá los siguientes con «Agregar». La lista solo ofrece los pasos que reciben lo que sale del anterior, así que no se puede armar una cadena imposible.',
+    'b6-3': 'Ajustá las opciones de cada paso. Los valores por defecto sirven para empezar. Si tenés otra clase de archivo, tocá «Agregar otra entrada» (hasta cuatro).',
+    'b6-4': 'Arrastrá todos los archivos a la zona: cada entrada toma los de su tipo. El resumen dice qué va a salir, por ejemplo «Entrega: PDF.» Después tocá «Ejecutar el flujo», que se activa cuando el flujo está bien armado y hay archivos.',
+    'b6-5': 'Con un solo resultado aparece «Descargar» con su nombre. Con varios, «Descargar todo (.zip)».',
+    'b7': 'Qué hace cada tipo de paso',
+    'b8-c1': 'Cómo se ve en la lista',
+    'b8-c2': 'Ejemplo',
+    'b8-c3': 'Qué pasa con los archivos',
+    'b8-f1c1': 'Sin etiqueta',
+    'b8-f1c2': '«Recortar documento (escáner con IA)»',
+    'b8-f1c3': 'Cada archivo entra y sale como uno solo. Si el paso lo quita, no sigue.',
+    'b8-f2c1': '«(abre cada archivo en varios)»',
+    'b8-f2c2': '«PDF a imágenes (cada página)»',
+    'b8-f2c3': 'Un PDF da varios resultados, y cada página sigue el flujo por su cuenta.',
+    'b8-f3c1': '«(junta todo en uno)»',
+    'b8-f3c2': '«Unir en un solo PDF»',
+    'b8-f3c3': 'Espera a todos los archivos que le llegan y devuelve un solo resultado.',
+    'b9': 'Ejemplo 1: fotos de recibos con QR en un solo PDF',
+    'b10': 'Las fotos están en el celular y el código de cada recibo tiene que quedar a la vista en el PDF. El botón «Ejemplo: QR → recorte → PDF» carga los tres primeros pasos; el cuarto lo agregás vos:',
+    'b11-1': '«Leer códigos QR y de barras», con «Si no hay código» en «Seguir con el archivo».',
+    'b11-2': '«Recortar documento (escáner con IA)», con «Mejora» en «Color realzado» y «Si no encuentra la hoja» en «Dejar la foto como está».',
+    'b11-3': '«Imagen a PDF», con «Tamaño de página» en «Ancho A4, alto según la imagen» y «Mostrar los códigos leídos en un cuadro» marcada.',
+    'b11-4': '«Unir en un solo PDF», al final.',
+    'b12': 'El lector va primero porque lee la foto tal como la sacaste. Si la foto pasa de 4096 píxeles por el lado más largo, el recorte la reduce antes de enderezar la hoja, y un código que cae fuera de la hoja se pierde. Los datos que lee un paso viajan con el archivo: leído antes, el código acompaña a la foto hasta «Imagen a PDF», que lo pone en un cuadro debajo de la imagen.',
+    'b13': 'Con «Quitarlo del flujo», una foto sin código no llega al PDF y figura en «Lo que no pasó:» como «quitado en el paso 1». Con «Seguir con el archivo», entra igual, pero sin cuadro.',
+    'b14': 'Ejemplo 2: escaneos en PDF con texto buscable y más liviano',
+    'b15': 'Un escaneo es una foto de cada hoja: no se puede buscar ni copiar, y suele pesar mucho. Estos dos pasos lo dejan buscable y más liviano:',
+    'b16-1': '«OCR: PDF con texto buscable», con «Idioma del texto» en el idioma del documento (por defecto, «Español e inglés»), «Enderezar páginas torcidas» marcada y «Preparar la imagen» en «Contraste automático».',
+    'b16-2': '«Comprimir PDF», con «Calidad de las fotos (%)» en 65 y «Tamaño de las fotos» en «Hasta 1600 px (pantalla)».',
+    'b17': 'El OCR va primero porque reconoce el texto tal como salió del escáner. Si comprimís antes, las letras pierden nitidez y el reconocimiento suele salir peor. «Comprimir PDF» solo recomprime las fotos a color, y el texto no cambia. Si el PDF ya trae texto que se puede seleccionar, no hace falta el OCR: «PDF a texto (.txt)» saca ese texto sin reconocer nada.',
+    'b18': 'Ejemplo 3: fotos y documentos de Word en un solo PDF',
+    'b19': 'Tenés fotos de comprobantes, un Word y una planilla de Excel, y querés un solo PDF. Las fotos y los documentos van por entradas separadas, que se juntan al final:',
+    'b20-1': 'En la «Entrada 1», «Imagen a PDF». Si las fotos son de hojas, podés poner antes «Recortar documento (escáner con IA)».',
+    'b20-2': 'Tocá «Agregar otra entrada» y en la «Entrada 2» agregá «Documento a PDF». Esa entrada recibe documentos o texto, así que el Word y la planilla entran ahí.',
+    'b20-3': 'En «Después de juntar las entradas», agregá «Unir en un solo PDF». La lista solo ofrece lo que recibe todo lo que llega, y este paso recibe PDF: por eso las dos entradas tienen que terminar en PDF.',
+    'b20-4': 'Arrastrá las fotos y los documentos juntos a la zona y tocá «Ejecutar el flujo». El PDF sale con las fotos primero y después los documentos, porque la unión sigue el orden de las entradas.',
+    'b21': 'Trampas frecuentes',
+    'b22-1': 'El PDF suelto del ejemplo 1 no entra: «Recortar documento (escáner con IA)» solo recibe imágenes, y el resumen lo marca como «ninguna entrada recibe este tipo de archivo». Los demás archivos siguen. En el ejemplo 3, el PDF suelto se resuelve con una entrada sin pasos: sus archivos pasan directo a «Después de juntar las entradas».',
+    'b22-2': 'Si ponés «Unir en un solo PDF» dentro de una entrada, cuando hay varias, la página marca el error y no deja ejecutar. No hay botón para moverlo: quitalo y agregalo otra vez en «Después de juntar las entradas».',
+    'b22-3': 'Leer el QR de un PDF y después separarlo con «PDF a imágenes (cada página)» deja todos los códigos del PDF en cada página, porque el lector no guarda el número de página.',
+    'b22-4': 'Las JPG ya derechas que llegan a «Imagen a PDF» sin un paso que las redibuje conservan sus datos EXIF: cámara, fecha y ubicación, si las tienen. Poné «Quitar metadatos EXIF» antes para sacarlos.',
+    'b22-5': 'Con un PDF protegido por contraseña fallan los pasos que lo abren con pdf-lib, como «Comprimir PDF» o «Rotar PDF». El resumen muestra el mensaje técnico de la librería, en inglés. Quitale la protección con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> antes del flujo.',
+    'b22-6': 'Más de 20 pasos en una misma lista: el motor usa los 20 primeros y no avisa.',
+    'b23': 'Lotes grandes',
+    'b24': 'Con muchos archivos, el flujo reparte el trabajo entre varios hilos: uno por núcleo del procesador, dejando uno libre para que la página siga respondiendo, con un tope de 12. Medido con 120 fotos (leer el QR, recortar el documento y comprimir) en una PC de 12 núcleos, el tiempo bajó de 36,7 s a 6,4 s. El resultado y el orden son los mismos que procesándolas de a una.',
+    'b25': 'En el celular son hasta tres hilos, según la memoria que informe el navegador. El OCR usa sus propios motores: hasta cuatro a la vez en una PC, y uno en el celular, porque cada motor ocupa bastante memoria. Todo corre en tu navegador: los archivos no salen de la computadora, tampoco en un lote de documentos privados. Con miles de archivos conviene partirlos en tandas, así, si algo sale mal, solo se rehace esa parte.',
+    'b26': 'Guardar un flujo y llevarlo a otra computadora',
+    'b27': 'El flujo se recuerda al recargar la página, pero los archivos no: hay que volver a elegirlos. Para una cadena que usás seguido, escribí un nombre en «Nombre para guardar este flujo» y tocá «Guardar en este navegador». Queda en «Mis flujos», y guardar con un nombre ya usado reemplaza el anterior sin preguntar.',
+    'b28': '«Descargar como archivo» baja un .json con el nombre del flujo y la terminación .flujo.json. Tiene solo los pasos y sus opciones, nunca tus archivos. En otra computadora, «Abrir un archivo de flujo» lo carga; los pasos que esa versión no conoce se omiten, y se avisa.',
+    'b29': 'Preguntas frecuentes',
+    'b30': '<strong>¿El flujo ordena los archivos?</strong> No. El resultado sigue el orden en que los cargaste, que es el que da el diálogo de archivos o el arrastre. Para cambiar el orden del PDF final, usá <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a>.',
+    'b31': '<strong>¿Qué pasa si un archivo falla a mitad del flujo?</strong> Los demás siguen. Al terminar, «Lo que no pasó:» dice qué archivo falló, en qué paso y por qué. Con varias entradas, también dice cuál.',
+    'b32': 'Resumen',
+    'b33': 'Un flujo aplica una cadena de pasos a muchos archivos a la vez. Leé los códigos antes de recortar, juntá solo lo que ya es PDF y dale una entrada a cada clase de archivo. Lo que no pasa aparece en «Lo que no pasó:», con el archivo, el paso y el motivo.',
+    'rel1': 'Flujos: encadená herramientas',
+    'rel2': 'Lector de códigos QR y de barras',
+    'rel3': 'Unir PDF, imágenes y documentos',
+    'rel4': 'OCR de PDF e imágenes escaneadas',
+    'rel5': 'Comprimir / optimizar PDF',
+    'rel6': 'Comprimir imagen'
+  },
+  en: {
+    'titulo-pagina': 'How to process many files at once with Flows, step by step — Mini Cookies',
+    'meta-descripcion': 'Build a flow that reads QR codes, crops document photos, makes them PDFs and merges them. Three examples, the order that matters and the limits.',
+    'h1': 'How to process many files at once with Flows, step by step',
+    'b1': 'Picture sixty receipt photos, each with a QR code that needs noting down, and one PDF at the end. Doing it photo by photo means the same clicks sixty times. With <a href="../herramientas/flujos.html">Flows: chain tools together</a> you build the chain of steps once and apply it to all of them together. If your case already has a ready-made flow in the Flows category, open it, change its options if needed and run it.',
+    'b2': 'One input or several',
+    'b3': 'Each file goes through the list of steps on its own, so sixty photos give sixty results. There are two exceptions. A step that “opens each file into several”, like “PDF to images (each page)”, turns a twelve-page PDF into twelve results. A step that “joins everything into one”, like “Merge into one PDF”, waits for all of them and returns one.',
+    'b4': 'With two kinds of file, for example photos and Word documents, you build one input for each. Everything that comes out of them joins in “After the inputs join”, where the steps that take everything that arrives go.',
+    'b5': 'Building the chain',
+    'b6-1': 'Pick the first step of “Input 1”. That step decides what the input takes: the heading says, for example, “Input 1 · takes images”.',
+    'b6-2': 'Add the next ones with “Add”. The list only offers the steps that take what the previous one produces, so you cannot build an impossible chain.',
+    'b6-3': 'Adjust the options of each step. The default values are a good place to start. If you have another kind of file, press “Add another input” (up to four).',
+    'b6-4': 'Drag all the files onto the area: each input takes the ones of its type. The summary says what will come out, for example “Produces: PDF.” Then press “Run the flow”, which turns on when the flow is valid and there are files.',
+    'b6-5': 'With a single result, a “Download” button appears with its name. With several, “Download all (.zip)”.',
+    'b7': 'What each kind of step does',
+    'b8-c1': 'How it looks in the list',
+    'b8-c2': 'Example',
+    'b8-c3': 'What happens to the files',
+    'b8-f1c1': 'No tag',
+    'b8-f1c2': '“Crop document (AI scanner)”',
+    'b8-f1c3': 'Each file goes in and comes out as one. If the step removes it, it goes no further.',
+    'b8-f2c1': '“(opens each file into several)”',
+    'b8-f2c2': '“PDF to images (each page)”',
+    'b8-f2c3': 'A PDF gives several results, and each page follows the flow on its own.',
+    'b8-f3c1': '“(joins everything into one)”',
+    'b8-f3c2': '“Merge into one PDF”',
+    'b8-f3c3': 'Waits for every file that reaches it and returns a single result.',
+    'b9': 'Example 1: receipt photos with QR codes in one PDF',
+    'b10': 'The photos are on your phone, and each receipt’s code has to stay visible in the PDF. The button “Example: QR → crop → PDF” loads the first three steps; you add the fourth:',
+    'b11-1': '“Read QR and barcodes”, with “If there is no code” set to “Keep the file”.',
+    'b11-2': '“Crop document (AI scanner)”, with “Enhancement” set to “Enhanced color” and “If no sheet is found” set to “Keep the photo as is”.',
+    'b11-3': '“Image to PDF”, with “Page size” set to “A4 width, height to fit the image” and “Show the codes read in a box” ticked.',
+    'b11-4': '“Merge into one PDF”, at the end.',
+    'b12': 'The reader goes first because it reads the photo the way you took it. If the photo is more than 4096 pixels on its longest side, the crop shrinks it before straightening the sheet, and a code outside the sheet is lost. The data a step reads travels with the file: read first, the code stays with the photo until “Image to PDF”, which puts it in a box under the image.',
+    'b13': 'With “Drop it from the flow”, a photo without a code does not reach the PDF and shows up under “What did not go through:” as “removed at step 1”. With “Keep the file”, it goes through, without a box.',
+    'b14': 'Example 2: scanned PDFs with searchable text and a smaller size',
+    'b15': 'A scan is a photo of each sheet: you cannot search or copy from it, and it tends to be heavy. These two steps make it searchable and lighter:',
+    'b16-1': '“OCR: searchable PDF”, with “Text language” set to the document’s language (default “Spanish and English”), “Straighten tilted pages” ticked and “Prepare the image” set to “Automatic contrast”.',
+    'b16-2': '“Compress PDF”, with “Photo quality (%)” at 65 and “Photo size” set to “Up to 1600 px (screen)”.',
+    'b17': 'OCR goes first because it reads the text as it came out of the scanner. If you compress first, the letters lose sharpness and recognition usually gets worse. “Compress PDF” only recompresses the color photos, and the text does not change. If the PDF already has text you can select, you don’t need OCR: “PDF to text (.txt)” takes that text out without recognizing anything.',
+    'b18': 'Example 3: photos and Word documents in one PDF',
+    'b19': 'You have photos of receipts, a Word file and an Excel table, and you want a single PDF. The photos and the documents go in separate inputs, which join at the end:',
+    'b20-1': 'In “Input 1”, “Image to PDF”. If the photos are of sheets, you can put “Crop document (AI scanner)” before it.',
+    'b20-2': 'Press “Add another input” and, in “Input 2”, add “Document to PDF”. That input takes documents or text, so the Word file and the Excel table go there.',
+    'b20-3': 'In “After the inputs join”, add “Merge into one PDF”. The list only offers what takes everything that arrives, and this step takes PDF only, so both inputs must end in PDF.',
+    'b20-4': 'Drag the photos and the documents together onto the area and press “Run the flow”. The PDF comes out with the photos first and then the documents, because the merge follows the order of the inputs.',
+    'b21': 'Common mistakes',
+    'b22-1': 'The loose PDF in Example 1 does not get in: “Crop document (AI scanner)” only takes images, and the summary says “no input takes this type of file”. The other files carry on. In Example 3, a loose PDF is handled by an input with no steps: its files go straight into “After the inputs join”.',
+    'b22-2': 'If you put “Merge into one PDF” inside an input when there are several, the page shows an error and won’t run. There is no button to move it: remove it and add it again under “After the inputs join”.',
+    'b22-3': 'Reading the QR of a PDF and then splitting it with “PDF to images (each page)” leaves all the codes of the PDF on every page, because the reader does not keep the page number.',
+    'b22-4': 'JPGs that are already upright and reach “Image to PDF” without a step that redraws them keep their EXIF data: camera, date and location, if they have them. Put “Remove EXIF metadata” before to strip them.',
+    'b22-5': 'With a password-protected PDF, steps that open it with pdf-lib fail, like “Compress PDF” or “Rotate PDF”. The summary shows the library’s technical message, in English. Unlock it with <a href="../herramientas/desbloquear-pdf.html">Unlock PDF</a> before the flow.',
+    'b22-6': 'More than 20 steps in one list: the engine uses the first 20 and does not warn.',
+    'b23': 'Large batches',
+    'b24': 'With many files, the flow spreads the work across several threads: one per processor core, leaving one free so the page keeps responding, up to a limit of 12. Measured with 120 photos (read the QR, crop the document and compress) on a 12-core PC, the time dropped from 36.7 s to 6.4 s. The result and the order are the same as processing them one by one.',
+    'b25': 'On a phone it uses up to three threads, depending on the memory the browser reports. OCR has its own engines: up to four at a time on a PC, and one on a phone, because each engine takes a lot of memory. Everything runs in your browser: the files never leave the computer, not even in a batch of private documents. With thousands of files, it helps to split them into batches, so that if something goes wrong only that part has to be redone.',
+    'b26': 'Saving a flow and taking it to another computer',
+    'b27': 'The flow is remembered when you reload the page, but the files are not: you have to choose them again. For a chain you use often, type a name in “Name to save this flow” and press “Save in this browser”. It goes to “My flows”, and saving under a name that already exists replaces the old one without asking.',
+    'b28': '“Download as a file” saves a .json file named after the flow, ending in .flow.json. It holds only the steps and their options, never your files. On another computer, “Open a flow file” loads it; steps that this version does not know are left out, and the page says so.',
+    'b29': 'Frequently asked questions',
+    'b30': '<strong>Does the flow sort the files?</strong> No. The result follows the order in which you loaded them, which is the order the file dialog or the drag gives. To change the order of the final PDF, use <a href="../herramientas/administrar-paginas.html">Manage PDF pages</a>.',
+    'b31': '<strong>What happens if a file fails halfway through?</strong> The others carry on. At the end, “What did not go through:” names the file, the step and the reason. With several inputs, it also says which one.',
+    'b32': 'Summary',
+    'b33': 'A flow applies a chain of steps to many files at once. Read the codes before cropping, merge only what is already PDF, and give each kind of file its own input. Whatever does not go through appears under “What did not go through:”, with the file, the step and the reason.',
+    'rel1': 'Flows: chain tools together',
+    'rel2': 'QR and barcode reader',
+    'rel3': 'Merge PDF, images and documents',
+    'rel4': 'OCR for scanned PDFs and images',
+    'rel5': 'Compress / optimize PDF',
+    'rel6': 'Compress an image'
+  }
+};
+</script>
+</head>
+<body>
+
+<div id="fondoDecorativo"></div>
+
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../todas.html" data-i18n="nav-todas">Todas las herramientas</a>
+    <a href="../privacidad.html" data-i18n="nav-privacidad">Privacidad</a>
+    <a href="../terminos.html" data-i18n="nav-terminos">Términos de uso</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <article class="guia-uso articulo">
+    <a class="articulo-volver" href="index.html" data-i18n="guias-volver">← Todas las guías</a>
+    <h1 data-i18n="h1">Cómo procesar muchos archivos de una vez con Flujos, paso a paso</h1>
+    <p data-i18n-html="b1">Imaginá sesenta fotos de recibos, cada una con un código QR que hay que anotar, y un solo PDF al final. Hecho foto por foto, son los mismos clics sesenta veces. Con <a href="../herramientas/flujos.html">Flujos: encadená herramientas</a> armás la cadena de pasos una vez y la aplicás a todas juntas. Si tu caso ya tiene un flujo listo en la categoría Flujos, lo abrís, cambiás sus opciones si hace falta y lo ejecutás.</p>
+    <h2 data-i18n="b2">Una entrada o varias</h2>
+    <p data-i18n-html="b3">Cada archivo recorre la lista de pasos por su cuenta, así que sesenta fotos dan sesenta resultados. Hay dos excepciones. Un paso que «abre cada archivo en varios», como «PDF a imágenes (cada página)», convierte un PDF de doce páginas en doce resultados. Un paso que «junta todo en uno», como «Unir en un solo PDF», espera a que lleguen todos y devuelve uno.</p>
+    <p data-i18n-html="b4">Con dos clases de archivo, por ejemplo fotos y documentos de Word, armás una entrada para cada una. Lo que sale de todas se junta en «Después de juntar las entradas», donde van los pasos que reciben todo lo que llega.</p>
+    <h2 data-i18n="b5">Armar la cadena</h2>
+    <ol>
+      <li data-i18n-html="b6-1">Elegí el primer paso de la «Entrada 1». Ese paso decide qué recibe la entrada: el encabezado dice, por ejemplo, «Entrada 1 · recibe imágenes».</li>
+      <li data-i18n-html="b6-2">Agregá los siguientes con «Agregar». La lista solo ofrece los pasos que reciben lo que sale del anterior, así que no se puede armar una cadena imposible.</li>
+      <li data-i18n-html="b6-3">Ajustá las opciones de cada paso. Los valores por defecto sirven para empezar. Si tenés otra clase de archivo, tocá «Agregar otra entrada» (hasta cuatro).</li>
+      <li data-i18n-html="b6-4">Arrastrá todos los archivos a la zona: cada entrada toma los de su tipo. El resumen dice qué va a salir, por ejemplo «Entrega: PDF.» Después tocá «Ejecutar el flujo», que se activa cuando el flujo está bien armado y hay archivos.</li>
+      <li data-i18n-html="b6-5">Con un solo resultado aparece «Descargar» con su nombre. Con varios, «Descargar todo (.zip)».</li>
+    </ol>
+    <h2 data-i18n="b7">Qué hace cada tipo de paso</h2>
+    <div class="tabla-ancha"><table>
+      <thead><tr><th data-i18n-html="b8-c1">Cómo se ve en la lista</th><th data-i18n-html="b8-c2">Ejemplo</th><th data-i18n-html="b8-c3">Qué pasa con los archivos</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n-html="b8-f1c1">Sin etiqueta</td><td data-i18n-html="b8-f1c2">«Recortar documento (escáner con IA)»</td><td data-i18n-html="b8-f1c3">Cada archivo entra y sale como uno solo. Si el paso lo quita, no sigue.</td></tr>
+        <tr><td data-i18n-html="b8-f2c1">«(abre cada archivo en varios)»</td><td data-i18n-html="b8-f2c2">«PDF a imágenes (cada página)»</td><td data-i18n-html="b8-f2c3">Un PDF da varios resultados, y cada página sigue el flujo por su cuenta.</td></tr>
+        <tr><td data-i18n-html="b8-f3c1">«(junta todo en uno)»</td><td data-i18n-html="b8-f3c2">«Unir en un solo PDF»</td><td data-i18n-html="b8-f3c3">Espera a todos los archivos que le llegan y devuelve un solo resultado.</td></tr>
+      </tbody>
+    </table></div>
+    <h2 data-i18n="b9">Ejemplo 1: fotos de recibos con QR en un solo PDF</h2>
+    <p data-i18n-html="b10">Las fotos están en el celular y el código de cada recibo tiene que quedar a la vista en el PDF. El botón «Ejemplo: QR → recorte → PDF» carga los tres primeros pasos; el cuarto lo agregás vos:</p>
+    <ol>
+      <li data-i18n-html="b11-1">«Leer códigos QR y de barras», con «Si no hay código» en «Seguir con el archivo».</li>
+      <li data-i18n-html="b11-2">«Recortar documento (escáner con IA)», con «Mejora» en «Color realzado» y «Si no encuentra la hoja» en «Dejar la foto como está».</li>
+      <li data-i18n-html="b11-3">«Imagen a PDF», con «Tamaño de página» en «Ancho A4, alto según la imagen» y «Mostrar los códigos leídos en un cuadro» marcada.</li>
+      <li data-i18n-html="b11-4">«Unir en un solo PDF», al final.</li>
+    </ol>
+    <p data-i18n-html="b12">El lector va primero porque lee la foto tal como la sacaste. Si la foto pasa de 4096 píxeles por el lado más largo, el recorte la reduce antes de enderezar la hoja, y un código que cae fuera de la hoja se pierde. Los datos que lee un paso viajan con el archivo: leído antes, el código acompaña a la foto hasta «Imagen a PDF», que lo pone en un cuadro debajo de la imagen.</p>
+    <p data-i18n-html="b13">Con «Quitarlo del flujo», una foto sin código no llega al PDF y figura en «Lo que no pasó:» como «quitado en el paso 1». Con «Seguir con el archivo», entra igual, pero sin cuadro.</p>
+    <h2 data-i18n="b14">Ejemplo 2: escaneos en PDF con texto buscable y más liviano</h2>
+    <p data-i18n-html="b15">Un escaneo es una foto de cada hoja: no se puede buscar ni copiar, y suele pesar mucho. Estos dos pasos lo dejan buscable y más liviano:</p>
+    <ol>
+      <li data-i18n-html="b16-1">«OCR: PDF con texto buscable», con «Idioma del texto» en el idioma del documento (por defecto, «Español e inglés»), «Enderezar páginas torcidas» marcada y «Preparar la imagen» en «Contraste automático».</li>
+      <li data-i18n-html="b16-2">«Comprimir PDF», con «Calidad de las fotos (%)» en 65 y «Tamaño de las fotos» en «Hasta 1600 px (pantalla)».</li>
+    </ol>
+    <p data-i18n-html="b17">El OCR va primero porque reconoce el texto tal como salió del escáner. Si comprimís antes, las letras pierden nitidez y el reconocimiento suele salir peor. «Comprimir PDF» solo recomprime las fotos a color, y el texto no cambia. Si el PDF ya trae texto que se puede seleccionar, no hace falta el OCR: «PDF a texto (.txt)» saca ese texto sin reconocer nada.</p>
+    <h2 data-i18n="b18">Ejemplo 3: fotos y documentos de Word en un solo PDF</h2>
+    <p data-i18n-html="b19">Tenés fotos de comprobantes, un Word y una planilla de Excel, y querés un solo PDF. Las fotos y los documentos van por entradas separadas, que se juntan al final:</p>
+    <ol>
+      <li data-i18n-html="b20-1">En la «Entrada 1», «Imagen a PDF». Si las fotos son de hojas, podés poner antes «Recortar documento (escáner con IA)».</li>
+      <li data-i18n-html="b20-2">Tocá «Agregar otra entrada» y en la «Entrada 2» agregá «Documento a PDF». Esa entrada recibe documentos o texto, así que el Word y la planilla entran ahí.</li>
+      <li data-i18n-html="b20-3">En «Después de juntar las entradas», agregá «Unir en un solo PDF». La lista solo ofrece lo que recibe todo lo que llega, y este paso recibe PDF: por eso las dos entradas tienen que terminar en PDF.</li>
+      <li data-i18n-html="b20-4">Arrastrá las fotos y los documentos juntos a la zona y tocá «Ejecutar el flujo». El PDF sale con las fotos primero y después los documentos, porque la unión sigue el orden de las entradas.</li>
+    </ol>
+    <h2 data-i18n="b21">Trampas frecuentes</h2>
+    <ul>
+      <li data-i18n-html="b22-1">El PDF suelto del ejemplo 1 no entra: «Recortar documento (escáner con IA)» solo recibe imágenes, y el resumen lo marca como «ninguna entrada recibe este tipo de archivo». Los demás archivos siguen. En el ejemplo 3, el PDF suelto se resuelve con una entrada sin pasos: sus archivos pasan directo a «Después de juntar las entradas».</li>
+      <li data-i18n-html="b22-2">Si ponés «Unir en un solo PDF» dentro de una entrada, cuando hay varias, la página marca el error y no deja ejecutar. No hay botón para moverlo: quitalo y agregalo otra vez en «Después de juntar las entradas».</li>
+      <li data-i18n-html="b22-3">Leer el QR de un PDF y después separarlo con «PDF a imágenes (cada página)» deja todos los códigos del PDF en cada página, porque el lector no guarda el número de página.</li>
+      <li data-i18n-html="b22-4">Las JPG ya derechas que llegan a «Imagen a PDF» sin un paso que las redibuje conservan sus datos EXIF: cámara, fecha y ubicación, si las tienen. Poné «Quitar metadatos EXIF» antes para sacarlos.</li>
+      <li data-i18n-html="b22-5">Con un PDF protegido por contraseña fallan los pasos que lo abren con pdf-lib, como «Comprimir PDF» o «Rotar PDF». El resumen muestra el mensaje técnico de la librería, en inglés. Quitale la protección con <a href="../herramientas/desbloquear-pdf.html">Desbloquear PDF</a> antes del flujo.</li>
+      <li data-i18n-html="b22-6">Más de 20 pasos en una misma lista: el motor usa los 20 primeros y no avisa.</li>
+    </ul>
+    <h2 data-i18n="b23">Lotes grandes</h2>
+    <p data-i18n-html="b24">Con muchos archivos, el flujo reparte el trabajo entre varios hilos: uno por núcleo del procesador, dejando uno libre para que la página siga respondiendo, con un tope de 12. Medido con 120 fotos (leer el QR, recortar el documento y comprimir) en una PC de 12 núcleos, el tiempo bajó de 36,7 s a 6,4 s. El resultado y el orden son los mismos que procesándolas de a una.</p>
+    <p data-i18n-html="b25">En el celular son hasta tres hilos, según la memoria que informe el navegador. El OCR usa sus propios motores: hasta cuatro a la vez en una PC, y uno en el celular, porque cada motor ocupa bastante memoria. Todo corre en tu navegador: los archivos no salen de la computadora, tampoco en un lote de documentos privados. Con miles de archivos conviene partirlos en tandas, así, si algo sale mal, solo se rehace esa parte.</p>
+    <h2 data-i18n="b26">Guardar un flujo y llevarlo a otra computadora</h2>
+    <p data-i18n-html="b27">El flujo se recuerda al recargar la página, pero los archivos no: hay que volver a elegirlos. Para una cadena que usás seguido, escribí un nombre en «Nombre para guardar este flujo» y tocá «Guardar en este navegador». Queda en «Mis flujos», y guardar con un nombre ya usado reemplaza el anterior sin preguntar.</p>
+    <p data-i18n-html="b28">«Descargar como archivo» baja un .json con el nombre del flujo y la terminación .flujo.json. Tiene solo los pasos y sus opciones, nunca tus archivos. En otra computadora, «Abrir un archivo de flujo» lo carga; los pasos que esa versión no conoce se omiten, y se avisa.</p>
+    <h2 data-i18n="b29">Preguntas frecuentes</h2>
+    <p data-i18n-html="b30"><strong>¿El flujo ordena los archivos?</strong> No. El resultado sigue el orden en que los cargaste, que es el que da el diálogo de archivos o el arrastre. Para cambiar el orden del PDF final, usá <a href="../herramientas/administrar-paginas.html">Administrar páginas de PDF</a>.</p>
+    <p data-i18n-html="b31"><strong>¿Qué pasa si un archivo falla a mitad del flujo?</strong> Los demás siguen. Al terminar, «Lo que no pasó:» dice qué archivo falló, en qué paso y por qué. Con varias entradas, también dice cuál.</p>
+    <h2 data-i18n="b32">Resumen</h2>
+    <p data-i18n-html="b33">Un flujo aplica una cadena de pasos a muchos archivos a la vez. Leé los códigos antes de recortar, juntá solo lo que ya es PDF y dale una entrada a cada clase de archivo. Lo que no pasa aparece en «Lo que no pasó:», con el archivo, el paso y el motivo.</p>
+  </article>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso articulo-relacionadas">
+    <h2 data-i18n="guias-relacionadas">Herramientas relacionadas</h2>
+    <ul>
+      <li><a href="../herramientas/flujos.html" data-i18n="rel1">Flujos: encadená herramientas</a></li>
+      <li><a href="../herramientas/lector-codigos.html" data-i18n="rel2">Lector de códigos QR y de barras</a></li>
+      <li><a href="../herramientas/unir-pdf.html" data-i18n="rel3">Unir PDF, imágenes y documentos</a></li>
+      <li><a href="../herramientas/ocr-pdf.html" data-i18n="rel4">OCR de PDF e imágenes escaneadas</a></li>
+      <li><a href="../herramientas/optimizar-pdf.html" data-i18n="rel5">Comprimir / optimizar PDF</a></li>
+      <li><a href="../herramientas/comprimir-imagen.html" data-i18n="rel6">Comprimir imagen</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

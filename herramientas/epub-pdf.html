@@ -12,6 +12,10 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-pdf-desde-epub-zip': 'pdf-desde-epub.zip',
+    'archivo-epub-desde-pdf-zip': 'epub-desde-pdf.zip',
+    'archivo-libro-pdf': 'libro.pdf',
+    'archivo-libro-epub': 'libro.epub',
     'titulo-pagina': 'Convertir EPUB y PDF gratis — Mini Cookies',
     'meta-descripcion': 'Convertí un libro EPUB a PDF, o un PDF a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'EPUB ↔ PDF',
@@ -64,6 +68,10 @@ window.i18nPagina = {
     'guia-r4': 'No. El EPUB conserva el texto con sus títulos, negritas, cursivas e imágenes, pero se reacomoda para pantallas pequeñas.'
   },
   en: {
+    'archivo-pdf-desde-epub-zip': 'pdf-from-epub.zip',
+    'archivo-epub-desde-pdf-zip': 'epub-from-pdf.zip',
+    'archivo-libro-pdf': 'book.pdf',
+    'archivo-libro-epub': 'book.epub',
     'titulo-pagina': 'Convert EPUB and PDF Free — Mini Cookies',
     'meta-descripcion': 'Convert an EPUB book to PDF, or a PDF to EPUB, in either direction — free and without uploading your file anywhere.',
     'h1': 'EPUB ↔ PDF',
@@ -150,7 +158,7 @@ window.i18nPagina = {
         <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
       </div>
       <div class="resultado" id="resultadoPdf">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="libro.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" data-i18n-attr="download:archivo-libro-pdf" download="libro.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
       </div>
       <div id="resumenLotePdf" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
@@ -177,7 +185,7 @@ window.i18nPagina = {
         El EPUB conserva títulos (cada título principal abre un capítulo), negritas, cursivas e imágenes; se quitan los números de página y encabezados que se repiten en cada hoja. Una página sin texto real (un escaneo) entra como imagen.
       </p>
       <div class="resultado" id="resultadoEpub">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" data-i18n-attr="download:archivo-libro-epub" download="libro.epub" data-i18n="resultado-enlace">Descargar EPUB</a>
       </div>
       <div id="resumenLoteEpub" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
@@ -315,7 +323,7 @@ botonAPdf.addEventListener('click', async () => {
       }), (i) => { libro = i + 1; });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaPdf.href = URL.createObjectURL(zip);
-      enlaceDescargaPdf.download = 'pdf-desde-epub.zip';
+      enlaceDescargaPdf.download = t('archivo-pdf-desde-epub-zip');
       enlaceDescargaPdf.textContent = t('enlace-descargar-zip-pdf');
       LoteArchivos.pintarResumen(resumenLotePdf, resultados, t);
     }
@@ -399,7 +407,7 @@ botonAEpub.addEventListener('click', async () => {
       }, (i) => { numero = i + 1; });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaEpub.href = URL.createObjectURL(zip);
-      enlaceDescargaEpub.download = 'epub-desde-pdf.zip';
+      enlaceDescargaEpub.download = t('archivo-epub-desde-pdf-zip');
       enlaceDescargaEpub.textContent = t('enlace-descargar-zip-epub');
       LoteArchivos.pintarResumen(resumenLoteEpub, resultados, t);
     }

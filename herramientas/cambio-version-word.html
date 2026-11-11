@@ -13,6 +13,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documentos-convertidos-zip': 'documentos-convertidos.zip',
     'titulo-pagina': 'Cambiar la versión de un Word: .docx, .doc, .odt y .rtf gratis — Mini Cookies',
     'meta-descripcion': 'Pasá un documento de Word 2007+ (.docx) a Word 97-2003 (.doc), a LibreOffice (.odt) o a RTF, o al revés, conservando estilos, tablas, imágenes y listas — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Cambio de versión de Word',
@@ -63,6 +64,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí. Se probó con Word y con LibreOffice, y se abre sin pedir reparación.'
   },
   en: {
+    'archivo-documentos-convertidos-zip': 'converted-documents.zip',
     'titulo-pagina': 'Change the version of a Word file: .docx, .doc, .odt and .rtf free — Mini Cookies',
     'meta-descripcion': 'Convert a document from Word 2007+ (.docx) to Word 97-2003 (.doc), LibreOffice (.odt) or RTF, or the other way round, keeping styles, tables, images and lists — free and without uploading your file to any server.',
     'h1': 'Word version change',
@@ -310,7 +312,7 @@ botonConvertir.addEventListener('click', async () => {
       const zip = await LoteArchivos.zipDeResultados(resultados);
       urlResultado = URL.createObjectURL(zip);
       enlaceDescarga.href = urlResultado;
-      enlaceDescarga.download = 'documentos-convertidos.zip';
+      enlaceDescarga.download = t('archivo-documentos-convertidos-zip');
       enlaceDescarga.textContent = t('resultado-enlace-zip');
       resultado.style.display = 'block';
     }

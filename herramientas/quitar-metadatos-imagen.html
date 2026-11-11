@@ -22,6 +22,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-sin-metadatos': 'imagen-sin-metadatos',
     'hero-titulo': 'Quitar metadatos EXIF de una foto',
     'intro': 'Elegí una foto, mirá qué metadatos tiene (cámara, fecha, ubicación GPS) y descargala sin ellos antes de compartirla.',
     'boton-descargar': 'Descargar sin metadatos',
@@ -56,6 +57,7 @@ window.i18nPagina = {
     'guia-r4': 'No, una por vez.'
   },
   en: {
+    'archivo-imagen-sin-metadatos': 'image-no-metadata',
     'hero-titulo': 'Remove EXIF metadata from a photo',
     'intro': 'Pick a photo, see what metadata it carries (camera, date, GPS location) and download it without any of that before you share it.',
     'boton-descargar': 'Download without metadata',
@@ -81,7 +83,7 @@ window.i18nPagina = {
     'guia-consejo-3': 'If the photo relies on the orientation tag to look upright (typical of phones), it is redrawn and exported again, so it doesn’t end up rotated.',
     'guia-consejo-4': 'PNG and WebP are also redrawn and come out without metadata. Other formats (GIF, BMP, SVG) are downloaded as PNG.',
     'guia-p1': 'What is the downloaded file called?',
-    'guia-r1': 'imagen-sin-metadatos.jpg (or .png / .webp depending on the format).',
+    'guia-r1': 'image-no-metadata.jpg (or .png / .webp depending on the format).',
     'guia-p2': 'Does it show all the data in the photo?',
     'guia-r2': 'No: only camera, date and location; it’s a summary, and the cleaning is complete.',
     'guia-p3': 'Does it work for videos or PDFs?',
@@ -128,7 +130,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-sin-metadatos" data-i18n="resultado-enlace">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-sin-metadatos" download="imagen-sin-metadatos" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -261,7 +263,7 @@ botonDescargar.addEventListener('click', async () => {
   // La lógica (sin pérdida en JPEG derecho; si no, redibujar en un canvas) está en assets/js/imagen-basica.js.
   const blob = await ImagenBasica.quitarMetadatos(archivoActual, imagenActual, orientacionActual);
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-sin-metadatos.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+  enlaceDescarga.download = `${t('archivo-imagen-sin-metadatos')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

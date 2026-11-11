@@ -29,6 +29,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-marcada': 'imagen-marcada',
     'hero-titulo': 'Marca de agua para imagen',
     'intro': 'Agregá un texto (ej. "CONFIDENCIAL", tu nombre) o tu logo como marca de agua sobre una imagen, en la posición y el ángulo que quieras.',
     'campo-texto': 'Texto de la marca de agua',
@@ -83,6 +84,7 @@ window.i18nPagina = {
     'guia-r4': 'Elegí «Donde yo la ponga» y arrastrala sobre la imagen.'
   },
   en: {
+    'archivo-imagen-marcada': 'watermarked-image',
     'hero-titulo': 'Image watermark',
     'intro': 'Add a piece of text (say "CONFIDENTIAL", or your name) or your logo as a watermark over an image, at the position and angle you want.',
     'campo-texto': 'Watermark text',
@@ -128,7 +130,7 @@ window.i18nPagina = {
     'guia-consejo-3': 'If the text or logo doesn’t fit when rotated, it’s shrunk automatically.',
     'guia-consejo-4': 'A low opacity with the watermark spread out leaves the image visible but hard to reuse.',
     'guia-p1': 'What format is it downloaded in?',
-    'guia-r1': 'PNG, JPG and WebP are kept; any other input format (GIF, BMP, SVG...) comes out as PNG. The file is named “imagen-marcada” with the format’s extension: .png, .jpg or .webp.',
+    'guia-r1': 'PNG, JPG and WebP are kept; any other input format (GIF, BMP, SVG...) comes out as PNG. The file is named “watermarked-image” with the format’s extension: .png, .jpg or .webp.',
     'guia-p2': 'Can I choose the text color?',
     'guia-r2': 'No, it’s white with a dark outline.',
     'guia-p3': 'Can I see the watermark in the preview before applying it?',
@@ -232,7 +234,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-marcada" data-i18n="resultado-enlace">Descargar imagen con marca de agua</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-marcada" download="imagen-marcada" data-i18n="resultado-enlace">Descargar imagen con marca de agua</a>
     </div>
   </div>
 
@@ -437,7 +439,7 @@ botonAplicar.addEventListener('click', async () => {
   const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-marcada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+  enlaceDescarga.download = `${t('archivo-imagen-marcada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-superpuesto-pdf': 'documento-superpuesto.pdf',
     'titulo-pagina': 'Superponer PDF gratis — Mini Cookies',
     'meta-descripcion': 'Superponé un PDF sobre otro (por ejemplo una plantilla o membrete) página por página, gratis y sin subir tus archivos a ningún servidor.',
     'h1': 'Superponer PDF',
@@ -45,6 +46,7 @@ window.i18nPagina = {
     'guia-r4': 'No, se genera un PDF nuevo.',
   },
   en: {
+    'archivo-documento-superpuesto-pdf': 'overlaid-document.pdf',
     'titulo-pagina': 'Overlay PDFs Free — Mini Cookies',
     'meta-descripcion': 'Overlay one PDF on top of another (e.g. a template or letterhead) page by page, free and without uploading your files anywhere.',
     'h1': 'Overlay PDF',
@@ -63,7 +65,7 @@ window.i18nPagina = {
     'guia-paso-1': 'In “Base PDF (the content)” drag or choose the document you want to add something to.',
     'guia-paso-2': 'In “Overlay PDF (the template/letterhead)” choose the PDF that will go on top.',
     'guia-paso-3': 'Click “Overlay PDFs” once both have a thumbnail; the button is only enabled when both files are loaded.',
-    'guia-paso-4': 'Download the result with “Download resulting PDF” (documento-superpuesto.pdf).',
+    'guia-paso-4': 'Download the result with “Download resulting PDF” (overlaid-document.pdf).',
     'guia-consejo-1': 'Page 1 of the base PDF gets page 1 of the overlay, page 2 gets page 2, and so on. If the overlay has fewer pages, the last one is repeated for the rest.',
     'guia-consejo-2': 'A single-page template with a transparent background is the most practical for a letterhead that repeats across the whole document.',
     'guia-consejo-3': 'The overlay is drawn on top of the content and fitted to the size of each base page. If your letterhead has opaque areas, it will cover whatever is underneath; use a template with empty or transparent areas.',
@@ -121,7 +123,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-superpuesto.pdf" data-i18n="resultado-enlace">Descargar PDF resultante</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-superpuesto-pdf" download="documento-superpuesto.pdf" data-i18n="resultado-enlace">Descargar PDF resultante</a>
     </div>
   </div>
 

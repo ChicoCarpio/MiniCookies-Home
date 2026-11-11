@@ -7,11 +7,15 @@
 //     opciones: { tiempoMaximoMs: 5000 }  (espera máxima por cada imagen).
 //     alAvanzar(pagina, totalPaginas): se llama antes de revisar cada página.
 //     → Promise<Array<{ pagina, numero, nombre, blob (PNG), ancho, alto }>>
-//       numero cuenta desde 1 en todo el PDF; nombre = pagina-X-imagen-N.png.
+//       numero cuenta desde 1 en todo el PDF; nombre = pagina-X-imagen-N.png (page-X-image-N.png en inglés).
 //
 // Las imágenes repetidas (mismo objeto común o mismo contenido) salen una vez.
 // Requiere antes: assets/js/vendor.js y assets/js/pdfjs.js (abrirPdf).
 (function () {
+  // También corre en el hilo de los flujos, donde no existe t: el nombre se elige por idioma.
+  const PIEZAS = { es: { pagina: 'pagina', imagen: 'imagen' }, en: { pagina: 'page', imagen: 'image' } };
+  const nombrePieza = (clave) => PIEZAS[(window.idiomaActual && idiomaActual()) === 'en' ? 'en' : 'es'][clave];
+
   function imagenPdfACanvas(imagenPdf) {
     const { width, height, data, kind, bitmap } = imagenPdf;
     const canvas = document.createElement('canvas');
@@ -115,7 +119,7 @@
           resultado.push({
             pagina: i,
             numero,
-            nombre: `pagina-${i}-imagen-${numero}.png`,
+            nombre: `${nombrePieza('pagina')}-${i}-${nombrePieza('imagen')}-${numero}.png`,
             blob,
             ancho: canvas.width,
             alto: canvas.height

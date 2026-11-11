@@ -13,6 +13,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-reemplazado-docx': 'documento-reemplazado.docx',
     'titulo-pagina': 'Buscar y reemplazar en Word gratis — Mini Cookies',
     'meta-descripcion': 'Buscá y reemplazá texto en un documento Word (.docx, .doc u .odt) conservando el formato, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Buscar y reemplazar en Word',
@@ -56,6 +57,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, acepta .doc y .odt además de .docx. El resultado se guarda siempre como .docx.',
   },
   en: {
+    'archivo-documento-reemplazado-docx': 'replaced-document.docx',
     'titulo-pagina': 'Find and Replace in Word Free — Mini Cookies',
     'meta-descripcion': 'Find and replace text in a Word document (.docx, .doc or .odt) while keeping the formatting, free and without uploading your file anywhere.',
     'h1': 'Find and replace in Word',
@@ -84,7 +86,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the Word document (.docx, .doc or .odt) onto the upload area or click to choose it.',
     'guia-paso-2': 'Type what you want to find under “Find” and the new text under “Replace with” (it can be left empty to delete the text).',
     'guia-paso-3': 'Choose the options you need: “Match case”, “Whole words only” or “Use regular expression”.',
-    'guia-paso-4': 'Tap “Replace and download”. It shows how many replacements were made and the “Download Word” link appears. The file is named “documento-reemplazado.docx”.',
+    'guia-paso-4': 'Tap “Replace and download”. It shows how many replacements were made and the “Download Word” link appears. The file is named “replaced-document.docx”.',
     'guia-consejo-1': 'It also searches headers, footers, footnotes, endnotes and comments.',
     'guia-consejo-2': 'It finds the phrase even if parts of it have different formatting (for example, a bold word in the middle). In that case, the new text takes the formatting of the start of the phrase found.',
     'guia-consejo-3': 'A tab or a line break cuts the search: phrases that span one are not found.',
@@ -155,7 +157,7 @@ window.i18nPagina = {
     <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reemplazado.docx" data-i18n="resultado-enlace">Descargar Word</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-reemplazado-docx" download="documento-reemplazado.docx" data-i18n="resultado-enlace">Descargar Word</a>
     </div>
   </div>
 

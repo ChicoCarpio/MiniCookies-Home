@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-diapositivas-zip': 'diapositivas.zip',
     'titulo-pagina': 'Convertir PowerPoint a imágenes gratis — Mini Cookies',
     'meta-descripcion': 'Exportá cada diapositiva de una presentación PowerPoint (.pptx, .ppt u .odp) como imagen PNG, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'PowerPoint a imágenes',
@@ -49,6 +50,7 @@ window.i18nPagina = {
     'guia-r4': 'No, solo lo que se ve en la diapositiva.'
   },
   en: {
+    'archivo-diapositivas-zip': 'slides.zip',
     'titulo-pagina': 'Convert PowerPoint to Images Free — Mini Cookies',
     'meta-descripcion': 'Export each slide of a PowerPoint presentation (.pptx, .ppt or .odp) as a PNG image, free and without uploading your file anywhere.',
     'h1': 'PowerPoint to images',
@@ -71,7 +73,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your PowerPoint file (.pptx, .ppt or .odp) or click to choose it.',
     'guia-paso-2': 'Tap “Convert to images”. While it works you see the progress (“Rendering slides...”) and then a preview of each slide is shown.',
     'guia-paso-3': 'When it finishes, tap “Download .zip with the images”.',
-    'guia-paso-4': 'Unzip the .zip: each slide ends up as diapositiva-01.png, diapositiva-02.png, and so on (the number of zeros adjusts to the total).',
+    'guia-paso-4': 'Unzip the .zip: each slide ends up as slide-01.png, slide-02.png, and so on (the number of zeros adjusts to the total).',
     'guia-consejo-1': 'Check the preview before downloading: since the drawing isn’t done by real PowerPoint, slides with very complex designs, animations or unusual elements may look different from the original.',
     'guia-consejo-2': 'PNG files have no lossy compression, so text and shapes come out sharp; the trade-off is that they can be quite large if the slide has many photos.',
     'guia-consejo-3': 'Whatever can’t be drawn is left out, and an unreadable slide comes out blank. The tool only shows an error if every slide comes out empty. Hidden slides are converted too.',
@@ -119,7 +121,7 @@ window.i18nPagina = {
     <div class="vista-previa-diapositivas" id="vistaPreviaDiapositivas"></div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="diapositivas.zip" data-i18n="resultado-enlace">Descargar .zip con las imágenes</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-diapositivas-zip" download="diapositivas.zip" data-i18n="resultado-enlace">Descargar .zip con las imágenes</a>
     </div>
   </div>
 

@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'prefijo-pagina': 'pagina',
+    'archivo-paginas-divididas-zip': 'paginas-divididas.zip',
     'titulo-pagina': 'Dividir PDF gratis y seguro — Mini Cookies',
     'meta-descripcion': 'Dividí un PDF en archivos individuales por página, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Dividir PDF',
@@ -39,6 +41,8 @@ window.i18nPagina = {
     'guia-r3': 'No directamente. Primero tenés que quitarle la protección con «Desbloquear PDF»; después se divide con normalidad. Si lo intentás directo, aparece «No se pudo dividir el PDF» con el detalle del error.'
   },
   en: {
+    'prefijo-pagina': 'page',
+    'archivo-paginas-divididas-zip': 'split-pages.zip',
     'titulo-pagina': 'Split PDF Free and Securely — Mini Cookies',
     'meta-descripcion': 'Split a PDF into individual files by page, free and without uploading your file anywhere.',
     'h1': 'Split PDF',
@@ -55,7 +59,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the PDF onto the upload area or click to choose it. You’ll see its thumbnail and the number of pages.',
     'guia-paso-2': 'Press “Split PDF”. The button shows “Splitting...” while the pages are separated one by one.',
     'guia-paso-3': 'When “Done” appears, download the .zip with the pages, unzip it and use the files you need.',
-    'guia-consejo-1': 'The files are named pagina-1.pdf, pagina-2.pdf… with leading zeros when the total calls for it (pagina-01 to pagina-12, for example), so they sort correctly in any folder.',
+    'guia-consejo-1': 'The files are named page-1.pdf, page-2.pdf… with leading zeros when the total calls for it (page-01 to page-12, for example), so they sort correctly in any folder.',
     'guia-consejo-2': 'If you only want some pages, split and keep the ones you need; to build another document from them, use “Merge PDF, Images and Documents” afterwards and choose the order.',
     'guia-consejo-3': 'The tool always separates page by page: it doesn’t let you enter ranges or cut at a specific point.',
     'guia-p1': 'Is quality lost when splitting?',
@@ -96,7 +100,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="paginas-divididas.zip" data-i18n="resultado-enlace">Descargar .zip con las páginas</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-paginas-divididas-zip" download="paginas-divididas.zip" data-i18n="resultado-enlace">Descargar .zip con las páginas</a>
     </div>
   </div>
 
@@ -186,7 +190,7 @@ botonDividir.addEventListener('click', async () => {
     const partes = await PdfRetoques.dividir(pdfOrigen);
     const zip = new ZipPropio();
     const cantidadDigitos = String(partes.length).length;
-    partes.forEach((bytesPagina, i) => zip.file(`pagina-${String(i + 1).padStart(cantidadDigitos, '0')}.pdf`, bytesPagina));
+    partes.forEach((bytesPagina, i) => zip.file(`${t('prefijo-pagina')}-${String(i + 1).padStart(cantidadDigitos, '0')}.pdf`, bytesPagina));
 
     const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     enlaceDescarga.href = URL.createObjectURL(blobZip);

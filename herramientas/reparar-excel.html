@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'sufijo-reparado': '-reparado',
+    'archivo-excel-reparado-xlsx': 'excel-reparado.xlsx',
     'titulo-pagina': 'Reparar Excel gratis — Mini Cookies',
     'meta-descripcion': 'Intentá recuperar un archivo Excel (.xlsx) dañado o que no abre bien, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Reparar Excel',
@@ -53,6 +55,8 @@ window.i18nPagina = {
     'guia-r3': 'Solo en parte. El nivel 1 quita la hoja dañada entera. El nivel 2 intenta leer sus datos: si consigue alguno, la devuelve solo con esos datos, sin colores, bordes ni fuentes. Si la hoja no se puede leer, el mensaje la nombra en «No se pudieron leer».'
   },
   en: {
+    'sufijo-reparado': '-repaired',
+    'archivo-excel-reparado-xlsx': 'repaired-excel.xlsx',
     'titulo-pagina': 'Repair Excel Free — Mini Cookies',
     'meta-descripcion': 'Try to recover a damaged Excel file (.xlsx) that won’t open properly, free and without uploading your file anywhere.',
     'h1': 'Repair Excel',
@@ -87,7 +91,7 @@ window.i18nPagina = {
     'guia-consejo-3': 'At level 2, if only some sheets of a multi-sheet workbook can be read, the message says how many of the total were recovered and which couldn’t be read. Empty sheets are skipped and the message names them separately.',
     'guia-consejo-4': 'If no row can be read, the tool says it couldn’t repair the file instead of making up a result.',
     'guia-p1': 'What is the repaired file called?',
-    'guia-r1': 'It has the original name with “-reparado” before the extension, for example ventas-reparado.xlsx. With level 2 it always comes out as .xlsx. If the file was healthy, it keeps its original name.',
+    'guia-r1': 'It has the original name with “-repaired” before the extension, for example ventas-reparado.xlsx. With level 2 it always comes out as .xlsx. If the file was healthy, it keeps its original name.',
     'guia-p2': 'Does it recover macros?',
     'guia-r2': 'At level 1, an .xlsm keeps its extension; at level 2 it comes out as .xlsx, without macros.',
     'guia-p3': 'Can it give me back a sheet that was broken?',
@@ -130,7 +134,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="excel-reparado.xlsx" data-i18n="resultado-enlace">Descargar Excel reparado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-excel-reparado-xlsx" download="excel-reparado.xlsx" data-i18n="resultado-enlace">Descargar Excel reparado</a>
     </div>
   </div>
 
@@ -318,7 +322,7 @@ async function reparar(forzarNivel2) {
         if (quitadas.length === 0) {
           mostrarResultado(reparados, archivoActual.name, t('mensaje-sano'), false, true);
         } else {
-          mostrarResultado(reparados, `${nombreBase()}-reparado.${extension}`, t('mensaje-nivel1').replace('{hojas}', quitadas.join(', ')), false, true);
+          mostrarResultado(reparados, `${nombreBase()}${t('sufijo-reparado')}.${extension}`, t('mensaje-nivel1').replace('{hojas}', quitadas.join(', ')), false, true);
         }
         return;
       } catch (errorNivel1) {
@@ -326,7 +330,7 @@ async function reparar(forzarNivel2) {
       }
     }
     const { bytes: reparados, mensaje } = await repararSoloDatos(archivoActual);
-    mostrarResultado(reparados, `${nombreBase()}-reparado.xlsx`, mensaje, true, false);
+    mostrarResultado(reparados, `${nombreBase()}${t('sufijo-reparado')}.xlsx`, mensaje, true, false);
   } catch (error) {
     alert(t('error-reparar') + ': ' + error.message);
   } finally {

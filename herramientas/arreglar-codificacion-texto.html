@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'sufijo-corregido': '-corregido',
+    'archivo-texto-corregido-txt': 'texto-corregido.txt',
     'titulo-pagina': 'Arreglar codificación de un texto gratis — Mini Cookies',
     'meta-descripcion': 'Arreglá problemas de codificación en un archivo de texto (.txt): BOM, saltos de línea mixtos y caracteres inválidos — gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo de texto acá o hacé clic para elegirlo (.txt, .csv, .tsv, .srt, .vtt, .md, .log)',
@@ -63,6 +65,8 @@ window.i18nPagina = {
     'guia-r4': 'No, solo texto plano.',
   },
   en: {
+    'sufijo-corregido': '-fixed',
+    'archivo-texto-corregido-txt': 'fixed-text.txt',
     'titulo-pagina': 'Fix Text File Encoding Free — Mini Cookies',
     'meta-descripcion': 'Fix broken accents and mixed line breaks in a text file (.txt, .csv, .srt...), free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your text file here or click to choose it (.txt, .csv, .tsv, .srt, .vtt, .md, .log)',
@@ -99,7 +103,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Under “Output line breaks” choose “Unix / Mac (LF)” (the default) or “Windows (CRLF)”.',
     'guia-paso-3': 'Check the “Save with BOM” box. It ticks itself if the file is .csv or .tsv, because the BOM helps Excel show the accents correctly.',
     'guia-paso-4': 'Tap “Fix”. A diagnosis appears with the detected encoding and the list of corrections made.',
-    'guia-paso-5': 'Tap “Download fixed file”. The file keeps its name with the “-corregido” suffix (for example, “subtitulos-corregido.srt”).',
+    'guia-paso-5': 'Tap “Download fixed file”. The file keeps its name with the “-fixed” suffix (for example, “subtitles-fixed.srt”).',
     'guia-consejo-1': 'The tool removes the UTF-8 BOM, converts UTF-16 files (what Notepad calls “Unicode”) to UTF-8 and, if the file isn’t valid UTF-8, reinterprets it as Windows-1252.',
     'guia-consejo-2': 'It also undoes text “broken” by having been saved with the wrong encoding, such as “â€™” instead of an apostrophe. It checks up to two passes, in case the damage was repeated.',
     'guia-consejo-3': 'If the file was already fine, it still generates a normalized copy and tells you so.',
@@ -157,7 +161,7 @@ window.i18nPagina = {
     <p id="diagnostico" style="color:var(--texto-suave); display:none; font-size:0.9rem;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-corregido.txt" data-i18n="resultado-enlace">Descargar archivo corregido</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-texto-corregido-txt" download="texto-corregido.txt" data-i18n="resultado-enlace">Descargar archivo corregido</a>
     </div>
   </div>
 
@@ -369,8 +373,8 @@ botonArreglar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     const punto = archivoActual.name.lastIndexOf('.');
     enlaceDescarga.download = punto > 0
-      ? `${archivoActual.name.slice(0, punto)}-corregido${archivoActual.name.slice(punto)}`
-      : `${archivoActual.name}-corregido.txt`;
+      ? `${archivoActual.name.slice(0, punto)}${t('sufijo-corregido')}${archivoActual.name.slice(punto)}`
+      : `${archivoActual.name}${t('sufijo-corregido')}.txt`;
     resultado.classList.add('visible');
   } catch (error) {
     alert(t('error-procesar') + ': ' + error.message);

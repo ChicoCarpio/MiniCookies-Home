@@ -259,7 +259,7 @@ export function iniciarDictado() {
     const blob = new Blob([areaTexto.value], { type: 'text/plain' });
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);
-    enlace.download = 'dictado.txt';
+    enlace.download = (window.idiomaActual && idiomaActual()) === 'en' ? 'dictation.txt' : 'dictado.txt';
     enlace.click();
   });
 

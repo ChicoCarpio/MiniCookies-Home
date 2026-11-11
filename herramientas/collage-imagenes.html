@@ -659,7 +659,7 @@ function cargarImagen(archivo) {
     const img = new Image();
     const url = URL.createObjectURL(archivo);
     img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`no se pudo abrir "${archivo.name}"`)); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`"${archivo.name}"`)); };   // solo el nombre: el aviso ya dice «no se pudieron abrir» en el idioma de la página
     img.src = url;
   });
 }

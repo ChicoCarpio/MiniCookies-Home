@@ -59,6 +59,9 @@
 
   const EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
   const conExtension = (nombre, tipo) => F.base(nombre) + (EXT[tipo] || '.png');
+  // Partes de los nombres de archivo que genera este archivo (también corre en el hilo de trabajo, donde no existe t): se eligen por idioma.
+  const NOMBRES = { es: { unido: 'unido', pagina: 'pagina', diapositiva: 'diapositiva' }, en: { unido: 'merged', pagina: 'page', diapositiva: 'slide' } };
+  const nom = (clave) => NOMBRES[(window.idiomaActual && idiomaActual()) === 'en' ? 'en' : 'es'][clave];
 
   // ---------- 1. Leer códigos QR y de barras ----------
   F.registrar({
@@ -337,7 +340,7 @@
     async ejecutar(f, o) {
       const paginas = await PdfAImagenes.renderizar(f.blob, { escala: Number(o.escala), formato: o.formato, calidad: 0.92 });
       const ext = o.formato === 'image/jpeg' ? '.jpg' : '.png', ancho = String(paginas.length).length;
-      return paginas.map((p) => fichaDeImagen(f, p, `${F.base(f.nombre)}-pagina-${String(p.pagina).padStart(ancho, '0')}${ext}`));
+      return paginas.map((p) => fichaDeImagen(f, p, `${F.base(f.nombre)}-${nom('pagina')}-${String(p.pagina).padStart(ancho, '0')}${ext}`));
     },
   });
 
@@ -358,7 +361,7 @@
       if (imagenes.length) return imagenes.map((i) => fichaDeImagen(f, i, `${F.base(f.nombre)}-${i.nombre}`));
       if (o.sinImagenes === 'pagina') {
         const paginas = await PdfAImagenes.renderizar(f.blob, { escala: 2, formato: 'image/png', calidad: 0.92 });
-        return paginas.map((p) => fichaDeImagen(f, p, `${F.base(f.nombre)}-pagina-${p.pagina}.png`));
+        return paginas.map((p) => fichaDeImagen(f, p, `${F.base(f.nombre)}-${nom('pagina')}-${p.pagina}.png`));
       }
       return [];   // queda en «lo que no pasó» como quitado en este paso
     },
@@ -379,7 +382,7 @@
     async ejecutar(fichas) {
       const bytes = await PdfUnir.unir(fichas.map((f) => f.blob));
       const codigos = fichas.flatMap((f) => f.datos.codigos || []);
-      return { nombre: 'unido.pdf', blob: new Blob([bytes], { type: 'application/pdf' }), tipo: 'pdf', datos: codigos.length ? { codigos } : {}, origen: 'unido.pdf' };
+      return { nombre: `${nom('unido')}.pdf`, blob: new Blob([bytes], { type: 'application/pdf' }), tipo: 'pdf', datos: codigos.length ? { codigos } : {}, origen: `${nom('unido')}.pdf` };
     },
   });
 
@@ -737,7 +740,7 @@
     async ejecutar(f) {
       const partes = await PdfRetoques.dividir(await abrirPdfLib(f));
       const ancho = String(partes.length).length;
-      return partes.map((bytes, i) => ({ ...fichaPdf(f, bytes), datos: { ...f.datos }, nombre: `${F.base(f.nombre)}-pagina-${String(i + 1).padStart(ancho, '0')}.pdf` }));
+      return partes.map((bytes, i) => ({ ...fichaPdf(f, bytes), datos: { ...f.datos }, nombre: `${F.base(f.nombre)}-${nom('pagina')}-${String(i + 1).padStart(ancho, '0')}.pdf` }));
     },
   });
 
@@ -779,7 +782,7 @@
       const ancho = String(imagenes.length).length;
       return imagenes.map((img, i) => {
         if (img.url) URL.revokeObjectURL(img.url);
-        return { ...f, datos: { ...f.datos }, blob: img.png, tipo: 'imagen', nombre: `${F.base(f.nombre)}-diapositiva-${String(i + 1).padStart(ancho, '0')}.png` };
+        return { ...f, datos: { ...f.datos }, blob: img.png, tipo: 'imagen', nombre: `${F.base(f.nombre)}-${nom('diapositiva')}-${String(i + 1).padStart(ancho, '0')}.png` };
       });
     },
   });

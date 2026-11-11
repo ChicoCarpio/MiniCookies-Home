@@ -18,6 +18,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-ocr-pdf': 'documento-ocr.pdf',
+    'archivo-texto-ocr-txt': 'texto-ocr.txt',
     'titulo-pagina': 'OCR de PDF e imágenes escaneadas gratis — Mini Cookies',
     'meta-descripcion': 'Convertí un PDF escaneado o fotos/imágenes escaneadas en un PDF con texto buscable/seleccionable, o extraé el texto a .txt — gratis, con OCR que corre en tu navegador.',
     'h1': 'OCR de PDF e imágenes escaneadas',
@@ -71,6 +73,8 @@ window.i18nPagina = {
     'guia-r3': 'Marcá todos los que aparecen. Se pueden usar a la vez, pero cuantos más elijas más lenta es la lectura, así que marcá solo los necesarios.',
   },
   en: {
+    'archivo-documento-ocr-pdf': 'ocr-document.pdf',
+    'archivo-texto-ocr-txt': 'ocr-text.txt',
     'titulo-pagina': 'OCR for Scanned PDFs and Images Free — Mini Cookies',
     'meta-descripcion': 'Convert a scanned PDF or scanned photos/images into a PDF with searchable/selectable text, or extract the text to .txt — free, with OCR that runs in your browser.',
     'h1': 'OCR for scanned PDFs and images',
@@ -188,8 +192,8 @@ window.i18nPagina = {
     <div class="resultado" id="resultado">
       <p id="mensajeResultado" style="margin-top:0;"></p>
       <div class="controles">
-        <a class="boton" id="enlaceDescargaPdf" download="documento-ocr.pdf" data-i18n="resultado-enlace-pdf">Descargar PDF con texto buscable</a>
-        <a class="boton" id="enlaceDescargaTxt" download="texto-ocr.txt" data-i18n="resultado-enlace-txt">Descargar .txt</a>
+        <a class="boton" id="enlaceDescargaPdf" data-i18n-attr="download:archivo-documento-ocr-pdf" download="documento-ocr.pdf" data-i18n="resultado-enlace-pdf">Descargar PDF con texto buscable</a>
+        <a class="boton" id="enlaceDescargaTxt" data-i18n-attr="download:archivo-texto-ocr-txt" download="texto-ocr.txt" data-i18n="resultado-enlace-txt">Descargar .txt</a>
       </div>
     </div>
   </div>
@@ -366,12 +370,12 @@ botonOcr.addEventListener('click', async () => {
     const bytesFinales = await pdfNuevo.save();
     const blobPdf = new Blob([bytesFinales], { type: 'application/pdf' });
     enlaceDescargaPdf.href = URL.createObjectURL(blobPdf);
-    enlaceDescargaPdf.download = 'documento-ocr.pdf';
+    enlaceDescargaPdf.download = t('archivo-documento-ocr-pdf');
 
     const textoCompleto = textosPorPagina.join(t('separador-pagina'));
     const blobTxt = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
     enlaceDescargaTxt.href = URL.createObjectURL(blobTxt);
-    enlaceDescargaTxt.download = 'texto-ocr.txt';
+    enlaceDescargaTxt.download = t('archivo-texto-ocr-txt');
 
     mensajeResultado.textContent = t('resultado-mensaje').replace('{n}', totalPaginas).replace('{s}', totalPaginas === 1 ? '' : 's');
     resultado.classList.add('visible');

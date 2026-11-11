@@ -35,6 +35,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-pdf': 'documento.pdf',
     'titulo-pagina': 'Convertir PDF a PDF/A gratis — Mini Cookies',
     'meta-descripcion': 'Convertí un PDF normal a PDF/A (formato de archivo para preservación a largo plazo) o quitá la marca PDF/A de uno existente, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'PDF ↔ PDF/A',
@@ -84,6 +85,7 @@ window.i18nPagina = {
     'guia-r4': 'No se redibuja nada: se agregan datos al archivo, el contenido de las páginas queda igual.'
   },
   en: {
+    'archivo-documento-pdf': 'document.pdf',
     'titulo-pagina': 'Convert PDF to PDF/A Free — Mini Cookies',
     'meta-descripcion': 'Convert a regular PDF to PDF/A (a file format for long-term preservation) or remove the PDF/A mark from an existing one, free and without uploading your file anywhere.',
     'h1': 'PDF ↔ PDF/A',
@@ -188,7 +190,7 @@ window.i18nPagina = {
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-pdf" download="documento.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
     </div>
   </div>
 

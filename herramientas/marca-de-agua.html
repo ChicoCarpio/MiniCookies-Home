@@ -27,6 +27,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-marcado-pdf': 'documento-marcado.pdf',
     'titulo-pagina': 'Marca de agua para PDF gratis — Mini Cookies',
     'meta-descripcion': 'Agregá una marca de agua de texto a todas las páginas de un PDF, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Marca de agua para PDF',
@@ -65,6 +66,7 @@ window.i18nPagina = {
     'guia-r4': 'No: usa una fuente estándar de PDF que cubre letras latinas con acentos, no otros alfabetos ni emojis.'
   },
   en: {
+    'archivo-documento-marcado-pdf': 'watermarked-document.pdf',
     'titulo-pagina': 'Free PDF Watermark — Mini Cookies',
     'meta-descripcion': 'Add a text watermark to every page of a PDF, free and without uploading your file anywhere.',
     'h1': 'PDF watermark',
@@ -88,7 +90,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your PDF to the upload area or click to choose it. You’ll see a thumbnail of the first page with the watermark as a preview.',
     'guia-paso-2': 'Type the “Watermark text”.',
     'guia-paso-3': 'Adjust the “Font size” (20 to 150), the “Opacity” (5 to 50 %) and “Repeat the message” (1 to 20 copies, spread out in a grid).',
-    'guia-paso-4': 'Tap “Apply watermark” and then “Download watermarked PDF”. The file is named “documento-marcado.pdf”.',
+    'guia-paso-4': 'Tap “Apply watermark” and then “Download watermarked PDF”. The file is named “watermarked-document.pdf”.',
     'guia-consejo-1': 'The watermark runs at 45 degrees, in gray and in the Helvetica Bold font. If the text is long, it shrinks by itself to fit.',
     'guia-consejo-2': 'The low opacity (15 % by default) lets the content be read; raise it if you need it to stand out more.',
     'guia-consejo-3': 'With several copies the text shrinks so each one fits in its cell; it helps cover the whole page better.',
@@ -149,7 +151,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-marcado.pdf" data-i18n="resultado-enlace">Descargar PDF con marca de agua</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-marcado-pdf" download="documento-marcado.pdf" data-i18n="resultado-enlace">Descargar PDF con marca de agua</a>
     </div>
   </div>
 

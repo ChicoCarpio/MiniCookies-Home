@@ -13,6 +13,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-codigo-qr-png': 'codigo-qr.png',
     'hero-titulo': 'Generador de códigos QR',
     'intro': 'Escribí un link o texto y generá un código QR al instante.',
     'campo-texto': 'Texto o URL',
@@ -87,6 +88,7 @@ window.i18nPagina = {
     'guia-r5': 'Los lectores necesitan que el código sea bastante más oscuro que el fondo. Si el par que elegiste no llega al contraste mínimo, la herramienta oscurece el código o aclara el fondo lo justo y te avisa. Un código claro sobre un fondo oscuro se intercambia, porque muchas aplicaciones no lo leen.',
   },
   en: {
+    'archivo-codigo-qr-png': 'qr-code.png',
     'hero-titulo': 'QR code generator',
     'intro': 'Type a link or some text and get a QR code instantly.',
     'campo-texto': 'Text or URL',
@@ -144,7 +146,7 @@ window.i18nPagina = {
     'guia-paso-2': 'Choose the “Size”: Small (200px), Medium (300px) or Large (500px). It only changes the preview; the PNG you download doesn’t depend on this option.',
     'guia-paso-3': 'Press “Generate QR” or the Enter key. The code appears below, surrounded by a white margin.',
     'guia-paso-4': 'If you want, open “Customize the QR (optional)” to put a logo in the center, pick colors or change the shape of the modules and the three corners.',
-    'guia-paso-5': 'Try it with your phone’s camera and, if it reads fine, use “Download the QR as an image” to save the codigo-qr.png file.',
+    'guia-paso-5': 'Try it with your phone’s camera and, if it reads fine, use “Download the QR as an image” to save the qr-code.png file.',
     'guia-consejo-1': 'For printing you don’t need to pick a size: the PNG you download is at least 2048 px per side, and its exact size appears next to the link. On a poster, make the code big enough to be read from the distance it will be scanned at.',
     'guia-consejo-2': 'When designing your material, don’t crop the white margin or place the code over a busy background: the reader needs good contrast and that clear area around it to find the code.',
     'guia-consejo-3': 'Shorter text produces a simpler QR with larger modules that is easier to read. If your link is very long, shorten it first.',
@@ -284,7 +286,7 @@ window.i18nPagina = {
     <div class="vista-fija vacia" id="panelVista">
       <canvas id="vistaQR" style="display:none;"></canvas>
       <div class="resultado" id="resultado">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a><span id="tamanoDescarga"></span>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-codigo-qr-png" download="codigo-qr.png" data-i18n="resultado-enlace">Descargar QR como imagen</a><span id="tamanoDescarga"></span>
       </div>
     </div>
    </div>

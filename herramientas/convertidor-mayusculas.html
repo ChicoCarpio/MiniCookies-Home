@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto': 'texto',
     'hero-titulo': 'Convertir mayúsculas y minúsculas',
     'intro': 'Escribí o pegá tu texto y elegí el formato.',
     'placeholder-texto': 'Escribí o pegá tu texto acá...',
@@ -46,6 +47,7 @@ window.i18nPagina = {
     'guia-r4': 'No hay un límite programado; depende de la memoria del navegador.',
   },
   en: {
+    'archivo-texto': 'text',
     'hero-titulo': 'Change text case',
     'intro': 'Type or paste your text and pick a format.',
     'placeholder-texto': 'Type or paste your text here...',
@@ -190,7 +192,7 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
 });
 
 document.getElementById('botonDescargar').addEventListener('click', () => {
-  if (texto.value) descargarTexto(texto.value, nombreConFecha('texto', 'txt'));
+  if (texto.value) descargarTexto(texto.value, nombreConFecha(t('archivo-texto'), 'txt'));
 });
 </script>
 <script src="../assets/js/tema.js"></script>

@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documentos-unidos-docx': 'documentos-unidos.docx',
     'titulo-pagina': 'Unir varios Word en uno gratis — Mini Cookies',
     'meta-descripcion': 'Combiná varios documentos Word (.docx, .doc u .odt) en uno solo, cada uno empezando en una página nueva, gratis y sin subir tus archivos a ningún servidor.',
     'h1': 'Unir varios Word',
@@ -51,6 +52,7 @@ window.i18nPagina = {
     'guia-r4': 'No, se genera uno nuevo.'
   },
   en: {
+    'archivo-documentos-unidos-docx': 'merged-documents.docx',
     'titulo-pagina': 'Merge Several Word Documents Free — Mini Cookies',
     'meta-descripcion': 'Combine several Word documents (.docx, .doc or .odt) into one, each starting on a new page, free and without uploading your files anywhere.',
     'h1': 'Merge several Word documents',
@@ -118,7 +120,7 @@ window.i18nPagina = {
     <div class="controles">
       <label class="campo">
         <span data-i18n="campo-nombre">Nombre del archivo</span>
-        <input type="text" id="nombreArchivo" value="documentos-unidos" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+        <input type="text" id="nombreArchivo" value="documentos-unidos" data-i18n-attr="value:nombre-defecto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
       </label>
       <button class="boton" id="botonUnir" disabled data-i18n="boton-unir">Unir en un Word</button>
     </div>
@@ -127,7 +129,7 @@ window.i18nPagina = {
     <p id="advertencias" style="color:#b45309; display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documentos-unidos.docx" data-i18n="resultado-enlace">Descargar Word combinado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documentos-unidos-docx" download="documentos-unidos.docx" data-i18n="resultado-enlace">Descargar Word combinado</a>
     </div>
   </div>
 

@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto-con-pie-txt': 'texto-con-pie.txt',
     'titulo-pagina': 'Agregar encabezado o pie a un texto plano gratis — Mini Cookies',
     'meta-descripcion': 'Agregá una línea de texto al principio o al final de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
@@ -47,6 +48,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, con una línea en blanco entre cada parte.'
   },
   en: {
+    'archivo-texto-con-pie-txt': 'text-with-footer.txt',
     'titulo-pagina': 'Add a Header or Footer to a Text File Free — Mini Cookies',
     'meta-descripcion': 'Add a line of text at the start and/or end of a plain text file (.txt), free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
@@ -67,7 +69,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your .txt file to the upload area or click to choose it.',
     'guia-paso-2': 'Type the “Header text (optional)”, the “Footer text (optional)”, or both.',
     'guia-paso-3': 'Tap “Apply and download”.',
-    'guia-paso-4': 'Use the “Download .txt” link. The resulting file is named “texto-con-pie.txt”.',
+    'guia-paso-4': 'Use the “Download .txt” link. The resulting file is named “text-with-footer.txt”.',
     'guia-consejo-1': 'At least one of the two texts is needed. If both are empty, a pop-up says “Couldn’t generate the file: Type at least one text”.',
     'guia-consejo-2': 'The header and footer are separated from the original content by a blank line.',
     'guia-consejo-3': 'For something visual like “--- Confidential document ---”, use dashes or symbols in the text itself, since it’s added literally.',
@@ -120,7 +122,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-con-pie.txt" data-i18n="resultado-enlace">Descargar .txt</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-texto-con-pie-txt" download="texto-con-pie.txt" data-i18n="resultado-enlace">Descargar .txt</a>
     </div>
   </div>
 

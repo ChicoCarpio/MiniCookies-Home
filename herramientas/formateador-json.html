@@ -16,6 +16,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-json-formateado': 'json-formateado',
     'hero-titulo': 'Formatear y validar JSON',
     'intro': 'Pegá tu JSON, formatealo con indentación legible o minificalo, y te avisamos si tiene algún error.',
     'boton-formatear': 'Formatear (indentado)',
@@ -48,6 +49,7 @@ window.i18nPagina = {
     'guia-r4': 'Siempre 2 espacios; no hay opción para cambiarla.',
   },
   en: {
+    'archivo-json-formateado': 'formatted-json',
     'hero-titulo': 'Format and validate JSON',
     'intro': 'Paste your JSON, format it with readable indentation or minify it, and we will tell you if anything is broken.',
     'boton-formatear': 'Format (indented)',
@@ -248,7 +250,7 @@ document.getElementById('botonCopiar').addEventListener('click', async () => {
 document.getElementById('botonDescargar').addEventListener('click', () => {
   actualizarResultado();
   if (!salida.value) return;
-  descargarTexto(salida.value, nombreConFecha('json-formateado', 'json'), 'application/json');
+  descargarTexto(salida.value, nombreConFecha(t('archivo-json-formateado'), 'json'), 'application/json');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

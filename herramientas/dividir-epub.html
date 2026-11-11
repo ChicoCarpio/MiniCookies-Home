@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'prefijo-capitulo': 'capitulo',
+    'archivo-capitulos-epub-zip': 'capitulos-epub.zip',
     'titulo-pagina': 'Dividir EPUB gratis — Mini Cookies',
     'meta-descripcion': 'Dividir EPUB por capítulos: separá un libro en un mini-EPUB por capítulo, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
@@ -46,6 +48,8 @@ window.i18nPagina = {
     'guia-r4': '«capitulos-epub.zip».',
   },
   en: {
+    'prefijo-capitulo': 'chapter',
+    'archivo-capitulos-epub-zip': 'epub-chapters.zip',
     'titulo-pagina': 'Split EPUB Free — Mini Cookies',
     'meta-descripcion': 'Split an EPUB by chapter: turn a book into one small EPUB per chapter, free and without uploading your file anywhere.',
     'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
@@ -77,7 +81,7 @@ window.i18nPagina = {
     'guia-p3': 'Can I put the chapters back together?',
     'guia-r3': 'This tool doesn’t do that.',
     'guia-p4': 'What is the zip called?',
-    'guia-r4': '“capitulos-epub.zip”.',
+    'guia-r4': '“epub-chapters.zip”.',
   }
 };
 </script>
@@ -112,7 +116,7 @@ window.i18nPagina = {
     <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="capitulos-epub.zip" data-i18n="resultado-enlace">Descargar .zip con los capítulos</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-capitulos-epub-zip" download="capitulos-epub.zip" data-i18n="resultado-enlace">Descargar .zip con los capítulos</a>
     </div>
   </div>
 
@@ -216,7 +220,7 @@ botonDividir.addEventListener('click', async () => {
       await podarRecursosEpub(parte);
       const blob = await guardarPaqueteEpub(parte);
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
-      const nombreLimpio = capitulos[i].titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || 'capitulo';
+      const nombreLimpio = capitulos[i].titulo.replace(/[\\/:*?"<>|]/g, '').slice(0, 50) || t('prefijo-capitulo');
       zip.file(`${numero}-${nombreLimpio}.epub`, blob);
     }
 

@@ -19,6 +19,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-con-borde': 'imagen-con-borde',
     'hero-titulo': 'Agregar borde a imagen',
     'intro': 'Elegí una imagen y agregale un borde de color alrededor.',
     'campo-color': 'Color del borde',
@@ -53,6 +54,7 @@ window.i18nPagina = {
     'guia-r4': 'No, de a una.',
   },
   en: {
+    'archivo-imagen-con-borde': 'image-with-border',
     'hero-titulo': 'Add a border to an image',
     'intro': 'Pick an image and add a colored border around it.',
     'campo-color': 'Border color',
@@ -72,7 +74,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag an image or click to choose it. A preview appears with a 20 px white border.',
     'guia-paso-2': 'Choose the “Border color” with the color picker.',
     'guia-paso-3': 'Adjust the “Thickness” with the slider (1 to 200 px). If you want a different border on each side, tick “Different thickness per side” and set Top, Right, Bottom and Left separately (0 to 200 px).',
-    'guia-paso-4': 'Tap “Download image” and then the “Download image” link. The file is named “imagen-con-borde” with a PNG, JPG or WebP extension.',
+    'guia-paso-4': 'Tap “Download image” and then the “Download image” link. The file is named “image-with-border” with a PNG, JPG or WebP extension.',
     'guia-consejo-1': 'With a different thickness per side you can set one side to 0 so it has no frame, or make a wider frame at the bottom, instant-photo style.',
     'guia-consejo-2': 'If the image is PNG or WebP it’s saved in that same format (with transparency); if it’s JPG it comes out as JPG. Any other format (GIF, BMP, SVG…) is saved as PNG.',
     'guia-consejo-3': 'The border is added to the original size, so the thickness is in pixels of the real image, not screen pixels.',
@@ -136,7 +138,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-con-borde" data-i18n="resultado-enlace">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-con-borde" download="imagen-con-borde" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -267,7 +269,7 @@ botonDescargar.addEventListener('click', async () => {
   const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-con-borde.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+  enlaceDescarga.download = `${t('archivo-imagen-con-borde')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

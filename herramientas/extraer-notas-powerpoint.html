@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-notas-orador-txt': 'notas-orador.txt',
     'titulo-pagina': 'Extraer notas del orador de PowerPoint gratis — Mini Cookies',
     'meta-descripcion': 'Sacá las notas del orador de una presentación PowerPoint (.pptx, .ppt u .odp) a texto plano, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Extraer notas del orador',
@@ -46,6 +47,7 @@ window.i18nPagina = {
     'guia-r4': 'No, una por vez.'
   },
   en: {
+    'archivo-notas-orador-txt': 'speaker-notes.txt',
     'titulo-pagina': 'Extract PowerPoint Speaker Notes Free — Mini Cookies',
     'meta-descripcion': 'Get the speaker notes from a PowerPoint presentation (.pptx, .ppt or .odp) as plain text, free and without uploading your file anywhere.',
     'h1': 'Extract speaker notes',
@@ -65,7 +67,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the PowerPoint file (.pptx, .ppt or .odp) or click to choose it.',
     'guia-paso-2': 'Tap “Extract notes”.',
     'guia-paso-3': 'The notes appear in a text box, each block headed by “--- Notes for slide N ---”.',
-    'guia-paso-4': 'Use “Copy text” to put them on the clipboard or “Download .txt” to save them as “notas-orador.txt”.',
+    'guia-paso-4': 'Use “Copy text” to put them on the clipboard or “Download .txt” to save them as “speaker-notes.txt”.',
     'guia-consejo-1': 'If a slide has a notes page but it’s empty, “(no notes)” appears under its heading.',
     'guia-consejo-2': 'A slide with no notes page in the file doesn’t appear in the result.',
     'guia-consejo-3': 'The number in the heading is that of the notes file inside the .pptx; if you reordered or deleted slides, it may not match the slide’s current position.',
@@ -113,7 +115,7 @@ window.i18nPagina = {
       <textarea id="textoExtraido" readonly></textarea>
       <div class="controles">
         <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
-        <a class="boton" id="enlaceDescarga" download="notas-orador.txt" data-i18n="enlace-descargar">Descargar .txt</a>
+        <a class="boton" id="enlaceDescarga" data-i18n-attr="download:archivo-notas-orador-txt" download="notas-orador.txt" data-i18n="enlace-descargar">Descargar .txt</a>
       </div>
     </div>
   </div>

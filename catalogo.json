@@ -150,7 +150,11 @@
       "convertidor-mayusculas": "🔠"
     },
     "flujos": {
-      "flujos": "🔗"
+      "flujos": "🔗",
+      "flujo-fotos-a-pdf": "📄",
+      "flujo-escaneos-a-pdf-buscable": "🔤",
+      "flujo-recibos-qr-a-pdf": "🧾",
+      "flujo-fotos-para-web": "🌐"
     }
   },
   "grupos": {
@@ -243,7 +247,9 @@
         "herramientas": ["contador-palabras","comparador-texto","convertidor-mayusculas","generador-lorem-ipsum","extractor-contacto","formateador-json","dictado-voz"] }
     ],
     "flujos": [
-      { "id": "encadenar", "es": "Encadenar herramientas", "en": "Chain tools",
+      { "id": "listos", "es": "Flujos listos", "en": "Ready-made flows",
+        "herramientas": ["flujo-fotos-a-pdf","flujo-escaneos-a-pdf-buscable","flujo-recibos-qr-a-pdf","flujo-fotos-para-web"] },
+      { "id": "encadenar", "es": "Creá tu propio flujo", "en": "Build your own flow",
         "herramientas": ["flujos"] }
     ]
   },
@@ -503,6 +509,22 @@
     "imagen-a-base64": {
       "es": ["Convertir imagen a Base64", "Obtené el texto Base64 (data URI) de una imagen, listo para pegar en HTML o CSS."],
       "en": ["Convert image to Base64", "Get an image as Base64 (data URI) text, ready to paste into HTML or CSS."]
+    },
+    "flujo-fotos-a-pdf": {
+      "es": ["Fotos de documentos a PDF", "Flujo listo: endereza cada foto, recorta el fondo y une todo en un solo PDF."],
+      "en": ["Photos of documents to PDF", "Ready-made flow: straightens each photo, crops the background and merges everything into one PDF."]
+    },
+    "flujo-escaneos-a-pdf-buscable": {
+      "es": ["Escaneos a PDF buscable", "Flujo listo: reconoce el texto con OCR para poder buscarlo y copiarlo, y achica el PDF."],
+      "en": ["Scans to searchable PDF", "Ready-made flow: recognizes the text with OCR so it can be searched and copied, and shrinks the PDF."]
+    },
+    "flujo-recibos-qr-a-pdf": {
+      "es": ["Recibos con QR a PDF", "Flujo listo: lee el QR de cada recibo, recorta el papel y arma un PDF con lo que dice cada código."],
+      "en": ["Receipts with QR to PDF", "Ready-made flow: reads the QR of each receipt, crops the paper and builds a PDF with what each code says."]
+    },
+    "flujo-fotos-para-web": {
+      "es": ["Fotos listas para la web", "Flujo listo: quita el GPS y los datos de la cámara, achica a 1600 px y pasa a WebP."],
+      "en": ["Photos ready for the web", "Ready-made flow: removes GPS and camera data, resizes to 1600 px and converts to WebP."]
     },
     "flujos": {
       "es": ["Flujos: encadenar herramientas", "Armá una cadena de pasos (leer QR, recortar, comprimir, pasar a PDF…) y aplicala a muchos archivos de una vez."],

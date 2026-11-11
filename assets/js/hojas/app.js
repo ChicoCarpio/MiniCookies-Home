@@ -5,6 +5,8 @@
   'use strict';
   // ---- textos ----------------------------------------------------------------------------------------------------
   const ES = {
+    'nombre-defecto-doc': 'Libro',
+    'archivo-hoja-pdf': 'hoja.pdf',
     'titulo-pagina': 'Editar Excel y .ods en el navegador — Mini Cookies', 'meta-descripcion': 'Edita libros de Excel (.xlsx) y hojas de LibreOffice (.ods) en el navegador: fórmulas, formato, gráficos y deshacer, sin instalar nada y sin subir tu archivo. Gratis y sin registro.',
     'h1': 'Editar Excel (Hojas)', 'intro': 'Abre un libro de Excel y edítalo como en una hoja de cálculo: valores, fórmulas, formato, deshacer. Al guardar, lo que no tocaste queda exactamente como estaba.',
     'zona-arrastre': '📊 Arrastra tu archivo aquí o haz clic para elegirlo (.xlsx, .xlsm, .ods, .csv, .tsv, .txt, .xls, .xlsb)', 'boton-nuevo': 'Libro en blanco', 'cargando': 'Abriendo el libro…',
@@ -38,6 +40,8 @@
     'aviso-pdf': 'Preparando el PDF…', 'aviso-pdf-listo': 'PDF listo: {0} páginas', 'aviso-ordenar-combinadas': 'No se puede ordenar: hay celdas combinadas en el rango', 'aviso-ordenar-matriz': 'No se puede ordenar: el rango incluye una matriz dinámica',
   };
   const EN = {
+    'nombre-defecto-doc': 'Workbook',
+    'archivo-hoja-pdf': 'sheet.pdf',
     'titulo-pagina': 'Edit Excel and .ods files in your browser — Mini Cookies', 'meta-descripcion': 'Edit Excel workbooks (.xlsx) and LibreOffice spreadsheets (.ods) in your browser: formulas, formatting, charts and undo, without installing anything or uploading your file. Free, no sign-up.',
     'h1': 'Edit Excel (Sheets)', 'intro': 'Open an Excel workbook and edit it like a spreadsheet: values, formulas, formatting, undo. When you save, everything you didn’t touch stays exactly as it was.',
     'zona-arrastre': '📊 Drop your file here or click to choose it (.xlsx, .xlsm, .ods, .csv, .tsv, .txt, .xls, .xlsb)', 'boton-nuevo': 'Blank workbook', 'cargando': 'Opening the workbook…',
@@ -91,7 +95,7 @@
   // ---- estado ------------------------------------------------------------------------------------------------------
   const $ = (id) => document.getElementById(id);
   const MAX_PEGAR = 200000;
-  let ed = null, hist = null, rejilla = null, docId = null, nombreDoc = 'Libro', convertido = false, lectura = false, cosasOds = null;
+  let ed = null, hist = null, rejilla = null, docId = null, nombreDoc = tx('nombre-defecto-doc'), convertido = false, lectura = false, cosasOds = null;
   const autoguardado = Autoguardado.crear('hojas');
   const comandos = Comandos.crear();
   // esqueleto del editor (arquetipo G, núcleo): lo propio de Hojas es la barra de fórmulas y la rejilla en el lienzo
@@ -157,7 +161,7 @@
     ed = nuevo;
     convertido = !!o.convertido;
     cosasOds = ed.formato === 'ods' ? await cosasDeOds() : null;
-    nombreDoc = nombre || 'Libro';
+    nombreDoc = nombre || tx('nombre-defecto-doc');
     docId = o.id || Autoguardado.nuevoId();
     hist = HistorialDoc.crear({ aplicar: aplicarApp, alCambiar: alCambiarHistorial });
     $('inicio').hidden = true; $('app').hidden = false; document.documentElement.classList.add('of-abierta');

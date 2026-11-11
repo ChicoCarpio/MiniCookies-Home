@@ -73,6 +73,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-recortada': 'imagen-recortada',
     'hero-titulo': 'Recortar imagen',
     'intro': 'Elegí una imagen, arrastrá la selección y recortala con relación de aspecto libre o fija.',
     'alt-recorte': 'Imagen a recortar',
@@ -111,6 +112,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, la selección no baja de unos 20 píxeles en pantalla.'
   },
   en: {
+    'archivo-imagen-recortada': 'cropped-image',
     'hero-titulo': 'Crop an image',
     'intro': 'Pick an image, drag the selection and crop it with a free or fixed aspect ratio.',
     'alt-recorte': 'Image to crop',
@@ -138,7 +140,7 @@ window.i18nPagina = {
     'guia-consejo-1': 'Next to the “Crop” button you see the final size of the crop in pixels, calculated on the original image, not on what you see on screen.',
     'guia-consejo-2': 'With a fixed ratio, the side handles are hidden and only the four corners are used; if you type a width in the fields, the height adjusts itself to keep the ratio.',
     'guia-consejo-3': 'The selector works with a mouse and with your finger on a phone.',
-    'guia-consejo-4': 'The downloaded image is imagen-recortada with the original’s extension: PNG, JPG or WebP. Other formats (GIF, BMP, SVG) come out as PNG.',
+    'guia-consejo-4': 'The downloaded image is cropped-image with the original’s extension: PNG, JPG or WebP. Other formats (GIF, BMP, SVG) come out as PNG.',
     'guia-p1': 'Does cropping reduce the resolution?',
     'guia-r1': 'No, the crop comes from the original image. JPG and WebP files are saved again at quality 0.92, so they may lose a little detail.',
     'guia-p2': 'Can I crop with round shapes?',
@@ -218,7 +220,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-recortada" data-i18n="resultado-enlace">Descargar imagen recortada</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-recortada" download="imagen-recortada" data-i18n="resultado-enlace">Descargar imagen recortada</a>
     </div>
   </div>
 
@@ -519,7 +521,7 @@ botonDescargar.addEventListener('click', async () => {
   const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaResultado.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-recortada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+  enlaceDescarga.download = `${t('archivo-imagen-recortada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

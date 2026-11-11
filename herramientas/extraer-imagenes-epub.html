@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagenes-epub-zip': 'imagenes-epub.zip',
     'titulo-pagina': 'Extraer imágenes de EPUB gratis — Mini Cookies',
     'meta-descripcion': 'Sacá todas las imágenes embebidas dentro de un libro EPUB a un .zip, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
@@ -43,6 +44,7 @@ window.i18nPagina = {
     'guia-r4': 'No, para eso está EPUB ↔ Texto.'
   },
   en: {
+    'archivo-imagenes-epub-zip': 'epub-images.zip',
     'titulo-pagina': 'Extract Images from EPUB Free — Mini Cookies',
     'meta-descripcion': 'Download all the images embedded in an EPUB book as a .zip, free and without uploading your file anywhere.',
     'zona-arrastre': '📚 Drag your .epub file here or click to choose it',
@@ -58,7 +60,7 @@ window.i18nPagina = {
     'guia-intro': 'An EPUB is a bundle of compressed files, and among them are the book’s illustrations, cover and graphics. This tool pulls them all out and hands them to you in a .zip. It’s handy for recovering a book’s cover, saving the illustrations of a children’s book or reusing a map. An unprotected .epub goes in; a .zip with the images comes out.',
     'guia-paso-1': 'Drag the .epub file or click to choose it; its name appears in the list.',
     'guia-paso-2': 'Tap “Extract images” (while it works the button reads “Extracting...”).',
-    'guia-paso-3': 'When “Done” appears, tap “Download .zip with the images”. It’s saved as “imagenes-epub.zip”.',
+    'guia-paso-3': 'When “Done” appears, tap “Download .zip with the images”. It’s saved as “epub-images.zip”.',
     'guia-paso-4': 'Unzip the .zip to see the images with the names they had inside the book.',
     'guia-consejo-1': 'Images are found by extension: PNG, JPG/JPEG, GIF, SVG, WebP and BMP, in whatever folder they are inside the book.',
     'guia-consejo-2': 'If two images from different folders have the same name, the tool adds a number at the end so they don’t overwrite each other.',
@@ -104,7 +106,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagenes-epub.zip" data-i18n="resultado-enlace">Descargar .zip con las imágenes</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagenes-epub-zip" download="imagenes-epub.zip" data-i18n="resultado-enlace">Descargar .zip con las imágenes</a>
     </div>
   </div>
 
