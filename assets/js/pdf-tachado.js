@@ -165,9 +165,15 @@ const PdfTachado = (() => {
     return total;
   }
 
-  // Suelta la memoria de un documento de PDF.js (según la versión es destroy o cleanup).
+  // Suelta un documento de PDF.js: sus datos y su hilo de PDF.js, así el PDF original (sin tachar) no queda en memoria.
+  // PDF.js 6 ya no tiene pdf.destroy(): se destruye la tarea de carga (2026-11-10; antes solo corría cleanup(), que
+  // suelta las páginas pero deja vivo el documento). destroy() de versiones viejas y cleanup() quedan de respaldo.
   function liberar(pdf) {
-    try { if (pdf.destroy) pdf.destroy(); else if (pdf.cleanup) pdf.cleanup(); } catch (error) { /* ya estaba liberado */ }
+    try {
+      if (pdf.loadingTask && pdf.loadingTask.destroy) pdf.loadingTask.destroy();
+      else if (pdf.destroy) pdf.destroy();
+      else if (pdf.cleanup) pdf.cleanup();
+    } catch (error) { /* ya estaba liberado */ }
   }
 
   // ¿Tiene capas opcionales (pueden estar ocultas)? Al copiar una página a un PDF nuevo se pierde cuáles estaban apagadas.
