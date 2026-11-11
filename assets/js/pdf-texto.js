@@ -467,9 +467,13 @@ async function extraerTextoPaginaPdf(pagina) {
 async function textoDePdf(archivo, separador) {
   const pdf = await abrirPdf(await archivo.arrayBuffer());
   const paginasDeTexto = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const pagina = await pdf.getPage(i);
-    paginasDeTexto.push(await extraerTextoPaginaPdf(pagina));
+  try {
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pagina = await pdf.getPage(i);
+      paginasDeTexto.push(await extraerTextoPaginaPdf(pagina));
+    }
+  } finally {
+    pdf.loadingTask.destroy();   // libera el PDF y su hilo de PDF.js: en un lote de miles no se acumulan
   }
   return { texto: paginasDeTexto.join(separador), sinTexto: paginasDeTexto.every((texto) => !texto.trim()) };
 }

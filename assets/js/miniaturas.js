@@ -52,15 +52,6 @@ function leerOrientacionJpeg(bytes) {
   return 1;
 }
 
-function cargarImagenElemento(archivo) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = URL.createObjectURL(archivo);
-  });
-}
-
 // Incrusta una imagen en un PDFDocument de pdf-lib. JPEG sin rotación y PNG
 // van directo (sin recomprimir). El resto —JPEG con orientación EXIF, WebP,
 // GIF, BMP, etc., que pdf-lib no sabe incrustar— se redibuja en un canvas (el
@@ -73,12 +64,27 @@ async function incrustarImagenEnPdf(pdf, archivo) {
   const esPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47;
   if (esJpeg && leerOrientacionJpeg(bytes) === 1) return pdf.embedJpg(bytes);
   if (esPng) return pdf.embedPng(bytes);
-  const img = await cargarImagenElemento(archivo);
+  // createImageBitmap (no <img>): da los mismos píxeles en la página y en los hilos de Flujos (flujos-hilo.js).
+  // Un SVG no lo abre createImageBitmap: en la página va por <img>, como antes (en un hilo falla y Flujos lo repite
+  // en la página).
+  let img, deElemento = false;
+  try {
+    img = await createImageBitmap(archivo);
+  } catch (error) {
+    if (typeof HTMLImageElement === 'undefined') throw error;
+    img = await new Promise((resolve, reject) => {
+      const elemento = new Image();
+      elemento.onload = () => resolve(elemento);
+      elemento.onerror = reject;
+      elemento.src = URL.createObjectURL(archivo);
+    });
+    deElemento = true;
+  }
   const canvas = document.createElement('canvas');
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
+  canvas.width = deElemento ? img.naturalWidth : img.width;
+  canvas.height = deElemento ? img.naturalHeight : img.height;
   canvas.getContext('2d').drawImage(img, 0, 0);
-  URL.revokeObjectURL(img.src);
+  if (deElemento) URL.revokeObjectURL(img.src); else img.close();
   const formato = esJpeg ? 'image/jpeg' : 'image/png';
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
   const bytesNuevos = new Uint8Array(await blob.arrayBuffer());

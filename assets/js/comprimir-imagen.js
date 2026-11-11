@@ -3,23 +3,14 @@
 // «Comprimir imagen» y los flujos. La orientación EXIF la aplica el navegador
 // al decodificar la imagen; aquí no se toca.
 (function () {
-  function cargarImagen(archivo) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(archivo);
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = url;
-    });
-  }
-
   // calidad: 0..1. formato: 'image/jpeg' o 'image/webp'. Devuelve el Blob;
   // su tipo es el real (un navegador sin WebP devuelve PNG).
   async function comprimir(archivo, { calidad, formato }) {
-    const img = await cargarImagen(archivo);
+    // createImageBitmap (no <img>): da los mismos píxeles en la página y en los hilos de Flujos (flujos-hilo.js).
+    const img = await createImageBitmap(archivo);
     const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+    canvas.width = img.width;
+    canvas.height = img.height;
     const contexto = canvas.getContext('2d');
     // JPG no tiene canal alfa: sin este relleno, la transparencia de un PNG
     // quedaba pintada de negro.
@@ -28,6 +19,7 @@
       contexto.fillRect(0, 0, canvas.width, canvas.height);
     }
     contexto.drawImage(img, 0, 0);
+    img.close();
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, calidad));
     if (!blob) throw new Error(typeof t === 'function' ? t('error-sin-imagen') : 'No se pudo generar la imagen');
     return blob;
