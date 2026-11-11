@@ -259,7 +259,7 @@ elBotonCopiar.addEventListener('click', async () => {
   if (!contrasenaValida) return; // no copiar el mensaje de error
   await navigator.clipboard.writeText(elResultado.textContent);
   elBotonCopiar.textContent = t('boton-copiado');
-  setTimeout(() => { elBotonCopiar.textContent = 'Copiar'; }, 1500);
+  setTimeout(() => { elBotonCopiar.textContent = t('boton-copiar'); }, 1500);
 });
 
 actualizarYGenerar();

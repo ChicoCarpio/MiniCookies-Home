@@ -34,6 +34,12 @@ const CATEGORIAS = {
   epub: 'EPUB', markdown: 'Markdown', texto: 'Texto plano', imagenes: 'Imágenes',
   generales: 'Generales', escaner: 'Escáner', flujos: 'Flujos',
 };
+// Los mismos nombres en inglés, para las migas de pan de las páginas /en/ (los de la navegación del sitio).
+const CATEGORIAS_EN = {
+  pdf: 'PDF', word: 'Word', 'excel-csv': 'Excel / CSV', powerpoint: 'PowerPoint',
+  epub: 'EPUB', markdown: 'Markdown', texto: 'Plain text', imagenes: 'Images',
+  generales: 'General', escaner: 'Scanner', flujos: 'Flows',
+};
 
 const escXml = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -96,11 +102,13 @@ export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
   const archivo = ruta.replace(/^herramientas\//, '');
   const esCategoria = !esHerramienta && Object.prototype.hasOwnProperty.call(CATEGORIAS, archivo.replace(/\.html$/, ''));
 
-  const migas = [{ name: 'Inicio', item: SITIO + '/' }];
+  // Las migas de una página /en/ apuntan a las páginas /en/ y con los nombres en inglés.
+  const pre = esIngles ? 'en/' : '';
+  const migas = [{ name: esIngles ? 'Home' : 'Inicio', item: urlDe(pre + 'index.html') }];
   if (esHerramienta) {
     const cat = indice.get(archivo);
     // El sitio seguro no tiene páginas de categoría.
-    if (cat && !ES_SEGURO) migas.push({ name: CATEGORIAS[cat], item: `${SITIO}/${cat}.html` });
+    if (cat && !ES_SEGURO) migas.push({ name: (esIngles ? CATEGORIAS_EN : CATEGORIAS)[cat], item: urlDe(pre + cat + '.html') });
     migas.push({ name: titulo.split('—')[0].split('|')[0].trim(), item: url });
   } else if (ruta.startsWith('guias/') && ruta !== 'guias/index.html') {
     migas.push({ name: esIngles ? 'Guides' : 'Guías', item: urlDe((esIngles ? 'en/' : '') + 'guias/') });
@@ -121,8 +129,8 @@ export function inyectarSeo(html, rel, indice, conIngles, esIngles = false) {
       description: desc,
       url,
       applicationCategory: 'UtilitiesApplication',
-      operatingSystem: 'Cualquiera con navegador web',
-      browserRequirements: 'Requiere JavaScript',
+      operatingSystem: esIngles ? 'Any with a web browser' : 'Cualquiera con navegador web',
+      browserRequirements: esIngles ? 'Requires JavaScript' : 'Requiere JavaScript',
       inLanguage: esIngles ? 'en' : 'es',
       isAccessibleForFree: true,
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
