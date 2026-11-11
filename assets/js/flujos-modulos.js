@@ -27,6 +27,10 @@
 // común acepta cualquier módulo que reciba lo que llega de todas: unir PDF es solo el primero de ese tipo.
 //
 // Cada módulo carga lo que necesita la primera vez que se usa (preparar). Necesita assets/js/vendor.js antes.
+// Los marcados con `hilo: true` corren en los hilos de trabajo de flujos-hilo.js (ver flujos.js, «hilos»): su código y
+// el de sus piezas solo pueden usar canvas e imágenes de la página, nada de DOMParser ni elementos de verdad. Quedan
+// en la página: unir PDF (junta), documento a PDF y PowerPoint a imágenes (sus motores usan la página) y el OCR, que
+// ya corre en los hilos de Tesseract (varios a la vez).
 // Agregar una herramienta: separar su lógica en una pieza compartida de assets/js, usarla en su página y
 // escribir aquí su ficha (ver el contrato en flujos.js).
 (function () {
@@ -42,7 +46,9 @@
     const lienzo = document.createElement('canvas');
     lienzo.width = Math.max(1, Math.round(mapa.width * escala));
     lienzo.height = Math.max(1, Math.round(mapa.height * escala));
-    lienzo.getContext('2d').drawImage(mapa, 0, 0, lienzo.width, lienzo.height);
+    // En la CPU desde el principio (se leen sus píxeles): un lienzo en la GPU achica distinto al dibujarlo en otro
+    // (Custos veía otra imagen) y el resultado cambiaba entre la página y los hilos.
+    lienzo.getContext('2d', { willReadFrequently: true }).drawImage(mapa, 0, 0, lienzo.width, lienzo.height);
     mapa.close();
     return lienzo;
   }
@@ -60,7 +66,7 @@
     icono: '🔍',
     nombre: { es: 'Leer códigos QR y de barras', en: 'Read QR and barcodes' },
     descripcion: { es: 'Busca un código en cada archivo y guarda lo que dice para los pasos siguientes.', en: 'Looks for a code in each file and keeps what it says for the next steps.' },
-    entra: ['imagen', 'pdf'], sale: 'igual', forma: 'uno',
+    entra: ['imagen', 'pdf'], sale: 'igual', hilo: true, forma: 'uno',
     opciones: [
       { id: 'sinCodigo', tipo: 'select', defecto: 'seguir', etiqueta: { es: 'Si no hay código', en: 'If there is no code' },
         valores: [{ valor: 'seguir', es: 'Seguir con el archivo', en: 'Keep the file' }, { valor: 'quitar', es: 'Quitarlo del flujo', en: 'Drop it from the flow' }] },
@@ -94,7 +100,7 @@
     icono: '📄',
     nombre: { es: 'Recortar documento (escáner con IA)', en: 'Crop document (AI scanner)' },
     descripcion: { es: 'Encuentra la hoja en la foto, la endereza y recorta el fondo.', en: 'Finds the sheet in the photo, straightens it and crops the background.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'mejora', tipo: 'select', defecto: 'color', etiqueta: { es: 'Mejora', en: 'Enhancement' }, valores: MEJORAS },
       { id: 'sinHoja', tipo: 'select', defecto: 'dejar', etiqueta: { es: 'Si no encuentra la hoja', en: 'If no sheet is found' },
@@ -103,7 +109,10 @@
     async preparar() {
       await js('escaner-documento.js');
       await js('custos.js');
-      Custos.cargar();
+      const carga = Custos.cargar();
+      // En un hilo (flujos-hilo.js) se espera la carga: con muchos hilos cargando a la vez puede pasar los 15 s de
+      // esperar() y las primeras fotos saldrían solo con el motor clásico.
+      if (typeof HTMLImageElement === 'undefined') await carga;
     },
     async ejecutar(f, o) {
       const lienzo = await lienzoDe(f.blob, LADO_MAX_FUENTE);
@@ -133,7 +142,7 @@
     icono: '🔄',
     nombre: { es: 'Girar o voltear imagen', en: 'Rotate or flip image' },
     descripcion: { es: 'Gira en pasos de 90° o voltea, sin perder calidad.', en: 'Rotates in 90° steps or flips, without losing quality.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'giro', tipo: 'select', defecto: '90', etiqueta: { es: 'Girar', en: 'Rotate' },
         valores: [{ valor: '0', es: 'No girar', en: 'Do not rotate' }, { valor: '90', es: '90° a la derecha', en: '90° right' },
@@ -157,7 +166,7 @@
     icono: '🗜️',
     nombre: { es: 'Comprimir imagen', en: 'Compress image' },
     descripcion: { es: 'Vuelve a guardar la imagen como JPG o WebP con la calidad elegida.', en: 'Saves the image again as JPG or WebP at the chosen quality.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'calidad', tipo: 'numero', defecto: 70, min: 10, max: 95, paso: 5, etiqueta: { es: 'Calidad (%)', en: 'Quality (%)' } },
       { id: 'formato', tipo: 'select', defecto: 'image/jpeg', etiqueta: { es: 'Formato', en: 'Format' },
@@ -281,7 +290,7 @@
     icono: '🖼️',
     nombre: { es: 'Imagen a PDF', en: 'Image to PDF' },
     descripcion: { es: 'Un PDF por cada imagen. Si un paso anterior leyó un código, lo muestra en un cuadro debajo de la imagen.', en: 'One PDF per image. If an earlier step read a code, it shows it in a box below the image.' },
-    entra: ['imagen'], sale: 'pdf', forma: 'uno',
+    entra: ['imagen'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'tamano', tipo: 'select', defecto: 'ajustar-a4', etiqueta: { es: 'Tamaño de página', en: 'Page size' },
         valores: [
@@ -317,7 +326,7 @@
     icono: '🖼️',
     nombre: { es: 'PDF a imágenes (cada página)', en: 'PDF to images (each page)' },
     descripcion: { es: 'Convierte cada página del PDF en una imagen; cada una sigue el flujo por su cuenta.', en: 'Turns each page of the PDF into an image; each one goes on through the flow on its own.' },
-    entra: ['pdf'], sale: 'imagen', forma: 'abrir',
+    entra: ['pdf'], sale: 'imagen', hilo: true, forma: 'abrir',
     opciones: [
       { id: 'escala', tipo: 'select', defecto: '2', etiqueta: { es: 'Resolución', en: 'Resolution' },
         valores: [{ valor: '1.5', es: 'Normal', en: 'Normal' }, { valor: '2', es: 'Alta', en: 'High' }, { valor: '3', es: 'Muy alta', en: 'Very high' }] },
@@ -338,7 +347,7 @@
     icono: '🧩',
     nombre: { es: 'Extraer imágenes de PDF (incrustadas)', en: 'Extract images from PDF (embedded)' },
     descripcion: { es: 'Saca las imágenes que el PDF lleva adentro, sin el texto; cada una sigue el flujo por su cuenta.', en: 'Takes out the images the PDF carries inside, without the text; each one goes on through the flow on its own.' },
-    entra: ['pdf'], sale: 'imagen', forma: 'abrir',
+    entra: ['pdf'], sale: 'imagen', hilo: true, forma: 'abrir',
     opciones: [
       { id: 'sinImagenes', tipo: 'select', defecto: 'avisar', etiqueta: { es: 'Si el PDF no trae imágenes', en: 'If the PDF has no images' },
         valores: [{ valor: 'avisar', es: 'Avisar en el resumen', en: 'Report it in the summary' }, { valor: 'pagina', es: 'Usar cada página como imagen', en: 'Use each page as an image' }] },
@@ -416,26 +425,39 @@
       valores: [{ valor: 'contraste', es: 'Contraste automático', en: 'Automatic contrast' }, { valor: 'otsu', es: 'Blanco y negro puro', en: 'Pure black and white' },
         { valor: 'ninguno', es: 'Tal cual', en: 'As is' }] },
   ];
-  // Un motor de Tesseract por combinación de idiomas, compartido por los dos módulos y por todos los archivos de una
-  // ejecución (crearlo tarda); terminar() los cierra al final.
-  const motoresOcr = new Map();
-  const motorOcr = (idiomas) => {
-    if (!motoresOcr.has(idiomas)) motoresOcr.set(idiomas, Ocr.crearWorker(idiomas.split('+')));
-    return motoresOcr.get(idiomas);
+  // Motores de Tesseract por combinación de idiomas, compartidos por los dos módulos y por todos los archivos de una
+  // ejecución (crearlos tarda); terminar() los cierra al final. Cada motor reconoce un archivo a la vez y corre en su
+  // propio hilo: con varios archivos a la vez (simultaneos) se abren hasta OCR_SIMULTANEOS motores y se usan varios
+  // núcleos. El tope es bajo porque cada motor ocupa bastante memoria (el diccionario de cada idioma).
+  const OCR_SIMULTANEOS = () => {
+    const nucleos = navigator.hardwareConcurrency || 2;
+    const movil = navigator.userAgentData ? navigator.userAgentData.mobile : /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    return movil ? 1 : Math.max(1, Math.min(4, Math.floor(nucleos / 2)));
   };
+  const motoresOcr = new Map();   // idiomas -> { libres: [Promise<worker>], todos: [Promise<worker>] }
+  async function conMotorOcr(idiomas, fn) {
+    if (!motoresOcr.has(idiomas)) motoresOcr.set(idiomas, { libres: [], todos: [] });
+    const g = motoresOcr.get(idiomas);
+    let p = g.libres.pop();
+    if (!p) { p = Ocr.crearWorker(idiomas.split('+')); g.todos.push(p); }
+    let motor;
+    try { motor = await p; } catch (e) { g.todos.splice(g.todos.indexOf(p), 1); throw e; }   // no se reusa uno que no arrancó
+    try { return await fn(motor); } finally { g.libres.push(p); }
+  }
   async function cerrarMotoresOcr() {
-    const lista = [...motoresOcr.values()];
+    const lista = [...motoresOcr.values()].flatMap((g) => g.todos);
     motoresOcr.clear();
     for (const p of lista) { try { await (await p).terminate(); } catch (e) { /* ya cerrado */ } }
   }
-  async function reconocer(f, o) {
-    const worker = await motorOcr(o.idiomas);
-    const pdf = await PDFLib.PDFDocument.create();
-    const textos = [];
-    for (const pagina of await Ocr.paginasDeArchivo(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar)) {
-      textos.push(await Ocr.agregarPagina(pdf, worker, pagina, o.preproceso));
-    }
-    return { pdf, texto: textos.join(separador()) };
+  function reconocer(f, o) {
+    return conMotorOcr(o.idiomas, async (worker) => {
+      const pdf = await PDFLib.PDFDocument.create();
+      const textos = [];
+      for (const pagina of await Ocr.paginasDeArchivo(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar)) {
+        textos.push(await Ocr.agregarPagina(pdf, worker, pagina, o.preproceso));
+      }
+      return { pdf, texto: textos.join(separador()) };
+    });
   }
   const prepararOcr = async () => {
     await PDF_LIB();
@@ -452,6 +474,7 @@
     opciones: OPCIONES_OCR,
     preparar: prepararOcr,
     terminar: cerrarMotoresOcr,
+    simultaneos: OCR_SIMULTANEOS,
     async ejecutar(f, o) {
       const { pdf } = await reconocer(f, o);
       return fichaPdf(f, await pdf.save());
@@ -466,6 +489,7 @@
     opciones: OPCIONES_OCR,
     preparar: prepararOcr,
     terminar: cerrarMotoresOcr,
+    simultaneos: OCR_SIMULTANEOS,
     async ejecutar(f, o) {
       const { texto } = await reconocer(f, o);
       return fichaTexto(f, texto);
@@ -478,7 +502,7 @@
     icono: '📝',
     nombre: { es: 'PDF a texto (.txt)', en: 'PDF to text (.txt)' },
     descripcion: { es: 'Saca el texto que el PDF ya trae, con sus párrafos y tablas. Para escaneos, usá el OCR.', en: 'Takes out the text the PDF already has, with its paragraphs and tables. For scans, use OCR.' },
-    entra: ['pdf'], sale: 'texto', forma: 'uno',
+    entra: ['pdf'], sale: 'texto', hilo: true, forma: 'uno',
     opciones: [
       { id: 'sinTexto', tipo: 'select', defecto: 'dejar', etiqueta: { es: 'Si el PDF no tiene texto (escaneo)', en: 'If the PDF has no text (scan)' },
         valores: [{ valor: 'dejar', es: 'Dejar el .txt vacío', en: 'Keep the empty .txt' }, { valor: 'quitar', es: 'Quitarlo del flujo', en: 'Drop it from the flow' }] },
@@ -497,7 +521,7 @@
     icono: '📐',
     nombre: { es: 'Redimensionar imagen', en: 'Resize image' },
     descripcion: { es: 'Cambia el tamaño manteniendo la proporción: por el lado más largo, por el ancho o en porcentaje.', en: 'Changes the size keeping the proportions: by the longest side, by the width or by a percentage.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'medida', tipo: 'select', defecto: 'lado', etiqueta: { es: 'Medida', en: 'Measure' },
         valores: [{ valor: 'lado', es: 'Lado más largo (px)', en: 'Longest side (px)' }, { valor: 'ancho', es: 'Ancho (px)', en: 'Width (px)' },
@@ -532,7 +556,7 @@
     icono: '🔁',
     nombre: { es: 'Convertir formato de imagen', en: 'Convert image format' },
     descripcion: { es: 'Guarda la imagen como PNG, JPG o WebP. En JPG lo transparente queda blanco.', en: 'Saves the image as PNG, JPG or WebP. In JPG, transparent areas turn white.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'formato', tipo: 'select', defecto: 'image/jpeg', etiqueta: { es: 'Formato', en: 'Format' },
         valores: [{ valor: 'image/png', es: 'PNG', en: 'PNG' }, { valor: 'image/jpeg', es: 'JPG', en: 'JPG' }, { valor: 'image/webp', es: 'WebP', en: 'WebP' }] },
@@ -555,7 +579,7 @@
     icono: '🧹',
     nombre: { es: 'Quitar metadatos EXIF', en: 'Remove EXIF metadata' },
     descripcion: { es: 'Saca cámara, fecha y ubicación GPS. Un JPG derecho queda idéntico, sin recomprimir.', en: 'Removes camera, date and GPS location. An upright JPG stays identical, without recompressing.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [],
     async preparar() { await js('imagen-basica.js'); },
     async ejecutar(f) {
@@ -577,7 +601,7 @@
     icono: '↻',
     nombre: { es: 'Rotar PDF', en: 'Rotate PDF' },
     descripcion: { es: 'Gira todas las páginas.', en: 'Rotates every page.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'grados', tipo: 'select', defecto: '90', etiqueta: { es: 'Girar', en: 'Rotate' },
         valores: [{ valor: '90', es: '90° a la derecha', en: '90° right' }, { valor: '180', es: '180°', en: '180°' }, { valor: '270', es: '90° a la izquierda', en: '90° left' }] },
@@ -595,7 +619,7 @@
     icono: '🗜️',
     nombre: { es: 'Comprimir PDF', en: 'Compress PDF' },
     descripcion: { es: 'Recomprime las fotos a color del PDF; el texto no cambia. Si no baja de peso, queda el original.', en: 'Recompresses the color photos in the PDF; the text does not change. If it does not get lighter, the original stays.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'calidad', tipo: 'numero', defecto: 65, min: 20, max: 90, paso: 5, etiqueta: { es: 'Calidad de las fotos (%)', en: 'Photo quality (%)' } },
       { id: 'ladoMaximo', tipo: 'select', defecto: '1600', etiqueta: { es: 'Tamaño de las fotos', en: 'Photo size' },
@@ -614,7 +638,7 @@
     icono: '#️⃣',
     nombre: { es: 'Numerar páginas', en: 'Number pages' },
     descripcion: { es: 'Agrega el número de página en la esquina elegida.', en: 'Adds the page number in the chosen corner.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'posicion', tipo: 'select', defecto: 'bottom-center', etiqueta: { es: 'Posición', en: 'Position' },
         valores: [
@@ -636,7 +660,7 @@
     icono: '💧',
     nombre: { es: 'Marca de agua en PDF', en: 'Watermark on PDF' },
     descripcion: { es: 'Escribe un texto en diagonal y semitransparente sobre cada página.', en: 'Writes a diagonal, semi-transparent text over every page.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'texto', tipo: 'texto', defecto: 'CONFIDENCIAL', max: 80, etiqueta: { es: 'Texto', en: 'Text' } },
       { id: 'tamano', tipo: 'numero', defecto: 60, min: 20, max: 150, etiqueta: { es: 'Tamaño máximo de letra', en: 'Maximum font size' } },
@@ -662,7 +686,7 @@
     icono: '🗄️',
     nombre: { es: 'PDF a PDF/A (archivo)', en: 'PDF to PDF/A (archiving)' },
     descripcion: { es: 'Marca el PDF como PDF/A para guardarlo a largo plazo, o le quita esa marca.', en: 'Marks the PDF as PDF/A for long-term storage, or removes that mark.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'accion', tipo: 'select', defecto: 'agregar', etiqueta: { es: 'Qué hacer', en: 'What to do' },
         valores: [{ valor: 'agregar', es: 'Pasar a PDF/A', en: 'Turn into PDF/A' }, { valor: 'quitar', es: 'Quitar la marca PDF/A', en: 'Remove the PDF/A mark' }] },
@@ -685,7 +709,7 @@
     icono: '✂️',
     nombre: { es: 'Extraer páginas de PDF', en: 'Extract PDF pages' },
     descripcion: { es: 'Deja solo las páginas indicadas, en ese orden (por ejemplo 1-3, 5).', en: 'Keeps only the pages given, in that order (for example 1-3, 5).' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [{ id: 'rango', tipo: 'texto', defecto: '1', max: 200, etiqueta: { es: 'Páginas', en: 'Pages' } }],
     preparar: prepararRetoques,
     async ejecutar(f, o) {
@@ -707,7 +731,7 @@
     icono: '📄',
     nombre: { es: 'Dividir PDF (un PDF por página)', en: 'Split PDF (one PDF per page)' },
     descripcion: { es: 'Separa cada página en su propio PDF; cada una sigue el flujo por su cuenta.', en: 'Puts each page in its own PDF; each one goes on through the flow on its own.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'abrir',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'abrir',
     opciones: [],
     preparar: prepararRetoques,
     async ejecutar(f) {
@@ -722,7 +746,7 @@
     icono: '🏷️',
     nombre: { es: 'Metadatos del PDF', en: 'PDF metadata' },
     descripcion: { es: 'Pone título, autor, asunto o palabras clave. Un campo vacío deja lo que el PDF ya tenía.', en: 'Sets title, author, subject or keywords. An empty field keeps what the PDF already had.' },
-    entra: ['pdf'], sale: 'pdf', forma: 'uno',
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
     opciones: [
       { id: 'titulo', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Título', en: 'Title' } },
       { id: 'autor', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Autor', en: 'Author' } },
@@ -768,7 +792,7 @@
     icono: '🧩',
     nombre: { es: 'Extraer imágenes de documentos', en: 'Extract images from documents' },
     descripcion: { es: 'Saca las fotos que llevan adentro un Word, Excel, PowerPoint o EPUB; cada una sigue el flujo por su cuenta.', en: 'Takes out the pictures inside a Word, Excel, PowerPoint or EPUB file; each one goes on through the flow on its own.' },
-    entra: ['documento'], sale: 'imagen', forma: 'abrir',
+    entra: ['documento'], sale: 'imagen', hilo: true, forma: 'abrir',
     opciones: [],
     async preparar() { await js('zip-propio.js'); await js('formatos-word.js'); await js('formatos-powerpoint.js'); await js('extraer-medios-zip.js'); },
     async ejecutar(f) {
@@ -811,7 +835,7 @@
     icono: '💧',
     nombre: { es: 'Marca de agua en imagen', en: 'Watermark on image' },
     descripcion: { es: 'Escribe un texto semitransparente sobre la imagen, en una posición o repartido.', en: 'Writes a semi-transparent text over the image, in one place or spread out.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'texto', tipo: 'texto', defecto: 'CONFIDENCIAL', max: 80, etiqueta: { es: 'Texto', en: 'Text' } },
       { id: 'posicion', tipo: 'select', defecto: 'centro-centro', etiqueta: { es: 'Posición', en: 'Position' }, valores: POSICIONES },
@@ -833,7 +857,7 @@
     icono: '🖼️',
     nombre: { es: 'Agregar borde a la imagen', en: 'Add a border to the image' },
     descripcion: { es: 'Rodea la imagen con un borde del color y grosor elegidos.', en: 'Surrounds the image with a border of the chosen color and width.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [
       { id: 'grosor', tipo: 'numero', defecto: 20, min: 1, max: 200, etiqueta: { es: 'Grosor (px)', en: 'Width (px)' } },
       { id: 'color', tipo: 'color', defecto: '#ffffff', etiqueta: { es: 'Color', en: 'Color' } },
@@ -850,7 +874,7 @@
     icono: '⬭',
     nombre: { es: 'Redondear esquinas', en: 'Round corners' },
     descripcion: { es: 'Redondea las esquinas (100 % = óvalo o círculo). Sale en PNG para que lo de afuera quede transparente.', en: 'Rounds the corners (100% = oval or circle). Comes out as PNG so the outside stays transparent.' },
-    entra: ['imagen'], sale: 'imagen', forma: 'uno',
+    entra: ['imagen'], sale: 'imagen', hilo: true, forma: 'uno',
     opciones: [{ id: 'radio', tipo: 'numero', defecto: 20, min: 0, max: 100, etiqueta: { es: 'Redondeo (%)', en: 'Rounding (%)' } }],
     async preparar() { await js('imagen-basica.js'); },
     ejecutar(f, o) {

@@ -56,7 +56,8 @@
       }
       return resultados;
     } finally {
-      if (typeof pdf.destroy === 'function') pdf.destroy();
+      // PDF.js 6 ya no tiene pdf.destroy(): se libera la tarea de carga (con el hilo de PDF.js de este documento).
+      pdf.loadingTask.destroy();
     }
   }
 

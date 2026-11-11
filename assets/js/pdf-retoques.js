@@ -125,14 +125,9 @@
     return false;
   }
 
-  function decodificarImagenJpeg(bytes) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
-      const img = new Image();
-      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('JPEG inválido')); };
-      img.src = url;
-    });
+  // createImageBitmap (no <img>): da los mismos píxeles en la página y en los hilos de Flujos (flujos-hilo.js).
+  async function decodificarImagenJpeg(bytes) {
+    try { return await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' })); } catch (e) { throw new Error('JPEG inválido'); }
   }
 
   // alAvanzar(n): se llama antes de procesar la foto n (1, 2, …); alGuardar(): antes de guardar el PDF.
@@ -161,11 +156,12 @@
         // Reducción opcional: el lado más largo queda en "ladoMaximo" px.
         // La foto ocupa el mismo lugar en la página (el tamaño en la página
         // lo define el contenido, no los píxeles), solo con menos detalle.
-        const escala = ladoMaximo > 0 ? Math.min(1, ladoMaximo / Math.max(img.naturalWidth, img.naturalHeight)) : 1;
+        const escala = ladoMaximo > 0 ? Math.min(1, ladoMaximo / Math.max(img.width, img.height)) : 1;
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.naturalWidth * escala));
-        canvas.height = Math.max(1, Math.round(img.naturalHeight * escala));
+        canvas.width = Math.max(1, Math.round(img.width * escala));
+        canvas.height = Math.max(1, Math.round(img.height * escala));
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        img.close();
         const blobNuevo = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', calidad));
         const bytesNuevos = new Uint8Array(await blobNuevo.arrayBuffer());
         if (bytesNuevos.length < bytesImagen.length) {

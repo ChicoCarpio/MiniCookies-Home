@@ -38,10 +38,14 @@
 //   forma:'uno'|'abrir'|'juntar', opciones:[{ id, tipo:'select'|'numero'|'casilla'|'texto'|'color', etiqueta:{es,en},
 //   valores:[{ valor, es, en }], defecto, min, max, paso }], preparar() -> Promise (carga lo que necesita),
 //   ejecutar(ficha | fichas, opciones, contexto) -> Promise<ficha | fichas | null>,
-//   terminar() -> Promise (opcional: libera lo que preparar o ejecutar dejaron abierto, p. ej. el motor de OCR) }.
+//   terminar() -> Promise (opcional: libera lo que preparar o ejecutar dejaron abierto, p. ej. el motor de OCR),
+//   hilo: true (opcional: puede correr en un hilo de trabajo, flujos-hilo.js; solo si su código y el de sus piezas no
+//   necesitan la página: nada de DOMParser ni elementos de verdad; canvas e imágenes sí),
+//   simultaneos: n | () => n (opcional, para los que corren en la página: cuántos archivos a la vez admite) }.
 //   'uno' recibe una ficha y devuelve una (o null para quitarla); 'abrir' recibe una y devuelve varias (un PDF ->
 //   sus páginas); 'juntar' recibe todas las que llegan y devuelve una.
-// Todo corre en este navegador, archivo por archivo (un lote grande no ocupa la memoria de todos juntos).
+// Todo corre en este navegador. Varios archivos avanzan a la vez, repartidos entre hilos de trabajo (uno por núcleo)
+// y solo unos pocos más que hilos, así un lote grande no ocupa la memoria de todos juntos.
 (function () {
   const registro = new Map();
   const CLAVE = 'flujos-guardados';
@@ -219,14 +223,128 @@
     return n;
   }
 
+  // ---------- hilos (2026-11-10) ----------
+  // Los módulos con `hilo: true` corren en hilos de trabajo (flujos-hilo.js), uno por núcleo menos uno (la página
+  // sigue respondiendo). Los demás corren en la página: los que declaran `simultaneos` (p. ej. el OCR, cuyo trabajo
+  // pesado ya va en los hilos de Tesseract) de a varios; el resto, de a uno y nunca dos a la vez aunque sean de
+  // módulos distintos (el mismo cuidado que antes, cuando todo iba de a un archivo).
+  // En la PC: con 120 fotos (leer QR > recortar > comprimir, Ryzen 9 9900X de 12 núcleos) 4 hilos dieron 2,8x, 8 hilos
+  // 4,3x y 12 hilos 5,7x; 16 igual que 12 y con más memoria (Investigaciones\investigacion-flujos\probar-multihilo.mjs).
+  const TOPE_HILOS = 12;
+  function cuantosHilos() {
+    const nucleos = navigator.hardwareConcurrency || 2;
+    // El iPad con Safari dice «Macintosh» y no tiene userAgentData: se lo reconoce por la pantalla táctil.
+    const movil = navigator.userAgentData ? navigator.userAgentData.mobile
+      : /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    // En el celular la memoria manda: cada hilo carga sus motores (Custos, PDF.js) y una foto grande ocupa ~64 MB.
+    const tope = movil ? Math.max(1, Math.min(3, Math.floor((navigator.deviceMemory || 4) / 2))) : TOPE_HILOS;
+    return Math.max(1, Math.min(nucleos - 1, tope));
+  }
+
+  // Errores que dicen «esto no anda en el hilo» (el entorno), no «este archivo está mal»: el paso se repite en la página.
+  const ERRORES_DE_ENTORNO = ['TypeError', 'ReferenceError', 'SecurityError', 'NotSupportedError', 'InvalidStateError', 'DataCloneError'];
+  const FALLAS_SEGUIDAS_MAX = 3;   // un módulo que falla así 3 veces seguidas deja de ir a los hilos en esta ejecución
+  // Un paso que no contesta en este tiempo da el hilo por trabado: se cierra y el paso se repite en la página.
+  const ESPERA_MAXIMA_PASO = 10 * 60 * 1000;
+
+  function semaforo(cupos) {
+    let libres = cupos;
+    const cola = [];
+    return async function (fn) {
+      if (libres > 0) libres--;
+      else await new Promise((ok) => cola.push(ok));
+      try { return await fn(); } finally {
+        if (cola.length) cola.shift()();
+        else libres++;
+      }
+    };
+  }
+
+  async function abrirHilos(cuantos) {
+    if (typeof Worker !== 'function' || typeof OffscreenCanvas !== 'function' || location.protocol === 'file:') return null;
+    const scripts = ['vendor.js', 'flujos.js', 'flujos-modulos.js'].map(rutaJs);
+    const idioma = window.idiomaActual && idiomaActual() === 'en' ? 'en' : 'es';
+    const nuevos = [];
+    for (let i = 0; i < cuantos; i++) { try { nuevos.push(new Worker(rutaJs('flujos-hilo.js'))); } catch (e) { break; } }
+    const listos = await Promise.all(nuevos.map((w) => new Promise((ok) => {
+      const espera = setTimeout(() => ok(false), 20000);
+      const fin = (bien) => { clearTimeout(espera); ok(bien); };
+      w.onmessage = (e) => fin(!!e.data && e.data.tipo === 'listo');
+      w.onerror = (e) => { if (e.preventDefault) e.preventDefault(); fin(false); };
+      w.postMessage({ tipo: 'iniciar', scripts, idioma });
+    })));
+    const vivos = nuevos.filter((w, i) => listos[i] || (w.terminate(), false));
+    return vivos.length ? grupoDeHilos(vivos) : null;
+  }
+
+  function grupoDeHilos(trabajadores) {
+    const libres = trabajadores.slice(), cola = [], enCurso = new Map();
+    const pasos = new Map(trabajadores.map((w) => [w, 0]));
+    const sinHilo = new Set();   // módulos que no pudieron prepararse en un hilo: siguen en la página
+    let siguiente = 1;
+    function despachar() {
+      while (libres.length && cola.length) {
+        const w = libres.shift(), tarea = cola.shift();
+        enCurso.set(w, tarea);
+        tarea.reloj = setTimeout(() => caido(w), ESPERA_MAXIMA_PASO);
+        try { w.postMessage(tarea.mensaje); } catch (e) { clearTimeout(tarea.reloj); enCurso.delete(w); libres.push(w); tarea.mal(e); }
+      }
+    }
+    function caido(w) {
+      const tarea = enCurso.get(w);
+      if (tarea) clearTimeout(tarea.reloj);
+      enCurso.delete(w);
+      w.terminate();
+      const i = trabajadores.indexOf(w);
+      if (i >= 0) trabajadores.splice(i, 1);
+      const j = libres.indexOf(w);
+      if (j >= 0) libres.splice(j, 1);
+      const error = Object.assign(new Error('El hilo se cerró'), { name: 'InvalidStateError' });
+      if (tarea) tarea.mal(error);
+      if (!trabajadores.length) while (cola.length) cola.shift().mal(error);
+    }
+    for (const w of trabajadores) {
+      w.onmessage = (e) => {
+        const tarea = enCurso.get(w);
+        if (!tarea) return;
+        clearTimeout(tarea.reloj);
+        enCurso.delete(w);
+        libres.push(w);
+        pasos.set(w, pasos.get(w) + 1);
+        const d = e.data || {};
+        if (d.tipo === 'hecho') tarea.ok(d);
+        else tarea.mal(Object.assign(new Error(d.mensaje || 'Error en el hilo'), { name: d.nombre || 'Error', enPreparar: !!d.enPreparar }));
+        despachar();
+      };
+      w.onerror = (e) => { if (e.preventDefault) e.preventDefault(); caido(w); };
+      w.onmessageerror = () => caido(w);
+    }
+    return {
+      tamano: trabajadores.length,
+      sirve: (m) => !!m.hilo && !sinHilo.has(m.id) && trabajadores.length > 0,
+      sinHilo,
+      ejecutar(m, ficha, opciones, contexto) {
+        return new Promise((ok, mal) => {
+          cola.push({ ok, mal, mensaje: { tipo: 'paso', id: siguiente++, modulo: m.id, ficha, opciones, contexto } });
+          despachar();
+        });
+      },
+      pasosPorHilo: () => [...pasos.values()],
+      cerrar() { for (const w of pasos.keys()) w.terminate(); },
+    };
+  }
+
   /**
    * Corre el flujo. archivosPorEntrada: un arreglo de archivos por entrada (con una sola entrada vale el arreglo
-   * de archivos directo). Cada entrada procesa sus archivos de a uno: un tramo de pasos 'uno'/'abrir' lleva cada
-   * archivo (y lo que se abra de él) hasta el próximo 'juntar', que espera a todos. Al final de las entradas, lo que
-   * salió de todas pasa junto al tramo común. alAvanzar({ hechos, total, archivo, entrada, paso }) avisa el avance
-   * (el total es aproximado si un paso abre un archivo en varios). Un archivo que falla no frena a los demás.
+   * de archivos directo). Un tramo de pasos 'uno'/'abrir' lleva cada archivo (y lo que se abra de él) hasta el
+   * próximo 'juntar', que espera a todos. Al final de las entradas, lo que salió de todas pasa junto al tramo común.
+   * Varios archivos avanzan a la vez (ver «hilos»), pero lo que sale queda en el orden de los archivos, como si
+   * hubieran ido de a uno. alAvanzar({ hechos, total, archivo, entrada, paso }) avisa el avance (el total es
+   * aproximado si un paso abre un archivo en varios). Un archivo que falla no frena a los demás.
+   * Devuelve { resultados, fallos, hilos: { cuantos, pasosPorHilo, enPagina } } (hilos: para medir y probar).
+   * opciones.hilos: cuántos hilos abrir (0 = todo en la página); por defecto, según los núcleos del equipo.
    */
-  async function ejecutar(flujo, archivos, { alAvanzar } = {}) {
+  async function ejecutar(flujo, archivos, { alAvanzar, hilos } = {}) {
     flujo = normalizar(flujo);
     const error = validar(flujo);
     if (error) throw Object.assign(new Error('Flujo inválido'), { codigo: error.motivo, entrada: error.entrada, paso: error.paso });
@@ -241,15 +359,76 @@
       r.sinEntrada.forEach((a) => fallos.push({ nombre: a.name, entrada: null, codigo: 'tipo' }));
     }
     const usados = [...new Set([...flujo.entradas.flat(), ...flujo.comun].map((p) => modulo(p.id)))];
+    const cuantos = hilos == null ? cuantosHilos() : Math.max(0, Math.floor(hilos));
+    let grupo = null;
     try {
-      for (const m of usados) if (m.preparar) await m.preparar();
-      return await correrTodo(flujo, archivosPorEntrada, fallos, alAvanzar);
+      // No más hilos que archivos, salvo que un paso abra cada archivo en varios (las páginas de un PDF).
+      const archivosTotal = archivosPorEntrada.reduce((s, l) => s + ((l && l.length) || 0), 0);
+      const necesarios = usados.some((m) => m.forma === 'abrir') ? cuantos : Math.min(cuantos, archivosTotal);
+      if (necesarios && usados.some((m) => m.hilo)) grupo = await abrirHilos(necesarios);
+      // Lo que va a la página se prepara ya (si falla, falla todo, como siempre). Lo que va a los hilos se prepara
+      // allá; en la página solo si algún paso tiene que volver (ver ejecutarPaso).
+      for (const m of usados) if (!grupo || !m.hilo) await prepararEnPagina(m);
+      return await correrTodo(flujo, archivosPorEntrada, fallos, alAvanzar, grupo);
     } finally {
+      if (grupo) grupo.cerrar();
       for (const m of usados) if (m.terminar) { try { await m.terminar(); } catch (e) { /* ya terminó */ } }
     }
   }
 
-  async function correrTodo(flujo, archivosPorEntrada, fallos, alAvanzar) {
+  const preparadosEnPagina = new Map();
+  function prepararEnPagina(m) {
+    if (!m.preparar) return Promise.resolve();
+    if (!preparadosEnPagina.has(m.id)) {
+      const p = Promise.resolve().then(() => m.preparar());
+      p.catch(() => preparadosEnPagina.delete(m.id));   // el próximo intento vuelve a probar
+      preparadosEnPagina.set(m.id, p);
+    }
+    return preparadosEnPagina.get(m.id);
+  }
+
+  async function correrTodo(flujo, archivosPorEntrada, fallos, alAvanzar, grupo) {
+    // Los de la página: uno solo a la vez entre todos (candado), salvo los que declaran `simultaneos`.
+    const candado = semaforo(1);
+    const propios = new Map();
+    const limiteDe = (m) => {
+      if (!m.simultaneos) return candado;
+      if (!propios.has(m.id)) propios.set(m.id, semaforo(Math.max(1, typeof m.simultaneos === 'function' ? m.simultaneos() : m.simultaneos)));
+      return propios.get(m.id);
+    };
+    let enPagina = 0;
+    const seguidas = new Map();   // fallas de entorno seguidas, por módulo
+    async function ejecutarPaso(m, ficha, opciones, contexto) {
+      if (grupo && grupo.sirve(m)) {
+        try {
+          const d = await grupo.ejecutar(m, ficha, opciones, contexto);
+          seguidas.set(m.id, 0);
+          return d.vacio ? undefined : d.r;
+        } catch (e) {
+          if (e.enPreparar) grupo.sinHilo.add(m.id);
+          else if (!ERRORES_DE_ENTORNO.includes(e.name)) { seguidas.set(m.id, 0); throw e; }   // el archivo está mal: en la página fallaría igual
+          else {
+            const n = (seguidas.get(m.id) || 0) + 1;
+            seguidas.set(m.id, n);
+            if (n >= FALLAS_SEGUIDAS_MAX) grupo.sinHilo.add(m.id);   // no anda en el hilo: el resto va directo a la página
+          }
+          // Se repite en la página: mismo código, mismo resultado.
+        }
+      }
+      return limiteDe(m)(async () => {
+        await prepararEnPagina(m);
+        enPagina++;
+        return m.ejecutar(ficha, opciones, contexto);
+      });
+    }
+    // Cuántos archivos avanzan a la vez: lo justo para que ningún hilo espere, sin tener el lote entero en memoria.
+    const usados = [...new Set([...flujo.entradas.flat(), ...flujo.comun].map((p) => modulo(p.id)))];
+    const enParalelo = grupo ? grupo.tamano + 2
+      : Math.max(1, ...usados.map((m) => (m.simultaneos ? (typeof m.simultaneos === 'function' ? m.simultaneos() : m.simultaneos) : 1)));
+    const admitir = semaforo(enParalelo);
+    // Un tramo que abre cada archivo en varios (PDF a imágenes, dividir) ya reparte sus partes entre los hilos: de a
+    // dos archivos, para no tener las páginas de muchos PDF a la vez en memoria.
+    const admitirAbriendo = grupo ? semaforo(2) : admitir;
 
     const porEntrada = flujo.entradas.map((pasos, i) => {
       const aceptados = tiposDeEntrada(flujo, i);
@@ -267,29 +446,32 @@
       + porEntrada.reduce((s, f) => s + f.length, 0) * flujo.comun.length;
     const avisar = (archivo, entrada, paso) => alAvanzar && alAvanzar({ hechos, total: Math.max(total, hechos), archivo, entrada, paso });
 
-    // Lleva una ficha por los pasos [k, fin) que son 'uno' o 'abrir'; devuelve lo que sale (0, 1 o varias).
-    async function recorrer(ficha, pasos, k, fin, entrada) {
+    // Los fallos se anotan con el orden del archivo, para listarlos al final como si todo hubiera ido de a uno.
+    const anotar = (orden, fallo) => fallos.push(Object.assign(fallo, { _orden: orden }));
+
+    // Lleva una ficha por los pasos [k, fin) que son 'uno' o 'abrir'; devuelve lo que sale (0, 1 o varias), en orden.
+    async function recorrer(ficha, pasos, k, fin, entrada, orden) {
       if (k >= fin) return [ficha];
       avisar(ficha.origen, entrada, k);
-      let r;
+      let r, fallo = false;
       try {
-        r = await modulo(pasos[k].id).ejecutar(ficha, pasos[k].opciones, { paso: k, entrada });
+        r = await ejecutarPaso(modulo(pasos[k].id), ficha, pasos[k].opciones, { paso: k, entrada });
       } catch (e) {
-        fallos.push({ nombre: ficha.origen, entrada, paso: k, error: e.message || String(e) });
+        anotar(orden, { nombre: ficha.origen, entrada, paso: k, error: e.message || String(e) });
         r = null;
+        fallo = true;
       }
       hechos++;
       await new Promise((ok) => setTimeout(ok, 0));   // deja respirar a la página (barra de avance)
       const lista = Array.isArray(r) ? r : r ? [r] : [];
-      if (!lista.length && r !== undefined && !fallos.some((f) => f.nombre === ficha.origen && f.paso === k && f.entrada === entrada)) {
-        fallos.push({ nombre: ficha.origen, entrada, paso: k, codigo: 'quitado' });
-      }
-      const salen = [];
-      for (const x of lista) { x.origen = ficha.origen; salen.push(...await recorrer(x, pasos, k + 1, fin, entrada)); }
-      return salen;
+      if (!lista.length && r !== undefined && !fallo) anotar(orden, { nombre: ficha.origen, entrada, paso: k, codigo: 'quitado' });
+      // Lo que abrió un paso (las páginas de un PDF) también avanza a la vez: un solo PDF grande usa todos los hilos.
+      const salen = await Promise.all(lista.map((x) => { x.origen = ficha.origen; x._orden = orden; return recorrer(x, pasos, k + 1, fin, entrada, orden); }));
+      return salen.flat();
     }
 
     async function correr(pasos, fichas, entrada) {
+      const inicio = (entrada === 'comun' ? flujo.entradas.length : entrada) * 1e7;
       let i = 0;
       while (i < pasos.length) {
         const m = modulo(pasos[i].id);
@@ -297,10 +479,12 @@
           avisar('', entrada, i);
           if (fichas.length) {
             try {
-              const r = await m.ejecutar(fichas, pasos[i].opciones, { paso: i, entrada });
+              await prepararEnPagina(m);
+              const juntas = fichas;   // también con el candado: las entradas corren a la vez
+              const r = await limiteDe(m)(() => m.ejecutar(juntas, pasos[i].opciones, { paso: i, entrada }));
               fichas = r ? [r] : [];
             } catch (e) {
-              fallos.push({ nombre: fichas.map((f) => f.origen).join(', '), entrada, paso: i, error: e.message || String(e) });
+              anotar(inicio + 1e7 - 1, { nombre: fichas.map((f) => f.origen).join(', '), entrada, paso: i, error: e.message || String(e) });
               fichas = [];
             }
           }
@@ -310,16 +494,18 @@
         }
         let j = i;
         while (j < pasos.length && modulo(pasos[j].id).forma !== 'juntar') j++;
-        const siguen = [];
-        for (const f of fichas) siguen.push(...await recorrer(f, pasos, i, j, entrada));
-        fichas = siguen;
+        const desde = i;
+        const entrar = pasos.slice(desde, j).some((p) => modulo(p.id).forma === 'abrir') ? admitirAbriendo : admitir;
+        // El orden de un fallo es el del archivo del que salió (viaja en _orden de etapa en etapa).
+        const siguen = await Promise.all(fichas.map((f, n) => entrar(() => recorrer(f, pasos, desde, j, entrada, f._orden ?? inicio + n))));
+        fichas = siguen.flat();
         i = j;
       }
       return fichas;
     }
 
-    let fichas = [];
-    for (let i = 0; i < flujo.entradas.length; i++) fichas.push(...await correr(flujo.entradas[i], porEntrada[i], i));
+    const salidas = await Promise.all(flujo.entradas.map((pasos, i) => correr(pasos, porEntrada[i], i)));
+    let fichas = salidas.flat();
     if (flujo.comun.length) fichas = await correr(flujo.comun, fichas, 'comun');
 
     const nombres = new Set();
@@ -327,7 +513,14 @@
       const nombre = f.tipo === 'pdf' ? base(f.nombre) + '.pdf' : f.tipo === 'texto' ? base(f.nombre) + '.txt' : f.nombre;
       return { nombre: nombreUnico(nombre, nombres), blob: f.blob, tipo: f.tipo, datos: f.datos, origen: f.origen };
     });
-    return { resultados, fallos };
+    // Orden estable: los de repartir (sin _orden) primero, después por archivo.
+    const ordenados = fallos.map((f, i) => [f, i]).sort((a, b) => ((a[0]._orden ?? -1) - (b[0]._orden ?? -1)) || a[1] - b[1]).map(([f]) => f);
+    ordenados.forEach((f) => delete f._orden);
+    fallos.splice(0, fallos.length, ...ordenados);
+    return {
+      resultados, fallos,
+      hilos: { cuantos: grupo ? grupo.pasosPorHilo().length : 0, pasosPorHilo: grupo ? grupo.pasosPorHilo() : [], enPagina },
+    };
   }
 
   // ---------- guardar ----------
