@@ -16,62 +16,67 @@
 //   FlujosPagina.montarListo(flujo)         arma la página de un flujo listo (marcado fijo: ver flujo-*.html)
 //
 // Los textos comunes vienen acá en es y en; los de la página mandan (pueden pisar cualquiera).
+// Los textos comunes, en window.i18nPieza: el build (ingles.mjs) los lee de acá para armar la versión /en/ de las
+// páginas que cargan esta pieza, y en el navegador se suman a los de la página (los de la página mandan).
+window.i18nPieza = {
+  es: {
+    'titulo-diagrama': 'Así va tu flujo', 'boton-ampliar': '⤢ Ver en grande', 'boton-cerrar': 'Cerrar',
+    'diagrama-vacio': 'Agregá pasos para ver el diagrama.', 'diagrama-entrada': '📂 Entrada {n}: {tipos}',
+    'diagrama-juntar': '🔀 Se juntan las entradas', 'diagrama-resultado': '📦 Resultado: {tipos}', 'diagrama-sin-pasos': '(sin pasos)',
+    'tipo-imagen': 'imágenes', 'tipo-pdf': 'PDF', 'tipo-documento': 'documentos', 'tipo-texto': 'texto', 'tipo-o': ' o ', 'tipo-nada': 'nada',
+    'forma-juntar': 'junta todo en uno', 'forma-abrir': 'abre cada archivo en varios', 'paso-n': 'Paso {n}',
+    'error-tipo': 'El paso {n} de la entrada {e} no recibe lo que entrega el anterior: cambiá el orden o quitalo.',
+    'error-tipo-comun': 'El paso {n} de «Después de juntar» no recibe todo lo que llega de las entradas.',
+    'error-juntar': 'El paso {n} de la entrada {e} junta todo en uno: con varias entradas, ponelo en «Después de juntar las entradas».',
+    'error-entrada-vacia': 'La entrada {e} no tiene pasos y no hay pasos después de juntar.',
+    'archivos-n': '{n} archivos listos.', 'archivos-ignorados': ' {n} no los recibe ninguna entrada y se van a saltar.',
+    'boton-ejecutar': 'Ejecutar el flujo', 'procesando': 'Procesando {archivo} ({donde}, paso {paso})…',
+    'donde-entrada': 'entrada {n}', 'donde-comun': 'después de juntar', 'preparando': 'Preparando los pasos…', 'falta-archivos': 'Elegí los archivos.',
+    'resultado-n': '✅ Listo: {ok} resultados.', 'resultado-cero': 'No salió ningún resultado.',
+    'boton-descargar': 'Descargar', 'boton-descargar-zip': 'Descargar todo (.zip)',
+    'fallos-titulo': 'Lo que no pasó:', 'fallo-tipo': 'ninguna entrada recibe este tipo de archivo',
+    'fallo-quitado': 'quitado en el paso {n}', 'fallo-paso': 'paso {n}: {error}',
+    'titulo-codigos': 'Códigos encontrados', 'sin-codigos': 'sin código',
+    // Páginas de flujos listos
+    'listo-zona': '📂 Arrastrá tus archivos acá o hacé clic para elegirlos',
+    'listo-titulo-pasos': 'Los pasos de este flujo',
+    'listo-nota-opciones': 'Podés cambiar las opciones de cada paso antes de ejecutar.',
+    'boton-personalizar': '✏️ Personalizar este flujo',
+    'listo-recibe': 'Recibe {tipos}.',
+  },
+  en: {
+    'titulo-diagrama': 'Your flow at a glance', 'boton-ampliar': '⤢ See it large', 'boton-cerrar': 'Close',
+    'diagrama-vacio': 'Add steps to see the diagram.', 'diagrama-entrada': '📂 Input {n}: {tipos}',
+    'diagrama-juntar': '🔀 The inputs join', 'diagrama-resultado': '📦 Result: {tipos}', 'diagrama-sin-pasos': '(no steps)',
+    'tipo-imagen': 'images', 'tipo-pdf': 'PDF', 'tipo-documento': 'documents', 'tipo-texto': 'text', 'tipo-o': ' or ', 'tipo-nada': 'nothing',
+    'forma-juntar': 'joins everything into one', 'forma-abrir': 'opens each file into several', 'paso-n': 'Step {n}',
+    'error-tipo': 'Step {n} of input {e} does not take what the previous one produces: change the order or remove it.',
+    'error-tipo-comun': 'Step {n} of “After the inputs join” does not take everything that comes from the inputs.',
+    'error-juntar': 'Step {n} of input {e} joins everything into one: with several inputs, put it in “After the inputs join”.',
+    'error-entrada-vacia': 'Input {e} has no steps and there are no steps after joining.',
+    'archivos-n': '{n} files ready.', 'archivos-ignorados': ' {n} are not taken by any input and will be skipped.',
+    'boton-ejecutar': 'Run the flow', 'procesando': 'Processing {archivo} ({donde}, step {paso})…',
+    'donde-entrada': 'input {n}', 'donde-comun': 'after joining', 'preparando': 'Getting the steps ready…', 'falta-archivos': 'Choose the files.',
+    'resultado-n': '✅ Done: {ok} results.', 'resultado-cero': 'No result came out.',
+    'boton-descargar': 'Download', 'boton-descargar-zip': 'Download all (.zip)',
+    'fallos-titulo': 'What did not go through:', 'fallo-tipo': 'no input takes this type of file',
+    'fallo-quitado': 'removed at step {n}', 'fallo-paso': 'step {n}: {error}',
+    'titulo-codigos': 'Codes found', 'sin-codigos': 'no code',
+    'listo-zona': '📂 Drag your files here or click to choose them',
+    'listo-titulo-pasos': 'The steps of this flow',
+    'listo-nota-opciones': 'You can change the options of each step before running it.',
+    'boton-personalizar': '✏️ Customize this flow',
+    'listo-recibe': 'Takes {tipos}.',
+  },
+};
+
 (function () {
   const F = window.Flujos;
 
   (function () {
     const pagina = window.i18nPagina || (window.i18nPagina = {});
-    const es = {
-      'titulo-diagrama': 'Así va tu flujo', 'boton-ampliar': '⤢ Ver en grande', 'boton-cerrar': 'Cerrar',
-      'diagrama-vacio': 'Agregá pasos para ver el diagrama.', 'diagrama-entrada': '📂 Entrada {n}: {tipos}',
-      'diagrama-juntar': '🔀 Se juntan las entradas', 'diagrama-resultado': '📦 Resultado: {tipos}', 'diagrama-sin-pasos': '(sin pasos)',
-      'tipo-imagen': 'imágenes', 'tipo-pdf': 'PDF', 'tipo-documento': 'documentos', 'tipo-texto': 'texto', 'tipo-o': ' o ', 'tipo-nada': 'nada',
-      'forma-juntar': 'junta todo en uno', 'forma-abrir': 'abre cada archivo en varios', 'paso-n': 'Paso {n}',
-      'error-tipo': 'El paso {n} de la entrada {e} no recibe lo que entrega el anterior: cambiá el orden o quitalo.',
-      'error-tipo-comun': 'El paso {n} de «Después de juntar» no recibe todo lo que llega de las entradas.',
-      'error-juntar': 'El paso {n} de la entrada {e} junta todo en uno: con varias entradas, ponelo en «Después de juntar las entradas».',
-      'error-entrada-vacia': 'La entrada {e} no tiene pasos y no hay pasos después de juntar.',
-      'archivos-n': '{n} archivos listos.', 'archivos-ignorados': ' {n} no los recibe ninguna entrada y se van a saltar.',
-      'boton-ejecutar': 'Ejecutar el flujo', 'procesando': 'Procesando {archivo} ({donde}, paso {paso})…',
-      'donde-entrada': 'entrada {n}', 'donde-comun': 'después de juntar', 'preparando': 'Preparando los pasos…', 'falta-archivos': 'Elegí los archivos.',
-      'resultado-n': '✅ Listo: {ok} resultados.', 'resultado-cero': 'No salió ningún resultado.',
-      'boton-descargar': 'Descargar', 'boton-descargar-zip': 'Descargar todo (.zip)',
-      'fallos-titulo': 'Lo que no pasó:', 'fallo-tipo': 'ninguna entrada recibe este tipo de archivo',
-      'fallo-quitado': 'quitado en el paso {n}', 'fallo-paso': 'paso {n}: {error}',
-      'titulo-codigos': 'Códigos encontrados', 'sin-codigos': 'sin código',
-      // Páginas de flujos listos
-      'listo-zona': '📂 Arrastrá tus archivos acá o hacé clic para elegirlos',
-      'listo-titulo-pasos': 'Los pasos de este flujo',
-      'listo-nota-opciones': 'Podés cambiar las opciones de cada paso antes de ejecutar.',
-      'boton-personalizar': '✏️ Personalizar este flujo',
-      'listo-recibe': 'Recibe {tipos}.',
-    };
-    const en = {
-      'titulo-diagrama': 'Your flow at a glance', 'boton-ampliar': '⤢ See it large', 'boton-cerrar': 'Close',
-      'diagrama-vacio': 'Add steps to see the diagram.', 'diagrama-entrada': '📂 Input {n}: {tipos}',
-      'diagrama-juntar': '🔀 The inputs join', 'diagrama-resultado': '📦 Result: {tipos}', 'diagrama-sin-pasos': '(no steps)',
-      'tipo-imagen': 'images', 'tipo-pdf': 'PDF', 'tipo-documento': 'documents', 'tipo-texto': 'text', 'tipo-o': ' or ', 'tipo-nada': 'nothing',
-      'forma-juntar': 'joins everything into one', 'forma-abrir': 'opens each file into several', 'paso-n': 'Step {n}',
-      'error-tipo': 'Step {n} of input {e} does not take what the previous one produces: change the order or remove it.',
-      'error-tipo-comun': 'Step {n} of “After the inputs join” does not take everything that comes from the inputs.',
-      'error-juntar': 'Step {n} of input {e} joins everything into one: with several inputs, put it in “After the inputs join”.',
-      'error-entrada-vacia': 'Input {e} has no steps and there are no steps after joining.',
-      'archivos-n': '{n} files ready.', 'archivos-ignorados': ' {n} are not taken by any input and will be skipped.',
-      'boton-ejecutar': 'Run the flow', 'procesando': 'Processing {archivo} ({donde}, step {paso})…',
-      'donde-entrada': 'input {n}', 'donde-comun': 'after joining', 'preparando': 'Getting the steps ready…', 'falta-archivos': 'Choose the files.',
-      'resultado-n': '✅ Done: {ok} results.', 'resultado-cero': 'No result came out.',
-      'boton-descargar': 'Download', 'boton-descargar-zip': 'Download all (.zip)',
-      'fallos-titulo': 'What did not go through:', 'fallo-tipo': 'no input takes this type of file',
-      'fallo-quitado': 'removed at step {n}', 'fallo-paso': 'step {n}: {error}',
-      'titulo-codigos': 'Codes found', 'sin-codigos': 'no code',
-      'listo-zona': '📂 Drag your files here or click to choose them',
-      'listo-titulo-pasos': 'The steps of this flow',
-      'listo-nota-opciones': 'You can change the options of each step before running it.',
-      'boton-personalizar': '✏️ Customize this flow',
-      'listo-recibe': 'Takes {tipos}.',
-    };
-    pagina.es = Object.assign({}, es, pagina.es);
-    pagina.en = Object.assign({}, en, pagina.en);
+    pagina.es = Object.assign({}, window.i18nPieza.es, pagina.es);
+    pagina.en = Object.assign({}, window.i18nPieza.en, pagina.en);
   })();
 
   const CLAVE_ACTUAL = 'flujos-actual';

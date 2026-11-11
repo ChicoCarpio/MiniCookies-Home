@@ -31,6 +31,24 @@ function leerObjeto(texto, nombre) {
   try { return new Function('return ' + m[1].replace(/;\s*$/, ''))(); } catch { return null; }
 }
 
+// Una pieza de assets/js que trae textos propios (p. ej. flujos-pagina.js) los declara en window.i18nPieza = { es, en },
+// en la columna 0 y cerrado con «};» en su propia línea; acá se suman a los de cada página que la carga (los de la
+// página mandan, como en el navegador).
+const piezasLeidas = new Map();
+function textosDePiezas(html, raiz) {
+  const textos = [];
+  for (const m of html.matchAll(/<script[^>]*\ssrc="[^"]*assets\/js\/([\w.-]+\.js)"/g)) {
+    if (!piezasLeidas.has(m[1])) {
+      let dic = null;
+      try { dic = leerObjeto(readFileSync(join(raiz, 'assets/js', m[1]), 'utf8'), 'i18nPieza'); } catch { /* no está */ }
+      piezasLeidas.set(m[1], dic);
+    }
+    const dic = piezasLeidas.get(m[1]);
+    if (dic && dic.en) textos.push(dic.en);
+  }
+  return textos;
+}
+
 /** Textos comunes a todas las páginas (nav, pie), de assets/js/idioma.js. */
 export function diccionarioComun(raiz) {
   const js = readFileSync(join(raiz, 'assets/js/idioma.js'), 'utf8');
@@ -70,7 +88,7 @@ export function traducir(html, raiz, comun, rutaWeb, conIngles) {
   if (!pagina || !pagina.en) return null;
   // Las tarjetas generadas desde catalogo.json traen sus textos en i18nCatalogo.
   const catalogo = leerObjeto(html, 'i18nCatalogo');
-  const dic = Object.assign({}, comun.en, catalogo ? catalogo.en : {}, pagina.en);
+  const dic = Object.assign({}, comun.en, catalogo ? catalogo.en : {}, ...textosDePiezas(html, raiz), pagina.en);
 
   // Texto de los elementos con data-i18n. idioma.js usa textContent, así que
   // el contenido siempre es texto plano y se puede reemplazar entero.
