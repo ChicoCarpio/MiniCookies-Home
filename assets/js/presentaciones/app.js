@@ -9,6 +9,7 @@
   'use strict';
   // ---- textos ----------------------------------------------------------------------------------------------------
   const ES = {
+    'nombre-defecto-doc': 'Presentación',
     'titulo-pagina': 'Editar PowerPoint (.pptx) en el navegador — Mini Cookies', 'meta-descripcion': 'Abre y edita presentaciones de PowerPoint (.pptx) en el navegador: mueve objetos, ordena diapositivas y presenta, sin instalar nada y sin subir tu archivo. Gratis y sin registro.',
     'h1': 'Editar PowerPoint (Presentaciones)', 'intro': 'Abre una presentación de PowerPoint, mueve sus objetos, ordena las diapositivas y preséntala. Al guardar, lo que no tocaste queda exactamente como estaba.',
     'zona-arrastre': '🎞️ Arrastra tu archivo aquí o haz clic para elegirlo (.pptx)', 'boton-nuevo': 'Presentación en blanco', 'cargando': 'Abriendo la presentación…',
@@ -34,6 +35,7 @@
     'error-abrir': 'No se pudo abrir el archivo', 'salir-sin-descargar': 'Hay cambios sin descargar.',
   };
   const EN = {
+    'nombre-defecto-doc': 'Presentation',
     'titulo-pagina': 'Edit PowerPoint (.pptx) files in your browser — Mini Cookies', 'meta-descripcion': 'Open and edit PowerPoint presentations (.pptx) in your browser: move objects, reorder slides and present, without installing anything or uploading your file. Free, no sign-up.',
     'h1': 'Presentations', 'intro': 'Open a PowerPoint presentation, move its objects, reorder the slides and present it. When you save, everything you didn’t touch stays exactly as it was.',
     'zona-arrastre': '🎞️ Drop your file here or click to choose it (.pptx)', 'boton-nuevo': 'Blank presentation', 'cargando': 'Opening the presentation…',
@@ -68,7 +70,7 @@
   const $ = (id) => document.getElementById(id);
   const EMU_POR_CM = 360000, EMU_POR_PX = 9525, MAX_EMU = 51206400 * 4, MINIMO = 22860;
   const crearEl = Oficina.crearEl;
-  let pe = null, modelo = null, hist = null, docId = null, nombreDoc = 'Presentación', lectura = false, actual = 0, cantidad = 0;
+  let pe = null, modelo = null, hist = null, docId = null, nombreDoc = tx('nombre-defecto-doc'), lectura = false, actual = 0, cantidad = 0;
   let diapActual = null, sel = null, mostrada = -1;   // sel: { clave, camino, bloqueada }
   const autoguardado = Autoguardado.crear('presentaciones');
   const comandos = Comandos.crear();
@@ -100,7 +102,7 @@
     const nuevo = await PresentacionEditable.abrir(bytes);
     const m = await PptxModelo.abrir(null, { zip: nuevo.zip });
     pe = nuevo; modelo = m; cantidad = m.cantidad; actual = 0; sel = null; mostrada = -1; diapActual = null; rutasAntes = m.rutas.join('|'); tocadas = new Set(); pedirIr = null;
-    nombreDoc = nombre || 'Presentación';
+    nombreDoc = nombre || tx('nombre-defecto-doc');
     docId = o.id || Autoguardado.nuevoId();
     hist = HistorialDoc.crear({ aplicar: aplicarOp, alCambiar: alCambiarHistorial });
     $('inicio').hidden = true; $('app').hidden = false; document.documentElement.classList.add('of-abierta');

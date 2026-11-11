@@ -59,6 +59,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-redimensionada': 'imagen-redimensionada',
     'hero-titulo': 'Redimensionar imagen',
     'intro': 'Elegí una imagen y cambiá su ancho y alto.',
     'cap-original': 'Original — ',
@@ -101,6 +102,7 @@ window.i18nPagina = {
     'guia-r3': 'Normalmente sí, porque una imagen con menos píxeles pesa menos, pero el objetivo es cambiar las medidas. Para controlar el peso con más precisión, usá Comprimir imagen.',
   },
   en: {
+    'archivo-imagen-redimensionada': 'resized-image',
     'hero-titulo': 'Resize an image',
     'intro': 'Pick an image and change its width and height.',
     'cap-original': 'Original — ',
@@ -217,7 +219,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-redimensionada" data-i18n="resultado-enlace">Descargar imagen redimensionada</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-redimensionada" download="imagen-redimensionada" data-i18n="resultado-enlace">Descargar imagen redimensionada</a>
     </div>
   </div>
 
@@ -431,7 +433,7 @@ botonRedimensionar.addEventListener('click', async () => {
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, formato, 0.92));
 
     enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `imagen-redimensionada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+    enlaceDescarga.download = `${t('archivo-imagen-redimensionada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } catch (error) {
     alert(t('error-redimensionar') + error.message);

@@ -12,6 +12,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'prefijo-parrafo': 'parrafo',
+    'archivo-parrafos-texto-zip': 'parrafos-texto.zip',
     'titulo-pagina': 'Dividir texto plano gratis — Mini Cookies',
     'meta-descripcion': 'Separá un archivo de texto plano (.txt) en varios archivos por párrafo, gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
@@ -42,6 +44,8 @@ window.i18nPagina = {
     'guia-r4': '«parrafos-texto.zip».'
   },
   en: {
+    'prefijo-parrafo': 'paragraph',
+    'archivo-parrafos-texto-zip': 'text-paragraphs.zip',
     'titulo-pagina': 'Split Plain Text Free — Mini Cookies',
     'meta-descripcion': 'Split a plain text file (.txt) into several files, one per paragraph, free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
@@ -60,7 +64,7 @@ window.i18nPagina = {
     'guia-paso-3': 'When “Done” appears, tap “Download .zip with the paragraphs”.',
     'guia-consejo-1': 'A paragraph is a block of text separated from the next one by at least one blank line. If your text has a single line break between ideas, those lines stay together in the same file.',
     'guia-consejo-2': 'Consecutive blank lines (even if they contain spaces) count as a single separator, and empty blocks are discarded.',
-    'guia-consejo-3': 'The files are named “parrafo-01.txt”, “parrafo-02.txt”, and so on, with leading zeros according to the total count.',
+    'guia-consejo-3': 'The files are named “paragraph-01.txt”, “paragraph-02.txt”, and so on, with leading zeros according to the total count.',
     'guia-consejo-4': 'The tool tries to detect whether the file is in UTF-8 or the old Windows format, and keeps the original’s line-break style, so accents and the ñ should display correctly.',
     'guia-p1': 'What happens if my file has only one paragraph?',
     'guia-r1': 'A notice appears: there’s nothing to split.',
@@ -69,7 +73,7 @@ window.i18nPagina = {
     'guia-p3': 'Does it accept other formats?',
     'guia-r3': 'Only .txt. For Markdown there’s Split Markdown, and for Word, Split Word.',
     'guia-p4': 'What is the zip called?',
-    'guia-r4': '“parrafos-texto.zip”.'
+    'guia-r4': '“text-paragraphs.zip”.'
   }
 };
 </script>
@@ -102,7 +106,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="parrafos-texto.zip" data-i18n="resultado-enlace">Descargar .zip con los párrafos</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-parrafos-texto-zip" download="parrafos-texto.zip" data-i18n="resultado-enlace">Descargar .zip con los párrafos</a>
     </div>
   </div>
 
@@ -189,7 +193,7 @@ botonDividir.addEventListener('click', async () => {
     const cantidadDigitos = String(parrafos.length).length;
     parrafos.forEach((parrafo, i) => {
       const numero = String(i + 1).padStart(cantidadDigitos, '0');
-      zip.file(`parrafo-${numero}.txt`, conFinDeLinea(parrafo, finDeLinea));
+      zip.file(`${t('prefijo-parrafo')}-${numero}.txt`, conFinDeLinea(parrafo, finDeLinea));
     });
 
     const blobZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });

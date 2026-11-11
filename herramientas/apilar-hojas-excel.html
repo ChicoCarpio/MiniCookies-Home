@@ -26,6 +26,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-tabla-combinada-xlsx': 'tabla-combinada.xlsx',
     'titulo-pagina': 'Combinar hojas de Excel en una tabla gratis — Mini Cookies',
     'meta-descripcion': 'Combiná varias hojas de un mismo Excel (.xlsx) en una sola tabla, apilando sus filas, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Combinar hojas en una tabla',
@@ -66,6 +67,7 @@ window.i18nPagina = {
     'guia-r4': 'No, se copian los valores calculados.',
   },
   en: {
+    'archivo-tabla-combinada-xlsx': 'merged-table.xlsx',
     'titulo-pagina': 'Combine Excel Sheets into One Table Free — Mini Cookies',
     'meta-descripcion': 'Combine several sheets from the same Excel file (.xlsx) into one table, stacking their rows, free and without uploading your file anywhere.',
     'h1': 'Combine sheets into one table',
@@ -91,7 +93,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your file onto the upload area or click to choose it. It accepts .xlsx, .xlsm, .xlsb, .xls, .xml and .ods.',
     'guia-paso-2': 'All the sheets are listed with a checkbox and a small preview of their first rows and columns. All of them come ticked; untick the ones you don’t want to include. At least two sheets are needed.',
     'guia-paso-3': 'Leave “Each sheet has a header row” ticked if the first row of each sheet is a column title. The first sheet’s row is used, and the others are dropped only if they are identical (ignoring spaces at the edges of each cell). If one differs, it is kept as data and a notice appears.',
-    'guia-paso-4': 'Tap “Combine into one table” and then “Download Excel”. The file is named “tabla-combinada.xlsx”.',
+    'guia-paso-4': 'Tap “Combine into one table” and then “Download Excel”. The file is named “merged-table.xlsx”.',
     'guia-consejo-1': 'Sheets are stacked in the order they appear in the workbook, not in the order you ticked them.',
     'guia-consejo-2': 'Values are copied (numbers and dates stay numbers) with their number format, but not colors, borders or formulas: the resulting table contains values.',
     'guia-consejo-3': 'The tool doesn’t reorder columns: if a sheet has the same columns in a different order, its rows end up misaligned. Check that they all have the same structure.',
@@ -145,7 +147,7 @@ window.i18nPagina = {
     <p class="nota-suave" id="avisoEncabezado" hidden></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="tabla-combinada.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-tabla-combinada-xlsx" download="tabla-combinada.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
     </div>
   </div>
 

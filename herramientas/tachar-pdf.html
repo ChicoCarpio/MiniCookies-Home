@@ -29,6 +29,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'sufijo-tachado': '-tachado',
+    'archivo-documento-tachado-pdf': 'documento-tachado.pdf',
     'titulo-pagina': 'Tachar texto de un PDF gratis — Mini Cookies',
     'meta-descripcion': 'Tachá nombres, números o cualquier texto de un PDF de verdad: el texto original se borra del archivo, no solo se tapa. Gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Tachar texto de un PDF',
@@ -95,6 +97,8 @@ window.i18nPagina = {
     'guia-r4': 'La herramienta avisa cuántas páginas no tienen texto buscable y cuántas tienen imágenes.'
   },
   en: {
+    'sufijo-tachado': '-redacted',
+    'archivo-documento-tachado-pdf': 'redacted-document.pdf',
     'titulo-pagina': 'Redact Text in a PDF Free — Mini Cookies',
     'meta-descripcion': 'Redact names, numbers or any text in a PDF for real: the original text is removed from the file, not just covered. Free and without uploading your file anywhere.',
     'h1': 'Redact text in a PDF',
@@ -257,7 +261,7 @@ window.i18nPagina = {
 
     <p class="aviso-tachado" id="avisoCapas" role="status" hidden></p>
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. Se comprobó que el texto tachado ya no está en el archivo. </span><a id="enlaceDescarga" download="documento-tachado.pdf" data-i18n="resultado-enlace">Descargar PDF tachado</a>
+      <span data-i18n="resultado-listo">✅ Listo. Se comprobó que el texto tachado ya no está en el archivo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-tachado-pdf" download="documento-tachado.pdf" data-i18n="resultado-enlace">Descargar PDF tachado</a>
     </div>
   </div>
 
@@ -538,7 +542,7 @@ botonTachar.addEventListener('click', async () => {
     const avisoCapas = document.getElementById('avisoCapas');
     avisoCapas.hidden = !(seConvirtioTodo && !todo);
     avisoCapas.textContent = avisoCapas.hidden ? '' : t('aviso-capas');
-    enlaceDescarga.download = `${nombreBase}-tachado.pdf`;
+    enlaceDescarga.download = `${nombreBase}${t('sufijo-tachado')}.pdf`;
     resultado.classList.add('visible');
   } catch (fallo) {
     mostrarError(errorTachar, fallo.codigo === 'quedan' ? t('error-quedan').replace('{n}', fallo.quedan) : t('error-generar') + ': ' + detalleErrorPdf(fallo));

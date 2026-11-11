@@ -95,6 +95,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-editada': 'imagen-editada',
     'hero-titulo': 'Editor de color',
     'intro': 'Elegí una imagen y ajustá luz, color, blanco y negro y efectos como en un editor de fotos.',
     'movil-filtros': '☰ Filtros',
@@ -188,6 +189,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, con los paneles que se abren desde los botones superiores.',
   },
   en: {
+    'archivo-imagen-editada': 'edited-image',
     'hero-titulo': 'Color editor',
     'intro': 'Pick an image and adjust light, color, black and white and effects the way a photo editor does.',
     'movil-filtros': '☰ Filters',
@@ -269,7 +271,7 @@ window.i18nPagina = {
     'guia-consejo-1': 'You can undo and redo with the buttons in the bar above the image or with Ctrl+Z and Ctrl+Shift+Z. On a phone, tapping the image with two fingers undoes.',
     'guia-consejo-2': '“Light by color” brightens or darkens just one color: for example, lowering the blues darkens the sky and raising the oranges brightens skin.',
     'guia-consejo-3': 'On a phone, the panels open with the “Filters” and “Adjustments” buttons.',
-    'guia-consejo-4': 'The file is saved as “imagen-editada” with a PNG, JPG or WebP extension depending on the original image’s format; any other input format comes out as PNG.',
+    'guia-consejo-4': 'The file is saved as “edited-image” with a PNG, JPG or WebP extension depending on the original image’s format; any other input format comes out as PNG.',
     'guia-consejo-5': 'If you need to edit only part of the image or work with layers, the page links to the Advanced editor.',
     'guia-p1': 'What is a LUT?',
     'guia-r1': 'It’s a table that swaps every color for another one, so a single .cube file applies a complete look. It’s applied after the filter and its strength is independent. The file can’t be larger than 40 MB.',
@@ -381,7 +383,7 @@ window.i18nPagina = {
                 <button type="button" id="botonCambiarImagen" class="boton-secundario-editor" data-i18n="boton-cambiar">🖼️ Cambiar imagen</button>
               </div>
               <div class="resultado" id="resultado">
-                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-editada" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
               </div>
             </div>
           </fieldset>
@@ -1269,7 +1271,7 @@ botonDescargar.addEventListener('click', async () => {
     const formato = formatoDeSalida(archivoActual);
     const blob = await new Promise((resolve) => canvasFinal.toBlob(resolve, formato, 0.92));
     enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+    enlaceDescarga.download = `${t('archivo-imagen-editada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } finally {
     botonDescargar.disabled = false;

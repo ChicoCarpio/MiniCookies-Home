@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-reordenado-docx': 'documento-reordenado.docx',
     'titulo-pagina': 'Reordenar secciones de Word gratis — Mini Cookies',
     'meta-descripcion': 'Reordená o eliminá secciones de un documento Word (.docx, .doc u .odt), gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Administrar / reordenar secciones de Word',
@@ -48,6 +49,7 @@ window.i18nPagina = {
     'guia-r4': 'La herramienta lo trata como una sección más; el nombre que se le muestra se toma del documento o de un título por defecto, «Documento».',
   },
   en: {
+    'archivo-documento-reordenado-docx': 'reordered-document.docx',
     'titulo-pagina': 'Reorder Word Sections Free — Mini Cookies',
     'meta-descripcion': 'Reorder or delete sections of a Word document (.docx, .doc or .odt), free and without uploading your file anywhere.',
     'h1': 'Manage / reorder Word sections',
@@ -69,7 +71,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the Word document (.docx, .doc or .odt) onto the upload area or click to choose it.',
     'guia-paso-2': 'One row appears per section, showing the text of the matching Heading 1.',
     'guia-paso-3': 'Drag the rows to reorder them or tap the ✕ to remove a section.',
-    'guia-paso-4': 'Tap “Download reordered” and then “Download Word”. The file is named “documento-reordenado.docx”.',
+    'guia-paso-4': 'Tap “Download reordered” and then “Download Word”. The file is named “reordered-document.docx”.',
     'guia-consejo-1': 'For this to work, the document has to use Word’s “Heading 1” style on the section headings. If there is no Heading 1, it’s treated as a single section and there is nothing to reorder (the page notes this under “Limitations”).',
     'guia-consejo-2': 'Headings, bold, italics, lists, tables and images are kept for each section.',
     'guia-consejo-3': 'The resulting document is rebuilt: it’s a new file that contains the text and those elements, so check the final look before handing it in.',
@@ -115,7 +117,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-reordenado.docx" data-i18n="resultado-enlace">Descargar Word</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-reordenado-docx" download="documento-reordenado.docx" data-i18n="resultado-enlace">Descargar Word</a>
     </div>
   </div>
 

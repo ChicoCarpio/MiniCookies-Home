@@ -216,7 +216,7 @@ window.i18nPieza = {
     if (resultados.length === 1) e.descargas.appendChild(enlaceDescarga(e, resultados[0].blob, resultados[0].nombre, 'boton-descargar'));
     else if (resultados.length > 1) {
       const zip = await LoteArchivos.zipDeResultados(resultados.map((r) => ({ ok: true, nombre: r.nombre, blob: r.blob })));
-      e.descargas.appendChild(enlaceDescarga(e, zip, nombreConFecha('flujo', 'zip'), 'boton-descargar-zip'));
+      e.descargas.appendChild(enlaceDescarga(e, zip, nombreConFecha(idioma() === 'en' ? 'flow' : 'flujo', 'zip'), 'boton-descargar-zip'));
     }
     // Lo que leyó el paso de códigos, archivo por archivo (texto de afuera: siempre con textContent)
     e.codigos.innerHTML = '';

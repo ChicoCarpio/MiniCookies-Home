@@ -12,6 +12,9 @@
 <script>
 window.i18nPagina = {
   es: {
+    'prefijo-pagina': 'pagina',
+    'archivo-imagenes-pdf': 'imagenes.pdf',
+    'archivo-paginas-pdf-zip': 'paginas-pdf.zip',
     'titulo-pagina': 'Convertir PDF e imágenes gratis — Mini Cookies',
     'meta-descripcion': 'Convertí imágenes a PDF o un PDF a imágenes, en los dos sentidos — gratis y sin subir tus archivos a ningún servidor.',
     'h1': 'PDF ↔ Imágenes',
@@ -60,6 +63,9 @@ window.i18nPagina = {
     'guia-r3': 'No: se convierten todas. Podés descartar del .zip las que no necesites.'
   },
   en: {
+    'prefijo-pagina': 'page',
+    'archivo-imagenes-pdf': 'images.pdf',
+    'archivo-paginas-pdf-zip': 'pdf-pages.zip',
     'titulo-pagina': 'Convert PDF and Images Free — Mini Cookies',
     'meta-descripcion': 'Convert images to PDF or a PDF to images, in either direction — free and without uploading your files anywhere.',
     'h1': 'PDF ↔ Images',
@@ -96,14 +102,14 @@ window.i18nPagina = {
     'guia-paso-1': 'Images → PDF: choose “Images → PDF” and drag one or more images (JPG, PNG, WebP, GIF or BMP). Each one becomes a page.',
     'guia-paso-2': 'Drag the cards to reorder them, remove any you don’t want and choose the “Page size”. Press “Convert to PDF” and download the PDF.',
     'guia-paso-3': 'PDF → Images: choose “PDF → Images” and load the PDF. Pick the “Format” (PNG or JPG) and the “Render quality” (Normal, High or Very high).',
-    'guia-paso-4': 'Press “Convert to images”: one page is processed at a time and you download a .zip with one file per page (pagina-1, pagina-2…).',
+    'guia-paso-4': 'Press “Convert to images”: one page is processed at a time and you download a .zip with one file per page (page-1, page-2…).',
     'guia-consejo-1': 'Phone photos are turned automatically according to the orientation stored in the file, so there’s no need to rotate them beforehand.',
     'guia-consejo-2': 'For pages with text or drawings, PNG gives sharper edges; for photos or lighter files, JPG. With “Very high” the images come out bigger and take longer to generate.',
     'guia-consejo-3': 'With “A4 width, height matched to the image” photos are neither cropped nor given margins; “Exact A4” or “Exact Letter” give pages of the same size, with white borders.',
     'guia-p1': 'Can I change the order of the images after loading them?',
     'guia-r1': 'Yes, by dragging the cards before converting. The PDF follows the order you see on screen.',
     'guia-p2': 'What are the images from the PDF called?',
-    'guia-r2': 'pagina-1, pagina-2… with the extension of the chosen format, and with leading zeros if the PDF has many pages so they sort correctly.',
+    'guia-r2': 'page-1, page-2… with the extension of the chosen format, and with leading zeros if the PDF has many pages so they sort correctly.',
     'guia-p3': 'Can I convert only some pages of the PDF?',
     'guia-r3': 'No: all of them are converted. You can discard the ones you don’t need from the .zip.'
   }
@@ -154,7 +160,7 @@ window.i18nPagina = {
         <button class="boton" id="botonAPdf" disabled data-i18n="boton-a-pdf">Convertir a PDF</button>
       </div>
       <div class="resultado" id="resultadoAPdf">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="imagenes.pdf" data-i18n="resultado-enlace-pdf">Descargar PDF</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" data-i18n-attr="download:archivo-imagenes-pdf" download="imagenes.pdf" data-i18n="resultado-enlace-pdf">Descargar PDF</a>
       </div>
     </div>
 
@@ -186,7 +192,7 @@ window.i18nPagina = {
       </div>
       <p id="progreso" style="color:var(--texto-suave); display:none;"></p>
       <div class="resultado" id="resultadoAImagenes">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaZip" download="paginas-pdf.zip" data-i18n="resultado-enlace-zip">Descargar .zip con las imágenes</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaZip" data-i18n-attr="download:archivo-paginas-pdf-zip" download="paginas-pdf.zip" data-i18n="resultado-enlace-zip">Descargar .zip con las imágenes</a>
       </div>
     </div>
   </div>
@@ -372,7 +378,7 @@ botonAImagenes.addEventListener('click', async () => {
     const cantidadDigitos = String(imagenes.length).length;
     for (const imagen of imagenes) {
       const numero = String(imagen.pagina).padStart(cantidadDigitos, '0');
-      zip.file(`pagina-${numero}.${extension}`, imagen.blob);
+      zip.file(`${t('prefijo-pagina')}-${numero}.${extension}`, imagen.blob);
     }
 
     progreso.textContent = t('progreso-zip');

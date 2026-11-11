@@ -16,6 +16,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-escaneo': 'escaneo',
     'inicio-texto': 'Elegí fotos que ya tengas o abrí la cámara para escanear.',
     'boton-activar': '📷 Abrir la cámara',
     'cambiar-camara': 'Cambiar de cámara',
@@ -106,6 +107,7 @@ window.i18nPagina = {
     'guia-r4': 'Esta herramienta arma el PDF con las páginas como imagen. Para sacarle el texto, pasá el PDF por «OCR de PDF».'
   },
   en: {
+    'archivo-escaneo': 'scan',
     'inicio-texto': 'Pick photos you already have or open the camera to scan.',
     'boton-activar': '📷 Open the camera',
     'cambiar-camara': 'Switch camera',
@@ -1006,7 +1008,7 @@ async function armarPdf() {
     agregarPaginaConImagen(pdf, imagen, tamano);
   }
   pdf.setProducer('Mini Cookies');
-  pdfListo = new File([await pdf.save()], nombreConFecha('escaneo', 'pdf'), { type: 'application/pdf' });
+  pdfListo = new File([await pdf.save()], nombreConFecha(t('archivo-escaneo'), 'pdf'), { type: 'application/pdf' });
   return pdfListo;
 }
 $('tamanoPagina').addEventListener('change', () => { pdfListo = null; });

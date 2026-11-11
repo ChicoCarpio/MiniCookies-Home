@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-comprimida': 'imagen-comprimida',
     'hero-titulo': 'Comprimir imagen',
     'intro': 'Elegí una imagen (JPG, PNG o WebP) y convertila a JPG o WebP con menos peso.',
     'campo-calidad-a': 'Calidad: ',
@@ -50,6 +51,7 @@ window.i18nPagina = {
     'guia-r4': 'No: la compresión descarta detalle y ese detalle no se recupera. El original no se toca, porque el resultado se descarga como archivo aparte. Si no te convence, cambiá la calidad y volvé a tocar «Comprimir imagen»: siempre parte del original.',
   },
   en: {
+    'archivo-imagen-comprimida': 'compressed-image',
     'hero-titulo': 'Compress an image',
     'intro': 'Pick an image (JPG, PNG or WebP) and turn it into a lighter JPG or WebP.',
     'campo-calidad-a': 'Quality: ',
@@ -139,7 +141,7 @@ window.i18nPagina = {
     <p id="avisoMasPesado" style="display:none; color:var(--texto-suave); font-size:0.9rem;" data-i18n="aviso-mas-pesado">⚠️ Con esta configuración la imagen pesa más que la original (ya venía bien comprimida). Probá bajar la calidad o elegir WebP; si no, te conviene quedarte con el archivo original.</p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-comprimida" data-i18n="resultado-enlace">Descargar imagen comprimida</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-comprimida" download="imagen-comprimida" data-i18n="resultado-enlace">Descargar imagen comprimida</a>
     </div>
   </div>
 
@@ -247,7 +249,7 @@ botonComprimir.addEventListener('click', async () => {
     // extensión sale del tipo real del resultado, no del elegido.
     const extension = { 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/png': 'png' }[blob.type] || 'jpg';
     enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `imagen-comprimida.${extension}`;
+    enlaceDescarga.download = `${t('archivo-imagen-comprimida')}.${extension}`;
 
     document.getElementById('pesoOriginal').textContent = formatearPeso(archivoActual.size);
     document.getElementById('pesoFinal').textContent = formatearPeso(blob.size);

@@ -15,6 +15,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-con-indice-md': 'documento-con-indice.md',
     'titulo-pagina': 'Generar tabla de contenidos de Markdown gratis — Mini Cookies',
     'meta-descripcion': 'Generá automáticamente una tabla de contenidos a partir de los encabezados de un Markdown, gratis y sin enviar nada a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .md acá, o escribí/pegá el Markdown directamente abajo',
@@ -51,6 +52,7 @@ window.i18nPagina = {
     'guia-r4': 'No, el resultado es un texto nuevo; el original no cambia.',
   },
   en: {
+    'archivo-documento-con-indice-md': 'document-with-index.md',
     'titulo-pagina': 'Markdown Table of Contents Generator Free — Mini Cookies',
     'meta-descripcion': 'Generate a table of contents with links to every heading of your Markdown, free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .md file here, or type/paste the Markdown directly below',
@@ -72,7 +74,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag a .md or .markdown file to the area, or type or paste the content directly into the “Markdown” box.',
     'guia-paso-2': 'Click “Generate table of contents”.',
     'guia-paso-3': 'Check the “Markdown with the table of contents added” box: the index appears at the top, with the title “Table of contents”.',
-    'guia-paso-4': 'Use “Copy result” or “Download .md” (documento-con-indice.md).',
+    'guia-paso-4': 'Use “Copy result” or “Download .md” (document-with-index.md).',
     'guia-consejo-1': 'The links follow GitHub’s anchor rule: lowercase, spaces turned into hyphens and no punctuation marks (except hyphens and underscores). If two headings have the same name, the second one gets -1, the third -2, and so on.',
     'guia-consejo-2': 'Headings inside code blocks don’t count, so a # something comment in an example doesn’t create a false entry.',
     'guia-consejo-3': 'If your file starts with YAML metadata (the block between ---), it is respected and the index is placed after it.',
@@ -126,7 +128,7 @@ window.i18nPagina = {
       </label>
       <div class="controles">
         <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar resultado</button>
-        <a class="boton" id="enlaceDescarga" download="documento-con-indice.md" data-i18n="enlace-descargar">Descargar .md</a>
+        <a class="boton" id="enlaceDescarga" data-i18n-attr="download:archivo-documento-con-indice-md" download="documento-con-indice.md" data-i18n="enlace-descargar">Descargar .md</a>
       </div>
     </div>
   </div>

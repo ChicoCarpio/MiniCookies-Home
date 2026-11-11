@@ -19,6 +19,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-redondeada-png': 'imagen-redondeada.png',
     'hero-titulo': 'Redondear esquinas',
     'intro': 'Elegí una imagen y redondeá sus esquinas — llevá el control al máximo para un círculo (o una píldora si la imagen no es cuadrada). El fondo (cuadriculado abajo) queda transparente.',
     'campo-radio-a': 'Radio de esquina: ',
@@ -46,6 +47,7 @@ window.i18nPagina = {
     'guia-r4': 'imagen-redondeada.png.'
   },
   en: {
+    'archivo-imagen-redondeada-png': 'rounded-image.png',
     'hero-titulo': 'Round the corners',
     'intro': 'Pick an image and round its corners — push the slider all the way for a circle (or a pill shape if the image is not square). The background (the checkerboard below) stays transparent.',
     'campo-radio-a': 'Corner radius: ',
@@ -70,7 +72,7 @@ window.i18nPagina = {
     'guia-p3': 'Is the checkerboard visible in the final image?',
     'guia-r3': 'No, the checkerboard is only in the preview.',
     'guia-p4': 'What is the downloaded file called?',
-    'guia-r4': 'imagen-redondeada.png.'
+    'guia-r4': 'rounded-image.png.'
   }
 };
 </script>
@@ -109,7 +111,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-redondeada.png" data-i18n="resultado-enlace">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-redondeada-png" download="imagen-redondeada.png" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 

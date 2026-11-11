@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto-limpio-txt': 'texto-limpio.txt',
     'titulo-pagina': 'Quitar líneas duplicadas o vacías gratis — Mini Cookies',
     'meta-descripcion': 'Quitá líneas duplicadas o vacías de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
@@ -48,6 +49,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí. La herramienta detecta la codificación del original (UTF-8, Windows-1252 o UTF-16) y guarda el resultado en UTF-8, con el mismo tipo de salto de línea.'
   },
   en: {
+    'archivo-texto-limpio-txt': 'clean-text.txt',
     'titulo-pagina': 'Remove Duplicate or Empty Lines Free — Mini Cookies',
     'meta-descripcion': 'Remove duplicate and/or empty lines from a plain text file (.txt), free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
@@ -69,7 +71,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your .txt file to the upload area or click to choose it.',
     'guia-paso-2': 'Tick the options you want: “Remove empty lines” and/or “Remove duplicate lines (the first occurrence is kept)”. Both are ticked by default.',
     'guia-paso-3': 'Tap “Process and download”. A summary like “Of 120 original lines, 95 remain (18 duplicate(s) removed)” appears.',
-    'guia-paso-4': 'Tap “Download .txt” to get texto-limpio.txt.',
+    'guia-paso-4': 'Tap “Download .txt” to get clean-text.txt.',
     'guia-consejo-1': 'If you untick both options, the tool asks you to tick at least one.',
     'guia-consejo-2': 'The comparison is exact, letter by letter: “Ana” and “ana”, or “Ana” and “Ana ” (with a trailing space), count as different lines and both are kept.',
     'guia-consejo-3': 'A line with only spaces counts as empty and is removed if the first option is on.',
@@ -124,7 +126,7 @@ window.i18nPagina = {
     <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-limpio.txt" data-i18n="resultado-enlace">Descargar .txt</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-texto-limpio-txt" download="texto-limpio.txt" data-i18n="resultado-enlace">Descargar .txt</a>
     </div>
   </div>
 

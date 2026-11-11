@@ -6,6 +6,7 @@
 (function () {
   'use strict';
   const ES = {
+    'nombre-defecto-doc': 'Documento',
     'titulo-pagina': 'Editar Word (.docx) y OpenDocument (.odt) en el navegador — Mini Cookies', 'meta-descripcion': 'Edita documentos de Word (.docx) y de LibreOffice (.odt) en el navegador: escribe, da formato, inserta tablas e imágenes, revisa la ortografía y descarga un PDF, sin instalar nada y sin subir tu archivo. Gratis y sin registro.',
     'h1': 'Editar Word (Documentos)', 'intro': 'Abre un documento de Word o de LibreOffice, léelo y edítalo. Al guardar, lo que no tocaste queda exactamente como estaba.',
     'zona-arrastre': '📄 Arrastra tu archivo aquí o haz clic para elegirlo (.docx, .odt)', 'boton-nuevo': 'Documento en blanco', 'cargando': 'Abriendo el documento…', 'anuncio': 'Espacio publicitario',
@@ -47,6 +48,7 @@
     'capa-imagen': 'Imagen', 'capa-dibujo': 'Dibujo', 'capa-notas': 'Notas al pie',
   };
   const EN = {
+    'nombre-defecto-doc': 'Document',
     'titulo-pagina': 'Edit Word (.docx) and OpenDocument (.odt) files in your browser — Mini Cookies', 'meta-descripcion': 'Edit Word (.docx) and LibreOffice (.odt) documents in your browser: type, format, insert tables and pictures, check spelling and download a PDF, without installing anything or uploading your file. Free, no sign-up.',
     'h1': 'Edit Word (Documents)', 'intro': 'Open a Word or LibreOffice document, read it and edit it. When you save, everything you didn’t touch stays exactly as it was.',
     'zona-arrastre': '📄 Drop your file here or click to choose it (.docx, .odt)', 'boton-nuevo': 'Blank document', 'cargando': 'Opening the document…', 'anuncio': 'Advertising space',
@@ -99,7 +101,7 @@
   let modelo = null, edDoc = null, editorDoc = null, mqDoc = null, pintorDoc = null, visor = null, capa = null;
   let ed = null, editor = null;           // los de lo que se está editando ahora: el documento o, mientras está abierto, su encabezado o pie
   let parte = null;                       // { vista, ed, editor, visor, tipo }
-  let docId = null, nombreDoc = 'Documento', lectura = false, partesCambiadas = false, cosas = new Set(), aproximado = new Set();
+  let docId = null, nombreDoc = tx('nombre-defecto-doc'), lectura = false, partesCambiadas = false, cosas = new Set(), aproximado = new Set();
   const autoguardado = Autoguardado.crear('documentos');
   const comandos = Comandos.crear();
   const sucio = () => !!(edDoc && edDoc.sucio()) || partesCambiadas;
@@ -162,7 +164,7 @@
     if (visor) visor.destruir();
     if (capa) capa.destruir();
     modelo = m;
-    nombreDoc = nombre || 'Documento';
+    nombreDoc = nombre || tx('nombre-defecto-doc');
     docId = o.id || Autoguardado.nuevoId();
     partesCambiadas = false;
     $('inicio').hidden = true; $('app').hidden = false; document.documentElement.classList.add('of-abierta');

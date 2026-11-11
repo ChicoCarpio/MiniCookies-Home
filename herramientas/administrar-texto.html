@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto-reordenado-txt': 'texto-reordenado.txt',
     'titulo-pagina': 'Reordenar párrafos de un texto gratis — Mini Cookies',
     'meta-descripcion': 'Reordená o eliminá párrafos de un archivo de texto plano (.txt), gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre': '📄 Arrastrá tu archivo .txt acá o hacé clic para elegirlo',
@@ -45,6 +46,7 @@ window.i18nPagina = {
     'guia-r4': 'No. Si quitás todos, el botón de descargar queda deshabilitado.'
   },
   en: {
+    'archivo-texto-reordenado-txt': 'reordered-text.txt',
     'titulo-pagina': 'Reorder Text Paragraphs Free — Mini Cookies',
     'meta-descripcion': 'Reorder or remove the paragraphs of a plain text file (.txt), free and without uploading your file anywhere.',
     'zona-arrastre': '📄 Drag your .txt file here or click to choose it',
@@ -63,7 +65,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the .txt file onto the upload area or click to choose it.',
     'guia-paso-2': 'Each paragraph appears in a row with its first line (cut at 60 characters with “…”). An empty paragraph is shown as “(empty paragraph)”.',
     'guia-paso-3': 'Drag the rows to reorder them or tap the ✕ to remove a paragraph.',
-    'guia-paso-4': 'Tap “Download reordered” and then “Download .txt”. The file is named “texto-reordenado.txt”.',
+    'guia-paso-4': 'Tap “Download reordered” and then “Download .txt”. The file is named “reordered-text.txt”.',
     'guia-consejo-1': 'Paragraphs are separated by blank lines. If your text uses a single line break between blocks, everything will show up as one paragraph.',
     'guia-consejo-2': 'In the result, paragraphs are separated by a single blank line, even if the original had several.',
     'guia-consejo-3': 'The file’s line-break type (Windows or Unix) is respected, as well as whether it ended with a final line break.',
@@ -109,7 +111,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="texto-reordenado.txt" data-i18n="resultado-enlace">Descargar .txt</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-texto-reordenado-txt" download="texto-reordenado.txt" data-i18n="resultado-enlace">Descargar .txt</a>
     </div>
   </div>
 

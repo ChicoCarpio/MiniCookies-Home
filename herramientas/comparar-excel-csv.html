@@ -32,6 +32,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-comparacion': 'comparacion',
     'titulo-pagina': 'Comparar Excel o CSV gratis — Mini Cookies',
     'meta-descripcion': 'Compará dos versiones de una planilla Excel o CSV y mirá qué filas se agregaron, se quitaron o cambiaron. Gratis y sin subir tus archivos a ningún servidor.',
     'h1': 'Comparar Excel / CSV',
@@ -76,6 +77,7 @@ window.i18nPagina = {
     'guia-r4': 'Empieza con «comparacion», seguido de la fecha y la hora.',
   },
   en: {
+    'archivo-comparacion': 'comparison',
     'titulo-pagina': 'Compare Excel or CSV Free — Mini Cookies',
     'meta-descripcion': 'Compare two versions of an Excel or CSV spreadsheet and see which rows were added, removed or changed. Free and without uploading your files anywhere.',
     'h1': 'Compare Excel / CSV',
@@ -117,7 +119,7 @@ window.i18nPagina = {
     'guia-p3': 'Does it compare formulas or formatting?',
     'guia-r3': 'No. It compares the text each cell displays, not formulas or colors.',
     'guia-p4': 'What is the downloaded file called?',
-    'guia-r4': 'It starts with “comparacion”, followed by the date and time.',
+    'guia-r4': 'It starts with “comparison”, followed by the date and time.',
   }
 };
 </script>
@@ -391,7 +393,7 @@ document.getElementById('botonDescargar').addEventListener('click', async () => 
   });
   const anchos = filas[0].map((_, i) => Math.min(50, Math.max(10, ...filas.map((f) => String(f[i] ?? '').length))));
   const datos = await XlsxEscritor.crearLibro([{ nombre: t('hoja-resultado'), filas, anchos, inmovilizarFilas: 1, autofiltro: true }], { negritaPrimeraFila: true });
-  descargarBlob(new Blob([datos], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nombreConFecha('comparacion', 'xlsx'));
+  descargarBlob(new Blob([datos], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nombreConFecha(t('archivo-comparacion'), 'xlsx'));
 });
 </script>
 <script src="../assets/js/tema.js"></script>

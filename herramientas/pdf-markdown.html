@@ -32,6 +32,10 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-markdown-desde-pdf-zip': 'markdown-desde-pdf.zip',
+    'archivo-pdf-desde-markdown-zip': 'pdf-desde-markdown.zip',
+    'archivo-documento-md': 'documento.md',
+    'archivo-documento-pdf': 'documento.pdf',
     'titulo-pagina': 'Convertir PDF y Markdown gratis — Mini Cookies',
     'meta-descripcion': 'Convertí PDF a Markdown o Markdown a PDF, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'PDF ↔ Markdown',
@@ -83,6 +87,10 @@ window.i18nPagina = {
     'guia-r4': 'El generador usa Helvetica, que no cubre todos los alfabetos: lo que no puede dibujar (por ejemplo, chino o cirílico) sale como «?».'
   },
   en: {
+    'archivo-markdown-desde-pdf-zip': 'markdown-from-pdf.zip',
+    'archivo-pdf-desde-markdown-zip': 'pdf-from-markdown.zip',
+    'archivo-documento-md': 'document.md',
+    'archivo-documento-pdf': 'document.pdf',
     'titulo-pagina': 'Convert PDF and Markdown Free — Mini Cookies',
     'meta-descripcion': 'Convert PDF to Markdown or Markdown to PDF, in either direction — free and without uploading your file anywhere.',
     'h1': 'PDF ↔ Markdown',
@@ -174,7 +182,7 @@ window.i18nPagina = {
         <textarea id="markdownExtraido" style="min-height:320px; font-family:monospace;"></textarea>
         <div class="controles">
           <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
-          <a class="boton" id="enlaceDescargaMd" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
+          <a class="boton" id="enlaceDescargaMd" data-i18n-attr="download:archivo-documento-md" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
@@ -191,7 +199,7 @@ window.i18nPagina = {
         <button class="boton" id="botonConvertirPdf" disabled data-i18n="boton-convertir-pdf">Convertir a PDF</button>
       </div>
       <div class="resultado" id="resultadoPdf">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="documento.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" data-i18n-attr="download:archivo-documento-pdf" download="documento.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
       </div>
 
       <h2 data-i18n="md-manual-titulo">O escribilo a mano</h2>
@@ -430,7 +438,7 @@ botonExtraer.addEventListener('click', async () => {
       const ok = resultados.filter((r) => r.ok).length;
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaMd.href = URL.createObjectURL(zip);
-      enlaceDescargaMd.download = 'markdown-desde-pdf.zip';
+      enlaceDescargaMd.download = t('archivo-markdown-desde-pdf-zip');
       enlaceDescargaMd.textContent = t('enlace-descargar-zip');
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
       if (ok > 0) {
@@ -517,7 +525,7 @@ botonConvertirPdf.addEventListener('click', async () => {
       });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaPdf.href = URL.createObjectURL(zip);
-      enlaceDescargaPdf.download = 'pdf-desde-markdown.zip';
+      enlaceDescargaPdf.download = t('archivo-pdf-desde-markdown-zip');
       enlaceDescargaPdf.textContent = t('enlace-descargar-pdf-zip');
       const ok = resultados.filter(r => r.ok).length;
       const fallos = resultados.filter(r => !r.ok);

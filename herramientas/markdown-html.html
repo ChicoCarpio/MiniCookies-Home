@@ -26,6 +26,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento': 'documento',
     'titulo-pagina': 'Convertir Markdown y HTML gratis — Mini Cookies',
     'meta-descripcion': 'Convertí Markdown a HTML o HTML a Markdown, en los dos sentidos, con vista previa en vivo — gratis y sin enviar nada a ningún servidor.',
     'h1': 'Markdown ↔ HTML',
@@ -63,6 +64,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, podés pegarlo o abrirlo; conviene revisar el resultado, porque menús o scripts de la página también se convierten en texto.'
   },
   en: {
+    'archivo-documento': 'document',
     'titulo-pagina': 'Convert Markdown and HTML Free — Mini Cookies',
     'meta-descripcion': 'Convert Markdown to HTML or HTML to Markdown, in either direction — free and without uploading anything anywhere.',
     'h1': 'Markdown ↔ HTML',
@@ -383,12 +385,12 @@ ${salidaHtml.value.trim()}
 </body>
 </html>
 `;
-  descargarTexto(documento, `${nombreBase || 'documento'}.html`, 'text/html');
+  descargarTexto(documento, `${nombreBase || t('archivo-documento')}.html`, 'text/html');
 });
 
 botonDescargarMarkdown.addEventListener('click', () => {
   actualizar();
-  if (salidaMarkdown.value) descargarTexto(salidaMarkdown.value + '\n', `${nombreBase || 'documento'}.md`, 'text/markdown');
+  if (salidaMarkdown.value) descargarTexto(salidaMarkdown.value + '\n', `${nombreBase || t('archivo-documento')}.md`, 'text/markdown');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

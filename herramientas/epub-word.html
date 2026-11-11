@@ -12,6 +12,10 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-word-desde-epub-zip': 'word-desde-epub.zip',
+    'archivo-epub-desde-word-zip': 'epub-desde-word.zip',
+    'archivo-libro-docx': 'libro.docx',
+    'archivo-libro-epub': 'libro.epub',
     'titulo-pagina': 'Convertir EPUB y Word gratis — Mini Cookies',
     'meta-descripcion': 'Convertí un libro EPUB a Word, o un Word a EPUB, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'zona-arrastre-epub': '📚 Arrastrá tu archivo .epub acá o hacé clic para elegirlo',
@@ -60,6 +64,10 @@ window.i18nPagina = {
     'guia-r4': 'El nombre de cada archivo.'
   },
   en: {
+    'archivo-word-desde-epub-zip': 'word-from-epub.zip',
+    'archivo-epub-desde-word-zip': 'epub-from-word.zip',
+    'archivo-libro-docx': 'book.docx',
+    'archivo-libro-epub': 'book.epub',
     'titulo-pagina': 'Convert EPUB and Word Free — Mini Cookies',
     'meta-descripcion': 'Convert an EPUB book to an editable Word document or Word to EPUB, free and without uploading your file anywhere.',
     'zona-arrastre-epub': '📚 Drag your .epub file here or click to choose it',
@@ -91,9 +99,9 @@ window.i18nPagina = {
     'guia-intro': 'It converts an EPUB book into a Word (.docx) document you can edit, or a Word document into an EPUB to read on an e-book reader. It’s useful for correcting or adapting an unprotected book, or for publishing a manuscript written in Word. An .epub or a Word file (.docx, .doc or .odt) goes in; a .docx or an .epub comes out.',
     'guia-paso-1': 'Choose the direction: “EPUB → Word” or “Word → EPUB”.',
     'guia-paso-2': 'In EPUB → Word, load one or several .epub files. With a single book, the “File name” is filled in with the book’s name and you can change it.',
-    'guia-paso-3': 'Tap “Convert to Word”. You’ll see the progress chapter by chapter; when it’s done, “Download Word” (or word-desde-epub.zip if you loaded several books).',
+    'guia-paso-3': 'Tap “Convert to Word”. You’ll see the progress chapter by chapter; when it’s done, “Download Word” (or word-from-epub.zip if you loaded several books).',
     'guia-paso-4': 'In Word → EPUB, load the document (.docx, .doc or .odt), fill in “Book title” and, if you want, “Author (optional)”, and tap “Convert to EPUB”.',
-    'guia-paso-5': 'Tap “Download EPUB” (with several documents, epub-desde-word.zip).',
+    'guia-paso-5': 'Tap “Download EPUB” (with several documents, epub-from-word.zip).',
     'guia-consejo-1': 'For your Word document to be split into chapters, use the Heading 1 style on each main heading: each one starts a new chapter in the EPUB.',
     'guia-consejo-2': 'In EPUB → Word, each chapter starts on a new page of the document.',
     'guia-consejo-3': 'Headings, bold, italics, lists, tables and images are kept. Fixed-layout designs (like a comic) may not look the same.',
@@ -146,7 +154,7 @@ window.i18nPagina = {
         <button class="boton" id="botonAWord" disabled data-i18n="boton-a-word">Convertir a Word</button>
       </div>
       <div class="resultado" id="resultadoWord">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="libro.docx" data-i18n="resultado-enlace-word">Descargar Word</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" data-i18n-attr="download:archivo-libro-docx" download="libro.docx" data-i18n="resultado-enlace-word">Descargar Word</a>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
@@ -170,7 +178,7 @@ window.i18nPagina = {
         <button class="boton" id="botonAEpub" disabled data-i18n="boton-a-epub">Convertir a EPUB</button>
       </div>
       <div class="resultado" id="resultadoEpub">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" download="libro.epub" data-i18n="resultado-enlace-epub">Descargar EPUB</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaEpub" data-i18n-attr="download:archivo-libro-epub" download="libro.epub" data-i18n="resultado-enlace-epub">Descargar EPUB</a>
       </div>
     </div>
 
@@ -274,7 +282,7 @@ function mostrarArchivosEpub(archivos) {
   resultadoWord.classList.remove('visible');
   resumenLote.style.display = 'none';
   // Con un solo libro, el nombre del Word sale de su archivo (si no se escribió otro).
-  if (archivos.length === 1 && (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === 'libro')) {
+  if (archivos.length === 1 && (!nombreArchivoInput.value.trim() || nombreArchivoInput.value === 'libro' || nombreArchivoInput.value === 'book')) {
     nombreArchivoInput.value = archivos[0].name.replace(/\.epub$/i, '');
   }
 }
@@ -312,7 +320,7 @@ botonAWord.addEventListener('click', async () => {
       const blob = await convertirEpubAWord(epubsActuales[0], (i, total) => {
         progreso.textContent = t('progreso-capitulo').replace('{actual}', i + 1).replace('{total}', total);
       });
-      const nombreArchivo = (nombreArchivoInput.value || 'libro').trim();
+      const nombreArchivo = (nombreArchivoInput.value || t('valor-nombre')).trim();
       enlaceDescargaWord.href = URL.createObjectURL(blob);
       enlaceDescargaWord.download = `${nombreArchivo}.docx`;
       enlaceDescargaWord.textContent = t('resultado-enlace-word');
@@ -329,7 +337,7 @@ botonAWord.addEventListener('click', async () => {
       });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaWord.href = URL.createObjectURL(zip);
-      enlaceDescargaWord.download = 'word-desde-epub.zip';
+      enlaceDescargaWord.download = t('archivo-word-desde-epub-zip');
       enlaceDescargaWord.textContent = t('lote-enlace-zip');
       resultadoWord.classList.add('visible');
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
@@ -411,7 +419,7 @@ botonAEpub.addEventListener('click', async () => {
       });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaEpub.href = URL.createObjectURL(zip);
-      enlaceDescargaEpub.download = 'epub-desde-word.zip';
+      enlaceDescargaEpub.download = t('archivo-epub-desde-word-zip');
       enlaceDescargaEpub.textContent = t('lote-enlace-zip');
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
       resultadoEpub.classList.add('visible');

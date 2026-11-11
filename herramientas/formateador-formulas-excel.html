@@ -97,6 +97,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-formula-formateada': 'formula-formateada',
     'titulo-pagina': 'Formatear fórmulas anidadas de Excel gratis — Mini Cookies',
     'aria-opciones-formato': 'Opciones de formato',
     'meta-descripcion': 'Pegá una fórmula larga de SI/SI.CONJUNTO y la reordena en líneas legibles con sangría, verificando que la lógica quede idéntica. Gratis y sin subir nada a ningún servidor.',
@@ -183,6 +184,7 @@ window.i18nPagina = {
     'guia-r4': 'Tendrás que simplificarla: ese es el límite de Excel y la herramienta solo avisa.'
   },
   en: {
+    'archivo-formula-formateada': 'formatted-formula',
     'titulo-pagina': 'Format Nested Excel Formulas Free — Mini Cookies',
     'aria-opciones-formato': 'Format options',
     'meta-descripcion': 'Paste a long IF/IFS formula and it reorders it into readable, indented lines, verifying the logic stays identical. Free and without uploading anything anywhere.',
@@ -943,7 +945,7 @@ window.i18nPagina = {
   });
 
   document.getElementById('btn-download').addEventListener('click', function(){
-    if(lastFormattedText) descargarTexto(lastFormattedText + '\n', nombreConFecha('formula-formateada', 'txt'));
+    if(lastFormattedText) descargarTexto(lastFormattedText + '\n', nombreConFecha(t('archivo-formula-formateada'), 'txt'));
   });
 
   btnReset.addEventListener('click', function(){

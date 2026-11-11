@@ -67,6 +67,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-tabla-pdf': 'tabla.pdf',
     'titulo-pagina': 'Convertir Excel o CSV a PDF gratis — Mini Cookies',
     'meta-descripcion': 'Exportá una hoja de Excel o un CSV como PDF con las mismas páginas que imprime Excel, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Excel / CSV a PDF',
@@ -212,6 +213,7 @@ window.i18nPagina = {
     'guia-r4': 'El PDF tiene un tope de 20.000 páginas. Si el libro pasa de ahí, el PDF trae solo las primeras y la vista previa avisa. Para un libro así, imprimí solo lo que necesitás con «Solo celdas seleccionadas».'
   },
   en: {
+    'archivo-tabla-pdf': 'table.pdf',
     'titulo-pagina': 'Convert Excel or CSV to PDF Free — Mini Cookies',
     'meta-descripcion': 'Export an Excel sheet or a CSV as a PDF with the same pages Excel prints, free and without uploading your file anywhere.',
     'h1': 'Excel / CSV to PDF',
@@ -388,7 +390,7 @@ window.i18nPagina = {
         <button class="boton" id="botonConvertir" type="button" data-i18n="boton-convertir">Generar PDF</button>
         <div class="resumen" id="resumenPaginas" aria-live="polite"></div>
         <div class="resultado" id="resultado">
-          <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="tabla.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
+          <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-tabla-pdf" download="tabla.pdf" data-i18n="resultado-enlace">Descargar PDF</a>
         </div>
       </div>
 

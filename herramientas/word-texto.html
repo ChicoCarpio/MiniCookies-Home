@@ -13,6 +13,9 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto-desde-word-zip': 'texto-desde-word.zip',
+    'archivo-texto-extraido-txt': 'texto-extraido.txt',
+    'archivo-documento-docx': 'documento.docx',
     'titulo-pagina': 'Convertir Word y texto plano gratis — Mini Cookies',
     'meta-descripcion': 'Extraé el texto de un Word (.docx, .doc u .odt) a .txt, o convertí un .txt a un documento Word, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Word ↔ Texto',
@@ -57,6 +60,9 @@ window.i18nPagina = {
     'guia-r4': 'Se escriben en el texto con sus columnas, no como celdas sueltas.'
   },
   en: {
+    'archivo-texto-desde-word-zip': 'text-from-word.zip',
+    'archivo-texto-extraido-txt': 'extracted-text.txt',
+    'archivo-documento-docx': 'document.docx',
     'titulo-pagina': 'Convert Word and Plain Text Free — Mini Cookies',
     'meta-descripcion': 'Extract the text from a Word document (.docx, .doc or .odt) to .txt, or convert a .txt to a Word document, in either direction — free and without uploading your file anywhere.',
     'h1': 'Word ↔ Text',
@@ -84,8 +90,8 @@ window.i18nPagina = {
     'guia-titulo': 'How to turn a Word document into plain text (and back)',
     'guia-intro': 'Two conversions in one tool. In one direction it pulls the text out of a Word document (.docx, .doc or .odt) into an unformatted .txt, handy for pasting into another program or analyzing it. In the other it turns a plain text file into a Word document, ready to edit with formatting. You choose the direction with the direction selector.',
     'guia-paso-1': 'Choose the direction at the top: “Word → Text” or “Text → Word”.',
-    'guia-paso-2': 'In Word → Text, drag one or more Word files (.docx, .doc or .odt) onto the area and click “Extract text”. With a single file you’ll see the text on screen and can use “Copy text” or “Download .txt” (texto-extraido.txt).',
-    'guia-paso-3': 'With several documents, the result is a ZIP (texto-desde-word.zip) with one .txt per document and a summary of the batch.',
+    'guia-paso-2': 'In Word → Text, drag one or more Word files (.docx, .doc or .odt) onto the area and click “Extract text”. With a single file you’ll see the text on screen and can use “Copy text” or “Download .txt” (extracted-text.txt).',
+    'guia-paso-3': 'With several documents, the result is a ZIP (text-from-word.zip) with one .txt per document and a summary of the batch.',
     'guia-paso-4': 'In Text → Word, drag a .txt file, type the “File name” (the .txt’s name is suggested) and click “Convert to Word”. Download with “Download Word”.',
     'guia-consejo-1': 'In Word → Text you get the body text: paragraphs, lists, text boxes and tables (in aligned columns, one row per line, with a line of dashes under the header). Headers and footers, footnotes, comments and the text of SmartArt and charts are left out. The “?” button reminds you of this.',
     'guia-consejo-2': 'For fields (page number, formulas) you get the last result Word saved.',
@@ -143,7 +149,7 @@ window.i18nPagina = {
         <textarea id="textoExtraido" readonly></textarea>
         <div class="controles">
           <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
-          <a class="boton" id="enlaceDescargaTxt" download="texto-extraido.txt" data-i18n="enlace-descargar-txt">Descargar .txt</a>
+          <a class="boton" id="enlaceDescargaTxt" data-i18n-attr="download:archivo-texto-extraido-txt" download="texto-extraido.txt" data-i18n="enlace-descargar-txt">Descargar .txt</a>
         </div>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
@@ -159,12 +165,12 @@ window.i18nPagina = {
       <div class="controles">
         <label class="campo">
           <span data-i18n="campo-nombre">Nombre del archivo</span>
-          <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+          <input type="text" id="nombreArchivo" value="documento" data-i18n-attr="value:nombre-defecto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
         <button class="boton" id="botonAWord" disabled data-i18n="boton-a-word">Convertir a Word</button>
       </div>
       <div class="resultado" id="resultadoWord">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="documento.docx" data-i18n="resultado-enlace">Descargar Word</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" data-i18n-attr="download:archivo-documento-docx" download="documento.docx" data-i18n="resultado-enlace">Descargar Word</a>
       </div>
     </div>
   </div>
@@ -290,7 +296,7 @@ botonExtraer.addEventListener('click', async () => {
       botonCopiar.style.display = '';
       const blob = new Blob([resultado.value], { type: 'text/plain;charset=utf-8' });
       enlaceDescargaTxt.href = URL.createObjectURL(blob);
-      enlaceDescargaTxt.download = 'texto-extraido.txt';
+      enlaceDescargaTxt.download = t('archivo-texto-extraido-txt');
       enlaceDescargaTxt.textContent = t('enlace-descargar-txt');
       bloqueResultadoTexto.style.display = 'block';
 
@@ -312,7 +318,7 @@ botonExtraer.addEventListener('click', async () => {
       textoExtraido.style.display = 'none';
       botonCopiar.style.display = 'none';
       enlaceDescargaTxt.href = URL.createObjectURL(zip);
-      enlaceDescargaTxt.download = 'texto-desde-word.zip';
+      enlaceDescargaTxt.download = t('archivo-texto-desde-word-zip');
       enlaceDescargaTxt.textContent = t('lote-enlace-zip');
       bloqueResultadoTexto.style.display = 'block';
       LoteArchivos.pintarResumen(resumenLote, resultados, t);

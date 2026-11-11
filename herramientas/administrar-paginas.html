@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-modificado-pdf': 'documento-modificado.pdf',
     'titulo-pagina': 'Reordenar y administrar páginas de PDF — Mini Cookies',
     'meta-descripcion': 'Reordená, eliminá o restaurá páginas de un PDF arrastrando sus miniaturas, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Administrar páginas de PDF',
@@ -47,6 +48,7 @@ window.i18nPagina = {
     'guia-r4': 'Al copiar solo las páginas a un documento nuevo, es posible que no se conserven elementos del documento como índices o marcadores.'
   },
   en: {
+    'archivo-documento-modificado-pdf': 'modified-document.pdf',
     'titulo-pagina': 'Reorder and Manage PDF Pages — Mini Cookies',
     'meta-descripcion': 'Reorder, delete or restore pages of a PDF by dragging their thumbnails, free and without uploading your file anywhere.',
     'h1': 'Manage PDF pages',
@@ -67,7 +69,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the PDF onto the upload area or click to choose it. Thumbnails of all the pages are generated (in a large PDF this can take a while).',
     'guia-paso-2': 'Each thumbnail carries the label “Original: page N”. Drag the thumbnails to change the order.',
     'guia-paso-3': 'Tap the ✕ on a thumbnail to delete that page. If you make a mistake, use the undo and redo buttons, or “Restore original order” to go back to all the pages in their initial order.',
-    'guia-paso-4': 'Tap “Save modified PDF” and then the “Download modified PDF” link. The file is named “documento-modificado.pdf”.',
+    'guia-paso-4': 'Tap “Save modified PDF” and then the “Download modified PDF” link. The file is named “modified-document.pdf”.',
     'guia-consejo-1': 'Above the thumbnails there is a selector with “Grid” and “List”. The mode you pick is remembered in this browser.',
     'guia-consejo-2': '“Restore original order” doesn’t read the file again and can also be undone.',
     'guia-consejo-3': 'The new PDF is built by copying the chosen pages from the original, so the content of each page stays the same.',
@@ -117,7 +119,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-modificado.pdf" data-i18n="resultado-enlace">Descargar PDF modificado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-modificado-pdf" download="documento-modificado.pdf" data-i18n="resultado-enlace">Descargar PDF modificado</a>
     </div>
   </div>
 

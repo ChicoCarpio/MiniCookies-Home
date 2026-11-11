@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-archivos-unidos-xlsx': 'archivos-unidos.xlsx',
     'titulo-pagina': 'Unir varios Excel o CSV en un archivo gratis — Mini Cookies',
     'meta-descripcion': 'Combiná varios archivos Excel o CSV en un solo libro, cada uno en su propia hoja, gratis y sin subir tus archivos a ningún servidor.',
     'h1': 'Unir Excel / CSV',
@@ -46,6 +47,7 @@ window.i18nPagina = {
     'guia-r4': 'No, cada archivo queda en sus propias hojas. Para apilarlas después, usá «Combinar hojas en una tabla» sobre el libro que sale de esta herramienta, si las hojas tienen las mismas columnas.'
   },
   en: {
+    'archivo-archivos-unidos-xlsx': 'merged-files.xlsx',
     'titulo-pagina': 'Merge Several Excel or CSV Files Free — Mini Cookies',
     'meta-descripcion': 'Combine several Excel or CSV files into one workbook, each on its own sheet, free and without uploading your files anywhere.',
     'h1': 'Merge Excel / CSV',
@@ -65,7 +67,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the files onto the “Drag your files here or click to choose them” area, or pick them with the multiple selector. They’re numbered in a list and you can remove any extras with the cross.',
     'guia-paso-2': 'With at least two files, the “Merge into an Excel file” button is enabled; click it.',
     'guia-paso-3': 'Wait for “Merging...” to finish.',
-    'guia-paso-4': 'Download the result with “Download combined Excel file” (archivos-unidos.xlsx).',
+    'guia-paso-4': 'Download the result with “Download combined Excel file” (merged-files.xlsx).',
     'guia-consejo-1': 'Sheet names come from the file name. If a file has several sheets, they’re named “file - sheet”; if it has only one, the sheet is named after the file. Names are shortened to 31 characters, characters Excel doesn’t accept are cleaned up and, if they repeat, a suffix _2, _3 is added.',
     'guia-consejo-2': 'Values, number formats, column widths and merged cells are kept, each in the same cell as in the original.',
     'guia-consejo-3': 'Cell styles such as colors and bold, and embedded images and charts, are not kept. If you need that formatting, merge them from Excel.',
@@ -110,7 +112,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="archivos-unidos.xlsx" data-i18n="resultado-enlace">Descargar Excel combinado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-archivos-unidos-xlsx" download="archivos-unidos.xlsx" data-i18n="resultado-enlace">Descargar Excel combinado</a>
     </div>
   </div>
 

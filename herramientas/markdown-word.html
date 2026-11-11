@@ -28,6 +28,13 @@
 <script>
 window.i18nPagina = {
   es: {
+    'sufijo-imagenes': '-imagenes',
+    'prefijo-imagen': 'imagen',
+    'nombre-defecto': 'documento',
+    'archivo-word-desde-markdown-zip': 'word-desde-markdown.zip',
+    'archivo-markdown-desde-word-zip': 'markdown-desde-word.zip',
+    'archivo-documento-docx': 'documento.docx',
+    'archivo-documento-md': 'documento.md',
     'ejemplo-markdown': '## Hola mundo\n\nEste es un ejemplo de **Markdown** con:\n\n- Una lista\n- *Texto en cursiva*\n- [Un link](https://ejemplo.com)',
     'titulo-pagina': 'Convertir Markdown y Word gratis — Mini Cookies',
     'meta-descripcion': 'Convertí Markdown a Word (.docx) o Word a Markdown, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
@@ -79,6 +86,13 @@ window.i18nPagina = {
     'guia-r4': 'Sí, se arrastran varios y se descarga un único .zip.'
   },
   en: {
+    'sufijo-imagenes': '-images',
+    'prefijo-imagen': 'image',
+    'nombre-defecto': 'document',
+    'archivo-word-desde-markdown-zip': 'word-from-markdown.zip',
+    'archivo-markdown-desde-word-zip': 'markdown-from-word.zip',
+    'archivo-documento-docx': 'document.docx',
+    'archivo-documento-md': 'document.md',
     'ejemplo-markdown': '## Hello world\n\nThis is an example of **Markdown** with:\n\n- A list\n- *Italic text*\n- [A link](https://example.com)',
     'titulo-pagina': 'Convert Markdown and Word Free — Mini Cookies',
     'meta-descripcion': 'Convert Markdown to an editable Word document or Word to Markdown, free and without uploading your file anywhere.',
@@ -164,7 +178,7 @@ window.i18nPagina = {
         <button class="boton" id="botonConvertirWord" disabled data-i18n="boton-convertir-word">Convertir a Word</button>
       </div>
       <div class="resultado" id="resultadoWord">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="documento.docx" data-i18n="enlace-descargar-docx">Descargar .docx</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" data-i18n-attr="download:archivo-documento-docx" download="documento.docx" data-i18n="enlace-descargar-docx">Descargar .docx</a>
       </div>
       <div id="resumenLoteWord" class="resultado" style="display:none; margin-top:20px;"></div>
 
@@ -188,7 +202,7 @@ Este es un ejemplo de **Markdown** con:
       <div class="controles">
         <label class="campo">
           <span data-i18n="campo-nombre">Nombre del archivo</span>
-          <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+          <input type="text" id="nombreArchivo" value="documento" data-i18n-attr="value:nombre-defecto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
         <button class="boton" id="botonGenerar" type="button" data-i18n="boton-generar">Descargar .docx</button>
       </div>
@@ -214,7 +228,7 @@ Este es un ejemplo de **Markdown** con:
         <textarea id="markdownResultado" style="min-height:320px; font-family:monospace;"></textarea>
         <div class="controles">
           <button class="boton" id="botonCopiarMd" type="button" data-i18n="boton-copiar-md">Copiar Markdown</button>
-          <a class="boton" id="enlaceDescargaMd" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
+          <a class="boton" id="enlaceDescargaMd" data-i18n-attr="download:archivo-documento-md" download="documento.md" data-i18n="enlace-descargar-md">Descargar .md</a>
         </div>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
@@ -354,7 +368,7 @@ botonConvertirWord.addEventListener('click', async () => {
       });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaWord.href = URL.createObjectURL(zip);
-      enlaceDescargaWord.download = 'word-desde-markdown.zip';
+      enlaceDescargaWord.download = t('archivo-word-desde-markdown-zip');
       enlaceDescargaWord.textContent = t('lote-enlace-zip');
       LoteArchivos.pintarResumen(resumenLoteWord, resultados, t);
     }
@@ -374,7 +388,7 @@ document.getElementById('botonGenerar').addEventListener('click', async () => {
   boton.textContent = t('boton-generar-procesando');
   try {
     const blob = await markdownAWord(entradaMarkdown.value, t('error-md-vacio'));
-    const nombreArchivo = document.getElementById('nombreArchivo').value.replace(/[\\/:*?"<>|]/g, '').replace(/\.docx$/i, '').trim().replace(/^\.+/, '') || 'documento';
+    const nombreArchivo = document.getElementById('nombreArchivo').value.replace(/[\\/:*?"<>|]/g, '').replace(/\.docx$/i, '').trim().replace(/^\.+/, '') || t('nombre-defecto');
 
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);
@@ -430,12 +444,12 @@ conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivos);
 async function convertirWordAMarkdown(archivo) {
   const arrayBuffer = await archivo.arrayBuffer();
   const base = FormatosWord.sinExtension(archivo.name);
-  const carpeta = `${base}-imagenes`;
+  const carpeta = `${base}${t('sufijo-imagenes')}`;
   const imagenes = [];
   const resultadoDocx = await DocxLector.convertirAHtml(arrayBuffer, {
     imagen: async (imagen) => {
       const { bytes, extension } = await ImagenesOffice.aFormatoComun(imagen.bytes, imagen.tipo);
-      const nombre = `${carpeta}/imagen-${imagenes.length + 1}.${extension}`;
+      const nombre = `${carpeta}/${t('prefijo-imagen')}-${imagenes.length + 1}.${extension}`;
       imagenes.push({ nombre, datos: bytes });
       return { src: encodeURI(nombre) };
     },
@@ -487,7 +501,7 @@ botonConvertir.addEventListener('click', async () => {
       markdownResultado.style.display = 'none';
       botonCopiarMd.style.display = 'none';
       enlaceDescargaMd.href = URL.createObjectURL(zip);
-      enlaceDescargaMd.download = 'markdown-desde-word.zip';
+      enlaceDescargaMd.download = t('archivo-markdown-desde-word-zip');
       enlaceDescargaMd.textContent = t('lote-enlace-zip');
       bloqueResultado.style.display = 'block';
       LoteArchivos.pintarResumen(resumenLote, resultados, t);

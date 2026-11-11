@@ -19,6 +19,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'sufijo-sin-duplicados': '-sin-duplicados',
+    'archivo-sin-duplicados-xlsx': 'sin-duplicados.xlsx',
     'titulo-pagina': 'Quitar encabezados duplicados de Excel gratis — Mini Cookies',
     'meta-descripcion': 'Quitá encabezados u otras filas duplicadas de una hoja de Excel, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Quitar encabezados duplicados',
@@ -63,6 +65,8 @@ window.i18nPagina = {
     'guia-r4': 'Se avisa que no se encontró ninguna. Con .xlsx o .xlsm, el archivo que descargás es el original sin cambios; con .xls, .xlsb u .ods, sale convertido a .xlsx aunque no tenga duplicados.'
   },
   en: {
+    'sufijo-sin-duplicados': '-no-duplicates',
+    'archivo-sin-duplicados-xlsx': 'no-duplicates.xlsx',
     'titulo-pagina': 'Remove Duplicate Excel Headers Free — Mini Cookies',
     'meta-descripcion': 'Remove duplicate headers or other repeated rows from an Excel sheet, free and without uploading your file anywhere.',
     'h1': 'Remove duplicate headers',
@@ -98,7 +102,7 @@ window.i18nPagina = {
     'guia-consejo-3': 'The preview shows the first 200 data rows, but processing uses all of them.',
     'guia-consejo-4': 'In .xlsx and .xlsm the rows are removed in the file itself, like Excel’s “Delete rows”: colors, borders, formulas, tables, images and charts are kept. An .xls, .xlsb or .ods file is first turned into an .xlsx with its colors, borders, alignment, column widths and row heights. If there are pivot tables or controls, a new workbook is built with the values, number formats, column widths and merged cells.',
     'guia-p1': 'What is the downloaded file called?',
-    'guia-r1': 'The original name plus -sin-duplicados, for example ventas-sin-duplicados.xlsx. An .xlsm edited in place stays .xlsm, and an .xls, .xlsb or .ods comes out as .xlsx.',
+    'guia-r1': 'The original name plus -no-duplicates, for example ventas-no-duplicates.xlsx. An .xlsm edited in place stays .xlsm, and an .xls, .xlsb or .ods comes out as .xlsx.',
     'guia-p2': 'Are all the sheets cleaned?',
     'guia-r2': 'Only the chosen sheet; the others are kept.',
     'guia-p3': 'How does it decide that two rows are the same?',
@@ -158,7 +162,7 @@ window.i18nPagina = {
     <p id="mensaje" style="color:var(--texto-suave); display:none;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="sin-duplicados.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-sin-duplicados-xlsx" download="sin-duplicados.xlsx" data-i18n="resultado-enlace">Descargar Excel</a>
     </div>
   </div>
 
@@ -459,7 +463,7 @@ botonProcesar.addEventListener('click', async () => {
     }
     const blob = new Blob([bytesFinales], { type: extension === 'xlsm' ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     enlaceDescarga.href = URL.createObjectURL(blob);
-    enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}-sin-duplicados.${extension}`;
+    enlaceDescarga.download = `${archivoActual.name.replace(/\.[^.]+$/, '')}${t('sufijo-sin-duplicados')}.${extension}`;
     resultado.classList.add('visible');
 
     const nombreHoja = libroActual.hojas.find(h => h.indice === indiceElegido).nombre;

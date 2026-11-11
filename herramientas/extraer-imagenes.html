@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagenes-extraidas-zip': 'imagenes-extraidas.zip',
     'titulo-pagina': 'Extraer imágenes de PDF gratis — Mini Cookies',
     'meta-descripcion': 'Extraé las imágenes embebidas dentro de un PDF, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Extraer imágenes de PDF',
@@ -42,6 +43,7 @@ window.i18nPagina = {
     'guia-r3': 'No, un PDF por vez.'
   },
   en: {
+    'archivo-imagenes-extraidas-zip': 'extracted-images.zip',
     'titulo-pagina': 'Extract Images from PDF Free — Mini Cookies',
     'meta-descripcion': 'Extract the images embedded inside a PDF, free and without uploading your file anywhere.',
     'h1': 'Extract images from PDF',
@@ -59,7 +61,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your PDF or click to choose it. A thumbnail appears with its name and the number of pages.',
     'guia-paso-2': 'Tap “Extract images”. The progress is shown (“Checking page 3 of 12...”).',
     'guia-paso-3': 'When it finishes, “Done, we found N image(s)” appears along with the “Download .zip” link.',
-    'guia-paso-4': 'Unzip the .zip: each image is named pagina-X-imagen-N.png, where X is the page where it was found.',
+    'guia-paso-4': 'Unzip the .zip: each image is named page-X-image-N.png, where X is the page where it was found.',
     'guia-consejo-1': 'If the same image appears on several pages (a repeated logo), it’s saved only once.',
     'guia-consejo-2': 'Images come out as PNG, even if they were in another format in the PDF.',
     'guia-consejo-3': 'If the PDF is all text or vector drawings (charts), there are no images to extract and the tool tells you so.',
@@ -105,7 +107,7 @@ window.i18nPagina = {
     <p id="sinImagenes" style="color:var(--texto-suave); display:none;" data-i18n="sin-imagenes">No se encontraron imágenes embebidas en este PDF (puede que el contenido sea todo texto/vectores, o que use un formato de imagen que esta herramienta no puede leer).</p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-antes">✅ Listo, se encontraron </span><span id="cantidadImagenes"></span><span data-i18n="resultado-medio"> imagen(es). </span><a id="enlaceDescarga" download="imagenes-extraidas.zip" data-i18n="resultado-enlace">Descargar .zip</a>
+      <span data-i18n="resultado-antes">✅ Listo, se encontraron </span><span id="cantidadImagenes"></span><span data-i18n="resultado-medio"> imagen(es). </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagenes-extraidas-zip" download="imagenes-extraidas.zip" data-i18n="resultado-enlace">Descargar .zip</a>
     </div>
   </div>
 

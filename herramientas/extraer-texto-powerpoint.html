@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-texto-presentacion-txt': 'texto-presentacion.txt',
     'titulo-pagina': 'Extraer texto de PowerPoint gratis — Mini Cookies',
     'meta-descripcion': 'Extraé todo el texto de una presentación PowerPoint (.pptx, .ppt u .odp) a texto plano, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Extraer texto de PowerPoint',
@@ -43,6 +44,7 @@ window.i18nPagina = {
     'guia-r4': 'No, una por vez.'
   },
   en: {
+    'archivo-texto-presentacion-txt': 'presentation-text.txt',
     'titulo-pagina': 'Extract Text from PowerPoint Free — Mini Cookies',
     'meta-descripcion': 'Extract all the text from a PowerPoint presentation (.pptx, .ppt or .odp) as plain text, free and without uploading your file anywhere.',
     'h1': 'Extract text from PowerPoint',
@@ -59,7 +61,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag the PowerPoint presentation (.pptx, .ppt or .odp) or click to choose it.',
     'guia-paso-2': 'Tap “Extract text”.',
     'guia-paso-3': 'The text appears in a box; each slide starts with a heading “--- Slide N ---”.',
-    'guia-paso-4': 'Use “Copy text” or “Download .txt” (it’s saved as “texto-presentacion.txt”).',
+    'guia-paso-4': 'Use “Copy text” or “Download .txt” (it’s saved as “presentation-text.txt”).',
     'guia-consejo-1': 'Slides without text still appear, marked “(no text)”, so none is skipped. The numbering follows the slide files inside the .pptx: if you reordered slides, it may not match the order you see in PowerPoint.',
     'guia-consejo-2': 'Tables come out with their columns aligned, not one cell per line.',
     'guia-consejo-3': 'Only the text on the slides is read. Speaker notes aren’t included: use Extract speaker notes.',
@@ -107,7 +109,7 @@ window.i18nPagina = {
       <textarea id="textoExtraido" readonly style="min-height:320px;"></textarea>
       <div class="controles">
         <button class="boton" id="botonCopiar" type="button" data-i18n="boton-copiar">Copiar texto</button>
-        <a class="boton" id="enlaceDescarga" download="texto-presentacion.txt" data-i18n="enlace-descargar">Descargar .txt</a>
+        <a class="boton" id="enlaceDescarga" data-i18n-attr="download:archivo-texto-presentacion-txt" download="texto-presentacion.txt" data-i18n="enlace-descargar">Descargar .txt</a>
       </div>
     </div>
   </div>

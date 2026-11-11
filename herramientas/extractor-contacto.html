@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-contactos': 'contactos',
     'hero-titulo': 'Extraer emails, teléfonos y links',
     'intro': 'Pegá cualquier texto (un correo, una página, tus notas) y sacamos todos los emails, teléfonos y links que contenga.',
     'placeholder-entrada': 'Pegá acá el texto donde buscar...',
@@ -48,6 +49,7 @@ window.i18nPagina = {
     'guia-r4': 'No, esas partes se excluyen de la búsqueda de teléfonos.'
   },
   en: {
+    'archivo-contactos': 'contacts',
     'hero-titulo': 'Extract emails, phone numbers and links',
     'intro': 'Paste any text (an email, a web page, your notes) and we pull out every email address, phone number and link in it.',
     'placeholder-entrada': 'Paste the text to search here...',
@@ -227,7 +229,7 @@ document.getElementById('botonDescargarCsv').addEventListener('click', () => {
   ultimoResultado.emails.forEach((v) => filas.push([t('csv-email'), v]));
   ultimoResultado.telefonos.forEach((v) => filas.push([t('csv-telefono'), v]));
   ultimoResultado.links.forEach((v) => filas.push([t('csv-link'), v]));
-  descargarTexto(filas.map((f) => f.map(celda).join(',')).join('\r\n'), nombreConFecha('contactos', 'csv'), 'text/csv', true);
+  descargarTexto(filas.map((f) => f.map(celda).join(',')).join('\r\n'), nombreConFecha(t('archivo-contactos'), 'csv'), 'text/csv', true);
 });
 
 document.getElementById('botonDescargarTxt').addEventListener('click', () => {
@@ -237,7 +239,7 @@ document.getElementById('botonDescargarTxt').addEventListener('click', () => {
     seccion(t('et-emails'), ultimoResultado.emails),
     seccion(t('et-telefonos'), ultimoResultado.telefonos),
     seccion(t('et-links'), ultimoResultado.links),
-  ].join('\n\n') + '\n', nombreConFecha('contactos', 'txt'));
+  ].join('\n\n') + '\n', nombreConFecha(t('archivo-contactos'), 'txt'));
 });
 </script>
 <script src="../assets/js/tema.js"></script>

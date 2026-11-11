@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-documento-comprimido-pdf': 'documento-comprimido.pdf',
     'titulo-pagina': 'Comprimir y optimizar PDF gratis — Mini Cookies',
     'meta-descripcion': 'Reducí el peso de un PDF recomprimiendo las fotos que tiene adentro, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Comprimir / optimizar PDF',
@@ -58,6 +59,7 @@ window.i18nPagina = {
     'guia-r3': 'Depende del escaneo. Solo se recomprimen las fotos JPEG a color: un escaneo en color guardado como JPEG puede bajar bastante. Los escaneos en gris o en blanco y negro se dejan como están, igual que las imágenes que no son JPEG.',
   },
   en: {
+    'archivo-documento-comprimido-pdf': 'compressed-document.pdf',
     'titulo-pagina': 'Compress and Optimize PDF Free — Mini Cookies',
     'meta-descripcion': 'Reduce a PDF’s size by recompressing the photos inside it, free and without uploading your file anywhere.',
     'h1': 'Compress / optimize PDF',
@@ -97,7 +99,7 @@ window.i18nPagina = {
     'guia-consejo-2': 'If you’re going to print, raise the quality (the slider goes up to 90%) and choose “Up to 2500 px (print quality)” or “Don’t shrink (recompress only)”.',
     'guia-consejo-3': 'Always keep the original: photo compression can’t be undone in the new file.',
     'guia-p1': 'Why did my PDF barely change in size?',
-    'guia-r1': 'If the PDF is text only, or its photos were already heavily compressed, there isn’t much to remove. Each photo is replaced only if the new version is smaller. If the whole PDF still isn’t smaller, you get the original unchanged, saved as documento-comprimido.pdf, with a notice that says “This PDF was already optimized”.',
+    'guia-r1': 'If the PDF is text only, or its photos were already heavily compressed, there isn’t much to remove. Each photo is replaced only if the new version is smaller. If the whole PDF still isn’t smaller, you get the original unchanged, saved as compressed-document.pdf, with a notice that says “This PDF was already optimized”.',
     'guia-p2': 'Is the text quality affected?',
     'guia-r2': 'No. Text and vector graphics aren’t modified; only the color JPEG photos inside the PDF are changed.',
     'guia-p3': 'Does it work with scanned PDFs?',
@@ -158,7 +160,7 @@ window.i18nPagina = {
     <p id="avisoSinMejora" style="display:none; color:var(--texto-suave);" data-i18n="aviso-sin-mejora">Este PDF ya estaba optimizado: la versión comprimida no pesaba menos, así que se ofrece el original sin cambios. Probá con una calidad más baja o reduciendo el tamaño de las fotos.</p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="documento-comprimido.pdf" data-i18n="resultado-enlace">Descargar PDF comprimido</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-documento-comprimido-pdf" download="documento-comprimido.pdf" data-i18n="resultado-enlace">Descargar PDF comprimido</a>
     </div>
   </div>
 

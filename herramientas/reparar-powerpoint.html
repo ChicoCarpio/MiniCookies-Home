@@ -13,6 +13,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-presentacion-reparada-pptx': 'presentacion-reparada.pptx',
     'titulo-pagina': 'Reparar PowerPoint gratis — Mini Cookies',
     'meta-descripcion': 'Intentá recuperar una presentación PowerPoint (.pptx, .ppt u .odp) dañada, descartando solo las diapositivas rotas, gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Reparar PowerPoint',
@@ -55,6 +56,7 @@ window.i18nPagina = {
     'guia-r4': 'Sí, acepta .ppt y .odp además de .pptx. El resultado se guarda siempre como .pptx.',
   },
   en: {
+    'archivo-presentacion-reparada-pptx': 'repaired-presentation.pptx',
     'titulo-pagina': 'Repair PowerPoint Free — Mini Cookies',
     'meta-descripcion': 'Try to recover a damaged PowerPoint presentation (.pptx, .ppt or .odp), discarding only the broken slides, free and without uploading your file anywhere.',
     'h1': 'Repair PowerPoint',
@@ -82,7 +84,7 @@ window.i18nPagina = {
     'guia-paso-1': 'Drag your file to the “Drag your PowerPoint file (.pptx, .ppt or .odp) here or click to choose it” area.',
     'guia-paso-2': 'Click “Repair”. The button changes to “Repairing...” while the slides are checked.',
     'guia-paso-3': 'Look at the message: it may say the full presentation was read with nothing discarded, or how many slides were discarded out of a total.',
-    'guia-paso-4': 'Download the result with “Download repaired PowerPoint” (presentacion-reparada.pptx).',
+    'guia-paso-4': 'Download the result with “Download repaired PowerPoint” (repaired-presentation.pptx).',
     'guia-consejo-1': 'It’s a good idea to keep the original somewhere else: discarded slides can’t be recovered from the new file.',
     'guia-consejo-2': 'If a slide that is kept had a link to one that was discarded, the link is removed but the text stays. Check it when you open the result.',
     'guia-consejo-3': 'Discarded slides are also removed from sections and custom shows, so PowerPoint doesn’t ask for repair again.',
@@ -133,7 +135,7 @@ window.i18nPagina = {
     <p id="mensajeNivel" style="display:none; font-size:0.85rem;"></p>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="presentacion-reparada.pptx" data-i18n="resultado-enlace">Descargar PowerPoint reparado</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-presentacion-reparada-pptx" download="presentacion-reparada.pptx" data-i18n="resultado-enlace">Descargar PowerPoint reparado</a>
     </div>
   </div>
 

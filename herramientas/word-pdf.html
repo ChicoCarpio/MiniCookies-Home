@@ -28,6 +28,10 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-pdf-desde-word-zip': 'pdf-desde-word.zip',
+    'archivo-word-desde-pdf-zip': 'word-desde-pdf.zip',
+    'archivo-documento-pdf': 'documento.pdf',
+    'archivo-documento-docx': 'documento.docx',
     'titulo-pagina': 'Convertir Word y PDF gratis — Mini Cookies',
     'meta-descripcion': 'Convertí un Word (.docx, .doc u .odt) a PDF conservando el formato, o un PDF a Word, en los dos sentidos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Word ↔ PDF',
@@ -72,6 +76,10 @@ window.i18nPagina = {
     'guia-r3': 'En Word → PDF usa el nombre del documento original. En PDF → Word con un solo archivo usa lo que escribas en «Nombre del archivo»; con varios, el nombre de cada PDF.'
   },
   en: {
+    'archivo-pdf-desde-word-zip': 'pdf-from-word.zip',
+    'archivo-word-desde-pdf-zip': 'word-from-pdf.zip',
+    'archivo-documento-pdf': 'document.pdf',
+    'archivo-documento-docx': 'document.docx',
     'titulo-pagina': 'Convert Word and PDF Free — Mini Cookies',
     'meta-descripcion': 'Convert a Word document (.docx, .doc or .odt) to PDF keeping the formatting, or a PDF to Word, in either direction — free and without uploading your file anywhere.',
     'h1': 'Word ↔ PDF',
@@ -158,7 +166,7 @@ window.i18nPagina = {
         <button class="boton" id="botonDescargarPdf" type="button" data-i18n="boton-descargar-pdf">⬇️ Descargar PDF</button>
       </div>
       <div class="resultado" id="resultadoPdf">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" download="documento.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaPdf" data-i18n-attr="download:archivo-documento-pdf" download="documento.pdf" data-i18n="enlace-descargar-pdf">Descargar PDF</a>
       </div>
       <div id="resumenDescargaPdf" class="resultado" style="display:none; margin-top:20px;"></div>
       <div class="vista-previa-documento" id="vistaPrevia" style="display:none;"></div>
@@ -177,12 +185,12 @@ window.i18nPagina = {
       <div class="controles">
         <label class="campo">
           <span data-i18n="campo-nombre">Nombre del archivo</span>
-          <input type="text" id="nombreArchivo" value="documento" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
+          <input type="text" id="nombreArchivo" value="documento" data-i18n-attr="value:nombre-defecto" style="padding:8px; border:1px solid var(--gris-borde); border-radius:6px;">
         </label>
         <button class="boton" id="botonAWord" disabled data-i18n="boton-a-word">Convertir a Word</button>
       </div>
       <div class="resultado" id="resultadoWord">
-        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" download="documento.docx" data-i18n="resultado-enlace">Descargar Word</a>
+        <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescargaWord" data-i18n-attr="download:archivo-documento-docx" download="documento.docx" data-i18n="resultado-enlace">Descargar Word</a>
       </div>
       <div id="resumenLote" class="resultado" style="display:none; margin-top:20px;"></div>
     </div>
@@ -352,7 +360,7 @@ botonDescargarPdf.addEventListener('click', async () => {
       });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaPdf.href = URL.createObjectURL(zip);
-      enlaceDescargaPdf.download = 'pdf-desde-word.zip';
+      enlaceDescargaPdf.download = t('archivo-pdf-desde-word-zip');
       enlaceDescargaPdf.textContent = t('enlace-descargar-zip-pdf');
       LoteArchivos.pintarResumen(resumenDescargaPdf, resultados, t);
     }
@@ -440,7 +448,7 @@ botonAWord.addEventListener('click', async () => {
       });
       const zip = await LoteArchivos.zipDeResultados(resultados);
       enlaceDescargaWord.href = URL.createObjectURL(zip);
-      enlaceDescargaWord.download = 'word-desde-pdf.zip';
+      enlaceDescargaWord.download = t('archivo-word-desde-pdf-zip');
       enlaceDescargaWord.textContent = t('lote-enlace-zip');
       resultadoWord.classList.add('visible');
       LoteArchivos.pintarResumen(resumenLotePdf, resultados, t);

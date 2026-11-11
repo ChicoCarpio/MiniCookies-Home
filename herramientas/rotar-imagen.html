@@ -16,6 +16,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-imagen-editada': 'imagen-editada',
     'hero-titulo': 'Rotar y voltear imagen',
     'intro': 'Elegí una imagen y rotala, enderezala en cualquier ángulo o volteala las veces que quieras antes de descargar.',
     'boton-izquierda': '↺ Rotar 90° izquierda',
@@ -55,6 +56,7 @@ window.i18nPagina = {
     'guia-r4': 'No, trabaja con una por vez.',
   },
   en: {
+    'archivo-imagen-editada': 'edited-image',
     'hero-titulo': 'Rotate and flip an image',
     'intro': 'Pick an image and rotate it, straighten it by any angle or flip it as many times as you like before downloading.',
     'boton-izquierda': '↺ Rotate 90° left',
@@ -87,7 +89,7 @@ window.i18nPagina = {
     'guia-p1': 'Can I undo a change?',
     'guia-r1': 'There’s no undo button. A 90° turn is undone with the opposite turn, and a flip with the same flip again. For a free angle, set the slider back to 0 or load the image again.',
     'guia-p2': 'What is the downloaded file called?',
-    'guia-r2': 'imagen-editada with the extension of the output format.',
+    'guia-r2': 'edited-image with the extension of the output format.',
     'guia-p3': 'Is quality lost when rotating?',
     'guia-r3': 'Right-angle turns don’t lose any. The free angle does resample the image once when drawing it.',
     'guia-p4': 'Does it rotate several images at once?',
@@ -157,7 +159,7 @@ window.i18nPagina = {
     </div>
 
     <div class="resultado" id="resultado">
-      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+      <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-editada" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
     </div>
   </div>
 
@@ -332,7 +334,7 @@ document.getElementById('botonDescargar').addEventListener('click', async () => 
   const formato = formatoDeSalida(archivoActual);
   const blob = await new Promise((resolve) => vistaPrevia.toBlob(resolve, formato, 0.92));
   enlaceDescarga.href = URL.createObjectURL(blob);
-  enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+  enlaceDescarga.download = `${t('archivo-imagen-editada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
   resultado.classList.add('visible');
 });
 </script>

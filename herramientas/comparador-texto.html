@@ -12,6 +12,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-comparacion-textos': 'comparacion-textos',
     'hero-titulo': 'Comparar dos textos',
     'intro': 'Pegá la versión original y la nueva. Te mostramos qué se agregó (en verde) y qué se quitó (en rojo).',
     'campo-original': 'Texto original',
@@ -51,6 +52,7 @@ window.i18nPagina = {
     'guia-r4': 'Empieza con «comparacion-textos» y lleva la fecha y la hora en el nombre.',
   },
   en: {
+    'archivo-comparacion-textos': 'text-comparison',
     'hero-titulo': 'Compare two texts',
     'intro': 'Paste the original version and the new one. We show what was added (in green) and what was removed (in red).',
     'campo-original': 'Original text',
@@ -87,7 +89,7 @@ window.i18nPagina = {
     'guia-p3': 'Is there a size limit?',
     'guia-r3': 'The code doesn’t impose one, but with very long texts the comparison may take a while depending on your computer.',
     'guia-p4': 'What is the downloaded file called?',
-    'guia-r4': 'It starts with “comparacion-textos” and has the date and time in the name.',
+    'guia-r4': 'It starts with “text-comparison” and has the date and time in the name.',
   }
 };
 </script>
@@ -239,7 +241,7 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
 <p class="nota">${fecha} · ${agregados}${t('informe-agregados')}<ins>${t('informe-en-verde')}</ins> · ${quitados}${t('informe-quitados')}<del>${t('informe-en-rojo')}</del>${t('informe-comparado')}${document.getElementById('porPalabra').checked ? t('informe-por-palabra') : t('informe-por-linea')}.</p>
 <div class="texto">${contenedor.innerHTML}</div>
 </body></html>`;
-  descargarTexto(html, nombreConFecha('comparacion-textos', 'html'), 'text/html');
+  descargarTexto(html, nombreConFecha(t('archivo-comparacion-textos'), 'html'), 'text/html');
 });
 </script>
 <script src="../assets/js/tema.js"></script>

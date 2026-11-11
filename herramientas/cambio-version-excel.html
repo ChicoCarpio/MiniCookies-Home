@@ -13,6 +13,7 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-planillas-convertidas-zip': 'planillas-convertidas.zip',
     'titulo-pagina': 'Cambiar la versión de un Excel: .xlsx, .xls y .ods gratis — Mini Cookies',
     'meta-descripcion': 'Pasá una planilla de Excel 2007+ (.xlsx) a Excel 97-2003 (.xls) o a LibreOffice (.ods), o al revés, conservando fórmulas, formatos y estilos — gratis y sin subir tu archivo a ningún servidor.',
     'h1': 'Cambio de versión de Excel',
@@ -68,6 +69,7 @@ window.i18nPagina = {
     'guia-r4': 'Un .xls solo guarda 56 colores por libro. Si la planilla usa más, los que sobran se reemplazan por el más cercano.'
   },
   en: {
+    'archivo-planillas-convertidas-zip': 'converted-spreadsheets.zip',
     'titulo-pagina': 'Change the version of an Excel file: .xlsx, .xls and .ods free — Mini Cookies',
     'meta-descripcion': 'Convert a spreadsheet from Excel 2007+ (.xlsx) to Excel 97-2003 (.xls) or LibreOffice (.ods), or the other way round, keeping formulas, formats and styles — free and without uploading your file to any server.',
     'h1': 'Excel version change',
@@ -359,7 +361,7 @@ botonConvertir.addEventListener('click', async () => {
       const zip = await LoteArchivos.zipDeResultados(resultados);
       urlResultado = URL.createObjectURL(zip);
       enlaceDescarga.href = urlResultado;
-      enlaceDescarga.download = 'planillas-convertidas.zip';
+      enlaceDescarga.download = t('archivo-planillas-convertidas-zip');
       enlaceDescarga.textContent = t('resultado-enlace-zip');
       resultado.style.display = 'block';
     }

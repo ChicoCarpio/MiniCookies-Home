@@ -238,6 +238,8 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-proyecto-editor-avanzado-json': 'proyecto-editor-avanzado.json',
+    'archivo-imagen-editada': 'imagen-editada',
     'hero-titulo': 'Editor avanzado',
     'intro-a': 'Editá por capas: cada una tiene su propia selección (toda la imagen, a mano libre, o solo un color puntual) y sus propios ajustes de luz, color y textura. ¿Buscás algo más simple? Probá el ',
     'intro-link': 'editor de un solo paso',
@@ -527,6 +529,8 @@ window.i18nPagina = {
     'guia-r4': 'Sí, el editor de un solo paso: Editor de color.',
   },
   en: {
+    'archivo-proyecto-editor-avanzado-json': 'advanced-editor-project.json',
+    'archivo-imagen-editada': 'edited-image',
     'hero-titulo': 'Advanced editor',
     'intro-a': 'Edit in layers: each one has its own selection (the whole image, freehand, or just one specific color) and its own light, color and texture adjustments. Looking for something simpler? Try the ',
     'intro-link': 'one-step editor',
@@ -804,10 +808,10 @@ window.i18nPagina = {
     'guia-paso-5': 'Check the result with the press-and-hold button to see the original, adjust the zoom and tap “Download image” and then “Download image” again on the link.',
     'guia-consejo-1': 'To remove a plain green or blue background, use the Chroma key piece; for other photos, choose Foreground or An object (the AI for each one is downloaded the first time: about 42 MB for Foreground and about 14 MB for An object) and then “Erase everything outside the area”.',
     'guia-consejo-2': 'You can group layers, reorder them by dragging and change each one’s blend mode. There are undo and redo buttons (↶ and ↷, Ctrl+Z and Ctrl+Shift+Z).',
-    'guia-consejo-3': '“Save project” creates a .json file (proyecto-editor-avanzado.json) with your layers, and “Load project” picks it up again later.',
+    'guia-consejo-3': '“Save project” creates a .json file (advanced-editor-project.json) with your layers, and “Load project” picks it up again later.',
     'guia-consejo-4': 'Under “Preview resolution” choose Fast, Medium or Original; the download always keeps the image’s full resolution.',
     'guia-p1': 'What format does it download in?',
-    'guia-r1': 'In the same format as the original image (PNG, JPG or WebP), named “imagen-editada”. If you erased parts of a JPG photo, it comes out as PNG to keep the transparency.',
+    'guia-r1': 'In the same format as the original image (PNG, JPG or WebP), named “edited-image”. If you erased parts of a JPG photo, it comes out as PNG to keep the transparency.',
     'guia-p2': 'What happens if I change the image?',
     'guia-r2': 'You start over and the layers are lost, which is why it asks for confirmation; save the project first.',
     'guia-p3': 'Does it work on a phone?',
@@ -1192,7 +1196,7 @@ window.i18nPagina = {
                 <button type="button" id="botonCargarProyecto" class="boton-secundario-editor" data-i18n="boton-cargar-proyecto">📂 Cargar proyecto</button>
               </div>
               <div class="resultado" id="resultado">
-                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
+                <span data-i18n="resultado-listo">✅ Listo. </span><a id="enlaceDescarga" data-i18n-attr="download:archivo-imagen-editada" download="imagen-editada" data-i18n="resultado-enlace">Descargar imagen</a>
               </div>
             </div>
           </fieldset>
@@ -4977,7 +4981,7 @@ botonDescargarAvanzado.addEventListener('click', async () => {
     if (urlDescargaAvanzada) URL.revokeObjectURL(urlDescargaAvanzada);
     urlDescargaAvanzada = URL.createObjectURL(blob);
     enlaceDescarga.href = urlDescargaAvanzada;
-    enlaceDescarga.download = `imagen-editada.${EXTENSION_FORMATO[blob.type] || 'png'}`;
+    enlaceDescarga.download = `${t('archivo-imagen-editada')}.${EXTENSION_FORMATO[blob.type] || 'png'}`;
     resultado.classList.add('visible');
   } finally {
     canvasOrigenTrabajo = origenTrabajoAnterior;
@@ -5050,7 +5054,7 @@ botonGuardarProyecto.addEventListener('click', () => {
   const enlace = document.createElement('a');
   const url = URL.createObjectURL(blob);
   enlace.href = url;
-  enlace.download = 'proyecto-editor-avanzado.json';
+  enlace.download = t('archivo-proyecto-editor-avanzado-json');
   enlace.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 });

@@ -14,6 +14,8 @@
 // Los textos comunes de Flujos (diagrama, ejecución, resultado) los trae assets/js/flujos-pagina.js.
 window.i18nPagina = {
   es: {
+    'archivo-flujo': 'flujo',
+    'extension-flujo': '.flujo.json',
     'titulo-pagina': 'Flujos: encadenar herramientas gratis — Mini Cookies',
     'meta-descripcion': 'Encadená herramientas y procesá muchos archivos de una vez: leer QR, recortar documentos, comprimir, girar, pasar a PDF y unir. Gratis y sin subir nada a ningún servidor.',
     'hero-titulo': 'Flujos: encadená herramientas',
@@ -76,6 +78,8 @@ window.i18nPagina = {
     'guia-r3': 'Los demás archivos siguen, y al terminar la página dice cuáles no pasaron y en qué paso. Los flujos se guardan en este navegador: solo los pasos y sus opciones, nunca tus archivos.',
   },
   en: {
+    'archivo-flujo': 'flow',
+    'extension-flujo': '.flow.json',
     'titulo-pagina': 'Flows: chain tools together for free — Mini Cookies',
     'meta-descripcion': 'Chain tools and process many files at once: read QR codes, crop documents, compress, rotate, turn into PDF and merge. Free, and nothing is uploaded to a server.',
     'hero-titulo': 'Flows: chain tools together',
@@ -504,10 +508,10 @@ $('botonAbrirGuardado').addEventListener('click', () => {
 });
 $('botonBorrarGuardado').addEventListener('click', () => { F.borrar($('selectorGuardados').value); pintarGuardados(); avisoGuardados(''); });
 $('botonExportar').addEventListener('click', () => {
-  const nombre = $('nombreFlujo').value.trim() || 'flujo';
+  const nombre = $('nombreFlujo').value.trim() || t('archivo-flujo');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(F.exportar(nombre, flujo));
-  a.download = nombre.replace(/[\\/:*?"<>|]+/g, '-') + '.flujo.json';
+  a.download = nombre.replace(/[\\/:*?"<>|]+/g, '-') + t('extension-flujo');
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 });

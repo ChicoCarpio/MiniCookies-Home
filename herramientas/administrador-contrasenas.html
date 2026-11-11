@@ -19,6 +19,9 @@
 <script>
 window.i18nPagina = {
   es: {
+    'archivo-clave-secreta': 'clave-secreta',
+    'archivo-caja-fuerte': 'caja-fuerte',
+    'archivo-contrasenas': 'contrasenas',
     'titulo-pagina': 'Administrador de contraseñas gratis — Mini Cookies',
     'meta-descripcion': 'Guardá tus contraseñas en una caja fuerte cifrada con una contraseña maestra, gratis y sin registro. Importá y exportá desde Chrome, Edge y Firefox, y llevá un respaldo cifrado.',
     'hero-titulo': 'Administrador de contraseñas',
@@ -165,6 +168,9 @@ window.i18nPagina = {
     'guia-r4': 'No se permite: hay que bloquearla primero en la otra.'
   },
   en: {
+    'archivo-clave-secreta': 'secret-key',
+    'archivo-caja-fuerte': 'vault',
+    'archivo-contrasenas': 'passwords',
     'titulo-pagina': 'Free password manager — Mini Cookies',
     'meta-descripcion': 'Keep your passwords in a vault encrypted with a master password, free and with no sign-up. Import and export from Chrome, Edge and Firefox, and keep an encrypted backup.',
     'hero-titulo': 'Password manager',
@@ -298,7 +304,7 @@ window.i18nPagina = {
     'guia-paso-4': 'In the list you can search by site, username or address, copy the username or the password, show or hide it, and edit it. Entries with a reused or weak password are flagged.',
     'guia-paso-5': 'Under “More options” you will find “Export the vault”, CSV import, CSV export, changing the master password and the automatic lock. “Lock” closes the vault instantly.',
     'guia-consejo-1': 'The master password can’t be recovered. If you forget it, the saved passwords are lost.',
-    'guia-consejo-2': 'The vault lives in this browser. Download an encrypted backup with the “Export vault” button (a .json file that starts with “caja-fuerte-”) before switching computers or clearing your browser data. On another device, open it with “Open an exported vault”.',
+    'guia-consejo-2': 'The vault lives in this browser. Download an encrypted backup with the “Export vault” button (a .json file that starts with “vault-”) before switching computers or clearing your browser data. On another device, open it with “Open an exported vault”.',
     'guia-consejo-3': 'The automatic lock can be set to 1, 5, 15 or 30 minutes of inactivity (5 by default).',
     'guia-consejo-4': 'A copied password is cleared from the clipboard after 30 seconds if you stay on the page.',
     'guia-p1': 'How is my data protected?',
@@ -954,7 +960,7 @@ window.i18nPagina = {
   });
   $('secretaDescargar').addEventListener('click', () => {
     if (!sesion) return;
-    descargarTexto(fmt('secreta-archivo-linea', { n: sesion.nombre, c: $('secretaTexto').textContent, f: new Date().toLocaleString(document.documentElement.lang === 'en' ? 'en-US' : 'es') }) + '\r\n', nombreConFecha('clave-secreta', 'txt'));
+    descargarTexto(fmt('secreta-archivo-linea', { n: sesion.nombre, c: $('secretaTexto').textContent, f: new Date().toLocaleString(document.documentElement.lang === 'en' ? 'en-US' : 'es') }) + '\r\n', nombreConFecha(t('archivo-clave-secreta'), 'txt'));
   });
 
   // Marca (solo un sí por caja, sin datos secretos) de que la copia guardada en este navegador
@@ -1123,7 +1129,7 @@ window.i18nPagina = {
 
   async function descargarRespaldo() {
     const archivo = await sesion.cifrar();
-    const base = 'caja-fuerte-' + (sesion.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mini-cookies');
+    const base = t('archivo-caja-fuerte') + '-' + (sesion.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mini-cookies');
     descargarTexto(JSON.stringify(archivo, null, 1), nombreConFecha(base, 'json'), 'application/json');
     revisionRespaldo = sesion.revision;
     marcarSinRespaldo(idCaja, false);
@@ -1189,7 +1195,7 @@ window.i18nPagina = {
     try {
       await B.abrir(await sesion.cifrar(), maestra, sesion.claveSecreta); // comprueba que es la maestra
       const formato = $('exportarFormato').value;
-      descargarTexto(B.aCsv(sesion.entradas(), formato), nombreConFecha('contrasenas-' + formato, 'csv'), 'text/csv');
+      descargarTexto(B.aCsv(sesion.entradas(), formato), nombreConFecha(t('archivo-contrasenas') + '-' + formato, 'csv'), 'text/csv');
       $('exportarMaestra').value = '';
       mostrar($('mensajeAjustes'), '');
     } catch (e) { mensaje($('mensajeAjustes'), 'error-maestra-incorrecta', null, 'error'); } finally { boton.disabled = false; }
