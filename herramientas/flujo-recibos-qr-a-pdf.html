@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Recibos y facturas con QR a un PDF, gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Juntá fotos de recibos o facturas con código QR en un solo PDF: lee cada código, recorta el papel y pone lo que dice el QR debajo de cada página. Gratis y en tu navegador.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+// Flujo listo (2026-11-10): los pasos están en FLUJO, abajo; la interfaz y sus textos comunes los pone
+// assets/js/flujos-pagina.js (montarListo). Acá van solo los textos de esta página.
+window.i18nPagina = {
+  es: {
+    "titulo-pagina": "Recibos y facturas con QR a un PDF, gratis — Mini Cookies",
+    "meta-descripcion": "Juntá fotos de recibos o facturas con código QR en un solo PDF: lee cada código, recorta el papel y pone lo que dice el QR debajo de cada página. Gratis y en tu navegador.",
+    "hero-titulo": "🧾 Recibos con QR a un PDF",
+    "intro": "Juntá fotos de recibos, facturas o comprobantes con código QR en un solo PDF. Cada código se lee antes de recortar y lo que dice queda escrito en un cuadro debajo de su página.",
+    "guia-titulo": "Cómo juntar recibos con QR en un solo PDF",
+    "guia-intro": "Muchas facturas electrónicas y comprobantes traen un QR con el número, el monto o un enlace de verificación. Este flujo lee ese código en cada foto, endereza y recorta el papel, y arma un PDF donde el contenido del QR queda escrito y se puede buscar.",
+    "guia-paso-1": "Arrastrá las fotos de los recibos a la zona.",
+    "guia-paso-2": "Decidí qué hacer con una foto sin código en «Si no hay código»: seguir con ella o dejarla afuera.",
+    "guia-paso-3": "Pulsá «Ejecutar el flujo». Al terminar, la página lista los códigos encontrados en cada archivo.",
+    "guia-paso-4": "Descargá «unido.pdf»: cada recibo en su página, con un cuadro amarillo debajo que dice lo que leyó el QR.",
+    "guia-consejo-1": "El código se lee antes de recortar, sobre la foto entera: así un QR que queda cerca del borde no se pierde con el recorte.",
+    "guia-consejo-2": "El texto del cuadro se puede buscar con Ctrl+F y también queda en las palabras clave del PDF: sirve para encontrar una factura por su número.",
+    "guia-consejo-3": "Funciona también con códigos de barras, no solo con QR.",
+    "guia-p1": "¿Qué pasa si un recibo tiene dos códigos?",
+    "guia-r1": "Se anota el que se encuentra primero en la foto. Si necesitás todos, recortá la foto en partes antes o usá el «Lector de códigos QR y de barras».",
+    "guia-p2": "¿Y si un QR no se lee?",
+    "guia-r2": "Suele pasar con fotos borrosas, muy chicas o con reflejos sobre el código. Sacá la foto más cerca y con luz pareja; con «Si no hay código: Seguir con el archivo», el recibo entra al PDF igual.",
+    "guia-p3": "¿Puedo usar PDF en vez de fotos?",
+    "guia-r3": "Este flujo recibe imágenes. Para PDF, abrí «Personalizar este flujo» y agregá «PDF a imágenes» como primer paso.",
+  },
+  en: {
+    "titulo-pagina": "Receipts and invoices with QR to one PDF, free — Mini Cookies",
+    "meta-descripcion": "Gather photos of receipts or invoices with a QR code into one PDF: it reads each code, crops the paper and writes what the QR says under each page. Free and in your browser.",
+    "hero-titulo": "🧾 Receipts with QR to one PDF",
+    "intro": "Gather photos of receipts, invoices or vouchers with a QR code into one PDF. Each code is read before cropping, and what it says is written in a box under its page.",
+    "guia-titulo": "How to gather receipts with QR codes into one PDF",
+    "guia-intro": "Many electronic invoices and vouchers carry a QR code with the number, the amount or a verification link. This flow reads that code in each photo, straightens and crops the paper, and builds a PDF where the content of the QR is written down and can be searched.",
+    "guia-paso-1": "Drag the photos of the receipts onto the drop zone.",
+    "guia-paso-2": "Decide what to do with a photo without a code in “If there is no code”: keep it or leave it out.",
+    "guia-paso-3": "Press “Run the flow”. When it finishes, the page lists the codes found in each file.",
+    "guia-paso-4": "Download “unido.pdf”: each receipt on its own page, with a yellow box under it saying what the QR read.",
+    "guia-consejo-1": "The code is read before cropping, on the whole photo: that way a QR close to the edge is not lost in the crop.",
+    "guia-consejo-2": "The text in the box can be searched with Ctrl+F and is also stored in the PDF keywords: handy for finding an invoice by its number.",
+    "guia-consejo-3": "It also works with barcodes, not only QR codes.",
+    "guia-p1": "What if a receipt has two codes?",
+    "guia-r1": "The one found first in the photo is recorded. If you need all of them, crop the photo into parts first or use the “QR and barcode reader”.",
+    "guia-p2": "And if a QR cannot be read?",
+    "guia-r2": "That usually happens with blurry or very small photos, or with glare on the code. Take the photo closer and in even light; with “If there is no code: Keep the file”, the receipt still goes into the PDF.",
+    "guia-p3": "Can I use PDFs instead of photos?",
+    "guia-r3": "This flow takes images. For PDFs, open “Customize this flow” and add “PDF to images” as the first step.",
+  },
+};
+</script>
+</head>
+<body>
+<div id="fondoDecorativo"></div>
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../flujos.html" data-i18n="nav-cat-flujos">Flujos</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">🧾 Recibos con QR a un PDF</h1>
+  <p data-i18n="intro">Juntá fotos de recibos, facturas o comprobantes con código QR en un solo PDF. Cada código se lee antes de recortar y lo que dice queda escrito en un cuadro debajo de su página.</p>
+
+  <div class="panel-herramienta">
+    <div class="columnas con-vista-fija vista-a-la-izquierda">
+      <aside class="vista-fija" aria-labelledby="tituloDiagrama">
+        <h2 class="diagrama-titulo" id="tituloDiagrama" data-i18n="titulo-diagrama">Así va tu flujo</h2>
+        <div class="diagrama-flujo mini" id="diagramaMini"></div>
+      </aside>
+
+      <div>
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="listo-zona">📂 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
+          <input type="file" id="entradaArchivos" multiple hidden>
+        </div>
+        <p class="nota-suave" id="recibe"></p>
+        <p class="nota-suave" id="avisoArchivos" hidden></p>
+        <h2 data-i18n="listo-titulo-pasos">Los pasos de este flujo</h2>
+        <p class="nota-suave" data-i18n="listo-nota-opciones">Podés cambiar las opciones de cada paso antes de ejecutar.</p>
+        <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
+
+        <div class="controles">
+          <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+          <button type="button" class="boton secundario" id="botonPersonalizar" data-i18n="boton-personalizar">✏️ Personalizar este flujo</button>
+        </div>
+        <p class="nota-suave" id="estado" role="status" hidden></p>
+        <progress id="avance" max="1" value="0" hidden></progress>
+
+        <div class="resultado" id="resultado">
+          <p id="resultadoTexto"></p>
+          <div class="controles" id="descargas"></div>
+          <div id="codigos"></div>
+          <div id="fallos"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo juntar recibos con QR en un solo PDF</h2>
+    <p data-i18n="guia-intro">Muchas facturas electrónicas y comprobantes traen un QR con el número, el monto o un enlace de verificación. Este flujo lee ese código en cada foto, endereza y recorta el papel, y arma un PDF donde el contenido del QR queda escrito y se puede buscar.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá las fotos de los recibos a la zona.</li>
+      <li data-i18n="guia-paso-2">Decidí qué hacer con una foto sin código en «Si no hay código»: seguir con ella o dejarla afuera.</li>
+      <li data-i18n="guia-paso-3">Pulsá «Ejecutar el flujo». Al terminar, la página lista los códigos encontrados en cada archivo.</li>
+      <li data-i18n="guia-paso-4">Descargá «unido.pdf»: cada recibo en su página, con un cuadro amarillo debajo que dice lo que leyó el QR.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">El código se lee antes de recortar, sobre la foto entera: así un QR que queda cerca del borde no se pierde con el recorte.</li>
+      <li data-i18n="guia-consejo-2">El texto del cuadro se puede buscar con Ctrl+F y también queda en las palabras clave del PDF: sirve para encontrar una factura por su número.</li>
+      <li data-i18n="guia-consejo-3">Funciona también con códigos de barras, no solo con QR.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Qué pasa si un recibo tiene dos códigos?</summary>
+      <p data-i18n="guia-r1">Se anota el que se encuentra primero en la foto. Si necesitás todos, recortá la foto en partes antes o usá el «Lector de códigos QR y de barras».</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Y si un QR no se lee?</summary>
+      <p data-i18n="guia-r2">Suele pasar con fotos borrosas, muy chicas o con reflejos sobre el código. Sacá la foto más cerca y con luz pareja; con «Si no hay código: Seguir con el archivo», el recibo entra al PDF igual.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Puedo usar PDF en vez de fotos?</summary>
+      <p data-i18n="guia-r3">Este flujo recibe imágenes. Para PDF, abrí «Personalizar este flujo» y agregá «PDF a imágenes» como primer paso.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/flujos.js"></script>
+<script src="../assets/js/flujos-modulos.js"></script>
+<script src="../assets/js/flujos-pagina.js"></script>
+<script>
+const FLUJO = {"entradas": [[{"id": "leer-codigos"}, {"id": "recortar-documento"}, {"id": "imagen-a-pdf"}, {"id": "unir-pdf"}]], "comun": []};
+// idioma.js se carga después de este script: t() existe recién cuando terminó de cargar la página.
+document.addEventListener('DOMContentLoaded', () => FlujosPagina.montarListo(FLUJO));
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>

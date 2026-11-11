@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="titulo-pagina">Escaneos a PDF buscable y liviano, gratis — Mini Cookies</title>
+<meta name="description" data-i18n-attr="content:meta-descripcion" content="Convertí PDF escaneados y fotos de texto en PDF donde se puede buscar y copiar, y achicá su peso en el mismo paso. OCR gratis, en tu navegador y sin subir nada.">
+<link rel="icon" type="image/png" href="../marca-logo/minicookies_galleta.png">
+<link rel="stylesheet" href="../assets/css/estilos.css">
+<link rel="stylesheet" href="../assets/css/fondo-decorativo.css">
+<script>(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>
+// Flujo listo (2026-11-10): los pasos están en FLUJO, abajo; la interfaz y sus textos comunes los pone
+// assets/js/flujos-pagina.js (montarListo). Acá van solo los textos de esta página.
+window.i18nPagina = {
+  es: {
+    "titulo-pagina": "Escaneos a PDF buscable y liviano, gratis — Mini Cookies",
+    "meta-descripcion": "Convertí PDF escaneados y fotos de texto en PDF donde se puede buscar y copiar, y achicá su peso en el mismo paso. OCR gratis, en tu navegador y sin subir nada.",
+    "hero-titulo": "🔤 Escaneos a PDF buscable",
+    "intro": "Pasá PDF escaneados o fotos de texto a PDF donde se puede buscar, seleccionar y copiar el texto, y achicá su peso en el mismo viaje. Sale un PDF por archivo.",
+    "guia-titulo": "Cómo hacer buscable un PDF escaneado",
+    "guia-intro": "Un escaneo es una foto de la página: se ve el texto, pero la computadora no lo sabe leer, así que no se puede buscar ni copiar. Este flujo reconoce el texto con OCR, lo deja invisible encima de cada página y después recomprime las imágenes para que el archivo no pese de más.",
+    "guia-paso-1": "Arrastrá los PDF escaneados o las fotos de las páginas a la zona.",
+    "guia-paso-2": "Elegí el «Idioma del texto»: el reconocimiento acierta mucho más cuando sabe en qué idioma está escrito.",
+    "guia-paso-3": "Pulsá «Ejecutar el flujo». Cada página se endereza si está torcida, se reconoce su texto y el PDF se arma igual al original.",
+    "guia-paso-4": "Descargá el resultado: un PDF por archivo, o un .zip si cargaste varios.",
+    "guia-consejo-1": "Si el escaneo es pálido o tiene manchas, probá «Preparar la imagen: Blanco y negro puro»; para papeles limpios, «Contraste automático» suele bastar.",
+    "guia-consejo-2": "El texto reconocido queda invisible: el PDF se ve igual que antes, pero ahora Ctrl+F encuentra las palabras.",
+    "guia-consejo-3": "«Comprimir PDF» solo cambia las fotos de cada página; si el archivo no baja de peso, queda el que salió del OCR.",
+    "guia-p1": "¿Sirve para un PDF que ya tiene texto?",
+    "guia-r1": "Funciona, pero no hace falta: si el PDF se puede buscar, el texto ya está. Para sacarlo a un .txt usá «PDF ↔ Texto».",
+    "guia-p2": "¿Por qué tarda más que otros flujos?",
+    "guia-r2": "Reconocer texto es el trabajo más pesado del sitio. El flujo abre varios motores de reconocimiento a la vez para usar más núcleos, pero un PDF de muchas páginas igual lleva su tiempo.",
+    "guia-p3": "¿Reconoce letra manuscrita?",
+    "guia-r3": "Muy poco. El reconocimiento está pensado para texto impreso; la letra a mano suele salir con muchos errores.",
+  },
+  en: {
+    "titulo-pagina": "Scans to a searchable, lighter PDF, free — Mini Cookies",
+    "meta-descripcion": "Turn scanned PDFs and photos of text into PDFs you can search and copy, and shrink them in the same step. Free OCR, in your browser, nothing uploaded.",
+    "hero-titulo": "🔤 Scans to a searchable PDF",
+    "intro": "Turn scanned PDFs or photos of text into PDFs where the text can be searched, selected and copied, and shrink them on the way. One PDF comes out per file.",
+    "guia-titulo": "How to make a scanned PDF searchable",
+    "guia-intro": "A scan is a picture of the page: you can see the text, but the computer cannot read it, so it cannot be searched or copied. This flow recognizes the text with OCR, places it invisibly over each page and then recompresses the images so the file is not heavier than it needs to be.",
+    "guia-paso-1": "Drag the scanned PDFs or the photos of the pages onto the drop zone.",
+    "guia-paso-2": "Choose the “Text language”: recognition is far more accurate when it knows which language the text is in.",
+    "guia-paso-3": "Press “Run the flow”. Each page is straightened if it is tilted, its text is recognized and the PDF is rebuilt to look like the original.",
+    "guia-paso-4": "Download the result: one PDF per file, or a .zip if you added several.",
+    "guia-consejo-1": "If the scan is faint or stained, try “Prepare the image: Pure black and white”; for clean paper, “Automatic contrast” is usually enough.",
+    "guia-consejo-2": "The recognized text is invisible: the PDF looks just as before, but now Ctrl+F finds the words.",
+    "guia-consejo-3": "“Compress PDF” only changes the pictures on each page; if the file does not get lighter, the one that came out of OCR is kept.",
+    "guia-p1": "Does it help with a PDF that already has text?",
+    "guia-r1": "It works, but there is no need: if the PDF can be searched, the text is already there. To get it into a .txt file, use “PDF ↔ Text”.",
+    "guia-p2": "Why does it take longer than other flows?",
+    "guia-r2": "Recognizing text is the heaviest job on the site. The flow opens several recognition engines at once to use more cores, but a PDF with many pages still takes a while.",
+    "guia-p3": "Does it recognize handwriting?",
+    "guia-r3": "Very little. Recognition is designed for printed text; handwriting usually comes out with many errors.",
+  },
+};
+</script>
+</head>
+<body>
+<div id="fondoDecorativo"></div>
+<header class="sitio">
+  <div class="marca"><a href="../index.html"><img src="../marca-logo/mini-cookies-logo-horizontal.png" alt="Mini Cookies" class="logo-marca"><div class="texto-marca" aria-hidden="true">Mini<span>Cookies</span></div></a></div>
+  <nav class="sitio">
+    <a href="../flujos.html" data-i18n="nav-cat-flujos">Flujos</a>
+    <button class="boton-tema" id="botonIdioma" title="Switch to English">EN</button>
+    <button class="boton-tema" id="botonTema" aria-label="Cambiar a modo oscuro" data-i18n-attr="aria-label:tema-aria;title:tema-title" title="Cambiar tema">🌙</button>
+  </nav>
+</header>
+
+<main>
+  <h1 data-i18n="hero-titulo">🔤 Escaneos a PDF buscable</h1>
+  <p data-i18n="intro">Pasá PDF escaneados o fotos de texto a PDF donde se puede buscar, seleccionar y copiar el texto, y achicá su peso en el mismo viaje. Sale un PDF por archivo.</p>
+
+  <div class="panel-herramienta">
+    <div class="columnas con-vista-fija vista-a-la-izquierda">
+      <aside class="vista-fija" aria-labelledby="tituloDiagrama">
+        <h2 class="diagrama-titulo" id="tituloDiagrama" data-i18n="titulo-diagrama">Así va tu flujo</h2>
+        <div class="diagrama-flujo mini" id="diagramaMini"></div>
+      </aside>
+
+      <div>
+        <div class="zona-arrastre" id="zonaArrastre">
+          <span data-i18n="listo-zona">📂 Arrastrá tus archivos acá o hacé clic para elegirlos</span>
+          <input type="file" id="entradaArchivos" multiple hidden>
+        </div>
+        <p class="nota-suave" id="recibe"></p>
+        <p class="nota-suave" id="avisoArchivos" hidden></p>
+        <h2 data-i18n="listo-titulo-pasos">Los pasos de este flujo</h2>
+        <p class="nota-suave" data-i18n="listo-nota-opciones">Podés cambiar las opciones de cada paso antes de ejecutar.</p>
+        <ol class="lista-archivos lista-pasos" id="listaPasos"></ol>
+
+        <div class="controles">
+          <button type="button" class="boton" id="botonEjecutar" disabled data-i18n="boton-ejecutar">Ejecutar el flujo</button>
+          <button type="button" class="boton secundario" id="botonPersonalizar" data-i18n="boton-personalizar">✏️ Personalizar este flujo</button>
+        </div>
+        <p class="nota-suave" id="estado" role="status" hidden></p>
+        <progress id="avance" max="1" value="0" hidden></progress>
+
+        <div class="resultado" id="resultado">
+          <p id="resultadoTexto"></p>
+          <div class="controles" id="descargas"></div>
+          <div id="codigos"></div>
+          <div id="fallos"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anuncio" data-i18n="anuncio">Espacio publicitario</div>
+
+  <section class="guia-uso">
+    <h2 data-i18n="guia-titulo">Cómo hacer buscable un PDF escaneado</h2>
+    <p data-i18n="guia-intro">Un escaneo es una foto de la página: se ve el texto, pero la computadora no lo sabe leer, así que no se puede buscar ni copiar. Este flujo reconoce el texto con OCR, lo deja invisible encima de cada página y después recomprime las imágenes para que el archivo no pese de más.</p>
+    <h3 data-i18n="guia-pasos">Paso a paso</h3>
+    <ol>
+      <li data-i18n="guia-paso-1">Arrastrá los PDF escaneados o las fotos de las páginas a la zona.</li>
+      <li data-i18n="guia-paso-2">Elegí el «Idioma del texto»: el reconocimiento acierta mucho más cuando sabe en qué idioma está escrito.</li>
+      <li data-i18n="guia-paso-3">Pulsá «Ejecutar el flujo». Cada página se endereza si está torcida, se reconoce su texto y el PDF se arma igual al original.</li>
+      <li data-i18n="guia-paso-4">Descargá el resultado: un PDF por archivo, o un .zip si cargaste varios.</li>
+    </ol>
+    <h3 data-i18n="guia-consejos">Consejos</h3>
+    <ul>
+      <li data-i18n="guia-consejo-1">Si el escaneo es pálido o tiene manchas, probá «Preparar la imagen: Blanco y negro puro»; para papeles limpios, «Contraste automático» suele bastar.</li>
+      <li data-i18n="guia-consejo-2">El texto reconocido queda invisible: el PDF se ve igual que antes, pero ahora Ctrl+F encuentra las palabras.</li>
+      <li data-i18n="guia-consejo-3">«Comprimir PDF» solo cambia las fotos de cada página; si el archivo no baja de peso, queda el que salió del OCR.</li>
+    </ul>
+    <h3 data-i18n="guia-faq">Preguntas frecuentes</h3>
+    <details>
+      <summary data-i18n="guia-p1">¿Sirve para un PDF que ya tiene texto?</summary>
+      <p data-i18n="guia-r1">Funciona, pero no hace falta: si el PDF se puede buscar, el texto ya está. Para sacarlo a un .txt usá «PDF ↔ Texto».</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p2">¿Por qué tarda más que otros flujos?</summary>
+      <p data-i18n="guia-r2">Reconocer texto es el trabajo más pesado del sitio. El flujo abre varios motores de reconocimiento a la vez para usar más núcleos, pero un PDF de muchas páginas igual lleva su tiempo.</p>
+    </details>
+    <details>
+      <summary data-i18n="guia-p3">¿Reconoce letra manuscrita?</summary>
+      <p data-i18n="guia-r3">Muy poco. El reconocimiento está pensado para texto impreso; la letra a mano suele salir con muchos errores.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="sitio">
+  <p data-i18n="footer-tagline">Mini Cookies — gratis, sin registro, sin subir tus archivos a ningún lado.</p>
+  <p><a href="../todas.html" data-i18n="footer-todas">Todas las herramientas</a> · <a href="../privacidad.html" data-i18n="footer-privacidad">Política de privacidad</a> · <a href="../terminos.html" data-i18n="footer-terminos">Términos de uso</a> · <a href="../creditos.html" data-i18n="footer-creditos">Créditos</a> · <a href="../acerca.html" data-i18n="footer-acerca">Acerca de</a> · <a href="../guias/index.html" data-i18n="footer-guias">Guías</a> · <a href="../contacto.html" data-i18n="footer-contacto">Contacto</a></p>
+</footer>
+
+<script src="../assets/js/vendor.js"></script>
+<script src="../assets/js/zona-arrastre.js"></script>
+<script src="../assets/js/descargar.js"></script>
+<script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/lote-archivos.js"></script>
+<script src="../assets/js/flujos.js"></script>
+<script src="../assets/js/flujos-modulos.js"></script>
+<script src="../assets/js/flujos-pagina.js"></script>
+<script>
+const FLUJO = {"entradas": [[{"id": "ocr-pdf"}, {"id": "comprimir-pdf"}]], "comun": []};
+// idioma.js se carga después de este script: t() existe recién cuando terminó de cargar la página.
+document.addEventListener('DOMContentLoaded', () => FlujosPagina.montarListo(FLUJO));
+</script>
+<script src="../assets/js/tema.js"></script>
+<script src="../assets/js/fondo-decorativo.js"></script>
+<script src="../assets/js/idioma.js"></script>
+</body>
+</html>
