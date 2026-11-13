@@ -110,7 +110,7 @@
 
   // ---------- pasos ----------
   const preparados = new Map();
-  const mensajeDe = (e) => (e && e.message) || String(e);
+  const mensajeDe = (e) => (e && typeof e.message === 'string' && e.message) || (e && e.type ? 'error: ' + e.type : String(e));
 
   self.onmessage = async (evento) => {
     const d = evento.data || {};

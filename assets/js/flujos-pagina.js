@@ -209,7 +209,7 @@ window.i18nPieza = {
       if (f.codigo === 'tipo') return t('fallo-tipo');
       const en = varias ? donde(f.entrada) + ', ' : '';
       if (f.codigo === 'quitado') return en + rellenar('fallo-quitado', { n: f.paso + 1 });
-      return en + rellenar('fallo-paso', { n: f.paso + 1, error: f.error });
+      return en + rellenar('fallo-paso', { n: f.paso + 1, error: detalleError({ message: f.error }) });
     };
     e.resultadoTexto.textContent = resultados.length ? rellenar('resultado-n', { ok: resultados.length }) : t('resultado-cero');
     e.descargas.innerHTML = '';

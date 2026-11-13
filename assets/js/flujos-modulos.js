@@ -462,9 +462,10 @@
     return conMotorOcr(o.idiomas, o.motor, async (worker) => {
       const pdf = await PDFLib.PDFDocument.create();
       const textos = [];
-      for (const pagina of await Ocr.paginasDeArchivo(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar)) {
+      // De a una página: las de un PDF largo, todas dibujadas a la vez, no entran en la memoria.
+      await Ocr.recorrerPaginas(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar, async (pagina) => {
         textos.push(await Ocr.agregarPagina(pdf, worker, pagina, o.preproceso));
-      }
+      });
       return { pdf, texto: textos.join(separador()) };
     });
   }

@@ -413,7 +413,7 @@ function pintar() {
     const h3 = el('h3', '', `${rellenar('entrada-n', { n: i + 1 })} · ${tipos.length ? rellenar('entrada-recibe', { tipos: nombreTipos(tipos) }) : t('entrada-no-recibe')}`);
     cab.appendChild(h3);
     if (varias()) {
-      const quitar = botonPaso('quitar-entrada', '✕', () => { flujo.entradas.splice(i, 1); cambio(); });
+      const quitar = botonPaso('quitar-entrada', '✕', () => { flujo.entradas.splice(i, 1); ponerFlujo(flujo); });
       const envuelve = el('span', 'paso-botones'); envuelve.appendChild(quitar); cab.appendChild(envuelve);
     }
     bloque.appendChild(cab);
