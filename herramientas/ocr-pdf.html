@@ -34,6 +34,11 @@ window.i18nPagina = {
     'idioma-chi': 'Chino simplificado',
     'idioma-jpn': 'Japonés',
     'idiomas-nota': 'Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.',
+    'motor-titulo': 'Motor de reconocimiento',
+    'motor-tesseract': 'Tesseract (estándar, todos los idiomas)',
+    'motor-librarius': 'Librarius (Beta): IA propia de Mini Cookies, más precisa',
+    'motor-nota': 'En nuestras pruebas con escaneos reales de libros, Librarius leyó con menos errores que Tesseract, sobre todo en páginas torcidas, giradas o con letra gótica. Sigue siendo Beta: solo lee idiomas con alfabeto latino, puede fallar con tablas, formularios o fotos con mucha sombra, y el texto invisible del PDF se ajusta a cada palabra de forma aproximada. Si no puede cargar en tu navegador, se usa Tesseract. Todo corre en tu equipo.',
+    'motor-nota-cjk': 'Con chino o japonés se usa Tesseract (Librarius todavía no los lee).',
     'corregir-inclinacion': 'Enderezar automáticamente páginas/fotos torcidas (recomendado)',
     'preproceso-titulo': 'Preprocesamiento antes del OCR',
     'preproceso-ninguno': 'Ninguno (usar la imagen tal cual)',
@@ -89,6 +94,11 @@ window.i18nPagina = {
     'idioma-chi': 'Simplified Chinese',
     'idioma-jpn': 'Japanese',
     'idiomas-nota': 'Only pick the languages that appear in your document — each one adds a several-MB download the first time it’s used.',
+    'motor-titulo': 'Recognition engine',
+    'motor-tesseract': 'Tesseract (standard, all languages)',
+    'motor-librarius': 'Librarius (Beta): Mini Cookies’ own AI, more accurate',
+    'motor-nota': 'In our tests with real scans of books, Librarius read with fewer errors than Tesseract, especially on crooked, rotated or Gothic-type pages. It is still Beta: it only reads Latin-alphabet languages, it can struggle with tables, forms or photos with heavy shadows, and the invisible text in the PDF is fitted to each word only approximately. If it cannot load in your browser, Tesseract is used. Everything runs on your device.',
+    'motor-nota-cjk': 'With Chinese or Japanese, Tesseract is used (Librarius does not read them yet).',
     'corregir-inclinacion': 'Automatically straighten tilted pages/photos (recommended)',
     'preproceso-titulo': 'Preprocessing before OCR',
     'preproceso-ninguno': 'None (use the image as is)',
@@ -158,6 +168,14 @@ window.i18nPagina = {
       <label><input type="checkbox" value="jpn"> <span data-i18n="idioma-jpn">Japonés</span></label>
     </div>
     <p style="color:var(--texto-suave); font-size:0.9em; margin-top:-10px;" data-i18n="idiomas-nota">Elegí solo los idiomas que aparecen en tu documento — cada uno agrega una descarga de varios MB la primera vez que se usa.</p>
+
+    <p style="margin:0 0 6px; font-weight:600;" data-i18n="motor-titulo">Motor de reconocimiento</p>
+    <div class="lista-idiomas" id="listaMotor" style="margin-top:0; margin-bottom:6px;">
+      <label><input type="radio" name="motorOcr" value="tesseract" checked> <span data-i18n="motor-tesseract">Tesseract (estándar, todos los idiomas)</span></label>
+      <label><input type="radio" name="motorOcr" value="librarius"> <span data-i18n="motor-librarius">Librarius (Beta): IA propia de Mini Cookies, más precisa</span></label>
+    </div>
+    <p style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:6px;" data-i18n="motor-nota">En nuestras pruebas con escaneos reales de libros, Librarius leyó con menos errores que Tesseract.</p>
+    <p id="motorNotaCjk" style="color:var(--texto-suave); font-size:0.9em; margin-top:0; margin-bottom:20px; display:none;" data-i18n="motor-nota-cjk">Con chino o japonés se usa Tesseract.</p>
 
     <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-bottom:14px;">
       <input type="checkbox" id="corregirInclinacion" checked>
@@ -248,6 +266,7 @@ window.i18nPagina = {
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../vendor/tesseract.js/7.0.0/dist/tesseract.min.js?v=2"></script>
+<script src="../assets/js/ocr-librarius.js"></script>
 <script src="../assets/js/ocr.js"></script>
 <script src="../assets/js/reordenar-tactil.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
@@ -323,6 +342,17 @@ function idiomasElegidos() {
   return [...document.querySelectorAll('#listaIdiomas input:checked')].map(c => c.value);
 }
 
+// Librarius (Beta) solo lee idiomas con alfabeto latino: con chino o japonés marcado se vuelve a Tesseract y se avisa.
+function actualizarMotor() {
+  const posible = OcrLibrarius.soportaIdiomas(idiomasElegidos());
+  const radioLibrarius = document.querySelector('input[name="motorOcr"][value="librarius"]');
+  radioLibrarius.disabled = !posible;
+  if (!posible) document.querySelector('input[name="motorOcr"][value="tesseract"]').checked = true;
+  document.getElementById('motorNotaCjk').style.display = posible ? 'none' : 'block';
+}
+document.getElementById('listaIdiomas').addEventListener('change', actualizarMotor);
+actualizarMotor();
+
 // Las páginas de todos los archivos, en el orden final elegido por el usuario (la lógica está en assets/js/ocr.js).
 async function prepararPaginas(ordenIds, corregirInclinacion) {
   const paginas = [];
@@ -345,10 +375,11 @@ botonOcr.addEventListener('click', async () => {
   let worker = null;
   try {
     progreso.textContent = t('progreso-cargando-motor');
+    const motor = document.querySelector('input[name="motorOcr"]:checked').value;
     worker = await Ocr.crearWorker(idiomas, (m) => {
       if (m.progress != null) barraProgresoRelleno.style.width = `${Math.round(m.progress * 100)}%`;
       if (m.status) progreso.textContent = `${m.status}...`;
-    });
+    }, motor);
 
     const corregirInclinacion = document.getElementById('corregirInclinacion').checked;
     const modoPreproceso = document.querySelector('input[name="preprocesoOcr"]:checked').value;

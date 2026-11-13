@@ -2,7 +2,7 @@
 // OCR sin interfaz (sobre Tesseract.js, copia propia en vendor/): separado de ocr-pdf.html para que lo usen la
 // página y Flujos con el mismo código. Supone ya cargados vendor.js, pdf-lib, Tesseract.js y, para PDF, pdfjs.js.
 //
-//   const worker = await Ocr.crearWorker(['spa', 'eng'], logger)      el motor y los idiomas (de vendor/)
+//   const worker = await Ocr.crearWorker(['spa', 'eng'], logger, motor)  el motor y los idiomas (de vendor/); motor 'librarius' = Beta (ocr-librarius.js)
 //   const paginas = await Ocr.paginasDeArchivo(archivo, enderezar)    [{ canvas, escala }] (PDF: una por página)
 //   const texto = await Ocr.agregarPagina(pdfNuevo, worker, pagina, preproceso)
 //        reconoce la página, la agrega a pdfNuevo (pdf-lib) con el texto invisible encima y devuelve el texto.
@@ -27,7 +27,18 @@
   // Tesseract baja por su cuenta el worker, el motor (WebAssembly) y el
   // diccionario de cada idioma; por defecto de cdn.jsdelivr.net. Se le
   // indican las copias propias de /vendor/ para no depender de esa CDN.
-  function crearWorker(idiomas, logger) {
+  // motor 'librarius' (Beta): el lector con IA propia (ocr-librarius.js), solo para idiomas latinos; si no puede cargar
+  // (navegador sin Workers o WebAssembly, o un idioma que no lee) se usa Tesseract. Devuelve un objeto con `terminate()`
+  // en los dos casos; el de Librarius lleva además `motor: 'librarius'` y `librarius` (el lector).
+  async function crearWorker(idiomas, logger, motor) {
+    if (motor === 'librarius' && window.OcrLibrarius && OcrLibrarius.soportaIdiomas(idiomas)) {
+      try {
+        const lector = await OcrLibrarius.crear();
+        return { motor: 'librarius', librarius: lector, terminate: async () => lector.cerrar() };
+      } catch (error) {
+        console.warn('Librarius no cargó; se usa Tesseract.', error);
+      }
+    }
     return Tesseract.createWorker(idiomas, 1, {
       workerPath: rutaVendor('tesseract.js/7.0.0/dist/worker.min.js?v=2'),
       corePath: rutaVendor('tesseract.js-core/7.0.0'),
@@ -304,6 +315,7 @@
   // Reconoce una página, la agrega a pdfNuevo con la imagen y el texto invisible
   // encima (seleccionable y buscable) y devuelve el texto reconocido.
   async function agregarPagina(pdfNuevo, worker, { canvas, escala }, preproceso) {
+    if (worker.motor === 'librarius') return agregarPaginaLibrarius(pdfNuevo, worker, { canvas, escala });
     let canvasParaOcr = canvas;
     if (preproceso === 'contraste') canvasParaOcr = prepararParaOcr(canvas);
     else if (preproceso === 'otsu') canvasParaOcr = binarizarOtsu(canvas);
@@ -341,6 +353,43 @@
       }
     }
     return data.text || '';
+  }
+
+  // Lo mismo que agregarPagina, con Librarius: la imagen más el texto invisible, una palabra por vez, con la caja
+  // repartida dentro de su línea y la inclinación de la línea. El preproceso no se usa (Librarius trabaja en grises).
+  async function agregarPaginaLibrarius(pdfNuevo, worker, { canvas, escala }) {
+    const r = await worker.librarius.leerPagina(canvas);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+    const imagenEmbebida = await pdfNuevo.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+    const anchoPagina = canvas.width / escala;
+    const altoPagina = canvas.height / escala;
+    const paginaNueva = pdfNuevo.addPage([anchoPagina, altoPagina]);
+    paginaNueva.drawImage(imagenEmbebida, { x: 0, y: 0, width: anchoPagina, height: altoPagina });
+    if (!pdfNuevo._fuenteOcr) pdfNuevo._fuenteOcr = await pdfNuevo.embedFont(PDFLib.StandardFonts.Helvetica);
+    const fuente = pdfNuevo._fuenteOcr;
+    for (const p of r.palabras) {
+      // La fuente estándar solo cubre WinAnsi: lo que no entra (griego, góticas…) se cambia por su letra base o se omite.
+      let texto = p.texto;
+      let ancho1;
+      try { ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e) {
+        texto = texto.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^ -~]/g, '');
+        if (!texto) continue;
+        try { ancho1 = fuente.widthOfTextAtSize(texto, 1); } catch (e2) { continue; }
+      }
+      if (!(ancho1 > 0)) continue;
+      // Tamaño que hace que el texto invisible mida lo mismo de ancho que la palabra de la imagen (sin pasar de su alto).
+      const tamano = Math.min(p.ancho / escala / ancho1, p.alto / escala);
+      if (!(tamano > 0)) continue;
+      try {
+        paginaNueva.drawText(texto, {
+          x: p.x / escala, y: altoPagina - p.y / escala, size: tamano, font: fuente,
+          rotate: PDFLib.degrees(p.angulo), color: PDFLib.rgb(0, 0, 0), opacity: 0,
+        });
+      } catch (errorTexto) {
+        console.warn('No se pudo dibujar una palabra del OCR:', texto, errorTexto);
+      }
+    }
+    return r.texto || '';
   }
 
   window.Ocr = { crearWorker, paginasDeArchivo, agregarPagina, esPdf };
