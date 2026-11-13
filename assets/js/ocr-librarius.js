@@ -29,6 +29,8 @@
   }
 
   let promesaCarga = null, motorUnico = null;
+  // Las páginas pasan de a una por el único lector: su detector guarda la página que está leyendo, y Flujos pide varias a la vez.
+  let fila = Promise.resolve();
 
   async function crear() {
     if (typeof Worker !== 'function' || typeof WebAssembly !== 'object') throw new Error('Este navegador no puede correr Librarius.');
@@ -74,7 +76,13 @@
       return { cx, cy, ux, uy };
     }
 
-    async function leerPagina(canvas) {
+    function leerPagina(canvas) {
+      const turno = fila.then(() => leerUna(canvas));
+      fila = turno.catch(() => {});
+      return turno;
+    }
+
+    async function leerUna(canvas) {
       const g = aGris(canvas);
       const r = await lector.leer(g.gris, g.w, g.h);
       const k = r.giroPrimeraPasada !== undefined ? LibrariusPagina._nucleo.cuartosDeVuelta(r.giroPrimeraPasada) : 0;
@@ -97,6 +105,8 @@
       return { texto: r.texto, palabras };
     }
 
+    // Varios pedidos simultáneos esperan la misma carga: todos reciben el mismo motor (y la misma fila).
+    if (motorUnico) return motorUnico;
     motorUnico = { leerPagina, cerrar() { lector.cerrar(); motorUnico = null; promesaCarga = null; } };
     return motorUnico;
   }

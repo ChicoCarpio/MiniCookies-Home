@@ -423,6 +423,10 @@
   ];
   const OPCIONES_OCR = [
     { id: 'idiomas', tipo: 'select', defecto: 'spa+eng', etiqueta: { es: 'Idioma del texto', en: 'Text language' }, valores: IDIOMAS_OCR },
+    // Librarius (Beta, ocr-librarius.js) solo lee idiomas latinos: con chino o japonés, Ocr.crearWorker usa Tesseract.
+    { id: 'motor', tipo: 'select', defecto: 'tesseract', etiqueta: { es: 'Motor de reconocimiento', en: 'Recognition engine' },
+      valores: [{ valor: 'tesseract', es: 'Tesseract (todos los idiomas)', en: 'Tesseract (all languages)' },
+        { valor: 'librarius', es: 'Librarius (Beta): IA propia, más precisa', en: 'Librarius (Beta): in-house AI, more accurate' }] },
     { id: 'enderezar', tipo: 'casilla', defecto: true, etiqueta: { es: 'Enderezar páginas torcidas', en: 'Straighten tilted pages' } },
     { id: 'preproceso', tipo: 'select', defecto: 'contraste', etiqueta: { es: 'Preparar la imagen', en: 'Prepare the image' },
       valores: [{ valor: 'contraste', es: 'Contraste automático', en: 'Automatic contrast' }, { valor: 'otsu', es: 'Blanco y negro puro', en: 'Pure black and white' },
@@ -437,12 +441,14 @@
     const movil = navigator.userAgentData ? navigator.userAgentData.mobile : /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
     return movil ? 1 : Math.max(1, Math.min(4, Math.floor(nucleos / 2)));
   };
-  const motoresOcr = new Map();   // idiomas -> { libres: [Promise<worker>], todos: [Promise<worker>] }
-  async function conMotorOcr(idiomas, fn) {
-    if (!motoresOcr.has(idiomas)) motoresOcr.set(idiomas, { libres: [], todos: [] });
-    const g = motoresOcr.get(idiomas);
+  // Con Librarius todos comparten el mismo lector (ocr-librarius.js pone las páginas en fila y reparte cada una entre sus hilos).
+  const motoresOcr = new Map();   // motor|idiomas -> { libres: [Promise<worker>], todos: [Promise<worker>] }
+  async function conMotorOcr(idiomas, tipoMotor, fn) {
+    const clave = (tipoMotor || 'tesseract') + '|' + idiomas;
+    if (!motoresOcr.has(clave)) motoresOcr.set(clave, { libres: [], todos: [] });
+    const g = motoresOcr.get(clave);
     let p = g.libres.pop();
-    if (!p) { p = Ocr.crearWorker(idiomas.split('+')); g.todos.push(p); }
+    if (!p) { p = Ocr.crearWorker(idiomas.split('+'), null, tipoMotor); g.todos.push(p); }
     let motor;
     try { motor = await p; } catch (e) { g.todos.splice(g.todos.indexOf(p), 1); throw e; }   // no se reusa uno que no arrancó
     try { return await fn(motor); } finally { g.libres.push(p); }
@@ -453,7 +459,7 @@
     for (const p of lista) { try { await (await p).terminate(); } catch (e) { /* ya cerrado */ } }
   }
   function reconocer(f, o) {
-    return conMotorOcr(o.idiomas, async (worker) => {
+    return conMotorOcr(o.idiomas, o.motor, async (worker) => {
       const pdf = await PDFLib.PDFDocument.create();
       const textos = [];
       for (const pagina of await Ocr.paginasDeArchivo(comoArchivo(f, f.tipo === 'pdf' ? 'application/pdf' : undefined), o.enderezar)) {
@@ -466,6 +472,7 @@
     await PDF_LIB();
     await js('pdfjs.js');
     await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
+    await js('ocr-librarius.js');
     await js('ocr.js');
   };
   F.registrar({
