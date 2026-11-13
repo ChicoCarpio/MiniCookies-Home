@@ -91,7 +91,15 @@
       return { texto: orden.map((l) => l.texto).filter((x) => x.trim()).join('\n'), lineas: orden, giro: giro * 180 / Math.PI, invertida: invertir };
     }
 
-    async function leer(gris, w, h, o) {
+    // Una página por vez: el detector guarda la página y las líneas que está leyendo; dos lecturas simultáneas se pisarían.
+    let fila = Promise.resolve();
+    function leer(gris, w, h, o) {
+      const turno = fila.then(() => leerUna(gris, w, h, o));
+      fila = turno.catch(() => {});
+      return turno;
+    }
+
+    async function leerUna(gris, w, h, o) {
       const tiempos = {}, inicio = performance.now();
       const orientar = !o || o.orientar !== false;
       const r = await pasada(gris.slice(), w, h, orientar, null, tiempos);       // se manda una copia: el buffer viaja al trabajador

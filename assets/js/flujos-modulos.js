@@ -472,7 +472,7 @@
     await PDF_LIB();
     await js('pdfjs.js');
     await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
-    await js('ocr-librarius.js');
+    await js('ocr-librarius.js?v=2');   // versión: ver ocr-librarius.js
     await js('ocr.js');
   };
   F.registrar({

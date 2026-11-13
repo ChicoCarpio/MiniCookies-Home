@@ -18,6 +18,9 @@
 
   const BASE = document.currentScript ? new URL('.', document.currentScript.src).href : new URL('assets/js/', location.href).href;
   const absoluta = (ruta) => new URL(ruta, location.href).href;
+  // Versión en la dirección de los scripts: el sitio deja que el navegador los guarde horas, y una copia vieja
+  // mezclada con una nueva rompe la lectura. Subirla cuando cambie librarius-pagina.js o librarius-pagina-hilos.js.
+  const V = '?v=2';
 
   function cargarScript(src) {
     return new Promise((ok, mal) => {
@@ -36,12 +39,12 @@
     if (typeof Worker !== 'function' || typeof WebAssembly !== 'object') throw new Error('Este navegador no puede correr Librarius.');
     if (motorUnico) return motorUnico;
     if (!promesaCarga) promesaCarga = (async () => {
-      if (!window.LibrariusPagina) await cargarScript(BASE + 'librarius-pagina.js');
-      if (!window.LibrariusPaginaHilos) await cargarScript(BASE + 'librarius-pagina-hilos.js');
+      if (!window.LibrariusPagina) await cargarScript(BASE + 'librarius-pagina.js' + V);
+      if (!window.LibrariusPaginaHilos) await cargarScript(BASE + 'librarius-pagina-hilos.js' + V);
       const alfabeto = (await (await fetch(BASE + '../modelos/librarius-alfabeto.json')).json()).alfabeto;
       const lector = await LibrariusPaginaHilos.crear({
         rutaOrt: absoluta(rutaVendor('onnxruntime-web/1.20.1/')),
-        rutaPagina: BASE + 'librarius-pagina.js',
+        rutaPagina: BASE + 'librarius-pagina.js' + V,
         rutaHilo: BASE + 'librarius-hilo.js',
         modeloVersus: BASE + '../modelos/versus-phone-v1.onnx',
         modeloLibrarius: BASE + '../modelos/librarius-phone-v1-int8.onnx',
