@@ -188,6 +188,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/texto-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -219,61 +220,17 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Número con el que EMPIEZA la línea (admite espacios y signo delante); si no
-// empieza con uno, null. Un punto o coma entre grupos de exactamente 3 cifras es
-// separador de miles ("1.200" → 1200); si no, es decimal ("3,5" → 3.5). Con
-// punto y coma a la vez, el último es el decimal ("1.234,50" → 1234.5).
-function numeroDeLinea(linea) {
-  const m = linea.match(/^\s*([+-]?\d+(?:[.,]\d+)*)/);
-  if (!m) return null;
-  let s = m[1];
-  const tienePunto = s.includes('.'), tieneComa = s.includes(',');
-  if (tienePunto && tieneComa) {
-    const decimal = s.lastIndexOf('.') > s.lastIndexOf(',') ? '.' : ',';
-    const miles = decimal === '.' ? ',' : '.';
-    s = s.split(miles).join('').replace(decimal, '.');
-  } else if (tienePunto || tieneComa) {
-    const partes = s.split(tienePunto ? '.' : ',');
-    if (partes.slice(1).every(p => p.length === 3)) s = partes.join('');
-    else if (partes.length === 2) s = partes.join('.');
-    else s = partes[0]; // "1.2.3": no es un número válido, se toma el primer grupo
-  }
-  const numero = parseFloat(s);
-  return Number.isFinite(numero) ? numero : null;
-}
+// El orden está en assets/js/texto-retoques.js (lo comparte con Flujos).
 
 botonOrdenar.addEventListener('click', async () => {
   try {
     const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
-    // El salto de línea final no es una línea más: antes aparecía una línea
-    // vacía al principio del resultado.
-    const terminaEnSalto = texto.endsWith('\n');
-    const lineas = (terminaEnSalto ? texto.slice(0, -1) : texto).split('\n');
-    const tipoOrden = document.getElementById('tipoOrden').value;
-    const ignorarMayusculas = document.getElementById('ignorarMayusculas').checked;
-
-    let lineasOrdenadas;
-    if (tipoOrden.startsWith('alfabetico')) {
-      // Orden de diccionario del idioma de la página: acentos y ñ en su
-      // lugar ("árbol" junto a "arco", "ñandú" después de "nube"; antes iban
-      // al final) y números como números ("tema 2" antes que "tema 10").
-      const colador = new Intl.Collator(idiomaActual(), { numeric: true, sensitivity: ignorarMayusculas ? 'accent' : 'variant', caseFirst: 'upper' });
-      lineasOrdenadas = [...lineas].sort(colador.compare);
-      if (tipoOrden.endsWith('desc')) lineasOrdenadas.reverse();
-    } else {
-      const conNumero = [];
-      const sinNumero = [];
-      lineas.forEach((linea) => {
-        const numero = numeroDeLinea(linea);
-        if (numero !== null) conNumero.push({ linea, numero });
-        else sinNumero.push(linea);
-      });
-      conNumero.sort((a, b) => a.numero - b.numero);
-      if (tipoOrden.endsWith('desc')) conNumero.reverse();
-      lineasOrdenadas = [...conNumero.map(x => x.linea), ...sinNumero];
-    }
-
-    const blob = new Blob([conFinDeLinea(lineasOrdenadas.join('\n') + (terminaEnSalto ? '\n' : ''), finDeLinea)], { type: 'text/plain;charset=utf-8' });
+    const ordenado = TextoRetoques.ordenar(texto, {
+      orden: document.getElementById('tipoOrden').value,
+      ignorarMayusculas: document.getElementById('ignorarMayusculas').checked,
+      idioma: idiomaActual(),
+    });
+    const blob = new Blob([conFinDeLinea(ordenado, finDeLinea)], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
   } catch (error) {

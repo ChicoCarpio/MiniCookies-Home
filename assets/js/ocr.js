@@ -4,6 +4,8 @@
 //
 //   const worker = await Ocr.crearWorker(['spa', 'eng'], logger, motor)  el motor y los idiomas (de vendor/); motor 'librarius' = Beta (ocr-librarius.js)
 //   const paginas = await Ocr.paginasDeArchivo(archivo, enderezar)    [{ canvas, escala }] (PDF: una por página)
+//   await Ocr.recorrerPaginas(archivo, enderezar, async (pagina) => …)   lo mismo de a una página (suelta cada lienzo al terminar)
+//   const n = await Ocr.contarPaginas(archivo)
 //   const texto = await Ocr.agregarPagina(pdfNuevo, worker, pagina, preproceso)
 //        reconoce la página, la agrega a pdfNuevo (pdf-lib) con el texto invisible encima y devuelve el texto.
 //        preproceso: 'ninguno' | 'contraste' | 'otsu'
@@ -68,7 +70,7 @@
       const img = new Image();
       const url = URL.createObjectURL(archivo);
       img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-      img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('The source image could not be decoded.')); };   // detalleError lo traduce
       img.src = url;
     });
   }
@@ -192,21 +194,28 @@
   // original que preservar más chico que la propia foto). Si enderezar está
   // activo, cada canvas se endereza antes de devolverlo — el mismo canvas (ya
   // derecho) es el que se usa después tanto para el OCR como para el PDF final.
-  async function paginasDeArchivo(archivo, enderezar) {
-    const paginas = [];
+  //
+  // Las páginas salen de a una (generador): una página de PDF a esta escala ocupa unos 25 MB, y tener las de un PDF
+  // de 100 páginas todas juntas (como antes) eran más de 2 GB y la pestaña se caía.
+  async function* generarPaginas(archivo, enderezar) {
     if (esPdf(archivo)) {
       const pdfjsDoc = await abrirPdf(await archivo.arrayBuffer());
-      for (let i = 1; i <= pdfjsDoc.numPages; i++) {
-        const pagina = await pdfjsDoc.getPage(i);
-        const viewport = pagina.getViewport({ scale: ESCALA_RENDERIZADO_PDF });
-        let canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        if (enderezar) canvas = corregirInclinacionSiHaceFalta(canvas);
-        paginas.push({ canvas, escala: ESCALA_RENDERIZADO_PDF });
+      try {
+        for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+          const pagina = await pdfjsDoc.getPage(i);
+          const viewport = pagina.getViewport({ scale: ESCALA_RENDERIZADO_PDF });
+          let canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+          pagina.cleanup();
+          if (enderezar) canvas = corregirInclinacionSiHaceFalta(canvas);
+          yield { canvas, escala: ESCALA_RENDERIZADO_PDF };
+        }
+      } finally {
+        try { await pdfjsDoc.destroy(); } catch (e) { /* ya cerrado */ }
       }
-      return paginas;
+      return;
     }
     const img = await cargarImagen(archivo);
     // Si la imagen es angosta, se agranda (escala > 1) para que el OCR
@@ -222,8 +231,28 @@
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     if (enderezar) canvas = corregirInclinacionSiHaceFalta(canvas);
-    paginas.push({ canvas, escala });
+    yield { canvas, escala };
+  }
+
+  async function paginasDeArchivo(archivo, enderezar) {
+    const paginas = [];
+    for await (const pagina of generarPaginas(archivo, enderezar)) paginas.push(pagina);
     return paginas;
+  }
+
+  // Página por página: alTenerPagina({ canvas, escala }) y, cuando termina, el lienzo se suelta antes de dibujar la
+  // siguiente. Para documentos largos, en vez de paginasDeArchivo.
+  async function recorrerPaginas(archivo, enderezar, alTenerPagina) {
+    for await (const pagina of generarPaginas(archivo, enderezar)) {
+      try { await alTenerPagina(pagina); } finally { pagina.canvas.width = pagina.canvas.height = 0; }
+    }
+  }
+
+  // Cuántas páginas va a dar un archivo (para el avance), sin dibujarlas.
+  async function contarPaginas(archivo) {
+    if (!esPdf(archivo)) return 1;
+    const pdfjsDoc = await abrirPdf(await archivo.arrayBuffer());
+    try { return pdfjsDoc.numPages; } finally { try { await pdfjsDoc.destroy(); } catch (e) { /* ya cerrado */ } }
   }
 
   // Escala de grises + estiramiento de contraste (histograma) sobre una copia
@@ -392,5 +421,5 @@
     return r.texto || '';
   }
 
-  window.Ocr = { crearWorker, paginasDeArchivo, agregarPagina, esPdf };
+  window.Ocr = { crearWorker, paginasDeArchivo, recorrerPaginas, contarPaginas, agregarPagina, esPdf };
 })();

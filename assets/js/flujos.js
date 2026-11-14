@@ -63,7 +63,7 @@
   function tipoDeArchivo(archivo) {
     const tipo = (archivo.type || '').toLowerCase(), nombre = (archivo.name || '').toLowerCase();
     if (tipo === 'application/pdf' || nombre.endsWith('.pdf')) return 'pdf';
-    if (tipo.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp)$/.test(nombre)) return 'imagen';
+    if (tipo.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|svg|avif)$/.test(nombre)) return 'imagen';
     const formato = window.ArchivoAPdf && archivo.name ? ArchivoAPdf.formatoDe(archivo) : null;
     if (formato) return formato === 'texto' ? 'texto' : 'documento';
     return null;
@@ -165,7 +165,17 @@
         if (!sirven.length) return { entrada: i, paso: k, motivo: 'tipo' };
         t = [...new Set(sirven.map((x) => salida(m, x)))];
       }
-      if (!tiposDeEntrada(flujo, i).length) return { entrada: 'comun', paso: 0, motivo: 'tipo' };
+      if (!tiposDeEntrada(flujo, i).length) {
+        // Nada de lo que sale de esta entrada llega al final del tramo común: se marca el paso donde se corta.
+        let k = 0;
+        for (; k < flujo.comun.length - 1; k++) {
+          const m = modulo(flujo.comun[k].id);
+          t = m ? t.filter((x) => m.entra.includes(x)) : [];
+          if (!t.length) break;
+          t = [...new Set(t.map((x) => salida(m, x)))];
+        }
+        return { entrada: 'comun', paso: k, motivo: 'tipo' };
+      }
     }
     let t = tiposAlComun(flujo);
     for (let k = 0; k < flujo.comun.length; k++) {
@@ -209,12 +219,38 @@
 
   function normalizar(flujo) {
     if (Array.isArray(flujo)) return { entradas: [normalizarPasos(flujo)], comun: [] };   // forma vieja: una lista
-    const entradas = (flujo && Array.isArray(flujo.entradas) ? flujo.entradas : [[]]).slice(0, MAX_ENTRADAS).map(normalizarPasos);
-    return { entradas: entradas.length ? entradas : [[]], comun: normalizarPasos(flujo && flujo.comun) };
+    let entradas = (flujo && Array.isArray(flujo.entradas) ? flujo.entradas : [[]]).slice(0, MAX_ENTRADAS).map(normalizarPasos);
+    if (!entradas.length) entradas = [[]];
+    let comun = normalizarPasos(flujo && flujo.comun);
+    // Con una sola entrada no hay tramo común (el editor ni lo muestra): sus pasos siguen al final de la entrada,
+    // que hace lo mismo. Si no, al quitar la segunda entrada quedaba un «Unir PDF» escondido que igual corría.
+    if (entradas.length === 1 && comun.length) { entradas = [entradas[0].concat(comun).slice(0, MAX_PASOS)]; comun = []; }
+    return { entradas, comun };
   }
 
   // ---------- ejecutar ----------
   function base(nombre) { const i = nombre.lastIndexOf('.'); return i > 0 ? nombre.slice(0, i) : nombre; }
+  // Lo que se lanzó, en texto: un Error da su mensaje; un evento de «no cargó» (un <img>, un script) no tiene.
+  const mensajeDe = (e) => (e && typeof e.message === 'string' && e.message) || (typeof e === 'string' && e) || (e && e.type ? 'error: ' + e.type : String(e));
+
+  // Un SVG no lo abre createImageBitmap, que es lo que usan los módulos de imagen (en los hilos no hay <img>):
+  // entra al flujo ya dibujado como PNG. Como es un dibujo sin tamaño fijo, se lo lleva a un lado útil.
+  const esSvg = (a) => (a.type || '').toLowerCase() === 'image/svg+xml' || /\.svg$/i.test(a.name || '');
+  async function svgAPng(archivo) {
+    const url = URL.createObjectURL(new Blob([archivo], { type: 'image/svg+xml' }));
+    try {
+      const img = new Image();
+      await new Promise((ok, mal) => { img.onload = ok; img.onerror = () => mal(new Error('The source image could not be decoded.')); img.src = url; });
+      const w = img.naturalWidth || 300, h = img.naturalHeight || 150;
+      const escala = Math.min(4096 / Math.max(w, h), Math.max(1, 1600 / Math.max(w, h)));
+      const lienzo = document.createElement('canvas');
+      lienzo.width = Math.max(1, Math.round(w * escala)); lienzo.height = Math.max(1, Math.round(h * escala));
+      lienzo.getContext('2d').drawImage(img, 0, 0, lienzo.width, lienzo.height);
+      const blob = await new Promise((ok) => lienzo.toBlob(ok, 'image/png'));
+      if (!blob) throw new Error('The source image could not be decoded.');
+      return new File([blob], base(archivo.name || 'imagen') + '.png', { type: 'image/png' });
+    } finally { URL.revokeObjectURL(url); }
+  }
 
   function nombreUnico(nombre, usados) {
     let n = nombre, k = 2;
@@ -399,27 +435,29 @@
     let enPagina = 0;
     const seguidas = new Map();   // fallas de entorno seguidas, por módulo
     async function ejecutarPaso(m, ficha, opciones, contexto) {
-      if (grupo && grupo.sirve(m)) {
-        try {
-          const d = await grupo.ejecutar(m, ficha, opciones, contexto);
-          seguidas.set(m.id, 0);
-          return d.vacio ? undefined : d.r;
-        } catch (e) {
-          if (e.enPreparar) grupo.sinHilo.add(m.id);
-          else if (!ERRORES_DE_ENTORNO.includes(e.name)) { seguidas.set(m.id, 0); throw e; }   // el archivo está mal: en la página fallaría igual
-          else {
-            const n = (seguidas.get(m.id) || 0) + 1;
-            seguidas.set(m.id, n);
-            if (n >= FALLAS_SEGUIDAS_MAX) grupo.sinHilo.add(m.id);   // no anda en el hilo: el resto va directo a la página
-          }
-          // Se repite en la página: mismo código, mismo resultado.
-        }
-      }
-      return limiteDe(m)(async () => {
+      const enLaPagina = () => limiteDe(m)(async () => {
         await prepararEnPagina(m);
         enPagina++;
         return m.ejecutar(ficha, opciones, contexto);
       });
+      if (!grupo || !grupo.sirve(m)) return enLaPagina();
+      try {
+        const d = await grupo.ejecutar(m, ficha, opciones, contexto);
+        seguidas.set(m.id, 0);
+        return d.vacio ? undefined : d.r;
+      } catch (e) {
+        if (e.enPreparar) { grupo.sinHilo.add(m.id); return enLaPagina(); }
+        if (!ERRORES_DE_ENTORNO.includes(e.name)) { seguidas.set(m.id, 0); throw e; }   // el archivo está mal: en la página fallaría igual
+      }
+      // Se repite en la página: mismo código, mismo resultado. Solo si ahí sí anduvo la culpa era del hilo: una foto que
+      // no se puede abrir da el mismo error en los dos lados (InvalidStateError), y tres seguidas sacaban al módulo de
+      // los hilos para todo el lote.
+      let r;
+      try { r = await enLaPagina(); } catch (e) { seguidas.set(m.id, 0); throw e; }
+      const n = (seguidas.get(m.id) || 0) + 1;
+      seguidas.set(m.id, n);
+      if (n >= FALLAS_SEGUIDAS_MAX) grupo.sinHilo.add(m.id);   // no anda en el hilo: el resto va directo a la página
+      return r;
     }
     // Cuántos archivos avanzan a la vez: lo justo para que ningún hilo espere, sin tener el lote entero en memoria.
     const usados = [...new Set([...flujo.entradas.flat(), ...flujo.comun].map((p) => modulo(p.id)))];
@@ -430,16 +468,21 @@
     // dos archivos, para no tener las páginas de muchos PDF a la vez en memoria.
     const admitirAbriendo = grupo ? semaforo(2) : admitir;
 
-    const porEntrada = flujo.entradas.map((pasos, i) => {
+    const porEntrada = [];
+    for (let i = 0; i < flujo.entradas.length; i++) {
       const aceptados = tiposDeEntrada(flujo, i);
       const fichas = [];
       for (const a of archivosPorEntrada[i] || []) {
         const tipo = tipoDeArchivo(a);
         if (!tipo || !aceptados.includes(tipo)) { fallos.push({ nombre: a.name, entrada: i, codigo: 'tipo' }); continue; }
-        fichas.push({ nombre: a.name, blob: a, tipo, datos: {}, origen: a.name });
+        let archivo = a;
+        if (tipo === 'imagen' && esSvg(a)) {
+          try { archivo = await svgAPng(a); } catch (e) { fallos.push({ nombre: a.name, entrada: i, paso: 0, error: mensajeDe(e) }); continue; }
+        }
+        fichas.push({ nombre: archivo.name, blob: archivo, tipo, datos: {}, origen: a.name });
       }
-      return fichas;
-    });
+      porEntrada.push(fichas);
+    }
 
     let hechos = 0;
     const total = flujo.entradas.reduce((s, pasos, i) => s + porEntrada[i].length * pasos.length, 0)
@@ -457,7 +500,7 @@
       try {
         r = await ejecutarPaso(modulo(pasos[k].id), ficha, pasos[k].opciones, { paso: k, entrada });
       } catch (e) {
-        anotar(orden, { nombre: ficha.origen, entrada, paso: k, error: e.message || String(e) });
+        anotar(orden, { nombre: ficha.origen, entrada, paso: k, error: mensajeDe(e) });
         r = null;
         fallo = true;
       }
@@ -484,7 +527,7 @@
               const r = await limiteDe(m)(() => m.ejecutar(juntas, pasos[i].opciones, { paso: i, entrada }));
               fichas = r ? [r] : [];
             } catch (e) {
-              anotar(inicio + 1e7 - 1, { nombre: fichas.map((f) => f.origen).join(', '), entrada, paso: i, error: e.message || String(e) });
+              anotar(inicio + 1e7 - 1, { nombre: fichas.map((f) => f.origen).join(', '), entrada, paso: i, error: mensajeDe(e) });
               fichas = [];
             }
           }

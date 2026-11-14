@@ -354,10 +354,12 @@ document.getElementById('listaIdiomas').addEventListener('change', actualizarMot
 actualizarMotor();
 
 // Las páginas de todos los archivos, en el orden final elegido por el usuario (la lógica está en assets/js/ocr.js).
-async function prepararPaginas(ordenIds, corregirInclinacion) {
-  const paginas = [];
-  for (const id of ordenIds) paginas.push(...await Ocr.paginasDeArchivo(archivosPorId.get(id), corregirInclinacion));
-  return paginas;
+// Se cuentan primero (para el avance) y después se dibujan y reconocen de a una: todas las páginas de un PDF largo
+// dibujadas a la vez no entran en la memoria.
+async function contarPaginas(ordenIds) {
+  let total = 0;
+  for (const id of ordenIds) total += await Ocr.contarPaginas(archivosPorId.get(id));
+  return total;
 }
 
 botonOcr.addEventListener('click', async () => {
@@ -386,16 +388,17 @@ botonOcr.addEventListener('click', async () => {
 
     progreso.textContent = t('progreso-preparando');
     const ordenIds = [...gridArchivos.children].map(el => parseInt(el.dataset.indiceOrden, 10));
-    const paginas = await prepararPaginas(ordenIds, corregirInclinacion);
-    const totalPaginas = paginas.length;
+    const totalPaginas = await contarPaginas(ordenIds);
     if (totalPaginas === 0) throw new Error(t('error-sin-paginas'));
 
     const pdfNuevo = await PDFLib.PDFDocument.create();
     const textosPorPagina = [];
 
-    for (let i = 0; i < totalPaginas; i++) {
-      progreso.textContent = t('progreso-reconociendo').replace('{actual}', i + 1).replace('{total}', totalPaginas);
-      textosPorPagina.push(await Ocr.agregarPagina(pdfNuevo, worker, paginas[i], modoPreproceso));
+    for (const id of ordenIds) {
+      await Ocr.recorrerPaginas(archivosPorId.get(id), corregirInclinacion, async (pagina) => {
+        progreso.textContent = t('progreso-reconociendo').replace('{actual}', textosPorPagina.length + 1).replace('{total}', totalPaginas);
+        textosPorPagina.push(await Ocr.agregarPagina(pdfNuevo, worker, pagina, modoPreproceso));
+      });
     }
 
     const bytesFinales = await pdfNuevo.save();

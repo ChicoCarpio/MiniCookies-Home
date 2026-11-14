@@ -172,6 +172,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/texto-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -206,12 +207,7 @@ botonAplicar.addEventListener('click', async () => {
     if (!textoEncabezado && !textoPie) throw new Error(t('error-sin-texto'));
 
     const { texto: contenidoOriginal, finDeLinea } = await leerTextoArchivo(archivoActual);
-    const partes = [];
-    if (textoEncabezado) partes.push(textoEncabezado);
-    partes.push(contenidoOriginal);
-    if (textoPie) partes.push(textoPie);
-
-    const textoFinal = partes.join('\n\n');
+    const textoFinal = TextoRetoques.encabezadoPie(contenidoOriginal, textoEncabezado, textoPie);   // assets/js/texto-retoques.js (lo comparte con Flujos)
     const blob = new Blob([conFinDeLinea(textoFinal, finDeLinea)], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');

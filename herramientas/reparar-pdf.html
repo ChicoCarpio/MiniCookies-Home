@@ -195,6 +195,7 @@ window.i18nPagina = {
 <script src="../vendor/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="../assets/js/pdfjs.js"></script>
 <script src="../assets/js/miniaturas.js"></script>
+<script src="../assets/js/pdf-reparar.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script src="../assets/js/ayuda-tip.js"></script>
 <script>
@@ -229,87 +230,7 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
-// Un PDF cortado (descarga o copia interrumpida) pierde el final: la tabla
-// xref y el "trailer", que es lo que indica dónde empieza el documento. Sin
-// eso ni pdf-lib ni PDF.js lo abren, aunque las páginas sigan todas ahí. Si
-// falta, se descarta el último objeto incompleto y se agrega un trailer que
-// apunta al catálogo (/Type /Catalog); después los dos niveles trabajan sobre
-// eso. Devuelve null si el archivo no parece cortado o no tiene catálogo.
-function completarFinalFaltante(buffer) {
-  const bytes = new Uint8Array(buffer);
-  // Texto byte a byte (sin decodificar), para buscar marcadores y cortar en
-  // la misma posición de los bytes originales.
-  let texto = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) texto += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  if (/startxref\s+\d+\s*%%EOF\s*$/.test(texto.slice(-2048))) return null;
-
-  let catalogo = null, mayorNumero = 0;
-  for (const m of texto.matchAll(/(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g)) {
-    mayorNumero = Math.max(mayorNumero, parseInt(m[1], 10));
-    if (/\/Type\s*\/Catalog\b/.test(m[3])) catalogo = `${m[1]} ${m[2]} R`;
-  }
-  const finUltimoObjeto = texto.lastIndexOf('endobj');
-  if (!catalogo || finUltimoObjeto < 0) return null;
-
-  const cola = `\ntrailer\n<< /Size ${mayorNumero + 1} /Root ${catalogo} >>\nstartxref\n0\n%%EOF\n`;
-  const resultado = new Uint8Array(finUltimoObjeto + 6 + cola.length);
-  resultado.set(bytes.subarray(0, finUltimoObjeto + 6));
-  for (let i = 0; i < cola.length; i++) resultado[finUltimoObjeto + 6 + i] = cola.charCodeAt(i);
-  return resultado.buffer;
-}
-
-// Cuántas páginas tiene el original según lo que se puede ver: lo que encuentra
-// el visor y los objetos de página que hay en los bytes (el mayor de los dos).
-async function paginasDelOriginal(bytes) {
-  const paginasVisor = (await abrirPdf(bytes.slice(0), { stopAtErrors: false })).numPages;
-  const objetosPagina = (new TextDecoder('latin1').decode(bytes).match(/\/Type\s*\/Page(?!s)/g) || []).length;
-  return Math.max(paginasVisor, objetosPagina);
-}
-
-async function intentarNivel1(bytes) {
-  const { PDFDocument } = PDFLib;
-  const pdf = await PDFDocument.load(bytes, {
-    ignoreEncryption: true,
-    throwOnInvalidObject: false,
-    updateMetadata: false,
-  });
-  if (pdf.getPageCount() === 0) throw new Error(t('error-sin-paginas'));
-  const guardado = await pdf.save();
-  // El nivel 1 puede "funcionar" y dejar solo unas páginas (un archivo cortado a
-  // la mitad). Se compara con las páginas que el visor encuentra en el original:
-  // si el nivel 1 pierde páginas, no se da por bueno y pasa al nivel 2.
-  // Referencia: lo que el visor encuentra y los objetos de página que hay en los bytes.
-  const referencia = await paginasDelOriginal(bytes);
-  const paginasGuardadas = (await PDFDocument.load(guardado, { ignoreEncryption: true, throwOnInvalidObject: false, updateMetadata: false })).getPageCount();
-  if (paginasGuardadas < referencia) throw new Error(`Nivel 1: ${paginasGuardadas} de ${referencia} páginas`);
-  return guardado;
-}
-
-async function intentarNivel2(bytes) {
-  const pdfjsDoc = await abrirPdf(bytes, { stopAtErrors: false });
-  if (pdfjsDoc.numPages === 0) throw new Error(t('error-sin-nada'));
-
-  const { PDFDocument } = PDFLib;
-  const pdfNuevo = await PDFDocument.create();
-
-  for (let i = 1; i <= pdfjsDoc.numPages; i++) {
-    progreso.textContent = t('progreso-nivel2-pagina').replace('{actual}', i).replace('{total}', pdfjsDoc.numPages);
-    const pagina = await pdfjsDoc.getPage(i);
-    const viewport = pagina.getViewport({ scale: 2 });
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
-    const bytesImagen = new Uint8Array(await blob.arrayBuffer());
-    const imagenEmbebida = await pdfNuevo.embedJpg(bytesImagen);
-    const paginaNueva = pdfNuevo.addPage([viewport.width, viewport.height]);
-    paginaNueva.drawImage(imagenEmbebida, { x: 0, y: 0, width: viewport.width, height: viewport.height });
-  }
-
-  return await pdfNuevo.save();
-}
+// La reparación (final faltante, nivel 1 y nivel 2) está en assets/js/pdf-reparar.js (la comparte con Flujos).
 
 botonReparar.addEventListener('click', async () => {
   botonReparar.disabled = true;
@@ -317,38 +238,20 @@ botonReparar.addEventListener('click', async () => {
   progreso.textContent = t('progreso-nivel1');
   resultado.classList.remove('visible');
   try {
-    const bytesLeidos = await archivoActual.arrayBuffer();
-    // Si el archivo está cortado, se le reconstruye el final antes de todo.
-    const bytesOriginales = completarFinalFaltante(bytesLeidos) || bytesLeidos;
-    let bytesFinales = null;
-    let mensaje = '';
-
-    // Un PDF protegido no está dañado: el nivel 1 (ignoreEncryption) lo
-    // "reparaba" guardando el contenido todavía cifrado, y el resultado no
-    // abría. Se avisa que hay que desbloquearlo primero.
+    let r;
     try {
-      await PDFLib.PDFDocument.load(bytesOriginales.slice(0), { throwOnInvalidObject: false, updateMetadata: false });
-    } catch (errorCarga) {
-      if (/encrypted/i.test(errorCarga.message)) throw errorCarga;
+      r = await PdfReparar.reparar(await archivoActual.arrayBuffer(), {
+        alAvanzar: ({ nivel, pagina, total }) => {
+          if (nivel === 2) progreso.textContent = pagina ? t('progreso-nivel2-pagina').replace('{actual}', pagina).replace('{total}', total) : t('progreso-nivel1-fallo');
+        },
+      });
+    } catch (error) {
+      if (error.codigo === 'sin-nada') throw new Error(t('error-sin-nada'));
+      if (error.codigo === 'sin-paginas') throw new Error(t('error-sin-paginas'));
+      throw error;
     }
-
-    try {
-      bytesFinales = await intentarNivel1(bytesOriginales.slice(0));
-      mensaje = t('mensaje-nivel1-ok');
-    } catch (errorNivel1) {
-      console.warn('Nivel 1 falló, probando nivel 2:', errorNivel1);
-      progreso.textContent = t('progreso-nivel1-fallo');
-      bytesFinales = await intentarNivel2(bytesOriginales.slice(0));
-      mensaje = t('mensaje-nivel2-ok');
-    }
-
-    const blob = new Blob([bytesFinales], { type: 'application/pdf' });
-    enlaceDescarga.href = URL.createObjectURL(blob);
-    // Cuántas páginas salieron de cuántas tiene el original: un nivel puede
-    // "funcionar" dejando solo unas pocas.
-    const recuperadas = (await PDFLib.PDFDocument.load(bytesFinales.slice(0), { ignoreEncryption: true, throwOnInvalidObject: false, updateMetadata: false })).getPageCount();
-    const posibles = await paginasDelOriginal(bytesOriginales.slice(0));
-    mensajeResultado.textContent = mensaje + ' ' + t('paginas-recuperadas').replace('{x}', recuperadas).replace('{y}', posibles);
+    enlaceDescarga.href = URL.createObjectURL(new Blob([r.bytes], { type: 'application/pdf' }));
+    mensajeResultado.textContent = t(r.nivel === 1 ? 'mensaje-nivel1-ok' : 'mensaje-nivel2-ok') + ' ' + t('paginas-recuperadas').replace('{x}', r.recuperadas).replace('{y}', r.posibles);
     resultado.classList.add('visible');
   } catch (error) {
     alert(t('error-reparar') + ': ' + detalleError(error));

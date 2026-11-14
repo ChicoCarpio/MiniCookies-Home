@@ -98,6 +98,8 @@ window.i18nComun = {
     'ppt-render-inconsistente': 'El renderizado devolvió un tamaño de diapositiva inconsistente.',
     // Usada por detalleError() (abajo) en todas las herramientas de PDF.
     'pdf-protegido': 'el PDF está protegido (tiene contraseña o restricciones de edición). Quitale la protección primero con la herramienta "Desbloquear PDF" y volvé a intentarlo.',
+    'pdf-danado': 'el PDF está dañado o el archivo no es un PDF.',
+    'imagen-ilegible': 'no se pudo abrir la imagen: está dañada o es de un formato que este navegador no lee.',
     // Mensaje genérico de lectura fallida (las páginas pueden definir uno propio).
     'error-leer': 'No se pudo leer el archivo. Puede estar dañado o no tener un formato válido',
     'xml-invalido': 'XML inválido'
@@ -183,6 +185,8 @@ window.i18nComun = {
     'ppt-tamano-invalido': 'Invalid slide size.',
     'ppt-render-inconsistente': 'Rendering returned an inconsistent slide size.',
     'pdf-protegido': 'the PDF is protected (it has a password or editing restrictions). Remove the protection first with the "Unlock PDF" tool and try again.',
+    'pdf-danado': 'the PDF is damaged or the file is not a PDF.',
+    'imagen-ilegible': 'the image could not be opened: it is damaged or in a format this browser cannot read.',
     'error-leer': 'Couldn’t read the file. It may be damaged or not in a valid format',
     'xml-invalido': 'Invalid XML'
   }
@@ -238,7 +242,9 @@ window.i18nComun = {
   // reemplaza por un mensaje traducido que dice qué hacer.
   window.detalleError = function (error) {
     var mensaje = (error && error.message) || String(error);
-    if (/encrypted/i.test(mensaje)) return t('pdf-protegido');
+    if (/encrypted|no password given|incorrect password/i.test(mensaje)) return t('pdf-protegido');   // pdf-lib y PDF.js
+    if (/no pdf header found|invalid pdf structure|failed to parse pdf document/i.test(mensaje)) return t('pdf-danado');
+    if (/source image could not be decoded|source image cannot be decoded/i.test(mensaje)) return t('imagen-ilegible');
     return mensaje;
   };
 
