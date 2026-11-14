@@ -52,7 +52,7 @@
     const N = global.LibrariusPagina._nucleo;
     const hilos = op.hilos || Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
     const opciones = Object.assign({}, N.DEFECTOS, op.opciones);
-    const direccion = (rol, modelo) => `${op.rutaHilo}?rol=${rol}&ort=${encodeURIComponent(op.rutaOrt)}&pag=${encodeURIComponent(op.rutaPagina)}&modelo=${encodeURIComponent(modelo)}&v=3`;
+    const direccion = (rol, modelo) => `${op.rutaHilo}?rol=${rol}&ort=${encodeURIComponent(op.rutaOrt)}&pag=${encodeURIComponent(op.rutaPagina)}&modelo=${encodeURIComponent(modelo)}&v=4`;
     const t0 = performance.now();
     const detector = new Trabajador(direccion('detector', op.modeloVersus));
     const trabajadores = Array.from({ length: hilos }, () => new Trabajador(direccion('lector', op.modeloLibrarius)));

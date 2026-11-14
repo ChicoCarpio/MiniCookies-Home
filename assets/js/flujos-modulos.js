@@ -421,6 +421,23 @@
     { valor: 'fra', es: 'Francés', en: 'French' },
     { valor: 'deu', es: 'Alemán', en: 'German' },
     { valor: 'ita', es: 'Italiano', en: 'Italian' },
+    { valor: 'nld', es: 'Neerlandés', en: 'Dutch' },
+    { valor: 'swe', es: 'Sueco', en: 'Swedish' },
+    { valor: 'dan', es: 'Danés', en: 'Danish' },
+    { valor: 'nor', es: 'Noruego', en: 'Norwegian' },
+    { valor: 'fin', es: 'Finés', en: 'Finnish' },
+    { valor: 'pol', es: 'Polaco', en: 'Polish' },
+    { valor: 'ces', es: 'Checo', en: 'Czech' },
+    { valor: 'slk', es: 'Eslovaco', en: 'Slovak' },
+    { valor: 'hun', es: 'Húngaro', en: 'Hungarian' },
+    { valor: 'ron', es: 'Rumano', en: 'Romanian' },
+    { valor: 'tur', es: 'Turco', en: 'Turkish' },
+    { valor: 'cat', es: 'Catalán', en: 'Catalan' },
+    { valor: 'hrv', es: 'Croata', en: 'Croatian' },
+    { valor: 'slv', es: 'Esloveno', en: 'Slovenian' },
+    { valor: 'lit', es: 'Lituano', en: 'Lithuanian' },
+    { valor: 'lav', es: 'Letón', en: 'Latvian' },
+    { valor: 'est', es: 'Estonio', en: 'Estonian' },
     { valor: 'chi_sim', es: 'Chino simplificado', en: 'Simplified Chinese' },
     { valor: 'jpn', es: 'Japonés', en: 'Japanese' },
   ];
@@ -476,7 +493,7 @@
     await PDF_LIB();
     await js('pdfjs.js');
     await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
-    await js('ocr-librarius.js?v=2');   // versión: ver ocr-librarius.js
+    await js('ocr-librarius.js?v=4');   // versión: ver ocr-librarius.js
     await js('ocr.js');
   };
   F.registrar({
