@@ -20,7 +20,7 @@
   const absoluta = (ruta) => new URL(ruta, location.href).href;
   // Versión en la dirección de los scripts: el sitio deja que el navegador los guarde horas, y una copia vieja
   // mezclada con una nueva rompe la lectura. Subirla cuando cambie librarius-pagina.js o librarius-pagina-hilos.js.
-  const V = '?v=2';
+  const V = '?v=3';
 
   function cargarScript(src) {
     return new Promise((ok, mal) => {
@@ -46,7 +46,7 @@
         rutaOrt: absoluta(rutaVendor('onnxruntime-web/1.20.1/')),
         rutaPagina: BASE + 'librarius-pagina.js' + V,
         rutaHilo: BASE + 'librarius-hilo.js',
-        modeloVersus: BASE + '../modelos/versus-phone-v1.onnx',
+        modeloVersus: BASE + '../modelos/versus-phone-v1.onnx' + V,
         modeloLibrarius: BASE + '../modelos/librarius-phone-v1-int8.onnx',
         alfabeto,
         hilos: Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1)),

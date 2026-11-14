@@ -198,10 +198,11 @@
   const marca = (tiempos, nombre, t0) => { if (tiempos) tiempos[nombre] = (tiempos[nombre] || 0) + performance.now() - t0; };
 
   // ctx: { ort, versus, ladoDet, umbralLogit, unir }  ->  líneas [{ centro, u, largo, alto }]
-  async function detectarLineas(ctx, gris, w, h, tiempos) {
+  // `lado`: lado largo al que se reduce la página (por defecto ctx.ladoDet; más chico para los títulos y letras grandes)
+  async function detectarLineas(ctx, gris, w, h, tiempos, lado) {
     const { ort, versus, ladoDet, umbralLogit, unir } = ctx;
     let t0 = performance.now();
-    const e = ladoDet / Math.max(h, w);
+    const e = (lado || ladoDet) / Math.max(h, w);
     const pw = Math.max(32, redondearPar(w * e)), ph = Math.max(32, redondearPar(h * e));
     const pequena = redimensionar(gris, w, h, pw, ph, false);
     const aw = pw + ((32 - (pw % 32)) % 32), ah = ph + ((32 - (ph % 32)) % 32);
@@ -244,11 +245,15 @@
   }
 
   // Sentido común del eje: en líneas verticales el signo de cada eje sale al azar; se alinea con el eje dominante de la página (o con `eje` si se da).
-  function alinearEje(lineas, eje) {
+  function ejeDominante(lineas, eje) {
+    if (eje) return eje;
     let txx = 0, txy = 0, tyy = 0;
     for (const l of lineas) { txx += l.largo * l.u[0] * l.u[0]; txy += l.largo * l.u[0] * l.u[1]; tyy += l.largo * l.u[1] * l.u[1]; }
-    let dominante = eje;
-    if (!dominante) { const th = 0.5 * Math.atan2(2 * txy, txx - tyy); dominante = [Math.cos(th), Math.sin(th)]; }
+    const th = 0.5 * Math.atan2(2 * txy, txx - tyy);
+    return [Math.cos(th), Math.sin(th)];
+  }
+  function alinearEje(lineas, eje) {
+    const dominante = ejeDominante(lineas, eje);
     for (const l of lineas) if (l.u[0] * dominante[0] + l.u[1] * dominante[1] < 0) l.u = [-l.u[0], -l.u[1]];
     return lineas;
   }
@@ -323,7 +328,63 @@
     return { texto, seguridad: nNoBlanco ? suma / nNoBlanco : 0 };
   }
 
-  const DEFECTOS = { ladoDet: 1024, alto: 24, alturaRel: 1.8, rellenoRel: 0.35, unir: 0.3, kOrientacion: 8, umbral: 0.5 };   // kOrientacion: 4, 8, 12 y 24 dieron lo mismo en 570 páginas
+  // ------------------------------------------------------------------ títulos y letras grandes (como _letras_grandes de leer_pagina.py)
+  // Versus solo ve bien letras de hasta ~7 % del ancho de la página; para las más grandes se detecta de nuevo con la página más chica y, donde esa
+  // lectura sea más segura que lo detectado a la escala normal (o no hubiera nada), se usa en lugar de ello.
+  function altoTipico(lineas) {                    // percentil 30 del alto ponderado por el largo (una línea normal; los pedacitos de una letra grande pesan poco)
+    const orden = lineas.slice().sort((a, b) => a.alto - b.alto);
+    let total = 0; for (const l of orden) total += l.largo;
+    let acum = 0;
+    for (const l of orden) { acum += l.largo; if (acum >= 0.3 * total) return l.alto; }
+    return orden[orden.length - 1].alto;
+  }
+  const altoNormal = (lineas, w, h) => (lineas.length ? altoTipico(lineas) : 0.02 * Math.max(w, h));
+
+  // Prepara las candidatas de una escala: eje alineado con el de la página. Devuelve { candidatas, normalChico }.
+  function prepararCandidatas(candidatas, dominante) {
+    for (const c of candidatas) {
+      if (c.u[0] * dominante[0] + c.u[1] * dominante[1] < 0) c.u = [-c.u[0], -c.u[1]];
+    }
+    return { candidatas, normalChico: candidatas.length ? altoTipico(candidatas) : 0 };
+  }
+
+  // Candidatas que pasan las reglas de forma (no hace falta leer las demás, lo que ahorra casi todo el trabajo): bastante más altas que una línea normal a su
+  // escala y sin chocar con una línea normal bien leída. `dentro` = las líneas ya detectadas que la caja cubre.
+  function candidatasPosibles(lineas, candidatas, normal, normalChico, w, h, lado) {
+    const buena = (l) => l.alto >= 0.5 * normal && l.seguridad >= 0.7;     // línea normal bien leída (los pedazos de un título salen chicos o con lectura al azar)
+    const posibles = [];
+    for (const c of candidatas) {
+      const cv = [-c.u[1], c.u[0]];
+      const dentro = [];
+      lineas.forEach((l, i) => {
+        const dx = l.centro[0] - c.centro[0], dy = l.centro[1] - c.centro[1];
+        if (Math.abs(dx * c.u[0] + dy * c.u[1]) <= c.largo / 2 + 0.25 * c.alto && Math.abs(dx * cv[0] + dy * cv[1]) <= 0.75 * c.alto) dentro.push(i);
+      });
+      if (c.alto < 1.25 * normalChico || dentro.some((i) => buena(lineas[i]))) continue;
+      const semialto = Math.max(0, c.alto - 2.0 * Math.max(w, h) / lado) / 2;
+      const choca = lineas.some((l) => {
+        if (!buena(l)) return false;
+        const dx = l.centro[0] - c.centro[0], dy = l.centro[1] - c.centro[1];
+        return Math.abs(dx * cv[0] + dy * cv[1]) < semialto + l.alto / 2 && Math.abs(dx * c.u[0] + dy * c.u[1]) < (c.largo + l.largo) / 2;
+      });
+      if (!choca) posibles.push({ c, dentro });
+    }
+    return posibles;
+  }
+
+  // posibles: lo que devolvió candidatasPosibles; lecturas[k] = {texto, seguridad} de posibles[k].c. Devuelve las líneas con los títulos puestos en su lugar.
+  function elegirGrandes(lineas, posibles, lecturas, invertir) {
+    const nuevas = [], quitar = new Set();
+    posibles.forEach(({ c, dentro }, k) => {
+      const { texto, seguridad } = lecturas[k];
+      if (!texto.trim() || seguridad < (dentro.length ? 0.6 : 0.75)) return;
+      nuevas.push({ centro: c.centro, u: invertir ? [-c.u[0], -c.u[1]] : c.u, largo: c.largo, alto: c.alto, texto, seguridad });
+      dentro.forEach((i) => quitar.add(i));
+    });
+    return lineas.filter((_, i) => !quitar.has(i)).concat(nuevas);
+  }
+
+  const DEFECTOS = { ladoDet: 1024, alto: 24, alturaRel: 1.8, rellenoRel: 0.35, unir: 0.3, kOrientacion: 8, umbral: 0.5, escalas: [512, 256] };   // kOrientacion: 4, 8, 12 y 24 dieron lo mismo en 570 páginas
 
   function contextos(opciones) {
     const o = Object.assign({}, DEFECTOS, opciones);
@@ -332,6 +393,7 @@
       rec: { alto: o.alto, alturaRel: o.alturaRel, rellenoRel: o.rellenoRel },
       lec: { ort: o.ort, librarius: o.librarius, alfabeto: o.alfabeto, alto: o.alto },
       kOrientacion: o.kOrientacion,
+      escalas: o.escalas || [],
     };
   }
 
@@ -340,10 +402,10 @@
     let sx = 0, sy = 0; for (const l of lineas) { sx += l.largo * l.u[0]; sy += l.largo * l.u[1]; }
     return Math.atan2(sy, sx);
   }
-  function votoInvertir(s0, s1) {                  // s0, s1: seguridades de leer al derecho y al revés las mismas líneas
-    let votos1 = 0, votos0 = 0, suma0 = 0, suma1 = 0;
-    for (let i = 0; i < s0.length; i++) { suma0 += s0[i]; suma1 += s1[i]; if (s1[i] > s0[i]) votos1++; else if (s0[i] > s1[i]) votos0++; }
-    return votos1 > votos0 || (votos1 === votos0 && suma1 > suma0);
+  function votoInvertir(s0, s1, pesos) {           // s0, s1: seguridades de leer al derecho y al revés las mismas líneas; pesos: el largo de cada una
+    let suma = 0;
+    for (let i = 0; i < s0.length; i++) suma += pesos[i] * (s1[i] - s0[i]);       // los pedazos cortos de una letra grande no pueden dar vuelta la página
+    return suma > 0;
   }
   const cuartosDeVuelta = (giroGrados) => ((Math.round(giroGrados / 90) % 4) + 4) % 4;
 
@@ -352,21 +414,40 @@
     const ctx = contextos(opciones);
     let tiempos = {};
 
+    async function letrasGrandes(gris, w, h, lineas, dominante, invertir, relleno) {
+      const normal = altoNormal(lineas, w, h);
+      for (const lado of ctx.escalas) {
+        const { candidatas, normalChico } = prepararCandidatas(await detectarLineas(ctx.det, gris, w, h, tiempos, lado), dominante);
+        const posibles = candidatasPosibles(lineas, candidatas, normal, normalChico, w, h, lado);
+        if (!posibles.length) continue;
+        const lecturas = [];
+        for (const { c } of posibles) {
+          const t0 = performance.now();
+          const r = recortarLinea(ctx.rec, gris, w, h, c, invertir, relleno);
+          marca(tiempos, 'recortar', t0);
+          lecturas.push(await leerRecorte(ctx.lec, r, tiempos));
+        }
+        lineas = elegirGrandes(lineas, posibles, lecturas, invertir);
+      }
+      return lineas;
+    }
+
     async function pasada(gris, w, h, orientar, eje) {
       const relleno = Math.trunc(percentil(gris, 80));
-      const lineas = await detectarLineas(ctx.det, gris, w, h, tiempos);
+      let lineas = await detectarLineas(ctx.det, gris, w, h, tiempos);
       if (!lineas.length) return { texto: '', lineas: [], giro: 0, invertida: false };
       alinearEje(lineas, eje);
+      const dominante = ejeDominante(lineas, eje);
       let invertir = false;
       if (orientar) {
-        const s0 = [], s1 = [];
-        for (const i of muestraOrientacion(lineas, ctx.kOrientacion)) {
+        const s0 = [], s1 = [], muestra = muestraOrientacion(lineas, ctx.kOrientacion);
+        for (const i of muestra) {
           const t0 = performance.now();
           const n0 = recortarLinea(ctx.rec, gris, w, h, lineas[i], false, relleno), n1 = recortarLinea(ctx.rec, gris, w, h, lineas[i], true, relleno);
           marca(tiempos, 'recortar', t0);
           s0.push((await leerRecorte(ctx.lec, n0, tiempos)).seguridad); s1.push((await leerRecorte(ctx.lec, n1, tiempos)).seguridad);
         }
-        invertir = votoInvertir(s0, s1);
+        invertir = votoInvertir(s0, s1, muestra.map((i) => lineas[i].largo));
         tiempos.orientacion_lecturas = s0.length * 2;
       }
       for (const l of lineas) {
@@ -377,6 +458,7 @@
         l.texto = lec.texto; l.seguridad = lec.seguridad;
         if (invertir) l.u = [-l.u[0], -l.u[1]];
       }
+      lineas = await letrasGrandes(gris, w, h, lineas, dominante, invertir, relleno);
       const giro = giroDeLineas(lineas);
       const t0 = performance.now();
       const orden = ordenarLineas(lineas, giro);
@@ -409,7 +491,7 @@
 
   global.LibrariusPagina = {
     crear,
-    _nucleo: { contextos, detectarLineas, alinearEje, muestraOrientacion, recortarLinea, leerRecorte, giroDeLineas, votoInvertir, cuartosDeVuelta, girarPagina, ordenarLineas, percentil, DEFECTOS },
+    _nucleo: { contextos, detectarLineas, alinearEje, ejeDominante, altoNormal, prepararCandidatas, candidatasPosibles, elegirGrandes, muestraOrientacion, recortarLinea, leerRecorte, giroDeLineas, votoInvertir, cuartosDeVuelta, girarPagina, ordenarLineas, percentil, DEFECTOS },
     _interno: { redimensionar, componentes, forma, ordenarLineas, girarPagina, percentil, redondearPar },
   };
 })(typeof window !== 'undefined' ? window : globalThis);

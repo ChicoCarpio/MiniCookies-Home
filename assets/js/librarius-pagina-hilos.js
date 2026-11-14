@@ -52,7 +52,7 @@
     const N = global.LibrariusPagina._nucleo;
     const hilos = op.hilos || Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
     const opciones = Object.assign({}, N.DEFECTOS, op.opciones);
-    const direccion = (rol, modelo) => `${op.rutaHilo}?rol=${rol}&ort=${encodeURIComponent(op.rutaOrt)}&pag=${encodeURIComponent(op.rutaPagina)}&modelo=${encodeURIComponent(modelo)}`;
+    const direccion = (rol, modelo) => `${op.rutaHilo}?rol=${rol}&ort=${encodeURIComponent(op.rutaOrt)}&pag=${encodeURIComponent(op.rutaPagina)}&modelo=${encodeURIComponent(modelo)}&v=3`;
     const t0 = performance.now();
     const detector = new Trabajador(direccion('detector', op.modeloVersus));
     const trabajadores = Array.from({ length: hilos }, () => new Trabajador(direccion('lector', op.modeloLibrarius)));
@@ -65,7 +65,7 @@
       let t = performance.now();
       const det = await detector.pedir(gris ? { tipo: 'detectar', gris, w, h, eje } : { tipo: 'detectar', eje }, gris ? [gris.buffer] : []);
       tiempos.detectar = (tiempos.detectar || 0) + performance.now() - t;
-      const lineas = det.lineas;
+      let lineas = det.lineas;
       if (!lineas.length) return { texto: '', lineas: [], giro: 0, invertida: false };
       let invertir = false;
       if (orientar) {
@@ -73,7 +73,7 @@
         const indices = N.muestraOrientacion(lineas, opciones.kOrientacion);
         const [c0, c1] = [await detector.pedir({ tipo: 'recortes', indices, invertir: false }), await detector.pedir({ tipo: 'recortes', indices, invertir: true })];
         const [l0, l1] = await Promise.all([Promise.all(c0.crops.map((c) => lectores.leer(c))), Promise.all(c1.crops.map((c) => lectores.leer(c)))]);
-        invertir = N.votoInvertir(l0.map((x) => x.seguridad), l1.map((x) => x.seguridad));
+        invertir = N.votoInvertir(l0.map((x) => x.seguridad), l1.map((x) => x.seguridad), indices.map((i) => lineas[i].largo));
         tiempos.orientacion = (tiempos.orientacion || 0) + performance.now() - t;
       }
       t = performance.now();
@@ -86,6 +86,21 @@
       const leidas = await Promise.all(lecturas);
       tiempos.lectura = (tiempos.lectura || 0) + performance.now() - t;
       lineas.forEach((l, i) => { l.texto = leidas[i].texto; l.seguridad = leidas[i].seguridad; if (invertir) l.u = [-l.u[0], -l.u[1]]; });
+      // títulos y letras grandes: se detecta de nuevo con la página más chica (las candidatas las recorta y reparte el mismo detector)
+      t = performance.now();
+      const normal = N.altoNormal(lineas, det.w, det.h);
+      for (const lado of opciones.escalas) {
+        const cd = await detector.pedir({ tipo: 'candidatas', lado });
+        const posibles = N.candidatasPosibles(lineas, cd.candidatas, normal, cd.normalChico, det.w, det.h, lado);
+        if (!posibles.length) continue;
+        const idx = posibles.map(({ c }) => cd.candidatas.indexOf(c)), lecs = [];
+        for (let i = 0; i < idx.length; i += TROZO) {
+          const sub = idx.slice(i, i + TROZO), c = await detector.pedir({ tipo: 'recortes', indices: sub, invertir, de: 'candidatas' });
+          c.crops.forEach((crop) => lecs.push(lectores.leer(crop)));
+        }
+        lineas = N.elegirGrandes(lineas, posibles, await Promise.all(lecs), invertir);
+      }
+      tiempos.grandes = (tiempos.grandes || 0) + performance.now() - t;
       const giro = N.giroDeLineas(lineas);
       const orden = N.ordenarLineas(lineas, giro).map((i) => lineas[i]);
       return { texto: orden.map((l) => l.texto).filter((x) => x.trim()).join('\n'), lineas: orden, giro: giro * 180 / Math.PI, invertida: invertir };
