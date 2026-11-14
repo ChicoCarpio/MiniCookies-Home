@@ -22,6 +22,9 @@
 //   powerpoint-a-imagenes  motor propio de PowerPoint vía ArchivoAPdf.preparar   documento -> imágenes (abre)
 //   extraer-imagenes-documento  imagenesDeDocumento (extraer-medios-zip.js)    documento -> imágenes (abre)
 //   marca-agua-imagen   MarcaAguaImagen; borde-imagen, redondear-esquinas   ImagenBasica   imagen -> imagen
+// Etapa 4 (2026-11-13):
+//   ordenar-lineas, quitar-lineas, encabezado-pie-texto, arreglar-codificacion   TextoRetoques (sus 4 páginas)   texto -> texto
+//   reparar-pdf         PdfReparar (reparar-pdf.html)                 pdf -> pdf
 //
 // Un módulo que junta (forma 'juntar', como unir-pdf) es el que se usa para unir varias entradas, pero el tramo
 // común acepta cualquier módulo que reciba lo que llega de todas: unir PDF es solo el primero de ese tipo.
@@ -890,6 +893,106 @@
     async preparar() { await js('imagen-basica.js'); },
     ejecutar(f, o) {
       return retocarImagen(f, (lienzo, mapa) => ImagenBasica.dibujarRedondeada(lienzo, mapa, o.radio), 'image/png');
+    },
+  });
+
+  // ================= Etapa 4 (2026-11-13) =================
+  // Lo que seguía faltando después de un paso que entrega texto (OCR, PDF a texto), y reparar un PDF antes de usarlo.
+
+  // ---------- 29 a 32. Retoques de texto ----------
+  const prepararTexto = async () => { await js('leer-texto.js'); await js('texto-retoques.js'); };
+  // Lee el .txt con su codificación, le aplica `cambiar(texto)` y lo guarda con los mismos saltos de línea que traía.
+  async function retocarTexto(f, cambiar) {
+    const { texto, finDeLinea } = await leerTextoArchivo(f.blob);
+    return fichaTexto(f, conFinDeLinea(cambiar(texto), finDeLinea));
+  }
+
+  F.registrar({
+    id: 'ordenar-lineas',
+    icono: '🔤',
+    nombre: { es: 'Ordenar líneas de texto', en: 'Sort text lines' },
+    descripcion: { es: 'Ordena las líneas del texto por orden alfabético o por el número con el que empiezan.', en: 'Sorts the lines of the text alphabetically or by the number they start with.' },
+    entra: ['texto'], sale: 'texto', hilo: true, forma: 'uno',
+    opciones: [
+      { id: 'orden', tipo: 'select', defecto: 'alfabetico-asc', etiqueta: { es: 'Orden', en: 'Order' },
+        valores: [{ valor: 'alfabetico-asc', es: 'Alfabético (A→Z)', en: 'Alphabetical (A→Z)' }, { valor: 'alfabetico-desc', es: 'Alfabético (Z→A)', en: 'Alphabetical (Z→A)' },
+          { valor: 'numerico-asc', es: 'Numérico (menor a mayor)', en: 'Numeric (lowest first)' }, { valor: 'numerico-desc', es: 'Numérico (mayor a menor)', en: 'Numeric (highest first)' }] },
+      { id: 'ignorarMayusculas', tipo: 'casilla', defecto: true, etiqueta: { es: 'No distinguir mayúsculas de minúsculas', en: 'Ignore upper and lower case' } },
+    ],
+    preparar: prepararTexto,
+    ejecutar(f, o) {
+      const idioma = (window.idiomaActual && idiomaActual()) === 'en' ? 'en' : 'es';
+      return retocarTexto(f, (texto) => TextoRetoques.ordenar(texto, { orden: o.orden, ignorarMayusculas: o.ignorarMayusculas, idioma }));
+    },
+  });
+
+  F.registrar({
+    id: 'quitar-lineas',
+    icono: '🧹',
+    nombre: { es: 'Quitar líneas duplicadas o vacías', en: 'Remove duplicate or empty lines' },
+    descripcion: { es: 'Saca del texto las líneas en blanco y las que se repiten (queda la primera).', en: 'Takes out the blank lines and the repeated ones (the first one stays).' },
+    entra: ['texto'], sale: 'texto', hilo: true, forma: 'uno',
+    opciones: [
+      { id: 'vacias', tipo: 'casilla', defecto: true, etiqueta: { es: 'Quitar las líneas vacías', en: 'Remove empty lines' } },
+      { id: 'duplicadas', tipo: 'casilla', defecto: true, etiqueta: { es: 'Quitar las líneas repetidas', en: 'Remove repeated lines' } },
+    ],
+    preparar: prepararTexto,
+    ejecutar(f, o) {
+      return retocarTexto(f, (texto) => TextoRetoques.quitarLineas(texto, { vacias: o.vacias, duplicadas: o.duplicadas }).texto);
+    },
+  });
+
+  F.registrar({
+    id: 'encabezado-pie-texto',
+    icono: '📝',
+    nombre: { es: 'Encabezado y pie de texto', en: 'Text header and footer' },
+    descripcion: { es: 'Agrega un texto al principio y otro al final. Un campo vacío no agrega nada.', en: 'Adds a text at the start and another at the end. An empty field adds nothing.' },
+    entra: ['texto'], sale: 'texto', hilo: true, forma: 'uno',
+    opciones: [
+      { id: 'encabezado', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Encabezado', en: 'Header' } },
+      { id: 'pie', tipo: 'texto', defecto: '', max: 200, etiqueta: { es: 'Pie', en: 'Footer' } },
+    ],
+    preparar: prepararTexto,
+    ejecutar(f, o) {
+      return retocarTexto(f, (texto) => TextoRetoques.encabezadoPie(texto, o.encabezado.trim(), o.pie.trim()));
+    },
+  });
+
+  F.registrar({
+    id: 'arreglar-codificacion',
+    icono: '🔣',
+    nombre: { es: 'Arreglar codificación del texto', en: 'Fix text encoding' },
+    descripcion: { es: 'Corrige los acentos rotos («canciÃ³n») y deja el texto en UTF-8 con los saltos de línea elegidos.', en: 'Fixes broken accents (“canciÃ³n”) and leaves the text as UTF-8 with the chosen line endings.' },
+    entra: ['texto'], sale: 'texto', hilo: true, forma: 'uno',
+    opciones: [
+      { id: 'finDeLinea', tipo: 'select', defecto: 'lf', etiqueta: { es: 'Saltos de línea', en: 'Line endings' },
+        valores: [{ valor: 'lf', es: 'Unix / Mac (LF)', en: 'Unix / Mac (LF)' }, { valor: 'crlf', es: 'Windows (CRLF)', en: 'Windows (CRLF)' }] },
+      { id: 'bom', tipo: 'casilla', defecto: false, etiqueta: { es: 'Agregar la marca BOM (para abrir en Excel)', en: 'Add the BOM mark (to open in Excel)' } },
+    ],
+    async preparar() { await js('texto-retoques.js'); },
+    async ejecutar(f, o) {
+      const { texto } = TextoRetoques.arreglarCodificacion(new Uint8Array(await f.blob.arrayBuffer()));
+      const final = o.finDeLinea === 'crlf' ? texto.replace(/\n/g, '\r\n') : texto;
+      return fichaTexto(f, o.bom ? '﻿' + final : final);
+    },
+  });
+
+  // ---------- 33. Reparar PDF ----------
+  F.registrar({
+    id: 'reparar-pdf',
+    icono: '🩹',
+    nombre: { es: 'Reparar PDF', en: 'Repair PDF' },
+    descripcion: { es: 'Intenta rescatar un PDF dañado o cortado. Si no alcanza con rearmarlo, cada página queda como imagen.', en: 'Tries to rescue a damaged or cut-off PDF. If rebuilding it is not enough, each page becomes an image.' },
+    entra: ['pdf'], sale: 'pdf', hilo: true, forma: 'uno',
+    opciones: [],
+    async preparar() { await PDF_LIB(); await js('pdfjs.js'); await js('pdf-reparar.js'); },
+    async ejecutar(f) {
+      try {
+        return fichaPdf(f, (await PdfReparar.reparar(await f.blob.arrayBuffer())).bytes);
+      } catch (e) {
+        if (e.codigo === 'sin-nada' || e.codigo === 'sin-paginas') throw fallo({ es: 'no se pudo rescatar ninguna página', en: 'no page could be rescued' });
+        throw e;
+      }
     },
   });
 })();

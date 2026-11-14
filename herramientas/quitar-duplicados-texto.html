@@ -177,6 +177,7 @@ window.i18nPagina = {
 
 <script src="../assets/js/seguridad-html.js"></script>
 <script src="../assets/js/leer-texto.js"></script>
+<script src="../assets/js/texto-retoques.js"></script>
 <script src="../assets/js/zona-arrastre.js"></script>
 <script>
 const zonaArrastre = document.getElementById('zonaArrastre');
@@ -215,29 +216,15 @@ botonProcesar.addEventListener('click', async () => {
     if (!quitarVacias && !quitarDuplicadas) throw new Error(t('error-sin-opcion'));
 
     const { texto, finDeLinea } = await leerTextoArchivo(archivoActual);
-    // El salto de línea final del archivo no es una línea más (se conserva al guardar).
-    const terminaEnSalto = texto.endsWith('\n');
-    let lineas = (terminaEnSalto ? texto.slice(0, -1) : texto).split('\n');
-    const totalOriginal = lineas.length;
+    // La lógica está en assets/js/texto-retoques.js (la comparte con Flujos).
+    const r = TextoRetoques.quitarLineas(texto, { vacias: quitarVacias, duplicadas: quitarDuplicadas });
 
-    if (quitarVacias) lineas = lineas.filter(l => l.trim() !== '');
-
-    let duplicadasQuitadas = 0;
-    if (quitarDuplicadas) {
-      const vistas = new Set();
-      lineas = lineas.filter((linea) => {
-        if (vistas.has(linea)) { duplicadasQuitadas++; return false; }
-        vistas.add(linea);
-        return true;
-      });
-    }
-
-    const blob = new Blob([conFinDeLinea(lineas.join('\n') + (terminaEnSalto ? '\n' : ''), finDeLinea)], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([conFinDeLinea(r.texto, finDeLinea)], { type: 'text/plain;charset=utf-8' });
     enlaceDescarga.href = URL.createObjectURL(blob);
     resultado.classList.add('visible');
 
-    mensaje.textContent = t('mensaje-resultado').replace('{total}', totalOriginal).replace('{quedan}', lineas.length) +
-      (quitarDuplicadas ? t('mensaje-duplicadas').replace('{n}', duplicadasQuitadas) : '') + '.';
+    mensaje.textContent = t('mensaje-resultado').replace('{total}', r.total).replace('{quedan}', r.quedan) +
+      (quitarDuplicadas ? t('mensaje-duplicadas').replace('{n}', r.duplicadasQuitadas) : '') + '.';
     mensaje.style.display = 'block';
   } catch (error) {
     alert(t('error-procesar') + ': ' + error.message);
