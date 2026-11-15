@@ -441,6 +441,12 @@
     { valor: 'chi_sim', es: 'Chino simplificado', en: 'Simplified Chinese' },
     { valor: 'jpn', es: 'Japonés', en: 'Japanese' },
     { valor: 'kor', es: 'Coreano', en: 'Korean' },
+    { valor: 'rus', es: 'Ruso', en: 'Russian' },
+    { valor: 'ukr', es: 'Ucraniano', en: 'Ukrainian' },
+    { valor: 'bel', es: 'Bielorruso', en: 'Belarusian' },
+    { valor: 'bul', es: 'Búlgaro', en: 'Bulgarian' },
+    { valor: 'srp', es: 'Serbio (cirílico)', en: 'Serbian (Cyrillic)' },
+    { valor: 'mkd', es: 'Macedonio', en: 'Macedonian' },
   ];
   const OPCIONES_OCR = [
     { id: 'idiomas', tipo: 'select', defecto: 'spa+eng', etiqueta: { es: 'Idioma del texto', en: 'Text language' }, valores: IDIOMAS_OCR },
@@ -494,7 +500,7 @@
     await PDF_LIB();
     await js('pdfjs.js');
     await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
-    await js('ocr-librarius.js?v=5');   // versión: ver ocr-librarius.js
+    await js('ocr-librarius.js?v=6');   // versión: ver ocr-librarius.js
     await js('ocr.js');
   };
   F.registrar({
