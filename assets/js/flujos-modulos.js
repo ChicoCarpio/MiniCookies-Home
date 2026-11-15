@@ -421,12 +421,30 @@
     { valor: 'fra', es: 'Francés', en: 'French' },
     { valor: 'deu', es: 'Alemán', en: 'German' },
     { valor: 'ita', es: 'Italiano', en: 'Italian' },
+    { valor: 'nld', es: 'Neerlandés', en: 'Dutch' },
+    { valor: 'swe', es: 'Sueco', en: 'Swedish' },
+    { valor: 'dan', es: 'Danés', en: 'Danish' },
+    { valor: 'nor', es: 'Noruego', en: 'Norwegian' },
+    { valor: 'fin', es: 'Finés', en: 'Finnish' },
+    { valor: 'pol', es: 'Polaco', en: 'Polish' },
+    { valor: 'ces', es: 'Checo', en: 'Czech' },
+    { valor: 'slk', es: 'Eslovaco', en: 'Slovak' },
+    { valor: 'hun', es: 'Húngaro', en: 'Hungarian' },
+    { valor: 'ron', es: 'Rumano', en: 'Romanian' },
+    { valor: 'tur', es: 'Turco', en: 'Turkish' },
+    { valor: 'cat', es: 'Catalán', en: 'Catalan' },
+    { valor: 'hrv', es: 'Croata', en: 'Croatian' },
+    { valor: 'slv', es: 'Esloveno', en: 'Slovenian' },
+    { valor: 'lit', es: 'Lituano', en: 'Lithuanian' },
+    { valor: 'lav', es: 'Letón', en: 'Latvian' },
+    { valor: 'est', es: 'Estonio', en: 'Estonian' },
     { valor: 'chi_sim', es: 'Chino simplificado', en: 'Simplified Chinese' },
     { valor: 'jpn', es: 'Japonés', en: 'Japanese' },
+    { valor: 'kor', es: 'Coreano', en: 'Korean' },
   ];
   const OPCIONES_OCR = [
     { id: 'idiomas', tipo: 'select', defecto: 'spa+eng', etiqueta: { es: 'Idioma del texto', en: 'Text language' }, valores: IDIOMAS_OCR },
-    // Librarius (Beta, ocr-librarius.js) solo lee idiomas latinos: con chino o japonés, Ocr.crearWorker usa Tesseract.
+    // Librarius (Beta, ocr-librarius.js): si no soporta los idiomas elegidos, Ocr.crearWorker usa Tesseract.
     { id: 'motor', tipo: 'select', defecto: 'tesseract', etiqueta: { es: 'Motor de reconocimiento', en: 'Recognition engine' },
       valores: [{ valor: 'tesseract', es: 'Tesseract (todos los idiomas)', en: 'Tesseract (all languages)' },
         { valor: 'librarius', es: 'Librarius (Beta): IA propia, más precisa', en: 'Librarius (Beta): in-house AI, more accurate' }] },
@@ -476,7 +494,7 @@
     await PDF_LIB();
     await js('pdfjs.js');
     await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
-    await js('ocr-librarius.js?v=2');   // versión: ver ocr-librarius.js
+    await js('ocr-librarius.js?v=5');   // versión: ver ocr-librarius.js
     await js('ocr.js');
   };
   F.registrar({

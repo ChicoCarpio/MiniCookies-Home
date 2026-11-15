@@ -14,7 +14,7 @@ ort.env.wasm.wasmPaths = rutaOrt;
 ort.env.wasm.numThreads = 1;
 const N = self.LibrariusPagina._nucleo;
 
-let ctx = null, pagina = null, lineas = null;
+let ctx = null, pagina = null, lineas = null, candidatas = null, dominante = null;
 
 self.onmessage = async (e) => {
   const m = e.data;
@@ -30,10 +30,16 @@ self.onmessage = async (e) => {
       const tiempos = {};
       lineas = await N.detectarLineas(ctx.det, pagina.gris, pagina.w, pagina.h, tiempos);
       N.alinearEje(lineas, m.eje || null);
+      dominante = N.ejeDominante(lineas, m.eje || null);
       self.postMessage({ id: m.id, lineas, w: pagina.w, h: pagina.h, tiempos });
+    } else if (m.tipo === 'candidatas') {                       // detector: detecta de nuevo a una escala más chica (títulos y letras grandes)
+      const c = N.prepararCandidatas(await N.detectarLineas(ctx.det, pagina.gris, pagina.w, pagina.h, {}, m.lado), dominante);
+      candidatas = c.candidatas;
+      self.postMessage({ id: m.id, candidatas, normalChico: c.normalChico });
     } else if (m.tipo === 'recortes') {                          // detector: recortes enderezados de las líneas pedidas
       const t0 = performance.now();
-      const crops = m.indices.map((i) => N.recortarLinea(ctx.rec, pagina.gris, pagina.w, pagina.h, lineas[i], m.invertir, pagina.relleno));
+      const fuente = m.de === 'candidatas' ? candidatas : lineas;
+      const crops = m.indices.map((i) => N.recortarLinea(ctx.rec, pagina.gris, pagina.w, pagina.h, fuente[i], m.invertir, pagina.relleno));
       self.postMessage({ id: m.id, crops, ms: performance.now() - t0 }, crops.map((c) => c.px.buffer));
     } else if (m.tipo === 'girar') {                             // detector: gira la página que tiene
       const g = N.girarPagina(pagina.gris, pagina.w, pagina.h, m.k);

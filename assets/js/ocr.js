@@ -35,7 +35,7 @@
   async function crearWorker(idiomas, logger, motor) {
     if (motor === 'librarius' && window.OcrLibrarius && OcrLibrarius.soportaIdiomas(idiomas)) {
       try {
-        const lector = await OcrLibrarius.crear();
+        const lector = await OcrLibrarius.crear(idiomas);
         return { motor: 'librarius', librarius: lector, terminate: async () => lector.cerrar() };
       } catch (error) {
         console.warn('Librarius no cargó; se usa Tesseract.', error);
