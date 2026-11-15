@@ -1,11 +1,11 @@
 /*! © 2026 Daniels Torres Solano (Mini Cookies). Todos los derechos reservados. Código fuente bajo la Licencia de Código Fuente de Mini Cookies: https://www.minicookies.net/terminos#codigo-fuente */
-// Librarius (Beta): el lector de texto con IA propia de Mini Cookies (Librarius Phone V1, E V1 u O V1 + Versus Phone V1), como motor
+// Librarius (Beta): el lector de texto con IA propia de Mini Cookies (Librarius Phone V1, E V1, C V1 u O V1 + Versus Phone V1), como motor
 // alternativo a Tesseract para ocr.js. Corre en hilos de trabajo (Web Workers) con onnxruntime-web: el documento no sale del equipo.
 //
-//   OcrLibrarius.soportaIdiomas(['spa', 'eng'])   -> boolean (latinos, o chino/japonés/coreano con los seis primeros; no CJK con EE1)
+//   OcrLibrarius.soportaIdiomas(['spa', 'eng'])   -> boolean (los seis primeros con, a lo sumo, UNA familia: EE1, EC1 o EO1)
 //   const motor = await OcrLibrarius.crear(['spa', 'swe'])   -> { leerPagina(canvas), cerrar() }   (rechaza si el navegador no puede)
-//        Con chino, japonés o coreano usa Librarius O V1; si no, con algún idioma de IDIOMAS_EE1, Librarius E V1 (23 idiomas);
-//        con solo los seis de Librarius Phone V1, ese.
+//        Con chino, japonés o coreano usa Librarius O V1; con cirílico, Librarius C V1; con algún idioma de IDIOMAS_EE1,
+//        Librarius E V1 (23 idiomas); con solo los seis de Librarius Phone V1, ese. Cada modelo trae el alfabeto de los seis primeros.
 //   const r = await motor.leerPagina(canvas)      -> { texto, palabras: [{ texto, x, y, ancho, alto, angulo }] }
 //        x, y: esquina inferior izquierda de la palabra sobre la línea base, en píxeles del canvas (y hacia abajo);
 //        ancho/alto en píxeles; angulo: grados antihorarios (para dibujar texto invisible inclinado en el PDF).
@@ -19,29 +19,31 @@
   // Librarius O V1 (EO1) lee chino simplificado, japonés y coreano, y también el alfabeto latino de los seis primeros (no los acentos de EE1).
   // Entrada de 32 px de alto (los demás, 24).
   const IDIOMAS_EO1 = new Set(['chi_sim', 'jpn', 'kor']);
-  const modeloPara = (idiomas) => {
-    const l = idiomas || [];
-    if (l.some((i) => IDIOMAS_EO1.has(i))) return 'eo1';
-    return l.some((i) => IDIOMAS_EE1.has(i)) ? 'ee1' : 'e4';
-  };
+  // Librarius C V1 (EC1) lee ruso (también con la ortografía anterior a 1918), ucraniano, bielorruso, búlgaro, serbio y macedonio.
+  const IDIOMAS_EC1 = new Set(['rus', 'ukr', 'bel', 'bul', 'srp', 'mkd']);
+  const FAMILIAS = [['eo1', IDIOMAS_EO1], ['ec1', IDIOMAS_EC1], ['ee1', IDIOMAS_EE1]];
+  const familiasDe = (idiomas) => FAMILIAS.filter(([, s]) => (idiomas || []).some((i) => s.has(i))).map(([c]) => c);
+  const modeloPara = (idiomas) => familiasDe(idiomas)[0] || 'e4';
   const MODELOS = {
     e4: { lector: 'librarius-phone-v1-int8.onnx', alfabeto: 'librarius-alfabeto.json', alto: 24 },
     ee1: { lector: 'librarius-ee1-int8.onnx', alfabeto: 'librarius-alfabeto-ee1.json', alto: 24 },
+    ec1: { lector: 'librarius-ec1-int8.onnx', alfabeto: 'librarius-alfabeto-ec1.json', alto: 24 },
     eo1: { lector: 'librarius-eo1-int8.onnx', alfabeto: 'librarius-alfabeto-eo1.json', alto: 32 },
   };
   const LADO_MAXIMO = 3200;   // lado largo máximo de la página que se le pasa a Librarius (más no aporta: las líneas se reescalan a 24 o 32 px)
 
-  // Chino, japonés y coreano se pueden mezclar con los seis primeros idiomas (EO1 trae su alfabeto), no con los 17 de EE1.
+  // Los seis primeros idiomas se mezclan con cualquiera (todos los modelos traen su alfabeto); dos familias a la vez (p. ej. ruso y
+  // japonés, o ruso y polaco) no las lee ningún modelo: ahí se usa Tesseract.
   const soportaIdiomas = (idiomas) => {
-    if (!idiomas.length || !idiomas.every((i) => IDIOMAS.has(i) || IDIOMAS_EE1.has(i) || IDIOMAS_EO1.has(i))) return false;
-    return !(idiomas.some((i) => IDIOMAS_EO1.has(i)) && idiomas.some((i) => IDIOMAS_EE1.has(i)));
+    if (!idiomas.length || !idiomas.every((i) => IDIOMAS.has(i) || FAMILIAS.some(([, s]) => s.has(i)))) return false;
+    return familiasDe(idiomas).length <= 1;
   };
 
   const BASE = document.currentScript ? new URL('.', document.currentScript.src).href : new URL('assets/js/', location.href).href;
   const absoluta = (ruta) => new URL(ruta, location.href).href;
   // Versión en la dirección de los scripts: el sitio deja que el navegador los guarde horas, y una copia vieja
   // mezclada con una nueva rompe la lectura. Subirla cuando cambie librarius-pagina.js o librarius-pagina-hilos.js.
-  const V = '?v=5';
+  const V = '?v=6';
 
   function cargarScript(src) {
     return new Promise((ok, mal) => {
