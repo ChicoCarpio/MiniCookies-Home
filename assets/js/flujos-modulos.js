@@ -440,10 +440,11 @@
     { valor: 'est', es: 'Estonio', en: 'Estonian' },
     { valor: 'chi_sim', es: 'Chino simplificado', en: 'Simplified Chinese' },
     { valor: 'jpn', es: 'Japonés', en: 'Japanese' },
+    { valor: 'kor', es: 'Coreano', en: 'Korean' },
   ];
   const OPCIONES_OCR = [
     { id: 'idiomas', tipo: 'select', defecto: 'spa+eng', etiqueta: { es: 'Idioma del texto', en: 'Text language' }, valores: IDIOMAS_OCR },
-    // Librarius (Beta, ocr-librarius.js) solo lee idiomas latinos: con chino o japonés, Ocr.crearWorker usa Tesseract.
+    // Librarius (Beta, ocr-librarius.js): si no soporta los idiomas elegidos, Ocr.crearWorker usa Tesseract.
     { id: 'motor', tipo: 'select', defecto: 'tesseract', etiqueta: { es: 'Motor de reconocimiento', en: 'Recognition engine' },
       valores: [{ valor: 'tesseract', es: 'Tesseract (todos los idiomas)', en: 'Tesseract (all languages)' },
         { valor: 'librarius', es: 'Librarius (Beta): IA propia, más precisa', en: 'Librarius (Beta): in-house AI, more accurate' }] },
@@ -493,7 +494,7 @@
     await PDF_LIB();
     await js('pdfjs.js');
     await F.cargarScript(rutaVendor('tesseract.js/7.0.0/dist/tesseract.min.js?v=2'));
-    await js('ocr-librarius.js?v=4');   // versión: ver ocr-librarius.js
+    await js('ocr-librarius.js?v=5');   // versión: ver ocr-librarius.js
     await js('ocr.js');
   };
   F.registrar({
