@@ -30,6 +30,7 @@
     ec1: { lector: 'librarius-ec1-int8.onnx', alfabeto: 'librarius-alfabeto-ec1.json', alto: 24 },
     eo1: { lector: 'librarius-eo1-int8.onnx', alfabeto: 'librarius-alfabeto-eo1.json', alto: 32 },
   };
+  const UMBRAL_FONDO_OSCURO = 110;   // mediana del gris por debajo de esto = fondo oscuro, se invierte antes de leer
   const LADO_MAXIMO = 3200;   // lado largo máximo de la página que se le pasa a Librarius (más no aporta: las líneas se reescalan a 24 o 32 px)
 
   // Los seis primeros idiomas se mezclan con cualquiera (todos los modelos traen su alfabeto); dos familias a la vez (p. ej. ruso y
@@ -91,7 +92,13 @@
       x.imageSmoothingQuality = 'high';
       x.drawImage(canvas, 0, 0, w, h);
       const d = x.getImageData(0, 0, w, h).data, g = new Uint8Array(w * h);
-      for (let i = 0, j = 0; j < g.length; i += 4, j++) g[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+      const hist = new Uint32Array(256);
+      for (let i = 0, j = 0; j < g.length; i += 4, j++) hist[g[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8]++;
+      // Versus y Librarius aprendieron con letra oscura sobre fondo claro: con fondo oscuro (capturas en modo oscuro,
+      // carteles) casi no encuentran líneas. Si la mediana de la página es oscura, se invierte el gris.
+      let acumulado = 0, mediana = 0;
+      while (mediana < 255 && (acumulado += hist[mediana]) < g.length / 2) mediana++;
+      if (mediana < UMBRAL_FONDO_OSCURO) for (let j = 0; j < g.length; j++) g[j] = 255 - g[j];
       return { gris: g, w, h, factor: f };
     }
 
