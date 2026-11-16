@@ -225,7 +225,7 @@ botonExtraer.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blob);
     bloqueResultado.style.display = 'block';
   } catch (error) {
-    alert(t('error-extraer') + ': ' + error.message);
+    alert(t('error-extraer') + ': ' + detalleError(error));
   } finally {
     botonExtraer.disabled = false;
     botonExtraer.textContent = t('boton-extraer');

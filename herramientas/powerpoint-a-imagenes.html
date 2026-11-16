@@ -247,7 +247,7 @@ botonConvertir.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobZip);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-renderizar') + ': ' + error.message);
+    alert(t('error-renderizar') + ': ' + detalleError(error));
   } finally {
     botonConvertir.disabled = false;
     botonConvertir.textContent = t('boton-convertir');

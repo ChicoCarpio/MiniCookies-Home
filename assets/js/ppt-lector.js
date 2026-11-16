@@ -6,7 +6,7 @@
 //   await PptLector.leer(bytes)        → { contrato, mensajes: [clave…] }
 //   await PptLector.aPptx(bytes)       → { bytes, mensajes }
 //
-// Lanza Error (con .codigo = 'cifrado' si tiene contraseña, 'antiguo' si es de PowerPoint 95 o anterior, 'danado' si está roto) con un mensaje listo para mostrar.
+// Lanza Error (con .codigo del catálogo de mensajes-error.js y .tipo = 'cifrado' si tiene contraseña, 'antiguo' si es de PowerPoint 95 o anterior, 'danado' si está roto) con un mensaje listo para mostrar.
 // Se llevan: diapositivas con su patrón (fondo y formas), formas predefinidas con relleno, línea, sombra, giro y volteo, texto con formato de carácter y de párrafo (fuente, tamaño,
 // color, negrita, cursiva, subrayado, viñetas y numeración, sangrías, espacios, alineación), cuadros de texto y marcadores de posición (también el texto que viene del patrón),
 // imágenes (PNG, JPEG; las DIB, EMF y WMF se llevan sin tocar, o se avisa si no se pueden), recorte de imágenes, grupos, líneas con flechas, fondos (color, degradado, imagen),
@@ -29,7 +29,8 @@
   const EMU_POR_MAESTRA = 1587.5;            // 1 unidad maestra = 1/576 de pulgada
   const sinProto = (o) => Object.assign(Object.create(null), o);
   const acotar = (x, min, max) => Math.min(Math.max(x, min), max);
-  class Danado extends Error { constructor(m, codigo) { super(m); this.codigo = codigo || 'danado'; } }
+  // Un error de errorMC marcado como «dañado»: .codigo es el del catálogo (mensajes-error.js) y .tipo conserva el motivo ('cifrado', 'antiguo', 'danado').
+  const marcarDanado = (e, tipo) => { e.tipo = tipo || 'danado'; e.danado = true; return e; };
 
   // ───────── Lectura de bytes sin salirse del arreglo ─────────
   const u8 = (b, p) => (p >= 0 && p < b.length ? b[p] : 0);
@@ -106,21 +107,21 @@
       this.imagenesLeidas = 0;
       this.unidades = 0;
       let cfb;
-      try { cfb = CfbPropio.leer(bytes, { danado: (d) => new Danado('El archivo está dañado y no se puede leer (' + d + ').') }); } catch (e) { throw e.codigo ? e : new Danado('El archivo está dañado y no se puede leer.'); }
+      try { cfb = CfbPropio.leer(bytes, { danado: (d) => marcarDanado(errorMC('ppt-cfb-danado', { detalle: d }, 'El archivo está dañado y no se puede leer ({detalle}).')) }); } catch (e) { throw e.danado ? e : marcarDanado(errorMC('ppt-danado', {}, 'El archivo está dañado y no se puede leer.')); }
       this.cfb = cfb;
       const flujo = (n) => { const e = cfb.entradas.find((x) => x.nombre === n && x.tipo === 2); return e ? cfb.flujo(e) : null; };
       this.pd = flujo('PowerPoint Document');
       this.usuario = flujo('Current User');
       this.imagenes = flujo('Pictures');
       if (!this.pd) {
-        if (cfb.entradas.some((x) => /^EncryptedPackage$/i.test(x.nombre))) throw new Danado('La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.', 'cifrado');
-        throw new Danado('Este archivo no es una presentación de PowerPoint 97-2003.');
+        if (cfb.entradas.some((x) => /^EncryptedPackage$/i.test(x.nombre))) throw marcarDanado(errorMC('ppt-cifrado', {}, 'La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.'), 'cifrado');
+        throw marcarDanado(errorMC('ppt-no-valido', {}, 'Este archivo no es una presentación de PowerPoint 97-2003.'));
       }
-      if (!this.usuario) throw new Danado('Esta presentación es de una versión de PowerPoint anterior a la 97 y no se puede leer.', 'antiguo');
+      if (!this.usuario) throw marcarDanado(errorMC('ppt-antiguo', {}, 'Esta presentación es de una versión de PowerPoint anterior a la 97 y no se puede leer.'), 'antiguo');
     }
     aviso(c) { this.mensajes.add(c); }
-    contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw new Danado('La presentación es demasiado grande y no se puede leer.'); }
-    contarRegistro() { if (++this.registros > MAX_REGISTROS) throw new Danado('La presentación es demasiado grande o está dañada y no se puede leer.'); }
+    contarUnidad(n) { if ((this.unidades += n) > MAX_UNIDADES) throw marcarDanado(errorMC('pptx-demasiado-grande', {}, 'La presentación es demasiado grande y no se puede leer.')); }
+    contarRegistro() { if (++this.registros > MAX_REGISTROS) throw marcarDanado(errorMC('ppt-grande-o-danada', {}, 'La presentación es demasiado grande o está dañada y no se puede leer.')); }
 
     // Registro en la posición p: { ver, inst, tipo, ini, fin } (fin recortado al flujo)
     reg(p, tope) {
@@ -147,8 +148,8 @@
     // ───── Historial de guardados: UserEditAtom → PersistDirectoryAtom ─────
     leerPersistencia() {
       const b = this.pd, cu = this.usuario;
-      if (u32(cu, 12) === 0xF3D1C4DF) throw new Danado('La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.', 'cifrado');
-      if (u32(cu, 12) !== 0xE391C05F) throw new Danado('El archivo está dañado y no se puede leer (usuario actual).');
+      if (u32(cu, 12) === 0xF3D1C4DF) throw marcarDanado(errorMC('ppt-cifrado', {}, 'La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.'), 'cifrado');
+      if (u32(cu, 12) !== 0xE391C05F) throw marcarDanado(errorMC('ppt-danado-usuario', {}, 'El archivo está dañado y no se puede leer (usuario actual).'));
       let edicion = u32(cu, 16);
       const persist = new Map();
       const vistos = new Set();
@@ -161,7 +162,7 @@
         if (!r || r.tipo !== RT.UserEditAtom || r.fin - r.ini < 28) break;
         const anterior = u32(b, r.ini + 8), dir = u32(b, r.ini + 12);
         if (!docRef) docRef = u32(b, r.ini + 16);
-        if (r.fin - r.ini >= 32 && u32(b, r.ini + 28)) throw new Danado('La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.', 'cifrado');
+        if (r.fin - r.ini >= 32 && u32(b, r.ini + 28)) throw marcarDanado(errorMC('ppt-cifrado', {}, 'La presentación tiene contraseña. Quitala en PowerPoint y volvé a intentarlo.'), 'cifrado');
         const d = this.reg(dir);
         if (d && d.tipo === RT.PersistDirectoryAtom && !dirsVistos.has(dir)) {
           dirsVistos.add(dir);
@@ -175,7 +176,7 @@
         }
         edicion = anterior;
       }
-      if (!persist.size || !docRef) throw new Danado('El archivo está dañado y no se puede leer (no tiene diapositivas).');
+      if (!persist.size || !docRef) throw marcarDanado(errorMC('ppt-danado-sin-diapositivas', {}, 'El archivo está dañado y no se puede leer (no tiene diapositivas).'));
       this.persist = persist;
       this.docRef = docRef;
     }
@@ -188,7 +189,7 @@
     // ───── Documento ─────
     leerDocumento() {
       const doc = this.contenedor(this.docRef);
-      if (!doc || doc.tipo !== RT.Document) throw new Danado('El archivo está dañado y no se puede leer (documento).');
+      if (!doc || doc.tipo !== RT.Document) throw marcarDanado(errorMC('ppt-danado-documento', {}, 'El archivo está dañado y no se puede leer (documento).'));
       const b = this.pd;
       this.fuentes = [];
       this.maestras = [];      // [{ slideId, persist }]
@@ -216,7 +217,7 @@
         }
       }
       for (const h of listas) this.leerListaTextos(h);     // después de los enlaces: el texto de la lista puede traer los suyos
-      if (!this.ancho || !this.alto || this.ancho > 51206400 || this.alto > 51206400) throw new Danado('El archivo está dañado y no se puede leer (tamaño de la diapositiva).');
+      if (!this.ancho || !this.alto || this.ancho > 51206400 || this.alto > 51206400) throw marcarDanado(errorMC('ppt-danado-tamano', {}, 'El archivo está dañado y no se puede leer (tamaño de la diapositiva).'));
     }
     // El texto de los marcadores que guardaban PowerPoint 97-2003: en SlideListWithText, después del SlidePersistAtom de cada hoja, un TextHeaderAtom
     // (con el número del texto en su instancia) y sus registros; la forma lo señala con un OutlineTextRefAtom en su ClientTextbox
@@ -387,7 +388,7 @@
       if (formato === 'png' || formato === 'jpeg') {
         const datos = b.subarray(o + 1, fin);
         if (!datos.length) { this.aviso('imagen-falta'); return null; }
-        if ((this.bytesImagenes += datos.length) > MAX_IMAGENES_BYTES || ++this.imagenesLeidas > MAX_IMAGENES) throw new Danado('Las imágenes de la presentación ocupan demasiado y no se puede leer.');
+        if ((this.bytesImagenes += datos.length) > MAX_IMAGENES_BYTES || ++this.imagenesLeidas > MAX_IMAGENES) throw marcarDanado(errorMC('pptx-imagenes-ocupan', {}, 'Las imágenes de la presentación ocupan demasiado y no se puede leer.'));
         return { datos: new Uint8Array(datos), tipo: formato };
       }
       if (formato === 'emf' || formato === 'wmf') {
@@ -396,7 +397,7 @@
         const sinComprimir = u32(b, h), guardado = u32(b, h + 28), compresion = u8(b, h + 32);
         const datos = b.subarray(h + 34, Math.min(fin, h + 34 + guardado));
         if (!datos.length || sinComprimir > 64 * 1024 * 1024) { this.aviso('imagen-falta'); return null; }
-        if ((this.bytesImagenes += sinComprimir) > MAX_IMAGENES_BYTES || ++this.imagenesLeidas > MAX_IMAGENES) throw new Danado('Las imágenes de la presentación ocupan demasiado y no se puede leer.');
+        if ((this.bytesImagenes += sinComprimir) > MAX_IMAGENES_BYTES || ++this.imagenesLeidas > MAX_IMAGENES) throw marcarDanado(errorMC('pptx-imagenes-ocupan', {}, 'Las imágenes de la presentación ocupan demasiado y no se puede leer.'));
         return { metarchivo: true, datos: new Uint8Array(datos), tipo: formato, comprimido: compresion === 0, sinComprimir };
       }
       this.aviso('imagen-formato');
@@ -432,7 +433,7 @@
       return { info, hijos: lista };
     },
     leerSp(c) {
-      if (++this.formas > MAX_FORMAS) throw new Danado('La presentación tiene demasiadas formas y no se puede leer.');
+      if (++this.formas > MAX_FORMAS) throw marcarDanado(errorMC('pptx-demasiadas-formas', {}, 'La presentación tiene demasiadas formas y no se puede leer.'));
       const b = this.pd;
       const sp = { flags: 0, tipoSp: 0, props: new Map(), comp: new Map(), ancla: null, anclaHijo: false, rectHijos: null, colocador: null, texto: null, enlace: null, pf9: null, refTexto: null };
       for (const h of this.hijos(c)) {
@@ -708,7 +709,7 @@
     convertirTexto(t, ctx, pp9) {
       const b = this.pd;
       const texto = t.texto || '';
-      if ((this.textoTotal += texto.length) > MAX_TEXTO) throw new Danado('La presentación tiene demasiado texto y no se puede leer.');
+      if ((this.textoTotal += texto.length) > MAX_TEXTO) throw marcarDanado(errorMC('pptx-demasiado-texto', {}, 'La presentación tiene demasiado texto y no se puede leer.'));
       const { pfs, cfs } = this.leerEstiloTexto(t.estilo, texto.length);
       const parrafos = [];
       let ip = 0, ic = 0;
@@ -1051,7 +1052,7 @@
       let texto = buscar(dibujo.formas);
       if (!texto) { const u = entrada.textos.find((e) => e.tipoTexto === 2 && e.texto); texto = u ? u.texto : null; }
       if (!texto) return null;
-      if ((this.textoTotal += texto.length) > MAX_TEXTO) throw new Danado('La presentación tiene demasiado texto y no se puede leer.');
+      if ((this.textoTotal += texto.length) > MAX_TEXTO) throw marcarDanado(errorMC('pptx-demasiado-texto', {}, 'La presentación tiene demasiado texto y no se puede leer.'));
       const partes = texto.replace(/\u000B/g, '\n').split('\r').map((s) => s.replace(/[\u0000-\u0008\u000C\u000E-\u001F]/g, ''));
       while (partes.length && partes[partes.length - 1] === '') partes.pop();
       return partes.length ? partes.map((s) => ({ hijos: s ? [{ texto: s }] : [] })) : null;
@@ -1059,8 +1060,8 @@
     contrato() {
       this.leerPersistencia();
       this.leerDocumento();
-      if (!this.listaDiap.length) throw new Danado('La presentación no tiene diapositivas.');
-      if (this.listaDiap.length > MAX_DIAPOSITIVAS) throw new Danado('La presentación tiene demasiadas diapositivas y no se puede leer.');
+      if (!this.listaDiap.length) throw marcarDanado(errorMC('pptx-sin-diapositivas', {}, 'La presentación no tiene diapositivas.'));
+      if (this.listaDiap.length > MAX_DIAPOSITIVAS) throw marcarDanado(errorMC('ppt-demasiadas-diapositivas', {}, 'La presentación tiene demasiadas diapositivas y no se puede leer.'));
       // lo que varias entradas comparten (un mismo contenedor señalado muchas veces) se lee una sola vez
       const cacheM = new Map();
       const maestros = this.maestras.map((e) => { if (!cacheM.has(e.persist)) cacheM.set(e.persist, this.leerMaestro(e)); return cacheM.get(e.persist); });

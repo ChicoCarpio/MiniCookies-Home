@@ -308,7 +308,7 @@ botonReparar.addEventListener('click', async () => {
       : t('mensaje-parcial').replace('{n}', descartadas).replace('{total}', totalOriginal);
     mensajeNivel.style.display = 'block';
   } catch (error) {
-    alert(t('error-reparar') + ': ' + error.message);
+    alert(t('error-reparar') + ': ' + detalleError(error));
   } finally {
     botonReparar.disabled = false;
     botonReparar.textContent = t('boton-reparar');

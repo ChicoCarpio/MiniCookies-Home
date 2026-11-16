@@ -33,6 +33,7 @@
   const ORDEN_SPPR = ['xfrm', 'custGeom', 'prstGeom', 'noFill', 'solidFill', 'gradFill', 'blipFill', 'pattFill', 'grpFill', 'ln', 'effectLst', 'effectDag', 'scene3d', 'sp3d', 'extLst'];
   const MAX_EMU = 51206400 * 4;
 
+    // Los errores del editor son errorMC (código del catálogo mensajes-error.js); la clase queda exportada por si alguien la pregunta, pero ya no se lanza.
   class ErrorPresentacion extends Error {}
 
   // prefijo con que el documento declara un espacio de nombres (a:, p:, r:…)
@@ -74,7 +75,7 @@
     const zip = await ZipPropio.loadAsync(bytes);
     const paquete = PaqueteEditable.desdeZip(zip);
     const leer = (r) => paquete.leer(r);
-    const presXml = async () => { const t = await leer('ppt/presentation.xml'); if (t === null) throw new ErrorPresentacion('no es una presentación'); return t; };
+    const presXml = async () => { const t = await leer('ppt/presentation.xml'); if (t === null) throw errorMC('presentacion-no-es', {}, 'no es una presentación'); return t; };
 
     async function rutas() {
       const t = await presXml();
@@ -84,14 +85,14 @@
       const porId = new Map(rels.map((r) => [r.id, r.destino]));
       return (lista ? X().hijos(lista, 'sldId') : []).map((s) => porId.get(s.attrs['r:id'] || Object.entries(s.attrs).find(([k]) => /:id$/.test(k))?.[1])).filter(Boolean);
     }
-    const rutaDe = async (i) => { const r = (await rutas())[i]; if (!r) throw new ErrorPresentacion('diapositiva ' + (i + 1)); return r; };
+    const rutaDe = async (i) => { const r = (await rutas())[i]; if (!r) throw errorMC('presentacion-diapositiva-ruta', { n: i + 1 }, 'diapositiva {n}'); return r; };
     // una edición de una sola diapositiva: fn(xml, raiz, nodo, pref) → xml nuevo
     async function editarForma(i, camino, fn) {
       const ruta = await rutaDe(i);
       const xml = await leer(ruta);
       const raiz = X().analizar(xml);
       const nodo = buscar(raiz, camino);
-      if (!nodo) throw new ErrorPresentacion('la forma no está en la diapositiva');
+      if (!nodo) throw errorMC('presentacion-forma-ausente', {}, 'la forma no está en la diapositiva');
       const pref = { a: prefijo(xml, NS_A, 'a'), p: prefijo(xml, NS_P, 'p'), r: prefijo(xml, NS_R, 'r') };
       const nuevo = fn(xml, raiz, nodo, pref);
       if (nuevo === xml) return null;
@@ -107,16 +108,16 @@
 
     // ---- posición y tamaño ----------------------------------------------------------------------------------------
     function opMover(i, camino, caja) {
-      for (const k of ['x', 'y', 'cx', 'cy']) if (!Number.isFinite(caja[k]) || Math.abs(caja[k]) > MAX_EMU) throw new ErrorPresentacion('posición fuera de rango');
+      for (const k of ['x', 'y', 'cx', 'cy']) if (!Number.isFinite(caja[k]) || Math.abs(caja[k]) > MAX_EMU) throw errorMC('presentacion-fuera-rango', {}, 'posición fuera de rango');
       return editarForma(i, camino, (xml, raiz, nodo, pref) => {
         const x = Math.round(caja.x), y = Math.round(caja.y), cx = Math.max(0, Math.round(caja.cx)), cy = Math.max(0, Math.round(caja.cy));
         let contenedor, prefXfrm = pref.a;
         if (nodo.local === 'graphicFrame') { contenedor = nodo; prefXfrm = pref.p; }
         else contenedor = X().hijo(nodo, nodo.local === 'grpSp' ? 'grpSpPr' : 'spPr');
-        if (!contenedor) throw new ErrorPresentacion('la forma no tiene propiedades');
+        if (!contenedor) throw errorMC('presentacion-sin-propiedades', {}, 'la forma no tiene propiedades');
         const xfrm = X().hijo(contenedor, 'xfrm');
         if (!xfrm) {
-          if (nodo.local === 'graphicFrame' || nodo.local === 'grpSp') throw new ErrorPresentacion('forma sin posición');
+          if (nodo.local === 'graphicFrame' || nodo.local === 'grpSp') throw errorMC('presentacion-sin-posicion', {}, 'forma sin posición');
           const nuevo = `<${pref.a}:xfrm${caja.rot ? ` rot="${Math.round(caja.rot)}"` : ''}><${pref.a}:off x="${x}" y="${y}"/><${pref.a}:ext cx="${cx}" cy="${cy}"/></${pref.a}:xfrm>`;
           return insertarHijo(xml, contenedor, 'xfrm', nuevo, ORDEN_SPPR);
         }
@@ -125,7 +126,7 @@
         if (off) ed.push({ ini: off.ini, fin: off.finApertura, texto: X().ponerAtributo(X().ponerAtributo(xml.slice(off.ini, off.finApertura), 'x', String(x)), 'y', String(y)) });
         if (ext) ed.push({ ini: ext.ini, fin: ext.finApertura, texto: X().ponerAtributo(X().ponerAtributo(xml.slice(ext.ini, ext.finApertura), 'cx', String(cx)), 'cy', String(cy)) });
         if (caja.rot !== undefined) ed.push({ ini: xfrm.ini, fin: xfrm.finApertura, texto: X().ponerAtributo(xml.slice(xfrm.ini, xfrm.finApertura), 'rot', caja.rot ? String(Math.round(caja.rot)) : null) });
-        if (!off || !ext) throw new ErrorPresentacion('posición incompleta');
+        if (!off || !ext) throw errorMC('presentacion-posicion-incompleta', {}, 'posición incompleta');
         return X().aplicar(xml, ed);
       });
     }
@@ -156,7 +157,7 @@
     // opTexto: cada elemento es un párrafo; U+2028 dentro de uno es un salto de línea (<a:br/>); un \n parte el párrafo en dos
     function opTexto(i, camino, parrafos) {
       return editarForma(i, camino, (xml, raiz, nodo, pref) => {
-        if (nodo.local !== 'sp') throw new ErrorPresentacion('esta forma no lleva texto');
+        if (nodo.local !== 'sp') throw errorMC('presentacion-sin-texto', {}, 'esta forma no lleva texto');
         const a = pref.a;
         const lineas = parrafos.flatMap((t) => String(t).split('\n'));
         let cuerpo = X().hijo(nodo, 'txBody');
@@ -364,7 +365,7 @@
     function opRelleno(i, camino, color) {
       return editarForma(i, camino, (xml, raiz, nodo, pref) => {
         const spPr = X().hijo(nodo, nodo.local === 'grpSp' ? 'grpSpPr' : 'spPr');
-        if (!spPr || nodo.local === 'graphicFrame') throw new ErrorPresentacion('esta forma no tiene relleno');
+        if (!spPr || nodo.local === 'graphicFrame') throw errorMC('presentacion-sin-relleno', {}, 'esta forma no tiene relleno');
         const viejo = spPr.hijos.find((h) => RELLENOS.includes(h.local));
         const nuevo = color ? colorXml(pref.a, color) : `<${pref.a}:noFill/>`;
         if (viejo) return X().aplicar(xml, [{ ini: viejo.ini, fin: viejo.fin, texto: nuevo }]);
@@ -374,7 +375,7 @@
     function opLinea(i, camino, color) {
       return editarForma(i, camino, (xml, raiz, nodo, pref) => {
         const spPr = X().hijo(nodo, 'spPr');
-        if (!spPr) throw new ErrorPresentacion('esta forma no tiene línea');
+        if (!spPr) throw errorMC('presentacion-sin-linea', {}, 'esta forma no tiene línea');
         const a = pref.a, ln = X().hijo(spPr, 'ln');
         const relleno = color ? colorXml(a, color) : `<${a}:noFill/>`;
         if (!ln) return insertarHijo(xml, spPr, 'ln', `<${a}:ln>${relleno}</${a}:ln>`, ORDEN_SPPR);
@@ -404,7 +405,7 @@
       const xml = await leer(ruta);
       const raiz = X().analizar(xml);
       const arbol = arbolDe(raiz);
-      if (!arbol) throw new ErrorPresentacion('diapositiva sin árbol de formas');
+      if (!arbol) throw errorMC('presentacion-sin-arbol', {}, 'diapositiva sin árbol de formas');
       const pref = { a: prefijo(xml, NS_A, 'a'), p: prefijo(xml, NS_P, 'p'), r: prefijo(xml, NS_R, 'r') };
       const id = mayorId(xml) + 1;
       const extra = await crear(id, pref, ruta);
@@ -427,7 +428,7 @@
     const CONECTORES = ['line', 'straightConnector1', 'bentConnector3', 'curvedConnector3'];
     function opForma(i, caja, prst, color, opciones) {
       const o = opciones || {};
-      if (!/^[A-Za-z][A-Za-z0-9]*$/.test(String(prst))) throw new ErrorPresentacion('forma desconocida');
+      if (!/^[A-Za-z][A-Za-z0-9]*$/.test(String(prst))) throw errorMC('presentacion-forma-desconocida', {}, 'forma desconocida');
       return insertarEnArbol(i, (id, { a, p }) => {
         const nombre = esc((o.nombre || (CONECTORES.includes(prst) ? 'Conector' : 'Forma')) + ' ' + id).replace(/"/g, '&quot;');
         const geom = `<${a}:prstGeom prst="${prst}"><${a}:avLst/></${a}:prstGeom>`;
@@ -445,7 +446,7 @@
     }
     async function opImagen(i, bytes, tipo, caja) {
       const ext = tipo === 'image/png' ? 'png' : tipo === 'image/jpeg' ? 'jpeg' : tipo === 'image/gif' ? 'gif' : null;
-      if (!ext) throw new ErrorPresentacion('formato de imagen no admitido (PNG, JPEG o GIF)');
+      if (!ext) throw errorMC('presentacion-imagen-formato', {}, 'formato de imagen no admitido (PNG, JPEG o GIF)');
       let k = 1; while (zip.file('ppt/media/imagen-mc' + k + '.' + ext)) k++;
       const media = 'ppt/media/imagen-mc' + k + '.' + ext;
       const ruta = await rutaDe(i);
@@ -547,7 +548,7 @@
       const ruta = await rutaDe(i);
       const rels = await paquete.relaciones(ruta);
       const layout = rels.find((r) => /slideLayout$/.test(r.tipo));
-      if (!layout) throw new ErrorPresentacion('la diapositiva no tiene diseño');
+      if (!layout) throw errorMC('presentacion-sin-diseno', {}, 'la diapositiva no tiene diseño');
       let destinoLayout = layout.destino, xl = (await leer(layout.destino)) || '';
       if (/<[\w.-]+:sldLayout\b[^>]*\btype="title"/.test(xl)) {   // la nueva después de una diapositiva de título lleva título y contenido (el diseño de tipo «obj» del mismo patrón)
         const patron = (await paquete.relaciones(layout.destino)).find((r) => /slideMaster$/.test(r.tipo));
@@ -575,7 +576,7 @@
     }
     async function opBorrarDiapositiva(i) {
       const lista = await rutas();
-      if (lista.length <= 1) throw new ErrorPresentacion('una presentación necesita al menos una diapositiva');
+      if (lista.length <= 1) throw errorMC('presentacion-una-minima', {}, 'una presentación necesita al menos una diapositiva');
       const ruta = lista[i];
       const c = await contexto();
       const relsPres = await paquete.relaciones('ppt/presentation.xml');

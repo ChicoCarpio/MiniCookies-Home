@@ -302,7 +302,7 @@ async function cargarPresentacion(archivo) {
     renderizarLista();
     historial.reiniciar();
   } catch (error) {
-    alert(t('error-leer') + ': ' + error.message);
+    alert(t('error-leer') + ': ' + detalleError(error));
   } finally {
     cargando.style.display = 'none';
   }
@@ -325,7 +325,7 @@ botonGuardar.addEventListener('click', async () => {
     enlaceDescarga.href = URL.createObjectURL(blobFinal);
     resultado.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonGuardar.disabled = false;
     botonGuardar.textContent = t('boton-guardar');
