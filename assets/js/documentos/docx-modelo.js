@@ -332,7 +332,7 @@
       if (r && r.attrs.Target) ruta = PaqueteEditable.resolver('x', r.attrs.Target);
     }
     let xml = await paquete.leer(ruta);
-    if (xml === null) throw new Error('No es un documento de Word válido (falta word/document.xml).');
+    if (xml === null) throw errorMC('word-sin-document-xml', {}, 'No es un documento de Word válido (falta word/document.xml).');
     // Un cuerpo sin ningún párrafo (solo sectPr, como lo deja python-docx al empezar) no deja dónde poner el cursor: se le agrega el párrafo vacío que Word exige
     const pre = /<(\w+):body[ >]/.exec(xml);
     if (pre && !new RegExp('<' + pre[1] + ':(p|tbl|sdt|customXml)[ >/]').test(xml.slice(pre.index))) {
@@ -343,7 +343,7 @@
     const rels = await D().leerRels(zip, ruta);
     const m = await DocxEstilos.cargar({ zip, rels });
     const cuerpo = hijo(X().analizar(xml), 'body');
-    if (!cuerpo) throw new Error('El documento no tiene cuerpo.');
+    if (!cuerpo) throw errorMC('word-sin-cuerpo', {}, 'El documento no tiene cuerpo.');
     // Notas al pie: se numeran por orden de aparición en el cuerpo; su texto está en word/footnotes.xml
     const notas = new Map();
     const rutaNotas = D().porTipo(rels, '/footnotes');

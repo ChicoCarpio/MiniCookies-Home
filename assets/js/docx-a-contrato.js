@@ -125,11 +125,11 @@
   P.texto = async function (ruta) {
     const f = this.zip.file(ruta);
     if (!f) return null;
-    if (tamanoDe(f) > 3 * MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');   // antes de descomprimir (bytes UTF-8)
+    if (tamanoDe(f) > 3 * MAX_TEXTO_XML) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');   // antes de descomprimir (bytes UTF-8)
     const t = await f.async('string');
     // tope por parte y para todas juntas (cientos de encabezados de varios MB que se comprimen a pocos KB colgaban la página minutos)
     this.textoLeido = (this.textoLeido || 0) + t.length;
-    if (t.length > MAX_TEXTO_XML || this.textoLeido > 2 * MAX_TEXTO_XML) throw new Error('El documento es demasiado grande para abrirlo aquí.');
+    if (t.length > MAX_TEXTO_XML || this.textoLeido > 2 * MAX_TEXTO_XML) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');
     return t;
   };
   P.arbol = async function (ruta) {
@@ -322,11 +322,11 @@
     if (!f) { this.mensajes.add('imagen-falta'); return null; }
     let datos = this.imagenes.get(rel.destino);
     if (!datos) {
-      if (++this.totalImagenes > MAX_IMAGENES) throw new Error('El documento tiene demasiadas imágenes para abrirlo aquí.');
-      if (this.bytesImagenes + tamanoDe(f) > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');   // antes de descomprimir
+      if (++this.totalImagenes > MAX_IMAGENES) throw errorMC('word-demasiadas-imagenes-aqui', {}, 'El documento tiene demasiadas imágenes para abrirlo aquí.');
+      if (this.bytesImagenes + tamanoDe(f) > MAX_IMAGENES_BYTES) throw errorMC('word-imagenes-ocupan', {}, 'Las imágenes del documento ocupan demasiado y no se puede leer.');   // antes de descomprimir
       datos = await f.async('uint8array');
       this.bytesImagenes += datos.length;
-      if (this.bytesImagenes > MAX_IMAGENES_BYTES) throw new Error('Las imágenes del documento ocupan demasiado y no se puede leer.');
+      if (this.bytesImagenes > MAX_IMAGENES_BYTES) throw errorMC('word-imagenes-ocupan', {}, 'Las imágenes del documento ocupan demasiado y no se puede leer.');
       this.imagenes.set(rel.destino, datos);
     }
     const ext = this.buscar(dib, 'extent');
@@ -349,7 +349,7 @@
 
   // ───────── Texto: párrafos y sus runs ─────────
   P.parrafo = async function (p, ctx, pila) {
-    if (++this.bloques > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos para abrirlo aquí.');
+    if (++this.bloques > MAX_BLOQUES) throw errorMC('word-demasiados-parrafos-aqui', {}, 'El documento tiene demasiados párrafos para abrirlo aquí.');
     const pPr = hijo(p, 'pPr');
     const est = hijo(pPr, 'pStyle');
     const b = { tipo: 'parrafo', hijos: [] };
@@ -523,7 +523,7 @@
       if (activo(hijo(trPr, 'tblHeader'))) fila.encabezado = true;
       let col = 0;
       for (const tc of hijos(tr, 'tc').slice(0, MAX_CELDAS_FILA)) {
-        if (++this.bloques > MAX_BLOQUES) throw new Error('El documento tiene demasiados párrafos para abrirlo aquí.');   // una celda vacía también cuenta: millones de filas de celdas vacías no tienen párrafos que contar
+        if (++this.bloques > MAX_BLOQUES) throw errorMC('word-demasiados-parrafos-aqui', {}, 'El documento tiene demasiados párrafos para abrirlo aquí.');   // una celda vacía también cuenta: millones de filas de celdas vacías no tienen párrafos que contar
         const tcPr = hijo(tc, 'tcPr');
         const span = Math.max(1, Math.min(MAX_COLUMNAS, entero((hijo(tcPr, 'gridSpan') || { a: {} }).a.val) || 1));
         const celda = { hijos: [] };
@@ -601,7 +601,7 @@
     this.partes = new Map();
     const doc = await this.arbol('word/document.xml');
     const cuerpo = hijo(doc, 'body');
-    if (!cuerpo) throw new Error('El archivo no tiene un documento de Word legible.');
+    if (!cuerpo) throw errorMC('word-sin-documento-legible', {}, 'El archivo no tiene un documento de Word legible.');
     const ctx = { rels };
     const pila = [];
     const secciones = [];
@@ -632,7 +632,7 @@
   async function leer(bytes) {
     const datos = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     const zip = await ZipPropio.loadAsync(datos);
-    if (!zip.file('word/document.xml')) throw new Error('El archivo no es un documento de Word (.docx).');
+    if (!zip.file('word/document.xml')) throw errorMC('word-no-es-docx', {}, 'El archivo no es un documento de Word (.docx).');
     const mensajes = new Set();
     const l = new Lector(zip, mensajes);
     const contrato = await l.convertir();

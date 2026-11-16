@@ -240,6 +240,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/formatos-word.js"></script>
 <script src="../assets/js/docx-base.js"></script>
@@ -343,7 +344,7 @@ botonAWord.addEventListener('click', async () => {
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
   } catch (error) {
-    alert(t('error-convertir') + ': ' + error.message);
+    alert(t('error-convertir') + ': ' + detalleError(error));
   } finally {
     botonAWord.disabled = false;
     progreso.style.display = 'none';
@@ -425,7 +426,7 @@ botonAEpub.addEventListener('click', async () => {
       resultadoEpub.classList.add('visible');
     }
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonAEpub.disabled = false;
     progreso.style.display = 'none';

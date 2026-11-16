@@ -220,6 +220,7 @@ window.i18nPagina = {
 </footer>
 
 <script src="../assets/js/zip-propio.js"></script>
+<script src="../assets/js/mensajes-error.js"></script>
 <script src="../assets/js/xml-ligero.js"></script>
 <script src="../assets/js/formatos-word.js"></script>
 <script src="../assets/js/docx-base.js"></script>
@@ -324,7 +325,7 @@ botonExtraer.addEventListener('click', async () => {
       LoteArchivos.pintarResumen(resumenLote, resultados, t);
     }
   } catch (error) {
-    alert(t('error-extraer') + ': ' + error.message);
+    alert(t('error-extraer') + ': ' + detalleError(error));
   } finally {
     botonExtraer.disabled = false;
     botonExtraer.textContent = t('boton-extraer');
@@ -390,7 +391,7 @@ botonAWord.addEventListener('click', async () => {
     enlaceDescargaWord.download = `${nombreArchivo}.docx`;
     resultadoWord.classList.add('visible');
   } catch (error) {
-    alert(t('error-generar') + ': ' + error.message);
+    alert(t('error-generar') + ': ' + detalleError(error));
   } finally {
     botonAWord.disabled = false;
     botonAWord.textContent = t('boton-a-word');

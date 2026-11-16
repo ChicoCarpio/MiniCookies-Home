@@ -281,7 +281,7 @@
   function cambiarZoom(f) { if (!visor) return; visor.zoom(visor.zoom() * f); editorDoc.relayout(); }
 
   // los errores del maquetador traen un código y se dicen en el idioma de la página; el resto viene con su mensaje
-  const textoError = (e) => (e && e.codigo === 'hojas' ? tx('error-hojas') : e && e.message ? e.message : String(e));
+  const textoError = (e) => (e && e.codigo === 'hojas' ? tx('error-hojas') : e && e.message ? detalleError(e) : String(e));
   // ───────── Descargar y PDF ─────────
   let escribiendoParte = Promise.resolve();
   async function descargar() {

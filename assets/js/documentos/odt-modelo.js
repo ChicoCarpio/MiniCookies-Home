@@ -92,7 +92,7 @@
       const crudo = c.xml.slice(a, b);
       const s = colapsar(huecoATexto(crudo), ctx);
       if (!s) return;
-      if ((c.caracteres += s.length) > MAX_CARACTERES) throw new Error('El documento es demasiado grande para abrirlo aquí.');
+      if ((c.caracteres += s.length) > MAX_CARACTERES) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');
       poner({ t: 'texto', s, r, ini: a, fin: b, ei: a, ef: b, ti: a, tf: b, hueco: true, rara: crudo.indexOf('<') >= 0 });
     };
     let pos = nodo.finApertura;
@@ -110,7 +110,7 @@
         }
         case 's': {
           const n = acotar(parseInt(a.c, 10) || 1, 1, 100000);
-          if ((c.caracteres += n) > MAX_CARACTERES) throw new Error('El documento es demasiado grande para abrirlo aquí.');
+          if ((c.caracteres += n) > MAX_CARACTERES) throw errorMC('word-demasiado-grande', {}, 'El documento es demasiado grande para abrirlo aquí.');
           ctx.espacio = false;
           poner({ t: 'texto', s: ' '.repeat(n), ...dato, espacio: true });
           break;
@@ -400,14 +400,14 @@
     const zip = await ZipPropio.loadAsync(bytes);
     const paquete = PaqueteEditable.desdeZip(zip);
     const mime = await paquete.leer('mimetype');
-    if (mime !== null && !/^\s*application\/vnd\.oasis\.opendocument\.text\s*$/.test(mime)) throw new Error('No es un documento de texto de OpenDocument (.odt).');
+    if (mime !== null && !/^\s*application\/vnd\.oasis\.opendocument\.text\s*$/.test(mime)) throw errorMC('odt-no-es-texto', {}, 'No es un documento de texto de OpenDocument (.odt).');
     const manifiesto = await paquete.leer('META-INF/manifest.xml');
-    if (manifiesto && /encryption-data/.test(manifiesto)) { const e = new Error('El documento está protegido con contraseña; ábrelo en LibreOffice y guárdalo sin contraseña.'); e.codigo = 'cifrado'; throw e; }
+    if (manifiesto && /encryption-data/.test(manifiesto)) { const e = errorMC('odt-cifrado-editor', {}, 'El documento está protegido con contraseña; ábrelo en LibreOffice y guárdalo sin contraseña.'); e.tipo = 'cifrado'; throw e; }
     const xml = await paquete.leer('content.xml');
-    if (xml === null) throw new Error('No es un documento de OpenDocument válido (falta content.xml).');
+    if (xml === null) throw errorMC('odt-sin-content-xml', {}, 'No es un documento de OpenDocument válido (falta content.xml).');
     const raiz = X().analizar(xml);
     const cuerpo = hijo(hijo(raiz, 'body'), 'text');
-    if (!cuerpo) throw new Error('El documento no tiene cuerpo.');
+    if (!cuerpo) throw errorMC('word-sin-cuerpo', {}, 'El documento no tiene cuerpo.');
     const xmlEstilos = await paquete.leer('styles.xml');
     let raizEstilos = xmlEstilos ? X().analizar(xmlEstilos) : null;
     const ajustesXml = await paquete.leer('settings.xml');

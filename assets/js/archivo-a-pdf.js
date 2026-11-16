@@ -68,7 +68,7 @@
       extensiones: ['docx', 'doc', 'odt'],
       async preparar() {
         await cargarEnOrden([
-          JSZIP(), propio('xml-ligero.js'), propio('seguridad-html.js'), propio('emf.js'), propio('imagenes-office.js'), propio('html-a-pdf.js'),
+          propio('mensajes-error.js'), JSZIP(), propio('xml-ligero.js'), propio('seguridad-html.js'), propio('emf.js'), propio('imagenes-office.js'), propio('html-a-pdf.js'),
           propio('formatos-word.js'), propio('docx-base.js'), propio('docx-estilos.js'), propio('pptx-texto.js'), propio('docx-maquetador.js'),
         ]);
         await cargarScript(propio('word-a-pdf.js'));
@@ -83,7 +83,7 @@
     excel: {
       extensiones: ['xlsx', 'xlsm', 'xlsb', 'xls', 'ods', 'csv'],
       preparar: () => cargarEnOrden([
-        JSZIP(), propio('xml-ligero.js'), propio('xlsx-formato.js'), propio('xlsx-estilos.js'), propio('xlsx-modelo.js'),
+        propio('mensajes-error.js'), JSZIP(), propio('xml-ligero.js'), propio('xlsx-formato.js'), propio('xlsx-estilos.js'), propio('xlsx-modelo.js'),
         propio('csv-planilla.js'), propio('lector-hojas.js'), propio('motor-hojas.js'), propio('excel-a-pdf-motor.js'),
       ]),
       convertir: (archivo, alAvanzar) => ExcelAPdfMotor.libroAPdf(archivo, alAvanzar),
@@ -91,7 +91,7 @@
     powerpoint: {
       extensiones: ['pptx', 'ppt', 'odp'],
       async preparar() {
-        await cargarEnOrden([JSZIP(), propio('formatos-powerpoint.js')]);
+        await cargarEnOrden([propio('mensajes-error.js'), JSZIP(), propio('formatos-powerpoint.js')]);
         // El motor propio, con la lista única de pptx-visual.js.
         await cargarEnOrden([propio('pdf-texto.js'), propio('pptx-visual.js')]);
         await cargarEnOrden(SCRIPTS_MOTOR_PPTX.map((x) => (x.startsWith('vendor/') ? rutaVendor(x.slice(7)) : propio(x))));
