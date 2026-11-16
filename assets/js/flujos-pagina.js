@@ -254,7 +254,10 @@ window.i18nPieza = {
       await pintarResultado(e, flujo, resultados, fallos);
       mostrarEstado(e, '');
     } catch (error) {
-      mostrarEstado(e, error.codigo ? textoError({ motivo: error.codigo, entrada: error.entrada, paso: error.paso }) : detalleError(error), true);
+      // .codigo es el motivo de un flujo inválido (Flujos.ejecutar), salvo que sea de un motor (errorMC, con texto en el catálogo):
+      // un script que no cargó en preparar() salía como «El paso NaN de la entrada NaN…».
+      const delFlujo = error.codigo && !(window.MensajesError && MensajesError.es['error-' + error.codigo]);
+      mostrarEstado(e, delFlujo ? textoError({ motivo: error.codigo, entrada: error.entrada, paso: error.paso }) : detalleError(error), true);
     } finally {
       e.avance.hidden = true;
       ocupar(false);

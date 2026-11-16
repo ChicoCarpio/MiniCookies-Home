@@ -3,7 +3,7 @@
 //   - un errorMC('código', …, 'texto') usa un código sin su texto en «es» o en «en» del catálogo, o con un texto en español distinto del
 //     catálogo (los dos tienen que decir lo mismo: el de la llamada es el que se ve si el catálogo no cargó);
 //   - el catálogo tiene un código que nadie usa, o un idioma tiene claves que el otro no tiene;
-//   - una página carga un script que usa errorMC (o flujos.js, que carga motores por dentro) sin cargar antes mensajes-error.js.
+//   - una página carga un script que usa errorMC (o flujos.js o lector-hojas.js, que cargan motores por dentro) sin cargar antes mensajes-error.js.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import vm from 'node:vm';
@@ -65,8 +65,8 @@ export function revisarMensajesError(raiz) {
     }
   }
 
-  // Las páginas: lo que usa errorMC (y flujos.js) necesita mensajes-error.js antes.
-  const necesitan = new Set([...conErrorMC].map((f) => f.split('/').pop()).concat('flujos.js'));
+  // Las páginas: lo que usa errorMC (y flujos.js y lector-hojas.js, que cargan por dentro motores que lo usan) necesita mensajes-error.js antes.
+  const necesitan = new Set([...conErrorMC].map((f) => f.split('/').pop()).concat('flujos.js', 'lector-hojas.js'));
   for (const carpeta of ['herramientas', '.']) {
     for (const archivo of readdirSync(join(raiz, carpeta)).filter((f) => f.endsWith('.html'))) {
       const orden = [...readFileSync(join(raiz, carpeta, archivo), 'utf8').matchAll(/<script[^>]*\bsrc="[^"]*?([\w.-]+\.js)(?:\?[^"]*)?"/g)].map((m) => m[1]);
