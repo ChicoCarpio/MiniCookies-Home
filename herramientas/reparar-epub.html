@@ -28,11 +28,12 @@ window.i18nPagina = {
     'error-sin-capitulos': 'No se encontró ningún capítulo legible dentro de este archivo.',
     'error-sin-texto': 'Los archivos encontrados no tenían contenido de texto.',
     'mensaje-nivel1-sano': '✅ La estructura del libro estaba bien. Se volvió a guardar con el formato correcto, sin cambiar su contenido ni su diseño.',
+    'mensaje-nivel1-guardado': '✅ Se volvió a guardar con el formato correcto, sin cambiar su contenido ni su diseño.',
     'mensaje-nivel1': '✅ Se reparó la estructura del libro ({arreglos}) sin rearmarlo: conserva su diseño, sus fuentes y su portada.',
     'arreglo-container': 'la ruta al índice del paquete',
     'arreglo-manifest': 'archivos listados que no existían',
     'arreglo-spine': 'capítulos del orden de lectura que no existían',
-    'arreglo-indice': 'un índice que no se podía leer',
+    'aviso-indice': '⚠️ La tabla de contenidos (el índice del libro) no se pudo leer y quedó como estaba: el lector puede no mostrarla, pero los capítulos se leen igual.',
     'mensaje-nivel2': '⚠️ La estructura del libro estaba dañada ({detalle}): se rearmó a partir de su contenido. Se conservan el texto y las imágenes, pero no su diseño original.',
     'mensaje-nivel3': '⚠️ El paquete EPUB estaba dañado ({detalle}) — se reconstruyó a partir de {n} archivo(s) de contenido encontrados directamente, sin depender de la tabla de contenidos original.',
     'error-reparar': 'No se pudo reparar el EPUB',
@@ -72,11 +73,12 @@ window.i18nPagina = {
     'error-sin-capitulos': 'No readable chapter was found inside this file.',
     'error-sin-texto': 'The files found had no text content.',
     'mensaje-nivel1-sano': '✅ The book’s structure was fine. It was saved again in the correct format, without changing its content or design.',
+    'mensaje-nivel1-guardado': '✅ It was saved again in the correct format, without changing its content or design.',
     'mensaje-nivel1': '✅ The book’s structure was repaired ({arreglos}) without rebuilding it: it keeps its design, fonts and cover.',
     'arreglo-container': 'the path to the package index',
     'arreglo-manifest': 'listed files that did not exist',
     'arreglo-spine': 'reading-order chapters that did not exist',
-    'arreglo-indice': 'a table of contents that could not be read',
+    'aviso-indice': '⚠️ The table of contents could not be read and was left as it was: your reader may not show it, but the chapters read fine.',
     'mensaje-nivel2': '⚠️ The book’s structure was damaged ({detalle}): it was rebuilt from its content. Text and images are kept, but not its original design.',
     'mensaje-nivel3': '⚠️ The EPUB package was damaged ({detalle}) — it was rebuilt from {n} content file(s) found directly, without relying on the original table of contents.',
     'error-reparar': 'Couldn’t repair the EPUB',
@@ -279,9 +281,12 @@ botonReparar.addEventListener('click', async () => {
       // repararPaqueteEpub en assets/js/epub.js.
       const { paquete, arreglos } = await repararPaqueteEpub(archivoActual);
       const blob = await guardarPaqueteEpub(paquete);
-      mostrar(blob, arreglos.length
-        ? t('mensaje-nivel1').replace('{arreglos}', arreglos.map((a) => t('arreglo-' + a)).join(', '))
-        : t('mensaje-nivel1-sano'), '#166534');
+      // «indice» no es un arreglo: el índice ilegible queda como estaba (epub.js, repararPaqueteEpub), y se dice así.
+      const hechos = arreglos.filter((a) => a !== 'indice');
+      const mensaje = (hechos.length
+        ? t('mensaje-nivel1').replace('{arreglos}', () => hechos.map((a) => t('arreglo-' + a)).join(', '))
+        : t(arreglos.includes('indice') ? 'mensaje-nivel1-guardado' : 'mensaje-nivel1-sano')) + (arreglos.includes('indice') ? ' ' + t('aviso-indice') : '');
+      mostrar(blob, mensaje, '#166534');
     } catch (errorNivel1) {
       try {
         // Nivel 2: el OPF no se puede usar, pero leerEpub todavía saca el

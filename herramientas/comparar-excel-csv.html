@@ -42,6 +42,7 @@ window.i18nPagina = {
     'campo-nueva': 'Versión nueva',
     'zona-b': '📊 Arrastrá el archivo nuevo acá o hacé clic para elegirlo',
     'campo-clave': 'Columna clave (identifica cada fila)',
+    'sin-columnas-comunes': 'Los dos archivos no tienen ninguna columna con el mismo nombre en la primera fila, así que no hay con qué emparejar las filas.',
     'boton-comparar': 'Comparar',
     'boton-descargar-xlsx': 'Descargar resultado (.xlsx)',
     'columna-cambios': 'Qué cambió',
@@ -87,6 +88,7 @@ window.i18nPagina = {
     'campo-nueva': 'New version',
     'zona-b': '📊 Drag the new file here or click to choose it',
     'campo-clave': 'Key column (identifies each row)',
+    'sin-columnas-comunes': 'The two files have no column with the same name in the first row, so there is nothing to match the rows by.',
     'boton-comparar': 'Compare',
     'boton-descargar-xlsx': 'Download result (.xlsx)',
     'columna-cambios': 'What changed',
@@ -164,6 +166,7 @@ window.i18nPagina = {
         <select id="columnaClave"></select>
       </label>
       <button class="boton" id="botonComparar" type="button" data-i18n="boton-comparar">Comparar</button>
+      <p class="nota-suave error" id="sinColumnasComunes" hidden data-i18n="sin-columnas-comunes">Los dos archivos no tienen ninguna columna con el mismo nombre en la primera fila, así que no hay con qué emparejar las filas.</p>
     </div>
 
     <div class="estadisticas" id="estadisticas" style="display:none;">
@@ -302,8 +305,14 @@ function actualizarControles() {
   const columnasB = Object.keys(filasB[0]);
   columnas = [...new Set([...columnasA, ...columnasB])].filter(c => !/^__EMPTY/.test(c));
 
+  // La clave tiene que estar en los dos archivos: si falta en uno, todas sus filas quedan con la misma clave
+  // vacía y se juntan en una sola.
+  const comunes = columnas.filter((c) => columnasA.includes(c) && columnasB.includes(c));
   const selector = document.getElementById('columnaClave');
-  selector.innerHTML = columnas.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
+  selector.innerHTML = comunes.map(c => `<option value="${escaparHtml(c)}">${escaparHtml(c)}</option>`).join('');
+  const sinComunes = document.getElementById('sinColumnasComunes');
+  sinComunes.hidden = comunes.length > 0;
+  document.getElementById('botonComparar').disabled = comunes.length === 0;
   document.getElementById('controles').style.display = 'flex';
 }
 

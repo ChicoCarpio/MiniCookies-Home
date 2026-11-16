@@ -126,6 +126,13 @@ export function iniciarGeneradorStickers() {
 
   function mostrarError(texto) {
     mensajeError.textContent = '❌ ' + texto;
+    mensajeError.style.color = '#dc2626';
+    mensajeError.style.display = 'block';
+  }
+  // Un aviso no es un error: el recorte salió y se puede usar. Mismo lugar, sin la cruz ni el rojo.
+  function mostrarAviso(texto) {
+    mensajeError.textContent = '⚠️ ' + texto;
+    mensajeError.style.color = 'inherit';
     mensajeError.style.display = 'block';
   }
   function ocultarError() {
@@ -613,7 +620,7 @@ export function iniciarGeneradorStickers() {
       usarRecorteListo(ajustarAlSujeto(recorte));
       marcando = false;
       vistaResultado.style.cursor = '';
-      if (cubierta > 0.9) mostrarError(tt('aviso-casi-toda', 'El recorte ocupa casi toda la foto: puede que una marca haya caído sobre el fondo.'));
+      if (cubierta > 0.9) mostrarAviso(tt('aviso-casi-toda', 'El recorte ocupa casi toda la foto: puede que una marca haya caído sobre el fondo.'));
     } catch (error) {
       if (gen !== generacion) return;
       const sinMemoria = /bad_alloc|memory|out of memory|OrtRun|allocation failed|RangeError/i.test(error.message);

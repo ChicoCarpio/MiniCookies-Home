@@ -201,10 +201,22 @@ window.i18nPagina = {
 <script src="../assets/js/diff-propio.js"></script>
 <script src="../assets/js/descargar.js"></script>
 <script>
+// Modo de la última comparación: el informe dice el que se usó, no el que la casilla muestre después.
+let porPalabraComparado = true;
+// Si se cambia un texto o el modo después de comparar, el resultado y el informe ya no corresponden: se esconden
+// hasta comparar de nuevo (antes se descargaba el resultado viejo).
+function invalidarResultado() {
+  document.getElementById('resultadoDiff').replaceChildren();
+  document.getElementById('controlesDescarga').style.display = 'none';
+}
+['textoA', 'textoB'].forEach((id) => document.getElementById(id).addEventListener('input', invalidarResultado));
+document.getElementById('porPalabra').addEventListener('change', invalidarResultado);
+
 document.getElementById('botonComparar').addEventListener('click', () => {
   const textoA = document.getElementById('textoA').value;
   const textoB = document.getElementById('textoB').value;
   const porPalabra = document.getElementById('porPalabra').checked;
+  porPalabraComparado = porPalabra;
 
   const cambios = porPalabra ? DiffPropio.diffWords(textoA, textoB) : DiffPropio.diffLines(textoA, textoB);
   const contenedor = document.getElementById('resultadoDiff');
@@ -238,7 +250,7 @@ document.getElementById('botonDescargar').addEventListener('click', () => {
   .nota { color: #71717a; font-size: 0.9rem; }
 </style></head><body>
 <h1>${t('informe-titulo')}</h1>
-<p class="nota">${fecha} · ${agregados}${t('informe-agregados')}<ins>${t('informe-en-verde')}</ins> · ${quitados}${t('informe-quitados')}<del>${t('informe-en-rojo')}</del>${t('informe-comparado')}${document.getElementById('porPalabra').checked ? t('informe-por-palabra') : t('informe-por-linea')}.</p>
+<p class="nota">${fecha} · ${agregados}${t('informe-agregados')}<ins>${t('informe-en-verde')}</ins> · ${quitados}${t('informe-quitados')}<del>${t('informe-en-rojo')}</del>${t('informe-comparado')}${porPalabraComparado ? t('informe-por-palabra') : t('informe-por-linea')}.</p>
 <div class="texto">${contenedor.innerHTML}</div>
 </body></html>`;
   descargarTexto(html, nombreConFecha(t('archivo-comparacion-textos'), 'html'), 'text/html');

@@ -223,6 +223,12 @@ function elegirArchivo(listaFileList) {
 
 conectarZonaArrastre(zonaArrastre, entradaArchivo, elegirArchivo);
 
+// El campo muestra el número que de verdad se va a usar (entero desde 1).
+const campoInicial = document.getElementById('numeroInicial');
+campoInicial.addEventListener('change', () => {
+  campoInicial.value = Math.max(1, Math.floor(Number(campoInicial.value)) || 1);
+});
+
 botonNumerar.addEventListener('click', async () => {
   botonNumerar.disabled = true;
   botonNumerar.textContent = t('boton-numerar-procesando');
